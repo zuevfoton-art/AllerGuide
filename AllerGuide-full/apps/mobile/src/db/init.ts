@@ -1,0 +1,26 @@
+import * as SQLite from 'expo-sqlite';
+
+const db = SQLite.openDatabaseSync('allerguide.db');
+
+export function initDb() {
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      birthYear INTEGER,
+      type TEXT,
+      allergies TEXT
+    );
+    CREATE TABLE IF NOT EXISTS diary_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      profileId INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      details TEXT,
+      createdAt TEXT NOT NULL
+    );
+  `);
+}
+
+export function getDb() {
+  return db;
+}
