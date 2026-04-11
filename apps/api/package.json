@@ -1,0 +1,11 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "echo lint",
+    "typecheck": "echo typecheck",
+    "test": "echo test"
+  }
+}
