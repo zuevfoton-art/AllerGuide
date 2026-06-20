@@ -1,0 +1,164 @@
+import { useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import {
+  getCrossReactionsForSelection,
+  getPopularAllergens,
+  type CrossReactionMatch,
+} from '@allerguide/core';
+import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
+
+interface AllergenPickerProps {
+  selected: string[];
+  onChange: (selected: string[]) => void;
+}
+
+export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+
+  const popularNames = useMemo(() => new Set(getPopularAllergens().map((item) => item.name)), []);
+  const extraSelected = selected.filter((name) => !popularNames.has(name));
+  const crossSuggestions = useMemo(() => getCrossReactionsForSelection(selected), [selected]);
+
+  const toggle = (name: string) => {
+    onChange(
+      selected.includes(name) ? selected.filter((item) => item !== name) : [...selected, name],
+    );
+  };
+
+  const addRelated = (matches: CrossReactionMatch[]) => {
+    const names = matches.map((item) => item.allergen.name);
+    onChange([...new Set([...selected, ...names])]);
+  };
+
+  return (
+    <View style={styles.wrap}>
+      <Text style={styles.sectionHint}>Частые аллергены</Text>
+      <View style={styles.chipGrid}>
+        {getPopularAllergens().map((item) => {
+          const active = selected.includes(item.name);
+          return (
+            <Pressable
+              key={item.id}
+              style={[styles.chip, active && styles.chipActive]}
+              onPress={() => toggle(item.name)}>
+              {active ? (
+                <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
+              ) : null}
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.name}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {extraSelected.length > 0 ? (
+        <>
+          <Text style={styles.sectionHint}>Из полного списка</Text>
+          <View style={styles.chipGrid}>
+            {extraSelected.map((name) => (
+              <Pressable
+                key={name}
+                style={[styles.chip, styles.chipActive]}
+                onPress={() => toggle(name)}>
+                <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
+                <Text style={[styles.chipText, styles.chipTextActive]}>{name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      ) : null}
+
+      <Pressable style={styles.catalogBtn} onPress={() => setCatalogOpen(true)}>
+        <Ionicons name="list" size={18} color={theme.colors.accent} />
+        <Text style={styles.catalogBtnText}>Выбрать из полного списка</Text>
+        <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+      </Pressable>
+
+      {crossSuggestions.length > 0 ? (
+        <View style={styles.crossCard}>
+          <View style={styles.crossHeader}>
+            <Ionicons name="git-network-outline" size={18} color={theme.colors.purple} />
+            <Text style={styles.crossTitle}>Возможные перекрёстные реакции</Text>
+          </View>
+          <Text style={styles.crossText}>
+            При выбранных аллергенах также часто реагируют на:{' '}
+            {crossSuggestions.map((item) => item.allergen.name).join(', ')}.
+          </Text>
+          <Pressable style={styles.crossBtn} onPress={() => addRelated(crossSuggestions)}>
+            <Text style={styles.crossBtnText}>Добавить связанные</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      <AllergenCatalogModal
+        visible={catalogOpen}
+        selected={selected}
+        onClose={() => setCatalogOpen(false)}
+        onApply={onChange}
+      />
+    </View>
+  );
+}
+
+function createStyles({ colors }: AppTheme) {
+  return StyleSheet.create({
+    wrap: { gap: 10 },
+    sectionHint: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingVertical: 9,
+      paddingHorizontal: 14,
+      borderRadius: 20,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+    },
+    chipActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+    chipText: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
+    chipTextActive: { color: colors.accent, fontWeight: '600' },
+    catalogBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
+      borderColor: colors.accentMid,
+    },
+    catalogBtnText: { flex: 1, fontSize: 15, fontWeight: '700', color: colors.text },
+    crossCard: {
+      gap: 10,
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: colors.tipBg,
+      borderWidth: 1,
+      borderColor: colors.tipBorder,
+    },
+    crossHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    crossTitle: { fontSize: 14, fontWeight: '700', color: colors.tipText },
+    crossText: { fontSize: 13, color: colors.tipText, lineHeight: 18 },
+    crossBtn: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 10,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.tipBorder,
+    },
+    crossBtnText: { fontSize: 13, fontWeight: '700', color: colors.purple },
+  });
+}

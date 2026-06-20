@@ -1,39 +1,33 @@
-export const ALLERGEN_OPTIONS = [
-  'Молоко',
-  'Яйца',
-  'Арахис',
-  'Орехи',
-  'Рыба',
-  'Морепродукты',
-  'Пшеница / глютен',
-  'Соя',
-  'Кунжут',
-  'Пыльца берёзы',
-  'Пыльца амброзии',
-  'Пыль клещей',
-  'Шерсть кошек',
-  'Шерсть собак',
-  'Пенициллин',
-  'Аспирин',
-] as const;
+import {
+  buildAllergenKeywordsMap,
+  getAllAllergenNames,
+  type AllergenRecord,
+} from './allergen-database';
 
-export type AllergenOption = (typeof ALLERGEN_OPTIONS)[number];
+export {
+  ALLERGENS,
+  ALLERGEN_CATEGORY_LABELS,
+  CROSS_REACTIONS,
+  getAllAllergens,
+  getPopularAllergens,
+  getAllergensByCategory,
+  findAllergenById,
+  findAllergenByName,
+  getCrossReactionsFor,
+  getCrossReactionsForSelection,
+  buildAllergenKeywordsMap,
+  getAllAllergenNames,
+} from './allergen-database';
 
-export const ALLERGEN_KEYWORDS: Record<string, string[]> = {
-  'молоко': ['молоко', 'лактоза', 'казеин', 'сыворотка', 'сливки'],
-  'яйца': ['яйц', 'альбумин', 'овальбумин'],
-  'арахис': ['арахис'],
-  'орехи': ['орех', 'миндаль', 'фундук', 'грецкий'],
-  'рыба': ['рыба', 'рыбный', 'лосось', 'треска'],
-  'морепродукты': ['кревет', 'мидии', 'кальмар', 'краб', 'морепродукт'],
-  'пшеница / глютен': ['глютен', 'пшениц', 'мука'],
-  'соя': ['соя', 'соев'],
-  'кунжут': ['кунжут', 'sesame'],
-  'пыльца берёзы': ['берёз', 'берез'],
-  'пыльца амброзии': ['амброз'],
-  'пыль клещей': ['клещ', 'домашняя пыль'],
-  'шерсть кошек': ['кошк', 'кошач'],
-  'шерсть собак': ['собак', 'собач'],
-  'пенициллин': ['пенициллин'],
-  'аспирин': ['аспирин', 'салицил'],
-};
+export type {
+  AllergenCategory,
+  AllergenRecord,
+  CrossReaction,
+  CrossReactionMatch,
+} from './allergen-database';
+
+export const ALLERGEN_OPTIONS = getAllAllergenNames();
+
+export type AllergenOption = AllergenRecord['name'];
+
+export const ALLERGEN_KEYWORDS = buildAllergenKeywordsMap();

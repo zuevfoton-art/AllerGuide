@@ -1,7 +1,8 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ALLERGEN_OPTIONS, type ProfileType } from '@allerguide/core';
+import { type ProfileType } from '@allerguide/core';
+import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { getProfile, updateProfile } from '@/src/services/profile-service';
 import {
   listEmergencyContacts,
@@ -50,8 +51,6 @@ export default function ProfileEditScreen() {
     });
   }, [profileId]);
 
-  const toggle = (item: string) =>
-    setSelected((prev) => (prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]));
 
   const save = async () => {
     const trimmedName = name.trim();
@@ -137,21 +136,7 @@ export default function ProfileEditScreen() {
       </View>
 
       <Text style={styles.label}>Аллергены</Text>
-      <View style={styles.allergyGrid}>
-        {ALLERGEN_OPTIONS.map((item) => (
-          <Pressable
-            key={item}
-            style={[styles.allergyChip, selected.includes(item) && styles.allergyChipActive]}
-            onPress={() => toggle(item)}>
-            {selected.includes(item) && (
-              <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
-            )}
-            <Text style={[styles.allergyText, selected.includes(item) && styles.allergyTextActive]}>
-              {item}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      <AllergenPicker selected={selected} onChange={setSelected} />
 
       <Text style={styles.label}>Экстренные контакты</Text>
       <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
@@ -213,21 +198,6 @@ function createStyles({ colors, shadows }: AppTheme) {
     toggleActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
     toggleText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary },
     toggleTextActive: { color: colors.accent },
-    allergyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    allergyChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      paddingVertical: 9,
-      paddingHorizontal: 14,
-      borderRadius: 20,
-      backgroundColor: colors.card,
-      borderWidth: 1.5,
-      borderColor: colors.border,
-    },
-    allergyChipActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
-    allergyText: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
-    allergyTextActive: { color: colors.accent, fontWeight: '600' },
     button: {
       backgroundColor: colors.accent,
       padding: 17,
