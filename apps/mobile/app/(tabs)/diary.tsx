@@ -23,6 +23,7 @@ import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import type { DiaryEntry } from '@/src/types';
 
 const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colors'] }> = {
@@ -46,6 +47,7 @@ export default function DiaryScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
+  const { t } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
@@ -145,18 +147,18 @@ export default function DiaryScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Дневник" subtitle="Пошаговые записи наблюдений" />
+      <ScreenHeader title={t('diary.title')} subtitle={t('diary.subtitle')} />
 
       <ProfileSwitcher />
 
       {!editor ? (
         <>
           <Pressable style={glass.primaryBtn} onPress={() => setEditor({ mode: 'full' })}>
-            <Text style={glass.primaryBtnText}>＋ Новая запись по шагам</Text>
+            <Text style={glass.primaryBtnText}>{t('diary.newEntry')}</Text>
           </Pressable>
 
           <View style={styles.quickAddBlock}>
-            <Text style={glass.sectionLabel}>Быстрое добавление</Text>
+            <Text style={glass.sectionLabel}>{t('diary.quickAdd')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickAddRow}>
               {DIARY_SECTIONS.map((section) => {
                 const cfg = TYPE_CONFIG[section.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
@@ -181,17 +183,17 @@ export default function DiaryScreen() {
       <View style={styles.row}>
         <Pressable style={glass.secondaryBtn} onPress={() => void load()}>
           <Ionicons name="refresh" size={16} color={theme.colors.teal} />
-          <Text style={glass.secondaryBtnText}>Обновить</Text>
+          <Text style={glass.secondaryBtnText}>{t('diary.refresh')}</Text>
         </Pressable>
         <Pressable style={glass.secondaryBtn} onPress={() => router.push('/doctor-report' as any)}>
           <Ionicons name="document-text" size={16} color={theme.colors.teal} />
-          <Text style={glass.secondaryBtnText}>Отчёт для врача</Text>
+          <Text style={glass.secondaryBtnText}>{t('diary.doctorReport')}</Text>
         </Pressable>
       </View>
 
       {list.length > 0 ? (
         <>
-          <Text style={glass.sectionLabel}>История записей</Text>
+          <Text style={glass.sectionLabel}>{t('diary.history')}</Text>
           <GlassCard padded={false}>
           {list.map((item, index) => {
             const cfg = TYPE_CONFIG[item.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
@@ -218,9 +220,7 @@ export default function DiaryScreen() {
         </>
       ) : null}
 
-      <Text style={glass.disclaimer}>
-        Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.
-      </Text>
+      <Text style={glass.disclaimer}>{t('diary.disclaimer')}</Text>
     </Screen>
   );
 }

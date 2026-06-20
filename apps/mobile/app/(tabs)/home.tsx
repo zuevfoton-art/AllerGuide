@@ -10,12 +10,7 @@ import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-
-const DIARY_ROWS = [
-  { label: 'Симптомы', icon: 'pulse', route: '/(tabs)/diary', sub: 'Записать самочувствие' },
-  { label: 'Питание', icon: 'restaurant', route: '/(tabs)/diary', sub: '0 записей сегодня' },
-  { label: 'Лекарство', icon: 'medkit', route: '/(tabs)/diary', sub: 'Отметить приём' },
-] as const;
+import { useTranslation } from '@/src/store/locale-store';
 
 function scoreColor(level: WellnessSnapshot['level'], colors: AppTheme['colors']) {
   if (level === 'good') return colors.teal;
@@ -32,6 +27,7 @@ function factorProgress(level: 'low' | 'mid' | 'high'): number {
 export default function HomeScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, locale } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
   const [wellness, setWellness] = useState<WellnessSnapshot | null>(null);
@@ -60,15 +56,25 @@ export default function HomeScreen() {
     }, [loadWellness]),
   );
 
+  const diaryRows = useMemo(
+    () =>
+      [
+        { label: t('home.symptoms'), icon: 'pulse', route: '/(tabs)/diary', sub: t('home.symptomsSub') },
+        { label: t('home.food'), icon: 'restaurant', route: '/(tabs)/diary', sub: t('home.foodSub') },
+        { label: t('home.medicine'), icon: 'medkit', route: '/(tabs)/diary', sub: t('home.medicineSub') },
+      ] as const,
+    [t, locale],
+  );
+
   const quickLinks = useMemo(
     () =>
       [
-        { label: 'Сканер', icon: 'scan', route: '/(tabs)/scanner' },
-        { label: 'Карта', icon: 'map', route: '/(tabs)/map' },
-        { label: 'Маркет', icon: 'bag', route: '/(tabs)/market' },
-        { label: 'Эксперт', icon: 'school', route: '/expert' },
+        { label: t('tabs.scanner'), icon: 'scan', route: '/(tabs)/scanner' },
+        { label: t('tabs.map'), icon: 'map', route: '/(tabs)/map' },
+        { label: t('tabs.market'), icon: 'bag', route: '/(tabs)/market' },
+        { label: t('home.expert'), icon: 'school', route: '/expert' },
       ] as const,
-    [],
+    [t, locale],
   );
 
   const pollenFactor = wellness?.factors.find((f) => f.label.includes('Пыльца'));
@@ -94,17 +100,19 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Сегодня</Text>
-        <Text style={styles.heroSub}>{profile?.name ? `Профиль · ${profile.name}` : 'Выберите профиль'}</Text>
+        <Text style={styles.heroTitle}>{t('home.today')}</Text>
+        <Text style={styles.heroSub}>
+          {profile?.name ? `${t('home.profilePrefix')} · ${profile.name}` : t('home.selectProfile')}
+        </Text>
       </View>
 
       <ProfileSwitcher />
 
       <GlassCard>
         <View style={styles.cardHead}>
-          <Text style={styles.cardTitle}>Сводка самочувствия</Text>
+          <Text style={styles.cardTitle}>{t('home.wellnessTitle')}</Text>
           <Pressable onPress={() => router.push('/(tabs)/map')}>
-            <Text style={styles.cardLink}>Подробности</Text>
+            <Text style={styles.cardLink}>{t('home.details')}</Text>
           </Pressable>
         </View>
 
@@ -115,15 +123,15 @@ export default function HomeScreen() {
             <View style={styles.gaugeRow}>
               <View style={styles.sideStat}>
                 <Text style={styles.sideNum}>{pollenFactor ? '↑' : '—'}</Text>
-                <Text style={styles.sideLabel}>Пыльца</Text>
+                <Text style={styles.sideLabel}>{t('home.pollen')}</Text>
               </View>
               <View style={[styles.gauge, { borderColor: scoreColor(wellness.level, theme.colors) }]}>
                 <Text style={styles.gaugeNum}>{wellness.score}</Text>
-                <Text style={styles.gaugeLabel}>индекс</Text>
+                <Text style={styles.gaugeLabel}>{t('home.index')}</Text>
               </View>
               <View style={styles.sideStat}>
                 <Text style={styles.sideNum}>{aqiFactor?.level === 'high' ? '!' : 'OK'}</Text>
-                <Text style={styles.sideLabel}>Воздух</Text>
+                <Text style={styles.sideLabel}>{t('home.air')}</Text>
               </View>
             </View>
 
@@ -155,22 +163,22 @@ export default function HomeScreen() {
             </View>
           </>
         ) : (
-          <Text style={styles.statusLine}>Выберите профиль для расчёта индекса.</Text>
+          <Text style={styles.statusLine}>{t('home.selectProfile')}</Text>
         )}
       </GlassCard>
 
       <View style={styles.sectionHead}>
-        <Text style={styles.sectionTitle}>Дневник</Text>
+        <Text style={styles.sectionTitle}>{t('home.diary')}</Text>
         <Pressable onPress={() => router.push('/(tabs)/diary')}>
-          <Text style={styles.cardLink}>Больше</Text>
+          <Text style={styles.cardLink}>{t('common.more')}</Text>
         </Pressable>
       </View>
 
       <GlassCard padded={false}>
-        {DIARY_ROWS.map((row, index) => (
+        {diaryRows.map((row, index) => (
           <Pressable
             key={row.label}
-            style={[styles.listRow, index < DIARY_ROWS.length - 1 && styles.listRowBorder]}
+            style={[styles.listRow, index < diaryRows.length - 1 && styles.listRowBorder]}
             onPress={() => router.push(row.route as any)}>
             <View style={styles.listIcon}>
               <Ionicons name={row.icon as any} size={18} color={theme.colors.teal} />
@@ -202,9 +210,7 @@ export default function HomeScreen() {
         ))}
       </ScrollView>
 
-      <Text style={styles.disclaimer}>
-        Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.
-      </Text>
+      <Text style={styles.disclaimer}>{t('home.disclaimer')}</Text>
     </Screen>
   );
 }

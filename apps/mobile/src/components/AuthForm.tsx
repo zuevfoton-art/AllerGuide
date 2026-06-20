@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { useMemo } from 'react';
 
 interface AuthModeToggleProps {
@@ -12,6 +13,7 @@ interface AuthModeToggleProps {
 export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <View style={styles.toggleRow}>
@@ -23,7 +25,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
           size={16}
           color={loginType === 'phone' ? theme.colors.teal : theme.colors.textSecondary}
         />
-        <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>Телефон</Text>
+        <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
       </Pressable>
       <Pressable
         style={[styles.toggleBtn, loginType === 'email' && styles.toggleActive]}
@@ -33,7 +35,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
           size={16}
           color={loginType === 'email' ? theme.colors.teal : theme.colors.textSecondary}
         />
-        <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>Email</Text>
+        <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>{t('common.email')}</Text>
       </Pressable>
     </View>
   );
@@ -89,13 +91,14 @@ export function AuthPrimaryButton({
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <Pressable
       style={[styles.button, loading && styles.buttonDisabled]}
       onPress={onPress}
       disabled={loading}>
-      <Text style={styles.buttonText}>{loading ? 'Подождите...' : label}</Text>
+      <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
     </Pressable>
   );
 }

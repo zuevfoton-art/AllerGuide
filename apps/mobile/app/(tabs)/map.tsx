@@ -20,6 +20,7 @@ import {
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { getRecommendedPlaces } from '@/src/services/place-service';
 
 const DEFAULT_REGION = {
@@ -40,9 +41,9 @@ if (Platform.OS !== 'web') {
 }
 
 const LAYERS = [
-  { key: 'places', label: 'Рестораны' },
-  { key: 'pollen', label: 'Пыление' },
-  { key: 'adair', label: 'АДАИР' },
+  { key: 'places', labelKey: 'map.places' },
+  { key: 'pollen', labelKey: 'map.pollen' },
+  { key: 'adair', labelKey: 'map.adair' },
 ] as const;
 
 type MapLayer = (typeof LAYERS)[number]['key'];
@@ -51,6 +52,7 @@ export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
+  const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const [layer, setLayer] = useState<MapLayer>('places');
   const [places, setPlaces] = useState<CatalogPlace[]>([]);
@@ -95,7 +97,7 @@ export default function MapScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Карта мест" subtitle="3 слоя по ТЗ v13" />
+      <ScreenHeader title={t('map.title')} subtitle={t('map.subtitle')} />
 
       <ProfileSwitcher />
 
@@ -105,7 +107,7 @@ export default function MapScreen() {
             key={item.key}
             style={[glass.toggle, layer === item.key && glass.toggleActive]}
             onPress={() => setLayer(item.key)}>
-            <Text style={[glass.toggleText, layer === item.key && glass.toggleTextActive]}>{item.label}</Text>
+            <Text style={[glass.toggleText, layer === item.key && glass.toggleTextActive]}>{t(item.labelKey)}</Text>
           </Pressable>
         ))}
       </View>
@@ -133,11 +135,11 @@ export default function MapScreen() {
       ) : (
         <View style={styles.mapPlaceholder}>
           <Ionicons name="map" size={40} color={theme.colors.textMuted} />
-          <Text style={styles.mapText}>Интерактивная карта доступна в мобильном приложении</Text>
+          <Text style={styles.mapText}>{t('map.mapWebHint')}</Text>
         </View>
       )}
 
-      <Text style={glass.sectionLabel}>Рекомендованные места</Text>
+      <Text style={glass.sectionLabel}>{t('map.recommended')}</Text>
 
       {places.map((place) => {
         const levelColor = getPlaceLevelColor(place.level, theme.isDark);
@@ -170,9 +172,7 @@ export default function MapScreen() {
         );
       })}
 
-      <Text style={glass.disclaimer}>
-        Информация о местах носит ориентировочный характер, состав нужно уточнять в заведении.
-      </Text>
+      <Text style={glass.disclaimer}>{t('map.disclaimerPlaces')}</Text>
         </>
       ) : null}
 
@@ -194,9 +194,7 @@ export default function MapScreen() {
               </View>
             </GlassCard>
           ))}
-          <Text style={glass.disclaimer}>
-            Данные о пылении носят ориентировочный характер. Уточняйте прогноз у лечащего врача.
-          </Text>
+          <Text style={glass.disclaimer}>{t('map.disclaimerPollen')}</Text>
         </>
       ) : null}
 
@@ -234,9 +232,7 @@ export default function MapScreen() {
               </View>
             </GlassCard>
           ))}
-          <Text style={glass.disclaimer}>
-            Информация о клиниках и врачах предоставлена АДАИР и носит справочный характер.
-          </Text>
+          <Text style={glass.disclaimer}>{t('map.disclaimerAdair')}</Text>
         </>
       ) : null}
     </Screen>

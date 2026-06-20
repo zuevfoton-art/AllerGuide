@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
+import { useTranslation } from '@/src/store/locale-store';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -31,6 +32,7 @@ function TabIcon({
 export default function TabsLayout() {
   const { colors, shadows } = useTheme();
   const { isCompact, showTabLabels, tabBarHeight } = useResponsiveLayout();
+  const { t } = useTranslation();
   const iconSize = isCompact ? 22 : 24;
 
   return (
@@ -76,7 +78,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Главная',
+          title: t('tabs.home'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="home"
@@ -91,7 +93,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="diary"
         options={{
-          title: 'Дневник',
+          title: t('tabs.diary'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="journal"
@@ -106,7 +108,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
-          title: 'Сканер',
+          title: t('tabs.scanner'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="scan"
@@ -121,7 +123,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="market"
         options={{
-          title: 'Маркет',
+          title: t('tabs.market'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="bag"
@@ -136,7 +138,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title: 'Карта',
+          title: t('tabs.map'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="map"
@@ -151,7 +153,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="sos"
         options={{
-          title: 'SOS',
+          title: t('tabs.sos'),
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="medkit"

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import type { LoginType } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
+import { LanguagePicker } from '@/src/components/LanguagePicker';
+import { useTranslation } from '@/src/store/locale-store';
 import {
   AuthError,
   AuthField,
@@ -13,6 +15,7 @@ import {
 } from '@/src/components/AuthForm';
 
 export default function LoginScreen() {
+  const { t, tAuthError } = useTranslation();
   const [loginType, setLoginType] = useState<LoginType>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +29,7 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (!result.ok) {
-      setError(result.error);
+      setError(tAuthError(result.error));
       return;
     }
 
@@ -35,27 +38,28 @@ export default function LoginScreen() {
 
   return (
     <Screen>
-      <AuthHero title="Вход" subtitle="Войдите по номеру телефона или email" />
+      <LanguagePicker compact />
+      <AuthHero title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')} />
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
       <AuthField
-        label={loginType === 'phone' ? 'Номер телефона' : 'Email'}
+        label={loginType === 'phone' ? t('auth.phoneLabel') : t('common.email')}
         value={login}
         onChangeText={setLogin}
-        placeholder={loginType === 'phone' ? '+7 999 123-45-67' : 'name@example.com'}
+        placeholder={loginType === 'phone' ? t('auth.phonePlaceholder') : 'name@example.com'}
         keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
       />
       <AuthField
-        label="Пароль"
+        label={t('common.password')}
         value={password}
         onChangeText={setPassword}
-        placeholder="Введите пароль"
+        placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
       />
       <AuthError message={error} />
-      <AuthPrimaryButton label="Войти" onPress={handleLogin} loading={loading} />
+      <AuthPrimaryButton label={t('auth.loginButton')} onPress={handleLogin} loading={loading} />
       <AuthLink
-        text="Нет аккаунта?"
-        linkText="Зарегистрироваться"
+        text={t('auth.noAccount')}
+        linkText={t('auth.registerLink')}
         onPress={() => router.push('/register')}
       />
     </Screen>

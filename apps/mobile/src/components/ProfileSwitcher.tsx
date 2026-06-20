@@ -5,11 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { listProfiles } from '@/src/services/profile-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
 export function ProfileSwitcher() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
@@ -66,12 +68,12 @@ export function ProfileSwitcher() {
 
         <Pressable style={styles.addChip} onPress={() => router.push('/profile-setup')}>
           <Ionicons name="add" size={18} color={theme.colors.teal} />
-          <Text style={styles.addChipText}>Профиль</Text>
+          <Text style={styles.addChipText}>{t('profileSwitcher.add')}</Text>
         </Pressable>
       </View>
 
       {activeProfileId ? (
-        <Text style={styles.hint}>Нажмите ещё раз на активный профиль для редактирования</Text>
+        <Text style={styles.hint}>{t('profileSwitcher.hint')}</Text>
       ) : null}
     </View>
   );

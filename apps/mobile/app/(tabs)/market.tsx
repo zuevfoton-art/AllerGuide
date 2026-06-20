@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { CatalogProduct } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { searchRecommendedProducts } from '@/src/services/product-service';
 
 function getProductColor(theme: AppTheme, key: CatalogProduct['colorKey']) {
@@ -27,6 +28,7 @@ export default function MarketScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
+  const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const [query, setQuery] = useState('');
   const [items, setItems] = useState<CatalogProduct[]>([]);
@@ -43,7 +45,7 @@ export default function MarketScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title="Маркет" subtitle="Товары для аллергиков" />
+      <ScreenHeader title={t('market.title')} subtitle={t('market.subtitle')} />
 
       <ProfileSwitcher />
 
@@ -54,7 +56,7 @@ export default function MarketScreen() {
             style={styles.searchInput}
             value={query}
             onChangeText={setQuery}
-            placeholder="Поиск по каталогу…"
+            placeholder={t('market.searchPlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
             onSubmitEditing={refresh}
           />
@@ -64,14 +66,14 @@ export default function MarketScreen() {
       <GlassCard style={styles.banner}>
         <Ionicons name="star" size={18} color={theme.colors.warning} />
         <Text style={styles.bannerText}>
-          Подборка на основе профиля аллергий — скрыты товары с конфликтующими аллергенами
+          {t('market.banner')}
         </Text>
       </GlassCard>
 
       {items.length === 0 ? (
         <GlassCard style={styles.empty}>
           <Ionicons name="basket-outline" size={36} color={theme.colors.textMuted} />
-          <Text style={styles.emptyText}>Ничего не найдено. Попробуйте другой запрос.</Text>
+          <Text style={styles.emptyText}>{t('market.empty')}</Text>
         </GlassCard>
       ) : (
         items.map((item) => {
@@ -96,9 +98,7 @@ export default function MarketScreen() {
         })
       )}
 
-      <Text style={glass.disclaimer}>
-        Рекомендации основаны на общих характеристиках товара и не заменяют назначения врача.
-      </Text>
+      <Text style={glass.disclaimer}>{t('market.disclaimer')}</Text>
     </Screen>
   );
 }

@@ -13,20 +13,22 @@ import { GlassCard } from '@/src/components/GlassCard';
 import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { scanBarcode, scanMenuPhoto, scanText } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 
 const MODES = [
-  { key: 'product', label: 'Продукт', icon: 'nutrition' },
-  { key: 'menu', label: 'Меню', icon: 'restaurant' },
-  { key: 'medicine', label: 'Лекарство', icon: 'medkit' },
-  { key: 'cosmetics', label: 'Косметика', icon: 'flask' },
+  { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
+  { key: 'menu', labelKey: 'scanner.menu', icon: 'restaurant' },
+  { key: 'medicine', labelKey: 'scanner.medicine', icon: 'medkit' },
+  { key: 'cosmetics', labelKey: 'scanner.cosmetics', icon: 'flask' },
 ] as const;
 
 export default function ScannerScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
+  const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('молоко, арахис, сахар');
@@ -186,8 +188,8 @@ export default function ScannerScreen() {
   return (
     <Screen>
       <ScreenHeader
-        title="Умный сканер"
-        subtitle="Open Food Facts + проверка аллергенов"
+        title={t('scanner.title')}
+        subtitle={t('scanner.subtitle')}
         right={
           <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
             <Ionicons name="camera" size={22} color={theme.colors.teal} />
@@ -208,7 +210,7 @@ export default function ScannerScreen() {
               size={18}
               color={mode === m.key ? theme.colors.teal : theme.colors.textMuted}
             />
-            <Text style={[glass.toggleText, mode === m.key && glass.toggleTextActive]}>{m.label}</Text>
+            <Text style={[glass.toggleText, mode === m.key && glass.toggleTextActive]}>{t(m.labelKey)}</Text>
           </Pressable>
         ))}
       </View>
@@ -228,10 +230,10 @@ export default function ScannerScreen() {
         </View>
         <View style={styles.scanBannerText}>
           <Text style={styles.scanBannerTitle}>
-            {mode === 'product' ? 'Сканировать штрихкод' : 'Снять меню на фото'}
+            {mode === 'product' ? t('scanner.scanBarcode') : t('scanner.scanMenu')}
           </Text>
           <Text style={styles.scanBannerDesc}>
-            {mode === 'product' ? 'Поиск состава в Open Food Facts' : 'Демо-анализ типичного меню'}
+            {mode === 'product' ? t('scanner.scanBarcodeDesc') : t('scanner.scanMenuDesc')}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
@@ -240,7 +242,7 @@ export default function ScannerScreen() {
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>или введите вручную</Text>
+        <Text style={styles.dividerText}>{t('scanner.manualDivider')}</Text>
         <View style={styles.dividerLine} />
       </View>
 
@@ -270,7 +272,7 @@ export default function ScannerScreen() {
         {loading ? (
           <ActivityIndicator color={theme.colors.onAccent} />
         ) : (
-          <Text style={glass.primaryBtnText}>Проверить</Text>
+          <Text style={glass.primaryBtnText}>{t('scanner.check')}</Text>
         )}
       </Pressable>
 
@@ -321,7 +323,7 @@ export default function ScannerScreen() {
 
       {history.length > 0 ? (
         <>
-          <Text style={glass.sectionLabel}>История сканирований</Text>
+          <Text style={glass.sectionLabel}>{t('scanner.history')}</Text>
           <GlassCard padded={false}>
           {history.map((item, index) => (
             <View
@@ -339,9 +341,7 @@ export default function ScannerScreen() {
         </>
       ) : null}
 
-      <Text style={glass.disclaimer}>
-        Результат носит предварительный характер и не исключает индивидуальной реакции.
-      </Text>
+      <Text style={glass.disclaimer}>{t('scanner.disclaimer')}</Text>
     </Screen>
   );
 }
