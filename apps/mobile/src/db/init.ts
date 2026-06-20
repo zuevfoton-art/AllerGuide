@@ -1,4 +1,9 @@
-import type { Profile, DiaryEntry } from '@allerguide/core';
+import type { AuthUser, Profile, DiaryEntry } from '@allerguide/core';
+
+interface StoredUser extends AuthUser {
+  passwordHash: string;
+  createdAt: string;
+}
 
 interface DbLike {
   execSync: (sql: string) => void;
@@ -42,6 +47,18 @@ class WebDb implements DbLike {
 
   private saveSettings(settings: Record<string, string>) {
     localStorage.setItem('ag_settings', JSON.stringify(settings));
+  }
+
+  private getUsers(): StoredUser[] {
+    try {
+      return JSON.parse(localStorage.getItem('ag_users') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  private saveUsers(users: StoredUser[]) {
+    localStorage.setItem('ag_users', JSON.stringify(users));
   }
 
   execSync(_sql: string) {}
@@ -110,6 +127,20 @@ class WebDb implements DbLike {
       const settings = this.getSettings();
       settings[params![0] as string] = params![1] as string;
       this.saveSettings(settings);
+      return;
+    }
+
+    if (s.startsWith('insert into users')) {
+      const users = this.getUsers();
+      const id = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+      users.push({
+        id,
+        login: params![0] as string,
+        loginType: params![1] as AuthUser['loginType'],
+        passwordHash: params![2] as string,
+        createdAt: params![3] as string,
+      });
+      this.saveUsers(users);
     }
   }
 
@@ -120,6 +151,16 @@ class WebDb implements DbLike {
       const settings = this.getSettings();
       const value = settings[params![0] as string];
       return value != null ? ({ value } as T) : null;
+    }
+
+    if (s.includes('from users') && s.includes('where login =')) {
+      const users = this.getUsers();
+      return (users.find((u) => u.login === params![0]) || null) as T | null;
+    }
+
+    if (s.includes('from users') && s.includes('where id =')) {
+      const users = this.getUsers();
+      return (users.find((u) => u.id === params![0]) || null) as T | null;
     }
 
     if (s.includes('from profiles') && s.includes('order by id desc limit 1')) {

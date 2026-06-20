@@ -2,6 +2,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { parseAllergies } from '@allerguide/core';
+import { logoutUser } from '@/src/services/auth-service';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
@@ -84,6 +85,16 @@ export default function ProfilesScreen() {
         <Ionicons name="add-circle" size={20} color={colors.accent} />
         <Text style={styles.addText}>Добавить профиль</Text>
       </Pressable>
+
+      <Pressable
+        style={styles.logoutBtn}
+        onPress={() => {
+          logoutUser();
+          router.replace('/login');
+        }}>
+        <Ionicons name="log-out-outline" size={18} color={colors.danger} />
+        <Text style={styles.logoutText}>Выйти из аккаунта</Text>
+      </Pressable>
     </Screen>
   );
 }
@@ -158,4 +169,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accentLight,
   },
   addText: { color: colors.accent, fontWeight: '700', fontSize: 15 },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: colors.dangerLight,
+    borderWidth: 1,
+    borderColor: '#FFB3AE',
+  },
+  logoutText: { color: colors.danger, fontWeight: '700', fontSize: 15 },
 });

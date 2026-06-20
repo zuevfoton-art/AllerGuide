@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
 import { initDb } from '@/src/db/init';
+import { isAuthenticated } from '@/src/services/auth-service';
 import { listProfiles } from '@/src/services/profile-service';
 import {
   getStoredScenario,
@@ -11,12 +12,20 @@ import {
 import { useAppStore } from '@/src/store/app-store';
 import { colors } from '@/src/constants/theme';
 
+type BootstrapRoute = '/login' | '/onboarding' | '/profile-setup' | '/(tabs)/home';
+
 export default function Index() {
-  const [target, setTarget] = useState<'/(tabs)/home' | '/onboarding' | '/profile-setup' | null>(null);
+  const [target, setTarget] = useState<BootstrapRoute | null>(null);
   const setScenario = useAppStore((s) => s.setScenario);
 
   useEffect(() => {
     initDb();
+
+    if (!isAuthenticated()) {
+      setTarget('/login');
+      return;
+    }
+
     const profiles = listProfiles();
     const scenario = getStoredScenario();
     if (scenario) setScenario(scenario);

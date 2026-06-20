@@ -10,6 +10,8 @@ declare module 'expo-router' {
         | { pathname: Router.RelativePathString; params?: Router.UnknownInputParams }
         | { pathname: Router.ExternalPathString; params?: Router.UnknownInputParams }
         | { pathname: `/`; params?: Router.UnknownInputParams }
+        | { pathname: `/login`; params?: Router.UnknownInputParams }
+        | { pathname: `/register`; params?: Router.UnknownInputParams }
         | { pathname: `/onboarding`; params?: Router.UnknownInputParams }
         | { pathname: `/profile-setup`; params?: Router.UnknownInputParams }
         | { pathname: `/profiles`; params?: Router.UnknownInputParams }
@@ -40,6 +42,8 @@ declare module 'expo-router' {
         | Router.RelativePathString
         | Router.ExternalPathString
         | `/${`?${string}` | `#${string}` | ''}`
+        | `/login${`?${string}` | `#${string}` | ''}`
+        | `/register${`?${string}` | `#${string}` | ''}`
         | `/onboarding${`?${string}` | `#${string}` | ''}`
         | `/profile-setup${`?${string}` | `#${string}` | ''}`
         | `/profiles${`?${string}` | `#${string}` | ''}`
@@ -60,6 +64,8 @@ declare module 'expo-router' {
         | { pathname: Router.RelativePathString; params?: Router.UnknownInputParams }
         | { pathname: Router.ExternalPathString; params?: Router.UnknownInputParams }
         | { pathname: `/`; params?: Router.UnknownInputParams }
+        | { pathname: `/login`; params?: Router.UnknownInputParams }
+        | { pathname: `/register`; params?: Router.UnknownInputParams }
         | { pathname: `/onboarding`; params?: Router.UnknownInputParams }
         | { pathname: `/profile-setup`; params?: Router.UnknownInputParams }
         | { pathname: `/profiles`; params?: Router.UnknownInputParams }
