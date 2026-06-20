@@ -1,8 +1,11 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { computeDiaryStats } from '@allerguide/core';
 import { getCurrentUser } from '@/src/services/auth-service';
 import { confirmLogout } from '@/src/utils/confirm-logout';
+import { getDiaryEntries } from '@/src/services/diary-service';
+import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +17,20 @@ export default function HomeScreen() {
   const { gridCardWidth } = useResponsiveLayout();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const currentUser = useMemo(() => getCurrentUser(), []);
+  const activeProfileId = useAppStore((s) => s.activeProfileId);
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof loadStats>> | null>(null);
+
+  async function loadStats(profileId: number | null) {
+    if (!profileId) return null;
+    const entries = await getDiaryEntries(profileId);
+    return computeDiaryStats(entries);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadStats(activeProfileId).then(setStats);
+    }, [activeProfileId]),
+  );
   const actions = useMemo(
     () =>
       [
@@ -84,6 +101,21 @@ export default function HomeScreen() {
           <Text style={styles.logoutText}>Выйти</Text>
         </Pressable>
       </View>
+
+      {stats && stats.totalEntries > 0 ? (
+        <View style={styles.statsCard}>
+          <Text style={styles.statsTitle}>Статистика дневника</Text>
+          <Text style={styles.statsMeta}>
+            {stats.totalEntries} записей · {stats.entriesLast7Days} за 7 дней
+          </Text>
+          {stats.recentSymptoms.length > 0 ? (
+            <Text style={styles.statsLine}>Симптомы: {stats.recentSymptoms.join(' · ')}</Text>
+          ) : null}
+          {stats.topFoodItems.length > 0 ? (
+            <Text style={styles.statsLine}>Питание: {stats.topFoodItems.join(' · ')}</Text>
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={styles.banner}>
         <View style={styles.bannerIcon}>
@@ -195,6 +227,17 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.dangerBorder,
     },
     logoutText: { color: colors.danger, fontWeight: '700', fontSize: 14 },
+    statsCard: {
+      backgroundColor: colors.card,
+      borderRadius: 14,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 6,
+    },
+    statsTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    statsMeta: { fontSize: 13, color: colors.textSecondary },
+    statsLine: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
     sectionLabel: {
       fontSize: 13,
       fontWeight: '700',

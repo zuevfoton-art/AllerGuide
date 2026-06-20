@@ -1,13 +1,17 @@
-import { Text, TextInput, Pressable, StyleSheet, View, Platform } from 'react-native';
-import { useMemo, useState } from 'react';
+import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { runMockScan, type ScanResult } from '@/src/services/mock-ai-service';
+import type { ScanResult } from '@allerguide/ai';
+import { formatDiaryDate, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
-import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { scanBarcode, scanMenuPhoto, scanText } from '@/src/services/scanner-service';
+import { listScanHistory } from '@/src/services/scan-history-service';
 
 const MODES = [
   { key: 'product', label: 'Продукт', icon: 'nutrition' },
@@ -19,14 +23,72 @@ export default function ScannerScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
+  const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('молоко, арахис, сахар');
   const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
+  const [loading, setLoading] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
-  const isDanger = result != null && result.matches.length > 0;
+  const isDanger =
+    result != null && (result.matches.length > 0 || (result.crossMatches?.length ?? 0) > 0);
+
+  const refreshHistory = useCallback(() => {
+    if (!activeProfileId) {
+      setHistory([]);
+      return;
+    }
+    setHistory(listScanHistory(activeProfileId).slice(0, 5));
+  }, [activeProfileId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshHistory();
+    }, [refreshHistory]),
+  );
+
+  const runCheck = async (text: string, barcodeMode = false) => {
+    setLoading(true);
+    try {
+      if (barcodeMode && mode === 'product') {
+        const scanResult = await scanBarcode({ barcode: text, profile });
+        setResult(scanResult);
+        return;
+      }
+
+      if (mode === 'menu' && !barcodeMode && text === input && text.includes(',')) {
+        setResult(scanMenuPhoto({ profile }));
+        return;
+      }
+
+      setResult(scanText({ mode, text, profile }));
+    } finally {
+      setLoading(false);
+      refreshHistory();
+    }
+  };
+
+  const pickMenuImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+
+    const picked = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+    if (picked.canceled) return;
+
+    setLoading(true);
+    try {
+      setResult(scanMenuPhoto({ profile }));
+    } finally {
+      setLoading(false);
+      refreshHistory();
+    }
+  };
 
   const openCamera = async () => {
     if (!permission?.granted) {
@@ -42,7 +104,16 @@ export default function ScannerScreen() {
     setScanned(true);
     setCameraOpen(false);
     setInput(data);
-    setResult(runMockScan({ mode, text: data, profile }));
+    void runCheck(data, true);
+  };
+
+  const handleMenuPhoto = async () => {
+    setLoading(true);
+    try {
+      setResult(scanMenuPhoto({ profile }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (cameraOpen) {
@@ -51,7 +122,8 @@ export default function ScannerScreen() {
         <CameraView
           style={StyleSheet.absoluteFillObject}
           facing="back"
-          onBarcodeScanned={handleBarcode}
+          barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }}
+          onBarcodeScanned={mode === 'product' ? handleBarcode : undefined}
         />
 
         <View style={styles.cameraOverlay}>
@@ -60,7 +132,7 @@ export default function ScannerScreen() {
               <Ionicons name="close" size={24} color={theme.colors.onAccent} />
             </Pressable>
             <Text style={styles.cameraTitle}>
-              {mode === 'product' ? 'Сканируйте штрихкод' : 'Наведите на текст'}
+              {mode === 'product' ? 'Сканируйте штрихкод' : 'Наведите на текст меню'}
             </Text>
             <View style={{ width: 40 }} />
           </View>
@@ -74,10 +146,20 @@ export default function ScannerScreen() {
             </View>
             <Text style={styles.viewfinderHint}>
               {mode === 'product'
-                ? 'Штрихкод будет распознан автоматически'
-                : 'Совместите состав блюда в рамке'}
+                ? 'Штрихкод будет проверен через Open Food Facts'
+                : 'Демо: нажмите кнопку ниже для анализа типичного меню'}
             </Text>
           </View>
+
+          {mode === 'menu' ? (
+            <Pressable style={styles.menuScanBtn} onPress={handleMenuPhoto} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color={theme.colors.onAccent} />
+              ) : (
+                <Text style={styles.menuScanBtnText}>Проанализировать меню</Text>
+              )}
+            </Pressable>
+          ) : null}
 
           {Platform.OS === 'web' && (
             <View style={styles.webHint}>
@@ -101,7 +183,7 @@ export default function ScannerScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Умный сканер</Text>
-          <Text style={styles.subtitle}>Проверка аллергенов в составе</Text>
+          <Text style={styles.subtitle}>Open Food Facts + проверка аллергенов</Text>
         </View>
         <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
           <Ionicons name="camera" size={22} color={theme.colors.accent} />
@@ -126,15 +208,25 @@ export default function ScannerScreen() {
         ))}
       </View>
 
-      <Pressable style={styles.scanBanner} onPress={openCamera}>
+      <Pressable
+        style={styles.scanBanner}
+        onPress={() => {
+          if (mode === 'menu') {
+            void pickMenuImage();
+            return;
+          }
+          void openCamera();
+        }}>
         <View style={styles.scanBannerIcon}>
-          <Ionicons name="barcode" size={26} color={theme.colors.accent} />
+          <Ionicons name={mode === 'product' ? 'barcode' : 'restaurant'} size={26} color={theme.colors.accent} />
         </View>
         <View style={styles.scanBannerText}>
           <Text style={styles.scanBannerTitle}>
-            {mode === 'product' ? 'Сканировать штрихкод' : 'Снять состав на фото'}
+            {mode === 'product' ? 'Сканировать штрихкод' : 'Снять меню на фото'}
           </Text>
-          <Text style={styles.scanBannerDesc}>Нажмите, чтобы открыть камеру</Text>
+          <Text style={styles.scanBannerDesc}>
+            {mode === 'product' ? 'Поиск состава в Open Food Facts' : 'Демо-анализ типичного меню'}
+          </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </Pressable>
@@ -150,16 +242,32 @@ export default function ScannerScreen() {
         <TextInput
           value={input}
           onChangeText={setInput}
-          placeholder="Введите состав, блюдо или название..."
+          placeholder={
+            mode === 'product'
+              ? 'Штрихкод или состав продукта...'
+              : 'Введите состав блюда или меню...'
+          }
           placeholderTextColor={theme.colors.textMuted}
           multiline
           style={styles.input}
         />
       </View>
 
-      <Pressable style={styles.button} onPress={() => setResult(runMockScan({ mode, text: input, profile }))}>
-        <Ionicons name="search" size={18} color={theme.colors.onAccent} />
-        <Text style={styles.buttonText}>Проверить</Text>
+      <Pressable
+        style={styles.button}
+        disabled={loading}
+        onPress={() => {
+          const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
+          void runCheck(input.trim(), looksLikeBarcode && mode === 'product');
+        }}>
+        {loading ? (
+          <ActivityIndicator color={theme.colors.onAccent} />
+        ) : (
+          <>
+            <Ionicons name="search" size={18} color={theme.colors.onAccent} />
+            <Text style={styles.buttonText}>Проверить</Text>
+          </>
+        )}
       </Pressable>
 
       {result && (
@@ -176,19 +284,50 @@ export default function ScannerScreen() {
               <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
                 {result.verdict}
               </Text>
+              {result.productName ? (
+                <Text style={styles.productName}>{result.productName}</Text>
+              ) : null}
             </View>
           </View>
           <Text style={styles.reason}>{result.reason}</Text>
           {result.matches?.length > 0 && (
             <View style={styles.matchesBadge}>
               <Ionicons name="alert-circle" size={13} color={theme.colors.danger} />
-              <Text style={styles.matchesText}>
-                Совпадения: {result.matches.join(', ')}
-              </Text>
+              <Text style={styles.matchesText}>Совпадения: {result.matches.join(', ')}</Text>
             </View>
           )}
+          {(result.crossMatches?.length ?? 0) > 0 && (
+            <View style={styles.crossBadge}>
+              <Ionicons name="git-network-outline" size={13} color={theme.colors.warning} />
+              <Text style={styles.crossText}>Перекрёстные: {result.crossMatches.join(', ')}</Text>
+            </View>
+          )}
+          {result.source ? (
+            <Text style={styles.sourceMeta}>
+              Источник:{' '}
+              {result.source === 'openfoodfacts'
+                ? 'Open Food Facts'
+                : result.source === 'barcode'
+                  ? 'штрихкод'
+                  : 'ручной ввод'}
+            </Text>
+          ) : null}
         </View>
       )}
+
+      {history.length > 0 ? (
+        <>
+          <Text style={styles.historyLabel}>История сканирований</Text>
+          {history.map((item) => (
+            <View key={item.id} style={styles.historyCard}>
+              <Text style={styles.historyTitle}>{item.productName || item.verdict}</Text>
+              <Text style={styles.historyMeta}>
+                {formatDiaryDate(item.createdAt)} · {item.source}
+              </Text>
+            </View>
+          ))}
+        </>
+      ) : null}
 
       <Text style={styles.disclaimer}>
         Результат носит предварительный характер и не исключает индивидуальной реакции.
@@ -211,7 +350,6 @@ function createStyles({ colors, shadows }: AppTheme) {
       justifyContent: 'center',
       marginTop: 4,
     },
-
     modeRow: { flexDirection: 'row', gap: 8 },
     modeBtn: {
       flex: 1,
@@ -228,7 +366,6 @@ function createStyles({ colors, shadows }: AppTheme) {
     modeBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
     modeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
     modeTextActive: { color: colors.accent },
-
     scanBanner: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -251,11 +388,9 @@ function createStyles({ colors, shadows }: AppTheme) {
     scanBannerText: { flex: 1, gap: 3 },
     scanBannerTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
     scanBannerDesc: { fontSize: 13, color: colors.textSecondary },
-
     divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
     dividerText: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
-
     inputWrap: {
       backgroundColor: colors.card,
       borderRadius: 16,
@@ -267,12 +402,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       minHeight: 100,
     },
     inputIcon: { marginBottom: 6 },
-    input: {
-      fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
-      color: colors.text,
-      textAlignVertical: 'top',
-      lineHeight: 22,
-    },
+    input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
     button: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -284,7 +414,6 @@ function createStyles({ colors, shadows }: AppTheme) {
       ...(shadows.accent as object),
     },
     buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
-
     resultCard: { borderRadius: 18, padding: 16, gap: 10, borderWidth: 1.5 },
     resultSafe: { backgroundColor: colors.successLight, borderColor: colors.scannerSafeBorder },
     resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.scannerDangerBorder },
@@ -302,6 +431,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     verdict: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
     verdictSafe: { color: colors.scannerSafeText },
     verdictDanger: { color: colors.danger },
+    productName: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
     reason: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
     matchesBadge: {
       flexDirection: 'row',
@@ -314,13 +444,37 @@ function createStyles({ colors, shadows }: AppTheme) {
       alignSelf: 'flex-start',
     },
     matchesText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
-
-    cameraContainer: {
-      flex: 1,
-      backgroundColor: colors.overlay,
-      ...(Platform.OS === 'web' ? { minHeight: '100dvh' as unknown as number } : null),
+    crossBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      backgroundColor: colors.warningLight,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      alignSelf: 'flex-start',
     },
+    crossText: { fontSize: 13, color: colors.warningText, fontWeight: '600' },
+    historyLabel: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+    },
+    historyCard: {
+      backgroundColor: colors.card,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 4,
+    },
+    historyTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+    historyMeta: { fontSize: 12, color: colors.textMuted },
+    sourceMeta: { fontSize: 12, color: colors.textMuted },
+    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+    cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,
       justifyContent: 'space-between',
@@ -343,18 +497,8 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     cameraTitle: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
     viewfinderWrap: { alignItems: 'center', gap: 20 },
-    viewfinder: {
-      width: 260,
-      height: 180,
-      position: 'relative',
-    },
-    corner: {
-      position: 'absolute',
-      width: 28,
-      height: 28,
-      borderColor: colors.accent,
-      borderWidth: 3,
-    },
+    viewfinder: { width: 260, height: 180, position: 'relative' },
+    corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.accent, borderWidth: 3 },
     cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
     cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
     cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
@@ -364,7 +508,16 @@ function createStyles({ colors, shadows }: AppTheme) {
       fontSize: 14,
       textAlign: 'center',
       fontWeight: '500',
+      paddingHorizontal: 24,
     },
+    menuScanBtn: {
+      marginHorizontal: 24,
+      backgroundColor: colors.accent,
+      borderRadius: 16,
+      padding: 16,
+      alignItems: 'center',
+    },
+    menuScanBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
     webHint: {
       flexDirection: 'row',
       alignItems: 'center',

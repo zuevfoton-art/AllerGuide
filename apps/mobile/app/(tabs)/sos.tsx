@@ -1,26 +1,44 @@
 import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
-import { getEmergencyContactRelationLabel, parseAllergies, type EmergencyContact } from '@allerguide/core';
+import {
+  getEmergencyContactRelationLabel,
+  parseAllergies,
+  type EmergencyContact,
+} from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { listEmergencyContacts } from '@/src/services/emergency-contact-service';
+import {
+  getEmergencyNumber,
+  getProfileAge,
+  getSosActionPlan,
+  getSosNotes,
+  listEmergencyContacts,
+} from '@/src/services/sos-service';
 
 export default function SosScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
+  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const [notes, setNotes] = useState('');
+  const [actionPlan, setActionPlan] = useState('');
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
 
   const refresh = useCallback(() => {
+    setEmergencyNumberState(getEmergencyNumber());
     if (!profile) {
+      setNotes('');
+      setActionPlan('');
       setContacts([]);
       return;
     }
+    setNotes(getSosNotes(profile.id));
+    setActionPlan(getSosActionPlan(profile.id));
     setContacts(listEmergencyContacts(profile.id));
   }, [profile]);
 
@@ -36,14 +54,20 @@ export default function SosScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <View style={styles.sosIconWrap}>
-          <Ionicons name="medkit" size={30} color={theme.colors.danger} />
+      <View style={styles.headerRow}>
+        <View style={styles.header}>
+          <View style={styles.sosIconWrap}>
+            <Ionicons name="medkit" size={30} color={theme.colors.danger} />
+          </View>
+          <View>
+            <Text style={styles.title}>SOS</Text>
+            <Text style={styles.subtitle}>Экстренная информация</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.title}>SOS</Text>
-          <Text style={styles.subtitle}>Экстренная информация</Text>
-        </View>
+        <Pressable style={styles.editBtn} onPress={() => router.push('/sos-edit' as any)}>
+          <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.editBtnText}>Изменить</Text>
+        </Pressable>
       </View>
 
       <ProfileSwitcher />
@@ -58,8 +82,8 @@ export default function SosScreen() {
           {profile.birthYear ? (
             <View style={styles.infoRow}>
               <Ionicons name="calendar" size={18} color={theme.colors.textSecondary} />
-              <Text style={styles.infoLabel}>Год рождения:</Text>
-              <Text style={styles.infoValue}>{profile.birthYear}</Text>
+              <Text style={styles.infoLabel}>Возраст:</Text>
+              <Text style={styles.infoValue}>{getProfileAge(profile.birthYear)}</Text>
             </View>
           ) : null}
           {allergies.length > 0 && (
@@ -69,14 +93,26 @@ export default function SosScreen() {
                 <Text style={[styles.infoLabel, { color: theme.colors.danger }]}>Аллергии:</Text>
               </View>
               <View style={styles.allergyChips}>
-                {allergies.map((a) => (
-                  <View key={a} style={styles.allergyChip}>
-                    <Text style={styles.allergyText}>{a}</Text>
+                {allergies.map((allergen) => (
+                  <View key={allergen} style={styles.allergyChip}>
+                    <Text style={styles.allergyText}>{allergen}</Text>
                   </View>
                 ))}
               </View>
             </View>
           )}
+          {notes ? (
+            <View style={styles.notesSection}>
+              <Text style={styles.notesLabel}>Медицинские заметки</Text>
+              <Text style={styles.notesText}>{notes}</Text>
+            </View>
+          ) : null}
+          {actionPlan ? (
+            <View style={styles.notesSection}>
+              <Text style={styles.notesLabel}>План действий</Text>
+              <Text style={styles.notesText}>{actionPlan}</Text>
+            </View>
+          ) : null}
         </View>
       ) : (
         <View style={styles.emptyCard}>
@@ -107,16 +143,21 @@ export default function SosScreen() {
         <View style={styles.hintCard}>
           <Ionicons name="people-outline" size={18} color={theme.colors.textSecondary} />
           <Text style={styles.hintText}>
-            Добавьте экстренные контакты в настройках профиля — родственника, доверенное лицо или врача.
+            Добавьте экстренные контакты в настройках профиля или на экране редактирования SOS.
           </Text>
         </View>
       ) : null}
 
       <Pressable
         style={({ pressed }) => [styles.emergencyBtn, pressed && { opacity: 0.9 }]}
-        onPress={() => Linking.openURL('tel:103')}>
+        onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}>
         <Ionicons name="call" size={22} color={theme.colors.onDanger} />
-        <Text style={styles.emergencyText}>Позвонить 103</Text>
+        <Text style={styles.emergencyText}>Позвонить {emergencyNumber}</Text>
+      </Pressable>
+
+      <Pressable style={styles.settingsLink} onPress={() => router.push('/settings' as any)}>
+        <Ionicons name="settings-outline" size={16} color={theme.colors.textSecondary} />
+        <Text style={styles.settingsLinkText}>Настройки SOS и уведомлений</Text>
       </Pressable>
 
       <View style={styles.tipCard}>
@@ -135,7 +176,8 @@ export default function SosScreen() {
 
 function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
     sosIconWrap: {
       width: 58,
       height: 58,
@@ -146,6 +188,16 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },
+    editBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: 12,
+      backgroundColor: colors.accentLight,
+    },
+    editBtnText: { color: colors.accent, fontWeight: '700', fontSize: 13 },
     infoCard: {
       backgroundColor: colors.card,
       borderRadius: 18,
@@ -167,6 +219,9 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.dangerBorder,
     },
     allergyText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
+    notesSection: { gap: 6 },
+    notesLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted },
+    notesText: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
     emptyCard: {
       backgroundColor: colors.card,
       borderRadius: 18,
@@ -217,6 +272,14 @@ function createStyles({ colors, shadows }: AppTheme) {
       ...(shadows.danger as object),
     },
     emergencyText: { color: colors.onDanger, fontWeight: '800', fontSize: 18 },
+    settingsLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 8,
+    },
+    settingsLinkText: { fontSize: 14, color: colors.textSecondary, fontWeight: '600' },
     tipCard: {
       flexDirection: 'row',
       alignItems: 'flex-start',

@@ -1,15 +1,27 @@
 import { getDb } from '@/src/db/init';
 import { useAppStore } from '@/src/store/app-store';
+import { getCurrentUserId } from '@/src/services/auth-service';
 import type { Profile, ProfileInput, ProfileType } from '@allerguide/core';
 
+function requireUserId(): number {
+  const userId = getCurrentUserId();
+  if (!userId) throw new Error('User is not authenticated');
+  return userId;
+}
+
 export function listProfiles() {
+  const userId = getCurrentUserId();
+  if (!userId) return [];
+
   const db = getDb();
-  return db.getAllSync<Profile>('SELECT * FROM profiles ORDER BY id DESC');
+  return db.getAllSync<Profile>('SELECT * FROM profiles WHERE userId = ? ORDER BY id DESC', [userId]);
 }
 
 export async function createProfile(input: ProfileInput) {
+  const userId = requireUserId();
   const db = getDb();
-  db.runSync('INSERT INTO profiles (name, birthYear, type, allergies) VALUES (?, ?, ?, ?)', [
+  db.runSync('INSERT INTO profiles (userId, name, birthYear, type, allergies) VALUES (?, ?, ?, ?, ?)', [
+    userId,
     input.name,
     input.birthYear,
     input.type,
@@ -23,14 +35,12 @@ export async function createProfile(input: ProfileInput) {
 }
 
 export async function updateProfile(id: number, input: ProfileInput) {
+  const userId = requireUserId();
   const db = getDb();
-  db.runSync('UPDATE profiles SET name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?', [
-    input.name,
-    input.birthYear,
-    input.type,
-    JSON.stringify(input.allergies),
-    id,
-  ]);
+  db.runSync(
+    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
+    [userId, input.name, input.birthYear, input.type, JSON.stringify(input.allergies), id],
+  );
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
   const { activeProfileId, setActiveProfile } = useAppStore.getState();
   if (activeProfileId === id) setActiveProfile(profile || null);
@@ -40,6 +50,7 @@ export async function updateProfile(id: number, input: ProfileInput) {
 export async function deleteProfile(id: number) {
   const db = getDb();
   db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [id]);
+  db.runSync('DELETE FROM scan_history WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profiles WHERE id = ?', [id]);
 
@@ -53,10 +64,28 @@ export async function deleteProfile(id: number) {
 }
 
 export async function getProfile(id: number) {
+  const userId = getCurrentUserId();
+  if (!userId) return null;
+
   const db = getDb();
-  return db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
+  const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
+  if (!profile || profile.userId !== userId) return null;
+  return profile;
 }
 
 export function countProfilesByType(type: ProfileType) {
-  return listProfiles().filter((p) => p.type === type).length;
+  return listProfiles().filter((profile) => profile.type === type).length;
+}
+
+export function migrateLegacyProfilesToUser(userId: number) {
+  const db = getDb();
+  const all = db.getAllSync<Profile>('SELECT * FROM profiles');
+  for (const profile of all) {
+    if (!profile.userId) {
+      db.runSync(
+        'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
+        [userId, profile.name, profile.birthYear, profile.type, profile.allergies, profile.id],
+      );
+    }
+  }
 }

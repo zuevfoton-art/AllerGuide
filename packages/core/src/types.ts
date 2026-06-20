@@ -4,6 +4,7 @@ export type RiskLevel = 'low' | 'medium' | 'high';
 
 export interface Profile {
   id: number;
+  userId?: number;
   name: string;
   birthYear: number;
   type: ProfileType;
@@ -15,6 +16,19 @@ export interface DiaryEntry {
   profileId: number;
   type: string;
   details: string;
+  createdAt: string;
+}
+
+export interface ScanHistoryEntry {
+  id: number;
+  profileId: number;
+  mode: string;
+  input: string;
+  verdict: string;
+  matches: string;
+  level: string;
+  productName: string | null;
+  source: string;
   createdAt: string;
 }
 

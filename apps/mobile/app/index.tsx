@@ -4,8 +4,8 @@ import { ActivityIndicator, View } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
 import { initDb } from '@/src/db/init';
 import { useTheme } from '@/src/hooks/use-theme';
-import { isAuthenticated } from '@/src/services/auth-service';
-import { listProfiles } from '@/src/services/profile-service';
+import { isAuthenticated, getCurrentUserId } from '@/src/services/auth-service';
+import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
 import {
   getStoredScenario,
   isOnboardingComplete,
@@ -26,6 +26,9 @@ export default function Index() {
       setTarget('/login');
       return;
     }
+
+    const userId = getCurrentUserId();
+    if (userId) migrateLegacyProfilesToUser(userId);
 
     const profiles = listProfiles();
     const scenario = getStoredScenario();
