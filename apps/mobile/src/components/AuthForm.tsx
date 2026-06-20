@@ -17,7 +17,10 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
     <View style={styles.toggleRow}>
       <Pressable
         style={[styles.toggleBtn, loginType === 'phone' && styles.toggleActive]}
-        onPress={() => onChange('phone')}>
+        onPress={() => onChange('phone')}
+        accessibilityRole="button"
+        accessibilityLabel="Вход по телефону"
+        accessibilityState={{ selected: loginType === 'phone' }}>
         <Ionicons
           name="call"
           size={16}
@@ -27,7 +30,10 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
       </Pressable>
       <Pressable
         style={[styles.toggleBtn, loginType === 'email' && styles.toggleActive]}
-        onPress={() => onChange('email')}>
+        onPress={() => onChange('email')}
+        accessibilityRole="button"
+        accessibilityLabel="Вход по email"
+        accessibilityState={{ selected: loginType === 'email' }}>
         <Ionicons
           name="mail"
           size={16}
@@ -73,6 +79,7 @@ export function AuthField({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         style={styles.input}
+        accessibilityLabel={label}
       />
     </View>
   );
@@ -94,7 +101,9 @@ export function AuthPrimaryButton({
     <Pressable
       style={[styles.button, loading && styles.buttonDisabled]}
       onPress={onPress}
-      disabled={loading}>
+      disabled={loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}>
       <Text style={styles.buttonText}>{loading ? 'Подождите...' : label}</Text>
     </Pressable>
   );

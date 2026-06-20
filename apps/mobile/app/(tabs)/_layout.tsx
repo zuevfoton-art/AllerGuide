@@ -71,6 +71,7 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Главная',
+          tabBarAccessibilityLabel: 'Главная',
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="home"
@@ -86,6 +87,7 @@ export default function TabsLayout() {
         name="diary"
         options={{
           title: 'Дневник',
+          tabBarAccessibilityLabel: 'Дневник',
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="journal"
@@ -101,6 +103,7 @@ export default function TabsLayout() {
         name="scanner"
         options={{
           title: 'Сканер',
+          tabBarAccessibilityLabel: 'Сканер аллергенов',
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="scan"
@@ -116,6 +119,7 @@ export default function TabsLayout() {
         name="market"
         options={{
           title: 'Маркет',
+          tabBarAccessibilityLabel: 'Маркет',
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="bag"
@@ -131,6 +135,7 @@ export default function TabsLayout() {
         name="map"
         options={{
           title: 'Карта',
+          tabBarAccessibilityLabel: 'Карта мест',
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="map"
@@ -146,6 +151,7 @@ export default function TabsLayout() {
         name="sos"
         options={{
           title: 'SOS',
+          tabBarAccessibilityLabel: 'Экстренная помощь SOS',
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="medkit"

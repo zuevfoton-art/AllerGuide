@@ -8,7 +8,7 @@
     "ios": "expo run:ios",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "echo test",
+    "test": "vitest run",
     "generate-assets": "node scripts/generate-assets.mjs"
   },
   "dependencies": {
@@ -16,9 +16,12 @@
     "@allerguide/core": "workspace:*",
     "@expo/metro-runtime": "^5.0.5",
     "@expo/vector-icons": "^14.1.0",
+    "@sentry/react-native": "^6.20.0",
     "expo": "~53.0.0",
     "expo-camera": "~16.0.0",
     "expo-crypto": "~14.0.0",
+    "expo-document-picker": "~13.0.0",
+    "expo-file-system": "~18.0.0",
     "expo-image-picker": "~16.0.0",
     "expo-location": "^56.0.18",
     "expo-notifications": "~0.31.0",
@@ -40,6 +43,7 @@
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
     "sharp": "^0.34.3",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
   }
 }

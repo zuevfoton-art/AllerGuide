@@ -12,6 +12,10 @@ import {
   syncDiaryReminder,
 } from '@/src/services/notification-service';
 import { downloadBackup, uploadBackup } from '@/src/services/sync-service';
+import {
+  pickAndImportLocalBackup,
+  shareLocalBackupFile,
+} from '@/src/services/backup-file-service';
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -25,6 +29,34 @@ export default function SettingsScreen() {
     setEmergencyNumberState(getEmergencyNumber());
     setReminderEnabled(isDiaryReminderEnabled());
   }, []);
+
+  const [backupLoading, setBackupLoading] = useState(false);
+
+  const handleExportLocal = async () => {
+    setBackupLoading(true);
+    try {
+      const result = await shareLocalBackupFile();
+      Alert.alert(
+        result.ok ? 'Готово' : 'Ошибка',
+        result.ok ? 'Файл резервной копии подготовлен.' : result.error ?? 'Не удалось',
+      );
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const handleImportLocal = async () => {
+    setBackupLoading(true);
+    try {
+      const result = await pickAndImportLocalBackup();
+      Alert.alert(
+        result.ok ? 'Готово' : 'Ошибка',
+        result.ok ? 'Данные восстановлены из файла.' : result.error ?? 'Не удалось',
+      );
+    } finally {
+      setBackupLoading(false);
+    }
+  };
 
   const saveEmergencyNumber = () => {
     const normalized = emergencyNumber.replace(/[^\d+]/g, '') || '103';
@@ -98,6 +130,19 @@ export default function SettingsScreen() {
         />
         <Pressable style={styles.primaryBtn} onPress={saveEmergencyNumber}>
           <Text style={styles.primaryBtnText}>Сохранить номер</Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.sectionLabel}>Локальная резервная копия</Text>
+      <View style={styles.card}>
+        <Text style={styles.cardHint}>
+          Экспорт и импорт JSON-файла с профилями, дневником, SOS и историей сканов. Данные остаются на вашем устройстве.
+        </Text>
+        <Pressable style={styles.primaryBtn} disabled={backupLoading} onPress={() => void handleExportLocal()}>
+          <Text style={styles.primaryBtnText}>Экспортировать данные</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryBtn} disabled={backupLoading} onPress={() => void handleImportLocal()}>
+          <Text style={styles.secondaryBtnText}>Импортировать из файла</Text>
         </Pressable>
       </View>
 

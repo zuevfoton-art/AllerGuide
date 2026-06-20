@@ -61,9 +61,13 @@ export function scanMenuPhoto({ profile }: { profile?: Profile | null }): ScanRe
     mode: 'menu',
     text: DEMO_MENU_TEXT,
     profile,
-    productName: 'Меню ресторана',
+    productName: 'Меню ресторана (демо)',
     source: 'ocr',
   });
-  if (profile) saveScanHistory(profile.id, DEMO_MENU_TEXT, result, 'Меню ресторана');
-  return result;
+  const demoResult: ScanResult = {
+    ...result,
+    reason: 'Демо-режим: фото не распознаётся. Показан пример типичного меню для проверки аллергенов.',
+  };
+  if (profile) saveScanHistory(profile.id, DEMO_MENU_TEXT, demoResult, 'Меню ресторана (демо)');
+  return demoResult;
 }
