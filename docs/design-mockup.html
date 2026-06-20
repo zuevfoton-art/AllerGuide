@@ -4,34 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AllerGuide — UI Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f2f2f7;
+      --bg: #f4f8f6;
+      --bg-2: #edf7f2;
+      --bg-3: #f0f4ff;
+      --glass: rgba(255, 255, 255, 0.78);
+      --glass-strong: rgba(255, 255, 255, 0.92);
       --card: #ffffff;
       --accent: #ff6b00;
-      --accent-light: #fff3ea;
+      --accent-light: #fff6f0;
       --accent-mid: #ffd4b0;
-      --text: #1c1c1e;
-      --text-secondary: #636366;
-      --text-muted: #aeaeb2;
-      --border: #e5e5ea;
-      --success: #34c759;
-      --success-light: #e8f9ed;
+      --teal: #2ec4a0;
+      --teal-light: rgba(46, 196, 160, 0.14);
+      --text: #1a1f1c;
+      --text-secondary: #5c6560;
+      --text-muted: #9aa39e;
+      --border: rgba(31, 77, 58, 0.08);
+      --success: #2ec4a0;
+      --success-light: #e8f9f3;
       --danger: #ff3b30;
-      --danger-light: #ffebea;
+      --danger-light: #fff0ef;
       --warning: #ff9500;
-      --warning-light: #fff3e0;
-      --purple: #5856d6;
-      --purple-light: #efedff;
-      --tip-bg: #efedff;
-      --tip-border: #c7c4f5;
+      --warning-light: #fff8ee;
+      --purple: #6b68e8;
+      --purple-light: #f3f2ff;
+      --tip-bg: #f3f2ff;
+      --tip-border: #d8d6f5;
       --forest: #1f4d3a;
-      --mint: #cbe9d8;
-      --foam: #e8f6ee;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      --phone-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
-      --radius-lg: 18px;
-      --radius-md: 14px;
+      --mint: #d4f0e4;
+      --foam: #edf7f2;
+      --surface: #eef3f0;
+      --shadow: 0 8px 32px rgba(31, 77, 58, 0.06);
+      --phone-shadow: 0 24px 80px rgba(31, 77, 58, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 16px;
       --radius-sm: 12px;
     }
 
@@ -65,8 +75,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(135deg, #e8f6ee 0%, #f2f2f7 45%, #fff3ea 100%);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(212, 240, 228, 0.9), transparent 42%),
+        radial-gradient(circle at 90% 0%, rgba(240, 244, 255, 0.95), transparent 38%),
+        linear-gradient(180deg, #f7fbf9 0%, #f4f8f6 100%);
       color: var(--text);
       min-height: 100vh;
       padding: 32px 20px 48px;
@@ -158,14 +171,42 @@
     .phone {
       width: 390px;
       height: 844px;
-      background: var(--bg);
+      background:
+        radial-gradient(circle at 85% 8%, rgba(212, 240, 228, 0.55), transparent 34%),
+        radial-gradient(circle at 10% 18%, rgba(240, 244, 255, 0.65), transparent 30%),
+        linear-gradient(165deg, #f7fbf9 0%, #f4f8f6 55%, #fafcff 100%);
       border-radius: 44px;
       box-shadow: var(--phone-shadow);
-      border: 10px solid #111;
+      border: 10px solid #eef2f0;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+    }
+
+    .phone::before,
+    .phone::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .phone::before {
+      width: 180px;
+      height: 180px;
+      top: 60px;
+      right: -40px;
+      background: rgba(212, 240, 228, 0.45);
+    }
+
+    .phone::after {
+      width: 140px;
+      height: 140px;
+      top: 220px;
+      left: -50px;
+      background: rgba(237, 247, 242, 0.8);
     }
 
     .notch {
@@ -175,7 +216,7 @@
       transform: translateX(-50%);
       width: 126px;
       height: 32px;
-      background: #111;
+      background: #eef2f0;
       border-bottom-left-radius: 18px;
       border-bottom-right-radius: 18px;
       z-index: 20;
@@ -196,9 +237,11 @@
     .screen {
       flex: 1;
       overflow-y: auto;
-      padding: 12px 18px 88px;
+      padding: 8px 16px 100px;
       display: none;
       scrollbar-width: none;
+      position: relative;
+      z-index: 1;
     }
 
     .screen.active { display: block; }
@@ -218,12 +261,23 @@
     }
 
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--glass-strong);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
       border-radius: var(--radius-lg);
       padding: 16px;
       box-shadow: var(--shadow);
       margin-bottom: 12px;
+    }
+
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(170%);
+      -webkit-backdrop-filter: blur(20px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
     }
 
     .row { display: flex; align-items: center; gap: 12px; }
@@ -416,16 +470,20 @@
 
     .tabbar {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 78px;
-      background: var(--card);
-      border-top: 1px solid var(--border);
+      bottom: 14px;
+      left: 16px;
+      right: 16px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 28px;
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      padding: 8px 4px 18px;
+      padding: 8px 6px 10px;
       z-index: 15;
+      box-shadow: var(--shadow);
     }
 
     .tab {
@@ -440,7 +498,7 @@
       cursor: pointer;
     }
 
-    .tab.active { color: var(--accent); }
+    .tab.active { color: var(--teal); }
     .tab.sos.active { color: var(--danger); }
     .tab-icon { font-size: 20px; line-height: 1; }
 
@@ -531,8 +589,6 @@
 
     .hidden-tabbar .tabbar { display: none; }
     .hidden-tabbar .screen { padding-bottom: 24px; }
-
-    /* Wellness dashboard */
     .wellness-card {
       background: linear-gradient(160deg, var(--foam) 0%, var(--card) 55%);
       border: 1.5px solid var(--mint);
@@ -708,10 +764,181 @@
     }
 
     .screen-title-sm {
-      font-size: 22px;
+      font-size: 34px;
       font-weight: 800;
-      letter-spacing: -0.4px;
+      letter-spacing: -0.8px;
       margin-bottom: 2px;
+    }
+
+    .today-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-head-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .card-head-link {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+
+    .gauge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .side-stat {
+      width: 64px;
+      text-align: center;
+    }
+
+    .side-num {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .side-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .gauge-main {
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      border: 5px solid var(--teal);
+      display: grid;
+      place-items: center;
+      background: var(--surface);
+    }
+
+    .gauge-main-num {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .gauge-main-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .macro-row {
+      margin-bottom: 10px;
+    }
+
+    .macro-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .macro-track {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--surface);
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .macro-fill {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--teal);
+    }
+
+    .macro-fill.warn { background: var(--warning); }
+    .macro-fill.danger { background: var(--danger); }
+
+    .macro-value {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .feed-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feed-row:last-child { border-bottom: none; }
+
+    .feed-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 22px;
+      background: var(--teal-light);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .feed-body { flex: 1; min-width: 0; }
+
+    .feed-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .feed-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .feed-add {
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 300;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .top-icons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .top-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      box-shadow: var(--shadow);
     }
   </style>
 </head>
@@ -745,7 +972,7 @@
       <div class="legend">
         <strong>Палитра</strong><br />
         Accent <span style="color:var(--accent)">#FF6B00</span> · Success · Danger · iOS gray bg<br /><br />
-        <strong>ТЗ v13</strong> — 5 модулей + эксперт Смолкина, дашборд, карта (3 слоя), ПСВ/АСИТ<br />
+        <strong>Стиль</strong> — светлый glass UI по референсу: «Сегодня», сводка, лента дневника<br />
         <strong>Шрифт</strong> — SF Pro / system-ui<br />
         <strong>Радиусы</strong> — 12–18px, pill chips<br />
         <strong>Tab bar</strong> — 6 вкладок, SOS красный
@@ -811,71 +1038,69 @@
         </section>
 
         <!-- HOME -->
-        <section class="screen" id="screen-home">
-          <div class="row between">
-            <div>
-              <div style="font-size:14px;color:var(--text-secondary)">Добро пожаловать 👋</div>
-              <h2 class="screen-title-sm">AllerGuide</h2>
+        <section class="screen active" id="screen-home">
+          <div class="row between" style="margin-bottom:4px">
+            <div class="top-icons">
+              <div class="top-icon">🌿</div>
+              <div class="top-icon">📅</div>
             </div>
-            <div class="avatar" style="background:var(--danger-light);color:var(--danger)">🚑</div>
-          </div>
-          <div class="card row between" style="margin-bottom:10px">
-            <div class="row">
-              <div class="avatar">А</div>
-              <div>
-                <strong>Анна</strong>
-                <div id="profile-allergens" style="font-size:12px;color:var(--text-secondary)">Я · 1990 · Молоко, Арахис, Берёза</div>
-              </div>
-            </div>
-            <span style="color:var(--text-muted)">▾</span>
+            <div class="avatar" style="background:var(--danger-light);color:var(--danger);width:40px;height:40px;border-radius:20px">🚑</div>
           </div>
 
-          <div class="section-label" style="margin-top:8px">Самочувствие сегодня</div>
-          <div class="wellness-card" id="wellness-dashboard">
-            <div class="dashboard-loading" id="wellness-loading">Загрузка данных Open-Meteo…</div>
+          <h2 class="screen-title-sm">Сегодня</h2>
+          <div class="today-sub" id="profile-allergens">Профиль · Анна · Молоко, Берёза</div>
+
+          <div class="glass card" style="padding:18px;margin-bottom:14px" id="wellness-dashboard">
+            <div class="card-head">
+              <div class="card-head-title">Сводка самочувствия</div>
+              <div class="card-head-link">Подробности</div>
+            </div>
+            <div class="dashboard-loading" id="wellness-loading">Загрузка Open-Meteo…</div>
             <div id="wellness-content" hidden>
-              <div class="wellness-head">
-                <div class="score-ring" id="score-ring">
-                  <div class="score-inner">
-                    <div class="score-num" id="score-num">—</div>
-                    <div class="score-of">из 100</div>
+              <div class="gauge-row">
+                <div class="side-stat"><div class="side-num" id="side-pollen">↑</div><div class="side-label">Пыльца</div></div>
+                <div class="gauge-main" id="score-ring">
+                  <div class="score-inner" style="position:static">
+                    <div class="gauge-main-num" id="score-num">—</div>
+                    <div class="gauge-main-label">индекс</div>
                   </div>
                 </div>
-                <div>
-                  <div class="wellness-title" id="wellness-status">—</div>
-                  <div class="wellness-sub" id="wellness-summary">—</div>
-                  <div class="wellness-updated" id="wellness-updated">—</div>
-                </div>
+                <div class="side-stat"><div class="side-num" id="side-aqi">OK</div><div class="side-label">Воздух</div></div>
               </div>
-              <div class="factor-list" id="factor-list"></div>
-              <div class="section-label" style="margin:8px 0 6px">Рекомендации</div>
-              <div class="rec-list" id="rec-list"></div>
-              <div class="sources-row" id="sources-row"></div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.45;margin-bottom:12px"><strong id="wellness-status">—</strong> · <span id="wellness-summary">—</span></div>
+              <div id="macro-list"></div>
+              <div class="rec-list" id="rec-list" style="margin-top:10px"></div>
+              <div class="wellness-updated" id="wellness-updated" style="font-size:11px;color:var(--text-muted);margin-top:8px">—</div>
             </div>
           </div>
 
-          <div class="section-label">Быстрые действия</div>
-          <div class="grid-2">
-            <div class="action-card">
-              <div class="action-icon" style="background:var(--accent-light);color:var(--accent)">📔</div>
-              <div class="action-label">Дневник</div>
-              <div class="action-desc">Записать самочувствие</div>
+          <div class="card-head">
+            <div class="card-head-title">Дневник</div>
+            <div class="card-head-link">Больше</div>
+          </div>
+          <div class="glass" style="margin-bottom:14px">
+            <div class="feed-row">
+              <div class="feed-icon">💓</div>
+              <div class="feed-body"><div class="feed-title">Симптомы →</div><div class="feed-sub">Зуд кожи · 14:30</div></div>
+              <div class="feed-add">+</div>
             </div>
-            <div class="action-card">
-              <div class="action-icon" style="background:var(--purple-light);color:var(--purple)">📷</div>
-              <div class="action-label">Сканер</div>
-              <div class="action-desc">Проверить состав</div>
+            <div class="feed-row">
+              <div class="feed-icon">🍽</div>
+              <div class="feed-body"><div class="feed-title">Питание →</div><div class="feed-sub">Овсянка, яблоко · 09:15</div></div>
+              <div class="feed-add">+</div>
             </div>
-            <div class="action-card">
-              <div class="action-icon" style="background:var(--success-light);color:var(--success)">🛒</div>
-              <div class="action-label">Маркет</div>
-              <div class="action-desc">Товары без аллергенов</div>
+            <div class="feed-row">
+              <div class="feed-icon">💊</div>
+              <div class="feed-body"><div class="feed-title">Лекарство →</div><div class="feed-sub">Отметить приём</div></div>
+              <div class="feed-add">+</div>
             </div>
-            <div class="action-card">
-              <div class="action-icon" style="background:var(--warning-light);color:var(--warning)">🗺️</div>
-              <div class="action-label">Карта</div>
-              <div class="action-desc">Безопасные места</div>
-            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">📷 Сканер</span>
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🗺️ Карта</span>
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🛒 Маркет</span>
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🎓 Эксперт</span>
           </div>
           <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
         </section>
@@ -1345,10 +1570,10 @@
     }
 
     function statusFromScore(score) {
-      if (score >= 80) return { title: 'Хорошо', summary: 'Среда и записи дневника не указывают на повышенные риски.', color: 'var(--success)' };
-      if (score >= 60) return { title: 'Умеренно', summary: 'Есть отдельные факторы внимания — см. рекомендации ниже.', color: 'var(--warning)' };
+      if (score >= 80) return { title: 'Хорошо', summary: 'Среда и дневник не указывают на повышенные риски.', color: 'var(--teal)' };
+      if (score >= 60) return { title: 'Умеренно', summary: 'Есть отдельные факторы внимания.', color: 'var(--warning)' };
       if (score >= 40) return { title: 'Повышенное внимание', summary: 'Несколько факторов могут влиять на самочувствие.', color: 'var(--warning)' };
-      return { title: 'Высокий риск', summary: 'Рекомендуем минимизировать триггеры и проконсультироваться с врачом.', color: 'var(--danger)' };
+      return { title: 'Высокий риск', summary: 'Минимизируйте триггеры и проконсультируйтесь с врачом.', color: 'var(--danger)' };
     }
 
     function renderFactor({ icon, iconBg, iconColor, label, value, badgeClass, badgeText, source }) {
@@ -1360,6 +1585,16 @@
       );
     }
 
+    function macroBar(label, value, level) {
+      const pct = level === 'high' ? 90 : level === 'mid' ? 55 : 25;
+      const cls = level === 'high' ? 'danger' : level === 'mid' ? 'warn' : '';
+      return (
+        '<div class="macro-row"><div class="macro-label">' + label + '</div>' +
+        '<div class="macro-track"><div class="macro-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="macro-value">' + value + '</div></div>'
+      );
+    }
+
     function renderWellnessDashboard(ctx) {
       document.getElementById('wellness-loading').hidden = true;
       const content = document.getElementById('wellness-content');
@@ -1367,8 +1602,7 @@
 
       const status = statusFromScore(ctx.score);
       const ring = document.getElementById('score-ring');
-      ring.style.setProperty('--score', String(ctx.score));
-      ring.style.setProperty('--score-color', status.color);
+      ring.style.borderColor = status.color;
 
       document.getElementById('score-num').textContent = String(ctx.score);
       document.getElementById('wellness-status').textContent = status.title;
@@ -1376,68 +1610,22 @@
       document.getElementById('wellness-updated').textContent =
         'Обновлено · ' + MOCK_LOCATION.label + ' · Open-Meteo · ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
-      const factors = [];
+      const pollenMatch = ctx.profilePollenMatches[0];
+      document.getElementById('side-pollen').textContent = pollenMatch && pollenMatch.tier.level !== 'low' ? '↑' : '—';
+      document.getElementById('side-aqi').textContent = ctx.aqi.tier.level === 'high' ? '!' : 'OK';
 
-      for (const match of ctx.profilePollenMatches) {
-        factors.push(
-          renderFactor({
-            icon: '🌿',
-            iconBg: 'var(--success-light)',
-            iconColor: 'var(--success)',
-            label: 'Пыльца · ' + match.label + ' · Open-Meteo',
-            value: match.value.toFixed(1) + ' grains/m³',
-            badgeClass: match.tier.level,
-            badgeText: match.tier.label,
-            source: 'Open-Meteo',
-          }),
-        );
+      const macros = [];
+      if (pollenMatch) {
+        macros.push(macroBar('Пыльца · ' + pollenMatch.label, pollenMatch.value.toFixed(1) + ' grains/m³', pollenMatch.tier.level));
       }
+      macros.push(macroBar('Качество воздуха', ctx.aqi.pm25 != null ? 'PM2.5 ' + ctx.aqi.pm25.toFixed(1) : 'EAQI', ctx.aqi.tier.level));
+      const symptomText = ctx.diary.recentSymptoms.length ? ctx.diary.recentSymptoms[0].text : 'Спокойно';
+      macros.push(macroBar('Дневник · 48 ч', symptomText, ctx.diary.recentSymptoms.length ? 'mid' : 'low'));
 
-      factors.push(
-        renderFactor({
-          icon: '💨',
-          iconBg: 'var(--purple-light)',
-          iconColor: 'var(--purple)',
-          label: 'Качество воздуха · EAQI · Open-Meteo',
-          value: ctx.aqi.pm25 != null ? 'PM2.5 ' + ctx.aqi.pm25.toFixed(1) + ' µg/m³' : '—',
-          badgeClass: ctx.aqi.tier.level,
-          badgeText: ctx.aqi.tier.label.split(' · ')[0],
-          source: 'Open-Meteo',
-        }),
-      );
-
-      const symptomText = ctx.diary.recentSymptoms.length
-        ? ctx.diary.recentSymptoms[0].text
-        : 'Нет свежих симптомов';
-      factors.push(
-        renderFactor({
-          icon: '📔',
-          iconBg: 'var(--accent-light)',
-          iconColor: 'var(--accent)',
-          label: 'Дневник · последние 48 ч',
-          value: symptomText,
-          badgeClass: ctx.diary.recentSymptoms.length ? 'high' : 'low',
-          badgeText: ctx.diary.recentSymptoms.length ? 'Симптомы' : 'Спокойно',
-          source: 'Локально',
-        }),
-      );
-
-      factors.push(
-        renderFactor({
-          icon: '👤',
-          iconBg: 'var(--warning-light)',
-          iconColor: 'var(--warning)',
-          label: 'Профиль · аллергены',
-          value: MOCK_PROFILE.allergens.map((a) => a.name).join(', '),
-          badgeClass: 'mid',
-          badgeText: MOCK_PROFILE.allergens.length + ' шт.',
-          source: 'Профиль',
-        }),
-      );
-
-      document.getElementById('factor-list').innerHTML = factors.join('');
+      document.getElementById('macro-list').innerHTML = macros.join('');
 
       document.getElementById('rec-list').innerHTML = ctx.recommendations
+        .slice(0, 1)
         .map(
           (r) =>
             '<div class="rec-item"><span style="font-size:18px">' +
@@ -1448,15 +1636,6 @@
             r.text +
             '</div></div>',
         )
-        .join('');
-
-      document.getElementById('sources-row').innerHTML = [
-        'Open-Meteo Air Quality',
-        'Open-Meteo Pollen',
-        'Профиль AllerGuide',
-        'Дневник',
-      ]
-        .map((s) => '<span class="source-pill">' + s + '</span>')
         .join('');
     }
 
