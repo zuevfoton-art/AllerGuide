@@ -22,3 +22,9 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 ### Backend API (optional) — `apps/api`
 - Not wired to the mobile app by default. Run with `pnpm --filter api dev` (port 3001).
 - Requires PostgreSQL (`DATABASE_URL`) and session/OIDC env vars for full boot. Schema via `pnpm --filter api db:push`.
+- Cloud sync is **disabled by default** (`SYNC_ENABLED=false`). See root `.env.example`.
+
+### Production builds
+- Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
+- Regenerate icons: `pnpm --filter mobile generate-assets`.
+- Replace placeholder `extra.eas.projectId` with your EAS project before building.

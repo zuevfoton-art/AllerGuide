@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies } from '@allerguide/core';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
+import { deleteAccount } from '@/src/services/auth-service';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,6 +37,30 @@ export default function ProfilesScreen() {
         },
       },
     ]);
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(
+      'Удалить аккаунт?',
+      'Будут удалены все профили, записи дневника, история сканов и экстренные контакты. Это действие необратимо.',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Удалить аккаунт',
+          style: 'destructive',
+          onPress: () => {
+            void (async () => {
+              const result = await deleteAccount();
+              if (!result.ok) {
+                Alert.alert('Ошибка', result.error ?? 'Не удалось удалить аккаунт.');
+                return;
+              }
+              router.replace('/login');
+            })();
+          },
+        },
+      ],
+    );
   };
 
   const openEdit = (id: number) => {
@@ -94,9 +119,18 @@ export default function ProfilesScreen() {
 
       <ThemeToggle />
 
+      <Pressable style={styles.settingsBtn} onPress={() => router.push('/settings')}>
+        <Ionicons name="settings-outline" size={18} color={theme.colors.textSecondary} />
+        <Text style={styles.settingsText}>Настройки и документы</Text>
+      </Pressable>
+
       <Pressable style={styles.logoutBtn} onPress={() => confirmLogout(router)}>
         <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
         <Text style={styles.logoutText}>Выйти из аккаунта</Text>
+      </Pressable>
+      <Pressable style={styles.deleteAccountBtn} onPress={confirmDeleteAccount}>
+        <Ionicons name="person-remove-outline" size={18} color={theme.colors.danger} />
+        <Text style={styles.deleteAccountText}>Удалить аккаунт и все данные</Text>
       </Pressable>
     </Screen>
   );
@@ -173,6 +207,18 @@ function createStyles({ colors, shadows }: AppTheme) {
       backgroundColor: colors.accentLight,
     },
     addText: { color: colors.accent, fontWeight: '700', fontSize: 15 },
+    settingsBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    settingsText: { color: colors.textSecondary, fontWeight: '600', fontSize: 15 },
     logoutBtn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -185,5 +231,17 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.dangerBorder,
     },
     logoutText: { color: colors.danger, fontWeight: '700', fontSize: 15 },
+    deleteAccountBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: colors.dangerLight,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+    },
+    deleteAccountText: { color: colors.danger, fontWeight: '700', fontSize: 15 },
   });
 }

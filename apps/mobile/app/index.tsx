@@ -4,7 +4,11 @@ import { ActivityIndicator, View } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
 import { initDb } from '@/src/db/init';
 import { useTheme } from '@/src/hooks/use-theme';
-import { isAuthenticated, getCurrentUserId } from '@/src/services/auth-service';
+import {
+  hydrateAuthSession,
+  isAuthenticated,
+  getCurrentUserId,
+} from '@/src/services/auth-service';
 import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
 import {
   getStoredScenario,
@@ -20,20 +24,23 @@ export default function Index() {
   const setScenario = useAppStore((s) => s.setScenario);
 
   useEffect(() => {
-    initDb();
+    void (async () => {
+      initDb();
+      await hydrateAuthSession();
 
-    if (!isAuthenticated()) {
-      setTarget('/login');
-      return;
-    }
+      if (!isAuthenticated()) {
+        setTarget('/login');
+        return;
+      }
 
-    const userId = getCurrentUserId();
-    if (userId) migrateLegacyProfilesToUser(userId);
+      const userId = getCurrentUserId();
+      if (userId) migrateLegacyProfilesToUser(userId);
 
-    const profiles = listProfiles();
-    const scenario = getStoredScenario();
-    if (scenario) setScenario(scenario);
-    setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
+      const profiles = listProfiles();
+      const scenario = getStoredScenario();
+      if (scenario) setScenario(scenario);
+      setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
+    })();
   }, [setScenario]);
 
   if (!target) {

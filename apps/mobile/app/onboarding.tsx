@@ -26,7 +26,7 @@ export default function OnboardingScreen() {
           <Ionicons name="leaf" size={36} color={theme.colors.onAccent} />
         </View>
         <Text style={styles.brand}>AllerGuide</Text>
-        <Text style={styles.tagline}>Ваш умный помощник в контроле аллергии</Text>
+        <Text style={styles.tagline}>Персональный помощник в контроле аллергии</Text>
       </View>
 
       <Text style={styles.sectionLabel}>Для кого ведём записи?</Text>

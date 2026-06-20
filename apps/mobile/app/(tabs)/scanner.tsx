@@ -182,8 +182,8 @@ export default function ScannerScreen() {
     <Screen>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Умный сканер</Text>
-          <Text style={styles.subtitle}>Open Food Facts + проверка аллергенов</Text>
+          <Text style={styles.title}>Сканер аллергенов</Text>
+          <Text style={styles.subtitle}>Open Food Facts + проверка по ключевым словам</Text>
         </View>
         <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
           <Ionicons name="camera" size={22} color={theme.colors.accent} />
@@ -330,7 +330,7 @@ export default function ScannerScreen() {
       ) : null}
 
       <Text style={styles.disclaimer}>
-        Результат носит предварительный характер и не исключает индивидуальной реакции.
+        Результат основан на ключевых словах и открытых базах. Не заменяет чтение этикетки и консультацию врача.
       </Text>
     </Screen>
   );

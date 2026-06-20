@@ -16,6 +16,10 @@ declare module 'expo-router' {
         | { pathname: `/profile-setup`; params?: Router.UnknownInputParams }
         | { pathname: `/profiles`; params?: Router.UnknownInputParams }
         | { pathname: `/profile-edit`; params?: Router.UnknownInputParams }
+        | { pathname: `/settings`; params?: Router.UnknownInputParams }
+        | { pathname: `/sos-edit`; params?: Router.UnknownInputParams }
+        | { pathname: `/legal/privacy`; params?: Router.UnknownInputParams }
+        | { pathname: `/legal/terms`; params?: Router.UnknownInputParams }
         | { pathname: `/_sitemap`; params?: Router.UnknownInputParams }
         | { pathname: `${'/(tabs)'}/diary` | `/diary`; params?: Router.UnknownInputParams }
         | { pathname: `${'/(tabs)'}/home` | `/home`; params?: Router.UnknownInputParams }
@@ -31,6 +35,10 @@ declare module 'expo-router' {
         | { pathname: `/profile-setup`; params?: Router.UnknownOutputParams }
         | { pathname: `/profiles`; params?: Router.UnknownOutputParams }
         | { pathname: `/profile-edit`; params?: Router.UnknownOutputParams }
+        | { pathname: `/settings`; params?: Router.UnknownOutputParams }
+        | { pathname: `/sos-edit`; params?: Router.UnknownOutputParams }
+        | { pathname: `/legal/privacy`; params?: Router.UnknownOutputParams }
+        | { pathname: `/legal/terms`; params?: Router.UnknownOutputParams }
         | { pathname: `/_sitemap`; params?: Router.UnknownOutputParams }
         | { pathname: `${'/(tabs)'}/diary` | `/diary`; params?: Router.UnknownOutputParams }
         | { pathname: `${'/(tabs)'}/home` | `/home`; params?: Router.UnknownOutputParams }
@@ -48,6 +56,10 @@ declare module 'expo-router' {
         | `/profile-setup${`?${string}` | `#${string}` | ''}`
         | `/profiles${`?${string}` | `#${string}` | ''}`
         | `/profile-edit${`?${string}` | `#${string}` | ''}`
+        | `/settings${`?${string}` | `#${string}` | ''}`
+        | `/sos-edit${`?${string}` | `#${string}` | ''}`
+        | `/legal/privacy${`?${string}` | `#${string}` | ''}`
+        | `/legal/terms${`?${string}` | `#${string}` | ''}`
         | `/_sitemap${`?${string}` | `#${string}` | ''}`
         | `${'/(tabs)'}/diary${`?${string}` | `#${string}` | ''}`
         | `/diary${`?${string}` | `#${string}` | ''}`
@@ -70,6 +82,10 @@ declare module 'expo-router' {
         | { pathname: `/profile-setup`; params?: Router.UnknownInputParams }
         | { pathname: `/profiles`; params?: Router.UnknownInputParams }
         | { pathname: `/profile-edit`; params?: Router.UnknownInputParams }
+        | { pathname: `/settings`; params?: Router.UnknownInputParams }
+        | { pathname: `/sos-edit`; params?: Router.UnknownInputParams }
+        | { pathname: `/legal/privacy`; params?: Router.UnknownInputParams }
+        | { pathname: `/legal/terms`; params?: Router.UnknownInputParams }
         | { pathname: `/_sitemap`; params?: Router.UnknownInputParams }
         | { pathname: `${'/(tabs)'}/diary` | `/diary`; params?: Router.UnknownInputParams }
         | { pathname: `${'/(tabs)'}/home` | `/home`; params?: Router.UnknownInputParams }

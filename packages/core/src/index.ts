@@ -2,6 +2,7 @@ export * from './types';
 export * from './allergens';
 export * from './onboarding';
 export * from './auth';
+export * from './password';
 export * from './emergency-contacts';
 export * from './diary';
 export * from './catalog';

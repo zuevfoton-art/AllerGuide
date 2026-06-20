@@ -1,9 +1,10 @@
-import * as Crypto from 'expo-crypto';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import {
+  hashPassword,
   normalizeLogin,
   validateAuthForm,
+  verifyPassword,
   type AuthUser,
   type LoginType,
 } from '@allerguide/core';
@@ -17,13 +18,6 @@ interface StoredUser extends AuthUser {
 }
 
 const AUTH_USER_ID_KEY = 'authUserId';
-
-async function hashPassword(password: string): Promise<string> {
-  return Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    `allerguide:${password}`,
-  );
-}
 
 function setSessionUserId(userId: number) {
   setSetting(AUTH_USER_ID_KEY, String(userId));
@@ -52,6 +46,18 @@ function toAuthUser(row: StoredUser): AuthUser {
     login: row.login,
     loginType: row.loginType,
   };
+}
+
+export async function hydrateAuthSession(): Promise<void> {
+  if (Platform.OS === 'web') return;
+
+  const secureValue = await SecureStore.getItemAsync(AUTH_USER_ID_KEY);
+  if (!secureValue) return;
+
+  const localValue = getSetting(AUTH_USER_ID_KEY);
+  if (localValue !== secureValue) {
+    setSetting(AUTH_USER_ID_KEY, secureValue);
+  }
 }
 
 export function isAuthenticated(): boolean {
@@ -125,9 +131,13 @@ export async function loginUser(input: {
     return { ok: false, error: 'Неверный логин или пароль.' };
   }
 
-  const passwordHash = await hashPassword(input.password);
-  if (row.passwordHash !== passwordHash) {
+  const verification = await verifyPassword(input.password, row.passwordHash);
+  if (!verification.valid) {
     return { ok: false, error: 'Неверный логин или пароль.' };
+  }
+
+  if (verification.upgradedHash) {
+    db.runSync('UPDATE users SET passwordHash = ? WHERE id = ?', [verification.upgradedHash, row.id]);
   }
 
   setSessionUserId(row.id);
@@ -137,4 +147,25 @@ export async function loginUser(input: {
 export function logoutUser() {
   clearSessionUserId();
   useAppStore.getState().resetAppState();
+}
+
+export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const userId = getSessionUserId();
+  if (!userId) return { ok: false, error: 'Пользователь не авторизован.' };
+
+  const db = getDb();
+  const profiles = db.getAllSync<{ id: number }>('SELECT id FROM profiles WHERE userId = ?', [userId]);
+
+  for (const profile of profiles) {
+    db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM scan_history WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM profiles WHERE id = ?', [profile.id]);
+  }
+
+  db.runSync('DELETE FROM users WHERE id = ?', [userId]);
+  clearSessionUserId();
+  useAppStore.getState().resetAppState();
+  return { ok: true };
 }

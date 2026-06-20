@@ -5,6 +5,7 @@ import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
 import {
   isDiaryReminderEnabled,
@@ -75,12 +76,12 @@ export default function SettingsScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Назад">
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View>
           <Text style={styles.title}>Настройки</Text>
-          <Text style={styles.subtitle}>SOS, синхронизация и напоминания</Text>
+          <Text style={styles.subtitle}>SOS, напоминания и документы</Text>
         </View>
       </View>
 
@@ -100,16 +101,27 @@ export default function SettingsScreen() {
         </Pressable>
       </View>
 
-      <Text style={styles.sectionLabel}>Облачная резервная копия</Text>
-      <View style={styles.card}>
-        <Text style={styles.cardHint}>Сохранение профилей и дневника на сервер AllerGuide API</Text>
-        <Pressable style={styles.primaryBtn} disabled={syncLoading} onPress={() => void handleUpload()}>
-          <Text style={styles.primaryBtnText}>Отправить резервную копию</Text>
-        </Pressable>
-        <Pressable style={styles.secondaryBtn} disabled={syncLoading} onPress={() => void handleDownload()}>
-          <Text style={styles.secondaryBtnText}>Восстановить с сервера</Text>
-        </Pressable>
-      </View>
+      {CLOUD_SYNC_ENABLED ? (
+        <>
+          <Text style={styles.sectionLabel}>Облачная резервная копия</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardHint}>Сохранение профилей и дневника на сервер AllerGuide API</Text>
+            <Pressable style={styles.primaryBtn} disabled={syncLoading} onPress={() => void handleUpload()}>
+              <Text style={styles.primaryBtnText}>Отправить резервную копию</Text>
+            </Pressable>
+            <Pressable style={styles.secondaryBtn} disabled={syncLoading} onPress={() => void handleDownload()}>
+              <Text style={styles.secondaryBtnText}>Восстановить с сервера</Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <View style={styles.card}>
+          <Text style={styles.sectionLabelInline}>Облачная синхронизация</Text>
+          <Text style={styles.cardHint}>
+            В версии 1.0 данные хранятся только на устройстве. Облачное резервное копирование появится в следующем обновлении.
+          </Text>
+        </View>
+      )}
 
       <Text style={styles.sectionLabel}>Напоминания</Text>
       <View style={styles.card}>
@@ -126,6 +138,18 @@ export default function SettingsScreen() {
             thumbColor={reminderEnabled ? theme.colors.accent : theme.colors.card}
           />
         </View>
+      </View>
+
+      <Text style={styles.sectionLabel}>Юридическая информация</Text>
+      <View style={styles.card}>
+        <Pressable style={styles.linkRow} onPress={() => router.push('/legal/privacy')}>
+          <Text style={styles.linkText}>Политика конфиденциальности</Text>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+        <Pressable style={styles.linkRow} onPress={() => router.push('/legal/terms')}>
+          <Text style={styles.linkText}>Условия использования</Text>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
       </View>
 
       <Text style={styles.sectionLabel}>Тема</Text>
@@ -156,6 +180,11 @@ function createStyles({ colors, shadows }: AppTheme) {
       textTransform: 'uppercase',
       letterSpacing: 0.8,
     },
+    sectionLabelInline: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.text,
+    },
     card: {
       backgroundColor: colors.card,
       borderRadius: 16,
@@ -165,7 +194,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.border,
       ...(shadows.sm as object),
     },
-    cardHint: { fontSize: 13, color: colors.textSecondary },
+    cardHint: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     input: {
       backgroundColor: colors.bg,
       borderRadius: 12,
@@ -194,5 +223,12 @@ function createStyles({ colors, shadows }: AppTheme) {
     switchText: { flex: 1, gap: 4 },
     switchTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
     switchHint: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    linkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 4,
+    },
+    linkText: { fontSize: 15, color: colors.text, fontWeight: '600' },
   });
 }

@@ -8,7 +8,8 @@
     "ios": "expo run:ios",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "echo test"
+    "test": "echo test",
+    "generate-assets": "node scripts/generate-assets.mjs"
   },
   "dependencies": {
     "@allerguide/ai": "workspace:*",
@@ -38,6 +39,7 @@
     "@types/react": "^19.0.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~9.2.0",
+    "sharp": "^0.34.3",
     "typescript": "^5.6.3"
   }
 }
