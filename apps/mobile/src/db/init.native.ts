@@ -22,5 +22,6 @@ export function initDb() {
 }
 
 export function getDb() {
+  initDb();
   return db;
 }

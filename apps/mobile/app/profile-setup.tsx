@@ -3,15 +3,10 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { createProfile } from '@/src/services/profile-service';
 import { useAppStore } from '@/src/store/app-store';
+import { ALLERGEN_OPTIONS } from '@/src/constants/allergens';
 import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
-
-const allergyOptions = [
-  'Пищевая аллергия', 'Поллиноз', 'Бронхиальная астма',
-  'Аллергический ринит', 'Атопический дерматит', 'Бытовая аллергия',
-  'Аллергия на животных', 'Лекарственная аллергия',
-];
 
 export default function ProfileSetupScreen() {
   const scenario = useAppStore((s) => s.scenario);
@@ -20,12 +15,32 @@ export default function ProfileSetupScreen() {
   const [birthYear, setBirthYear] = useState('');
   const [type, setType] = useState<'self' | 'child'>(scenario === 'child' ? 'child' : 'self');
   const [selected, setSelected] = useState<string[]>([]);
+  const [error, setError] = useState('');
 
   const toggle = (item: string) =>
-    setSelected((prev) => prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]);
+    setSelected((prev) => (prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]));
 
   const save = async () => {
-    const id = await createProfile({ name, birthYear: Number(birthYear || 0), type, allergies: selected });
+    const trimmedName = name.trim();
+    const year = Number(birthYear);
+
+    if (!trimmedName) {
+      setError('Укажите имя профиля.');
+      return;
+    }
+
+    if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
+      setError('Укажите корректный год рождения.');
+      return;
+    }
+
+    if (selected.length === 0) {
+      setError('Выберите хотя бы один аллерген.');
+      return;
+    }
+
+    setError('');
+    const id = await createProfile({ name: trimmedName, birthYear: year, type, allergies: selected });
     if (id) setActiveProfileId(id);
     router.replace('/(tabs)/home');
   };
@@ -72,9 +87,9 @@ export default function ProfileSetupScreen() {
         </Pressable>
       </View>
 
-      <Text style={styles.label}>Типы аллергии</Text>
+      <Text style={styles.label}>Аллергены</Text>
       <View style={styles.allergyGrid}>
-        {allergyOptions.map((item) => (
+        {ALLERGEN_OPTIONS.map((item) => (
           <Pressable
             key={item}
             style={[styles.allergyChip, selected.includes(item) && styles.allergyChipActive]}
@@ -88,6 +103,8 @@ export default function ProfileSetupScreen() {
           </Pressable>
         ))}
       </View>
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Pressable style={styles.button} onPress={save}>
         <Text style={styles.buttonText}>Сохранить профиль</Text>
@@ -104,7 +121,14 @@ const styles = StyleSheet.create({
   header: { gap: 4, marginBottom: 4 },
   title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: colors.textSecondary },
-  label: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: -4 },
+  label: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: -4,
+  },
   input: {
     backgroundColor: colors.card,
     padding: 15,
@@ -154,5 +178,6 @@ const styles = StyleSheet.create({
     ...(shadows.accent as object),
   },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  error: { color: colors.danger, fontSize: 14, textAlign: 'center' },
   disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
 });

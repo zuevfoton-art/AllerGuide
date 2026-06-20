@@ -1,5 +1,5 @@
 import { Text, TextInput, Pressable, StyleSheet, View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { addDiaryEntry, getDiaryEntries, generateDoctorPdf } from '@/src/services/diary-service';
 import { useAppStore } from '@/src/store/app-store';
 import { colors, shadows } from '@/src/constants/theme';
@@ -24,12 +24,14 @@ export default function DiaryScreen() {
   const [details, setDetails] = useState('');
   const [list, setList] = useState<any[]>([]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!activeProfileId) return;
     setList(await getDiaryEntries(activeProfileId));
-  };
+  }, [activeProfileId]);
 
-  useEffect(() => { load(); }, [activeProfileId]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const save = async () => {
     if (!activeProfileId) return;

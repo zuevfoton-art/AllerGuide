@@ -7,6 +7,15 @@ import { useAppStore } from '@/src/store/app-store';
 
 export default function SosScreen() {
   const profile = useAppStore((s) => s.activeProfile);
+  const allergies: string[] = profile?.allergies
+    ? (() => {
+        try {
+          return JSON.parse(profile.allergies) as string[];
+        } catch {
+          return [];
+        }
+      })()
+    : [];
 
   return (
     <Screen>
@@ -36,14 +45,14 @@ export default function SosScreen() {
               <Text style={styles.infoValue}>{profile.birthYear}</Text>
             </View>
           ) : null}
-          {profile.allergies?.length > 0 && (
+          {allergies.length > 0 && (
             <View style={styles.allergySection}>
               <View style={styles.infoRow}>
                 <Ionicons name="warning" size={18} color={colors.danger} />
                 <Text style={[styles.infoLabel, { color: colors.danger }]}>Аллергии:</Text>
               </View>
               <View style={styles.allergyChips}>
-                {profile.allergies.map((a: string) => (
+                {allergies.map((a) => (
                   <View key={a} style={styles.allergyChip}>
                     <Text style={styles.allergyText}>{a}</Text>
                   </View>

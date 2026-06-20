@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "start": "pnpm --filter mobile start",
-    "lint": "pnpm -r lint",
+    "lint": "pnpm --filter mobile lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test"
   },

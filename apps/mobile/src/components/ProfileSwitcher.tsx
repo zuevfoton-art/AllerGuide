@@ -4,14 +4,16 @@ import { listProfiles } from '@/src/services/profile-service';
 import { useAppStore } from '@/src/store/app-store';
 import { colors } from '@/src/constants/theme';
 
+import type { Profile } from '@/src/types';
+
 export function ProfileSwitcher() {
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const setActiveProfile = useAppStore((s) => s.setActiveProfile);
 
   useEffect(() => {
-    listProfiles().then(setProfiles);
+    setProfiles(listProfiles());
   }, [activeProfileId]);
 
   if (profiles.length === 0) return null;

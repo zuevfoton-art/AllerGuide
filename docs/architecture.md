@@ -1,15 +1,23 @@
 # AllerGuide Architecture
 
-Репозиторий организован как monorepo с `apps/mobile`, `apps/api` и shared packages, что хорошо сочетается с Expo workspaces и позволяет держать mobile, backend и общие модули в одном исходном коде.[web:38][web:52]
+Репозиторий организован как monorepo с `apps/mobile`, `apps/api` и shared packages.
 
 ## Mobile
 
-Mobile-приложение использует Expo Router tabs, а директория `(tabs)` в структуре `app/` интерпретируется Expo Router как layout для вкладок.[web:52][web:55]
+Mobile-приложение использует Expo Router tabs. Директория `(tabs)` в структуре `app/` интерпретируется Expo Router как layout для вкладок.
 
 ## Data
 
-SQLite используется как локальное хранилище профилей и записей, а актуальный API Expo SQLite ориентирован на `openDatabaseSync` и современные методы работы с БД.[web:38][web:57][web:59]
+На native-платформах используется SQLite (`init.native.ts`, `openDatabaseSync`). На web — localStorage-адаптер (`init.ts`) с тем же интерфейсом сервисов.
 
 ## PDF
 
-PDF-отчёт создаётся через `Print.printToFileAsync`, который сохраняет файл в cache directory приложения, после чего файл можно расшарить пользователю.[web:43]
+PDF-отчёт создаётся через `Print.printToFileAsync`, который сохраняет файл в cache directory приложения, после чего файл можно расшарить пользователю.
+
+## CI
+
+GitHub Actions запускает `pnpm typecheck` и `pnpm lint` на каждый push и pull request в `main`.
+
+## API
+
+Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL, с интеграцией Replit Auth.

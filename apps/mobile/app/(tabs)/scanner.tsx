@@ -1,7 +1,7 @@
 import { Text, TextInput, Pressable, StyleSheet, View, Platform } from 'react-native';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { runMockScan } from '@/src/services/mock-ai-service';
+import { runMockScan, type ScanResult } from '@/src/services/mock-ai-service';
 import { useAppStore } from '@/src/store/app-store';
 import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
@@ -18,13 +18,12 @@ export default function ScannerScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const [input, setInput] = useState('молоко, арахис, сахар');
   const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ScanResult | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
-  const isSafe = result && result.matches?.length === 0;
-  const isDanger = result && result.matches?.length > 0;
+  const isDanger = result != null && result.matches.length > 0;
 
   const openCamera = async () => {
     if (!permission?.granted) {

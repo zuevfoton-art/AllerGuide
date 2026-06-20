@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+
+# pnpm
+.pnpm-store/
+
+# npm (project uses pnpm)
+package-lock.json
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Turbo
+.turbo/
+
+# iOS / Android
+apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/ios/**/xcuserdata/
+apps/mobile/ios/**/*.xcuserstate
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
