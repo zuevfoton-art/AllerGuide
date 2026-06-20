@@ -299,15 +299,188 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: 999px;
-      border: 1.5px solid var(--accent-mid);
-      background: var(--accent-light);
-      color: var(--accent);
+      border: 1px solid var(--border);
+      background: var(--glass-strong);
+      color: var(--text);
       font-size: 13px;
       font-weight: 700;
       margin-right: 8px;
       margin-bottom: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .chip.teal { border-color: rgba(46, 196, 160, 0.35); background: var(--teal-light); color: var(--forest); }
+
+    .select-card {
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .select-card.active {
+      border-color: rgba(46, 196, 160, 0.45);
+      background: var(--teal-light);
+    }
+
+    .primary-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--teal) 0%, #3dd6a8 100%);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 8px;
+      box-shadow: 0 8px 24px rgba(46, 196, 160, 0.25);
+    }
+
+    .secondary-btn {
+      width: 100%;
+      background: var(--glass-strong);
+      color: var(--forest);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .input {
+      width: 100%;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .toggle {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--glass-strong);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow);
+    }
+
+    .toggle.active {
+      border-color: rgba(46, 196, 160, 0.45);
+      background: var(--teal-light);
+      color: var(--forest);
+    }
+
+    .hero-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--teal) 0%, #7fd4a8 100%);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      margin: 12px auto;
+      box-shadow: 0 12px 28px rgba(46, 196, 160, 0.28);
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+    }
+
+    .progress-dot.active {
+      width: 22px;
+      background: var(--teal);
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .list-row:last-child { border-bottom: none; }
+
+    .chevron { color: var(--text-muted); font-size: 18px; }
+
+    .sos-hero {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 107, 100, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px;
+      text-align: center;
+      margin: 12px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .sos-btn {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ff5a4f, #ff3b30);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      margin: 16px auto;
+      font-size: 26px;
+      font-weight: 900;
+      box-shadow: 0 16px 40px rgba(255, 59, 48, 0.28);
+    }
+
+    .map-placeholder {
+      height: 160px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, var(--teal-light), var(--glass-strong));
+      display: grid;
+      place-items: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .scanner-preview {
+      height: 120px;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(46, 196, 160, 0.45);
+      background: var(--teal-light);
+      display: grid;
+      place-items: center;
+      color: var(--forest);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .streak-card {
+      background: linear-gradient(135deg, #fff6ee 0%, var(--glass-strong) 100%);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
     }
 
     .grid-2 {
@@ -988,34 +1161,36 @@
         </div>
 
         <!-- LOGIN -->
-        <section class="screen active" id="screen-login">
+        <section class="screen" id="screen-login">
           <div class="hero-logo">🌿</div>
-          <h2 class="screen-title" style="text-align:center">Вход</h2>
-          <p class="screen-sub" style="text-align:center">Войдите по телефону или email</p>
-          <div class="toggle-row">
-            <div class="toggle active">📞 Телефон</div>
-            <div class="toggle">✉️ Email</div>
+          <h2 class="screen-title-sm" style="text-align:center">Вход</h2>
+          <p class="today-sub" style="text-align:center;margin-bottom:16px">Войдите по телефону или email</p>
+          <div class="glass card">
+            <div class="toggle-row">
+              <div class="toggle active">📞 Телефон</div>
+              <div class="toggle">✉️ Email</div>
+            </div>
+            <div class="field-label">Номер телефона</div>
+            <input class="input" value="+7 999 123-45-67" readonly />
+            <div class="field-label">Пароль</div>
+            <input class="input" type="password" value="••••••••" readonly />
+            <button class="primary-btn">Войти</button>
           </div>
-          <div class="field-label">Номер телефона</div>
-          <input class="input" value="+7 999 123-45-67" readonly />
-          <div class="field-label">Пароль</div>
-          <input class="input" type="password" value="••••••••" readonly />
-          <button class="primary-btn">Войти</button>
-          <p class="disclaimer">Нет аккаунта? <strong style="color:var(--accent)">Зарегистрироваться</strong></p>
+          <p class="disclaimer">Нет аккаунта? <strong style="color:var(--teal)">Зарегистрироваться</strong></p>
         </section>
 
         <!-- ONBOARDING INTRO -->
         <section class="screen" id="screen-onboarding-intro">
-          <div style="display:flex;gap:6px;justify-content:center;margin-bottom:20px">
-            <span style="width:20px;height:8px;border-radius:4px;background:var(--accent)"></span>
-            <span style="width:8px;height:8px;border-radius:4px;background:var(--border)"></span>
-            <span style="width:8px;height:8px;border-radius:4px;background:var(--border)"></span>
-            <span style="width:8px;height:8px;border-radius:4px;background:var(--border)"></span>
-            <span style="width:8px;height:8px;border-radius:4px;background:var(--border)"></span>
+          <div class="progress-dots">
+            <span class="progress-dot active"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
           </div>
           <div class="hero-logo">📔</div>
-          <h2 class="screen-title" style="text-align:center">Персональный дневник</h2>
-          <p class="screen-sub" style="text-align:center">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</p>
+          <h2 class="screen-title-sm" style="text-align:center">Персональный дневник</h2>
+          <p class="today-sub" style="text-align:center">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</p>
           <button class="primary-btn">Далее</button>
           <p class="disclaimer">5 модулей + экспертный раздел проф. Смолкина Ю.С.</p>
         </section>
@@ -1023,16 +1198,18 @@
         <!-- ONBOARDING -->
         <section class="screen" id="screen-onboarding">
           <div class="hero-logo">🌿</div>
-          <h2 class="screen-title" style="text-align:center">AllerGuide</h2>
-          <p class="screen-sub" style="text-align:center">Персональный помощник в контроле аллергии</p>
+          <h2 class="screen-title-sm" style="text-align:center">AllerGuide</h2>
+          <p class="today-sub" style="text-align:center">Персональный помощник в контроле аллергии</p>
           <div class="section-label">Для кого ведём записи?</div>
-          <div class="card row">
-            <div class="avatar">👤</div>
-            <div><strong>Только для себя</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Личный дневник и сканер</span></div>
+          <div class="glass card row select-card">
+            <div class="avatar" style="background:var(--teal-light);color:var(--forest)">👤</div>
+            <div style="flex:1"><strong>Только для себя</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Личный дневник и сканер</span></div>
+            <span class="chevron">›</span>
           </div>
-          <div class="card row" style="border-color:var(--accent);background:var(--accent-light)">
-            <div class="avatar">👨‍👩‍👧</div>
-            <div><strong>Для себя и ребёнка</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Несколько профилей</span></div>
+          <div class="glass card row select-card active">
+            <div class="avatar" style="background:var(--teal-light);color:var(--forest)">👨‍👩‍👧</div>
+            <div style="flex:1"><strong>Для себя и ребёнка</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Несколько профилей</span></div>
+            <span class="chevron">›</span>
           </div>
           <p class="disclaimer">Информация носит рекомендательный характер и не заменяет консультацию врача.</p>
         </section>
@@ -1107,12 +1284,12 @@
 
         <!-- DIARY -->
         <section class="screen" id="screen-diary">
-          <h2 class="screen-title">Дневник</h2>
-          <p class="screen-sub">Пошаговые записи наблюдений</p>
+          <h2 class="screen-title-sm">Дневник</h2>
+          <p class="today-sub">Пошаговые записи наблюдений</p>
           <button class="primary-btn">＋ Новая запись по шагам</button>
           <div class="section-label">Быстрое добавление</div>
           <div>
-            <span class="chip">💓 Симптомы</span>
+            <span class="chip teal">💓 Симптомы</span>
             <span class="chip">💊 Лекарство</span>
             <span class="chip">🍽 Питание</span>
             <span class="chip">📈 ПСВ</span>
@@ -1121,20 +1298,24 @@
             <span class="chip">⚠️ Триггер</span>
           </div>
           <div class="section-label">История записей</div>
-          <div class="card list-item" style="padding:0;border:none;box-shadow:none;background:transparent">
-            <div class="dot" style="background:var(--danger-light);color:var(--danger)">💓</div>
-            <div>
-              <strong>Симптомы</strong>
-              <div style="font-size:13px;color:var(--text-secondary);margin:4px 0">Зуд кожи, лёгкая отёчность</div>
-              <div style="font-size:11px;color:var(--text-muted)">18 июня · 14:30</div>
+          <div class="glass" style="margin-bottom:14px">
+            <div class="feed-row">
+              <div class="feed-icon" style="background:var(--danger-light);color:var(--danger)">💓</div>
+              <div class="feed-body">
+                <div class="feed-title">Симптомы</div>
+                <div class="feed-sub">Зуд кожи, лёгкая отёчность</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">18 июня · 14:30</div>
+              </div>
+              <span class="chevron">›</span>
             </div>
-          </div>
-          <div class="card list-item" style="padding:0;border:none;box-shadow:none;background:transparent">
-            <div class="dot" style="background:var(--accent-light);color:var(--accent)">🍽</div>
-            <div>
-              <strong>Питание</strong>
-              <div style="font-size:13px;color:var(--text-secondary);margin:4px 0">Овсянка на воде, яблоко</div>
-              <div style="font-size:11px;color:var(--text-muted)">18 июня · 09:15</div>
+            <div class="feed-row">
+              <div class="feed-icon">🍽</div>
+              <div class="feed-body">
+                <div class="feed-title">Питание</div>
+                <div class="feed-sub">Овсянка на воде, яблоко</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">18 июня · 09:15</div>
+              </div>
+              <span class="chevron">›</span>
             </div>
           </div>
           <p class="disclaimer">Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.</p>
@@ -1142,8 +1323,8 @@
 
         <!-- DOCTOR REPORT -->
         <section class="screen" id="screen-doctor-report">
-          <h2 class="screen-title">Отчёт для врача</h2>
-          <p class="screen-sub">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</p>
+          <h2 class="screen-title-sm">Отчёт для врача</h2>
+          <p class="today-sub">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</p>
           <div class="section-label">Период</div>
           <div class="toggle-row">
             <div class="toggle">7 дн.</div>
@@ -1151,40 +1332,44 @@
             <div class="toggle active">30 дн.</div>
           </div>
           <div class="section-label">Блоки</div>
-          <div class="card row between"><span>☑ Симптомы</span><span>☑</span></div>
-          <div class="card row between"><span>☑ Пикфлоуметрия</span><span>☑</span></div>
-          <div class="card row between"><span>☑ АСИТ</span><span>☑</span></div>
-          <div class="card row between"><span>☑ Питание и триггеры</span><span>☑</span></div>
+          <div class="glass" style="margin-bottom:14px">
+            <div class="feed-row"><span>☑ Симптомы</span><span style="color:var(--teal)">☑</span></div>
+            <div class="feed-row"><span>☑ Пикфлоуметрия</span><span style="color:var(--teal)">☑</span></div>
+            <div class="feed-row"><span>☑ АСИТ</span><span style="color:var(--teal)">☑</span></div>
+            <div class="feed-row"><span>☑ Питание и триггеры</span><span style="color:var(--teal)">☑</span></div>
+          </div>
           <button class="primary-btn">Сформировать PDF</button>
           <p class="disclaimer">Отчёт не является медицинской документацией.</p>
         </section>
 
         <!-- SCANNER -->
         <section class="screen" id="screen-scanner">
-          <h2 class="screen-title">Сканер аллергенов</h2>
-          <p class="screen-sub">Open Food Facts + проверка по ключевым словам</p>
+          <h2 class="screen-title-sm">Сканер</h2>
+          <p class="today-sub">Open Food Facts + проверка по ключевым словам</p>
           <div class="toggle-row">
             <div class="toggle active">🥫 Продукт</div>
             <div class="toggle">🍽 Меню</div>
             <div class="toggle">💊 Лекарство</div>
             <div class="toggle">🧴 Косметика</div>
           </div>
-          <div class="card row between">
+          <div class="glass card row between">
             <div>
               <strong>Сканировать штрихкод</strong>
               <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">Поиск состава в Open Food Facts</div>
             </div>
-            <span>›</span>
+            <span class="chevron">›</span>
           </div>
-          <div class="field-label">Или введите состав вручную</div>
-          <input class="input" value="молоко, сахар, какао" readonly />
-          <button class="primary-btn">Проверить</button>
-          <div class="result-danger">
+          <div class="glass card">
+            <div class="field-label">Или введите состав вручную</div>
+            <input class="input" value="молоко, сахар, какао" readonly />
+            <button class="primary-btn" style="margin-top:12px">Проверить</button>
+          </div>
+          <div class="glass card" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light)">
             <strong>⚠️ Есть совпадения</strong>
-            <p style="font-size:13px;margin-top:6px;line-height:1.5">Обнаружено: <strong>Молоко</strong>. Результат основан на ключевых словах и не заменяет чтение этикетки.</p>
+            <p style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--text-secondary)">Обнаружено: <strong>Молоко</strong>. Результат основан на ключевых словах и не заменяет чтение этикетки.</p>
           </div>
           <div class="section-label">История</div>
-          <div class="card row between">
+          <div class="glass card row between">
             <div>
               <strong>Йогурт натуральный</strong>
               <div style="font-size:12px;color:var(--text-muted);margin-top:4px">17 июня · openfoodfacts</div>
@@ -1195,25 +1380,25 @@
 
         <!-- MARKET -->
         <section class="screen" id="screen-market">
-          <h2 class="screen-title">Маркет</h2>
-          <p class="screen-sub">Подборка для вашего профиля</p>
-          <div class="card row">
+          <h2 class="screen-title-sm">Маркет</h2>
+          <p class="today-sub">Подборка для вашего профиля</p>
+          <div class="glass card row">
             <div class="dot" style="background:var(--purple-light);color:var(--purple)">💨</div>
-            <div>
+            <div style="flex:1">
               <div class="row between"><strong>Очиститель HEPA</strong><span class="badge badge-high">Воздух</span></div>
               <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Снижает концентрацию пыльцы и аллергенов</p>
             </div>
           </div>
-          <div class="card row">
+          <div class="glass card row">
             <div class="dot" style="background:var(--success-light);color:var(--success)">🥛</div>
-            <div>
+            <div style="flex:1">
               <div class="row between"><strong>Овсяное молоко</strong><span class="badge badge-high">Питание</span></div>
               <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Альтернатива коровьему молоку</p>
             </div>
           </div>
-          <div class="card row">
+          <div class="glass card row">
             <div class="dot" style="background:var(--danger-light);color:var(--danger)">💉</div>
-            <div>
+            <div style="flex:1">
               <div class="row between"><strong>Чехол для автоинжектора</strong><span class="badge badge-high">SOS</span></div>
               <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Удобное хранение экстренного препарата</p>
             </div>
@@ -1222,8 +1407,8 @@
 
         <!-- MAP -->
         <section class="screen" id="screen-map">
-          <h2 class="screen-title">Карта мест</h2>
-          <p class="screen-sub">3 слоя по ТЗ v13</p>
+          <h2 class="screen-title-sm">Карта мест</h2>
+          <p class="today-sub">3 слоя по ТЗ v13</p>
           <div class="toggle-row">
             <div class="toggle active">🍽 Рестораны</div>
             <div class="toggle">🌿 Пыление</div>
@@ -1231,7 +1416,7 @@
           </div>
           <div class="map-placeholder">🗺️ Интерактивная карта (native)</div>
           <div class="section-label">Рекомендованные места</div>
-          <div class="card row">
+          <div class="glass card row">
             <div class="dot" style="background:var(--success-light);color:var(--success)">🌿</div>
             <div style="flex:1">
               <div class="row between">
@@ -1241,7 +1426,7 @@
               <p style="font-size:13px;color:var(--text-secondary);margin-top:6px">Меню с маркировкой аллергенов · 350 м</p>
             </div>
           </div>
-          <div class="card row">
+          <div class="glass card row">
             <div class="dot" style="background:var(--warning-light);color:var(--warning)">🍽</div>
             <div style="flex:1">
               <div class="row between">
@@ -1255,24 +1440,25 @@
 
         <!-- EXPERT -->
         <section class="screen" id="screen-expert">
-          <h2 class="screen-title">Эксперт</h2>
-          <p class="screen-sub">д.м.н., проф. Юрий Соломонович Смолкин · Президент АДАИР</p>
-          <div class="card" style="background:var(--accent-light);border-color:var(--accent-mid)">
+          <h2 class="screen-title-sm">Эксперт</h2>
+          <p class="today-sub">д.м.н., проф. Юрий Соломонович Смолкин · Президент АДАИР</p>
+          <div class="glass card" style="text-align:center">
+            <div class="hero-logo" style="width:52px;height:52px;font-size:22px;margin:0 auto 8px">🎓</div>
             <strong>Главный медицинский эксперт АллерГайд</strong>
             <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.5">Научный руководитель НККЦ</p>
           </div>
           <div class="section-label">Материалы</div>
-          <div class="card row between"><div><strong>Рекомендации по поллинозу</strong><br /><span style="font-size:12px;color:var(--text-muted)">Сезонные советы</span></div><span>›</span></div>
-          <div class="card row between"><div><strong>Календарь пыления</strong><br /><span style="font-size:12px;color:var(--text-muted)">По регионам России</span></div><span>›</span></div>
-          <div class="card row between"><div><strong>Перекрёстные реакции</strong><br /><span style="font-size:12px;color:var(--text-muted)">Справочник аллергенов</span></div><span>›</span></div>
-          <div class="card row between"><div><strong>АСИТ для пациентов</strong><br /><span style="font-size:12px;color:var(--text-muted)">Общая информация</span></div><span>›</span></div>
+          <div class="glass card row between"><div><strong>Рекомендации по поллинозу</strong><br /><span style="font-size:12px;color:var(--text-muted)">Сезонные советы</span></div><span class="chevron">›</span></div>
+          <div class="glass card row between"><div><strong>Календарь пыления</strong><br /><span style="font-size:12px;color:var(--text-muted)">По регионам России</span></div><span class="chevron">›</span></div>
+          <div class="glass card row between"><div><strong>Перекрёстные реакции</strong><br /><span style="font-size:12px;color:var(--text-muted)">Справочник аллергенов</span></div><span class="chevron">›</span></div>
+          <div class="glass card row between"><div><strong>АСИТ для пациентов</strong><br /><span style="font-size:12px;color:var(--text-muted)">Общая информация</span></div><span class="chevron">›</span></div>
           <p class="disclaimer">Контент носит информационный характер и не является медицинским назначением.</p>
         </section>
 
         <!-- SOS -->
         <section class="screen" id="screen-sos">
-          <h2 class="screen-title">SOS</h2>
-          <p class="screen-sub">Экстренная помощь при аллергии</p>
+          <h2 class="screen-title-sm">SOS</h2>
+          <p class="today-sub">Экстренная помощь при аллергии</p>
           <div class="sos-hero">
             <div style="font-size:14px;color:var(--text-secondary)">Профиль: Анна · 35 лет</div>
             <div class="sos-btn">SOS</div>
@@ -1280,17 +1466,17 @@
           </div>
           <div class="section-label">Аллергены</div>
           <div>
-            <span class="chip">Молоко</span>
-            <span class="chip">Арахис</span>
+            <span class="chip" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light);color:var(--danger)">Молоко</span>
+            <span class="chip" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light);color:var(--danger)">Арахис</span>
           </div>
           <div class="section-label">Экстренные контакты</div>
-          <div class="card">
+          <div class="glass card">
             <div class="row between">
               <div><strong>Мама</strong><br /><span style="font-size:13px;color:var(--text-secondary)">+7 999 000-00-01</span></div>
               <span>📞</span>
             </div>
           </div>
-          <div class="card">
+          <div class="glass card">
             <strong>План действий</strong>
             <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5">Автоинжектор в сумке. При отёке губ — эпинефрин, затем вызов скорой.</p>
           </div>
@@ -1298,37 +1484,35 @@
 
         <!-- PROFILES -->
         <section class="screen" id="screen-profiles">
-          <h2 class="screen-title">Мои профили</h2>
-          <p class="screen-sub">Редактирование и удаление</p>
-          <div class="card">
+          <h2 class="screen-title-sm">Мои профили</h2>
+          <p class="today-sub">Редактирование и удаление</p>
+          <div class="glass card">
             <div class="row between">
               <div class="row">
-                <div class="avatar">А</div>
+                <div class="avatar" style="background:var(--teal-light);color:var(--forest)">А</div>
                 <div>
                   <strong>Анна</strong>
                   <div style="font-size:12px;color:var(--text-secondary)">Я · 1990</div>
                   <div style="font-size:12px;color:var(--text-muted)">Молоко, Арахис, Берёза</div>
                 </div>
               </div>
-              <span>›</span>
+              <span class="chevron">›</span>
             </div>
             <div class="row" style="margin-top:12px;gap:8px">
               <button class="secondary-btn" style="margin:0;flex:1;padding:10px">Изменить</button>
               <button class="secondary-btn" style="margin:0;flex:1;padding:10px;color:var(--danger);border-color:var(--danger);background:var(--danger-light)">Удалить</button>
             </div>
           </div>
-          <div class="card">
-            <div class="row between">
-              <div class="row">
-                <div class="avatar">М</div>
-                <div>
-                  <strong>Миша</strong>
-                  <div style="font-size:12px;color:var(--text-secondary)">Ребёнок · 2018</div>
-                  <div style="font-size:12px;color:var(--text-muted)">Яйца</div>
-                </div>
+          <div class="glass card row between">
+            <div class="row">
+              <div class="avatar" style="background:var(--teal-light);color:var(--forest)">М</div>
+              <div>
+                <strong>Миша</strong>
+                <div style="font-size:12px;color:var(--text-secondary)">Ребёнок · 2018</div>
+                <div style="font-size:12px;color:var(--text-muted)">Яйца</div>
               </div>
-              <span>›</span>
             </div>
+            <span class="chevron">›</span>
           </div>
           <button class="secondary-btn">＋ Добавить профиль</button>
           <button class="secondary-btn" style="color:var(--danger);border-color:var(--danger);background:var(--danger-light)">Удалить аккаунт и все данные</button>
@@ -1336,23 +1520,23 @@
 
         <!-- SETTINGS -->
         <section class="screen" id="screen-settings">
-          <h2 class="screen-title">Настройки</h2>
-          <p class="screen-sub">SOS, резервные копии и документы</p>
+          <h2 class="screen-title-sm">Настройки</h2>
+          <p class="today-sub">SOS, резервные копии и документы</p>
           <div class="section-label">Экстренный вызов</div>
-          <div class="card">
+          <div class="glass card">
             <div class="field-label">Номер SOS</div>
             <input class="input" value="103" readonly />
             <button class="primary-btn" style="margin-top:12px">Сохранить номер</button>
           </div>
           <div class="section-label">Локальная резервная копия</div>
-          <div class="card">
+          <div class="glass card">
             <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Экспорт JSON с профилями, дневником и историей сканов.</p>
             <button class="primary-btn">Экспортировать данные</button>
             <button class="secondary-btn">Импортировать из файла</button>
           </div>
           <div class="section-label">Юридическая информация</div>
-          <div class="card row between"><span>Политика конфиденциальности</span><span>›</span></div>
-          <div class="card row between"><span>Условия использования</span><span>›</span></div>
+          <div class="glass card row between"><span>Политика конфиденциальности</span><span class="chevron">›</span></div>
+          <div class="glass card row between"><span>Условия использования</span><span class="chevron">›</span></div>
           <div class="section-label">Тема</div>
           <div class="toggle-row">
             <div class="toggle">☀️ Светлая</div>

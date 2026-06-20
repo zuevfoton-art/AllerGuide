@@ -5,6 +5,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { setStoredScenario } from '@/src/services/settings-service';
 import type { Scenario } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { GlassCard } from '@/src/components/GlassCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
@@ -34,20 +35,21 @@ export default function OnboardingScreen() {
       {scenarios.map((item) => (
         <Pressable
           key={item.key}
-          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
           onPress={() => {
             setScenario(item.key as Scenario);
             setStoredScenario(item.key as Scenario);
             router.push('/profile-setup');
           }}>
+          <GlassCard style={styles.card}>
           <View style={styles.cardIcon}>
-            <Ionicons name={item.icon as 'person'} size={22} color={theme.colors.accent} />
+            <Ionicons name={item.icon as 'person'} size={22} color={theme.colors.teal} />
           </View>
           <View style={styles.cardText}>
             <Text style={styles.cardTitle}>{item.label}</Text>
             <Text style={styles.cardDesc}>{item.desc}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          </GlassCard>
         </Pressable>
       ))}
 
@@ -65,11 +67,11 @@ function createStyles({ colors, shadows }: AppTheme) {
       width: 72,
       height: 72,
       borderRadius: 20,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.teal,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 4,
-      ...(shadows.accentLg as object),
+      ...(shadows.glass as object),
     },
     brand: { fontSize: 32, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     tagline: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
@@ -84,18 +86,14 @@ function createStyles({ colors, shadows }: AppTheme) {
     card: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: 16,
       gap: 14,
-      ...(shadows.sm as object),
+      marginBottom: 0,
     },
-    cardPressed: { opacity: 0.85 },
     cardIcon: {
       width: 44,
       height: 44,
       borderRadius: 12,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.tealLight,
       alignItems: 'center',
       justifyContent: 'center',
     },

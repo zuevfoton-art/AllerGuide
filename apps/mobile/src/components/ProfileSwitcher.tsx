@@ -58,14 +58,14 @@ export function ProfileSwitcher() {
               </View>
               <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{profile.name}</Text>
               {isActive ? (
-                <Ionicons name="create-outline" size={14} color={theme.colors.accent} />
+                <Ionicons name="create-outline" size={14} color={theme.colors.teal} />
               ) : null}
             </Pressable>
           );
         })}
 
         <Pressable style={styles.addChip} onPress={() => router.push('/profile-setup')}>
-          <Ionicons name="add" size={18} color={theme.colors.accent} />
+          <Ionicons name="add" size={18} color={theme.colors.teal} />
           <Text style={styles.addChipText}>Профиль</Text>
         </Pressable>
       </View>
@@ -93,8 +93,8 @@ function createStyles({ colors }: AppTheme) {
       borderColor: colors.border,
     },
     active: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
+      borderColor: colors.teal,
+      backgroundColor: colors.tealLight,
     },
     avatar: {
       width: 26,
@@ -104,23 +104,23 @@ function createStyles({ colors }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    avatarActive: { backgroundColor: colors.accent },
+    avatarActive: { backgroundColor: colors.teal },
     avatarText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
     avatarTextActive: { color: colors.onAccent },
     chipText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
-    chipTextActive: { color: colors.accent },
+    chipTextActive: { color: colors.teal },
     addChip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.tealLight,
       paddingVertical: 8,
       paddingHorizontal: 12,
       borderRadius: 20,
       borderWidth: 1.5,
-      borderColor: colors.accentMid,
+      borderColor: colors.teal,
     },
-    addChipText: { fontSize: 14, fontWeight: '700', color: colors.accent },
+    addChipText: { fontSize: 14, fontWeight: '700', color: colors.teal },
     hint: { fontSize: 12, color: colors.textMuted, lineHeight: 16 },
   });
 }
