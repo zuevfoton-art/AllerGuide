@@ -28,6 +28,10 @@ function validateProfileInput(name: string, birthYear: string, selected: string[
   return '';
 }
 
+function needsChildConsent(type: ProfileType, scenario: ReturnType<typeof getStoredScenario>) {
+  return type === 'child' || scenario === 'child';
+}
+
 export default function ProfileSetupScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -37,6 +41,7 @@ export default function ProfileSetupScreen() {
   const [birthYear, setBirthYear] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
+  const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
   const [, setRefreshKey] = useState(0);
 
@@ -76,6 +81,11 @@ export default function ProfileSetupScreen() {
     const validationError = validateProfileInput(name, birthYear, selected);
     if (validationError) {
       setError(validationError);
+      return;
+    }
+
+    if (needsChildConsent(effectiveType, scenario) && !childConsent) {
+      setError('Подтвердите, что вы являетесь родителем или законным представителем ребёнка.');
       return;
     }
 
@@ -175,6 +185,20 @@ export default function ProfileSetupScreen() {
       <Text style={styles.label}>Аллергены</Text>
       <AllergenPicker selected={selected} onChange={setSelected} />
 
+      {needsChildConsent(effectiveType, scenario) ? (
+        <Pressable style={styles.consentRow} onPress={() => setChildConsent((v) => !v)}>
+          <Ionicons
+            name={childConsent ? 'checkbox' : 'square-outline'}
+            size={22}
+            color={theme.colors.accent}
+          />
+          <Text style={styles.consentText}>
+            Я подтверждаю, что являюсь родителем или законным представителем данного ребёнка и вправе
+            вводить сведения о его состоянии здоровья.
+          </Text>
+        </Pressable>
+      ) : null}
+
       <Text style={styles.label}>Экстренные контакты</Text>
       <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
 
@@ -242,6 +266,8 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.accentMid,
     },
     lockedTypeText: { fontSize: 15, fontWeight: '600', color: colors.accent },
+    consentRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+    consentText: { flex: 1, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     button: {
       backgroundColor: colors.accent,
       padding: 17,

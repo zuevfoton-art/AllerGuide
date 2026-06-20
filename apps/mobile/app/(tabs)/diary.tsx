@@ -1,4 +1,5 @@
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DIARY_SECTIONS,
@@ -10,7 +11,6 @@ import {
 import {
   addDiaryEntries,
   deleteDiaryEntry,
-  generateDoctorPdf,
   getDiaryEntries,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
@@ -28,6 +28,9 @@ const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colo
   Питание: { icon: 'restaurant', colorKey: 'accent' },
   Триггер: { icon: 'warning', colorKey: 'warning' },
   Кожа: { icon: 'body', colorKey: 'pink' },
+  Пикфлоуметрия: { icon: 'speedometer', colorKey: 'success' },
+  АСИТ: { icon: 'fitness', colorKey: 'forest' },
+  'Визит к врачу': { icon: 'calendar', colorKey: 'purple' },
   Заметка: { icon: 'create', colorKey: 'success' },
 };
 
@@ -180,11 +183,9 @@ export default function DiaryScreen() {
           <Ionicons name="refresh" size={16} color={theme.colors.accent} />
           <Text style={styles.secondaryText}>Обновить</Text>
         </Pressable>
-        <Pressable
-          style={styles.secondaryBtn}
-          onPress={() => activeProfileId && generateDoctorPdf(activeProfileId)}>
+        <Pressable style={styles.secondaryBtn} onPress={() => router.push('/doctor-report' as any)}>
           <Ionicons name="document-text" size={16} color={theme.colors.accent} />
-          <Text style={styles.secondaryText}>PDF-отчёт</Text>
+          <Text style={styles.secondaryText}>Отчёт для врача</Text>
         </Pressable>
       </View>
 

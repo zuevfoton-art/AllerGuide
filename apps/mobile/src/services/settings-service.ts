@@ -31,6 +31,14 @@ export function markOnboardingComplete() {
   setSetting('onboardingComplete', 'true');
 }
 
+export function isIntroComplete(): boolean {
+  return getSetting('introComplete') === 'true';
+}
+
+export function markIntroComplete() {
+  setSetting('introComplete', 'true');
+}
+
 export function getThemeMode(): ThemeMode | null {
   const value = getSetting('themeMode');
   if (value === 'light' || value === 'dark' || value === 'system') return value;

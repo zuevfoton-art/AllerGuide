@@ -6,8 +6,13 @@ import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  ADAIR_CLINICS,
+  ADAIR_DOCTORS,
+  ADAIR_SPECIALIZATION_LABELS,
   getPlaceLevelColor,
   getPlaceLevelLabel,
+  getPollenPeaksForMonth,
+  formatPollenMonth,
   type CatalogPlace,
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
@@ -31,10 +36,19 @@ if (Platform.OS !== 'web') {
   MarkerComponent = maps.Marker;
 }
 
+const LAYERS = [
+  { key: 'places', label: 'Рестораны' },
+  { key: 'pollen', label: 'Пыление' },
+  { key: 'adair', label: 'АДАИР' },
+] as const;
+
+type MapLayer = (typeof LAYERS)[number]['key'];
+
 export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
+  const [layer, setLayer] = useState<MapLayer>('places');
   const [places, setPlaces] = useState<CatalogPlace[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
@@ -62,6 +76,8 @@ export default function MapScreen() {
   );
 
   const selected = places.find((place) => place.id === selectedId) ?? places[0] ?? null;
+  const pollenMonth = new Date().getMonth() + 1;
+  const pollenPeaks = getPollenPeaksForMonth(pollenMonth);
 
   const levelBg = useMemo(
     () =>
@@ -82,6 +98,19 @@ export default function MapScreen() {
 
       <ProfileSwitcher />
 
+      <View style={styles.layerRow}>
+        {LAYERS.map((item) => (
+          <Pressable
+            key={item.key}
+            style={[styles.layerChip, layer === item.key && styles.layerChipActive]}
+            onPress={() => setLayer(item.key)}>
+            <Text style={[styles.layerText, layer === item.key && styles.layerTextActive]}>{item.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {layer === 'places' ? (
+        <>
       {Platform.OS !== 'web' && MapViewComponent && MarkerComponent ? (
         <View style={styles.mapWrap}>
           <MapViewComponent style={styles.map} initialRegion={DEFAULT_REGION} showsUserLocation={!!userLocation}>
@@ -146,6 +175,72 @@ export default function MapScreen() {
       <Text style={styles.disclaimer}>
         Информация о местах носит ориентировочный характер, состав нужно уточнять в заведении.
       </Text>
+        </>
+      ) : null}
+
+      {layer === 'pollen' ? (
+        <>
+          <View style={styles.pollenHero}>
+            <Ionicons name="leaf" size={28} color={theme.colors.success} />
+            <Text style={styles.pollenTitle}>Карта пыления · {formatPollenMonth(pollenMonth)}</Text>
+            <Text style={styles.pollenSub}>Данные Open-Meteo / ориентир АДАИР</Text>
+          </View>
+          {pollenPeaks.map((peak) => (
+            <View key={peak.allergen} style={styles.card}>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{peak.allergen}</Text>
+                <Text style={styles.cardNote}>Пик сезона: {formatPollenMonth(peak.peakMonth)} · {peak.region}</Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: theme.colors.warningLight }]}>
+                <Text style={[styles.badgeText, { color: theme.colors.warning }]}>Сезон</Text>
+              </View>
+            </View>
+          ))}
+          <Text style={styles.disclaimer}>
+            Данные о пылении носят ориентировочный характер. Уточняйте прогноз у лечащего врача.
+          </Text>
+        </>
+      ) : null}
+
+      {layer === 'adair' ? (
+        <>
+          {ADAIR_CLINICS.map((clinic) => (
+            <View key={clinic.id} style={styles.card}>
+              <View style={[styles.cardIcon, { backgroundColor: `${theme.colors.purple}18` }]}>
+                <Ionicons name="medical" size={24} color={theme.colors.purple} />
+              </View>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{clinic.name}</Text>
+                <Text style={styles.cardNote}>{clinic.address}</Text>
+                <Text style={styles.tags}>{clinic.phone}</Text>
+              </View>
+              {clinic.isNkcc ? (
+                <View style={[styles.badge, { backgroundColor: theme.colors.accentLight }]}>
+                  <Text style={[styles.badgeText, { color: theme.colors.accent }]}>НККЦ</Text>
+                </View>
+              ) : null}
+            </View>
+          ))}
+          {ADAIR_DOCTORS.map((doctor) => (
+            <View key={doctor.id} style={styles.card}>
+              <View style={[styles.cardIcon, { backgroundColor: theme.colors.successLight }]}>
+                <Ionicons name="person" size={24} color={theme.colors.success} />
+              </View>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{doctor.name}</Text>
+                <Text style={styles.cardNote}>{doctor.degree}</Text>
+                <Text style={styles.tags}>{ADAIR_SPECIALIZATION_LABELS[doctor.specialization]}</Text>
+                {doctor.isChiefExpert ? (
+                  <Text style={[styles.tags, { color: theme.colors.accent }]}>Главный медицинский эксперт АллерГайд</Text>
+                ) : null}
+              </View>
+            </View>
+          ))}
+          <Text style={styles.disclaimer}>
+            Информация о клиниках и врачах предоставлена АДАИР и носит справочный характер.
+          </Text>
+        </>
+      ) : null}
     </Screen>
   );
 }
@@ -155,6 +250,30 @@ function createStyles({ colors, shadows }: AppTheme) {
     header: { gap: 3 },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },
+    layerRow: { flexDirection: 'row', gap: 8 },
+    layerChip: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 12,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      alignItems: 'center',
+      backgroundColor: colors.card,
+    },
+    layerChipActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+    layerText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
+    layerTextActive: { color: colors.accent },
+    pollenHero: {
+      backgroundColor: colors.successLight,
+      borderRadius: 16,
+      padding: 16,
+      alignItems: 'center',
+      gap: 6,
+      borderWidth: 1,
+      borderColor: colors.successBorder,
+    },
+    pollenTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
+    pollenSub: { fontSize: 12, color: colors.textSecondary },
     mapWrap: {
       height: 220,
       borderRadius: 18,

@@ -17,6 +17,7 @@ const MODES = [
   { key: 'product', label: 'Продукт', icon: 'nutrition' },
   { key: 'menu', label: 'Меню', icon: 'restaurant' },
   { key: 'medicine', label: 'Лекарство', icon: 'medkit' },
+  { key: 'cosmetics', label: 'Косметика', icon: 'flask' },
 ] as const;
 
 export default function ScannerScreen() {
@@ -25,7 +26,7 @@ export default function ScannerScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('молоко, арахис, сахар');
-  const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');
+  const [mode, setMode] = useState<'product' | 'menu' | 'medicine' | 'cosmetics'>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);

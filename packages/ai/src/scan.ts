@@ -6,7 +6,7 @@ import {
   type RiskLevel,
 } from '@allerguide/core';
 
-export type ScanMode = 'product' | 'menu' | 'medicine';
+export type ScanMode = 'product' | 'menu' | 'medicine' | 'cosmetics';
 
 export interface ScanResult {
   verdict: string;

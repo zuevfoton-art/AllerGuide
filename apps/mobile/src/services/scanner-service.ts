@@ -47,7 +47,7 @@ export function scanText({
   text,
   profile,
 }: {
-  mode: 'product' | 'menu' | 'medicine';
+  mode: 'product' | 'menu' | 'medicine' | 'cosmetics';
   text: string;
   profile?: Profile | null;
 }): ScanResult {
