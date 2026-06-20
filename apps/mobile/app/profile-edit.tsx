@@ -26,12 +26,21 @@ export default function ProfileEditScreen() {
   const [selected, setSelected] = useState<string[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profileId) return;
-    const profile = getProfile(profileId);
-    profile.then((row) => {
-      if (!row) return;
+    if (!profileId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    void getProfile(profileId).then((row) => {
+      if (!row) {
+        setLoading(false);
+        return;
+      }
+
       setName(row.name);
       setBirthYear(String(row.birthYear));
       setType(row.type);
@@ -48,6 +57,7 @@ export default function ProfileEditScreen() {
           relation: contact.relation,
         })),
       );
+      setLoading(false);
     });
   }, [profileId]);
 
@@ -87,11 +97,15 @@ export default function ProfileEditScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View>
-          <Text style={styles.title}>Редактирование</Text>
-          <Text style={styles.subtitle}>Обновите данные профиля</Text>
+          <Text style={styles.title}>Профиль</Text>
+          <Text style={styles.subtitle}>Данные и редактирование</Text>
         </View>
       </View>
 
+      {loading ? (
+        <Text style={styles.loadingText}>Загрузка…</Text>
+      ) : (
+        <>
       <Text style={styles.label}>Имя</Text>
       <TextInput
         placeholder="Введите имя"
@@ -146,6 +160,8 @@ export default function ProfileEditScreen() {
       <Pressable style={styles.button} onPress={save}>
         <Text style={styles.buttonText}>Сохранить изменения</Text>
       </Pressable>
+        </>
+      )}
     </Screen>
   );
 }
@@ -165,6 +181,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },
+    loadingText: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', paddingVertical: 24 },
     label: {
       fontSize: 13,
       fontWeight: '700',

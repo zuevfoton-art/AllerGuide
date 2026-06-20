@@ -7,6 +7,7 @@ import {
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { useAppStore } from '@/src/store/app-store';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -123,4 +124,5 @@ export async function loginUser(input: {
 
 export function logoutUser() {
   clearSessionUserId();
+  useAppStore.getState().resetAppState();
 }

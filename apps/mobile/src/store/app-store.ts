@@ -8,6 +8,7 @@ interface AppState {
   setScenario: (scenario: Scenario | null) => void;
   setActiveProfileId: (id: number | null) => void;
   setActiveProfile: (profile: Profile | null) => void;
+  resetAppState: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -17,6 +18,7 @@ export const useAppStore = create<AppState>((set) => ({
   setScenario: (scenario) => set({ scenario }),
   setActiveProfileId: (activeProfileId) => set({ activeProfileId }),
   setActiveProfile: (activeProfile) => set({ activeProfile }),
+  resetAppState: () => set({ scenario: null, activeProfileId: null, activeProfile: null }),
 }));
 
 export type { Scenario };
