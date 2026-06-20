@@ -1,6 +1,8 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useAppStore } from '@/src/store/app-store';
+import { setStoredScenario } from '@/src/services/settings-service';
+import type { Scenario } from '@allerguide/core';
 import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,7 +33,8 @@ export default function OnboardingScreen() {
           key={item.key}
           style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
           onPress={() => {
-            setScenario(item.key);
+            setScenario(item.key as Scenario);
+            setStoredScenario(item.key as Scenario);
             router.push('/profile-setup');
           }}>
           <View style={styles.cardIcon}>

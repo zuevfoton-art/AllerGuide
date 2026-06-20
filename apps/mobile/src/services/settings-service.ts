@@ -1,0 +1,31 @@
+import { getDb } from '@/src/db/init';
+import type { Scenario } from '@allerguide/core';
+
+export function getSetting(key: string): string | null {
+  const db = getDb();
+  const row = db.getFirstSync<{ value: string }>('SELECT value FROM app_settings WHERE key = ?', [key]);
+  return row?.value ?? null;
+}
+
+export function setSetting(key: string, value: string) {
+  const db = getDb();
+  db.runSync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', [key, value]);
+}
+
+export function getStoredScenario(): Scenario | null {
+  const value = getSetting('scenario');
+  if (value === 'self' || value === 'child' || value === 'both') return value;
+  return null;
+}
+
+export function setStoredScenario(scenario: Scenario) {
+  setSetting('scenario', scenario);
+}
+
+export function isOnboardingComplete(): boolean {
+  return getSetting('onboardingComplete') === 'true';
+}
+
+export function markOnboardingComplete() {
+  setSetting('onboardingComplete', 'true');
+}

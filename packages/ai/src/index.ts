@@ -1,1 +1,2 @@
-export const aiVersion = 'mock-1';
+export * from './scan';
+export const aiVersion = 'mock-2';

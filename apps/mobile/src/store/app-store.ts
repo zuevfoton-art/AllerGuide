@@ -1,13 +1,11 @@
 import { create } from 'zustand';
-import type { Profile } from '@/src/types';
-
-export type Scenario = 'self' | 'child' | 'both' | null;
+import type { Profile, Scenario } from '@allerguide/core';
 
 interface AppState {
-  scenario: Scenario;
+  scenario: Scenario | null;
   activeProfileId: number | null;
   activeProfile: Profile | null;
-  setScenario: (scenario: Scenario) => void;
+  setScenario: (scenario: Scenario | null) => void;
   setActiveProfileId: (id: number | null) => void;
   setActiveProfile: (profile: Profile | null) => void;
 }
@@ -20,3 +18,5 @@ export const useAppStore = create<AppState>((set) => ({
   setActiveProfileId: (activeProfileId) => set({ activeProfileId }),
   setActiveProfile: (activeProfile) => set({ activeProfile }),
 }));
+
+export type { Scenario };

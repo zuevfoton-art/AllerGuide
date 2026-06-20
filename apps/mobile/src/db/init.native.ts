@@ -18,6 +18,10 @@ export function initDb() {
       details TEXT,
       createdAt TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
   `);
 }
 

@@ -1,18 +1,27 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { resolveBootstrapRoute } from '@allerguide/core';
 import { initDb } from '@/src/db/init';
 import { listProfiles } from '@/src/services/profile-service';
+import {
+  getStoredScenario,
+  isOnboardingComplete,
+} from '@/src/services/settings-service';
+import { useAppStore } from '@/src/store/app-store';
 import { colors } from '@/src/constants/theme';
 
 export default function Index() {
-  const [target, setTarget] = useState<'/(tabs)/home' | '/onboarding' | null>(null);
+  const [target, setTarget] = useState<'/(tabs)/home' | '/onboarding' | '/profile-setup' | null>(null);
+  const setScenario = useAppStore((s) => s.setScenario);
 
   useEffect(() => {
     initDb();
     const profiles = listProfiles();
-    setTarget(profiles.length > 0 ? '/(tabs)/home' : '/onboarding');
-  }, []);
+    const scenario = getStoredScenario();
+    if (scenario) setScenario(scenario);
+    setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
+  }, [setScenario]);
 
   if (!target) {
     return (

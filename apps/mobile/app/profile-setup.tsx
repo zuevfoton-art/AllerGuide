@@ -1,55 +1,108 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { createProfile } from '@/src/services/profile-service';
+import { ALLERGEN_OPTIONS, getWizardStep, shouldCompleteOnboarding, type ProfileType } from '@allerguide/core';
+import { createProfile, listProfiles } from '@/src/services/profile-service';
+import { getStoredScenario, isOnboardingComplete, markOnboardingComplete } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
-import { ALLERGEN_OPTIONS } from '@/src/constants/allergens';
 import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 
+function validateProfileInput(name: string, birthYear: string, selected: string[]) {
+  const trimmedName = name.trim();
+  const year = Number(birthYear);
+
+  if (!trimmedName) return 'Укажите имя профиля.';
+  if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
+    return 'Укажите корректный год рождения.';
+  }
+  if (selected.length === 0) return 'Выберите хотя бы один аллерген.';
+  return '';
+}
+
 export default function ProfileSetupScreen() {
-  const scenario = useAppStore((s) => s.scenario);
+  const scenario = useAppStore((s) => s.scenario) ?? getStoredScenario();
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
-  const [type, setType] = useState<'self' | 'child'>(scenario === 'child' ? 'child' : 'self');
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [, setRefreshKey] = useState(0);
+
+  const wizardStep = getWizardStep(scenario, listProfiles());
+
+  const lockedType: ProfileType =
+    scenario === 'child' || wizardStep === 'child' ? 'child' : 'self';
+
+  const canToggleType = scenario !== 'self' && scenario !== 'child' && scenario !== 'both';
+  const [type, setType] = useState<ProfileType>(lockedType);
+  const effectiveType = canToggleType ? type : lockedType;
+
+  const title =
+    scenario === 'both' && wizardStep === 'child'
+      ? 'Профиль ребёнка'
+      : scenario === 'both'
+        ? 'Ваш профиль'
+        : 'Создание профиля';
+
+  const subtitle =
+    scenario === 'both' && wizardStep === 'child'
+      ? 'Шаг 2 из 2 — добавьте профиль ребёнка'
+      : scenario === 'both'
+        ? 'Шаг 1 из 2 — создайте свой профиль'
+        : 'Заполните информацию для персонализации';
 
   const toggle = (item: string) =>
     setSelected((prev) => (prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]));
 
+  const resetForm = () => {
+    setName('');
+    setBirthYear('');
+    setSelected([]);
+    setError('');
+  };
+
   const save = async () => {
-    const trimmedName = name.trim();
-    const year = Number(birthYear);
-
-    if (!trimmedName) {
-      setError('Укажите имя профиля.');
-      return;
-    }
-
-    if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
-      setError('Укажите корректный год рождения.');
-      return;
-    }
-
-    if (selected.length === 0) {
-      setError('Выберите хотя бы один аллерген.');
+    const validationError = validateProfileInput(name, birthYear, selected);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setError('');
-    const id = await createProfile({ name: trimmedName, birthYear: year, type, allergies: selected });
-    if (id) setActiveProfileId(id);
-    router.replace('/(tabs)/home');
+    const id = await createProfile({
+      name: name.trim(),
+      birthYear: Number(birthYear),
+      type: effectiveType,
+      allergies: selected,
+    });
+
+    if (!id) return;
+
+    setActiveProfileId(id);
+    const profiles = listProfiles();
+
+    if (isOnboardingComplete()) {
+      router.back();
+      return;
+    }
+
+    if (shouldCompleteOnboarding(scenario, profiles)) {
+      markOnboardingComplete();
+      router.replace('/(tabs)/home');
+      return;
+    }
+
+    resetForm();
+    setRefreshKey((key) => key + 1);
   };
 
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>Создание профиля</Text>
-        <Text style={styles.subtitle}>Заполните информацию для персонализации</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
 
       <Text style={styles.label}>Имя</Text>
@@ -71,21 +124,30 @@ export default function ProfileSetupScreen() {
         style={styles.input}
       />
 
-      <Text style={styles.label}>Профиль</Text>
-      <View style={styles.toggleRow}>
-        <Pressable
-          style={[styles.toggleBtn, type === 'self' && styles.toggleActive]}
-          onPress={() => setType('self')}>
-          <Ionicons name="person" size={16} color={type === 'self' ? colors.accent : colors.textSecondary} />
-          <Text style={[styles.toggleText, type === 'self' && styles.toggleTextActive]}>Я</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.toggleBtn, type === 'child' && styles.toggleActive]}
-          onPress={() => setType('child')}>
-          <Ionicons name="happy" size={16} color={type === 'child' ? colors.accent : colors.textSecondary} />
-          <Text style={[styles.toggleText, type === 'child' && styles.toggleTextActive]}>Ребёнок</Text>
-        </Pressable>
-      </View>
+      {canToggleType ? (
+        <>
+          <Text style={styles.label}>Профиль</Text>
+          <View style={styles.toggleRow}>
+            <Pressable
+              style={[styles.toggleBtn, type === 'self' && styles.toggleActive]}
+              onPress={() => setType('self')}>
+              <Ionicons name="person" size={16} color={type === 'self' ? colors.accent : colors.textSecondary} />
+              <Text style={[styles.toggleText, type === 'self' && styles.toggleTextActive]}>Я</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.toggleBtn, type === 'child' && styles.toggleActive]}
+              onPress={() => setType('child')}>
+              <Ionicons name="happy" size={16} color={type === 'child' ? colors.accent : colors.textSecondary} />
+              <Text style={[styles.toggleText, type === 'child' && styles.toggleTextActive]}>Ребёнок</Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <View style={styles.lockedType}>
+          <Ionicons name={lockedType === 'self' ? 'person' : 'happy'} size={16} color={colors.accent} />
+          <Text style={styles.lockedTypeText}>{lockedType === 'self' ? 'Ваш профиль' : 'Профиль ребёнка'}</Text>
+        </View>
+      )}
 
       <Text style={styles.label}>Аллергены</Text>
       <View style={styles.allergyGrid}>
@@ -107,7 +169,9 @@ export default function ProfileSetupScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Pressable style={styles.button} onPress={save}>
-        <Text style={styles.buttonText}>Сохранить профиль</Text>
+        <Text style={styles.buttonText}>
+          {scenario === 'both' && wizardStep === 'self' ? 'Далее: профиль ребёнка' : 'Сохранить профиль'}
+        </Text>
       </Pressable>
 
       <Text style={styles.disclaimer}>
@@ -154,6 +218,17 @@ const styles = StyleSheet.create({
   toggleActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
   toggleText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary },
   toggleTextActive: { color: colors.accent },
+  lockedType: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.accentLight,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: colors.accentMid,
+  },
+  lockedTypeText: { fontSize: 15, fontWeight: '600', color: colors.accent },
   allergyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   allergyChip: {
     flexDirection: 'row',

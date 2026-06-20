@@ -4,20 +4,24 @@
 
 ## Mobile
 
-Mobile-приложение использует Expo Router tabs. Директория `(tabs)` в структуре `app/` интерпретируется Expo Router как layout для вкладок.
+Mobile-приложение использует Expo Router tabs. Shared-логика вынесена в `@allerguide/core` (типы, аллергены, onboarding) и `@allerguide/ai` (mock-сканер).
 
 ## Data
 
-На native-платформах используется SQLite (`init.native.ts`, `openDatabaseSync`). На web — localStorage-адаптер (`init.ts`) с тем же интерфейсом сервисов.
+На native-платформах используется SQLite (`init.native.ts`). На web — localStorage-адаптер (`init.ts`). Таблица `app_settings` хранит сценарий onboarding и флаг завершения.
 
-## PDF
+## Onboarding
 
-PDF-отчёт создаётся через `Print.printToFileAsync`, который сохраняет файл в cache directory приложения, после чего файл можно расшарить пользователю.
+Сценарий `both` запускает двухшаговый wizard: профиль «Я» → профиль «Ребёнок». Bootstrap-маршрут определяется через `resolveBootstrapRoute()` из `@allerguide/core`.
+
+## Profiles
+
+CRUD профилей: создание, список, редактирование (`/profile-edit`), удаление с каскадом записей дневника (`/profiles`).
 
 ## CI
 
-GitHub Actions запускает `pnpm typecheck` и `pnpm lint` на каждый push и pull request в `main`.
+GitHub Actions: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 ## API
 
-Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL, с интеграцией Replit Auth.
+Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL.

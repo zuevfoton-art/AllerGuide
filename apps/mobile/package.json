@@ -11,6 +11,8 @@
     "test": "echo test"
   },
   "dependencies": {
+    "@allerguide/ai": "workspace:*",
+    "@allerguide/core": "workspace:*",
     "@expo/metro-runtime": "^5.0.5",
     "@expo/vector-icons": "^14.1.0",
     "expo": "~53.0.0",

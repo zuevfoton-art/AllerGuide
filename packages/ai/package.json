@@ -2,5 +2,16 @@
   "name": "@allerguide/ai",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts"
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@allerguide/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
+  }
 }

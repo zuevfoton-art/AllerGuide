@@ -29,6 +29,12 @@ export default function HomeScreen() {
 
       <ProfileSwitcher />
 
+      <Pressable style={styles.profilesLink} onPress={() => router.push('/profiles')}>
+        <Ionicons name="people" size={18} color={colors.accent} />
+        <Text style={styles.profilesLinkText}>Управление профилями</Text>
+        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+      </Pressable>
+
       <View style={styles.banner}>
         <View style={styles.bannerIcon}>
           <Ionicons name="shield-checkmark" size={28} color={colors.accent} />
@@ -97,6 +103,17 @@ const styles = StyleSheet.create({
   bannerText: { flex: 1, gap: 3 },
   bannerTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   bannerDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+  profilesLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: colors.card,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  profilesLinkText: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
   sectionLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: -4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   actionCard: {

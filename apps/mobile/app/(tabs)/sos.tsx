@@ -3,19 +3,12 @@ import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
+import { parseAllergies } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 
 export default function SosScreen() {
   const profile = useAppStore((s) => s.activeProfile);
-  const allergies: string[] = profile?.allergies
-    ? (() => {
-        try {
-          return JSON.parse(profile.allergies) as string[];
-        } catch {
-          return [];
-        }
-      })()
-    : [];
+  const allergies = profile ? parseAllergies(profile.allergies) : [];
 
   return (
     <Screen>
