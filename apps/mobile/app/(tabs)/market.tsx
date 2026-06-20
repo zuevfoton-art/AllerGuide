@@ -1,22 +1,118 @@
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Pressable } from 'react-native';
 import { colors } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { Ionicons } from '@expo/vector-icons';
 
 const items = [
-  { title: 'Очиститель воздуха', why: 'Может быть полезен при бытовой аллергии и поллинозе' },
-  { title: 'Гипоаллергенный крем', why: 'Подходит для сценариев с кожными проявлениями' },
-  { title: 'Чехлы для постельного белья', why: 'Актуально при реакции на пыль и клещей' },
+  {
+    title: 'Очиститель воздуха',
+    why: 'Может быть полезен при бытовой аллергии и поллинозе',
+    icon: 'cloudy',
+    tag: 'Воздух',
+    color: '#5856D6',
+  },
+  {
+    title: 'Гипоаллергенный крем',
+    why: 'Подходит для сценариев с кожными проявлениями',
+    icon: 'hand-left',
+    tag: 'Кожа',
+    color: '#FF2D55',
+  },
+  {
+    title: 'Чехлы для постельного белья',
+    why: 'Актуально при реакции на пыль и клещей',
+    icon: 'bed',
+    tag: 'Дом',
+    color: colors.accent,
+  },
 ];
 
 export default function MarketScreen() {
   return (
     <Screen>
-      <Text style={styles.title}>Маркет</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Маркет</Text>
+        <Text style={styles.subtitle}>Товары для аллергиков</Text>
+      </View>
+
       <ProfileSwitcher />
-      {items.map((item) => <View key={item.title} style={styles.card}><Text style={styles.name}>{item.title}</Text><Text>{item.why}</Text></View>)}
-      <Text style={styles.disclaimer}>Рекомендации основаны на общих характеристиках товара и не заменяют назначения врача.</Text>
+
+      <View style={styles.banner}>
+        <Ionicons name="star" size={18} color={colors.warning} />
+        <Text style={styles.bannerText}>
+          Подборка на основе вашего профиля аллергии
+        </Text>
+      </View>
+
+      {items.map((item) => (
+        <Pressable
+          key={item.title}
+          style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+          <View style={[styles.cardIcon, { backgroundColor: `${item.color}18` }]}>
+            <Ionicons name={item.icon as any} size={26} color={item.color} />
+          </View>
+          <View style={styles.cardBody}>
+            <View style={styles.cardTop}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <View style={[styles.tag, { backgroundColor: `${item.color}18` }]}>
+                <Text style={[styles.tagText, { color: item.color }]}>{item.tag}</Text>
+              </View>
+            </View>
+            <Text style={styles.cardWhy}>{item.why}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+        </Pressable>
+      ))}
+
+      <Text style={styles.disclaimer}>
+        Рекомендации основаны на общих характеристиках товара и не заменяют назначения врача.
+      </Text>
     </Screen>
   );
 }
-const styles = StyleSheet.create({ title:{fontSize:26,fontWeight:'700',color:colors.forest}, card:{backgroundColor:'#fff',padding:16,borderRadius:16,gap:6}, name:{fontWeight:'700'}, disclaimer:{fontSize:12,color:'#5f6d61'} });
+
+const styles = StyleSheet.create({
+  header: { gap: 3 },
+  title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, color: colors.textSecondary },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFF9E6',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FFE599',
+  },
+  bannerText: { fontSize: 13, color: '#8A6600', fontWeight: '500', flex: 1 },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: colors.card,
+    borderRadius: 18,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  pressed: { opacity: 0.85 },
+  cardIcon: {
+    width: 54,
+    height: 54,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardBody: { flex: 1, gap: 6 },
+  cardTop: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+  tag: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 8 },
+  tagText: { fontSize: 11, fontWeight: '700' },
+  cardWhy: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+  disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+});

@@ -1,0 +1,1 @@
+- [React dedup in pnpm+Expo monorepo](react-dedup-expo-pnpm.md) — npm install at root creates real dirs that break pnpm symlinks; always use pnpm only

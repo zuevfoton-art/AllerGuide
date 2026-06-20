@@ -3,41 +3,98 @@ import { router } from 'expo-router';
 import { useAppStore } from '@/src/store/app-store';
 import { colors } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
+import { Ionicons } from '@expo/vector-icons';
+
+const scenarios = [
+  { key: 'self', label: 'Только для себя', icon: 'person', desc: 'Личный дневник и сканер аллергенов' },
+  { key: 'child', label: 'Только для ребёнка', icon: 'happy', desc: 'Профиль и контроль для вашего ребёнка' },
+  { key: 'both', label: 'Для себя и ребёнка', icon: 'people', desc: 'Несколько профилей в одном приложении' },
+] as const;
 
 export default function OnboardingScreen() {
   const setScenario = useAppStore((s) => s.setScenario);
-  const scenarios = [
-    { key: 'self', label: 'Только для себя' },
-    { key: 'child', label: 'Только для ребёнка' },
-    { key: 'both', label: 'Для себя и ребёнка' },
-  ] as const;
 
   return (
     <Screen>
-      <Text style={styles.brand}>AllerGuide</Text>
-      <Text style={styles.title}>Контроль аллергии, дневник, сканер, маркет и карта мест</Text>
-      <Text style={styles.subtitle}>Выберите сценарий, для кого вы хотите вести записи</Text>
+      <View style={styles.hero}>
+        <View style={styles.logoWrap}>
+          <Ionicons name="leaf" size={36} color="#fff" />
+        </View>
+        <Text style={styles.brand}>AllerGuide</Text>
+        <Text style={styles.tagline}>Ваш умный помощник в контроле аллергии</Text>
+      </View>
+
+      <Text style={styles.sectionLabel}>Для кого ведём записи?</Text>
+
       {scenarios.map((item) => (
         <Pressable
           key={item.key}
-          style={styles.card}
+          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
           onPress={() => {
             setScenario(item.key);
             router.push('/profile-setup');
           }}>
-          <Text style={styles.cardText}>{item.label}</Text>
+          <View style={styles.cardIcon}>
+            <Ionicons name={item.icon as any} size={22} color={colors.accent} />
+          </View>
+          <View style={styles.cardText}>
+            <Text style={styles.cardTitle}>{item.label}</Text>
+            <Text style={styles.cardDesc}>{item.desc}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </Pressable>
       ))}
-      <Text style={styles.disclaimer}>Информация в приложении носит рекомендательный и справочный характер и не заменяет консультацию врача.</Text>
+
+      <Text style={styles.disclaimer}>
+        Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.
+      </Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  brand: { fontSize: 32, fontWeight: '700', color: colors.forest },
-  title: { fontSize: 24, fontWeight: '700', color: colors.forest },
-  subtitle: { fontSize: 16, color: colors.green },
-  card: { backgroundColor: '#fff', padding: 18, borderRadius: 16, borderWidth: 1, borderColor: colors.foam },
-  cardText: { fontSize: 16, fontWeight: '600', color: colors.forest },
-  disclaimer: { marginTop: 20, color: '#4b5d51', fontSize: 13, lineHeight: 18 }
+  hero: { alignItems: 'center', paddingVertical: 24, gap: 10 },
+  logoWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  brand: { fontSize: 32, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+  tagline: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  sectionLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: -4 },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    borderRadius: 18,
+    padding: 16,
+    gap: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardPressed: { opacity: 0.85 },
+  cardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.accentLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardText: { flex: 1, gap: 3 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  cardDesc: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+  disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18, marginTop: 4 },
 });
