@@ -74,11 +74,11 @@ export default function ScannerScreen() {
       }
 
       if (mode === 'menu' && !barcodeMode && text === input && text.includes(',')) {
-        setResult(scanMenuPhoto({ profile }));
+        setResult(await scanMenuPhoto({ profile }));
         return;
       }
 
-      setResult(scanText({ mode, text, profile }));
+      setResult(await scanText({ mode, text, profile }));
     } finally {
       setLoading(false);
       refreshHistory();
@@ -97,7 +97,7 @@ export default function ScannerScreen() {
 
     setLoading(true);
     try {
-      setResult(scanMenuPhoto({ profile }));
+      setResult(await scanMenuPhoto({ profile }));
     } finally {
       setLoading(false);
       refreshHistory();
@@ -124,7 +124,7 @@ export default function ScannerScreen() {
   const handleMenuPhoto = async () => {
     setLoading(true);
     try {
-      setResult(scanMenuPhoto({ profile }));
+      setResult(await scanMenuPhoto({ profile }));
     } finally {
       setLoading(false);
     }

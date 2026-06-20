@@ -1,4 +1,4 @@
-import { runSmartScan, type ScanResult } from '@allerguide/ai';
+import { runSmartScan, type ScanMode, type ScanResult } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
@@ -15,14 +15,16 @@ function getLlmEndpoint(): string | undefined {
 }
 
 async function analyzeText(input: {
-  mode: 'product' | 'menu' | 'medicine';
+  mode: 'product' | 'menu' | 'medicine' | 'cosmetics';
   text: string;
   profile?: Profile | null;
   productName?: string;
   source?: ScanResult['source'];
 }): Promise<ScanResult> {
+  const scanMode = input.mode === 'cosmetics' ? 'product' : input.mode;
   return runSmartScan({
     ...input,
+    mode: scanMode,
     llmEndpoint: getLlmEndpoint(),
   });
 }

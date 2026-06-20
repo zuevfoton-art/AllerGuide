@@ -16,7 +16,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 
 ### Quality checks
 - `pnpm typecheck` — TypeScript across all packages
-- `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
+- `pnpm test` — Vitest in `packages/core`, `packages/ai`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
 
 ### Backend API (optional) — `apps/api`
