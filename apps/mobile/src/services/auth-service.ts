@@ -1,4 +1,6 @@
 import * as Crypto from 'expo-crypto';
+import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import {
   normalizeLogin,
   validateAuthForm,
@@ -25,10 +27,16 @@ async function hashPassword(password: string): Promise<string> {
 
 function setSessionUserId(userId: number) {
   setSetting(AUTH_USER_ID_KEY, String(userId));
+  if (Platform.OS !== 'web') {
+    void SecureStore.setItemAsync(AUTH_USER_ID_KEY, String(userId));
+  }
 }
 
 function clearSessionUserId() {
   setSetting(AUTH_USER_ID_KEY, '');
+  if (Platform.OS !== 'web') {
+    void SecureStore.deleteItemAsync(AUTH_USER_ID_KEY);
+  }
 }
 
 function getSessionUserId(): number | null {
@@ -57,6 +65,10 @@ export function getCurrentUser(): AuthUser | null {
   const db = getDb();
   const row = db.getFirstSync<StoredUser>('SELECT * FROM users WHERE id = ?', [userId]);
   return row ? toAuthUser(row) : null;
+}
+
+export function getCurrentUserId(): number | null {
+  return getSessionUserId();
 }
 
 export async function registerUser(input: {

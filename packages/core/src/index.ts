@@ -4,3 +4,6 @@ export * from './onboarding';
 export * from './auth';
 export * from './emergency-contacts';
 export * from './diary';
+export * from './catalog';
+export * from './diary-stats';
+export * from './sync';
