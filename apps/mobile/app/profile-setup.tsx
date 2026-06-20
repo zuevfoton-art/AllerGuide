@@ -15,6 +15,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
 function validateProfileInput(name: string, birthYear: string, selected: string[]) {
   const trimmedName = name.trim();
@@ -28,15 +29,21 @@ function validateProfileInput(name: string, birthYear: string, selected: string[
   return '';
 }
 
+function needsChildConsent(type: ProfileType, scenario: ReturnType<typeof getStoredScenario>) {
+  return type === 'child' || scenario === 'child';
+}
+
 export default function ProfileSetupScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, tProfileError } = useTranslation();
   const scenario = useAppStore((s) => s.scenario) ?? getStoredScenario();
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
+  const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
   const [, setRefreshKey] = useState(0);
 
@@ -51,18 +58,17 @@ export default function ProfileSetupScreen() {
 
   const title =
     scenario === 'both' && wizardStep === 'child'
-      ? 'Профиль ребёнка'
+      ? t('profileSetup.titleChild')
       : scenario === 'both'
-        ? 'Ваш профиль'
-        : 'Создание профиля';
+        ? t('profileSetup.titleSelf')
+        : t('profileSetup.titleCreate');
 
   const subtitle =
     scenario === 'both' && wizardStep === 'child'
-      ? 'Шаг 2 из 2 — добавьте профиль ребёнка'
+      ? t('profileSetup.subtitleChildStep')
       : scenario === 'both'
-        ? 'Шаг 1 из 2 — создайте свой профиль'
-        : 'Заполните информацию для персонализации';
-
+        ? t('profileSetup.subtitleSelfStep')
+        : t('profileSetup.subtitleDefault');
 
   const resetForm = () => {
     setName('');
@@ -75,7 +81,12 @@ export default function ProfileSetupScreen() {
   const save = async () => {
     const validationError = validateProfileInput(name, birthYear, selected);
     if (validationError) {
-      setError(validationError);
+      setError(tProfileError(validationError));
+      return;
+    }
+
+    if (needsChildConsent(effectiveType, scenario) && !childConsent) {
+      setError(t('profileSetup.errors.consentRequired'));
       return;
     }
 
@@ -116,18 +127,18 @@ export default function ProfileSetupScreen() {
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
 
-      <Text style={styles.label}>Имя</Text>
+      <Text style={styles.label}>{t('profileSetup.nameLabel')}</Text>
       <TextInput
-        placeholder="Введите имя"
+        placeholder={t('profileSetup.namePlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
         value={name}
         onChangeText={setName}
         style={styles.input}
       />
 
-      <Text style={styles.label}>Год рождения</Text>
+      <Text style={styles.label}>{t('profileSetup.birthYearLabel')}</Text>
       <TextInput
-        placeholder="Например, 1990"
+        placeholder={t('profileSetup.birthYearPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
         value={birthYear}
         onChangeText={setBirthYear}
@@ -137,7 +148,7 @@ export default function ProfileSetupScreen() {
 
       {canToggleType ? (
         <>
-          <Text style={styles.label}>Профиль</Text>
+          <Text style={styles.label}>{t('profileSetup.profileLabel')}</Text>
           <View style={styles.toggleRow}>
             <Pressable
               style={[styles.toggleBtn, type === 'self' && styles.toggleActive]}
@@ -147,7 +158,9 @@ export default function ProfileSetupScreen() {
                 size={16}
                 color={type === 'self' ? theme.colors.accent : theme.colors.textSecondary}
               />
-              <Text style={[styles.toggleText, type === 'self' && styles.toggleTextActive]}>Я</Text>
+              <Text style={[styles.toggleText, type === 'self' && styles.toggleTextActive]}>
+                {t('profileSetup.profileSelf')}
+              </Text>
             </Pressable>
             <Pressable
               style={[styles.toggleBtn, type === 'child' && styles.toggleActive]}
@@ -157,7 +170,9 @@ export default function ProfileSetupScreen() {
                 size={16}
                 color={type === 'child' ? theme.colors.accent : theme.colors.textSecondary}
               />
-              <Text style={[styles.toggleText, type === 'child' && styles.toggleTextActive]}>Ребёнок</Text>
+              <Text style={[styles.toggleText, type === 'child' && styles.toggleTextActive]}>
+                {t('profileSetup.profileChild')}
+              </Text>
             </Pressable>
           </View>
         </>
@@ -168,27 +183,38 @@ export default function ProfileSetupScreen() {
             size={16}
             color={theme.colors.accent}
           />
-          <Text style={styles.lockedTypeText}>{lockedType === 'self' ? 'Ваш профиль' : 'Профиль ребёнка'}</Text>
+          <Text style={styles.lockedTypeText}>
+            {lockedType === 'self' ? t('profileSetup.profileSelfLocked') : t('profileSetup.profileChildLocked')}
+          </Text>
         </View>
       )}
 
-      <Text style={styles.label}>Аллергены</Text>
+      <Text style={styles.label}>{t('profileSetup.allergensLabel')}</Text>
       <AllergenPicker selected={selected} onChange={setSelected} />
 
-      <Text style={styles.label}>Экстренные контакты</Text>
+      {needsChildConsent(effectiveType, scenario) ? (
+        <Pressable style={styles.consentRow} onPress={() => setChildConsent((v) => !v)}>
+          <Ionicons
+            name={childConsent ? 'checkbox' : 'square-outline'}
+            size={22}
+            color={theme.colors.accent}
+          />
+          <Text style={styles.consentText}>{t('profileSetup.consent')}</Text>
+        </Pressable>
+      ) : null}
+
+      <Text style={styles.label}>{t('profileSetup.contactsLabel')}</Text>
       <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Pressable style={styles.button} onPress={save}>
         <Text style={styles.buttonText}>
-          {scenario === 'both' && wizardStep === 'self' ? 'Далее: профиль ребёнка' : 'Сохранить профиль'}
+          {scenario === 'both' && wizardStep === 'self' ? t('profileSetup.nextChild') : t('profileSetup.saveProfile')}
         </Text>
       </Pressable>
 
-      <Text style={styles.disclaimer}>
-        Профиль используется для персонализации сканера, дневника, отчётов и рекомендаций.
-      </Text>
+      <Text style={styles.disclaimer}>{t('profileSetup.disclaimer')}</Text>
     </Screen>
   );
 }
@@ -242,6 +268,8 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.accentMid,
     },
     lockedTypeText: { fontSize: 15, fontWeight: '600', color: colors.accent },
+    consentRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+    consentText: { flex: 1, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     button: {
       backgroundColor: colors.accent,
       padding: 17,

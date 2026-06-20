@@ -8,24 +8,33 @@ import { formatDiaryDate, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
+import { GlassCard } from '@/src/components/GlassCard';
+import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeScanResult } from '@/src/i18n/translate';
 import { scanBarcode, scanMenuPhoto, scanText } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 
 const MODES = [
-  { key: 'product', label: 'Продукт', icon: 'nutrition' },
-  { key: 'menu', label: 'Меню', icon: 'restaurant' },
-  { key: 'medicine', label: 'Лекарство', icon: 'medkit' },
+  { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
+  { key: 'menu', labelKey: 'scanner.menu', icon: 'restaurant' },
+  { key: 'medicine', labelKey: 'scanner.medicine', icon: 'medkit' },
+  { key: 'cosmetics', labelKey: 'scanner.cosmetics', icon: 'flask' },
 ] as const;
 
 export default function ScannerScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const glass = useGlassStyles();
+  const { t, content } = useTranslation();
+  const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('молоко, арахис, сахар');
-  const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');
+  const [mode, setMode] = useState<'product' | 'menu' | 'medicine' | 'cosmetics'>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,8 +42,13 @@ export default function ScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
+  const displayResult = useMemo(
+    () => (result ? localizeScanResult(result, localeContent) : null),
+    [result, localeContent],
+  );
+
   const isDanger =
-    result != null && (result.matches.length > 0 || (result.crossMatches?.length ?? 0) > 0);
+    displayResult != null && (displayResult.matches.length > 0 || (displayResult.crossMatches?.length ?? 0) > 0);
 
   const refreshHistory = useCallback(() => {
     if (!activeProfileId) {
@@ -132,7 +146,7 @@ export default function ScannerScreen() {
               <Ionicons name="close" size={24} color={theme.colors.onAccent} />
             </Pressable>
             <Text style={styles.cameraTitle}>
-              {mode === 'product' ? 'Сканируйте штрихкод' : 'Наведите на текст меню'}
+              {mode === 'product' ? t('scanner.cameraScanBarcode') : t('scanner.cameraScanMenu')}
             </Text>
             <View style={{ width: 40 }} />
           </View>
@@ -145,9 +159,7 @@ export default function ScannerScreen() {
               <View style={[styles.corner, styles.cornerBR]} />
             </View>
             <Text style={styles.viewfinderHint}>
-              {mode === 'product'
-                ? 'Штрихкод будет проверен через Open Food Facts'
-                : 'Демо: нажмите кнопку ниже для анализа типичного меню'}
+              {mode === 'product' ? t('scanner.cameraBarcodeHint') : t('scanner.cameraMenuHint')}
             </Text>
           </View>
 
@@ -156,7 +168,7 @@ export default function ScannerScreen() {
               {loading ? (
                 <ActivityIndicator color={theme.colors.onAccent} />
               ) : (
-                <Text style={styles.menuScanBtnText}>Проанализировать меню</Text>
+                <Text style={styles.menuScanBtnText}>{t('scanner.analyzeMenu')}</Text>
               )}
             </Pressable>
           ) : null}
@@ -164,14 +176,12 @@ export default function ScannerScreen() {
           {Platform.OS === 'web' && (
             <View style={styles.webHint}>
               <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.7)" />
-              <Text style={styles.webHintText}>
-                Сканирование штрихкодов доступно в мобильном приложении
-              </Text>
+              <Text style={styles.webHintText}>{t('scanner.barcodeWebHint')}</Text>
             </View>
           )}
 
           <Pressable style={styles.cancelBtn} onPress={() => setCameraOpen(false)}>
-            <Text style={styles.cancelBtnText}>Отмена</Text>
+            <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
           </Pressable>
         </View>
       </View>
@@ -180,34 +190,35 @@ export default function ScannerScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Умный сканер</Text>
-          <Text style={styles.subtitle}>Open Food Facts + проверка аллергенов</Text>
-        </View>
-        <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
-          <Ionicons name="camera" size={22} color={theme.colors.accent} />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title={t('scanner.title')}
+        subtitle={t('scanner.subtitle')}
+        right={
+          <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
+            <Ionicons name="camera" size={22} color={theme.colors.teal} />
+          </Pressable>
+        }
+      />
 
       <ProfileSwitcher />
 
-      <View style={styles.modeRow}>
+      <View style={glass.toggleRow}>
         {MODES.map((m) => (
           <Pressable
             key={m.key}
-            style={[styles.modeBtn, mode === m.key && styles.modeBtnActive]}
+            style={[glass.toggle, mode === m.key && glass.toggleActive]}
             onPress={() => setMode(m.key)}>
             <Ionicons
               name={m.icon as any}
               size={18}
-              color={mode === m.key ? theme.colors.accent : theme.colors.textMuted}
+              color={mode === m.key ? theme.colors.teal : theme.colors.textMuted}
             />
-            <Text style={[styles.modeText, mode === m.key && styles.modeTextActive]}>{m.label}</Text>
+            <Text style={[glass.toggleText, mode === m.key && glass.toggleTextActive]}>{t(m.labelKey)}</Text>
           </Pressable>
         ))}
       </View>
 
+      <GlassCard>
       <Pressable
         style={styles.scanBanner}
         onPress={() => {
@@ -218,22 +229,23 @@ export default function ScannerScreen() {
           void openCamera();
         }}>
         <View style={styles.scanBannerIcon}>
-          <Ionicons name={mode === 'product' ? 'barcode' : 'restaurant'} size={26} color={theme.colors.accent} />
+          <Ionicons name={mode === 'product' ? 'barcode' : 'restaurant'} size={26} color={theme.colors.teal} />
         </View>
         <View style={styles.scanBannerText}>
           <Text style={styles.scanBannerTitle}>
-            {mode === 'product' ? 'Сканировать штрихкод' : 'Снять меню на фото'}
+            {mode === 'product' ? t('scanner.scanBarcode') : t('scanner.scanMenu')}
           </Text>
           <Text style={styles.scanBannerDesc}>
-            {mode === 'product' ? 'Поиск состава в Open Food Facts' : 'Демо-анализ типичного меню'}
+            {mode === 'product' ? t('scanner.scanBarcodeDesc') : t('scanner.scanMenuDesc')}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </Pressable>
+      </GlassCard>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>или введите вручную</Text>
+        <Text style={styles.dividerText}>{t('scanner.manualDivider')}</Text>
         <View style={styles.dividerLine} />
       </View>
 
@@ -242,11 +254,7 @@ export default function ScannerScreen() {
         <TextInput
           value={input}
           onChangeText={setInput}
-          placeholder={
-            mode === 'product'
-              ? 'Штрихкод или состав продукта...'
-              : 'Введите состав блюда или меню...'
-          }
+          placeholder={mode === 'product' ? t('scanner.productPlaceholder') : t('scanner.menuPlaceholder')}
           placeholderTextColor={theme.colors.textMuted}
           multiline
           style={styles.input}
@@ -254,7 +262,7 @@ export default function ScannerScreen() {
       </View>
 
       <Pressable
-        style={styles.button}
+        style={glass.primaryBtn}
         disabled={loading}
         onPress={() => {
           const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
@@ -263,14 +271,11 @@ export default function ScannerScreen() {
         {loading ? (
           <ActivityIndicator color={theme.colors.onAccent} />
         ) : (
-          <>
-            <Ionicons name="search" size={18} color={theme.colors.onAccent} />
-            <Text style={styles.buttonText}>Проверить</Text>
-          </>
+          <Text style={glass.primaryBtnText}>{t('scanner.check')}</Text>
         )}
       </Pressable>
 
-      {result && (
+      {displayResult && (
         <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
           <View style={styles.resultHeader}>
             <View style={[styles.resultIcon, isDanger ? styles.resultIconDanger : styles.resultIconSafe]}>
@@ -282,34 +287,38 @@ export default function ScannerScreen() {
             </View>
             <View style={styles.resultText}>
               <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
-                {result.verdict}
+                {displayResult.verdict}
               </Text>
-              {result.productName ? (
-                <Text style={styles.productName}>{result.productName}</Text>
+              {displayResult.productName ? (
+                <Text style={styles.productName}>{displayResult.productName}</Text>
               ) : null}
             </View>
           </View>
-          <Text style={styles.reason}>{result.reason}</Text>
-          {result.matches?.length > 0 && (
+          <Text style={styles.reason}>{displayResult.reason}</Text>
+          {displayResult.matches?.length > 0 && (
             <View style={styles.matchesBadge}>
               <Ionicons name="alert-circle" size={13} color={theme.colors.danger} />
-              <Text style={styles.matchesText}>Совпадения: {result.matches.join(', ')}</Text>
+              <Text style={styles.matchesText}>
+                {t('scanner.matches')} {displayResult.matches.join(', ')}
+              </Text>
             </View>
           )}
-          {(result.crossMatches?.length ?? 0) > 0 && (
+          {(displayResult.crossMatches?.length ?? 0) > 0 && (
             <View style={styles.crossBadge}>
               <Ionicons name="git-network-outline" size={13} color={theme.colors.warning} />
-              <Text style={styles.crossText}>Перекрёстные: {result.crossMatches.join(', ')}</Text>
+              <Text style={styles.crossText}>
+                {t('scanner.crossMatches')} {displayResult.crossMatches.join(', ')}
+              </Text>
             </View>
           )}
-          {result.source ? (
+          {displayResult.source ? (
             <Text style={styles.sourceMeta}>
-              Источник:{' '}
-              {result.source === 'openfoodfacts'
-                ? 'Open Food Facts'
-                : result.source === 'barcode'
-                  ? 'штрихкод'
-                  : 'ручной ввод'}
+              {t('scanner.source')}{' '}
+              {displayResult.source === 'openfoodfacts'
+                ? t('scanner.sourceOpenFoodFacts')
+                : displayResult.source === 'barcode'
+                  ? t('scanner.sourceBarcode')
+                  : t('scanner.sourceManual')}
             </Text>
           ) : null}
         </View>
@@ -317,71 +326,53 @@ export default function ScannerScreen() {
 
       {history.length > 0 ? (
         <>
-          <Text style={styles.historyLabel}>История сканирований</Text>
-          {history.map((item) => (
-            <View key={item.id} style={styles.historyCard}>
-              <Text style={styles.historyTitle}>{item.productName || item.verdict}</Text>
-              <Text style={styles.historyMeta}>
-                {formatDiaryDate(item.createdAt)} · {item.source}
-              </Text>
+          <Text style={glass.sectionLabel}>{t('scanner.history')}</Text>
+          <GlassCard padded={false}>
+          {history.map((item, index) => (
+            <View
+              key={item.id}
+              style={[glass.feedRow, index < history.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border }]}>
+              <View style={glass.feedBody}>
+                <Text style={glass.feedTitle}>{item.productName || item.verdict}</Text>
+                <Text style={glass.feedSub}>
+                  {formatDiaryDate(item.createdAt)} · {item.source}
+                </Text>
+              </View>
             </View>
           ))}
+          </GlassCard>
         </>
       ) : null}
 
-      <Text style={styles.disclaimer}>
-        Результат носит предварительный характер и не исключает индивидуальной реакции.
-      </Text>
+      <Text style={glass.disclaimer}>{t('scanner.disclaimer')}</Text>
     </Screen>
   );
 }
 
 function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-    title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
-    subtitle: { fontSize: 14, color: colors.textSecondary },
     cameraIconBtn: {
       width: 44,
       height: 44,
       borderRadius: 12,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.tealLight,
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 4,
-    },
-    modeRow: { flexDirection: 'row', gap: 8 },
-    modeBtn: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      paddingVertical: 11,
-      borderRadius: 14,
-      backgroundColor: colors.card,
-      borderWidth: 1.5,
+      borderWidth: 1,
       borderColor: colors.border,
+      ...(shadows.glass as object),
     },
-    modeBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
-    modeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    modeTextActive: { color: colors.accent },
     scanBanner: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: 16,
-      borderWidth: 1.5,
-      borderColor: colors.accentMid,
-      ...(shadows.sm as object),
     },
     scanBannerIcon: {
       width: 50,
       height: 50,
       borderRadius: 14,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.tealLight,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -403,17 +394,6 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     inputIcon: { marginBottom: 6 },
     input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
-    button: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      backgroundColor: colors.accent,
-      padding: 16,
-      borderRadius: 16,
-      ...(shadows.accent as object),
-    },
-    buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
     resultCard: { borderRadius: 18, padding: 16, gap: 10, borderWidth: 1.5 },
     resultSafe: { backgroundColor: colors.successLight, borderColor: colors.scannerSafeBorder },
     resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.scannerDangerBorder },
@@ -455,25 +435,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       alignSelf: 'flex-start',
     },
     crossText: { fontSize: 13, color: colors.warningText, fontWeight: '600' },
-    historyLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-    },
-    historyCard: {
-      backgroundColor: colors.card,
-      borderRadius: 14,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: 4,
-    },
-    historyTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
-    historyMeta: { fontSize: 12, color: colors.textMuted },
     sourceMeta: { fontSize: 12, color: colors.textMuted },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
     cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,
@@ -498,7 +460,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     cameraTitle: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
     viewfinderWrap: { alignItems: 'center', gap: 20 },
     viewfinder: { width: 260, height: 180, position: 'relative' },
-    corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.accent, borderWidth: 3 },
+    corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.teal, borderWidth: 3 },
     cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
     cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
     cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
@@ -512,7 +474,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     menuScanBtn: {
       marginHorizontal: 24,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.teal,
       borderRadius: 16,
       padding: 16,
       alignItems: 'center',

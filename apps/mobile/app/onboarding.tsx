@@ -5,18 +5,21 @@ import { useAppStore } from '@/src/store/app-store';
 import { setStoredScenario } from '@/src/services/settings-service';
 import type { Scenario } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { GlassCard } from '@/src/components/GlassCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
-const scenarios = [
-  { key: 'self', label: 'Только для себя', icon: 'person', desc: 'Личный дневник и сканер аллергенов' },
-  { key: 'child', label: 'Только для ребёнка', icon: 'happy', desc: 'Профиль и контроль для вашего ребёнка' },
-  { key: 'both', label: 'Для себя и ребёнка', icon: 'people', desc: 'Несколько профилей в одном приложении' },
+const SCENARIO_KEYS = [
+  { key: 'self', labelKey: 'onboarding.self', descKey: 'onboarding.selfDesc', icon: 'person' },
+  { key: 'child', labelKey: 'onboarding.child', descKey: 'onboarding.childDesc', icon: 'happy' },
+  { key: 'both', labelKey: 'onboarding.both', descKey: 'onboarding.bothDesc', icon: 'people' },
 ] as const;
 
 export default function OnboardingScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
   const setScenario = useAppStore((s) => s.setScenario);
 
   return (
@@ -26,34 +29,33 @@ export default function OnboardingScreen() {
           <Ionicons name="leaf" size={36} color={theme.colors.onAccent} />
         </View>
         <Text style={styles.brand}>AllerGuide</Text>
-        <Text style={styles.tagline}>Ваш умный помощник в контроле аллергии</Text>
+        <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
       </View>
 
-      <Text style={styles.sectionLabel}>Для кого ведём записи?</Text>
+      <Text style={styles.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
 
-      {scenarios.map((item) => (
+      {SCENARIO_KEYS.map((item) => (
         <Pressable
           key={item.key}
-          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
           onPress={() => {
             setScenario(item.key as Scenario);
             setStoredScenario(item.key as Scenario);
             router.push('/profile-setup');
           }}>
-          <View style={styles.cardIcon}>
-            <Ionicons name={item.icon as 'person'} size={22} color={theme.colors.accent} />
-          </View>
-          <View style={styles.cardText}>
-            <Text style={styles.cardTitle}>{item.label}</Text>
-            <Text style={styles.cardDesc}>{item.desc}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          <GlassCard style={styles.card}>
+            <View style={styles.cardIcon}>
+              <Ionicons name={item.icon as 'person'} size={22} color={theme.colors.teal} />
+            </View>
+            <View style={styles.cardText}>
+              <Text style={styles.cardTitle}>{t(item.labelKey)}</Text>
+              <Text style={styles.cardDesc}>{t(item.descKey)}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+          </GlassCard>
         </Pressable>
       ))}
 
-      <Text style={styles.disclaimer}>
-        Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.
-      </Text>
+      <Text style={styles.disclaimer}>{t('onboarding.disclaimer')}</Text>
     </Screen>
   );
 }
@@ -65,11 +67,11 @@ function createStyles({ colors, shadows }: AppTheme) {
       width: 72,
       height: 72,
       borderRadius: 20,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.teal,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 4,
-      ...(shadows.accentLg as object),
+      ...(shadows.glass as object),
     },
     brand: { fontSize: 32, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     tagline: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
@@ -84,18 +86,14 @@ function createStyles({ colors, shadows }: AppTheme) {
     card: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: 16,
       gap: 14,
-      ...(shadows.sm as object),
+      marginBottom: 0,
     },
-    cardPressed: { opacity: 0.85 },
     cardIcon: {
       width: 44,
       height: 44,
       borderRadius: 12,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.tealLight,
       alignItems: 'center',
       justifyContent: 'center',
     },

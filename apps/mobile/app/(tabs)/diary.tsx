@@ -1,4 +1,5 @@
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DIARY_SECTIONS,
@@ -10,16 +11,20 @@ import {
 import {
   addDiaryEntries,
   deleteDiaryEntry,
-  generateDoctorPdf,
   getDiaryEntries,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
+import { GlassCard } from '@/src/components/GlassCard';
+import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 
 const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colors'] }> = {
@@ -28,6 +33,9 @@ const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colo
   Питание: { icon: 'restaurant', colorKey: 'accent' },
   Триггер: { icon: 'warning', colorKey: 'warning' },
   Кожа: { icon: 'body', colorKey: 'pink' },
+  Пикфлоуметрия: { icon: 'speedometer', colorKey: 'success' },
+  АСИТ: { icon: 'fitness', colorKey: 'forest' },
+  'Визит к врачу': { icon: 'calendar', colorKey: 'purple' },
   Заметка: { icon: 'create', colorKey: 'success' },
 };
 
@@ -39,6 +47,13 @@ type EditorState =
 export default function DiaryScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const glass = useGlassStyles();
+  const { t, locale, content } = useTranslation();
+  const localeContent = content();
+  const localizedSections = useMemo(
+    () => localizeDiarySections(locale, localeContent),
+    [locale, localeContent],
+  );
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
@@ -68,18 +83,22 @@ export default function DiaryScreen() {
   };
 
   const confirmDelete = (entry: DiaryEntry) => {
-    Alert.alert('Удалить запись?', `Запись «${entry.type}» будет удалена без возможности восстановления.`, [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Удалить',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteDiaryEntry(entry.id);
-          closeEditor();
-          await load();
+    Alert.alert(
+      t('diary.deleteTitle'),
+      t('diary.deleteMessage', { type: localizeDiaryType(entry.type, localeContent) }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteDiaryEntry(entry.id);
+            closeEditor();
+            await load();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const openEdit = (entry: DiaryEntry) => {
@@ -106,11 +125,17 @@ export default function DiaryScreen() {
     }
 
     if (editor.mode === 'full') {
-      return <DiaryWizard onCancel={closeEditor} onComplete={(entries) => void handleCreate(entries)} />;
+      return (
+        <DiaryWizard
+          sections={localizedSections}
+          onCancel={closeEditor}
+          onComplete={(entries) => void handleCreate(entries)}
+        />
+      );
     }
 
     const sectionType = editor.mode === 'section' ? editor.sectionType : editor.entry.type;
-    const section = getDiarySection(sectionType);
+    const section = localizedSections.find((s) => s.type === sectionType) ?? getDiarySection(sectionType);
     if (!section) return null;
 
     const initialAnswers = editor.mode === 'edit' ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details) : null;
@@ -120,7 +145,7 @@ export default function DiaryScreen() {
         sections={[section]}
         initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
         allowSkipSection={false}
-        submitLabel={editor.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
+        submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
         onCancel={closeEditor}
         onComplete={(entries) => {
           const [entry] = entries;
@@ -138,24 +163,20 @@ export default function DiaryScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Text style={styles.title}>Дневник</Text>
-        <Text style={styles.subtitle}>Пошаговые записи наблюдений</Text>
-      </View>
+      <ScreenHeader title={t('diary.title')} subtitle={t('diary.subtitle')} />
 
       <ProfileSwitcher />
 
       {!editor ? (
         <>
-          <Pressable style={styles.startBtn} onPress={() => setEditor({ mode: 'full' })}>
-            <Ionicons name="add-circle" size={20} color={theme.colors.onAccent} />
-            <Text style={styles.startBtnText}>Новая запись по шагам</Text>
+          <Pressable style={glass.primaryBtn} onPress={() => setEditor({ mode: 'full' })}>
+            <Text style={glass.primaryBtnText}>{t('diary.newEntry')}</Text>
           </Pressable>
 
           <View style={styles.quickAddBlock}>
-            <Text style={styles.sectionLabel}>Быстрое добавление</Text>
+            <Text style={glass.sectionLabel}>{t('diary.quickAdd')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickAddRow}>
-              {DIARY_SECTIONS.map((section) => {
+              {localizedSections.map((section) => {
                 const cfg = TYPE_CONFIG[section.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
                 const color = theme.colors[cfg.colorKey];
                 return (
@@ -176,47 +197,46 @@ export default function DiaryScreen() {
       )}
 
       <View style={styles.row}>
-        <Pressable style={styles.secondaryBtn} onPress={() => void load()}>
-          <Ionicons name="refresh" size={16} color={theme.colors.accent} />
-          <Text style={styles.secondaryText}>Обновить</Text>
+        <Pressable style={glass.secondaryBtn} onPress={() => void load()}>
+          <Ionicons name="refresh" size={16} color={theme.colors.teal} />
+          <Text style={glass.secondaryBtnText}>{t('diary.refresh')}</Text>
         </Pressable>
-        <Pressable
-          style={styles.secondaryBtn}
-          onPress={() => activeProfileId && generateDoctorPdf(activeProfileId)}>
-          <Ionicons name="document-text" size={16} color={theme.colors.accent} />
-          <Text style={styles.secondaryText}>PDF-отчёт</Text>
+        <Pressable style={glass.secondaryBtn} onPress={() => router.push('/doctor-report' as any)}>
+          <Ionicons name="document-text" size={16} color={theme.colors.teal} />
+          <Text style={glass.secondaryBtnText}>{t('diary.doctorReport')}</Text>
         </Pressable>
       </View>
 
       {list.length > 0 ? (
         <>
-          <Text style={styles.sectionLabel}>История записей</Text>
-          {list.map((item) => {
+          <Text style={glass.sectionLabel}>{t('diary.history')}</Text>
+          <GlassCard padded={false}>
+          {list.map((item, index) => {
             const cfg = TYPE_CONFIG[item.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
             const color = theme.colors[cfg.colorKey];
             const summary = formatDiaryEntrySummary(item.type, item.details);
             return (
-              <Pressable key={item.id} style={styles.card} onPress={() => openEdit(item)}>
-                <View style={[styles.cardDot, { backgroundColor: `${color}18` }]}>
+              <Pressable
+                key={item.id}
+                style={[glass.feedRow, index < list.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border }]}
+                onPress={() => openEdit(item)}>
+                <View style={[glass.feedIcon, { backgroundColor: `${color}18` }]}>
                   <Ionicons name={cfg.icon as any} size={16} color={color} />
                 </View>
-                <View style={styles.cardBody}>
-                  <View style={styles.cardTopRow}>
-                    <Text style={styles.cardType}>{item.type}</Text>
-                    <Ionicons name="create-outline" size={16} color={theme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.cardDetails}>{summary}</Text>
+                <View style={glass.feedBody}>
+                  <Text style={glass.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
+                  <Text style={glass.feedSub}>{summary}</Text>
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
+                <Ionicons name="create-outline" size={16} color={theme.colors.textMuted} />
               </Pressable>
             );
           })}
+          </GlassCard>
         </>
       ) : null}
 
-      <Text style={styles.disclaimer}>
-        Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.
-      </Text>
+      <Text style={glass.disclaimer}>{t('diary.disclaimer')}</Text>
     </Screen>
   );
 }
@@ -227,22 +247,8 @@ function entryDetailsText(entry: DiaryEntry): string {
   return entry.details.trim();
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors }: AppTheme) {
   return StyleSheet.create({
-    header: { gap: 3 },
-    title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
-    subtitle: { fontSize: 14, color: colors.textSecondary },
-    startBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      backgroundColor: colors.accent,
-      padding: 16,
-      borderRadius: 16,
-      ...(shadows.accent as object),
-    },
-    startBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
     quickAddBlock: { gap: 8 },
     quickAddRow: { gap: 8, paddingRight: 4 },
     quickChip: {
@@ -255,49 +261,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderWidth: 1.5,
     },
     quickChipText: { fontSize: 13, fontWeight: '700' },
-    sectionLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-    },
     row: { flexDirection: 'row', gap: 10 },
-    secondaryBtn: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      backgroundColor: colors.accentLight,
-      padding: 13,
-      borderRadius: 14,
-      borderWidth: 1.5,
-      borderColor: colors.accentMid,
-    },
-    secondaryText: { color: colors.accent, fontWeight: '600', fontSize: 14 },
-    card: {
-      flexDirection: 'row',
-      gap: 12,
-      backgroundColor: colors.card,
-      padding: 14,
-      borderRadius: 16,
-      alignItems: 'flex-start',
-      ...(shadows.xs as object),
-    },
-    cardDot: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 2,
-    },
-    cardBody: { flex: 1, gap: 4 },
-    cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-    cardType: { fontSize: 14, fontWeight: '700', color: colors.text },
-    cardDetails: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-    cardMeta: { fontSize: 11, color: colors.textMuted },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+    cardMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   });
 }

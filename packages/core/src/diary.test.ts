@@ -12,7 +12,7 @@ import {
 
 describe('diary schema', () => {
   it('defines sequential steps for each diary section', () => {
-    expect(DIARY_SECTIONS).toHaveLength(6);
+    expect(DIARY_SECTIONS).toHaveLength(9);
     for (const section of DIARY_SECTIONS) {
       expect(section.steps.length).toBeGreaterThanOrEqual(2);
     }

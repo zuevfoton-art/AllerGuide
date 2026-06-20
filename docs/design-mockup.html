@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — UI Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f8f6;
+      --bg-2: #edf7f2;
+      --bg-3: #f0f4ff;
+      --glass: rgba(255, 255, 255, 0.78);
+      --glass-strong: rgba(255, 255, 255, 0.92);
+      --card: #ffffff;
+      --accent: #ff6b00;
+      --accent-light: #fff6f0;
+      --accent-mid: #ffd4b0;
+      --teal: #2ec4a0;
+      --teal-light: rgba(46, 196, 160, 0.14);
+      --text: #1a1f1c;
+      --text-secondary: #5c6560;
+      --text-muted: #9aa39e;
+      --border: rgba(31, 77, 58, 0.08);
+      --success: #2ec4a0;
+      --success-light: #e8f9f3;
+      --danger: #ff3b30;
+      --danger-light: #fff0ef;
+      --warning: #ff9500;
+      --warning-light: #fff8ee;
+      --purple: #6b68e8;
+      --purple-light: #f3f2ff;
+      --tip-bg: #f3f2ff;
+      --tip-border: #d8d6f5;
+      --forest: #1f4d3a;
+      --mint: #d4f0e4;
+      --foam: #edf7f2;
+      --surface: #eef3f0;
+      --shadow: 0 8px 32px rgba(31, 77, 58, 0.06);
+      --phone-shadow: 0 24px 80px rgba(31, 77, 58, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    [data-theme='dark'] {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --accent: #ff8a3d;
+      --accent-light: #2a1608;
+      --accent-mid: #4a280f;
+      --text: #ffffff;
+      --text-secondary: #aeaeb2;
+      --text-muted: #636366;
+      --border: #38383a;
+      --success: #30d158;
+      --success-light: #102817;
+      --danger: #ff453a;
+      --danger-light: #3d1512;
+      --warning: #ff9f0a;
+      --warning-light: #3d2e10;
+      --purple: #5e5ce6;
+      --purple-light: #1c1b33;
+      --tip-bg: #1e1b33;
+      --tip-border: #3a3566;
+      --forest: #7fd4a8;
+      --mint: #1a2e24;
+      --foam: #142018;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --phone-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(212, 240, 228, 0.9), transparent 42%),
+        radial-gradient(circle at 90% 0%, rgba(240, 244, 255, 0.95), transparent 38%),
+        linear-gradient(180deg, #f7fbf9 0%, #f4f8f6 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 20px 48px;
+    }
+
+    [data-theme='dark'] body,
+    body[data-theme-shell='dark'] {
+      background: linear-gradient(135deg, #0d1f17 0%, #000 45%, #1a1008 100%);
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .page { grid-template-columns: 1fr; }
+      .sidebar { order: 2; }
+    }
+
+    .sidebar h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar p {
+      color: var(--text-secondary);
+      line-height: 1.5;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .screen-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .legend {
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .legend strong { color: var(--text); }
+
+    .device-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      background:
+        radial-gradient(circle at 85% 8%, rgba(212, 240, 228, 0.55), transparent 34%),
+        radial-gradient(circle at 10% 18%, rgba(240, 244, 255, 0.65), transparent 30%),
+        linear-gradient(165deg, #f7fbf9 0%, #f4f8f6 55%, #fafcff 100%);
+      border-radius: 44px;
+      box-shadow: var(--phone-shadow);
+      border: 10px solid #eef2f0;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .phone::before,
+    .phone::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .phone::before {
+      width: 180px;
+      height: 180px;
+      top: 60px;
+      right: -40px;
+      background: rgba(212, 240, 228, 0.45);
+    }
+
+    .phone::after {
+      width: 140px;
+      height: 140px;
+      top: 220px;
+      left: -50px;
+      background: rgba(237, 247, 242, 0.8);
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 126px;
+      height: 32px;
+      background: #eef2f0;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      z-index: 20;
+    }
+
+    .status-bar {
+      height: 44px;
+      padding: 12px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      z-index: 10;
+    }
+
+    .screen {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 16px 100px;
+      display: none;
+      scrollbar-width: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .screen.active { display: block; }
+    .screen::-webkit-scrollbar { display: none; }
+
+    .screen-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .screen-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--glass-strong);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(170%);
+      -webkit-backdrop-filter: blur(20px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.88);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .row { display: flex; align-items: center; gap: 12px; }
+    .between { justify-content: space-between; }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--accent-light);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--glass-strong);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .chip.teal { border-color: rgba(46, 196, 160, 0.35); background: var(--teal-light); color: var(--forest); }
+
+    .select-card {
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .select-card.active {
+      border-color: rgba(46, 196, 160, 0.45);
+      background: var(--teal-light);
+    }
+
+    .primary-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--teal) 0%, #3dd6a8 100%);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 8px;
+      box-shadow: 0 8px 24px rgba(46, 196, 160, 0.25);
+    }
+
+    .secondary-btn {
+      width: 100%;
+      background: var(--glass-strong);
+      color: var(--forest);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .input {
+      width: 100%;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 16px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .toggle {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--glass-strong);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-secondary);
+      box-shadow: var(--shadow);
+    }
+
+    .toggle.active {
+      border-color: rgba(46, 196, 160, 0.45);
+      background: var(--teal-light);
+      color: var(--forest);
+    }
+
+    .hero-logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--teal) 0%, #7fd4a8 100%);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      margin: 12px auto;
+      box-shadow: 0 12px 28px rgba(46, 196, 160, 0.28);
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+    }
+
+    .progress-dot.active {
+      width: 22px;
+      background: var(--teal);
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .list-row:last-child { border-bottom: none; }
+
+    .chevron { color: var(--text-muted); font-size: 18px; }
+
+    .sos-hero {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 107, 100, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px;
+      text-align: center;
+      margin: 12px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .sos-btn {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ff5a4f, #ff3b30);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      margin: 16px auto;
+      font-size: 26px;
+      font-weight: 900;
+      box-shadow: 0 16px 40px rgba(255, 59, 48, 0.28);
+    }
+
+    .map-placeholder {
+      height: 160px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, var(--teal-light), var(--glass-strong));
+      display: grid;
+      place-items: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .scanner-preview {
+      height: 120px;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(46, 196, 160, 0.45);
+      background: var(--teal-light);
+      display: grid;
+      place-items: center;
+      color: var(--forest);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .streak-card {
+      background: linear-gradient(135deg, #fff6ee 0%, var(--glass-strong) 100%);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .action-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      min-height: 108px;
+      box-shadow: var(--shadow);
+    }
+
+    .action-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .action-label { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .action-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .stat-num { font-size: 22px; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .primary-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1.5px solid var(--accent-mid);
+      border-radius: var(--radius-md);
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin: 12px 0 6px;
+    }
+
+    .input {
+      width: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .toggle {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .toggle.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .result-safe {
+      border: 1.5px solid #a8e6be;
+      background: #e8f9ed;
+      color: #1a7a3c;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .result-danger {
+      border: 1.5px solid #ffb3ae;
+      background: #ffebea;
+      color: #c41e12;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    [data-theme='dark'] .result-safe {
+      background: var(--success-light);
+      border-color: #1f5c34;
+      color: var(--success);
+    }
+
+    [data-theme='dark'] .result-danger {
+      background: var(--danger-light);
+      border-color: #7a2018;
+      color: var(--danger);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-demo { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning); }
+    .badge-high { background: var(--success-light); color: var(--success); }
+    .badge-danger { background: var(--danger-light); color: var(--danger); }
+
+    .tabbar {
+      position: absolute;
+      bottom: 14px;
+      left: 16px;
+      right: 16px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 28px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      padding: 8px 6px 10px;
+      z-index: 15;
+      box-shadow: var(--shadow);
+    }
+
+    .tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .tab.active { color: var(--teal); }
+    .tab.sos.active { color: var(--danger); }
+    .tab-icon { font-size: 20px; line-height: 1; }
+
+    .sos-hero {
+      background: linear-gradient(180deg, var(--danger-light), var(--card));
+      border: 1.5px solid var(--danger);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px;
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .sos-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      margin: 16px auto;
+      font-size: 28px;
+      font-weight: 900;
+      box-shadow: 0 12px 32px rgba(255, 59, 48, 0.35);
+    }
+
+    .disclaimer {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+      margin-top: 16px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 16px 0 8px;
+    }
+
+    .map-placeholder {
+      height: 160px;
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border);
+      background: linear-gradient(135deg, var(--success-light), var(--card));
+      display: grid;
+      place-items: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .list-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .list-item:last-child { border-bottom: none; }
+
+    .dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .hero-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      margin: 12px auto;
+      box-shadow: 0 10px 24px rgba(255, 107, 0, 0.35);
+    }
+
+    .hidden-tabbar .tabbar { display: none; }
+    .hidden-tabbar .screen { padding-bottom: 24px; }
+    .wellness-card {
+      background: linear-gradient(160deg, var(--foam) 0%, var(--card) 55%);
+      border: 1.5px solid var(--mint);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .wellness-head {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .score-ring {
+      --score: 68;
+      --score-color: var(--warning);
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: conic-gradient(var(--score-color) calc(var(--score) * 1%), var(--border) 0);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .score-ring::before {
+      content: '';
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: var(--card);
+      position: absolute;
+    }
+
+    .score-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .score-num {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .score-of {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .wellness-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .wellness-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .wellness-updated {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .factor-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .factor {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .factor-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .factor-body { flex: 1; min-width: 0; }
+
+    .factor-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .factor-value {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .factor-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+    }
+
+    .factor-badge.low { background: var(--success-light); color: var(--success); }
+    .factor-badge.mid { background: var(--warning-light); color: var(--warning); }
+    .factor-badge.high { background: var(--danger-light); color: var(--danger); }
+
+    .rec-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rec-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--tip-bg);
+      border: 1px solid var(--tip-border);
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .rec-item strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 13px; }
+
+    .sources-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .source-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .dashboard-loading {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 24px 8px;
+    }
+
+    .screen-title-sm {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 2px;
+    }
+
+    .today-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-head-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .card-head-link {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+
+    .gauge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .side-stat {
+      width: 64px;
+      text-align: center;
+    }
+
+    .side-num {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .side-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .gauge-main {
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      border: 5px solid var(--teal);
+      display: grid;
+      place-items: center;
+      background: var(--surface);
+    }
+
+    .gauge-main-num {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .gauge-main-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .macro-row {
+      margin-bottom: 10px;
+    }
+
+    .macro-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .macro-track {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--surface);
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .macro-fill {
+      height: 6px;
+      border-radius: 999px;
+      background: var(--teal);
+    }
+
+    .macro-fill.warn { background: var(--warning); }
+    .macro-fill.danger { background: var(--danger); }
+
+    .macro-value {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .feed-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feed-row:last-child { border-bottom: none; }
+
+    .feed-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 22px;
+      background: var(--teal-light);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .feed-body { flex: 1; min-width: 0; }
+
+    .feed-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .feed-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .feed-add {
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 300;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .top-icons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .top-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <aside class="sidebar">
+      <h1>AllerGuide</h1>
+      <p>Интерактивный HTML-макет основных экранов мобильного приложения. Цвета и компоненты соответствуют теме из <code>apps/mobile</code>.</p>
+
+      <div class="controls">
+        <button class="btn" id="theme-light" type="button">☀️ Светлая</button>
+        <button class="btn" id="theme-dark" type="button">🌙 Тёмная</button>
+      </div>
+
+      <div class="screen-list" id="screen-list">
+        <button class="btn" data-screen="login">Вход</button>
+        <button class="btn" data-screen="onboarding-intro">Слайдер модулей</button>
+        <button class="btn" data-screen="onboarding">Онбординг</button>
+        <button class="btn" data-screen="home">Главная</button>
+        <button class="btn" data-screen="diary">Дневник</button>
+        <button class="btn" data-screen="doctor-report">Отчёт врачу</button>
+        <button class="btn" data-screen="scanner">Сканер</button>
+        <button class="btn" data-screen="market">Маркет</button>
+        <button class="btn" data-screen="map">Карта</button>
+        <button class="btn" data-screen="expert">Эксперт</button>
+        <button class="btn" data-screen="sos">SOS</button>
+        <button class="btn" data-screen="profiles">Профили</button>
+        <button class="btn" data-screen="settings">Настройки</button>
+      </div>
+
+      <div class="legend">
+        <strong>Палитра</strong><br />
+        Accent <span style="color:var(--accent)">#FF6B00</span> · Success · Danger · iOS gray bg<br /><br />
+        <strong>Стиль</strong> — светлый glass UI по референсу: «Сегодня», сводка, лента дневника<br />
+        <strong>Шрифт</strong> — SF Pro / system-ui<br />
+        <strong>Радиусы</strong> — 12–18px, pill chips<br />
+        <strong>Tab bar</strong> — 6 вкладок, SOS красный
+      </div>
+    </aside>
+
+    <div class="device-wrap">
+      <div class="phone" id="phone">
+        <div class="notch"></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <span>LTE · 100%</span>
+        </div>
+
+        <!-- LOGIN -->
+        <section class="screen" id="screen-login">
+          <div class="hero-logo">🌿</div>
+          <h2 class="screen-title-sm" style="text-align:center">Вход</h2>
+          <p class="today-sub" style="text-align:center;margin-bottom:16px">Войдите по телефону или email</p>
+          <div class="glass card">
+            <div class="toggle-row">
+              <div class="toggle active">📞 Телефон</div>
+              <div class="toggle">✉️ Email</div>
+            </div>
+            <div class="field-label">Номер телефона</div>
+            <input class="input" value="+7 999 123-45-67" readonly />
+            <div class="field-label">Пароль</div>
+            <input class="input" type="password" value="••••••••" readonly />
+            <button class="primary-btn">Войти</button>
+          </div>
+          <p class="disclaimer">Нет аккаунта? <strong style="color:var(--teal)">Зарегистрироваться</strong></p>
+        </section>
+
+        <!-- ONBOARDING INTRO -->
+        <section class="screen" id="screen-onboarding-intro">
+          <div class="progress-dots">
+            <span class="progress-dot active"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+            <span class="progress-dot"></span>
+          </div>
+          <div class="hero-logo">📔</div>
+          <h2 class="screen-title-sm" style="text-align:center">Персональный дневник</h2>
+          <p class="today-sub" style="text-align:center">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</p>
+          <button class="primary-btn">Далее</button>
+          <p class="disclaimer">5 модулей + экспертный раздел проф. Смолкина Ю.С.</p>
+        </section>
+
+        <!-- ONBOARDING -->
+        <section class="screen" id="screen-onboarding">
+          <div class="hero-logo">🌿</div>
+          <h2 class="screen-title-sm" style="text-align:center">AllerGuide</h2>
+          <p class="today-sub" style="text-align:center">Персональный помощник в контроле аллергии</p>
+          <div class="section-label">Для кого ведём записи?</div>
+          <div class="glass card row select-card">
+            <div class="avatar" style="background:var(--teal-light);color:var(--forest)">👤</div>
+            <div style="flex:1"><strong>Только для себя</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Личный дневник и сканер</span></div>
+            <span class="chevron">›</span>
+          </div>
+          <div class="glass card row select-card active">
+            <div class="avatar" style="background:var(--teal-light);color:var(--forest)">👨‍👩‍👧</div>
+            <div style="flex:1"><strong>Для себя и ребёнка</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Несколько профилей</span></div>
+            <span class="chevron">›</span>
+          </div>
+          <p class="disclaimer">Информация носит рекомендательный характер и не заменяет консультацию врача.</p>
+        </section>
+
+        <!-- HOME -->
+        <section class="screen active" id="screen-home">
+          <div class="row between" style="margin-bottom:4px">
+            <div class="top-icons">
+              <div class="top-icon">🌿</div>
+              <div class="top-icon">📅</div>
+            </div>
+            <div class="avatar" style="background:var(--danger-light);color:var(--danger);width:40px;height:40px;border-radius:20px">🚑</div>
+          </div>
+
+          <h2 class="screen-title-sm">Сегодня</h2>
+          <div class="today-sub" id="profile-allergens">Профиль · Анна · Молоко, Берёза</div>
+
+          <div class="glass card" style="padding:18px;margin-bottom:14px" id="wellness-dashboard">
+            <div class="card-head">
+              <div class="card-head-title">Сводка самочувствия</div>
+              <div class="card-head-link">Подробности</div>
+            </div>
+            <div class="dashboard-loading" id="wellness-loading">Загрузка Open-Meteo…</div>
+            <div id="wellness-content" hidden>
+              <div class="gauge-row">
+                <div class="side-stat"><div class="side-num" id="side-pollen">↑</div><div class="side-label">Пыльца</div></div>
+                <div class="gauge-main" id="score-ring">
+                  <div class="score-inner" style="position:static">
+                    <div class="gauge-main-num" id="score-num">—</div>
+                    <div class="gauge-main-label">индекс</div>
+                  </div>
+                </div>
+                <div class="side-stat"><div class="side-num" id="side-aqi">OK</div><div class="side-label">Воздух</div></div>
+              </div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.45;margin-bottom:12px"><strong id="wellness-status">—</strong> · <span id="wellness-summary">—</span></div>
+              <div id="macro-list"></div>
+              <div class="rec-list" id="rec-list" style="margin-top:10px"></div>
+              <div class="wellness-updated" id="wellness-updated" style="font-size:11px;color:var(--text-muted);margin-top:8px">—</div>
+            </div>
+          </div>
+
+          <div class="card-head">
+            <div class="card-head-title">Дневник</div>
+            <div class="card-head-link">Больше</div>
+          </div>
+          <div class="glass" style="margin-bottom:14px">
+            <div class="feed-row">
+              <div class="feed-icon">💓</div>
+              <div class="feed-body"><div class="feed-title">Симптомы →</div><div class="feed-sub">Зуд кожи · 14:30</div></div>
+              <div class="feed-add">+</div>
+            </div>
+            <div class="feed-row">
+              <div class="feed-icon">🍽</div>
+              <div class="feed-body"><div class="feed-title">Питание →</div><div class="feed-sub">Овсянка, яблоко · 09:15</div></div>
+              <div class="feed-add">+</div>
+            </div>
+            <div class="feed-row">
+              <div class="feed-icon">💊</div>
+              <div class="feed-body"><div class="feed-title">Лекарство →</div><div class="feed-sub">Отметить приём</div></div>
+              <div class="feed-add">+</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">📷 Сканер</span>
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🗺️ Карта</span>
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🛒 Маркет</span>
+            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🎓 Эксперт</span>
+          </div>
+          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
+        </section>
+
+        <!-- DIARY -->
+        <section class="screen" id="screen-diary">
+          <h2 class="screen-title-sm">Дневник</h2>
+          <p class="today-sub">Пошаговые записи наблюдений</p>
+          <button class="primary-btn">＋ Новая запись по шагам</button>
+          <div class="section-label">Быстрое добавление</div>
+          <div>
+            <span class="chip teal">💓 Симптомы</span>
+            <span class="chip">💊 Лекарство</span>
+            <span class="chip">🍽 Питание</span>
+            <span class="chip">📈 ПСВ</span>
+            <span class="chip">💉 АСИТ</span>
+            <span class="chip">📅 Визит</span>
+            <span class="chip">⚠️ Триггер</span>
+          </div>
+          <div class="section-label">История записей</div>
+          <div class="glass" style="margin-bottom:14px">
+            <div class="feed-row">
+              <div class="feed-icon" style="background:var(--danger-light);color:var(--danger)">💓</div>
+              <div class="feed-body">
+                <div class="feed-title">Симптомы</div>
+                <div class="feed-sub">Зуд кожи, лёгкая отёчность</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">18 июня · 14:30</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="feed-row">
+              <div class="feed-icon">🍽</div>
+              <div class="feed-body">
+                <div class="feed-title">Питание</div>
+                <div class="feed-sub">Овсянка на воде, яблоко</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">18 июня · 09:15</div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+          </div>
+          <p class="disclaimer">Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.</p>
+        </section>
+
+        <!-- DOCTOR REPORT -->
+        <section class="screen" id="screen-doctor-report">
+          <h2 class="screen-title-sm">Отчёт для врача</h2>
+          <p class="today-sub">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</p>
+          <div class="section-label">Период</div>
+          <div class="toggle-row">
+            <div class="toggle">7 дн.</div>
+            <div class="toggle">14 дн.</div>
+            <div class="toggle active">30 дн.</div>
+          </div>
+          <div class="section-label">Блоки</div>
+          <div class="glass" style="margin-bottom:14px">
+            <div class="feed-row"><span>☑ Симптомы</span><span style="color:var(--teal)">☑</span></div>
+            <div class="feed-row"><span>☑ Пикфлоуметрия</span><span style="color:var(--teal)">☑</span></div>
+            <div class="feed-row"><span>☑ АСИТ</span><span style="color:var(--teal)">☑</span></div>
+            <div class="feed-row"><span>☑ Питание и триггеры</span><span style="color:var(--teal)">☑</span></div>
+          </div>
+          <button class="primary-btn">Сформировать PDF</button>
+          <p class="disclaimer">Отчёт не является медицинской документацией.</p>
+        </section>
+
+        <!-- SCANNER -->
+        <section class="screen" id="screen-scanner">
+          <h2 class="screen-title-sm">Сканер</h2>
+          <p class="today-sub">Open Food Facts + проверка по ключевым словам</p>
+          <div class="toggle-row">
+            <div class="toggle active">🥫 Продукт</div>
+            <div class="toggle">🍽 Меню</div>
+            <div class="toggle">💊 Лекарство</div>
+            <div class="toggle">🧴 Косметика</div>
+          </div>
+          <div class="glass card row between">
+            <div>
+              <strong>Сканировать штрихкод</strong>
+              <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">Поиск состава в Open Food Facts</div>
+            </div>
+            <span class="chevron">›</span>
+          </div>
+          <div class="glass card">
+            <div class="field-label">Или введите состав вручную</div>
+            <input class="input" value="молоко, сахар, какао" readonly />
+            <button class="primary-btn" style="margin-top:12px">Проверить</button>
+          </div>
+          <div class="glass card" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light)">
+            <strong>⚠️ Есть совпадения</strong>
+            <p style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--text-secondary)">Обнаружено: <strong>Молоко</strong>. Результат основан на ключевых словах и не заменяет чтение этикетки.</p>
+          </div>
+          <div class="section-label">История</div>
+          <div class="glass card row between">
+            <div>
+              <strong>Йогурт натуральный</strong>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:4px">17 июня · openfoodfacts</div>
+            </div>
+            <span class="badge badge-danger">Риск</span>
+          </div>
+        </section>
+
+        <!-- MARKET -->
+        <section class="screen" id="screen-market">
+          <h2 class="screen-title-sm">Маркет</h2>
+          <p class="today-sub">Подборка для вашего профиля</p>
+          <div class="glass card row">
+            <div class="dot" style="background:var(--purple-light);color:var(--purple)">💨</div>
+            <div style="flex:1">
+              <div class="row between"><strong>Очиститель HEPA</strong><span class="badge badge-high">Воздух</span></div>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Снижает концентрацию пыльцы и аллергенов</p>
+            </div>
+          </div>
+          <div class="glass card row">
+            <div class="dot" style="background:var(--success-light);color:var(--success)">🥛</div>
+            <div style="flex:1">
+              <div class="row between"><strong>Овсяное молоко</strong><span class="badge badge-high">Питание</span></div>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Альтернатива коровьему молоку</p>
+            </div>
+          </div>
+          <div class="glass card row">
+            <div class="dot" style="background:var(--danger-light);color:var(--danger)">💉</div>
+            <div style="flex:1">
+              <div class="row between"><strong>Чехол для автоинжектора</strong><span class="badge badge-high">SOS</span></div>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Удобное хранение экстренного препарата</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- MAP -->
+        <section class="screen" id="screen-map">
+          <h2 class="screen-title-sm">Карта мест</h2>
+          <p class="today-sub">3 слоя по ТЗ v13</p>
+          <div class="toggle-row">
+            <div class="toggle active">🍽 Рестораны</div>
+            <div class="toggle">🌿 Пыление</div>
+            <div class="toggle">🏥 АДАИР</div>
+          </div>
+          <div class="map-placeholder">🗺️ Интерактивная карта (native)</div>
+          <div class="section-label">Рекомендованные места</div>
+          <div class="glass card row">
+            <div class="dot" style="background:var(--success-light);color:var(--success)">🌿</div>
+            <div style="flex:1">
+              <div class="row between">
+                <strong>Green Bowl Cafe</strong>
+                <span class="badge badge-high">Высокий</span>
+              </div>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px">Меню с маркировкой аллергенов · 350 м</p>
+            </div>
+          </div>
+          <div class="glass card row">
+            <div class="dot" style="background:var(--warning-light);color:var(--warning)">🍽</div>
+            <div style="flex:1">
+              <div class="row between">
+                <strong>Simple Family Kitchen</strong>
+                <span class="badge" style="background:var(--warning-light);color:var(--warning)">Средний</span>
+              </div>
+              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px">Уточняйте состав у официанта · 1.2 км</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- EXPERT -->
+        <section class="screen" id="screen-expert">
+          <h2 class="screen-title-sm">Эксперт</h2>
+          <p class="today-sub">д.м.н., проф. Юрий Соломонович Смолкин · Президент АДАИР</p>
+          <div class="glass card" style="text-align:center">
+            <div class="hero-logo" style="width:52px;height:52px;font-size:22px;margin:0 auto 8px">🎓</div>
+            <strong>Главный медицинский эксперт АллерГайд</strong>
+            <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.5">Научный руководитель НККЦ</p>
+          </div>
+          <div class="section-label">Материалы</div>
+          <div class="glass card row between"><div><strong>Рекомендации по поллинозу</strong><br /><span style="font-size:12px;color:var(--text-muted)">Сезонные советы</span></div><span class="chevron">›</span></div>
+          <div class="glass card row between"><div><strong>Календарь пыления</strong><br /><span style="font-size:12px;color:var(--text-muted)">По регионам России</span></div><span class="chevron">›</span></div>
+          <div class="glass card row between"><div><strong>Перекрёстные реакции</strong><br /><span style="font-size:12px;color:var(--text-muted)">Справочник аллергенов</span></div><span class="chevron">›</span></div>
+          <div class="glass card row between"><div><strong>АСИТ для пациентов</strong><br /><span style="font-size:12px;color:var(--text-muted)">Общая информация</span></div><span class="chevron">›</span></div>
+          <p class="disclaimer">Контент носит информационный характер и не является медицинским назначением.</p>
+        </section>
+
+        <!-- SOS -->
+        <section class="screen" id="screen-sos">
+          <h2 class="screen-title-sm">SOS</h2>
+          <p class="today-sub">Экстренная помощь при аллергии</p>
+          <div class="sos-hero">
+            <div style="font-size:14px;color:var(--text-secondary)">Профиль: Анна · 35 лет</div>
+            <div class="sos-btn">SOS</div>
+            <div style="font-size:13px;color:var(--text-secondary)">Нажмите для вызова <strong>103</strong></div>
+          </div>
+          <div class="section-label">Аллергены</div>
+          <div>
+            <span class="chip" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light);color:var(--danger)">Молоко</span>
+            <span class="chip" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light);color:var(--danger)">Арахис</span>
+          </div>
+          <div class="section-label">Экстренные контакты</div>
+          <div class="glass card">
+            <div class="row between">
+              <div><strong>Мама</strong><br /><span style="font-size:13px;color:var(--text-secondary)">+7 999 000-00-01</span></div>
+              <span>📞</span>
+            </div>
+          </div>
+          <div class="glass card">
+            <strong>План действий</strong>
+            <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5">Автоинжектор в сумке. При отёке губ — эпинефрин, затем вызов скорой.</p>
+          </div>
+        </section>
+
+        <!-- PROFILES -->
+        <section class="screen" id="screen-profiles">
+          <h2 class="screen-title-sm">Мои профили</h2>
+          <p class="today-sub">Редактирование и удаление</p>
+          <div class="glass card">
+            <div class="row between">
+              <div class="row">
+                <div class="avatar" style="background:var(--teal-light);color:var(--forest)">А</div>
+                <div>
+                  <strong>Анна</strong>
+                  <div style="font-size:12px;color:var(--text-secondary)">Я · 1990</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Молоко, Арахис, Берёза</div>
+                </div>
+              </div>
+              <span class="chevron">›</span>
+            </div>
+            <div class="row" style="margin-top:12px;gap:8px">
+              <button class="secondary-btn" style="margin:0;flex:1;padding:10px">Изменить</button>
+              <button class="secondary-btn" style="margin:0;flex:1;padding:10px;color:var(--danger);border-color:var(--danger);background:var(--danger-light)">Удалить</button>
+            </div>
+          </div>
+          <div class="glass card row between">
+            <div class="row">
+              <div class="avatar" style="background:var(--teal-light);color:var(--forest)">М</div>
+              <div>
+                <strong>Миша</strong>
+                <div style="font-size:12px;color:var(--text-secondary)">Ребёнок · 2018</div>
+                <div style="font-size:12px;color:var(--text-muted)">Яйца</div>
+              </div>
+            </div>
+            <span class="chevron">›</span>
+          </div>
+          <button class="secondary-btn">＋ Добавить профиль</button>
+          <button class="secondary-btn" style="color:var(--danger);border-color:var(--danger);background:var(--danger-light)">Удалить аккаунт и все данные</button>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="screen" id="screen-settings">
+          <h2 class="screen-title-sm">Настройки</h2>
+          <p class="today-sub">SOS, резервные копии и документы</p>
+          <div class="section-label">Экстренный вызов</div>
+          <div class="glass card">
+            <div class="field-label">Номер SOS</div>
+            <input class="input" value="103" readonly />
+            <button class="primary-btn" style="margin-top:12px">Сохранить номер</button>
+          </div>
+          <div class="section-label">Локальная резервная копия</div>
+          <div class="glass card">
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Экспорт JSON с профилями, дневником и историей сканов.</p>
+            <button class="primary-btn">Экспортировать данные</button>
+            <button class="secondary-btn">Импортировать из файла</button>
+          </div>
+          <div class="section-label">Юридическая информация</div>
+          <div class="glass card row between"><span>Политика конфиденциальности</span><span class="chevron">›</span></div>
+          <div class="glass card row between"><span>Условия использования</span><span class="chevron">›</span></div>
+          <div class="section-label">Тема</div>
+          <div class="toggle-row">
+            <div class="toggle">☀️ Светлая</div>
+            <div class="toggle">🌙 Тёмная</div>
+            <div class="toggle active">⚙️ Системная</div>
+          </div>
+        </section>
+
+        <nav class="tabbar" id="tabbar">
+          <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Главная</div>
+          <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Дневник</div>
+          <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Сканер</div>
+          <div class="tab" data-screen="market"><span class="tab-icon">🛒</span>Маркет</div>
+          <div class="tab" data-screen="map"><span class="tab-icon">🗺️</span>Карта</div>
+          <div class="tab sos" data-screen="sos"><span class="tab-icon">🚑</span>SOS</div>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const phone = document.getElementById('phone');
+    const tabbar = document.getElementById('tabbar');
+    const authScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert']);
+
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
+      document.getElementById('screen-' + name)?.classList.add('active');
+
+      document.querySelectorAll('#screen-list .btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.screen === name);
+      });
+
+      document.querySelectorAll('.tabbar .tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.dataset.screen === name);
+      });
+
+      phone.classList.toggle('hidden-tabbar', authScreens.has(name));
+    }
+
+    document.getElementById('screen-list').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-screen]');
+      if (btn) showScreen(btn.dataset.screen);
+    });
+
+    tabbar.addEventListener('click', (e) => {
+      const tab = e.target.closest('[data-screen]');
+      if (tab) showScreen(tab.dataset.screen);
+    });
+
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.setAttribute('data-theme-shell', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.body.removeAttribute('data-theme-shell');
+      }
+      document.getElementById('theme-light').classList.toggle('active', mode === 'light');
+      document.getElementById('theme-dark').classList.toggle('active', mode === 'dark');
+    }
+
+    document.getElementById('theme-light').addEventListener('click', () => setTheme('light'));
+    document.getElementById('theme-dark').addEventListener('click', () => setTheme('dark'));
+
+    /* ── Wellness dashboard (Open-Meteo + profile + diary) ── */
+    const MOCK_LOCATION = { lat: 55.75, lon: 37.62, label: 'Москва' };
+
+    const MOCK_PROFILE = {
+      name: 'Анна',
+      birthYear: 1990,
+      allergens: [
+        { id: 'milk', name: 'Молоко', category: 'food', pollenKey: null },
+        { id: 'peanut', name: 'Арахис', category: 'food', pollenKey: null },
+        { id: 'birch-pollen', name: 'Берёза', category: 'environmental', pollenKey: 'birch_pollen' },
+      ],
+    };
+
+    const MOCK_DIARY = [
+      { type: 'symptoms', text: 'Зуд кожи, лёгкая отёчность', hoursAgo: 18 },
+      { type: 'food', text: 'Овсянка на воде, яблоко', hoursAgo: 30 },
+      { type: 'trigger', text: 'Возможная реакция на молочный десерт', hoursAgo: 48 },
+    ];
+
+    const POLLEN_LABELS = {
+      birch_pollen: 'Берёза',
+      grass_pollen: 'Тимофеевка',
+      ragweed_pollen: 'Амброзия',
+    };
+
+    const CROSS_REACTIONS = [
+      { pollen: 'birch_pollen', food: 'яблок', note: 'Оральный аллергический синдром (берёза → яблоко)' },
+    ];
+
+    function pollenTier(value) {
+      if (value == null || value < 10) return { level: 'low', label: 'Низкий', penalty: 0 };
+      if (value < 50) return { level: 'mid', label: 'Средний', penalty: 12 };
+      return { level: 'high', label: 'Высокий', penalty: 28 };
+    }
+
+    function aqiTier(value) {
+      if (value == null) return { level: 'mid', label: 'Нет данных', penalty: 5 };
+      if (value <= 20) return { level: 'low', label: 'Хорошо · ' + value, penalty: 0 };
+      if (value <= 50) return { level: 'mid', label: 'Умеренно · ' + value, penalty: 6 };
+      if (value <= 75) return { level: 'mid', label: 'Повышен · ' + value, penalty: 12 };
+      return { level: 'high', label: 'Плохо · ' + value, penalty: 20 };
+    }
+
+    function diaryPenalty(entries) {
+      let penalty = 0;
+      const recentSymptoms = entries.filter((e) => e.type === 'symptoms' && e.hoursAgo <= 48);
+      const recentTriggers = entries.filter((e) => e.type === 'trigger' && e.hoursAgo <= 72);
+      if (recentSymptoms.length) penalty += 14 + recentSymptoms.length * 4;
+      if (recentTriggers.length) penalty += 8;
+      return { penalty: Math.min(penalty, 30), recentSymptoms, recentTriggers };
+    }
+
+    function currentHourlyMax(hourly, key) {
+      if (!hourly?.[key]?.length) return null;
+      const now = new Date();
+      const idx = hourly.time.findIndex((t) => new Date(t) >= now);
+      const slice = idx >= 0 ? hourly[key].slice(idx, idx + 12) : hourly[key].slice(0, 12);
+      return Math.max(...slice.filter((v) => v != null));
+    }
+
+    async function fetchEnvironmentalData() {
+      const qs = new URLSearchParams({
+        latitude: String(MOCK_LOCATION.lat),
+        longitude: String(MOCK_LOCATION.lon),
+        timezone: 'Europe/Moscow',
+        forecast_days: '1',
+      });
+      const airUrl =
+        'https://air-quality-api.open-meteo.com/v1/air-quality?' +
+        qs +
+        '&current=european_aqi,pm2_5&hourly=birch_pollen,grass_pollen,ragweed_pollen';
+      const res = await fetch(airUrl);
+      if (!res.ok) throw new Error('Open-Meteo unavailable');
+      return res.json();
+    }
+
+    function buildRecommendations(ctx) {
+      const recs = [];
+
+      for (const match of ctx.profilePollenMatches) {
+        if (match.tier.level !== 'low') {
+          recs.push({
+            icon: '🌿',
+            title: 'Снизьте контакт с пыльцой',
+            text:
+              'Уровень пыльцы «' +
+              match.label +
+              '» ' +
+              match.tier.label.toLowerCase() +
+              '. По возможности проводите меньше времени на улице в дневные часы, используйте очки и промойте нос после прогулки.',
+          });
+        }
+      }
+
+      if (ctx.aqi.tier.level !== 'low') {
+        recs.push({
+          icon: '💨',
+          title: 'Качество воздуха',
+          text:
+            'Индекс EAQI ' +
+            ctx.aqi.tier.label +
+            '. Чувствительным людям стоит сократить активность на открытом воздухе и проветривать квартиру в часы с более низким загрязнением.',
+        });
+      }
+
+      if (ctx.diary.recentSymptoms.length) {
+        recs.push({
+          icon: '📔',
+          title: 'Симптомы в дневнике',
+          text:
+            'За последние 2 суток зафиксированы симптомы («' +
+            ctx.diary.recentSymptoms[0].text +
+            '»). Отслеживайте динамику; при ухудшении обратитесь к врачу.',
+        });
+      }
+
+      for (const cr of CROSS_REACTIONS) {
+        const pollenHigh = ctx.pollens[cr.pollen]?.tier?.level !== 'low';
+        const ateFood = MOCK_DIARY.some((e) => e.type === 'food' && e.text.toLowerCase().includes(cr.food));
+        if (pollenHigh && ateFood && ctx.profilePollenKeys.has(cr.pollen)) {
+          recs.push({
+            icon: '🍎',
+            title: 'Возможная перекрёстная реакция',
+            text: cr.note + '. Свежие фрукты могут усиливать зуд во время сезона пыления.',
+          });
+        }
+      }
+
+      const foodAllergens = MOCK_PROFILE.allergens.filter((a) => a.category === 'food');
+      if (foodAllergens.length) {
+        recs.push({
+          icon: '📷',
+          title: 'Пищевые аллергены',
+          text:
+            'В профиле: ' +
+            foodAllergens.map((a) => a.name).join(', ') +
+            '. Перед покупкой новых продуктов проверяйте состав через сканер (Open Food Facts).',
+        });
+      }
+
+      if (!recs.length) {
+        recs.push({
+          icon: '✅',
+          title: 'Стабильный день',
+          text: 'Показатели среды и записи дневника не указывают на повышенные риски. Продолжайте вести наблюдения.',
+        });
+      }
+
+      return recs.slice(0, 4);
+    }
+
+    function statusFromScore(score) {
+      if (score >= 80) return { title: 'Хорошо', summary: 'Среда и дневник не указывают на повышенные риски.', color: 'var(--teal)' };
+      if (score >= 60) return { title: 'Умеренно', summary: 'Есть отдельные факторы внимания.', color: 'var(--warning)' };
+      if (score >= 40) return { title: 'Повышенное внимание', summary: 'Несколько факторов могут влиять на самочувствие.', color: 'var(--warning)' };
+      return { title: 'Высокий риск', summary: 'Минимизируйте триггеры и проконсультируйтесь с врачом.', color: 'var(--danger)' };
+    }
+
+    function renderFactor({ icon, iconBg, iconColor, label, value, badgeClass, badgeText, source }) {
+      return (
+        '<div class="factor">' +
+        '<div class="factor-icon" style="background:' + iconBg + ';color:' + iconColor + '">' + icon + '</div>' +
+        '<div class="factor-body"><div class="factor-label">' + label + '</div><div class="factor-value">' + value + '</div></div>' +
+        '<span class="factor-badge ' + badgeClass + '">' + badgeText + '</span></div>'
+      );
+    }
+
+    function macroBar(label, value, level) {
+      const pct = level === 'high' ? 90 : level === 'mid' ? 55 : 25;
+      const cls = level === 'high' ? 'danger' : level === 'mid' ? 'warn' : '';
+      return (
+        '<div class="macro-row"><div class="macro-label">' + label + '</div>' +
+        '<div class="macro-track"><div class="macro-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="macro-value">' + value + '</div></div>'
+      );
+    }
+
+    function renderWellnessDashboard(ctx) {
+      document.getElementById('wellness-loading').hidden = true;
+      const content = document.getElementById('wellness-content');
+      content.hidden = false;
+
+      const status = statusFromScore(ctx.score);
+      const ring = document.getElementById('score-ring');
+      ring.style.borderColor = status.color;
+
+      document.getElementById('score-num').textContent = String(ctx.score);
+      document.getElementById('wellness-status').textContent = status.title;
+      document.getElementById('wellness-summary').textContent = status.summary;
+      document.getElementById('wellness-updated').textContent =
+        'Обновлено · ' + MOCK_LOCATION.label + ' · Open-Meteo · ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+      const pollenMatch = ctx.profilePollenMatches[0];
+      document.getElementById('side-pollen').textContent = pollenMatch && pollenMatch.tier.level !== 'low' ? '↑' : '—';
+      document.getElementById('side-aqi').textContent = ctx.aqi.tier.level === 'high' ? '!' : 'OK';
+
+      const macros = [];
+      if (pollenMatch) {
+        macros.push(macroBar('Пыльца · ' + pollenMatch.label, pollenMatch.value.toFixed(1) + ' grains/m³', pollenMatch.tier.level));
+      }
+      macros.push(macroBar('Качество воздуха', ctx.aqi.pm25 != null ? 'PM2.5 ' + ctx.aqi.pm25.toFixed(1) : 'EAQI', ctx.aqi.tier.level));
+      const symptomText = ctx.diary.recentSymptoms.length ? ctx.diary.recentSymptoms[0].text : 'Спокойно';
+      macros.push(macroBar('Дневник · 48 ч', symptomText, ctx.diary.recentSymptoms.length ? 'mid' : 'low'));
+
+      document.getElementById('macro-list').innerHTML = macros.join('');
+
+      document.getElementById('rec-list').innerHTML = ctx.recommendations
+        .slice(0, 1)
+        .map(
+          (r) =>
+            '<div class="rec-item"><span style="font-size:18px">' +
+            r.icon +
+            '</span><div><strong>' +
+            r.title +
+            '</strong>' +
+            r.text +
+            '</div></div>',
+        )
+        .join('');
+    }
+
+    async function loadWellnessDashboard() {
+      const loading = document.getElementById('wellness-loading');
+      try {
+        const data = await fetchEnvironmentalData();
+        const hourly = data.hourly;
+        const profilePollenKeys = new Set(
+          MOCK_PROFILE.allergens.filter((a) => a.pollenKey).map((a) => a.pollenKey),
+        );
+
+        const pollens = {};
+        for (const key of Object.keys(POLLEN_LABELS)) {
+          const value = currentHourlyMax(hourly, key);
+          pollens[key] = { value: value ?? 0, tier: pollenTier(value ?? 0), label: POLLEN_LABELS[key] };
+        }
+
+        const profilePollenMatches = MOCK_PROFILE.allergens
+          .filter((a) => a.pollenKey)
+          .map((a) => ({
+            key: a.pollenKey,
+            label: a.name,
+            value: pollens[a.pollenKey].value,
+            tier: pollens[a.pollenKey].tier,
+          }));
+
+        const aqiValue = data.current?.european_aqi;
+        const aqi = { value: aqiValue, pm25: data.current?.pm2_5, tier: aqiTier(aqiValue) };
+        const diary = diaryPenalty(MOCK_DIARY);
+
+        let penalty = 0;
+        for (const match of profilePollenMatches) penalty += match.tier.penalty;
+        penalty += aqi.tier.penalty;
+        penalty += diary.penalty;
+
+        const score = Math.max(5, Math.min(100, 100 - penalty));
+        const recommendations = buildRecommendations({
+          score,
+          pollens,
+          profilePollenMatches,
+          profilePollenKeys,
+          aqi,
+          diary,
+        });
+
+        renderWellnessDashboard({
+          score,
+          pollens,
+          profilePollenMatches,
+          aqi,
+          diary,
+          recommendations,
+        });
+      } catch (err) {
+        loading.textContent = 'Не удалось загрузить Open-Meteo — показаны локальные данные.';
+        const diary = diaryPenalty(MOCK_DIARY);
+        const fallbackPollen = { value: 42, tier: pollenTier(42), label: 'Берёза' };
+        const score = Math.max(5, 100 - diary.penalty - fallbackPollen.tier.penalty - 6);
+        renderWellnessDashboard({
+          score,
+          pollens: { birch_pollen: fallbackPollen },
+          profilePollenMatches: [{ key: 'birch_pollen', label: 'Берёза', value: 42, tier: fallbackPollen.tier }],
+          aqi: { value: 45, pm25: 18, tier: aqiTier(45) },
+          diary,
+          recommendations: buildRecommendations({
+            score,
+            pollens: { birch_pollen: fallbackPollen },
+            profilePollenMatches: [{ key: 'birch_pollen', label: 'Берёза', value: 42, tier: fallbackPollen.tier }],
+            profilePollenKeys: new Set(['birch_pollen']),
+            aqi: { tier: aqiTier(45) },
+            diary,
+          }),
+        });
+      }
+    }
+
+    void loadWellnessDashboard();
+
+    setTheme('light');
+    showScreen('home');
+  </script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import { initDb } from '@/src/db/init';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useThemeStore } from '@/src/store/theme-store';
+import { useLocaleStore } from '@/src/store/locale-store';
 
 function WebShell({ children }: { children: ReactNode }) {
   const { colors } = useTheme();
@@ -24,12 +25,14 @@ function WebShell({ children }: { children: ReactNode }) {
 
 export default function RootLayout() {
   const hydrateTheme = useThemeStore((s) => s.hydrate);
+  const hydrateLocale = useLocaleStore((s) => s.hydrate);
   const { colors, isDark } = useTheme();
 
   useEffect(() => {
     initDb();
     hydrateTheme();
-  }, [hydrateTheme]);
+    hydrateLocale();
+  }, [hydrateTheme, hydrateLocale]);
 
   return (
     <WebShell>

@@ -9,10 +9,10 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        scrollOuter: { flex: 1, backgroundColor: colors.bg },
+        scrollOuter: { flex: 1, backgroundColor: colors.cream },
         scroll: {
           flexGrow: 1,
-          backgroundColor: colors.bg,
+          backgroundColor: colors.cream,
           paddingTop: layout.topPadding,
           paddingBottom: layout.bottomPadding,
           gap: 16,
@@ -26,7 +26,7 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
         },
         safe: {
           flex: 1,
-          backgroundColor: colors.bg,
+          backgroundColor: colors.cream,
           paddingHorizontal: layout.horizontalPadding,
           paddingTop: layout.topPadding,
           paddingBottom: layout.bottomPadding,

@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
+import { useTranslation } from '@/src/store/locale-store';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -31,6 +32,7 @@ function TabIcon({
 export default function TabsLayout() {
   const { colors, shadows } = useTheme();
   const { isCompact, showTabLabels, tabBarHeight } = useResponsiveLayout();
+  const { t } = useTranslation();
   const iconSize = isCompact ? 22 : 24;
 
   return (
@@ -38,24 +40,30 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: Platform.OS === 'ios' ? 22 : Platform.OS === 'web' ? 12 : 10,
+          height: tabBarHeight - 8,
           backgroundColor: colors.card,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-          height: tabBarHeight,
-          paddingBottom: Platform.OS === 'ios' ? 24 : Platform.OS === 'web' ? 10 : 8,
+          borderTopColor: 'transparent',
+          borderTopWidth: 0,
+          borderRadius: 28,
+          paddingBottom: Platform.OS === 'ios' ? 18 : Platform.OS === 'web' ? 8 : 6,
           paddingTop: 8,
-          paddingHorizontal: Platform.OS === 'web' && isCompact ? 2 : 0,
-          ...(shadows.none as object),
+          paddingHorizontal: 8,
+          borderWidth: 1,
+          borderColor: colors.border,
+          ...(shadows.glass as object),
           ...(Platform.OS === 'web'
             ? {
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
+                maxWidth: 720,
+                alignSelf: 'center',
+                marginHorizontal: 'auto',
               }
             : null),
         },
-        tabBarActiveTintColor: colors.accent,
+        tabBarActiveTintColor: colors.teal,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarShowLabel: showTabLabels,
         tabBarLabelStyle: {
@@ -70,12 +78,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Главная',
+          title: t('tabs.home'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="home"
               focused={focused}
-              color={colors.accent}
+              color={colors.teal}
               muted={colors.textMuted}
               size={iconSize}
             />
@@ -85,12 +93,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="diary"
         options={{
-          title: 'Дневник',
+          title: t('tabs.diary'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="journal"
               focused={focused}
-              color={colors.accent}
+              color={colors.teal}
               muted={colors.textMuted}
               size={iconSize}
             />
@@ -100,12 +108,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
-          title: 'Сканер',
+          title: t('tabs.scanner'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="scan"
               focused={focused}
-              color={colors.accent}
+              color={colors.teal}
               muted={colors.textMuted}
               size={iconSize}
             />
@@ -115,12 +123,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="market"
         options={{
-          title: 'Маркет',
+          title: t('tabs.market'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="bag"
               focused={focused}
-              color={colors.accent}
+              color={colors.teal}
               muted={colors.textMuted}
               size={iconSize}
             />
@@ -130,12 +138,12 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title: 'Карта',
+          title: t('tabs.map'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="map"
               focused={focused}
-              color={colors.accent}
+              color={colors.teal}
               muted={colors.textMuted}
               size={iconSize}
             />
@@ -145,7 +153,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="sos"
         options={{
-          title: 'SOS',
+          title: t('tabs.sos'),
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="medkit"

@@ -1,12 +1,16 @@
-import { Text, View, StyleSheet, Pressable, TextInput } from 'react-native';
+import { Text, View, StyleSheet, TextInput } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
+import { GlassCard } from '@/src/components/GlassCard';
+import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import type { CatalogProduct } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { searchRecommendedProducts } from '@/src/services/product-service';
 
 function getProductColor(theme: AppTheme, key: CatalogProduct['colorKey']) {
@@ -23,6 +27,8 @@ function getProductColor(theme: AppTheme, key: CatalogProduct['colorKey']) {
 export default function MarketScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const glass = useGlassStyles();
+  const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const [query, setQuery] = useState('');
   const [items, setItems] = useState<CatalogProduct[]>([]);
@@ -39,44 +45,41 @@ export default function MarketScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Text style={styles.title}>Маркет</Text>
-        <Text style={styles.subtitle}>Товары для аллергиков</Text>
-      </View>
+      <ScreenHeader title={t('market.title')} subtitle={t('market.subtitle')} />
 
       <ProfileSwitcher />
 
-      <View style={styles.searchRow}>
-        <Ionicons name="search" size={18} color={theme.colors.textMuted} />
-        <TextInput
-          style={styles.searchInput}
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Поиск по каталогу…"
-          placeholderTextColor={theme.colors.textMuted}
-          onSubmitEditing={refresh}
-        />
-      </View>
+      <GlassCard style={styles.searchCard}>
+        <View style={styles.searchRow}>
+          <Ionicons name="search" size={18} color={theme.colors.textMuted} />
+          <TextInput
+            style={styles.searchInput}
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t('market.searchPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+            onSubmitEditing={refresh}
+          />
+        </View>
+      </GlassCard>
 
-      <View style={styles.banner}>
+      <GlassCard style={styles.banner}>
         <Ionicons name="star" size={18} color={theme.colors.warning} />
         <Text style={styles.bannerText}>
-          Подборка на основе профиля аллергий — скрыты товары с конфликтующими аллергенами
+          {t('market.banner')}
         </Text>
-      </View>
+      </GlassCard>
 
       {items.length === 0 ? (
-        <View style={styles.empty}>
+        <GlassCard style={styles.empty}>
           <Ionicons name="basket-outline" size={36} color={theme.colors.textMuted} />
-          <Text style={styles.emptyText}>Ничего не найдено. Попробуйте другой запрос.</Text>
-        </View>
+          <Text style={styles.emptyText}>{t('market.empty')}</Text>
+        </GlassCard>
       ) : (
         items.map((item) => {
           const color = getProductColor(theme, item.colorKey);
           return (
-            <Pressable
-              key={item.id}
-              style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+            <GlassCard key={item.id} style={styles.card}>
               <View style={[styles.cardIcon, { backgroundColor: `${color}18` }]}>
                 <Ionicons name={item.icon as any} size={26} color={color} />
               </View>
@@ -90,58 +93,37 @@ export default function MarketScreen() {
                 <Text style={styles.cardWhy}>{item.why}</Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
-            </Pressable>
+            </GlassCard>
           );
         })
       )}
 
-      <Text style={styles.disclaimer}>
-        Рекомендации основаны на общих характеристиках товара и не заменяют назначения врача.
-      </Text>
+      <Text style={glass.disclaimer}>{t('market.disclaimer')}</Text>
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors }: AppTheme) {
   return StyleSheet.create({
-    header: { gap: 3 },
-    title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
-    subtitle: { fontSize: 14, color: colors.textSecondary },
-    searchRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      backgroundColor: colors.card,
-      borderRadius: 14,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
+    searchCard: { padding: 12, marginBottom: 0 },
+    searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     searchInput: { flex: 1, fontSize: 15, color: colors.text },
     banner: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
       backgroundColor: colors.warningLight,
-      borderRadius: 14,
-      padding: 12,
-      borderWidth: 1,
       borderColor: colors.warningBorder,
     },
     bannerText: { fontSize: 13, color: colors.warningText, fontWeight: '500', flex: 1 },
-    empty: { alignItems: 'center', paddingVertical: 32, gap: 8 },
+    empty: { alignItems: 'center', paddingVertical: 24, gap: 8 },
     emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
     card: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: 16,
-      ...(shadows.md as object),
+      marginBottom: 0,
     },
-    pressed: { opacity: 0.85 },
     cardIcon: {
       width: 54,
       height: 54,
@@ -155,6 +137,5 @@ function createStyles({ colors, shadows }: AppTheme) {
     tag: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 8 },
     tagText: { fontSize: 11, fontWeight: '700' },
     cardWhy: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
   });
 }

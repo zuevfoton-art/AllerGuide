@@ -8,11 +8,12 @@ import { isAuthenticated, getCurrentUserId } from '@/src/services/auth-service';
 import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
 import {
   getStoredScenario,
+  isIntroComplete,
   isOnboardingComplete,
 } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
 
-type BootstrapRoute = '/login' | '/onboarding' | '/profile-setup' | '/(tabs)/home';
+type BootstrapRoute = '/login' | '/onboarding-intro' | '/onboarding' | '/profile-setup' | '/(tabs)/home';
 
 export default function Index() {
   const { colors } = useTheme();
@@ -33,6 +34,12 @@ export default function Index() {
     const profiles = listProfiles();
     const scenario = getStoredScenario();
     if (scenario) setScenario(scenario);
+
+    if (!isIntroComplete()) {
+      setTarget('/onboarding-intro');
+      return;
+    }
+
     setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
   }, [setScenario]);
 
@@ -44,5 +51,5 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={target} />;
+  return <Redirect href={target as any} />;
 }

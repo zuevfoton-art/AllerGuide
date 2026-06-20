@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { useMemo } from 'react';
 
 interface AuthModeToggleProps {
@@ -12,6 +13,7 @@ interface AuthModeToggleProps {
 export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <View style={styles.toggleRow}>
@@ -21,9 +23,9 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Ionicons
           name="call"
           size={16}
-          color={loginType === 'phone' ? theme.colors.accent : theme.colors.textSecondary}
+          color={loginType === 'phone' ? theme.colors.teal : theme.colors.textSecondary}
         />
-        <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>Телефон</Text>
+        <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
       </Pressable>
       <Pressable
         style={[styles.toggleBtn, loginType === 'email' && styles.toggleActive]}
@@ -31,9 +33,9 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Ionicons
           name="mail"
           size={16}
-          color={loginType === 'email' ? theme.colors.accent : theme.colors.textSecondary}
+          color={loginType === 'email' ? theme.colors.teal : theme.colors.textSecondary}
         />
-        <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>Email</Text>
+        <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>{t('common.email')}</Text>
       </Pressable>
     </View>
   );
@@ -89,13 +91,14 @@ export function AuthPrimaryButton({
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <Pressable
       style={[styles.button, loading && styles.buttonDisabled]}
       onPress={onPress}
       disabled={loading}>
-      <Text style={styles.buttonText}>{loading ? 'Подождите...' : label}</Text>
+      <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
     </Pressable>
   );
 }
@@ -149,12 +152,12 @@ function createStyles({ colors, shadows }: AppTheme) {
       width: 64,
       height: 64,
       borderRadius: 18,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.teal,
       alignItems: 'center',
       justifyContent: 'center',
-      ...(shadows.accentLg as object),
+      ...(shadows.glass as object),
     },
-    heroTitle: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+    heroTitle: { fontSize: 32, fontWeight: '800', color: colors.text, letterSpacing: -0.8 },
     heroSubtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
     toggleRow: { flexDirection: 'row', gap: 10 },
     toggleBtn: {
@@ -169,9 +172,9 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderWidth: 1.5,
       borderColor: colors.border,
     },
-    toggleActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+    toggleActive: { borderColor: colors.teal, backgroundColor: colors.tealLight },
     toggleText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary },
-    toggleTextActive: { color: colors.accent },
+    toggleTextActive: { color: colors.teal, fontWeight: '700' },
     fieldWrap: { gap: 6 },
     label: {
       fontSize: 13,
@@ -190,17 +193,17 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.border,
     },
     button: {
-      backgroundColor: colors.accent,
+      backgroundColor: colors.teal,
       padding: 17,
       borderRadius: 16,
       alignItems: 'center',
       marginTop: 4,
-      ...(shadows.accent as object),
+      ...(shadows.glass as object),
     },
     buttonDisabled: { opacity: 0.7 },
     buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
     linkText: { fontSize: 14, color: colors.textSecondary },
-    linkAccent: { color: colors.accent, fontWeight: '700' },
+    linkAccent: { color: colors.teal, fontWeight: '700' },
   });
 }

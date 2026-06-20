@@ -12,6 +12,8 @@ import {
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeDiarySections } from '@/src/i18n/content';
 
 export interface DiaryWizardResult {
   type: string;
@@ -29,7 +31,7 @@ interface DiaryWizardProps {
 }
 
 export function DiaryWizard({
-  sections = DIARY_SECTIONS,
+  sections: sectionsProp,
   initialAnswersBySection,
   onCancel,
   onComplete,
@@ -39,6 +41,11 @@ export function DiaryWizard({
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, tDiaryError, locale, content } = useTranslation();
+  const sections = useMemo(
+    () => sectionsProp ?? localizeDiarySections(locale, content()),
+    [sectionsProp, locale, content],
+  );
   const [sectionIndex, setSectionIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
   const [answersBySection, setAnswersBySection] = useState<Record<string, Record<string, string>>>(
@@ -75,7 +82,7 @@ export function DiaryWizard({
   const goNext = () => {
     const validationError = validateDiarySectionStep(section, stepIndex, sectionAnswers);
     if (validationError) {
-      setError(validationError);
+      setError(tDiaryError(validationError));
       return;
     }
 
@@ -125,7 +132,7 @@ export function DiaryWizard({
     });
 
     if (entries.length === 0) {
-      setError('Заполните хотя бы один раздел дневника.');
+      setError(t('diaryWizard.fillOneSection'));
       return;
     }
 
@@ -136,10 +143,10 @@ export function DiaryWizard({
     <View style={styles.wrap}>
       <View style={styles.topRow}>
         <Text style={styles.progressText}>
-          Шаг {overallStepNumber} из {overallStepsTotal}
+          {t('diaryWizard.stepOf', { current: overallStepNumber, total: overallStepsTotal })}
         </Text>
         <Pressable onPress={onCancel}>
-          <Text style={styles.cancelText}>Отмена</Text>
+          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
         </Pressable>
       </View>
 
@@ -170,23 +177,25 @@ export function DiaryWizard({
           style={[styles.secondaryBtn, sectionIndex === 0 && stepIndex === 0 && styles.btnDisabled]}
           disabled={sectionIndex === 0 && stepIndex === 0}
           onPress={goBack}>
-          <Text style={styles.secondaryText}>Назад</Text>
+          <Text style={styles.secondaryText}>{t('common.back')}</Text>
         </Pressable>
         <Pressable style={styles.primaryBtn} onPress={goNext}>
-          <Text style={styles.primaryText}>{isLastStep ? (submitLabel ?? 'Сохранить') : 'Далее'}</Text>
+          <Text style={styles.primaryText}>
+            {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
+          </Text>
         </Pressable>
       </View>
 
       {canSkipSection ? (
         <Pressable style={styles.skipBtn} onPress={skipSection}>
-          <Text style={styles.skipText}>Пропустить раздел</Text>
+          <Text style={styles.skipText}>{t('diaryWizard.skipSection')}</Text>
         </Pressable>
       ) : null}
 
       {onDelete ? (
         <Pressable style={styles.deleteBtn} onPress={onDelete}>
           <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
-          <Text style={styles.deleteText}>Удалить запись</Text>
+          <Text style={styles.deleteText}>{t('diaryWizard.deleteEntry')}</Text>
         </Pressable>
       ) : null}
     </View>
@@ -203,13 +212,14 @@ interface DiaryLegacyEditorProps {
 export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLegacyEditorProps) {
   const theme = useTheme();
   const styles = useMemo(() => createLegacyStyles(theme), [theme]);
+  const { t } = useTranslation();
   const [text, setText] = useState(value);
   const [error, setError] = useState('');
 
   const handleSave = () => {
     const trimmed = text.trim();
     if (!trimmed) {
-      setError('Введите текст записи.');
+      setError(t('diaryWizard.enterEntryText'));
       return;
     }
     onSave(trimmed);
@@ -218,28 +228,28 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
   return (
     <View style={styles.wrap}>
       <View style={styles.topRow}>
-        <Text style={styles.title}>Редактирование записи</Text>
+        <Text style={styles.title}>{t('diaryWizard.editEntry')}</Text>
         <Pressable onPress={onCancel}>
-          <Text style={styles.cancelText}>Отмена</Text>
+          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
         </Pressable>
       </View>
       <TextInput
         style={styles.input}
         value={text}
         onChangeText={setText}
-        placeholder="Текст записи"
+        placeholder={t('diaryWizard.entryPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
         multiline
         textAlignVertical="top"
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable style={styles.primaryBtn} onPress={handleSave}>
-        <Text style={styles.primaryText}>Сохранить изменения</Text>
+        <Text style={styles.primaryText}>{t('diary.saveChanges')}</Text>
       </Pressable>
       {onDelete ? (
         <Pressable style={styles.deleteBtn} onPress={onDelete}>
           <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
-          <Text style={styles.deleteText}>Удалить запись</Text>
+          <Text style={styles.deleteText}>{t('diaryWizard.deleteEntry')}</Text>
         </Pressable>
       ) : null}
     </View>

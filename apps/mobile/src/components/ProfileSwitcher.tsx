@@ -5,11 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { listProfiles } from '@/src/services/profile-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
 export function ProfileSwitcher() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
@@ -58,20 +60,20 @@ export function ProfileSwitcher() {
               </View>
               <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{profile.name}</Text>
               {isActive ? (
-                <Ionicons name="create-outline" size={14} color={theme.colors.accent} />
+                <Ionicons name="create-outline" size={14} color={theme.colors.teal} />
               ) : null}
             </Pressable>
           );
         })}
 
         <Pressable style={styles.addChip} onPress={() => router.push('/profile-setup')}>
-          <Ionicons name="add" size={18} color={theme.colors.accent} />
-          <Text style={styles.addChipText}>Профиль</Text>
+          <Ionicons name="add" size={18} color={theme.colors.teal} />
+          <Text style={styles.addChipText}>{t('profileSwitcher.add')}</Text>
         </Pressable>
       </View>
 
       {activeProfileId ? (
-        <Text style={styles.hint}>Нажмите ещё раз на активный профиль для редактирования</Text>
+        <Text style={styles.hint}>{t('profileSwitcher.hint')}</Text>
       ) : null}
     </View>
   );
@@ -93,8 +95,8 @@ function createStyles({ colors }: AppTheme) {
       borderColor: colors.border,
     },
     active: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
+      borderColor: colors.teal,
+      backgroundColor: colors.tealLight,
     },
     avatar: {
       width: 26,
@@ -104,23 +106,23 @@ function createStyles({ colors }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    avatarActive: { backgroundColor: colors.accent },
+    avatarActive: { backgroundColor: colors.teal },
     avatarText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
     avatarTextActive: { color: colors.onAccent },
     chipText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
-    chipTextActive: { color: colors.accent },
+    chipTextActive: { color: colors.teal },
     addChip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.tealLight,
       paddingVertical: 8,
       paddingHorizontal: 12,
       borderRadius: 20,
       borderWidth: 1.5,
-      borderColor: colors.accentMid,
+      borderColor: colors.teal,
     },
-    addChipText: { fontSize: 14, fontWeight: '700', color: colors.accent },
+    addChipText: { fontSize: 14, fontWeight: '700', color: colors.teal },
     hint: { fontSize: 12, color: colors.textMuted, lineHeight: 16 },
   });
 }

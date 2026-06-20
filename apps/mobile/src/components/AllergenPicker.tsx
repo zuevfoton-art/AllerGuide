@@ -8,6 +8,7 @@ import {
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
+import { useTranslation } from '@/src/store/locale-store';
 
 interface AllergenPickerProps {
   selected: string[];
@@ -17,6 +18,7 @@ interface AllergenPickerProps {
 export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
   const [catalogOpen, setCatalogOpen] = useState(false);
 
   const popularNames = useMemo(() => new Set(getPopularAllergens().map((item) => item.name)), []);
@@ -36,7 +38,7 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.sectionHint}>Частые аллергены</Text>
+      <Text style={styles.sectionHint}>{t('allergens.popular')}</Text>
       <View style={styles.chipGrid}>
         {getPopularAllergens().map((item) => {
           const active = selected.includes(item.name);
@@ -56,7 +58,7 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
 
       {extraSelected.length > 0 ? (
         <>
-          <Text style={styles.sectionHint}>Из полного списка</Text>
+          <Text style={styles.sectionHint}>{t('allergens.fromCatalog')}</Text>
           <View style={styles.chipGrid}>
             {extraSelected.map((name) => (
               <Pressable
@@ -73,7 +75,7 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
 
       <Pressable style={styles.catalogBtn} onPress={() => setCatalogOpen(true)}>
         <Ionicons name="list" size={18} color={theme.colors.accent} />
-        <Text style={styles.catalogBtnText}>Выбрать из полного списка</Text>
+        <Text style={styles.catalogBtnText}>{t('allergens.openCatalog')}</Text>
         <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
       </Pressable>
 
@@ -81,14 +83,13 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
         <View style={styles.crossCard}>
           <View style={styles.crossHeader}>
             <Ionicons name="git-network-outline" size={18} color={theme.colors.purple} />
-            <Text style={styles.crossTitle}>Возможные перекрёстные реакции</Text>
+            <Text style={styles.crossTitle}>{t('allergens.crossTitle')}</Text>
           </View>
           <Text style={styles.crossText}>
-            При выбранных аллергенах также часто реагируют на:{' '}
-            {crossSuggestions.map((item) => item.allergen.name).join(', ')}.
+            {t('allergens.crossText')} {crossSuggestions.map((item) => item.allergen.name).join(', ')}.
           </Text>
           <Pressable style={styles.crossBtn} onPress={() => addRelated(crossSuggestions)}>
-            <Text style={styles.crossBtnText}>Добавить связанные</Text>
+            <Text style={styles.crossBtnText}>{t('allergens.crossAdd')}</Text>
           </Pressable>
         </View>
       ) : null}

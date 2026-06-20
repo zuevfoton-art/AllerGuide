@@ -1,6 +1,8 @@
 import { getDb } from '@/src/db/init';
 import type { Scenario } from '@allerguide/core';
 import type { ThemeMode } from '@/src/constants/theme';
+import type { AppLocale } from '@/src/i18n/types';
+import { APP_LOCALES } from '@/src/i18n/types';
 
 export function getSetting(key: string): string | null {
   const db = getDb();
@@ -31,6 +33,14 @@ export function markOnboardingComplete() {
   setSetting('onboardingComplete', 'true');
 }
 
+export function isIntroComplete(): boolean {
+  return getSetting('introComplete') === 'true';
+}
+
+export function markIntroComplete() {
+  setSetting('introComplete', 'true');
+}
+
 export function getThemeMode(): ThemeMode | null {
   const value = getSetting('themeMode');
   if (value === 'light' || value === 'dark' || value === 'system') return value;
@@ -39,4 +49,16 @@ export function getThemeMode(): ThemeMode | null {
 
 export function setThemeMode(mode: ThemeMode) {
   setSetting('themeMode', mode);
+}
+
+export function getLocale(): AppLocale | null {
+  const value = getSetting('locale');
+  if (value && (APP_LOCALES as readonly string[]).includes(value)) {
+    return value as AppLocale;
+  }
+  return null;
+}
+
+export function setLocale(locale: AppLocale) {
+  setSetting('locale', locale);
 }

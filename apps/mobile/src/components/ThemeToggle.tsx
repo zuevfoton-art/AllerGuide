@@ -3,20 +3,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import type { ThemeMode } from '@/src/constants/theme';
+import { useTranslation } from '@/src/store/locale-store';
 
-const MODES: { key: ThemeMode; label: string; icon: 'sunny' | 'moon' | 'phone-portrait' }[] = [
-  { key: 'light', label: 'Светлая', icon: 'sunny' },
-  { key: 'dark', label: 'Тёмная', icon: 'moon' },
-  { key: 'system', label: 'Системная', icon: 'phone-portrait' },
+const MODES: { key: ThemeMode; labelKey: 'theme.light' | 'theme.dark' | 'theme.system'; icon: 'sunny' | 'moon' | 'phone-portrait' }[] = [
+  { key: 'light', labelKey: 'theme.light', icon: 'sunny' },
+  { key: 'dark', labelKey: 'theme.dark', icon: 'moon' },
+  { key: 'system', labelKey: 'theme.system', icon: 'phone-portrait' },
 ];
 
 export function ThemeToggle() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>Тема оформления</Text>
+      <Text style={styles.title}>{t('theme.title')}</Text>
       <View style={styles.row}>
         {MODES.map((item) => {
           const active = theme.mode === item.key;
@@ -30,7 +32,7 @@ export function ThemeToggle() {
                 size={16}
                 color={active ? theme.colors.accent : theme.colors.textSecondary}
               />
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{t(item.labelKey)}</Text>
             </Pressable>
           );
         })}
