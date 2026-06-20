@@ -1,10 +1,31 @@
 import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
+import { formatDiaryEntrySummary } from '@allerguide/core';
 import type { DiaryEntry, Profile } from '@/src/types';
 
-export async function addDiaryEntry(input: { profileId: number; type: string; details: string; createdAt: string; }) {
+export async function addDiaryEntry(input: {
+  profileId: number;
+  type: string;
+  details: string;
+  createdAt: string;
+}) {
   const db = getDb();
-  db.runSync('INSERT INTO diary_entries (profileId, type, details, createdAt) VALUES (?, ?, ?, ?)', [input.profileId, input.type, input.details, input.createdAt]);
+  db.runSync('INSERT INTO diary_entries (profileId, type, details, createdAt) VALUES (?, ?, ?, ?)', [
+    input.profileId,
+    input.type,
+    input.details,
+    input.createdAt,
+  ]);
+}
+
+export async function addDiaryEntries(
+  profileId: number,
+  entries: { type: string; details: string }[],
+  createdAt = new Date().toISOString(),
+) {
+  for (const entry of entries) {
+    await addDiaryEntry({ profileId, type: entry.type, details: entry.details, createdAt });
+  }
 }
 
 export async function getDiaryEntries(profileId: number) {
@@ -23,7 +44,12 @@ export async function generateDoctorPdf(profileId: number) {
       <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
       <p style="font-size:12px;color:#555;">Отчёт сформирован пользователем/родителем на основе самостоятельно введённых данных и не является медицинской документацией.</p>
       <hr />
-      ${entries.map((e) => `<div style="margin-bottom:12px;"><h3>${e.type}</h3><p>${e.details || ''}</p><small>${e.createdAt}</small></div>`).join('')}
+      ${entries
+        .map((e) => {
+          const summary = formatDiaryEntrySummary(e.type, e.details || '');
+          return `<div style="margin-bottom:12px;"><h3>${e.type}</h3><p>${summary}</p><small>${e.createdAt}</small></div>`;
+        })
+        .join('')}
       <hr />
       <p style="font-size:12px;color:#555;">Информация в приложении носит рекомендательный и справочный характер и не является медицинским заключением, диагнозом или назначением лечения.</p>
     </body></html>`;

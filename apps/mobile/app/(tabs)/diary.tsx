@@ -1,32 +1,30 @@
-import { Text, TextInput, Pressable, StyleSheet, View } from 'react-native';
+import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { addDiaryEntry, getDiaryEntries, generateDoctorPdf } from '@/src/services/diary-service';
+import { formatDiaryEntrySummary } from '@allerguide/core';
+import { addDiaryEntries, generateDoctorPdf, getDiaryEntries } from '@/src/services/diary-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { DiaryWizard } from '@/src/components/DiaryWizard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import type { DiaryEntry } from '@/src/types';
 
-const TYPES = ['Симптомы', 'Лекарство', 'Питание', 'Триггер', 'Кожа', 'Заметка'];
+const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colors'] }> = {
+  Симптомы: { icon: 'pulse', colorKey: 'danger' },
+  Лекарство: { icon: 'medkit', colorKey: 'purple' },
+  Питание: { icon: 'restaurant', colorKey: 'accent' },
+  Триггер: { icon: 'warning', colorKey: 'warning' },
+  Кожа: { icon: 'body', colorKey: 'pink' },
+  Заметка: { icon: 'create', colorKey: 'success' },
+};
 
 export default function DiaryScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const [type, setType] = useState('Симптомы');
-  const [details, setDetails] = useState('');
-  const [list, setList] = useState<any[]>([]);
-  const typeConfig = useMemo<Record<string, { icon: string; color: string }>>(
-    () => ({
-      Симптомы: { icon: 'pulse', color: theme.colors.danger },
-      Лекарство: { icon: 'medkit', color: theme.colors.purple },
-      Питание: { icon: 'restaurant', color: theme.colors.accent },
-      Триггер: { icon: 'warning', color: theme.colors.warning },
-      Кожа: { icon: 'body', color: theme.colors.pink },
-      Заметка: { icon: 'create', color: theme.colors.success },
-    }),
-    [theme],
-  );
+  const [list, setList] = useState<DiaryEntry[]>([]);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (!activeProfileId) return;
@@ -34,13 +32,13 @@ export default function DiaryScreen() {
   }, [activeProfileId]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
-  const save = async () => {
+  const handleComplete = async (entries: { type: string; details: string }[]) => {
     if (!activeProfileId) return;
-    await addDiaryEntry({ profileId: activeProfileId, type, details, createdAt: new Date().toISOString() });
-    setDetails('');
+    await addDiaryEntries(activeProfileId, entries);
+    setWizardOpen(false);
     await load();
   };
 
@@ -48,79 +46,55 @@ export default function DiaryScreen() {
     <Screen>
       <View style={styles.header}>
         <Text style={styles.title}>Дневник</Text>
-        <Text style={styles.subtitle}>Записи наблюдений</Text>
+        <Text style={styles.subtitle}>Пошаговые записи наблюдений</Text>
       </View>
 
       <ProfileSwitcher />
 
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Тип записи</Text>
-        <View style={styles.chips}>
-          {TYPES.map((item) => {
-            const cfg = typeConfig[item];
-            const active = type === item;
-            return (
-              <Pressable
-                key={item}
-                style={[styles.chip, active && { backgroundColor: `${cfg.color}18`, borderColor: cfg.color }]}
-                onPress={() => setType(item)}>
-                <Ionicons
-                  name={cfg.icon as any}
-                  size={13}
-                  color={active ? cfg.color : theme.colors.textMuted}
-                />
-                <Text style={[styles.chipText, active && { color: cfg.color, fontWeight: '700' }]}>{item}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      <TextInput
-        value={details}
-        onChangeText={setDetails}
-        placeholder="Опишите наблюдение..."
-        placeholderTextColor={theme.colors.textMuted}
-        multiline
-        style={styles.input}
-      />
-
-      <Pressable style={styles.button} onPress={save}>
-        <Ionicons name="add-circle" size={18} color={theme.colors.onAccent} />
-        <Text style={styles.buttonText}>Сохранить запись</Text>
-      </Pressable>
+      {!wizardOpen ? (
+        <Pressable style={styles.startBtn} onPress={() => setWizardOpen(true)}>
+          <Ionicons name="add-circle" size={20} color={theme.colors.onAccent} />
+          <Text style={styles.startBtnText}>Новая запись по шагам</Text>
+        </Pressable>
+      ) : (
+        <DiaryWizard onCancel={() => setWizardOpen(false)} onComplete={handleComplete} />
+      )}
 
       <View style={styles.row}>
-        <Pressable style={styles.secondaryBtn} onPress={load}>
+        <Pressable style={styles.secondaryBtn} onPress={() => void load()}>
           <Ionicons name="refresh" size={16} color={theme.colors.accent} />
           <Text style={styles.secondaryText}>Обновить</Text>
         </Pressable>
-        <Pressable style={styles.secondaryBtn} onPress={() => activeProfileId && generateDoctorPdf(activeProfileId)}>
+        <Pressable
+          style={styles.secondaryBtn}
+          onPress={() => activeProfileId && generateDoctorPdf(activeProfileId)}>
           <Ionicons name="document-text" size={16} color={theme.colors.accent} />
           <Text style={styles.secondaryText}>PDF-отчёт</Text>
         </Pressable>
       </View>
 
-      {list.length > 0 && (
+      {list.length > 0 ? (
         <>
           <Text style={styles.sectionLabel}>История записей</Text>
           {list.map((item) => {
-            const cfg = typeConfig[item.type] ?? { icon: 'create', color: theme.colors.textSecondary };
+            const cfg = TYPE_CONFIG[item.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
+            const color = theme.colors[cfg.colorKey];
+            const summary = formatDiaryEntrySummary(item.type, item.details);
             return (
               <View key={item.id} style={styles.card}>
-                <View style={[styles.cardDot, { backgroundColor: `${cfg.color}18` }]}>
-                  <Ionicons name={cfg.icon as any} size={16} color={cfg.color} />
+                <View style={[styles.cardDot, { backgroundColor: `${color}18` }]}>
+                  <Ionicons name={cfg.icon as any} size={16} color={color} />
                 </View>
                 <View style={styles.cardBody}>
                   <Text style={styles.cardType}>{item.type}</Text>
-                  <Text style={styles.cardDetails}>{item.details}</Text>
+                  <Text style={styles.cardDetails}>{summary}</Text>
                   <Text style={styles.cardMeta}>{item.createdAt}</Text>
                 </View>
               </View>
             );
           })}
         </>
-      )}
+      ) : null}
 
       <Text style={styles.disclaimer}>
         Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.
@@ -134,40 +108,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     header: { gap: 3 },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },
-    section: { gap: 10 },
-    sectionLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-    },
-    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    chip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      paddingVertical: 8,
-      paddingHorizontal: 13,
-      borderRadius: 20,
-      backgroundColor: colors.card,
-      borderWidth: 1.5,
-      borderColor: colors.border,
-    },
-    chipText: { fontSize: 13, fontWeight: '500', color: colors.textSecondary },
-    input: {
-      minHeight: 110,
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      padding: 15,
-      fontSize: 15,
-      color: colors.text,
-      textAlignVertical: 'top',
-      borderWidth: 1.5,
-      borderColor: colors.border,
-      lineHeight: 22,
-    },
-    button: {
+    startBtn: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
@@ -177,7 +118,14 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderRadius: 16,
       ...(shadows.accent as object),
     },
-    buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+    startBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+    sectionLabel: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+    },
     row: { flexDirection: 'row', gap: 10 },
     secondaryBtn: {
       flex: 1,
