@@ -1,10 +1,27 @@
-import { createSyncPayload, parseSyncPayload } from '@allerguide/core';
+import {
+  createSyncPayload,
+  filterUserScopedSettings,
+  parseSyncPayload,
+  validateSyncPayload,
+  type DiaryEntry,
+  type EmergencyContact,
+  type ScanHistoryEntry,
+} from '@allerguide/core';
 import { getCurrentUserId } from '@/src/services/auth-service';
 import { listProfiles } from '@/src/services/profile-service';
+import { getSosNotes } from '@/src/services/sos-service';
 import { getDb } from '@/src/db/init';
-import type { DiaryEntry, EmergencyContact } from '@allerguide/core';
+import { applySyncPayload } from '@/src/services/sync-restore';
+import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+
+function collectAppSettings(): Record<string, string> {
+  const db = getDb();
+  const rows = db.getAllSync<{ key: string; value: string }>('SELECT key, value FROM app_settings');
+  const settings = Object.fromEntries(rows.map((row) => [row.key, row.value]));
+  return filterUserScopedSettings(settings);
+}
 
 function collectUserData(userId: number) {
   const profiles = listProfiles();
@@ -22,11 +39,25 @@ function collectUserData(userId: number) {
     ),
   );
 
+  const scanHistory = profileIds.flatMap((profileId) =>
+    db.getAllSync<ScanHistoryEntry>(
+      'SELECT * FROM scan_history WHERE profileId = ?',
+      [profileId],
+    ),
+  );
+
+  const profileSos = profileIds
+    .map((profileId) => ({ profileId, notes: getSosNotes(profileId) }))
+    .filter((entry) => entry.notes.length > 0);
+
   return createSyncPayload({
     userId,
     profiles,
     diaryEntries,
     emergencyContacts,
+    scanHistory,
+    profileSos,
+    appSettings: collectAppSettings(),
   });
 }
 
@@ -36,7 +67,25 @@ export function exportLocalBackup(): string {
   return JSON.stringify(collectUserData(userId));
 }
 
+export function importLocalBackup(raw: string): { ok: true } | { ok: false; error: string } {
+  const userId = getCurrentUserId();
+  if (!userId) return { ok: false, error: 'Не выполнен вход' };
+
+  const payload = parseSyncPayload(raw);
+  if (!payload) return { ok: false, error: 'Некорректный файл резервной копии' };
+
+  const validationError = validateSyncPayload(payload, userId);
+  if (validationError) return { ok: false, error: 'Файл резервной копии не подходит для этого аккаунта' };
+
+  applySyncPayload(getDb(), payload, userId);
+  return { ok: true };
+}
+
 export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
+  if (!CLOUD_SYNC_ENABLED) {
+    return { ok: false, error: 'Облачная синхронизация пока недоступна' };
+  }
+
   const userId = getCurrentUserId();
   if (!userId) return { ok: false, error: 'Не выполнен вход' };
 
@@ -58,6 +107,10 @@ export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
 }
 
 export async function downloadBackup(): Promise<{ ok: boolean; error?: string }> {
+  if (!CLOUD_SYNC_ENABLED) {
+    return { ok: false, error: 'Облачная синхронизация пока недоступна' };
+  }
+
   const userId = getCurrentUserId();
   if (!userId) return { ok: false, error: 'Не выполнен вход' };
 
@@ -66,18 +119,12 @@ export async function downloadBackup(): Promise<{ ok: boolean; error?: string }>
     if (!response.ok) return { ok: false, error: 'Резервная копия не найдена' };
 
     const payload = parseSyncPayload(await response.text());
-    if (!payload || payload.userId !== userId) {
-      return { ok: false, error: 'Некорректные данные резервной копии' };
-    }
+    if (!payload) return { ok: false, error: 'Некорректные данные резервной копии' };
 
-    const db = getDb();
-    for (const profile of payload.profiles) {
-      db.runSync(
-        'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies) VALUES (?, ?, ?, ?, ?, ?)',
-        [profile.id, userId, profile.name, profile.birthYear, profile.type, profile.allergies],
-      );
-    }
+    const validationError = validateSyncPayload(payload, userId);
+    if (validationError) return { ok: false, error: 'Резервная копия не подходит для этого аккаунта' };
 
+    applySyncPayload(getDb(), payload, userId);
     return { ok: true };
   } catch {
     return { ok: false, error: 'Не удалось загрузить резервную копию' };

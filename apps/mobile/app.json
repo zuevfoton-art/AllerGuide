@@ -3,21 +3,82 @@
     "name": "AllerGuide",
     "slug": "allerguide",
     "scheme": "allerguide",
+    "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "AllerGuide использует камеру для сканирования штрихкодов продуктов."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "AllerGuide использует фото для загрузки меню и состава продуктов."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "AllerGuide использует геолокацию для показа аллерго-дружелюбных мест рядом."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1F7A5A"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4FAF7"
+    },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/favicon.png"
     },
     "ios": {
-      "bundleIdentifier": "com.anonymous.allerguide"
+      "bundleIdentifier": "com.allerguide.app",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "AllerGuide использует камеру для сканирования штрихкодов продуктов.",
+        "NSPhotoLibraryUsageDescription": "AllerGuide использует фото для загрузки меню и состава продуктов.",
+        "NSLocationWhenInUseUsageDescription": "AllerGuide использует геолокацию для показа аллерго-дружелюбных мест рядом."
+      }
+    },
+    "android": {
+      "package": "com.allerguide.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1F7A5A"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      }
     }
   }
 }

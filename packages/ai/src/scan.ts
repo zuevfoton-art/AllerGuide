@@ -16,7 +16,7 @@ export interface ScanResult {
   mode: ScanMode;
   level: RiskLevel;
   productName?: string;
-  source?: 'manual' | 'barcode' | 'openfoodfacts' | 'ocr';
+  source?: 'manual' | 'barcode' | 'openfoodfacts' | 'ocr' | 'llm';
 }
 
 function parseProfileAllergens(profile?: Pick<Profile, 'allergies'> | null): string[] {
@@ -119,4 +119,4 @@ export function runMockScan({
   };
 }
 
-export const aiVersion = 'scan-3-cross-off';
+export const aiVersion = 'scan-4-smart-llm';

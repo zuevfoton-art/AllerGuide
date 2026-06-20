@@ -1,14 +1,28 @@
-import * as Crypto from 'expo-crypto';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import {
+  hashPassword,
   normalizeLogin,
   validateAuthForm,
+  verifyPassword,
   type AuthUser,
   type LoginType,
 } from '@allerguide/core';
+import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import {
+  backendDeleteAccount,
+  backendLogin,
+  backendRegister,
+  cacheAuthUser,
+  clearAuthToken,
+  clearCachedAuthUser,
+  getAuthToken,
+  getCachedAuthUser,
+  setAuthToken,
+  syncProfilesFromBackend,
+} from '@/src/services/backend-api';
 import { useAppStore } from '@/src/store/app-store';
 
 interface StoredUser extends AuthUser {
@@ -17,13 +31,6 @@ interface StoredUser extends AuthUser {
 }
 
 const AUTH_USER_ID_KEY = 'authUserId';
-
-async function hashPassword(password: string): Promise<string> {
-  return Crypto.digestStringAsync(
-    Crypto.CryptoDigestAlgorithm.SHA256,
-    `allerguide:${password}`,
-  );
-}
 
 function setSessionUserId(userId: number) {
   setSetting(AUTH_USER_ID_KEY, String(userId));
@@ -54,11 +61,30 @@ function toAuthUser(row: StoredUser): AuthUser {
   };
 }
 
+export async function hydrateAuthSession(): Promise<void> {
+  if (Platform.OS === 'web') return;
+
+  const secureValue = await SecureStore.getItemAsync(AUTH_USER_ID_KEY);
+  if (!secureValue) return;
+
+  const localValue = getSetting(AUTH_USER_ID_KEY);
+  if (localValue !== secureValue) {
+    setSetting(AUTH_USER_ID_KEY, secureValue);
+  }
+}
+
 export function isAuthenticated(): boolean {
+  if (BACKEND_AUTH_ENABLED) {
+    return getSessionUserId() != null && getCachedAuthUser() != null;
+  }
   return getSessionUserId() != null && getCurrentUser() != null;
 }
 
 export function getCurrentUser(): AuthUser | null {
+  if (BACKEND_AUTH_ENABLED) {
+    return getCachedAuthUser();
+  }
+
   const userId = getSessionUserId();
   if (!userId) return null;
 
@@ -79,6 +105,17 @@ export async function registerUser(input: {
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
   const validationError = validateAuthForm(input);
   if (validationError) return { ok: false, error: validationError };
+
+  if (BACKEND_AUTH_ENABLED) {
+    const response = await backendRegister(input);
+    if (!response.ok) return { ok: false, error: response.error };
+
+    await setAuthToken(response.data.token);
+    cacheAuthUser(response.data.user);
+    setSessionUserId(response.data.user.id);
+    await syncProfilesFromBackend(response.data.user.id, response.data.token);
+    return { ok: true, user: response.data.user };
+  }
 
   const normalizedLogin = normalizeLogin(input.loginType, input.login);
   const db = getDb();
@@ -117,6 +154,17 @@ export async function loginUser(input: {
   const validationError = validateAuthForm(input);
   if (validationError) return { ok: false, error: validationError };
 
+  if (BACKEND_AUTH_ENABLED) {
+    const response = await backendLogin(input);
+    if (!response.ok) return { ok: false, error: response.error };
+
+    await setAuthToken(response.data.token);
+    cacheAuthUser(response.data.user);
+    setSessionUserId(response.data.user.id);
+    await syncProfilesFromBackend(response.data.user.id, response.data.token);
+    return { ok: true, user: response.data.user };
+  }
+
   const normalizedLogin = normalizeLogin(input.loginType, input.login);
   const db = getDb();
   const row = db.getFirstSync<StoredUser>('SELECT * FROM users WHERE login = ?', [normalizedLogin]);
@@ -125,9 +173,13 @@ export async function loginUser(input: {
     return { ok: false, error: 'Неверный логин или пароль.' };
   }
 
-  const passwordHash = await hashPassword(input.password);
-  if (row.passwordHash !== passwordHash) {
+  const verification = await verifyPassword(input.password, row.passwordHash);
+  if (!verification.valid) {
     return { ok: false, error: 'Неверный логин или пароль.' };
+  }
+
+  if (verification.upgradedHash) {
+    db.runSync('UPDATE users SET passwordHash = ? WHERE id = ?', [verification.upgradedHash, row.id]);
   }
 
   setSessionUserId(row.id);
@@ -136,5 +188,46 @@ export async function loginUser(input: {
 
 export function logoutUser() {
   clearSessionUserId();
+  clearCachedAuthUser();
+  void clearAuthToken();
   useAppStore.getState().resetAppState();
+}
+
+export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const userId = getSessionUserId();
+  if (!userId) return { ok: false, error: 'Пользователь не авторизован.' };
+
+  if (BACKEND_AUTH_ENABLED) {
+    const token = await getAuthToken();
+    if (!token) return { ok: false, error: 'Сессия истекла. Войдите снова.' };
+
+    const response = await backendDeleteAccount(token);
+    if (!response.ok) return { ok: false, error: response.error };
+  }
+
+  const db = getDb();
+  const profiles = db.getAllSync<{ id: number }>('SELECT id FROM profiles WHERE userId = ?', [userId]);
+
+  for (const profile of profiles) {
+    db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM scan_history WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM profiles WHERE id = ?', [profile.id]);
+  }
+
+  if (!BACKEND_AUTH_ENABLED) {
+    db.runSync('DELETE FROM users WHERE id = ?', [userId]);
+  }
+
+  clearSessionUserId();
+  clearCachedAuthUser();
+  void clearAuthToken();
+  useAppStore.getState().resetAppState();
+  return { ok: true };
+}
+
+export async function getBackendAuthToken(): Promise<string | null> {
+  if (!BACKEND_AUTH_ENABLED) return null;
+  return getAuthToken();
 }

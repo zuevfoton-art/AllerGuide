@@ -1,6 +1,13 @@
 import { getDb } from '@/src/db/init';
 import { useAppStore } from '@/src/store/app-store';
-import { getCurrentUserId } from '@/src/services/auth-service';
+import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
+import { getCurrentUserId, getBackendAuthToken } from '@/src/services/auth-service';
+import {
+  backendCreateProfile,
+  backendDeleteProfile,
+  backendUpdateProfile,
+  upsertLocalProfile,
+} from '@/src/services/backend-api';
 import type { Profile, ProfileInput, ProfileType } from '@allerguide/core';
 
 function requireUserId(): number {
@@ -19,6 +26,19 @@ export function listProfiles() {
 
 export async function createProfile(input: ProfileInput) {
   const userId = requireUserId();
+
+  if (BACKEND_AUTH_ENABLED) {
+    const token = await getBackendAuthToken();
+    if (!token) throw new Error('Session expired');
+
+    const response = await backendCreateProfile(token, input);
+    if (!response.ok) throw new Error(response.error);
+
+    upsertLocalProfile({ ...response.data.profile, userId });
+    useAppStore.getState().setActiveProfile(response.data.profile);
+    return response.data.profile.id;
+  }
+
   const db = getDb();
   db.runSync('INSERT INTO profiles (userId, name, birthYear, type, allergies) VALUES (?, ?, ?, ?, ?)', [
     userId,
@@ -36,6 +56,20 @@ export async function createProfile(input: ProfileInput) {
 
 export async function updateProfile(id: number, input: ProfileInput) {
   const userId = requireUserId();
+
+  if (BACKEND_AUTH_ENABLED) {
+    const token = await getBackendAuthToken();
+    if (!token) throw new Error('Session expired');
+
+    const response = await backendUpdateProfile(token, id, input);
+    if (!response.ok) throw new Error(response.error);
+
+    upsertLocalProfile({ ...response.data.profile, userId });
+    const { activeProfileId, setActiveProfile } = useAppStore.getState();
+    if (activeProfileId === id) setActiveProfile(response.data.profile);
+    return response.data.profile;
+  }
+
   const db = getDb();
   db.runSync(
     'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
@@ -48,10 +82,19 @@ export async function updateProfile(id: number, input: ProfileInput) {
 }
 
 export async function deleteProfile(id: number) {
+  if (BACKEND_AUTH_ENABLED) {
+    const token = await getBackendAuthToken();
+    if (token) {
+      const response = await backendDeleteProfile(token, id);
+      if (!response.ok) throw new Error(response.error);
+    }
+  }
+
   const db = getDb();
   db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM scan_history WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
+  db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profiles WHERE id = ?', [id]);
 
   const { activeProfileId, setActiveProfileId, setActiveProfile } = useAppStore.getState();

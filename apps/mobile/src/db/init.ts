@@ -124,6 +124,80 @@ class WebDb implements DbLike {
       return;
     }
 
+    if (s.startsWith('insert or replace into profiles')) {
+      const profiles = this.getProfiles();
+      const id = params![0] as number;
+      const next: Profile = {
+        id,
+        userId: params![1] as number,
+        name: params![2] as string,
+        birthYear: params![3] as number,
+        type: params![4] as Profile['type'],
+        allergies: params![5] as string,
+      };
+      const index = profiles.findIndex((profile) => profile.id === id);
+      if (index >= 0) profiles[index] = next;
+      else profiles.push(next);
+      this.saveProfiles(profiles);
+      return;
+    }
+
+    if (s.startsWith('insert or replace into diary_entries')) {
+      const entries = this.getDiaryEntries();
+      const id = params![0] as number;
+      const next: DiaryEntry = {
+        id,
+        profileId: params![1] as number,
+        type: params![2] as string,
+        details: params![3] as string,
+        createdAt: params![4] as string,
+      };
+      const index = entries.findIndex((entry) => entry.id === id);
+      if (index >= 0) entries[index] = next;
+      else entries.push(next);
+      this.saveDiaryEntries(entries);
+      return;
+    }
+
+    if (s.startsWith('insert or replace into scan_history')) {
+      const entries = this.getScanHistory();
+      const id = params![0] as number;
+      const next: ScanHistoryEntry = {
+        id,
+        profileId: params![1] as number,
+        mode: params![2] as string,
+        input: params![3] as string,
+        verdict: params![4] as string,
+        matches: params![5] as string,
+        level: params![6] as string,
+        productName: (params![7] as string | null) ?? null,
+        source: params![8] as string,
+        createdAt: params![9] as string,
+      };
+      const index = entries.findIndex((entry) => entry.id === id);
+      if (index >= 0) entries[index] = next;
+      else entries.push(next);
+      this.saveScanHistory(entries);
+      return;
+    }
+
+    if (s.startsWith('insert or replace into emergency_contacts')) {
+      const items = this.getEmergencyContacts();
+      const id = params![0] as number;
+      const next: EmergencyContact = {
+        id,
+        profileId: params![1] as number,
+        name: params![2] as string,
+        phone: params![3] as string,
+        relation: params![4] as EmergencyContact['relation'],
+      };
+      const index = items.findIndex((item) => item.id === id);
+      if (index >= 0) items[index] = next;
+      else items.push(next);
+      this.saveEmergencyContacts(items);
+      return;
+    }
+
     if (s.startsWith('update profiles')) {
       const profiles = this.getProfiles();
       const id = params![5] as number;
@@ -345,6 +419,11 @@ class WebDb implements DbLike {
     if (s.includes('from emergency_contacts') && s.includes('where profileid =')) {
       const items = this.getEmergencyContacts();
       return items.filter((item) => item.profileId === params![0]) as T[];
+    }
+
+    if (s.includes('from app_settings')) {
+      const settings = this.getSettings();
+      return Object.entries(settings).map(([key, value]) => ({ key, value })) as T[];
     }
 
     if (s.includes('from diary_entries')) {

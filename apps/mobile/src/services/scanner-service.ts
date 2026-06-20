@@ -1,10 +1,31 @@
-import { runMockScan, type ScanResult } from '@allerguide/ai';
+import { runSmartScan, type ScanResult } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
+import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
 import { saveScanHistory } from '@/src/services/scan-history-service';
 
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+
 const DEMO_MENU_TEXT =
   'Паста карбонара (сливки, сыр пармезан), салат с орехами и молочной заправкой, тирамisu (яйца, молоко).';
+
+function getLlmEndpoint(): string | undefined {
+  if (!AI_SCAN_ENABLED) return undefined;
+  return `${API_BASE}/api/scan`;
+}
+
+async function analyzeText(input: {
+  mode: 'product' | 'menu' | 'medicine';
+  text: string;
+  profile?: Profile | null;
+  productName?: string;
+  source?: ScanResult['source'];
+}): Promise<ScanResult> {
+  return runSmartScan({
+    ...input,
+    llmEndpoint: getLlmEndpoint(),
+  });
+}
 
 export async function scanBarcode({
   barcode,
@@ -16,7 +37,7 @@ export async function scanBarcode({
   const product = await fetchProductByBarcode(barcode);
 
   if (!product) {
-    const fallback = runMockScan({
+    const fallback = await analyzeText({
       mode: 'product',
       text: barcode,
       profile,
@@ -31,7 +52,7 @@ export async function scanBarcode({
     return result;
   }
 
-  const result = runMockScan({
+  const result = await analyzeText({
     mode: 'product',
     text: product.ingredients,
     profile,
@@ -42,7 +63,7 @@ export async function scanBarcode({
   return result;
 }
 
-export function scanText({
+export async function scanText({
   mode,
   text,
   profile,
@@ -50,20 +71,24 @@ export function scanText({
   mode: 'product' | 'menu' | 'medicine' | 'cosmetics';
   text: string;
   profile?: Profile | null;
-}): ScanResult {
-  const result = runMockScan({ mode, text, profile, source: 'manual' });
+}): Promise<ScanResult> {
+  const result = await analyzeText({ mode, text, profile, source: 'manual' });
   if (profile) saveScanHistory(profile.id, text, result);
   return result;
 }
 
-export function scanMenuPhoto({ profile }: { profile?: Profile | null }): ScanResult {
-  const result = runMockScan({
+export async function scanMenuPhoto({ profile }: { profile?: Profile | null }): Promise<ScanResult> {
+  const result = await analyzeText({
     mode: 'menu',
     text: DEMO_MENU_TEXT,
     profile,
-    productName: 'Меню ресторана',
+    productName: 'Меню ресторана (демо)',
     source: 'ocr',
   });
-  if (profile) saveScanHistory(profile.id, DEMO_MENU_TEXT, result, 'Меню ресторана');
-  return result;
+  const demoResult: ScanResult = {
+    ...result,
+    reason: `${result.reason} Демо-режим: фото не распознаётся, использован пример меню.`,
+  };
+  if (profile) saveScanHistory(profile.id, DEMO_MENU_TEXT, demoResult, 'Меню ресторана (демо)');
+  return demoResult;
 }
