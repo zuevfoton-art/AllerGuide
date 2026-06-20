@@ -8,8 +8,21 @@ import {
   type AuthUser,
   type LoginType,
 } from '@allerguide/core';
+import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import {
+  backendDeleteAccount,
+  backendLogin,
+  backendRegister,
+  cacheAuthUser,
+  clearAuthToken,
+  clearCachedAuthUser,
+  getAuthToken,
+  getCachedAuthUser,
+  setAuthToken,
+  syncProfilesFromBackend,
+} from '@/src/services/backend-api';
 import { useAppStore } from '@/src/store/app-store';
 
 interface StoredUser extends AuthUser {
@@ -61,10 +74,17 @@ export async function hydrateAuthSession(): Promise<void> {
 }
 
 export function isAuthenticated(): boolean {
+  if (BACKEND_AUTH_ENABLED) {
+    return getSessionUserId() != null && getCachedAuthUser() != null;
+  }
   return getSessionUserId() != null && getCurrentUser() != null;
 }
 
 export function getCurrentUser(): AuthUser | null {
+  if (BACKEND_AUTH_ENABLED) {
+    return getCachedAuthUser();
+  }
+
   const userId = getSessionUserId();
   if (!userId) return null;
 
@@ -85,6 +105,17 @@ export async function registerUser(input: {
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
   const validationError = validateAuthForm(input);
   if (validationError) return { ok: false, error: validationError };
+
+  if (BACKEND_AUTH_ENABLED) {
+    const response = await backendRegister(input);
+    if (!response.ok) return { ok: false, error: response.error };
+
+    await setAuthToken(response.data.token);
+    cacheAuthUser(response.data.user);
+    setSessionUserId(response.data.user.id);
+    await syncProfilesFromBackend(response.data.user.id, response.data.token);
+    return { ok: true, user: response.data.user };
+  }
 
   const normalizedLogin = normalizeLogin(input.loginType, input.login);
   const db = getDb();
@@ -123,6 +154,17 @@ export async function loginUser(input: {
   const validationError = validateAuthForm(input);
   if (validationError) return { ok: false, error: validationError };
 
+  if (BACKEND_AUTH_ENABLED) {
+    const response = await backendLogin(input);
+    if (!response.ok) return { ok: false, error: response.error };
+
+    await setAuthToken(response.data.token);
+    cacheAuthUser(response.data.user);
+    setSessionUserId(response.data.user.id);
+    await syncProfilesFromBackend(response.data.user.id, response.data.token);
+    return { ok: true, user: response.data.user };
+  }
+
   const normalizedLogin = normalizeLogin(input.loginType, input.login);
   const db = getDb();
   const row = db.getFirstSync<StoredUser>('SELECT * FROM users WHERE login = ?', [normalizedLogin]);
@@ -146,12 +188,22 @@ export async function loginUser(input: {
 
 export function logoutUser() {
   clearSessionUserId();
+  clearCachedAuthUser();
+  void clearAuthToken();
   useAppStore.getState().resetAppState();
 }
 
 export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error: string }> {
   const userId = getSessionUserId();
   if (!userId) return { ok: false, error: 'Пользователь не авторизован.' };
+
+  if (BACKEND_AUTH_ENABLED) {
+    const token = await getAuthToken();
+    if (!token) return { ok: false, error: 'Сессия истекла. Войдите снова.' };
+
+    const response = await backendDeleteAccount(token);
+    if (!response.ok) return { ok: false, error: response.error };
+  }
 
   const db = getDb();
   const profiles = db.getAllSync<{ id: number }>('SELECT id FROM profiles WHERE userId = ?', [userId]);
@@ -164,8 +216,18 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
     db.runSync('DELETE FROM profiles WHERE id = ?', [profile.id]);
   }
 
-  db.runSync('DELETE FROM users WHERE id = ?', [userId]);
+  if (!BACKEND_AUTH_ENABLED) {
+    db.runSync('DELETE FROM users WHERE id = ?', [userId]);
+  }
+
   clearSessionUserId();
+  clearCachedAuthUser();
+  void clearAuthToken();
   useAppStore.getState().resetAppState();
   return { ok: true };
+}
+
+export async function getBackendAuthToken(): Promise<string | null> {
+  if (!BACKEND_AUTH_ENABLED) return null;
+  return getAuthToken();
 }
