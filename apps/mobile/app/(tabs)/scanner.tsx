@@ -1,5 +1,6 @@
-import { Text, TextInput, Pressable, StyleSheet, View } from 'react-native';
-import { useState } from 'react';
+import { Text, TextInput, Pressable, StyleSheet, View, Platform } from 'react-native';
+import { useState, useRef } from 'react';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { runMockScan } from '@/src/services/mock-ai-service';
 import { useAppStore } from '@/src/store/app-store';
 import { colors, shadows } from '@/src/constants/theme';
@@ -18,15 +19,91 @@ export default function ScannerScreen() {
   const [input, setInput] = useState('молоко, арахис, сахар');
   const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');
   const [result, setResult] = useState<any>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [scanned, setScanned] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
 
   const isSafe = result && result.matches?.length === 0;
   const isDanger = result && result.matches?.length > 0;
 
+  const openCamera = async () => {
+    if (!permission?.granted) {
+      const res = await requestPermission();
+      if (!res.granted) return;
+    }
+    setScanned(false);
+    setCameraOpen(true);
+  };
+
+  const handleBarcode = ({ data }: { data: string }) => {
+    if (scanned) return;
+    setScanned(true);
+    setCameraOpen(false);
+    setInput(data);
+    setResult(runMockScan({ mode, text: data, profile }));
+  };
+
+  if (cameraOpen) {
+    return (
+      <View style={styles.cameraContainer}>
+        <CameraView
+          style={StyleSheet.absoluteFillObject}
+          facing="back"
+          onBarcodeScanned={handleBarcode}
+        />
+
+        <View style={styles.cameraOverlay}>
+          <View style={styles.cameraTopBar}>
+            <Pressable style={styles.closeBtn} onPress={() => setCameraOpen(false)}>
+              <Ionicons name="close" size={24} color="#fff" />
+            </Pressable>
+            <Text style={styles.cameraTitle}>
+              {mode === 'product' ? 'Сканируйте штрихкод' : 'Наведите на текст'}
+            </Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <View style={styles.viewfinderWrap}>
+            <View style={styles.viewfinder}>
+              <View style={[styles.corner, styles.cornerTL]} />
+              <View style={[styles.corner, styles.cornerTR]} />
+              <View style={[styles.corner, styles.cornerBL]} />
+              <View style={[styles.corner, styles.cornerBR]} />
+            </View>
+            <Text style={styles.viewfinderHint}>
+              {mode === 'product'
+                ? 'Штрихкод будет распознан автоматически'
+                : 'Совместите состав блюда в рамке'}
+            </Text>
+          </View>
+
+          {Platform.OS === 'web' && (
+            <View style={styles.webHint}>
+              <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.7)" />
+              <Text style={styles.webHintText}>
+                Сканирование штрихкодов доступно в мобильном приложении
+              </Text>
+            </View>
+          )}
+
+          <Pressable style={styles.cancelBtn} onPress={() => setCameraOpen(false)}>
+            <Text style={styles.cancelBtnText}>Отмена</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>Умный сканер</Text>
-        <Text style={styles.subtitle}>Проверка аллергенов в составе</Text>
+        <View>
+          <Text style={styles.title}>Умный сканер</Text>
+          <Text style={styles.subtitle}>Проверка аллергенов в составе</Text>
+        </View>
+        <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
+          <Ionicons name="camera" size={22} color={colors.accent} />
+        </Pressable>
       </View>
 
       <ProfileSwitcher />
@@ -41,6 +118,25 @@ export default function ScannerScreen() {
             <Text style={[styles.modeText, mode === m.key && styles.modeTextActive]}>{m.label}</Text>
           </Pressable>
         ))}
+      </View>
+
+      <Pressable style={styles.scanBanner} onPress={openCamera}>
+        <View style={styles.scanBannerIcon}>
+          <Ionicons name="barcode" size={26} color={colors.accent} />
+        </View>
+        <View style={styles.scanBannerText}>
+          <Text style={styles.scanBannerTitle}>
+            {mode === 'product' ? 'Сканировать штрихкод' : 'Снять состав на фото'}
+          </Text>
+          <Text style={styles.scanBannerDesc}>Нажмите, чтобы открыть камеру</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      </Pressable>
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>или введите вручную</Text>
+        <View style={styles.dividerLine} />
       </View>
 
       <View style={styles.inputWrap}>
@@ -96,9 +192,19 @@ export default function ScannerScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { gap: 3 },
+  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: colors.textSecondary },
+  cameraIconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.accentLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+
   modeRow: { flexDirection: 'row', gap: 8 },
   modeBtn: {
     flex: 1,
@@ -115,6 +221,34 @@ const styles = StyleSheet.create({
   modeBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
   modeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
   modeTextActive: { color: colors.accent },
+
+  scanBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: colors.card,
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: colors.accentMid,
+    ...(shadows.sm as object),
+  },
+  scanBannerIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
+    backgroundColor: colors.accentLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scanBannerText: { flex: 1, gap: 3 },
+  scanBannerTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+  scanBannerDesc: { fontSize: 13, color: colors.textSecondary },
+
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+
   inputWrap: {
     backgroundColor: colors.card,
     borderRadius: 16,
@@ -123,7 +257,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingHorizontal: 14,
     paddingBottom: 14,
-    minHeight: 130,
+    minHeight: 100,
   },
   inputIcon: { marginBottom: 6 },
   input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
@@ -138,22 +272,12 @@ const styles = StyleSheet.create({
     ...(shadows.accent as object),
   },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  resultCard: {
-    borderRadius: 18,
-    padding: 16,
-    gap: 10,
-    borderWidth: 1.5,
-  },
+
+  resultCard: { borderRadius: 18, padding: 16, gap: 10, borderWidth: 1.5 },
   resultSafe: { backgroundColor: colors.successLight, borderColor: '#A8E6BE' },
   resultDanger: { backgroundColor: colors.dangerLight, borderColor: '#FFB3AE' },
   resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  resultIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  resultIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   resultIconSafe: { backgroundColor: '#C8F2D6' },
   resultIconDanger: { backgroundColor: '#FFD6D4' },
   resultText: { flex: 1 },
@@ -173,4 +297,63 @@ const styles = StyleSheet.create({
   },
   matchesText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
   disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+
+  cameraContainer: { flex: 1, backgroundColor: '#000' },
+  cameraOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'space-between',
+    paddingBottom: 48,
+  },
+  cameraTopBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 56,
+    paddingHorizontal: 20,
+  },
+  closeBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  viewfinderWrap: { alignItems: 'center', gap: 20 },
+  viewfinder: {
+    width: 260,
+    height: 180,
+    position: 'relative',
+  },
+  corner: {
+    position: 'absolute',
+    width: 28,
+    height: 28,
+    borderColor: colors.accent,
+    borderWidth: 3,
+  },
+  cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
+  cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
+  cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
+  cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 6 },
+  viewfinderHint: { color: 'rgba(255,255,255,0.85)', fontSize: 14, textAlign: 'center', fontWeight: '500' },
+  webHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginHorizontal: 24,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 10,
+    padding: 10,
+  },
+  webHintText: { color: 'rgba(255,255,255,0.7)', fontSize: 12, flex: 1 },
+  cancelBtn: {
+    marginHorizontal: 24,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+  },
+  cancelBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });
