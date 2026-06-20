@@ -2,8 +2,8 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies } from '@allerguide/core';
-import { logoutUser } from '@/src/services/auth-service';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
+import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
@@ -38,6 +38,10 @@ export default function ProfilesScreen() {
     ]);
   };
 
+  const openEdit = (id: number) => {
+    router.push({ pathname: '/profile-edit', params: { id: String(id) } });
+  };
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -54,7 +58,7 @@ export default function ProfilesScreen() {
         const allergies = parseAllergies(profile.allergies);
         return (
           <View key={profile.id} style={styles.card}>
-            <View style={styles.cardTop}>
+            <Pressable style={styles.cardTop} onPress={() => openEdit(profile.id)}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>{profile.name?.[0]?.toUpperCase() ?? '?'}</Text>
               </View>
@@ -67,11 +71,10 @@ export default function ProfilesScreen() {
                   {allergies.join(', ') || 'Аллергены не указаны'}
                 </Text>
               </View>
-            </View>
+              <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+            </Pressable>
             <View style={styles.actions}>
-              <Pressable
-                style={styles.editBtn}
-                onPress={() => router.push({ pathname: '/profile-edit', params: { id: String(profile.id) } })}>
+              <Pressable style={styles.editBtn} onPress={() => openEdit(profile.id)}>
                 <Ionicons name="create-outline" size={16} color={theme.colors.accent} />
                 <Text style={styles.editText}>Изменить</Text>
               </Pressable>
@@ -91,12 +94,7 @@ export default function ProfilesScreen() {
 
       <ThemeToggle />
 
-      <Pressable
-        style={styles.logoutBtn}
-        onPress={() => {
-          logoutUser();
-          router.replace('/login');
-        }}>
+      <Pressable style={styles.logoutBtn} onPress={() => confirmLogout(router)}>
         <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
         <Text style={styles.logoutText}>Выйти из аккаунта</Text>
       </Pressable>
@@ -126,7 +124,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       gap: 14,
       ...(shadows.sm as object),
     },
-    cardTop: { flexDirection: 'row', gap: 12 },
+    cardTop: { flexDirection: 'row', gap: 12, alignItems: 'center' },
     avatar: {
       width: 48,
       height: 48,

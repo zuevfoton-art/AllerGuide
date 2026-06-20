@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { listProfiles } from '@/src/services/profile-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -14,40 +16,70 @@ export function ProfileSwitcher() {
   const setActiveProfile = useAppStore((s) => s.setActiveProfile);
 
   useEffect(() => {
-    setProfiles(listProfiles());
-  }, [activeProfileId]);
+    const nextProfiles = listProfiles();
+    setProfiles(nextProfiles);
+
+    if (nextProfiles.length === 0) return;
+
+    const activeExists = nextProfiles.some((profile) => profile.id === activeProfileId);
+    if (!activeProfileId || !activeExists) {
+      const first = nextProfiles[0];
+      setActiveProfileId(first.id);
+      setActiveProfile(first);
+    }
+  }, [activeProfileId, setActiveProfile, setActiveProfileId]);
+
+  const handleProfilePress = (profile: Profile) => {
+    if (activeProfileId === profile.id) {
+      router.push({ pathname: '/profile-edit', params: { id: String(profile.id) } });
+      return;
+    }
+
+    setActiveProfileId(profile.id);
+    setActiveProfile(profile);
+  };
 
   if (profiles.length === 0) return null;
 
   return (
     <View style={styles.wrap}>
       <View style={styles.row}>
-        {profiles.map((profile) => (
-          <Pressable
-            key={profile.id}
-            style={[styles.chip, activeProfileId === profile.id && styles.active]}
-            onPress={() => {
-              setActiveProfileId(profile.id);
-              setActiveProfile(profile);
-            }}>
-            <View style={[styles.avatar, activeProfileId === profile.id && styles.avatarActive]}>
-              <Text style={[styles.avatarText, activeProfileId === profile.id && styles.avatarTextActive]}>
-                {profile.name?.[0]?.toUpperCase() ?? '?'}
-              </Text>
-            </View>
-            <Text style={[styles.chipText, activeProfileId === profile.id && styles.chipTextActive]}>
-              {profile.name}
-            </Text>
-          </Pressable>
-        ))}
+        {profiles.map((profile) => {
+          const isActive = activeProfileId === profile.id;
+          return (
+            <Pressable
+              key={profile.id}
+              style={[styles.chip, isActive && styles.active]}
+              onPress={() => handleProfilePress(profile)}>
+              <View style={[styles.avatar, isActive && styles.avatarActive]}>
+                <Text style={[styles.avatarText, isActive && styles.avatarTextActive]}>
+                  {profile.name?.[0]?.toUpperCase() ?? '?'}
+                </Text>
+              </View>
+              <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{profile.name}</Text>
+              {isActive ? (
+                <Ionicons name="create-outline" size={14} color={theme.colors.accent} />
+              ) : null}
+            </Pressable>
+          );
+        })}
+
+        <Pressable style={styles.addChip} onPress={() => router.push('/profile-setup')}>
+          <Ionicons name="add" size={18} color={theme.colors.accent} />
+          <Text style={styles.addChipText}>Профиль</Text>
+        </Pressable>
       </View>
+
+      {activeProfileId ? (
+        <Text style={styles.hint}>Нажмите ещё раз на активный профиль для редактирования</Text>
+      ) : null}
     </View>
   );
 }
 
 function createStyles({ colors }: AppTheme) {
   return StyleSheet.create({
-    wrap: { gap: 8 },
+    wrap: { gap: 6 },
     row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
     chip: {
       flexDirection: 'row',
@@ -77,5 +109,18 @@ function createStyles({ colors }: AppTheme) {
     avatarTextActive: { color: colors.onAccent },
     chipText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
     chipTextActive: { color: colors.accent },
+    addChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: colors.accentLight,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      borderWidth: 1.5,
+      borderColor: colors.accentMid,
+    },
+    addChipText: { fontSize: 14, fontWeight: '700', color: colors.accent },
+    hint: { fontSize: 12, color: colors.textMuted, lineHeight: 16 },
   });
 }

@@ -1,6 +1,8 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
+import { getCurrentUser } from '@/src/services/auth-service';
+import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +13,7 @@ export default function HomeScreen() {
   const theme = useTheme();
   const { gridCardWidth } = useResponsiveLayout();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const currentUser = useMemo(() => getCurrentUser(), []);
   const actions = useMemo(
     () =>
       [
@@ -67,6 +70,20 @@ export default function HomeScreen() {
         <Text style={styles.profilesLinkText}>Управление профилями</Text>
         <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
       </Pressable>
+
+      <View style={styles.accountBlock}>
+        <View style={styles.accountInfo}>
+          <Ionicons name="person-circle-outline" size={22} color={theme.colors.accent} />
+          <View style={styles.accountTextWrap}>
+            <Text style={styles.accountLabel}>Аккаунт</Text>
+            <Text style={styles.accountLogin}>{currentUser?.login ?? 'Не авторизован'}</Text>
+          </View>
+        </View>
+        <Pressable style={styles.logoutBtn} onPress={() => confirmLogout(router)}>
+          <Ionicons name="log-out-outline" size={16} color={theme.colors.danger} />
+          <Text style={styles.logoutText}>Выйти</Text>
+        </Pressable>
+      </View>
 
       <View style={styles.banner}>
         <View style={styles.bannerIcon}>
@@ -148,6 +165,36 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.border,
     },
     profilesLinkText: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
+    accountBlock: {
+      backgroundColor: colors.card,
+      borderRadius: 14,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 12,
+    },
+    accountInfo: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    accountTextWrap: { flex: 1, gap: 2 },
+    accountLabel: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    accountLogin: { fontSize: 15, fontWeight: '600', color: colors.text },
+    logoutBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 12,
+      borderRadius: 12,
+      backgroundColor: colors.dangerLight,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+    },
+    logoutText: { color: colors.danger, fontWeight: '700', fontSize: 14 },
     sectionLabel: {
       fontSize: 13,
       fontWeight: '700',
