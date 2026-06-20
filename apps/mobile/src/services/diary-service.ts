@@ -1,6 +1,5 @@
+import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export async function addDiaryEntry(input: { profileId: number; type: string; details: string; createdAt: string; }) {
@@ -28,6 +27,19 @@ export async function generateDoctorPdf(profileId: number) {
       <hr />
       <p style="font-size:12px;color:#555;">Информация в приложении носит рекомендательный и справочный характер и не является медицинским заключением, диагнозом или назначением лечения.</p>
     </body></html>`;
+
+  if (Platform.OS === 'web') {
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.print();
+    }
+    return;
+  }
+
+  const Print = await import('expo-print');
+  const Sharing = await import('expo-sharing');
   const { uri } = await Print.printToFileAsync({ html });
   await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
 }

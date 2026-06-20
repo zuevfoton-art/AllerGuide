@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import type { Profile, DiaryEntry } from '@/src/types';
 
 interface DbLike {
@@ -10,13 +9,13 @@ interface DbLike {
 
 class WebDb implements DbLike {
   private getProfiles(): Profile[] {
-    try { return JSON.parse(localStorage.getItem('profiles') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('ag_profiles') || '[]'); } catch { return []; }
   }
-  private saveProfiles(p: Profile[]) { localStorage.setItem('profiles', JSON.stringify(p)); }
+  private saveProfiles(p: Profile[]) { localStorage.setItem('ag_profiles', JSON.stringify(p)); }
   private getDiaryEntries(): DiaryEntry[] {
-    try { return JSON.parse(localStorage.getItem('diary_entries') || '[]'); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem('ag_diary') || '[]'); } catch { return []; }
   }
-  private saveDiaryEntries(e: DiaryEntry[]) { localStorage.setItem('diary_entries', JSON.stringify(e)); }
+  private saveDiaryEntries(e: DiaryEntry[]) { localStorage.setItem('ag_diary', JSON.stringify(e)); }
 
   execSync(_sql: string) {}
 
@@ -55,48 +54,22 @@ class WebDb implements DbLike {
   getAllSync<T>(sql: string, params?: any[]): T[] {
     const s = sql.trim().toLowerCase();
     if (s.includes('from profiles')) {
-      const profiles = this.getProfiles();
-      return [...profiles].reverse() as T[];
+      return [...this.getProfiles()].reverse() as T[];
     }
     if (s.includes('from diary_entries') && s.includes('where profileid =')) {
       const entries = this.getDiaryEntries();
       return entries.filter(e => e.profileId === params![0]).reverse() as T[];
     }
     if (s.includes('from diary_entries')) {
-      const entries = this.getDiaryEntries();
-      return [...entries].reverse() as T[];
+      return [...this.getDiaryEntries()].reverse() as T[];
     }
     return [];
   }
 }
 
-let db: DbLike;
+const db: DbLike = new WebDb();
 
-if (Platform.OS === 'web') {
-  db = new WebDb();
-} else {
-  const SQLite = require('expo-sqlite');
-  db = SQLite.openDatabaseSync('allerguide.db');
-}
-
-export function initDb() {
-  db.execSync(`
-    CREATE TABLE IF NOT EXISTS profiles (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      birthYear INTEGER,
-      type TEXT,
-      allergies TEXT
-    );
-    CREATE TABLE IF NOT EXISTS diary_entries (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      profileId INTEGER NOT NULL,
-      type TEXT NOT NULL,
-      details TEXT,
-      createdAt TEXT NOT NULL
-    );
-  `);
-}
+export function initDb() {}
 
 export function getDb() {
   return db;
