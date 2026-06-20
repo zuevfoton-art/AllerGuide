@@ -11,10 +11,12 @@ import {
   syncDiaryReminder,
 } from '@/src/services/notification-service';
 import { downloadBackup, uploadBackup } from '@/src/services/sync-service';
+import { useTranslation } from '@/src/store/locale-store';
 
 export default function SettingsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(false);
@@ -29,12 +31,12 @@ export default function SettingsScreen() {
     const normalized = emergencyNumber.replace(/[^\d+]/g, '') || '103';
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
-    Alert.alert('Сохранено', `Экстренный номер: ${normalized}`);
+    Alert.alert(t('settings.saved'), t('settings.savedNumberMessage', { number: normalized }));
   };
 
   const toggleReminder = async (value: boolean) => {
     if (Platform.OS === 'web') {
-      Alert.alert('Недоступно', 'Push-уведомления работают только в мобильном приложении.');
+      Alert.alert(t('settings.unavailable'), t('settings.reminderWeb'));
       return;
     }
 
@@ -42,7 +44,7 @@ export default function SettingsScreen() {
     try {
       const ok = await syncDiaryReminder(value);
       if (!ok && value) {
-        Alert.alert('Нет разрешения', 'Разрешите уведомления в настройках устройства.');
+        Alert.alert(t('settings.unavailable'), t('settings.reminderDenied'));
         setReminderEnabled(false);
         return;
       }
@@ -56,7 +58,10 @@ export default function SettingsScreen() {
     setSyncLoading(true);
     try {
       const result = await uploadBackup();
-      Alert.alert(result.ok ? 'Готово' : 'Ошибка', result.ok ? 'Резервная копия отправлена на сервер.' : result.error ?? 'Не удалось');
+      Alert.alert(
+        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
+        result.ok ? t('settings.uploadSuccess') : result.error ?? t('common.error'),
+      );
     } finally {
       setSyncLoading(false);
     }
@@ -66,7 +71,10 @@ export default function SettingsScreen() {
     setSyncLoading(true);
     try {
       const result = await downloadBackup();
-      Alert.alert(result.ok ? 'Готово' : 'Ошибка', result.ok ? 'Данные восстановлены из резервной копии.' : result.error ?? 'Не удалось');
+      Alert.alert(
+        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
+        result.ok ? t('settings.downloadSuccess') : result.error ?? t('common.error'),
+      );
     } finally {
       setSyncLoading(false);
     }
@@ -79,14 +87,14 @@ export default function SettingsScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View>
-          <Text style={styles.title}>Настройки</Text>
-          <Text style={styles.subtitle}>SOS, синхронизация и напоминания</Text>
+          <Text style={styles.title}>{t('settings.title')}</Text>
+          <Text style={styles.subtitle}>{t('settings.subtitle')}</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionLabel}>Экстренный вызов</Text>
+      <Text style={styles.sectionLabel}>{t('settings.emergencyNumber')}</Text>
       <View style={styles.card}>
-        <Text style={styles.cardHint}>Номер для кнопки SOS (по умолчанию 103)</Text>
+        <Text style={styles.cardHint}>{t('settings.emergencyHint')}</Text>
         <TextInput
           style={styles.input}
           value={emergencyNumber}
@@ -96,27 +104,27 @@ export default function SettingsScreen() {
           keyboardType="phone-pad"
         />
         <Pressable style={styles.primaryBtn} onPress={saveEmergencyNumber}>
-          <Text style={styles.primaryBtnText}>Сохранить номер</Text>
+          <Text style={styles.primaryBtnText}>{t('settings.saveNumber')}</Text>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionLabel}>Облачная резервная копия</Text>
+      <Text style={styles.sectionLabel}>{t('settings.cloudBackup')}</Text>
       <View style={styles.card}>
-        <Text style={styles.cardHint}>Сохранение профилей и дневника на сервер AllerGuide API</Text>
+        <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
         <Pressable style={styles.primaryBtn} disabled={syncLoading} onPress={() => void handleUpload()}>
-          <Text style={styles.primaryBtnText}>Отправить резервную копию</Text>
+          <Text style={styles.primaryBtnText}>{t('settings.uploadBackup')}</Text>
         </Pressable>
         <Pressable style={styles.secondaryBtn} disabled={syncLoading} onPress={() => void handleDownload()}>
-          <Text style={styles.secondaryBtnText}>Восстановить с сервера</Text>
+          <Text style={styles.secondaryBtnText}>{t('settings.downloadBackup')}</Text>
         </Pressable>
       </View>
 
-      <Text style={styles.sectionLabel}>Напоминания</Text>
+      <Text style={styles.sectionLabel}>{t('settings.reminder')}</Text>
       <View style={styles.card}>
         <View style={styles.switchRow}>
           <View style={styles.switchText}>
-            <Text style={styles.switchTitle}>Дневник в 20:00</Text>
-            <Text style={styles.switchHint}>Ежедневное напоминание записать самочувствие</Text>
+            <Text style={styles.switchTitle}>{t('settings.reminderTitle')}</Text>
+            <Text style={styles.switchHint}>{t('settings.reminderHint')}</Text>
           </View>
           <Switch
             value={reminderEnabled}
@@ -128,7 +136,7 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      <Text style={styles.sectionLabel}>Тема</Text>
+      <Text style={styles.sectionLabel}>{t('theme.title')}</Text>
       <ThemeToggle />
     </Screen>
   );

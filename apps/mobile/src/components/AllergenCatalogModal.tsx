@@ -17,6 +17,8 @@ import {
   type AllergenRecord,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeAllergenCategory } from '@/src/i18n/content';
 
 const CATEGORY_ORDER: AllergenCategory[] = ['food', 'environmental', 'medication', 'insect'];
 
@@ -35,6 +37,8 @@ export function AllergenCatalogModal({
 }: AllergenCatalogModalProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, content } = useTranslation();
+  const localeContent = content();
   const [query, setQuery] = useState('');
   const [draft, setDraft] = useState<string[]>(selected);
   const [expandedNote, setExpandedNote] = useState<string | null>(null);
@@ -49,7 +53,7 @@ export function AllergenCatalogModal({
   const grouped = useMemo(() => {
     return CATEGORY_ORDER.map((category) => ({
       category,
-      label: ALLERGEN_CATEGORY_LABELS[category],
+      label: localizeAllergenCategory(category, localeContent),
       items: filtered.filter((item) => item.category === category),
     })).filter((section) => section.items.length > 0);
   }, [filtered]);
@@ -84,7 +88,7 @@ export function AllergenCatalogModal({
             <Text style={[styles.itemTitle, active && styles.itemTitleActive]}>{item.name}</Text>
             {crossReactions.length > 0 ? (
               <Text style={styles.itemHint}>
-                Перекрёстные реакции: {crossReactions.map((match) => match.allergen.name).join(', ')}
+                {t('allergens.crossReactions')}: {crossReactions.map((match) => match.allergen.name).join(', ')}
               </Text>
             ) : null}
           </View>
@@ -112,16 +116,16 @@ export function AllergenCatalogModal({
       <View style={styles.container}>
         <View style={styles.header}>
           <Pressable style={styles.headerBtn} onPress={onClose}>
-            <Text style={styles.headerBtnText}>Отмена</Text>
+            <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>Все аллергены</Text>
+          <Text style={styles.headerTitle}>{t('allergens.catalogTitle')}</Text>
           <Pressable
             style={styles.headerBtn}
             onPress={() => {
               onApply(draft);
               onClose();
             }}>
-            <Text style={[styles.headerBtnText, styles.headerBtnPrimary]}>Готово</Text>
+            <Text style={[styles.headerBtnText, styles.headerBtnPrimary]}>{t('common.done')}</Text>
           </Pressable>
         </View>
 
@@ -131,7 +135,7 @@ export function AllergenCatalogModal({
             style={styles.searchInput}
             value={query}
             onChangeText={setQuery}
-            placeholder="Поиск аллергена…"
+            placeholder={t('allergens.searchPlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
           />
         </View>

@@ -24,6 +24,7 @@ import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 
 const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colors'] }> = {
@@ -47,7 +48,12 @@ export default function DiaryScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
-  const { t } = useTranslation();
+  const { t, locale, content } = useTranslation();
+  const localeContent = content();
+  const localizedSections = useMemo(
+    () => localizeDiarySections(locale, localeContent),
+    [locale, localeContent],
+  );
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
@@ -77,18 +83,22 @@ export default function DiaryScreen() {
   };
 
   const confirmDelete = (entry: DiaryEntry) => {
-    Alert.alert('Удалить запись?', `Запись «${entry.type}» будет удалена без возможности восстановления.`, [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Удалить',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteDiaryEntry(entry.id);
-          closeEditor();
-          await load();
+    Alert.alert(
+      t('diary.deleteTitle'),
+      t('diary.deleteMessage', { type: localizeDiaryType(entry.type, localeContent) }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteDiaryEntry(entry.id);
+            closeEditor();
+            await load();
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const openEdit = (entry: DiaryEntry) => {
@@ -115,11 +125,17 @@ export default function DiaryScreen() {
     }
 
     if (editor.mode === 'full') {
-      return <DiaryWizard onCancel={closeEditor} onComplete={(entries) => void handleCreate(entries)} />;
+      return (
+        <DiaryWizard
+          sections={localizedSections}
+          onCancel={closeEditor}
+          onComplete={(entries) => void handleCreate(entries)}
+        />
+      );
     }
 
     const sectionType = editor.mode === 'section' ? editor.sectionType : editor.entry.type;
-    const section = getDiarySection(sectionType);
+    const section = localizedSections.find((s) => s.type === sectionType) ?? getDiarySection(sectionType);
     if (!section) return null;
 
     const initialAnswers = editor.mode === 'edit' ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details) : null;
@@ -129,7 +145,7 @@ export default function DiaryScreen() {
         sections={[section]}
         initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
         allowSkipSection={false}
-        submitLabel={editor.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
+        submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
         onCancel={closeEditor}
         onComplete={(entries) => {
           const [entry] = entries;
@@ -160,7 +176,7 @@ export default function DiaryScreen() {
           <View style={styles.quickAddBlock}>
             <Text style={glass.sectionLabel}>{t('diary.quickAdd')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickAddRow}>
-              {DIARY_SECTIONS.map((section) => {
+              {localizedSections.map((section) => {
                 const cfg = TYPE_CONFIG[section.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
                 const color = theme.colors[cfg.colorKey];
                 return (
@@ -208,7 +224,7 @@ export default function DiaryScreen() {
                   <Ionicons name={cfg.icon as any} size={16} color={color} />
                 </View>
                 <View style={glass.feedBody}>
-                  <Text style={glass.feedTitle}>{item.type}</Text>
+                  <Text style={glass.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
                   <Text style={glass.feedSub}>{summary}</Text>
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>

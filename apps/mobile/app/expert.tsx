@@ -1,41 +1,37 @@
 import { ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import {
-  EXPERT_ARTICLES,
-  EXPERT_CATEGORIES,
-  EXPERT_DISCLAIMER,
-  EXPERT_HERO,
-  getExpertArticlesByCategory,
-  type ExpertArticleCategory,
-} from '@allerguide/core';
+import { EXPERT_CATEGORIES, getExpertArticlesByCategory, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
 export default function ExpertScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
+  const { t, content } = useTranslation();
+  const localeContent = content();
   const [category, setCategory] = useState<ExpertArticleCategory>('recommendations');
   const [articleId, setArticleId] = useState<string | null>(null);
 
   const articles = getExpertArticlesByCategory(category);
-  const article = EXPERT_ARTICLES.find((a) => a.id === articleId) ?? null;
+  const article = articleId ? localeContent.expertArticles[articleId] : null;
 
   if (article) {
     return (
       <Screen>
         <Pressable style={styles.backBtn} onPress={() => setArticleId(null)}>
           <Ionicons name="chevron-back" size={18} color={theme.colors.teal} />
-          <Text style={styles.backText}>Назад</Text>
+          <Text style={styles.backText}>{t('expert.back')}</Text>
         </Pressable>
         <Text style={styles.articleTitle}>{article.title}</Text>
         <Text style={styles.articleBody}>{article.body}</Text>
-        <Text style={glass.disclaimer}>{EXPERT_DISCLAIMER}</Text>
+        <Text style={glass.disclaimer}>{localeContent.expertDisclaimer}</Text>
       </Screen>
     );
   }
@@ -44,40 +40,51 @@ export default function ExpertScreen() {
     <Screen>
       <Pressable style={styles.backBtn} onPress={() => router.back()}>
         <Ionicons name="chevron-back" size={18} color={theme.colors.teal} />
-        <Text style={styles.backText}>Главная</Text>
+        <Text style={styles.backText}>{t('expert.home')}</Text>
       </Pressable>
 
-      <ScreenHeader title="Эксперт" subtitle={`${EXPERT_HERO.name} · ${EXPERT_HERO.role}`} />
+      <ScreenHeader
+        title={t('expert.title')}
+        subtitle={`${localeContent.expertHero.name} · ${localeContent.expertHero.role}`}
+      />
 
       <GlassCard style={styles.hero}>
         <View style={styles.heroIcon}>
           <Ionicons name="school" size={28} color={theme.colors.onAccent} />
         </View>
-        <Text style={styles.heroSubtitle}>{EXPERT_HERO.subtitle}</Text>
+        <Text style={styles.heroSubtitle}>{localeContent.expertHero.subtitle}</Text>
       </GlassCard>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={glass.pillRow}>
         {EXPERT_CATEGORIES.map((cat) => (
           <Pressable
             key={cat.id}
-            style={[glass.pill, category === cat.id && { borderColor: theme.colors.teal, backgroundColor: theme.colors.tealLight }]}
+            style={[
+              glass.pill,
+              category === cat.id && { borderColor: theme.colors.teal, backgroundColor: theme.colors.tealLight },
+            ]}
             onPress={() => setCategory(cat.id)}>
-            <Text style={[glass.pillText, category === cat.id && { color: theme.colors.teal }]}>{cat.label}</Text>
+            <Text style={[glass.pillText, category === cat.id && { color: theme.colors.teal }]}>
+              {localeContent.expertCategories[cat.id]}
+            </Text>
           </Pressable>
         ))}
       </ScrollView>
 
-      {articles.map((item) => (
-        <Pressable key={item.id} onPress={() => setArticleId(item.id)}>
-          <GlassCard style={styles.card}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardSummary}>{item.summary}</Text>
-            <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
-          </GlassCard>
-        </Pressable>
-      ))}
+      {articles.map((item) => {
+        const localized = localeContent.expertArticles[item.id] ?? item;
+        return (
+          <Pressable key={item.id} onPress={() => setArticleId(item.id)}>
+            <GlassCard style={styles.card}>
+              <Text style={styles.cardTitle}>{localized.title}</Text>
+              <Text style={styles.cardSummary}>{localized.summary}</Text>
+              <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+            </GlassCard>
+          </Pressable>
+        );
+      })}
 
-      <Text style={glass.disclaimer}>{EXPERT_DISCLAIMER}</Text>
+      <Text style={glass.disclaimer}>{localeContent.expertDisclaimer}</Text>
     </Screen>
   );
 }

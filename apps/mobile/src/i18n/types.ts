@@ -27,6 +27,14 @@ export type LocaleMessages = {
     email: string;
     phone: string;
     password: string;
+    next: string;
+    skip: string;
+    done: string;
+    ok: string;
+    error: string;
+    name: string;
+    years: string;
+    daysShort: string;
   };
   auth: {
     loginTitle: string;
@@ -117,6 +125,18 @@ export type LocaleMessages = {
     refresh: string;
     doctorReport: string;
     disclaimer: string;
+    deleteTitle: string;
+    deleteMessage: string;
+    saveChanges: string;
+  };
+  diaryWizard: {
+    stepOf: string;
+    skipSection: string;
+    deleteEntry: string;
+    fillOneSection: string;
+    editEntry: string;
+    entryPlaceholder: string;
+    enterEntryText: string;
   };
   scanner: {
     title: string;
@@ -133,6 +153,20 @@ export type LocaleMessages = {
     check: string;
     history: string;
     disclaimer: string;
+    cameraScanBarcode: string;
+    cameraScanMenu: string;
+    cameraBarcodeHint: string;
+    cameraMenuHint: string;
+    analyzeMenu: string;
+    barcodeWebHint: string;
+    productPlaceholder: string;
+    menuPlaceholder: string;
+    matches: string;
+    crossMatches: string;
+    source: string;
+    sourceOpenFoodFacts: string;
+    sourceBarcode: string;
+    sourceManual: string;
   };
   market: {
     title: string;
@@ -153,6 +187,12 @@ export type LocaleMessages = {
     disclaimerPlaces: string;
     disclaimerPollen: string;
     disclaimerAdair: string;
+    pollenMapTitle: string;
+    pollenMapSub: string;
+    peakSeason: string;
+    season: string;
+    nkcc: string;
+    chiefExpert: string;
   };
   settings: {
     title: string;
@@ -161,18 +201,175 @@ export type LocaleMessages = {
     emergencyHint: string;
     saveNumber: string;
     saved: string;
+    savedNumberMessage: string;
     backup: string;
     backupDesc: string;
+    cloudBackup: string;
+    cloudBackupDesc: string;
+    uploadBackup: string;
+    downloadBackup: string;
     export: string;
     import: string;
     reminder: string;
+    reminderTitle: string;
+    reminderHint: string;
     reminderWeb: string;
+    reminderDenied: string;
+    unavailable: string;
     legal: string;
     privacy: string;
     terms: string;
+    syncSuccess: string;
+    syncError: string;
+    uploadSuccess: string;
+    downloadSuccess: string;
   };
   profileSwitcher: {
     add: string;
     hint: string;
+  };
+  onboarding: {
+    tagline: string;
+    sectionLabel: string;
+    self: string;
+    selfDesc: string;
+    child: string;
+    childDesc: string;
+    both: string;
+    bothDesc: string;
+    disclaimer: string;
+  };
+  onboardingIntro: {
+    next: string;
+    startSetup: string;
+    skip: string;
+    disclaimer: string;
+    slides: {
+      diary: { title: string; desc: string };
+      scanner: { title: string; desc: string };
+      market: { title: string; desc: string };
+      map: { title: string; desc: string };
+      expert: { title: string; desc: string };
+    };
+  };
+  profileSetup: {
+    titleSelf: string;
+    titleChild: string;
+    titleCreate: string;
+    subtitleSelfStep: string;
+    subtitleChildStep: string;
+    subtitleDefault: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    birthYearLabel: string;
+    birthYearPlaceholder: string;
+    profileLabel: string;
+    profileSelf: string;
+    profileChild: string;
+    profileSelfLocked: string;
+    profileChildLocked: string;
+    allergensLabel: string;
+    consent: string;
+    contactsLabel: string;
+    saveProfile: string;
+    nextChild: string;
+    disclaimer: string;
+    errors: {
+      nameRequired: string;
+      birthYearInvalid: string;
+      allergenRequired: string;
+      consentRequired: string;
+    };
+  };
+  profileEdit: {
+    title: string;
+    subtitle: string;
+    saveChanges: string;
+    errors: {
+      nameRequired: string;
+      birthYearInvalid: string;
+      allergenRequired: string;
+    };
+  };
+  sos: {
+    title: string;
+    subtitle: string;
+    edit: string;
+    name: string;
+    age: string;
+    allergies: string;
+    medicalNotes: string;
+    actionPlan: string;
+    emptyProfile: string;
+    contactsTitle: string;
+    contactsHint: string;
+    call: string;
+    settingsLink: string;
+    tip: string;
+    disclaimer: string;
+  };
+  sosEdit: {
+    title: string;
+    noProfile: string;
+    notesLabel: string;
+    notesPlaceholder: string;
+    saveNotes: string;
+    planLabel: string;
+    planPlaceholder: string;
+    savePlan: string;
+    contactsLabel: string;
+    addContact: string;
+    savedNotes: string;
+    savedPlan: string;
+    errors: {
+      profileRequired: string;
+      contactRequired: string;
+    };
+  };
+  doctorReport: {
+    back: string;
+    title: string;
+    subtitle: string;
+    period: string;
+    blocks: string;
+    generating: string;
+    generate: string;
+    disclaimer: string;
+  };
+  expert: {
+    back: string;
+    home: string;
+    title: string;
+  };
+  allergens: {
+    popular: string;
+    fromCatalog: string;
+    openCatalog: string;
+    crossTitle: string;
+    crossText: string;
+    crossAdd: string;
+    catalogTitle: string;
+    searchPlaceholder: string;
+    crossReactions: string;
+  };
+  emergencyContacts: {
+    empty: string;
+    contactN: string;
+    nameLabel: string;
+    namePlaceholder: string;
+    phoneLabel: string;
+    relationLabel: string;
+    addContact: string;
+  };
+  wellness: {
+    pollenLabel: string;
+    airLabel: string;
+    diaryLabel: string;
+    hasSymptoms: string;
+    calm: string;
+    grains: string;
+  };
+  errors: {
+    selectProfile: string;
   };
 };

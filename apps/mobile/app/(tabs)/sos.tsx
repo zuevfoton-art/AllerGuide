@@ -4,13 +4,11 @@ import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
-import {
-  getEmergencyContactRelationLabel,
-  parseAllergies,
-  type EmergencyContact,
-} from '@allerguide/core';
+import { parseAllergies, type EmergencyContact } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeEmergencyRelation } from '@/src/i18n/content';
 import {
   getEmergencyNumber,
   getProfileAge,
@@ -22,6 +20,8 @@ import {
 export default function SosScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, content } = useTranslation();
+  const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
@@ -60,13 +60,13 @@ export default function SosScreen() {
             <Ionicons name="medkit" size={30} color={theme.colors.danger} />
           </View>
           <View>
-            <Text style={styles.title}>SOS</Text>
-            <Text style={styles.subtitle}>Экстренная информация</Text>
+            <Text style={styles.title}>{t('sos.title')}</Text>
+            <Text style={styles.subtitle}>{t('sos.subtitle')}</Text>
           </View>
         </View>
         <Pressable style={styles.editBtn} onPress={() => router.push('/sos-edit' as any)}>
           <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.editBtnText}>Изменить</Text>
+          <Text style={styles.editBtnText}>{t('sos.edit')}</Text>
         </Pressable>
       </View>
 
@@ -76,13 +76,13 @@ export default function SosScreen() {
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Ionicons name="person-circle" size={18} color={theme.colors.textSecondary} />
-            <Text style={styles.infoLabel}>Имя:</Text>
+            <Text style={styles.infoLabel}>{t('sos.name')}</Text>
             <Text style={styles.infoValue}>{profile.name}</Text>
           </View>
           {profile.birthYear ? (
             <View style={styles.infoRow}>
               <Ionicons name="calendar" size={18} color={theme.colors.textSecondary} />
-              <Text style={styles.infoLabel}>Возраст:</Text>
+              <Text style={styles.infoLabel}>{t('sos.age')}</Text>
               <Text style={styles.infoValue}>{getProfileAge(profile.birthYear)}</Text>
             </View>
           ) : null}
@@ -90,7 +90,7 @@ export default function SosScreen() {
             <View style={styles.allergySection}>
               <View style={styles.infoRow}>
                 <Ionicons name="warning" size={18} color={theme.colors.danger} />
-                <Text style={[styles.infoLabel, { color: theme.colors.danger }]}>Аллергии:</Text>
+                <Text style={[styles.infoLabel, { color: theme.colors.danger }]}>{t('sos.allergies')}</Text>
               </View>
               <View style={styles.allergyChips}>
                 {allergies.map((allergen) => (
@@ -103,13 +103,13 @@ export default function SosScreen() {
           )}
           {notes ? (
             <View style={styles.notesSection}>
-              <Text style={styles.notesLabel}>Медицинские заметки</Text>
+              <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
               <Text style={styles.notesText}>{notes}</Text>
             </View>
           ) : null}
           {actionPlan ? (
             <View style={styles.notesSection}>
-              <Text style={styles.notesLabel}>План действий</Text>
+              <Text style={styles.notesLabel}>{t('sos.actionPlan')}</Text>
               <Text style={styles.notesText}>{actionPlan}</Text>
             </View>
           ) : null}
@@ -117,13 +117,13 @@ export default function SosScreen() {
       ) : (
         <View style={styles.emptyCard}>
           <Ionicons name="person-add" size={32} color={theme.colors.textMuted} />
-          <Text style={styles.emptyText}>Выберите профиль, чтобы увидеть медицинскую информацию</Text>
+          <Text style={styles.emptyText}>{t('sos.emptyProfile')}</Text>
         </View>
       )}
 
       {contacts.length > 0 ? (
         <View style={styles.contactsCard}>
-          <Text style={styles.contactsTitle}>Экстренные контакты</Text>
+          <Text style={styles.contactsTitle}>{t('sos.contactsTitle')}</Text>
           {contacts.map((contact) => (
             <Pressable
               key={contact.id}
@@ -132,7 +132,7 @@ export default function SosScreen() {
               <View style={styles.contactInfo}>
                 <Text style={styles.contactName}>{contact.name}</Text>
                 <Text style={styles.contactMeta}>
-                  {getEmergencyContactRelationLabel(contact.relation)} · {contact.phone}
+                  {localizeEmergencyRelation(contact.relation, localeContent)} · {contact.phone}
                 </Text>
               </View>
               <Ionicons name="call" size={18} color={theme.colors.accent} />
@@ -142,9 +142,7 @@ export default function SosScreen() {
       ) : profile ? (
         <View style={styles.hintCard}>
           <Ionicons name="people-outline" size={18} color={theme.colors.textSecondary} />
-          <Text style={styles.hintText}>
-            Добавьте экстренные контакты в настройках профиля или на экране редактирования SOS.
-          </Text>
+          <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
         </View>
       ) : null}
 
@@ -152,24 +150,20 @@ export default function SosScreen() {
         style={({ pressed }) => [styles.emergencyBtn, pressed && { opacity: 0.9 }]}
         onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}>
         <Ionicons name="call" size={22} color={theme.colors.onDanger} />
-        <Text style={styles.emergencyText}>Позвонить {emergencyNumber}</Text>
+        <Text style={styles.emergencyText}>{t('sos.call', { number: emergencyNumber })}</Text>
       </Pressable>
 
       <Pressable style={styles.settingsLink} onPress={() => router.push('/settings' as any)}>
         <Ionicons name="settings-outline" size={16} color={theme.colors.textSecondary} />
-        <Text style={styles.settingsLinkText}>Настройки SOS и уведомлений</Text>
+        <Text style={styles.settingsLinkText}>{t('sos.settingsLink')}</Text>
       </Pressable>
 
       <View style={styles.tipCard}>
         <Ionicons name="information-circle" size={18} color={theme.colors.purple} />
-        <Text style={styles.tipText}>
-          Покажите этот экран медработнику в случае анафилактической реакции
-        </Text>
+        <Text style={styles.tipText}>{t('sos.tip')}</Text>
       </View>
 
-      <Text style={styles.disclaimer}>
-        Информация на экране SOS внесена пользователем и не является медицинским назначением.
-      </Text>
+      <Text style={styles.disclaimer}>{t('sos.disclaimer')}</Text>
     </Screen>
   );
 }

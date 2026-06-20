@@ -14,6 +14,7 @@ import { useGlassStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { localizeScanResult } from '@/src/i18n/translate';
 import { scanBarcode, scanMenuPhoto, scanText } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 
@@ -28,7 +29,8 @@ export default function ScannerScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const glass = useGlassStyles();
-  const { t } = useTranslation();
+  const { t, content } = useTranslation();
+  const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('молоко, арахис, сахар');
@@ -40,8 +42,13 @@ export default function ScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
+  const displayResult = useMemo(
+    () => (result ? localizeScanResult(result, localeContent) : null),
+    [result, localeContent],
+  );
+
   const isDanger =
-    result != null && (result.matches.length > 0 || (result.crossMatches?.length ?? 0) > 0);
+    displayResult != null && (displayResult.matches.length > 0 || (displayResult.crossMatches?.length ?? 0) > 0);
 
   const refreshHistory = useCallback(() => {
     if (!activeProfileId) {
@@ -139,7 +146,7 @@ export default function ScannerScreen() {
               <Ionicons name="close" size={24} color={theme.colors.onAccent} />
             </Pressable>
             <Text style={styles.cameraTitle}>
-              {mode === 'product' ? 'Сканируйте штрихкод' : 'Наведите на текст меню'}
+              {mode === 'product' ? t('scanner.cameraScanBarcode') : t('scanner.cameraScanMenu')}
             </Text>
             <View style={{ width: 40 }} />
           </View>
@@ -152,9 +159,7 @@ export default function ScannerScreen() {
               <View style={[styles.corner, styles.cornerBR]} />
             </View>
             <Text style={styles.viewfinderHint}>
-              {mode === 'product'
-                ? 'Штрихкод будет проверен через Open Food Facts'
-                : 'Демо: нажмите кнопку ниже для анализа типичного меню'}
+              {mode === 'product' ? t('scanner.cameraBarcodeHint') : t('scanner.cameraMenuHint')}
             </Text>
           </View>
 
@@ -163,7 +168,7 @@ export default function ScannerScreen() {
               {loading ? (
                 <ActivityIndicator color={theme.colors.onAccent} />
               ) : (
-                <Text style={styles.menuScanBtnText}>Проанализировать меню</Text>
+                <Text style={styles.menuScanBtnText}>{t('scanner.analyzeMenu')}</Text>
               )}
             </Pressable>
           ) : null}
@@ -171,14 +176,12 @@ export default function ScannerScreen() {
           {Platform.OS === 'web' && (
             <View style={styles.webHint}>
               <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.7)" />
-              <Text style={styles.webHintText}>
-                Сканирование штрихкодов доступно в мобильном приложении
-              </Text>
+              <Text style={styles.webHintText}>{t('scanner.barcodeWebHint')}</Text>
             </View>
           )}
 
           <Pressable style={styles.cancelBtn} onPress={() => setCameraOpen(false)}>
-            <Text style={styles.cancelBtnText}>Отмена</Text>
+            <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
           </Pressable>
         </View>
       </View>
@@ -251,11 +254,7 @@ export default function ScannerScreen() {
         <TextInput
           value={input}
           onChangeText={setInput}
-          placeholder={
-            mode === 'product'
-              ? 'Штрихкод или состав продукта...'
-              : 'Введите состав блюда или меню...'
-          }
+          placeholder={mode === 'product' ? t('scanner.productPlaceholder') : t('scanner.menuPlaceholder')}
           placeholderTextColor={theme.colors.textMuted}
           multiline
           style={styles.input}
@@ -276,7 +275,7 @@ export default function ScannerScreen() {
         )}
       </Pressable>
 
-      {result && (
+      {displayResult && (
         <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
           <View style={styles.resultHeader}>
             <View style={[styles.resultIcon, isDanger ? styles.resultIconDanger : styles.resultIconSafe]}>
@@ -288,34 +287,38 @@ export default function ScannerScreen() {
             </View>
             <View style={styles.resultText}>
               <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
-                {result.verdict}
+                {displayResult.verdict}
               </Text>
-              {result.productName ? (
-                <Text style={styles.productName}>{result.productName}</Text>
+              {displayResult.productName ? (
+                <Text style={styles.productName}>{displayResult.productName}</Text>
               ) : null}
             </View>
           </View>
-          <Text style={styles.reason}>{result.reason}</Text>
-          {result.matches?.length > 0 && (
+          <Text style={styles.reason}>{displayResult.reason}</Text>
+          {displayResult.matches?.length > 0 && (
             <View style={styles.matchesBadge}>
               <Ionicons name="alert-circle" size={13} color={theme.colors.danger} />
-              <Text style={styles.matchesText}>Совпадения: {result.matches.join(', ')}</Text>
+              <Text style={styles.matchesText}>
+                {t('scanner.matches')} {displayResult.matches.join(', ')}
+              </Text>
             </View>
           )}
-          {(result.crossMatches?.length ?? 0) > 0 && (
+          {(displayResult.crossMatches?.length ?? 0) > 0 && (
             <View style={styles.crossBadge}>
               <Ionicons name="git-network-outline" size={13} color={theme.colors.warning} />
-              <Text style={styles.crossText}>Перекрёстные: {result.crossMatches.join(', ')}</Text>
+              <Text style={styles.crossText}>
+                {t('scanner.crossMatches')} {displayResult.crossMatches.join(', ')}
+              </Text>
             </View>
           )}
-          {result.source ? (
+          {displayResult.source ? (
             <Text style={styles.sourceMeta}>
-              Источник:{' '}
-              {result.source === 'openfoodfacts'
-                ? 'Open Food Facts'
-                : result.source === 'barcode'
-                  ? 'штрихкод'
-                  : 'ручной ввод'}
+              {t('scanner.source')}{' '}
+              {displayResult.source === 'openfoodfacts'
+                ? t('scanner.sourceOpenFoodFacts')
+                : displayResult.source === 'barcode'
+                  ? t('scanner.sourceBarcode')
+                  : t('scanner.sourceManual')}
             </Text>
           ) : null}
         </View>

@@ -14,10 +14,12 @@ import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEdito
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
 export default function ProfileEditScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, tProfileError } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const profileId = Number(id);
   const [name, setName] = useState('');
@@ -61,21 +63,20 @@ export default function ProfileEditScreen() {
     });
   }, [profileId]);
 
-
   const save = async () => {
     const trimmedName = name.trim();
     const year = Number(birthYear);
 
     if (!trimmedName) {
-      setError('Укажите имя профиля.');
+      setError(t('profileEdit.errors.nameRequired'));
       return;
     }
     if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
-      setError('Укажите корректный год рождения.');
+      setError(t('profileEdit.errors.birthYearInvalid'));
       return;
     }
     if (selected.length === 0) {
-      setError('Выберите хотя бы один аллерген.');
+      setError(t('profileEdit.errors.allergenRequired'));
       return;
     }
 
@@ -97,69 +98,73 @@ export default function ProfileEditScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View>
-          <Text style={styles.title}>Профиль</Text>
-          <Text style={styles.subtitle}>Данные и редактирование</Text>
+          <Text style={styles.title}>{t('profileEdit.title')}</Text>
+          <Text style={styles.subtitle}>{t('profileEdit.subtitle')}</Text>
         </View>
       </View>
 
       {loading ? (
-        <Text style={styles.loadingText}>Загрузка…</Text>
+        <Text style={styles.loadingText}>{t('common.loading')}</Text>
       ) : (
         <>
-      <Text style={styles.label}>Имя</Text>
-      <TextInput
-        placeholder="Введите имя"
-        placeholderTextColor={theme.colors.textMuted}
-        value={name}
-        onChangeText={setName}
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Год рождения</Text>
-      <TextInput
-        placeholder="Например, 1990"
-        placeholderTextColor={theme.colors.textMuted}
-        value={birthYear}
-        onChangeText={setBirthYear}
-        keyboardType="numeric"
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Профиль</Text>
-      <View style={styles.toggleRow}>
-        <Pressable
-          style={[styles.toggleBtn, type === 'self' && styles.toggleActive]}
-          onPress={() => setType('self')}>
-          <Ionicons
-            name="person"
-            size={16}
-            color={type === 'self' ? theme.colors.accent : theme.colors.textSecondary}
+          <Text style={styles.label}>{t('profileSetup.nameLabel')}</Text>
+          <TextInput
+            placeholder={t('profileSetup.namePlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+            value={name}
+            onChangeText={setName}
+            style={styles.input}
           />
-          <Text style={[styles.toggleText, type === 'self' && styles.toggleTextActive]}>Я</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.toggleBtn, type === 'child' && styles.toggleActive]}
-          onPress={() => setType('child')}>
-          <Ionicons
-            name="happy"
-            size={16}
-            color={type === 'child' ? theme.colors.accent : theme.colors.textSecondary}
+
+          <Text style={styles.label}>{t('profileSetup.birthYearLabel')}</Text>
+          <TextInput
+            placeholder={t('profileSetup.birthYearPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+            value={birthYear}
+            onChangeText={setBirthYear}
+            keyboardType="numeric"
+            style={styles.input}
           />
-          <Text style={[styles.toggleText, type === 'child' && styles.toggleTextActive]}>Ребёнок</Text>
-        </Pressable>
-      </View>
 
-      <Text style={styles.label}>Аллергены</Text>
-      <AllergenPicker selected={selected} onChange={setSelected} />
+          <Text style={styles.label}>{t('profileSetup.profileLabel')}</Text>
+          <View style={styles.toggleRow}>
+            <Pressable
+              style={[styles.toggleBtn, type === 'self' && styles.toggleActive]}
+              onPress={() => setType('self')}>
+              <Ionicons
+                name="person"
+                size={16}
+                color={type === 'self' ? theme.colors.accent : theme.colors.textSecondary}
+              />
+              <Text style={[styles.toggleText, type === 'self' && styles.toggleTextActive]}>
+                {t('profileSetup.profileSelf')}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.toggleBtn, type === 'child' && styles.toggleActive]}
+              onPress={() => setType('child')}>
+              <Ionicons
+                name="happy"
+                size={16}
+                color={type === 'child' ? theme.colors.accent : theme.colors.textSecondary}
+              />
+              <Text style={[styles.toggleText, type === 'child' && styles.toggleTextActive]}>
+                {t('profileSetup.profileChild')}
+              </Text>
+            </Pressable>
+          </View>
 
-      <Text style={styles.label}>Экстренные контакты</Text>
-      <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
+          <Text style={styles.label}>{t('profileSetup.allergensLabel')}</Text>
+          <AllergenPicker selected={selected} onChange={setSelected} />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+          <Text style={styles.label}>{t('profileSetup.contactsLabel')}</Text>
+          <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
 
-      <Pressable style={styles.button} onPress={save}>
-        <Text style={styles.buttonText}>Сохранить изменения</Text>
-      </Pressable>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <Pressable style={styles.button} onPress={save}>
+            <Text style={styles.buttonText}>{t('profileEdit.saveChanges')}</Text>
+          </Pressable>
         </>
       )}
     </Screen>

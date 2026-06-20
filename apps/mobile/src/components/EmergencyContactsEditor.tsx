@@ -11,6 +11,8 @@ import {
   DEFAULT_EMERGENCY_CONTACT_RELATION,
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeEmergencyRelation } from '@/src/i18n/content';
 
 interface EmergencyContactsEditorProps {
   contacts: EmergencyContactDraft[];
@@ -28,6 +30,8 @@ function createEmptyContact(): EmergencyContactDraft {
 export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContactsEditorProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, content } = useTranslation();
+  const localeContent = content();
 
   const updateContact = (index: number, patch: Partial<EmergencyContactDraft>) => {
     onChange(contacts.map((contact, i) => (i === index ? { ...contact, ...patch } : contact)));
@@ -44,30 +48,28 @@ export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContact
   return (
     <View style={styles.wrap}>
       {contacts.length === 0 ? (
-        <Text style={styles.emptyText}>
-          Добавьте человека, которому можно позвонить в экстренной ситуации.
-        </Text>
+        <Text style={styles.emptyText}>{t('emergencyContacts.empty')}</Text>
       ) : null}
 
       {contacts.map((contact, index) => (
         <View key={contact.id ?? `draft-${index}`} style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Контакт {index + 1}</Text>
+            <Text style={styles.cardTitle}>{t('emergencyContacts.contactN', { n: index + 1 })}</Text>
             <Pressable onPress={() => removeContact(index)} hitSlop={8}>
               <Ionicons name="trash-outline" size={18} color={theme.colors.danger} />
             </Pressable>
           </View>
 
-          <Text style={styles.fieldLabel}>Имя</Text>
+          <Text style={styles.fieldLabel}>{t('emergencyContacts.nameLabel')}</Text>
           <TextInput
             style={styles.input}
             value={contact.name}
             onChangeText={(name) => updateContact(index, { name })}
-            placeholder="Например, Анна"
+            placeholder={t('emergencyContacts.namePlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
           />
 
-          <Text style={styles.fieldLabel}>Телефон</Text>
+          <Text style={styles.fieldLabel}>{t('emergencyContacts.phoneLabel')}</Text>
           <TextInput
             style={styles.input}
             value={contact.phone}
@@ -77,7 +79,7 @@ export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContact
             keyboardType="phone-pad"
           />
 
-          <Text style={styles.fieldLabel}>Кто это</Text>
+          <Text style={styles.fieldLabel}>{t('emergencyContacts.relationLabel')}</Text>
           <View style={styles.relationRow}>
             {EMERGENCY_CONTACT_RELATIONS.map((option) => {
               const active = contact.relation === option.key;
@@ -89,7 +91,7 @@ export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContact
                     updateContact(index, { relation: option.key as EmergencyContactRelation })
                   }>
                   <Text style={[styles.relationText, active && styles.relationTextActive]}>
-                    {option.label}
+                    {localizeEmergencyRelation(option.key, localeContent)}
                   </Text>
                 </Pressable>
               );
@@ -100,7 +102,7 @@ export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContact
 
       <Pressable style={styles.addBtn} onPress={addContact}>
         <Ionicons name="person-add" size={16} color={theme.colors.accent} />
-        <Text style={styles.addBtnText}>Добавить контакт</Text>
+        <Text style={styles.addBtnText}>{t('emergencyContacts.addContact')}</Text>
       </Pressable>
     </View>
   );

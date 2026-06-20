@@ -43,12 +43,12 @@ export default function HomeScreen() {
       const snapshot = await fetchWellnessSnapshot(allergies, {
         recentSymptoms: stats.recentSymptoms.length > 0,
         recentTriggers: stats.entriesLast7Days > 0 && stats.recentSymptoms.length > 0,
-      });
+      }, locale);
       setWellness(snapshot);
     } finally {
       setLoadingWellness(false);
     }
-  }, [activeProfileId, profile]);
+  }, [activeProfileId, profile, locale]);
 
   useFocusEffect(
     useCallback(() => {
@@ -77,7 +77,7 @@ export default function HomeScreen() {
     [t, locale],
   );
 
-  const pollenFactor = wellness?.factors.find((f) => f.label.includes('Пыльца'));
+  const pollenFactor = wellness?.factors.find((f) => f.label.toLowerCase().includes(t('home.pollen').toLowerCase()));
   const aqiFactor = wellness?.factors.find((f) => f.label.includes('EAQI'));
 
   return (

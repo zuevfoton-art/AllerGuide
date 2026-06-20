@@ -1,52 +1,32 @@
-import { View, Text, Pressable, StyleSheet, FlatList } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { markIntroComplete } from '@/src/services/settings-service';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
-const SLIDES = [
-  {
-    key: 'diary',
-    title: 'Персональный дневник',
-    desc: 'Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача.',
-    icon: 'journal',
-    colorKey: 'accent' as const,
-  },
-  {
-    key: 'scanner',
-    title: 'Умный сканер',
-    desc: 'Продукты, меню, лекарства и косметика — проверка по вашему профилю.',
-    icon: 'scan',
-    colorKey: 'purple' as const,
-  },
-  {
-    key: 'market',
-    title: 'Маркетплейс',
-    desc: 'Персональные подборки товаров для аллергиков.',
-    icon: 'bag',
-    colorKey: 'success' as const,
-  },
-  {
-    key: 'map',
-    title: 'Карта мест',
-    desc: 'Рестораны, карта пыления и клиники АДАИР.',
-    icon: 'map',
-    colorKey: 'warning' as const,
-  },
-  {
-    key: 'expert',
-    title: 'Эксперт: проф. Смолкин Ю.С.',
-    desc: 'Материалы и рекомендации АДАИР в доступном формате.',
-    icon: 'school',
-    colorKey: 'pink' as const,
-  },
-];
+const SLIDE_KEYS = ['diary', 'scanner', 'market', 'map', 'expert'] as const;
+const SLIDE_ICONS = {
+  diary: 'journal',
+  scanner: 'scan',
+  market: 'bag',
+  map: 'map',
+  expert: 'school',
+} as const;
+const SLIDE_COLORS = {
+  diary: 'accent',
+  scanner: 'purple',
+  market: 'success',
+  map: 'warning',
+  expert: 'pink',
+} as const;
 
 export default function OnboardingIntroScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
 
   const finish = () => {
@@ -55,43 +35,44 @@ export default function OnboardingIntroScreen() {
   };
 
   const next = () => {
-    if (index >= SLIDES.length - 1) {
+    if (index >= SLIDE_KEYS.length - 1) {
       finish();
       return;
     }
     setIndex((i) => i + 1);
   };
 
-  const slide = SLIDES[index];
-  const color = theme.colors[slide.colorKey];
+  const slideKey = SLIDE_KEYS[index];
+  const colorKey = SLIDE_COLORS[slideKey];
+  const color = theme.colors[colorKey];
 
   return (
     <Screen>
       <View style={styles.progressRow}>
-        {SLIDES.map((s, i) => (
-          <View key={s.key} style={[styles.dot, i <= index && styles.dotActive]} />
+        {SLIDE_KEYS.map((s, i) => (
+          <View key={s} style={[styles.dot, i <= index && styles.dotActive]} />
         ))}
       </View>
 
       <View style={styles.slide}>
         <View style={[styles.iconWrap, { backgroundColor: `${color}18` }]}>
-          <Ionicons name={slide.icon as 'journal'} size={36} color={color} />
+          <Ionicons name={SLIDE_ICONS[slideKey] as 'journal'} size={36} color={color} />
         </View>
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.desc}>{slide.desc}</Text>
+        <Text style={styles.title}>{t(`onboardingIntro.slides.${slideKey}.title`)}</Text>
+        <Text style={styles.desc}>{t(`onboardingIntro.slides.${slideKey}.desc`)}</Text>
       </View>
 
       <Pressable style={styles.primaryBtn} onPress={next}>
-        <Text style={styles.primaryText}>{index >= SLIDES.length - 1 ? 'Начать настройку' : 'Далее'}</Text>
+        <Text style={styles.primaryText}>
+          {index >= SLIDE_KEYS.length - 1 ? t('onboardingIntro.startSetup') : t('onboardingIntro.next')}
+        </Text>
       </Pressable>
 
       <Pressable onPress={finish}>
-        <Text style={styles.skip}>Пропустить</Text>
+        <Text style={styles.skip}>{t('onboardingIntro.skip')}</Text>
       </Pressable>
 
-      <Text style={styles.disclaimer}>
-        Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.
-      </Text>
+      <Text style={styles.disclaimer}>{t('onboardingIntro.disclaimer')}</Text>
     </Screen>
   );
 }

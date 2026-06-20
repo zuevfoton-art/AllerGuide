@@ -5,6 +5,8 @@ import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
+import { localizeEmergencyRelation } from '@/src/i18n/content';
 import {
   addEmergencyContact,
   deleteEmergencyContact,
@@ -19,6 +21,8 @@ import type { EmergencyContact, EmergencyContactRelation } from '@allerguide/cor
 export default function SosEditScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t, tSosError, content } = useTranslation();
+  const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const [notes, setNotes] = useState('');
   const [plan, setPlan] = useState('');
@@ -48,31 +52,31 @@ export default function SosEditScreen() {
 
   const saveNotes = () => {
     if (!profile) {
-      setError('Выберите профиль на главном экране.');
+      setError(t('errors.selectProfile'));
       return;
     }
     saveSosNotes(profile.id, notes);
     setError('');
-    Alert.alert('Сохранено', 'Заметки SOS обновлены.');
+    Alert.alert(t('settings.saved'), t('sosEdit.savedNotes'));
   };
 
   const savePlan = () => {
     if (!profile) {
-      setError('Выберите профиль на главном экране.');
+      setError(t('errors.selectProfile'));
       return;
     }
     saveSosActionPlan(profile.id, plan);
     setError('');
-    Alert.alert('Сохранено', 'План действий обновлён.');
+    Alert.alert(t('settings.saved'), t('sosEdit.savedPlan'));
   };
 
   const addContact = () => {
     if (!profile) {
-      setError('Выберите профиль на главном экране.');
+      setError(t('errors.selectProfile'));
       return;
     }
     if (!name.trim() || !phone.trim()) {
-      setError('Укажите имя и телефон контакта.');
+      setError(t('sosEdit.errors.contactRequired'));
       return;
     }
 
@@ -101,47 +105,45 @@ export default function SosEditScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View>
-          <Text style={styles.title}>Редактирование SOS</Text>
-          <Text style={styles.subtitle}>
-            {profile ? profile.name : 'Профиль не выбран'}
-          </Text>
+          <Text style={styles.title}>{t('sosEdit.title')}</Text>
+          <Text style={styles.subtitle}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionLabel}>Медицинские заметки</Text>
+      <Text style={styles.sectionLabel}>{t('sosEdit.notesLabel')}</Text>
       <TextInput
         style={styles.notesInput}
         value={notes}
         onChangeText={setNotes}
-        placeholder="Препараты, особенности реакции, инструкции врача…"
+        placeholder={t('sosEdit.notesPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
         multiline
       />
       <Pressable style={styles.primaryBtn} onPress={saveNotes}>
-        <Text style={styles.primaryBtnText}>Сохранить заметки</Text>
+        <Text style={styles.primaryBtnText}>{t('sosEdit.saveNotes')}</Text>
       </Pressable>
 
-      <Text style={styles.sectionLabel}>План действий при реакции</Text>
+      <Text style={styles.sectionLabel}>{t('sosEdit.planLabel')}</Text>
       <TextInput
         style={styles.notesInput}
         value={plan}
         onChangeText={setPlan}
-        placeholder="Лёгкая реакция: … Умеренная: … Анафилаксия: …"
+        placeholder={t('sosEdit.planPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
         multiline
       />
       <Pressable style={styles.primaryBtn} onPress={savePlan}>
-        <Text style={styles.primaryBtnText}>Сохранить план</Text>
+        <Text style={styles.primaryBtnText}>{t('sosEdit.savePlan')}</Text>
       </Pressable>
 
-      <Text style={styles.sectionLabel}>Экстренные контакты</Text>
+      <Text style={styles.sectionLabel}>{t('sosEdit.contactsLabel')}</Text>
 
       {contacts.map((contact) => (
         <View key={contact.id} style={styles.contactCard}>
           <View style={styles.contactInfo}>
             <Text style={styles.contactName}>{contact.name}</Text>
             <Text style={styles.contactMeta}>
-              {contact.relation} · {contact.phone}
+              {localizeEmergencyRelation(contact.relation, localeContent)} · {contact.phone}
             </Text>
           </View>
           <Pressable onPress={() => removeContact(contact.id)}>
@@ -155,14 +157,14 @@ export default function SosEditScreen() {
           style={styles.input}
           value={name}
           onChangeText={setName}
-          placeholder="Имя"
+          placeholder={t('common.name')}
           placeholderTextColor={theme.colors.textMuted}
         />
         <TextInput
           style={styles.input}
           value={phone}
           onChangeText={setPhone}
-          placeholder="Телефон"
+          placeholder={t('common.phone')}
           placeholderTextColor={theme.colors.textMuted}
           keyboardType="phone-pad"
         />
@@ -175,11 +177,11 @@ export default function SosEditScreen() {
         />
         <Pressable style={styles.secondaryBtn} onPress={addContact}>
           <Ionicons name="person-add" size={16} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>Добавить контакт</Text>
+          <Text style={styles.secondaryBtnText}>{t('sosEdit.addContact')}</Text>
         </Pressable>
       </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>{tSosError(error)}</Text> : null}
     </Screen>
   );
 }

@@ -180,17 +180,19 @@ export default function MapScreen() {
         <>
           <View style={styles.pollenHero}>
             <Ionicons name="leaf" size={28} color={theme.colors.success} />
-            <Text style={styles.pollenTitle}>Карта пыления · {formatPollenMonth(pollenMonth)}</Text>
-            <Text style={styles.pollenSub}>Данные Open-Meteo / ориентир АДАИР</Text>
+            <Text style={styles.pollenTitle}>{t('map.pollenMapTitle', { month: formatPollenMonth(pollenMonth) })}</Text>
+            <Text style={styles.pollenSub}>{t('map.pollenMapSub')}</Text>
           </View>
           {pollenPeaks.map((peak) => (
             <GlassCard key={peak.allergen} style={styles.card}>
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{peak.allergen}</Text>
-                <Text style={styles.cardNote}>Пик сезона: {formatPollenMonth(peak.peakMonth)} · {peak.region}</Text>
+                <Text style={styles.cardNote}>
+                  {t('map.peakSeason', { month: formatPollenMonth(peak.peakMonth), region: peak.region })}
+                </Text>
               </View>
               <View style={[styles.badge, { backgroundColor: theme.colors.warningLight }]}>
-                <Text style={[styles.badgeText, { color: theme.colors.warning }]}>Сезон</Text>
+                <Text style={[styles.badgeText, { color: theme.colors.warning }]}>{t('map.season')}</Text>
               </View>
             </GlassCard>
           ))}
@@ -212,7 +214,7 @@ export default function MapScreen() {
               </View>
               {clinic.isNkcc ? (
                 <View style={[styles.badge, { backgroundColor: theme.colors.accentLight }]}>
-                  <Text style={[styles.badgeText, { color: theme.colors.accent }]}>НККЦ</Text>
+                  <Text style={[styles.badgeText, { color: theme.colors.accent }]}>{t('map.nkcc')}</Text>
                 </View>
               ) : null}
             </GlassCard>
@@ -227,7 +229,7 @@ export default function MapScreen() {
                 <Text style={styles.cardNote}>{doctor.degree}</Text>
                 <Text style={styles.tags}>{ADAIR_SPECIALIZATION_LABELS[doctor.specialization]}</Text>
                 {doctor.isChiefExpert ? (
-                  <Text style={[styles.tags, { color: theme.colors.accent }]}>Главный медицинский эксперт АллерГайд</Text>
+                  <Text style={[styles.tags, { color: theme.colors.accent }]}>{t('map.chiefExpert')}</Text>
                 ) : null}
               </View>
             </GlassCard>
