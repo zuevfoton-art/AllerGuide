@@ -1,6 +1,6 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { colors } from '@/src/constants/theme';
+import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -105,11 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 2,
+    ...(shadows.sm as object),
   },
   pressed: { opacity: 0.82 },
   actionIcon: {

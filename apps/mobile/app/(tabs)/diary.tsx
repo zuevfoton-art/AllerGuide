@@ -2,7 +2,7 @@ import { Text, TextInput, Pressable, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { addDiaryEntry, getDiaryEntries, generateDoctorPdf } from '@/src/services/diary-service';
 import { useAppStore } from '@/src/store/app-store';
-import { colors } from '@/src/constants/theme';
+import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -158,11 +158,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     padding: 16,
     borderRadius: 16,
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    ...(shadows.accent as object),
   },
   buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   row: { flexDirection: 'row', gap: 10 },
@@ -186,11 +182,7 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 16,
     alignItems: 'flex-start',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    ...(shadows.xs as object),
   },
   cardDot: {
     width: 36,

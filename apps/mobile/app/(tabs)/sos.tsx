@@ -1,5 +1,5 @@
 import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
-import { colors } from '@/src/constants/theme';
+import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -97,11 +97,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    ...(shadows.md as object),
   },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   infoLabel: { fontSize: 14, color: colors.textSecondary, fontWeight: '600' },
@@ -133,11 +129,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.danger,
     padding: 18,
     borderRadius: 18,
-    shadowColor: colors.danger,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 6,
+    ...(shadows.danger as object),
   },
   emergencyText: { color: '#fff', fontWeight: '800', fontSize: 18 },
   tipCard: {
