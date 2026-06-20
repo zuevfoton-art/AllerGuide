@@ -11,5 +11,13 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test"
+  },
+  "dependencies": {
+    "pnpm": "^10.34.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "react-dom": "19.0.0"
+    }
   }
 }
