@@ -16,7 +16,7 @@ const MODES = [
 
 export default function ScannerScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
   const [input, setInput] = useState('молоко, арахис, сахар');
   const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');

@@ -1,16 +1,15 @@
-import { Text } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import type { LoginType } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import {
+  AuthError,
   AuthField,
   AuthHero,
   AuthLink,
   AuthModeToggle,
   AuthPrimaryButton,
-  authStyles,
 } from '@/src/components/AuthForm';
 
 export default function LoginScreen() {
@@ -37,9 +36,7 @@ export default function LoginScreen() {
   return (
     <Screen>
       <AuthHero title="Вход" subtitle="Войдите по номеру телефона или email" />
-
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
-
       <AuthField
         label={loginType === 'phone' ? 'Номер телефона' : 'Email'}
         value={login}
@@ -47,7 +44,6 @@ export default function LoginScreen() {
         placeholder={loginType === 'phone' ? '+7 999 123-45-67' : 'name@example.com'}
         keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
       />
-
       <AuthField
         label="Пароль"
         value={password}
@@ -55,11 +51,8 @@ export default function LoginScreen() {
         placeholder="Введите пароль"
         secureTextEntry
       />
-
-      {error ? <Text style={authStyles.error}>{error}</Text> : null}
-
+      <AuthError message={error} />
       <AuthPrimaryButton label="Войти" onPress={handleLogin} loading={loading} />
-
       <AuthLink
         text="Нет аккаунта?"
         linkText="Зарегистрироваться"

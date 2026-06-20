@@ -1,16 +1,15 @@
-import { Text } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import type { LoginType } from '@allerguide/core';
 import { registerUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import {
+  AuthError,
   AuthField,
   AuthHero,
   AuthLink,
   AuthModeToggle,
   AuthPrimaryButton,
-  authStyles,
 } from '@/src/components/AuthForm';
 
 export default function RegisterScreen() {
@@ -38,9 +37,7 @@ export default function RegisterScreen() {
   return (
     <Screen>
       <AuthHero title="Регистрация" subtitle="Создайте аккаунт по телефону или email" />
-
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
-
       <AuthField
         label={loginType === 'phone' ? 'Номер телефона' : 'Email'}
         value={login}
@@ -48,7 +45,6 @@ export default function RegisterScreen() {
         placeholder={loginType === 'phone' ? '+7 999 123-45-67' : 'name@example.com'}
         keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
       />
-
       <AuthField
         label="Пароль"
         value={password}
@@ -56,7 +52,6 @@ export default function RegisterScreen() {
         placeholder="Минимум 6 символов"
         secureTextEntry
       />
-
       <AuthField
         label="Подтверждение пароля"
         value={confirmPassword}
@@ -64,11 +59,8 @@ export default function RegisterScreen() {
         placeholder="Повторите пароль"
         secureTextEntry
       />
-
-      {error ? <Text style={authStyles.error}>{error}</Text> : null}
-
+      <AuthError message={error} />
       <AuthPrimaryButton label="Зарегистрироваться" onPress={handleRegister} loading={loading} />
-
       <AuthLink
         text="Уже есть аккаунт?"
         linkText="Войти"

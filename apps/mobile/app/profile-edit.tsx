@@ -9,7 +9,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function ProfileEditScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const profileId = Number(id);
   const [name, setName] = useState('');

@@ -9,7 +9,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function SosScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
 

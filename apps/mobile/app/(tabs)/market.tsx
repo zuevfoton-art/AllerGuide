@@ -7,7 +7,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function MarketScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const items = useMemo(
     () => [
       {
@@ -32,7 +32,7 @@ export default function MarketScreen() {
         color: theme.colors.accent,
       },
     ],
-    [theme.isDark, theme.mode],
+    [theme],
   );
 
   return (

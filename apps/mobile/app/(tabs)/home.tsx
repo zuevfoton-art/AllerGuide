@@ -8,7 +8,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const actions = useMemo(
     () =>
       [
@@ -41,7 +41,7 @@ export default function HomeScreen() {
           color: theme.colors.warning,
         },
       ] as const,
-    [theme.isDark, theme.mode],
+    [theme],
   );
 
   return (

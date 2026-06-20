@@ -11,7 +11,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function ProfilesScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [profiles, setProfiles] = useState(listProfiles());
 
   const refresh = useCallback(() => {

@@ -23,7 +23,7 @@ function validateProfileInput(name: string, birthYear: string, selected: string[
 
 export default function ProfileSetupScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const scenario = useAppStore((s) => s.scenario) ?? getStoredScenario();
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const [name, setName] = useState('');

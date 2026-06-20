@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
 import { initDb } from '@/src/db/init';
+import { useTheme } from '@/src/hooks/use-theme';
 import { isAuthenticated } from '@/src/services/auth-service';
 import { listProfiles } from '@/src/services/profile-service';
 import {
@@ -10,11 +11,11 @@ import {
   isOnboardingComplete,
 } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
-import { colors } from '@/src/constants/theme';
 
 type BootstrapRoute = '/login' | '/onboarding' | '/profile-setup' | '/(tabs)/home';
 
 export default function Index() {
+  const { colors } = useTheme();
   const [target, setTarget] = useState<BootstrapRoute | null>(null);
   const setScenario = useAppStore((s) => s.setScenario);
 

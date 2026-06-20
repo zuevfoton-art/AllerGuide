@@ -7,7 +7,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function MapScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const places = useMemo(
     () => [
       {
@@ -25,7 +25,7 @@ export default function MapScreen() {
         icon: 'restaurant',
       },
     ],
-    [theme.isDark, theme.mode],
+    [theme],
   );
   const levelBg = useMemo(
     () =>
@@ -33,7 +33,7 @@ export default function MapScreen() {
         [theme.colors.success]: theme.colors.successLight,
         [theme.colors.warning]: theme.colors.warningLight,
       }) as Record<string, string>,
-    [theme.isDark, theme.mode],
+    [theme],
   );
 
   return (

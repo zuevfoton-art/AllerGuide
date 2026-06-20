@@ -1,21 +1,33 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '@/src/constants/theme';
 import { Platform } from 'react-native';
+import { useTheme } from '@/src/hooks/use-theme';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
-function TabIcon({ name, focused }: { name: IoniconsName; focused: boolean }) {
+function TabIcon({
+  name,
+  focused,
+  color,
+  muted,
+}: {
+  name: IoniconsName;
+  focused: boolean;
+  color: string;
+  muted: string;
+}) {
   return (
     <Ionicons
       name={focused ? name : (`${name}-outline` as IoniconsName)}
       size={24}
-      color={focused ? colors.accent : colors.textMuted}
+      color={focused ? color : muted}
     />
   );
 }
 
 export default function TabsLayout() {
+  const { colors, shadows } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
@@ -41,35 +53,45 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Главная',
-          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="home" focused={focused} color={colors.accent} muted={colors.textMuted} />
+          ),
         }}
       />
       <Tabs.Screen
         name="diary"
         options={{
           title: 'Дневник',
-          tabBarIcon: ({ focused }) => <TabIcon name="journal" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="journal" focused={focused} color={colors.accent} muted={colors.textMuted} />
+          ),
         }}
       />
       <Tabs.Screen
         name="scanner"
         options={{
           title: 'Сканер',
-          tabBarIcon: ({ focused }) => <TabIcon name="scan" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="scan" focused={focused} color={colors.accent} muted={colors.textMuted} />
+          ),
         }}
       />
       <Tabs.Screen
         name="market"
         options={{
           title: 'Маркет',
-          tabBarIcon: ({ focused }) => <TabIcon name="bag" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="bag" focused={focused} color={colors.accent} muted={colors.textMuted} />
+          ),
         }}
       />
       <Tabs.Screen
         name="map"
         options={{
           title: 'Карта',
-          tabBarIcon: ({ focused }) => <TabIcon name="map" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="map" focused={focused} color={colors.accent} muted={colors.textMuted} />
+          ),
         }}
       />
       <Tabs.Screen

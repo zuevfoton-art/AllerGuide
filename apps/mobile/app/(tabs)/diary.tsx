@@ -11,7 +11,7 @@ const TYPES = ['Симптомы', 'Лекарство', 'Питание', 'Тр
 
 export default function DiaryScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [type, setType] = useState('Симптомы');
   const [details, setDetails] = useState('');
@@ -25,7 +25,7 @@ export default function DiaryScreen() {
       Кожа: { icon: 'body', color: theme.colors.pink },
       Заметка: { icon: 'create', color: theme.colors.success },
     }),
-    [theme.isDark, theme.mode],
+    [theme],
   );
 
   const load = useCallback(async () => {

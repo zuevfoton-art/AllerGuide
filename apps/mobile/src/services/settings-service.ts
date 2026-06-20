@@ -1,5 +1,6 @@
 import { getDb } from '@/src/db/init';
 import type { Scenario } from '@allerguide/core';
+import type { ThemeMode } from '@/src/constants/theme';
 
 export function getSetting(key: string): string | null {
   const db = getDb();
@@ -28,4 +29,14 @@ export function isOnboardingComplete(): boolean {
 
 export function markOnboardingComplete() {
   setSetting('onboardingComplete', 'true');
+}
+
+export function getThemeMode(): ThemeMode | null {
+  const value = getSetting('themeMode');
+  if (value === 'light' || value === 'dark' || value === 'system') return value;
+  return null;
+}
+
+export function setThemeMode(mode: ThemeMode) {
+  setSetting('themeMode', mode);
 }
