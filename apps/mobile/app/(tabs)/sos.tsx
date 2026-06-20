@@ -1,28 +1,70 @@
 import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
 import { parseAllergies } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import {
+  getEmergencyNumber,
+  getProfileAge,
+  getSosNotes,
+  listEmergencyContacts,
+} from '@/src/services/sos-service';
+import type { EmergencyContact } from '@allerguide/core';
 
 export default function SosScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
+  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const [notes, setNotes] = useState('');
+  const [contacts, setContacts] = useState<EmergencyContact[]>([]);
+
+  const refresh = useCallback(() => {
+    setEmergencyNumberState(getEmergencyNumber());
+    if (!profile) {
+      setNotes('');
+      setContacts([]);
+      return;
+    }
+    setNotes(getSosNotes(profile.id));
+    setContacts(listEmergencyContacts(profile.id));
+  }, [profile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
+
+  const callEmergency = () => {
+    void Linking.openURL(`tel:${emergencyNumber}`);
+  };
+
+  const callContact = (phone: string) => {
+    void Linking.openURL(`tel:${phone.replace(/\s/g, '')}`);
+  };
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <View style={styles.sosIconWrap}>
-          <Ionicons name="medkit" size={30} color={theme.colors.danger} />
+      <View style={styles.headerRow}>
+        <View style={styles.header}>
+          <View style={styles.sosIconWrap}>
+            <Ionicons name="medkit" size={30} color={theme.colors.danger} />
+          </View>
+          <View>
+            <Text style={styles.title}>SOS</Text>
+            <Text style={styles.subtitle}>Экстренная информация</Text>
+          </View>
         </View>
-        <View>
-          <Text style={styles.title}>SOS</Text>
-          <Text style={styles.subtitle}>Экстренная информация</Text>
-        </View>
+        <Pressable style={styles.editBtn} onPress={() => router.push('/sos-edit')}>
+          <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.editBtnText}>Изменить</Text>
+        </Pressable>
       </View>
 
       <ProfileSwitcher />
@@ -37,8 +79,8 @@ export default function SosScreen() {
           {profile.birthYear ? (
             <View style={styles.infoRow}>
               <Ionicons name="calendar" size={18} color={theme.colors.textSecondary} />
-              <Text style={styles.infoLabel}>Год рождения:</Text>
-              <Text style={styles.infoValue}>{profile.birthYear}</Text>
+              <Text style={styles.infoLabel}>Возраст:</Text>
+              <Text style={styles.infoValue}>{getProfileAge(profile.birthYear)}</Text>
             </View>
           ) : null}
           {allergies.length > 0 && (
@@ -56,6 +98,15 @@ export default function SosScreen() {
               </View>
             </View>
           )}
+          {notes ? (
+            <View style={styles.notesSection}>
+              <View style={styles.infoRow}>
+                <Ionicons name="document-text" size={18} color={theme.colors.purple} />
+                <Text style={styles.infoLabel}>Заметки:</Text>
+              </View>
+              <Text style={styles.notesText}>{notes}</Text>
+            </View>
+          ) : null}
         </View>
       ) : (
         <View style={styles.emptyCard}>
@@ -64,11 +115,36 @@ export default function SosScreen() {
         </View>
       )}
 
+      {contacts.length > 0 ? (
+        <View style={styles.contactsCard}>
+          <Text style={styles.contactsTitle}>Экстренные контакты</Text>
+          {contacts.map((contact) => (
+            <Pressable
+              key={contact.id}
+              style={styles.contactRow}
+              onPress={() => callContact(contact.phone)}>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactName}>{contact.name}</Text>
+                <Text style={styles.contactMeta}>
+                  {contact.relation} · {contact.phone}
+                </Text>
+              </View>
+              <Ionicons name="call" size={18} color={theme.colors.accent} />
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
       <Pressable
         style={({ pressed }) => [styles.emergencyBtn, pressed && { opacity: 0.9 }]}
-        onPress={() => Linking.openURL('tel:103')}>
+        onPress={callEmergency}>
         <Ionicons name="call" size={22} color={theme.colors.onDanger} />
-        <Text style={styles.emergencyText}>Позвонить 103</Text>
+        <Text style={styles.emergencyText}>Позвонить {emergencyNumber}</Text>
+      </Pressable>
+
+      <Pressable style={styles.settingsLink} onPress={() => router.push('/settings')}>
+        <Ionicons name="settings-outline" size={16} color={theme.colors.textSecondary} />
+        <Text style={styles.settingsLinkText}>Настройки SOS и уведомлений</Text>
       </Pressable>
 
       <View style={styles.tipCard}>
@@ -87,7 +163,8 @@ export default function SosScreen() {
 
 function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    headerRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
     sosIconWrap: {
       width: 58,
       height: 58,
@@ -98,6 +175,16 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },
+    editBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 12,
+      backgroundColor: colors.accentLight,
+    },
+    editBtnText: { color: colors.accent, fontWeight: '700', fontSize: 13 },
     infoCard: {
       backgroundColor: colors.card,
       borderRadius: 18,
@@ -119,6 +206,8 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.dangerBorder,
     },
     allergyText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
+    notesSection: { gap: 6 },
+    notesText: { fontSize: 14, color: colors.text, lineHeight: 20 },
     emptyCard: {
       backgroundColor: colors.card,
       borderRadius: 18,
@@ -127,6 +216,25 @@ function createStyles({ colors, shadows }: AppTheme) {
       gap: 10,
     },
     emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+    contactsCard: {
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      padding: 16,
+      gap: 10,
+      ...(shadows.sm as object),
+    },
+    contactsTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    contactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    contactInfo: { flex: 1, gap: 2 },
+    contactName: { fontSize: 14, fontWeight: '700', color: colors.text },
+    contactMeta: { fontSize: 12, color: colors.textSecondary },
     emergencyBtn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -138,6 +246,13 @@ function createStyles({ colors, shadows }: AppTheme) {
       ...(shadows.danger as object),
     },
     emergencyText: { color: colors.onDanger, fontWeight: '800', fontSize: 18 },
+    settingsLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    settingsLinkText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
     tipCard: {
       flexDirection: 'row',
       alignItems: 'flex-start',

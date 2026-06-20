@@ -1,4 +1,4 @@
-import type { AuthUser, Profile, DiaryEntry } from '@allerguide/core';
+import type { AuthUser, EmergencyContact, Profile, DiaryEntry } from '@allerguide/core';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -59,6 +59,30 @@ class WebDb implements DbLike {
 
   private saveUsers(users: StoredUser[]) {
     localStorage.setItem('ag_users', JSON.stringify(users));
+  }
+
+  private getEmergencyContacts(): EmergencyContact[] {
+    try {
+      return JSON.parse(localStorage.getItem('ag_emergency_contacts') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  private saveEmergencyContacts(items: EmergencyContact[]) {
+    localStorage.setItem('ag_emergency_contacts', JSON.stringify(items));
+  }
+
+  private getProfileSos(): { profileId: number; notes: string }[] {
+    try {
+      return JSON.parse(localStorage.getItem('ag_profile_sos') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  private saveProfileSos(items: { profileId: number; notes: string }[]) {
+    localStorage.setItem('ag_profile_sos', JSON.stringify(items));
   }
 
   execSync(_sql: string) {}
@@ -141,6 +165,33 @@ class WebDb implements DbLike {
         createdAt: params![3] as string,
       });
       this.saveUsers(users);
+      return;
+    }
+
+    if (s.startsWith('insert into emergency_contacts')) {
+      const items = this.getEmergencyContacts();
+      const id = items.length > 0 ? Math.max(...items.map((i) => i.id)) + 1 : 1;
+      items.push({
+        id,
+        profileId: params![0] as number,
+        name: params![1] as string,
+        phone: params![2] as string,
+        relation: params![3] as string,
+      });
+      this.saveEmergencyContacts(items);
+      return;
+    }
+
+    if (s.startsWith('delete from emergency_contacts')) {
+      const items = this.getEmergencyContacts();
+      this.saveEmergencyContacts(items.filter((i) => i.id !== params![0]));
+      return;
+    }
+
+    if (s.startsWith('insert or replace into profile_sos')) {
+      const items = this.getProfileSos().filter((i) => i.profileId !== params![0]);
+      items.push({ profileId: params![0] as number, notes: params![1] as string });
+      this.saveProfileSos(items);
     }
   }
 
@@ -178,6 +229,11 @@ class WebDb implements DbLike {
       return (entries.find((e) => e.profileId === params![0]) || null) as T | null;
     }
 
+    if (s.includes('from profile_sos') && s.includes('where profileid =')) {
+      const items = this.getProfileSos();
+      return (items.find((i) => i.profileId === params![0]) || null) as T | null;
+    }
+
     return null;
   }
 
@@ -195,6 +251,11 @@ class WebDb implements DbLike {
 
     if (s.includes('from diary_entries')) {
       return [...this.getDiaryEntries()].reverse() as T[];
+    }
+
+    if (s.includes('from emergency_contacts') && s.includes('where profileid =')) {
+      const items = this.getEmergencyContacts().filter((i) => i.profileId === params![0]);
+      return items as T[];
     }
 
     return [];

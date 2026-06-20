@@ -7,7 +7,14 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "AllerGuide использует геолокацию для показа безопасных заведений рядом."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

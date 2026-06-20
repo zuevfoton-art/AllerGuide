@@ -8,6 +8,8 @@ export interface ScanResult {
   matches: string[];
   mode: ScanMode;
   level: RiskLevel;
+  productName?: string;
+  source?: 'manual' | 'barcode' | 'openfoodfacts';
 }
 
 function getKeywords(allergen: string): string[] {
@@ -26,10 +28,14 @@ export function runMockScan({
   mode,
   text,
   profile,
+  productName,
+  source = 'manual',
 }: {
   mode: ScanMode;
   text: string;
   profile?: Pick<Profile, 'allergies'> | null;
+  productName?: string;
+  source?: ScanResult['source'];
 }): ScanResult {
   const allergens: string[] = profile?.allergies
     ? (() => {
@@ -46,28 +52,34 @@ export function runMockScan({
   if (matches.length >= 2) {
     return {
       verdict: 'Выявлено множество совпадений',
-      reason: `Mock AI обнаружил несколько совпадений состава с активным профилем: ${matches.join(', ')}.`,
+      reason: `Обнаружено несколько совпадений${productName ? ` в «${productName}»` : ''}: ${matches.join(', ')}.`,
       matches,
       mode,
       level: 'high',
+      productName,
+      source,
     };
   }
 
   if (matches.length === 1) {
     return {
       verdict: 'Есть частичные совпадения',
-      reason: `Mock AI обнаружил одно потенциально значимое совпадение: ${matches[0]}.`,
+      reason: `Обнаружено потенциально значимое совпадение${productName ? ` в «${productName}»` : ''}: ${matches[0]}.`,
       matches,
       mode,
       level: 'medium',
+      productName,
+      source,
     };
   }
 
   return {
     verdict: 'Нет явных совпадений',
-    reason: 'Mock AI не нашёл явных пересечений с текущими аллергенами профиля, но это не исключает индивидуальную реакцию.',
+    reason: `Явных пересечений с аллергенами профиля не найдено${productName ? ` в «${productName}»` : ''}, но это не исключает индивидуальной реакции.`,
     matches,
     mode,
     level: 'low',
+    productName,
+    source,
   };
 }

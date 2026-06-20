@@ -29,6 +29,17 @@ export function initDb() {
       passwordHash TEXT NOT NULL,
       createdAt TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS emergency_contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      profileId INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      relation TEXT
+    );
+    CREATE TABLE IF NOT EXISTS profile_sos (
+      profileId INTEGER PRIMARY KEY,
+      notes TEXT
+    );
   `);
 }
 

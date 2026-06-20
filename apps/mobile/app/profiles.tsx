@@ -91,6 +91,11 @@ export default function ProfilesScreen() {
 
       <ThemeToggle />
 
+      <Pressable style={styles.settingsBtn} onPress={() => router.push('/settings')}>
+        <Ionicons name="settings-outline" size={18} color={theme.colors.textSecondary} />
+        <Text style={styles.settingsText}>Настройки приложения</Text>
+      </Pressable>
+
       <Pressable
         style={styles.logoutBtn}
         onPress={() => {
@@ -175,6 +180,18 @@ function createStyles({ colors, shadows }: AppTheme) {
       backgroundColor: colors.accentLight,
     },
     addText: { color: colors.accent, fontWeight: '700', fontSize: 15 },
+    settingsBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      padding: 14,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    settingsText: { color: colors.textSecondary, fontWeight: '600', fontSize: 15 },
     logoutBtn: {
       flexDirection: 'row',
       alignItems: 'center',

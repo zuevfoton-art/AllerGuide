@@ -1,38 +1,75 @@
-import { Text, View, StyleSheet, Pressable } from 'react-native';
-import { useMemo } from 'react';
+import { Text, View, StyleSheet, Pressable, Platform } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import * as Location from 'expo-location';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
+import {
+  getPlaceLevelColor,
+  getPlaceLevelLabel,
+  type CatalogPlace,
+} from '@allerguide/core';
+import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { getRecommendedPlaces } from '@/src/services/place-service';
+
+const DEFAULT_REGION = {
+  latitude: 55.7558,
+  longitude: 37.6173,
+  latitudeDelta: 0.06,
+  longitudeDelta: 0.06,
+};
+
+let MapViewComponent: typeof import('react-native-maps').default | null = null;
+let MarkerComponent: typeof import('react-native-maps').Marker | null = null;
+
+if (Platform.OS !== 'web') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const maps = require('react-native-maps');
+  MapViewComponent = maps.default;
+  MarkerComponent = maps.Marker;
+}
 
 export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const places = useMemo(
-    () => [
-      {
-        title: 'Green Bowl Cafe',
-        level: 'Высокий',
-        levelColor: theme.colors.success,
-        note: 'Есть аллергенная разметка и фильтры по меню',
-        icon: 'leaf',
-      },
-      {
-        title: 'Simple Family Kitchen',
-        level: 'Средний',
-        levelColor: theme.colors.warning,
-        note: 'Нужно уточнять состав блюд у персонала',
-        icon: 'restaurant',
-      },
-    ],
-    [theme],
+  const profile = useAppStore((s) => s.activeProfile);
+  const [places, setPlaces] = useState<CatalogPlace[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
+    null,
   );
+
+  const refresh = useCallback(async () => {
+    setPlaces(getRecommendedPlaces(profile));
+    if (Platform.OS === 'web') return;
+
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') return;
+
+    const location = await Location.getCurrentPositionAsync({});
+    setUserLocation({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+  }, [profile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
+
+  const selected = places.find((place) => place.id === selectedId) ?? places[0] ?? null;
+
   const levelBg = useMemo(
     () =>
       ({
-        [theme.colors.success]: theme.colors.successLight,
-        [theme.colors.warning]: theme.colors.warningLight,
-      }) as Record<string, string>,
+        high: theme.isDark ? '#1A3D28' : theme.colors.successLight,
+        medium: theme.isDark ? '#3D2E10' : theme.colors.warningLight,
+        low: theme.isDark ? '#3D1512' : theme.colors.dangerLight,
+      }) as Record<CatalogPlace['level'], string>,
     [theme],
   );
 
@@ -45,33 +82,66 @@ export default function MapScreen() {
 
       <ProfileSwitcher />
 
-      <View style={styles.mapPlaceholder}>
-        <Ionicons name="map" size={40} color={theme.colors.textMuted} />
-        <Text style={styles.mapText}>Карта доступна в нативной версии</Text>
-      </View>
+      {Platform.OS !== 'web' && MapViewComponent && MarkerComponent ? (
+        <View style={styles.mapWrap}>
+          <MapViewComponent style={styles.map} initialRegion={DEFAULT_REGION} showsUserLocation={!!userLocation}>
+            {places.map((place) => {
+              const color = getPlaceLevelColor(place.level, theme.isDark);
+              return (
+                <MarkerComponent
+                  key={place.id}
+                  coordinate={{ latitude: place.lat, longitude: place.lng }}
+                  title={place.title}
+                  description={place.note}
+                  pinColor={color}
+                  onPress={() => setSelectedId(place.id)}
+                />
+              );
+            })}
+          </MapViewComponent>
+        </View>
+      ) : (
+        <View style={styles.mapPlaceholder}>
+          <Ionicons name="map" size={40} color={theme.colors.textMuted} />
+          <Text style={styles.mapText}>Интерактивная карта доступна в мобильном приложении</Text>
+        </View>
+      )}
 
       <Text style={styles.sectionLabel}>Рекомендованные места</Text>
 
-      {places.map((p) => (
-        <Pressable
-          key={p.title}
-          style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
-          <View
-            style={[styles.cardIcon, { backgroundColor: levelBg[p.levelColor] ?? theme.colors.accentLight }]}>
-            <Ionicons name={p.icon as any} size={24} color={p.levelColor} />
-          </View>
-          <View style={styles.cardBody}>
-            <View style={styles.cardTop}>
-              <Text style={styles.cardTitle}>{p.title}</Text>
-              <View style={[styles.badge, { backgroundColor: levelBg[p.levelColor] ?? theme.colors.accentLight }]}>
-                <Text style={[styles.badgeText, { color: p.levelColor }]}>{p.level}</Text>
-              </View>
+      {places.map((place) => {
+        const levelColor = getPlaceLevelColor(place.level, theme.isDark);
+        const levelLabel = getPlaceLevelLabel(place.level);
+        const isSelected = selected?.id === place.id;
+
+        return (
+          <Pressable
+            key={place.id}
+            style={({ pressed }) => [
+              styles.card,
+              isSelected && styles.cardSelected,
+              pressed && styles.pressed,
+            ]}
+            onPress={() => setSelectedId(place.id)}>
+            <View style={[styles.cardIcon, { backgroundColor: levelBg[place.level] }]}>
+              <Ionicons name={place.icon as any} size={24} color={levelColor} />
             </View>
-            <Text style={styles.cardNote}>{p.note}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
-        </Pressable>
-      ))}
+            <View style={styles.cardBody}>
+              <View style={styles.cardTop}>
+                <Text style={styles.cardTitle}>{place.title}</Text>
+                <View style={[styles.badge, { backgroundColor: levelBg[place.level] }]}>
+                  <Text style={[styles.badgeText, { color: levelColor }]}>{levelLabel}</Text>
+                </View>
+              </View>
+              <Text style={styles.cardNote}>{place.note}</Text>
+              {place.tags.length > 0 ? (
+                <Text style={styles.tags}>{place.tags.join(' · ')}</Text>
+              ) : null}
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+          </Pressable>
+        );
+      })}
 
       <Text style={styles.disclaimer}>
         Информация о местах носит ориентировочный характер, состав нужно уточнять в заведении.
@@ -85,6 +155,14 @@ function createStyles({ colors, shadows }: AppTheme) {
     header: { gap: 3 },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },
+    mapWrap: {
+      height: 220,
+      borderRadius: 18,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    map: { flex: 1 },
     mapPlaceholder: {
       height: 160,
       backgroundColor: colors.card,
@@ -96,7 +174,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.border,
       borderStyle: 'dashed',
     },
-    mapText: { fontSize: 14, color: colors.textMuted, fontWeight: '500' },
+    mapText: { fontSize: 14, color: colors.textMuted, fontWeight: '500', textAlign: 'center', paddingHorizontal: 24 },
     sectionLabel: {
       fontSize: 13,
       fontWeight: '700',
@@ -114,6 +192,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       padding: 16,
       ...(shadows.md as object),
     },
+    cardSelected: { borderWidth: 1.5, borderColor: colors.accent },
     pressed: { opacity: 0.85 },
     cardIcon: {
       width: 50,
@@ -128,6 +207,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     badge: { paddingVertical: 3, paddingHorizontal: 9, borderRadius: 8 },
     badgeText: { fontSize: 11, fontWeight: '700' },
     cardNote: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    tags: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
     disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
   });
 }
