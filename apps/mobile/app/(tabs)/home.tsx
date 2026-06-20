@@ -5,9 +5,11 @@ import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const { gridCardWidth } = useResponsiveLayout();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const actions = useMemo(
     () =>
@@ -82,7 +84,7 @@ export default function HomeScreen() {
         {actions.map((item) => (
           <Pressable
             key={item.label}
-            style={({ pressed }) => [styles.actionCard, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.actionCard, { width: gridCardWidth }, pressed && styles.pressed]}
             onPress={() => router.push(item.route as any)}>
             <View style={[styles.actionIcon, { backgroundColor: `${item.color}18` }]}>
               <Ionicons name={item.icon as any} size={24} color={item.color} />
@@ -156,7 +158,6 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     actionCard: {
-      width: '47%',
       backgroundColor: colors.card,
       borderRadius: 18,
       padding: 16,

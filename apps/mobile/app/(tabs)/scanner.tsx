@@ -6,6 +6,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
+import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 const MODES = [
@@ -266,7 +267,12 @@ function createStyles({ colors, shadows }: AppTheme) {
       minHeight: 100,
     },
     inputIcon: { marginBottom: 6 },
-    input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
+    input: {
+      fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
+      color: colors.text,
+      textAlignVertical: 'top',
+      lineHeight: 22,
+    },
     button: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -310,7 +316,11 @@ function createStyles({ colors, shadows }: AppTheme) {
     matchesText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
     disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
 
-    cameraContainer: { flex: 1, backgroundColor: colors.overlay },
+    cameraContainer: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      ...(Platform.OS === 'web' ? { minHeight: '100dvh' as unknown as number } : null),
+    },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,
       justifyContent: 'space-between',

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -6,6 +6,7 @@ import {
   type EmergencyContactRelation,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import {
   DEFAULT_EMERGENCY_CONTACT_RELATION,
   type EmergencyContactDraft,
@@ -135,7 +136,7 @@ function createStyles({ colors }: AppTheme) {
       backgroundColor: colors.bg,
       padding: 12,
       borderRadius: 12,
-      fontSize: 15,
+      fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
