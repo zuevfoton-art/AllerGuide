@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { LoginType } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
@@ -13,6 +14,7 @@ import {
 } from '@/src/components/AuthForm';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [loginType, setLoginType] = useState<LoginType>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -35,7 +37,7 @@ export default function LoginScreen() {
 
   return (
     <Screen>
-      <AuthHero title="Вход" subtitle="Войдите по номеру телефона или email" />
+      <AuthHero title={t('auth.login')} subtitle="Войдите по номеру телефона или email" />
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
       <AuthField
         label={loginType === 'phone' ? 'Номер телефона' : 'Email'}
@@ -52,10 +54,10 @@ export default function LoginScreen() {
         secureTextEntry
       />
       <AuthError message={error} />
-      <AuthPrimaryButton label="Войти" onPress={handleLogin} loading={loading} />
+      <AuthPrimaryButton label={t('auth.loginAction')} onPress={handleLogin} loading={loading} />
       <AuthLink
-        text="Нет аккаунта?"
-        linkText="Зарегистрироваться"
+        text={t('auth.noAccount')}
+        linkText={t('auth.register')}
         onPress={() => router.push('/register')}
       />
     </Screen>

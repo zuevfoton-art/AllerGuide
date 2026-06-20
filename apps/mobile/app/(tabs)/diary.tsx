@@ -1,4 +1,4 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DIARY_SECTIONS,
@@ -136,8 +136,29 @@ export default function DiaryScreen() {
     );
   };
 
-  return (
-    <Screen>
+  const renderEntry = ({ item }: { item: DiaryEntry }) => {
+    const cfg = TYPE_CONFIG[item.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
+    const color = theme.colors[cfg.colorKey];
+    const summary = formatDiaryEntrySummary(item.type, item.details);
+    return (
+      <Pressable style={styles.card} onPress={() => openEdit(item)}>
+        <View style={[styles.cardDot, { backgroundColor: `${color}18` }]}>
+          <Ionicons name={cfg.icon as any} size={16} color={color} />
+        </View>
+        <View style={styles.cardBody}>
+          <View style={styles.cardTopRow}>
+            <Text style={styles.cardType}>{item.type}</Text>
+            <Ionicons name="create-outline" size={16} color={theme.colors.textMuted} />
+          </View>
+          <Text style={styles.cardDetails}>{summary}</Text>
+          <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
+        </View>
+      </Pressable>
+    );
+  };
+
+  const listHeader = (
+    <>
       <View style={styles.header}>
         <Text style={styles.title}>Дневник</Text>
         <Text style={styles.subtitle}>Пошаговые записи наблюдений</Text>
@@ -188,35 +209,30 @@ export default function DiaryScreen() {
         </Pressable>
       </View>
 
-      {list.length > 0 ? (
-        <>
-          <Text style={styles.sectionLabel}>История записей</Text>
-          {list.map((item) => {
-            const cfg = TYPE_CONFIG[item.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
-            const color = theme.colors[cfg.colorKey];
-            const summary = formatDiaryEntrySummary(item.type, item.details);
-            return (
-              <Pressable key={item.id} style={styles.card} onPress={() => openEdit(item)}>
-                <View style={[styles.cardDot, { backgroundColor: `${color}18` }]}>
-                  <Ionicons name={cfg.icon as any} size={16} color={color} />
-                </View>
-                <View style={styles.cardBody}>
-                  <View style={styles.cardTopRow}>
-                    <Text style={styles.cardType}>{item.type}</Text>
-                    <Ionicons name="create-outline" size={16} color={theme.colors.textMuted} />
-                  </View>
-                  <Text style={styles.cardDetails}>{summary}</Text>
-                  <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
-                </View>
-              </Pressable>
-            );
-          })}
-        </>
-      ) : null}
+      {list.length > 0 ? <Text style={styles.sectionLabel}>История записей</Text> : null}
+    </>
+  );
 
-      <Text style={styles.disclaimer}>
-        Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.
-      </Text>
+  return (
+    <Screen scroll={false}>
+      <View style={styles.listWrap}>
+        <FlatList
+          style={{ flex: 1 }}
+        data={editor ? [] : list}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={renderEntry}
+        ListHeaderComponent={listHeader}
+        ListFooterComponent={
+          <Text style={styles.disclaimer}>
+            Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.
+          </Text>
+        }
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={12}
+        windowSize={8}
+        />
+      </View>
     </Screen>
   );
 }
@@ -229,6 +245,8 @@ function entryDetailsText(entry: DiaryEntry): string {
 
 function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
+    listContent: { gap: 16, paddingBottom: 24 },
+    listWrap: { flex: 1 },
     header: { gap: 3 },
     title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
     subtitle: { fontSize: 14, color: colors.textSecondary },

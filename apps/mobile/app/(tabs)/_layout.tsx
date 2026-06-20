@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
@@ -29,6 +30,7 @@ function TabIcon({
 }
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const { colors, shadows } = useTheme();
   const { isCompact, showTabLabels, tabBarHeight } = useResponsiveLayout();
   const iconSize = isCompact ? 22 : 24;
@@ -70,8 +72,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Главная',
-          tabBarAccessibilityLabel: 'Главная',
+          title: t('tabs.home'),
+          tabBarAccessibilityLabel: t('tabs.home'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="home"
@@ -86,8 +88,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="diary"
         options={{
-          title: 'Дневник',
-          tabBarAccessibilityLabel: 'Дневник',
+          title: t('tabs.diary'),
+          tabBarAccessibilityLabel: t('tabs.diary'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="journal"
@@ -102,8 +104,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
-          title: 'Сканер',
-          tabBarAccessibilityLabel: 'Сканер аллергенов',
+          title: t('tabs.scanner'),
+          tabBarAccessibilityLabel: t('tabs.scanner'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="scan"
@@ -118,8 +120,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="market"
         options={{
-          title: 'Маркет',
-          tabBarAccessibilityLabel: 'Маркет',
+          title: t('tabs.market'),
+          tabBarAccessibilityLabel: t('tabs.market'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="bag"
@@ -134,8 +136,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title: 'Карта',
-          tabBarAccessibilityLabel: 'Карта мест',
+          title: t('tabs.map'),
+          tabBarAccessibilityLabel: t('tabs.map'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="map"
@@ -150,8 +152,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="sos"
         options={{
-          title: 'SOS',
-          tabBarAccessibilityLabel: 'Экстренная помощь SOS',
+          title: t('tabs.sos'),
+          tabBarAccessibilityLabel: t('tabs.sos'),
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name="medkit"

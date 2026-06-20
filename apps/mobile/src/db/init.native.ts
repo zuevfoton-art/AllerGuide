@@ -1,13 +1,7 @@
 import * as SQLite from 'expo-sqlite';
+import { runMigrations } from './migrations';
 
 const db = SQLite.openDatabaseSync('allerguide.db');
-
-function migrateDb() {
-  const columns = db.getAllSync<{ name: string }>('PRAGMA table_info(profiles)');
-  if (!columns.some((column) => column.name === 'userId')) {
-    db.execSync('ALTER TABLE profiles ADD COLUMN userId INTEGER');
-  }
-}
 
 export function initDb() {
   db.execSync(`
@@ -62,7 +56,7 @@ export function initDb() {
     );
   `);
 
-  migrateDb();
+  runMigrations(db as unknown as import('./types').DbLike);
 }
 
 export function getDb() {

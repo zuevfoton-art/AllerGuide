@@ -2,6 +2,7 @@ import express, { type Express } from 'express';
 import cors from 'cors';
 import { setupAuth, registerAuthRoutes } from './replit_integrations/auth';
 import { registerSyncRoutes } from './routes/sync';
+import { registerScanRoutes } from './routes/scan';
 
 export async function createApp(options: { withAuth?: boolean } = {}): Promise<Express> {
   const { withAuth = true } = options;
@@ -21,6 +22,7 @@ export async function createApp(options: { withAuth?: boolean } = {}): Promise<E
   }
 
   registerSyncRoutes(app);
+  registerScanRoutes(app);
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });

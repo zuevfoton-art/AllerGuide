@@ -6,13 +6,14 @@ import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  formatDistanceKm,
   getPlaceLevelColor,
   getPlaceLevelLabel,
   type CatalogPlace,
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { getRecommendedPlaces } from '@/src/services/place-service';
+import { getRecommendedPlaces, type PlaceWithDistance } from '@/src/services/place-service';
 
 const DEFAULT_REGION = {
   latitude: 55.7558,
@@ -35,24 +36,28 @@ export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
-  const [places, setPlaces] = useState<CatalogPlace[]>([]);
+  const [places, setPlaces] = useState<PlaceWithDistance[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
     null,
   );
 
   const refresh = useCallback(async () => {
-    setPlaces(getRecommendedPlaces(profile));
-    if (Platform.OS === 'web') return;
+    let origin: { latitude: number; longitude: number } | null = null;
 
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return;
+    if (Platform.OS !== 'web') {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const location = await Location.getCurrentPositionAsync({});
+        origin = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+        setUserLocation(origin);
+      }
+    }
 
-    const location = await Location.getCurrentPositionAsync({});
-    setUserLocation({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    });
+    setPlaces(getRecommendedPlaces(profile, origin));
   }, [profile]);
 
   useFocusEffect(
@@ -133,7 +138,10 @@ export default function MapScreen() {
                   <Text style={[styles.badgeText, { color: levelColor }]}>{levelLabel}</Text>
                 </View>
               </View>
-              <Text style={styles.cardNote}>{place.note}</Text>
+              <Text style={styles.cardNote}>
+                {place.note}
+                {place.distanceKm != null ? ` · ${formatDistanceKm(place.distanceKm)}` : ''}
+              </Text>
               {place.tags.length > 0 ? (
                 <Text style={styles.tags}>{place.tags.join(' · ')}</Text>
               ) : null}

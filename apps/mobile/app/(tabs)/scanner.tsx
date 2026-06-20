@@ -4,7 +4,9 @@ import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
+import { Badge } from '@allerguide/ui';
 import { formatDiaryDate, type ScanHistoryEntry } from '@allerguide/core';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
@@ -20,6 +22,7 @@ const MODES = [
 ] as const;
 
 export default function ScannerScreen() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
@@ -60,11 +63,11 @@ export default function ScannerScreen() {
       }
 
       if (mode === 'menu' && !barcodeMode && text === input && text.includes(',')) {
-        setResult(scanMenuPhoto({ profile }));
+        setResult(await scanMenuPhoto({ profile }));
         return;
       }
 
-      setResult(scanText({ mode, text, profile }));
+      setResult(await scanText({ mode, text, profile }));
     } finally {
       setLoading(false);
       refreshHistory();
@@ -83,7 +86,7 @@ export default function ScannerScreen() {
 
     setLoading(true);
     try {
-      setResult(scanMenuPhoto({ profile }));
+      setResult(await scanMenuPhoto({ profile }));
     } finally {
       setLoading(false);
       refreshHistory();
@@ -110,7 +113,7 @@ export default function ScannerScreen() {
   const handleMenuPhoto = async () => {
     setLoading(true);
     try {
-      setResult(scanMenuPhoto({ profile }));
+      setResult(await scanMenuPhoto({ profile }));
     } finally {
       setLoading(false);
     }
@@ -182,8 +185,8 @@ export default function ScannerScreen() {
     <Screen>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Сканер аллергенов</Text>
-          <Text style={styles.subtitle}>Open Food Facts + проверка по ключевым словам</Text>
+          <Text style={styles.title}>{t('scanner.title')}</Text>
+          <Text style={styles.subtitle}>{t('scanner.subtitle')}</Text>
         </View>
         <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
           <Ionicons name="camera" size={22} color={theme.colors.accent} />
@@ -224,9 +227,12 @@ export default function ScannerScreen() {
           <Text style={styles.scanBannerTitle}>
             {mode === 'product' ? 'Сканировать штрихкод' : 'Снять меню на фото'}
           </Text>
-          <Text style={styles.scanBannerDesc}>
-            {mode === 'product' ? 'Поиск состава в Open Food Facts' : 'Демо-анализ типичного меню'}
-          </Text>
+          <View style={styles.scanBannerDescRow}>
+            <Text style={styles.scanBannerDesc}>
+              {mode === 'product' ? 'Поиск состава в Open Food Facts' : t('scanner.demoMenu')}
+            </Text>
+            {mode === 'menu' ? <Badge label="Демо" color={theme.colors.warning} backgroundColor={theme.colors.warningLight} /> : null}
+          </View>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </Pressable>
@@ -387,6 +393,7 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     scanBannerText: { flex: 1, gap: 3 },
     scanBannerTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    scanBannerDescRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
     scanBannerDesc: { fontSize: 13, color: colors.textSecondary },
     divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
