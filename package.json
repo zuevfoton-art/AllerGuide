@@ -1,7 +1,7 @@
 {
   "name": "allerguide",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@10.34.4",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -11,9 +11,6 @@
     "lint": "pnpm --filter mobile lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @allerguide/core test && pnpm --filter @allerguide/ai test"
-  },
-  "dependencies": {
-    "pnpm": "^10.34.4"
   },
   "pnpm": {
     "overrides": {
