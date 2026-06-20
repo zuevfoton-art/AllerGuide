@@ -25,6 +25,9 @@
       --purple-light: #efedff;
       --tip-bg: #efedff;
       --tip-border: #c7c4f5;
+      --forest: #1f4d3a;
+      --mint: #cbe9d8;
+      --foam: #e8f6ee;
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
       --phone-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
       --radius-lg: 18px;
@@ -52,6 +55,9 @@
       --purple-light: #1c1b33;
       --tip-bg: #1e1b33;
       --tip-border: #3a3566;
+      --forest: #7fd4a8;
+      --mint: #1a2e24;
+      --foam: #142018;
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
       --phone-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
     }
@@ -525,6 +531,188 @@
 
     .hidden-tabbar .tabbar { display: none; }
     .hidden-tabbar .screen { padding-bottom: 24px; }
+
+    /* Wellness dashboard */
+    .wellness-card {
+      background: linear-gradient(160deg, var(--foam) 0%, var(--card) 55%);
+      border: 1.5px solid var(--mint);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .wellness-head {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .score-ring {
+      --score: 68;
+      --score-color: var(--warning);
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: conic-gradient(var(--score-color) calc(var(--score) * 1%), var(--border) 0);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .score-ring::before {
+      content: '';
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: var(--card);
+      position: absolute;
+    }
+
+    .score-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .score-num {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .score-of {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .wellness-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .wellness-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .wellness-updated {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .factor-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .factor {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .factor-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .factor-body { flex: 1; min-width: 0; }
+
+    .factor-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .factor-value {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .factor-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+    }
+
+    .factor-badge.low { background: var(--success-light); color: var(--success); }
+    .factor-badge.mid { background: var(--warning-light); color: var(--warning); }
+    .factor-badge.high { background: var(--danger-light); color: var(--danger); }
+
+    .rec-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rec-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--tip-bg);
+      border: 1px solid var(--tip-border);
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .rec-item strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 13px; }
+
+    .sources-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .source-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .dashboard-loading {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 24px 8px;
+    }
+
+    .screen-title-sm {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body>
@@ -554,6 +742,7 @@
       <div class="legend">
         <strong>Палитра</strong><br />
         Accent <span style="color:var(--accent)">#FF6B00</span> · Success · Danger · iOS gray bg<br /><br />
+        <strong>Главная</strong> — дашборд самочувствия: Open-Meteo (пыльца, AQI) + профиль + дневник<br />
         <strong>Шрифт</strong> — SF Pro / system-ui<br />
         <strong>Радиусы</strong> — 12–18px, pill chips<br />
         <strong>Tab bar</strong> — 6 вкладок, SOS красный
@@ -607,25 +796,46 @@
           <div class="row between">
             <div>
               <div style="font-size:14px;color:var(--text-secondary)">Добро пожаловать 👋</div>
-              <h2 class="screen-title">AllerGuide</h2>
+              <h2 class="screen-title-sm">AllerGuide</h2>
             </div>
             <div class="avatar" style="background:var(--danger-light);color:var(--danger)">🚑</div>
           </div>
-          <div class="card row between">
+          <div class="card row between" style="margin-bottom:10px">
             <div class="row">
               <div class="avatar">А</div>
               <div>
                 <strong>Анна</strong>
-                <div style="font-size:12px;color:var(--text-secondary)">Я · 1990 · Молоко, Арахис</div>
+                <div id="profile-allergens" style="font-size:12px;color:var(--text-secondary)">Я · 1990 · Молоко, Арахис, Берёза</div>
               </div>
             </div>
             <span style="color:var(--text-muted)">▾</span>
           </div>
-          <div class="stat-grid">
-            <div class="stat"><div class="stat-num">12</div><div class="stat-label">Записей</div></div>
-            <div class="stat"><div class="stat-num">3</div><div class="stat-label">Триггера</div></div>
-            <div class="stat"><div class="stat-num">7</div><div class="stat-label">Дней</div></div>
+
+          <div class="section-label" style="margin-top:8px">Самочувствие сегодня</div>
+          <div class="wellness-card" id="wellness-dashboard">
+            <div class="dashboard-loading" id="wellness-loading">Загрузка данных Open-Meteo…</div>
+            <div id="wellness-content" hidden>
+              <div class="wellness-head">
+                <div class="score-ring" id="score-ring">
+                  <div class="score-inner">
+                    <div class="score-num" id="score-num">—</div>
+                    <div class="score-of">из 100</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="wellness-title" id="wellness-status">—</div>
+                  <div class="wellness-sub" id="wellness-summary">—</div>
+                  <div class="wellness-updated" id="wellness-updated">—</div>
+                </div>
+              </div>
+              <div class="factor-list" id="factor-list"></div>
+              <div class="section-label" style="margin:8px 0 6px">Рекомендации</div>
+              <div class="rec-list" id="rec-list"></div>
+              <div class="sources-row" id="sources-row"></div>
+            </div>
           </div>
+
+          <div class="section-label">Быстрые действия</div>
           <div class="grid-2">
             <div class="action-card">
               <div class="action-icon" style="background:var(--accent-light);color:var(--accent)">📔</div>
@@ -648,10 +858,7 @@
               <div class="action-desc">Безопасные места</div>
             </div>
           </div>
-          <div class="card" style="background:var(--tip-bg);border-color:var(--tip-border)">
-            <strong style="color:var(--purple)">💡 Совет дня</strong>
-            <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.5">Сфотографируйте этикетку или проверьте штрихкод перед покупкой нового продукта.</p>
-          </div>
+          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
         </section>
 
         <!-- DIARY -->
@@ -812,7 +1019,7 @@
                 <div>
                   <strong>Анна</strong>
                   <div style="font-size:12px;color:var(--text-secondary)">Я · 1990</div>
-                  <div style="font-size:12px;color:var(--text-muted)">Молоко, Арахис</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Молоко, Арахис, Берёза</div>
                 </div>
               </div>
               <span>›</span>
@@ -923,8 +1130,351 @@
     document.getElementById('theme-light').addEventListener('click', () => setTheme('light'));
     document.getElementById('theme-dark').addEventListener('click', () => setTheme('dark'));
 
+    /* ── Wellness dashboard (Open-Meteo + profile + diary) ── */
+    const MOCK_LOCATION = { lat: 55.75, lon: 37.62, label: 'Москва' };
+
+    const MOCK_PROFILE = {
+      name: 'Анна',
+      birthYear: 1990,
+      allergens: [
+        { id: 'milk', name: 'Молоко', category: 'food', pollenKey: null },
+        { id: 'peanut', name: 'Арахис', category: 'food', pollenKey: null },
+        { id: 'birch-pollen', name: 'Берёза', category: 'environmental', pollenKey: 'birch_pollen' },
+      ],
+    };
+
+    const MOCK_DIARY = [
+      { type: 'symptoms', text: 'Зуд кожи, лёгкая отёчность', hoursAgo: 18 },
+      { type: 'food', text: 'Овсянка на воде, яблоко', hoursAgo: 30 },
+      { type: 'trigger', text: 'Возможная реакция на молочный десерт', hoursAgo: 48 },
+    ];
+
+    const POLLEN_LABELS = {
+      birch_pollen: 'Берёза',
+      grass_pollen: 'Тимофеевка',
+      ragweed_pollen: 'Амброзия',
+    };
+
+    const CROSS_REACTIONS = [
+      { pollen: 'birch_pollen', food: 'яблок', note: 'Оральный аллергический синдром (берёза → яблоко)' },
+    ];
+
+    function pollenTier(value) {
+      if (value == null || value < 10) return { level: 'low', label: 'Низкий', penalty: 0 };
+      if (value < 50) return { level: 'mid', label: 'Средний', penalty: 12 };
+      return { level: 'high', label: 'Высокий', penalty: 28 };
+    }
+
+    function aqiTier(value) {
+      if (value == null) return { level: 'mid', label: 'Нет данных', penalty: 5 };
+      if (value <= 20) return { level: 'low', label: 'Хорошо · ' + value, penalty: 0 };
+      if (value <= 50) return { level: 'mid', label: 'Умеренно · ' + value, penalty: 6 };
+      if (value <= 75) return { level: 'mid', label: 'Повышен · ' + value, penalty: 12 };
+      return { level: 'high', label: 'Плохо · ' + value, penalty: 20 };
+    }
+
+    function diaryPenalty(entries) {
+      let penalty = 0;
+      const recentSymptoms = entries.filter((e) => e.type === 'symptoms' && e.hoursAgo <= 48);
+      const recentTriggers = entries.filter((e) => e.type === 'trigger' && e.hoursAgo <= 72);
+      if (recentSymptoms.length) penalty += 14 + recentSymptoms.length * 4;
+      if (recentTriggers.length) penalty += 8;
+      return { penalty: Math.min(penalty, 30), recentSymptoms, recentTriggers };
+    }
+
+    function currentHourlyMax(hourly, key) {
+      if (!hourly?.[key]?.length) return null;
+      const now = new Date();
+      const idx = hourly.time.findIndex((t) => new Date(t) >= now);
+      const slice = idx >= 0 ? hourly[key].slice(idx, idx + 12) : hourly[key].slice(0, 12);
+      return Math.max(...slice.filter((v) => v != null));
+    }
+
+    async function fetchEnvironmentalData() {
+      const qs = new URLSearchParams({
+        latitude: String(MOCK_LOCATION.lat),
+        longitude: String(MOCK_LOCATION.lon),
+        timezone: 'Europe/Moscow',
+        forecast_days: '1',
+      });
+      const airUrl =
+        'https://air-quality-api.open-meteo.com/v1/air-quality?' +
+        qs +
+        '&current=european_aqi,pm2_5&hourly=birch_pollen,grass_pollen,ragweed_pollen';
+      const res = await fetch(airUrl);
+      if (!res.ok) throw new Error('Open-Meteo unavailable');
+      return res.json();
+    }
+
+    function buildRecommendations(ctx) {
+      const recs = [];
+
+      for (const match of ctx.profilePollenMatches) {
+        if (match.tier.level !== 'low') {
+          recs.push({
+            icon: '🌿',
+            title: 'Снизьте контакт с пыльцой',
+            text:
+              'Уровень пыльцы «' +
+              match.label +
+              '» ' +
+              match.tier.label.toLowerCase() +
+              '. По возможности проводите меньше времени на улице в дневные часы, используйте очки и промойте нос после прогулки.',
+          });
+        }
+      }
+
+      if (ctx.aqi.tier.level !== 'low') {
+        recs.push({
+          icon: '💨',
+          title: 'Качество воздуха',
+          text:
+            'Индекс EAQI ' +
+            ctx.aqi.tier.label +
+            '. Чувствительным людям стоит сократить активность на открытом воздухе и проветривать квартиру в часы с более низким загрязнением.',
+        });
+      }
+
+      if (ctx.diary.recentSymptoms.length) {
+        recs.push({
+          icon: '📔',
+          title: 'Симптомы в дневнике',
+          text:
+            'За последние 2 суток зафиксированы симптомы («' +
+            ctx.diary.recentSymptoms[0].text +
+            '»). Отслеживайте динамику; при ухудшении обратитесь к врачу.',
+        });
+      }
+
+      for (const cr of CROSS_REACTIONS) {
+        const pollenHigh = ctx.pollens[cr.pollen]?.tier?.level !== 'low';
+        const ateFood = MOCK_DIARY.some((e) => e.type === 'food' && e.text.toLowerCase().includes(cr.food));
+        if (pollenHigh && ateFood && ctx.profilePollenKeys.has(cr.pollen)) {
+          recs.push({
+            icon: '🍎',
+            title: 'Возможная перекрёстная реакция',
+            text: cr.note + '. Свежие фрукты могут усиливать зуд во время сезона пыления.',
+          });
+        }
+      }
+
+      const foodAllergens = MOCK_PROFILE.allergens.filter((a) => a.category === 'food');
+      if (foodAllergens.length) {
+        recs.push({
+          icon: '📷',
+          title: 'Пищевые аллергены',
+          text:
+            'В профиле: ' +
+            foodAllergens.map((a) => a.name).join(', ') +
+            '. Перед покупкой новых продуктов проверяйте состав через сканер (Open Food Facts).',
+        });
+      }
+
+      if (!recs.length) {
+        recs.push({
+          icon: '✅',
+          title: 'Стабильный день',
+          text: 'Показатели среды и записи дневника не указывают на повышенные риски. Продолжайте вести наблюдения.',
+        });
+      }
+
+      return recs.slice(0, 4);
+    }
+
+    function statusFromScore(score) {
+      if (score >= 80) return { title: 'Хорошо', summary: 'Среда и записи дневника не указывают на повышенные риски.', color: 'var(--success)' };
+      if (score >= 60) return { title: 'Умеренно', summary: 'Есть отдельные факторы внимания — см. рекомендации ниже.', color: 'var(--warning)' };
+      if (score >= 40) return { title: 'Повышенное внимание', summary: 'Несколько факторов могут влиять на самочувствие.', color: 'var(--warning)' };
+      return { title: 'Высокий риск', summary: 'Рекомендуем минимизировать триггеры и проконсультироваться с врачом.', color: 'var(--danger)' };
+    }
+
+    function renderFactor({ icon, iconBg, iconColor, label, value, badgeClass, badgeText, source }) {
+      return (
+        '<div class="factor">' +
+        '<div class="factor-icon" style="background:' + iconBg + ';color:' + iconColor + '">' + icon + '</div>' +
+        '<div class="factor-body"><div class="factor-label">' + label + '</div><div class="factor-value">' + value + '</div></div>' +
+        '<span class="factor-badge ' + badgeClass + '">' + badgeText + '</span></div>'
+      );
+    }
+
+    function renderWellnessDashboard(ctx) {
+      document.getElementById('wellness-loading').hidden = true;
+      const content = document.getElementById('wellness-content');
+      content.hidden = false;
+
+      const status = statusFromScore(ctx.score);
+      const ring = document.getElementById('score-ring');
+      ring.style.setProperty('--score', String(ctx.score));
+      ring.style.setProperty('--score-color', status.color);
+
+      document.getElementById('score-num').textContent = String(ctx.score);
+      document.getElementById('wellness-status').textContent = status.title;
+      document.getElementById('wellness-summary').textContent = status.summary;
+      document.getElementById('wellness-updated').textContent =
+        'Обновлено · ' + MOCK_LOCATION.label + ' · Open-Meteo · ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+      const factors = [];
+
+      for (const match of ctx.profilePollenMatches) {
+        factors.push(
+          renderFactor({
+            icon: '🌿',
+            iconBg: 'var(--success-light)',
+            iconColor: 'var(--success)',
+            label: 'Пыльца · ' + match.label + ' · Open-Meteo',
+            value: match.value.toFixed(1) + ' grains/m³',
+            badgeClass: match.tier.level,
+            badgeText: match.tier.label,
+            source: 'Open-Meteo',
+          }),
+        );
+      }
+
+      factors.push(
+        renderFactor({
+          icon: '💨',
+          iconBg: 'var(--purple-light)',
+          iconColor: 'var(--purple)',
+          label: 'Качество воздуха · EAQI · Open-Meteo',
+          value: ctx.aqi.pm25 != null ? 'PM2.5 ' + ctx.aqi.pm25.toFixed(1) + ' µg/m³' : '—',
+          badgeClass: ctx.aqi.tier.level,
+          badgeText: ctx.aqi.tier.label.split(' · ')[0],
+          source: 'Open-Meteo',
+        }),
+      );
+
+      const symptomText = ctx.diary.recentSymptoms.length
+        ? ctx.diary.recentSymptoms[0].text
+        : 'Нет свежих симптомов';
+      factors.push(
+        renderFactor({
+          icon: '📔',
+          iconBg: 'var(--accent-light)',
+          iconColor: 'var(--accent)',
+          label: 'Дневник · последние 48 ч',
+          value: symptomText,
+          badgeClass: ctx.diary.recentSymptoms.length ? 'high' : 'low',
+          badgeText: ctx.diary.recentSymptoms.length ? 'Симптомы' : 'Спокойно',
+          source: 'Локально',
+        }),
+      );
+
+      factors.push(
+        renderFactor({
+          icon: '👤',
+          iconBg: 'var(--warning-light)',
+          iconColor: 'var(--warning)',
+          label: 'Профиль · аллергены',
+          value: MOCK_PROFILE.allergens.map((a) => a.name).join(', '),
+          badgeClass: 'mid',
+          badgeText: MOCK_PROFILE.allergens.length + ' шт.',
+          source: 'Профиль',
+        }),
+      );
+
+      document.getElementById('factor-list').innerHTML = factors.join('');
+
+      document.getElementById('rec-list').innerHTML = ctx.recommendations
+        .map(
+          (r) =>
+            '<div class="rec-item"><span style="font-size:18px">' +
+            r.icon +
+            '</span><div><strong>' +
+            r.title +
+            '</strong>' +
+            r.text +
+            '</div></div>',
+        )
+        .join('');
+
+      document.getElementById('sources-row').innerHTML = [
+        'Open-Meteo Air Quality',
+        'Open-Meteo Pollen',
+        'Профиль AllerGuide',
+        'Дневник',
+      ]
+        .map((s) => '<span class="source-pill">' + s + '</span>')
+        .join('');
+    }
+
+    async function loadWellnessDashboard() {
+      const loading = document.getElementById('wellness-loading');
+      try {
+        const data = await fetchEnvironmentalData();
+        const hourly = data.hourly;
+        const profilePollenKeys = new Set(
+          MOCK_PROFILE.allergens.filter((a) => a.pollenKey).map((a) => a.pollenKey),
+        );
+
+        const pollens = {};
+        for (const key of Object.keys(POLLEN_LABELS)) {
+          const value = currentHourlyMax(hourly, key);
+          pollens[key] = { value: value ?? 0, tier: pollenTier(value ?? 0), label: POLLEN_LABELS[key] };
+        }
+
+        const profilePollenMatches = MOCK_PROFILE.allergens
+          .filter((a) => a.pollenKey)
+          .map((a) => ({
+            key: a.pollenKey,
+            label: a.name,
+            value: pollens[a.pollenKey].value,
+            tier: pollens[a.pollenKey].tier,
+          }));
+
+        const aqiValue = data.current?.european_aqi;
+        const aqi = { value: aqiValue, pm25: data.current?.pm2_5, tier: aqiTier(aqiValue) };
+        const diary = diaryPenalty(MOCK_DIARY);
+
+        let penalty = 0;
+        for (const match of profilePollenMatches) penalty += match.tier.penalty;
+        penalty += aqi.tier.penalty;
+        penalty += diary.penalty;
+
+        const score = Math.max(5, Math.min(100, 100 - penalty));
+        const recommendations = buildRecommendations({
+          score,
+          pollens,
+          profilePollenMatches,
+          profilePollenKeys,
+          aqi,
+          diary,
+        });
+
+        renderWellnessDashboard({
+          score,
+          pollens,
+          profilePollenMatches,
+          aqi,
+          diary,
+          recommendations,
+        });
+      } catch (err) {
+        loading.textContent = 'Не удалось загрузить Open-Meteo — показаны локальные данные.';
+        const diary = diaryPenalty(MOCK_DIARY);
+        const fallbackPollen = { value: 42, tier: pollenTier(42), label: 'Берёза' };
+        const score = Math.max(5, 100 - diary.penalty - fallbackPollen.tier.penalty - 6);
+        renderWellnessDashboard({
+          score,
+          pollens: { birch_pollen: fallbackPollen },
+          profilePollenMatches: [{ key: 'birch_pollen', label: 'Берёза', value: 42, tier: fallbackPollen.tier }],
+          aqi: { value: 45, pm25: 18, tier: aqiTier(45) },
+          diary,
+          recommendations: buildRecommendations({
+            score,
+            pollens: { birch_pollen: fallbackPollen },
+            profilePollenMatches: [{ key: 'birch_pollen', label: 'Берёза', value: 42, tier: fallbackPollen.tier }],
+            profilePollenKeys: new Set(['birch_pollen']),
+            aqi: { tier: aqiTier(45) },
+            diary,
+          }),
+        });
+      }
+    }
+
+    void loadWellnessDashboard();
+
     setTheme('light');
-    showScreen('login');
+    showScreen('home');
   </script>
 </body>
 </html>
