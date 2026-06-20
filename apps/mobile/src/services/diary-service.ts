@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
-import { formatDiaryEntrySummary } from '@allerguide/core';
+import { formatDiaryDate, formatDiaryEntrySummary } from '@allerguide/core';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export async function addDiaryEntry(input: {
@@ -33,6 +33,23 @@ export async function getDiaryEntries(profileId: number) {
   return db.getAllSync<DiaryEntry>('SELECT * FROM diary_entries WHERE profileId = ? ORDER BY id DESC', [profileId]);
 }
 
+export async function updateDiaryEntry(
+  id: number,
+  input: { type: string; details: string },
+) {
+  const db = getDb();
+  db.runSync('UPDATE diary_entries SET type = ?, details = ? WHERE id = ?', [
+    input.type,
+    input.details,
+    id,
+  ]);
+}
+
+export async function deleteDiaryEntry(id: number) {
+  const db = getDb();
+  db.runSync('DELETE FROM diary_entries WHERE id = ?', [id]);
+}
+
 export async function generateDoctorPdf(profileId: number) {
   const db = getDb();
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [profileId]);
@@ -47,7 +64,7 @@ export async function generateDoctorPdf(profileId: number) {
       ${entries
         .map((e) => {
           const summary = formatDiaryEntrySummary(e.type, e.details || '');
-          return `<div style="margin-bottom:12px;"><h3>${e.type}</h3><p>${summary}</p><small>${e.createdAt}</small></div>`;
+          return `<div style="margin-bottom:12px;"><h3>${e.type}</h3><p>${summary}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`;
         })
         .join('')}
       <hr />

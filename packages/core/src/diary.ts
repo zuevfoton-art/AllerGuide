@@ -274,3 +274,62 @@ export function validateDiarySectionStep(
   if (!value) return `Заполните поле «${step.label}».`;
   return null;
 }
+
+const MONTHS_SHORT_RU = [
+  'янв',
+  'фев',
+  'мар',
+  'апр',
+  'май',
+  'июн',
+  'июл',
+  'авг',
+  'сен',
+  'окт',
+  'ноя',
+  'дек',
+];
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function padTimePart(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+export function formatDiaryDate(iso: string, reference = new Date()): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+
+  const time = `${padTimePart(date.getHours())}:${padTimePart(date.getMinutes())}`;
+  const dayDiff = Math.round(
+    (startOfDay(reference).getTime() - startOfDay(date).getTime()) / 86_400_000,
+  );
+
+  if (dayDiff === 0) return `Сегодня, ${time}`;
+  if (dayDiff === 1) return `Вчера, ${time}`;
+
+  const day = date.getDate();
+  const month = MONTHS_SHORT_RU[date.getMonth()];
+  if (date.getFullYear() === reference.getFullYear()) {
+    return `${day} ${month}, ${time}`;
+  }
+
+  return `${day} ${month} ${date.getFullYear()}, ${time}`;
+}
+
+export function getDiaryEntryAnswers(type: string, details: string): Record<string, string> | null {
+  const structured = decodeDiaryDetails(details);
+  if (structured) return structured.answers;
+
+  const trimmed = details.trim();
+  if (!trimmed) return null;
+
+  const section = getDiarySection(type);
+  if (section?.type === 'Заметка') {
+    return { noteBody: trimmed };
+  }
+
+  return null;
+}

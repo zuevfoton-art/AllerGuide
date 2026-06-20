@@ -7,6 +7,7 @@ import {
   getDiaryStepAnswers,
   hasSectionAnswers,
   validateDiarySectionStep,
+  type DiarySection,
   type DiaryStep,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -18,30 +19,48 @@ export interface DiaryWizardResult {
 }
 
 interface DiaryWizardProps {
+  sections?: DiarySection[];
+  initialAnswersBySection?: Record<string, Record<string, string>>;
   onCancel: () => void;
   onComplete: (entries: DiaryWizardResult[]) => void;
+  onDelete?: () => void;
+  submitLabel?: string;
+  allowSkipSection?: boolean;
 }
 
-export function DiaryWizard({ onCancel, onComplete }: DiaryWizardProps) {
+export function DiaryWizard({
+  sections = DIARY_SECTIONS,
+  initialAnswersBySection,
+  onCancel,
+  onComplete,
+  onDelete,
+  submitLabel,
+  allowSkipSection = true,
+}: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [sectionIndex, setSectionIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
   const [answersBySection, setAnswersBySection] = useState<Record<string, Record<string, string>>>(
-    {},
+    initialAnswersBySection ?? {},
   );
   const [error, setError] = useState('');
 
-  const section = DIARY_SECTIONS[sectionIndex];
+  const section = sections[sectionIndex];
   const step = section.steps[stepIndex];
   const sectionAnswers = answersBySection[section.type] ?? {};
-  const totalSections = DIARY_SECTIONS.length;
+  const totalSections = sections.length;
   const totalStepsInSection = section.steps.length;
   const overallStepNumber =
-    DIARY_SECTIONS.slice(0, sectionIndex).reduce((sum, item) => sum + item.steps.length, 0) +
+    sections.slice(0, sectionIndex).reduce((sum, item) => sum + item.steps.length, 0) +
     stepIndex +
     1;
-  const overallStepsTotal = DIARY_SECTIONS.reduce((sum, item) => sum + item.steps.length, 0);
+  const overallStepsTotal = sections.reduce((sum, item) => sum + item.steps.length, 0);
+  const isLastStep = sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1;
+  const canSkipSection =
+    allowSkipSection &&
+    totalSections > 1 &&
+    (!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0);
 
   const setAnswer = (stepId: string, value: string) => {
     setAnswersBySection((prev) => ({
@@ -82,7 +101,7 @@ export function DiaryWizard({ onCancel, onComplete }: DiaryWizardProps) {
       return;
     }
     if (sectionIndex > 0) {
-      const prevSection = DIARY_SECTIONS[sectionIndex - 1];
+      const prevSection = sections[sectionIndex - 1];
       setSectionIndex((value) => value - 1);
       setStepIndex(prevSection.steps.length - 1);
     }
@@ -99,7 +118,7 @@ export function DiaryWizard({ onCancel, onComplete }: DiaryWizardProps) {
   };
 
   const finishWizard = () => {
-    const entries = DIARY_SECTIONS.flatMap((item) => {
+    const entries = sections.flatMap((item) => {
       const answers = answersBySection[item.type] ?? {};
       if (!hasSectionAnswers(item, answers)) return [];
       return [{ type: item.type, details: encodeDiaryDetails(answers) }];
@@ -154,17 +173,73 @@ export function DiaryWizard({ onCancel, onComplete }: DiaryWizardProps) {
           <Text style={styles.secondaryText}>Назад</Text>
         </Pressable>
         <Pressable style={styles.primaryBtn} onPress={goNext}>
-          <Text style={styles.primaryText}>
-            {sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1
-              ? 'Сохранить'
-              : 'Далее'}
-          </Text>
+          <Text style={styles.primaryText}>{isLastStep ? (submitLabel ?? 'Сохранить') : 'Далее'}</Text>
         </Pressable>
       </View>
 
-      {!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0 ? (
+      {canSkipSection ? (
         <Pressable style={styles.skipBtn} onPress={skipSection}>
           <Text style={styles.skipText}>Пропустить раздел</Text>
+        </Pressable>
+      ) : null}
+
+      {onDelete ? (
+        <Pressable style={styles.deleteBtn} onPress={onDelete}>
+          <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
+          <Text style={styles.deleteText}>Удалить запись</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+interface DiaryLegacyEditorProps {
+  value: string;
+  onCancel: () => void;
+  onSave: (details: string) => void;
+  onDelete?: () => void;
+}
+
+export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLegacyEditorProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createLegacyStyles(theme), [theme]);
+  const [text, setText] = useState(value);
+  const [error, setError] = useState('');
+
+  const handleSave = () => {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      setError('Введите текст записи.');
+      return;
+    }
+    onSave(trimmed);
+  };
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.topRow}>
+        <Text style={styles.title}>Редактирование записи</Text>
+        <Pressable onPress={onCancel}>
+          <Text style={styles.cancelText}>Отмена</Text>
+        </Pressable>
+      </View>
+      <TextInput
+        style={styles.input}
+        value={text}
+        onChangeText={setText}
+        placeholder="Текст записи"
+        placeholderTextColor={theme.colors.textMuted}
+        multiline
+        textAlignVertical="top"
+      />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <Pressable style={styles.primaryBtn} onPress={handleSave}>
+        <Text style={styles.primaryText}>Сохранить изменения</Text>
+      </Pressable>
+      {onDelete ? (
+        <Pressable style={styles.deleteBtn} onPress={onDelete}>
+          <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
+          <Text style={styles.deleteText}>Удалить запись</Text>
         </Pressable>
       ) : null}
     </View>
@@ -212,6 +287,52 @@ function StepField({
       textAlignVertical={step.multiline ? 'top' : 'center'}
     />
   );
+}
+
+function createLegacyStyles({ colors, shadows }: AppTheme) {
+  return StyleSheet.create({
+    wrap: {
+      gap: 14,
+      padding: 16,
+      borderRadius: 18,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...(shadows.sm as object),
+    },
+    topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    title: { fontSize: 16, fontWeight: '700', color: colors.text },
+    cancelText: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
+    input: {
+      minHeight: 140,
+      backgroundColor: colors.card,
+      borderRadius: 14,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
+      color: colors.text,
+      lineHeight: 22,
+    },
+    error: { color: colors.danger, fontSize: 13, fontWeight: '600' },
+    primaryBtn: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      borderRadius: 14,
+      backgroundColor: colors.accent,
+    },
+    primaryText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
+    deleteBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 8,
+    },
+    deleteText: { fontSize: 13, fontWeight: '600', color: colors.danger },
+  });
 }
 
 function createFieldStyles({ colors }: AppTheme) {
@@ -300,5 +421,13 @@ function createStyles({ colors, shadows }: AppTheme) {
     btnDisabled: { opacity: 0.45 },
     skipBtn: { alignItems: 'center', paddingVertical: 4 },
     skipText: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
+    deleteBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 4,
+    },
+    deleteText: { fontSize: 13, fontWeight: '600', color: colors.danger },
   });
 }

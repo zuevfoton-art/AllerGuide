@@ -1,11 +1,23 @@
-import { Text, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { formatDiaryEntrySummary } from '@allerguide/core';
-import { addDiaryEntries, generateDoctorPdf, getDiaryEntries } from '@/src/services/diary-service';
+import {
+  DIARY_SECTIONS,
+  formatDiaryDate,
+  formatDiaryEntrySummary,
+  getDiaryEntryAnswers,
+  getDiarySection,
+} from '@allerguide/core';
+import {
+  addDiaryEntries,
+  deleteDiaryEntry,
+  generateDoctorPdf,
+  getDiaryEntries,
+  updateDiaryEntry,
+} from '@/src/services/diary-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
-import { DiaryWizard } from '@/src/components/DiaryWizard';
+import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import type { DiaryEntry } from '@/src/types';
@@ -19,12 +31,17 @@ const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colo
   Заметка: { icon: 'create', colorKey: 'success' },
 };
 
+type EditorState =
+  | { mode: 'full' }
+  | { mode: 'section'; sectionType: string }
+  | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
+
 export default function DiaryScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [list, setList] = useState<DiaryEntry[]>([]);
-  const [wizardOpen, setWizardOpen] = useState(false);
+  const [editor, setEditor] = useState<EditorState | null>(null);
 
   const load = useCallback(async () => {
     if (!activeProfileId) return;
@@ -35,11 +52,88 @@ export default function DiaryScreen() {
     void load();
   }, [load]);
 
-  const handleComplete = async (entries: { type: string; details: string }[]) => {
+  const closeEditor = () => setEditor(null);
+
+  const handleCreate = async (entries: { type: string; details: string }[]) => {
     if (!activeProfileId) return;
     await addDiaryEntries(activeProfileId, entries);
-    setWizardOpen(false);
+    closeEditor();
     await load();
+  };
+
+  const handleUpdate = async (entry: DiaryEntry, type: string, details: string) => {
+    await updateDiaryEntry(entry.id, { type, details });
+    closeEditor();
+    await load();
+  };
+
+  const confirmDelete = (entry: DiaryEntry) => {
+    Alert.alert('Удалить запись?', `Запись «${entry.type}» будет удалена без возможности восстановления.`, [
+      { text: 'Отмена', style: 'cancel' },
+      {
+        text: 'Удалить',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteDiaryEntry(entry.id);
+          closeEditor();
+          await load();
+        },
+      },
+    ]);
+  };
+
+  const openEdit = (entry: DiaryEntry) => {
+    const answers = getDiaryEntryAnswers(entry.type, entry.details);
+    if (answers) {
+      setEditor({ mode: 'edit', entry });
+      return;
+    }
+    setEditor({ mode: 'edit', entry, legacy: true });
+  };
+
+  const renderEditor = () => {
+    if (!editor) return null;
+
+    if (editor.mode === 'edit' && editor.legacy) {
+      return (
+        <DiaryLegacyEditor
+          value={entryDetailsText(editor.entry)}
+          onCancel={closeEditor}
+          onSave={(details) => void handleUpdate(editor.entry, editor.entry.type, details)}
+          onDelete={() => confirmDelete(editor.entry)}
+        />
+      );
+    }
+
+    if (editor.mode === 'full') {
+      return <DiaryWizard onCancel={closeEditor} onComplete={(entries) => void handleCreate(entries)} />;
+    }
+
+    const sectionType = editor.mode === 'section' ? editor.sectionType : editor.entry.type;
+    const section = getDiarySection(sectionType);
+    if (!section) return null;
+
+    const initialAnswers = editor.mode === 'edit' ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details) : null;
+
+    return (
+      <DiaryWizard
+        sections={[section]}
+        initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
+        allowSkipSection={false}
+        submitLabel={editor.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
+        onCancel={closeEditor}
+        onComplete={(entries) => {
+          const [entry] = entries;
+          if (!entry) return;
+          if (editor.mode === 'edit') {
+            void handleUpdate(editor.entry, entry.type, entry.details);
+            return;
+          }
+          void handleCreate(entries);
+        }}
+        onDelete={editor.mode === 'edit' ? () => confirmDelete(editor.entry) : undefined}
+      />
+    );
   };
 
   return (
@@ -51,13 +145,34 @@ export default function DiaryScreen() {
 
       <ProfileSwitcher />
 
-      {!wizardOpen ? (
-        <Pressable style={styles.startBtn} onPress={() => setWizardOpen(true)}>
-          <Ionicons name="add-circle" size={20} color={theme.colors.onAccent} />
-          <Text style={styles.startBtnText}>Новая запись по шагам</Text>
-        </Pressable>
+      {!editor ? (
+        <>
+          <Pressable style={styles.startBtn} onPress={() => setEditor({ mode: 'full' })}>
+            <Ionicons name="add-circle" size={20} color={theme.colors.onAccent} />
+            <Text style={styles.startBtnText}>Новая запись по шагам</Text>
+          </Pressable>
+
+          <View style={styles.quickAddBlock}>
+            <Text style={styles.sectionLabel}>Быстрое добавление</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickAddRow}>
+              {DIARY_SECTIONS.map((section) => {
+                const cfg = TYPE_CONFIG[section.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
+                const color = theme.colors[cfg.colorKey];
+                return (
+                  <Pressable
+                    key={section.type}
+                    style={[styles.quickChip, { borderColor: `${color}55`, backgroundColor: `${color}12` }]}
+                    onPress={() => setEditor({ mode: 'section', sectionType: section.type })}>
+                    <Ionicons name={section.icon as any} size={14} color={color} />
+                    <Text style={[styles.quickChipText, { color }]}>{section.title}</Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </>
       ) : (
-        <DiaryWizard onCancel={() => setWizardOpen(false)} onComplete={handleComplete} />
+        renderEditor()
       )}
 
       <View style={styles.row}>
@@ -81,16 +196,19 @@ export default function DiaryScreen() {
             const color = theme.colors[cfg.colorKey];
             const summary = formatDiaryEntrySummary(item.type, item.details);
             return (
-              <View key={item.id} style={styles.card}>
+              <Pressable key={item.id} style={styles.card} onPress={() => openEdit(item)}>
                 <View style={[styles.cardDot, { backgroundColor: `${color}18` }]}>
                   <Ionicons name={cfg.icon as any} size={16} color={color} />
                 </View>
                 <View style={styles.cardBody}>
-                  <Text style={styles.cardType}>{item.type}</Text>
+                  <View style={styles.cardTopRow}>
+                    <Text style={styles.cardType}>{item.type}</Text>
+                    <Ionicons name="create-outline" size={16} color={theme.colors.textMuted} />
+                  </View>
                   <Text style={styles.cardDetails}>{summary}</Text>
-                  <Text style={styles.cardMeta}>{item.createdAt}</Text>
+                  <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
-              </View>
+              </Pressable>
             );
           })}
         </>
@@ -101,6 +219,12 @@ export default function DiaryScreen() {
       </Text>
     </Screen>
   );
+}
+
+function entryDetailsText(entry: DiaryEntry): string {
+  const answers = getDiaryEntryAnswers(entry.type, entry.details);
+  if (answers?.noteBody) return answers.noteBody;
+  return entry.details.trim();
 }
 
 function createStyles({ colors, shadows }: AppTheme) {
@@ -119,6 +243,18 @@ function createStyles({ colors, shadows }: AppTheme) {
       ...(shadows.accent as object),
     },
     startBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+    quickAddBlock: { gap: 8 },
+    quickAddRow: { gap: 8, paddingRight: 4 },
+    quickChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 999,
+      borderWidth: 1.5,
+    },
+    quickChipText: { fontSize: 13, fontWeight: '700' },
     sectionLabel: {
       fontSize: 13,
       fontWeight: '700',
@@ -158,6 +294,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       marginTop: 2,
     },
     cardBody: { flex: 1, gap: 4 },
+    cardTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
     cardType: { fontSize: 14, fontWeight: '700', color: colors.text },
     cardDetails: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
     cardMeta: { fontSize: 11, color: colors.textMuted },
