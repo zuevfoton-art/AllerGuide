@@ -1,12 +1,12 @@
 import { Text, TextInput, Pressable, StyleSheet, View, Platform } from 'react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { runMockScan, type ScanResult } from '@/src/services/mock-ai-service';
 import { useAppStore } from '@/src/store/app-store';
-import { colors, shadows } from '@/src/constants/theme';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 const MODES = [
   { key: 'product', label: 'Продукт', icon: 'nutrition' },
@@ -15,6 +15,8 @@ const MODES = [
 ] as const;
 
 export default function ScannerScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme.isDark, theme.mode]);
   const profile = useAppStore((s) => s.activeProfile);
   const [input, setInput] = useState('молоко, арахис, сахар');
   const [mode, setMode] = useState<'product' | 'menu' | 'medicine'>('product');
@@ -54,7 +56,7 @@ export default function ScannerScreen() {
         <View style={styles.cameraOverlay}>
           <View style={styles.cameraTopBar}>
             <Pressable style={styles.closeBtn} onPress={() => setCameraOpen(false)}>
-              <Ionicons name="close" size={24} color="#fff" />
+              <Ionicons name="close" size={24} color={theme.colors.onAccent} />
             </Pressable>
             <Text style={styles.cameraTitle}>
               {mode === 'product' ? 'Сканируйте штрихкод' : 'Наведите на текст'}
@@ -101,7 +103,7 @@ export default function ScannerScreen() {
           <Text style={styles.subtitle}>Проверка аллергенов в составе</Text>
         </View>
         <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
-          <Ionicons name="camera" size={22} color={colors.accent} />
+          <Ionicons name="camera" size={22} color={theme.colors.accent} />
         </Pressable>
       </View>
 
@@ -113,7 +115,11 @@ export default function ScannerScreen() {
             key={m.key}
             style={[styles.modeBtn, mode === m.key && styles.modeBtnActive]}
             onPress={() => setMode(m.key)}>
-            <Ionicons name={m.icon as any} size={18} color={mode === m.key ? colors.accent : colors.textMuted} />
+            <Ionicons
+              name={m.icon as any}
+              size={18}
+              color={mode === m.key ? theme.colors.accent : theme.colors.textMuted}
+            />
             <Text style={[styles.modeText, mode === m.key && styles.modeTextActive]}>{m.label}</Text>
           </Pressable>
         ))}
@@ -121,7 +127,7 @@ export default function ScannerScreen() {
 
       <Pressable style={styles.scanBanner} onPress={openCamera}>
         <View style={styles.scanBannerIcon}>
-          <Ionicons name="barcode" size={26} color={colors.accent} />
+          <Ionicons name="barcode" size={26} color={theme.colors.accent} />
         </View>
         <View style={styles.scanBannerText}>
           <Text style={styles.scanBannerTitle}>
@@ -129,7 +135,7 @@ export default function ScannerScreen() {
           </Text>
           <Text style={styles.scanBannerDesc}>Нажмите, чтобы открыть камеру</Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </Pressable>
 
       <View style={styles.divider}>
@@ -139,19 +145,19 @@ export default function ScannerScreen() {
       </View>
 
       <View style={styles.inputWrap}>
-        <Ionicons name="list" size={18} color={colors.textMuted} style={styles.inputIcon} />
+        <Ionicons name="list" size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
         <TextInput
           value={input}
           onChangeText={setInput}
           placeholder="Введите состав, блюдо или название..."
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={theme.colors.textMuted}
           multiline
           style={styles.input}
         />
       </View>
 
       <Pressable style={styles.button} onPress={() => setResult(runMockScan({ mode, text: input, profile }))}>
-        <Ionicons name="search" size={18} color="#fff" />
+        <Ionicons name="search" size={18} color={theme.colors.onAccent} />
         <Text style={styles.buttonText}>Проверить</Text>
       </Pressable>
 
@@ -162,7 +168,7 @@ export default function ScannerScreen() {
               <Ionicons
                 name={isDanger ? 'warning' : 'checkmark-circle'}
                 size={24}
-                color={isDanger ? colors.danger : colors.success}
+                color={isDanger ? theme.colors.danger : theme.colors.success}
               />
             </View>
             <View style={styles.resultText}>
@@ -174,7 +180,7 @@ export default function ScannerScreen() {
           <Text style={styles.reason}>{result.reason}</Text>
           {result.matches?.length > 0 && (
             <View style={styles.matchesBadge}>
-              <Ionicons name="alert-circle" size={13} color={colors.danger} />
+              <Ionicons name="alert-circle" size={13} color={theme.colors.danger} />
               <Text style={styles.matchesText}>
                 Совпадения: {result.matches.join(', ')}
               </Text>
@@ -190,169 +196,182 @@ export default function ScannerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-  title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, color: colors.textSecondary },
-  cameraIconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: colors.accentLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
+function createStyles({ colors, shadows }: AppTheme) {
+  return StyleSheet.create({
+    header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+    title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+    subtitle: { fontSize: 14, color: colors.textSecondary },
+    cameraIconBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 4,
+    },
 
-  modeRow: { flexDirection: 'row', gap: 8 },
-  modeBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 11,
-    borderRadius: 14,
-    backgroundColor: colors.card,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  modeBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
-  modeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-  modeTextActive: { color: colors.accent },
+    modeRow: { flexDirection: 'row', gap: 8 },
+    modeBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 11,
+      borderRadius: 14,
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+    },
+    modeBtnActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+    modeText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    modeTextActive: { color: colors.accent },
 
-  scanBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: colors.accentMid,
-    ...(shadows.sm as object),
-  },
-  scanBannerIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
-    backgroundColor: colors.accentLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scanBannerText: { flex: 1, gap: 3 },
-  scanBannerTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-  scanBannerDesc: { fontSize: 13, color: colors.textSecondary },
+    scanBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      padding: 16,
+      borderWidth: 1.5,
+      borderColor: colors.accentMid,
+      ...(shadows.sm as object),
+    },
+    scanBannerIcon: {
+      width: 50,
+      height: 50,
+      borderRadius: 14,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    scanBannerText: { flex: 1, gap: 3 },
+    scanBannerTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    scanBannerDesc: { fontSize: 13, color: colors.textSecondary },
 
-  divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
-  dividerText: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+    divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+    dividerText: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
 
-  inputWrap: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    paddingTop: 12,
-    paddingHorizontal: 14,
-    paddingBottom: 14,
-    minHeight: 100,
-  },
-  inputIcon: { marginBottom: 6 },
-  input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: colors.accent,
-    padding: 16,
-    borderRadius: 16,
-    ...(shadows.accent as object),
-  },
-  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+    inputWrap: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      paddingTop: 12,
+      paddingHorizontal: 14,
+      paddingBottom: 14,
+      minHeight: 100,
+    },
+    inputIcon: { marginBottom: 6 },
+    input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: colors.accent,
+      padding: 16,
+      borderRadius: 16,
+      ...(shadows.accent as object),
+    },
+    buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
 
-  resultCard: { borderRadius: 18, padding: 16, gap: 10, borderWidth: 1.5 },
-  resultSafe: { backgroundColor: colors.successLight, borderColor: '#A8E6BE' },
-  resultDanger: { backgroundColor: colors.dangerLight, borderColor: '#FFB3AE' },
-  resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  resultIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  resultIconSafe: { backgroundColor: '#C8F2D6' },
-  resultIconDanger: { backgroundColor: '#FFD6D4' },
-  resultText: { flex: 1 },
-  verdict: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
-  verdictSafe: { color: '#1A7A3C' },
-  verdictDanger: { color: colors.danger },
-  reason: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
-  matchesBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#FFD6D4',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  matchesText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
-  disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+    resultCard: { borderRadius: 18, padding: 16, gap: 10, borderWidth: 1.5 },
+    resultSafe: { backgroundColor: colors.successLight, borderColor: colors.scannerSafeBorder },
+    resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.scannerDangerBorder },
+    resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    resultIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    resultIconSafe: { backgroundColor: colors.scannerSafeIconBg },
+    resultIconDanger: { backgroundColor: colors.scannerDangerIconBg },
+    resultText: { flex: 1 },
+    verdict: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+    verdictSafe: { color: colors.scannerSafeText },
+    verdictDanger: { color: colors.danger },
+    reason: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+    matchesBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      backgroundColor: colors.scannerDangerIconBg,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      alignSelf: 'flex-start',
+    },
+    matchesText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
+    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
 
-  cameraContainer: { flex: 1, backgroundColor: '#000' },
-  cameraOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'space-between',
-    paddingBottom: 48,
-  },
-  cameraTopBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 56,
-    paddingHorizontal: 20,
-  },
-  closeBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cameraTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  viewfinderWrap: { alignItems: 'center', gap: 20 },
-  viewfinder: {
-    width: 260,
-    height: 180,
-    position: 'relative',
-  },
-  corner: {
-    position: 'absolute',
-    width: 28,
-    height: 28,
-    borderColor: colors.accent,
-    borderWidth: 3,
-  },
-  cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
-  cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
-  cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
-  cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 6 },
-  viewfinderHint: { color: 'rgba(255,255,255,0.85)', fontSize: 14, textAlign: 'center', fontWeight: '500' },
-  webHint: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginHorizontal: 24,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 10,
-    padding: 10,
-  },
-  webHintText: { color: 'rgba(255,255,255,0.7)', fontSize: 12, flex: 1 },
-  cancelBtn: {
-    marginHorizontal: 24,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-  },
-  cancelBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-});
+    cameraContainer: { flex: 1, backgroundColor: colors.overlay },
+    cameraOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'space-between',
+      paddingBottom: 48,
+    },
+    cameraTopBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: 56,
+      paddingHorizontal: 20,
+    },
+    closeBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cameraTitle: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
+    viewfinderWrap: { alignItems: 'center', gap: 20 },
+    viewfinder: {
+      width: 260,
+      height: 180,
+      position: 'relative',
+    },
+    corner: {
+      position: 'absolute',
+      width: 28,
+      height: 28,
+      borderColor: colors.accent,
+      borderWidth: 3,
+    },
+    cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
+    cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
+    cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
+    cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 6 },
+    viewfinderHint: {
+      color: 'rgba(255,255,255,0.85)',
+      fontSize: 14,
+      textAlign: 'center',
+      fontWeight: '500',
+    },
+    webHint: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginHorizontal: 24,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      borderRadius: 10,
+      padding: 10,
+    },
+    webHintText: { color: 'rgba(255,255,255,0.7)', fontSize: 12, flex: 1 },
+    cancelBtn: {
+      marginHorizontal: 24,
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      borderRadius: 16,
+      padding: 16,
+      alignItems: 'center',
+    },
+    cancelBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+  });
+}
