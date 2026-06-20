@@ -40,6 +40,7 @@ export async function updateProfile(id: number, input: ProfileInput) {
 export async function deleteProfile(id: number) {
   const db = getDb();
   db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [id]);
+  db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profiles WHERE id = ?', [id]);
 
   const { activeProfileId, setActiveProfileId, setActiveProfile } = useAppStore.getState();

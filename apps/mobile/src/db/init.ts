@@ -1,4 +1,4 @@
-import type { AuthUser, Profile, DiaryEntry } from '@allerguide/core';
+import type { AuthUser, EmergencyContact, Profile, DiaryEntry } from '@allerguide/core';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -61,6 +61,18 @@ class WebDb implements DbLike {
     localStorage.setItem('ag_users', JSON.stringify(users));
   }
 
+  private getEmergencyContacts(): EmergencyContact[] {
+    try {
+      return JSON.parse(localStorage.getItem('ag_emergency_contacts') || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  private saveEmergencyContacts(items: EmergencyContact[]) {
+    localStorage.setItem('ag_emergency_contacts', JSON.stringify(items));
+  }
+
   execSync(_sql: string) {}
 
   runSync(sql: string, params?: unknown[]) {
@@ -103,9 +115,37 @@ class WebDb implements DbLike {
       return;
     }
 
+    if (s.startsWith('delete from emergency_contacts where profileid =')) {
+      const items = this.getEmergencyContacts();
+      this.saveEmergencyContacts(items.filter((item) => item.profileId !== params![0]));
+      return;
+    }
+
+    if (s.startsWith('delete from emergency_contacts')) {
+      const items = this.getEmergencyContacts();
+      this.saveEmergencyContacts(items.filter((item) => item.id !== params![0]));
+      return;
+    }
+
     if (s.startsWith('delete from profiles')) {
       const profiles = this.getProfiles();
       this.saveProfiles(profiles.filter((p) => p.id !== params![0]));
+      const contacts = this.getEmergencyContacts();
+      this.saveEmergencyContacts(contacts.filter((item) => item.profileId !== params![0]));
+      return;
+    }
+
+    if (s.startsWith('insert into emergency_contacts')) {
+      const items = this.getEmergencyContacts();
+      const id = items.length > 0 ? Math.max(...items.map((item) => item.id)) + 1 : 1;
+      items.push({
+        id,
+        profileId: params![0] as number,
+        name: params![1] as string,
+        phone: params![2] as string,
+        relation: params![3] as EmergencyContact['relation'],
+      });
+      this.saveEmergencyContacts(items);
       return;
     }
 
@@ -191,6 +231,11 @@ class WebDb implements DbLike {
     if (s.includes('from diary_entries') && s.includes('where profileid =')) {
       const entries = this.getDiaryEntries();
       return entries.filter((e) => e.profileId === params![0]).reverse() as T[];
+    }
+
+    if (s.includes('from emergency_contacts') && s.includes('where profileid =')) {
+      const items = this.getEmergencyContacts();
+      return items.filter((item) => item.profileId === params![0]) as T[];
     }
 
     if (s.includes('from diary_entries')) {

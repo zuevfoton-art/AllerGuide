@@ -3,6 +3,12 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ALLERGEN_OPTIONS, getWizardStep, shouldCompleteOnboarding, type ProfileType } from '@allerguide/core';
 import { createProfile, listProfiles } from '@/src/services/profile-service';
+import {
+  normalizeEmergencyContactDrafts,
+  syncEmergencyContacts,
+  type EmergencyContactDraft,
+} from '@/src/services/emergency-contact-service';
+import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
 import { getStoredScenario, isOnboardingComplete, markOnboardingComplete } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -29,6 +35,7 @@ export default function ProfileSetupScreen() {
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
   const [, setRefreshKey] = useState(0);
 
@@ -62,6 +69,7 @@ export default function ProfileSetupScreen() {
     setName('');
     setBirthYear('');
     setSelected([]);
+    setContacts([]);
     setError('');
   };
 
@@ -81,6 +89,8 @@ export default function ProfileSetupScreen() {
     });
 
     if (!id) return;
+
+    syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
 
     setActiveProfileId(id);
     const profiles = listProfiles();
@@ -179,6 +189,9 @@ export default function ProfileSetupScreen() {
           </Pressable>
         ))}
       </View>
+
+      <Text style={styles.label}>Экстренные контакты</Text>
+      <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 

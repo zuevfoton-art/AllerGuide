@@ -1,17 +1,38 @@
 import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
-import { parseAllergies } from '@allerguide/core';
+import { getEmergencyContactRelationLabel, parseAllergies, type EmergencyContact } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { listEmergencyContacts } from '@/src/services/emergency-contact-service';
 
 export default function SosScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
+  const [contacts, setContacts] = useState<EmergencyContact[]>([]);
+
+  const refresh = useCallback(() => {
+    if (!profile) {
+      setContacts([]);
+      return;
+    }
+    setContacts(listEmergencyContacts(profile.id));
+  }, [profile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
+
+  const callPhone = (phone: string) => {
+    void Linking.openURL(`tel:${phone.replace(/\s/g, '')}`);
+  };
 
   return (
     <Screen>
@@ -63,6 +84,33 @@ export default function SosScreen() {
           <Text style={styles.emptyText}>Выберите профиль, чтобы увидеть медицинскую информацию</Text>
         </View>
       )}
+
+      {contacts.length > 0 ? (
+        <View style={styles.contactsCard}>
+          <Text style={styles.contactsTitle}>Экстренные контакты</Text>
+          {contacts.map((contact) => (
+            <Pressable
+              key={contact.id}
+              style={({ pressed }) => [styles.contactRow, pressed && styles.pressed]}
+              onPress={() => callPhone(contact.phone)}>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactName}>{contact.name}</Text>
+                <Text style={styles.contactMeta}>
+                  {getEmergencyContactRelationLabel(contact.relation)} · {contact.phone}
+                </Text>
+              </View>
+              <Ionicons name="call" size={18} color={theme.colors.accent} />
+            </Pressable>
+          ))}
+        </View>
+      ) : profile ? (
+        <View style={styles.hintCard}>
+          <Ionicons name="people-outline" size={18} color={theme.colors.textSecondary} />
+          <Text style={styles.hintText}>
+            Добавьте экстренные контакты в настройках профиля — родственника, доверенное лицо или врача.
+          </Text>
+        </View>
+      ) : null}
 
       <Pressable
         style={({ pressed }) => [styles.emergencyBtn, pressed && { opacity: 0.9 }]}
@@ -127,6 +175,37 @@ function createStyles({ colors, shadows }: AppTheme) {
       gap: 10,
     },
     emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+    contactsCard: {
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      padding: 16,
+      gap: 4,
+      ...(shadows.sm as object),
+    },
+    contactsTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginBottom: 4 },
+    contactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    pressed: { opacity: 0.85 },
+    contactInfo: { flex: 1, gap: 2 },
+    contactName: { fontSize: 15, fontWeight: '700', color: colors.text },
+    contactMeta: { fontSize: 13, color: colors.textSecondary },
+    hintCard: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 10,
+      backgroundColor: colors.card,
+      borderRadius: 14,
+      padding: 13,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    hintText: { flex: 1, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
     emergencyBtn: {
       flexDirection: 'row',
       alignItems: 'center',

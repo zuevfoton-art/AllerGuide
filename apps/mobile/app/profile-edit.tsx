@@ -3,6 +3,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ALLERGEN_OPTIONS, type ProfileType } from '@allerguide/core';
 import { getProfile, updateProfile } from '@/src/services/profile-service';
+import {
+  listEmergencyContacts,
+  normalizeEmergencyContactDrafts,
+  syncEmergencyContacts,
+  type EmergencyContactDraft,
+} from '@/src/services/emergency-contact-service';
+import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
 import { Screen } from '@/src/components/Screen';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -16,6 +23,7 @@ export default function ProfileEditScreen() {
   const [birthYear, setBirthYear] = useState('');
   const [type, setType] = useState<ProfileType>('self');
   const [selected, setSelected] = useState<string[]>([]);
+  const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -31,6 +39,14 @@ export default function ProfileEditScreen() {
       } catch {
         setSelected([]);
       }
+      setContacts(
+        listEmergencyContacts(profileId).map((contact) => ({
+          id: contact.id,
+          name: contact.name,
+          phone: contact.phone,
+          relation: contact.relation,
+        })),
+      );
     });
   }, [profileId]);
 
@@ -61,6 +77,7 @@ export default function ProfileEditScreen() {
       type,
       allergies: selected,
     });
+    syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     router.back();
   };
 
@@ -135,6 +152,9 @@ export default function ProfileEditScreen() {
           </Pressable>
         ))}
       </View>
+
+      <Text style={styles.label}>Экстренные контакты</Text>
+      <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
