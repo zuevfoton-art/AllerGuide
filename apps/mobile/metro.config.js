@@ -22,4 +22,19 @@ config.resolver.extraNodeModules = {
   '@allerguide/ai': path.resolve(workspaceRoot, 'packages/ai'),
 };
 
+const WEB_ONLY_STUBS = {
+  'expo-location': path.resolve(projectRoot, 'src/stubs/expo-location-web-stub.js'),
+};
+
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (platform === 'web' && WEB_ONLY_STUBS[moduleName]) {
+    return { filePath: WEB_ONLY_STUBS[moduleName], type: 'sourceFile' };
+  }
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = config;

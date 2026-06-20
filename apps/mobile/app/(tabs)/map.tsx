@@ -1,7 +1,6 @@
 import { Text, View, StyleSheet, Pressable, Platform } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import * as Location from 'expo-location';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,6 +44,8 @@ export default function MapScreen() {
     setPlaces(getRecommendedPlaces(profile));
     if (Platform.OS === 'web') return;
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Location = require('expo-location');
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return;
 
