@@ -1,9 +1,9 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 export type BrandTabIconName = 'home' | 'diary' | 'scanner' | 'sos';
+export type BrandFeatureIconName = 'market' | 'map' | 'expert';
 
-type BrandTabIconProps = {
-  name: BrandTabIconName;
+type BrandIconProps = {
   size?: number;
   color: string;
   focused?: boolean;
@@ -11,7 +11,12 @@ type BrandTabIconProps = {
 
 const STROKE = 1.75;
 
-export function BrandTabIcon({ name, size = 24, color, focused = false }: BrandTabIconProps) {
+export function BrandTabIcon({
+  name,
+  size = 24,
+  color,
+  focused = false,
+}: BrandIconProps & { name: BrandTabIconName }) {
   switch (name) {
     case 'home':
       return (
@@ -78,4 +83,70 @@ export function BrandTabIcon({ name, size = 24, color, focused = false }: BrandT
     default:
       return null;
   }
+}
+
+export function BrandFeatureIcon({
+  name,
+  size = 24,
+  color,
+}: BrandIconProps & { name: BrandFeatureIconName }) {
+  switch (name) {
+    case 'market':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M8 9h8l.9 10H7.1L8 9Z"
+            stroke={color}
+            strokeWidth={STROKE}
+            strokeLinejoin="round"
+          />
+          <Path
+            d="M9.5 9V7.5a2.75 2.75 0 0 1 5.5 0V9"
+            stroke={color}
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+          />
+        </Svg>
+      );
+    case 'map':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M9 5.5 5 7v13l4-1.5M9 5.5l6 2M9 5.5v13M15 7.5l4 1.5v13l-4-1.5M15 7.5v13"
+            stroke={color}
+            strokeWidth={STROKE}
+            strokeLinejoin="round"
+          />
+        </Svg>
+      );
+    case 'expert':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M12 4.5 14.5 9H19l-3.75 2.7 1.4 4.3L12 13.8 7.35 16l1.4-4.3L5 9h4.5L12 4.5Z"
+            stroke={color}
+            strokeWidth={STROKE}
+            strokeLinejoin="round"
+          />
+        </Svg>
+      );
+    default:
+      return null;
+  }
+}
+
+/** Intro carousel: maps slide keys to brand icons */
+export function BrandSlideIcon({
+  slide,
+  size = 32,
+  color,
+}: {
+  slide: 'diary' | 'scanner' | 'market' | 'map' | 'expert';
+  size?: number;
+  color: string;
+}) {
+  if (slide === 'diary' || slide === 'scanner') {
+    return <BrandTabIcon name={slide} size={size} color={color} focused />;
+  }
+  return <BrandFeatureIcon name={slide} size={size} color={color} />;
 }

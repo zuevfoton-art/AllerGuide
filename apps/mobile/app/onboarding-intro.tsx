@@ -5,18 +5,12 @@ import { markIntroComplete } from '@/src/services/settings-service';
 import { Screen } from '@/src/components/Screen';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
-import { Ionicons } from '@expo/vector-icons';
+import { BrandLogo } from '@/src/components/brand/BrandLogo';
+import { BrandSlideIcon } from '@/src/components/brand/BrandTabIcon';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
 const SLIDE_KEYS = ['diary', 'scanner', 'market', 'map', 'expert'] as const;
-const SLIDE_ICONS = {
-  diary: 'journal',
-  scanner: 'scan',
-  market: 'bag',
-  map: 'map',
-  expert: 'school',
-} as const;
 const SLIDE_COLORS = {
   diary: 'accent',
   scanner: 'purple',
@@ -50,6 +44,8 @@ export default function OnboardingIntroScreen() {
 
   return (
     <Screen>
+      <BrandLogo size={40} showWordmark style={styles.brand} />
+
       <View style={styles.progressRow}>
         {SLIDE_KEYS.map((s, i) => (
           <View key={s} style={[styles.dot, i <= index && styles.dotActive]} />
@@ -58,7 +54,7 @@ export default function OnboardingIntroScreen() {
 
       <View style={styles.slide}>
         <View style={[styles.iconWrap, { backgroundColor: `${color}18` }]}>
-          <Ionicons name={SLIDE_ICONS[slideKey] as 'journal'} size={32} color={color} />
+          <BrandSlideIcon slide={slideKey} size={32} color={color} />
         </View>
         <Text style={styles.title}>{t(`onboardingIntro.slides.${slideKey}.title`)}</Text>
         <Text style={styles.desc}>{t(`onboardingIntro.slides.${slideKey}.desc`)}</Text>
@@ -82,6 +78,7 @@ export default function OnboardingIntroScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    brand: { alignSelf: 'center', marginBottom: 8 },
     progressRow: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginBottom: 24 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     dotActive: { backgroundColor: colors.accent, width: 20 },

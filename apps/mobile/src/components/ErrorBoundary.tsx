@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { BrandMark } from '@/src/components/brand/BrandMark';
 import { lightColors } from '@/src/constants/theme';
 import { fonts } from '@/src/constants/typography';
 import { captureError } from '@/src/services/error-reporting';
@@ -32,6 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return (
       <View style={styles.container} accessibilityRole="alert">
+        <BrandMark size={56} accent={lightColors.accent} color={lightColors.onAccent} />
         <Text style={styles.title}>Что-то пошло не так</Text>
         <Text style={styles.message}>
           Приложение столкнулось с неожиданной ошибкой. Попробуйте снова или перезапустите AllerGuide.

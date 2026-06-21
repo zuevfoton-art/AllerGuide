@@ -10,6 +10,7 @@ import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { BrandTabIcon } from '@/src/components/brand/BrandTabIcon';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -83,7 +84,7 @@ export default function HomeScreen() {
           style={styles.sosBtn}
           accessibilityRole="button"
           accessibilityLabel={t('tabs.sos')}>
-          <Ionicons name="medkit" size={18} color={theme.colors.danger} />
+          <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
         </Pressable>
       </View>
 
