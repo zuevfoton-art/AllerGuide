@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — Brand Kit (Clinical Calm)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f6f9; --card: #fff; --head: #1e3a5f; --accent: #2563eb;
+      --danger: #b91c1c; --text: #0f172a; --muted: #94a3b8; --border: #e2e8f0;
+      --sans: Inter, system-ui, sans-serif; --serif: 'Source Serif 4', Georgia, serif;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); padding: 32px 20px 48px; }
+    .wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 24px; }
+    h1 { font-family: var(--serif); color: var(--head); font-size: 32px; letter-spacing: -0.3px; }
+    p.lead { color: #475569; line-height: 1.55; max-width: 640px; }
+    section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
+    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin-bottom: 16px; font-weight: 600; }
+    .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
+    .wordmark { display: flex; align-items: center; gap: 16px; }
+    .wordmark-text { display: flex; align-items: baseline; gap: 0; font-size: 32px; }
+    .wordmark-text .aller { font-family: var(--serif); font-weight: 700; color: var(--head); }
+    .wordmark-text .guide { font-weight: 600; color: var(--accent); }
+    .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; }
+    .icon-cell { text-align: center; padding: 16px; border: 1px solid var(--border); border-radius: 8px; }
+    .icon-cell span { display: block; margin-top: 8px; font-size: 12px; color: var(--muted); font-weight: 600; }
+    .icon-cell svg { color: var(--accent); }
+    .icon-cell.danger svg { color: var(--danger); }
+    .sizes { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+    .palette { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch { width: 72px; text-align: center; font-size: 10px; color: var(--muted); }
+    .swatch div { height: 48px; border-radius: 6px; border: 1px solid var(--border); margin-bottom: 6px; }
+    .concept { font-size: 14px; line-height: 1.65; color: #475569; }
+    .concept strong { color: var(--head); }
+    .app-icon { width: 120px; height: 120px; border-radius: 22px; box-shadow: 0 8px 24px rgba(37,99,235,.2); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>AllerGuide Brand Kit</h1>
+      <p class="lead">Concept A — <strong>Clinical Calm</strong>. Logomark «Shield Chart»: щит (защита от аллергенов) + галочка чек-листа (наблюдения и отчёт). Плоский стиль, без glass.</p>
+    </header>
+
+    <section>
+      <h2>Концепция</h2>
+      <p class="concept">
+        <strong>Shield Chart</strong> — щит с горизонтальной строкой документа и галочкой проверки.
+        Ассоциации: клиническая надёжность, персональный дневник, безопасность.
+        <br /><br />
+        <strong>Цвета:</strong> фон #F4F6F9 · заголовки #1E3A5F · действия #2563EB · SOS #B91C1C<br />
+        <strong>Шрифты:</strong> Source Serif 4 (Aller) + Inter (Guide, UI)<br />
+        <strong>Радиус:</strong> 6–8px · stroke иконок 1.75px · linecap round
+      </p>
+    </section>
+
+    <section>
+      <h2>Logomark</h2>
+      <div class="row">
+        <img class="app-icon" src="../../apps/mobile/assets/icon.png" alt="App icon" />
+        <div class="sizes">
+          <img src="logo-mark.svg" width="64" height="64" alt="64" />
+          <img src="logo-mark.svg" width="48" height="48" alt="48" />
+          <img src="logo-mark.svg" width="32" height="32" alt="32" />
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Wordmark</h2>
+      <div class="wordmark">
+        <img src="logo-mark.svg" width="56" height="56" alt="" />
+        <div class="wordmark-text">
+          <span class="aller">Aller</span><span class="guide">Guide</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Tab icons</h2>
+      <div class="icons">
+        <div class="icon-cell"><img src="icons/home.svg" width="28" height="28" alt="" /><span>Home</span></div>
+        <div class="icon-cell"><img src="icons/diary.svg" width="28" height="28" alt="" /><span>Diary</span></div>
+        <div class="icon-cell"><img src="icons/scanner.svg" width="28" height="28" alt="" /><span>Scanner</span></div>
+        <div class="icon-cell danger"><img src="icons/sos.svg" width="28" height="28" alt="" style="filter: invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" /><span>SOS</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Palette</h2>
+      <div class="palette">
+        <div class="swatch"><div style="background:#F4F6F9"></div>bg</div>
+        <div class="swatch"><div style="background:#FFFFFF"></div>card</div>
+        <div class="swatch"><div style="background:#1E3A5F"></div>head</div>
+        <div class="swatch"><div style="background:#2563EB"></div>accent</div>
+        <div class="swatch"><div style="background:#B91C1C"></div>danger</div>
+        <div class="swatch"><div style="background:#15803D"></div>success</div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

@@ -34,7 +34,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#1F7A5A"
+          "color": "#2563EB"
         }
       ]
     ],
@@ -44,7 +44,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F4FAF7"
+      "backgroundColor": "#F4F6F9"
     },
     "web": {
       "bundler": "metro",
@@ -66,7 +66,7 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1F7A5A"
+        "backgroundColor": "#2563EB"
       },
       "permissions": [
         "android.permission.CAMERA",
