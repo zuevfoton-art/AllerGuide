@@ -8,6 +8,7 @@ import {
   backendUpdateProfile,
   upsertLocalProfile,
 } from '@/src/services/backend-api';
+import { trackEvent } from '@/src/services/analytics-service';
 import type { Profile, ProfileInput, ProfileType } from '@allerguide/core';
 
 function requireUserId(): number {
@@ -36,6 +37,7 @@ export async function createProfile(input: ProfileInput) {
 
     upsertLocalProfile({ ...response.data.profile, userId });
     useAppStore.getState().setActiveProfile(response.data.profile);
+    trackEvent('profile_created', { type: input.type, source: 'backend' });
     return response.data.profile.id;
   }
 
@@ -51,6 +53,7 @@ export async function createProfile(input: ProfileInput) {
   if (!row?.id) return null;
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [row.id]);
   useAppStore.getState().setActiveProfile(profile || null);
+  trackEvent('profile_created', { type: input.type, source: 'local' });
   return row.id;
 }
 

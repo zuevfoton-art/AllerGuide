@@ -3,6 +3,7 @@ import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
 import { saveScanHistory } from '@/src/services/scan-history-service';
+import { trackEvent } from '@/src/services/analytics-service';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -21,10 +22,17 @@ async function analyzeText(input: {
   productName?: string;
   source?: ScanResult['source'];
 }): Promise<ScanResult> {
-  return runSmartScan({
+  const result = await runSmartScan({
     ...input,
     llmEndpoint: getLlmEndpoint(),
   });
+  trackEvent('scan_completed', {
+    mode: result.mode,
+    level: result.level,
+    source: result.source ?? input.source ?? 'manual',
+    matches: result.matches.length,
+  });
+  return result;
 }
 
 export async function scanBarcode({

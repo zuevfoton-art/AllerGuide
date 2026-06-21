@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { useEffect, type ReactNode } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -7,7 +7,7 @@ import { initDb } from '@/src/db/init';
 import { initI18n } from '@/src/i18n';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
-import { initAnalytics } from '@/src/services/analytics-service';
+import { initAnalytics, trackScreen } from '@/src/services/analytics-service';
 import { initErrorReporting } from '@/src/services/error-reporting';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
@@ -31,6 +31,7 @@ export default function RootLayout() {
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const hydrateLocale = useLocaleStore((s) => s.hydrate);
   const { colors, isDark } = useTheme();
+  const pathname = usePathname();
 
   useEffect(() => {
     initI18n();
@@ -40,6 +41,10 @@ export default function RootLayout() {
     hydrateTheme();
     hydrateLocale();
   }, [hydrateTheme, hydrateLocale]);
+
+  useEffect(() => {
+    if (pathname) trackScreen(pathname);
+  }, [pathname]);
 
   return (
     <ErrorBoundary>
