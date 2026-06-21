@@ -66,6 +66,9 @@ const en: LocaleMessages = {
   profiles: {
     title: 'My profiles',
     subtitle: 'Edit and delete',
+    eyebrow: 'Settings',
+    listTitle: 'Profile list',
+    empty: 'No profiles yet. Add your first one — it only takes a minute.',
     self: 'Me',
     child: 'Child',
     noAllergens: 'No allergens specified',

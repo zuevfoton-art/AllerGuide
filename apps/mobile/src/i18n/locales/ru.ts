@@ -66,6 +66,9 @@ const ru: LocaleMessages = {
   profiles: {
     title: 'Мои профили',
     subtitle: 'Редактирование и удаление',
+    eyebrow: 'Настройки',
+    listTitle: 'Список профилей',
+    empty: 'Профилей пока нет. Добавьте первый — это займёт пару минут.',
     self: 'Я',
     child: 'Ребёнок',
     noAllergens: 'Аллергены не указаны',

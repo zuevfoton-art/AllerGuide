@@ -16,16 +16,18 @@ const LOCALE_FLAGS: Record<AppLocale, string> = {
 
 type LanguagePickerProps = {
   compact?: boolean;
+  /** Renders inside a GlassCard without outer card chrome */
+  embedded?: boolean;
 };
 
-export function LanguagePicker({ compact = false }: LanguagePickerProps) {
+export function LanguagePicker({ compact = false, embedded = false }: LanguagePickerProps) {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme, compact), [theme, compact]);
+  const styles = useMemo(() => createStyles(theme, compact, embedded), [theme, compact, embedded]);
   const { locale, setLocale, t } = useTranslation();
 
   return (
     <View style={styles.wrap}>
-      {!compact ? <Text style={styles.title}>{t('language.title')}</Text> : null}
+      {!compact && !embedded ? <Text style={styles.title}>{t('language.title')}</Text> : null}
       <View style={styles.row}>
         {APP_LOCALES.map((code) => {
           const active = locale === code;
@@ -38,7 +40,7 @@ export function LanguagePicker({ compact = false }: LanguagePickerProps) {
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {t(`language.${code}` as 'language.ru')}
               </Text>
-              {active ? <Ionicons name="checkmark" size={14} color={theme.colors.teal} /> : null}
+              {active ? <Ionicons name="checkmark" size={14} color={theme.colors.accent} /> : null}
             </Pressable>
           );
         })}
@@ -47,35 +49,49 @@ export function LanguagePicker({ compact = false }: LanguagePickerProps) {
   );
 }
 
-function createStyles({ colors }: AppTheme, compact: boolean) {
+function createStyles({ colors, fonts }: AppTheme, compact: boolean, embedded: boolean) {
   return StyleSheet.create({
     wrap: {
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: compact ? 12 : 16,
-      gap: compact ? 8 : 12,
-      borderWidth: 1,
-      borderColor: colors.border,
+      ...(embedded
+        ? { gap: 10, marginTop: 4 }
+        : {
+            backgroundColor: colors.card,
+            borderRadius: 8,
+            padding: compact ? 12 : 16,
+            gap: compact ? 8 : 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }),
     },
-    title: { fontSize: 15, fontWeight: '700', color: colors.text },
-    row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    title: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    row: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      paddingVertical: 8,
+      paddingVertical: 7,
       paddingHorizontal: 10,
-      borderRadius: 14,
-      backgroundColor: colors.bg,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      borderRadius: 6,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
     },
     chipActive: {
-      borderColor: colors.teal,
-      backgroundColor: colors.tealLight,
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
     },
     flag: { fontSize: 14 },
-    chipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    chipTextActive: { color: colors.teal, fontWeight: '700' },
+    chipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    chipTextActive: { color: colors.accent, fontWeight: '600' },
   });
 }

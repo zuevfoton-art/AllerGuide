@@ -70,6 +70,9 @@ export type LocaleMessages = {
   profiles: {
     title: string;
     subtitle: string;
+    eyebrow: string;
+    listTitle: string;
+    empty: string;
     self: string;
     child: string;
     noAllergens: string;
