@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 export const appUsers = pgTable('app_users', {
   id: serial('id').primaryKey(),
@@ -22,7 +22,23 @@ export const profiles = pgTable('profiles', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+/**
+ * Cloud backup store. `payload` is opaque to the server: it is either a JSON
+ * SyncPayload or an AES-GCM envelope (when `encrypted` is true), so the server
+ * never needs to read user health data in the clear.
+ */
+export const syncBackups = pgTable('sync_backups', {
+  userId: integer('user_id').primaryKey(),
+  version: integer('version').notNull().default(2),
+  encrypted: boolean('encrypted').notNull().default(false),
+  payload: text('payload').notNull(),
+  exportedAt: varchar('exported_at', { length: 64 }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type AppUser = typeof appUsers.$inferSelect;
 export type NewAppUser = typeof appUsers.$inferInsert;
 export type ProfileRow = typeof profiles.$inferSelect;
 export type NewProfileRow = typeof profiles.$inferInsert;
+export type SyncBackupRow = typeof syncBackups.$inferSelect;
+export type NewSyncBackupRow = typeof syncBackups.$inferInsert;
