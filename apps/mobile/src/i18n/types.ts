@@ -124,11 +124,14 @@ export type LocaleMessages = {
   diary: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     newEntry: string;
+    quickEntry: string;
     quickAdd: string;
     history: string;
     refresh: string;
     doctorReport: string;
+    empty: string;
     disclaimer: string;
     deleteTitle: string;
     deleteMessage: string;
