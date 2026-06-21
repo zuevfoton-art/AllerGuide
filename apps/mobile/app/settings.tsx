@@ -2,8 +2,11 @@ import { Alert, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View }
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
-import { Ionicons } from '@expo/vector-icons';
+import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
+import { Ionicons } from '@expo/vector-icons';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
 import {
@@ -15,6 +18,7 @@ import { useTranslation } from '@/src/store/locale-store';
 
 export default function SettingsScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
@@ -83,17 +87,22 @@ export default function SettingsScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
-        <View>
-          <Text style={styles.title}>{t('settings.title')}</Text>
-          <Text style={styles.subtitle}>{t('settings.subtitle')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('settings.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('settings.title')}</Text>
+          <Text style={ui.docMeta}>{t('settings.subtitle')}</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionLabel}>{t('settings.emergencyNumber')}</Text>
-      <View style={styles.card}>
+      <Text style={ui.sectionLabel}>{t('settings.emergencyNumber')}</Text>
+      <GlassCard>
         <Text style={styles.cardHint}>{t('settings.emergencyHint')}</Text>
         <TextInput
           style={styles.input}
@@ -103,24 +112,30 @@ export default function SettingsScreen() {
           placeholderTextColor={theme.colors.textMuted}
           keyboardType="phone-pad"
         />
-        <Pressable style={styles.primaryBtn} onPress={saveEmergencyNumber}>
-          <Text style={styles.primaryBtnText}>{t('settings.saveNumber')}</Text>
-        </Pressable>
-      </View>
+        <Button label={t('settings.saveNumber')} variant="primary" block onPress={saveEmergencyNumber} />
+      </GlassCard>
 
-      <Text style={styles.sectionLabel}>{t('settings.cloudBackup')}</Text>
-      <View style={styles.card}>
+      <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
+      <GlassCard>
         <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
-        <Pressable style={styles.primaryBtn} disabled={syncLoading} onPress={() => void handleUpload()}>
-          <Text style={styles.primaryBtnText}>{t('settings.uploadBackup')}</Text>
-        </Pressable>
-        <Pressable style={styles.secondaryBtn} disabled={syncLoading} onPress={() => void handleDownload()}>
-          <Text style={styles.secondaryBtnText}>{t('settings.downloadBackup')}</Text>
-        </Pressable>
-      </View>
+        <Button
+          label={t('settings.uploadBackup')}
+          variant="primary"
+          block
+          disabled={syncLoading}
+          onPress={() => void handleUpload()}
+        />
+        <Button
+          label={t('settings.downloadBackup')}
+          variant="secondary"
+          block
+          disabled={syncLoading}
+          onPress={() => void handleDownload()}
+        />
+      </GlassCard>
 
-      <Text style={styles.sectionLabel}>{t('settings.reminder')}</Text>
-      <View style={styles.card}>
+      <Text style={ui.sectionLabel}>{t('settings.reminder')}</Text>
+      <GlassCard>
         <View style={styles.switchRow}>
           <View style={styles.switchText}>
             <Text style={styles.switchTitle}>{t('settings.reminderTitle')}</Text>
@@ -134,73 +149,59 @@ export default function SettingsScreen() {
             thumbColor={reminderEnabled ? theme.colors.accent : theme.colors.card}
           />
         </View>
-      </View>
+      </GlassCard>
 
-      <Text style={styles.sectionLabel}>{t('theme.title')}</Text>
+      <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
       <ThemeToggle />
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
     backBtn: {
       width: 40,
       height: 40,
-      borderRadius: 12,
+      borderRadius: 6,
       backgroundColor: colors.card,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: colors.border,
+      marginTop: 2,
     },
-    title: { fontSize: 24, fontWeight: '800', color: colors.text },
-    subtitle: { fontSize: 14, color: colors.textSecondary },
-    sectionLabel: {
+    headerText: { flex: 1, gap: 2 },
+    cardHint: {
+      fontFamily: fonts.sans,
       fontSize: 13,
-      fontWeight: '700',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
-    card: {
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      padding: 16,
-      gap: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      ...(shadows.sm as object),
-    },
-    cardHint: { fontSize: 13, color: colors.textSecondary },
     input: {
-      backgroundColor: colors.bg,
-      borderRadius: 12,
+      backgroundColor: colors.card,
+      borderRadius: 6,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderInput,
       paddingHorizontal: 14,
       paddingVertical: 12,
       fontSize: 16,
+      fontFamily: fonts.sans,
       color: colors.text,
     },
-    primaryBtn: {
-      backgroundColor: colors.accent,
-      borderRadius: 12,
-      padding: 12,
-      alignItems: 'center',
-    },
-    primaryBtnText: { color: colors.onAccent, fontWeight: '700' },
-    secondaryBtn: {
-      borderRadius: 12,
-      padding: 12,
-      alignItems: 'center',
-      backgroundColor: colors.accentLight,
-    },
-    secondaryBtnText: { color: colors.accent, fontWeight: '700' },
     switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     switchText: { flex: 1, gap: 4 },
-    switchTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-    switchHint: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    switchTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    switchHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
   });
 }

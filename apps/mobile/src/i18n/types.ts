@@ -70,6 +70,9 @@ export type LocaleMessages = {
   profiles: {
     title: string;
     subtitle: string;
+    eyebrow: string;
+    listTitle: string;
+    empty: string;
     self: string;
     child: string;
     noAllergens: string;
@@ -99,6 +102,7 @@ export type LocaleMessages = {
   };
   home: {
     today: string;
+    summary: string;
     profilePrefix: string;
     selectProfile: string;
     wellnessTitle: string;
@@ -107,6 +111,7 @@ export type LocaleMessages = {
     air: string;
     index: string;
     diary: string;
+    addEntry: string;
     symptoms: string;
     symptomsSub: string;
     food: string;
@@ -119,11 +124,14 @@ export type LocaleMessages = {
   diary: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     newEntry: string;
+    quickEntry: string;
     quickAdd: string;
     history: string;
     refresh: string;
     doctorReport: string;
+    empty: string;
     disclaimer: string;
     deleteTitle: string;
     deleteMessage: string;
@@ -141,6 +149,8 @@ export type LocaleMessages = {
   scanner: {
     title: string;
     subtitle: string;
+    eyebrow: string;
+    openAction: string;
     product: string;
     menu: string;
     medicine: string;
@@ -171,6 +181,7 @@ export type LocaleMessages = {
   market: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     searchPlaceholder: string;
     banner: string;
     empty: string;
@@ -179,6 +190,7 @@ export type LocaleMessages = {
   map: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     places: string;
     pollen: string;
     adair: string;
@@ -197,6 +209,7 @@ export type LocaleMessages = {
   settings: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     emergencyNumber: string;
     emergencyHint: string;
     saveNumber: string;
@@ -253,6 +266,7 @@ export type LocaleMessages = {
     };
   };
   profileSetup: {
+    eyebrow: string;
     titleSelf: string;
     titleChild: string;
     titleCreate: string;
@@ -294,6 +308,7 @@ export type LocaleMessages = {
   sos: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     edit: string;
     name: string;
     age: string;
@@ -303,6 +318,7 @@ export type LocaleMessages = {
     emptyProfile: string;
     contactsTitle: string;
     contactsHint: string;
+    callContact: string;
     call: string;
     settingsLink: string;
     tip: string;
@@ -310,6 +326,7 @@ export type LocaleMessages = {
   };
   sosEdit: {
     title: string;
+    eyebrow: string;
     noProfile: string;
     notesLabel: string;
     notesPlaceholder: string;
@@ -330,6 +347,7 @@ export type LocaleMessages = {
     back: string;
     title: string;
     subtitle: string;
+    eyebrow: string;
     period: string;
     blocks: string;
     generating: string;
@@ -340,6 +358,7 @@ export type LocaleMessages = {
     back: string;
     home: string;
     title: string;
+    eyebrow: string;
   };
   allergens: {
     popular: string;

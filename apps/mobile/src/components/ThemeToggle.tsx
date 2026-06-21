@@ -5,34 +5,46 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import type { ThemeMode } from '@/src/constants/theme';
 import { useTranslation } from '@/src/store/locale-store';
 
-const MODES: { key: ThemeMode; labelKey: 'theme.light' | 'theme.dark' | 'theme.system'; icon: 'sunny' | 'moon' | 'phone-portrait' }[] = [
+const MODES: {
+  key: ThemeMode;
+  labelKey: 'theme.light' | 'theme.dark' | 'theme.system';
+  icon: 'sunny' | 'moon' | 'phone-portrait';
+}[] = [
   { key: 'light', labelKey: 'theme.light', icon: 'sunny' },
   { key: 'dark', labelKey: 'theme.dark', icon: 'moon' },
   { key: 'system', labelKey: 'theme.system', icon: 'phone-portrait' },
 ];
 
-export function ThemeToggle() {
+type ThemeToggleProps = {
+  embedded?: boolean;
+};
+
+export function ThemeToggle({ embedded = false }: ThemeToggleProps) {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createStyles(theme, embedded), [theme, embedded]);
   const { t } = useTranslation();
 
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>{t('theme.title')}</Text>
       <View style={styles.row}>
-        {MODES.map((item) => {
+        {MODES.map((item, index) => {
           const active = theme.mode === item.key;
           return (
             <Pressable
               key={item.key}
-              style={[styles.chip, active && styles.chipActive]}
+              style={[
+                styles.seg,
+                index < MODES.length - 1 && styles.segBorder,
+                active && styles.segActive,
+              ]}
               onPress={() => theme.setMode(item.key)}>
               <Ionicons
                 name={item.icon}
-                size={16}
-                color={active ? theme.colors.accent : theme.colors.textSecondary}
+                size={15}
+                color={active ? theme.colors.onAccent : theme.colors.textMuted}
               />
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>{t(item.labelKey)}</Text>
+              <Text style={[styles.segText, active && styles.segTextActive]}>{t(item.labelKey)}</Text>
             </Pressable>
           );
         })}
@@ -41,34 +53,51 @@ export function ThemeToggle() {
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme, embedded: boolean) {
   return StyleSheet.create({
     wrap: {
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: 16,
-      gap: 12,
+      ...(embedded
+        ? { gap: 10 }
+        : {
+            backgroundColor: colors.card,
+            borderRadius: 8,
+            padding: 16,
+            gap: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }),
+    },
+    title: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    row: {
+      flexDirection: 'row',
       borderWidth: 1,
       borderColor: colors.border,
+      borderRadius: 6,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
     },
-    title: { fontSize: 15, fontWeight: '700', color: colors.text },
-    row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-    chip: {
+    seg: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
-      paddingVertical: 10,
-      paddingHorizontal: 12,
-      borderRadius: 14,
-      backgroundColor: colors.bg,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      justifyContent: 'center',
+      gap: 5,
+      paddingVertical: 11,
+      paddingHorizontal: 6,
     },
-    chipActive: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
+    segBorder: { borderRightWidth: 1, borderRightColor: colors.border },
+    segActive: { backgroundColor: colors.accent },
+    segText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textMuted,
     },
-    chipText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    chipTextActive: { color: colors.accent },
+    segTextActive: { color: colors.onAccent },
   });
 }

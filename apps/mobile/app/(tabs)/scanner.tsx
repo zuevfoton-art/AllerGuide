@@ -1,4 +1,4 @@
-import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator } from 'react-native';
+import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -8,9 +8,10 @@ import { formatDiaryDate, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
-import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { useGlassStyles } from '@/src/hooks/use-glass-styles';
+import { Button } from '@/src/components/Button';
+import { Disclaimer } from '@/src/components/Disclaimer';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -25,16 +26,18 @@ const MODES = [
   { key: 'cosmetics', labelKey: 'scanner.cosmetics', icon: 'flask' },
 ] as const;
 
+type ScanMode = (typeof MODES)[number]['key'];
+
 export default function ScannerScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const glass = useGlassStyles();
   const { t, content } = useTranslation();
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('молоко, арахис, сахар');
-  const [mode, setMode] = useState<'product' | 'menu' | 'medicine' | 'cosmetics'>('product');
+  const [mode, setMode] = useState<ScanMode>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,8 +89,8 @@ export default function ScannerScreen() {
   };
 
   const pickMenuImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) return;
 
     const picked = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -128,6 +131,14 @@ export default function ScannerScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openScanAction = () => {
+    if (mode === 'menu') {
+      void pickMenuImage();
+      return;
+    }
+    void openCamera();
   };
 
   if (cameraOpen) {
@@ -190,127 +201,102 @@ export default function ScannerScreen() {
 
   return (
     <Screen>
-      <ScreenHeader
-        title={t('scanner.title')}
-        subtitle={t('scanner.subtitle')}
-        right={
-          <Pressable style={styles.cameraIconBtn} onPress={openCamera}>
-            <Ionicons name="camera" size={22} color={theme.colors.teal} />
-          </Pressable>
-        }
-      />
+      <View style={styles.header}>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('scanner.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('scanner.title')}</Text>
+          <Text style={ui.docMeta}>{t('scanner.subtitle')}</Text>
+        </View>
+        <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
+          <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
+        </Pressable>
+      </View>
 
       <ProfileSwitcher />
 
-      <View style={glass.toggleRow}>
-        {MODES.map((m) => (
-          <Pressable
-            key={m.key}
-            style={[glass.toggle, mode === m.key && glass.toggleActive]}
-            onPress={() => setMode(m.key)}>
-            <Ionicons
-              name={m.icon as any}
-              size={18}
-              color={mode === m.key ? theme.colors.teal : theme.colors.textMuted}
-            />
-            <Text style={[glass.toggleText, mode === m.key && glass.toggleTextActive]}>{t(m.labelKey)}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.modeRow}>
+        {MODES.map((m) => {
+          const active = mode === m.key;
+          return (
+            <Pressable
+              key={m.key}
+              style={[styles.modeChip, active && styles.modeChipActive]}
+              onPress={() => setMode(m.key)}>
+              <Ionicons
+                name={m.icon as any}
+                size={14}
+                color={active ? theme.colors.accent : theme.colors.textSecondary}
+              />
+              <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>{t(m.labelKey)}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       <GlassCard>
-      <Pressable
-        style={styles.scanBanner}
-        onPress={() => {
-          if (mode === 'menu') {
-            void pickMenuImage();
-            return;
-          }
-          void openCamera();
-        }}>
-        <View style={styles.scanBannerIcon}>
-          <Ionicons name={mode === 'product' ? 'barcode' : 'restaurant'} size={26} color={theme.colors.teal} />
+        <View style={styles.scanRow}>
+          <View style={ui.feedIcon}>
+            <Ionicons
+              name={mode === 'product' ? 'barcode-outline' : 'restaurant-outline'}
+              size={18}
+              color={theme.colors.textSecondary}
+            />
+          </View>
+          <View style={styles.scanBody}>
+            <Text style={styles.scanTitle}>
+              {mode === 'product' ? t('scanner.scanBarcode') : t('scanner.scanMenu')}
+            </Text>
+            <Text style={styles.scanDesc}>
+              {mode === 'product' ? t('scanner.scanBarcodeDesc') : t('scanner.scanMenuDesc')}
+            </Text>
+          </View>
+          <Button label={t('scanner.openAction')} variant="secondary" size="sm" onPress={openScanAction} />
         </View>
-        <View style={styles.scanBannerText}>
-          <Text style={styles.scanBannerTitle}>
-            {mode === 'product' ? t('scanner.scanBarcode') : t('scanner.scanMenu')}
-          </Text>
-          <Text style={styles.scanBannerDesc}>
-            {mode === 'product' ? t('scanner.scanBarcodeDesc') : t('scanner.scanMenuDesc')}
-          </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
-      </Pressable>
       </GlassCard>
 
-      <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>{t('scanner.manualDivider')}</Text>
-        <View style={styles.dividerLine} />
-      </View>
+      <Text style={ui.sectionLabel}>{t('scanner.manualDivider')}</Text>
+      <TextInput
+        value={input}
+        onChangeText={setInput}
+        placeholder={mode === 'product' ? t('scanner.productPlaceholder') : t('scanner.menuPlaceholder')}
+        placeholderTextColor={theme.colors.textMuted}
+        multiline
+        style={styles.input}
+      />
 
-      <View style={styles.inputWrap}>
-        <Ionicons name="list" size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder={mode === 'product' ? t('scanner.productPlaceholder') : t('scanner.menuPlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          multiline
-          style={styles.input}
-        />
-      </View>
-
-      <Pressable
-        style={glass.primaryBtn}
+      <Button
+        label={t('scanner.check')}
+        variant="primary"
+        block
         disabled={loading}
         onPress={() => {
           const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
           void runCheck(input.trim(), looksLikeBarcode && mode === 'product');
-        }}>
-        {loading ? (
-          <ActivityIndicator color={theme.colors.onAccent} />
-        ) : (
-          <Text style={glass.primaryBtnText}>{t('scanner.check')}</Text>
-        )}
-      </Pressable>
+        }}
+      />
+      {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
 
-      {displayResult && (
+      {displayResult ? (
         <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
-          <View style={styles.resultHeader}>
-            <View style={[styles.resultIcon, isDanger ? styles.resultIconDanger : styles.resultIconSafe]}>
-              <Ionicons
-                name={isDanger ? 'warning' : 'checkmark-circle'}
-                size={24}
-                color={isDanger ? theme.colors.danger : theme.colors.success}
-              />
-            </View>
-            <View style={styles.resultText}>
-              <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
-                {displayResult.verdict}
-              </Text>
-              {displayResult.productName ? (
-                <Text style={styles.productName}>{displayResult.productName}</Text>
-              ) : null}
-            </View>
-          </View>
+          <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
+            {displayResult.verdict}
+          </Text>
+          {displayResult.productName ? <Text style={styles.productName}>{displayResult.productName}</Text> : null}
           <Text style={styles.reason}>{displayResult.reason}</Text>
-          {displayResult.matches?.length > 0 && (
+          {displayResult.matches?.length > 0 ? (
             <View style={styles.matchesBadge}>
-              <Ionicons name="alert-circle" size={13} color={theme.colors.danger} />
               <Text style={styles.matchesText}>
                 {t('scanner.matches')} {displayResult.matches.join(', ')}
               </Text>
             </View>
-          )}
-          {(displayResult.crossMatches?.length ?? 0) > 0 && (
+          ) : null}
+          {(displayResult.crossMatches?.length ?? 0) > 0 ? (
             <View style={styles.crossBadge}>
-              <Ionicons name="git-network-outline" size={13} color={theme.colors.warning} />
               <Text style={styles.crossText}>
                 {t('scanner.crossMatches')} {displayResult.crossMatches.join(', ')}
               </Text>
             </View>
-          )}
+          ) : null}
           {displayResult.source ? (
             <Text style={styles.sourceMeta}>
               {t('scanner.source')}{' '}
@@ -322,120 +308,161 @@ export default function ScannerScreen() {
             </Text>
           ) : null}
         </View>
-      )}
+      ) : null}
 
       {history.length > 0 ? (
-        <>
-          <Text style={glass.sectionLabel}>{t('scanner.history')}</Text>
-          <GlassCard padded={false}>
+        <GlassCard padded={false}>
+          <Text style={[ui.cardTitle, styles.historyHead]}>{t('scanner.history')}</Text>
           {history.map((item, index) => (
             <View
               key={item.id}
-              style={[glass.feedRow, index < history.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border }]}>
-              <View style={glass.feedBody}>
-                <Text style={glass.feedTitle}>{item.productName || item.verdict}</Text>
-                <Text style={glass.feedSub}>
+              style={[styles.historyRow, index < history.length - 1 && styles.historyRowBorder]}>
+              <View style={ui.feedBody}>
+                <Text style={ui.feedTitle}>{item.productName || item.verdict}</Text>
+                <Text style={ui.feedSub}>
                   {formatDiaryDate(item.createdAt)} · {item.source}
                 </Text>
               </View>
             </View>
           ))}
-          </GlassCard>
-        </>
+        </GlassCard>
       ) : null}
 
-      <Text style={glass.disclaimer}>{t('scanner.disclaimer')}</Text>
+      <Disclaimer>{t('scanner.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    cameraIconBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      backgroundColor: colors.tealLight,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 4,
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    headerText: { flex: 1, gap: 2 },
+    cameraBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
-      ...(shadows.glass as object),
-    },
-    scanBanner: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 14,
-    },
-    scanBannerIcon: {
-      width: 50,
-      height: 50,
-      borderRadius: 14,
-      backgroundColor: colors.tealLight,
       alignItems: 'center',
       justifyContent: 'center',
+      marginTop: 2,
     },
-    scanBannerText: { flex: 1, gap: 3 },
-    scanBannerTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-    scanBannerDesc: { fontSize: 13, color: colors.textSecondary },
-    divider: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
-    dividerText: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
-    inputWrap: {
+    modeRow: { gap: 6, paddingRight: 4 },
+    modeChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 6,
       backgroundColor: colors.card,
-      borderRadius: 16,
-      borderWidth: 1.5,
-      borderColor: colors.border,
-      paddingTop: 12,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+    },
+    modeChipActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+    },
+    modeChipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    modeChipTextActive: { color: colors.accent },
+    scanRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    scanBody: { flex: 1, gap: 2, minWidth: 0 },
+    scanTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    scanDesc: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 16,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
       paddingHorizontal: 14,
-      paddingBottom: 14,
-      minHeight: 100,
+      paddingVertical: 12,
+      minHeight: 96,
+      fontSize: 15,
+      fontFamily: fonts.sans,
+      color: colors.text,
+      textAlignVertical: 'top',
+      lineHeight: 22,
     },
-    inputIcon: { marginBottom: 6 },
-    input: { fontSize: 15, color: colors.text, textAlignVertical: 'top', lineHeight: 22 },
-    resultCard: { borderRadius: 18, padding: 16, gap: 10, borderWidth: 1.5 },
-    resultSafe: { backgroundColor: colors.successLight, borderColor: colors.scannerSafeBorder },
-    resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.scannerDangerBorder },
-    resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    resultIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      alignItems: 'center',
-      justifyContent: 'center',
+    resultCard: { borderRadius: 8, padding: 16, gap: 8, borderWidth: 1 },
+    resultSafe: { backgroundColor: colors.successLight, borderColor: colors.successBorder },
+    resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+    verdict: {
+      fontFamily: fonts.sansBold,
+      fontSize: 16,
+      fontWeight: '700',
     },
-    resultIconSafe: { backgroundColor: colors.scannerSafeIconBg },
-    resultIconDanger: { backgroundColor: colors.scannerDangerIconBg },
-    resultText: { flex: 1 },
-    verdict: { fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
-    verdictSafe: { color: colors.scannerSafeText },
+    verdictSafe: { color: colors.success },
     verdictDanger: { color: colors.danger },
-    productName: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-    reason: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+    productName: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+    },
+    reason: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
     matchesBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      backgroundColor: colors.scannerDangerIconBg,
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: 8,
       alignSelf: 'flex-start',
+      backgroundColor: colors.dangerLight,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderRadius: 4,
     },
-    matchesText: { fontSize: 13, color: colors.danger, fontWeight: '600' },
+    matchesText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      color: colors.danger,
+      fontWeight: '600',
+    },
     crossBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 5,
-      backgroundColor: colors.warningLight,
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: 8,
       alignSelf: 'flex-start',
+      backgroundColor: colors.warningLight,
+      borderWidth: 1,
+      borderColor: colors.warningBorder,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderRadius: 4,
     },
-    crossText: { fontSize: 13, color: colors.warningText, fontWeight: '600' },
-    sourceMeta: { fontSize: 12, color: colors.textMuted },
+    crossText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      color: colors.warningText,
+      fontWeight: '600',
+    },
+    sourceMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
+    historyRow: { paddingHorizontal: 16, paddingVertical: 12 },
+    historyRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
     cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,
@@ -452,15 +479,20 @@ function createStyles({ colors, shadows }: AppTheme) {
     closeBtn: {
       width: 40,
       height: 40,
-      borderRadius: 20,
+      borderRadius: 6,
       backgroundColor: 'rgba(0,0,0,0.5)',
       alignItems: 'center',
       justifyContent: 'center',
     },
-    cameraTitle: { color: colors.onAccent, fontSize: 16, fontWeight: '700' },
+    cameraTitle: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.onAccent,
+      fontSize: 15,
+      fontWeight: '600',
+    },
     viewfinderWrap: { alignItems: 'center', gap: 20 },
     viewfinder: { width: 260, height: 180, position: 'relative' },
-    corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.teal, borderWidth: 3 },
+    corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.accent, borderWidth: 3 },
     cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
     cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
     cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
@@ -474,29 +506,43 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     menuScanBtn: {
       marginHorizontal: 24,
-      backgroundColor: colors.teal,
-      borderRadius: 16,
-      padding: 16,
+      backgroundColor: colors.accent,
+      borderRadius: 6,
+      padding: 14,
       alignItems: 'center',
+      minHeight: 48,
+      justifyContent: 'center',
     },
-    menuScanBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+    menuScanBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.onAccent,
+      fontWeight: '600',
+      fontSize: 15,
+    },
     webHint: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
       marginHorizontal: 24,
       backgroundColor: 'rgba(0,0,0,0.5)',
-      borderRadius: 10,
+      borderRadius: 6,
       padding: 10,
     },
     webHintText: { color: 'rgba(255,255,255,0.7)', fontSize: 12, flex: 1 },
     cancelBtn: {
       marginHorizontal: 24,
-      backgroundColor: 'rgba(255,255,255,0.15)',
-      borderRadius: 16,
-      padding: 16,
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      borderRadius: 6,
+      padding: 14,
       alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.2)',
     },
-    cancelBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+    cancelBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.onAccent,
+      fontWeight: '600',
+      fontSize: 15,
+    },
   });
 }

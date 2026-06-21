@@ -66,6 +66,9 @@ const ru: LocaleMessages = {
   profiles: {
     title: 'Мои профили',
     subtitle: 'Редактирование и удаление',
+    eyebrow: 'Профили',
+    listTitle: 'Список профилей',
+    empty: 'Профилей пока нет. Добавьте первый — это займёт пару минут.',
     self: 'Я',
     child: 'Ребёнок',
     noAllergens: 'Аллергены не указаны',
@@ -95,6 +98,7 @@ const ru: LocaleMessages = {
   },
   home: {
     today: 'Сегодня',
+    summary: 'Сводка',
     profilePrefix: 'Профиль',
     selectProfile: 'Выберите профиль',
     wellnessTitle: 'Сводка самочувствия',
@@ -103,6 +107,7 @@ const ru: LocaleMessages = {
     air: 'Воздух',
     index: 'индекс',
     diary: 'Дневник',
+    addEntry: '+ Запись',
     symptoms: 'Симптомы',
     symptomsSub: 'Записать самочувствие',
     food: 'Питание',
@@ -115,11 +120,14 @@ const ru: LocaleMessages = {
   diary: {
     title: 'Дневник',
     subtitle: 'Пошаговые записи наблюдений',
-    newEntry: '＋ Новая запись по шагам',
+    eyebrow: 'Наблюдения',
+    newEntry: '+ Новая запись по шагам',
+    quickEntry: 'Быстрая запись',
     quickAdd: 'Быстрое добавление',
     history: 'История записей',
     refresh: 'Обновить',
     doctorReport: 'Отчёт для врача',
+    empty: 'Записей пока нет. Первая займёт меньше минуты.',
     disclaimer: 'Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.',
     deleteTitle: 'Удалить запись?',
     deleteMessage: 'Запись «{{type}}» будет удалена без возможности восстановления.',
@@ -136,7 +144,9 @@ const ru: LocaleMessages = {
   },
   scanner: {
     title: 'Умный сканер',
-    subtitle: 'Open Food Facts + проверка аллергенов',
+    subtitle: 'Проверка состава по профилю аллергий',
+    eyebrow: 'Сканер',
+    openAction: 'Открыть',
     product: 'Продукт',
     menu: 'Меню',
     medicine: 'Лекарство',
@@ -167,6 +177,7 @@ const ru: LocaleMessages = {
   market: {
     title: 'Маркет',
     subtitle: 'Товары для аллергиков',
+    eyebrow: 'Маркет',
     searchPlaceholder: 'Поиск по каталогу…',
     banner: 'Подборка на основе профиля аллергий — скрыты товары с конфликтующими аллергенами',
     empty: 'Ничего не найдено. Попробуйте другой запрос.',
@@ -175,6 +186,7 @@ const ru: LocaleMessages = {
   map: {
     title: 'Карта мест',
     subtitle: '3 слоя по ТЗ v13',
+    eyebrow: 'Карта',
     places: 'Рестораны',
     pollen: 'Пыление',
     adair: 'АДАИР',
@@ -193,6 +205,7 @@ const ru: LocaleMessages = {
   settings: {
     title: 'Настройки',
     subtitle: 'SOS, синхронизация и напоминания',
+    eyebrow: 'Настройки',
     emergencyNumber: 'Экстренный вызов',
     emergencyHint: 'Номер для кнопки SOS (по умолчанию 103)',
     saveNumber: 'Сохранить номер',
@@ -264,6 +277,7 @@ const ru: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Профиль',
     titleSelf: 'Ваш профиль',
     titleChild: 'Профиль ребёнка',
     titleCreate: 'Создание профиля',
@@ -306,6 +320,7 @@ const ru: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Экстренная информация',
+    eyebrow: 'SOS',
     edit: 'Изменить',
     name: 'Имя:',
     age: 'Возраст:',
@@ -315,6 +330,7 @@ const ru: LocaleMessages = {
     emptyProfile: 'Выберите профиль, чтобы увидеть медицинскую информацию',
     contactsTitle: 'Экстренные контакты',
     contactsHint: 'Добавьте экстренные контакты в настройках профиля или на экране редактирования SOS.',
+    callContact: 'Позвонить',
     call: 'Позвонить {{number}}',
     settingsLink: 'Настройки SOS и уведомлений',
     tip: 'Покажите этот экран медработнику в случае анафилактической реакции',
@@ -322,6 +338,7 @@ const ru: LocaleMessages = {
   },
   sosEdit: {
     title: 'Редактирование SOS',
+    eyebrow: 'SOS',
     noProfile: 'Профиль не выбран',
     notesLabel: 'Медицинские заметки',
     notesPlaceholder: 'Препараты, особенности реакции, инструкции врача…',
@@ -342,6 +359,7 @@ const ru: LocaleMessages = {
     back: 'Дневник',
     title: 'Отчёт для врача',
     subtitle: 'PDF с логотипом АДАИР · проф. Смолкин Ю.С.',
+    eyebrow: 'Отчёт',
     period: 'Период',
     blocks: 'Блоки отчёта',
     generating: 'Формирование…',
@@ -352,6 +370,7 @@ const ru: LocaleMessages = {
     back: 'Назад',
     home: 'Главная',
     title: 'Эксперт',
+    eyebrow: 'Эксперт',
   },
   allergens: {
     popular: 'Частые аллергены',

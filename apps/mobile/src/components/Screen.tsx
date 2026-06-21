@@ -9,10 +9,10 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        scrollOuter: { flex: 1, backgroundColor: colors.cream },
+        scrollOuter: { flex: 1, backgroundColor: colors.bg },
         scroll: {
           flexGrow: 1,
-          backgroundColor: colors.cream,
+          backgroundColor: colors.bg,
           paddingTop: layout.topPadding,
           paddingBottom: layout.bottomPadding,
           gap: 16,
@@ -26,19 +26,13 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
         },
         safe: {
           flex: 1,
-          backgroundColor: colors.cream,
+          backgroundColor: colors.bg,
           paddingHorizontal: layout.horizontalPadding,
           paddingTop: layout.topPadding,
           paddingBottom: layout.bottomPadding,
         },
       }),
-    [
-      colors.bg,
-      layout.bottomPadding,
-      layout.contentMaxWidth,
-      layout.horizontalPadding,
-      layout.topPadding,
-    ],
+    [colors.bg, layout.bottomPadding, layout.contentMaxWidth, layout.horizontalPadding, layout.topPadding],
   );
 
   const body = <View style={styles.content}>{children}</View>;

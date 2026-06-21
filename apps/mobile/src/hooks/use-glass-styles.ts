@@ -2,33 +2,50 @@ import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
-export function useGlassStyles() {
+export function useUiStyles() {
   const theme = useTheme();
-  return useMemo(() => createGlassStyles(theme), [theme]);
+  return useMemo(() => createUiStyles(theme), [theme]);
 }
 
-function createGlassStyles({ colors, shadows }: AppTheme) {
+/** @deprecated Use useUiStyles */
+export const useGlassStyles = useUiStyles;
+
+function createUiStyles({ colors, shadows, fonts }: AppTheme) {
   return StyleSheet.create({
     sectionHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    sectionTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
-    sectionLink: { fontSize: 14, fontWeight: '700', color: colors.teal },
+    sectionTitle: {
+      fontFamily: fonts.sansBold,
+      fontSize: 18,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    sectionLink: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     pill: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
       paddingHorizontal: 14,
       paddingVertical: 10,
-      borderRadius: 999,
+      borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
-      ...(shadows.glass as object),
     },
-    pillText: { fontSize: 13, fontWeight: '700', color: colors.text },
+    pillText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+    },
     pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     feedRow: {
       flexDirection: 'row',
@@ -40,58 +57,88 @@ function createGlassStyles({ colors, shadows }: AppTheme) {
       borderBottomColor: colors.border,
     },
     feedIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.tealLight,
+      width: 36,
+      height: 36,
+      borderRadius: 6,
+      backgroundColor: colors.surfaceMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },
     feedBody: { flex: 1, gap: 2 },
-    feedTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-    feedSub: { fontSize: 13, color: colors.textMuted },
+    feedTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    feedSub: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+    },
     addBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 36,
+      height: 36,
+      borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderInput,
       alignItems: 'center',
       justifyContent: 'center',
-      ...(shadows.glass as object),
     },
     primaryBtn: {
-      backgroundColor: colors.teal,
-      padding: 16,
-      borderRadius: 16,
+      backgroundColor: colors.accent,
+      padding: 14,
+      borderRadius: 6,
       alignItems: 'center',
-      ...(shadows.glass as object),
+      minHeight: 44,
     },
-    primaryBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
-    toggleRow: { flexDirection: 'row', gap: 8 },
+    primaryBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.onAccent,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 6,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+    },
     toggle: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
-      paddingVertical: 12,
-      borderRadius: 14,
-      borderWidth: 1.5,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
+      paddingVertical: 11,
+      borderRightWidth: 1,
+      borderRightColor: colors.border,
     },
-    toggleActive: { borderColor: colors.teal, backgroundColor: colors.tealLight },
-    toggleText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
-    toggleTextActive: { color: colors.teal, fontWeight: '700' },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
-    sectionLabel: {
+    toggleActive: { backgroundColor: colors.accent },
+    toggleText: {
+      fontFamily: fonts.sansSemiBold,
       fontSize: 13,
-      fontWeight: '700',
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    toggleTextActive: { color: colors.onAccent, fontWeight: '600' },
+    disclaimer: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      textAlign: 'center',
+      lineHeight: 16,
+    },
+    sectionLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
-      letterSpacing: 0.8,
+      letterSpacing: 0.7,
     },
     secondaryBtn: {
       flex: 1,
@@ -101,18 +148,125 @@ function createGlassStyles({ colors, shadows }: AppTheme) {
       gap: 6,
       backgroundColor: colors.card,
       padding: 13,
-      borderRadius: 14,
+      borderRadius: 6,
       borderWidth: 1,
-      borderColor: colors.border,
-      ...(shadows.glass as object),
+      borderColor: colors.borderInput,
+      minHeight: 44,
     },
-    secondaryBtnText: { color: colors.teal, fontWeight: '700', fontSize: 14 },
+    secondaryBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.text,
+      fontWeight: '600',
+      fontSize: 14,
+    },
     cardHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 14,
+      marginBottom: 12,
     },
-    cardTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
+    cardTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    docLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    docTitle: {
+      fontFamily: fonts.serifBold,
+      fontSize: 26,
+      fontWeight: '700',
+      color: colors.head,
+      letterSpacing: -0.3,
+    },
+    docMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+    },
+    kpiRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    kpiLabel: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      flex: 1,
+    },
+    kpiValue: {
+      fontFamily: fonts.sansBold,
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.head,
+      fontVariant: ['tabular-nums'],
+    },
+    heroKpi: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
+      paddingBottom: 12,
+      marginBottom: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    heroKpiNum: {
+      fontFamily: fonts.sansBold,
+      fontSize: 36,
+      fontWeight: '700',
+      color: colors.head,
+      fontVariant: ['tabular-nums'],
+      lineHeight: 40,
+    },
+    heroKpiSub: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    badge: {
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 4,
+      borderWidth: 1,
+      overflow: 'hidden',
+    },
+    badgeText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+    },
   });
+}
+
+export function badgeStyle(
+  kind: 'ok' | 'warn' | 'danger',
+  { colors }: AppTheme,
+): { container: object; text: object } {
+  if (kind === 'ok') {
+    return {
+      container: { backgroundColor: colors.successLight, borderColor: colors.successBorder },
+      text: { color: colors.success },
+    };
+  }
+  if (kind === 'danger') {
+    return {
+      container: { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+      text: { color: colors.danger },
+    };
+  }
+  return {
+    container: { backgroundColor: colors.warningLight, borderColor: colors.warningBorder },
+    text: { color: colors.warning },
+  };
 }

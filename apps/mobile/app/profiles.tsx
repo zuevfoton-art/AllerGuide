@@ -5,14 +5,18 @@ import { parseAllergies } from '@allerguide/core';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
+import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
-import { Ionicons } from '@expo/vector-icons';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
+import { Ionicons } from '@expo/vector-icons';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export default function ProfilesScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState(listProfiles());
@@ -48,147 +52,153 @@ export default function ProfilesScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
-        <View>
-          <Text style={styles.title}>{t('profiles.title')}</Text>
-          <Text style={styles.subtitle}>{t('profiles.subtitle')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('profiles.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('profiles.title')}</Text>
+          <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
         </View>
       </View>
 
-      <LanguagePicker />
+      <GlassCard>
+        <Text style={ui.cardTitle}>{t('language.title')}</Text>
+        <LanguagePicker embedded />
+      </GlassCard>
 
-      {profiles.map((profile) => {
-        const allergies = parseAllergies(profile.allergies);
-        return (
-          <View key={profile.id} style={styles.card}>
-            <Pressable style={styles.cardTop} onPress={() => openEdit(profile.id)}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{profile.name?.[0]?.toUpperCase() ?? '?'}</Text>
+      <GlassCard padded={false}>
+        <View style={styles.listHead}>
+          <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('profiles.listTitle')}</Text>
+        </View>
+
+        {profiles.length === 0 ? (
+          <Text style={[styles.empty, styles.listHeadPad]}>{t('profiles.empty')}</Text>
+        ) : (
+          profiles.map((profile, index) => {
+            const allergies = parseAllergies(profile.allergies);
+            const typeLabel = profile.type === 'self' ? t('profiles.self') : t('profiles.child');
+            return (
+              <View
+                key={profile.id}
+                style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}>
+                <View style={styles.rowBody}>
+                  <Text style={styles.rowTitle}>
+                    {profile.name} · {typeLabel}
+                  </Text>
+                  <Text style={styles.rowSub}>
+                    {profile.birthYear} · {allergies.join(', ') || t('profiles.noAllergens')}
+                  </Text>
+                </View>
+                <View style={styles.rowActions}>
+                  <Button
+                    label={t('profiles.edit')}
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => openEdit(profile.id)}
+                  />
+                  <Pressable
+                    style={styles.deleteLink}
+                    onPress={() => confirmDelete(profile.id, profile.name)}
+                    accessibilityRole="button">
+                    <Text style={styles.deleteLinkText}>{t('profiles.delete')}</Text>
+                  </Pressable>
+                </View>
               </View>
-              <View style={styles.cardInfo}>
-                <Text style={styles.name}>{profile.name}</Text>
-                <Text style={styles.meta}>
-                  {profile.type === 'self' ? t('profiles.self') : t('profiles.child')} · {profile.birthYear}
-                </Text>
-                <Text style={styles.allergies} numberOfLines={2}>
-                  {allergies.join(', ') || t('profiles.noAllergens')}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
-            </Pressable>
-            <View style={styles.actions}>
-              <Pressable style={styles.editBtn} onPress={() => openEdit(profile.id)}>
-                <Ionicons name="create-outline" size={16} color={theme.colors.teal} />
-                <Text style={styles.editText}>{t('profiles.edit')}</Text>
-              </Pressable>
-              <Pressable style={styles.deleteBtn} onPress={() => confirmDelete(profile.id, profile.name)}>
-                <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
-                <Text style={styles.deleteText}>{t('profiles.delete')}</Text>
-              </Pressable>
-            </View>
-          </View>
-        );
-      })}
+            );
+          })
+        )}
+      </GlassCard>
 
-      <Pressable style={styles.addBtn} onPress={() => router.push('/profile-setup')}>
-        <Ionicons name="add-circle" size={20} color={theme.colors.teal} />
-        <Text style={styles.addText}>{t('profiles.add')}</Text>
-      </Pressable>
+      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup')} />
 
-      <ThemeToggle />
+      <GlassCard>
+        <ThemeToggle embedded />
+      </GlassCard>
 
-      <Pressable style={styles.logoutBtn} onPress={() => confirmLogout(router)}>
-        <Ionicons name="log-out-outline" size={18} color={theme.colors.danger} />
+      <Pressable
+        style={styles.logoutBtn}
+        onPress={() => confirmLogout(router)}
+        accessibilityRole="button">
         <Text style={styles.logoutText}>{t('profiles.logout')}</Text>
       </Pressable>
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
     backBtn: {
       width: 40,
       height: 40,
-      borderRadius: 12,
+      borderRadius: 6,
       backgroundColor: colors.card,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: colors.border,
+      marginTop: 2,
     },
-    title: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
-    subtitle: { fontSize: 14, color: colors.textSecondary },
-    card: {
-      backgroundColor: colors.card,
-      borderRadius: 18,
-      padding: 16,
-      gap: 14,
-      ...(shadows.sm as object),
-    },
-    cardTop: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-    avatar: {
-      width: 48,
-      height: 48,
-      borderRadius: 14,
-      backgroundColor: colors.tealLight,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    avatarText: { fontSize: 18, fontWeight: '800', color: colors.teal },
-    cardInfo: { flex: 1, gap: 4 },
-    name: { fontSize: 17, fontWeight: '700', color: colors.text },
-    meta: { fontSize: 13, color: colors.textSecondary },
-    allergies: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
-    actions: { flexDirection: 'row', gap: 10 },
-    editBtn: {
-      flex: 1,
+    headerText: { flex: 1, gap: 2 },
+    listHead: { paddingTop: 14 },
+    listHeadPad: { paddingHorizontal: 16 },
+    row: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      padding: 12,
-      borderRadius: 12,
-      backgroundColor: colors.tealLight,
+      alignItems: 'flex-start',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
     },
-    editText: { color: colors.teal, fontWeight: '700' },
-    deleteBtn: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      padding: 12,
-      borderRadius: 12,
-      backgroundColor: colors.dangerLight,
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    rowBody: { flex: 1, gap: 3, minWidth: 0 },
+    rowTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
     },
-    deleteText: { color: colors.danger, fontWeight: '700' },
-    addBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      padding: 16,
-      borderRadius: 16,
-      borderWidth: 1.5,
-      borderColor: colors.teal,
-      backgroundColor: colors.tealLight,
+    rowSub: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 17,
     },
-    addText: { color: colors.teal, fontWeight: '700', fontSize: 15 },
+    rowActions: { alignItems: 'flex-end', gap: 6 },
+    deleteLink: { paddingVertical: 2, paddingHorizontal: 4, minHeight: 28, justifyContent: 'center' },
+    deleteLinkText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.danger,
+    },
+    empty: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      paddingBottom: 16,
+      lineHeight: 18,
+    },
     logoutBtn: {
-      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      padding: 14,
-      borderRadius: 14,
-      backgroundColor: colors.dangerLight,
+      minHeight: 44,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },
-    logoutText: { color: colors.danger, fontWeight: '700', fontSize: 15 },
+    logoutText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.danger,
+    },
   });
 }

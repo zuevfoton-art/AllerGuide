@@ -6,9 +6,10 @@ import { generateDoctorReportPdf } from '@/src/services/doctor-report-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
-import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { useGlassStyles } from '@/src/hooks/use-glass-styles';
+import { Button } from '@/src/components/Button';
+import { Disclaimer } from '@/src/components/Disclaimer';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -20,7 +21,7 @@ type ReportPeriod = (typeof PERIODS)[number];
 export default function DoctorReportScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const glass = useGlassStyles();
+  const ui = useUiStyles();
   const { t, content } = useTranslation();
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
@@ -44,64 +45,92 @@ export default function DoctorReportScreen() {
 
   return (
     <Screen>
-      <Pressable style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={18} color={theme.colors.teal} />
-        <Text style={styles.backText}>{t('doctorReport.back')}</Text>
-      </Pressable>
-
-      <ScreenHeader title={t('doctorReport.title')} subtitle={t('doctorReport.subtitle')} />
+      <View style={styles.header}>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
+          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
+        </Pressable>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('doctorReport.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('doctorReport.title')}</Text>
+          <Text style={ui.docMeta}>{t('doctorReport.subtitle')}</Text>
+        </View>
+      </View>
 
       <ProfileSwitcher />
 
-      <Text style={glass.sectionLabel}>{t('doctorReport.period')}</Text>
-      <View style={glass.toggleRow}>
+      <Text style={ui.sectionLabel}>{t('doctorReport.period')}</Text>
+      <View style={ui.toggleRow}>
         {PERIODS.map((days) => (
           <Pressable
             key={days}
-            style={[glass.toggle, period === days && glass.toggleActive]}
+            style={[ui.toggle, period === days && ui.toggleActive]}
             onPress={() => setPeriod(days)}>
-            <Text style={[glass.toggleText, period === days && glass.toggleTextActive]}>
+            <Text style={[ui.toggleText, period === days && ui.toggleTextActive]}>
               {days} {t('common.daysShort')}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      <Text style={glass.sectionLabel}>{t('doctorReport.blocks')}</Text>
+      <Text style={ui.sectionLabel}>{t('doctorReport.blocks')}</Text>
       <GlassCard padded={false}>
         {BLOCKS.map((block, index) => (
           <Pressable
             key={block.id}
             style={[
-              glass.feedRow,
+              ui.feedRow,
               index < BLOCKS.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
             ]}
             onPress={() => toggleBlock(block.id)}>
             <Ionicons
               name={blockIds.includes(block.id) ? 'checkbox' : 'square-outline'}
               size={22}
-              color={theme.colors.teal}
+              color={theme.colors.accent}
             />
-            <Text style={styles.checkLabel}>{localizeReportBlockLabel(block.id, localeContent)}</Text>
+            <Text style={styles.checkLabel}>
+              {localizeReportBlockLabel(block.id, localeContent)}
+            </Text>
           </Pressable>
         ))}
       </GlassCard>
 
-      <Pressable style={glass.primaryBtn} onPress={() => void generate()} disabled={loading}>
-        <Text style={glass.primaryBtnText}>
-          {loading ? t('doctorReport.generating') : t('doctorReport.generate')}
-        </Text>
-      </Pressable>
+      <Button
+        label={loading ? t('doctorReport.generating') : t('doctorReport.generate')}
+        variant="primary"
+        block
+        disabled={loading}
+        onPress={() => void generate()}
+      />
 
-      <Text style={glass.disclaimer}>{t('doctorReport.disclaimer')}</Text>
+      <Disclaimer>{t('doctorReport.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8 },
-    backText: { color: colors.teal, fontWeight: '600', fontSize: 15 },
-    checkLabel: { fontSize: 15, color: colors.text, fontWeight: '500', flex: 1 },
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      backgroundColor: colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginTop: 2,
+    },
+    headerText: { flex: 1, gap: 2 },
+    checkLabel: {
+      fontFamily: fonts.sans,
+      fontSize: 15,
+      color: colors.text,
+      flex: 1,
+    },
   });
 }

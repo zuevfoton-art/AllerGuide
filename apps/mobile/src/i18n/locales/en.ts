@@ -66,6 +66,9 @@ const en: LocaleMessages = {
   profiles: {
     title: 'My profiles',
     subtitle: 'Edit and delete',
+    eyebrow: 'Profiles',
+    listTitle: 'Profile list',
+    empty: 'No profiles yet. Add your first one — it only takes a minute.',
     self: 'Me',
     child: 'Child',
     noAllergens: 'No allergens specified',
@@ -95,6 +98,7 @@ const en: LocaleMessages = {
   },
   home: {
     today: 'Today',
+    summary: 'Summary',
     profilePrefix: 'Profile',
     selectProfile: 'Select a profile',
     wellnessTitle: 'Wellness summary',
@@ -103,6 +107,7 @@ const en: LocaleMessages = {
     air: 'Air',
     index: 'index',
     diary: 'Diary',
+    addEntry: '+ Entry',
     symptoms: 'Symptoms',
     symptomsSub: 'Log how you feel',
     food: 'Food',
@@ -115,11 +120,14 @@ const en: LocaleMessages = {
   diary: {
     title: 'Diary',
     subtitle: 'Step-by-step observation logs',
-    newEntry: '＋ New step-by-step entry',
+    eyebrow: 'Observations',
+    newEntry: '+ New step-by-step entry',
+    quickEntry: 'Quick entry',
     quickAdd: 'Quick add',
     history: 'Entry history',
     refresh: 'Refresh',
     doctorReport: 'Doctor report',
+    empty: 'No entries yet. The first one takes less than a minute.',
     disclaimer: 'The diary reflects user observations only and is not medical documentation.',
     deleteTitle: 'Delete entry?',
     deleteMessage: 'Entry «{{type}}» will be permanently deleted.',
@@ -136,7 +144,9 @@ const en: LocaleMessages = {
   },
   scanner: {
     title: 'Smart scanner',
-    subtitle: 'Open Food Facts + allergen check',
+    subtitle: 'Ingredient check against allergy profile',
+    eyebrow: 'Scanner',
+    openAction: 'Open',
     product: 'Product',
     menu: 'Menu',
     medicine: 'Medicine',
@@ -167,6 +177,7 @@ const en: LocaleMessages = {
   market: {
     title: 'Market',
     subtitle: 'Products for allergy sufferers',
+    eyebrow: 'Market',
     searchPlaceholder: 'Search catalog…',
     banner: 'Personalized picks — products with conflicting allergens are hidden',
     empty: 'Nothing found. Try another search.',
@@ -175,6 +186,7 @@ const en: LocaleMessages = {
   map: {
     title: 'Places map',
     subtitle: '3 layers per spec v13',
+    eyebrow: 'Map',
     places: 'Restaurants',
     pollen: 'Pollen',
     adair: 'ADAIR',
@@ -193,6 +205,7 @@ const en: LocaleMessages = {
   settings: {
     title: 'Settings',
     subtitle: 'SOS, sync and reminders',
+    eyebrow: 'Settings',
     emergencyNumber: 'Emergency call',
     emergencyHint: 'Number for SOS button (default 103)',
     saveNumber: 'Save number',
@@ -264,6 +277,7 @@ const en: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Profile',
     titleSelf: 'Your profile',
     titleChild: "Child's profile",
     titleCreate: 'Create profile',
@@ -306,6 +320,7 @@ const en: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Emergency information',
+    eyebrow: 'SOS',
     edit: 'Edit',
     name: 'Name:',
     age: 'Age:',
@@ -315,6 +330,7 @@ const en: LocaleMessages = {
     emptyProfile: 'Select a profile to view medical information',
     contactsTitle: 'Emergency contacts',
     contactsHint: 'Add emergency contacts in profile settings or on the SOS edit screen.',
+    callContact: 'Call',
     call: 'Call {{number}}',
     settingsLink: 'SOS and notification settings',
     tip: 'Show this screen to medical staff in case of an anaphylactic reaction',
@@ -322,6 +338,7 @@ const en: LocaleMessages = {
   },
   sosEdit: {
     title: 'Edit SOS',
+    eyebrow: 'SOS',
     noProfile: 'No profile selected',
     notesLabel: 'Medical notes',
     notesPlaceholder: 'Medications, reaction details, doctor instructions…',
@@ -342,6 +359,7 @@ const en: LocaleMessages = {
     back: 'Diary',
     title: 'Doctor report',
     subtitle: 'PDF with ADAIR logo · Prof. Smolkin Yu.S.',
+    eyebrow: 'Report',
     period: 'Period',
     blocks: 'Report sections',
     generating: 'Generating…',
@@ -352,6 +370,7 @@ const en: LocaleMessages = {
     back: 'Back',
     home: 'Home',
     title: 'Expert',
+    eyebrow: 'Expert',
   },
   allergens: {
     popular: 'Common allergens',

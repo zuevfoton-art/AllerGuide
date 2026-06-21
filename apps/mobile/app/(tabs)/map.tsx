@@ -3,9 +3,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
-import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { useGlassStyles } from '@/src/hooks/use-glass-styles';
+import { Disclaimer } from '@/src/components/Disclaimer';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import {
   ADAIR_CLINICS,
@@ -50,7 +50,7 @@ type MapLayer = (typeof LAYERS)[number]['key'];
 export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const glass = useGlassStyles();
+  const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const [layer, setLayer] = useState<MapLayer>('places');
@@ -98,106 +98,126 @@ export default function MapScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title={t('map.title')} subtitle={t('map.subtitle')} />
+      <View style={styles.header}>
+        <Text style={ui.docLabel}>AllerGuide · {t('map.eyebrow')}</Text>
+        <Text style={ui.docTitle}>{t('map.title')}</Text>
+        <Text style={ui.docMeta}>{t('map.subtitle')}</Text>
+      </View>
 
       <ProfileSwitcher />
 
-      <View style={glass.toggleRow}>
+      <View style={ui.toggleRow}>
         {LAYERS.map((item) => (
           <Pressable
             key={item.key}
-            style={[glass.toggle, layer === item.key && glass.toggleActive]}
+            style={[ui.toggle, layer === item.key && ui.toggleActive]}
             onPress={() => setLayer(item.key)}>
-            <Text style={[glass.toggleText, layer === item.key && glass.toggleTextActive]}>{t(item.labelKey)}</Text>
+            <Text style={[ui.toggleText, layer === item.key && ui.toggleTextActive]}>
+              {t(item.labelKey)}
+            </Text>
           </Pressable>
         ))}
       </View>
 
       {layer === 'places' ? (
         <>
-      {Platform.OS !== 'web' && MapViewComponent && MarkerComponent ? (
-        <View style={styles.mapWrap}>
-          <MapViewComponent style={styles.map} initialRegion={DEFAULT_REGION} showsUserLocation={!!userLocation}>
-            {places.map((place) => {
-              const color = getPlaceLevelColor(place.level, theme.isDark);
-              return (
-                <MarkerComponent
-                  key={place.id}
-                  coordinate={{ latitude: place.lat, longitude: place.lng }}
-                  title={place.title}
-                  description={place.note}
-                  pinColor={color}
-                  onPress={() => setSelectedId(place.id)}
-                />
-              );
-            })}
-          </MapViewComponent>
-        </View>
-      ) : (
-        <View style={styles.mapPlaceholder}>
-          <Ionicons name="map" size={40} color={theme.colors.textMuted} />
-          <Text style={styles.mapText}>{t('map.mapWebHint')}</Text>
-        </View>
-      )}
-
-      <Text style={glass.sectionLabel}>{t('map.recommended')}</Text>
-
-      {places.map((place) => {
-        const levelColor = getPlaceLevelColor(place.level, theme.isDark);
-        const levelLabel = getPlaceLevelLabel(place.level);
-        const isSelected = selected?.id === place.id;
-
-        return (
-          <GlassCard key={place.id} style={styles.card}>
-            <Pressable
-              style={({ pressed }) => [styles.cardInner, isSelected && styles.cardSelected, pressed && styles.pressed]}
-              onPress={() => setSelectedId(place.id)}>
-            <View style={[styles.cardIcon, { backgroundColor: levelBg[place.level] }]}>
-              <Ionicons name={place.icon as any} size={24} color={levelColor} />
+          {Platform.OS !== 'web' && MapViewComponent && MarkerComponent ? (
+            <View style={styles.mapWrap}>
+              <MapViewComponent
+                style={styles.map}
+                initialRegion={DEFAULT_REGION}
+                showsUserLocation={!!userLocation}>
+                {places.map((place) => {
+                  const color = getPlaceLevelColor(place.level, theme.isDark);
+                  return (
+                    <MarkerComponent
+                      key={place.id}
+                      coordinate={{ latitude: place.lat, longitude: place.lng }}
+                      title={place.title}
+                      description={place.note}
+                      pinColor={color}
+                      onPress={() => setSelectedId(place.id)}
+                    />
+                  );
+                })}
+              </MapViewComponent>
             </View>
-            <View style={styles.cardBody}>
-              <View style={styles.cardTop}>
-                <Text style={styles.cardTitle}>{place.title}</Text>
-                <View style={[styles.badge, { backgroundColor: levelBg[place.level] }]}>
-                  <Text style={[styles.badgeText, { color: levelColor }]}>{levelLabel}</Text>
-                </View>
-              </View>
-              <Text style={styles.cardNote}>{place.note}</Text>
-              {place.tags.length > 0 ? (
-                <Text style={styles.tags}>{place.tags.join(' · ')}</Text>
-              ) : null}
+          ) : (
+            <View style={styles.mapPlaceholder}>
+              <Ionicons name="map" size={40} color={theme.colors.textMuted} />
+              <Text style={styles.mapText}>{t('map.mapWebHint')}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
-            </Pressable>
-          </GlassCard>
-        );
-      })}
+          )}
 
-      <Text style={glass.disclaimer}>{t('map.disclaimerPlaces')}</Text>
+          <Text style={ui.sectionLabel}>{t('map.recommended')}</Text>
+
+          {places.map((place) => {
+            const levelColor = getPlaceLevelColor(place.level, theme.isDark);
+            const levelLabel = getPlaceLevelLabel(place.level);
+            const isSelected = selected?.id === place.id;
+
+            return (
+              <GlassCard key={place.id} style={styles.card}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.cardInner,
+                    isSelected && styles.cardSelected,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={() => setSelectedId(place.id)}>
+                  <View style={[styles.cardIcon, { backgroundColor: levelBg[place.level] }]}>
+                    <Ionicons name={place.icon as any} size={22} color={levelColor} />
+                  </View>
+                  <View style={styles.cardBody}>
+                    <View style={styles.cardTop}>
+                      <Text style={styles.cardTitle}>{place.title}</Text>
+                      <View style={[styles.badge, { backgroundColor: levelBg[place.level] }]}>
+                        <Text style={[styles.badgeText, { color: levelColor }]}>{levelLabel}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.cardNote}>{place.note}</Text>
+                    {place.tags.length > 0 ? (
+                      <Text style={styles.tags}>{place.tags.join(' · ')}</Text>
+                    ) : null}
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                </Pressable>
+              </GlassCard>
+            );
+          })}
+
+          <Disclaimer>{t('map.disclaimerPlaces')}</Disclaimer>
         </>
       ) : null}
 
       {layer === 'pollen' ? (
         <>
-          <View style={styles.pollenHero}>
-            <Ionicons name="leaf" size={28} color={theme.colors.success} />
-            <Text style={styles.pollenTitle}>{t('map.pollenMapTitle', { month: formatPollenMonth(pollenMonth) })}</Text>
+          <GlassCard style={styles.pollenHero}>
+            <Ionicons name="leaf" size={24} color={theme.colors.success} />
+            <Text style={styles.pollenTitle}>
+              {t('map.pollenMapTitle', { month: formatPollenMonth(pollenMonth) })}
+            </Text>
             <Text style={styles.pollenSub}>{t('map.pollenMapSub')}</Text>
-          </View>
+          </GlassCard>
           {pollenPeaks.map((peak) => (
             <GlassCard key={peak.allergen} style={styles.card}>
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{peak.allergen}</Text>
                 <Text style={styles.cardNote}>
-                  {t('map.peakSeason', { month: formatPollenMonth(peak.peakMonth), region: peak.region })}
+                  {t('map.peakSeason', {
+                    month: formatPollenMonth(peak.peakMonth),
+                    region: peak.region,
+                  })}
                 </Text>
               </View>
               <View style={[styles.badge, { backgroundColor: theme.colors.warningLight }]}>
-                <Text style={[styles.badgeText, { color: theme.colors.warning }]}>{t('map.season')}</Text>
+                <Text style={[styles.badgeText, { color: theme.colors.warning }]}>
+                  {t('map.season')}
+                </Text>
               </View>
             </GlassCard>
           ))}
-          <Text style={glass.disclaimer}>{t('map.disclaimerPollen')}</Text>
+          <Disclaimer>{t('map.disclaimerPollen')}</Disclaimer>
         </>
       ) : null}
 
@@ -206,7 +226,7 @@ export default function MapScreen() {
           {ADAIR_CLINICS.map((clinic) => (
             <GlassCard key={clinic.id} style={styles.card}>
               <View style={[styles.cardIcon, { backgroundColor: `${theme.colors.purple}18` }]}>
-                <Ionicons name="medical" size={24} color={theme.colors.purple} />
+                <Ionicons name="medical" size={22} color={theme.colors.purple} />
               </View>
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{clinic.name}</Text>
@@ -215,7 +235,9 @@ export default function MapScreen() {
               </View>
               {clinic.isNkcc ? (
                 <View style={[styles.badge, { backgroundColor: theme.colors.accentLight }]}>
-                  <Text style={[styles.badgeText, { color: theme.colors.accent }]}>{t('map.nkcc')}</Text>
+                  <Text style={[styles.badgeText, { color: theme.colors.accent }]}>
+                    {t('map.nkcc')}
+                  </Text>
                 </View>
               ) : null}
             </GlassCard>
@@ -223,42 +245,49 @@ export default function MapScreen() {
           {ADAIR_DOCTORS.map((doctor) => (
             <GlassCard key={doctor.id} style={styles.card}>
               <View style={[styles.cardIcon, { backgroundColor: theme.colors.successLight }]}>
-                <Ionicons name="person" size={24} color={theme.colors.success} />
+                <Ionicons name="person" size={22} color={theme.colors.success} />
               </View>
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{doctor.name}</Text>
                 <Text style={styles.cardNote}>{doctor.degree}</Text>
-                <Text style={styles.tags}>{ADAIR_SPECIALIZATION_LABELS[doctor.specialization]}</Text>
+                <Text style={styles.tags}>
+                  {ADAIR_SPECIALIZATION_LABELS[doctor.specialization]}
+                </Text>
                 {doctor.isChiefExpert ? (
-                  <Text style={[styles.tags, { color: theme.colors.accent }]}>{t('map.chiefExpert')}</Text>
+                  <Text style={[styles.tags, { color: theme.colors.accent }]}>
+                    {t('map.chiefExpert')}
+                  </Text>
                 ) : null}
               </View>
             </GlassCard>
           ))}
-          <Text style={glass.disclaimer}>{t('map.disclaimerAdair')}</Text>
+          <Disclaimer>{t('map.disclaimerAdair')}</Disclaimer>
         </>
       ) : null}
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    pollenHero: {
-      backgroundColor: colors.tealLight,
-      borderRadius: 16,
-      padding: 16,
-      alignItems: 'center',
-      gap: 6,
-      borderWidth: 1,
-      borderColor: colors.border,
-      ...(shadows.glass as object),
+    header: { gap: 2 },
+    pollenHero: { alignItems: 'center', gap: 6 },
+    pollenTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.head,
+      textAlign: 'center',
     },
-    pollenTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
-    pollenSub: { fontSize: 12, color: colors.textSecondary },
+    pollenSub: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
     mapWrap: {
       height: 220,
-      borderRadius: 18,
+      borderRadius: 8,
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: colors.border,
@@ -266,16 +295,22 @@ function createStyles({ colors, shadows }: AppTheme) {
     map: { flex: 1 },
     mapPlaceholder: {
       height: 160,
-      backgroundColor: colors.tealLight,
-      borderRadius: 18,
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
       gap: 10,
       borderWidth: 1,
       borderColor: colors.border,
-      ...(shadows.glass as object),
     },
-    mapText: { fontSize: 14, color: colors.textMuted, fontWeight: '500', textAlign: 'center', paddingHorizontal: 24 },
+    mapText: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingHorizontal: 24,
+      lineHeight: 20,
+    },
     card: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -286,18 +321,37 @@ function createStyles({ colors, shadows }: AppTheme) {
     cardSelected: { opacity: 0.92 },
     pressed: { opacity: 0.85 },
     cardIcon: {
-      width: 50,
-      height: 50,
-      borderRadius: 14,
+      width: 44,
+      height: 44,
+      borderRadius: 6,
       alignItems: 'center',
       justifyContent: 'center',
     },
     cardBody: { flex: 1, gap: 6 },
     cardTop: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-    cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-    badge: { paddingVertical: 3, paddingHorizontal: 9, borderRadius: 8 },
-    badgeText: { fontSize: 11, fontWeight: '700' },
-    cardNote: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    tags: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
+    cardTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    badge: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 },
+    badgeText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+    },
+    cardNote: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    tags: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
   });
 }

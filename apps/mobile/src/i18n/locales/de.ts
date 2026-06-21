@@ -66,6 +66,9 @@ const de: LocaleMessages = {
   profiles: {
     title: 'Meine Profile',
     subtitle: 'Bearbeiten und löschen',
+    eyebrow: 'Profile',
+    listTitle: 'Profileliste',
+    empty: 'Noch keine Profile. Fügen Sie das erste hinzu — dauert nur eine Minute.',
     self: 'Ich',
     child: 'Kind',
     noAllergens: 'Keine Allergene angegeben',
@@ -95,6 +98,7 @@ const de: LocaleMessages = {
   },
   home: {
     today: 'Heute',
+    summary: 'Übersicht',
     profilePrefix: 'Profil',
     selectProfile: 'Profil auswählen',
     wellnessTitle: 'Wohlbefinden',
@@ -103,6 +107,7 @@ const de: LocaleMessages = {
     air: 'Luft',
     index: 'Index',
     diary: 'Tagebuch',
+    addEntry: '+ Eintrag',
     symptoms: 'Symptome',
     symptomsSub: 'Befinden notieren',
     food: 'Ernährung',
@@ -115,11 +120,14 @@ const de: LocaleMessages = {
   diary: {
     title: 'Tagebuch',
     subtitle: 'Schrittweise Beobachtungen',
-    newEntry: '＋ Neuer Schritt-für-Schritt-Eintrag',
+    eyebrow: 'Beobachtungen',
+    newEntry: '+ Neuer Schritt-für-Schritt-Eintrag',
+    quickEntry: 'Schnelleintrag',
     quickAdd: 'Schnell hinzufügen',
     history: 'Verlauf',
     refresh: 'Aktualisieren',
     doctorReport: 'Arztbericht',
+    empty: 'Noch keine Einträge. Der erste dauert weniger als eine Minute.',
     disclaimer: 'Das Tagebuch spiegelt nur Nutzerbeobachtungen wider und ist keine medizinische Dokumentation.',
     deleteTitle: 'Eintrag löschen?',
     deleteMessage: 'Eintrag «{{type}}» wird dauerhaft gelöscht.',
@@ -136,7 +144,9 @@ const de: LocaleMessages = {
   },
   scanner: {
     title: 'Smart Scanner',
-    subtitle: 'Open Food Facts + Allergene',
+    subtitle: 'Prüfung nach Allergieprofil',
+    eyebrow: 'Scanner',
+    openAction: 'Öffnen',
     product: 'Produkt',
     menu: 'Menü',
     medicine: 'Medikament',
@@ -167,6 +177,7 @@ const de: LocaleMessages = {
   market: {
     title: 'Markt',
     subtitle: 'Produkte für Allergiker',
+    eyebrow: 'Markt',
     searchPlaceholder: 'Katalog durchsuchen…',
     banner: 'Personalisierte Auswahl — konfliktäre Allergene ausgeblendet',
     empty: 'Nichts gefunden. Andere Suche versuchen.',
@@ -175,6 +186,7 @@ const de: LocaleMessages = {
   map: {
     title: 'Orte-Karte',
     subtitle: '3 Ebenen Spec v13',
+    eyebrow: 'Karte',
     places: 'Restaurants',
     pollen: 'Pollen',
     adair: 'ADAIR',
@@ -193,6 +205,7 @@ const de: LocaleMessages = {
   settings: {
     title: 'Einstellungen',
     subtitle: 'SOS, Sync und Erinnerungen',
+    eyebrow: 'Einstellungen',
     emergencyNumber: 'Notruf',
     emergencyHint: 'Nummer für SOS-Taste (Standard 103)',
     saveNumber: 'Nummer speichern',
@@ -264,6 +277,7 @@ const de: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Profil',
     titleSelf: 'Ihr Profil',
     titleChild: 'Kinderprofil',
     titleCreate: 'Profil erstellen',
@@ -306,6 +320,7 @@ const de: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Notfallinformationen',
+    eyebrow: 'SOS',
     edit: 'Bearbeiten',
     name: 'Name:',
     age: 'Alter:',
@@ -315,6 +330,7 @@ const de: LocaleMessages = {
     emptyProfile: 'Profil auswählen, um medizinische Informationen anzuzeigen',
     contactsTitle: 'Notfallkontakte',
     contactsHint: 'Notfallkontakte in Profileinstellungen oder auf dem SOS-Bearbeitungsbildschirm hinzufügen.',
+    callContact: 'Anrufen',
     call: '{{number}} anrufen',
     settingsLink: 'SOS- und Benachrichtigungseinstellungen',
     tip: 'Zeigen Sie diesen Bildschirm bei anaphylaktischer Reaktion dem medizinischen Personal',
@@ -322,6 +338,7 @@ const de: LocaleMessages = {
   },
   sosEdit: {
     title: 'SOS bearbeiten',
+    eyebrow: 'SOS',
     noProfile: 'Kein Profil ausgewählt',
     notesLabel: 'Medizinische Notizen',
     notesPlaceholder: 'Medikamente, Reaktionsdetails, Arztanweisungen…',
@@ -342,6 +359,7 @@ const de: LocaleMessages = {
     back: 'Tagebuch',
     title: 'Arztbericht',
     subtitle: 'PDF mit ADAIR-Logo · Prof. Smolkin Yu.S.',
+    eyebrow: 'Bericht',
     period: 'Zeitraum',
     blocks: 'Berichtsabschnitte',
     generating: 'Wird erstellt…',
@@ -352,6 +370,7 @@ const de: LocaleMessages = {
     back: 'Zurück',
     home: 'Start',
     title: 'Experte',
+    eyebrow: 'Experte',
   },
   allergens: {
     popular: 'Häufige Allergene',

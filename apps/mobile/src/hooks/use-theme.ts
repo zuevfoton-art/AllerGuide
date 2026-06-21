@@ -6,11 +6,13 @@ import {
   type ThemeColors,
   type ThemeMode,
 } from '@/src/constants/theme';
+import { fonts, type AppFonts } from '@/src/constants/typography';
 import { useThemeStore } from '@/src/store/theme-store';
 
 export type AppTheme = {
   colors: ThemeColors;
   shadows: ReturnType<typeof createShadows>;
+  fonts: AppFonts;
   isDark: boolean;
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
@@ -29,6 +31,7 @@ export function useTheme(): AppTheme {
     return {
       colors,
       shadows: createShadows(colors),
+      fonts,
       isDark,
       mode,
       setMode,

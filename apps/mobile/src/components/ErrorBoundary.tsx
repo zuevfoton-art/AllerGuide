@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { lightColors } from '@/src/constants/theme';
+import { fonts } from '@/src/constants/typography';
 import { captureError } from '@/src/services/error-reporting';
 
 interface Props {
@@ -49,16 +51,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
     gap: 12,
-    backgroundColor: '#F4FAF7',
+    backgroundColor: lightColors.bg,
   },
-  title: { fontSize: 22, fontWeight: '800', color: '#123527' },
-  message: { fontSize: 15, lineHeight: 22, color: '#456356', textAlign: 'center' },
+  title: {
+    fontFamily: fonts.serifBold,
+    fontSize: 22,
+    fontWeight: '700',
+    color: lightColors.head,
+  },
+  message: {
+    fontFamily: fonts.sans,
+    fontSize: 15,
+    lineHeight: 22,
+    color: lightColors.textSecondary,
+    textAlign: 'center',
+  },
   button: {
     marginTop: 8,
-    backgroundColor: '#1F7A5A',
-    borderRadius: 12,
+    backgroundColor: lightColors.accent,
+    borderRadius: 6,
     paddingHorizontal: 18,
     paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
   },
-  buttonText: { color: '#FFFFFF', fontWeight: '700' },
+  buttonText: {
+    fontFamily: fonts.sansSemiBold,
+    color: lightColors.onAccent,
+    fontWeight: '600',
+  },
 });

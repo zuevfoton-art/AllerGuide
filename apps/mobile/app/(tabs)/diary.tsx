@@ -1,8 +1,7 @@
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  DIARY_SECTIONS,
   formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
@@ -17,9 +16,10 @@ import {
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
-import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { useGlassStyles } from '@/src/hooks/use-glass-styles';
+import { Button } from '@/src/components/Button';
+import { Disclaimer } from '@/src/components/Disclaimer';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -27,16 +27,16 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 
-const TYPE_CONFIG: Record<string, { icon: string; colorKey: keyof AppTheme['colors'] }> = {
-  Симптомы: { icon: 'pulse', colorKey: 'danger' },
-  Лекарство: { icon: 'medkit', colorKey: 'purple' },
-  Питание: { icon: 'restaurant', colorKey: 'accent' },
-  Триггер: { icon: 'warning', colorKey: 'warning' },
-  Кожа: { icon: 'body', colorKey: 'pink' },
-  Пикфлоуметрия: { icon: 'speedometer', colorKey: 'success' },
-  АСИТ: { icon: 'fitness', colorKey: 'forest' },
-  'Визит к врачу': { icon: 'calendar', colorKey: 'purple' },
-  Заметка: { icon: 'create', colorKey: 'success' },
+const TYPE_ICONS: Record<string, string> = {
+  Симптомы: 'pulse',
+  Лекарство: 'medkit',
+  Питание: 'restaurant',
+  Триггер: 'warning',
+  Кожа: 'body',
+  Пикфлоуметрия: 'speedometer',
+  АСИТ: 'fitness',
+  'Визит к врачу': 'calendar',
+  Заметка: 'create',
 };
 
 type EditorState =
@@ -46,8 +46,8 @@ type EditorState =
 
 export default function DiaryScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const glass = useGlassStyles();
   const { t, locale, content } = useTranslation();
   const localeContent = content();
   const localizedSections = useMemo(
@@ -142,101 +142,113 @@ export default function DiaryScreen() {
 
     return (
       <DiaryWizard
-        sections={[section]}
-        initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
-        allowSkipSection={false}
-        submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
-        onCancel={closeEditor}
-        onComplete={(entries) => {
-          const [entry] = entries;
-          if (!entry) return;
-          if (editor.mode === 'edit') {
-            void handleUpdate(editor.entry, entry.type, entry.details);
-            return;
-          }
-          void handleCreate(entries);
-        }}
-        onDelete={editor.mode === 'edit' ? () => confirmDelete(editor.entry) : undefined}
+          sections={[section]}
+          initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
+          allowSkipSection={false}
+          submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
+          onCancel={closeEditor}
+          onComplete={(entries) => {
+            const [entry] = entries;
+            if (!entry) return;
+            if (editor.mode === 'edit') {
+              void handleUpdate(editor.entry, entry.type, entry.details);
+              return;
+            }
+            void handleCreate(entries);
+          }}
+          onDelete={editor.mode === 'edit' ? () => confirmDelete(editor.entry) : undefined}
       />
     );
   };
 
   return (
     <Screen>
-      <ScreenHeader title={t('diary.title')} subtitle={t('diary.subtitle')} />
+      <View style={styles.header}>
+        <Text style={ui.docLabel}>AllerGuide · {t('diary.eyebrow')}</Text>
+        <Text style={ui.docTitle}>{t('diary.title')}</Text>
+        <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
+      </View>
 
       <ProfileSwitcher />
 
       {!editor ? (
         <>
-          <Pressable style={glass.primaryBtn} onPress={() => setEditor({ mode: 'full' })}>
-            <Text style={glass.primaryBtnText}>{t('diary.newEntry')}</Text>
-          </Pressable>
+          <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
+          <Button
+            label={t('diary.quickEntry')}
+            variant="secondary"
+            block
+            onPress={() => {
+              const section = localizedSections.find((s) => s.type === 'Симптомы') ?? localizedSections[0];
+              if (section) setEditor({ mode: 'section', sectionType: section.type });
+            }}
+          />
 
-          <View style={styles.quickAddBlock}>
-            <Text style={glass.sectionLabel}>{t('diary.quickAdd')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickAddRow}>
-              {localizedSections.map((section) => {
-                const cfg = TYPE_CONFIG[section.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
-                const color = theme.colors[cfg.colorKey];
-                return (
+          <GlassCard>
+            <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>
+            <View style={styles.chipRow}>
+              {localizedSections.map((section) => (
                   <Pressable
                     key={section.type}
-                    style={[styles.quickChip, { borderColor: `${color}55`, backgroundColor: `${color}12` }]}
+                    style={styles.chip}
                     onPress={() => setEditor({ mode: 'section', sectionType: section.type })}>
-                    <Ionicons name={section.icon as any} size={14} color={color} />
-                    <Text style={[styles.quickChipText, { color }]}>{section.title}</Text>
+                    <Ionicons
+                      name={(TYPE_ICONS[section.type] ?? section.icon) as any}
+                      size={14}
+                      color={theme.colors.textSecondary}
+                    />
+                    <Text style={styles.chipText}>{section.title}</Text>
                   </Pressable>
-                );
-              })}
-            </ScrollView>
-          </View>
+                ))}
+            </View>
+          </GlassCard>
         </>
       ) : (
         renderEditor()
       )}
 
-      <View style={styles.row}>
-        <Pressable style={glass.secondaryBtn} onPress={() => void load()}>
-          <Ionicons name="refresh" size={16} color={theme.colors.teal} />
-          <Text style={glass.secondaryBtnText}>{t('diary.refresh')}</Text>
-        </Pressable>
-        <Pressable style={glass.secondaryBtn} onPress={() => router.push('/doctor-report' as any)}>
-          <Ionicons name="document-text" size={16} color={theme.colors.teal} />
-          <Text style={glass.secondaryBtnText}>{t('diary.doctorReport')}</Text>
-        </Pressable>
+      <View style={styles.actionRow}>
+        <Button label={t('diary.refresh')} variant="secondary" style={styles.actionBtn} onPress={() => void load()} />
+        <Button
+          label={t('diary.doctorReport')}
+          variant="secondary"
+          style={styles.actionBtn}
+          onPress={() => router.push('/doctor-report' as any)}
+        />
       </View>
 
-      {list.length > 0 ? (
-        <>
-          <Text style={glass.sectionLabel}>{t('diary.history')}</Text>
-          <GlassCard padded={false}>
-          {list.map((item, index) => {
-            const cfg = TYPE_CONFIG[item.type] ?? { icon: 'create', colorKey: 'textSecondary' as const };
-            const color = theme.colors[cfg.colorKey];
+      <GlassCard padded={false}>
+        <View style={styles.listHead}>
+          <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
+        </View>
+
+        {list.length === 0 ? (
+          <Text style={[styles.empty, styles.listHeadPad]}>{t('diary.empty')}</Text>
+        ) : (
+          list.map((item, index) => {
+            const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
             return (
               <Pressable
                 key={item.id}
-                style={[glass.feedRow, index < list.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border }]}
+                style={[styles.row, index < list.length - 1 && styles.rowBorder]}
                 onPress={() => openEdit(item)}>
-                <View style={[glass.feedIcon, { backgroundColor: `${color}18` }]}>
-                  <Ionicons name={cfg.icon as any} size={16} color={color} />
+                <View style={ui.feedIcon}>
+                  <Ionicons name={icon as any} size={16} color={theme.colors.textSecondary} />
                 </View>
-                <View style={glass.feedBody}>
-                  <Text style={glass.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
-                  <Text style={glass.feedSub}>{summary}</Text>
+                <View style={ui.feedBody}>
+                  <Text style={ui.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
+                  <Text style={ui.feedSub}>{summary}</Text>
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
-                <Ionicons name="create-outline" size={16} color={theme.colors.textMuted} />
+                <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
               </Pressable>
             );
-          })}
-          </GlassCard>
-        </>
-      ) : null}
+          })
+        )}
+      </GlassCard>
 
-      <Text style={glass.disclaimer}>{t('diary.disclaimer')}</Text>
+      <Disclaimer>{t('diary.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
@@ -247,21 +259,56 @@ function entryDetailsText(entry: DiaryEntry): string {
   return entry.details.trim();
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    quickAddBlock: { gap: 8 },
-    quickAddRow: { gap: 8, paddingRight: 4 },
-    quickChip: {
+    header: { gap: 2 },
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
+    chip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      paddingVertical: 10,
-      paddingHorizontal: 12,
-      borderRadius: 999,
-      borderWidth: 1.5,
+      paddingVertical: 7,
+      paddingHorizontal: 10,
+      borderRadius: 6,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
     },
-    quickChipText: { fontSize: 13, fontWeight: '700' },
-    row: { flexDirection: 'row', gap: 10 },
-    cardMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+    chipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    actionRow: { flexDirection: 'row', gap: 8 },
+    actionBtn: { flex: 1 },
+    listHead: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingTop: 14,
+    },
+    listHeadPad: { paddingHorizontal: 16 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    cardMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    empty: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      paddingBottom: 16,
+      lineHeight: 18,
+    },
   });
 }

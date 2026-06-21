@@ -2,8 +2,11 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
+import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeEmergencyRelation } from '@/src/i18n/content';
@@ -20,6 +23,7 @@ import type { EmergencyContact, EmergencyContactRelation } from '@allerguide/cor
 
 export default function SosEditScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, tSosError, content } = useTranslation();
   const localeContent = content();
@@ -101,58 +105,63 @@ export default function SosEditScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
-        <View>
-          <Text style={styles.title}>{t('sosEdit.title')}</Text>
-          <Text style={styles.subtitle}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('sosEdit.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('sosEdit.title')}</Text>
+          <Text style={ui.docMeta}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionLabel}>{t('sosEdit.notesLabel')}</Text>
-      <TextInput
-        style={styles.notesInput}
-        value={notes}
-        onChangeText={setNotes}
-        placeholder={t('sosEdit.notesPlaceholder')}
-        placeholderTextColor={theme.colors.textMuted}
-        multiline
-      />
-      <Pressable style={styles.primaryBtn} onPress={saveNotes}>
-        <Text style={styles.primaryBtnText}>{t('sosEdit.saveNotes')}</Text>
-      </Pressable>
+      <Text style={ui.sectionLabel}>{t('sosEdit.notesLabel')}</Text>
+      <GlassCard style={styles.section}>
+        <TextInput
+          style={styles.notesInput}
+          value={notes}
+          onChangeText={setNotes}
+          placeholder={t('sosEdit.notesPlaceholder')}
+          placeholderTextColor={theme.colors.textMuted}
+          multiline
+        />
+        <Button label={t('sosEdit.saveNotes')} variant="primary" block onPress={saveNotes} />
+      </GlassCard>
 
-      <Text style={styles.sectionLabel}>{t('sosEdit.planLabel')}</Text>
-      <TextInput
-        style={styles.notesInput}
-        value={plan}
-        onChangeText={setPlan}
-        placeholder={t('sosEdit.planPlaceholder')}
-        placeholderTextColor={theme.colors.textMuted}
-        multiline
-      />
-      <Pressable style={styles.primaryBtn} onPress={savePlan}>
-        <Text style={styles.primaryBtnText}>{t('sosEdit.savePlan')}</Text>
-      </Pressable>
+      <Text style={ui.sectionLabel}>{t('sosEdit.planLabel')}</Text>
+      <GlassCard style={styles.section}>
+        <TextInput
+          style={styles.notesInput}
+          value={plan}
+          onChangeText={setPlan}
+          placeholder={t('sosEdit.planPlaceholder')}
+          placeholderTextColor={theme.colors.textMuted}
+          multiline
+        />
+        <Button label={t('sosEdit.savePlan')} variant="primary" block onPress={savePlan} />
+      </GlassCard>
 
-      <Text style={styles.sectionLabel}>{t('sosEdit.contactsLabel')}</Text>
+      <Text style={ui.sectionLabel}>{t('sosEdit.contactsLabel')}</Text>
 
       {contacts.map((contact) => (
-        <View key={contact.id} style={styles.contactCard}>
+        <GlassCard key={contact.id} style={styles.contactCard}>
           <View style={styles.contactInfo}>
             <Text style={styles.contactName}>{contact.name}</Text>
             <Text style={styles.contactMeta}>
               {localizeEmergencyRelation(contact.relation, localeContent)} · {contact.phone}
             </Text>
           </View>
-          <Pressable onPress={() => removeContact(contact.id)}>
+          <Pressable onPress={() => removeContact(contact.id)} hitSlop={8}>
             <Ionicons name="trash-outline" size={18} color={theme.colors.danger} />
           </Pressable>
-        </View>
+        </GlassCard>
       ))}
 
-      <View style={styles.form}>
+      <GlassCard style={styles.section}>
         <TextInput
           style={styles.input}
           value={name}
@@ -175,92 +184,80 @@ export default function SosEditScreen() {
           placeholder="relative / trusted / doctor"
           placeholderTextColor={theme.colors.textMuted}
         />
-        <Pressable style={styles.secondaryBtn} onPress={addContact}>
-          <Ionicons name="person-add" size={16} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>{t('sosEdit.addContact')}</Text>
-        </Pressable>
-      </View>
+        <Button
+          label={t('sosEdit.addContact')}
+          variant="secondary"
+          block
+          onPress={addContact}
+        />
+      </GlassCard>
 
       {error ? <Text style={styles.error}>{tSosError(error)}</Text> : null}
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
     backBtn: {
       width: 40,
       height: 40,
-      borderRadius: 12,
+      borderRadius: 6,
       backgroundColor: colors.card,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: colors.border,
+      marginTop: 2,
     },
-    title: { fontSize: 24, fontWeight: '800', color: colors.text },
-    subtitle: { fontSize: 14, color: colors.textSecondary },
-    sectionLabel: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-    },
+    headerText: { flex: 1, gap: 2 },
+    section: { gap: 10 },
     notesInput: {
       minHeight: 120,
       backgroundColor: colors.card,
-      borderRadius: 16,
+      borderRadius: 6,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderInput,
       padding: 14,
       fontSize: 15,
+      fontFamily: fonts.sans,
       color: colors.text,
       textAlignVertical: 'top',
     },
-    primaryBtn: {
-      backgroundColor: colors.accent,
-      borderRadius: 14,
-      padding: 14,
-      alignItems: 'center',
-      ...(shadows.accent as object),
-    },
-    primaryBtnText: { color: colors.onAccent, fontWeight: '700', fontSize: 15 },
     contactCard: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      backgroundColor: colors.card,
-      borderRadius: 14,
-      padding: 14,
-      borderWidth: 1,
-      borderColor: colors.border,
     },
     contactInfo: { flex: 1, gap: 2 },
-    contactName: { fontSize: 15, fontWeight: '700', color: colors.text },
-    contactMeta: { fontSize: 12, color: colors.textSecondary },
-    form: { gap: 10 },
+    contactName: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    contactMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
     input: {
       backgroundColor: colors.card,
-      borderRadius: 12,
+      borderRadius: 6,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderInput,
       paddingHorizontal: 14,
       paddingVertical: 12,
       fontSize: 15,
+      fontFamily: fonts.sans,
       color: colors.text,
     },
-    secondaryBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      padding: 14,
-      borderRadius: 14,
-      backgroundColor: colors.accentLight,
+    error: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.danger,
+      fontSize: 13,
+      fontWeight: '600',
     },
-    secondaryBtnText: { color: colors.accent, fontWeight: '700' },
-    error: { color: colors.danger, fontSize: 13, fontWeight: '600' },
   });
 }
