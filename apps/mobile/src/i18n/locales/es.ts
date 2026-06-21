@@ -66,7 +66,7 @@ const es: LocaleMessages = {
   profiles: {
     title: 'Mis perfiles',
     subtitle: 'Editar y eliminar',
-    eyebrow: 'Ajustes',
+    eyebrow: 'Perfiles',
     listTitle: 'Lista de perfiles',
     empty: 'Aún no hay perfiles. Añade el primero — solo toma un minuto.',
     self: 'Yo',
@@ -177,6 +177,7 @@ const es: LocaleMessages = {
   market: {
     title: 'Mercado',
     subtitle: 'Productos para alérgicos',
+    eyebrow: 'Mercado',
     searchPlaceholder: 'Buscar en catálogo…',
     banner: 'Selección personalizada — ocultos productos con alérgenos conflictivos',
     empty: 'No se encontró nada. Prueba otra búsqueda.',
@@ -185,6 +186,7 @@ const es: LocaleMessages = {
   map: {
     title: 'Mapa de lugares',
     subtitle: '3 capas según spec v13',
+    eyebrow: 'Mapa',
     places: 'Restaurantes',
     pollen: 'Polen',
     adair: 'ADAIR',
@@ -203,6 +205,7 @@ const es: LocaleMessages = {
   settings: {
     title: 'Ajustes',
     subtitle: 'SOS, sincronización y recordatorios',
+    eyebrow: 'Ajustes',
     emergencyNumber: 'Llamada de emergencia',
     emergencyHint: 'Número del botón SOS (predeterminado 103)',
     saveNumber: 'Guardar número',
@@ -274,6 +277,7 @@ const es: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Perfil',
     titleSelf: 'Tu perfil',
     titleChild: 'Perfil del niño',
     titleCreate: 'Crear perfil',
@@ -334,6 +338,7 @@ const es: LocaleMessages = {
   },
   sosEdit: {
     title: 'Editar SOS',
+    eyebrow: 'SOS',
     noProfile: 'Ningún perfil seleccionado',
     notesLabel: 'Notas médicas',
     notesPlaceholder: 'Medicamentos, detalles de reacción, instrucciones del médico…',
@@ -354,6 +359,7 @@ const es: LocaleMessages = {
     back: 'Diario',
     title: 'Informe médico',
     subtitle: 'PDF con logo ADAIR · Prof. Smolkin Yu.S.',
+    eyebrow: 'Informe',
     period: 'Periodo',
     blocks: 'Secciones del informe',
     generating: 'Generando…',
@@ -364,6 +370,7 @@ const es: LocaleMessages = {
     back: 'Atrás',
     home: 'Inicio',
     title: 'Experto',
+    eyebrow: 'Experto',
   },
   allergens: {
     popular: 'Alérgenos frecuentes',

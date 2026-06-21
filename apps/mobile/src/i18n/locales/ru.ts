@@ -66,7 +66,7 @@ const ru: LocaleMessages = {
   profiles: {
     title: 'Мои профили',
     subtitle: 'Редактирование и удаление',
-    eyebrow: 'Настройки',
+    eyebrow: 'Профили',
     listTitle: 'Список профилей',
     empty: 'Профилей пока нет. Добавьте первый — это займёт пару минут.',
     self: 'Я',
@@ -177,6 +177,7 @@ const ru: LocaleMessages = {
   market: {
     title: 'Маркет',
     subtitle: 'Товары для аллергиков',
+    eyebrow: 'Маркет',
     searchPlaceholder: 'Поиск по каталогу…',
     banner: 'Подборка на основе профиля аллергий — скрыты товары с конфликтующими аллергенами',
     empty: 'Ничего не найдено. Попробуйте другой запрос.',
@@ -185,6 +186,7 @@ const ru: LocaleMessages = {
   map: {
     title: 'Карта мест',
     subtitle: '3 слоя по ТЗ v13',
+    eyebrow: 'Карта',
     places: 'Рестораны',
     pollen: 'Пыление',
     adair: 'АДАИР',
@@ -203,6 +205,7 @@ const ru: LocaleMessages = {
   settings: {
     title: 'Настройки',
     subtitle: 'SOS, синхронизация и напоминания',
+    eyebrow: 'Настройки',
     emergencyNumber: 'Экстренный вызов',
     emergencyHint: 'Номер для кнопки SOS (по умолчанию 103)',
     saveNumber: 'Сохранить номер',
@@ -274,6 +277,7 @@ const ru: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Профиль',
     titleSelf: 'Ваш профиль',
     titleChild: 'Профиль ребёнка',
     titleCreate: 'Создание профиля',
@@ -334,6 +338,7 @@ const ru: LocaleMessages = {
   },
   sosEdit: {
     title: 'Редактирование SOS',
+    eyebrow: 'SOS',
     noProfile: 'Профиль не выбран',
     notesLabel: 'Медицинские заметки',
     notesPlaceholder: 'Препараты, особенности реакции, инструкции врача…',
@@ -354,6 +359,7 @@ const ru: LocaleMessages = {
     back: 'Дневник',
     title: 'Отчёт для врача',
     subtitle: 'PDF с логотипом АДАИР · проф. Смолкин Ю.С.',
+    eyebrow: 'Отчёт',
     period: 'Период',
     blocks: 'Блоки отчёта',
     generating: 'Формирование…',
@@ -364,6 +370,7 @@ const ru: LocaleMessages = {
     back: 'Назад',
     home: 'Главная',
     title: 'Эксперт',
+    eyebrow: 'Эксперт',
   },
   allergens: {
     popular: 'Частые аллергены',

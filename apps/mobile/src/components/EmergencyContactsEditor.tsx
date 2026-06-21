@@ -108,13 +108,18 @@ export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContact
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     wrap: { gap: 12 },
-    emptyText: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    emptyText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
     card: {
-      backgroundColor: colors.card,
-      borderRadius: 16,
+      backgroundColor: colors.bg,
+      borderRadius: 6,
       padding: 14,
       gap: 8,
       borderWidth: 1,
@@ -125,38 +130,50 @@ function createStyles({ colors }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'space-between',
     },
-    cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
+    cardTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
     fieldLabel: {
-      fontSize: 12,
-      fontWeight: '700',
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
-      letterSpacing: 0.5,
+      letterSpacing: 0.6,
       marginTop: 2,
     },
     input: {
-      backgroundColor: colors.bg,
+      backgroundColor: colors.card,
       padding: 12,
-      borderRadius: 12,
+      borderRadius: 6,
       fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
+      fontFamily: fonts.sans,
       color: colors.text,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderInput,
     },
     relationRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     relationChip: {
       paddingVertical: 8,
       paddingHorizontal: 12,
-      borderRadius: 999,
-      backgroundColor: colors.bg,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      borderRadius: 6,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
     },
     relationChipActive: {
       borderColor: colors.accent,
       backgroundColor: colors.accentLight,
     },
-    relationText: { fontSize: 13, fontWeight: '600', color: colors.textSecondary },
+    relationText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
     relationTextActive: { color: colors.accent },
     addBtn: {
       flexDirection: 'row',
@@ -164,11 +181,16 @@ function createStyles({ colors }: AppTheme) {
       justifyContent: 'center',
       gap: 6,
       padding: 14,
-      borderRadius: 14,
+      borderRadius: 6,
       backgroundColor: colors.accentLight,
-      borderWidth: 1.5,
-      borderColor: colors.accentMid,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
     },
-    addBtnText: { color: colors.accent, fontWeight: '700', fontSize: 14 },
+    addBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.accent,
+      fontWeight: '600',
+      fontSize: 14,
+    },
   });
 }

@@ -153,7 +153,7 @@ export function AllergenCatalogModal({
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     header: {
@@ -166,9 +166,19 @@ function createStyles({ colors }: AppTheme) {
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    headerTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+    headerTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 17,
+      fontWeight: '600',
+      color: colors.head,
+    },
     headerBtn: { minWidth: 72 },
-    headerBtnText: { fontSize: 15, color: colors.textSecondary, fontWeight: '600' },
+    headerBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      color: colors.textSecondary,
+      fontWeight: '600',
+    },
     headerBtnPrimary: { color: colors.accent, textAlign: 'right' },
     searchRow: {
       flexDirection: 'row',
@@ -178,17 +188,23 @@ function createStyles({ colors }: AppTheme) {
       marginBottom: 8,
       paddingHorizontal: 14,
       paddingVertical: 10,
-      borderRadius: 12,
+      borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.borderInput,
     },
-    searchInput: { flex: 1, fontSize: 16, color: colors.text },
+    searchInput: {
+      flex: 1,
+      fontSize: 16,
+      fontFamily: fonts.sans,
+      color: colors.text,
+    },
     list: { paddingHorizontal: 16, paddingBottom: 32, gap: 16 },
     section: { gap: 8 },
     sectionLabel: {
-      fontSize: 13,
-      fontWeight: '700',
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
       letterSpacing: 0.6,
@@ -199,7 +215,7 @@ function createStyles({ colors }: AppTheme) {
       alignItems: 'flex-start',
       gap: 12,
       padding: 12,
-      borderRadius: 12,
+      borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
@@ -208,27 +224,42 @@ function createStyles({ colors }: AppTheme) {
     checkbox: {
       width: 22,
       height: 22,
-      borderRadius: 6,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 2,
     },
     checkboxActive: { backgroundColor: colors.accent, borderColor: colors.accent },
     itemText: { flex: 1, gap: 4 },
-    itemTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+    itemTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
     itemTitleActive: { color: colors.accent },
-    itemHint: { fontSize: 12, color: colors.textSecondary, lineHeight: 16 },
+    itemHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 16,
+    },
     noteBox: {
       marginLeft: 34,
       padding: 10,
-      borderRadius: 10,
+      borderRadius: 6,
       backgroundColor: colors.tipBg,
       borderWidth: 1,
       borderColor: colors.tipBorder,
       gap: 4,
     },
-    noteText: { fontSize: 12, color: colors.tipText, lineHeight: 16 },
+    noteText: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.tipText,
+      lineHeight: 16,
+    },
   });
 }

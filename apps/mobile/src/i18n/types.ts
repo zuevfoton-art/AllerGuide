@@ -181,6 +181,7 @@ export type LocaleMessages = {
   market: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     searchPlaceholder: string;
     banner: string;
     empty: string;
@@ -189,6 +190,7 @@ export type LocaleMessages = {
   map: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     places: string;
     pollen: string;
     adair: string;
@@ -207,6 +209,7 @@ export type LocaleMessages = {
   settings: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     emergencyNumber: string;
     emergencyHint: string;
     saveNumber: string;
@@ -263,6 +266,7 @@ export type LocaleMessages = {
     };
   };
   profileSetup: {
+    eyebrow: string;
     titleSelf: string;
     titleChild: string;
     titleCreate: string;
@@ -322,6 +326,7 @@ export type LocaleMessages = {
   };
   sosEdit: {
     title: string;
+    eyebrow: string;
     noProfile: string;
     notesLabel: string;
     notesPlaceholder: string;
@@ -342,6 +347,7 @@ export type LocaleMessages = {
     back: string;
     title: string;
     subtitle: string;
+    eyebrow: string;
     period: string;
     blocks: string;
     generating: string;
@@ -352,6 +358,7 @@ export type LocaleMessages = {
     back: string;
     home: string;
     title: string;
+    eyebrow: string;
   };
   allergens: {
     popular: string;

@@ -66,7 +66,7 @@ const it: LocaleMessages = {
   profiles: {
     title: 'I miei profili',
     subtitle: 'Modifica ed elimina',
-    eyebrow: 'Impostazioni',
+    eyebrow: 'Profili',
     listTitle: 'Elenco profili',
     empty: 'Nessun profilo. Aggiungi il primo — ci vuole un minuto.',
     self: 'Io',
@@ -177,6 +177,7 @@ const it: LocaleMessages = {
   market: {
     title: 'Mercato',
     subtitle: 'Prodotti per allergici',
+    eyebrow: 'Mercato',
     searchPlaceholder: 'Cerca nel catalogo…',
     banner: 'Selezione personalizzata — nascosti prodotti con allergeni conflittuali',
     empty: 'Nessun risultato. Prova un\'altra ricerca.',
@@ -185,6 +186,7 @@ const it: LocaleMessages = {
   map: {
     title: 'Mappa luoghi',
     subtitle: '3 livelli spec v13',
+    eyebrow: 'Mappa',
     places: 'Ristoranti',
     pollen: 'Polline',
     adair: 'ADAIR',
@@ -203,6 +205,7 @@ const it: LocaleMessages = {
   settings: {
     title: 'Impostazioni',
     subtitle: 'SOS, sync e promemoria',
+    eyebrow: 'Impostazioni',
     emergencyNumber: 'Chiamata emergenza',
     emergencyHint: 'Numero pulsante SOS (predefinito 103)',
     saveNumber: 'Salva numero',
@@ -274,6 +277,7 @@ const it: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Profilo',
     titleSelf: 'Il tuo profilo',
     titleChild: 'Profilo del bambino',
     titleCreate: 'Crea profilo',
@@ -334,6 +338,7 @@ const it: LocaleMessages = {
   },
   sosEdit: {
     title: 'Modifica SOS',
+    eyebrow: 'SOS',
     noProfile: 'Nessun profilo selezionato',
     notesLabel: 'Note mediche',
     notesPlaceholder: 'Farmaci, dettagli reazione, istruzioni del medico…',
@@ -354,6 +359,7 @@ const it: LocaleMessages = {
     back: 'Diario',
     title: 'Referto medico',
     subtitle: 'PDF con logo ADAIR · Prof. Smolkin Yu.S.',
+    eyebrow: 'Referto',
     period: 'Periodo',
     blocks: 'Sezioni del referto',
     generating: 'Generazione…',
@@ -364,6 +370,7 @@ const it: LocaleMessages = {
     back: 'Indietro',
     home: 'Home',
     title: 'Esperto',
+    eyebrow: 'Esperto',
   },
   allergens: {
     popular: 'Allergeni comuni',

@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { markIntroComplete } from '@/src/services/settings-service';
 import { Screen } from '@/src/components/Screen';
+import { Button } from '@/src/components/Button';
+import { Disclaimer } from '@/src/components/Disclaimer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -56,52 +58,64 @@ export default function OnboardingIntroScreen() {
 
       <View style={styles.slide}>
         <View style={[styles.iconWrap, { backgroundColor: `${color}18` }]}>
-          <Ionicons name={SLIDE_ICONS[slideKey] as 'journal'} size={36} color={color} />
+          <Ionicons name={SLIDE_ICONS[slideKey] as 'journal'} size={32} color={color} />
         </View>
         <Text style={styles.title}>{t(`onboardingIntro.slides.${slideKey}.title`)}</Text>
         <Text style={styles.desc}>{t(`onboardingIntro.slides.${slideKey}.desc`)}</Text>
       </View>
 
-      <Pressable style={styles.primaryBtn} onPress={next}>
-        <Text style={styles.primaryText}>
-          {index >= SLIDE_KEYS.length - 1 ? t('onboardingIntro.startSetup') : t('onboardingIntro.next')}
-        </Text>
-      </Pressable>
+      <Button
+        label={index >= SLIDE_KEYS.length - 1 ? t('onboardingIntro.startSetup') : t('onboardingIntro.next')}
+        variant="primary"
+        block
+        onPress={next}
+      />
 
       <Pressable onPress={finish}>
         <Text style={styles.skip}>{t('onboardingIntro.skip')}</Text>
       </Pressable>
 
-      <Text style={styles.disclaimer}>{t('onboardingIntro.disclaimer')}</Text>
+      <Disclaimer>{t('onboardingIntro.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     progressRow: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginBottom: 24 },
     dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
     dotActive: { backgroundColor: colors.accent, width: 20 },
     slide: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 12 },
     iconWrap: {
-      width: 80,
-      height: 80,
-      borderRadius: 22,
+      width: 72,
+      height: 72,
+      borderRadius: 8,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 8,
     },
-    title: { fontSize: 26, fontWeight: '800', color: colors.text, textAlign: 'center' },
-    desc: { fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
-    primaryBtn: {
-      backgroundColor: colors.accent,
-      padding: 16,
-      borderRadius: 16,
-      alignItems: 'center',
-      ...(shadows.accent as object),
+    title: {
+      fontFamily: fonts.serifBold,
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.head,
+      textAlign: 'center',
+      letterSpacing: -0.2,
     },
-    primaryText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
-    skip: { textAlign: 'center', color: colors.textMuted, fontWeight: '600', marginTop: 12 },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18, marginTop: 16 },
+    desc: {
+      fontFamily: fonts.sans,
+      fontSize: 15,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    skip: {
+      fontFamily: fonts.sansSemiBold,
+      textAlign: 'center',
+      color: colors.textMuted,
+      fontWeight: '600',
+      marginTop: 12,
+      fontSize: 14,
+    },
   });
 }

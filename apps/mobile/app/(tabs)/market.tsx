@@ -3,9 +3,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
-import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { useGlassStyles } from '@/src/hooks/use-glass-styles';
+import { Disclaimer } from '@/src/components/Disclaimer';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import type { CatalogProduct } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
@@ -27,7 +27,7 @@ function getProductColor(theme: AppTheme, key: CatalogProduct['colorKey']) {
 export default function MarketScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const glass = useGlassStyles();
+  const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const [query, setQuery] = useState('');
@@ -45,7 +45,11 @@ export default function MarketScreen() {
 
   return (
     <Screen>
-      <ScreenHeader title={t('market.title')} subtitle={t('market.subtitle')} />
+      <View style={styles.header}>
+        <Text style={ui.docLabel}>AllerGuide · {t('market.eyebrow')}</Text>
+        <Text style={ui.docTitle}>{t('market.title')}</Text>
+        <Text style={ui.docMeta}>{t('market.subtitle')}</Text>
+      </View>
 
       <ProfileSwitcher />
 
@@ -65,9 +69,7 @@ export default function MarketScreen() {
 
       <GlassCard style={styles.banner}>
         <Ionicons name="star" size={18} color={theme.colors.warning} />
-        <Text style={styles.bannerText}>
-          {t('market.banner')}
-        </Text>
+        <Text style={styles.bannerText}>{t('market.banner')}</Text>
       </GlassCard>
 
       {items.length === 0 ? (
@@ -81,7 +83,7 @@ export default function MarketScreen() {
           return (
             <GlassCard key={item.id} style={styles.card}>
               <View style={[styles.cardIcon, { backgroundColor: `${color}18` }]}>
-                <Ionicons name={item.icon as any} size={26} color={color} />
+                <Ionicons name={item.icon as any} size={24} color={color} />
               </View>
               <View style={styles.cardBody}>
                 <View style={styles.cardTop}>
@@ -98,16 +100,22 @@ export default function MarketScreen() {
         })
       )}
 
-      <Text style={glass.disclaimer}>{t('market.disclaimer')}</Text>
+      <Disclaimer>{t('market.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    header: { gap: 2 },
     searchCard: { padding: 12, marginBottom: 0 },
     searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    searchInput: { flex: 1, fontSize: 15, color: colors.text },
+    searchInput: {
+      flex: 1,
+      fontSize: 15,
+      fontFamily: fonts.sans,
+      color: colors.text,
+    },
     banner: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -115,9 +123,20 @@ function createStyles({ colors }: AppTheme) {
       backgroundColor: colors.warningLight,
       borderColor: colors.warningBorder,
     },
-    bannerText: { fontSize: 13, color: colors.warningText, fontWeight: '500', flex: 1 },
+    bannerText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.warningText,
+      flex: 1,
+      lineHeight: 18,
+    },
     empty: { alignItems: 'center', paddingVertical: 24, gap: 8 },
-    emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
+    emptyText: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
     card: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -125,17 +144,31 @@ function createStyles({ colors }: AppTheme) {
       marginBottom: 0,
     },
     cardIcon: {
-      width: 54,
-      height: 54,
-      borderRadius: 15,
+      width: 44,
+      height: 44,
+      borderRadius: 6,
       alignItems: 'center',
       justifyContent: 'center',
     },
     cardBody: { flex: 1, gap: 6 },
     cardTop: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-    cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-    tag: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 8 },
-    tagText: { fontSize: 11, fontWeight: '700' },
-    cardWhy: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+    cardTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    tag: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 },
+    tagText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+    },
+    cardWhy: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
   });
 }

@@ -66,7 +66,7 @@ const en: LocaleMessages = {
   profiles: {
     title: 'My profiles',
     subtitle: 'Edit and delete',
-    eyebrow: 'Settings',
+    eyebrow: 'Profiles',
     listTitle: 'Profile list',
     empty: 'No profiles yet. Add your first one — it only takes a minute.',
     self: 'Me',
@@ -177,6 +177,7 @@ const en: LocaleMessages = {
   market: {
     title: 'Market',
     subtitle: 'Products for allergy sufferers',
+    eyebrow: 'Market',
     searchPlaceholder: 'Search catalog…',
     banner: 'Personalized picks — products with conflicting allergens are hidden',
     empty: 'Nothing found. Try another search.',
@@ -185,6 +186,7 @@ const en: LocaleMessages = {
   map: {
     title: 'Places map',
     subtitle: '3 layers per spec v13',
+    eyebrow: 'Map',
     places: 'Restaurants',
     pollen: 'Pollen',
     adair: 'ADAIR',
@@ -203,6 +205,7 @@ const en: LocaleMessages = {
   settings: {
     title: 'Settings',
     subtitle: 'SOS, sync and reminders',
+    eyebrow: 'Settings',
     emergencyNumber: 'Emergency call',
     emergencyHint: 'Number for SOS button (default 103)',
     saveNumber: 'Save number',
@@ -274,6 +277,7 @@ const en: LocaleMessages = {
     },
   },
   profileSetup: {
+    eyebrow: 'Profile',
     titleSelf: 'Your profile',
     titleChild: "Child's profile",
     titleCreate: 'Create profile',
@@ -334,6 +338,7 @@ const en: LocaleMessages = {
   },
   sosEdit: {
     title: 'Edit SOS',
+    eyebrow: 'SOS',
     noProfile: 'No profile selected',
     notesLabel: 'Medical notes',
     notesPlaceholder: 'Medications, reaction details, doctor instructions…',
@@ -354,6 +359,7 @@ const en: LocaleMessages = {
     back: 'Diary',
     title: 'Doctor report',
     subtitle: 'PDF with ADAIR logo · Prof. Smolkin Yu.S.',
+    eyebrow: 'Report',
     period: 'Period',
     blocks: 'Report sections',
     generating: 'Generating…',
@@ -364,6 +370,7 @@ const en: LocaleMessages = {
     back: 'Back',
     home: 'Home',
     title: 'Expert',
+    eyebrow: 'Expert',
   },
   allergens: {
     popular: 'Common allergens',

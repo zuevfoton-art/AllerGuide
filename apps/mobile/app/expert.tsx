@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { EXPERT_CATEGORIES, getExpertArticlesByCategory, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { useGlassStyles } from '@/src/hooks/use-glass-styles';
+import { Disclaimer } from '@/src/components/Disclaimer';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -13,7 +13,7 @@ import { useTranslation } from '@/src/store/locale-store';
 export default function ExpertScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const glass = useGlassStyles();
+  const ui = useUiStyles();
   const { t, content } = useTranslation();
   const localeContent = content();
   const [category, setCategory] = useState<ExpertArticleCategory>('recommendations');
@@ -25,46 +25,68 @@ export default function ExpertScreen() {
   if (article) {
     return (
       <Screen>
-        <Pressable style={styles.backBtn} onPress={() => setArticleId(null)}>
-          <Ionicons name="chevron-back" size={18} color={theme.colors.teal} />
-          <Text style={styles.backText}>{t('expert.back')}</Text>
-        </Pressable>
-        <Text style={styles.articleTitle}>{article.title}</Text>
+        <View style={styles.header}>
+          <Pressable
+            style={styles.backBtn}
+            onPress={() => setArticleId(null)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.back')}>
+            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
+          </Pressable>
+          <View style={styles.headerText}>
+            <Text style={ui.docLabel}>AllerGuide · {t('expert.eyebrow')}</Text>
+            <Text style={ui.docTitle}>{article.title}</Text>
+          </View>
+        </View>
         <Text style={styles.articleBody}>{article.body}</Text>
-        <Text style={glass.disclaimer}>{localeContent.expertDisclaimer}</Text>
+        <Disclaimer>{localeContent.expertDisclaimer}</Disclaimer>
       </Screen>
     );
   }
 
   return (
     <Screen>
-      <Pressable style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="chevron-back" size={18} color={theme.colors.teal} />
-        <Text style={styles.backText}>{t('expert.home')}</Text>
-      </Pressable>
-
-      <ScreenHeader
-        title={t('expert.title')}
-        subtitle={`${localeContent.expertHero.name} · ${localeContent.expertHero.role}`}
-      />
+      <View style={styles.header}>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
+          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
+        </Pressable>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('expert.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('expert.title')}</Text>
+          <Text style={ui.docMeta}>
+            {localeContent.expertHero.name} · {localeContent.expertHero.role}
+          </Text>
+        </View>
+      </View>
 
       <GlassCard style={styles.hero}>
         <View style={styles.heroIcon}>
-          <Ionicons name="school" size={28} color={theme.colors.onAccent} />
+          <Ionicons name="school" size={24} color={theme.colors.onAccent} />
         </View>
         <Text style={styles.heroSubtitle}>{localeContent.expertHero.subtitle}</Text>
       </GlassCard>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={glass.pillRow}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={ui.pillRow}>
         {EXPERT_CATEGORIES.map((cat) => (
           <Pressable
             key={cat.id}
             style={[
-              glass.pill,
-              category === cat.id && { borderColor: theme.colors.teal, backgroundColor: theme.colors.tealLight },
+              ui.pill,
+              category === cat.id && {
+                borderColor: theme.colors.accent,
+                backgroundColor: theme.colors.accentLight,
+              },
             ]}
             onPress={() => setCategory(cat.id)}>
-            <Text style={[glass.pillText, category === cat.id && { color: theme.colors.teal }]}>
+            <Text
+              style={[
+                ui.pillText,
+                category === cat.id && { color: theme.colors.accent },
+              ]}>
               {localeContent.expertCategories[cat.id]}
             </Text>
           </Pressable>
@@ -76,38 +98,76 @@ export default function ExpertScreen() {
         return (
           <Pressable key={item.id} onPress={() => setArticleId(item.id)}>
             <GlassCard style={styles.card}>
-              <Text style={styles.cardTitle}>{localized.title}</Text>
-              <Text style={styles.cardSummary}>{localized.summary}</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{localized.title}</Text>
+                <Text style={styles.cardSummary}>{localized.summary}</Text>
+              </View>
               <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
             </GlassCard>
           </Pressable>
         );
       })}
 
-      <Text style={glass.disclaimer}>{localeContent.expertDisclaimer}</Text>
+      <Disclaimer>{localeContent.expertDisclaimer}</Disclaimer>
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8 },
-    backText: { color: colors.teal, fontWeight: '600', fontSize: 15 },
-    hero: { alignItems: 'center', gap: 8 },
-    heroIcon: {
-      width: 52,
-      height: 52,
-      borderRadius: 14,
-      backgroundColor: colors.teal,
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      backgroundColor: colors.card,
       alignItems: 'center',
       justifyContent: 'center',
-      ...(shadows.glass as object),
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginTop: 2,
     },
-    heroSubtitle: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', lineHeight: 18 },
-    card: { gap: 6, marginBottom: 0 },
-    cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
-    cardSummary: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    articleTitle: { fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 12 },
-    articleBody: { fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
+    headerText: { flex: 1, gap: 2 },
+    hero: { alignItems: 'center', gap: 8 },
+    heroIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 6,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    heroSubtitle: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 18,
+    },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      marginBottom: 0,
+    },
+    cardBody: { flex: 1, gap: 4 },
+    cardTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    cardSummary: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    articleBody: {
+      fontFamily: fonts.sans,
+      fontSize: 15,
+      color: colors.textSecondary,
+      lineHeight: 22,
+    },
   });
 }
