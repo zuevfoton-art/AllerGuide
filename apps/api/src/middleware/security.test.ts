@@ -1,0 +1,53 @@
+import { afterEach, describe, expect, it } from 'vitest';
+import request from 'supertest';
+import { createApp } from '../app';
+import { buildCorsOptions } from './security';
+
+const ORIGINAL_ENV = { ...process.env };
+
+afterEach(() => {
+  process.env = { ...ORIGINAL_ENV };
+});
+
+describe('security middleware', () => {
+  it('sets helmet security headers', async () => {
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app).get('/api/health');
+    expect(response.status).toBe(200);
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
+  });
+
+  it('reflects origin when no allowlist is configured', () => {
+    delete process.env.CORS_ORIGINS;
+    const options = buildCorsOptions();
+    expect(options.origin).toBe(true);
+  });
+
+  it('rejects origins outside the allowlist when configured', () => {
+    process.env.CORS_ORIGINS = 'https://app.allerguide.io';
+    const options = buildCorsOptions();
+    const originFn = options.origin as (
+      origin: string | undefined,
+      cb: (err: Error | null, allow?: boolean) => void,
+    ) => void;
+
+    const allowed = (origin: string | undefined) =>
+      new Promise<boolean>((resolve, reject) => {
+        originFn(origin, (err, allow) => (err ? reject(err) : resolve(Boolean(allow))));
+      });
+
+    return Promise.all([
+      expect(allowed('https://app.allerguide.io')).resolves.toBe(true),
+      expect(allowed(undefined)).resolves.toBe(true),
+      expect(allowed('https://evil.example.com')).rejects.toThrow(),
+    ]);
+  });
+
+  it('disables rate limiting when RATE_LIMIT_DISABLED is set', async () => {
+    process.env.RATE_LIMIT_DISABLED = 'true';
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app).get('/api/health');
+    expect(response.headers['ratelimit-limit']).toBeUndefined();
+  });
+});
