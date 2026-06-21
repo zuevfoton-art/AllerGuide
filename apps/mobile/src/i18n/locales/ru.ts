@@ -95,6 +95,7 @@ const ru: LocaleMessages = {
   },
   home: {
     today: 'Сегодня',
+    summary: 'Сводка',
     profilePrefix: 'Профиль',
     selectProfile: 'Выберите профиль',
     wellnessTitle: 'Сводка самочувствия',
@@ -103,6 +104,7 @@ const ru: LocaleMessages = {
     air: 'Воздух',
     index: 'индекс',
     diary: 'Дневник',
+    addEntry: '+ Запись',
     symptoms: 'Симптомы',
     symptomsSub: 'Записать самочувствие',
     food: 'Питание',

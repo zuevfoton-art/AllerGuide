@@ -95,6 +95,7 @@ const fr: LocaleMessages = {
   },
   home: {
     today: "Aujourd'hui",
+    summary: 'Résumé',
     profilePrefix: 'Profil',
     selectProfile: 'Choisissez un profil',
     wellnessTitle: 'Résumé bien-être',
@@ -103,6 +104,7 @@ const fr: LocaleMessages = {
     air: 'Air',
     index: 'indice',
     diary: 'Journal',
+    addEntry: '+ Entrée',
     symptoms: 'Symptômes',
     symptomsSub: 'Noter ressenti',
     food: 'Alimentation',

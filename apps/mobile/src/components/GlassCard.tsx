@@ -7,6 +7,7 @@ type GlassCardProps = PropsWithChildren<{
   padded?: boolean;
 }>;
 
+/** Clinical Calm card surface (formerly GlassCard). */
 export function GlassCard({ children, style, padded = true }: GlassCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -14,17 +15,19 @@ export function GlassCard({ children, style, padded = true }: GlassCardProps) {
   return <View style={[styles.card, padded && styles.padded, style]}>{children}</View>;
 }
 
+export const Card = GlassCard;
+
 function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
     card: {
       backgroundColor: colors.card,
-      borderRadius: 22,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
-      ...(shadows.glass as object),
+      ...(shadows.sm as object),
     },
     padded: {
-      padding: 18,
+      padding: 16,
     },
   });
 }

@@ -45,30 +45,20 @@ export function ProfileSwitcher() {
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.row}>
+      <View style={styles.seg}>
         {profiles.map((profile) => {
           const isActive = activeProfileId === profile.id;
           return (
             <Pressable
               key={profile.id}
-              style={[styles.chip, isActive && styles.active]}
+              style={[styles.segItem, isActive && styles.segItemActive]}
               onPress={() => handleProfilePress(profile)}>
-              <View style={[styles.avatar, isActive && styles.avatarActive]}>
-                <Text style={[styles.avatarText, isActive && styles.avatarTextActive]}>
-                  {profile.name?.[0]?.toUpperCase() ?? '?'}
-                </Text>
-              </View>
-              <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{profile.name}</Text>
-              {isActive ? (
-                <Ionicons name="create-outline" size={14} color={theme.colors.teal} />
-              ) : null}
+              <Text style={[styles.segText, isActive && styles.segTextActive]}>{profile.name}</Text>
             </Pressable>
           );
         })}
-
-        <Pressable style={styles.addChip} onPress={() => router.push('/profile-setup')}>
-          <Ionicons name="add" size={18} color={theme.colors.teal} />
-          <Text style={styles.addChipText}>{t('profileSwitcher.add')}</Text>
+        <Pressable style={styles.segAdd} onPress={() => router.push('/profile-setup')}>
+          <Ionicons name="add" size={18} color={theme.colors.accent} />
         </Pressable>
       </View>
 
@@ -79,50 +69,47 @@ export function ProfileSwitcher() {
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles({ colors, shadows, fonts }: AppTheme) {
   return StyleSheet.create({
     wrap: { gap: 6 },
-    row: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-    chip: {
+    seg: {
       flexDirection: 'row',
+      backgroundColor: colors.mint,
+      borderRadius: 6,
+      padding: 3,
+      gap: 0,
+    },
+    segItem: {
+      flex: 1,
       alignItems: 'center',
-      gap: 8,
+      justifyContent: 'center',
+      paddingVertical: 9,
+      paddingHorizontal: 8,
+      borderRadius: 4,
+    },
+    segItemActive: {
       backgroundColor: colors.card,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 20,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      ...(shadows.sm as object),
     },
-    active: {
-      borderColor: colors.teal,
-      backgroundColor: colors.tealLight,
+    segText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
     },
-    avatar: {
-      width: 26,
-      height: 26,
-      borderRadius: 13,
-      backgroundColor: colors.border,
+    segTextActive: {
+      color: colors.text,
+    },
+    segAdd: {
+      width: 40,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    avatarActive: { backgroundColor: colors.teal },
-    avatarText: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
-    avatarTextActive: { color: colors.onAccent },
-    chipText: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
-    chipTextActive: { color: colors.teal },
-    addChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      backgroundColor: colors.tealLight,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 20,
-      borderWidth: 1.5,
-      borderColor: colors.teal,
+    hint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 16,
     },
-    addChipText: { fontSize: 14, fontWeight: '700', color: colors.teal },
-    hint: { fontSize: 12, color: colors.textMuted, lineHeight: 16 },
   });
 }

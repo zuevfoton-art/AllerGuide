@@ -23,7 +23,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Ionicons
           name="call"
           size={16}
-          color={loginType === 'phone' ? theme.colors.teal : theme.colors.textSecondary}
+          color={loginType === 'phone' ? theme.colors.onAccent : theme.colors.textSecondary}
         />
         <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
       </Pressable>
@@ -33,7 +33,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Ionicons
           name="mail"
           size={16}
-          color={loginType === 'email' ? theme.colors.teal : theme.colors.textSecondary}
+          color={loginType === 'email' ? theme.colors.onAccent : theme.colors.textSecondary}
         />
         <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>{t('common.email')}</Text>
       </Pressable>
@@ -131,7 +131,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
   return (
     <View style={styles.hero}>
       <View style={styles.logoWrap}>
-        <Ionicons name="leaf" size={32} color={theme.colors.onAccent} />
+        <Ionicons name="medkit-outline" size={28} color={theme.colors.onAccent} />
       </View>
       <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
@@ -145,21 +145,34 @@ export function AuthError({ message }: { message: string }) {
   return <Text style={{ color: theme.colors.danger, fontSize: 14, textAlign: 'center' }}>{message}</Text>;
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 8 },
     logoWrap: {
-      width: 64,
-      height: 64,
-      borderRadius: 18,
-      backgroundColor: colors.teal,
+      width: 56,
+      height: 56,
+      borderRadius: 8,
+      backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
-      ...(shadows.glass as object),
+      borderWidth: 1,
+      borderColor: colors.border,
     },
-    heroTitle: { fontSize: 32, fontWeight: '800', color: colors.text, letterSpacing: -0.8 },
-    heroSubtitle: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
-    toggleRow: { flexDirection: 'row', gap: 10 },
+    heroTitle: {
+      fontFamily: fonts.serifBold,
+      fontSize: 26,
+      fontWeight: '700',
+      color: colors.head,
+      letterSpacing: -0.3,
+    },
+    heroSubtitle: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    toggleRow: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, borderRadius: 6, overflow: 'hidden' },
     toggleBtn: {
       flex: 1,
       flexDirection: 'row',
@@ -167,43 +180,54 @@ function createStyles({ colors, shadows }: AppTheme) {
       justifyContent: 'center',
       gap: 6,
       backgroundColor: colors.card,
-      padding: 14,
-      borderRadius: 14,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      padding: 12,
+      borderRightWidth: 1,
+      borderRightColor: colors.border,
     },
-    toggleActive: { borderColor: colors.teal, backgroundColor: colors.tealLight },
-    toggleText: { fontSize: 15, fontWeight: '600', color: colors.textSecondary },
-    toggleTextActive: { color: colors.teal, fontWeight: '700' },
+    toggleActive: { backgroundColor: colors.accent },
+    toggleText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    toggleTextActive: { color: colors.onAccent, fontWeight: '600' },
     fieldWrap: { gap: 6 },
     label: {
-      fontSize: 13,
-      fontWeight: '700',
-      color: colors.textMuted,
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
       textTransform: 'uppercase',
-      letterSpacing: 0.6,
+      letterSpacing: 0.5,
     },
     input: {
       backgroundColor: colors.card,
-      padding: 15,
-      borderRadius: 14,
+      padding: 14,
+      borderRadius: 6,
       fontSize: 16,
+      fontFamily: fonts.sans,
       color: colors.text,
-      borderWidth: 1.5,
-      borderColor: colors.border,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
     },
     button: {
-      backgroundColor: colors.teal,
-      padding: 17,
-      borderRadius: 16,
+      backgroundColor: colors.accent,
+      padding: 14,
+      borderRadius: 6,
       alignItems: 'center',
       marginTop: 4,
-      ...(shadows.glass as object),
+      minHeight: 44,
     },
     buttonDisabled: { opacity: 0.7 },
-    buttonText: { color: colors.onAccent, fontWeight: '700', fontSize: 16 },
+    buttonText: {
+      fontFamily: fonts.sansSemiBold,
+      color: colors.onAccent,
+      fontWeight: '600',
+      fontSize: 16,
+    },
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
-    linkText: { fontSize: 14, color: colors.textSecondary },
-    linkAccent: { color: colors.teal, fontWeight: '700' },
+    linkText: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary },
+    linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.accent, fontWeight: '600' },
   });
 }

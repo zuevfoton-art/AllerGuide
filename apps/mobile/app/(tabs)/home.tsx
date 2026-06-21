@@ -1,4 +1,4 @@
-import { Text, Pressable, StyleSheet, View, ActivityIndicator, ScrollView } from 'react-native';
+import { Text, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { computeDiaryStats } from '@allerguide/core';
@@ -8,24 +8,22 @@ import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
+import { Disclaimer } from '@/src/components/Disclaimer';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 
-function scoreColor(level: WellnessSnapshot['level'], colors: AppTheme['colors']) {
-  if (level === 'good') return colors.teal;
-  if (level === 'high-risk') return colors.danger;
-  return colors.warning;
-}
-
-function factorProgress(level: 'low' | 'mid' | 'high'): number {
-  if (level === 'low') return 0.25;
-  if (level === 'mid') return 0.55;
-  return 0.9;
+function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
+  if (level === 'good') return 'ok';
+  if (level === 'high-risk') return 'danger';
+  return 'warn';
 }
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
@@ -66,131 +64,107 @@ export default function HomeScreen() {
     [t, locale],
   );
 
-  const quickLinks = useMemo(
-    () =>
-      [
-        { label: t('tabs.scanner'), icon: 'scan', route: '/(tabs)/scanner' },
-        { label: t('tabs.map'), icon: 'map', route: '/(tabs)/map' },
-        { label: t('tabs.market'), icon: 'bag', route: '/(tabs)/market' },
-        { label: t('home.expert'), icon: 'school', route: '/expert' },
-      ] as const,
-    [t, locale],
-  );
+  const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;
 
-  const pollenFactor = wellness?.factors.find((f) => f.label.toLowerCase().includes(t('home.pollen').toLowerCase()));
-  const aqiFactor = wellness?.factors.find((f) => f.label.includes('EAQI'));
+  const todayLabel = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date());
+    } catch {
+      return t('home.today');
+    }
+  }, [locale, t]);
 
   return (
     <Screen>
-      <View style={styles.meshTop} pointerEvents="none" />
-      <View style={styles.meshBottom} pointerEvents="none" />
-
       <View style={styles.topBar}>
-        <View style={styles.topBarIcons}>
-          <View style={styles.chipIcon}>
-            <Ionicons name="leaf" size={14} color={theme.colors.teal} />
-          </View>
-          <View style={styles.chipIcon}>
-            <Ionicons name="calendar-outline" size={14} color={theme.colors.textMuted} />
-          </View>
-        </View>
-        <Pressable onPress={() => router.push('/(tabs)/sos')} style={styles.sosBtn}>
+        <Text style={ui.docLabel}>AllerGuide · {t('home.summary')}</Text>
+        <Pressable
+          onPress={() => router.push('/(tabs)/sos')}
+          style={styles.sosBtn}
+          accessibilityRole="button"
+          accessibilityLabel={t('tabs.sos')}>
           <Ionicons name="medkit" size={18} color={theme.colors.danger} />
         </Pressable>
       </View>
 
       <View style={styles.hero}>
-        <Text style={styles.heroTitle}>{t('home.today')}</Text>
-        <Text style={styles.heroSub}>
-          {profile?.name ? `${t('home.profilePrefix')} · ${profile.name}` : t('home.selectProfile')}
+        <Text style={ui.docTitle}>{t('home.today')}</Text>
+        <Text style={ui.docMeta}>
+          {todayLabel}
+          {profile?.name ? ` · ${t('home.profilePrefix')}: ${profile.name}` : ` · ${t('home.selectProfile')}`}
         </Text>
       </View>
 
       <ProfileSwitcher />
 
       <GlassCard>
-        <View style={styles.cardHead}>
-          <Text style={styles.cardTitle}>{t('home.wellnessTitle')}</Text>
-          <Pressable onPress={() => router.push('/(tabs)/map')}>
-            <Text style={styles.cardLink}>{t('home.details')}</Text>
-          </Pressable>
+        <View style={ui.cardHead}>
+          <Text style={ui.cardTitle}>{t('home.wellnessTitle')}</Text>
+          <View style={styles.cardHeadRight}>
+            {badge ? (
+              <View style={[ui.badge, badge.container]}>
+                <Text style={[ui.badgeText, badge.text]}>{wellness?.statusTitle}</Text>
+              </View>
+            ) : null}
+            <Pressable onPress={() => router.push('/(tabs)/map')}>
+              <Text style={ui.sectionLink}>{t('home.details')}</Text>
+            </Pressable>
+          </View>
         </View>
 
         {loadingWellness && !wellness ? (
-          <ActivityIndicator color={theme.colors.teal} style={{ marginVertical: 24 }} />
+          <ActivityIndicator color={theme.colors.accent} style={{ marginVertical: 24 }} />
         ) : wellness ? (
           <>
-            <View style={styles.gaugeRow}>
-              <View style={styles.sideStat}>
-                <Text style={styles.sideNum}>{pollenFactor ? '↑' : '—'}</Text>
-                <Text style={styles.sideLabel}>{t('home.pollen')}</Text>
-              </View>
-              <View style={[styles.gauge, { borderColor: scoreColor(wellness.level, theme.colors) }]}>
-                <Text style={styles.gaugeNum}>{wellness.score}</Text>
-                <Text style={styles.gaugeLabel}>{t('home.index')}</Text>
-              </View>
-              <View style={styles.sideStat}>
-                <Text style={styles.sideNum}>{aqiFactor?.level === 'high' ? '!' : 'OK'}</Text>
-                <Text style={styles.sideLabel}>{t('home.air')}</Text>
-              </View>
+            <View style={ui.heroKpi}>
+              <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
+              <Text style={ui.heroKpiNum}>
+                {wellness.score}
+                <Text style={ui.heroKpiSub}> / 100</Text>
+              </Text>
             </View>
 
-            <Text style={styles.statusLine}>{wellness.statusTitle} · {wellness.statusSummary}</Text>
+            {wellness.factors.slice(0, 3).map((factor) => (
+              <View key={factor.label} style={ui.kpiRow}>
+                <Text style={ui.kpiLabel}>
+                  {factor.label.replace(' · Open-Meteo', '').replace(' · EAQI', '')}
+                </Text>
+                <Text style={ui.kpiValue}>{factor.value}</Text>
+              </View>
+            ))}
 
-            <View style={styles.macroList}>
-              {wellness.factors.slice(0, 3).map((factor) => (
-                <View key={factor.label} style={styles.macroRow}>
-                  <Text style={styles.macroLabel}>{factor.label.replace(' · Open-Meteo', '').replace(' · EAQI', '')}</Text>
-                  <View style={styles.macroTrack}>
-                    <View
-                      style={[
-                        styles.macroFill,
-                        {
-                          width: `${factorProgress(factor.level) * 100}%`,
-                          backgroundColor:
-                            factor.level === 'high'
-                              ? theme.colors.danger
-                              : factor.level === 'mid'
-                                ? theme.colors.warning
-                                : theme.colors.teal,
-                        },
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.macroValue}>{factor.value}</Text>
-                </View>
-              ))}
-            </View>
+            <Text style={styles.interpret}>{wellness.statusSummary}</Text>
           </>
         ) : (
-          <Text style={styles.statusLine}>{t('home.selectProfile')}</Text>
+          <Text style={styles.interpret}>{t('home.selectProfile')}</Text>
         )}
       </GlassCard>
 
-      <View style={styles.sectionHead}>
-        <Text style={styles.sectionTitle}>{t('home.diary')}</Text>
-        <Pressable onPress={() => router.push('/(tabs)/diary')}>
-          <Text style={styles.cardLink}>{t('common.more')}</Text>
-        </Pressable>
-      </View>
-
       <GlassCard padded={false}>
-        {diaryRows.map((row, index) => (
-          <Pressable
-            key={row.label}
-            style={[styles.listRow, index < diaryRows.length - 1 && styles.listRowBorder]}
-            onPress={() => router.push(row.route as any)}>
-            <View style={styles.listIcon}>
-              <Ionicons name={row.icon as any} size={18} color={theme.colors.teal} />
-            </View>
-            <View style={styles.listBody}>
-              <Text style={styles.listTitle}>{row.label} →</Text>
-              <Text style={styles.listSub}>{row.sub}</Text>
-            </View>
-            <View style={styles.addBtn}>
-              <Ionicons name="add" size={22} color={theme.colors.text} />
-            </View>
+        <View style={[styles.listHead, styles.listHeadPad]}>
+          <Text style={ui.cardTitle}>{t('home.diary')}</Text>
+          <Pressable onPress={() => router.push('/(tabs)/diary')}>
+            <Text style={ui.sectionLink}>{t('common.more')}</Text>
           </Pressable>
+        </View>
+        {diaryRows.map((row, index) => (
+          <View
+            key={row.label}
+            style={[styles.listRow, index < diaryRows.length - 1 && styles.listRowBorder]}>
+            <View style={ui.feedIcon}>
+              <Ionicons name={row.icon as any} size={16} color={theme.colors.textSecondary} />
+            </View>
+            <View style={ui.feedBody}>
+              <Text style={ui.feedTitle}>{row.label}</Text>
+              <Text style={ui.feedSub}>{row.sub}</Text>
+            </View>
+            <Button
+              label={t('home.addEntry')}
+              variant="primary"
+              size="sm"
+              onPress={() => router.push(row.route as any)}
+            />
+          </View>
         ))}
       </GlassCard>
 
@@ -201,151 +175,89 @@ export default function HomeScreen() {
         </GlassCard>
       ) : null}
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pills}>
-        {quickLinks.map((item) => (
-          <Pressable key={item.label} style={styles.pill} onPress={() => router.push(item.route as any)}>
-            <Ionicons name={item.icon as any} size={16} color={theme.colors.teal} />
-            <Text style={styles.pillText}>{item.label}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+      <View style={styles.quickRow}>
+        <Button
+          label={t('tabs.scanner')}
+          variant="secondary"
+          style={styles.quickBtn}
+          onPress={() => router.push('/(tabs)/scanner')}
+        />
+        <Button
+          label={t('tabs.map')}
+          variant="secondary"
+          style={styles.quickBtn}
+          onPress={() => router.push('/(tabs)/map')}
+        />
+      </View>
 
-      <Text style={styles.disclaimer}>{t('home.disclaimer')}</Text>
+      <Disclaimer>{t('home.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
 
-function createStyles({ colors, shadows }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    meshTop: {
-      position: 'absolute',
-      top: -40,
-      right: -30,
-      width: 180,
-      height: 180,
-      borderRadius: 90,
-      backgroundColor: colors.mint,
-      opacity: 0.45,
-    },
-    meshBottom: {
-      position: 'absolute',
-      top: 120,
-      left: -50,
-      width: 140,
-      height: 140,
-      borderRadius: 70,
-      backgroundColor: colors.foam,
-      opacity: 0.8,
-    },
     topBar: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    topBarIcons: { flexDirection: 'row', gap: 8 },
-    chipIcon: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...(shadows.glass as object),
-    },
     sosBtn: {
       width: 40,
       height: 40,
-      borderRadius: 20,
+      borderRadius: 6,
       backgroundColor: colors.dangerLight,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },
-    hero: { gap: 4, marginTop: 4 },
-    heroTitle: { fontSize: 34, fontWeight: '800', color: colors.text, letterSpacing: -0.8 },
-    heroSub: { fontSize: 15, color: colors.textSecondary, fontWeight: '500' },
-    cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    cardTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
-    cardLink: { fontSize: 14, fontWeight: '700', color: colors.teal },
-    gaugeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-    sideStat: { width: 64, alignItems: 'center', gap: 4 },
-    sideNum: { fontSize: 20, fontWeight: '800', color: colors.text },
-    sideLabel: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
-    gauge: {
-      width: 112,
-      height: 112,
-      borderRadius: 56,
-      borderWidth: 5,
+    hero: { gap: 4 },
+    cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    heroKpiLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    interpret: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+      marginTop: 10,
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    listHead: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.surfaceMuted,
     },
-    gaugeNum: { fontSize: 32, fontWeight: '900', color: colors.text, letterSpacing: -1 },
-    gaugeLabel: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
-    statusLine: { fontSize: 13, color: colors.textSecondary, lineHeight: 18, marginBottom: 14 },
-    macroList: { gap: 10 },
-    macroRow: { gap: 6 },
-    macroLabel: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
-    macroTrack: {
-      height: 6,
-      borderRadius: 999,
-      backgroundColor: colors.surfaceMuted,
-      overflow: 'hidden',
-    },
-    macroFill: { height: 6, borderRadius: 999 },
-    macroValue: { fontSize: 11, color: colors.textMuted },
-    sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    sectionTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
+    listHeadPad: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     listRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
       paddingHorizontal: 16,
-      paddingVertical: 14,
+      paddingVertical: 12,
     },
     listRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    listIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.tealLight,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    listBody: { flex: 1, gap: 2 },
-    listTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-    listSub: { fontSize: 13, color: colors.textMuted },
-    addBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...(shadows.glass as object),
-    },
     recCard: { gap: 6 },
-    recTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
-    recText: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    pills: { gap: 8, paddingRight: 8 },
-    pill: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: 999,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      ...(shadows.glass as object),
+    recTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
     },
-    pillText: { fontSize: 13, fontWeight: '700', color: colors.text },
-    disclaimer: { fontSize: 12, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+    recText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    quickRow: { flexDirection: 'row', gap: 8 },
+    quickBtn: { flex: 1 },
   });
 }

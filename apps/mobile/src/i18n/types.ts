@@ -99,6 +99,7 @@ export type LocaleMessages = {
   };
   home: {
     today: string;
+    summary: string;
     profilePrefix: string;
     selectProfile: string;
     wellnessTitle: string;
@@ -107,6 +108,7 @@ export type LocaleMessages = {
     air: string;
     index: string;
     diary: string;
+    addEntry: string;
     symptoms: string;
     symptomsSub: string;
     food: string;

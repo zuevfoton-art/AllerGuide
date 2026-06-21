@@ -95,6 +95,7 @@ const it: LocaleMessages = {
   },
   home: {
     today: 'Oggi',
+    summary: 'Riepilogo',
     profilePrefix: 'Profilo',
     selectProfile: 'Seleziona un profilo',
     wellnessTitle: 'Riepilogo benessere',
@@ -103,6 +104,7 @@ const it: LocaleMessages = {
     air: 'Aria',
     index: 'indice',
     diary: 'Diario',
+    addEntry: '+ Voce',
     symptoms: 'Sintomi',
     symptomsSub: 'Registra benessere',
     food: 'Alimentazione',
