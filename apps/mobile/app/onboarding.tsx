@@ -7,6 +7,7 @@ import type { Scenario } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -28,10 +29,7 @@ export default function OnboardingScreen() {
   return (
     <Screen>
       <View style={styles.hero}>
-        <View style={styles.logoWrap}>
-          <Ionicons name="medkit" size={32} color={theme.colors.onAccent} />
-        </View>
-        <Text style={styles.brand}>AllerGuide</Text>
+        <BrandLogo size={64} showWordmark />
         <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
       </View>
 
@@ -65,23 +63,7 @@ export default function OnboardingScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    hero: { alignItems: 'center', paddingVertical: 24, gap: 8 },
-    logoWrap: {
-      width: 64,
-      height: 64,
-      borderRadius: 8,
-      backgroundColor: colors.accent,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 4,
-    },
-    brand: {
-      fontFamily: fonts.serifBold,
-      fontSize: 30,
-      fontWeight: '700',
-      color: colors.head,
-      letterSpacing: -0.3,
-    },
+    hero: { alignItems: 'center', paddingVertical: 24, gap: 12 },
     tagline: {
       fontFamily: fonts.sans,
       fontSize: 15,

@@ -1,5 +1,6 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -130,9 +131,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
 
   return (
     <View style={styles.hero}>
-      <View style={styles.logoWrap}>
-        <Ionicons name="medkit-outline" size={28} color={theme.colors.onAccent} />
-      </View>
+      <BrandLogo size={56} />
       <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>
@@ -148,16 +147,6 @@ export function AuthError({ message }: { message: string }) {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 8 },
-    logoWrap: {
-      width: 56,
-      height: 56,
-      borderRadius: 8,
-      backgroundColor: colors.accent,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
     heroTitle: {
       fontFamily: fonts.serifBold,
       fontSize: 26,

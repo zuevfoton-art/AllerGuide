@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none" role="img" aria-label="AllerGuide">
+  <title>AllerGuide wordmark</title>
+  <rect width="64" height="64" rx="8" fill="#2563EB"/>
+  <path d="M32 13.5 46.5 19v13.2c0 8.4-11 15.3-14.5 17.3-3.5-2-14.5-8.9-14.5-17.3V19L32 13.5Z" stroke="#FFF" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M24 28.5h16" stroke="#FFF" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>
+  <path d="M24.5 34.5 29.5 39.5 40 27" stroke="#FFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="76" y="42" fill="#1E3A5F" font-family="Georgia, 'Source Serif 4', serif" font-size="28" font-weight="700">Aller</text>
+  <text x="152" y="42" fill="#2563EB" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="600">Guide</text>
+</svg>
