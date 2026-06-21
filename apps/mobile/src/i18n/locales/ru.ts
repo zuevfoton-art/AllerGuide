@@ -144,7 +144,9 @@ const ru: LocaleMessages = {
   },
   scanner: {
     title: 'Умный сканер',
-    subtitle: 'Open Food Facts + проверка аллергенов',
+    subtitle: 'Проверка состава по профилю аллергий',
+    eyebrow: 'Сканер',
+    openAction: 'Открыть',
     product: 'Продукт',
     menu: 'Меню',
     medicine: 'Лекарство',
@@ -314,6 +316,7 @@ const ru: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Экстренная информация',
+    eyebrow: 'SOS',
     edit: 'Изменить',
     name: 'Имя:',
     age: 'Возраст:',
@@ -323,6 +326,7 @@ const ru: LocaleMessages = {
     emptyProfile: 'Выберите профиль, чтобы увидеть медицинскую информацию',
     contactsTitle: 'Экстренные контакты',
     contactsHint: 'Добавьте экстренные контакты в настройках профиля или на экране редактирования SOS.',
+    callContact: 'Позвонить',
     call: 'Позвонить {{number}}',
     settingsLink: 'Настройки SOS и уведомлений',
     tip: 'Покажите этот экран медработнику в случае анафилактической реакции',

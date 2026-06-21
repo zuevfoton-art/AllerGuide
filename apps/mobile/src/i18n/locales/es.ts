@@ -144,7 +144,9 @@ const es: LocaleMessages = {
   },
   scanner: {
     title: 'Escáner inteligente',
-    subtitle: 'Open Food Facts + alérgenos',
+    subtitle: 'Comprobación según perfil de alergias',
+    eyebrow: 'Escáner',
+    openAction: 'Abrir',
     product: 'Producto',
     menu: 'Menú',
     medicine: 'Medicamento',
@@ -314,6 +316,7 @@ const es: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Información de emergencia',
+    eyebrow: 'SOS',
     edit: 'Editar',
     name: 'Nombre:',
     age: 'Edad:',
@@ -323,6 +326,7 @@ const es: LocaleMessages = {
     emptyProfile: 'Selecciona un perfil para ver la información médica',
     contactsTitle: 'Contactos de emergencia',
     contactsHint: 'Añade contactos de emergencia en los ajustes del perfil o en la pantalla de edición SOS.',
+    callContact: 'Llamar',
     call: 'Llamar {{number}}',
     settingsLink: 'Ajustes SOS y notificaciones',
     tip: 'Muestra esta pantalla al personal médico en caso de reacción anafiláctica',

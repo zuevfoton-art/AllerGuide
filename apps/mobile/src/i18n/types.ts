@@ -149,6 +149,8 @@ export type LocaleMessages = {
   scanner: {
     title: string;
     subtitle: string;
+    eyebrow: string;
+    openAction: string;
     product: string;
     menu: string;
     medicine: string;
@@ -302,6 +304,7 @@ export type LocaleMessages = {
   sos: {
     title: string;
     subtitle: string;
+    eyebrow: string;
     edit: string;
     name: string;
     age: string;
@@ -311,6 +314,7 @@ export type LocaleMessages = {
     emptyProfile: string;
     contactsTitle: string;
     contactsHint: string;
+    callContact: string;
     call: string;
     settingsLink: string;
     tip: string;
