@@ -57,7 +57,6 @@ export async function createApp(
       createProxyMiddleware({
         target: metroUrl,
         changeOrigin: true,
-        ws: true,
       })
     );
   }
