@@ -26,6 +26,16 @@ GitHub Actions: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL.
 
+### Разделение БД на схемы (`profile` и `catalog`)
+
+Данные разнесены по двум Postgres-схемам («базам»):
+
+- **`profile`** — всё, что относится к пользователю: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`. Определение: `src/db/app-schema.ts` (`profileSchema`).
+- **`catalog`** — общие справочники: `allergens`, `cross_reactions`, `products`. Определение: `src/db/catalog-schema.ts` (`catalogSchema`).
+- Таблицы Replit-OIDC (`users`, `sessions`) остаются в `public`.
+
+Drizzle-объекты схемо-квалифицированы, поэтому код запросов не меняется. Человекочитаемые автономные определения каждой «базы» лежат в `apps/api/sql/profile.sql` и `apps/api/sql/catalog.sql` (справочные артефакты; живая БД управляется миграциями). Перенос существующих таблиц в схемы выполнен неразрушающей миграцией `drizzle/0003_*` через `ALTER TABLE ... SET SCHEMA`.
+
 ### Production hardening
 
 - **Безопасность** (`src/middleware/security.ts`, подключено в `app.ts`): `helmet`, строгий CORS по allowlist (`CORS_ORIGINS`), rate-limiting per-IP (глобальный + усиленный для `/api/auth` и `/api/scan`). Отключается через `RATE_LIMIT_DISABLED=true`.
