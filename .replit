@@ -36,5 +36,5 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "static"
-build = ["bash", "-c", "COREPACK_ENABLE_STRICT=0 pnpm install --frozen-lockfile=false; cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir ../../dist"]
-publicDir = "dist"
+build = ["bash", "-c", "COREPACK_ENABLE_STRICT=0 pnpm install --frozen-lockfile=false; cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir dist"]
+publicDir = "apps/mobile/dist"
