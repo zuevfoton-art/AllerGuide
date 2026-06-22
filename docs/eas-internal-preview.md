@@ -172,6 +172,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | iOS: No profiles for bundle ID | Создайте app в App Store Connect с `com.allerguide.app` |
 | Android: INSTALL_FAILED | Удалите старую debug-сборку с тем же package |
 | Build fails on monorepo | Запускайте из `apps/mobile`; EAS определяет root автоматически |
+| `pnpm add pnpm@10.34.4` exit code 1 | Не пиньте `"pnpm"` в `eas.json` — используйте `packageManager` в корневом `package.json` + `.npmrc` с `node-linker=hoisted` |
 | Expo SDK warnings | Ожидаемы на Expo 53; не блокируют preview |
 
 ---

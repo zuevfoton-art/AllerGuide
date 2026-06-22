@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "generate-assets": "node scripts/generate-assets.mjs",
+    "eas-build-pre-install": "bash scripts/eas-build-pre-install.sh",
     "build:preview": "eas build --profile preview --platform all",
     "build:preview:android": "eas build --profile preview --platform android",
     "build:preview:ios": "eas build --profile preview --platform ios"
