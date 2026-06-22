@@ -19,6 +19,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 - `pnpm typecheck` — TypeScript across all packages
 - `pnpm test` — Vitest in `packages/core`, `packages/ai`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
+- `pnpm import:barcodes` — import local barcode DB from `data/barcodes_db` (or `BARCODES_DB_PATH`) into the app catalog
 
 ### Backend API (optional) — `apps/api`
 - Not wired to the mobile app by default. Run with `pnpm --filter api dev` (port 3001). Requires PostgreSQL (`DATABASE_URL`) + `JWT_SECRET` to boot the auth/sync/scan features.

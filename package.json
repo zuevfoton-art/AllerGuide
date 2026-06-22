@@ -10,7 +10,8 @@
     "start": "pnpm --filter mobile start",
     "lint": "pnpm --filter mobile lint",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @allerguide/core test && pnpm --filter @allerguide/ai test && pnpm --filter mobile test && pnpm --filter api test"
+    "test": "pnpm --filter @allerguide/core test && pnpm --filter @allerguide/ai test && pnpm --filter mobile test && pnpm --filter api test",
+    "import:barcodes": "node scripts/import-barcodes-db.mjs"
   },
   "pnpm": {
     "overrides": {

@@ -302,9 +302,11 @@ export default function ScannerScreen() {
               {t('scanner.source')}{' '}
               {displayResult.source === 'openfoodfacts'
                 ? t('scanner.sourceOpenFoodFacts')
-                : displayResult.source === 'barcode'
-                  ? t('scanner.sourceBarcode')
-                  : t('scanner.sourceManual')}
+                : displayResult.source === 'barcodes_db'
+                  ? t('scanner.sourceBarcodesDb')
+                  : displayResult.source === 'barcode'
+                    ? t('scanner.sourceBarcode')
+                    : t('scanner.sourceManual')}
             </Text>
           ) : null}
         </View>

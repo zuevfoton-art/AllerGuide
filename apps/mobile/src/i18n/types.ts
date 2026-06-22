@@ -175,6 +175,7 @@ export type LocaleMessages = {
     crossMatches: string;
     source: string;
     sourceOpenFoodFacts: string;
+    sourceBarcodesDb: string;
     sourceBarcode: string;
     sourceManual: string;
   };

@@ -1,7 +1,7 @@
 import { runSmartScan, type ScanMode, type ScanResult } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
-import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
+import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 import { saveScanHistory } from '@/src/services/scan-history-service';
 import { trackEvent } from '@/src/services/analytics-service';
 
@@ -42,7 +42,7 @@ export async function scanBarcode({
   barcode: string;
   profile?: Profile | null;
 }): Promise<ScanResult & { lookupFailed?: boolean }> {
-  const product = await fetchProductByBarcode(barcode);
+  const product = await resolveProductByBarcode(barcode);
 
   if (!product) {
     const fallback = await analyzeText({
@@ -53,7 +53,8 @@ export async function scanBarcode({
     });
     const result = {
       ...fallback,
-      reason: 'Продукт не найден в Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
+      reason:
+        'Продукт не найден в локальной базе штрихкодов и Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
       lookupFailed: true,
     };
     if (profile) saveScanHistory(profile.id, barcode, result);
@@ -65,7 +66,7 @@ export async function scanBarcode({
     text: product.ingredients,
     profile,
     productName: product.name,
-    source: 'openfoodfacts',
+    source: product.source,
   });
   if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
   return result;

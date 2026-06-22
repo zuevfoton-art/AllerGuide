@@ -132,7 +132,7 @@ const ruContent: LocaleContent = {
     },
     crossSuffix: '(перекр. реакция)',
     productNotFound:
-      'Продукт не найден в Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
+      'Продукт не найден в локальной базе штрихкодов и Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
     restaurantMenu: 'Меню ресторана',
   },
   diaryValidation: {
