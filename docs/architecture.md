@@ -36,6 +36,17 @@ Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL.
 
 LLM-запрос обёрнут кэшем результатов (ключ — хэш режима/текста/аллергенов) и дневным бюджетом на пользователя/IP; биллится только промах кэша. Опциональная JWT-аутентификация (`SCAN_REQUIRE_AUTH`). Кэш резко снижает стоимость при росте аудитории.
 
+### Справочники: аллергены и штрихкоды (`src/db/catalog-schema.ts`, `src/routes/catalog.ts`)
+
+Глобальные справочники во внешней БД:
+
+- `allergens` / `cross_reactions` — сид из `@allerguide/core` (`db:seed-allergens`), единый источник правды — статический каталог в core.
+- `products` — каталог по штрихкоду (`barcode` PK, `name`, `ingredients`, `allergen_tags`, `source`). Наполняется импортом датасета `db:import-food-allergy` (`apps/api/data/food-allergy/`, источник — [alexf388/Food-Allergy-SQL-Database](https://github.com/alexf388/Food-Allergy-SQL-Database)) и/или write-through кэшем поверх Open Food Facts.
+- **Индексация** (миграция `drizzle/0002_*`): `pg_trgm` + GIN по `name` (нечёткий поиск), полнотекст по `ingredients` (`to_tsvector('russian', ...)`), GIN по `allergen_tags` и `keywords`.
+- Эндпоинты: `GET /api/allergens` (fallback на статический core-список без БД), `GET /api/products/:barcode`, `GET /api/products/search?q=`. Клиент включается флагом `EXPO_PUBLIC_PRODUCT_DB`.
+- При росте каталога до миллионов SKU поиск выносится в Meilisearch/Typesense/OpenSearch с наполнением из Postgres (Postgres остаётся source of truth).
+- Follow-up: маппинг англоязычных тегов датасета на RU-таксономию аллергенов для кросс-языкового матчинга в сканере.
+
 ### Облачная синхронизация (`src/routes/sync.ts`)
 
 Резервные копии сохраняются в таблицу `sync_backups` (in-memory fallback без БД), доступ по мобильному JWT или legacy `SYNC_API_KEY`, владение проверяется по `userId` из токена. Полезная нагрузка хранится непрозрачно: клиент шифрует бэкап на устройстве (AES-GCM, `@allerguide/core`) перед загрузкой — сервер zero-knowledge.
