@@ -15,6 +15,13 @@
       "when": 1782075444006,
       "tag": "0001_low_supernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782114810115,
+      "tag": "0002_dear_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }
