@@ -13,8 +13,19 @@
     },
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_BACKEND_AUTH": "false",
+        "EXPO_PUBLIC_CLOUD_SYNC": "false",
+        "EXPO_PUBLIC_AI_SCAN_ENABLED": "false",
+        "EXPO_PUBLIC_PRODUCT_DB": "false",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "false"
+      },
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
       }
     },
     "production": {

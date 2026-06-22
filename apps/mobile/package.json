@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "generate-assets": "node scripts/generate-assets.mjs"
+    "generate-assets": "node scripts/generate-assets.mjs",
+    "build:preview": "eas build --profile preview --platform all",
+    "build:preview:android": "eas build --profile preview --platform android",
+    "build:preview:ios": "eas build --profile preview --platform ios"
   },
   "dependencies": {
     "@allerguide/ai": "workspace:*",
