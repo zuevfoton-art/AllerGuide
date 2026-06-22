@@ -58,7 +58,7 @@ function getSubtle(): SubtleCrypto {
 }
 
 function getCrypto(): { getRandomValues(buf: Uint8Array): Uint8Array } {
-  if (typeof globalThis !== 'undefined' && globalThis.crypto?.getRandomValues) {
+  if (typeof globalThis !== 'undefined' && typeof globalThis.crypto?.getRandomValues === 'function') {
     return globalThis.crypto;
   }
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -85,7 +85,7 @@ async function derivePbkdf2(
     ['deriveBits'],
   );
   const bits = await subtle.deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt, iterations },
+    { name: 'PBKDF2', hash: 'SHA-256', salt: salt as BufferSource, iterations },
     keyMaterial,
     256,
   );
