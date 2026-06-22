@@ -33,7 +33,9 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 - Mobile backend auth: set `JWT_SECRET` + `DATABASE_URL` on API, migrate, then enable `EXPO_PUBLIC_BACKEND_AUTH=true` on mobile.
 - Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`) to console/HTTP; `EXPO_PUBLIC_SENTRY_DSN` enables crash reporting. Both off by default.
 
-### Production builds
+### Production builds (internal alpha)
+- EAS preview: see [`docs/eas-internal-preview.md`](../docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
+- QA regression: [`docs/qa-checklist.md`](../docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.
 - Replace placeholder `extra.eas.projectId` with your EAS project before building.

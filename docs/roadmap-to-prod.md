@@ -123,10 +123,10 @@ flowchart TB
 
 | ID | Задача | Критерий готовности |
 |----|--------|---------------------|
-| P0.1 | Регрессионный чеклист | `docs/qa-checklist.md`, пройден на iOS + Android + web |
+| P0.1 | Регрессионный чеклист | [`docs/qa-checklist.md`](./qa-checklist.md), пройден на iOS + Android + web |
 | P0.2 | Критичные баги MVP | 0 открытых P0/P1 |
 | P0.3 | Актуализировать README | IndexedDB, feature flags, env |
-| P0.4 | EAS preview-сборки | TestFlight / internal APK на 3+ устройствах |
+| P0.4 | EAS preview-сборки | [`docs/eas-internal-preview.md`](./eas-internal-preview.md), TestFlight / internal APK на 3+ устройствах |
 | P0.5 | Локализация legal | Privacy/Terms на 6 языках |
 
 ---
@@ -280,6 +280,8 @@ flowchart LR
 
 - [`scripts/roadmap-issues.json`](../scripts/roadmap-issues.json) — данные для GitHub milestones/issues
 - [`scripts/create-roadmap-issues.sh`](../scripts/create-roadmap-issues.sh) — скрипт создания milestones и issues
+- [`docs/qa-checklist.md`](./qa-checklist.md) — регрессионный чеклист internal alpha (P0.1)
+- [`docs/eas-internal-preview.md`](./eas-internal-preview.md) — первая EAS preview-сборка (P0.4)
 - [`docs/architecture.md`](./architecture.md) — архитектура и production hardening
 - [`docs/functional-requirements.md`](./functional-requirements.md) — функциональные требования
 - [`docs/design-mockup.html`](./design-mockup.html) — UI mockup Clinical Calm
