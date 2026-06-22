@@ -2,7 +2,6 @@ modules = ["nodejs-20", "ruby-3.2", "swift-5.8"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
-integrations = ["javascript_log_in_with_replit:2.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -35,15 +34,7 @@ waitForPort = 5000
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 5001
-externalPort = 3001
-
 [deployment]
 deploymentTarget = "static"
-build = ["bash", "-c", "cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir ../../dist"]
+build = ["bash", "-c", "COREPACK_ENABLE_STRICT=0 pnpm install --frozen-lockfile=false; cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir ../../dist"]
 publicDir = "dist"
-
-[postMerge]
-path = "scripts/post-merge.sh"
-timeoutMs = 120000

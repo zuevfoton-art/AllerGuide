@@ -1,11 +1,9 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
-
-type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+import { BrandTabIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
 
 function TabIcon({
   name,
@@ -14,19 +12,13 @@ function TabIcon({
   muted,
   size,
 }: {
-  name: IoniconsName;
+  name: BrandTabIconName;
   focused: boolean;
   color: string;
   muted: string;
   size: number;
 }) {
-  return (
-    <Ionicons
-      name={focused ? name : (`${name}-outline` as IoniconsName)}
-      size={size}
-      color={focused ? color : muted}
-    />
-  );
+  return <BrandTabIcon name={name} size={size} color={focused ? color : muted} focused={focused} />;
 }
 
 export default function TabsLayout() {
@@ -93,7 +85,7 @@ export default function TabsLayout() {
           title: t('tabs.diary'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              name="journal"
+              name="diary"
               focused={focused}
               color={colors.accent}
               muted={colors.textMuted}
@@ -108,7 +100,7 @@ export default function TabsLayout() {
           title: t('tabs.scanner'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              name="scan"
+              name="scanner"
               focused={focused}
               color={colors.accent}
               muted={colors.textMuted}
@@ -134,10 +126,12 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.sos'),
           tabBarIcon: ({ focused }) => (
-            <Ionicons
-              name="medkit"
+            <TabIcon
+              name="sos"
+              focused={focused}
+              color={colors.danger}
+              muted={colors.textMuted}
               size={iconSize}
-              color={focused ? colors.danger : colors.textMuted}
             />
           ),
           tabBarActiveTintColor: colors.danger,

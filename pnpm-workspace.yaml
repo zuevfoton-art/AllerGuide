@@ -1,3 +1,9 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# EAS Build + Expo native autolinking with pnpm strict layout
+publicHoistPattern:
+  - '*expo-modules-core'
+  - '*expo-modules-autolinking'
+  - '*babel-preset-expo'

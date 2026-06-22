@@ -3,95 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AllerGuide — UI Mockup</title>
+  <title>AllerGuide — Clinical Calm Mockup</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f4f8f6;
-      --bg-2: #edf7f2;
-      --bg-3: #f0f4ff;
-      --glass: rgba(255, 255, 255, 0.78);
-      --glass-strong: rgba(255, 255, 255, 0.92);
+      --bg: #f4f6f9;
       --card: #ffffff;
-      --accent: #ff6b00;
-      --accent-light: #fff6f0;
-      --accent-mid: #ffd4b0;
-      --teal: #2ec4a0;
-      --teal-light: rgba(46, 196, 160, 0.14);
-      --text: #1a1f1c;
-      --text-secondary: #5c6560;
-      --text-muted: #9aa39e;
-      --border: rgba(31, 77, 58, 0.08);
-      --success: #2ec4a0;
-      --success-light: #e8f9f3;
-      --danger: #ff3b30;
-      --danger-light: #fff0ef;
-      --warning: #ff9500;
-      --warning-light: #fff8ee;
-      --purple: #6b68e8;
-      --purple-light: #f3f2ff;
-      --tip-bg: #f3f2ff;
-      --tip-border: #d8d6f5;
-      --forest: #1f4d3a;
-      --mint: #d4f0e4;
-      --foam: #edf7f2;
-      --surface: #eef3f0;
-      --shadow: 0 8px 32px rgba(31, 77, 58, 0.06);
-      --phone-shadow: 0 24px 80px rgba(31, 77, 58, 0.12);
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --radius-sm: 12px;
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --accent-mid: #bfdbfe;
+      --head: #1e3a5f;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-input: #cbd5e1;
+      --success: #15803d;
+      --success-light: #f0fdf4;
+      --success-border: #bbf7d0;
+      --danger: #b91c1c;
+      --danger-light: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #b45309;
+      --warning-light: #fffbeb;
+      --warning-border: #fde68a;
+      --purple: #6366f1;
+      --surface-muted: #f1f5f9;
+      --tip-bg: #eff6ff;
+      --tip-border: #bfdbfe;
+      --tip-text: #1e40af;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --phone-border: #e2e8f0;
+      --radius: 8px;
+      --radius-sm: 6px;
+      --sans: 'Inter', system-ui, sans-serif;
+      --serif: 'Source Serif 4', Georgia, serif;
     }
 
     [data-theme='dark'] {
-      --bg: #000000;
-      --card: #1c1c1e;
-      --accent: #ff8a3d;
-      --accent-light: #2a1608;
-      --accent-mid: #4a280f;
-      --text: #ffffff;
-      --text-secondary: #aeaeb2;
-      --text-muted: #636366;
-      --border: #38383a;
-      --success: #30d158;
-      --success-light: #102817;
-      --danger: #ff453a;
-      --danger-light: #3d1512;
-      --warning: #ff9f0a;
-      --warning-light: #3d2e10;
-      --purple: #5e5ce6;
-      --purple-light: #1c1b33;
-      --tip-bg: #1e1b33;
-      --tip-border: #3a3566;
-      --forest: #7fd4a8;
-      --mint: #1a2e24;
-      --foam: #142018;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-      --phone-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      --bg: #0b1120;
+      --card: #151d2e;
+      --accent: #3b82f6;
+      --accent-light: #1e3a5f;
+      --accent-mid: #1d4ed8;
+      --head: #e2e8f0;
+      --text: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+      --border: #334155;
+      --border-input: #475569;
+      --success-light: #14532d;
+      --success-border: #166534;
+      --danger-light: #450a0a;
+      --danger-border: #991b1b;
+      --warning-light: #451a03;
+      --warning-border: #92400e;
+      --surface-muted: #1e293b;
+      --tip-bg: #1e3a5f;
+      --tip-border: #1d4ed8;
+      --tip-text: #93c5fd;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+      --phone-border: #334155;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background:
-        radial-gradient(circle at 10% 10%, rgba(212, 240, 228, 0.9), transparent 42%),
-        radial-gradient(circle at 90% 0%, rgba(240, 244, 255, 0.95), transparent 38%),
-        linear-gradient(180deg, #f7fbf9 0%, #f4f8f6 100%);
+      font-family: var(--sans);
+      background: linear-gradient(180deg, #eef2f7 0%, var(--bg) 100%);
       color: var(--text);
       min-height: 100vh;
       padding: 32px 20px 48px;
     }
 
-    [data-theme='dark'] body,
-    body[data-theme-shell='dark'] {
-      background: linear-gradient(135deg, #0d1f17 0%, #000 45%, #1a1008 100%);
-    }
+    [data-theme='dark'] body { background: linear-gradient(180deg, #0f172a 0%, var(--bg) 100%); }
 
     .page {
-      max-width: 1200px;
+      max-width: 1180px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 280px 1fr;
@@ -101,1017 +91,346 @@
 
     @media (max-width: 960px) {
       .page { grid-template-columns: 1fr; }
-      .sidebar { order: 2; }
     }
 
     .sidebar h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-family: var(--serif);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--head);
+      letter-spacing: -0.3px;
       margin-bottom: 6px;
     }
 
     .sidebar p {
       color: var(--text-secondary);
-      line-height: 1.5;
+      line-height: 1.55;
       font-size: 14px;
-      margin-bottom: 24px;
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
       margin-bottom: 20px;
     }
 
-    .btn {
-      border: 1px solid var(--border);
+    .controls, .screen-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+    .btn-nav {
+      border: 1px solid var(--border-input);
       background: var(--card);
       color: var(--text);
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 13px;
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.15s ease;
+      font-family: var(--sans);
     }
 
-    .btn:hover { border-color: var(--accent); color: var(--accent); }
-    .btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .screen-list {
-      display: grid;
-      gap: 8px;
-    }
+    .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-nav.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
     .legend {
-      margin-top: 24px;
-      padding: 16px;
+      padding: 14px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      font-size: 13px;
+      border-radius: var(--radius);
+      font-size: 12px;
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.65;
+      box-shadow: var(--shadow-sm);
     }
 
-    .legend strong { color: var(--text); }
+    .legend strong { color: var(--head); font-weight: 600; }
 
-    .device-wrap {
-      display: flex;
-      justify-content: center;
-      padding: 12px 0;
+    .swatch-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .swatch {
+      width: 28px; height: 28px; border-radius: 4px;
+      border: 1px solid var(--border);
     }
+
+    .device-wrap { display: flex; justify-content: center; padding: 8px 0; }
 
     .phone {
       width: 390px;
       height: 844px;
-      background:
-        radial-gradient(circle at 85% 8%, rgba(212, 240, 228, 0.55), transparent 34%),
-        radial-gradient(circle at 10% 18%, rgba(240, 244, 255, 0.65), transparent 30%),
-        linear-gradient(165deg, #f7fbf9 0%, #f4f8f6 55%, #fafcff 100%);
-      border-radius: 44px;
-      box-shadow: var(--phone-shadow);
-      border: 10px solid #eef2f0;
+      background: var(--bg);
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12);
+      border: 10px solid var(--phone-border);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    .phone::before,
-    .phone::after {
-      content: '';
-      position: absolute;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .phone::before {
-      width: 180px;
-      height: 180px;
-      top: 60px;
-      right: -40px;
-      background: rgba(212, 240, 228, 0.45);
-    }
-
-    .phone::after {
-      width: 140px;
-      height: 140px;
-      top: 220px;
-      left: -50px;
-      background: rgba(237, 247, 242, 0.8);
-    }
-
     .notch {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 126px;
-      height: 32px;
-      background: #eef2f0;
-      border-bottom-left-radius: 18px;
-      border-bottom-right-radius: 18px;
-      z-index: 20;
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 126px; height: 32px; background: var(--phone-border);
+      border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; z-index: 20;
     }
 
     .status-bar {
-      height: 44px;
-      padding: 12px 24px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-      z-index: 10;
+      height: 44px; padding: 12px 24px 0;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; font-weight: 600; z-index: 10;
     }
 
     .screen {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px 16px 100px;
-      display: none;
-      scrollbar-width: none;
-      position: relative;
-      z-index: 1;
+      flex: 1; overflow-y: auto; padding: 8px 16px 88px;
+      display: none; scrollbar-width: none;
     }
 
     .screen.active { display: block; }
     .screen::-webkit-scrollbar { display: none; }
 
-    .screen-title {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 4px;
+    .hidden-tabbar .screen { padding-bottom: 24px; }
+    .hidden-tabbar .tabbar { display: none; }
+
+    /* ── Clinical Calm components ── */
+    .doc-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.6px;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px;
     }
 
-    .screen-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
+    .doc-title {
+      font-family: var(--serif); font-size: 26px; font-weight: 700;
+      color: var(--head); letter-spacing: -0.3px; line-height: 1.15;
     }
+
+    .doc-meta { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+    .doc-header { margin-bottom: 12px; }
+    .doc-header.row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 
     .card {
-      background: var(--glass-strong);
-      backdrop-filter: blur(18px) saturate(160%);
-      -webkit-backdrop-filter: blur(18px) saturate(160%);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      border-radius: var(--radius-lg);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       padding: 16px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-sm);
       margin-bottom: 12px;
     }
 
-    .glass {
-      background: var(--glass);
-      backdrop-filter: blur(20px) saturate(170%);
-      -webkit-backdrop-filter: blur(20px) saturate(170%);
-      border: 1px solid rgba(255, 255, 255, 0.88);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
+    .card.flush { padding: 0; overflow: hidden; }
+
+    .card-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
     }
 
-    .row { display: flex; align-items: center; gap: 12px; }
-    .between { justify-content: space-between; }
-
-    .avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: var(--accent-light);
-      color: var(--accent);
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 18px;
+    .card-title {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
 
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--glass-strong);
-      color: var(--text);
+    .section-link { font-size: 13px; font-weight: 600; color: var(--accent); cursor: pointer; }
+
+    .section-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.7px;
+      margin: 4px 0 8px;
+    }
+
+    .kpi-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-top: 1px solid var(--border);
       font-size: 13px;
-      font-weight: 700;
-      margin-right: 8px;
-      margin-bottom: 8px;
-      box-shadow: var(--shadow);
     }
 
-    .chip.teal { border-color: rgba(46, 196, 160, 0.35); background: var(--teal-light); color: var(--forest); }
+    .kpi-row:first-child { border-top: none; padding-top: 0; }
+    .kpi-label { color: var(--text-secondary); flex: 1; }
+    .kpi-value { font-weight: 700; color: var(--head); font-variant-numeric: tabular-nums; }
 
-    .select-card {
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    .select-card.active {
-      border-color: rgba(46, 196, 160, 0.45);
-      background: var(--teal-light);
-    }
-
-    .primary-btn {
-      width: 100%;
-      background: linear-gradient(135deg, var(--teal) 0%, #3dd6a8 100%);
-      color: #fff;
-      border: none;
-      border-radius: 16px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 700;
-      margin-top: 8px;
-      box-shadow: 0 8px 24px rgba(46, 196, 160, 0.25);
-    }
-
-    .secondary-btn {
-      width: 100%;
-      background: var(--glass-strong);
-      color: var(--forest);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      margin-top: 8px;
-      box-shadow: var(--shadow);
-    }
-
-    .input {
-      width: 100%;
-      background: var(--glass-strong);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px 16px;
-      font-size: 16px;
-      color: var(--text);
-      box-shadow: var(--shadow);
-    }
-
-    .toggle {
-      flex: 1;
-      text-align: center;
-      padding: 12px 8px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--glass-strong);
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--text-secondary);
-      box-shadow: var(--shadow);
-    }
-
-    .toggle.active {
-      border-color: rgba(46, 196, 160, 0.45);
-      background: var(--teal-light);
-      color: var(--forest);
-    }
-
-    .hero-logo {
-      width: 72px;
-      height: 72px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, var(--teal) 0%, #7fd4a8 100%);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      margin: 12px auto;
-      box-shadow: 0 12px 28px rgba(46, 196, 160, 0.28);
-    }
-
-    .progress-dots {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-
-    .progress-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--border);
-    }
-
-    .progress-dot.active {
-      width: 22px;
-      background: var(--teal);
-    }
-
-    .list-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 0;
+    .hero-kpi {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding-bottom: 12px; margin-bottom: 4px;
       border-bottom: 1px solid var(--border);
     }
 
-    .list-row:last-child { border-bottom: none; }
-
-    .chevron { color: var(--text-muted); font-size: 18px; }
-
-    .sos-hero {
-      background: var(--glass);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 107, 100, 0.25);
-      border-radius: var(--radius-lg);
-      padding: 24px 16px;
-      text-align: center;
-      margin: 12px 0;
-      box-shadow: var(--shadow);
+    .hero-kpi-num {
+      font-size: 36px; font-weight: 700; color: var(--head);
+      font-variant-numeric: tabular-nums; line-height: 1;
     }
 
-    .sos-btn {
-      width: 112px;
-      height: 112px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, #ff5a4f, #ff3b30);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      margin: 16px auto;
-      font-size: 26px;
-      font-weight: 900;
-      box-shadow: 0 16px 40px rgba(255, 59, 48, 0.28);
+    .hero-kpi-sub { font-size: 14px; color: var(--text-muted); font-weight: 400; }
+
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600; border: 1px solid;
     }
 
-    .map-placeholder {
-      height: 160px;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      background: linear-gradient(135deg, var(--teal-light), var(--glass-strong));
-      display: grid;
-      place-items: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow);
+    .badge-ok { background: var(--success-light); border-color: var(--success-border); color: var(--success); }
+    .badge-warn { background: var(--warning-light); border-color: var(--warning-border); color: var(--warning); }
+    .badge-danger { background: var(--danger-light); border-color: var(--danger-border); color: var(--danger); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--radius-sm); font-family: var(--sans);
+      font-size: 14px; font-weight: 600; min-height: 44px;
+      padding: 10px 16px; border: none; cursor: pointer; width: 100%;
     }
 
-    .scanner-preview {
-      height: 120px;
-      border-radius: var(--radius-lg);
-      border: 1px dashed rgba(46, 196, 160, 0.45);
-      background: var(--teal-light);
-      display: grid;
-      place-items: center;
-      color: var(--forest);
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-
-    .streak-card {
-      background: linear-gradient(135deg, #fff6ee 0%, var(--glass-strong) 100%);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      margin-bottom: 12px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 12px 0;
-    }
-
-    .action-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      min-height: 108px;
-      box-shadow: var(--shadow);
-    }
-
-    .action-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .action-label { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .action-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin: 12px 0;
-    }
-
-    .stat {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 8px;
-      text-align: center;
-    }
-
-    .stat-num { font-size: 22px; font-weight: 800; color: var(--accent); }
-    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
-    .primary-btn {
-      width: 100%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 15px;
-      font-size: 16px;
-      font-weight: 700;
-      margin-top: 8px;
-    }
-
-    .secondary-btn {
-      width: 100%;
-      background: var(--accent-light);
-      color: var(--accent);
-      border: 1.5px solid var(--accent-mid);
-      border-radius: var(--radius-md);
-      padding: 13px;
-      font-size: 15px;
-      font-weight: 700;
-      margin-top: 8px;
-    }
-
-    .field-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin: 12px 0 6px;
-    }
+    .btn-sm { min-height: 36px; padding: 7px 12px; font-size: 12px; width: auto; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border-input); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row .btn { flex: 1; }
 
     .input {
-      width: 100%;
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 14px;
-      font-size: 16px;
-      color: var(--text);
+      width: 100%; background: var(--card);
+      border: 1px solid var(--border-input); border-radius: var(--radius-sm);
+      padding: 12px 14px; font-size: 15px; color: var(--text); font-family: var(--sans);
     }
 
     .toggle-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
+      display: flex; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--card); margin-bottom: 12px;
     }
 
     .toggle {
-      flex: 1;
-      text-align: center;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--border);
-      background: var(--card);
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--text-secondary);
+      flex: 1; text-align: center; padding: 11px 6px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      border-right: 1px solid var(--border); cursor: pointer;
     }
 
-    .toggle.active {
-      border-color: var(--accent);
-      background: var(--accent-light);
-      color: var(--accent);
-    }
+    .toggle:last-child { border-right: none; }
+    .toggle.active { background: var(--accent); color: #fff; }
 
-    .result-safe {
-      border: 1.5px solid #a8e6be;
-      background: #e8f9ed;
-      color: #1a7a3c;
-      border-radius: var(--radius-md);
-      padding: 14px;
-      margin: 12px 0;
-    }
-
-    .result-danger {
-      border: 1.5px solid #ffb3ae;
-      background: #ffebea;
-      color: #c41e12;
-      border-radius: var(--radius-md);
-      padding: 14px;
-      margin: 12px 0;
-    }
-
-    [data-theme='dark'] .result-safe {
-      background: var(--success-light);
-      border-color: #1f5c34;
-      color: var(--success);
-    }
-
-    [data-theme='dark'] .result-danger {
-      background: var(--danger-light);
-      border-color: #7a2018;
-      color: var(--danger);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .badge-demo { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning); }
-    .badge-high { background: var(--success-light); color: var(--success); }
-    .badge-danger { background: var(--danger-light); color: var(--danger); }
-
-    .tabbar {
-      position: absolute;
-      bottom: 14px;
-      left: 16px;
-      right: 16px;
-      height: 68px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(18px) saturate(160%);
-      -webkit-backdrop-filter: blur(18px) saturate(160%);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      border-radius: 28px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      padding: 8px 6px 10px;
-      z-index: 15;
-      box-shadow: var(--shadow);
-    }
-
-    .tab {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .tab.active { color: var(--teal); }
-    .tab.sos.active { color: var(--danger); }
-    .tab-icon { font-size: 20px; line-height: 1; }
-
-    .sos-hero {
-      background: linear-gradient(180deg, var(--danger-light), var(--card));
-      border: 1.5px solid var(--danger);
-      border-radius: var(--radius-lg);
-      padding: 24px 16px;
-      text-align: center;
-      margin: 16px 0;
-    }
-
-    .sos-btn {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: var(--danger);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      margin: 16px auto;
-      font-size: 28px;
-      font-weight: 900;
-      box-shadow: 0 12px 32px rgba(255, 59, 48, 0.35);
-    }
-
-    .disclaimer {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.5;
-      margin-top: 16px;
-    }
-
-    .section-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin: 16px 0 8px;
-    }
-
-    .map-placeholder {
-      height: 160px;
-      border-radius: var(--radius-lg);
-      border: 1px dashed var(--border);
-      background: linear-gradient(135deg, var(--success-light), var(--card));
-      display: grid;
-      place-items: center;
-      color: var(--text-muted);
-      font-size: 14px;
+    .segment {
+      display: flex; gap: 6px; padding: 4px;
+      background: var(--surface-muted); border-radius: var(--radius-sm);
       margin-bottom: 12px;
     }
 
-    .list-item {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
+    .segment-item {
+      flex: 1; text-align: center; padding: 8px;
+      border-radius: 4px; font-size: 13px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer;
     }
 
-    .list-item:last-child { border-bottom: none; }
-
-    .dot {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .hero-logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      background: var(--accent);
-      color: #fff;
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      margin: 12px auto;
-      box-shadow: 0 10px 24px rgba(255, 107, 0, 0.35);
-    }
-
-    .hidden-tabbar .tabbar { display: none; }
-    .hidden-tabbar .screen { padding-bottom: 24px; }
-    .wellness-card {
-      background: linear-gradient(160deg, var(--foam) 0%, var(--card) 55%);
-      border: 1.5px solid var(--mint);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow);
-    }
-
-    .wellness-head {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .score-ring {
-      --score: 68;
-      --score-color: var(--warning);
-      width: 88px;
-      height: 88px;
-      border-radius: 50%;
-      background: conic-gradient(var(--score-color) calc(var(--score) * 1%), var(--border) 0);
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      position: relative;
-    }
-
-    .score-ring::before {
-      content: '';
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      background: var(--card);
-      position: absolute;
-    }
-
-    .score-inner {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      line-height: 1.1;
-    }
-
-    .score-num {
-      font-size: 24px;
-      font-weight: 900;
-      color: var(--text);
-      letter-spacing: -0.5px;
-    }
-
-    .score-of {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .wellness-title {
-      font-size: 17px;
-      font-weight: 800;
-      margin-bottom: 4px;
-    }
-
-    .wellness-sub {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    .wellness-updated {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-
-    .factor-list {
-      display: grid;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .factor {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 12px;
-    }
-
-    .factor-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
-      display: grid;
-      place-items: center;
-      font-size: 15px;
-      flex-shrink: 0;
-    }
-
-    .factor-body { flex: 1; min-width: 0; }
-
-    .factor-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .factor-value {
-      font-size: 14px;
-      font-weight: 700;
-      margin-top: 2px;
-    }
-
-    .factor-badge {
-      font-size: 10px;
-      font-weight: 800;
-      padding: 4px 8px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      flex-shrink: 0;
-    }
-
-    .factor-badge.low { background: var(--success-light); color: var(--success); }
-    .factor-badge.mid { background: var(--warning-light); color: var(--warning); }
-    .factor-badge.high { background: var(--danger-light); color: var(--danger); }
-
-    .rec-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .rec-item {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      background: var(--tip-bg);
-      border: 1px solid var(--tip-border);
-      font-size: 13px;
-      line-height: 1.45;
-      color: var(--text-secondary);
-    }
-
-    .rec-item strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 13px; }
-
-    .sources-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .source-pill {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-    }
-
-    .dashboard-loading {
-      font-size: 13px;
-      color: var(--text-secondary);
-      text-align: center;
-      padding: 24px 8px;
-    }
-
-    .screen-title-sm {
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: -0.8px;
-      margin-bottom: 2px;
-    }
-
-    .today-sub {
-      font-size: 15px;
-      color: var(--text-secondary);
-      font-weight: 500;
-      margin-bottom: 12px;
-    }
-
-    .card-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .card-head-title {
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .card-head-link {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--teal);
-    }
-
-    .gauge-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-
-    .side-stat {
-      width: 64px;
-      text-align: center;
-    }
-
-    .side-num {
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    .side-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    .gauge-main {
-      width: 118px;
-      height: 118px;
-      border-radius: 50%;
-      border: 5px solid var(--teal);
-      display: grid;
-      place-items: center;
-      background: var(--surface);
-    }
-
-    .gauge-main-num {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-
-    .gauge-main-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .macro-row {
-      margin-bottom: 10px;
-    }
-
-    .macro-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .macro-track {
-      height: 6px;
-      border-radius: 999px;
-      background: var(--surface);
-      overflow: hidden;
-      margin-bottom: 4px;
-    }
-
-    .macro-fill {
-      height: 6px;
-      border-radius: 999px;
-      background: var(--teal);
-    }
-
-    .macro-fill.warn { background: var(--warning); }
-    .macro-fill.danger { background: var(--danger); }
-
-    .macro-value {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
+    .segment-item.active { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }
 
     .feed-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
     }
 
     .feed-row:last-child { border-bottom: none; }
-
     .feed-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 22px;
-      background: var(--teal-light);
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      background: var(--surface-muted); display: grid; place-items: center; font-size: 16px;
     }
 
     .feed-body { flex: 1; min-width: 0; }
+    .feed-title { font-size: 14px; font-weight: 600; }
+    .feed-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-    .feed-title {
-      font-size: 16px;
-      font-weight: 700;
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-input); background: var(--card);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      margin: 0 6px 6px 0;
     }
 
-    .feed-sub {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .chip.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+    .disclaimer {
+      font-size: 11px; color: var(--text-muted); text-align: center;
+      line-height: 16px; margin-top: 12px;
     }
 
-    .feed-add {
-      width: 40px;
-      height: 40px;
-      border-radius: 20px;
-      background: var(--glass-strong);
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      font-size: 22px;
-      font-weight: 300;
-      box-shadow: var(--shadow);
-      flex-shrink: 0;
+    .sos-top-btn {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      background: var(--danger-light); border: 1px solid var(--danger-border);
+      display: grid; place-items: center; font-size: 16px; flex-shrink: 0;
     }
 
-    .top-icons {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
+    .sos-call {
+      text-align: center; padding: 20px 16px;
+      border: 1px solid var(--danger-border); border-radius: var(--radius);
+      background: var(--danger-light); margin-bottom: 12px;
     }
 
-    .top-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 16px;
-      background: var(--glass-strong);
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      box-shadow: var(--shadow);
+    .sos-call-btn {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: var(--danger); color: #fff;
+      display: grid; place-items: center; margin: 12px auto;
+      font-size: 22px; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(185, 28, 28, 0.25);
+    }
+
+    .map-box {
+      height: 160px; border-radius: var(--radius); border: 1px solid var(--border);
+      background: var(--surface-muted); display: grid; place-items: center;
+      color: var(--text-muted); font-size: 13px; margin-bottom: 12px;
+    }
+
+    .result-danger {
+      border: 1px solid var(--danger-border); background: var(--danger-light);
+      border-radius: var(--radius-sm); padding: 14px; margin: 12px 0;
+      font-size: 13px; line-height: 1.5;
+    }
+
+    .hero-logo {
+      width: 64px; height: 64px; border-radius: var(--radius);
+      background: var(--accent); color: #fff;
+      display: grid; place-items: center; font-size: 28px;
+      margin: 16px auto 12px;
+    }
+
+    .progress-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 24px; }
+    .dot { width: 8px; height: 8px; border-radius: 4px; background: var(--border); }
+    .dot.active { width: 20px; background: var(--accent); }
+
+    .intro-slide { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px 8px; }
+    .intro-icon { width: 72px; height: 72px; border-radius: var(--radius); display: grid; place-items: center; font-size: 32px; }
+
+    .back-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .back-btn {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      background: var(--card); border: 1px solid var(--border);
+      display: grid; place-items: center; font-size: 18px; flex-shrink: 0; margin-top: 2px;
+    }
+
+    .list-pad { padding: 0 16px 14px; }
+
+    .tabbar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 72px; background: var(--card);
+      border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      padding: 8px 4px 16px; z-index: 15;
+    }
+
+    .tab {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; font-size: 10px; font-weight: 600; color: var(--text-muted); cursor: pointer;
+    }
+
+    .tab.active { color: var(--accent); }
+    .tab.sos.active { color: var(--danger); }
+    .tab-icon { font-size: 20px; line-height: 1; }
+
+    .interpret {
+      font-size: 13px; color: var(--text-secondary); line-height: 1.45;
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    }
+
+    .rec-card { gap: 6px; }
+    .rec-title { font-size: 14px; font-weight: 600; }
+    .rec-text { font-size: 13px; color: var(--text-secondary); line-height: 1.45; }
+
+    .plan-step { display: flex; gap: 10px; margin-top: 8px; font-size: 13px; color: var(--text-secondary); line-height: 1.45; }
+    .plan-num {
+      width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0;
+      background: var(--surface-muted); display: grid; place-items: center;
+      font-size: 11px; font-weight: 700; color: var(--head);
+    }
+
+    .banner-warn {
+      display: flex; gap: 8px; align-items: center;
+      background: var(--warning-light); border-color: var(--warning-border);
+      font-size: 13px; color: var(--warning); line-height: 1.4;
     }
   </style>
 </head>
@@ -1119,429 +438,393 @@
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет основных экранов мобильного приложения. Цвета и компоненты соответствуют теме из <code>apps/mobile</code>.</p>
+      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Соответствует реализованной теме в <code>apps/mobile</code> (PR #23).</p>
 
       <div class="controls">
-        <button class="btn" id="theme-light" type="button">☀️ Светлая</button>
-        <button class="btn" id="theme-dark" type="button">🌙 Тёмная</button>
+        <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
+        <button class="btn-nav" id="theme-dark" type="button">Тёмная</button>
       </div>
 
       <div class="screen-list" id="screen-list">
-        <button class="btn" data-screen="login">Вход</button>
-        <button class="btn" data-screen="onboarding-intro">Слайдер модулей</button>
-        <button class="btn" data-screen="onboarding">Онбординг</button>
-        <button class="btn" data-screen="home">Главная</button>
-        <button class="btn" data-screen="diary">Дневник</button>
-        <button class="btn" data-screen="doctor-report">Отчёт врачу</button>
-        <button class="btn" data-screen="scanner">Сканер</button>
-        <button class="btn" data-screen="market">Маркет</button>
-        <button class="btn" data-screen="map">Карта</button>
-        <button class="btn" data-screen="expert">Эксперт</button>
-        <button class="btn" data-screen="sos">SOS</button>
-        <button class="btn" data-screen="profiles">Профили</button>
-        <button class="btn" data-screen="settings">Настройки</button>
+        <button class="btn-nav" data-screen="login">Вход</button>
+        <button class="btn-nav" data-screen="onboarding-intro">Intro</button>
+        <button class="btn-nav" data-screen="onboarding">Онбординг</button>
+        <button class="btn-nav active" data-screen="home">Главная</button>
+        <button class="btn-nav" data-screen="diary">Дневник</button>
+        <button class="btn-nav" data-screen="doctor-report">Отчёт</button>
+        <button class="btn-nav" data-screen="scanner">Сканер</button>
+        <button class="btn-nav" data-screen="market">Маркет</button>
+        <button class="btn-nav" data-screen="map">Карта</button>
+        <button class="btn-nav" data-screen="expert">Эксперт</button>
+        <button class="btn-nav" data-screen="sos">SOS</button>
+        <button class="btn-nav" data-screen="profiles">Профили</button>
+        <button class="btn-nav" data-screen="settings">Настройки</button>
       </div>
 
       <div class="legend">
-        <strong>Палитра</strong><br />
-        Accent <span style="color:var(--accent)">#FF6B00</span> · Success · Danger · iOS gray bg<br /><br />
-        <strong>Стиль</strong> — светлый glass UI по референсу: «Сегодня», сводка, лента дневника<br />
-        <strong>Шрифт</strong> — SF Pro / system-ui<br />
-        <strong>Радиусы</strong> — 12–18px, pill chips<br />
-        <strong>Tab bar</strong> — 6 вкладок, SOS красный
+        <strong>Clinical Calm</strong><br />
+        Фон <code>#F4F6F9</code> · KPI/заголовки <code>#1E3A5F</code> · Actions <code>#2563EB</code> · SOS <code>#B91C1C</code><br /><br />
+        <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
+        <strong>Карточки</strong> — плоские, radius 6–8px, без glass<br />
+        <strong>Tab bar</strong> — 4 вкладки: Главная · Дневник · Сканер · SOS<br />
+        <strong>Header</strong> — <code>AllerGuide · {раздел}</code> + serif title
+        <div class="swatch-row">
+          <span class="swatch" style="background:#F4F6F9" title="bg"></span>
+          <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
+          <span class="swatch" style="background:#1E3A5F" title="head"></span>
+          <span class="swatch" style="background:#2563EB" title="accent"></span>
+          <span class="swatch" style="background:#B91C1C" title="danger"></span>
+        </div>
       </div>
     </aside>
 
     <div class="device-wrap">
       <div class="phone" id="phone">
         <div class="notch"></div>
-        <div class="status-bar">
-          <span>9:41</span>
-          <span>LTE · 100%</span>
-        </div>
+        <div class="status-bar"><span>9:41</span><span>LTE · 100%</span></div>
 
         <!-- LOGIN -->
         <section class="screen" id="screen-login">
-          <div class="hero-logo">🌿</div>
-          <h2 class="screen-title-sm" style="text-align:center">Вход</h2>
-          <p class="today-sub" style="text-align:center;margin-bottom:16px">Войдите по телефону или email</p>
-          <div class="glass card">
-            <div class="toggle-row">
-              <div class="toggle active">📞 Телефон</div>
-              <div class="toggle">✉️ Email</div>
-            </div>
-            <div class="field-label">Номер телефона</div>
-            <input class="input" value="+7 999 123-45-67" readonly />
-            <div class="field-label">Пароль</div>
-            <input class="input" type="password" value="••••••••" readonly />
-            <button class="primary-btn">Войти</button>
+          <div class="hero-logo">➕</div>
+          <div class="doc-header" style="text-align:center;margin-bottom:20px">
+            <div class="doc-title">Вход</div>
+            <div class="doc-meta">Войдите по телефону или email</div>
           </div>
-          <p class="disclaimer">Нет аккаунта? <strong style="color:var(--teal)">Зарегистрироваться</strong></p>
+          <div class="card">
+            <div class="toggle-row">
+              <div class="toggle active">Телефон</div>
+              <div class="toggle">Email</div>
+            </div>
+            <div class="section-label">Номер телефона</div>
+            <input class="input" value="+7 999 123-45-67" readonly />
+            <div class="section-label">Пароль</div>
+            <input class="input" type="password" value="••••••••" readonly />
+            <button class="btn btn-primary" style="margin-top:12px">Войти</button>
+          </div>
+          <p class="disclaimer">Нет аккаунта? <strong style="color:var(--accent)">Зарегистрироваться</strong></p>
         </section>
 
-        <!-- ONBOARDING INTRO -->
+        <!-- INTRO -->
         <section class="screen" id="screen-onboarding-intro">
           <div class="progress-dots">
-            <span class="progress-dot active"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
+            <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
           </div>
-          <div class="hero-logo">📔</div>
-          <h2 class="screen-title-sm" style="text-align:center">Персональный дневник</h2>
-          <p class="today-sub" style="text-align:center">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</p>
-          <button class="primary-btn">Далее</button>
-          <p class="disclaimer">5 модулей + экспертный раздел проф. Смолкина Ю.С.</p>
+          <div class="intro-slide">
+            <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">📔</div>
+            <div class="doc-title">Персональный дневник</div>
+            <div class="doc-meta">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</div>
+          </div>
+          <button class="btn btn-primary">Далее</button>
+          <p class="disclaimer" style="margin-top:12px">Пропустить</p>
         </section>
 
         <!-- ONBOARDING -->
         <section class="screen" id="screen-onboarding">
-          <div class="hero-logo">🌿</div>
-          <h2 class="screen-title-sm" style="text-align:center">AllerGuide</h2>
-          <p class="today-sub" style="text-align:center">Персональный помощник в контроле аллергии</p>
-          <div class="section-label">Для кого ведём записи?</div>
-          <div class="glass card row select-card">
-            <div class="avatar" style="background:var(--teal-light);color:var(--forest)">👤</div>
-            <div style="flex:1"><strong>Только для себя</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Личный дневник и сканер</span></div>
-            <span class="chevron">›</span>
+          <div class="hero-logo">🩺</div>
+          <div class="doc-header" style="text-align:center;margin-bottom:16px">
+            <div class="doc-title">AllerGuide</div>
+            <div class="doc-meta">Персональный помощник в контроле аллергии</div>
           </div>
-          <div class="glass card row select-card active">
-            <div class="avatar" style="background:var(--teal-light);color:var(--forest)">👨‍👩‍👧</div>
-            <div style="flex:1"><strong>Для себя и ребёнка</strong><br /><span style="font-size:13px;color:var(--text-secondary)">Несколько профилей</span></div>
-            <span class="chevron">›</span>
+          <div class="section-label">Для кого ведём записи?</div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer">
+            <div class="feed-icon">👤</div>
+            <div style="flex:1"><strong>Только для себя</strong><div class="feed-sub">Личный дневник и сканер</div></div>
+            <span style="color:var(--text-muted)">›</span>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer;border-color:var(--accent)">
+            <div class="feed-icon">👨‍👩‍👧</div>
+            <div style="flex:1"><strong>Для себя и ребёнка</strong><div class="feed-sub">Несколько профилей</div></div>
+            <span style="color:var(--text-muted)">›</span>
           </div>
           <p class="disclaimer">Информация носит рекомендательный характер и не заменяет консультацию врача.</p>
         </section>
 
         <!-- HOME -->
         <section class="screen active" id="screen-home">
-          <div class="row between" style="margin-bottom:4px">
-            <div class="top-icons">
-              <div class="top-icon">🌿</div>
-              <div class="top-icon">📅</div>
-            </div>
-            <div class="avatar" style="background:var(--danger-light);color:var(--danger);width:40px;height:40px;border-radius:20px">🚑</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="doc-label">AllerGuide · Сводка</div>
+            <div class="sos-top-btn">🚑</div>
+          </div>
+          <div class="doc-header">
+            <div class="doc-title">Сегодня</div>
+            <div class="doc-meta" id="home-meta">20 июня · Профиль: Анна</div>
           </div>
 
-          <h2 class="screen-title-sm">Сегодня</h2>
-          <div class="today-sub" id="profile-allergens">Профиль · Анна · Молоко, Берёза</div>
+          <div class="segment">
+            <div class="segment-item active">Анна</div>
+            <div class="segment-item">Миша</div>
+            <div class="segment-item">＋</div>
+          </div>
 
-          <div class="glass card" style="padding:18px;margin-bottom:14px" id="wellness-dashboard">
+          <div class="card" id="wellness-card">
             <div class="card-head">
-              <div class="card-head-title">Сводка самочувствия</div>
-              <div class="card-head-link">Подробности</div>
-            </div>
-            <div class="dashboard-loading" id="wellness-loading">Загрузка Open-Meteo…</div>
-            <div id="wellness-content" hidden>
-              <div class="gauge-row">
-                <div class="side-stat"><div class="side-num" id="side-pollen">↑</div><div class="side-label">Пыльца</div></div>
-                <div class="gauge-main" id="score-ring">
-                  <div class="score-inner" style="position:static">
-                    <div class="gauge-main-num" id="score-num">—</div>
-                    <div class="gauge-main-label">индекс</div>
-                  </div>
-                </div>
-                <div class="side-stat"><div class="side-num" id="side-aqi">OK</div><div class="side-label">Воздух</div></div>
+              <span class="card-title">Самочувствие</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="badge badge-warn" id="wellness-badge">Умеренно</span>
+                <span class="section-link">Подробности</span>
               </div>
-              <div style="font-size:13px;color:var(--text-secondary);line-height:1.45;margin-bottom:12px"><strong id="wellness-status">—</strong> · <span id="wellness-summary">—</span></div>
-              <div id="macro-list"></div>
-              <div class="rec-list" id="rec-list" style="margin-top:10px"></div>
-              <div class="wellness-updated" id="wellness-updated" style="font-size:11px;color:var(--text-muted);margin-top:8px">—</div>
+            </div>
+            <div id="wellness-loading" class="doc-meta" style="text-align:center;padding:16px">Загрузка Open-Meteo…</div>
+            <div id="wellness-body" hidden>
+              <div class="hero-kpi">
+                <span class="kpi-label" style="font-weight:600;color:var(--text)">Индекс</span>
+                <span class="hero-kpi-num"><span id="score-num">—</span><span class="hero-kpi-sub"> / 100</span></span>
+              </div>
+              <div id="kpi-rows"></div>
+              <div class="interpret" id="wellness-summary">—</div>
             </div>
           </div>
 
-          <div class="card-head">
-            <div class="card-head-title">Дневник</div>
-            <div class="card-head-link">Больше</div>
-          </div>
-          <div class="glass" style="margin-bottom:14px">
+          <div class="card flush">
+            <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px">
+              <span class="card-title">Дневник</span>
+              <span class="section-link">Больше</span>
+            </div>
             <div class="feed-row">
               <div class="feed-icon">💓</div>
-              <div class="feed-body"><div class="feed-title">Симптомы →</div><div class="feed-sub">Зуд кожи · 14:30</div></div>
-              <div class="feed-add">+</div>
+              <div class="feed-body"><div class="feed-title">Симптомы</div><div class="feed-sub">Зуд кожи · 14:30</div></div>
+              <button class="btn btn-primary btn-sm">Запись</button>
             </div>
             <div class="feed-row">
               <div class="feed-icon">🍽</div>
-              <div class="feed-body"><div class="feed-title">Питание →</div><div class="feed-sub">Овсянка, яблоко · 09:15</div></div>
-              <div class="feed-add">+</div>
+              <div class="feed-body"><div class="feed-title">Питание</div><div class="feed-sub">Овсянка, яблоко · 09:15</div></div>
+              <button class="btn btn-primary btn-sm">Запись</button>
             </div>
             <div class="feed-row">
               <div class="feed-icon">💊</div>
-              <div class="feed-body"><div class="feed-title">Лекарство →</div><div class="feed-sub">Отметить приём</div></div>
-              <div class="feed-add">+</div>
+              <div class="feed-body"><div class="feed-title">Лекарство</div><div class="feed-sub">Отметить приём</div></div>
+              <button class="btn btn-primary btn-sm">Запись</button>
             </div>
           </div>
 
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">📷 Сканер</span>
-            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🗺️ Карта</span>
-            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🛒 Маркет</span>
-            <span class="chip" style="background:var(--glass-strong);border-color:var(--border);color:var(--text)">🎓 Эксперт</span>
+          <div class="card rec-card" id="rec-card" hidden>
+            <div class="rec-title" id="rec-title">—</div>
+            <div class="rec-text" id="rec-text">—</div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-secondary">Сканер</button>
+            <button class="btn btn-secondary">Карта</button>
           </div>
           <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
         </section>
 
         <!-- DIARY -->
         <section class="screen" id="screen-diary">
-          <h2 class="screen-title-sm">Дневник</h2>
-          <p class="today-sub">Пошаговые записи наблюдений</p>
-          <button class="primary-btn">＋ Новая запись по шагам</button>
-          <div class="section-label">Быстрое добавление</div>
-          <div>
-            <span class="chip teal">💓 Симптомы</span>
-            <span class="chip">💊 Лекарство</span>
-            <span class="chip">🍽 Питание</span>
-            <span class="chip">📈 ПСВ</span>
-            <span class="chip">💉 АСИТ</span>
-            <span class="chip">📅 Визит</span>
-            <span class="chip">⚠️ Триггер</span>
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Наблюдения</div>
+            <div class="doc-title">Дневник</div>
+            <div class="doc-meta">Пошаговые записи наблюдений</div>
           </div>
-          <div class="section-label">История записей</div>
-          <div class="glass" style="margin-bottom:14px">
+          <div class="segment"><div class="segment-item active">Анна</div><div class="segment-item">Миша</div></div>
+          <button class="btn btn-primary">＋ Новая запись</button>
+          <div class="section-label">Быстрое добавление</div>
+          <div><span class="chip active">💓 Симптомы</span><span class="chip">💊 Лекарство</span><span class="chip">🍽 Питание</span></div>
+          <div class="section-label">История</div>
+          <div class="card flush">
             <div class="feed-row">
-              <div class="feed-icon" style="background:var(--danger-light);color:var(--danger)">💓</div>
-              <div class="feed-body">
-                <div class="feed-title">Симптомы</div>
-                <div class="feed-sub">Зуд кожи, лёгкая отёчность</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">18 июня · 14:30</div>
-              </div>
-              <span class="chevron">›</span>
+              <div class="feed-icon">💓</div>
+              <div class="feed-body"><div class="feed-title">Симптомы</div><div class="feed-sub">Зуд кожи · 18 июня</div></div>
+              <span style="color:var(--text-muted)">›</span>
             </div>
             <div class="feed-row">
               <div class="feed-icon">🍽</div>
-              <div class="feed-body">
-                <div class="feed-title">Питание</div>
-                <div class="feed-sub">Овсянка на воде, яблоко</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">18 июня · 09:15</div>
-              </div>
-              <span class="chevron">›</span>
+              <div class="feed-body"><div class="feed-title">Питание</div><div class="feed-sub">Овсянка, яблоко · 18 июня</div></div>
+              <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
-          <p class="disclaimer">Дневник отражает только наблюдения пользователя и не заменяет медицинскую документацию.</p>
+          <p class="disclaimer">Дневник отражает только наблюдения пользователя.</p>
         </section>
 
         <!-- DOCTOR REPORT -->
         <section class="screen" id="screen-doctor-report">
-          <h2 class="screen-title-sm">Отчёт для врача</h2>
-          <p class="today-sub">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</p>
+          <div class="back-row">
+            <div class="back-btn">‹</div>
+            <div>
+              <div class="doc-label">AllerGuide · Отчёт</div>
+              <div class="doc-title">Отчёт для врача</div>
+              <div class="doc-meta">PDF с логотипом АДАИР</div>
+            </div>
+          </div>
+          <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="section-label">Период</div>
           <div class="toggle-row">
-            <div class="toggle">7 дн.</div>
-            <div class="toggle">14 дн.</div>
-            <div class="toggle active">30 дн.</div>
+            <div class="toggle">7 дн.</div><div class="toggle">14 дн.</div><div class="toggle active">30 дн.</div>
           </div>
-          <div class="section-label">Блоки</div>
-          <div class="glass" style="margin-bottom:14px">
-            <div class="feed-row"><span>☑ Симптомы</span><span style="color:var(--teal)">☑</span></div>
-            <div class="feed-row"><span>☑ Пикфлоуметрия</span><span style="color:var(--teal)">☑</span></div>
-            <div class="feed-row"><span>☑ АСИТ</span><span style="color:var(--teal)">☑</span></div>
-            <div class="feed-row"><span>☑ Питание и триггеры</span><span style="color:var(--teal)">☑</span></div>
+          <div class="section-label">Блоки отчёта</div>
+          <div class="card flush">
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Симптомы</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пикфлоуметрия</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Питание и триггеры</span></div>
           </div>
-          <button class="primary-btn">Сформировать PDF</button>
+          <button class="btn btn-primary">Сформировать PDF</button>
           <p class="disclaimer">Отчёт не является медицинской документацией.</p>
         </section>
 
         <!-- SCANNER -->
         <section class="screen" id="screen-scanner">
-          <h2 class="screen-title-sm">Сканер</h2>
-          <p class="today-sub">Open Food Facts + проверка по ключевым словам</p>
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Сканер</div>
+            <div class="doc-title">Сканер</div>
+            <div class="doc-meta">Open Food Facts + проверка состава</div>
+          </div>
+          <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
-            <div class="toggle active">🥫 Продукт</div>
-            <div class="toggle">🍽 Меню</div>
-            <div class="toggle">💊 Лекарство</div>
-            <div class="toggle">🧴 Косметика</div>
+            <div class="toggle active">Продукт</div><div class="toggle">Меню</div><div class="toggle">Лекарство</div><div class="toggle">Косметика</div>
           </div>
-          <div class="glass card row between">
-            <div>
-              <strong>Сканировать штрихкод</strong>
-              <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">Поиск состава в Open Food Facts</div>
-            </div>
-            <span class="chevron">›</span>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Сканировать штрихкод</strong><div class="feed-sub">Open Food Facts</div></div>
+            <span style="color:var(--text-muted)">›</span>
           </div>
-          <div class="glass card">
-            <div class="field-label">Или введите состав вручную</div>
+          <div class="card">
+            <div class="section-label">Состав вручную</div>
             <input class="input" value="молоко, сахар, какао" readonly />
-            <button class="primary-btn" style="margin-top:12px">Проверить</button>
+            <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
           </div>
-          <div class="glass card" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light)">
-            <strong>⚠️ Есть совпадения</strong>
-            <p style="font-size:13px;margin-top:6px;line-height:1.5;color:var(--text-secondary)">Обнаружено: <strong>Молоко</strong>. Результат основан на ключевых словах и не заменяет чтение этикетки.</p>
-          </div>
-          <div class="section-label">История</div>
-          <div class="glass card row between">
-            <div>
-              <strong>Йогурт натуральный</strong>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:4px">17 июня · openfoodfacts</div>
-            </div>
-            <span class="badge badge-danger">Риск</span>
-          </div>
+          <div class="result-danger"><strong>⚠ Есть совпадения</strong><br />Обнаружено: <strong>Молоко</strong>. Результат не заменяет чтение этикетки.</div>
+          <p class="disclaimer">Сканер использует ключевые слова и Open Food Facts.</p>
         </section>
 
         <!-- MARKET -->
         <section class="screen" id="screen-market">
-          <h2 class="screen-title-sm">Маркет</h2>
-          <p class="today-sub">Подборка для вашего профиля</p>
-          <div class="glass card row">
-            <div class="dot" style="background:var(--purple-light);color:var(--purple)">💨</div>
-            <div style="flex:1">
-              <div class="row between"><strong>Очиститель HEPA</strong><span class="badge badge-high">Воздух</span></div>
-              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Снижает концентрацию пыльцы и аллергенов</p>
-            </div>
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Маркет</div>
+            <div class="doc-title">Маркет</div>
+            <div class="doc-meta">Товары для аллергиков</div>
           </div>
-          <div class="glass card row">
-            <div class="dot" style="background:var(--success-light);color:var(--success)">🥛</div>
-            <div style="flex:1">
-              <div class="row between"><strong>Овсяное молоко</strong><span class="badge badge-high">Питание</span></div>
-              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Альтернатива коровьему молоку</p>
-            </div>
+          <div class="segment"><div class="segment-item active">Анна</div></div>
+          <div class="card" style="padding:12px"><input class="input" style="border:none;padding:0" placeholder="Поиск по каталогу…" readonly /></div>
+          <div class="card banner-warn">⭐ Подборка на основе профиля аллергий</div>
+          <div class="card" style="display:flex;gap:14px;align-items:center">
+            <div class="feed-icon" style="background:#6366f118;color:var(--purple)">💨</div>
+            <div style="flex:1"><strong>Очиститель HEPA</strong><div class="feed-sub">Снижает концентрацию аллергенов</div></div>
+            <span style="color:var(--text-muted)">›</span>
           </div>
-          <div class="glass card row">
-            <div class="dot" style="background:var(--danger-light);color:var(--danger)">💉</div>
-            <div style="flex:1">
-              <div class="row between"><strong>Чехол для автоинжектора</strong><span class="badge badge-high">SOS</span></div>
-              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.4">Удобное хранение экстренного препарата</p>
-            </div>
-          </div>
+          <p class="disclaimer">Рекомендации не заменяют назначения врача.</p>
         </section>
 
         <!-- MAP -->
         <section class="screen" id="screen-map">
-          <h2 class="screen-title-sm">Карта мест</h2>
-          <p class="today-sub">3 слоя по ТЗ v13</p>
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Карта</div>
+            <div class="doc-title">Карта мест</div>
+            <div class="doc-meta">3 слоя по ТЗ v13</div>
+          </div>
+          <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
-            <div class="toggle active">🍽 Рестораны</div>
-            <div class="toggle">🌿 Пыление</div>
-            <div class="toggle">🏥 АДАИР</div>
+            <div class="toggle active">Рестораны</div><div class="toggle">Пыление</div><div class="toggle">АДАИР</div>
           </div>
-          <div class="map-placeholder">🗺️ Интерактивная карта (native)</div>
+          <div class="map-box">🗺️ Интерактивная карта (native)</div>
           <div class="section-label">Рекомендованные места</div>
-          <div class="glass card row">
-            <div class="dot" style="background:var(--success-light);color:var(--success)">🌿</div>
+          <div class="card" style="display:flex;gap:14px;align-items:center">
+            <div class="feed-icon" style="background:var(--success-light);color:var(--success)">🌿</div>
             <div style="flex:1">
-              <div class="row between">
-                <strong>Green Bowl Cafe</strong>
-                <span class="badge badge-high">Высокий</span>
-              </div>
-              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px">Меню с маркировкой аллергенов · 350 м</p>
+              <div style="display:flex;gap:8px;align-items:center"><strong>Green Bowl Cafe</strong><span class="badge badge-ok">Высокий</span></div>
+              <div class="feed-sub">Меню с маркировкой аллергенов</div>
             </div>
           </div>
-          <div class="glass card row">
-            <div class="dot" style="background:var(--warning-light);color:var(--warning)">🍽</div>
-            <div style="flex:1">
-              <div class="row between">
-                <strong>Simple Family Kitchen</strong>
-                <span class="badge" style="background:var(--warning-light);color:var(--warning)">Средний</span>
-              </div>
-              <p style="font-size:13px;color:var(--text-secondary);margin-top:6px">Уточняйте состав у официанта · 1.2 км</p>
-            </div>
-          </div>
+          <p class="disclaimer">Информация о местах носит ориентировочный характер.</p>
         </section>
 
         <!-- EXPERT -->
         <section class="screen" id="screen-expert">
-          <h2 class="screen-title-sm">Эксперт</h2>
-          <p class="today-sub">д.м.н., проф. Юрий Соломонович Смолкин · Президент АДАИР</p>
-          <div class="glass card" style="text-align:center">
-            <div class="hero-logo" style="width:52px;height:52px;font-size:22px;margin:0 auto 8px">🎓</div>
-            <strong>Главный медицинский эксперт АллерГайд</strong>
-            <p style="font-size:13px;color:var(--text-secondary);margin-top:6px;line-height:1.5">Научный руководитель НККЦ</p>
+          <div class="back-row">
+            <div class="back-btn">‹</div>
+            <div>
+              <div class="doc-label">AllerGuide · Эксперт</div>
+              <div class="doc-title">Эксперт</div>
+              <div class="doc-meta">проф. Смолкин Ю.С. · АДАИР</div>
+            </div>
           </div>
-          <div class="section-label">Материалы</div>
-          <div class="glass card row between"><div><strong>Рекомендации по поллинозу</strong><br /><span style="font-size:12px;color:var(--text-muted)">Сезонные советы</span></div><span class="chevron">›</span></div>
-          <div class="glass card row between"><div><strong>Календарь пыления</strong><br /><span style="font-size:12px;color:var(--text-muted)">По регионам России</span></div><span class="chevron">›</span></div>
-          <div class="glass card row between"><div><strong>Перекрёстные реакции</strong><br /><span style="font-size:12px;color:var(--text-muted)">Справочник аллергенов</span></div><span class="chevron">›</span></div>
-          <div class="glass card row between"><div><strong>АСИТ для пациентов</strong><br /><span style="font-size:12px;color:var(--text-muted)">Общая информация</span></div><span class="chevron">›</span></div>
-          <p class="disclaimer">Контент носит информационный характер и не является медицинским назначением.</p>
+          <div class="card" style="text-align:center">
+            <div class="hero-logo" style="width:48px;height:48px;font-size:22px;margin:0 auto 8px">🎓</div>
+            <div class="feed-sub">Главный медицинский эксперт AllerGuide</div>
+          </div>
+          <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px">
+            <span class="chip active">Рекомендации</span><span class="chip">Пыление</span><span class="chip">АСИТ</span>
+          </div>
+          <div class="card"><strong>Рекомендации по поллинозу</strong><div class="feed-sub">Сезонные советы</div></div>
+          <div class="card"><strong>Календарь пыления</strong><div class="feed-sub">По регионам России</div></div>
+          <p class="disclaimer">Контент носит информационный характер.</p>
         </section>
 
         <!-- SOS -->
         <section class="screen" id="screen-sos">
-          <h2 class="screen-title-sm">SOS</h2>
-          <p class="today-sub">Экстренная помощь при аллергии</p>
-          <div class="sos-hero">
-            <div style="font-size:14px;color:var(--text-secondary)">Профиль: Анна · 35 лет</div>
-            <div class="sos-btn">SOS</div>
-            <div style="font-size:13px;color:var(--text-secondary)">Нажмите для вызова <strong>103</strong></div>
-          </div>
-          <div class="section-label">Аллергены</div>
-          <div>
-            <span class="chip" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light);color:var(--danger)">Молоко</span>
-            <span class="chip" style="border-color:rgba(255,59,48,0.25);background:var(--danger-light);color:var(--danger)">Арахис</span>
-          </div>
-          <div class="section-label">Экстренные контакты</div>
-          <div class="glass card">
-            <div class="row between">
-              <div><strong>Мама</strong><br /><span style="font-size:13px;color:var(--text-secondary)">+7 999 000-00-01</span></div>
-              <span>📞</span>
+          <div class="doc-header row">
+            <div>
+              <div class="doc-label">AllerGuide · SOS</div>
+              <div class="doc-title">SOS</div>
+              <div class="doc-meta">Экстренная помощь при аллергии</div>
             </div>
+            <button class="btn btn-secondary btn-sm">Изменить</button>
           </div>
-          <div class="glass card">
-            <strong>План действий</strong>
-            <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;line-height:1.5">Автоинжектор в сумке. При отёке губ — эпинефрин, затем вызов скорой.</p>
+          <div class="segment"><div class="segment-item active">Анна</div></div>
+          <div class="card">
+            <div class="kpi-row" style="border:none;padding-top:0"><span class="kpi-label">Имя</span><span class="kpi-value">Анна</span></div>
+            <div class="kpi-row"><span class="kpi-label">Возраст</span><span class="kpi-value">35</span></div>
+            <div class="kpi-row"><span class="kpi-label">Аллергены</span><span><span class="badge badge-danger">Молоко</span> <span class="badge badge-danger">Арахис</span></span></div>
           </div>
+          <div class="sos-call">
+            <div class="doc-meta">Экстренный вызов</div>
+            <div class="sos-call-btn">103</div>
+            <button class="btn btn-danger">Позвонить 103</button>
+          </div>
+          <div class="section-label">План действий</div>
+          <div class="card">
+            <div class="plan-step"><span class="plan-num">1</span><span>Автоинжектор в сумке — использовать при отёке губ</span></div>
+            <div class="plan-step"><span class="plan-num">2</span><span>Вызвать скорую помощь</span></div>
+          </div>
+          <p class="disclaimer">Информация внесена пользователем и не является медицинским назначением.</p>
         </section>
 
         <!-- PROFILES -->
         <section class="screen" id="screen-profiles">
-          <h2 class="screen-title-sm">Мои профили</h2>
-          <p class="today-sub">Редактирование и удаление</p>
-          <div class="glass card">
-            <div class="row between">
-              <div class="row">
-                <div class="avatar" style="background:var(--teal-light);color:var(--forest)">А</div>
-                <div>
-                  <strong>Анна</strong>
-                  <div style="font-size:12px;color:var(--text-secondary)">Я · 1990</div>
-                  <div style="font-size:12px;color:var(--text-muted)">Молоко, Арахис, Берёза</div>
-                </div>
-              </div>
-              <span class="chevron">›</span>
-            </div>
-            <div class="row" style="margin-top:12px;gap:8px">
-              <button class="secondary-btn" style="margin:0;flex:1;padding:10px">Изменить</button>
-              <button class="secondary-btn" style="margin:0;flex:1;padding:10px;color:var(--danger);border-color:var(--danger);background:var(--danger-light)">Удалить</button>
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Профили</div>
+            <div class="doc-title">Мои профили</div>
+            <div class="doc-meta">Редактирование и удаление</div>
+          </div>
+          <div class="card flush">
+            <div class="feed-row">
+              <div class="feed-icon">А</div>
+              <div class="feed-body"><div class="feed-title">Анна</div><div class="feed-sub">Я · 1990 · Молоко, Берёза</div></div>
+              <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
-          <div class="glass card row between">
-            <div class="row">
-              <div class="avatar" style="background:var(--teal-light);color:var(--forest)">М</div>
-              <div>
-                <strong>Миша</strong>
-                <div style="font-size:12px;color:var(--text-secondary)">Ребёнок · 2018</div>
-                <div style="font-size:12px;color:var(--text-muted)">Яйца</div>
-              </div>
+          <div class="card flush">
+            <div class="feed-row">
+              <div class="feed-icon">М</div>
+              <div class="feed-body"><div class="feed-title">Миша</div><div class="feed-sub">Ребёнок · 2018 · Яйца</div></div>
+              <span style="color:var(--text-muted)">›</span>
             </div>
-            <span class="chevron">›</span>
           </div>
-          <button class="secondary-btn">＋ Добавить профиль</button>
-          <button class="secondary-btn" style="color:var(--danger);border-color:var(--danger);background:var(--danger-light)">Удалить аккаунт и все данные</button>
+          <button class="btn btn-secondary">＋ Добавить профиль</button>
         </section>
 
         <!-- SETTINGS -->
         <section class="screen" id="screen-settings">
-          <h2 class="screen-title-sm">Настройки</h2>
-          <p class="today-sub">SOS, резервные копии и документы</p>
+          <div class="back-row">
+            <div class="back-btn">‹</div>
+            <div>
+              <div class="doc-label">AllerGuide · Настройки</div>
+              <div class="doc-title">Настройки</div>
+              <div class="doc-meta">SOS, синхронизация и напоминания</div>
+            </div>
+          </div>
           <div class="section-label">Экстренный вызов</div>
-          <div class="glass card">
-            <div class="field-label">Номер SOS</div>
+          <div class="card">
+            <div class="feed-sub" style="margin-bottom:8px">Номер для кнопки SOS</div>
             <input class="input" value="103" readonly />
-            <button class="primary-btn" style="margin-top:12px">Сохранить номер</button>
+            <button class="btn btn-primary" style="margin-top:10px">Сохранить номер</button>
           </div>
-          <div class="section-label">Локальная резервная копия</div>
-          <div class="glass card">
-            <p style="font-size:13px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Экспорт JSON с профилями, дневником и историей сканов.</p>
-            <button class="primary-btn">Экспортировать данные</button>
-            <button class="secondary-btn">Импортировать из файла</button>
+          <div class="section-label">Облачная копия</div>
+          <div class="card">
+            <button class="btn btn-primary">Загрузить резервную копию</button>
+            <button class="btn btn-secondary" style="margin-top:8px">Скачать резервную копию</button>
           </div>
-          <div class="section-label">Юридическая информация</div>
-          <div class="glass card row between"><span>Политика конфиденциальности</span><span class="chevron">›</span></div>
-          <div class="glass card row between"><span>Условия использования</span><span class="chevron">›</span></div>
           <div class="section-label">Тема</div>
           <div class="toggle-row">
-            <div class="toggle">☀️ Светлая</div>
-            <div class="toggle">🌙 Тёмная</div>
-            <div class="toggle active">⚙️ Системная</div>
+            <div class="toggle active">Светлая</div><div class="toggle">Тёмная</div><div class="toggle">Системная</div>
           </div>
         </section>
 
@@ -1549,8 +832,6 @@
           <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Главная</div>
           <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Дневник</div>
           <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Сканер</div>
-          <div class="tab" data-screen="market"><span class="tab-icon">🛒</span>Маркет</div>
-          <div class="tab" data-screen="map"><span class="tab-icon">🗺️</span>Карта</div>
           <div class="tab sos" data-screen="sos"><span class="tab-icon">🚑</span>SOS</div>
         </nav>
       </div>
@@ -1559,22 +840,19 @@
 
   <script>
     const phone = document.getElementById('phone');
-    const tabbar = document.getElementById('tabbar');
-    const authScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert']);
+    const tabScreens = new Set(['home', 'diary', 'scanner', 'sos']);
+    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert', 'market', 'map']);
 
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
       document.getElementById('screen-' + name)?.classList.add('active');
-
-      document.querySelectorAll('#screen-list .btn').forEach((btn) => {
+      document.querySelectorAll('#screen-list .btn-nav[data-screen]').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.screen === name);
       });
-
       document.querySelectorAll('.tabbar .tab').forEach((tab) => {
         tab.classList.toggle('active', tab.dataset.screen === name);
       });
-
-      phone.classList.toggle('hidden-tabbar', authScreens.has(name));
+      phone.classList.toggle('hidden-tabbar', noTabScreens.has(name));
     }
 
     document.getElementById('screen-list').addEventListener('click', (e) => {
@@ -1582,19 +860,14 @@
       if (btn) showScreen(btn.dataset.screen);
     });
 
-    tabbar.addEventListener('click', (e) => {
+    document.getElementById('tabbar').addEventListener('click', (e) => {
       const tab = e.target.closest('[data-screen]');
       if (tab) showScreen(tab.dataset.screen);
     });
 
     function setTheme(mode) {
-      if (mode === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.body.setAttribute('data-theme-shell', 'dark');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        document.body.removeAttribute('data-theme-shell');
-      }
+      if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      else document.documentElement.removeAttribute('data-theme');
       document.getElementById('theme-light').classList.toggle('active', mode === 'light');
       document.getElementById('theme-dark').classList.toggle('active', mode === 'dark');
     }
@@ -1602,303 +875,61 @@
     document.getElementById('theme-light').addEventListener('click', () => setTheme('light'));
     document.getElementById('theme-dark').addEventListener('click', () => setTheme('dark'));
 
-    /* ── Wellness dashboard (Open-Meteo + profile + diary) ── */
-    const MOCK_LOCATION = { lat: 55.75, lon: 37.62, label: 'Москва' };
+    /* Wellness KPI (Open-Meteo) */
+    const MOCK = { lat: 55.75, lon: 37.62, allergens: ['birch_pollen'] };
 
-    const MOCK_PROFILE = {
-      name: 'Анна',
-      birthYear: 1990,
-      allergens: [
-        { id: 'milk', name: 'Молоко', category: 'food', pollenKey: null },
-        { id: 'peanut', name: 'Арахис', category: 'food', pollenKey: null },
-        { id: 'birch-pollen', name: 'Берёза', category: 'environmental', pollenKey: 'birch_pollen' },
-      ],
-    };
-
-    const MOCK_DIARY = [
-      { type: 'symptoms', text: 'Зуд кожи, лёгкая отёчность', hoursAgo: 18 },
-      { type: 'food', text: 'Овсянка на воде, яблоко', hoursAgo: 30 },
-      { type: 'trigger', text: 'Возможная реакция на молочный десерт', hoursAgo: 48 },
-    ];
-
-    const POLLEN_LABELS = {
-      birch_pollen: 'Берёза',
-      grass_pollen: 'Тимофеевка',
-      ragweed_pollen: 'Амброзия',
-    };
-
-    const CROSS_REACTIONS = [
-      { pollen: 'birch_pollen', food: 'яблок', note: 'Оральный аллергический синдром (берёза → яблоко)' },
-    ];
-
-    function pollenTier(value) {
-      if (value == null || value < 10) return { level: 'low', label: 'Низкий', penalty: 0 };
-      if (value < 50) return { level: 'mid', label: 'Средний', penalty: 12 };
-      return { level: 'high', label: 'Высокий', penalty: 28 };
+    function tier(v) {
+      if (v == null || v < 10) return 'low';
+      if (v < 50) return 'mid';
+      return 'high';
     }
 
-    function aqiTier(value) {
-      if (value == null) return { level: 'mid', label: 'Нет данных', penalty: 5 };
-      if (value <= 20) return { level: 'low', label: 'Хорошо · ' + value, penalty: 0 };
-      if (value <= 50) return { level: 'mid', label: 'Умеренно · ' + value, penalty: 6 };
-      if (value <= 75) return { level: 'mid', label: 'Повышен · ' + value, penalty: 12 };
-      return { level: 'high', label: 'Плохо · ' + value, penalty: 20 };
+    function kpiRow(label, value) {
+      return `<div class="kpi-row"><span class="kpi-label">${label}</span><span class="kpi-value">${value}</span></div>`;
     }
 
-    function diaryPenalty(entries) {
-      let penalty = 0;
-      const recentSymptoms = entries.filter((e) => e.type === 'symptoms' && e.hoursAgo <= 48);
-      const recentTriggers = entries.filter((e) => e.type === 'trigger' && e.hoursAgo <= 72);
-      if (recentSymptoms.length) penalty += 14 + recentSymptoms.length * 4;
-      if (recentTriggers.length) penalty += 8;
-      return { penalty: Math.min(penalty, 30), recentSymptoms, recentTriggers };
-    }
-
-    function currentHourlyMax(hourly, key) {
-      if (!hourly?.[key]?.length) return null;
-      const now = new Date();
-      const idx = hourly.time.findIndex((t) => new Date(t) >= now);
-      const slice = idx >= 0 ? hourly[key].slice(idx, idx + 12) : hourly[key].slice(0, 12);
-      return Math.max(...slice.filter((v) => v != null));
-    }
-
-    async function fetchEnvironmentalData() {
-      const qs = new URLSearchParams({
-        latitude: String(MOCK_LOCATION.lat),
-        longitude: String(MOCK_LOCATION.lon),
-        timezone: 'Europe/Moscow',
-        forecast_days: '1',
-      });
-      const airUrl =
-        'https://air-quality-api.open-meteo.com/v1/air-quality?' +
-        qs +
-        '&current=european_aqi,pm2_5&hourly=birch_pollen,grass_pollen,ragweed_pollen';
-      const res = await fetch(airUrl);
-      if (!res.ok) throw new Error('Open-Meteo unavailable');
-      return res.json();
-    }
-
-    function buildRecommendations(ctx) {
-      const recs = [];
-
-      for (const match of ctx.profilePollenMatches) {
-        if (match.tier.level !== 'low') {
-          recs.push({
-            icon: '🌿',
-            title: 'Снизьте контакт с пыльцой',
-            text:
-              'Уровень пыльцы «' +
-              match.label +
-              '» ' +
-              match.tier.label.toLowerCase() +
-              '. По возможности проводите меньше времени на улице в дневные часы, используйте очки и промойте нос после прогулки.',
-          });
-        }
-      }
-
-      if (ctx.aqi.tier.level !== 'low') {
-        recs.push({
-          icon: '💨',
-          title: 'Качество воздуха',
-          text:
-            'Индекс EAQI ' +
-            ctx.aqi.tier.label +
-            '. Чувствительным людям стоит сократить активность на открытом воздухе и проветривать квартиру в часы с более низким загрязнением.',
-        });
-      }
-
-      if (ctx.diary.recentSymptoms.length) {
-        recs.push({
-          icon: '📔',
-          title: 'Симптомы в дневнике',
-          text:
-            'За последние 2 суток зафиксированы симптомы («' +
-            ctx.diary.recentSymptoms[0].text +
-            '»). Отслеживайте динамику; при ухудшении обратитесь к врачу.',
-        });
-      }
-
-      for (const cr of CROSS_REACTIONS) {
-        const pollenHigh = ctx.pollens[cr.pollen]?.tier?.level !== 'low';
-        const ateFood = MOCK_DIARY.some((e) => e.type === 'food' && e.text.toLowerCase().includes(cr.food));
-        if (pollenHigh && ateFood && ctx.profilePollenKeys.has(cr.pollen)) {
-          recs.push({
-            icon: '🍎',
-            title: 'Возможная перекрёстная реакция',
-            text: cr.note + '. Свежие фрукты могут усиливать зуд во время сезона пыления.',
-          });
-        }
-      }
-
-      const foodAllergens = MOCK_PROFILE.allergens.filter((a) => a.category === 'food');
-      if (foodAllergens.length) {
-        recs.push({
-          icon: '📷',
-          title: 'Пищевые аллергены',
-          text:
-            'В профиле: ' +
-            foodAllergens.map((a) => a.name).join(', ') +
-            '. Перед покупкой новых продуктов проверяйте состав через сканер (Open Food Facts).',
-        });
-      }
-
-      if (!recs.length) {
-        recs.push({
-          icon: '✅',
-          title: 'Стабильный день',
-          text: 'Показатели среды и записи дневника не указывают на повышенные риски. Продолжайте вести наблюдения.',
-        });
-      }
-
-      return recs.slice(0, 4);
-    }
-
-    function statusFromScore(score) {
-      if (score >= 80) return { title: 'Хорошо', summary: 'Среда и дневник не указывают на повышенные риски.', color: 'var(--teal)' };
-      if (score >= 60) return { title: 'Умеренно', summary: 'Есть отдельные факторы внимания.', color: 'var(--warning)' };
-      if (score >= 40) return { title: 'Повышенное внимание', summary: 'Несколько факторов могут влиять на самочувствие.', color: 'var(--warning)' };
-      return { title: 'Высокий риск', summary: 'Минимизируйте триггеры и проконсультируйтесь с врачом.', color: 'var(--danger)' };
-    }
-
-    function renderFactor({ icon, iconBg, iconColor, label, value, badgeClass, badgeText, source }) {
-      return (
-        '<div class="factor">' +
-        '<div class="factor-icon" style="background:' + iconBg + ';color:' + iconColor + '">' + icon + '</div>' +
-        '<div class="factor-body"><div class="factor-label">' + label + '</div><div class="factor-value">' + value + '</div></div>' +
-        '<span class="factor-badge ' + badgeClass + '">' + badgeText + '</span></div>'
-      );
-    }
-
-    function macroBar(label, value, level) {
-      const pct = level === 'high' ? 90 : level === 'mid' ? 55 : 25;
-      const cls = level === 'high' ? 'danger' : level === 'mid' ? 'warn' : '';
-      return (
-        '<div class="macro-row"><div class="macro-label">' + label + '</div>' +
-        '<div class="macro-track"><div class="macro-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
-        '<div class="macro-value">' + value + '</div></div>'
-      );
-    }
-
-    function renderWellnessDashboard(ctx) {
-      document.getElementById('wellness-loading').hidden = true;
-      const content = document.getElementById('wellness-content');
-      content.hidden = false;
-
-      const status = statusFromScore(ctx.score);
-      const ring = document.getElementById('score-ring');
-      ring.style.borderColor = status.color;
-
-      document.getElementById('score-num').textContent = String(ctx.score);
-      document.getElementById('wellness-status').textContent = status.title;
-      document.getElementById('wellness-summary').textContent = status.summary;
-      document.getElementById('wellness-updated').textContent =
-        'Обновлено · ' + MOCK_LOCATION.label + ' · Open-Meteo · ' + new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
-      const pollenMatch = ctx.profilePollenMatches[0];
-      document.getElementById('side-pollen').textContent = pollenMatch && pollenMatch.tier.level !== 'low' ? '↑' : '—';
-      document.getElementById('side-aqi').textContent = ctx.aqi.tier.level === 'high' ? '!' : 'OK';
-
-      const macros = [];
-      if (pollenMatch) {
-        macros.push(macroBar('Пыльца · ' + pollenMatch.label, pollenMatch.value.toFixed(1) + ' grains/m³', pollenMatch.tier.level));
-      }
-      macros.push(macroBar('Качество воздуха', ctx.aqi.pm25 != null ? 'PM2.5 ' + ctx.aqi.pm25.toFixed(1) : 'EAQI', ctx.aqi.tier.level));
-      const symptomText = ctx.diary.recentSymptoms.length ? ctx.diary.recentSymptoms[0].text : 'Спокойно';
-      macros.push(macroBar('Дневник · 48 ч', symptomText, ctx.diary.recentSymptoms.length ? 'mid' : 'low'));
-
-      document.getElementById('macro-list').innerHTML = macros.join('');
-
-      document.getElementById('rec-list').innerHTML = ctx.recommendations
-        .slice(0, 1)
-        .map(
-          (r) =>
-            '<div class="rec-item"><span style="font-size:18px">' +
-            r.icon +
-            '</span><div><strong>' +
-            r.title +
-            '</strong>' +
-            r.text +
-            '</div></div>',
-        )
-        .join('');
-    }
-
-    async function loadWellnessDashboard() {
+    async function loadWellness() {
       const loading = document.getElementById('wellness-loading');
+      const body = document.getElementById('wellness-body');
       try {
-        const data = await fetchEnvironmentalData();
-        const hourly = data.hourly;
-        const profilePollenKeys = new Set(
-          MOCK_PROFILE.allergens.filter((a) => a.pollenKey).map((a) => a.pollenKey),
-        );
+        const qs = new URLSearchParams({ latitude: MOCK.lat, longitude: MOCK.lon, timezone: 'Europe/Moscow', forecast_days: '1' });
+        const res = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?' + qs + '&current=european_aqi,pm2_5&hourly=birch_pollen');
+        if (!res.ok) throw new Error('api');
+        const data = await res.json();
+        const birch = Math.max(...(data.hourly?.birch_pollen?.slice(0, 12) || [0]));
+        const aqi = data.current?.european_aqi ?? 45;
+        let score = 100;
+        if (tier(birch) === 'mid') score -= 18;
+        if (tier(birch) === 'high') score -= 32;
+        if (aqi > 50) score -= 12;
+        score = Math.max(5, score);
 
-        const pollens = {};
-        for (const key of Object.keys(POLLEN_LABELS)) {
-          const value = currentHourlyMax(hourly, key);
-          pollens[key] = { value: value ?? 0, tier: pollenTier(value ?? 0), label: POLLEN_LABELS[key] };
-        }
+        loading.hidden = true;
+        body.hidden = false;
+        document.getElementById('score-num').textContent = score;
+        document.getElementById('wellness-summary').textContent =
+          score >= 80 ? 'Среда и дневник не указывают на повышенные риски.' : 'Есть отдельные факторы внимания — следите за симптомами.';
+        document.getElementById('wellness-badge').textContent = score >= 80 ? 'Хорошо' : score >= 60 ? 'Умеренно' : 'Внимание';
+        document.getElementById('wellness-badge').className = 'badge ' + (score >= 80 ? 'badge-ok' : score >= 60 ? 'badge-warn' : 'badge-danger');
+        document.getElementById('kpi-rows').innerHTML =
+          kpiRow('Пыльца · Берёза', birch.toFixed(1) + ' grains/m³') +
+          kpiRow('Качество воздуха', 'EAQI ' + aqi) +
+          kpiRow('Дневник · 48 ч', 'Зуд кожи');
 
-        const profilePollenMatches = MOCK_PROFILE.allergens
-          .filter((a) => a.pollenKey)
-          .map((a) => ({
-            key: a.pollenKey,
-            label: a.name,
-            value: pollens[a.pollenKey].value,
-            tier: pollens[a.pollenKey].tier,
-          }));
-
-        const aqiValue = data.current?.european_aqi;
-        const aqi = { value: aqiValue, pm25: data.current?.pm2_5, tier: aqiTier(aqiValue) };
-        const diary = diaryPenalty(MOCK_DIARY);
-
-        let penalty = 0;
-        for (const match of profilePollenMatches) penalty += match.tier.penalty;
-        penalty += aqi.tier.penalty;
-        penalty += diary.penalty;
-
-        const score = Math.max(5, Math.min(100, 100 - penalty));
-        const recommendations = buildRecommendations({
-          score,
-          pollens,
-          profilePollenMatches,
-          profilePollenKeys,
-          aqi,
-          diary,
-        });
-
-        renderWellnessDashboard({
-          score,
-          pollens,
-          profilePollenMatches,
-          aqi,
-          diary,
-          recommendations,
-        });
-      } catch (err) {
-        loading.textContent = 'Не удалось загрузить Open-Meteo — показаны локальные данные.';
-        const diary = diaryPenalty(MOCK_DIARY);
-        const fallbackPollen = { value: 42, tier: pollenTier(42), label: 'Берёза' };
-        const score = Math.max(5, 100 - diary.penalty - fallbackPollen.tier.penalty - 6);
-        renderWellnessDashboard({
-          score,
-          pollens: { birch_pollen: fallbackPollen },
-          profilePollenMatches: [{ key: 'birch_pollen', label: 'Берёза', value: 42, tier: fallbackPollen.tier }],
-          aqi: { value: 45, pm25: 18, tier: aqiTier(45) },
-          diary,
-          recommendations: buildRecommendations({
-            score,
-            pollens: { birch_pollen: fallbackPollen },
-            profilePollenMatches: [{ key: 'birch_pollen', label: 'Берёза', value: 42, tier: fallbackPollen.tier }],
-            profilePollenKeys: new Set(['birch_pollen']),
-            aqi: { tier: aqiTier(45) },
-            diary,
-          }),
-        });
+        const rec = document.getElementById('rec-card');
+        rec.hidden = false;
+        document.getElementById('rec-title').textContent = 'Снизьте контакт с пыльцой';
+        document.getElementById('rec-text').textContent = 'По возможности проводите меньше времени на улице в дневные часы и промойте нос после прогулки.';
+      } catch {
+        loading.textContent = 'Open-Meteo недоступен — показаны демо-данные.';
+        body.hidden = false;
+        document.getElementById('score-num').textContent = '68';
+        document.getElementById('kpi-rows').innerHTML = kpiRow('Пыльца · Берёза', '42 grains/m³') + kpiRow('Качество воздуха', 'EAQI 45');
+        document.getElementById('wellness-summary').textContent = 'Есть отдельные факторы внимания.';
       }
     }
 
-    void loadWellnessDashboard();
-
+    void loadWellness();
     setTheme('light');
     showScreen('home');
   </script>

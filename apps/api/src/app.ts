@@ -1,10 +1,18 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { setupAuth, registerAuthRoutes } from './replit_integrations/auth';
 import { registerSyncRoutes } from './routes/sync';
 import { registerScanRoutes } from './routes/scan';
 import { registerMobileAuthRoutes } from './routes/mobile-auth';
 import { registerProfileRoutes } from './routes/profiles';
+import { registerCatalogRoutes } from './routes/catalog';
+import {
+  buildCorsOptions,
+  createAuthRateLimiter,
+  createGlobalRateLimiter,
+  createScanRateLimiter,
+} from './middleware/security';
 
 export async function createApp(
   options: { withReplitAuth?: boolean } = {},
@@ -12,18 +20,22 @@ export async function createApp(
   const withReplitAuth = options.withReplitAuth ?? Boolean(process.env.REPL_ID);
   const app = express();
 
+  // Correct client IPs / secure cookies when running behind a load balancer.
+  app.set('trust proxy', 1);
+
+  app.use(helmet());
+  app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: '2mb' }));
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-    }),
-  );
+  app.use(createGlobalRateLimiter());
+
+  app.use('/api/auth', createAuthRateLimiter());
+  app.use('/api/scan', createScanRateLimiter());
 
   registerMobileAuthRoutes(app);
   registerProfileRoutes(app);
   registerSyncRoutes(app);
   registerScanRoutes(app);
+  registerCatalogRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);

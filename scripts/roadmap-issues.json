@@ -1,0 +1,284 @@
+{
+  "repo": "zuevfoton-art/AllerGuide",
+  "labels": [
+    "phase-0",
+    "phase-1",
+    "phase-2",
+    "phase-3",
+    "phase-4",
+    "phase-5",
+    "roadmap"
+  ],
+  "milestones": [
+    {
+      "title": "Phase 0: Stabilization MVP",
+      "description": "QA checklist, bug fixes, README, EAS preview, legal i18n. Target: internal alpha.",
+      "due_on": "2026-07-04T23:59:59Z"
+    },
+    {
+      "title": "Phase 1: Backend integration",
+      "description": "Staging API, auth/sync E2E, backup recovery key, AI scan, API integration tests. Target: closed beta.",
+      "due_on": "2026-08-01T23:59:59Z"
+    },
+    {
+      "title": "Phase 2: Quality & Security",
+      "description": "Maestro E2E, mobile unit tests, Sentry, analytics, security audit, performance. Target: release candidate.",
+      "due_on": "2026-08-29T23:59:59Z"
+    },
+    {
+      "title": "Phase 3: Compliance & Store",
+      "description": "EAS production certs, store metadata, GDPR/152-ФЗ, soft launch, production API.",
+      "due_on": "2026-09-26T23:59:59Z"
+    },
+    {
+      "title": "Phase 4: v1.0 Launch",
+      "description": "Production feature flags, Go/No-Go checklist, public App Store + Google Play release.",
+      "due_on": "2026-10-10T23:59:59Z"
+    },
+    {
+      "title": "Phase 5: Post-launch",
+      "description": "v1.1+ backlog: OCR menu, push reminders, More tab, live map, marketplace, scaling.",
+      "due_on": null
+    }
+  ],
+  "issues": [
+    {
+      "id": "P0.1",
+      "milestone": "Phase 0: Stabilization MVP",
+      "labels": ["phase-0", "roadmap"],
+      "title": "[P0.1] Регрессионный чеклист MVP",
+      "body": "## Описание\nСоставить и пройти регрессионный чеклист для MVP на iOS, Android и web.\n\n## Критерий готовности\n- [ ] Файл `docs/qa-checklist.md` создан и покрывает все основные user flows\n- [ ] Чеклист пройден на iOS (физическое устройство или симулятор)\n- [ ] Чеклист пройден на Android\n- [ ] Чеклист пройден на web (Expo web)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)"
+    },
+    {
+      "id": "P0.2",
+      "milestone": "Phase 0: Stabilization MVP",
+      "labels": ["phase-0", "roadmap"],
+      "title": "[P0.2] Закрыть критичные баги MVP",
+      "body": "## Описание\nИсправить все открытые баги с приоритетом P0/P1, блокирующие internal alpha.\n\n## Критерий готовности\n- [ ] 0 открытых issues с метками `P0` / `P1` (или эквивалент)\n- [ ] Smoke-проход основных экранов без crash\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)"
+    },
+    {
+      "id": "P0.3",
+      "milestone": "Phase 0: Stabilization MVP",
+      "labels": ["phase-0", "roadmap"],
+      "title": "[P0.3] Актуализировать README",
+      "body": "## Описание\nОбновить корневой `README.md`: IndexedDB вместо localStorage, feature flags, env-переменные, команды запуска.\n\n## Критерий готовности\n- [ ] Описание хранилища данных соответствует коду (SQLite + IndexedDB)\n- [ ] Документированы `EXPO_PUBLIC_*` feature flags\n- [ ] Инструкции по запуску mobile + API актуальны\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)\n- [AGENTS.md](../AGENTS.md)"
+    },
+    {
+      "id": "P0.4",
+      "milestone": "Phase 0: Stabilization MVP",
+      "labels": ["phase-0", "roadmap"],
+      "title": "[P0.4] EAS preview-сборки",
+      "body": "## Описание\nНастроить и распространить EAS preview-сборки для internal alpha.\n\n## Критерий готовности\n- [ ] `eas build --profile preview` успешно для iOS и Android\n- [ ] TestFlight / internal APK доступны тестировщикам\n- [ ] Проверено на 3+ физических устройствах\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)\n- `apps/mobile/eas.json`"
+    },
+    {
+      "id": "P0.5",
+      "milestone": "Phase 0: Stabilization MVP",
+      "labels": ["phase-0", "roadmap"],
+      "title": "[P0.5] Локализация legal-документов",
+      "body": "## Описание\nПеревести Privacy Policy и Terms of Service на все 6 языков приложения (ru, en, es, fr, de, it).\n\n## Критерий готовности\n- [ ] Privacy Policy доступна на 6 языках\n- [ ] Terms of Service доступны на 6 языках\n- [ ] Язык legal-документа соответствует выбранной локали приложения\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)"
+    },
+    {
+      "id": "P1.1",
+      "milestone": "Phase 1: Backend integration",
+      "labels": ["phase-1", "roadmap"],
+      "title": "[P1.1] Deploy API на staging",
+      "body": "## Описание\nРазвернуть API на staging-окружении с TLS, CORS и автоматическими миграциями.\n\n## Критерий готовности\n- [ ] Health check endpoint отвечает 200\n- [ ] Drizzle-миграции применяются при деплое\n- [ ] TLS и CORS настроены для mobile/web клиентов\n- [ ] URL задокументирован (например `api.staging.allerguide.app`)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)\n- [docs/architecture.md](../docs/architecture.md)"
+    },
+    {
+      "id": "P1.2",
+      "milestone": "Phase 1: Backend integration",
+      "labels": ["phase-1", "roadmap"],
+      "title": "[P1.2] Backend auth E2E",
+      "body": "## Описание\nСквозной flow: register → login → создание/чтение профилей на сервере с `EXPO_PUBLIC_BACKEND_AUTH=true`.\n\n## Критерий готовности\n- [ ] Регистрация создаёт пользователя на сервере\n- [ ] Login возвращает JWT, сессия сохраняется на клиенте\n- [ ] Профили синхронизируются с сервером после auth\n\n## Открытый вопрос\nDual-write (local + server) vs server-authoritative после login.\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)"
+    },
+    {
+      "id": "P1.3",
+      "milestone": "Phase 1: Backend integration",
+      "labels": ["phase-1", "roadmap"],
+      "title": "[P1.3] Ключ восстановления бэкапа",
+      "body": "## Описание\nРеализовать cross-device restore через recovery key для зашифрованных бэкапов.\n\n## Критерий готовности\n- [ ] Пользователь может сгенерировать и сохранить recovery key\n- [ ] Восстановление на новом устройстве с recovery key работает\n- [ ] UX предупреждает о потере данных без ключа\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)"
+    },
+    {
+      "id": "P1.4",
+      "milestone": "Phase 1: Backend integration",
+      "labels": ["phase-1", "roadmap"],
+      "title": "[P1.4] Cloud sync E2E",
+      "body": "## Описание\nПолный encrypted upload/download и restore с `EXPO_PUBLIC_CLOUD_SYNC=true`.\n\n## Критерий готовности\n- [ ] Данные шифруются на клиенте перед upload\n- [ ] Download + decrypt восстанавливает полное состояние\n- [ ] Конфликты при sync обрабатываются предсказуемо\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)"
+    },
+    {
+      "id": "P1.5",
+      "milestone": "Phase 1: Backend integration",
+      "labels": ["phase-1", "roadmap"],
+      "title": "[P1.5] AI scan на staging",
+      "body": "## Описание\nВключить AI-сканер на staging с budget-лимитами и кэшем.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_AI_SCAN_ENABLED=true` работает со staging API\n- [ ] Budget 50/user/day не превышается\n- [ ] Scan cache снижает количество LLM-вызовов\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)"
+    },
+    {
+      "id": "P1.6",
+      "milestone": "Phase 1: Backend integration",
+      "labels": ["phase-1", "roadmap"],
+      "title": "[P1.6] Интеграционные тесты API",
+      "body": "## Описание\nДобавить интеграционные тесты API в CI: auth, sync, scan.\n\n## Критерий готовности\n- [ ] Тесты auth (register/login) в CI\n- [ ] Тесты sync upload/download в CI\n- [ ] Тесты scan endpoint (с mock LLM) в CI\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)"
+    },
+    {
+      "id": "P2.1",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.1] E2E mobile (Maestro)",
+      "body": "## Описание\nНастроить Maestro smoke-flows для mobile и nightly CI.\n\n## Критерий готовности\n- [ ] 5 smoke-flows: onboarding, diary, scanner, SOS, settings\n- [ ] Nightly CI job запускает Maestro\n- [ ] Документация по запуску локально\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P2.2",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.2] Mobile unit tests",
+      "body": "## Описание\nРасширить покрытие mobile unit-тестами (auth, diary, profiles).\n\n## Критерий готовности\n- [ ] ≥30 unit-тестов в `apps/mobile`\n- [ ] Покрыты auth, diary, profiles\n- [ ] Тесты проходят в CI\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P2.3",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.3] Sentry production",
+      "body": "## Описание\nПодключить Sentry в production-сборках с source maps через EAS.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_SENTRY_DSN` настроен для staging/production\n- [ ] Source maps загружаются через EAS build hooks\n- [ ] Тестовый crash виден в Sentry dashboard\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P2.4",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.4] Analytics",
+      "body": "## Описание\nВключить аналитику: screen views и key events.\n\n## Критерий готовности\n- [ ] Screen views логируются для основных экранов\n- [ ] Key events: scan, diary entry, SOS open, profile create\n- [ ] Privacy-compliant (без PII в событиях)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P2.5",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.5] Security audit mobile",
+      "body": "## Описание\nПройти OWASP Mobile checklist для клиентского приложения.\n\n## Критерий готовности\n- [ ] Чеклист OWASP Mobile Top 10 пройден\n- [ ] Найденные issues задокументированы и закрыты или приняты\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P2.6",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.6] Pen-test API",
+      "body": "## Описание\nПентест API: JWT, IDOR, rate-limit, injection.\n\n## Критерий готовности\n- [ ] 0 critical findings\n- [ ] JWT validation и expiration проверены\n- [ ] IDOR на sync/profile endpoints закрыт\n- [ ] Rate-limit эффективен под нагрузкой\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P2.7",
+      "milestone": "Phase 2: Quality & Security",
+      "labels": ["phase-2", "roadmap"],
+      "title": "[P2.7] Performance profiling",
+      "body": "## Описание\nПрофилирование cold start и IndexedDB на web.\n\n## Критерий готовности\n- [ ] Cold start p95 <3 сек на mid-range Android\n- [ ] IndexedDB операции профилированы, узкие места устранены\n- [ ] Метрики задокументированы\n\n## Инфра (связанное)\nRedis rate-limit store, PgBouncer, health checks.\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+    },
+    {
+      "id": "P3.1",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.1] EAS production certificates",
+      "body": "## Описание\nНастроить production signing: реальный EAS projectId, Apple/Google store IDs.\n\n## Критерий готовности\n- [ ] Реальный `projectId` в `eas.json`\n- [ ] Apple App Store Connect + Google Play Console настроены\n- [ ] Production signing credentials в EAS\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P3.2",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.2] Store metadata",
+      "body": "## Описание\nПодготовить store listing: скриншоты, описания на 6 языках, age rating.\n\n## Критерий готовности\n- [ ] Скриншоты для iOS и Android (все требуемые размеры)\n- [ ] Описания на ru, en, es, fr, de, it\n- [ ] Age rating определён и согласован\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P3.3",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.3] Medical disclaimer",
+      "body": "## Описание\nЮридически согласованный medical disclaimer в приложении и store listing.\n\n## Критерий готовности\n- [ ] Disclaimer подписан юристом\n- [ ] Отображается в onboarding и/или settings\n- [ ] Указан в store listing\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P3.4",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.4] Privacy compliance (GDPR + 152-ФЗ)",
+      "body": "## Описание\nРеализовать export данных, account deletion и server data wipe.\n\n## Критерий готовности\n- [ ] Пользователь может экспортировать свои данные\n- [ ] Account deletion удаляет локальные и серверные данные\n- [ ] Соответствие GDPR и 152-ФЗ задокументировано\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P3.5",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.5] Permissions justification",
+      "body": "## Описание\nОбоснование и UX для Camera, Location, Notifications permissions.\n\n## Критерий готовности\n- [ ] Pre-permission screens объясняют зачем нужен доступ\n- [ ] Store review notes содержат justification\n- [ ] Graceful degradation при отказе\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P3.6",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.6] Soft launch (closed beta)",
+      "body": "## Описание\nClosed beta 50–100 пользователей, мониторинг crash-free rate.\n\n## Критерий готовности\n- [ ] 50–100 beta-тестеров подключены (TestFlight + Play internal)\n- [ ] Crash-free sessions ≥99.5%\n- [ ] Feedback channel работает\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P3.7",
+      "milestone": "Phase 3: Compliance & Store",
+      "labels": ["phase-3", "roadmap"],
+      "title": "[P3.7] Production API",
+      "body": "## Описание\nProduction API на `api.allerguide.app` с monitoring и backups.\n\n## Критерий готовности\n- [ ] Production deploy pipeline\n- [ ] Monitoring и alerting (uptime, errors, latency)\n- [ ] Automated Postgres backups с тестом restore\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+    },
+    {
+      "id": "P4.1",
+      "milestone": "Phase 4: v1.0 Launch",
+      "labels": ["phase-4", "roadmap"],
+      "title": "[P4.1] Production feature flags",
+      "body": "## Описание\nВключить production feature flags для v1.0.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_API_URL` = `https://api.allerguide.app`\n- [ ] Backend auth ON для новых пользователей\n- [ ] Cloud sync ON + recovery key\n- [ ] AI scan ON (budget 50/user/day)\n- [ ] Sentry и analytics ON\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
+    },
+    {
+      "id": "P4.2",
+      "milestone": "Phase 4: v1.0 Launch",
+      "labels": ["phase-4", "roadmap"],
+      "title": "[P4.2] Go/No-Go checklist",
+      "body": "## Описание\nФинальный чеклист перед публичным релизом.\n\n## Критерий готовности\n- [ ] 0 открытых P0 issues\n- [ ] E2E smoke green\n- [ ] Legal docs подписаны\n- [ ] Rollback plan задокументирован\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
+    },
+    {
+      "id": "P4.3",
+      "milestone": "Phase 4: v1.0 Launch",
+      "labels": ["phase-4", "roadmap"],
+      "title": "[P4.3] Public store release",
+      "body": "## Описание\nПубликация v1.0 в App Store и Google Play.\n\n## Критерий готовности\n- [ ] App Store review passed, app live\n- [ ] Google Play review passed, app live\n- [ ] Release notes опубликованы\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
+    },
+    {
+      "id": "P5.1",
+      "milestone": "Phase 5: Post-launch",
+      "labels": ["phase-5", "roadmap"],
+      "title": "[P5.1] Реальный OCR меню",
+      "body": "## Описание\nЗаменить mock OCR меню на реальное распознавание.\n\n## Приоритет\nP1 (post-launch)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-5--post-launch-v11)"
+    },
+    {
+      "id": "P5.2",
+      "milestone": "Phase 5: Post-launch",
+      "labels": ["phase-5", "roadmap"],
+      "title": "[P5.2] Персонализированные push-напоминания",
+      "body": "## Описание\nPush-уведомления на основе профиля аллергий и дневника.\n\n## Приоритет\nP1 (post-launch)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-5--post-launch-v11)"
+    },
+    {
+      "id": "P5.3",
+      "milestone": "Phase 5: Post-launch",
+      "labels": ["phase-5", "roadmap"],
+      "title": "[P5.3] Вкладка «Ещё» (Map, Market, Settings)",
+      "body": "## Описание\nВынести Map, Market и Settings во вкладку «Ещё» вместо скрытых маршрутов.\n\n## Приоритет\nP1 (post-launch)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-5--post-launch-v11)"
+    },
+    {
+      "id": "P5.4",
+      "milestone": "Phase 5: Post-launch",
+      "labels": ["phase-5", "roadmap"],
+      "title": "[P5.4] Live карта мест",
+      "body": "## Описание\nИнтеграция с partner API для живой карты аллерген-безопасных мест.\n\n## Приоритет\nP2 (post-launch)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-5--post-launch-v11)"
+    },
+    {
+      "id": "P5.5",
+      "milestone": "Phase 5: Post-launch",
+      "labels": ["phase-5", "roadmap"],
+      "title": "[P5.5] Маркетплейс",
+      "body": "## Описание\nМаркетплейс с affiliate / deep links на аллерген-безопасные продукты.\n\n## Приоритет\nP2 (post-launch)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-5--post-launch-v11)"
+    },
+    {
+      "id": "P5.6",
+      "milestone": "Phase 5: Post-launch",
+      "labels": ["phase-5", "roadmap"],
+      "title": "[P5.6] Масштабирование инфраструктуры",
+      "body": "## Описание\nRedis scan cache, read replicas, горизонтальное масштабирование API.\n\n## Приоритет\nP2 (post-launch)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-5--post-launch-v11)"
+    }
+  ]
+}

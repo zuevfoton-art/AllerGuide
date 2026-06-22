@@ -5,6 +5,7 @@ import { EXPERT_CATEGORIES, getExpertArticlesByCategory, type ExpertArticleCateg
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { BrandMark } from '@/src/components/brand/BrandMark';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -65,7 +66,7 @@ export default function ExpertScreen() {
 
       <GlassCard style={styles.hero}>
         <View style={styles.heroIcon}>
-          <Ionicons name="school" size={24} color={theme.colors.onAccent} />
+          <BrandMark size={48} variant="mono" color={theme.colors.onAccent} />
         </View>
         <Text style={styles.heroSubtitle}>{localeContent.expertHero.subtitle}</Text>
       </GlassCard>

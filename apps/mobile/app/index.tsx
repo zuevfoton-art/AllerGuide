@@ -1,9 +1,8 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
+import { AppSplash } from '@/src/components/AppSplash';
 import { initDb } from '@/src/db/init';
-import { useTheme } from '@/src/hooks/use-theme';
 import { isAuthenticated, getCurrentUserId } from '@/src/services/auth-service';
 import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
 import {
@@ -16,7 +15,6 @@ import { useAppStore } from '@/src/store/app-store';
 type BootstrapRoute = '/login' | '/onboarding-intro' | '/onboarding' | '/profile-setup' | '/(tabs)/home';
 
 export default function Index() {
-  const { colors } = useTheme();
   const [target, setTarget] = useState<BootstrapRoute | null>(null);
   const setScenario = useAppStore((s) => s.setScenario);
 
@@ -44,11 +42,7 @@ export default function Index() {
   }, [setScenario]);
 
   if (!target) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }}>
-        <ActivityIndicator color={colors.accent} />
-      </View>
-    );
+    return <AppSplash />;
   }
 
   return <Redirect href={target as any} />;
