@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sql } from 'drizzle-orm';
+import { mapExternalAllergenNames } from '@allerguide/core';
 import { db } from './index';
 import { products } from './catalog-schema';
 import type { NewProductRow } from './catalog-schema';
@@ -81,7 +82,9 @@ export async function importFoodAllergyDataset() {
       barcode,
       name,
       ingredients: '',
-      allergenTags: [...(tagsByBarcode.get(barcode) ?? [])],
+      // Map dataset English allergy names to the canonical RU taxonomy so the
+      // scanner can match them against user profiles.
+      allergenTags: mapExternalAllergenNames([...(tagsByBarcode.get(barcode) ?? [])]),
       source: 'food-allergy-db',
     });
   }
