@@ -1,5 +1,12 @@
-# Shrink EAS upload; install runs fresh on build servers
+# Shrink EAS upload; install runs fresh on build servers.
+# Keep lockfiles and workspace config — EAS needs them for pnpm monorepo detection.
 **/.git
+**/.turbo
+**/node_modules
+**/.expo
+**/dist
+**/coverage
+AllerGuide-full/
 **/.turbo
 **/node_modules
 **/.expo

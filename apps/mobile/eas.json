@@ -15,7 +15,6 @@
       "distribution": "internal",
       "channel": "preview",
       "node": "22.14.0",
-      "pnpm": "10.34.4",
       "env": {
         "EXPO_PUBLIC_BACKEND_AUTH": "false",
         "EXPO_PUBLIC_CLOUD_SYNC": "false",
