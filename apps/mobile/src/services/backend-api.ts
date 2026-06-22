@@ -80,6 +80,10 @@ export async function backendDeleteAccount(token: string) {
   return apiRequest<{ ok: true }>('/api/auth/account', { method: 'DELETE', token });
 }
 
+export async function backendReplitExchange() {
+  return apiRequest<{ user: AuthUser; token: string }>('/api/auth/replit-exchange', {});
+}
+
 export async function backendListProfiles(token: string) {
   return apiRequest<{ profiles: Profile[] }>('/api/profiles', { token });
 }

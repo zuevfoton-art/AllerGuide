@@ -1,9 +1,10 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
 import { AppSplash } from '@/src/components/AppSplash';
 import { initDb } from '@/src/db/init';
-import { isAuthenticated, getCurrentUserId } from '@/src/services/auth-service';
+import { isAuthenticated, getCurrentUserId, loginWithReplitExchange } from '@/src/services/auth-service';
 import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
 import {
   getStoredScenario,
@@ -21,24 +22,46 @@ export default function Index() {
   useEffect(() => {
     initDb();
 
+    const isWeb = Platform.OS === 'web';
+    const hasReplitCallback =
+      isWeb &&
+      typeof window !== 'undefined' &&
+      window.location.search.includes('replit_auth=1');
+
+    function continueBootstrap() {
+      const userId = getCurrentUserId();
+      if (userId) migrateLegacyProfilesToUser(userId);
+
+      const profiles = listProfiles();
+      const scenario = getStoredScenario();
+      if (scenario) setScenario(scenario);
+
+      if (!isIntroComplete()) {
+        setTarget('/onboarding-intro');
+        return;
+      }
+
+      setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
+    }
+
+    if (hasReplitCallback) {
+      if (window.history) window.history.replaceState({}, '', '/');
+      loginWithReplitExchange().then((result) => {
+        if (!result.ok) {
+          setTarget('/login');
+          return;
+        }
+        continueBootstrap();
+      });
+      return;
+    }
+
     if (!isAuthenticated()) {
       setTarget('/login');
       return;
     }
 
-    const userId = getCurrentUserId();
-    if (userId) migrateLegacyProfilesToUser(userId);
-
-    const profiles = listProfiles();
-    const scenario = getStoredScenario();
-    if (scenario) setScenario(scenario);
-
-    if (!isIntroComplete()) {
-      setTarget('/onboarding-intro');
-      return;
-    }
-
-    setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
+    continueBootstrap();
   }, [setScenario]);
 
   if (!target) {

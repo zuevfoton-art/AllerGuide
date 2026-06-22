@@ -1,6 +1,7 @@
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import { setupAuth, registerAuthRoutes } from './replit_integrations/auth';
 import { registerSyncRoutes } from './routes/sync';
 import { registerScanRoutes } from './routes/scan';
@@ -23,7 +24,8 @@ export async function createApp(
   // Correct client IPs / secure cookies when running behind a load balancer.
   app.set('trust proxy', 1);
 
-  app.use(helmet());
+  const isDev = Boolean(process.env.METRO_URL);
+  app.use(helmet({ contentSecurityPolicy: isDev ? false : undefined }));
   app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: '2mb' }));
   app.use(createGlobalRateLimiter());
@@ -48,6 +50,17 @@ export async function createApp(
       authDatabase: Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET),
     });
   });
+
+  const metroUrl = process.env.METRO_URL;
+  if (metroUrl) {
+    app.use(
+      createProxyMiddleware({
+        target: metroUrl,
+        changeOrigin: true,
+        ws: true,
+      })
+    );
+  }
 
   return app;
 }

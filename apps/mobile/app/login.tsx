@@ -1,11 +1,13 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { Platform } from 'react-native';
 import type { LoginType } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
 import { useTranslation } from '@/src/store/locale-store';
 import {
+  AuthDivider,
   AuthError,
   AuthField,
   AuthForgotLink,
@@ -13,6 +15,7 @@ import {
   AuthLink,
   AuthModeToggle,
   AuthPrimaryButton,
+  AuthReplitButton,
 } from '@/src/components/AuthForm';
 
 const FORGOT_LABELS: Record<string, string> = {
@@ -48,6 +51,12 @@ export default function LoginScreen() {
 
   const forgotLabel = FORGOT_LABELS[locale] ?? FORGOT_LABELS.en;
 
+  const handleReplitLogin = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/api/login';
+    }
+  };
+
   return (
     <Screen>
       <LanguagePicker compact />
@@ -75,6 +84,12 @@ export default function LoginScreen() {
         linkText={t('auth.registerLink')}
         onPress={() => router.push('/register')}
       />
+      {Platform.OS === 'web' && (
+        <>
+          <AuthDivider />
+          <AuthReplitButton onPress={handleReplitLogin} />
+        </>
+      )}
     </Screen>
   );
 }
