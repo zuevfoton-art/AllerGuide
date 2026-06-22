@@ -1,5 +1,5 @@
-import { Stack } from 'expo-router';
-import { useEffect, type ReactNode } from 'react';
+import { Stack, usePathname } from 'expo-router';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -18,7 +18,7 @@ import { initDb } from '@/src/db/init';
 import { initI18n } from '@/src/i18n';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
-import { initAnalytics } from '@/src/services/analytics-service';
+import { initAnalytics, trackScreen } from '@/src/services/analytics-service';
 import { initErrorReporting } from '@/src/services/error-reporting';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
@@ -64,27 +64,49 @@ export default function RootLayout() {
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const hydrateLocale = useLocaleStore((s) => s.hydrate);
   const { colors, isDark } = useTheme();
+  const pathname = usePathname();
+  const [dbReady, setDbReady] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     initI18n();
     initAnalytics();
     initErrorReporting();
-    initDb();
-    hydrateTheme();
-    hydrateLocale();
+
+    // Storage hydration is async on web (IndexedDB). Gate rendering on it so
+    // screens never read from an empty cache before hydration completes.
+    void (async () => {
+      await initDb();
+      if (!mounted) return;
+      hydrateTheme();
+      hydrateLocale();
+      setDbReady(true);
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [hydrateTheme, hydrateLocale]);
+
+  useEffect(() => {
+    if (dbReady && pathname) trackScreen(pathname);
+  }, [dbReady, pathname]);
 
   return (
     <ErrorBoundary>
       <FontGate>
         <WebShell>
           <StatusBar style={isDark ? 'light' : 'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.bg, flex: 1 },
-            }}
-          />
+          {dbReady ? (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.bg, flex: 1 },
+              }}
+            />
+          ) : (
+            <View style={[styles.loading, { backgroundColor: colors.bg }]} />
+          )}
         </WebShell>
       </FontGate>
     </ErrorBoundary>
@@ -92,6 +114,7 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
+  loading: { flex: 1 },
   webOuter: {
     flex: 1,
     width: '100%',

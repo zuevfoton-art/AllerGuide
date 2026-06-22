@@ -1,5 +1,12 @@
 import type { Express, Request, Response } from 'express';
 import { buildScanPrompt, parseLlmScanResponse, type ScanMode } from '@allerguide/ai';
+import { verifyAuthToken } from '../lib/jwt';
+import {
+  consumeScanBudget,
+  getCachedScan,
+  scanCacheKey,
+  setCachedScan,
+} from '../lib/scan-cache';
 
 interface ScanRequestBody {
   mode?: ScanMode;
@@ -11,6 +18,21 @@ interface ScanRequestBody {
 
 function isScanEnabled(): boolean {
   return process.env.AI_SCAN_ENABLED === 'true';
+}
+
+function requireScanAuth(): boolean {
+  return process.env.SCAN_REQUIRE_AUTH === 'true';
+}
+
+/** Identify the caller for budgeting: prefer authenticated user, fall back to IP. */
+async function resolveScanIdentity(req: Request): Promise<string | null> {
+  const header = req.header('authorization');
+  if (header?.startsWith('Bearer ')) {
+    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+    if (payload) return `user:${payload.sub}`;
+  }
+  if (requireScanAuth()) return null;
+  return `ip:${req.ip ?? 'unknown'}`;
 }
 
 async function callOpenAiCompatible(prompt: string): Promise<string | null> {
@@ -55,6 +77,12 @@ export function registerScanRoutes(app: Express) {
       return;
     }
 
+    const identity = await resolveScanIdentity(req);
+    if (!identity) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+
     const body = req.body as ScanRequestBody;
     const mode = body.mode ?? 'product';
     const text = body.text?.trim();
@@ -62,6 +90,26 @@ export function registerScanRoutes(app: Express) {
 
     if (!text) {
       res.status(400).json({ ok: false, error: 'Missing text' });
+      return;
+    }
+
+    const cacheKey = scanCacheKey({
+      mode,
+      text,
+      allergens,
+      productName: body.productName,
+      prompt: body.prompt,
+    });
+
+    const cached = getCachedScan(cacheKey);
+    if (cached) {
+      res.json({ ok: true, result: cached, cached: true });
+      return;
+    }
+
+    // Only billable (cache-missing) calls consume the daily budget.
+    if (!consumeScanBudget(identity)) {
+      res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;
     }
 
@@ -87,7 +135,8 @@ export function registerScanRoutes(app: Express) {
         return;
       }
 
-      res.json({ ok: true, result });
+      setCachedScan(cacheKey, result);
+      res.json({ ok: true, result, cached: false });
     } catch {
       res.status(500).json({ ok: false, error: 'Scan failed' });
     }

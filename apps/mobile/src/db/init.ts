@@ -5,6 +5,7 @@ import type {
   Profile,
   ScanHistoryEntry,
 } from '@allerguide/core';
+import { hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -20,88 +21,60 @@ interface DbLike {
 
 class WebDb implements DbLike {
   private getProfiles(): Profile[] {
-    try {
-      const profiles = JSON.parse(localStorage.getItem('ag_profiles') || '[]') as Profile[];
-      return profiles.map((profile) => ({ ...profile, userId: profile.userId ?? 0 }));
-    } catch {
-      return [];
-    }
+    const profiles = loadJson<Profile[]>('ag_profiles', []);
+    return profiles.map((profile) => ({ ...profile, userId: profile.userId ?? 0 }));
   }
 
   private saveProfiles(profiles: Profile[]) {
-    localStorage.setItem('ag_profiles', JSON.stringify(profiles));
+    saveJson('ag_profiles', profiles);
   }
 
   private getDiaryEntries(): DiaryEntry[] {
-    try {
-      return JSON.parse(localStorage.getItem('ag_diary') || '[]');
-    } catch {
-      return [];
-    }
+    return loadJson<DiaryEntry[]>('ag_diary', []);
   }
 
   private saveDiaryEntries(entries: DiaryEntry[]) {
-    localStorage.setItem('ag_diary', JSON.stringify(entries));
+    saveJson('ag_diary', entries);
   }
 
   private getScanHistory(): ScanHistoryEntry[] {
-    try {
-      return JSON.parse(localStorage.getItem('ag_scan_history') || '[]');
-    } catch {
-      return [];
-    }
+    return loadJson<ScanHistoryEntry[]>('ag_scan_history', []);
   }
 
   private saveScanHistory(entries: ScanHistoryEntry[]) {
-    localStorage.setItem('ag_scan_history', JSON.stringify(entries));
+    saveJson('ag_scan_history', entries);
   }
 
   private getProfileSos(): Record<number, string> {
-    try {
-      return JSON.parse(localStorage.getItem('ag_profile_sos') || '{}');
-    } catch {
-      return {};
-    }
+    return loadJson<Record<number, string>>('ag_profile_sos', {});
   }
 
   private saveProfileSos(data: Record<number, string>) {
-    localStorage.setItem('ag_profile_sos', JSON.stringify(data));
+    saveJson('ag_profile_sos', data);
   }
 
   private getSettings(): Record<string, string> {
-    try {
-      return JSON.parse(localStorage.getItem('ag_settings') || '{}');
-    } catch {
-      return {};
-    }
+    return loadJson<Record<string, string>>('ag_settings', {});
   }
 
   private saveSettings(settings: Record<string, string>) {
-    localStorage.setItem('ag_settings', JSON.stringify(settings));
+    saveJson('ag_settings', settings);
   }
 
   private getUsers(): StoredUser[] {
-    try {
-      return JSON.parse(localStorage.getItem('ag_users') || '[]');
-    } catch {
-      return [];
-    }
+    return loadJson<StoredUser[]>('ag_users', []);
   }
 
   private saveUsers(users: StoredUser[]) {
-    localStorage.setItem('ag_users', JSON.stringify(users));
+    saveJson('ag_users', users);
   }
 
   private getEmergencyContacts(): EmergencyContact[] {
-    try {
-      return JSON.parse(localStorage.getItem('ag_emergency_contacts') || '[]');
-    } catch {
-      return [];
-    }
+    return loadJson<EmergencyContact[]>('ag_emergency_contacts', []);
   }
 
   private saveEmergencyContacts(items: EmergencyContact[]) {
-    localStorage.setItem('ag_emergency_contacts', JSON.stringify(items));
+    saveJson('ag_emergency_contacts', items);
   }
 
   execSync(_sql: string) {}
@@ -436,7 +409,9 @@ class WebDb implements DbLike {
 
 const db: DbLike = new WebDb();
 
-export function initDb() {}
+export async function initDb() {
+  await hydrateWebStore();
+}
 
 export function getDb() {
   return db;

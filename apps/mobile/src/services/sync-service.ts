@@ -8,6 +8,8 @@ import {
   type ScanHistoryEntry,
 } from '@allerguide/core';
 import { getCurrentUserId } from '@/src/services/auth-service';
+import { getAuthToken } from '@/src/services/backend-api';
+import { decryptBackup, encryptBackup } from '@/src/services/backup-crypto';
 import { listProfiles } from '@/src/services/profile-service';
 import { getSosNotes } from '@/src/services/sos-service';
 import { getDb } from '@/src/db/init';
@@ -90,10 +92,23 @@ export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
   if (!userId) return { ok: false, error: 'Не выполнен вход' };
 
   try {
+    const payload = collectUserData(userId);
+    const token = await getAuthToken();
+    const envelope = await encryptBackup(JSON.stringify(payload));
+
+    // Prefer zero-knowledge encrypted upload; fall back to plaintext over TLS
+    // when the platform lacks Web Crypto (e.g. RN without a polyfill).
+    const body = envelope
+      ? { v: 2 as const, userId, exportedAt: payload.exportedAt, encrypted: true, payload: envelope }
+      : payload;
+
     const response = await fetch(`${API_BASE}/api/sync/backup`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(collectUserData(userId)),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -115,10 +130,21 @@ export async function downloadBackup(): Promise<{ ok: boolean; error?: string }>
   if (!userId) return { ok: false, error: 'Не выполнен вход' };
 
   try {
-    const response = await fetch(`${API_BASE}/api/sync/backup/${userId}`);
+    const token = await getAuthToken();
+    const response = await fetch(`${API_BASE}/api/sync/backup/${userId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     if (!response.ok) return { ok: false, error: 'Резервная копия не найдена' };
 
-    const payload = parseSyncPayload(await response.text());
+    let raw = await response.text();
+    const outer = JSON.parse(raw) as { encrypted?: boolean; payload?: string };
+    if (outer?.encrypted && typeof outer.payload === 'string') {
+      const decrypted = await decryptBackup(outer.payload);
+      if (!decrypted) return { ok: false, error: 'Не удалось расшифровать резервную копию' };
+      raw = decrypted;
+    }
+
+    const payload = parseSyncPayload(raw);
     if (!payload) return { ok: false, error: 'Некорректные данные резервной копии' };
 
     const validationError = validateSyncPayload(payload, userId);
