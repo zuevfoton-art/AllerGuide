@@ -5,6 +5,7 @@ import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useMemo } from 'react';
+import { AppLogoMark } from '@/src/components/AppLogo';
 
 interface AuthModeToggleProps {
   loginType: LoginType;
@@ -157,10 +158,14 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
 
   return (
     <View style={styles.hero}>
-      <View style={styles.logoWrap}>
-        <Ionicons name="medkit-outline" size={30} color={theme.colors.onAccent} />
+      <AppLogoMark size={72} />
+      <View style={styles.heroWordmark}>
+        <Text style={styles.heroTitle}>
+          <Text>Aller</Text>
+          <Text style={{ color: theme.colors.accent }}>Guide</Text>
+        </Text>
+        <Text style={styles.heroTagline}>ALLERGY MANAGEMENT</Text>
       </View>
-      <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>
   );
@@ -178,21 +183,21 @@ export function AuthError({ message }: { message: string }) {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    hero: { alignItems: 'center', paddingVertical: 12, gap: 8 },
-    logoWrap: {
-      width: 60,
-      height: 60,
-      borderRadius: 14,
-      backgroundColor: colors.accent,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+    hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
+    heroWordmark: { alignItems: 'center', gap: 2, marginTop: 2 },
     heroTitle: {
       fontFamily: fonts.serifBold,
-      fontSize: 26,
+      fontSize: 28,
       fontWeight: '700',
       color: colors.head,
       letterSpacing: -0.3,
+    },
+    heroTagline: {
+      fontFamily: fonts.sans,
+      fontSize: 10,
+      color: colors.textMuted,
+      letterSpacing: 1.8,
+      textTransform: 'uppercase',
     },
     heroSubtitle: {
       fontFamily: fonts.sans,
@@ -200,6 +205,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 20,
+      marginTop: 4,
     },
     toggleRow: {
       flexDirection: 'row',

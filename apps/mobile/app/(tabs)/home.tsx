@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
+import { AppLogoMark } from '@/src/components/AppLogo';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -77,7 +78,12 @@ export default function HomeScreen() {
   return (
     <Screen>
       <View style={styles.topBar}>
-        <Text style={ui.docLabel}>AllerGuide · {t('home.summary')}</Text>
+        <View style={styles.topBarLogo}>
+          <AppLogoMark size={32} />
+          <Text style={[styles.topBarWordmark, { fontFamily: theme.fonts.serifBold, color: theme.colors.head }]}>
+            Aller<Text style={{ color: theme.colors.accent }}>Guide</Text>
+          </Text>
+        </View>
         <Pressable
           onPress={() => router.push('/(tabs)/sos')}
           style={styles.sosBtn}
@@ -201,6 +207,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+    },
+    topBarLogo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    topBarWordmark: {
+      fontSize: 18,
+      fontWeight: '700',
+      letterSpacing: -0.2,
     },
     sosBtn: {
       width: 40,
