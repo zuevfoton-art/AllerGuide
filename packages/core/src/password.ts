@@ -1,7 +1,3 @@
-import { pbkdf2 } from '@noble/hashes/pbkdf2';
-import { sha256 } from '@noble/hashes/sha2';
-import { bytesToHex, hexToBytes, randomBytes } from '@noble/hashes/utils';
-
 const PREFIX = 'pbkdf2-sha256';
 const ITERATIONS = 600_000;
 const LEGACY_SALT = 'allerguide:';
@@ -39,20 +35,67 @@ function fromBase64(value: string): Uint8Array {
   return Uint8Array.from(bytes);
 }
 
-function derivePbkdf2(password: string, salt: Uint8Array): Uint8Array {
-  return pbkdf2(sha256, new TextEncoder().encode(password), salt, {
-    c: ITERATIONS,
-    dkLen: 32,
-  });
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
-function hashLegacy(password: string): string {
-  return bytesToHex(sha256(new TextEncoder().encode(`${LEGACY_SALT}${password}`)));
+function hexToBytes(hex: string): Uint8Array {
+  const result = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    result[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  }
+  return result;
+}
+
+function getSubtle(): SubtleCrypto {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto?.subtle) {
+    return globalThis.crypto.subtle;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return (require('crypto') as { webcrypto: { subtle: SubtleCrypto } }).webcrypto.subtle;
+}
+
+function getCrypto(): { getRandomValues(buf: Uint8Array): Uint8Array } {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto?.getRandomValues) {
+    return globalThis.crypto;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return (require('crypto') as { webcrypto: Crypto }).webcrypto;
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const digest = await getSubtle().digest('SHA-256', data);
+  return bytesToHex(new Uint8Array(digest));
+}
+
+async function derivePbkdf2(
+  password: string,
+  salt: Uint8Array,
+  iterations: number,
+): Promise<Uint8Array> {
+  const subtle = getSubtle();
+  const keyMaterial = await subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits'],
+  );
+  const bits = await subtle.deriveBits(
+    { name: 'PBKDF2', hash: 'SHA-256', salt, iterations },
+    keyMaterial,
+    256,
+  );
+  return new Uint8Array(bits);
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
-  const hash = derivePbkdf2(password, salt);
+  const salt = new Uint8Array(16);
+  getCrypto().getRandomValues(salt);
+  const hash = await derivePbkdf2(password, salt, ITERATIONS);
   return `${PREFIX}:${ITERATIONS}:${toBase64(salt)}:${toBase64(hash)}`;
 }
 
@@ -67,21 +110,20 @@ export async function verifyPassword(
 
     const salt = fromBase64(saltB64);
     const expected = fromBase64(hashB64);
-    const actual =
-      iterations === ITERATIONS
-        ? derivePbkdf2(password, salt)
-        : pbkdf2(sha256, new TextEncoder().encode(password), salt, {
-            c: iterations,
-            dkLen: 32,
-          });
+    const actual = await derivePbkdf2(password, salt, iterations);
 
     if (actual.length !== expected.length) return { valid: false };
     let diff = 0;
     for (let i = 0; i < actual.length; i += 1) diff |= actual[i] ^ expected[i];
-    return { valid: diff === 0 };
+    if (diff !== 0) return { valid: false };
+    if (iterations !== ITERATIONS) {
+      const upgradedHash = await hashPassword(password);
+      return { valid: true, upgradedHash };
+    }
+    return { valid: true };
   }
 
-  const legacy = hashLegacy(password);
+  const legacy = await sha256Hex(`${LEGACY_SALT}${password}`);
   const storedBytes = hexToBytes(stored);
   const legacyBytes = hexToBytes(legacy);
   if (storedBytes.length !== legacyBytes.length) return { valid: false };
