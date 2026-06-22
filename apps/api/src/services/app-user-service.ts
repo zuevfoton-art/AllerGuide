@@ -52,6 +52,8 @@ export async function registerAppUser(input: {
     .values({
       login: normalizedLogin,
       loginType: input.loginType,
+      email: input.loginType === 'email' ? normalizedLogin : null,
+      phone: input.loginType === 'phone' ? normalizedLogin : null,
       passwordHash,
     })
     .returning();
