@@ -18,7 +18,34 @@ Internal alpha-сборка для TestFlight (iOS) и прямой устано
 
 ---
 
-## Предварительные требования
+## Быстрый старт (Windows)
+
+Из корня репозитория (после `git pull`):
+
+```powershell
+pnpm install
+.\scripts\first-preview-build.ps1
+```
+
+Скрипт: `eas login` → `eas init` (если projectId ещё placeholder) → `pnpm build:preview:android`.
+
+Только iOS:
+
+```powershell
+.\scripts\first-preview-build.ps1 -Platform ios
+```
+
+Вручную (без скрипта):
+
+```powershell
+cd apps\mobile
+pnpm install
+pnpm exec eas login
+pnpm exec eas init
+pnpm build:preview:android
+```
+
+---
 
 ### Аккаунты
 
@@ -29,8 +56,8 @@ Internal alpha-сборка для TestFlight (iOS) и прямой устано
 ### Инструменты
 
 ```bash
-npm install -g eas-cli   # или: pnpm add -g eas-cli
-eas --version            # >= 16.0.0
+pnpm install   # eas-cli уже в devDependencies apps/mobile
+pnpm exec eas --version
 ```
 
 ---

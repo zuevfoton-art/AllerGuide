@@ -1,0 +1,8 @@
+# Shrink EAS upload; install runs fresh on build servers
+**/.git
+**/.turbo
+**/node_modules
+**/.expo
+**/dist
+**/coverage
+AllerGuide-full/
