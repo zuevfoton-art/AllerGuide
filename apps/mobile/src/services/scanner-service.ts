@@ -54,19 +54,22 @@ export async function scanBarcode({
     const result = {
       ...fallback,
       reason:
-        'Продукт не найден в Open Food Facts и локальном кэше. Проверка выполнена по штрихкоду как тексту.',
+        'Продукт не найден в локальном кэше, каталоге и Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
       lookupFailed: true,
     };
     if (profile) saveScanHistory(profile.id, barcode, result);
     return result;
   }
 
+  const scanSource: ScanResult['source'] =
+    product.source === 'catalog_api' ? 'barcode' : product.source;
+
   const result = await analyzeText({
     mode: 'product',
     text: product.ingredients,
     profile,
     productName: product.name,
-    source: product.source,
+    source: scanSource,
   });
   if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
   return result;

@@ -26,6 +26,16 @@ GitHub Actions: `pnpm typecheck`, `pnpm lint`, `pnpm test`.
 
 Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL.
 
+### Разделение БД на схемы (`profile` и `catalog`)
+
+Данные разнесены по двум Postgres-схемам («базам»):
+
+- **`profile`** — всё, что относится к пользователю: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`. Определение: `src/db/app-schema.ts` (`profileSchema`).
+- **`catalog`** — общие справочники: `allergens`, `cross_reactions`, `products`. Определение: `src/db/catalog-schema.ts` (`catalogSchema`).
+- Таблицы Replit-OIDC (`users`, `sessions`) остаются в `public`.
+
+Drizzle-объекты схемо-квалифицированы, поэтому код запросов не меняется. Человекочитаемые автономные определения каждой «базы» лежат в `apps/api/sql/profile.sql` и `apps/api/sql/catalog.sql` (справочные артефакты; живая БД управляется миграциями). Перенос существующих таблиц в схемы выполнен неразрушающей миграцией `drizzle/0003_*` через `ALTER TABLE ... SET SCHEMA`.
+
 ### Production hardening
 
 - **Безопасность** (`src/middleware/security.ts`, подключено в `app.ts`): `helmet`, строгий CORS по allowlist (`CORS_ORIGINS`), rate-limiting per-IP (глобальный + усиленный для `/api/auth` и `/api/scan`). Отключается через `RATE_LIMIT_DISABLED=true`.
@@ -35,6 +45,18 @@ Backend в `apps/api` — Express + Drizzle ORM + PostgreSQL.
 ### AI-сканер (`src/routes/scan.ts`, `src/lib/scan-cache.ts`)
 
 LLM-запрос обёрнут кэшем результатов (ключ — хэш режима/текста/аллергенов) и дневным бюджетом на пользователя/IP; биллится только промах кэша. Опциональная JWT-аутентификация (`SCAN_REQUIRE_AUTH`). Кэш резко снижает стоимость при росте аудитории.
+
+### Справочники: аллергены и штрихкоды (`src/db/catalog-schema.ts`, `src/routes/catalog.ts`)
+
+Глобальные справочники во внешней БД:
+
+- `allergens` / `cross_reactions` — сид из `@allerguide/core` (`db:seed-allergens`), единый источник правды — статический каталог в core.
+- `products` — каталог по штрихкоду (`barcode` PK, `name`, `ingredients`, `allergen_tags`, `source`). Наполняется импортом датасета `db:import-food-allergy` (`apps/api/data/food-allergy/`, источник — [alexf388/Food-Allergy-SQL-Database](https://github.com/alexf388/Food-Allergy-SQL-Database)) и/или write-through кэшем поверх Open Food Facts.
+- **Индексация** (миграция `drizzle/0002_*`): `pg_trgm` + GIN по `name` (нечёткий поиск), полнотекст по `ingredients` (`to_tsvector('russian', ...)`), GIN по `allergen_tags` и `keywords`.
+- Эндпоинты: `GET /api/allergens` (fallback на статический core-список без БД), `GET /api/products/:barcode`, `GET /api/products/search?q=`. Клиент включается флагом `EXPO_PUBLIC_PRODUCT_DB`.
+- **Маппинг словарей**: внешние теги (датасет, OFF `allergens_tags` вида `en:milk`) приводятся к канонической RU-таксономии через `@allerguide/core` (`mapExternalAllergenNames`) — и при импорте, и при write-through. Так сканер матчит товары на профиль пользователя.
+- **Write-through кэш OFF**: при промахе `GET /api/products/:barcode` сервер тянет Open Food Facts (`src/services/open-food-facts.ts`), нормализует, маппит теги и сохраняет в `products` (`source='openfoodfacts'`); повторный запрос отдаётся из БД. Управляется `PRODUCT_OFF_FALLBACK`.
+- При росте каталога до миллионов SKU поиск выносится в Meilisearch/Typesense/OpenSearch с наполнением из Postgres (Postgres остаётся source of truth).
 
 ### Облачная синхронизация (`src/routes/sync.ts`)
 

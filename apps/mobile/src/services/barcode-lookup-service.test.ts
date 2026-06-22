@@ -3,10 +3,28 @@ import { resolveProductByBarcode } from './barcode-lookup-service';
 
 const cache = new Map<string, { barcode: string; name: string; ingredients: string }>();
 
+vi.mock('@/src/constants/features', () => ({
+  PRODUCT_DB_ENABLED: true,
+}));
+
 vi.mock('@/src/services/barcode-cache-service', () => ({
   lookupBarcodeCache: vi.fn((barcode: string) => cache.get(barcode) ?? null),
   saveBarcodeCache: vi.fn((product: { barcode: string; name: string; ingredients: string }) => {
     cache.set(product.barcode, product);
+  }),
+}));
+
+vi.mock('@/src/services/catalog-api', () => ({
+  fetchProductFromCatalog: vi.fn(async (barcode: string) => {
+    if (barcode === '8888888888888') {
+      return {
+        barcode: '8888888888888',
+        name: 'Catalog Product',
+        ingredients: 'water',
+        allergenTags: ['молоко'],
+      };
+    }
+    return null;
   }),
 }));
 
@@ -40,7 +58,14 @@ describe('barcode-lookup-service', () => {
     expect(product?.name).toBe('Cached Product');
   });
 
-  it('fetches online and saves to cache on first scan', async () => {
+  it('uses backend catalog before Open Food Facts', async () => {
+    const product = await resolveProductByBarcode('8888888888888');
+    expect(product?.source).toBe('catalog_api');
+    expect(product?.ingredients).toContain('молоко');
+    expect(cache.has('8888888888888')).toBe(true);
+  });
+
+  it('fetches online and saves to cache when catalog misses', async () => {
     const product = await resolveProductByBarcode('9999999999999');
     expect(product?.source).toBe('openfoodfacts');
     expect(product?.name).toBe('Remote Product');

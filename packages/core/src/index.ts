@@ -9,6 +9,7 @@ export * from './catalog';
 export * from './diary-stats';
 export * from './sync';
 export * from './crypto';
+export * from './allergen-aliases';
 export * from './allergy-conditions';
 export * from './expert-content';
 export * from './adair-catalog';

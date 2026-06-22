@@ -9,3 +9,6 @@ export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true
 
 /** Use PostgreSQL backend for users and profiles (JWT auth). */
 export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'true';
+
+/** Look up barcodes in the backend product catalog before Open Food Facts. */
+export const PRODUCT_DB_ENABLED = process.env.EXPO_PUBLIC_PRODUCT_DB === 'true';
