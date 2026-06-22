@@ -1,16 +1,18 @@
-import { Text, View, StyleSheet, Pressable, Platform } from 'react-native';
+import { Text, View, StyleSheet, Pressable } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { YandexMap } from '@/src/components/YandexMap';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import {
   ADAIR_CLINICS,
   ADAIR_DOCTORS,
   ADAIR_SPECIALIZATION_LABELS,
+  buildPlacesMapUrl,
   getPlaceLevelColor,
   getPlaceLevelLabel,
   getPollenPeaksForMonth,
@@ -21,23 +23,6 @@ import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { getRecommendedPlaces } from '@/src/services/place-service';
-
-const DEFAULT_REGION = {
-  latitude: 55.7558,
-  longitude: 37.6173,
-  latitudeDelta: 0.06,
-  longitudeDelta: 0.06,
-};
-
-let MapViewComponent: typeof import('react-native-maps').default | null = null;
-let MarkerComponent: typeof import('react-native-maps').Marker | null = null;
-
-if (Platform.OS !== 'web') {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const maps = require('react-native-maps');
-  MapViewComponent = maps.default;
-  MarkerComponent = maps.Marker;
-}
 
 const LAYERS = [
   { key: 'places', labelKey: 'map.places' },
@@ -56,24 +41,9 @@ export default function MapScreen() {
   const [layer, setLayer] = useState<MapLayer>('places');
   const [places, setPlaces] = useState<CatalogPlace[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(
-    null,
-  );
 
   const refresh = useCallback(async () => {
     setPlaces(getRecommendedPlaces(profile));
-    if (Platform.OS === 'web') return;
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Location = require('expo-location');
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return;
-
-    const location = await Location.getCurrentPositionAsync({});
-    setUserLocation({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    });
   }, [profile]);
 
   useFocusEffect(
@@ -83,6 +53,7 @@ export default function MapScreen() {
   );
 
   const selected = places.find((place) => place.id === selectedId) ?? places[0] ?? null;
+  const mapUrl = useMemo(() => buildPlacesMapUrl(places, selectedId), [places, selectedId]);
   const pollenMonth = new Date().getMonth() + 1;
   const pollenPeaks = getPollenPeaksForMonth(pollenMonth);
 
@@ -102,6 +73,7 @@ export default function MapScreen() {
         <Text style={ui.docLabel}>AllerGuide · {t('map.eyebrow')}</Text>
         <Text style={ui.docTitle}>{t('map.title')}</Text>
         <Text style={ui.docMeta}>{t('map.subtitle')}</Text>
+        <Text style={styles.regionLabel}>{t('map.regionLabel')}</Text>
       </View>
 
       <ProfileSwitcher />
@@ -121,33 +93,16 @@ export default function MapScreen() {
 
       {layer === 'places' ? (
         <>
-          {Platform.OS !== 'web' && MapViewComponent && MarkerComponent ? (
-            <View style={styles.mapWrap}>
-              <MapViewComponent
-                style={styles.map}
-                initialRegion={DEFAULT_REGION}
-                showsUserLocation={!!userLocation}>
-                {places.map((place) => {
-                  const color = getPlaceLevelColor(place.level, theme.isDark);
-                  return (
-                    <MarkerComponent
-                      key={place.id}
-                      coordinate={{ latitude: place.lat, longitude: place.lng }}
-                      title={place.title}
-                      description={place.note}
-                      pinColor={color}
-                      onPress={() => setSelectedId(place.id)}
-                    />
-                  );
-                })}
-              </MapViewComponent>
-            </View>
+          {places.length > 0 ? (
+            <YandexMap url={mapUrl} />
           ) : (
             <View style={styles.mapPlaceholder}>
               <Ionicons name="map" size={40} color={theme.colors.textMuted} />
-              <Text style={styles.mapText}>{t('map.mapWebHint')}</Text>
+              <Text style={styles.mapText}>{t('map.emptyPlaces')}</Text>
             </View>
           )}
+
+          <Text style={styles.mapAttribution}>{t('map.yandexAttribution')}</Text>
 
           <Text style={ui.sectionLabel}>{t('map.recommended')}</Text>
 
@@ -271,6 +226,13 @@ export default function MapScreen() {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     header: { gap: 2 },
+    regionLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.accent,
+      marginTop: 4,
+    },
     pollenHero: { alignItems: 'center', gap: 6 },
     pollenTitle: {
       fontFamily: fonts.sansSemiBold,
@@ -285,14 +247,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       textAlign: 'center',
     },
-    mapWrap: {
-      height: 220,
-      borderRadius: 8,
-      overflow: 'hidden',
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    map: { flex: 1 },
     mapPlaceholder: {
       height: 160,
       backgroundColor: colors.surfaceMuted,
@@ -310,6 +264,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       textAlign: 'center',
       paddingHorizontal: 24,
       lineHeight: 20,
+    },
+    mapAttribution: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      marginTop: 6,
+      marginBottom: 4,
     },
     card: {
       flexDirection: 'row',

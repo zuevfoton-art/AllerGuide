@@ -196,6 +196,9 @@ export type LocaleMessages = {
     adair: string;
     recommended: string;
     mapWebHint: string;
+    regionLabel: string;
+    yandexAttribution: string;
+    emptyPlaces: string;
     disclaimerPlaces: string;
     disclaimerPollen: string;
     disclaimerAdair: string;

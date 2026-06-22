@@ -16,3 +16,4 @@ export * from './pollen-calendar';
 export * from './doctor-report';
 export * from './wellness';
 export * from './geo';
+export * from './yandex-map';
