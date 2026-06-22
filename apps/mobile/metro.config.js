@@ -22,8 +22,6 @@ config.resolver.extraNodeModules = {
   '@allerguide/ai': path.resolve(workspaceRoot, 'packages/ai'),
 };
 
-config.resolver.assetExts = [...config.resolver.assetExts, 'sqlite', 'db'];
-
 const WEB_ONLY_STUBS = {
   'expo-location': path.resolve(projectRoot, 'src/stubs/expo-location-web-stub.js'),
 };

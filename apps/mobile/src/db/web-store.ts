@@ -20,6 +20,7 @@ const KNOWN_KEYS = [
   'ag_profiles',
   'ag_diary',
   'ag_scan_history',
+  'ag_barcode_cache',
   'ag_profile_sos',
   'ag_settings',
   'ag_users',

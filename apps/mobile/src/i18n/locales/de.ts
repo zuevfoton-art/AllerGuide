@@ -171,7 +171,7 @@ const de: LocaleMessages = {
     crossMatches: 'Kreuzreaktionen',
     source: 'Quelle',
     sourceOpenFoodFacts: 'Open Food Facts',
-    sourceBarcodesDb: 'lokale Barcode-Datenbank',
+    sourceBarcodesDb: 'lokaler Cache',
     sourceBarcode: 'Barcode',
     sourceManual: 'manuelle Eingabe',
   },

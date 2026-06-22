@@ -51,11 +51,6 @@ Thumbs.db
 # Testing
 coverage/
 
-# Large local barcode source files (generate SQLite before release build)
-data/barcodes_db/*.csv
-data/barcodes_db/*.sqlite
-data/barcodes_db/*.db
-
 # Turbo
 .turbo/
 

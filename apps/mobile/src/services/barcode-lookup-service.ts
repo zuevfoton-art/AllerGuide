@@ -1,37 +1,48 @@
-import { lookupBarcodeInCatalog, type BarcodeProduct } from '@allerguide/core';
-import { fetchProductByBarcode, type OpenFoodFactsProduct } from '@/src/services/open-food-facts-service';
+import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
 import {
-  initBarcodeSqliteCatalog,
-  lookupBarcodeInSqlite,
-} from '@/src/services/barcode-sqlite-service';
+  lookupBarcodeCache,
+  saveBarcodeCache,
+  type BarcodeCacheEntry,
+} from '@/src/services/barcode-cache-service';
 
 export type BarcodeLookupSource = 'barcodes_db' | 'openfoodfacts';
 
-export type ResolvedBarcodeProduct = OpenFoodFactsProduct & {
-  source: BarcodeLookupSource;
+export type ResolvedBarcodeProduct = {
+  barcode: string;
+  name: string;
+  ingredients: string;
   brand?: string;
-  category?: string;
+  source: BarcodeLookupSource;
 };
 
 export async function resolveProductByBarcode(
   barcode: string,
 ): Promise<ResolvedBarcodeProduct | null> {
-  await initBarcodeSqliteCatalog();
-
-  const local =
-    lookupBarcodeInSqlite(barcode) ?? lookupBarcodeInCatalog(barcode);
-  if (local) {
-    return toResolvedProduct(local, 'barcodes_db');
+  const cached = lookupBarcodeCache(barcode);
+  if (cached) {
+    return toResolvedProduct(cached, 'barcodes_db');
   }
 
   const remote = await fetchProductByBarcode(barcode);
   if (!remote) return null;
 
-  return { ...remote, source: 'openfoodfacts' };
+  saveBarcodeCache({
+    barcode: remote.barcode,
+    name: remote.name,
+    ingredients: remote.ingredients,
+    originSource: 'openfoodfacts',
+  });
+
+  return {
+    barcode: remote.barcode,
+    name: remote.name,
+    ingredients: remote.ingredients,
+    source: 'openfoodfacts',
+  };
 }
 
 function toResolvedProduct(
-  product: BarcodeProduct,
+  product: BarcodeCacheEntry,
   source: BarcodeLookupSource,
 ): ResolvedBarcodeProduct {
   return {
@@ -39,7 +50,6 @@ function toResolvedProduct(
     name: product.name,
     ingredients: product.ingredients,
     brand: product.brand,
-    category: product.category,
     source,
   };
 }

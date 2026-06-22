@@ -54,7 +54,7 @@ export async function scanBarcode({
     const result = {
       ...fallback,
       reason:
-        'Продукт не найден в локальной базе штрихкодов и Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
+        'Продукт не найден в Open Food Facts и локальном кэше. Проверка выполнена по штрихкоду как тексту.',
       lookupFailed: true,
     };
     if (profile) saveScanHistory(profile.id, barcode, result);

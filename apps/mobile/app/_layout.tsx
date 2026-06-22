@@ -77,8 +77,6 @@ export default function RootLayout() {
     // screens never read from an empty cache before hydration completes.
     void (async () => {
       await initDb();
-      const { initBarcodeSqliteCatalog } = await import('@/src/services/barcode-sqlite-service');
-      await initBarcodeSqliteCatalog();
       if (!mounted) return;
       hydrateTheme();
       hydrateLocale();
