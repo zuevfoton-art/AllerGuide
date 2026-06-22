@@ -44,8 +44,9 @@ LLM-запрос обёрнут кэшем результатов (ключ — 
 - `products` — каталог по штрихкоду (`barcode` PK, `name`, `ingredients`, `allergen_tags`, `source`). Наполняется импортом датасета `db:import-food-allergy` (`apps/api/data/food-allergy/`, источник — [alexf388/Food-Allergy-SQL-Database](https://github.com/alexf388/Food-Allergy-SQL-Database)) и/или write-through кэшем поверх Open Food Facts.
 - **Индексация** (миграция `drizzle/0002_*`): `pg_trgm` + GIN по `name` (нечёткий поиск), полнотекст по `ingredients` (`to_tsvector('russian', ...)`), GIN по `allergen_tags` и `keywords`.
 - Эндпоинты: `GET /api/allergens` (fallback на статический core-список без БД), `GET /api/products/:barcode`, `GET /api/products/search?q=`. Клиент включается флагом `EXPO_PUBLIC_PRODUCT_DB`.
+- **Маппинг словарей**: внешние теги (датасет, OFF `allergens_tags` вида `en:milk`) приводятся к канонической RU-таксономии через `@allerguide/core` (`mapExternalAllergenNames`) — и при импорте, и при write-through. Так сканер матчит товары на профиль пользователя.
+- **Write-through кэш OFF**: при промахе `GET /api/products/:barcode` сервер тянет Open Food Facts (`src/services/open-food-facts.ts`), нормализует, маппит теги и сохраняет в `products` (`source='openfoodfacts'`); повторный запрос отдаётся из БД. Управляется `PRODUCT_OFF_FALLBACK`.
 - При росте каталога до миллионов SKU поиск выносится в Meilisearch/Typesense/OpenSearch с наполнением из Postgres (Postgres остаётся source of truth).
-- Follow-up: маппинг англоязычных тегов датасета на RU-таксономию аллергенов для кросс-языкового матчинга в сканере.
 
 ### Облачная синхронизация (`src/routes/sync.ts`)
 
