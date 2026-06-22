@@ -1,4 +1,5 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { useState, useRef } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -28,7 +29,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
       </Pressable>
       <Pressable
-        style={[styles.toggleBtn, loginType === 'email' && styles.toggleActive]}
+        style={[styles.toggleBtn, styles.toggleBtnLast, loginType === 'email' && styles.toggleActive]}
         onPress={() => onChange('email')}>
         <Ionicons
           name="mail"
@@ -62,10 +63,11 @@ export function AuthField({
 }: AuthFieldProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.fieldWrap}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -74,7 +76,9 @@ export function AuthField({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
-        style={styles.input}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={[styles.input, focused && styles.inputFocused]}
       />
     </View>
   );
@@ -92,13 +96,25 @@ export function AuthPrimaryButton({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
+  };
+  const handlePressOut = () => {
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 4 }).start();
+  };
 
   return (
     <Pressable
       style={[styles.button, loading && styles.buttonDisabled]}
       onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       disabled={loading}>
-      <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
+      </Animated.View>
     </Pressable>
   );
 }
@@ -124,6 +140,17 @@ export function AuthLink({
   );
 }
 
+export function AuthForgotLink({ text, onPress }: { text: string; onPress: () => void }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  return (
+    <Pressable style={styles.forgotWrap} onPress={onPress}>
+      <Text style={styles.forgotText}>{text}</Text>
+    </Pressable>
+  );
+}
+
 export function AuthHero({ title, subtitle }: { title: string; subtitle: string }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -131,7 +158,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
   return (
     <View style={styles.hero}>
       <View style={styles.logoWrap}>
-        <Ionicons name="medkit-outline" size={28} color={theme.colors.onAccent} />
+        <Ionicons name="medkit-outline" size={30} color={theme.colors.onAccent} />
       </View>
       <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
@@ -142,21 +169,23 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
 export function AuthError({ message }: { message: string }) {
   const theme = useTheme();
   if (!message) return null;
-  return <Text style={{ color: theme.colors.danger, fontSize: 14, textAlign: 'center' }}>{message}</Text>;
+  return (
+    <View style={{ backgroundColor: theme.colors.dangerLight, borderRadius: 6, padding: 10, borderWidth: 1, borderColor: theme.colors.dangerBorder }}>
+      <Text style={{ color: theme.colors.danger, fontSize: 14, textAlign: 'center', fontFamily: undefined }}>{message}</Text>
+    </View>
+  );
 }
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 8 },
     logoWrap: {
-      width: 56,
-      height: 56,
-      borderRadius: 8,
+      width: 60,
+      height: 60,
+      borderRadius: 14,
       backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
     },
     heroTitle: {
       fontFamily: fonts.serifBold,
@@ -172,7 +201,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       textAlign: 'center',
       lineHeight: 20,
     },
-    toggleRow: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, borderRadius: 6, overflow: 'hidden' },
+    toggleRow: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 6,
+      overflow: 'hidden',
+    },
     toggleBtn: {
       flex: 1,
       flexDirection: 'row',
@@ -183,6 +218,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       padding: 12,
       borderRightWidth: 1,
       borderRightColor: colors.border,
+    },
+    toggleBtnLast: {
+      borderRightWidth: 0,
     },
     toggleActive: { backgroundColor: colors.accent },
     toggleText: {
@@ -201,6 +239,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       textTransform: 'uppercase',
       letterSpacing: 0.5,
     },
+    labelFocused: {
+      color: colors.accent,
+    },
     input: {
       backgroundColor: colors.card,
       padding: 14,
@@ -211,13 +252,18 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.borderInput,
     },
+    inputFocused: {
+      borderColor: colors.accent,
+      borderWidth: 1.5,
+    },
     button: {
       backgroundColor: colors.accent,
       padding: 14,
       borderRadius: 6,
       alignItems: 'center',
-      marginTop: 4,
-      minHeight: 44,
+      marginTop: 8,
+      minHeight: 48,
+      justifyContent: 'center',
     },
     buttonDisabled: { opacity: 0.7 },
     buttonText: {
@@ -229,5 +275,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
     linkText: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary },
     linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.accent, fontWeight: '600' },
+    forgotWrap: { alignItems: 'flex-end', marginTop: -4 },
+    forgotText: { fontFamily: fonts.sans, fontSize: 13, color: colors.accent },
   });
 }

@@ -8,14 +8,24 @@ import { useTranslation } from '@/src/store/locale-store';
 import {
   AuthError,
   AuthField,
+  AuthForgotLink,
   AuthHero,
   AuthLink,
   AuthModeToggle,
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
 
+const FORGOT_LABELS: Record<string, string> = {
+  ru: 'Забыли пароль?',
+  en: 'Forgot password?',
+  es: '¿Olvidaste tu contraseña?',
+  fr: 'Mot de passe oublié ?',
+  de: 'Passwort vergessen?',
+  it: 'Password dimenticata?',
+};
+
 export default function LoginScreen() {
-  const { t, tAuthError } = useTranslation();
+  const { t, tAuthError, locale } = useTranslation();
   const [loginType, setLoginType] = useState<LoginType>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -36,6 +46,8 @@ export default function LoginScreen() {
     router.replace('/');
   };
 
+  const forgotLabel = FORGOT_LABELS[locale] ?? FORGOT_LABELS.en;
+
   return (
     <Screen>
       <LanguagePicker compact />
@@ -55,6 +67,7 @@ export default function LoginScreen() {
         placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
       />
+      <AuthForgotLink text={forgotLabel} onPress={() => router.push('/register')} />
       <AuthError message={error} />
       <AuthPrimaryButton label={t('auth.loginButton')} onPress={handleLogin} loading={loading} />
       <AuthLink
