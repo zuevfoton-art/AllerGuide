@@ -1,10 +1,17 @@
-import { boolean, index, jsonb, pgTable, primaryKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { boolean, index, jsonb, pgSchema, primaryKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+
+/**
+ * `catalog` database (Postgres schema) — global reference data shared by all
+ * users: the allergen taxonomy, cross-reactions, and the product/barcode
+ * catalog. User-specific data lives in the separate `profile` schema.
+ */
+export const catalogSchema = pgSchema('catalog');
 
 /**
  * Global allergen reference catalog. Seeded from `@allerguide/core`
  * (`ALLERGENS`) so the static taxonomy and the database stay in sync.
  */
-export const allergens = pgTable('allergens', {
+export const allergens = catalogSchema.table('allergens', {
   id: varchar('id', { length: 64 }).primaryKey(),
   name: varchar('name', { length: 128 }).notNull(),
   category: varchar('category', { length: 32 }).notNull(),
@@ -13,7 +20,7 @@ export const allergens = pgTable('allergens', {
 });
 
 /** Pairwise cross-reaction notes (seeded from `CROSS_REACTIONS`). */
-export const crossReactions = pgTable(
+export const crossReactions = catalogSchema.table(
   'cross_reactions',
   {
     fromId: varchar('from_id', { length: 64 }).notNull(),
@@ -28,7 +35,7 @@ export const crossReactions = pgTable(
  * write-through cache over Open Food Facts. `allergenTags` is the set of
  * allergens detected for the product (free-form tags from the source dataset).
  */
-export const products = pgTable(
+export const products = catalogSchema.table(
   'products',
   {
     barcode: varchar('barcode', { length: 64 }).primaryKey(),

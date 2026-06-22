@@ -22,6 +22,13 @@
       "when": 1782114810115,
       "tag": "0002_dear_kitty_pryde",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782116379233,
+      "tag": "0003_nebulous_arclight",
+      "breakpoints": true
     }
   ]
 }
