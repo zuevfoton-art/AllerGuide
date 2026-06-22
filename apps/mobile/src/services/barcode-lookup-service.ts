@@ -1,5 +1,9 @@
 import { lookupBarcodeInCatalog, type BarcodeProduct } from '@allerguide/core';
 import { fetchProductByBarcode, type OpenFoodFactsProduct } from '@/src/services/open-food-facts-service';
+import {
+  initBarcodeSqliteCatalog,
+  lookupBarcodeInSqlite,
+} from '@/src/services/barcode-sqlite-service';
 
 export type BarcodeLookupSource = 'barcodes_db' | 'openfoodfacts';
 
@@ -12,7 +16,10 @@ export type ResolvedBarcodeProduct = OpenFoodFactsProduct & {
 export async function resolveProductByBarcode(
   barcode: string,
 ): Promise<ResolvedBarcodeProduct | null> {
-  const local = lookupBarcodeInCatalog(barcode);
+  await initBarcodeSqliteCatalog();
+
+  const local =
+    lookupBarcodeInSqlite(barcode) ?? lookupBarcodeInCatalog(barcode);
   if (local) {
     return toResolvedProduct(local, 'barcodes_db');
   }

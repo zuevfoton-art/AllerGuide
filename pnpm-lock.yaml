@@ -136,6 +136,9 @@ importers:
       expo:
         specifier: ~53.0.0
         version: 53.0.27(@babel/core@7.29.7)(@expo/dom-webview@56.0.5)(@expo/metro-runtime@5.0.5(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.2.17)(react@19.0.0)))(react-native-webview@13.13.5(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.2.17)(react@19.0.0))(react@19.0.0))(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.2.17)(react@19.0.0))(react@19.0.0)
+      expo-asset:
+        specifier: ~11.1.7
+        version: 11.1.7(expo@53.0.27)(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.2.17)(react@19.0.0))(react@19.0.0)
       expo-camera:
         specifier: ~16.0.0
         version: 16.0.18(expo@53.0.27)(react-native-web@0.20.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.2.17)(react@19.0.0))(react@19.0.0)

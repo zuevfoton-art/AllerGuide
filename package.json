@@ -11,7 +11,8 @@
     "lint": "pnpm --filter mobile lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @allerguide/core test && pnpm --filter @allerguide/ai test && pnpm --filter mobile test && pnpm --filter api test",
-    "import:barcodes": "node scripts/import-barcodes-db.mjs"
+    "import:barcodes": "node scripts/import-barcodes-db.mjs",
+    "import:barcodes:sqlite": "node scripts/import-barcodes-csv-to-sqlite.mjs"
   },
   "pnpm": {
     "overrides": {

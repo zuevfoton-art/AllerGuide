@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { resolveProductByBarcode } from './barcode-lookup-service';
 
+vi.mock('@/src/services/barcode-sqlite-service', () => ({
+  initBarcodeSqliteCatalog: vi.fn(async () => false),
+  lookupBarcodeInSqlite: vi.fn(() => null),
+}));
+
 vi.mock('@/src/services/open-food-facts-service', () => ({
   fetchProductByBarcode: vi.fn(async (barcode: string) => {
     if (barcode === '9999999999999') {
