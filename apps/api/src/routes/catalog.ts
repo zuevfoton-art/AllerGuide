@@ -1,11 +1,16 @@
 import type { Express, Request, Response } from 'express';
-import { eq, ilike } from 'drizzle-orm';
+import { eq, ilike, sql } from 'drizzle-orm';
 import { getAllAllergens } from '@allerguide/core';
 import { db } from '../db';
 import { allergens, products } from '../db/catalog-schema';
+import { fetchOpenFoodFactsProduct } from '../services/open-food-facts';
 
 function databaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
+}
+
+function offFallbackEnabled(): boolean {
+  return process.env.PRODUCT_OFF_FALLBACK !== 'false';
 }
 
 function normalizeBarcode(raw: string): string {
@@ -74,11 +79,41 @@ export function registerCatalogRoutes(app: Express) {
 
     try {
       const [row] = await db.select().from(products).where(eq(products.barcode, barcode));
-      if (!row) {
-        res.status(404).json({ ok: false, error: 'Product not found' });
+      if (row) {
+        res.json({ ok: true, product: row, source: 'cache' });
         return;
       }
-      res.json({ ok: true, product: row });
+
+      // Write-through cache: on a miss, look up Open Food Facts, persist, return.
+      if (offFallbackEnabled()) {
+        const fetched = await fetchOpenFoodFactsProduct(barcode);
+        if (fetched) {
+          const [saved] = await db
+            .insert(products)
+            .values({
+              barcode: fetched.barcode,
+              name: fetched.name,
+              ingredients: fetched.ingredients,
+              allergenTags: fetched.allergenTags,
+              source: 'openfoodfacts',
+            })
+            .onConflictDoUpdate({
+              target: products.barcode,
+              set: {
+                name: sql`excluded.name`,
+                ingredients: sql`excluded.ingredients`,
+                allergenTags: sql`excluded.allergen_tags`,
+                source: sql`excluded.source`,
+                updatedAt: new Date(),
+              },
+            })
+            .returning();
+          res.json({ ok: true, product: saved, source: 'openfoodfacts' });
+          return;
+        }
+      }
+
+      res.status(404).json({ ok: false, error: 'Product not found' });
     } catch {
       res.status(500).json({ ok: false, error: 'Lookup failed' });
     }
