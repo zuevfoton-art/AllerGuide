@@ -8,6 +8,8 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed-allergens": "tsx src/db/seed-allergens.ts",
+    "db:import-food-allergy": "tsx src/db/import-food-allergy.ts",
     "lint": "echo lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
