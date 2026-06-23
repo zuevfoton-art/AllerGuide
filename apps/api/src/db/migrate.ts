@@ -3,17 +3,21 @@ import { fileURLToPath } from 'node:url';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import { buildConnectionOptions, resolveMigrationUrl } from './config';
 
 /**
  * Applies versioned SQL migrations from ./drizzle.
  * Use this instead of `drizzle-kit push` for production: migrations are
  * generated with `pnpm --filter api db:generate`, committed to git, and
  * applied deterministically here.
+ *
+ * Runs against the DIRECT (unpooled) connection on Neon — migrations are not
+ * compatible with PgBouncer transaction pooling.
  */
 async function main() {
-  const url = process.env.DATABASE_URL;
+  const url = resolveMigrationUrl();
   if (!url) {
-    throw new Error('DATABASE_URL is not configured');
+    throw new Error('DIRECT_DATABASE_URL or DATABASE_URL is not configured');
   }
 
   const migrationsFolder = path.join(
@@ -23,7 +27,7 @@ async function main() {
     'drizzle',
   );
 
-  const client = postgres(url, { max: 1 });
+  const client = postgres(url, { ...buildConnectionOptions(), max: 1 });
   const db = drizzle(client);
 
   console.log(`Running migrations from ${migrationsFolder} ...`);
