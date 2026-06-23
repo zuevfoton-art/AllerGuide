@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   ANAPHYLAXIS_GRADES,
+  BIPHASIC_WARNING,
   createDefaultPassport,
+  formatPassportHtml,
   formatPassportText,
   parsePassport,
   serializePassport,
@@ -48,5 +50,19 @@ describe('allergy passport', () => {
   it('defines three anaphylaxis grades', () => {
     expect(ANAPHYLAXIS_GRADES).toHaveLength(3);
     expect(ANAPHYLAXIS_GRADES.map((g) => g.grade)).toEqual([1, 2, 3]);
+  });
+
+  it('includes biphasic reaction warning text', () => {
+    expect(BIPHASIC_WARNING).toContain('4–6');
+  });
+
+  it('formats passport HTML export', () => {
+    const html = formatPassportHtml({
+      profileName: 'Анна',
+      allergies: ['Арахис'],
+      passport: createDefaultPassport(),
+    });
+    expect(html).toContain('Паспорт аллергика');
+    expect(html).toContain('Анна');
   });
 });

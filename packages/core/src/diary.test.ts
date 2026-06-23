@@ -6,6 +6,7 @@ import {
   formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
+  getDiarySection,
   hasSectionAnswers,
   validateDiarySectionStep,
 } from './diary';
@@ -16,6 +17,14 @@ describe('diary schema', () => {
     for (const section of DIARY_SECTIONS) {
       expect(section.steps.length).toBeGreaterThanOrEqual(2);
     }
+  });
+
+  it('includes trigger context fields for diary-trigger linking', () => {
+    const trigger = getDiarySection('Триггер');
+    const ids = trigger?.steps.map((step) => step.id) ?? [];
+    expect(ids).toContain('pollenContext');
+    expect(ids).toContain('recentScan');
+    expect(ids).toContain('todayMeds');
   });
 
   it('encodes and decodes structured diary details', () => {
@@ -33,6 +42,17 @@ describe('diary schema', () => {
     const summary = formatDiaryEntrySummary('Лекарство', details);
     expect(summary).toContain('Цетиризин');
     expect(summary).toContain('10 мг');
+  });
+
+  it('formats clinical scale entry summary from enriched answers', () => {
+    const details = encodeDiaryDetails({
+      scaleId: 'act',
+      scaleScore: '22',
+      scaleInterpretation: 'Хороший контроль',
+    });
+    const summary = formatDiaryEntrySummary('Шкала', details);
+    expect(summary).toContain('22 баллов');
+    expect(summary).toContain('Хороший контроль');
   });
 
   it('keeps legacy plain-text entries readable', () => {
