@@ -62,6 +62,16 @@ LLM-запрос обёрнут кэшем результатов (ключ — 
 
 Резервные копии сохраняются в таблицу `sync_backups` (in-memory fallback без БД), доступ по мобильному JWT или legacy `SYNC_API_KEY`, владение проверяется по `userId` из токена. Полезная нагрузка хранится непрозрачно: клиент шифрует бэкап на устройстве (AES-GCM, `@allerguide/core`) перед загрузкой — сервер zero-knowledge.
 
+### Neon (serverless Postgres)
+
+Слой БД (`src/db/index.ts`, `src/db/config.ts`) подготовлен под Neon:
+
+- **Pooled vs direct**: рантайм использует `DATABASE_URL` (на Neon — pooled `-pooler` эндпоинт), миграции — `DIRECT_DATABASE_URL` (direct, не через PgBouncer); `migrate.ts`/`drizzle.config.ts` берут direct с fallback на `DATABASE_URL`.
+- **Опции подключения из env** (`buildConnectionOptions`): `DB_SSL=require` (TLS обязателен у Neon), `DB_PREPARE=false` (prepared statements несовместимы с transaction-pooling PgBouncer), `DB_POOL_MAX`/`DB_IDLE_TIMEOUT`/`DB_CONNECT_TIMEOUT`/`DB_MAX_LIFETIME`.
+- **Read replica**: `READ_DATABASE_URL` включает отдельный read-клиент (`readDb`); чтения каталога (`/api/allergens`, `/api/products/:barcode`, `/api/products/search`) идут в `readDb`, записи — в primary `db`. Без переменной `readDb` прозрачно падает на primary.
+- **Branching для preview/CI**: `.github/workflows/neon-preview.yml` создаёт эфемерную ветку БД на каждый PR (миграции+тесты на изолированной копии) и удаляет её при закрытии PR; включается при наличии секрета `NEON_API_KEY`.
+- **Cold start / scale-to-zero**: ленивый синглтон переиспользует подключение; на проде отключить scale-to-zero или принять задержку первого запроса.
+
 ### Масштабирование до 1M MAU (инфраструктура, вне кода)
 
 Следующие пункты — инфраструктурные и настраиваются при деплое, а не в этом репозитории:
