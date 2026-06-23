@@ -55,6 +55,10 @@ externalPort = 3001
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 23636
+externalPort = 3002
+
 [deployment]
 deploymentTarget = "static"
 build = ["bash", "-c", "COREPACK_ENABLE_STRICT=0 pnpm install --frozen-lockfile=false; cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir dist"]
