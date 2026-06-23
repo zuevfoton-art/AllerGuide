@@ -21,6 +21,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
   { id: 'triggers', label: 'Триггеры', diaryTypes: ['Триггер'], defaultEnabled: true },
   { id: 'peakflow', label: 'Пикфлоуметрия', diaryTypes: ['Пикфлоуметрия'], defaultEnabled: true },
   { id: 'asit', label: 'АСИТ', diaryTypes: ['АСИТ'], defaultEnabled: true },
+  {
+    id: 'foodDrug',
+    label: 'Пищевая и лекарственная аллергия',
+    diaryTypes: [],
+    defaultEnabled: true,
+  },
   { id: 'skin', label: 'Кожные проявления', diaryTypes: ['Кожа'], defaultEnabled: true },
   { id: 'scales', label: 'Клинические шкалы', diaryTypes: ['Шкала'], defaultEnabled: true },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },

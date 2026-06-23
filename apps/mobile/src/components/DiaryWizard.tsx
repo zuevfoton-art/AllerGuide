@@ -11,6 +11,7 @@ import {
   hasSectionAnswers,
   validateClinicalScale,
   validateDiarySectionStep,
+  buildIntoleranceAlert,
   type DiarySection,
   type DiaryStep,
 } from '@allerguide/core';
@@ -32,6 +33,7 @@ interface DiaryWizardProps {
   onDelete?: () => void;
   submitLabel?: string;
   allowSkipSection?: boolean;
+  drugIntolerances?: string[];
 }
 
 export function DiaryWizard({
@@ -42,6 +44,7 @@ export function DiaryWizard({
   onDelete,
   submitLabel,
   allowSkipSection = true,
+  drugIntolerances,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -82,13 +85,21 @@ export function DiaryWizard({
       : null;
 
   const setAnswer = (stepId: string, value: string) => {
-    setAnswersBySection((prev) => ({
-      ...prev,
-      [section.type]: {
+    setAnswersBySection((prev) => {
+      const nextSectionAnswers = {
         ...(prev[section.type] ?? {}),
         [stepId]: value,
-      },
-    }));
+      };
+      if (stepId === 'medicine' && section.type === 'Лекарство' && drugIntolerances?.length) {
+        const alert = buildIntoleranceAlert(value, drugIntolerances);
+        if (alert) nextSectionAnswers.intoleranceAlert = alert;
+        else delete nextSectionAnswers.intoleranceAlert;
+      }
+      return {
+        ...prev,
+        [section.type]: nextSectionAnswers,
+      };
+    });
   };
 
   const goNext = () => {

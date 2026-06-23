@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
   buildAsitPrefill,
+  buildFoodPrefillFromProfile,
+  buildFoodPrefillFromScan,
+  buildMedicinePrefill,
   buildScaleInitialAnswers,
   buildTriggerPrefill,
   collectLatestScaleTrends,
@@ -17,6 +20,8 @@ import {
   isAsitCourseConfigured,
   parseAllergies,
   profileEnablesAsit,
+  profileEnablesDrugFocus,
+  profileEnablesFoodFocus,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
@@ -28,7 +33,11 @@ import {
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
 import { getProfileConditions } from '@/src/services/profile-conditions-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { listScanHistory } from '@/src/services/scan-history-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
+import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -103,6 +112,26 @@ export default function DiaryScreen() {
     () => profileEnablesAsit(profileConditions),
     [profileConditions],
   );
+  const foodFocusEnabled = useMemo(
+    () =>
+      activeProfile
+        ? profileEnablesFoodFocus(profileConditions, parseAllergies(activeProfile.allergies))
+        : false,
+    [profileConditions, activeProfile],
+  );
+  const drugFocusEnabled = useMemo(() => {
+    if (!activeProfileId) return false;
+    const passport = getAllergyPassport(activeProfileId);
+    return profileEnablesDrugFocus(profileConditions, passport.drugIntolerances);
+  }, [profileConditions, activeProfileId, list]);
+  const foodDrugRegistry = useMemo(
+    () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
+    [activeProfileId, list],
+  );
+  const drugIntolerances = useMemo(() => {
+    if (!activeProfileId) return [];
+    return getAllergyPassport(activeProfileId).drugIntolerances;
+  }, [activeProfileId, list]);
   const asitCourse = useMemo(
     () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
     [activeProfileId, list],
@@ -119,6 +148,38 @@ export default function DiaryScreen() {
         });
         return;
       }
+    }
+    if (sectionType === 'Питание' && activeProfile) {
+      const allergies = parseAllergies(activeProfile.allergies);
+      const registry = activeProfileId ? getFoodDrugRegistry(activeProfileId) : null;
+      const scans = activeProfileId ? listScanHistory(activeProfileId) : [];
+      const recentFoodScan = scans.find((scan) => scan.mode === 'product' || scan.mode === 'menu');
+      const withinDay =
+        recentFoodScan &&
+        Date.now() - new Date(recentFoodScan.createdAt).getTime() <= 24 * 3_600_000;
+      const prefill = withinDay
+        ? buildFoodPrefillFromScan({
+            productName: recentFoodScan.productName,
+            verdict: recentFoodScan.verdict,
+            level: recentFoodScan.level,
+            matches: (() => {
+              try {
+                return JSON.parse(recentFoodScan.matches) as string[];
+              } catch {
+                return [];
+              }
+            })(),
+            createdAt: recentFoodScan.createdAt,
+          })
+        : buildFoodPrefillFromProfile(allergies, registry);
+      setEditor({ mode: 'section', sectionType, prefill: { Питание: prefill } });
+      return;
+    }
+    if (sectionType === 'Лекарство' && activeProfileId) {
+      const passport = getAllergyPassport(activeProfileId);
+      const prefill = buildMedicinePrefill(passport.drugIntolerances);
+      setEditor({ mode: 'section', sectionType, prefill: { Лекарство: prefill } });
+      return;
     }
     if (sectionType === 'Триггер' && activeProfileId) {
       const allergies = activeProfile ? parseAllergies(activeProfile.allergies) : [];
@@ -201,6 +262,7 @@ export default function DiaryScreen() {
       return (
         <DiaryWizard
           sections={visibleSections}
+          drugIntolerances={drugIntolerances}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -236,6 +298,7 @@ export default function DiaryScreen() {
           sections={[section]}
           initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
           allowSkipSection={false}
+          drugIntolerances={drugIntolerances}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {
@@ -269,6 +332,30 @@ export default function DiaryScreen() {
               course={asitCourse}
               entries={list}
               onLogDose={() => void openSection('АСИТ')}
+            />
+          ) : null}
+
+          {foodFocusEnabled && activeProfile ? (
+            <FoodDrugAllergyCard
+              mode="food"
+              profileAllergies={parseAllergies(activeProfile.allergies)}
+              drugIntolerances={drugIntolerances}
+              registry={foodDrugRegistry}
+              entries={list}
+              onLogFood={() => void openSection('Питание')}
+              onLogMedicine={() => void openSection('Лекарство')}
+            />
+          ) : null}
+
+          {drugFocusEnabled ? (
+            <FoodDrugAllergyCard
+              mode="drug"
+              profileAllergies={activeProfile ? parseAllergies(activeProfile.allergies) : []}
+              drugIntolerances={drugIntolerances}
+              registry={foodDrugRegistry}
+              entries={list}
+              onLogFood={() => void openSection('Питание')}
+              onLogMedicine={() => void openSection('Лекарство')}
             />
           ) : null}
 

@@ -342,6 +342,33 @@ export type LocaleMessages = {
     noProfile: string;
     notEligible: string;
   };
+  foodDrug: {
+    eyebrow: string;
+    foodTitle: string;
+    drugTitle: string;
+    editRegistry: string;
+    editSos: string;
+    emptyFoodList: string;
+    emptyDrugList: string;
+    foodEntries30d: string;
+    foodReactions30d: string;
+    drugEntries30d: string;
+    drugWarnings30d: string;
+    logFood: string;
+    logMedicine: string;
+    registryTitle: string;
+    registrySubtitle: string;
+    profileAllergens: string;
+    noProfileAllergens: string;
+    extraAvoidFoods: string;
+    extraAvoidFoodsPlaceholder: string;
+    clinicalNotes: string;
+    clinicalNotesPlaceholder: string;
+    saveRegistry: string;
+    disclaimer: string;
+    noProfile: string;
+    notEligibleFood: string;
+  };
   sos: {
     title: string;
     subtitle: string;

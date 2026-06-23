@@ -37,6 +37,19 @@ const POLLEN_PATTERN =
 const ASTHMA_MARKERS = ['астм', 'бронх'];
 const DERMATITIS_MARKERS = ['дерматит', 'экзем', 'нейродерм', 'атопическ'];
 const RHINITIS_MARKERS = ['ринит', 'насморк', 'поллиноз'];
+const FOOD_MARKERS = [
+  'молок',
+  'яйц',
+  'орех',
+  'арахис',
+  'рыб',
+  'морепродукт',
+  'соя',
+  'пшениц',
+  'глютен',
+  'кунжут',
+];
+const DRUG_MARKERS = ['аспирин', 'ибупрофен', 'пенициллин', 'антибиот', 'нпвп', 'нпвс', 'парацетамол'];
 
 export function inferConditionIdsFromAllergies(allergies: string[]): AllergyConditionId[] {
   const ids = new Set<AllergyConditionId>();
@@ -52,6 +65,8 @@ export function inferConditionIdsFromAllergies(allergies: string[]): AllergyCond
     if (ASTHMA_MARKERS.some((marker) => lower.includes(marker))) ids.add('asthma');
     if (DERMATITIS_MARKERS.some((marker) => lower.includes(marker))) ids.add('dermatitis');
     if (RHINITIS_MARKERS.some((marker) => lower.includes(marker))) ids.add('rhinitis');
+    if (FOOD_MARKERS.some((marker) => lower.includes(marker))) ids.add('food');
+    if (DRUG_MARKERS.some((marker) => lower.includes(marker))) ids.add('drug');
 
     for (const condition of ALLERGY_CONDITION_TYPES) {
       if (lower.includes(condition.label.toLowerCase())) {

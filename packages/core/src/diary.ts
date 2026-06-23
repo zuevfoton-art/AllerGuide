@@ -1,5 +1,6 @@
 import { formatScaleSummary } from './clinical-scales';
 import { formatAsitSummary } from './asit-therapy';
+import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 
 export type DiaryStepField = 'text' | 'choice';
 
@@ -101,6 +102,21 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: false,
       },
       {
+        id: 'intoleranceAlert',
+        label: 'Предупреждение о непереносимости (авто)',
+        placeholder: 'Подставляется из паспорта SOS при совпадении',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
+      {
+        id: 'sideEffectSeverity',
+        label: 'Побочная реакция',
+        field: 'choice',
+        choices: ['Нет', 'Лёгкая', 'Умеренная', 'Сильная'],
+        required: false,
+      },
+      {
         id: 'effect',
         label: 'Эффект или побочная реакция',
         placeholder: 'Стало ли лучше? Были ли побочные эффекты?',
@@ -124,9 +140,23 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: true,
       },
       {
+        id: 'foodSource',
+        label: 'Источник записи',
+        field: 'choice',
+        choices: ['Вручную', 'Сканер'],
+        required: false,
+      },
+      {
         id: 'allergens',
         label: 'Возможные аллергены в еде',
         placeholder: 'Молоко, орехи, глютен…',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'scanRef',
+        label: 'Сканирование (авто)',
+        placeholder: 'Подставляется из сканера',
         field: 'text',
         required: false,
       },
@@ -136,6 +166,20 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'choice',
         choices: ['Нет реакции', 'Лёгкая', 'Умеренная', 'Сильная'],
         required: true,
+      },
+      {
+        id: 'reactionType',
+        label: 'Тип реакции (клинический)',
+        field: 'choice',
+        choices: [
+          'Нет',
+          'Ораллергический синдром',
+          'ЖКТ',
+          'Кожа',
+          'Дыхание',
+          'Анафилаксия',
+        ],
+        required: false,
       },
     ],
   },
@@ -438,6 +482,14 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
 
   if (type === 'АСИТ') {
     return formatAsitSummary(structured.answers);
+  }
+
+  if (type === 'Питание') {
+    return formatFoodEntrySummary(structured.answers);
+  }
+
+  if (type === 'Лекарство') {
+    return formatMedicineEntrySummary(structured.answers);
   }
 
   const section = getDiarySection(type);
