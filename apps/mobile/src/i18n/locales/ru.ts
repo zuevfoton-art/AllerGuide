@@ -382,6 +382,9 @@ const ru: LocaleMessages = {
     catalogTitle: 'Все аллергены',
     searchPlaceholder: 'Поиск аллергена…',
     crossReactions: 'Перекрёстные реакции',
+    crossRiskHigh: 'высокий риск',
+    crossRiskMedium: 'средний риск',
+    crossRiskLow: 'низкий риск',
   },
   emergencyContacts: {
     empty: 'Добавьте человека, которому можно позвонить в экстренной ситуации.',

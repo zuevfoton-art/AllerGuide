@@ -2,6 +2,7 @@ import {
   ALLERGEN_KEYWORDS,
   buildAllergenKeywordsMap,
   getCrossReactionsForSelection,
+  type CrossReactionMatch,
   type Profile,
   type RiskLevel,
 } from '@allerguide/core';
@@ -42,22 +43,24 @@ function findDirectMatches(allergens: string[], text: string): string[] {
   );
 }
 
-function findCrossMatches(allergens: string[], text: string): string[] {
+function findMatchedCrossReactions(allergens: string[], text: string): CrossReactionMatch[] {
   const normalizedText = text.toLowerCase();
-  const keywordMap = buildAllergenKeywordsMap();
-  const crossReactions = getCrossReactionsForSelection(allergens);
 
-  return crossReactions
-    .filter((item) =>
-      item.allergen.keywords.some((keyword) => normalizedText.includes(keyword.toLowerCase())),
-    )
-    .map((item) => `${item.allergen.name} (перекр. реакция)`);
+  return getCrossReactionsForSelection(allergens).filter((item) =>
+    item.allergen.keywords.some((keyword) => normalizedText.includes(keyword.toLowerCase())),
+  );
 }
 
-function buildLevel(directCount: number, crossCount: number): RiskLevel {
-  if (directCount >= 2 || (directCount >= 1 && crossCount >= 1)) return 'high';
-  if (directCount >= 1 || crossCount >= 1) return 'medium';
+function buildLevel(directCount: number, crossMatches: CrossReactionMatch[]): RiskLevel {
+  const highCrossCount = crossMatches.filter((item) => item.risk === 'high').length;
+
+  if (directCount >= 2 || (directCount >= 1 && highCrossCount >= 1)) return 'high';
+  if (directCount >= 1 || highCrossCount >= 1) return 'medium';
   return 'low';
+}
+
+function formatCrossMatchLabel(match: CrossReactionMatch): string {
+  return `${match.allergen.name} (перекр. реакция)`;
 }
 
 export function runMockScan({
@@ -75,8 +78,9 @@ export function runMockScan({
 }): ScanResult {
   const allergens = parseProfileAllergens(profile);
   const directMatches = findDirectMatches(allergens, text);
-  const crossMatches = findCrossMatches(allergens, text);
-  const level = buildLevel(directMatches.length, crossMatches.length);
+  const matchedCrossReactions = findMatchedCrossReactions(allergens, text);
+  const crossMatches = matchedCrossReactions.map(formatCrossMatchLabel);
+  const level = buildLevel(directMatches.length, matchedCrossReactions);
   const productSuffix = productName ? ` в «${productName}»` : '';
 
   if (level === 'high') {

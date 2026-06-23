@@ -8,17 +8,6 @@ export interface AllergenRecord {
   keywords: string[];
 }
 
-export interface CrossReaction {
-  fromId: string;
-  toId: string;
-  note: string;
-}
-
-export interface CrossReactionMatch {
-  allergen: AllergenRecord;
-  note: string;
-}
-
 export const ALLERGEN_CATEGORY_LABELS: Record<AllergenCategory, string> = {
   food: 'Еда',
   environmental: 'Среда',
@@ -267,24 +256,6 @@ export const ALLERGENS: AllergenRecord[] = [
   },
 ];
 
-export const CROSS_REACTIONS: CrossReaction[] = [
-  { fromId: 'birch-pollen', toId: 'apple', note: 'Оральный аллергический синдром' },
-  { fromId: 'birch-pollen', toId: 'hazelnut', note: 'Оральный аллергический синдром' },
-  { fromId: 'birch-pollen', toId: 'carrot', note: 'Оральный аллергический синдром' },
-  { fromId: 'birch-pollen', toId: 'tomato', note: 'Возможна перекрёстная реакция' },
-  { fromId: 'latex', toId: 'banana', note: 'Латекс-фруктовый синдром' },
-  { fromId: 'latex', toId: 'kiwi', note: 'Латекс-фруктовый синдром' },
-  { fromId: 'latex', toId: 'avocado', note: 'Латекс-фруктовый синдром' },
-  { fromId: 'milk', toId: 'goat-milk', note: 'Сходные молочные белки' },
-  { fromId: 'peanut', toId: 'tree-nuts', note: 'Частичное перекрытие белков' },
-  { fromId: 'peanut', toId: 'hazelnut', note: 'Возможна перекрёстная реакция' },
-  { fromId: 'fish', toId: 'seafood', note: 'Частичное перекрытие белков рыбы и морепродуктов' },
-  { fromId: 'tree-nuts', toId: 'hazelnut', note: 'Семейство древесных орехов' },
-  { fromId: 'dust-mites', toId: 'house-dust', note: 'Связанные бытовые аллергены' },
-  { fromId: 'ragweed-pollen', toId: 'honey', note: 'Возможна реакция на продукты пчеловодства' },
-  { fromId: 'cat-dander', toId: 'dog-dander', note: 'Частичное перекрытие белков шерсти' },
-];
-
 const allergenById = new Map(ALLERGENS.map((item) => [item.id, item]));
 const allergenByName = new Map(ALLERGENS.map((item) => [item.name, item]));
 
@@ -306,43 +277,6 @@ export function findAllergenById(id: string): AllergenRecord | undefined {
 
 export function findAllergenByName(name: string): AllergenRecord | undefined {
   return allergenByName.get(name);
-}
-
-export function getCrossReactionsFor(allergenId: string): CrossReactionMatch[] {
-  const related = CROSS_REACTIONS.filter(
-    (item) => item.fromId === allergenId || item.toId === allergenId,
-  );
-
-  const matches: CrossReactionMatch[] = [];
-
-  for (const reaction of related) {
-    const otherId = reaction.fromId === allergenId ? reaction.toId : reaction.fromId;
-    const allergen = findAllergenById(otherId);
-    if (allergen) {
-      matches.push({ allergen, note: reaction.note });
-    }
-  }
-
-  return matches;
-}
-
-export function getCrossReactionsForSelection(selectedNames: string[]): CrossReactionMatch[] {
-  const selectedIds = selectedNames
-    .map((name) => findAllergenByName(name)?.id)
-    .filter((id): id is string => Boolean(id));
-
-  const seen = new Set<string>();
-  const matches: CrossReactionMatch[] = [];
-
-  for (const id of selectedIds) {
-    for (const match of getCrossReactionsFor(id)) {
-      if (selectedNames.includes(match.allergen.name) || seen.has(match.allergen.id)) continue;
-      seen.add(match.allergen.id);
-      matches.push(match);
-    }
-  }
-
-  return matches;
 }
 
 export function buildAllergenKeywordsMap(): Record<string, string[]> {

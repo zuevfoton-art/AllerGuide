@@ -19,6 +19,10 @@ import {
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeAllergenCategory } from '@/src/i18n/content';
+import {
+  crossReactionRiskColor,
+  formatCrossReactionLabel,
+} from '@/src/i18n/cross-reactions';
 
 const CATEGORY_ORDER: AllergenCategory[] = ['food', 'environmental', 'medication', 'insect'];
 
@@ -88,7 +92,8 @@ export function AllergenCatalogModal({
             <Text style={[styles.itemTitle, active && styles.itemTitleActive]}>{item.name}</Text>
             {crossReactions.length > 0 ? (
               <Text style={styles.itemHint}>
-                {t('allergens.crossReactions')}: {crossReactions.map((match) => match.allergen.name).join(', ')}
+                {t('allergens.crossReactions')}:{' '}
+                {crossReactions.map((match) => formatCrossReactionLabel(match, t)).join(', ')}
               </Text>
             ) : null}
           </View>
@@ -97,7 +102,15 @@ export function AllergenCatalogModal({
           <View style={styles.noteBox}>
             {crossReactions.map((match) => (
               <Text key={match.allergen.id} style={styles.noteText}>
-                {match.allergen.name}: {match.note}
+                <Text
+                  style={[
+                    styles.noteRisk,
+                    { color: crossReactionRiskColor(match.risk, theme.colors) },
+                  ]}>
+                  {match.risk ? `${formatCrossReactionLabel(match, t)}` : match.allergen.name}
+                </Text>
+                {match.protein ? ` · ${match.protein}` : ''}
+                {`: ${match.note}`}
               </Text>
             ))}
           </View>
@@ -260,6 +273,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.tipText,
       lineHeight: 16,
+    },
+    noteRisk: {
+      fontFamily: fonts.sansSemiBold,
+      fontWeight: '600',
     },
   });
 }

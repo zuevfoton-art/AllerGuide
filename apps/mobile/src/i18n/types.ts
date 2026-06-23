@@ -370,6 +370,9 @@ export type LocaleMessages = {
     catalogTitle: string;
     searchPlaceholder: string;
     crossReactions: string;
+    crossRiskHigh: string;
+    crossRiskMedium: string;
+    crossRiskLow: string;
   };
   emergencyContacts: {
     empty: string;
