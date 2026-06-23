@@ -1,66 +1,20 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
+import { BrandMark } from '@/src/components/brand/BrandMark';
 
 /**
- * AllerGuide brand logo mark — pure React Native (no SVG deps).
- * Renders a navy rounded square with an accent-blue allergen drop
- * and a white medical cross inside.
+ * AllerGuide logo mark — delegates to the canonical BrandMark SVG.
+ * Kept as a separate component so existing import sites don't need to change.
  */
 export function AppLogoMark({ size = 64 }: { size?: number }) {
   const theme = useTheme();
-
-  const radius = Math.round(size * 0.22);
-  const dropW = Math.round(size * 0.42);
-  const dropH = Math.round(size * 0.54);
-  const dropRadius = Math.round(dropW / 2);
-  const crossThick = Math.max(3, Math.round(size * 0.073));
-  const crossShort = Math.round(size * 0.26);
-  const crossLong = Math.round(size * 0.36);
-  const crossR = Math.round(crossThick / 2);
-
   return (
-    <View
-      style={[
-        styles.outer,
-        {
-          width: size,
-          height: size,
-          borderRadius: radius,
-          backgroundColor: theme.colors.head,
-        },
-      ]}>
-      {/* Allergen drop shape */}
-      <View
-        style={{
-          width: dropW,
-          height: dropH,
-          borderRadius: dropRadius,
-          backgroundColor: theme.colors.accent,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        {/* Vertical bar of cross */}
-        <View
-          style={{
-            position: 'absolute',
-            width: crossThick,
-            height: crossLong,
-            borderRadius: crossR,
-            backgroundColor: 'white',
-          }}
-        />
-        {/* Horizontal bar of cross */}
-        <View
-          style={{
-            position: 'absolute',
-            width: crossShort,
-            height: crossThick,
-            borderRadius: crossR,
-            backgroundColor: 'white',
-          }}
-        />
-      </View>
-    </View>
+    <BrandMark
+      size={size}
+      variant="filled"
+      accent={theme.colors.accent}
+      color={theme.colors.onAccent}
+    />
   );
 }
 
@@ -105,11 +59,6 @@ export function AppLogoFull({ size = 32 }: { size?: number }) {
 }
 
 const styles = StyleSheet.create({
-  outer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
   fullWrap: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -8,29 +8,30 @@ type BrandMarkProps = {
   accent?: string;
 };
 
-/** AllerGuide logomark — shield + checklist check (Clinical Calm) */
+/** AllerGuide logomark — shield + medical cross (Clinical Calm brandbook) */
 export function BrandMark({
   size = 64,
   variant = 'filled',
   color = '#FFFFFF',
   accent = '#2563EB',
 }: BrandMarkProps) {
+  const shieldPath =
+    'M32 13.5 46.5 19v13.2c0 8.4-11 15.3-14.5 17.3-3.5-2-14.5-8.9-14.5-17.3V19L32 13.5Z';
+
   if (variant === 'mono') {
     return (
       <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
         <Path
-          d="M32 13.5 46.5 19v13.2c0 8.4-11 15.3-14.5 17.3-3.5-2-14.5-8.9-14.5-17.3V19L32 13.5Z"
+          d={shieldPath}
           stroke={color}
           strokeWidth={2.4}
           strokeLinejoin="round"
         />
-        <Path d="M24 28.5h16" stroke={color} strokeWidth={1.8} strokeLinecap="round" opacity={0.55} />
         <Path
-          d="M24.5 34.5 29.5 39.5 40 27"
+          d="M32 22.5v16M24 30.5h16"
           stroke={color}
           strokeWidth={2.4}
           strokeLinecap="round"
-          strokeLinejoin="round"
         />
       </Svg>
     );
@@ -38,20 +39,19 @@ export function BrandMark({
 
   return (
     <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-      <Rect width={64} height={64} rx={8} fill={accent} />
+      <Rect width={64} height={64} rx={14} fill={accent} />
       <Path
-        d="M32 13.5 46.5 19v13.2c0 8.4-11 15.3-14.5 17.3-3.5-2-14.5-8.9-14.5-17.3V19L32 13.5Z"
+        d={shieldPath}
+        fill={`${color}22`}
         stroke={color}
-        strokeWidth={2.4}
+        strokeWidth={2.2}
         strokeLinejoin="round"
       />
-      <Path d="M24 28.5h16" stroke={color} strokeWidth={1.8} strokeLinecap="round" opacity={0.55} />
       <Path
-        d="M24.5 34.5 29.5 39.5 40 27"
+        d="M32 22.5v16M24 30.5h16"
         stroke={color}
-        strokeWidth={2.4}
+        strokeWidth={2.6}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </Svg>
   );
