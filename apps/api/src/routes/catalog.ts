@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from 'express';
 import { eq, ilike, sql } from 'drizzle-orm';
 import { getAllAllergens } from '@allerguide/core';
-import { db } from '../db';
+import { db, readDb } from '../db';
 import { allergens, products } from '../db/catalog-schema';
 import { fetchOpenFoodFactsProduct } from '../services/open-food-facts';
 
@@ -27,7 +27,7 @@ export function registerCatalogRoutes(app: Express) {
     }
 
     try {
-      const rows = await db.select().from(allergens);
+      const rows = await readDb.select().from(allergens);
       if (rows.length === 0) {
         res.json({ ok: true, source: 'static', allergens: getAllAllergens() });
         return;
@@ -53,7 +53,7 @@ export function registerCatalogRoutes(app: Express) {
     }
 
     try {
-      const rows = await db
+      const rows = await readDb
         .select()
         .from(products)
         .where(ilike(products.name, `%${query}%`))
@@ -78,7 +78,7 @@ export function registerCatalogRoutes(app: Express) {
     }
 
     try {
-      const [row] = await db.select().from(products).where(eq(products.barcode, barcode));
+      const [row] = await readDb.select().from(products).where(eq(products.barcode, barcode));
       if (row) {
         res.json({ ok: true, product: row, source: 'cache' });
         return;
