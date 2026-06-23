@@ -7,24 +7,32 @@ import {
 export {
   ALLERGENS,
   ALLERGEN_CATEGORY_LABELS,
-  CROSS_REACTIONS,
   getAllAllergens,
   getPopularAllergens,
   getAllergensByCategory,
   findAllergenById,
   findAllergenByName,
-  getCrossReactionsFor,
-  getCrossReactionsForSelection,
   buildAllergenKeywordsMap,
   getAllAllergenNames,
 } from './allergen-database';
 
+export type { AllergenCategory, AllergenRecord } from './allergen-database';
+
+export {
+  CROSS_REACTIONS,
+  CROSS_REACTION_RISK_ORDER,
+  compareCrossReactionRisk,
+  getCrossReactionsFor,
+  getCrossReactionsForSelection,
+  pickHigherRiskReaction,
+} from './cross-reactions';
+
 export type {
-  AllergenCategory,
-  AllergenRecord,
   CrossReaction,
   CrossReactionMatch,
-} from './allergen-database';
+  CrossReactionRisk,
+  CrossReactionSyndrome,
+} from './cross-reactions';
 
 export const ALLERGEN_OPTIONS = getAllAllergenNames();
 

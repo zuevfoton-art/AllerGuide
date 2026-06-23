@@ -44,12 +44,16 @@ export const EXTERNAL_ALLERGEN_ALIASES: Record<string, string> = {
   wheat: 'wheat-gluten',
   gluten: 'wheat-gluten',
   'gluten-containing-cereals': 'wheat-gluten',
+  rye: 'rye',
+  barley: 'barley',
   // sesame
   sesame: 'sesame',
   'sesame-seeds': 'sesame',
   // others present in the core taxonomy
   citrus: 'citrus',
   honey: 'honey',
+  celery: 'celery',
+  chestnut: 'chestnut',
 };
 
 function normalizeExternalTerm(name: string): string {

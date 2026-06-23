@@ -180,6 +180,42 @@ export function AuthError({ message }: { message: string }) {
   );
 }
 
+export function AuthDivider() {
+  const theme = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
+      <View style={{ flex: 1, height: 1, backgroundColor: theme.colors.border }} />
+      <Text style={{ fontFamily: theme.fonts.sans, fontSize: 12, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 }}>or</Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: theme.colors.border }} />
+    </View>
+  );
+}
+
+export function AuthReplitButton({ onPress }: { onPress: () => void }) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      style={{
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: 6,
+        padding: 14,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: theme.colors.card,
+        minHeight: 48,
+      }}
+      onPress={onPress}>
+      <Ionicons name="code-slash-outline" size={18} color={theme.colors.text} />
+      <Text style={{ fontFamily: theme.fonts.sansSemiBold, fontSize: 16, fontWeight: '600', color: theme.colors.text }}>
+        Sign in with Replit
+      </Text>
+    </Pressable>
+  );
+}
+
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },

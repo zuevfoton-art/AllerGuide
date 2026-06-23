@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import {
   hashPassword,
@@ -51,6 +52,8 @@ export async function registerAppUser(input: {
     .values({
       login: normalizedLogin,
       loginType: input.loginType,
+      email: input.loginType === 'email' ? normalizedLogin : null,
+      phone: input.loginType === 'phone' ? normalizedLogin : null,
       passwordHash,
     })
     .returning();
@@ -93,4 +96,21 @@ export async function loginAppUser(input: {
 
 export async function deleteAppUser(userId: number) {
   await db.delete(appUsers).where(eq(appUsers.id, userId));
+}
+
+export async function findOrCreateReplitUser(claims: {
+  sub: string;
+}): Promise<(typeof appUsers.$inferSelect) | null> {
+  const login = `replit_${claims.sub}`;
+
+  const existing = await findUserByLogin(login);
+  if (existing) return existing;
+
+  const passwordHash = await hashPassword(randomUUID());
+  const [created] = await db
+    .insert(appUsers)
+    .values({ login, loginType: 'replit', passwordHash })
+    .returning();
+
+  return created ?? null;
 }

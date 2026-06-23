@@ -382,6 +382,9 @@ const de: LocaleMessages = {
     catalogTitle: 'Alle Allergene',
     searchPlaceholder: 'Allergen suchen…',
     crossReactions: 'Kreuzreaktionen',
+    crossRiskHigh: 'hohes Risiko',
+    crossRiskMedium: 'mittleres Risiko',
+    crossRiskLow: 'niedriges Risiko',
   },
   emergencyContacts: {
     empty: 'Fügen Sie jemanden hinzu, den man im Notfall anrufen kann.',

@@ -1,6 +1,6 @@
 {
-  "id": "733ceb4c-e199-47a1-ba15-7542a3ca5b12",
-  "prevId": "b480e599-4365-4ea7-b57e-e826c0241b54",
+  "id": "f761786b-6bae-44bb-a50e-0ab133079703",
+  "prevId": "733ceb4c-e199-47a1-ba15-7542a3ca5b12",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -807,6 +807,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "brand": {
+          "name": "brand",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
         },
         "ingredients": {
           "name": "ingredients",
