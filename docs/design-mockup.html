@@ -432,13 +432,83 @@
       background: var(--warning-light); border-color: var(--warning-border);
       font-size: 13px; color: var(--warning); line-height: 1.4;
     }
+
+    .collapse-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; cursor: pointer; margin-bottom: 4px;
+    }
+
+    .collapse-title { font-size: 13px; font-weight: 600; color: var(--head); }
+    .collapse-chevron { color: var(--text-muted); font-size: 14px; user-select: none; }
+
+    .passport-row { margin-bottom: 10px; }
+    .passport-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;
+    }
+    .passport-value { font-size: 13px; color: var(--text-secondary); line-height: 1.45; }
+
+    .btn-row-inline { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-row-inline .btn { flex: 1; }
+
+    .grade-block {
+      margin-bottom: 12px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .grade-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .grade-title { font-size: 13px; font-weight: 700; color: var(--head); margin-bottom: 4px; }
+    .grade-signs { font-size: 12px; color: var(--text-secondary); line-height: 1.45; margin-bottom: 6px; }
+    .grade-action { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    .tip-card {
+      display: flex; gap: 8px; align-items: flex-start;
+      background: var(--tip-bg); border: 1px solid var(--tip-border);
+      border-radius: var(--radius-sm); padding: 12px; margin: 12px 0;
+      font-size: 12px; color: var(--tip-text); line-height: 1.45;
+    }
+
+    .map-yandex {
+      height: 180px; border-radius: var(--radius); border: 1px solid var(--border);
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+      position: relative; overflow: hidden; margin-bottom: 6px;
+    }
+
+    [data-theme='dark'] .map-yandex {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%);
+    }
+
+    .map-pin {
+      position: absolute; width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .map-pin.high { background: var(--success); top: 38%; left: 42%; }
+    .map-pin.mid { background: var(--warning); top: 55%; left: 58%; }
+    .map-attribution { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+
+    .source-chain {
+      font-size: 11px; color: var(--tip-text); line-height: 1.5; margin-top: 8px;
+      padding: 10px; background: var(--tip-bg); border: 1px solid var(--tip-border);
+      border-radius: var(--radius-sm);
+    }
+    .source-badge {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      padding: 2px 6px; border-radius: 4px;
+      background: var(--accent-light); color: var(--accent); margin-left: 6px;
+    }
+
+    .chip-row-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .chip-row-wrap .chip { margin: 0; }
+    .action-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .action-row .btn { flex: 1; }
+    .warn-text { font-size: 12px; color: var(--warning); font-weight: 600; margin: 8px 0; }
+    .collapse-panel[hidden] { display: none; }
   </style>
 </head>
 <body>
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Соответствует реализованной теме в <code>apps/mobile</code> (PR #23).</p>
+      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: SOS-паспорт, алгоритм анафилаксии, клинические шкалы, отчёт v2, Яндекс.Карты, кэш штрихкодов.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -469,7 +539,8 @@
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Карточки</strong> — плоские, radius 6–8px, без glass<br />
         <strong>Tab bar</strong> — 4 вкладки: Главная · Дневник · Сканер · SOS<br />
-        <strong>Header</strong> — <code>AllerGuide · {раздел}</code> + serif title
+        <strong>Header</strong> — <code>AllerGuide · {раздел}</code> + serif title<br />
+        <strong>v2</strong> — паспорт SOS · шкалы ARIA/ACT/SCORAD/UAS7 · отчёт с трендом ПСВ · OFF+cache
         <div class="swatch-row">
           <span class="swatch" style="background:#F4F6F9" title="bg"></span>
           <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
@@ -642,23 +713,66 @@
             <div class="feed-sub">Сталораль · берёза · 8 приёмов за 30 дн.</div>
           </div>
           <button class="btn btn-primary">＋ Новая запись</button>
-          <div class="section-label">Быстрое добавление</div>
-          <div><span class="chip active">💓 Симптомы</span><span class="chip">💊 Лекарство</span><span class="chip">🍽 Питание</span><span class="chip">📊 Шкала</span><span class="chip">⚠ Триггер</span></div>
+          <button class="btn btn-secondary" style="margin-top:8px">Быстрая запись</button>
           <div class="card">
-            <div class="section-label">Клинические шкалы</div>
+            <div class="card-title" style="margin-bottom:8px">Быстрое добавление</div>
+            <div class="chip-row-wrap">
+              <span class="chip active">💓 Симптомы</span>
+              <span class="chip">💊 Лекарство</span>
+              <span class="chip">🍽 Питание</span>
+              <span class="chip">⚠ Триггер</span>
+              <span class="chip">🧴 Кожа</span>
+              <span class="chip">🌬 Пикфлоуметрия</span>
+              <span class="chip">💉 АСИТ</span>
+              <span class="chip">📅 Визит к врачу</span>
+              <span class="chip">📝 Заметка</span>
+              <span class="chip">📊 Шкала</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:8px">Выберите шкалу</div>
+            <div class="chip-row-wrap">
+              <span class="chip">Ринит</span>
+              <span class="chip active">Астма</span>
+              <span class="chip">Кожа</span>
+              <span class="chip active">Крапивница (UAS7)</span>
+            </div>
+            <button class="btn btn-secondary btn-sm">Отмена</button>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:8px">Клинические шкалы · тренды</div>
             <div class="feed-sub">Ринит: 6 · умеренная · вчера</div>
             <div class="feed-sub" style="margin-top:4px">Крапивница (UAS7): 4 · умеренно · 3 дн. назад</div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-secondary">Обновить</button>
+            <button class="btn btn-secondary">Отчёт для врача</button>
           </div>
           <div class="section-label">История</div>
           <div class="card flush">
             <div class="feed-row">
+              <div class="feed-icon">📊</div>
+              <div class="feed-body">
+                <div class="feed-title">Шкала</div>
+                <div class="feed-sub">ACT · 22/25 · контроль хороший</div>
+                <div class="feed-sub">19 июня</div>
+              </div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="feed-row">
               <div class="feed-icon">💓</div>
-              <div class="feed-body"><div class="feed-title">Симптомы</div><div class="feed-sub">Зуд кожи · 18 июня</div></div>
+              <div class="feed-body">
+                <div class="feed-title">Симптомы</div>
+                <div class="feed-sub">Зуд кожи · 18 июня</div>
+              </div>
               <span style="color:var(--text-muted)">›</span>
             </div>
             <div class="feed-row">
               <div class="feed-icon">🍽</div>
-              <div class="feed-body"><div class="feed-title">Питание</div><div class="feed-sub">Йогурт · перекрёстные: козье молоко · 18 июня</div></div>
+              <div class="feed-body">
+                <div class="feed-title">Питание</div>
+                <div class="feed-sub">Йогурт · перекрёстные: козье молоко · 18 июня</div>
+              </div>
               <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
@@ -672,7 +786,7 @@
             <div>
               <div class="doc-label">AllerGuide · Отчёт</div>
               <div class="doc-title">Отчёт для врача</div>
-              <div class="doc-meta">PDF с логотипом АДАИР</div>
+              <div class="doc-meta">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</div>
             </div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
@@ -687,39 +801,56 @@
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Питание</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Триггеры</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Контекст триггеров</span></div>
-            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Клинические шкалы</span></div>
-            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пикфлоуметрия</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пикфлоуметрия <span class="feed-sub">(тренд ПСВ)</span></span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>АСИТ</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пищевая и лекарственная аллергия</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Кожные проявления</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Клинические шкалы</span></div>
             <div class="feed-row"><span style="color:var(--text-muted)">☐</span><span>Заметки и визиты</span></div>
           </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:8px">Превью PDF</div>
+            <div class="kpi-row" style="border:none;padding-top:0"><span class="kpi-label">ПСВ за 30 дн.</span><span class="kpi-value">320–410 л/мин</span></div>
+            <div class="kpi-row"><span class="kpi-label">Шкала ACT</span><span class="kpi-value">22/25</span></div>
+            <div class="kpi-row"><span class="kpi-label">Контекст триггеров</span><span class="kpi-value" style="font-size:12px;font-weight:600">пыльца · скан · ЛС</span></div>
+            <div class="kpi-row"><span class="kpi-label">Пищевая / лекарственная</span><span class="kpi-value" style="font-size:12px;font-weight:600">4 записи · 1 предупреждение</span></div>
+            <div class="kpi-row"><span class="kpi-label">Паспорт SOS</span><span class="kpi-value" style="font-size:12px;font-weight:600">Адреналин · врач</span></div>
+          </div>
           <button class="btn btn-primary">Сформировать PDF</button>
-          <p class="disclaimer">Отчёт не является медицинской документацией.</p>
+          <p class="disclaimer">Отчёт сформирован на основе самостоятельно введённых данных и не является медицинской документацией.</p>
         </section>
 
         <!-- SCANNER -->
         <section class="screen" id="screen-scanner">
           <div class="doc-header">
             <div class="doc-label">AllerGuide · Сканер</div>
-            <div class="doc-title">Сканер</div>
-            <div class="doc-meta">Open Food Facts + проверка состава</div>
+            <div class="doc-title">Умный сканер</div>
+            <div class="doc-meta">Проверка состава по профилю аллергий</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
             <div class="toggle active">Продукт</div><div class="toggle">Меню</div><div class="toggle">Лекарство</div><div class="toggle">Косметика</div>
           </div>
           <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong>Сканировать штрихкод</strong><div class="feed-sub">Open Food Facts</div></div>
+            <div>
+              <strong>Сканировать штрихкод</strong>
+              <div class="feed-sub">Поиск в Open Food Facts, повторные сканы — из локального кэша</div>
+            </div>
             <span style="color:var(--text-muted)">›</span>
           </div>
+          <div class="source-chain">
+            <strong>Цепочка поиска:</strong> локальный кэш → catalog API → Open Food Facts
+          </div>
           <div class="card">
-            <div class="section-label">Состав вручную</div>
+            <div class="section-label">или введите вручную</div>
             <input class="input" value="молоко, сахар, какао" readonly />
             <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
           </div>
-          <div class="result-danger"><strong>⚠ Есть совпадения</strong><br />Обнаружено: <strong>Молоко</strong>. Результат не заменяет чтение этикетки.</div>
-          <p class="disclaimer">Сканер использует ключевые слова и Open Food Facts.</p>
+          <div class="result-danger">
+            <strong>⚠ Есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
+            Обнаружено: <strong>Молоко</strong>. Результат не заменяет чтение этикетки.
+          </div>
+          <p class="disclaimer">Результат носит предварительный характер и не исключает индивидуальной реакции.</p>
         </section>
 
         <!-- MARKET -->
@@ -746,21 +877,27 @@
             <div class="doc-label">AllerGuide · Карта</div>
             <div class="doc-title">Карта мест</div>
             <div class="doc-meta">3 слоя по ТЗ v13</div>
+            <div class="doc-meta" style="margin-top:2px;font-weight:600">Москва и Московская область</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
             <div class="toggle active">Рестораны</div><div class="toggle">Пыление</div><div class="toggle">АДАИР</div>
           </div>
-          <div class="map-box">🗺️ Интерактивная карта (native)</div>
+          <div class="map-yandex" aria-label="Яндекс Карты">
+            <span class="map-pin high" title="Высокий уровень"></span>
+            <span class="map-pin mid" title="Средний уровень"></span>
+            <div style="position:absolute;bottom:10px;left:12px;font-size:11px;color:var(--text-muted);font-weight:600">Яндекс · WebView</div>
+          </div>
+          <div class="map-attribution">Карта: Яндекс Карты</div>
           <div class="section-label">Рекомендованные места</div>
           <div class="card" style="display:flex;gap:14px;align-items:center">
             <div class="feed-icon" style="background:var(--success-light);color:var(--success)">🌿</div>
             <div style="flex:1">
               <div style="display:flex;gap:8px;align-items:center"><strong>Green Bowl Cafe</strong><span class="badge badge-ok">Высокий</span></div>
-              <div class="feed-sub">Меню с маркировкой аллергенов</div>
+              <div class="feed-sub">Меню с маркировкой аллергенов · без глютена</div>
             </div>
           </div>
-          <p class="disclaimer">Информация о местах носит ориентировочный характер.</p>
+          <p class="disclaimer">Информация о местах носит ориентировочный характер, состав нужно уточнять в заведении.</p>
         </section>
 
         <!-- EXPERT -->
@@ -791,7 +928,7 @@
             <div>
               <div class="doc-label">AllerGuide · SOS</div>
               <div class="doc-title">SOS</div>
-              <div class="doc-meta">Экстренная помощь при аллергии</div>
+              <div class="doc-meta">Экстренная информация</div>
             </div>
             <button class="btn btn-secondary btn-sm">Изменить</button>
           </div>
@@ -799,19 +936,88 @@
           <div class="card">
             <div class="kpi-row" style="border:none;padding-top:0"><span class="kpi-label">Имя</span><span class="kpi-value">Анна</span></div>
             <div class="kpi-row"><span class="kpi-label">Возраст</span><span class="kpi-value">35</span></div>
-            <div class="kpi-row"><span class="kpi-label">Аллергены</span><span><span class="badge badge-danger">Молоко</span> <span class="badge badge-danger">Арахис</span></span></div>
+            <div class="kpi-row"><span class="kpi-label">Аллергии</span><span><span class="badge badge-danger">Молоко</span> <span class="badge badge-danger">Арахис</span></span></div>
           </div>
-          <div class="sos-call">
-            <div class="doc-meta">Экстренный вызов</div>
-            <div class="sos-call-btn">103</div>
-            <button class="btn btn-danger">Позвонить 103</button>
+
+          <div class="collapse-head" data-collapse="passport-panel" role="button" tabindex="0">
+            <span class="collapse-title">Паспорт аллергика</span>
+            <span class="collapse-chevron" id="passport-chevron">▾</span>
           </div>
-          <div class="section-label">План действий</div>
+          <div class="card collapse-panel" id="passport-panel">
+            <div class="passport-row">
+              <div class="passport-label">Непереносимые ЛС</div>
+              <div class="passport-value">Аспирин, НПВС</div>
+            </div>
+            <div class="passport-row">
+              <div class="passport-label">Триггеры</div>
+              <div class="passport-value">Арахис, молочные продукты</div>
+            </div>
+            <div class="passport-row">
+              <div class="passport-label">Адреналин</div>
+              <div class="passport-value">EpiPen · 2027-06 · сумка</div>
+            </div>
+            <div class="passport-row">
+              <div class="passport-label">Врач</div>
+              <div class="passport-value">Иванова А. · +7 495 000-00-00</div>
+            </div>
+            <div class="warn-text">В анамнезе — тяжёлая аллергическая реакция</div>
+            <div class="passport-row">
+              <div class="passport-label">Набор первой помощи</div>
+              <div class="passport-value">Автоинжектор; Антигистаминное; Ингалятор</div>
+            </div>
+            <div class="btn-row-inline">
+              <button class="btn btn-secondary btn-sm">Поделиться</button>
+              <button class="btn btn-secondary btn-sm">PDF</button>
+            </div>
+          </div>
+
+          <div class="collapse-head" data-collapse="anaphylaxis-panel" role="button" tabindex="0">
+            <span class="collapse-title">Алгоритм анафилаксии</span>
+            <span class="collapse-chevron" id="anaphylaxis-chevron">▸</span>
+          </div>
+          <div class="card collapse-panel" id="anaphylaxis-panel" hidden>
+            <div class="grade-block">
+              <div class="grade-title">Степень 1 — кожа и слизистые</div>
+              <div class="grade-signs">Крапивница, зуд, отёк губ/век без других систем.</div>
+              <div class="grade-action">· Антигистаминное по назначению врача.</div>
+              <div class="grade-action">· Наблюдение 4–6 часов (риск бифазной реакции).</div>
+            </div>
+            <div class="grade-block">
+              <div class="grade-title">Степень 2 — вовлечение других систем</div>
+              <div class="grade-signs">Симптомы степени 1 + кашель, одышка, рвота.</div>
+              <div class="grade-action">· Адреналин (автоинжектор) по плану врача.</div>
+              <div class="grade-action">· Вызвать скорую помощь (103).</div>
+            </div>
+            <div class="grade-block">
+              <div class="grade-title">Степень 3 — жизнеугрожающая реакция</div>
+              <div class="grade-signs">Шок, потеря сознания, выраженная обструкция дыхания.</div>
+              <div class="grade-action">· Немедленно адреналин · вызвать 103.</div>
+            </div>
+            <div class="banner-warn card" style="margin:0;padding:10px">
+              ⚠ Бифазная реакция возможна через 4–6 часов после первых симптомов.
+            </div>
+          </div>
+
           <div class="card">
+            <div class="section-label" style="margin-top:0">План действий</div>
             <div class="plan-step"><span class="plan-num">1</span><span>Автоинжектор в сумке — использовать при отёке губ</span></div>
             <div class="plan-step"><span class="plan-num">2</span><span>Вызвать скорую помощь</span></div>
           </div>
-          <p class="disclaimer">Информация внесена пользователем и не является медицинским назначением.</p>
+
+          <div class="card flush">
+            <div class="feed-row" style="padding-top:12px">
+              <div class="feed-body">
+                <div class="feed-title">Экстренные контакты</div>
+                <div class="feed-sub">Муж · +7 999 111-22-33</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Позвонить</button>
+            </div>
+          </div>
+
+          <button class="btn btn-danger">Позвонить 103</button>
+
+          <div class="tip-card">ℹ Покажите этот экран медработнику в случае анафилактической реакции</div>
+          <p class="disclaimer">Информация на экране SOS внесена пользователем и не является медицинским назначением.</p>
         </section>
 
         <!-- PROFILES -->
@@ -911,6 +1117,25 @@
 
     document.getElementById('theme-light').addEventListener('click', () => setTheme('light'));
     document.getElementById('theme-dark').addEventListener('click', () => setTheme('dark'));
+
+    document.querySelectorAll('[data-collapse]').forEach((head) => {
+      const panelId = head.getAttribute('data-collapse');
+      const panel = document.getElementById(panelId);
+      const chevron = head.querySelector('.collapse-chevron');
+      const toggle = () => {
+        if (!panel) return;
+        const open = panel.hidden;
+        panel.hidden = !open;
+        if (chevron) chevron.textContent = open ? '▾' : '▸';
+      };
+      head.addEventListener('click', toggle);
+      head.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
 
     /* Wellness KPI (Open-Meteo) */
     const MOCK = { lat: 55.75, lon: 37.62, allergens: ['birch_pollen'] };
