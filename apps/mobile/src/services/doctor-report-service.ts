@@ -5,15 +5,18 @@ import {
   DOCTOR_REPORT_TITLE,
   computeAsitCompliance,
   computeFoodDrugSummary,
+  computeInsectStingSummary,
   computePefTrend,
   formatAsitReportSummary,
   formatFoodDrugReportSummary,
+  formatInsectReportSummary,
   formatDiaryDate,
   formatDiaryEntrySummary,
   formatPassportHtml,
   formatPassportText,
   formatTriggerContextReport,
   getConsolidatedFoodAvoidList,
+  getConsolidatedInsectList,
   getDefaultReportBlockIds,
   getReportDiaryTypes,
   parseAllergies,
@@ -23,6 +26,7 @@ import { getDb } from '@/src/db/init';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
+import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
@@ -133,6 +137,21 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ).replace(/</g, '&lt;')}</pre></section>`
     : '';
 
+  const insectPlan = getInsectActionPlan(options.profileId);
+  const insectHtml =
+    options.blockIds.includes('insect') && profile
+      ? `<section><h2>Инсектная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatInsectReportSummary(
+          computeInsectStingSummary(periodEntries, options.periodDays),
+          {
+            knownInsects: getConsolidatedInsectList(parseAllergies(profile.allergies), insectPlan),
+            adrenalineLocation: insectPlan?.adrenalineLocation,
+            emergencySteps: insectPlan?.emergencySteps,
+            clinicalNotes: insectPlan?.clinicalNotes,
+            periodDays: options.periodDays,
+          },
+        ).replace(/</g, '&lt;')}</pre></section>`
+      : '';
+
   const triggerContextHtml = options.blockIds.includes('triggerContext')
     ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
     : '';
@@ -158,6 +177,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${scalesHtml}
       ${asitHtml}
       ${foodDrugHtml}
+      ${insectHtml}
       ${triggerContextHtml}
       ${blocksHtml}
       ${passportHtml}

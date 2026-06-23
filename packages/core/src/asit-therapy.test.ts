@@ -3,11 +3,14 @@ import {
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
   buildAsitPrefill,
+  buildAsitReminderContent,
   computeAsitCompliance,
   createDefaultAsitCourse,
+  formatAsitReminderTime,
   formatAsitReportSummary,
   formatAsitSummary,
   isAsitCourseConfigured,
+  isAsitReminderConfigured,
   parseAsitCourse,
   serializeAsitCourse,
 } from './asit-therapy';
@@ -120,5 +123,24 @@ describe('asit-therapy', () => {
     );
     expect(text).toContain('Сталораль');
     expect(text).toContain('Приёмов: 2');
+  });
+
+  it('detects ASIT reminder configuration', () => {
+    expect(isAsitReminderConfigured(null)).toBe(false);
+    expect(isAsitReminderConfigured({ ...createDefaultAsitCourse(), reminderHour: 8 })).toBe(true);
+    expect(isAsitReminderConfigured({ ...createDefaultAsitCourse(), active: false, reminderHour: 8 })).toBe(
+      false,
+    );
+  });
+
+  it('formats reminder time and notification content', () => {
+    expect(formatAsitReminderTime(8, 30)).toBe('08:30');
+    const content = buildAsitReminderContent({
+      ...createDefaultAsitCourse(),
+      allergen: 'Берёза',
+      drug: 'Сталораль',
+    });
+    expect(content.body).toContain('Сталораль');
+    expect(content.body).toContain('Берёза');
   });
 });

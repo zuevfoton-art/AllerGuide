@@ -7,7 +7,9 @@ import {
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
   computeAsitCompliance,
+  formatAsitReminderTime,
   isAsitCourseConfigured,
+  isAsitReminderConfigured,
   type AsitCourse,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -64,6 +66,13 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
       </Text>
       {course.scheduleNotes.trim() ? (
         <Text style={styles.schedule}>{course.scheduleNotes.trim()}</Text>
+      ) : null}
+      {isAsitReminderConfigured(course) ? (
+        <Text style={styles.reminder}>
+          {t('asit.reminderAt', {
+            time: formatAsitReminderTime(course.reminderHour ?? 8, course.reminderMinute ?? 0),
+          })}
+        </Text>
       ) : null}
 
       <View style={styles.statsRow}>
@@ -123,6 +132,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 17,
+    },
+    reminder: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.accent,
     },
     statsRow: { flexDirection: 'row', gap: 8 },
     stat: {
