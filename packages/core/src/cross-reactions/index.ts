@@ -1,5 +1,6 @@
 import { findAllergenById, findAllergenByName } from '../allergen-database';
 import { CROSS_REACTIONS_PHASE_1 } from './phase-1';
+import { CROSS_REACTIONS_PHASE_2 } from './phase-2';
 import {
   compareCrossReactionRisk,
   type CrossReaction,
@@ -16,7 +17,10 @@ export {
   type CrossReactionSyndrome,
 } from './types';
 
-export const CROSS_REACTIONS: CrossReaction[] = CROSS_REACTIONS_PHASE_1;
+export const CROSS_REACTIONS: CrossReaction[] = [
+  ...CROSS_REACTIONS_PHASE_1,
+  ...CROSS_REACTIONS_PHASE_2,
+];
 
 function toMatch(reaction: CrossReaction, allergenId: string): CrossReactionMatch | null {
   const otherId = reaction.fromId === allergenId ? reaction.toId : reaction.fromId;

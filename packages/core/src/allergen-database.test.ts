@@ -99,6 +99,35 @@ describe('allergen database', () => {
   });
 
   it('ships phase-1 cross-reaction coverage', () => {
-    expect(CROSS_REACTIONS.length).toBeGreaterThanOrEqual(24);
+    expect(CROSS_REACTIONS.length).toBeGreaterThanOrEqual(40);
+  });
+
+  it('includes phase-2 pollen and food cross reactions', () => {
+    const mugwort = findAllergenByName('Пыльца полыни');
+    expect(mugwort).toBeDefined();
+    const mugwortMatches = getCrossReactionsFor(mugwort!.id);
+    expect(mugwortMatches.some((item) => item.allergen.name === 'Сельдерей')).toBe(true);
+    expect(mugwortMatches.find((item) => item.allergen.name === 'Сельдерей')?.risk).toBe('high');
+
+    const grass = findAllergenByName('Пыльца злаков');
+    expect(grass).toBeDefined();
+    const grassMatches = getCrossReactionsFor(grass!.id);
+    expect(grassMatches.some((item) => item.allergen.name === 'Томаты')).toBe(true);
+
+    const wheat = findAllergenByName('Пшеница / глютен');
+    const rye = getCrossReactionsFor(wheat!.id).find((item) => item.allergen.name === 'Рожь');
+    expect(rye?.risk).toBe('high');
+
+    const fish = findAllergenByName('Рыба');
+    const otherFish = getCrossReactionsFor(fish!.id).find(
+      (item) => item.allergen.name === 'Другие виды рыб',
+    );
+    expect(otherFish?.risk).toBe('high');
+  });
+
+  it('prefers higher tomato risk when birch and grass pollen are selected', () => {
+    const suggestions = getCrossReactionsForSelection(['Пыльца берёзы', 'Пыльца злаков']);
+    const tomato = suggestions.find((item) => item.allergen.name === 'Томаты');
+    expect(tomato?.risk).toBe('medium');
   });
 });

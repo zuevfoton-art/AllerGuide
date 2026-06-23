@@ -38,4 +38,11 @@ describe('runMockScan', () => {
     expect(result.crossMatches.length).toBeGreaterThan(0);
     expect(result.level).toBe('medium');
   });
+
+  it('detects fish cross-reaction via other fish keywords', () => {
+    const fishProfile = { allergies: JSON.stringify(['Рыба']) };
+    const result = runMockScan({ mode: 'product', text: 'филе лосося, рис', profile: fishProfile });
+    expect(result.crossMatches.some((item) => item.includes('Другие виды рыб'))).toBe(true);
+    expect(result.level).toBe('medium');
+  });
 });
