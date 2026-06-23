@@ -119,6 +119,10 @@ export type LocaleMessages = {
     medicine: string;
     medicineSub: string;
     expert: string;
+    marketplaceTitle: string;
+    marketplaceSub: string;
+    marketplaceEmpty: string;
+    marketplaceOpen: string;
     disclaimer: string;
   };
   diary: {

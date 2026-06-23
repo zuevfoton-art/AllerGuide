@@ -115,6 +115,10 @@ const de: LocaleMessages = {
     medicine: 'Medikament',
     medicineSub: 'Einnahme notieren',
     expert: 'Experte',
+    marketplaceTitle: 'Marktplatz',
+    marketplaceSub: 'Produkte passend zu Ihrem Allergieprofil',
+    marketplaceEmpty: 'Wählen Sie ein Profil mit Allergenen für persönliche Empfehlungen.',
+    marketplaceOpen: 'Marktplatz öffnen',
     disclaimer: 'Der Index ist beratend und ersetzt keine allergologische Beratung.',
   },
   diary: {

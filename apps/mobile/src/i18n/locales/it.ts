@@ -115,6 +115,10 @@ const it: LocaleMessages = {
     medicine: 'Farmaco',
     medicineSub: 'Registra assunzione',
     expert: 'Esperto',
+    marketplaceTitle: 'Marketplace',
+    marketplaceSub: 'Prodotti in base al profilo allergologico',
+    marketplaceEmpty: 'Seleziona un profilo con allergeni per vedere suggerimenti personalizzati.',
+    marketplaceOpen: 'Apri marketplace',
     disclaimer: "L'indice è indicativo e non sostituisce la consultazione con un allergologo.",
   },
   diary: {

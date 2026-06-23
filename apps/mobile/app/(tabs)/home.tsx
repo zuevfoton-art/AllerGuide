@@ -16,6 +16,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { AppLogoMark } from '@/src/components/AppLogo';
+import { MarketplaceModule } from '@/src/modules/marketplace';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -175,6 +176,8 @@ export default function HomeScreen() {
         ))}
       </GlassCard>
 
+      <MarketplaceModule variant="embedded" />
+
       {wellness?.recommendations[0] ? (
         <GlassCard style={styles.recCard}>
           <Text style={styles.recTitle}>{wellness.recommendations[0].title}</Text>
@@ -188,6 +191,12 @@ export default function HomeScreen() {
           variant="secondary"
           style={styles.quickBtn}
           onPress={() => router.push('/(tabs)/scanner')}
+        />
+        <Button
+          label={t('tabs.market')}
+          variant="secondary"
+          style={styles.quickBtn}
+          onPress={() => router.push('/(tabs)/market')}
         />
         <Button
           label={t('tabs.map')}
