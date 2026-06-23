@@ -13,10 +13,10 @@ import { useTranslation } from '@/src/store/locale-store';
 const SLIDE_KEYS = ['diary', 'scanner', 'market', 'map', 'expert'] as const;
 const SLIDE_COLORS = {
   diary: 'accent',
-  scanner: 'purple',
+  scanner: 'info',
   market: 'success',
-  map: 'warning',
-  expert: 'pink',
+  map: 'head',
+  expert: 'accent',
 } as const;
 
 export default function OnboardingIntroScreen() {
