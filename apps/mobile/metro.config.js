@@ -13,6 +13,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
+const rootNodeModules = path.resolve(workspaceRoot, 'node_modules');
+
 config.resolver.extraNodeModules = {
   react: path.resolve(localNodeModules, 'react'),
   'react-dom': path.resolve(localNodeModules, 'react-dom'),
@@ -20,6 +22,8 @@ config.resolver.extraNodeModules = {
   'react-native-web': path.resolve(localNodeModules, 'react-native-web'),
   '@allerguide/core': path.resolve(workspaceRoot, 'packages/core'),
   '@allerguide/ai': path.resolve(workspaceRoot, 'packages/ai'),
+  '@expo-google-fonts/inter': path.resolve(rootNodeModules, '@expo-google-fonts/inter'),
+  '@expo-google-fonts/source-serif-4': path.resolve(rootNodeModules, '@expo-google-fonts/source-serif-4'),
 };
 
 const WEB_ONLY_STUBS = {

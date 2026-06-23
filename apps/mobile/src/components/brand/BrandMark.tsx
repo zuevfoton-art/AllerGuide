@@ -2,7 +2,7 @@ import Svg, { Path, Rect } from 'react-native-svg';
 
 type BrandMarkProps = {
   size?: number;
-  /** Filled mark on accent square (default) or monochrome for inline use */
+  /** Filled mark on accent square (default) or monochrome shield + cross */
   variant?: 'filled' | 'mono';
   color?: string;
   accent?: string;

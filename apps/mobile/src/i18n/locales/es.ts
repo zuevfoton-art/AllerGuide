@@ -115,6 +115,10 @@ const es: LocaleMessages = {
     medicine: 'Medicamento',
     medicineSub: 'Registrar toma',
     expert: 'Experto',
+    marketplaceTitle: 'Marketplace',
+    marketplaceSub: 'Productos según su perfil de alergias',
+    marketplaceEmpty: 'Elija un perfil con alérgenos para ver recomendaciones personalizadas.',
+    marketplaceOpen: 'Abrir marketplace',
     disclaimer: 'El índice es orientativo y no sustituye la consulta con un alergólogo.',
   },
   diary: {

@@ -1,10 +1,11 @@
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { initDb } from '@/src/db/init';
 import { initI18n } from '@/src/i18n';
+import { useAppFonts } from '@/src/hooks/use-fonts';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { initAnalytics, trackScreen } from '@/src/services/analytics-service';
@@ -32,7 +33,9 @@ export default function RootLayout() {
   const hydrateLocale = useLocaleStore((s) => s.hydrate);
   const { colors, isDark } = useTheme();
   const pathname = usePathname();
+  const fontsLoaded = useAppFonts();
   const [dbReady, setDbReady] = useState(false);
+  const appReady = dbReady && fontsLoaded;
 
   useEffect(() => {
     let mounted = true;
@@ -56,14 +59,14 @@ export default function RootLayout() {
   }, [hydrateTheme, hydrateLocale]);
 
   useEffect(() => {
-    if (dbReady && pathname) trackScreen(pathname);
-  }, [dbReady, pathname]);
+    if (appReady && pathname) trackScreen(pathname);
+  }, [appReady, pathname]);
 
   return (
     <ErrorBoundary>
       <WebShell>
         <StatusBar style={isDark ? 'light' : 'dark'} />
-        {dbReady ? (
+        {appReady ? (
           <Stack
             screenOptions={{
               headerShown: false,

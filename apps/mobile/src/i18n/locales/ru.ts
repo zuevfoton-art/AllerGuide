@@ -115,6 +115,10 @@ const ru: LocaleMessages = {
     medicine: 'Лекарство',
     medicineSub: 'Отметить приём',
     expert: 'Эксперт',
+    marketplaceTitle: 'Маркетплейс',
+    marketplaceSub: 'Товары по вашему профилю аллергий',
+    marketplaceEmpty: 'Подборка появится после выбора профиля с аллергенами.',
+    marketplaceOpen: 'Открыть маркетплейс',
     disclaimer: 'Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.',
   },
   diary: {
