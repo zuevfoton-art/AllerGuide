@@ -47,8 +47,11 @@ describe('diary schema', () => {
   it('formats clinical scale entry summary from enriched answers', () => {
     const details = encodeDiaryDetails({
       scaleId: 'act',
-      scaleScore: '22',
-      scaleInterpretation: 'Хороший контроль',
+      actActivity: '4',
+      actBreath: '4',
+      actNight: '4',
+      actReliever: '5',
+      actControl: '5',
     });
     const summary = formatDiaryEntrySummary('Шкала', details);
     expect(summary).toContain('22 баллов');

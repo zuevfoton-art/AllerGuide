@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { encodeDiaryDetails } from './diary';
-import { buildTriggerContext, buildTriggerPrefill, extractTodayMedicines, formatTriggerContextLine } from './diary-triggers';
+import {
+  buildTriggerContext,
+  buildTriggerPrefill,
+  extractTodayMedicines,
+  formatTriggerContextLine,
+  formatTriggerContextReport,
+} from './diary-triggers';
 import type { DiaryEntry } from './types';
 
 describe('diary triggers', () => {
@@ -61,5 +67,31 @@ describe('diary triggers', () => {
     });
     expect(line).toContain('Пыльца');
     expect(line).toContain('Лоратадин');
+  });
+
+  it('formats trigger context report only for entries with auto-context', () => {
+    const empty = formatTriggerContextReport([
+      {
+        type: 'Триггер',
+        details: encodeDiaryDetails({ trigger: 'Стресс' }),
+        createdAt: '2026-06-20T12:00:00',
+      },
+    ]);
+    expect(empty).toContain('нет');
+
+    const report = formatTriggerContextReport([
+      {
+        type: 'Триггер',
+        details: encodeDiaryDetails({
+          trigger: 'Прогулка в парке',
+          pollenContext: 'Берёза: высокий',
+          recentScan: 'Йогурт: риск',
+        }),
+        createdAt: '2026-06-20T12:00:00',
+      },
+    ]);
+    expect(report).toContain('Прогулка в парке');
+    expect(report).toContain('Пыльца');
+    expect(report).toContain('Скан');
   });
 });

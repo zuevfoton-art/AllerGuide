@@ -50,4 +50,8 @@ describe('doctor report helpers', () => {
     expect(periodToDays(7)).toBe(7);
     expect(periodToDays('custom')).toBeNull();
   });
+
+  it('includes triggerContext in default report blocks', () => {
+    expect(getDefaultReportBlockIds()).toContain('triggerContext');
+  });
 });
