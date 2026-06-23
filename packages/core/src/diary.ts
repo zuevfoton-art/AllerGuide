@@ -1,4 +1,5 @@
 import { formatScaleSummary } from './clinical-scales';
+import { formatAsitSummary } from './asit-therapy';
 
 export type DiaryStepField = 'text' | 'choice';
 
@@ -267,6 +268,13 @@ export const DIARY_SECTIONS: DiarySection[] = [
     icon: 'fitness',
     steps: [
       {
+        id: 'asitAllergen',
+        label: 'Аллерген курса',
+        placeholder: 'Например: пыльца берёзы, клещ',
+        field: 'text',
+        required: true,
+      },
+      {
         id: 'asitDrug',
         label: 'Название препарата',
         placeholder: 'Как указал врач',
@@ -274,9 +282,23 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: true,
       },
       {
+        id: 'asitRoute',
+        label: 'Путь введения',
+        field: 'choice',
+        choices: ['Подъязычная (SLIT)', 'Подкожная (SCIT)'],
+        required: true,
+      },
+      {
+        id: 'asitPhase',
+        label: 'Фаза терапии',
+        field: 'choice',
+        choices: ['Наращивание дозы', 'Поддерживающая терапия'],
+        required: true,
+      },
+      {
         id: 'asitSchedule',
         label: 'Схема приёма (описание)',
-        placeholder: 'По словам врача, без коррекции доз',
+        placeholder: 'По назначению врача, без коррекции доз в приложении',
         field: 'text',
         multiline: true,
         required: false,
@@ -289,8 +311,29 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: true,
       },
       {
+        id: 'asitDoseNumber',
+        label: 'Номер приёма / дозы (если известен)',
+        placeholder: 'Например: 12-й приём',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'asitOnSchedule',
+        label: 'Соблюдение графика',
+        field: 'choice',
+        choices: ['В срок', 'С опозданием', 'Пропущена'],
+        required: true,
+      },
+      {
+        id: 'asitLocalReaction',
+        label: 'Местная реакция (для подкожной АСИТ)',
+        field: 'choice',
+        choices: ['Нет', 'Покраснение', 'Отёк', 'Зуд', 'Другое'],
+        required: false,
+      },
+      {
         id: 'asitReaction',
-        label: 'Субъективная реакция',
+        label: 'Системная (общая) реакция',
         field: 'choice',
         choices: ['Нет реакции', 'Лёгкая', 'Умеренная', 'Сильная'],
         required: true,
@@ -391,6 +434,10 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
 
   if (type === 'Шкала') {
     return formatScaleSummary(structured.answers);
+  }
+
+  if (type === 'АСИТ') {
+    return formatAsitSummary(structured.answers);
   }
 
   const section = getDiarySection(type);

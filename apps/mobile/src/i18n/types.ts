@@ -315,6 +315,33 @@ export type LocaleMessages = {
       allergenRequired: string;
     };
   };
+  asit: {
+    title: string;
+    eyebrow: string;
+    courseTitle: string;
+    courseSubtitle: string;
+    setupCourse: string;
+    editCourse: string;
+    logDose: string;
+    emptyCourse: string;
+    doses30d: string;
+    onTime: string;
+    missed: string;
+    allergenLabel: string;
+    allergenPlaceholder: string;
+    drugLabel: string;
+    drugPlaceholder: string;
+    routeLabel: string;
+    phaseLabel: string;
+    startDateLabel: string;
+    startDatePlaceholder: string;
+    scheduleLabel: string;
+    schedulePlaceholder: string;
+    saveCourse: string;
+    disclaimer: string;
+    noProfile: string;
+    notEligible: string;
+  };
   sos: {
     title: string;
     subtitle: string;

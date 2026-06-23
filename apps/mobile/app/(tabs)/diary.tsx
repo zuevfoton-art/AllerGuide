@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
+  buildAsitPrefill,
   buildScaleInitialAnswers,
   buildTriggerPrefill,
   collectLatestScaleTrends,
@@ -13,7 +14,9 @@ import {
   getDiaryEntryAnswers,
   getDiarySection,
   getRecommendedScalesForConditions,
+  isAsitCourseConfigured,
   parseAllergies,
+  profileEnablesAsit,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
@@ -24,6 +27,8 @@ import {
 } from '@/src/services/diary-service';
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
 import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
+import { AsitCourseCard } from '@/src/components/AsitCourseCard';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -94,8 +99,27 @@ export default function DiaryScreen() {
     [recommendedScaleIds],
   );
   const scaleTrends = useMemo(() => collectLatestScaleTrends(list), [list]);
+  const asitEnabled = useMemo(
+    () => profileEnablesAsit(profileConditions),
+    [profileConditions],
+  );
+  const asitCourse = useMemo(
+    () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
+    [activeProfileId, list],
+  );
 
   const openSection = async (sectionType: string) => {
+    if (sectionType === 'АСИТ' && activeProfileId) {
+      const course = getAsitCourse(activeProfileId);
+      if (course && isAsitCourseConfigured(course)) {
+        setEditor({
+          mode: 'section',
+          sectionType,
+          prefill: { АСИТ: buildAsitPrefill(course) },
+        });
+        return;
+      }
+    }
     if (sectionType === 'Триггер' && activeProfileId) {
       const allergies = activeProfile ? parseAllergies(activeProfile.allergies) : [];
       const wellness = await fetchWellnessSnapshot(allergies, { recentSymptoms: false, recentTriggers: false }, locale).catch(() => null);
@@ -240,6 +264,14 @@ export default function DiaryScreen() {
 
       {!editor ? (
         <>
+          {asitEnabled ? (
+            <AsitCourseCard
+              course={asitCourse}
+              entries={list}
+              onLogDose={() => void openSection('АСИТ')}
+            />
+          ) : null}
+
           <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
           <Button
             label={t('diary.quickEntry')}

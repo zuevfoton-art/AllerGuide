@@ -3,7 +3,9 @@ import {
   DOCTOR_REPORT_BLOCKS,
   DOCTOR_REPORT_DISCLAIMER,
   DOCTOR_REPORT_TITLE,
+  computeAsitCompliance,
   computePefTrend,
+  formatAsitReportSummary,
   formatDiaryDate,
   formatDiaryEntrySummary,
   formatPassportHtml,
@@ -15,6 +17,7 @@ import {
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
@@ -102,6 +105,14 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     ? `<section><h2>Сводка шкал</h2><ul>${renderScaleTrend(periodEntries)}</ul></section>`
     : '';
 
+  const asitHtml = options.blockIds.includes('asit')
+    ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatAsitReportSummary(
+        computeAsitCompliance(periodEntries, options.periodDays),
+        getAsitCourse(options.profileId),
+        options.periodDays,
+      ).replace(/</g, '&lt;')}</pre></section>`
+    : '';
+
   const pefHtml = options.blockIds.includes('peakflow')
     ? `<section><h2>Тренд ПСВ</h2>${renderPefTrend(periodEntries)}</section>`
     : '';
@@ -121,6 +132,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       <hr />
       ${pefHtml}
       ${scalesHtml}
+      ${asitHtml}
       ${blocksHtml}
       ${passportHtml}
       <hr />
