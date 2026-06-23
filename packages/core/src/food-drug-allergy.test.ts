@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildFoodPrefill,
   buildFoodPrefillFromProfile,
   buildFoodPrefillFromScan,
   buildIntoleranceAlert,
@@ -44,6 +45,24 @@ describe('food-drug-allergy', () => {
 
   it('builds food prefill with cross-reactions from profile', () => {
     const prefill = buildFoodPrefillFromProfile(['Молоко'], null);
+    expect(prefill.allergens).toContain('Молоко');
+    expect(prefill.crossReactions).toBeDefined();
+  });
+
+  it('builds unified food prefill from scan and profile with cross-reactions', () => {
+    const prefill = buildFoodPrefill(
+      ['Молоко'],
+      null,
+      {
+        productName: 'Йогурт',
+        verdict: 'Риск',
+        level: 'high',
+        matches: ['Молоко'],
+        createdAt: new Date().toISOString(),
+      },
+    );
+    expect(prefill.food).toBe('Йогурт');
+    expect(prefill.foodSource).toBe('Сканер');
     expect(prefill.allergens).toContain('Молоко');
     expect(prefill.crossReactions).toBeDefined();
   });

@@ -153,6 +153,51 @@ export function buildFoodPrefillFromScan(scan: FoodDrugScanRef): Record<string, 
   return prefill;
 }
 
+function formatCrossReactionsHint(avoidList: string[]): string | undefined {
+  const crossMatches = getCrossReactionsForSelection(avoidList);
+  if (!crossMatches.length) return undefined;
+  return crossMatches
+    .slice(0, 5)
+    .map((match) => `${match.allergen.name} (${match.risk})`)
+    .join(', ');
+}
+
+export function enrichFoodPrefillWithCrossReactions(
+  prefill: Record<string, string>,
+  profileAllergies: string[],
+  registry: FoodDrugRegistry | null,
+): Record<string, string> {
+  if (prefill.crossReactions?.trim()) return prefill;
+  const avoidList = getConsolidatedFoodAvoidList(profileAllergies, registry);
+  const cross = formatCrossReactionsHint(avoidList);
+  if (!cross) return prefill;
+  return { ...prefill, crossReactions: cross };
+}
+
+/** Единый префилл «Питание»: профиль + опционально скан за 24 ч + перекрёстные реакции. */
+export function buildFoodPrefill(
+  profileAllergies: string[],
+  registry: FoodDrugRegistry | null,
+  scan?: FoodDrugScanRef | null,
+): Record<string, string> {
+  const profilePart = buildFoodPrefillFromProfile(profileAllergies, registry);
+
+  if (!scan) return profilePart;
+
+  const scanPart = buildFoodPrefillFromScan(scan);
+  const mergedAllergens = [scanPart.allergens, profilePart.allergens]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join('; ');
+
+  const merged: Record<string, string> = {
+    ...profilePart,
+    ...scanPart,
+  };
+  if (mergedAllergens) merged.allergens = mergedAllergens;
+
+  return enrichFoodPrefillWithCrossReactions(merged, profileAllergies, registry);
+}
+
 export function buildFoodPrefillFromProfile(
   profileAllergies: string[],
   registry: FoodDrugRegistry | null,
@@ -163,13 +208,8 @@ export function buildFoodPrefillFromProfile(
 
   prefill.allergens = avoidList.join(', ');
 
-  const crossMatches = getCrossReactionsForSelection(avoidList);
-  if (crossMatches.length) {
-    prefill.crossReactions = crossMatches
-      .slice(0, 5)
-      .map((match) => `${match.allergen.name} (${match.risk})`)
-      .join(', ');
-  }
+  const cross = formatCrossReactionsHint(avoidList);
+  if (cross) prefill.crossReactions = cross;
 
   return prefill;
 }

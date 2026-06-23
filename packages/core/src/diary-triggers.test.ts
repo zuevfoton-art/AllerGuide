@@ -54,7 +54,16 @@ describe('diary triggers', () => {
     expect(prefill.context).toContain('Пыльца');
   });
 
-  it('formats trigger context report from diary entries', () => {
+  it('formats trigger context report only for entries with auto-context', () => {
+    const empty = formatTriggerContextReport([
+      {
+        type: 'Триггер',
+        details: encodeDiaryDetails({ trigger: 'Стресс' }),
+        createdAt: '2026-06-20T12:00:00',
+      },
+    ]);
+    expect(empty).toContain('нет');
+
     const report = formatTriggerContextReport([
       {
         type: 'Триггер',

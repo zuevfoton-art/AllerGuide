@@ -107,11 +107,13 @@ export function formatTriggerContextReport(
 
     const parts: string[] = [];
     const trigger = payload.answers.trigger?.trim();
-    if (trigger) parts.push(trigger);
-
     const pollen = payload.answers.pollenContext?.trim();
     const scan = payload.answers.recentScan?.trim();
     const meds = payload.answers.todayMeds?.trim();
+    const hasContext = Boolean(pollen || scan || meds);
+    if (!hasContext) continue;
+
+    if (trigger) parts.push(trigger);
     if (pollen) parts.push(`Пыльца: ${pollen}`);
     if (scan) parts.push(`Скан: ${scan}`);
     if (meds) parts.push(`ЛС: ${meds}`);

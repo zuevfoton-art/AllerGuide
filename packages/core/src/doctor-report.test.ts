@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { encodeDiaryDetails } from './diary';
-import { computePefTrend } from './doctor-report';
+import { computePefTrend, getDefaultReportBlockIds } from './doctor-report';
 
 describe('doctor report helpers', () => {
   it('computes PEF trend from diary entries', () => {
@@ -21,5 +21,9 @@ describe('doctor report helpers', () => {
     expect(trend.min).toBe(280);
     expect(trend.max).toBe(320);
     expect(trend.latest).toBe(320);
+  });
+
+  it('includes triggerContext in default report blocks', () => {
+    expect(getDefaultReportBlockIds()).toContain('triggerContext');
   });
 });

@@ -4,8 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
   buildAsitPrefill,
-  buildFoodPrefillFromProfile,
-  buildFoodPrefillFromScan,
+  buildFoodPrefill,
   buildMedicinePrefill,
   buildScaleInitialAnswers,
   buildTriggerPrefill,
@@ -157,21 +156,25 @@ export default function DiaryScreen() {
       const withinDay =
         recentFoodScan &&
         Date.now() - new Date(recentFoodScan.createdAt).getTime() <= 24 * 3_600_000;
-      const prefill = withinDay
-        ? buildFoodPrefillFromScan({
-            productName: recentFoodScan.productName,
-            verdict: recentFoodScan.verdict,
-            level: recentFoodScan.level,
-            matches: (() => {
-              try {
-                return JSON.parse(recentFoodScan.matches) as string[];
-              } catch {
-                return [];
-              }
-            })(),
-            createdAt: recentFoodScan.createdAt,
-          })
-        : buildFoodPrefillFromProfile(allergies, registry);
+      const prefill = buildFoodPrefill(
+        allergies,
+        registry,
+        withinDay
+          ? {
+              productName: recentFoodScan.productName,
+              verdict: recentFoodScan.verdict,
+              level: recentFoodScan.level,
+              matches: (() => {
+                try {
+                  return JSON.parse(recentFoodScan.matches) as string[];
+                } catch {
+                  return [];
+                }
+              })(),
+              createdAt: recentFoodScan.createdAt,
+            }
+          : null,
+      );
       setEditor({ mode: 'section', sectionType, prefill: { Питание: prefill } });
       return;
     }
