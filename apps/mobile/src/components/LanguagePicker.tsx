@@ -23,9 +23,7 @@ export const LOCALE_FLAGS: Record<AppLocale, string> = {
 };
 
 type LanguagePickerProps = {
-  /** Compact trigger for auth screens (aligned right) */
   compact?: boolean;
-  /** Inside GlassCard — no outer card chrome */
   embedded?: boolean;
   style?: ViewStyle;
 };

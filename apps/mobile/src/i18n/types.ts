@@ -136,6 +136,8 @@ export type LocaleMessages = {
     deleteTitle: string;
     deleteMessage: string;
     saveChanges: string;
+    scale: string;
+    scalePick: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -327,6 +329,18 @@ export type LocaleMessages = {
     settingsLink: string;
     tip: string;
     disclaimer: string;
+    passportTitle: string;
+    passportEmpty: string;
+    drugIntolerances: string;
+    triggers: string;
+    epinephrine: string;
+    doctor: string;
+    anaphylaxisHistory: string;
+    shockKit: string;
+    anaphylaxisTitle: string;
+    sharePassport: string;
+    exportPdf: string;
+    sharing: string;
   };
   sosEdit: {
     title: string;
@@ -342,6 +356,18 @@ export type LocaleMessages = {
     addContact: string;
     savedNotes: string;
     savedPlan: string;
+    passportLabel: string;
+    drugIntolerancesPlaceholder: string;
+    triggersPlaceholder: string;
+    epiBrandPlaceholder: string;
+    epiExpiryPlaceholder: string;
+    epiLocationPlaceholder: string;
+    doctorNamePlaceholder: string;
+    doctorPhonePlaceholder: string;
+    anaphylaxisHistory: string;
+    shockKitLabel: string;
+    savePassport: string;
+    savedPassport: string;
     errors: {
       profileRequired: string;
       contactRequired: string;
@@ -374,6 +400,9 @@ export type LocaleMessages = {
     catalogTitle: string;
     searchPlaceholder: string;
     crossReactions: string;
+    crossRiskHigh: string;
+    crossRiskMedium: string;
+    crossRiskLow: string;
   };
   emergencyContacts: {
     empty: string;

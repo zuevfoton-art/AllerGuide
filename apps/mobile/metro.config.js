@@ -24,6 +24,8 @@ config.resolver.extraNodeModules = {
 
 const WEB_ONLY_STUBS = {
   'expo-location': path.resolve(projectRoot, 'src/stubs/expo-location-web-stub.js'),
+  'i18next': path.resolve(projectRoot, 'src/stubs/i18next-stub.js'),
+  'react-i18next': path.resolve(projectRoot, 'src/stubs/react-i18next-stub.js'),
 };
 
 const originalResolveRequest = config.resolver.resolveRequest;

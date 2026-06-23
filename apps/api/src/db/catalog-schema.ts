@@ -40,6 +40,8 @@ export const products = catalogSchema.table(
   {
     barcode: varchar('barcode', { length: 64 }).primaryKey(),
     name: text('name').notNull(),
+    brand: varchar('brand', { length: 255 }).notNull().default(''),
+    imageUrl: text('image_url').notNull().default(''),
     ingredients: text('ingredients').notNull().default(''),
     allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
     source: varchar('source', { length: 32 }).notNull().default('manual'),

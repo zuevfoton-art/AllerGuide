@@ -1,15 +1,21 @@
+import { Platform, Share } from 'react-native';
 import {
   DOCTOR_REPORT_BLOCKS,
   DOCTOR_REPORT_DISCLAIMER,
   DOCTOR_REPORT_TITLE,
+  computePefTrend,
   formatDiaryDate,
   formatDiaryEntrySummary,
+  formatPassportHtml,
+  formatPassportText,
   getDefaultReportBlockIds,
   getReportDiaryTypes,
-  type DoctorReportPeriod,
+  parseAllergies,
+  type DoctorReportBlock,
 } from '@allerguide/core';
-import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export type DoctorReportOptions = {
@@ -21,6 +27,48 @@ export type DoctorReportOptions = {
 function filterEntriesByPeriod(entries: DiaryEntry[], days: number): DiaryEntry[] {
   const cutoff = Date.now() - days * 86_400_000;
   return entries.filter((e) => new Date(e.createdAt).getTime() >= cutoff);
+}
+
+function renderScaleTrend(entries: DiaryEntry[]): string {
+  const scaleEntries = entries.filter((e) => e.type === 'Шкала');
+  if (!scaleEntries.length) return '<p style="color:#666;">Нет записей шкал за период.</p>';
+
+  const byType = new Map<string, DiaryEntry>();
+  for (const entry of scaleEntries) {
+    try {
+      const parsed = JSON.parse(entry.details) as { answers?: Record<string, string> };
+      const scaleId = parsed?.answers?.scaleId ?? 'unknown';
+      if (!byType.has(scaleId)) byType.set(scaleId, entry);
+    } catch {
+      // skip
+    }
+  }
+
+  return [...byType.values()]
+    .map((e) => {
+      const summary = formatDiaryEntrySummary(e.type, e.details || '');
+      return `<li>${summary} <small>(${formatDiaryDate(e.createdAt)})</small></li>`;
+    })
+    .join('');
+}
+
+function renderPefTrend(entries: DiaryEntry[]): string {
+  const trend = computePefTrend(entries);
+  if (!trend.count) return '<p style="color:#666;">Нет измерений ПСВ за период.</p>';
+  return `<p>Измерений: ${trend.count}. Min: ${trend.min ?? '—'}, Max: ${trend.max ?? '—'}, последнее: ${trend.latest ?? '—'} л/мин${trend.latestAt ? ` (${formatDiaryDate(trend.latestAt)})` : ''}.</p>`;
+}
+
+function renderPassportSummary(profile: Profile): string {
+  const passport = getAllergyPassport(profile.id);
+  const allergies = parseAllergies(profile.allergies);
+  const text = formatPassportText({
+    profileName: profile.name,
+    profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
+    allergies,
+    passport,
+    emergencyNumber: getEmergencyNumber(),
+  });
+  return `<pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${text.replace(/</g, '&lt;')}</pre>`;
 }
 
 export async function generateDoctorReportPdf(options: DoctorReportOptions) {
@@ -36,7 +84,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
   const entries = periodEntries.filter((e) => allowedTypes.includes(e.type));
 
   const blocksHtml = DOCTOR_REPORT_BLOCKS.filter((b) => options.blockIds.includes(b.id))
-    .map((block) => {
+    .map((block: DoctorReportBlock) => {
       const blockEntries = entries.filter((e) => block.diaryTypes.includes(e.type));
       if (!blockEntries.length) {
         return `<section><h2>${block.label}</h2><p style="color:#666;">Нет записей за период.</p></section>`;
@@ -50,6 +98,18 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     })
     .join('');
 
+  const scalesHtml = options.blockIds.includes('scales')
+    ? `<section><h2>Сводка шкал</h2><ul>${renderScaleTrend(periodEntries)}</ul></section>`
+    : '';
+
+  const pefHtml = options.blockIds.includes('peakflow')
+    ? `<section><h2>Тренд ПСВ</h2>${renderPefTrend(periodEntries)}</section>`
+    : '';
+
+  const passportHtml = profile
+    ? `<section><h2>Паспорт SOS</h2>${renderPassportSummary(profile)}</section>`
+    : '';
+
   const html = `
     <html><body style="font-family: Helvetica, Arial, sans-serif; padding: 24px; color:#20322a;">
       <h1>Отчёт AllerGuide для врача</h1>
@@ -59,7 +119,10 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       <p><strong>Период:</strong> ${options.periodDays} дней</p>
       <p style="font-size:12px;color:#555;">${DOCTOR_REPORT_DISCLAIMER}</p>
       <hr />
+      ${pefHtml}
+      ${scalesHtml}
       ${blocksHtml}
+      ${passportHtml}
       <hr />
       <p style="font-size:12px;color:#555;">Информация носит рекомендательный характер и не является медицинским заключением.</p>
     </body></html>`;
@@ -78,6 +141,47 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
   const Sharing = await import('expo-sharing');
   const { uri } = await Print.printToFileAsync({ html });
   await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+}
+
+export async function exportPassportPdf(profile: Profile) {
+  const passport = getAllergyPassport(profile.id);
+  const allergies = parseAllergies(profile.allergies);
+  const html = formatPassportHtml({
+    profileName: profile.name,
+    profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
+    allergies,
+    passport,
+    emergencyNumber: getEmergencyNumber(),
+  });
+
+  if (Platform.OS === 'web') {
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.print();
+    }
+    return;
+  }
+
+  const Print = await import('expo-print');
+  const Sharing = await import('expo-sharing');
+  const { uri } = await Print.printToFileAsync({ html });
+  await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+}
+
+export async function sharePassportText(profile: Profile) {
+  const passport = getAllergyPassport(profile.id);
+  const allergies = parseAllergies(profile.allergies);
+  const text = formatPassportText({
+    profileName: profile.name,
+    profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
+    allergies,
+    passport,
+    emergencyNumber: getEmergencyNumber(),
+  });
+
+  await Share.share({ message: text, title: 'Паспорт аллергика' });
 }
 
 export { getDefaultReportBlockIds, DOCTOR_REPORT_BLOCKS };

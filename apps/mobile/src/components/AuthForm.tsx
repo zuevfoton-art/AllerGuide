@@ -1,10 +1,10 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { useState, useRef, useMemo } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { useMemo } from 'react';
+import { AppLogoMark } from '@/src/components/AppLogo';
 
 interface AuthModeToggleProps {
   loginType: LoginType;
@@ -29,7 +29,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
       </Pressable>
       <Pressable
-        style={[styles.toggleBtn, loginType === 'email' && styles.toggleActive]}
+        style={[styles.toggleBtn, styles.toggleBtnLast, loginType === 'email' && styles.toggleActive]}
         onPress={() => onChange('email')}>
         <Ionicons
           name="mail"
@@ -63,10 +63,11 @@ export function AuthField({
 }: AuthFieldProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const [focused, setFocused] = useState(false);
 
   return (
     <View style={styles.fieldWrap}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -75,7 +76,9 @@ export function AuthField({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
-        style={styles.input}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={[styles.input, focused && styles.inputFocused]}
       />
     </View>
   );
@@ -93,13 +96,25 @@ export function AuthPrimaryButton({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
+  };
+  const handlePressOut = () => {
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 4 }).start();
+  };
 
   return (
     <Pressable
       style={[styles.button, loading && styles.buttonDisabled]}
       onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       disabled={loading}>
-      <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
+      </Animated.View>
     </Pressable>
   );
 }
@@ -125,14 +140,31 @@ export function AuthLink({
   );
 }
 
+export function AuthForgotLink({ text, onPress }: { text: string; onPress: () => void }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  return (
+    <Pressable style={styles.forgotWrap} onPress={onPress}>
+      <Text style={styles.forgotText}>{text}</Text>
+    </Pressable>
+  );
+}
+
 export function AuthHero({ title, subtitle }: { title: string; subtitle: string }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.hero}>
-      <BrandLogo size={56} />
-      <Text style={styles.heroTitle}>{title}</Text>
+      <AppLogoMark size={72} />
+      <View style={styles.heroWordmark}>
+        <Text style={styles.heroTitle}>
+          <Text>Aller</Text>
+          <Text style={{ color: theme.colors.accent }}>Guide</Text>
+        </Text>
+        <Text style={styles.heroTagline}>ALLERGY MANAGEMENT</Text>
+      </View>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>
   );
@@ -141,18 +173,66 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
 export function AuthError({ message }: { message: string }) {
   const theme = useTheme();
   if (!message) return null;
-  return <Text style={{ color: theme.colors.danger, fontSize: 14, textAlign: 'center' }}>{message}</Text>;
+  return (
+    <View style={{ backgroundColor: theme.colors.dangerLight, borderRadius: 6, padding: 10, borderWidth: 1, borderColor: theme.colors.dangerBorder }}>
+      <Text style={{ color: theme.colors.danger, fontSize: 14, textAlign: 'center', fontFamily: undefined }}>{message}</Text>
+    </View>
+  );
+}
+
+export function AuthDivider() {
+  const theme = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 4 }}>
+      <View style={{ flex: 1, height: 1, backgroundColor: theme.colors.border }} />
+      <Text style={{ fontFamily: theme.fonts.sans, fontSize: 12, color: theme.colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 }}>or</Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: theme.colors.border }} />
+    </View>
+  );
+}
+
+export function AuthReplitButton({ onPress }: { onPress: () => void }) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      style={{
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        borderRadius: 6,
+        padding: 14,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
+        backgroundColor: theme.colors.card,
+        minHeight: 48,
+      }}
+      onPress={onPress}>
+      <Ionicons name="code-slash-outline" size={18} color={theme.colors.text} />
+      <Text style={{ fontFamily: theme.fonts.sansSemiBold, fontSize: 16, fontWeight: '600', color: theme.colors.text }}>
+        Sign in with Replit
+      </Text>
+    </Pressable>
+  );
 }
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    hero: { alignItems: 'center', paddingVertical: 12, gap: 8 },
+    hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
+    heroWordmark: { alignItems: 'center', gap: 2, marginTop: 2 },
     heroTitle: {
       fontFamily: fonts.serifBold,
-      fontSize: 26,
+      fontSize: 28,
       fontWeight: '700',
       color: colors.head,
       letterSpacing: -0.3,
+    },
+    heroTagline: {
+      fontFamily: fonts.sans,
+      fontSize: 10,
+      color: colors.textMuted,
+      letterSpacing: 1.8,
+      textTransform: 'uppercase',
     },
     heroSubtitle: {
       fontFamily: fonts.sans,
@@ -160,8 +240,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 20,
+      marginTop: 4,
     },
-    toggleRow: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, borderRadius: 6, overflow: 'hidden' },
+    toggleRow: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 6,
+      overflow: 'hidden',
+    },
     toggleBtn: {
       flex: 1,
       flexDirection: 'row',
@@ -172,6 +259,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       padding: 12,
       borderRightWidth: 1,
       borderRightColor: colors.border,
+    },
+    toggleBtnLast: {
+      borderRightWidth: 0,
     },
     toggleActive: { backgroundColor: colors.accent },
     toggleText: {
@@ -190,6 +280,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       textTransform: 'uppercase',
       letterSpacing: 0.5,
     },
+    labelFocused: {
+      color: colors.accent,
+    },
     input: {
       backgroundColor: colors.card,
       padding: 14,
@@ -200,13 +293,18 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.borderInput,
     },
+    inputFocused: {
+      borderColor: colors.accent,
+      borderWidth: 1.5,
+    },
     button: {
       backgroundColor: colors.accent,
       padding: 14,
       borderRadius: 6,
       alignItems: 'center',
-      marginTop: 4,
-      minHeight: 44,
+      marginTop: 8,
+      minHeight: 48,
+      justifyContent: 'center',
     },
     buttonDisabled: { opacity: 0.7 },
     buttonText: {
@@ -218,5 +316,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
     linkText: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary },
     linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.accent, fontWeight: '600' },
+    forgotWrap: { alignItems: 'flex-end', marginTop: -4 },
+    forgotText: { fontFamily: fonts.sans, fontSize: 13, color: colors.accent },
   });
 }

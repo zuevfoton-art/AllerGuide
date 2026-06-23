@@ -55,7 +55,11 @@ LLM-запрос обёрнут кэшем результатов (ключ — 
 - **Индексация** (миграция `drizzle/0002_*`): `pg_trgm` + GIN по `name` (нечёткий поиск), полнотекст по `ingredients` (`to_tsvector('russian', ...)`), GIN по `allergen_tags` и `keywords`.
 - Эндпоинты: `GET /api/allergens` (fallback на статический core-список без БД), `GET /api/products/:barcode`, `GET /api/products/search?q=`. Клиент включается флагом `EXPO_PUBLIC_PRODUCT_DB`.
 - **Маппинг словарей**: внешние теги (датасет, OFF `allergens_tags` вида `en:milk`) приводятся к канонической RU-таксономии через `@allerguide/core` (`mapExternalAllergenNames`) — и при импорте, и при write-through. Так сканер матчит товары на профиль пользователя.
-- **Write-through кэш OFF**: при промахе `GET /api/products/:barcode` сервер тянет Open Food Facts (`src/services/open-food-facts.ts`), нормализует, маппит теги и сохраняет в `products` (`source='openfoodfacts'`); повторный запрос отдаётся из БД. Управляется `PRODUCT_OFF_FALLBACK`.
+- **Интеграция с Open Food Facts (по запросу)** — `src/services/open-food-facts.ts`:
+  - `fetchOpenFoodFactsProduct(barcode)` — поиск по штрихкоду (`/api/v2/product`), обогащение: бренд, изображение, состав, аллергены + следы (`traces`), маппинг тегов в RU-таксономию.
+  - `searchOpenFoodFacts(query)` — полнотекстовый поиск (`/cgi/search.pl`) по запросу.
+  - Обязательный `User-Agent` (`OPENFOODFACTS_USER_AGENT`) по требованию OFF.
+  - Write-through кэш: `GET /api/products/:barcode` при промахе тянет товар из OFF и сохраняет в `catalog.products` (`source='openfoodfacts'`); `GET /api/products/search?q=` при отсутствии локальных совпадений ищет в OFF и кэширует результаты. Управляется `PRODUCT_OFF_FALLBACK`. Поля `brand`/`image_url` добавлены миграцией `0004`.
 - При росте каталога до миллионов SKU поиск выносится в Meilisearch/Typesense/OpenSearch с наполнением из Postgres (Postgres остаётся source of truth).
 
 ### Облачная синхронизация (`src/routes/sync.ts`)

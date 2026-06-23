@@ -23,6 +23,8 @@ export const appUsers = profileSchema.table('app_users', {
   id: serial('id').primaryKey(),
   login: varchar('login', { length: 255 }).notNull().unique(),
   loginType: varchar('login_type', { length: 16 }).notNull(),
+  email: varchar('email', { length: 255 }),
+  phone: varchar('phone', { length: 32 }),
   passwordHash: varchar('password_hash', { length: 512 }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

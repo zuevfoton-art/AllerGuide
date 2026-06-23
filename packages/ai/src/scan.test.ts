@@ -25,9 +25,24 @@ describe('runMockScan', () => {
     expect(result.crossMatches).toEqual([]);
   });
 
-  it('includes cross reaction matches in result', () => {
+  it('includes birch cross reaction matches in result', () => {
     const birchProfile = { allergies: JSON.stringify(['Пыльца берёзы']) };
     const result = runMockScan({ mode: 'product', text: 'яблоко, сахар', profile: birchProfile });
     expect(result.crossMatches.length).toBeGreaterThan(0);
+    expect(result.level).toBe('medium');
+  });
+
+  it('elevates risk for high cross-reactions such as dust mites and seafood', () => {
+    const dustProfile = { allergies: JSON.stringify(['Пыль клещей']) };
+    const result = runMockScan({ mode: 'product', text: 'креветки, рис', profile: dustProfile });
+    expect(result.crossMatches.length).toBeGreaterThan(0);
+    expect(result.level).toBe('medium');
+  });
+
+  it('detects fish cross-reaction via other fish keywords', () => {
+    const fishProfile = { allergies: JSON.stringify(['Рыба']) };
+    const result = runMockScan({ mode: 'product', text: 'филе лосося, рис', profile: fishProfile });
+    expect(result.crossMatches.some((item) => item.includes('Другие виды рыб'))).toBe(true);
+    expect(result.level).toBe('medium');
   });
 });
