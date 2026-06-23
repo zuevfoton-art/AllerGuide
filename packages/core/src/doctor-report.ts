@@ -19,6 +19,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
   { id: 'medicine', label: 'Лекарства', diaryTypes: ['Лекарство'], defaultEnabled: true },
   { id: 'food', label: 'Питание', diaryTypes: ['Питание'], defaultEnabled: true },
   { id: 'triggers', label: 'Триггеры', diaryTypes: ['Триггер'], defaultEnabled: true },
+  {
+    id: 'triggerContext',
+    label: 'Контекст триггеров',
+    diaryTypes: [],
+    defaultEnabled: true,
+  },
   { id: 'peakflow', label: 'Пикфлоуметрия', diaryTypes: ['Пикфлоуметрия'], defaultEnabled: true },
   { id: 'asit', label: 'АСИТ', diaryTypes: ['АСИТ'], defaultEnabled: true },
   {

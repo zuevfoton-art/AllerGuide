@@ -12,6 +12,7 @@ import {
   formatDiaryEntrySummary,
   formatPassportHtml,
   formatPassportText,
+  formatTriggerContextReport,
   getConsolidatedFoodAvoidList,
   getDefaultReportBlockIds,
   getReportDiaryTypes,
@@ -132,6 +133,10 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ).replace(/</g, '&lt;')}</pre></section>`
     : '';
 
+  const triggerContextHtml = options.blockIds.includes('triggerContext')
+    ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
+    : '';
+
   const pefHtml = options.blockIds.includes('peakflow')
     ? `<section><h2>Тренд ПСВ</h2>${renderPefTrend(periodEntries)}</section>`
     : '';
@@ -153,6 +158,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${scalesHtml}
       ${asitHtml}
       ${foodDrugHtml}
+      ${triggerContextHtml}
       ${blocksHtml}
       ${passportHtml}
       <hr />

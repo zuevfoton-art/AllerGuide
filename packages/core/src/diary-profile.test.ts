@@ -21,6 +21,11 @@ describe('diary-profile', () => {
     expect(scales).toEqual(expect.arrayContaining(['aria-lite', 'act']));
   });
 
+  it('recommends UAS7 when urticaria is in profile allergies', () => {
+    const scales = getRecommendedScalesForProfile(['Крапивница'], []);
+    expect(scales).toContain('uas7');
+  });
+
   it('falls back to all RAACI scales when conditions unknown', () => {
     expect(getRecommendedScalesForProfile(['Молоко'])).toEqual([
       'aria-lite',

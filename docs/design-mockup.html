@@ -464,6 +464,8 @@
       <div class="legend">
         <strong>Clinical Calm</strong><br />
         Фон <code>#F4F6F9</code> · KPI/заголовки <code>#1E3A5F</code> · Actions <code>#2563EB</code> · SOS <code>#B91C1C</code><br /><br />
+        <strong>Клинический roadmap (РААКИ)</strong><br />
+        P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Карточки</strong> — плоские, radius 6–8px, без glass<br />
         <strong>Tab bar</strong> — 4 вкладки: Главная · Дневник · Сканер · SOS<br />
@@ -614,12 +616,31 @@
           <div class="doc-header">
             <div class="doc-label">AllerGuide · Наблюдения</div>
             <div class="doc-title">Дневник</div>
-            <div class="doc-meta">Пошаговые записи наблюдений</div>
+            <div class="doc-meta">Симптомы, питание, лекарства, шкалы, АСИТ и отчёты</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div><div class="segment-item">Миша</div></div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>🍽 Пищевая аллергия</strong>
+              <span style="font-size:11px;color:var(--accent)">Исключения</span>
+            </div>
+            <div class="feed-sub">Молоко, орехи · 4 записи за 30 дн.</div>
+            <button class="btn btn-primary" style="margin-top:8px;font-size:12px;padding:8px">Записать питание</button>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>💊 Лекарственная аллергия</strong>
+              <span style="font-size:11px;color:var(--accent)">Паспорт SOS</span>
+            </div>
+            <div class="feed-sub">Непереносимые: Аспирин, Ибупрофен</div>
+          </div>
           <button class="btn btn-primary">＋ Новая запись</button>
           <div class="section-label">Быстрое добавление</div>
-          <div><span class="chip active">💓 Симптомы</span><span class="chip">💊 Лекарство</span><span class="chip">🍽 Питание</span></div>
+          <div><span class="chip active">💓 Симптомы</span><span class="chip">💊 Лекарство</span><span class="chip">🍽 Питание</span><span class="chip">📊 Шкала</span><span class="chip">⚠ Триггер</span></div>
+          <div class="card">
+            <div class="section-label">Клинические шкалы</div>
+            <div class="feed-sub">Ринит: 6 · умеренная · вчера</div>
+          </div>
           <div class="section-label">История</div>
           <div class="card flush">
             <div class="feed-row">
@@ -654,8 +675,15 @@
           <div class="section-label">Блоки отчёта</div>
           <div class="card flush">
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Симптомы</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Лекарства</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Питание</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Триггеры</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Контекст триггеров</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Клинические шкалы</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пикфлоуметрия</span></div>
-            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Питание и триггеры</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>АСИТ</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пищевая и лекарственная аллергия</span></div>
+            <div class="feed-row"><span style="color:var(--text-muted)">☐</span><span>Заметки и визиты</span></div>
           </div>
           <button class="btn btn-primary">Сформировать PDF</button>
           <p class="disclaimer">Отчёт не является медицинской документацией.</p>

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildFoodPrefillFromProfile,
   buildFoodPrefillFromScan,
   buildIntoleranceAlert,
   computeFoodDrugSummary,
@@ -39,6 +40,12 @@ describe('food-drug-allergy', () => {
     expect(matchDrugIntolerance('Нурофен 200', ['Ибупрофен'])).toBe('Ибупрофен');
     expect(matchDrugIntolerance('АЦК', ['Аспирин'])).toBe('Аспирин');
     expect(buildIntoleranceAlert('Нурофен', ['Ибупрофен'])).toContain('Ибупрофен');
+  });
+
+  it('builds food prefill with cross-reactions from profile', () => {
+    const prefill = buildFoodPrefillFromProfile(['Молоко'], null);
+    expect(prefill.allergens).toContain('Молоко');
+    expect(prefill.crossReactions).toBeDefined();
   });
 
   it('builds food prefill from scan', () => {

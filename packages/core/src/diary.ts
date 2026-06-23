@@ -154,6 +154,13 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: false,
       },
       {
+        id: 'crossReactions',
+        label: 'Перекрёстные реакции (справочно)',
+        placeholder: 'Подставляется из справочника аллергенов профиля',
+        field: 'text',
+        required: false,
+      },
+      {
         id: 'scanRef',
         label: 'Сканирование (авто)',
         placeholder: 'Подставляется из сканера',

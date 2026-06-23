@@ -1,4 +1,5 @@
 import { ALLERGENS, getAllergensByCategory } from './allergen-database';
+import { getCrossReactionsForSelection } from './cross-reactions';
 import type { AllergyConditionId } from './allergy-conditions';
 import { decodeDiaryDetails } from './diary';
 
@@ -157,11 +158,20 @@ export function buildFoodPrefillFromProfile(
   registry: FoodDrugRegistry | null,
 ): Record<string, string> {
   const avoidList = getConsolidatedFoodAvoidList(profileAllergies, registry);
-  if (!avoidList.length) return { foodSource: 'Вручную' };
-  return {
-    foodSource: 'Вручную',
-    allergens: avoidList.join(', '),
-  };
+  const prefill: Record<string, string> = { foodSource: 'Вручную' };
+  if (!avoidList.length) return prefill;
+
+  prefill.allergens = avoidList.join(', ');
+
+  const crossMatches = getCrossReactionsForSelection(avoidList);
+  if (crossMatches.length) {
+    prefill.crossReactions = crossMatches
+      .slice(0, 5)
+      .map((match) => `${match.allergen.name} (${match.risk})`)
+      .join(', ');
+  }
+
+  return prefill;
 }
 
 export function buildMedicinePrefill(intolerances: string[], medicineDraft = ''): Record<string, string> {
@@ -302,6 +312,8 @@ export function formatFoodEntrySummary(answers: Record<string, string>): string 
 
   if (food) parts.push(food);
   if (allergens) parts.push(allergens);
+  const cross = answers.crossReactions?.trim();
+  if (cross) parts.push(`перекрёстные: ${cross}`);
   if (reaction) parts.push(`реакция: ${reaction}`);
   if (source) parts.push(source);
 

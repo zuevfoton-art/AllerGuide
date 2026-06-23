@@ -12,8 +12,11 @@ import {
 } from './clinical-scales';
 import { decodeDiaryDetails } from './diary';
 
-/** Шкалы дневника по ориентирам РААКИ: ринит, астма, атопический дерматит. */
+/** Шкалы дневника по ориентирам РААКИ: ринит, астма, атопический дерматит, крапивница. */
 export const RAACI_SCALE_IDS: ClinicalScaleId[] = ['aria-lite', 'act', 'scorad-lite'];
+
+/** Шкалы, отображаемые в трендах дневника (включая UAS7). */
+export const DIARY_TREND_SCALE_IDS: ClinicalScaleId[] = [...RAACI_SCALE_IDS, 'uas7'];
 
 const SCALE_BY_CONDITION: Partial<Record<AllergyConditionId, ClinicalScaleId>> = {
   rhinitis: 'aria-lite',
@@ -50,6 +53,7 @@ const FOOD_MARKERS = [
   'кунжут',
 ];
 const DRUG_MARKERS = ['аспирин', 'ибупрофен', 'пенициллин', 'антибиот', 'нпвп', 'нпвс', 'парацетамол'];
+const URTICARIA_MARKERS = ['крапивниц', 'urticaria', 'urticari'];
 
 export function inferConditionIdsFromAllergies(allergies: string[]): AllergyConditionId[] {
   const ids = new Set<AllergyConditionId>();
@@ -106,11 +110,20 @@ export function getRecommendedScalesForConditions(
   return [...scales];
 }
 
+function profileSuggestsUas7(allergies: string[]): boolean {
+  return allergies.some((name) => {
+    const lower = name.toLowerCase();
+    return URTICARIA_MARKERS.some((marker) => lower.includes(marker));
+  });
+}
+
 export function getRecommendedScalesForProfile(
   allergies: string[],
   explicit: AllergyConditionId[] = [],
 ): ClinicalScaleId[] {
-  return getRecommendedScalesForConditions(resolveProfileConditions(allergies, explicit));
+  const scales = new Set(getRecommendedScalesForConditions(resolveProfileConditions(allergies, explicit)));
+  if (profileSuggestsUas7(allergies)) scales.add('uas7');
+  return [...scales];
 }
 
 export function isDiarySectionVisible(
@@ -149,7 +162,7 @@ export function collectLatestScaleTrends(
     if (!payload) continue;
 
     const scaleId = getScaleIdFromAnswers(payload.answers);
-    if (!scaleId || !RAACI_SCALE_IDS.includes(scaleId)) continue;
+    if (!scaleId || !DIARY_TREND_SCALE_IDS.includes(scaleId)) continue;
     if (latest.has(scaleId)) continue;
 
     const score =
@@ -172,5 +185,5 @@ export function collectLatestScaleTrends(
     });
   }
 
-  return RAACI_SCALE_IDS.filter((id) => latest.has(id)).map((id) => latest.get(id)!);
+  return DIARY_TREND_SCALE_IDS.filter((id) => latest.has(id)).map((id) => latest.get(id)!);
 }
