@@ -134,6 +134,11 @@ const ru: LocaleMessages = {
     saveChanges: 'Сохранить изменения',
     scale: 'Шкала',
     scalePick: 'Выберите шкалу',
+    scaleRaaciHint:
+      'Шкалы подобраны по состоянию профиля (ринит — ARIA, астма — ACT, АтД — SCORAD-lite). Уточните типы аллергии в профиле.',
+    scaleTrends: 'Клинические шкалы',
+    scaleTrendsEmpty: 'Пока нет оценок. Заполните шкалу для отслеживания динамики.',
+    scaleSuggested: 'Рекомендовано для профиля',
   },
   diaryWizard: {
     stepOf: 'Шаг {{current}} из {{total}}',
@@ -143,6 +148,7 @@ const ru: LocaleMessages = {
     editEntry: 'Редактирование записи',
     entryPlaceholder: 'Текст записи',
     enterEntryText: 'Введите текст записи.',
+    scalePreview: 'Предварительная оценка: {{score}} баллов — {{interpretation}}',
   },
   scanner: {
     title: 'Умный сканер',
@@ -296,6 +302,10 @@ const ru: LocaleMessages = {
     profileSelfLocked: 'Ваш профиль',
     profileChildLocked: 'Профиль ребёнка',
     allergensLabel: 'Аллергены',
+    conditionsLabel: 'Типы аллергических состояний',
+    conditionsHint:
+      'Укажите состояния по РААКИ — дневник предложит подходящие шкалы и разделы (ПСВ при астме, АСИТ при поллинозе и др.).',
+    conditionsOther: 'Другие состояния',
     consent:
       'Я подтверждаю, что являюсь родителем или законным представителем данного ребёнка и вправе вводить сведения о его состоянии здоровья.',
     contactsLabel: 'Экстренные контакты',

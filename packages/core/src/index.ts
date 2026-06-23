@@ -17,6 +17,7 @@ export * from './pollen-calendar';
 export * from './doctor-report';
 export * from './allergy-passport';
 export * from './clinical-scales';
+export * from './diary-profile';
 export * from './diary-triggers';
 export * from './wellness';
 export * from './geo';

@@ -134,6 +134,11 @@ const es: LocaleMessages = {
     saveChanges: 'Guardar cambios',
     scale: 'Escala',
     scalePick: 'Elegir escala',
+    scaleRaaciHint:
+      'Escalas según el perfil (rinitis — ARIA, asma — ACT, dermatitis — SCORAD-lite).',
+    scaleTrends: 'Escalas clínicas',
+    scaleTrendsEmpty: 'Aún no hay puntuaciones de escalas.',
+    scaleSuggested: 'Recomendado para el perfil',
   },
   diaryWizard: {
     stepOf: 'Paso {{current}} de {{total}}',
@@ -143,6 +148,7 @@ const es: LocaleMessages = {
     editEntry: 'Editar entrada',
     entryPlaceholder: 'Texto de la entrada',
     enterEntryText: 'Introduce el texto de la entrada.',
+    scalePreview: 'Puntuación preliminar: {{score}} — {{interpretation}}',
   },
   scanner: {
     title: 'Escáner inteligente',
@@ -296,6 +302,9 @@ const es: LocaleMessages = {
     profileSelfLocked: 'Tu perfil',
     profileChildLocked: 'Perfil del niño',
     allergensLabel: 'Alérgenos',
+    conditionsLabel: 'Tipos de alergia',
+    conditionsHint: 'Seleccione estados RAACI para escalas y secciones del diario.',
+    conditionsOther: 'Otros estados',
     consent:
       'Confirmo que soy el padre, la madre o tutor legal de este niño y estoy autorizado a introducir su información de salud.',
     contactsLabel: 'Contactos de emergencia',

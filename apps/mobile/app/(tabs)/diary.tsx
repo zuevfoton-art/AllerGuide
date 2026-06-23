@@ -5,11 +5,14 @@ import {
   CLINICAL_SCALES,
   buildScaleInitialAnswers,
   buildTriggerPrefill,
+  collectLatestScaleTrends,
+  filterDiarySections,
   formatDiaryDate,
   formatDiaryEntrySummary,
   getClinicalScaleSection,
   getDiaryEntryAnswers,
   getDiarySection,
+  getRecommendedScalesForConditions,
   parseAllergies,
   type ClinicalScaleId,
 } from '@allerguide/core';
@@ -20,6 +23,7 @@ import {
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
+import { getProfileConditions } from '@/src/services/profile-conditions-service';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -60,15 +64,36 @@ export default function DiaryScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
   const localeContent = content();
-  const localizedSections = useMemo(
-    () => localizeDiarySections(locale, localeContent),
-    [locale, localeContent],
-  );
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
+  const localizedSections = useMemo(
+    () => localizeDiarySections(locale, localeContent),
+    [locale, localeContent],
+  );
+  const profileConditions = useMemo(
+    () => (activeProfile ? getProfileConditions(activeProfile) : []),
+    [activeProfile],
+  );
+  const visibleSections = useMemo(
+    () => filterDiarySections(localizedSections, profileConditions),
+    [localizedSections, profileConditions],
+  );
+  const recommendedScaleIds = useMemo(
+    () => getRecommendedScalesForConditions(profileConditions),
+    [profileConditions],
+  );
+  const recommendedScales = useMemo(
+    () => CLINICAL_SCALES.filter((scale) => recommendedScaleIds.includes(scale.id)),
+    [recommendedScaleIds],
+  );
+  const otherScales = useMemo(
+    () => CLINICAL_SCALES.filter((scale) => !recommendedScaleIds.includes(scale.id)),
+    [recommendedScaleIds],
+  );
+  const scaleTrends = useMemo(() => collectLatestScaleTrends(list), [list]);
 
   const openSection = async (sectionType: string) => {
     if (sectionType === 'Триггер' && activeProfileId) {
@@ -151,7 +176,7 @@ export default function DiaryScreen() {
     if (editor.mode === 'full') {
       return (
         <DiaryWizard
-          sections={localizedSections}
+          sections={visibleSections}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -221,7 +246,7 @@ export default function DiaryScreen() {
             variant="secondary"
             block
             onPress={() => {
-              const section = localizedSections.find((s) => s.type === 'Симптомы') ?? localizedSections[0];
+              const section = visibleSections.find((s) => s.type === 'Симптомы') ?? visibleSections[0];
               if (section) setEditor({ mode: 'section', sectionType: section.type });
             }}
           />
@@ -229,7 +254,7 @@ export default function DiaryScreen() {
           <GlassCard>
             <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>
             <View style={styles.chipRow}>
-              {localizedSections.map((section) => (
+              {visibleSections.map((section) => (
                   <Pressable
                     key={section.type}
                     style={styles.chip}
@@ -249,22 +274,60 @@ export default function DiaryScreen() {
             </View>
           </GlassCard>
 
+          {scaleTrends.length > 0 ? (
+            <GlassCard>
+              <Text style={ui.cardTitle}>{t('diary.scaleTrends')}</Text>
+              {scaleTrends.map((trend, index) => (
+                <View
+                  key={trend.scaleId}
+                  style={[styles.trendRow, index === 0 && styles.trendRowFirst]}>
+                  <Text style={styles.trendLabel}>{trend.label}</Text>
+                  <Text style={styles.trendValue}>
+                    {trend.total} · {trend.interpretation}
+                  </Text>
+                  <Text style={styles.trendMeta}>{formatDiaryDate(trend.at)}</Text>
+                </View>
+              ))}
+            </GlassCard>
+          ) : null}
+
           {scalePickerOpen ? (
             <GlassCard style={styles.scalePicker}>
               <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
-              <View style={styles.chipRow}>
-                {CLINICAL_SCALES.map((scale) => (
-                  <Pressable
-                    key={scale.id}
-                    style={styles.chip}
-                    onPress={() => {
-                      setScalePickerOpen(false);
-                      setEditor({ mode: 'scale', scaleId: scale.id });
-                    }}>
-                    <Text style={styles.chipText}>{scale.shortLabel}</Text>
-                  </Pressable>
-                ))}
-              </View>
+              <Text style={styles.scaleHint}>{t('diary.scaleRaaciHint')}</Text>
+              {recommendedScales.length > 0 ? (
+                <>
+                  <Text style={styles.scaleGroupLabel}>{t('diary.scaleSuggested')}</Text>
+                  <View style={styles.chipRow}>
+                    {recommendedScales.map((scale) => (
+                      <Pressable
+                        key={scale.id}
+                        style={[styles.chip, styles.chipAccent]}
+                        onPress={() => {
+                          setScalePickerOpen(false);
+                          setEditor({ mode: 'scale', scaleId: scale.id });
+                        }}>
+                        <Text style={styles.chipText}>{scale.shortLabel}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              ) : null}
+              {otherScales.length > 0 ? (
+                <View style={styles.chipRow}>
+                  {otherScales.map((scale) => (
+                    <Pressable
+                      key={scale.id}
+                      style={styles.chip}
+                      onPress={() => {
+                        setScalePickerOpen(false);
+                        setEditor({ mode: 'scale', scaleId: scale.id });
+                      }}>
+                      <Text style={styles.chipText}>{scale.shortLabel}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
               <Button label={t('common.cancel')} variant="secondary" size="sm" onPress={() => setScalePickerOpen(false)} />
             </GlassCard>
           ) : null}
@@ -347,6 +410,47 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     scalePicker: { gap: 10 },
+    scaleHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+    },
+    scaleGroupLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    chipAccent: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+    },
+    trendRow: {
+      paddingVertical: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      gap: 2,
+    },
+    trendRowFirst: { borderTopWidth: 0, paddingTop: 0 },
+    trendLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    trendValue: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+    },
+    trendMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
     actionRow: { flexDirection: 'row', gap: 8 },
     actionBtn: { flex: 1 },
     listHead: {

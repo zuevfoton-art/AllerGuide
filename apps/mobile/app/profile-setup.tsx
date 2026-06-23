@@ -1,9 +1,11 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { getWizardStep, shouldCompleteOnboarding, type ProfileType } from '@allerguide/core';
+import { getWizardStep, shouldCompleteOnboarding, type AllergyConditionId, type ProfileType } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
+import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { createProfile, listProfiles } from '@/src/services/profile-service';
+import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import {
   normalizeEmergencyContactDrafts,
   syncEmergencyContacts,
@@ -47,6 +49,7 @@ export default function ProfileSetupScreen() {
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
@@ -79,6 +82,7 @@ export default function ProfileSetupScreen() {
     setName('');
     setBirthYear('');
     setSelected([]);
+    setConditions([]);
     setContacts([]);
     setError('');
   };
@@ -105,6 +109,7 @@ export default function ProfileSetupScreen() {
 
     if (!id) return;
 
+    setStoredProfileConditions(id, conditions);
     syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
 
     setActiveProfileId(id);
@@ -197,6 +202,11 @@ export default function ProfileSetupScreen() {
             </Text>
           </View>
         )}
+      </GlassCard>
+
+      <GlassCard style={styles.section}>
+        <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
+        <ConditionPicker selected={conditions} onChange={setConditions} />
       </GlassCard>
 
       <GlassCard style={styles.section}>

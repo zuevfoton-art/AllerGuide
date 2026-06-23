@@ -138,6 +138,10 @@ export type LocaleMessages = {
     saveChanges: string;
     scale: string;
     scalePick: string;
+    scaleRaaciHint: string;
+    scaleTrends: string;
+    scaleTrendsEmpty: string;
+    scaleSuggested: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -147,6 +151,7 @@ export type LocaleMessages = {
     editEntry: string;
     entryPlaceholder: string;
     enterEntryText: string;
+    scalePreview: string;
   };
   scanner: {
     title: string;
@@ -285,6 +290,9 @@ export type LocaleMessages = {
     profileSelfLocked: string;
     profileChildLocked: string;
     allergensLabel: string;
+    conditionsLabel: string;
+    conditionsHint: string;
+    conditionsOther: string;
     consent: string;
     contactsLabel: string;
     saveProfile: string;

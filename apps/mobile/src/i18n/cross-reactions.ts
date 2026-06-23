@@ -1,5 +1,5 @@
 import type { CrossReactionMatch, CrossReactionRisk } from '@allerguide/core';
-import type { TranslationKey } from '@/src/i18n/types';
+import type { TranslationKey } from '@/src/i18n/translate';
 
 export function crossReactionRiskKey(risk: CrossReactionRisk): TranslationKey {
   if (risk === 'high') return 'allergens.crossRiskHigh';

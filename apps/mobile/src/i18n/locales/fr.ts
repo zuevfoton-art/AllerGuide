@@ -134,6 +134,11 @@ const fr: LocaleMessages = {
     saveChanges: 'Enregistrer les modifications',
     scale: 'Échelle',
     scalePick: 'Choisir une échelle',
+    scaleRaaciHint:
+      'Échelles selon le profil (rhinite — ARIA, asthme — ACT, dermatite — SCORAD-lite).',
+    scaleTrends: 'Échelles cliniques',
+    scaleTrendsEmpty: 'Pas encore de scores d\'échelle.',
+    scaleSuggested: 'Recommandé pour le profil',
   },
   diaryWizard: {
     stepOf: 'Étape {{current}} sur {{total}}',
@@ -143,6 +148,7 @@ const fr: LocaleMessages = {
     editEntry: 'Modifier l\'entrée',
     entryPlaceholder: 'Texte de l\'entrée',
     enterEntryText: 'Entrez le texte de l\'entrée.',
+    scalePreview: 'Score préliminaire : {{score}} — {{interpretation}}',
   },
   scanner: {
     title: 'Scanner intelligent',
@@ -296,6 +302,9 @@ const fr: LocaleMessages = {
     profileSelfLocked: 'Votre profil',
     profileChildLocked: 'Profil de l\'enfant',
     allergensLabel: 'Allergènes',
+    conditionsLabel: 'Types d\'allergie',
+    conditionsHint: 'Sélectionnez les états RAACI pour les échelles et sections du journal.',
+    conditionsOther: 'Autres états',
     consent:
       'Je confirme être le parent ou le représentant légal de cet enfant et être autorisé à saisir ses informations de santé.',
     contactsLabel: 'Contacts d\'urgence',

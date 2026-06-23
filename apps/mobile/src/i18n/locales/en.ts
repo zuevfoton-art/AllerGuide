@@ -134,6 +134,11 @@ const en: LocaleMessages = {
     saveChanges: 'Save changes',
     scale: 'Scale',
     scalePick: 'Choose a scale',
+    scaleRaaciHint:
+      'Scales match profile conditions (rhinitis — ARIA, asthma — ACT, atopic dermatitis — SCORAD-lite). Update conditions in profile settings.',
+    scaleTrends: 'Clinical scales',
+    scaleTrendsEmpty: 'No scale scores yet. Complete a scale to track trends.',
+    scaleSuggested: 'Recommended for profile',
   },
   diaryWizard: {
     stepOf: 'Step {{current}} of {{total}}',
@@ -143,6 +148,7 @@ const en: LocaleMessages = {
     editEntry: 'Edit entry',
     entryPlaceholder: 'Entry text',
     enterEntryText: 'Enter entry text.',
+    scalePreview: 'Preliminary score: {{score}} points — {{interpretation}}',
   },
   scanner: {
     title: 'Smart scanner',
@@ -296,6 +302,10 @@ const en: LocaleMessages = {
     profileSelfLocked: 'Your profile',
     profileChildLocked: "Child's profile",
     allergensLabel: 'Allergens',
+    conditionsLabel: 'Allergy condition types',
+    conditionsHint:
+      'Select RAACI-oriented conditions — the diary will suggest matching scales and sections (peak flow for asthma, AIT for pollinosis, etc.).',
+    conditionsOther: 'Other conditions',
     consent:
       'I confirm that I am the parent or legal guardian of this child and am authorized to enter their health information.',
     contactsLabel: 'Emergency contacts',

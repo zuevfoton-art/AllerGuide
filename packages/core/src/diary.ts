@@ -1,3 +1,5 @@
+import { formatScaleSummary } from './clinical-scales';
+
 export type DiaryStepField = 'text' | 'choice';
 
 export interface DiaryStep {
@@ -388,13 +390,7 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
   if (!structured) return details.trim() || 'Без описания';
 
   if (type === 'Шкала') {
-    const score = structured.answers.scaleScore?.trim();
-    const interpretation = structured.answers.scaleInterpretation?.trim();
-    const scaleId = structured.answers.scaleId?.trim();
-    if (score && interpretation) {
-      return scaleId ? `${scaleId}: ${score} баллов — ${interpretation}` : `${score} баллов — ${interpretation}`;
-    }
-    return 'Шкала';
+    return formatScaleSummary(structured.answers);
   }
 
   const section = getDiarySection(type);

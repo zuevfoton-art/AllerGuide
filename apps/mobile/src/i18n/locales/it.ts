@@ -134,6 +134,11 @@ const it: LocaleMessages = {
     saveChanges: 'Salva modifiche',
     scale: 'Scala',
     scalePick: 'Scegli una scala',
+    scaleRaaciHint:
+      'Scale in base al profilo (rinite — ARIA, asma — ACT, dermatite — SCORAD-lite).',
+    scaleTrends: 'Scale cliniche',
+    scaleTrendsEmpty: 'Nessun punteggio di scala ancora.',
+    scaleSuggested: 'Consigliato per il profilo',
   },
   diaryWizard: {
     stepOf: 'Passo {{current}} di {{total}}',
@@ -143,6 +148,7 @@ const it: LocaleMessages = {
     editEntry: 'Modifica voce',
     entryPlaceholder: 'Testo della voce',
     enterEntryText: 'Inserisci il testo della voce.',
+    scalePreview: 'Punteggio preliminare: {{score}} — {{interpretation}}',
   },
   scanner: {
     title: 'Scanner intelligente',
@@ -296,6 +302,9 @@ const it: LocaleMessages = {
     profileSelfLocked: 'Il tuo profilo',
     profileChildLocked: 'Profilo del bambino',
     allergensLabel: 'Allergeni',
+    conditionsLabel: 'Tipi di allergia',
+    conditionsHint: 'Seleziona condizioni RAACI per scale e sezioni del diario.',
+    conditionsOther: 'Altre condizioni',
     consent:
       'Confermo di essere genitore o tutore legale di questo bambino e di essere autorizzato a inserire le sue informazioni sanitarie.',
     contactsLabel: 'Contatti di emergenza',

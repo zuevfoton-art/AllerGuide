@@ -44,6 +44,8 @@
 
 Отдельный раздел **«Шкала»** — опциональный, не входит в полный мастер записи по умолчанию.
 
+Шкалы подбираются по профилю (`diary-profile.ts`): ринит/поллиноз → ARIA-lite, астма → ACT, атопический дерматит → SCORAD-lite. Типы состояний задаются в профиле и дополняются эвристикой по аллергенам. Разделы «Пикфлоуметрия» и «АСИТ» показываются только при соответствующих состояниях (FR-PROF-10/11).
+
 ### ARIA-lite (ринит)
 
 4 симптома по шкале 0–3: заложенность, ринорея, чихание, зуд. Сумма 0–12 → интерпретация: лёгкая / умеренная / выраженная.
@@ -107,6 +109,8 @@
 |-----------|------|
 | Паспорт (домен) | `packages/core/src/allergy-passport.ts` |
 | Шкалы | `packages/core/src/clinical-scales.ts` |
+| Профиль дневника (РААКИ) | `packages/core/src/diary-profile.ts` |
+| Условия профиля (mobile) | `apps/mobile/src/services/profile-conditions-service.ts` |
 | Контекст триггеров | `packages/core/src/diary-triggers.ts` |
 | SOS UI | `apps/mobile/app/(tabs)/sos.tsx`, `sos-edit.tsx` |
 | SOS сервис | `apps/mobile/src/services/sos-passport-service.ts` |
