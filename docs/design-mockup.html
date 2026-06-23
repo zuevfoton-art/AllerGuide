@@ -534,6 +534,8 @@
       <div class="legend">
         <strong>Clinical Calm</strong><br />
         Фон <code>#F4F6F9</code> · KPI/заголовки <code>#1E3A5F</code> · Actions <code>#2563EB</code> · SOS <code>#B91C1C</code><br /><br />
+        <strong>Клинический roadmap (РААКИ)</strong><br />
+        P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Карточки</strong> — плоские, radius 6–8px, без glass<br />
         <strong>Tab bar</strong> — 4 вкладки: Главная · Дневник · Сканер · SOS<br />
@@ -685,16 +687,37 @@
           <div class="doc-header">
             <div class="doc-label">AllerGuide · Наблюдения</div>
             <div class="doc-title">Дневник</div>
-            <div class="doc-meta">Пошаговые записи наблюдений</div>
+            <div class="doc-meta">Симптомы, питание, лекарства, шкалы, АСИТ и отчёты</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div><div class="segment-item">Миша</div></div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>🍽 Пищевая аллергия</strong>
+              <span style="font-size:11px;color:var(--accent)">Исключения</span>
+            </div>
+            <div class="feed-sub">Молоко, орехи · 4 записи за 30 дн.</div>
+            <button class="btn btn-primary" style="margin-top:8px;font-size:12px;padding:8px">Записать питание</button>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>💊 Лекарственная аллергия</strong>
+              <span style="font-size:11px;color:var(--accent)">Паспорт SOS</span>
+            </div>
+            <div class="feed-sub">Непереносимые: Аспирин, Ибупрофен</div>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>💉 АСИТ</strong>
+              <span style="font-size:11px;color:var(--accent)">Изменить</span>
+            </div>
+            <div class="feed-sub">Сталораль · берёза · 8 приёмов за 30 дн.</div>
+          </div>
           <button class="btn btn-primary">＋ Новая запись</button>
           <button class="btn btn-secondary" style="margin-top:8px">Быстрая запись</button>
-          <div class="section-label">Быстрое добавление</div>
           <div class="card">
             <div class="card-title" style="margin-bottom:8px">Быстрое добавление</div>
             <div class="chip-row-wrap">
-              <span class="chip">💓 Симптомы</span>
+              <span class="chip active">💓 Симптомы</span>
               <span class="chip">💊 Лекарство</span>
               <span class="chip">🍽 Питание</span>
               <span class="chip">⚠ Триггер</span>
@@ -703,7 +726,7 @@
               <span class="chip">💉 АСИТ</span>
               <span class="chip">📅 Визит к врачу</span>
               <span class="chip">📝 Заметка</span>
-              <span class="chip active">📊 Шкала</span>
+              <span class="chip">📊 Шкала</span>
             </div>
           </div>
           <div class="card">
@@ -712,9 +735,14 @@
               <span class="chip">Ринит</span>
               <span class="chip active">Астма</span>
               <span class="chip">Кожа</span>
-              <span class="chip">Крапивница</span>
+              <span class="chip active">Крапивница (UAS7)</span>
             </div>
             <button class="btn btn-secondary btn-sm">Отмена</button>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:8px">Клинические шкалы · тренды</div>
+            <div class="feed-sub">Ринит: 6 · умеренная · вчера</div>
+            <div class="feed-sub" style="margin-top:4px">Крапивница (UAS7): 4 · умеренно · 3 дн. назад</div>
           </div>
           <div class="action-row">
             <button class="btn btn-secondary">Обновить</button>
@@ -743,7 +771,7 @@
               <div class="feed-icon">🍽</div>
               <div class="feed-body">
                 <div class="feed-title">Питание</div>
-                <div class="feed-sub">Овсянка, яблоко · 18 июня</div>
+                <div class="feed-sub">Йогурт · перекрёстные: козье молоко · 18 июня</div>
               </div>
               <span style="color:var(--text-muted)">›</span>
             </div>
@@ -772,16 +800,20 @@
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Лекарства</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Питание</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Триггеры</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Контекст триггеров</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пикфлоуметрия <span class="feed-sub">(тренд ПСВ)</span></span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>АСИТ</span></div>
+            <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Пищевая и лекарственная аллергия</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Кожные проявления</span></div>
             <div class="feed-row"><span style="color:var(--accent)">☑</span><span>Клинические шкалы</span></div>
-            <div class="feed-row"><span style="color:var(--text-muted)">☐</span><span>Заметки</span></div>
+            <div class="feed-row"><span style="color:var(--text-muted)">☐</span><span>Заметки и визиты</span></div>
           </div>
           <div class="card">
             <div class="card-title" style="margin-bottom:8px">Превью PDF</div>
             <div class="kpi-row" style="border:none;padding-top:0"><span class="kpi-label">ПСВ за 30 дн.</span><span class="kpi-value">320–410 л/мин</span></div>
             <div class="kpi-row"><span class="kpi-label">Шкала ACT</span><span class="kpi-value">22/25</span></div>
+            <div class="kpi-row"><span class="kpi-label">Контекст триггеров</span><span class="kpi-value" style="font-size:12px;font-weight:600">пыльца · скан · ЛС</span></div>
+            <div class="kpi-row"><span class="kpi-label">Пищевая / лекарственная</span><span class="kpi-value" style="font-size:12px;font-weight:600">4 записи · 1 предупреждение</span></div>
             <div class="kpi-row"><span class="kpi-label">Паспорт SOS</span><span class="kpi-value" style="font-size:12px;font-weight:600">Адреналин · врач</span></div>
           </div>
           <button class="btn btn-primary">Сформировать PDF</button>

@@ -3,12 +3,15 @@ import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import {
   DIARY_SECTIONS,
+  computeScaleScore,
   encodeDiaryDetails,
   enrichScaleAnswers,
   getDiaryStepAnswers,
+  getScaleIdFromAnswers,
   hasSectionAnswers,
   validateClinicalScale,
   validateDiarySectionStep,
+  buildIntoleranceAlert,
   type DiarySection,
   type DiaryStep,
 } from '@allerguide/core';
@@ -30,6 +33,7 @@ interface DiaryWizardProps {
   onDelete?: () => void;
   submitLabel?: string;
   allowSkipSection?: boolean;
+  drugIntolerances?: string[];
 }
 
 export function DiaryWizard({
@@ -40,6 +44,7 @@ export function DiaryWizard({
   onDelete,
   submitLabel,
   allowSkipSection = true,
+  drugIntolerances,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -71,14 +76,30 @@ export function DiaryWizard({
     totalSections > 1 &&
     (!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0);
 
+  const scalePreview =
+    section.type === 'Шкала' && isLastStep
+      ? (() => {
+          const scaleId = getScaleIdFromAnswers(sectionAnswers);
+          return scaleId ? computeScaleScore(scaleId, sectionAnswers) : null;
+        })()
+      : null;
+
   const setAnswer = (stepId: string, value: string) => {
-    setAnswersBySection((prev) => ({
-      ...prev,
-      [section.type]: {
+    setAnswersBySection((prev) => {
+      const nextSectionAnswers = {
         ...(prev[section.type] ?? {}),
         [stepId]: value,
-      },
-    }));
+      };
+      if (stepId === 'medicine' && section.type === 'Лекарство' && drugIntolerances?.length) {
+        const alert = buildIntoleranceAlert(value, drugIntolerances);
+        if (alert) nextSectionAnswers.intoleranceAlert = alert;
+        else delete nextSectionAnswers.intoleranceAlert;
+      }
+      return {
+        ...prev,
+        [section.type]: nextSectionAnswers,
+      };
+    });
   };
 
   const goNext = () => {
@@ -183,6 +204,15 @@ export function DiaryWizard({
         value={sectionAnswers[step.id] ?? ''}
         onChange={(value) => setAnswer(step.id, value)}
       />
+
+      {scalePreview ? (
+        <Text style={styles.scalePreview}>
+          {t('diaryWizard.scalePreview', {
+            score: scalePreview.total,
+            interpretation: scalePreview.interpretation,
+          })}
+        </Text>
+      ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -473,6 +503,17 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
       lineHeight: 24,
+    },
+    scalePreview: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.accent,
+      lineHeight: 18,
+      backgroundColor: colors.accentLight,
+      borderRadius: 6,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: colors.accentMid,
     },
     error: {
       fontFamily: fonts.sansSemiBold,

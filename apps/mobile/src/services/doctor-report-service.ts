@@ -3,11 +3,17 @@ import {
   DOCTOR_REPORT_BLOCKS,
   DOCTOR_REPORT_DISCLAIMER,
   DOCTOR_REPORT_TITLE,
+  computeAsitCompliance,
+  computeFoodDrugSummary,
   computePefTrend,
+  formatAsitReportSummary,
+  formatFoodDrugReportSummary,
   formatDiaryDate,
   formatDiaryEntrySummary,
   formatPassportHtml,
   formatPassportText,
+  formatTriggerContextReport,
+  getConsolidatedFoodAvoidList,
   getDefaultReportBlockIds,
   getReportDiaryTypes,
   parseAllergies,
@@ -15,6 +21,8 @@ import {
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
@@ -102,6 +110,33 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     ? `<section><h2>Сводка шкал</h2><ul>${renderScaleTrend(periodEntries)}</ul></section>`
     : '';
 
+  const asitHtml = options.blockIds.includes('asit')
+    ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatAsitReportSummary(
+        computeAsitCompliance(periodEntries, options.periodDays),
+        getAsitCourse(options.profileId),
+        options.periodDays,
+      ).replace(/</g, '&lt;')}</pre></section>`
+    : '';
+
+  const foodDrugHtml = options.blockIds.includes('foodDrug') && profile
+    ? `<section><h2>Пищевая и лекарственная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatFoodDrugReportSummary(
+        computeFoodDrugSummary(periodEntries, options.periodDays),
+        {
+          avoidFoods: getConsolidatedFoodAvoidList(
+            parseAllergies(profile.allergies),
+            getFoodDrugRegistry(options.profileId),
+          ),
+          drugIntolerances: getAllergyPassport(options.profileId).drugIntolerances,
+          clinicalNotes: getFoodDrugRegistry(options.profileId)?.clinicalNotes,
+          periodDays: options.periodDays,
+        },
+      ).replace(/</g, '&lt;')}</pre></section>`
+    : '';
+
+  const triggerContextHtml = options.blockIds.includes('triggerContext')
+    ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
+    : '';
+
   const pefHtml = options.blockIds.includes('peakflow')
     ? `<section><h2>Тренд ПСВ</h2>${renderPefTrend(periodEntries)}</section>`
     : '';
@@ -121,6 +156,9 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       <hr />
       ${pefHtml}
       ${scalesHtml}
+      ${asitHtml}
+      ${foodDrugHtml}
+      ${triggerContextHtml}
       ${blocksHtml}
       ${passportHtml}
       <hr />

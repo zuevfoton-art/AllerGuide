@@ -1,9 +1,14 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { type ProfileType } from '@allerguide/core';
+import { type AllergyConditionId, type ProfileType } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
+import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { getProfile, updateProfile } from '@/src/services/profile-service';
+import {
+  getStoredProfileConditions,
+  setStoredProfileConditions,
+} from '@/src/services/profile-conditions-service';
 import {
   listEmergencyContacts,
   normalizeEmergencyContactDrafts,
@@ -30,6 +35,7 @@ export default function ProfileEditScreen() {
   const [birthYear, setBirthYear] = useState('');
   const [type, setType] = useState<ProfileType>('self');
   const [selected, setSelected] = useState<string[]>([]);
+  const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -63,6 +69,7 @@ export default function ProfileEditScreen() {
           relation: contact.relation,
         })),
       );
+      setConditions(getStoredProfileConditions(profileId));
       setLoading(false);
     });
   }, [profileId]);
@@ -91,6 +98,7 @@ export default function ProfileEditScreen() {
       type,
       allergies: selected,
     });
+    setStoredProfileConditions(profileId, conditions);
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     router.back();
   };
@@ -163,6 +171,11 @@ export default function ProfileEditScreen() {
                 </Text>
               </Pressable>
             </View>
+          </GlassCard>
+
+          <GlassCard style={styles.section}>
+            <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
+            <ConditionPicker selected={conditions} onChange={setConditions} />
           </GlassCard>
 
           <GlassCard style={styles.section}>
