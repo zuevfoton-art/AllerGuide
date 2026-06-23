@@ -115,6 +115,10 @@ const fr: LocaleMessages = {
     medicine: 'Médicament',
     medicineSub: 'Noter la prise',
     expert: 'Expert',
+    marketplaceTitle: 'Marketplace',
+    marketplaceSub: 'Produits adaptés à votre profil d’allergies',
+    marketplaceEmpty: 'Choisissez un profil avec des allergènes pour voir des suggestions personnalisées.',
+    marketplaceOpen: 'Ouvrir le marketplace',
     disclaimer: "L'indice est indicatif et ne remplace pas une consultation allergologique.",
   },
   diary: {

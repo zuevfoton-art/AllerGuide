@@ -115,6 +115,10 @@ const en: LocaleMessages = {
     medicine: 'Medicine',
     medicineSub: 'Log intake',
     expert: 'Expert',
+    marketplaceTitle: 'Marketplace',
+    marketplaceSub: 'Products matched to your allergy profile',
+    marketplaceEmpty: 'Pick a profile with allergens to see personalized picks.',
+    marketplaceOpen: 'Open marketplace',
     disclaimer: 'The index is advisory and does not replace consultation with an allergist.',
   },
   diary: {
