@@ -2,10 +2,16 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  CLINICAL_SCALES,
+  buildScaleInitialAnswers,
+  buildTriggerPrefill,
   formatDiaryDate,
   formatDiaryEntrySummary,
+  getClinicalScaleSection,
   getDiaryEntryAnswers,
   getDiarySection,
+  parseAllergies,
+  type ClinicalScaleId,
 } from '@allerguide/core';
 import {
   addDiaryEntries,
@@ -13,6 +19,8 @@ import {
   getDiaryEntries,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
+import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
+import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
@@ -37,11 +45,13 @@ const TYPE_ICONS: Record<string, string> = {
   АСИТ: 'fitness',
   'Визит к врачу': 'calendar',
   Заметка: 'create',
+  Шкала: 'analytics',
 };
 
 type EditorState =
   | { mode: 'full' }
-  | { mode: 'section'; sectionType: string }
+  | { mode: 'section'; sectionType: string; prefill?: Record<string, Record<string, string>> }
+  | { mode: 'scale'; scaleId: ClinicalScaleId }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
 export default function DiaryScreen() {
@@ -55,8 +65,22 @@ export default function DiaryScreen() {
     [locale, localeContent],
   );
   const activeProfileId = useAppStore((s) => s.activeProfileId);
+  const activeProfile = useAppStore((s) => s.activeProfile);
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [scalePickerOpen, setScalePickerOpen] = useState(false);
+
+  const openSection = async (sectionType: string) => {
+    if (sectionType === 'Триггер' && activeProfileId) {
+      const allergies = activeProfile ? parseAllergies(activeProfile.allergies) : [];
+      const wellness = await fetchWellnessSnapshot(allergies, { recentSymptoms: false, recentTriggers: false }, locale).catch(() => null);
+      const context = await loadDiaryTriggerContext(activeProfileId, wellness?.factors);
+      const prefill = { Триггер: buildTriggerPrefill(context) };
+      setEditor({ mode: 'section', sectionType, prefill });
+      return;
+    }
+    setEditor({ mode: 'section', sectionType });
+  };
 
   const load = useCallback(async () => {
     if (!activeProfileId) return;
@@ -134,11 +158,29 @@ export default function DiaryScreen() {
       );
     }
 
+    if (editor.mode === 'scale') {
+      const section = getClinicalScaleSection(editor.scaleId);
+      return (
+        <DiaryWizard
+          sections={[section]}
+          initialAnswersBySection={{ Шкала: buildScaleInitialAnswers(editor.scaleId) }}
+          allowSkipSection={false}
+          onCancel={closeEditor}
+          onComplete={(entries) => void handleCreate(entries)}
+        />
+      );
+    }
+
     const sectionType = editor.mode === 'section' ? editor.sectionType : editor.entry.type;
     const section = localizedSections.find((s) => s.type === sectionType) ?? getDiarySection(sectionType);
     if (!section) return null;
 
-    const initialAnswers = editor.mode === 'edit' ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details) : null;
+    const initialAnswers =
+      editor.mode === 'edit'
+        ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details)
+        : editor.mode === 'section'
+          ? editor.prefill?.[section.type]
+          : null;
 
     return (
       <DiaryWizard
@@ -191,7 +233,7 @@ export default function DiaryScreen() {
                   <Pressable
                     key={section.type}
                     style={styles.chip}
-                    onPress={() => setEditor({ mode: 'section', sectionType: section.type })}>
+                    onPress={() => void openSection(section.type)}>
                     <Ionicons
                       name={(TYPE_ICONS[section.type] ?? section.icon) as any}
                       size={14}
@@ -200,8 +242,32 @@ export default function DiaryScreen() {
                     <Text style={styles.chipText}>{section.title}</Text>
                   </Pressable>
                 ))}
+              <Pressable style={styles.chip} onPress={() => setScalePickerOpen(true)}>
+                <Ionicons name="analytics" size={14} color={theme.colors.textSecondary} />
+                <Text style={styles.chipText}>{t('diary.scale')}</Text>
+              </Pressable>
             </View>
           </GlassCard>
+
+          {scalePickerOpen ? (
+            <GlassCard style={styles.scalePicker}>
+              <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
+              <View style={styles.chipRow}>
+                {CLINICAL_SCALES.map((scale) => (
+                  <Pressable
+                    key={scale.id}
+                    style={styles.chip}
+                    onPress={() => {
+                      setScalePickerOpen(false);
+                      setEditor({ mode: 'scale', scaleId: scale.id });
+                    }}>
+                    <Text style={styles.chipText}>{scale.shortLabel}</Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Button label={t('common.cancel')} variant="secondary" size="sm" onPress={() => setScalePickerOpen(false)} />
+            </GlassCard>
+          ) : null}
         </>
       ) : (
         renderEditor()
@@ -280,6 +346,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.textSecondary,
     },
+    scalePicker: { gap: 10 },
     actionRow: { flexDirection: 'row', gap: 8 },
     actionBtn: { flex: 1 },
     listHead: {

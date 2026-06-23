@@ -157,6 +157,27 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: false,
       },
       {
+        id: 'pollenContext',
+        label: 'Уровень пыльцы (авто)',
+        placeholder: 'Подставляется из сводки самочувствия',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'recentScan',
+        label: 'Последнее сканирование (авто)',
+        placeholder: 'Подставляется из сканера за 24 ч',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'todayMeds',
+        label: 'Принятые ЛС сегодня (авто)',
+        placeholder: 'Подставляется из записей «Лекарство»',
+        field: 'text',
+        required: false,
+      },
+      {
         id: 'triggerNotes',
         label: 'Дополнительные детали',
         placeholder: 'Что ещё важно зафиксировать?',
@@ -365,6 +386,16 @@ export function hasSectionAnswers(section: DiarySection, answers: Record<string,
 export function formatDiaryEntrySummary(type: string, details: string): string {
   const structured = decodeDiaryDetails(details);
   if (!structured) return details.trim() || 'Без описания';
+
+  if (type === 'Шкала') {
+    const score = structured.answers.scaleScore?.trim();
+    const interpretation = structured.answers.scaleInterpretation?.trim();
+    const scaleId = structured.answers.scaleId?.trim();
+    if (score && interpretation) {
+      return scaleId ? `${scaleId}: ${score} баллов — ${interpretation}` : `${score} баллов — ${interpretation}`;
+    }
+    return 'Шкала';
+  }
 
   const section = getDiarySection(type);
   if (!section) {

@@ -4,8 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   DIARY_SECTIONS,
   encodeDiaryDetails,
+  enrichScaleAnswers,
   getDiaryStepAnswers,
   hasSectionAnswers,
+  validateClinicalScale,
   validateDiarySectionStep,
   type DiarySection,
   type DiaryStep,
@@ -80,7 +82,10 @@ export function DiaryWizard({
   };
 
   const goNext = () => {
-    const validationError = validateDiarySectionStep(section, stepIndex, sectionAnswers);
+    const validationError =
+      section.type === 'Шкала' && isLastStep
+        ? validateClinicalScale(sectionAnswers)
+        : validateDiarySectionStep(section, stepIndex, sectionAnswers);
     if (validationError) {
       setError(tDiaryError(validationError));
       return;
@@ -125,14 +130,23 @@ export function DiaryWizard({
   };
 
   const finishWizard = () => {
+    let scaleError: string | null = null;
     const entries = sections.flatMap((item) => {
       const answers = answersBySection[item.type] ?? {};
       if (!hasSectionAnswers(item, answers)) return [];
+
+      if (item.type === 'Шкала') {
+        scaleError = validateClinicalScale(answers);
+        if (scaleError) return [];
+        const enriched = enrichScaleAnswers(answers);
+        return [{ type: item.type, details: encodeDiaryDetails(enriched) }];
+      }
+
       return [{ type: item.type, details: encodeDiaryDetails(answers) }];
     });
 
     if (entries.length === 0) {
-      setError(t('diaryWizard.fillOneSection'));
+      setError(scaleError ? tDiaryError(scaleError) : t('diaryWizard.fillOneSection'));
       return;
     }
 

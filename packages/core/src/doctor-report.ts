@@ -22,8 +22,51 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
   { id: 'peakflow', label: 'Пикфлоуметрия', diaryTypes: ['Пикфлоуметрия'], defaultEnabled: true },
   { id: 'asit', label: 'АСИТ', diaryTypes: ['АСИТ'], defaultEnabled: true },
   { id: 'skin', label: 'Кожные проявления', diaryTypes: ['Кожа'], defaultEnabled: true },
+  { id: 'scales', label: 'Клинические шкалы', diaryTypes: ['Шкала'], defaultEnabled: true },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },
 ];
+
+export interface PefTrendSummary {
+  count: number;
+  min: number | null;
+  max: number | null;
+  latest: number | null;
+  latestAt: string | null;
+}
+
+export function computePefTrend(
+  entries: { type: string; details: string; createdAt: string }[],
+): PefTrendSummary {
+  const values: { value: number; createdAt: string }[] = [];
+
+  for (const entry of entries) {
+    if (entry.type !== 'Пикфлоуметрия') continue;
+    try {
+      const parsed = JSON.parse(entry.details) as { v?: number; answers?: Record<string, string> };
+      const raw = parsed?.answers?.pefValue ?? '';
+      const num = Number(String(raw).replace(/[^\d.]/g, ''));
+      if (Number.isFinite(num) && num > 0) {
+        values.push({ value: num, createdAt: entry.createdAt });
+      }
+    } catch {
+      // skip malformed
+    }
+  }
+
+  if (!values.length) {
+    return { count: 0, min: null, max: null, latest: null, latestAt: null };
+  }
+
+  const nums = values.map((v) => v.value);
+  const latest = values[0];
+  return {
+    count: values.length,
+    min: Math.min(...nums),
+    max: Math.max(...nums),
+    latest: latest.value,
+    latestAt: latest.createdAt,
+  };
+}
 
 export function getDefaultReportBlockIds(): string[] {
   return DOCTOR_REPORT_BLOCKS.filter((b) => b.defaultEnabled).map((b) => b.id);
