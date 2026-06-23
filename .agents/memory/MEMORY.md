@@ -5,3 +5,4 @@
 - [Merge conflict JSON crash pattern](merge-conflict-json-crash.md) — unresolved git conflict markers in package.json or .tsx files crash pnpm on startup with "call config.load() before reading values"; grep -rl "<<<<<<< HEAD" apps/ to find all at once
 - [Replit Auth gateway architecture](replit-auth-gateway.md) — Express on port 5000 is the external gateway; Metro on port 3001 (internal); same-origin ensures OIDC session cookies work.
 - [DB migration conflict with Replit Auth tables](db-migration-conflict.md) — blueprint pre-creates public.sessions/users w/o journal, so drizzle migrate fails on 0000; drizzle-kit push falsely reports "no changes" for pgSchema tables. Use migrate, not push.
+- [Onboarding routing / profile-setup entry points](onboarding-routing.md) — disambiguate profile-setup nav with `?mode=add`, not the stale global onboardingComplete flag; createProfile can throw.

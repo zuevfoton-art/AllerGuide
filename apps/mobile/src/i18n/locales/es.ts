@@ -316,6 +316,7 @@ const es: LocaleMessages = {
       birthYearInvalid: 'Introduce un año de nacimiento válido.',
       allergenRequired: 'Selecciona al menos un alérgeno.',
       consentRequired: 'Confirma que eres el padre, la madre o tutor legal de este niño.',
+      saveFailed: 'No se pudo guardar el perfil. Inténtalo de nuevo.',
     },
   },
   profileEdit: {

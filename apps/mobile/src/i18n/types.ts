@@ -303,6 +303,7 @@ export type LocaleMessages = {
       birthYearInvalid: string;
       allergenRequired: string;
       consentRequired: string;
+      saveFailed: string;
     };
   };
   profileEdit: {

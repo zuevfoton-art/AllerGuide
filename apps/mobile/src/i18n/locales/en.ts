@@ -317,6 +317,7 @@ const en: LocaleMessages = {
       birthYearInvalid: 'Enter a valid birth year.',
       allergenRequired: 'Select at least one allergen.',
       consentRequired: 'Confirm that you are the parent or legal guardian of this child.',
+      saveFailed: 'Could not save the profile. Please try again.',
     },
   },
   profileEdit: {
