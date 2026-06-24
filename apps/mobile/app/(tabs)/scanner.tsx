@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
-import { scanBarcode, scanMenuPhoto, scanText } from '@/src/services/scanner-service';
+import { scanBarcode, scanFromOcr, scanText, extractOcrText } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 
 const MODES = [
@@ -41,6 +41,7 @@ export default function ScannerScreen() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [ocrHint, setOcrHint] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
@@ -69,6 +70,7 @@ export default function ScannerScreen() {
 
   const runCheck = async (text: string, barcodeMode = false) => {
     setLoading(true);
+    setOcrHint(null);
     try {
       if (barcodeMode && mode === 'product') {
         const scanResult = await scanBarcode({ barcode: text, profile });
@@ -76,12 +78,41 @@ export default function ScannerScreen() {
         return;
       }
 
-      if (mode === 'menu' && !barcodeMode && text === input && text.includes(',')) {
-        setResult(await scanMenuPhoto({ profile }));
+      if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
+        const scanResult = await scanFromOcr({
+          mode,
+          ocrText: text,
+          profile,
+        });
+        setResult(scanResult);
+        if (scanResult.ocr?.warnings.length) {
+          setOcrHint(scanResult.ocr.warnings.join(' '));
+        }
         return;
       }
 
       setResult(await scanText({ mode, text, profile }));
+    } finally {
+      setLoading(false);
+      refreshHistory();
+    }
+  };
+
+  const runOcrCapture = async (manualText?: string) => {
+    setLoading(true);
+    setOcrHint(null);
+    try {
+      const extraction = extractOcrText(mode, manualText);
+      setInput(extraction.text);
+      const scanResult = await scanFromOcr({
+        mode,
+        ocrText: extraction.text,
+        profile,
+      });
+      setResult(scanResult);
+      if (extraction.warnings.length) {
+        setOcrHint(extraction.warnings.join(' '));
+      }
     } finally {
       setLoading(false);
       refreshHistory();
@@ -100,10 +131,9 @@ export default function ScannerScreen() {
 
     setLoading(true);
     try {
-      setResult(await scanMenuPhoto({ profile }));
+      await runOcrCapture();
     } finally {
       setLoading(false);
-      refreshHistory();
     }
   };
 
@@ -124,17 +154,13 @@ export default function ScannerScreen() {
     void runCheck(data, true);
   };
 
-  const handleMenuPhoto = async () => {
-    setLoading(true);
-    try {
-      setResult(await scanMenuPhoto({ profile }));
-    } finally {
-      setLoading(false);
-    }
+  const handleLabelPhoto = async () => {
+    await runOcrCapture(input.trim() || undefined);
+    setCameraOpen(false);
   };
 
   const openScanAction = () => {
-    if (mode === 'menu') {
+    if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
       void pickMenuImage();
       return;
     }
@@ -157,7 +183,11 @@ export default function ScannerScreen() {
               <Ionicons name="close" size={24} color={theme.colors.onAccent} />
             </Pressable>
             <Text style={styles.cameraTitle}>
-              {mode === 'product' ? t('scanner.cameraScanBarcode') : t('scanner.cameraScanMenu')}
+              {mode === 'product'
+                ? t('scanner.cameraScanBarcode')
+                : mode === 'menu'
+                  ? t('scanner.cameraScanMenu')
+                  : t('scanner.cameraScanLabel')}
             </Text>
             <View style={{ width: 40 }} />
           </View>
@@ -170,16 +200,22 @@ export default function ScannerScreen() {
               <View style={[styles.corner, styles.cornerBR]} />
             </View>
             <Text style={styles.viewfinderHint}>
-              {mode === 'product' ? t('scanner.cameraBarcodeHint') : t('scanner.cameraMenuHint')}
+              {mode === 'product'
+                ? t('scanner.cameraBarcodeHint')
+                : mode === 'menu'
+                  ? t('scanner.cameraMenuHint')
+                  : t('scanner.cameraLabelHint')}
             </Text>
           </View>
 
-          {mode === 'menu' ? (
-            <Pressable style={styles.menuScanBtn} onPress={handleMenuPhoto} disabled={loading}>
+          {mode !== 'product' ? (
+            <Pressable style={styles.menuScanBtn} onPress={handleLabelPhoto} disabled={loading}>
               {loading ? (
                 <ActivityIndicator color={theme.colors.onAccent} />
               ) : (
-                <Text style={styles.menuScanBtnText}>{t('scanner.analyzeMenu')}</Text>
+                <Text style={styles.menuScanBtnText}>
+                  {mode === 'menu' ? t('scanner.analyzeMenu') : t('scanner.analyzeLabel')}
+                </Text>
               )}
             </Pressable>
           ) : null}
@@ -237,17 +273,31 @@ export default function ScannerScreen() {
         <View style={styles.scanRow}>
           <View style={ui.feedIcon}>
             <Ionicons
-              name={mode === 'product' ? 'barcode-outline' : 'restaurant-outline'}
+              name={
+                mode === 'product'
+                  ? 'barcode-outline'
+                  : mode === 'menu'
+                    ? 'restaurant-outline'
+                    : 'medkit-outline'
+              }
               size={18}
               color={theme.colors.textSecondary}
             />
           </View>
           <View style={styles.scanBody}>
             <Text style={styles.scanTitle}>
-              {mode === 'product' ? t('scanner.scanBarcode') : t('scanner.scanMenu')}
+              {mode === 'product'
+                ? t('scanner.scanBarcode')
+                : mode === 'menu'
+                  ? t('scanner.scanMenu')
+                  : t('scanner.scanLabel')}
             </Text>
             <Text style={styles.scanDesc}>
-              {mode === 'product' ? t('scanner.scanBarcodeDesc') : t('scanner.scanMenuDesc')}
+              {mode === 'product'
+                ? t('scanner.scanBarcodeDesc')
+                : mode === 'menu'
+                  ? t('scanner.scanMenuDesc')
+                  : t('scanner.scanLabelDesc')}
             </Text>
           </View>
           <Button label={t('scanner.openAction')} variant="secondary" size="sm" onPress={openScanAction} />
@@ -258,7 +308,13 @@ export default function ScannerScreen() {
       <TextInput
         value={input}
         onChangeText={setInput}
-        placeholder={mode === 'product' ? t('scanner.productPlaceholder') : t('scanner.menuPlaceholder')}
+        placeholder={
+          mode === 'product'
+            ? t('scanner.productPlaceholder')
+            : mode === 'menu'
+              ? t('scanner.menuPlaceholder')
+              : t('scanner.labelPlaceholder')
+        }
         placeholderTextColor={theme.colors.textMuted}
         multiline
         style={styles.input}
@@ -275,6 +331,7 @@ export default function ScannerScreen() {
         }}
       />
       {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
+      {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
       {displayResult ? (
         <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
@@ -306,7 +363,9 @@ export default function ScannerScreen() {
                   ? t('scanner.sourceBarcodesDb')
                   : displayResult.source === 'barcode'
                     ? t('scanner.sourceBarcode')
-                    : t('scanner.sourceManual')}
+                    : displayResult.source === 'ocr'
+                      ? t('scanner.sourceOcr')
+                      : t('scanner.sourceManual')}
             </Text>
           ) : null}
         </View>
@@ -461,6 +520,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 11,
       color: colors.textMuted,
+    },
+    ocrHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
     },
     historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     historyRow: { paddingHorizontal: 16, paddingVertical: 12 },

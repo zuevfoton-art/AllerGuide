@@ -4,6 +4,7 @@ import {
   profileEnablesAsit,
   profileEnablesPeakFlow,
 } from './allergy-conditions';
+import { profileEnablesInsectFocus } from './insect-allergy';
 import {
   CLINICAL_SCALES,
   computeScaleScore,
@@ -54,6 +55,7 @@ const FOOD_MARKERS = [
 ];
 const DRUG_MARKERS = ['аспирин', 'ибупрофен', 'пенициллин', 'антибиот', 'нпвп', 'нпвс', 'парацетамол'];
 const URTICARIA_MARKERS = ['крапивниц', 'urticaria', 'urticari'];
+const INSECT_MARKERS = ['пчел', 'пчёл', 'ос', 'шершн', 'комар', 'насеком', 'укус'];
 
 export function inferConditionIdsFromAllergies(allergies: string[]): AllergyConditionId[] {
   const ids = new Set<AllergyConditionId>();
@@ -71,6 +73,7 @@ export function inferConditionIdsFromAllergies(allergies: string[]): AllergyCond
     if (RHINITIS_MARKERS.some((marker) => lower.includes(marker))) ids.add('rhinitis');
     if (FOOD_MARKERS.some((marker) => lower.includes(marker))) ids.add('food');
     if (DRUG_MARKERS.some((marker) => lower.includes(marker))) ids.add('drug');
+    if (INSECT_MARKERS.some((marker) => lower.includes(marker))) ids.add('insect');
 
     for (const condition of ALLERGY_CONDITION_TYPES) {
       if (lower.includes(condition.label.toLowerCase())) {
@@ -133,6 +136,7 @@ export function isDiarySectionVisible(
   if (ALWAYS_VISIBLE_SECTIONS.has(sectionType)) return true;
   if (sectionType === 'Пикфлоуметрия') return profileEnablesPeakFlow(conditions);
   if (sectionType === 'АСИТ') return profileEnablesAsit(conditions);
+  if (sectionType === 'Укус насекомого') return profileEnablesInsectFocus(conditions);
   return true;
 }
 

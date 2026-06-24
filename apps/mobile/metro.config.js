@@ -27,16 +27,23 @@ config.resolver.extraNodeModules = {
   '@allerguide/ai': path.resolve(workspaceRoot, 'packages/ai'),
   '@expo-google-fonts/inter': path.resolve(rootNodeModules, '@expo-google-fonts/inter'),
   '@expo-google-fonts/source-serif-4': path.resolve(rootNodeModules, '@expo-google-fonts/source-serif-4'),
+  crypto: path.resolve(rootNodeModules, 'react-native-quick-crypto'),
 };
 
 const WEB_ONLY_STUBS = {
   'expo-location': path.resolve(projectRoot, 'src/stubs/expo-location-web-stub.js'),
+};
+
+const I18N_STUBS = {
   'i18next': path.resolve(projectRoot, 'src/stubs/i18next-stub.js'),
   'react-i18next': path.resolve(projectRoot, 'src/stubs/react-i18next-stub.js'),
 };
 
 const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (I18N_STUBS[moduleName]) {
+    return { filePath: I18N_STUBS[moduleName], type: 'sourceFile' };
+  }
   if (platform === 'web' && WEB_ONLY_STUBS[moduleName]) {
     return { filePath: WEB_ONLY_STUBS[moduleName], type: 'sourceFile' };
   }

@@ -27,4 +27,4 @@ then `cd apps/api && npx tsx src/db/migrate.ts`. Migration 0000 recreates `users
 
 ## Production risk
 
-**Why this matters:** the same conflict will hit production on first deploy if the Replit Auth blueprint pre-creates `sessions`/`users` before migrations run. Before deploying, either make migration 0000's session/users creation idempotent (`CREATE TABLE IF NOT EXISTS`), or seed the migration journal so 0000 is marked applied. Do not blindly drop tables in production — they may hold real users.
+**Why this matters:** the same conflict will hit production on first deploy if the Replit Auth blueprint pre-creates `sessions`/`users` before migrations run. Migration `0000` uses `CREATE TABLE IF NOT EXISTS` and `prepareReplitAuthBeforeMigrate()` in `migrate.ts` handles the blueprint case. **Republish** must use `ignoreDatabaseMigrations = true` in `.replit` so Replit does not try to re-push dev schema when production already exists (see `docs/replit-deploy.md`).
