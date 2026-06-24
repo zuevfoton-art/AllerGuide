@@ -3,6 +3,7 @@ import type {
   DiaryEntry,
   EmergencyContact,
   Profile,
+  SafeProduct,
   ScanHistoryEntry,
 } from '@allerguide/core';
 import { hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
@@ -75,6 +76,14 @@ class WebDb implements DbLike {
 
   private saveEmergencyContacts(items: EmergencyContact[]) {
     saveJson('ag_emergency_contacts', items);
+  }
+
+  private getSafeProducts(): SafeProduct[] {
+    return loadJson<SafeProduct[]>('ag_safe_products', []);
+  }
+
+  private saveSafeProducts(items: SafeProduct[]) {
+    saveJson('ag_safe_products', items);
   }
 
   execSync(_sql: string) {}
@@ -269,6 +278,8 @@ class WebDb implements DbLike {
       this.saveDiaryEntries(diary.filter((entry) => entry.profileId !== params![0]));
       const scans = this.getScanHistory();
       this.saveScanHistory(scans.filter((entry) => entry.profileId !== params![0]));
+      const safeProducts = this.getSafeProducts();
+      this.saveSafeProducts(safeProducts.filter((item) => item.profileId !== params![0]));
       const sos = this.getProfileSos();
       delete sos[params![0] as number];
       this.saveProfileSos(sos);
@@ -286,6 +297,33 @@ class WebDb implements DbLike {
         relation: params![3] as EmergencyContact['relation'],
       });
       this.saveEmergencyContacts(items);
+      return;
+    }
+
+    if (s.startsWith('insert into safe_products')) {
+      const items = this.getSafeProducts();
+      const id = items.length > 0 ? Math.max(...items.map((item) => item.id)) + 1 : 1;
+      items.push({
+        id,
+        profileId: params![0] as number,
+        name: params![1] as string,
+        mode: params![2] as string,
+        input: params![3] as string,
+        savedAt: params![4] as string,
+      });
+      this.saveSafeProducts(items);
+      return;
+    }
+
+    if (s.startsWith('delete from safe_products where id =')) {
+      const items = this.getSafeProducts();
+      this.saveSafeProducts(items.filter((item) => item.id !== params![0]));
+      return;
+    }
+
+    if (s.startsWith('delete from safe_products where profileid =')) {
+      const items = this.getSafeProducts();
+      this.saveSafeProducts(items.filter((item) => item.profileId !== params![0]));
       return;
     }
 
@@ -392,6 +430,11 @@ class WebDb implements DbLike {
     if (s.includes('from emergency_contacts') && s.includes('where profileid =')) {
       const items = this.getEmergencyContacts();
       return items.filter((item) => item.profileId === params![0]) as T[];
+    }
+
+    if (s.includes('from safe_products') && s.includes('where profileid =')) {
+      const items = this.getSafeProducts();
+      return items.filter((item) => item.profileId === params![0]).reverse() as T[];
     }
 
     if (s.includes('from app_settings')) {

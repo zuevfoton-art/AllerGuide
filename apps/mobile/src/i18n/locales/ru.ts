@@ -214,6 +214,11 @@ const ru: LocaleMessages = {
     sourceOpenFoodFacts: 'Open Food Facts',
     sourceBarcode: 'штрихкод',
     sourceManual: 'ручной ввод',
+    safeList: 'Безопасные продукты',
+    saveToSafe: '✓ Сохранить в безопасные',
+    savedToSafe: '✓ Сохранено',
+    safeListEmpty: 'Безопасных продуктов пока нет',
+    removeSafe: 'Убрать',
   },
   market: {
     title: 'Маркет',

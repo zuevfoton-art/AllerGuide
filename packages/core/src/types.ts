@@ -19,6 +19,15 @@ export interface DiaryEntry {
   createdAt: string;
 }
 
+export interface SafeProduct {
+  id: number;
+  profileId: number;
+  name: string;
+  mode: string;
+  input: string;
+  savedAt: string;
+}
+
 export interface ScanHistoryEntry {
   id: number;
   profileId: number;

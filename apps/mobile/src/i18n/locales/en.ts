@@ -214,6 +214,11 @@ const en: LocaleMessages = {
     sourceOpenFoodFacts: 'Open Food Facts',
     sourceBarcode: 'barcode',
     sourceManual: 'manual entry',
+    safeList: 'Safe Products',
+    saveToSafe: '✓ Save to safe list',
+    savedToSafe: '✓ Saved',
+    safeListEmpty: 'No safe products yet',
+    removeSafe: 'Remove',
   },
   market: {
     title: 'Market',

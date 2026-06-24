@@ -217,6 +217,11 @@ export type LocaleMessages = {
     sourceOpenFoodFacts: string;
     sourceBarcode: string;
     sourceManual: string;
+    safeList: string;
+    saveToSafe: string;
+    savedToSafe: string;
+    safeListEmpty: string;
+    removeSafe: string;
   };
   market: {
     title: string;

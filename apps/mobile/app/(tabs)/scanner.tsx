@@ -4,7 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
-import { formatDiaryDate, type ScanHistoryEntry } from '@allerguide/core';
+import { formatDiaryDate, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
@@ -18,6 +18,11 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
 import { scanBarcode, scanMenuPhoto, scanText } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
+import {
+  addSafeProduct,
+  listSafeProducts,
+  removeSafeProduct,
+} from '@/src/services/safe-products-service';
 
 const MODES = [
   { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
@@ -40,6 +45,7 @@ export default function ScannerScreen() {
   const [mode, setMode] = useState<ScanMode>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
+  const [safeList, setSafeList] = useState<SafeProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
@@ -56,10 +62,20 @@ export default function ScannerScreen() {
   const refreshHistory = useCallback(() => {
     if (!activeProfileId) {
       setHistory([]);
+      setSafeList([]);
       return;
     }
     setHistory(listScanHistory(activeProfileId).slice(0, 5));
+    setSafeList(listSafeProducts(activeProfileId));
   }, [activeProfileId]);
+
+  const isCurrentInputSaved = useMemo(
+    () =>
+      result != null && activeProfileId != null
+        ? safeList.some((p) => p.input.trim().toLowerCase() === input.trim().toLowerCase())
+        : false,
+    [safeList, result, input, activeProfileId],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -310,6 +326,23 @@ export default function ScannerScreen() {
         </View>
       ) : null}
 
+      {displayResult && !isDanger && activeProfileId ? (
+        isCurrentInputSaved ? (
+          <Button label={t('scanner.savedToSafe')} variant="secondary" block disabled />
+        ) : (
+          <Button
+            label={t('scanner.saveToSafe')}
+            variant="secondary"
+            block
+            onPress={() => {
+              const name = result?.productName || input.trim().slice(0, 60);
+              addSafeProduct(activeProfileId, name, mode, input.trim());
+              refreshHistory();
+            }}
+          />
+        )
+      ) : null}
+
       {history.length > 0 ? (
         <GlassCard padded={false}>
           <Text style={[ui.cardTitle, styles.historyHead]}>{t('scanner.history')}</Text>
@@ -325,6 +358,41 @@ export default function ScannerScreen() {
               </View>
             </View>
           ))}
+        </GlassCard>
+      ) : null}
+
+      {safeList.length > 0 ? (
+        <GlassCard padded={false}>
+          <Text style={[ui.cardTitle, styles.historyHead]}>{t('scanner.safeList')}</Text>
+          {safeList.map((item, index) => {
+            const modeLabel = MODES.find((m) => m.key === item.mode);
+            return (
+              <View
+                key={item.id}
+                style={[styles.historyRow, index < safeList.length - 1 && styles.historyRowBorder]}>
+                <View style={ui.feedIcon}>
+                  <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
+                </View>
+                <View style={ui.feedBody}>
+                  <Text style={ui.feedTitle}>{item.name}</Text>
+                  <Text style={ui.feedSub}>
+                    {modeLabel ? t(modeLabel.labelKey) : item.mode}
+                    {' · '}
+                    {formatDiaryDate(item.savedAt)}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => {
+                    removeSafeProduct(item.id);
+                    refreshHistory();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('scanner.removeSafe')}>
+                  <Ionicons name="close-circle-outline" size={20} color={theme.colors.textMuted} />
+                </Pressable>
+              </View>
+            );
+          })}
         </GlassCard>
       ) : null}
 
