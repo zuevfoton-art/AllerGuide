@@ -8,10 +8,15 @@ const localNodeModules = path.resolve(projectRoot, 'node_modules');
 const config = getDefaultConfig(projectRoot);
 
 config.watchFolders = [workspaceRoot];
+config.resolver.blockList = new RegExp(
+  `${workspaceRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/\\.local/.*`
+);
 config.resolver.nodeModulesPaths = [
   localNodeModules,
   path.resolve(workspaceRoot, 'node_modules'),
 ];
+
+const rootNodeModules = path.resolve(workspaceRoot, 'node_modules');
 
 config.resolver.extraNodeModules = {
   react: path.resolve(localNodeModules, 'react'),
@@ -20,6 +25,8 @@ config.resolver.extraNodeModules = {
   'react-native-web': path.resolve(localNodeModules, 'react-native-web'),
   '@allerguide/core': path.resolve(workspaceRoot, 'packages/core'),
   '@allerguide/ai': path.resolve(workspaceRoot, 'packages/ai'),
+  '@expo-google-fonts/inter': path.resolve(rootNodeModules, '@expo-google-fonts/inter'),
+  '@expo-google-fonts/source-serif-4': path.resolve(rootNodeModules, '@expo-google-fonts/source-serif-4'),
 };
 
 const WEB_ONLY_STUBS = {

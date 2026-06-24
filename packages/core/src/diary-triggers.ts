@@ -1,4 +1,4 @@
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails, formatDiaryDate } from './diary';
 import type { DiaryEntry } from './types';
 
 export interface DiaryTriggerContext {
@@ -94,4 +94,37 @@ export function formatTriggerContextLine(context: DiaryTriggerContext): string {
   if (context.recentScanSummary) parts.push(`Скан: ${context.recentScanSummary}`);
   if (context.todayMedsSummary) parts.push(`ЛС сегодня: ${context.todayMedsSummary}`);
   return parts.join(' · ');
+}
+
+export function formatTriggerContextReport(
+  entries: { type: string; details: string; createdAt: string }[],
+): string {
+  const lines: string[] = [];
+  for (const entry of entries) {
+    if (entry.type !== 'Триггер') continue;
+    const payload = decodeDiaryDetails(entry.details);
+    if (!payload) continue;
+
+    const parts: string[] = [];
+    const trigger = payload.answers.trigger?.trim();
+    const pollen = payload.answers.pollenContext?.trim();
+    const scan = payload.answers.recentScan?.trim();
+    const meds = payload.answers.todayMeds?.trim();
+    const hasContext = Boolean(pollen || scan || meds);
+    if (!hasContext) continue;
+
+    if (trigger) parts.push(trigger);
+    if (pollen) parts.push(`Пыльца: ${pollen}`);
+    if (scan) parts.push(`Скан: ${scan}`);
+    if (meds) parts.push(`ЛС: ${meds}`);
+
+    if (!parts.length) continue;
+    lines.push(`• ${parts.join(' · ')} (${formatDiaryDate(entry.createdAt)})`);
+  }
+
+  if (!lines.length) {
+    return 'Записей «Триггер» с контекстом за период нет.';
+  }
+
+  return lines.join('\n');
 }

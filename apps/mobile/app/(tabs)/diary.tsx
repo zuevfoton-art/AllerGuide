@@ -3,14 +3,24 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
+  buildAsitPrefill,
+  buildFoodPrefill,
+  buildMedicinePrefill,
   buildScaleInitialAnswers,
   buildTriggerPrefill,
+  collectLatestScaleTrends,
+  filterDiarySections,
   formatDiaryDate,
   formatDiaryEntrySummary,
   getClinicalScaleSection,
   getDiaryEntryAnswers,
   getDiarySection,
+  getRecommendedScalesForConditions,
+  isAsitCourseConfigured,
   parseAllergies,
+  profileEnablesAsit,
+  profileEnablesDrugFocus,
+  profileEnablesFoodFocus,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
@@ -20,6 +30,13 @@ import {
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
+import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { listScanHistory } from '@/src/services/scan-history-service';
+import { AsitCourseCard } from '@/src/components/AsitCourseCard';
+import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -60,17 +77,113 @@ export default function DiaryScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
   const localeContent = content();
-  const localizedSections = useMemo(
-    () => localizeDiarySections(locale, localeContent),
-    [locale, localeContent],
-  );
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
+  const localizedSections = useMemo(
+    () => localizeDiarySections(locale, localeContent),
+    [locale, localeContent],
+  );
+  const profileConditions = useMemo(
+    () => (activeProfile ? getProfileConditions(activeProfile) : []),
+    [activeProfile],
+  );
+  const visibleSections = useMemo(
+    () => filterDiarySections(localizedSections, profileConditions),
+    [localizedSections, profileConditions],
+  );
+  const recommendedScaleIds = useMemo(
+    () => getRecommendedScalesForConditions(profileConditions),
+    [profileConditions],
+  );
+  const recommendedScales = useMemo(
+    () => CLINICAL_SCALES.filter((scale) => recommendedScaleIds.includes(scale.id)),
+    [recommendedScaleIds],
+  );
+  const otherScales = useMemo(
+    () => CLINICAL_SCALES.filter((scale) => !recommendedScaleIds.includes(scale.id)),
+    [recommendedScaleIds],
+  );
+  const scaleTrends = useMemo(() => collectLatestScaleTrends(list), [list]);
+  const asitEnabled = useMemo(
+    () => profileEnablesAsit(profileConditions),
+    [profileConditions],
+  );
+  const foodFocusEnabled = useMemo(
+    () =>
+      activeProfile
+        ? profileEnablesFoodFocus(profileConditions, parseAllergies(activeProfile.allergies))
+        : false,
+    [profileConditions, activeProfile],
+  );
+  const drugFocusEnabled = useMemo(() => {
+    if (!activeProfileId) return false;
+    const passport = getAllergyPassport(activeProfileId);
+    return profileEnablesDrugFocus(profileConditions, passport.drugIntolerances);
+  }, [profileConditions, activeProfileId, list]);
+  const foodDrugRegistry = useMemo(
+    () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
+    [activeProfileId, list],
+  );
+  const drugIntolerances = useMemo(() => {
+    if (!activeProfileId) return [];
+    return getAllergyPassport(activeProfileId).drugIntolerances;
+  }, [activeProfileId, list]);
+  const asitCourse = useMemo(
+    () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
+    [activeProfileId, list],
+  );
 
   const openSection = async (sectionType: string) => {
+    if (sectionType === 'АСИТ' && activeProfileId) {
+      const course = getAsitCourse(activeProfileId);
+      if (course && isAsitCourseConfigured(course)) {
+        setEditor({
+          mode: 'section',
+          sectionType,
+          prefill: { АСИТ: buildAsitPrefill(course) },
+        });
+        return;
+      }
+    }
+    if (sectionType === 'Питание' && activeProfile) {
+      const allergies = parseAllergies(activeProfile.allergies);
+      const registry = activeProfileId ? getFoodDrugRegistry(activeProfileId) : null;
+      const scans = activeProfileId ? listScanHistory(activeProfileId) : [];
+      const recentFoodScan = scans.find((scan) => scan.mode === 'product' || scan.mode === 'menu');
+      const withinDay =
+        recentFoodScan &&
+        Date.now() - new Date(recentFoodScan.createdAt).getTime() <= 24 * 3_600_000;
+      const prefill = buildFoodPrefill(
+        allergies,
+        registry,
+        withinDay
+          ? {
+              productName: recentFoodScan.productName,
+              verdict: recentFoodScan.verdict,
+              level: recentFoodScan.level,
+              matches: (() => {
+                try {
+                  return JSON.parse(recentFoodScan.matches) as string[];
+                } catch {
+                  return [];
+                }
+              })(),
+              createdAt: recentFoodScan.createdAt,
+            }
+          : null,
+      );
+      setEditor({ mode: 'section', sectionType, prefill: { Питание: prefill } });
+      return;
+    }
+    if (sectionType === 'Лекарство' && activeProfileId) {
+      const passport = getAllergyPassport(activeProfileId);
+      const prefill = buildMedicinePrefill(passport.drugIntolerances);
+      setEditor({ mode: 'section', sectionType, prefill: { Лекарство: prefill } });
+      return;
+    }
     if (sectionType === 'Триггер' && activeProfileId) {
       const allergies = activeProfile ? parseAllergies(activeProfile.allergies) : [];
       const wellness = await fetchWellnessSnapshot(allergies, { recentSymptoms: false, recentTriggers: false }, locale).catch(() => null);
@@ -151,7 +264,8 @@ export default function DiaryScreen() {
     if (editor.mode === 'full') {
       return (
         <DiaryWizard
-          sections={localizedSections}
+          sections={visibleSections}
+          drugIntolerances={drugIntolerances}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -187,6 +301,7 @@ export default function DiaryScreen() {
           sections={[section]}
           initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
           allowSkipSection={false}
+          drugIntolerances={drugIntolerances}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {
@@ -215,13 +330,45 @@ export default function DiaryScreen() {
 
       {!editor ? (
         <>
+          {asitEnabled ? (
+            <AsitCourseCard
+              course={asitCourse}
+              entries={list}
+              onLogDose={() => void openSection('АСИТ')}
+            />
+          ) : null}
+
+          {foodFocusEnabled && activeProfile ? (
+            <FoodDrugAllergyCard
+              mode="food"
+              profileAllergies={parseAllergies(activeProfile.allergies)}
+              drugIntolerances={drugIntolerances}
+              registry={foodDrugRegistry}
+              entries={list}
+              onLogFood={() => void openSection('Питание')}
+              onLogMedicine={() => void openSection('Лекарство')}
+            />
+          ) : null}
+
+          {drugFocusEnabled ? (
+            <FoodDrugAllergyCard
+              mode="drug"
+              profileAllergies={activeProfile ? parseAllergies(activeProfile.allergies) : []}
+              drugIntolerances={drugIntolerances}
+              registry={foodDrugRegistry}
+              entries={list}
+              onLogFood={() => void openSection('Питание')}
+              onLogMedicine={() => void openSection('Лекарство')}
+            />
+          ) : null}
+
           <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
           <Button
             label={t('diary.quickEntry')}
             variant="secondary"
             block
             onPress={() => {
-              const section = localizedSections.find((s) => s.type === 'Симптомы') ?? localizedSections[0];
+              const section = visibleSections.find((s) => s.type === 'Симптомы') ?? visibleSections[0];
               if (section) setEditor({ mode: 'section', sectionType: section.type });
             }}
           />
@@ -229,7 +376,7 @@ export default function DiaryScreen() {
           <GlassCard>
             <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>
             <View style={styles.chipRow}>
-              {localizedSections.map((section) => (
+              {visibleSections.map((section) => (
                   <Pressable
                     key={section.type}
                     style={styles.chip}
@@ -249,22 +396,60 @@ export default function DiaryScreen() {
             </View>
           </GlassCard>
 
+          {scaleTrends.length > 0 ? (
+            <GlassCard>
+              <Text style={ui.cardTitle}>{t('diary.scaleTrends')}</Text>
+              {scaleTrends.map((trend, index) => (
+                <View
+                  key={trend.scaleId}
+                  style={[styles.trendRow, index === 0 && styles.trendRowFirst]}>
+                  <Text style={styles.trendLabel}>{trend.label}</Text>
+                  <Text style={styles.trendValue}>
+                    {trend.total} · {trend.interpretation}
+                  </Text>
+                  <Text style={styles.trendMeta}>{formatDiaryDate(trend.at)}</Text>
+                </View>
+              ))}
+            </GlassCard>
+          ) : null}
+
           {scalePickerOpen ? (
             <GlassCard style={styles.scalePicker}>
               <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
-              <View style={styles.chipRow}>
-                {CLINICAL_SCALES.map((scale) => (
-                  <Pressable
-                    key={scale.id}
-                    style={styles.chip}
-                    onPress={() => {
-                      setScalePickerOpen(false);
-                      setEditor({ mode: 'scale', scaleId: scale.id });
-                    }}>
-                    <Text style={styles.chipText}>{scale.shortLabel}</Text>
-                  </Pressable>
-                ))}
-              </View>
+              <Text style={styles.scaleHint}>{t('diary.scaleRaaciHint')}</Text>
+              {recommendedScales.length > 0 ? (
+                <>
+                  <Text style={styles.scaleGroupLabel}>{t('diary.scaleSuggested')}</Text>
+                  <View style={styles.chipRow}>
+                    {recommendedScales.map((scale) => (
+                      <Pressable
+                        key={scale.id}
+                        style={[styles.chip, styles.chipAccent]}
+                        onPress={() => {
+                          setScalePickerOpen(false);
+                          setEditor({ mode: 'scale', scaleId: scale.id });
+                        }}>
+                        <Text style={styles.chipText}>{scale.shortLabel}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              ) : null}
+              {otherScales.length > 0 ? (
+                <View style={styles.chipRow}>
+                  {otherScales.map((scale) => (
+                    <Pressable
+                      key={scale.id}
+                      style={styles.chip}
+                      onPress={() => {
+                        setScalePickerOpen(false);
+                        setEditor({ mode: 'scale', scaleId: scale.id });
+                      }}>
+                      <Text style={styles.chipText}>{scale.shortLabel}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
               <Button label={t('common.cancel')} variant="secondary" size="sm" onPress={() => setScalePickerOpen(false)} />
             </GlassCard>
           ) : null}
@@ -347,6 +532,47 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     scalePicker: { gap: 10 },
+    scaleHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+    },
+    scaleGroupLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    chipAccent: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+    },
+    trendRow: {
+      paddingVertical: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      gap: 2,
+    },
+    trendRowFirst: { borderTopWidth: 0, paddingTop: 0 },
+    trendLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    trendValue: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+    },
+    trendMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
     actionRow: { flexDirection: 'row', gap: 8 },
     actionBtn: { flex: 1 },
     listHead: {
