@@ -151,6 +151,17 @@ export default function SettingsScreen() {
         </View>
       </GlassCard>
 
+      <Text style={ui.sectionLabel}>{t('settings.account')}</Text>
+      <GlassCard>
+        <Text style={styles.cardHint}>{t('settings.manageProfilesHint')}</Text>
+        <Button
+          label={t('settings.manageProfiles')}
+          variant="secondary"
+          block
+          onPress={() => router.push('/profiles')}
+        />
+      </GlassCard>
+
       <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
       <ThemeToggle />
     </Screen>

@@ -102,6 +102,13 @@ const it: LocaleMessages = {
     logoutConfirm: 'Esci',
     deleteTitle: 'Eliminare il profilo?',
     deleteMessage: 'Il profilo «{{name}}» e tutte le voci del diario saranno eliminati.',
+    accountTitle: 'Account',
+    accountHint: 'Esci o elimina definitivamente l\'account e tutti i dati.',
+    deleteAccount: 'Elimina account',
+    deleteAccountTitle: 'Eliminare l\'account?',
+    deleteAccountMessage:
+      'Tutti i profili, le voci del diario e la cronologia delle scansioni saranno eliminati definitivamente.',
+    deleteAccountConfirm: 'Elimina account',
   },
   theme: {
     title: 'Aspetto',
@@ -164,6 +171,14 @@ const it: LocaleMessages = {
     scaleTrends: 'Scale cliniche',
     scaleTrendsEmpty: 'Nessun punteggio di scala ancora.',
     scaleSuggested: 'Consigliato per il profilo',
+    insights: 'Attività · 7 giorni',
+    insightsStreak: '{{n}} giorni di fila',
+    insightsTop: 'Top della settimana',
+    insightsLegendNormal: 'Voci',
+    insightsLegendSym: 'Sintomi',
+    insightsCorSymFood: '{{n}} su {{of}} giorni con sintomi avevano anche una voce alimentare',
+    insightsCorSymTrig: '{{n}} su {{of}} giorni con sintomi aveva un fattore scatenante registrato',
+    insightsCorSymMeds: '{{n}} su {{of}} giorni con sintomi includevano un farmaco',
   },
   diaryWizard: {
     stepOf: 'Passo {{current}} di {{total}}',
@@ -265,10 +280,14 @@ const it: LocaleMessages = {
     syncError: 'Errore',
     uploadSuccess: 'Backup caricato sul server.',
     downloadSuccess: 'Dati ripristinati dal backup.',
+    account: 'Account',
+    manageProfiles: 'I miei profili',
+    manageProfilesHint: 'Profili, uscita ed eliminazione account',
   },
   profileSwitcher: {
     add: 'Profilo',
     hint: 'Tocca di nuovo il profilo attivo per modificare',
+    manage: 'I miei profili e account',
   },
   onboarding: {
     tagline: 'Il tuo assistente intelligente per il controllo delle allergie',

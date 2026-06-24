@@ -102,6 +102,13 @@ const en: LocaleMessages = {
     logoutConfirm: 'Sign out',
     deleteTitle: 'Delete profile?',
     deleteMessage: 'Profile «{{name}}» and all diary entries will be deleted.',
+    accountTitle: 'Account',
+    accountHint: 'Sign out or permanently delete your user account and all data.',
+    deleteAccount: 'Delete account',
+    deleteAccountTitle: 'Delete account?',
+    deleteAccountMessage:
+      'All profiles, diary entries, and scan history will be permanently deleted.',
+    deleteAccountConfirm: 'Delete account',
   },
   theme: {
     title: 'Appearance',
@@ -164,6 +171,14 @@ const en: LocaleMessages = {
     scaleTrends: 'Clinical scales',
     scaleTrendsEmpty: 'No scale scores yet. Complete a scale to track trends.',
     scaleSuggested: 'Recommended for profile',
+    insights: 'Activity · 7 days',
+    insightsStreak: '{{n}} days in a row',
+    insightsTop: 'Top this week',
+    insightsLegendNormal: 'Entries',
+    insightsLegendSym: 'Symptoms',
+    insightsCorSymFood: '{{n}} of {{of}} symptom days also had a food entry',
+    insightsCorSymTrig: '{{n}} of {{of}} symptom days had a trigger logged',
+    insightsCorSymMeds: '{{n}} of {{of}} symptom days included medication',
   },
   diaryWizard: {
     stepOf: 'Step {{current}} of {{total}}',
@@ -265,10 +280,14 @@ const en: LocaleMessages = {
     syncError: 'Error',
     uploadSuccess: 'Backup uploaded to server.',
     downloadSuccess: 'Data restored from backup.',
+    account: 'Account',
+    manageProfiles: 'My profiles',
+    manageProfilesHint: 'Profiles, sign out and delete account',
   },
   profileSwitcher: {
     add: 'Profile',
     hint: 'Tap the active profile again to edit',
+    manage: 'My profiles & account',
   },
   onboarding: {
     tagline: 'Your smart allergy management assistant',

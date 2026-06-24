@@ -36,6 +36,7 @@ import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
+import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
@@ -467,6 +468,8 @@ export default function DiaryScreen() {
           onPress={() => router.push('/doctor-report' as any)}
         />
       </View>
+
+      <DiaryInsightsCard entries={list} />
 
       <GlassCard padded={false}>
         <View style={styles.listHead}>
