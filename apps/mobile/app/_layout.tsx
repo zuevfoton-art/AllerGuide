@@ -1,3 +1,7 @@
+import { install as installQuickCrypto } from 'react-native-quick-crypto';
+
+installQuickCrypto();
+
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';

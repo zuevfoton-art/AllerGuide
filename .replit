@@ -61,7 +61,11 @@ externalPort = 3002
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["bash", "-c", "COREPACK_ENABLE_STRICT=0 pnpm install --frozen-lockfile=false; cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir dist"]
+# Let Drizzle migrations in scripts/replit-deploy-build.sh manage production schema.
+# Replit's auto dev→prod DB push fails on republish with:
+# "Cannot push development database objects, production database already exists".
+ignoreDatabaseMigrations = true
+build = ["bash", "scripts/replit-deploy-build.sh"]
 run = ["bash", "-c", "cd apps/api && npx tsx src/index.ts"]
 
 [userenv]

@@ -38,6 +38,28 @@ export const ASIT_SYSTEMIC_REACTION_CHOICES = [
 export const ASIT_DISCLAIMER =
   'АСИТ назначается только врачом. Приложение фиксирует приёмы и реакции, но не корректирует дозировки и схему.';
 
+export const DEFAULT_ASIT_REMINDER_HOUR = 8;
+export const DEFAULT_ASIT_REMINDER_MINUTE = 0;
+
+export function isAsitReminderConfigured(course: AsitCourse | null): boolean {
+  if (!course?.active) return false;
+  return typeof course.reminderHour === 'number' && course.reminderHour >= 0 && course.reminderHour <= 23;
+}
+
+export function formatAsitReminderTime(hour: number, minute = 0): string {
+  const h = String(hour).padStart(2, '0');
+  const m = String(minute).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+export function buildAsitReminderContent(course: AsitCourse): { title: string; body: string } {
+  const drug = course.drug.trim() || 'препарат';
+  return {
+    title: 'Напоминание АСИТ',
+    body: `Время приёма: ${drug} (${course.allergen.trim() || 'курс АСИТ'})`,
+  };
+}
+
 export function createDefaultAsitCourse(): AsitCourse {
   return {
     v: 1,

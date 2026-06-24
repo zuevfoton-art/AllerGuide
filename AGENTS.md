@@ -37,7 +37,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 
 ### Production builds (internal alpha)
 - EAS preview: see [`docs/eas-internal-preview.md`](../docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
-- Replit deploy (web): see [`docs/replit-deploy.md`](../docs/replit-deploy.md). `.replit` runs `pnpm install` + `expo export`.
+- Replit deploy (web): see [`docs/replit-deploy.md`](../docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true` and `scripts/replit-deploy-build.sh` (`pnpm install` → `db:migrate` when `DATABASE_URL` is set → `expo export`). On republish, do not re-enable «Create production database» if production already exists.
 - QA regression: [`docs/qa-checklist.md`](../docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.

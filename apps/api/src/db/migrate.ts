@@ -4,6 +4,7 @@ import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { buildConnectionOptions, resolveMigrationUrl } from './config';
+import { prepareReplitAuthBeforeMigrate } from './replit-bootstrap';
 
 /**
  * Applies versioned SQL migrations from ./drizzle.
@@ -29,6 +30,8 @@ async function main() {
 
   const client = postgres(url, { ...buildConnectionOptions(), max: 1 });
   const db = drizzle(client);
+
+  await prepareReplitAuthBeforeMigrate(client);
 
   console.log(`Running migrations from ${migrationsFolder} ...`);
   await migrate(db, { migrationsFolder });
