@@ -57,7 +57,7 @@ export function ProfileSwitcher() {
             </Pressable>
           );
         })}
-        <Pressable style={styles.segAdd} onPress={() => router.push('/profile-setup')}>
+        <Pressable style={styles.segAdd} onPress={() => router.push('/profile-setup?mode=add')}>
           <Ionicons name="add" size={18} color={theme.colors.accent} />
         </Pressable>
       </View>

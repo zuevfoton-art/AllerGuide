@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
+import { brandReportColors as c } from '@/src/constants/layout';
 import { formatDiaryDate, formatDiaryEntrySummary } from '@allerguide/core';
 import type { DiaryEntry, Profile } from '@/src/types';
 
@@ -55,20 +56,20 @@ export async function generateDoctorPdf(profileId: number) {
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [profileId]);
   const entries = db.getAllSync<DiaryEntry>('SELECT * FROM diary_entries WHERE profileId = ? ORDER BY createdAt DESC', [profileId]);
   const html = `
-    <html><body style="font-family: Helvetica, Arial, sans-serif; padding: 24px; color:#20322a;">
-      <h1>Отчёт AllerGuide для врача</h1>
+    <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
+      <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">Отчёт AllerGuide для врача</h1>
       <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
       <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
-      <p style="font-size:12px;color:#555;">Отчёт сформирован пользователем/родителем на основе самостоятельно введённых данных и не является медицинской документацией.</p>
-      <hr />
+      <p style="font-size:12px;color:${c.muted};">Отчёт сформирован пользователем/родителем на основе самостоятельно введённых данных и не является медицинской документацией.</p>
+      <hr style="border:none;border-top:1px solid ${c.border};" />
       ${entries
         .map((e) => {
           const summary = formatDiaryEntrySummary(e.type, e.details || '');
           return `<div style="margin-bottom:12px;"><h3>${e.type}</h3><p>${summary}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`;
         })
         .join('')}
-      <hr />
-      <p style="font-size:12px;color:#555;">Информация в приложении носит рекомендательный и справочный характер и не является медицинским заключением, диагнозом или назначением лечения.</p>
+      <hr style="border:none;border-top:1px solid ${c.border};" />
+      <p style="font-size:12px;color:${c.muted};">Информация в приложении носит рекомендательный и справочный характер и не является медицинским заключением, диагнозом или назначением лечения.</p>
     </body></html>`;
 
   if (Platform.OS === 'web') {

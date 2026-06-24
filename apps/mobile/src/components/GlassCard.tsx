@@ -1,5 +1,6 @@
 import { PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
+import { radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 type GlassCardProps = PropsWithChildren<{
@@ -21,13 +22,13 @@ function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
     card: {
       backgroundColor: colors.card,
-      borderRadius: 8,
+      borderRadius: radii.lg,
       borderWidth: 1,
       borderColor: colors.border,
       ...(shadows.sm as object),
     },
     padded: {
-      padding: 16,
+      padding: space[4],
     },
   });
 }

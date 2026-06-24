@@ -36,8 +36,10 @@
       --tip-text: #1e40af;
       --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
       --phone-border: #e2e8f0;
-      --radius: 8px;
       --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
       --sans: 'Inter', system-ui, sans-serif;
       --serif: 'Source Serif 4', Georgia, serif;
     }
@@ -130,7 +132,7 @@
       padding: 14px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--radius-lg);
       font-size: 12px;
       color: var(--text-secondary);
       line-height: 1.65;
@@ -202,7 +204,7 @@
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--radius-lg);
       padding: 16px;
       box-shadow: var(--shadow-sm);
       margin-bottom: 12px;
@@ -262,8 +264,8 @@
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
-      border-radius: var(--radius-sm); font-family: var(--sans);
-      font-size: 14px; font-weight: 600; min-height: 44px;
+      border-radius: var(--radius-md); font-family: var(--sans);
+      font-size: 15px; font-weight: 600; min-height: 44px;
       padding: 10px 16px; border: none; cursor: pointer; width: 100%;
     }
 
@@ -276,13 +278,13 @@
 
     .input {
       width: 100%; background: var(--card);
-      border: 1px solid var(--border-input); border-radius: var(--radius-sm);
+      border: 1px solid var(--border-input); border-radius: var(--radius-md);
       padding: 12px 14px; font-size: 15px; color: var(--text); font-family: var(--sans);
     }
 
     .toggle-row {
       display: flex; border: 1px solid var(--border);
-      border-radius: var(--radius-sm); overflow: hidden;
+      border-radius: var(--radius-md); overflow: hidden;
       background: var(--card); margin-bottom: 12px;
     }
 
@@ -347,7 +349,7 @@
 
     .sos-call {
       text-align: center; padding: 20px 16px;
-      border: 1px solid var(--danger-border); border-radius: var(--radius);
+      border: 1px solid var(--danger-border); border-radius: var(--radius-lg);
       background: var(--danger-light); margin-bottom: 12px;
     }
 
@@ -360,7 +362,7 @@
     }
 
     .map-box {
-      height: 160px; border-radius: var(--radius); border: 1px solid var(--border);
+      height: 160px; border-radius: var(--radius-lg); border: 1px solid var(--border);
       background: var(--surface-muted); display: grid; place-items: center;
       color: var(--text-muted); font-size: 13px; margin-bottom: 12px;
     }
@@ -371,19 +373,45 @@
       font-size: 13px; line-height: 1.5;
     }
 
+    .brand-row { display: flex; align-items: center; gap: 10px; }
+    .wordmark { font-size: 18px; line-height: 1; display: flex; align-items: baseline; letter-spacing: -0.2px; }
+    .word-aller { font-family: var(--serif); font-weight: 700; color: var(--head); }
+    .word-guide { font-family: var(--sans); font-weight: 600; color: var(--accent); }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
     .hero-logo {
-      width: 64px; height: 64px; border-radius: var(--radius);
-      background: var(--accent); color: #fff;
-      display: grid; place-items: center; font-size: 28px;
+      width: 64px; height: 64px; border-radius: var(--radius-md);
+      display: grid; place-items: center;
       margin: 16px auto 12px;
     }
+
+    .hero-logo svg { display: block; }
 
     .progress-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 24px; }
     .dot { width: 8px; height: 8px; border-radius: 4px; background: var(--border); }
     .dot.active { width: 20px; background: var(--accent); }
 
     .intro-slide { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px 8px; }
-    .intro-icon { width: 72px; height: 72px; border-radius: var(--radius); display: grid; place-items: center; font-size: 32px; }
+    .intro-icon { width: 72px; height: 72px; border-radius: var(--radius-md); display: grid; place-items: center; font-size: 32px; }
+
+    .market-banner {
+      display: flex; gap: 8px; align-items: center;
+      padding: 10px 16px; margin: 0;
+      background: var(--warning-light); border: none; border-bottom: 1px solid var(--warning-border);
+      border-radius: 0; font-size: 12px; color: var(--warning); font-weight: 600;
+    }
+
+    .market-row {
+      display: flex; gap: 12px; align-items: center;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .market-row:last-child { border-bottom: none; }
+    .market-thumb {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      background: var(--accent-light); color: var(--accent);
+      display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+    }
+    .market-footer { padding: 12px 16px 14px; }
 
     .back-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
     .back-btn {
@@ -468,7 +496,7 @@
     }
 
     .map-yandex {
-      height: 180px; border-radius: var(--radius); border: 1px solid var(--border);
+      height: 180px; border-radius: var(--radius-lg); border: 1px solid var(--border);
       background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
       position: relative; overflow: hidden; margin-bottom: 6px;
     }
@@ -508,7 +536,7 @@
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: SOS-паспорт, алгоритм анафилаксии, клинические шкалы, отчёт v2, Яндекс.Карты, кэш штрихкодов.</p>
+      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code> после брендбука (#45): shield+cross логотип, Inter + Source Serif 4, маркетплейс на главной, SOS-паспорт, шкалы, отчёт v2, Яндекс.Карты.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -537,9 +565,10 @@
         <strong>Клинический roadmap (РААКИ)</strong><br />
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
-        <strong>Карточки</strong> — плоские, radius 6–8px, без glass<br />
+        <strong>Радиусы</strong> — кнопки/input 8px · карточки 12px · бейджи 6px<br />
+        <strong>Логотип</strong> — shield + cross на <code>#2563EB</code>, wordmark Aller/Guide<br />
         <strong>Tab bar</strong> — 4 вкладки: Главная · Дневник · Сканер · SOS<br />
-        <strong>Header</strong> — <code>AllerGuide · {раздел}</code> + serif title<br />
+        <strong>Главная</strong> — BrandLogo + маркетплейс (embedded) + 3 quick-кнопки<br />
         <strong>v2</strong> — паспорт SOS · шкалы ARIA/ACT/SCORAD/UAS7 · отчёт с трендом ПСВ · OFF+cache
         <div class="swatch-row">
           <span class="swatch" style="background:#F4F6F9" title="bg"></span>
@@ -558,7 +587,13 @@
 
         <!-- LOGIN -->
         <section class="screen" id="screen-login">
-          <div class="hero-logo">➕</div>
+          <div class="hero-logo">
+            <svg width="64" height="64" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <rect width="44" height="44" rx="10" fill="#2563EB"/>
+              <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="doc-header" style="text-align:center;margin-bottom:20px">
             <div class="doc-title">Вход</div>
             <div class="doc-meta">Войдите по телефону или email</div>
@@ -579,6 +614,14 @@
 
         <!-- INTRO -->
         <section class="screen" id="screen-onboarding-intro">
+          <div class="brand-row" style="justify-content:center;margin-bottom:8px">
+            <svg width="40" height="40" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <rect width="44" height="44" rx="10" fill="#2563EB"/>
+              <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
+          </div>
           <div class="progress-dots">
             <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
           </div>
@@ -593,7 +636,13 @@
 
         <!-- ONBOARDING -->
         <section class="screen" id="screen-onboarding">
-          <div class="hero-logo">🩺</div>
+          <div class="hero-logo">
+            <svg width="64" height="64" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+              <rect width="44" height="44" rx="10" fill="#2563EB"/>
+              <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="doc-header" style="text-align:center;margin-bottom:16px">
             <div class="doc-title">AllerGuide</div>
             <div class="doc-meta">Персональный помощник в контроле аллергии</div>
@@ -614,8 +663,15 @@
 
         <!-- HOME -->
         <section class="screen active" id="screen-home">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div class="doc-label">AllerGuide · Сводка</div>
+          <div class="top-bar">
+            <div class="brand-row">
+              <svg width="32" height="32" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+              <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
+            </div>
             <div class="sos-top-btn">🚑</div>
           </div>
           <div class="doc-header">
@@ -670,6 +726,41 @@
             </div>
           </div>
 
+          <div class="card flush">
+            <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <span class="card-title">Маркетплейс</span>
+                <div class="feed-sub" style="margin-top:2px">Товары для аллергиков</div>
+              </div>
+              <span class="section-link">Больше</span>
+            </div>
+            <div class="market-banner">⭐ Подборка на основе профиля аллергий</div>
+            <div class="market-row">
+              <div class="market-thumb">💨</div>
+              <div class="feed-body">
+                <div class="feed-title">Очиститель HEPA</div>
+                <div class="feed-sub">Снижает концентрацию аллергенов</div>
+              </div>
+            </div>
+            <div class="market-row">
+              <div class="market-thumb">🧴</div>
+              <div class="feed-body">
+                <div class="feed-title">Гипоаллергенный крем</div>
+                <div class="feed-sub">Без отдушек и ланолина</div>
+              </div>
+            </div>
+            <div class="market-row">
+              <div class="market-thumb">🍯</div>
+              <div class="feed-body">
+                <div class="feed-title">Питание без топ-14</div>
+                <div class="feed-sub">Подборка продуктов</div>
+              </div>
+            </div>
+            <div class="market-footer">
+              <button class="btn btn-secondary btn-sm" style="width:100%">Открыть маркет</button>
+            </div>
+          </div>
+
           <div class="card rec-card" id="rec-card" hidden>
             <div class="rec-title" id="rec-title">—</div>
             <div class="rec-text" id="rec-text">—</div>
@@ -677,6 +768,7 @@
 
           <div class="btn-row">
             <button class="btn btn-secondary">Сканер</button>
+            <button class="btn btn-secondary">Маркет</button>
             <button class="btn btn-secondary">Карта</button>
           </div>
           <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
@@ -861,10 +953,10 @@
             <div class="doc-meta">Товары для аллергиков</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
-          <div class="card" style="padding:12px"><input class="input" style="border:none;padding:0" placeholder="Поиск по каталогу…" readonly /></div>
+          <div class="card" style="padding:12px"><input class="input" style="border-radius:var(--radius-md)" placeholder="Поиск по каталогу…" readonly /></div>
           <div class="card banner-warn">⭐ Подборка на основе профиля аллергий</div>
           <div class="card" style="display:flex;gap:14px;align-items:center">
-            <div class="feed-icon" style="background:#6366f118;color:var(--purple)">💨</div>
+            <div class="feed-icon" style="background:var(--accent-light);color:var(--accent)">💨</div>
             <div style="flex:1"><strong>Очиститель HEPA</strong><div class="feed-sub">Снижает концентрацию аллергенов</div></div>
             <span style="color:var(--text-muted)">›</span>
           </div>
@@ -911,7 +1003,13 @@
             </div>
           </div>
           <div class="card" style="text-align:center">
-            <div class="hero-logo" style="width:48px;height:48px;font-size:22px;margin:0 auto 8px">🎓</div>
+            <div class="hero-logo" style="width:48px;height:48px;margin:0 auto 8px">
+              <svg width="48" height="48" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
             <div class="feed-sub">Главный медицинский эксперт AllerGuide</div>
           </div>
           <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px">
