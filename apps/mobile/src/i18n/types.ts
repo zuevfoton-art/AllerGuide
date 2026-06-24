@@ -106,6 +106,12 @@ export type LocaleMessages = {
     logoutConfirm: string;
     deleteTitle: string;
     deleteMessage: string;
+    accountTitle: string;
+    accountHint: string;
+    deleteAccount: string;
+    deleteAccountTitle: string;
+    deleteAccountMessage: string;
+    deleteAccountConfirm: string;
   };
   theme: {
     title: string;
@@ -268,10 +274,14 @@ export type LocaleMessages = {
     syncError: string;
     uploadSuccess: string;
     downloadSuccess: string;
+    account: string;
+    manageProfiles: string;
+    manageProfilesHint: string;
   };
   profileSwitcher: {
     add: string;
     hint: string;
+    manage: string;
   };
   onboarding: {
     tagline: string;

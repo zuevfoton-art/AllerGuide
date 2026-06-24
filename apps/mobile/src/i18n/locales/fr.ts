@@ -102,6 +102,13 @@ const fr: LocaleMessages = {
     logoutConfirm: 'Quitter',
     deleteTitle: 'Supprimer le profil ?',
     deleteMessage: 'Le profil « {{name}} » et toutes les entrées seront supprimés.',
+    accountTitle: 'Compte',
+    accountHint: 'Se déconnecter ou supprimer définitivement le compte et toutes les données.',
+    deleteAccount: 'Supprimer le compte',
+    deleteAccountTitle: 'Supprimer le compte ?',
+    deleteAccountMessage:
+      'Tous les profils, entrées du journal et historique des scans seront définitivement supprimés.',
+    deleteAccountConfirm: 'Supprimer le compte',
   },
   theme: {
     title: 'Apparence',
@@ -265,10 +272,14 @@ const fr: LocaleMessages = {
     syncError: 'Erreur',
     uploadSuccess: 'Sauvegarde envoyée au serveur.',
     downloadSuccess: 'Données restaurées depuis la sauvegarde.',
+    account: 'Compte',
+    manageProfiles: 'Mes profils',
+    manageProfilesHint: 'Profils, déconnexion et suppression du compte',
   },
   profileSwitcher: {
     add: 'Profil',
     hint: 'Appuyez à nouveau sur le profil actif pour modifier',
+    manage: 'Mes profils et compte',
   },
   onboarding: {
     tagline: 'Votre assistant intelligent pour le suivi des allergies',

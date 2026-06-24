@@ -102,6 +102,13 @@ const es: LocaleMessages = {
     logoutConfirm: 'Salir',
     deleteTitle: '¿Eliminar perfil?',
     deleteMessage: 'El perfil «{{name}}» y todas las entradas del diario serán eliminados.',
+    accountTitle: 'Cuenta',
+    accountHint: 'Cerrar sesión o eliminar permanentemente la cuenta y todos los datos.',
+    deleteAccount: 'Eliminar cuenta',
+    deleteAccountTitle: '¿Eliminar cuenta?',
+    deleteAccountMessage:
+      'Todos los perfiles, entradas del diario e historial de escaneos se eliminarán permanentemente.',
+    deleteAccountConfirm: 'Eliminar cuenta',
   },
   theme: {
     title: 'Tema',
@@ -265,10 +272,14 @@ const es: LocaleMessages = {
     syncError: 'Error',
     uploadSuccess: 'Copia de seguridad enviada al servidor.',
     downloadSuccess: 'Datos restaurados desde la copia de seguridad.',
+    account: 'Cuenta',
+    manageProfiles: 'Mis perfiles',
+    manageProfilesHint: 'Perfiles, cerrar sesión y eliminar cuenta',
   },
   profileSwitcher: {
     add: 'Perfil',
     hint: 'Toca de nuevo el perfil activo para editar',
+    manage: 'Mis perfiles y cuenta',
   },
   onboarding: {
     tagline: 'Tu asistente inteligente para el control de alergias',

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies } from '@allerguide/core';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { confirmLogout } from '@/src/utils/confirm-logout';
+import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
@@ -120,12 +121,22 @@ export default function ProfilesScreen() {
         <ThemeToggle embedded />
       </GlassCard>
 
-      <Pressable
-        style={styles.logoutBtn}
-        onPress={() => confirmLogout(router)}
-        accessibilityRole="button">
-        <Text style={styles.logoutText}>{t('profiles.logout')}</Text>
-      </Pressable>
+      <Text style={ui.sectionLabel}>{t('profiles.accountTitle')}</Text>
+      <GlassCard>
+        <Text style={styles.accountHint}>{t('profiles.accountHint')}</Text>
+        <Pressable
+          style={styles.accountBtn}
+          onPress={() => confirmLogout(router)}
+          accessibilityRole="button">
+          <Text style={styles.logoutText}>{t('profiles.logout')}</Text>
+        </Pressable>
+        <Pressable
+          style={styles.deleteAccountBtn}
+          onPress={() => confirmDeleteAccount(router)}
+          accessibilityRole="button">
+          <Text style={styles.deleteAccountText}>{t('profiles.deleteAccount')}</Text>
+        </Pressable>
+      </GlassCard>
     </Screen>
   );
 }
@@ -183,7 +194,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingBottom: 16,
       lineHeight: 18,
     },
-    logoutBtn: {
+    accountHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+      marginBottom: 12,
+    },
+    accountBtn: {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 44,
@@ -193,8 +211,26 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.dangerBorder,
+      marginBottom: 10,
+    },
+    deleteAccountBtn: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 44,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.danger,
     },
     logoutText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.danger,
+    },
+    deleteAccountText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
       fontWeight: '600',

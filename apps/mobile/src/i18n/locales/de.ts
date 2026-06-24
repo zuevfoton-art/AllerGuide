@@ -102,6 +102,13 @@ const de: LocaleMessages = {
     logoutConfirm: 'Abmelden',
     deleteTitle: 'Profil löschen?',
     deleteMessage: 'Profil «{{name}}» und alle Tagebucheinträge werden gelöscht.',
+    accountTitle: 'Konto',
+    accountHint: 'Abmelden oder Konto und alle Daten dauerhaft löschen.',
+    deleteAccount: 'Konto löschen',
+    deleteAccountTitle: 'Konto löschen?',
+    deleteAccountMessage:
+      'Alle Profile, Tagebucheinträge und Scan-Verläufe werden unwiderruflich gelöscht.',
+    deleteAccountConfirm: 'Konto löschen',
   },
   theme: {
     title: 'Erscheinungsbild',
@@ -265,10 +272,14 @@ const de: LocaleMessages = {
     syncError: 'Fehler',
     uploadSuccess: 'Backup auf Server hochgeladen.',
     downloadSuccess: 'Daten aus Backup wiederhergestellt.',
+    account: 'Konto',
+    manageProfiles: 'Meine Profile',
+    manageProfilesHint: 'Profile, Abmelden und Konto löschen',
   },
   profileSwitcher: {
     add: 'Profil',
     hint: 'Aktives Profil erneut tippen zum Bearbeiten',
+    manage: 'Meine Profile & Konto',
   },
   onboarding: {
     tagline: 'Ihr intelligenter Assistent für Allergiemanagement',
