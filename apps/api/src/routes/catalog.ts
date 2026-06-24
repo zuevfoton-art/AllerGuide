@@ -2,8 +2,12 @@ import type { Express, Request, Response } from 'express';
 import { eq, ilike, sql } from 'drizzle-orm';
 import { getAllAllergens } from '@allerguide/core';
 import { db, readDb } from '../db';
-import { allergens, products } from '../db/catalog-schema';
-import { fetchOpenFoodFactsProduct } from '../services/open-food-facts';
+import { allergens, products, type ProductRow } from '../db/catalog-schema';
+import {
+  fetchOpenFoodFactsProduct,
+  searchOpenFoodFacts,
+  type NormalizedProduct,
+} from '../services/open-food-facts';
 
 function databaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
@@ -15,6 +19,35 @@ function offFallbackEnabled(): boolean {
 
 function normalizeBarcode(raw: string): string {
   return raw.replace(/\s+/g, '').trim();
+}
+
+/** Upsert an Open Food Facts product into the catalog cache. */
+async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> {
+  const [saved] = await db
+    .insert(products)
+    .values({
+      barcode: product.barcode,
+      name: product.name,
+      brand: product.brand,
+      imageUrl: product.imageUrl,
+      ingredients: product.ingredients,
+      allergenTags: product.allergenTags,
+      source: 'openfoodfacts',
+    })
+    .onConflictDoUpdate({
+      target: products.barcode,
+      set: {
+        name: sql`excluded.name`,
+        brand: sql`excluded.brand`,
+        imageUrl: sql`excluded.image_url`,
+        ingredients: sql`excluded.ingredients`,
+        allergenTags: sql`excluded.allergen_tags`,
+        source: sql`excluded.source`,
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
+  return saved;
 }
 
 export function registerCatalogRoutes(app: Express) {
@@ -53,12 +86,25 @@ export function registerCatalogRoutes(app: Express) {
     }
 
     try {
-      const rows = await readDb
+      const local = await readDb
         .select()
         .from(products)
         .where(ilike(products.name, `%${query}%`))
         .limit(20);
-      res.json({ ok: true, count: rows.length, products: rows });
+
+      if (local.length > 0 || !offFallbackEnabled()) {
+        res.json({ ok: true, source: 'cache', count: local.length, products: local });
+        return;
+      }
+
+      // On-demand: nothing cached locally -> query Open Food Facts and cache it.
+      const offResults = await searchOpenFoodFacts(query);
+      const saved: ProductRow[] = [];
+      for (const product of offResults) {
+        saved.push(await cacheOffProduct(product));
+      }
+
+      res.json({ ok: true, source: 'openfoodfacts', count: saved.length, products: saved });
     } catch {
       res.status(500).json({ ok: false, error: 'Search failed' });
     }
@@ -88,26 +134,7 @@ export function registerCatalogRoutes(app: Express) {
       if (offFallbackEnabled()) {
         const fetched = await fetchOpenFoodFactsProduct(barcode);
         if (fetched) {
-          const [saved] = await db
-            .insert(products)
-            .values({
-              barcode: fetched.barcode,
-              name: fetched.name,
-              ingredients: fetched.ingredients,
-              allergenTags: fetched.allergenTags,
-              source: 'openfoodfacts',
-            })
-            .onConflictDoUpdate({
-              target: products.barcode,
-              set: {
-                name: sql`excluded.name`,
-                ingredients: sql`excluded.ingredients`,
-                allergenTags: sql`excluded.allergen_tags`,
-                source: sql`excluded.source`,
-                updatedAt: new Date(),
-              },
-            })
-            .returning();
+          const saved = await cacheOffProduct(fetched);
           res.json({ ok: true, product: saved, source: 'openfoodfacts' });
           return;
         }

@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, type PressableProps, type ViewStyle } from 'react-native';
+import { radii } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -62,7 +64,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     base: {
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 6,
+      borderRadius: radii.md,
       minHeight: 44,
       paddingHorizontal: 16,
       paddingVertical: 10,
@@ -71,7 +73,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       minHeight: 36,
       paddingHorizontal: 12,
       paddingVertical: 7,
-      borderRadius: 5,
+      borderRadius: radii.sm,
     },
     block: { width: '100%' },
     primary: { backgroundColor: colors.accent },
@@ -86,9 +88,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     pressed: { opacity: 0.88 },
     text: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.body,
       fontWeight: '600',
     },
-    textSm: { fontSize: 12 },
+    textSm: { fontSize: fontSizes.label },
   });
 }

@@ -3,10 +3,15 @@ import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import {
   DIARY_SECTIONS,
+  computeScaleScore,
   encodeDiaryDetails,
+  enrichScaleAnswers,
   getDiaryStepAnswers,
+  getScaleIdFromAnswers,
   hasSectionAnswers,
+  validateClinicalScale,
   validateDiarySectionStep,
+  buildIntoleranceAlert,
   type DiarySection,
   type DiaryStep,
 } from '@allerguide/core';
@@ -28,6 +33,7 @@ interface DiaryWizardProps {
   onDelete?: () => void;
   submitLabel?: string;
   allowSkipSection?: boolean;
+  drugIntolerances?: string[];
 }
 
 export function DiaryWizard({
@@ -38,6 +44,7 @@ export function DiaryWizard({
   onDelete,
   submitLabel,
   allowSkipSection = true,
+  drugIntolerances,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -69,18 +76,37 @@ export function DiaryWizard({
     totalSections > 1 &&
     (!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0);
 
+  const scalePreview =
+    section.type === 'Шкала' && isLastStep
+      ? (() => {
+          const scaleId = getScaleIdFromAnswers(sectionAnswers);
+          return scaleId ? computeScaleScore(scaleId, sectionAnswers) : null;
+        })()
+      : null;
+
   const setAnswer = (stepId: string, value: string) => {
-    setAnswersBySection((prev) => ({
-      ...prev,
-      [section.type]: {
+    setAnswersBySection((prev) => {
+      const nextSectionAnswers = {
         ...(prev[section.type] ?? {}),
         [stepId]: value,
-      },
-    }));
+      };
+      if (stepId === 'medicine' && section.type === 'Лекарство' && drugIntolerances?.length) {
+        const alert = buildIntoleranceAlert(value, drugIntolerances);
+        if (alert) nextSectionAnswers.intoleranceAlert = alert;
+        else delete nextSectionAnswers.intoleranceAlert;
+      }
+      return {
+        ...prev,
+        [section.type]: nextSectionAnswers,
+      };
+    });
   };
 
   const goNext = () => {
-    const validationError = validateDiarySectionStep(section, stepIndex, sectionAnswers);
+    const validationError =
+      section.type === 'Шкала' && isLastStep
+        ? validateClinicalScale(sectionAnswers)
+        : validateDiarySectionStep(section, stepIndex, sectionAnswers);
     if (validationError) {
       setError(tDiaryError(validationError));
       return;
@@ -125,14 +151,23 @@ export function DiaryWizard({
   };
 
   const finishWizard = () => {
+    let scaleError: string | null = null;
     const entries = sections.flatMap((item) => {
       const answers = answersBySection[item.type] ?? {};
       if (!hasSectionAnswers(item, answers)) return [];
+
+      if (item.type === 'Шкала') {
+        scaleError = validateClinicalScale(answers);
+        if (scaleError) return [];
+        const enriched = enrichScaleAnswers(answers);
+        return [{ type: item.type, details: encodeDiaryDetails(enriched) }];
+      }
+
       return [{ type: item.type, details: encodeDiaryDetails(answers) }];
     });
 
     if (entries.length === 0) {
-      setError(t('diaryWizard.fillOneSection'));
+      setError(scaleError ? tDiaryError(scaleError) : t('diaryWizard.fillOneSection'));
       return;
     }
 
@@ -169,6 +204,15 @@ export function DiaryWizard({
         value={sectionAnswers[step.id] ?? ''}
         onChange={(value) => setAnswer(step.id, value)}
       />
+
+      {scalePreview ? (
+        <Text style={styles.scalePreview}>
+          {t('diaryWizard.scalePreview', {
+            score: scalePreview.total,
+            interpretation: scalePreview.interpretation,
+          })}
+        </Text>
+      ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -459,6 +503,17 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
       lineHeight: 24,
+    },
+    scalePreview: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.accent,
+      lineHeight: 18,
+      backgroundColor: colors.accentLight,
+      borderRadius: 6,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: colors.accentMid,
     },
     error: {
       fontFamily: fonts.sansSemiBold,

@@ -1,16 +1,18 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { getWizardStep, shouldCompleteOnboarding, type ProfileType } from '@allerguide/core';
+import { getWizardStep, shouldCompleteOnboarding, type AllergyConditionId, type ProfileType } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
+import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { createProfile, listProfiles } from '@/src/services/profile-service';
+import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import {
   normalizeEmergencyContactDrafts,
   syncEmergencyContacts,
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
 import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
-import { getStoredScenario, isOnboardingComplete, markOnboardingComplete } from '@/src/services/settings-service';
+import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -42,11 +44,14 @@ export default function ProfileSetupScreen() {
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, tProfileError } = useTranslation();
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const isAddingProfile = params.mode === 'add';
   const scenario = useAppStore((s) => s.scenario) ?? getStoredScenario();
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
@@ -79,6 +84,7 @@ export default function ProfileSetupScreen() {
     setName('');
     setBirthYear('');
     setSelected([]);
+    setConditions([]);
     setContacts([]);
     setError('');
   };
@@ -96,22 +102,38 @@ export default function ProfileSetupScreen() {
     }
 
     setError('');
-    const id = await createProfile({
-      name: name.trim(),
-      birthYear: Number(birthYear),
-      type: effectiveType,
-      allergies: selected,
-    });
 
-    if (!id) return;
+    let id: number | null;
+    try {
+      id = await createProfile({
+        name: name.trim(),
+        birthYear: Number(birthYear),
+        type: effectiveType,
+        allergies: selected,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('profileSetup.errors.saveFailed'));
+      return;
+    }
 
+    if (!id) {
+      setError(t('profileSetup.errors.saveFailed'));
+      return;
+    }
+
+    setStoredProfileConditions(id, conditions);
     syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
 
     setActiveProfileId(id);
     const profiles = listProfiles();
 
-    if (isOnboardingComplete()) {
-      router.back();
+    if (isAddingProfile) {
+      markOnboardingComplete();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/(tabs)/home');
+      }
       return;
     }
 
@@ -197,6 +219,11 @@ export default function ProfileSetupScreen() {
             </Text>
           </View>
         )}
+      </GlassCard>
+
+      <GlassCard style={styles.section}>
+        <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
+        <ConditionPicker selected={conditions} onChange={setConditions} />
       </GlassCard>
 
       <GlassCard style={styles.section}>

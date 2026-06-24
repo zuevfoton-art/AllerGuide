@@ -1,0 +1,152 @@
+import type { CrossReaction } from './types';
+
+/** Phase 2: new allergen ids (pollen, celery, melon, cereals, fish, chestnut). */
+export const CROSS_REACTIONS_PHASE_2: CrossReaction[] = [
+  {
+    fromId: 'birch-pollen',
+    toId: 'celery',
+    risk: 'high',
+    protein: 'Api g 1',
+    syndrome: 'oas',
+    note: 'Синдром «берёза — полынь — сельдерей»',
+  },
+
+  {
+    fromId: 'mugwort-pollen',
+    toId: 'celery',
+    risk: 'high',
+    protein: 'Api g 1',
+    syndrome: 'oas',
+    note: 'Синдром «полынь — сельдерей — специи»',
+  },
+  {
+    fromId: 'mugwort-pollen',
+    toId: 'carrot',
+    risk: 'high',
+    protein: 'Dau c 4',
+    note: 'Перекрёст через LTP — термостабилен',
+  },
+  {
+    fromId: 'mugwort-pollen',
+    toId: 'birch-pollen',
+    risk: 'medium',
+    syndrome: 'pollen-food',
+    note: 'Родственные пыльцевые аллергены',
+  },
+  {
+    fromId: 'mugwort-pollen',
+    toId: 'ragweed-pollen',
+    risk: 'low',
+    syndrome: 'pollen-food',
+    note: 'Сорные травы — частичное перекрытие',
+  },
+
+  {
+    fromId: 'grass-pollen',
+    toId: 'wheat-gluten',
+    risk: 'medium',
+    protein: 'Tri a 12',
+    syndrome: 'pollen-food',
+    note: 'Профилин, перекрёст с Phl p 12',
+  },
+  {
+    fromId: 'grass-pollen',
+    toId: 'rye',
+    risk: 'medium',
+    protein: 'Sec c',
+    syndrome: 'pollen-food',
+    note: 'Перекрёст через профилины',
+  },
+  {
+    fromId: 'grass-pollen',
+    toId: 'barley',
+    risk: 'low',
+    syndrome: 'pollen-food',
+    note: 'Перекрёст возможен через профилины',
+  },
+  {
+    fromId: 'grass-pollen',
+    toId: 'tomato',
+    risk: 'medium',
+    protein: 'Sola l 1',
+    syndrome: 'pollen-food',
+    note: 'Профилин, перекрёст с Phl p 12',
+  },
+  {
+    fromId: 'grass-pollen',
+    toId: 'peanut',
+    risk: 'low',
+    protein: 'Ara h 5',
+    syndrome: 'pollen-food',
+    note: 'Профилин',
+  },
+  {
+    fromId: 'grass-pollen',
+    toId: 'melon',
+    risk: 'low',
+    protein: 'Cuc m 2',
+    syndrome: 'pollen-food',
+    note: 'Профилин бахчевых',
+  },
+  {
+    fromId: 'grass-pollen',
+    toId: 'citrus',
+    risk: 'low',
+    protein: 'Cit s 2',
+    syndrome: 'pollen-food',
+    note: 'Профилин цитрусовых',
+  },
+
+  {
+    fromId: 'ragweed-pollen',
+    toId: 'melon',
+    risk: 'high',
+    protein: 'Cuc m 1',
+    syndrome: 'pollen-food',
+    note: 'Профилин, перекрёст с Amb a 8',
+  },
+
+  {
+    fromId: 'latex',
+    toId: 'chestnut',
+    risk: 'high',
+    protein: 'Cas s 5',
+    syndrome: 'latex-fruit',
+    note: 'Хитиназа класса I',
+  },
+
+  {
+    fromId: 'wheat-gluten',
+    toId: 'rye',
+    risk: 'high',
+    protein: 'Sec c',
+    syndrome: 'cereal',
+    clinicalFrequency: '70-80%',
+    note: 'Высокая гомология глютенов и глиадинов',
+  },
+  {
+    fromId: 'wheat-gluten',
+    toId: 'barley',
+    risk: 'high',
+    protein: 'Hor v',
+    syndrome: 'cereal',
+    note: 'Гомология с белками пшеницы >80%',
+  },
+  {
+    fromId: 'wheat-gluten',
+    toId: 'grass-pollen',
+    risk: 'medium',
+    syndrome: 'pollen-food',
+    note: 'Пыльца злаковых трав',
+  },
+
+  {
+    fromId: 'fish',
+    toId: 'other-fish',
+    risk: 'high',
+    protein: 'Gad c 1',
+    syndrome: 'animal-protein',
+    clinicalFrequency: '50-70%',
+    note: 'Парвальбумин — перекрёст между видами рыб',
+  },
+];

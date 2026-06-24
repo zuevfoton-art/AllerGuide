@@ -66,6 +66,27 @@ export type LocaleMessages = {
       phoneTaken: string;
       createFailed: string;
     };
+    forgot: {
+      title: string;
+      subtitle: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      submitButton: string;
+      successTitle: string;
+      successMessage: string;
+      backToLogin: string;
+      emailOnlyHint: string;
+    };
+    resetPassword: {
+      title: string;
+      subtitle: string;
+      newPassword: string;
+      confirmPassword: string;
+      submitButton: string;
+      successTitle: string;
+      successMessage: string;
+      invalidToken: string;
+    };
   };
   profiles: {
     title: string;
@@ -119,6 +140,10 @@ export type LocaleMessages = {
     medicine: string;
     medicineSub: string;
     expert: string;
+    marketplaceTitle: string;
+    marketplaceSub: string;
+    marketplaceEmpty: string;
+    marketplaceOpen: string;
     disclaimer: string;
   };
   diary: {
@@ -136,6 +161,12 @@ export type LocaleMessages = {
     deleteTitle: string;
     deleteMessage: string;
     saveChanges: string;
+    scale: string;
+    scalePick: string;
+    scaleRaaciHint: string;
+    scaleTrends: string;
+    scaleTrendsEmpty: string;
+    scaleSuggested: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -145,6 +176,7 @@ export type LocaleMessages = {
     editEntry: string;
     entryPlaceholder: string;
     enterEntryText: string;
+    scalePreview: string;
   };
   scanner: {
     title: string;
@@ -283,6 +315,9 @@ export type LocaleMessages = {
     profileSelfLocked: string;
     profileChildLocked: string;
     allergensLabel: string;
+    conditionsLabel: string;
+    conditionsHint: string;
+    conditionsOther: string;
     consent: string;
     contactsLabel: string;
     saveProfile: string;
@@ -293,6 +328,7 @@ export type LocaleMessages = {
       birthYearInvalid: string;
       allergenRequired: string;
       consentRequired: string;
+      saveFailed: string;
     };
   };
   profileEdit: {
@@ -304,6 +340,60 @@ export type LocaleMessages = {
       birthYearInvalid: string;
       allergenRequired: string;
     };
+  };
+  asit: {
+    title: string;
+    eyebrow: string;
+    courseTitle: string;
+    courseSubtitle: string;
+    setupCourse: string;
+    editCourse: string;
+    logDose: string;
+    emptyCourse: string;
+    doses30d: string;
+    onTime: string;
+    missed: string;
+    allergenLabel: string;
+    allergenPlaceholder: string;
+    drugLabel: string;
+    drugPlaceholder: string;
+    routeLabel: string;
+    phaseLabel: string;
+    startDateLabel: string;
+    startDatePlaceholder: string;
+    scheduleLabel: string;
+    schedulePlaceholder: string;
+    saveCourse: string;
+    disclaimer: string;
+    noProfile: string;
+    notEligible: string;
+  };
+  foodDrug: {
+    eyebrow: string;
+    foodTitle: string;
+    drugTitle: string;
+    editRegistry: string;
+    editSos: string;
+    emptyFoodList: string;
+    emptyDrugList: string;
+    foodEntries30d: string;
+    foodReactions30d: string;
+    drugEntries30d: string;
+    drugWarnings30d: string;
+    logFood: string;
+    logMedicine: string;
+    registryTitle: string;
+    registrySubtitle: string;
+    profileAllergens: string;
+    noProfileAllergens: string;
+    extraAvoidFoods: string;
+    extraAvoidFoodsPlaceholder: string;
+    clinicalNotes: string;
+    clinicalNotesPlaceholder: string;
+    saveRegistry: string;
+    disclaimer: string;
+    noProfile: string;
+    notEligibleFood: string;
   };
   sos: {
     title: string;
@@ -323,6 +413,18 @@ export type LocaleMessages = {
     settingsLink: string;
     tip: string;
     disclaimer: string;
+    passportTitle: string;
+    passportEmpty: string;
+    drugIntolerances: string;
+    triggers: string;
+    epinephrine: string;
+    doctor: string;
+    anaphylaxisHistory: string;
+    shockKit: string;
+    anaphylaxisTitle: string;
+    sharePassport: string;
+    exportPdf: string;
+    sharing: string;
   };
   sosEdit: {
     title: string;
@@ -338,6 +440,18 @@ export type LocaleMessages = {
     addContact: string;
     savedNotes: string;
     savedPlan: string;
+    passportLabel: string;
+    drugIntolerancesPlaceholder: string;
+    triggersPlaceholder: string;
+    epiBrandPlaceholder: string;
+    epiExpiryPlaceholder: string;
+    epiLocationPlaceholder: string;
+    doctorNamePlaceholder: string;
+    doctorPhonePlaceholder: string;
+    anaphylaxisHistory: string;
+    shockKitLabel: string;
+    savePassport: string;
+    savedPassport: string;
     errors: {
       profileRequired: string;
       contactRequired: string;
@@ -370,6 +484,9 @@ export type LocaleMessages = {
     catalogTitle: string;
     searchPlaceholder: string;
     crossReactions: string;
+    crossRiskHigh: string;
+    crossRiskMedium: string;
+    crossRiskLow: string;
   };
   emergencyContacts: {
     empty: string;

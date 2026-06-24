@@ -5,6 +5,13 @@ import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
+import {
+  DEFAULT_SHOCK_KIT,
+  type AllergyPassport,
+  type EmergencyContact,
+  type EmergencyContactRelation,
+  type ShockKitItem,
+} from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -19,7 +26,21 @@ import {
   getSosActionPlan,
   saveSosActionPlan,
 } from '@/src/services/sos-service';
-import type { EmergencyContact, EmergencyContactRelation } from '@allerguide/core';
+import {
+  getAllergyPassport,
+  saveAllergyPassport,
+} from '@/src/services/sos-passport-service';
+
+function parseListInput(value: string): string[] {
+  return value
+    .split(/[,;\n]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function formatListInput(items: string[]): string {
+  return items.join(', ');
+}
 
 export default function SosEditScreen() {
   const theme = useTheme();
@@ -31,21 +52,42 @@ export default function SosEditScreen() {
   const [notes, setNotes] = useState('');
   const [plan, setPlan] = useState('');
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
+  const [passport, setPassport] = useState<AllergyPassport | null>(null);
+  const [drugIntolerances, setDrugIntolerances] = useState('');
+  const [triggers, setTriggers] = useState('');
+  const [epiBrand, setEpiBrand] = useState('');
+  const [epiExpiry, setEpiExpiry] = useState('');
+  const [epiLocation, setEpiLocation] = useState('');
+  const [doctorName, setDoctorName] = useState('');
+  const [doctorPhone, setDoctorPhone] = useState('');
+  const [anaphylaxisHistory, setAnaphylaxisHistory] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [relation, setRelation] = useState<EmergencyContactRelation>('relative');
   const [error, setError] = useState('');
+  const [passportOpen, setPassportOpen] = useState(false);
 
   const refresh = useCallback(() => {
     if (!profile) {
       setNotes('');
       setPlan('');
       setContacts([]);
+      setPassport(null);
       return;
     }
     setNotes(getSosNotes(profile.id));
     setPlan(getSosActionPlan(profile.id));
     setContacts(listEmergencyContacts(profile.id));
+    const p = getAllergyPassport(profile.id);
+    setPassport(p);
+    setDrugIntolerances(formatListInput(p.drugIntolerances));
+    setTriggers(formatListInput(p.triggers));
+    setEpiBrand(p.epinephrine?.brand ?? '');
+    setEpiExpiry(p.epinephrine?.expiry ?? '');
+    setEpiLocation(p.epinephrine?.location ?? '');
+    setDoctorName(p.doctorName ?? '');
+    setDoctorPhone(p.doctorPhone ?? '');
+    setAnaphylaxisHistory(Boolean(p.anaphylaxisHistory));
   }, [profile]);
 
   useFocusEffect(
@@ -72,6 +114,40 @@ export default function SosEditScreen() {
     saveSosActionPlan(profile.id, plan);
     setError('');
     Alert.alert(t('settings.saved'), t('sosEdit.savedPlan'));
+  };
+
+  const savePassport = () => {
+    if (!profile || !passport) {
+      setError(t('errors.selectProfile'));
+      return;
+    }
+    const next: AllergyPassport = {
+      ...passport,
+      drugIntolerances: parseListInput(drugIntolerances),
+      triggers: parseListInput(triggers),
+      epinephrine: {
+        brand: epiBrand.trim() || undefined,
+        expiry: epiExpiry.trim() || undefined,
+        location: epiLocation.trim() || undefined,
+      },
+      doctorName: doctorName.trim() || undefined,
+      doctorPhone: doctorPhone.trim() || undefined,
+      anaphylaxisHistory,
+    };
+    saveAllergyPassport(profile.id, next);
+    setPassport(next);
+    setError('');
+    Alert.alert(t('settings.saved'), t('sosEdit.savedPassport'));
+  };
+
+  const toggleKitItem = (id: string) => {
+    if (!passport) return;
+    const shockKit = passport.shockKit.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item,
+    );
+    const next = { ...passport, shockKit };
+    setPassport(next);
+    if (profile) saveAllergyPassport(profile.id, next);
   };
 
   const addContact = () => {
@@ -102,6 +178,8 @@ export default function SosEditScreen() {
     refresh();
   };
 
+  const kitItems = passport?.shockKit ?? DEFAULT_SHOCK_KIT;
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -118,6 +196,86 @@ export default function SosEditScreen() {
           <Text style={ui.docMeta}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
         </View>
       </View>
+
+      <Pressable style={styles.collapseHead} onPress={() => setPassportOpen((v) => !v)}>
+        <Text style={ui.sectionLabel}>{t('sosEdit.passportLabel')}</Text>
+        <Ionicons name={passportOpen ? 'chevron-up' : 'chevron-down'} size={18} color={theme.colors.textMuted} />
+      </Pressable>
+
+      {passportOpen ? (
+        <GlassCard style={styles.section}>
+          <TextInput
+            style={styles.input}
+            value={drugIntolerances}
+            onChangeText={setDrugIntolerances}
+            placeholder={t('sosEdit.drugIntolerancesPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+          />
+          <TextInput
+            style={styles.input}
+            value={triggers}
+            onChangeText={setTriggers}
+            placeholder={t('sosEdit.triggersPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+          />
+          <TextInput
+            style={styles.input}
+            value={epiBrand}
+            onChangeText={setEpiBrand}
+            placeholder={t('sosEdit.epiBrandPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+          />
+          <TextInput
+            style={styles.input}
+            value={epiExpiry}
+            onChangeText={setEpiExpiry}
+            placeholder={t('sosEdit.epiExpiryPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+          />
+          <TextInput
+            style={styles.input}
+            value={epiLocation}
+            onChangeText={setEpiLocation}
+            placeholder={t('sosEdit.epiLocationPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+          />
+          <TextInput
+            style={styles.input}
+            value={doctorName}
+            onChangeText={setDoctorName}
+            placeholder={t('sosEdit.doctorNamePlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+          />
+          <TextInput
+            style={styles.input}
+            value={doctorPhone}
+            onChangeText={setDoctorPhone}
+            placeholder={t('sosEdit.doctorPhonePlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+            keyboardType="phone-pad"
+          />
+          <Pressable style={styles.checkRow} onPress={() => setAnaphylaxisHistory((v) => !v)}>
+            <Ionicons
+              name={anaphylaxisHistory ? 'checkbox' : 'square-outline'}
+              size={20}
+              color={theme.colors.accent}
+            />
+            <Text style={styles.checkLabel}>{t('sosEdit.anaphylaxisHistory')}</Text>
+          </Pressable>
+          <Text style={styles.subLabel}>{t('sosEdit.shockKitLabel')}</Text>
+          {kitItems.map((item: ShockKitItem) => (
+            <Pressable key={item.id} style={styles.checkRow} onPress={() => toggleKitItem(item.id)}>
+              <Ionicons
+                name={item.checked ? 'checkbox' : 'square-outline'}
+                size={20}
+                color={theme.colors.accent}
+              />
+              <Text style={styles.checkLabel}>{item.label}</Text>
+            </Pressable>
+          ))}
+          <Button label={t('sosEdit.savePassport')} variant="primary" block onPress={savePassport} />
+        </GlassCard>
+      ) : null}
 
       <Text style={ui.sectionLabel}>{t('sosEdit.notesLabel')}</Text>
       <GlassCard style={styles.section}>
@@ -212,6 +370,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       marginTop: 2,
     },
     headerText: { flex: 1, gap: 2 },
+    collapseHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 4,
+    },
     section: { gap: 10 },
     notesInput: {
       minHeight: 120,
@@ -252,6 +416,20 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 15,
       fontFamily: fonts.sans,
       color: colors.text,
+    },
+    checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    checkLabel: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.text,
+      flex: 1,
+    },
+    subLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      marginTop: 4,
     },
     error: {
       fontFamily: fonts.sansSemiBold,

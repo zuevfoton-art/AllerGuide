@@ -76,7 +76,7 @@ export default function LoginScreen() {
         placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
       />
-      <AuthForgotLink text={forgotLabel} onPress={() => router.push('/register')} />
+      <AuthForgotLink text={forgotLabel} onPress={() => router.push('/forgot-password')} />
       <AuthError message={error} />
       <AuthPrimaryButton label={t('auth.loginButton')} onPress={handleLogin} loading={loading} />
       <AuthLink

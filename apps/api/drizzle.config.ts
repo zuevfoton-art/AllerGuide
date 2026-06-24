@@ -8,4 +8,5 @@ export default defineConfig({
     // Use the direct (unpooled) endpoint for schema diffing/migrations on Neon.
     url: (process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL)!,
   },
+  tablesFilter: ['!sessions', '!users'],
 });

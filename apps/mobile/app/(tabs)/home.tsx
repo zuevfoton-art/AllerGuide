@@ -13,9 +13,11 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandTabIcon } from '@/src/components/brand/BrandTabIcon';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { radii } from '@/src/constants/layout';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
-import { AppLogoMark } from '@/src/components/AppLogo';
+import { BrandLogo } from '@/src/components/brand/BrandLogo';
+import { MarketplaceModule } from '@/src/modules/marketplace';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -79,12 +81,7 @@ export default function HomeScreen() {
   return (
     <Screen>
       <View style={styles.topBar}>
-        <View style={styles.topBarLogo}>
-          <AppLogoMark size={32} />
-          <Text style={[styles.topBarWordmark, { fontFamily: theme.fonts.serifBold, color: theme.colors.head }]}>
-            Aller<Text style={{ color: theme.colors.accent }}>Guide</Text>
-          </Text>
-        </View>
+        <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
         <Pressable
           onPress={() => router.push('/(tabs)/sos')}
           style={styles.sosBtn}
@@ -175,6 +172,8 @@ export default function HomeScreen() {
         ))}
       </GlassCard>
 
+      <MarketplaceModule variant="embedded" />
+
       {wellness?.recommendations[0] ? (
         <GlassCard style={styles.recCard}>
           <Text style={styles.recTitle}>{wellness.recommendations[0].title}</Text>
@@ -188,6 +187,12 @@ export default function HomeScreen() {
           variant="secondary"
           style={styles.quickBtn}
           onPress={() => router.push('/(tabs)/scanner')}
+        />
+        <Button
+          label={t('tabs.market')}
+          variant="secondary"
+          style={styles.quickBtn}
+          onPress={() => router.push('/(tabs)/market')}
         />
         <Button
           label={t('tabs.map')}
@@ -210,19 +215,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
     },
     topBarLogo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    topBarWordmark: {
-      fontSize: 18,
-      fontWeight: '700',
-      letterSpacing: -0.2,
+      flexShrink: 1,
     },
     sosBtn: {
       width: 40,
       height: 40,
-      borderRadius: 6,
+      borderRadius: radii.sm,
       backgroundColor: colors.dangerLight,
       alignItems: 'center',
       justifyContent: 'center',

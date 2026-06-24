@@ -7,12 +7,22 @@ import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Ionicons } from '@expo/vector-icons';
-import { parseAllergies, type EmergencyContact } from '@allerguide/core';
+import {
+  ANAPHYLAXIS_GRADES,
+  BIPHASIC_WARNING,
+  parseAllergies,
+  type EmergencyContact,
+} from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeEmergencyRelation } from '@/src/i18n/content';
+import {
+  exportPassportPdf,
+  sharePassportText,
+} from '@/src/services/doctor-report-service';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import {
   getEmergencyNumber,
   getProfileAge,
@@ -33,6 +43,10 @@ export default function SosScreen() {
   const [notes, setNotes] = useState('');
   const [actionPlan, setActionPlan] = useState('');
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
+  const [passportOpen, setPassportOpen] = useState(false);
+  const [anaphylaxisOpen, setAnaphylaxisOpen] = useState(false);
+  const [passport, setPassport] = useState(() => getAllergyPassport(profile?.id ?? 0));
+  const [sharing, setSharing] = useState(false);
 
   const refresh = useCallback(() => {
     setEmergencyNumberState(getEmergencyNumber());
@@ -45,6 +59,7 @@ export default function SosScreen() {
     setNotes(getSosNotes(profile.id));
     setActionPlan(getSosActionPlan(profile.id));
     setContacts(listEmergencyContacts(profile.id));
+    setPassport(getAllergyPassport(profile.id));
   }, [profile]);
 
   useFocusEffect(
@@ -66,6 +81,35 @@ export default function SosScreen() {
     [actionPlan],
   );
 
+  const kitChecked = passport.shockKit.filter((item) => item.checked);
+  const hasPassportDetails =
+    passport.drugIntolerances.length > 0 ||
+    passport.triggers.length > 0 ||
+    passport.epinephrine?.brand ||
+    passport.doctorName ||
+    passport.anaphylaxisHistory ||
+    kitChecked.length > 0;
+
+  const handleShare = async () => {
+    if (!profile) return;
+    setSharing(true);
+    try {
+      await sharePassportText(profile);
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handlePdf = async () => {
+    if (!profile) return;
+    setSharing(true);
+    try {
+      await exportPassportPdf(profile);
+    } finally {
+      setSharing(false);
+    }
+  };
+
   return (
     <Screen>
       <View style={styles.headerRow}>
@@ -80,47 +124,156 @@ export default function SosScreen() {
       <ProfileSwitcher />
 
       {profile ? (
-        <GlassCard>
-          <View style={ui.kpiRow}>
-            <Text style={ui.kpiLabel}>{t('sos.name')}</Text>
-            <Text style={ui.kpiValue}>{profile.name}</Text>
-          </View>
-          {profile.birthYear ? (
+        <>
+          <GlassCard>
             <View style={ui.kpiRow}>
-              <Text style={ui.kpiLabel}>{t('sos.age')}</Text>
-              <Text style={ui.kpiValue}>{getProfileAge(profile.birthYear)}</Text>
+              <Text style={ui.kpiLabel}>{t('sos.name')}</Text>
+              <Text style={ui.kpiValue}>{profile.name}</Text>
             </View>
-          ) : null}
-          {allergies.length > 0 ? (
-            <View style={[ui.kpiRow, styles.allergyRow]}>
-              <Text style={ui.kpiLabel}>{t('sos.allergies')}</Text>
-              <View style={styles.allergyChips}>
-                {allergies.map((allergen) => (
-                  <View key={allergen} style={styles.allergyChip}>
-                    <Text style={styles.allergyText}>{allergen}</Text>
-                  </View>
-                ))}
+            {profile.birthYear ? (
+              <View style={ui.kpiRow}>
+                <Text style={ui.kpiLabel}>{t('sos.age')}</Text>
+                <Text style={ui.kpiValue}>{getProfileAge(profile.birthYear)}</Text>
               </View>
-            </View>
+            ) : null}
+            {allergies.length > 0 ? (
+              <View style={[ui.kpiRow, styles.allergyRow]}>
+                <Text style={ui.kpiLabel}>{t('sos.allergies')}</Text>
+                <View style={styles.allergyChips}>
+                  {allergies.map((allergen) => (
+                    <View key={allergen} style={styles.allergyChip}>
+                      <Text style={styles.allergyText}>{allergen}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+          </GlassCard>
+
+          <Pressable style={styles.collapseHead} onPress={() => setPassportOpen((v) => !v)}>
+            <Text style={styles.collapseTitle}>{t('sos.passportTitle')}</Text>
+            <Ionicons
+              name={passportOpen ? 'chevron-up' : 'chevron-down'}
+              size={18}
+              color={theme.colors.textMuted}
+            />
+          </Pressable>
+
+          {passportOpen ? (
+            <GlassCard>
+              {hasPassportDetails ? (
+                <>
+                  {passport.drugIntolerances.length > 0 ? (
+                    <View style={styles.passportRow}>
+                      <Text style={styles.passportLabel}>{t('sos.drugIntolerances')}</Text>
+                      <Text style={styles.passportValue}>{passport.drugIntolerances.join(', ')}</Text>
+                    </View>
+                  ) : null}
+                  {passport.triggers.length > 0 ? (
+                    <View style={styles.passportRow}>
+                      <Text style={styles.passportLabel}>{t('sos.triggers')}</Text>
+                      <Text style={styles.passportValue}>{passport.triggers.join(', ')}</Text>
+                    </View>
+                  ) : null}
+                  {passport.epinephrine?.brand ? (
+                    <View style={styles.passportRow}>
+                      <Text style={styles.passportLabel}>{t('sos.epinephrine')}</Text>
+                      <Text style={styles.passportValue}>
+                        {[passport.epinephrine.brand, passport.epinephrine.expiry, passport.epinephrine.location]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {passport.doctorName || passport.doctorPhone ? (
+                    <View style={styles.passportRow}>
+                      <Text style={styles.passportLabel}>{t('sos.doctor')}</Text>
+                      <Text style={styles.passportValue}>
+                        {[passport.doctorName, passport.doctorPhone].filter(Boolean).join(' · ')}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {passport.anaphylaxisHistory ? (
+                    <Text style={styles.warnText}>{t('sos.anaphylaxisHistory')}</Text>
+                  ) : null}
+                  {kitChecked.length > 0 ? (
+                    <View style={styles.passportRow}>
+                      <Text style={styles.passportLabel}>{t('sos.shockKit')}</Text>
+                      <Text style={styles.passportValue}>{kitChecked.map((i) => i.label).join('; ')}</Text>
+                    </View>
+                  ) : null}
+                </>
+              ) : (
+                <Text style={styles.hintText}>{t('sos.passportEmpty')}</Text>
+              )}
+              <View style={styles.exportRow}>
+                <Button
+                  label={sharing ? t('sos.sharing') : t('sos.sharePassport')}
+                  variant="secondary"
+                  size="sm"
+                  onPress={() => void handleShare()}
+                />
+                <Button
+                  label={t('sos.exportPdf')}
+                  variant="secondary"
+                  size="sm"
+                  onPress={() => void handlePdf()}
+                />
+              </View>
+            </GlassCard>
           ) : null}
-          {notes ? (
-            <View style={styles.notesBlock}>
-              <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
-              <Text style={styles.notesText}>{notes}</Text>
-            </View>
-          ) : null}
-          {planSteps.length > 0 ? (
-            <View style={styles.notesBlock}>
-              <Text style={styles.notesLabel}>{t('sos.actionPlan')}</Text>
-              {planSteps.map((step, index) => (
-                <View key={`${index}-${step}`} style={styles.planStep}>
-                  <Text style={styles.planNum}>{index + 1}</Text>
-                  <Text style={styles.planText}>{step}</Text>
+
+          <Pressable style={styles.collapseHead} onPress={() => setAnaphylaxisOpen((v) => !v)}>
+            <Text style={styles.collapseTitle}>{t('sos.anaphylaxisTitle')}</Text>
+            <Ionicons
+              name={anaphylaxisOpen ? 'chevron-up' : 'chevron-down'}
+              size={18}
+              color={theme.colors.textMuted}
+            />
+          </Pressable>
+
+          {anaphylaxisOpen ? (
+            <GlassCard style={styles.anaphylaxisCard}>
+              {ANAPHYLAXIS_GRADES.map((grade) => (
+                <View key={grade.grade} style={styles.gradeBlock}>
+                  <Text style={styles.gradeTitle}>{grade.title}</Text>
+                  <Text style={styles.gradeSigns}>{grade.signs}</Text>
+                  {grade.actions.map((action) => (
+                    <Text key={action} style={styles.gradeAction}>
+                      · {action}
+                    </Text>
+                  ))}
                 </View>
               ))}
-            </View>
+              <View style={styles.biphasicTip}>
+                <Ionicons name="alert-circle-outline" size={16} color={theme.colors.warning} />
+                <Text style={styles.biphasicText}>{BIPHASIC_WARNING}</Text>
+              </View>
+            </GlassCard>
           ) : null}
-        </GlassCard>
+
+          {(notes || planSteps.length > 0) && (
+            <GlassCard>
+              {notes ? (
+                <View style={styles.notesBlock}>
+                  <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
+                  <Text style={styles.notesText}>{notes}</Text>
+                </View>
+              ) : null}
+              {planSteps.length > 0 ? (
+                <View style={styles.notesBlock}>
+                  <Text style={styles.notesLabel}>{t('sos.actionPlan')}</Text>
+                  {planSteps.map((step, index) => (
+                    <View key={`${index}-${step}`} style={styles.planStep}>
+                      <Text style={styles.planNum}>{index + 1}</Text>
+                      <Text style={styles.planText}>{step}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </GlassCard>
+          )}
+        </>
       ) : (
         <GlassCard>
           <Text style={styles.emptyText}>{t('sos.emptyProfile')}</Text>
@@ -185,6 +338,20 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    collapseHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 6,
+    },
+    collapseTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+    },
     allergyRow: { flexDirection: 'column', alignItems: 'flex-start', gap: 8 },
     allergyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, width: '100%' },
     allergyChip: {
@@ -200,6 +367,63 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.danger,
       fontWeight: '600',
+    },
+    passportRow: { gap: 4, marginBottom: 8 },
+    passportLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    passportValue: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.text,
+      lineHeight: 20,
+    },
+    warnText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      color: colors.danger,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
+    exportRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
+    anaphylaxisCard: { gap: 12 },
+    gradeBlock: { gap: 4 },
+    gradeTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    gradeSigns: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    gradeAction: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 18,
+      paddingLeft: 4,
+    },
+    biphasicTip: {
+      flexDirection: 'row',
+      gap: 8,
+      backgroundColor: colors.warningLight,
+      padding: 10,
+      borderRadius: 6,
+      alignItems: 'flex-start',
+    },
+    biphasicText: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      flex: 1,
+      lineHeight: 17,
     },
     notesBlock: {
       marginTop: 10,

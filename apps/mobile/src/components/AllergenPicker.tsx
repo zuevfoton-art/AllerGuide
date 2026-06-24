@@ -9,6 +9,7 @@ import {
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
 import { useTranslation } from '@/src/store/locale-store';
+import { formatCrossReactionLabel } from '@/src/i18n/cross-reactions';
 
 interface AllergenPickerProps {
   selected: string[];
@@ -86,7 +87,8 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
             <Text style={styles.crossTitle}>{t('allergens.crossTitle')}</Text>
           </View>
           <Text style={styles.crossText}>
-            {t('allergens.crossText')} {crossSuggestions.map((item) => item.allergen.name).join(', ')}.
+            {t('allergens.crossText')}{' '}
+            {crossSuggestions.map((item) => formatCrossReactionLabel(item, t)).join(', ')}.
           </Text>
           <Pressable style={styles.crossBtn} onPress={() => addRelated(crossSuggestions)}>
             <Text style={styles.crossBtnText}>{t('allergens.crossAdd')}</Text>

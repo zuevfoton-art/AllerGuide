@@ -1,5 +1,5 @@
 /**
- * Generates Expo app icon assets for AllerGuide.
+ * Generates Expo app icon assets for AllerGuide (Clinical Calm brandbook).
  * Run: node scripts/generate-assets.mjs
  */
 import { Buffer } from 'node:buffer';
@@ -10,37 +10,33 @@ import sharp from 'sharp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const assetsDir = join(__dirname, '..', 'assets');
-const BRAND = '#1F7A5A';
-const BRAND_DARK = '#145C44';
-const BG = '#F4FAF7';
+const ACCENT = '#2563EB';
+const BG = '#F4F6F9';
+
+function brandIconSvg(size) {
+  const rx = Math.round(size * 0.22);
+  const innerRx = size < 48 ? 8 : Math.round(size * 0.22);
+  const shieldStroke = size < 48 ? 0 : 2.5;
+  const crossStroke = size < 48 ? Math.max(4, size * 0.12) : 3;
+  const showShield = size >= 24;
+
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${size}" height="${size}" rx="${rx}" fill="${ACCENT}" />
+      ${
+        showShield
+          ? `<path d="M${size * 0.5} ${size * 0.23} L${size * 0.73} ${size * 0.36} V${size * 0.64} L${size * 0.5} ${size * 0.77} L${size * 0.27} ${size * 0.64} V${size * 0.36} Z"
+        fill="none" stroke="white" stroke-width="${shieldStroke}" stroke-linejoin="round"/>
+      <path d="M${size * 0.39} ${size * 0.5} h${size * 0.22} M${size * 0.5} ${size * 0.39} v${size * 0.22}"
+        stroke="white" stroke-width="${crossStroke}" stroke-linecap="round"/>`
+          : `<path d="M${size * 0.39} ${size * 0.5} h${size * 0.22} M${size * 0.5} ${size * 0.39} v${size * 0.22}"
+        stroke="white" stroke-width="${crossStroke}" stroke-linecap="round"/>`
+      }
+    </svg>`;
+}
 
 async function drawIcon(size) {
-  const center = size / 2;
-  const leafSvg = `
-    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${BRAND}" />
-          <stop offset="100%" stop-color="${BRAND_DARK}" />
-        </linearGradient>
-      </defs>
-      <rect width="${size}" height="${size}" rx="${size * 0.22}" fill="url(#bg)" />
-      <path
-        d="M ${center} ${size * 0.18}
-           C ${size * 0.72} ${size * 0.22}, ${size * 0.82} ${size * 0.52}, ${center} ${size * 0.82}
-           C ${size * 0.18} ${size * 0.52}, ${size * 0.28} ${size * 0.22}, ${center} ${size * 0.18} Z"
-        fill="#FFFFFF"
-        opacity="0.95"
-      />
-      <path
-        d="M ${center} ${size * 0.24} L ${center} ${size * 0.76}"
-        stroke="${BRAND_DARK}"
-        stroke-width="${Math.max(2, size * 0.02)}"
-        stroke-linecap="round"
-      />
-    </svg>`;
-
-  return sharp(Buffer.from(leafSvg)).png().toBuffer();
+  return sharp(Buffer.from(brandIconSvg(size))).png().toBuffer();
 }
 
 async function drawSplash(size) {

@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BrandMark } from '@/src/components/brand/BrandMark';
+import { radii } from '@/src/constants/layout';
 import { lightColors } from '@/src/constants/theme';
 import { fonts } from '@/src/constants/typography';
 import { captureError } from '@/src/services/error-reporting';
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 8,
     backgroundColor: lightColors.accent,
-    borderRadius: 6,
+    borderRadius: radii.md,
     paddingHorizontal: 18,
     paddingVertical: 12,
     minHeight: 44,
