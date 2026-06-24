@@ -1,8 +1,3 @@
-- [React dedup in pnpm+Expo monorepo](react-dedup-expo-pnpm.md) — npm install at root creates real dirs that break pnpm symlinks; always use pnpm only
-- [Incompatible package versions from task agents](task-agent-dep-versions.md) — task agents repeatedly add wrong package versions; expo-location@56, expo-font@56 break Expo 53; use ~18.x and ~13.x respectively
-- [Metro web stubs for uninstallable packages](metro-web-stubs.md) — pnpm install silently fails/times out on heavy packages (@sentry, @noble/hashes, Google Fonts); stub via resolveRequest in metro.config.js pointing to src/stubs/*.js
-- [packages/core must be zero-dep for Metro](core-package-deps.md) — @allerguide/core is bundled by Metro so any new dep must be in pnpm store or replaced with Web Crypto / built-ins; replace @noble/hashes with native Web Crypto API
-- [Merge conflict JSON crash pattern](merge-conflict-json-crash.md) — unresolved git conflict markers in package.json or .tsx files crash pnpm on startup with "call config.load() before reading values"; grep -rl "<<<<<<< HEAD" apps/ to find all at once
-- [Replit Auth gateway architecture](replit-auth-gateway.md) — Express on port 5000 is the external gateway; Metro on port 3001 (internal); same-origin ensures OIDC session cookies work.
-- [DB migration conflict with Replit Auth tables](db-migration-conflict.md) — blueprint pre-creates public.sessions/users w/o journal, so drizzle migrate fails on 0000; drizzle-kit push falsely reports "no changes" for pgSchema tables. Use migrate, not push.
-- [Onboarding routing / profile-setup entry points](onboarding-routing.md) — disambiguate profile-setup nav with `?mode=add`, not the stale global onboardingComplete flag; createProfile can throw.
+- [Deployment static-vs-autoscale](deployment-type.md) — static type broke DB publish flow; autoscale required to properly sync dev→prod DB.
+- [API serves frontend in prod](api-static-serving.md) — Express must serve apps/mobile/dist + SPA fallback when METRO_URL is absent.
+- [Metro blockList for .local](metro-blocklist.md) — watchFolders=[workspaceRoot] must exclude .local via blockList RegExp or Metro crashes on deleted artifact dirs.
