@@ -167,6 +167,14 @@ export type LocaleMessages = {
     scaleTrends: string;
     scaleTrendsEmpty: string;
     scaleSuggested: string;
+    insights: string;
+    insightsStreak: string;
+    insightsTop: string;
+    insightsLegendNormal: string;
+    insightsLegendSym: string;
+    insightsCorSymFood: string;
+    insightsCorSymTrig: string;
+    insightsCorSymMeds: string;
   };
   diaryWizard: {
     stepOf: string;
