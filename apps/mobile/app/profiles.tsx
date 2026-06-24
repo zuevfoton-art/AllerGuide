@@ -114,7 +114,7 @@ export default function ProfilesScreen() {
         )}
       </GlassCard>
 
-      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup')} />
+      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
 
       <GlassCard>
         <ThemeToggle embedded />

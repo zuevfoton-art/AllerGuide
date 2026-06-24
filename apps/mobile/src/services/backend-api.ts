@@ -80,6 +80,20 @@ export async function backendDeleteAccount(token: string) {
   return apiRequest<{ ok: true }>('/api/auth/account', { method: 'DELETE', token });
 }
 
+export async function backendForgotPassword(input: { login: string; loginType: 'email' | 'phone' }) {
+  return apiRequest<{ ok: true; resetToken?: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    body: input,
+  });
+}
+
+export async function backendResetPassword(input: { token: string; password: string; confirmPassword: string }) {
+  return apiRequest<{ ok: true }>('/api/auth/reset-password', {
+    method: 'POST',
+    body: input,
+  });
+}
+
 export async function backendReplitExchange() {
   return apiRequest<{ user: AuthUser; token: string }>('/api/auth/replit-exchange', {});
 }

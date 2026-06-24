@@ -1,3 +1,4 @@
+import path from 'path';
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -59,6 +60,12 @@ export async function createApp(
         changeOrigin: true,
       })
     );
+  } else {
+    const distDir = path.resolve(__dirname, '../../mobile/dist');
+    app.use(express.static(distDir));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distDir, 'index.html'));
+    });
   }
 
   return app;

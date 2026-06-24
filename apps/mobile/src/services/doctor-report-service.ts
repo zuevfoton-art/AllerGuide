@@ -23,6 +23,7 @@ import {
   type DoctorReportBlock,
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
+import { brandReportColors as c } from '@/src/constants/layout';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
@@ -43,7 +44,7 @@ function filterEntriesByPeriod(entries: DiaryEntry[], days: number): DiaryEntry[
 
 function renderScaleTrend(entries: DiaryEntry[]): string {
   const scaleEntries = entries.filter((e) => e.type === 'Шкала');
-  if (!scaleEntries.length) return '<p style="color:#666;">Нет записей шкал за период.</p>';
+  if (!scaleEntries.length) return `<p style="color:${c.muted};">Нет записей шкал за период.</p>`;
 
   const byType = new Map<string, DiaryEntry>();
   for (const entry of scaleEntries) {
@@ -66,7 +67,7 @@ function renderScaleTrend(entries: DiaryEntry[]): string {
 
 function renderPefTrend(entries: DiaryEntry[]): string {
   const trend = computePefTrend(entries);
-  if (!trend.count) return '<p style="color:#666;">Нет измерений ПСВ за период.</p>';
+  if (!trend.count) return `<p style="color:${c.muted};">Нет измерений ПСВ за период.</p>`;
   return `<p>Измерений: ${trend.count}. Min: ${trend.min ?? '—'}, Max: ${trend.max ?? '—'}, последнее: ${trend.latest ?? '—'} л/мин${trend.latestAt ? ` (${formatDiaryDate(trend.latestAt)})` : ''}.</p>`;
 }
 
@@ -80,7 +81,7 @@ function renderPassportSummary(profile: Profile): string {
     passport,
     emergencyNumber: getEmergencyNumber(),
   });
-  return `<pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${text.replace(/</g, '&lt;')}</pre>`;
+  return `<pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${text.replace(/</g, '&lt;')}</pre>`;
 }
 
 export async function generateDoctorReportPdf(options: DoctorReportOptions) {
@@ -99,12 +100,12 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     .map((block: DoctorReportBlock) => {
       const blockEntries = entries.filter((e) => block.diaryTypes.includes(e.type));
       if (!blockEntries.length) {
-        return `<section><h2>${block.label}</h2><p style="color:#666;">Нет записей за период.</p></section>`;
+        return `<section><h2>${block.label}</h2><p style="color:${c.muted};">Нет записей за период.</p></section>`;
       }
       return `<section><h2>${block.label}</h2>${blockEntries
         .map(
           (e) =>
-            `<div style="margin-bottom:12px;border-left:3px solid #FF6B00;padding-left:10px;"><strong>${e.type}</strong><p>${formatDiaryEntrySummary(e.type, e.details || '')}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`,
+            `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${e.type}</strong><p>${formatDiaryEntrySummary(e.type, e.details || '')}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`,
         )
         .join('')}</section>`;
     })
@@ -115,7 +116,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     : '';
 
   const asitHtml = options.blockIds.includes('asit')
-    ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatAsitReportSummary(
+    ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatAsitReportSummary(
         computeAsitCompliance(periodEntries, options.periodDays),
         getAsitCourse(options.profileId),
         options.periodDays,
@@ -123,7 +124,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     : '';
 
   const foodDrugHtml = options.blockIds.includes('foodDrug') && profile
-    ? `<section><h2>Пищевая и лекарственная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatFoodDrugReportSummary(
+    ? `<section><h2>Пищевая и лекарственная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatFoodDrugReportSummary(
         computeFoodDrugSummary(periodEntries, options.periodDays),
         {
           avoidFoods: getConsolidatedFoodAvoidList(
@@ -153,7 +154,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       : '';
 
   const triggerContextHtml = options.blockIds.includes('triggerContext')
-    ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
+    ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
     : '';
 
   const pefHtml = options.blockIds.includes('peakflow')
@@ -165,14 +166,14 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     : '';
 
   const html = `
-    <html><body style="font-family: Helvetica, Arial, sans-serif; padding: 24px; color:#20322a;">
-      <h1>Отчёт AllerGuide для врача</h1>
-      <p style="font-size:13px;color:#FF6B00;font-weight:700;">${DOCTOR_REPORT_TITLE}</p>
+    <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
+      <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">Отчёт AllerGuide для врача</h1>
+      <p style="font-size:13px;color:${c.head};font-weight:700;">${DOCTOR_REPORT_TITLE}</p>
       <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
       <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
       <p><strong>Период:</strong> ${options.periodDays} дней</p>
-      <p style="font-size:12px;color:#555;">${DOCTOR_REPORT_DISCLAIMER}</p>
-      <hr />
+      <p style="font-size:12px;color:${c.muted};">${DOCTOR_REPORT_DISCLAIMER}</p>
+      <hr style="border:none;border-top:1px solid ${c.border};" />
       ${pefHtml}
       ${scalesHtml}
       ${asitHtml}
@@ -181,8 +182,8 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${triggerContextHtml}
       ${blocksHtml}
       ${passportHtml}
-      <hr />
-      <p style="font-size:12px;color:#555;">Информация носит рекомендательный характер и не является медицинским заключением.</p>
+      <hr style="border:none;border-top:1px solid ${c.border};" />
+      <p style="font-size:12px;color:${c.muted};">Информация носит рекомендательный характер и не является медицинским заключением.</p>
     </body></html>`;
 
   if (Platform.OS === 'web') {
