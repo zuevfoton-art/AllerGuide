@@ -66,6 +66,27 @@ export type LocaleMessages = {
       phoneTaken: string;
       createFailed: string;
     };
+    forgot: {
+      title: string;
+      subtitle: string;
+      emailLabel: string;
+      emailPlaceholder: string;
+      submitButton: string;
+      successTitle: string;
+      successMessage: string;
+      backToLogin: string;
+      emailOnlyHint: string;
+    };
+    resetPassword: {
+      title: string;
+      subtitle: string;
+      newPassword: string;
+      confirmPassword: string;
+      submitButton: string;
+      successTitle: string;
+      successMessage: string;
+      invalidToken: string;
+    };
   };
   profiles: {
     title: string;

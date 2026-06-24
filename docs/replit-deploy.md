@@ -4,7 +4,7 @@ Replit поддерживает два сценария для AllerGuide:
 
 | Сценарий | Что публикуется | Где настраивается |
 |----------|-----------------|-------------------|
-| **Replit Deploy (web)** | Статический PWA (Expo web export) | `.replit` → `[deployment]` |
+| **Replit Deploy (web)** | PWA (Expo export) + API (autoscale) | `.replit` → `[deployment]` |
 | **EAS Build (native)** | APK / TestFlight (iOS/Android) | `apps/mobile` + Expo cloud |
 
 ---
@@ -15,11 +15,13 @@ Replit поддерживает два сценария для AllerGuide:
 
 ```toml
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 ignoreDatabaseMigrations = true
 build = ["bash", "scripts/replit-deploy-build.sh"]
-publicDir = "apps/mobile/dist"
+run = ["bash", "-c", "cd apps/api && npx tsx src/index.ts"]
 ```
+
+API раздаёт собранный фронтенд из `apps/mobile/dist` (см. `apps/api/src/app.ts`).
 
 Скрипт [`scripts/replit-deploy-build.sh`](../scripts/replit-deploy-build.sh):
 
@@ -40,9 +42,9 @@ publicDir = "apps/mobile/dist"
 
 ### Шаги
 
-1. В Replit: **Deploy** → **Static**
-2. Дождитесь сборки (`pnpm install` + `expo export`)
-3. Откройте URL деплоя
+1. В Replit: **Deploy** → **Autoscale** (или Republish)
+2. Дождитесь сборки (`pnpm install` + миграции + `expo export`)
+3. Откройте URL деплоя — фронтенд и API на одном домене
 
 ### Ограничения web-версии
 

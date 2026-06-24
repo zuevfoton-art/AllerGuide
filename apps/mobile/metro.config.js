@@ -8,6 +8,9 @@ const localNodeModules = path.resolve(projectRoot, 'node_modules');
 const config = getDefaultConfig(projectRoot);
 
 config.watchFolders = [workspaceRoot];
+config.resolver.blockList = new RegExp(
+  `${workspaceRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/\\.local/.*`
+);
 config.resolver.nodeModulesPaths = [
   localNodeModules,
   path.resolve(workspaceRoot, 'node_modules'),

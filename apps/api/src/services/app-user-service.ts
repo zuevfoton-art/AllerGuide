@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { randomBytes } from 'crypto';
+import { and, eq, gt, isNull } from 'drizzle-orm';
 import {
   hashPassword,
   normalizeLogin,
@@ -8,7 +9,7 @@ import {
   type LoginType,
 } from '@allerguide/core';
 import { db } from '../db';
-import { appUsers } from '../db/app-schema';
+import { appUsers, passwordResetTokens } from '../db/app-schema';
 
 export function toAuthUser(row: typeof appUsers.$inferSelect): AuthUser {
   return {
@@ -96,6 +97,46 @@ export async function loginAppUser(input: {
 
 export async function deleteAppUser(userId: number) {
   await db.delete(appUsers).where(eq(appUsers.id, userId));
+}
+
+export async function createPasswordResetToken(userId: number): Promise<string> {
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  await db.insert(passwordResetTokens).values({ userId, token, expiresAt });
+  return token;
+}
+
+export async function findValidResetToken(token: string) {
+  const rows = await db
+    .select()
+    .from(passwordResetTokens)
+    .where(
+      and(
+        eq(passwordResetTokens.token, token),
+        gt(passwordResetTokens.expiresAt, new Date()),
+        isNull(passwordResetTokens.usedAt),
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function consumeResetToken(token: string, newPassword: string): Promise<boolean> {
+  const row = await findValidResetToken(token);
+  if (!row) return false;
+
+  const passwordHash = await hashPassword(newPassword);
+  await db
+    .update(appUsers)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(appUsers.id, row.userId));
+
+  await db
+    .update(passwordResetTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(passwordResetTokens.id, row.id));
+
+  return true;
 }
 
 export async function findOrCreateReplitUser(claims: {
