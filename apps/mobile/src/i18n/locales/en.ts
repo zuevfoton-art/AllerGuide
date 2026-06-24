@@ -102,6 +102,13 @@ const en: LocaleMessages = {
     logoutConfirm: 'Sign out',
     deleteTitle: 'Delete profile?',
     deleteMessage: 'Profile «{{name}}» and all diary entries will be deleted.',
+    accountTitle: 'Account',
+    accountHint: 'Sign out or permanently delete your user account and all data.',
+    deleteAccount: 'Delete account',
+    deleteAccountTitle: 'Delete account?',
+    deleteAccountMessage:
+      'All profiles, diary entries, and scan history will be permanently deleted.',
+    deleteAccountConfirm: 'Delete account',
   },
   theme: {
     title: 'Appearance',
@@ -273,10 +280,14 @@ const en: LocaleMessages = {
     syncError: 'Error',
     uploadSuccess: 'Backup uploaded to server.',
     downloadSuccess: 'Data restored from backup.',
+    account: 'Account',
+    manageProfiles: 'My profiles',
+    manageProfilesHint: 'Profiles, sign out and delete account',
   },
   profileSwitcher: {
     add: 'Profile',
     hint: 'Tap the active profile again to edit',
+    manage: 'My profiles & account',
   },
   onboarding: {
     tagline: 'Your smart allergy management assistant',

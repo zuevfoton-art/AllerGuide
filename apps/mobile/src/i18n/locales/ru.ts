@@ -102,6 +102,13 @@ const ru: LocaleMessages = {
     logoutConfirm: 'Выйти',
     deleteTitle: 'Удалить профиль?',
     deleteMessage: 'Профиль «{{name}}» и все записи дневника будут удалены.',
+    accountTitle: 'Аккаунт',
+    accountHint: 'Выход из приложения и полное удаление данных пользователя.',
+    deleteAccount: 'Удалить аккаунт',
+    deleteAccountTitle: 'Удалить аккаунт?',
+    deleteAccountMessage:
+      'Все профили, записи дневника и история сканов будут удалены без возможности восстановления.',
+    deleteAccountConfirm: 'Удалить аккаунт',
   },
   theme: {
     title: 'Тема оформления',
@@ -273,10 +280,14 @@ const ru: LocaleMessages = {
     syncError: 'Ошибка',
     uploadSuccess: 'Резервная копия отправлена на сервер.',
     downloadSuccess: 'Данные восстановлены из резервной копии.',
+    account: 'Аккаунт',
+    manageProfiles: 'Мои профили',
+    manageProfilesHint: 'Профили, выход и удаление аккаунта',
   },
   profileSwitcher: {
     add: 'Профиль',
     hint: 'Нажмите ещё раз на активный профиль для редактирования',
+    manage: 'Мои профили и аккаунт',
   },
   onboarding: {
     tagline: 'Ваш умный помощник в контроле аллергии',
