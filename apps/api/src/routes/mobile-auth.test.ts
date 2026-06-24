@@ -79,6 +79,8 @@ describe('mobile auth routes', () => {
       id: 3,
       login: 'user@example.com',
       loginType: 'email',
+      email: 'user@example.com',
+      phone: null,
       passwordHash: 'hash',
       createdAt: new Date(),
       updatedAt: new Date(),
