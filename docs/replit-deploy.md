@@ -11,14 +11,32 @@ Replit поддерживает два сценария для AllerGuide:
 
 ## 1. Web-публикация (Replit Deploy)
 
-Уже настроено в [`.replit`](../.replit):
+Настроено в [`.replit`](../.replit):
 
 ```toml
 [deployment]
 deploymentTarget = "static"
-build = ["bash", "-c", "corepack enable && pnpm install && cd apps/mobile && pnpm exec expo export --platform web --output-dir ../../dist"]
-publicDir = "dist"
+ignoreDatabaseMigrations = true
+build = ["bash", "scripts/replit-deploy-build.sh"]
+publicDir = "apps/mobile/dist"
 ```
+
+Скрипт [`scripts/replit-deploy-build.sh`](../scripts/replit-deploy-build.sh):
+
+1. `pnpm install`
+2. `pnpm --filter api db:migrate` — если задан `DATABASE_URL` (production при деплое)
+3. `expo export` → `apps/mobile/dist`
+
+### Ошибка «Cannot push development database objects, production database already exists»
+
+**Причина:** при повторной публикации Replit пытается снова скопировать схему/данные из **development** БД в **production**, хотя production уже создана.
+
+**Исправление в репозитории:** `ignoreDatabaseMigrations = true` — Replit не делает автоматический push dev→prod; схема обновляется нашими Drizzle-миграциями в `build`.
+
+**В UI Publishing при Republish:**
+
+- **Не включайте** «Create production database» / «Set up production database with development data», если production уже есть.
+- Достаточно **Republish** — миграции применятся на этапе `build`.
 
 ### Шаги
 
