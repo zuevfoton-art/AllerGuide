@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
+  DEFAULT_ASIT_REMINDER_HOUR,
+  DEFAULT_ASIT_REMINDER_MINUTE,
+  formatAsitReminderTime,
+  isAsitReminderConfigured,
   type AsitCourse,
   type AsitPhase,
   type AsitRoute,
@@ -22,6 +26,7 @@ import {
   getAsitCourse,
   saveAsitCourse,
 } from '@/src/services/asit-course-service';
+import { ensureNotificationPermission, syncAsitReminder } from '@/src/services/asit-reminder-service';
 import { profileEnablesAsit } from '@allerguide/core';
 import { getProfileConditions } from '@/src/services/profile-conditions-service';
 
@@ -45,13 +50,37 @@ export default function AsitCourseScreen() {
   useEffect(() => {
     if (!profileId) return;
     const existing = getAsitCourse(profileId);
-    if (existing) setCourse(existing);
+    if (existing) {
+      setCourse(existing);
+      void syncAsitReminder(profileId, existing);
+    }
   }, [profileId]);
 
-  const save = () => {
+  const save = async () => {
     if (!profileId) return;
     saveAsitCourse(profileId, course);
+    if (isAsitReminderConfigured(course)) {
+      await ensureNotificationPermission();
+    }
     router.back();
+  };
+
+  const reminderEnabled = isAsitReminderConfigured(course);
+
+  const toggleReminder = (enabled: boolean) => {
+    setCourse((prev) => {
+      if (!enabled) {
+        const next = { ...prev };
+        delete next.reminderHour;
+        delete next.reminderMinute;
+        return next;
+      }
+      return {
+        ...prev,
+        reminderHour: prev.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR,
+        reminderMinute: prev.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE,
+      };
+    });
   };
 
   if (!profile) {
@@ -160,6 +189,70 @@ export default function AsitCourseScreen() {
           multiline
           textAlignVertical="top"
         />
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.reminderLabel')}</Text>
+        <View style={ui.toggleRow}>
+          <Pressable
+            style={[ui.toggle, reminderEnabled && ui.toggleActive]}
+            onPress={() => toggleReminder(true)}>
+            <Text style={[ui.toggleText, reminderEnabled && ui.toggleTextActive]}>
+              {t('asit.reminderOn')}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[ui.toggle, !reminderEnabled && ui.toggleActive]}
+            onPress={() => toggleReminder(false)}>
+            <Text style={[ui.toggleText, !reminderEnabled && ui.toggleTextActive]}>
+              {t('asit.reminderOff')}
+            </Text>
+          </Pressable>
+        </View>
+
+        {reminderEnabled ? (
+          <View style={styles.reminderRow}>
+            <View style={styles.reminderField}>
+              <Text style={styles.reminderFieldLabel}>{t('asit.reminderHour')}</Text>
+              <TextInput
+                style={styles.input}
+                value={String(course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR)}
+                onChangeText={(value) => {
+                  const hour = Number(value.replace(/\D/g, ''));
+                  if (!Number.isFinite(hour)) return;
+                  setCourse((prev) => ({ ...prev, reminderHour: Math.min(23, Math.max(0, hour)) }));
+                }}
+                keyboardType="number-pad"
+                maxLength={2}
+                placeholderTextColor={theme.colors.textMuted}
+              />
+            </View>
+            <View style={styles.reminderField}>
+              <Text style={styles.reminderFieldLabel}>{t('asit.reminderMinute')}</Text>
+              <TextInput
+                style={styles.input}
+                value={String(course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE)}
+                onChangeText={(value) => {
+                  const minute = Number(value.replace(/\D/g, ''));
+                  if (!Number.isFinite(minute)) return;
+                  setCourse((prev) => ({
+                    ...prev,
+                    reminderMinute: Math.min(59, Math.max(0, minute)),
+                  }));
+                }}
+                keyboardType="number-pad"
+                maxLength={2}
+                placeholderTextColor={theme.colors.textMuted}
+              />
+            </View>
+            <Text style={styles.reminderPreview}>
+              {formatAsitReminderTime(
+                course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR,
+                course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE,
+              )}
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.hint}>{t('asit.reminderHint')}</Text>
+        )}
       </GlassCard>
 
       <Button label={t('asit.saveCourse')} variant="primary" block onPress={save} />
@@ -198,6 +291,20 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.text,
     },
     inputMultiline: { minHeight: 96, lineHeight: 22 },
+    reminderRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 8 },
+    reminderField: { flex: 1, gap: 4 },
+    reminderFieldLabel: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+    reminderPreview: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.accent,
+      paddingBottom: 12,
+    },
     empty: {
       fontFamily: fonts.sans,
       fontSize: 15,

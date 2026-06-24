@@ -5,6 +5,7 @@ import {
   CLINICAL_SCALES,
   buildAsitPrefill,
   buildFoodPrefill,
+  buildInsectStingPrefill,
   buildMedicinePrefill,
   buildScaleInitialAnswers,
   buildTriggerPrefill,
@@ -21,6 +22,7 @@ import {
   profileEnablesAsit,
   profileEnablesDrugFocus,
   profileEnablesFoodFocus,
+  profileEnablesInsectFocus,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
@@ -33,10 +35,13 @@ import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
 import { getProfileConditions } from '@/src/services/profile-conditions-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
+import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
+import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
+import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -60,6 +65,7 @@ const TYPE_ICONS: Record<string, string> = {
   Кожа: 'body',
   Пикфлоуметрия: 'speedometer',
   АСИТ: 'fitness',
+  'Укус насекомого': 'bug',
   'Визит к врачу': 'calendar',
   Заметка: 'create',
   Шкала: 'analytics',
@@ -123,6 +129,13 @@ export default function DiaryScreen() {
     const passport = getAllergyPassport(activeProfileId);
     return profileEnablesDrugFocus(profileConditions, passport.drugIntolerances);
   }, [profileConditions, activeProfileId, list]);
+  const insectFocusEnabled = useMemo(
+    () =>
+      activeProfile
+        ? profileEnablesInsectFocus(profileConditions, parseAllergies(activeProfile.allergies))
+        : false,
+    [profileConditions, activeProfile],
+  );
   const foodDrugRegistry = useMemo(
     () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
     [activeProfileId, list],
@@ -133,6 +146,10 @@ export default function DiaryScreen() {
   }, [activeProfileId, list]);
   const asitCourse = useMemo(
     () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
+    [activeProfileId, list],
+  );
+  const insectActionPlan = useMemo(
+    () => (activeProfileId ? getInsectActionPlan(activeProfileId) : null),
     [activeProfileId, list],
   );
 
@@ -182,6 +199,13 @@ export default function DiaryScreen() {
       const passport = getAllergyPassport(activeProfileId);
       const prefill = buildMedicinePrefill(passport.drugIntolerances);
       setEditor({ mode: 'section', sectionType, prefill: { Лекарство: prefill } });
+      return;
+    }
+    if (sectionType === 'Укус насекомого' && activeProfile) {
+      const allergies = parseAllergies(activeProfile.allergies);
+      const plan = activeProfileId ? getInsectActionPlan(activeProfileId) : null;
+      const prefill = buildInsectStingPrefill(allergies, plan);
+      setEditor({ mode: 'section', sectionType, prefill: { 'Укус насекомого': prefill } });
       return;
     }
     if (sectionType === 'Триггер' && activeProfileId) {
@@ -362,6 +386,15 @@ export default function DiaryScreen() {
             />
           ) : null}
 
+          {insectFocusEnabled && activeProfile ? (
+            <InsectAllergyCard
+              profileAllergies={parseAllergies(activeProfile.allergies)}
+              plan={insectActionPlan}
+              entries={list}
+              onLogSting={() => void openSection('Укус насекомого')}
+            />
+          ) : null}
+
           <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
           <Button
             label={t('diary.quickEntry')}
@@ -467,6 +500,8 @@ export default function DiaryScreen() {
           onPress={() => router.push('/doctor-report' as any)}
         />
       </View>
+
+      <DiaryInsightsCard entries={list} />
 
       <GlassCard padded={false}>
         <View style={styles.listHead}>

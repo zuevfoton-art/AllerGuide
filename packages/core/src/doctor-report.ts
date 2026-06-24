@@ -33,6 +33,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
     diaryTypes: [],
     defaultEnabled: true,
   },
+  {
+    id: 'insect',
+    label: 'Инсектная аллергия',
+    diaryTypes: ['Укус насекомого'],
+    defaultEnabled: true,
+  },
   { id: 'skin', label: 'Кожные проявления', diaryTypes: ['Кожа'], defaultEnabled: true },
   { id: 'scales', label: 'Клинические шкалы', diaryTypes: ['Шкала'], defaultEnabled: true },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },

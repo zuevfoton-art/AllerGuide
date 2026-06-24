@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import { prepareReplitAuthBeforeMigrate } from './replit-bootstrap';
 
 /**
  * Applies versioned SQL migrations from ./drizzle.
@@ -25,6 +26,8 @@ async function main() {
 
   const client = postgres(url, { max: 1 });
   const db = drizzle(client);
+
+  await prepareReplitAuthBeforeMigrate(client);
 
   console.log(`Running migrations from ${migrationsFolder} ...`);
   await migrate(db, { migrationsFolder });

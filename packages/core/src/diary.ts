@@ -1,6 +1,7 @@
 import { formatScaleSummary } from './clinical-scales';
 import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
+import { formatInsectStingEntrySummary } from './insect-allergy';
 
 export type DiaryStepField = 'text' | 'choice';
 
@@ -314,6 +315,92 @@ export const DIARY_SECTIONS: DiarySection[] = [
     ],
   },
   {
+    type: 'Укус насекомого',
+    title: 'Укус насекомого',
+    icon: 'bug',
+    steps: [
+      {
+        id: 'insectType',
+        label: 'Насекомое',
+        field: 'choice',
+        choices: ['Пчёлы', 'Осы', 'Шершни', 'Комары', 'Другое'],
+        required: true,
+      },
+      {
+        id: 'knownInsects',
+        label: 'Известные аллергены (авто)',
+        placeholder: 'Подставляется из профиля и плана действий',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'stingLocation',
+        label: 'Место укуса',
+        placeholder: 'Рука, лицо, шея…',
+        field: 'text',
+        required: true,
+      },
+      {
+        id: 'stingSeverity',
+        label: 'Тяжесть реакции',
+        field: 'choice',
+        choices: ['Лёгкая', 'Умеренная', 'Тяжёлая', 'Анафилаксия'],
+        required: true,
+      },
+      {
+        id: 'localSymptoms',
+        label: 'Местные симптомы',
+        field: 'choice',
+        choices: ['Покраснение', 'Отёк', 'Зуд', 'Боль', 'Крапивница', 'Нет'],
+        required: false,
+      },
+      {
+        id: 'systemicSymptoms',
+        label: 'Системные симптомы',
+        field: 'choice',
+        choices: ['Нет', 'Зуд кожи', 'Одышка', 'Головокружение', 'Тошнота', 'Падение давления'],
+        required: false,
+      },
+      {
+        id: 'adrenalineUsed',
+        label: 'Использован адреналин',
+        field: 'choice',
+        choices: ['Нет', 'Да'],
+        required: false,
+      },
+      {
+        id: 'adrenalineLocation',
+        label: 'Где хранится адреналин (авто)',
+        placeholder: 'Из плана действий',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'emergencyPlan',
+        label: 'План действий (авто)',
+        placeholder: 'Из плана действий',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
+      {
+        id: 'treatment',
+        label: 'Оказанная помощь',
+        placeholder: 'Антигистаминное, холод, вызов 103…',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
+      {
+        id: 'stingNotes',
+        label: 'Дополнительные заметки',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
+    ],
+  },
+  {
     type: 'АСИТ',
     title: 'АСИТ',
     icon: 'fitness',
@@ -497,6 +584,10 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
 
   if (type === 'Лекарство') {
     return formatMedicineEntrySummary(structured.answers);
+  }
+
+  if (type === 'Укус насекомого') {
+    return formatInsectStingEntrySummary(structured.answers);
   }
 
   const section = getDiarySection(type);
