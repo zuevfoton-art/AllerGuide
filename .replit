@@ -60,9 +60,10 @@ localPort = 23636
 externalPort = 3002
 
 [deployment]
-deploymentTarget = "autoscale"
+deploymentTarget = "static"
 build = ["bash", "-c", "COREPACK_ENABLE_STRICT=0 pnpm install --frozen-lockfile=false; cd apps/mobile && COREPACK_ENABLE_STRICT=0 npx expo export --platform web --output-dir dist"]
 run = ["bash", "-c", "cd apps/api && npx tsx src/index.ts"]
+publicDir = "dist"
 
 [userenv]
 
