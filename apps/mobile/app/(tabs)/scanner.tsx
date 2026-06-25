@@ -41,7 +41,7 @@ export default function ScannerScreen() {
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const [input, setInput] = useState('молоко, арахис, сахар');
+  const [input, setInput] = useState('');
   const [mode, setMode] = useState<ScanMode>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
@@ -151,6 +151,13 @@ export default function ScannerScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const selectMode = (next: ScanMode) => {
+    if (next === mode) return;
+    setMode(next);
+    setResult(null);
+    setOcrHint(null);
   };
 
   const openCamera = async () => {
@@ -273,7 +280,10 @@ export default function ScannerScreen() {
             <Pressable
               key={m.key}
               style={[styles.modeChip, active && styles.modeChipActive]}
-              onPress={() => setMode(m.key)}>
+              onPress={() => selectMode(m.key)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={t(m.labelKey)}>
               <Ionicons
                 name={m.icon as any}
                 size={14}
