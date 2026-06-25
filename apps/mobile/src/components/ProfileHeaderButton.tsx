@@ -13,7 +13,7 @@ export function ProfileHeaderButton() {
   return (
     <Pressable
       style={styles.button}
-      onPress={() => router.push('/profile')}
+      onPress={() => router.push('/profile' as any)}
       accessibilityRole="button"
       accessibilityLabel={t('profileSwitcher.manage')}>
       <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />

@@ -158,7 +158,7 @@ export default function SettingsScreen() {
           label={t('settings.manageProfiles')}
           variant="secondary"
           block
-          onPress={() => router.push('/profile')}
+          onPress={() => router.push('/profile' as any)}
         />
       </GlassCard>
 
