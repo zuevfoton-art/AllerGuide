@@ -195,16 +195,10 @@ export default function HomeScreen() {
           onPress={() => router.push('/(tabs)/scanner')}
         />
         <Button
-          label={t('tabs.market')}
+          label={t('tabs.more')}
           variant="secondary"
           style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/market')}
-        />
-        <Button
-          label={t('tabs.map')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/map')}
+          onPress={() => router.push('/(tabs)/more')}
         />
       </View>
 

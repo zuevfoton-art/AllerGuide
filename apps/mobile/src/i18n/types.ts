@@ -129,7 +129,17 @@ export type LocaleMessages = {
     scanner: string;
     market: string;
     map: string;
+    more: string;
     sos: string;
+  };
+  more: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    marketDesc: string;
+    mapDesc: string;
+    expertDesc: string;
+    settingsDesc: string;
   };
   home: {
     today: string;
