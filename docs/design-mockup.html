@@ -17,7 +17,7 @@
       --head: #1e3a5f;
       --text: #0f172a;
       --text-secondary: #475569;
-      --text-muted: #94a3b8;
+      --text-muted: #5e6b7c;
       --border: #e2e8f0;
       --border-input: #cbd5e1;
       --success: #15803d;
@@ -391,6 +391,65 @@
     .dot { width: 8px; height: 8px; border-radius: 4px; background: var(--border); }
     .dot.active { width: 20px; background: var(--accent); }
 
+    .intro-carousel {
+      display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+      flex: 1; margin-bottom: 8px; scrollbar-width: none;
+    }
+    .intro-carousel::-webkit-scrollbar { display: none; }
+    .intro-carousel .intro-slide { flex: 0 0 100%; scroll-snap-align: start; }
+
+    .profile-btn {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      background: var(--surface-muted); border: 1px solid var(--border);
+      display: grid; place-items: center; font-size: 16px; font-weight: 700; color: var(--head);
+    }
+
+    .top-bar-actions { display: flex; align-items: center; gap: 8px; }
+
+    .sos-emergency-bar {
+      background: var(--card); border: 1px solid var(--danger-border);
+      border-radius: var(--radius-lg); padding: 12px; margin-bottom: 12px; display: grid; gap: 8px;
+    }
+
+    .sos-contact-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .more-hub-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+    }
+
+    .modal-overlay {
+      position: absolute; inset: 0; background: rgba(15, 23, 42, 0.45);
+      z-index: 20; display: flex; flex-direction: column; justify-content: flex-end;
+    }
+
+    .modal-sheet {
+      background: var(--bg); border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      max-height: 88%; overflow: auto; padding: 0 16px 24px;
+      border-top: 1px solid var(--border); box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.12);
+    }
+
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border); margin-bottom: 12px;
+      position: sticky; top: 0; background: var(--bg); z-index: 1;
+    }
+
+    .modal-cancel { font-size: 15px; font-weight: 600; color: var(--accent); cursor: pointer; }
+
+    .undo-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: var(--head); color: #fff; border-radius: var(--radius-md);
+      padding: 12px 14px; font-size: 13px; margin-top: 8px;
+    }
+
+    .undo-banner button {
+      border: none; background: transparent; color: var(--accent);
+      font-weight: 700; font-size: 13px; cursor: pointer; font-family: var(--sans);
+    }
+
     .intro-slide { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; padding: 24px 8px; }
     .intro-icon { width: 72px; height: 72px; border-radius: var(--radius-md); display: grid; place-items: center; font-size: 32px; }
 
@@ -426,13 +485,13 @@
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 72px; background: var(--card);
       border-top: 1px solid var(--border);
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      padding: 8px 4px 16px; z-index: 15;
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      padding: 8px 2px 16px; z-index: 15;
     }
 
     .tab {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 3px; font-size: 10px; font-weight: 600; color: var(--text-muted); cursor: pointer;
+      gap: 2px; font-size: 9px; font-weight: 600; color: var(--text-muted); cursor: pointer;
     }
 
     .tab.active { color: var(--accent); }
@@ -536,7 +595,7 @@
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code> после брендбука (#45): shield+cross логотип, Inter + Source Serif 4, маркетплейс на главной, SOS-паспорт, шкалы, отчёт v2, Яндекс.Карты.</p>
+      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: UX этапы A–D (вкладка «Ещё», модальный дневник, свайп intro), wellness v2, sticky SOS, профиль в шапке.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -548,7 +607,9 @@
         <button class="btn-nav" data-screen="onboarding-intro">Intro</button>
         <button class="btn-nav" data-screen="onboarding">Онбординг</button>
         <button class="btn-nav active" data-screen="home">Главная</button>
+        <button class="btn-nav" data-screen="more">Ещё</button>
         <button class="btn-nav" data-screen="diary">Дневник</button>
+        <button class="btn-nav" data-screen="diary-editor">Дневник · модал</button>
         <button class="btn-nav" data-screen="doctor-report">Отчёт</button>
         <button class="btn-nav" data-screen="scanner">Сканер</button>
         <button class="btn-nav" data-screen="market">Маркет</button>
@@ -567,9 +628,13 @@
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Радиусы</strong> — кнопки/input 8px · карточки 12px · бейджи 6px<br />
         <strong>Логотип</strong> — shield + cross на <code>#2563EB</code>, wordmark Aller/Guide<br />
-        <strong>Tab bar</strong> — 4 вкладки: Главная · Дневник · Сканер · SOS<br />
-        <strong>Главная</strong> — BrandLogo + маркетплейс (embedded) + 3 quick-кнопки<br />
-        <strong>v2</strong> — паспорт SOS · шкалы ARIA/ACT/SCORAD/UAS7 · отчёт с трендом ПСВ · OFF+cache
+        <strong>Tab bar</strong> — 5 вкладок: Главная · Дневник · Сканер · Ещё · SOS<br />
+        <strong>Ещё</strong> — хаб: Маркет · Карта · Эксперт · Настройки (скрытые маршруты)<br />
+        <strong>Главная</strong> — wellness v2 + дневник + quick: Сканер / Ещё<br />
+        <strong>Дневник</strong> — модальный редактор (pageSheet), без кнопки «Обновить»<br />
+        <strong>Intro</strong> — горизонтальный свайп (5 слайдов)<br />
+        <strong>SOS</strong> — закреплённая панель 103 + контакт<br />
+        <strong>v2</strong> — паспорт SOS · шкалы · отчёт · OFF+cache · textMuted #5E6B7C
         <div class="swatch-row">
           <span class="swatch" style="background:#F4F6F9" title="bg"></span>
           <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
@@ -622,15 +687,38 @@
             </svg>
             <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
           </div>
-          <div class="progress-dots">
-            <span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <div class="progress-dots" id="intro-dots">
+            <span class="dot active" data-intro="0"></span><span class="dot" data-intro="1"></span><span class="dot" data-intro="2"></span><span class="dot" data-intro="3"></span><span class="dot" data-intro="4"></span>
           </div>
-          <div class="intro-slide">
-            <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">📔</div>
-            <div class="doc-title">Персональный дневник</div>
-            <div class="doc-meta">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</div>
+          <div class="intro-carousel" id="intro-carousel">
+            <div class="intro-slide">
+              <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">📔</div>
+              <div class="doc-title">Персональный дневник</div>
+              <div class="doc-meta">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</div>
+            </div>
+            <div class="intro-slide">
+              <div class="intro-icon" style="background:var(--tip-bg);color:var(--info,#0369A1)">📷</div>
+              <div class="doc-title">Умный сканер</div>
+              <div class="doc-meta">Проверка состава по профилю аллергий — продукт, меню, лекарства</div>
+            </div>
+            <div class="intro-slide">
+              <div class="intro-icon" style="background:var(--success-light);color:var(--success)">🛒</div>
+              <div class="doc-title">Маркетплейс</div>
+              <div class="doc-meta">Персональные подборки товаров для аллергиков</div>
+            </div>
+            <div class="intro-slide">
+              <div class="intro-icon" style="background:var(--surface-muted);color:var(--head)">🗺</div>
+              <div class="doc-title">Карта мест</div>
+              <div class="doc-meta">Рестораны, карта пыления и клиники АДАИР</div>
+            </div>
+            <div class="intro-slide">
+              <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">⭐</div>
+              <div class="doc-title">Эксперт: проф. Смолкин Ю.С.</div>
+              <div class="doc-meta">Материалы и рекомендации АДАИР в доступном формате</div>
+            </div>
           </div>
-          <button class="btn btn-primary">Далее</button>
+          <p class="disclaimer" style="margin-bottom:8px;font-size:12px">← свайп →</p>
+          <button class="btn btn-primary" id="intro-next">Далее</button>
           <p class="disclaimer" style="margin-top:12px">Пропустить</p>
         </section>
 
@@ -672,7 +760,10 @@
               </svg>
               <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
             </div>
-            <div class="sos-top-btn">🚑</div>
+            <div class="top-bar-actions">
+              <div class="profile-btn" title="Профиль">А</div>
+              <div class="sos-top-btn">🚑</div>
+            </div>
           </div>
           <div class="doc-header">
             <div class="doc-title">Сегодня</div>
@@ -687,17 +778,19 @@
 
           <div class="card" id="wellness-card">
             <div class="card-head">
-              <span class="card-title">Самочувствие</span>
+              <span class="card-title">Сводка самочувствия</span>
               <div style="display:flex;gap:8px;align-items:center">
                 <span class="badge badge-warn" id="wellness-badge">Умеренно</span>
-                <span class="section-link">Подробности</span>
               </div>
             </div>
             <div id="wellness-loading" class="doc-meta" style="text-align:center;padding:16px">Загрузка Open-Meteo…</div>
             <div id="wellness-body" hidden>
               <div class="hero-kpi">
-                <span class="kpi-label" style="font-weight:600;color:var(--text)">Индекс</span>
+                <span class="kpi-label" style="font-weight:600;color:var(--text)">индекс</span>
                 <span class="hero-kpi-num"><span id="score-num">—</span><span class="hero-kpi-sub"> / 100</span></span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+                <span class="badge badge-ok" id="confidence-badge">Высокая уверенность</span>
               </div>
               <div id="kpi-rows"></div>
               <div class="interpret" id="wellness-summary">—</div>
@@ -726,41 +819,6 @@
             </div>
           </div>
 
-          <div class="card flush">
-            <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-start">
-              <div>
-                <span class="card-title">Маркетплейс</span>
-                <div class="feed-sub" style="margin-top:2px">Товары для аллергиков</div>
-              </div>
-              <span class="section-link">Больше</span>
-            </div>
-            <div class="market-banner">⭐ Подборка на основе профиля аллергий</div>
-            <div class="market-row">
-              <div class="market-thumb">💨</div>
-              <div class="feed-body">
-                <div class="feed-title">Очиститель HEPA</div>
-                <div class="feed-sub">Снижает концентрацию аллергенов</div>
-              </div>
-            </div>
-            <div class="market-row">
-              <div class="market-thumb">🧴</div>
-              <div class="feed-body">
-                <div class="feed-title">Гипоаллергенный крем</div>
-                <div class="feed-sub">Без отдушек и ланолина</div>
-              </div>
-            </div>
-            <div class="market-row">
-              <div class="market-thumb">🍯</div>
-              <div class="feed-body">
-                <div class="feed-title">Питание без топ-14</div>
-                <div class="feed-sub">Подборка продуктов</div>
-              </div>
-            </div>
-            <div class="market-footer">
-              <button class="btn btn-secondary btn-sm" style="width:100%">Открыть маркет</button>
-            </div>
-          </div>
-
           <div class="card rec-card" id="rec-card" hidden>
             <div class="rec-title" id="rec-title">—</div>
             <div class="rec-text" id="rec-text">—</div>
@@ -768,8 +826,51 @@
 
           <div class="btn-row">
             <button class="btn btn-secondary">Сканер</button>
-            <button class="btn btn-secondary">Маркет</button>
-            <button class="btn btn-secondary">Карта</button>
+            <button class="btn btn-secondary">Ещё</button>
+          </div>
+          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
+        </section>
+
+        <!-- MORE -->
+        <section class="screen" id="screen-more">
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Разделы</div>
+            <div class="doc-title">Ещё</div>
+            <div class="doc-meta">Маркет, карта, эксперт и настройки</div>
+          </div>
+          <div class="card flush">
+            <div class="feed-row">
+              <div class="more-hub-icon" style="background:var(--success-light);color:var(--success)">🛒</div>
+              <div class="feed-body">
+                <div class="feed-title">Маркет</div>
+                <div class="feed-sub">Товары для аллергиков по вашему профилю</div>
+              </div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="feed-row">
+              <div class="more-hub-icon" style="background:var(--surface-muted);color:var(--head)">🗺</div>
+              <div class="feed-body">
+                <div class="feed-title">Карта</div>
+                <div class="feed-sub">Рестораны, пыление и клиники АДАИР</div>
+              </div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="feed-row">
+              <div class="more-hub-icon" style="background:var(--accent-light);color:var(--accent)">⭐</div>
+              <div class="feed-body">
+                <div class="feed-title">Эксперт</div>
+                <div class="feed-sub">Материалы и рекомендации АДАИР</div>
+              </div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="feed-row">
+              <div class="more-hub-icon" style="background:var(--surface-muted);color:var(--text-secondary)">⚙</div>
+              <div class="feed-body">
+                <div class="feed-title">Настройки</div>
+                <div class="feed-sub">SOS, синхронизация и напоминания</div>
+              </div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
           </div>
           <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
         </section>
@@ -837,7 +938,6 @@
             <div class="feed-sub" style="margin-top:4px">Крапивница (UAS7): 4 · умеренно · 3 дн. назад</div>
           </div>
           <div class="action-row">
-            <button class="btn btn-secondary">Обновить</button>
             <button class="btn btn-secondary">Отчёт для врача</button>
           </div>
           <div class="section-label">История</div>
@@ -869,6 +969,53 @@
             </div>
           </div>
           <p class="disclaimer">Дневник отражает только наблюдения пользователя.</p>
+        </section>
+
+        <!-- DIARY EDITOR MODAL -->
+        <section class="screen" id="screen-diary-editor" style="position:relative">
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Наблюдения</div>
+            <div class="doc-title">Дневник</div>
+            <div class="doc-meta">Список записей остаётся на экране</div>
+          </div>
+          <div class="segment"><div class="segment-item active">Анна</div></div>
+          <button class="btn btn-primary">＋ Новая запись</button>
+          <div class="section-label">История</div>
+          <div class="card flush" style="opacity:0.45;pointer-events:none">
+            <div class="feed-row">
+              <div class="feed-icon">📊</div>
+              <div class="feed-body"><div class="feed-title">Шкала</div><div class="feed-sub">ACT · 22/25</div></div>
+            </div>
+            <div class="feed-row">
+              <div class="feed-icon">💓</div>
+              <div class="feed-body"><div class="feed-title">Симптомы</div><div class="feed-sub">Зуд кожи</div></div>
+            </div>
+          </div>
+          <div class="modal-overlay">
+            <div class="modal-sheet">
+              <div class="modal-header">
+                <span class="modal-cancel">Отмена</span>
+                <strong>Дневник</strong>
+                <span style="width:56px"></span>
+              </div>
+              <div class="section-label" style="margin-top:0">Шаг 1 из 4 · Симптомы</div>
+              <div class="card">
+                <div class="feed-sub" style="margin-bottom:8px">Какие симптомы наблюдаются?</div>
+                <div class="chip-row-wrap">
+                  <span class="chip active">Зуд кожи</span>
+                  <span class="chip">Насморк</span>
+                  <span class="chip">Кашель</span>
+                </div>
+              </div>
+              <div class="card">
+                <div class="section-label" style="margin-top:0">Интенсивность</div>
+                <div class="toggle-row">
+                  <div class="toggle">0</div><div class="toggle">1</div><div class="toggle active">2</div><div class="toggle">3</div>
+                </div>
+              </div>
+              <button class="btn btn-primary">Далее</button>
+            </div>
+          </div>
         </section>
 
         <!-- DOCTOR REPORT -->
@@ -935,12 +1082,24 @@
           </div>
           <div class="card">
             <div class="section-label">или введите вручную</div>
-            <input class="input" value="молоко, сахар, какао" readonly />
+            <input class="input" placeholder="Введите состав или штрихкод…" readonly />
             <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
           </div>
           <div class="result-danger">
             <strong>⚠ Есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
             Обнаружено: <strong>Молоко</strong>. Результат не заменяет чтение этикетки.
+          </div>
+          <div class="section-label">Безопасные продукты</div>
+          <div class="card flush">
+            <div class="feed-row">
+              <div class="feed-icon" style="background:var(--success-light);color:var(--success)">✓</div>
+              <div class="feed-body"><div class="feed-title">Овсяное молоко</div><div class="feed-sub">Продукт · вчера</div></div>
+              <span style="color:var(--text-muted);font-size:22px;padding:8px">⊗</span>
+            </div>
+          </div>
+          <div class="undo-banner">
+            <span>Удалено из безопасных</span>
+            <button type="button">Отменить</button>
           </div>
           <p class="disclaimer">Результат носит предварительный характер и не исключает индивидуальной реакции.</p>
         </section>
@@ -1031,6 +1190,18 @@
             <button class="btn btn-secondary btn-sm">Изменить</button>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
+
+          <div class="sos-emergency-bar">
+            <button class="btn btn-danger">Позвонить 103</button>
+            <div class="sos-contact-row">
+              <div class="feed-body">
+                <div class="feed-title">Муж</div>
+                <div class="feed-sub">Супруг · +7 999 111-22-33</div>
+              </div>
+              <button class="btn btn-primary btn-sm">Позвонить</button>
+            </div>
+          </div>
+
           <div class="card">
             <div class="kpi-row" style="border:none;padding-top:0"><span class="kpi-label">Имя</span><span class="kpi-value">Анна</span></div>
             <div class="kpi-row"><span class="kpi-label">Возраст</span><span class="kpi-value">35</span></div>
@@ -1112,8 +1283,6 @@
             </div>
           </div>
 
-          <button class="btn btn-danger">Позвонить 103</button>
-
           <div class="tip-card">ℹ Покажите этот экран медработнику в случае анафилактической реакции</div>
           <p class="disclaimer">Информация на экране SOS внесена пользователем и не является медицинским назначением.</p>
         </section>
@@ -1173,6 +1342,7 @@
           <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Главная</div>
           <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Дневник</div>
           <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Сканер</div>
+          <div class="tab" data-screen="more"><span class="tab-icon">⊞</span>Ещё</div>
           <div class="tab sos" data-screen="sos"><span class="tab-icon">🚑</span>SOS</div>
         </nav>
       </div>
@@ -1181,8 +1351,8 @@
 
   <script>
     const phone = document.getElementById('phone');
-    const tabScreens = new Set(['home', 'diary', 'scanner', 'sos']);
-    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert', 'market', 'map']);
+    const tabScreens = new Set(['home', 'diary', 'scanner', 'more', 'sos']);
+    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert', 'market', 'map', 'diary-editor']);
 
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
@@ -1290,6 +1460,39 @@
     }
 
     void loadWellness();
+
+    /* Intro carousel */
+    const introCarousel = document.getElementById('intro-carousel');
+    const introDots = document.querySelectorAll('#intro-dots .dot');
+    const introNext = document.getElementById('intro-next');
+    let introIndex = 0;
+
+    function syncIntroDots() {
+      introDots.forEach((dot, i) => {
+        dot.classList.toggle('active', i <= introIndex);
+      });
+    }
+
+    if (introCarousel) {
+      introCarousel.addEventListener('scroll', () => {
+        const w = introCarousel.clientWidth || 1;
+        introIndex = Math.round(introCarousel.scrollLeft / w);
+        syncIntroDots();
+      });
+    }
+
+    introNext?.addEventListener('click', () => {
+      if (!introCarousel) return;
+      const w = introCarousel.clientWidth || 1;
+      if (introIndex >= 4) {
+        showScreen('onboarding');
+        return;
+      }
+      introIndex += 1;
+      introCarousel.scrollTo({ left: w * introIndex, behavior: 'smooth' });
+      syncIntroDots();
+    });
+
     setTheme('light');
     showScreen('home');
   </script>
