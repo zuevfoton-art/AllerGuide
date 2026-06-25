@@ -23,6 +23,7 @@ const en: LocaleMessages = {
     retry: 'Retry',
     loadFailed: 'Failed to load data.',
     createProfile: 'Create profile',
+    undo: 'Undo',
     email: 'Email',
     phone: 'Phone',
     password: 'Password',
@@ -238,6 +239,9 @@ const en: LocaleMessages = {
     savedToSafe: '✓ Saved',
     safeListEmpty: 'No safe products yet',
     removeSafe: 'Remove',
+    removeSafeTitle: 'Remove from safe list?',
+    removeSafeMessage: '«{{name}}» will be removed from your safe products.',
+    removedFromSafe: 'Removed from safe list',
   },
   market: {
     title: 'Market',
