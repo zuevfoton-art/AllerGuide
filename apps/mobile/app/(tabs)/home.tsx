@@ -18,7 +18,7 @@ import { radii } from '@/src/constants/layout';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { MarketplaceModule } from '@/src/modules/marketplace';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -87,13 +87,16 @@ export default function HomeScreen() {
       refreshing={wellnessState.refreshing}>
       <View style={styles.topBar}>
         <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
-        <Pressable
-          onPress={() => router.push('/(tabs)/sos')}
-          style={styles.sosBtn}
-          accessibilityRole="button"
-          accessibilityLabel={t('tabs.sos')}>
-          <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
-        </Pressable>
+        <View style={styles.topBarActions}>
+          <ProfileHeaderButton />
+          <Pressable
+            onPress={() => router.push('/(tabs)/sos')}
+            style={styles.sosBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('tabs.sos')}>
+            <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.hero}>
@@ -115,9 +118,6 @@ export default function HomeScreen() {
                 <Text style={[ui.badgeText, badge.text]}>{wellness?.statusTitle}</Text>
               </View>
             ) : null}
-            <Pressable onPress={() => router.push('/(tabs)/map')}>
-              <Text style={ui.sectionLink}>{t('home.details')}</Text>
-            </Pressable>
           </View>
         </View>
 
@@ -195,35 +195,12 @@ export default function HomeScreen() {
         ))}
       </GlassCard>
 
-      <MarketplaceModule variant="embedded" />
-
       {wellness?.recommendations[0] ? (
         <GlassCard style={styles.recCard}>
           <Text style={styles.recTitle}>{wellness.recommendations[0].title}</Text>
           <Text style={styles.recText}>{wellness.recommendations[0].text}</Text>
         </GlassCard>
       ) : null}
-
-      <View style={styles.quickRow}>
-        <Button
-          label={t('tabs.scanner')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/scanner')}
-        />
-        <Button
-          label={t('tabs.market')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/market')}
-        />
-        <Button
-          label={t('tabs.map')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/map')}
-        />
-      </View>
 
       <Disclaimer>{t('home.disclaimer')}</Disclaimer>
     </Screen>
@@ -239,6 +216,11 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     topBarLogo: {
       flexShrink: 1,
+    },
+    topBarActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
     },
     sosBtn: {
       width: 40,
@@ -311,7 +293,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
-    quickRow: { flexDirection: 'row', gap: 8 },
-    quickBtn: { flex: 1 },
   });
 }

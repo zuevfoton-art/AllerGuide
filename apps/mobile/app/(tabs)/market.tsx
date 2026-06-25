@@ -6,6 +6,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { MarketplaceModule } from '@/src/modules/marketplace';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 export default function MarketScreen() {
   const theme = useTheme();
@@ -16,9 +17,12 @@ export default function MarketScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={ui.docLabel}>AllerGuide · {t('market.eyebrow')}</Text>
-        <Text style={ui.docTitle}>{t('market.title')}</Text>
-        <Text style={ui.docMeta}>{t('market.subtitle')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('market.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('market.title')}</Text>
+          <Text style={ui.docMeta}>{t('market.subtitle')}</Text>
+        </View>
+        <ProfileHeaderButton />
       </View>
 
       <ProfileSwitcher />
@@ -30,6 +34,12 @@ export default function MarketScreen() {
 
 function createStyles(_theme: AppTheme) {
   return StyleSheet.create({
-    header: { gap: 2 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    headerText: { flex: 1, gap: 2 },
   });
 }
