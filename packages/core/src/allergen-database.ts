@@ -185,6 +185,27 @@ export const ALLERGENS: AllergenRecord[] = [
     keywords: ['сельдер', 'сельдерей'],
   },
   {
+    id: 'mustard',
+    name: 'Горчица',
+    category: 'food',
+    popular: false,
+    keywords: ['горчиц', 'горчичн'],
+  },
+  {
+    id: 'sulphites',
+    name: 'Сульфиты',
+    category: 'food',
+    popular: false,
+    keywords: ['сульфит', 'диоксид серы', 'e220', 'e221', 'e222', 'e223', 'e224', 'e225', 'e226', 'e227', 'e228'],
+  },
+  {
+    id: 'lupin',
+    name: 'Люпин',
+    category: 'food',
+    popular: false,
+    keywords: ['люпин'],
+  },
+  {
     id: 'melon',
     name: 'Дыня и арбуз',
     category: 'food',

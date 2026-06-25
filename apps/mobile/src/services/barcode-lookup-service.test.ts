@@ -21,7 +21,7 @@ vi.mock('@/src/services/catalog-api', () => ({
         barcode: '8888888888888',
         name: 'Catalog Product',
         ingredients: 'water',
-        allergenTags: ['молоко'],
+        allergenTags: ['milk'],
       };
     }
     return null;
@@ -61,7 +61,8 @@ describe('barcode-lookup-service', () => {
   it('uses backend catalog before Open Food Facts', async () => {
     const product = await resolveProductByBarcode('8888888888888');
     expect(product?.source).toBe('catalog_api');
-    expect(product?.ingredients).toContain('молоко');
+    expect(product?.ingredients).toContain('Молоко');
+    expect(product?.ingredients).toContain('лактоза');
     expect(cache.has('8888888888888')).toBe(true);
   });
 

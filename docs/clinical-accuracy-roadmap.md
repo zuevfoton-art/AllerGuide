@@ -38,7 +38,7 @@
 | ID | Задача | Статус |
 |----|--------|--------|
 | **A.1** | Миграция `profiles.allergies` на canonical ids (`milk`, `birch-pollen`) | ✅ Done |
-| A.2 | Маппинг EU14 / FDA9 / OFF → `allergenId` | Planned |
+| **A.2** | Маппинг EU14 / FDA9 / OFF → `allergenId` | ✅ Done |
 | A.3 | ICD-11 / SNOMED crosswalk в doctor-report | Planned |
 | A.4 | `confirmedBy`: self_reported / specific_ige / clinician | Planned |
 | A.5 | Валидация профиля при save (дубликаты, consent) | Planned |
@@ -49,6 +49,13 @@
 - DB migration v4 — rewrite stored JSON to ids
 - `AllergenPicker` / catalog — select by id
 - `ProfileInput.allergies` — canonical ids
+
+**A.2 deliverables:**
+- `packages/core/src/regulatory-allergens.ts` — EU14, FDA9, OFF explicit maps
+- `mapExternalAllergenToId` / `mapExternalAllergenIds` — canonical ids from external vocabularies
+- `expandAllergenTagsForScan` — ids → keywords for barcode ingredient enrichment
+- `products.allergenTags` — canonical ids (OFF import + food-allergy dataset)
+- EU14 gaps in taxonomy: `mustard`, `sulphites`, `lupin`
 
 ### Phase B — Wellness Engine v2
 

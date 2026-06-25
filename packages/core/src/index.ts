@@ -11,6 +11,7 @@ export * from './diary-stats';
 export * from './sync';
 export * from './crypto';
 export * from './allergen-aliases';
+export * from './regulatory-allergens';
 export * from './allergy-conditions';
 export * from './expert-content';
 export * from './adair-catalog';

@@ -1,4 +1,4 @@
-import { mapExternalAllergenNames } from '@allerguide/core';
+import { mapExternalAllergenIds } from '@allerguide/core';
 
 export interface NormalizedProduct {
   barcode: string;
@@ -49,8 +49,8 @@ function normalize(product: OffProduct, fallbackBarcode = ''): NormalizedProduct
 
   if (!barcode || (!name && !ingredients)) return null;
 
-  // Combine declared allergens and "may contain" traces, mapped to RU taxonomy.
-  const allergenTags = mapExternalAllergenNames([
+  // Combine declared allergens and "may contain" traces, mapped to canonical ids.
+  const allergenTags = mapExternalAllergenIds([
     ...(product.allergens_tags ?? []),
     ...(product.traces_tags ?? []),
   ]);
@@ -90,7 +90,7 @@ export async function fetchOpenFoodFactsProduct(
 
 /**
  * On-demand full-text product search from the Open Food Facts API.
- * Returns normalized products (allergen tags mapped to the RU taxonomy).
+ * Returns normalized products (allergen tags mapped to canonical ids).
  */
 export async function searchOpenFoodFacts(
   query: string,

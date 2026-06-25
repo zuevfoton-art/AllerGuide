@@ -1,4 +1,9 @@
 import { findAllergenById, type AllergenRecord } from './allergen-database';
+import { resolveAllergenId } from './profile-allergens';
+import {
+  normalizeExternalAllergenTerm,
+  REGULATORY_ALLERGEN_ALIASES,
+} from './regulatory-allergens';
 
 /**
  * Maps external allergen vocabularies (the food-allergy-db dataset, Open Food
@@ -8,64 +13,88 @@ import { findAllergenById, type AllergenRecord } from './allergen-database';
  * Values are core allergen ids from `allergen-database.ts`.
  */
 export const EXTERNAL_ALLERGEN_ALIASES: Record<string, string> = {
-  // dairy
-  milk: 'milk',
-  dairy: 'milk',
+  ...REGULATORY_ALLERGEN_ALIASES,
+  // dataset / free-form aliases beyond regulatory codes
   lactose: 'milk',
-  // eggs
-  egg: 'eggs',
-  eggs: 'eggs',
-  // peanut
-  peanut: 'peanut',
-  peanuts: 'peanut',
-  // tree nuts
-  treenut: 'tree-nuts',
-  treenuts: 'tree-nuts',
-  'tree-nut': 'tree-nuts',
-  'tree-nuts': 'tree-nuts',
   nut: 'tree-nuts',
-  nuts: 'tree-nuts',
-  hazelnut: 'hazelnut',
-  hazelnuts: 'hazelnut',
-  // fish & seafood
-  fish: 'fish',
   shellfish: 'seafood',
-  crustaceans: 'seafood',
-  crustacean: 'seafood',
-  molluscs: 'seafood',
-  mollusks: 'seafood',
-  seafood: 'seafood',
-  // soy
-  soy: 'soy',
-  soya: 'soy',
-  soybeans: 'soy',
-  soybean: 'soy',
-  // wheat / gluten
-  wheat: 'wheat-gluten',
-  gluten: 'wheat-gluten',
-  'gluten-containing-cereals': 'wheat-gluten',
-  rye: 'rye',
-  barley: 'barley',
-  // sesame
-  sesame: 'sesame',
-  'sesame-seeds': 'sesame',
-  // others present in the core taxonomy
-  citrus: 'citrus',
-  honey: 'honey',
-  celery: 'celery',
-  chestnut: 'chestnut',
 };
 
-function normalizeExternalTerm(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/^[a-z]{2}:/, ''); // strip OFF language prefix, e.g. "en:milk"
+export {
+  EU14_ALLERGEN_CODES,
+  EU14_CANONICAL_ALLERGEN_IDS,
+  FDA9_ALLERGEN_CODES,
+  FDA9_CANONICAL_ALLERGEN_IDS,
+  normalizeExternalAllergenTerm,
+  OPEN_FOOD_FACTS_ALLERGEN_TAGS,
+  REGULATORY_ALLERGEN_ALIASES,
+} from './regulatory-allergens';
+
+/** Resolve an external allergen term to a canonical allergen id, if known. */
+export function mapExternalAllergenToId(name: string): string | undefined {
+  const normalized = normalizeExternalAllergenTerm(name);
+  if (!normalized) return undefined;
+
+  const fromAlias = EXTERNAL_ALLERGEN_ALIASES[normalized];
+  if (fromAlias) return fromAlias;
+
+  return resolveAllergenId(name) ?? undefined;
+}
+
+/**
+ * Map external allergen terms (EU14 / FDA9 / OFF / dataset names) to canonical ids.
+ * Unrecognized terms are skipped. Order-preserving and de-duplicated.
+ */
+export function mapExternalAllergenIds(names: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+
+  for (const raw of names) {
+    const id = mapExternalAllergenToId(raw);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+
+  return out;
+}
+
+/**
+ * Expand stored allergen tags (ids or legacy labels) into scan-friendly text
+ * (localized names + keywords) for ingredient string enrichment.
+ */
+export function expandAllergenTagsForScan(tags: string[]): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+
+  for (const tag of tags) {
+    const id = mapExternalAllergenToId(tag) ?? resolveAllergenId(tag);
+    if (id) {
+      const record = findAllergenById(id);
+      if (record) {
+        for (const part of [record.name, ...record.keywords]) {
+          const key = part.toLowerCase();
+          if (!key || seen.has(key)) continue;
+          seen.add(key);
+          out.push(part);
+        }
+        continue;
+      }
+    }
+
+    const trimmed = tag.trim();
+    const key = trimmed.toLowerCase();
+    if (!trimmed || seen.has(key)) continue;
+    seen.add(key);
+    out.push(trimmed);
+  }
+
+  return out;
 }
 
 /** Resolve an external allergen term to a core allergen record, if known. */
 export function mapExternalAllergen(name: string): AllergenRecord | undefined {
-  const id = EXTERNAL_ALLERGEN_ALIASES[normalizeExternalTerm(name)];
+  const id = mapExternalAllergenToId(name);
   return id ? findAllergenById(id) : undefined;
 }
 
