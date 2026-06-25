@@ -11,6 +11,9 @@ const resources = {
 export function initI18n() {
   if (i18next.isInitialized) return i18next;
 
+  // i18next exposes `use` as both an instance method and a named export; we want
+  // the instance method here.
+  // eslint-disable-next-line import/no-named-as-default-member
   void i18next.use(initReactI18next).init({
     resources,
     lng: 'ru',
