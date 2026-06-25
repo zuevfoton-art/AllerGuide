@@ -37,7 +37,13 @@
           "color": "#2563EB"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "AllerGuide использует микрофон для голосовых заметок в дневнике."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -59,7 +65,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "AllerGuide использует камеру для сканирования штрихкодов продуктов.",
         "NSPhotoLibraryUsageDescription": "AllerGuide использует фото для загрузки меню и состава продуктов.",
-        "NSLocationWhenInUseUsageDescription": "AllerGuide использует геолокацию для показа аллерго-дружелюбных мест рядом."
+        "NSLocationWhenInUseUsageDescription": "AllerGuide использует геолокацию для показа аллерго-дружелюбных мест рядом.",
+        "NSMicrophoneUsageDescription": "AllerGuide использует микрофон для голосовых заметок в дневнике."
       }
     },
     "android": {
@@ -73,7 +80,8 @@
         "android.permission.CAMERA",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "extra": {

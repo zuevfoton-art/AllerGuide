@@ -19,6 +19,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections } from '@/src/i18n/content';
+import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 
 export interface DiaryWizardResult {
   type: string;
@@ -286,6 +287,7 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
         multiline
         textAlignVertical="top"
       />
+      <VoiceNoteButton value={text} onChange={setText} />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable style={styles.primaryBtn} onPress={handleSave}>
         <Text style={styles.primaryText}>{t('diary.saveChanges')}</Text>
@@ -331,15 +333,18 @@ function StepField({
   }
 
   return (
-    <TextInput
-      style={[styles.input, step.multiline && styles.inputMultiline]}
-      value={value}
-      onChangeText={onChange}
-      placeholder={step.placeholder}
-      placeholderTextColor={theme.colors.textMuted}
-      multiline={step.multiline}
-      textAlignVertical={step.multiline ? 'top' : 'center'}
-    />
+    <View style={styles.textWrap}>
+      <TextInput
+        style={[styles.input, step.multiline && styles.inputMultiline]}
+        value={value}
+        onChangeText={onChange}
+        placeholder={step.placeholder}
+        placeholderTextColor={theme.colors.textMuted}
+        multiline={step.multiline}
+        textAlignVertical={step.multiline ? 'top' : 'center'}
+      />
+      {step.multiline ? <VoiceNoteButton value={value} onChange={onChange} /> : null}
+    </View>
   );
 }
 
@@ -417,6 +422,7 @@ function createLegacyStyles({ colors, fonts }: AppTheme) {
 
 function createFieldStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    textWrap: { gap: 8 },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,

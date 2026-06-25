@@ -12,3 +12,6 @@ export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'tr
 
 /** Look up barcodes in the backend product catalog before Open Food Facts. */
 export const PRODUCT_DB_ENABLED = process.env.EXPO_PUBLIC_PRODUCT_DB === 'true';
+
+/** Cloud speech-to-text for voice diary notes via /api/transcribe (native). Web uses browser Speech API. */
+export const VOICE_TRANSCRIBE_ENABLED = process.env.EXPO_PUBLIC_VOICE_TRANSCRIBE === 'true';

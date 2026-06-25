@@ -583,6 +583,19 @@ const it: LocaleMessages = {
     calm: 'Calmo',
     grains: 'grani/m³',
   },
+  voiceNote: {
+    title: 'Nota vocale',
+    startRecording: 'Avvia registrazione',
+    stopRecording: 'Ferma e trascrivi',
+    transcribing: 'Trascrizione…',
+    tapToSpeak: 'Tocca per dettare',
+    permissionDenied: 'Accesso al microfono negato. Abilitalo nelle impostazioni del dispositivo.',
+    notSupported: 'L’input vocale non è disponibile su questo dispositivo.',
+    cloudRequired:
+      'Su mobile la trascrizione usa il server. Abilita EXPO_PUBLIC_VOICE_TRANSCRIBE e API VOICE_TRANSCRIBE_ENABLED.',
+    failed: 'Impossibile trascrivere la registrazione. Riprova.',
+    quickVoice: 'Nota vocale',
+  },
   errors: {
     selectProfile: 'Seleziona un profilo nella schermata home.',
   },

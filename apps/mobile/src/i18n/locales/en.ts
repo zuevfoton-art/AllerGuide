@@ -584,6 +584,19 @@ const en: LocaleMessages = {
     calm: 'Calm',
     grains: 'grains/m³',
   },
+  voiceNote: {
+    title: 'Voice note',
+    startRecording: 'Start recording',
+    stopRecording: 'Stop and transcribe',
+    transcribing: 'Transcribing…',
+    tapToSpeak: 'Tap to dictate',
+    permissionDenied: 'Microphone access denied. Enable it in device settings.',
+    notSupported: 'Voice input is not available on this device.',
+    cloudRequired:
+      'On mobile, transcription uses the server. Enable EXPO_PUBLIC_VOICE_TRANSCRIBE and API VOICE_TRANSCRIBE_ENABLED.',
+    failed: 'Could not transcribe the recording. Please try again.',
+    quickVoice: 'Voice note',
+  },
   errors: {
     selectProfile: 'Select a profile on the home screen.',
   },
