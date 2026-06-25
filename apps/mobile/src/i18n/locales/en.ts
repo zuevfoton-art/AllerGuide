@@ -179,6 +179,13 @@ const en: LocaleMessages = {
     insightsCorSymFood: '{{n}} of {{of}} symptom days also had a food entry',
     insightsCorSymTrig: '{{n}} of {{of}} symptom days had a trigger logged',
     insightsCorSymMeds: '{{n}} of {{of}} symptom days included medication',
+    insightsTemporalCorSymFood: '{{n}} of {{of}} symptom episodes had food within ±4h',
+    insightsTemporalCorSymTrig: '{{n}} of {{of}} symptom episodes had a trigger within ±4h',
+    insightsTemporalCorSymMeds: '{{n}} of {{of}} symptom episodes had medication within ±4h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} consecutive days with symptoms but no trigger logged',
+    actPromptTitle: 'Time for ACT',
+    actPromptText: 'It has been 4+ weeks since your last asthma control (ACT) assessment. We recommend completing ACT.',
+    actPromptButton: 'Complete ACT',
   },
   diaryWizard: {
     stepOf: 'Step {{current}} of {{total}}',

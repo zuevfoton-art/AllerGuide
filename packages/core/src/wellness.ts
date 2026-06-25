@@ -1,6 +1,7 @@
 import type { ClinicalScaleId, ScaleScoreResult } from './clinical-scales';
 import { inferScaleLevelFromTotal } from './clinical-scales';
 import type { DiaryInsights } from './diary-stats';
+import type { AsitComplianceSummary } from './asit-therapy';
 import type { ScaleTrendEntry } from './diary-profile';
 import type { OpenMeteoPollenTaxonId } from './pollen-taxonomy';
 import { classifyPollenConcentration } from './pollen-thresholds';
@@ -48,6 +49,16 @@ export interface WellnessDiarySeries {
   streak: number;
   weekTotal: number;
   correlationKind: DiaryInsights['correlationKind'];
+  temporalCorrelationKind: DiaryInsights['temporalCorrelationKind'];
+  anomalyKind: DiaryInsights['anomalyKind'];
+  anomalyDays: number;
+}
+
+export interface WellnessAsitSummary {
+  totalDoses: number;
+  missed: number;
+  delayed: number;
+  severeReactions: number;
 }
 
 export interface WellnessInput {
@@ -59,6 +70,7 @@ export interface WellnessInput {
   clinicalScales: WellnessClinicalScale[];
   foodAllergens: string[];
   envDataAvailable: boolean;
+  asit?: WellnessAsitSummary | null;
   /** @deprecated Use `diary.symptomDays > 0` — kept for transitional callers */
   recentSymptoms?: boolean;
   /** @deprecated Use `diary.triggerDays > 0` */
@@ -71,6 +83,7 @@ export interface WellnessScoreBreakdown {
   aqiPenalty: number;
   diaryPenalty: number;
   clinicalPenalty: number;
+  asitPenalty: number;
   crossReactionPenalty: number;
   crossReactionMatches: ReturnType<typeof computeCrossReactionWellnessPenalty>['matches'];
   weightsVersion: string;
@@ -107,7 +120,29 @@ export function buildDiarySeriesFromInsights(insights: DiaryInsights): WellnessD
     streak: insights.streak,
     weekTotal: insights.weekTotal,
     correlationKind: insights.correlationKind,
+    temporalCorrelationKind: insights.temporalCorrelationKind,
+    anomalyKind: insights.anomalyKind,
+    anomalyDays: insights.anomalyDays,
   };
+}
+
+export function buildAsitSummaryFromCompliance(
+  summary: AsitComplianceSummary | null,
+): WellnessAsitSummary | null {
+  if (!summary?.totalDoses) return summary ? { totalDoses: 0, missed: 0, delayed: 0, severeReactions: 0 } : null;
+  return {
+    totalDoses: summary.totalDoses,
+    missed: summary.missed,
+    delayed: summary.delayed,
+    severeReactions: summary.reactions.severe,
+  };
+}
+
+export function computeAsitPenalty(asit: WellnessAsitSummary | null | undefined): number {
+  if (!asit) return 0;
+  let penalty = asit.missed * WELLNESS_WEIGHTS.asitMissedDose;
+  penalty += asit.severeReactions * WELLNESS_WEIGHTS.asitSevereReaction;
+  return penalty;
 }
 
 export function buildClinicalScalesFromTrends(trends: ScaleTrendEntry[]): WellnessClinicalScale[] {
@@ -123,9 +158,21 @@ export function computeDiaryPenalty(diary: WellnessDiarySeries): number {
   let penalty = diary.symptomDays * WELLNESS_WEIGHTS.diarySymptomDay;
   penalty += diary.triggerDays * WELLNESS_WEIGHTS.diaryTriggerDay;
   if (diary.streak >= 3) penalty += WELLNESS_WEIGHTS.diaryStreakBonus;
-  if (diary.correlationKind === 'symptom-trigger' || diary.correlationKind === 'symptom-food') {
+
+  const temporalKind = diary.temporalCorrelationKind ?? diary.correlationKind;
+  if (temporalKind === 'symptom-trigger' || temporalKind === 'symptom-food') {
+    penalty +=
+      diary.temporalCorrelationKind != null
+        ? WELLNESS_WEIGHTS.temporalCorrelationBonus
+        : WELLNESS_WEIGHTS.diaryCorrelationBonus;
+  } else if (diary.correlationKind === 'symptom-trigger' || diary.correlationKind === 'symptom-food') {
     penalty += WELLNESS_WEIGHTS.diaryCorrelationBonus;
   }
+
+  if (diary.anomalyKind === 'symptoms-without-trigger') {
+    penalty += WELLNESS_WEIGHTS.symptomWithoutTriggerAnomaly;
+  }
+
   return penalty;
 }
 
@@ -157,6 +204,7 @@ export function computeWellnessScoreBreakdown(input: WellnessInput): WellnessSco
 
   const aqiPenalty = aqiTier(input.europeanAqi).penalty;
   const diaryPenalty = computeDiaryPenalty(input.diary);
+  const asitPenalty = computeAsitPenalty(input.asit);
 
   let clinicalPenalty = 0;
   for (const scale of input.clinicalScales) {
@@ -166,7 +214,7 @@ export function computeWellnessScoreBreakdown(input: WellnessInput): WellnessSco
   const crossResult = computeCrossReactionWellnessPenalty(input.profileAllergenIds, pollenExposures);
 
   const totalPenalty =
-    pollenPenalty + aqiPenalty + diaryPenalty + clinicalPenalty + crossResult.penalty;
+    pollenPenalty + aqiPenalty + diaryPenalty + clinicalPenalty + asitPenalty + crossResult.penalty;
 
   const score = Math.max(
     WELLNESS_WEIGHTS.scoreMin,
@@ -179,6 +227,7 @@ export function computeWellnessScoreBreakdown(input: WellnessInput): WellnessSco
     aqiPenalty,
     diaryPenalty,
     clinicalPenalty,
+    asitPenalty,
     crossReactionPenalty: crossResult.penalty,
     crossReactionMatches: crossResult.matches,
     weightsVersion: WELLNESS_WEIGHTS_VERSION,
@@ -272,6 +321,22 @@ export function buildWellnessRecommendations(input: WellnessInput): WellnessReco
       icon: '🔗',
       title: 'Возможные перекрёстные реакции',
       text: `При повышенной пыльце возможна реакция на: ${names.join(', ')}. Учитывайте при питании и на улице.`,
+    });
+  }
+
+  if (input.diary.anomalyKind === 'symptoms-without-trigger') {
+    recs.push({
+      icon: '⚠️',
+      title: 'Симптомы без триггера',
+      text: `${input.diary.anomalyDays} дн. подряд симптомы без записанного триггера. Попробуйте зафиксировать возможные причины.`,
+    });
+  }
+
+  if (input.asit && input.asit.missed > 0) {
+    recs.push({
+      icon: '💉',
+      title: 'АСИТ',
+      text: `За 30 дней пропущено ${input.asit.missed} приём(ов). Обсудите соблюдение схемы с врачом.`,
     });
   }
 

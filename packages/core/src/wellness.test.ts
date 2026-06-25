@@ -23,7 +23,7 @@ describe('wellness v2 (B.4–B.9)', () => {
     pollenMatches: [{ label: 'Берёза', value: 5, profileRelevant: true, taxonId: 'birch_pollen' as const, allergenId: 'birch-pollen' }],
     europeanAqi: 15,
     pm25: 10,
-    diary: { symptomDays: 0, triggerDays: 0, streak: 0, weekTotal: 0, correlationKind: null },
+    diary: { symptomDays: 0, triggerDays: 0, streak: 0, weekTotal: 0, correlationKind: null, temporalCorrelationKind: null, anomalyKind: null, anomalyDays: 0 },
     clinicalScales: [],
     foodAllergens: [],
     envDataAvailable: true,
@@ -40,7 +40,16 @@ describe('wellness v2 (B.4–B.9)', () => {
     const bad = computeWellnessScore({
       ...baseInput,
       pollenMatches: [{ label: 'Берёза', value: 90, profileRelevant: true, taxonId: 'birch_pollen', allergenId: 'birch-pollen' }],
-      diary: { symptomDays: 4, triggerDays: 2, streak: 4, weekTotal: 8, correlationKind: 'symptom-trigger' },
+      diary: {
+        symptomDays: 4,
+        triggerDays: 2,
+        streak: 4,
+        weekTotal: 8,
+        correlationKind: 'symptom-trigger',
+        temporalCorrelationKind: 'symptom-trigger',
+        anomalyKind: null,
+        anomalyDays: 0,
+      },
     });
     expect(good).toBeGreaterThan(bad);
   });

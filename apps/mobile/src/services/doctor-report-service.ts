@@ -4,6 +4,7 @@ import {
   DOCTOR_REPORT_DISCLAIMER,
   DOCTOR_REPORT_TITLE,
   buildCodedAllergyLines,
+  buildDoctorReportTimeline,
   computeAsitCompliance,
   computeFoodDrugSummary,
   computeInsectStingSummary,
@@ -44,6 +45,18 @@ export type DoctorReportOptions = {
 function filterEntriesByPeriod(entries: DiaryEntry[], days: number): DiaryEntry[] {
   const cutoff = Date.now() - days * 86_400_000;
   return entries.filter((e) => new Date(e.createdAt).getTime() >= cutoff);
+}
+
+function renderTimeline(entries: DiaryEntry[]): string {
+  const items = buildDoctorReportTimeline(entries);
+  if (!items.length) return `<p style="color:${c.muted};">Нет записей за период.</p>`;
+  return items
+    .map((item) => {
+      const severity = item.severityLabel ? ` · тяжесть: ${item.severityLabel}` : '';
+      const coded = item.codedSymptoms ? `<br/><small>Коды: ${item.codedSymptoms}</small>` : '';
+      return `<div style="margin-bottom:10px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${item.type}</strong> <small>(${formatDiaryDate(item.createdAt)})</small><p>${item.summary}${severity}</p>${coded}</div>`;
+    })
+    .join('');
 }
 
 function renderScaleTrend(entries: DiaryEntry[]): string {
@@ -114,6 +127,10 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
         .join('')}</section>`;
     })
     .join('');
+
+  const timelineHtml = options.blockIds.includes('timeline')
+    ? `<section><h2>Хронология записей</h2>${renderTimeline(periodEntries)}</section>`
+    : '';
 
   const scalesHtml = options.blockIds.includes('scales')
     ? `<section><h2>Сводка шкал</h2><ul>${renderScaleTrend(periodEntries)}</ul></section>`
@@ -188,6 +205,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       <p style="font-size:12px;color:${c.muted};">${DOCTOR_REPORT_DISCLAIMER}</p>
       <hr style="border:none;border-top:1px solid ${c.border};" />
       ${pefHtml}
+      ${timelineHtml}
       ${scalesHtml}
       ${asitHtml}
       ${foodDrugHtml}

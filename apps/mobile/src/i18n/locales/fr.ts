@@ -179,6 +179,13 @@ const fr: LocaleMessages = {
     insightsCorSymFood: '{{n}} jour(s) sur {{of}} avec symptômes avaient aussi une entrée alimentaire',
     insightsCorSymTrig: '{{n}} jour(s) sur {{of}} avec symptômes avaient un déclencheur enregistré',
     insightsCorSymMeds: '{{n}} jour(s) sur {{of}} avec symptômes incluaient un médicament',
+    insightsTemporalCorSymFood: '{{n}} sur {{of}} épisodes de symptômes avec aliment dans ±4 h',
+    insightsTemporalCorSymTrig: '{{n}} sur {{of}} épisodes de symptômes avec déclencheur dans ±4 h',
+    insightsTemporalCorSymMeds: '{{n}} sur {{of}} épisodes de symptômes avec médicament dans ±4 h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} jours consécutifs de symptômes sans déclencheur enregistré',
+    actPromptTitle: 'Il est temps de remplir l\'ACT',
+    actPromptText: 'Plus de 4 semaines depuis la dernière évaluation ACT. Nous recommandons de la compléter.',
+    actPromptButton: 'Remplir l\'ACT',
   },
   diaryWizard: {
     stepOf: 'Étape {{current}} sur {{total}}',

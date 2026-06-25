@@ -131,15 +131,43 @@
 
 ### Phase C — Diary & Symptoms
 
-| ID | Задача |
-|----|--------|
-| C.1 | Симптомы по SNOMED / ICD кодам |
-| C.2 | Severity 0–3 единая шкала |
-| C.3 | Корреляция симптом ↔ триггер ±4 ч |
-| C.4 | ACT auto-prompt раз в 4 недели |
-| C.5 | АСИТ-трекинг в wellness trend |
-| C.6 | Аномалии (3 дня симптомов без триггера) |
-| C.7 | PDF timeline для врача |
+| ID | Задача | Статус |
+|----|--------|--------|
+| **C.1** | Симптомы по SNOMED / ICD кодам | ✅ Done |
+| **C.2** | Severity 0–3 единая шкала | ✅ Done |
+| **C.3** | Корреляция симптом ↔ триггер ±4 ч | ✅ Done |
+| **C.4** | ACT auto-prompt раз в 4 недели | ✅ Done |
+| **C.5** | АСИТ-трекинг в wellness trend | ✅ Done |
+| **C.6** | Аномалии (3 дня симптомов без триггера) | ✅ Done |
+| **C.7** | PDF timeline для врача | ✅ Done |
+
+**C.1 deliverables:**
+- `packages/core/src/symptom-coding.ts` — symptom catalog + SNOMED/ICD crosswalk
+- `enrichSymptomAnswers()` on save; symptom picker step in diary wizard
+
+**C.2 deliverables:**
+- `packages/core/src/diary-severity.ts` — unified 0–3 scale + legacy 0–10 mapping
+- `severity0_3` step in symptoms section; `severity` canonical field in answers
+
+**C.3 deliverables:**
+- `computeTemporalCorrelations()` — ±4h pairing in `diary-stats.ts`
+- `DiaryInsights.temporalCorrelationKind` + wellness temporal bonus
+
+**C.4 deliverables:**
+- `isActPromptDue()` in `diary-profile.ts` (28-day interval)
+- ACT prompt banner on diary screen for asthma profiles
+
+**C.5 deliverables:**
+- `WellnessInput.asit` + `computeAsitPenalty()` in wellness engine
+- `wellness-service.ts` wires `computeAsitCompliance`
+
+**C.6 deliverables:**
+- `detectSymptomWithoutTriggerAnomaly()` — 3+ consecutive days
+- Anomaly alert in `DiaryInsightsCard` + wellness recommendation
+
+**C.7 deliverables:**
+- `packages/core/src/doctor-report-timeline.ts` — chronological merge
+- `timeline` block in doctor PDF (`doctor-report-service.ts`)
 
 ### Phase D — Scanner v2
 
@@ -207,6 +235,9 @@ flowchart LR
 | `packages/core/src/cross-reactions/` | Кросс-реактивность |
 | `packages/core/src/clinical-scales.ts` | ARIA, ACT, SCORAD, UAS7 |
 | `packages/core/src/diary-profile.ts` | Условия → шкалы дневника |
+| `packages/core/src/symptom-coding.ts` | C.1 — SNOMED/ICD symptoms |
+| `packages/core/src/diary-severity.ts` | C.2 — unified 0–3 severity |
+| `packages/core/src/doctor-report-timeline.ts` | C.7 — PDF timeline |
 
 ---
 
