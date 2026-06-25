@@ -1,10 +1,21 @@
-import { install as installQuickCrypto } from 'react-native-quick-crypto';
-
-installQuickCrypto();
-
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
+
+// react-native-quick-crypto (0.x, Bridge/JSI) polyfills the global `crypto` used
+// for native backup encryption. Its install() can throw on launch (the 0.x JSI
+// build is only best-effort on the New Architecture, and fails if the native
+// module isn't linked). Guard it so a crypto-polyfill failure NEVER crashes the
+// app at startup — web has Web Crypto, and backup encryption degrades gracefully.
+if (Platform.OS !== 'web') {
+  try {
+    // Lazy require so the web bundle never loads the native module.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    (require('react-native-quick-crypto') as { install: () => void }).install();
+  } catch (error) {
+    console.warn('[crypto] react-native-quick-crypto install skipped:', error);
+  }
+}
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { initDb } from '@/src/db/init';
