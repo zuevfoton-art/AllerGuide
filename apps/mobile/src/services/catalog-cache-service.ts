@@ -17,7 +17,7 @@ const WEB_PRODUCTS_KEY = 'ag_catalog_products';
 
 type ProductCacheMap = Record<string, CachedCatalogProduct>;
 
-function useWebStore(): boolean {
+function isWebStorageBackend(): boolean {
   return Platform.OS === 'web';
 }
 
@@ -38,7 +38,7 @@ function writeWebProductMap(map: ProductCacheMap) {
 }
 
 export function getCachedAllergenCatalog(): CachedCatalogAllergens | null {
-  if (useWebStore()) {
+  if (isWebStorageBackend()) {
     const snapshot = readWebAllergenSnapshot();
     return snapshot && isCatalogCacheFresh(snapshot.fetchedAt) ? snapshot : null;
   }
@@ -66,7 +66,7 @@ export function saveCachedAllergenCatalog(
 ): CachedCatalogAllergens {
   const snapshot = buildCachedAllergensPayload(allergens, source);
 
-  if (useWebStore()) {
+  if (isWebStorageBackend()) {
     writeWebAllergenSnapshot(snapshot);
     return snapshot;
   }
@@ -84,7 +84,7 @@ export function getCachedCatalogProduct(barcode: string): CachedCatalogProduct |
   const normalized = barcode.replace(/\s+/g, '').trim();
   if (!normalized) return null;
 
-  if (useWebStore()) {
+  if (isWebStorageBackend()) {
     const product = readWebProductMap()[normalized];
     return product && isCatalogCacheFresh(product.fetchedAt) ? product : null;
   }
@@ -148,7 +148,7 @@ export function saveCachedCatalogProduct(
     source,
   });
 
-  if (useWebStore()) {
+  if (isWebStorageBackend()) {
     const map = readWebProductMap();
     map[cached.barcode] = cached;
     writeWebProductMap(map);
