@@ -23,6 +23,7 @@ const ru: LocaleMessages = {
     retry: 'Повторить',
     loadFailed: 'Не удалось загрузить данные.',
     createProfile: 'Создать профиль',
+    undo: 'Отменить',
     email: 'Email',
     phone: 'Телефон',
     password: 'Пароль',
@@ -245,6 +246,9 @@ const ru: LocaleMessages = {
     savedToSafe: '✓ Сохранено',
     safeListEmpty: 'Безопасных продуктов пока нет',
     removeSafe: 'Убрать',
+    removeSafeTitle: 'Убрать из безопасных?',
+    removeSafeMessage: '«{{name}}» будет удалён из списка безопасных продуктов.',
+    removedFromSafe: 'Убрано из безопасных',
   },
   market: {
     title: 'Маркет',
