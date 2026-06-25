@@ -1,6 +1,7 @@
 # AllerGuide — регрессионный чеклист (internal alpha)
 
 **Roadmap:** [P0.1](roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)  
+**Архитектура:** [architecture.md](./architecture.md) · [development-rules.md](./development-rules.md)  
 **Версия чеклиста:** 1.0  
 **Целевые платформы:** iOS · Android · Web (Expo)
 

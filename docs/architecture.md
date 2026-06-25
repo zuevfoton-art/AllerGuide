@@ -4,6 +4,8 @@ AllerGuide — offline-first приложение для управления а
 
 Репозиторий — **pnpm workspaces + Turborepo** monorepo.
 
+> **Правила разработки:** при написании кода обязательно следовать [`docs/development-rules.md`](./development-rules.md). Этот документ описывает *что* и *как устроено*; правила — *куда класть код* и *что запрещено*.
+
 ---
 
 ## Содержание
@@ -635,6 +637,7 @@ pnpm --filter mobile lint
 | Документ | Тема |
 |----------|------|
 | `README.md` | Быстрый старт |
+| `docs/development-rules.md` | **Обязательные правила разработки** (слои, чеклист, антипаттерны) |
 | `AGENTS.md` | Инструкции для разработки / Cloud Agent |
 | `docs/functional-requirements.md` | Функциональные требования |
 | `docs/clinical-features-raaci.md` | Клинические фичи (RAACI) |
