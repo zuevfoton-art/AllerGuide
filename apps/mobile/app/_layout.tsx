@@ -14,15 +14,13 @@ import { initErrorReporting } from '@/src/services/error-reporting';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
 
-// react-native-quick-crypto (0.x, Bridge/JSI) polyfills the global `crypto` used
-// for native backup encryption. Its install() can throw on launch (the 0.x JSI
-// build is only best-effort on the New Architecture, and fails if the native
-// module isn't linked). Guard it so a crypto-polyfill failure NEVER crashes the
-// app at startup — web has Web Crypto, and backup encryption degrades gracefully.
-// (ES imports are evaluated before this runs, so ordering is unaffected.)
+// react-native-quick-crypto (0.x, Bridge/JSI) polyfills the global `crypto`
+// (metro aliases `crypto` -> this package). The 0.x line is reliable on the OLD
+// architecture but only best-effort ("🤞") on the New Architecture — which is why
+// the app disables newArchEnabled (see app.json). install() is still guarded so a
+// polyfill failure can never take down the app at launch.
 if (Platform.OS !== 'web') {
   try {
-    // Lazy require so the web bundle never loads the native module.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     (require('react-native-quick-crypto') as { install: () => void }).install();
   } catch (error) {
@@ -56,18 +54,33 @@ export default function RootLayout() {
 
   useEffect(() => {
     let mounted = true;
-    initI18n();
-    initAnalytics();
-    initErrorReporting();
+
+    // Each startup step is independent — a failure in one subsystem must never
+    // block the whole app from rendering.
+    const safe = (label: string, fn: () => void) => {
+      try {
+        fn();
+      } catch (error) {
+        console.warn(`[startup] ${label} failed:`, error);
+      }
+    };
+
+    safe('initI18n', initI18n);
+    safe('initAnalytics', initAnalytics);
+    safe('initErrorReporting', initErrorReporting);
 
     // Storage hydration is async on web (IndexedDB). Gate rendering on it so
     // screens never read from an empty cache before hydration completes.
     void (async () => {
-      await initDb();
+      try {
+        await initDb();
+      } catch (error) {
+        console.warn('[startup] initDb failed:', error);
+      }
       if (!mounted) return;
-      warmAllergenCatalogCache();
-      hydrateTheme();
-      hydrateLocale();
+      safe('warmAllergenCatalogCache', warmAllergenCatalogCache);
+      safe('hydrateTheme', hydrateTheme);
+      safe('hydrateLocale', hydrateLocale);
       setDbReady(true);
     })();
 

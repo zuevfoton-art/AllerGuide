@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BrandMark } from '@/src/components/brand/BrandMark';
 import { radii } from '@/src/constants/layout';
 import { lightColors } from '@/src/constants/theme';
@@ -12,13 +12,15 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  detail: string;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  state: State = { hasError: false, detail: '' };
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: unknown): State {
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    return { hasError: true, detail: message };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -26,7 +28,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private reset = () => {
-    this.setState({ hasError: false });
+    this.setState({ hasError: false, detail: '' });
   };
 
   render() {
@@ -39,6 +41,14 @@ export class ErrorBoundary extends Component<Props, State> {
         <Text style={styles.message}>
           Приложение столкнулось с неожиданной ошибкой. Попробуйте снова или перезапустите AllerGuide.
         </Text>
+        {this.state.detail ? (
+          <ScrollView style={styles.detailBox} contentContainerStyle={styles.detailContent}>
+            {/* Shown so testers can report the exact cause from a preview build. */}
+            <Text style={styles.detailText} selectable>
+              {this.state.detail}
+            </Text>
+          </ScrollView>
+        ) : null}
         <Pressable style={styles.button} onPress={this.reset} accessibilityRole="button">
           <Text style={styles.buttonText}>Попробовать снова</Text>
         </Pressable>
@@ -68,6 +78,23 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: lightColors.textSecondary,
     textAlign: 'center',
+  },
+  detailBox: {
+    maxHeight: 160,
+    alignSelf: 'stretch',
+    backgroundColor: lightColors.card,
+    borderRadius: radii.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  detailContent: {
+    paddingVertical: 4,
+  },
+  detailText: {
+    fontFamily: fonts.sans,
+    fontSize: 12,
+    lineHeight: 18,
+    color: lightColors.danger,
   },
   button: {
     marginTop: 8,
