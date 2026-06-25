@@ -1,0 +1,84 @@
+name: Release Android APK
+
+# Builds a release APK and publishes it as a GitHub Release asset (a downloadable
+# link). Trigger by pushing a tag like `android-preview-1.0.1`, or run manually
+# via "Run workflow". The release is created by GITHUB_TOKEN (no extra secrets;
+# debug-signed preview, mirroring scripts/build-preview-apk.sh).
+
+on:
+  push:
+    tags:
+      - 'android-preview-*'
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to create'
+        required: true
+        default: 'android-preview-1.0.1'
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.1.12297006" >/dev/null
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate app assets (icons / splash)
+        working-directory: apps/mobile
+        run: pnpm generate-assets || true
+
+      - name: Prebuild Android project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Build release APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Resolve release tag
+        id: tag
+        run: echo "name=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Stage APK
+        run: |
+          mkdir -p dist
+          cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk \
+            "dist/AllerGuide-${{ steps.tag.outputs.name }}.apk"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: AllerGuide Android ${{ steps.tag.outputs.name }}
+          body: |
+            AllerGuide internal preview APK (offline-first).
+
+            - Package: `com.allerguide.app` (debug-signed — internal testing only, not for Play Store)
+            - Fix: guarded native crypto initialization that crashed the app on launch (Android 14).
+
+            Install: download the `.apk` → allow installs from unknown sources → open the file.
+            If a previous build is installed, uninstall it first (the debug signature may differ between builds).
+          files: dist/AllerGuide-${{ steps.tag.outputs.name }}.apk
