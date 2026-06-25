@@ -1,0 +1,33 @@
+emote: Enumerating objects: 470, done.
+remote: Counting objects: 100% (331/331), done.
+remote: Compressing objects: 100% (91/91), done.
+remote: Total 150 (delta 58), reused 144 (delta 52), pack-reused 0 (from 0)
+Receiving objects: 100% (150/150), 171.84 KiB | 931.00 KiB/s, done.
+Resolving deltas: 100% (58/58), completed with 39 local objects.
+From https://github.com/zuevfoton-art/AllerGuide
+ * branch            main       -> FETCH_HEAD
+   e12a494..9fb3647  main       -> origin/main
+Auto-merging apps/mobile/app/(tabs)/scanner.tsx
+Auto-merging apps/mobile/src/db/init.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/db/init.ts
+Auto-merging apps/mobile/src/i18n/locales/de.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/locales/de.ts
+Auto-merging apps/mobile/src/i18n/locales/en.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/locales/en.ts
+Auto-merging apps/mobile/src/i18n/locales/es.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/locales/es.ts
+Auto-merging apps/mobile/src/i18n/locales/fr.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/locales/fr.ts
+Auto-merging apps/mobile/src/i18n/locales/it.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/locales/it.ts
+Auto-merging apps/mobile/src/i18n/locales/ru.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/locales/ru.ts
+Auto-merging apps/mobile/src/i18n/types.ts
+CONFLICT (content): Merge conflict in apps/mobile/src/i18n/types.ts
+error: could not apply 6b63825... Add a safe product list feature to the scanner
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Could not apply 6b63825... # Add a safe product list feature to the scanner
