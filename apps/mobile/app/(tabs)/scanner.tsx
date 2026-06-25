@@ -1,6 +1,6 @@
-import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView } from 'react-native';
-import { useCallback, useMemo, useState } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
@@ -10,6 +10,8 @@ import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
+import { ErrorState } from '@/src/components/ErrorState';
+import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +25,13 @@ import {
   listSafeProducts,
   removeSafeProduct,
 } from '@/src/services/safe-products-service';
+import { BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
+
+const UNDO_MS = 5000;
+
+type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
 const MODES = [
   { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
@@ -41,16 +50,22 @@ export default function ScannerScreen() {
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const [input, setInput] = useState('молоко, арахис, сахар');
+  const [input, setInput] = useState('');
   const [mode, setMode] = useState<ScanMode>('product');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [safeList, setSafeList] = useState<SafeProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [ocrHint, setOcrHint] = useState<string | null>(null);
+  const [scanError, setScanError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const lastScanRef = useRef<(() => void) | null>(null);
+  const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHapticResultRef = useRef<ScanResult | null>(null);
 
   const displayResult = useMemo(
     () => (result ? localizeScanResult(result, localeContent) : null),
@@ -84,9 +99,61 @@ export default function ScannerScreen() {
     }, [refreshHistory]),
   );
 
+  useEffect(() => {
+    if (loading || !result) return;
+    if (lastHapticResultRef.current === result) return;
+    lastHapticResultRef.current = result;
+    if (isDanger) void hapticDanger();
+  }, [result, loading, isDanger]);
+
+  const clearUndo = useCallback(() => {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = null;
+    setUndoItem(null);
+  }, []);
+
+  useEffect(() => () => clearUndo(), [clearUndo]);
+
+  const confirmRemoveSafe = (item: SafeProduct) => {
+    Alert.alert(
+      t('scanner.removeSafeTitle'),
+      t('scanner.removeSafeMessage', { name: item.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            removeSafeProduct(item.id);
+            void hapticLight();
+            refreshHistory();
+            setUndoItem({
+              name: item.name,
+              mode: item.mode,
+              input: item.input,
+              savedAt: item.savedAt,
+            });
+            if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+            undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleUndoRemove = () => {
+    if (!undoItem || !activeProfileId) return;
+    addSafeProduct(activeProfileId, undoItem.name, undoItem.mode, undoItem.input);
+    clearUndo();
+    refreshHistory();
+    void hapticSuccess();
+  };
+
   const runCheck = async (text: string, barcodeMode = false) => {
+    lastScanRef.current = () => void runCheck(text, barcodeMode);
     setLoading(true);
     setOcrHint(null);
+    setScanError(false);
     try {
       if (barcodeMode && mode === 'product') {
         const scanResult = await scanBarcode({ barcode: text, profile });
@@ -108,6 +175,9 @@ export default function ScannerScreen() {
       }
 
       setResult(await scanText({ mode, text, profile }));
+    } catch {
+      setResult(null);
+      setScanError(true);
     } finally {
       setLoading(false);
       refreshHistory();
@@ -115,8 +185,10 @@ export default function ScannerScreen() {
   };
 
   const runOcrCapture = async (manualText?: string) => {
+    lastScanRef.current = () => void runOcrCapture(manualText);
     setLoading(true);
     setOcrHint(null);
+    setScanError(false);
     try {
       const extraction = extractOcrText(mode, manualText);
       setInput(extraction.text);
@@ -129,11 +201,23 @@ export default function ScannerScreen() {
       if (extraction.warnings.length) {
         setOcrHint(extraction.warnings.join(' '));
       }
+    } catch {
+      setResult(null);
+      setScanError(true);
     } finally {
       setLoading(false);
       refreshHistory();
     }
   };
+
+  const refresh = useCallback(() => {
+    setRefreshing(true);
+    try {
+      refreshHistory();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshHistory]);
 
   const pickMenuImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -151,6 +235,15 @@ export default function ScannerScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const selectMode = (next: ScanMode) => {
+    if (next === mode) return;
+    setMode(next);
+    setResult(null);
+    setOcrHint(null);
+    setScanError(false);
+    lastHapticResultRef.current = null;
   };
 
   const openCamera = async () => {
@@ -252,16 +345,21 @@ export default function ScannerScreen() {
   }
 
   return (
-    <Screen>
+    <Screen
+      onRefresh={activeProfileId ? () => refresh() : undefined}
+      refreshing={refreshing}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={ui.docLabel}>AllerGuide · {t('scanner.eyebrow')}</Text>
           <Text style={ui.docTitle}>{t('scanner.title')}</Text>
           <Text style={ui.docMeta}>{t('scanner.subtitle')}</Text>
         </View>
-        <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
-          <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <ProfileHeaderButton />
+          <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
+            <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
+          </Pressable>
+        </View>
       </View>
 
       <ProfileSwitcher />
@@ -273,7 +371,10 @@ export default function ScannerScreen() {
             <Pressable
               key={m.key}
               style={[styles.modeChip, active && styles.modeChipActive]}
-              onPress={() => setMode(m.key)}>
+              onPress={() => selectMode(m.key)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={t(m.labelKey)}>
               <Ionicons
                 name={m.icon as any}
                 size={14}
@@ -349,6 +450,13 @@ export default function ScannerScreen() {
       {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
       {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
+      {scanError && !loading ? (
+        <ErrorState
+          message={t('scanner.checkFailed')}
+          onRetry={() => lastScanRef.current?.()}
+        />
+      ) : null}
+
       {displayResult ? (
         <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
           <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
@@ -398,6 +506,7 @@ export default function ScannerScreen() {
             onPress={() => {
               const name = result?.productName || input.trim().slice(0, 60);
               addSafeProduct(activeProfileId, name, mode, input.trim());
+              void hapticSuccess();
               refreshHistory();
             }}
           />
@@ -443,10 +552,7 @@ export default function ScannerScreen() {
                   </Text>
                 </View>
                 <Pressable
-                  onPress={() => {
-                    removeSafeProduct(item.id);
-                    refreshHistory();
-                  }}
+                  onPress={() => confirmRemoveSafe(item)}
                   accessibilityRole="button"
                   accessibilityLabel={t('scanner.removeSafe')}>
                   <Ionicons name="close-circle-outline" size={20} color={theme.colors.textMuted} />
@@ -455,6 +561,52 @@ export default function ScannerScreen() {
             );
           })}
         </GlassCard>
+      ) : null}
+
+      <Text style={ui.sectionLabel}>{t('common.more')}</Text>
+      <GlassCard>
+        <View style={styles.previewRow}>
+          <View style={styles.previewIcon}>
+            <BrandFeatureIcon name="market" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.previewBody}>
+            <Text style={styles.previewTitle}>{t('market.title')}</Text>
+            <Text style={styles.previewSub}>{t('market.subtitle')}</Text>
+          </View>
+          <Button
+            label={t('home.marketplaceOpen')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/(tabs)/market')}
+          />
+        </View>
+      </GlassCard>
+
+      <GlassCard>
+        <View style={styles.previewRow}>
+          <View style={styles.previewIcon}>
+            <BrandFeatureIcon name="map" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.previewBody}>
+            <Text style={styles.previewTitle}>{t('map.title')}</Text>
+            <Text style={styles.previewSub}>{t('map.subtitle')}</Text>
+          </View>
+          <Button
+            label={t('home.details')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/(tabs)/map')}
+          />
+        </View>
+      </GlassCard>
+
+      {undoItem ? (
+        <UndoBanner
+          message={t('scanner.removedFromSafe')}
+          actionLabel={t('common.undo')}
+          onUndo={handleUndoRemove}
+          onDismiss={clearUndo}
+        />
       ) : null}
 
       <Disclaimer>{t('scanner.disclaimer')}</Disclaimer>
@@ -471,6 +623,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
     cameraBtn: {
       width: 40,
       height: 40,
@@ -598,6 +755,30 @@ function createStyles({ colors, fonts }: AppTheme) {
     historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     historyRow: { paddingHorizontal: 16, paddingVertical: 12 },
     historyRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    previewRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    previewIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.accentMid,
+    },
+    previewBody: { flex: 1, minWidth: 0, gap: 2 },
+    previewTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    previewSub: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+    },
     cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,

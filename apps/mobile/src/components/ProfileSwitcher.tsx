@@ -66,7 +66,7 @@ export function ProfileSwitcher() {
         <View style={styles.footer}>
           <Text style={styles.hint}>{t('profileSwitcher.hint')}</Text>
           <Pressable
-            onPress={() => router.push('/profiles')}
+            onPress={() => router.push('/profile' as any)}
             accessibilityRole="button"
             style={styles.manageLink}>
             <Text style={styles.manageLinkText}>{t('profileSwitcher.manage')}</Text>

@@ -24,6 +24,10 @@ export type LocaleMessages = {
     back: string;
     more: string;
     refresh: string;
+    retry: string;
+    loadFailed: string;
+    createProfile: string;
+    undo: string;
     email: string;
     phone: string;
     password: string;
@@ -214,6 +218,7 @@ export type LocaleMessages = {
     scanMenuDesc: string;
     manualDivider: string;
     check: string;
+    checkFailed: string;
     history: string;
     disclaimer: string;
     cameraScanBarcode: string;
@@ -243,6 +248,9 @@ export type LocaleMessages = {
     savedToSafe: string;
     safeListEmpty: string;
     removeSafe: string;
+    removeSafeTitle: string;
+    removeSafeMessage: string;
+    removedFromSafe: string;
   };
   market: {
     title: string;

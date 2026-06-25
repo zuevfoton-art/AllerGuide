@@ -1,6 +1,6 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
   buildAsitPrefill,
@@ -48,6 +48,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -57,6 +58,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -89,6 +91,7 @@ export default function DiaryScreen() {
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const localizedSections = useMemo(
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
@@ -229,9 +232,21 @@ export default function DiaryScreen() {
     setList(await getDiaryEntries(activeProfileId));
   }, [activeProfileId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const refresh = useCallback(async () => {
+    if (!activeProfileId) return;
+    setRefreshing(true);
+    try {
+      setList(await getDiaryEntries(activeProfileId));
+    } finally {
+      setRefreshing(false);
+    }
+  }, [activeProfileId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
 
   const closeEditor = () => setEditor(null);
 
@@ -348,11 +363,16 @@ export default function DiaryScreen() {
   };
 
   return (
-    <Screen>
+    <Screen
+      onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
+      refreshing={refreshing}>
       <View style={styles.header}>
-        <Text style={ui.docLabel}>AllerGuide · {t('diary.eyebrow')}</Text>
-        <Text style={ui.docTitle}>{t('diary.title')}</Text>
-        <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('diary.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('diary.title')}</Text>
+          <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
+        </View>
+        <ProfileHeaderButton />
       </View>
 
       <ProfileSwitcher />
@@ -431,7 +451,9 @@ export default function DiaryScreen() {
                   <Pressable
                     key={section.type}
                     style={styles.chip}
-                    onPress={() => void openSection(section.type)}>
+                    onPress={() => void openSection(section.type)}
+                    accessibilityRole="button"
+                    accessibilityLabel={section.title}>
                     <Ionicons
                       name={(TYPE_ICONS[section.type] ?? section.icon) as any}
                       size={14}
@@ -440,7 +462,11 @@ export default function DiaryScreen() {
                     <Text style={styles.chipText}>{section.title}</Text>
                   </Pressable>
                 ))}
-              <Pressable style={styles.chip} onPress={() => setScalePickerOpen(true)}>
+              <Pressable
+                style={styles.chip}
+                onPress={() => setScalePickerOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('diary.scale')}>
                 <Ionicons name="analytics" size={14} color={theme.colors.textSecondary} />
                 <Text style={styles.chipText}>{t('diary.scale')}</Text>
               </Pressable>
@@ -479,7 +505,9 @@ export default function DiaryScreen() {
                         onPress={() => {
                           setScalePickerOpen(false);
                           setEditor({ mode: 'scale', scaleId: scale.id });
-                        }}>
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={scale.shortLabel}>
                         <Text style={styles.chipText}>{scale.shortLabel}</Text>
                       </Pressable>
                     ))}
@@ -495,7 +523,9 @@ export default function DiaryScreen() {
                       onPress={() => {
                         setScalePickerOpen(false);
                         setEditor({ mode: 'scale', scaleId: scale.id });
-                      }}>
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={scale.shortLabel}>
                       <Text style={styles.chipText}>{scale.shortLabel}</Text>
                     </Pressable>
                   ))}
@@ -509,27 +539,24 @@ export default function DiaryScreen() {
         renderEditor()
       )}
 
-      <View style={styles.actionRow}>
-        <Button label={t('diary.refresh')} variant="secondary" style={styles.actionBtn} onPress={() => void load()} />
-        <Button
-          label={t('diary.doctorReport')}
-          variant="secondary"
-          style={styles.actionBtn}
-          onPress={() => router.push('/doctor-report' as any)}
-        />
-      </View>
+      <Button
+        label={t('diary.doctorReport')}
+        variant="secondary"
+        block
+        onPress={() => router.push('/doctor-report' as any)}
+      />
 
       <DiaryInsightsCard entries={list} />
 
-      <GlassCard padded={false}>
-        <View style={styles.listHead}>
-          <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
-        </View>
+      {list.length === 0 ? (
+        <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
+      ) : (
+        <GlassCard padded={false}>
+          <View style={styles.listHead}>
+            <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
+          </View>
 
-        {list.length === 0 ? (
-          <Text style={[styles.empty, styles.listHeadPad]}>{t('diary.empty')}</Text>
-        ) : (
-          list.map((item, index) => {
+          {list.map((item, index) => {
             const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
             return (
@@ -548,9 +575,9 @@ export default function DiaryScreen() {
                 <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
               </Pressable>
             );
-          })
-        )}
-      </GlassCard>
+          })}
+        </GlassCard>
+      )}
 
       <Disclaimer>{t('diary.disclaimer')}</Disclaimer>
     </Screen>
@@ -565,7 +592,13 @@ function entryDetailsText(entry: DiaryEntry): string {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { gap: 2 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    headerText: { flex: 1, gap: 2 },
     actPromptCard: { gap: 8 },
     actPromptText: {
       fontFamily: fonts.sans,
@@ -633,8 +666,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
     },
-    actionRow: { flexDirection: 'row', gap: 8 },
-    actionBtn: { flex: 1 },
     listHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -655,13 +686,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
-    },
-    empty: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      paddingBottom: 16,
-      lineHeight: 18,
     },
   });
 }

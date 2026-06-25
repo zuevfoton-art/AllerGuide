@@ -1,12 +1,14 @@
-import { Text, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
+import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { Skeleton } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandTabIcon } from '@/src/components/brand/BrandTabIcon';
@@ -16,7 +18,7 @@ import { radii } from '@/src/constants/layout';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { MarketplaceModule } from '@/src/modules/marketplace';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -39,25 +41,21 @@ export default function HomeScreen() {
   const { t, locale } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
-  const [wellness, setWellness] = useState<WellnessSnapshot | null>(null);
-  const [loadingWellness, setLoadingWellness] = useState(false);
 
-  const loadWellness = useCallback(async () => {
-    if (!activeProfileId || !profile) return;
-    setLoadingWellness(true);
-    try {
-      const entries = await getDiaryEntries(activeProfileId);
-      const snapshot = await fetchWellnessSnapshot(profile.allergies, entries, locale);
-      setWellness(snapshot);
-    } finally {
-      setLoadingWellness(false);
-    }
-  }, [activeProfileId, profile, locale]);
+  const wellnessState = useAsyncState<WellnessSnapshot | null>(async () => {
+    if (!activeProfileId || !profile) return null;
+    const entries = await getDiaryEntries(activeProfileId);
+    return fetchWellnessSnapshot(profile.allergies, entries, locale);
+  });
+  const wellness = wellnessState.data;
+  const loadingWellness = wellnessState.loading;
+  const reloadWellness = wellnessState.reload;
 
   useFocusEffect(
     useCallback(() => {
-      void loadWellness();
-    }, [loadWellness]),
+      void reloadWellness();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reloadWellness, activeProfileId, locale]),
   );
 
   const diaryRows = useMemo(
@@ -84,16 +82,21 @@ export default function HomeScreen() {
   }, [locale, t]);
 
   return (
-    <Screen>
+    <Screen
+      onRefresh={activeProfileId ? () => void wellnessState.refresh() : undefined}
+      refreshing={wellnessState.refreshing}>
       <View style={styles.topBar}>
         <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
-        <Pressable
-          onPress={() => router.push('/(tabs)/sos')}
-          style={styles.sosBtn}
-          accessibilityRole="button"
-          accessibilityLabel={t('tabs.sos')}>
-          <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
-        </Pressable>
+        <View style={styles.topBarActions}>
+          <ProfileHeaderButton />
+          <Pressable
+            onPress={() => router.push('/(tabs)/sos')}
+            style={styles.sosBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('tabs.sos')}>
+            <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.hero}>
@@ -115,14 +118,16 @@ export default function HomeScreen() {
                 <Text style={[ui.badgeText, badge.text]}>{wellness?.statusTitle}</Text>
               </View>
             ) : null}
-            <Pressable onPress={() => router.push('/(tabs)/map')}>
-              <Text style={ui.sectionLink}>{t('home.details')}</Text>
-            </Pressable>
           </View>
         </View>
 
         {loadingWellness && !wellness ? (
-          <ActivityIndicator color={theme.colors.accent} style={{ marginVertical: 24 }} />
+          <View style={styles.skeletonWrap}>
+            <Skeleton width={120} height={32} />
+            <Skeleton width="100%" height={14} />
+            <Skeleton width="100%" height={14} />
+            <Skeleton width="70%" height={14} />
+          </View>
         ) : wellness ? (
           <>
             <View style={ui.heroKpi}>
@@ -190,35 +195,12 @@ export default function HomeScreen() {
         ))}
       </GlassCard>
 
-      <MarketplaceModule variant="embedded" />
-
       {wellness?.recommendations[0] ? (
         <GlassCard style={styles.recCard}>
           <Text style={styles.recTitle}>{wellness.recommendations[0].title}</Text>
           <Text style={styles.recText}>{wellness.recommendations[0].text}</Text>
         </GlassCard>
       ) : null}
-
-      <View style={styles.quickRow}>
-        <Button
-          label={t('tabs.scanner')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/scanner')}
-        />
-        <Button
-          label={t('tabs.market')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/market')}
-        />
-        <Button
-          label={t('tabs.map')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/map')}
-        />
-      </View>
 
       <Disclaimer>{t('home.disclaimer')}</Disclaimer>
     </Screen>
@@ -235,6 +217,11 @@ function createStyles({ colors, fonts }: AppTheme) {
     topBarLogo: {
       flexShrink: 1,
     },
+    topBarActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
     sosBtn: {
       width: 40,
       height: 40,
@@ -246,6 +233,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.dangerBorder,
     },
     hero: { gap: 4 },
+    skeletonWrap: { gap: 10, paddingVertical: 12 },
     cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     heroKpiLabel: {
       fontFamily: fonts.sansSemiBold,
@@ -305,7 +293,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
-    quickRow: { flexDirection: 'row', gap: 8 },
-    quickBtn: { flex: 1 },
   });
 }

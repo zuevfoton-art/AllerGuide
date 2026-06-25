@@ -4,6 +4,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { EmptyState } from '@/src/components/EmptyState';
+import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +24,7 @@ import {
   exportPassportPdf,
   sharePassportText,
 } from '@/src/services/doctor-report-service';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import {
   getEmergencyNumber,
@@ -47,6 +50,7 @@ export default function SosScreen() {
   const [anaphylaxisOpen, setAnaphylaxisOpen] = useState(false);
   const [passport, setPassport] = useState(() => getAllergyPassport(profile?.id ?? 0));
   const [sharing, setSharing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const refresh = useCallback(() => {
     setEmergencyNumberState(getEmergencyNumber());
@@ -61,6 +65,15 @@ export default function SosScreen() {
     setContacts(listEmergencyContacts(profile.id));
     setPassport(getAllergyPassport(profile.id));
   }, [profile]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    try {
+      refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refresh]);
 
   useFocusEffect(
     useCallback(() => {
@@ -110,15 +123,39 @@ export default function SosScreen() {
     }
   };
 
+  const firstContact = contacts[0] ?? null;
+
   return (
-    <Screen>
+    <Screen
+      onRefresh={() => handleRefresh()}
+      refreshing={refreshing}
+      pinnedTop={
+        profile ? (
+          <SosEmergencyBar
+            emergencyLabel={t('sos.call', { number: emergencyNumber })}
+            contactName={firstContact?.name}
+            contactPhone={firstContact?.phone}
+            contactRelation={
+              firstContact
+                ? localizeEmergencyRelation(firstContact.relation, localeContent)
+                : undefined
+            }
+            callContactLabel={t('sos.callContact')}
+            onCallEmergency={() => void Linking.openURL(`tel:${emergencyNumber}`)}
+            onCallContact={() => firstContact && callPhone(firstContact.phone)}
+          />
+        ) : undefined
+      }>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
           <Text style={ui.docLabel}>AllerGuide · {t('sos.eyebrow')}</Text>
           <Text style={ui.docTitle}>{t('sos.title')}</Text>
           <Text style={ui.docMeta}>{t('sos.subtitle')}</Text>
         </View>
-        <Button label={t('sos.edit')} variant="secondary" size="sm" onPress={() => router.push('/sos-edit' as any)} />
+        <View style={styles.headerActions}>
+          <ProfileHeaderButton />
+          <Button label={t('sos.edit')} variant="secondary" size="sm" onPress={() => router.push('/sos-edit' as any)} />
+        </View>
       </View>
 
       <ProfileSwitcher />
@@ -150,7 +187,12 @@ export default function SosScreen() {
             ) : null}
           </GlassCard>
 
-          <Pressable style={styles.collapseHead} onPress={() => setPassportOpen((v) => !v)}>
+          <Pressable
+            style={styles.collapseHead}
+            onPress={() => setPassportOpen((v) => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: passportOpen }}
+            accessibilityLabel={t('sos.passportTitle')}>
             <Text style={styles.collapseTitle}>{t('sos.passportTitle')}</Text>
             <Ionicons
               name={passportOpen ? 'chevron-up' : 'chevron-down'}
@@ -223,7 +265,12 @@ export default function SosScreen() {
             </GlassCard>
           ) : null}
 
-          <Pressable style={styles.collapseHead} onPress={() => setAnaphylaxisOpen((v) => !v)}>
+          <Pressable
+            style={styles.collapseHead}
+            onPress={() => setAnaphylaxisOpen((v) => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: anaphylaxisOpen }}
+            accessibilityLabel={t('sos.anaphylaxisTitle')}>
             <Text style={styles.collapseTitle}>{t('sos.anaphylaxisTitle')}</Text>
             <Ionicons
               name={anaphylaxisOpen ? 'chevron-up' : 'chevron-down'}
@@ -275,9 +322,12 @@ export default function SosScreen() {
           )}
         </>
       ) : (
-        <GlassCard>
-          <Text style={styles.emptyText}>{t('sos.emptyProfile')}</Text>
-        </GlassCard>
+        <EmptyState
+          icon="person-add-outline"
+          title={t('sos.emptyProfile')}
+          actionLabel={t('common.createProfile')}
+          onAction={() => router.push('/profile-setup?mode=add')}
+        />
       )}
 
       {contacts.length > 0 ? (
@@ -296,7 +346,7 @@ export default function SosScreen() {
               <Button
                 label={t('sos.callContact')}
                 variant="primary"
-                size="sm"
+                accessibilityLabel={`${t('sos.callContact')}: ${contact.name}`}
                 onPress={() => callPhone(contact.phone)}
               />
             </View>
@@ -308,14 +358,11 @@ export default function SosScreen() {
         </GlassCard>
       ) : null}
 
-      <Button
-        label={t('sos.call', { number: emergencyNumber })}
-        variant="danger"
-        block
-        onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}
-      />
-
-      <Pressable style={styles.settingsLink} onPress={() => router.push('/settings' as any)}>
+      <Pressable
+        style={styles.settingsLink}
+        onPress={() => router.push('/profile' as any)}
+        accessibilityRole="button"
+        accessibilityLabel={t('sos.settingsLink')}>
         <Text style={styles.settingsLinkText}>{t('sos.settingsLink')}</Text>
       </Pressable>
 
@@ -338,6 +385,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
     collapseHead: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -458,13 +510,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.text,
       lineHeight: 20,
-    },
-    emptyText: {
-      fontFamily: fonts.sans,
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 20,
-      textAlign: 'center',
     },
     contactsHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     contactRow: {
