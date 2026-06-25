@@ -18,6 +18,8 @@ chmod +x scripts/create-roadmap-issues.sh
 
 Требуется `gh` с правами `issues:write` на репозиторий. Скрипт идемпотентен: повторный запуск пропускает уже существующие issues (по префиксу `[Px.x]`).
 
+**Windows:** полная инструкция через Git Bash — [`docs/git-bash-roadmap.md`](./git-bash-roadmap.md).
+
 | Milestone | Задач | Due (ориентир) |
 |-----------|-------|----------------|
 | [Phase 0: Stabilization MVP](https://github.com/zuevfoton-art/AllerGuide/milestone/1) | P0.1–P0.5 | 2026-07-04 |

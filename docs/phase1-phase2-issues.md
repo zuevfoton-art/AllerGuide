@@ -10,6 +10,8 @@ chmod +x scripts/create-phase-issues.sh
 ./scripts/create-phase-issues.sh             # создать issues
 ```
 
+**Windows (Git Bash):** пошаговая инструкция — [`docs/git-bash-roadmap.md`](./git-bash-roadmap.md) (установка `gh`/`jq`, CRLF, `gh pr create`).
+
 Данные: [`scripts/phase1-phase2-issues.json`](../scripts/phase1-phase2-issues.json). Скрипт идемпотентен (пропускает существующие по префиксу `[P1.1a]` и т.д.).
 
 Родительские задачи P1.1–P1.6, P2.1–P2.7 создаются скриптом [`create-roadmap-issues.sh`](../scripts/create-roadmap-issues.sh); этот файл — **подзадачи** с графом зависимостей.
@@ -22,7 +24,7 @@ chmod +x scripts/create-phase-issues.sh
 |------|----------|-------------|------|
 | **Phase 1** | 27 | ~32 | DevOps, Backend, Mobile, QA |
 | **Phase 2** | 17 | ~27 | Mobile, QA, DevOps, Backend |
-| **Итого** | 44 | ~59 | 2–3 разработчика + QA part-time |
+| **Итого** | 45 | ~59.5 | 2–3 разработчика + QA part-time |
 
 Оценки — календарные дни одного исполнителя на задачу. Параллельная работа сокращает wall-clock time.
 
