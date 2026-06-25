@@ -23,6 +23,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { getRecommendedPlaces } from '@/src/services/place-service';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 const LAYERS = [
   { key: 'places', labelKey: 'map.places' },
@@ -70,10 +71,13 @@ export default function MapScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={ui.docLabel}>AllerGuide · {t('map.eyebrow')}</Text>
-        <Text style={ui.docTitle}>{t('map.title')}</Text>
-        <Text style={ui.docMeta}>{t('map.subtitle')}</Text>
-        <Text style={styles.regionLabel}>{t('map.regionLabel')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('map.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('map.title')}</Text>
+          <Text style={ui.docMeta}>{t('map.subtitle')}</Text>
+          <Text style={styles.regionLabel}>{t('map.regionLabel')}</Text>
+        </View>
+        <ProfileHeaderButton />
       </View>
 
       <ProfileSwitcher />
@@ -225,7 +229,13 @@ export default function MapScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { gap: 2 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    headerText: { flex: 1, gap: 2 },
     regionLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,

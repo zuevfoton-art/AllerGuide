@@ -22,6 +22,7 @@ import {
   exportPassportPdf,
   sharePassportText,
 } from '@/src/services/doctor-report-service';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import {
   getEmergencyNumber,
@@ -118,7 +119,10 @@ export default function SosScreen() {
           <Text style={ui.docTitle}>{t('sos.title')}</Text>
           <Text style={ui.docMeta}>{t('sos.subtitle')}</Text>
         </View>
-        <Button label={t('sos.edit')} variant="secondary" size="sm" onPress={() => router.push('/sos-edit' as any)} />
+        <View style={styles.headerActions}>
+          <ProfileHeaderButton />
+          <Button label={t('sos.edit')} variant="secondary" size="sm" onPress={() => router.push('/sos-edit' as any)} />
+        </View>
       </View>
 
       <ProfileSwitcher />
@@ -315,7 +319,7 @@ export default function SosScreen() {
         onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}
       />
 
-      <Pressable style={styles.settingsLink} onPress={() => router.push('/settings' as any)}>
+      <Pressable style={styles.settingsLink} onPress={() => router.push('/profile' as any)}>
         <Text style={styles.settingsLinkText}>{t('sos.settingsLink')}</Text>
       </Pressable>
 
@@ -338,6 +342,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
     collapseHead: {
       flexDirection: 'row',
       alignItems: 'center',

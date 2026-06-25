@@ -1,6 +1,6 @@
 import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
@@ -23,6 +23,8 @@ import {
   listSafeProducts,
   removeSafeProduct,
 } from '@/src/services/safe-products-service';
+import { BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 const MODES = [
   { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
@@ -259,9 +261,12 @@ export default function ScannerScreen() {
           <Text style={ui.docTitle}>{t('scanner.title')}</Text>
           <Text style={ui.docMeta}>{t('scanner.subtitle')}</Text>
         </View>
-        <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
-          <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <ProfileHeaderButton />
+          <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
+            <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
+          </Pressable>
+        </View>
       </View>
 
       <ProfileSwitcher />
@@ -457,6 +462,43 @@ export default function ScannerScreen() {
         </GlassCard>
       ) : null}
 
+      <Text style={ui.sectionLabel}>{t('common.more')}</Text>
+      <GlassCard>
+        <View style={styles.previewRow}>
+          <View style={styles.previewIcon}>
+            <BrandFeatureIcon name="market" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.previewBody}>
+            <Text style={styles.previewTitle}>{t('market.title')}</Text>
+            <Text style={styles.previewSub}>{t('market.subtitle')}</Text>
+          </View>
+          <Button
+            label={t('home.marketplaceOpen')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/(tabs)/market')}
+          />
+        </View>
+      </GlassCard>
+
+      <GlassCard>
+        <View style={styles.previewRow}>
+          <View style={styles.previewIcon}>
+            <BrandFeatureIcon name="map" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.previewBody}>
+            <Text style={styles.previewTitle}>{t('map.title')}</Text>
+            <Text style={styles.previewSub}>{t('map.subtitle')}</Text>
+          </View>
+          <Button
+            label={t('home.details')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/(tabs)/map')}
+          />
+        </View>
+      </GlassCard>
+
       <Disclaimer>{t('scanner.disclaimer')}</Disclaimer>
     </Screen>
   );
@@ -471,6 +513,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
     cameraBtn: {
       width: 40,
       height: 40,
@@ -598,6 +645,30 @@ function createStyles({ colors, fonts }: AppTheme) {
     historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     historyRow: { paddingHorizontal: 16, paddingVertical: 12 },
     historyRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    previewRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    previewIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: colors.accentMid,
+    },
+    previewBody: { flex: 1, minWidth: 0, gap: 2 },
+    previewTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    previewSub: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+    },
     cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,

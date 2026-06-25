@@ -56,6 +56,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -345,9 +346,12 @@ export default function DiaryScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={ui.docLabel}>AllerGuide · {t('diary.eyebrow')}</Text>
-        <Text style={ui.docTitle}>{t('diary.title')}</Text>
-        <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
+        <View style={styles.headerText}>
+          <Text style={ui.docLabel}>AllerGuide · {t('diary.eyebrow')}</Text>
+          <Text style={ui.docTitle}>{t('diary.title')}</Text>
+          <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
+        </View>
+        <ProfileHeaderButton />
       </View>
 
       <ProfileSwitcher />
@@ -547,7 +551,13 @@ function entryDetailsText(entry: DiaryEntry): string {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { gap: 2 },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    headerText: { flex: 1, gap: 2 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
     chip: {
       flexDirection: 'row',
