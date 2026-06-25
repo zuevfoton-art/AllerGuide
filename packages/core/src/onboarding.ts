@@ -1,15 +1,7 @@
 import type { Profile, Scenario } from './types';
+export { parseAllergies } from './profile-allergens';
 
 export type BootstrapRoute = '/onboarding' | '/profile-setup' | '/(tabs)/home';
-
-export function parseAllergies(allergiesJson: string): string[] {
-  try {
-    const parsed = JSON.parse(allergiesJson);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 export function getWizardStep(scenario: Scenario | null, profiles: Profile[]): 'self' | 'child' | null {
   if (scenario !== 'both') return null;

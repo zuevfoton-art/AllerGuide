@@ -186,13 +186,10 @@ export const CATALOG_PLACES: CatalogPlace[] = [
   },
 ];
 
+import { parseAllergies } from './profile-allergens';
+
 export function parseProfileAllergens(allergiesJson: string): string[] {
-  try {
-    const parsed = JSON.parse(allergiesJson) as unknown;
-    return Array.isArray(parsed) ? parsed.map(String) : [];
-  } catch {
-    return [];
-  }
+  return parseAllergies(allergiesJson);
 }
 
 export function filterProductsForProfile(

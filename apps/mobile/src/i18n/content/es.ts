@@ -341,6 +341,10 @@ const esContent: LocaleContent = {
         title: 'Día estable',
         text: 'Los indicadores ambientales y las entradas del diario no sugieren riesgos elevados.',
       },
+      envUnavailable: {
+        title: 'Sin datos ambientales',
+        text: 'No se pudo cargar polen ni calidad del aire. El índice refleja solo el diario.',
+      },
     },
     pollenLabels: {
       birch_pollen: 'Abedul',
@@ -348,6 +352,8 @@ const esContent: LocaleContent = {
       ragweed_pollen: 'Ambrosía',
     },
     locationDefault: 'Madrid',
+    envUnavailableSummary:
+      'Datos de Open-Meteo no disponibles. El índice usa solo el diario; sin factores ambientales.',
   },
   scanner: {
     verdicts: {

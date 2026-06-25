@@ -588,6 +588,7 @@ const ru: LocaleMessages = {
     hasSymptoms: 'Есть симптомы',
     calm: 'Спокойно',
     grains: 'зёрен/м³',
+    envUnavailable: 'Нет данных',
   },
   errors: {
     selectProfile: 'Выберите профиль на главном экране.',

@@ -1,7 +1,7 @@
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { type AllergyConditionId, type ProfileType } from '@allerguide/core';
+import { type AllergyConditionId, parseProfileAllergenIds, type ProfileType } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { getProfile, updateProfile } from '@/src/services/profile-service';
@@ -56,11 +56,7 @@ export default function ProfileEditScreen() {
       setName(row.name);
       setBirthYear(String(row.birthYear));
       setType(row.type);
-      try {
-        setSelected(JSON.parse(row.allergies));
-      } catch {
-        setSelected([]);
-      }
+      setSelected(parseProfileAllergenIds(row.allergies));
       setContacts(
         listEmergencyContacts(profileId).map((contact) => ({
           id: contact.id,

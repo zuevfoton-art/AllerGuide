@@ -341,6 +341,10 @@ const itContent: LocaleContent = {
         title: 'Giornata stabile',
         text: 'Gli indicatori ambientali e le voci del diario non suggeriscono rischi elevati.',
       },
+      envUnavailable: {
+        title: 'Dati ambientali non disponibili',
+        text: 'Impossibile caricare polline e qualità dell\'aria. L\'indice riflette solo il diario.',
+      },
     },
     pollenLabels: {
       birch_pollen: 'Betulla',
@@ -348,6 +352,8 @@ const itContent: LocaleContent = {
       ragweed_pollen: 'Ambrosia',
     },
     locationDefault: 'Rome',
+    envUnavailableSummary:
+      'Dati Open-Meteo non disponibili. L\'indice usa solo il diario; fattori ambientali esclusi.',
   },
   scanner: {
     verdicts: {

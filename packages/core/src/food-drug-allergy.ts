@@ -1,4 +1,5 @@
-import { ALLERGENS, getAllergensByCategory } from './allergen-database';
+import { ALLERGENS, findAllergenById, getAllergensByCategory } from './allergen-database';
+import { resolveAllergenId } from './profile-allergens';
 import { getCrossReactionsForSelection } from './cross-reactions';
 import type { AllergyConditionId } from './allergy-conditions';
 import { decodeDiaryDetails } from './diary';
@@ -67,23 +68,25 @@ export function serializeFoodDrugRegistry(registry: FoodDrugRegistry): string {
   return JSON.stringify(registry);
 }
 
-export function extractFoodAllergensFromProfile(allergies: string[]): string[] {
+export function extractFoodAllergensFromProfile(allergenRefs: string[]): string[] {
   const result: string[] = [];
-  for (const name of allergies) {
-    const trimmed = name.trim();
-    if (!trimmed) continue;
-    const lower = trimmed.toLowerCase();
-    if (FOOD_ALLERGEN_NAMES.has(lower)) {
-      result.push(trimmed);
+  for (const ref of allergenRefs) {
+    const id = resolveAllergenId(ref) ?? ref;
+    const record = findAllergenById(id);
+    const name = record?.name ?? ref.trim();
+    if (!name) continue;
+    const lower = name.toLowerCase();
+    if (record?.category === 'food' || FOOD_ALLERGEN_NAMES.has(lower)) {
+      result.push(name);
       continue;
     }
-    const record = ALLERGENS.find(
+    const legacy = ALLERGENS.find(
       (item) =>
         item.category === 'food' &&
         (item.keywords.some((keyword) => lower.includes(keyword)) || lower.includes(item.name.toLowerCase())),
     );
-    if (record && !result.includes(record.name)) {
-      result.push(record.name);
+    if (legacy && !result.includes(legacy.name)) {
+      result.push(legacy.name);
     }
   }
   return result;

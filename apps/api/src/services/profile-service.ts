@@ -1,5 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm';
 import type { Profile, ProfileInput } from '@allerguide/core';
+import { normalizeProfileAllergenIds, serializeProfileAllergenIds } from '@allerguide/core';
 import { db } from '../db';
 import { profiles } from '../db/app-schema';
 
@@ -35,6 +36,7 @@ export async function getProfileForUser(userId: number, profileId: number): Prom
 }
 
 export async function createProfileForUser(userId: number, input: ProfileInput): Promise<Profile> {
+  const allergies = serializeProfileAllergenIds(normalizeProfileAllergenIds(input.allergies));
   const inserted = await db
     .insert(profiles)
     .values({
@@ -42,7 +44,7 @@ export async function createProfileForUser(userId: number, input: ProfileInput):
       name: input.name,
       birthYear: input.birthYear,
       type: input.type,
-      allergies: JSON.stringify(input.allergies),
+      allergies,
     })
     .returning();
 
@@ -56,13 +58,14 @@ export async function updateProfileForUser(
   profileId: number,
   input: ProfileInput,
 ): Promise<Profile | null> {
+  const allergies = serializeProfileAllergenIds(normalizeProfileAllergenIds(input.allergies));
   const updated = await db
     .update(profiles)
     .set({
       name: input.name,
       birthYear: input.birthYear,
       type: input.type,
-      allergies: JSON.stringify(input.allergies),
+      allergies,
       updatedAt: new Date(),
     })
     .where(and(eq(profiles.id, profileId), eq(profiles.userId, userId)))
