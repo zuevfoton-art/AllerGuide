@@ -54,6 +54,15 @@ export function initDb() {
       profileId INTEGER PRIMARY KEY,
       notes TEXT
     );
+    CREATE TABLE IF NOT EXISTS barcode_cache (
+      barcode TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      ingredients TEXT NOT NULL,
+      brand TEXT,
+      origin_source TEXT NOT NULL DEFAULT 'openfoodfacts',
+      cached_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 
   runMigrations(db as unknown as import('./types').DbLike);

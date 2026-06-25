@@ -6,9 +6,8 @@ import {
   type OcrExtractionResult,
 } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
-import { AI_SCAN_ENABLED, PRODUCT_DB_ENABLED } from '@/src/constants/features';
-import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
-import { fetchProductFromCatalog } from '@/src/services/catalog-api';
+import { AI_SCAN_ENABLED } from '@/src/constants/features';
+import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 import { saveScanHistory } from '@/src/services/scan-history-service';
 import { trackEvent } from '@/src/services/analytics-service';
 
@@ -58,25 +57,7 @@ export async function scanBarcode({
   barcode: string;
   profile?: Profile | null;
 }): Promise<ScanResult & { lookupFailed?: boolean }> {
-  if (PRODUCT_DB_ENABLED) {
-    const catalogProduct = await fetchProductFromCatalog(barcode);
-    if (catalogProduct) {
-      const text = [catalogProduct.ingredients, ...catalogProduct.allergenTags]
-        .filter(Boolean)
-        .join(', ');
-      const result = await analyzeText({
-        mode: 'product',
-        text,
-        profile,
-        productName: catalogProduct.name,
-        source: 'barcode',
-      });
-      if (profile) saveScanHistory(profile.id, text || barcode, result, catalogProduct.name);
-      return result;
-    }
-  }
-
-  const product = await fetchProductByBarcode(barcode);
+  const product = await resolveProductByBarcode(barcode);
 
   if (!product) {
     const fallback = await analyzeText({
@@ -87,19 +68,23 @@ export async function scanBarcode({
     });
     const result = {
       ...fallback,
-      reason: 'Продукт не найден в Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
+      reason:
+        'Продукт не найден в локальном кэше, каталоге и Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
       lookupFailed: true,
     };
     if (profile) saveScanHistory(profile.id, barcode, result);
     return result;
   }
 
+  const scanSource: ScanResult['source'] =
+    product.source === 'catalog_api' ? 'barcode' : product.source;
+
   const result = await analyzeText({
     mode: 'product',
     text: product.ingredients,
     profile,
     productName: product.name,
-    source: 'openfoodfacts',
+    source: scanSource,
   });
   if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
   return result;

@@ -227,6 +227,7 @@ export type LocaleMessages = {
     crossMatches: string;
     source: string;
     sourceOpenFoodFacts: string;
+    sourceBarcodesDb: string;
     sourceBarcode: string;
     sourceManual: string;
     sourceOcr: string;
@@ -249,6 +250,9 @@ export type LocaleMessages = {
     adair: string;
     recommended: string;
     mapWebHint: string;
+    regionLabel: string;
+    yandexAttribution: string;
+    emptyPlaces: string;
     disclaimerPlaces: string;
     disclaimerPollen: string;
     disclaimerAdair: string;

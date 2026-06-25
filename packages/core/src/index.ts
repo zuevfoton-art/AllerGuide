@@ -24,3 +24,5 @@ export * from './diary-profile';
 export * from './diary-triggers';
 export * from './wellness';
 export * from './geo';
+export * from './yandex-map';
+export * from './barcodes';

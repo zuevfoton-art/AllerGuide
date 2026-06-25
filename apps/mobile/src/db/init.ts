@@ -19,6 +19,16 @@ interface DbLike {
   getAllSync: <T>(sql: string, params?: unknown[]) => T[];
 }
 
+interface BarcodeCacheRow {
+  barcode: string;
+  name: string;
+  ingredients: string;
+  brand: string | null;
+  origin_source: string;
+  cached_at: string;
+  updated_at: string;
+}
+
 class WebDb implements DbLike {
   private getProfiles(): Profile[] {
     const profiles = loadJson<Profile[]>('ag_profiles', []);
@@ -75,6 +85,14 @@ class WebDb implements DbLike {
 
   private saveEmergencyContacts(items: EmergencyContact[]) {
     saveJson('ag_emergency_contacts', items);
+  }
+
+  private getBarcodeCache(): BarcodeCacheRow[] {
+    return loadJson<BarcodeCacheRow[]>('ag_barcode_cache', []);
+  }
+
+  private saveBarcodeCache(rows: BarcodeCacheRow[]) {
+    saveJson('ag_barcode_cache', rows);
   }
 
   execSync(_sql: string) {}
@@ -321,6 +339,24 @@ class WebDb implements DbLike {
         createdAt: params![3] as string,
       });
       this.saveUsers(users);
+      return;
+    }
+
+    if (s.startsWith('insert or replace into barcode_cache')) {
+      const rows = this.getBarcodeCache();
+      const next: BarcodeCacheRow = {
+        barcode: params![0] as string,
+        name: params![1] as string,
+        ingredients: params![2] as string,
+        brand: (params![3] as string | null) ?? null,
+        origin_source: params![4] as string,
+        cached_at: params![5] as string,
+        updated_at: params![6] as string,
+      };
+      const index = rows.findIndex((row) => row.barcode === next.barcode);
+      if (index >= 0) rows[index] = next;
+      else rows.push(next);
+      this.saveBarcodeCache(rows);
     }
   }
 
@@ -362,6 +398,16 @@ class WebDb implements DbLike {
     if (s.includes('from diary_entries') && s.includes('where profileid =')) {
       const entries = this.getDiaryEntries();
       return (entries.find((e) => e.profileId === params![0]) || null) as T | null;
+    }
+
+    if (s.includes('from barcode_cache') && s.includes('where barcode =')) {
+      const rows = this.getBarcodeCache();
+      return (rows.find((row) => row.barcode === params![0]) || null) as T | null;
+    }
+
+    if (s.includes('from barcode_cache') && s.includes('count(*)')) {
+      const rows = this.getBarcodeCache();
+      return { count: rows.length } as T;
     }
 
     return null;
