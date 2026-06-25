@@ -25,21 +25,25 @@ describe('allergy-conditions', () => {
 });
 
 describe('wellness', () => {
+  const baseInput = {
+    profileAllergenIds: [] as string[],
+    pollenMatches: [{ label: 'Берёза', value: 5, profileRelevant: true, taxonId: 'birch_pollen' as const }],
+    europeanAqi: 15,
+    pm25: 10,
+    diary: { symptomDays: 0, triggerDays: 0, streak: 0, weekTotal: 0, correlationKind: null, temporalCorrelationKind: null, anomalyKind: null, anomalyDays: 0 },
+    clinicalScales: [],
+    foodAllergens: [],
+    envDataAvailable: true,
+  };
+
   it('computes lower score with high pollen and symptoms', () => {
-    const good = computeWellnessScore({
-      pollenMatches: [{ label: 'Берёза', value: 5, profileRelevant: true }],
-      europeanAqi: 15,
-      pm25: 10,
-      recentSymptoms: false,
-      recentTriggers: false,
-      foodAllergens: [],
-    });
+    const good = computeWellnessScore(baseInput);
     const bad = computeWellnessScore({
-      pollenMatches: [{ label: 'Берёза', value: 80, profileRelevant: true }],
+      ...baseInput,
+      pollenMatches: [{ label: 'Берёза', value: 80, profileRelevant: true, taxonId: 'birch_pollen' }],
       europeanAqi: 70,
       pm25: 40,
-      recentSymptoms: true,
-      recentTriggers: true,
+      diary: { symptomDays: 3, triggerDays: 2, streak: 3, weekTotal: 5, correlationKind: 'symptom-trigger' },
       foodAllergens: ['Молоко'],
     });
     expect(good).toBeGreaterThan(bad);

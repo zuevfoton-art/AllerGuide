@@ -333,6 +333,18 @@ const itContent: LocaleContent = {
         title: 'Sintomi del diario',
         text: 'Sintomi registrati nelle ultime 48 ore. Monitorate l\'evoluzione; contattate il medico se peggiorano.',
       },
+      symptomsWeek: {
+        title: 'Sintomi del diario',
+        text: 'Sintomi registrati in {days} degli ultimi 7 giorni. Monitorate l\'evoluzione; contattate il medico se peggiorano.',
+      },
+      clinicalScale: {
+        title: 'Scala {label}',
+        text: 'Ultima valutazione: {total} punti ({level}). Discutete il controllo con il medico.',
+      },
+      crossReaction: {
+        title: 'Possibili reazioni incrociate',
+        text: 'Con polline elevato, possibile reazione a: {allergens}. Da considerare per alimentazione e attività all\'aperto.',
+      },
       food: {
         title: 'Allergeni alimentari',
         text: 'Nel profilo: {allergens}. Verificate gli ingredienti con lo scanner prima di acquistare nuovi prodotti.',
@@ -345,10 +357,17 @@ const itContent: LocaleContent = {
         title: 'Dati ambientali non disponibili',
         text: 'Impossibile caricare polline e qualità dell\'aria. L\'indice riflette solo il diario.',
       },
+      seasonalPollen: {
+        title: 'Stagione del polline nella tua regione',
+        text: 'Picco di «{label}» secondo il calendario regionale. Pianifica esposizione e terapia con il medico.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Ontano',
       birch_pollen: 'Betulla',
       grass_pollen: 'Festuca prati',
+      mugwort_pollen: 'Artemisia',
+      olive_pollen: 'Olivo',
       ragweed_pollen: 'Ambrosia',
     },
     locationDefault: 'Rome',

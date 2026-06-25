@@ -179,6 +179,13 @@ const ru: LocaleMessages = {
     insightsCorSymFood: 'В {{n}} из {{of}} дней с симптомами — также запись о питании',
     insightsCorSymTrig: 'В {{n}} из {{of}} дней с симптомами — зафиксирован триггер',
     insightsCorSymMeds: 'В {{n}} из {{of}} дней с симптомами — принималось лекарство',
+    insightsTemporalCorSymFood: 'В {{n}} из {{of}} эпизодов симптомов — питание в ±4 ч',
+    insightsTemporalCorSymTrig: 'В {{n}} из {{of}} эпизодов симптомов — триггер в ±4 ч',
+    insightsTemporalCorSymMeds: 'В {{n}} из {{of}} эпизодов симптомов — лекарство в ±4 ч',
+    insightsAnomalySymptomsNoTrigger: '{{days}} дн. подряд симптомы без записанного триггера',
+    actPromptTitle: 'Пора заполнить ACT',
+    actPromptText: 'Прошло 4+ недели с последней оценки контроля астмы. Рекомендуем заполнить шкалу ACT.',
+    actPromptButton: 'Заполнить ACT',
   },
   diaryWizard: {
     stepOf: 'Шаг {{current}} из {{total}}',
@@ -368,6 +375,11 @@ const ru: LocaleMessages = {
     conditionsOther: 'Другие состояния',
     consent:
       'Я подтверждаю, что являюсь родителем или законным представителем данного ребёнка и вправе вводить сведения о его состоянии здоровья.',
+    confirmationLabel: 'Источник подтверждения',
+    confirmationHint: 'Нажмите на строку, чтобы переключить: самоотчёт → специфический IgE → подтверждено врачом.',
+    confirmationSelf: 'Самоотчёт',
+    confirmationIge: 'Специфический IgE',
+    confirmationClinician: 'Подтверждено врачом',
     contactsLabel: 'Экстренные контакты',
     saveProfile: 'Сохранить профиль',
     nextChild: 'Далее: профиль ребёнка',
@@ -589,6 +601,12 @@ const ru: LocaleMessages = {
     calm: 'Спокойно',
     grains: 'зёрен/м³',
     envUnavailable: 'Нет данных',
+    symptomDays: 'Симптомы {days}/7 дн.',
+    confidence: {
+      high: 'Высокая достоверность',
+      medium: 'Средняя достоверность',
+      low: 'Низкая достоверность',
+    },
   },
   errors: {
     selectProfile: 'Выберите профиль на главном экране.',

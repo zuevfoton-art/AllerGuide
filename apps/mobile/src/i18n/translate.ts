@@ -63,6 +63,10 @@ export function translateAuthError(messages: LocaleMessages, error: string): str
 }
 
 const PROFILE_ERROR_KEY_MAP: Record<string, keyof LocaleMessages['profileSetup']['errors']> = {
+  name_required: 'nameRequired',
+  birth_year_invalid: 'birthYearInvalid',
+  allergen_required: 'allergenRequired',
+  child_consent_required: 'consentRequired',
   'Укажите имя профиля.': 'nameRequired',
   'Укажите корректный год рождения.': 'birthYearInvalid',
   'Выберите хотя бы один аллерген.': 'allergenRequired',

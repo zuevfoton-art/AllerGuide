@@ -333,6 +333,18 @@ const enContent: LocaleContent = {
         title: 'Diary symptoms',
         text: 'Symptoms recorded in the last 48 hours. Track changes; contact your doctor if they worsen.',
       },
+      symptomsWeek: {
+        title: 'Diary symptoms',
+        text: 'Symptoms recorded on {days} of the last 7 days. Track changes; contact your doctor if they worsen.',
+      },
+      clinicalScale: {
+        title: 'Scale {label}',
+        text: 'Latest score: {total} ({level}). Discuss control with your doctor.',
+      },
+      crossReaction: {
+        title: 'Possible cross-reactions',
+        text: 'With elevated pollen, possible reaction to: {allergens}. Consider this for food and outdoor exposure.',
+      },
       foodAllergens: {
         title: 'Food allergens',
         text: 'In your profile: {allergens}. Check ingredients with the scanner before buying new products.',
@@ -345,10 +357,17 @@ const enContent: LocaleContent = {
         title: 'Environment data unavailable',
         text: 'Could not load pollen and air quality. The index reflects diary entries only.',
       },
+      seasonalPollen: {
+        title: 'Pollen season in your region',
+        text: 'Peak season for «{label}» in your regional calendar. Plan exposure and medication with your doctor.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Alder',
       birch_pollen: 'Birch',
       grass_pollen: 'Timothy grass',
+      mugwort_pollen: 'Mugwort',
+      olive_pollen: 'Olive',
       ragweed_pollen: 'Ragweed',
     },
     locationDefault: 'Moscow',

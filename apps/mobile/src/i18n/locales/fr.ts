@@ -179,6 +179,13 @@ const fr: LocaleMessages = {
     insightsCorSymFood: '{{n}} jour(s) sur {{of}} avec symptômes avaient aussi une entrée alimentaire',
     insightsCorSymTrig: '{{n}} jour(s) sur {{of}} avec symptômes avaient un déclencheur enregistré',
     insightsCorSymMeds: '{{n}} jour(s) sur {{of}} avec symptômes incluaient un médicament',
+    insightsTemporalCorSymFood: '{{n}} sur {{of}} épisodes de symptômes avec aliment dans ±4 h',
+    insightsTemporalCorSymTrig: '{{n}} sur {{of}} épisodes de symptômes avec déclencheur dans ±4 h',
+    insightsTemporalCorSymMeds: '{{n}} sur {{of}} épisodes de symptômes avec médicament dans ±4 h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} jours consécutifs de symptômes sans déclencheur enregistré',
+    actPromptTitle: 'Il est temps de remplir l\'ACT',
+    actPromptText: 'Plus de 4 semaines depuis la dernière évaluation ACT. Nous recommandons de la compléter.',
+    actPromptButton: 'Remplir l\'ACT',
   },
   diaryWizard: {
     stepOf: 'Étape {{current}} sur {{total}}',
@@ -367,6 +374,11 @@ const fr: LocaleMessages = {
     conditionsOther: 'Autres états',
     consent:
       'Je confirme être le parent ou le représentant légal de cet enfant et être autorisé à saisir ses informations de santé.',
+    confirmationLabel: 'Source de vérification',
+    confirmationHint: 'Appuyez sur une ligne : auto-déclaration → IgE spécifique → confirmé par un médecin.',
+    confirmationSelf: 'Auto-déclaration',
+    confirmationIge: 'IgE spécifique',
+    confirmationClinician: 'Confirmé par un médecin',
     contactsLabel: 'Contacts d\'urgence',
     saveProfile: 'Enregistrer le profil',
     nextChild: 'Suivant : profil de l\'enfant',
@@ -588,6 +600,12 @@ const fr: LocaleMessages = {
     calm: 'Calme',
     grains: 'grains/m³',
     envUnavailable: 'Pas de données',
+    symptomDays: 'Symptômes {days}/7 j.',
+    confidence: {
+      high: 'Confiance élevée',
+      medium: 'Confiance moyenne',
+      low: 'Confiance faible',
+    },
   },
   errors: {
     selectProfile: 'Choisissez un profil sur l\'écran d\'accueil.',

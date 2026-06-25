@@ -63,6 +63,22 @@ export function initDb() {
       cached_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS catalog_allergen_snapshot (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      payload TEXT NOT NULL,
+      fetched_at TEXT NOT NULL,
+      source TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS catalog_products (
+      barcode TEXT PRIMARY KEY NOT NULL,
+      name TEXT NOT NULL,
+      brand TEXT NOT NULL DEFAULT '',
+      image_url TEXT NOT NULL DEFAULT '',
+      ingredients TEXT NOT NULL DEFAULT '',
+      allergen_tags TEXT NOT NULL DEFAULT '[]',
+      source TEXT NOT NULL DEFAULT 'cache',
+      fetched_at TEXT NOT NULL
+    );
   `);
 
   runMigrations(db as unknown as import('./types').DbLike);

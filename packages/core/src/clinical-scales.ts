@@ -212,6 +212,32 @@ export function computeScaleScore(
   }
 }
 
+export function inferScaleLevelFromTotal(
+  scaleId: ClinicalScaleId,
+  total: number,
+): ScaleScoreResult['level'] {
+  switch (scaleId) {
+    case 'aria-lite':
+      if (total <= 3) return 'good';
+      if (total <= 7) return 'moderate';
+      return 'severe';
+    case 'act':
+      if (total >= 20) return 'good';
+      if (total >= 16) return 'moderate';
+      return 'uncontrolled';
+    case 'scorad-lite':
+      if (total < 15) return 'good';
+      if (total < 30) return 'moderate';
+      return 'severe';
+    case 'uas7':
+      if (total <= 1) return 'good';
+      if (total <= 3) return 'moderate';
+      return 'severe';
+    default:
+      return 'moderate';
+  }
+}
+
 export function formatScaleSummary(answers: Record<string, string>): string {
   const scaleId = getScaleIdFromAnswers(answers);
   if (!scaleId) return 'Шкала без оценки';

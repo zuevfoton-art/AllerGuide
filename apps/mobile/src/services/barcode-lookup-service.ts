@@ -1,3 +1,4 @@
+import { expandAllergenTagsForScan } from '@allerguide/core';
 import { PRODUCT_DB_ENABLED } from '@/src/constants/features';
 import { fetchProductFromCatalog } from '@/src/services/catalog-api';
 import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
@@ -28,7 +29,10 @@ export async function resolveProductByBarcode(
   if (PRODUCT_DB_ENABLED) {
     const catalogProduct = await fetchProductFromCatalog(barcode);
     if (catalogProduct) {
-      const ingredients = [catalogProduct.ingredients, ...catalogProduct.allergenTags]
+      const ingredients = [
+        catalogProduct.ingredients,
+        ...expandAllergenTagsForScan(catalogProduct.allergenTags),
+      ]
         .filter(Boolean)
         .join(', ');
 

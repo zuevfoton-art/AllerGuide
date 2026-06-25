@@ -333,6 +333,18 @@ const deContent: LocaleContent = {
         title: 'Tagebuchsymptome',
         text: 'Symptome der letzten 48 Stunden erfasst. Veränderungen beobachten; bei Verschlechterung Arzt kontaktieren.',
       },
+      symptomsWeek: {
+        title: 'Tagebuchsymptome',
+        text: 'Symptome an {days} der letzten 7 Tage erfasst. Veränderungen beobachten; bei Verschlechterung Arzt kontaktieren.',
+      },
+      clinicalScale: {
+        title: 'Skala {label}',
+        text: 'Letzte Bewertung: {total} Punkte ({level}). Kontrolle mit dem Arzt besprechen.',
+      },
+      crossReaction: {
+        title: 'Mögliche Kreuzreaktionen',
+        text: 'Bei erhöhtem Pollenflug mögliche Reaktion auf: {allergens}. Bei Ernährung und Aufenthalt im Freien beachten.',
+      },
       food: {
         title: 'Nahrungsmittelallergene',
         text: 'In Ihrem Profil: {allergens}. Prüfen Sie Inhaltsstoffe mit dem Scanner, bevor Sie neue Produkte kaufen.',
@@ -345,11 +357,18 @@ const deContent: LocaleContent = {
         title: 'Keine Umweltdaten',
         text: 'Pollen und Luftqualität konnten nicht geladen werden. Der Index basiert nur auf dem Tagebuch.',
       },
+      seasonalPollen: {
+        title: 'Pollensaison in Ihrer Region',
+        text: 'Hauptsaison für «{label}» laut regionalem Kalender. Planen Sie Belastung und Therapie mit Ihrem Arzt.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Erle',
       birch_pollen: 'Birke',
       grass_pollen: 'Wiesenlieschgras',
-      ragweed_pollen: 'Beifuß',
+      mugwort_pollen: 'Beifuß',
+      olive_pollen: 'Olive',
+      ragweed_pollen: 'Beifußambrosie',
     },
     locationDefault: 'Berlin',
     envUnavailableSummary:

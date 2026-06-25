@@ -179,6 +179,13 @@ const en: LocaleMessages = {
     insightsCorSymFood: '{{n}} of {{of}} symptom days also had a food entry',
     insightsCorSymTrig: '{{n}} of {{of}} symptom days had a trigger logged',
     insightsCorSymMeds: '{{n}} of {{of}} symptom days included medication',
+    insightsTemporalCorSymFood: '{{n}} of {{of}} symptom episodes had food within ±4h',
+    insightsTemporalCorSymTrig: '{{n}} of {{of}} symptom episodes had a trigger within ±4h',
+    insightsTemporalCorSymMeds: '{{n}} of {{of}} symptom episodes had medication within ±4h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} consecutive days with symptoms but no trigger logged',
+    actPromptTitle: 'Time for ACT',
+    actPromptText: 'It has been 4+ weeks since your last asthma control (ACT) assessment. We recommend completing ACT.',
+    actPromptButton: 'Complete ACT',
   },
   diaryWizard: {
     stepOf: 'Step {{current}} of {{total}}',
@@ -368,6 +375,11 @@ const en: LocaleMessages = {
     conditionsOther: 'Other conditions',
     consent:
       'I confirm that I am the parent or legal guardian of this child and am authorized to enter their health information.',
+    confirmationLabel: 'Verification source',
+    confirmationHint: 'Tap a row to cycle: self-report → specific IgE → clinician confirmed.',
+    confirmationSelf: 'Self-reported',
+    confirmationIge: 'Specific IgE',
+    confirmationClinician: 'Clinician confirmed',
     contactsLabel: 'Emergency contacts',
     saveProfile: 'Save profile',
     nextChild: 'Next: child profile',
@@ -589,6 +601,12 @@ const en: LocaleMessages = {
     calm: 'Calm',
     grains: 'grains/m³',
     envUnavailable: 'No data',
+    symptomDays: 'Symptoms {days}/7 days',
+    confidence: {
+      high: 'High confidence',
+      medium: 'Medium confidence',
+      low: 'Low confidence',
+    },
   },
   errors: {
     selectProfile: 'Select a profile on the home screen.',

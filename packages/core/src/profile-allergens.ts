@@ -79,16 +79,14 @@ export function getFoodAllergenLabels(ids: ProfileAllergenId[]): string[] {
   return getFoodAllergenIds(ids).map((id) => findAllergenById(id)!.name);
 }
 
-/** Open-Meteo hourly keys → canonical pollen allergen ids. */
-export const OPEN_METEO_POLLEN_ALLERGEN_IDS: Record<string, ProfileAllergenId> = {
-  birch_pollen: 'birch-pollen',
-  grass_pollen: 'grass-pollen',
-  ragweed_pollen: 'ragweed-pollen',
-};
-
-export function profileHasPollenAllergen(
-  profileAllergenIds: ProfileAllergenId[],
-  pollenAllergenId: ProfileAllergenId,
-): boolean {
-  return profileAllergenIds.includes(pollenAllergenId);
-}
+export {
+  mapOpenMeteoHourlyKeyToAllergenId,
+  OPEN_METEO_POLLEN_ALLERGEN_IDS,
+  OPEN_METEO_POLLEN_TAXON_IDS,
+  parseOpenMeteoPollenHourly,
+  profileHasPollenAllergen,
+  profileMatchesPollenTaxon,
+  type OpenMeteoPollenTaxonId,
+  type PollenReading,
+  type PollenTaxonId,
+} from './pollen-taxonomy';

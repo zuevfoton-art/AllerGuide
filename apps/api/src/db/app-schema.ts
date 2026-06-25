@@ -39,6 +39,7 @@ export const profiles = profileSchema.table('profiles', {
   birthYear: integer('birth_year'),
   type: varchar('type', { length: 16 }).notNull(),
   allergies: text('allergies').notNull().default('[]'),
+  allergyConfirmations: text('allergy_confirmations').notNull().default('{}'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

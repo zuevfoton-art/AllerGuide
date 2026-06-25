@@ -17,6 +17,7 @@ import {
   getDiaryEntryAnswers,
   getDiarySection,
   getRecommendedScalesForConditions,
+  isActPromptDue,
   isAsitCourseConfigured,
   parseAllergies,
   profileEnablesAsit,
@@ -148,6 +149,10 @@ export default function DiaryScreen() {
     () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
     [activeProfileId, list],
   );
+  const actPromptDue = useMemo(
+    () => isActPromptDue(list, profileConditions),
+    [list, profileConditions],
+  );
   const insectActionPlan = useMemo(
     () => (activeProfileId ? getInsectActionPlan(activeProfileId) : null),
     [activeProfileId, list],
@@ -209,8 +214,8 @@ export default function DiaryScreen() {
       return;
     }
     if (sectionType === 'Триггер' && activeProfileId) {
-      const allergies = activeProfile ? parseAllergies(activeProfile.allergies) : [];
-      const wellness = await fetchWellnessSnapshot(allergies, { recentSymptoms: false, recentTriggers: false }, locale).catch(() => null);
+      const allergiesJson = activeProfile?.allergies ?? '[]';
+      const wellness = await fetchWellnessSnapshot(allergiesJson, [], locale).catch(() => null);
       const context = await loadDiaryTriggerContext(activeProfileId, wellness?.factors);
       const prefill = { Триггер: buildTriggerPrefill(context) };
       setEditor({ mode: 'section', sectionType, prefill });
@@ -354,6 +359,19 @@ export default function DiaryScreen() {
 
       {!editor ? (
         <>
+          {actPromptDue ? (
+            <GlassCard style={styles.actPromptCard}>
+              <Text style={ui.cardTitle}>{t('diary.actPromptTitle')}</Text>
+              <Text style={styles.actPromptText}>{t('diary.actPromptText')}</Text>
+              <Button
+                label={t('diary.actPromptButton')}
+                variant="secondary"
+                size="sm"
+                onPress={() => setEditor({ mode: 'scale', scaleId: 'act' })}
+              />
+            </GlassCard>
+          ) : null}
+
           {asitEnabled ? (
             <AsitCourseCard
               course={asitCourse}
@@ -548,6 +566,13 @@ function entryDetailsText(entry: DiaryEntry): string {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     header: { gap: 2 },
+    actPromptCard: { gap: 8 },
+    actPromptText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
     chip: {
       flexDirection: 'row',

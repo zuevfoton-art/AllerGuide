@@ -10,12 +10,52 @@ import {
 } from '@/src/services/backend-api';
 import { trackEvent } from '@/src/services/analytics-service';
 import type { Profile, ProfileInput, ProfileType } from '@allerguide/core';
-import { migrateProfileAllergiesJson, normalizeProfileAllergenIds, serializeProfileAllergenIds } from '@allerguide/core';
+import {
+  dedupeAllergenIds,
+  migrateProfileAllergiesJson,
+  normalizeAllergyConfirmations,
+  normalizeProfileAllergenIds,
+  parseAllergyConfirmations,
+  serializeAllergyConfirmations,
+  serializeProfileAllergenIds,
+  validateProfileInput,
+  type ProfileValidationErrorCode,
+} from '@allerguide/core';
+
+export class ProfileValidationError extends Error {
+  code: ProfileValidationErrorCode;
+
+  constructor(code: ProfileValidationErrorCode) {
+    super(code);
+    this.code = code;
+  }
+}
 
 function requireUserId(): number {
   const userId = getCurrentUserId();
   if (!userId) throw new Error('User is not authenticated');
   return userId;
+}
+
+function normalizeProfilePayload(input: ProfileInput) {
+  const allergenIds = dedupeAllergenIds(input.allergies);
+  const allergiesJson = serializeProfileAllergenIds(allergenIds);
+  const allergyConfirmationsJson = serializeAllergyConfirmations(
+    normalizeAllergyConfirmations(allergenIds, input.allergyConfirmations),
+  );
+  return { allergenIds, allergiesJson, allergyConfirmationsJson };
+}
+
+function assertValidProfileInput(input: ProfileInput) {
+  const error = validateProfileInput({
+    name: input.name,
+    birthYear: input.birthYear,
+    type: input.type,
+    allergies: input.allergies,
+    childConsent: input.childConsent,
+    scenario: input.scenario,
+  });
+  if (error) throw new ProfileValidationError(error);
 }
 
 export function listProfiles() {
@@ -26,13 +66,10 @@ export function listProfiles() {
   return db.getAllSync<Profile>('SELECT * FROM profiles WHERE userId = ? ORDER BY id DESC', [userId]);
 }
 
-function normalizeAllergiesInput(allergies: string[]): string {
-  return serializeProfileAllergenIds(normalizeProfileAllergenIds(allergies));
-}
-
 export async function createProfile(input: ProfileInput) {
+  assertValidProfileInput(input);
   const userId = requireUserId();
-  const allergiesJson = normalizeAllergiesInput(input.allergies);
+  const { allergenIds, allergiesJson, allergyConfirmationsJson } = normalizeProfilePayload(input);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -40,7 +77,8 @@ export async function createProfile(input: ProfileInput) {
 
     const response = await backendCreateProfile(token, {
       ...input,
-      allergies: normalizeProfileAllergenIds(input.allergies),
+      allergies: allergenIds,
+      allergyConfirmations: parseAllergyConfirmations(allergyConfirmationsJson),
     });
     if (!response.ok) throw new Error(response.error);
 
@@ -51,13 +89,10 @@ export async function createProfile(input: ProfileInput) {
   }
 
   const db = getDb();
-  db.runSync('INSERT INTO profiles (userId, name, birthYear, type, allergies) VALUES (?, ?, ?, ?, ?)', [
-    userId,
-    input.name,
-    input.birthYear,
-    input.type,
-    allergiesJson,
-  ]);
+  db.runSync(
+    'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations) VALUES (?, ?, ?, ?, ?, ?)',
+    [userId, input.name, input.birthYear, input.type, allergiesJson, allergyConfirmationsJson],
+  );
   const row = db.getFirstSync<{ id: number }>('SELECT id FROM profiles ORDER BY id DESC LIMIT 1');
   if (!row?.id) return null;
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [row.id]);
@@ -67,8 +102,9 @@ export async function createProfile(input: ProfileInput) {
 }
 
 export async function updateProfile(id: number, input: ProfileInput) {
+  assertValidProfileInput(input);
   const userId = requireUserId();
-  const allergiesJson = normalizeAllergiesInput(input.allergies);
+  const { allergenIds, allergiesJson, allergyConfirmationsJson } = normalizeProfilePayload(input);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -76,7 +112,8 @@ export async function updateProfile(id: number, input: ProfileInput) {
 
     const response = await backendUpdateProfile(token, id, {
       ...input,
-      allergies: normalizeProfileAllergenIds(input.allergies),
+      allergies: allergenIds,
+      allergyConfirmations: parseAllergyConfirmations(allergyConfirmationsJson),
     });
     if (!response.ok) throw new Error(response.error);
 
@@ -88,8 +125,8 @@ export async function updateProfile(id: number, input: ProfileInput) {
 
   const db = getDb();
   db.runSync(
-    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
-    [userId, input.name, input.birthYear, input.type, allergiesJson, id],
+    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ? WHERE id = ?',
+    [userId, input.name, input.birthYear, input.type, allergiesJson, allergyConfirmationsJson, id],
   );
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
   const { activeProfileId, setActiveProfile } = useAppStore.getState();
@@ -141,15 +178,17 @@ export function migrateLegacyProfilesToUser(userId: number) {
   const all = db.getAllSync<Profile>('SELECT * FROM profiles');
   for (const profile of all) {
     const migratedAllergies = migrateProfileAllergiesJson(profile.allergies);
+    const confirmations = profile.allergyConfirmations ?? '{}';
     if (!profile.userId || migratedAllergies !== profile.allergies) {
       db.runSync(
-        'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
+        'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ? WHERE id = ?',
         [
           profile.userId || userId,
           profile.name,
           profile.birthYear,
           profile.type,
           migratedAllergies,
+          confirmations,
           profile.id,
         ],
       );

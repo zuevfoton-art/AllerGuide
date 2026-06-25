@@ -119,6 +119,7 @@ class WebDb implements DbLike {
         birthYear: params![2] as number,
         type: params![3] as Profile['type'],
         allergies: params![4] as string,
+        allergyConfirmations: (params![5] as string | undefined) ?? '{}',
       });
       this.saveProfiles(profiles);
       return;
@@ -134,6 +135,7 @@ class WebDb implements DbLike {
         birthYear: params![3] as number,
         type: params![4] as Profile['type'],
         allergies: params![5] as string,
+        allergyConfirmations: (params![6] as string | undefined) ?? '{}',
       };
       const index = profiles.findIndex((profile) => profile.id === id);
       if (index >= 0) profiles[index] = next;
@@ -200,7 +202,7 @@ class WebDb implements DbLike {
 
     if (s.startsWith('update profiles')) {
       const profiles = this.getProfiles();
-      const id = params![5] as number;
+      const id = params![6] as number;
       const index = profiles.findIndex((p) => p.id === id);
       if (index >= 0) {
         profiles[index] = {
@@ -210,6 +212,7 @@ class WebDb implements DbLike {
           birthYear: params![2] as number,
           type: params![3] as Profile['type'],
           allergies: params![4] as string,
+          allergyConfirmations: (params![5] as string | undefined) ?? profiles[index].allergyConfirmations ?? '{}',
         };
         this.saveProfiles(profiles);
       }

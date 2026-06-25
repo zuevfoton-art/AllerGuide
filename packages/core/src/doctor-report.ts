@@ -41,6 +41,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
   },
   { id: 'skin', label: 'Кожные проявления', diaryTypes: ['Кожа'], defaultEnabled: true },
   { id: 'scales', label: 'Клинические шкалы', diaryTypes: ['Шкала'], defaultEnabled: true },
+  {
+    id: 'timeline',
+    label: 'Хронология',
+    diaryTypes: [],
+    defaultEnabled: true,
+  },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },
 ];
 
