@@ -12,6 +12,7 @@ import {
 import type { AppLocale } from '@/src/i18n/types';
 import { DEFAULT_LOCALE } from '@/src/i18n/types';
 import { getLocale, setLocale as persistLocale } from '@/src/services/settings-service';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 
 interface LocaleState {
   locale: AppLocale;
@@ -36,6 +37,7 @@ export const useLocaleStore = create<LocaleState>((set, get) => ({
   setLocale: (locale) => {
     persistLocale(locale);
     set({ locale });
+    void reconcileAllReminders();
   },
   t: (key, params) => {
     const messages = LOCALE_MESSAGES[get().locale];

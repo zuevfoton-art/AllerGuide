@@ -1,7 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import {
-  buildAsitReminderContent,
   isAsitReminderConfigured,
   type AsitCourse,
 } from '@allerguide/core';
@@ -30,7 +29,11 @@ export async function cancelAsitReminder(profileId: number) {
   }
 }
 
-export async function scheduleAsitReminder(profileId: number, course: AsitCourse): Promise<boolean> {
+export async function scheduleAsitReminder(
+  profileId: number,
+  course: AsitCourse,
+  content: { title: string; body: string },
+): Promise<boolean> {
   if (Platform.OS === 'web') return false;
   if (!isAsitReminderConfigured(course)) {
     await cancelAsitReminder(profileId);
@@ -44,7 +47,6 @@ export async function scheduleAsitReminder(profileId: number, course: AsitCourse
 
   const hour = course.reminderHour ?? 8;
   const minute = course.reminderMinute ?? 0;
-  const content = buildAsitReminderContent(course);
 
   const id = await Notifications.scheduleNotificationAsync({
     content: {
@@ -63,12 +65,16 @@ export async function scheduleAsitReminder(profileId: number, course: AsitCourse
   return true;
 }
 
-export async function syncAsitReminder(profileId: number, course: AsitCourse | null): Promise<boolean> {
+export async function syncAsitReminder(
+  profileId: number,
+  course: AsitCourse | null,
+  content: { title: string; body: string },
+): Promise<boolean> {
   if (!course || !isAsitReminderConfigured(course)) {
     await cancelAsitReminder(profileId);
     return true;
   }
-  return scheduleAsitReminder(profileId, course);
+  return scheduleAsitReminder(profileId, course, content);
 }
 
 export function isAsitReminderScheduled(profileId: number): boolean {

@@ -11,6 +11,7 @@ import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { initAnalytics, trackScreen } from '@/src/services/analytics-service';
 import { initErrorReporting } from '@/src/services/error-reporting';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
 
@@ -82,6 +83,7 @@ export default function RootLayout() {
       safe('hydrateTheme', hydrateTheme);
       safe('hydrateLocale', hydrateLocale);
       setDbReady(true);
+      void reconcileAllReminders();
     })();
 
     return () => {

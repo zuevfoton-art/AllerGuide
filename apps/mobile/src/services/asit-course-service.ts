@@ -5,7 +5,8 @@ import {
   type AsitCourse,
 } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
-import { syncAsitReminder } from '@/src/services/asit-reminder-service';
+import { cancelAsitReminder, syncAsitReminder } from '@/src/services/asit-reminder-service';
+import { getAsitReminderNotificationContent } from '@/src/services/notification-content-service';
 
 function courseKey(profileId: number) {
   return `asitCourse:${profileId}`;
@@ -17,7 +18,7 @@ export function getAsitCourse(profileId: number): AsitCourse | null {
 
 export function saveAsitCourse(profileId: number, course: AsitCourse) {
   setSetting(courseKey(profileId), serializeAsitCourse(course));
-  void syncAsitReminder(profileId, course);
+  void syncAsitReminder(profileId, course, getAsitReminderNotificationContent(course));
 }
 
 export function createEmptyAsitCourse(): AsitCourse {
@@ -26,4 +27,5 @@ export function createEmptyAsitCourse(): AsitCourse {
 
 export function clearAsitCourse(profileId: number) {
   setSetting(courseKey(profileId), '');
+  void cancelAsitReminder(profileId);
 }
