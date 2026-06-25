@@ -60,13 +60,14 @@ localPort = 23636
 externalPort = 3002
 
 [deployment]
-deploymentTarget = "autoscale"
+deploymentTarget = "static"
 # Let Drizzle migrations in scripts/replit-deploy-build.sh manage production schema.
 # Replit's auto dev→prod DB push fails on republish with:
 # "Cannot push development database objects, production database already exists".
 ignoreDatabaseMigrations = true
 build = ["bash", "scripts/replit-deploy-build.sh"]
 run = ["bash", "-c", "cd apps/api && npx tsx src/index.ts"]
+publicDir = "dist"
 
 [userenv]
 
