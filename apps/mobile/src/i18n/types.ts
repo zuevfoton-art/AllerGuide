@@ -579,6 +579,12 @@ export type LocaleMessages = {
     calm: string;
     grains: string;
     envUnavailable: string;
+    symptomDays: string;
+    confidence: {
+      high: string;
+      medium: string;
+      low: string;
+    };
   };
   errors: {
     selectProfile: string;

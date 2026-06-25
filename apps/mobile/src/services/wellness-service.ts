@@ -1,6 +1,12 @@
 import {
   aqiTier,
+  buildClinicalScalesFromTrends,
+  buildDiarySeriesFromInsights,
+  collectLatestScaleTrends,
+  computeDiaryInsights,
+  computeWellnessConfidence,
   computeWellnessScore,
+  computeWellnessScoreBreakdown,
   getCurrentPollenAlerts,
   getDefaultPollenRegion,
   getFoodAllergenLabels,
@@ -10,12 +16,16 @@ import {
   pollenTier,
   resolvePollenRegion,
   wellnessStatusFromScore,
+  WELLNESS_WEIGHTS_VERSION,
+  type DiaryEntry,
   type WellnessRecommendation,
 } from '@allerguide/core';
 import { getLocaleContent } from '@/src/i18n/content';
 import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatTemplate } from '@/src/i18n/translate';
 import type { AppLocale } from '@/src/i18n/types';
+
+export type WellnessConfidence = 'high' | 'medium' | 'low';
 
 export type WellnessSnapshot = {
   score: number;
@@ -29,6 +39,9 @@ export type WellnessSnapshot = {
   regionId: string;
   /** False when Open-Meteo air-quality data could not be loaded (no synthetic fallback). */
   envDataAvailable: boolean;
+  /** Data quality indicator (B.7). */
+  confidence: WellnessConfidence;
+  weightsVersion: string;
 };
 
 function labelForPollenTaxon(
@@ -43,6 +56,7 @@ function buildRecommendations(
   locale: AppLocale,
   envDataAvailable: boolean,
   seasonalAlerts: { label: string }[],
+  crossReactionNames: string[],
 ): WellnessRecommendation[] {
   const content = getLocaleContent(locale);
   const recs: WellnessRecommendation[] = [];
@@ -66,7 +80,7 @@ function buildRecommendations(
   }
 
   for (const match of input.pollenMatches) {
-    const tier = pollenTier(match.value);
+    const tier = pollenTier(match.value, match.taxonId);
     if (match.profileRelevant && tier.level !== 'low') {
       const tierLabel = content.wellness.pollenTier[tier.level].toLowerCase();
       recs.push({
@@ -90,11 +104,47 @@ function buildRecommendations(
     });
   }
 
-  if (input.recentSymptoms) {
+  if (input.diary.symptomDays >= 2) {
+    const symptomsWeek = content.wellness.recommendations.symptomsWeek;
+    recs.push({
+      icon: '📔',
+      title: symptomsWeek?.title ?? content.wellness.recommendations.symptoms.title,
+      text: formatTemplate(symptomsWeek?.text ?? content.wellness.recommendations.symptoms.text, {
+        days: String(input.diary.symptomDays),
+      }),
+    });
+  } else if (input.diary.symptomDays === 1) {
     recs.push({
       icon: '📔',
       title: content.wellness.recommendations.symptoms.title,
       text: content.wellness.recommendations.symptoms.text,
+    });
+  }
+
+  for (const scale of input.clinicalScales) {
+    if (scale.level !== 'good') {
+      const clinicalScale = content.wellness.recommendations.clinicalScale;
+      recs.push({
+        icon: '📊',
+        title: formatTemplate(clinicalScale?.title ?? 'Scale {label}', {
+          label: scale.label,
+        }),
+        text: formatTemplate(clinicalScale?.text ?? '{total} ({level})', {
+          total: String(scale.total),
+          level: scale.level,
+        }),
+      });
+    }
+  }
+
+  if (crossReactionNames.length) {
+    const crossReaction = content.wellness.recommendations.crossReaction;
+    recs.push({
+      icon: '🔗',
+      title: crossReaction?.title ?? 'Cross-reactions',
+      text: formatTemplate(crossReaction?.text ?? '{allergens}', {
+        allergens: crossReactionNames.join(', '),
+      }),
     });
   }
 
@@ -121,7 +171,7 @@ function buildRecommendations(
 
 export async function fetchWellnessSnapshot(
   profileAllergiesJson: string,
-  diaryFlags: { recentSymptoms: boolean; recentTriggers: boolean },
+  diaryEntries: DiaryEntry[] = [],
   locale: AppLocale = 'ru',
   location?: { lat: number; lon: number; label?: string },
 ): Promise<WellnessSnapshot> {
@@ -137,6 +187,10 @@ export async function fetchWellnessSnapshot(
   };
 
   const profileAllergenIds = parseProfileAllergenIds(profileAllergiesJson);
+  const diaryInsights = computeDiaryInsights(diaryEntries);
+  const diarySeries = buildDiarySeriesFromInsights(diaryInsights);
+  const clinicalScales = buildClinicalScalesFromTrends(collectLatestScaleTrends(diaryEntries));
+
   const month = new Date().getMonth() + 1;
   const seasonalAlerts = getCurrentPollenAlerts(month, profileAllergenIds, region.id).map(
     (peak) => ({ label: peak.label }),
@@ -152,7 +206,13 @@ export async function fetchWellnessSnapshot(
   let europeanAqi: number | null = null;
   let pm25: number | null = null;
   let envDataAvailable = false;
-  let pollenMatches: { label: string; value: number; profileRelevant: boolean }[] = [];
+  let pollenMatches: {
+    label: string;
+    value: number;
+    profileRelevant: boolean;
+    taxonId?: (typeof OPEN_METEO_POLLEN_TAXON_IDS)[number];
+    allergenId?: string | null;
+  }[] = [];
 
   try {
     const res = await fetch(url);
@@ -170,6 +230,8 @@ export async function fetchWellnessSnapshot(
       label: reading.label,
       value: reading.value,
       profileRelevant: reading.profileRelevant,
+      taxonId: reading.taxonId as (typeof OPEN_METEO_POLLEN_TAXON_IDS)[number],
+      allergenId: reading.allergenId,
     }));
   } catch {
     envDataAvailable = false;
@@ -178,17 +240,28 @@ export async function fetchWellnessSnapshot(
   const foodAllergens = getFoodAllergenLabels(profileAllergenIds);
 
   const scoreInput = {
+    profileAllergenIds,
     pollenMatches: envDataAvailable ? pollenMatches : [],
     europeanAqi: envDataAvailable ? europeanAqi : null,
     pm25: envDataAvailable ? pm25 : null,
-    recentSymptoms: diaryFlags.recentSymptoms,
-    recentTriggers: diaryFlags.recentTriggers,
+    diary: diarySeries,
+    clinicalScales,
     foodAllergens,
+    envDataAvailable,
   };
 
   const score = computeWellnessScore(scoreInput);
+  const breakdown = computeWellnessScoreBreakdown(scoreInput);
   const status = wellnessStatusFromScore(score);
   const localizedStatus = content.wellness.status[status.level];
+
+  const confidence = computeWellnessConfidence({
+    envDataAvailable,
+    diaryWeekTotal: diarySeries.weekTotal,
+    clinicalScalesCount: clinicalScales.length,
+  });
+
+  const crossReactionNames = breakdown.crossReactionMatches.map((m) => m.allergen.name);
 
   const factors = envDataAvailable
     ? [
@@ -197,7 +270,7 @@ export async function fetchWellnessSnapshot(
           .map((m) => ({
             label: `${messages.wellness.pollenLabel} · ${m.label}`,
             value: `${m.value.toFixed(1)} ${messages.wellness.grains}`,
-            level: pollenTier(m.value).level,
+            level: pollenTier(m.value, m.taxonId).level,
           })),
         {
           label: messages.wellness.airLabel,
@@ -206,8 +279,13 @@ export async function fetchWellnessSnapshot(
         },
         {
           label: messages.wellness.diaryLabel,
-          value: diaryFlags.recentSymptoms ? messages.wellness.hasSymptoms : messages.wellness.calm,
-          level: diaryFlags.recentSymptoms ? ('high' as const) : ('low' as const),
+          value:
+            diarySeries.symptomDays > 0
+              ? formatTemplate(messages.wellness.symptomDays, {
+                  days: String(diarySeries.symptomDays),
+                })
+              : messages.wellness.calm,
+          level: diarySeries.symptomDays >= 3 ? ('high' as const) : diarySeries.symptomDays >= 1 ? ('mid' as const) : ('low' as const),
         },
       ]
     : [
@@ -218,8 +296,13 @@ export async function fetchWellnessSnapshot(
         },
         {
           label: messages.wellness.diaryLabel,
-          value: diaryFlags.recentSymptoms ? messages.wellness.hasSymptoms : messages.wellness.calm,
-          level: diaryFlags.recentSymptoms ? ('high' as const) : ('low' as const),
+          value:
+            diarySeries.symptomDays > 0
+              ? formatTemplate(messages.wellness.symptomDays, {
+                  days: String(diarySeries.symptomDays),
+                })
+              : messages.wellness.calm,
+          level: diarySeries.symptomDays >= 3 ? ('high' as const) : diarySeries.symptomDays >= 1 ? ('mid' as const) : ('low' as const),
         },
       ];
 
@@ -231,10 +314,18 @@ export async function fetchWellnessSnapshot(
       : content.wellness.envUnavailableSummary,
     level: status.level,
     factors,
-    recommendations: buildRecommendations(scoreInput, locale, envDataAvailable, seasonalAlerts),
+    recommendations: buildRecommendations(
+      scoreInput,
+      locale,
+      envDataAvailable,
+      seasonalAlerts,
+      crossReactionNames,
+    ),
     updatedAt: new Date().toISOString(),
     locationLabel: resolvedLocation.label,
     regionId: region.id,
     envDataAvailable,
+    confidence,
+    weightsVersion: WELLNESS_WEIGHTS_VERSION,
   };
 }

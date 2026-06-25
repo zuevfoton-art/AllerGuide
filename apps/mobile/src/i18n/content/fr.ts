@@ -333,6 +333,18 @@ const frContent: LocaleContent = {
         title: 'Symptômes du journal',
         text: 'Symptômes enregistrés au cours des 48 dernières heures. Suivez l\'évolution ; contactez votre médecin s\'ils s\'aggravent.',
       },
+      symptomsWeek: {
+        title: 'Symptômes du journal',
+        text: 'Symptômes enregistrés sur {days} des 7 derniers jours. Suivez l\'évolution ; contactez votre médecin s\'ils s\'aggravent.',
+      },
+      clinicalScale: {
+        title: 'Échelle {label}',
+        text: 'Dernière évaluation : {total} points ({level}). Discutez du contrôle avec votre médecin.',
+      },
+      crossReaction: {
+        title: 'Réactions croisées possibles',
+        text: 'Avec un pollen élevé, réaction possible à : {allergens}. À prendre en compte pour l\'alimentation et les sorties.',
+      },
       food: {
         title: 'Allergènes alimentaires',
         text: 'Dans votre profil : {allergens}. Vérifiez les ingrédients avec le scanner avant d\'acheter de nouveaux produits.',

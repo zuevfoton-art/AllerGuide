@@ -593,6 +593,12 @@ const it: LocaleMessages = {
     calm: 'Calmo',
     grains: 'grani/m³',
     envUnavailable: 'Nessun dato',
+    symptomDays: 'Sintomi {days}/7 gg.',
+    confidence: {
+      high: 'Alta affidabilità',
+      medium: 'Affidabilità media',
+      low: 'Bassa affidabilità',
+    },
   },
   errors: {
     selectProfile: 'Seleziona un profilo nella schermata home.',

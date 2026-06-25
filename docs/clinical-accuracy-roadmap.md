@@ -86,6 +86,30 @@
 - `POLLEN_CALENDARS` — Moscow, SPb, Krasnodar, Novosibirsk, Ekaterinburg
 - Map pollen layer + wellness seasonal alerts use regional calendar
 
+**B.3 deliverables:**
+- `packages/core/src/pollen-thresholds.ts` — EAACI-inspired tiers per taxon + percentile helpers
+- `pollenTier()` in `wellness.ts` uses taxon-specific cutoffs (not global 10/50)
+
+**B.4 deliverables:**
+- `WellnessInput.clinicalScales` — latest ACT / ARIA / SCORAD / UAS7 from diary
+- `buildClinicalScalesFromTrends()` + scale penalties in `computeWellnessScore`
+
+**B.5 deliverables:**
+- `WellnessDiarySeries` — 7-day symptom/trigger days, streak, correlation
+- `buildDiarySeriesFromInsights()` replaces boolean `recentSymptoms` flags
+
+**B.6 deliverables:**
+- `packages/core/src/wellness-cross-reactions.ts` — pollen-food / OAS penalty when pollen elevated
+- Cross-reaction recommendations in wellness UI
+
+**B.7 deliverables:**
+- `computeWellnessConfidence()` — high / medium / low
+- `WellnessSnapshot.confidence` + badge on home screen; `envDataAvailable` hint
+
+**B.9 deliverables:**
+- `packages/core/src/wellness-weights.ts` — versioned `WELLNESS_WEIGHTS` registry (`beta-1.0`)
+- `computeWellnessScoreBreakdown()` exposes penalty components for E.4 calibration
+
 ### Phase B — Wellness Engine v2
 
 | ID | Задача | Статус |
@@ -93,12 +117,12 @@
 | **B.8** | Убрать fake Open-Meteo fallback (42/45) | ✅ Done |
 | **B.1** | Пыльца по `pollen_taxon_id`, не substring | ✅ Done |
 | **B.2** | Региональные pollen calendars | ✅ Done |
-| B.3 | Пороги пыльцы по EAACI / перцентилям | Planned |
-| B.4 | ACT / ARIA / UAS7 в `computeWellnessScore` | Planned |
-| B.5 | Дневник как time-series (7 дней) | Planned |
-| B.6 | Cross-reactions в wellness risk | Planned |
-| B.7 | `confidence` / `envDataAvailable` в UI | Partial (B.8) |
-| B.9 | Калибровка весов (expert panel + beta) | Planned |
+| **B.3** | Пороги пыльцы по EAACI / перцентилям | ✅ Done |
+| **B.4** | ACT / ARIA / UAS7 в `computeWellnessScore` | ✅ Done |
+| **B.5** | Дневник как time-series (7 дней) | ✅ Done |
+| **B.6** | Cross-reactions в wellness risk | ✅ Done |
+| **B.7** | `confidence` / `envDataAvailable` в UI | ✅ Done |
+| **B.9** | Калибровка весов (expert panel + beta) | ✅ Done |
 
 **B.8 deliverables:**
 - `wellness-service.ts` — `envDataAvailable: false` при ошибке API
@@ -175,7 +199,10 @@ flowchart LR
 | `apps/mobile/src/services/catalog-cache-service.ts` | A.6 — offline catalog |
 | `packages/core/src/pollen-taxonomy.ts` | B.1 — pollen taxon ids |
 | `packages/core/src/pollen-regions.ts` | B.2 — regional calendars |
-| `packages/core/src/wellness.ts` | Scoring engine |
+| `packages/core/src/pollen-thresholds.ts` | B.3 — EAACI pollen tiers |
+| `packages/core/src/wellness-weights.ts` | B.9 — scoring weights registry |
+| `packages/core/src/wellness-cross-reactions.ts` | B.6 — cross-reaction risk |
+| `packages/core/src/wellness.ts` | Scoring engine v2 (B.4–B.7) |
 | `apps/mobile/src/services/wellness-service.ts` | Open-Meteo + B.8 |
 | `packages/core/src/cross-reactions/` | Кросс-реактивность |
 | `packages/core/src/clinical-scales.ts` | ARIA, ACT, SCORAD, UAS7 |

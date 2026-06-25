@@ -593,6 +593,12 @@ const de: LocaleMessages = {
     calm: 'Ruhig',
     grains: 'Körner/m³',
     envUnavailable: 'Keine Daten',
+    symptomDays: 'Symptome {days}/7 Tage',
+    confidence: {
+      high: 'Hohe Zuverlässigkeit',
+      medium: 'Mittlere Zuverlässigkeit',
+      low: 'Niedrige Zuverlässigkeit',
+    },
   },
   errors: {
     selectProfile: 'Profil auf dem Startbildschirm auswählen.',

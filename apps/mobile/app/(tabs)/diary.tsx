@@ -209,8 +209,8 @@ export default function DiaryScreen() {
       return;
     }
     if (sectionType === 'Триггер' && activeProfileId) {
-      const allergies = activeProfile ? parseAllergies(activeProfile.allergies) : [];
-      const wellness = await fetchWellnessSnapshot(allergies, { recentSymptoms: false, recentTriggers: false }, locale).catch(() => null);
+      const allergiesJson = activeProfile?.allergies ?? '[]';
+      const wellness = await fetchWellnessSnapshot(allergiesJson, [], locale).catch(() => null);
       const context = await loadDiaryTriggerContext(activeProfileId, wellness?.factors);
       const prefill = { Триггер: buildTriggerPrefill(context) };
       setEditor({ mode: 'section', sectionType, prefill });
