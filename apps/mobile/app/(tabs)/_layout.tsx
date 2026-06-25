@@ -122,6 +122,21 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="more"
+        options={{
+          title: t('tabs.more'),
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="more"
+              focused={focused}
+              color={colors.accent}
+              muted={colors.textMuted}
+              size={iconSize}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="sos"
         options={{
           title: t('tabs.sos'),

@@ -1,6 +1,6 @@
 import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
@@ -25,7 +25,6 @@ import {
   listSafeProducts,
   removeSafeProduct,
 } from '@/src/services/safe-products-service';
-import { BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 
@@ -115,30 +114,32 @@ export default function ScannerScreen() {
   useEffect(() => () => clearUndo(), [clearUndo]);
 
   const confirmRemoveSafe = (item: SafeProduct) => {
-    Alert.alert(
-      t('scanner.removeSafeTitle'),
-      t('scanner.removeSafeMessage', { name: item.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            removeSafeProduct(item.id);
-            void hapticLight();
-            refreshHistory();
-            setUndoItem({
-              name: item.name,
-              mode: item.mode,
-              input: item.input,
-              savedAt: item.savedAt,
-            });
-            if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
-            undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
-          },
-        },
-      ],
-    );
+    const title = t('scanner.removeSafeTitle');
+    const message = t('scanner.removeSafeMessage', { name: item.name });
+
+    const performRemove = () => {
+      removeSafeProduct(item.id);
+      void hapticLight();
+      refreshHistory();
+      setUndoItem({
+        name: item.name,
+        mode: item.mode,
+        input: item.input,
+        savedAt: item.savedAt,
+      });
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${message}`)) performRemove();
+      return;
+    }
+
+    Alert.alert(title, message, [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: performRemove },
+    ]);
   };
 
   const handleUndoRemove = () => {
@@ -539,7 +540,7 @@ export default function ScannerScreen() {
             return (
               <View
                 key={item.id}
-                style={[styles.historyRow, index < safeList.length - 1 && styles.historyRowBorder]}>
+                style={[styles.listRow, index < safeList.length - 1 && styles.historyRowBorder]}>
                 <View style={ui.feedIcon}>
                   <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
                 </View>
@@ -553,52 +554,17 @@ export default function ScannerScreen() {
                 </View>
                 <Pressable
                   onPress={() => confirmRemoveSafe(item)}
+                  hitSlop={8}
+                  style={styles.removeBtn}
                   accessibilityRole="button"
                   accessibilityLabel={t('scanner.removeSafe')}>
-                  <Ionicons name="close-circle-outline" size={20} color={theme.colors.textMuted} />
+                  <Ionicons name="close-circle-outline" size={22} color={theme.colors.textMuted} />
                 </Pressable>
               </View>
             );
           })}
         </GlassCard>
       ) : null}
-
-      <Text style={ui.sectionLabel}>{t('common.more')}</Text>
-      <GlassCard>
-        <View style={styles.previewRow}>
-          <View style={styles.previewIcon}>
-            <BrandFeatureIcon name="market" size={20} color={theme.colors.accent} />
-          </View>
-          <View style={styles.previewBody}>
-            <Text style={styles.previewTitle}>{t('market.title')}</Text>
-            <Text style={styles.previewSub}>{t('market.subtitle')}</Text>
-          </View>
-          <Button
-            label={t('home.marketplaceOpen')}
-            variant="secondary"
-            size="sm"
-            onPress={() => router.push('/(tabs)/market')}
-          />
-        </View>
-      </GlassCard>
-
-      <GlassCard>
-        <View style={styles.previewRow}>
-          <View style={styles.previewIcon}>
-            <BrandFeatureIcon name="map" size={20} color={theme.colors.accent} />
-          </View>
-          <View style={styles.previewBody}>
-            <Text style={styles.previewTitle}>{t('map.title')}</Text>
-            <Text style={styles.previewSub}>{t('map.subtitle')}</Text>
-          </View>
-          <Button
-            label={t('home.details')}
-            variant="secondary"
-            size="sm"
-            onPress={() => router.push('/(tabs)/map')}
-          />
-        </View>
-      </GlassCard>
 
       {undoItem ? (
         <UndoBanner
@@ -754,30 +720,20 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     historyRow: { paddingHorizontal: 16, paddingVertical: 12 },
+    listRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
     historyRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    previewRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    previewIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.accentLight,
+    removeBtn: {
+      width: 44,
+      height: 44,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.accentMid,
-    },
-    previewBody: { flex: 1, minWidth: 0, gap: 2 },
-    previewTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    previewSub: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textSecondary,
-      lineHeight: 17,
+      marginRight: -8,
     },
     cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {

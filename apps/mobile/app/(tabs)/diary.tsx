@@ -53,6 +53,7 @@ import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
+import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -377,167 +378,165 @@ export default function DiaryScreen() {
 
       <ProfileSwitcher />
 
-      {!editor ? (
-        <>
-          {actPromptDue ? (
-            <GlassCard style={styles.actPromptCard}>
-              <Text style={ui.cardTitle}>{t('diary.actPromptTitle')}</Text>
-              <Text style={styles.actPromptText}>{t('diary.actPromptText')}</Text>
-              <Button
-                label={t('diary.actPromptButton')}
-                variant="secondary"
-                size="sm"
-                onPress={() => setEditor({ mode: 'scale', scaleId: 'act' })}
-              />
-            </GlassCard>
-          ) : null}
-
-          {asitEnabled ? (
-            <AsitCourseCard
-              course={asitCourse}
-              entries={list}
-              onLogDose={() => void openSection('АСИТ')}
-            />
-          ) : null}
-
-          {foodFocusEnabled && activeProfile ? (
-            <FoodDrugAllergyCard
-              mode="food"
-              profileAllergies={parseAllergies(activeProfile.allergies)}
-              drugIntolerances={drugIntolerances}
-              registry={foodDrugRegistry}
-              entries={list}
-              onLogFood={() => void openSection('Питание')}
-              onLogMedicine={() => void openSection('Лекарство')}
-            />
-          ) : null}
-
-          {drugFocusEnabled ? (
-            <FoodDrugAllergyCard
-              mode="drug"
-              profileAllergies={activeProfile ? parseAllergies(activeProfile.allergies) : []}
-              drugIntolerances={drugIntolerances}
-              registry={foodDrugRegistry}
-              entries={list}
-              onLogFood={() => void openSection('Питание')}
-              onLogMedicine={() => void openSection('Лекарство')}
-            />
-          ) : null}
-
-          {insectFocusEnabled && activeProfile ? (
-            <InsectAllergyCard
-              profileAllergies={parseAllergies(activeProfile.allergies)}
-              plan={insectActionPlan}
-              entries={list}
-              onLogSting={() => void openSection('Укус насекомого')}
-            />
-          ) : null}
-
-          <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
+      {actPromptDue ? (
+        <GlassCard style={styles.actPromptCard}>
+          <Text style={ui.cardTitle}>{t('diary.actPromptTitle')}</Text>
+          <Text style={styles.actPromptText}>{t('diary.actPromptText')}</Text>
           <Button
-            label={t('diary.quickEntry')}
+            label={t('diary.actPromptButton')}
             variant="secondary"
-            block
-            onPress={() => {
-              const section = visibleSections.find((s) => s.type === 'Симптомы') ?? visibleSections[0];
-              if (section) setEditor({ mode: 'section', sectionType: section.type });
-            }}
+            size="sm"
+            onPress={() => setEditor({ mode: 'scale', scaleId: 'act' })}
           />
+        </GlassCard>
+      ) : null}
 
-          <GlassCard>
-            <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>
-            <View style={styles.chipRow}>
-              {visibleSections.map((section) => (
+      {asitEnabled ? (
+        <AsitCourseCard
+          course={asitCourse}
+          entries={list}
+          onLogDose={() => void openSection('АСИТ')}
+        />
+      ) : null}
+
+      {foodFocusEnabled && activeProfile ? (
+        <FoodDrugAllergyCard
+          mode="food"
+          profileAllergies={parseAllergies(activeProfile.allergies)}
+          drugIntolerances={drugIntolerances}
+          registry={foodDrugRegistry}
+          entries={list}
+          onLogFood={() => void openSection('Питание')}
+          onLogMedicine={() => void openSection('Лекарство')}
+        />
+      ) : null}
+
+      {drugFocusEnabled ? (
+        <FoodDrugAllergyCard
+          mode="drug"
+          profileAllergies={activeProfile ? parseAllergies(activeProfile.allergies) : []}
+          drugIntolerances={drugIntolerances}
+          registry={foodDrugRegistry}
+          entries={list}
+          onLogFood={() => void openSection('Питание')}
+          onLogMedicine={() => void openSection('Лекарство')}
+        />
+      ) : null}
+
+      {insectFocusEnabled && activeProfile ? (
+        <InsectAllergyCard
+          profileAllergies={parseAllergies(activeProfile.allergies)}
+          plan={insectActionPlan}
+          entries={list}
+          onLogSting={() => void openSection('Укус насекомого')}
+        />
+      ) : null}
+
+      <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
+      <Button
+        label={t('diary.quickEntry')}
+        variant="secondary"
+        block
+        onPress={() => {
+          const section = visibleSections.find((s) => s.type === 'Симптомы') ?? visibleSections[0];
+          if (section) setEditor({ mode: 'section', sectionType: section.type });
+        }}
+      />
+
+      <GlassCard>
+        <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>
+        <View style={styles.chipRow}>
+          {visibleSections.map((section) => (
+              <Pressable
+                key={section.type}
+                style={styles.chip}
+                onPress={() => void openSection(section.type)}
+                accessibilityRole="button"
+                accessibilityLabel={section.title}>
+                <Ionicons
+                  name={(TYPE_ICONS[section.type] ?? section.icon) as any}
+                  size={14}
+                  color={theme.colors.textSecondary}
+                />
+                <Text style={styles.chipText}>{section.title}</Text>
+              </Pressable>
+            ))}
+          <Pressable
+            style={styles.chip}
+            onPress={() => setScalePickerOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('diary.scale')}>
+            <Ionicons name="analytics" size={14} color={theme.colors.textSecondary} />
+            <Text style={styles.chipText}>{t('diary.scale')}</Text>
+          </Pressable>
+        </View>
+      </GlassCard>
+
+      {scaleTrends.length > 0 ? (
+        <GlassCard>
+          <Text style={ui.cardTitle}>{t('diary.scaleTrends')}</Text>
+          {scaleTrends.map((trend, index) => (
+            <View
+              key={trend.scaleId}
+              style={[styles.trendRow, index === 0 && styles.trendRowFirst]}>
+              <Text style={styles.trendLabel}>{trend.label}</Text>
+              <Text style={styles.trendValue}>
+                {trend.total} · {trend.interpretation}
+              </Text>
+              <Text style={styles.trendMeta}>{formatDiaryDate(trend.at)}</Text>
+            </View>
+          ))}
+        </GlassCard>
+      ) : null}
+
+      {scalePickerOpen ? (
+        <GlassCard style={styles.scalePicker}>
+          <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
+          <Text style={styles.scaleHint}>{t('diary.scaleRaaciHint')}</Text>
+          {recommendedScales.length > 0 ? (
+            <>
+              <Text style={styles.scaleGroupLabel}>{t('diary.scaleSuggested')}</Text>
+              <View style={styles.chipRow}>
+                {recommendedScales.map((scale) => (
                   <Pressable
-                    key={section.type}
-                    style={styles.chip}
-                    onPress={() => void openSection(section.type)}
+                    key={scale.id}
+                    style={[styles.chip, styles.chipAccent]}
+                    onPress={() => {
+                      setScalePickerOpen(false);
+                      setEditor({ mode: 'scale', scaleId: scale.id });
+                    }}
                     accessibilityRole="button"
-                    accessibilityLabel={section.title}>
-                    <Ionicons
-                      name={(TYPE_ICONS[section.type] ?? section.icon) as any}
-                      size={14}
-                      color={theme.colors.textSecondary}
-                    />
-                    <Text style={styles.chipText}>{section.title}</Text>
+                    accessibilityLabel={scale.shortLabel}>
+                    <Text style={styles.chipText}>{scale.shortLabel}</Text>
                   </Pressable>
                 ))}
-              <Pressable
-                style={styles.chip}
-                onPress={() => setScalePickerOpen(true)}
-                accessibilityRole="button"
-                accessibilityLabel={t('diary.scale')}>
-                <Ionicons name="analytics" size={14} color={theme.colors.textSecondary} />
-                <Text style={styles.chipText}>{t('diary.scale')}</Text>
-              </Pressable>
-            </View>
-          </GlassCard>
-
-          {scaleTrends.length > 0 ? (
-            <GlassCard>
-              <Text style={ui.cardTitle}>{t('diary.scaleTrends')}</Text>
-              {scaleTrends.map((trend, index) => (
-                <View
-                  key={trend.scaleId}
-                  style={[styles.trendRow, index === 0 && styles.trendRowFirst]}>
-                  <Text style={styles.trendLabel}>{trend.label}</Text>
-                  <Text style={styles.trendValue}>
-                    {trend.total} · {trend.interpretation}
-                  </Text>
-                  <Text style={styles.trendMeta}>{formatDiaryDate(trend.at)}</Text>
-                </View>
+              </View>
+            </>
+          ) : null}
+          {otherScales.length > 0 ? (
+            <View style={styles.chipRow}>
+              {otherScales.map((scale) => (
+                <Pressable
+                  key={scale.id}
+                  style={styles.chip}
+                  onPress={() => {
+                    setScalePickerOpen(false);
+                    setEditor({ mode: 'scale', scaleId: scale.id });
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={scale.shortLabel}>
+                  <Text style={styles.chipText}>{scale.shortLabel}</Text>
+                </Pressable>
               ))}
-            </GlassCard>
+            </View>
           ) : null}
+          <Button label={t('common.cancel')} variant="secondary" size="sm" onPress={() => setScalePickerOpen(false)} />
+        </GlassCard>
+      ) : null}
 
-          {scalePickerOpen ? (
-            <GlassCard style={styles.scalePicker}>
-              <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
-              <Text style={styles.scaleHint}>{t('diary.scaleRaaciHint')}</Text>
-              {recommendedScales.length > 0 ? (
-                <>
-                  <Text style={styles.scaleGroupLabel}>{t('diary.scaleSuggested')}</Text>
-                  <View style={styles.chipRow}>
-                    {recommendedScales.map((scale) => (
-                      <Pressable
-                        key={scale.id}
-                        style={[styles.chip, styles.chipAccent]}
-                        onPress={() => {
-                          setScalePickerOpen(false);
-                          setEditor({ mode: 'scale', scaleId: scale.id });
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={scale.shortLabel}>
-                        <Text style={styles.chipText}>{scale.shortLabel}</Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                </>
-              ) : null}
-              {otherScales.length > 0 ? (
-                <View style={styles.chipRow}>
-                  {otherScales.map((scale) => (
-                    <Pressable
-                      key={scale.id}
-                      style={styles.chip}
-                      onPress={() => {
-                        setScalePickerOpen(false);
-                        setEditor({ mode: 'scale', scaleId: scale.id });
-                      }}
-                      accessibilityRole="button"
-                      accessibilityLabel={scale.shortLabel}>
-                      <Text style={styles.chipText}>{scale.shortLabel}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              ) : null}
-              <Button label={t('common.cancel')} variant="secondary" size="sm" onPress={() => setScalePickerOpen(false)} />
-            </GlassCard>
-          ) : null}
-        </>
-      ) : (
-        renderEditor()
-      )}
+      <DiaryEditorModal visible={editor !== null} onClose={closeEditor}>
+        {renderEditor()}
+      </DiaryEditorModal>
 
       <Button
         label={t('diary.doctorReport')}

@@ -43,7 +43,14 @@ describe('wellness', () => {
       pollenMatches: [{ label: 'Берёза', value: 80, profileRelevant: true, taxonId: 'birch_pollen' }],
       europeanAqi: 70,
       pm25: 40,
-      diary: { symptomDays: 3, triggerDays: 2, streak: 3, weekTotal: 5, correlationKind: 'symptom-trigger' },
+      diary: {
+        ...baseInput.diary,
+        symptomDays: 3,
+        triggerDays: 2,
+        streak: 3,
+        weekTotal: 5,
+        correlationKind: 'symptom-trigger',
+      },
       foodAllergens: ['Молоко'],
     });
     expect(good).toBeGreaterThan(bad);

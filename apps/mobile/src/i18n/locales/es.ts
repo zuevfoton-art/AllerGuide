@@ -126,7 +126,17 @@ const es: LocaleMessages = {
     scanner: 'Escáner',
     market: 'Mercado',
     map: 'Mapa',
+    more: 'Más',
     sos: 'SOS',
+  },
+  more: {
+    eyebrow: 'Secciones',
+    title: 'Más',
+    subtitle: 'Mercado, mapa, experto y ajustes',
+    marketDesc: 'Productos para alérgicos según tu perfil',
+    mapDesc: 'Restaurantes, polen y clínicas ADAIR',
+    expertDesc: 'Materiales y recomendaciones ADAIR',
+    settingsDesc: 'SOS, sincronización y recordatorios',
   },
   home: {
     today: 'Hoy',

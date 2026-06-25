@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from 'express';
+import type { AllergyConfirmationSource } from '@allerguide/core';
 import { requireJwt } from '../middleware/require-jwt';
 import {
   createProfileForUser,
@@ -21,7 +22,7 @@ export function registerProfileRoutes(app: Express) {
       birthYear?: number;
       type?: 'self' | 'child';
       allergies?: string[];
-      allergyConfirmations?: Record<string, string>;
+      allergyConfirmations?: Record<string, AllergyConfirmationSource>;
       childConsent?: boolean;
       scenario?: 'self' | 'child' | 'both';
     };
@@ -75,7 +76,7 @@ export function registerProfileRoutes(app: Express) {
       birthYear?: number;
       type?: 'self' | 'child';
       allergies?: string[];
-      allergyConfirmations?: Record<string, string>;
+      allergyConfirmations?: Record<string, AllergyConfirmationSource>;
       childConsent?: boolean;
       scenario?: 'self' | 'child' | 'both';
     };

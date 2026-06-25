@@ -103,7 +103,7 @@ export default function ProfileSetupScreen() {
       return;
     }
 
-    if (needsChildConsent(effectiveType, scenario) && !childConsent) {
+    if (needsChildConsent(effectiveType, scenario ?? undefined) && !childConsent) {
       setError(tProfileError('child_consent_required'));
       return;
     }
@@ -119,7 +119,7 @@ export default function ProfileSetupScreen() {
         allergies: selected,
         allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
         childConsent,
-        scenario,
+        scenario: scenario ?? undefined,
       });
     } catch (err) {
       if (err instanceof ProfileValidationError) {
@@ -256,7 +256,7 @@ export default function ProfileSetupScreen() {
         />
       </GlassCard>
 
-      {needsChildConsent(effectiveType, scenario) ? (
+      {needsChildConsent(effectiveType, scenario ?? undefined) ? (
         <Pressable style={styles.consentRow} onPress={() => setChildConsent((v) => !v)}>
           <Ionicons
             name={childConsent ? 'checkbox' : 'square-outline'}

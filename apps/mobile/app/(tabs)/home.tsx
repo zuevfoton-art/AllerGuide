@@ -202,6 +202,21 @@ export default function HomeScreen() {
         </GlassCard>
       ) : null}
 
+      <View style={styles.quickRow}>
+        <Button
+          label={t('tabs.scanner')}
+          variant="secondary"
+          style={styles.quickBtn}
+          onPress={() => router.push('/(tabs)/scanner')}
+        />
+        <Button
+          label={t('tabs.more')}
+          variant="secondary"
+          style={styles.quickBtn}
+          onPress={() => router.push('/(tabs)/more')}
+        />
+      </View>
+
       <Disclaimer>{t('home.disclaimer')}</Disclaimer>
     </Screen>
   );
@@ -293,5 +308,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
+    quickRow: { flexDirection: 'row', gap: 8 },
+    quickBtn: { flex: 1 },
   });
 }
