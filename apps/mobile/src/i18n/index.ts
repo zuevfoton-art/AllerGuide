@@ -1,4 +1,4 @@
-import { createInstance } from 'i18next';
+import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import ru from './locales/ru';
 import en from './locales/en';
@@ -7,8 +7,6 @@ const resources = {
   ru: { translation: ru },
   en: { translation: en },
 };
-
-const i18next = createInstance();
 
 export function initI18n() {
   if (i18next.isInitialized) return i18next;
