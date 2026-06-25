@@ -1,5 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { encodeDiaryDetails } from '@allerguide/core';
+import {
+  buildPollenSummaryFromFactors,
+  getTriggerPrefillAnswers,
+} from './diary-context-service';
 
 vi.mock('@/src/db/init', () => ({
   getDb: () => ({
@@ -12,11 +16,6 @@ vi.mock('@/src/db/init', () => ({
 vi.mock('@/src/services/scan-history-service', () => ({
   listScanHistory: () => [],
 }));
-
-import {
-  buildPollenSummaryFromFactors,
-  getTriggerPrefillAnswers,
-} from './diary-context-service';
 
 describe('diary-context-service', () => {
   it('builds pollen summary from wellness factors', () => {

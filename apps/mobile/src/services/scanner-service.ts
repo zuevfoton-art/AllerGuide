@@ -1,8 +1,10 @@
-import { runSmartScan, type ScanMode, type ScanResult } from '@allerguide/ai';
 import {
+  runSmartScan,
   buildOcrScanProductName,
   prepareScanTextFromOcr,
   simulateOcrFromCapture,
+  type ScanMode,
+  type ScanResult,
   type OcrExtractionResult,
 } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';

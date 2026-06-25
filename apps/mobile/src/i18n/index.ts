@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import ru from './locales/ru';
 import en from './locales/en';
@@ -8,10 +8,12 @@ const resources = {
   en: { translation: en },
 };
 
-export function initI18n() {
-  if (i18n.isInitialized) return i18n;
+const i18next = createInstance();
 
-  void i18n.use(initReactI18next).init({
+export function initI18n() {
+  if (i18next.isInitialized) return i18next;
+
+  void i18next.use(initReactI18next).init({
     resources,
     lng: 'ru',
     fallbackLng: 'ru',
@@ -19,7 +21,7 @@ export function initI18n() {
     compatibilityJSON: 'v4',
   });
 
-  return i18n;
+  return i18next;
 }
 
-export default i18n;
+export default i18next;

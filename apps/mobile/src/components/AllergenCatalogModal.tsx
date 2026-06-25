@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  ALLERGEN_CATEGORY_LABELS,
   getAllAllergens,
   getCrossReactionsFor,
   type AllergenCategory,
@@ -68,7 +67,7 @@ export function AllergenCatalogModal({
       label: localizeAllergenCategory(category, localeContent),
       items: filtered.filter((item) => item.category === category),
     })).filter((section) => section.items.length > 0);
-  }, [filtered]);
+  }, [filtered, localeContent]);
 
   const toggle = (id: string) => {
     setDraft((prev) =>

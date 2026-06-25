@@ -65,7 +65,7 @@ export default function HomeScreen() {
         { label: t('home.food'), icon: 'restaurant', route: '/(tabs)/diary', sub: t('home.foodSub') },
         { label: t('home.medicine'), icon: 'medkit', route: '/(tabs)/diary', sub: t('home.medicineSub') },
       ] as const,
-    [t, locale],
+    [t],
   );
 
   const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;

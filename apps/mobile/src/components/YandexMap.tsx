@@ -14,7 +14,6 @@ export function YandexMap({ url, height = 220 }: YandexMapProps) {
   if (Platform.OS === 'web') {
     return (
       <View style={styles.wrap}>
-        {/* eslint-disable-next-line react/no-unknown-property */}
         <iframe
           src={url}
           title="Yandex Map"

@@ -15,7 +15,6 @@ const BG = '#F4F6F9';
 
 function brandIconSvg(size) {
   const rx = Math.round(size * 0.22);
-  const innerRx = size < 48 ? 8 : Math.round(size * 0.22);
   const shieldStroke = size < 48 ? 0 : 2.5;
   const crossStroke = size < 48 ? Math.max(4, size * 0.12) : 3;
   const showShield = size >= 24;

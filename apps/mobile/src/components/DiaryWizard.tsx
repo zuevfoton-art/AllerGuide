@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  DIARY_SECTIONS,
   computeScaleScore,
   encodeDiaryDetails,
   enrichScaleAnswers,

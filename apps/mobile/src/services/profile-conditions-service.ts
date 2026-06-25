@@ -1,10 +1,11 @@
 import {
   parseConditionIds,
-  type AllergyConditionId,
+  parseAllergies,
   resolveProfileConditions,
+  type AllergyConditionId,
+  type Profile,
 } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
-import { parseAllergies, type Profile } from '@allerguide/core';
 
 function conditionsKey(profileId: number) {
   return `profileConditions:${profileId}`;

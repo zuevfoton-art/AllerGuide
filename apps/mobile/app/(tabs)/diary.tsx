@@ -133,7 +133,7 @@ export default function DiaryScreen() {
     if (!activeProfileId) return false;
     const passport = getAllergyPassport(activeProfileId);
     return profileEnablesDrugFocus(profileConditions, passport.drugIntolerances);
-  }, [profileConditions, activeProfileId, list]);
+  }, [profileConditions, activeProfileId]);
   const insectFocusEnabled = useMemo(
     () =>
       activeProfile
@@ -143,15 +143,15 @@ export default function DiaryScreen() {
   );
   const foodDrugRegistry = useMemo(
     () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
-    [activeProfileId, list],
+    [activeProfileId],
   );
   const drugIntolerances = useMemo(() => {
     if (!activeProfileId) return [];
     return getAllergyPassport(activeProfileId).drugIntolerances;
-  }, [activeProfileId, list]);
+  }, [activeProfileId]);
   const asitCourse = useMemo(
     () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
-    [activeProfileId, list],
+    [activeProfileId],
   );
   const actPromptDue = useMemo(
     () => isActPromptDue(list, profileConditions),
@@ -159,7 +159,7 @@ export default function DiaryScreen() {
   );
   const insectActionPlan = useMemo(
     () => (activeProfileId ? getInsectActionPlan(activeProfileId) : null),
-    [activeProfileId, list],
+    [activeProfileId],
   );
 
   const openSection = async (sectionType: string) => {

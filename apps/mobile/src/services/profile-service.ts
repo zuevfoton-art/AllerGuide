@@ -9,16 +9,17 @@ import {
   upsertLocalProfile,
 } from '@/src/services/backend-api';
 import { trackEvent } from '@/src/services/analytics-service';
-import type { Profile, ProfileInput, ProfileType } from '@allerguide/core';
 import {
   dedupeAllergenIds,
   migrateProfileAllergiesJson,
   normalizeAllergyConfirmations,
-  normalizeProfileAllergenIds,
   parseAllergyConfirmations,
   serializeAllergyConfirmations,
   serializeProfileAllergenIds,
   validateProfileInput,
+  type Profile,
+  type ProfileInput,
+  type ProfileType,
   type ProfileValidationErrorCode,
 } from '@allerguide/core';
 

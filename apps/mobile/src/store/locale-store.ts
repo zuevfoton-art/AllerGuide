@@ -6,7 +6,6 @@ import {
   translateAuthError,
   translateDiaryValidationError,
   translateProfileError,
-  translateSelectProfileError,
   translateSosContactError,
   type TranslationKey,
 } from '@/src/i18n/translate';
