@@ -11,7 +11,7 @@ import { GlassCard } from '@/src/components/GlassCard';
 import { Skeleton } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
-import { BrandTabIcon } from '@/src/components/brand/BrandTabIcon';
+import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
@@ -202,20 +202,22 @@ export default function HomeScreen() {
         </GlassCard>
       ) : null}
 
-      <View style={styles.quickRow}>
-        <Button
-          label={t('tabs.scanner')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/scanner')}
-        />
-        <Button
-          label={t('tabs.more')}
-          variant="secondary"
-          style={styles.quickBtn}
-          onPress={() => router.push('/(tabs)/more')}
-        />
-      </View>
+      <GlassCard padded={false}>
+        <Pressable
+          style={styles.expertRow}
+          onPress={() => router.push('/expert')}
+          accessibilityRole="button"
+          accessibilityLabel={t('home.expert')}>
+          <View style={styles.expertIcon}>
+            <BrandFeatureIcon name="expert" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.expertBody}>
+            <Text style={ui.feedTitle}>{t('home.expert')}</Text>
+            <Text style={ui.feedSub}>{t('more.expertDesc')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+      </GlassCard>
 
       <Disclaimer showMdrFootnote>{t('home.disclaimer')}</Disclaimer>
     </Screen>
@@ -308,7 +310,21 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
-    quickRow: { flexDirection: 'row', gap: 8 },
-    quickBtn: { flex: 1 },
+    expertRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    expertIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 8,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    expertBody: { flex: 1, gap: 2 },
   });
 }

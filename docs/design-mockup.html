@@ -595,7 +595,7 @@
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: UX этапы A–D (вкладка «Ещё», модальный дневник, свайп intro), wellness v2, sticky SOS, профиль в шапке.</p>
+      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: вкладка «Карта», эксперт на главной, маркетплейс в дневнике.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -607,7 +607,7 @@
         <button class="btn-nav" data-screen="onboarding-intro">Intro</button>
         <button class="btn-nav" data-screen="onboarding">Онбординг</button>
         <button class="btn-nav active" data-screen="home">Главная</button>
-        <button class="btn-nav" data-screen="more">Ещё</button>
+        <button class="btn-nav" data-screen="map">Карта</button>
         <button class="btn-nav" data-screen="diary">Дневник</button>
         <button class="btn-nav" data-screen="diary-editor">Дневник · модал</button>
         <button class="btn-nav" data-screen="doctor-report">Отчёт</button>
@@ -628,10 +628,9 @@
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Радиусы</strong> — кнопки/input 8px · карточки 12px · бейджи 6px<br />
         <strong>Логотип</strong> — shield + cross на <code>#2563EB</code>, wordmark Aller/Guide<br />
-        <strong>Tab bar</strong> — 5 вкладок: Главная · Дневник · Сканер · Ещё · SOS<br />
-        <strong>Ещё</strong> — хаб: Маркет · Карта · Эксперт · Настройки (скрытые маршруты)<br />
-        <strong>Главная</strong> — wellness v2 + дневник + quick: Сканер / Ещё<br />
-        <strong>Дневник</strong> — модальный редактор (pageSheet), без кнопки «Обновить»<br />
+        <strong>Tab bar</strong> — 5 вкладок: Главная · Дневник · Сканер · Карта · SOS<br />
+        <strong>Главная</strong> — wellness v2 + дневник + раздел «Эксперт»<br />
+        <strong>Дневник</strong> — маркетплейс (embedded) + модальный редактор<br />
         <strong>Intro</strong> — горизонтальный свайп (5 слайдов)<br />
         <strong>SOS</strong> — закреплённая панель 103 + контакт<br />
         <strong>v2</strong> — паспорт SOS · шкалы · отчёт · OFF+cache · textMuted #5E6B7C
@@ -824,50 +823,12 @@
             <div class="rec-text" id="rec-text">—</div>
           </div>
 
-          <div class="btn-row">
-            <button class="btn btn-secondary">Сканер</button>
-            <button class="btn btn-secondary">Ещё</button>
-          </div>
-          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
-        </section>
-
-        <!-- MORE -->
-        <section class="screen" id="screen-more">
-          <div class="doc-header">
-            <div class="doc-label">AllerGuide · Разделы</div>
-            <div class="doc-title">Ещё</div>
-            <div class="doc-meta">Маркет, карта, эксперт и настройки</div>
-          </div>
           <div class="card flush">
-            <div class="feed-row">
-              <div class="more-hub-icon" style="background:var(--success-light);color:var(--success)">🛒</div>
-              <div class="feed-body">
-                <div class="feed-title">Маркет</div>
-                <div class="feed-sub">Товары для аллергиков по вашему профилю</div>
-              </div>
-              <span style="color:var(--text-muted)">›</span>
-            </div>
-            <div class="feed-row">
-              <div class="more-hub-icon" style="background:var(--surface-muted);color:var(--head)">🗺</div>
-              <div class="feed-body">
-                <div class="feed-title">Карта</div>
-                <div class="feed-sub">Рестораны, пыление и клиники АДАИР</div>
-              </div>
-              <span style="color:var(--text-muted)">›</span>
-            </div>
             <div class="feed-row">
               <div class="more-hub-icon" style="background:var(--accent-light);color:var(--accent)">⭐</div>
               <div class="feed-body">
                 <div class="feed-title">Эксперт</div>
                 <div class="feed-sub">Материалы и рекомендации АДАИР</div>
-              </div>
-              <span style="color:var(--text-muted)">›</span>
-            </div>
-            <div class="feed-row">
-              <div class="more-hub-icon" style="background:var(--surface-muted);color:var(--text-secondary)">⚙</div>
-              <div class="feed-body">
-                <div class="feed-title">Настройки</div>
-                <div class="feed-sub">SOS, синхронизация и напоминания</div>
               </div>
               <span style="color:var(--text-muted)">›</span>
             </div>
@@ -940,6 +901,25 @@
           <div class="action-row">
             <button class="btn btn-secondary">Отчёт для врача</button>
           </div>
+
+          <div class="card flush">
+            <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <span class="card-title">Маркетплейс</span>
+                <div class="feed-sub" style="margin-top:2px">Товары по вашему профилю аллергий</div>
+              </div>
+              <span class="section-link">Больше</span>
+            </div>
+            <div class="market-banner">⭐ Подборка на основе профиля аллергий</div>
+            <div class="market-row">
+              <div class="market-thumb">💨</div>
+              <div class="feed-body"><div class="feed-title">Очиститель HEPA</div><div class="feed-sub">Снижает концентрацию аллергенов</div></div>
+            </div>
+            <div class="market-footer">
+              <button class="btn btn-secondary btn-sm" style="width:100%">Открыть маркетплейс</button>
+            </div>
+          </div>
+
           <div class="section-label">История</div>
           <div class="card flush">
             <div class="feed-row">
@@ -1342,7 +1322,7 @@
           <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Главная</div>
           <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Дневник</div>
           <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Сканер</div>
-          <div class="tab" data-screen="more"><span class="tab-icon">⊞</span>Ещё</div>
+          <div class="tab" data-screen="map"><span class="tab-icon">🗺</span>Карта</div>
           <div class="tab sos" data-screen="sos"><span class="tab-icon">🚑</span>SOS</div>
         </nav>
       </div>
@@ -1351,8 +1331,8 @@
 
   <script>
     const phone = document.getElementById('phone');
-    const tabScreens = new Set(['home', 'diary', 'scanner', 'more', 'sos']);
-    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert', 'market', 'map', 'diary-editor']);
+    const tabScreens = new Set(['home', 'diary', 'scanner', 'map', 'sos']);
+    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert', 'market', 'diary-editor']);
 
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));

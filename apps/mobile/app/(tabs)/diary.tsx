@@ -60,6 +60,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { MarketplaceModule } from '@/src/modules/marketplace';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -546,6 +547,8 @@ export default function DiaryScreen() {
       />
 
       <DiaryInsightsCard entries={list} />
+
+      <MarketplaceModule variant="embedded" />
 
       {list.length === 0 ? (
         <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
