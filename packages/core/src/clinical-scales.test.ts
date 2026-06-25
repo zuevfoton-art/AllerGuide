@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildScaleInitialAnswers,
   computeScaleScore,
+  enrichScaleAnswers,
   formatScaleSummary,
   getClinicalScaleSection,
   validateClinicalScale,
@@ -55,5 +56,32 @@ describe('clinical scales', () => {
     });
     expect(summary).toContain('UAS7');
     expect(summary).toContain('баллов');
+  });
+
+  it('scores SCORAD-lite and UAS7', () => {
+    const scorad = computeScaleScore('scorad-lite', {
+      scoradExtent: '20',
+      scoradItch: '5–6',
+      scoradSleep: '1 — лёгкое',
+    });
+    expect(scorad?.total).toBeGreaterThan(0);
+
+    const uas = computeScaleScore('uas7', {
+      uasWheals: '>12',
+      uasItch: '3 — сильный',
+    });
+    expect(uas?.level).toBe('severe');
+  });
+
+  it('enriches scale answers with score metadata for diary storage', () => {
+    const enriched = enrichScaleAnswers({
+      ...buildScaleInitialAnswers('aria-lite'),
+      ariaCongestion: '1',
+      ariaRhinorrhea: '1',
+      ariaSneezing: '1',
+      ariaItching: '0 — нет',
+    });
+    expect(enriched.scaleScore).toBe('3');
+    expect(enriched.scaleInterpretation).toBeTruthy();
   });
 });

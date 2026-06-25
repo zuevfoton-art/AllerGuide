@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { encodeDiaryDetails } from './diary';
-import { buildTriggerContext, buildTriggerPrefill, extractTodayMedicines, formatTriggerContextReport } from './diary-triggers';
+import {
+  buildTriggerContext,
+  buildTriggerPrefill,
+  extractTodayMedicines,
+  formatTriggerContextLine,
+  formatTriggerContextReport,
+} from './diary-triggers';
 import type { DiaryEntry } from './types';
 
 describe('diary triggers', () => {
@@ -52,6 +58,15 @@ describe('diary triggers', () => {
     expect(prefill.recentScan).toContain('шоколад');
     expect(prefill.todayMeds).toContain('Лоратадин');
     expect(prefill.context).toContain('Пыльца');
+  });
+
+  it('formats trigger context as a single line', () => {
+    const line = formatTriggerContextLine({
+      pollenSummary: 'Берёза: высокий',
+      todayMedsSummary: 'Лоратадин',
+    });
+    expect(line).toContain('Пыльца');
+    expect(line).toContain('Лоратадин');
   });
 
   it('formats trigger context report only for entries with auto-context', () => {
