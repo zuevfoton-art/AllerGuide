@@ -1,5 +1,5 @@
 import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView } from 'react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -10,6 +10,7 @@ import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
+import { ErrorState } from '@/src/components/ErrorState';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -48,9 +49,12 @@ export default function ScannerScreen() {
   const [safeList, setSafeList] = useState<SafeProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [ocrHint, setOcrHint] = useState<string | null>(null);
+  const [scanError, setScanError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const lastScanRef = useRef<(() => void) | null>(null);
 
   const displayResult = useMemo(
     () => (result ? localizeScanResult(result, localeContent) : null),
@@ -85,8 +89,10 @@ export default function ScannerScreen() {
   );
 
   const runCheck = async (text: string, barcodeMode = false) => {
+    lastScanRef.current = () => void runCheck(text, barcodeMode);
     setLoading(true);
     setOcrHint(null);
+    setScanError(false);
     try {
       if (barcodeMode && mode === 'product') {
         const scanResult = await scanBarcode({ barcode: text, profile });
@@ -108,6 +114,9 @@ export default function ScannerScreen() {
       }
 
       setResult(await scanText({ mode, text, profile }));
+    } catch {
+      setResult(null);
+      setScanError(true);
     } finally {
       setLoading(false);
       refreshHistory();
@@ -115,8 +124,10 @@ export default function ScannerScreen() {
   };
 
   const runOcrCapture = async (manualText?: string) => {
+    lastScanRef.current = () => void runOcrCapture(manualText);
     setLoading(true);
     setOcrHint(null);
+    setScanError(false);
     try {
       const extraction = extractOcrText(mode, manualText);
       setInput(extraction.text);
@@ -129,11 +140,23 @@ export default function ScannerScreen() {
       if (extraction.warnings.length) {
         setOcrHint(extraction.warnings.join(' '));
       }
+    } catch {
+      setResult(null);
+      setScanError(true);
     } finally {
       setLoading(false);
       refreshHistory();
     }
   };
+
+  const refresh = useCallback(() => {
+    setRefreshing(true);
+    try {
+      refreshHistory();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshHistory]);
 
   const pickMenuImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -158,6 +181,7 @@ export default function ScannerScreen() {
     setMode(next);
     setResult(null);
     setOcrHint(null);
+    setScanError(false);
   };
 
   const openCamera = async () => {
@@ -259,7 +283,9 @@ export default function ScannerScreen() {
   }
 
   return (
-    <Screen>
+    <Screen
+      onRefresh={activeProfileId ? () => refresh() : undefined}
+      refreshing={refreshing}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={ui.docLabel}>AllerGuide · {t('scanner.eyebrow')}</Text>
@@ -358,6 +384,13 @@ export default function ScannerScreen() {
       />
       {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
       {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
+
+      {scanError && !loading ? (
+        <ErrorState
+          message={t('scanner.checkFailed')}
+          onRetry={() => lastScanRef.current?.()}
+        />
+      ) : null}
 
       {displayResult ? (
         <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>

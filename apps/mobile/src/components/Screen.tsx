@@ -1,9 +1,16 @@
 import { PropsWithChildren, useMemo } from 'react';
-import { Platform, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, RefreshControl, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
-export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?: boolean }>) {
+type ScreenProps = {
+  scroll?: boolean;
+  /** Enables pull-to-refresh when provided (scroll mode only). */
+  onRefresh?: () => void;
+  refreshing?: boolean;
+};
+
+export function Screen({ children, scroll = true, onRefresh, refreshing = false }: PropsWithChildren<ScreenProps>) {
   const { colors } = useTheme();
   const layout = useResponsiveLayout();
   const styles = useMemo(
@@ -44,7 +51,17 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}>
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.accent}
+              colors={[colors.accent]}
+            />
+          ) : undefined
+        }>
         {body}
       </ScrollView>
     );

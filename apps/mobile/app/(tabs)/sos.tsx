@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,6 +48,7 @@ export default function SosScreen() {
   const [anaphylaxisOpen, setAnaphylaxisOpen] = useState(false);
   const [passport, setPassport] = useState(() => getAllergyPassport(profile?.id ?? 0));
   const [sharing, setSharing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const refresh = useCallback(() => {
     setEmergencyNumberState(getEmergencyNumber());
@@ -61,6 +63,15 @@ export default function SosScreen() {
     setContacts(listEmergencyContacts(profile.id));
     setPassport(getAllergyPassport(profile.id));
   }, [profile]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    try {
+      refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refresh]);
 
   useFocusEffect(
     useCallback(() => {
@@ -111,7 +122,7 @@ export default function SosScreen() {
   };
 
   return (
-    <Screen>
+    <Screen onRefresh={() => handleRefresh()} refreshing={refreshing}>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
           <Text style={ui.docLabel}>AllerGuide · {t('sos.eyebrow')}</Text>
@@ -285,9 +296,12 @@ export default function SosScreen() {
           )}
         </>
       ) : (
-        <GlassCard>
-          <Text style={styles.emptyText}>{t('sos.emptyProfile')}</Text>
-        </GlassCard>
+        <EmptyState
+          icon="person-add-outline"
+          title={t('sos.emptyProfile')}
+          actionLabel={t('common.createProfile')}
+          onAction={() => router.push('/profile-setup?mode=add')}
+        />
       )}
 
       {contacts.length > 0 ? (
@@ -472,13 +486,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.text,
       lineHeight: 20,
-    },
-    emptyText: {
-      fontFamily: fonts.sans,
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 20,
-      textAlign: 'center',
     },
     contactsHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     contactRow: {
