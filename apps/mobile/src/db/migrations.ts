@@ -1,7 +1,7 @@
 import type { DbLike } from './types';
 import { migrateProfileAllergiesJson, type Profile } from '@allerguide/core';
 
-export const CURRENT_SCHEMA_VERSION = 5;
+export const CURRENT_SCHEMA_VERSION = 6;
 
 const MIGRATIONS: Record<number, (db: DbLike) => void> = {
   1: (db) => {
@@ -61,6 +61,33 @@ const MIGRATIONS: Record<number, (db: DbLike) => void> = {
         allergen_tags TEXT NOT NULL DEFAULT '[]',
         source TEXT NOT NULL DEFAULT 'cache',
         fetched_at TEXT NOT NULL
+      );
+    `);
+  },
+  6: (db) => {
+    const barcodeColumns = db.getAllSync<{ name: string }>('PRAGMA table_info(barcode_cache)');
+    if (!barcodeColumns.some((column) => column.name === 'declared_allergen_ids')) {
+      db.execSync('ALTER TABLE barcode_cache ADD COLUMN declared_allergen_ids TEXT');
+    }
+    if (!barcodeColumns.some((column) => column.name === 'trace_allergen_ids')) {
+      db.execSync('ALTER TABLE barcode_cache ADD COLUMN trace_allergen_ids TEXT');
+    }
+
+    const catalogColumns = db.getAllSync<{ name: string }>('PRAGMA table_info(catalog_products)');
+    if (!catalogColumns.some((column) => column.name === 'trace_tags')) {
+      db.execSync("ALTER TABLE catalog_products ADD COLUMN trace_tags TEXT NOT NULL DEFAULT '[]'");
+    }
+
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS alias_feedback (
+        id TEXT PRIMARY KEY NOT NULL,
+        term TEXT NOT NULL,
+        suggested_allergen_id TEXT,
+        context TEXT,
+        profile_id INTEGER,
+        scan_input TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TEXT NOT NULL
       );
     `);
   },

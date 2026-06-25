@@ -44,6 +44,7 @@ export const products = catalogSchema.table(
     imageUrl: text('image_url').notNull().default(''),
     ingredients: text('ingredients').notNull().default(''),
     allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
+    traceTags: jsonb('trace_tags').$type<string[]>().notNull().default([]),
     source: varchar('source', { length: 32 }).notNull().default('manual'),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },

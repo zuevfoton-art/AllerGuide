@@ -387,6 +387,7 @@ const deContent: LocaleContent = {
       low: 'Keine offensichtliche Überschneidung mit Profilallergenen gefunden{productSuffix}, dies schließt jedoch keine individuelle Reaktion aus.',
     },
     crossSuffix: '(Kreuzreaktion)',
+    traceSuffix: '(Spuren / may contain)',
     productNotFound:
       'Produkt nicht in Open Food Facts gefunden. Die Prüfung wurde unter Verwendung des Barcodes als Text durchgeführt.',
     restaurantMenu: 'Speisekarte',

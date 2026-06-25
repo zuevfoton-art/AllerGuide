@@ -9,6 +9,7 @@ import { registerScanRoutes } from './routes/scan';
 import { registerMobileAuthRoutes } from './routes/mobile-auth';
 import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
+import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import {
   buildCorsOptions,
   createAuthRateLimiter,
@@ -39,6 +40,7 @@ export async function createApp(
   registerSyncRoutes(app);
   registerScanRoutes(app);
   registerCatalogRoutes(app);
+  registerAliasFeedbackRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);

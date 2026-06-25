@@ -1,8 +1,15 @@
+import { mapExternalAllergenIds } from '@allerguide/core';
+
 export interface OpenFoodFactsProduct {
   name: string;
   ingredients: string;
   barcode: string;
+  allergenTags: string[];
+  traceTags: string[];
 }
+
+const PRODUCT_FIELDS =
+  'code,product_name,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags';
 
 export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFactsProduct | null> {
   const normalized = barcode.replace(/\D/g, '');
@@ -10,7 +17,7 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
 
   try {
     const response = await fetch(
-      `https://world.openfoodfacts.org/api/v2/product/${normalized}.json?fields=product_name,ingredients_text,ingredients_text_ru,code`,
+      `https://world.openfoodfacts.org/api/v2/product/${normalized}.json?fields=${PRODUCT_FIELDS}`,
     );
 
     if (!response.ok) return null;
@@ -22,6 +29,8 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
         ingredients_text?: string;
         ingredients_text_ru?: string;
         code?: string;
+        allergens_tags?: string[];
+        traces_tags?: string[];
       };
     };
 
@@ -38,6 +47,8 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
       name: data.product.product_name?.trim() || `Продукт ${normalized}`,
       ingredients: ingredients || data.product.product_name || '',
       barcode: data.product.code || normalized,
+      allergenTags: mapExternalAllergenIds(data.product.allergens_tags ?? []),
+      traceTags: mapExternalAllergenIds(data.product.traces_tags ?? []),
     };
   } catch {
     return null;

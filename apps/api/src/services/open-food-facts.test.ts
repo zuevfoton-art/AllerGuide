@@ -36,8 +36,9 @@ describe('open food facts service', () => {
     expect(product!.name).toBe('Nutella');
     expect(product!.brand).toBe('Ferrero');
     expect(product!.imageUrl).toContain('nutella.jpg');
-    // declared allergens + "may contain" traces, mapped to canonical ids
-    expect(product!.allergenTags).toEqual(['milk', 'tree-nuts', 'soy']);
+    // declared allergens and traces are kept separate
+    expect(product!.allergenTags).toEqual(['milk', 'tree-nuts']);
+    expect(product!.traceTags).toEqual(['soy']);
   });
 
   it('sends a descriptive User-Agent header (OFF requirement)', async () => {

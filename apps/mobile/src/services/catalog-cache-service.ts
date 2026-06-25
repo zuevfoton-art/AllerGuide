@@ -96,10 +96,11 @@ export function getCachedCatalogProduct(barcode: string): CachedCatalogProduct |
     image_url: string;
     ingredients: string;
     allergen_tags: string;
+    trace_tags: string | null;
     source: string;
     fetched_at: string;
   }>(
-    `SELECT barcode, name, brand, image_url, ingredients, allergen_tags, source, fetched_at
+    `SELECT barcode, name, brand, image_url, ingredients, allergen_tags, trace_tags, source, fetched_at
      FROM catalog_products WHERE barcode = ?`,
     [normalized],
   );
@@ -107,10 +108,16 @@ export function getCachedCatalogProduct(barcode: string): CachedCatalogProduct |
   if (!row || !isCatalogCacheFresh(row.fetched_at)) return null;
 
   let allergenTags: string[] = [];
+  let traceTags: string[] = [];
   try {
     allergenTags = JSON.parse(row.allergen_tags) as string[];
   } catch {
     allergenTags = [];
+  }
+  try {
+    traceTags = JSON.parse(row.trace_tags ?? '[]') as string[];
+  } catch {
+    traceTags = [];
   }
 
   return {
@@ -120,6 +127,7 @@ export function getCachedCatalogProduct(barcode: string): CachedCatalogProduct |
     imageUrl: row.image_url,
     ingredients: row.ingredients,
     allergenTags,
+    traceTags,
     source: row.source,
     fetchedAt: row.fetched_at,
   };
@@ -136,6 +144,7 @@ export function saveCachedCatalogProduct(
     imageUrl: product.imageUrl,
     ingredients: product.ingredients,
     allergenTags: product.allergenTags,
+    traceTags: product.traceTags,
     source,
   });
 
@@ -148,8 +157,8 @@ export function saveCachedCatalogProduct(
 
   getDb().runSync(
     `INSERT OR REPLACE INTO catalog_products
-      (barcode, name, brand, image_url, ingredients, allergen_tags, source, fetched_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (barcode, name, brand, image_url, ingredients, allergen_tags, trace_tags, source, fetched_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       cached.barcode,
       cached.name,
@@ -157,6 +166,7 @@ export function saveCachedCatalogProduct(
       cached.imageUrl,
       cached.ingredients,
       JSON.stringify(cached.allergenTags),
+      JSON.stringify(cached.traceTags),
       cached.source,
       cached.fetchedAt,
     ],
@@ -177,5 +187,6 @@ export function cachedCatalogProductToDto(product: CachedCatalogProduct): Catalo
     imageUrl: product.imageUrl,
     ingredients: product.ingredients,
     allergenTags: product.allergenTags,
+    traceTags: product.traceTags,
   };
 }

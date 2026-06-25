@@ -13,7 +13,7 @@
 | Индекс самочувствия | `packages/core/src/wellness.ts` + Open-Meteo | Эмпирические пороги; клинические шкалы не в score |
 | Профиль | `allergen-database.ts`, `AllergenPicker` | ~~Хранились RU-лейблы~~ → **A.1: canonical ids** |
 | Дневник | Structured wizard + `diary-stats` | Симптомы без SNOMED/ICD кодов |
-| Сканер | `@allerguide/ai` + cross-reactions | Keyword matching; traces не различаются |
+| Сканер | `@allerguide/ai` + cross-reactions | ~~Keyword matching; traces не различаются~~ → **D: structured risk v2** |
 | Справочники | OFF, food-allergy DB, EAACI-контент | Частично интегрированы |
 
 ---
@@ -171,13 +171,35 @@
 
 ### Phase D — Scanner v2
 
-| ID | Задача |
-|----|--------|
-| D.1 | Risk: direct / cross / traces / unknown |
-| D.2 | Catalog → OFF write-through priority |
-| D.3 | OAS medium vs true allergy high |
-| D.4 | «May contain» parsing |
-| D.5 | Feedback queue для aliases |
+| ID | Задача | Статус |
+|----|--------|--------|
+| D.1 | Risk: direct / cross / traces / unknown | ✅ Done |
+| D.2 | Catalog → OFF write-through priority | ✅ Done |
+| D.3 | OAS medium vs true allergy high | ✅ Done |
+| D.4 | «May contain» parsing | ✅ Done |
+| D.5 | Feedback queue для aliases | ✅ Done |
+
+**D.1 deliverables:**
+- `packages/core/src/scan-risk.ts` — `ScanMatchKind`, `computeScanRiskLevel`
+- `ScanResult.structuredMatches` + `traceMatches` in `@allerguide/ai`
+
+**D.2 deliverables:**
+- Catalog-first barcode lookup (`barcode-lookup-service.ts`)
+- Mobile OFF fetch with `allergenTags` + `traceTags`
+- `barcode_cache.declared_allergen_ids` / `trace_allergen_ids` (mobile v6)
+- `products.trace_tags` in catalog schema
+
+**D.3 deliverables:**
+- Direct food-allergy hit → `high`; OAS / pollen-food cross capped at `medium`
+- `runSmartScan` uses `parseProfileAllergenIds`
+
+**D.4 deliverables:**
+- `packages/core/src/may-contain-parser.ts` — RU/EN may-contain regex
+- API OFF: declared vs `traceTags` separated
+
+**D.5 deliverables:**
+- `packages/core/src/alias-feedback.ts` + mobile SQLite queue
+- `POST /api/alias-feedback` + «Сообщить о неточности» in scanner UI
 
 ### Phase E — Governance
 

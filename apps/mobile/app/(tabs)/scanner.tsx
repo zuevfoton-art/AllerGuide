@@ -27,6 +27,7 @@ import {
 } from '@/src/services/safe-products-service';
 import { BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 
 const UNDO_MS = 5000;
@@ -72,8 +73,7 @@ export default function ScannerScreen() {
     [result, localeContent],
   );
 
-  const isDanger =
-    displayResult != null && (displayResult.matches.length > 0 || (displayResult.crossMatches?.length ?? 0) > 0);
+  const isDanger = displayResult != null && displayResult.level !== 'low';
 
   const refreshHistory = useCallback(() => {
     if (!activeProfileId) {
@@ -478,6 +478,13 @@ export default function ScannerScreen() {
               </Text>
             </View>
           ) : null}
+          {(displayResult.traceMatches?.length ?? 0) > 0 ? (
+            <View style={styles.traceBadge}>
+              <Text style={styles.traceText}>
+                {t('scanner.traceMatches')} {displayResult.traceMatches!.join(', ')}
+              </Text>
+            </View>
+          ) : null}
           {displayResult.source ? (
             <Text style={styles.sourceMeta}>
               {t('scanner.source')}{' '}
@@ -491,6 +498,27 @@ export default function ScannerScreen() {
                       ? t('scanner.sourceOcr')
                       : t('scanner.sourceManual')}
             </Text>
+          ) : null}
+          {displayResult && activeProfileId ? (
+            <Pressable
+              style={styles.reportBtn}
+              onPress={() => {
+                const term =
+                  result?.unknownMatches?.[0] ??
+                  [...(result?.matches ?? []), ...(result?.crossMatches ?? [])][0] ??
+                  input.trim().slice(0, 80);
+                saveAliasFeedback({
+                  term,
+                  context: result?.productName ?? mode,
+                  profileId: activeProfileId,
+                  scanInput: input.trim(),
+                });
+                Alert.alert(t('scanner.reportIncorrect'), t('scanner.reportThanks'));
+                void hapticLight();
+              }}
+              accessibilityRole="button">
+              <Text style={styles.reportBtnText}>{t('scanner.reportIncorrect')}</Text>
+            </Pressable>
           ) : null}
         </View>
       ) : null}
@@ -740,6 +768,31 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.warningText,
       fontWeight: '600',
+    },
+    traceBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.surfaceMuted,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      borderRadius: 4,
+    },
+    traceText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      color: colors.textSecondary,
+      fontWeight: '600',
+    },
+    reportBtn: {
+      marginTop: 8,
+      alignSelf: 'flex-start',
+    },
+    reportBtnText: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      textDecorationLine: 'underline',
     },
     sourceMeta: {
       fontFamily: fonts.sans,

@@ -379,6 +379,7 @@ const enContent: LocaleContent = {
       'Выявлено множество совпадений': 'Multiple matches found',
       'Есть совпадения': 'Matches found',
       'Возможна перекрёстная реакция': 'Possible cross-reaction',
+      'Возможны следы аллергена': 'Possible allergen traces',
       'Нет явных совпадений': 'No obvious matches',
     },
     reasons: {
@@ -387,6 +388,7 @@ const enContent: LocaleContent = {
       low: 'No obvious overlap with profile allergens found{productSuffix}, but this does not rule out an individual reaction.',
     },
     crossSuffix: '(cross-reaction)',
+    traceSuffix: '(traces / may contain)',
     productNotFound:
       'Product not found in Open Food Facts. Check was performed using the barcode as text.',
     restaurantMenu: 'Restaurant menu',

@@ -387,6 +387,7 @@ const esContent: LocaleContent = {
       low: 'No se encontró coincidencia evidente con los alérgenos del perfil{productSuffix}, pero esto no descarta una reacción individual.',
     },
     crossSuffix: '(reacción cruzada)',
+    traceSuffix: '(trazas / may contain)',
     productNotFound:
       'Producto no encontrado en Open Food Facts. La verificación se realizó usando el código de barras como texto.',
     restaurantMenu: 'Carta del restaurante',
