@@ -27,6 +27,7 @@ export type LocaleMessages = {
     retry: string;
     loadFailed: string;
     createProfile: string;
+    undo: string;
     email: string;
     phone: string;
     password: string;
@@ -128,7 +129,17 @@ export type LocaleMessages = {
     scanner: string;
     market: string;
     map: string;
+    more: string;
     sos: string;
+  };
+  more: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    marketDesc: string;
+    mapDesc: string;
+    expertDesc: string;
+    settingsDesc: string;
   };
   home: {
     today: string;
@@ -240,6 +251,9 @@ export type LocaleMessages = {
     savedToSafe: string;
     safeListEmpty: string;
     removeSafe: string;
+    removeSafeTitle: string;
+    removeSafeMessage: string;
+    removedFromSafe: string;
   };
   market: {
     title: string;
