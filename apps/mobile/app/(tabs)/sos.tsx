@@ -150,7 +150,12 @@ export default function SosScreen() {
             ) : null}
           </GlassCard>
 
-          <Pressable style={styles.collapseHead} onPress={() => setPassportOpen((v) => !v)}>
+          <Pressable
+            style={styles.collapseHead}
+            onPress={() => setPassportOpen((v) => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: passportOpen }}
+            accessibilityLabel={t('sos.passportTitle')}>
             <Text style={styles.collapseTitle}>{t('sos.passportTitle')}</Text>
             <Ionicons
               name={passportOpen ? 'chevron-up' : 'chevron-down'}
@@ -223,7 +228,12 @@ export default function SosScreen() {
             </GlassCard>
           ) : null}
 
-          <Pressable style={styles.collapseHead} onPress={() => setAnaphylaxisOpen((v) => !v)}>
+          <Pressable
+            style={styles.collapseHead}
+            onPress={() => setAnaphylaxisOpen((v) => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: anaphylaxisOpen }}
+            accessibilityLabel={t('sos.anaphylaxisTitle')}>
             <Text style={styles.collapseTitle}>{t('sos.anaphylaxisTitle')}</Text>
             <Ionicons
               name={anaphylaxisOpen ? 'chevron-up' : 'chevron-down'}
@@ -296,7 +306,7 @@ export default function SosScreen() {
               <Button
                 label={t('sos.callContact')}
                 variant="primary"
-                size="sm"
+                accessibilityLabel={`${t('sos.callContact')}: ${contact.name}`}
                 onPress={() => callPhone(contact.phone)}
               />
             </View>
@@ -315,7 +325,11 @@ export default function SosScreen() {
         onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}
       />
 
-      <Pressable style={styles.settingsLink} onPress={() => router.push('/settings' as any)}>
+      <Pressable
+        style={styles.settingsLink}
+        onPress={() => router.push('/settings' as any)}
+        accessibilityRole="button"
+        accessibilityLabel={t('sos.settingsLink')}>
         <Text style={styles.settingsLinkText}>{t('sos.settingsLink')}</Text>
       </Pressable>
 

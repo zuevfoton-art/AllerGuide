@@ -413,7 +413,9 @@ export default function DiaryScreen() {
                   <Pressable
                     key={section.type}
                     style={styles.chip}
-                    onPress={() => void openSection(section.type)}>
+                    onPress={() => void openSection(section.type)}
+                    accessibilityRole="button"
+                    accessibilityLabel={section.title}>
                     <Ionicons
                       name={(TYPE_ICONS[section.type] ?? section.icon) as any}
                       size={14}
@@ -422,7 +424,11 @@ export default function DiaryScreen() {
                     <Text style={styles.chipText}>{section.title}</Text>
                   </Pressable>
                 ))}
-              <Pressable style={styles.chip} onPress={() => setScalePickerOpen(true)}>
+              <Pressable
+                style={styles.chip}
+                onPress={() => setScalePickerOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('diary.scale')}>
                 <Ionicons name="analytics" size={14} color={theme.colors.textSecondary} />
                 <Text style={styles.chipText}>{t('diary.scale')}</Text>
               </Pressable>
@@ -461,7 +467,9 @@ export default function DiaryScreen() {
                         onPress={() => {
                           setScalePickerOpen(false);
                           setEditor({ mode: 'scale', scaleId: scale.id });
-                        }}>
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={scale.shortLabel}>
                         <Text style={styles.chipText}>{scale.shortLabel}</Text>
                       </Pressable>
                     ))}
@@ -477,7 +485,9 @@ export default function DiaryScreen() {
                       onPress={() => {
                         setScalePickerOpen(false);
                         setEditor({ mode: 'scale', scaleId: scale.id });
-                      }}>
+                      }}
+                      accessibilityRole="button"
+                      accessibilityLabel={scale.shortLabel}>
                       <Text style={styles.chipText}>{scale.shortLabel}</Text>
                     </Pressable>
                   ))}
