@@ -41,8 +41,7 @@ export default function HomeScreen() {
     try {
       const entries = await getDiaryEntries(activeProfileId);
       const stats = computeDiaryStats(entries);
-      const allergies = profile.allergies.split(',').map((a) => a.trim()).filter(Boolean);
-      const snapshot = await fetchWellnessSnapshot(allergies, {
+      const snapshot = await fetchWellnessSnapshot(profile.allergies, {
         recentSymptoms: stats.recentSymptoms.length > 0,
         recentTriggers: stats.entriesLast7Days > 0 && stats.recentSymptoms.length > 0,
       }, locale);

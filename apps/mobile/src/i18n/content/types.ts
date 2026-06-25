@@ -37,6 +37,7 @@ export type LocaleContent = {
     recommendations: Record<string, { title: string; text: string }>;
     pollenLabels: Record<string, string>;
     locationDefault: string;
+    envUnavailableSummary: string;
   };
   scanner: {
     verdicts: Record<string, string>;

@@ -1,4 +1,5 @@
-import { findAllergenById, findAllergenByName } from '../allergen-database';
+import { findAllergenById } from '../allergen-database';
+import { resolveAllergenId } from '../profile-allergens';
 import { CROSS_REACTIONS_PHASE_1 } from './phase-1';
 import { CROSS_REACTIONS_PHASE_2 } from './phase-2';
 import {
@@ -52,16 +53,18 @@ export function getCrossReactionsFor(allergenId: string): CrossReactionMatch[] {
   return matches.sort((left, right) => compareCrossReactionRisk(left.risk, right.risk));
 }
 
-export function getCrossReactionsForSelection(selectedNames: string[]): CrossReactionMatch[] {
-  const selectedIds = selectedNames
-    .map((name) => findAllergenByName(name)?.id)
-    .filter((id): id is string => Boolean(id));
+export function getCrossReactionsForSelection(selected: string[]): CrossReactionMatch[] {
+  const selectedIds = [
+    ...new Set(selected.map((value) => resolveAllergenId(value)).filter((id): id is string => Boolean(id))),
+  ];
+  const selectedIdSet = new Set(selectedIds);
+  const selectedNames = new Set(selected.map((value) => value.trim()));
 
   const bestByAllergenId = new Map<string, CrossReactionMatch>();
 
   for (const id of selectedIds) {
     for (const match of getCrossReactionsFor(id)) {
-      if (selectedNames.includes(match.allergen.name)) continue;
+      if (selectedIdSet.has(match.allergen.id) || selectedNames.has(match.allergen.name)) continue;
 
       const existing = bestByAllergenId.get(match.allergen.id);
       if (!existing || compareCrossReactionRisk(match.risk, existing.risk) < 0) {

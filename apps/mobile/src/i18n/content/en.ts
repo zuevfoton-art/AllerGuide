@@ -341,6 +341,10 @@ const enContent: LocaleContent = {
         title: 'Stable day',
         text: 'Environmental indicators and diary entries do not suggest elevated risks.',
       },
+      envUnavailable: {
+        title: 'Environment data unavailable',
+        text: 'Could not load pollen and air quality. The index reflects diary entries only.',
+      },
     },
     pollenLabels: {
       birch_pollen: 'Birch',
@@ -348,6 +352,8 @@ const enContent: LocaleContent = {
       ragweed_pollen: 'Ragweed',
     },
     locationDefault: 'Moscow',
+    envUnavailableSummary:
+      'Open-Meteo data is unavailable. The index uses diary data only; environmental factors are not included.',
   },
   scanner: {
     verdicts: {

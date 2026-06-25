@@ -1,7 +1,9 @@
 import {
   ALLERGEN_KEYWORDS,
   buildAllergenKeywordsMap,
+  findAllergenById,
   getCrossReactionsForSelection,
+  parseProfileAllergenIds,
   type CrossReactionMatch,
   type Profile,
   type RiskLevel,
@@ -22,31 +24,33 @@ export interface ScanResult {
 
 function parseProfileAllergens(profile?: Pick<Profile, 'allergies'> | null): string[] {
   if (!profile?.allergies) return [];
-  try {
-    return JSON.parse(profile.allergies) as string[];
-  } catch {
-    return [];
-  }
+  return parseProfileAllergenIds(profile.allergies);
 }
 
-function getKeywords(allergen: string, keywordMap: Record<string, string[]>): string[] {
-  const normalized = allergen.toLowerCase().trim();
-  return keywordMap[normalized] ?? ALLERGEN_KEYWORDS[normalized] ?? [normalized.split('/')[0]?.trim() ?? normalized];
+function getKeywords(allergenId: string, keywordMap: Record<string, string[]>): string[] {
+  const record = findAllergenById(allergenId);
+  if (record) return record.keywords;
+  const normalized = allergenId.toLowerCase().trim();
+  return keywordMap[normalized] ?? ALLERGEN_KEYWORDS[normalized] ?? [normalized];
 }
 
-function findDirectMatches(allergens: string[], text: string): string[] {
+function findDirectMatches(allergenIds: string[], text: string): string[] {
   const normalizedText = text.toLowerCase();
   const keywordMap = buildAllergenKeywordsMap();
 
-  return allergens.filter((allergen) =>
-    getKeywords(allergen, keywordMap).some((keyword) => normalizedText.includes(keyword)),
-  );
+  return allergenIds
+    .filter((allergenId) =>
+      getKeywords(allergenId, keywordMap).some((keyword) =>
+        normalizedText.includes(keyword.toLowerCase()),
+      ),
+    )
+    .map((id) => findAllergenById(id)?.name ?? id);
 }
 
-function findMatchedCrossReactions(allergens: string[], text: string): CrossReactionMatch[] {
+function findMatchedCrossReactions(allergenIds: string[], text: string): CrossReactionMatch[] {
   const normalizedText = text.toLowerCase();
 
-  return getCrossReactionsForSelection(allergens).filter((item) =>
+  return getCrossReactionsForSelection(allergenIds).filter((item) =>
     item.allergen.keywords.some((keyword) => normalizedText.includes(keyword.toLowerCase())),
   );
 }

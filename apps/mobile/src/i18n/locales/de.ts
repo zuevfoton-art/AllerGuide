@@ -587,6 +587,7 @@ const de: LocaleMessages = {
     hasSymptoms: 'Symptome erfasst',
     calm: 'Ruhig',
     grains: 'Körner/m³',
+    envUnavailable: 'Keine Daten',
   },
   errors: {
     selectProfile: 'Profil auf dem Startbildschirm auswählen.',

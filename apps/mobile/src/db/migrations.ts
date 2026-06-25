@@ -1,6 +1,7 @@
 import type { DbLike } from './types';
+import { migrateProfileAllergiesJson, type Profile } from '@allerguide/core';
 
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;
 
 const MIGRATIONS: Record<number, (db: DbLike) => void> = {
   1: (db) => {
@@ -28,6 +29,15 @@ const MIGRATIONS: Record<number, (db: DbLike) => void> = {
         updated_at TEXT NOT NULL
       );
     `);
+  },
+  4: (db) => {
+    const profiles = db.getAllSync<Profile>('SELECT * FROM profiles');
+    for (const profile of profiles) {
+      const migrated = migrateProfileAllergiesJson(profile.allergies);
+      if (migrated !== profile.allergies) {
+        db.runSync('UPDATE profiles SET allergies = ? WHERE id = ?', [migrated, profile.id]);
+      }
+    }
   },
 };
 

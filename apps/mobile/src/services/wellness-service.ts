@@ -1,7 +1,11 @@
 import {
   aqiTier,
   computeWellnessScore,
+  getFoodAllergenLabels,
+  OPEN_METEO_POLLEN_ALLERGEN_IDS,
+  parseProfileAllergenIds,
   pollenTier,
+  profileHasPollenAllergen,
   wellnessStatusFromScore,
   type WellnessRecommendation,
 } from '@allerguide/core';
@@ -19,6 +23,8 @@ export type WellnessSnapshot = {
   recommendations: WellnessRecommendation[];
   updatedAt: string;
   locationLabel: string;
+  /** False when Open-Meteo air-quality data could not be loaded (no synthetic fallback). */
+  envDataAvailable: boolean;
 };
 
 const POLLEN_KEYS = ['birch_pollen', 'grass_pollen', 'ragweed_pollen'] as const;
@@ -29,18 +35,21 @@ function currentHourlyMax(hourly: Record<string, number[]>, key: string): number
   return Math.max(...values.filter((v) => v != null));
 }
 
-function profileMatchesPollen(allergies: string[], label: string): boolean {
-  const normalized = allergies.map((a) => a.toLowerCase());
-  const needle = label.toLowerCase();
-  return normalized.some((a) => a.includes(needle) || needle.includes(a));
-}
-
 function buildRecommendations(
   input: Parameters<typeof computeWellnessScore>[0],
   locale: AppLocale,
+  envDataAvailable: boolean,
 ): WellnessRecommendation[] {
   const content = getLocaleContent(locale);
   const recs: WellnessRecommendation[] = [];
+
+  if (!envDataAvailable) {
+    recs.push({
+      icon: '🌐',
+      title: content.wellness.recommendations.envUnavailable.title,
+      text: content.wellness.recommendations.envUnavailable.text,
+    });
+  }
 
   for (const match of input.pollenMatches) {
     const tier = pollenTier(match.value);
@@ -58,7 +67,7 @@ function buildRecommendations(
   }
 
   const aqi = aqiTier(input.europeanAqi);
-  if (aqi.level !== 'low') {
+  if (envDataAvailable && aqi.level !== 'low') {
     const tierLabel = (content.wellness.aqiTier[aqi.level] ?? aqi.label).toLowerCase();
     recs.push({
       icon: '💨',
@@ -97,7 +106,7 @@ function buildRecommendations(
 }
 
 export async function fetchWellnessSnapshot(
-  allergies: string[],
+  profileAllergiesJson: string,
   diaryFlags: { recentSymptoms: boolean; recentTriggers: boolean },
   locale: AppLocale = 'ru',
   location?: { lat: number; lon: number; label: string },
@@ -110,6 +119,8 @@ export async function fetchWellnessSnapshot(
     label: content.wellness.locationDefault,
   };
 
+  const profileAllergenIds = parseProfileAllergenIds(profileAllergiesJson);
+
   const url =
     `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLocation.lat}` +
     `&longitude=${resolvedLocation.lon}&timezone=Europe%2FMoscow&forecast_days=1` +
@@ -117,43 +128,36 @@ export async function fetchWellnessSnapshot(
 
   let europeanAqi: number | null = null;
   let pm25: number | null = null;
+  let envDataAvailable = false;
   const pollenMatches: { label: string; value: number; profileRelevant: boolean }[] = [];
 
   try {
     const res = await fetch(url);
+    if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
     const data = await res.json();
     europeanAqi = data.current?.european_aqi ?? null;
     pm25 = data.current?.pm2_5 ?? null;
+    envDataAvailable = true;
     for (const key of POLLEN_KEYS) {
       const label = content.wellness.pollenLabels[key];
+      const pollenAllergenId = OPEN_METEO_POLLEN_ALLERGEN_IDS[key];
       const value = currentHourlyMax(data.hourly ?? {}, key);
       pollenMatches.push({
         label,
         value,
-        profileRelevant: profileMatchesPollen(allergies, label),
+        profileRelevant: profileHasPollenAllergen(profileAllergenIds, pollenAllergenId),
       });
     }
   } catch {
-    const fallbackLabel = content.wellness.pollenLabels.birch_pollen;
-    pollenMatches.push({
-      label: fallbackLabel,
-      value: 42,
-      profileRelevant: profileMatchesPollen(allergies, fallbackLabel),
-    });
-    europeanAqi = 45;
-    pm25 = 18;
+    envDataAvailable = false;
   }
 
-  const foodAllergens = allergies.filter((a) =>
-    ['молоко', 'milk', 'арахис', 'peanut', 'яйц', 'egg', 'орех', 'nut', 'рыба', 'fish', 'соя', 'soy', 'пшени', 'wheat'].some(
-      (k) => a.toLowerCase().includes(k),
-    ),
-  );
+  const foodAllergens = getFoodAllergenLabels(profileAllergenIds);
 
   const scoreInput = {
-    pollenMatches,
-    europeanAqi,
-    pm25,
+    pollenMatches: envDataAvailable ? pollenMatches : [],
+    europeanAqi: envDataAvailable ? europeanAqi : null,
+    pm25: envDataAvailable ? pm25 : null,
     recentSymptoms: diaryFlags.recentSymptoms,
     recentTriggers: diaryFlags.recentTriggers,
     foodAllergens,
@@ -163,34 +167,50 @@ export async function fetchWellnessSnapshot(
   const status = wellnessStatusFromScore(score);
   const localizedStatus = content.wellness.status[status.level];
 
-  const factors = [
-    ...pollenMatches
-      .filter((m) => m.profileRelevant)
-      .map((m) => ({
-        label: `${messages.wellness.pollenLabel} · ${m.label}`,
-        value: `${m.value.toFixed(1)} ${messages.wellness.grains}`,
-        level: pollenTier(m.value).level,
-      })),
-    {
-      label: messages.wellness.airLabel,
-      value: pm25 != null ? `PM2.5 ${pm25.toFixed(1)} µg/m³` : '—',
-      level: aqiTier(europeanAqi).level,
-    },
-    {
-      label: messages.wellness.diaryLabel,
-      value: diaryFlags.recentSymptoms ? messages.wellness.hasSymptoms : messages.wellness.calm,
-      level: diaryFlags.recentSymptoms ? ('high' as const) : ('low' as const),
-    },
-  ];
+  const factors = envDataAvailable
+    ? [
+        ...pollenMatches
+          .filter((m) => m.profileRelevant)
+          .map((m) => ({
+            label: `${messages.wellness.pollenLabel} · ${m.label}`,
+            value: `${m.value.toFixed(1)} ${messages.wellness.grains}`,
+            level: pollenTier(m.value).level,
+          })),
+        {
+          label: messages.wellness.airLabel,
+          value: pm25 != null ? `PM2.5 ${pm25.toFixed(1)} µg/m³` : '—',
+          level: aqiTier(europeanAqi).level,
+        },
+        {
+          label: messages.wellness.diaryLabel,
+          value: diaryFlags.recentSymptoms ? messages.wellness.hasSymptoms : messages.wellness.calm,
+          level: diaryFlags.recentSymptoms ? ('high' as const) : ('low' as const),
+        },
+      ]
+    : [
+        {
+          label: messages.wellness.airLabel,
+          value: messages.wellness.envUnavailable,
+          level: 'mid' as const,
+        },
+        {
+          label: messages.wellness.diaryLabel,
+          value: diaryFlags.recentSymptoms ? messages.wellness.hasSymptoms : messages.wellness.calm,
+          level: diaryFlags.recentSymptoms ? ('high' as const) : ('low' as const),
+        },
+      ];
 
   return {
     score,
     statusTitle: localizedStatus?.title ?? status.title,
-    statusSummary: localizedStatus?.summary ?? status.summary,
+    statusSummary: envDataAvailable
+      ? (localizedStatus?.summary ?? status.summary)
+      : content.wellness.envUnavailableSummary,
     level: status.level,
     factors,
-    recommendations: buildRecommendations(scoreInput, locale),
+    recommendations: buildRecommendations(scoreInput, locale, envDataAvailable),
     updatedAt: new Date().toISOString(),
     locationLabel: resolvedLocation.label,
+    envDataAvailable,
   };
 }

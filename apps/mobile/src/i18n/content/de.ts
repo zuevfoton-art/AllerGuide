@@ -341,6 +341,10 @@ const deContent: LocaleContent = {
         title: 'Stabiler Tag',
         text: 'Umweltindikatoren und Tagebucheinträge deuten nicht auf erhöhte Risiken hin.',
       },
+      envUnavailable: {
+        title: 'Keine Umweltdaten',
+        text: 'Pollen und Luftqualität konnten nicht geladen werden. Der Index basiert nur auf dem Tagebuch.',
+      },
     },
     pollenLabels: {
       birch_pollen: 'Birke',
@@ -348,6 +352,8 @@ const deContent: LocaleContent = {
       ragweed_pollen: 'Beifuß',
     },
     locationDefault: 'Berlin',
+    envUnavailableSummary:
+      'Open-Meteo-Daten nicht verfügbar. Der Index nutzt nur Tagebuchdaten; Umweltfaktoren fehlen.',
   },
   scanner: {
     verdicts: {

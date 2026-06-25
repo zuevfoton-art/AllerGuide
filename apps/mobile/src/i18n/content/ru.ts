@@ -110,6 +110,10 @@ const ruContent: LocaleContent = {
         title: 'Стабильный день',
         text: 'Показатели среды и записи дневника не указывают на повышенные риски.',
       },
+      envUnavailable: {
+        title: 'Нет данных о среде',
+        text: 'Не удалось загрузить пыльцу и качество воздуха. Индекс учитывает только записи дневника.',
+      },
     },
     pollenLabels: {
       birch_pollen: 'Берёза',
@@ -117,6 +121,8 @@ const ruContent: LocaleContent = {
       ragweed_pollen: 'Амброзия',
     },
     locationDefault: 'Москва',
+    envUnavailableSummary:
+      'Данные Open-Meteo недоступны. Индекс рассчитан по дневнику; факторы среды не учтены.',
   },
   scanner: {
     verdicts: {
