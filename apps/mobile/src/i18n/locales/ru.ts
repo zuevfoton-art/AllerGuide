@@ -126,7 +126,17 @@ const ru: LocaleMessages = {
     scanner: 'Сканер',
     market: 'Маркет',
     map: 'Карта',
+    more: 'Ещё',
     sos: 'SOS',
+  },
+  more: {
+    eyebrow: 'Разделы',
+    title: 'Ещё',
+    subtitle: 'Маркет, карта, эксперт и настройки',
+    marketDesc: 'Товары для аллергиков по вашему профилю',
+    mapDesc: 'Рестораны, пыление и клиники АДАИР',
+    expertDesc: 'Материалы и рекомендации АДАИР',
+    settingsDesc: 'SOS, синхронизация и напоминания',
   },
   home: {
     today: 'Сегодня',
