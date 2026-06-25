@@ -345,11 +345,18 @@ const deContent: LocaleContent = {
         title: 'Keine Umweltdaten',
         text: 'Pollen und Luftqualität konnten nicht geladen werden. Der Index basiert nur auf dem Tagebuch.',
       },
+      seasonalPollen: {
+        title: 'Pollensaison in Ihrer Region',
+        text: 'Hauptsaison für «{label}» laut regionalem Kalender. Planen Sie Belastung und Therapie mit Ihrem Arzt.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Erle',
       birch_pollen: 'Birke',
       grass_pollen: 'Wiesenlieschgras',
-      ragweed_pollen: 'Beifuß',
+      mugwort_pollen: 'Beifuß',
+      olive_pollen: 'Olive',
+      ragweed_pollen: 'Beifußambrosie',
     },
     locationDefault: 'Berlin',
     envUnavailableSummary:

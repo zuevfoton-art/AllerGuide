@@ -345,10 +345,17 @@ const itContent: LocaleContent = {
         title: 'Dati ambientali non disponibili',
         text: 'Impossibile caricare polline e qualità dell\'aria. L\'indice riflette solo il diario.',
       },
+      seasonalPollen: {
+        title: 'Stagione del polline nella tua regione',
+        text: 'Picco di «{label}» secondo il calendario regionale. Pianifica esposizione e terapia con il medico.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Ontano',
       birch_pollen: 'Betulla',
       grass_pollen: 'Festuca prati',
+      mugwort_pollen: 'Artemisia',
+      olive_pollen: 'Olivo',
       ragweed_pollen: 'Ambrosia',
     },
     locationDefault: 'Rome',

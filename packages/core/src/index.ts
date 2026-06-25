@@ -19,6 +19,8 @@ export * from './regulatory-allergens';
 export * from './allergy-conditions';
 export * from './expert-content';
 export * from './adair-catalog';
+export * from './pollen-taxonomy';
+export * from './pollen-regions';
 export * from './pollen-calendar';
 export * from './doctor-report';
 export * from './allergy-passport';

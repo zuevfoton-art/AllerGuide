@@ -345,10 +345,17 @@ const frContent: LocaleContent = {
         title: 'Données environnementales indisponibles',
         text: 'Impossible de charger le pollen et la qualité de l\'air. L\'indice reflète uniquement le journal.',
       },
+      seasonalPollen: {
+        title: 'Saison pollinique dans votre région',
+        text: 'Pic de « {label} » selon le calendrier régional. Planifiez l\'exposition et le traitement avec votre médecin.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Aulne',
       birch_pollen: 'Bouleau',
       grass_pollen: 'Fléole des prés',
+      mugwort_pollen: 'Armoise',
+      olive_pollen: 'Olive',
       ragweed_pollen: 'Ambroisie',
     },
     locationDefault: 'Paris',

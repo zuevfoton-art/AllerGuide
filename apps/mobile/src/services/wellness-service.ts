@@ -1,11 +1,14 @@
 import {
   aqiTier,
   computeWellnessScore,
+  getCurrentPollenAlerts,
+  getDefaultPollenRegion,
   getFoodAllergenLabels,
-  OPEN_METEO_POLLEN_ALLERGEN_IDS,
+  OPEN_METEO_POLLEN_TAXON_IDS,
+  parseOpenMeteoPollenHourly,
   parseProfileAllergenIds,
   pollenTier,
-  profileHasPollenAllergen,
+  resolvePollenRegion,
   wellnessStatusFromScore,
   type WellnessRecommendation,
 } from '@allerguide/core';
@@ -23,22 +26,23 @@ export type WellnessSnapshot = {
   recommendations: WellnessRecommendation[];
   updatedAt: string;
   locationLabel: string;
+  regionId: string;
   /** False when Open-Meteo air-quality data could not be loaded (no synthetic fallback). */
   envDataAvailable: boolean;
 };
 
-const POLLEN_KEYS = ['birch_pollen', 'grass_pollen', 'ragweed_pollen'] as const;
-
-function currentHourlyMax(hourly: Record<string, number[]>, key: string): number {
-  const values = hourly[key];
-  if (!values?.length) return 0;
-  return Math.max(...values.filter((v) => v != null));
+function labelForPollenTaxon(
+  taxonId: string,
+  content: ReturnType<typeof getLocaleContent>,
+): string {
+  return content.wellness.pollenLabels[taxonId] ?? taxonId;
 }
 
 function buildRecommendations(
   input: Parameters<typeof computeWellnessScore>[0],
   locale: AppLocale,
   envDataAvailable: boolean,
+  seasonalAlerts: { label: string }[],
 ): WellnessRecommendation[] {
   const content = getLocaleContent(locale);
   const recs: WellnessRecommendation[] = [];
@@ -48,6 +52,16 @@ function buildRecommendations(
       icon: '🌐',
       title: content.wellness.recommendations.envUnavailable.title,
       text: content.wellness.recommendations.envUnavailable.text,
+    });
+  }
+
+  for (const alert of seasonalAlerts) {
+    recs.push({
+      icon: '📅',
+      title: content.wellness.recommendations.seasonalPollen.title,
+      text: formatTemplate(content.wellness.recommendations.seasonalPollen.text, {
+        label: alert.label,
+      }),
     });
   }
 
@@ -109,27 +123,36 @@ export async function fetchWellnessSnapshot(
   profileAllergiesJson: string,
   diaryFlags: { recentSymptoms: boolean; recentTriggers: boolean },
   locale: AppLocale = 'ru',
-  location?: { lat: number; lon: number; label: string },
+  location?: { lat: number; lon: number; label?: string },
 ): Promise<WellnessSnapshot> {
   const content = getLocaleContent(locale);
   const messages = LOCALE_MESSAGES[locale];
-  const resolvedLocation = location ?? {
-    lat: 55.75,
-    lon: 37.62,
-    label: content.wellness.locationDefault,
+  const region = location
+    ? resolvePollenRegion(location.lat, location.lon)
+    : getDefaultPollenRegion();
+  const resolvedLocation = {
+    lat: location?.lat ?? region.lat,
+    lon: location?.lon ?? region.lon,
+    label: location?.label ?? region.name,
   };
 
   const profileAllergenIds = parseProfileAllergenIds(profileAllergiesJson);
+  const month = new Date().getMonth() + 1;
+  const seasonalAlerts = getCurrentPollenAlerts(month, profileAllergenIds, region.id).map(
+    (peak) => ({ label: peak.label }),
+  );
 
+  const timezone = encodeURIComponent(region.timezone);
+  const pollenHourly = OPEN_METEO_POLLEN_TAXON_IDS.join(',');
   const url =
     `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLocation.lat}` +
-    `&longitude=${resolvedLocation.lon}&timezone=Europe%2FMoscow&forecast_days=1` +
-    `&current=european_aqi,pm2_5&hourly=${POLLEN_KEYS.join(',')}`;
+    `&longitude=${resolvedLocation.lon}&timezone=${timezone}&forecast_days=1` +
+    `&current=european_aqi,pm2_5&hourly=${pollenHourly}`;
 
   let europeanAqi: number | null = null;
   let pm25: number | null = null;
   let envDataAvailable = false;
-  const pollenMatches: { label: string; value: number; profileRelevant: boolean }[] = [];
+  let pollenMatches: { label: string; value: number; profileRelevant: boolean }[] = [];
 
   try {
     const res = await fetch(url);
@@ -138,16 +161,16 @@ export async function fetchWellnessSnapshot(
     europeanAqi = data.current?.european_aqi ?? null;
     pm25 = data.current?.pm2_5 ?? null;
     envDataAvailable = true;
-    for (const key of POLLEN_KEYS) {
-      const label = content.wellness.pollenLabels[key];
-      const pollenAllergenId = OPEN_METEO_POLLEN_ALLERGEN_IDS[key];
-      const value = currentHourlyMax(data.hourly ?? {}, key);
-      pollenMatches.push({
-        label,
-        value,
-        profileRelevant: profileHasPollenAllergen(profileAllergenIds, pollenAllergenId),
-      });
-    }
+
+    pollenMatches = parseOpenMeteoPollenHourly(
+      data.hourly ?? {},
+      profileAllergenIds,
+      (taxonId) => labelForPollenTaxon(taxonId, content),
+    ).map((reading) => ({
+      label: reading.label,
+      value: reading.value,
+      profileRelevant: reading.profileRelevant,
+    }));
   } catch {
     envDataAvailable = false;
   }
@@ -208,9 +231,10 @@ export async function fetchWellnessSnapshot(
       : content.wellness.envUnavailableSummary,
     level: status.level,
     factors,
-    recommendations: buildRecommendations(scoreInput, locale, envDataAvailable),
+    recommendations: buildRecommendations(scoreInput, locale, envDataAvailable, seasonalAlerts),
     updatedAt: new Date().toISOString(),
     locationLabel: resolvedLocation.label,
+    regionId: region.id,
     envDataAvailable,
   };
 }

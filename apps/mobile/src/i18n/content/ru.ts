@@ -114,10 +114,17 @@ const ruContent: LocaleContent = {
         title: 'Нет данных о среде',
         text: 'Не удалось загрузить пыльцу и качество воздуха. Индекс учитывает только записи дневника.',
       },
+      seasonalPollen: {
+        title: 'Сезон пыления в вашем регионе',
+        text: 'Пик сезона «{label}» по региональному календарю. Планируйте нагрузку и терапию с врачом.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Ольха',
       birch_pollen: 'Берёза',
       grass_pollen: 'Тимофеевка',
+      mugwort_pollen: 'Полынь',
+      olive_pollen: 'Олива',
       ragweed_pollen: 'Амброзия',
     },
     locationDefault: 'Москва',

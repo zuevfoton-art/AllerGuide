@@ -345,10 +345,17 @@ const enContent: LocaleContent = {
         title: 'Environment data unavailable',
         text: 'Could not load pollen and air quality. The index reflects diary entries only.',
       },
+      seasonalPollen: {
+        title: 'Pollen season in your region',
+        text: 'Peak season for «{label}» in your regional calendar. Plan exposure and medication with your doctor.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Alder',
       birch_pollen: 'Birch',
       grass_pollen: 'Timothy grass',
+      mugwort_pollen: 'Mugwort',
+      olive_pollen: 'Olive',
       ragweed_pollen: 'Ragweed',
     },
     locationDefault: 'Moscow',

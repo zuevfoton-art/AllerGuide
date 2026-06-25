@@ -76,13 +76,23 @@
 - `allergen-catalog-service.ts` — API-first with static fallback; warmed on app start
 - `catalog-api.ts` — cache-before-network product lookup
 
+**B.1 deliverables:**
+- `packages/core/src/pollen-taxonomy.ts` — `PollenTaxonId`, Open-Meteo hourly keys → allergenId
+- `parseOpenMeteoPollenHourly` — profile relevance by taxon id (not substring)
+- Wellness fetches all 6 CAMS pollen taxa (incl. mugwort, alder, olive)
+
+**B.2 deliverables:**
+- `packages/core/src/pollen-regions.ts` — 5 reference regions + `resolvePollenRegion(lat, lon)`
+- `POLLEN_CALENDARS` — Moscow, SPb, Krasnodar, Novosibirsk, Ekaterinburg
+- Map pollen layer + wellness seasonal alerts use regional calendar
+
 ### Phase B — Wellness Engine v2
 
 | ID | Задача | Статус |
 |----|--------|--------|
 | **B.8** | Убрать fake Open-Meteo fallback (42/45) | ✅ Done |
-| B.1 | Пыльца по `pollen_taxon_id`, не substring | Partial (OPEN_METEO_POLLEN_ALLERGEN_IDS) |
-| B.2 | Региональные pollen calendars | Planned |
+| **B.1** | Пыльца по `pollen_taxon_id`, не substring | ✅ Done |
+| **B.2** | Региональные pollen calendars | ✅ Done |
 | B.3 | Пороги пыльцы по EAACI / перцентилям | Planned |
 | B.4 | ACT / ARIA / UAS7 в `computeWellnessScore` | Planned |
 | B.5 | Дневник как time-series (7 дней) | Planned |
@@ -163,6 +173,8 @@ flowchart LR
 | `packages/core/src/allergy-confirmations.ts` | A.4 — confirmedBy |
 | `packages/core/src/profile-validation.ts` | A.5 — save validation |
 | `apps/mobile/src/services/catalog-cache-service.ts` | A.6 — offline catalog |
+| `packages/core/src/pollen-taxonomy.ts` | B.1 — pollen taxon ids |
+| `packages/core/src/pollen-regions.ts` | B.2 — regional calendars |
 | `packages/core/src/wellness.ts` | Scoring engine |
 | `apps/mobile/src/services/wellness-service.ts` | Open-Meteo + B.8 |
 | `packages/core/src/cross-reactions/` | Кросс-реактивность |

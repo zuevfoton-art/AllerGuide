@@ -345,10 +345,17 @@ const esContent: LocaleContent = {
         title: 'Sin datos ambientales',
         text: 'No se pudo cargar polen ni calidad del aire. El índice refleja solo el diario.',
       },
+      seasonalPollen: {
+        title: 'Temporada de polen en su región',
+        text: 'Pico de «{label}» según el calendario regional. Planifique exposición y tratamiento con su médico.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Aliso',
       birch_pollen: 'Abedul',
       grass_pollen: 'Festuca',
+      mugwort_pollen: 'Artemisia',
+      olive_pollen: 'Olivo',
       ragweed_pollen: 'Ambrosía',
     },
     locationDefault: 'Madrid',
