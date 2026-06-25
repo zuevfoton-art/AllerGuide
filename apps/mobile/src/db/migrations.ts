@@ -1,6 +1,6 @@
 import type { DbLike } from './types';
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 const MIGRATIONS: Record<number, (db: DbLike) => void> = {
   1: (db) => {
@@ -15,6 +15,19 @@ const MIGRATIONS: Record<number, (db: DbLike) => void> = {
     if (!columns.some((column) => column.name === 'userId')) {
       db.execSync('ALTER TABLE profiles ADD COLUMN userId INTEGER');
     }
+  },
+  3: (db) => {
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS barcode_cache (
+        barcode TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        ingredients TEXT NOT NULL,
+        brand TEXT,
+        origin_source TEXT NOT NULL DEFAULT 'openfoodfacts',
+        cached_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    `);
   },
 };
 

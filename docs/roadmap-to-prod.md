@@ -2,6 +2,8 @@
 
 Дорожная карта от текущего MVP до публичного релиза v1.0 и пост-релизного развития.
 
+**Архитектура и правила кода:** [`docs/architecture.md`](./architecture.md) · [`docs/development-rules.md`](./development-rules.md)
+
 **Трекинг в GitHub:** [Milestones](https://github.com/zuevfoton-art/AllerGuide/milestones) · метки `phase-0` … `phase-5`, `roadmap` · префиксы задач `[P0.x]` … `[P5.x]`
 
 ### Bootstrap (один раз)
@@ -41,7 +43,7 @@ chmod +x scripts/create-roadmap-issues.sh
 | PDF | Отчёт для врача (`expo-print`) |
 | API | Express + Drizzle + Postgres, JWT-auth, sync, LLM-scan с кэшем |
 | Безопасность API | helmet, CORS, rate-limit, client-side шифрование бэкапов |
-| CI | `typecheck` + `lint` + `test` (~67 unit-тестов) |
+| CI | `typecheck` + `lint` + `test` (core, ai, mobile, api) |
 | Инфра-заготовки | `eas.json`, Sentry/analytics hooks (выключены) |
 
 ### Частично / за feature flags
@@ -57,7 +59,7 @@ chmod +x scripts/create-roadmap-issues.sh
 ### Пробелы
 
 - Нет E2E / UI-тестов
-- Mobile: 1 unit-тест (`sync-restore`)
+- Mobile unit tests: сервисы (`apps/mobile/src/services/*.test.ts`); цель Phase 2 — ≥30 тестов
 - Нет production deploy API в репозитории (Docker/K8s)
 - `eas.json`: placeholder Apple/Google IDs
 - Legal docs только на русском
@@ -111,7 +113,22 @@ flowchart TB
 
 **Принцип v1.0:** mobile остаётся offline-first; backend — auth, sync, AI-scan, опционально push.
 
-Подробнее об API и флагах: [`docs/architecture.md`](./architecture.md), [`AGENTS.md`](../AGENTS.md).
+Подробнее: [`docs/architecture.md`](./architecture.md) · правила кода: [`docs/development-rules.md`](./development-rules.md) · env: [`AGENTS.md`](../AGENTS.md).
+
+### Архитектурные гейты (обязательны для каждой фазы)
+
+Каждая задача фазы должна проходить гейты из [`development-rules.md` §7](./development-rules.md#7-план-разработки-и-фазы):
+
+| Фаза | Архитектурный гейт |
+|------|-------------------|
+| P0 | Core flows без API; регрессия `qa-checklist.md` |
+| P1 | Backend только за флагами; dual-write в `src/services/*`, не в UI |
+| P2 | Тесты на core/ai/services; offline не ломается |
+| P3 | Account deletion + zero-knowledge sync; миграции versioned |
+| P4 | Production env-матрица (§4); документация флагов актуальна |
+| P5 | Новые фичи расширяют `core`/`ai`, не обходят слои |
+
+**Чеклист перед merge любой задачи:** [`development-rules.md` §8](./development-rules.md#8-чеклист-перед-merge).
 
 ---
 
@@ -121,13 +138,13 @@ flowchart TB
 
 **Milestone:** [Phase 0: Stabilization MVP](https://github.com/zuevfoton-art/AllerGuide/milestone/1)
 
-| ID | Задача | Критерий готовности |
-|----|--------|---------------------|
-| P0.1 | Регрессионный чеклист | [`docs/qa-checklist.md`](./qa-checklist.md), пройден на iOS + Android + web |
-| P0.2 | Критичные баги MVP | 0 открытых P0/P1 |
-| P0.3 | Актуализировать README | IndexedDB, feature flags, env |
-| P0.4 | EAS preview-сборки | [`docs/eas-internal-preview.md`](./eas-internal-preview.md), TestFlight / internal APK на 3+ устройствах |
-| P0.5 | Локализация legal | Privacy/Terms на 6 языках |
+| ID | Задача | Критерий готовности | Архитектура |
+|----|--------|---------------------|-------------|
+| P0.1 | Регрессионный чеклист | [`docs/qa-checklist.md`](./qa-checklist.md), пройден на iOS + Android + web | Offline-first не нарушен |
+| P0.2 | Критичные баги MVP | 0 открытых P0/P1 | Фиксы через services/core, не хаки в UI |
+| P0.3 | Актуализировать README | IndexedDB, feature flags, env, ссылки на docs | Документация синхронна с `architecture.md` |
+| P0.4 | EAS preview-сборки | [`docs/eas-internal-preview.md`](./eas-internal-preview.md), TestFlight / internal APK на 3+ устройствах | — |
+| P0.5 | Локализация legal | Privacy/Terms на 6 языках | Все локали + `types.ts` |
 
 ---
 
@@ -135,14 +152,14 @@ flowchart TB
 
 **Milestone:** [Phase 1: Backend integration](https://github.com/zuevfoton-art/AllerGuide/milestone/2)
 
-| ID | Задача | Критерий готовности |
-|----|--------|---------------------|
-| P1.1 | Deploy API staging | Health check, миграции, TLS, CORS |
-| P1.2 | Backend auth E2E | Register → login → profiles на сервере |
-| P1.3 | Ключ восстановления бэкапа | Cross-device restore |
-| P1.4 | Cloud sync E2E | Encrypted upload/download, полный restore |
-| P1.5 | AI scan staging | Budget + cache, без превышения лимитов |
-| P1.6 | Интеграционные тесты API | CI: auth, sync, scan |
+| ID | Задача | Критерий готовности | Архитектура |
+|----|--------|---------------------|-------------|
+| P1.1 | Deploy API staging | Health check, миграции, TLS, CORS | `db:migrate`, не `db:push` |
+| P1.2 | Backend auth E2E | Register → login → profiles на сервере | `auth-service` + `backend-api`; флаг `BACKEND_AUTH` |
+| P1.3 | Ключ восстановления бэкапа | Cross-device restore | Клиентское шифрование core/crypto сохранено |
+| P1.4 | Cloud sync E2E | Encrypted upload/download, полный restore | `sync-service` → zero-knowledge API |
+| P1.5 | AI scan staging | Budget + cache, без превышения лимитов | `runSmartScan` + `/api/scan`; флаги AI |
+| P1.6 | Интеграционные тесты API | CI: auth, sync, scan | `routes/*.test.ts` |
 
 **Открытый вопрос:** dual-write (local + server) vs server-authoritative после login.
 
@@ -152,15 +169,15 @@ flowchart TB
 
 **Milestone:** [Phase 2: Quality & Security](https://github.com/zuevfoton-art/AllerGuide/milestone/3)
 
-| ID | Задача | Критерий готовности |
-|----|--------|---------------------|
-| P2.1 | E2E mobile (Maestro) | 5 smoke-flows, nightly CI |
-| P2.2 | Mobile unit tests | ≥30 тестов (auth, diary, profiles) |
-| P2.3 | Sentry production | DSN + source maps через EAS |
-| P2.4 | Analytics | Screen views + key events |
-| P2.5 | Security audit mobile | OWASP mobile checklist |
-| P2.6 | Pen-test API | 0 critical (JWT, IDOR, rate-limit) |
-| P2.7 | Performance | Cold start p95 <3s, профилирование IndexedDB |
+| ID | Задача | Критерий готовности | Архитектура |
+|----|--------|---------------------|-------------|
+| P2.1 | E2E mobile (Maestro) | 5 smoke-flows, nightly CI | Smoke покрывает offline paths |
+| P2.2 | Mobile unit tests | ≥30 тестов (auth, diary, profiles) | Тесты на `src/services/*`, не JSX |
+| P2.3 | Sentry production | DSN + source maps через EAS | `error-reporting.ts` |
+| P2.4 | Analytics | Screen views + key events | `analytics-service.ts`, opt-in |
+| P2.5 | Security audit mobile | OWASP mobile checklist | Нет секретов в коде |
+| P2.6 | Pen-test API | 0 critical (JWT, IDOR, rate-limit) | JWT stateless, `require-jwt` |
+| P2.7 | Performance | Cold start p95 <3s, профилирование IndexedDB | Web-store async write-through |
 
 **Инфра:** Redis rate-limit store, PgBouncer, health checks.
 
@@ -283,6 +300,7 @@ flowchart LR
 - [`docs/qa-checklist.md`](./qa-checklist.md) — регрессионный чеклист internal alpha (P0.1)
 - [`docs/eas-internal-preview.md`](./eas-internal-preview.md) — первая EAS preview-сборка (P0.4)
 - [`docs/architecture.md`](./architecture.md) — архитектура и production hardening
+- [`docs/development-rules.md`](./development-rules.md) — обязательные правила разработки
 - [`docs/functional-requirements.md`](./functional-requirements.md) — функциональные требования
 - [`docs/design-mockup.html`](./design-mockup.html) — UI mockup Clinical Calm
 - [`docs/brand/brand-preview.html`](./brand/brand-preview.html) — бренд-кит

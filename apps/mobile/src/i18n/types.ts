@@ -106,6 +106,12 @@ export type LocaleMessages = {
     logoutConfirm: string;
     deleteTitle: string;
     deleteMessage: string;
+    accountTitle: string;
+    accountHint: string;
+    deleteAccount: string;
+    deleteAccountTitle: string;
+    deleteAccountMessage: string;
+    deleteAccountConfirm: string;
   };
   theme: {
     title: string;
@@ -205,9 +211,15 @@ export type LocaleMessages = {
     disclaimer: string;
     cameraScanBarcode: string;
     cameraScanMenu: string;
+    cameraScanLabel: string;
     cameraBarcodeHint: string;
     cameraMenuHint: string;
+    cameraLabelHint: string;
     analyzeMenu: string;
+    analyzeLabel: string;
+    scanLabel: string;
+    scanLabelDesc: string;
+    labelPlaceholder: string;
     barcodeWebHint: string;
     productPlaceholder: string;
     menuPlaceholder: string;
@@ -215,8 +227,10 @@ export type LocaleMessages = {
     crossMatches: string;
     source: string;
     sourceOpenFoodFacts: string;
+    sourceBarcodesDb: string;
     sourceBarcode: string;
     sourceManual: string;
+    sourceOcr: string;
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
@@ -241,6 +255,9 @@ export type LocaleMessages = {
     adair: string;
     recommended: string;
     mapWebHint: string;
+    regionLabel: string;
+    yandexAttribution: string;
+    emptyPlaces: string;
     disclaimerPlaces: string;
     disclaimerPollen: string;
     disclaimerAdair: string;
@@ -281,10 +298,14 @@ export type LocaleMessages = {
     syncError: string;
     uploadSuccess: string;
     downloadSuccess: string;
+    account: string;
+    manageProfiles: string;
+    manageProfilesHint: string;
   };
   profileSwitcher: {
     add: string;
     hint: string;
+    manage: string;
   };
   onboarding: {
     tagline: string;
@@ -377,6 +398,41 @@ export type LocaleMessages = {
     scheduleLabel: string;
     schedulePlaceholder: string;
     saveCourse: string;
+    disclaimer: string;
+    noProfile: string;
+    notEligible: string;
+    reminderLabel: string;
+    reminderOn: string;
+    reminderOff: string;
+    reminderHour: string;
+    reminderMinute: string;
+    reminderHint: string;
+    reminderAt: string;
+  };
+  insect: {
+    title: string;
+    eyebrow: string;
+    planTitle: string;
+    planSubtitle: string;
+    editPlan: string;
+    emptyList: string;
+    adrenaline: string;
+    stings30d: string;
+    severe30d: string;
+    adrenalineUsed30d: string;
+    logSting: string;
+    profileInsects: string;
+    noProfileInsects: string;
+    knownInsects: string;
+    knownInsectsPlaceholder: string;
+    adrenalineLocation: string;
+    adrenalineLocationPlaceholder: string;
+    emergencySteps: string;
+    emergencyStepsPlaceholder: string;
+    clinicalNotes: string;
+    clinicalNotesPlaceholder: string;
+    consolidated: string;
+    savePlan: string;
     disclaimer: string;
     noProfile: string;
     notEligible: string;

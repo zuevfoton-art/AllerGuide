@@ -4,6 +4,32 @@ pnpm + Turborepo monorepo. The product is **AllerGuide**, an Expo / React Native
 
 See `README.md` for the basic stack/run summary and root `package.json` / per-package `package.json` for the canonical scripts.
 
+---
+
+## Architecture-first development (mandatory)
+
+**Before writing or changing code**, read and follow:
+
+1. [`docs/architecture.md`](docs/architecture.md) — system design, layers, data flows, feature flags
+2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist
+
+Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
+
+### Non-negotiable rules (summary)
+
+| Rule | Detail |
+|------|--------|
+| **Offline-first** | Core flows work without API; network is optional enrichment |
+| **Thin adapters** | Domain logic in `packages/core` / `packages/ai`; mobile screens and API routes orchestrate only |
+| **No DB/API in screens** | `app/**/*.tsx` → `src/services/*` → `db` / `core` / optional backend |
+| **Feature flags** | Backend integration behind `EXPO_PUBLIC_*` (default off in `.env.example`) |
+| **i18n** | `useTranslation()` + all 6 locales + `types.ts`; not legacy i18next |
+| **Migrations** | `db:generate` + commit SQL + `db:migrate`; never `db:push` on real data |
+
+Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-чеклист-перед-merge).
+
+---
+
 ## Cursor Cloud specific instructions
 
 - Package manager is **pnpm** (`packageManager: pnpm@10.34.4`). Run `pnpm install` from the repo root before typecheck/tests.
@@ -17,7 +43,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 
 ### Quality checks
 - `pnpm typecheck` — TypeScript across all packages
-- `pnpm test` — Vitest in `packages/core`, `packages/ai`, and `apps/api`
+- `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
 
 ### Backend API (optional) — `apps/api`
@@ -27,6 +53,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 - Catalog data: `pnpm --filter api db:seed-allergens` loads the allergen taxonomy from `@allerguide/core`; `pnpm --filter api db:import-food-allergy` imports the bundled dataset (`apps/api/data/food-allergy/`) into the `products` table. Endpoints: `GET /api/allergens` (falls back to the static core list when no DB), `GET /api/products/:barcode`, `GET /api/products/search?q=`. Mobile uses them when `EXPO_PUBLIC_PRODUCT_DB=true` (backend-first barcode lookup, Open Food Facts fallback).
 - External allergen vocabularies (dataset tags, OFF `en:milk` tags) are mapped to the canonical RU taxonomy via `@allerguide/core` `mapExternalAllergenNames` (both at import and at OFF write-through).
 - Open Food Facts integration (`src/services/open-food-facts.ts`): on-demand `fetchOpenFoodFactsProduct(barcode)` (enriched: brand, image, ingredients, allergens+traces) and `searchOpenFoodFacts(query)` (full-text). OFF requires a `User-Agent` (`OPENFOODFACTS_USER_AGENT`). `/api/products/:barcode` and `/api/products/search?q=` query OFF on demand and cache into `catalog.products` when there's no local hit (`PRODUCT_OFF_FALLBACK=true`, default on).
+- DB connection (Neon-ready, `src/db/config.ts` + `index.ts`): runtime uses `DATABASE_URL` (Neon pooled `-pooler` endpoint), migrations use `DIRECT_DATABASE_URL` (direct, fallback to `DATABASE_URL`). Env-driven options: `DB_SSL` (`require`/`disable`), `DB_PREPARE=false` (for PgBouncer transaction pooling), `DB_POOL_MAX`/`DB_IDLE_TIMEOUT`/`DB_CONNECT_TIMEOUT`/`DB_MAX_LIFETIME`. Optional read replica via `READ_DATABASE_URL` exposes `readDb` (catalog reads route there; writes use primary `db`; falls back to primary when unset). Per-PR Neon DB branches run in `.github/workflows/neon-preview.yml` when `NEON_API_KEY` is configured.
 - DB layout: data is split into two Postgres schemas — `profile` (per-user: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`) and `catalog` (global: `allergens`, `cross_reactions`, `products`). Replit-OIDC `users`/`sessions` stay in `public`. Drizzle table objects are schema-qualified (`profileSchema`/`catalogSchema` in `db/app-schema.ts` / `db/catalog-schema.ts`), so query code is unchanged. Human-readable standalone definitions live in `apps/api/sql/{profile,catalog}.sql` (reference artifacts; the live DB is managed by migrations).
 - Production hardening lives in `app.ts` + `src/middleware/security.ts`: helmet, strict CORS (`CORS_ORIGINS` allowlist), and per-IP rate limits. Set `RATE_LIMIT_DISABLED=true` to turn limits off (tests already do this where needed).
 - AI scan (`src/routes/scan.ts` + `src/lib/scan-cache.ts`): in-memory result cache + per-identity daily budget + optional `SCAN_REQUIRE_AUTH`. Enable with `AI_SCAN_ENABLED=true` + `OPENAI_API_KEY`; mobile flag `EXPO_PUBLIC_AI_SCAN_ENABLED=true`.
@@ -35,9 +62,9 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 - Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`) to console/HTTP; `EXPO_PUBLIC_SENTRY_DSN` enables crash reporting. Both off by default.
 
 ### Production builds (internal alpha)
-- EAS preview: see [`docs/eas-internal-preview.md`](../docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
-- Replit deploy (web): see [`docs/replit-deploy.md`](../docs/replit-deploy.md). `.replit` runs `pnpm install` + `expo export`.
-- QA regression: [`docs/qa-checklist.md`](../docs/qa-checklist.md).
+- EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
+- Replit deploy (web): see [`docs/replit-deploy.md`](docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true` and `scripts/replit-deploy-build.sh` (`pnpm install` → `db:migrate` when `DATABASE_URL` is set → `expo export`). On republish, do not re-enable «Create production database» if production already exists.
+- QA regression: [`docs/qa-checklist.md`](docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.
 - Replace placeholder `extra.eas.projectId` with your EAS project before building.

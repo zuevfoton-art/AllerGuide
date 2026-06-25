@@ -63,7 +63,15 @@ export function ProfileSwitcher() {
       </View>
 
       {activeProfileId ? (
-        <Text style={styles.hint}>{t('profileSwitcher.hint')}</Text>
+        <View style={styles.footer}>
+          <Text style={styles.hint}>{t('profileSwitcher.hint')}</Text>
+          <Pressable
+            onPress={() => router.push('/profiles')}
+            accessibilityRole="button"
+            style={styles.manageLink}>
+            <Text style={styles.manageLinkText}>{t('profileSwitcher.manage')}</Text>
+          </Pressable>
+        </View>
       ) : null}
     </View>
   );
@@ -110,6 +118,14 @@ function createStyles({ colors, shadows, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 16,
+    },
+    footer: { gap: 4 },
+    manageLink: { alignSelf: 'flex-start', paddingVertical: 2 },
+    manageLinkText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.accent,
     },
   });
 }
