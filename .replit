@@ -39,25 +39,17 @@ waitForPort = 5000
 name = "Start Metro"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd apps/mobile && npx expo start --web --port 3001 --clear"
-waitForPort = 3001
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd apps/mobile && UV_THREADPOOL_SIZE=4 npx expo start --web --port 3001 --no-open"
+waitForPort = 3001
 
 [[ports]]
 localPort = 3001
 externalPort = 3001
-
-[[ports]]
-localPort = 5000
-externalPort = 80
-
-[[ports]]
-localPort = 23636
-externalPort = 3002
 
 [deployment]
 deploymentTarget = "autoscale"
