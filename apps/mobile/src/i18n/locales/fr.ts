@@ -593,6 +593,12 @@ const fr: LocaleMessages = {
     calm: 'Calme',
     grains: 'grains/m³',
     envUnavailable: 'Pas de données',
+    symptomDays: 'Symptômes {days}/7 j.',
+    confidence: {
+      high: 'Confiance élevée',
+      medium: 'Confiance moyenne',
+      low: 'Confiance faible',
+    },
   },
   errors: {
     selectProfile: 'Choisissez un profil sur l\'écran d\'accueil.',

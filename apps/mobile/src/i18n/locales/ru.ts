@@ -594,6 +594,12 @@ const ru: LocaleMessages = {
     calm: 'Спокойно',
     grains: 'зёрен/м³',
     envUnavailable: 'Нет данных',
+    symptomDays: 'Симптомы {days}/7 дн.',
+    confidence: {
+      high: 'Высокая достоверность',
+      medium: 'Средняя достоверность',
+      low: 'Низкая достоверность',
+    },
   },
   errors: {
     selectProfile: 'Выберите профиль на главном экране.',
