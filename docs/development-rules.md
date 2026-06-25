@@ -189,6 +189,18 @@ pnpm --filter mobile lint   # при изменениях в apps/mobile
 
 ### 6.1. Именование
 
+Общие соглашения (дополняют архитектурные правила §3):
+
+| Сущность | Стиль | Пример |
+|----------|-------|--------|
+| Классы, React-компоненты | PascalCase | `ProfileSwitcher`, `BarcodeCacheEntry` |
+| Переменные, функции, методы | camelCase | `resolveProductByBarcode`, `getUserData` |
+| Файлы, каталоги | kebab-case | `barcode-lookup-service.ts`, `scan-history-service.ts` |
+| Константы, env | UPPERCASE | `PRODUCT_DB_ENABLED`, `JWT_SECRET` |
+| Типы / интерфейсы | PascalCase | `ScanResult`, `LocaleMessages` |
+
+Специфика monorepo:
+
 - Сервисы mobile: `*-service.ts` (`profile-service.ts`)
 - API routes: `register*Routes(app)` в `routes/*.ts`
 - Feature flags: `*_ENABLED` в `features.ts`, env `EXPO_PUBLIC_*` / server env
@@ -248,6 +260,9 @@ ui     → (peer RN only)
 - [ ] Postgres: миграция сгенерирована и закоммичена (если менялась схема)
 - [ ] `pnpm typecheck` и `pnpm test` проходят
 - [ ] Нет unrelated изменений в diff
+- [ ] Типизация без `any`; `import type` для type-only импортов
+- [ ] Нет дублирования логики; ошибки обработаны осмысленно
+- [ ] Публичные API (`core`, `ai`, services) задокументированы JSDoc (см. §10)
 
 ---
 
@@ -263,6 +278,98 @@ ui     → (peer RN only)
 | Новая фича только с backend | Offline fallback + feature flag |
 | Строки только в `ru.ts` | Все 6 локалей |
 | Дублирование OFF lookup в UI и service | Один lookup в service layer |
+
+---
+
+## 10. TypeScript и стандарты кода
+
+> **Приоритет:** архитектурные правила (§2–3) и offline-first важнее общих соглашений ниже.  
+> Стек AllerGuide: TypeScript, Node.js (`apps/api`), Expo / React Native (`apps/mobile`), pnpm workspaces, Drizzle, Vitest. **Zod** — для новых API-схем валидации; **Lodash** — только при явной необходимости (в проекте по умолчанию не используется).
+
+### Overview
+
+You are an expert in TypeScript and Node.js development, and in the libraries and frameworks used in this monorepo. Follow user and architecture requirements carefully.
+
+**Before coding:**
+
+1. Restate the objective of the change in a short summary.
+2. Think step-by-step: describe the plan in pseudocode or bullet points with enough detail to implement.
+3. Confirm which layer owns the change (`core` / `ai` / `services` / `routes` / UI) per §3.
+
+### Tech stack (this repo)
+
+| Layer | Stack |
+|-------|--------|
+| Shared domain | TypeScript, Vitest (`packages/core`, `packages/ai`) |
+| API | TypeScript, Node.js, Express, Drizzle, Zod (new validation) |
+| Mobile | TypeScript, Expo, React Native, Zustand, expo-sqlite / IndexedDB |
+| Tooling | pnpm, Turborepo, ESLint |
+
+Performance: prefer `Promise.all()` for independent async work; avoid N+1 queries; batch DB reads in services.
+
+### Shortcuts (Cursor / pair programming)
+
+| Trigger | Action |
+|---------|--------|
+| **CURSOR:PAIR** | Act as pair programmer and senior dev: suggest alternatives, weigh trade-offs, align with architecture. |
+| **RFC** | Refactor per provided instructions; follow architecture layers and minimal scope. |
+| **RFP** | Improve the prompt: break into steps, clarify goal first; follow [Google Technical Writing Style Guide](https://developers.google.com/tech-writing). |
+
+### Core principles
+
+- Write straightforward, readable, maintainable code.
+- Follow SOLID and familiar design patterns within monorepo constraints.
+- Use strong typing; avoid `any` (use `unknown` + narrowing when needed).
+- Prefer immutability (`readonly` fields, spread over mutation) in domain types.
+
+### Functions
+
+- Descriptive names: verbs + nouns (`getUserData`, `resolveBootstrapRoute`).
+- Prefer arrow functions for short callbacks; named `function` for hoisted exports if clearer.
+- Use default parameters and object destructuring for optional args.
+- Document **exported** functions with JSDoc (TypeDoc-compatible tags only).
+
+### Types and interfaces
+
+- **API boundaries (new code):** prefer a Zod schema + `z.infer<typeof Schema>` for request/response bodies.
+- **Domain (`packages/core`):** TypeScript interfaces/types are fine; keep schemas close to modules that own the data.
+- Use `import type` when an import is only used as a type.
+- Use `readonly` for immutable properties on shared types.
+- Re-export public types from package `index.ts` when part of the package API.
+
+### Code review checklist
+
+In addition to §8:
+
+- [ ] Proper typing (no stray `any`)
+- [ ] No duplicated logic across mobile / API / core
+- [ ] Error handling: user-safe messages; no swallowed failures in services
+- [ ] Tests for non-trivial behavior in the right package
+- [ ] Naming matches §6.1
+- [ ] Structure readable; files stay focused (single responsibility)
+
+### Documentation
+
+When writing READMEs, architecture docs, or JSDoc:
+
+- Follow [Google Technical Writing Style Guide](https://developers.google.com/tech-writing).
+- Define terms when needed; use active voice and present tense.
+- Use lists and tables for structured information.
+- **JSDoc:** TypeDoc-compatible tags only (`@param`, `@returns`, `@throws`, `@example`).
+- **Scope in this repo:** JSDoc on exported functions, classes, and types in `packages/core`, `packages/ai`, and `apps/*/src/services`. Internal helpers need JSDoc only when behavior is non-obvious.
+
+### Git commit rules
+
+- **Title:** brief, imperative mood; [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`).
+- **Body:** elaborate context after a blank line (two newlines after title); mention architecture impact if any.
+- **Example:**
+
+  ```
+  feat(scanner): add local barcode cache lookup
+
+  Route barcode resolution through barcode-lookup-service before OFF.
+  Keeps offline-first path when PRODUCT_DB_ENABLED is false.
+  ```
 
 ---
 
