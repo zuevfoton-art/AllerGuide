@@ -118,16 +118,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: t('tabs.more'),
+          title: t('tabs.map'),
           tabBarIcon: ({ focused }) => (
             <TabIcon
-              name="more"
+              name="map"
               focused={focused}
               color={colors.accent}
               muted={colors.textMuted}

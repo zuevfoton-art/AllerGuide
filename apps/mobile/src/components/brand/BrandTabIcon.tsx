@@ -1,6 +1,6 @@
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
-export type BrandTabIconName = 'home' | 'diary' | 'scanner' | 'more' | 'sos';
+export type BrandTabIconName = 'home' | 'diary' | 'scanner' | 'map' | 'sos';
 export type BrandFeatureIconName = 'market' | 'map' | 'expert';
 
 type BrandIconProps = {
@@ -65,23 +65,17 @@ export function BrandTabIcon({
           <Path d="M8 12h8" stroke={color} strokeWidth={STROKE} strokeLinecap="round" />
         </Svg>
       );
-    case 'more':
+    case 'map':
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-          <Rect
-            x={5}
-            y={5}
-            width={6}
-            height={6}
-            rx={1}
+          <Path
+            d="M9 5.5 5 7v13l4-1.5M9 5.5l6 2M9 5.5v13M15 7.5l4 1.5v13l-4-1.5M15 7.5v13"
             stroke={color}
             strokeWidth={STROKE}
+            strokeLinejoin="round"
             fill={focused ? color : 'none'}
             fillOpacity={focused ? 0.12 : 0}
           />
-          <Rect x={13} y={5} width={6} height={6} rx={1} stroke={color} strokeWidth={STROKE} />
-          <Rect x={5} y={13} width={6} height={6} rx={1} stroke={color} strokeWidth={STROKE} />
-          <Rect x={13} y={13} width={6} height={6} rx={1} stroke={color} strokeWidth={STROKE} />
         </Svg>
       );
     case 'sos':
