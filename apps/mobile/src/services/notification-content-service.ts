@@ -25,3 +25,27 @@ export function getAsitReminderNotificationContent(course: AsitCourse): { title:
     body: formatMessage(translate(messages, 'notifications.asitPushBody'), { drug, allergen }),
   };
 }
+
+export function getActReminderNotificationContent(): { title: string; body: string } {
+  const messages = LOCALE_MESSAGES[resolveLocale()];
+  return {
+    title: translate(messages, 'notifications.actPushTitle'),
+    body: translate(messages, 'notifications.actPushBody'),
+  };
+}
+
+export function getDoctorVisitReminderNotificationContent(visitLabel: string): { title: string; body: string } {
+  const messages = LOCALE_MESSAGES[resolveLocale()];
+  return {
+    title: translate(messages, 'notifications.visitPushTitle'),
+    body: formatMessage(translate(messages, 'notifications.visitPushBody'), { visit: visitLabel }),
+  };
+}
+
+export function getEpinephrineExpiryNotificationContent(): { title: string; body: string } {
+  const messages = LOCALE_MESSAGES[resolveLocale()];
+  return {
+    title: translate(messages, 'notifications.epiPushTitle'),
+    body: translate(messages, 'notifications.epiPushBody'),
+  };
+}

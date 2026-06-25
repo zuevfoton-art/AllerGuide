@@ -51,6 +51,11 @@ export async function deleteDiaryEntry(id: number) {
   db.runSync('DELETE FROM diary_entries WHERE id = ?', [id]);
 }
 
+export function listAllDiaryEntries(): DiaryEntry[] {
+  const db = getDb();
+  return db.getAllSync<DiaryEntry>('SELECT * FROM diary_entries ORDER BY id DESC', []);
+}
+
 export async function generateDoctorPdf(profileId: number) {
   const db = getDb();
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [profileId]);
