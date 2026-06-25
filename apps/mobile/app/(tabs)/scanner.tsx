@@ -1,5 +1,5 @@
-import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView } from 'react-native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -11,6 +11,7 @@ import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { ErrorState } from '@/src/components/ErrorState';
+import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,6 +25,11 @@ import {
   listSafeProducts,
   removeSafeProduct,
 } from '@/src/services/safe-products-service';
+import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
+
+const UNDO_MS = 5000;
+
+type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
 const MODES = [
   { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
@@ -55,6 +61,9 @@ export default function ScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const lastScanRef = useRef<(() => void) | null>(null);
+  const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHapticResultRef = useRef<ScanResult | null>(null);
 
   const displayResult = useMemo(
     () => (result ? localizeScanResult(result, localeContent) : null),
@@ -87,6 +96,56 @@ export default function ScannerScreen() {
       refreshHistory();
     }, [refreshHistory]),
   );
+
+  useEffect(() => {
+    if (loading || !result) return;
+    if (lastHapticResultRef.current === result) return;
+    lastHapticResultRef.current = result;
+    if (isDanger) void hapticDanger();
+  }, [result, loading, isDanger]);
+
+  const clearUndo = useCallback(() => {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = null;
+    setUndoItem(null);
+  }, []);
+
+  useEffect(() => () => clearUndo(), [clearUndo]);
+
+  const confirmRemoveSafe = (item: SafeProduct) => {
+    Alert.alert(
+      t('scanner.removeSafeTitle'),
+      t('scanner.removeSafeMessage', { name: item.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            removeSafeProduct(item.id);
+            void hapticLight();
+            refreshHistory();
+            setUndoItem({
+              name: item.name,
+              mode: item.mode,
+              input: item.input,
+              savedAt: item.savedAt,
+            });
+            if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+            undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
+          },
+        },
+      ],
+    );
+  };
+
+  const handleUndoRemove = () => {
+    if (!undoItem || !activeProfileId) return;
+    addSafeProduct(activeProfileId, undoItem.name, undoItem.mode, undoItem.input);
+    clearUndo();
+    refreshHistory();
+    void hapticSuccess();
+  };
 
   const runCheck = async (text: string, barcodeMode = false) => {
     lastScanRef.current = () => void runCheck(text, barcodeMode);
@@ -182,6 +241,7 @@ export default function ScannerScreen() {
     setResult(null);
     setOcrHint(null);
     setScanError(false);
+    lastHapticResultRef.current = null;
   };
 
   const openCamera = async () => {
@@ -441,6 +501,7 @@ export default function ScannerScreen() {
             onPress={() => {
               const name = result?.productName || input.trim().slice(0, 60);
               addSafeProduct(activeProfileId, name, mode, input.trim());
+              void hapticSuccess();
               refreshHistory();
             }}
           />
@@ -486,10 +547,7 @@ export default function ScannerScreen() {
                   </Text>
                 </View>
                 <Pressable
-                  onPress={() => {
-                    removeSafeProduct(item.id);
-                    refreshHistory();
-                  }}
+                  onPress={() => confirmRemoveSafe(item)}
                   accessibilityRole="button"
                   accessibilityLabel={t('scanner.removeSafe')}>
                   <Ionicons name="close-circle-outline" size={20} color={theme.colors.textMuted} />
@@ -498,6 +556,15 @@ export default function ScannerScreen() {
             );
           })}
         </GlassCard>
+      ) : null}
+
+      {undoItem ? (
+        <UndoBanner
+          message={t('scanner.removedFromSafe')}
+          actionLabel={t('common.undo')}
+          onUndo={handleUndoRemove}
+          onDismiss={clearUndo}
+        />
       ) : null}
 
       <Disclaimer>{t('scanner.disclaimer')}</Disclaimer>

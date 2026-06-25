@@ -5,6 +5,7 @@ import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
+import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Ionicons } from '@expo/vector-icons';
@@ -121,8 +122,29 @@ export default function SosScreen() {
     }
   };
 
+  const firstContact = contacts[0] ?? null;
+
   return (
-    <Screen onRefresh={() => handleRefresh()} refreshing={refreshing}>
+    <Screen
+      onRefresh={() => handleRefresh()}
+      refreshing={refreshing}
+      pinnedTop={
+        profile ? (
+          <SosEmergencyBar
+            emergencyLabel={t('sos.call', { number: emergencyNumber })}
+            contactName={firstContact?.name}
+            contactPhone={firstContact?.phone}
+            contactRelation={
+              firstContact
+                ? localizeEmergencyRelation(firstContact.relation, localeContent)
+                : undefined
+            }
+            callContactLabel={t('sos.callContact')}
+            onCallEmergency={() => void Linking.openURL(`tel:${emergencyNumber}`)}
+            onCallContact={() => firstContact && callPhone(firstContact.phone)}
+          />
+        ) : undefined
+      }>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
           <Text style={ui.docLabel}>AllerGuide · {t('sos.eyebrow')}</Text>
@@ -331,13 +353,6 @@ export default function SosScreen() {
           <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
         </GlassCard>
       ) : null}
-
-      <Button
-        label={t('sos.call', { number: emergencyNumber })}
-        variant="danger"
-        block
-        onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}
-      />
 
       <Pressable
         style={styles.settingsLink}
