@@ -113,30 +113,32 @@ export default function ScannerScreen() {
   useEffect(() => () => clearUndo(), [clearUndo]);
 
   const confirmRemoveSafe = (item: SafeProduct) => {
-    Alert.alert(
-      t('scanner.removeSafeTitle'),
-      t('scanner.removeSafeMessage', { name: item.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            removeSafeProduct(item.id);
-            void hapticLight();
-            refreshHistory();
-            setUndoItem({
-              name: item.name,
-              mode: item.mode,
-              input: item.input,
-              savedAt: item.savedAt,
-            });
-            if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
-            undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
-          },
-        },
-      ],
-    );
+    const title = t('scanner.removeSafeTitle');
+    const message = t('scanner.removeSafeMessage', { name: item.name });
+
+    const performRemove = () => {
+      removeSafeProduct(item.id);
+      void hapticLight();
+      refreshHistory();
+      setUndoItem({
+        name: item.name,
+        mode: item.mode,
+        input: item.input,
+        savedAt: item.savedAt,
+      });
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${title}\n\n${message}`)) performRemove();
+      return;
+    }
+
+    Alert.alert(title, message, [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: performRemove },
+    ]);
   };
 
   const handleUndoRemove = () => {
@@ -534,7 +536,7 @@ export default function ScannerScreen() {
             return (
               <View
                 key={item.id}
-                style={[styles.historyRow, index < safeList.length - 1 && styles.historyRowBorder]}>
+                style={[styles.listRow, index < safeList.length - 1 && styles.historyRowBorder]}>
                 <View style={ui.feedIcon}>
                   <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
                 </View>
@@ -709,6 +711,13 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     historyRow: { paddingHorizontal: 16, paddingVertical: 12 },
+    listRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
     historyRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
     removeBtn: {
       width: 44,
