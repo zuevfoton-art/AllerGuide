@@ -25,9 +25,37 @@ API раздаёт собранный фронтенд из `apps/mobile/dist` (
 
 Скрипт [`scripts/replit-deploy-build.sh`](../scripts/replit-deploy-build.sh):
 
-1. `pnpm install`
-2. `pnpm --filter api db:migrate` — если задан `DATABASE_URL` (production при деплое)
-3. `expo export` → `apps/mobile/dist`
+1. `source scripts/replit-db-env.sh` — Neon/Helium TLS и direct URL для миграций
+2. `pnpm install`
+3. `pnpm --filter api db:migrate` — если задан `DATABASE_URL` (production при деплое)
+4. `expo export` → `apps/mobile/dist`
+
+### Ошибка «Invalid Neon production database found for repl …»
+
+**Причина:** у опубликованного Repl привязана **недействительная** production-база Neon (устаревшая shared БД, удалённый endpoint, или конфликт после миграции Replit на Helium). Replit не может проверить diff схемы и останавливает Republish.
+
+**Что сделано в репозитории:**
+
+- Убран модуль `postgresql-16` из `.replit` — используется только managed Postgres из панели **Database**, без локального Nix Postgres.
+- [`scripts/replit-db-env.sh`](../scripts/replit-db-env.sh) — при деплое выставляет `DB_SSL=require`, `DB_PREPARE=false`, `DIRECT_DATABASE_URL` (из pooled URL).
+- `ignoreDatabaseMigrations = true` — схема обновляется Drizzle в `build`, не автоматическим push dev→prod.
+
+**Шаги в Replit UI (обязательно):**
+
+1. **Database** → вкладка **Development** → **Unpause database** (если кнопка есть).
+2. **Database** → вкладка **Production** → **Unpause database**.
+3. **Secrets** (в Project Editor и в Publishing → Secrets):
+   - Удалите **ручной** `DATABASE_URL`, если он указывает на старый `neon.tech` от другого Repl / remix.
+   - Оставьте URL только из панели Database текущего проекта.
+4. **Publish / Republish** → **Production database**:
+   - Включите **Create production database** (пересоздаёт битую production Neon).
+   - Включите **Set up your production database with your current development data** (если нужны данные из dev).
+5. Завершите публикацию. Replit подставит новый `DATABASE_URL` в production secrets.
+6. На следующих Republish **не** включайте «Create production database» снова — только Republish; миграции применит `replit-deploy-build.sh`.
+
+Если ошибка повторяется — [Replit Support](https://replit.com/support) с ID Repl из сообщения об ошибке.
+
+См. также: [Fix a published app using a shared database](https://docs.replit.com/references/data-and-storage/shared-database-migration).
 
 ### Ошибка «Cannot push development database objects, production database already exists»
 
@@ -35,10 +63,12 @@ API раздаёт собранный фронтенд из `apps/mobile/dist` (
 
 **Исправление в репозитории:** `ignoreDatabaseMigrations = true` — Replit не делает автоматический push dev→prod; схема обновляется нашими Drizzle-миграциями в `build`.
 
-**В UI Publishing при Republish:**
+**В UI Publishing при Republish (после успешного пересоздания production):**
 
-- **Не включайте** «Create production database» / «Set up production database with development data», если production уже есть.
+- **Не включайте** «Create production database», если production уже работает.
 - Достаточно **Republish** — миграции применятся на этапе `build`.
+
+**Исключение:** при ошибке «Invalid Neon production database» нужно **один раз** снова включить Create production database (см. выше).
 
 ### Шаги
 

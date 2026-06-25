@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "ruby-3.2", "swift-5.8", "postgresql-16"]
+modules = ["nodejs-20", "ruby-3.2", "swift-5.8"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -66,7 +66,8 @@ deploymentTarget = "autoscale"
 # "Cannot push development database objects, production database already exists".
 ignoreDatabaseMigrations = true
 build = ["bash", "scripts/replit-deploy-build.sh"]
-run = ["bash", "-c", "cd apps/api && npx tsx src/index.ts"]
+# replit-db-env.sh sets DB_SSL / DB_PREPARE / DIRECT_DATABASE_URL for managed Postgres.
+run = ["bash", "-c", "source scripts/replit-db-env.sh && cd apps/api && npx tsx src/index.ts"]
 
 [userenv]
 

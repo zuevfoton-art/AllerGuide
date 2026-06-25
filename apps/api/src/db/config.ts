@@ -52,6 +52,11 @@ export function buildConnectionOptions(env: Env = process.env): PgConnectionOpti
   return options;
 }
 
+/** Strip Neon PgBouncer `-pooler` host suffix for direct (migration) connections. */
+export function deriveDirectDatabaseUrl(url: string): string {
+  return url.includes('-pooler') ? url.replace('-pooler', '') : url;
+}
+
 /** Runtime (app) connection string — the pooled endpoint on Neon. */
 export function resolveRuntimeUrl(env: Env = process.env): string | undefined {
   return env.DATABASE_URL;
@@ -59,7 +64,10 @@ export function resolveRuntimeUrl(env: Env = process.env): string | undefined {
 
 /** Migration connection string — the direct (unpooled) endpoint on Neon. */
 export function resolveMigrationUrl(env: Env = process.env): string | undefined {
-  return env.DIRECT_DATABASE_URL ?? env.DATABASE_URL;
+  if (env.DIRECT_DATABASE_URL) return env.DIRECT_DATABASE_URL;
+  const runtime = env.DATABASE_URL;
+  if (!runtime) return undefined;
+  return deriveDirectDatabaseUrl(runtime);
 }
 
 /** Optional read-replica connection string; null when not configured. */

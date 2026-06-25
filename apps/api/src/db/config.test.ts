@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildConnectionOptions,
+  deriveDirectDatabaseUrl,
   resolveMigrationUrl,
   resolveReadUrl,
   resolveRuntimeUrl,
@@ -48,5 +49,14 @@ describe('db connection config', () => {
   it('falls back migration URL to DATABASE_URL and read URL to null', () => {
     expect(resolveMigrationUrl({ DATABASE_URL: 'postgres://only' })).toBe('postgres://only');
     expect(resolveReadUrl({ DATABASE_URL: 'postgres://only' })).toBeNull();
+  });
+
+  it('derives direct migration URL from Neon pooled DATABASE_URL', () => {
+    const pooled =
+      'postgres://user:pass@ep-abc-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require';
+    const direct =
+      'postgres://user:pass@ep-abc.us-east-2.aws.neon.tech/neondb?sslmode=require';
+    expect(deriveDirectDatabaseUrl(pooled)).toBe(direct);
+    expect(resolveMigrationUrl({ DATABASE_URL: pooled })).toBe(direct);
   });
 });
