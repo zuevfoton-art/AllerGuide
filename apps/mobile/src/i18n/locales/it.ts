@@ -587,6 +587,7 @@ const it: LocaleMessages = {
     hasSymptoms: 'Sintomi registrati',
     calm: 'Calmo',
     grains: 'grani/m³',
+    envUnavailable: 'Nessun dato',
   },
   errors: {
     selectProfile: 'Seleziona un profilo nella schermata home.',

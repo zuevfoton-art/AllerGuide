@@ -45,5 +45,6 @@ export interface ProfileInput {
   name: string;
   birthYear: number;
   type: ProfileType;
+  /** Canonical allergen ids (`milk`, `birch-pollen`, …). Legacy labels are normalized on save. */
   allergies: string[];
 }

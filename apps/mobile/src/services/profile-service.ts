@@ -10,6 +10,7 @@ import {
 } from '@/src/services/backend-api';
 import { trackEvent } from '@/src/services/analytics-service';
 import type { Profile, ProfileInput, ProfileType } from '@allerguide/core';
+import { migrateProfileAllergiesJson, normalizeProfileAllergenIds, serializeProfileAllergenIds } from '@allerguide/core';
 
 function requireUserId(): number {
   const userId = getCurrentUserId();
@@ -25,14 +26,22 @@ export function listProfiles() {
   return db.getAllSync<Profile>('SELECT * FROM profiles WHERE userId = ? ORDER BY id DESC', [userId]);
 }
 
+function normalizeAllergiesInput(allergies: string[]): string {
+  return serializeProfileAllergenIds(normalizeProfileAllergenIds(allergies));
+}
+
 export async function createProfile(input: ProfileInput) {
   const userId = requireUserId();
+  const allergiesJson = normalizeAllergiesInput(input.allergies);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
     if (!token) throw new Error('Session expired');
 
-    const response = await backendCreateProfile(token, input);
+    const response = await backendCreateProfile(token, {
+      ...input,
+      allergies: normalizeProfileAllergenIds(input.allergies),
+    });
     if (!response.ok) throw new Error(response.error);
 
     upsertLocalProfile({ ...response.data.profile, userId });
@@ -47,7 +56,7 @@ export async function createProfile(input: ProfileInput) {
     input.name,
     input.birthYear,
     input.type,
-    JSON.stringify(input.allergies),
+    allergiesJson,
   ]);
   const row = db.getFirstSync<{ id: number }>('SELECT id FROM profiles ORDER BY id DESC LIMIT 1');
   if (!row?.id) return null;
@@ -59,12 +68,16 @@ export async function createProfile(input: ProfileInput) {
 
 export async function updateProfile(id: number, input: ProfileInput) {
   const userId = requireUserId();
+  const allergiesJson = normalizeAllergiesInput(input.allergies);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
     if (!token) throw new Error('Session expired');
 
-    const response = await backendUpdateProfile(token, id, input);
+    const response = await backendUpdateProfile(token, id, {
+      ...input,
+      allergies: normalizeProfileAllergenIds(input.allergies),
+    });
     if (!response.ok) throw new Error(response.error);
 
     upsertLocalProfile({ ...response.data.profile, userId });
@@ -76,7 +89,7 @@ export async function updateProfile(id: number, input: ProfileInput) {
   const db = getDb();
   db.runSync(
     'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
-    [userId, input.name, input.birthYear, input.type, JSON.stringify(input.allergies), id],
+    [userId, input.name, input.birthYear, input.type, allergiesJson, id],
   );
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
   const { activeProfileId, setActiveProfile } = useAppStore.getState();
@@ -127,10 +140,18 @@ export function migrateLegacyProfilesToUser(userId: number) {
   const db = getDb();
   const all = db.getAllSync<Profile>('SELECT * FROM profiles');
   for (const profile of all) {
-    if (!profile.userId) {
+    const migratedAllergies = migrateProfileAllergiesJson(profile.allergies);
+    if (!profile.userId || migratedAllergies !== profile.allergies) {
       db.runSync(
         'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ? WHERE id = ?',
-        [userId, profile.name, profile.birthYear, profile.type, profile.allergies, profile.id],
+        [
+          profile.userId || userId,
+          profile.name,
+          profile.birthYear,
+          profile.type,
+          migratedAllergies,
+          profile.id,
+        ],
       );
     }
   }

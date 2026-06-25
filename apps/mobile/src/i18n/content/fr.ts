@@ -341,6 +341,10 @@ const frContent: LocaleContent = {
         title: 'Journée stable',
         text: 'Les indicateurs environnementaux et les entrées du journal ne suggèrent pas de risques élevés.',
       },
+      envUnavailable: {
+        title: 'Données environnementales indisponibles',
+        text: 'Impossible de charger le pollen et la qualité de l\'air. L\'indice reflète uniquement le journal.',
+      },
     },
     pollenLabels: {
       birch_pollen: 'Bouleau',
@@ -348,6 +352,8 @@ const frContent: LocaleContent = {
       ragweed_pollen: 'Ambroisie',
     },
     locationDefault: 'Paris',
+    envUnavailableSummary:
+      'Données Open-Meteo indisponibles. L\'indice utilise le journal uniquement; facteurs environnementaux exclus.',
   },
   scanner: {
     verdicts: {

@@ -4,6 +4,7 @@ import { filterProductsForProfile, parseProfileAllergens } from './catalog';
 describe('catalog', () => {
   it('parses profile allergens json', () => {
     expect(parseProfileAllergens('["Молоко"]')).toEqual(['Молоко']);
+    expect(parseProfileAllergens('["milk"]')).toEqual(['Молоко']);
   });
 
   it('filters products that contain profile allergens', () => {

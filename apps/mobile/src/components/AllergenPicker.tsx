@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  findAllergenById,
   getCrossReactionsForSelection,
   getPopularAllergens,
   type CrossReactionMatch,
@@ -12,6 +13,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { formatCrossReactionLabel } from '@/src/i18n/cross-reactions';
 
 interface AllergenPickerProps {
+  /** Canonical allergen ids (`milk`, `birch-pollen`, …). */
   selected: string[];
   onChange: (selected: string[]) => void;
 }
@@ -22,19 +24,17 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
   const { t } = useTranslation();
   const [catalogOpen, setCatalogOpen] = useState(false);
 
-  const popularNames = useMemo(() => new Set(getPopularAllergens().map((item) => item.name)), []);
-  const extraSelected = selected.filter((name) => !popularNames.has(name));
+  const popularIds = useMemo(() => new Set(getPopularAllergens().map((item) => item.id)), []);
+  const extraSelected = selected.filter((id) => !popularIds.has(id));
   const crossSuggestions = useMemo(() => getCrossReactionsForSelection(selected), [selected]);
 
-  const toggle = (name: string) => {
-    onChange(
-      selected.includes(name) ? selected.filter((item) => item !== name) : [...selected, name],
-    );
+  const toggle = (id: string) => {
+    onChange(selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id]);
   };
 
   const addRelated = (matches: CrossReactionMatch[]) => {
-    const names = matches.map((item) => item.allergen.name);
-    onChange([...new Set([...selected, ...names])]);
+    const ids = matches.map((item) => item.allergen.id);
+    onChange([...new Set([...selected, ...ids])]);
   };
 
   return (
@@ -42,12 +42,12 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
       <Text style={styles.sectionHint}>{t('allergens.popular')}</Text>
       <View style={styles.chipGrid}>
         {getPopularAllergens().map((item) => {
-          const active = selected.includes(item.name);
+          const active = selected.includes(item.id);
           return (
             <Pressable
               key={item.id}
               style={[styles.chip, active && styles.chipActive]}
-              onPress={() => toggle(item.name)}>
+              onPress={() => toggle(item.id)}>
               {active ? (
                 <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
               ) : null}
@@ -61,15 +61,18 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
         <>
           <Text style={styles.sectionHint}>{t('allergens.fromCatalog')}</Text>
           <View style={styles.chipGrid}>
-            {extraSelected.map((name) => (
-              <Pressable
-                key={name}
-                style={[styles.chip, styles.chipActive]}
-                onPress={() => toggle(name)}>
-                <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
-                <Text style={[styles.chipText, styles.chipTextActive]}>{name}</Text>
-              </Pressable>
-            ))}
+            {extraSelected.map((id) => {
+              const label = findAllergenById(id)?.name ?? id;
+              return (
+                <Pressable
+                  key={id}
+                  style={[styles.chip, styles.chipActive]}
+                  onPress={() => toggle(id)}>
+                  <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
+                  <Text style={[styles.chipText, styles.chipTextActive]}>{label}</Text>
+                </Pressable>
+              );
+            })}
           </View>
         </>
       ) : null}

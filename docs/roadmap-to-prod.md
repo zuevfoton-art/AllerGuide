@@ -297,7 +297,7 @@ flowchart LR
 
 - [`scripts/roadmap-issues.json`](../scripts/roadmap-issues.json) — данные для GitHub milestones/issues
 - [`scripts/create-roadmap-issues.sh`](../scripts/create-roadmap-issues.sh) — скрипт создания milestones и issues
-- [`docs/qa-checklist.md`](./qa-checklist.md) — регрессионный чеклист internal alpha (P0.1)
+- [`docs/clinical-accuracy-roadmap.md`](./clinical-accuracy-roadmap.md) — точность wellness, профиля, дневника (фазы A–E)
 - [`docs/eas-internal-preview.md`](./eas-internal-preview.md) — первая EAS preview-сборка (P0.4)
 - [`docs/architecture.md`](./architecture.md) — архитектура и production hardening
 - [`docs/development-rules.md`](./development-rules.md) — обязательные правила разработки

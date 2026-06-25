@@ -62,9 +62,9 @@ export function AllergenCatalogModal({
     })).filter((section) => section.items.length > 0);
   }, [filtered]);
 
-  const toggle = (name: string) => {
+  const toggle = (id: string) => {
     setDraft((prev) =>
-      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name],
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -75,7 +75,7 @@ export function AllergenCatalogModal({
   };
 
   const renderItem = (item: AllergenRecord) => {
-    const active = draft.includes(item.name);
+    const active = draft.includes(item.id);
     const crossReactions = getCrossReactionsFor(item.id);
     const showNote = expandedNote === item.id;
 
@@ -83,7 +83,7 @@ export function AllergenCatalogModal({
       <View key={item.id} style={styles.itemWrap}>
         <Pressable
           style={[styles.itemRow, active && styles.itemRowActive]}
-          onPress={() => toggle(item.name)}
+          onPress={() => toggle(item.id)}
           onLongPress={() => setExpandedNote(showNote ? null : item.id)}>
           <View style={[styles.checkbox, active && styles.checkboxActive]}>
             {active ? <Ionicons name="checkmark" size={14} color={theme.colors.onAccent} /> : null}

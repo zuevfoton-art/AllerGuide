@@ -573,6 +573,7 @@ export type LocaleMessages = {
     hasSymptoms: string;
     calm: string;
     grains: string;
+    envUnavailable: string;
   };
   errors: {
     selectProfile: string;

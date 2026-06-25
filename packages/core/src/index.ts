@@ -1,3 +1,4 @@
+export * from './profile-allergens';
 export * from './types';
 export * from './allergens';
 export * from './onboarding';
