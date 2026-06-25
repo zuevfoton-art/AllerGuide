@@ -43,16 +43,38 @@ export function DiaryInsightsCard({ entries }: Props) {
   const barWidth = Math.floor((chartWidth - 2 * PAD - BAR_GAP * 6) / 7);
 
   const correlationText = useMemo(() => {
-    if (!insights.correlationKind || insights.correlationOf < 2) return null;
-    const n = String(insights.correlationCount);
-    const of = String(insights.correlationOf);
-    if (insights.correlationKind === 'symptom-food')
-      return t('diary.insightsCorSymFood', { n, of });
-    if (insights.correlationKind === 'symptom-trigger')
-      return t('diary.insightsCorSymTrig', { n, of });
-    if (insights.correlationKind === 'symptom-meds')
-      return t('diary.insightsCorSymMeds', { n, of });
+    const kind = insights.temporalCorrelationKind ?? insights.correlationKind;
+    const count = insights.temporalCorrelationKind
+      ? insights.temporalCorrelationCount
+      : insights.correlationCount;
+    const of = insights.temporalCorrelationKind
+      ? insights.temporalCorrelationOf
+      : insights.correlationOf;
+    if (!kind || of < 2) return null;
+    const n = String(count);
+    const total = String(of);
+    const temporal = Boolean(insights.temporalCorrelationKind);
+    if (kind === 'symptom-food') {
+      return temporal
+        ? t('diary.insightsTemporalCorSymFood', { n, of: total })
+        : t('diary.insightsCorSymFood', { n, of: total });
+    }
+    if (kind === 'symptom-trigger') {
+      return temporal
+        ? t('diary.insightsTemporalCorSymTrig', { n, of: total })
+        : t('diary.insightsCorSymTrig', { n, of: total });
+    }
+    if (kind === 'symptom-meds') {
+      return temporal
+        ? t('diary.insightsTemporalCorSymMeds', { n, of: total })
+        : t('diary.insightsCorSymMeds', { n, of: total });
+    }
     return null;
+  }, [insights, t]);
+
+  const anomalyText = useMemo(() => {
+    if (insights.anomalyKind !== 'symptoms-without-trigger') return null;
+    return t('diary.insightsAnomalySymptomsNoTrigger', { days: String(insights.anomalyDays) });
   }, [insights, t]);
 
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -136,6 +158,12 @@ export function DiaryInsightsCard({ entries }: Props) {
           </View>
         </View>
       )}
+
+      {anomalyText ? (
+        <View style={[styles.hintRow, styles.anomalyRow]}>
+          <Text style={styles.hintText}>{'⚠️ ' + anomalyText}</Text>
+        </View>
+      ) : null}
 
       {correlationText ? (
         <View style={styles.hintRow}>
@@ -230,6 +258,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       borderRadius: radii.sm,
       padding: space[3],
+    },
+    anomalyRow: {
+      backgroundColor: colors.warningLight,
     },
     hintText: {
       fontFamily: fonts.sans,

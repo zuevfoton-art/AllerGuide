@@ -13,8 +13,16 @@ export interface WellnessWeightSet {
   diaryTriggerDay: number;
   /** Bonus when logging streak ≥ 3 days. */
   diaryStreakBonus: number;
-  /** Bonus when symptom–trigger correlation detected. */
+  /** Bonus when day-level symptom–trigger correlation detected. */
   diaryCorrelationBonus: number;
+  /** Bonus when symptom–trigger temporal correlation detected (±4h, C.3). */
+  temporalCorrelationBonus: number;
+  /** Penalty when symptom days without trigger anomaly (C.6). */
+  symptomWithoutTriggerAnomaly: number;
+  /** Per missed ASIT dose in 30-day window (C.5). */
+  asitMissedDose: number;
+  /** When ASIT systemic reaction is severe (C.5). */
+  asitSevereReaction: number;
   clinicalScale: Record<'moderate' | 'severe' | 'uncontrolled', number>;
   crossReaction: Record<'high' | 'medium' | 'low', number>;
   scoreMin: number;
@@ -29,6 +37,10 @@ export const WELLNESS_WEIGHTS: WellnessWeightSet = {
   diaryTriggerDay: 3,
   diaryStreakBonus: 4,
   diaryCorrelationBonus: 6,
+  temporalCorrelationBonus: 8,
+  symptomWithoutTriggerAnomaly: 10,
+  asitMissedDose: 4,
+  asitSevereReaction: 12,
   clinicalScale: { moderate: 8, severe: 16, uncontrolled: 22 },
   crossReaction: { high: 12, medium: 8, low: 4 },
   scoreMin: 5,

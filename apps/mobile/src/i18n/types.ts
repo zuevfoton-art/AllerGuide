@@ -181,6 +181,13 @@ export type LocaleMessages = {
     insightsCorSymFood: string;
     insightsCorSymTrig: string;
     insightsCorSymMeds: string;
+    insightsTemporalCorSymFood: string;
+    insightsTemporalCorSymTrig: string;
+    insightsTemporalCorSymMeds: string;
+    insightsAnomalySymptomsNoTrigger: string;
+    actPromptTitle: string;
+    actPromptText: string;
+    actPromptButton: string;
   };
   diaryWizard: {
     stepOf: string;

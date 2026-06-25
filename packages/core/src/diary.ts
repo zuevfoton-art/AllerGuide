@@ -1,4 +1,6 @@
 import { formatScaleSummary } from './clinical-scales';
+import { enrichSeverityAnswers, formatSeveritySummary, normalizeSeverity } from './diary-severity';
+import { enrichSymptomAnswers, formatCodedSymptomsSummary, resolveSymptomCodes } from './symptom-coding';
 import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
@@ -34,6 +36,24 @@ export const DIARY_SECTIONS: DiarySection[] = [
     icon: 'pulse',
     steps: [
       {
+        id: 'symptomCode',
+        label: 'Основной симптом (из справочника)',
+        field: 'choice',
+        choices: [
+          'Заложенность носа',
+          'Выделения из носа',
+          'Чихание',
+          'Зуд глаз',
+          'Кашель',
+          'Одышка / свистящее дыхание',
+          'Крапивница',
+          'Отёк (ангионевротический)',
+          'ЖКТ-симптомы',
+          'Зуд кожи',
+        ],
+        required: false,
+      },
+      {
         id: 'symptoms',
         label: 'Какие симптомы наблюдаются?',
         placeholder: 'Например: зуд, отёк губ, кашель',
@@ -42,8 +62,15 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: true,
       },
       {
+        id: 'severity0_3',
+        label: 'Выраженность симптомов (0–3)',
+        field: 'choice',
+        choices: ['0 — нет', '1 — лёгкая', '2 — умеренная', '3 — сильная'],
+        required: true,
+      },
+      {
         id: 'intensity',
-        label: 'Насколько выражены симптомы?',
+        label: 'Насколько выражены симптомы? (устар.)',
         field: 'choice',
         choices: [
           '0 — нет',
@@ -58,7 +85,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
           '9',
           '10 — очень сильно',
         ],
-        required: true,
+        required: false,
       },
       {
         id: 'symptomAreas',
@@ -539,9 +566,26 @@ export function getDiaryStepLabel(section: DiarySection, stepId: string): string
   return section.steps.find((step) => step.id === stepId)?.label ?? stepId;
 }
 
-export function encodeDiaryDetails(answers: Record<string, string>): string {
-  const payload: StructuredDiaryPayload = { v: 1, answers };
+export function encodeDiaryDetails(answers: Record<string, string>, sectionType?: string): string {
+  let enriched = { ...answers };
+  if (sectionType === 'Симптомы') {
+    enriched = enrichSymptomAnswers(enriched);
+    enriched = enrichSeverityAnswers(enriched, 'Симптомы');
+  } else if (sectionType) {
+    enriched = enrichSeverityAnswers(enriched, sectionType);
+  }
+  const payload: StructuredDiaryPayload = { v: 1, answers: enriched };
   return JSON.stringify(payload);
+}
+
+export function enrichDiaryAnswers(
+  sectionType: string,
+  answers: Record<string, string>,
+): Record<string, string> {
+  if (sectionType === 'Симптомы') {
+    return enrichSeverityAnswers(enrichSymptomAnswers(answers), 'Симптомы');
+  }
+  return enrichSeverityAnswers(answers, sectionType);
 }
 
 export function decodeDiaryDetails(details: string): StructuredDiaryPayload | null {
@@ -590,6 +634,17 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
     return formatInsectStingEntrySummary(structured.answers);
   }
 
+  if (type === 'Симптомы') {
+    const parts: string[] = [];
+    const symptoms = structured.answers.symptoms?.trim();
+    if (symptoms) parts.push(symptoms);
+    const severity = normalizeSeverity(structured.answers, 'Симптомы');
+    if (severity !== null) parts.push(`тяжесть ${formatSeveritySummary(severity)}`);
+    const coded = formatCodedSymptomsSummary(resolveSymptomCodes(structured.answers));
+    if (coded) parts.push(coded);
+    return parts.length ? parts.join(' · ') : 'Симптомы';
+  }
+
   const section = getDiarySection(type);
   if (!section) {
     return Object.values(structured.answers)
@@ -605,6 +660,24 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
     })
     .filter(Boolean)
     .join(' · ');
+}
+
+export function validateDiarySection(
+  section: DiarySection,
+  answers: Record<string, string>,
+): string | null {
+  for (let i = 0; i < section.steps.length; i++) {
+    const err = validateDiarySectionStep(section, i, answers);
+    if (err) return err;
+  }
+
+  if (section.type === 'Симптомы') {
+    const hasSeverity =
+      answers.severity0_3?.trim() || answers.intensity?.trim() || answers.severity?.trim();
+    if (!hasSeverity) return 'Укажите выраженность симптомов (0–3).';
+  }
+
+  return null;
 }
 
 export function validateDiarySectionStep(

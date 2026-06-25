@@ -2,7 +2,9 @@ import {
   aqiTier,
   buildClinicalScalesFromTrends,
   buildDiarySeriesFromInsights,
+  buildAsitSummaryFromCompliance,
   collectLatestScaleTrends,
+  computeAsitCompliance,
   computeDiaryInsights,
   computeWellnessConfidence,
   computeWellnessScore,
@@ -238,6 +240,8 @@ export async function fetchWellnessSnapshot(
   }
 
   const foodAllergens = getFoodAllergenLabels(profileAllergenIds);
+  const asitCompliance = computeAsitCompliance(diaryEntries, 30);
+  const asit = buildAsitSummaryFromCompliance(asitCompliance);
 
   const scoreInput = {
     profileAllergenIds,
@@ -248,6 +252,7 @@ export async function fetchWellnessSnapshot(
     clinicalScales,
     foodAllergens,
     envDataAvailable,
+    asit,
   };
 
   const score = computeWellnessScore(scoreInput);

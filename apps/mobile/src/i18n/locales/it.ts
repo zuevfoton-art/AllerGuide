@@ -179,6 +179,13 @@ const it: LocaleMessages = {
     insightsCorSymFood: '{{n}} su {{of}} giorni con sintomi avevano anche una voce alimentare',
     insightsCorSymTrig: '{{n}} su {{of}} giorni con sintomi aveva un fattore scatenante registrato',
     insightsCorSymMeds: '{{n}} su {{of}} giorni con sintomi includevano un farmaco',
+    insightsTemporalCorSymFood: '{{n}} su {{of}} episodi sintomi con cibo entro ±4 h',
+    insightsTemporalCorSymTrig: '{{n}} su {{of}} episodi sintomi con trigger entro ±4 h',
+    insightsTemporalCorSymMeds: '{{n}} su {{of}} episodi sintomi con farmaco entro ±4 h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} giorni consecutivi con sintomi senza trigger registrato',
+    actPromptTitle: 'È il momento dell\'ACT',
+    actPromptText: 'Sono passate più di 4 settimane dall\'ultima valutazione ACT. Consigliamo di compilarla.',
+    actPromptButton: 'Compila ACT',
   },
   diaryWizard: {
     stepOf: 'Passo {{current}} di {{total}}',

@@ -30,7 +30,7 @@ describe('wellness', () => {
     pollenMatches: [{ label: 'Берёза', value: 5, profileRelevant: true, taxonId: 'birch_pollen' as const }],
     europeanAqi: 15,
     pm25: 10,
-    diary: { symptomDays: 0, triggerDays: 0, streak: 0, weekTotal: 0, correlationKind: null },
+    diary: { symptomDays: 0, triggerDays: 0, streak: 0, weekTotal: 0, correlationKind: null, temporalCorrelationKind: null, anomalyKind: null, anomalyDays: 0 },
     clinicalScales: [],
     foodAllergens: [],
     envDataAvailable: true,

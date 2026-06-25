@@ -179,6 +179,13 @@ const de: LocaleMessages = {
     insightsCorSymFood: 'An {{n}} von {{of}} Symptomtagen gab es auch einen Ernährungseintrag',
     insightsCorSymTrig: 'An {{n}} von {{of}} Symptomtagen wurde ein Auslöser erfasst',
     insightsCorSymMeds: 'An {{n}} von {{of}} Symptomtagen wurde ein Medikament eingenommen',
+    insightsTemporalCorSymFood: 'Bei {{n}} von {{of}} Symptomepisoden Essen innerhalb ±4 h',
+    insightsTemporalCorSymTrig: 'Bei {{n}} von {{of}} Symptomepisoden Trigger innerhalb ±4 h',
+    insightsTemporalCorSymMeds: 'Bei {{n}} von {{of}} Symptomepisoden Medikament innerhalb ±4 h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} Tage in Folge Symptome ohne dokumentierten Trigger',
+    actPromptTitle: 'Zeit für ACT',
+    actPromptText: 'Seit der letzten ACT-Bewertung sind 4+ Wochen vergangen. Wir empfehlen ACT auszufüllen.',
+    actPromptButton: 'ACT ausfüllen',
   },
   diaryWizard: {
     stepOf: 'Schritt {{current}} von {{total}}',
