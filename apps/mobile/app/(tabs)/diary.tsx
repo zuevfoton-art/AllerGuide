@@ -405,6 +405,12 @@ export default function DiaryScreen() {
               if (section) setEditor({ mode: 'section', sectionType: section.type });
             }}
           />
+          <Button
+            label={t('voiceNote.quickVoice')}
+            variant="secondary"
+            block
+            onPress={() => setEditor({ mode: 'section', sectionType: 'Заметка' })}
+          />
 
           <GlassCard>
             <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>

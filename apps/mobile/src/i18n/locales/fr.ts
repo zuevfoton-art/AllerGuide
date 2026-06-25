@@ -583,6 +583,19 @@ const fr: LocaleMessages = {
     calm: 'Calme',
     grains: 'grains/m³',
   },
+  voiceNote: {
+    title: 'Note vocale',
+    startRecording: 'Commencer l’enregistrement',
+    stopRecording: 'Arrêter et transcrire',
+    transcribing: 'Transcription…',
+    tapToSpeak: 'Appuyez pour dicter',
+    permissionDenied: 'Accès au micro refusé. Activez-le dans les réglages de l’appareil.',
+    notSupported: 'La saisie vocale n’est pas disponible sur cet appareil.',
+    cloudRequired:
+      'Sur mobile, la transcription passe par le serveur. Activez EXPO_PUBLIC_VOICE_TRANSCRIBE et API VOICE_TRANSCRIBE_ENABLED.',
+    failed: 'Impossible de transcrire l’enregistrement. Réessayez.',
+    quickVoice: 'Note vocale',
+  },
   errors: {
     selectProfile: 'Choisissez un profil sur l\'écran d\'accueil.',
   },

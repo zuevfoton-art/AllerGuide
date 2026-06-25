@@ -584,6 +584,19 @@ const ru: LocaleMessages = {
     calm: 'Спокойно',
     grains: 'зёрен/м³',
   },
+  voiceNote: {
+    title: 'Голосовая заметка',
+    startRecording: 'Начать запись',
+    stopRecording: 'Остановить и расшифровать',
+    transcribing: 'Расшифровка…',
+    tapToSpeak: 'Нажмите, чтобы надиктовать',
+    permissionDenied: 'Нет доступа к микрофону. Разрешите запись в настройках устройства.',
+    notSupported: 'Голосовой ввод недоступен на этом устройстве.',
+    cloudRequired:
+      'На мобильном приложении расшифровка выполняется через сервер. Включите EXPO_PUBLIC_VOICE_TRANSCRIBE и API с VOICE_TRANSCRIBE_ENABLED.',
+    failed: 'Не удалось расшифровать запись. Попробуйте ещё раз.',
+    quickVoice: 'Голосовая заметка',
+  },
   errors: {
     selectProfile: 'Выберите профиль на главном экране.',
   },

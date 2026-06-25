@@ -569,6 +569,18 @@ export type LocaleMessages = {
     calm: string;
     grains: string;
   };
+  voiceNote: {
+    title: string;
+    startRecording: string;
+    stopRecording: string;
+    transcribing: string;
+    tapToSpeak: string;
+    permissionDenied: string;
+    notSupported: string;
+    cloudRequired: string;
+    failed: string;
+    quickVoice: string;
+  };
   errors: {
     selectProfile: string;
   };

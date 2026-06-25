@@ -9,11 +9,13 @@ import { registerScanRoutes } from './routes/scan';
 import { registerMobileAuthRoutes } from './routes/mobile-auth';
 import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
+import { registerTranscribeRoutes } from './routes/transcribe';
 import {
   buildCorsOptions,
   createAuthRateLimiter,
   createGlobalRateLimiter,
   createScanRateLimiter,
+  createTranscribeRateLimiter,
 } from './middleware/security';
 
 export async function createApp(
@@ -33,11 +35,13 @@ export async function createApp(
 
   app.use('/api/auth', createAuthRateLimiter());
   app.use('/api/scan', createScanRateLimiter());
+  app.use('/api/transcribe', createTranscribeRateLimiter());
 
   registerMobileAuthRoutes(app);
   registerProfileRoutes(app);
   registerSyncRoutes(app);
   registerScanRoutes(app);
+  registerTranscribeRoutes(app);
   registerCatalogRoutes(app);
 
   if (withReplitAuth) {

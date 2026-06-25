@@ -583,6 +583,19 @@ const de: LocaleMessages = {
     calm: 'Ruhig',
     grains: 'Körner/m³',
   },
+  voiceNote: {
+    title: 'Sprachnotiz',
+    startRecording: 'Aufnahme starten',
+    stopRecording: 'Stoppen und transkribieren',
+    transcribing: 'Transkription…',
+    tapToSpeak: 'Tippen zum Diktieren',
+    permissionDenied: 'Mikrofonzugriff verweigert. In den Geräteeinstellungen aktivieren.',
+    notSupported: 'Spracheingabe auf diesem Gerät nicht verfügbar.',
+    cloudRequired:
+      'Auf dem Handy erfolgt die Transkription über den Server. EXPO_PUBLIC_VOICE_TRANSCRIBE und API VOICE_TRANSCRIBE_ENABLED aktivieren.',
+    failed: 'Transkription fehlgeschlagen. Bitte erneut versuchen.',
+    quickVoice: 'Sprachnotiz',
+  },
   errors: {
     selectProfile: 'Profil auf dem Startbildschirm auswählen.',
   },

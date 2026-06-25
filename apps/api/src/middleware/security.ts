@@ -82,3 +82,15 @@ export function createScanRateLimiter(): RateLimitRequestHandler {
     message: { ok: false, error: 'Too many scan requests' },
   });
 }
+
+/** Limiter for voice transcription (Whisper calls). */
+export function createTranscribeRateLimiter(): RateLimitRequestHandler {
+  if (rateLimitDisabled()) return passthrough;
+  return rateLimit({
+    windowMs: parseNumber(process.env.TRANSCRIBE_RATE_LIMIT_WINDOW_MS, 60 * 1000),
+    max: parseNumber(process.env.TRANSCRIBE_RATE_LIMIT_MAX, 20),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { ok: false, error: 'Too many transcription requests' },
+  });
+}
