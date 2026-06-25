@@ -1,6 +1,6 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
   buildAsitPrefill,
@@ -47,6 +47,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -88,6 +89,7 @@ export default function DiaryScreen() {
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const localizedSections = useMemo(
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
@@ -224,9 +226,21 @@ export default function DiaryScreen() {
     setList(await getDiaryEntries(activeProfileId));
   }, [activeProfileId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const refresh = useCallback(async () => {
+    if (!activeProfileId) return;
+    setRefreshing(true);
+    try {
+      setList(await getDiaryEntries(activeProfileId));
+    } finally {
+      setRefreshing(false);
+    }
+  }, [activeProfileId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
 
   const closeEditor = () => setEditor(null);
 
@@ -343,7 +357,9 @@ export default function DiaryScreen() {
   };
 
   return (
-    <Screen>
+    <Screen
+      onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
+      refreshing={refreshing}>
       <View style={styles.header}>
         <Text style={ui.docLabel}>AllerGuide · {t('diary.eyebrow')}</Text>
         <Text style={ui.docTitle}>{t('diary.title')}</Text>
@@ -501,27 +517,24 @@ export default function DiaryScreen() {
         renderEditor()
       )}
 
-      <View style={styles.actionRow}>
-        <Button label={t('diary.refresh')} variant="secondary" style={styles.actionBtn} onPress={() => void load()} />
-        <Button
-          label={t('diary.doctorReport')}
-          variant="secondary"
-          style={styles.actionBtn}
-          onPress={() => router.push('/doctor-report' as any)}
-        />
-      </View>
+      <Button
+        label={t('diary.doctorReport')}
+        variant="secondary"
+        block
+        onPress={() => router.push('/doctor-report' as any)}
+      />
 
       <DiaryInsightsCard entries={list} />
 
-      <GlassCard padded={false}>
-        <View style={styles.listHead}>
-          <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
-        </View>
+      {list.length === 0 ? (
+        <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
+      ) : (
+        <GlassCard padded={false}>
+          <View style={styles.listHead}>
+            <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
+          </View>
 
-        {list.length === 0 ? (
-          <Text style={[styles.empty, styles.listHeadPad]}>{t('diary.empty')}</Text>
-        ) : (
-          list.map((item, index) => {
+          {list.map((item, index) => {
             const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
             return (
@@ -540,9 +553,9 @@ export default function DiaryScreen() {
                 <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
               </Pressable>
             );
-          })
-        )}
-      </GlassCard>
+          })}
+        </GlassCard>
+      )}
 
       <Disclaimer>{t('diary.disclaimer')}</Disclaimer>
     </Screen>
@@ -618,8 +631,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
     },
-    actionRow: { flexDirection: 'row', gap: 8 },
-    actionBtn: { flex: 1 },
     listHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -640,13 +651,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
-    },
-    empty: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      paddingBottom: 16,
-      lineHeight: 18,
     },
   });
 }
