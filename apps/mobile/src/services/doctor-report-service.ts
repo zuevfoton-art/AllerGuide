@@ -3,11 +3,13 @@ import {
   DOCTOR_REPORT_BLOCKS,
   DOCTOR_REPORT_DISCLAIMER,
   DOCTOR_REPORT_TITLE,
+  buildCodedAllergyLines,
   computeAsitCompliance,
   computeFoodDrugSummary,
   computeInsectStingSummary,
   computePefTrend,
   formatAsitReportSummary,
+  formatCodedAllergiesReportHtml,
   formatFoodDrugReportSummary,
   formatInsectReportSummary,
   formatDiaryDate,
@@ -20,6 +22,8 @@ import {
   getDefaultReportBlockIds,
   getReportDiaryTypes,
   parseAllergies,
+  parseAllergyConfirmations,
+  parseProfileAllergenIds,
   type DoctorReportBlock,
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
@@ -165,6 +169,15 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     ? `<section><h2>Паспорт SOS</h2>${renderPassportSummary(profile)}</section>`
     : '';
 
+  const codedAllergiesHtml = profile
+    ? `<section><h2>Кодированные аллергены (ICD-11 / SNOMED)</h2>${formatCodedAllergiesReportHtml(
+        buildCodedAllergyLines(
+          parseProfileAllergenIds(profile.allergies),
+          parseAllergyConfirmations(profile.allergyConfirmations),
+        ),
+      )}</section>`
+    : '';
+
   const html = `
     <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
       <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">Отчёт AllerGuide для врача</h1>
@@ -180,6 +193,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${foodDrugHtml}
       ${insectHtml}
       ${triggerContextHtml}
+      ${codedAllergiesHtml}
       ${blocksHtml}
       ${passportHtml}
       <hr style="border:none;border-top:1px solid ${c.border};" />

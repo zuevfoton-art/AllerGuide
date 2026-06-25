@@ -1,4 +1,9 @@
 import { getApiBaseUrl } from '@/src/services/api-client';
+import {
+  cachedCatalogProductToDto,
+  getCachedCatalogProduct,
+  saveCachedCatalogProduct,
+} from '@/src/services/catalog-cache-service';
 
 export interface CatalogProduct {
   barcode: string;
@@ -16,6 +21,7 @@ interface ProductDto {
   imageUrl?: string;
   ingredients?: string;
   allergenTags?: string[];
+  source?: string;
 }
 
 function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct | null {
@@ -32,30 +38,39 @@ function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct
 }
 
 /**
- * Looks up a product in the backend catalog (`/api/products/:barcode`), which
- * fetches on demand from Open Food Facts on a cache miss.
- * Returns null on miss/offline so callers can fall back to a direct OFF lookup.
+ * Looks up a product: offline catalog cache first, then backend API (catalog DB
+ * source of truth with OFF write-through). Successful API hits are cached locally.
  */
 export async function fetchProductFromCatalog(barcode: string): Promise<CatalogProduct | null> {
   const normalized = barcode.replace(/\s+/g, '').trim();
   if (!normalized) return null;
 
+  const cached = getCachedCatalogProduct(normalized);
+  if (cached) return cachedCatalogProductToDto(cached);
+
   try {
     const response = await fetch(`${getApiBaseUrl()}/api/products/${encodeURIComponent(normalized)}`);
     if (!response.ok) return null;
 
-    const data = (await response.json()) as { ok?: boolean; product?: ProductDto };
+    const data = (await response.json()) as {
+      ok?: boolean;
+      product?: ProductDto;
+      source?: string;
+    };
     if (!data.ok || !data.product) return null;
 
-    return toCatalogProduct(data.product, normalized);
+    const product = toCatalogProduct(data.product, normalized);
+    if (!product) return null;
+
+    saveCachedCatalogProduct(product, data.source ?? 'api');
+    return product;
   } catch {
     return null;
   }
 }
 
 /**
- * Full-text product search via the backend catalog (`/api/products/search`),
- * which queries Open Food Facts on demand when nothing is cached locally.
+ * Full-text product search via backend catalog; caches each result for offline reuse.
  */
 export async function searchProductsFromCatalog(query: string): Promise<CatalogProduct[]> {
   const term = query.trim();
@@ -67,11 +82,19 @@ export async function searchProductsFromCatalog(query: string): Promise<CatalogP
     );
     if (!response.ok) return [];
 
-    const data = (await response.json()) as { ok?: boolean; products?: ProductDto[] };
+    const data = (await response.json()) as {
+      ok?: boolean;
+      products?: ProductDto[];
+      source?: string;
+    };
     if (!data.ok || !Array.isArray(data.products)) return [];
 
     return data.products
-      .map((dto) => toCatalogProduct(dto))
+      .map((dto) => {
+        const product = toCatalogProduct(dto);
+        if (product) saveCachedCatalogProduct(product, data.source ?? 'api');
+        return product;
+      })
       .filter((product): product is CatalogProduct => product !== null);
   } catch {
     return [];

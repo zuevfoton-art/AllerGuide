@@ -368,6 +368,11 @@ const ru: LocaleMessages = {
     conditionsOther: 'Другие состояния',
     consent:
       'Я подтверждаю, что являюсь родителем или законным представителем данного ребёнка и вправе вводить сведения о его состоянии здоровья.',
+    confirmationLabel: 'Источник подтверждения',
+    confirmationHint: 'Нажмите на строку, чтобы переключить: самоотчёт → специфический IgE → подтверждено врачом.',
+    confirmationSelf: 'Самоотчёт',
+    confirmationIge: 'Специфический IgE',
+    confirmationClinician: 'Подтверждено врачом',
     contactsLabel: 'Экстренные контакты',
     saveProfile: 'Сохранить профиль',
     nextChild: 'Далее: профиль ребёнка',

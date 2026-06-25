@@ -4,6 +4,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { initDb } from '@/src/db/init';
+import { warmAllergenCatalogCache } from '@/src/services/allergen-catalog-service';
 import { initI18n } from '@/src/i18n';
 import { useAppFonts } from '@/src/hooks/use-fonts';
 import { useTheme } from '@/src/hooks/use-theme';
@@ -64,6 +65,7 @@ export default function RootLayout() {
     void (async () => {
       await initDb();
       if (!mounted) return;
+      warmAllergenCatalogCache();
       hydrateTheme();
       hydrateLocale();
       setDbReady(true);

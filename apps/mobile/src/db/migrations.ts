@@ -1,7 +1,7 @@
 import type { DbLike } from './types';
 import { migrateProfileAllergiesJson, type Profile } from '@allerguide/core';
 
-export const CURRENT_SCHEMA_VERSION = 4;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 const MIGRATIONS: Record<number, (db: DbLike) => void> = {
   1: (db) => {
@@ -38,6 +38,31 @@ const MIGRATIONS: Record<number, (db: DbLike) => void> = {
         db.runSync('UPDATE profiles SET allergies = ? WHERE id = ?', [migrated, profile.id]);
       }
     }
+  },
+  5: (db) => {
+    const columns = db.getAllSync<{ name: string }>('PRAGMA table_info(profiles)');
+    if (!columns.some((column) => column.name === 'allergyConfirmations')) {
+      db.execSync("ALTER TABLE profiles ADD COLUMN allergyConfirmations TEXT NOT NULL DEFAULT '{}'");
+    }
+
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS catalog_allergen_snapshot (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        payload TEXT NOT NULL,
+        fetched_at TEXT NOT NULL,
+        source TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS catalog_products (
+        barcode TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        brand TEXT NOT NULL DEFAULT '',
+        image_url TEXT NOT NULL DEFAULT '',
+        ingredients TEXT NOT NULL DEFAULT '',
+        allergen_tags TEXT NOT NULL DEFAULT '[]',
+        source TEXT NOT NULL DEFAULT 'cache',
+        fetched_at TEXT NOT NULL
+      );
+    `);
   },
 };
 

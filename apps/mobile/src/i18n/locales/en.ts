@@ -368,6 +368,11 @@ const en: LocaleMessages = {
     conditionsOther: 'Other conditions',
     consent:
       'I confirm that I am the parent or legal guardian of this child and am authorized to enter their health information.',
+    confirmationLabel: 'Verification source',
+    confirmationHint: 'Tap a row to cycle: self-report → specific IgE → clinician confirmed.',
+    confirmationSelf: 'Self-reported',
+    confirmationIge: 'Specific IgE',
+    confirmationClinician: 'Clinician confirmed',
     contactsLabel: 'Emergency contacts',
     saveProfile: 'Save profile',
     nextChild: 'Next: child profile',

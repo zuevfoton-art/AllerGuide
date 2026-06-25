@@ -353,6 +353,11 @@ export type LocaleMessages = {
     conditionsHint: string;
     conditionsOther: string;
     consent: string;
+    confirmationLabel: string;
+    confirmationHint: string;
+    confirmationSelf: string;
+    confirmationIge: string;
+    confirmationClinician: string;
     contactsLabel: string;
     saveProfile: string;
     nextChild: string;

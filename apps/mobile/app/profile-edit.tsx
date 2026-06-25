@@ -1,10 +1,18 @@
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { type AllergyConditionId, parseProfileAllergenIds, type ProfileType } from '@allerguide/core';
+import {
+  normalizeAllergyConfirmations,
+  parseAllergyConfirmations,
+  parseProfileAllergenIds,
+  type AllergyConditionId,
+  type AllergyConfirmationSource,
+  type ProfileType,
+} from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
+import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
 import { ConditionPicker } from '@/src/components/ConditionPicker';
-import { getProfile, updateProfile } from '@/src/services/profile-service';
+import { getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
 import {
   getStoredProfileConditions,
   setStoredProfileConditions,
@@ -28,13 +36,15 @@ export default function ProfileEditScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t } = useTranslation();
+  const { t, tProfileError } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const profileId = Number(id);
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [type, setType] = useState<ProfileType>('self');
   const [selected, setSelected] = useState<string[]>([]);
+  const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
+  const [childConsent, setChildConsent] = useState(true);
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
@@ -57,6 +67,7 @@ export default function ProfileEditScreen() {
       setBirthYear(String(row.birthYear));
       setType(row.type);
       setSelected(parseProfileAllergenIds(row.allergies));
+      setConfirmations(parseAllergyConfirmations(row.allergyConfirmations));
       setContacts(
         listEmergencyContacts(profileId).map((contact) => ({
           id: contact.id,
@@ -74,26 +85,25 @@ export default function ProfileEditScreen() {
     const trimmedName = name.trim();
     const year = Number(birthYear);
 
-    if (!trimmedName) {
-      setError(t('profileEdit.errors.nameRequired'));
-      return;
-    }
-    if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
-      setError(t('profileEdit.errors.birthYearInvalid'));
-      return;
-    }
-    if (selected.length === 0) {
-      setError(t('profileEdit.errors.allergenRequired'));
+    setError('');
+    try {
+      await updateProfile(profileId, {
+        name: trimmedName,
+        birthYear: year,
+        type,
+        allergies: selected,
+        allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
+        childConsent: type === 'child' ? childConsent : true,
+      });
+    } catch (err) {
+      if (err instanceof ProfileValidationError) {
+        setError(tProfileError(err.code));
+        return;
+      }
+      setError(err instanceof Error ? err.message : t('profileSetup.errors.saveFailed'));
       return;
     }
 
-    setError('');
-    await updateProfile(profileId, {
-      name: trimmedName,
-      birthYear: year,
-      type,
-      allergies: selected,
-    });
     setStoredProfileConditions(profileId, conditions);
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     router.back();
@@ -176,8 +186,30 @@ export default function ProfileEditScreen() {
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
-            <AllergenPicker selected={selected} onChange={setSelected} />
+            <AllergenPicker
+              selected={selected}
+              onChange={(ids) => {
+                setSelected(ids);
+                setConfirmations((prev) => normalizeAllergyConfirmations(ids, prev));
+              }}
+            />
+            <AllergyConfirmationEditor
+              selected={selected}
+              confirmations={confirmations}
+              onChange={setConfirmations}
+            />
           </GlassCard>
+
+          {type === 'child' ? (
+            <Pressable style={styles.consentRow} onPress={() => setChildConsent((v) => !v)}>
+              <Ionicons
+                name={childConsent ? 'checkbox' : 'square-outline'}
+                size={22}
+                color={theme.colors.accent}
+              />
+              <Text style={styles.consentText}>{t('profileSetup.consent')}</Text>
+            </Pressable>
+          ) : null}
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.contactsLabel')}</Text>
@@ -232,6 +264,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.danger,
       fontSize: 14,
       textAlign: 'center',
+    },
+    consentRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+    consentText: {
+      flex: 1,
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
   });
 }

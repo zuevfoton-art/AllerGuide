@@ -367,6 +367,11 @@ const de: LocaleMessages = {
     conditionsOther: 'Weitere Zustände',
     consent:
       'Ich bestätige, dass ich Elternteil oder gesetzlicher Vertreter dieses Kindes bin und berechtigt bin, Gesundheitsdaten einzugeben.',
+    confirmationLabel: 'Bestätigungsquelle',
+    confirmationHint: 'Tippen Sie auf eine Zeile: Selbstangabe → spezifisches IgE → ärztlich bestätigt.',
+    confirmationSelf: 'Selbstangabe',
+    confirmationIge: 'Spezifisches IgE',
+    confirmationClinician: 'Ärztlich bestätigt',
     contactsLabel: 'Notfallkontakte',
     saveProfile: 'Profil speichern',
     nextChild: 'Weiter: Kinderprofil',

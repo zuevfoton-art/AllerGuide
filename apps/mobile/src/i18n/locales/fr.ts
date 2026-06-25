@@ -367,6 +367,11 @@ const fr: LocaleMessages = {
     conditionsOther: 'Autres états',
     consent:
       'Je confirme être le parent ou le représentant légal de cet enfant et être autorisé à saisir ses informations de santé.',
+    confirmationLabel: 'Source de vérification',
+    confirmationHint: 'Appuyez sur une ligne : auto-déclaration → IgE spécifique → confirmé par un médecin.',
+    confirmationSelf: 'Auto-déclaration',
+    confirmationIge: 'IgE spécifique',
+    confirmationClinician: 'Confirmé par un médecin',
     contactsLabel: 'Contacts d\'urgence',
     saveProfile: 'Enregistrer le profil',
     nextChild: 'Suivant : profil de l\'enfant',

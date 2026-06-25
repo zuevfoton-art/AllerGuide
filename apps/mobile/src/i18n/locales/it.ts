@@ -367,6 +367,11 @@ const it: LocaleMessages = {
     conditionsOther: 'Altre condizioni',
     consent:
       'Confermo di essere genitore o tutore legale di questo bambino e di essere autorizzato a inserire le sue informazioni sanitarie.',
+    confirmationLabel: 'Fonte di verifica',
+    confirmationHint: 'Tocca una riga per alternare: autodichiarazione → IgE specifica → confermato dal medico.',
+    confirmationSelf: 'Autodichiarazione',
+    confirmationIge: 'IgE specifica',
+    confirmationClinician: 'Confermato dal medico',
     contactsLabel: 'Contatti di emergenza',
     saveProfile: 'Salva profilo',
     nextChild: 'Avanti: profilo del bambino',

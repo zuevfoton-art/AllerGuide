@@ -39,10 +39,10 @@
 |----|--------|--------|
 | **A.1** | Миграция `profiles.allergies` на canonical ids (`milk`, `birch-pollen`) | ✅ Done |
 | **A.2** | Маппинг EU14 / FDA9 / OFF → `allergenId` | ✅ Done |
-| A.3 | ICD-11 / SNOMED crosswalk в doctor-report | Planned |
-| A.4 | `confirmedBy`: self_reported / specific_ige / clinician | Planned |
-| A.5 | Валидация профиля при save (дубликаты, consent) | Planned |
-| A.6 | Catalog DB = source of truth + offline cache | Planned |
+| **A.3** | ICD-11 / SNOMED crosswalk в doctor-report | ✅ Done |
+| **A.4** | `confirmedBy`: self_reported / specific_ige / clinician | ✅ Done |
+| **A.5** | Валидация профиля при save (дубликаты, consent) | ✅ Done |
+| **A.6** | Catalog DB = source of truth + offline cache | ✅ Done |
 
 **A.1 deliverables:**
 - `packages/core/src/profile-allergens.ts` — parse, serialize, migrate legacy labels
@@ -56,6 +56,25 @@
 - `expandAllergenTagsForScan` — ids → keywords for barcode ingredient enrichment
 - `products.allergenTags` — canonical ids (OFF import + food-allergy dataset)
 - EU14 gaps in taxonomy: `mustard`, `sulphites`, `lupin`
+
+**A.3 deliverables:**
+- `packages/core/src/clinical-coding.ts` — ICD-11 / SNOMED crosswalk per allergen id
+- `buildCodedAllergyLines` / `formatCodedAllergiesReportHtml` in doctor PDF
+
+**A.4 deliverables:**
+- `packages/core/src/allergy-confirmations.ts` — `confirmedBy` per allergen
+- `profiles.allergyConfirmations` JSON column (mobile v5 + API)
+- `AllergyConfirmationEditor` UI in profile setup/edit
+
+**A.5 deliverables:**
+- `packages/core/src/profile-validation.ts` — `validateProfileInput`, dedupe, child consent
+- Enforced in mobile `profile-service` and API `profiles` routes
+
+**A.6 deliverables:**
+- `packages/core/src/catalog-cache.ts` — TTL helpers
+- `catalog-cache-service.ts` — offline SQLite / web storage for allergens + products
+- `allergen-catalog-service.ts` — API-first with static fallback; warmed on app start
+- `catalog-api.ts` — cache-before-network product lookup
 
 ### Phase B — Wellness Engine v2
 
@@ -140,6 +159,10 @@ flowchart LR
 | Файл | Назначение |
 |------|------------|
 | `packages/core/src/profile-allergens.ts` | A.1 — ids, migration |
+| `packages/core/src/clinical-coding.ts` | A.3 — ICD-11 / SNOMED |
+| `packages/core/src/allergy-confirmations.ts` | A.4 — confirmedBy |
+| `packages/core/src/profile-validation.ts` | A.5 — save validation |
+| `apps/mobile/src/services/catalog-cache-service.ts` | A.6 — offline catalog |
 | `packages/core/src/wellness.ts` | Scoring engine |
 | `apps/mobile/src/services/wellness-service.ts` | Open-Meteo + B.8 |
 | `packages/core/src/cross-reactions/` | Кросс-реактивность |

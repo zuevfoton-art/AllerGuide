@@ -367,6 +367,11 @@ const es: LocaleMessages = {
     conditionsOther: 'Otros estados',
     consent:
       'Confirmo que soy el padre, la madre o tutor legal de este niño y estoy autorizado a introducir su información de salud.',
+    confirmationLabel: 'Fuente de verificación',
+    confirmationHint: 'Toque una fila para alternar: autoinforme → IgE específica → confirmado por médico.',
+    confirmationSelf: 'Autoinforme',
+    confirmationIge: 'IgE específica',
+    confirmationClinician: 'Confirmado por médico',
     contactsLabel: 'Contactos de emergencia',
     saveProfile: 'Guardar perfil',
     nextChild: 'Siguiente: perfil del niño',

@@ -128,7 +128,7 @@ export async function backendDeleteProfile(token: string, id: number) {
 export function upsertLocalProfile(profile: Profile) {
   const db = getDb();
   db.runSync(
-    'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies) VALUES (?, ?, ?, ?, ?, ?)',
+    'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies, allergyConfirmations) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [
       profile.id,
       profile.userId ?? 0,
@@ -136,6 +136,7 @@ export function upsertLocalProfile(profile: Profile) {
       profile.birthYear,
       profile.type,
       profile.allergies,
+      profile.allergyConfirmations ?? '{}',
     ],
   );
 }
