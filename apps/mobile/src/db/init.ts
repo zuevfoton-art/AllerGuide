@@ -28,6 +28,8 @@ interface BarcodeCacheRow {
   origin_source: string;
   cached_at: string;
   updated_at: string;
+  declared_allergen_ids?: string | null;
+  trace_allergen_ids?: string | null;
 }
 
 class WebDb implements DbLike {
@@ -393,6 +395,8 @@ class WebDb implements DbLike {
         origin_source: params![4] as string,
         cached_at: params![5] as string,
         updated_at: params![6] as string,
+        declared_allergen_ids: (params![7] as string | null) ?? null,
+        trace_allergen_ids: (params![8] as string | null) ?? null,
       };
       const index = rows.findIndex((row) => row.barcode === next.barcode);
       if (index >= 0) rows[index] = next;

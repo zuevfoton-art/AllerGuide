@@ -586,6 +586,8 @@ const es: LocaleMessages = {
     home: 'Inicio',
     title: 'Experto',
     eyebrow: 'Experto',
+    advisoryTitle: 'Consejo médico asesor',
+    advisorySubtitle: 'Revisión clínica de umbrales, pesos y contenido para pacientes.',
   },
   allergens: {
     popular: 'Alérgenos frecuentes',

@@ -15,6 +15,7 @@ export interface CachedCatalogProduct {
   imageUrl: string;
   ingredients: string;
   allergenTags: string[];
+  traceTags: string[];
   source: string;
   fetchedAt: string;
 }

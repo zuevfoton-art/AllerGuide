@@ -1,5 +1,4 @@
-import type { RiskLevel } from '@allerguide/core';
-import type { Profile } from '@allerguide/core';
+import { parseProfileAllergenIds, type Profile, type RiskLevel } from '@allerguide/core';
 import type { ScanMode, ScanResult } from './scan';
 import { runMockScan } from './scan';
 
@@ -108,17 +107,14 @@ export async function runSmartScan(input: {
   profile?: Pick<Profile, 'allergies'> | null;
   productName?: string;
   source?: ScanResult['source'];
+  declaredAllergenIds?: string[];
+  traceAllergenIds?: string[];
   llmEndpoint?: string;
   llmApiKey?: string;
 }): Promise<ScanResult> {
-  let allergens: string[] = [];
-  if (input.profile?.allergies) {
-    try {
-      allergens = JSON.parse(input.profile.allergies) as string[];
-    } catch {
-      allergens = [];
-    }
-  }
+  const allergens = input.profile?.allergies
+    ? parseProfileAllergenIds(input.profile.allergies)
+    : [];
 
   if (input.llmEndpoint) {
     const llmResult = await runLlmScan({
@@ -138,5 +134,7 @@ export async function runSmartScan(input: {
     profile: input.profile,
     productName: input.productName,
     source: input.source,
+    declaredAllergenIds: input.declaredAllergenIds,
+    traceAllergenIds: input.traceAllergenIds,
   });
 }

@@ -1,7 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { resolveProductByBarcode } from './barcode-lookup-service';
 
-const cache = new Map<string, { barcode: string; name: string; ingredients: string }>();
+const cache = new Map<string, {
+  barcode: string;
+  name: string;
+  ingredients: string;
+  originSource: string;
+  cachedAt: string;
+  updatedAt: string;
+}>();
 
 vi.mock('@/src/constants/features', () => ({
   PRODUCT_DB_ENABLED: true,
@@ -9,8 +16,21 @@ vi.mock('@/src/constants/features', () => ({
 
 vi.mock('@/src/services/barcode-cache-service', () => ({
   lookupBarcodeCache: vi.fn((barcode: string) => cache.get(barcode) ?? null),
-  saveBarcodeCache: vi.fn((product: { barcode: string; name: string; ingredients: string }) => {
-    cache.set(product.barcode, product);
+  saveBarcodeCache: vi.fn((product: {
+    barcode: string;
+    name: string;
+    ingredients: string;
+    originSource: string;
+  }) => {
+    const now = new Date().toISOString();
+    cache.set(product.barcode, {
+      barcode: product.barcode,
+      name: product.name,
+      ingredients: product.ingredients,
+      originSource: product.originSource,
+      cachedAt: now,
+      updatedAt: now,
+    });
   }),
 }));
 
@@ -22,6 +42,7 @@ vi.mock('@/src/services/catalog-api', () => ({
         name: 'Catalog Product',
         ingredients: 'water',
         allergenTags: ['milk'],
+        traceTags: ['peanut'],
       };
     }
     return null;
@@ -35,6 +56,8 @@ vi.mock('@/src/services/open-food-facts-service', () => ({
         barcode: '9999999999999',
         name: 'Remote Product',
         ingredients: 'water, sugar',
+        allergenTags: ['soy'],
+        traceTags: [],
       };
     }
     return null;
@@ -63,6 +86,9 @@ describe('barcode-lookup-service', () => {
     expect(product?.source).toBe('catalog_api');
     expect(product?.ingredients).toContain('Молоко');
     expect(product?.ingredients).toContain('лактоза');
+    expect(product?.ingredients).toContain('может содержать');
+    expect(product?.declaredAllergenIds).toEqual(['milk']);
+    expect(product?.traceAllergenIds).toEqual(['peanut']);
     expect(cache.has('8888888888888')).toBe(true);
   });
 

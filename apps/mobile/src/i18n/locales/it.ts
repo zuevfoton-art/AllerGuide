@@ -586,6 +586,8 @@ const it: LocaleMessages = {
     home: 'Home',
     title: 'Esperto',
     eyebrow: 'Esperto',
+    advisoryTitle: 'Comitato consultivo medico',
+    advisorySubtitle: 'Revisione clinica di soglie, pesi e contenuti per i pazienti.',
   },
   allergens: {
     popular: 'Allergeni comuni',

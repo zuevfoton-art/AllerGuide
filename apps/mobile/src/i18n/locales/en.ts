@@ -245,6 +245,9 @@ const en: LocaleMessages = {
     labelPlaceholder: 'Ingredients from medicine or cosmetics label…',
     matches: 'Matches',
     crossMatches: 'Cross-reactions',
+    traceMatches: 'Traces (may contain)',
+    reportIncorrect: 'Report incorrect result',
+    reportThanks: 'Thanks — your feedback was saved for review.',
     source: 'Source',
     sourceOpenFoodFacts: 'Open Food Facts',
     sourceBarcodesDb: 'local cache',
@@ -587,6 +590,8 @@ const en: LocaleMessages = {
     home: 'Home',
     title: 'Expert',
     eyebrow: 'Expert',
+    advisoryTitle: 'Medical advisory board',
+    advisorySubtitle: 'Clinical review of thresholds, weights, and patient-facing content (E.1).',
   },
   allergens: {
     popular: 'Common allergens',

@@ -47,6 +47,7 @@ export type LocaleContent = {
     verdicts: Record<string, string>;
     reasons: Record<string, string>;
     crossSuffix: string;
+    traceSuffix: string;
     productNotFound: string;
     restaurantMenu: string;
   };

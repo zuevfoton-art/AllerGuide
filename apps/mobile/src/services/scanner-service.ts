@@ -25,12 +25,17 @@ async function analyzeText(input: {
   productName?: string;
   source?: ScanResult['source'];
   ocrNote?: string;
+  declaredAllergenIds?: string[];
+  traceAllergenIds?: string[];
 }): Promise<ScanResult> {
   const result = await runSmartScan({
     mode: input.mode,
     text: input.text,
     profile: input.profile,
     productName: input.productName,
+    source: input.source,
+    declaredAllergenIds: input.declaredAllergenIds,
+    traceAllergenIds: input.traceAllergenIds,
     llmEndpoint: getLlmEndpoint(),
   });
   trackEvent('scan_completed', {
@@ -85,6 +90,8 @@ export async function scanBarcode({
     profile,
     productName: product.name,
     source: scanSource,
+    declaredAllergenIds: product.declaredAllergenIds,
+    traceAllergenIds: product.traceAllergenIds,
   });
   if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
   return result;

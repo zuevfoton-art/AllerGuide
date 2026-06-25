@@ -217,7 +217,7 @@ export default function HomeScreen() {
         />
       </View>
 
-      <Disclaimer>{t('home.disclaimer')}</Disclaimer>
+      <Disclaimer showMdrFootnote>{t('home.disclaimer')}</Disclaimer>
     </Screen>
   );
 }

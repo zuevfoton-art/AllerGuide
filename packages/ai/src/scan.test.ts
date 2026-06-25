@@ -13,9 +13,10 @@ describe('runMockScan', () => {
     expect(result.matches).toContain('Арахис');
   });
 
-  it('detects lactose as milk allergen', () => {
+  it('detects lactose as milk allergen with high risk (D.3)', () => {
     const result = runMockScan({ mode: 'product', text: 'лактоза, вода', profile });
     expect(result.matches).toContain('Молоко');
+    expect(result.level).toBe('high');
   });
 
   it('returns low risk when no matches', () => {
@@ -44,5 +45,29 @@ describe('runMockScan', () => {
     const result = runMockScan({ mode: 'product', text: 'филе лосося, рис', profile: fishProfile });
     expect(result.crossMatches.some((item) => item.includes('Другие виды рыб'))).toBe(true);
     expect(result.level).toBe('medium');
+  });
+
+  it('detects trace allergens from may-contain text (D.4)', () => {
+    const peanutProfile = { allergies: JSON.stringify(['Арахис']) };
+    const result = runMockScan({
+      mode: 'product',
+      text: 'рис, соль. Может содержать арахис.',
+      profile: peanutProfile,
+    });
+    expect(result.traceMatches?.length).toBeGreaterThan(0);
+    expect(result.level).toBe('medium');
+  });
+
+  it('uses declared and trace tags from barcode lookup (D.2)', () => {
+    const result = runMockScan({
+      mode: 'product',
+      text: 'water, sugar',
+      profile,
+      declaredAllergenIds: ['milk'],
+      traceAllergenIds: ['peanut'],
+    });
+    expect(result.matches).toContain('Молоко');
+    expect(result.traceMatches?.some((item) => item.includes('Арахис'))).toBe(true);
+    expect(result.level).toBe('high');
   });
 });

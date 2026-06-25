@@ -572,6 +572,8 @@ export type LocaleMessages = {
     home: string;
     title: string;
     eyebrow: string;
+    advisoryTitle: string;
+    advisorySubtitle: string;
   };
   allergens: {
     popular: string;

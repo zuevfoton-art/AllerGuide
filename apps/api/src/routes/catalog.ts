@@ -32,6 +32,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
       imageUrl: product.imageUrl,
       ingredients: product.ingredients,
       allergenTags: product.allergenTags,
+      traceTags: product.traceTags,
       source: 'openfoodfacts',
     })
     .onConflictDoUpdate({
@@ -42,6 +43,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
         imageUrl: sql`excluded.image_url`,
         ingredients: sql`excluded.ingredients`,
         allergenTags: sql`excluded.allergen_tags`,
+        traceTags: sql`excluded.trace_tags`,
         source: sql`excluded.source`,
         updatedAt: new Date(),
       },

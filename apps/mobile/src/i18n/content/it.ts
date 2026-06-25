@@ -387,6 +387,7 @@ const itContent: LocaleContent = {
       low: 'Nessuna sovrapposizione evidente con gli allergeni del profilo trovata{productSuffix}, ma ciò non esclude una reazione individuale.',
     },
     crossSuffix: '(reazione incrociata)',
+    traceSuffix: '(tracce / may contain)',
     productNotFound:
       'Prodotto non trovato in Open Food Facts. La verifica è stata eseguita utilizzando il codice a barre come testo.',
     restaurantMenu: 'Menu del ristorante',

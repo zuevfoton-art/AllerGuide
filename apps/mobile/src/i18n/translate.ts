@@ -94,13 +94,16 @@ export function localizeScanResult(result: ScanResult, content: LocaleContent): 
   const verdict = content.scanner.verdicts[result.verdict] ?? result.verdict;
   let reason = result.reason;
 
+  const traceSuffix = content.scanner.traceSuffix;
+  const crossSuffix = content.scanner.crossSuffix;
+
   if (result.level === 'high' && content.scanner.reasons.high) {
     reason = formatTemplate(content.scanner.reasons.high, {
       productSuffix: result.productName ? ` in «${result.productName}»` : '',
-      matches: [...result.matches, ...result.crossMatches].join(', '),
+      matches: [...result.matches, ...result.crossMatches, ...(result.traceMatches ?? [])].join(', '),
     });
   } else if (result.level === 'medium' && content.scanner.reasons.medium) {
-    const label = result.matches[0] ?? result.crossMatches[0] ?? '';
+    const label = result.matches[0] ?? result.crossMatches[0] ?? result.traceMatches?.[0] ?? '';
     reason = formatTemplate(content.scanner.reasons.medium, {
       productSuffix: result.productName ? ` in «${result.productName}»` : '',
       label,
@@ -112,14 +115,20 @@ export function localizeScanResult(result: ScanResult, content: LocaleContent): 
   }
 
   const crossMatches = result.crossMatches.map((item) => {
-    const suffix = content.scanner.crossSuffix;
     if (item.includes('(перекр. реакция)')) {
-      return item.replace('(перекр. реакция)', suffix);
+      return item.replace('(перекр. реакция)', crossSuffix);
     }
     return item;
   });
 
-  return { ...result, verdict, reason, crossMatches };
+  const traceMatches = (result.traceMatches ?? []).map((item) => {
+    if (item.includes('(следы / may contain)')) {
+      return item.replace('(следы / may contain)', traceSuffix);
+    }
+    return item;
+  });
+
+  return { ...result, verdict, reason, crossMatches, traceMatches };
 }
 
 export function translateSelectProfileError(messages: LocaleMessages, error: string): string {

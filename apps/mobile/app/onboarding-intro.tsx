@@ -107,7 +107,7 @@ export default function OnboardingIntroScreen() {
             <Text style={styles.skip}>{t('onboardingIntro.skip')}</Text>
           </Pressable>
 
-          <Disclaimer>{t('onboardingIntro.disclaimer')}</Disclaimer>
+          <Disclaimer showMdrFootnote>{t('onboardingIntro.disclaimer')}</Disclaimer>
         </View>
       </View>
     </Screen>

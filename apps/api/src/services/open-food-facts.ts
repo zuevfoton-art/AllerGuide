@@ -7,6 +7,7 @@ export interface NormalizedProduct {
   imageUrl: string;
   ingredients: string;
   allergenTags: string[];
+  traceTags: string[];
 }
 
 interface OffProduct {
@@ -49,11 +50,9 @@ function normalize(product: OffProduct, fallbackBarcode = ''): NormalizedProduct
 
   if (!barcode || (!name && !ingredients)) return null;
 
-  // Combine declared allergens and "may contain" traces, mapped to canonical ids.
-  const allergenTags = mapExternalAllergenIds([
-    ...(product.allergens_tags ?? []),
-    ...(product.traces_tags ?? []),
-  ]);
+  // Declared allergens and "may contain" traces are kept separate (D.4).
+  const allergenTags = mapExternalAllergenIds(product.allergens_tags ?? []);
+  const traceTags = mapExternalAllergenIds(product.traces_tags ?? []);
 
   return {
     barcode,
@@ -62,6 +61,7 @@ function normalize(product: OffProduct, fallbackBarcode = ''): NormalizedProduct
     imageUrl: product.image_small_url?.trim() || product.image_url?.trim() || '',
     ingredients,
     allergenTags,
+    traceTags,
   };
 }
 

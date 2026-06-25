@@ -245,6 +245,9 @@ const ru: LocaleMessages = {
     labelPlaceholder: 'Состав с упаковки лекарства или косметики…',
     matches: 'Совпадения',
     crossMatches: 'Перекрёстные',
+    traceMatches: 'Следы (may contain)',
+    reportIncorrect: 'Сообщить о неточности',
+    reportThanks: 'Спасибо — отзыв сохранён для проверки.',
     source: 'Источник',
     sourceOpenFoodFacts: 'Open Food Facts',
     sourceBarcodesDb: 'локальный кэш',
@@ -587,6 +590,8 @@ const ru: LocaleMessages = {
     home: 'Главная',
     title: 'Эксперт',
     eyebrow: 'Эксперт',
+    advisoryTitle: 'Медицинский консультативный совет',
+    advisorySubtitle: 'Клиническая экспертиза порогов, весов и контента для пациентов (E.1).',
   },
   allergens: {
     popular: 'Частые аллергены',

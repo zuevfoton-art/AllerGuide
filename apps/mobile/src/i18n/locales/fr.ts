@@ -586,6 +586,8 @@ const fr: LocaleMessages = {
     home: 'Accueil',
     title: 'Expert',
     eyebrow: 'Expert',
+    advisoryTitle: 'Conseil consultatif médical',
+    advisorySubtitle: 'Revue clinique des seuils, pondérations et contenus patients.',
   },
   allergens: {
     popular: 'Allergènes fréquents',

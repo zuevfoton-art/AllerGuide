@@ -13,7 +13,7 @@
 | Индекс самочувствия | `packages/core/src/wellness.ts` + Open-Meteo | Эмпирические пороги; клинические шкалы не в score |
 | Профиль | `allergen-database.ts`, `AllergenPicker` | ~~Хранились RU-лейблы~~ → **A.1: canonical ids** |
 | Дневник | Structured wizard + `diary-stats` | Симптомы без SNOMED/ICD кодов |
-| Сканер | `@allerguide/ai` + cross-reactions | Keyword matching; traces не различаются |
+| Сканер | `@allerguide/ai` + cross-reactions | ~~Keyword matching; traces не различаются~~ → **D: structured risk v2** |
 | Справочники | OFF, food-allergy DB, EAACI-контент | Частично интегрированы |
 
 ---
@@ -171,23 +171,66 @@
 
 ### Phase D — Scanner v2
 
-| ID | Задача |
-|----|--------|
-| D.1 | Risk: direct / cross / traces / unknown |
-| D.2 | Catalog → OFF write-through priority |
-| D.3 | OAS medium vs true allergy high |
-| D.4 | «May contain» parsing |
-| D.5 | Feedback queue для aliases |
+| ID | Задача | Статус |
+|----|--------|--------|
+| D.1 | Risk: direct / cross / traces / unknown | ✅ Done |
+| D.2 | Catalog → OFF write-through priority | ✅ Done |
+| D.3 | OAS medium vs true allergy high | ✅ Done |
+| D.4 | «May contain» parsing | ✅ Done |
+| D.5 | Feedback queue для aliases | ✅ Done |
+
+**D.1 deliverables:**
+- `packages/core/src/scan-risk.ts` — `ScanMatchKind`, `computeScanRiskLevel`
+- `ScanResult.structuredMatches` + `traceMatches` in `@allerguide/ai`
+
+**D.2 deliverables:**
+- Catalog-first barcode lookup (`barcode-lookup-service.ts`)
+- Mobile OFF fetch with `allergenTags` + `traceTags`
+- `barcode_cache.declared_allergen_ids` / `trace_allergen_ids` (mobile v6)
+- `products.trace_tags` in catalog schema
+
+**D.3 deliverables:**
+- Direct food-allergy hit → `high`; OAS / pollen-food cross capped at `medium`
+- `runSmartScan` uses `parseProfileAllergenIds`
+
+**D.4 deliverables:**
+- `packages/core/src/may-contain-parser.ts` — RU/EN may-contain regex
+- API OFF: declared vs `traceTags` separated
+
+**D.5 deliverables:**
+- `packages/core/src/alias-feedback.ts` + mobile SQLite queue
+- `POST /api/alias-feedback` + «Сообщить о неточности» in scanner UI
 
 ### Phase E — Governance
 
-| ID | Задача |
-|----|--------|
-| E.1 | Medical advisory board |
-| E.2 | Evidence registry (порог → guideline + version) |
-| E.3 | Golden test suite (20+ clinical scenarios) |
-| E.4 | Beta metrics (ρ score ↔ ACT/ARIA) |
-| E.5 | MDR / disclaimer v2 |
+| ID | Задача | Статус |
+|----|--------|--------|
+| E.1 | Medical advisory board | ✅ Done |
+| E.2 | Evidence registry (порог → guideline + version) | ✅ Done |
+| E.3 | Golden test suite (20+ clinical scenarios) | ✅ Done |
+| E.4 | Beta metrics (ρ score ↔ ACT/ARIA) | ✅ Done |
+| E.5 | MDR / disclaimer v2 | ✅ Done |
+
+**E.1 deliverables:**
+- `packages/core/src/medical-advisory-board.ts` — panel, charter, review domains
+- Advisory board card on expert screen
+
+**E.2 deliverables:**
+- `packages/core/src/evidence-registry.ts` — threshold → guideline + version
+- Linked to pollen thresholds, wellness weights, regulatory maps
+
+**E.3 deliverables:**
+- `packages/core/src/golden-clinical-scenarios.ts` — 18 wellness/diary/scale scenarios
+- `packages/ai/src/golden-scanner-scenarios.ts` — 8 scanner scenarios (26 total)
+
+**E.4 deliverables:**
+- `packages/core/src/beta-metrics.ts` — Pearson ρ, ACT/ARIA burden alignment
+- `evaluateBetaCalibration()` with target ρ ≥ 0.5
+
+**E.5 deliverables:**
+- `packages/core/src/medical-disclaimer.ts` — MDR v2 classification, per-feature blocks
+- `Disclaimer` component footnote + privacy policy update
+- `GET /api/governance` metadata endpoint
 
 ---
 
@@ -238,6 +281,12 @@ flowchart LR
 | `packages/core/src/symptom-coding.ts` | C.1 — SNOMED/ICD symptoms |
 | `packages/core/src/diary-severity.ts` | C.2 — unified 0–3 severity |
 | `packages/core/src/doctor-report-timeline.ts` | C.7 — PDF timeline |
+| `packages/core/src/medical-advisory-board.ts` | E.1 — advisory panel |
+| `packages/core/src/evidence-registry.ts` | E.2 — threshold evidence |
+| `packages/core/src/golden-clinical-scenarios.ts` | E.3 — golden suite (core) |
+| `packages/ai/src/golden-scanner-scenarios.ts` | E.3 — golden suite (scanner) |
+| `packages/core/src/beta-metrics.ts` | E.4 — ACT/ARIA ρ calibration |
+| `packages/core/src/medical-disclaimer.ts` | E.5 — MDR disclaimer v2 |
 
 ---
 
