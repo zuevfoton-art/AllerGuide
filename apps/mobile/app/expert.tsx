@@ -1,7 +1,7 @@
 import { ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { EXPERT_CATEGORIES, getExpertArticlesByCategory, type ExpertArticleCategory } from '@allerguide/core';
+import { EXPERT_CATEGORIES, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -40,7 +40,7 @@ export default function ExpertScreen() {
           </View>
         </View>
         <Text style={styles.articleBody}>{article.body}</Text>
-        <Disclaimer>{localeContent.expertDisclaimer}</Disclaimer>
+        <Disclaimer showMdrFootnote>{localeContent.expertDisclaimer}</Disclaimer>
       </Screen>
     );
   }
@@ -69,6 +69,19 @@ export default function ExpertScreen() {
           <BrandMark size={48} variant="mono" color={theme.colors.onAccent} />
         </View>
         <Text style={styles.heroSubtitle}>{localeContent.expertHero.subtitle}</Text>
+      </GlassCard>
+
+      <GlassCard style={styles.advisoryCard}>
+        <Text style={styles.advisoryTitle}>{t('expert.advisoryTitle')}</Text>
+        <Text style={styles.advisoryMeta}>{t('expert.advisorySubtitle')}</Text>
+        {MEDICAL_ADVISORY_BOARD.map((member) => (
+          <View key={member.id} style={styles.advisoryRow}>
+            <Text style={styles.advisoryName}>{member.name}</Text>
+            <Text style={styles.advisoryRole}>
+              {member.role} · {member.affiliation}
+            </Text>
+          </View>
+        ))}
       </GlassCard>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={ui.pillRow}>
@@ -109,7 +122,7 @@ export default function ExpertScreen() {
         );
       })}
 
-      <Disclaimer>{localeContent.expertDisclaimer}</Disclaimer>
+      <Disclaimer showMdrFootnote>{localeContent.expertDisclaimer}</Disclaimer>
     </Screen>
   );
 }
@@ -144,6 +157,31 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 18,
+    },
+    advisoryCard: { gap: 8, marginBottom: 12 },
+    advisoryTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    advisoryMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 16,
+    },
+    advisoryRow: { gap: 2, paddingTop: 4 },
+    advisoryName: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    advisoryRole: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
     },
     card: {
       flexDirection: 'row',

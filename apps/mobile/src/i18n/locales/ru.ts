@@ -577,6 +577,8 @@ const ru: LocaleMessages = {
     home: 'Главная',
     title: 'Эксперт',
     eyebrow: 'Эксперт',
+    advisoryTitle: 'Медицинский консультативный совет',
+    advisorySubtitle: 'Клиническая экспертиза порогов, весов и контента для пациентов (E.1).',
   },
   allergens: {
     popular: 'Частые аллергены',

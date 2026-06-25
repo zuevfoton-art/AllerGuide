@@ -181,13 +181,34 @@
 
 ### Phase E — Governance
 
-| ID | Задача |
-|----|--------|
-| E.1 | Medical advisory board |
-| E.2 | Evidence registry (порог → guideline + version) |
-| E.3 | Golden test suite (20+ clinical scenarios) |
-| E.4 | Beta metrics (ρ score ↔ ACT/ARIA) |
-| E.5 | MDR / disclaimer v2 |
+| ID | Задача | Статус |
+|----|--------|--------|
+| E.1 | Medical advisory board | ✅ Done |
+| E.2 | Evidence registry (порог → guideline + version) | ✅ Done |
+| E.3 | Golden test suite (20+ clinical scenarios) | ✅ Done |
+| E.4 | Beta metrics (ρ score ↔ ACT/ARIA) | ✅ Done |
+| E.5 | MDR / disclaimer v2 | ✅ Done |
+
+**E.1 deliverables:**
+- `packages/core/src/medical-advisory-board.ts` — panel, charter, review domains
+- Advisory board card on expert screen
+
+**E.2 deliverables:**
+- `packages/core/src/evidence-registry.ts` — threshold → guideline + version
+- Linked to pollen thresholds, wellness weights, regulatory maps
+
+**E.3 deliverables:**
+- `packages/core/src/golden-clinical-scenarios.ts` — 18 wellness/diary/scale scenarios
+- `packages/ai/src/golden-scanner-scenarios.ts` — 8 scanner scenarios (26 total)
+
+**E.4 deliverables:**
+- `packages/core/src/beta-metrics.ts` — Pearson ρ, ACT/ARIA burden alignment
+- `evaluateBetaCalibration()` with target ρ ≥ 0.5
+
+**E.5 deliverables:**
+- `packages/core/src/medical-disclaimer.ts` — MDR v2 classification, per-feature blocks
+- `Disclaimer` component footnote + privacy policy update
+- `GET /api/governance` metadata endpoint
 
 ---
 
@@ -238,6 +259,12 @@ flowchart LR
 | `packages/core/src/symptom-coding.ts` | C.1 — SNOMED/ICD symptoms |
 | `packages/core/src/diary-severity.ts` | C.2 — unified 0–3 severity |
 | `packages/core/src/doctor-report-timeline.ts` | C.7 — PDF timeline |
+| `packages/core/src/medical-advisory-board.ts` | E.1 — advisory panel |
+| `packages/core/src/evidence-registry.ts` | E.2 — threshold evidence |
+| `packages/core/src/golden-clinical-scenarios.ts` | E.3 — golden suite (core) |
+| `packages/ai/src/golden-scanner-scenarios.ts` | E.3 — golden suite (scanner) |
+| `packages/core/src/beta-metrics.ts` | E.4 — ACT/ARIA ρ calibration |
+| `packages/core/src/medical-disclaimer.ts` | E.5 — MDR disclaimer v2 |
 
 ---
 

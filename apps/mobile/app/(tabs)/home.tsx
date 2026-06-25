@@ -202,7 +202,7 @@ export default function HomeScreen() {
         </GlassCard>
       ) : null}
 
-      <Disclaimer>{t('home.disclaimer')}</Disclaimer>
+      <Disclaimer showMdrFootnote>{t('home.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
