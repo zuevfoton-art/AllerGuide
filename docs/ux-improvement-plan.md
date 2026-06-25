@@ -67,6 +67,16 @@
 
 `useAsyncState`, `ErrorState`, `EmptyState`, `Skeleton`, `RefreshControl` в `Screen` + подключение на 4 основных экранах. Заменяет ручной «Обновить», вводит единые состояния загрузки/ошибки/пустоты.
 
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| B1 | Хук `useAsyncState` (loading/refreshing/error + reload/refresh) | `hooks/use-async-state.ts` |
+| B2 | Компоненты `Skeleton`, `EmptyState`, `ErrorState` | `components/*` |
+| B3 | Pull-to-refresh (`RefreshControl`) в `Screen` | `Screen.tsx` |
+| B4 | Главная: `useAsyncState` + скелетон самочувствия + pull-to-refresh | `home.tsx` |
+| B5 | Дневник: убран ручной «Обновить», `useFocusEffect` + pull-to-refresh + `EmptyState` | `diary.tsx` |
+| B6 | Сканер: обработка ошибок + «Повторить» + pull-to-refresh истории | `scanner.tsx` |
+| B7 | SOS: pull-to-refresh + `EmptyState` с CTA «Создать профиль» | `sos.tsx` |
+
 ### Этап C — Безопасность взаимодействия и доверие
 
 Sticky-аварийный блок SOS (звонок 103 + первый контакт вверху/закреплён), `expo-haptics` на опасный вердикт/успех/удаление, подтверждение/undo при удалении безопасного продукта.
@@ -92,7 +102,7 @@ Sticky-аварийный блок SOS (звонок 103 + первый конт
 
 | Этап | Статус |
 |------|--------|
-| A — Quick wins | В работе |
-| B — UX-примитивы | Запланирован |
+| A — Quick wins | Готово (PR) |
+| B — UX-примитивы | В работе |
 | C — Безопасность взаимодействия | Запланирован |
 | D — Навигация и онбординг | Запланирован |

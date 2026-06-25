@@ -1,12 +1,14 @@
-import { Text, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
+import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
+import { Skeleton } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandTabIcon } from '@/src/components/brand/BrandTabIcon';
@@ -39,25 +41,21 @@ export default function HomeScreen() {
   const { t, locale } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
-  const [wellness, setWellness] = useState<WellnessSnapshot | null>(null);
-  const [loadingWellness, setLoadingWellness] = useState(false);
 
-  const loadWellness = useCallback(async () => {
-    if (!activeProfileId || !profile) return;
-    setLoadingWellness(true);
-    try {
-      const entries = await getDiaryEntries(activeProfileId);
-      const snapshot = await fetchWellnessSnapshot(profile.allergies, entries, locale);
-      setWellness(snapshot);
-    } finally {
-      setLoadingWellness(false);
-    }
-  }, [activeProfileId, profile, locale]);
+  const wellnessState = useAsyncState<WellnessSnapshot | null>(async () => {
+    if (!activeProfileId || !profile) return null;
+    const entries = await getDiaryEntries(activeProfileId);
+    return fetchWellnessSnapshot(profile.allergies, entries, locale);
+  });
+  const wellness = wellnessState.data;
+  const loadingWellness = wellnessState.loading;
+  const reloadWellness = wellnessState.reload;
 
   useFocusEffect(
     useCallback(() => {
-      void loadWellness();
-    }, [loadWellness]),
+      void reloadWellness();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [reloadWellness, activeProfileId, locale]),
   );
 
   const diaryRows = useMemo(
@@ -84,7 +82,9 @@ export default function HomeScreen() {
   }, [locale, t]);
 
   return (
-    <Screen>
+    <Screen
+      onRefresh={activeProfileId ? () => void wellnessState.refresh() : undefined}
+      refreshing={wellnessState.refreshing}>
       <View style={styles.topBar}>
         <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
         <Pressable
@@ -122,7 +122,12 @@ export default function HomeScreen() {
         </View>
 
         {loadingWellness && !wellness ? (
-          <ActivityIndicator color={theme.colors.accent} style={{ marginVertical: 24 }} />
+          <View style={styles.skeletonWrap}>
+            <Skeleton width={120} height={32} />
+            <Skeleton width="100%" height={14} />
+            <Skeleton width="100%" height={14} />
+            <Skeleton width="70%" height={14} />
+          </View>
         ) : wellness ? (
           <>
             <View style={ui.heroKpi}>
@@ -246,6 +251,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.dangerBorder,
     },
     hero: { gap: 4 },
+    skeletonWrap: { gap: 10, paddingVertical: 12 },
     cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     heroKpiLabel: {
       fontFamily: fonts.sansSemiBold,
