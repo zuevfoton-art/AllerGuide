@@ -74,6 +74,9 @@ describe('barcode-lookup-service', () => {
       barcode: '4607025392138',
       name: 'Cached Product',
       ingredients: 'milk, sugar',
+      originSource: 'barcodes_db',
+      cachedAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     });
 
     const product = await resolveProductByBarcode('4607025392138');

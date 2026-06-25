@@ -247,6 +247,9 @@ export type LocaleMessages = {
     menuPlaceholder: string;
     matches: string;
     crossMatches: string;
+    traceMatches: string;
+    reportIncorrect: string;
+    reportThanks: string;
     source: string;
     sourceOpenFoodFacts: string;
     sourceBarcodesDb: string;

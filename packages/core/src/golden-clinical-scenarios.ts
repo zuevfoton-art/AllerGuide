@@ -59,7 +59,7 @@ const baseWellness = {
     triggerDays: 0,
     streak: 0,
     weekTotal: 0,
-    correlationKind: null as const,
+    correlationKind: null,
     temporalCorrelationKind: null,
     anomalyKind: null,
     anomalyDays: 0,
