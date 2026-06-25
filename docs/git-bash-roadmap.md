@@ -33,9 +33,40 @@ jq --version
 Если `pnpm` не найден:
 
 ```bash
+node --version   # нужен v18.12+ (лучше v20 LTS)
+```
+
+**Способ 1 — Corepack (рекомендуется, версия из `package.json`):**
+
+```bash
 corepack enable
 corepack prepare pnpm@10.34.4 --activate
+pnpm --version
 ```
+
+Если `corepack: command not found` — переустановите Node.js LTS с https://nodejs.org/ (галочка «Add to PATH»).
+
+**Способ 2 — глобально через npm (если Corepack не сработал):**
+
+```bash
+npm install -g pnpm@10.34.4
+pnpm --version
+```
+
+**Способ 3 — без установки (одна команда):**
+
+```bash
+npx pnpm@10.34.4 install
+```
+
+После любого способа из корня репозитория:
+
+```bash
+cd ~/projects/AllerGuide   # ваш путь
+pnpm install
+```
+
+**Windows Git Bash:** если `corepack enable` пишет про права — откройте **Git Bash от имени администратора** один раз, выполните `corepack enable`, затем работайте в обычном окне.
 
 ---
 
