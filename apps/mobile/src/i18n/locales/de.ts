@@ -576,6 +576,8 @@ const de: LocaleMessages = {
     home: 'Start',
     title: 'Experte',
     eyebrow: 'Experte',
+    advisoryTitle: 'Medizinischer Beirat',
+    advisorySubtitle: 'Klinische Prüfung von Schwellenwerten, Gewichten und Inhalten.',
   },
   allergens: {
     popular: 'Häufige Allergene',

@@ -580,6 +580,8 @@ const en: LocaleMessages = {
     home: 'Home',
     title: 'Expert',
     eyebrow: 'Expert',
+    advisoryTitle: 'Medical advisory board',
+    advisorySubtitle: 'Clinical review of thresholds, weights, and patient-facing content (E.1).',
   },
   allergens: {
     popular: 'Common allergens',
