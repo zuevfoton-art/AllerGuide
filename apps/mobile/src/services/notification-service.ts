@@ -36,6 +36,14 @@ const VISIT_REMINDER_ENABLED_KEY = 'visitReminderEnabled';
 const EPI_REMINDER_ENABLED_KEY = 'epinephrineReminderEnabled';
 const QUIET_HOURS_ENABLED_KEY = 'quietHoursEnabled';
 const CLINICAL_REMINDER_IDS_KEY = 'clinicalReminderIds';
+const POLLEN_REMINDER_ENABLED_KEY = 'pollenReminderEnabled';
+const POLLEN_REMINDER_HOUR_KEY = 'pollenReminderHour';
+const POLLEN_REMINDER_MINUTE_KEY = 'pollenReminderMinute';
+const POLLEN_REMINDER_THRESHOLD_KEY = 'pollenReminderThreshold';
+
+function pollenReminderIdKey(profileId: number) {
+  return `pollenReminderId:${profileId}`;
+}
 
 export type NotificationPermissionStatus = 'granted' | 'denied' | 'undetermined' | 'web-unavailable';
 
@@ -134,6 +142,58 @@ export function isQuietHoursEnabled(): boolean {
 
 export function setQuietHoursEnabled(enabled: boolean) {
   setSetting(QUIET_HOURS_ENABLED_KEY, enabled ? 'true' : 'false');
+}
+
+export type PollenReminderThreshold = 'high' | 'moderate';
+
+export function isPollenReminderEnabled(): boolean {
+  return getSetting(POLLEN_REMINDER_ENABLED_KEY) === 'true';
+}
+
+export function setPollenReminderEnabled(enabled: boolean) {
+  setSetting(POLLEN_REMINDER_ENABLED_KEY, enabled ? 'true' : 'false');
+}
+
+export function getPollenReminderHour(): number {
+  const hour = parseInt(getSetting(POLLEN_REMINDER_HOUR_KEY) ?? '7', 10);
+  return Number.isFinite(hour) ? Math.min(23, Math.max(0, hour)) : 7;
+}
+
+export function getPollenReminderMinute(): number {
+  const minute = parseInt(getSetting(POLLEN_REMINDER_MINUTE_KEY) ?? '30', 10);
+  return Number.isFinite(minute) ? Math.min(59, Math.max(0, minute)) : 30;
+}
+
+export function setPollenReminderTime(hour: number, minute: number) {
+  setSetting(POLLEN_REMINDER_HOUR_KEY, String(Math.min(23, Math.max(0, hour))));
+  setSetting(POLLEN_REMINDER_MINUTE_KEY, String(Math.min(59, Math.max(0, minute))));
+}
+
+export function getPollenReminderThreshold(): PollenReminderThreshold {
+  const raw = getSetting(POLLEN_REMINDER_THRESHOLD_KEY) ?? 'high';
+  return raw === 'moderate' ? 'moderate' : 'high';
+}
+
+export function setPollenReminderThreshold(threshold: PollenReminderThreshold) {
+  setSetting(POLLEN_REMINDER_THRESHOLD_KEY, threshold);
+}
+
+export async function cancelPollenReminder(profileId: number): Promise<void> {
+  if (Platform.OS === 'web') return;
+
+  const existing = getSetting(pollenReminderIdKey(profileId));
+  if (existing) {
+    try {
+      await Notifications.cancelScheduledNotificationAsync(existing);
+    } catch {
+      /* ignore */
+    }
+    setSetting(pollenReminderIdKey(profileId), '');
+  }
+}
+
+export function setPollenReminderId(profileId: number, id: string) {
+  setSetting(pollenReminderIdKey(profileId), id);
 }
 
 export function getDiaryReminderHour(): number {

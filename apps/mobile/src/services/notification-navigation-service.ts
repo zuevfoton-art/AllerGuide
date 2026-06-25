@@ -25,6 +25,9 @@ function navigateFromNotification(data: NotificationPayload | undefined) {
     case 'epinephrine-expiry':
       router.push('/(tabs)/sos');
       return;
+    case 'pollen':
+      router.push('/(tabs)/map');
+      return;
     default:
       return;
   }

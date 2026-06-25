@@ -1,8 +1,9 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
+import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
@@ -57,6 +58,16 @@ export default function HomeScreen() {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reloadWellness, activeProfileId, locale]),
   );
+
+  useEffect(() => {
+    if (!wellness || !activeProfileId || !profile) return;
+    void syncPollenReminderForProfile(
+      activeProfileId,
+      profile.name,
+      wellness.pollenMatches,
+      wellness.envDataAvailable,
+    );
+  }, [wellness, activeProfileId, profile]);
 
   const diaryRows = useMemo(
     () =>

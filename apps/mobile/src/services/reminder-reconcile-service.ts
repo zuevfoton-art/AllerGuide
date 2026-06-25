@@ -1,5 +1,6 @@
 import { isAsitReminderConfigured } from '@allerguide/core';
 import { reconcileClinicalReminders } from '@/src/services/clinical-reminder-service';
+import { reconcilePollenReminders } from '@/src/services/pollen-reminder-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { scheduleAsitReminder } from '@/src/services/asit-reminder-service';
 import { listAllDiaryEntries } from '@/src/services/diary-service';
@@ -26,4 +27,5 @@ export async function reconcileAllReminders(): Promise<void> {
   }
 
   await reconcileClinicalReminders();
+  await reconcilePollenReminders();
 }

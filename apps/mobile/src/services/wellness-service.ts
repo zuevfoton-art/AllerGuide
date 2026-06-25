@@ -20,6 +20,7 @@ import {
   wellnessStatusFromScore,
   WELLNESS_WEIGHTS_VERSION,
   type DiaryEntry,
+  type PollenMatchLike,
   type WellnessRecommendation,
 } from '@allerguide/core';
 import { getLocaleContent } from '@/src/i18n/content';
@@ -44,6 +45,7 @@ export type WellnessSnapshot = {
   /** Data quality indicator (B.7). */
   confidence: WellnessConfidence;
   weightsVersion: string;
+  pollenMatches: PollenMatchLike[];
 };
 
 function labelForPollenTaxon(
@@ -332,5 +334,6 @@ export async function fetchWellnessSnapshot(
     envDataAvailable,
     confidence,
     weightsVersion: WELLNESS_WEIGHTS_VERSION,
+    pollenMatches: envDataAvailable ? pollenMatches : [],
   };
 }

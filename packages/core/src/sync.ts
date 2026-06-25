@@ -66,13 +66,41 @@ export const USER_SCOPED_SETTING_KEYS = [
   'emergencyNumber',
 ] as const;
 
+/** Reminder preferences synced in backup (not OS notification IDs). */
+export const REMINDER_SETTING_KEYS = [
+  'diaryReminderEnabled',
+  'diaryReminderHour',
+  'diaryReminderMinute',
+  'actReminderEnabled',
+  'visitReminderEnabled',
+  'epinephrineReminderEnabled',
+  'quietHoursEnabled',
+  'pollenReminderEnabled',
+  'pollenReminderHour',
+  'pollenReminderMinute',
+  'pollenReminderThreshold',
+] as const;
+
+export const REMINDER_CACHE_PREFIXES = ['pollenAlertCache:'] as const;
+
+export function isReminderSettingKey(key: string): boolean {
+  if ((REMINDER_SETTING_KEYS as readonly string[]).includes(key)) return true;
+  return REMINDER_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
 export function filterUserScopedSettings(settings: Record<string, string>): Record<string, string> {
   const filtered: Record<string, string> = {};
   for (const key of USER_SCOPED_SETTING_KEYS) {
     if (settings[key] != null) filtered[key] = settings[key];
   }
+  for (const key of REMINDER_SETTING_KEYS) {
+    if (settings[key] != null) filtered[key] = settings[key];
+  }
   for (const [key, value] of Object.entries(settings)) {
     if (key.startsWith('sosPlan:')) filtered[key] = value;
+    if (REMINDER_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      filtered[key] = value;
+    }
   }
   return filtered;
 }

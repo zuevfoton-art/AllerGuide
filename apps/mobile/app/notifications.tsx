@@ -16,9 +16,13 @@ import {
   getDiaryReminderHour,
   getDiaryReminderMinute,
   getNotificationPermissionStatus,
+  getPollenReminderHour,
+  getPollenReminderMinute,
+  getPollenReminderThreshold,
   isActReminderEnabled,
   isDiaryReminderEnabled,
   isEpinephrineReminderEnabled,
+  isPollenReminderEnabled,
   isQuietHoursEnabled,
   isVisitReminderEnabled,
   openNotificationSettings,
@@ -27,10 +31,14 @@ import {
   setActReminderEnabled,
   setDiaryReminderTime,
   setEpinephrineReminderEnabled,
+  setPollenReminderEnabled,
+  setPollenReminderThreshold,
+  setPollenReminderTime,
   setQuietHoursEnabled,
   setVisitReminderEnabled,
   syncDiaryReminder,
   type NotificationPermissionStatus,
+  type PollenReminderThreshold,
 } from '@/src/services/notification-service';
 
 export default function NotificationsScreen() {
@@ -45,6 +53,10 @@ export default function NotificationsScreen() {
   const [visitEnabled, setVisitEnabled] = useState(false);
   const [epiEnabled, setEpiEnabled] = useState(false);
   const [quietHoursEnabled, setQuietHoursEnabledState] = useState(true);
+  const [pollenEnabled, setPollenEnabled] = useState(false);
+  const [pollenHour, setPollenHour] = useState('7');
+  const [pollenMinute, setPollenMinute] = useState('30');
+  const [pollenThreshold, setPollenThresholdState] = useState<PollenReminderThreshold>('high');
   const [reminderHour, setReminderHour] = useState('20');
   const [reminderMinute, setReminderMinute] = useState('00');
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermissionStatus>('undetermined');
@@ -56,6 +68,10 @@ export default function NotificationsScreen() {
     setVisitEnabled(isVisitReminderEnabled());
     setEpiEnabled(isEpinephrineReminderEnabled());
     setQuietHoursEnabledState(isQuietHoursEnabled());
+    setPollenEnabled(isPollenReminderEnabled());
+    setPollenHour(String(getPollenReminderHour()));
+    setPollenMinute(String(getPollenReminderMinute()).padStart(2, '0'));
+    setPollenThresholdState(getPollenReminderThreshold());
     setReminderHour(String(getDiaryReminderHour()));
     setReminderMinute(String(getDiaryReminderMinute()).padStart(2, '0'));
     setPermissionStatus(await getNotificationPermissionStatus());
@@ -74,6 +90,13 @@ export default function NotificationsScreen() {
     return t('notifications.diaryAt', { time: formatReminderClock(hour, minute) });
   }, [reminderHour, reminderMinute, t]);
 
+  const pollenTimeLabel = useMemo(() => {
+    const hour = Number(pollenHour);
+    const minute = Number(pollenMinute);
+    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return '';
+    return t('notifications.pollenAt', { time: formatReminderClock(hour, minute) });
+  }, [pollenHour, pollenMinute, t]);
+
   const permissionLabel = useMemo(() => {
     if (permissionStatus === 'web-unavailable') return t('notifications.permissionWeb');
     if (permissionStatus === 'granted') return t('notifications.permissionGranted');
@@ -86,6 +109,43 @@ export default function NotificationsScreen() {
     const minute = Number(minuteRaw.replace(/\D/g, ''));
     if (!Number.isFinite(hour) || !Number.isFinite(minute)) return;
     setDiaryReminderTime(hour, minute);
+  };
+
+  const persistPollenTime = (hourRaw: string, minuteRaw: string) => {
+    const hour = Number(hourRaw.replace(/\D/g, ''));
+    const minute = Number(minuteRaw.replace(/\D/g, ''));
+    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return;
+    setPollenReminderTime(hour, minute);
+  };
+
+  const savePollenTimeAndReschedule = async () => {
+    if (isWeb) return;
+
+    persistPollenTime(pollenHour, pollenMinute);
+    if (!pollenEnabled) return;
+
+    setLoading(true);
+    try {
+      await reconcileAllReminders();
+      setPermissionStatus(await getNotificationPermissionStatus());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const togglePollenThreshold = async (threshold: PollenReminderThreshold) => {
+    if (isWeb) return;
+
+    setPollenThresholdState(threshold);
+    setPollenReminderThreshold(threshold);
+    if (pollenEnabled) {
+      setLoading(true);
+      try {
+        await reconcileAllReminders();
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const toggleReminder = async (value: boolean) => {
@@ -316,6 +376,95 @@ export default function NotificationsScreen() {
         </View>
       </GlassCard>
 
+      <Text style={ui.sectionLabel}>{t('notifications.environmentSection')}</Text>
+      <GlassCard>
+        <View style={styles.switchRow}>
+          <View style={styles.switchText}>
+            <Text style={styles.switchTitle}>{t('notifications.pollenTitle')}</Text>
+            <Text style={styles.switchHint}>
+              {pollenEnabled && pollenTimeLabel
+                ? pollenTimeLabel
+                : t('notifications.pollenHint')}
+            </Text>
+            <Text style={styles.microHint}>{t('notifications.pollenCacheHint')}</Text>
+          </View>
+          <Switch
+            value={pollenEnabled}
+            onValueChange={(value) => void toggleClinical(value, setPollenEnabled, setPollenReminderEnabled)}
+            disabled={loading || isWeb}
+            trackColor={{ false: theme.colors.border, true: theme.colors.accentMid }}
+            thumbColor={pollenEnabled ? theme.colors.accent : theme.colors.card}
+          />
+        </View>
+
+        {!isWeb ? (
+          <>
+            <Text style={[ui.sectionLabel, styles.timeLabel]}>{t('notifications.pollenTimeLabel')}</Text>
+            <View style={styles.timeRow}>
+              <View style={styles.timeField}>
+                <Text style={styles.timeFieldLabel}>{t('notifications.pollenHour')}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pollenHour}
+                  onChangeText={(value) => {
+                    const next = value.replace(/\D/g, '').slice(0, 2);
+                    setPollenHour(next);
+                  }}
+                  onBlur={() => void savePollenTimeAndReschedule()}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  editable={!loading}
+                  placeholderTextColor={theme.colors.textMuted}
+                />
+              </View>
+              <View style={styles.timeField}>
+                <Text style={styles.timeFieldLabel}>{t('notifications.pollenMinute')}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={pollenMinute}
+                  onChangeText={(value) => {
+                    const next = value.replace(/\D/g, '').slice(0, 2);
+                    setPollenMinute(next);
+                  }}
+                  onBlur={() => void savePollenTimeAndReschedule()}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                  editable={!loading}
+                  placeholderTextColor={theme.colors.textMuted}
+                />
+              </View>
+            </View>
+            <Text style={[ui.sectionLabel, styles.timeLabel]}>{t('notifications.pollenThresholdLabel')}</Text>
+            <View style={styles.thresholdRow}>
+              <Pressable
+                style={[styles.thresholdBtn, pollenThreshold === 'high' && styles.thresholdBtnActive]}
+                onPress={() => void togglePollenThreshold('high')}
+                disabled={loading}>
+                <Text
+                  style={[
+                    styles.thresholdBtnText,
+                    pollenThreshold === 'high' && styles.thresholdBtnTextActive,
+                  ]}>
+                  {t('notifications.pollenThresholdHigh')}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.thresholdBtn, pollenThreshold === 'moderate' && styles.thresholdBtnActive]}
+                onPress={() => void togglePollenThreshold('moderate')}
+                disabled={loading}>
+                <Text
+                  style={[
+                    styles.thresholdBtnText,
+                    pollenThreshold === 'moderate' && styles.thresholdBtnTextActive,
+                  ]}>
+                  {t('notifications.pollenThresholdModerate')}
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        ) : null}
+      </GlassCard>
+
       <Text style={ui.sectionLabel}>{t('notifications.quietHoursTitle')}</Text>
       <GlassCard>
         <View style={styles.switchRow}>
@@ -419,6 +568,31 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 12,
       fontSize: 16,
       fontFamily: fonts.sans,
+      color: colors.text,
+    },
+    thresholdRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+    thresholdBtn: {
+      flex: 1,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+    },
+    thresholdBtnActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentMid,
+    },
+    thresholdBtnText: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    thresholdBtnTextActive: {
+      fontFamily: fonts.sansSemiBold,
+      fontWeight: '600',
       color: colors.text,
     },
   });
