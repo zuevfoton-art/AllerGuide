@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildConnectionOptions,
   deriveDirectDatabaseUrl,
+  isHeliumDatabaseUrl,
   resolveMigrationUrl,
   resolveReadUrl,
   resolveRuntimeUrl,
@@ -58,5 +59,17 @@ describe('db connection config', () => {
       'postgres://user:pass@ep-abc.us-east-2.aws.neon.tech/neondb?sslmode=require';
     expect(deriveDirectDatabaseUrl(pooled)).toBe(direct);
     expect(resolveMigrationUrl({ DATABASE_URL: pooled })).toBe(direct);
+  });
+
+  it('honors sslmode=disable in Helium URL without DB_SSL env', () => {
+    const helium =
+      'postgresql://postgres:password@helium/heliumdb?sslmode=disable';
+    expect(isHeliumDatabaseUrl(helium)).toBe(true);
+    expect(buildConnectionOptions({ DATABASE_URL: helium }).ssl).toBe(false);
+  });
+
+  it('honors sslmode=require in URL when DB_SSL unset', () => {
+    const url = 'postgres://user@host/db?sslmode=require';
+    expect(buildConnectionOptions({ DATABASE_URL: url }).ssl).toBe('require');
   });
 });

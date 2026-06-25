@@ -57,6 +57,19 @@ API раздаёт собранный фронтенд из `apps/mobile/dist` (
 
 См. также: [Fix a published app using a shared database](https://docs.replit.com/references/data-and-storage/shared-database-migration).
 
+### Replit Helium (текущая БД)
+
+Replit выдаёт внутренний URL вида:
+
+```text
+postgresql://postgres:password@helium/heliumdb?sslmode=disable
+```
+
+- **Development** и **Production** используют одинаковый формат; Replit подставляет разные credentials через Secrets / Database panel — **не дублируйте** `DATABASE_URL` вручную в `[userenv]`.
+- `sslmode=disable` — нормально для Helium внутри сети Replit; скрипт [`replit-db-env.sh`](../scripts/replit-db-env.sh) выставляет `DB_SSL=disable`, **не** `require`.
+- Отдельный `DIRECT_DATABASE_URL` для Helium **не нужен** (нет `-pooler`).
+- Проверка в Shell: `pnpm --filter api db:migrate` (после `source scripts/replit-db-env.sh`).
+
 ### Ошибка «Cannot push development database objects, production database already exists»
 
 **Причина:** при повторной публикации Replit пытается снова скопировать схему/данные из **development** БД в **production**, хотя production уже создана.

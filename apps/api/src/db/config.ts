@@ -25,14 +25,30 @@ function positiveNumber(value: string | undefined): number | undefined {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+function sslModeFromUrl(url: string | undefined): 'require' | 'disable' | undefined {
+  if (!url) return undefined;
+  if (/[?&]sslmode=disable(?:&|$)/.test(url)) return 'disable';
+  if (/[?&]sslmode=require(?:&|$)/.test(url)) return 'require';
+  return undefined;
+}
+
+/** True for Replit Helium internal Postgres (`@helium/` host). */
+export function isHeliumDatabaseUrl(url: string): boolean {
+  return /@helium(?:\/|$)/.test(url) || url.includes('heliumdb');
+}
+
 /** Build postgres-js connection options from environment variables. */
 export function buildConnectionOptions(env: Env = process.env): PgConnectionOptions {
   const options: PgConnectionOptions = {};
 
-  // TLS: Neon requires it. `require` for managed, `disable` for plain local PG.
-  // When unset, postgres-js honors `sslmode` in the connection string.
+  // TLS: explicit env wins; else honor sslmode= in the connection string (Helium uses disable).
   if (env.DB_SSL === 'require') options.ssl = 'require';
   else if (env.DB_SSL === 'disable') options.ssl = false;
+  else {
+    const fromUrl = sslModeFromUrl(env.DATABASE_URL ?? env.DIRECT_DATABASE_URL);
+    if (fromUrl === 'require') options.ssl = 'require';
+    else if (fromUrl === 'disable') options.ssl = false;
+  }
 
   // Disable prepared statements for PgBouncer transaction pooling (Neon pooled).
   if (env.DB_PREPARE === 'false') options.prepare = false;
