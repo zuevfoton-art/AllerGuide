@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { mapExternalAllergen, mapExternalAllergenNames } from './allergen-aliases';
+import {
+  mapExternalAllergen,
+  mapExternalAllergenIds,
+  mapExternalAllergenNames,
+  mapExternalAllergenToId,
+} from './allergen-aliases';
 
 describe('external allergen aliases', () => {
   it('maps dataset English names to the core RU taxonomy', () => {
@@ -15,12 +20,18 @@ describe('external allergen aliases', () => {
     expect(mapExternalAllergen('en:peanuts')?.name).toBe('Арахис');
   });
 
-  it('keeps unrecognized terms as-is and de-duplicates', () => {
+  it('maps to canonical ids', () => {
+    expect(mapExternalAllergenToId('en:milk')).toBe('milk');
+    expect(mapExternalAllergenIds(['en:milk', 'en:nuts'])).toEqual(['milk', 'tree-nuts']);
+  });
+
+  it('keeps unrecognized terms as-is in names mapper and de-duplicates', () => {
     const result = mapExternalAllergenNames(['Treenut', 'Milk', 'Garlic', 'Milk']);
     expect(result).toEqual(['Орехи', 'Молоко', 'Garlic']);
   });
 
   it('returns undefined for unknown terms', () => {
     expect(mapExternalAllergen('Tartrazine')).toBeUndefined();
+    expect(mapExternalAllergenToId('Tartrazine')).toBeUndefined();
   });
 });

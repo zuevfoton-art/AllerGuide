@@ -191,3 +191,39 @@ export function collectLatestScaleTrends(
 
   return DIARY_TREND_SCALE_IDS.filter((id) => latest.has(id)).map((id) => latest.get(id)!);
 }
+
+export const ACT_PROMPT_INTERVAL_DAYS = 28;
+
+export function getLastScaleEntryAt(
+  entries: { type: string; details: string; createdAt: string }[],
+  scaleId: ClinicalScaleId,
+): string | null {
+  for (const entry of entries) {
+    if (entry.type !== 'Шкала') continue;
+    const payload = decodeDiaryDetails(entry.details);
+    if (!payload) continue;
+    const id = getScaleIdFromAnswers(payload.answers);
+    if (id === scaleId) return entry.createdAt;
+  }
+  return null;
+}
+
+/** C.4: prompt ACT when asthma profile and last ACT entry is older than 28 days. */
+export function isActPromptDue(
+  entries: { type: string; details: string; createdAt: string }[],
+  conditions: AllergyConditionId[],
+): boolean {
+  if (!conditions.includes('asthma')) return false;
+  const lastAt = getLastScaleEntryAt(entries, 'act');
+  if (!lastAt) return true;
+  const daysSince = (Date.now() - new Date(lastAt).getTime()) / 86_400_000;
+  return daysSince >= ACT_PROMPT_INTERVAL_DAYS;
+}
+
+export function daysSinceActEntry(
+  entries: { type: string; details: string; createdAt: string }[],
+): number | null {
+  const lastAt = getLastScaleEntryAt(entries, 'act');
+  if (!lastAt) return null;
+  return Math.floor((Date.now() - new Date(lastAt).getTime()) / 86_400_000);
+}

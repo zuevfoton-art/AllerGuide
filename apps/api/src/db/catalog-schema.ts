@@ -33,7 +33,7 @@ export const crossReactions = catalogSchema.table(
 /**
  * Product catalog keyed by barcode. Populated from imported datasets and/or a
  * write-through cache over Open Food Facts. `allergenTags` is the set of
- * allergens detected for the product (free-form tags from the source dataset).
+ * canonical allergen ids detected for the product.
  */
 export const products = catalogSchema.table(
   'products',

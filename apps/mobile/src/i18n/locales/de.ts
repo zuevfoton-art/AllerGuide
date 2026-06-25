@@ -179,6 +179,13 @@ const de: LocaleMessages = {
     insightsCorSymFood: 'An {{n}} von {{of}} Symptomtagen gab es auch einen Ernährungseintrag',
     insightsCorSymTrig: 'An {{n}} von {{of}} Symptomtagen wurde ein Auslöser erfasst',
     insightsCorSymMeds: 'An {{n}} von {{of}} Symptomtagen wurde ein Medikament eingenommen',
+    insightsTemporalCorSymFood: 'Bei {{n}} von {{of}} Symptomepisoden Essen innerhalb ±4 h',
+    insightsTemporalCorSymTrig: 'Bei {{n}} von {{of}} Symptomepisoden Trigger innerhalb ±4 h',
+    insightsTemporalCorSymMeds: 'Bei {{n}} von {{of}} Symptomepisoden Medikament innerhalb ±4 h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} Tage in Folge Symptome ohne dokumentierten Trigger',
+    actPromptTitle: 'Zeit für ACT',
+    actPromptText: 'Seit der letzten ACT-Bewertung sind 4+ Wochen vergangen. Wir empfehlen ACT auszufüllen.',
+    actPromptButton: 'ACT ausfüllen',
   },
   diaryWizard: {
     stepOf: 'Schritt {{current}} von {{total}}',
@@ -367,6 +374,11 @@ const de: LocaleMessages = {
     conditionsOther: 'Weitere Zustände',
     consent:
       'Ich bestätige, dass ich Elternteil oder gesetzlicher Vertreter dieses Kindes bin und berechtigt bin, Gesundheitsdaten einzugeben.',
+    confirmationLabel: 'Bestätigungsquelle',
+    confirmationHint: 'Tippen Sie auf eine Zeile: Selbstangabe → spezifisches IgE → ärztlich bestätigt.',
+    confirmationSelf: 'Selbstangabe',
+    confirmationIge: 'Spezifisches IgE',
+    confirmationClinician: 'Ärztlich bestätigt',
     contactsLabel: 'Notfallkontakte',
     saveProfile: 'Profil speichern',
     nextChild: 'Weiter: Kinderprofil',
@@ -588,6 +600,12 @@ const de: LocaleMessages = {
     calm: 'Ruhig',
     grains: 'Körner/m³',
     envUnavailable: 'Keine Daten',
+    symptomDays: 'Symptome {days}/7 Tage',
+    confidence: {
+      high: 'Hohe Zuverlässigkeit',
+      medium: 'Mittlere Zuverlässigkeit',
+      low: 'Niedrige Zuverlässigkeit',
+    },
   },
   errors: {
     selectProfile: 'Profil auf dem Startbildschirm auswählen.',

@@ -34,7 +34,11 @@ export type LocaleContent = {
     status: Record<string, { title: string; summary: string }>;
     pollenTier: Record<string, string>;
     aqiTier: Record<string, string> & { noData?: string };
-    recommendations: Record<string, { title: string; text: string }>;
+    recommendations: Record<string, { title: string; text: string }> & {
+      symptomsWeek: { title: string; text: string };
+      clinicalScale: { title: string; text: string };
+      crossReaction: { title: string; text: string };
+    };
     pollenLabels: Record<string, string>;
     locationDefault: string;
     envUnavailableSummary: string;

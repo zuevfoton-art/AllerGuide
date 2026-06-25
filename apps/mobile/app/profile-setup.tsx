@@ -1,10 +1,19 @@
+import { useMemo, useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { getWizardStep, shouldCompleteOnboarding, type AllergyConditionId, type ProfileType } from '@allerguide/core';
+import {
+  getWizardStep,
+  needsChildConsent,
+  normalizeAllergyConfirmations,
+  shouldCompleteOnboarding,
+  type AllergyConditionId,
+  type AllergyConfirmationSource,
+  type ProfileType,
+} from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
+import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
 import { ConditionPicker } from '@/src/components/ConditionPicker';
-import { createProfile, listProfiles } from '@/src/services/profile-service';
+import { createProfile, listProfiles, ProfileValidationError } from '@/src/services/profile-service';
 import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import {
   normalizeEmergencyContactDrafts,
@@ -27,16 +36,12 @@ function validateProfileInput(name: string, birthYear: string, selected: string[
   const trimmedName = name.trim();
   const year = Number(birthYear);
 
-  if (!trimmedName) return 'Укажите имя профиля.';
+  if (!trimmedName) return 'name_required';
   if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
-    return 'Укажите корректный год рождения.';
+    return 'birth_year_invalid';
   }
-  if (selected.length === 0) return 'Выберите хотя бы один аллерген.';
-  return '';
-}
-
-function needsChildConsent(type: ProfileType, scenario: ReturnType<typeof getStoredScenario>) {
-  return type === 'child' || scenario === 'child';
+  if (selected.length === 0) return 'allergen_required';
+  return null;
 }
 
 export default function ProfileSetupScreen() {
@@ -51,6 +56,7 @@ export default function ProfileSetupScreen() {
   const [name, setName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [childConsent, setChildConsent] = useState(false);
@@ -86,6 +92,7 @@ export default function ProfileSetupScreen() {
     setSelected([]);
     setConditions([]);
     setContacts([]);
+    setConfirmations({});
     setError('');
   };
 
@@ -96,8 +103,8 @@ export default function ProfileSetupScreen() {
       return;
     }
 
-    if (needsChildConsent(effectiveType, scenario) && !childConsent) {
-      setError(t('profileSetup.errors.consentRequired'));
+    if (needsChildConsent(effectiveType, scenario ?? undefined) && !childConsent) {
+      setError(tProfileError('child_consent_required'));
       return;
     }
 
@@ -110,8 +117,15 @@ export default function ProfileSetupScreen() {
         birthYear: Number(birthYear),
         type: effectiveType,
         allergies: selected,
+        allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
+        childConsent,
+        scenario: scenario ?? undefined,
       });
     } catch (err) {
+      if (err instanceof ProfileValidationError) {
+        setError(tProfileError(err.code));
+        return;
+      }
       setError(err instanceof Error ? err.message : t('profileSetup.errors.saveFailed'));
       return;
     }
@@ -228,10 +242,21 @@ export default function ProfileSetupScreen() {
 
       <GlassCard style={styles.section}>
         <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
-        <AllergenPicker selected={selected} onChange={setSelected} />
+        <AllergenPicker
+          selected={selected}
+          onChange={(ids) => {
+            setSelected(ids);
+            setConfirmations((prev) => normalizeAllergyConfirmations(ids, prev));
+          }}
+        />
+        <AllergyConfirmationEditor
+          selected={selected}
+          confirmations={confirmations}
+          onChange={setConfirmations}
+        />
       </GlassCard>
 
-      {needsChildConsent(effectiveType, scenario) ? (
+      {needsChildConsent(effectiveType, scenario ?? undefined) ? (
         <Pressable style={styles.consentRow} onPress={() => setChildConsent((v) => !v)}>
           <Ionicons
             name={childConsent ? 'checkbox' : 'square-outline'}

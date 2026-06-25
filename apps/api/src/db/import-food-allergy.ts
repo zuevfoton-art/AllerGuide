@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sql } from 'drizzle-orm';
-import { mapExternalAllergenNames } from '@allerguide/core';
+import { mapExternalAllergenIds } from '@allerguide/core';
 import { db } from './index';
 import { products } from './catalog-schema';
 import type { NewProductRow } from './catalog-schema';
@@ -57,7 +57,7 @@ function readCsv(file: string): string[][] {
  *  - allergy.csv      -> Allergy_ID -> Allergy_name
  *  - foodallergy.csv  -> Allergy_ID, food_barcode  (M:N)
  *  - foodproduct.csv  -> food_name, food_barcode
- * Each product is written with `allergenTags` = the set of allergy names that
+ * Each product is written with `allergenTags` = canonical allergen ids that
  * map to its barcode. Idempotent (upsert by barcode).
  */
 export async function importFoodAllergyDataset() {
@@ -82,9 +82,8 @@ export async function importFoodAllergyDataset() {
       barcode,
       name,
       ingredients: '',
-      // Map dataset English allergy names to the canonical RU taxonomy so the
-      // scanner can match them against user profiles.
-      allergenTags: mapExternalAllergenNames([...(tagsByBarcode.get(barcode) ?? [])]),
+      // Map dataset English allergy names to canonical ids for scanner matching.
+      allergenTags: mapExternalAllergenIds([...(tagsByBarcode.get(barcode) ?? [])]),
       source: 'food-allergy-db',
     });
   }

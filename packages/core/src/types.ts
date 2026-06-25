@@ -2,6 +2,8 @@ export type ProfileType = 'self' | 'child';
 export type Scenario = 'self' | 'child' | 'both';
 export type RiskLevel = 'low' | 'medium' | 'high';
 
+export type { AllergyConfirmationSource } from './allergy-confirmations';
+
 export interface Profile {
   id: number;
   userId?: number;
@@ -9,6 +11,8 @@ export interface Profile {
   birthYear: number;
   type: ProfileType;
   allergies: string;
+  /** JSON map allergenId → confirmation source (`self_reported` | `specific_ige` | `clinician`). */
+  allergyConfirmations?: string;
 }
 
 export interface DiaryEntry {
@@ -47,4 +51,10 @@ export interface ProfileInput {
   type: ProfileType;
   /** Canonical allergen ids (`milk`, `birch-pollen`, …). Legacy labels are normalized on save. */
   allergies: string[];
+  /** Per-allergen verification source (defaults to `self_reported`). */
+  allergyConfirmations?: Record<string, import('./allergy-confirmations').AllergyConfirmationSource>;
+  /** Required when `type === 'child'` or onboarding scenario is `child`. */
+  childConsent?: boolean;
+  /** Onboarding scenario hint for consent validation. */
+  scenario?: Scenario;
 }

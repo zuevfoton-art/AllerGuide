@@ -27,11 +27,15 @@ describe('diary schema', () => {
     expect(ids).toContain('todayMeds');
   });
 
-  it('encodes and decodes structured diary details', () => {
-    const encoded = encodeDiaryDetails({ symptoms: 'Зуд', intensity: '3 — умеренно' });
+  it('encodes and decodes structured diary details with severity enrichment', () => {
+    const encoded = encodeDiaryDetails(
+      { symptoms: 'чихание', symptomCode: 'Чихание', severity0_3: '2 — умеренная' },
+      'Симптомы',
+    );
     const decoded = decodeDiaryDetails(encoded);
-    expect(decoded?.answers.symptoms).toBe('Зуд');
-    expect(decoded?.answers.intensity).toBe('3 — умеренно');
+    expect(decoded?.answers.symptoms).toBe('чихание');
+    expect(decoded?.answers.severity).toBe('2');
+    expect(decoded?.answers.symptomCodes).toContain('sneezing');
   });
 
   it('formats structured summary for history cards', () => {
@@ -63,9 +67,9 @@ describe('diary schema', () => {
   });
 
   it('validates required step answers', () => {
-    const section = DIARY_SECTIONS[0];
-    expect(validateDiarySectionStep(section, 0, {})).toMatch(/Заполните поле/);
-    expect(validateDiarySectionStep(section, 0, { symptoms: 'Кашель' })).toBeNull();
+    const section = getDiarySection('Симптомы')!;
+    expect(validateDiarySectionStep(section, 1, {})).toMatch(/Заполните поле/);
+    expect(validateDiarySectionStep(section, 1, { symptoms: 'Кашель' })).toBeNull();
   });
 
   it('detects when a section has answers', () => {

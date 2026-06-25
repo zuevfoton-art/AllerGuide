@@ -7,6 +7,8 @@ export interface DiaryStats {
   byType: Record<string, number>;
   recentSymptoms: string[];
   topFoodItems: string[];
+  /** Share of symptom entries with at least one SNOMED-coded symptom (C.1). */
+  codedSymptomRate: number;
 }
 
 export interface DayBucket {
@@ -18,15 +20,30 @@ export interface DayBucket {
   hasTrigger: boolean;
 }
 
+export type DiaryCorrelationKind = 'symptom-food' | 'symptom-trigger' | 'symptom-meds' | null;
+
+export type DiaryAnomalyKind = 'symptoms-without-trigger' | null;
+
 export interface DiaryInsights {
   days: DayBucket[];
   streak: number;
   topTypes: Array<{ type: string; count: number }>;
   weekTotal: number;
-  correlationKind: 'symptom-food' | 'symptom-trigger' | 'symptom-meds' | null;
+  /** Day-level correlation (legacy). */
+  correlationKind: DiaryCorrelationKind;
   correlationCount: number;
   correlationOf: number;
+  /** Temporal ±4h correlation (C.3). */
+  temporalCorrelationKind: DiaryCorrelationKind;
+  temporalCorrelationCount: number;
+  temporalCorrelationOf: number;
+  /** C.6: consecutive symptom days without logged trigger. */
+  anomalyKind: DiaryAnomalyKind;
+  anomalyDays: number;
 }
+
+const TEMPORAL_WINDOW_MS = 4 * 3_600_000;
+const ANOMALY_SYMPTOM_DAYS_THRESHOLD = 3;
 
 function daysAgo(dateIso: string, days: number): boolean {
   const date = new Date(dateIso);
@@ -48,15 +65,97 @@ function isoDate(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+function entryTime(entry: DiaryEntry): number {
+  const t = new Date(entry.createdAt).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function withinWindow(symptomAt: number, otherAt: number, windowMs = TEMPORAL_WINDOW_MS): boolean {
+  return Math.abs(symptomAt - otherAt) <= windowMs;
+}
+
+export function computeTemporalCorrelations(
+  entries: DiaryEntry[],
+  windowHours = 4,
+): {
+  kind: DiaryCorrelationKind;
+  count: number;
+  of: number;
+} {
+  const windowMs = windowHours * 3_600_000;
+  const cutoff7 = Date.now() - 7 * 86_400_000;
+  const weekEntries = entries.filter((e) => entryTime(e) >= cutoff7);
+
+  const symptoms = weekEntries.filter((e) => e.type === 'Симптомы');
+  const foods = weekEntries.filter((e) => e.type === 'Питание');
+  const triggers = weekEntries.filter((e) => e.type === 'Триггер');
+  const meds = weekEntries.filter((e) => e.type === 'Лекарство');
+
+  if (!symptoms.length) return { kind: null, count: 0, of: 0 };
+
+  let foodPairs = 0;
+  let triggerPairs = 0;
+  let medsPairs = 0;
+
+  for (const symptom of symptoms) {
+    const at = entryTime(symptom);
+    if (foods.some((e) => withinWindow(at, entryTime(e), windowMs))) foodPairs++;
+    if (triggers.some((e) => withinWindow(at, entryTime(e), windowMs))) triggerPairs++;
+    if (meds.some((e) => withinWindow(at, entryTime(e), windowMs))) medsPairs++;
+  }
+
+  const of = symptoms.length;
+  const threshold = Math.max(1, Math.ceil(of * 0.5));
+
+  if (foodPairs >= threshold && foodPairs >= triggerPairs && foodPairs >= medsPairs) {
+    return { kind: 'symptom-food', count: foodPairs, of };
+  }
+  if (triggerPairs >= threshold && triggerPairs >= medsPairs) {
+    return { kind: 'symptom-trigger', count: triggerPairs, of };
+  }
+  if (medsPairs >= threshold) {
+    return { kind: 'symptom-meds', count: medsPairs, of };
+  }
+
+  return { kind: null, count: 0, of };
+}
+
+export function detectSymptomWithoutTriggerAnomaly(days: DayBucket[]): {
+  kind: DiaryAnomalyKind;
+  days: number;
+} {
+  let maxRun = 0;
+  let currentRun = 0;
+
+  for (const day of days) {
+    if (day.hasSymptoms && !day.hasTrigger) {
+      currentRun++;
+      maxRun = Math.max(maxRun, currentRun);
+    } else {
+      currentRun = 0;
+    }
+  }
+
+  if (maxRun >= ANOMALY_SYMPTOM_DAYS_THRESHOLD) {
+    return { kind: 'symptoms-without-trigger', days: maxRun };
+  }
+  return { kind: null, days: maxRun };
+}
+
 export function computeDiaryStats(entries: DiaryEntry[]): DiaryStats {
   const byType: Record<string, number> = {};
   const symptoms: string[] = [];
   const foods: string[] = [];
+  let symptomEntries = 0;
+  let codedSymptomEntries = 0;
 
   for (const entry of entries) {
     byType[entry.type] = (byType[entry.type] ?? 0) + 1;
 
     if (entry.type === 'Симптомы') {
+      symptomEntries++;
+      const payload = decodeDiaryDetails(entry.details);
+      if (payload?.answers.symptomCodes?.trim()) codedSymptomEntries++;
       const value = extractAnswer(entry, 'symptoms');
       if (value) symptoms.push(value);
     }
@@ -73,6 +172,7 @@ export function computeDiaryStats(entries: DiaryEntry[]): DiaryStats {
     byType,
     recentSymptoms: symptoms.slice(0, 3),
     topFoodItems: foods.slice(0, 3),
+    codedSymptomRate: symptomEntries ? codedSymptomEntries / symptomEntries : 0,
   };
 }
 
@@ -134,7 +234,7 @@ export function computeDiaryInsights(entries: DiaryEntry[]): DiaryInsights {
   const trigWithSym = symptomDays.filter((d) => d.hasTrigger).length;
   const medsWithSym = symptomDays.filter((d) => d.hasMeds).length;
 
-  let correlationKind: DiaryInsights['correlationKind'] = null;
+  let correlationKind: DiaryCorrelationKind = null;
   let correlationCount = 0;
   const correlationOf = symptomDays.length;
 
@@ -152,5 +252,21 @@ export function computeDiaryInsights(entries: DiaryEntry[]): DiaryInsights {
     }
   }
 
-  return { days, streak, topTypes, weekTotal, correlationKind, correlationCount, correlationOf };
+  const temporal = computeTemporalCorrelations(entries);
+  const anomaly = detectSymptomWithoutTriggerAnomaly(days);
+
+  return {
+    days,
+    streak,
+    topTypes,
+    weekTotal,
+    correlationKind,
+    correlationCount,
+    correlationOf,
+    temporalCorrelationKind: temporal.kind,
+    temporalCorrelationCount: temporal.count,
+    temporalCorrelationOf: temporal.of,
+    anomalyKind: anomaly.kind,
+    anomalyDays: anomaly.days,
+  };
 }

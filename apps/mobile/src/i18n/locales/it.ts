@@ -179,6 +179,13 @@ const it: LocaleMessages = {
     insightsCorSymFood: '{{n}} su {{of}} giorni con sintomi avevano anche una voce alimentare',
     insightsCorSymTrig: '{{n}} su {{of}} giorni con sintomi aveva un fattore scatenante registrato',
     insightsCorSymMeds: '{{n}} su {{of}} giorni con sintomi includevano un farmaco',
+    insightsTemporalCorSymFood: '{{n}} su {{of}} episodi sintomi con cibo entro ±4 h',
+    insightsTemporalCorSymTrig: '{{n}} su {{of}} episodi sintomi con trigger entro ±4 h',
+    insightsTemporalCorSymMeds: '{{n}} su {{of}} episodi sintomi con farmaco entro ±4 h',
+    insightsAnomalySymptomsNoTrigger: '{{days}} giorni consecutivi con sintomi senza trigger registrato',
+    actPromptTitle: 'È il momento dell\'ACT',
+    actPromptText: 'Sono passate più di 4 settimane dall\'ultima valutazione ACT. Consigliamo di compilarla.',
+    actPromptButton: 'Compila ACT',
   },
   diaryWizard: {
     stepOf: 'Passo {{current}} di {{total}}',
@@ -367,6 +374,11 @@ const it: LocaleMessages = {
     conditionsOther: 'Altre condizioni',
     consent:
       'Confermo di essere genitore o tutore legale di questo bambino e di essere autorizzato a inserire le sue informazioni sanitarie.',
+    confirmationLabel: 'Fonte di verifica',
+    confirmationHint: 'Tocca una riga per alternare: autodichiarazione → IgE specifica → confermato dal medico.',
+    confirmationSelf: 'Autodichiarazione',
+    confirmationIge: 'IgE specifica',
+    confirmationClinician: 'Confermato dal medico',
     contactsLabel: 'Contatti di emergenza',
     saveProfile: 'Salva profilo',
     nextChild: 'Avanti: profilo del bambino',
@@ -588,6 +600,12 @@ const it: LocaleMessages = {
     calm: 'Calmo',
     grains: 'grani/m³',
     envUnavailable: 'Nessun dato',
+    symptomDays: 'Sintomi {days}/7 gg.',
+    confidence: {
+      high: 'Alta affidabilità',
+      medium: 'Affidabilità media',
+      low: 'Bassa affidabilità',
+    },
   },
   errors: {
     selectProfile: 'Seleziona un profilo nella schermata home.',

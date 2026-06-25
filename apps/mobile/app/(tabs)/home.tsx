@@ -1,7 +1,6 @@
 import { Text, Pressable, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { computeDiaryStats } from '@allerguide/core';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
@@ -25,6 +24,14 @@ function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'd
   return 'warn';
 }
 
+function confidenceBadgeKind(
+  confidence: WellnessSnapshot['confidence'],
+): 'ok' | 'warn' | 'danger' {
+  if (confidence === 'high') return 'ok';
+  if (confidence === 'low') return 'danger';
+  return 'warn';
+}
+
 export default function HomeScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
@@ -40,11 +47,7 @@ export default function HomeScreen() {
     setLoadingWellness(true);
     try {
       const entries = await getDiaryEntries(activeProfileId);
-      const stats = computeDiaryStats(entries);
-      const snapshot = await fetchWellnessSnapshot(profile.allergies, {
-        recentSymptoms: stats.recentSymptoms.length > 0,
-        recentTriggers: stats.entriesLast7Days > 0 && stats.recentSymptoms.length > 0,
-      }, locale);
+      const snapshot = await fetchWellnessSnapshot(profile.allergies, entries, locale);
       setWellness(snapshot);
     } finally {
       setLoadingWellness(false);
@@ -68,6 +71,9 @@ export default function HomeScreen() {
   );
 
   const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;
+  const confidenceBadge = wellness
+    ? badgeStyle(confidenceBadgeKind(wellness.confidence), theme)
+    : null;
 
   const todayLabel = useMemo(() => {
     try {
@@ -125,6 +131,19 @@ export default function HomeScreen() {
                 {wellness.score}
                 <Text style={ui.heroKpiSub}> / 100</Text>
               </Text>
+            </View>
+
+            <View style={styles.metaRow}>
+              {confidenceBadge ? (
+                <View style={[ui.badge, confidenceBadge.container, styles.confidenceBadge]}>
+                  <Text style={[ui.badgeText, confidenceBadge.text]}>
+                    {t(`wellness.confidence.${wellness.confidence}`)}
+                  </Text>
+                </View>
+              ) : null}
+              {!wellness.envDataAvailable ? (
+                <Text style={styles.envHint}>{t('wellness.envUnavailable')}</Text>
+              ) : null}
             </View>
 
             {wellness.factors.slice(0, 3).map((factor) => (
@@ -215,6 +234,21 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       fontWeight: '600',
       color: colors.text,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap',
+      marginTop: 6,
+    },
+    confidenceBadge: {
+      alignSelf: 'flex-start',
+    },
+    envHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
     },
     interpret: {
       fontFamily: fonts.sans,

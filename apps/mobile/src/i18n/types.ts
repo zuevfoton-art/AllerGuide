@@ -181,6 +181,13 @@ export type LocaleMessages = {
     insightsCorSymFood: string;
     insightsCorSymTrig: string;
     insightsCorSymMeds: string;
+    insightsTemporalCorSymFood: string;
+    insightsTemporalCorSymTrig: string;
+    insightsTemporalCorSymMeds: string;
+    insightsAnomalySymptomsNoTrigger: string;
+    actPromptTitle: string;
+    actPromptText: string;
+    actPromptButton: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -353,6 +360,11 @@ export type LocaleMessages = {
     conditionsHint: string;
     conditionsOther: string;
     consent: string;
+    confirmationLabel: string;
+    confirmationHint: string;
+    confirmationSelf: string;
+    confirmationIge: string;
+    confirmationClinician: string;
     contactsLabel: string;
     saveProfile: string;
     nextChild: string;
@@ -574,6 +586,12 @@ export type LocaleMessages = {
     calm: string;
     grains: string;
     envUnavailable: string;
+    symptomDays: string;
+    confidence: {
+      high: string;
+      medium: string;
+      low: string;
+    };
   };
   errors: {
     selectProfile: string;

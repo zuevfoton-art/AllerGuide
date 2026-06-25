@@ -7,8 +7,16 @@ export interface SyncDb {
 export function applySyncPayload(db: SyncDb, payload: SyncPayload, userId: number) {
   for (const profile of payload.profiles) {
     db.runSync(
-      'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies) VALUES (?, ?, ?, ?, ?, ?)',
-      [profile.id, userId, profile.name, profile.birthYear, profile.type, profile.allergies],
+      'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies, allergyConfirmations) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        profile.id,
+        userId,
+        profile.name,
+        profile.birthYear,
+        profile.type,
+        profile.allergies,
+        profile.allergyConfirmations ?? '{}',
+      ],
     );
   }
 

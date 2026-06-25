@@ -20,6 +20,7 @@ vi.mock('../services/profile-service', () => ({
   getProfileForUser: vi.fn(),
   updateProfileForUser: vi.fn(),
   deleteProfileForUser: vi.fn(),
+  validateProfilePayload: vi.fn(() => null),
 }));
 
 import {

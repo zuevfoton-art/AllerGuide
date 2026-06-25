@@ -36,8 +36,8 @@ describe('open food facts service', () => {
     expect(product!.name).toBe('Nutella');
     expect(product!.brand).toBe('Ferrero');
     expect(product!.imageUrl).toContain('nutella.jpg');
-    // declared allergens + "may contain" traces, mapped to RU taxonomy
-    expect(product!.allergenTags).toEqual(['Молоко', 'Орехи', 'Соя']);
+    // declared allergens + "may contain" traces, mapped to canonical ids
+    expect(product!.allergenTags).toEqual(['milk', 'tree-nuts', 'soy']);
   });
 
   it('sends a descriptive User-Agent header (OFF requirement)', async () => {
@@ -63,7 +63,7 @@ describe('open food facts service', () => {
 
     const results = await searchOpenFoodFacts('молоко');
     expect(results.map((p) => p.barcode)).toEqual(['111', '222']);
-    expect(results[0].allergenTags).toEqual(['Молоко']);
+    expect(results[0].allergenTags).toEqual(['milk']);
   });
 
   it('returns an empty array for short queries without calling the API', async () => {

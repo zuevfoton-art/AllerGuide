@@ -333,6 +333,18 @@ const frContent: LocaleContent = {
         title: 'Symptômes du journal',
         text: 'Symptômes enregistrés au cours des 48 dernières heures. Suivez l\'évolution ; contactez votre médecin s\'ils s\'aggravent.',
       },
+      symptomsWeek: {
+        title: 'Symptômes du journal',
+        text: 'Symptômes enregistrés sur {days} des 7 derniers jours. Suivez l\'évolution ; contactez votre médecin s\'ils s\'aggravent.',
+      },
+      clinicalScale: {
+        title: 'Échelle {label}',
+        text: 'Dernière évaluation : {total} points ({level}). Discutez du contrôle avec votre médecin.',
+      },
+      crossReaction: {
+        title: 'Réactions croisées possibles',
+        text: 'Avec un pollen élevé, réaction possible à : {allergens}. À prendre en compte pour l\'alimentation et les sorties.',
+      },
       food: {
         title: 'Allergènes alimentaires',
         text: 'Dans votre profil : {allergens}. Vérifiez les ingrédients avec le scanner avant d\'acheter de nouveaux produits.',
@@ -345,10 +357,17 @@ const frContent: LocaleContent = {
         title: 'Données environnementales indisponibles',
         text: 'Impossible de charger le pollen et la qualité de l\'air. L\'indice reflète uniquement le journal.',
       },
+      seasonalPollen: {
+        title: 'Saison pollinique dans votre région',
+        text: 'Pic de « {label} » selon le calendrier régional. Planifiez l\'exposition et le traitement avec votre médecin.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Aulne',
       birch_pollen: 'Bouleau',
       grass_pollen: 'Fléole des prés',
+      mugwort_pollen: 'Armoise',
+      olive_pollen: 'Olive',
       ragweed_pollen: 'Ambroisie',
     },
     locationDefault: 'Paris',

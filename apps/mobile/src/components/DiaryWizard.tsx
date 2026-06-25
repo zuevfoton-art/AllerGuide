@@ -160,10 +160,10 @@ export function DiaryWizard({
         scaleError = validateClinicalScale(answers);
         if (scaleError) return [];
         const enriched = enrichScaleAnswers(answers);
-        return [{ type: item.type, details: encodeDiaryDetails(enriched) }];
+        return [{ type: item.type, details: encodeDiaryDetails(enriched, item.type) }];
       }
 
-      return [{ type: item.type, details: encodeDiaryDetails(answers) }];
+      return [{ type: item.type, details: encodeDiaryDetails(answers, item.type) }];
     });
 
     if (entries.length === 0) {

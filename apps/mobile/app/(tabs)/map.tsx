@@ -17,6 +17,7 @@ import {
   getPlaceLevelLabel,
   getPollenPeaksForMonth,
   formatPollenMonth,
+  resolvePollenRegion,
   type CatalogPlace,
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
@@ -56,7 +57,8 @@ export default function MapScreen() {
   const selected = places.find((place) => place.id === selectedId) ?? places[0] ?? null;
   const mapUrl = useMemo(() => buildPlacesMapUrl(places, selectedId), [places, selectedId]);
   const pollenMonth = new Date().getMonth() + 1;
-  const pollenPeaks = getPollenPeaksForMonth(pollenMonth);
+  const pollenRegion = resolvePollenRegion(55.75, 37.62);
+  const pollenPeaks = getPollenPeaksForMonth(pollenMonth, pollenRegion.id);
 
   const levelBg = useMemo(
     () =>
@@ -75,7 +77,7 @@ export default function MapScreen() {
           <Text style={ui.docLabel}>AllerGuide · {t('map.eyebrow')}</Text>
           <Text style={ui.docTitle}>{t('map.title')}</Text>
           <Text style={ui.docMeta}>{t('map.subtitle')}</Text>
-          <Text style={styles.regionLabel}>{t('map.regionLabel')}</Text>
+          <Text style={styles.regionLabel}>{pollenRegion.name}</Text>
         </View>
         <ProfileHeaderButton />
       </View>
@@ -159,13 +161,13 @@ export default function MapScreen() {
             <Text style={styles.pollenSub}>{t('map.pollenMapSub')}</Text>
           </GlassCard>
           {pollenPeaks.map((peak) => (
-            <GlassCard key={peak.allergen} style={styles.card}>
+            <GlassCard key={peak.taxonId} style={styles.card}>
               <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{peak.allergen}</Text>
+                <Text style={styles.cardTitle}>{peak.label}</Text>
                 <Text style={styles.cardNote}>
                   {t('map.peakSeason', {
                     month: formatPollenMonth(peak.peakMonth),
-                    region: peak.region,
+                    region: pollenRegion.name,
                   })}
                 </Text>
               </View>

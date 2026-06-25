@@ -333,6 +333,18 @@ const esContent: LocaleContent = {
         title: 'Síntomas del diario',
         text: 'Síntomas registrados en las últimas 48 horas. Siga la evolución; contacte con su médico si empeoran.',
       },
+      symptomsWeek: {
+        title: 'Síntomas del diario',
+        text: 'Síntomas registrados en {days} de los últimos 7 días. Siga la evolución; contacte con su médico si empeoran.',
+      },
+      clinicalScale: {
+        title: 'Escala {label}',
+        text: 'Última puntuación: {total} ({level}). Comente el control con su médico.',
+      },
+      crossReaction: {
+        title: 'Posibles reacciones cruzadas',
+        text: 'Con polen elevado, posible reacción a: {allergens}. Téngalo en cuenta en la alimentación y al aire libre.',
+      },
       food: {
         title: 'Alérgenos alimentarios',
         text: 'En su perfil: {allergens}. Revise los ingredientes con el escáner antes de comprar productos nuevos.',
@@ -345,10 +357,17 @@ const esContent: LocaleContent = {
         title: 'Sin datos ambientales',
         text: 'No se pudo cargar polen ni calidad del aire. El índice refleja solo el diario.',
       },
+      seasonalPollen: {
+        title: 'Temporada de polen en su región',
+        text: 'Pico de «{label}» según el calendario regional. Planifique exposición y tratamiento con su médico.',
+      },
     },
     pollenLabels: {
+      alder_pollen: 'Aliso',
       birch_pollen: 'Abedul',
       grass_pollen: 'Festuca',
+      mugwort_pollen: 'Artemisia',
+      olive_pollen: 'Olivo',
       ragweed_pollen: 'Ambrosía',
     },
     locationDefault: 'Madrid',
