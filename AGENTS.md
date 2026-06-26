@@ -62,6 +62,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`) to console/HTTP; `EXPO_PUBLIC_SENTRY_DSN` enables crash reporting. Both off by default.
 
 ### Production builds (internal alpha)
+- Local Android build (Node.js + Gradle) and Android Studio verification: see [`docs/android-local-build.md`](docs/android-local-build.md). Quick path from `apps/mobile`: `pnpm android` (= `expo run:android`) or `cd android && ./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`. The native `apps/mobile/android/` project is committed (Gradle 8.13, Hermes, JDK 17).
 - EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
 - Replit deploy (web): see [`docs/replit-deploy.md`](docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true`, `scripts/replit-db-env.sh`, and `scripts/replit-deploy-build.sh`. «Invalid Neon production database» is usually a stale **deployment production DB** binding on Replit's side (not dev Secrets); see replit-deploy.md.
 - QA regression: [`docs/qa-checklist.md`](docs/qa-checklist.md).

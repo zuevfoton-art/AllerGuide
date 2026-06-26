@@ -5,6 +5,8 @@
 
 Internal alpha-сборка для TestFlight (iOS) и прямой установки APK (Android). Backend feature flags **выключены** — приложение работает offline-first, как в локальной разработке.
 
+> Нужна **локальная** сборка Android (Node.js + Gradle) и проверка в Android Studio без облака? См. [`docs/android-local-build.md`](android-local-build.md).
+
 ---
 
 ## Что даёт preview

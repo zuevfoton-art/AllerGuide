@@ -11,6 +11,8 @@
 | [`docs/functional-requirements.md`](docs/functional-requirements.md) | Функциональные требования |
 | [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) | Roadmap к production |
 | [`docs/git-bash-roadmap.md`](docs/git-bash-roadmap.md) | Git Bash: milestones, issues, ветки, PR |
+| [`docs/android-local-build.md`](docs/android-local-build.md) | Локальная сборка Android (Node.js + Gradle) и проверка в Android Studio |
+| [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md) | Облачная сборка (EAS) для internal alpha |
 | [`AGENTS.md`](AGENTS.md) | Команды, env, инструкции для агентов |
 
 ## Стек
