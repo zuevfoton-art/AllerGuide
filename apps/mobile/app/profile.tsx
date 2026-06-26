@@ -104,12 +104,8 @@ export default function ProfileScreen() {
           <Text style={ui.docTitle}>{t('profiles.title')}</Text>
           <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
         </View>
+        <LanguagePicker header />
       </View>
-
-      <GlassCard>
-        <Text style={ui.cardTitle}>{t('language.title')}</Text>
-        <LanguagePicker embedded />
-      </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>
       <GlassCard padded={false}>
@@ -239,8 +235,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.border,
       marginTop: 2,
+      flexShrink: 0,
     },
-    headerText: { flex: 1, gap: 2 },
+    headerText: { flex: 1, gap: 2, minWidth: 0 },
     listHeadPad: { paddingHorizontal: 16, paddingVertical: 16 },
     row: {
       flexDirection: 'row',
