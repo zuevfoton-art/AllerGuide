@@ -131,6 +131,26 @@ Sentry и analytics остаются выключенными (DSN пустой)
 
 ---
 
+## Нативные ограничения сборки (важно для Android)
+
+Эти настройки обязательны для стабильного запуска APK — не возвращайте их назад без проверки на физическом устройстве:
+
+| Настройка | Значение | Почему |
+|-----------|----------|--------|
+| `newArchEnabled` (`app.json` + `android/gradle.properties`) | **`false`** | Часть нативных модулей нестабильна на New Architecture в этом наборе зависимостей. |
+| `react-native-quick-crypto` | **не используется** | Его нативный `install()` аварийно завершал процесс **при запуске** на Android (native/JNI abort, который JS `try/catch` не ловит). Полностью удалён. |
+| Криптография (хэш паролей, PBKDF2/SHA-256) | **чистый JS `@noble/hashes`** в `@allerguide/core` (`src/password.ts`) | Не грузит нативный крипто-модуль на старте; формат хэшей не изменился (старые хэши проверяются). |
+| Резервное шифрование (AES-GCM) | Web Crypto, с мягкой деградацией | На нативе `crypto.subtle` отсутствует → `isEncryptionAvailable() === false`, облачный бэкап (по умолчанию выключен) просто не шифруется. |
+
+**История крашей запуска (для контекста):**
+- 1.0.0 / 1.0.1 — краш из-за `react-native-quick-crypto` `install()` на старте (New Arch). JS-guard в 1.0.1 не помог (нативный abort).
+- 1.0.2 / 1.0.3 — отключение New Architecture не помогло (нативный модуль грузился всё равно).
+- **1.0.4 — `react-native-quick-crypto` удалён, крипто переведено на pure-JS `@noble/hashes`** → нативный крипто-модуль на старте не загружается.
+
+Если снова появится краш на запуске, нужен `adb logcat *:E` с устройства в момент старта — ErrorBoundary показывает текст JS-ошибки, но нативный abort виден только в logcat.
+
+---
+
 ## Распространение тестировщикам
 
 ### Android
@@ -171,6 +191,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | `Invalid UUID appId` | Запустите `eas init`, закоммитьте `projectId` |
 | iOS: No profiles for bundle ID | Создайте app в App Store Connect с `com.allerguide.app` |
 | Android: INSTALL_FAILED | Удалите старую debug-сборку с тем же package |
+| Android: краш сразу при запуске | Не подключайте `react-native-quick-crypto` и не включайте `newArchEnabled` без проверки на устройстве (см. «Нативные ограничения сборки»). Соберите свежий APK и снимите `adb logcat *:E`. |
 | Build fails on monorepo | Запускайте из `apps/mobile`; EAS определяет root автоматически |
 | `pnpm add pnpm@10.34.4` exit code 1 | Не пиньте `"pnpm"` в `eas.json` — используйте `packageManager` в корневом `package.json` + `.npmrc` с `node-linker=hoisted` |
 | Expo SDK warnings | Ожидаемы на Expo 53; не блокируют preview |
