@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "start": "pnpm --filter mobile start",
+    "android": "pnpm --filter mobile android",
+    "android:release": "pnpm --filter mobile android:release",
     "lint": "pnpm --filter mobile lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm --filter @allerguide/core test && pnpm --filter @allerguide/ai test && pnpm --filter mobile test && pnpm --filter api test"

@@ -41,6 +41,21 @@ pnpm --filter mobile start
 
 Web: `cd apps/mobile && npx expo start --web --port 5000`
 
+### Локальная Android-сборка (release)
+
+Команды Expo нужно запускать из **`apps/mobile`** (или через скрипты из корня). Из корня репозитория `npx expo run:android` падает с `Unable to resolve module ../../App`, потому что у корневого `package.json` нет `main: "expo-router/entry"`.
+
+```bash
+# из корня (рекомендуется)
+pnpm android:release
+
+# или вручную
+cd apps/mobile
+pnpm android:release
+```
+
+Используйте **pnpm**, не `npx`/`npm`: в `.npmrc` настроен `node-linker=hoisted` для pnpm.
+
 ## Проверки
 
 ```bash
