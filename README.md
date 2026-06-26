@@ -47,11 +47,18 @@ Web: `cd apps/mobile && npx expo start --web --port 5000`
 
 ```bash
 # из корня (рекомендуется)
-pnpm android:release
+pnpm android-release
 
 # или вручную
 cd apps/mobile
-pnpm android:release
+pnpm android-release
+```
+
+На Windows не используйте двоеточие в имени скрипта (`android:release`) — cmd.exe воспринимает его как путь на диске. Если скрипт не найден, запустите напрямую:
+
+```bash
+cd apps/mobile
+pnpm exec expo run:android --variant release
 ```
 
 Используйте **pnpm**, не `npx`/`npm`: в `.npmrc` настроен `node-linker=hoisted` для pnpm.
