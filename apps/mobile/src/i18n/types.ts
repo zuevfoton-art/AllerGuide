@@ -264,6 +264,18 @@ export type LocaleMessages = {
     removeSafeTitle: string;
     removeSafeMessage: string;
     removedFromSafe: string;
+    smartScan: string;
+    smartScanDesc: string;
+    smartScanTitle: string;
+    smartScanHint: string;
+    smartCapture: string;
+    smartAnalyzing: string;
+    smartDetectedBarcode: string;
+    smartDetectedQR: string;
+    smartDetectedMenu: string;
+    smartDetectedLabel: string;
+    smartClassifyFailed: string;
+    smartNoAi: string;
   };
   market: {
     title: string;

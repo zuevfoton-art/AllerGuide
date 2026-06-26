@@ -11,6 +11,7 @@ import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
+import { registerClassifyPhotoRoutes } from './routes/classify-photo';
 import {
   buildCorsOptions,
   createAuthRateLimiter,
@@ -30,7 +31,7 @@ export async function createApp(
   const isDev = Boolean(process.env.METRO_URL);
   app.use(helmet({ contentSecurityPolicy: isDev ? false : undefined }));
   app.use(cors(buildCorsOptions()));
-  app.use(express.json({ limit: '2mb' }));
+  app.use(express.json({ limit: '8mb' }));
   app.use(createGlobalRateLimiter());
 
   app.use('/api/auth', createAuthRateLimiter());
@@ -43,6 +44,7 @@ export async function createApp(
   registerCatalogRoutes(app);
   registerAliasFeedbackRoutes(app);
   registerGovernanceRoutes(app);
+  registerClassifyPhotoRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);
