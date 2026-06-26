@@ -18,6 +18,7 @@ export interface PgConnectionOptions {
   idle_timeout?: number;
   connect_timeout?: number;
   max_lifetime?: number;
+  connection?: Record<string, string>;
 }
 
 function positiveNumber(value: string | undefined): number | undefined {
@@ -39,7 +40,9 @@ export function isHeliumDatabaseUrl(url: string): boolean {
 
 /** Build postgres-js connection options from environment variables. */
 export function buildConnectionOptions(env: Env = process.env): PgConnectionOptions {
-  const options: PgConnectionOptions = {};
+  const options: PgConnectionOptions = {
+    connection: { search_path: 'public' },
+  };
 
   // TLS: explicit env wins; else honor sslmode= in the connection string (Helium uses disable).
   if (env.DB_SSL === 'require') options.ssl = 'require';

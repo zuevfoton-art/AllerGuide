@@ -1,4 +1,4 @@
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-codec';
 import type { DiaryEntry } from './types';
 
 export interface DiaryStats {

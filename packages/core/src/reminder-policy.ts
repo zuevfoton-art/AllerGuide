@@ -1,5 +1,5 @@
 import type { AllergyConditionId } from './allergy-conditions';
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-codec';
 import { isActPromptDue } from './diary-profile';
 
 export const DEFAULT_QUIET_HOURS_START = 22;
