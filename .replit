@@ -44,12 +44,16 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd apps/mobile && UV_THREADPOOL_SIZE=4 npx expo start --web --port 3001 --no-open"
+args = "cd apps/mobile && EXPO_NO_OPEN_BROWSER=1 npx expo start --web --port 3001"
 waitForPort = 3001
 
 [[ports]]
 localPort = 3001
 externalPort = 3001
+
+[[ports]]
+localPort = 23636
+externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
