@@ -32,28 +32,36 @@ API раздаёт собранный фронтенд из `apps/mobile/dist` (
 
 ### Ошибка «Invalid Neon production database found for repl …»
 
-**Причина:** у опубликованного Repl привязана **недействительная** production-база Neon (устаревшая shared БД, удалённый endpoint, или конфликт после миграции Replit на Helium). Replit не может проверить diff схемы и останавливает Republish.
+**Важно:** сообщение говорит «Neon», но ошибка **не обязательно** означает, что в Secrets лежит старый `neon.tech`. Development на Helium (`@helium/heliumdb`) с автоматическими PG-переменными — **нормальная конфигурация**. Ошибка возникает на этапе **Republish**, когда Replit проверяет **production-базу опубликованного деплоя** — это отдельная сущность от dev-БД в Database panel.
+
+**Типичные причины (при корректных Secrets):**
+
+- **Битая или устаревшая привязка production DB** у уже опубликованного Repl (часто после fork/remix или миграции Replit dev → Helium).
+- **Production DB на паузе** — Replit не может сравнить схему (`Failed to check for database diff`).
+- **Несовпадение dev и production** в метаданных Publishing (dev уже Helium, а production-запись ещё ссылается на удалённый Neon endpoint).
 
 **Что сделано в репозитории:**
 
-- Убран модуль `postgresql-16` из `.replit` — используется только managed Postgres из панели **Database**, без локального Nix Postgres.
-- [`scripts/replit-db-env.sh`](../scripts/replit-db-env.sh) — при деплое выставляет `DB_SSL=require`, `DB_PREPARE=false`, `DIRECT_DATABASE_URL` (из pooled URL).
+- Убран модуль `postgresql-16` из `.replit` — используется только managed Postgres из панели **Database**.
+- [`scripts/replit-db-env.sh`](../scripts/replit-db-env.sh) — для Helium (`sslmode=disable`) выставляет `DB_SSL=disable`; для Neon/pooler — `require` и `DIRECT_DATABASE_URL`.
 - `ignoreDatabaseMigrations = true` — схема обновляется Drizzle в `build`, не автоматическим push dev→prod.
 
-**Шаги в Replit UI (обязательно):**
+**Шаги в Replit UI (если Secrets уже чистые):**
 
-1. **Database** → вкладка **Development** → **Unpause database** (если кнопка есть).
-2. **Database** → вкладка **Production** → **Unpause database**.
-3. **Secrets** (в Project Editor и в Publishing → Secrets):
-   - Удалите **ручной** `DATABASE_URL`, если он указывает на старый `neon.tech` от другого Repl / remix.
-   - Оставьте URL только из панели Database текущего проекта.
-4. **Publish / Republish** → **Production database**:
-   - Включите **Create production database** (пересоздаёт битую production Neon).
-   - Включите **Set up your production database with your current development data** (если нужны данные из dev).
-5. Завершите публикацию. Replit подставит новый `DATABASE_URL` в production secrets.
-6. На следующих Republish **не** включайте «Create production database» снова — только Republish; миграции применит `replit-deploy-build.sh`.
+1. **Database** → **Development** → **Unpause database** (если кнопка есть).
+2. **Database** → **Production** → **Unpause database** — именно production часто «спит» и ломает Republish, хотя dev работает.
+3. **Publish / Republish** → **Production database**:
+   - Включите **Create production database** (пересоздаёт привязку production у деплоя).
+   - При необходимости — **Set up your production database with your current development data**.
+4. Завершите публикацию. Replit подставит новый production `DATABASE_URL` в secrets **деплоя** (не в `[userenv]`).
+5. На следующих Republish **не** включайте «Create production database» — только Republish; миграции применит `replit-deploy-build.sh`.
 
-Если ошибка повторяется — [Replit Support](https://replit.com/support) с ID Repl из сообщения об ошибке.
+**Проверка только если подозреваете ручной override** (у вас может не понадобиться):
+
+- В Secrets нет ручного `DATABASE_URL` / `NEON_DATABASE_URL`, который переопределяет Database panel.
+- В `[userenv]` нет PG-переменных — только флаги приложения (`EXPO_PUBLIC_*`, `JWT_SECRET`).
+
+Если после Unpause + пересоздания production ошибка повторяется — [Replit Support](https://replit.com/support) с **Repl ID** из сообщения об ошибке (это сбой на стороне платформы, не в коде приложения).
 
 См. также: [Fix a published app using a shared database](https://docs.replit.com/references/data-and-storage/shared-database-migration).
 

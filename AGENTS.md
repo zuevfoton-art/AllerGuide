@@ -63,7 +63,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 
 ### Production builds (internal alpha)
 - EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
-- Replit deploy (web): see [`docs/replit-deploy.md`](docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true`, `scripts/replit-db-env.sh`, and `scripts/replit-deploy-build.sh`. On «Invalid Neon production database», recreate production DB once in Publishing UI (see replit-deploy.md).
+- Replit deploy (web): see [`docs/replit-deploy.md`](docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true`, `scripts/replit-db-env.sh`, and `scripts/replit-deploy-build.sh`. «Invalid Neon production database» is usually a stale **deployment production DB** binding on Replit's side (not dev Secrets); see replit-deploy.md.
 - QA regression: [`docs/qa-checklist.md`](docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.
