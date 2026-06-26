@@ -25,12 +25,19 @@ export const LOCALE_FLAGS: Record<AppLocale, string> = {
 type LanguagePickerProps = {
   compact?: boolean;
   embedded?: boolean;
+  /** Icon-sized trigger for screen headers (top-right). */
+  header?: boolean;
   style?: ViewStyle;
 };
 
-export function LanguagePicker({ compact = false, embedded = false, style }: LanguagePickerProps) {
+export function LanguagePicker({
+  compact = false,
+  embedded = false,
+  header = false,
+  style,
+}: LanguagePickerProps) {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme, compact), [theme, compact]);
+  const styles = useMemo(() => createStyles(theme, { compact, header }), [theme, compact, header]);
   const { locale, setLocale, t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -43,8 +50,16 @@ export function LanguagePicker({ compact = false, embedded = false, style }: Lan
 
   return (
     <>
-      <View style={[styles.wrap, compact && styles.wrapCompact, style]}>
-        {!compact && !embedded ? <Text style={styles.title}>{t('language.title')}</Text> : null}
+      <View
+        style={[
+          styles.wrap,
+          compact && styles.wrapCompact,
+          header && styles.wrapHeader,
+          style,
+        ]}>
+        {!compact && !embedded && !header ? (
+          <Text style={styles.title}>{t('language.title')}</Text>
+        ) : null}
         <Pressable
           style={styles.trigger}
           onPress={() => setOpen(true)}
@@ -52,10 +67,14 @@ export function LanguagePicker({ compact = false, embedded = false, style }: Lan
           accessibilityLabel={t('language.title')}
           accessibilityHint={currentLabel}>
           <Text style={styles.triggerFlag}>{LOCALE_FLAGS[locale]}</Text>
-          <Text style={styles.triggerText} numberOfLines={1}>
-            {currentLabel}
-          </Text>
-          <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
+          {header ? null : (
+            <>
+              <Text style={styles.triggerText} numberOfLines={1}>
+                {currentLabel}
+              </Text>
+              <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
+            </>
+          )}
         </Pressable>
       </View>
 
@@ -105,10 +124,14 @@ export function LanguagePicker({ compact = false, embedded = false, style }: Lan
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme, compact: boolean) {
+function createStyles(
+  { colors, fonts }: AppTheme,
+  { compact, header }: { compact: boolean; header: boolean },
+) {
   return StyleSheet.create({
     wrap: { gap: 10 },
     wrapCompact: { alignSelf: 'flex-end', marginBottom: 4 },
+    wrapHeader: { flexShrink: 0, marginTop: 2 },
     title: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
@@ -120,17 +143,24 @@ function createStyles({ colors, fonts }: AppTheme, compact: boolean) {
     trigger: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      paddingVertical: 10,
-      paddingHorizontal: 14,
+      gap: header ? 4 : 8,
+      paddingVertical: header ? 0 : 10,
+      paddingHorizontal: header ? 0 : 14,
       borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.borderInput,
-      minHeight: 44,
-      ...(compact ? { minWidth: 148 } : {}),
+      borderColor: header ? colors.border : colors.borderInput,
+      minHeight: header ? 40 : 44,
+      ...(header
+        ? {
+            width: 40,
+            justifyContent: 'center',
+          }
+        : compact
+          ? { minWidth: 148 }
+          : {}),
     },
-    triggerFlag: { fontSize: 18, lineHeight: 22 },
+    triggerFlag: { fontSize: header ? 20 : 18, lineHeight: header ? 24 : 22 },
     triggerText: {
       flex: 1,
       fontFamily: fonts.sansSemiBold,
