@@ -3,12 +3,16 @@ import { Linking, Platform } from 'react-native';
 import {
   DEFAULT_DIARY_REMINDER_HOUR,
   DEFAULT_DIARY_REMINDER_MINUTE,
+  DEFAULT_QUIET_HOURS_END,
+  DEFAULT_QUIET_HOURS_START,
   DIARY_REMINDER_HOUR_KEY,
   DIARY_REMINDER_MINUTE_KEY,
   clampReminderHour,
   clampReminderMinute,
+  computeNextDiaryReminderAt,
   parseReminderHour,
   parseReminderMinute,
+  type DiaryEntryLike,
   type ReminderNotificationContent,
 } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
@@ -27,8 +31,21 @@ if (Platform.OS !== 'web') {
 
 const REMINDER_ID_KEY = 'diaryReminderId';
 const REMINDER_ENABLED_KEY = 'diaryReminderEnabled';
+const ACT_REMINDER_ENABLED_KEY = 'actReminderEnabled';
+const VISIT_REMINDER_ENABLED_KEY = 'visitReminderEnabled';
+const EPI_REMINDER_ENABLED_KEY = 'epinephrineReminderEnabled';
+const QUIET_HOURS_ENABLED_KEY = 'quietHoursEnabled';
+const CLINICAL_REMINDER_IDS_KEY = 'clinicalReminderIds';
 
 export type NotificationPermissionStatus = 'granted' | 'denied' | 'undetermined' | 'web-unavailable';
+
+export type NotificationPayload = {
+  type: string;
+  profileId?: number;
+  scaleId?: string;
+  entryId?: number;
+  visitLabel?: string;
+};
 
 function isNotificationGranted(
   permissions: Awaited<ReturnType<typeof Notifications.getPermissionsAsync>>,
@@ -36,6 +53,21 @@ function isNotificationGranted(
   const legacy = permissions as { granted?: boolean; status?: string };
   if (typeof legacy.granted === 'boolean') return legacy.granted;
   return legacy.status === 'granted';
+}
+
+function readClinicalReminderIds(): string[] {
+  const raw = getSetting(CLINICAL_REMINDER_IDS_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeClinicalReminderIds(ids: string[]) {
+  setSetting(CLINICAL_REMINDER_IDS_KEY, JSON.stringify(ids));
 }
 
 export async function requestNotificationPermission(): Promise<boolean> {
@@ -72,6 +104,38 @@ export function setDiaryReminderEnabled(enabled: boolean) {
   setSetting(REMINDER_ENABLED_KEY, enabled ? 'true' : 'false');
 }
 
+export function isActReminderEnabled(): boolean {
+  return getSetting(ACT_REMINDER_ENABLED_KEY) === 'true';
+}
+
+export function setActReminderEnabled(enabled: boolean) {
+  setSetting(ACT_REMINDER_ENABLED_KEY, enabled ? 'true' : 'false');
+}
+
+export function isVisitReminderEnabled(): boolean {
+  return getSetting(VISIT_REMINDER_ENABLED_KEY) === 'true';
+}
+
+export function setVisitReminderEnabled(enabled: boolean) {
+  setSetting(VISIT_REMINDER_ENABLED_KEY, enabled ? 'true' : 'false');
+}
+
+export function isEpinephrineReminderEnabled(): boolean {
+  return getSetting(EPI_REMINDER_ENABLED_KEY) === 'true';
+}
+
+export function setEpinephrineReminderEnabled(enabled: boolean) {
+  setSetting(EPI_REMINDER_ENABLED_KEY, enabled ? 'true' : 'false');
+}
+
+export function isQuietHoursEnabled(): boolean {
+  return getSetting(QUIET_HOURS_ENABLED_KEY) !== 'false';
+}
+
+export function setQuietHoursEnabled(enabled: boolean) {
+  setSetting(QUIET_HOURS_ENABLED_KEY, enabled ? 'true' : 'false');
+}
+
 export function getDiaryReminderHour(): number {
   return parseReminderHour(getSetting(DIARY_REMINDER_HOUR_KEY), DEFAULT_DIARY_REMINDER_HOUR);
 }
@@ -95,12 +159,44 @@ async function cancelDiaryReminderSchedule() {
   }
 }
 
+export async function cancelAllClinicalReminders() {
+  if (Platform.OS === 'web') return;
+
+  const ids = readClinicalReminderIds();
+  await Promise.all(ids.map((id) => Notifications.cancelScheduledNotificationAsync(id)));
+  writeClinicalReminderIds([]);
+}
+
 export async function cancelDiaryReminder() {
   await cancelDiaryReminderSchedule();
   setDiaryReminderEnabled(false);
 }
 
-export async function scheduleDiaryReminder(content: ReminderNotificationContent): Promise<boolean> {
+export async function scheduleDateNotification(
+  at: Date,
+  content: ReminderNotificationContent,
+  data: NotificationPayload,
+): Promise<string | null> {
+  if (Platform.OS === 'web') return null;
+  if (at.getTime() <= Date.now()) return null;
+
+  return Notifications.scheduleNotificationAsync({
+    content: {
+      title: content.title,
+      body: content.body,
+      data,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: at,
+    },
+  });
+}
+
+export async function scheduleDiaryReminder(
+  content: ReminderNotificationContent,
+  entries: DiaryEntryLike[],
+): Promise<boolean> {
   if (Platform.OS === 'web') return false;
 
   const granted = await requestNotificationPermission();
@@ -108,21 +204,19 @@ export async function scheduleDiaryReminder(content: ReminderNotificationContent
 
   await cancelDiaryReminderSchedule();
 
-  const hour = getDiaryReminderHour();
-  const minute = getDiaryReminderMinute();
+  const quietHours = isQuietHoursEnabled()
+    ? { start: DEFAULT_QUIET_HOURS_START, end: DEFAULT_QUIET_HOURS_END }
+    : undefined;
+  const at = computeNextDiaryReminderAt(
+    entries,
+    getDiaryReminderHour(),
+    getDiaryReminderMinute(),
+    new Date(),
+    quietHours,
+  );
 
-  const id = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: content.title,
-      body: content.body,
-      data: { type: 'diary' },
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour,
-      minute,
-    },
-  });
+  const id = await scheduleDateNotification(at, content, { type: 'diary' });
+  if (!id) return false;
 
   setSetting(REMINDER_ID_KEY, id);
   setDiaryReminderEnabled(true);
@@ -132,21 +226,30 @@ export async function scheduleDiaryReminder(content: ReminderNotificationContent
 export async function syncDiaryReminder(
   enabled: boolean,
   content: ReminderNotificationContent,
+  entries: DiaryEntryLike[],
 ): Promise<boolean> {
   if (!enabled) {
     await cancelDiaryReminder();
     return true;
   }
-  return scheduleDiaryReminder(content);
+  return scheduleDiaryReminder(content, entries);
 }
 
-export async function rescheduleDiaryReminderIfEnabled(content: ReminderNotificationContent): Promise<void> {
+export async function rescheduleDiaryReminderIfEnabled(
+  content: ReminderNotificationContent,
+  entries: DiaryEntryLike[],
+): Promise<void> {
   if (Platform.OS === 'web' || !isDiaryReminderEnabled()) return;
 
   const status = await getNotificationPermissionStatus();
   if (status !== 'granted') return;
 
-  await scheduleDiaryReminder(content);
+  await scheduleDiaryReminder(content, entries);
+}
+
+export async function appendClinicalReminderIds(ids: string[]) {
+  if (ids.length === 0) return;
+  writeClinicalReminderIds([...readClinicalReminderIds(), ...ids]);
 }
 
 export async function sendDiaryReminderPreview(content: ReminderNotificationContent): Promise<boolean> {

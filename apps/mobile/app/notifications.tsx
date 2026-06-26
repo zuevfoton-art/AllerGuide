@@ -10,14 +10,25 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { getDiaryReminderNotificationContent } from '@/src/services/notification-content-service';
+import { listAllDiaryEntries } from '@/src/services/diary-service';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import {
   getDiaryReminderHour,
   getDiaryReminderMinute,
   getNotificationPermissionStatus,
+  isActReminderEnabled,
   isDiaryReminderEnabled,
+  isEpinephrineReminderEnabled,
+  isQuietHoursEnabled,
+  isVisitReminderEnabled,
   openNotificationSettings,
+  requestNotificationPermission,
   sendDiaryReminderPreview,
+  setActReminderEnabled,
   setDiaryReminderTime,
+  setEpinephrineReminderEnabled,
+  setQuietHoursEnabled,
+  setVisitReminderEnabled,
   syncDiaryReminder,
   type NotificationPermissionStatus,
 } from '@/src/services/notification-service';
@@ -30,6 +41,10 @@ export default function NotificationsScreen() {
   const isWeb = Platform.OS === 'web';
 
   const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [actEnabled, setActEnabled] = useState(false);
+  const [visitEnabled, setVisitEnabled] = useState(false);
+  const [epiEnabled, setEpiEnabled] = useState(false);
+  const [quietHoursEnabled, setQuietHoursEnabledState] = useState(true);
   const [reminderHour, setReminderHour] = useState('20');
   const [reminderMinute, setReminderMinute] = useState('00');
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermissionStatus>('undetermined');
@@ -37,6 +52,10 @@ export default function NotificationsScreen() {
 
   const refresh = useCallback(async () => {
     setReminderEnabled(isDiaryReminderEnabled());
+    setActEnabled(isActReminderEnabled());
+    setVisitEnabled(isVisitReminderEnabled());
+    setEpiEnabled(isEpinephrineReminderEnabled());
+    setQuietHoursEnabledState(isQuietHoursEnabled());
     setReminderHour(String(getDiaryReminderHour()));
     setReminderMinute(String(getDiaryReminderMinute()).padStart(2, '0'));
     setPermissionStatus(await getNotificationPermissionStatus());
@@ -75,7 +94,7 @@ export default function NotificationsScreen() {
     setLoading(true);
     try {
       const content = getDiaryReminderNotificationContent();
-      const ok = await syncDiaryReminder(value, content);
+      const ok = await syncDiaryReminder(value, content, listAllDiaryEntries());
       if (!ok && value) {
         Alert.alert(t('notifications.unavailable'), t('notifications.denied'));
         setReminderEnabled(false);
@@ -98,11 +117,38 @@ export default function NotificationsScreen() {
     setLoading(true);
     try {
       const content = getDiaryReminderNotificationContent();
-      const ok = await syncDiaryReminder(true, content);
+      const ok = await syncDiaryReminder(true, content, listAllDiaryEntries());
       if (!ok) {
         Alert.alert(t('notifications.unavailable'), t('notifications.denied'));
         setReminderEnabled(false);
       }
+      setPermissionStatus(await getNotificationPermissionStatus());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleClinical = async (
+    value: boolean,
+    setter: (next: boolean) => void,
+    persist: (next: boolean) => void,
+  ) => {
+    if (isWeb) return;
+
+    setLoading(true);
+    try {
+      if (value) {
+        const granted = await requestNotificationPermission();
+        if (!granted) {
+          Alert.alert(t('notifications.unavailable'), t('notifications.denied'));
+          setter(false);
+          setPermissionStatus(await getNotificationPermissionStatus());
+          return;
+        }
+      }
+      persist(value);
+      setter(value);
+      await reconcileAllReminders();
       setPermissionStatus(await getNotificationPermissionStatus());
     } finally {
       setLoading(false);
@@ -168,6 +214,7 @@ export default function NotificationsScreen() {
                 ? reminderTimeLabel
                 : t('notifications.diaryHint')}
             </Text>
+            <Text style={styles.microHint}>{t('notifications.diarySkipHint')}</Text>
           </View>
           <Switch
             value={reminderEnabled}
@@ -224,6 +271,70 @@ export default function NotificationsScreen() {
             />
           </>
         ) : null}
+      </GlassCard>
+
+      <Text style={ui.sectionLabel}>{t('notifications.clinicalSection')}</Text>
+      <GlassCard>
+        <View style={styles.switchRow}>
+          <View style={styles.switchText}>
+            <Text style={styles.switchTitle}>{t('notifications.actTitle')}</Text>
+            <Text style={styles.switchHint}>{t('notifications.actHint')}</Text>
+          </View>
+          <Switch
+            value={actEnabled}
+            onValueChange={(value) => void toggleClinical(value, setActEnabled, setActReminderEnabled)}
+            disabled={loading || isWeb}
+            trackColor={{ false: theme.colors.border, true: theme.colors.accentMid }}
+            thumbColor={actEnabled ? theme.colors.accent : theme.colors.card}
+          />
+        </View>
+        <View style={[styles.switchRow, styles.switchGap]}>
+          <View style={styles.switchText}>
+            <Text style={styles.switchTitle}>{t('notifications.visitTitle')}</Text>
+            <Text style={styles.switchHint}>{t('notifications.visitHint')}</Text>
+          </View>
+          <Switch
+            value={visitEnabled}
+            onValueChange={(value) => void toggleClinical(value, setVisitEnabled, setVisitReminderEnabled)}
+            disabled={loading || isWeb}
+            trackColor={{ false: theme.colors.border, true: theme.colors.accentMid }}
+            thumbColor={visitEnabled ? theme.colors.accent : theme.colors.card}
+          />
+        </View>
+        <View style={[styles.switchRow, styles.switchGap]}>
+          <View style={styles.switchText}>
+            <Text style={styles.switchTitle}>{t('notifications.epiTitle')}</Text>
+            <Text style={styles.switchHint}>{t('notifications.epiHint')}</Text>
+          </View>
+          <Switch
+            value={epiEnabled}
+            onValueChange={(value) => void toggleClinical(value, setEpiEnabled, setEpinephrineReminderEnabled)}
+            disabled={loading || isWeb}
+            trackColor={{ false: theme.colors.border, true: theme.colors.accentMid }}
+            thumbColor={epiEnabled ? theme.colors.accent : theme.colors.card}
+          />
+        </View>
+      </GlassCard>
+
+      <Text style={ui.sectionLabel}>{t('notifications.quietHoursTitle')}</Text>
+      <GlassCard>
+        <View style={styles.switchRow}>
+          <View style={styles.switchText}>
+            <Text style={styles.switchTitle}>{t('notifications.quietHoursTitle')}</Text>
+            <Text style={styles.switchHint}>{t('notifications.quietHoursHint')}</Text>
+          </View>
+          <Switch
+            value={quietHoursEnabled}
+            onValueChange={(value) => {
+              setQuietHoursEnabled(value);
+              setQuietHoursEnabledState(value);
+              void reconcileAllReminders();
+            }}
+            disabled={loading || isWeb}
+            trackColor={{ false: theme.colors.border, true: theme.colors.accentMid }}
+            thumbColor={quietHoursEnabled ? theme.colors.accent : theme.colors.card}
+          />
+        </View>
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('notifications.asitSection')}</Text>
@@ -283,6 +394,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
+    microHint: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      lineHeight: 15,
+      marginTop: 2,
+    },
+    switchGap: { marginTop: 14 },
     timeLabel: { marginTop: 14, marginBottom: 8 },
     timeRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
     timeField: { flex: 1, gap: 6 },

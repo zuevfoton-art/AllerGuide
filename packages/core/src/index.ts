@@ -27,6 +27,7 @@ export * from './allergy-passport';
 export * from './clinical-scales';
 export * from './asit-therapy';
 export * from './diary-reminder';
+export * from './reminder-policy';
 export * from './food-drug-allergy';
 export * from './insect-allergy';
 export * from './diary-profile';

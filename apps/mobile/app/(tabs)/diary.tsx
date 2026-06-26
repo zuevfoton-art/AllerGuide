@@ -1,6 +1,6 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
   buildAsitPrefill,
@@ -61,6 +61,7 @@ import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { MarketplaceModule } from '@/src/modules/marketplace';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -87,6 +88,7 @@ export default function DiaryScreen() {
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
+  const { openScale } = useLocalSearchParams<{ openScale?: string }>();
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
@@ -250,6 +252,12 @@ export default function DiaryScreen() {
     }, [load]),
   );
 
+  useEffect(() => {
+    if (openScale !== 'act') return;
+    setEditor({ mode: 'scale', scaleId: 'act' });
+    router.setParams({ openScale: undefined } as any);
+  }, [openScale]);
+
   const closeEditor = () => setEditor(null);
 
   const handleCreate = async (entries: { type: string; details: string }[]) => {
@@ -257,12 +265,14 @@ export default function DiaryScreen() {
     await addDiaryEntries(activeProfileId, entries);
     closeEditor();
     await load();
+    void reconcileAllReminders();
   };
 
   const handleUpdate = async (entry: DiaryEntry, type: string, details: string) => {
     await updateDiaryEntry(entry.id, { type, details });
     closeEditor();
     await load();
+    void reconcileAllReminders();
   };
 
   const confirmDelete = (entry: DiaryEntry) => {
@@ -278,6 +288,7 @@ export default function DiaryScreen() {
             await deleteDiaryEntry(entry.id);
             closeEditor();
             await load();
+            void reconcileAllReminders();
           },
         },
       ],

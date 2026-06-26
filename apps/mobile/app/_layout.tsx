@@ -1,6 +1,6 @@
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { initDb } from '@/src/db/init';
@@ -12,6 +12,7 @@ import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { initAnalytics, trackScreen } from '@/src/services/analytics-service';
 import { initErrorReporting } from '@/src/services/error-reporting';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
+import { registerNotificationNavigation } from '@/src/services/notification-navigation-service';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
 
@@ -94,6 +95,20 @@ export default function RootLayout() {
   useEffect(() => {
     if (appReady && pathname) trackScreen(pathname);
   }, [appReady, pathname]);
+
+  useEffect(() => {
+    if (!appReady || Platform.OS === 'web') return;
+    const unsubscribeNavigation = registerNotificationNavigation();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        void reconcileAllReminders();
+      }
+    });
+    return () => {
+      unsubscribeNavigation();
+      subscription.remove();
+    };
+  }, [appReady]);
 
   return (
     <ErrorBoundary>
