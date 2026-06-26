@@ -27,7 +27,6 @@ config.resolver.extraNodeModules = {
   '@allerguide/ai': path.resolve(workspaceRoot, 'packages/ai'),
   '@expo-google-fonts/inter': path.resolve(rootNodeModules, '@expo-google-fonts/inter'),
   '@expo-google-fonts/source-serif-4': path.resolve(rootNodeModules, '@expo-google-fonts/source-serif-4'),
-  crypto: path.resolve(rootNodeModules, 'react-native-quick-crypto'),
 };
 
 const WEB_ONLY_STUBS = {

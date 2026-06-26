@@ -14,19 +14,11 @@ import { initErrorReporting } from '@/src/services/error-reporting';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
 
-// react-native-quick-crypto (0.x, Bridge/JSI) polyfills the global `crypto`
-// (metro aliases `crypto` -> this package). The 0.x line is reliable on the OLD
-// architecture but only best-effort ("🤞") on the New Architecture — which is why
-// the app disables newArchEnabled (see app.json). install() is still guarded so a
-// polyfill failure can never take down the app at launch.
-if (Platform.OS !== 'web') {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    (require('react-native-quick-crypto') as { install: () => void }).install();
-  } catch (error) {
-    console.warn('[crypto] react-native-quick-crypto install skipped:', error);
-  }
-}
+// NOTE: react-native-quick-crypto was removed. Its native install() crashed the
+// Android app at launch (a native/JNI abort that a JS try/catch cannot catch,
+// independent of the New Architecture flag). Password hashing now uses the
+// pure-JS `@noble/hashes` in @allerguide/core, so no native crypto module is
+// loaded at startup.
 
 function WebShell({ children }: { children: ReactNode }) {
   const { colors } = useTheme();
