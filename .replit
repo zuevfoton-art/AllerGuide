@@ -56,17 +56,13 @@ localPort = 5000
 externalPort = 5000
 
 [[ports]]
-localPort = 23636
+localPort = 5000
 externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-# Let Drizzle migrations in scripts/replit-deploy-build.sh manage production schema.
-# Replit's auto dev→prod DB push fails on republish with:
-# "Cannot push development database objects, production database already exists".
-ignoreDatabaseMigrations = true
+ignoreDatabaseMigrations = false
 build = ["bash", "scripts/replit-deploy-build.sh"]
-# replit-db-env.sh sets DB_SSL / DB_PREPARE / DIRECT_DATABASE_URL for managed Postgres.
 run = ["bash", "-c", "source scripts/replit-db-env.sh && cd apps/api && npx tsx src/index.ts"]
 
 [userenv]
