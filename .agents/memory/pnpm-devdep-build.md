@@ -1,18 +1,19 @@
 ---
-name: pnpm in devDependencies breaks build
-description: Having pnpm itself listed in devDependencies causes Replit's build container to self-install pnpm, which crashes with SIGABRT on @pnpm/exe.
+name: pnpm packageManager field breaks Replit build
+description: The "packageManager" field in package.json causes Replit's build system to self-install pnpm, crashing with SIGABRT on @pnpm/exe.
 ---
 
 ## Rule
 
-Never put `pnpm` (or any other package manager) in `devDependencies` of the root `package.json`.
+Never include a `"packageManager"` field (e.g. `"packageManager": "pnpm@10.34.4"`) in the root `package.json` of a Replit project. Also do not put `pnpm` itself in `devDependencies`.
 
 ## Why
 
-Replit's autoscale build container reads `devDependencies` and runs `pnpm add pnpm@<version> --allow-build=@pnpm/exe`. The `@pnpm/exe` native binary gets killed with `SIGABRT` inside the sandboxed build environment, causing the entire build to fail in a tight error loop with no useful output except repeated `Command failed with exit code 1`.
+Replit's autoscale build container reads the `packageManager` field and runs `pnpm add pnpm@<version> --allow-build=@pnpm/exe`. The `@pnpm/exe` native binary gets killed with `SIGABRT` inside the sandboxed build environment, causing the entire build to fail in a tight error loop with no useful output except repeated `Command failed with exit code 1`. Removing only `devDependencies.pnpm` is not enough — the `packageManager` field alone is sufficient to trigger the loop.
 
 ## How to apply
 
-- Remove `"pnpm": "<version>"` from `devDependencies` in the root `package.json`.
-- The `"packageManager": "pnpm@<version>"` field in `package.json` is fine to keep — it is a Corepack hint and doesn't trigger an installation when `COREPACK_ENABLE_STRICT=0` is set (as it is in `scripts/replit-deploy-build.sh`).
-- pnpm is already present in Replit's build environment; it does not need to be listed as a dependency.
+- Remove `"packageManager": "pnpm@<version>"` from the root `package.json`.
+- Remove `"pnpm": "<version>"` from `devDependencies` as well if present.
+- pnpm is already present in Replit's build environment; neither field is needed.
+- The `pnpm.overrides` section (dependency overrides) is unaffected and can stay.
