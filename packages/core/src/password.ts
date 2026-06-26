@@ -1,6 +1,11 @@
+import { pbkdf2 } from '@noble/hashes/pbkdf2';
+import { sha256 } from '@noble/hashes/sha2';
+import { randomBytes } from '@noble/hashes/utils';
+
 const PREFIX = 'pbkdf2-sha256';
 const ITERATIONS = 600_000;
 const LEGACY_SALT = 'allerguide:';
+const textEncoder = new TextEncoder();
 
 function toBase64(bytes: Uint8Array): string {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -49,53 +54,24 @@ function hexToBytes(hex: string): Uint8Array {
   return result;
 }
 
-function getSubtle(): SubtleCrypto {
-  if (typeof globalThis !== 'undefined' && globalThis.crypto?.subtle) {
-    return globalThis.crypto.subtle;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return (require('crypto') as { webcrypto: { subtle: SubtleCrypto } }).webcrypto.subtle;
+/**
+ * PBKDF2-SHA256 and SHA-256 are implemented with the pure-JS `@noble/hashes`
+ * library (no native module). This keeps the byte output identical to the
+ * previous Web Crypto implementation (so existing hashes still verify) while
+ * removing the dependency on `react-native-quick-crypto`, whose native init
+ * crashed the Android app at launch.
+ */
+function sha256Hex(input: string): string {
+  return bytesToHex(sha256(textEncoder.encode(input)));
 }
 
-function getCrypto(): { getRandomValues(buf: Uint8Array): Uint8Array } {
-  if (typeof globalThis !== 'undefined' && typeof globalThis.crypto?.getRandomValues === 'function') {
-    return globalThis.crypto;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return (require('crypto') as { webcrypto: Crypto }).webcrypto;
-}
-
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const digest = await getSubtle().digest('SHA-256', data);
-  return bytesToHex(new Uint8Array(digest));
-}
-
-async function derivePbkdf2(
-  password: string,
-  salt: Uint8Array,
-  iterations: number,
-): Promise<Uint8Array> {
-  const subtle = getSubtle();
-  const keyMaterial = await subtle.importKey(
-    'raw',
-    new TextEncoder().encode(password),
-    'PBKDF2',
-    false,
-    ['deriveBits'],
-  );
-  const bits = await subtle.deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt: salt as BufferSource, iterations },
-    keyMaterial,
-    256,
-  );
-  return new Uint8Array(bits);
+function derivePbkdf2(password: string, salt: Uint8Array, iterations: number): Uint8Array {
+  return pbkdf2(sha256, textEncoder.encode(password), salt, { c: iterations, dkLen: 32 });
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const salt = new Uint8Array(16);
-  getCrypto().getRandomValues(salt);
-  const hash = await derivePbkdf2(password, salt, ITERATIONS);
+  const salt = randomBytes(16);
+  const hash = derivePbkdf2(password, salt, ITERATIONS);
   return `${PREFIX}:${ITERATIONS}:${toBase64(salt)}:${toBase64(hash)}`;
 }
 
@@ -110,7 +86,7 @@ export async function verifyPassword(
 
     const salt = fromBase64(saltB64);
     const expected = fromBase64(hashB64);
-    const actual = await derivePbkdf2(password, salt, iterations);
+    const actual = derivePbkdf2(password, salt, iterations);
 
     if (actual.length !== expected.length) return { valid: false };
     let diff = 0;
@@ -123,7 +99,7 @@ export async function verifyPassword(
     return { valid: true };
   }
 
-  const legacy = await sha256Hex(`${LEGACY_SALT}${password}`);
+  const legacy = sha256Hex(`${LEGACY_SALT}${password}`);
   const storedBytes = hexToBytes(stored);
   const legacyBytes = hexToBytes(legacy);
   if (storedBytes.length !== legacyBytes.length) return { valid: false };

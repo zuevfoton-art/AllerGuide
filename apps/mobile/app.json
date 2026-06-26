@@ -3,7 +3,7 @@
     "name": "AllerGuide",
     "slug": "allerguide",
     "scheme": "allerguide",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -64,7 +64,7 @@
     },
     "android": {
       "package": "com.allerguide.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2563EB"
