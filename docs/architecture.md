@@ -24,6 +24,8 @@ AllerGuide — offline-first приложение для управления а
 12. [Масштабирование](#масштабирование)
 13. [Переменные окружения](#переменные-окружения)
 
+**План MVP → prod (Phase 1–2):** детальные GitHub issues с зависимостями — [`docs/phase1-phase2-issues.md`](./phase1-phase2-issues.md) · сводка фаз — [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md).
+
 ---
 
 ## Структура monorepo

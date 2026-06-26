@@ -10,6 +10,7 @@
 | [`docs/development-rules.md`](docs/development-rules.md) | **Правила разработки** (обязательно перед кодом) |
 | [`docs/functional-requirements.md`](docs/functional-requirements.md) | Функциональные требования |
 | [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) | Roadmap к production |
+| [`docs/git-bash-roadmap.md`](docs/git-bash-roadmap.md) | Git Bash: milestones, issues, ветки, PR |
 | [`AGENTS.md`](AGENTS.md) | Команды, env, инструкции для агентов |
 
 ## Стек
