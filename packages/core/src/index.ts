@@ -1,3 +1,4 @@
+export * from './diary-codec';
 export * from './profile-allergens';
 export * from './allergy-confirmations';
 export * from './profile-validation';
