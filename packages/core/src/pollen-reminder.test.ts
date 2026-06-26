@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   collectPollenReminderTrigger,
   evaluatePollenAlert,
+  parsePollenAlertThreshold,
   pollenLevelMeetsThreshold,
 } from './pollen-reminder';
 
@@ -52,5 +53,12 @@ describe('pollen-reminder', () => {
   it('checks threshold helper', () => {
     expect(pollenLevelMeetsThreshold('mid', 'moderate')).toBe(true);
     expect(pollenLevelMeetsThreshold('mid', 'high')).toBe(false);
+  });
+
+  it('defaults pollen threshold to high', () => {
+    expect(parsePollenAlertThreshold(null)).toBe('high');
+    expect(parsePollenAlertThreshold(undefined)).toBe('high');
+    expect(parsePollenAlertThreshold('')).toBe('high');
+    expect(parsePollenAlertThreshold('moderate')).toBe('moderate');
   });
 });

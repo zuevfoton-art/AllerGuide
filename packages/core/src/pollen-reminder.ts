@@ -28,7 +28,7 @@ export interface PollenAlertEvaluation {
 }
 
 export function parsePollenAlertThreshold(raw: string | null | undefined): PollenAlertThreshold {
-  return raw === 'high' ? 'high' : 'moderate';
+  return raw === 'moderate' ? 'moderate' : 'high';
 }
 
 export function pollenLevelMeetsThreshold(
