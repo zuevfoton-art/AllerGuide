@@ -341,6 +341,18 @@
       line-height: 16px; margin-top: 12px;
     }
 
+    .disclaimer-footnote {
+      font-size: 9px; line-height: 12px; opacity: 0.85; margin-top: 4px;
+    }
+
+    .header-actions { display: flex; align-items: flex-start; gap: 8px; flex-shrink: 0; }
+
+    .header-icon-btn {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      background: var(--card); border: 1px solid var(--border);
+      display: grid; place-items: center; font-size: 18px; color: var(--accent);
+    }
+
     .sos-top-btn {
       width: 40px; height: 40px; border-radius: var(--radius-sm);
       background: var(--danger-light); border: 1px solid var(--danger-border);
@@ -595,7 +607,7 @@
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: вкладка «Карта», эксперт на главной, маркетплейс в дневнике.</p>
+      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: вкладка «Карта», эксперт на главной, маркетплейс в дневнике, единый экран профиля.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -613,11 +625,9 @@
         <button class="btn-nav" data-screen="doctor-report">Отчёт</button>
         <button class="btn-nav" data-screen="scanner">Сканер</button>
         <button class="btn-nav" data-screen="market">Маркет</button>
-        <button class="btn-nav" data-screen="map">Карта</button>
         <button class="btn-nav" data-screen="expert">Эксперт</button>
         <button class="btn-nav" data-screen="sos">SOS</button>
-        <button class="btn-nav" data-screen="profiles">Профили</button>
-        <button class="btn-nav" data-screen="settings">Настройки</button>
+        <button class="btn-nav" data-screen="profile">Профиль</button>
       </div>
 
       <div class="legend">
@@ -629,8 +639,10 @@
         <strong>Радиусы</strong> — кнопки/input 8px · карточки 12px · бейджи 6px<br />
         <strong>Логотип</strong> — shield + cross на <code>#2563EB</code>, wordmark Aller/Guide<br />
         <strong>Tab bar</strong> — 5 вкладок: Главная · Дневник · Сканер · Карта · SOS<br />
+        <strong>Профиль</strong> — кнопка в шапке табов → профили + настройки<br />
+        <strong>Маркет</strong> — embedded в дневнике; полный экран — скрытый маршрут<br />
         <strong>Главная</strong> — wellness v2 + дневник + раздел «Эксперт»<br />
-        <strong>Дневник</strong> — маркетплейс (embedded) + модальный редактор<br />
+        <strong>Дневник</strong> — ACT-напоминание + маркетплейс + модальный редактор<br />
         <strong>Intro</strong> — горизонтальный свайп (5 слайдов)<br />
         <strong>SOS</strong> — закреплённая панель 103 + контакт<br />
         <strong>v2</strong> — паспорт SOS · шкалы · отчёт · OFF+cache · textMuted #5E6B7C
@@ -804,17 +816,17 @@
             <div class="feed-row">
               <div class="feed-icon">💓</div>
               <div class="feed-body"><div class="feed-title">Симптомы</div><div class="feed-sub">Зуд кожи · 14:30</div></div>
-              <button class="btn btn-primary btn-sm">Запись</button>
+              <button class="btn btn-primary btn-sm">+ Запись</button>
             </div>
             <div class="feed-row">
               <div class="feed-icon">🍽</div>
               <div class="feed-body"><div class="feed-title">Питание</div><div class="feed-sub">Овсянка, яблоко · 09:15</div></div>
-              <button class="btn btn-primary btn-sm">Запись</button>
+              <button class="btn btn-primary btn-sm">+ Запись</button>
             </div>
             <div class="feed-row">
               <div class="feed-icon">💊</div>
               <div class="feed-body"><div class="feed-title">Лекарство</div><div class="feed-sub">Отметить приём</div></div>
-              <button class="btn btn-primary btn-sm">Запись</button>
+              <button class="btn btn-primary btn-sm">+ Запись</button>
             </div>
           </div>
 
@@ -833,17 +845,25 @@
               <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
-          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
+          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
         </section>
 
         <!-- DIARY -->
         <section class="screen" id="screen-diary">
-          <div class="doc-header">
-            <div class="doc-label">AllerGuide · Наблюдения</div>
-            <div class="doc-title">Дневник</div>
-            <div class="doc-meta">Симптомы, питание, лекарства, шкалы, АСИТ и отчёты</div>
+          <div class="doc-header row">
+            <div>
+              <div class="doc-label">AllerGuide · Наблюдения</div>
+              <div class="doc-title">Дневник</div>
+              <div class="doc-meta">Симптомы, питание, лекарства, шкалы, АСИТ и отчёты</div>
+            </div>
+            <div class="profile-btn" title="Профиль">А</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div><div class="segment-item">Миша</div></div>
+          <div class="card banner-warn">
+            <div class="card-title" style="margin-bottom:4px">Пора заполнить ACT</div>
+            <div class="feed-sub" style="margin-bottom:8px">Прошло 4+ недели с последней оценки контроля астмы. Рекомендуем заполнить шкалу ACT.</div>
+            <button class="btn btn-secondary btn-sm">Заполнить ACT</button>
+          </div>
           <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
               <strong>🍽 Пищевая аллергия</strong>
@@ -1041,10 +1061,16 @@
 
         <!-- SCANNER -->
         <section class="screen" id="screen-scanner">
-          <div class="doc-header">
-            <div class="doc-label">AllerGuide · Сканер</div>
-            <div class="doc-title">Умный сканер</div>
-            <div class="doc-meta">Проверка состава по профилю аллергий</div>
+          <div class="doc-header row">
+            <div>
+              <div class="doc-label">AllerGuide · Сканер</div>
+              <div class="doc-title">Умный сканер</div>
+              <div class="doc-meta">Проверка состава по профилю аллергий</div>
+            </div>
+            <div class="header-actions">
+              <div class="profile-btn" title="Профиль">А</div>
+              <div class="header-icon-btn" title="Камера">📷</div>
+            </div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
@@ -1086,10 +1112,13 @@
 
         <!-- MARKET -->
         <section class="screen" id="screen-market">
-          <div class="doc-header">
-            <div class="doc-label">AllerGuide · Маркет</div>
-            <div class="doc-title">Маркет</div>
-            <div class="doc-meta">Товары для аллергиков</div>
+          <div class="doc-header row">
+            <div>
+              <div class="doc-label">AllerGuide · Маркет</div>
+              <div class="doc-title">Маркет</div>
+              <div class="doc-meta">Товары для аллергиков · скрытый маршрут</div>
+            </div>
+            <div class="profile-btn" title="Профиль">А</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="card" style="padding:12px"><input class="input" style="border-radius:var(--radius-md)" placeholder="Поиск по каталогу…" readonly /></div>
@@ -1104,11 +1133,14 @@
 
         <!-- MAP -->
         <section class="screen" id="screen-map">
-          <div class="doc-header">
-            <div class="doc-label">AllerGuide · Карта</div>
-            <div class="doc-title">Карта мест</div>
-            <div class="doc-meta">3 слоя по ТЗ v13</div>
-            <div class="doc-meta" style="margin-top:2px;font-weight:600">Москва и Московская область</div>
+          <div class="doc-header row">
+            <div>
+              <div class="doc-label">AllerGuide · Карта</div>
+              <div class="doc-title">Карта мест</div>
+              <div class="doc-meta">3 слоя по ТЗ v13</div>
+              <div class="doc-meta" style="margin-top:2px;font-weight:600">Москва и Московская область</div>
+            </div>
+            <div class="profile-btn" title="Профиль">А</div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
@@ -1154,9 +1186,19 @@
           <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px">
             <span class="chip active">Рекомендации</span><span class="chip">Пыление</span><span class="chip">АСИТ</span>
           </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:4px">Медицинский консультативный совет</div>
+            <div class="feed-sub" style="margin-bottom:8px">Клиническая экспертиза порогов, весов и контента для пациентов (E.1).</div>
+            <div class="feed-sub" style="font-weight:600;color:var(--text)">д.м.н., проф. Юрий Соломонович Смолкин</div>
+            <div class="feed-sub">Председатель консультативного совета · АДАИР, НККЦ</div>
+            <div class="feed-sub" style="margin-top:6px;font-weight:600;color:var(--text)">Панель аллергологов АДАИР</div>
+            <div class="feed-sub">Клинический рецензент · АДАИР</div>
+            <div class="feed-sub" style="margin-top:6px;font-weight:600;color:var(--text)">AllerGuide Clinical Data Steward</div>
+            <div class="feed-sub">Куратор evidence registry · AllerGuide</div>
+          </div>
           <div class="card"><strong>Рекомендации по поллинозу</strong><div class="feed-sub">Сезонные советы</div></div>
           <div class="card"><strong>Календарь пыления</strong><div class="feed-sub">По регионам России</div></div>
-          <p class="disclaimer">Контент носит информационный характер.</p>
+          <p class="disclaimer">Контент носит информационный характер.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
         </section>
 
         <!-- SOS -->
@@ -1167,7 +1209,10 @@
               <div class="doc-title">SOS</div>
               <div class="doc-meta">Экстренная информация</div>
             </div>
-            <button class="btn btn-secondary btn-sm">Изменить</button>
+            <div class="header-actions">
+              <div class="profile-btn" title="Профиль">А</div>
+              <button class="btn btn-secondary btn-sm">Изменить</button>
+            </div>
           </div>
           <div class="segment"><div class="segment-item active">Анна</div></div>
 
@@ -1267,54 +1312,82 @@
           <p class="disclaimer">Информация на экране SOS внесена пользователем и не является медицинским назначением.</p>
         </section>
 
-        <!-- PROFILES -->
-        <section class="screen" id="screen-profiles">
-          <div class="doc-header">
-            <div class="doc-label">AllerGuide · Профили</div>
-            <div class="doc-title">Мои профили</div>
-            <div class="doc-meta">Редактирование и удаление</div>
-          </div>
-          <div class="card flush">
-            <div class="feed-row">
-              <div class="feed-icon">А</div>
-              <div class="feed-body"><div class="feed-title">Анна</div><div class="feed-sub">Я · 1990 · Молоко, Берёза</div></div>
-              <span style="color:var(--text-muted)">›</span>
-            </div>
-          </div>
-          <div class="card flush">
-            <div class="feed-row">
-              <div class="feed-icon">М</div>
-              <div class="feed-body"><div class="feed-title">Миша</div><div class="feed-sub">Ребёнок · 2018 · Яйца</div></div>
-              <span style="color:var(--text-muted)">›</span>
-            </div>
-          </div>
-          <button class="btn btn-secondary">＋ Добавить профиль</button>
-        </section>
-
-        <!-- SETTINGS -->
-        <section class="screen" id="screen-settings">
+        <!-- PROFILE (profiles + settings) -->
+        <section class="screen" id="screen-profile">
           <div class="back-row">
             <div class="back-btn">‹</div>
             <div>
-              <div class="doc-label">AllerGuide · Настройки</div>
-              <div class="doc-title">Настройки</div>
-              <div class="doc-meta">SOS, синхронизация и напоминания</div>
+              <div class="doc-label">AllerGuide · Профили</div>
+              <div class="doc-title">Мои профили</div>
+              <div class="doc-meta">Редактирование и удаление</div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:8px">Язык</div>
+            <div class="toggle-row">
+              <div class="toggle active">Русский</div><div class="toggle">English</div><div class="toggle">Deutsch</div>
+            </div>
+          </div>
+
+          <div class="section-label">Список профилей</div>
+          <div class="card flush">
+            <div class="feed-row" style="align-items:flex-start">
+              <div class="feed-body">
+                <div class="feed-title">Анна · Я</div>
+                <div class="feed-sub">1990 · Молоко, Берёза</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <button class="btn btn-secondary btn-sm">Изменить</button>
+                <span style="font-size:11px;color:var(--danger);font-weight:600">Удалить</span>
+              </div>
+            </div>
+            <div class="feed-row" style="align-items:flex-start;border-top:1px solid var(--border)">
+              <div class="feed-body">
+                <div class="feed-title">Миша · Ребёнок</div>
+                <div class="feed-sub">2018 · Яйца</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <button class="btn btn-secondary btn-sm">Изменить</button>
+                <span style="font-size:11px;color:var(--danger);font-weight:600">Удалить</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary">Добавить профиль</button>
+
           <div class="section-label">Экстренный вызов</div>
           <div class="card">
             <div class="feed-sub" style="margin-bottom:8px">Номер для кнопки SOS</div>
             <input class="input" value="103" readonly />
             <button class="btn btn-primary" style="margin-top:10px">Сохранить номер</button>
           </div>
+
           <div class="section-label">Облачная копия</div>
           <div class="card">
+            <div class="feed-sub" style="margin-bottom:8px">Шифрованная резервная копия (zero-knowledge)</div>
             <button class="btn btn-primary">Загрузить резервную копию</button>
             <button class="btn btn-secondary" style="margin-top:8px">Скачать резервную копию</button>
           </div>
+
+          <div class="section-label">Напоминание о дневнике</div>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div>
+              <div class="feed-title">Ежедневное напоминание</div>
+              <div class="feed-sub">Локальное уведомление (нативные платформы)</div>
+            </div>
+            <div class="toggle" style="min-width:44px;text-align:center">Выкл</div>
+          </div>
+
           <div class="section-label">Тема</div>
           <div class="toggle-row">
             <div class="toggle active">Светлая</div><div class="toggle">Тёмная</div><div class="toggle">Системная</div>
+          </div>
+
+          <div class="section-label">Аккаунт</div>
+          <div class="card">
+            <div class="feed-sub" style="margin-bottom:10px">Выход из приложения и полное удаление данных пользователя.</div>
+            <button class="btn btn-secondary" style="width:100%;margin-bottom:8px">Выйти из аккаунта</button>
+            <button class="btn btn-danger btn-sm" style="width:100%">Удалить аккаунт</button>
           </div>
         </section>
 
@@ -1332,7 +1405,7 @@
   <script>
     const phone = document.getElementById('phone');
     const tabScreens = new Set(['home', 'diary', 'scanner', 'map', 'sos']);
-    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profiles', 'settings', 'doctor-report', 'expert', 'market', 'diary-editor']);
+    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profile', 'doctor-report', 'expert', 'market', 'diary-editor']);
 
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));

@@ -27,6 +27,7 @@ import {
   saveAsitCourse,
 } from '@/src/services/asit-course-service';
 import { ensureNotificationPermission, syncAsitReminder } from '@/src/services/asit-reminder-service';
+import { getAsitReminderNotificationContent } from '@/src/services/notification-content-service';
 import { profileEnablesAsit } from '@allerguide/core';
 import { getProfileConditions } from '@/src/services/profile-conditions-service';
 
@@ -52,7 +53,7 @@ export default function AsitCourseScreen() {
     const existing = getAsitCourse(profileId);
     if (existing) {
       setCourse(existing);
-      void syncAsitReminder(profileId, existing);
+      void syncAsitReminder(profileId, existing, getAsitReminderNotificationContent(existing));
     }
   }, [profileId]);
 

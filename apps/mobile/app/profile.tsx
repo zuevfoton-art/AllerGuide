@@ -1,4 +1,4 @@
-import { Alert, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies } from '@allerguide/core';
@@ -15,10 +15,6 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
-import {
-  isDiaryReminderEnabled,
-  syncDiaryReminder,
-} from '@/src/services/notification-service';
 import { downloadBackup, uploadBackup } from '@/src/services/sync-service';
 import type { Profile } from '@/src/types';
 
@@ -29,14 +25,11 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
-  const [reminderEnabled, setReminderEnabled] = useState(false);
-  const [reminderLoading, setReminderLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
 
   const refresh = useCallback(() => {
     setProfiles(listProfiles());
     setEmergencyNumberState(getEmergencyNumber());
-    setReminderEnabled(isDiaryReminderEnabled());
   }, []);
 
   useFocusEffect(
@@ -68,26 +61,6 @@ export default function ProfileScreen() {
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
     Alert.alert(t('settings.saved'), t('settings.savedNumberMessage', { number: normalized }));
-  };
-
-  const toggleReminder = async (value: boolean) => {
-    if (Platform.OS === 'web') {
-      Alert.alert(t('settings.unavailable'), t('settings.reminderWeb'));
-      return;
-    }
-
-    setReminderLoading(true);
-    try {
-      const ok = await syncDiaryReminder(value);
-      if (!ok && value) {
-        Alert.alert(t('settings.unavailable'), t('settings.reminderDenied'));
-        setReminderEnabled(false);
-        return;
-      }
-      setReminderEnabled(value);
-    } finally {
-      setReminderLoading(false);
-    }
   };
 
   const handleUpload = async () => {
@@ -212,21 +185,22 @@ export default function ProfileScreen() {
         />
       </GlassCard>
 
-      <Text style={ui.sectionLabel}>{t('settings.reminder')}</Text>
-      <GlassCard>
-        <View style={styles.switchRow}>
-          <View style={styles.switchText}>
-            <Text style={styles.switchTitle}>{t('settings.reminderTitle')}</Text>
-            <Text style={styles.switchHint}>{t('settings.reminderHint')}</Text>
+      <Text style={ui.sectionLabel}>{t('notifications.hubTitle')}</Text>
+      <GlassCard padded={false}>
+        <Pressable
+          style={styles.hubRow}
+          onPress={() => router.push('/notifications' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('notifications.hubTitle')}>
+          <View style={styles.hubIcon}>
+            <Ionicons name="notifications-outline" size={20} color={theme.colors.accent} />
           </View>
-          <Switch
-            value={reminderEnabled}
-            onValueChange={(value) => void toggleReminder(value)}
-            disabled={reminderLoading}
-            trackColor={{ false: theme.colors.border, true: theme.colors.accentMid }}
-            thumbColor={reminderEnabled ? theme.colors.accent : theme.colors.card}
-          />
-        </View>
+          <View style={styles.hubBody}>
+            <Text style={styles.hubTitle}>{t('notifications.hubTitle')}</Text>
+            <Text style={styles.hubHint}>{t('notifications.hubHint')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
@@ -319,16 +293,31 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 16,
       fontFamily: fonts.sans,
       color: colors.text,
+      marginBottom: 10,
     },
-    switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    switchText: { flex: 1, gap: 4 },
-    switchTitle: {
+    hubRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    hubIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      backgroundColor: colors.accentLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    hubBody: { flex: 1, gap: 3 },
+    hubTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 15,
       fontWeight: '600',
       color: colors.text,
     },
-    switchHint: {
+    hubHint: {
       fontFamily: fonts.sans,
       fontSize: 13,
       color: colors.textSecondary,
