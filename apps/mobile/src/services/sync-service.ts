@@ -14,6 +14,7 @@ import { listProfiles } from '@/src/services/profile-service';
 import { getSosNotes } from '@/src/services/sos-service';
 import { getDb } from '@/src/db/init';
 import { applySyncPayload } from '@/src/services/sync-restore';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
@@ -80,6 +81,7 @@ export function importLocalBackup(raw: string): { ok: true } | { ok: false; erro
   if (validationError) return { ok: false, error: 'Файл резервной копии не подходит для этого аккаунта' };
 
   applySyncPayload(getDb(), payload, userId);
+  void reconcileAllReminders();
   return { ok: true };
 }
 
@@ -151,6 +153,7 @@ export async function downloadBackup(): Promise<{ ok: boolean; error?: string }>
     if (validationError) return { ok: false, error: 'Резервная копия не подходит для этого аккаунта' };
 
     applySyncPayload(getDb(), payload, userId);
+    void reconcileAllReminders();
     return { ok: true };
   } catch {
     return { ok: false, error: 'Не удалось загрузить резервную копию' };

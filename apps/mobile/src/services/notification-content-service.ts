@@ -49,3 +49,17 @@ export function getEpinephrineExpiryNotificationContent(): { title: string; body
     body: translate(messages, 'notifications.epiPushBody'),
   };
 }
+
+export function getPollenReminderNotificationContent(
+  profileName: string,
+  pollenLabel: string,
+  pollenLevel: 'high' | 'moderate',
+): { title: string; body: string } {
+  const messages = LOCALE_MESSAGES[resolveLocale()];
+  const bodyKey =
+    pollenLevel === 'high' ? 'notifications.pollenPushBodyHigh' : 'notifications.pollenPushBodyModerate';
+  return {
+    title: translate(messages, 'notifications.pollenPushTitle'),
+    body: formatMessage(translate(messages, bodyKey), { name: profileName, pollen: pollenLabel }),
+  };
+}

@@ -379,6 +379,20 @@ export type LocaleMessages = {
     denied: string;
     unavailable: string;
     webOnly: string;
+    environmentSection: string;
+    pollenTitle: string;
+    pollenHint: string;
+    pollenTimeLabel: string;
+    pollenHour: string;
+    pollenMinute: string;
+    pollenAt: string;
+    pollenThresholdLabel: string;
+    pollenThresholdHigh: string;
+    pollenThresholdModerate: string;
+    pollenPushTitle: string;
+    pollenPushBodyHigh: string;
+    pollenPushBodyModerate: string;
+    pollenCacheHint: string;
   };
   profileSwitcher: {
     add: string;

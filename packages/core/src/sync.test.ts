@@ -74,9 +74,17 @@ describe('sync payload', () => {
       authUserId: '1',
       unrelated: 'skip',
       'sosPlan:3': 'plan',
+      pollenReminderEnabled: 'true',
+      pollenReminderHour: '7',
+      'pollenAlertCache:1': '{"matches":[]}',
+      diaryReminderId: 'skip-id',
     });
     expect(filtered.themeMode).toBe('dark');
     expect(filtered.unrelated).toBeUndefined();
     expect(filtered['sosPlan:3']).toBe('plan');
+    expect(filtered.pollenReminderEnabled).toBe('true');
+    expect(filtered.pollenReminderHour).toBe('7');
+    expect(filtered['pollenAlertCache:1']).toBe('{"matches":[]}');
+    expect(filtered.diaryReminderId).toBeUndefined();
   });
 });

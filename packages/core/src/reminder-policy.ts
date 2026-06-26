@@ -18,14 +18,16 @@ export type DiaryEntryLike = {
   createdAt: string;
 };
 
-export interface ScheduledReminderTrigger {
+export type ScheduledReminderTrigger = {
   at: Date;
-  kind: 'diary' | 'act' | 'doctor-visit' | 'epinephrine-expiry';
+  kind: 'diary' | 'act' | 'doctor-visit' | 'epinephrine-expiry' | 'pollen';
   profileId?: number;
   entryId?: number;
   scaleId?: string;
   visitLabel?: string;
-}
+  pollenLabel?: string;
+  pollenLevel?: 'mid' | 'high';
+};
 
 export function startOfLocalDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -254,7 +256,8 @@ export function limitRemindersPerDay(
     'epinephrine-expiry': 0,
     act: 1,
     'doctor-visit': 2,
-    diary: 3,
+    pollen: 3,
+    diary: 4,
   };
 
   const sorted = [...reminders].sort((a, b) => {
