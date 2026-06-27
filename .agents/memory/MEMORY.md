@@ -2,3 +2,4 @@
 - [API serves frontend in prod](api-static-serving.md) — Express must serve apps/mobile/dist + SPA fallback when METRO_URL is absent.
 - [Metro blockList for .local](metro-blocklist.md) — watchFolders=[workspaceRoot] must exclude .local via blockList RegExp or Metro crashes on deleted artifact dirs.
 - [pnpm in devDependencies breaks build](pnpm-devdep-build.md) — never put pnpm itself in devDependencies; build container kills @pnpm/exe with SIGABRT.
+- [Production port mapping](production-port-mapping.md) — API must run on port 23636 (API_PORT=23636) in production; Replit always maps 23636→external 80.

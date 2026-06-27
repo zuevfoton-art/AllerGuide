@@ -63,7 +63,7 @@ externalPort = 80
 deploymentTarget = "autoscale"
 ignoreDatabaseMigrations = false
 build = ["bash", "scripts/replit-deploy-build.sh"]
-run = ["bash", "-c", "source scripts/replit-db-env.sh && cd apps/api && npx tsx src/index.ts"]
+run = ["bash", "-c", "source scripts/replit-db-env.sh && cd apps/api && API_PORT=23636 npx tsx src/index.ts"]
 
 [userenv]
 
