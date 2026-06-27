@@ -203,6 +203,12 @@ export type LocaleMessages = {
     actPromptText: string;
     actPromptButton: string;
   };
+  diaryForm: {
+    addDetails: string;
+    hideDetails: string;
+    repeat: string;
+    fillRequired: string;
+  };
   diaryWizard: {
     stepOf: string;
     skipSection: string;

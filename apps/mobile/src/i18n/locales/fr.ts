@@ -201,6 +201,12 @@ const fr: LocaleMessages = {
     actPromptText: 'Plus de 4 semaines depuis la dernière évaluation ACT. Nous recommandons de la compléter.',
     actPromptButton: 'Remplir l\'ACT',
   },
+  diaryForm: {
+    addDetails: '+ Détails',
+    hideDetails: 'Masquer les détails',
+    repeat: 'Répéter',
+    fillRequired: 'Veuillez remplir les champs obligatoires.',
+  },
   diaryWizard: {
     stepOf: 'Étape {{current}} sur {{total}}',
     skipSection: 'Passer la section',

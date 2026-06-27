@@ -30,6 +30,7 @@ import {
   addDiaryEntries,
   deleteDiaryEntry,
   getDiaryEntries,
+  getLastDiaryAnswers,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
@@ -53,6 +54,7 @@ import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
+import { DiaryFormView } from '@/src/components/DiaryFormView';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -209,8 +211,13 @@ export default function DiaryScreen() {
     }
     if (sectionType === 'Лекарство' && activeProfileId) {
       const passport = getAllergyPassport(activeProfileId);
-      const prefill = buildMedicinePrefill(passport.drugIntolerances);
-      setEditor({ mode: 'section', sectionType, prefill: { Лекарство: prefill } });
+      const basePrefill = buildMedicinePrefill(passport.drugIntolerances);
+      const last = getLastDiaryAnswers(activeProfileId, 'Лекарство');
+      const smartPrefill: Record<string, string> = { ...basePrefill };
+      if (last?.medicine) smartPrefill.medicine = last.medicine;
+      if (last?.dosage) smartPrefill.dosage = last.dosage;
+      if (last?.takenAt) smartPrefill.takenAt = last.takenAt;
+      setEditor({ mode: 'section', sectionType, prefill: { Лекарство: smartPrefill } });
       return;
     }
     if (sectionType === 'Укус насекомого' && activeProfile) {
@@ -304,6 +311,13 @@ export default function DiaryScreen() {
     setEditor({ mode: 'edit', entry, legacy: true });
   };
 
+  const handleRepeat = async (entry: DiaryEntry) => {
+    if (!activeProfileId) return;
+    await addDiaryEntries(activeProfileId, [{ type: entry.type, details: entry.details }]);
+    await load();
+    void reconcileAllReminders();
+  };
+
   const renderEditor = () => {
     if (!editor) return null;
 
@@ -354,23 +368,22 @@ export default function DiaryScreen() {
           : null;
 
     return (
-      <DiaryWizard
-          sections={[section]}
-          initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
-          allowSkipSection={false}
-          drugIntolerances={drugIntolerances}
-          submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
-          onCancel={closeEditor}
-          onComplete={(entries) => {
-            const [entry] = entries;
-            if (!entry) return;
-            if (editor.mode === 'edit') {
-              void handleUpdate(editor.entry, entry.type, entry.details);
-              return;
-            }
-            void handleCreate(entries);
-          }}
-          onDelete={editor.mode === 'edit' ? () => confirmDelete(editor.entry) : undefined}
+      <DiaryFormView
+        section={section}
+        initialAnswers={initialAnswers ?? undefined}
+        drugIntolerances={drugIntolerances}
+        submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
+        onCancel={closeEditor}
+        onComplete={(entries) => {
+          const [entry] = entries;
+          if (!entry) return;
+          if (editor.mode === 'edit') {
+            void handleUpdate(editor.entry, entry.type, entry.details);
+            return;
+          }
+          void handleCreate(entries);
+        }}
+        onDelete={editor.mode === 'edit' ? () => confirmDelete(editor.entry) : undefined}
       />
     );
   };
@@ -585,7 +598,15 @@ export default function DiaryScreen() {
                   <Text style={ui.feedSub}>{summary}</Text>
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                <View style={styles.rowEnd}>
+                  <Pressable
+                    style={styles.repeatBtn}
+                    onPress={(e) => { e.stopPropagation(); void handleRepeat(item); }}
+                    accessibilityLabel={t('diaryForm.repeat')}>
+                    <Ionicons name="copy-outline" size={16} color={theme.colors.accent} />
+                  </Pressable>
+                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                </View>
               </Pressable>
             );
           })}
@@ -619,6 +640,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
+    rowEnd: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    repeatBtn: { padding: 6, borderRadius: 6 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
     chip: {
       flexDirection: 'row',

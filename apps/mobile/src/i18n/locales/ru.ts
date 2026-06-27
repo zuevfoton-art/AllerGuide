@@ -201,6 +201,12 @@ const ru: LocaleMessages = {
     actPromptText: 'Прошло 4+ недели с последней оценки контроля астмы. Рекомендуем заполнить шкалу ACT.',
     actPromptButton: 'Заполнить ACT',
   },
+  diaryForm: {
+    addDetails: '+ Детали',
+    hideDetails: 'Скрыть детали',
+    repeat: 'Повторить',
+    fillRequired: 'Пожалуйста, заполните обязательные поля.',
+  },
   diaryWizard: {
     stepOf: 'Шаг {{current}} из {{total}}',
     skipSection: 'Пропустить раздел',

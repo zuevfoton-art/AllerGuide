@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -202,6 +202,7 @@ export function DiaryWizard({
         step={step}
         value={sectionAnswers[step.id] ?? ''}
         onChange={(value) => setAnswer(step.id, value)}
+        onAutoAdvance={step.field === 'choice' ? goNext : undefined}
       />
 
       {scalePreview ? (
@@ -303,13 +304,16 @@ function StepField({
   step,
   value,
   onChange,
+  onAutoAdvance,
 }: {
   step: DiaryStep;
   value: string;
   onChange: (value: string) => void;
+  onAutoAdvance?: () => void;
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createFieldStyles(theme), [theme]);
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (step.field === 'choice' && step.choices) {
     return (
@@ -320,7 +324,13 @@ function StepField({
             <Pressable
               key={choice}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
-              onPress={() => onChange(choice)}>
+              onPress={() => {
+                onChange(choice);
+                if (onAutoAdvance) {
+                  if (advanceTimer.current) clearTimeout(advanceTimer.current);
+                  advanceTimer.current = setTimeout(onAutoAdvance, 150);
+                }
+              }}>
               <Text style={[styles.choiceText, active && styles.choiceTextActive]}>{choice}</Text>
             </Pressable>
           );

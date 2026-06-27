@@ -201,6 +201,12 @@ const en: LocaleMessages = {
     actPromptText: 'It has been 4+ weeks since your last asthma control (ACT) assessment. We recommend completing ACT.',
     actPromptButton: 'Complete ACT',
   },
+  diaryForm: {
+    addDetails: '+ Details',
+    hideDetails: 'Hide details',
+    repeat: 'Repeat',
+    fillRequired: 'Please fill in the required fields.',
+  },
   diaryWizard: {
     stepOf: 'Step {{current}} of {{total}}',
     skipSection: 'Skip section',
