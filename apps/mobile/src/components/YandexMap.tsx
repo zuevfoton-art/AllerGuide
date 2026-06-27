@@ -17,20 +17,16 @@ type YandexMapProps = {
 function widgetUrlToStaticUrl(widgetUrl: string, width = 650, height = 440): string {
   try {
     const src = new URL(widgetUrl);
+    // searchParams.get() returns decoded values (commas, tildes as-is)
     const ll = src.searchParams.get('ll') ?? '37.5,55.75';
     const z = src.searchParams.get('z') ?? '9';
-    const pt = src.searchParams.get('pt');
+    const pt = src.searchParams.get('pt') ?? '';
 
-    const params = new URLSearchParams({
-      ll,
-      z,
-      l: 'map',
-      size: `${width},${height}`,
-      lang: 'ru_RU',
-    });
-    if (pt) params.set('pt', pt);
-
-    return `https://static-maps.yandex.ru/1.x/?${params.toString()}`;
+    // Build URL manually — URLSearchParams encodes commas as %2C and tildes as %7E,
+    // but Yandex Static Maps API requires literal commas in ll/size and tildes in pt.
+    let url = `https://static-maps.yandex.ru/1.x/?ll=${ll}&z=${z}&l=map&size=${width},${height}&lang=ru_RU`;
+    if (pt) url += `&pt=${pt}`;
+    return url;
   } catch {
     return '';
   }

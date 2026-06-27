@@ -29,7 +29,21 @@ export async function createApp(
   app.set('trust proxy', 1);
 
   const isDev = Boolean(process.env.METRO_URL);
-  app.use(helmet({ contentSecurityPolicy: isDev ? false : undefined }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: isDev
+        ? false
+        : {
+            directives: {
+              ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+              // Allow Yandex static map images rendered by the web client.
+              'img-src': ["'self'", 'data:', 'https://static-maps.yandex.ru'],
+              // Allow the Yandex map widget iframe on native WebView builds.
+              'frame-src': ["'self'", 'https://yandex.ru'],
+            },
+          },
+    }),
+  );
   app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: '8mb' }));
   app.use(createGlobalRateLimiter());
