@@ -143,9 +143,12 @@ export function upsertLocalProfile(profile: Profile) {
 
 export function replaceLocalProfilesForUser(userId: number, items: Profile[]) {
   const db = getDb();
+  const serverIds = new Set(items.map((p) => p.id));
   const existing = db.getAllSync<{ id: number }>('SELECT id FROM profiles WHERE userId = ?', [userId]);
   for (const row of existing) {
-    db.runSync('DELETE FROM profiles WHERE id = ?', [row.id]);
+    if (!serverIds.has(row.id)) {
+      db.runSync('DELETE FROM profiles WHERE id = ?', [row.id]);
+    }
   }
   for (const profile of items) {
     upsertLocalProfile({ ...profile, userId });
