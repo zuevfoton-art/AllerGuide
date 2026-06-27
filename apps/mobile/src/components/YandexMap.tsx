@@ -7,20 +7,66 @@ type YandexMapProps = {
   height?: number;
 };
 
+/**
+ * Converts a Yandex map-widget URL into a Yandex Static Maps API URL.
+ * Both share the same `ll`, `z`, and `pt` parameter formats — we just swap
+ * the host and add `size`. No API key required for the static endpoint.
+ *
+ * Static Maps docs: https://yandex.ru/dev/staticapi/doc/ru/
+ */
+function widgetUrlToStaticUrl(widgetUrl: string, width = 650, height = 440): string {
+  try {
+    const src = new URL(widgetUrl);
+    const ll = src.searchParams.get('ll') ?? '37.5,55.75';
+    const z = src.searchParams.get('z') ?? '9';
+    const pt = src.searchParams.get('pt');
+
+    const params = new URLSearchParams({
+      ll,
+      z,
+      l: 'map',
+      size: `${width},${height}`,
+      lang: 'ru_RU',
+    });
+    if (pt) params.set('pt', pt);
+
+    return `https://static-maps.yandex.ru/1.x/?${params.toString()}`;
+  } catch {
+    return '';
+  }
+}
+
 export function YandexMap({ url, height = 220 }: YandexMapProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, height), [theme, height]);
 
   if (Platform.OS === 'web') {
+    const staticUrl = widgetUrlToStaticUrl(url, 650, 440);
     return (
       <View style={styles.wrap}>
-        <iframe
-          src={url}
-          title="Yandex Map"
-          style={styles.iframe as object}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+        {staticUrl ? (
+          <img
+            src={staticUrl}
+            alt="Яндекс Карты"
+            style={
+              {
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+                border: 'none',
+              } as React.CSSProperties
+            }
+          />
+        ) : (
+          <iframe
+            src={url}
+            title="Yandex Map"
+            style={styles.iframe as object}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        )}
       </View>
     );
   }
@@ -59,7 +105,7 @@ function createStyles({ colors }: AppTheme, height: number) {
     iframe: {
       width: '100%',
       height: '100%',
-      borderWidth: 0,
+      border: 'none',
     } as object,
   });
 }
