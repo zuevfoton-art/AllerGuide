@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "ruby-3.2", "swift-5.8"]
+modules = ["nodejs-20", "ruby-3.2", "swift-5.8", "postgresql-16"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -56,7 +56,7 @@ localPort = 5000
 externalPort = 5000
 
 [[ports]]
-localPort = 5000
+localPort = 23636
 externalPort = 80
 
 [deployment]

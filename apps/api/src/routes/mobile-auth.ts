@@ -45,24 +45,29 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const result = await registerAppUser({
-      loginType: loginType!,
-      login: login!,
-      password: password!,
-    });
+    try {
+      const result = await registerAppUser({
+        loginType: loginType!,
+        login: login!,
+        password: password!,
+      });
 
-    if (!result.ok) {
-      res.status(409).json(result);
-      return;
+      if (!result.ok) {
+        res.status(409).json(result);
+        return;
+      }
+
+      const token = await signAuthToken({
+        sub: result.user.id,
+        login: result.user.login,
+        loginType: result.user.loginType,
+      });
+
+      res.status(201).json({ ok: true, user: result.user, token });
+    } catch (err) {
+      console.error('Register error:', err);
+      res.status(500).json({ ok: false, error: 'Registration failed. Please try again.' });
     }
-
-    const token = await signAuthToken({
-      sub: result.user.id,
-      login: result.user.login,
-      loginType: result.user.loginType,
-    });
-
-    res.status(201).json({ ok: true, user: result.user, token });
   });
 
   app.post('/api/auth/login', async (req: Request, res: Response) => {
@@ -88,39 +93,53 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const result = await loginAppUser({
-      loginType: loginType!,
-      login: login!,
-      password: password!,
-    });
+    try {
+      const result = await loginAppUser({
+        loginType: loginType!,
+        login: login!,
+        password: password!,
+      });
 
-    if (!result.ok) {
-      res.status(401).json({ ok: false, error: result.error });
-      return;
+      if (!result.ok) {
+        res.status(401).json({ ok: false, error: result.error });
+        return;
+      }
+
+      const token = await signAuthToken({
+        sub: result.user.id,
+        login: result.user.login,
+        loginType: result.user.loginType,
+      });
+
+      res.json({ ok: true, user: result.user, token });
+    } catch (err) {
+      console.error('Login error:', err);
+      res.status(500).json({ ok: false, error: 'Login failed. Please try again.' });
     }
-
-    const token = await signAuthToken({
-      sub: result.user.id,
-      login: result.user.login,
-      loginType: result.user.loginType,
-    });
-
-    res.json({ ok: true, user: result.user, token });
   });
 
   app.get('/api/auth/me', requireJwt, async (req: Request, res: Response) => {
-    const user = await findUserById(req.authUser!.sub);
-    if (!user) {
-      res.status(404).json({ ok: false, error: 'User not found' });
-      return;
+    try {
+      const user = await findUserById(req.authUser!.sub);
+      if (!user) {
+        res.status(404).json({ ok: false, error: 'User not found' });
+        return;
+      }
+      res.json({ ok: true, user: toAuthUser(user) });
+    } catch (err) {
+      console.error('Auth me error:', err);
+      res.status(500).json({ ok: false, error: 'Failed to fetch user.' });
     }
-
-    res.json({ ok: true, user: toAuthUser(user) });
   });
 
   app.delete('/api/auth/account', requireJwt, async (req: Request, res: Response) => {
-    await deleteAppUser(req.authUser!.sub);
-    res.json({ ok: true });
+    try {
+      await deleteAppUser(req.authUser!.sub);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('Delete account error:', err);
+      res.status(500).json({ ok: false, error: 'Failed to delete account.' });
+    }
   });
 
   app.post('/api/auth/forgot-password', async (req: Request, res: Response) => {
@@ -135,16 +154,21 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const normalized = normalizeLogin(loginType, login);
-    const user = await findUserByLogin(normalized);
+    try {
+      const normalized = normalizeLogin(loginType, login);
+      const user = await findUserByLogin(normalized);
 
-    if (!user || (loginType !== 'email')) {
-      res.json({ ok: true });
-      return;
+      if (!user || (loginType !== 'email')) {
+        res.json({ ok: true });
+        return;
+      }
+
+      const resetToken = await createPasswordResetToken(user.id);
+      res.json({ ok: true, resetToken });
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      res.status(500).json({ ok: false, error: 'Failed to process request.' });
     }
-
-    const resetToken = await createPasswordResetToken(user.id);
-    res.json({ ok: true, resetToken });
   });
 
   app.get('/api/auth/verify-reset-token', async (req: Request, res: Response) => {
@@ -153,12 +177,17 @@ export function registerMobileAuthRoutes(app: Express) {
       res.status(400).json({ ok: false, error: 'token is required' });
       return;
     }
-    const row = await findValidResetToken(token);
-    if (!row) {
-      res.status(400).json({ ok: false, error: 'Ссылка недействительна или истекла.' });
-      return;
+    try {
+      const row = await findValidResetToken(token);
+      if (!row) {
+        res.status(400).json({ ok: false, error: 'Ссылка недействительна или истекла.' });
+        return;
+      }
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('Verify reset token error:', err);
+      res.status(500).json({ ok: false, error: 'Failed to verify token.' });
     }
-    res.json({ ok: true });
   });
 
   app.post('/api/auth/reset-password', async (req: Request, res: Response) => {
@@ -188,12 +217,16 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const success = await consumeResetToken(token, password);
-    if (!success) {
-      res.status(400).json({ ok: false, error: 'Ссылка недействительна или истекла.' });
-      return;
+    try {
+      const success = await consumeResetToken(token, password);
+      if (!success) {
+        res.status(400).json({ ok: false, error: 'Ссылка недействительна или истекла.' });
+        return;
+      }
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('Reset password error:', err);
+      res.status(500).json({ ok: false, error: 'Failed to reset password.' });
     }
-
-    res.json({ ok: true });
   });
 }

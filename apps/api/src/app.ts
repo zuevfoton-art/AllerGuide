@@ -1,5 +1,5 @@
 import path from 'path';
-import express, { type Express } from 'express';
+import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createProxyMiddleware } from 'http-proxy-middleware';
@@ -73,6 +73,13 @@ export async function createApp(
       res.sendFile(path.join(distDir, 'index.html'));
     });
   }
+
+  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('Unhandled route error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ ok: false, error: 'Internal server error' });
+    }
+  });
 
   return app;
 }
