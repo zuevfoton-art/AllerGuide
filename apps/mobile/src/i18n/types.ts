@@ -347,6 +347,11 @@ export type LocaleMessages = {
     account: string;
     manageProfiles: string;
     manageProfilesHint: string;
+    dataStorage: string;
+    dataStorageLocal: string;
+    dataStorageLocalDesc: string;
+    dataStorageCloud: string;
+    dataStorageCloudDesc: string;
   };
   notifications: {
     eyebrow: string;
@@ -416,6 +421,16 @@ export type LocaleMessages = {
     add: string;
     hint: string;
     manage: string;
+  };
+  storageOnboarding: {
+    title: string;
+    subtitle: string;
+    sectionLabel: string;
+    localTitle: string;
+    localDesc: string;
+    cloudTitle: string;
+    cloudDesc: string;
+    disclaimer: string;
   };
   onboarding: {
     tagline: string;

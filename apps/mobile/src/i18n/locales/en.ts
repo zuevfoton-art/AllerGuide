@@ -353,6 +353,11 @@ const en: LocaleMessages = {
     account: 'Account',
     manageProfiles: 'My profiles',
     manageProfilesHint: 'Profiles, sign out and delete account',
+    dataStorage: 'Data storage',
+    dataStorageLocal: 'Device only',
+    dataStorageLocalDesc: 'Data stays on your phone',
+    dataStorageCloud: 'Device + server',
+    dataStorageCloudDesc: 'Automatic backup on AllerGuide server',
   },
   notifications: {
     eyebrow: 'Notifications',
@@ -422,6 +427,16 @@ const en: LocaleMessages = {
     add: 'Profile',
     hint: 'Tap the active profile again to edit',
     manage: 'My profiles & account',
+  },
+  storageOnboarding: {
+    title: 'Where to store your data?',
+    subtitle: 'You can always change this choice in the app settings.',
+    sectionLabel: 'Choose storage mode',
+    localTitle: 'Device only',
+    localDesc: 'Your data never leaves your phone. No account — no third-party access.',
+    cloudTitle: 'Device + server',
+    cloudDesc: 'Automatic backup on the AllerGuide server. Data is available after reinstalling the app.',
+    disclaimer: 'When stored on the server, data is transmitted over an encrypted channel and linked to your account.',
   },
   onboarding: {
     tagline: 'Your smart allergy management assistant',

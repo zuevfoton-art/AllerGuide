@@ -41,7 +41,7 @@ export default function OnboardingScreen() {
           onPress={() => {
             setScenario(item.key as Scenario);
             setStoredScenario(item.key as Scenario);
-            router.push('/profile-setup');
+            router.push('/onboarding-storage');
           }}>
           <GlassCard style={styles.card}>
             <View style={styles.cardIcon}>

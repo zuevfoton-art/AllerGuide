@@ -16,6 +16,12 @@ import { getDb } from '@/src/db/init';
 import { applySyncPayload } from '@/src/services/sync-restore';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
+import { getSetting } from '@/src/services/settings-service';
+
+function isCloudSyncEnabled(): boolean {
+  if (!CLOUD_SYNC_ENABLED) return false;
+  return getSetting('storageMode') !== 'local';
+}
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -86,7 +92,7 @@ export function importLocalBackup(raw: string): { ok: true } | { ok: false; erro
 }
 
 export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
-  if (!CLOUD_SYNC_ENABLED) {
+  if (!isCloudSyncEnabled()) {
     return { ok: false, error: 'Облачная синхронизация пока недоступна' };
   }
 
@@ -142,7 +148,7 @@ export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
  * Never throws — runs silently in the background.
  */
 export async function pushSync(): Promise<void> {
-  if (!CLOUD_SYNC_ENABLED) return;
+  if (!isCloudSyncEnabled()) return;
   const userId = getCurrentUserId();
   if (!userId) return;
 
@@ -164,7 +170,7 @@ export async function pushSync(): Promise<void> {
 }
 
 export async function downloadBackup(): Promise<{ ok: boolean; error?: string }> {
-  if (!CLOUD_SYNC_ENABLED) {
+  if (!isCloudSyncEnabled()) {
     return { ok: false, error: 'Облачная синхронизация пока недоступна' };
   }
 

@@ -10,7 +10,13 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
 import { downloadBackup, uploadBackup } from '@/src/services/sync-service';
+import {
+  getStorageMode,
+  setStorageMode,
+  type StorageMode,
+} from '@/src/services/settings-service';
 import { useTranslation } from '@/src/store/locale-store';
+import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -19,9 +25,11 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
   const [syncLoading, setSyncLoading] = useState(false);
+  const [storageMode, setStorageModeState] = useState<StorageMode>('cloud');
 
   useEffect(() => {
     setEmergencyNumberState(getEmergencyNumber());
+    setStorageModeState(getStorageMode());
   }, []);
 
   const saveEmergencyNumber = () => {
@@ -57,6 +65,11 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleStorageMode = (mode: StorageMode) => {
+    setStorageMode(mode);
+    setStorageModeState(mode);
+  };
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -88,24 +101,78 @@ export default function SettingsScreen() {
         <Button label={t('settings.saveNumber')} variant="primary" block onPress={saveEmergencyNumber} />
       </GlassCard>
 
-      <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
-      <GlassCard>
-        <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
-        <Button
-          label={t('settings.uploadBackup')}
-          variant="primary"
-          block
-          disabled={syncLoading}
-          onPress={() => void handleUpload()}
-        />
-        <Button
-          label={t('settings.downloadBackup')}
-          variant="secondary"
-          block
-          disabled={syncLoading}
-          onPress={() => void handleDownload()}
-        />
+      <Text style={ui.sectionLabel}>{t('settings.dataStorage')}</Text>
+      <GlassCard padded={false}>
+        {(
+          [
+            {
+              key: 'local' as StorageMode,
+              icon: 'phone-portrait-outline',
+              label: t('settings.dataStorageLocal'),
+              desc: t('settings.dataStorageLocalDesc'),
+              disabled: false,
+            },
+            {
+              key: 'cloud' as StorageMode,
+              icon: 'cloud-outline',
+              label: t('settings.dataStorageCloud'),
+              desc: t('settings.dataStorageCloudDesc'),
+              disabled: !CLOUD_SYNC_ENABLED,
+            },
+          ]
+        ).map((opt, idx, arr) => {
+          const active = storageMode === opt.key;
+          const color = active ? theme.colors.accent : theme.colors.textMuted;
+          return (
+            <Pressable
+              key={opt.key}
+              style={[
+                styles.storageRow,
+                idx < arr.length - 1 && styles.storageRowBorder,
+                opt.disabled && styles.storageRowDisabled,
+              ]}
+              onPress={() => !opt.disabled && handleStorageMode(opt.key)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: active, disabled: opt.disabled }}>
+              <View style={[styles.storageIcon, { backgroundColor: `${color}18` }]}>
+                <Ionicons name={opt.icon as 'phone-portrait-outline'} size={18} color={color} />
+              </View>
+              <View style={styles.storageBody}>
+                <Text style={[styles.storageTitle, active && styles.storageTitleActive]}>
+                  {opt.label}
+                </Text>
+                <Text style={styles.storageDesc}>{opt.desc}</Text>
+              </View>
+              <View style={[styles.radio, active && styles.radioActive]}>
+                {active && <View style={styles.radioDot} />}
+              </View>
+            </Pressable>
+          );
+        })}
       </GlassCard>
+
+      {storageMode === 'cloud' && CLOUD_SYNC_ENABLED && (
+        <>
+          <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
+          <GlassCard>
+            <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
+            <Button
+              label={t('settings.uploadBackup')}
+              variant="primary"
+              block
+              disabled={syncLoading}
+              onPress={() => void handleUpload()}
+            />
+            <Button
+              label={t('settings.downloadBackup')}
+              variant="secondary"
+              block
+              disabled={syncLoading}
+              onPress={() => void handleDownload()}
+            />
+          </GlassCard>
+        </>
+      )}
 
       <Text style={ui.sectionLabel}>{t('notifications.hubTitle')}</Text>
       <GlassCard padded={false}>
@@ -175,6 +242,57 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       color: colors.text,
       marginBottom: 10,
+    },
+    storageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    storageRowBorder: {
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    storageRowDisabled: { opacity: 0.4 },
+    storageIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 6,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+    storageBody: { flex: 1, gap: 2 },
+    storageTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    storageTitleActive: { color: colors.text },
+    storageDesc: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 16,
+    },
+    radio: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+    radioActive: { borderColor: colors.accent },
+    radioDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.accent,
     },
     hubRow: {
       flexDirection: 'row',

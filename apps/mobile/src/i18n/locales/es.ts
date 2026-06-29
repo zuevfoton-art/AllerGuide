@@ -345,6 +345,11 @@ const es: LocaleMessages = {
     account: 'Cuenta',
     manageProfiles: 'Mis perfiles',
     manageProfilesHint: 'Perfiles, cerrar sesión y eliminar cuenta',
+    dataStorage: 'Almacenamiento de datos',
+    dataStorageLocal: 'Solo en el dispositivo',
+    dataStorageLocalDesc: 'Los datos permanecen en tu teléfono',
+    dataStorageCloud: 'Dispositivo + servidor',
+    dataStorageCloudDesc: 'Copia de seguridad automática en servidor AllerGuide',
   },
   notifications: {
     eyebrow: 'Notificaciones',
@@ -414,6 +419,16 @@ const es: LocaleMessages = {
     add: 'Perfil',
     hint: 'Toca de nuevo el perfil activo para editar',
     manage: 'Mis perfiles y cuenta',
+  },
+  storageOnboarding: {
+    title: '¿Dónde guardar tus datos?',
+    subtitle: 'Siempre puedes cambiar esta elección en los ajustes de la aplicación.',
+    sectionLabel: 'Elige el modo de almacenamiento',
+    localTitle: 'Solo en el dispositivo',
+    localDesc: 'Tus datos nunca salen de tu teléfono. Sin cuenta — sin acceso de terceros.',
+    cloudTitle: 'Dispositivo + servidor',
+    cloudDesc: 'Copia de seguridad automática en el servidor AllerGuide. Datos disponibles tras reinstalar la app.',
+    disclaimer: 'Con almacenamiento en servidor, los datos se transmiten por canal cifrado y se asocian a tu cuenta.',
   },
   onboarding: {
     tagline: 'Tu asistente inteligente para el control de alergias',
