@@ -102,14 +102,19 @@ export const emergencyContacts = profileSchema.table(
   (table) => [index('contacts_user_profile_idx').on(table.userId, table.profileId)],
 );
 
-export const profileSos = profileSchema.table('profile_sos', {
-  profileId: integer('profile_id').primaryKey(),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => appUsers.id, { onDelete: 'cascade' }),
-  notes: text('notes').notNull().default(''),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+export const profileSos = profileSchema.table(
+  'profile_sos',
+  {
+    id: serial('id').primaryKey(),
+    profileId: integer('profile_id').notNull(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => appUsers.id, { onDelete: 'cascade' }),
+    notes: text('notes').notNull().default(''),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index('sos_user_profile_idx').on(table.userId, table.profileId)],
+);
 
 /**
  * Cloud backup store. `payload` is opaque to the server: it is either a JSON

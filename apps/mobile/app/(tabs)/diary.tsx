@@ -64,6 +64,7 @@ import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { MarketplaceModule } from '@/src/modules/marketplace';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
+import { pushSync } from '@/src/services/sync-service';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -273,6 +274,7 @@ export default function DiaryScreen() {
     closeEditor();
     await load();
     void reconcileAllReminders();
+    void pushSync();
   };
 
   const handleUpdate = async (entry: DiaryEntry, type: string, details: string) => {
@@ -280,6 +282,7 @@ export default function DiaryScreen() {
     closeEditor();
     await load();
     void reconcileAllReminders();
+    void pushSync();
   };
 
   const confirmDelete = (entry: DiaryEntry) => {
@@ -316,6 +319,7 @@ export default function DiaryScreen() {
     await addDiaryEntries(activeProfileId, [{ type: entry.type, details: entry.details }]);
     await load();
     void reconcileAllReminders();
+    void pushSync();
   };
 
   const renderEditor = () => {

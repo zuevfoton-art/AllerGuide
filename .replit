@@ -70,3 +70,5 @@ run = ["bash", "-c", "source scripts/replit-db-env.sh && cd apps/api && API_PORT
 [userenv.shared]
 EXPO_PUBLIC_BACKEND_AUTH = "true"
 JWT_SECRET = "49070571c862141791c05039b4c0ef1b3c966040428a757cb4807258b7469cb37ebfa1480e52fb2151605d0c18ced768"
+SYNC_ENABLED = "true"
+EXPO_PUBLIC_CLOUD_SYNC = "true"
