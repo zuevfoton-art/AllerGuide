@@ -79,10 +79,18 @@ describe('JWT-authenticated sync', () => {
     expect(JSON.stringify(download.body)).not.toContain('Anna');
   });
 
-  it('rejects sync without auth when JWT secret is the only mechanism', async () => {
+  it('denies unauthenticated access (no JWT, no API key) — prevents IDOR', async () => {
     const app = await createApp({ withReplitAuth: false });
     const download = await request(app).get('/api/sync/backup/4242');
-    // No JWT and no SYNC_API_KEY configured -> access middleware passes, but no data
-    expect(download.status).toBe(404);
+    // Must NOT fall through to data access when no auth is presented.
+    expect(download.status).toBe(401);
+  });
+
+  it('denies unauthenticated writes to an arbitrary user backup', async () => {
+    const app = await createApp({ withReplitAuth: false });
+    const upload = await request(app)
+      .post('/api/sync/backup')
+      .send({ v: 2, userId: 1, exportedAt: new Date().toISOString(), profiles: [] });
+    expect(upload.status).toBe(401);
   });
 });
