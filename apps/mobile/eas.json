@@ -28,7 +28,8 @@
       },
       "ios": {
         "simulator": false
-      }
+      },
+      "pnpm": "10.34.4"
     },
     "production": {
       "autoIncrement": true,
