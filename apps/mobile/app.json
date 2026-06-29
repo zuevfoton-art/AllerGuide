@@ -73,7 +73,8 @@
         "android.permission.CAMERA",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "extra": {
@@ -81,7 +82,7 @@
         "root": "app"
       },
       "eas": {
-        "projectId": "00000000-0000-0000-0000-000000000000"
+        "projectId": "a7a65ba6-58c0-494e-abcd-0803dc0ed5a0"
       }
     }
   }
