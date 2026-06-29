@@ -43,13 +43,6 @@
       "when": 1782200000000,
       "tag": "0006_trace_tags",
       "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1782564100000,
-      "tag": "0007_allergy_confirmations",
-      "breakpoints": true
     }
   ]
 }

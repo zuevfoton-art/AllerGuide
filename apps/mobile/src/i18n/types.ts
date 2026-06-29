@@ -203,12 +203,6 @@ export type LocaleMessages = {
     actPromptText: string;
     actPromptButton: string;
   };
-  diaryForm: {
-    addDetails: string;
-    hideDetails: string;
-    repeat: string;
-    fillRequired: string;
-  };
   diaryWizard: {
     stepOf: string;
     skipSection: string;
@@ -270,18 +264,6 @@ export type LocaleMessages = {
     removeSafeTitle: string;
     removeSafeMessage: string;
     removedFromSafe: string;
-    smartScan: string;
-    smartScanDesc: string;
-    smartScanTitle: string;
-    smartScanHint: string;
-    smartCapture: string;
-    smartAnalyzing: string;
-    smartDetectedBarcode: string;
-    smartDetectedQR: string;
-    smartDetectedMenu: string;
-    smartDetectedLabel: string;
-    smartClassifyFailed: string;
-    smartNoAi: string;
   };
   market: {
     title: string;
@@ -347,11 +329,6 @@ export type LocaleMessages = {
     account: string;
     manageProfiles: string;
     manageProfilesHint: string;
-    dataStorage: string;
-    dataStorageLocal: string;
-    dataStorageLocalDesc: string;
-    dataStorageCloud: string;
-    dataStorageCloudDesc: string;
   };
   notifications: {
     eyebrow: string;
@@ -421,16 +398,6 @@ export type LocaleMessages = {
     add: string;
     hint: string;
     manage: string;
-  };
-  storageOnboarding: {
-    title: string;
-    subtitle: string;
-    sectionLabel: string;
-    localTitle: string;
-    localDesc: string;
-    cloudTitle: string;
-    cloudDesc: string;
-    disclaimer: string;
   };
   onboarding: {
     tagline: string;

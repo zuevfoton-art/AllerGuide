@@ -11,7 +11,7 @@ import {
   getScaleIdFromAnswers,
   type ClinicalScaleId,
 } from './clinical-scales';
-import { decodeDiaryDetails } from './diary-codec';
+import { decodeDiaryDetails } from './diary';
 
 /** Шкалы дневника по ориентирам РААКИ: ринит, астма, атопический дерматит, крапивница. */
 export const RAACI_SCALE_IDS: ClinicalScaleId[] = ['aria-lite', 'act', 'scorad-lite'];

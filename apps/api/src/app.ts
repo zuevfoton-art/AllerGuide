@@ -1,5 +1,5 @@
 import path from 'path';
-import express, { type Express, type NextFunction, type Request, type Response } from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createProxyMiddleware } from 'http-proxy-middleware';
@@ -11,7 +11,6 @@ import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
 import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
-import { registerClassifyPhotoRoutes } from './routes/classify-photo';
 import {
   buildCorsOptions,
   createAuthRateLimiter,
@@ -29,23 +28,9 @@ export async function createApp(
   app.set('trust proxy', 1);
 
   const isDev = Boolean(process.env.METRO_URL);
-  app.use(
-    helmet({
-      contentSecurityPolicy: isDev
-        ? false
-        : {
-            directives: {
-              ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-              // Allow Yandex static map images rendered by the web client.
-              'img-src': ["'self'", 'data:', 'https://static-maps.yandex.ru'],
-              // Allow the Yandex map widget iframe on native WebView builds.
-              'frame-src': ["'self'", 'https://yandex.ru'],
-            },
-          },
-    }),
-  );
+  app.use(helmet({ contentSecurityPolicy: isDev ? false : undefined }));
   app.use(cors(buildCorsOptions()));
-  app.use(express.json({ limit: '8mb' }));
+  app.use(express.json({ limit: '2mb' }));
   app.use(createGlobalRateLimiter());
 
   app.use('/api/auth', createAuthRateLimiter());
@@ -58,7 +43,6 @@ export async function createApp(
   registerCatalogRoutes(app);
   registerAliasFeedbackRoutes(app);
   registerGovernanceRoutes(app);
-  registerClassifyPhotoRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);
@@ -87,13 +71,6 @@ export async function createApp(
       res.sendFile(path.join(distDir, 'index.html'));
     });
   }
-
-  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error('Unhandled route error:', err);
-    if (!res.headersSent) {
-      res.status(500).json({ ok: false, error: 'Internal server error' });
-    }
-  });
 
   return app;
 }

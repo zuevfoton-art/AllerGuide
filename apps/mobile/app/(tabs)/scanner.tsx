@@ -28,7 +28,6 @@ import {
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
-import { SmartScannerCamera, type SmartScanResult } from '@/src/components/SmartScannerCamera';
 
 const UNDO_MS = 5000;
 
@@ -62,7 +61,6 @@ export default function ScannerScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
-  const [smartCameraOpen, setSmartCameraOpen] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const lastScanRef = useRef<(() => void) | null>(null);
   const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
@@ -271,18 +269,6 @@ export default function ScannerScreen() {
     setCameraOpen(false);
   };
 
-  const handleSmartResult = (result: SmartScanResult) => {
-    setSmartCameraOpen(false);
-    const text = result.text.trim();
-    setInput(text);
-    if (result.mode !== mode) {
-      selectMode(result.mode as ScanMode);
-    }
-    if (text) {
-      void runCheck(text, result.isBarcode);
-    }
-  };
-
   const openScanAction = () => {
     if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
       void pickMenuImage();
@@ -290,15 +276,6 @@ export default function ScannerScreen() {
     }
     void openCamera();
   };
-
-  if (smartCameraOpen) {
-    return (
-      <SmartScannerCamera
-        onResult={handleSmartResult}
-        onClose={() => setSmartCameraOpen(false)}
-      />
-    );
-  }
 
   if (cameraOpen) {
     return (
@@ -380,13 +357,6 @@ export default function ScannerScreen() {
         </View>
         <View style={styles.headerActions}>
           <ProfileHeaderButton />
-          <Pressable
-            style={styles.cameraBtn}
-            onPress={() => setSmartCameraOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel={t('scanner.smartScan')}>
-            <Ionicons name="scan-outline" size={20} color={theme.colors.accent} />
-          </Pressable>
           <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
             <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
           </Pressable>

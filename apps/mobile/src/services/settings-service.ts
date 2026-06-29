@@ -62,15 +62,3 @@ export function getLocale(): AppLocale | null {
 export function setLocale(locale: AppLocale) {
   setSetting('locale', locale);
 }
-
-export type StorageMode = 'local' | 'cloud';
-
-export function getStorageMode(): StorageMode {
-  const value = getSetting('storageMode');
-  if (value === 'local' || value === 'cloud') return value;
-  return 'cloud';
-}
-
-export function setStorageMode(mode: StorageMode) {
-  setSetting('storageMode', mode);
-}

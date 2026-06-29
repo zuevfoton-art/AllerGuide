@@ -4,7 +4,6 @@ import { enrichSymptomAnswers, formatCodedSymptomsSummary, resolveSymptomCodes }
 import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
-import { type StructuredDiaryPayload, decodeDiaryDetails } from './diary-codec';
 
 export type DiaryStepField = 'text' | 'choice';
 
@@ -23,6 +22,11 @@ export interface DiarySection {
   title: string;
   icon: string;
   steps: DiaryStep[];
+}
+
+export interface StructuredDiaryPayload {
+  v: 1;
+  answers: Record<string, string>;
 }
 
 export const DIARY_SECTIONS: DiarySection[] = [
@@ -582,6 +586,18 @@ export function enrichDiaryAnswers(
     return enrichSeverityAnswers(enrichSymptomAnswers(answers), 'Симптомы');
   }
   return enrichSeverityAnswers(answers, sectionType);
+}
+
+export function decodeDiaryDetails(details: string): StructuredDiaryPayload | null {
+  try {
+    const parsed = JSON.parse(details) as StructuredDiaryPayload;
+    if (parsed?.v === 1 && parsed.answers && typeof parsed.answers === 'object') {
+      return parsed;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 export function getDiaryStepAnswers(section: DiarySection, answers: Record<string, string>): string[] {

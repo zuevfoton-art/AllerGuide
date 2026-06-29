@@ -1,6 +1,6 @@
 import { formatDiaryEntrySummary } from './diary';
 import { buildCodedSymptomLines, resolveSymptomCodes } from './symptom-coding';
-import { decodeDiaryDetails } from './diary-codec';
+import { decodeDiaryDetails } from './diary';
 import { normalizeSeverity, formatSeveritySummary } from './diary-severity';
 import type { DiaryEntry } from './types';
 

@@ -2,7 +2,7 @@ import { ALLERGENS, findAllergenById, getAllergensByCategory } from './allergen-
 import { resolveAllergenId } from './profile-allergens';
 import { getCrossReactionsForSelection } from './cross-reactions';
 import type { AllergyConditionId } from './allergy-conditions';
-import { decodeDiaryDetails } from './diary-codec';
+import { decodeDiaryDetails } from './diary';
 
 export interface FoodDrugRegistry {
   v: 1;

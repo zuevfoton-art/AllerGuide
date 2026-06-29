@@ -153,35 +153,6 @@ export async function scanFromOcr({
   return { ...result, ocr: extraction };
 }
 
-export async function classifyPhoto({
-  imageBase64,
-}: {
-  imageBase64: string;
-}): Promise<{ type: 'barcode' | 'qr' | 'menu' | 'label' | 'other'; text: string; mode: ScanMode } | null> {
-  try {
-    const response = await fetch(`${API_BASE}/api/classify-photo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64 }),
-    });
-    if (!response.ok) return null;
-    const payload = (await response.json()) as {
-      ok?: boolean;
-      type?: string;
-      text?: string;
-      mode?: string;
-    };
-    if (!payload.ok) return null;
-    return {
-      type: (payload.type as 'barcode' | 'qr' | 'menu' | 'label' | 'other') ?? 'other',
-      text: payload.text ?? '',
-      mode: (payload.mode as ScanMode) ?? 'product',
-    };
-  } catch {
-    return null;
-  }
-}
-
 export async function scanMenuPhoto({
   profile,
   ocrText,

@@ -1,4 +1,4 @@
-import { decodeDiaryDetails } from './diary-codec';
+import { decodeDiaryDetails } from './diary';
 
 export type AsitRoute = 'slit' | 'scit';
 export type AsitPhase = 'buildup' | 'maintenance';

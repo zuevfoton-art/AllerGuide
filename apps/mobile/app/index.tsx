@@ -10,8 +10,6 @@ import {
   getStoredScenario,
   isIntroComplete,
   isOnboardingComplete,
-  markIntroComplete,
-  markOnboardingComplete,
 } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
 
@@ -38,19 +36,6 @@ export default function Index() {
       const scenario = getStoredScenario();
       if (scenario) setScenario(scenario);
 
-      // Returning user: has profiles in local DB (synced from server or created
-      // on this device). Skip intro and onboarding — go straight to the app.
-      // This covers the case where the user logs in on a new device and the
-      // local "introComplete" / "onboardingComplete" flags are not yet set.
-      const isReturningUser = profiles.length > 0;
-      if (isReturningUser) {
-        markIntroComplete();
-        markOnboardingComplete();
-        setTarget(resolveBootstrapRoute(profiles, scenario, true));
-        return;
-      }
-
-      // Brand-new user: no profiles yet — show the intro / onboarding flow.
       if (!isIntroComplete()) {
         setTarget('/onboarding-intro');
         return;

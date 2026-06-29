@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
-import { formatDiaryDate, formatDiaryEntrySummary, getDiaryEntryAnswers } from '@allerguide/core';
+import { formatDiaryDate, formatDiaryEntrySummary } from '@allerguide/core';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export async function addDiaryEntry(input: {
@@ -44,20 +44,6 @@ export async function updateDiaryEntry(
     input.details,
     id,
   ]);
-}
-
-export function getLastDiaryAnswers(
-  profileId: number,
-  type: string,
-): Record<string, string> | null {
-  const db = getDb();
-  const entries = db.getAllSync<DiaryEntry>(
-    'SELECT * FROM diary_entries WHERE profileId = ? ORDER BY id DESC',
-    [profileId],
-  );
-  const match = entries.find((e) => e.type === type);
-  if (!match) return null;
-  return getDiaryEntryAnswers(type, match.details);
 }
 
 export async function deleteDiaryEntry(id: number) {

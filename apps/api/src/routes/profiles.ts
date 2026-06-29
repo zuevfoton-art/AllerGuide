@@ -12,13 +12,8 @@ import {
 
 export function registerProfileRoutes(app: Express) {
   app.get('/api/profiles', requireJwt, async (req: Request, res: Response) => {
-    try {
-      const items = await listProfilesForUser(req.authUser!.sub);
-      res.json({ ok: true, profiles: items });
-    } catch (err) {
-      console.error('List profiles error:', err);
-      res.status(500).json({ ok: false, error: 'Failed to fetch profiles' });
-    }
+    const items = await listProfilesForUser(req.authUser!.sub);
+    res.json({ ok: true, profiles: items });
   });
 
   app.post('/api/profiles', requireJwt, async (req: Request, res: Response) => {
@@ -65,18 +60,13 @@ export function registerProfileRoutes(app: Express) {
   });
 
   app.get('/api/profiles/:id', requireJwt, async (req: Request, res: Response) => {
-    try {
-      const profileId = Number(req.params.id);
-      const profile = await getProfileForUser(req.authUser!.sub, profileId);
-      if (!profile) {
-        res.status(404).json({ ok: false, error: 'Profile not found' });
-        return;
-      }
-      res.json({ ok: true, profile });
-    } catch (err) {
-      console.error('Get profile error:', err);
-      res.status(500).json({ ok: false, error: 'Failed to fetch profile' });
+    const profileId = Number(req.params.id);
+    const profile = await getProfileForUser(req.authUser!.sub, profileId);
+    if (!profile) {
+      res.status(404).json({ ok: false, error: 'Profile not found' });
+      return;
     }
+    res.json({ ok: true, profile });
   });
 
   app.patch('/api/profiles/:id', requireJwt, async (req: Request, res: Response) => {
@@ -128,17 +118,12 @@ export function registerProfileRoutes(app: Express) {
   });
 
   app.delete('/api/profiles/:id', requireJwt, async (req: Request, res: Response) => {
-    try {
-      const profileId = Number(req.params.id);
-      const deleted = await deleteProfileForUser(req.authUser!.sub, profileId);
-      if (!deleted) {
-        res.status(404).json({ ok: false, error: 'Profile not found' });
-        return;
-      }
-      res.json({ ok: true });
-    } catch (err) {
-      console.error('Delete profile error:', err);
-      res.status(500).json({ ok: false, error: 'Failed to delete profile' });
+    const profileId = Number(req.params.id);
+    const deleted = await deleteProfileForUser(req.authUser!.sub, profileId);
+    if (!deleted) {
+      res.status(404).json({ ok: false, error: 'Profile not found' });
+      return;
     }
+    res.json({ ok: true });
   });
 }

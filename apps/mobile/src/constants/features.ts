@@ -2,9 +2,7 @@
  * Encrypted, JWT-authenticated PostgreSQL cloud backup. Enable with
  * EXPO_PUBLIC_CLOUD_SYNC=true (requires backend auth + a running API).
  */
-export const CLOUD_SYNC_ENABLED =
-  process.env.EXPO_PUBLIC_CLOUD_SYNC === 'true' ||
-  process.env.EXPO_PUBLIC_BACKEND_AUTH === 'true';
+export const CLOUD_SYNC_ENABLED = process.env.EXPO_PUBLIC_CLOUD_SYNC === 'true';
 
 /** Smart LLM scan via AllerGuide API (/api/scan). Requires AI_SCAN_ENABLED on server. */
 export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true';

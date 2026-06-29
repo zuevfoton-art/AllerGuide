@@ -16,12 +16,6 @@ import { getDb } from '@/src/db/init';
 import { applySyncPayload } from '@/src/services/sync-restore';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
-import { getSetting } from '@/src/services/settings-service';
-
-function isCloudSyncEnabled(): boolean {
-  if (!CLOUD_SYNC_ENABLED) return false;
-  return getSetting('storageMode') !== 'local';
-}
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -92,7 +86,7 @@ export function importLocalBackup(raw: string): { ok: true } | { ok: false; erro
 }
 
 export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
-  if (!isCloudSyncEnabled()) {
+  if (!CLOUD_SYNC_ENABLED) {
     return { ok: false, error: 'Облачная синхронизация пока недоступна' };
   }
 
@@ -102,19 +96,6 @@ export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
   try {
     const payload = collectUserData(userId);
     const token = await getAuthToken();
-
-    // Push structured data to server (writes to individual DB tables)
-    if (token) {
-      await fetch(`${API_BASE}/api/sync/push`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => null); // fire-and-forget; don't block on failure
-    }
-
     const envelope = await encryptBackup(JSON.stringify(payload));
 
     // Prefer zero-knowledge encrypted upload; fall back to plaintext over TLS
@@ -142,35 +123,8 @@ export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
   }
 }
 
-/**
- * Lightweight push that only writes to the structured DB tables.
- * Called automatically after local data mutations.
- * Never throws — runs silently in the background.
- */
-export async function pushSync(): Promise<void> {
-  if (!isCloudSyncEnabled()) return;
-  const userId = getCurrentUserId();
-  if (!userId) return;
-
-  try {
-    const token = await getAuthToken();
-    if (!token) return;
-    const payload = collectUserData(userId);
-    await fetch(`${API_BASE}/api/sync/push`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    // silent — sync is best-effort
-  }
-}
-
 export async function downloadBackup(): Promise<{ ok: boolean; error?: string }> {
-  if (!isCloudSyncEnabled()) {
+  if (!CLOUD_SYNC_ENABLED) {
     return { ok: false, error: 'Облачная синхронизация пока недоступна' };
   }
 
