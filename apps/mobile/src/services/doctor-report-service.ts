@@ -42,6 +42,23 @@ export type DoctorReportOptions = {
   blockIds: string[];
 };
 
+const HTML_ESCAPES: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
+
+/**
+ * Escape user-derived text before interpolating into report HTML. The report is
+ * rendered via `document.write` on web (a real browser print window), so
+ * unescaped diary/profile free-text would otherwise allow HTML/script injection.
+ */
+function esc(value: unknown): string {
+  return String(value ?? '').replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
+}
+
 function filterEntriesByPeriod(entries: DiaryEntry[], days: number): DiaryEntry[] {
   const cutoff = Date.now() - days * 86_400_000;
   return entries.filter((e) => new Date(e.createdAt).getTime() >= cutoff);
@@ -52,9 +69,9 @@ function renderTimeline(entries: DiaryEntry[]): string {
   if (!items.length) return `<p style="color:${c.muted};">Нет записей за период.</p>`;
   return items
     .map((item) => {
-      const severity = item.severityLabel ? ` · тяжесть: ${item.severityLabel}` : '';
-      const coded = item.codedSymptoms ? `<br/><small>Коды: ${item.codedSymptoms}</small>` : '';
-      return `<div style="margin-bottom:10px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${item.type}</strong> <small>(${formatDiaryDate(item.createdAt)})</small><p>${item.summary}${severity}</p>${coded}</div>`;
+      const severity = item.severityLabel ? ` · тяжесть: ${esc(item.severityLabel)}` : '';
+      const coded = item.codedSymptoms ? `<br/><small>Коды: ${esc(item.codedSymptoms)}</small>` : '';
+      return `<div style="margin-bottom:10px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${esc(item.type)}</strong> <small>(${formatDiaryDate(item.createdAt)})</small><p>${esc(item.summary)}${severity}</p>${coded}</div>`;
     })
     .join('');
 }
@@ -77,7 +94,7 @@ function renderScaleTrend(entries: DiaryEntry[]): string {
   return [...byType.values()]
     .map((e) => {
       const summary = formatDiaryEntrySummary(e.type, e.details || '');
-      return `<li>${summary} <small>(${formatDiaryDate(e.createdAt)})</small></li>`;
+      return `<li>${esc(summary)} <small>(${formatDiaryDate(e.createdAt)})</small></li>`;
     })
     .join('');
 }
@@ -122,7 +139,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       return `<section><h2>${block.label}</h2>${blockEntries
         .map(
           (e) =>
-            `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${e.type}</strong><p>${formatDiaryEntrySummary(e.type, e.details || '')}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`,
+            `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${esc(e.type)}</strong><p>${esc(formatDiaryEntrySummary(e.type, e.details || ''))}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`,
         )
         .join('')}</section>`;
     })
@@ -199,8 +216,8 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
       <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">Отчёт AllerGuide для врача</h1>
       <p style="font-size:13px;color:${c.head};font-weight:700;">${DOCTOR_REPORT_TITLE}</p>
-      <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
-      <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
+      <p><strong>Профиль:</strong> ${esc(profile?.name || 'Профиль')}</p>
+      <p><strong>Год рождения:</strong> ${esc(profile?.birthYear || '')}</p>
       <p><strong>Период:</strong> ${options.periodDays} дней</p>
       <p style="font-size:12px;color:${c.muted};">${DOCTOR_REPORT_DISCLAIMER}</p>
       <hr style="border:none;border-top:1px solid ${c.border};" />

@@ -94,15 +94,17 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
     return;
   }
 
+  // Server-to-server / legacy access via shared secret.
   const configuredKey = process.env.SYNC_API_KEY;
-  if (configuredKey) {
-    if (req.header('x-sync-api-key') !== configuredKey) {
-      res.status(401).json({ ok: false, error: 'Unauthorized' });
-      return;
-    }
+  if (configuredKey && req.header('x-sync-api-key') === configuredKey) {
+    next();
+    return;
   }
 
-  next();
+  // Deny by default: never allow unauthenticated access to user backups, even
+  // when SYNC_API_KEY is not configured (otherwise any user's backup could be
+  // read/overwritten by enumerating numeric ids — IDOR).
+  res.status(401).json({ ok: false, error: 'Unauthorized' });
 }
 
 export function registerSyncRoutes(app: Express) {
