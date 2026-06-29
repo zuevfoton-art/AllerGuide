@@ -19,6 +19,8 @@ config.resolver.nodeModulesPaths = [
 const rootNodeModules = path.resolve(workspaceRoot, 'node_modules');
 
 config.resolver.extraNodeModules = {
+  '@': projectRoot,
+  '@/src': path.resolve(projectRoot, 'src'),
   react: path.resolve(localNodeModules, 'react'),
   'react-dom': path.resolve(localNodeModules, 'react-dom'),
   'react-native': path.resolve(localNodeModules, 'react-native'),
@@ -40,6 +42,9 @@ const I18N_STUBS = {
 
 const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName.startsWith('@/')) {
+    return context.resolveRequest(context, path.resolve(projectRoot, moduleName.slice(2)), platform);
+  }
   if (I18N_STUBS[moduleName]) {
     return { filePath: I18N_STUBS[moduleName], type: 'sourceFile' };
   }

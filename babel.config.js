@@ -1,4 +1,4 @@
-цconst path = require('path');
+const path = require('path');
 
 function mobileAliasPlugin() {
   return {
@@ -21,7 +21,7 @@ function rewriteSource(source) {
   if (!source || source.type !== 'StringLiteral' || !source.value.startsWith('@/')) {
     return;
   }
-  source.value = path.resolve(__dirname, source.value.slice(2)).replace(/\\/g, '/');
+  source.value = path.resolve(__dirname, 'apps/mobile', source.value.slice(2)).replace(/\\/g, '/');
 }
 
 module.exports = function (api) {
