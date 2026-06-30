@@ -1,5 +1,7 @@
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
+import type { ComponentProps } from 'react';
+import { Platform, Pressable } from 'react-native';
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
@@ -19,6 +21,11 @@ function TabIcon({
   size: number;
 }) {
   return <BrandTabIcon name={name} size={size} color={focused ? color : muted} focused={focused} />;
+}
+
+function TabBarButton({ testID, ...props }: BottomTabBarButtonProps & { testID: string }) {
+  // BottomTabBarButtonProps ref typing is wider than Pressable; safe at runtime.
+  return <Pressable {...(props as ComponentProps<typeof Pressable>)} testID={testID} />;
 }
 
 export default function TabsLayout() {
@@ -68,6 +75,7 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: t('tabs.home'),
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-home" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="home"
@@ -83,6 +91,7 @@ export default function TabsLayout() {
         name="diary"
         options={{
           title: t('tabs.diary'),
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-diary" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="diary"
@@ -98,6 +107,7 @@ export default function TabsLayout() {
         name="scanner"
         options={{
           title: t('tabs.scanner'),
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-scanner" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="scanner"
@@ -119,6 +129,7 @@ export default function TabsLayout() {
         name="map"
         options={{
           title: t('tabs.map'),
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-map" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="map"
@@ -134,6 +145,7 @@ export default function TabsLayout() {
         name="sos"
         options={{
           title: t('tabs.sos'),
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-sos" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
               name="sos"

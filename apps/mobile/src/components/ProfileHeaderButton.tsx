@@ -12,6 +12,7 @@ export function ProfileHeaderButton() {
 
   return (
     <Pressable
+      testID="profile-header-button"
       style={styles.button}
       onPress={() => router.push('/profile' as any)}
       accessibilityRole="button"

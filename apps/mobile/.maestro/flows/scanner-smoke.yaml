@@ -1,0 +1,17 @@
+# P2.1a — scanner: manual text check (offline ingredient match)
+appId: com.allerguide.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-scanner
+- tapOn:
+    id: scanner-input
+- inputText: молоко
+- tapOn:
+    id: scanner-check
+- extendedWaitUntil:
+    visible:
+      id: scanner-result
+    timeout: 15000
+- assertVisible:
+    id: scanner-result

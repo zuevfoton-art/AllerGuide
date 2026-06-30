@@ -446,6 +446,7 @@ export default function DiaryScreen() {
 
       <Button label={t('diary.newEntry')} variant="primary" block onPress={() => setEditor({ mode: 'full' })} />
       <Button
+        testID="diary-quick-entry"
         label={t('diary.quickEntry')}
         variant="secondary"
         block

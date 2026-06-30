@@ -74,7 +74,7 @@ export default function ProfileScreen() {
         </Pressable>
         <View style={styles.headerText}>
           <Text style={ui.docLabel}>AllerGuide · {t('profiles.eyebrow')}</Text>
-          <Text style={ui.docTitle}>{t('profiles.title')}</Text>
+          <Text testID="profile-screen-title" style={ui.docTitle}>{t('profiles.title')}</Text>
           <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
         </View>
         <LanguagePicker header />
@@ -125,6 +125,7 @@ export default function ProfileScreen() {
       <GlassCard>
         <Text style={styles.cardHint}>{t('settings.emergencyHint')}</Text>
         <TextInput
+          testID="profile-emergency-number"
           style={styles.input}
           value={emergencyNumber}
           onChangeText={setEmergencyNumberState}
@@ -132,7 +133,13 @@ export default function ProfileScreen() {
           placeholderTextColor={theme.colors.textMuted}
           keyboardType="phone-pad"
         />
-        <Button label={t('settings.saveNumber')} variant="primary" block onPress={saveEmergencyNumber} />
+        <Button
+          testID="profile-save-number"
+          label={t('settings.saveNumber')}
+          variant="primary"
+          block
+          onPress={saveEmergencyNumber}
+        />
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>

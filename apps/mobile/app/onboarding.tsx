@@ -38,6 +38,7 @@ export default function OnboardingScreen() {
       {SCENARIO_KEYS.map((item) => (
         <Pressable
           key={item.key}
+          testID={`onboarding-scenario-${item.key}`}
           onPress={() => {
             setScenario(item.key as Scenario);
             setStoredScenario(item.key as Scenario);

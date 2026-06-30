@@ -6,14 +6,19 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 type GlassCardProps = PropsWithChildren<{
   style?: ViewStyle;
   padded?: boolean;
+  testID?: string;
 }>;
 
 /** Clinical Calm card surface (formerly GlassCard). */
-export function GlassCard({ children, style, padded = true }: GlassCardProps) {
+export function GlassCard({ children, style, padded = true, testID }: GlassCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  return <View style={[styles.card, padded && styles.padded, style]}>{children}</View>;
+  return (
+    <View testID={testID} style={[styles.card, padded && styles.padded, style]}>
+      {children}
+    </View>
+  );
 }
 
 export const Card = GlassCard;

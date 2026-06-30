@@ -1,0 +1,16 @@
+# P2.1a — SOS: profile card + passport collapse
+appId: com.allerguide.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-sos
+- extendedWaitUntil:
+    visible:
+      id: sos-profile-card
+    timeout: 10000
+- assertVisible:
+    text: Maestro Tester
+- tapOn:
+    id: sos-passport-toggle
+- assertVisible:
+    id: sos-passport-toggle

@@ -50,6 +50,7 @@ interface AuthFieldProps {
   secureTextEntry?: boolean;
   keyboardType?: 'default' | 'email-address' | 'phone-pad';
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  testID?: string;
 }
 
 export function AuthField({
@@ -60,6 +61,7 @@ export function AuthField({
   secureTextEntry,
   keyboardType = 'default',
   autoCapitalize = 'none',
+  testID,
 }: AuthFieldProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -69,6 +71,7 @@ export function AuthField({
     <View style={styles.fieldWrap}>
       <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
       <TextInput
+        testID={testID}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -88,10 +91,12 @@ export function AuthPrimaryButton({
   label,
   onPress,
   loading,
+  testID,
 }: {
   label: string;
   onPress: () => void;
   loading?: boolean;
+  testID?: string;
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -107,6 +112,7 @@ export function AuthPrimaryButton({
 
   return (
     <Pressable
+      testID={testID}
       style={[styles.button, loading && styles.buttonDisabled]}
       onPress={onPress}
       onPressIn={handlePressIn}
@@ -123,16 +129,18 @@ export function AuthLink({
   text,
   linkText,
   onPress,
+  testID,
 }: {
   text: string;
   linkText: string;
   onPress: () => void;
+  testID?: string;
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable style={styles.linkWrap} onPress={onPress}>
+    <Pressable testID={testID} style={styles.linkWrap} onPress={onPress}>
       <Text style={styles.linkText}>
         {text} <Text style={styles.linkAccent}>{linkText}</Text>
       </Text>

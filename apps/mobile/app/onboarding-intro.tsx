@@ -97,13 +97,14 @@ export default function OnboardingIntroScreen() {
 
         <View style={styles.footer}>
           <Button
+            testID="onboarding-intro-next"
             label={index >= SLIDE_KEYS.length - 1 ? t('onboardingIntro.startSetup') : t('onboardingIntro.next')}
             variant="primary"
             block
             onPress={next}
           />
 
-          <Pressable onPress={finish}>
+          <Pressable testID="onboarding-intro-skip" onPress={finish}>
             <Text style={styles.skip}>{t('onboardingIntro.skip')}</Text>
           </Pressable>
 

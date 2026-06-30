@@ -48,6 +48,7 @@ export default function RegisterScreen() {
         onChangeText={setLogin}
         placeholder={loginType === 'phone' ? t('auth.phonePlaceholder') : 'name@example.com'}
         keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
+        testID="auth-login-input"
       />
       <AuthField
         label={t('common.password')}
@@ -55,6 +56,7 @@ export default function RegisterScreen() {
         onChangeText={setPassword}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
+        testID="auth-password-input"
       />
       <AuthField
         label={t('auth.confirmPassword')}
@@ -62,13 +64,20 @@ export default function RegisterScreen() {
         onChangeText={setConfirmPassword}
         placeholder={t('auth.confirmPasswordPlaceholder')}
         secureTextEntry
+        testID="auth-confirm-password-input"
       />
       <AuthError message={error} />
-      <AuthPrimaryButton label={t('auth.registerButton')} onPress={handleRegister} loading={loading} />
+      <AuthPrimaryButton
+        label={t('auth.registerButton')}
+        onPress={handleRegister}
+        loading={loading}
+        testID="auth-submit"
+      />
       <AuthLink
         text={t('auth.hasAccount')}
         linkText={t('auth.loginLink')}
         onPress={() => router.push('/login')}
+        testID="auth-login-link"
       />
     </Screen>
   );

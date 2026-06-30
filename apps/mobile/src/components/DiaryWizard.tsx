@@ -222,7 +222,7 @@ export function DiaryWizard({
           onPress={goBack}>
           <Text style={styles.secondaryText}>{t('common.back')}</Text>
         </Pressable>
-        <Pressable style={styles.primaryBtn} onPress={goNext}>
+        <Pressable style={styles.primaryBtn} onPress={goNext} testID="diary-wizard-primary">
           <Text style={styles.primaryText}>
             {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
           </Text>
@@ -331,6 +331,7 @@ function StepField({
 
   return (
     <TextInput
+      testID="diary-wizard-field"
       style={[styles.input, step.multiline && styles.inputMultiline]}
       value={value}
       onChangeText={onChange}
