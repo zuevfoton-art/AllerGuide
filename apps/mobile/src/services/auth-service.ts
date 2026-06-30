@@ -98,6 +98,8 @@ export async function restoreAuthSession(): Promise<void> {
   }
 
   if (getCachedAuthUser() && getSessionUserId()) {
+    const userId = getSessionUserId()!;
+    void syncProfilesFromBackend(userId, token).catch(() => undefined);
     return;
   }
 

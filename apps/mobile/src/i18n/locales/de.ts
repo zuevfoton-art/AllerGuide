@@ -327,6 +327,20 @@ const de: LocaleMessages = {
     account: 'Konto',
     manageProfiles: 'Meine Profile',
     manageProfilesHint: 'Profile, Abmelden und Konto löschen',
+    recoveryKeySetupTitle: 'Wiederherstellungsschlüssel',
+    recoveryKeySetupDesc:
+      'Bewahren Sie diesen Schlüssel sicher auf. Ohne ihn ist keine Wiederherstellung auf einem neuen Gerät möglich. Wir speichern den Schlüssel nicht auf dem Server.',
+    recoveryKeyEnterTitle: 'Wiederherstellungsschlüssel eingeben',
+    recoveryKeyEnterDesc: 'Der Schlüssel vom Gerät, auf dem Sie das Backup erstellt haben.',
+    recoveryKeyEnterPlaceholder: 'xxxx-xxxx-xxxx-…',
+    recoveryKeyMigrateTitle: 'Neuer Wiederherstellungsschlüssel',
+    recoveryKeyMigrateDesc:
+      'Für Cloud-Backup brauchen Sie einen Schlüssel für ein anderes Gerät. Der alte lokale Schlüssel wird ersetzt.',
+    recoveryKeyDisplayLabel: 'Ihr Schlüssel',
+    recoveryKeyConfirmSaved: 'Ich habe den Schlüssel sicher aufbewahrt',
+    recoveryKeyCopyHint: 'Schlüssel manuell kopieren (Text lange drücken).',
+    recoveryKeyWrong: 'Falscher Wiederherstellungsschlüssel.',
+    recoveryKeyRequired: 'Geben Sie den Wiederherstellungsschlüssel ein.',
   },
   notifications: {
     eyebrow: 'Benachrichtigungen',

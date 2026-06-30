@@ -294,6 +294,16 @@
 ☐ `staging-auth-smoke.sh` Pass (API)  
 ☐ Нет P0/P1 блокеров auth
 
+### P1.2e — Offline regression (backend auth ON)
+
+| ID | Сценарий | iOS | Android | Web | Критерий Pass |
+|----|----------|-----|---------|-----|---------------|
+| **O.1** | После login: airplane mode → запись в дневник | ☐ | ☐ | N/A | Запись сохраняется локально |
+| **O.2** | После login: airplane mode → сканер (ручной ввод) | ☐ | ☐ | ☐ | Результат без API |
+| **O.3** | Logout → login снова (online) | ☐ | ☐ | ☐ | Локальные данные на месте; профили с сервера при login |
+| **O.4** | Create profile **offline** (backend auth) | ☐ | ☐ | ☐ | Понятная ошибка «нет сети», без crash |
+| **O.5** | Kill app offline после login → reopen | ☐ | ☐ | ☐ | Сессия жива, дневник доступен |
+
 ---
 
 ## Шаблон баг-репорта

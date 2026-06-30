@@ -15,7 +15,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
-import { downloadBackup, uploadBackup } from '@/src/services/sync-service';
+import { CloudBackupCard } from '@/src/components/CloudBackupCard';
 import type { Profile } from '@/src/types';
 
 export default function ProfileScreen() {
@@ -25,7 +25,6 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
-  const [syncLoading, setSyncLoading] = useState(false);
 
   const refresh = useCallback(() => {
     setProfiles(listProfiles());
@@ -61,32 +60,6 @@ export default function ProfileScreen() {
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
     Alert.alert(t('settings.saved'), t('settings.savedNumberMessage', { number: normalized }));
-  };
-
-  const handleUpload = async () => {
-    setSyncLoading(true);
-    try {
-      const result = await uploadBackup();
-      Alert.alert(
-        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
-        result.ok ? t('settings.uploadSuccess') : result.error ?? t('common.error'),
-      );
-    } finally {
-      setSyncLoading(false);
-    }
-  };
-
-  const handleDownload = async () => {
-    setSyncLoading(true);
-    try {
-      const result = await downloadBackup();
-      Alert.alert(
-        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
-        result.ok ? t('settings.downloadSuccess') : result.error ?? t('common.error'),
-      );
-    } finally {
-      setSyncLoading(false);
-    }
   };
 
   return (
@@ -163,23 +136,7 @@ export default function ProfileScreen() {
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
-      <GlassCard>
-        <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
-        <Button
-          label={t('settings.uploadBackup')}
-          variant="primary"
-          block
-          disabled={syncLoading}
-          onPress={() => void handleUpload()}
-        />
-        <Button
-          label={t('settings.downloadBackup')}
-          variant="secondary"
-          block
-          disabled={syncLoading}
-          onPress={() => void handleDownload()}
-        />
-      </GlassCard>
+      <CloudBackupCard />
 
       <Text style={ui.sectionLabel}>{t('notifications.hubTitle')}</Text>
       <GlassCard padded={false}>

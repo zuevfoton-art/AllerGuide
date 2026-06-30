@@ -64,7 +64,7 @@ vi.mock('@/src/services/backend-api', () => ({
   backendLogin: vi.fn(),
   backendDeleteAccount: vi.fn(),
   backendReplitExchange: vi.fn(),
-  syncProfilesFromBackend: vi.fn(),
+  syncProfilesFromBackend: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@/src/store/app-store', () => ({

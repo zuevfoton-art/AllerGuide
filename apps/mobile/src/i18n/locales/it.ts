@@ -327,6 +327,20 @@ const it: LocaleMessages = {
     account: 'Account',
     manageProfiles: 'I miei profili',
     manageProfilesHint: 'Profili, uscita ed eliminazione account',
+    recoveryKeySetupTitle: 'Chiave di recupero',
+    recoveryKeySetupDesc:
+      'Salva questa chiave in un posto sicuro. Senza di essa non puoi ripristinare su un nuovo dispositivo. Non conserviamo la chiave sul server.',
+    recoveryKeyEnterTitle: 'Inserisci la chiave di recupero',
+    recoveryKeyEnterDesc: 'La chiave dal dispositivo in cui hai creato il backup.',
+    recoveryKeyEnterPlaceholder: 'xxxx-xxxx-xxxx-…',
+    recoveryKeyMigrateTitle: 'Nuova chiave di recupero',
+    recoveryKeyMigrateDesc:
+      'Il backup cloud richiede una chiave utilizzabile su un altro dispositivo. La vecchia chiave locale sarà sostituita.',
+    recoveryKeyDisplayLabel: 'La tua chiave',
+    recoveryKeyConfirmSaved: 'Ho salvato la chiave in un posto sicuro',
+    recoveryKeyCopyHint: 'Copia la chiave manualmente (pressione lunga sul testo).',
+    recoveryKeyWrong: 'Chiave di recupero non corretta.',
+    recoveryKeyRequired: 'Inserisci la chiave di recupero.',
   },
   notifications: {
     eyebrow: 'Notifiche',
