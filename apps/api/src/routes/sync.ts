@@ -100,6 +100,13 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
       res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;
     }
+    next();
+    return;
+  }
+
+  if (process.env.JWT_SECRET) {
+    res.status(401).json({ ok: false, error: 'Authorization required' });
+    return;
   }
 
   next();

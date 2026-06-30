@@ -48,5 +48,15 @@ jobs:
         env:
           STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
         run: |
-          chmod +x scripts/staging-smoke.sh
+          chmod +x scripts/staging-smoke.sh scripts/staging-auth-smoke.sh scripts/staging-sync-smoke.sh
           ./scripts/staging-smoke.sh
+
+      - name: Auth smoke (P1.2c)
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: ./scripts/staging-auth-smoke.sh
+
+      - name: Encrypted sync smoke (P1.4b)
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: ./scripts/staging-sync-smoke.sh

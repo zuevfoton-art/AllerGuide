@@ -68,6 +68,7 @@ API smoke (без устройства):
 
 ```bash
 ./scripts/staging-auth-smoke.sh
+./scripts/staging-sync-smoke.sh
 ```
 
 Минимум на устройстве:
@@ -77,7 +78,9 @@ API smoke (без устройства):
 3. **Login** после logout (S.2)
 4. **Create profile** — dual-write на сервер (S.4)
 
-Далее для closed beta: upload backup (P1.3b), AI scan (P1.5b).
+Далее для closed beta: cross-device backup (P1.4c), AI scan (P1.5b).
+
+Чеклист cross-device: [`qa-checklist.md` § P1.4c](qa-checklist.md#p14c--cloud-sync-cross-device-e2e).
 
 ---
 

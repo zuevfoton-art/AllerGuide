@@ -131,6 +131,9 @@ export async function uploadBackup(): Promise<SyncResult> {
     });
 
     if (!response.ok) {
+      if (response.status === 503) {
+        return { ok: false, error: 'Облачная синхронизация пока недоступна', code: 'sync_disabled' };
+      }
       return { ok: false, error: 'Сервер недоступен', code: 'server_unreachable' };
     }
 
@@ -165,6 +168,9 @@ export async function downloadBackup(options?: {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     if (!response.ok) {
+      if (response.status === 503) {
+        return { ok: false, error: 'Облачная синхронизация пока недоступна', code: 'sync_disabled' };
+      }
       return { ok: false, error: 'Резервная копия не найдена', code: 'backup_not_found' };
     }
 

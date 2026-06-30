@@ -18,6 +18,7 @@ https://api.staging.allerguide.app/api/health
 {
   "ok": true,
   "authDatabase": true,
+  "features": { "sync": true, "aiScan": true },
   "database": { "ok": true, "latencyMs": 42 }
 }
 ```
@@ -161,6 +162,7 @@ Workflow [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-st
 - [ ] `pnpm --filter api db:migrate` успешен
 - [ ] API отвечает на `/api/health` (200, `database.ok: true`)
 - [ ] `./scripts/staging-auth-smoke.sh` — register/login/me (P1.2c)
+- [ ] `./scripts/staging-sync-smoke.sh` — encrypted backup round-trip (P1.4b)
 - [ ] TLS валидный на `api.staging.allerguide.app`
 - [ ] `SYNC_ENABLED=true`, `JWT_SECRET` задан
 - [ ] `.env.staging.example` и этот runbook в репозитории
