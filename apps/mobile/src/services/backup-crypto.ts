@@ -1,7 +1,18 @@
 import { decryptString, encryptString, isEncryptionAvailable } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 
-const BACKUP_SECRET_KEY = 'backupSecret';
+/** Legacy device-only secret (pre–recovery-key). Migrated in P1.3e. */
+const LEGACY_BACKUP_SECRET_KEY = 'backupSecret';
+
+/** Normalized 64-char hex recovery key (32 bytes). */
+const RECOVERY_KEY_SETTING = 'recoveryKey';
+
+/** User acknowledged saving the key (`true` / absent). */
+const RECOVERY_KEY_CONFIRMED_SETTING = 'recoveryKeyConfirmed';
+
+const RECOVERY_KEY_BYTE_LENGTH = 32;
+const RECOVERY_KEY_HEX_LENGTH = RECOVERY_KEY_BYTE_LENGTH * 2;
+const DISPLAY_GROUP_LENGTH = 8;
 
 function randomHex(byteLength: number): string {
   const bytes = new Uint8Array(byteLength);
@@ -17,32 +28,108 @@ function randomHex(byteLength: number): string {
 }
 
 /**
- * Device-held backup key. Cloud backups are encrypted with this secret so the
- * server only ever stores ciphertext (zero-knowledge). NOTE: the key currently
- * lives on the device only — same-device restore works, but cross-device restore
- * needs key escrow / a password-derived key (tracked as a follow-up).
+ * Strip separators/spaces and validate 32-byte hex recovery key.
+ * Returns lowercase normalized form or null when invalid.
+ */
+export function normalizeRecoveryKey(input: string): string | null {
+  const normalized = input.replace(/[\s-]/g, '').toLowerCase();
+  if (!/^[0-9a-f]+$/.test(normalized)) return null;
+  if (normalized.length !== RECOVERY_KEY_HEX_LENGTH) return null;
+  return normalized;
+}
+
+export function validateRecoveryKey(input: string): boolean {
+  return normalizeRecoveryKey(input) != null;
+}
+
+/** Human-readable groups: `abcd1234-ef567890-...` (8×8 hex). */
+export function formatRecoveryKeyForDisplay(normalizedKey: string): string {
+  const key = normalizeRecoveryKey(normalizedKey);
+  if (!key) return normalizedKey;
+  const groups: string[] = [];
+  for (let i = 0; i < key.length; i += DISPLAY_GROUP_LENGTH) {
+    groups.push(key.slice(i, i + DISPLAY_GROUP_LENGTH));
+  }
+  return groups.join('-');
+}
+
+/**
+ * Generate a new recovery key (does not persist — caller shows UX then `setRecoveryKey`).
+ */
+export function generateRecoveryKey(): string {
+  return randomHex(RECOVERY_KEY_BYTE_LENGTH);
+}
+
+export function hasRecoveryKey(): boolean {
+  return getStoredRecoveryKey() != null;
+}
+
+export function getStoredRecoveryKey(): string | null {
+  const raw = getSetting(RECOVERY_KEY_SETTING);
+  if (!raw) return null;
+  return normalizeRecoveryKey(raw);
+}
+
+export function setRecoveryKey(input: string): { ok: true } | { ok: false; error: string } {
+  const normalized = normalizeRecoveryKey(input);
+  if (!normalized) {
+    return { ok: false, error: 'invalid_recovery_key' };
+  }
+  setSetting(RECOVERY_KEY_SETTING, normalized);
+  setSetting(RECOVERY_KEY_CONFIRMED_SETTING, 'false');
+  return { ok: true };
+}
+
+export function markRecoveryKeyConfirmed(): void {
+  if (!hasRecoveryKey()) return;
+  setSetting(RECOVERY_KEY_CONFIRMED_SETTING, 'true');
+}
+
+export function isRecoveryKeyConfirmed(): boolean {
+  return getSetting(RECOVERY_KEY_CONFIRMED_SETTING) === 'true';
+}
+
+/** Device had auto-generated backupSecret before recovery-key rollout. */
+export function usesLegacyDeviceKeyOnly(): boolean {
+  return Boolean(getSetting(LEGACY_BACKUP_SECRET_KEY)) && !hasRecoveryKey();
+}
+
+/**
+ * Passphrase for AES-GCM backup encryption.
+ * Prefers user recovery key; falls back to legacy device-only secret.
  */
 export function getBackupPassphrase(): string {
-  let secret = getSetting(BACKUP_SECRET_KEY);
+  const recovery = getStoredRecoveryKey();
+  if (recovery) return recovery;
+
+  let secret = getSetting(LEGACY_BACKUP_SECRET_KEY);
   if (!secret) {
-    secret = randomHex(32);
-    setSetting(BACKUP_SECRET_KEY, secret);
+    secret = randomHex(RECOVERY_KEY_BYTE_LENGTH);
+    setSetting(LEGACY_BACKUP_SECRET_KEY, secret);
   }
   return secret;
 }
 
 export { isEncryptionAvailable };
 
-export async function encryptBackup(plaintext: string): Promise<string | null> {
+export async function encryptBackup(
+  plaintext: string,
+  options?: { passphrase?: string },
+): Promise<string | null> {
   if (!isEncryptionAvailable()) return null;
   try {
-    return await encryptString(plaintext, getBackupPassphrase());
+    const passphrase = options?.passphrase ?? getBackupPassphrase();
+    return await encryptString(plaintext, passphrase);
   } catch {
     return null;
   }
 }
 
-export async function decryptBackup(envelope: string): Promise<string | null> {
+export async function decryptBackup(
+  envelope: string,
+  options?: { passphrase?: string },
+): Promise<string | null> {
   if (!isEncryptionAvailable()) return null;
-  return decryptString(envelope, getBackupPassphrase());
+  const passphrase = options?.passphrase ?? getBackupPassphrase();
+  return decryptString(envelope, passphrase);
 }
