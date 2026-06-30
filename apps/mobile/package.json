@@ -14,7 +14,10 @@
     "eas-build-pre-install": "bash scripts/eas-build-pre-install.sh",
     "build:preview": "eas build --profile preview --platform all",
     "build:preview:android": "eas build --profile preview --platform android",
-    "build:preview:ios": "eas build --profile preview --platform ios"
+    "build:preview:ios": "eas build --profile preview --platform ios",
+    "build:staging": "eas build --profile staging --platform all",
+    "build:staging:android": "eas build --profile staging --platform android",
+    "build:staging:ios": "eas build --profile staging --platform ios"
   },
   "dependencies": {
     "@allerguide/ai": "workspace:*",

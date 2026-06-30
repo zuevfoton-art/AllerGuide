@@ -247,7 +247,7 @@ flowchart TB
 | Env | Mobile | API | Флаги |
 |-----|--------|-----|-------|
 | Local | Expo dev | `localhost:3001` | все OFF |
-| Staging | EAS preview | `api.staging.*` | auth + sync + scan ON |
+| Staging | EAS **`staging`** | `api.staging.*` | auth + sync + scan ON |
 | Production | EAS production | `api.allerguide.app` | все ON |
 
 ---

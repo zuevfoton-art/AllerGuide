@@ -12,6 +12,7 @@
 | **P1.1a** (docs) | [`docs/staging-deploy.md`](./staging-deploy.md), [`apps/api/.env.staging.example`](../apps/api/.env.staging.example), `scripts/staging-*.sh` | Done |
 | **P1.1e** (CI skeleton) | [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | Done (нужны GitHub Secrets) |
 | **P1.3a** | [`backup-crypto.ts`](../apps/mobile/src/services/backup-crypto.ts) recovery key API + tests | Done |
+| **P1.2b** | [`eas.json`](../apps/mobile/eas.json) profile `staging`, [`eas-staging-build.md`](./eas-staging-build.md) | Done |
 | Health | [`apps/api/src/lib/health.ts`](../apps/api/src/lib/health.ts) — DB ping для staging smoke | Done |
 
 ---
@@ -34,7 +35,7 @@
 
 | После | Задача |
 |-------|--------|
-| P1.1c | **P1.2b** EAS profile `staging` |
+| P1.1c | ~~**P1.2b** EAS profile `staging`~~ → [`eas-staging-build.md`](./eas-staging-build.md) |
 | P1.2b | **P1.2c** auth smoke на staging build |
 | P1.2c | **P1.3b** recovery key UX |
 | P1.3a + P1.4a | **P1.4b** encrypted sync E2E |

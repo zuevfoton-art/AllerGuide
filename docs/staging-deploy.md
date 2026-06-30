@@ -130,7 +130,7 @@ pnpm --filter api start
 curl -sf https://api.staging.allerguide.app/api/health | jq .
 ```
 
-4. Зафиксировать URL в EAS staging profile (`EXPO_PUBLIC_API_URL`) — задача P1.2b
+4. Зафиксировать URL в EAS staging profile (`EXPO_PUBLIC_API_URL`) — [`docs/eas-staging-build.md`](./eas-staging-build.md) (P1.2b)
 
 ---
 
