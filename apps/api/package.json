@@ -12,7 +12,8 @@
     "db:import-food-allergy": "tsx src/db/import-food-allergy.ts",
     "lint": "echo lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "@allerguide/ai": "workspace:*",
