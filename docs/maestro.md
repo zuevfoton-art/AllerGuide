@@ -1,8 +1,11 @@
 # Maestro E2E — AllerGuide mobile
 
-Smoke-тесты UI на **нативных** сборках (Android emulator / iOS simulator / физическое устройство). Web (`expo start --web`) Maestro не покрывает — только preview/staging APK/IPA.
+Smoke-тесты UI на **нативных** сборках (Android emulator / iOS simulator / физическое устройство). Web (`expo start --web`) Maestro не покрывает.
 
-**Профиль сборки для P2.1a:** EAS `preview` (`EXPO_PUBLIC_BACKEND_AUTH=false`, offline-first).
+| Профиль | EAS / сборка | API |
+|---------|--------------|-----|
+| **P2.1a offline** | `preview` — `EXPO_PUBLIC_BACKEND_AUTH=false` | не нужен |
+| **P2.1b staging** | `staging` — auth + sync + fixture recovery key | `api.staging.allerguide.app` или локальный API |
 
 ---
 
@@ -11,8 +14,8 @@ Smoke-тесты UI на **нативных** сборках (Android emulator /
 | Инструмент | Версия |
 |------------|--------|
 | [Maestro CLI](https://maestro.mobile.dev/getting-started/installing-maestro) | ≥ 1.36 |
-| Android emulator или iOS simulator | API 34+ / iOS 17+ |
-| Preview APK/IPA | `pnpm --filter mobile build:preview:android` |
+| Android emulator | API 34+ |
+| APK | preview или staging (см. ниже) |
 
 ---
 
@@ -20,95 +23,108 @@ Smoke-тесты UI на **нативных** сборках (Android emulator /
 
 ```
 apps/mobile/.maestro/
-  config.yaml              # appId: com.allerguide.app
-  scripts/random-phone.js  # уникальный телефон для регистрации
+  config.yaml
+  scripts/
+    random-phone.js
+    staging-credentials.js
   flows/
-    _offline-bootstrap.yaml   # register → onboarding → home (subflow)
-    onboarding-smoke.yaml
-    diary-smoke.yaml
-    scanner-smoke.yaml
-    sos-smoke.yaml
-    settings-smoke.yaml
-    smoke-all.yaml            # все 5 flows подряд
+    _offline-bootstrap.yaml
+    onboarding-smoke.yaml … settings-smoke.yaml
+    smoke-all.yaml                 # P2.1a — все offline
+    _staging-bootstrap.yaml
+    staging-auth-smoke.yaml        # P2.1b — logout → login
+    staging-backup-smoke.yaml      # P2.1b — upload + recovery key
+    staging-smoke-all.yaml         # P2.1b — оба staging flow
 ```
 
-Селекторы стабильны по `testID` (локаль RU по умолчанию, но тексты в YAML минимальны).
+Селекторы по `testID` (локаль RU по умолчанию).
+
+**Fixture recovery key (P2.1b):** в staging-сборке задаётся `EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY` (64 hex) — модалка показывает фиксированный ключ, Maestro отмечает «сохранил» и подтверждает. Только internal/staging, не production.
+
+---
+
+## Сборка APK для Maestro
+
+```bash
+# Offline (preview)
+./scripts/maestro-build-apk.sh preview
+
+# Staging (локальный API на хосте — эмулятор видит как 10.0.2.2:3001)
+./scripts/maestro-start-api.sh   # Postgres + migrate + API :3001
+MAESTRO_API_URL=http://10.0.2.2:3001 ./scripts/maestro-build-apk.sh staging
+
+adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+EAS: `pnpm --filter mobile build:preview:android` / `build:staging:android`.
 
 ---
 
 ## Локальный запуск
 
-### 1. Собрать preview APK
-
 ```bash
-pnpm --filter mobile build:preview:android
-# Скачать APK из EAS Dashboard и установить на эмулятор:
-adb install allerguide-preview.apk
+# P2.1a — offline
+pnpm --filter mobile maestro:test
+
+# P2.1b — staging (нужен API + staging APK)
+pnpm --filter mobile maestro:staging
+pnpm --filter mobile maestro:staging-auth
+pnpm --filter mobile maestro:staging-backup
 ```
 
-Для dev-loop без EAS: `pnpm --filter mobile android` (debug build, тот же `appId`).
-
-### 2. Запустить эмулятор
-
-```bash
-# Android
-emulator -avd Pixel_7_API_34 &
-adb wait-for-device
-```
-
-### 3. Maestro
-
-Из корня монорепо:
-
-```bash
-pnpm --filter mobile maestro:test          # все 5 smoke flows
-pnpm --filter mobile maestro:onboarding    # один flow
-```
-
-Или напрямую:
+Прямой вызов:
 
 ```bash
 cd apps/mobile
-maestro test .maestro/flows/smoke-all.yaml
-maestro test .maestro/flows/diary-smoke.yaml
+maestro test .maestro/flows/staging-smoke-all.yaml
 ```
-
-Полезные флаги:
-
-- `--debug` — подробный лог
-- `maestro studio` — интерактивная запись/отладка
 
 ---
 
-## Покрытие P2.1a (offline)
+## Покрытие
+
+### P2.1a (offline)
 
 | Flow | Сценарий |
 |------|----------|
-| `onboarding-smoke` | Регистрация → intro skip → профиль self + молоко → home |
-| `diary-smoke` | Быстрая запись симптомов |
-| `scanner-smoke` | Ручной ввод «молоко» → вердикт |
-| `sos-smoke` | Карточка профиля, паспорт аллергика |
-| `settings-smoke` | `/profile` — номер экстренной службы |
+| `onboarding-smoke` | регистрация → профиль → home |
+| `diary-smoke` | быстрая запись симптомов |
+| `scanner-smoke` | «молоко» → вердикт |
+| `sos-smoke` | карточка + паспорт |
+| `settings-smoke` | номер экстренной службы |
 
-**Дальше (P2.1b):** staging flows auth + backup (`EXPO_PUBLIC_BACKEND_AUTH=true`).
+### P2.1b (staging)
 
-**Дальше (P2.1c):** nightly CI `.github/workflows/maestro-nightly.yml`.
+| Flow | Сценарий |
+|------|----------|
+| `staging-auth-smoke` | email register (API) → logout → login |
+| `staging-backup-smoke` | recovery key fixture → upload backup → alert «Готово» |
 
 ---
 
-## testID (основные)
+## Nightly CI (P2.1c)
+
+Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-nightly.yml):
+
+| Job | Runner | Что делает |
+|-----|--------|------------|
+| `maestro-offline` | `macos-latest` | preview APK → `smoke-all.yaml` |
+| `maestro-staging` | `ubuntu-latest` | Postgres + API → staging APK → `staging-smoke-all.yaml` |
+
+Расписание: `0 3 * * *` (03:00 UTC). Ручной запуск: **Actions → Maestro Nightly → Run workflow**.
+
+При падении — артефакты JUnit (`maestro-offline-report`, `maestro-staging-report`). Опционально: настроить GitHub notifications / Slack webhook на failed workflow.
+
+---
+
+## testID (дополнение к P2.1a)
 
 | ID | Экран |
 |----|-------|
-| `auth-*` | login / register |
-| `onboarding-*` | intro, scenario |
-| `profile-*` | profile-setup, /profile |
-| `allergen-milk` | популярный аллерген |
-| `tab-*` | нижняя навигация |
-| `diary-quick-entry`, `diary-wizard-*` | дневник |
-| `scanner-input`, `scanner-check`, `scanner-result` | сканер |
-| `sos-profile-card`, `sos-passport-toggle` | SOS |
-| `profile-header-button` | шестерёнка профиля на табах |
+| `auth-mode-email` / `auth-mode-phone` | переключатель login type |
+| `cloud-backup-upload` / `cloud-backup-download` | облачный бэкап |
+| `recovery-key-*` | модалка recovery key |
+| `profile-logout` | выход из аккаунта |
 
 ---
 
@@ -116,9 +132,8 @@ maestro test .maestro/flows/diary-smoke.yaml
 
 | Симптом | Решение |
 |---------|---------|
-| `Unable to launch app` | Проверьте `appId` в `config.yaml` и установленный APK |
-| Timeout на `auth-register-link` | Холодный старт — увеличьте `extendedWaitUntil` или перезапустите app |
-| Scanner timeout | Offline match «молоко»; профиль должен содержать аллерген milk (bootstrap) |
-| Diary wizard застрял | Убедитесь, что заполнены обязательные шаги (симптом + выраженность) |
+| Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
+| Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
+| Offline scanner fail | профиль с allergen `milk` (bootstrap) |
 
-См. также: [QA checklist § P2.1](./qa-checklist.md), [roadmap P2.1](./roadmap-to-prod.md).
+См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

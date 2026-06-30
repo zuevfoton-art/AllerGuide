@@ -170,6 +170,7 @@ export default function ProfileScreen() {
       <GlassCard>
         <Text style={styles.accountHint}>{t('profiles.accountHint')}</Text>
         <Pressable
+          testID="profile-logout"
           style={styles.accountBtn}
           onPress={() => confirmLogout(router)}
           accessibilityRole="button">

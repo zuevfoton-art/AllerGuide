@@ -19,6 +19,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
   return (
     <View style={styles.toggleRow}>
       <Pressable
+        testID="auth-mode-phone"
         style={[styles.toggleBtn, loginType === 'phone' && styles.toggleActive]}
         onPress={() => onChange('phone')}>
         <Ionicons
@@ -29,6 +30,7 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
         <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
       </Pressable>
       <Pressable
+        testID="auth-mode-email"
         style={[styles.toggleBtn, styles.toggleBtnLast, loginType === 'email' && styles.toggleActive]}
         onPress={() => onChange('email')}>
         <Ionicons

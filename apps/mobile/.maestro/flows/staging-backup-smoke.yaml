@@ -1,0 +1,31 @@
+# P2.1b — staging: recovery key setup + encrypted backup upload
+appId: com.allerguide.app
+---
+- runFlow: _staging-bootstrap.yaml
+- tapOn:
+    id: profile-header-button
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: cloud-backup-upload
+- tapOn:
+    id: cloud-backup-upload
+- extendedWaitUntil:
+    visible:
+      id: recovery-key-confirm
+    timeout: 10000
+- tapOn:
+    id: recovery-key-saved-ack
+- tapOn:
+    id: recovery-key-confirm
+- extendedWaitUntil:
+    visible:
+      text: "Готово"
+    timeout: 60000
+- tapOn:
+    text: OK
+- assertVisible:
+    id: cloud-backup-upload

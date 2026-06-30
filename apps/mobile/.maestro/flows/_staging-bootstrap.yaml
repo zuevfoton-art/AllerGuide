@@ -1,0 +1,51 @@
+# Shared subflow: staging register (email + API) → onboarding → home
+appId: com.allerguide.app
+---
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: auth-register-link
+    timeout: 30000
+- tapOn:
+    id: auth-register-link
+- tapOn:
+    id: auth-mode-email
+- runScript: ../scripts/staging-credentials.js
+- tapOn:
+    id: auth-login-input
+- inputText: ${output.email}
+- tapOn:
+    id: auth-password-input
+- inputText: ${output.password}
+- tapOn:
+    id: auth-confirm-password-input
+- inputText: ${output.password}
+- tapOn:
+    id: auth-submit
+- extendedWaitUntil:
+    visible:
+      id: onboarding-intro-skip
+    timeout: 45000
+- tapOn:
+    id: onboarding-intro-skip
+- extendedWaitUntil:
+    visible:
+      id: onboarding-scenario-self
+    timeout: 10000
+- tapOn:
+    id: onboarding-scenario-self
+- tapOn:
+    id: profile-name
+- inputText: Maestro Staging
+- tapOn:
+    id: profile-birth-year
+- inputText: "1990"
+- tapOn:
+    id: allergen-milk
+- tapOn:
+    id: profile-save
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 30000

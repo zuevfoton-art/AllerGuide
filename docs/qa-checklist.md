@@ -438,6 +438,43 @@
 
 ---
 
+## P2.1b — Maestro staging (auth + backup)
+
+**Документация:** [`maestro.md`](maestro.md) § P2.1b  
+**Сборка:** EAS `staging` или `./scripts/maestro-build-apk.sh staging`  
+**API:** `https://api.staging.allerguide.app` или локально `maestro-start-api.sh` + `10.0.2.2:3001`
+
+| Flow | Файл | Проверка |
+|------|------|----------|
+| Auth | `staging-auth-smoke.yaml` | register (API) → logout → login |
+| Backup | `staging-backup-smoke.yaml` | fixture recovery key → upload → «Готово» |
+
+**Запуск:** `pnpm --filter mobile maestro:staging`
+
+### Итог P2.1b
+
+☐ `staging-smoke-all.yaml` green против staging или local API  
+☐ Fixture recovery key только в staging/internal builds
+
+---
+
+## P2.1c — Nightly CI Maestro
+
+**Workflow:** [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-nightly.yml)  
+**Cron:** 03:00 UTC ежедневно + `workflow_dispatch`
+
+| Job | Suite |
+|-----|-------|
+| `maestro-offline` | `smoke-all.yaml` (preview) |
+| `maestro-staging` | `staging-smoke-all.yaml` (Postgres + API in CI) |
+
+### Итог P2.1c
+
+☐ Nightly green 3+ ночи подряд  
+☐ JUnit-артефакты при падении
+
+---
+
 ## Шаблон баг-репорта
 
 ```markdown
