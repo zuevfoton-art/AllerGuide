@@ -382,6 +382,40 @@
 
 ---
 
+## P1.7 — Closed beta gate (координатор)
+
+**Runbook:** [closed-beta-p17.md](closed-beta-p17.md) · **Бриф тестерам:** [beta-tester-brief-ru.md](beta-tester-brief-ru.md)
+
+### Preflight (до рассылки сборки)
+
+```bash
+./scripts/staging-preflight.sh
+```
+
+| # | Проверка | Pass |
+|---|----------|------|
+| **G.1** | `staging-preflight.sh` (health + auth + sync + scan) | ☐ |
+| **G.2** | CI `main`: quality + api-integration | ☐ |
+| **G.3** | Internal QA: S.1–S.4, O.1–O.3, B.1–B.6, C.1 | ☐ |
+| **G.4** | EAS staging build ≤ 7 дней | ☐ |
+
+### Минимум от 10–20 тестеров
+
+| Метрика | Порог | Факт |
+|---------|-------|------|
+| Завершили onboarding | ≥ 80% | |
+| Auth S.1–S.3 без P0 | 0 блокеров | |
+| Cross-device B.1–B.6 | ≥ 1 пара устройств | |
+| Scan C.1 «ИИ-анализ» | ≥ 70% | |
+| Открытые P0 | 0 | |
+
+### Итог P1.7
+
+☐ Gate out выполнен → milestone Phase 1 закрыт → старт Phase 2  
+☐ Feedback issues с меткой `beta` разобраны
+
+---
+
 ## Шаблон баг-репорта
 
 ```markdown
@@ -406,6 +440,7 @@
 - [Roadmap to Production](roadmap-to-prod.md)
 - [EAS Internal Preview](eas-internal-preview.md)
 - [EAS Staging Build](eas-staging-build.md)
+- [Closed beta P1.7](closed-beta-p17.md)
 - [Functional Requirements](functional-requirements.md)
 - [Clinical Features (RAAKI)](clinical-features-raaci.md)
 - [QA Test Cases](qa-test-cases.md)
