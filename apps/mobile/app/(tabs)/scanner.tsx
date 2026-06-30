@@ -497,7 +497,9 @@ export default function ScannerScreen() {
                     ? t('scanner.sourceBarcode')
                     : displayResult.source === 'ocr'
                       ? t('scanner.sourceOcr')
-                      : t('scanner.sourceManual')}
+                      : displayResult.source === 'llm'
+                        ? t('scanner.sourceLlm')
+                        : t('scanner.sourceManual')}
             </Text>
           ) : null}
           {displayResult && activeProfileId ? (

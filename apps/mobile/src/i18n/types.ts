@@ -256,6 +256,7 @@ export type LocaleMessages = {
     sourceBarcode: string;
     sourceManual: string;
     sourceOcr: string;
+    sourceLlm: string;
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;

@@ -6,12 +6,22 @@ interface CacheEntry {
   expiresAt: number;
 }
 
+interface BudgetEntry {
+  day: string;
+  count: number;
+}
+
 function envNumber(name: string, fallback: number): number {
   const parsed = Number(process.env[name]);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 const cache = new Map<string, CacheEntry>();
+const budget = new Map<string, BudgetEntry>();
+
+let cacheHits = 0;
+let cacheMisses = 0;
+let budgetRejections = 0;
 
 export interface ScanCacheKeyInput {
   mode: string;
@@ -63,12 +73,42 @@ export function clearScanCache(): void {
   cache.clear();
 }
 
-interface BudgetEntry {
-  day: string;
-  count: number;
+export function recordCacheHit(): void {
+  cacheHits += 1;
 }
 
-const budget = new Map<string, BudgetEntry>();
+export function recordCacheMiss(): void {
+  cacheMisses += 1;
+}
+
+export function recordBudgetRejection(): void {
+  budgetRejections += 1;
+}
+
+export function getScanMetrics(): {
+  cacheEntries: number;
+  cacheHits: number;
+  cacheMisses: number;
+  budgetRejections: number;
+  hitRate: number | null;
+  dailyBudget: number;
+} {
+  const total = cacheHits + cacheMisses;
+  return {
+    cacheEntries: cache.size,
+    cacheHits,
+    cacheMisses,
+    budgetRejections,
+    hitRate: total > 0 ? Math.round((cacheHits / total) * 1000) / 1000 : null,
+    dailyBudget: envNumber('SCAN_DAILY_BUDGET', 100),
+  };
+}
+
+export function resetScanMetrics(): void {
+  cacheHits = 0;
+  cacheMisses = 0;
+  budgetRejections = 0;
+}
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -99,4 +139,10 @@ export function consumeScanBudget(identity: string): boolean {
 
 export function resetScanBudget(): void {
   budget.clear();
+}
+
+export function resetScanState(): void {
+  clearScanCache();
+  resetScanBudget();
+  resetScanMetrics();
 }

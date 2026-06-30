@@ -254,6 +254,7 @@ const es: LocaleMessages = {
     sourceBarcode: 'código de barras',
     sourceManual: 'entrada manual',
     sourceOcr: 'OCR',
+    sourceLlm: 'análisis IA',
     safeList: 'Productos seguros',
     saveToSafe: '✓ Guardar como seguro',
     savedToSafe: '✓ Guardado',

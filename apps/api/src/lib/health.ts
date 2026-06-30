@@ -1,5 +1,16 @@
 import postgres from 'postgres';
 import { buildConnectionOptions, resolveRuntimeUrl } from '../db/config';
+import { getScanMetrics } from './scan-cache';
+
+export interface ScanHealthMetrics {
+  enabled: boolean;
+  cacheEntries: number;
+  cacheHits: number;
+  cacheMisses: number;
+  budgetRejections: number;
+  hitRate: number | null;
+  dailyBudget: number;
+}
 
 export interface HealthCheckResult {
   ok: boolean;
@@ -8,6 +19,7 @@ export interface HealthCheckResult {
     sync: boolean;
     aiScan: boolean;
   };
+  scan?: ScanHealthMetrics;
   database?: {
     ok: boolean;
     latencyMs?: number;
@@ -43,6 +55,12 @@ export async function checkDatabaseConnectivity(): Promise<{
   }
 }
 
+function buildScanHealth(): ScanHealthMetrics | undefined {
+  if (process.env.AI_SCAN_ENABLED !== 'true') return undefined;
+  const metrics = getScanMetrics();
+  return { enabled: true, ...metrics };
+}
+
 export async function buildHealthPayload(): Promise<HealthCheckResult> {
   const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
   const authDatabase = hasDatabaseUrl && Boolean(process.env.JWT_SECRET);
@@ -55,6 +73,7 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
         sync: process.env.SYNC_ENABLED === 'true',
         aiScan: process.env.AI_SCAN_ENABLED === 'true',
       },
+      scan: buildScanHealth(),
     };
   }
 
@@ -67,6 +86,7 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
       sync: process.env.SYNC_ENABLED === 'true',
       aiScan: process.env.AI_SCAN_ENABLED === 'true',
     },
+    scan: buildScanHealth(),
     database,
   };
 }

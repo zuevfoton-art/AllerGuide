@@ -69,6 +69,7 @@ API smoke (без устройства):
 ```bash
 ./scripts/staging-auth-smoke.sh
 ./scripts/staging-sync-smoke.sh
+./scripts/staging-scan-smoke.sh
 ```
 
 Минимум на устройстве:
@@ -77,10 +78,12 @@ API smoke (без устройства):
 2. **Cold start** — kill app → reopen, сессия жива (S.3)
 3. **Login** после logout (S.2)
 4. **Create profile** — dual-write на сервер (S.4)
+5. **Manual scan** — ручной ввод состава → источник «ИИ-анализ» (P1.5b / C.1)
 
-Далее для closed beta: cross-device backup (P1.4c), AI scan (P1.5b).
+Далее для closed beta: cross-device backup (P1.4c).
 
-Чеклист cross-device: [`qa-checklist.md` § P1.4c](qa-checklist.md#p14c--cloud-sync-cross-device-e2e).
+Чеклист AI scan: [`qa-checklist.md` § P1.5b](qa-checklist.md#p15b--ai-scan-staging-e2e).
+Чеклист cross-device backup: [`qa-checklist.md` § P1.4c](qa-checklist.md#p14c--cloud-sync-cross-device-e2e).
 
 ---
 

@@ -72,6 +72,7 @@ pnpm --filter api db:migrate
 | `STAGING_DIRECT_DATABASE_URL` | Direct URL |
 | `STAGING_JWT_SECRET` | JWT для mobile auth |
 | `STAGING_API_URL` | `https://api.staging.allerguide.app` (после P1.1c) |
+| `STAGING_OPENAI_API_KEY` | Опционально для локального smoke; на хостинге — в env провайдера |
 | `NEON_API_KEY` | Уже для PR preview (опционально тот же project) |
 | `NEON_PROJECT_ID` | Variable для neon-preview workflow |
 
@@ -99,7 +100,7 @@ pnpm --filter api start
 
 - `SYNC_ENABLED=true`
 - `CORS_ORIGINS` — origins web-клиента (если есть)
-- `AI_SCAN_ENABLED` — можно `false` до P1.5a
+- `AI_SCAN_ENABLED=true` + `OPENAI_API_KEY` (P1.5a — required for scan smoke)
 
 **Не задавайте** `METRO_URL` на API-only staging (иначе API проксирует на Metro).
 
@@ -163,8 +164,9 @@ Workflow [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-st
 - [ ] API отвечает на `/api/health` (200, `database.ok: true`)
 - [ ] `./scripts/staging-auth-smoke.sh` — register/login/me (P1.2c)
 - [ ] `./scripts/staging-sync-smoke.sh` — encrypted backup round-trip (P1.4b)
+- [ ] `./scripts/staging-scan-smoke.sh` — AI scan JWT + cache hit (P1.5b)
 - [ ] TLS валидный на `api.staging.allerguide.app`
-- [ ] `SYNC_ENABLED=true`, `JWT_SECRET` задан
+- [ ] `SYNC_ENABLED=true`, `AI_SCAN_ENABLED=true`, `OPENAI_API_KEY` задан
 - [ ] `.env.staging.example` и этот runbook в репозитории
 
 ---

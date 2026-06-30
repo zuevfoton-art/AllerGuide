@@ -21,6 +21,12 @@ if command -v jq >/dev/null 2>&1; then
     echo "Health check failed: features.sync=$sync_enabled (expected true on staging)" >&2
     exit 1
   fi
+
+  ai_scan_enabled="$(echo "$response" | jq -r '.features.aiScan // empty')"
+  if [ -n "$ai_scan_enabled" ] && [ "$ai_scan_enabled" != "true" ]; then
+    echo "Health check failed: features.aiScan=$ai_scan_enabled (expected true on staging, P1.5a)" >&2
+    exit 1
+  fi
 fi
 
 echo "Staging smoke passed."
