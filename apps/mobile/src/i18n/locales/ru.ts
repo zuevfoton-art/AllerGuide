@@ -254,6 +254,7 @@ const ru: LocaleMessages = {
     sourceBarcode: 'штрихкод',
     sourceManual: 'ручной ввод',
     sourceOcr: 'OCR',
+    sourceLlm: 'ИИ-анализ',
     safeList: 'Безопасные продукты',
     saveToSafe: '✓ Сохранить в безопасные',
     savedToSafe: '✓ Сохранено',

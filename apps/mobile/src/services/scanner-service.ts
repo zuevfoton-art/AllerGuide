@@ -9,6 +9,7 @@ import {
 } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
+import { getBackendAuthToken } from '@/src/services/auth-service';
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 import { saveScanHistory } from '@/src/services/scan-history-service';
 import { trackEvent } from '@/src/services/analytics-service';
@@ -30,6 +31,7 @@ async function analyzeText(input: {
   declaredAllergenIds?: string[];
   traceAllergenIds?: string[];
 }): Promise<ScanResult> {
+  const llmApiKey = AI_SCAN_ENABLED ? ((await getBackendAuthToken()) ?? undefined) : undefined;
   const result = await runSmartScan({
     mode: input.mode,
     text: input.text,
@@ -39,6 +41,7 @@ async function analyzeText(input: {
     declaredAllergenIds: input.declaredAllergenIds,
     traceAllergenIds: input.traceAllergenIds,
     llmEndpoint: getLlmEndpoint(),
+    llmApiKey,
   });
   trackEvent('scan_completed', {
     mode: result.mode,

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app';
-import { clearScanCache, resetScanBudget } from '../lib/scan-cache';
+import { getScanMetrics, resetScanState } from '../lib/scan-cache';
 
 const ORIGINAL_ENV = { ...process.env };
 
@@ -24,8 +24,7 @@ describe('scan caching, budget and auth', () => {
     process.env.OPENAI_API_KEY = 'test-key';
     delete process.env.SCAN_REQUIRE_AUTH;
     delete process.env.SCAN_DAILY_BUDGET;
-    clearScanCache();
-    resetScanBudget();
+    resetScanState();
   });
 
   afterEach(() => {
@@ -79,5 +78,31 @@ describe('scan caching, budget and auth', () => {
       .send({ mode: 'product', text: 'молоко', allergens: [] });
 
     expect(response.status).toBe(401);
+  });
+
+  it('tracks cache metrics and enforces SCAN_DAILY_BUDGET=50', async () => {
+    process.env.SCAN_DAILY_BUDGET = '50';
+    const fetchMock = mockLlm();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const app = await createApp({ withReplitAuth: false });
+    resetScanState();
+
+    for (let i = 0; i < 50; i += 1) {
+      const response = await request(app)
+        .post('/api/scan')
+        .send({ mode: 'product', text: `budget-${i}`, allergens: [] });
+      expect(response.status).toBe(200);
+    }
+
+    const rejected = await request(app)
+      .post('/api/scan')
+      .send({ mode: 'product', text: 'budget-51', allergens: [] });
+    expect(rejected.status).toBe(429);
+
+    const metrics = getScanMetrics();
+    expect(metrics.cacheMisses).toBe(51);
+    expect(metrics.budgetRejections).toBe(1);
+    expect(metrics.hitRate).toBe(0);
   });
 });

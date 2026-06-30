@@ -354,6 +354,34 @@
 
 ---
 
+## P1.5b — AI scan staging E2E
+
+**Профиль:** EAS `staging` · `AI_SCAN_ENABLED=true` · `BACKEND_AUTH=true`  
+**API:** `AI_SCAN_ENABLED=true`, `OPENAI_API_KEY`, `SCAN_REQUIRE_AUTH=true`
+
+Перед mobile smoke:
+
+```bash
+./scripts/staging-scan-smoke.sh
+```
+
+### Сценарии scan (обязательно на ≥1 native)
+
+| ID | Сценарий | iOS | Android | Web | Критерий Pass |
+|----|----------|-----|---------|-----|---------------|
+| **C.1** | Login → сканер → ручной ввод состава | ☐ | ☐ | ☐ | Результат без «Сервер недоступен»; источник **ИИ-анализ** |
+| **C.2** | Повтор того же текста | ☐ | ☐ | ☐ | Быстрее / из кэша (API `cached: true` в логах) |
+| **C.3** | Airplane mode → ручной scan | ☐ | ☐ | N/A | Mock fallback, без crash (offline-first) |
+| **C.4** | Logout → scan без login | ☐ | ☐ | ☐ | Mock или ошибка auth, без crash |
+
+### Итог P1.5b
+
+☐ C.1 Pass на **Android или iOS**  
+☐ `staging-scan-smoke.sh` Pass (API)  
+☐ Health `/api/health` → `features.aiScan: true`, `scan.dailyBudget: 50`
+
+---
+
 ## Шаблон баг-репорта
 
 ```markdown

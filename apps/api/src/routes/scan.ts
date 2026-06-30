@@ -4,6 +4,10 @@ import { verifyAuthToken } from '../lib/jwt';
 import {
   consumeScanBudget,
   getCachedScan,
+  getScanMetrics,
+  recordBudgetRejection,
+  recordCacheHit,
+  recordCacheMiss,
   scanCacheKey,
   setCachedScan,
 } from '../lib/scan-cache';
@@ -33,6 +37,13 @@ async function resolveScanIdentity(req: Request): Promise<string | null> {
   }
   if (requireScanAuth()) return null;
   return `ip:${req.ip ?? 'unknown'}`;
+}
+
+function logScanCacheEvent(hit: boolean): void {
+  const metrics = getScanMetrics();
+  console.info(
+    `[scan] cache_${hit ? 'hit' : 'miss'} hits=${metrics.cacheHits} misses=${metrics.cacheMisses} hitRate=${metrics.hitRate ?? 'n/a'}`,
+  );
 }
 
 async function callOpenAiCompatible(prompt: string): Promise<string | null> {
@@ -103,15 +114,22 @@ export function registerScanRoutes(app: Express) {
 
     const cached = getCachedScan(cacheKey);
     if (cached) {
+      recordCacheHit();
+      logScanCacheEvent(true);
       res.json({ ok: true, result: cached, cached: true });
       return;
     }
 
+    recordCacheMiss();
+
     // Only billable (cache-missing) calls consume the daily budget.
     if (!consumeScanBudget(identity)) {
+      recordBudgetRejection();
       res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;
     }
+
+    logScanCacheEvent(false);
 
     const prompt =
       body.prompt ??

@@ -15,5 +15,8 @@
 | P1.4b | Done | `staging-sync-smoke.ts`, `sync-encrypted-e2e.test.ts`, mobile 503 → `sync_disabled` |
 | P1.4c | Done | QA § P1.4c cross-device sync |
 | P1.4d | Done | [`docs/adr/002-sync-conflict-policy.md`](./adr/002-sync-conflict-policy.md) |
+| P1.5a | Done | `.env.staging.example`, health `features.aiScan`, staging smoke |
+| P1.5b | Done | mobile JWT → `/api/scan`, `staging-scan-smoke.ts`, QA § P1.5b |
+| P1.5c | Done | scan metrics in health + cache hit logging |
 
-**Далее:** P1.5 AI scan staging · P1.6 API integration tests · P1.7 closed beta gate
+**Далее:** P1.6 API integration tests · P1.7 closed beta gate
