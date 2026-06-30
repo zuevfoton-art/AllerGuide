@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/src/components/Screen';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
 interface LegalDocumentScreenProps {
   title: string;
@@ -15,6 +16,7 @@ export function LegalDocumentScreen({ title, body }: LegalDocumentScreenProps) {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <Screen scroll={false}>
@@ -23,7 +25,7 @@ export function LegalDocumentScreen({ title, body }: LegalDocumentScreenProps) {
           style={styles.backBtn}
           onPress={() => router.back()}
           accessibilityRole="button"
-          accessibilityLabel="Назад">
+          accessibilityLabel={t('common.back')}>
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>

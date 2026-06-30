@@ -59,7 +59,7 @@
 | 1.5 | Регистрация нового пользователя | ☐ | ☐ | ☐ | |
 | 1.6 | Неверный пароль — сообщение об ошибке | ☐ | ☐ | ☐ | |
 | 1.7 | Language picker на login/register: 6 языков, UI обновляется | ☐ | ☐ | ☐ | |
-| 1.8 | Выход из аккаунта → экран входа, данные недоступны без re-login | ☐ | ☐ | ☐ | `/profiles` → Logout |
+| 1.8 | Выход из аккаунта → экран входа, данные недоступны без re-login | ☐ | ☐ | ☐ | `/profile` → Logout |
 
 ---
 
@@ -88,7 +88,7 @@
 | 3.4 | «+» в switcher → создание нового профиля | ☐ | ☐ | ☐ | |
 | 3.5 | Редактирование: имя, год, аллергены сохраняются | ☐ | ☐ | ☐ | `/profile-edit` |
 | 3.6 | Удаление профиля с подтверждением | ☐ | ☐ | ☐ | `/profiles` |
-| 3.7 | Экран «Мои профили»: язык, тема, logout | ☐ | ☐ | ☐ | deep link `/profiles` |
+| 3.7 | Экран профиля: язык (шапка), тема, legal, logout | ☐ | ☐ | ☐ | `/profile` |
 | 3.8 | Каталог аллергенов: группы, поиск, выбор | ☐ | ☐ | ☐ | |
 
 ---
@@ -104,7 +104,7 @@
 | 4.5 | Блок дневника: 3 quick-add кнопки → дневник | ☐ | ☐ | ☐ | |
 | 4.6 | Quick actions: Сканер, Карта | ☐ | ☐ | ☐ | |
 | 4.7 | Disclaimer внизу экрана | ☐ | ☐ | ☐ | |
-| 4.8 | Tab bar: 4 вкладки (Home, Diary, Scanner, SOS) | ☐ | ☐ | ☐ | Map/Market скрыты |
+| 4.8 | Tab bar: 5 вкладок (Home, Diary, Scanner, Map, SOS) | ☐ | ☐ | ☐ | Market скрыт |
 
 ---
 
@@ -186,9 +186,9 @@
 | # | Сценарий | iOS | Android | Web | Примечания |
 |---|----------|-----|---------|-----|------------|
 | 10.1 | Экстренный номер: сохранение | ☐ | ☐ | ☐ | `/settings` via SOS |
-| 10.2 | Напоминание дневника: toggle | ☐ | ☐ | N/A | push только native |
+| 10.2 | Напоминания: хаб `/notifications` (дневник, клинические, пыльца) | ☐ | ☐ | N/A | push только native |
 | 10.3 | Cloud backup UI (должен сообщить об ошибке / OFF без backend) | ☐ | ☐ | ☐ | flags OFF |
-| 10.4 | Legal: Privacy + Terms | ☐ | ☐ | ☐ | |
+| 10.4 | Legal: Privacy + Terms (профиль или `/settings`) | ☐ | ☐ | ☐ | `/legal/privacy`, `/legal/terms` |
 | 10.5 | Theme toggle | ☐ | ☐ | ☐ | |
 
 ---
@@ -236,7 +236,7 @@
 | 14.1 | Shell max-width, центрирование | ☐ | |
 | 14.2 | Tab bar не перекрывает контент | ☐ | |
 | 14.3 | Keyboard: формы login/diary не ломают layout | ☐ | |
-| 14.4 | Deep routes работают: `/profiles`, `/expert`, `/settings` | ☐ | |
+| 14.4 | Deep routes работают: `/profile`, `/notifications`, `/expert`, `/settings` | ☐ | |
 
 ---
 
@@ -274,6 +274,7 @@
 ## Связанные документы
 
 - [Roadmap to Production](roadmap-to-prod.md)
+- [Phase 0 run report](phase-0-run.md)
 - [EAS Internal Preview](eas-internal-preview.md)
 - [Functional Requirements](functional-requirements.md)
 - [Clinical Features (RAAKI)](clinical-features-raaci.md)

@@ -5,6 +5,7 @@ import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
+import { LegalLinks } from '@/src/components/LegalLinks';
 import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -138,6 +139,8 @@ export default function SettingsScreen() {
 
       <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
       <ThemeToggle />
+
+      <LegalLinks />
     </Screen>
   );
 }

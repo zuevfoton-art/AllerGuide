@@ -1,4 +1,4 @@
-цconst path = require('path');
+const path = require('path');
 
 function mobileAliasPlugin() {
   return {

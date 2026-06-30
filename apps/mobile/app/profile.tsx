@@ -10,6 +10,7 @@ import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
 import { ThemeToggle } from '@/src/components/ThemeToggle';
+import { LegalLinks } from '@/src/components/LegalLinks';
 import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
@@ -201,6 +202,8 @@ export default function ProfileScreen() {
 
       <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
       <ThemeToggle />
+
+      <LegalLinks />
 
       <Text style={ui.sectionLabel}>{t('profiles.accountTitle')}</Text>
       <GlassCard>

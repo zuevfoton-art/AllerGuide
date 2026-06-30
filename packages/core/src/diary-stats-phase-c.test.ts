@@ -7,24 +7,31 @@ import {
 import { encodeDiaryDetails } from './diary';
 import type { DiaryEntry } from './types';
 
-function entry(type: string, iso: string, hour: number, answers: Record<string, string>): DiaryEntry {
-  const h = String(hour).padStart(2, '0');
+function entryAt(
+  type: string,
+  daysBack: number,
+  hour: number,
+  answers: Record<string, string>,
+): DiaryEntry {
+  const at = new Date();
+  at.setDate(at.getDate() - daysBack);
+  at.setUTCHours(hour, 0, 0, 0);
   return {
     id: Math.random(),
     profileId: 1,
     type,
     details: encodeDiaryDetails(answers, type),
-    createdAt: `${iso}T${h}:00:00.000Z`,
+    createdAt: at.toISOString(),
   };
 }
 
 describe('diary-stats Phase C', () => {
   it('detects temporal symptom-trigger correlation within ±4h (C.3)', () => {
     const entries = [
-      entry('Симптомы', '2026-06-20', 10, { symptoms: 'зуд', severity0_3: '2 — умеренная' }),
-      entry('Триггер', '2026-06-20', 11, { trigger: 'пыльца' }),
-      entry('Симптомы', '2026-06-19', 9, { symptoms: 'кашель', severity0_3: '1 — лёгкая' }),
-      entry('Триггер', '2026-06-19', 14, { trigger: 'холод' }),
+      entryAt('Симптомы', 1, 10, { symptoms: 'зуд', severity0_3: '2 — умеренная' }),
+      entryAt('Триггер', 1, 11, { trigger: 'пыльца' }),
+      entryAt('Симптомы', 2, 9, { symptoms: 'кашель', severity0_3: '1 — лёгкая' }),
+      entryAt('Триггер', 2, 14, { trigger: 'холод' }),
     ];
     const result = computeTemporalCorrelations(entries);
     expect(result.kind).toBe('symptom-trigger');
@@ -54,8 +61,8 @@ describe('diary-stats Phase C', () => {
 
   it('includes temporal fields in insights', () => {
     const entries = [
-      entry('Симптомы', '2026-06-20', 10, { symptoms: 'зуд', severity0_3: '1 — лёгкая' }),
-      entry('Триггер', '2026-06-20', 10, { trigger: 'пыльца' }),
+      entryAt('Симптомы', 0, 10, { symptoms: 'зуд', severity0_3: '1 — лёгкая' }),
+      entryAt('Триггер', 0, 10, { trigger: 'пыльца' }),
     ];
     const insights = computeDiaryInsights(entries);
     expect(insights.temporalCorrelationOf).toBeGreaterThanOrEqual(0);
