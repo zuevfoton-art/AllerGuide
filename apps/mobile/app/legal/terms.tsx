@@ -1,6 +1,10 @@
 import { LegalDocumentScreen } from '@/src/components/LegalDocumentScreen';
-import { TERMS_OF_SERVICE } from '@/src/constants/legal';
+import { getLegalDocuments } from '@/src/i18n/legal-content';
+import { useTranslation } from '@/src/store/locale-store';
 
 export default function TermsOfServiceScreen() {
-  return <LegalDocumentScreen title="Условия использования" body={TERMS_OF_SERVICE} />;
+  const { locale } = useTranslation();
+  const doc = getLegalDocuments(locale);
+
+  return <LegalDocumentScreen title={doc.termsTitle} body={doc.termsBody} />;
 }
