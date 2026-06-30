@@ -15,6 +15,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import {
   formatRecoveryKeyForDisplay,
   generateRecoveryKey,
+  getMaestroFixtureRecoveryKey,
   normalizeRecoveryKey,
   setRecoveryKey,
 } from '@/src/services/backup-crypto';
@@ -32,7 +33,7 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const [generatedKey] = useState(() => generateRecoveryKey());
+  const [generatedKey] = useState(() => getMaestroFixtureRecoveryKey() ?? generateRecoveryKey());
   const [enteredKey, setEnteredKey] = useState('');
   const [savedAck, setSavedAck] = useState(false);
 
@@ -77,6 +78,7 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
 
           {mode === 'enter' ? (
             <TextInput
+              testID="recovery-key-input"
               style={styles.input}
               value={enteredKey}
               onChangeText={setEnteredKey}
@@ -88,11 +90,12 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
           ) : (
             <>
               <Text style={styles.keyLabel}>{t('settings.recoveryKeyDisplayLabel')}</Text>
-              <Text selectable style={styles.keyValue}>
+              <Text testID="recovery-key-display" selectable style={styles.keyValue}>
                 {displayKey}
               </Text>
               <Text style={styles.hint}>{t('settings.recoveryKeyCopyHint')}</Text>
               <Pressable
+                testID="recovery-key-saved-ack"
                 style={styles.checkRow}
                 onPress={() => setSavedAck((v) => !v)}
                 accessibilityRole="checkbox"
@@ -104,8 +107,14 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
           )}
 
           <View style={styles.actions}>
-            <Button label={t('common.cancel')} variant="secondary" onPress={onClose} />
             <Button
+              testID="recovery-key-cancel"
+              label={t('common.cancel')}
+              variant="secondary"
+              onPress={onClose}
+            />
+            <Button
+              testID="recovery-key-confirm"
               label={t('common.next')}
               variant="primary"
               disabled={mode === 'enter' ? !normalizeRecoveryKey(enteredKey) : !savedAck}

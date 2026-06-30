@@ -1,0 +1,8 @@
+# Run all P2.1a offline smoke flows sequentially
+appId: com.allerguide.app
+---
+- runFlow: onboarding-smoke.yaml
+- runFlow: diary-smoke.yaml
+- runFlow: scanner-smoke.yaml
+- runFlow: sos-smoke.yaml
+- runFlow: settings-smoke.yaml

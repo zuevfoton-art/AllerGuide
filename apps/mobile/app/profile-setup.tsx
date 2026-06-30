@@ -172,6 +172,7 @@ export default function ProfileSetupScreen() {
       <GlassCard style={styles.section}>
         <Text style={ui.sectionLabel}>{t('profileSetup.nameLabel')}</Text>
         <TextInput
+          testID="profile-name"
           placeholder={t('profileSetup.namePlaceholder')}
           placeholderTextColor={theme.colors.textMuted}
           value={name}
@@ -181,6 +182,7 @@ export default function ProfileSetupScreen() {
 
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('profileSetup.birthYearLabel')}</Text>
         <TextInput
+          testID="profile-birth-year"
           placeholder={t('profileSetup.birthYearPlaceholder')}
           placeholderTextColor={theme.colors.textMuted}
           value={birthYear}
@@ -275,6 +277,7 @@ export default function ProfileSetupScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Button
+        testID="profile-save"
         label={
           scenario === 'both' && wizardStep === 'self'
             ? t('profileSetup.nextChild')

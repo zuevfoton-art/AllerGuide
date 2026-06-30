@@ -1,0 +1,35 @@
+# P2.1b — staging: logout → login with backend JWT
+appId: com.allerguide.app
+---
+- runFlow: _staging-bootstrap.yaml
+- tapOn:
+    id: profile-header-button
+- extendedWaitUntil:
+    visible:
+      id: profile-logout
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: profile-logout
+- tapOn:
+    id: profile-logout
+- tapOn:
+    text: "Выйти"
+- extendedWaitUntil:
+    visible:
+      id: auth-submit
+    timeout: 15000
+- tapOn:
+    id: auth-mode-email
+- tapOn:
+    id: auth-login-input
+- inputText: ${output.email}
+- tapOn:
+    id: auth-password-input
+- inputText: ${output.password}
+- tapOn:
+    id: auth-submit
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 45000

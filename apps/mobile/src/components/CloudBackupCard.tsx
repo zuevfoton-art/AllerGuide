@@ -107,6 +107,7 @@ export function CloudBackupCard() {
       <GlassCard>
         <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
         <Button
+          testID="cloud-backup-upload"
           label={t('settings.uploadBackup')}
           variant="primary"
           block
@@ -114,6 +115,7 @@ export function CloudBackupCard() {
           onPress={() => void handleUpload()}
         />
         <Button
+          testID="cloud-backup-download"
           label={t('settings.downloadBackup')}
           variant="secondary"
           block

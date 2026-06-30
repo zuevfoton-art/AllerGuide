@@ -1,0 +1,20 @@
+# P2.1a — settings (/profile): emergency number
+appId: com.allerguide.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: profile-header-button
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- tapOn:
+    id: profile-emergency-number
+- eraseText
+- inputText: "112"
+- tapOn:
+    id: profile-save-number
+- tapOn:
+    text: OK
+- assertVisible:
+    id: profile-emergency-number

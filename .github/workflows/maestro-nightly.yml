@@ -1,0 +1,154 @@
+name: Maestro Nightly
+
+# P2.1c — nightly Maestro E2E (offline preview + staging auth/backup with local API).
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: maestro-nightly
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  maestro-offline:
+    name: Offline smoke (preview)
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" >/dev/null
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build preview APK
+        run: ./scripts/maestro-build-apk.sh preview
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run offline Maestro flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            maestro test --format junit --output maestro-offline-report.xml apps/mobile/.maestro/flows/smoke-all.yaml
+
+      - name: Upload Maestro report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-offline-report
+          path: maestro-offline-report.xml
+          if-no-files-found: ignore
+
+  maestro-staging:
+    name: Staging smoke (auth + backup)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: allerguide
+          POSTGRES_PASSWORD: allerguide
+          POSTGRES_DB: allerguide_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U allerguide -d allerguide_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" >/dev/null
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start API for staging E2E
+        env:
+          DATABASE_URL: postgresql://allerguide:allerguide@localhost:5432/allerguide_test?sslmode=disable
+          DIRECT_DATABASE_URL: postgresql://allerguide:allerguide@localhost:5432/allerguide_test?sslmode=disable
+        run: ./scripts/maestro-start-api.sh
+
+      - name: Build staging APK
+        env:
+          MAESTRO_API_URL: http://10.0.2.2:3001
+        run: ./scripts/maestro-build-apk.sh staging
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run staging Maestro flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            maestro test --format junit --output maestro-staging-report.xml apps/mobile/.maestro/flows/staging-smoke-all.yaml
+
+      - name: Upload Maestro report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-staging-report
+          path: maestro-staging-report.xml
+          if-no-files-found: ignore
+
+      - name: API log on failure
+        if: failure()
+        run: |
+          tail -100 "${TMPDIR:-/tmp}/maestro-api.log" || true

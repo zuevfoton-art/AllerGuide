@@ -1,0 +1,36 @@
+# P2.1a — diary: quick symptoms entry (offline)
+appId: com.allerguide.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-diary
+- tapOn:
+    id: diary-quick-entry
+- extendedWaitUntil:
+    visible:
+      id: diary-wizard-primary
+    timeout: 10000
+# Optional symptom catalog step
+- tapOn:
+    id: diary-wizard-primary
+- tapOn:
+    id: diary-wizard-field
+- inputText: зуд
+- tapOn:
+    id: diary-wizard-primary
+- tapOn:
+    text: "1 — лёгкая"
+- tapOn:
+    id: diary-wizard-primary
+- tapOn:
+    id: diary-wizard-primary
+- tapOn:
+    id: diary-wizard-primary
+- tapOn:
+    id: diary-wizard-primary
+- extendedWaitUntil:
+    notVisible:
+      id: diary-wizard-primary
+    timeout: 10000
+- assertVisible:
+    id: diary-quick-entry

@@ -60,6 +60,13 @@ export function generateRecoveryKey(): string {
   return randomHex(RECOVERY_KEY_BYTE_LENGTH);
 }
 
+/** Fixed key for Maestro staging E2E when `EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY` is set (staging CI only). */
+export function getMaestroFixtureRecoveryKey(): string | null {
+  const raw = process.env.EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY;
+  if (!raw) return null;
+  return normalizeRecoveryKey(raw);
+}
+
 export function hasRecoveryKey(): boolean {
   return getStoredRecoveryKey() != null;
 }

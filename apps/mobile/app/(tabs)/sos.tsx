@@ -162,7 +162,7 @@ export default function SosScreen() {
 
       {profile ? (
         <>
-          <GlassCard>
+          <GlassCard testID="sos-profile-card">
             <View style={ui.kpiRow}>
               <Text style={ui.kpiLabel}>{t('sos.name')}</Text>
               <Text style={ui.kpiValue}>{profile.name}</Text>
@@ -188,6 +188,7 @@ export default function SosScreen() {
           </GlassCard>
 
           <Pressable
+            testID="sos-passport-toggle"
             style={styles.collapseHead}
             onPress={() => setPassportOpen((v) => !v)}
             accessibilityRole="button"

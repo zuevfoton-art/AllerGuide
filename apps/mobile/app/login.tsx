@@ -68,6 +68,7 @@ export default function LoginScreen() {
         onChangeText={setLogin}
         placeholder={loginType === 'phone' ? t('auth.phonePlaceholder') : 'name@example.com'}
         keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
+        testID="auth-login-input"
       />
       <AuthField
         label={t('common.password')}
@@ -75,14 +76,21 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
+        testID="auth-password-input"
       />
       <AuthForgotLink text={forgotLabel} onPress={() => router.push('/forgot-password')} />
       <AuthError message={error} />
-      <AuthPrimaryButton label={t('auth.loginButton')} onPress={handleLogin} loading={loading} />
+      <AuthPrimaryButton
+        label={t('auth.loginButton')}
+        onPress={handleLogin}
+        loading={loading}
+        testID="auth-submit"
+      />
       <AuthLink
         text={t('auth.noAccount')}
         linkText={t('auth.registerLink')}
         onPress={() => router.push('/register')}
+        testID="auth-register-link"
       />
       {Platform.OS === 'web' && (
         <>

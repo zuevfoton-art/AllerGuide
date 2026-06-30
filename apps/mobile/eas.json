@@ -42,6 +42,7 @@
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
+        "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "NODE_OPTIONS": "--max-old-space-size=8192"
       },
       "android": {

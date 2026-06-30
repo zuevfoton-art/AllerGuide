@@ -19,6 +19,7 @@ import {
   encryptBackup,
   formatRecoveryKeyForDisplay,
   generateRecoveryKey,
+  getMaestroFixtureRecoveryKey,
   getBackupPassphrase,
   hasRecoveryKey,
   isRecoveryKeyConfirmed,
@@ -55,6 +56,13 @@ describe('recovery key format', () => {
   it('rejects wrong length', () => {
     expect(normalizeRecoveryKey('abc')).toBeNull();
     expect(validateRecoveryKey('g'.repeat(64))).toBe(false);
+  });
+
+  it('reads Maestro fixture key from env when valid', () => {
+    vi.stubEnv('EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY', SAMPLE_KEY);
+    expect(getMaestroFixtureRecoveryKey()).toBe(SAMPLE_KEY);
+    vi.unstubAllEnvs();
+    expect(getMaestroFixtureRecoveryKey()).toBeNull();
   });
 });
 

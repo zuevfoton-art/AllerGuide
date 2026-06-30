@@ -416,6 +416,65 @@
 
 ---
 
+## P2.1a — Maestro offline smoke (автоматизация)
+
+**Документация:** [`maestro.md`](maestro.md)  
+**Сборка:** EAS `preview` (`EXPO_PUBLIC_BACKEND_AUTH=false`)  
+**Запуск:** `pnpm --filter mobile maestro:test` (нужен Maestro CLI + emulator + установленный APK)
+
+| Flow | Файл | Проверка |
+|------|------|----------|
+| Onboarding | `onboarding-smoke.yaml` | register → profile → `tab-home` |
+| Diary | `diary-smoke.yaml` | быстрая запись симптомов |
+| Scanner | `scanner-smoke.yaml` | ручной ввод «молоко» → `scanner-result` |
+| SOS | `sos-smoke.yaml` | `sos-profile-card`, паспорт |
+| Settings | `settings-smoke.yaml` | `/profile`, номер 112 |
+
+### Итог P2.1a
+
+☐ Все 5 flows green на Android emulator  
+☐ `testID` стабильны (не зависят от локали)  
+☐ Документация локального запуска актуальна
+
+---
+
+## P2.1b — Maestro staging (auth + backup)
+
+**Документация:** [`maestro.md`](maestro.md) § P2.1b  
+**Сборка:** EAS `staging` или `./scripts/maestro-build-apk.sh staging`  
+**API:** `https://api.staging.allerguide.app` или локально `maestro-start-api.sh` + `10.0.2.2:3001`
+
+| Flow | Файл | Проверка |
+|------|------|----------|
+| Auth | `staging-auth-smoke.yaml` | register (API) → logout → login |
+| Backup | `staging-backup-smoke.yaml` | fixture recovery key → upload → «Готово» |
+
+**Запуск:** `pnpm --filter mobile maestro:staging`
+
+### Итог P2.1b
+
+☐ `staging-smoke-all.yaml` green против staging или local API  
+☐ Fixture recovery key только в staging/internal builds
+
+---
+
+## P2.1c — Nightly CI Maestro
+
+**Workflow:** [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-nightly.yml)  
+**Cron:** 03:00 UTC ежедневно + `workflow_dispatch`
+
+| Job | Suite |
+|-----|-------|
+| `maestro-offline` | `smoke-all.yaml` (preview) |
+| `maestro-staging` | `staging-smoke-all.yaml` (Postgres + API in CI) |
+
+### Итог P2.1c
+
+☐ Nightly green 3+ ночи подряд  
+☐ JUnit-артефакты при падении
+
+---
+
 ## Шаблон баг-репорта
 
 ```markdown
@@ -441,6 +500,7 @@
 - [EAS Internal Preview](eas-internal-preview.md)
 - [EAS Staging Build](eas-staging-build.md)
 - [Closed beta P1.7](closed-beta-p17.md)
+- [Maestro E2E (P2.1)](maestro.md)
 - [Functional Requirements](functional-requirements.md)
 - [Clinical Features (RAAKI)](clinical-features-raaci.md)
 - [QA Test Cases](qa-test-cases.md)

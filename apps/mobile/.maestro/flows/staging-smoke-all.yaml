@@ -1,0 +1,5 @@
+# P2.1b — all staging Maestro flows
+appId: com.allerguide.app
+---
+- runFlow: staging-auth-smoke.yaml
+- runFlow: staging-backup-smoke.yaml

@@ -46,6 +46,7 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
           return (
             <Pressable
               key={item.id}
+              testID={`allergen-${item.id}`}
               style={[styles.chip, active && styles.chipActive]}
               onPress={() => toggle(item.id)}>
               {active ? (

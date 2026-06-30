@@ -1,0 +1,49 @@
+# Shared subflow: fresh install → register → onboarding → home (offline preview)
+appId: com.allerguide.app
+---
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: auth-register-link
+    timeout: 30000
+- tapOn:
+    id: auth-register-link
+- runScript: ../scripts/random-phone.js
+- tapOn:
+    id: auth-login-input
+- inputText: ${output.phone}
+- tapOn:
+    id: auth-password-input
+- inputText: maestro1
+- tapOn:
+    id: auth-confirm-password-input
+- inputText: maestro1
+- tapOn:
+    id: auth-submit
+- extendedWaitUntil:
+    visible:
+      id: onboarding-intro-skip
+    timeout: 20000
+- tapOn:
+    id: onboarding-intro-skip
+- extendedWaitUntil:
+    visible:
+      id: onboarding-scenario-self
+    timeout: 10000
+- tapOn:
+    id: onboarding-scenario-self
+- tapOn:
+    id: profile-name
+- inputText: Maestro Tester
+- tapOn:
+    id: profile-birth-year
+- inputText: "1990"
+- tapOn:
+    id: allergen-milk
+- tapOn:
+    id: profile-save
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 20000

@@ -424,6 +424,7 @@ export default function ScannerScreen() {
 
       <Text style={ui.sectionLabel}>{t('scanner.manualDivider')}</Text>
       <TextInput
+        testID="scanner-input"
         value={input}
         onChangeText={setInput}
         placeholder={
@@ -439,6 +440,7 @@ export default function ScannerScreen() {
       />
 
       <Button
+        testID="scanner-check"
         label={t('scanner.check')}
         variant="primary"
         block
@@ -459,7 +461,9 @@ export default function ScannerScreen() {
       ) : null}
 
       {displayResult ? (
-        <View style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
+        <View
+          testID="scanner-result"
+          style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
           <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
             {displayResult.verdict}
           </Text>
