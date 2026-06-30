@@ -62,15 +62,22 @@ pnpm build:staging:ios          # TestFlight internal
 
 ## Smoke после установки (P1.2c)
 
-Минимум перед closed beta:
+Детальный чеклист: [`qa-checklist.md` § Staging — backend auth E2E](qa-checklist.md#staging--backend-auth-e2e-p12c).
 
-1. **Register** — новый email на staging API
-2. **Login** — JWT сохранён, перезапуск приложения сохраняет сессию
-3. **Create profile** — dual-write на сервер (`POST /api/profiles`)
-4. **Upload backup** — достигает `POST /api/sync/backup` (после recovery key UX в P1.3b)
-5. **AI scan** — текст состава → ответ от `/api/scan`
+API smoke (без устройства):
 
-Полный чеклист: [`qa-checklist.md`](qa-checklist.md) (секция staging).
+```bash
+./scripts/staging-auth-smoke.sh
+```
+
+Минимум на устройстве:
+
+1. **Register** — новый email на staging API (S.1)
+2. **Cold start** — kill app → reopen, сессия жива (S.3)
+3. **Login** после logout (S.2)
+4. **Create profile** — dual-write на сервер (S.4)
+
+Далее для closed beta: upload backup (P1.3b), AI scan (P1.5b).
 
 ---
 

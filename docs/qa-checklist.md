@@ -252,6 +252,50 @@
 
 ---
 
+## Staging — backend auth E2E (P1.2c)
+
+**Профиль сборки:** EAS `staging` ([`eas-staging-build.md`](eas-staging-build.md))  
+**API:** `https://api.staging.allerguide.app` (или ваш `STAGING_API_URL`)  
+**Флаги:** `BACKEND_AUTH=true`, `CLOUD_SYNC=true`, `AI_SCAN=true`
+
+Перед mobile smoke (опционально, с машины с доступом к API):
+
+```bash
+./scripts/staging-auth-smoke.sh
+```
+
+### Метаданные staging-прогона
+
+| Поле | Значение |
+|------|----------|
+| Staging API health | ☐ 200 `GET /api/health` |
+| EAS profile | `staging` |
+| Тестовый email | `staging-qa+…@example.com` (уникальный) |
+
+### Сценарии auth (обязательно на ≥1 native + web)
+
+| ID | Сценарий | iOS | Android | Web | Критерий Pass |
+|----|----------|-----|---------|-----|---------------|
+| **S.1** | Register нового email → onboarding/home | ☐ | ☐ | ☐ | Нет «Сервер недоступен»; пользователь в `profile.app_users` на API |
+| **S.2** | Login тем же email/паролем после logout | ☐ | ☐ | ☐ | Успешный вход, JWT выдан |
+| **S.3** | Cold start: kill app → reopen | ☐ | ☐ | ☐ | **Не** экран login; сессия жива (native: SecureStore + SQLite; web: IndexedDB settings) |
+| **S.4** | Create profile после login | ☐ | ☐ | ☐ | Профиль в UI + `POST /api/profiles` на сервере (dual-write) |
+| **S.5** | Неверный пароль | ☐ | ☐ | ☐ | Сообщение об ошибке, без crash |
+| **S.6** | Logout → login screen | ☐ | ☐ | ☐ | JWT очищен; повторный login работает |
+| **S.7** | Airplane mode после login: дневник | ☐ | ☐ | N/A | Offline-first: запись дневника без сети |
+
+### Проверка JWT на native (опционально)
+
+После S.1/S.2 на Android/iOS: в dev можно убедиться, что `authToken` / `authUserId` есть в SecureStore (не логировать JWT в issues).
+
+### Итог P1.2c
+
+☐ S.1–S.3 Pass на **Android или iOS** + **web**  
+☐ `staging-auth-smoke.sh` Pass (API)  
+☐ Нет P0/P1 блокеров auth
+
+---
+
 ## Шаблон баг-репорта
 
 ```markdown
@@ -275,6 +319,7 @@
 
 - [Roadmap to Production](roadmap-to-prod.md)
 - [EAS Internal Preview](eas-internal-preview.md)
+- [EAS Staging Build](eas-staging-build.md)
 - [Functional Requirements](functional-requirements.md)
 - [Clinical Features (RAAKI)](clinical-features-raaci.md)
 - [QA Test Cases](qa-test-cases.md)

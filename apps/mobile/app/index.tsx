@@ -4,7 +4,12 @@ import { Platform } from 'react-native';
 import { resolveBootstrapRoute } from '@allerguide/core';
 import { AppSplash } from '@/src/components/AppSplash';
 import { initDb } from '@/src/db/init';
-import { isAuthenticated, getCurrentUserId, loginWithReplitExchange } from '@/src/services/auth-service';
+import {
+  isAuthenticated,
+  getCurrentUserId,
+  loginWithReplitExchange,
+  restoreAuthSession,
+} from '@/src/services/auth-service';
 import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
 import {
   getStoredScenario,
@@ -20,48 +25,60 @@ export default function Index() {
   const setScenario = useAppStore((s) => s.setScenario);
 
   useEffect(() => {
-    initDb();
+    let mounted = true;
 
-    const isWeb = Platform.OS === 'web';
-    const hasReplitCallback =
-      isWeb &&
-      typeof window !== 'undefined' &&
-      window.location.search.includes('replit_auth=1');
+    void (async () => {
+      await initDb();
+      if (!mounted) return;
 
-    function continueBootstrap() {
-      const userId = getCurrentUserId();
-      if (userId) migrateLegacyProfilesToUser(userId);
+      const isWeb = Platform.OS === 'web';
+      const hasReplitCallback =
+        isWeb &&
+        typeof window !== 'undefined' &&
+        window.location.search.includes('replit_auth=1');
 
-      const profiles = listProfiles();
-      const scenario = getStoredScenario();
-      if (scenario) setScenario(scenario);
+      function continueBootstrap() {
+        const userId = getCurrentUserId();
+        if (userId) migrateLegacyProfilesToUser(userId);
 
-      if (!isIntroComplete()) {
-        setTarget('/onboarding-intro');
-        return;
+        const profiles = listProfiles();
+        const scenario = getStoredScenario();
+        if (scenario) setScenario(scenario);
+
+        if (!isIntroComplete()) {
+          setTarget('/onboarding-intro');
+          return;
+        }
+
+        setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
       }
 
-      setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
-    }
-
-    if (hasReplitCallback) {
-      if (window.history) window.history.replaceState({}, '', '/');
-      loginWithReplitExchange().then((result) => {
+      if (hasReplitCallback) {
+        if (window.history) window.history.replaceState({}, '', '/');
+        const result = await loginWithReplitExchange();
+        if (!mounted) return;
         if (!result.ok) {
           setTarget('/login');
           return;
         }
         continueBootstrap();
-      });
-      return;
-    }
+        return;
+      }
 
-    if (!isAuthenticated()) {
-      setTarget('/login');
-      return;
-    }
+      await restoreAuthSession();
+      if (!mounted) return;
 
-    continueBootstrap();
+      if (!isAuthenticated()) {
+        setTarget('/login');
+        return;
+      }
+
+      continueBootstrap();
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, [setScenario]);
 
   if (!target) {
