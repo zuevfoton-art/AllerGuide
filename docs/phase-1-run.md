@@ -22,5 +22,8 @@
 | P1.6b | Done | `sync.integration.test.ts` — Postgres backup + IDOR |
 | P1.6c | Done | `scan.integration.test.ts` — JWT scan, cache, budget |
 | P1.6d | Done | CI job `api-integration` + Postgres 16 service |
+| P1.7 | Ready | [`closed-beta-p17.md`](./closed-beta-p17.md), `staging-preflight.sh`, QA § P1.7, beta issue template |
 
-**Далее:** P1.7 closed beta gate
+**Phase 1 code complete.** P1.7 gate out = 10–20 тестеров на staging (ops).  
+**Staging infra plan:** [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md)  
+**Далее:** [Phase 2](roadmap-to-prod.md) — P2.1 Maestro E2E, P2.2 mobile unit tests gate, Sentry.

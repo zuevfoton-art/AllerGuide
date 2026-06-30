@@ -37,4 +37,4 @@ esac
 
 echo ""
 echo "Staging build queued. Track at https://expo.dev → AllerGuide → Builds"
-echo "After install: docs/eas-staging-build.md § Smoke (P1.2c)"
+echo "After install: docs/closed-beta-p17.md and docs/eas-staging-build.md"

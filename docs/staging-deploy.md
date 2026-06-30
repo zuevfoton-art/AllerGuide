@@ -2,6 +2,7 @@
 
 Runbook для развёртывания `apps/api` на staging: Neon Postgres, хостинг, DNS, CI smoke.
 
+**Обзорный план инфраструктуры:** [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md)  
 **Связанные задачи:** P1.1a–e · [`roadmap-to-prod.md`](./roadmap-to-prod.md) · [`apps/api/.env.staging.example`](../apps/api/.env.staging.example)
 
 ---
@@ -165,6 +166,7 @@ Workflow [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-st
 - [ ] `./scripts/staging-auth-smoke.sh` — register/login/me (P1.2c)
 - [ ] `./scripts/staging-sync-smoke.sh` — encrypted backup round-trip (P1.4b)
 - [ ] `./scripts/staging-scan-smoke.sh` — AI scan JWT + cache hit (P1.5b)
+- [ ] `./scripts/staging-preflight.sh` — all smokes before closed beta (P1.7)
 - [ ] TLS валидный на `api.staging.allerguide.app`
 - [ ] `SYNC_ENABLED=true`, `AI_SCAN_ENABLED=true`, `OPENAI_API_KEY` задан
 - [ ] `.env.staging.example` и этот runbook в репозитории
