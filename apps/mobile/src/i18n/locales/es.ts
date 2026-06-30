@@ -327,6 +327,20 @@ const es: LocaleMessages = {
     account: 'Cuenta',
     manageProfiles: 'Mis perfiles',
     manageProfilesHint: 'Perfiles, cerrar sesión y eliminar cuenta',
+    recoveryKeySetupTitle: 'Clave de recuperación',
+    recoveryKeySetupDesc:
+      'Guarde esta clave en un lugar seguro. Sin ella no podrá restaurar en un dispositivo nuevo. No guardamos la clave en el servidor.',
+    recoveryKeyEnterTitle: 'Introduzca la clave de recuperación',
+    recoveryKeyEnterDesc: 'La clave del dispositivo donde creó la copia de seguridad.',
+    recoveryKeyEnterPlaceholder: 'xxxx-xxxx-xxxx-…',
+    recoveryKeyMigrateTitle: 'Nueva clave de recuperación',
+    recoveryKeyMigrateDesc:
+      'La copia en la nube requiere una clave usable en otro dispositivo. Se reemplazará la clave local anterior.',
+    recoveryKeyDisplayLabel: 'Su clave',
+    recoveryKeyConfirmSaved: 'Guardé la clave en un lugar seguro',
+    recoveryKeyCopyHint: 'Copie la clave manualmente (pulsación larga en el texto).',
+    recoveryKeyWrong: 'Clave de recuperación incorrecta.',
+    recoveryKeyRequired: 'Introduzca la clave de recuperación.',
   },
   notifications: {
     eyebrow: 'Notificaciones',

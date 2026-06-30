@@ -327,6 +327,20 @@ const ru: LocaleMessages = {
     account: 'Аккаунт',
     manageProfiles: 'Мои профили',
     manageProfilesHint: 'Профили, выход и удаление аккаунта',
+    recoveryKeySetupTitle: 'Ключ восстановления',
+    recoveryKeySetupDesc:
+      'Сохраните этот ключ в надёжном месте. Без него восстановление на новом устройстве невозможно. Мы не храним ключ на сервере.',
+    recoveryKeyEnterTitle: 'Введите ключ восстановления',
+    recoveryKeyEnterDesc: 'Ключ с устройства, где вы создавали резервную копию.',
+    recoveryKeyEnterPlaceholder: 'xxxx-xxxx-xxxx-…',
+    recoveryKeyMigrateTitle: 'Новый ключ восстановления',
+    recoveryKeyMigrateDesc:
+      'Для облачного бэкапа нужен ключ, который можно перенести на другое устройство. Старый локальный ключ будет заменён.',
+    recoveryKeyDisplayLabel: 'Ваш ключ',
+    recoveryKeyConfirmSaved: 'Я сохранил ключ в безопасном месте',
+    recoveryKeyCopyHint: 'Скопируйте ключ вручную (длинное нажатие на текст).',
+    recoveryKeyWrong: 'Неверный ключ восстановления.',
+    recoveryKeyRequired: 'Введите ключ восстановления.',
   },
   notifications: {
     eyebrow: 'Уведомления',

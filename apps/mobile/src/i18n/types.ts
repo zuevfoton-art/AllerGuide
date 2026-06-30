@@ -329,6 +329,18 @@ export type LocaleMessages = {
     account: string;
     manageProfiles: string;
     manageProfilesHint: string;
+    recoveryKeySetupTitle: string;
+    recoveryKeySetupDesc: string;
+    recoveryKeyEnterTitle: string;
+    recoveryKeyEnterDesc: string;
+    recoveryKeyEnterPlaceholder: string;
+    recoveryKeyMigrateTitle: string;
+    recoveryKeyMigrateDesc: string;
+    recoveryKeyDisplayLabel: string;
+    recoveryKeyConfirmSaved: string;
+    recoveryKeyCopyHint: string;
+    recoveryKeyWrong: string;
+    recoveryKeyRequired: string;
   };
   notifications: {
     eyebrow: string;

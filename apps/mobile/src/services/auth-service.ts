@@ -16,6 +16,7 @@ import {
   backendLogin,
   backendRegister,
   backendReplitExchange,
+  backendFetchMe,
   cacheAuthUser,
   clearAuthToken,
   clearCachedAuthUser,
@@ -65,13 +66,51 @@ function toAuthUser(row: StoredUser): AuthUser {
 export async function hydrateAuthSession(): Promise<void> {
   if (Platform.OS === 'web') return;
 
-  const secureValue = await SecureStore.getItemAsync(AUTH_USER_ID_KEY);
-  if (!secureValue) return;
-
-  const localValue = getSetting(AUTH_USER_ID_KEY);
-  if (localValue !== secureValue) {
-    setSetting(AUTH_USER_ID_KEY, secureValue);
+  const secureUserId = await SecureStore.getItemAsync(AUTH_USER_ID_KEY);
+  if (secureUserId) {
+    const localValue = getSetting(AUTH_USER_ID_KEY);
+    if (localValue !== secureUserId) {
+      setSetting(AUTH_USER_ID_KEY, secureUserId);
+    }
   }
+
+  const secureToken = await SecureStore.getItemAsync('authToken');
+  if (secureToken && !getSetting('authToken')) {
+    setSetting('authToken', secureToken);
+  }
+}
+
+/**
+ * Restore backend JWT session after cold start (P1.2c).
+ * Offline-first: cached user + token is enough; /api/auth/me only when cache is incomplete.
+ */
+export async function restoreAuthSession(): Promise<void> {
+  await hydrateAuthSession();
+
+  if (!BACKEND_AUTH_ENABLED) return;
+
+  const token = await getAuthToken();
+  if (!token) {
+    if (getSessionUserId() || getCachedAuthUser()) {
+      logoutUser();
+    }
+    return;
+  }
+
+  if (getCachedAuthUser() && getSessionUserId()) {
+    const userId = getSessionUserId()!;
+    void syncProfilesFromBackend(userId, token).catch(() => undefined);
+    return;
+  }
+
+  const me = await backendFetchMe(token);
+  if (!me.ok) {
+    logoutUser();
+    return;
+  }
+
+  cacheAuthUser(me.data.user);
+  setSessionUserId(me.data.user.id);
 }
 
 export function isAuthenticated(): boolean {

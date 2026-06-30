@@ -327,6 +327,20 @@ const en: LocaleMessages = {
     account: 'Account',
     manageProfiles: 'My profiles',
     manageProfilesHint: 'Profiles, sign out and delete account',
+    recoveryKeySetupTitle: 'Recovery key',
+    recoveryKeySetupDesc:
+      'Save this key in a safe place. Without it you cannot restore on a new device. We never store the key on the server.',
+    recoveryKeyEnterTitle: 'Enter recovery key',
+    recoveryKeyEnterDesc: 'The key from the device where you created the backup.',
+    recoveryKeyEnterPlaceholder: 'xxxx-xxxx-xxxx-…',
+    recoveryKeyMigrateTitle: 'New recovery key',
+    recoveryKeyMigrateDesc:
+      'Cloud backup needs a key you can use on another device. The old device-only key will be replaced.',
+    recoveryKeyDisplayLabel: 'Your key',
+    recoveryKeyConfirmSaved: 'I saved the key in a safe place',
+    recoveryKeyCopyHint: 'Copy the key manually (long-press the text).',
+    recoveryKeyWrong: 'Incorrect recovery key.',
+    recoveryKeyRequired: 'Enter your recovery key.',
   },
   notifications: {
     eyebrow: 'Notifications',

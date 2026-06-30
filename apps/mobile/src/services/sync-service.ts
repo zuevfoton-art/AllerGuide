@@ -9,7 +9,13 @@ import {
 } from '@allerguide/core';
 import { getCurrentUserId } from '@/src/services/auth-service';
 import { getAuthToken } from '@/src/services/backend-api';
-import { decryptBackup, encryptBackup } from '@/src/services/backup-crypto';
+import {
+  decryptBackup,
+  encryptBackup,
+  hasRecoveryKey,
+  markRecoveryKeyConfirmed,
+  setRecoveryKey,
+} from '@/src/services/backup-crypto';
 import { listProfiles } from '@/src/services/profile-service';
 import { getSosNotes } from '@/src/services/sos-service';
 import { getDb } from '@/src/db/init';
@@ -18,6 +24,19 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+
+export type SyncErrorCode =
+  | 'sync_disabled'
+  | 'not_authenticated'
+  | 'server_unreachable'
+  | 'backup_not_found'
+  | 'decrypt_failed'
+  | 'wrong_recovery_key'
+  | 'recovery_key_required'
+  | 'invalid_payload'
+  | 'wrong_account';
+
+export type SyncResult = { ok: true } | { ok: false; error: string; code: SyncErrorCode };
 
 function collectAppSettings(): Record<string, string> {
   const db = getDb();
@@ -85,21 +104,19 @@ export function importLocalBackup(raw: string): { ok: true } | { ok: false; erro
   return { ok: true };
 }
 
-export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
+export async function uploadBackup(): Promise<SyncResult> {
   if (!CLOUD_SYNC_ENABLED) {
-    return { ok: false, error: 'Облачная синхронизация пока недоступна' };
+    return { ok: false, error: 'Облачная синхронизация пока недоступна', code: 'sync_disabled' };
   }
 
   const userId = getCurrentUserId();
-  if (!userId) return { ok: false, error: 'Не выполнен вход' };
+  if (!userId) return { ok: false, error: 'Не выполнен вход', code: 'not_authenticated' };
 
   try {
     const payload = collectUserData(userId);
     const token = await getAuthToken();
     const envelope = await encryptBackup(JSON.stringify(payload));
 
-    // Prefer zero-knowledge encrypted upload; fall back to plaintext over TLS
-    // when the platform lacks Web Crypto (e.g. RN without a polyfill).
     const body = envelope
       ? { v: 2 as const, userId, exportedAt: payload.exportedAt, encrypted: true, payload: envelope }
       : payload;
@@ -114,48 +131,87 @@ export async function uploadBackup(): Promise<{ ok: boolean; error?: string }> {
     });
 
     if (!response.ok) {
-      return { ok: false, error: 'Сервер недоступен' };
+      return { ok: false, error: 'Сервер недоступен', code: 'server_unreachable' };
     }
 
     return { ok: true };
   } catch {
-    return { ok: false, error: 'Не удалось подключиться к серверу' };
+    return { ok: false, error: 'Не удалось подключиться к серверу', code: 'server_unreachable' };
   }
 }
 
-export async function downloadBackup(): Promise<{ ok: boolean; error?: string }> {
+export async function downloadBackup(options?: {
+  recoveryKey?: string;
+}): Promise<SyncResult> {
   if (!CLOUD_SYNC_ENABLED) {
-    return { ok: false, error: 'Облачная синхронизация пока недоступна' };
+    return { ok: false, error: 'Облачная синхронизация пока недоступна', code: 'sync_disabled' };
   }
 
   const userId = getCurrentUserId();
-  if (!userId) return { ok: false, error: 'Не выполнен вход' };
+  if (!userId) return { ok: false, error: 'Не выполнен вход', code: 'not_authenticated' };
+
+  const recoveryKey = options?.recoveryKey?.trim();
+  if (!hasRecoveryKey() && !recoveryKey) {
+    return {
+      ok: false,
+      error: 'Введите ключ восстановления с другого устройства',
+      code: 'recovery_key_required',
+    };
+  }
 
   try {
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE}/api/sync/backup/${userId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
-    if (!response.ok) return { ok: false, error: 'Резервная копия не найдена' };
+    if (!response.ok) {
+      return { ok: false, error: 'Резервная копия не найдена', code: 'backup_not_found' };
+    }
 
     let raw = await response.text();
     const outer = JSON.parse(raw) as { encrypted?: boolean; payload?: string };
     if (outer?.encrypted && typeof outer.payload === 'string') {
-      const decrypted = await decryptBackup(outer.payload);
-      if (!decrypted) return { ok: false, error: 'Не удалось расшифровать резервную копию' };
+      const passphrase = recoveryKey ?? undefined;
+      const decrypted = await decryptBackup(outer.payload, passphrase ? { passphrase } : undefined);
+      if (!decrypted) {
+        if (recoveryKey) {
+          return { ok: false, error: 'Неверный ключ восстановления', code: 'wrong_recovery_key' };
+        }
+        return {
+          ok: false,
+          error: 'Не удалось расшифровать резервную копию',
+          code: 'recovery_key_required',
+        };
+      }
       raw = decrypted;
     }
 
     const payload = parseSyncPayload(raw);
-    if (!payload) return { ok: false, error: 'Некорректные данные резервной копии' };
+    if (!payload) {
+      return { ok: false, error: 'Некорректные данные резервной копии', code: 'invalid_payload' };
+    }
 
     const validationError = validateSyncPayload(payload, userId);
-    if (validationError) return { ok: false, error: 'Резервная копия не подходит для этого аккаунта' };
+    if (validationError) {
+      return {
+        ok: false,
+        error: 'Резервная копия не подходит для этого аккаунта',
+        code: 'wrong_account',
+      };
+    }
+
+    if (recoveryKey) {
+      const stored = setRecoveryKey(recoveryKey);
+      if (!stored.ok) {
+        return { ok: false, error: 'Некорректный ключ восстановления', code: 'wrong_recovery_key' };
+      }
+      markRecoveryKeyConfirmed();
+    }
 
     applySyncPayload(getDb(), payload, userId);
     void reconcileAllReminders();
     return { ok: true };
   } catch {
-    return { ok: false, error: 'Не удалось загрузить резервную копию' };
+    return { ok: false, error: 'Не удалось загрузить резервную копию', code: 'server_unreachable' };
   }
 }

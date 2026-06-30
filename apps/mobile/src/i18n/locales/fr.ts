@@ -327,6 +327,20 @@ const fr: LocaleMessages = {
     account: 'Compte',
     manageProfiles: 'Mes profils',
     manageProfilesHint: 'Profils, déconnexion et suppression du compte',
+    recoveryKeySetupTitle: 'Clé de récupération',
+    recoveryKeySetupDesc:
+      'Conservez cette clé en lieu sûr. Sans elle, la restauration sur un nouvel appareil est impossible. Nous ne stockons pas la clé sur le serveur.',
+    recoveryKeyEnterTitle: 'Saisir la clé de récupération',
+    recoveryKeyEnterDesc: 'La clé de l’appareil où vous avez créé la sauvegarde.',
+    recoveryKeyEnterPlaceholder: 'xxxx-xxxx-xxxx-…',
+    recoveryKeyMigrateTitle: 'Nouvelle clé de récupération',
+    recoveryKeyMigrateDesc:
+      'La sauvegarde cloud nécessite une clé utilisable sur un autre appareil. L’ancienne clé locale sera remplacée.',
+    recoveryKeyDisplayLabel: 'Votre clé',
+    recoveryKeyConfirmSaved: 'J’ai enregistré la clé en lieu sûr',
+    recoveryKeyCopyHint: 'Copiez la clé manuellement (appui long sur le texte).',
+    recoveryKeyWrong: 'Clé de récupération incorrecte.',
+    recoveryKeyRequired: 'Saisissez la clé de récupération.',
   },
   notifications: {
     eyebrow: 'Notifications',
