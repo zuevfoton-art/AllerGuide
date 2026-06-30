@@ -10,6 +10,10 @@
 | P1.3a | Done | `backup-crypto.ts` recovery API |
 | P1.3b | Done | `RecoveryKeyModal`, `CloudBackupCard` |
 | P1.3c | Done | `downloadBackup({ recoveryKey })` |
-| P1.3e | Done | migrate flow in `CloudBackupCard` (`usesLegacyDeviceKeyOnly`) |
+| P1.3e | Done | migrate flow in `CloudBackupCard` |
+| P1.4a | Done | Health `features.sync`, JWT-only sync on staging, `staging-smoke.sh` |
+| P1.4b | Done | `staging-sync-smoke.ts`, `sync-encrypted-e2e.test.ts`, mobile 503 → `sync_disabled` |
+| P1.4c | Done | QA § P1.4c cross-device sync |
+| P1.4d | Done | [`docs/adr/002-sync-conflict-policy.md`](./adr/002-sync-conflict-policy.md) |
 
-**Далее:** P1.4a sync flags on staging infra · P1.4b E2E encrypted sync · P1.4c cross-device QA
+**Далее:** P1.5 AI scan staging · P1.6 API integration tests · P1.7 closed beta gate

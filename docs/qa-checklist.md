@@ -306,6 +306,54 @@
 
 ---
 
+## P1.4c — Cloud sync cross-device E2E
+
+**Профиль:** EAS `staging` · `CLOUD_SYNC=true`  
+**API:** `SYNC_ENABLED=true` на staging  
+**Политика конфликтов:** [ADR 002](adr/002-sync-conflict-policy.md) (last-write-wins)
+
+Перед mobile smoke (опционально):
+
+```bash
+./scripts/staging-smoke.sh          # health + features.sync
+./scripts/staging-sync-smoke.sh     # encrypted v2 round-trip
+```
+
+### Метаданные sync-прогона
+
+| Поле | Значение |
+|------|----------|
+| Устройство A | (модель / OS) |
+| Устройство B | (модель / OS) |
+| Recovery key сохранён | ☐ вне приложения |
+
+### Сценарии backup (обязательно на 2 native-устройствах)
+
+| ID | Сценарий | Dev A | Dev B | Критерий Pass |
+|----|----------|-------|-------|---------------|
+| **B.1** | Первый upload: setup recovery key → подтверждение → upload | ☐ | N/A | Успех; ключ показан и подтверждён |
+| **B.2** | Данные на A: профиль + запись дневника + SOS note | ☐ | N/A | Локально видны |
+| **B.3** | Upload backup на A | ☐ | N/A | «Резервная копия загружена» |
+| **B.4** | Login тем же аккаунтом на B | N/A | ☐ | Успешный вход |
+| **B.5** | Download на B без локального ключа → ввод recovery key | N/A | ☐ | Модалка ключа; после ввода — успех |
+| **B.6** | Данные после restore на B | N/A | ☐ | Профиль, дневник, SOS совпадают с A |
+| **B.7** | Неверный recovery key на B | N/A | ☐ | Ошибка «Неверный ключ», данные не меняются |
+| **B.8** | Повторный upload с B → download на A | ☐ | ☐ | LWW: данные B видны на A после download |
+
+### Web (опционально)
+
+| ID | Сценарий | Web | Примечание |
+|----|----------|-----|------------|
+| **B.W1** | Upload/download с recovery key | ☐ | Требует `crypto.subtle` (обычно OK в браузере) |
+
+### Итог P1.4c
+
+☐ B.1–B.6 Pass на **двух** native-устройствах  
+☐ `staging-sync-smoke.sh` Pass (API)  
+☐ Recovery key сохранён тестером вне приложения
+
+---
+
 ## Шаблон баг-репорта
 
 ```markdown

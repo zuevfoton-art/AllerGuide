@@ -115,6 +115,17 @@ describe('downloadBackup recovery key', () => {
     });
   });
 
+  it('returns sync_disabled when server returns 503', async () => {
+    mockFetch.mockResolvedValue({ ok: false, status: 503 });
+    const { uploadBackup } = await import('./sync-service');
+    const result = await uploadBackup();
+    expect(result).toEqual({
+      ok: false,
+      error: 'Облачная синхронизация пока недоступна',
+      code: 'sync_disabled',
+    });
+  });
+
   it('persists recovery key and applies payload on success', async () => {
     const { downloadBackup } = await import('./sync-service');
     const key = 'b'.repeat(64);

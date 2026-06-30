@@ -82,7 +82,6 @@ describe('JWT-authenticated sync', () => {
   it('rejects sync without auth when JWT secret is the only mechanism', async () => {
     const app = await createApp({ withReplitAuth: false });
     const download = await request(app).get('/api/sync/backup/4242');
-    // No JWT and no SYNC_API_KEY configured -> access middleware passes, but no data
-    expect(download.status).toBe(404);
+    expect(download.status).toBe(401);
   });
 });

@@ -4,6 +4,10 @@ import { buildConnectionOptions, resolveRuntimeUrl } from '../db/config';
 export interface HealthCheckResult {
   ok: boolean;
   authDatabase: boolean;
+  features?: {
+    sync: boolean;
+    aiScan: boolean;
+  };
   database?: {
     ok: boolean;
     latencyMs?: number;
@@ -44,7 +48,14 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
   const authDatabase = hasDatabaseUrl && Boolean(process.env.JWT_SECRET);
 
   if (!hasDatabaseUrl) {
-    return { ok: true, authDatabase: false };
+    return {
+      ok: true,
+      authDatabase: false,
+      features: {
+        sync: process.env.SYNC_ENABLED === 'true',
+        aiScan: process.env.AI_SCAN_ENABLED === 'true',
+      },
+    };
   }
 
   const database = await checkDatabaseConnectivity();
@@ -52,6 +63,10 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
   return {
     ok,
     authDatabase,
+    features: {
+      sync: process.env.SYNC_ENABLED === 'true',
+      aiScan: process.env.AI_SCAN_ENABLED === 'true',
+    },
     database,
   };
 }

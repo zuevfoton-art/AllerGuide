@@ -61,7 +61,7 @@ sequenceDiagram
 
 - Один backup на `userId` на сервере (`sync_backups`, upsert).
 - **Last-write-wins** по полю `exportedAt` в payload.
-- Конфликты двух устройств без merge — побеждает последний upload (детали: ADR после P1.4c или секция в architecture.md).
+- Конфликты двух устройств без merge — побеждает последний upload ([ADR 002](./002-sync-conflict-policy.md)).
 
 ### Logout и delete account
 

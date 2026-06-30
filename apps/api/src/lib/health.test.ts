@@ -28,4 +28,14 @@ describe('buildHealthPayload', () => {
     expect(payload.ok).toBe(false);
     expect(payload.authDatabase).toBe(false);
   });
+
+  it('exposes staging feature flags in health payload', async () => {
+    process.env.SYNC_ENABLED = 'true';
+    process.env.AI_SCAN_ENABLED = 'false';
+    delete process.env.DATABASE_URL;
+
+    const { buildHealthPayload } = await import('./health');
+    const payload = await buildHealthPayload();
+    expect(payload.features).toEqual({ sync: true, aiScan: false });
+  });
 });

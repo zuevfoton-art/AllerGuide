@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Post-deploy smoke for staging API (P1.1c / P1.1e).
+# Post-deploy smoke for staging API (P1.1c / P1.1e / P1.4a).
 set -euo pipefail
 
 BASE="${STAGING_API_URL:-${1:-https://api.staging.allerguide.app}}"
@@ -13,6 +13,12 @@ if command -v jq >/dev/null 2>&1; then
   ok="$(echo "$response" | jq -r '.ok')"
   if [ "$ok" != "true" ]; then
     echo "Health check failed: ok=$ok" >&2
+    exit 1
+  fi
+
+  sync_enabled="$(echo "$response" | jq -r '.features.sync // empty')"
+  if [ -n "$sync_enabled" ] && [ "$sync_enabled" != "true" ]; then
+    echo "Health check failed: features.sync=$sync_enabled (expected true on staging)" >&2
     exit 1
   fi
 fi
