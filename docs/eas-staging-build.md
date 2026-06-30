@@ -3,7 +3,7 @@
 **Roadmap:** Phase 1 · [P1.2b](phase1-phase2-issues.md)  
 **Профиль:** `staging` в [`apps/mobile/eas.json`](../apps/mobile/eas.json)
 
-Internal-сборка для closed beta: **backend auth, cloud sync и AI scan включены**. Требует живой staging API ([`staging-deploy.md`](staging-deploy.md)).
+Internal-сборка для closed beta: **backend auth, cloud sync и AI scan включены**. Требует живой staging API ([`staging-deploy.md`](staging-deploy.md), план: [`staging-infrastructure-plan.md`](staging-infrastructure-plan.md)).
 
 > Offline-only smoke без сервера — используйте профиль [`preview`](eas-internal-preview.md).
 

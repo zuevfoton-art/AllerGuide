@@ -158,7 +158,7 @@ flowchart TB
 
 | ID | Задача | Критерий готовности | Архитектура |
 |----|--------|---------------------|-------------|
-| P1.1 | Deploy API staging | Health check, миграции, TLS, CORS | [`staging-deploy.md`](./staging-deploy.md) · `db:migrate`, не `db:push` |
+| P1.1 | Deploy API staging | Health check, миграции, TLS, CORS | [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`staging-deploy.md`](./staging-deploy.md) · `db:migrate`, не `db:push` |
 | P1.2 | Backend auth E2E | Register → login → profiles на сервере | `auth-service` + `backend-api`; флаг `BACKEND_AUTH` |
 | P1.3 | Ключ восстановления бэкапа | Cross-device restore | Клиентское шифрование core/crypto сохранено |
 | P1.4 | Cloud sync E2E | Encrypted upload/download, полный restore | `sync-service` → zero-knowledge API |

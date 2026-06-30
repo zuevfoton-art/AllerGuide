@@ -2,7 +2,7 @@
 
 **Roadmap:** Phase 1 milestone · [phase1-phase2-issues.md](phase1-phase2-issues.md)  
 **Сборка:** EAS profile `staging` ([eas-staging-build.md](eas-staging-build.md))  
-**API:** [staging-deploy.md](staging-deploy.md)
+**API:** [staging-deploy.md](staging-deploy.md) · [staging-infrastructure-plan.md](staging-infrastructure-plan.md)
 
 Закрытая бета на **10–20 тестеров** с backend-интеграцией (auth, sync, AI scan). Цель — подтвердить готовность Phase 1 перед Phase 2 (Maestro E2E, Sentry).
 
