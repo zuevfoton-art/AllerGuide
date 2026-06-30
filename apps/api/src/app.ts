@@ -17,6 +17,7 @@ import {
   createGlobalRateLimiter,
   createScanRateLimiter,
 } from './middleware/security';
+import { buildHealthPayload } from './lib/health';
 
 export async function createApp(
   options: { withReplitAuth?: boolean } = {},
@@ -49,11 +50,9 @@ export async function createApp(
     registerAuthRoutes(app);
   }
 
-  app.get('/api/health', (_req, res) => {
-    res.json({
-      ok: true,
-      authDatabase: Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET),
-    });
+  app.get('/api/health', async (_req, res) => {
+    const health = await buildHealthPayload();
+    res.status(health.ok ? 200 : 503).json(health);
   });
 
   const metroUrl = process.env.METRO_URL;

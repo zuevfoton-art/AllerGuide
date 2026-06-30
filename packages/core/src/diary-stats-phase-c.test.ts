@@ -18,13 +18,20 @@ function entry(type: string, iso: string, hour: number, answers: Record<string, 
   };
 }
 
+/** ISO date N days before today (keeps entries inside the 7-day rolling window). */
+function recentIso(daysBack: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysBack);
+  return d.toISOString().slice(0, 10);
+}
+
 describe('diary-stats Phase C', () => {
   it('detects temporal symptom-trigger correlation within ±4h (C.3)', () => {
     const entries = [
-      entry('Симптомы', '2026-06-20', 10, { symptoms: 'зуд', severity0_3: '2 — умеренная' }),
-      entry('Триггер', '2026-06-20', 11, { trigger: 'пыльца' }),
-      entry('Симптомы', '2026-06-19', 9, { symptoms: 'кашель', severity0_3: '1 — лёгкая' }),
-      entry('Триггер', '2026-06-19', 14, { trigger: 'холод' }),
+      entry('Симптомы', recentIso(1), 10, { symptoms: 'зуд', severity0_3: '2 — умеренная' }),
+      entry('Триггер', recentIso(1), 11, { trigger: 'пыльца' }),
+      entry('Симптомы', recentIso(2), 9, { symptoms: 'кашель', severity0_3: '1 — лёгкая' }),
+      entry('Триггер', recentIso(2), 14, { trigger: 'холод' }),
     ];
     const result = computeTemporalCorrelations(entries);
     expect(result.kind).toBe('symptom-trigger');
@@ -54,8 +61,8 @@ describe('diary-stats Phase C', () => {
 
   it('includes temporal fields in insights', () => {
     const entries = [
-      entry('Симптомы', '2026-06-20', 10, { symptoms: 'зуд', severity0_3: '1 — лёгкая' }),
-      entry('Триггер', '2026-06-20', 10, { trigger: 'пыльца' }),
+      entry('Симптомы', recentIso(0), 10, { symptoms: 'зуд', severity0_3: '1 — лёгкая' }),
+      entry('Триггер', recentIso(0), 10, { trigger: 'пыльца' }),
     ];
     const insights = computeDiaryInsights(entries);
     expect(insights.temporalCorrelationOf).toBeGreaterThanOrEqual(0);

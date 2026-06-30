@@ -205,7 +205,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 1. Зафиксировать баги из QA → GitHub issues (`phase-0`)
 2. [P0.2] Закрыть P0/P1 баги
 3. [P0.5] Локализация legal
-4. [Phase 1] Staging API + backend flags
+4. [Phase 1] Staging API + [`eas-staging-build.md`](eas-staging-build.md)
 
 ---
 

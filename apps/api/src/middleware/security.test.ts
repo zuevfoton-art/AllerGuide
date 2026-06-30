@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app';
+import { buildHealthPayload } from '../lib/health';
 import { buildCorsOptions } from './security';
 
 const ORIGINAL_ENV = { ...process.env };
@@ -49,5 +50,24 @@ describe('security middleware', () => {
     const app = await createApp({ withReplitAuth: false });
     const response = await request(app).get('/api/health');
     expect(response.headers['ratelimit-limit']).toBeUndefined();
+  });
+});
+
+describe('health endpoint', () => {
+  it('returns liveness when DATABASE_URL is unset', async () => {
+    delete process.env.DATABASE_URL;
+    delete process.env.JWT_SECRET;
+    const payload = await buildHealthPayload();
+    expect(payload.ok).toBe(true);
+    expect(payload.database).toBeUndefined();
+  });
+
+  it('returns 503 when DATABASE_URL is set but JWT_SECRET is missing', async () => {
+    process.env.DATABASE_URL = 'postgresql://example';
+    delete process.env.JWT_SECRET;
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app).get('/api/health');
+    expect(response.status).toBe(503);
+    expect(response.body.authDatabase).toBe(false);
   });
 });

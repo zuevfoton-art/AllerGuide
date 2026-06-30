@@ -1,0 +1,52 @@
+name: Deploy staging API
+
+# P1.1e — migrate staging DB and smoke /api/health.
+# Hosting deploy (Railway/Render) is configured on the provider; this workflow
+# validates migrations + readiness when secrets are set.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [staging]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: ${{ secrets.STAGING_DATABASE_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations to staging Neon
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+          DB_PREPARE: 'false'
+        run: pnpm --filter api db:migrate
+
+  smoke:
+    needs: [migrate]
+    if: ${{ always() && needs.migrate.result == 'success' && secrets.STAGING_API_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Health check
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          chmod +x scripts/staging-smoke.sh
+          ./scripts/staging-smoke.sh

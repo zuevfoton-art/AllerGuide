@@ -99,7 +99,7 @@ flowchart TB
 | Режим | Описание |
 |-------|----------|
 | **Offline (по умолчанию)** | Только local DB + keyword-сканер из `@allerguide/ai` |
-| **+ Backend auth** | JWT, профили на сервере, dual-write с локальной копией |
+| **+ Backend auth** | JWT, профили на сервере, dual-write с локальной копией — см. [ADR 001](adr/001-dual-write.md) |
 | **+ Product DB** | Поиск штрихкода в Postgres-каталоге до OFF |
 | **+ AI scan** | LLM через `POST /api/scan` с кэшем и дневным бюджетом |
 | **+ Cloud sync** | AES-GCM бэкап на сервер (zero-knowledge) |
@@ -378,6 +378,10 @@ flowchart LR
 | **Replit OIDC** | Сессия в Postgres `public.sessions`, обмен на JWT для mobile | `REPL_ID` на API, web callback |
 
 JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 7 дней (`apps/api/src/lib/jwt.ts`).
+
+### Dual-write policy (Phase 1)
+
+При `BACKEND_AUTH_ENABLED` профили пишутся в API и локальную БД; дневник/SOS/сканер остаются локальными; облачный перенос — через encrypted backup. Подробно: [ADR 001: Offline-first dual-write](adr/001-dual-write.md).
 
 ---
 
