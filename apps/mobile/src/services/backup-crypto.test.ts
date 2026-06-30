@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const settings = new Map<string, string>();
+const { settings } = vi.hoisted(() => {
+  const settings = new Map<string, string>();
+  return { settings };
+});
 
 vi.mock('@/src/services/settings-service', () => ({
   getSetting: (key: string) => settings.get(key) ?? null,
@@ -9,6 +12,8 @@ vi.mock('@/src/services/settings-service', () => ({
   },
 }));
 
+// Mock must be registered before backup-crypto loads settings-service.
+// eslint-disable-next-line import/first
 import {
   decryptBackup,
   encryptBackup,
