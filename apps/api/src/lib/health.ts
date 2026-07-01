@@ -1,6 +1,8 @@
 import postgres from 'postgres';
-import { buildConnectionOptions, resolveRuntimeUrl } from '../db/config';
+import { buildConnectionOptions, isNeonPoolerUrl, resolveRuntimeUrl } from '../db/config';
 import { getScanMetrics } from './scan-cache';
+import { pingRedis } from './redis-client';
+import { resolveRateLimitStoreKind } from './rate-limit-store';
 
 export interface ScanHealthMetrics {
   enabled: boolean;
@@ -22,6 +24,14 @@ export interface HealthCheckResult {
   scan?: ScanHealthMetrics;
   database?: {
     ok: boolean;
+    latencyMs?: number;
+    error?: string;
+    pooler?: boolean;
+    poolerWarning?: string;
+  };
+  rateLimit?: {
+    store: 'redis' | 'memory';
+    ok?: boolean;
     latencyMs?: number;
     error?: string;
   };
@@ -74,11 +84,28 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
         aiScan: process.env.AI_SCAN_ENABLED === 'true',
       },
       scan: buildScanHealth(),
+      rateLimit: { store: resolveRateLimitStoreKind() },
     };
   }
 
   const database = await checkDatabaseConnectivity();
-  const ok = database.ok && Boolean(process.env.JWT_SECRET);
+  const pooler = isNeonPoolerUrl(process.env.DATABASE_URL);
+  const poolerWarning =
+    pooler && process.env.DB_PREPARE !== 'false'
+      ? 'Neon pooler detected; set DB_PREPARE=false for transaction pooling'
+      : undefined;
+
+  const rateLimitStore = resolveRateLimitStoreKind();
+  const rateLimitPing = rateLimitStore === 'redis' ? await pingRedis() : null;
+  const rateLimit = rateLimitPing
+    ? { store: rateLimitStore, ...rateLimitPing }
+    : { store: rateLimitStore };
+
+  const ok =
+    database.ok &&
+    Boolean(process.env.JWT_SECRET) &&
+    (rateLimitStore !== 'redis' || rateLimitPing?.ok !== false);
+
   return {
     ok,
     authDatabase,
@@ -87,6 +114,11 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
       aiScan: process.env.AI_SCAN_ENABLED === 'true',
     },
     scan: buildScanHealth(),
-    database,
+    database: {
+      ...database,
+      pooler,
+      ...(poolerWarning ? { poolerWarning } : {}),
+    },
+    rateLimit,
   };
 }

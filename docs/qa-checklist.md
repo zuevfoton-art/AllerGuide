@@ -237,6 +237,8 @@
 | 14.2 | Tab bar не перекрывает контент | ☐ | |
 | 14.3 | Keyboard: формы login/diary не ломают layout | ☐ | |
 | 14.4 | Deep routes работают: `/profiles`, `/expert`, `/settings` | ☐ | |
+| 14.5 | IndexedDB: данные профиля/дневника сохраняются после reload | ☐ | P2.7c |
+| 14.6 | Быстрый ввод 5 записей дневника — UI без заметных фризов | ☐ | idle flush |
 
 ---
 
@@ -244,7 +246,7 @@
 
 | # | Сценарий | iOS | Android | Примечания |
 |---|----------|-----|---------|------------|
-| 15.1 | Cold start <5 сек до интерактивного UI | ☐ | ☐ | target p95 <3s later |
+| 15.1 | Cold start <3 сек до интерактивного UI (p95) | ☐ | ☐ | см. `performance-cold-start.md` |
 | 15.2 | Camera permission dialog на русском / выбранном языке | ☐ | ☐ | |
 | 15.3 | Location permission на карте | ☐ | ☐ | |
 | 15.4 | Notifications permission (reminder toggle) | ☐ | ☐ | |

@@ -73,6 +73,11 @@ export function deriveDirectDatabaseUrl(url: string): string {
   return url.includes('-pooler') ? url.replace('-pooler', '') : url;
 }
 
+/** True when DATABASE_URL points at a Neon PgBouncer pooler host. */
+export function isNeonPoolerUrl(url: string | undefined): boolean {
+  return Boolean(url?.includes('-pooler'));
+}
+
 /** Runtime (app) connection string — the pooled endpoint on Neon. */
 export function resolveRuntimeUrl(env: Env = process.env): string | undefined {
   return env.DATABASE_URL;

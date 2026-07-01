@@ -14,9 +14,7 @@ import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
 import {
   buildCorsOptions,
-  createAuthRateLimiter,
-  createGlobalRateLimiter,
-  createScanRateLimiter,
+  installRateLimiters,
 } from './middleware/security';
 import { buildHealthPayload } from './lib/health';
 
@@ -33,10 +31,7 @@ export async function createApp(
   app.use(helmet({ contentSecurityPolicy: isDev ? false : undefined }));
   app.use(cors(buildCorsOptions()));
   app.use(express.json({ limit: '2mb' }));
-  app.use(createGlobalRateLimiter());
-
-  app.use('/api/auth', createAuthRateLimiter());
-  app.use('/api/scan', createScanRateLimiter());
+  await installRateLimiters(app);
 
   registerMobileAuthRoutes(app);
   registerProfileRoutes(app);

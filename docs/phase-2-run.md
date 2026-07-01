@@ -16,10 +16,19 @@
 | P2.5a | Done | OWASP mobile audit, [`security-audit-mobile.md`](./security-audit-mobile.md) |
 | P2.6a | Done | Pen-test JWT/IDOR/rate-limit, [`security-audit-api.md`](./security-audit-api.md) |
 | P2.6b | Done | 0 critical open; fixes + regression tests |
+| P2.7a | Done | `startup-metrics.ts`, deferred allergen warm, [`performance-cold-start.md`](./performance-cold-start.md) |
+| P2.7b | Done | Redis rate-limit, health DB/redis, [`performance-api-infra.md`](./performance-api-infra.md) |
+| P2.7c | Done | `web-store.test.ts`, idle flush, [`performance-web-store.md`](./performance-web-store.md) |
 
-**Далее:** P2.7 Performance profiling (cold start, Redis rate-limit).
+**Далее:** P2.8 RC gate + 2-week soak ([`rc-gate.md`](./rc-gate.md) — PR #105).
 
 См. [roadmap Phase 2](roadmap-to-prod.md#phase-2--quality--security--release-candidate) · [подзадачи](phase1-phase2-issues.md#phase-2--quality--security).
+
+## Performance (P2.7)
+
+1. Cold start: см. [`performance-cold-start.md`](./performance-cold-start.md) — `[startup-metrics]` в logcat, target p95 &lt;3s.
+2. API: `REDIS_URL` для shared rate-limit; health → `database` + `rateLimit`.
+3. Web: IndexedDB smoke в [qa-checklist](./qa-checklist.md) §14.
 
 ## Sentry (P2.3)
 

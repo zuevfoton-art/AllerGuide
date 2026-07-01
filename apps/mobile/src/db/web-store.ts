@@ -85,11 +85,20 @@ export function saveJson(key: string, value: unknown): void {
 }
 
 function scheduleFlush(): void {
-  if (flushTimer) return;
-  flushTimer = setTimeout(() => {
+  if (flushTimer != null) return;
+
+  const run = () => {
     flushTimer = null;
     void flush();
-  }, 120);
+  };
+
+  if (typeof requestIdleCallback === 'function') {
+    const idleId = requestIdleCallback(run, { timeout: 500 });
+    flushTimer = idleId as unknown as ReturnType<typeof setTimeout>;
+    return;
+  }
+
+  flushTimer = setTimeout(run, 120);
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -203,6 +212,19 @@ export async function hydrateWebStore(): Promise<void> {
   } catch {
     hydrateFromLocalStorage();
   }
+}
+
+/** Test/diagnostic helper. */
+export function getWebStoreDiagnostics(): {
+  hydrated: boolean;
+  memoryKeys: number;
+  dirtyKeys: number;
+} {
+  return {
+    hydrated,
+    memoryKeys: memory.size,
+    dirtyKeys: dirty.size,
+  };
 }
 
 /** Test/diagnostic helper. */
