@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   getWizardStep,
   parseAllergies,
+  resolveAuthedBootstrapRoute,
   resolveBootstrapRoute,
   shouldCompleteOnboarding,
 } from './onboarding';
+
+const selfProfile = { id: 1, name: 'A', birthYear: 1990, type: 'self' as const, allergies: '[]' };
+const childProfile = { id: 2, name: 'B', birthYear: 2015, type: 'child' as const, allergies: '[]' };
 
 describe('parseAllergies', () => {
   it('parses valid JSON array', () => {
@@ -60,6 +64,30 @@ describe('resolveBootstrapRoute', () => {
         false,
       ),
     ).toBe('/profile-setup');
+  });
+});
+
+describe('resolveAuthedBootstrapRoute', () => {
+  it('sends a returning user with a profile straight to home, even on a fresh install (intro/onboarding flags false)', () => {
+    expect(resolveAuthedBootstrapRoute([selfProfile], 'self', false, false)).toBe('/(tabs)/home');
+  });
+
+  it('shows the intro tour to a brand-new user with no profiles', () => {
+    expect(resolveAuthedBootstrapRoute([], null, false, false)).toBe('/onboarding-intro');
+  });
+
+  it('sends a new user who finished the intro to scenario onboarding', () => {
+    expect(resolveAuthedBootstrapRoute([], null, true, false)).toBe('/onboarding');
+  });
+
+  it('resumes the both-wizard for a user missing the child profile', () => {
+    expect(resolveAuthedBootstrapRoute([selfProfile], 'both', false, false)).toBe('/profile-setup');
+  });
+
+  it('sends a user with both profiles to home', () => {
+    expect(resolveAuthedBootstrapRoute([selfProfile, childProfile], 'both', false, true)).toBe(
+      '/(tabs)/home',
+    );
   });
 });
 

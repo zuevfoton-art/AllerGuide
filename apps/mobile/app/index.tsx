@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { resolveBootstrapRoute } from '@allerguide/core';
+import { resolveAuthedBootstrapRoute } from '@allerguide/core';
 import { AppSplash } from '@/src/components/AppSplash';
 import { initDb } from '@/src/db/init';
 import {
@@ -45,12 +45,14 @@ export default function Index() {
         const scenario = getStoredScenario();
         if (scenario) setScenario(scenario);
 
-        if (!isIntroComplete()) {
-          setTarget('/onboarding-intro');
-          return;
-        }
-
-        setTarget(resolveBootstrapRoute(profiles, scenario, isOnboardingComplete()));
+        setTarget(
+          resolveAuthedBootstrapRoute(
+            profiles,
+            scenario,
+            isIntroComplete(),
+            isOnboardingComplete(),
+          ),
+        );
       }
 
       if (hasReplitCallback) {

@@ -33,6 +33,33 @@ export function resolveBootstrapRoute(
   return '/profile-setup';
 }
 
+export type AuthedBootstrapRoute = '/onboarding-intro' | BootstrapRoute;
+
+/**
+ * First route for an already-authenticated user.
+ *
+ * A returning user who already has at least one profile skips the first-run
+ * intro tour and onboarding and goes straight to their resolved route (Home,
+ * or the profile-setup wizard if a "both" scenario is only half complete).
+ * The intro is only shown to brand-new users who have no profiles yet.
+ */
+export function resolveAuthedBootstrapRoute(
+  profiles: Profile[],
+  scenario: Scenario | null,
+  introComplete: boolean,
+  onboardingComplete: boolean,
+): AuthedBootstrapRoute {
+  if (profiles.length > 0) {
+    return resolveBootstrapRoute(profiles, scenario, onboardingComplete);
+  }
+
+  if (!introComplete) {
+    return '/onboarding-intro';
+  }
+
+  return resolveBootstrapRoute(profiles, scenario, onboardingComplete);
+}
+
 export function shouldCompleteOnboarding(scenario: Scenario | null, profiles: Profile[]): boolean {
   if (!scenario) return profiles.length > 0;
   if (scenario === 'both') {
