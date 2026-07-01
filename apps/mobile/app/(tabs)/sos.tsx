@@ -33,6 +33,7 @@ import {
   getSosNotes,
   listEmergencyContacts,
 } from '@/src/services/sos-service';
+import { trackEvent } from '@/src/services/analytics-service';
 
 export default function SosScreen() {
   const theme = useTheme();
@@ -77,6 +78,7 @@ export default function SosScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      trackEvent('sos_opened');
       refresh();
     }, [refresh]),
   );

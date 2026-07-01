@@ -25,6 +25,7 @@ import {
   setAuthToken,
   syncProfilesFromBackend,
 } from '@/src/services/backend-api';
+import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 
 interface StoredUser extends AuthUser {
@@ -154,6 +155,7 @@ export async function registerUser(input: {
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
+    trackEvent('auth_register', { login_type: input.loginType, source: 'backend' });
     return { ok: true, user: response.data.user };
   }
 
@@ -183,6 +185,7 @@ export async function registerUser(input: {
   if (!created) return { ok: false, error: 'Не удалось создать аккаунт.' };
 
   setSessionUserId(created.id);
+  trackEvent('auth_register', { login_type: input.loginType, source: 'local' });
   return { ok: true, user: toAuthUser(created) };
 }
 
@@ -202,6 +205,7 @@ export async function loginUser(input: {
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
+    trackEvent('auth_login', { login_type: input.loginType, source: 'backend' });
     return { ok: true, user: response.data.user };
   }
 
@@ -223,10 +227,12 @@ export async function loginUser(input: {
   }
 
   setSessionUserId(row.id);
+  trackEvent('auth_login', { login_type: input.loginType, source: 'local' });
   return { ok: true, user: toAuthUser(row) };
 }
 
 export function logoutUser() {
+  trackEvent('auth_logout');
   clearSessionUserId();
   clearCachedAuthUser();
   void clearAuthToken();

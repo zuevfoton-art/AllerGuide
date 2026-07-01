@@ -46,6 +46,10 @@ vi.mock('react-native', () => ({
   Platform: { OS: 'ios' },
 }));
 
+vi.mock('@/src/services/analytics-service', () => ({
+  trackEvent: vi.fn(),
+}));
+
 vi.mock('@/src/db/init', () => ({
   getDb: () => ({ runSync, getAllSync, getFirstSync: vi.fn() }),
 }));

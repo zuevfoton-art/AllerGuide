@@ -4,7 +4,21 @@ import {
   buildAnalyticsPayload,
   isAnalyticsEventName,
   sanitizeAnalyticsProps,
-} from './analytics-events';
+} from '@allerguide/core';
+
+vi.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
+vi.mock('@/src/services/settings-service', () => {
+  const settings = new Map<string, string>();
+  return {
+    getSetting: (key: string) => settings.get(key) ?? null,
+    setSetting: (key: string, value: string) => {
+      settings.set(key, value);
+    },
+  };
+});
 
 describe('analytics-events', () => {
   it('defines a closed set of event names', () => {
@@ -41,8 +55,10 @@ describe('analytics-events', () => {
 describe('trackEvent integration', () => {
   beforeEach(() => {
     vi.resetModules();
+    vi.unstubAllEnvs();
     vi.stubEnv('EXPO_PUBLIC_ANALYTICS_ENABLED', 'true');
     vi.stubEnv('EXPO_PUBLIC_ANALYTICS_ENDPOINT', '');
+    vi.stubEnv('EXPO_PUBLIC_API_URL', 'https://api.staging.allerguide.app');
   });
 
   it('ignores unknown event names', async () => {
@@ -66,6 +82,23 @@ describe('trackEvent integration', () => {
     expect(payload?.event).toBe('screen_view');
     expect(payload?.screen).toBe('diary');
     expect(payload?.email).toBeUndefined();
+    expect(payload?.client_id).toBeTruthy();
     info.mockRestore();
+  });
+
+  it('posts to API analytics endpoint by default', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    global.fetch = fetchMock as typeof fetch;
+
+    const { initAnalytics, trackEvent } = await import('./analytics-service');
+    initAnalytics();
+    trackEvent('auth_login', { login_type: 'email' });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.staging.allerguide.app/api/analytics/events',
+      expect.objectContaining({ method: 'POST' }),
+    );
   });
 });

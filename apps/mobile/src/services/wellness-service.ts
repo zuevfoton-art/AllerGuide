@@ -27,6 +27,7 @@ import { getLocaleContent } from '@/src/i18n/content';
 import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatTemplate } from '@/src/i18n/translate';
 import type { AppLocale } from '@/src/i18n/types';
+import { trackEvent } from '@/src/services/analytics-service';
 
 export type WellnessConfidence = 'high' | 'medium' | 'low';
 
@@ -312,6 +313,13 @@ export async function fetchWellnessSnapshot(
           level: diarySeries.symptomDays >= 3 ? ('high' as const) : diarySeries.symptomDays >= 1 ? ('mid' as const) : ('low' as const),
         },
       ];
+
+  trackEvent('wellness_refreshed', {
+    score,
+    level: status.level,
+    env_data: envDataAvailable,
+    confidence,
+  });
 
   return {
     score,

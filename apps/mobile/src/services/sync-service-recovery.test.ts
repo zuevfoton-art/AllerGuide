@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createSyncPayload } from '@allerguide/core';
 
+vi.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
+vi.mock('@/src/services/analytics-service', () => ({
+  trackEvent: vi.fn(),
+}));
+
 const {
   mockGetCurrentUserId,
   mockGetAuthToken,

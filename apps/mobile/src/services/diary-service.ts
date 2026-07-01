@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
 import { formatDiaryDate, formatDiaryEntrySummary } from '@allerguide/core';
+import { trackEvent } from '@/src/services/analytics-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export async function addDiaryEntry(input: {
@@ -17,6 +18,7 @@ export async function addDiaryEntry(input: {
     input.details,
     input.createdAt,
   ]);
+  trackEvent('diary_entry_saved', { entry_type: input.type });
 }
 
 export async function addDiaryEntries(

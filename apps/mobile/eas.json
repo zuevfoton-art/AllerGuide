@@ -62,7 +62,7 @@
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
-        "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "staging",
         "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "EXPO_PUBLIC_SENTRY_DSN": "",

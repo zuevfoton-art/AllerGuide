@@ -21,6 +21,7 @@ import { getSosNotes } from '@/src/services/sos-service';
 import { getDb } from '@/src/db/init';
 import { applySyncPayload } from '@/src/services/sync-restore';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
@@ -137,6 +138,7 @@ export async function uploadBackup(): Promise<SyncResult> {
       return { ok: false, error: 'Сервер недоступен', code: 'server_unreachable' };
     }
 
+    trackEvent('sync_upload');
     return { ok: true };
   } catch {
     return { ok: false, error: 'Не удалось подключиться к серверу', code: 'server_unreachable' };
@@ -216,6 +218,7 @@ export async function downloadBackup(options?: {
 
     applySyncPayload(getDb(), payload, userId);
     void reconcileAllReminders();
+    trackEvent('sync_download');
     return { ok: true };
   } catch {
     return { ok: false, error: 'Не удалось загрузить резервную копию', code: 'server_unreachable' };
