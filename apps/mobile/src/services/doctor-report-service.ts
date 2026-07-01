@@ -34,6 +34,7 @@ import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export type DoctorReportOptions = {
@@ -225,6 +226,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       win.document.close();
       win.print();
     }
+    trackEvent('diary_report_exported', { period_days: options.periodDays, platform: 'web' });
     return;
   }
 
@@ -232,6 +234,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
   const Sharing = await import('expo-sharing');
   const { uri } = await Print.printToFileAsync({ html });
   await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+  trackEvent('diary_report_exported', { period_days: options.periodDays, platform: Platform.OS });
 }
 
 export async function exportPassportPdf(profile: Profile) {

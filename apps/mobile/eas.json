@@ -62,8 +62,10 @@
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
-        "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
+        "EXPO_PUBLIC_APP_ENV": "staging",
         "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "EXPO_PUBLIC_SENTRY_DSN": "",
         "NODE_OPTIONS": "--max-old-space-size=8192"
       },
       "android": {
@@ -77,7 +79,13 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.allerguide.app"
+        "EXPO_PUBLIC_API_URL": "https://api.allerguide.app",
+        "EXPO_PUBLIC_BACKEND_AUTH": "true",
+        "EXPO_PUBLIC_CLOUD_SYNC": "true",
+        "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
+        "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_SENTRY_DSN": ""
       }
     }
   },

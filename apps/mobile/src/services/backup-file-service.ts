@@ -3,6 +3,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import { exportLocalBackup, importLocalBackup } from '@/src/services/sync-service';
+import { trackEvent } from '@/src/services/analytics-service';
 
 async function shareOnWeb(json: string): Promise<{ ok: true } | { ok: false; error: string }> {
   if (typeof document === 'undefined') {
@@ -24,7 +25,9 @@ export async function shareLocalBackupFile(): Promise<{ ok: true } | { ok: false
     const json = exportLocalBackup();
 
     if (Platform.OS === 'web') {
-      return shareOnWeb(json);
+      const webResult = await shareOnWeb(json);
+      if (webResult.ok) trackEvent('backup_exported');
+      return webResult;
     }
 
     const uri = `${FileSystem.cacheDirectory}allerguide-backup.json`;
@@ -39,6 +42,7 @@ export async function shareLocalBackupFile(): Promise<{ ok: true } | { ok: false
       dialogTitle: 'Экспорт данных AllerGuide',
     });
 
+    trackEvent('backup_exported');
     return { ok: true };
   } catch {
     return { ok: false, error: 'Не удалось экспортировать данные' };
@@ -61,7 +65,9 @@ export async function pickAndImportLocalBackup(): Promise<{ ok: true } | { ok: f
     }
 
     const raw = await FileSystem.readAsStringAsync(result.assets[0].uri);
-    return importLocalBackup(raw);
+    const importResult = importLocalBackup(raw);
+    if (importResult.ok) trackEvent('backup_imported');
+    return importResult;
   } catch {
     return { ok: false, error: 'Не удалось импортировать файл' };
   }

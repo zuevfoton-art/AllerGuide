@@ -49,6 +49,7 @@ export * from './evidence-registry';
 export * from './beta-metrics';
 export * from './medical-disclaimer';
 export * from './golden-clinical-scenarios';
+export * from './analytics-events';
 export * from './geo';
 export * from './yandex-map';
 export * from './barcodes';

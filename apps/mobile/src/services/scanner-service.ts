@@ -67,6 +67,7 @@ export async function scanBarcode({
   barcode: string;
   profile?: Profile | null;
 }): Promise<ScanResult & { lookupFailed?: boolean }> {
+  trackEvent('scan_barcode', { lookup: 'pending' });
   const product = await resolveProductByBarcode(barcode);
 
   if (!product) {

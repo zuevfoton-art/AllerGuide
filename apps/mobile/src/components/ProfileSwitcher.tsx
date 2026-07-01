@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { listProfiles } from '@/src/services/profile-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -39,6 +40,7 @@ export function ProfileSwitcher() {
 
     setActiveProfileId(profile.id);
     setActiveProfile(profile);
+    trackEvent('profile_switched', { profile_type: profile.type });
   };
 
   if (profiles.length === 0) return null;
