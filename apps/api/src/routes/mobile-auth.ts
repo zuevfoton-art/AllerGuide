@@ -19,6 +19,10 @@ function isDatabaseConfigured() {
   return Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET);
 }
 
+function passwordResetTokenInResponseEnabled(): boolean {
+  return process.env.PASSWORD_RESET_TOKEN_IN_RESPONSE === 'true';
+}
+
 export function registerMobileAuthRoutes(app: Express) {
   app.post('/api/auth/register', async (req: Request, res: Response) => {
     if (!isDatabaseConfigured()) {
@@ -144,7 +148,12 @@ export function registerMobileAuthRoutes(app: Express) {
     }
 
     const resetToken = await createPasswordResetToken(user.id);
-    res.json({ ok: true, resetToken });
+    if (passwordResetTokenInResponseEnabled()) {
+      res.json({ ok: true, resetToken });
+      return;
+    }
+
+    res.json({ ok: true });
   });
 
   app.get('/api/auth/verify-reset-token', async (req: Request, res: Response) => {

@@ -8,6 +8,7 @@ describe('analytics routes', () => {
     resetAnalyticsStoreForTests();
     process.env.ANALYTICS_INGEST_ENABLED = 'true';
     process.env.ANALYTICS_DASHBOARD_ENABLED = 'true';
+    process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
   });
 
   it('accepts a single analytics event', async () => {
@@ -35,7 +36,8 @@ describe('analytics routes', () => {
     expect(response.status).toBe(400);
   });
 
-  it('returns dashboard aggregates', async () => {
+  it('returns dashboard aggregates when dashboard key is provided', async () => {
+    process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
     const app = await createApp({ withReplitAuth: false });
 
     await request(app).post('/api/analytics/events').send({
@@ -45,10 +47,19 @@ describe('analytics routes', () => {
       ],
     });
 
-    const dashboard = await request(app).get('/api/analytics/dashboard?days=7');
+    const dashboard = await request(app)
+      .get('/api/analytics/dashboard?days=7')
+      .set('x-analytics-dashboard-key', 'dashboard-secret');
     expect(dashboard.status).toBe(200);
     expect(dashboard.body.dashboard.totalEvents).toBe(2);
     expect(dashboard.body.dashboard.topEvents.length).toBeGreaterThan(0);
+  });
+
+  it('rejects dashboard without key when enabled', async () => {
+    process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app).get('/api/analytics/dashboard');
+    expect(response.status).toBe(401);
   });
 
   it('hides dashboard when disabled', async () => {

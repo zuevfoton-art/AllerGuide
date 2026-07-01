@@ -1,5 +1,41 @@
 type ErrorContext = Record<string, string>;
 
+const SENSITIVE_EXTRA_KEYS = [
+  'token',
+  'password',
+  'recoverykey',
+  'recovery_key',
+  'authorization',
+  'secret',
+  'jwt',
+] as const;
+
+function scrubErrorContext(context?: ErrorContext): ErrorContext | undefined {
+  if (!context) return undefined;
+  const out: ErrorContext = {};
+  for (const [key, value] of Object.entries(context)) {
+    const lower = key.toLowerCase();
+    if (SENSITIVE_EXTRA_KEYS.some((blocked) => lower.includes(blocked))) continue;
+    out[key] = value;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+function scrubSentryEvent(event: {
+  extra?: Record<string, unknown>;
+  breadcrumbs?: { message?: string }[];
+}): typeof event {
+  if (event.extra) {
+    const scrubbed = scrubErrorContext(
+      Object.fromEntries(
+        Object.entries(event.extra).filter(([, value]) => typeof value === 'string'),
+      ) as ErrorContext,
+    );
+    event.extra = scrubbed;
+  }
+  return event;
+}
+
 type SentryLike = {
   init: (options: Record<string, unknown>) => void;
   captureException: (error: Error, context?: { extra?: ErrorContext }) => void;
@@ -54,26 +90,29 @@ export function initErrorReporting() {
     tracesSampleRate: 0.1,
     enableAutoSessionTracking: true,
     attachStacktrace: true,
+    beforeSend: (event: { extra?: Record<string, unknown> }) => scrubSentryEvent(event),
   });
   reportingEnabled = true;
 }
 
 export function captureError(error: Error, context?: ErrorContext) {
+  const safeContext = scrubErrorContext(context);
   const client = reportingEnabled ? loadSentry() : null;
   if (client) {
-    client.captureException(error, { extra: context });
+    client.captureException(error, { extra: safeContext });
     return;
   }
-  console.error('[AllerGuide]', error, context);
+  console.error('[AllerGuide]', error, safeContext);
 }
 
 export function captureMessage(message: string, context?: ErrorContext) {
+  const safeContext = scrubErrorContext(context);
   const client = reportingEnabled ? loadSentry() : null;
   if (client) {
-    client.captureMessage(message, { level: 'warning', extra: context });
+    client.captureMessage(message, { level: 'warning', extra: safeContext });
     return;
   }
-  console.warn('[AllerGuide]', message, context);
+  console.warn('[AllerGuide]', message, safeContext);
 }
 
 /** Test-only helper for verifying Sentry wiring without sending events. */

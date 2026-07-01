@@ -62,16 +62,18 @@ export default function ForgotPasswordScreen() {
         <View style={styles.successBox}>
           <Ionicons name="checkmark-circle" size={48} color={theme.colors.accent} style={styles.successIcon} />
           <Text style={styles.successText}>{t('auth.forgot.successMessage')}</Text>
-          {resetToken && (
+          {__DEV__ && resetToken ? (
             <View style={styles.tokenBox}>
               <Text style={styles.tokenLabel}>Ссылка для сброса (dev):</Text>
               <Text
                 style={styles.tokenLink}
-                onPress={() => router.push(`/reset-password?token=${resetToken}`)}>
+                onPress={() =>
+                  router.push({ pathname: '/reset-password', params: { token: resetToken } })
+                }>
                 Перейти к смене пароля →
               </Text>
             </View>
-          )}
+          ) : null}
         </View>
         <AuthLink
           text=""

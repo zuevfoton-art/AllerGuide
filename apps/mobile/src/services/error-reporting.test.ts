@@ -73,4 +73,16 @@ describe('error-reporting', () => {
       extra: { attempt: '2' },
     });
   });
+
+  it('strips sensitive fields from Sentry context', async () => {
+    vi.stubEnv('EXPO_PUBLIC_SENTRY_DSN', 'https://example@sentry.io/1');
+
+    const { initErrorReporting, captureError } = await import('./error-reporting');
+    initErrorReporting();
+
+    const error = new Error('auth failed');
+    captureError(error, { screen: 'login', authToken: 'secret-jwt' });
+
+    expect(captureException).toHaveBeenCalledWith(error, { extra: { screen: 'login' } });
+  });
 });

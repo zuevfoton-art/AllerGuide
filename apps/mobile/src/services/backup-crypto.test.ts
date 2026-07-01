@@ -5,10 +5,20 @@ const { settings } = vi.hoisted(() => {
   return { settings };
 });
 
+const secureSettings = new Map<string, string>();
+
 vi.mock('@/src/services/settings-service', () => ({
   getSetting: (key: string) => settings.get(key) ?? null,
   setSetting: (key: string, value: string) => {
     settings.set(key, value);
+  },
+}));
+
+vi.mock('@/src/services/secure-settings-service', () => ({
+  getSensitiveSetting: (key: string) => secureSettings.get(key) ?? null,
+  setSensitiveSettingSync: (key: string, value: string) => {
+    secureSettings.set(key, value);
+    settings.delete(key);
   },
 }));
 
@@ -34,10 +44,12 @@ const SAMPLE_KEY = 'a'.repeat(64);
 
 beforeEach(() => {
   settings.clear();
+  secureSettings.clear();
 });
 
 afterEach(() => {
   settings.clear();
+  secureSettings.clear();
 });
 
 describe('recovery key format', () => {

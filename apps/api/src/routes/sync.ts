@@ -109,7 +109,7 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
     return;
   }
 
-  next();
+  res.status(401).json({ ok: false, error: 'Authorization required' });
 }
 
 export function registerSyncRoutes(app: Express) {

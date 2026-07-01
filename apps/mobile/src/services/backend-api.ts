@@ -4,6 +4,11 @@ import type { AuthUser, Profile, ProfileInput } from '@allerguide/core';
 import { apiRequest } from '@/src/services/api-client';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import {
+  deleteSensitiveSetting,
+  getSensitiveSetting,
+  setSensitiveSettingSync,
+} from '@/src/services/secure-settings-service';
 
 const AUTH_TOKEN_KEY = 'authToken';
 const AUTH_USER_JSON_KEY = 'authUserJson';
@@ -12,21 +17,21 @@ export async function getAuthToken(): Promise<string | null> {
   if (Platform.OS === 'web') {
     return getSetting(AUTH_TOKEN_KEY);
   }
+  const cached = getSensitiveSetting(AUTH_TOKEN_KEY);
+  if (cached) return cached;
   return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
 }
 
 export async function setAuthToken(token: string) {
-  setSetting(AUTH_TOKEN_KEY, token);
-  if (Platform.OS !== 'web') {
-    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+  if (Platform.OS === 'web') {
+    setSetting(AUTH_TOKEN_KEY, token);
+    return;
   }
+  setSensitiveSettingSync(AUTH_TOKEN_KEY, token);
 }
 
 export async function clearAuthToken() {
-  setSetting(AUTH_TOKEN_KEY, '');
-  if (Platform.OS !== 'web') {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
-  }
+  await deleteSensitiveSetting(AUTH_TOKEN_KEY);
 }
 
 export function cacheAuthUser(user: AuthUser) {
