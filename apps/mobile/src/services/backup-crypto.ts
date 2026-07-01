@@ -1,5 +1,6 @@
 import { decryptString, encryptString, isEncryptionAvailable } from '@allerguide/core';
-import { getSetting, setSetting } from '@/src/services/settings-service';
+import { getSetting } from '@/src/services/settings-service';
+import { getSensitiveSetting, setSensitiveSettingSync } from '@/src/services/secure-settings-service';
 
 /** Legacy device-only secret (pre–recovery-key). Migrated in P1.3e. */
 const LEGACY_BACKUP_SECRET_KEY = 'backupSecret';
@@ -72,7 +73,7 @@ export function hasRecoveryKey(): boolean {
 }
 
 export function getStoredRecoveryKey(): string | null {
-  const raw = getSetting(RECOVERY_KEY_SETTING);
+  const raw = getSensitiveSetting(RECOVERY_KEY_SETTING) ?? getSetting(RECOVERY_KEY_SETTING);
   if (!raw) return null;
   return normalizeRecoveryKey(raw);
 }
@@ -82,23 +83,26 @@ export function setRecoveryKey(input: string): { ok: true } | { ok: false; error
   if (!normalized) {
     return { ok: false, error: 'invalid_recovery_key' };
   }
-  setSetting(RECOVERY_KEY_SETTING, normalized);
-  setSetting(RECOVERY_KEY_CONFIRMED_SETTING, 'false');
+  setSensitiveSettingSync(RECOVERY_KEY_SETTING, normalized);
+  setSensitiveSettingSync(RECOVERY_KEY_CONFIRMED_SETTING, 'false');
   return { ok: true };
 }
 
 export function markRecoveryKeyConfirmed(): void {
   if (!hasRecoveryKey()) return;
-  setSetting(RECOVERY_KEY_CONFIRMED_SETTING, 'true');
+  setSensitiveSettingSync(RECOVERY_KEY_CONFIRMED_SETTING, 'true');
 }
 
 export function isRecoveryKeyConfirmed(): boolean {
-  return getSetting(RECOVERY_KEY_CONFIRMED_SETTING) === 'true';
+  return (
+    getSensitiveSetting(RECOVERY_KEY_CONFIRMED_SETTING) === 'true' ||
+    getSetting(RECOVERY_KEY_CONFIRMED_SETTING) === 'true'
+  );
 }
 
 /** Device had auto-generated backupSecret before recovery-key rollout. */
 export function usesLegacyDeviceKeyOnly(): boolean {
-  return Boolean(getSetting(LEGACY_BACKUP_SECRET_KEY)) && !hasRecoveryKey();
+  return Boolean(getSensitiveSetting(LEGACY_BACKUP_SECRET_KEY) ?? getSetting(LEGACY_BACKUP_SECRET_KEY)) && !hasRecoveryKey();
 }
 
 /**
@@ -109,10 +113,10 @@ export function getBackupPassphrase(): string {
   const recovery = getStoredRecoveryKey();
   if (recovery) return recovery;
 
-  let secret = getSetting(LEGACY_BACKUP_SECRET_KEY);
+  let secret = getSensitiveSetting(LEGACY_BACKUP_SECRET_KEY) ?? getSetting(LEGACY_BACKUP_SECRET_KEY);
   if (!secret) {
     secret = randomHex(RECOVERY_KEY_BYTE_LENGTH);
-    setSetting(LEGACY_BACKUP_SECRET_KEY, secret);
+    setSensitiveSettingSync(LEGACY_BACKUP_SECRET_KEY, secret);
   }
   return secret;
 }

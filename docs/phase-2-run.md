@@ -13,8 +13,11 @@
 | P2.3b | Done | `@sentry/react-native/expo` при `SENTRY_ORG`/`SENTRY_PROJECT`, EAS env в `eas.json` |
 | P2.4a | Done | `packages/core/src/analytics-events.ts` (schema, no PII), `analytics-service.test.ts` |
 | P2.4b | Done | API ingest + dashboard, mobile wiring, [`analytics-staging.md`](./analytics-staging.md) |
+| P2.5a | Done | OWASP mobile audit, [`security-audit-mobile.md`](./security-audit-mobile.md) |
+| P2.6a | Done | Pen-test JWT/IDOR/rate-limit, [`security-audit-api.md`](./security-audit-api.md) |
+| P2.6b | Done | 0 critical open; fixes + regression tests |
 
-**Далее:** P2.5 OWASP mobile audit, P2.6 API pen-test.
+**Далее:** P2.7 Performance profiling (cold start, Redis rate-limit).
 
 См. [roadmap Phase 2](roadmap-to-prod.md#phase-2--quality--security--release-candidate) · [подзадачи](phase1-phase2-issues.md#phase-2--quality--security).
 
@@ -31,3 +34,9 @@
 2. API: `ANALYTICS_DASHBOARD_ENABLED=true` на staging; опционально `POSTHOG_API_KEY`.
 3. Проверка: открыть экран → `GET /api/analytics/dashboard?days=1` показывает `screen_view`.
 4. Подробнее: [`analytics-staging.md`](./analytics-staging.md).
+
+## Security audits (P2.5 / P2.6)
+
+1. Mobile: [`security-audit-mobile.md`](./security-audit-mobile.md) — OWASP checklist, SecureStore for secrets.
+2. API: [`security-audit-api.md`](./security-audit-api.md) — JWT/IDOR/rate-limit pen-test, 0 critical gate.
+3. Staging API: set `ANALYTICS_DASHBOARD_KEY`, do **not** set `PASSWORD_RESET_TOKEN_IN_RESPONSE` in production.

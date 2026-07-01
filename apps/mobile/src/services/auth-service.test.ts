@@ -34,6 +34,15 @@ vi.mock('@/src/services/settings-service', () => ({
   },
 }));
 
+vi.mock('@/src/services/secure-settings-service', () => ({
+  hydrateSensitiveSettings: vi.fn().mockResolvedValue(undefined),
+  getSensitiveSetting: (key: string) => secureStore.get(key) ?? null,
+  setSensitiveSettingSync: (key: string, value: string) => {
+    secureStore.set(key, value);
+  },
+  deleteSensitiveSetting: vi.fn(),
+}));
+
 const backendFetchMe = vi.fn();
 const getAuthToken = vi.fn();
 const clearAuthToken = vi.fn();
@@ -103,9 +112,8 @@ describe('restoreAuthSession', () => {
     expect(settings.get('authUserId')).toBe('42');
   });
 
-  it('hydrates userId and token from SecureStore into settings', async () => {
+  it('hydrates userId from SecureStore into settings', async () => {
     secureStore.set('authUserId', '7');
-    secureStore.set('authToken', 'secure-jwt');
     settings.set('authUserJson', JSON.stringify({ id: 7, login: 'x@y.z', loginType: 'email' }));
     getAuthToken.mockResolvedValue('secure-jwt');
 
@@ -113,7 +121,7 @@ describe('restoreAuthSession', () => {
     await restoreAuthSession();
 
     expect(settings.get('authUserId')).toBe('7');
-    expect(settings.get('authToken')).toBe('secure-jwt');
+    expect(settings.has('authToken')).toBe(false);
     expect(backendFetchMe).not.toHaveBeenCalled();
   });
 

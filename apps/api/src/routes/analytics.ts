@@ -15,6 +15,12 @@ function dashboardEnabled(): boolean {
   return process.env.ANALYTICS_DASHBOARD_ENABLED === 'true';
 }
 
+function dashboardAuthorized(req: Request): boolean {
+  const configuredKey = process.env.ANALYTICS_DASHBOARD_KEY?.trim();
+  if (!configuredKey) return false;
+  return req.header('x-analytics-dashboard-key') === configuredKey;
+}
+
 export function registerAnalyticsRoutes(app: Express) {
   app.post('/api/analytics/events', async (req: Request, res: Response) => {
     if (!analyticsEnabled()) {
@@ -46,6 +52,11 @@ export function registerAnalyticsRoutes(app: Express) {
   app.get('/api/analytics/dashboard', (req: Request, res: Response) => {
     if (!dashboardEnabled()) {
       res.status(404).json({ ok: false, error: 'Dashboard disabled' });
+      return;
+    }
+
+    if (!dashboardAuthorized(req)) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;
     }
 

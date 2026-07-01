@@ -65,6 +65,7 @@
     "android": {
       "package": "com.allerguide.app",
       "versionCode": 4,
+      "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2563EB"

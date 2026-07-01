@@ -51,6 +51,22 @@ describe('security middleware', () => {
     const response = await request(app).get('/api/health');
     expect(response.headers['ratelimit-limit']).toBeUndefined();
   });
+
+  it('returns 429 after exceeding auth rate limit', async () => {
+    process.env.AUTH_RATE_LIMIT_MAX = '2';
+    process.env.AUTH_RATE_LIMIT_WINDOW_MS = '60000';
+    delete process.env.RATE_LIMIT_DISABLED;
+
+    const app = await createApp({ withReplitAuth: false });
+    const payload = { loginType: 'email', login: 'x@y.z', password: 'short' };
+
+    await request(app).post('/api/auth/login').send(payload);
+    await request(app).post('/api/auth/login').send(payload);
+    const blocked = await request(app).post('/api/auth/login').send(payload);
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.error).toBe('Too many authentication attempts');
+  });
 });
 
 describe('health endpoint', () => {

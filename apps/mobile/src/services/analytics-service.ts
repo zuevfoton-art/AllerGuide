@@ -11,6 +11,11 @@ const CLIENT_ID_KEY = 'analyticsClientId';
 let analyticsEnabled = false;
 let clientId: string | null = null;
 
+function shouldLogAnalyticsPayload(): boolean {
+  if (typeof __DEV__ !== 'undefined') return __DEV__;
+  return process.env.NODE_ENV !== 'production';
+}
+
 function resolveAnalyticsEndpoint(): string | undefined {
   const explicit = process.env.EXPO_PUBLIC_ANALYTICS_ENDPOINT?.trim();
   if (explicit) return explicit;
@@ -74,7 +79,9 @@ export function trackEvent(name: string, props?: AnalyticsEventProps) {
   if (!isAnalyticsEventName(name)) return;
 
   const payload = buildAnalyticsPayload(name as AnalyticsEventName, props, transportMeta());
-  console.info('[analytics]', payload);
+  if (shouldLogAnalyticsPayload()) {
+    console.info('[analytics]', payload);
+  }
   void sendPayload(payload);
 }
 

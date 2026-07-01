@@ -18,18 +18,20 @@ Events are sent with an anonymous `client_id` stored in app settings (not linked
 |----------|---------|
 | `ANALYTICS_INGEST_ENABLED` | default on; set `false` to reject ingest |
 | `ANALYTICS_DASHBOARD_ENABLED` | set `true` to expose dashboard |
+| `ANALYTICS_DASHBOARD_KEY` | required secret for `x-analytics-dashboard-key` header |
 | `POSTHOG_API_KEY` | optional forward to PostHog |
 | `POSTHOG_HOST` | default `https://us.i.posthog.com` |
 
 ### Endpoints
 
 - **Ingest:** `POST /api/analytics/events` — single event object or `{ "events": [...] }`
-- **Dashboard:** `GET /api/analytics/dashboard?days=7` — requires `ANALYTICS_DASHBOARD_ENABLED=true`
+- **Dashboard:** `GET /api/analytics/dashboard?days=7` — requires `ANALYTICS_DASHBOARD_ENABLED=true` and header `x-analytics-dashboard-key: <ANALYTICS_DASHBOARD_KEY>`
 
 Example dashboard URL (staging):
 
 ```
-https://api.staging.allerguide.app/api/analytics/dashboard?days=7
+curl -H "x-analytics-dashboard-key: $ANALYTICS_DASHBOARD_KEY" \
+  "https://api.staging.allerguide.app/api/analytics/dashboard?days=7"
 ```
 
 ### Wired events

@@ -11,6 +11,7 @@ import {
 import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { hydrateSensitiveSettings } from '@/src/services/secure-settings-service';
 import {
   backendDeleteAccount,
   backendLogin,
@@ -67,17 +68,14 @@ function toAuthUser(row: StoredUser): AuthUser {
 export async function hydrateAuthSession(): Promise<void> {
   if (Platform.OS === 'web') return;
 
+  await hydrateSensitiveSettings();
+
   const secureUserId = await SecureStore.getItemAsync(AUTH_USER_ID_KEY);
   if (secureUserId) {
     const localValue = getSetting(AUTH_USER_ID_KEY);
     if (localValue !== secureUserId) {
       setSetting(AUTH_USER_ID_KEY, secureUserId);
     }
-  }
-
-  const secureToken = await SecureStore.getItemAsync('authToken');
-  if (secureToken && !getSetting('authToken')) {
-    setSetting('authToken', secureToken);
   }
 }
 
