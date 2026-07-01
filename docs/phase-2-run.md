@@ -19,8 +19,9 @@
 | P2.7a | Done | `startup-metrics.ts`, deferred allergen warm, [`performance-cold-start.md`](./performance-cold-start.md) |
 | P2.7b | Done | Redis rate-limit, health DB/redis, [`performance-api-infra.md`](./performance-api-infra.md) |
 | P2.7c | Done | `web-store.test.ts`, idle flush, [`performance-web-store.md`](./performance-web-store.md) |
+| P2.8 | In progress | [`rc-gate.md`](./rc-gate.md), [`staging-soak-log.md`](./staging-soak-log.md), `rc-gate-check.mjs`, [RC Gate CI](../.github/workflows/rc-gate.yml) |
 
-**Далее:** P2.8 RC gate + 2-week soak ([`rc-gate.md`](./rc-gate.md) — PR #105).
+**Далее:** завершить soak 14 дней → [Phase 3 readiness](./phase-3-readiness.md) (PR #105).
 
 См. [roadmap Phase 2](roadmap-to-prod.md#phase-2--quality--security--release-candidate) · [подзадачи](phase1-phase2-issues.md#phase-2--quality--security).
 
@@ -29,6 +30,14 @@
 1. Cold start: см. [`performance-cold-start.md`](./performance-cold-start.md) — `[startup-metrics]` в logcat, target p95 &lt;3s.
 2. API: `REDIS_URL` для shared rate-limit; health → `database` + `rateLimit`.
 3. Web: IndexedDB smoke в [qa-checklist](./qa-checklist.md) §14.
+
+## RC gate (P2.8)
+
+1. Automated: `pnpm rc-gate` (или CI [rc-gate.yml](../.github/workflows/rc-gate.yml)).
+2. EAS staging RC build → internal testers.
+3. Вести [`staging-soak-log.md`](./staging-soak-log.md) 14 дней; Sentry crash-free ≥99%.
+4. Maestro nightly green; security audits 0 critical.
+5. Sign-off → [phase-3-readiness.md](./phase-3-readiness.md).
 
 ## Sentry (P2.3)
 

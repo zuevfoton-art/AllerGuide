@@ -1,0 +1,45 @@
+name: RC Gate
+
+# P2.8 — weekly / manual Release Candidate gate (automated checks + staging health).
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: rc-gate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rc-gate:
+    name: Automated RC gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: RC gate checks (P2.8)
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: node scripts/rc-gate-check.mjs
+
+      - name: Gate summary
+        if: always()
+        run: |
+          echo "## RC Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "See [docs/rc-gate.md](docs/rc-gate.md) and [staging-soak-log.md](docs/staging-soak-log.md)." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Manual: Maestro nightly green, Sentry crash-free ≥99%, soak sign-off." >> "$GITHUB_STEP_SUMMARY"
