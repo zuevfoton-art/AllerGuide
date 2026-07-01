@@ -99,6 +99,33 @@
     }
 
     /* ── Showcase row (3 slides like reference) ── */
+    .showcase-stage {
+      position: relative;
+      padding: 0 56px;
+    }
+
+    .showcase-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      font-size: 22px;
+      color: var(--text);
+      cursor: pointer;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+    }
+
+    .showcase-arrow:hover { background: #fff; color: var(--accent); }
+    .showcase-arrow.left { left: 0; }
+    .showcase-arrow.right { right: 0; }
+
     .showcase {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -106,8 +133,27 @@
       align-items: end;
     }
 
+    .showcase.scenario-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 720px;
+      margin-top: 8px;
+    }
+
     @media (max-width: 1024px) {
-      .showcase { grid-template-columns: 1fr; max-width: 390px; margin: 0 auto; }
+      .showcase-stage { padding: 0; }
+      .showcase-arrow { display: grid; }
+      .showcase {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 16px;
+        max-width: 100%;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+      }
+      .showcase::-webkit-scrollbar { display: none; }
+      .showcase-item { flex: 0 0 min(100%, 320px); scroll-snap-align: center; }
+      .showcase.scenario-grid { display: grid; overflow: visible; }
     }
 
     .showcase-item {
@@ -418,20 +464,23 @@
     <header>
       <h1>AllerGuide — онбординг (line-art)</h1>
       <p>
-        Mockup нового онбординга: синий фон с волнами, белая карточка, SVG-иллюстрации в стиле line-art,
-        три intro-слайда и экран выбора сценария. Соответствует реализации в
-        <code>apps/mobile/app/onboarding-intro.tsx</code> и <code>onboarding.tsx</code> (PR #107).
+        Mockup онбординга AllerGuide: line-art иллюстрации с людьми, синий фон с волнами, белая карточка,
+        3 intro-слайда + экран выбора сценария. Откройте этот файл в браузере из папки <code>docs/</code>.
       </p>
       <div class="meta">
+        <span class="pill"><strong>Файл</strong> docs/onboarding-mockup.html</span>
         <span class="pill"><strong>Accent</strong> #2563EB</span>
         <span class="pill"><strong>Card radius</strong> 28px</span>
-        <span class="pill"><strong>Slides</strong> 3</span>
-        <span class="pill"><strong>Шрифты</strong> Source Serif 4 + Inter</span>
+        <span class="pill"><strong>Slides</strong> 3 + сценарий</span>
+        <span class="pill"><strong>SVG</strong> docs/assets/onboarding/</span>
       </div>
     </header>
 
     <h2 class="section-title">Intro carousel <span>3 экрана</span></h2>
-    <div class="showcase" id="showcase">
+    <div class="showcase-stage">
+      <button class="showcase-arrow left" type="button" aria-label="Предыдущий" id="showcase-prev">‹</button>
+      <button class="showcase-arrow right" type="button" aria-label="Следующий" id="showcase-next">›</button>
+      <div class="showcase" id="showcase">
       <!-- Slide 1 -->
       <div class="showcase-item">
         <span class="showcase-label">1 · Профиль</span>
@@ -496,6 +545,49 @@
               <button class="btn-pill">Начать настройку</button>
               <p class="disclaimer">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <h2 class="section-title">Выбор сценария <span>после intro</span></h2>
+    <div class="showcase scenario-grid">
+      <div class="showcase-item" style="grid-column:1/-1;max-width:390px;margin:0 auto;width:100%">
+        <span class="showcase-label">4 · Сценарий</span>
+        <div class="phone wide">
+          <svg class="phone-waves" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
+            <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
+            <circle cx="6%" cy="82%" r="48" fill="#2563eb" opacity="0.1"/>
+          </svg>
+          <div class="phone-inner" style="overflow-y:auto;padding-top:16px">
+            <div class="brand-row">
+              <svg width="36" height="36" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+              <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
+            </div>
+            <div class="illus" style="flex:0;min-height:140px" data-illus="profile"></div>
+            <p class="tagline">Персональный помощник в контроле аллергии</p>
+            <p class="section-label">Для кого ведём записи?</p>
+            <div class="scenario-card">
+              <div class="scenario-icon">👤</div>
+              <div class="scenario-text"><strong>Только для себя</strong><span>Личный дневник и сканер аллергенов</span></div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="scenario-card">
+              <div class="scenario-icon">😊</div>
+              <div class="scenario-text"><strong>Только для ребёнка</strong><span>Дневник и сканер для ребёнка</span></div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="scenario-card">
+              <div class="scenario-icon">👨‍👩‍👧</div>
+              <div class="scenario-text"><strong>Для себя и ребёнка</strong><span>Два профиля в одном приложении</span></div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <p class="disclaimer" style="margin-top:12px">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>
           </div>
         </div>
       </div>
@@ -680,6 +772,19 @@
       btn.addEventListener('click', () => showSlide(Number(btn.dataset.slide)));
     });
     document.querySelector('.ctrl-btn[data-screen="scenario"]')?.addEventListener('click', showScenario);
+
+    const showcaseEl = document.getElementById('showcase');
+    const showcaseItems = showcaseEl ? [...showcaseEl.querySelectorAll('.showcase-item')] : [];
+    let showcaseIdx = 0;
+
+    function scrollShowcase(index) {
+      if (!showcaseItems.length) return;
+      showcaseIdx = Math.max(0, Math.min(showcaseItems.length - 1, index));
+      showcaseItems[showcaseIdx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    document.getElementById('showcase-prev')?.addEventListener('click', () => scrollShowcase(showcaseIdx - 1));
+    document.getElementById('showcase-next')?.addEventListener('click', () => scrollShowcase(showcaseIdx + 1));
 
     showSlide(0);
   </script>
