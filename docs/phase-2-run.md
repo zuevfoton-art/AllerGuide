@@ -31,8 +31,8 @@
 ## Analytics (P2.4b)
 
 1. Staging build: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` (см. `eas.json` profile `staging`).
-2. API: `ANALYTICS_DASHBOARD_ENABLED=true` на staging; опционально `POSTHOG_API_KEY`.
-3. Проверка: открыть экран → `GET /api/analytics/dashboard?days=1` показывает `screen_view`.
+2. API: `ANALYTICS_DASHBOARD_ENABLED=true`, `ANALYTICS_DASHBOARD_KEY` на staging; опционально `POSTHOG_API_KEY`.
+3. Проверка: `GET /api/analytics/dashboard?days=1` с заголовком `x-analytics-dashboard-key`.
 4. Подробнее: [`analytics-staging.md`](./analytics-staging.md).
 
 ## Security audits (P2.5 / P2.6)
