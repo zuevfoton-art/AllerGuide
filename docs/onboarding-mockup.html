@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — Onboarding Mockup (line-art)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --accent-mid: #bfdbfe;
+      --head: #1e3a5f;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #5e6b7c;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --surface-muted: #f1f5f9;
+      --stroke: #0f172a;
+      --sans: 'Inter', system-ui, sans-serif;
+      --serif: 'Source Serif 4', Georgia, serif;
+      --shadow-phone: 0 24px 64px rgba(37, 99, 235, 0.18);
+      --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--sans);
+      color: var(--text);
+      background: linear-gradient(165deg, #dbeafe 0%, #eff6ff 35%, #f8fafc 100%);
+      min-height: 100vh;
+      padding: 32px 20px 56px;
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--head);
+      letter-spacing: -0.4px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      max-width: 720px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .pill strong { color: var(--accent); }
+
+    h2.section-title {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--head);
+      margin: 40px 0 16px;
+    }
+
+    .section-title span {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Showcase row (3 slides like reference) ── */
+    .showcase {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+      align-items: end;
+    }
+
+    @media (max-width: 1024px) {
+      .showcase { grid-template-columns: 1fr; max-width: 390px; margin: 0 auto; }
+    }
+
+    .showcase-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .showcase-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    /* ── Phone shell ── */
+    .phone {
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 390 / 700;
+      border-radius: 36px;
+      position: relative;
+      overflow: hidden;
+      background: var(--accent);
+      box-shadow: var(--shadow-phone);
+      border: 8px solid rgba(255, 255, 255, 0.65);
+    }
+
+    .phone.wide { max-width: 390px; aspect-ratio: 390 / 844; }
+
+    .phone-waves {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .phone-inner {
+      position: absolute;
+      inset: 14px;
+      background: var(--card);
+      border-radius: 28px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .illus {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      padding: 8px 0;
+    }
+
+    .illus svg { width: 100%; max-width: 260px; height: auto; }
+
+    .slide-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--head);
+      text-align: center;
+      line-height: 1.2;
+      letter-spacing: -0.25px;
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+
+    .slide-desc {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 0 8px;
+      min-height: 60px;
+    }
+
+    .chrome {
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    .chrome-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--accent-mid);
+      opacity: 0.45;
+    }
+
+    .dot.active {
+      width: 22px;
+      background: var(--accent);
+      opacity: 1;
+    }
+
+    .btn-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    .btn-pill {
+      width: 100%;
+      padding: 15px 20px;
+      border-radius: 28px;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      cursor: default;
+    }
+
+    .dots-center {
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .skip {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    .disclaimer {
+      font-size: 10px;
+      line-height: 1.45;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* ── Interactive preview ── */
+    .preview-wrap {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .preview-controls {
+      width: 280px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .preview-controls h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--head);
+      margin-bottom: 12px;
+    }
+
+    .ctrl-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ctrl-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .preview-phone .phone-inner { transition: opacity 0.2s ease; }
+
+    /* ── Scenario screen ── */
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .wordmark {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--head);
+    }
+
+    .word-aller { color: var(--head); }
+    .word-guide { color: var(--accent); }
+
+    .tagline {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.5;
+      margin: 0 8px 12px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+
+    .scenario-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      margin-bottom: 8px;
+    }
+
+    .scenario-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--accent-light);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .scenario-text { flex: 1; }
+    .scenario-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+    .scenario-text span { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .spec-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .spec-card strong {
+      display: block;
+      color: var(--head);
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    footer {
+      margin-top: 48px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>AllerGuide — онбординг (line-art)</h1>
+      <p>
+        Mockup нового онбординга: синий фон с волнами, белая карточка, SVG-иллюстрации в стиле line-art,
+        три intro-слайда и экран выбора сценария. Соответствует реализации в
+        <code>apps/mobile/app/onboarding-intro.tsx</code> и <code>onboarding.tsx</code> (PR #107).
+      </p>
+      <div class="meta">
+        <span class="pill"><strong>Accent</strong> #2563EB</span>
+        <span class="pill"><strong>Card radius</strong> 28px</span>
+        <span class="pill"><strong>Slides</strong> 3</span>
+        <span class="pill"><strong>Шрифты</strong> Source Serif 4 + Inter</span>
+      </div>
+    </header>
+
+    <h2 class="section-title">Intro carousel <span>3 экрана</span></h2>
+    <div class="showcase" id="showcase">
+      <!-- Slide 1 -->
+      <div class="showcase-item">
+        <span class="showcase-label">1 · Профиль</span>
+        <div class="phone">
+          <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
+            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
+            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2563eb" opacity="0.12"/>
+            <circle cx="88%" cy="12%" r="56" fill="#eff6ff" opacity="0.45"/>
+          </svg>
+          <div class="phone-inner">
+            <div class="illus" data-illus="profile"></div>
+            <h3 class="slide-title">Создайте профиль аллергика</h3>
+            <p class="slide-desc">Аллергены, симптомы и экстренные контакты — всё в одном защищённом месте.</p>
+            <div class="chrome">
+              <div class="chrome-row">
+                <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+                <button class="btn-circle" aria-label="Далее">→</button>
+              </div>
+              <p class="skip">Пропустить</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="showcase-item">
+        <span class="showcase-label">2 · Сканер</span>
+        <div class="phone">
+          <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
+            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
+            <circle cx="8%" cy="78%" r="42" fill="#2563eb" opacity="0.1"/>
+          </svg>
+          <div class="phone-inner">
+            <div class="illus" data-illus="scanner"></div>
+            <h3 class="slide-title">Сканируйте перед едой</h3>
+            <p class="slide-desc">Проверяйте продукты, меню и косметику по вашему профилю за секунды.</p>
+            <div class="chrome">
+              <div class="chrome-row">
+                <div class="dots"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+                <button class="btn-circle" aria-label="Далее">→</button>
+              </div>
+              <p class="skip">Пропустить</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="showcase-item">
+        <span class="showcase-label">3 · Защита</span>
+        <div class="phone">
+          <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
+            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2563eb" opacity="0.12"/>
+            <circle cx="88%" cy="12%" r="56" fill="#eff6ff" opacity="0.45"/>
+          </svg>
+          <div class="phone-inner">
+            <div class="illus" data-illus="care"></div>
+            <h3 class="slide-title">Защита каждый день</h3>
+            <p class="slide-desc">Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.</p>
+            <div class="chrome">
+              <div class="dots dots-center"><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+              <button class="btn-pill">Начать настройку</button>
+              <p class="disclaimer">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Интерактивный превью <span>карусель</span></h2>
+    <div class="preview-wrap">
+      <div class="preview-controls">
+        <h3>Переключить слайд</h3>
+        <button class="ctrl-btn active" data-slide="0">1 — Профиль</button>
+        <button class="ctrl-btn" data-slide="1">2 — Сканер</button>
+        <button class="ctrl-btn" data-slide="2">3 — Защита</button>
+        <hr style="border:none;border-top:1px solid var(--border);margin:14px 0" />
+        <button class="ctrl-btn" data-screen="scenario">Сценарий (после intro)</button>
+      </div>
+
+      <div class="preview-phone">
+        <div class="phone wide" id="live-phone">
+          <svg class="phone-waves" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
+            <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
+            <path d="M-40 280 C120 180, 220 340, 450 250 S720 180, 600 320 S240 420, -40 360 Z" fill="#2563eb" opacity="0.12"/>
+            <circle cx="88%" cy="10%" r="64" fill="#eff6ff" opacity="0.45"/>
+            <circle cx="6%" cy="82%" r="48" fill="#2563eb" opacity="0.1"/>
+          </svg>
+          <div class="phone-inner" id="live-intro">
+            <div class="illus" id="live-illus"></div>
+            <h3 class="slide-title" id="live-title"></h3>
+            <p class="slide-desc" id="live-desc"></p>
+            <div class="chrome" id="live-chrome"></div>
+          </div>
+          <div class="phone-inner" id="live-scenario" hidden style="padding-top:16px;overflow-y:auto">
+            <div class="brand-row">
+              <svg width="36" height="36" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+              <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
+            </div>
+            <div class="illus" style="flex:0;min-height:140px" data-illus="profile"></div>
+            <p class="tagline">Персональный помощник в контроле аллергии</p>
+            <p class="section-label">Для кого ведём записи?</p>
+            <div class="scenario-card">
+              <div class="scenario-icon">👤</div>
+              <div class="scenario-text"><strong>Только для себя</strong><span>Личный дневник и сканер аллергенов</span></div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="scenario-card">
+              <div class="scenario-icon">😊</div>
+              <div class="scenario-text"><strong>Только для ребёнка</strong><span>Дневник и сканер для ребёнка</span></div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <div class="scenario-card">
+              <div class="scenario-icon">👨‍👩‍👧</div>
+              <div class="scenario-text"><strong>Для себя и ребёнка</strong><span>Два профиля в одном приложении</span></div>
+              <span style="color:var(--text-muted)">›</span>
+            </div>
+            <p class="disclaimer" style="margin-top:12px">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Спецификация <span>design tokens</span></h2>
+    <div class="spec-grid">
+      <div class="spec-card">
+        <strong>Фон экрана</strong>
+        Solid <code>#2563EB</code> + SVG-волны (<code>accentLight</code> 55%, <code>accent</code> 12% opacity)
+      </div>
+      <div class="spec-card">
+        <strong>Карточка контента</strong>
+        Белая, <code>border-radius: 28px</code>, inset 14px от краёв телефона
+      </div>
+      <div class="spec-card">
+        <strong>Иллюстрации</strong>
+        Line-art SVG 280×220, stroke <code>#0F172A</code>, акцентные заливки <code>#2563EB</code> / <code>#EFF6FF</code>
+      </div>
+      <div class="spec-card">
+        <strong>Навигация</strong>
+        Слайды 1–2: точки слева + круг 56px со стрелкой. Слайд 3: точки по центру + pill CTA на всю ширину
+      </div>
+      <div class="spec-card">
+        <strong>Типографика</strong>
+        Заголовок: Source Serif 4, 26px / 700. Описание: Inter 15px, secondary color
+      </div>
+      <div class="spec-card">
+        <strong>Маршруты</strong>
+        <code>/onboarding-intro</code> → <code>/onboarding</code> → <code>/profile-setup</code>
+      </div>
+    </div>
+
+    <footer>
+      Mockup · <a href="design-mockup.html">Clinical Calm (полный)</a> ·
+      <a href="https://github.com/zuevfoton-art/AllerGuide/pull/107">PR #107</a>
+    </footer>
+  </div>
+
+  <template id="svg-profile">
+    <svg viewBox="0 0 280 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="140" cy="118" r="78" fill="#EFF6FF" opacity="0.65"/>
+      <path d="M92 78c8-18 28-28 48-28s40 10 48 28" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="140" cy="52" r="18" stroke="#0F172A" stroke-width="2.2"/>
+      <path d="M108 92c6 34 16 52 32 58s26-24 32-58" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
+      <rect x="168" y="96" width="54" height="68" rx="8" stroke="#0F172A" stroke-width="2.2" fill="#FFFFFF"/>
+      <line x1="178" y1="112" x2="212" y2="112" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round"/>
+      <line x1="178" y1="126" x2="204" y2="126" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+      <line x1="178" y1="138" x2="208" y2="138" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+      <circle cx="72" cy="64" r="18" fill="#EFF6FF" stroke="#0F172A" stroke-width="1.8"/>
+      <path d="M72 58v12M66 64h12" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="214" cy="58" r="16" stroke="#0F172A" stroke-width="1.8" fill="#FFFFFF"/>
+      <path d="M207 58l5 5 10-11" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M58 148 72 134h20l10 14v18H58V148Z" stroke="#0F172A" stroke-width="1.8" fill="#2563EB" fill-opacity="0.18"/>
+      <ellipse cx="82" cy="176" rx="10" ry="4" fill="#0F172A" fill-opacity="0.08"/>
+    </svg>
+  </template>
+
+  <template id="svg-scanner">
+    <svg viewBox="0 0 280 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="78" y="44" width="96" height="118" rx="10" stroke="#0F172A" stroke-width="2.2" fill="#FFFFFF"/>
+      <rect x="92" y="58" width="68" height="44" rx="4" fill="#EFF6FF"/>
+      <line x1="96" y1="66" x2="156" y2="66" stroke="#0F172A" stroke-width="1.4" opacity="0.35"/>
+      <line x1="96" y1="76" x2="148" y2="76" stroke="#0F172A" stroke-width="1.4" opacity="0.35"/>
+      <line x1="96" y1="86" x2="152" y2="86" stroke="#0F172A" stroke-width="1.4" opacity="0.35"/>
+      <rect x="98" y="112" width="56" height="34" rx="3" stroke="#0F172A" stroke-width="1.6"/>
+      <line x1="102" y1="118" x2="102" y2="140" stroke="#0F172A" stroke-width="2.2"/>
+      <line x1="108" y1="118" x2="108" y2="140" stroke="#0F172A" stroke-width="1.2"/>
+      <line x1="114" y1="118" x2="114" y2="140" stroke="#0F172A" stroke-width="2.6"/>
+      <line x1="120" y1="118" x2="120" y2="140" stroke="#0F172A" stroke-width="1.2"/>
+      <line x1="126" y1="118" x2="126" y2="140" stroke="#0F172A" stroke-width="2.2"/>
+      <line x1="132" y1="118" x2="132" y2="140" stroke="#0F172A" stroke-width="1.6"/>
+      <line x1="138" y1="118" x2="138" y2="140" stroke="#0F172A" stroke-width="2.8"/>
+      <line x1="144" y1="118" x2="144" y2="140" stroke="#0F172A" stroke-width="1.2"/>
+      <path d="M186 72h34a8 8 0 0 1 8 8v72a8 8 0 0 1-8 8h-34" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M94 72H60a8 8 0 0 0-8 8v72a8 8 0 0 0 8 8h34" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round"/>
+      <line x1="60" y1="108" x2="228" y2="108" stroke="#2563EB" stroke-width="2" stroke-dasharray="6 5"/>
+      <rect x="188" y="128" width="58" height="96" rx="12" stroke="#0F172A" stroke-width="2.2" fill="#FFFFFF"/>
+      <circle cx="217" cy="148" r="10" fill="#EFF6FF"/>
+      <rect x="202" y="164" width="30" height="22" rx="4" stroke="#0F172A" stroke-width="1.6"/>
+      <circle cx="48" cy="156" r="22" fill="#EFF6FF" stroke="#0F172A" stroke-width="1.8"/>
+      <path d="M48 148v16M40 156h16" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+  </template>
+
+  <template id="svg-care">
+    <svg viewBox="0 0 280 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M42 118c38-52 158-52 196 0" stroke="#2563EB" stroke-width="3" stroke-linecap="round" fill="#2563EB" fill-opacity="0.12"/>
+      <line x1="140" y1="118" x2="140" y2="168" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="108" cy="150" r="14" stroke="#0F172A" stroke-width="2"/>
+      <path d="M96 168c4 10 12 16 12 16s8-6 12-16" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="140" cy="142" r="16" stroke="#0F172A" stroke-width="2"/>
+      <path d="M126 162c6 12 14 18 14 18s8-6 14-18" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="172" cy="150" r="14" stroke="#0F172A" stroke-width="2"/>
+      <path d="M160 168c4 10 12 16 12 16s8-6 12-16" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
+      <rect x="196" y="132" width="44" height="52" rx="6" stroke="#0F172A" stroke-width="1.8" fill="#FFFFFF"/>
+      <line x1="206" y1="146" x2="230" y2="146" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>
+      <line x1="206" y1="158" x2="224" y2="158" stroke="#0F172A" stroke-width="1.4" opacity="0.4"/>
+      <line x1="206" y1="168" x2="228" y2="168" stroke="#0F172A" stroke-width="1.4" opacity="0.4"/>
+      <circle cx="58" cy="132" r="18" fill="#EFF6FF" stroke="#0F172A" stroke-width="1.6"/>
+      <path d="M58 126c0-4 3-7 6-7s6 3 6 7-3 8-6 12c-3-4-6-8-6-12Z" fill="#2563EB" fill-opacity="0.85"/>
+      <circle cx="228" cy="64" r="14" stroke="#0F172A" stroke-width="1.6" fill="#FFFFFF"/>
+      <path d="M222 66a6 6 0 1 0 12 0" stroke="#0F172A" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="234" cy="62" r="1.6" fill="#0F172A"/>
+      <circle cx="238" cy="66" r="1.6" fill="#0F172A"/>
+    </svg>
+  </template>
+
+  <script>
+    const SLIDES = [
+      {
+        key: 'profile',
+        title: 'Создайте профиль аллергика',
+        desc: 'Аллергены, симптомы и экстренные контакты — всё в одном защищённом месте.',
+      },
+      {
+        key: 'scanner',
+        title: 'Сканируйте перед едой',
+        desc: 'Проверяйте продукты, меню и косметику по вашему профилю за секунды.',
+      },
+      {
+        key: 'care',
+        title: 'Защита каждый день',
+        desc: 'Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.',
+      },
+    ];
+
+    function mountIllustration(container, key) {
+      const tpl = document.getElementById('svg-' + key);
+      if (!tpl || !container) return;
+      container.innerHTML = '';
+      container.appendChild(tpl.content.cloneNode(true));
+    }
+
+    document.querySelectorAll('[data-illus]').forEach((node) => {
+      mountIllustration(node, node.getAttribute('data-illus'));
+    });
+
+    const liveTitle = document.getElementById('live-title');
+    const liveDesc = document.getElementById('live-desc');
+    const liveIllus = document.getElementById('live-illus');
+    const liveChrome = document.getElementById('live-chrome');
+    const liveIntro = document.getElementById('live-intro');
+    const liveScenario = document.getElementById('live-scenario');
+    let liveIndex = 0;
+
+    function renderDots(active, centered) {
+      return '<div class="dots' + (centered ? ' dots-center' : '') + '">' +
+        [0, 1, 2].map((i) => '<span class="dot' + (i === active ? ' active' : '') + '"></span>').join('') +
+        '</div>';
+    }
+
+    function renderChrome(index) {
+      const isLast = index === 2;
+      if (isLast) {
+        return renderDots(index, true) +
+          '<button class="btn-pill">Начать настройку</button>' +
+          '<p class="disclaimer">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>';
+      }
+      return '<div class="chrome-row">' + renderDots(index, false) +
+        '<button class="btn-circle" aria-label="Далее">→</button></div>' +
+        '<p class="skip">Пропустить</p>';
+    }
+
+    function showSlide(index) {
+      liveIndex = index;
+      const slide = SLIDES[index];
+      liveTitle.textContent = slide.title;
+      liveDesc.textContent = slide.desc;
+      mountIllustration(liveIllus, slide.key);
+      liveChrome.innerHTML = renderChrome(index);
+      liveIntro.hidden = false;
+      liveScenario.hidden = true;
+      document.querySelectorAll('.ctrl-btn[data-slide]').forEach((btn) => {
+        btn.classList.toggle('active', Number(btn.dataset.slide) === index);
+      });
+      document.querySelector('.ctrl-btn[data-screen="scenario"]')?.classList.remove('active');
+    }
+
+    function showScenario() {
+      liveIntro.hidden = true;
+      liveScenario.hidden = false;
+      document.querySelectorAll('.ctrl-btn[data-slide]').forEach((b) => b.classList.remove('active'));
+      document.querySelector('.ctrl-btn[data-screen="scenario"]')?.classList.add('active');
+    }
+
+    document.querySelectorAll('.ctrl-btn[data-slide]').forEach((btn) => {
+      btn.addEventListener('click', () => showSlide(Number(btn.dataset.slide)));
+    });
+    document.querySelector('.ctrl-btn[data-screen="scenario"]')?.addEventListener('click', showScenario);
+
+    showSlide(0);
+  </script>
+</body>
+</html>
