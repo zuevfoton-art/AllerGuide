@@ -184,6 +184,7 @@ flowchart TB
 | P2.5 | Security audit mobile | OWASP mobile checklist | Нет секретов в коде |
 | P2.6 | Pen-test API | 0 critical (JWT, IDOR, rate-limit) | JWT stateless, `require-jwt` |
 | P2.7 | Performance | Cold start p95 <3s, профилирование IndexedDB | Web-store async write-through |
+| P2.8 | RC gate + soak | CI + Maestro + Sentry ≥99%, 14-day soak | [`rc-gate.md`](./rc-gate.md) |
 
 **Инфра:** Redis rate-limit store, PgBouncer, health checks.
 
