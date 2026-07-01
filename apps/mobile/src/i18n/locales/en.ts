@@ -429,25 +429,17 @@ const en: LocaleMessages = {
     skip: 'Skip',
     disclaimer: 'Information in the app is advisory and does not replace medical consultation.',
     slides: {
-      diary: {
-        title: 'Personal diary',
-        desc: 'Symptoms, nutrition, medicine, peak flow, SLIT and doctor reports.',
+      profile: {
+        title: 'Build your allergy profile',
+        desc: 'Add allergens, symptoms and emergency contacts — one secure place for your health data.',
       },
       scanner: {
-        title: 'Smart scanner',
-        desc: 'Products, menus, medicine and cosmetics — checked against your profile.',
+        title: 'Scan before you eat',
+        desc: 'Check products, menus and cosmetics instantly against your personal allergy profile.',
       },
-      market: {
-        title: 'Marketplace',
-        desc: 'Personalized product picks for allergy sufferers.',
-      },
-      map: {
-        title: 'Places map',
-        desc: 'Restaurants, pollen map and ADAIR clinics.',
-      },
-      expert: {
-        title: 'Expert: Prof. Smolkin Yu.S.',
-        desc: 'ADAIR materials and recommendations in an accessible format.',
+      care: {
+        title: 'Stay protected every day',
+        desc: 'Diary, pollen alerts and doctor reports — everything to manage allergies with confidence.',
       },
     },
   },

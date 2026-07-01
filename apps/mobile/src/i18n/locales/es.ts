@@ -429,25 +429,17 @@ const es: LocaleMessages = {
     skip: 'Omitir',
     disclaimer: 'La información de la app es orientativa y no sustituye la consulta médica.',
     slides: {
-      diary: {
-        title: 'Diario personal',
-        desc: 'Síntomas, alimentación, medicamentos, peak flow, inmunoterapia e informes médicos.',
+      profile: {
+        title: 'Crea tu perfil de alergia',
+        desc: 'Alérgenos, síntomas y contactos de emergencia — todo en un lugar seguro.',
       },
       scanner: {
-        title: 'Escáner inteligente',
-        desc: 'Productos, menús, medicamentos y cosmética — verificados según tu perfil.',
+        title: 'Escanea antes de comer',
+        desc: 'Comprueba productos, menús y cosmética al instante según tu perfil de alergia.',
       },
-      market: {
-        title: 'Marketplace',
-        desc: 'Selecciones personalizadas de productos para alérgicos.',
-      },
-      map: {
-        title: 'Mapa de lugares',
-        desc: 'Restaurantes, mapa de polen y clínicas ADAIR.',
-      },
-      expert: {
-        title: 'Experto: Prof. Smolkin Yu.S.',
-        desc: 'Materiales y recomendaciones ADAIR en formato accesible.',
+      care: {
+        title: 'Protección cada día',
+        desc: 'Diario, alertas de polen e informes médicos — control seguro de tu alergia.',
       },
     },
   },

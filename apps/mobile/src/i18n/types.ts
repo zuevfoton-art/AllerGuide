@@ -429,11 +429,9 @@ export type LocaleMessages = {
     skip: string;
     disclaimer: string;
     slides: {
-      diary: { title: string; desc: string };
+      profile: { title: string; desc: string };
       scanner: { title: string; desc: string };
-      market: { title: string; desc: string };
-      map: { title: string; desc: string };
-      expert: { title: string; desc: string };
+      care: { title: string; desc: string };
     };
   };
   profileSetup: {
