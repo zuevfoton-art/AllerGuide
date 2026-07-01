@@ -1,39 +1,21 @@
 <svg viewBox="0 0 280 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="150" cy="188" rx="80" ry="10" fill="#0F172A" fill-opacity="0.06"/>
-  <rect x="28" y="42" width="30" height="22" rx="3" stroke="#0F172A" stroke-width="1.6" fill="#FFFFFF"/>
-  <line x1="33" y1="46" x2="33" y2="60" stroke="#0F172A" stroke-width="2"/><line x1="37" y1="46" x2="37" y2="60" stroke="#0F172A" stroke-width="1"/>
-  <line x1="41" y1="46" x2="41" y2="60" stroke="#0F172A" stroke-width="2.4"/><line x1="46" y1="46" x2="46" y2="60" stroke="#0F172A" stroke-width="1.2"/>
-  <line x1="50" y1="46" x2="50" y2="60" stroke="#0F172A" stroke-width="2"/>
-  <path d="M235 30 250 36v14c0 9-15 16-15 16s-15-7-15-16V36l15-6Z" stroke="#0F172A" stroke-width="1.6" fill="#EFF6FF"/>
-  <path d="M235 42v10M230 47h10" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>
-  <path d="M252 52c-8-6-14-2-14 4 0 8 14 16 14 16s14-8 14-16c0-6-6-10-14-4Z" stroke="#0F172A" stroke-width="1.6" fill="#EFF6FF"/>
-  <line x1="58" y1="52" x2="108" y2="88" stroke="#0F172A" stroke-width="1.2" stroke-dasharray="3 4" opacity="0.35"/>
-  <line x1="232" y1="48" x2="188" y2="78" stroke="#0F172A" stroke-width="1.2" stroke-dasharray="3 4" opacity="0.35"/>
-  <rect x="118" y="118" width="72" height="52" rx="6" stroke="#0F172A" stroke-width="2" fill="#FFFFFF"/>
-  <rect x="128" y="128" width="52" height="18" rx="2" fill="#EFF6FF"/>
-  <line x1="132" y1="152" x2="132" y2="164" stroke="#0F172A" stroke-width="2.2"/><line x1="138" y1="152" x2="138" y2="164" stroke="#0F172A" stroke-width="1.2"/>
-  <line x1="144" y1="152" x2="144" y2="164" stroke="#0F172A" stroke-width="2.6"/><line x1="150" y1="152" x2="150" y2="164" stroke="#0F172A" stroke-width="1.4"/>
-  <line x1="156" y1="152" x2="156" y2="164" stroke="#0F172A" stroke-width="2.2"/><line x1="162" y1="152" x2="162" y2="164" stroke="#0F172A" stroke-width="1.2"/>
-  <line x1="168" y1="152" x2="168" y2="164" stroke="#0F172A" stroke-width="2.8"/>
-  <path d="M108 108h22M108 108v18M192 108h-22M192 108v18M108 178h22M108 178v-18M192 178h-22M192 178v-18" stroke="#2563EB" stroke-width="2.4" stroke-linecap="round"/>
-  <line x1="108" y1="143" x2="192" y2="143" stroke="#2563EB" stroke-width="1.8" stroke-dasharray="5 4"/>
-  <path d="M58 70c0-10 8-17 16-17s16 7 16 17" stroke="#0F172A" stroke-width="2" fill="none"/>
-  <circle cx="74" cy="76" r="13" stroke="#0F172A" stroke-width="2" fill="#FFFFFF"/>
-  <circle cx="69.8" cy="74.7" r="1.6" fill="#0F172A"/><circle cx="78.2" cy="74.7" r="1.6" fill="#0F172A"/>
-  <path d="M69.5 80.5Q74 82.8 78.5 80.5" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-  <path d="M58 94c4 32 10 48 16 54s12-22 14-54" stroke="#0F172A" stroke-width="2" fill="#2563EB" fill-opacity="0.3"/>
-  <path d="M54 98c-12 6-16 18-12 30" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
-  <path d="M88 108c18-6 32-4 42 8" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
-  <rect x="124" y="96" width="34" height="58" rx="8" stroke="#0F172A" stroke-width="2" fill="#FFFFFF"/>
-  <rect x="130" y="104" width="22" height="36" rx="3" fill="#EFF6FF"/>
-  <circle cx="142" cy="144" r="3" stroke="#0F172A" stroke-width="1.2"/>
-  <line x1="74" y1="148" x2="70" y2="176" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
-  <line x1="90" y1="148" x2="94" y2="176" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="218" cy="108" r="11" stroke="#0F172A" stroke-width="2" fill="#FFFFFF"/>
-  <circle cx="214.5" cy="106.9" r="1.6" fill="#0F172A"/><circle cx="221.5" cy="106.9" r="1.6" fill="#0F172A"/>
-  <path d="M214.2 111.8Q218 113.6 221.8 111.8" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-  <path d="M210 94c0-6 5-9 8-9s8 3 8 9" stroke="#0F172A" stroke-width="1.4" fill="none"/>
-  <path d="M206 118c2 22 6 34 10 38s8-16 10-38" stroke="#0F172A" stroke-width="1.6" fill="#2563EB" fill-opacity="0.2"/>
-  <line x1="212" y1="156" x2="208" y2="176" stroke="#0F172A" stroke-width="1.6" stroke-linecap="round"/>
-  <line x1="226" y1="156" x2="230" y2="176" stroke="#0F172A" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="34" y="72" width="26" height="16" rx="2" fill="#2563EB" stroke="#0F172A" stroke-width="1.4"/>
+  <circle cx="47" cy="80" r="4" stroke="#FFFFFF" stroke-width="1.2"/>
+  <rect x="42" y="94" width="22" height="14" rx="2" fill="#EFF6FF" stroke="#0F172A" stroke-width="1.4"/>
+  <path d="M228 78c-10-8-18-3-18 5 0 10 18 20 18 20s18-10 18-20c0-8-8-13-18-5Z" fill="#2563EB" stroke="#0F172A" stroke-width="1.6"/>
+  <path d="M214 74h20M218 70v12M226 72v8" stroke="#FFFFFF" stroke-width="1.4" stroke-linecap="round" opacity="0.85"/>
+  <path d="M18 148c28-18 52-62 78-78 8-5 18-2 22 8 4 12-6 28-18 38-20 16-48 28-72 32-10 2-14-6-10-14Z" fill="#2563EB" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M88 78c6 8 4 18-4 24" stroke="#0F172A" stroke-width="1.6" stroke-linecap="round"/>
+  <rect x="108" y="52" width="88" height="118" rx="8" fill="#FFFFFF" stroke="#2563EB" stroke-width="2.4"/>
+  <rect x="118" y="44" width="68" height="14" rx="4" fill="#2563EB" stroke="#0F172A" stroke-width="1.4"/>
+  <path d="M152 38v12" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="152" cy="36" r="4" stroke="#0F172A" stroke-width="1.4"/>
+  <path d="M146 68v16M138 76h16" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round"/>
+  <rect x="122" y="92" width="12" height="12" rx="2" stroke="#2563EB" stroke-width="1.6" fill="#EFF6FF"/>
+  <rect x="122" y="112" width="12" height="12" rx="2" stroke="#0F172A" stroke-width="1.4"/>
+  <rect x="122" y="132" width="12" height="12" rx="2" stroke="#0F172A" stroke-width="1.4"/>
+  <line x1="140" y1="98" x2="182" y2="98" stroke="#0F172A" stroke-width="1.4" opacity="0.45"/>
+  <line x1="140" y1="118" x2="176" y2="118" stroke="#0F172A" stroke-width="1.4" opacity="0.45"/>
+  <line x1="140" y1="138" x2="180" y2="138" stroke="#0F172A" stroke-width="1.4" opacity="0.45"/>
+  <path d="M125 98l3 3 6-7" stroke="#2563EB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

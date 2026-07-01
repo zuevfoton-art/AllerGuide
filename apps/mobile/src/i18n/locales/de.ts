@@ -434,8 +434,8 @@ const de: LocaleMessages = {
         desc: 'Allergene, Symptome und Notfallkontakte — alles an einem sicheren Ort.',
       },
       scanner: {
-        title: 'Vor dem Essen scannen',
-        desc: 'Produkte, Menüs und Kosmetik sofort gegen Ihr persönliches Allergieprofil prüfen.',
+        title: 'Allergene markieren',
+        desc: 'Erstellen Sie eine Checkliste für Allergene und Reaktionen — wie eine Arztkarte, in der App.',
       },
       care: {
         title: 'Jeden Tag geschützt',

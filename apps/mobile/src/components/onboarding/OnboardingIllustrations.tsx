@@ -1,4 +1,4 @@
-import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
 
 type IllustrationProps = {
   width?: number;
@@ -11,25 +11,19 @@ type IllustrationProps = {
 const DEFAULT_W = 280;
 const DEFAULT_H = 220;
 const SW = 2;
-const SW_THIN = 1.6;
 
-type PersonBits = {
-  stroke: string;
-  accent: string;
-  skin?: string;
-};
+/** Reference onboarding art — line-art people, blue fills (#2563EB family) */
 
-/** Minimal face — dot eyes + smile (reference style) */
 function Face({ cx, cy, r, stroke }: { cx: number; cy: number; r: number; stroke: string }) {
   return (
     <G>
       <Circle cx={cx} cy={cy} r={r} stroke={stroke} strokeWidth={SW} fill="#FFFFFF" />
-      <Circle cx={cx - r * 0.32} cy={cy - r * 0.1} r={1.6} fill={stroke} />
-      <Circle cx={cx + r * 0.32} cy={cy - r * 0.1} r={1.6} fill={stroke} />
+      <Circle cx={cx - r * 0.28} cy={cy - r * 0.08} r={1.5} fill={stroke} />
+      <Circle cx={cx + r * 0.28} cy={cy - r * 0.08} r={1.5} fill={stroke} />
       <Path
-        d={`M${cx - r * 0.35} ${cy + r * 0.35} Q${cx} ${cy + r * 0.62} ${cx + r * 0.35} ${cy + r * 0.35}`}
+        d={`M${cx - r * 0.3} ${cy + r * 0.32} Q${cx} ${cy + r * 0.55} ${cx + r * 0.3} ${cy + r * 0.32}`}
         stroke={stroke}
-        strokeWidth={1.4}
+        strokeWidth={1.3}
         strokeLinecap="round"
         fill="none"
       />
@@ -37,92 +31,11 @@ function Face({ cx, cy, r, stroke }: { cx: number; cy: number; r: number; stroke
   );
 }
 
-function FloatingIcon({
-  x,
-  y,
-  stroke,
-  accent,
-  accentLight,
-  kind,
-}: {
-  x: number;
-  y: number;
-  stroke: string;
-  accent: string;
-  accentLight: string;
-  kind: 'profile' | 'shield' | 'check' | 'barcode' | 'heart' | 'smile';
-}) {
-  if (kind === 'profile') {
-    return (
-      <G>
-        <Rect x={x} y={y} width={34} height={42} rx={4} stroke={stroke} strokeWidth={SW_THIN} fill="#FFFFFF" />
-        <Path d={`M${x + 8} ${y + 6}h18l4 6v26H${x + 4}V${y + 12}l4-6Z`} stroke={stroke} strokeWidth={1.4} fill={accentLight} />
-        <Circle cx={x + 17} cy={y + 24} r={5} stroke={stroke} strokeWidth={1.2} />
-        <Path d={`M${x + 12} ${y + 34}c2 4 10 4 10 0`} stroke={stroke} strokeWidth={1.2} fill="none" />
-      </G>
-    );
-  }
-  if (kind === 'shield') {
-    return (
-      <G>
-        <Path
-          d={`M${x + 17} ${y + 4}  ${x + 32} ${y + 10}v14c0 9-15 16-15 16s-15-7-15-16V${y + 10}l15-6Z`}
-          stroke={stroke}
-          strokeWidth={SW_THIN}
-          fill={accentLight}
-        />
-        <Path d={`M${x + 17} ${y + 16}v10M${x + 12} ${y + 21}h10`} stroke={accent} strokeWidth={2} strokeLinecap="round" />
-      </G>
-    );
-  }
-  if (kind === 'check') {
-    return (
-      <G>
-        <Circle cx={x + 14} cy={y + 14} r={14} stroke={stroke} strokeWidth={SW_THIN} fill="#FFFFFF" />
-        <Path d={`M${x + 7} ${y + 14}l5 5 10-11`} stroke={accent} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-      </G>
-    );
-  }
-  if (kind === 'barcode') {
-    return (
-      <G>
-        <Rect x={x} y={y + 6} width={30} height={22} rx={3} stroke={stroke} strokeWidth={SW_THIN} fill="#FFFFFF" />
-        <Line x1={x + 5} y1={y + 10} x2={x + 5} y2={y + 24} stroke={stroke} strokeWidth={2} />
-        <Line x1={x + 9} y1={y + 10} x2={x + 9} y2={y + 24} stroke={stroke} strokeWidth={1} />
-        <Line x1={x + 13} y1={y + 10} x2={x + 13} y2={y + 24} stroke={stroke} strokeWidth={2.4} />
-        <Line x1={x + 18} y1={y + 10} x2={x + 18} y2={y + 24} stroke={stroke} strokeWidth={1.2} />
-        <Line x1={x + 22} y1={y + 10} x2={x + 22} y2={y + 24} stroke={stroke} strokeWidth={2} />
-      </G>
-    );
-  }
-  if (kind === 'heart') {
-    return (
-      <G>
-        <Path
-          d={`M${x + 16} ${y + 22}c-8-6-14-2-14 4 0 8 14 16 14 16s14-8 14-16c0-6-6-10-14-4Z`}
-          stroke={stroke}
-          strokeWidth={SW_THIN}
-          fill={accentLight}
-        />
-        <Path d={`M${x + 10} ${y + 16}h12M${x + 16} ${y + 10}v12`} stroke={accent} strokeWidth={1.4} strokeLinecap="round" opacity={0.6} />
-      </G>
-    );
-  }
-  return (
-    <G>
-      <Circle cx={x + 14} cy={y + 14} r={14} stroke={stroke} strokeWidth={SW_THIN} fill="#FFFFFF" />
-      <Path d={`M${x + 8} ${y + 16}a6 6 0 1 0 12 0`} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" fill="none" />
-      <Circle cx={x + 11} cy={y + 12} r={1.4} fill={stroke} />
-      <Circle cx={x + 19} cy={y + 12} r={1.4} fill={stroke} />
-    </G>
-  );
-}
-
 function Connector({ x1, y1, x2, y2, stroke }: { x1: number; y1: number; x2: number; y2: number; stroke: string }) {
-  return <Line x1={x1} y1={y1} x2={x2} y2={y2} stroke={stroke} strokeWidth={1.2} strokeDasharray="3 4" opacity={0.35} />;
+  return <Line x1={x1} y1={y1} x2={x2} y2={y2} stroke={stroke} strokeWidth={1.3} opacity={0.28} />;
 }
 
-/** Slide 1 — family registering allergy profiles */
+/** Slide 1 — family + scroll / shield / check (reference screen 1) */
 export function ProfileSetupIllustration({
   width = DEFAULT_W,
   height = DEFAULT_H,
@@ -130,74 +43,66 @@ export function ProfileSetupIllustration({
   accent = '#2563EB',
   accentLight = '#EFF6FF',
 }: IllustrationProps) {
-  const p: PersonBits = { stroke, accent };
   return (
     <Svg width={width} height={height} viewBox="0 0 280 220" fill="none">
-      <Ellipse cx="140" cy="188" rx="88" ry="10" fill={stroke} opacity={0.06} />
-
-      <Connector x1={52} y1={56} x2={98} y2={88} stroke={stroke} />
-      <Connector x1={210} y1={52} x2={168} y2={82} stroke={stroke} />
-      <Connector x1={248} y1={82} x2={198} y2={76} stroke={stroke} />
-      <FloatingIcon x={38} y={28} stroke={stroke} accent={accent} accentLight={accentLight} kind="profile" />
-      <FloatingIcon x={196} y={22} stroke={stroke} accent={accent} accentLight={accentLight} kind="shield" />
-      <FloatingIcon x={234} y={58} stroke={stroke} accent={accent} accentLight={accentLight} kind="check" />
-
-      {/* Mother */}
+      {/* floating icons */}
       <G>
-        <Path d="M72 62c0-8 6-14 14-14s14 6 14 14" stroke={stroke} strokeWidth={SW} fill="none" />
-        <Path d="M68 68c-4 10-2 18 4 22" stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
-        <Face cx={86} cy={72} r={13} stroke={p.stroke} />
+        <Connector x1={54} y1={62} x2={92} y2={88} stroke={stroke} />
+        <Connector x1={140} y1={48} x2={140} y2={78} stroke={stroke} />
+        <Connector x1={226} y1={62} x2={188} y2={88} stroke={stroke} />
+        {/* scroll + profile */}
+        <Rect x={36} y={38} width={28} height={36} rx={3} stroke={stroke} strokeWidth={1.6} fill="#FFFFFF" />
+        <Path d="M42 44h16l3 5v21H39V49l3-5Z" stroke={stroke} strokeWidth={1.2} fill={accentLight} />
+        <Circle cx={50} cy={56} r={4.5} stroke={stroke} strokeWidth={1.2} />
+        <Path d="M45 64c2 3 8 3 10 0" stroke={stroke} strokeWidth={1.1} fill="none" />
+        {/* shield above */}
         <Path
-          d="M72 88c2 28 8 42 14 48s12-20 14-48"
-          stroke={stroke}
-          strokeWidth={SW}
-          strokeLinecap="round"
+          d="M140 28 156 34v16c0 10-16 18-16 18s-16-8-16-18V34l16-6Z"
           fill={accent}
-          fillOpacity={0.22}
-        />
-        <Path d="M68 92c-10 6-14 16-12 26" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Path d="M104 94c8 4 12 14 10 24" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={78} y1={136} x2={74} y2={168} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={98} y1={136} x2={102} y2={168} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-      </G>
-
-      {/* Father */}
-      <G>
-        <Path d="M148 54c0-9 7-15 15-15s15 6 15 15" stroke={stroke} strokeWidth={SW} fill="none" />
-        <Face cx={163} cy={64} r={14} stroke={p.stroke} />
-        <Path
-          d="M147 82c3 30 10 46 16 52s14-22 16-52"
-          stroke={stroke}
-          strokeWidth={SW}
-          strokeLinecap="round"
-          fill={accent}
-          fillOpacity={0.35}
-        />
-        <Path d="M142 86c-12 4-18 14-16 26" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Path d="M178 88c10 2 16 12 14 24" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={155} y1={134} x2={150} y2={168} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={175} y1={134} x2={180} y2={168} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-      </G>
-
-      {/* Child (in father's arms) */}
-      <G>
-        <Face cx={196} cy={78} r={10} stroke={p.stroke} />
-        <Path d="M188 62c0-5 4-8 8-8s8 3 8 8" stroke={stroke} strokeWidth={1.4} fill="none" />
-        <Path
-          d="M186 90c2 18 6 28 10 32s8-14 10-32"
           stroke={stroke}
           strokeWidth={1.6}
-          fill={accent}
-          fillOpacity={0.28}
         />
-        <Path d="M182 94c-8 2-10 10-8 16" stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
-        <Path d="M206 96c6 0 10 6 10 14" stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
+        <Path d="M140 40v12M134 46h12" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" />
+        {/* check circle */}
+        <Circle cx={226} cy={50} r={15} fill={accent} stroke={stroke} strokeWidth={1.6} />
+        <Path d="M218 50l6 6 12-13" stroke="#FFFFFF" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      </G>
+
+      {/* Mother — long hair, blue top, white pants, holds child */}
+      <G>
+        <Path d="M78 58c-2-12 8-20 18-20 6 0 12 3 14 10" stroke={stroke} strokeWidth={SW} fill="none" />
+        <Path d="M68 64c-8 14-6 28 2 36" stroke={stroke} strokeWidth={1.8} strokeLinecap="round" />
+        <Path d="M96 60c6 8 4 18-2 24" stroke={stroke} strokeWidth={1.8} strokeLinecap="round" />
+        <Face cx={92} cy={72} r={12} stroke={stroke} />
+        <Path d="M78 86c2 26 8 40 14 46s12-20 14-46" stroke={stroke} strokeWidth={SW} fill={accent} />
+        <Path d="M76 90c-12 8-14 22-10 34" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M78 132v36" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M98 132v36" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Line x1={78} y1={132} x2={98} y2={132} stroke={stroke} strokeWidth={SW} />
+        {/* white pants blocks */}
+        <Path d="M76 132h24v36H76v-36Z" fill="#FFFFFF" stroke={stroke} strokeWidth={1.6} />
+        {/* child in arms */}
+        <Face cx={118} cy={82} r={9} stroke={stroke} />
+        <Path d="M110 70c0-5 4-8 8-8s8 3 8 8" stroke={stroke} strokeWidth={1.3} fill="none" />
+        <Path d="M108 92c2 16 6 24 10 28s8-12 10-28" stroke={stroke} strokeWidth={1.5} fill={accentLight} />
+        <Path d="M104 96c-8 4-10 12-6 18" stroke={stroke} strokeWidth={1.5} strokeLinecap="round" />
+      </G>
+
+      {/* Father — blue hair, white tee, blue pants */}
+      <G>
+        <Path d="M162 54c0-10 8-16 16-16s16 6 16 16" stroke={stroke} strokeWidth={SW} fill={accent} />
+        <Face cx={178} cy={64} r={13} stroke={stroke} />
+        <Path d="M162 80c4 28 10 44 16 50s14-22 16-50" stroke={stroke} strokeWidth={SW} fill="#FFFFFF" />
+        <Path d="M156 84c-14 6-18 20-14 32" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M194 86c12 4 16 16 12 28" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M168 130h20v38h-20v-38Z" fill={accent} stroke={stroke} strokeWidth={1.6} />
+        <Line x1={168} y1={130} x2={188} y2={130} stroke={stroke} strokeWidth={SW} />
       </G>
     </Svg>
   );
 }
 
-/** Slide 2 — person scanning a product label */
+/** Slide 2 — hand + clipboard + money + heart (reference screen 2) */
 export function ScannerIllustration({
   width = DEFAULT_W,
   height = DEFAULT_H,
@@ -207,64 +112,55 @@ export function ScannerIllustration({
 }: IllustrationProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 280 220" fill="none">
-      <Ellipse cx="150" cy="188" rx="80" ry="10" fill={stroke} opacity={0.06} />
-
-      <FloatingIcon x={28} y={36} stroke={stroke} accent={accent} accentLight={accentLight} kind="barcode" />
-      <FloatingIcon x={218} y={30} stroke={stroke} accent={accent} accentLight={accentLight} kind="shield" />
-      <FloatingIcon x={236} y={72} stroke={stroke} accent={accent} accentLight={accentLight} kind="heart" />
-      <Connector x1={58} y1={52} x2={108} y2={88} stroke={stroke} />
-      <Connector x1={232} y1={48} x2={188} y2={78} stroke={stroke} />
-
-      {/* Product on counter */}
-      <Rect x={118} y={118} width={72} height={52} rx={6} stroke={stroke} strokeWidth={SW} fill="#FFFFFF" />
-      <Rect x={128} y={128} width={52} height={18} rx={2} fill={accentLight} />
-      <Line x1={132} y1={152} x2={132} y2={164} stroke={stroke} strokeWidth={2.2} />
-      <Line x1={138} y1={152} x2={138} y2={164} stroke={stroke} strokeWidth={1.2} />
-      <Line x1={144} y1={152} x2={144} y2={164} stroke={stroke} strokeWidth={2.6} />
-      <Line x1={150} y1={152} x2={150} y2={164} stroke={stroke} strokeWidth={1.4} />
-      <Line x1={156} y1={152} x2={156} y2={164} stroke={stroke} strokeWidth={2.2} />
-      <Line x1={162} y1={152} x2={162} y2={164} stroke={stroke} strokeWidth={1.2} />
-      <Line x1={168} y1={152} x2={168} y2={164} stroke={stroke} strokeWidth={2.8} />
-
-      {/* Scan frame */}
-      <Path d="M108 108h22M108 108v18M192 108h-22M192 108v18M108 178h22M108 178v-18M192 178h-22M192 178v-18" stroke={accent} strokeWidth={2.4} strokeLinecap="round" />
-      <Line x1={108} y1={143} x2={192} y2={143} stroke={accent} strokeWidth={1.8} strokeDasharray="5 4" />
-
-      {/* Woman scanning */}
+      {/* money bills */}
+      <G opacity={0.95}>
+        <Rect x={34} y={72} width={26} height={16} rx={2} fill={accent} stroke={stroke} strokeWidth={1.4} />
+        <Circle cx={47} cy={80} r={4} stroke="#FFFFFF" strokeWidth={1.2} />
+        <Rect x={42} y={94} width={22} height={14} rx={2} fill={accentLight} stroke={stroke} strokeWidth={1.4} />
+      </G>
+      {/* heart + pulse */}
       <G>
-        <Path d="M58 70c0-10 8-17 16-17s16 7 16 17" stroke={stroke} strokeWidth={SW} fill="none" />
-        <Path d="M52 78c-6 8-4 16 2 20" stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
-        <Face cx={74} cy={76} r={13} stroke={stroke} />
         <Path
-          d="M58 94c4 32 10 48 16 54s12-22 14-54"
-          stroke={stroke}
-          strokeWidth={SW}
+          d="M228 78c-10-8-18-3-18 5 0 10 18 20 18 20s18-10 18-20c0-8-8-13-18-5Z"
           fill={accent}
-          fillOpacity={0.3}
+          stroke={stroke}
+          strokeWidth={1.6}
         />
-        <Path d="M54 98c-12 6-16 18-12 30" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        {/* arm + phone */}
-        <Path d="M88 108c18-6 32-4 42 8" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Rect x={124} y={96} width={34} height={58} rx={8} stroke={stroke} strokeWidth={SW} fill="#FFFFFF" />
-        <Rect x={130} y={104} width={22} height={36} rx={3} fill={accentLight} />
-        <Circle cx={142} cy={144} r={3} stroke={stroke} strokeWidth={1.2} />
-        <Line x1={74} y1={148} x2={70} y2={176} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={90} y1={148} x2={94} y2={176} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M214 74h20M218 70v12M226 72v8" stroke="#FFFFFF" strokeWidth={1.4} strokeLinecap="round" opacity={0.85} />
       </G>
 
-      {/* Child watching */}
+      {/* blue hand from left */}
+      <Path
+        d="M18 148c28-18 52-62 78-78 8-5 18-2 22 8 4 12-6 28-18 38-20 16-48 28-72 32-10 2-14-6-10-14Z"
+        fill={accent}
+        stroke={stroke}
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+      <Path d="M88 78c6 8 4 18-4 24" stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
+
+      {/* clipboard */}
       <G>
-        <Face cx={218} cy={108} r={11} stroke={stroke} />
-        <Path d="M210 94c0-6 5-9 8-9s8 3 8 9" stroke={stroke} strokeWidth={1.4} fill="none" />
-        <Path d="M206 118c2 22 6 34 10 38s8-16 10-38" stroke={stroke} strokeWidth={1.6} fill={accent} fillOpacity={0.2} />
-        <Line x1={212} y1={156} x2={208} y2={176} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
-        <Line x1={226} y1={156} x2={230} y2={176} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
+        <Rect x={108} y={52} width={88} height={118} rx={8} fill="#FFFFFF" stroke={accent} strokeWidth={2.4} />
+        <Rect x={118} y={44} width={68} height={14} rx={4} fill={accent} stroke={stroke} strokeWidth={1.4} />
+        <Path d="M152 38v12" stroke={stroke} strokeWidth={2} strokeLinecap="round" />
+        <Circle cx={152} cy={36} r={4} stroke={stroke} strokeWidth={1.4} />
+        {/* medical cross header */}
+        <Path d="M146 68v16M138 76h16" stroke={accent} strokeWidth={2.6} strokeLinecap="round" />
+        {/* checklist */}
+        <Rect x={122} y={92} width={12} height={12} rx={2} stroke={accent} strokeWidth={1.6} fill={accentLight} />
+        <Rect x={122} y={112} width={12} height={12} rx={2} stroke={stroke} strokeWidth={1.4} />
+        <Rect x={122} y={132} width={12} height={12} rx={2} stroke={stroke} strokeWidth={1.4} />
+        <Line x1={140} y1={98} x2={182} y2={98} stroke={stroke} strokeWidth={1.4} opacity={0.45} />
+        <Line x1={140} y1={118} x2={176} y2={118} stroke={stroke} strokeWidth={1.4} opacity={0.45} />
+        <Line x1={140} y1={138} x2={180} y2={138} stroke={stroke} strokeWidth={1.4} opacity={0.45} />
+        <Path d="M125 98l3 3 6-7" stroke={accent} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
       </G>
     </Svg>
   );
 }
 
-/** Slide 3 — family under protective umbrella */
+/** Slide 3 — family under striped umbrella + shield + smiley (reference screen 3) */
 export function DailyCareIllustration({
   width = DEFAULT_W,
   height = DEFAULT_H,
@@ -274,75 +170,73 @@ export function DailyCareIllustration({
 }: IllustrationProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 280 220" fill="none">
-      <Ellipse cx="140" cy="188" rx={90} ry={10} fill={stroke} opacity={0.06} />
+      <FloatingSmiley x={214} y={28} stroke={stroke} />
+      <ShieldIcon x={38} y={118} stroke={stroke} accent={accent} />
 
-      <FloatingIcon x={214} y={24} stroke={stroke} accent={accent} accentLight={accentLight} kind="smile" />
+      {/* striped umbrella */}
+      <Path d="M34 108c36-48 76-58 106-58s70 10 106 58" fill={accent} fillOpacity={0.22} stroke={stroke} strokeWidth={2} />
+      <Path d="M34 108c18-28 42-40 70-46" stroke="#FFFFFF" strokeWidth={14} strokeLinecap="round" opacity={0.55} />
+      <Path d="M88 62c28-6 52 2 70 46" stroke={accent} strokeWidth={12} strokeLinecap="round" opacity={0.35} />
+      <Path d="M140 56c24 4 48 20 66 52" stroke="#FFFFFF" strokeWidth={12} strokeLinecap="round" opacity={0.5} />
+      <Line x1={140} y1={108} x2={140} y2={174} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
 
-      {/* Umbrella */}
-      <Path
-        d="M36 108c46-58 162-58 208 0"
-        stroke={accent}
-        strokeWidth={2.8}
-        strokeLinecap="round"
-        fill={accent}
-        fillOpacity={0.18}
-      />
-      <Line x1={140} y1={108} x2={140} y2={172} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-
-      {/* Woman */}
+      {/* Mother */}
       <G>
-        <Path d="M98 88c0-9 7-15 14-15s14 6 14 15" stroke={stroke} strokeWidth={SW} fill="none" />
-        <Face cx={112} cy={92} r={12} stroke={stroke} />
-        <Path
-          d="M98 108c3 28 8 42 14 48s12-20 14-48"
-          stroke={stroke}
-          strokeWidth={SW}
-          fill={accent}
-          fillOpacity={0.28}
-        />
-        <Line x1={104} y1={156} x2={100} y2={176} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={122} y1={156} x2={126} y2={176} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M96 86c0-9 7-15 14-15s14 6 14 15" stroke={stroke} strokeWidth={SW} fill="none" />
+        <Path d="M88 92c-6 10-4 20 4 26" stroke={stroke} strokeWidth={1.6} />
+        <Face cx={110} cy={90} r={11} stroke={stroke} />
+        <Path d="M96 104c3 26 8 40 14 46s12-20 14-46" stroke={stroke} strokeWidth={SW} fill={accent} />
+        <Path d="M104 150v26" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M120 150v26" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Line x1={104} y1={150} x2={120} y2={150} stroke={stroke} strokeWidth={SW} />
+        <Path d="M102 150h20v26h-20v-26Z" fill="#FFFFFF" stroke={stroke} strokeWidth={1.4} />
       </G>
 
-      {/* Man with shield */}
+      {/* Father — holds umbrella, blue pants, white shirt */}
       <G>
-        <Path d="M158 82c0-10 8-16 16-16s16 6 16 16" stroke={stroke} strokeWidth={SW} fill="none" />
-        <Face cx={174} cy={86} r={13} stroke={stroke} />
-        <Path
-          d="M158 104c4 30 10 46 16 52s14-22 16-52"
-          stroke={stroke}
-          strokeWidth={SW}
-          fill={accent}
-          fillOpacity={0.38}
-        />
-        <Path d="M152 108c-12 4-16 16-12 28" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={166} y1={156} x2={162} y2={176} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        <Line x1={186} y1={156} x2={190} y2={176} stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
-        {/* Shield in hand */}
-        <Path
-          d="M196 118 208 122v12c0 7-12 12-12 12s-12-5-12-12v-12l12-4Z"
-          stroke={stroke}
-          strokeWidth={SW_THIN}
-          fill={accentLight}
-        />
-        <Path d="M196 126v8M191 130h10" stroke={accent} strokeWidth={1.8} strokeLinecap="round" />
+        <Path d="M154 78c0-10 8-16 16-16s16 6 16 16" stroke={stroke} strokeWidth={SW} fill={accent} />
+        <Face cx={170} cy={82} r={12} stroke={stroke} />
+        <Path d="M154 96c4 28 10 44 16 50s14-22 16-50" stroke={stroke} strokeWidth={SW} fill="#FFFFFF" />
+        <Path d="M148 100c-12 4-16 16-12 28" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M188 102c14 2 18 14 14 26" stroke={stroke} strokeWidth={SW} strokeLinecap="round" />
+        <Path d="M160 146h22v30h-22v-30Z" fill={accent} stroke={stroke} strokeWidth={1.6} />
+        <Path d="M140 108c-4 8-2 16 4 20" stroke={stroke} strokeWidth={1.8} strokeLinecap="round" />
       </G>
 
-      {/* Child in front */}
+      {/* Child front center */}
       <G>
-        <Face cx={140} cy={124} r={10} stroke={stroke} />
-        <Path d="M132 110c0-5 4-8 8-8s8 3 8 8" stroke={stroke} strokeWidth={1.4} fill="none" />
-        <Path
-          d="M130 136c2 20 6 30 10 34s8-14 10-34"
-          stroke={stroke}
-          strokeWidth={1.6}
-          fill={accent}
-          fillOpacity={0.25}
-        />
-        <Line x1={134} y1={170} x2={132} y2={176} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
-        <Line x1={148} y1={170} x2={150} y2={176} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
+        <Face cx={140} cy={118} r={9} stroke={stroke} />
+        <Path d="M132 106c0-5 4-8 8-8s8 3 8 8" stroke={stroke} strokeWidth={1.3} fill="none" />
+        <Path d="M130 128c2 18 6 28 10 32s8-14 10-32" stroke={stroke} strokeWidth={1.5} fill={accentLight} />
+        <Line x1={134} y1={160} x2={132} y2={176} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
+        <Line x1={148} y1={160} x2={150} y2={176} stroke={stroke} strokeWidth={1.6} strokeLinecap="round" />
       </G>
     </Svg>
+  );
+}
+
+function ShieldIcon({ x, y, stroke, accent }: { x: number; y: number; stroke: string; accent: string }) {
+  return (
+    <G>
+      <Path
+        d={`M${x + 16} ${y} ${x + 32} ${y + 6}v14c0 9-16 16-16 16s-16-7-16-16V${y + 6}l16-6Z`}
+        fill={accent}
+        stroke={stroke}
+        strokeWidth={1.6}
+      />
+      <Path d={`M${x + 16} ${y + 12}v10M${x + 11} ${y + 17}h10`} stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" />
+    </G>
+  );
+}
+
+function FloatingSmiley({ x, y, stroke }: { x: number; y: number; stroke: string }) {
+  return (
+    <G>
+      <Circle cx={x + 14} cy={y + 14} r={14} stroke={stroke} strokeWidth={1.6} fill="#FFFFFF" />
+      <Path d={`M${x + 8} ${y + 16}a6 6 0 1 0 12 0`} stroke={stroke} strokeWidth={1.5} strokeLinecap="round" fill="none" />
+      <Circle cx={x + 11} cy={y + 12} r={1.4} fill={stroke} />
+      <Circle cx={x + 19} cy={y + 12} r={1.4} fill={stroke} />
+    </G>
   );
 }
 

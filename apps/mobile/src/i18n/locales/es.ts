@@ -434,8 +434,8 @@ const es: LocaleMessages = {
         desc: 'Alérgenos, síntomas y contactos de emergencia — todo en un lugar seguro.',
       },
       scanner: {
-        title: 'Escanea antes de comer',
-        desc: 'Comprueba productos, menús y cosmética al instante según tu perfil de alergia.',
+        title: 'Marca tus alérgenos',
+        desc: 'Crea una lista de alérgenos y reacciones — como una ficha médica, en la app.',
       },
       care: {
         title: 'Protección cada día',

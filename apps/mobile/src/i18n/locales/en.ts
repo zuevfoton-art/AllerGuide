@@ -434,8 +434,8 @@ const en: LocaleMessages = {
         desc: 'Add allergens, symptoms and emergency contacts — one secure place for your health data.',
       },
       scanner: {
-        title: 'Scan before you eat',
-        desc: 'Check products, menus and cosmetics instantly against your personal allergy profile.',
+        title: 'Check off your allergens',
+        desc: 'Build a checklist of allergens and reactions — like a medical chart, in your pocket.',
       },
       care: {
         title: 'Stay protected every day',
