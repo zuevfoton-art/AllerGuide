@@ -1,5 +1,8 @@
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
 
+/** Abort a backend request after this long so the UI never hangs on "Подождите…". */
+const DEFAULT_TIMEOUT_MS = 15000;
+
 export function getApiBaseUrl() {
   return API_BASE;
 }
@@ -10,9 +13,13 @@ export async function apiRequest<T>(
     method?: string;
     body?: unknown;
     token?: string | null;
+    timeoutMs?: number;
   } = {},
 ): Promise<{ ok: true; data: T } | { ok: false; error: string; status: number }> {
-  const { method = 'GET', body, token } = options;
+  const { method = 'GET', body, token, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -22,6 +29,7 @@ export async function apiRequest<T>(
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: body != null ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
     });
 
     const payload = (await response.json()) as T & { error?: string; ok?: boolean };
@@ -37,5 +45,7 @@ export async function apiRequest<T>(
     return { ok: true, data: payload };
   } catch {
     return { ok: false, error: 'Не удалось подключиться к серверу', status: 0 };
+  } finally {
+    clearTimeout(timeout);
   }
 }
