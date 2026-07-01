@@ -207,6 +207,66 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
+## 5а. Подключение приложения к backend (Replit)
+
+По умолчанию сборка работает **offline** (локальная регистрация в SQLite). Чтобы регистрация/вход шли на сервер `https://aller-guide.replit.app`, нужно задать две `EXPO_PUBLIC_*` переменные и **пересобрать** приложение.
+
+> ⚠️ Важно: `EXPO_PUBLIC_*` встраиваются в JS-бандл **во время сборки**. В приложении нет экрана для смены адреса сервера — уже установленный APK переключить нельзя, нужна новая сборка. На native (в отличие от web) URL должен быть **абсолютным** — относительные пути (`/api/...`) на телефоне не работают, из-за этого экран регистрации виснет на «Подождите…».
+
+| Переменная | Значение |
+|------------|----------|
+| `EXPO_PUBLIC_API_URL` | `https://aller-guide.replit.app` |
+| `EXPO_PUBLIC_BACKEND_AUTH` | `true` |
+
+### Вариант 1 — файл `.env` (для локальной сборки)
+
+Есть готовый шаблон [`apps/mobile/.env.replit.example`](../apps/mobile/.env.replit.example):
+
+```bash
+cp apps/mobile/.env.replit.example apps/mobile/.env
+```
+
+Expo автоматически подхватит `apps/mobile/.env` и для Metro (debug), и для `export:embed` (release). После этого пересоберите (раздел 4 или 5), например:
+
+```bash
+cd apps/mobile/android && ./gradlew assembleRelease
+```
+
+### Вариант 2 — переменные окружения (без файла)
+
+```bash
+cd apps/mobile
+export EXPO_PUBLIC_API_URL=https://aller-guide.replit.app
+export EXPO_PUBLIC_BACKEND_AUTH=true
+cd android && ./gradlew assembleRelease     # Windows PowerShell: $env:EXPO_PUBLIC_API_URL="..."; $env:EXPO_PUBLIC_BACKEND_AUTH="true"
+```
+
+### Вариант 3 — облачная сборка EAS
+
+В [`apps/mobile/eas.json`](../apps/mobile/eas.json) есть профиль **`replit`** с этими переменными:
+
+```bash
+pnpm --filter mobile build:replit:android     # eas build --profile replit --platform android
+```
+
+### Проверка, что URL вшит в сборку
+
+```bash
+# в собранном APK должен встречаться адрес сервера
+unzip -p apps/mobile/android/app/build/outputs/apk/release/app-release.apk assets/index.android.bundle \
+  | strings | grep -m1 aller-guide.replit.app
+```
+
+Backend должен отвечать (проверка живости):
+
+```bash
+curl -s https://aller-guide.replit.app/api/health      # {"ok":true,"authDatabase":true}
+```
+
+После установки такой сборки регистрация создаёт пользователя на сервере и возвращает JWT — экран больше не зависает на «Подождите…».
+
+---
+
 ## 6. Проверка в Android Studio
 
 1. **Откройте именно папку** `apps/mobile/android` (а не корень репозитория): Android Studio → **Open** → выберите `apps/mobile/android`.
@@ -245,6 +305,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 | Долгая первая сборка / таймаут скачивания Gradle | Это нормально (качается Gradle 8.13 + зависимости); повторный запуск использует кеш |
 | `adb: no devices/emulators found` | Запустите эмулятор или подключите телефон с включённой USB-отладкой; проверьте `adb devices` |
 | Приложение зависает на splash в debug | Не поднят Metro — запустите `pnpm --filter mobile start`, либо собирайте `release` |
+| Регистрация висит на «Подождите…» | Включён backend-auth, но URL сервера не задан/недоступен. Задайте абсолютный `EXPO_PUBLIC_API_URL` и пересоберите (раздел 5а). Запрос теперь прерывается по таймауту (15 c) с ошибкой «Не удалось подключиться к серверу» |
 | Нужна чистая пересборка | `cd apps/mobile/android && ./gradlew clean` |
 | Сбросить нативную папку с нуля | Из `apps/mobile`: `npx expo prebuild --platform android --clean` (перегенерирует `android/` из `app.json`) |
 
