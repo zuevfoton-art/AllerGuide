@@ -30,7 +30,9 @@
     "memoizee": "^0.4.17",
     "openid-client": "^6.8.4",
     "passport": "^0.7.0",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "rate-limit-redis": "^5.0.0",
+    "redis": "^6.1.0"
   },
   "devDependencies": {
     "@types/connect-pg-simple": "^7.0.3",

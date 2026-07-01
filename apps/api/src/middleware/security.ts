@@ -1,6 +1,7 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Express, NextFunction, Request, Response } from 'express';
 import type { CorsOptions } from 'cors';
 import rateLimit, { type RateLimitRequestHandler } from 'express-rate-limit';
+import { createRedisRateLimitStore } from '../lib/rate-limit-store';
 
 function parseList(value: string | undefined): string[] {
   return (value ?? '')
@@ -47,38 +48,53 @@ const passthrough = ((_req: Request, _res: Response, next: NextFunction) => {
   next();
 }) as unknown as RateLimitRequestHandler;
 
-/** Coarse per-IP limiter applied to every request. */
-export function createGlobalRateLimiter(): RateLimitRequestHandler {
+async function buildLimiter(
+  prefix: string,
+  config: { windowMs: number; max: number; message: string },
+): Promise<RateLimitRequestHandler> {
   if (rateLimitDisabled()) return passthrough;
+
+  const store = await createRedisRateLimitStore(prefix);
   return rateLimit({
-    windowMs: parseNumber(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
-    max: parseNumber(process.env.RATE_LIMIT_MAX, 300),
+    windowMs: config.windowMs,
+    max: config.max,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { ok: false, error: 'Too many requests' },
+    message: { ok: false, error: config.message },
+    ...(store ? { store } : {}),
+  });
+}
+
+/** Coarse per-IP limiter applied to every request. */
+export async function createGlobalRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('global', {
+    windowMs: parseNumber(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+    max: parseNumber(process.env.RATE_LIMIT_MAX, 300),
+    message: 'Too many requests',
   });
 }
 
 /** Stricter limiter for credential endpoints to slow brute-force attempts. */
-export function createAuthRateLimiter(): RateLimitRequestHandler {
-  if (rateLimitDisabled()) return passthrough;
-  return rateLimit({
+export async function createAuthRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('auth', {
     windowMs: parseNumber(process.env.AUTH_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
     max: parseNumber(process.env.AUTH_RATE_LIMIT_MAX, 30),
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { ok: false, error: 'Too many authentication attempts' },
+    message: 'Too many authentication attempts',
   });
 }
 
 /** Limiter for the AI scan endpoint (LLM calls are expensive). */
-export function createScanRateLimiter(): RateLimitRequestHandler {
-  if (rateLimitDisabled()) return passthrough;
-  return rateLimit({
+export async function createScanRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('scan', {
     windowMs: parseNumber(process.env.SCAN_RATE_LIMIT_WINDOW_MS, 60 * 1000),
     max: parseNumber(process.env.SCAN_RATE_LIMIT_MAX, 30),
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { ok: false, error: 'Too many scan requests' },
+    message: 'Too many scan requests',
   });
+}
+
+/** Install global/auth/scan rate limiters (Redis-backed when REDIS_URL is set). */
+export async function installRateLimiters(app: Express): Promise<void> {
+  app.use(await createGlobalRateLimiter());
+  app.use('/api/auth', await createAuthRateLimiter());
+  app.use('/api/scan', await createScanRateLimiter());
 }

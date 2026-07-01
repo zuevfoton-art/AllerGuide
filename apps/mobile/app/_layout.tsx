@@ -1,6 +1,6 @@
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Platform, StyleSheet, View, AppState } from 'react-native';
+import { InteractionManager, Platform, StyleSheet, View, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { initDb } from '@/src/db/init';
@@ -15,6 +15,10 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { registerNotificationNavigation } from '@/src/services/notification-navigation-service';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
+import {
+  logStartupMetrics,
+  markStartupPhase,
+} from '@/src/services/startup-metrics';
 
 // NOTE: react-native-quick-crypto was removed. Its native install() crashed the
 // Android app at launch (a native/JNI abort that a JS try/catch cannot catch,
@@ -48,6 +52,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     let mounted = true;
+    markStartupPhase('layout_mount');
 
     // Each startup step is independent — a failure in one subsystem must never
     // block the whole app from rendering.
@@ -66,23 +71,40 @@ export default function RootLayout() {
     // Storage hydration is async on web (IndexedDB). Gate rendering on it so
     // screens never read from an empty cache before hydration completes.
     void (async () => {
+      markStartupPhase('init_db_start');
       try {
         await initDb();
       } catch (error) {
         console.warn('[startup] initDb failed:', error);
       }
       if (!mounted) return;
-      safe('warmAllergenCatalogCache', warmAllergenCatalogCache);
       safe('hydrateTheme', hydrateTheme);
       safe('hydrateLocale', hydrateLocale);
+      markStartupPhase('db_ready');
       setDbReady(true);
       void reconcileAllReminders();
+
+      const deferBackgroundWarmup = () => {
+        safe('warmAllergenCatalogCache', warmAllergenCatalogCache);
+      };
+
+      if (Platform.OS === 'web') {
+        deferBackgroundWarmup();
+      } else {
+        InteractionManager.runAfterInteractions(deferBackgroundWarmup);
+      }
     })();
 
     return () => {
       mounted = false;
     };
   }, [hydrateTheme, hydrateLocale]);
+
+  useEffect(() => {
+    if (!appReady) return;
+    markStartupPhase('app_ready');
+    logStartupMetrics();
+  }, [appReady]);
 
   useEffect(() => {
     if (appReady && pathname) trackScreen(pathname);
