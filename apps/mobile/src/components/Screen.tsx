@@ -48,6 +48,12 @@ export function Screen({
           paddingHorizontal: layout.horizontalPadding,
           gap: 16,
         },
+        // In non-scroll mode the content must fill the SafeAreaView so flex
+        // children (e.g. the onboarding carousel / legal doc scroller) get a
+        // bounded height instead of collapsing to zero.
+        contentFill: {
+          flex: 1,
+        },
         safe: {
           flex: 1,
           backgroundColor: colors.bg,
@@ -94,5 +100,9 @@ export function Screen({
     );
   }
 
-  return <SafeAreaView style={styles.safe}>{body}</SafeAreaView>;
+  return (
+    <SafeAreaView style={styles.safe}>
+      <View style={[styles.content, styles.contentFill]}>{children}</View>
+    </SafeAreaView>
+  );
 }
