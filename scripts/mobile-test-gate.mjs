@@ -9,6 +9,10 @@ import { fileURLToPath } from 'node:url';
 const MIN_TESTS = 30;
 const mobileDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'apps', 'mobile');
 
+function stripAnsi(text) {
+  return text.replace(/\x1b\[[0-9;]*m/g, '');
+}
+
 const result = spawnSync('pnpm', ['vitest', 'run'], {
   cwd: mobileDir,
   encoding: 'utf8',
@@ -22,7 +26,7 @@ if (result.status !== 0) {
   process.exit(result.status ?? 1);
 }
 
-const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+const output = stripAnsi(`${result.stdout ?? ''}\n${result.stderr ?? ''}`);
 const match = output.match(/Tests\s+(\d+)\s+passed/);
 const count = match ? Number(match[1]) : 0;
 
