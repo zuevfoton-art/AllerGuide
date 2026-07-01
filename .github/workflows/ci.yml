@@ -35,6 +35,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Mobile unit test gate (P2.2d, ≥30)
+        run: node scripts/mobile-test-gate.mjs
+
   api-integration:
     runs-on: ubuntu-latest
     services:

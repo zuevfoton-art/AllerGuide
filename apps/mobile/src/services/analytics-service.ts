@@ -1,4 +1,9 @@
-type AnalyticsProps = Record<string, string | number | boolean | null | undefined>;
+import {
+  buildAnalyticsPayload,
+  isAnalyticsEventName,
+  type AnalyticsEventName,
+  type AnalyticsEventProps,
+} from './analytics-events';
 
 let analyticsEnabled = false;
 
@@ -6,10 +11,15 @@ export function initAnalytics() {
   analyticsEnabled = process.env.EXPO_PUBLIC_ANALYTICS_ENABLED === 'true';
 }
 
-export function trackEvent(name: string, props?: AnalyticsProps) {
-  if (!analyticsEnabled) return;
+export function isAnalyticsEnabled(): boolean {
+  return analyticsEnabled;
+}
 
-  const payload = { event: name, at: new Date().toISOString(), ...props };
+export function trackEvent(name: string, props?: AnalyticsEventProps) {
+  if (!analyticsEnabled) return;
+  if (!isAnalyticsEventName(name)) return;
+
+  const payload = buildAnalyticsPayload(name as AnalyticsEventName, props);
   console.info('[analytics]', payload);
 
   const endpoint = process.env.EXPO_PUBLIC_ANALYTICS_ENDPOINT;
