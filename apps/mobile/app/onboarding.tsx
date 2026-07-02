@@ -7,7 +7,7 @@ import type { Scenario } from '@allerguide/core';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
-import { ProfileSetupIllustration } from '@/src/components/onboarding/OnboardingIllustrations';
+import { OnboardingSlideImage } from '@/src/components/onboarding/OnboardingSlideImage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -37,13 +37,7 @@ export default function OnboardingScreen() {
           <View style={styles.hero}>
             <BrandLogo size={44} showWordmark />
             <View style={styles.heroArt}>
-              <ProfileSetupIllustration
-                width={220}
-                height={150}
-                stroke={theme.isDark ? theme.colors.text : '#0F172A'}
-                accent={theme.colors.accent}
-                accentLight={theme.colors.accentLight}
-              />
+              <OnboardingSlideImage slide="profile" width={220} height={150} />
             </View>
             <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
           </View>

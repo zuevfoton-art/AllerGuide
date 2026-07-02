@@ -472,7 +472,7 @@
         <span class="pill"><strong>Accent</strong> #2563EB</span>
         <span class="pill"><strong>Card radius</strong> 28px</span>
         <span class="pill"><strong>Slides</strong> 3 + сценарий</span>
-        <span class="pill"><strong>SVG</strong> docs/assets/onboarding/</span>
+        <span class="pill"><strong>Art</strong> PNG reference illustrations</span>
       </div>
     </header>
 
@@ -507,7 +507,7 @@
 
       <!-- Slide 2 -->
       <div class="showcase-item">
-        <span class="showcase-label">2 · Аллергены</span>
+        <span class="showcase-label">2 · Сканер</span>
         <div class="phone">
           <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
             <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
@@ -515,8 +515,8 @@
           </svg>
           <div class="phone-inner">
             <div class="illus" data-illus="scanner"></div>
-            <h3 class="slide-title">Отметьте аллергены</h3>
-            <p class="slide-desc">Соберите чек-лист аллергенов и реакций — как в медицинской карте, только в приложении.</p>
+            <h3 class="slide-title">Сканируйте перед едой</h3>
+            <p class="slide-desc">Проверяйте продукты, меню и косметику по вашему профилю за секунды.</p>
             <div class="chrome">
               <div class="chrome-row">
                 <div class="dots"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
@@ -598,7 +598,7 @@
       <div class="preview-controls">
         <h3>Переключить слайд</h3>
         <button class="ctrl-btn active" data-slide="0">1 — Профиль</button>
-        <button class="ctrl-btn" data-slide="1">2 — Аллергены</button>
+        <button class="ctrl-btn" data-slide="1">2 — Сканер</button>
         <button class="ctrl-btn" data-slide="2">3 — Защита</button>
         <hr style="border:none;border-top:1px solid var(--border);margin:14px 0" />
         <button class="ctrl-btn" data-screen="scenario">Сценарий (после intro)</button>
@@ -663,7 +663,7 @@
       </div>
       <div class="spec-card">
         <strong>Иллюстрации</strong>
-        Line-art SVG 280×220 с людьми (семья, сканирование, зонт). Stroke <code>#0F172A</code>, одежда <code>#2563EB</code>. Файлы: <code>docs/assets/onboarding/*.svg</code>
+        Line-art PNG 280×220 (reference art). Файлы: <code>docs/assets/onboarding/*.png</code>
       </div>
       <div class="spec-card">
         <strong>Навигация</strong>
@@ -695,8 +695,8 @@
       },
       {
         key: 'scanner',
-        title: 'Отметьте аллергены',
-        desc: 'Соберите чек-лист аллергенов и реакций — как в медицинской карте, только в приложении.',
+        title: 'Сканируйте перед едой',
+        desc: 'Проверяйте продукты, меню и косметику по вашему профилю за секунды.',
       },
       {
         key: 'care',
@@ -709,10 +709,10 @@
       if (!container || !key) return;
       container.innerHTML = '';
       const img = document.createElement('img');
-      img.src = ASSET_BASE + key + '.svg';
+      img.src = ASSET_BASE + key + '.png';
       img.alt = '';
       img.width = 260;
-      img.height = 204;
+      img.height = 220;
       container.appendChild(img);
     }
 

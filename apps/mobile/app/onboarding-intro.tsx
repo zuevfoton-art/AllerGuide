@@ -13,10 +13,7 @@ import { useMemo, useRef, useState } from 'react';
 import { markIntroComplete } from '@/src/services/settings-service';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
-import {
-  OnboardingIllustration,
-  type OnboardingSlideKey,
-} from '@/src/components/onboarding/OnboardingIllustrations';
+import { OnboardingSlideImage, type OnboardingSlideKey } from '@/src/components/onboarding/OnboardingSlideImage';
 import { OnboardingSlideChrome } from '@/src/components/onboarding/OnboardingSlideChrome';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -63,13 +60,10 @@ export default function OnboardingIntroScreen() {
   const renderSlide = ({ item }: { item: OnboardingSlideKey }) => (
     <View style={[styles.slide, { width: cardWidth }]}>
       <View style={styles.illustrationFrame}>
-        <OnboardingIllustration
+        <OnboardingSlideImage
           slide={item}
           width={illustrationWidth}
-          height={illustrationWidth * 0.78}
-          stroke={theme.isDark ? theme.colors.text : '#0F172A'}
-          accent={theme.colors.accent}
-          accentLight={theme.colors.accentLight}
+          height={illustrationWidth * 0.85}
         />
       </View>
       <Text style={styles.title}>{t(`onboardingIntro.slides.${item}.title`)}</Text>
