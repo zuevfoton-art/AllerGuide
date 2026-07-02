@@ -429,25 +429,17 @@ const it: LocaleMessages = {
     skip: 'Salta',
     disclaimer: 'Le informazioni nell\'app sono indicative e non sostituiscono la consultazione medica.',
     slides: {
-      diary: {
-        title: 'Diario personale',
-        desc: 'Sintomi, alimentazione, farmaci, peak flow, SLIT e referti medici.',
+      profile: {
+        title: 'Crea il tuo profilo allergico',
+        desc: 'Allergeni, sintomi e contatti di emergenza — tutto in un unico posto sicuro.',
       },
       scanner: {
-        title: 'Scanner intelligente',
-        desc: 'Prodotti, menu, farmaci e cosmetici — verificati in base al tuo profilo.',
+        title: 'Scansiona prima di mangiare',
+        desc: 'Controlla prodotti, menu e cosmetici in base al tuo profilo allergico in pochi secondi.',
       },
-      market: {
-        title: 'Marketplace',
-        desc: 'Selezione personalizzata di prodotti per allergici.',
-      },
-      map: {
-        title: 'Mappa luoghi',
-        desc: 'Ristoranti, mappa del polline e cliniche ADAIR.',
-      },
-      expert: {
-        title: 'Esperto: Prof. Smolkin Yu.S.',
-        desc: 'Materiali e raccomandazioni ADAIR in formato accessibile.',
+      care: {
+        title: 'Protetto ogni giorno',
+        desc: 'Diario, avvisi sul polline e referti medici — gestisci le allergie con sicurezza.',
       },
     },
   },

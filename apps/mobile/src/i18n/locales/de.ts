@@ -429,25 +429,17 @@ const de: LocaleMessages = {
     skip: 'Überspringen',
     disclaimer: 'App-Informationen sind beratend und ersetzen keine ärztliche Beratung.',
     slides: {
-      diary: {
-        title: 'Persönliches Tagebuch',
-        desc: 'Symptome, Ernährung, Medikamente, Peak Flow, SLIT und Arztberichte.',
+      profile: {
+        title: 'Erstellen Sie Ihr Allergieprofil',
+        desc: 'Allergene, Symptome und Notfallkontakte — alles an einem sicheren Ort.',
       },
       scanner: {
-        title: 'Smart Scanner',
-        desc: 'Produkte, Menüs, Medikamente und Kosmetik — geprüft nach Ihrem Profil.',
+        title: 'Vor dem Essen scannen',
+        desc: 'Produkte, Menüs und Kosmetik sofort gegen Ihr persönliches Allergieprofil prüfen.',
       },
-      market: {
-        title: 'Marktplatz',
-        desc: 'Personalisierte Produktauswahl für Allergiker.',
-      },
-      map: {
-        title: 'Orte-Karte',
-        desc: 'Restaurants, Pollenkarte und ADAIR-Kliniken.',
-      },
-      expert: {
-        title: 'Experte: Prof. Smolkin Yu.S.',
-        desc: 'ADAIR-Materialien und Empfehlungen in zugänglichem Format.',
+      care: {
+        title: 'Jeden Tag geschützt',
+        desc: 'Tagebuch, Pollenwarnungen und Arztberichte — für sicheres Allergiemanagement.',
       },
     },
   },

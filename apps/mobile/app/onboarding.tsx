@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { useAppStore } from '@/src/store/app-store';
 import { setStoredScenario } from '@/src/services/settings-service';
 import type { Scenario } from '@allerguide/core';
-import { Screen } from '@/src/components/Screen';
-import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
+import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
+import { OnboardingSlideImage } from '@/src/components/onboarding/OnboardingSlideImage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
 const SCENARIO_KEYS = [
   { key: 'self', labelKey: 'onboarding.self', descKey: 'onboarding.selfDesc', icon: 'person' },
@@ -21,68 +21,122 @@ const SCENARIO_KEYS = [
 
 export default function OnboardingScreen() {
   const theme = useTheme();
-  const ui = useUiStyles();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const layout = useResponsiveLayout();
+  const styles = useMemo(
+    () => createStyles(theme, layout.horizontalPadding),
+    [theme, layout.horizontalPadding],
+  );
   const { t } = useTranslation();
   const setScenario = useAppStore((s) => s.setScenario);
 
   return (
-    <Screen>
-      <View style={styles.hero}>
-        <BrandLogo size={64} showWordmark />
-        <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
-      </View>
-
-      <Text style={ui.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
-
-      {SCENARIO_KEYS.map((item) => (
-        <Pressable
-          key={item.key}
-          testID={`onboarding-scenario-${item.key}`}
-          onPress={() => {
-            setScenario(item.key as Scenario);
-            setStoredScenario(item.key as Scenario);
-            router.push('/profile-setup');
-          }}>
-          <GlassCard style={styles.card}>
-            <View style={styles.cardIcon}>
-              <Ionicons name={item.icon as 'person'} size={20} color={theme.colors.accent} />
+    <View style={styles.root}>
+      <OnboardingWaveBackground accent={theme.colors.accent} accentLight={theme.colors.accentLight} />
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.card, { maxWidth: layout.contentMaxWidth }]}>
+          <View style={styles.hero}>
+            <BrandLogo size={44} showWordmark />
+            <View style={styles.heroArt}>
+              <OnboardingSlideImage slide="profile" width={220} height={150} />
             </View>
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>{t(item.labelKey)}</Text>
-              <Text style={styles.cardDesc}>{t(item.descKey)}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
-          </GlassCard>
-        </Pressable>
-      ))}
+            <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
+          </View>
 
-      <Disclaimer>{t('onboarding.disclaimer')}</Disclaimer>
-    </Screen>
+          <Text style={styles.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
+
+          {SCENARIO_KEYS.map((item) => (
+            <Pressable
+              key={item.key}
+              testID={`onboarding-scenario-${item.key}`}
+              onPress={() => {
+                setScenario(item.key as Scenario);
+                setStoredScenario(item.key as Scenario);
+                router.push('/profile-setup');
+              }}>
+              <View style={styles.scenarioCard}>
+                <View style={styles.cardIcon}>
+                  <Ionicons name={item.icon as 'person'} size={20} color={theme.colors.accent} />
+                </View>
+                <View style={styles.cardText}>
+                  <Text style={styles.cardTitle}>{t(item.labelKey)}</Text>
+                  <Text style={styles.cardDesc}>{t(item.descKey)}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+              </View>
+            </Pressable>
+          ))}
+
+          <Disclaimer>{t('onboarding.disclaimer')}</Disclaimer>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: number) {
   return StyleSheet.create({
-    hero: { alignItems: 'center', paddingVertical: 24, gap: 12 },
+    root: {
+      flex: 1,
+      backgroundColor: colors.accent,
+    },
+    safe: {
+      flex: 1,
+      paddingHorizontal: horizontalPadding,
+      paddingVertical: 12,
+    },
+    card: {
+      flex: 1,
+      width: '100%',
+      alignSelf: 'center',
+      backgroundColor: colors.card,
+      borderRadius: 28,
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 24,
+      gap: 14,
+      ...shadows.md,
+    },
+    hero: {
+      alignItems: 'center',
+      gap: 8,
+      paddingBottom: 4,
+    },
+    heroArt: {
+      marginTop: -4,
+      marginBottom: -8,
+    },
     tagline: {
       fontFamily: fonts.sans,
       fontSize: 15,
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 22,
+      paddingHorizontal: 8,
     },
-    card: {
+    sectionLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    scenarioCard: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
-      marginBottom: 0,
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceMuted,
     },
     cardIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.surfaceMuted,
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: colors.accentLight,
       alignItems: 'center',
       justifyContent: 'center',
     },

@@ -1,34 +1,36 @@
-import { View, Text, Pressable, StyleSheet, FlatList, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  useWindowDimensions,
+  SafeAreaView,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { markIntroComplete } from '@/src/services/settings-service';
-import { Screen } from '@/src/components/Screen';
-import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
-import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { BrandSlideIcon } from '@/src/components/brand/BrandTabIcon';
+import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
+import { OnboardingSlideImage, type OnboardingSlideKey } from '@/src/components/onboarding/OnboardingSlideImage';
+import { OnboardingSlideChrome } from '@/src/components/onboarding/OnboardingSlideChrome';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
-const SLIDE_KEYS = ['diary', 'scanner', 'market', 'map', 'expert'] as const;
-const SLIDE_COLORS = {
-  diary: 'accent',
-  scanner: 'info',
-  market: 'success',
-  map: 'head',
-  expert: 'accent',
-} as const;
-
-type SlideKey = (typeof SLIDE_KEYS)[number];
+const SLIDE_KEYS: OnboardingSlideKey[] = ['profile', 'scanner', 'care'];
 
 export default function OnboardingIntroScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const layout = useResponsiveLayout();
+  const styles = useMemo(() => createStyles(theme, layout.horizontalPadding), [theme, layout.horizontalPadding]);
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
-  const listRef = useRef<FlatList<SlideKey>>(null);
+  const listRef = useRef<FlatList<OnboardingSlideKey>>(null);
   const [index, setIndex] = useState(0);
-  const slideWidth = Math.min(windowWidth, 720);
+  const cardWidth = Math.min(windowWidth - layout.horizontalPadding * 2, 720);
+  const illustrationWidth = Math.min(cardWidth - 32, 300);
 
   const finish = () => {
     markIntroComplete();
@@ -49,103 +51,118 @@ export default function OnboardingIntroScreen() {
   };
 
   const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / slideWidth);
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardWidth);
     if (nextIndex >= 0 && nextIndex < SLIDE_KEYS.length) {
       setIndex(nextIndex);
     }
   };
 
-  const renderSlide = ({ item }: { item: SlideKey }) => {
-    const colorKey = SLIDE_COLORS[item];
-    const color = theme.colors[colorKey];
-
-    return (
-      <View style={[styles.slide, { width: slideWidth }]}>
-        <View style={[styles.iconWrap, { backgroundColor: `${color}18` }]}>
-          <BrandSlideIcon slide={item} size={32} color={color} />
-        </View>
-        <Text style={styles.title}>{t(`onboardingIntro.slides.${item}.title`)}</Text>
-        <Text style={styles.desc}>{t(`onboardingIntro.slides.${item}.desc`)}</Text>
+  const renderSlide = ({ item }: { item: OnboardingSlideKey }) => (
+    <View style={[styles.slide, { width: cardWidth }]}>
+      <View style={styles.illustrationFrame}>
+        <OnboardingSlideImage
+          slide={item}
+          width={illustrationWidth}
+          height={illustrationWidth * 0.85}
+        />
       </View>
-    );
-  };
+      <Text style={styles.title}>{t(`onboardingIntro.slides.${item}.title`)}</Text>
+      <Text style={styles.desc}>{t(`onboardingIntro.slides.${item}.desc`)}</Text>
+    </View>
+  );
+
+  const isLast = index >= SLIDE_KEYS.length - 1;
 
   return (
-    <Screen scroll={false}>
-      <View style={styles.body}>
-        <BrandLogo size={40} showWordmark style={styles.brand} />
-
-        <View style={styles.progressRow}>
-          {SLIDE_KEYS.map((s, i) => (
-            <View key={s} style={[styles.dot, i <= index && styles.dotActive]} />
-          ))}
-        </View>
-
-        <FlatList
-          ref={listRef}
-          data={[...SLIDE_KEYS]}
-          keyExtractor={(item) => item}
-          renderItem={renderSlide}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onMomentumScrollEnd={onMomentumScrollEnd}
-          getItemLayout={(_, i) => ({ length: slideWidth, offset: slideWidth * i, index: i })}
-          style={styles.carousel}
-          contentContainerStyle={styles.carouselContent}
-        />
-
-        <View style={styles.footer}>
-          <Button
-            testID="onboarding-intro-next"
-            label={index >= SLIDE_KEYS.length - 1 ? t('onboardingIntro.startSetup') : t('onboardingIntro.next')}
-            variant="primary"
-            block
-            onPress={next}
+    <View style={styles.root}>
+      <OnboardingWaveBackground accent={theme.colors.accent} accentLight={theme.colors.accentLight} />
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.card, { maxWidth: layout.contentMaxWidth }]}>
+          <FlatList
+            ref={listRef}
+            data={SLIDE_KEYS}
+            keyExtractor={(item) => item}
+            renderItem={renderSlide}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={onMomentumScrollEnd}
+            getItemLayout={(_, i) => ({ length: cardWidth, offset: cardWidth * i, index: i })}
+            style={styles.carousel}
+            contentContainerStyle={styles.carouselContent}
           />
 
-          <Pressable testID="onboarding-intro-skip" onPress={finish}>
-            <Text style={styles.skip}>{t('onboardingIntro.skip')}</Text>
-          </Pressable>
-
-          <Disclaimer showMdrFootnote>{t('onboardingIntro.disclaimer')}</Disclaimer>
+          <View style={styles.bottom}>
+            <OnboardingSlideChrome
+              theme={theme}
+              slideCount={SLIDE_KEYS.length}
+              index={index}
+              isLast={isLast}
+              nextLabel={t('onboardingIntro.next')}
+              startLabel={t('onboardingIntro.startSetup')}
+              skipLabel={t('onboardingIntro.skip')}
+              onNext={next}
+              onSkip={finish}
+            />
+            <Disclaimer showMdrFootnote>{t('onboardingIntro.disclaimer')}</Disclaimer>
+          </View>
         </View>
-      </View>
-    </Screen>
+      </SafeAreaView>
+    </View>
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number) {
   return StyleSheet.create({
-    body: { flex: 1, gap: 8 },
-    brand: { alignSelf: 'center', marginBottom: 8 },
-    progressRow: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginBottom: 8 },
-    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
-    dotActive: { backgroundColor: colors.accent, width: 20 },
-    carousel: { flex: 1 },
-    carouselContent: { alignItems: 'center' },
+    root: {
+      flex: 1,
+      backgroundColor: colors.accent,
+    },
+    safe: {
+      flex: 1,
+      paddingHorizontal: horizontalPadding,
+      paddingVertical: 12,
+    },
+    card: {
+      flex: 1,
+      width: '100%',
+      alignSelf: 'center',
+      backgroundColor: colors.card,
+      borderRadius: 28,
+      overflow: 'hidden',
+      paddingTop: 20,
+      paddingBottom: 20,
+      paddingHorizontal: 16,
+    },
+    carousel: {
+      flex: 1,
+    },
+    carouselContent: {
+      alignItems: 'stretch',
+    },
     slide: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 12,
-      paddingHorizontal: 12,
+      gap: 14,
+      paddingHorizontal: 8,
     },
-    iconWrap: {
-      width: 72,
-      height: 72,
-      borderRadius: 8,
+    illustrationFrame: {
+      width: '100%',
+      minHeight: 200,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 8,
+      marginBottom: 4,
     },
     title: {
       fontFamily: fonts.serifBold,
-      fontSize: 24,
+      fontSize: 26,
       fontWeight: '700',
       color: colors.head,
       textAlign: 'center',
-      letterSpacing: -0.2,
+      letterSpacing: -0.3,
+      lineHeight: 32,
+      paddingHorizontal: 8,
     },
     desc: {
       fontFamily: fonts.sans,
@@ -153,15 +170,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 22,
+      paddingHorizontal: 12,
+      maxWidth: 320,
     },
-    footer: { gap: 0, paddingTop: 8 },
-    skip: {
-      fontFamily: fonts.sansSemiBold,
-      textAlign: 'center',
-      color: colors.textMuted,
-      fontWeight: '600',
-      marginTop: 12,
-      fontSize: 14,
+    bottom: {
+      gap: 10,
+      paddingTop: 4,
     },
   });
 }
