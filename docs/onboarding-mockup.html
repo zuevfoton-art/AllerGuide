@@ -213,7 +213,14 @@
     }
 
     .illus img,
-    .illus svg { width: 100%; max-width: 260px; height: auto; display: block; }
+    .illus-img {
+      width: 100%;
+      max-width: 260px;
+      height: auto;
+      max-height: 200px;
+      display: block;
+      object-fit: contain;
+    }
 
     .slide-title {
       font-family: var(--serif);
@@ -464,8 +471,10 @@
     <header>
       <h1>AllerGuide — онбординг (line-art)</h1>
       <p>
-        Mockup онбординга AllerGuide: line-art иллюстрации с людьми, синий фон с волнами, белая карточка,
-        3 intro-слайда + экран выбора сценария. Откройте этот файл в браузере из папки <code>docs/</code>.
+        Mockup онбординга AllerGuide: 3 intro-слайда + экран сценария.
+        Локально: <code>cd docs && python3 -m http.server 8080</code> →
+        <code>http://127.0.0.1:8080/onboarding-mockup.html</code>.
+        При ошибке загрузки WebP mockup подставит локальный PNG.
       </p>
       <div class="meta">
         <span class="pill"><strong>Файл</strong> docs/onboarding-mockup.html</span>
@@ -491,7 +500,9 @@
             <circle cx="88%" cy="12%" r="56" fill="#eff6ff" opacity="0.45"/>
           </svg>
           <div class="phone-inner">
-            <div class="illus" data-illus="profile"></div>
+            <div class="illus">
+              <img class="illus-img" src="./assets/onboarding/profile.webp" alt="" width="260" height="200" loading="lazy" />
+            </div>
             <h3 class="slide-title">Создайте профиль аллергика</h3>
             <p class="slide-desc">Аллергены, симптомы и экстренные контакты — всё в одном защищённом месте.</p>
             <div class="chrome">
@@ -514,7 +525,9 @@
             <circle cx="8%" cy="78%" r="42" fill="#2563eb" opacity="0.1"/>
           </svg>
           <div class="phone-inner">
-            <div class="illus" data-illus="scanner"></div>
+            <div class="illus">
+              <img class="illus-img" src="./assets/onboarding/scanner.webp" alt="" width="260" height="200" loading="lazy" />
+            </div>
             <h3 class="slide-title">Сканируйте перед едой</h3>
             <p class="slide-desc">Проверяйте продукты, меню и косметику по вашему профилю за секунды.</p>
             <div class="chrome">
@@ -537,7 +550,9 @@
             <circle cx="88%" cy="12%" r="56" fill="#eff6ff" opacity="0.45"/>
           </svg>
           <div class="phone-inner">
-            <div class="illus" data-illus="care"></div>
+            <div class="illus">
+              <img class="illus-img" src="./assets/onboarding/care.webp" alt="" width="260" height="200" loading="lazy" />
+            </div>
             <h3 class="slide-title">Защита каждый день</h3>
             <p class="slide-desc">Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.</p>
             <div class="chrome">
@@ -569,7 +584,9 @@
               </svg>
               <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
             </div>
-            <div class="illus" style="flex:0;min-height:140px" data-illus="profile"></div>
+            <div class="illus" style="flex:0;min-height:140px">
+              <img class="illus-img" src="./assets/onboarding/profile.webp" alt="" width="220" height="140" loading="lazy" />
+            </div>
             <p class="tagline">Персональный помощник в контроле аллергии</p>
             <p class="section-label">Для кого ведём записи?</p>
             <div class="scenario-card">
@@ -627,7 +644,9 @@
               </svg>
               <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
             </div>
-            <div class="illus" style="flex:0;min-height:140px" data-illus="profile"></div>
+            <div class="illus" style="flex:0;min-height:140px">
+              <img class="illus-img" src="./assets/onboarding/profile.webp" alt="" width="220" height="140" loading="lazy" />
+            </div>
             <p class="tagline">Персональный помощник в контроле аллергии</p>
             <p class="section-label">Для кого ведём записи?</p>
             <div class="scenario-card">
@@ -663,7 +682,7 @@
       </div>
       <div class="spec-card">
         <strong>Иллюстрации</strong>
-        Line-art PNG 280×220 (reference art). Файлы: <code>docs/assets/onboarding/*.png</code>
+        Line-art WebP для mockup (<code>*.webp</code>, ~10 KB) + PNG fallback. Папка: <code>docs/assets/onboarding/</code>
       </div>
       <div class="spec-card">
         <strong>Навигация</strong>
@@ -686,7 +705,37 @@
   </div>
 
   <script>
-    const ASSET_BASE = 'assets/onboarding/';
+    function onboardingAsset(key, ext = 'webp') {
+      return new URL(key + '.' + ext, new URL('./assets/onboarding/', document.baseURI)).href;
+    }
+
+    function applyAssetFallback(img, key) {
+      img.onerror = () => {
+        if (img.dataset.pngTried) return;
+        img.dataset.pngTried = '1';
+        img.src = onboardingAsset(key, 'png');
+      };
+    }
+
+    function mountIllustration(container, key) {
+      if (!container || !key) return;
+      const existing = container.querySelector('img');
+      if (existing) {
+        existing.src = onboardingAsset(key);
+        return;
+      }
+      container.innerHTML = '';
+      const img = document.createElement('img');
+      img.className = 'illus-img';
+      img.alt = '';
+      img.width = 260;
+      img.height = 200;
+      img.loading = 'lazy';
+      applyAssetFallback(img, key);
+      img.src = onboardingAsset(key, 'webp');
+      container.appendChild(img);
+    }
+
     const SLIDES = [
       {
         key: 'profile',
@@ -705,19 +754,14 @@
       },
     ];
 
-    function mountIllustration(container, key) {
-      if (!container || !key) return;
-      container.innerHTML = '';
-      const img = document.createElement('img');
-      img.src = ASSET_BASE + key + '.png';
-      img.alt = '';
-      img.width = 260;
-      img.height = 220;
-      container.appendChild(img);
-    }
-
     document.querySelectorAll('[data-illus]').forEach((node) => {
       mountIllustration(node, node.getAttribute('data-illus'));
+    });
+
+    document.querySelectorAll('.illus-img').forEach((img) => {
+      const match = (img.getAttribute('src') || '').match(/\/([^/.]+)\.(webp|png)$/);
+      if (!match) return;
+      applyAssetFallback(img, match[1]);
     });
 
     const liveTitle = document.getElementById('live-title');
