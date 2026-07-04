@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from 'express';
-import { validateAuthForm, type LoginType } from '@allerguide/core';
+import { validateAuthForm, normalizeLogin, type LoginType } from '@allerguide/core';
 import { signAuthToken } from '../lib/jwt';
 import { requireJwt } from '../middleware/require-jwt';
 import {
@@ -13,7 +13,8 @@ import {
   registerAppUser,
   toAuthUser,
 } from '../services/app-user-service';
-import { normalizeLogin } from '@allerguide/core';
+import { sendPasswordResetEmail } from '../lib/email-service';
+import { listProfilesForUser } from '../services/profile-service';
 
 function isDatabaseConfigured() {
   return Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET);
@@ -153,7 +154,34 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
+    const sent = await sendPasswordResetEmail(normalized, resetToken);
+    if (!sent && process.env.NODE_ENV !== 'production') {
+      console.warn('[auth] Password reset email not sent — configure RESEND_API_KEY');
+    }
+
     res.json({ ok: true });
+  });
+
+  app.get('/api/auth/export', requireJwt, async (req: Request, res: Response) => {
+    if (!isDatabaseConfigured()) {
+      res.status(503).json({ ok: false, error: 'Auth database is not configured' });
+      return;
+    }
+
+    const user = await findUserById(req.authUser!.sub);
+    if (!user) {
+      res.status(404).json({ ok: false, error: 'User not found' });
+      return;
+    }
+
+    const profiles = await listProfilesForUser(req.authUser!.sub);
+    res.json({
+      ok: true,
+      exportedAt: new Date().toISOString(),
+      user: toAuthUser(user),
+      profiles,
+      note: 'Diary and scan history are stored locally or in encrypted cloud backup (zero-knowledge).',
+    });
   });
 
   app.get('/api/auth/verify-reset-token', async (req: Request, res: Response) => {

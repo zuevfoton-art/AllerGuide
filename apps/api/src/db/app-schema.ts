@@ -4,7 +4,6 @@ import {
   integer,
   jsonb,
   pgSchema,
-  primaryKey,
   serial,
   text,
   timestamp,
@@ -117,7 +116,9 @@ export const profileSos = profileSchema.table('profile_sos', {
  * never needs to read user health data in the clear.
  */
 export const syncBackups = profileSchema.table('sync_backups', {
-  userId: integer('user_id').primaryKey(),
+  userId: integer('user_id')
+    .primaryKey()
+    .references(() => appUsers.id, { onDelete: 'cascade' }),
   version: integer('version').notNull().default(2),
   encrypted: boolean('encrypted').notNull().default(false),
   payload: text('payload').notNull(),

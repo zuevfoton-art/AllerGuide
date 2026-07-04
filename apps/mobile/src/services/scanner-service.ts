@@ -11,7 +11,8 @@ import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
-import { saveScanHistory } from '@/src/services/scan-history-service';
+import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
+import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
@@ -66,8 +67,10 @@ export async function scanBarcode({
 }: {
   barcode: string;
   profile?: Profile | null;
-}): Promise<ScanResult & { lookupFailed?: boolean }> {
+}): Promise<ScanResult & { lookupFailed?: boolean; repeatUnsafe?: boolean }> {
   trackEvent('scan_barcode', { lookup: 'pending' });
+  const history = profile ? listScanHistory(profile.id) : [];
+  const repeatUnsafe = wasBarcodePreviouslyHighRisk(history, barcode);
   const product = await resolveProductByBarcode(barcode);
 
   if (!product) {
@@ -84,7 +87,7 @@ export async function scanBarcode({
       lookupFailed: true,
     };
     if (profile) saveScanHistory(profile.id, barcode, result);
-    return result;
+    return { ...result, repeatUnsafe };
   }
 
   const scanSource: ScanResult['source'] =
@@ -100,7 +103,7 @@ export async function scanBarcode({
     traceAllergenIds: product.traceAllergenIds,
   });
   if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
-  return result;
+  return { ...result, repeatUnsafe };
 }
 
 export async function scanText({

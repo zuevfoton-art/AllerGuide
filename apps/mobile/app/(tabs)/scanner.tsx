@@ -4,7 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
-import { formatDiaryDate, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
+import { computeScanTrends, formatDiaryDate, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
@@ -58,6 +58,7 @@ export default function ScannerScreen() {
   const [loading, setLoading] = useState(false);
   const [ocrHint, setOcrHint] = useState<string | null>(null);
   const [scanError, setScanError] = useState(false);
+  const [repeatUnsafe, setRepeatUnsafe] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
@@ -66,6 +67,8 @@ export default function ScannerScreen() {
   const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticResultRef = useRef<ScanResult | null>(null);
+
+  const scanTrends = useMemo(() => computeScanTrends(history), [history]);
 
   const displayResult = useMemo(
     () => (result ? localizeScanResult(result, localeContent) : null),
@@ -159,6 +162,7 @@ export default function ScannerScreen() {
       if (barcodeMode && mode === 'product') {
         const scanResult = await scanBarcode({ barcode: text, profile });
         setResult(scanResult);
+        setRepeatUnsafe(Boolean((scanResult as { repeatUnsafe?: boolean }).repeatUnsafe));
         return;
       }
 
@@ -460,6 +464,10 @@ export default function ScannerScreen() {
         />
       ) : null}
 
+      {repeatUnsafe ? (
+        <Text style={styles.repeatWarning}>{t('scanner.repeatUnsafeWarning')}</Text>
+      ) : null}
+
       {displayResult ? (
         <View
           testID="scanner-result"
@@ -546,6 +554,20 @@ export default function ScannerScreen() {
             }}
           />
         )
+      ) : null}
+
+      {scanTrends.totalScans > 0 ? (
+        <GlassCard>
+          <Text style={ui.cardTitle}>{t('scanner.trendsTitle')}</Text>
+          <Text style={styles.trendMeta}>
+            {scanTrends.totalScans} scans · {scanTrends.highRiskCount} high risk
+          </Text>
+          {scanTrends.topAllergens.map((item) => (
+            <Text key={item.allergenId} style={styles.trendRow}>
+              {item.label}: {item.count}
+            </Text>
+          ))}
+        </GlassCard>
       ) : null}
 
       {history.length > 0 ? (
@@ -693,6 +715,24 @@ function createStyles({ colors, fonts }: AppTheme) {
     resultCard: { borderRadius: 8, padding: 16, gap: 8, borderWidth: 1 },
     resultSafe: { backgroundColor: colors.successLight, borderColor: colors.successBorder },
     resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+    repeatWarning: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      color: colors.danger,
+      marginBottom: 8,
+    },
+    trendMeta: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      marginBottom: 6,
+    },
+    trendRow: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginBottom: 2,
+    },
     verdict: {
       fontFamily: fonts.sansBold,
       fontSize: 16,

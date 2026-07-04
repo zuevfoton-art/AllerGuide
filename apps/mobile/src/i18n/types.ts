@@ -80,6 +80,7 @@ export type LocaleMessages = {
       successMessage: string;
       backToLogin: string;
       emailOnlyHint: string;
+      backendRequired: string;
     };
     resetPassword: {
       title: string;
@@ -199,9 +200,13 @@ export type LocaleMessages = {
     insightsTemporalCorSymTrig: string;
     insightsTemporalCorSymMeds: string;
     insightsAnomalySymptomsNoTrigger: string;
+    insightsCalendar: string;
     actPromptTitle: string;
     actPromptText: string;
     actPromptButton: string;
+    trendsTitle: string;
+    heatmapTitle: string;
+    temporalCorrelationTitle: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -265,6 +270,8 @@ export type LocaleMessages = {
     removeSafeTitle: string;
     removeSafeMessage: string;
     removedFromSafe: string;
+    trendsTitle: string;
+    repeatUnsafeWarning: string;
   };
   market: {
     title: string;
@@ -274,6 +281,7 @@ export type LocaleMessages = {
     banner: string;
     empty: string;
     disclaimer: string;
+    buyLink: string;
   };
   map: {
     title: string;
@@ -342,6 +350,26 @@ export type LocaleMessages = {
     recoveryKeyCopyHint: string;
     recoveryKeyWrong: string;
     recoveryKeyRequired: string;
+    localBackupDesc: string;
+    localBackupExportSuccess: string;
+    localBackupImportSuccess: string;
+    localBackupImportTitle: string;
+    localBackupImportMessage: string;
+    recoveryKeyBannerTitle: string;
+    recoveryKeyBannerDesc: string;
+    pollenRegionTitle: string;
+    pollenRegionHint: string;
+    locationDefaultHint: string;
+    appLockTitle: string;
+    appLockHint: string;
+    appLockEnable: string;
+    appLockDisable: string;
+  };
+  legal: {
+    privacyTitle: string;
+    termsTitle: string;
+    privacyBody: string;
+    termsBody: string;
   };
   notifications: {
     eyebrow: string;
@@ -432,6 +460,8 @@ export type LocaleMessages = {
       profile: { title: string; desc: string };
       scanner: { title: string; desc: string };
       care: { title: string; desc: string };
+      map: { title: string; desc: string };
+      sos: { title: string; desc: string };
     };
   };
   profileSetup: {

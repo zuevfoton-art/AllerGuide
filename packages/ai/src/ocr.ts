@@ -114,3 +114,14 @@ export function buildOcrScanProductName(mode: ScanMode): string {
       return 'Продукт (OCR)';
   }
 }
+
+/**
+ * Future native OCR entry point (P5.1). When `@react-native-ml-kit/text-recognition`
+ * or similar is integrated, implement here and fall back to `simulateOcrFromCapture`.
+ */
+export async function runOcrFromImageUri(
+  _imageUri: string,
+  mode: ScanMode,
+): Promise<OcrExtractionResult> {
+  return simulateOcrFromCapture(mode);
+}

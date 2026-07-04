@@ -1,4 +1,14 @@
-import { boolean, index, jsonb, pgSchema, primaryKey, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgSchema,
+  primaryKey,
+  text,
+  timestamp,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 /**
  * `catalog` database (Postgres schema) — global reference data shared by all
@@ -49,6 +59,22 @@ export const products = catalogSchema.table(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [index('products_source_idx').on(table.source)],
+);
+
+/** Crowdsourced alias terms for scanner keyword enrichment (D.5 persistence). */
+export const aliasFeedback = catalogSchema.table(
+  'alias_feedback',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    term: varchar('term', { length: 255 }).notNull(),
+    suggestedAllergenId: varchar('suggested_allergen_id', { length: 64 }),
+    context: text('context'),
+    profileId: integer('profile_id'),
+    scanInput: text('scan_input'),
+    status: varchar('status', { length: 32 }).notNull().default('pending'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index('alias_feedback_status_idx').on(table.status)],
 );
 
 export type AllergenRow = typeof allergens.$inferSelect;

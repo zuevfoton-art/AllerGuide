@@ -1,5 +1,6 @@
 import { getDb } from '@/src/db/init';
 import { enqueueAliasFeedback, type AliasFeedbackEntry, type AliasFeedbackInput } from '@allerguide/core';
+import { apiRequest } from '@/src/services/api-client';
 
 export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry {
   const entry = enqueueAliasFeedback(input);
@@ -19,6 +20,17 @@ export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry
       entry.createdAt,
     ],
   );
+
+  void apiRequest('/api/alias-feedback', {
+    method: 'POST',
+    body: {
+      term: entry.term,
+      suggestedAllergenId: entry.suggestedAllergenId,
+      context: entry.context,
+      profileId: entry.profileId,
+      scanInput: entry.scanInput,
+    },
+  }).catch(() => undefined);
 
   return entry;
 }

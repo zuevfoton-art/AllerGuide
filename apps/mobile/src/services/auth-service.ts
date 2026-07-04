@@ -28,6 +28,7 @@ import {
 } from '@/src/services/backend-api';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
+import { clearRecoveryKey } from '@/src/services/backup-crypto';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -260,10 +261,10 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
     db.runSync('DELETE FROM profiles WHERE id = ?', [profile.id]);
   }
 
-  if (!BACKEND_AUTH_ENABLED) {
-    db.runSync('DELETE FROM users WHERE id = ?', [userId]);
-  }
+  db.runSync('DELETE FROM alias_feedback');
+  db.runSync('DELETE FROM users WHERE id = ?', [userId]);
 
+  clearRecoveryKey();
   clearSessionUserId();
   clearCachedAuthUser();
   void clearAuthToken();

@@ -1,11 +1,13 @@
 import { Image, StyleSheet, View } from 'react-native';
 
-export type OnboardingSlideKey = 'profile' | 'scanner' | 'care';
+export type OnboardingSlideKey = 'profile' | 'scanner' | 'care' | 'map' | 'sos';
 
 const SLIDE_IMAGES: Record<OnboardingSlideKey, number> = {
   profile: require('../../../assets/onboarding/profile.png'),
   scanner: require('../../../assets/onboarding/scanner.png'),
   care: require('../../../assets/onboarding/care.png'),
+  map: require('../../../assets/onboarding/scanner.png'),
+  sos: require('../../../assets/onboarding/care.png'),
 };
 
 type OnboardingSlideImageProps = {

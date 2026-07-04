@@ -21,6 +21,7 @@ import {
 } from '@/src/services/notification-service';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 import { listProfiles } from '@/src/services/profile-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import { Platform } from 'react-native';
 
 function pollenCacheKey(profileId: number) {
@@ -90,7 +91,10 @@ export async function syncPollenReminderForProfile(
     type: 'pollen',
     profileId,
   });
-  if (id) setPollenReminderId(profileId, id);
+  if (id) {
+    setPollenReminderId(profileId, id);
+    trackEvent('pollen_alert_sent', { profileId, level });
+  }
 }
 
 export async function reconcilePollenReminders(): Promise<void> {

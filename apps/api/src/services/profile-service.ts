@@ -3,7 +3,6 @@ import type { Profile, ProfileInput } from '@allerguide/core';
 import {
   dedupeAllergenIds,
   normalizeAllergyConfirmations,
-  normalizeProfileAllergenIds,
   parseAllergyConfirmations,
   serializeAllergyConfirmations,
   serializeProfileAllergenIds,

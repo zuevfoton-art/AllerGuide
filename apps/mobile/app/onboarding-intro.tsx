@@ -19,7 +19,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
-const SLIDE_KEYS: OnboardingSlideKey[] = ['profile', 'scanner', 'care'];
+const SLIDE_KEYS: OnboardingSlideKey[] = ['profile', 'scanner', 'care', 'map', 'sos'];
 
 export default function OnboardingIntroScreen() {
   const theme = useTheme();

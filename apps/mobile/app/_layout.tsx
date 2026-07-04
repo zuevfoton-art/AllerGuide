@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { InteractionManager, Platform, StyleSheet, View, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
+import { AppLockGate } from '@/src/components/AppLockGate';
 import { initDb } from '@/src/db/init';
 import { warmAllergenCatalogCache } from '@/src/services/allergen-catalog-service';
 import { initI18n } from '@/src/i18n';
@@ -126,19 +127,21 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <WebShell>
-        <StatusBar style={isDark ? 'light' : 'dark'} />
-        {appReady ? (
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.bg, flex: 1 },
-            }}
-          />
-        ) : (
-          <View style={[styles.loading, { backgroundColor: colors.bg }]} />
-        )}
-      </WebShell>
+      <AppLockGate>
+        <WebShell>
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+          {appReady ? (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.bg, flex: 1 },
+              }}
+            />
+          ) : (
+            <View style={[styles.loading, { backgroundColor: colors.bg }]} />
+          )}
+        </WebShell>
+      </AppLockGate>
     </ErrorBoundary>
   );
 }

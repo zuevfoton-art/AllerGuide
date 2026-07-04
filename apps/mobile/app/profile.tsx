@@ -1,7 +1,7 @@
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { parseAllergies } from '@allerguide/core';
+import { parseAllergies, type Profile } from '@allerguide/core';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
 import { confirmLogout } from '@/src/utils/confirm-logout';
@@ -16,7 +16,18 @@ import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
 import { CloudBackupCard } from '@/src/components/CloudBackupCard';
-import type { Profile } from '@/src/types';
+import { LocalBackupCard } from '@/src/components/LocalBackupCard';
+import { RecoveryKeyBanner } from '@/src/components/RecoveryKeyBanner';
+import {
+  canUseBiometricLock,
+  isAppLockEnabled,
+  setAppLockEnabled,
+} from '@/src/services/app-lock-service';
+import {
+  getManualPollenRegionId,
+  listPollenRegionOptions,
+  setManualPollenRegionId,
+} from '@/src/services/location-service';
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -25,10 +36,12 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const [appLockAvailable, setAppLockAvailable] = useState(false);
 
   const refresh = useCallback(() => {
     setProfiles(listProfiles());
     setEmergencyNumberState(getEmergencyNumber());
+    void canUseBiometricLock().then(setAppLockAvailable);
   }, []);
 
   useFocusEffect(
@@ -142,8 +155,45 @@ export default function ProfileScreen() {
         />
       </GlassCard>
 
+      <Text style={ui.sectionLabel}>{t('settings.backup')}</Text>
+      <RecoveryKeyBanner />
+      <LocalBackupCard />
+
       <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
       <CloudBackupCard />
+
+      <Text style={ui.sectionLabel}>{t('settings.pollenRegionTitle')}</Text>
+      <GlassCard>
+        <Text style={styles.cardHint}>{t('settings.pollenRegionHint')}</Text>
+        {listPollenRegionOptions().map((region) => {
+          const selected = getManualPollenRegionId() === region.id;
+          return (
+            <Pressable
+              key={region.id}
+              style={[styles.regionRow, selected && styles.regionRowSelected]}
+              onPress={() => setManualPollenRegionId(selected ? null : region.id)}
+              accessibilityRole="button">
+              <Text style={styles.rowTitle}>{region.name}</Text>
+              {selected ? <Ionicons name="checkmark-circle" size={18} color={theme.colors.accent} /> : null}
+            </Pressable>
+          );
+        })}
+      </GlassCard>
+
+      {appLockAvailable ? (
+        <>
+          <Text style={ui.sectionLabel}>{t('settings.appLockTitle')}</Text>
+          <GlassCard>
+            <Text style={styles.cardHint}>{t('settings.appLockHint')}</Text>
+            <Button
+              label={isAppLockEnabled() ? t('settings.appLockDisable') : t('settings.appLockEnable')}
+              variant="secondary"
+              block
+              onPress={() => setAppLockEnabled(!isAppLockEnabled())}
+            />
+          </GlassCard>
+        </>
+      ) : null}
 
       <Text style={ui.sectionLabel}>{t('notifications.hubTitle')}</Text>
       <GlassCard padded={false}>
@@ -326,6 +376,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       fontWeight: '600',
       color: colors.danger,
+    },
+    regionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    regionRowSelected: {
+      backgroundColor: colors.accentLight,
+      borderRadius: 6,
+      paddingHorizontal: 8,
     },
   });
 }

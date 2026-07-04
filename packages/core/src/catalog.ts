@@ -7,6 +7,8 @@ export interface CatalogProduct {
   colorKey: 'purple' | 'pink' | 'accent' | 'success' | 'warning';
   forAllergens: string[];
   containsAllergens: string[];
+  /** Optional affiliate / product deeplink (P5.5). */
+  affiliateUrl?: string;
 }
 
 export interface CatalogPlace {
@@ -30,6 +32,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     colorKey: 'purple',
     forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пыль клещей', 'Бытовая аллергия'],
     containsAllergens: [],
+    affiliateUrl: 'https://www.iherb.com/search?kw=hepa+air+purifier',
   },
   {
     id: 'hypo-cream',

@@ -24,6 +24,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { getRecommendedPlaces } from '@/src/services/place-service';
+import { getCurrentLocation } from '@/src/services/location-service';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 
 const LAYERS = [
@@ -44,8 +45,17 @@ export default function MapScreen() {
   const [places, setPlaces] = useState<CatalogPlace[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const [coords, setCoords] = useState({ lat: 55.75, lon: 37.62, label: '' });
+
   const refresh = useCallback(async () => {
-    setPlaces(getRecommendedPlaces(profile));
+    const location = await getCurrentLocation();
+    setCoords({ lat: location.lat, lon: location.lon, label: location.label });
+    setPlaces(
+      getRecommendedPlaces(profile, {
+        latitude: location.lat,
+        longitude: location.lon,
+      }),
+    );
   }, [profile]);
 
   useFocusEffect(
@@ -57,7 +67,7 @@ export default function MapScreen() {
   const selected = places.find((place) => place.id === selectedId) ?? places[0] ?? null;
   const mapUrl = useMemo(() => buildPlacesMapUrl(places, selectedId), [places, selectedId]);
   const pollenMonth = new Date().getMonth() + 1;
-  const pollenRegion = resolvePollenRegion(55.75, 37.62);
+  const pollenRegion = resolvePollenRegion(coords.lat, coords.lon);
   const pollenPeaks = getPollenPeaksForMonth(pollenMonth, pollenRegion.id);
 
   const levelBg = useMemo(

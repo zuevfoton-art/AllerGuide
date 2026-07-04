@@ -10,6 +10,7 @@ export async function forwardAnalyticsToPostHog(events: AnalyticsEventPayload[])
   for (const event of events) {
     const distinctId = event.client_id || 'anonymous';
     const { event: eventName, client_id: _clientId, ...properties } = event;
+    void _clientId;
 
     const response = await fetch(`${host}/capture/`, {
       method: 'POST',

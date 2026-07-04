@@ -10,7 +10,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed-allergens": "tsx src/db/seed-allergens.ts",
     "db:import-food-allergy": "tsx src/db/import-food-allergy.ts",
-    "lint": "echo lint",
+    "lint": "eslint src --max-warnings 0",
+    "db:merge-approved-aliases": "tsx src/db/merge-approved-aliases.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts"
@@ -43,9 +44,11 @@
     "@types/passport": "^1.0.17",
     "@types/supertest": "^6.0.3",
     "drizzle-kit": "^0.31.0",
+    "eslint": "^9.28.0",
     "supertest": "^7.1.4",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.0",
     "vitest": "^3.2.4"
   }
 }
