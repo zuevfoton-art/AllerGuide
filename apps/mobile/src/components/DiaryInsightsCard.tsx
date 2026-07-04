@@ -2,8 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import { computeDiaryInsights } from '@allerguide/core';
-import type { DiaryEntry } from '@allerguide/core';
+import type { DiaryEntry, DiaryInsights } from '@allerguide/core';
 import { GlassCard } from './GlassCard';
+import { DiaryTrendChart, type DiaryTrendPoint } from './diary/DiaryTrendChart';
+import { DiaryCalendarHeatmap, type DiaryHeatmapDay } from './diary/DiaryCalendarHeatmap';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiaryType } from '@/src/i18n/content';
@@ -18,6 +20,27 @@ const CHART_H = 72;
 const LABEL_H = 20;
 const BAR_GAP = 5;
 const PAD = 4;
+
+function daySeverity(day: DiaryInsights['days'][number]): number {
+  if (!day.hasSymptoms) return day.count > 0 ? 1 : 0;
+  if (day.count >= 2 || (day.hasTrigger && day.hasFood)) return 3;
+  if (day.hasTrigger || day.hasFood) return 2;
+  return 1;
+}
+
+function buildTrendPoints(insights: DiaryInsights): DiaryTrendPoint[] {
+  return insights.days.map((day) => ({
+    date: day.iso,
+    severity: daySeverity(day),
+  }));
+}
+
+function buildHeatmapDays(insights: DiaryInsights): DiaryHeatmapDay[] {
+  return insights.days.map((day) => ({
+    date: day.iso,
+    severity: daySeverity(day),
+  }));
+}
 
 export function DiaryInsightsCard({ entries }: Props) {
   const theme = useTheme();
@@ -41,6 +64,8 @@ export function DiaryInsightsCard({ entries }: Props) {
 
   const maxCount = Math.max(...insights.days.map((d) => d.count), 1);
   const barWidth = Math.floor((chartWidth - 2 * PAD - BAR_GAP * 6) / 7);
+  const trendPoints = useMemo(() => buildTrendPoints(insights), [insights]);
+  const heatmapDays = useMemo(() => buildHeatmapDays(insights), [insights]);
 
   const correlationText = useMemo(() => {
     const kind = insights.temporalCorrelationKind ?? insights.correlationKind;
@@ -133,6 +158,16 @@ export function DiaryInsightsCard({ entries }: Props) {
         </Svg>
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('diary.trendsTitle')}</Text>
+        <DiaryTrendChart points={trendPoints} />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('diary.insightsCalendar')}</Text>
+        <DiaryCalendarHeatmap days={heatmapDays} />
+      </View>
+
       <View style={styles.legend}>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: colors.accent }]} />
@@ -206,6 +241,17 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     chartWrap: {
       height: CHART_H + LABEL_H,
+    },
+    section: {
+      gap: space[2],
+    },
+    sectionTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.caption,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.3,
     },
     legend: {
       flexDirection: 'row',

@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { CatalogProduct } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useMemo } from 'react';
 import { getProductColor } from '@/src/modules/marketplace/product-theme';
+import { trackEvent } from '@/src/services/analytics-service';
+import { useTranslation } from '@/src/store/locale-store';
 
 interface MarketplaceProductCardProps {
   item: CatalogProduct;
@@ -15,6 +17,13 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, compact), [theme, compact]);
   const color = getProductColor(theme, item.colorKey);
+  const { t } = useTranslation();
+
+  const openAffiliate = () => {
+    if (!item.affiliateUrl) return;
+    trackEvent('market_click', { productId: item.id });
+    void Linking.openURL(item.affiliateUrl);
+  };
 
   const content = (
     <>
@@ -33,6 +42,11 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
         <Text style={styles.cardWhy} numberOfLines={compact ? 2 : undefined}>
           {item.why}
         </Text>
+        {item.affiliateUrl && !compact ? (
+          <Pressable onPress={openAffiliate} accessibilityRole="link">
+            <Text style={styles.buyLink}>{t('market.buyLink')} →</Text>
+          </Pressable>
+        ) : null}
       </View>
       {!compact ? (
         <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
@@ -44,7 +58,11 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
     return <View style={styles.card}>{content}</View>;
   }
 
-  return <GlassCard style={styles.card}>{content}</GlassCard>;
+  return (
+    <Pressable onPress={item.affiliateUrl ? openAffiliate : undefined} accessibilityRole="button">
+      <GlassCard style={styles.card}>{content}</GlassCard>
+    </Pressable>
+  );
 }
 
 function createStyles({ colors, fonts }: AppTheme, compact: boolean) {
@@ -84,6 +102,13 @@ function createStyles({ colors, fonts }: AppTheme, compact: boolean) {
       fontSize: compact ? 12 : 13,
       color: colors.textSecondary,
       lineHeight: compact ? 16 : 18,
+    },
+    buyLink: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+      marginTop: 4,
     },
   });
 }

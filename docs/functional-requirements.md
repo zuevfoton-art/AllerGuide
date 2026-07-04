@@ -299,7 +299,7 @@ AllerGuide — мобильное приложение-помощник для �
 ## 15. Данные и синхронизация
 
 - **FR-DATA-01.** Локальное хранение на native: SQLite (профили, дневник, настройки, история сканов, контакты).
-- **FR-DATA-02.** Web-fallback: localStorage с тем же API.
+- **FR-DATA-02.** Web-fallback: **IndexedDB** с in-memory cache и async write-through (legacy localStorage мигрируется один раз).
 - **FR-DATA-03.** Привязка профилей к userId после авторизации; миграция legacy-данных.
 - **FR-DATA-04.** Формат резервной копии: JSON v1 с timestamp экспорта.
 - **FR-DATA-05.** Backend API (Express + PostgreSQL): маршруты auth и sync.

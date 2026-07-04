@@ -23,6 +23,7 @@ describe('smart scan', () => {
         level: 'high',
       }),
       'product',
+      ['milk'],
       'Йогурт',
     );
 

@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo } from 'react';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
+import { getCurrentLocation } from '@/src/services/location-service';
 import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
@@ -46,7 +47,12 @@ export default function HomeScreen() {
   const wellnessState = useAsyncState<WellnessSnapshot | null>(async () => {
     if (!activeProfileId || !profile) return null;
     const entries = await getDiaryEntries(activeProfileId);
-    return fetchWellnessSnapshot(profile.allergies, entries, locale);
+    const location = await getCurrentLocation();
+    return fetchWellnessSnapshot(profile.allergies, entries, locale, {
+      lat: location.lat,
+      lon: location.lon,
+      label: location.label,
+    });
   });
   const wellness = wellnessState.data;
   const loadingWellness = wellnessState.loading;

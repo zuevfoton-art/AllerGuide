@@ -20,6 +20,36 @@ async function shareOnWeb(json: string): Promise<{ ok: true } | { ok: false; err
   return { ok: true };
 }
 
+function importLocalBackupFromWebFileInput(): Promise<{ ok: true } | { ok: false; error: string }> {
+  return new Promise((resolve) => {
+    if (typeof document === 'undefined') {
+      resolve({ ok: false, error: 'Импорт недоступен на этой платформе' });
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json,.json';
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) {
+        resolve({ ok: false, error: 'Файл не выбран' });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const raw = String(reader.result ?? '');
+        const importResult = importLocalBackup(raw);
+        if (importResult.ok) trackEvent('backup_imported');
+        resolve(importResult);
+      };
+      reader.onerror = () => resolve({ ok: false, error: 'Не удалось прочитать файл' });
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+}
+
 export async function shareLocalBackupFile(): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     const json = exportLocalBackup();
@@ -52,7 +82,7 @@ export async function shareLocalBackupFile(): Promise<{ ok: true } | { ok: false
 export async function pickAndImportLocalBackup(): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     if (Platform.OS === 'web') {
-      return { ok: false, error: 'Импорт на web пока недоступен. Используйте мобильное приложение.' };
+      return importLocalBackupFromWebFileInput();
     }
 
     const result = await DocumentPicker.getDocumentAsync({

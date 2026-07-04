@@ -5,7 +5,7 @@ import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
-import { BrandTabIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
+import { BrandTabIcon, BrandFeatureIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
 
 function TabIcon({
   name,
@@ -122,7 +122,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="market"
         options={{
-          href: null,
+          title: t('tabs.market'),
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-market" />,
+          tabBarIcon: ({ focused }) => (
+            <BrandFeatureIcon
+              name="market"
+              size={iconSize}
+              color={focused ? colors.accent : colors.textMuted}
+            />
+          ),
         }}
       />
       <Tabs.Screen

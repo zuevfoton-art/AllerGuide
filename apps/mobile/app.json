@@ -82,6 +82,7 @@
       "router": {
         "root": "app"
       },
+      "privacyPolicyUrl": "https://allerguide.app/privacy",
       "eas": {
         "projectId": "a7a65ba6-58c0-494e-abcd-0803dc0ed5a0"
       }

@@ -93,6 +93,12 @@ export function markRecoveryKeyConfirmed(): void {
   setSensitiveSettingSync(RECOVERY_KEY_CONFIRMED_SETTING, 'true');
 }
 
+export function clearRecoveryKey(): void {
+  setSensitiveSettingSync(RECOVERY_KEY_SETTING, '');
+  setSensitiveSettingSync(RECOVERY_KEY_CONFIRMED_SETTING, '');
+  setSensitiveSettingSync(LEGACY_BACKUP_SECRET_KEY, '');
+}
+
 export function isRecoveryKeyConfirmed(): boolean {
   return (
     getSensitiveSetting(RECOVERY_KEY_CONFIRMED_SETTING) === 'true' ||

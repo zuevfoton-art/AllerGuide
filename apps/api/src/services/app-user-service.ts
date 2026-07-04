@@ -9,7 +9,7 @@ import {
   type LoginType,
 } from '@allerguide/core';
 import { db } from '../db';
-import { appUsers, passwordResetTokens } from '../db/app-schema';
+import { appUsers, passwordResetTokens, syncBackups } from '../db/app-schema';
 
 export function toAuthUser(row: typeof appUsers.$inferSelect): AuthUser {
   return {
@@ -96,6 +96,7 @@ export async function loginAppUser(input: {
 }
 
 export async function deleteAppUser(userId: number) {
+  await db.delete(syncBackups).where(eq(syncBackups.userId, userId));
   await db.delete(appUsers).where(eq(appUsers.id, userId));
 }
 

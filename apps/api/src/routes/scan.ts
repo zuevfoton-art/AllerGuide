@@ -112,7 +112,7 @@ export function registerScanRoutes(app: Express) {
       prompt: body.prompt,
     });
 
-    const cached = getCachedScan(cacheKey);
+    const cached = await getCachedScan(cacheKey);
     if (cached) {
       recordCacheHit();
       logScanCacheEvent(true);
@@ -147,13 +147,13 @@ export function registerScanRoutes(app: Express) {
         return;
       }
 
-      const result = parseLlmScanResponse(content, mode, body.productName);
+      const result = parseLlmScanResponse(content, mode, allergens, body.productName);
       if (!result) {
         res.status(502).json({ ok: false, error: 'Invalid LLM response' });
         return;
       }
 
-      setCachedScan(cacheKey, result);
+      await setCachedScan(cacheKey, result);
       res.json({ ok: true, result, cached: false });
     } catch {
       res.status(500).json({ ok: false, error: 'Scan failed' });

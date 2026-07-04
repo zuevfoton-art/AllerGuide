@@ -456,6 +456,17 @@ Drizzle-объекты схемо-квалифицированы — код за
 - Владение по `userId` из токена
 - Клиент шифрует до загрузки — сервер zero-knowledge
 
+#### Recovery key flow (cross-device restore)
+
+1. **Setup:** при первой загрузке в облако (`CloudBackupCard`) пользователь создаёт recovery key (12 слов), подтверждает его и только после этого выполняется upload.
+2. **Хранение:** ключ держится на устройстве (`backup-crypto.ts`, SecureStore / web settings); сервер получает только AES-GCM ciphertext.
+3. **Legacy migration:** пользователи с device-only ключом видят modal `migrate` перед upload.
+4. **Download на новом устройстве:** ввод recovery key → расшифровка payload → импорт в локальную БД.
+5. **Banner:** `RecoveryKeyBanner` на профиле, если ключ создан, но не подтверждён.
+6. **Account deletion:** mobile wipe + server cascade (`sync_backups.user_id → app_users.id ON DELETE CASCADE`).
+
+Флаг: `EXPO_PUBLIC_CLOUD_SYNC=true` + API `SYNC_ENABLED=true`. Maestro: `staging-backup-smoke.yaml`.
+
 ### Production hardening
 
 - **Безопасность:** helmet, строгий CORS, rate-limiting per-IP

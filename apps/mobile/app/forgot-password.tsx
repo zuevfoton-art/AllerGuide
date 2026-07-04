@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { backendForgotPassword } from '@/src/services/backend-api';
+import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { Screen } from '@/src/components/Screen';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -87,6 +88,11 @@ export default function ForgotPasswordScreen() {
   return (
     <Screen>
       <AuthHero title={t('auth.forgot.title')} subtitle={t('auth.forgot.subtitle')} />
+      {!BACKEND_AUTH_ENABLED ? (
+        <View style={styles.offlineBox}>
+          <Text style={styles.offlineText}>{t('auth.forgot.backendRequired')}</Text>
+        </View>
+      ) : null}
       <AuthField
         label={t('auth.forgot.emailLabel')}
         value={email}
@@ -148,6 +154,20 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.accent,
       fontWeight: '600',
+    },
+    offlineBox: {
+      backgroundColor: colors.warningLight,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    offlineText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
   });
 }

@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-**Soak start:** _YYYY-MM-DD_  
+**Soak start:** 2026-07-04  
 **Soak end:** _YYYY-MM-DD_
 | RC version | _e.g. 1.0.4 (staging)_ |
 | RC commit | _git SHA_ |
