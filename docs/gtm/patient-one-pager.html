@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — One-pager для пациента</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="gtm-styles.css" />
+  <style>
+    @page { size: A4 portrait; margin: 14mm; }
+    body { padding: 0; }
+    .page {
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 14mm;
+      background: #fff;
+    }
+    @media screen {
+      body { padding: 24px; background: var(--bg); }
+      .page { box-shadow: 0 4px 24px rgba(15,23,42,.08); border-radius: 8px; margin-bottom: 24px; }
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--head);
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: 26px;
+      color: var(--head);
+      line-height: 1.2;
+      margin: 10px 0 6px;
+    }
+    .hero .tagline {
+      font-size: 15px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .hero .lead {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+      max-width: 420px;
+    }
+    .cta-box {
+      text-align: center;
+      padding: 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cta-box p { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .cta-box strong { font-size: 12px; color: var(--head); display: block; }
+    section { margin-bottom: 16px; }
+    section h2 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .benefit {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .benefit img { margin-bottom: 6px; }
+    .benefit h3 { font-size: 12px; color: var(--head); margin-bottom: 4px; }
+    .benefit p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .for-whom {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .for-whom span {
+      background: #eff6ff;
+      color: var(--head);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    footer .expert {
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 360px;
+    }
+    footer .expert strong { color: var(--head); }
+  </style>
+</head>
+<body>
+  <p class="no-print" style="text-align:center;padding:12px;color:#64748b;font-size:13px;">
+    Для печати или экспорта в PDF: <kbd>Ctrl+P</kbd> / <kbd>⌘P</kbd> → «Сохранить как PDF». Формат A4.
+  </p>
+
+  <article class="page">
+    <header>
+      <div class="hero">
+        <div class="wordmark">
+          <img src="../brand/logo-mark.svg" width="44" height="44" alt="" />
+          <div class="wordmark-text">
+            <span class="aller">Aller</span><span class="guide">Guide</span>
+          </div>
+          <span class="badge badge-adair">АДАИР</span>
+        </div>
+        <h1>Ваш умный помощник в контроле аллергии</h1>
+        <p class="tagline">Сканируйте · Ведите дневник · Будьте готовы к экстренной ситуации</p>
+        <p class="lead">
+          AllerGuide помогает людям с аллергией и их родителям безопаснее выбирать продукты,
+          отслеживать симптомы и быстро показать врачу или медработнику нужную информацию.
+          Работает без интернета — данные хранятся на вашем устройстве.
+        </p>
+      </div>
+      <div class="cta-box">
+        <div class="qr-placeholder">QR-код<br />App Store /<br />Google Play</div>
+        <strong>Скачайте бесплатно</strong>
+        <p>allerguide.app</p>
+      </div>
+    </header>
+
+    <section>
+      <h2>Что вы получаете</h2>
+      <div class="benefits">
+        <div class="benefit">
+          <img src="../brand/icons/scanner.svg" width="28" height="28" alt="" />
+          <h3>Сканер</h3>
+          <p>Проверка продуктов по штрихкоду и составу с учётом ваших аллергенов и перекрёстных реакций</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/diary.svg" width="28" height="28" alt="" />
+          <h3>Дневник</h3>
+          <p>Симптомы, питание, лекарства, пикфлоуметрия, АСИТ — структурированные записи за секунды</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/sos.svg" width="28" height="28" alt="" style="filter: invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" />
+          <h3>SOS</h3>
+          <p>Аллергопаспорт, план действий и экстренные контакты — покажите экран медработнику</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/home.svg" width="28" height="28" alt="" />
+          <h3>Индекс дня</h3>
+          <p>Персональная сводка: пыльца, качество воздуха и записи дневника — что учитывать сегодня</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/expert.svg" width="28" height="28" alt="" />
+          <h3>Эксперт</h3>
+          <p>Материалы АДАИР: рекомендации, календарь пыления, справочник аллергенов</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/diary.svg" width="28" height="28" alt="" />
+          <h3>Отчёт врачу</h3>
+          <p>PDF за 7 / 14 / 30 дней — структурированная история для приёма у аллерголога</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Начните за 3 минуты</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div>
+            <strong>Скачайте и создайте профиль</strong>
+            <p style="font-size:12px;color:var(--muted);">Укажите аллергены из каталога — для себя или ребёнка</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div>
+            <strong>Отсканируйте первый продукт</strong>
+            <p style="font-size:12px;color:var(--muted);">Наведите камеру на штрихкод или введите состав вручную</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div>
+            <strong>Заполните SOS и добавьте контакты</strong>
+            <p style="font-size:12px;color:var(--muted);">Готовность к экстренной ситуации — особенно важно для детей</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Для кого</h2>
+      <div class="for-whom">
+        <span>Родители детей с аллергией</span>
+        <span>Пищевая аллергия</span>
+        <span>Поллиноз и ринит</span>
+        <span>Бронхиальная астма</span>
+        <span>Пациенты на АСИТ</span>
+      </div>
+    </section>
+
+    <footer>
+      <div class="expert">
+        <strong>Научный руководитель:</strong> д.м.н., проф. Юрий Соломонович Смолкин<br />
+        Президент АДАИР · Главный медицинский эксперт AllerGuide
+      </div>
+      <div class="disclaimer" style="max-width:280px;margin-top:0;">
+        AllerGuide не ставит диагноз и не назначает лечение. Информация носит рекомендательный характер и не заменяет консультацию врача.
+      </div>
+    </footer>
+  </article>
+</body>
+</html>
