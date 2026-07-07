@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-export STAGING_API_URL="${STAGING_API_URL:-${1:-https://api.staging.allerguide.app}}"
+export STAGING_API_URL="${STAGING_API_URL:-${1:-https://api.staging.aclearo.com}}"
 
 echo "Running staging sync smoke against $STAGING_API_URL"
 pnpm --filter api exec tsx "$ROOT/scripts/staging-sync-smoke.ts"

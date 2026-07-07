@@ -27,7 +27,7 @@ export function LegalDocumentScreen({ title, body }: LegalDocumentScreenProps) {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide</Text>
+          <Text style={ui.docLabel}>A-Claro</Text>
           <Text style={ui.docTitle}>{title}</Text>
         </View>
       </View>

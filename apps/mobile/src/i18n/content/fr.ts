@@ -218,7 +218,7 @@ const frContent: LocaleContent = {
   expertHero: {
     name: 'Pr. Yuri Solomonovich Smolkin, MD, PhD',
     role: 'Président de l\'ADAIR, Directeur scientifique du Centre national de recherche clinique',
-    subtitle: 'Expert médical en chef d\'AllerGuide',
+    subtitle: 'Expert médical en chef d\'Aclearo',
   },
   expertDisclaimer:
     'Le contenu d\'experts est fourni à titre informatif et de référence uniquement et ne constitue pas une prescription médicale.',
@@ -244,7 +244,7 @@ const frContent: LocaleContent = {
       summary: 'Comment vérifier les ingrédients et quoi demander au fabricant.',
       body:
         'Lisez attentivement la liste des ingrédients, surveillez les traces d\'allergènes et les réactions croisées. ' +
-        'Le scanner AllerGuide vous aide à vous orienter parmi les produits, mais ne remplace pas la lecture de l\'étiquette ni la consultation de votre médecin.',
+        'Le scanner Aclearo vous aide à vous orienter parmi les produits, mais ne remplace pas la lecture de l\'étiquette ni la consultation de votre médecin.',
     },
     'asthma-diary': {
       title: 'Asthme bronchique : tenir un journal',

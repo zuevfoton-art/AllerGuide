@@ -1,25 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="AllerGuide">
-  <title>AllerGuide mark</title>
-  <!-- Clinical Calm: flat shield + checklist check -->
-  <rect width="64" height="64" rx="8" fill="#2563EB"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="A-Claro">
+  <title>A-Claro monogram</title>
+  <rect width="64" height="64" rx="14" fill="#2A9D8F"/>
   <path
-    d="M32 13.5 46.5 19v13.2c0 8.4-11 15.3-14.5 17.3-3.5-2-14.5-8.9-14.5-17.3V19L32 13.5Z"
-    stroke="#FFFFFF"
-    stroke-width="2.4"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M24 28.5h16"
-    stroke="#FFFFFF"
-    stroke-width="1.8"
-    stroke-linecap="round"
-    opacity="0.55"
-  />
-  <path
-    d="M24.5 34.5 29.5 39.5 40 27"
-    stroke="#FFFFFF"
-    stroke-width="2.4"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+    d="M32 15 48.5 49H42.2L39.2 41.5H24.8L21.8 49H15.5L32 15ZM26.8 36.5H37.2L32 23.5 26.8 36.5Z"
+    fill="#FFFFFF"
+    fill-rule="evenodd"
   />
 </svg>

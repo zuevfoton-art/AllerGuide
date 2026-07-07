@@ -13,7 +13,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 
 | Переменная | `preview` | `staging` |
 |------------|-----------|-----------|
-| `EXPO_PUBLIC_API_URL` | не задан (localhost по умолчанию в dev) | `https://api.staging.allerguide.app` |
+| `EXPO_PUBLIC_API_URL` | не задан (localhost по умолчанию в dev) | `https://api.staging.aclearo.com` |
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` | **`true`** |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | **`true`** |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | **`true`** |
@@ -24,7 +24,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 
 ## Предпосылки
 
-1. Staging API доступен: `curl https://api.staging.allerguide.app/api/health` → 200 ([P1.1c](staging-deploy.md))
+1. Staging API доступен: `curl https://api.staging.aclearo.com/api/health` → 200 ([P1.1c](staging-deploy.md))
 2. `eas login` и реальный `projectId` в [`app.json`](../apps/mobile/app.json) (см. [preview runbook](eas-internal-preview.md))
 3. Apple/Google credentials для internal distribution (те же, что для preview)
 
@@ -92,7 +92,7 @@ Closed beta: [`closed-beta-p17.md`](closed-beta-p17.md).
 
 Как у preview — [expo.dev](https://expo.dev) → Builds → QR / APK link (Android) или TestFlight (iOS). См. [`eas-internal-preview.md` § Распространение](eas-internal-preview.md).
 
-**Важно:** staging и preview используют один `com.allerguide.app` — перед установкой staging APK удалите preview-сборку с тем же package, если установка падает.
+**Важно:** staging и preview используют один `com.aclearo.app` — перед установкой staging APK удалите preview-сборку с тем же package, если установка падает.
 
 ---
 

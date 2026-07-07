@@ -31,6 +31,6 @@ export const brandReportColors = {
   muted: '#64748B',
   bg: '#F4F6F9',
   border: '#E2E8F0',
-  accent: '#2563EB',
+  accent: '#2A9D8F',
   danger: '#B91C1C',
 } as const;

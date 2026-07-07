@@ -2,7 +2,7 @@
 # Post-deploy smoke for staging API (P1.1c / P1.1e / P1.4a).
 set -euo pipefail
 
-BASE="${STAGING_API_URL:-${1:-https://api.staging.allerguide.app}}"
+BASE="${STAGING_API_URL:-${1:-https://api.staging.aclearo.com}}"
 BASE="${BASE%/}"
 
 echo "Smoke: GET $BASE/api/health"

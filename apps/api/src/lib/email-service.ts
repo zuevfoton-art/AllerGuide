@@ -6,7 +6,7 @@ function passwordResetAppUrl(): string {
   return (
     process.env.PASSWORD_RESET_APP_URL?.trim() ||
     process.env.APP_URL?.trim() ||
-    'https://allerguide.app/reset-password'
+    'https://aclearo.com/reset-password'
   );
 }
 
@@ -18,16 +18,16 @@ export function buildPasswordResetUrl(token: string): string {
 
 export async function sendPasswordResetEmail(to: string, token: string): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.EMAIL_FROM?.trim() || 'AllerGuide <noreply@allerguide.app>';
+  const from = process.env.EMAIL_FROM?.trim() || 'Aclearo <noreply@aclearo.com>';
 
   if (!apiKey) {
     return false;
   }
 
   const resetUrl = buildPasswordResetUrl(token);
-  const subject = 'AllerGuide — восстановление пароля';
+  const subject = 'A-Claro — восстановление пароля';
   const html = [
-    '<p>Вы запросили сброс пароля AllerGuide.</p>',
+    '<p>Вы запросили сброс пароля A-Claro (Aclearo).</p>',
     `<p><a href="${resetUrl}">Сбросить пароль</a></p>`,
     '<p>Ссылка действует 1 час. Если вы не запрашивали сброс, проигнорируйте это письмо.</p>',
   ].join('');

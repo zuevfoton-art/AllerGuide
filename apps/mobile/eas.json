@@ -57,7 +57,7 @@
       "channel": "staging",
       "node": "22.14.0",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.staging.allerguide.app",
+        "EXPO_PUBLIC_API_URL": "https://api.staging.aclearo.com",
         "EXPO_PUBLIC_BACKEND_AUTH": "true",
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
@@ -79,7 +79,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.allerguide.app",
+        "EXPO_PUBLIC_API_URL": "https://api.aclearo.com",
         "EXPO_PUBLIC_BACKEND_AUTH": "true",
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
@@ -92,7 +92,7 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "support@allerguide.app",
+        "appleId": "support@aclearo.com",
         "ascAppId": "0000000000",
         "appleTeamId": "XXXXXXXXXX"
       },

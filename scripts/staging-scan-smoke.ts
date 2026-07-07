@@ -3,7 +3,7 @@
  * Requires staging API with AI_SCAN_ENABLED=true and OPENAI_API_KEY set.
  * Run: pnpm --filter api exec tsx ../../scripts/staging-scan-smoke.ts
  */
-const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.allerguide.app').replace(/\/$/, '');
+const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.aclearo.com').replace(/\/$/, '');
 const RAND = process.env.RAND ?? String(Date.now());
 const EMAIL = `staging-scan-${RAND}@example.com`;
 const PASSWORD = 'SmokeTest1!';

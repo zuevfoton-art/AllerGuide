@@ -82,7 +82,7 @@
       "milestone": "Phase 1: Backend integration",
       "labels": ["phase-1", "roadmap"],
       "title": "[P1.1] Deploy API на staging",
-      "body": "## Описание\nРазвернуть API на staging-окружении с TLS, CORS и автоматическими миграциями.\n\n## Критерий готовности\n- [ ] Health check endpoint отвечает 200\n- [ ] Drizzle-миграции применяются при деплое\n- [ ] TLS и CORS настроены для mobile/web клиентов\n- [ ] URL задокументирован (например `api.staging.allerguide.app`)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)\n- [docs/architecture.md](../docs/architecture.md)"
+      "body": "## Описание\nРазвернуть API на staging-окружении с TLS, CORS и автоматическими миграциями.\n\n## Критерий готовности\n- [ ] Health check endpoint отвечает 200\n- [ ] Drizzle-миграции применяются при деплое\n- [ ] TLS и CORS настроены для mobile/web клиентов\n- [ ] URL задокументирован (например `api.staging.aclearo.com`)\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-1--backend-integration--closed-beta)\n- [docs/architecture.md](../docs/architecture.md)"
     },
     {
       "id": "P1.2",
@@ -215,14 +215,14 @@
       "milestone": "Phase 3: Compliance & Store",
       "labels": ["phase-3", "roadmap"],
       "title": "[P3.7] Production API",
-      "body": "## Описание\nProduction API на `api.allerguide.app` с monitoring и backups.\n\n## Критерий готовности\n- [ ] Production deploy pipeline\n- [ ] Monitoring и alerting (uptime, errors, latency)\n- [ ] Automated Postgres backups с тестом restore\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
+      "body": "## Описание\nProduction API на `api.aclearo.com` с monitoring и backups.\n\n## Критерий готовности\n- [ ] Production deploy pipeline\n- [ ] Monitoring и alerting (uptime, errors, latency)\n- [ ] Automated Postgres backups с тестом restore\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-3--compliance--store-readiness)"
     },
     {
       "id": "P4.1",
       "milestone": "Phase 4: v1.0 Launch",
       "labels": ["phase-4", "roadmap"],
       "title": "[P4.1] Production feature flags",
-      "body": "## Описание\nВключить production feature flags для v1.0.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_API_URL` = `https://api.allerguide.app`\n- [ ] Backend auth ON для новых пользователей\n- [ ] Cloud sync ON + recovery key\n- [ ] AI scan ON (budget 50/user/day)\n- [ ] Sentry и analytics ON\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
+      "body": "## Описание\nВключить production feature flags для v1.0.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_API_URL` = `https://api.aclearo.com`\n- [ ] Backend auth ON для новых пользователей\n- [ ] Cloud sync ON + recovery key\n- [ ] AI scan ON (budget 50/user/day)\n- [ ] Sentry и analytics ON\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
     },
     {
       "id": "P4.2",

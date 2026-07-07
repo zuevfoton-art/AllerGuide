@@ -9,7 +9,7 @@ import {
   isEncryptionAvailable,
 } from '@allerguide/core';
 
-const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.allerguide.app').replace(/\/$/, '');
+const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.aclearo.com').replace(/\/$/, '');
 const RAND = process.env.RAND ?? String(Date.now());
 const EMAIL = `staging-sync-${RAND}@example.com`;
 const PASSWORD = 'SmokeTest1!';

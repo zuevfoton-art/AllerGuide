@@ -9,7 +9,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/apps/mobile"
 
 echo "=== AllerGuide — first EAS staging build ($PLATFORM) ==="
-echo "Requires staging API: https://api.staging.allerguide.app/api/health"
+echo "Requires staging API: https://api.staging.aclearo.com/api/health"
 echo "See docs/staging-deploy.md and docs/eas-staging-build.md"
 echo ""
 

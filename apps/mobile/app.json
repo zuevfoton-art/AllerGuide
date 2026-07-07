@@ -34,7 +34,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#2563EB"
+          "color": "#2A9D8F"
         }
       ],
       "expo-asset"
@@ -57,6 +57,7 @@
       "buildNumber": "1",
       "supportsTablet": true,
       "infoPlist": {
+        "CFBundleDisplayName": "A-Claro",
         "NSCameraUsageDescription": "A-Claro использует камеру для сканирования штрихкодов продуктов.",
         "NSPhotoLibraryUsageDescription": "A-Claro использует фото для загрузки меню и состава продуктов.",
         "NSLocationWhenInUseUsageDescription": "A-Claro использует геолокацию для показа аллерго-дружелюбных мест рядом."
@@ -68,7 +69,7 @@
       "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#2563EB"
+        "backgroundColor": "#2A9D8F"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -82,7 +83,7 @@
       "router": {
         "root": "app"
       },
-      "privacyPolicyUrl": "https://aclearo.app/legal",
+      "privacyPolicyUrl": "https://aclearo.com/legal",
       "eas": {
         "projectId": "a7a65ba6-58c0-494e-abcd-0803dc0ed5a0"
       }

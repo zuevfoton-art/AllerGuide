@@ -45,8 +45,8 @@
       "effort_days": 0.5,
       "depends_on": ["P1.1b"],
       "blocks": ["P1.2b", "P1.2c", "P1.4a", "P1.5b", "P2.6a"],
-      "title": "[P1.1c] DNS + TLS: api.staging.allerguide.app",
-      "body": "## Родитель\nP1.1 Deploy API на staging\n\n## Зависимости\n- **Требует:** P1.1b\n- **Блокирует:** P1.2b, P1.2c, P1.4a, P1.5b, P2.6a\n\n## Оценка\n0.5 дня · DevOps\n\n## Задача\nНастроить DNS и HTTPS для staging API.\n\n## Критерии\n- [ ] `curl https://api.staging.allerguide.app/api/health` → 200\n- [ ] TLS валидный (Let's Encrypt / Cloudflare)\n- [ ] URL зафиксирован в `EXPO_PUBLIC_API_URL` для EAS staging\n\n## Ресурсы\nДомен `allerguide.app`, DNS-панель"
+      "title": "[P1.1c] DNS + TLS: api.staging.aclearo.com",
+      "body": "## Родитель\nP1.1 Deploy API на staging\n\n## Зависимости\n- **Требует:** P1.1b\n- **Блокирует:** P1.2b, P1.2c, P1.4a, P1.5b, P2.6a\n\n## Оценка\n0.5 дня · DevOps\n\n## Задача\nНастроить DNS и HTTPS для staging API.\n\n## Критерии\n- [ ] `curl https://api.staging.aclearo.com/api/health` → 200\n- [ ] TLS валидный (Let's Encrypt / Cloudflare)\n- [ ] URL зафиксирован в `EXPO_PUBLIC_API_URL` для EAS staging\n\n## Ресурсы\nДомен `aclearo.com`, DNS-панель"
     },
     {
       "id": "P1.1d",
