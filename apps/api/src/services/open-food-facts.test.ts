@@ -45,7 +45,7 @@ describe('open food facts service', () => {
     const fetchMock = mockJson({ status: 1, product: { code: '1', product_name: 'X' } });
     await fetchOpenFoodFactsProduct('1');
     const call = fetchMock.mock.calls[0] as unknown as [string, { headers: Record<string, string> }];
-    expect(call[1].headers['User-Agent']).toMatch(/AllerGuide/);
+    expect(call[1].headers['User-Agent']).toMatch(/A-Claro/);
   });
 
   it('returns null when the product is not found', async () => {

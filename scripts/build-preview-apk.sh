@@ -22,4 +22,4 @@ cd android
 APK="$PWD/app/build/outputs/apk/release/app-release.apk"
 echo ""
 echo "APK ready: $APK"
-echo "Package: com.allerguide.app | Signed with debug keystore (testing only)"
+echo "Package: com.aclearo.com | Signed with debug keystore (testing only)"

@@ -1,5 +1,5 @@
 # P2.1a — SOS: profile card + passport collapse
-appId: com.allerguide.app
+appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - tapOn:

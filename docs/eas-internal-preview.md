@@ -82,7 +82,7 @@ eas init                 # создаёт проект на expo.dev, пропи
 eas credentials --platform ios
 ```
 
-EAS может автоматически создать Distribution Certificate и Provisioning Profile. Для TestFlight нужен App Store Connect app record с bundle ID `com.allerguide.app`.
+EAS может автоматически создать Distribution Certificate и Provisioning Profile. Для TestFlight нужен App Store Connect app record с bundle ID `com.aclearo.app`.
 
 ### Android
 
@@ -191,7 +191,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | Проблема | Решение |
 |----------|---------|
 | `Invalid UUID appId` | Запустите `eas init`, закоммитьте `projectId` |
-| iOS: No profiles for bundle ID | Создайте app в App Store Connect с `com.allerguide.app` |
+| iOS: No profiles for bundle ID | Создайте app в App Store Connect с `com.aclearo.app` |
 | Android: INSTALL_FAILED | Удалите старую debug-сборку с тем же package |
 | Android: краш сразу при запуске | Не подключайте `react-native-quick-crypto` и не включайте `newArchEnabled` без проверки на устройстве (см. «Нативные ограничения сборки»). Соберите свежий APK и снимите `adb logcat *:E`. |
 | Build fails on monorepo | Запускайте из `apps/mobile`; EAS определяет root автоматически |

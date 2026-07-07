@@ -58,7 +58,7 @@ describe('trackEvent integration', () => {
     vi.unstubAllEnvs();
     vi.stubEnv('EXPO_PUBLIC_ANALYTICS_ENABLED', 'true');
     vi.stubEnv('EXPO_PUBLIC_ANALYTICS_ENDPOINT', '');
-    vi.stubEnv('EXPO_PUBLIC_API_URL', 'https://api.staging.allerguide.app');
+    vi.stubEnv('EXPO_PUBLIC_API_URL', 'https://api.staging.aclearo.com');
   });
 
   it('ignores unknown event names', async () => {
@@ -97,7 +97,7 @@ describe('trackEvent integration', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://api.staging.allerguide.app/api/analytics/events',
+      'https://api.staging.aclearo.com/api/analytics/events',
       expect.objectContaining({ method: 'POST' }),
     );
   });

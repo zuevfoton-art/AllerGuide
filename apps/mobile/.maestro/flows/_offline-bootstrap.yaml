@@ -1,5 +1,5 @@
 # Shared subflow: fresh install → register → onboarding → home (offline preview)
-appId: com.allerguide.app
+appId: com.aclearo.app
 ---
 - clearState
 - launchApp

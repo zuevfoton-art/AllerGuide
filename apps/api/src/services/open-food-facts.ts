@@ -35,7 +35,7 @@ function baseUrl(): string {
  * contact. See https://openfoodfacts.github.io/openfoodfacts-server/api/
  */
 function userAgent(): string {
-  return process.env.OPENFOODFACTS_USER_AGENT || 'AllerGuide/1.0 (support@allerguide.app)';
+  return process.env.OPENFOODFACTS_USER_AGENT || 'A-Claro/1.0 (support@aclearo.com)';
 }
 
 function headers(): Record<string, string> {

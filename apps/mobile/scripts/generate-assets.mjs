@@ -1,6 +1,6 @@
 /**
- * Generates Expo app icon assets for AllerGuide (Clinical Calm brandbook).
- * Run: node scripts/generate-assets.mjs
+ * Generates Expo app icon assets for A-Claro / Aclearo (Claro Teal brandbook).
+ * Run: pnpm --filter mobile generate-assets
  */
 import { Buffer } from 'node:buffer';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -10,48 +10,47 @@ import sharp from 'sharp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const assetsDir = join(__dirname, '..', 'assets');
-const ACCENT = '#2563EB';
+const ACCENT = '#2A9D8F';
 const BG = '#F4F6F9';
+const INK = '#1E3A5F';
+const MUTED = '#5E6B7C';
 
-function brandIconSvg(size) {
+function monogramSvg(size) {
   const rx = Math.round(size * 0.22);
-  const shieldStroke = size < 48 ? 0 : 2.5;
-  const crossStroke = size < 48 ? Math.max(4, size * 0.12) : 3;
-  const showShield = size >= 24;
+  const aPath = `M${size * 0.5} ${size * 0.23} L${size * 0.76} ${size * 0.77} H${size * 0.66} L${size * 0.61} ${size * 0.65} H${size * 0.39} L${size * 0.34} ${size * 0.77} H${size * 0.24} L${size * 0.5} ${size * 0.23} Z M${size * 0.42} ${size * 0.57} H${size * 0.58} L${size * 0.5} ${size * 0.37} Z`;
 
   return `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
       <rect width="${size}" height="${size}" rx="${rx}" fill="${ACCENT}" />
-      ${
-        showShield
-          ? `<path d="M${size * 0.5} ${size * 0.23} L${size * 0.73} ${size * 0.36} V${size * 0.64} L${size * 0.5} ${size * 0.77} L${size * 0.27} ${size * 0.64} V${size * 0.36} Z"
-        fill="none" stroke="white" stroke-width="${shieldStroke}" stroke-linejoin="round"/>
-      <path d="M${size * 0.39} ${size * 0.5} h${size * 0.22} M${size * 0.5} ${size * 0.39} v${size * 0.22}"
-        stroke="white" stroke-width="${crossStroke}" stroke-linecap="round"/>`
-          : `<path d="M${size * 0.39} ${size * 0.5} h${size * 0.22} M${size * 0.5} ${size * 0.39} v${size * 0.22}"
-        stroke="white" stroke-width="${crossStroke}" stroke-linecap="round"/>`
-      }
+      <path d="${aPath}" fill="white" fill-rule="evenodd" />
+    </svg>`;
+}
+
+function splashLockupSvg(size) {
+  const icon = 360;
+  const iconX = (size - icon) / 2;
+  const iconY = size * 0.34;
+  const aPath = `M${icon * 0.5} ${icon * 0.23} L${icon * 0.76} ${icon * 0.77} H${icon * 0.66} L${icon * 0.61} ${icon * 0.65} H${icon * 0.39} L${icon * 0.34} ${icon * 0.77} H${icon * 0.24} L${icon * 0.5} ${icon * 0.23} Z M${icon * 0.42} ${icon * 0.57} H${icon * 0.58} L${icon * 0.5} ${icon * 0.37} Z`;
+
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${size}" height="${size}" fill="${BG}" />
+      <g transform="translate(${iconX}, ${iconY})">
+        <rect width="${icon}" height="${icon}" rx="78" fill="${ACCENT}" />
+        <path d="${aPath}" fill="white" fill-rule="evenodd" />
+      </g>
+      <text x="50%" y="${iconY + icon + 120}" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="112" font-weight="700" fill="${ACCENT}">A</text>
+      <text x="50%" y="${iconY + icon + 120}" dx="42" text-anchor="start" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="112" font-weight="600" fill="${INK}">‑Claro</text>
+      <text x="50%" y="${iconY + icon + 200}" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="56" font-weight="400" fill="${MUTED}">an Aclearo app</text>
     </svg>`;
 }
 
 async function drawIcon(size) {
-  return sharp(Buffer.from(brandIconSvg(size))).png().toBuffer();
+  return sharp(Buffer.from(monogramSvg(size))).png().toBuffer();
 }
 
 async function drawSplash(size) {
-  const iconSize = Math.round(size * 0.28);
-  const icon = await drawIcon(iconSize);
-  return sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: BG,
-    },
-  })
-    .composite([{ input: icon, gravity: 'center' }])
-    .png()
-    .toBuffer();
+  return sharp(Buffer.from(splashLockupSvg(size))).png().toBuffer();
 }
 
 await mkdir(assetsDir, { recursive: true });
@@ -67,4 +66,4 @@ await writeFile(join(assetsDir, 'splash-icon.png'), splash);
 await writeFile(join(assetsDir, 'favicon.png'), favicon);
 await writeFile(join(assetsDir, 'notification-icon.png'), notification);
 
-console.log('Generated assets in apps/mobile/assets/');
+console.log('Generated A-Claro assets in apps/mobile/assets/');

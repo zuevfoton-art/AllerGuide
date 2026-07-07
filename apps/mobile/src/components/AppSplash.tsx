@@ -13,7 +13,7 @@ export function AppSplash(_props: AppSplashProps) {
 
   return (
     <View style={styles.container}>
-      <BrandLogo size={72} showWordmark />
+      <BrandLogo size={72} showWordmark showEndorser />
       <ActivityIndicator color={theme.colors.accent} style={styles.spinner} />
     </View>
   );

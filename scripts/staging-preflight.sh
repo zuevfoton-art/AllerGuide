@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-export STAGING_API_URL="${STAGING_API_URL:-https://api.staging.allerguide.app}"
+export STAGING_API_URL="${STAGING_API_URL:-https://api.staging.aclearo.com}"
 export STAGING_API_URL="${STAGING_API_URL%/}"
 
 echo "=== AllerGuide staging preflight (P1.7) ==="

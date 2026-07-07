@@ -10,7 +10,7 @@ async function main() {
   const server = http.createServer(app);
 
   server.listen(PORT, () => {
-    console.log(`AllerGuide API running on port ${PORT}`);
+    console.log(`Aclearo API running on port ${PORT}`);
   });
 
   if (METRO_URL) {

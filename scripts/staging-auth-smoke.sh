@@ -2,7 +2,7 @@
 # API-level auth smoke for staging (P1.2c). Complements mobile E2E in qa-checklist.
 set -euo pipefail
 
-BASE="${STAGING_API_URL:-${1:-https://api.staging.allerguide.app}}"
+BASE="${STAGING_API_URL:-${1:-https://api.staging.aclearo.com}}"
 BASE="${BASE%/}"
 
 RAND="${RAND:-$(date +%s)}"

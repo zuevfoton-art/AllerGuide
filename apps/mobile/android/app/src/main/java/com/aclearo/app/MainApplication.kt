@@ -1,4 +1,4 @@
-package com.allerguide.app
+package com.aclearo.app
 
 import android.app.Application
 import android.content.res.Configuration

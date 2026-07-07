@@ -1,5 +1,5 @@
 # P2.1b — staging: logout → login with backend JWT
-appId: com.allerguide.app
+appId: com.aclearo.app
 ---
 - runFlow: _staging-bootstrap.yaml
 - tapOn:

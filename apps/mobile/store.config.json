@@ -1,0 +1,51 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "categories": ["HEALTH_AND_FITNESS", "MEDICAL"],
+    "info": {
+      "en-US": {
+        "title": "A-Claro",
+        "subtitle": "See allergy clearly",
+        "description": "A-Claro is an Aclearo allergy companion app. Offline-first diary, explainable product scanner, pollen and air context, SOS passport, and doctor-ready PDF reports — in 6 languages.\n\nA-Claro helps you see allergy information clearly: scan barcodes, log symptoms, track environmental triggers, and share structured reports with your clinician. Not a medical device — decision support only.",
+        "keywords": ["allergy", "allergen", "scanner", "pollen", "diary", "food", "aclearo", "claro"],
+        "marketingUrl": "https://aclearo.com",
+        "supportUrl": "https://aclearo.com/support",
+        "privacyPolicyUrl": "https://aclearo.com/legal"
+      },
+      "ru": {
+        "title": "A-Claro",
+        "subtitle": "Аллергия без тумана",
+        "description": "A-Claro — приложение Aclearo для управления аллергией. Офлайн-дневник, сканер с объяснимым риском, пыльца и воздух, SOS-паспорт и PDF для врача — на 6 языках.\n\nНе является медицинским изделием. Информационный характер.",
+        "keywords": ["аллергия", "аллерген", "сканер", "пыльца", "дневник", "aclearo"],
+        "marketingUrl": "https://aclearo.com",
+        "supportUrl": "https://aclearo.com/support",
+        "privacyPolicyUrl": "https://aclearo.com/legal"
+      },
+      "es-ES": {
+        "title": "A-Claro",
+        "subtitle": "Alergias, con claridad",
+        "description": "A-Claro es la app de alergias de Aclearo: diario offline, escáner explicable, polen, SOS y informes PDF — 6 idiomas.",
+        "keywords": ["alergia", "alérgeno", "escáner", "polen", "diario", "aclearo", "claro"],
+        "marketingUrl": "https://aclearo.com",
+        "supportUrl": "https://aclearo.com/support",
+        "privacyPolicyUrl": "https://aclearo.com/legal"
+      }
+    }
+  },
+  "android": {
+    "info": {
+      "en-US": {
+        "title": "A-Claro",
+        "shortDescription": "Allergy companion by Aclearo — clear scanner, diary, pollen & SOS",
+        "fullDescription": "A-Claro is an Aclearo allergy companion app. Offline-first diary, explainable product scanner, pollen and air context, SOS passport, and doctor-ready PDF reports — in 6 languages.\n\nNot a medical device — decision support only.",
+        "developerName": "Aclearo"
+      },
+      "ru-RU": {
+        "title": "A-Claro",
+        "shortDescription": "Приложение Aclearo: дневник, сканер, пыльца и SOS — офлайн",
+        "fullDescription": "A-Claro — приложение Aclearo для управления аллергией. Офлайн-дневник, сканер с объяснимым риском, пыльца, SOS и PDF для врача.",
+        "developerName": "Aclearo"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 # P2.1a — onboarding: register → intro skip → profile → home
-appId: com.allerguide.app
+appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - assertVisible:

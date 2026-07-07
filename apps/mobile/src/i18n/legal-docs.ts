@@ -10,13 +10,13 @@ export type LegalDocs = {
 const RU: LegalDocs = {
   privacyTitle: 'Политика конфиденциальности',
   termsTitle: 'Условия использования',
-  privacyBody: `# Политика конфиденциальности AllerGuide
+  privacyBody: `# Политика конфиденциальности Aclearo (A-Claro)
 
 **Дата вступления в силу:** 4 июля 2026 г.
 
 ## 1. Общие положения
 
-AllerGuide помогает вести дневник аллергии, проверять продукты и хранить экстренную информацию. Данные о здоровье обрабатываются конфиденциально.
+**A-Claro** — приложение компании **Aclearo**. Оно помогает вести дневник аллергии, проверять продукты и хранить экстренную информацию. Данные о здоровье обрабатываются конфиденциально.
 
 ## 2. Какие данные мы обрабатываем
 
@@ -34,18 +34,18 @@ AllerGuide помогает вести дневник аллергии, пров
 
 ## 5. Медицинский disclaimer
 
-AllerGuide не является медицинским изделием и не заменяет консультацию врача.
+A-Claro не является медицинским изделием и не заменяет консультацию врача.
 
 ## 6. Контакты
 
-support@allerguide.app`,
-  termsBody: `# Условия использования AllerGuide
+support@aclearo.com`,
+  termsBody: `# Условия использования A-Claro (Aclearo)
 
 **Дата вступления в силу:** 4 июля 2026 г.
 
 ## 1. Принятие условий
 
-Используя AllerGuide, вы соглашаетесь с настоящими Условиями и Политикой конфиденциальности.
+Используя A-Claro, вы соглашаетесь с настоящими Условиями и Политикой конфиденциальности Aclearo.
 
 ## 2. Назначение
 
@@ -61,19 +61,19 @@ support@allerguide.app`,
 
 ## 5. Контакты
 
-support@allerguide.app`,
+support@aclearo.com`,
 };
 
 const EN: LegalDocs = {
   privacyTitle: 'Privacy Policy',
   termsTitle: 'Terms of Service',
-  privacyBody: `# AllerGuide Privacy Policy
+  privacyBody: `# Aclearo Privacy Policy (A-Claro)
 
 **Effective date:** July 4, 2026
 
 ## 1. Overview
 
-AllerGuide helps you manage allergies offline-first. Health data is treated as sensitive.
+**A-Claro** is an Aclearo allergy companion app. It helps you manage allergies offline-first. Health data is treated as sensitive.
 
 ## 2. Data we process
 
@@ -91,18 +91,18 @@ Delete profiles or your full account in Settings. Server-side profiles and backu
 
 ## 5. Medical disclaimer
 
-AllerGuide is not a medical device and does not replace professional care.
+A-Claro is not a medical device and does not replace professional care.
 
 ## 6. Contact
 
-support@allerguide.app`,
-  termsBody: `# AllerGuide Terms of Service
+support@aclearo.com`,
+  termsBody: `# A-Claro Terms of Service (Aclearo)
 
 **Effective date:** July 4, 2026
 
 ## 1. Acceptance
 
-By using AllerGuide you agree to these Terms and the Privacy Policy.
+By using A-Claro you agree to these Terms and the Aclearo Privacy Policy.
 
 ## 2. Purpose
 
@@ -118,7 +118,7 @@ You may delete your account and all data at any time.
 
 ## 5. Contact
 
-support@allerguide.app`,
+support@aclearo.com`,
 };
 
 const DOCS: Record<AppLocale, LegalDocs> = {
