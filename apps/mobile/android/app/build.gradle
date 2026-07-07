@@ -90,9 +90,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.allerguide.app'
+    namespace 'com.aclearo.app'
     defaultConfig {
-        applicationId 'com.allerguide.app'
+        applicationId 'com.aclearo.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

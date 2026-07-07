@@ -441,7 +441,7 @@ const es: LocaleMessages = {
     manage: 'Mis perfiles y cuenta',
   },
   onboarding: {
-    tagline: 'Tu asistente inteligente para el control de alergias',
+    tagline: 'Alergia. Claro.',
     sectionLabel: '¿Para quién llevas el registro?',
     self: 'Solo para mí',
     selfDesc: 'Diario personal y escáner de alérgenos',
