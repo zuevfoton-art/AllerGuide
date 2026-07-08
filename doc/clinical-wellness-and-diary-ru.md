@@ -405,6 +405,8 @@ flowchart LR
 - данные о **частоте клинических перекрёстных реакций** (где указано — поле `clinicalFrequency`);
 - экспертная ревизия консультативного совета AllerGuide / АДАИР (домен `cross-reactions` в medical advisory board).
 
+Подробная привязка к литературе, базам данных и молекулярным семействам — **§4.7.1**.
+
 **Справочник не является динамической базой IgE-кроссреактивности** и не заменяет кожные пробы, BAT или молекулярную диагностику (компонентную IgE).
 
 #### Структура записи перекрёстной реакции
@@ -487,6 +489,111 @@ flowchart LR
 
 При нескольких аллергенах профиля, указывающих на один и тот же перекрёстный продукт (напр. берёза + злаки → томаты), сохраняется **наивысший риск** (`pickHigherRiskReaction`).
 
+#### 4.7.1. Библиография, базы данных и молекулярные источники
+
+В коде (`cross-reactions/phase-1.ts`, `phase-2.ts`) **нет построчных библиографических ссылок** на каждую из 44 пар. Ниже — привязка трёх опорных блоков (OAS/PFS, молекулярные семейства, `clinicalFrequency`) к литературе, руководствам и базам данных. Справочник **не синхронизируется** с внешними БД автоматически; пары курируются вручную с экспертной ревизией (§4.7).
+
+**Архитектурные опоры проекта** (см. также [`docs/clinical-accuracy-roadmap.md`](../docs/clinical-accuracy-roadmap.md), §2):
+
+| Источник | Тип | Роль в AllerGuide |
+|----------|-----|-------------------|
+| **Allergome** | База данных ([allergome.org](https://www.allergome.org)) | Кросс-реактивность аллергенов, молекулярные семейства, клинические ассоциации |
+| **iFAAM** | EU FP7-проект (Integrated Approaches to Food Allergen and Allergy Risk Management, ~2013–2017) | Систематизация рисков пищевой аллергии, перекрёстности, маркировки |
+| **WHO/IUIS Allergen Nomenclature** | Номенклатура ([allergen.org](https://www.allergen.org)) | Официальные имена молекул в поле `protein` (`Bet v 1`, `Mal d 1`, `Der p 10`…) |
+| **EAACI Molecular Allergology User's Guide** | Учебник / гайд (Matricardi PM, Kleine-Tebbe J, Wiley-Blackwell / EAACI) | Систематизация PFS, PR-10, профилинов, LTP, тропомиозина |
+| **EAACI Food Allergy and Anaphylaxis Guidelines** | Клинические руководства | OAS vs истинная пищевая аллергия; компонентная диагностика |
+| **AllergenOnline** | In silico-БД (University of Nebraska) | Предсказание перекрёстности по гомологии последовательностей |
+| **Medical Advisory Board AllerGuide / АДАИР** | Экспертная ревизия | Отбор пар, уровни `risk`, русские `note` |
+
+> **Ограничение:** `evidence-registry.ts` содержит привязку порогов пыльцы, AQI и весов индекса, но **не** содержит машиночитаемых цитат для перекрёстных реакций. Поле `clinicalFrequency` — ориентир из обзорной литературы (часто для IgE-перекрёста), а не персональная вероятность.
+
+##### OAS и pollen-food syndrome (PFS)
+
+| Источник | Тип | Что даёт для справочника |
+|----------|-----|--------------------------|
+| Ortolani C, Ispano M, et al. *The oral allergy syndrome.* Ann Allergy / J Allergy Clin Immunol, 1988 | Оригинальное описание | Термин OAS, связь сырых фруктов/овощей с реакциями у поллинотиков |
+| Valenta R, et al. — работы по Bet v 1 и пищевым гомологам | Молекулярная аллергология | Механизм берёза → яблоко, морковь, орехи (PR-10) |
+| Asero R. — серия работ по birch-related plant food allergy | Клинические серии | Частота и клиника OAS при берёзовой сенсибилизации |
+| Ballmer-Weber BK, Vieths S. — разделы EAACI по пищевой аллергии | Руководство | Классификация IgE-реакций, OAS vs истинная PA |
+| Skypala IJ. — обзоры pollen-food syndrome | Обзор | Связь пыльцы злаков, амброзии, полыни с пищей |
+| WAO / EAACI position papers по компонентной диагностике | Позиционные документы | Различение «истинной» ПА и перекрёста с пыльцой (Ara h 8 vs Ara h 2 и т.д.) |
+
+**Отражение в парах справочника:**
+
+- **`oas` (PR-10, берёзовая линия):** `birch-pollen` → `apple`, `hazelnut`, `carrot`, `celery`, `soy`, `peanut`, `kiwi`, `tomato`; синдром «берёза — полынь — сельдерей».
+- **`pollen-food` (профилины, LTP):** `grass-pollen` → злаки, томаты, арахис, дыня, цитрусы; `ragweed-pollen` → банан, дыня; `mugwort-pollen` → морковь (LTP, `Dau c 4`).
+
+В индексе самочувствия учитываются **только** пары с синдромами `oas` и `pollen-food` при повышенной пыльце (`wellness-cross-reactions.ts`).
+
+##### Молекулярные семейства
+
+| Семейство / синдром | Ключевые молекулы (WHO/IUIS) | Механизм и клиника | Источники | Пары в AllerGuide |
+|---------------------|------------------------------|--------------------|-----------|-------------------|
+| **PR-10 / Bet v 1** | Bet v 1, Mal d 1, Cor a 1, Dau c 1, Api g 1, Gly m 4, Ara h 8, Act d 8 | Гомология PR-10; OAS на **сырое**, термолабильно | Valenta R; EAACI MAUG; Allergome (PR-10 family) | `birch-pollen` → яблоко, фундук, морковь, сельдерей, соя, арахис, киви |
+| **Профилины** | Phl p 12, Amb a 8, Tri a 12, Sola l 1, Ara h 5, Cuc m 1/2, Cit s 2 | Паналлергены; часто лёгкий OAS, у части пациентов клинически незначимы | EAACI MAUG; Hauser M (panallergens); Allergome | `grass-pollen` → пшеница, рожь, ячмень, томат, арахис, дыня, цитрусы; `ragweed-pollen` → банан, дыня |
+| **LTP** | Dau c 4, Pru p 3, Art v 3 | Термостабильны; возможны системные реакции; «полынь — сельдерей — специи» | Asero R, Mistrello G; EAACI MAUG; Allergome (nsLTP) | `mugwort-pollen` → `carrot` (Dau c 4) |
+| **Тропомиозин** | Der p 10, Pen a 1, Bla g 7 | Клещи/насекомые ↔ ракообразные; **термостабилен** | Ayuso R, Reese G; EAACI MAUG; Fernandes J | `dust-mites` → `seafood` (Der p 10) |
+| **Парвальбумин** | Gad c 1, Cyp c 1 | Перекрёст **между видами рыб**; термостабилен | EAACI fish allergy guidelines; Bugakesari J, Lin J | `fish` → `other-fish` (Gad c 1) |
+| **Латекс-фруктовый** | Hev b 6/7, Mus a 1, Cas s 5 | Хитиназы класса I/II | Mertens M, Brehler R; EAACI latex guidelines; Allergome | `latex` → банан, киви, авокадо, томат, каштан |
+| **Бобовые (`legume`)** | Ara h 1/3, Gly m (вицилины, легумины) | Частичный перекрёст арахис ↔ соя | EAACI peanut guidelines; iFAAM | `peanut` → `soy` |
+| **Злаки (`cereal`)** | Tri a, Sec c, Hor v (глютены, глиадины) | Высокая гомология пшеница ↔ рожь ↔ ячмень | Battais F; EAACI wheat allergy | `wheat-gluten` → `rye`, `barley` |
+| **Белки животного происхождения (`animal-protein`)** | Казеин, альбумин (Fel d 2), овомукоид | Молоко ↔ козье молоко; яйца ↔ курица; редкий pork-cat syndrome | EAACI milk guidelines; Host A; Drouet M (pork-cat) | `milk` → `goat-milk`, `beef`; `eggs` → `chicken`; `cat-dander` → `pork` |
+
+##### Поле `clinicalFrequency`: привязка к литературе
+
+В справочнике `clinicalFrequency` задано **только для 6 пар** из 44. Остальные пары используют только `risk` без числовой частоты.
+
+| Пара (`fromId` → `toId`) | Значение в коде | Молекула | Типичные источники |
+|--------------------------|-----------------|----------|-------------------|
+| `dust-mites` → `seafood` | `40-60%` | Der p 10 | Ayuso R et al. (Der p 10 ↔ shellfish); Arlian LG reviews; Allergome. *Клиническая реакция реже, чем IgE-перекрёст.* |
+| `cat-dander` → `pork` | `~3%` | Fel d 2 | Drouet M, Boutet S — pork-cat syndrome; case series (J Allergy Clin Immunol / Allergy) |
+| `milk` → `goat-milk` | `>90%` | Казеины, α-lactalbumin, β-lactoglobulin | EAACI cow's milk guidelines; Host A, Halken S; WHO/IUIS (Bos d, Cap h) |
+| `peanut` → `soy` | `5-10%` | Вицилины/легумины | EAACI peanut guidelines; Beyer K; iFAAM risk assessment |
+| `wheat-gluten` → `rye` | `70-80%` | Sec c (глютен ржи) | EAACI wheat allergy; Battais F et al.; гомология глиадинов |
+| `fish` → `other-fish` | `50-70%` | Gad c 1 | EAACI fish allergy guidelines; Kuehn A et al.; Bernhisel-Broadbent J et al. |
+
+**Пары без `clinicalFrequency`** (напр. `birch-pollen` → `apple`): в литературе частота **сенсибилизации** к Mal d 1 у берёзовых поллинотиков высока (часто 50–70% IgE-перекрёста в северной Европе, Asero R; Valenta R), но в коде указан только `risk: high`.
+
+##### Уровни доказательности в проекте
+
+```mermaid
+flowchart TB
+  subgraph tier1 [Уровень 1 — номенклатура и семейства]
+    IUIS[WHO/IUIS Allergen Nomenclature]
+    EAACI_MAU[EAACI Molecular Allergology User's Guide]
+    ALLERGOME[Allergome]
+  end
+
+  subgraph tier2 [Уровень 2 — клинические синдромы]
+    OAS_LIT[OAS / PFS literature]
+    EAACI_FA[EAACI Food Allergy Guidelines]
+    iFAAM[iFAAM]
+  end
+
+  subgraph tier3 [Уровень 3 — кураторство AllerGuide]
+    PANEL[Medical Advisory Board АДАИР]
+    GOLDEN[Golden scenarios E.3]
+    CODE[cross-reactions phase-1/2]
+  end
+
+  IUIS --> CODE
+  EAACI_MAU --> CODE
+  ALLERGOME --> CODE
+  OAS_LIT --> CODE
+  EAACI_FA --> CODE
+  iFAAM --> CODE
+  PANEL --> CODE
+  GOLDEN --> CODE
+```
+
+| Уровень | Что покрывает | Где в репозитории |
+|---------|---------------|-------------------|
+| Номенклатура молекул | `Bet v 1`, `Mal d 1`… | Поле `protein` в `packages/core/src/cross-reactions/` |
+| Клинические синдромы | OAS, PFS, latex-fruit… | Поле `syndrome`; §4.7 настоящего документа |
+| Частота | `40-60%`, `>90%`… | Поле `clinicalFrequency` (6 пар); таблица выше |
+| Экспертная валидация | Отбор пар, `risk`, `note` | Medical Advisory Board; не в `evidence-registry.ts` |
+| Автотесты | Берёза+яблоко, клещи+морепродукты | Golden scenarios (E.3), `docs/clinical-accuracy-roadmap.md` |
+
 ### 4.8. Где используются перекрёстные реакции
 
 | Компонент | Функция | Клинический эффект |
@@ -514,7 +621,7 @@ flowchart LR
 ### 4.10. Экспертный контент и реестр доказательств
 
 - **АДАИР / проф. Смолкин Ю.С.** — научное руководство экспертными материалами и калибровкой порогов.
-- **`evidence-registry.ts`** — машиночитаемая привязка порогов (пыльца, AQI, веса индекса) к источникам и датам ревизии.
+- **`evidence-registry.ts`** — машиночитаемая привязка порогов (пыльца, AQI, веса индекса) к источникам и датам ревизии. Библиография перекрёстных реакций — §4.7.1.
 - Статьи для пациентов (перекрёстные реакции, календарь пыления, АСИТ) — **информационные**, не назначение.
 
 ### 4.11. Ограничения и клинические оговорки по данным об аллергенах
