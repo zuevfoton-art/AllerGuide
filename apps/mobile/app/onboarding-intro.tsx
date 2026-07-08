@@ -5,11 +5,12 @@ import {
   FlatList,
   useWindowDimensions,
   SafeAreaView,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { markIntroComplete } from '@/src/services/settings-service';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
@@ -20,17 +21,35 @@ import { useTranslation } from '@/src/store/locale-store';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
 const SLIDE_KEYS: OnboardingSlideKey[] = ['profile', 'scanner', 'care', 'map', 'sos'];
+const CARD_PADDING_H = 16;
 
 export default function OnboardingIntroScreen() {
   const theme = useTheme();
   const layout = useResponsiveLayout();
-  const styles = useMemo(() => createStyles(theme, layout.horizontalPadding), [theme, layout.horizontalPadding]);
+  const styles = useMemo(
+    () => createStyles(theme, layout.horizontalPadding, layout.isCompact),
+    [theme, layout.horizontalPadding, layout.isCompact],
+  );
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
   const listRef = useRef<FlatList<OnboardingSlideKey>>(null);
   const [index, setIndex] = useState(0);
-  const cardWidth = Math.min(windowWidth - layout.horizontalPadding * 2, 720);
-  const illustrationWidth = Math.min(cardWidth - 32, 300);
+  const [measuredSlideWidth, setMeasuredSlideWidth] = useState(0);
+
+  const cardOuterWidth = Math.min(
+    windowWidth - layout.horizontalPadding * 2,
+    layout.contentMaxWidth ?? Number.POSITIVE_INFINITY,
+  );
+  const fallbackSlideWidth = Math.max(0, cardOuterWidth - CARD_PADDING_H * 2);
+  const slideWidth = measuredSlideWidth || fallbackSlideWidth;
+  const illustrationWidth = Math.min(slideWidth - 16, layout.isCompact ? 248 : 300);
+
+  const onCarouselLayout = useCallback((event: LayoutChangeEvent) => {
+    const width = Math.round(event.nativeEvent.layout.width);
+    if (width > 0) {
+      setMeasuredSlideWidth(width);
+    }
+  }, []);
 
   const finish = () => {
     markIntroComplete();
@@ -51,14 +70,15 @@ export default function OnboardingIntroScreen() {
   };
 
   const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardWidth);
+    if (slideWidth <= 0) return;
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / slideWidth);
     if (nextIndex >= 0 && nextIndex < SLIDE_KEYS.length) {
       setIndex(nextIndex);
     }
   };
 
   const renderSlide = ({ item }: { item: OnboardingSlideKey }) => (
-    <View style={[styles.slide, { width: cardWidth }]}>
+    <View style={[styles.slide, slideWidth > 0 && { width: slideWidth }]}>
       <View style={styles.illustrationFrame}>
         <OnboardingSlideImage
           slide={item}
@@ -81,19 +101,23 @@ export default function OnboardingIntroScreen() {
       />
       <SafeAreaView style={styles.safe}>
         <View style={[styles.card, { maxWidth: layout.contentMaxWidth }]}>
-          <FlatList
-            ref={listRef}
-            data={SLIDE_KEYS}
-            keyExtractor={(item) => item}
-            renderItem={renderSlide}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={onMomentumScrollEnd}
-            getItemLayout={(_, i) => ({ length: cardWidth, offset: cardWidth * i, index: i })}
-            style={styles.carousel}
-            contentContainerStyle={styles.carouselContent}
-          />
+          <View style={styles.carouselViewport} onLayout={onCarouselLayout}>
+            {slideWidth > 0 ? (
+              <FlatList
+                ref={listRef}
+                data={SLIDE_KEYS}
+                keyExtractor={(item) => item}
+                renderItem={renderSlide}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={onMomentumScrollEnd}
+                getItemLayout={(_, i) => ({ length: slideWidth, offset: slideWidth * i, index: i })}
+                style={styles.carousel}
+                contentContainerStyle={styles.carouselContent}
+              />
+            ) : null}
+          </View>
 
           <View style={styles.bottom}>
             <OnboardingSlideChrome
@@ -115,7 +139,7 @@ export default function OnboardingIntroScreen() {
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number) {
+function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number, isCompact: boolean) {
   return StyleSheet.create({
     root: {
       flex: 1,
@@ -137,6 +161,11 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number) {
       paddingBottom: 20,
       paddingHorizontal: 16,
     },
+    carouselViewport: {
+      flex: 1,
+      width: '100%',
+      overflow: 'hidden',
+    },
     carousel: {
       flex: 1,
     },
@@ -148,7 +177,7 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number) {
       alignItems: 'center',
       justifyContent: 'center',
       gap: 14,
-      paddingHorizontal: 8,
+      paddingHorizontal: 4,
     },
     illustrationFrame: {
       width: '100%',
@@ -159,22 +188,25 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number) {
     },
     title: {
       fontFamily: fonts.serifBold,
-      fontSize: 26,
+      fontSize: isCompact ? 22 : 26,
       fontWeight: '700',
       color: colors.head,
       textAlign: 'center',
       letterSpacing: -0.3,
-      lineHeight: 32,
-      paddingHorizontal: 8,
+      lineHeight: isCompact ? 28 : 32,
+      paddingHorizontal: 4,
+      width: '100%',
+      flexShrink: 1,
     },
     desc: {
       fontFamily: fonts.sans,
-      fontSize: 15,
+      fontSize: isCompact ? 14 : 15,
       color: colors.textSecondary,
       textAlign: 'center',
-      lineHeight: 22,
-      paddingHorizontal: 12,
-      maxWidth: 320,
+      lineHeight: isCompact ? 20 : 22,
+      paddingHorizontal: 4,
+      width: '100%',
+      flexShrink: 1,
     },
     bottom: {
       gap: 10,

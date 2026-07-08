@@ -19,15 +19,23 @@ const SCENARIO_KEYS = [
   { key: 'both', labelKey: 'onboarding.both', descKey: 'onboarding.bothDesc', icon: 'people' },
 ] as const;
 
+const CARD_PADDING_H = 20;
+
 export default function OnboardingScreen() {
   const theme = useTheme();
   const layout = useResponsiveLayout();
   const styles = useMemo(
-    () => createStyles(theme, layout.horizontalPadding),
-    [theme, layout.horizontalPadding],
+    () => createStyles(theme, layout.horizontalPadding, layout.isCompact),
+    [theme, layout.horizontalPadding, layout.isCompact],
   );
   const { t } = useTranslation();
   const setScenario = useAppStore((s) => s.setScenario);
+  const cardInnerWidth = Math.max(
+    0,
+    Math.min(layout.width - layout.horizontalPadding * 2, layout.contentMaxWidth ?? Number.POSITIVE_INFINITY) -
+      CARD_PADDING_H * 2,
+  );
+  const heroArtWidth = Math.min(cardInnerWidth - 24, layout.isCompact ? 200 : 220);
 
   return (
     <View style={styles.root}>
@@ -40,7 +48,7 @@ export default function OnboardingScreen() {
           <View style={styles.hero}>
             <BrandLogo size={44} showWordmark showEndorser />
             <View style={styles.heroArt}>
-              <OnboardingSlideImage slide="profile" width={220} height={150} />
+              <OnboardingSlideImage slide="profile" width={heroArtWidth} height={heroArtWidth * 0.68} />
             </View>
             <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
           </View>
@@ -76,7 +84,7 @@ export default function OnboardingScreen() {
   );
 }
 
-function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: number) {
+function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: number, isCompact: boolean) {
   return StyleSheet.create({
     root: {
       flex: 1,
@@ -110,11 +118,13 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
     },
     tagline: {
       fontFamily: fonts.sans,
-      fontSize: 15,
+      fontSize: isCompact ? 14 : 15,
       color: colors.textSecondary,
       textAlign: 'center',
-      lineHeight: 22,
-      paddingHorizontal: 8,
+      lineHeight: isCompact ? 20 : 22,
+      paddingHorizontal: 4,
+      width: '100%',
+      flexShrink: 1,
     },
     sectionLabel: {
       fontFamily: fonts.sansSemiBold,
@@ -134,6 +144,7 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surfaceMuted,
+      width: '100%',
     },
     cardIcon: {
       width: 44,
@@ -143,18 +154,20 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
       alignItems: 'center',
       justifyContent: 'center',
     },
-    cardText: { flex: 1, gap: 3 },
+    cardText: { flex: 1, gap: 3, minWidth: 0, flexShrink: 1 },
     cardTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 16,
+      fontSize: isCompact ? 15 : 16,
       fontWeight: '600',
       color: colors.text,
+      flexShrink: 1,
     },
     cardDesc: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: isCompact ? 12 : 13,
       color: colors.textSecondary,
       lineHeight: 18,
+      flexShrink: 1,
     },
   });
 }
