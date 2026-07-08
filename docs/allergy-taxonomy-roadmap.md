@@ -171,13 +171,13 @@ type ClinicalPhenotypeId =
 
 | ID | Задача | Файлы |
 |----|--------|-------|
-| 1.1 | Домен `condition-history.ts`: типы, parse/serialize | `packages/core` |
-| 1.2 | `buildConditionHistoryFromOnboarding()` | core |
-| 1.3 | Mobile service + `app_settings` key | `condition-history-service.ts` |
-| 1.4 | Wizard step «Хронология» после conditions | `use-profile-setup-wizard` |
-| 1.5 | Секция «История аллергии» в profile-edit | `profile-edit.tsx` |
-| 1.6 | Unit-тесты + migration note | core tests |
-| 1.7 | FR-PROF-14: дебют состояния | `functional-requirements.md` |
+| 1.1 | Домен `condition-history.ts`: типы, parse/serialize | ✅ Done |
+| 1.2 | `buildConditionHistoryFromOnboarding()` | ✅ Done |
+| 1.3 | Mobile service + `app_settings` key | ✅ Done |
+| 1.4 | Wizard step «Хронология» после conditions | ✅ Done |
+| 1.5 | Секция «История аллергии» в profile-edit | ✅ Done |
+| 1.6 | Unit-тесты | ✅ Done |
+| 1.7 | FR-PROF-14 | ✅ Done |
 
 **Поля UI (на тип):** период дебюта · год (opt) · статус · кто подтвердил · «не помню»
 

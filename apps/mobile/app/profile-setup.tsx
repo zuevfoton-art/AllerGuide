@@ -12,6 +12,7 @@ import {
 } from '@allerguide/core';
 import { createProfile, listProfiles, ProfileValidationError } from '@/src/services/profile-service';
 import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
+import { saveConditionHistoryFromOnboarding } from '@/src/services/condition-history-service';
 import {
   normalizeEmergencyContactDrafts,
   syncEmergencyContacts,
@@ -30,16 +31,20 @@ import { ProfileSetupNameStep } from '@/src/components/profile-setup/ProfileSetu
 import { ProfileSetupBirthYearStep } from '@/src/components/profile-setup/ProfileSetupBirthYearStep';
 import { ProfileSetupConditionsStep } from '@/src/components/profile-setup/ProfileSetupConditionsStep';
 import { ProfileSetupAllergensStep } from '@/src/components/profile-setup/ProfileSetupAllergensStep';
-import { ProfileSetupContactsStep } from '@/src/components/profile-setup/ProfileSetupContactsStep';
+import { ProfileSetupConditionHistoryStep } from '@/src/components/profile-setup/ProfileSetupConditionHistoryStep';
+import type { ConditionHistoryDrafts } from '@/src/components/ConditionHistoryEditor';
 import {
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   PROFILE_SETUP_WIZARD_STEPS,
+  reconcileConditionHistoryDrafts,
+  shouldSkipConditionHistoryStep,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardStep,
 } from '@/src/hooks/use-profile-setup-wizard';
+import { ProfileSetupContactsStep } from '@/src/components/profile-setup/ProfileSetupContactsStep';
 
 export default function ProfileSetupScreen() {
   const theme = useTheme();
@@ -55,6 +60,7 @@ export default function ProfileSetupScreen() {
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
+  const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
@@ -97,18 +103,27 @@ export default function ProfileSetupScreen() {
       selectedAllergenIds: selected,
       confirmations,
       conditions,
+      conditionHistoryDrafts,
       contacts,
       childConsent,
       profileType: effectiveType,
     }),
-    [name, birthYear, selected, confirmations, conditions, contacts, childConsent, effectiveType],
+    [name, birthYear, selected, confirmations, conditions, conditionHistoryDrafts, contacts, childConsent, effectiveType],
   );
+
+  const skipConditionHistory = shouldSkipConditionHistoryStep(draft);
+
+  const handleConditionsChange = (next: AllergyConditionId[]) => {
+    setConditions(next);
+    setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
+  };
 
   const resetForm = () => {
     setName('');
     setBirthYear('');
     setSelected([]);
     setConditions([]);
+    setConditionHistoryDrafts({});
     setContacts([]);
     setConfirmations({});
     setChildConsent(false);
@@ -151,6 +166,7 @@ export default function ProfileSetupScreen() {
     }
 
     setStoredProfileConditions(id, conditions);
+    saveConditionHistoryFromOnboarding(id, conditions, conditionHistoryDrafts);
     syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
 
     setActiveProfileId(id);
@@ -184,7 +200,7 @@ export default function ProfileSetupScreen() {
     }
 
     setError('');
-    const next = getNextProfileSetupWizardStep(currentStep);
+    const next = getNextProfileSetupWizardStep(currentStep, { skipConditionHistory });
     if (next) {
       setCurrentStep(next);
       return;
@@ -195,7 +211,7 @@ export default function ProfileSetupScreen() {
 
   const goBack = () => {
     setError('');
-    const previous = getPreviousProfileSetupWizardStep(currentStep);
+    const previous = getPreviousProfileSetupWizardStep(currentStep, { skipConditionHistory });
     if (previous) setCurrentStep(previous);
   };
 
@@ -240,8 +256,16 @@ export default function ProfileSetupScreen() {
       {currentStep === 'conditions' ? (
         <ProfileSetupConditionsStep
           selected={conditions}
-          onChange={setConditions}
+          onChange={handleConditionsChange}
           profileType={effectiveType}
+        />
+      ) : null}
+
+      {currentStep === 'conditionHistory' ? (
+        <ProfileSetupConditionHistoryStep
+          conditions={conditions}
+          drafts={conditionHistoryDrafts}
+          onChange={setConditionHistoryDrafts}
         />
       ) : null}
 

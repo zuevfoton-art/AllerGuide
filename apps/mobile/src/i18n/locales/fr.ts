@@ -524,6 +524,39 @@ const fr: LocaleMessages = {
     conditionsQuestionChild: 'Quelles allergies a ton enfant ?',
     conditionsHint:
       'Sélectionnez tous les types concernés — le journal adaptera échelles et sections (débit de pointe pour l\'asthme, AIT pour le pollinose, etc.).',
+    conditionHistory: {
+      title: 'Quand l\'allergie a-t-elle commencé ?',
+      hint: 'Indiquez la période approximative de début pour chaque type. Champs optionnels.',
+      empty: 'Sélectionnez d\'abord les types d\'allergie à l\'étape précédente.',
+      onsetLabel: 'Premières manifestations',
+      onsetYearLabel: 'Année (si connue)',
+      onsetYearPlaceholder: 'Par exemple 2018',
+      statusLabel: 'Statut actuel',
+      confirmedBy: 'Confirmation',
+      foodTimingLabel: 'Délai entre l\'aliment et les symptômes',
+      notesLabel: 'Notes',
+      notesPlaceholder: 'Par exemple : diagnostic par un allergologue en 2020',
+      onset: {
+        infancy: 'Petite enfance',
+        'early-childhood': 'Enfance précoce',
+        'school-age': 'Âge scolaire',
+        adolescence: 'Adolescence',
+        adulthood: 'Âge adulte',
+        unknown: 'Je ne sais pas',
+      },
+      status: {
+        active: 'Active',
+        'in-remission': 'En rémission',
+        resolved: 'Résolue',
+        unknown: 'Inconnu',
+      },
+      foodTiming: {
+        'within-30min': 'Moins de 30 min',
+        '30min-2h': '30 min — 2 h',
+        'over-2h': 'Plus de 2 h',
+        unknown: 'Inconnu',
+      },
+    },
     consent:
       'Je confirme être le parent ou le représentant légal de cet enfant et être autorisé à saisir ses informations de santé.',
     confirmationLabel: 'Source de vérification',
@@ -548,6 +581,7 @@ const fr: LocaleMessages = {
   profileEdit: {
     title: 'Profil',
     subtitle: 'Données et modification',
+    conditionHistoryLabel: 'Historique allergique',
     saveChanges: 'Enregistrer les modifications',
     errors: {
       nameRequired: 'Entrez un nom de profil.',
