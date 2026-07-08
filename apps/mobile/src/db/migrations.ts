@@ -1,7 +1,7 @@
 import type { DbLike } from './types';
 import { migrateProfileAllergiesJson, type Profile } from '@allerguide/core';
 
-export const CURRENT_SCHEMA_VERSION = 6;
+export const CURRENT_SCHEMA_VERSION = 7;
 
 const MIGRATIONS: Record<number, (db: DbLike) => void> = {
   1: (db) => {
@@ -88,6 +88,18 @@ const MIGRATIONS: Record<number, (db: DbLike) => void> = {
         scan_input TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
         created_at TEXT NOT NULL
+      );
+    `);
+  },
+  7: (db) => {
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS safe_products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profileId INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        input TEXT NOT NULL,
+        savedAt TEXT NOT NULL
       );
     `);
   },

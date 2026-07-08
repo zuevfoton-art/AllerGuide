@@ -203,6 +203,7 @@ export async function deleteProfile(id: number) {
   db.runSync('DELETE FROM scan_history WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [id]);
+  db.runSync('DELETE FROM safe_products WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profiles WHERE id = ?', [id]);
 
   const { activeProfileId, setActiveProfileId, setActiveProfile } = useAppStore.getState();

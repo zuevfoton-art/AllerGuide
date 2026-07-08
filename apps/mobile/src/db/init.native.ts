@@ -79,6 +79,14 @@ export function initDb() {
       source TEXT NOT NULL DEFAULT 'cache',
       fetched_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS safe_products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      profileId INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      mode TEXT NOT NULL,
+      input TEXT NOT NULL,
+      savedAt TEXT NOT NULL
+    );
   `);
 
   runMigrations(db as unknown as import('./types').DbLike);
