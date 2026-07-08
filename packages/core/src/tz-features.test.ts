@@ -19,8 +19,9 @@ describe('allergy-conditions', () => {
     expect(profileEnablesAsit(['food'])).toBe(false);
   });
 
-  it('defines 10 condition types from TZ', () => {
-    expect(ALLERGY_CONDITION_TYPES.length).toBe(10);
+  it('defines 11 condition types including urticaria', () => {
+    expect(ALLERGY_CONDITION_TYPES.length).toBe(11);
+    expect(ALLERGY_CONDITION_TYPES.some((item) => item.id === 'urticaria')).toBe(true);
   });
 });
 

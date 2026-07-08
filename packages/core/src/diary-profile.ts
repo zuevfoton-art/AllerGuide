@@ -24,6 +24,7 @@ const SCALE_BY_CONDITION: Partial<Record<AllergyConditionId, ClinicalScaleId>> =
   pollinosis: 'aria-lite',
   asthma: 'act',
   dermatitis: 'scorad-lite',
+  urticaria: 'uas7',
 };
 
 const ALWAYS_VISIBLE_SECTIONS = new Set([
@@ -73,6 +74,7 @@ export function inferConditionIdsFromAllergies(allergies: string[]): AllergyCond
     if (RHINITIS_MARKERS.some((marker) => lower.includes(marker))) ids.add('rhinitis');
     if (FOOD_MARKERS.some((marker) => lower.includes(marker))) ids.add('food');
     if (DRUG_MARKERS.some((marker) => lower.includes(marker))) ids.add('drug');
+    if (URTICARIA_MARKERS.some((marker) => lower.includes(marker))) ids.add('urticaria');
     if (INSECT_MARKERS.some((marker) => lower.includes(marker))) ids.add('insect');
 
     for (const condition of ALLERGY_CONDITION_TYPES) {
@@ -125,7 +127,7 @@ export function getRecommendedScalesForProfile(
   explicit: AllergyConditionId[] = [],
 ): ClinicalScaleId[] {
   const scales = new Set(getRecommendedScalesForConditions(resolveProfileConditions(allergies, explicit)));
-  if (profileSuggestsUas7(allergies)) scales.add('uas7');
+  if (profileSuggestsUas7(allergies) || explicit.includes('urticaria')) scales.add('uas7');
   return [...scales];
 }
 

@@ -4,6 +4,7 @@ export type AllergyConditionId =
   | 'asthma'
   | 'rhinitis'
   | 'dermatitis'
+  | 'urticaria'
   | 'household'
   | 'animal'
   | 'drug'
@@ -33,7 +34,7 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
     options: [
       { id: 'milk', label: 'Молоко' },
       { id: 'eggs', label: 'Яйцо' },
-      { id: 'wheat', label: 'Пшеница' },
+      { id: 'wheat-gluten', label: 'Пшеница' },
       { id: 'tree-nuts', label: 'Орехи' },
       { id: 'fish', label: 'Рыба' },
       { id: 'seafood', label: 'Морепродукты' },
@@ -48,7 +49,7 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
     options: [
       { id: 'alder', label: 'Ольха', season: 'spring' },
       { id: 'hazel', label: 'Лещина', season: 'spring' },
-      { id: 'birch', label: 'Берёза', season: 'spring' },
+      { id: 'birch-pollen', label: 'Берёза', season: 'spring' },
       { id: 'oak', label: 'Дуб', season: 'spring' },
       { id: 'maple', label: 'Клён', season: 'spring' },
       { id: 'ash', label: 'Ясень', season: 'spring' },
@@ -59,9 +60,9 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
       { id: 'fescue', label: 'Овсяница', season: 'summer' },
       { id: 'rye-grass', label: 'Рожь', season: 'summer' },
       { id: 'raggrass', label: 'Райграс', season: 'summer' },
-      { id: 'wormwood', label: 'Полынь', season: 'late-summer' },
+      { id: 'mugwort-pollen', label: 'Полынь', season: 'late-summer' },
       { id: 'saltwort', label: 'Лебеда', season: 'late-summer' },
-      { id: 'ragweed', label: 'Амброзия', season: 'late-summer' },
+      { id: 'ragweed-pollen', label: 'Амброзия', season: 'late-summer' },
     ],
     enablesAsit: true,
   },
@@ -83,12 +84,17 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
     description: 'Кожные проявления: экзема, нейродермит',
   },
   {
+    id: 'urticaria',
+    label: 'Крапивница / ангиоотёк',
+    description: 'Острая или хроническая крапивница, отёк Квинке',
+  },
+  {
     id: 'household',
     label: 'Бытовая аллергия',
     description: 'Домашняя пыль, клещи, плесень',
     options: [
-      { id: 'dust', label: 'Домашняя пыль' },
-      { id: 'dust-mite', label: 'Клещ домашней пыли' },
+      { id: 'house-dust', label: 'Домашняя пыль' },
+      { id: 'dust-mites', label: 'Клещ домашней пыли' },
       { id: 'mold', label: 'Плесень' },
     ],
     enablesAsit: true,
@@ -98,8 +104,8 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
     label: 'Аллергия на животных',
     description: 'Кошки, собаки, грызуны, птицы',
     options: [
-      { id: 'cat', label: 'Кошки' },
-      { id: 'dog', label: 'Собаки' },
+      { id: 'cat-dander', label: 'Кошки' },
+      { id: 'dog-dander', label: 'Собаки' },
       { id: 'rodent', label: 'Грызуны' },
       { id: 'bird', label: 'Птицы' },
       { id: 'horse', label: 'Лошади' },
