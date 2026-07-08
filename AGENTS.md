@@ -11,9 +11,13 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 **Before writing or changing code**, read and follow:
 
 1. [`docs/architecture.md`](docs/architecture.md) — system design, layers, data flows, feature flags
-2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist
+2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist, **TypeScript standards (§10)**
 
 Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
+
+### TypeScript & code style (summary)
+
+See [`development-rules.md` §10](docs/development-rules.md#10-typescript-и-стандарты-кода): plan before coding, strong typing, Zod for new API schemas, Conventional Commits, JSDoc on exported APIs. Shortcuts: `CURSOR:PAIR`, `RFC`, `RFP`.
 
 ### Non-negotiable rules (summary)
 
@@ -25,6 +29,7 @@ Task context: [`docs/functional-requirements.md`](docs/functional-requirements.m
 | **Feature flags** | Backend integration behind `EXPO_PUBLIC_*` (default off in `.env.example`) |
 | **i18n** | `useTranslation()` + all 6 locales + `types.ts`; not legacy i18next |
 | **Migrations** | `db:generate` + commit SQL + `db:migrate`; never `db:push` on real data |
+| **TypeScript** | No `any`; plan before code; Conventional Commits; see §10 in development-rules |
 
 Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-чеклист-перед-merge).
 
