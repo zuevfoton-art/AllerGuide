@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ALLERGY_CONDITION_TYPES, type AllergyConditionId } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { localizeAllergyConditionLabel } from '@/src/i18n/content/localize';
+import { useTranslation } from '@/src/store/locale-store';
 
 interface ConditionPickerProps {
   selected: AllergyConditionId[];
@@ -12,6 +14,8 @@ interface ConditionPickerProps {
 export function ConditionPicker({ selected, onChange }: ConditionPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { content } = useTranslation();
+  const localeContent = content();
 
   const toggle = (id: AllergyConditionId) => {
     onChange(selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id]);
@@ -22,6 +26,7 @@ export function ConditionPicker({ selected, onChange }: ConditionPickerProps) {
       <View style={styles.chipGrid}>
         {ALLERGY_CONDITION_TYPES.map((item) => {
           const active = selected.includes(item.id);
+          const label = localizeAllergyConditionLabel(item.id, localeContent);
           return (
             <Pressable
               key={item.id}
@@ -30,7 +35,7 @@ export function ConditionPicker({ selected, onChange }: ConditionPickerProps) {
               {active ? (
                 <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
               ) : null}
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
+              <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
             </Pressable>
           );
         })}

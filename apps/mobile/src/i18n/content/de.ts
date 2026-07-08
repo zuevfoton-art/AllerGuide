@@ -215,6 +215,39 @@ const deContent: LocaleContent = {
     medication: 'Medikamente',
     insect: 'Insekten',
   },
+  allergyConditions: {
+    food: {
+      label: 'Nahrungsmittelallergie',
+      description: 'Milch, Ei, Weizen, Nüsse, Fisch, Meeresfrüchte, Soja, Erdnuss',
+    },
+    pollinosis: {
+      label: 'Pollinose',
+      description: 'Allergie auf Pflanzenpollen nach Saison',
+    },
+    asthma: { label: 'Bronchialasthma', description: 'Chronische Atemwegserkrankung' },
+    rhinitis: { label: 'Allergische Rhinitis', description: 'Entzündung der Nasenschleimhaut' },
+    dermatitis: {
+      label: 'Atopisches Ekzem',
+      description: 'Haut: Ekzem, Neurodermitis',
+    },
+    household: {
+      label: 'Hausstauballergie',
+      description: 'Hausstaub, Milben, Schimmel',
+    },
+    animal: {
+      label: 'Tierallergie',
+      description: 'Katzen, Hunde, Nagetiere, Vögel',
+    },
+    drug: { label: 'Medikamentenallergie', description: 'Reaktionen auf Arzneimittel' },
+    insect: {
+      label: 'Insektenallergie',
+      description: 'Bienen-, Wespen-, Hornissen-, Mückenstiche',
+    },
+    other: {
+      label: 'Andere Allergien',
+      description: 'Seltene Allergene mit manueller Angabe',
+    },
+  },
   expertHero: {
     name: 'Prof. Dr. Yuri Solomonovich Smolkin, MD, PhD',
     role: 'Präsident von ADAIR, Wissenschaftlicher Leiter des Nationalen Klinischen Forschungszentrums',

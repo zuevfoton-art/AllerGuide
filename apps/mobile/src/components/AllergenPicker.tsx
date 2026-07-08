@@ -16,16 +16,25 @@ interface AllergenPickerProps {
   /** Canonical allergen ids (`milk`, `birch-pollen`, …). */
   selected: string[];
   onChange: (selected: string[]) => void;
+  /** Shown first when user selected matching allergy condition types. */
+  suggestedIds?: string[];
 }
 
-export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
+export function AllergenPicker({ selected, onChange, suggestedIds = [] }: AllergenPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [catalogOpen, setCatalogOpen] = useState(false);
 
   const popularIds = useMemo(() => new Set(getPopularAllergens().map((item) => item.id)), []);
-  const extraSelected = selected.filter((id) => !popularIds.has(id));
+  const suggested = useMemo(
+    () =>
+      [...new Set(suggestedIds)].filter(
+        (id) => findAllergenById(id) && !popularIds.has(id),
+      ),
+    [suggestedIds, popularIds],
+  );
+  const extraSelected = selected.filter((id) => !popularIds.has(id) && !suggested.includes(id));
   const crossSuggestions = useMemo(() => getCrossReactionsForSelection(selected), [selected]);
 
   const toggle = (id: string) => {
@@ -39,6 +48,30 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
 
   return (
     <View style={styles.wrap}>
+      {suggested.length > 0 ? (
+        <>
+          <Text style={styles.sectionHint}>{t('allergens.suggested')}</Text>
+          <View style={styles.chipGrid}>
+            {suggested.map((id) => {
+              const item = findAllergenById(id)!;
+              const active = selected.includes(item.id);
+              return (
+                <Pressable
+                  key={item.id}
+                  testID={`allergen-${item.id}`}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => toggle(item.id)}>
+                  {active ? (
+                    <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
+                  ) : null}
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      ) : null}
+
       <Text style={styles.sectionHint}>{t('allergens.popular')}</Text>
       <View style={styles.chipGrid}>
         {getPopularAllergens().map((item) => {

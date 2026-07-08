@@ -734,6 +734,7 @@ const ru: LocaleMessages = {
   },
   allergens: {
     popular: 'Частые аллергены',
+    suggested: 'По выбранным типам аллергии',
     fromCatalog: 'Из полного списка',
     openCatalog: 'Выбрать из полного списка',
     crossTitle: 'Возможные перекрёстные реакции',

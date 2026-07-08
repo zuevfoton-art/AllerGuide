@@ -215,6 +215,39 @@ const itContent: LocaleContent = {
     medication: 'Farmaci',
     insect: 'Insetti',
   },
+  allergyConditions: {
+    food: {
+      label: 'Allergia alimentare',
+      description: 'Latte, uovo, grano, noci, pesce, frutti di mare, soia, arachidi',
+    },
+    pollinosis: {
+      label: 'Pollinosi',
+      description: 'Allergia al polline delle piante per stagione',
+    },
+    asthma: { label: 'Asma bronchiale', description: 'Malattia cronica delle vie aeree' },
+    rhinitis: { label: 'Rinite allergica', description: 'Infiammazione della mucosa nasale' },
+    dermatitis: {
+      label: 'Dermatite atopica',
+      description: 'Pelle: eczema, neurodermite',
+    },
+    household: {
+      label: 'Allergia domestica',
+      description: 'Polvere, acari, muffa',
+    },
+    animal: {
+      label: 'Allergia agli animali',
+      description: 'Gatti, cani, roditori, uccelli',
+    },
+    drug: { label: 'Allergia ai farmaci', description: 'Reazioni ai medicinali' },
+    insect: {
+      label: 'Allergia agli insetti',
+      description: 'Punture di ape, vespa, calabrone, zanzara',
+    },
+    other: {
+      label: 'Altre allergie',
+      description: 'Allergeni rari con inserimento manuale',
+    },
+  },
   expertHero: {
     name: 'Prof. Yuri Solomonovich Smolkin, MD, PhD',
     role: 'Presidente di ADAIR, Direttore Scientifico del Centro Nazionale di Ricerca Clinica',

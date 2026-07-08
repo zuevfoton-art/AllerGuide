@@ -11,7 +11,7 @@ import {
 } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
-import { ConditionPicker } from '@/src/components/ConditionPicker';
+import { ProfileConditionsSection } from '@/src/components/profile-setup/ProfileConditionsSection';
 import { getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
 import {
   getStoredProfileConditions,
@@ -180,10 +180,11 @@ export default function ProfileEditScreen() {
             </View>
           </GlassCard>
 
-          <GlassCard style={styles.section}>
-            <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-            <ConditionPicker selected={conditions} onChange={setConditions} />
-          </GlassCard>
+          <ProfileConditionsSection
+            selected={conditions}
+            onChange={setConditions}
+            profileType={type}
+          />
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>

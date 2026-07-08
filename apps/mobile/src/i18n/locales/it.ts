@@ -727,6 +727,7 @@ const it: LocaleMessages = {
   },
   allergens: {
     popular: 'Allergeni comuni',
+    suggested: 'In base ai tipi di allergia scelti',
     fromCatalog: 'Dall\'elenco completo',
     openCatalog: 'Scegli dall\'elenco completo',
     crossTitle: 'Possibili reazioni incrociate',

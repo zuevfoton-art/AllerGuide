@@ -50,3 +50,10 @@ export function localizeEmergencyRelation(relation: string, content: LocaleConte
 export function localizeAllergenCategory(category: string, content: LocaleContent): string {
   return content.allergenCategories[category] ?? category;
 }
+
+export function localizeAllergyConditionLabel(
+  conditionId: string,
+  content: LocaleContent,
+): string {
+  return content.allergyConditions[conditionId]?.label ?? conditionId;
+}

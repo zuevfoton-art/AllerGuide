@@ -26,6 +26,7 @@ export type LocaleContent = {
   reportBlocks: Record<string, string>;
   emergencyRelations: Record<string, string>;
   allergenCategories: Record<string, string>;
+  allergyConditions: Record<string, { label: string; description?: string }>;
   expertHero: { name: string; role: string; subtitle: string };
   expertDisclaimer: string;
   expertCategories: Record<ExpertArticleCategory, string>;

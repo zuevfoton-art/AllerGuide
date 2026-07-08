@@ -733,6 +733,7 @@ const en: LocaleMessages = {
   },
   allergens: {
     popular: 'Common allergens',
+    suggested: 'Based on your allergy types',
     fromCatalog: 'From full list',
     openCatalog: 'Choose from full list',
     crossTitle: 'Possible cross-reactions',

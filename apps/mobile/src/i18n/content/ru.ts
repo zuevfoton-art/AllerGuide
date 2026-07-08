@@ -1,5 +1,6 @@
 import {
   ALLERGEN_CATEGORY_LABELS,
+  ALLERGY_CONDITION_TYPES,
   DIARY_SECTIONS,
   DOCTOR_REPORT_BLOCKS,
   EMERGENCY_CONTACT_RELATIONS,
@@ -49,12 +50,20 @@ const expertArticles = Object.fromEntries(
   EXPERT_ARTICLES.map(({ id, title, summary, body }) => [id, { title, summary, body }]),
 );
 
+const allergyConditions = Object.fromEntries(
+  ALLERGY_CONDITION_TYPES.map((item) => [
+    item.id,
+    { label: item.label, description: item.description },
+  ]),
+) as LocaleContent['allergyConditions'];
+
 const ruContent: LocaleContent = {
   diarySections,
   diaryTypes,
   reportBlocks,
   emergencyRelations,
   allergenCategories: ALLERGEN_CATEGORY_LABELS,
+  allergyConditions,
   expertHero: EXPERT_HERO,
   expertDisclaimer: EXPERT_DISCLAIMER,
   expertCategories,
