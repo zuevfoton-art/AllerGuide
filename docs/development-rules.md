@@ -55,6 +55,24 @@ apps/api        — HTTP-маршруты, Drizzle, интеграции (OFF, O
 | Каталог продуктов (online) | Postgres `catalog.products` (+ OFF write-through) |
 | Sync payload | Клиент шифрует; сервер хранит opaque blob |
 
+### 2.5. Бронхиальная астма — только GINA
+
+Вся логика, пороги, контент и отчёты по **бронхиальной астме** должны опираться на публичные ориентиры [GINA](https://ginasthma.org/) (Global Initiative for Asthma):
+
+| Область | Модуль в `packages/core` |
+|---------|--------------------------|
+| Единый источник порогов и метаданных | `gina-asthma.ts` |
+| Зоны ПСВ (traffic-light) | `pef-zones.ts` → константы из `gina-asthma.ts` |
+| Шкала ACT | `clinical-scales.ts` → `classifyActScoreGina()` |
+| Напоминание ACT (4 нед.) | `diary-profile.ts` → `GINA_ACT_PROMPT_INTERVAL_DAYS` |
+| План действий | `asthma-action-plan.ts` |
+| Экспертные статьи | `expert-content.ts` — id из `GINA_ASTHMA_EXPERT_ARTICLE_IDS`, упоминание GINA в body/tags |
+| Evidence registry | `evidence-registry.ts` — guideline `GINA`, citation `gina-asthma.ts` |
+
+**Запрещено:** произвольные пороги ACT/ПСВ в mobile или API; парсинг сайта GINA; встраивание PDF без лицензии.
+
+**Обязательно:** при новой астма-фиче — зарегистрировать id в `GINA_ASTHMA_FEATURE_IDS`, добавить тест в `gina-asthma.test.ts`, обновить evidence при изменении порогов.
+
 ---
 
 ## 3. Куда класть код
@@ -248,6 +266,7 @@ ui     → (peer RN only)
 - [ ] Postgres: миграция сгенерирована и закоммичена (если менялась схема)
 - [ ] `pnpm typecheck` и `pnpm test` проходят
 - [ ] Нет unrelated изменений в diff
+- [ ] Астма-логика ссылается на `gina-asthma.ts` (см. §2.5), не дублирует пороги ACT/ПСВ
 
 ---
 

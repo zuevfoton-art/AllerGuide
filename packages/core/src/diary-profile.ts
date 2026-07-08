@@ -1,4 +1,5 @@
 import type { AllergyConditionId } from './allergy-conditions';
+import { GINA_ACT_PROMPT_INTERVAL_DAYS } from './gina-asthma';
 import {
   ALLERGY_CONDITION_TYPES,
   profileEnablesAsit,
@@ -24,6 +25,7 @@ const SCALE_BY_CONDITION: Partial<Record<AllergyConditionId, ClinicalScaleId>> =
   pollinosis: 'aria-lite',
   asthma: 'act',
   dermatitis: 'scorad-lite',
+  urticaria: 'uas7',
 };
 
 const ALWAYS_VISIBLE_SECTIONS = new Set([
@@ -73,6 +75,7 @@ export function inferConditionIdsFromAllergies(allergies: string[]): AllergyCond
     if (RHINITIS_MARKERS.some((marker) => lower.includes(marker))) ids.add('rhinitis');
     if (FOOD_MARKERS.some((marker) => lower.includes(marker))) ids.add('food');
     if (DRUG_MARKERS.some((marker) => lower.includes(marker))) ids.add('drug');
+    if (URTICARIA_MARKERS.some((marker) => lower.includes(marker))) ids.add('urticaria');
     if (INSECT_MARKERS.some((marker) => lower.includes(marker))) ids.add('insect');
 
     for (const condition of ALLERGY_CONDITION_TYPES) {
@@ -125,7 +128,7 @@ export function getRecommendedScalesForProfile(
   explicit: AllergyConditionId[] = [],
 ): ClinicalScaleId[] {
   const scales = new Set(getRecommendedScalesForConditions(resolveProfileConditions(allergies, explicit)));
-  if (profileSuggestsUas7(allergies)) scales.add('uas7');
+  if (profileSuggestsUas7(allergies) || explicit.includes('urticaria')) scales.add('uas7');
   return [...scales];
 }
 
@@ -192,7 +195,8 @@ export function collectLatestScaleTrends(
   return DIARY_TREND_SCALE_IDS.filter((id) => latest.has(id)).map((id) => latest.get(id)!);
 }
 
-export const ACT_PROMPT_INTERVAL_DAYS = 28;
+/** @deprecated use GINA_ACT_PROMPT_INTERVAL_DAYS from gina-asthma */
+export const ACT_PROMPT_INTERVAL_DAYS = GINA_ACT_PROMPT_INTERVAL_DAYS;
 
 export function getLastScaleEntryAt(
   entries: { type: string; details: string; createdAt: string }[],
@@ -208,7 +212,7 @@ export function getLastScaleEntryAt(
   return null;
 }
 
-/** C.4: prompt ACT when asthma profile and last ACT entry is older than 28 days. */
+/** C.4: prompt ACT when asthma profile and last ACT entry is older than GINA 4-week window. */
 export function isActPromptDue(
   entries: { type: string; details: string; createdAt: string }[],
   conditions: AllergyConditionId[],

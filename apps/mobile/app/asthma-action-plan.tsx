@@ -2,7 +2,7 @@ import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-nat
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ASTHMA_GINA_ATTRIBUTION,
+  GINA_ASTHMA_ATTRIBUTION,
   profileEnablesPeakFlow,
   type AsthmaActionPlan,
 } from '@allerguide/core';
@@ -163,7 +163,7 @@ export default function AsthmaActionPlanScreen() {
 
       <Button label={t('asthma.savePlan')} variant="primary" block onPress={save} />
       <Disclaimer>{t('asthma.disclaimer')}</Disclaimer>
-      <Text style={styles.attribution}>{ASTHMA_GINA_ATTRIBUTION}</Text>
+      <Text style={styles.attribution}>{GINA_ASTHMA_ATTRIBUTION}</Text>
     </Screen>
   );
 }

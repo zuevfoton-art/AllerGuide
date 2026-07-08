@@ -1,4 +1,5 @@
 import type { DiarySection, DiaryStep } from './diary';
+import { classifyActScoreGina, ginaActLevelToScaleLevel } from './gina-asthma';
 
 export type ClinicalScaleId = 'aria-lite' | 'act' | 'scorad-lite' | 'uas7';
 
@@ -24,9 +25,9 @@ export const CLINICAL_SCALES: ClinicalScaleMeta[] = [
   },
   {
     id: 'act',
-    title: 'ACT (астма)',
+    title: 'ACT (астма, GINA)',
     shortLabel: 'Астма',
-    description: '5 вопросов по шкале 1–5. Сумма 5–25.',
+    description: '5 вопросов по шкале 1–5. Сумма 5–25. Пороги контроля — GINA / ACT.',
   },
   {
     id: 'scorad-lite',
@@ -176,9 +177,13 @@ export function computeScaleScore(
       if (values.some((v) => v === null || (v ?? 0) < 1 || (v ?? 0) > 5)) return null;
       const nums = values as number[];
       const total = nums.reduce((sum, v) => sum + v, 0);
-      if (total >= 20) return { total, interpretation: 'Хороший контроль', level: 'good' };
-      if (total >= 16) return { total, interpretation: 'Частичный контроль', level: 'moderate' };
-      return { total, interpretation: 'Недостаточный контроль — консультация врача', level: 'uncontrolled' };
+      const band = classifyActScoreGina(total);
+      if (!band) return null;
+      return {
+        total,
+        interpretation: band.interpretation,
+        level: ginaActLevelToScaleLevel(band.level),
+      };
     }
     case 'scorad-lite': {
       const extent = parsePercent(answers.scoradExtent);

@@ -1,6 +1,6 @@
 import { formatScaleSummary } from './clinical-scales';
 import { enrichSeverityAnswers, formatSeveritySummary, normalizeSeverity } from './diary-severity';
-import { enrichSymptomAnswers, formatCodedSymptomsSummary, resolveSymptomCodes } from './symptom-coding';
+import { enrichSymptomAnswers, formatCodedSymptomsSummary, getSymptomCatalogChoices, resolveSymptomCodes } from './symptom-coding';
 import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
@@ -39,18 +39,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         id: 'symptomCode',
         label: 'Основной симптом (из справочника)',
         field: 'choice',
-        choices: [
-          'Заложенность носа',
-          'Выделения из носа',
-          'Чихание',
-          'Зуд глаз',
-          'Кашель',
-          'Одышка / свистящее дыхание',
-          'Крапивница',
-          'Отёк (ангионевротический)',
-          'ЖКТ-симптомы',
-          'Зуд кожи',
-        ],
+        choices: getSymptomCatalogChoices(),
         required: false,
       },
       {

@@ -1,19 +1,23 @@
 /**
- * PEF traffic-light zones relative to personal best (GINA-style decision support).
+ * PEF traffic-light zones relative to personal best (GINA decision support).
  * Thresholds: green ≥80%, yellow 50–79%, red <50%.
  */
 
+import {
+  GINA_ASTHMA_ATTRIBUTION,
+  GINA_ASTHMA_DISCLAIMER,
+  GINA_PEF_GREEN_MIN_PERCENT,
+  GINA_PEF_YELLOW_MIN_PERCENT,
+} from './gina-asthma';
+
 export type PefZone = 'green' | 'yellow' | 'red';
 
-export const PEF_ZONE_GREEN_MIN_PERCENT = 80;
-export const PEF_ZONE_YELLOW_MIN_PERCENT = 50;
+export const PEF_ZONE_GREEN_MIN_PERCENT = GINA_PEF_GREEN_MIN_PERCENT;
+export const PEF_ZONE_YELLOW_MIN_PERCENT = GINA_PEF_YELLOW_MIN_PERCENT;
 
-export const PEF_ZONE_DISCLAIMER =
-  'Зоны ПСВ носят справочный характер по образцу GINA. Пороги и план действий определяет лечащий врач.';
+export const PEF_ZONE_DISCLAIMER = GINA_ASTHMA_DISCLAIMER;
 
-export const ASTHMA_GINA_ATTRIBUTION =
-  'Ориентиры по контролю астмы основаны на публичных рекомендациях Global Initiative for Asthma (GINA). ' +
-  'Полный отчёт: https://ginasthma.org/reports/';
+export const ASTHMA_GINA_ATTRIBUTION = GINA_ASTHMA_ATTRIBUTION;
 
 export function parsePefNumeric(raw: string | number | null | undefined): number | null {
   if (typeof raw === 'number') {

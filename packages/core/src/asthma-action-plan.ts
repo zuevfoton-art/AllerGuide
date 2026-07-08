@@ -1,4 +1,5 @@
 import { parsePefNumeric } from './pef-zones';
+import { GINA_ASTHMA_DISCLAIMER } from './gina-asthma';
 
 export interface AsthmaActionPlan {
   v: 1;
@@ -10,8 +11,7 @@ export interface AsthmaActionPlan {
   clinicalNotes: string;
 }
 
-export const ASTHMA_ACTION_PLAN_DISCLAIMER =
-  'План действий при астме носит информационный характер. Схему лечения и пороги определяет лечащий врач.';
+export const ASTHMA_ACTION_PLAN_DISCLAIMER = GINA_ASTHMA_DISCLAIMER;
 
 export function createDefaultAsthmaActionPlan(): AsthmaActionPlan {
   return {
