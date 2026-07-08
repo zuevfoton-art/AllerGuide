@@ -34,12 +34,23 @@ export const CONDITION_OPTION_ALLERGEN_MAP: Partial<
   animal: {
     'cat-dander': 'cat-dander',
     'dog-dander': 'dog-dander',
+    rodent: 'rodent',
+    bird: 'bird',
+    horse: 'horse',
+    rabbit: 'rabbit',
   },
   insect: {
-    bee: 'insect-stings',
-    wasp: 'insect-stings',
-    hornet: 'insect-stings',
-    mosquito: 'insect-stings',
+    bee: 'bee-venom',
+    wasp: 'wasp-venom',
+    hornet: 'hornet-venom',
+    mosquito: 'mosquito',
+  },
+  drug: {
+    penicillin: 'penicillin',
+    aspirin: 'aspirin',
+    nsaid: 'nsaid',
+    cephalosporins: 'cephalosporins',
+    paracetamol: 'paracetamol',
   },
 };
 
@@ -49,17 +60,39 @@ export const CONDITION_OPTION_POLLEN_TAXON_MAP: Partial<
 > = {
   pollinosis: {
     alder: 'alder_pollen',
+    hazel: 'hazel_pollen',
     'birch-pollen': 'birch_pollen',
+    oak: 'oak_pollen',
+    maple: 'maple_pollen',
+    ash: 'ash_pollen',
+    willow: 'willow_pollen',
+    poplar: 'poplar_pollen',
     timothy: 'grass_pollen',
     meadow: 'grass_pollen',
     fescue: 'grass_pollen',
     'rye-grass': 'rye_pollen',
     raggrass: 'grass_pollen',
     'mugwort-pollen': 'mugwort_pollen',
+    saltwort: 'saltwort_pollen',
     'ragweed-pollen': 'ragweed_pollen',
-    oak: 'oak_pollen',
   },
 };
+
+/** Pollinosis sub-options with calendar/Open-Meteo taxon but no dedicated allergen row. */
+export const CALENDAR_ONLY_POLLEN_OPTION_IDS = new Set([
+  'alder',
+  'hazel',
+  'oak',
+  'maple',
+  'ash',
+  'willow',
+  'poplar',
+  'saltwort',
+]);
+
+export function isCalendarOnlyPollenOption(optionId: string): boolean {
+  return CALENDAR_ONLY_POLLEN_OPTION_IDS.has(normalizeConditionOptionId('pollinosis', optionId));
+}
 
 /** Legacy option ids kept for backward compatibility with stored UI selections. */
 export const LEGACY_CONDITION_OPTION_ALIASES: Partial<

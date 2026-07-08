@@ -13,7 +13,15 @@ export type OpenMeteoPollenTaxonId =
   | 'ragweed_pollen';
 
 /** Calendar-only taxa (no Open-Meteo hourly key, used in regional season tables). */
-export type CalendarPollenTaxonId = 'oak_pollen' | 'rye_pollen';
+export type CalendarPollenTaxonId =
+  | 'oak_pollen'
+  | 'rye_pollen'
+  | 'hazel_pollen'
+  | 'maple_pollen'
+  | 'ash_pollen'
+  | 'willow_pollen'
+  | 'poplar_pollen'
+  | 'saltwort_pollen';
 
 export type PollenTaxonId = OpenMeteoPollenTaxonId | CalendarPollenTaxonId;
 
@@ -45,6 +53,31 @@ export const POLLEN_TAXA: PollenTaxon[] = [
     labelRu: 'Дуб',
   },
   {
+    id: 'hazel_pollen',
+    allergenId: 'hazelnut',
+    labelRu: 'Лещина',
+  },
+  {
+    id: 'maple_pollen',
+    allergenId: 'birch-pollen',
+    labelRu: 'Клён',
+  },
+  {
+    id: 'ash_pollen',
+    allergenId: 'birch-pollen',
+    labelRu: 'Ясень',
+  },
+  {
+    id: 'willow_pollen',
+    allergenId: 'birch-pollen',
+    labelRu: 'Ива',
+  },
+  {
+    id: 'poplar_pollen',
+    allergenId: 'birch-pollen',
+    labelRu: 'Тополь',
+  },
+  {
     id: 'grass_pollen',
     allergenId: 'grass-pollen',
     labelRu: 'Тимофеевка',
@@ -60,6 +93,11 @@ export const POLLEN_TAXA: PollenTaxon[] = [
     allergenId: 'mugwort-pollen',
     labelRu: 'Полынь',
     openMeteoHourlyKey: 'mugwort_pollen',
+  },
+  {
+    id: 'saltwort_pollen',
+    allergenId: 'mugwort-pollen',
+    labelRu: 'Лебеда',
   },
   {
     id: 'olive_pollen',
