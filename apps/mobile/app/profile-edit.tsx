@@ -25,6 +25,7 @@ import {
 } from '@/src/services/emergency-contact-service';
 import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
@@ -120,7 +121,7 @@ export default function ProfileEditScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('profiles.eyebrow')}</Text>
+          <ScreenEyebrow section={t('profiles.eyebrow')} />
           <Text style={ui.docTitle}>{t('profileEdit.title')}</Text>
           <Text style={ui.docMeta}>{t('profileEdit.subtitle')}</Text>
         </View>

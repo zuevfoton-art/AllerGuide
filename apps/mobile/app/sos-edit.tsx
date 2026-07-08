@@ -2,6 +2,7 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
@@ -191,7 +192,7 @@ export default function SosEditScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('sosEdit.eyebrow')}</Text>
+          <ScreenEyebrow section={t('sosEdit.eyebrow')} />
           <Text style={ui.docTitle}>{t('sosEdit.title')}</Text>
           <Text style={ui.docMeta}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
         </View>

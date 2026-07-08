@@ -13,6 +13,7 @@ import {
   type AsitRoute,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -100,7 +101,7 @@ export default function AsitCourseScreen() {
             <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={ui.docLabel}>AllerGuide · {t('asit.eyebrow')}</Text>
+            <ScreenEyebrow section={t('asit.eyebrow')} />
             <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
           </View>
         </View>
@@ -118,7 +119,7 @@ export default function AsitCourseScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('asit.eyebrow')}</Text>
+          <ScreenEyebrow section={t('asit.eyebrow')} />
           <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
           <Text style={ui.docMeta}>{t('asit.courseSubtitle')}</Text>
         </View>

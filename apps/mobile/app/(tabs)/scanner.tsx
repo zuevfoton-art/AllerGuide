@@ -7,6 +7,7 @@ import type { ScanResult } from '@allerguide/ai';
 import { computeScanTrends, formatDiaryDate, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
@@ -355,7 +356,7 @@ export default function ScannerScreen() {
       refreshing={refreshing}>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('scanner.eyebrow')}</Text>
+          <ScreenEyebrow section={t('scanner.eyebrow')} />
           <Text style={ui.docTitle}>{t('scanner.title')}</Text>
           <Text style={ui.docMeta}>{t('scanner.subtitle')}</Text>
         </View>

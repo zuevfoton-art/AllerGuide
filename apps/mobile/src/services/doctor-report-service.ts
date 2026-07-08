@@ -29,6 +29,7 @@ import {
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
+import { doctorReportPdfFooterRu, doctorReportTitleRu } from '@/src/constants/brand';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
@@ -198,7 +199,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
 
   const html = `
     <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
-      <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">Отчёт AllerGuide для врача</h1>
+      <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">${doctorReportTitleRu()}</h1>
       <p style="font-size:13px;color:${c.head};font-weight:700;">${DOCTOR_REPORT_TITLE}</p>
       <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
       <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
@@ -217,6 +218,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${passportHtml}
       <hr style="border:none;border-top:1px solid ${c.border};" />
       <p style="font-size:12px;color:${c.muted};">Информация носит рекомендательный характер и не является медицинским заключением.</p>
+      <p style="font-size:11px;color:${c.muted};">${doctorReportPdfFooterRu()}</p>
     </body></html>`;
 
   if (Platform.OS === 'web') {

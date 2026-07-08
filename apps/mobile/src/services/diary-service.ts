@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
+import { doctorReportPdfFooterRu, doctorReportTitleRu } from '@/src/constants/brand';
 import { formatDiaryDate, formatDiaryEntrySummary } from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
 import type { DiaryEntry, Profile } from '@/src/types';
@@ -64,7 +65,7 @@ export async function generateDoctorPdf(profileId: number) {
   const entries = db.getAllSync<DiaryEntry>('SELECT * FROM diary_entries WHERE profileId = ? ORDER BY createdAt DESC', [profileId]);
   const html = `
     <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
-      <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">Отчёт AllerGuide для врача</h1>
+      <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">${doctorReportTitleRu()}</h1>
       <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
       <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
       <p style="font-size:12px;color:${c.muted};">Отчёт сформирован пользователем/родителем на основе самостоятельно введённых данных и не является медицинской документацией.</p>
@@ -77,6 +78,7 @@ export async function generateDoctorPdf(profileId: number) {
         .join('')}
       <hr style="border:none;border-top:1px solid ${c.border};" />
       <p style="font-size:12px;color:${c.muted};">Информация в приложении носит рекомендательный и справочный характер и не является медицинским заключением, диагнозом или назначением лечения.</p>
+      <p style="font-size:11px;color:${c.muted};">${doctorReportPdfFooterRu()}</p>
     </body></html>`;
 
   if (Platform.OS === 'web') {

@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -18,7 +19,7 @@ export default function MarketScreen() {
     <Screen>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('market.eyebrow')}</Text>
+          <ScreenEyebrow section={t('market.eyebrow')} />
           <Text style={ui.docTitle}>{t('market.title')}</Text>
           <Text style={ui.docMeta}>{t('market.subtitle')}</Text>
         </View>

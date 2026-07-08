@@ -8,6 +8,7 @@ import {
   type FoodDrugRegistry,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -89,7 +90,7 @@ export default function FoodDrugRegistryScreen() {
             <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={ui.docLabel}>AllerGuide · {t('foodDrug.eyebrow')}</Text>
+            <ScreenEyebrow section={t('foodDrug.eyebrow')} />
             <Text style={ui.docTitle}>{t('foodDrug.registryTitle')}</Text>
           </View>
         </View>
@@ -107,7 +108,7 @@ export default function FoodDrugRegistryScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('foodDrug.eyebrow')}</Text>
+          <ScreenEyebrow section={t('foodDrug.eyebrow')} />
           <Text style={ui.docTitle}>{t('foodDrug.registryTitle')}</Text>
           <Text style={ui.docMeta}>{t('foodDrug.registrySubtitle')}</Text>
         </View>

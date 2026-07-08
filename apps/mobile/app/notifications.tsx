@@ -3,6 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { formatReminderClock } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
@@ -244,7 +245,7 @@ export default function NotificationsScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('notifications.eyebrow')}</Text>
+          <ScreenEyebrow section={t('notifications.eyebrow')} />
           <Text style={ui.docTitle}>{t('notifications.title')}</Text>
           <Text style={ui.docMeta}>{t('notifications.subtitle')}</Text>
         </View>

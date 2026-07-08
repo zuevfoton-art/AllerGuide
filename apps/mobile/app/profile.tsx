@@ -6,6 +6,7 @@ import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
@@ -86,7 +87,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('profiles.eyebrow')}</Text>
+          <ScreenEyebrow section={t('profiles.eyebrow')} />
           <Text testID="profile-screen-title" style={ui.docTitle}>{t('profiles.title')}</Text>
           <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
         </View>
