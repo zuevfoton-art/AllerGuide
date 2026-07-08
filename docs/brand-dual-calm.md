@@ -105,8 +105,8 @@ flowchart LR
 |------|-----|------------|--------|
 | **P3.0** | этот PR | `brand-dual-calm.md`, cross-link в rollout, dual palette в `brand-preview.html` | ✅ |
 | **P3.1** | этот PR | `calm.*` tokens, `info` → blue, `getCalmGradient()` | ✅ |
-| **P3.2** | след. | Onboarding waves, home wellness, about hero — ambient blue | ☐ |
-| **P3.3** | след. | Tab pill `calmWash`, `GlassCard variant="calm"` | ☐ |
+| **P3.2** | этот PR | Onboarding waves, home wellness + hero — ambient blue | ✅ |
+| **P3.3** | след. | Tab pill `calmWash`, `GlassCard variant="calm"` (остальные экраны) | ☐ |
 | **P3.4** | опц. | Store screenshots, `design-mockup.html` sync | ☐ |
 | **P3.5** | опц. | QA checklist: accent teal + calm blue | ☐ |
 
