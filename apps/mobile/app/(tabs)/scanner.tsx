@@ -474,14 +474,14 @@ export default function ScannerScreen() {
           testID="scanner-result"
           style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
           <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
-            {displayResult.verdict}
+            {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
           </Text>
           {displayResult.productName ? <Text style={styles.productName}>{displayResult.productName}</Text> : null}
           <Text style={styles.reason}>{displayResult.reason}</Text>
           {displayResult.matches?.length > 0 ? (
             <View style={styles.matchesBadge}>
               <Text style={styles.matchesText}>
-                {t('scanner.matches')} {displayResult.matches.join(', ')}
+                {t('scanner.claroMatches', { items: displayResult.matches.join(', ') })}
               </Text>
             </View>
           ) : null}

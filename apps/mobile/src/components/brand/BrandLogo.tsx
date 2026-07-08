@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { BrandMark } from '@/src/components/brand/BrandMark';
+import { useTranslation } from '@/src/store/locale-store';
 
 type BrandLogoProps = {
   size?: number;
@@ -18,6 +19,7 @@ export function BrandLogo({
   style,
 }: BrandLogoProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme, size), [theme, size]);
 
   if (!showWordmark) {
@@ -37,7 +39,7 @@ export function BrandLogo({
           <Text style={styles.wordClaro}>‑Claro</Text>
         </View>
       </View>
-      {showEndorser ? <Text style={styles.endorser}>an Aclearo app</Text> : null}
+      {showEndorser ? <Text style={styles.endorser}>{t('brand.endorser')}</Text> : null}
     </View>
   );
 }

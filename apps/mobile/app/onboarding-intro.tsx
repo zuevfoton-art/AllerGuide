@@ -116,7 +116,7 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number) {
   return StyleSheet.create({
     root: {
       flex: 1,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.bg,
     },
     safe: {
       flex: 1,

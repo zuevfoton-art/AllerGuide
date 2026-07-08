@@ -197,8 +197,8 @@ export default function MapScreen() {
         <>
           {ADAIR_CLINICS.map((clinic) => (
             <GlassCard key={clinic.id} style={styles.card}>
-              <View style={[styles.cardIcon, { backgroundColor: `${theme.colors.purple}18` }]}>
-                <Ionicons name="medical" size={22} color={theme.colors.purple} />
+              <View style={[styles.cardIcon, { backgroundColor: `${theme.colors.accent}18` }]}>
+                <Ionicons name="medical" size={22} color={theme.colors.accent} />
               </View>
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{clinic.name}</Text>

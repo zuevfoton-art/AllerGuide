@@ -102,8 +102,8 @@ export const lightColors: ThemeColors = {
   teal: '#2A9D8F',
   tealLight: '#E6F6F4',
   surfaceMuted: '#F1F5F9',
-  info: '#0369A1',
-  infoLight: '#F0F9FF',
+  info: '#1F6B62',
+  infoLight: '#E6F6F4',
 };
 
 export const darkColors: ThemeColors = {
@@ -150,8 +150,8 @@ export const darkColors: ThemeColors = {
   teal: '#3DB8A8',
   tealLight: '#134E48',
   surfaceMuted: '#1E293B',
-  info: '#38BDF8',
-  infoLight: '#0C4A6E',
+  info: '#3DB8A8',
+  infoLight: '#134E48',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {

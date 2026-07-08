@@ -38,6 +38,7 @@ const ru: LocaleMessages = {
   },
   brand: {
     productName: 'A-Claro',
+    endorser: 'приложение Aclearo',
   },
   auth: {
     loginTitle: 'Вход',
@@ -252,6 +253,8 @@ const ru: LocaleMessages = {
     menuPlaceholder: 'Введите состав блюда или меню…',
     labelPlaceholder: 'Состав с упаковки лекарства или косметики…',
     matches: 'Совпадения',
+    claroVerdict: 'Claro: {{verdict}}',
+    claroMatches: 'Claro: {{items}}',
     crossMatches: 'Перекрёстные',
     traceMatches: 'Следы (may contain)',
     reportIncorrect: 'Сообщить о неточности',

@@ -42,6 +42,8 @@ export type LocaleMessages = {
   };
   brand: {
     productName: string;
+    /** Co-brand lockup under wordmark, e.g. «приложение Aclearo» */
+    endorser: string;
   };
   auth: {
     loginTitle: string;
@@ -254,6 +256,10 @@ export type LocaleMessages = {
     productPlaceholder: string;
     menuPlaceholder: string;
     matches: string;
+    /** Branded verdict line, e.g. «Claro: …» */
+    claroVerdict: string;
+    /** Branded matches line, e.g. «Claro: …» */
+    claroMatches: string;
     crossMatches: string;
     traceMatches: string;
     reportIncorrect: string;
