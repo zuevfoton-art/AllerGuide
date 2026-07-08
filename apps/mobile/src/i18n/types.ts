@@ -501,6 +501,7 @@ export type LocaleMessages = {
     subtitleSelfStep: string;
     subtitleChildStep: string;
     subtitleDefault: string;
+    stepProgress: string;
     nameLabel: string;
     namePlaceholder: string;
     birthYearLabel: string;
@@ -512,8 +513,9 @@ export type LocaleMessages = {
     profileChildLocked: string;
     allergensLabel: string;
     conditionsLabel: string;
+    conditionsQuestion: string;
+    conditionsQuestionChild: string;
     conditionsHint: string;
-    conditionsOther: string;
     consent: string;
     confirmationLabel: string;
     confirmationHint: string;
@@ -521,6 +523,8 @@ export type LocaleMessages = {
     confirmationIge: string;
     confirmationClinician: string;
     contactsLabel: string;
+    next: string;
+    back: string;
     saveProfile: string;
     nextChild: string;
     disclaimer: string;
