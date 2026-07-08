@@ -281,7 +281,7 @@ flowchart LR
 | `grass-pollen` | Пыльца злаков | Open-Meteo `grass_pollen` |
 | `ragweed-pollen` | Пыльца амброзии | Open-Meteo `ragweed_pollen` |
 | `mugwort-pollen` | Пыльца полыни | Open-Meteo `mugwort_pollen` |
-| `dust-mites` | Пыль клещей | — |
+| `dust-mites` | Пылевые клещи | — |
 | `house-dust` | Бытовая пыль | — |
 | `cat-dander`, `dog-dander` | Шерсть кошек / собак | — |
 | `mold` | Плесень | — |

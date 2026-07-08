@@ -270,7 +270,7 @@ export const ALLERGENS: AllergenRecord[] = [
   },
   {
     id: 'dust-mites',
-    name: 'Пыль клещей',
+    name: 'Пылевые клещи',
     category: 'environmental',
     popular: true,
     keywords: ['клещ', 'домашняя пыль'],

@@ -71,7 +71,7 @@ export const GOLDEN_SCANNER_SCENARIOS: GoldenScannerScenario[] = [
       const result = runMockScan({
         mode: 'product',
         text: 'креветки',
-        profile: { allergies: JSON.stringify(['Пыль клещей']) },
+        profile: { allergies: JSON.stringify(['Пылевые клещи']) },
       });
       return result.crossMatches.length > 0 ? { passed: true } : { passed: false, message: 'no cross match' };
     },

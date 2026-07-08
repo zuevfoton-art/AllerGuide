@@ -23,7 +23,7 @@ const LEGACY_ALLERGEN_NAMES = [
   'Кунжут',
   'Пыльца берёзы',
   'Пыльца амброзии',
-  'Пыль клещей',
+  'Пылевые клещи',
   'Шерсть кошек',
   'Шерсть собак',
   'Пенициллин',
@@ -68,7 +68,7 @@ describe('allergen database', () => {
   });
 
   it('includes phase-1 high-risk cross reactions', () => {
-    const dustMites = findAllergenByName('Пыль клещей');
+    const dustMites = findAllergenByName('Пылевые клещи');
     expect(dustMites).toBeDefined();
     const matches = getCrossReactionsFor(dustMites!.id);
     const seafood = matches.find((item) => item.allergen.name === 'Морепродукты');

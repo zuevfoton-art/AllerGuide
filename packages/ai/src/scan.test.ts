@@ -34,7 +34,7 @@ describe('runMockScan', () => {
   });
 
   it('elevates risk for high cross-reactions such as dust mites and seafood', () => {
-    const dustProfile = { allergies: JSON.stringify(['Пыль клещей']) };
+    const dustProfile = { allergies: JSON.stringify(['Пылевые клещи']) };
     const result = runMockScan({ mode: 'product', text: 'креветки, рис', profile: dustProfile });
     expect(result.crossMatches.length).toBeGreaterThan(0);
     expect(result.level).toBe('medium');
