@@ -54,7 +54,7 @@
 | Симптомы | reactionType в еде/укусах не в SNOMED pipeline | P1 |
 | ICD/SNOMED | 24 аллергена без crosswalk | P2 |
 | Профиль | Нет дебюта, хронологии, фенотипов | P0 (следующий этап) |
-| FR | FR-PROF-02 всё ещё «10 типов» | P1 (док) |
+| FR | FR-PROF-02: 11 типов + urticaria | ✅ Done (Phase 5) |
 
 ---
 
@@ -237,10 +237,10 @@ type ClinicalPhenotypeId =
 
 | ID | Задача |
 |----|--------|
-| 5.1 | Обновить FR-PROF-02: 11 типов + urticaria |
-| 5.2 | Матрица S1–S10 в `clinical-features-raaci.md` (+ urticaria, phenotypes) |
-| 5.3 | QA checklist: onboarding history, phenotype card, PDF |
-| 5.4 | `pnpm rc-gate` |
+| 5.1 | Обновить FR-PROF-02: 11 типов + urticaria | ✅ Done |
+| 5.2 | Матрица S1–S10 в `clinical-features-raaci.md` (+ urticaria, phenotypes) | ✅ Done |
+| 5.3 | QA checklist: onboarding history, phenotype card, PDF | ✅ Done |
+| 5.4 | `pnpm rc-gate` | ✅ Done |
 
 ---
 
