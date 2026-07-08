@@ -7,15 +7,25 @@ type GlassCardProps = PropsWithChildren<{
   style?: ViewStyle;
   padded?: boolean;
   testID?: string;
+  /** Medical Calm ambient surface — calmWash background */
+  variant?: 'default' | 'calm';
 }>;
 
 /** Clinical Calm card surface (formerly GlassCard). */
-export function GlassCard({ children, style, padded = true, testID }: GlassCardProps) {
+export function GlassCard({
+  children,
+  style,
+  padded = true,
+  testID,
+  variant = 'default',
+}: GlassCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <View testID={testID} style={[styles.card, padded && styles.padded, style]}>
+    <View
+      testID={testID}
+      style={[styles.card, variant === 'calm' && styles.calm, padded && styles.padded, style]}>
       {children}
     </View>
   );
@@ -31,6 +41,10 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.border,
       ...(shadows.sm as object),
+    },
+    calm: {
+      backgroundColor: colors.calmWash,
+      borderColor: colors.calmMist,
     },
     padded: {
       padding: space[4],

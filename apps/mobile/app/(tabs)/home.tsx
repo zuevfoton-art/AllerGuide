@@ -116,7 +116,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={styles.hero}>
+      <View style={styles.heroCalm}>
         <Text style={ui.docTitle}>{t('home.today')}</Text>
         <Text style={ui.docMeta}>
           {todayLabel}
@@ -126,7 +126,7 @@ export default function HomeScreen() {
 
       <ProfileSwitcher />
 
-      <GlassCard>
+      <GlassCard variant="calm">
         <View style={ui.cardHead}>
           <Text style={ui.cardTitle}>{t('home.wellnessTitle')}</Text>
           <View style={styles.cardHeadRight}>
@@ -266,14 +266,22 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },
-    hero: { gap: 4 },
+    heroCalm: {
+      gap: 4,
+      backgroundColor: colors.calmWash,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      borderColor: colors.calmMist,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
     skeletonWrap: { gap: 10, paddingVertical: 12 },
     cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     heroKpiLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.text,
+      color: colors.head,
     },
     metaRow: {
       flexDirection: 'row',
