@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AllerGuide: индекс самочувствия, дневник и источники данных</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --text: #1a1a2e;
+      --muted: #5c6370;
+      --border: #d8dee4;
+      --accent: #0d6e6e;
+      --code-bg: #f0f3f6;
+      --table-stripe: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 2rem 1rem 4rem;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 1.75rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+    h2 { font-size: 1.35rem; margin-top: 2.5rem; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
+    h3 { font-size: 1.1rem; margin-top: 1.75rem; }
+    h4, h5 { font-size: 1rem; margin-top: 1.25rem; }
+    p { margin: 0.75rem 0; }
+    a { color: var(--accent); }
+    strong { font-weight: 600; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    code { background: var(--code-bg); padding: 0.15em 0.4em; border-radius: 4px; font-size: 0.9em; }
+    pre:not(.mermaid) { background: var(--code-bg); padding: 1rem; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); }
+    pre code { background: none; padding: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: #e8f4f4; font-weight: 600; }
+    tr:nth-child(even) { background: var(--table-stripe); }
+    blockquote { margin: 1rem 0; padding: 0.75rem 1rem; border-left: 4px solid var(--accent); background: #eef7f7; color: var(--muted); }
+    ul, ol { padding-left: 1.5rem; }
+    li { margin: 0.35rem 0; }
+    .mermaid { margin: 1.5rem 0; text-align: center; background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+    .doc-footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); font-style: italic; }
+    @media print {
+      body { background: white; padding: 0; }
+      h2 { page-break-after: avoid; }
+      table { page-break-inside: avoid; }
+    }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
+  </script>
+</head>
+<body>
+  <div class="container">
+<h1>AllerGuide: индекс самочувствия, дневник и источники данных</h1>
+<p><strong>Документ для врача-аллерголога / иммунолога</strong></p>
+<p>Версия описания: соответствует коду приложения AllerGuide (ветка <code>main</code>, веса индекса <code>beta-1.0</code>).</p>
+<hr>
+<h2>1. Назначение и ограничения</h2>
+<p>AllerGuide — <strong>инструмент поддержки решений</strong> (decision support) для самонаблюдения при аллергических заболеваниях. Приложение <strong>не является медицинским изделием</strong> по EU MDR 2017/745 и <strong>не ставит диагноз</strong>, не назначает и не корректирует лечение.</p>
+<table>
+<thead>
+<tr>
+<th>Компонент</th>
+<th>Что делает</th>
+<th>Чего не делает</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Индекс самочувствия</strong></td>
+<td>Агрегирует данные среды и дневника в числовую оценку 5–100</td>
+<td>Не заменяет клиническую оценку тяжести</td>
+</tr>
+<tr>
+<td><strong>Дневник</strong></td>
+<td>Фиксирует наблюдения пациента в структурированном виде</td>
+<td>Не является медицинской документацией</td>
+</tr>
+<tr>
+<td><strong>Сканер состава</strong></td>
+<td>Эвристическая проверка этикетки по профилю аллергенов</td>
+<td>Не гарантирует отсутствие скрытых или следовых аллергенов</td>
+</tr>
+<tr>
+<td><strong>PDF-отчёт для врача</strong></td>
+<td>Сводка записей дневника за выбранный период</td>
+<td>Отражает только то, что ввёл пользователь</td>
+</tr>
+</tbody></table>
+<p><strong>Важно для интерпретации:</strong> веса индекса находятся в <strong>бета-калибровке</strong> и могут изменяться после клинической валидации (целевая корреляция с шкалами ACT и ARIA-lite: коэффициент Пирсона ρ ≥ 0,5).</p>
+<p>При анафилаксии или затруднённом дыхании пациенту рекомендуется немедленно вызвать экстренную помощь (103 / 112).</p>
+<hr>
+<h2>2. Индекс самочувствия</h2>
+<h3>2.1. Общий принцип</h3>
+<p>Индекс — <strong>субтрактивная модель</strong>: от максимума (100 баллов) вычитаются штрафы за факторы риска. Итоговое значение ограничено диапазоном <strong>5–100</strong>.</p>
+<pre><code>Индекс = min(100, max(5, 100 − Σ штрафов))
+</code></pre>
+<p>Чем <strong>выше</strong> индекс, тем <strong>благоприятнее</strong> совокупная картина по учтённым факторам. Индекс отражает <strong>контекст самонаблюдения</strong>, а не объективную тяжесть заболевания.</p>
+<h3>2.2. Компоненты расчёта</h3>
+<table>
+<thead>
+<tr>
+<th>Компонент</th>
+<th>Источник данных</th>
+<th>Окно анализа</th>
+<th>Штрафы (версия <code>beta-1.0</code>)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Пыльца</strong></td>
+<td>Open-Meteo Air Quality API</td>
+<td>Текущие почасовые концентрации</td>
+<td>Низкий: 0; средний: 12; высокий: 28 <strong>за каждый</strong> релевантный таксон</td>
+</tr>
+<tr>
+<td><strong>Качество воздуха (EAQI)</strong></td>
+<td>Open-Meteo (<code>european_aqi</code>, <code>pm2_5</code>)</td>
+<td>Текущее значение</td>
+<td>≤20: 0; 21–50: 6; 51–75: 12; &gt;75: 20; нет данных: 5</td>
+</tr>
+<tr>
+<td><strong>Дневник</strong></td>
+<td>Записи пользователя</td>
+<td>Последние 7 календарных дней</td>
+<td>См. раздел 5</td>
+</tr>
+<tr>
+<td><strong>Клинические шкалы</strong></td>
+<td>Записи раздела «Шкала»</td>
+<td>Последняя оценка по каждой шкале</td>
+<td>Умеренный контроль: 8; тяжёлый: 16; неконтролируемый: 22</td>
+</tr>
+<tr>
+<td><strong>АСИТ</strong></td>
+<td>Записи раздела «АСИТ»</td>
+<td>Последние 30 дней</td>
+<td>Пропуск приёма: 4; сильная системная реакция: 12</td>
+</tr>
+<tr>
+<td><strong>Перекрёстные реакции</strong></td>
+<td>Справочник + профиль + пыльца</td>
+<td>При повышенной пыльце по профилю</td>
+<td>Высокий риск: 12; средний: 8; низкий: 4 (+ доп. 50% при совпадении с профилем)</td>
+</tr>
+</tbody></table>
+<h4>Классификация концентрации пыльцы</h4>
+<p>Пороги вдохновлены подходами EAACI / GA²LEN и заданы <strong>отдельно для каждого таксона</strong> (гран/м³). Примеры:</p>
+<table>
+<thead>
+<tr>
+<th>Таксон</th>
+<th>Низкий</th>
+<th>Средний</th>
+<th>Высокий</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Берёза (<code>birch_pollen</code>)</td>
+<td>&lt; 15</td>
+<td>15–79</td>
+<td>≥ 80</td>
+</tr>
+<tr>
+<td>Злаки (<code>grass_pollen</code>)</td>
+<td>&lt; 5</td>
+<td>5–19</td>
+<td>≥ 20</td>
+</tr>
+<tr>
+<td>Амброзия (<code>ragweed_pollen</code>)</td>
+<td>&lt; 10</td>
+<td>10–29</td>
+<td>≥ 30</td>
+</tr>
+<tr>
+<td>Прочие (по умолчанию)</td>
+<td>&lt; 10</td>
+<td>10–49</td>
+<td>≥ 50</td>
+</tr>
+</tbody></table>
+<p>В расчёт попадают только таксоны, <strong>релевантные профилю</strong> пациента (сопоставление через таксономию аллергенов приложения).</p>
+<h4>Перекрёстные реакции в индексе</h4>
+<p>При <strong>среднем или высоком</strong> уровне пыльцы по аллергену из профиля система проверяет справочник перекрёстных реакций (синдромы оральной аллергии, pollen-food). Штраф начисляется за потенциально значимые перекрёстные пары; при совпадении перекрёстного аллергена с профилем пациента штраф увеличивается на 50%.</p>
+<h3>2.3. Интерпретация значения индекса</h3>
+<table>
+<thead>
+<tr>
+<th>Диапазон</th>
+<th>Статус</th>
+<th>Клинический смысл (для пациента)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>≥ 80</td>
+<td>Хорошо</td>
+<td>Среда и дневник не указывают на повышенные риски</td>
+</tr>
+<tr>
+<td>60–79</td>
+<td>Умеренно</td>
+<td>Есть отдельные факторы внимания</td>
+</tr>
+<tr>
+<td>40–59</td>
+<td>Повышенное внимание</td>
+<td>Несколько факторов могут влиять на самочувствие</td>
+</tr>
+<tr>
+<td>&lt; 40</td>
+<td>Высокий риск</td>
+<td>Рекомендуется минимизировать триггеры и обратиться к врачу</td>
+</tr>
+</tbody></table>
+<h3>2.4. Уверенность в данных (confidence)</h3>
+<p>Помимо числового индекса отображается уровень <strong>уверенности в полноте данных</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Уровень</th>
+<th>Условие</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Высокая</strong></td>
+<td>Доступны данные среды (Open-Meteo) <strong>и</strong> (≥ 3 записей дневника за неделю <strong>или</strong> есть клинические шкалы)</td>
+</tr>
+<tr>
+<td><strong>Средняя</strong></td>
+<td>Доступны данные среды <strong>или</strong> ≥ 1 запись дневника за неделю</td>
+</tr>
+<tr>
+<td><strong>Низкая</strong></td>
+<td>Нет данных среды и мало записей дневника</td>
+</tr>
+</tbody></table>
+<h3>2.5. Поведение при недоступности данных среды</h3>
+<p>Если Open-Meteo недоступен, приложение <strong>не подставляет синтетические</strong> значения пыльцы и AQI. В этом случае:</p>
+<ul>
+<li>штрафы за пыльцу и AQI <strong>не начисляются</strong> (кроме фиксированного штрафа 5 за отсутствие AQI, если <code>envDataAvailable = false</code>);</li>
+<li>индекс рассчитывается <strong>только по дневнику</strong>, шкалам и АСИТ;</li>
+<li>пользователю показывается соответствующее предупреждение.</li>
+</ul>
+<h3>2.6. Сезонные оповещения</h3>
+<p>Помимо текущих концентраций учитывается <strong>региональный календарь пыльцы</strong> (Москва, Санкт-Петербург, Краснодар, Новосибирск, Екатеринбург и др.). Если текущий месяц совпадает с пиком сезона для аллергена из профиля, в рекомендации добавляется сезонное предупреждение (не влияет на числовой индекс напрямую).</p>
+<hr>
+<h2>3. Дневник самонаблюдения</h2>
+<h3>3.1. Назначение</h3>
+<p>Дневник предназначен для <strong>структурированной фиксации</strong> симптомов, триггеров, терапии и объективных измерений. Данные хранятся локально на устройстве пациента (SQLite) и могут синхронизироваться с сервером в зашифрованном виде.</p>
+<p>Каждая запись содержит:</p>
+<ul>
+<li><strong>тип раздела</strong> (например, «Симптомы», «Питание»);</li>
+<li><strong>структурированные ответы</strong> (JSON, версия схемы <code>v: 1</code>);</li>
+<li><strong>метку времени</strong> (<code>createdAt</code>).</li>
+</ul>
+<h3>3.2. Разделы дневника</h3>
+<table>
+<thead>
+<tr>
+<th>Раздел</th>
+<th>Клиническое содержание</th>
+<th>Ключевые поля</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Симптомы</strong></td>
+<td>Аллергические и сопутствующие проявления</td>
+<td>Симптом из справочника, свободное описание, выраженность 0–3, зоны поражения, время начала</td>
+</tr>
+<tr>
+<td><strong>Лекарство</strong></td>
+<td>Приём препаратов</td>
+<td>Название, дозировка, время, побочные реакции; предупреждение о непереносимости из паспорта SOS</td>
+</tr>
+<tr>
+<td><strong>Питание</strong></td>
+<td>Пищевые экспозиции</td>
+<td>Продукты, возможные аллергены, тип реакции (в т.ч. ОАС, ЖКТ, анафилаксия), источник записи</td>
+</tr>
+<tr>
+<td><strong>Триггер</strong></td>
+<td>Предполагаемые причины обострения</td>
+<td>Триггер, контекст, автоподстановка пыльцы / скана / ЛС за день</td>
+</tr>
+<tr>
+<td><strong>Кожа</strong></td>
+<td>Кожные проявления</td>
+<td>Зона, внешний вид, интенсивность зуда</td>
+</tr>
+<tr>
+<td><strong>Пикфлоуметрия</strong></td>
+<td>Объективный показатель при астме</td>
+<td>ПСВ (л/мин), время (утро/вечер), лучшее значение</td>
+</tr>
+<tr>
+<td><strong>Укус насекомого</strong></td>
+<td>Hymenoptera-аллергия</td>
+<td>Тип насекомого, тяжесть, местные/системные симптомы, адреналин</td>
+</tr>
+<tr>
+<td><strong>АСИТ</strong></td>
+<td>Соблюдение аллерген-специфической иммунотерапии</td>
+<td>Препарат, путь (SLIT/SCIT), фаза, соблюдение графика, реакции</td>
+</tr>
+<tr>
+<td><strong>Шкала</strong></td>
+<td>Валидированные клинические шкалы</td>
+<td>ARIA-lite, ACT, SCORAD-lite, UAS7</td>
+</tr>
+<tr>
+<td><strong>Визит к врачу</strong></td>
+<td>Планирование консультации</td>
+<td>Тип врача, дата, комментарий</td>
+</tr>
+<tr>
+<td><strong>Заметка</strong></td>
+<td>Произвольные наблюдения</td>
+<td>Заголовок, текст</td>
+</tr>
+</tbody></table>
+<h3>3.3. Кодирование симптомов</h3>
+<p>При выборе симптома из справочника или при анализе свободного текста система сопоставляет проявления с <strong>каталогом симптомов</strong>, содержащим:</p>
+<ul>
+<li>идентификатор симптома;</li>
+<li>русское наименование;</li>
+<li>код <strong>SNOMED CT</strong>;</li>
+<li>код <strong>МКБ-11</strong> (где применимо).</li>
+</ul>
+<p>Примеры:</p>
+<table>
+<thead>
+<tr>
+<th>Симптом</th>
+<th>SNOMED CT</th>
+<th>МКБ-11</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Заложенность носа</td>
+<td>68235000</td>
+<td>MD11.0 (аллергический ринит)</td>
+</tr>
+<tr>
+<td>Одышка / свистящее дыхание</td>
+<td>56018004</td>
+<td>CA23.0 (аллергическая астма)</td>
+</tr>
+<tr>
+<td>Крапивница</td>
+<td>126485001</td>
+<td>EB00</td>
+</tr>
+<tr>
+<td>Отёк (ангионевротический)</td>
+<td>41291007</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>В PDF-отчёте для врача коды отображаются в хронологии.</p>
+<h3>3.4. Шкала выраженности симптомов</h3>
+<p>Основная шкала: <strong>0–3</strong> (нет / лёгкая / умеренная / сильная). Устаревшая шкала 0–10 поддерживается для обратной совместимости и нормализуется при отображении.</p>
+<h3>3.5. Клинические шкалы в дневнике</h3>
+<table>
+<thead>
+<tr>
+<th>Шкала</th>
+<th>Назначение</th>
+<th>Диапазон</th>
+<th>Интерпретация уровня контроля</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ARIA-lite</strong></td>
+<td>Аллергический ринит (4 симптома × 0–3)</td>
+<td>0–12</td>
+<td>good / moderate / severe / uncontrolled</td>
+</tr>
+<tr>
+<td><strong>ACT</strong></td>
+<td>Контроль астмы (5 вопросов × 1–5)</td>
+<td>5–25</td>
+<td>good / moderate / severe / uncontrolled</td>
+</tr>
+<tr>
+<td><strong>SCORAD-lite</strong></td>
+<td>Атопический дерматит (упрощённо)</td>
+<td>—</td>
+<td>good / moderate / severe / uncontrolled</td>
+</tr>
+<tr>
+<td><strong>UAS7</strong></td>
+<td>Крапивница (сыпь + зуд)</td>
+<td>—</td>
+<td>good / moderate / severe / uncontrolled</td>
+</tr>
+</tbody></table>
+<p>Для профилей с астмой приложение может напоминать о прохождении <strong>ACT</strong> каждые 28 дней.</p>
+<p><strong>Последняя</strong> оценка по каждой шкале участвует в расчёте индекса самочувствия.</p>
+<h3>3.6. Аналитика дневника (7-дневное окно)</h3>
+<p>При расчёте индекса из дневника извлекаются:</p>
+<table>
+<thead>
+<tr>
+<th>Показатель</th>
+<th>Определение</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Дни с симптомами</strong></td>
+<td>Календарные дни с ≥ 1 записью «Симптомы»</td>
+</tr>
+<tr>
+<td><strong>Дни с триггерами</strong></td>
+<td>Календарные дни с ≥ 1 записью «Триггер»</td>
+</tr>
+<tr>
+<td><strong>Серия записей (streak)</strong></td>
+<td>Подряд идущие дни с любой записью, считая от сегодня назад</td>
+</tr>
+<tr>
+<td><strong>Корреляция на уровне дней</strong></td>
+<td>Если ≥ 50% дней с симптомами совпадают с днём питания / триггера / ЛС</td>
+</tr>
+<tr>
+<td><strong>Временная корреляция (±4 ч)</strong></td>
+<td>Связь записи «Симптомы» с «Питание», «Триггер» или «Лекарство» в окне ±4 часа</td>
+</tr>
+<tr>
+<td><strong>Аномалия «симптомы без триггера»</strong></td>
+<td>≥ 3 подряд календарных дня с симптомами, но без записи «Триггер»</td>
+</tr>
+</tbody></table>
+<p>Временная корреляция имеет <strong>приоритет</strong> над дневной при начислении штрафа.</p>
+<hr>
+<h2>4. Источники данных об аллергии и профиле пациента</h2>
+<p>В AllerGuide данные об аллергенах проходят <strong>многоуровневую нормализацию</strong>: внешние источники (этикетки, базы продуктов, API пыльцы) приводятся к <strong>единой канонической таксономии</strong>, на которой строятся профиль, сканер, индекс самочувствия и справочник перекрёстных реакций.</p>
+<pre class="mermaid">flowchart LR
+  subgraph input [Внешние источники]
+    U[Самоотчёт пациента]
+    EU[EU14 / FDA9]
+    OFF[Open Food Facts]
+    FAD[Food-Allergy-DB]
+    OM[Open-Meteo pollen]
+  end
+
+  subgraph norm [Нормализация]
+    A[allergen-aliases]
+    P[profile-allergens]
+    T[pollen-taxonomy]
+  end
+
+  subgraph core [Каноническая таксономия]
+    DB[(allergen-database\n46 аллергенов)]
+    CR[(cross-reactions\n44 пары)]
+  end
+
+  subgraph use [Использование]
+    PR[Профиль]
+    SC[Сканер]
+    WZ[Индекс самочувствия]
+    DY[Дневник / PDF]
+  end
+
+  U --> P
+  EU --> A
+  OFF --> A
+  FAD --> A
+  OM --> T
+  A --> DB
+  P --> DB
+  T --> DB
+  DB --> CR
+  DB --> PR
+  DB --> SC
+  CR --> SC
+  CR --> WZ
+  CR --> DY</pre>
+<h3>4.1. Профиль пациента</h3>
+<p>Профиль — <strong>первичный клинический контекст</strong> для всех алгоритмов. Хранится локально (SQLite) и при синхронизации — на сервере в зашифрованном виде.</p>
+<table>
+<thead>
+<tr>
+<th>Поле</th>
+<th>Формат</th>
+<th>Источник</th>
+<th>Роль в системе</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code>, <code>birthYear</code>, <code>type</code></td>
+<td>текст / число / <code>self</code> | <code>child</code></td>
+<td>Онбординг</td>
+<td>Идентификация; для детских профилей — проверка согласия</td>
+</tr>
+<tr>
+<td><code>allergies</code></td>
+<td>JSON-массив <strong>канонических id</strong> (<code>milk</code>, <code>birch-pollen</code>, …)</td>
+<td>Выбор из справочника</td>
+<td>База для сканера, индекса, перекрёстных реакций</td>
+</tr>
+<tr>
+<td><code>allergyConfirmations</code></td>
+<td>JSON: <code>{ &quot;allergenId&quot;: &quot;источник&quot; }</code></td>
+<td>Редактирование профиля</td>
+<td>Метаданные достоверности (не влияют на расчёт индекса)</td>
+</tr>
+</tbody></table>
+<p><strong>Нормализация при сохранении.</strong> Любое значение (старые русские названия вроде «Молоко» или id <code>milk</code>) проходит через <code>resolveAllergenId</code> и сохраняется как канонический id. Это обеспечивает совместимость со старыми данными и единообразие для сканера.</p>
+<p><strong>Дополнительные реестры (не в таблице <code>profiles</code>, но связаны с аллергией):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Реестр</th>
+<th>Содержание</th>
+<th>Использование</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>foodDrugRegistry</code></td>
+<td>Дополнительные исключаемые продукты, клинические заметки</td>
+<td>Расширяет список пищевых ограничений сверх профиля</td>
+</tr>
+<tr>
+<td><code>asitCourse</code></td>
+<td>Активный курс АСИТ (аллерген, препарат, маршрут SLIT/SCIT)</td>
+<td>Префилл раздела «АСИТ» в дневнике</td>
+</tr>
+<tr>
+<td><code>scan_history</code></td>
+<td>История сканирований (вердикт, совпадения, уровень риска)</td>
+<td>Контекст для раздела «Триггер» и «Питание»</td>
+</tr>
+</tbody></table>
+<h3>4.2. Канонический справочник аллергенов</h3>
+<p><strong>Источник истины:</strong> статический модуль <code>allergen-database.ts</code> в пакете <code>@allerguide/core</code>. Содержит <strong>46 аллергенов</strong>, дублируется в PostgreSQL (<code>catalog.allergens</code>) при сидировании для API и каталога продуктов.</p>
+<h4>Структура записи</h4>
+<table>
+<thead>
+<tr>
+<th>Поле</th>
+<th>Описание</th>
+<th>Клинический смысл</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>Стабильный идентификатор (<code>peanut</code>, <code>birch-pollen</code>)</td>
+<td>Ключ для профиля, БД, перекрёстных реакций</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>Русское отображаемое имя</td>
+<td>UI, PDF-отчёт</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td><code>food</code> / <code>environmental</code> / <code>medication</code> / <code>insect</code></td>
+<td>Фильтрация (напр. только пищевые — в рекомендациях сканера)</td>
+</tr>
+<tr>
+<td><code>popular</code></td>
+<td>Флаг «частый выбор»</td>
+<td>Быстрый выбор при онбординге</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>Массив строк для текстового поиска</td>
+<td>Сканер состава, OCR, ручной ввод</td>
+</tr>
+</tbody></table>
+<h4>Состав справочника по категориям</h4>
+<p><strong>Пищевые аллергены</strong> (основа для сканера и пищевого дневника):</p>
+<table>
+<thead>
+<tr>
+<th>Группа</th>
+<th>Примеры id / названия</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Молочные / мясные</td>
+<td><code>milk</code>, <code>goat-milk</code>, <code>beef</code>, <code>pork</code>, <code>chicken</code>, <code>eggs</code></td>
+</tr>
+<tr>
+<td>Орехи и бобовые</td>
+<td><code>peanut</code>, <code>tree-nuts</code>, <code>hazelnut</code>, <code>soy</code>, <code>lupin</code></td>
+</tr>
+<tr>
+<td>Рыба и морепродукты</td>
+<td><code>fish</code>, <code>other-fish</code>, <code>seafood</code></td>
+</tr>
+<tr>
+<td>Злаки</td>
+<td><code>wheat-gluten</code>, <code>rye</code>, <code>barley</code></td>
+</tr>
+<tr>
+<td>Фрукты и овощи (в т.ч. для OAS)</td>
+<td><code>apple</code>, <code>carrot</code>, <code>banana</code>, <code>kiwi</code>, <code>avocado</code>, <code>tomato</code>, <code>citrus</code>, <code>melon</code>, <code>celery</code>, <code>strawberry</code>, <code>chestnut</code></td>
+</tr>
+<tr>
+<td>Прочие</td>
+<td><code>sesame</code>, <code>mustard</code>, <code>honey</code>, <code>sulphites</code></td>
+</tr>
+</tbody></table>
+<p><strong>Экологические аллергены</strong> (пыльца, быт, животные):</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>Название</th>
+<th>Связь с мониторингом среды</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>birch-pollen</code></td>
+<td>Пыльца берёзы</td>
+<td>Open-Meteo <code>birch_pollen</code></td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td>Пыльца злаков</td>
+<td>Open-Meteo <code>grass_pollen</code></td>
+</tr>
+<tr>
+<td><code>ragweed-pollen</code></td>
+<td>Пыльца амброзии</td>
+<td>Open-Meteo <code>ragweed_pollen</code></td>
+</tr>
+<tr>
+<td><code>mugwort-pollen</code></td>
+<td>Пыльца полыни</td>
+<td>Open-Meteo <code>mugwort_pollen</code></td>
+</tr>
+<tr>
+<td><code>dust-mites</code></td>
+<td>Пыль клещей</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>house-dust</code></td>
+<td>Бытовая пыль</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>cat-dander</code>, <code>dog-dander</code></td>
+<td>Шерсть кошек / собак</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>mold</code></td>
+<td>Плесень</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>latex</code></td>
+<td>Латекс</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p><strong>Лекарственные:</strong> <code>penicillin</code>, <code>aspirin</code> (с расширенными алиасами классов НПВП, цефалоспоринов и т.д. в модуле пищевой/лекарственной аллергии).</p>
+<p><strong>Инсектные:</strong> <code>insect-stings</code> (пчёлы, осы, шершни — детализируются в разделе дневника «Укус насекомого»).</p>
+<h4>Популярные аллергены при онбординге</h4>
+<p>Отмечены флагом <code>popular: true</code>: молоко, яйца, арахис, орехи, рыба, пшеница/глютен, соя, пыльца берёзы, пыль клещей, пенициллин и др. — для ускорения первичного заполнения профиля без потери полноты справочника.</p>
+<h3>4.3. Подтверждение аллергии (источник верификации)</h3>
+<p>Для каждого аллергена в профиле может быть указан <strong>источник подтверждения</strong> — это <strong>метаданные качества данных</strong>, а не клинический фильтр алгоритмов:</p>
+<table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Отображение</th>
+<th>Клинический смысл</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>self_reported</code></td>
+<td>Самоотчёт</td>
+<td>Пациент указал аллергию без документального подтверждения в приложении (<strong>значение по умолчанию</strong>)</td>
+</tr>
+<tr>
+<td><code>specific_ige</code></td>
+<td>Специфический IgE</td>
+<td>Пациент отметил лабораторное подтверждение</td>
+</tr>
+<tr>
+<td><code>clinician</code></td>
+<td>Подтверждено врачом</td>
+<td>Пациент отметил подтверждение специалистом</td>
+</tr>
+</tbody></table>
+<p><strong>Важно для врача:</strong> статус подтверждения <strong>не изменяет</strong> чувствительность сканера, веса индекса или набор перекрёстных реакций. При интерпретации отчёта рекомендуется уточнять у пациента, какие аллергии подтверждены объективно.</p>
+<h3>4.4. Внешние словари и нормализация (allergen-aliases)</h3>
+<p>Внешние названия аллергенов <strong>не хранятся в профиле напрямую</strong> — они преобразуются в канонические id через цепочку алиасов (<code>regulatory-allergens.ts</code> + <code>allergen-aliases.ts</code>).</p>
+<h4>EU14 — Регламент ЕС 1169/2011, Приложение II</h4>
+<p>14 групп обязательных аллергенов на этикетке. Примеры маппинга:</p>
+<table>
+<thead>
+<tr>
+<th>Регуляторный термин</th>
+<th>Канонический id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cereals-containing-gluten</code>, <code>gluten</code></td>
+<td><code>wheat-gluten</code></td>
+</tr>
+<tr>
+<td><code>crustaceans</code>, <code>molluscs</code></td>
+<td><code>seafood</code></td>
+</tr>
+<tr>
+<td><code>eggs</code>, <code>egg</code></td>
+<td><code>eggs</code></td>
+</tr>
+<tr>
+<td><code>peanuts</code>, <code>peanut</code></td>
+<td><code>peanut</code></td>
+</tr>
+<tr>
+<td><code>tree-nuts</code>, <code>nuts</code></td>
+<td><code>tree-nuts</code></td>
+</tr>
+<tr>
+<td><code>milk</code>, <code>dairy</code></td>
+<td><code>milk</code></td>
+</tr>
+<tr>
+<td><code>soybeans</code>, <code>soy</code>, <code>soya</code></td>
+<td><code>soy</code></td>
+</tr>
+<tr>
+<td><code>celery</code>, <code>mustard</code>, <code>sesame</code>, <code>lupin</code></td>
+<td>одноимённые id</td>
+</tr>
+<tr>
+<td><code>sulphites</code>, <code>sulfites</code></td>
+<td><code>sulphites</code></td>
+</tr>
+</tbody></table>
+<h4>FDA FALCPA — Big 9 (США)</h4>
+<p>Покрывает молоко, яйца, рыбу, моллюски/ракообразные, орехи, арахис, пшеницу, сою, кунжут. Частично пересекается с EU14; при конфликте приоритет у объединённого словаря <code>REGULATORY_ALLERGEN_ALIASES</code>.</p>
+<h4>Open Food Facts (OFF)</h4>
+<p>Теги <code>allergens_tags</code> и <code>traces_tags</code> с языковыми префиксами (<code>en:milk</code>, <code>fr:gluten</code>). Нормализуются функцией <code>normalizeExternalAllergenTerm</code> (снятие префикса, приведение к slug). OFF даёт <strong>дополнительную детализацию</strong> (напр. <code>almonds</code>, <code>hazelnuts</code> → <code>tree-nuts</code> или <code>hazelnut</code>).</p>
+<h4>Food-Allergy-DB (импорт в каталог)</h4>
+<p>Открытый датасет <a href="https://github.com/alexf388/Food-Allergy-SQL-Database">alexf388/Food-Allergy-SQL-Database</a>:</p>
+<ul>
+<li><code>allergy.csv</code> — идентификаторы и английские названия аллергий;</li>
+<li><code>foodallergy.csv</code> — связь штрихкод ↔ аллергия;</li>
+<li><code>foodproduct.csv</code> — названия продуктов по штрихкодам.</li>
+</ul>
+<p>При импорте английские названия проходят <code>mapExternalAllergenIds</code> и записываются в <code>catalog.products.allergenTags</code> как канонические id. Источник помечается <code>source: &#39;food-allergy-db&#39;</code>.</p>
+<h4>Дополнительные алиасы</h4>
+<table>
+<thead>
+<tr>
+<th>Внешний термин</th>
+<th>Канонический id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lactose</code></td>
+<td><code>milk</code></td>
+</tr>
+<tr>
+<td><code>nut</code>, <code>shellfish</code></td>
+<td><code>tree-nuts</code>, <code>seafood</code></td>
+</tr>
+</tbody></table>
+<h3>4.5. Каталог продуктов и приоритет источников при сканировании</h3>
+<p>При сканировании штрихкода или состава продукт аллергены определяются из нескольких слоёв (в порядке убывания надёжности для данного штрихкода):</p>
+<table>
+<thead>
+<tr>
+<th>Приоритет</th>
+<th>Источник</th>
+<th>Поле / механизм</th>
+<th>Примечание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Локальный каталог</strong> (PostgreSQL <code>catalog.products</code>)</td>
+<td><code>allergenTags</code>, <code>traceTags</code></td>
+<td>Проверенные записи; приоритет при совпадении штрихкода</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Open Food Facts</strong></td>
+<td><code>allergens_tags</code>, <code>traces_tags</code></td>
+<td>Write-through кэш; обновляется при запросе</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Food-Allergy-DB</strong></td>
+<td>Импортированные связи штрихкод ↔ аллерген</td>
+<td>Базовое покрытие продуктов</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Текст состава</strong> (OCR / ручной ввод)</td>
+<td>Поиск по <code>keywords</code> справочника</td>
+<td>Прямые совпадения в ингредиентах</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Перекрёстные реакции</strong></td>
+<td>Справочник <code>CROSS_REACTIONS</code></td>
+<td>Если в составе есть продукт, перекрёстный к аллергену профиля</td>
+</tr>
+</tbody></table>
+<p><strong>Типы совпадений в сканере (scan-risk v2):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Тип (<code>kind</code>)</th>
+<th>Определение</th>
+<th>Пример</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>direct</code></td>
+<td>Аллерген профиля явно указан в составе или тегах</td>
+<td>Молоко в составе при аллергии на <code>milk</code></td>
+</tr>
+<tr>
+<td><code>cross</code></td>
+<td>Продукт из справочника перекрёстных реакций найден в тексте</td>
+<td>Яблоко при аллергии на <code>birch-pollen</code></td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td>Следы / «may contain» (RU/EN парсер)</td>
+<td>«Может содержать следы орехов»</td>
+</tr>
+<tr>
+<td><code>unknown</code></td>
+<td>Нераспознанные фразы из блока следов</td>
+<td>Требует ручной проверки этикетки</td>
+</tr>
+</tbody></table>
+<p>Уровень риска (<code>low</code> / <code>medium</code> / <code>high</code>) вычисляется клиническими правилами: прямое пищевое совпадение с профилем → <code>high</code>; OAS / pollen-food перекрёст → не выше <code>medium</code>; следы → <code>medium</code> при релевантности профилю.</p>
+<h3>4.6. Таксономия пыльцы и связь с профилем</h3>
+<p>Пыльцевые аллергены профиля сопоставляются с <strong>таксонами</strong> Open-Meteo и региональным календарём через <code>pollen-taxonomy.ts</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Таксон Open-Meteo / календаря</th>
+<th>Канонический allergen id</th>
+<th>Примечание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>birch_pollen</code></td>
+<td><code>birch-pollen</code></td>
+<td>Прямое соответствие</td>
+</tr>
+<tr>
+<td><code>grass_pollen</code></td>
+<td><code>grass-pollen</code></td>
+<td>Тимофеевка и злаковые</td>
+</tr>
+<tr>
+<td><code>ragweed_pollen</code></td>
+<td><code>ragweed-pollen</code></td>
+<td>Амброзия</td>
+</tr>
+<tr>
+<td><code>mugwort_pollen</code></td>
+<td><code>mugwort-pollen</code></td>
+<td>Полынь</td>
+</tr>
+<tr>
+<td><code>alder_pollen</code></td>
+<td>—</td>
+<td>Мониторинг без привязки к id профиля</td>
+</tr>
+<tr>
+<td><code>olive_pollen</code></td>
+<td>—</td>
+<td>Южные регионы</td>
+</tr>
+<tr>
+<td><code>oak_pollen</code> (только календарь)</td>
+<td><code>birch-pollen</code></td>
+<td>Перекрёстная чувствительность берёзовых</td>
+</tr>
+<tr>
+<td><code>rye_pollen</code> (только календарь)</td>
+<td><code>rye</code></td>
+<td>Пищевой и пыльцевой контекст</td>
+</tr>
+</tbody></table>
+<p><strong>Релевантность для индекса:</strong> штраф за пыльцу начисляется только если <code>profileRelevant = true</code>, т.е. соответствующий id есть в <code>profiles.allergies</code>.</p>
+<h3>4.7. Справочник перекрёстных реакций</h3>
+<h4>Происхождение и характер данных</h4>
+<p>Перекрёстные реакции — <strong>курируемый статический справочник</strong> в <code>@allerguide/core</code> (<code>cross-reactions/phase-1.ts</code>, <code>phase-2.ts</code>). Объединяется в массив <code>CROSS_REACTIONS</code> (<strong>44 направленные пары</strong>). Дублируется в PostgreSQL (<code>catalog.cross_reactions</code>) при сидировании.</p>
+<p><strong>Источники при формировании (клинико-биологический контекст):</strong></p>
+<ul>
+<li>литература по <strong>оральному аллергическому синдрому (OAS)</strong> и pollen-food syndrome;</li>
+<li>известные <strong>молекулярные семейства</strong> (PR-10 / Bet v 1, профилины, LTP, тропомиозин, парвальбумин, латекс-фруктовый синдром);</li>
+<li>данные о <strong>частоте клинических перекрёстных реакций</strong> (где указано — поле <code>clinicalFrequency</code>);</li>
+<li>экспертная ревизия консультативного совета AllerGuide / АДАИР (домен <code>cross-reactions</code> в medical advisory board).</li>
+</ul>
+<p>Подробная привязка к литературе, базам данных и молекулярным семействам — <strong>§4.7.1</strong>.</p>
+<p><strong>Справочник не является динамической базой IgE-кроссреактивности</strong> и не заменяет кожные пробы, BAT или молекулярную диагностику (компонентную IgE).</p>
+<h4>Структура записи перекрёстной реакции</h4>
+<table>
+<thead>
+<tr>
+<th>Поле</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>fromId</code>, <code>toId</code></td>
+<td>Пара канонических id (напр. <code>birch-pollen</code> → <code>apple</code>)</td>
+</tr>
+<tr>
+<td><code>risk</code></td>
+<td><code>high</code> / <code>medium</code> / <code>low</code> — ориентир клинической значимости</td>
+</tr>
+<tr>
+<td><code>syndrome</code></td>
+<td>Тип синдрома (см. таблицу ниже)</td>
+</tr>
+<tr>
+<td><code>protein</code></td>
+<td>Имя молекулы-носителя (напр. <code>Mal d 1</code>, <code>Der p 10</code>)</td>
+</tr>
+<tr>
+<td><code>clinicalFrequency</code></td>
+<td>Оценка частоты в литературе (напр. <code>40-60%</code>, <code>&gt;90%</code>)</td>
+</tr>
+<tr>
+<td><code>note</code></td>
+<td>Краткое пояснение на русском</td>
+</tr>
+</tbody></table>
+<h4>Типы синдромов (<code>syndrome</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Клиническое название</th>
+<th>Типичный механизм</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>oas</code></td>
+<td>Оральный аллергический синдром</td>
+<td>PR-10, часто сырьё; термолабильные</td>
+</tr>
+<tr>
+<td><code>pollen-food</code></td>
+<td>Пыльца–пища (профилины, LTP)</td>
+<td>Связь сенсибилизации к пыльце и пище</td>
+</tr>
+<tr>
+<td><code>latex-fruit</code></td>
+<td>Латекс-фруктовый синдром</td>
+<td>Хитиназы, Hev b</td>
+</tr>
+<tr>
+<td><code>tropomyosin</code></td>
+<td>Тропомиозин</td>
+<td>Домашняя пыль / клещи ↔ ракообразные; термостабилен</td>
+</tr>
+<tr>
+<td><code>legume</code></td>
+<td>Бобовые</td>
+<td>Вицилины, легумины (арахис ↔ соя)</td>
+</tr>
+<tr>
+<td><code>cereal</code></td>
+<td>Злаки</td>
+<td>Глютены, глиадины (пшеница ↔ рожь ↔ ячмень)</td>
+</tr>
+<tr>
+<td><code>animal-protein</code></td>
+<td>Белки животного происхождения</td>
+<td>Казеин, альбумин, овомукоид, парвальбумин</td>
+</tr>
+</tbody></table>
+<h4>Полный перечень пар по группам</h4>
+<p><strong>Фаза 1 — базовые клинические связи</strong></p>
+<table>
+<thead>
+<tr>
+<th>От (fromId)</th>
+<th>К (toId)</th>
+<th>Риск</th>
+<th>Белок / синдром</th>
+<th>Примечание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>birch-pollen</code></td>
+<td><code>apple</code></td>
+<td>high</td>
+<td>Mal d 1 / OAS</td>
+<td>Оральный аллергический синдром</td>
+</tr>
+<tr>
+<td><code>birch-pollen</code></td>
+<td><code>hazelnut</code></td>
+<td>high</td>
+<td>Cor a 1 / OAS</td>
+<td>Оральный аллергический синдром</td>
+</tr>
+<tr>
+<td><code>birch-pollen</code></td>
+<td><code>carrot</code></td>
+<td>high</td>
+<td>Dau c 1 / OAS</td>
+<td>Оральный аллергический синдром</td>
+</tr>
+<tr>
+<td><code>birch-pollen</code></td>
+<td><code>tomato</code></td>
+<td>low</td>
+<td>OAS</td>
+<td>Реже, чем при злаках</td>
+</tr>
+<tr>
+<td><code>birch-pollen</code></td>
+<td><code>soy</code></td>
+<td>medium</td>
+<td>Gly m 4 / OAS</td>
+<td>PR-10 гомолог Bet v 1</td>
+</tr>
+<tr>
+<td><code>birch-pollen</code></td>
+<td><code>peanut</code></td>
+<td>medium</td>
+<td>Ara h 8 / OAS</td>
+<td>Перекрёст с берёзой, не истинная PA</td>
+</tr>
+<tr>
+<td><code>birch-pollen</code></td>
+<td><code>kiwi</code></td>
+<td>low</td>
+<td>Act d 8 / OAS</td>
+<td>PR-10 гомолог</td>
+</tr>
+<tr>
+<td><code>latex</code></td>
+<td><code>banana</code></td>
+<td>high</td>
+<td>Mus a 1 / latex-fruit</td>
+<td>Латекс-фруктовый синдром</td>
+</tr>
+<tr>
+<td><code>latex</code></td>
+<td><code>kiwi</code></td>
+<td>high</td>
+<td>latex-fruit</td>
+<td>Латекс-фруктовый синдром</td>
+</tr>
+<tr>
+<td><code>latex</code></td>
+<td><code>avocado</code></td>
+<td>high</td>
+<td>latex-fruit</td>
+<td>Латекс-фруктовый синдром</td>
+</tr>
+<tr>
+<td><code>latex</code></td>
+<td><code>tomato</code></td>
+<td>medium</td>
+<td>latex-fruit</td>
+<td>Перекрёст через хитиназы</td>
+</tr>
+<tr>
+<td><code>dust-mites</code></td>
+<td><code>seafood</code></td>
+<td>high</td>
+<td>Der p 10 / tropomyosin</td>
+<td>40–60%; термостабилен</td>
+</tr>
+<tr>
+<td><code>dust-mites</code></td>
+<td><code>house-dust</code></td>
+<td>low</td>
+<td>—</td>
+<td>Связанные бытовые аллергены</td>
+</tr>
+<tr>
+<td><code>cat-dander</code></td>
+<td><code>pork</code></td>
+<td>medium</td>
+<td>Fel d 2 / animal-protein</td>
+<td>~3%; альбумин</td>
+</tr>
+<tr>
+<td><code>cat-dander</code></td>
+<td><code>dog-dander</code></td>
+<td>low</td>
+<td>—</td>
+<td>Частичное перекрытие белков шерсти</td>
+</tr>
+<tr>
+<td><code>ragweed-pollen</code></td>
+<td><code>banana</code></td>
+<td>medium</td>
+<td>pollen-food</td>
+<td>Профилины</td>
+</tr>
+<tr>
+<td><code>ragweed-pollen</code></td>
+<td><code>honey</code></td>
+<td>low</td>
+<td>—</td>
+<td>Продукты пчеловодства</td>
+</tr>
+<tr>
+<td><code>milk</code></td>
+<td><code>goat-milk</code></td>
+<td>high</td>
+<td>—</td>
+<td>&gt;90%; сходные молочные белки</td>
+</tr>
+<tr>
+<td><code>milk</code></td>
+<td><code>beef</code></td>
+<td>medium</td>
+<td>animal-protein</td>
+<td>Казеины и альбумин</td>
+</tr>
+<tr>
+<td><code>eggs</code></td>
+<td><code>chicken</code></td>
+<td>medium</td>
+<td>animal-protein</td>
+<td>Овомукоид / овальбумин</td>
+</tr>
+<tr>
+<td><code>peanut</code></td>
+<td><code>soy</code></td>
+<td>medium</td>
+<td>legume</td>
+<td>5–10%; вицилины</td>
+</tr>
+<tr>
+<td><code>peanut</code></td>
+<td><code>tree-nuts</code></td>
+<td>medium</td>
+<td>—</td>
+<td>Частичное перекрытие белков</td>
+</tr>
+<tr>
+<td><code>peanut</code></td>
+<td><code>hazelnut</code></td>
+<td>medium</td>
+<td>—</td>
+<td>Возможна перекрёстная реакция</td>
+</tr>
+<tr>
+<td><code>tree-nuts</code></td>
+<td><code>hazelnut</code></td>
+<td>high</td>
+<td>—</td>
+<td>Семейство древесных орехов</td>
+</tr>
+<tr>
+<td><code>fish</code></td>
+<td><code>seafood</code></td>
+<td>low</td>
+<td>—</td>
+<td>Основной перекрёст — между видами рыб</td>
+</tr>
+</tbody></table>
+<p><strong>Фаза 2 — расширение (пыльца, злаки, рыба, каштан)</strong></p>
+<table>
+<thead>
+<tr>
+<th>От (fromId)</th>
+<th>К (toId)</th>
+<th>Риск</th>
+<th>Белок / синдром</th>
+<th>Примечание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>birch-pollen</code></td>
+<td><code>celery</code></td>
+<td>high</td>
+<td>Api g 1 / OAS</td>
+<td>Синдром «берёза — полынь — сельдерей»</td>
+</tr>
+<tr>
+<td><code>mugwort-pollen</code></td>
+<td><code>celery</code></td>
+<td>high</td>
+<td>Api g 1 / OAS</td>
+<td>Синдром «полынь — сельдерей — специи»</td>
+</tr>
+<tr>
+<td><code>mugwort-pollen</code></td>
+<td><code>carrot</code></td>
+<td>high</td>
+<td>Dau c 4</td>
+<td>LTP — термостабилен</td>
+</tr>
+<tr>
+<td><code>mugwort-pollen</code></td>
+<td><code>birch-pollen</code></td>
+<td>medium</td>
+<td>pollen-food</td>
+<td>Родственные пыльцевые аллергены</td>
+</tr>
+<tr>
+<td><code>mugwort-pollen</code></td>
+<td><code>ragweed-pollen</code></td>
+<td>low</td>
+<td>pollen-food</td>
+<td>Сорные травы</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>wheat-gluten</code></td>
+<td>medium</td>
+<td>Tri a 12 / pollen-food</td>
+<td>Профилин, перекрёст с Phl p 12</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>rye</code></td>
+<td>medium</td>
+<td>Sec c / pollen-food</td>
+<td>Профилины</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>barley</code></td>
+<td>low</td>
+<td>pollen-food</td>
+<td>Через профилины</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>tomato</code></td>
+<td>medium</td>
+<td>Sola l 1 / pollen-food</td>
+<td>Профилин</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>peanut</code></td>
+<td>low</td>
+<td>Ara h 5 / pollen-food</td>
+<td>Профилин</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>melon</code></td>
+<td>low</td>
+<td>Cuc m 2 / pollen-food</td>
+<td>Профилин бахчевых</td>
+</tr>
+<tr>
+<td><code>grass-pollen</code></td>
+<td><code>citrus</code></td>
+<td>low</td>
+<td>Cit s 2 / pollen-food</td>
+<td>Профилин цитрусовых</td>
+</tr>
+<tr>
+<td><code>ragweed-pollen</code></td>
+<td><code>melon</code></td>
+<td>high</td>
+<td>Cuc m 1 / pollen-food</td>
+<td>Профилин, перекрёст с Amb a 8</td>
+</tr>
+<tr>
+<td><code>latex</code></td>
+<td><code>chestnut</code></td>
+<td>high</td>
+<td>Cas s 5 / latex-fruit</td>
+<td>Хитиназа класса I</td>
+</tr>
+<tr>
+<td><code>wheat-gluten</code></td>
+<td><code>rye</code></td>
+<td>high</td>
+<td>Sec c / cereal</td>
+<td>70–80%; глютены</td>
+</tr>
+<tr>
+<td><code>wheat-gluten</code></td>
+<td><code>barley</code></td>
+<td>high</td>
+<td>Hor v / cereal</td>
+<td>Гомология &gt;80%</td>
+</tr>
+<tr>
+<td><code>wheat-gluten</code></td>
+<td><code>grass-pollen</code></td>
+<td>medium</td>
+<td>pollen-food</td>
+<td>Пыльца злаковых трав</td>
+</tr>
+<tr>
+<td><code>fish</code></td>
+<td><code>other-fish</code></td>
+<td>high</td>
+<td>Gad c 1 / animal-protein</td>
+<td>50–70%; парвальбумин</td>
+</tr>
+</tbody></table>
+<p>При нескольких аллергенах профиля, указывающих на один и тот же перекрёстный продукт (напр. берёза + злаки → томаты), сохраняется <strong>наивысший риск</strong> (<code>pickHigherRiskReaction</code>).</p>
+<h4>4.7.1. Библиография, базы данных и молекулярные источники</h4>
+<p>В коде (<code>cross-reactions/phase-1.ts</code>, <code>phase-2.ts</code>) <strong>нет построчных библиографических ссылок</strong> на каждую из 44 пар. Ниже — привязка трёх опорных блоков (OAS/PFS, молекулярные семейства, <code>clinicalFrequency</code>) к литературе, руководствам и базам данных. Справочник <strong>не синхронизируется</strong> с внешними БД автоматически; пары курируются вручную с экспертной ревизией (§4.7).</p>
+<p><strong>Архитектурные опоры проекта</strong> (см. также <a href="../docs/clinical-accuracy-roadmap.md"><code>docs/clinical-accuracy-roadmap.md</code></a>, §2):</p>
+<table>
+<thead>
+<tr>
+<th>Источник</th>
+<th>Тип</th>
+<th>Роль в AllerGuide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Allergome</strong></td>
+<td>База данных (<a href="https://www.allergome.org">allergome.org</a>)</td>
+<td>Кросс-реактивность аллергенов, молекулярные семейства, клинические ассоциации</td>
+</tr>
+<tr>
+<td><strong>iFAAM</strong></td>
+<td>EU FP7-проект (Integrated Approaches to Food Allergen and Allergy Risk Management, ~2013–2017)</td>
+<td>Систематизация рисков пищевой аллергии, перекрёстности, маркировки</td>
+</tr>
+<tr>
+<td><strong>WHO/IUIS Allergen Nomenclature</strong></td>
+<td>Номенклатура (<a href="https://www.allergen.org">allergen.org</a>)</td>
+<td>Официальные имена молекул в поле <code>protein</code> (<code>Bet v 1</code>, <code>Mal d 1</code>, <code>Der p 10</code>…)</td>
+</tr>
+<tr>
+<td><strong>EAACI Molecular Allergology User&#39;s Guide</strong></td>
+<td>Учебник / гайд (Matricardi PM, Kleine-Tebbe J, Wiley-Blackwell / EAACI)</td>
+<td>Систематизация PFS, PR-10, профилинов, LTP, тропомиозина</td>
+</tr>
+<tr>
+<td><strong>EAACI Food Allergy and Anaphylaxis Guidelines</strong></td>
+<td>Клинические руководства</td>
+<td>OAS vs истинная пищевая аллергия; компонентная диагностика</td>
+</tr>
+<tr>
+<td><strong>AllergenOnline</strong></td>
+<td>In silico-БД (University of Nebraska)</td>
+<td>Предсказание перекрёстности по гомологии последовательностей</td>
+</tr>
+<tr>
+<td><strong>Medical Advisory Board AllerGuide / АДАИР</strong></td>
+<td>Экспертная ревизия</td>
+<td>Отбор пар, уровни <code>risk</code>, русские <code>note</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Ограничение:</strong> <code>evidence-registry.ts</code> содержит привязку порогов пыльцы, AQI и весов индекса, но <strong>не</strong> содержит машиночитаемых цитат для перекрёстных реакций. Поле <code>clinicalFrequency</code> — ориентир из обзорной литературы (часто для IgE-перекрёста), а не персональная вероятность.</p>
+</blockquote>
+<h5>OAS и pollen-food syndrome (PFS)</h5>
+<table>
+<thead>
+<tr>
+<th>Источник</th>
+<th>Тип</th>
+<th>Что даёт для справочника</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ortolani C, Ispano M, et al. <em>The oral allergy syndrome.</em> Ann Allergy / J Allergy Clin Immunol, 1988</td>
+<td>Оригинальное описание</td>
+<td>Термин OAS, связь сырых фруктов/овощей с реакциями у поллинотиков</td>
+</tr>
+<tr>
+<td>Valenta R, et al. — работы по Bet v 1 и пищевым гомологам</td>
+<td>Молекулярная аллергология</td>
+<td>Механизм берёза → яблоко, морковь, орехи (PR-10)</td>
+</tr>
+<tr>
+<td>Asero R. — серия работ по birch-related plant food allergy</td>
+<td>Клинические серии</td>
+<td>Частота и клиника OAS при берёзовой сенсибилизации</td>
+</tr>
+<tr>
+<td>Ballmer-Weber BK, Vieths S. — разделы EAACI по пищевой аллергии</td>
+<td>Руководство</td>
+<td>Классификация IgE-реакций, OAS vs истинная PA</td>
+</tr>
+<tr>
+<td>Skypala IJ. — обзоры pollen-food syndrome</td>
+<td>Обзор</td>
+<td>Связь пыльцы злаков, амброзии, полыни с пищей</td>
+</tr>
+<tr>
+<td>WAO / EAACI position papers по компонентной диагностике</td>
+<td>Позиционные документы</td>
+<td>Различение «истинной» ПА и перекрёста с пыльцой (Ara h 8 vs Ara h 2 и т.д.)</td>
+</tr>
+</tbody></table>
+<p><strong>Отражение в парах справочника:</strong></p>
+<ul>
+<li><strong><code>oas</code> (PR-10, берёзовая линия):</strong> <code>birch-pollen</code> → <code>apple</code>, <code>hazelnut</code>, <code>carrot</code>, <code>celery</code>, <code>soy</code>, <code>peanut</code>, <code>kiwi</code>, <code>tomato</code>; синдром «берёза — полынь — сельдерей».</li>
+<li><strong><code>pollen-food</code> (профилины, LTP):</strong> <code>grass-pollen</code> → злаки, томаты, арахис, дыня, цитрусы; <code>ragweed-pollen</code> → банан, дыня; <code>mugwort-pollen</code> → морковь (LTP, <code>Dau c 4</code>).</li>
+</ul>
+<p>В индексе самочувствия учитываются <strong>только</strong> пары с синдромами <code>oas</code> и <code>pollen-food</code> при повышенной пыльце (<code>wellness-cross-reactions.ts</code>).</p>
+<h5>Молекулярные семейства</h5>
+<table>
+<thead>
+<tr>
+<th>Семейство / синдром</th>
+<th>Ключевые молекулы (WHO/IUIS)</th>
+<th>Механизм и клиника</th>
+<th>Источники</th>
+<th>Пары в AllerGuide</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PR-10 / Bet v 1</strong></td>
+<td>Bet v 1, Mal d 1, Cor a 1, Dau c 1, Api g 1, Gly m 4, Ara h 8, Act d 8</td>
+<td>Гомология PR-10; OAS на <strong>сырое</strong>, термолабильно</td>
+<td>Valenta R; EAACI MAUG; Allergome (PR-10 family)</td>
+<td><code>birch-pollen</code> → яблоко, фундук, морковь, сельдерей, соя, арахис, киви</td>
+</tr>
+<tr>
+<td><strong>Профилины</strong></td>
+<td>Phl p 12, Amb a 8, Tri a 12, Sola l 1, Ara h 5, Cuc m 1/2, Cit s 2</td>
+<td>Паналлергены; часто лёгкий OAS, у части пациентов клинически незначимы</td>
+<td>EAACI MAUG; Hauser M (panallergens); Allergome</td>
+<td><code>grass-pollen</code> → пшеница, рожь, ячмень, томат, арахис, дыня, цитрусы; <code>ragweed-pollen</code> → банан, дыня</td>
+</tr>
+<tr>
+<td><strong>LTP</strong></td>
+<td>Dau c 4, Pru p 3, Art v 3</td>
+<td>Термостабильны; возможны системные реакции; «полынь — сельдерей — специи»</td>
+<td>Asero R, Mistrello G; EAACI MAUG; Allergome (nsLTP)</td>
+<td><code>mugwort-pollen</code> → <code>carrot</code> (Dau c 4)</td>
+</tr>
+<tr>
+<td><strong>Тропомиозин</strong></td>
+<td>Der p 10, Pen a 1, Bla g 7</td>
+<td>Клещи/насекомые ↔ ракообразные; <strong>термостабилен</strong></td>
+<td>Ayuso R, Reese G; EAACI MAUG; Fernandes J</td>
+<td><code>dust-mites</code> → <code>seafood</code> (Der p 10)</td>
+</tr>
+<tr>
+<td><strong>Парвальбумин</strong></td>
+<td>Gad c 1, Cyp c 1</td>
+<td>Перекрёст <strong>между видами рыб</strong>; термостабилен</td>
+<td>EAACI fish allergy guidelines; Bugakesari J, Lin J</td>
+<td><code>fish</code> → <code>other-fish</code> (Gad c 1)</td>
+</tr>
+<tr>
+<td><strong>Латекс-фруктовый</strong></td>
+<td>Hev b 6/7, Mus a 1, Cas s 5</td>
+<td>Хитиназы класса I/II</td>
+<td>Mertens M, Brehler R; EAACI latex guidelines; Allergome</td>
+<td><code>latex</code> → банан, киви, авокадо, томат, каштан</td>
+</tr>
+<tr>
+<td><strong>Бобовые (<code>legume</code>)</strong></td>
+<td>Ara h 1/3, Gly m (вицилины, легумины)</td>
+<td>Частичный перекрёст арахис ↔ соя</td>
+<td>EAACI peanut guidelines; iFAAM</td>
+<td><code>peanut</code> → <code>soy</code></td>
+</tr>
+<tr>
+<td><strong>Злаки (<code>cereal</code>)</strong></td>
+<td>Tri a, Sec c, Hor v (глютены, глиадины)</td>
+<td>Высокая гомология пшеница ↔ рожь ↔ ячмень</td>
+<td>Battais F; EAACI wheat allergy</td>
+<td><code>wheat-gluten</code> → <code>rye</code>, <code>barley</code></td>
+</tr>
+<tr>
+<td><strong>Белки животного происхождения (<code>animal-protein</code>)</strong></td>
+<td>Казеин, альбумин (Fel d 2), овомукоид</td>
+<td>Молоко ↔ козье молоко; яйца ↔ курица; редкий pork-cat syndrome</td>
+<td>EAACI milk guidelines; Host A; Drouet M (pork-cat)</td>
+<td><code>milk</code> → <code>goat-milk</code>, <code>beef</code>; <code>eggs</code> → <code>chicken</code>; <code>cat-dander</code> → <code>pork</code></td>
+</tr>
+</tbody></table>
+<h5>Поле <code>clinicalFrequency</code>: привязка к литературе</h5>
+<p>В справочнике <code>clinicalFrequency</code> задано <strong>только для 6 пар</strong> из 44. Остальные пары используют только <code>risk</code> без числовой частоты.</p>
+<table>
+<thead>
+<tr>
+<th>Пара (<code>fromId</code> → <code>toId</code>)</th>
+<th>Значение в коде</th>
+<th>Молекула</th>
+<th>Типичные источники</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>dust-mites</code> → <code>seafood</code></td>
+<td><code>40-60%</code></td>
+<td>Der p 10</td>
+<td>Ayuso R et al. (Der p 10 ↔ shellfish); Arlian LG reviews; Allergome. <em>Клиническая реакция реже, чем IgE-перекрёст.</em></td>
+</tr>
+<tr>
+<td><code>cat-dander</code> → <code>pork</code></td>
+<td><code>~3%</code></td>
+<td>Fel d 2</td>
+<td>Drouet M, Boutet S — pork-cat syndrome; case series (J Allergy Clin Immunol / Allergy)</td>
+</tr>
+<tr>
+<td><code>milk</code> → <code>goat-milk</code></td>
+<td><code>&gt;90%</code></td>
+<td>Казеины, α-lactalbumin, β-lactoglobulin</td>
+<td>EAACI cow&#39;s milk guidelines; Host A, Halken S; WHO/IUIS (Bos d, Cap h)</td>
+</tr>
+<tr>
+<td><code>peanut</code> → <code>soy</code></td>
+<td><code>5-10%</code></td>
+<td>Вицилины/легумины</td>
+<td>EAACI peanut guidelines; Beyer K; iFAAM risk assessment</td>
+</tr>
+<tr>
+<td><code>wheat-gluten</code> → <code>rye</code></td>
+<td><code>70-80%</code></td>
+<td>Sec c (глютен ржи)</td>
+<td>EAACI wheat allergy; Battais F et al.; гомология глиадинов</td>
+</tr>
+<tr>
+<td><code>fish</code> → <code>other-fish</code></td>
+<td><code>50-70%</code></td>
+<td>Gad c 1</td>
+<td>EAACI fish allergy guidelines; Kuehn A et al.; Bernhisel-Broadbent J et al.</td>
+</tr>
+</tbody></table>
+<p><strong>Пары без <code>clinicalFrequency</code></strong> (напр. <code>birch-pollen</code> → <code>apple</code>): в литературе частота <strong>сенсибилизации</strong> к Mal d 1 у берёзовых поллинотиков высока (часто 50–70% IgE-перекрёста в северной Европе, Asero R; Valenta R), но в коде указан только <code>risk: high</code>.</p>
+<h5>Уровни доказательности в проекте</h5>
+<pre class="mermaid">flowchart TB
+  subgraph tier1 [Уровень 1 — номенклатура и семейства]
+    IUIS[WHO/IUIS Allergen Nomenclature]
+    EAACI_MAU[EAACI Molecular Allergology User&#39;s Guide]
+    ALLERGOME[Allergome]
+  end
+
+  subgraph tier2 [Уровень 2 — клинические синдромы]
+    OAS_LIT[OAS / PFS literature]
+    EAACI_FA[EAACI Food Allergy Guidelines]
+    iFAAM[iFAAM]
+  end
+
+  subgraph tier3 [Уровень 3 — кураторство AllerGuide]
+    PANEL[Medical Advisory Board АДАИР]
+    GOLDEN[Golden scenarios E.3]
+    CODE[cross-reactions phase-1/2]
+  end
+
+  IUIS --> CODE
+  EAACI_MAU --> CODE
+  ALLERGOME --> CODE
+  OAS_LIT --> CODE
+  EAACI_FA --> CODE
+  iFAAM --> CODE
+  PANEL --> CODE
+  GOLDEN --> CODE</pre>
+<table>
+<thead>
+<tr>
+<th>Уровень</th>
+<th>Что покрывает</th>
+<th>Где в репозитории</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Номенклатура молекул</td>
+<td><code>Bet v 1</code>, <code>Mal d 1</code>…</td>
+<td>Поле <code>protein</code> в <code>packages/core/src/cross-reactions/</code></td>
+</tr>
+<tr>
+<td>Клинические синдромы</td>
+<td>OAS, PFS, latex-fruit…</td>
+<td>Поле <code>syndrome</code>; §4.7 настоящего документа</td>
+</tr>
+<tr>
+<td>Частота</td>
+<td><code>40-60%</code>, <code>&gt;90%</code>…</td>
+<td>Поле <code>clinicalFrequency</code> (6 пар); таблица выше</td>
+</tr>
+<tr>
+<td>Экспертная валидация</td>
+<td>Отбор пар, <code>risk</code>, <code>note</code></td>
+<td>Medical Advisory Board; не в <code>evidence-registry.ts</code></td>
+</tr>
+<tr>
+<td>Автотесты</td>
+<td>Берёза+яблоко, клещи+морепродукты</td>
+<td>Golden scenarios (E.3), <code>docs/clinical-accuracy-roadmap.md</code></td>
+</tr>
+</tbody></table>
+<h3>4.8. Где используются перекрёстные реакции</h3>
+<table>
+<thead>
+<tr>
+<th>Компонент</th>
+<th>Функция</th>
+<th>Клинический эффект</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Сканер</strong></td>
+<td><code>getCrossReactionsForSelection</code> + поиск keywords в составе</td>
+<td>Совпадение типа <code>cross</code>; OAS/pollen-food ограничены уровнем <code>medium</code></td>
+</tr>
+<tr>
+<td><strong>Индекс самочувствия</strong></td>
+<td><code>computeCrossReactionWellnessPenalty</code> при повышенной пыльце</td>
+<td>Штраф только для синдромов <code>oas</code> и <code>pollen-food</code>, если аллерген пыльцы в профиле</td>
+</tr>
+<tr>
+<td><strong>Дневник «Питание»</strong></td>
+<td>Поле <code>crossReactions</code> (автопрефилл)</td>
+<td>До 5 подсказок вида «Яблоко (high)» по списку исключений</td>
+</tr>
+<tr>
+<td><strong>PDF-отчёт</strong></td>
+<td>Блок «Пищевая и лекарственная аллергия»</td>
+<td>Сводка ограничений и перекрёстов</td>
+</tr>
+<tr>
+<td><strong>Экспертный раздел</strong></td>
+<td>Статья «Перекрёстные реакции»</td>
+<td>Справочная информация для пациента</td>
+</tr>
+<tr>
+<td><strong>Golden-сценарии (E.3)</strong></td>
+<td>Автотесты клинической логики</td>
+<td>Валидация берёза+яблоко, клещи+креветки, рыба+лосось</td>
+</tr>
+</tbody></table>
+<p><strong>Логика штрафа в индексе (B.6):</strong> при среднем/высоком уровне пыльцы по аллергену из профиля система перебирает перекрёстные пары с синдромом OAS или pollen-food. Штраф: high → 12, medium → 8, low → 4 балла; если перекрёстный аллерген <strong>тоже в профиле</strong> — дополнительно +50% к штрафу.</p>
+<h3>4.9. Данные среды (экологические аллергены)</h3>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>API</th>
+<th>Использование</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>european_aqi</code></td>
+<td>Open-Meteo Air Quality</td>
+<td>Штраф за качество воздуха</td>
+</tr>
+<tr>
+<td><code>pm2_5</code></td>
+<td>Open-Meteo Air Quality</td>
+<td>Отображение в факторах (не отдельный штраф)</td>
+</tr>
+<tr>
+<td>Пыльца (birch, grass, alder, ragweed, mugwort, olive)</td>
+<td>Open-Meteo hourly</td>
+<td>Штрафы по релевантным таксонам</td>
+</tr>
+<tr>
+<td>Дуб, рожь (календарь)</td>
+<td>Региональные таблицы <code>POLLEN_CALENDARS</code></td>
+<td>Сезонные рекомендации</td>
+</tr>
+</tbody></table>
+<p>Геолокация пациента (или регион по умолчанию — Москва) определяет <strong>регион пыльцы</strong> и часовой пояс запроса. Пороги концентрации привязаны к реестру доказательств (<code>evidence-registry</code>, версия <code>2026-1</code>, ревизия EAACI/GA²LEN).</p>
+<h3>4.10. Экспертный контент и реестр доказательств</h3>
+<ul>
+<li><strong>АДАИР / проф. Смолкин Ю.С.</strong> — научное руководство экспертными материалами и калибровкой порогов.</li>
+<li><strong><code>evidence-registry.ts</code></strong> — машиночитаемая привязка порогов (пыльца, AQI, веса индекса) к источникам и датам ревизии. Библиография перекрёстных реакций — §4.7.1.</li>
+<li>Статьи для пациентов (перекрёстные реакции, календарь пыления, АСИТ) — <strong>информационные</strong>, не назначение.</li>
+</ul>
+<h3>4.11. Ограничения и клинические оговорки по данным об аллергенах</h3>
+<ol>
+<li><strong>Профиль — самоотчёт по умолчанию.</strong> Алгоритмы не различают подтверждённые и неподтверждённые аллергии.</li>
+<li><strong>Сканер эвристический.</strong> Возможны пропуски незаявленных аллергенов, ложные срабатывания на общие слова, неполная маркировка следов.</li>
+<li><strong>Перекрёстные реакции — не исчерпывающий атлас.</strong> 44 пары покрывают наиболее частые клинические сценарии; индивидуальная кросс-реактивность может отличаться.</li>
+<li><strong>Частота в справочнике — ориентир из литературы</strong>, не персональная вероятность для конкретного пациента.</li>
+<li><strong>Каталог продуктов зависит от полноты баз.</strong> OFF и Food-Allergy-DB могут не содержать региональных SKU или актуальной маркировки.</li>
+<li><strong>Пыльца Open-Meteo — модель/прогноз</strong>, не замена официального поллинного мониторинга региона.</li>
+</ol>
+<hr>
+<h2>5. Влияние заполнения дневника на индекс самочувствия</h2>
+<p>Заполнение дневника — <strong>основной источник субъективных и клинических данных</strong> для индекса. Все расчёты по дневнику выполняются в <strong>скользящем 7-дневном окне</strong> (календарные дни, включая сегодня).</p>
+<h3>5.1. Прямые штрафы</h3>
+<table>
+<thead>
+<tr>
+<th>Событие</th>
+<th>Условие</th>
+<th>Штраф (баллы)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>День с симптомами</td>
+<td>≥ 1 запись «Симптомы» в календарный день</td>
+<td><strong>6</strong> за каждый такой день (макс. 7 дней → до 42)</td>
+</tr>
+<tr>
+<td>День с триггером</td>
+<td>≥ 1 запись «Триггер» в календарный день</td>
+<td><strong>3</strong> за каждый такой день (макс. до 21)</td>
+</tr>
+<tr>
+<td>Серия ведения дневника</td>
+<td>≥ 3 подряд дня с любой записью</td>
+<td><strong>+4</strong> (единоразово)</td>
+</tr>
+<tr>
+<td>Корреляция симптом–триггер или симптом–питание (дневная)</td>
+<td>≥ 50% дней с симптомами совпадают с триггером/питанием</td>
+<td><strong>+6</strong></td>
+</tr>
+<tr>
+<td>Временная корреляция (±4 ч)</td>
+<td>То же, но по времени записей</td>
+<td><strong>+8</strong> (вместо +6)</td>
+</tr>
+<tr>
+<td>Аномалия: симптомы без триггера</td>
+<td>≥ 3 подряд дня с симптомами без «Триггер»</td>
+<td><strong>+10</strong></td>
+</tr>
+</tbody></table>
+<h3>5.2. Клинические шкалы из дневника</h3>
+<table>
+<thead>
+<tr>
+<th>Уровень контроля (последняя шкала)</th>
+<th>Штраф</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Хороший (<code>good</code>)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Умеренный (<code>moderate</code>)</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Тяжёлый (<code>severe</code>)</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Неконтролируемый (<code>uncontrolled</code>)</td>
+<td>22</td>
+</tr>
+</tbody></table>
+<p>Если заполнены несколько шкал, штрафы <strong>суммируются</strong>.</p>
+<h3>5.3. АСИТ из дневника (30-дневное окно)</h3>
+<table>
+<thead>
+<tr>
+<th>Событие</th>
+<th>Штраф</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Пропущенный приём (<code>Пропущена</code>)</td>
+<td>4 за каждый</td>
+</tr>
+<tr>
+<td>Сильная системная реакция</td>
+<td>12 за каждый</td>
+</tr>
+</tbody></table>
+<p>Опоздание (<code>С опозданием</code>) учитывается в аналитике соблюдения, но <strong>отдельного штрафа</strong> не имеет.</p>
+<h3>5.4. Практические следствия для врача</h3>
+<ol>
+<li><strong>Регулярное ведение дневника повышает информативность</strong>, но при симптомах <strong>снижает</strong> индекс — это ожидаемое поведение модели.</li>
+<li><strong>Серия записей (streak ≥ 3)</strong> добавляет небольшой штраф (+4): модель интерпретирует активное ведение при наличии записей как период повышенного внимания к состоянию, а не как «штраф за дисциплину».</li>
+<li><strong>Фиксация триггеров</strong> снижает риск аномалии «симптомы без триггера» (−10 баллов штрафа).</li>
+<li><strong>Временная близость</strong> записей «Симптомы» и «Питание»/«Триггер» усиливает штраф — это эвристика для выявления возможной связи, не доказательство причинности.</li>
+<li>Записи <strong>«Пикфлоуметрия»</strong>, <strong>«Кожа»</strong>, <strong>«Укус насекомого»</strong>, <strong>«Заметка»</strong> сами по себе <strong>не входят</strong> в формулу индекса, но отображаются в PDF-отчёте и поддерживают клиническую картину.</li>
+</ol>
+<hr>
+<h2>6. Влияние сканирования на индекс самочувствия</h2>
+<h3>6.1. Прямое влияние: отсутствует</h3>
+<p><strong>Результат сканирования штрихкода или состава не входит в формулу <code>computeWellnessScore</code>.</strong> Вердикт сканера («безопасно», «осторожно», «опасно»), уровень риска и список совпадений <strong>не изменяют</strong> числовой индекс.</p>
+<h3>6.2. Косвенное влияние</h3>
+<p>Сканер влияет на самочувствие пациента <strong>опосредованно</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Механизм</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Автоподстановка в «Триггер»</strong></td>
+<td>При открытии раздела «Триггер» в поле <code>recentScan</code> подставляется последнее сканирование за <strong>24 часа</strong> (название продукта, вердикт, уровень). Пациент может сохранить это как контекст триггера.</td>
+</tr>
+<tr>
+<td><strong>Автоподстановка в «Питание»</strong></td>
+<td>Поля <code>foodSource</code> («Сканер»), <code>scanRef</code>, <code>allergens</code> могут заполняться из результата сканирования.</td>
+</tr>
+<tr>
+<td><strong>Рекомендации индекса</strong></td>
+<td>Если в профиле есть <strong>пищевые</strong> аллергены, в рекомендации добавляется напоминание проверять состав через сканер (не зависит от факта сканирования).</td>
+</tr>
+<tr>
+<td><strong>История сканов</strong></td>
+<td>Сохраняется в <code>scan_history</code> (локально): режим, входные данные, вердикт, совпадения, уровень, источник (каталог / OFF / ручной ввод).</td>
+</tr>
+</tbody></table>
+<h3>6.3. Цепочка влияния через дневник</h3>
+<pre><code>Сканирование → запись «Питание» или контекст «Триггер»
+             → (при симптомах в ±4 ч) временная корреляция
+             → дополнительный штраф дневника (+8)
+             → снижение индекса
+</code></pre>
+<p>Таким образом, сканер может <strong>косвенно</strong> повлиять на индекс только если пациент <strong>зафиксировал</strong> экспозицию в дневнике и впоследствии отметил симптомы.</p>
+<h3>6.4. Логика сканера (для контекста)</h3>
+<p>Сканер использует:</p>
+<ul>
+<li>профиль аллергенов пациента;</li>
+<li>регуляторные теги (EU14 / FDA9);</li>
+<li>ключевые слова и алиасы;</li>
+<li>каталог продуктов и Open Food Facts;</li>
+<li>разделение <strong>прямых</strong>, <strong>перекрёстных</strong>, <strong>следовых</strong> (<code>may contain</code>) и <strong>неизвестных</strong> совпадений.</li>
+</ul>
+<p>Результат носит <strong>эвристический</strong> характер: возможны ложноположительные и ложноотрицательные срабатывания, особенно при неполной маркировке или следовых аллергенах.</p>
+<hr>
+<h2>7. PDF-отчёт для врача</h2>
+<p>Пациент может сформировать PDF-отчёт за <strong>7, 14, 30 дней</strong> или произвольный период.</p>
+<h3>7.1. Блоки отчёта</h3>
+<table>
+<thead>
+<tr>
+<th>Блок</th>
+<th>Содержание</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Симптомы</td>
+<td>Записи с выраженностью и SNOMED-кодами</td>
+</tr>
+<tr>
+<td>Лекарства</td>
+<td>Препараты, дозировки, эффект</td>
+</tr>
+<tr>
+<td>Питание</td>
+<td>Продукты, реакции</td>
+</tr>
+<tr>
+<td>Триггеры</td>
+<td>Предполагаемые причины</td>
+</tr>
+<tr>
+<td>Контекст триггеров</td>
+<td>Автоподстановки: пыльца, скан, ЛС за день</td>
+</tr>
+<tr>
+<td>Пикфлоуметрия</td>
+<td>Тренд ПСВ (мин / макс / последнее)</td>
+</tr>
+<tr>
+<td>АСИТ</td>
+<td>Приёмы, соблюдение, реакции</td>
+</tr>
+<tr>
+<td>Пищевая и лекарственная аллергия</td>
+<td>Сводка из профиля</td>
+</tr>
+<tr>
+<td>Инсектная аллергия</td>
+<td>Записи об укусах</td>
+</tr>
+<tr>
+<td>Кожные проявления</td>
+<td>Записи раздела «Кожа»</td>
+</tr>
+<tr>
+<td>Клинические шкалы</td>
+<td>ACT, ARIA-lite и др.</td>
+</tr>
+<tr>
+<td>Хронология</td>
+<td>Все записи в обратном хронологическом порядке</td>
+</tr>
+</tbody></table>
+<h3>7.2. Ограничения отчёта</h3>
+<blockquote>
+<p>Отчёт сформирован пользователем/родителем на основе самостоятельно введённых данных. Документ <strong>не является медицинской документацией</strong>.</p>
+</blockquote>
+<p>Отчёт предназначен для <strong>обсуждения на приёме</strong>, а не для юридического или страхового оформления.</p>
+<hr>
+<h2>8. Сводная схема потоков данных</h2>
+<pre class="mermaid">flowchart TB
+  subgraph profile [Профиль пациента]
+    A[Справочник аллергенов]
+    B[Подтверждения: самоотчёт / IgE / врач]
+  end
+
+  subgraph env [Среда]
+    C[Open-Meteo: AQI + пыльца]
+    D[Региональный календарь пыльцы]
+  end
+
+  subgraph diary [Дневник 7 дней]
+    E[Симптомы + SNOMED]
+    F[Триггеры / Питание / ЛС]
+    G[Шкалы ACT / ARIA / SCORAD / UAS7]
+    H[АСИТ 30 дней]
+  end
+
+  subgraph scanner [Сканер]
+    I[Каталог / OFF / этикетка]
+    J[История сканов]
+  end
+
+  A --> C
+  A --> I
+  B --> A
+  C --> W[Индекс самочувствия]
+  D --> R[Рекомендации]
+  E --> W
+  F --> W
+  G --> W
+  H --> W
+  I --> J
+  J --> F
+  W --> R
+  E --> PDF[PDF-отчёт для врача]
+  F --> PDF
+  G --> PDF
+  H --> PDF</pre>
+<hr>
+<h2>9. Рекомендации по интерпретации на приёме</h2>
+<ol>
+<li><strong>Сопоставляйте индекс с confidence.</strong> Низкая уверенность означает недостаток данных — не делайте выводов только по числу.</li>
+<li><strong>Уточняйте источник аллергенов в профиле.</strong> Самоотчёт ≠ подтверждение врачом или IgE.</li>
+<li><strong>Используйте PDF-отчёт</strong> для анализа динамики симптомов, соблюдения АСИТ и объективных показателей (ПСВ, шкалы).</li>
+<li><strong>Корреляции в дневнике — гипотезы</strong>, а не установленная причинно-следственная связь.</li>
+<li><strong>Сканер — вспомогательный фильтр</strong> этикетки; решение об употреблении продукта остаётся за пациентом и врачом.</li>
+<li><strong>Индекс не заменяет</strong> ACT, ARIA, SCORAD, провокационные пробы или специфический IgE — он агрегирует доступные данные для мотивации самонаблюдения.</li>
+</ol>
+<hr>
+<h2>10. Технические ссылки (для специалистов, участвующих в валидации)</h2>
+<table>
+<thead>
+<tr>
+<th>Модуль</th>
+<th>Назначение</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>packages/core/src/wellness.ts</code></td>
+<td>Расчёт индекса и рекомендаций</td>
+</tr>
+<tr>
+<td><code>packages/core/src/wellness-weights.ts</code></td>
+<td>Версионированные веса (<code>beta-1.0</code>)</td>
+</tr>
+<tr>
+<td><code>packages/core/src/diary-stats.ts</code></td>
+<td>Аналитика дневника, корреляции, аномалии</td>
+</tr>
+<tr>
+<td><code>packages/core/src/diary.ts</code></td>
+<td>Структура разделов дневника</td>
+</tr>
+<tr>
+<td><code>packages/core/src/allergen-database.ts</code></td>
+<td>Каноническая таксономия (46 аллергенов)</td>
+</tr>
+<tr>
+<td><code>packages/core/src/allergen-aliases.ts</code></td>
+<td>Маппинг EU14 / FDA9 / OFF / датасетов</td>
+</tr>
+<tr>
+<td><code>packages/core/src/regulatory-allergens.ts</code></td>
+<td>Регуляторные коды аллергенов</td>
+</tr>
+<tr>
+<td><code>packages/core/src/cross-reactions/</code></td>
+<td>Справочник перекрёстных реакций (44 пары)</td>
+</tr>
+<tr>
+<td><code>packages/core/src/pollen-taxonomy.ts</code></td>
+<td>Связь таксонов пыльцы с id профиля</td>
+</tr>
+<tr>
+<td><code>packages/core/src/pollen-thresholds.ts</code></td>
+<td>Пороги пыльцы (EAACI / GA²LEN)</td>
+</tr>
+<tr>
+<td><code>packages/core/src/allergy-confirmations.ts</code></td>
+<td>Источники подтверждения аллергии</td>
+</tr>
+<tr>
+<td><code>packages/core/src/scan-risk.ts</code></td>
+<td>Классификация совпадений сканера</td>
+</tr>
+<tr>
+<td><code>packages/ai/src/scan.ts</code></td>
+<td>Логика сканирования состава</td>
+</tr>
+<tr>
+<td><code>packages/core/src/food-drug-allergy.ts</code></td>
+<td>Префилл дневника, перекрёстные подсказки</td>
+</tr>
+<tr>
+<td><code>packages/core/src/evidence-registry.ts</code></td>
+<td>Реестр доказательств для порогов</td>
+</tr>
+<tr>
+<td><code>packages/core/src/doctor-report.ts</code></td>
+<td>Блоки PDF-отчёта</td>
+</tr>
+<tr>
+<td><code>packages/core/src/beta-metrics.ts</code></td>
+<td>Метрики калибровки (ρ с ACT / ARIA)</td>
+</tr>
+<tr>
+<td><code>packages/core/src/medical-disclaimer.ts</code></td>
+<td>Правовые ограничения и дисклеймеры</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>Документ подготовлен на основании исходного кода AllerGuide. При обновлении алгоритмов версия весов (<code>WELLNESS_WEIGHTS_VERSION</code>) и содержание разделов могут измениться.</em></p>
+
+    <p class="doc-footer">Сгенерировано из clinical-wellness-and-diary-ru.md · AllerGuide</p>
+  </div>
+</body>
+</html>
