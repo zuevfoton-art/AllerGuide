@@ -5,6 +5,11 @@ export type ProfileAllergenId = string;
 
 const allergenIdSet = new Set(ALLERGENS.map((item) => item.id));
 
+/** Retired RU display labels still stored in older profiles/backups. */
+const LEGACY_ALLERGEN_NAME_ALIASES: Record<string, ProfileAllergenId> = {
+  'Пыль клещей': 'dust-mites',
+};
+
 /**
  * Resolve a stored value (legacy RU label or id) to a canonical allergen id.
  */
@@ -13,6 +18,9 @@ export function resolveAllergenId(value: string): ProfileAllergenId | null {
   if (!trimmed) return null;
 
   if (allergenIdSet.has(trimmed)) return trimmed;
+
+  const legacyAlias = LEGACY_ALLERGEN_NAME_ALIASES[trimmed];
+  if (legacyAlias) return legacyAlias;
 
   const byName = findAllergenByName(trimmed);
   if (byName) return byName.id;

@@ -30,7 +30,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     icon: 'cloudy',
     tag: 'Воздух',
     colorKey: 'purple',
-    forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пыль клещей', 'Бытовая аллергия'],
+    forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пылевые клещи', 'Бытовая аллергия'],
     containsAllergens: [],
     affiliateUrl: 'https://www.iherb.com/search?kw=hepa+air+purifier',
   },
@@ -51,7 +51,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     icon: 'bed',
     tag: 'Дом',
     colorKey: 'accent',
-    forAllergens: ['Пыль клещей', 'Бытовая аллергия'],
+    forAllergens: ['Пылевые клещи', 'Бытовая аллергия'],
     containsAllergens: [],
   },
   {
