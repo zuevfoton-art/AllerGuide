@@ -37,10 +37,18 @@ appId: com.aclearo.app
     id: profile-name
 - inputText: Maestro Tester
 - tapOn:
+    id: profile-wizard-next
+- tapOn:
     id: profile-birth-year
 - inputText: "1990"
 - tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
     id: allergen-milk
+- tapOn:
+    id: profile-wizard-next
 - tapOn:
     id: profile-save
 - extendedWaitUntil:

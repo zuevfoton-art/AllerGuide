@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   getWizardStep,
@@ -10,9 +10,6 @@ import {
   type AllergyConfirmationSource,
   type ProfileType,
 } from '@allerguide/core';
-import { AllergenPicker } from '@/src/components/AllergenPicker';
-import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
-import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { createProfile, listProfiles, ProfileValidationError } from '@/src/services/profile-service';
 import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import {
@@ -20,30 +17,29 @@ import {
   syncEmergencyContacts,
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
-import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-
-function validateProfileInput(name: string, birthYear: string, selected: string[]) {
-  const trimmedName = name.trim();
-  const year = Number(birthYear);
-
-  if (!trimmedName) return 'name_required';
-  if (!birthYear || Number.isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
-    return 'birth_year_invalid';
-  }
-  if (selected.length === 0) return 'allergen_required';
-  return null;
-}
+import { ProfileSetupNameStep } from '@/src/components/profile-setup/ProfileSetupNameStep';
+import { ProfileSetupBirthYearStep } from '@/src/components/profile-setup/ProfileSetupBirthYearStep';
+import { ProfileSetupConditionsStep } from '@/src/components/profile-setup/ProfileSetupConditionsStep';
+import { ProfileSetupAllergensStep } from '@/src/components/profile-setup/ProfileSetupAllergensStep';
+import { ProfileSetupContactsStep } from '@/src/components/profile-setup/ProfileSetupContactsStep';
+import {
+  getNextProfileSetupWizardStep,
+  getPreviousProfileSetupWizardStep,
+  PROFILE_SETUP_WIZARD_STEP_COUNT,
+  PROFILE_SETUP_WIZARD_STEPS,
+  validateProfileSetupWizardDraft,
+  validateProfileSetupWizardStep,
+  type ProfileSetupWizardStep,
+} from '@/src/hooks/use-profile-setup-wizard';
 
 export default function ProfileSetupScreen() {
   const theme = useTheme();
@@ -62,6 +58,7 @@ export default function ProfileSetupScreen() {
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
+  const [currentStep, setCurrentStep] = useState<ProfileSetupWizardStep>('name');
   const [, setRefreshKey] = useState(0);
 
   const wizardStep = getWizardStep(scenario, listProfiles());
@@ -80,12 +77,32 @@ export default function ProfileSetupScreen() {
         ? t('profileSetup.titleSelf')
         : t('profileSetup.titleCreate');
 
+  const stepIndex = PROFILE_SETUP_WIZARD_STEPS.indexOf(currentStep);
+  const stepProgress = t('profileSetup.stepProgress', {
+    current: stepIndex + 1,
+    total: PROFILE_SETUP_WIZARD_STEP_COUNT,
+  });
+
   const subtitle =
     scenario === 'both' && wizardStep === 'child'
-      ? t('profileSetup.subtitleChildStep')
+      ? t('profileSetup.subtitleChildStep', { step: stepProgress })
       : scenario === 'both'
-        ? t('profileSetup.subtitleSelfStep')
-        : t('profileSetup.subtitleDefault');
+        ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
+        : t('profileSetup.subtitleDefault', { step: stepProgress });
+
+  const draft = useMemo(
+    () => ({
+      name,
+      birthYear,
+      selectedAllergenIds: selected,
+      confirmations,
+      conditions,
+      contacts,
+      childConsent,
+      profileType: effectiveType,
+    }),
+    [name, birthYear, selected, confirmations, conditions, contacts, childConsent, effectiveType],
+  );
 
   const resetForm = () => {
     setName('');
@@ -94,18 +111,15 @@ export default function ProfileSetupScreen() {
     setConditions([]);
     setContacts([]);
     setConfirmations({});
+    setChildConsent(false);
+    setCurrentStep('name');
     setError('');
   };
 
   const save = async () => {
-    const validationError = validateProfileInput(name, birthYear, selected);
+    const validationError = validateProfileSetupWizardDraft(draft, { scenario });
     if (validationError) {
       setError(tProfileError(validationError));
-      return;
-    }
-
-    if (needsChildConsent(effectiveType, scenario ?? undefined) && !childConsent) {
-      setError(tProfileError('child_consent_required'));
       return;
     }
 
@@ -162,6 +176,38 @@ export default function ProfileSetupScreen() {
     setRefreshKey((key) => key + 1);
   };
 
+  const goNext = () => {
+    const validationError = validateProfileSetupWizardStep(currentStep, draft, { scenario });
+    if (validationError) {
+      setError(tProfileError(validationError));
+      return;
+    }
+
+    setError('');
+    const next = getNextProfileSetupWizardStep(currentStep);
+    if (next) {
+      setCurrentStep(next);
+      return;
+    }
+
+    void save();
+  };
+
+  const goBack = () => {
+    setError('');
+    const previous = getPreviousProfileSetupWizardStep(currentStep);
+    if (previous) setCurrentStep(previous);
+  };
+
+  const isLastStep = currentStep === 'contacts';
+  const showBack = stepIndex > 0;
+
+  const primaryLabel = isLastStep
+    ? scenario === 'both' && wizardStep === 'self'
+      ? t('profileSetup.nextChild')
+      : t('profileSetup.saveProfile')
+    : t('profileSetup.next');
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -170,124 +216,69 @@ export default function ProfileSetupScreen() {
         <Text style={ui.docMeta}>{subtitle}</Text>
       </View>
 
-      <GlassCard style={styles.section}>
-        <Text style={ui.sectionLabel}>{t('profileSetup.nameLabel')}</Text>
-        <TextInput
-          testID="profile-name"
-          placeholder={t('profileSetup.namePlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
+      {currentStep === 'name' ? (
+        <ProfileSetupNameStep
+          name={name}
+          onNameChange={setName}
+          profileType={type}
+          onProfileTypeChange={setType}
+          canToggleType={canToggleType}
+          lockedType={lockedType}
         />
-
-        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('profileSetup.birthYearLabel')}</Text>
-        <TextInput
-          testID="profile-birth-year"
-          placeholder={t('profileSetup.birthYearPlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          value={birthYear}
-          onChangeText={setBirthYear}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-
-        {canToggleType ? (
-          <>
-            <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('profileSetup.profileLabel')}</Text>
-            <View style={ui.toggleRow}>
-              <Pressable
-                style={[ui.toggle, type === 'self' && ui.toggleActive]}
-                onPress={() => setType('self')}>
-                <Ionicons
-                  name="person"
-                  size={16}
-                  color={type === 'self' ? theme.colors.onAccent : theme.colors.textMuted}
-                />
-                <Text style={[ui.toggleText, type === 'self' && ui.toggleTextActive]}>
-                  {t('profileSetup.profileSelf')}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[ui.toggle, type === 'child' && ui.toggleActive]}
-                onPress={() => setType('child')}>
-                <Ionicons
-                  name="happy"
-                  size={16}
-                  color={type === 'child' ? theme.colors.onAccent : theme.colors.textMuted}
-                />
-                <Text style={[ui.toggleText, type === 'child' && ui.toggleTextActive]}>
-                  {t('profileSetup.profileChild')}
-                </Text>
-              </Pressable>
-            </View>
-          </>
-        ) : (
-          <View style={styles.lockedType}>
-            <Ionicons
-              name={lockedType === 'self' ? 'person' : 'happy'}
-              size={16}
-              color={theme.colors.accent}
-            />
-            <Text style={styles.lockedTypeText}>
-              {lockedType === 'self'
-                ? t('profileSetup.profileSelfLocked')
-                : t('profileSetup.profileChildLocked')}
-            </Text>
-          </View>
-        )}
-      </GlassCard>
-
-      <GlassCard style={styles.section}>
-        <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-        <ConditionPicker selected={conditions} onChange={setConditions} />
-      </GlassCard>
-
-      <GlassCard style={styles.section}>
-        <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
-        <AllergenPicker
-          selected={selected}
-          onChange={(ids) => {
-            setSelected(ids);
-            setConfirmations((prev) => normalizeAllergyConfirmations(ids, prev));
-          }}
-        />
-        <AllergyConfirmationEditor
-          selected={selected}
-          confirmations={confirmations}
-          onChange={setConfirmations}
-        />
-      </GlassCard>
-
-      {needsChildConsent(effectiveType, scenario ?? undefined) ? (
-        <Pressable style={styles.consentRow} onPress={() => setChildConsent((v) => !v)}>
-          <Ionicons
-            name={childConsent ? 'checkbox' : 'square-outline'}
-            size={22}
-            color={theme.colors.accent}
-          />
-          <Text style={styles.consentText}>{t('profileSetup.consent')}</Text>
-        </Pressable>
       ) : null}
 
-      <GlassCard style={styles.section}>
-        <Text style={ui.sectionLabel}>{t('profileSetup.contactsLabel')}</Text>
-        <EmergencyContactsEditor contacts={contacts} onChange={setContacts} />
-      </GlassCard>
+      {currentStep === 'birthYear' ? (
+        <ProfileSetupBirthYearStep
+          birthYear={birthYear}
+          onBirthYearChange={setBirthYear}
+          showChildConsent={needsChildConsent(effectiveType, scenario ?? undefined)}
+          childConsent={childConsent}
+          onChildConsentChange={setChildConsent}
+        />
+      ) : null}
+
+      {currentStep === 'conditions' ? (
+        <ProfileSetupConditionsStep
+          selected={conditions}
+          onChange={setConditions}
+          profileType={effectiveType}
+        />
+      ) : null}
+
+      {currentStep === 'allergens' ? (
+        <ProfileSetupAllergensStep
+          selected={selected}
+          onSelectedChange={setSelected}
+          confirmations={confirmations}
+          onConfirmationsChange={setConfirmations}
+        />
+      ) : null}
+
+      {currentStep === 'contacts' ? (
+        <ProfileSetupContactsStep contacts={contacts} onChange={setContacts} />
+      ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Button
-        testID="profile-save"
-        label={
-          scenario === 'both' && wizardStep === 'self'
-            ? t('profileSetup.nextChild')
-            : t('profileSetup.saveProfile')
-        }
-        variant="primary"
-        block
-        onPress={save}
-      />
+      <View style={styles.actions}>
+        {showBack ? (
+          <Button
+            testID="profile-wizard-back"
+            label={t('profileSetup.back')}
+            variant="secondary"
+            onPress={goBack}
+            style={styles.backButton}
+          />
+        ) : null}
+        <Button
+          testID={isLastStep ? 'profile-save' : 'profile-wizard-next'}
+          label={primaryLabel}
+          variant="primary"
+          block={!showBack}
+          onPress={goNext}
+          style={showBack ? styles.nextButton : undefined}
+        />
+      </View>
 
       <Disclaimer>{t('profileSetup.disclaimer')}</Disclaimer>
     </Screen>
@@ -297,43 +288,13 @@ export default function ProfileSetupScreen() {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     header: { gap: 2, marginBottom: 4 },
-    section: { gap: 8 },
-    fieldGap: { marginTop: 12 },
-    input: {
-      backgroundColor: colors.card,
-      padding: 14,
-      borderRadius: 6,
-      fontSize: 16,
-      fontFamily: fonts.sans,
-      color: colors.text,
-      borderWidth: 1,
-      borderColor: colors.borderInput,
-    },
-    lockedType: {
+    actions: {
       flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      backgroundColor: colors.accentLight,
-      padding: 14,
-      borderRadius: 6,
-      borderWidth: 1,
-      borderColor: colors.accentMid,
-      marginTop: 12,
+      gap: 10,
+      alignItems: 'stretch',
     },
-    lockedTypeText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.accent,
-    },
-    consentRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-    consentText: {
-      flex: 1,
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
+    backButton: { flex: 1 },
+    nextButton: { flex: 2 },
     error: {
       fontFamily: fonts.sans,
       color: colors.danger,
