@@ -173,6 +173,7 @@ const de: LocaleMessages = {
     marketplaceEmpty: 'Wählen Sie ein Profil mit Allergenen für persönliche Empfehlungen.',
     marketplaceOpen: 'Marktplatz öffnen',
     disclaimer: 'Der Index ist beratend und ersetzt keine allergologische Beratung.',
+    phenotypeHintsTitle: 'Profil-Empfehlungen',
   },
   diary: {
     title: 'Tagebuch',
@@ -557,6 +558,22 @@ const de: LocaleMessages = {
         'over-2h': 'Über 2 Std',
         unknown: 'Unbekannt',
       },
+      ocularSymptoms: 'Ausgeprägte Augensymptome (Juckreiz, Tränen)',
+    },
+    comorbidity: {
+      title: 'Was trat zuerst auf?',
+      hint: 'Die Reihenfolge hilft beim klinischen Phänotyp. Optional.',
+      empty: 'Mindestens zwei Allergietypen auf den vorherigen Schritten wählen.',
+      pairQuestion: '{{a}} und {{b}}',
+      leftFirst: '{{name}} zuerst',
+      concurrent: 'Etwa gleichzeitig',
+      unknown: 'Weiß nicht',
+    },
+    phenotype: {
+      title: 'Ihr klinischer Phänotyp',
+      hint: 'Basierend auf Typen, Chronologie und Allergenen. Informativ — keine Diagnose.',
+      empty: 'Noch nicht genug Daten für einen Phänotyp.',
+      disclaimer: 'Phänotypen sind nur Empfehlungen und schränken Scanner, Karte oder Tagebuch nicht ein.',
     },
     consent:
       'Ich bestätige, dass ich Elternteil oder gesetzlicher Vertreter dieses Kindes bin und berechtigt bin, Gesundheitsdaten einzugeben.',

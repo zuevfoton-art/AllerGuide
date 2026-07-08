@@ -176,6 +176,7 @@ export type LocaleMessages = {
     marketplaceEmpty: string;
     marketplaceOpen: string;
     disclaimer: string;
+    phenotypeHintsTitle: string;
   };
   diary: {
     title: string;
@@ -534,6 +535,22 @@ export type LocaleMessages = {
       >;
       status: Record<'active' | 'in-remission' | 'resolved' | 'unknown', string>;
       foodTiming: Record<'within-30min' | '30min-2h' | 'over-2h' | 'unknown', string>;
+      ocularSymptoms: string;
+    };
+    comorbidity: {
+      title: string;
+      hint: string;
+      empty: string;
+      pairQuestion: string;
+      leftFirst: string;
+      concurrent: string;
+      unknown: string;
+    };
+    phenotype: {
+      title: string;
+      hint: string;
+      empty: string;
+      disclaimer: string;
     };
     consent: string;
     confirmationLabel: string;

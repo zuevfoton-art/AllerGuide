@@ -138,6 +138,25 @@ export function ConditionHistoryEditor({
               </>
             ) : null}
 
+            {conditionId === 'rhinitis' ? (
+              <Pressable
+                style={styles.confirmationRow}
+                onPress={() =>
+                  updateEpisode(conditionId, {
+                    ocularSymptoms: !episode.ocularSymptoms,
+                  })
+                }>
+                <Ionicons
+                  name={episode.ocularSymptoms ? 'checkbox' : 'square-outline'}
+                  size={16}
+                  color={theme.colors.accent}
+                />
+                <Text style={styles.confirmationText}>
+                  {t('profileSetup.conditionHistory.ocularSymptoms')}
+                </Text>
+              </Pressable>
+            ) : null}
+
             <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.notesLabel')}</Text>
             <TextInput
               value={episode.notes ?? ''}

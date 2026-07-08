@@ -82,7 +82,18 @@ describe('condition-history', () => {
 
   it('ignores invalid JSON', () => {
     expect(parseConditionHistory('not-json')).toBeNull();
-    expect(parseConditionHistory(JSON.stringify({ v: 2 }))).toBeNull();
+    expect(parseConditionHistory(JSON.stringify({ v: 3 }))).toBeNull();
+  });
+
+  it('parses v:2 with comorbidity links', () => {
+    const source = buildConditionHistoryFromOnboarding(
+      ['dermatitis', 'asthma'],
+      {},
+      [{ fromConditionId: 'dermatitis', toConditionId: 'asthma', relation: 'preceded' }],
+    );
+    const parsed = parseConditionHistory(serializeConditionHistory(source));
+    expect(parsed?.v).toBe(2);
+    expect(parsed?.comorbidityLinks).toHaveLength(1);
   });
 
   it('normalizes partial episode input', () => {

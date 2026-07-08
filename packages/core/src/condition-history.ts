@@ -25,6 +25,14 @@ export type FoodSymptomTiming =
   | 'over-2h'
   | 'unknown';
 
+export type ComorbidityRelation = 'preceded' | 'concurrent';
+
+export interface ComorbidityLink {
+  fromConditionId: AllergyConditionId;
+  toConditionId: AllergyConditionId;
+  relation: ComorbidityRelation;
+}
+
 export interface ConditionEpisode {
   conditionId: AllergyConditionId;
   onsetKind: ConditionOnsetKind;
@@ -33,12 +41,15 @@ export interface ConditionEpisode {
   diagnosedBy: ConditionDiagnosedBy;
   /** EAACI food history: time from ingestion to symptoms (food type only). */
   foodSymptomTiming?: FoodSymptomTiming;
+  /** ARIA ocular phenotype flag (rhinitis type only). */
+  ocularSymptoms?: boolean;
   notes?: string;
 }
 
 export interface ConditionHistory {
-  v: 1;
+  v: 1 | 2;
   episodes: ConditionEpisode[];
+  comorbidityLinks?: ComorbidityLink[];
 }
 
 export type ConditionEpisodeInput = Omit<ConditionEpisode, 'conditionId' | 'onsetYear'> & {
@@ -158,6 +169,8 @@ function normalizeEpisode(raw: unknown): ConditionEpisode | null {
     item.conditionId === 'food' && isFoodSymptomTiming(item.foodSymptomTiming)
       ? item.foodSymptomTiming
       : undefined;
+  const ocularSymptoms =
+    item.conditionId === 'rhinitis' && item.ocularSymptoms === true ? true : undefined;
   const notes = typeof item.notes === 'string' ? item.notes.trim() : '';
 
   return {
@@ -167,7 +180,26 @@ function normalizeEpisode(raw: unknown): ConditionEpisode | null {
     diagnosedBy,
     ...(onsetYear !== undefined ? { onsetYear } : {}),
     ...(foodSymptomTiming ? { foodSymptomTiming } : {}),
+    ...(ocularSymptoms ? { ocularSymptoms } : {}),
     ...(notes ? { notes } : {}),
+  };
+}
+
+function isComorbidityRelation(value: unknown): value is ComorbidityRelation {
+  return value === 'preceded' || value === 'concurrent';
+}
+
+function normalizeComorbidityLink(raw: unknown): ComorbidityLink | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const item = raw as Record<string, unknown>;
+  if (!isConditionId(item.fromConditionId) || !isConditionId(item.toConditionId)) return null;
+  if (!isComorbidityRelation(item.relation)) return null;
+  if (item.fromConditionId === item.toConditionId) return null;
+
+  return {
+    fromConditionId: item.fromConditionId,
+    toConditionId: item.toConditionId,
+    relation: item.relation,
   };
 }
 
@@ -177,7 +209,7 @@ export function parseConditionHistory(raw: string | null | undefined): Condition
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
     const record = parsed as Record<string, unknown>;
-    if (record.v !== 1) return null;
+    if (record.v !== 1 && record.v !== 2) return null;
 
     const episodes: ConditionEpisode[] = [];
     if (Array.isArray(record.episodes)) {
@@ -187,6 +219,22 @@ export function parseConditionHistory(raw: string | null | undefined): Condition
       }
     }
 
+    const comorbidityLinks: ComorbidityLink[] = [];
+    if (Array.isArray(record.comorbidityLinks)) {
+      for (const item of record.comorbidityLinks) {
+        const link = normalizeComorbidityLink(item);
+        if (link) comorbidityLinks.push(link);
+      }
+    }
+
+    if (record.v === 2 || comorbidityLinks.length > 0) {
+      return {
+        v: 2,
+        episodes,
+        ...(comorbidityLinks.length ? { comorbidityLinks } : {}),
+      };
+    }
+
     return { v: 1, episodes };
   } catch {
     return null;
@@ -194,7 +242,11 @@ export function parseConditionHistory(raw: string | null | undefined): Condition
 }
 
 export function serializeConditionHistory(history: ConditionHistory): string {
-  return JSON.stringify(history);
+  const payload =
+    history.comorbidityLinks?.length || history.v === 2
+      ? { v: 2 as const, episodes: history.episodes, comorbidityLinks: history.comorbidityLinks ?? [] }
+      : { v: 1 as const, episodes: history.episodes };
+  return JSON.stringify(payload);
 }
 
 export function normalizeConditionEpisodeInput(
@@ -213,6 +265,9 @@ export function normalizeConditionEpisodeInput(
     ...(conditionId === 'food' && isFoodSymptomTiming(input.foodSymptomTiming)
       ? { foodSymptomTiming: input.foodSymptomTiming }
       : {}),
+    ...(conditionId === 'rhinitis' && input.ocularSymptoms === true
+      ? { ocularSymptoms: true }
+      : {}),
     ...(input.notes?.trim() ? { notes: input.notes.trim() } : {}),
   };
 }
@@ -221,14 +276,18 @@ export function normalizeConditionEpisodeInput(
 export function buildConditionHistoryFromOnboarding(
   conditionIds: AllergyConditionId[],
   drafts: Partial<Record<AllergyConditionId, Partial<ConditionEpisodeInput>>> = {},
+  comorbidityLinks: ComorbidityLink[] = [],
 ): ConditionHistory {
   const unique = [...new Set(conditionIds)];
-  return {
-    v: 1,
-    episodes: unique.map((conditionId) =>
-      normalizeConditionEpisodeInput(conditionId, drafts[conditionId]),
-    ),
-  };
+  const episodes = unique.map((conditionId) =>
+    normalizeConditionEpisodeInput(conditionId, drafts[conditionId]),
+  );
+
+  if (comorbidityLinks.length) {
+    return { v: 2, episodes, comorbidityLinks };
+  }
+
+  return { v: 1, episodes };
 }
 
 /** Keep episodes aligned with currently selected condition types. */
@@ -251,12 +310,24 @@ export function reconcileConditionHistory(
     }
   }
 
-  return {
-    v: 1,
-    episodes: [...selected]
-      .map((id) => byId.get(id))
-      .filter((item): item is ConditionEpisode => Boolean(item)),
-  };
+  const nextEpisodes = [...selected]
+    .map((id) => byId.get(id))
+    .filter((item): item is ConditionEpisode => Boolean(item));
+
+  const selectedSet = selected;
+  const links = (history?.comorbidityLinks ?? []).filter(
+    (link) => selectedSet.has(link.fromConditionId) && selectedSet.has(link.toConditionId),
+  );
+
+  if (links.length || history?.v === 2) {
+    return {
+      v: 2,
+      episodes: nextEpisodes,
+      ...(links.length ? { comorbidityLinks: links } : {}),
+    };
+  }
+
+  return { v: 1, episodes: nextEpisodes };
 }
 
 export function getConditionEpisode(
@@ -315,8 +386,37 @@ export function conditionHistoryToDraftMap(
       status: episode.status,
       diagnosedBy: episode.diagnosedBy,
       foodSymptomTiming: episode.foodSymptomTiming,
+      ocularSymptoms: episode.ocularSymptoms,
       notes: episode.notes,
     };
   }
   return map;
+}
+
+export function listConditionPairs(
+  conditionIds: AllergyConditionId[],
+): Array<[AllergyConditionId, AllergyConditionId]> {
+  const unique = [...new Set(conditionIds)];
+  const pairs: Array<[AllergyConditionId, AllergyConditionId]> = [];
+  for (let i = 0; i < unique.length; i += 1) {
+    for (let j = i + 1; j < unique.length; j += 1) {
+      pairs.push([unique[i]!, unique[j]!]);
+    }
+  }
+  return pairs;
+}
+
+export function upsertComorbidityLink(
+  links: ComorbidityLink[],
+  link: ComorbidityLink,
+): ComorbidityLink[] {
+  const rest = links.filter(
+    (item) =>
+      !(
+        (item.fromConditionId === link.fromConditionId &&
+          item.toConditionId === link.toConditionId) ||
+        (item.fromConditionId === link.toConditionId && item.toConditionId === link.fromConditionId)
+      ),
+  );
+  return [...rest, link];
 }

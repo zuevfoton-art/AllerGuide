@@ -1,5 +1,6 @@
 import type {
   AllergyConditionId,
+  ComorbidityLink,
   ConditionEpisodeInput,
   ProfileType,
   Scenario,
@@ -14,7 +15,9 @@ export const PROFILE_SETUP_WIZARD_STEPS = [
   'birthYear',
   'conditions',
   'conditionHistory',
+  'comorbidity',
   'allergens',
+  'phenotypeSummary',
   'contacts',
 ] as const;
 
@@ -35,6 +38,7 @@ export interface ProfileSetupWizardDraft {
   confirmations: Record<string, AllergyConfirmationSource>;
   conditions: AllergyConditionId[];
   conditionHistoryDrafts: ConditionHistoryDrafts;
+  comorbidityLinks: ComorbidityLink[];
   contacts: EmergencyContactDraft[];
   childConsent: boolean;
   profileType: ProfileType;
@@ -42,6 +46,8 @@ export interface ProfileSetupWizardDraft {
 
 export interface ProfileSetupWizardNavOptions {
   skipConditionHistory?: boolean;
+  skipComorbidity?: boolean;
+  skipPhenotypeSummary?: boolean;
 }
 
 export function validateProfileSetupWizardStep(
@@ -65,6 +71,8 @@ export function validateProfileSetupWizardStep(
     }
     case 'conditions':
     case 'conditionHistory':
+    case 'comorbidity':
+    case 'phenotypeSummary':
       return null;
     case 'allergens':
       if (draft.selectedAllergenIds.length === 0) return 'allergen_required';
@@ -82,6 +90,8 @@ export function validateProfileSetupWizardDraft(
 ): ProfileSetupWizardErrorCode | null {
   for (const step of PROFILE_SETUP_WIZARD_STEPS) {
     if (step === 'conditionHistory' && shouldSkipConditionHistoryStep(draft)) continue;
+    if (step === 'comorbidity' && shouldSkipComorbidityStep(draft)) continue;
+    if (step === 'phenotypeSummary' && shouldSkipPhenotypeSummaryStep(draft)) continue;
     const error = validateProfileSetupWizardStep(step, draft, options);
     if (error) return error;
   }
@@ -92,8 +102,23 @@ export function shouldSkipConditionHistoryStep(draft: Pick<ProfileSetupWizardDra
   return draft.conditions.length === 0;
 }
 
+export function shouldSkipComorbidityStep(draft: Pick<ProfileSetupWizardDraft, 'conditions'>) {
+  return draft.conditions.length < 2;
+}
+
+export function shouldSkipPhenotypeSummaryStep(draft: Pick<ProfileSetupWizardDraft, 'conditions'>) {
+  return draft.conditions.length === 0;
+}
+
 export function getProfileSetupWizardStepIndex(step: ProfileSetupWizardStep): number {
   return PROFILE_SETUP_WIZARD_STEPS.indexOf(step);
+}
+
+function shouldSkipStep(step: ProfileSetupWizardStep, nav: ProfileSetupWizardNavOptions): boolean {
+  if (step === 'conditionHistory' && nav.skipConditionHistory) return true;
+  if (step === 'comorbidity' && nav.skipComorbidity) return true;
+  if (step === 'phenotypeSummary' && nav.skipPhenotypeSummary) return true;
+  return false;
 }
 
 export function getNextProfileSetupWizardStep(
@@ -105,7 +130,7 @@ export function getNextProfileSetupWizardStep(
 
   for (let i = index + 1; i < PROFILE_SETUP_WIZARD_STEPS.length; i += 1) {
     const next = PROFILE_SETUP_WIZARD_STEPS[i];
-    if (next === 'conditionHistory' && nav.skipConditionHistory) continue;
+    if (shouldSkipStep(next, nav)) continue;
     return next;
   }
   return null;
@@ -120,7 +145,7 @@ export function getPreviousProfileSetupWizardStep(
 
   for (let i = index - 1; i >= 0; i -= 1) {
     const previous = PROFILE_SETUP_WIZARD_STEPS[i];
-    if (previous === 'conditionHistory' && nav.skipConditionHistory) continue;
+    if (shouldSkipStep(previous, nav)) continue;
     return previous;
   }
   return null;
@@ -139,4 +164,24 @@ export function reconcileConditionHistoryDrafts(
     } satisfies ConditionEpisodeInput;
   }
   return next;
+}
+
+export function reconcileComorbidityLinks(
+  conditionIds: AllergyConditionId[],
+  links: ComorbidityLink[],
+): ComorbidityLink[] {
+  const selected = new Set(conditionIds);
+  return links.filter(
+    (link) => selected.has(link.fromConditionId) && selected.has(link.toConditionId),
+  );
+}
+
+export function buildProfileSetupWizardNavOptions(
+  draft: Pick<ProfileSetupWizardDraft, 'conditions'>,
+): ProfileSetupWizardNavOptions {
+  return {
+    skipConditionHistory: shouldSkipConditionHistoryStep(draft),
+    skipComorbidity: shouldSkipComorbidityStep(draft),
+    skipPhenotypeSummary: shouldSkipPhenotypeSummaryStep(draft),
+  };
 }

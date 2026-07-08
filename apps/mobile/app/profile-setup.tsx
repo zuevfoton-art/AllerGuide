@@ -8,6 +8,7 @@ import {
   shouldCompleteOnboarding,
   type AllergyConditionId,
   type AllergyConfirmationSource,
+  type ComorbidityLink,
   type ProfileType,
 } from '@allerguide/core';
 import { createProfile, listProfiles, ProfileValidationError } from '@/src/services/profile-service';
@@ -38,13 +39,16 @@ import {
   getPreviousProfileSetupWizardStep,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   PROFILE_SETUP_WIZARD_STEPS,
+  buildProfileSetupWizardNavOptions,
+  reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
-  shouldSkipConditionHistoryStep,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardStep,
 } from '@/src/hooks/use-profile-setup-wizard';
 import { ProfileSetupContactsStep } from '@/src/components/profile-setup/ProfileSetupContactsStep';
+import { ProfileSetupComorbidityStep } from '@/src/components/profile-setup/ProfileSetupComorbidityStep';
+import { ProfileSetupPhenotypeStep } from '@/src/components/profile-setup/ProfileSetupPhenotypeStep';
 
 export default function ProfileSetupScreen() {
   const theme = useTheme();
@@ -61,6 +65,7 @@ export default function ProfileSetupScreen() {
   const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
+  const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
@@ -104,18 +109,20 @@ export default function ProfileSetupScreen() {
       confirmations,
       conditions,
       conditionHistoryDrafts,
+      comorbidityLinks,
       contacts,
       childConsent,
       profileType: effectiveType,
     }),
-    [name, birthYear, selected, confirmations, conditions, conditionHistoryDrafts, contacts, childConsent, effectiveType],
+    [name, birthYear, selected, confirmations, conditions, conditionHistoryDrafts, comorbidityLinks, contacts, childConsent, effectiveType],
   );
 
-  const skipConditionHistory = shouldSkipConditionHistoryStep(draft);
+  const wizardNav = buildProfileSetupWizardNavOptions(draft);
 
   const handleConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
     setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
+    setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
   };
 
   const resetForm = () => {
@@ -124,6 +131,7 @@ export default function ProfileSetupScreen() {
     setSelected([]);
     setConditions([]);
     setConditionHistoryDrafts({});
+    setComorbidityLinks([]);
     setContacts([]);
     setConfirmations({});
     setChildConsent(false);
@@ -166,7 +174,7 @@ export default function ProfileSetupScreen() {
     }
 
     setStoredProfileConditions(id, conditions);
-    saveConditionHistoryFromOnboarding(id, conditions, conditionHistoryDrafts);
+    saveConditionHistoryFromOnboarding(id, conditions, conditionHistoryDrafts, comorbidityLinks);
     syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
 
     setActiveProfileId(id);
@@ -200,7 +208,7 @@ export default function ProfileSetupScreen() {
     }
 
     setError('');
-    const next = getNextProfileSetupWizardStep(currentStep, { skipConditionHistory });
+    const next = getNextProfileSetupWizardStep(currentStep, wizardNav);
     if (next) {
       setCurrentStep(next);
       return;
@@ -211,7 +219,7 @@ export default function ProfileSetupScreen() {
 
   const goBack = () => {
     setError('');
-    const previous = getPreviousProfileSetupWizardStep(currentStep, { skipConditionHistory });
+    const previous = getPreviousProfileSetupWizardStep(currentStep, wizardNav);
     if (previous) setCurrentStep(previous);
   };
 
@@ -269,12 +277,31 @@ export default function ProfileSetupScreen() {
         />
       ) : null}
 
+      {currentStep === 'comorbidity' ? (
+        <ProfileSetupComorbidityStep
+          conditions={conditions}
+          links={comorbidityLinks}
+          onChange={setComorbidityLinks}
+        />
+      ) : null}
+
       {currentStep === 'allergens' ? (
         <ProfileSetupAllergensStep
           selected={selected}
           onSelectedChange={setSelected}
           confirmations={confirmations}
           onConfirmationsChange={setConfirmations}
+        />
+      ) : null}
+
+      {currentStep === 'phenotypeSummary' ? (
+        <ProfileSetupPhenotypeStep
+          conditions={conditions}
+          conditionHistoryDrafts={conditionHistoryDrafts}
+          comorbidityLinks={comorbidityLinks}
+          allergenIds={selected}
+          profileType={effectiveType}
+          birthYear={birthYear}
         />
       ) : null}
 

@@ -5,6 +5,7 @@ import {
   reconcileConditionHistory,
   serializeConditionHistory,
   type AllergyConditionId,
+  type ComorbidityLink,
   type ConditionEpisodeInput,
   type ConditionHistory,
 } from '@allerguide/core';
@@ -32,8 +33,9 @@ export function saveConditionHistoryFromOnboarding(
   profileId: number,
   conditionIds: AllergyConditionId[],
   drafts: Partial<Record<AllergyConditionId, Partial<ConditionEpisodeInput>>>,
+  comorbidityLinks: ComorbidityLink[] = [],
 ) {
-  const history = buildConditionHistoryFromOnboarding(conditionIds, drafts);
+  const history = buildConditionHistoryFromOnboarding(conditionIds, drafts, comorbidityLinks);
   setStoredConditionHistory(profileId, history);
 }
 
