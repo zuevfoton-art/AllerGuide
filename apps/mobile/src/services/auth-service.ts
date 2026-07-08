@@ -258,6 +258,7 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
     db.runSync('DELETE FROM scan_history WHERE profileId = ?', [profile.id]);
     db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [profile.id]);
     db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [profile.id]);
+    db.runSync('DELETE FROM safe_products WHERE profileId = ?', [profile.id]);
     db.runSync('DELETE FROM profiles WHERE id = ?', [profile.id]);
   }
 
