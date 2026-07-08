@@ -2,7 +2,7 @@
 
 **Roadmap:** [P0.1](roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)  
 **Архитектура:** [architecture.md](./architecture.md) · [development-rules.md](./development-rules.md)  
-**Версия чеклиста:** 1.1  
+**Версия чеклиста:** 1.2  
 **Целевые платформы:** iOS · Android · Web (Expo)
 
 Чеклист для ручного прогона перед internal-сборкой (EAS preview) и перед включением backend / store submission.  
@@ -71,7 +71,10 @@
 | 2.2 | Intro можно пропустить | ☐ | ☐ | ☐ | |
 | 2.3 | Повторный вход не показывает intro | ☐ | ☐ | ☐ | |
 | 2.4 | Выбор сценария: только я / только ребёнок / я + ребёнок | ☐ | ☐ | ☐ | |
-| 2.5 | Wizard профиля: имя, год рождения, аллергены | ☐ | ☐ | ☐ | |
+| 2.5 | Wizard профиля: имя, год, **11 типов состояний**, аллергены | ☐ | ☐ | ☐ | |
+| 2.5a | Шаг «Хронология»: дебют, статус, food timing, ocular (ринит) | ☐ | ☐ | ☐ | skip если нет типов |
+| 2.5b | Шаг «Коморbidность» (≥2 типов): порядок появления | ☐ | ☐ | ☐ | skip если <2 типов |
+| 2.5c | Шаг «Ваш фенотип»: карточка + disclaimer «не диагноз» | ☐ | ☐ | ☐ | skip если 0 фенотипов |
 | 2.6 | Профиль ребёнка: требуется согласие родителя | ☐ | ☐ | ☐ | |
 | 2.7 | После onboarding → главная с активным профилем | ☐ | ☐ | ☐ | |
 | 2.8 | AppSplash / загрузка шрифтов без белого экрана >3 сек | ☐ | ☐ | ☐ | |
@@ -86,7 +89,8 @@
 | 3.2 | Переключение активного профиля меняет данные на экранах | ☐ | ☐ | ☐ | |
 | 3.3 | Тап по активному профилю → редактирование | ☐ | ☐ | ☐ | |
 | 3.4 | «+» в switcher → создание нового профиля | ☐ | ☐ | ☐ | |
-| 3.5 | Редактирование: имя, год, аллергены сохраняются | ☐ | ☐ | ☐ | `/profile-edit` |
+| 3.5 | Редактирование: имя, год, аллергены, **история аллергии**, коморbidность | ☐ | ☐ | ☐ | `/profile-edit` |
+| 3.5a | Тип `urticaria` в picker → UAS7 в рекомендуемых шкалах | ☐ | ☐ | ☐ | FR-PROF-12 |
 | 3.6 | Удаление профиля с подтверждением | ☐ | ☐ | ☐ | `/profiles` |
 | 3.7 | Экран «Мои профили»: язык, тема, logout | ☐ | ☐ | ☐ | deep link `/profiles` |
 | 3.8 | Каталог аллергенов: группы, поиск, выбор | ☐ | ☐ | ☐ | |
@@ -105,6 +109,7 @@
 | 4.6 | Quick actions: Сканер, Карта | ☐ | ☐ | ☐ | |
 | 4.7 | Disclaimer внизу экрана | ☐ | ☐ | ☐ | |
 | 4.8 | Tab bar: 4 вкладки (Home, Diary, Scanner, SOS) | ☐ | ☐ | ☐ | Map/Market скрыты |
+| 4.9 | Блок подсказок фенотипа / reassessment hints (при ≥1 phenotype) | ☐ | ☐ | ☐ | FR-PROF-16 |
 
 ---
 
@@ -118,6 +123,9 @@
 | 5.4 | Удаление записи | ☐ | ☐ | ☐ | |
 | 5.5 | Записи изолированы между профилями | ☐ | ☐ | ☐ | |
 | 5.6 | Отчёт врачу → PDF preview / share | ☐ | ☐ | ☐ | `expo-print` |
+| 5.6a | PDF: блок «Хронология и фенотипы профиля» при заполненной истории | ☐ | ☐ | ☐ | FR-PROF-17 |
+| 5.6b | PDF: SNOMED из reactionType (анафилаксия в «Питание») | ☐ | ☐ | ☐ | Phase 3 |
+| 5.6c | Подсказки фенотипа на экране дневника (reassessment hints) | ☐ | ☐ | ☐ | FR-PROF-16 |
 | 5.7 | Чип «Шкала»: ARIA / ACT / SCORAD / UAS7 | ☐ | ☐ | ☐ | |
 | 5.8 | Триггер: автоподстановка пыльцы, скана, ЛС | ☐ | ☐ | ☐ | нужен интернет для пыльцы |
 | 5.9 | Disclaimer на экране | ☐ | ☐ | ☐ | |
@@ -251,6 +259,27 @@
 | 15.3 | Location permission на карте | ☐ | ☐ | |
 | 15.4 | Notifications permission (reminder toggle) | ☐ | ☐ | |
 | 15.5 | Нет crash при background → foreground | ☐ | ☐ | |
+
+---
+
+## 16. Клинический профиль (taxonomy Phases 1–4)
+
+Ручной прогон матрицы **S1–S10** — [`clinical-features-raaci.md` §11](./clinical-features-raaci.md#11-матрица-клинических-фenotипов-s1s10). Backend flags **OFF** (offline-first).
+
+| # | Сценарий | iOS | Android | Web | Phenotype / FR |
+|---|----------|-----|---------|-----|----------------|
+| 16.1 | Онбординг: 8 шагов wizard (conditions → history → comorbidity → allergens → phenotype) | ☐ | ☐ | ☐ | FR-PROF-14..16 |
+| 16.2 | **S1** atopic-march-child: АтД + поллиноз + астма + порядок в comorbidity | ☐ | ☐ | ☐ | S1 |
+| 16.3 | **S2** aria-asthma: ринит + астма → hints на главной | ☐ | ☐ | ☐ | S2, wellness |
+| 16.4 | **S3** aria-conjunctivitis: ринит + ocularSymptoms | ☐ | ☐ | ☐ | S3 |
+| 16.5 | **S4** food-anaphylaxis-risk: food + SOS anaphylaxisHistory | ☐ | ☐ | ☐ | S4, SOS banner |
+| 16.6 | **S9** adult-onset-food: food + дебют adulthood → reassessment hint | ☐ | ☐ | ☐ | S9 |
+| 16.7 | Карточка «Ваш фенотип» в wizard: disclaimer, без gating сканера | ☐ | ☐ | ☐ | FR-PROF-16 |
+| 16.8 | Profile-edit: секция «История аллергии» + comorbidity сохраняются offline | ☐ | ☐ | ☐ | FR-PROF-14/15 |
+| 16.9 | PDF: блок conditionPhenotypes с хронологией и фенотипами | ☐ | ☐ | ☐ | FR-PROF-17 |
+| 16.10 | Сканер / карта / маркет доступны при любом фенотипе | ☐ | ☐ | ☐ | invariant |
+
+**Итог §16:** ☐ Pass · ☐ Fail
 
 ---
 
