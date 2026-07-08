@@ -40,6 +40,11 @@ const en: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'an Aclearo app',
   },
+  errorBoundary: {
+    title: 'Something went wrong',
+    message: 'The app hit an unexpected error. Try again or restart A-Claro.',
+    retry: 'Try again',
+  },
   auth: {
     loginTitle: 'Sign in',
     loginSubtitle: 'Sign in with phone number or email',
@@ -370,6 +375,22 @@ const en: LocaleMessages = {
     appLockHint: 'Biometrics or PIN for SOS and diary',
     appLockEnable: 'Enable',
     appLockDisable: 'Disable',
+    aboutTitle: 'About',
+    aboutHint: 'A-Claro · an Aclearo app',
+  },
+  about: {
+    eyebrow: 'About',
+    title: 'A-Claro',
+    subtitle: 'Allergy companion — offline-first',
+    version: 'Version',
+    developer: 'Developer',
+    product: 'Product',
+    website: 'Website',
+    support: 'Support',
+    privacy: 'Privacy policy',
+    terms: 'Terms of use',
+    disclaimer:
+      'A-Claro is for informational purposes only and does not replace medical advice. Not a medical device.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',

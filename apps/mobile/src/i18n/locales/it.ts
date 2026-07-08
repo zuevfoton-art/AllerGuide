@@ -40,6 +40,11 @@ const it: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'un\'app Aclearo',
   },
+  errorBoundary: {
+    title: 'Qualcosa è andato storto',
+    message: "L'app ha riscontrato un errore imprevisto. Riprova o riavvia A-Claro.",
+    retry: 'Riprova',
+  },
   auth: {
     loginTitle: 'Accedi',
     loginSubtitle: 'Accedi con telefono o email',
@@ -370,6 +375,22 @@ const it: LocaleMessages = {
     appLockHint: 'Biometrics for SOS and diary',
     appLockEnable: 'Enable',
     appLockDisable: 'Disable',
+    aboutTitle: 'Informazioni',
+    aboutHint: 'A-Claro · un\'app Aclearo',
+  },
+  about: {
+    eyebrow: 'Informazioni',
+    title: 'A-Claro',
+    subtitle: 'Compagno per le allergie — offline-first',
+    version: 'Versione',
+    developer: 'Sviluppatore',
+    product: 'Prodotto',
+    website: 'Sito web',
+    support: 'Supporto',
+    privacy: 'Informativa sulla privacy',
+    terms: 'Termini di utilizzo',
+    disclaimer:
+      'A-Claro è solo informativo e non sostituisce il parere medico. Non è un dispositivo medico.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',

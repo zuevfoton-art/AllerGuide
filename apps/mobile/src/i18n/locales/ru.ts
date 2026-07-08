@@ -40,6 +40,12 @@ const ru: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'приложение Aclearo',
   },
+  errorBoundary: {
+    title: 'Что-то пошло не так',
+    message:
+      'Приложение столкнулось с неожиданной ошибкой. Попробуйте снова или перезапустите A-Claro.',
+    retry: 'Попробовать снова',
+  },
   auth: {
     loginTitle: 'Вход',
     loginSubtitle: 'Войдите по номеру телефона или email',
@@ -370,6 +376,22 @@ const ru: LocaleMessages = {
     appLockHint: 'Биометрия или PIN при открытии SOS и дневника',
     appLockEnable: 'Включить',
     appLockDisable: 'Отключить',
+    aboutTitle: 'О приложении',
+    aboutHint: 'A-Claro · приложение Aclearo',
+  },
+  about: {
+    eyebrow: 'О приложении',
+    title: 'A-Claro',
+    subtitle: 'Помощник при аллергии — offline-first',
+    version: 'Версия',
+    developer: 'Разработчик',
+    product: 'Продукт',
+    website: 'Сайт',
+    support: 'Поддержка',
+    privacy: 'Политика конфиденциальности',
+    terms: 'Условия использования',
+    disclaimer:
+      'A-Claro носит информационный характер и не заменяет консультацию врача. Не является медицинским изделием.',
   },
   legal: {
     privacyTitle: 'Политика конфиденциальности',

@@ -217,6 +217,24 @@ export default function ProfileScreen() {
       <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
       <ThemeToggle />
 
+      <Text style={ui.sectionLabel}>{t('settings.aboutTitle')}</Text>
+      <GlassCard padded={false}>
+        <Pressable
+          style={styles.hubRow}
+          onPress={() => router.push('/about' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.aboutTitle')}>
+          <View style={styles.hubIcon}>
+            <Ionicons name="information-circle-outline" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.hubBody}>
+            <Text style={styles.hubTitle}>{t('settings.aboutTitle')}</Text>
+            <Text style={styles.hubHint}>{t('settings.aboutHint')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+      </GlassCard>
+
       <Text style={ui.sectionLabel}>{t('profiles.accountTitle')}</Text>
       <GlassCard>
         <Text style={styles.accountHint}>{t('profiles.accountHint')}</Text>
