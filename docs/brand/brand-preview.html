@@ -39,14 +39,18 @@
     .app-icon { width: 120px; height: 120px; border-radius: 22px; box-shadow: 0 8px 24px rgba(42,157,143,.22); }
     .pill-demo { display: inline-flex; gap: 8px; padding: 8px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; }
     .pill { padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--muted); }
-    .pill.active { background: var(--accent-light); color: var(--accent); }
+    .pill.active { background: #eff4ff; color: var(--accent); }
+    .dual-palettes { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 640px) { .dual-palettes { grid-template-columns: 1fr; } }
+    .palette-col h3 { font-size: 12px; font-weight: 600; color: var(--head); margin-bottom: 10px; }
+    .gradient-bar { height: 56px; border-radius: 8px; background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #3b82f6 100%); margin-top: 12px; border: 1px solid var(--border); }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>Aclearo × A-Claro</h1>
-      <p class="lead">Endorsed Product Brand — master <strong>Aclearo</strong>, product <strong>A-Claro</strong>. Monogram <strong>A</strong>, accent Claro Teal, clinical calm UI.</p>
+      <p class="lead">Endorsed Product Brand — master <strong>Aclearo</strong>, product <strong>A-Claro</strong>. <strong>Dual Calm:</strong> Medical blue ambient + Claro teal product. См. <code>docs/brand-dual-calm.md</code>.</p>
     </header>
 
     <section>
@@ -56,7 +60,7 @@
         <strong>L2 Product:</strong> A-Claro (store name, in-app, icon)<br />
         <strong>Lockup:</strong> A-Claro + <em>приложение Aclearo</em> / <em>an Aclearo app</em><br />
         <strong>Bundle ID:</strong> com.aclearo.app<br /><br />
-        <strong>Цвета:</strong> фон #F4F6F9 · заголовки #1E3A5F · accent #2A9D8F · SOS #B91C1C<br />
+        <strong>Dual Calm:</strong> ambient calm.* (#1E3A5F → #2563EB) · product accent #2A9D8F · SOS #B91C1C<br />
         <strong>Шрифты:</strong> Source Serif 4 (заголовки) + Inter (UI)<br />
         <strong>Радиус:</strong> 6–8px · stroke иконок 1.75px
       </p>
@@ -108,7 +112,34 @@
     </section>
 
     <section>
-      <h2>Palette</h2>
+      <h2>Dual Calm palettes</h2>
+      <div class="dual-palettes">
+        <div class="palette-col">
+          <h3>Medical Calm (ambient)</h3>
+          <div class="palette">
+            <div class="swatch"><div style="background:#1E3A5F"></div>calmDeep</div>
+            <div class="swatch"><div style="background:#2563EB"></div>calmMid</div>
+            <div class="swatch"><div style="background:#3B82F6"></div>calmLight</div>
+            <div class="swatch"><div style="background:#EFF4FF"></div>calmWash</div>
+            <div class="swatch"><div style="background:#DBEAFE"></div>calmMist</div>
+          </div>
+          <div class="gradient-bar" title="getCalmGradient light"></div>
+        </div>
+        <div class="palette-col">
+          <h3>Claro (product)</h3>
+          <div class="palette">
+            <div class="swatch"><div style="background:#2A9D8F"></div>accent</div>
+            <div class="swatch"><div style="background:#E6F6F4"></div>accentLight</div>
+            <div class="swatch"><div style="background:#9FD9D1"></div>accentMid</div>
+            <div class="swatch"><div style="background:#1E3A5F"></div>head</div>
+            <div class="swatch"><div style="background:#F4F6F9"></div>bg</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Palette (legacy summary)</h2>
       <div class="palette">
         <div class="swatch"><div style="background:#F4F6F9"></div>bg</div>
         <div class="swatch"><div style="background:#FFFFFF"></div>card</div>
