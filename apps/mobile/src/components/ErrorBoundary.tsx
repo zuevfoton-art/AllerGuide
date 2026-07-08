@@ -5,6 +5,7 @@ import { radii } from '@/src/constants/layout';
 import { lightColors } from '@/src/constants/theme';
 import { fonts } from '@/src/constants/typography';
 import { captureError } from '@/src/services/error-reporting';
+import { useLocaleStore } from '@/src/store/locale-store';
 
 interface Props {
   children: ReactNode;
@@ -13,6 +14,29 @@ interface Props {
 interface State {
   hasError: boolean;
   detail: string;
+}
+
+function ErrorFallback({ detail, onReset }: { detail: string; onReset: () => void }) {
+  const t = useLocaleStore.getState().t;
+
+  return (
+    <View style={styles.container} accessibilityRole="alert">
+      <BrandMark size={56} accent={lightColors.accent} color={lightColors.onAccent} />
+      <Text style={styles.title}>{t('errorBoundary.title')}</Text>
+      <Text style={styles.message}>{t('errorBoundary.message')}</Text>
+      {detail ? (
+        <ScrollView style={styles.detailBox} contentContainerStyle={styles.detailContent}>
+          {/* Shown so testers can report the exact cause from a preview build. */}
+          <Text style={styles.detailText} selectable>
+            {detail}
+          </Text>
+        </ScrollView>
+      ) : null}
+      <Pressable style={styles.button} onPress={onReset} accessibilityRole="button">
+        <Text style={styles.buttonText}>{t('errorBoundary.retry')}</Text>
+      </Pressable>
+    </View>
+  );
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -34,26 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.hasError) return this.props.children;
 
-    return (
-      <View style={styles.container} accessibilityRole="alert">
-        <BrandMark size={56} accent={lightColors.accent} color={lightColors.onAccent} />
-        <Text style={styles.title}>Что-то пошло не так</Text>
-        <Text style={styles.message}>
-          Приложение столкнулось с неожиданной ошибкой. Попробуйте снова или перезапустите AllerGuide.
-        </Text>
-        {this.state.detail ? (
-          <ScrollView style={styles.detailBox} contentContainerStyle={styles.detailContent}>
-            {/* Shown so testers can report the exact cause from a preview build. */}
-            <Text style={styles.detailText} selectable>
-              {this.state.detail}
-            </Text>
-          </ScrollView>
-        ) : null}
-        <Pressable style={styles.button} onPress={this.reset} accessibilityRole="button">
-          <Text style={styles.buttonText}>Попробовать снова</Text>
-        </Pressable>
-      </View>
-    );
+    return <ErrorFallback detail={this.state.detail} onReset={this.reset} />;
   }
 }
 

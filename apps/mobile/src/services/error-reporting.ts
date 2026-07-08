@@ -1,3 +1,5 @@
+import { BRAND_LOG_PREFIX } from '@/src/constants/brand';
+
 type ErrorContext = Record<string, string>;
 
 const SENSITIVE_EXTRA_KEYS = [
@@ -79,7 +81,7 @@ export function initErrorReporting() {
   const client = loadSentry();
   if (!client) {
     reportingEnabled = false;
-    console.warn('[AllerGuide] Sentry SDK unavailable — error reporting stays on console');
+    console.warn(`[${BRAND_LOG_PREFIX}] Sentry SDK unavailable — error reporting stays on console`);
     return;
   }
 
@@ -102,7 +104,7 @@ export function captureError(error: Error, context?: ErrorContext) {
     client.captureException(error, { extra: safeContext });
     return;
   }
-  console.error('[AllerGuide]', error, safeContext);
+  console.error(`[${BRAND_LOG_PREFIX}]`, error, safeContext);
 }
 
 export function captureMessage(message: string, context?: ErrorContext) {
@@ -112,7 +114,7 @@ export function captureMessage(message: string, context?: ErrorContext) {
     client.captureMessage(message, { level: 'warning', extra: safeContext });
     return;
   }
-  console.warn('[AllerGuide]', message, safeContext);
+  console.warn(`[${BRAND_LOG_PREFIX}]`, message, safeContext);
 }
 
 /** Test-only helper for verifying Sentry wiring without sending events. */

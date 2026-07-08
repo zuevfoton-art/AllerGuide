@@ -45,6 +45,11 @@ export type LocaleMessages = {
     /** Co-brand lockup under wordmark, e.g. «приложение Aclearo» */
     endorser: string;
   };
+  errorBoundary: {
+    title: string;
+    message: string;
+    retry: string;
+  };
   auth: {
     loginTitle: string;
     loginSubtitle: string;
@@ -373,6 +378,21 @@ export type LocaleMessages = {
     appLockHint: string;
     appLockEnable: string;
     appLockDisable: string;
+    aboutTitle: string;
+    aboutHint: string;
+  };
+  about: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    version: string;
+    developer: string;
+    product: string;
+    website: string;
+    support: string;
+    privacy: string;
+    terms: string;
+    disclaimer: string;
   };
   legal: {
     privacyTitle: string;

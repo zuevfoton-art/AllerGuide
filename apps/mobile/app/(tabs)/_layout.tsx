@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { Platform, Pressable } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
@@ -23,10 +23,40 @@ function TabIcon({
   return <BrandTabIcon name={name} size={size} color={focused ? color : muted} focused={focused} />;
 }
 
-function TabBarButton({ testID, ...props }: BottomTabBarButtonProps & { testID: string }) {
-  // BottomTabBarButtonProps ref typing is wider than Pressable; safe at runtime.
-  return <Pressable {...(props as ComponentProps<typeof Pressable>)} testID={testID} />;
+function TabBarButton({
+  testID,
+  accessibilityState,
+  style,
+  ...props
+}: BottomTabBarButtonProps & { testID: string }) {
+  const { colors } = useTheme();
+  const focused = accessibilityState?.selected ?? false;
+
+  return (
+    <Pressable
+      {...(props as ComponentProps<typeof Pressable>)}
+      testID={testID}
+      accessibilityState={accessibilityState}
+      style={[
+        tabBarStyles.button,
+        focused && { backgroundColor: colors.accentLight },
+        style,
+      ]}>
+      {props.children}
+    </Pressable>
+  );
 }
+
+const tabBarStyles = StyleSheet.create({
+  button: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    marginHorizontal: 2,
+    minHeight: 44,
+  },
+});
 
 export default function TabsLayout() {
   const { colors } = useTheme();

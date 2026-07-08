@@ -40,6 +40,12 @@ const de: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'eine Aclearo-App',
   },
+  errorBoundary: {
+    title: 'Etwas ist schiefgelaufen',
+    message:
+      'Die App ist auf einen unerwarteten Fehler gestoßen. Versuchen Sie es erneut oder starten Sie A-Claro neu.',
+    retry: 'Erneut versuchen',
+  },
   auth: {
     loginTitle: 'Anmelden',
     loginSubtitle: 'Mit Telefon oder E-Mail anmelden',
@@ -370,6 +376,22 @@ const de: LocaleMessages = {
     appLockHint: 'Biometrics for SOS and diary',
     appLockEnable: 'Enable',
     appLockDisable: 'Disable',
+    aboutTitle: 'Über die App',
+    aboutHint: 'A-Claro · eine Aclearo-App',
+  },
+  about: {
+    eyebrow: 'Über die App',
+    title: 'A-Claro',
+    subtitle: 'Allergie-Begleiter — offline-first',
+    version: 'Version',
+    developer: 'Entwickler',
+    product: 'Produkt',
+    website: 'Website',
+    support: 'Support',
+    privacy: 'Datenschutzerklärung',
+    terms: 'Nutzungsbedingungen',
+    disclaimer:
+      'A-Claro dient nur zur Information und ersetzt keine ärztliche Beratung. Kein Medizinprodukt.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',
