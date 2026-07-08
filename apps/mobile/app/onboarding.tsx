@@ -35,7 +35,7 @@ export default function OnboardingScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={[styles.card, { maxWidth: layout.contentMaxWidth }]}>
           <View style={styles.hero}>
-            <BrandLogo size={44} showWordmark />
+            <BrandLogo size={44} showWordmark showEndorser />
             <View style={styles.heroArt}>
               <OnboardingSlideImage slide="profile" width={220} height={150} />
             </View>
@@ -77,7 +77,7 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
   return StyleSheet.create({
     root: {
       flex: 1,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.bg,
     },
     safe: {
       flex: 1,

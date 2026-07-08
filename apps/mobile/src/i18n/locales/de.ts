@@ -38,6 +38,7 @@ const de: LocaleMessages = {
   },
   brand: {
     productName: 'A-Claro',
+    endorser: 'eine Aclearo-App',
   },
   auth: {
     loginTitle: 'Anmelden',
@@ -252,6 +253,8 @@ const de: LocaleMessages = {
     menuPlaceholder: 'Gericht- oder Menüzutaten eingeben…',
     labelPlaceholder: 'Inhaltsstoffe von Arznei- oder Kosmetikverpackung…',
     matches: 'Treffer',
+    claroVerdict: 'Claro: {{verdict}}',
+    claroMatches: 'Claro: {{items}}',
     crossMatches: 'Kreuzreaktionen',
     traceMatches: 'Spuren (kann enthalten)',
     reportIncorrect: 'Falsches Ergebnis melden',

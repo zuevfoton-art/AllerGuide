@@ -87,7 +87,7 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
       {crossSuggestions.length > 0 ? (
         <View style={styles.crossCard}>
           <View style={styles.crossHeader}>
-            <Ionicons name="git-network-outline" size={18} color={theme.colors.purple} />
+            <Ionicons name="git-network-outline" size={18} color={theme.colors.accent} />
             <Text style={styles.crossTitle}>{t('allergens.crossTitle')}</Text>
           </View>
           <Text style={styles.crossText}>
@@ -195,7 +195,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.purple,
+      color: colors.accent,
     },
   });
 }
