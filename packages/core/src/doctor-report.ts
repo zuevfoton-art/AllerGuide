@@ -62,6 +62,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
     diaryTypes: [],
     defaultEnabled: true,
   },
+  {
+    id: 'conditionPhenotypes',
+    label: 'Хронология и фенотипы профиля',
+    diaryTypes: [],
+    defaultEnabled: true,
+  },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },
 ];
 

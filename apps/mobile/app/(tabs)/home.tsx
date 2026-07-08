@@ -53,7 +53,7 @@ export default function HomeScreen() {
       lat: location.lat,
       lon: location.lon,
       label: location.label,
-    });
+    }, { profileId: activeProfileId ?? undefined });
   });
   const wellness = wellnessState.data;
   const loadingWellness = wellnessState.loading;

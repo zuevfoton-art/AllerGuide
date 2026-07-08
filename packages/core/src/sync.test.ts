@@ -77,6 +77,9 @@ describe('sync payload', () => {
       pollenReminderEnabled: 'true',
       pollenReminderHour: '7',
       'pollenAlertCache:1': '{"matches":[]}',
+      'conditionHistory:1': '{"v":1,"episodes":[]}',
+      'profileConditions:1': 'food,asthma',
+      'sosPassport:2': '{}',
       diaryReminderId: 'skip-id',
     });
     expect(filtered.themeMode).toBe('dark');
@@ -86,5 +89,8 @@ describe('sync payload', () => {
     expect(filtered.pollenReminderHour).toBe('7');
     expect(filtered['pollenAlertCache:1']).toBe('{"matches":[]}');
     expect(filtered.diaryReminderId).toBeUndefined();
+    expect(filtered['conditionHistory:1']).toBe('{"v":1,"episodes":[]}');
+    expect(filtered['profileConditions:1']).toBe('food,asthma');
+    expect(filtered['sosPassport:2']).toBe('{}');
   });
 });

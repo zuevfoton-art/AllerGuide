@@ -209,12 +209,12 @@ type ClinicalPhenotypeId =
 
 | ID | Задача | Модуль |
 |----|--------|--------|
-| 3.1 | PDF: блок «Хронология и фенотипы» | doctor-report |
-| 3.2 | `reassessmentHints` (food у детей — EAACI) | home / diary |
-| 3.3 | Wellness v3: multimorbid penalty (AR+астма) | wellness.ts |
-| 3.4 | Связать `reactionType` еды ↔ SNOMED (`anaphylaxis`) | food-drug + symptom-coding |
-| 3.5 | SOS ↔ phenotypes (epinephrine eligibility) | allergy-passport |
-| 3.6 | Cloud sync `conditionHistory` | sync payload |
+| 3.1 | PDF: блок «Хронология и фенотипы» | ✅ Done |
+| 3.2 | `reassessmentHints` (food у детей — EAACI) | ✅ Done |
+| 3.3 | Wellness v3: multimorbid penalty (AR+астма) | ✅ Done |
+| 3.4 | Связать `reactionType` еды ↔ SNOMED (`anaphylaxis`) | ✅ Done |
+| 3.5 | SOS ↔ phenotypes (epinephrine eligibility) | ✅ Done |
+| 3.6 | Cloud sync `conditionHistory` | ✅ Done |
 
 ---
 

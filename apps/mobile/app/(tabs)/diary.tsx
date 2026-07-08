@@ -65,6 +65,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { MarketplaceModule } from '@/src/modules/marketplace';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 
@@ -107,6 +108,10 @@ export default function DiaryScreen() {
   );
   const profileConditions = useMemo(
     () => (activeProfile ? getProfileConditions(activeProfile) : []),
+    [activeProfile],
+  );
+  const phenotypeHints = useMemo(
+    () => (activeProfile ? getProfileReassessmentHints(activeProfile) : []),
     [activeProfile],
   );
   const visibleSections = useMemo(
@@ -584,6 +589,17 @@ export default function DiaryScreen() {
 
       <DiaryInsightsCard entries={list} />
 
+      {phenotypeHints.length ? (
+        <GlassCard style={styles.hintsCard}>
+          <Text style={ui.cardTitle}>{t('home.phenotypeHintsTitle')}</Text>
+          {phenotypeHints.map((hint) => (
+            <Text key={hint} style={styles.hintText}>
+              • {hint}
+            </Text>
+          ))}
+        </GlassCard>
+      ) : null}
+
       <MarketplaceModule variant="embedded" />
 
       {list.length === 0 ? (
@@ -724,6 +740,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
+    },
+    hintsCard: { gap: 8 },
+    hintText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
   });
 }

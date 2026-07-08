@@ -5,6 +5,7 @@ import {
   createDefaultPassport,
   formatPassportHtml,
   formatPassportText,
+  isEpinephrineEligible,
   parsePassport,
   serializePassport,
 } from './allergy-passport';
@@ -64,5 +65,20 @@ describe('allergy passport', () => {
     });
     expect(html).toContain('Паспорт аллергика');
     expect(html).toContain('Анна');
+  });
+
+  it('detects epinephrine eligibility from phenotypes (Phase 3)', () => {
+    expect(
+      isEpinephrineEligible({
+        conditionIds: ['food'],
+        phenotypeIds: ['food-anaphylaxis-risk'],
+      }),
+    ).toBe(true);
+    expect(
+      isEpinephrineEligible({
+        conditionIds: ['pollinosis'],
+        anaphylaxisHistory: false,
+      }),
+    ).toBe(false);
   });
 });

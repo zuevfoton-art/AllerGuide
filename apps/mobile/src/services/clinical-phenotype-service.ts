@@ -1,5 +1,6 @@
 import {
   buildConditionHistoryFromOnboarding,
+  isEpinephrineEligible,
   parseProfileAllergenIds,
   resolveClinicalPhenotypes,
   type Profile,
@@ -31,6 +32,16 @@ export function resolveProfileClinicalPhenotypes(
 
 export function getProfileReassessmentHints(profile: Profile): string[] {
   return resolveProfileClinicalPhenotypes(profile).reassessmentHints;
+}
+
+export function isProfileEpinephrineEligible(profile: Profile): boolean {
+  const phenotypes = resolveProfileClinicalPhenotypes(profile);
+  const passport = getAllergyPassport(profile.id);
+  return isEpinephrineEligible({
+    conditionIds: getStoredProfileConditions(profile.id),
+    anaphylaxisHistory: passport.anaphylaxisHistory,
+    phenotypeIds: phenotypes.phenotypeIds,
+  });
 }
 
 export function buildDraftClinicalPhenotypes(input: {

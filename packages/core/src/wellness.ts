@@ -71,6 +71,8 @@ export interface WellnessInput {
   foodAllergens: string[];
   envDataAvailable: boolean;
   asit?: WellnessAsitSummary | null;
+  /** ARIA multimorbid AR + asthma penalty input (Phase 3). */
+  multimorbidAriaAsthma?: boolean;
   /** @deprecated Use `diary.symptomDays > 0` — kept for transitional callers */
   recentSymptoms?: boolean;
   /** @deprecated Use `diary.triggerDays > 0` */
@@ -85,6 +87,7 @@ export interface WellnessScoreBreakdown {
   clinicalPenalty: number;
   asitPenalty: number;
   crossReactionPenalty: number;
+  multimorbidPenalty: number;
   crossReactionMatches: ReturnType<typeof computeCrossReactionWellnessPenalty>['matches'];
   weightsVersion: string;
 }
@@ -212,9 +215,18 @@ export function computeWellnessScoreBreakdown(input: WellnessInput): WellnessSco
   }
 
   const crossResult = computeCrossReactionWellnessPenalty(input.profileAllergenIds, pollenExposures);
+  const multimorbidPenalty = input.multimorbidAriaAsthma
+    ? WELLNESS_WEIGHTS.multimorbidAriaAsthma
+    : 0;
 
   const totalPenalty =
-    pollenPenalty + aqiPenalty + diaryPenalty + clinicalPenalty + asitPenalty + crossResult.penalty;
+    pollenPenalty +
+    aqiPenalty +
+    diaryPenalty +
+    clinicalPenalty +
+    asitPenalty +
+    crossResult.penalty +
+    multimorbidPenalty;
 
   const score = Math.max(
     WELLNESS_WEIGHTS.scoreMin,
@@ -229,6 +241,7 @@ export function computeWellnessScoreBreakdown(input: WellnessInput): WellnessSco
     clinicalPenalty,
     asitPenalty,
     crossReactionPenalty: crossResult.penalty,
+    multimorbidPenalty,
     crossReactionMatches: crossResult.matches,
     weightsVersion: WELLNESS_WEIGHTS_VERSION,
   };
@@ -345,6 +358,14 @@ export function buildWellnessRecommendations(input: WellnessInput): WellnessReco
       icon: '📷',
       title: 'Пищевые аллергены',
       text: `В профиле: ${input.foodAllergens.join(', ')}. Проверяйте состав через сканер перед покупкой новых продуктов.`,
+    });
+  }
+
+  if (input.multimorbidAriaAsthma) {
+    recs.push({
+      icon: '🫁',
+      title: 'Ринит и астма',
+      text: 'При сочетании аллергического ринита/поллиноза и астмы полезно заполнять шкалы ACT и ARIA и обсудить единый план лечения с врачом.',
     });
   }
 

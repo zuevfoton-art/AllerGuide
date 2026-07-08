@@ -9,6 +9,7 @@ import {
   computeWellnessConfidence,
   computeWellnessScore,
   computeWellnessScoreBreakdown,
+  hasAriaAsthmaMultimorbidity,
   getCurrentPollenAlerts,
   getDefaultPollenRegion,
   getFoodAllergenLabels,
@@ -28,6 +29,7 @@ import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatTemplate } from '@/src/i18n/translate';
 import type { AppLocale } from '@/src/i18n/types';
 import { trackEvent } from '@/src/services/analytics-service';
+import { getStoredProfileConditions } from '@/src/services/profile-conditions-service';
 
 export type WellnessConfidence = 'high' | 'medium' | 'low';
 
@@ -179,6 +181,7 @@ export async function fetchWellnessSnapshot(
   diaryEntries: DiaryEntry[] = [],
   locale: AppLocale = 'ru',
   location?: { lat: number; lon: number; label?: string },
+  options?: { profileId?: number },
 ): Promise<WellnessSnapshot> {
   const content = getLocaleContent(locale);
   const messages = LOCALE_MESSAGES[locale];
@@ -192,6 +195,8 @@ export async function fetchWellnessSnapshot(
   };
 
   const profileAllergenIds = parseProfileAllergenIds(profileAllergiesJson);
+  const conditionIds = options?.profileId ? getStoredProfileConditions(options.profileId) : [];
+  const multimorbidAriaAsthma = hasAriaAsthmaMultimorbidity(conditionIds);
   const diaryInsights = computeDiaryInsights(diaryEntries);
   const diarySeries = buildDiarySeriesFromInsights(diaryInsights);
   const clinicalScales = buildClinicalScalesFromTrends(collectLatestScaleTrends(diaryEntries));
@@ -256,6 +261,7 @@ export async function fetchWellnessSnapshot(
     foodAllergens,
     envDataAvailable,
     asit,
+    multimorbidAriaAsthma,
   };
 
   const score = computeWellnessScore(scoreInput);

@@ -100,4 +100,14 @@ describe('wellness v2 (B.4–B.9)', () => {
     expect(wellnessStatusFromScore(85).level).toBe('good');
     expect(wellnessStatusFromScore(55).level).toBe('attention');
   });
+
+  it('applies multimorbid ARIA+asthma penalty (Phase 3)', () => {
+    const without = computeWellnessScore(baseInput);
+    const withMultimorbid = computeWellnessScore({
+      ...baseInput,
+      multimorbidAriaAsthma: true,
+    });
+    expect(without).toBeGreaterThan(withMultimorbid);
+    expect(without - withMultimorbid).toBe(WELLNESS_WEIGHTS.multimorbidAriaAsthma);
+  });
 });

@@ -15,6 +15,8 @@ import {
   formatFoodDrugReportSummary,
   formatInsectReportSummary,
   formatPefTrendSummary,
+  formatConditionHistoryReportText,
+  formatClinicalPhenotypesReportText,
   formatDiaryDate,
   formatDiaryEntrySummary,
   formatPassportHtml,
@@ -33,6 +35,8 @@ import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
 import { doctorReportPdfFooterRu, doctorReportTitleRu } from '@/src/constants/brand';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { getStoredConditionHistory } from '@/src/services/condition-history-service';
+import { resolveProfileClinicalPhenotypes } from '@/src/services/clinical-phenotype-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
@@ -137,6 +141,18 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     ? `<section><h2>Хронология записей</h2>${renderTimeline(periodEntries)}</section>`
     : '';
 
+  const conditionPhenotypesHtml =
+    options.blockIds.includes('conditionPhenotypes') && profile
+      ? (() => {
+          const history = getStoredConditionHistory(profile.id);
+          const phenotypes = resolveProfileClinicalPhenotypes(profile);
+          const historyText = formatConditionHistoryReportText(history);
+          const phenotypeText = formatClinicalPhenotypesReportText(phenotypes);
+          const body = `${historyText}\n\n---\n\n${phenotypeText}`.replace(/</g, '&lt;');
+          return `<section><h2>Хронология и фенотипы профиля</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${body}</pre></section>`;
+        })()
+      : '';
+
   const scalesHtml = options.blockIds.includes('scales')
     ? `<section><h2>Сводка шкал</h2><ul>${renderScaleTrend(periodEntries)}</ul></section>`
     : '';
@@ -231,6 +247,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${pefHtml}
       ${asthmaHtml}
       ${timelineHtml}
+      ${conditionPhenotypesHtml}
       ${scalesHtml}
       ${asitHtml}
       ${foodDrugHtml}

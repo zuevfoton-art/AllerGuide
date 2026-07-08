@@ -237,6 +237,11 @@ function matchesAriaAsthma(conditionIds: AllergyConditionId[]): boolean {
   );
 }
 
+/** Exported for wellness multimorbid penalty (Phase 3). */
+export function hasAriaAsthmaMultimorbidity(conditionIds: AllergyConditionId[]): boolean {
+  return matchesAriaAsthma(conditionIds);
+}
+
 function matchesAriaConjunctivitis(
   conditionIds: AllergyConditionId[],
   history: ConditionHistory | null | undefined,
@@ -325,6 +330,7 @@ function matchesPolysensitized(
   return respiratoryCount >= 3 && countAllergenGroups(allergenIds) >= 2;
 }
 
+
 const REASSESSMENT_HINTS: Partial<Record<ClinicalPhenotypeId, string>> = {
   'adult-onset-food':
     'Пищевая аллергия с дебютом во взрослом возрасте может меняться — обсудите повторное обследование с аллергологом.',
@@ -339,6 +345,28 @@ const REASSESSMENT_HINTS: Partial<Record<ClinicalPhenotypeId, string>> = {
   polysensitized:
     'При полисенсибилизации индекс самочувствия менее точен — опирайтесь на дневник и консультации врача.',
 };
+
+const CHILD_FOOD_REASSESSMENT_HINT =
+  'У детей с пищевой аллергией возможно изменение толерантности — обсудите повторную оценку у аллерголога (EAACI).';
+
+function buildReassessmentHints(
+  phenotypeIds: ClinicalPhenotypeId[],
+  ctx: ClinicalPhenotypeContext,
+): string[] {
+  const hints = phenotypeIds
+    .map((id) => REASSESSMENT_HINTS[id])
+    .filter((hint): hint is string => Boolean(hint));
+
+  if (
+    isChildProfile(ctx) &&
+    hasCondition(ctx.conditionIds, 'food') &&
+    !hints.includes(CHILD_FOOD_REASSESSMENT_HINT)
+  ) {
+    hints.push(CHILD_FOOD_REASSESSMENT_HINT);
+  }
+
+  return hints;
+}
 
 export function resolveClinicalPhenotypes(ctx: ClinicalPhenotypeContext): ResolvedClinicalPhenotypes {
   const conditionIds = [...new Set(ctx.conditionIds)];
@@ -370,9 +398,7 @@ export function resolveClinicalPhenotypes(ctx: ClinicalPhenotypeContext): Resolv
     .map((id) => PHENOTYPE_BY_ID.get(id))
     .filter((item): item is ClinicalPhenotype => Boolean(item));
 
-  const reassessmentHints = phenotypeIds
-    .map((id) => REASSESSMENT_HINTS[id])
-    .filter((hint): hint is string => Boolean(hint));
+  const reassessmentHints = buildReassessmentHints(phenotypeIds, { ...ctx, conditionIds });
 
   return { phenotypeIds, phenotypes, reassessmentHints };
 }

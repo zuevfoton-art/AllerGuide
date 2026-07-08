@@ -1,3 +1,6 @@
+import type { AllergyConditionId } from './allergy-conditions';
+import type { ClinicalPhenotypeId } from './clinical-phenotypes';
+
 export interface ShockKitItem {
   id: string;
   label: string;
@@ -172,4 +175,23 @@ export function formatPassportHtml(input: PassportExportInput): string {
       <hr/>
       <p style="font-size:11px;color:#666;">Информация внесена пользователем и не является медицинским назначением.</p>
     </body></html>`;
+}
+
+export interface EpinephrineEligibilityInput {
+  conditionIds: AllergyConditionId[];
+  anaphylaxisHistory?: boolean;
+  phenotypeIds?: ClinicalPhenotypeId[];
+}
+
+/** Whether the profile suggests carrying epinephrine (informational, Phase 3). */
+export function isEpinephrineEligible(input: EpinephrineEligibilityInput): boolean {
+  if (input.anaphylaxisHistory) return true;
+  if (input.phenotypeIds?.includes('food-anaphylaxis-risk')) return true;
+  if (input.phenotypeIds?.includes('insect-venom-severe')) return true;
+  return false;
+}
+
+export function formatEpinephrineEligibilityHint(eligible: boolean): string | null {
+  if (!eligible) return null;
+  return 'По данным профиля рекомендуется обсудить с врачом наличие адреналина (автоинжектора) и заполнить данные в паспорте SOS.';
 }
