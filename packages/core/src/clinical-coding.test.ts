@@ -1,15 +1,34 @@
 import { describe, expect, it } from 'vitest';
+import { ALLERGENS } from './allergen-database';
 import {
   buildCodedAllergyLines,
   formatCodedAllergiesReportText,
   getClinicalCoding,
+  ALLERGEN_CLINICAL_CODES,
 } from './clinical-coding';
 
 describe('clinical coding crosswalk', () => {
+  it('covers every catalog allergen with ICD-11 crosswalk', () => {
+    for (const allergen of ALLERGENS) {
+      expect(getClinicalCoding(allergen.id), allergen.id).toBeDefined();
+    }
+    expect(Object.keys(ALLERGEN_CLINICAL_CODES).length).toBe(ALLERGENS.length);
+  });
+
   it('maps food allergens to ICD-11 CA08.3 and SNOMED', () => {
     const milk = getClinicalCoding('milk');
     expect(milk?.icd11).toBe('CA08.3');
     expect(milk?.snomed).toBe('425525006');
+  });
+
+  it('maps insect venom allergens to ICD-11 CA08.1', () => {
+    expect(getClinicalCoding('bee-venom')?.icd11).toBe('CA08.1');
+    expect(getClinicalCoding('wasp-venom')?.snomed).toBe('432674006');
+  });
+
+  it('maps drug allergens to ICD-11 CA08.2', () => {
+    expect(getClinicalCoding('nsaid')?.icd11).toBe('CA08.2');
+    expect(getClinicalCoding('cephalosporins')?.snomed).toBeTruthy();
   });
 
   it('maps pollen allergens to ICD-11 CA08.4', () => {

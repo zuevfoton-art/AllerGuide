@@ -9,7 +9,9 @@ export type CrossReactionSyndrome =
   | 'tropomyosin'
   | 'legume'
   | 'cereal'
-  | 'animal-protein';
+  | 'animal-protein'
+  | 'fpies'
+  | 'contact-dermatitis';
 
 export interface CrossReaction {
   fromId: string;

@@ -29,6 +29,16 @@ export const FOOD_REACTION_TYPE_CHOICES = [
 
 export const DRUG_SIDE_EFFECT_CHOICES = ['Нет', 'Лёгкая', 'Умеренная', 'Сильная'] as const;
 
+/** EAACI drug hypersensitivity reaction timing / phenotype (informational diary field). */
+export const DRUG_REACTION_TYPE_CHOICES = [
+  'Нет',
+  'Немедленная (IgE)',
+  'Отсроченная (T-cell)',
+  'Кожная',
+] as const;
+
+export type DrugReactionTypeChoice = (typeof DRUG_REACTION_TYPE_CHOICES)[number];
+
 export const FOOD_DRUG_DISCLAIMER =
   'Учёт пищевых и лекарственных реакций носит информационный характер. Назначения и исключения определяет врач.';
 
