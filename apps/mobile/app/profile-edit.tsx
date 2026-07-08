@@ -7,6 +7,7 @@ import {
   parseProfileAllergenIds,
   type AllergyConditionId,
   type AllergyConfirmationSource,
+  type ComorbidityLink,
   type ProfileType,
 } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
@@ -27,7 +28,6 @@ import {
   type ConditionHistoryDrafts,
 } from '@/src/components/ConditionHistoryEditor';
 import { ComorbidityEditor } from '@/src/components/ComorbidityEditor';
-import type { ComorbidityLink } from '@allerguide/core';
 import {
   listEmergencyContacts,
   normalizeEmergencyContactDrafts,
