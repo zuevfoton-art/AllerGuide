@@ -70,7 +70,7 @@
 
 Отдельный раздел **«Шкала»** — опциональный, не входит в полный мастер записи по умолчанию.
 
-Шкалы подбираются по профилю (`diary-profile.ts`): ринит/поллиноз → ARIA-lite, астма → ACT, атопический дерматит → SCORAD-lite, **крапивница в аллергенах профиля** → UAS7. Типы состояний задаются в профиле и дополняются эвристикой по аллергенам. Разделы «Пикфлоуметрия» и «АСИТ» показываются только при соответствующих состояниях (FR-PROF-10/11). UAS7 входит в тренды дневника (`DIARY_TREND_SCALE_IDS`).
+Шкалы подбираются по профилю (`diary-profile.ts`): ринит/поллиноз → ARIA-lite, астма → ACT, атопический дерматит → SCORAD-lite, **явный тип `urticaria` или крапивница в аллергенах** → UAS7. Типы состояний задаются в профиле (11 типов, FR-PROF-02) и дополняются эвристикой по аллергенам. Разделы «Пикфлоуметрия» и «АСИТ» показываются только при соответствующих состояниях (FR-PROF-10/11). UAS7 — при `urticaria` (FR-PROF-12). UAS7 входит в тренды дневника (`DIARY_TREND_SCALE_IDS`).
 
 ### ARIA-lite (ринит)
 
@@ -116,6 +116,7 @@
 |------|------------|
 | `scales` | Записи «Шкала» с итоговым баллом и интерпретацией |
 | `triggerContext` | Триггеры с контекстом пыльцы, сканов и ЛС (агрегированный блок PDF) |
+| `conditionPhenotypes` | Хронология состояний (`conditionHistory`) + выведенные клинические фенотипы (`resolveClinicalPhenotypes`) |
 
 Дополнительно в PDF:
 
@@ -255,3 +256,43 @@ PDF-отчёт: блок **«Инсектная аллергия»** — пла�
 - `packages/core/src/insect-allergy.test.ts` — план, префилл, сводки, отчёт.
 - `packages/ai/src/ocr.test.ts` — нормализация OCR, извлечение состава.
 - `packages/core/src/diary-triggers.test.ts` — префилл триггеров и отчёт контекста.
+- `packages/core/src/clinical-phenotypes.test.ts` — сценарии S1–S10 (P1–P10).
+- `packages/core/src/condition-history.test.ts` — хронология, коморbidность, ocular flag.
+- `packages/core/src/catalog-expansion.test.ts` — Phase 4 drug reaction types, FPIES syndromes.
+
+## 11. Матрица клинических фенотипов S1–S10
+
+Фенотипы **выводятся** доменом `resolveClinicalPhenotypes()` (`packages/core/src/clinical-phenotypes.ts`). Не добавляют gating сканера / карты / маркетплейса (FR-PROF-16). Используются для подсказок на главной и в дневнике, карточки «Ваш фенотип» в онбординге и блока PDF `conditionPhenotypes`.
+
+| ID | PhenotypeId | Условия (+ SOS / история) | Источник | Поведение в приложении |
+|----|------------|---------------------------|----------|------------------------|
+| **S1** | `atopic-march-child` | АтД → ринит/поллиноз → астма (детский профиль, порядок в `conditionHistory` / `comorbidityLinks`) | РААКИ атопический марш | Подсказка траектории; SCORAD + ARIA + ACT в рекомендациях |
+| **S2** | `aria-asthma` | Ринит или поллиноз **+** астма | EAACI ARIA 2024 | Pollen alerts + prompt ACT; wellness multimorbid penalty |
+| **S3** | `aria-conjunctivitis` | Ринит + `ocularSymptoms: true` в episode | EAACI ARIA 2024 | Приоритет глазных симптомов в подсказках |
+| **S4** | `food-anaphylaxis-risk` | Пищевая аллергия + `anaphylaxisHistory` в SOS | EAACI anaphylaxis | Напоминание об адреналине; `isEpinephrineEligible()` |
+| **S5** | `pollen-food-oas` | Поллиноз + пищевая + cross-reaction OAS | EAACI PFAS | Подсказка OAS в дневнике «Питание» |
+| **S6** | `dustmite-seafood` | Бытовая (клещи) + морепродукты в профиле | iFAAM tropomyosin | Hint по traces в сканере |
+| **S7** | `insect-venom-severe` | Инсектная + `anaphylaxisHistory` | EAACI venom | План действий при укусах; SOS epinephrine banner |
+| **S8** | `drug-respiratory` | Лекарственная + астма/ринит | РААКИ NSAID | Сканер лекарств по умолчанию; предупреждения НПВС |
+| **S9** | `adult-onset-food` | Пищевая + дебют `adulthood` в history | EAACI food history | `reassessmentHints` на главной / дневнике |
+| **S10** | `polysensitized` | ≥3 респираторных типа + ≥2 групп аллергенов | MeDALL / MASK-air | Wellness confidence ↓ |
+
+### Покрытие по типам состояния (11 типов, FR-PROF-02)
+
+| AllergyConditionId | Gating дневника | Шкала | Phenotypes (примеры) |
+|--------------------|-----------------|-------|---------------------|
+| `food` | Питание | — | S4, S5, S9 |
+| `pollinosis` | АСИТ | ARIA-lite | S2, S5, S10 |
+| `asthma` | Пикфлоуметрия | ACT | S1, S2, S8 |
+| `rhinitis` | АСИТ | ARIA-lite | S2, S3, S8 |
+| `dermatitis` | Кожа | SCORAD-lite | S1 |
+| `urticaria` | — | **UAS7** | — (отдельный тип, FR-PROF-12) |
+| `household` | АСИТ | — | S6, S10 |
+| `animal` | АСИТ | — | S10 |
+| `drug` | Лекарство | — | S8 |
+| `insect` | Укус насекомого | — | S7 |
+| `other` | — | — | — |
+
+### QA-прогон матрицы
+
+Ручные сценарии — [`qa-checklist.md` §16](./qa-checklist.md#16-клинический-профиль-taxonomy-phases-14). Unit-тесты P1–P10 — `clinical-phenotypes.test.ts`.

@@ -84,8 +84,12 @@ Tracking issues for the allergy profile taxonomy workstream. Implemented in PR f
 
 ---
 
-## Issue 7 — Per-allergen ICD/SNOMED gaps (planned)
+## Issue 7 — Per-allergen ICD/SNOMED gaps **done**
 
 **Title:** `core: clinical-coding crosswalk for remaining 24 allergens`
 
-**Reference:** `clinical-accuracy-roadmap.md` Phase A
+**Reference:** `clinical-accuracy-roadmap.md` Phase A · Phase 4 catalog expansion
+
+**Acceptance:**
+- [x] ICD-11 + SNOMED for all catalog allergens (56 rows)
+- [x] `clinical-coding.test.ts` full coverage assertion
