@@ -718,6 +718,7 @@ export type LocaleMessages = {
   };
   allergens: {
     popular: string;
+    suggested: string;
     fromCatalog: string;
     openCatalog: string;
     crossTitle: string;

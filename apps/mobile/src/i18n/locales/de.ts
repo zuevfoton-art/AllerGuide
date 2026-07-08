@@ -728,6 +728,7 @@ const de: LocaleMessages = {
   },
   allergens: {
     popular: 'Häufige Allergene',
+    suggested: 'Zu Ihren Allergietypen',
     fromCatalog: 'Aus vollständiger Liste',
     openCatalog: 'Aus vollständiger Liste wählen',
     crossTitle: 'Mögliche Kreuzreaktionen',

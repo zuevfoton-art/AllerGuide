@@ -1,5 +1,6 @@
-import type { AllergyConfirmationSource } from '@allerguide/core';
-import { normalizeAllergyConfirmations } from '@allerguide/core';
+import { useMemo } from 'react';
+import type { AllergyConditionId, AllergyConfirmationSource } from '@allerguide/core';
+import { getSuggestedAllergenIdsForConditions, normalizeAllergyConfirmations } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -12,6 +13,7 @@ interface ProfileSetupAllergensStepProps {
   onSelectedChange: (ids: string[]) => void;
   confirmations: Record<string, AllergyConfirmationSource>;
   onConfirmationsChange: (value: Record<string, AllergyConfirmationSource>) => void;
+  conditions: AllergyConditionId[];
 }
 
 export function ProfileSetupAllergensStep({
@@ -19,15 +21,21 @@ export function ProfileSetupAllergensStep({
   onSelectedChange,
   confirmations,
   onConfirmationsChange,
+  conditions,
 }: ProfileSetupAllergensStepProps) {
   const ui = useUiStyles();
   const { t } = useTranslation();
+  const suggestedIds = useMemo(
+    () => getSuggestedAllergenIdsForConditions(conditions),
+    [conditions],
+  );
 
   return (
     <GlassCard style={{ gap: 8 }}>
       <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
       <AllergenPicker
         selected={selected}
+        suggestedIds={suggestedIds}
         onChange={(ids) => {
           onSelectedChange(ids);
           onConfirmationsChange(normalizeAllergyConfirmations(ids, confirmations));

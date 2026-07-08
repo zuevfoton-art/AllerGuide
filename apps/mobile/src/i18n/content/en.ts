@@ -215,6 +215,48 @@ const enContent: LocaleContent = {
     medication: 'Medications',
     insect: 'Insects',
   },
+  allergyConditions: {
+    food: {
+      label: 'Food allergy',
+      description: 'Milk, egg, wheat, nuts, fish, shellfish, soy, peanut',
+    },
+    pollinosis: {
+      label: 'Pollinosis',
+      description: 'Allergy to plant pollen by season',
+    },
+    asthma: {
+      label: 'Bronchial asthma',
+      description: 'Chronic airway disease',
+    },
+    rhinitis: {
+      label: 'Allergic rhinitis',
+      description: 'Nasal mucosa inflammation',
+    },
+    dermatitis: {
+      label: 'Atopic dermatitis',
+      description: 'Skin: eczema, neurodermatitis',
+    },
+    household: {
+      label: 'Household allergy',
+      description: 'House dust, mites, mold',
+    },
+    animal: {
+      label: 'Pet allergy',
+      description: 'Cats, dogs, rodents, birds',
+    },
+    drug: {
+      label: 'Drug allergy',
+      description: 'Reactions to medications',
+    },
+    insect: {
+      label: 'Insect allergy',
+      description: 'Bee, wasp, hornet, mosquito stings',
+    },
+    other: {
+      label: 'Other allergies',
+      description: 'Rare allergens with manual entry',
+    },
+  },
   expertHero: {
     name: 'MD, PhD, Prof. Yuri Solomonovich Smolkin',
     role: 'President of ADAIR, Scientific Director of the National Clinical Research Center',

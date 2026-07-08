@@ -251,6 +251,7 @@ export default function ProfileSetupScreen() {
           onSelectedChange={setSelected}
           confirmations={confirmations}
           onConfirmationsChange={setConfirmations}
+          conditions={conditions}
         />
       ) : null}
 
