@@ -517,6 +517,25 @@ export type LocaleMessages = {
     conditionsQuestion: string;
     conditionsQuestionChild: string;
     conditionsHint: string;
+    conditionHistory: {
+      title: string;
+      hint: string;
+      empty: string;
+      onsetLabel: string;
+      onsetYearLabel: string;
+      onsetYearPlaceholder: string;
+      statusLabel: string;
+      confirmedBy: string;
+      foodTimingLabel: string;
+      notesLabel: string;
+      notesPlaceholder: string;
+      onset: Record<
+        'infancy' | 'early-childhood' | 'school-age' | 'adolescence' | 'adulthood' | 'unknown',
+        string
+      >;
+      status: Record<'active' | 'in-remission' | 'resolved' | 'unknown', string>;
+      foodTiming: Record<'within-30min' | '30min-2h' | 'over-2h' | 'unknown', string>;
+    };
     consent: string;
     confirmationLabel: string;
     confirmationHint: string;
@@ -540,6 +559,7 @@ export type LocaleMessages = {
   profileEdit: {
     title: string;
     subtitle: string;
+    conditionHistoryLabel: string;
     saveChanges: string;
     errors: {
       nameRequired: string;

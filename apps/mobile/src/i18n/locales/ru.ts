@@ -532,6 +532,39 @@ const ru: LocaleMessages = {
     conditionsQuestionChild: 'Какая аллергия у ребёнка?',
     conditionsHint:
       'Выберите все подходящие типы — дневник подстроит шкалы и разделы (ПСВ при астме, АСИТ при поллинозе и др.).',
+    conditionHistory: {
+      title: 'Когда появилась аллергия?',
+      hint: 'Укажите примерный период дебюта для каждого типа. Можно пропустить отдельные поля.',
+      empty: 'Сначала выберите типы аллергии на предыдущем шаге.',
+      onsetLabel: 'Когда впервые проявилось',
+      onsetYearLabel: 'Год (если помните)',
+      onsetYearPlaceholder: 'Например, 2018',
+      statusLabel: 'Текущий статус',
+      confirmedBy: 'Подтверждение',
+      foodTimingLabel: 'Время симптомов после еды',
+      notesLabel: 'Заметки',
+      notesPlaceholder: 'Например: диагноз поставил аллерголог в 2020',
+      onset: {
+        infancy: 'Младенчество',
+        'early-childhood': 'Раннее детство',
+        'school-age': 'Школьный возраст',
+        adolescence: 'Подростковый',
+        adulthood: 'Взрослый возраст',
+        unknown: 'Не помню',
+      },
+      status: {
+        active: 'Активно',
+        'in-remission': 'В ремиссии',
+        resolved: 'Прошло',
+        unknown: 'Не знаю',
+      },
+      foodTiming: {
+        'within-30min': 'До 30 мин',
+        '30min-2h': '30 мин — 2 ч',
+        'over-2h': 'Более 2 ч',
+        unknown: 'Не знаю',
+      },
+    },
     consent:
       'Я подтверждаю, что являюсь родителем или законным представителем данного ребёнка и вправе вводить сведения о его состоянии здоровья.',
     confirmationLabel: 'Источник подтверждения',
@@ -556,6 +589,7 @@ const ru: LocaleMessages = {
   profileEdit: {
     title: 'Профиль',
     subtitle: 'Данные и редактирование',
+    conditionHistoryLabel: 'История аллергии',
     saveChanges: 'Сохранить изменения',
     errors: {
       nameRequired: 'Укажите имя профиля.',

@@ -526,6 +526,39 @@ const de: LocaleMessages = {
     conditionsQuestionChild: 'Welche Allergien hat dein Kind?',
     conditionsHint:
       'Wählen Sie alle zutreffenden Typen — das Tagebuch passt Skalen und Abschnitte an (PSF bei Asthma, AIT bei Pollinose usw.).',
+    conditionHistory: {
+      title: 'Wann begann die Allergie?',
+      hint: 'Geben Sie den ungefähren Beginn für jeden Typ an. Felder können übersprungen werden.',
+      empty: 'Wählen Sie zuerst Allergietypen im vorherigen Schritt.',
+      onsetLabel: 'Erstes Auftreten',
+      onsetYearLabel: 'Jahr (falls bekannt)',
+      onsetYearPlaceholder: 'Zum Beispiel 2018',
+      statusLabel: 'Aktueller Status',
+      confirmedBy: 'Bestätigung',
+      foodTimingLabel: 'Zeit bis zu Symptomen nach dem Essen',
+      notesLabel: 'Notizen',
+      notesPlaceholder: 'Zum Beispiel: Diagnose durch Allergologe 2020',
+      onset: {
+        infancy: 'Säuglingsalter',
+        'early-childhood': 'Frühe Kindheit',
+        'school-age': 'Schulalter',
+        adolescence: 'Jugend',
+        adulthood: 'Erwachsenenalter',
+        unknown: 'Weiß nicht',
+      },
+      status: {
+        active: 'Aktiv',
+        'in-remission': 'In Remission',
+        resolved: 'Abgeklungen',
+        unknown: 'Unbekannt',
+      },
+      foodTiming: {
+        'within-30min': 'Bis 30 Min',
+        '30min-2h': '30 Min — 2 Std',
+        'over-2h': 'Über 2 Std',
+        unknown: 'Unbekannt',
+      },
+    },
     consent:
       'Ich bestätige, dass ich Elternteil oder gesetzlicher Vertreter dieses Kindes bin und berechtigt bin, Gesundheitsdaten einzugeben.',
     confirmationLabel: 'Bestätigungsquelle',
@@ -550,6 +583,7 @@ const de: LocaleMessages = {
   profileEdit: {
     title: 'Profil',
     subtitle: 'Daten und Bearbeitung',
+    conditionHistoryLabel: 'Allergieverlauf',
     saveChanges: 'Änderungen speichern',
     errors: {
       nameRequired: 'Profilnamen eingeben.',

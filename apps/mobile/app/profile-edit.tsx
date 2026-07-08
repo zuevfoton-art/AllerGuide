@@ -18,6 +18,14 @@ import {
   setStoredProfileConditions,
 } from '@/src/services/profile-conditions-service';
 import {
+  getConditionHistoryDrafts,
+  saveConditionHistoryFromOnboarding,
+} from '@/src/services/condition-history-service';
+import {
+  ConditionHistoryEditor,
+  type ConditionHistoryDrafts,
+} from '@/src/components/ConditionHistoryEditor';
+import {
   listEmergencyContacts,
   normalizeEmergencyContactDrafts,
   syncEmergencyContacts,
@@ -31,6 +39,7 @@ import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { reconcileConditionHistoryDrafts } from '@/src/hooks/use-profile-setup-wizard';
 import { useTranslation } from '@/src/store/locale-store';
 
 export default function ProfileEditScreen() {
@@ -47,6 +56,7 @@ export default function ProfileEditScreen() {
   const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [childConsent, setChildConsent] = useState(true);
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
+  const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -77,7 +87,9 @@ export default function ProfileEditScreen() {
           relation: contact.relation,
         })),
       );
-      setConditions(getStoredProfileConditions(profileId));
+      const storedConditions = getStoredProfileConditions(profileId);
+      setConditions(storedConditions);
+      setConditionHistoryDrafts(getConditionHistoryDrafts(profileId));
       setLoading(false);
     });
   }, [profileId]);
@@ -106,6 +118,7 @@ export default function ProfileEditScreen() {
     }
 
     setStoredProfileConditions(profileId, conditions);
+    saveConditionHistoryFromOnboarding(profileId, conditions, conditionHistoryDrafts);
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     router.back();
   };
@@ -182,8 +195,25 @@ export default function ProfileEditScreen() {
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-            <ConditionPicker selected={conditions} onChange={setConditions} />
+            <ConditionPicker
+              selected={conditions}
+              onChange={(next) => {
+                setConditions(next);
+                setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
+              }}
+            />
           </GlassCard>
+
+          {conditions.length > 0 ? (
+            <GlassCard style={styles.section}>
+              <Text style={ui.sectionLabel}>{t('profileEdit.conditionHistoryLabel')}</Text>
+              <ConditionHistoryEditor
+                conditionIds={conditions}
+                drafts={conditionHistoryDrafts}
+                onChange={setConditionHistoryDrafts}
+              />
+            </GlassCard>
+          ) : null}
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>

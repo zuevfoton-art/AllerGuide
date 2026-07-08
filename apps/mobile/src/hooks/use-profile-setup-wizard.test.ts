@@ -3,6 +3,8 @@ import {
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
+  reconcileConditionHistoryDrafts,
+  shouldSkipConditionHistoryStep,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardDraft,
@@ -14,18 +16,30 @@ const baseDraft = (): ProfileSetupWizardDraft => ({
   selectedAllergenIds: ['milk'],
   confirmations: {},
   conditions: [],
+  conditionHistoryDrafts: {},
   contacts: [],
   childConsent: false,
   profileType: 'self',
 });
 
 describe('profile setup wizard', () => {
-  it('defines five ordered steps', () => {
-    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(5);
+  it('defines six ordered steps including condition history', () => {
+    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(6);
     expect(getNextProfileSetupWizardStep('name')).toBe('birthYear');
+    expect(getNextProfileSetupWizardStep('conditions')).toBe('conditionHistory');
     expect(getNextProfileSetupWizardStep('contacts')).toBeNull();
-    expect(getPreviousProfileSetupWizardStep('allergens')).toBe('conditions');
+    expect(getPreviousProfileSetupWizardStep('allergens')).toBe('conditionHistory');
     expect(getPreviousProfileSetupWizardStep('name')).toBeNull();
+  });
+
+  it('skips condition history when no conditions selected', () => {
+    expect(shouldSkipConditionHistoryStep({ conditions: [] })).toBe(true);
+    expect(getNextProfileSetupWizardStep('conditions', { skipConditionHistory: true })).toBe(
+      'allergens',
+    );
+    expect(getPreviousProfileSetupWizardStep('allergens', { skipConditionHistory: true })).toBe(
+      'conditions',
+    );
   });
 
   it('validates name step', () => {
@@ -66,5 +80,13 @@ describe('profile setup wizard', () => {
     expect(
       validateProfileSetupWizardDraft({ ...baseDraft(), selectedAllergenIds: [] }, {}),
     ).toBe('allergen_required');
+  });
+
+  it('reconciles condition history drafts when conditions change', () => {
+    const drafts = reconcileConditionHistoryDrafts(['food', 'asthma'], {
+      food: { onsetKind: 'infancy', status: 'active', diagnosedBy: 'self_reported' },
+    });
+    expect(Object.keys(drafts)).toEqual(['food', 'asthma']);
+    expect(drafts.asthma?.onsetKind).toBe('unknown');
   });
 });

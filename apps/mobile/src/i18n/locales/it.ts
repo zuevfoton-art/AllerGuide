@@ -525,6 +525,39 @@ const it: LocaleMessages = {
     conditionsQuestionChild: 'Quali allergie ha tuo figlio?',
     conditionsHint:
       'Seleziona tutti i tipi pertinenti — il diario adatterà scale e sezioni (picco di flusso per l\'asma, AIT per la pollinosi, ecc.).',
+    conditionHistory: {
+      title: 'Quando è iniziata l\'allergia?',
+      hint: 'Indica il periodo approssimativo di insorgenza per ogni tipo. I campi sono facoltativi.',
+      empty: 'Seleziona prima i tipi di allergia nel passo precedente.',
+      onsetLabel: 'Prime manifestazioni',
+      onsetYearLabel: 'Anno (se lo ricordi)',
+      onsetYearPlaceholder: 'Ad esempio 2018',
+      statusLabel: 'Stato attuale',
+      confirmedBy: 'Conferma',
+      foodTimingLabel: 'Tempo tra cibo e sintomi',
+      notesLabel: 'Note',
+      notesPlaceholder: 'Ad esempio: diagnosi dall\'allergologo nel 2020',
+      onset: {
+        infancy: 'Neonato',
+        'early-childhood': 'Prima infanzia',
+        'school-age': 'Età scolare',
+        adolescence: 'Adolescenza',
+        adulthood: 'Età adulta',
+        unknown: 'Non ricordo',
+      },
+      status: {
+        active: 'Attiva',
+        'in-remission': 'In remissione',
+        resolved: 'Risolta',
+        unknown: 'Sconosciuto',
+      },
+      foodTiming: {
+        'within-30min': 'Entro 30 min',
+        '30min-2h': '30 min — 2 h',
+        'over-2h': 'Oltre 2 h',
+        unknown: 'Sconosciuto',
+      },
+    },
     consent:
       'Confermo di essere genitore o tutore legale di questo bambino e di essere autorizzato a inserire le sue informazioni sanitarie.',
     confirmationLabel: 'Fonte di verifica',
@@ -549,6 +582,7 @@ const it: LocaleMessages = {
   profileEdit: {
     title: 'Profilo',
     subtitle: 'Dati e modifica',
+    conditionHistoryLabel: 'Storia allergica',
     saveChanges: 'Salva modifiche',
     errors: {
       nameRequired: 'Inserisci un nome profilo.',

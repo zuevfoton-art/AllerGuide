@@ -531,6 +531,39 @@ const en: LocaleMessages = {
     conditionsQuestionChild: "What allergies does your child have?",
     conditionsHint:
       'Select all that apply — the diary will tailor scales and sections (peak flow for asthma, AIT for pollinosis, etc.).',
+    conditionHistory: {
+      title: 'When did the allergy start?',
+      hint: 'Enter an approximate onset period for each type. Optional fields can be skipped.',
+      empty: 'Select allergy types on the previous step first.',
+      onsetLabel: 'When symptoms first appeared',
+      onsetYearLabel: 'Year (if you remember)',
+      onsetYearPlaceholder: 'For example, 2018',
+      statusLabel: 'Current status',
+      confirmedBy: 'Confirmation',
+      foodTimingLabel: 'Time from food to symptoms',
+      notesLabel: 'Notes',
+      notesPlaceholder: 'For example: diagnosed by allergist in 2020',
+      onset: {
+        infancy: 'Infancy',
+        'early-childhood': 'Early childhood',
+        'school-age': 'School age',
+        adolescence: 'Adolescence',
+        adulthood: 'Adulthood',
+        unknown: 'Do not remember',
+      },
+      status: {
+        active: 'Active',
+        'in-remission': 'In remission',
+        resolved: 'Resolved',
+        unknown: 'Unknown',
+      },
+      foodTiming: {
+        'within-30min': 'Within 30 min',
+        '30min-2h': '30 min — 2 h',
+        'over-2h': 'Over 2 h',
+        unknown: 'Unknown',
+      },
+    },
     consent:
       'I confirm that I am the parent or legal guardian of this child and am authorized to enter their health information.',
     confirmationLabel: 'Verification source',
@@ -555,6 +588,7 @@ const en: LocaleMessages = {
   profileEdit: {
     title: 'Profile',
     subtitle: 'Details and editing',
+    conditionHistoryLabel: 'Allergy history',
     saveChanges: 'Save changes',
     errors: {
       nameRequired: 'Enter a profile name.',

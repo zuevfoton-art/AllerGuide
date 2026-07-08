@@ -525,6 +525,39 @@ const es: LocaleMessages = {
     conditionsQuestionChild: '¿Qué alergias tiene tu hijo?',
     conditionsHint:
       'Selecciona todos los que correspondan — el diario adaptará escalas y secciones (flujo máximo con asma, AIT con polinosis, etc.).',
+    conditionHistory: {
+      title: '¿Cuándo empezó la alergia?',
+      hint: 'Indica el periodo aproximado de inicio de cada tipo. Puedes omitir campos.',
+      empty: 'Primero selecciona tipos de alergia en el paso anterior.',
+      onsetLabel: 'Cuándo apareció por primera vez',
+      onsetYearLabel: 'Año (si lo recuerdas)',
+      onsetYearPlaceholder: 'Por ejemplo, 2018',
+      statusLabel: 'Estado actual',
+      confirmedBy: 'Confirmación',
+      foodTimingLabel: 'Tiempo desde la comida hasta los síntomas',
+      notesLabel: 'Notas',
+      notesPlaceholder: 'Por ejemplo: diagnóstico del alergólogo en 2020',
+      onset: {
+        infancy: 'Lactancia',
+        'early-childhood': 'Primera infancia',
+        'school-age': 'Edad escolar',
+        adolescence: 'Adolescencia',
+        adulthood: 'Edad adulta',
+        unknown: 'No recuerdo',
+      },
+      status: {
+        active: 'Activa',
+        'in-remission': 'En remisión',
+        resolved: 'Resuelta',
+        unknown: 'Desconocido',
+      },
+      foodTiming: {
+        'within-30min': 'Menos de 30 min',
+        '30min-2h': '30 min — 2 h',
+        'over-2h': 'Más de 2 h',
+        unknown: 'Desconocido',
+      },
+    },
     consent:
       'Confirmo que soy el padre, la madre o tutor legal de este niño y estoy autorizado a introducir su información de salud.',
     confirmationLabel: 'Fuente de verificación',
@@ -549,6 +582,7 @@ const es: LocaleMessages = {
   profileEdit: {
     title: 'Perfil',
     subtitle: 'Datos y edición',
+    conditionHistoryLabel: 'Historial de alergia',
     saveChanges: 'Guardar cambios',
     errors: {
       nameRequired: 'Introduce un nombre de perfil.',
