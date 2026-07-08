@@ -412,7 +412,7 @@ export default function DiaryScreen() {
       <ProfileSwitcher />
 
       {actPromptDue ? (
-        <GlassCard style={styles.actPromptCard}>
+        <GlassCard variant="calm" style={styles.actPromptCard}>
           <Text style={ui.cardTitle}>{t('diary.actPromptTitle')}</Text>
           <Text style={styles.actPromptText}>{t('diary.actPromptText')}</Text>
           <Button
@@ -590,7 +590,7 @@ export default function DiaryScreen() {
       <DiaryInsightsCard entries={list} />
 
       {phenotypeHints.length ? (
-        <GlassCard style={styles.hintsCard}>
+        <GlassCard variant="calm" style={styles.hintsCard}>
           <Text style={ui.cardTitle}>{t('home.phenotypeHintsTitle')}</Text>
           {phenotypeHints.map((hint) => (
             <Text key={hint} style={styles.hintText}>
