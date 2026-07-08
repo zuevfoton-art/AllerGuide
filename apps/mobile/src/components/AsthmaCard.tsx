@@ -42,7 +42,7 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
   const configured = isAsthmaPlanConfigured(plan);
 
   return (
-    <GlassCard style={styles.card}>
+    <GlassCard variant="calm" style={styles.card}>
       <View style={styles.headerRow}>
         <Ionicons name="fitness" size={18} color={theme.colors.accent} />
         <Text style={ui.cardTitle}>{t('asthma.title')}</Text>

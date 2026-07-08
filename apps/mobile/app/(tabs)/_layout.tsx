@@ -39,7 +39,11 @@ function TabBarButton({
       accessibilityState={accessibilityState}
       style={[
         tabBarStyles.button,
-        focused && { backgroundColor: colors.accentLight },
+        focused && {
+          backgroundColor: colors.calmWash,
+          borderWidth: 1,
+          borderColor: colors.calmMist,
+        },
         style,
       ]}>
       {props.children}

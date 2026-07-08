@@ -219,7 +219,7 @@ export default function HomeScreen() {
       </GlassCard>
 
       {phenotypeHints.length ? (
-        <GlassCard style={styles.recCard}>
+        <GlassCard variant="calm" style={styles.recCard}>
           <Text style={styles.recTitle}>{t('home.phenotypeHintsTitle')}</Text>
           {phenotypeHints.map((hint) => (
             <Text key={hint} style={styles.recText}>
@@ -230,7 +230,7 @@ export default function HomeScreen() {
       ) : null}
 
       {wellness?.recommendations[0] ? (
-        <GlassCard style={styles.recCard}>
+        <GlassCard variant="calm" style={styles.recCard}>
           <Text style={styles.recTitle}>{wellness.recommendations[0].title}</Text>
           <Text style={styles.recText}>{wellness.recommendations[0].text}</Text>
         </GlassCard>

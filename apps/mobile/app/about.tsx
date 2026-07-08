@@ -52,7 +52,7 @@ export default function AboutScreen() {
         <BrandLogo size={56} showWordmark showEndorser />
       </View>
 
-      <GlassCard>
+      <GlassCard variant="calm">
         <View style={styles.metaRow}>
           <Text style={styles.metaLabel}>{t('about.version')}</Text>
           <Text style={styles.metaValue}>{APP_VERSION}</Text>

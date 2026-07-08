@@ -65,14 +65,14 @@ export default function ExpertScreen() {
         </View>
       </View>
 
-      <GlassCard style={styles.hero}>
+      <GlassCard variant="calm" style={styles.hero}>
         <View style={styles.heroIcon}>
           <BrandMark size={48} variant="mono" color={theme.colors.onAccent} />
         </View>
         <Text style={styles.heroSubtitle}>{localeContent.expertHero.subtitle}</Text>
       </GlassCard>
 
-      <GlassCard style={styles.advisoryCard}>
+      <GlassCard variant="calm" style={styles.advisoryCard}>
         <Text style={styles.advisoryTitle}>{t('expert.advisoryTitle')}</Text>
         <Text style={styles.advisoryMeta}>{t('expert.advisorySubtitle')}</Text>
         {MEDICAL_ADVISORY_BOARD.map((member) => (
