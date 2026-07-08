@@ -16,6 +16,7 @@ describe('resolveAllergenId', () => {
   it('resolves legacy Russian label', () => {
     expect(resolveAllergenId('Молоко')).toBe('milk');
     expect(resolveAllergenId('Арахис')).toBe('peanut');
+    expect(resolveAllergenId('Пыль клещей')).toBe('dust-mites');
   });
 });
 
