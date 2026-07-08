@@ -65,7 +65,6 @@
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "staging",
         "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "EXPO_PUBLIC_SENTRY_DSN": "",
         "NODE_OPTIONS": "--max-old-space-size=8192"
       },
       "android": {
@@ -84,8 +83,7 @@
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
-        "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_SENTRY_DSN": ""
+        "EXPO_PUBLIC_APP_ENV": "production"
       }
     }
   },
