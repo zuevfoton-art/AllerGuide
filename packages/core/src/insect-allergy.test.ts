@@ -28,7 +28,8 @@ describe('insect-allergy', () => {
   });
 
   it('extracts insect allergens from profile', () => {
-    expect(extractInsectAllergensFromProfile(['Осы', 'Молоко'])).toContain('Укусы насекомых');
+    expect(extractInsectAllergensFromProfile(['Осы', 'Молоко'])).toContain('Осы');
+    expect(extractInsectAllergensFromProfile(['bee-venom', 'Молоко'])).toContain('Пчёлы');
     expect(
       getConsolidatedInsectList(['Осы'], { ...createDefaultInsectActionPlan(), knownInsects: ['Шершни'] }),
     ).toEqual(expect.arrayContaining(['Шершни']));

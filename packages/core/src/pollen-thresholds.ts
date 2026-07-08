@@ -24,6 +24,12 @@ const TAXON_THRESHOLDS: Partial<Record<PollenTaxonId, PollenThresholdSet>> = {
   olive_pollen: { lowMax: 10, midMax: 40 },
   oak_pollen: { lowMax: 15, midMax: 80 },
   rye_pollen: { lowMax: 5, midMax: 20 },
+  hazel_pollen: { lowMax: 15, midMax: 80 },
+  maple_pollen: { lowMax: 15, midMax: 80 },
+  ash_pollen: { lowMax: 15, midMax: 80 },
+  willow_pollen: { lowMax: 15, midMax: 80 },
+  poplar_pollen: { lowMax: 15, midMax: 80 },
+  saltwort_pollen: { lowMax: 5, midMax: 15 },
 };
 
 export function getPollenThresholds(taxonId: PollenTaxonId | OpenMeteoPollenTaxonId): PollenThresholdSet {

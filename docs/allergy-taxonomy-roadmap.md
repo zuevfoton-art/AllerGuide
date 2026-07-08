@@ -222,14 +222,14 @@ type ClinicalPhenotypeId =
 
 | ID | Задача | Приоритет |
 |----|--------|-----------|
-| 4.1 | Разбить `insect-stings` → bee/wasp/hornet/mosquito | P1 |
-| 4.2 | Лекарственные аллергены: NSAID, cephalosporins, paracetamol | P1 |
-| 4.3 | Животные: rodent, bird, horse, rabbit | P2 |
-| 4.4 | Pollen allergen rows для alder, oak, … или явный «calendar-only» | P2 |
-| 4.5 | ICD/SNOMED для 24 аллергенов | P2 |
-| 4.6 | Тип `conjunctivitis` или flag в rhinitis (ARIA ocular) | P2 |
-| 4.7 | Drug reaction types: immediate / delayed / cutaneous | P3 |
-| 4.8 | Cross-reaction syndromes: FPIES, contact dermatitis (info-only) | P3 |
+| 4.1 | Разбить `insect-stings` → bee/wasp/hornet/mosquito | ✅ Done |
+| 4.2 | Лекарственные аллергены: NSAID, cephalosporins, paracetamol | ✅ Done |
+| 4.3 | Животные: rodent, bird, horse, rabbit | ✅ Done |
+| 4.4 | Pollen allergen rows для alder, oak, … или явный «calendar-only» | ✅ Done |
+| 4.5 | ICD/SNOMED для 24 аллергенов | ✅ Done |
+| 4.6 | Тип `conjunctivitis` или flag в rhinitis (ARIA ocular) | ✅ Done (Phase 2: `ocularSymptoms`) |
+| 4.7 | Drug reaction types: immediate / delayed / cutaneous | ✅ Done |
+| 4.8 | Cross-reaction syndromes: FPIES, contact dermatitis (info-only) | ✅ Done |
 
 ---
 
