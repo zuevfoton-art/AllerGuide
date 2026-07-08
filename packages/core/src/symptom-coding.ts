@@ -268,3 +268,45 @@ export function enrichSymptomAnswers(answers: Record<string, string>): Record<st
     symptomCodedSummary: formatCodedSymptomsSummary(codes),
   };
 }
+
+const FOOD_REACTION_TYPE_SYMPTOM_MAP: Record<string, string[]> = {
+  Анафилаксия: ['anaphylaxis'],
+  ЖКТ: ['nausea', 'vomiting', 'diarrhea', 'gi-symptoms'],
+  Кожа: ['urticaria', 'pruritus', 'angioedema'],
+  Дыхание: ['wheeze', 'cough', 'chest-tightness'],
+  'Ораллергический синдром': ['angioedema', 'pruritus'],
+};
+
+export function mapFoodReactionTypeToSymptomCodes(reactionType: string | undefined): string[] {
+  const normalized = reactionType?.trim() ?? '';
+  if (!normalized) return [];
+
+  const mapped = FOOD_REACTION_TYPE_SYMPTOM_MAP[normalized];
+  if (mapped?.length) {
+    return mapped.filter((id) => Boolean(catalogById.get(id)));
+  }
+
+  if (normalized === 'Сильная' || normalized === 'Умеренная') {
+    return ['urticaria'];
+  }
+
+  return [];
+}
+
+/** Enrich food diary answers with SNOMED/ICD from reactionType (Phase 3). */
+export function enrichFoodAnswers(answers: Record<string, string>): Record<string, string> {
+  const reactionType = answers.reactionType?.trim();
+  if (!reactionType) return answers;
+
+  const codes = mapFoodReactionTypeToSymptomCodes(reactionType);
+  if (!codes.length) return answers;
+
+  const coded = buildCodedSymptomLines(codes);
+  return {
+    ...answers,
+    reactionSymptomCodes: codes.join(','),
+    reactionSnomed: coded.map((item) => item.snomed).join(','),
+    reactionIcd11: coded.map((item) => item.icd11).join(','),
+    reactionCodedSummary: formatCodedSymptomsSummary(codes),
+  };
+}

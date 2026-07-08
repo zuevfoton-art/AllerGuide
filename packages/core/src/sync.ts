@@ -88,6 +88,13 @@ export function isReminderSettingKey(key: string): boolean {
   return REMINDER_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
+export const PROFILE_SCOPED_SETTING_PREFIXES = [
+  'conditionHistory:',
+  'profileConditions:',
+  'sosPassport:',
+  'sosPlan:',
+] as const;
+
 export function filterUserScopedSettings(settings: Record<string, string>): Record<string, string> {
   const filtered: Record<string, string> = {};
   for (const key of USER_SCOPED_SETTING_KEYS) {
@@ -97,7 +104,9 @@ export function filterUserScopedSettings(settings: Record<string, string>): Reco
     if (settings[key] != null) filtered[key] = settings[key];
   }
   for (const [key, value] of Object.entries(settings)) {
-    if (key.startsWith('sosPlan:')) filtered[key] = value;
+    if (PROFILE_SCOPED_SETTING_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      filtered[key] = value;
+    }
     if (REMINDER_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
       filtered[key] = value;
     }

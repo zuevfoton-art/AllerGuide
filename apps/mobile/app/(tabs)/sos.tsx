@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   ANAPHYLAXIS_GRADES,
   BIPHASIC_WARNING,
+  formatEpinephrineEligibilityHint,
   parseAllergies,
   type EmergencyContact,
 } from '@allerguide/core';
@@ -27,6 +28,7 @@ import {
 } from '@/src/services/doctor-report-service';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { isProfileEpinephrineEligible } from '@/src/services/clinical-phenotype-service';
 import {
   getEmergencyNumber,
   getProfileAge,
@@ -98,6 +100,11 @@ export default function SosScreen() {
   );
 
   const kitChecked = passport.shockKit.filter((item) => item.checked);
+  const epinephrineEligible = profile ? isProfileEpinephrineEligible(profile) : false;
+  const epinephrineHint =
+    epinephrineEligible && !passport.epinephrine?.brand
+      ? formatEpinephrineEligibilityHint(true)
+      : null;
   const hasPassportDetails =
     passport.drugIntolerances.length > 0 ||
     passport.triggers.length > 0 ||
@@ -162,6 +169,18 @@ export default function SosScreen() {
       </View>
 
       <ProfileSwitcher />
+
+      {epinephrineHint ? (
+        <GlassCard style={styles.epiHintCard}>
+          <Text style={styles.epiHintText}>{epinephrineHint}</Text>
+          <Button
+            label={t('sos.edit')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/sos-edit' as any)}
+          />
+        </GlassCard>
+      ) : null}
 
       {profile ? (
         <>
@@ -548,6 +567,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       fontWeight: '600',
       color: colors.accent,
+    },
+    epiHintCard: { gap: 10, borderColor: colors.dangerBorder, backgroundColor: colors.dangerLight },
+    epiHintText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 18,
     },
     tipCard: {
       flexDirection: 'row',

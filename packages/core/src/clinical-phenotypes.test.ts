@@ -130,4 +130,13 @@ describe('clinical-phenotypes', () => {
     expect(result.phenotypeIds).toEqual([]);
     expect(result.phenotypes).toEqual([]);
   });
+
+  it('adds child food reassessment hint (Phase 3)', () => {
+    const result = resolveClinicalPhenotypes({
+      conditionIds: ['food'],
+      profileType: 'child',
+    });
+
+    expect(result.reassessmentHints.some((hint) => hint.includes('детей'))).toBe(true);
+  });
 });

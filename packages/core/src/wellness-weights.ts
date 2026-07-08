@@ -2,7 +2,7 @@
  * Wellness scoring weights — beta-calibrated defaults (B.9).
  * Versioned registry for expert-panel tuning and E.4 correlation studies.
  */
-export const WELLNESS_WEIGHTS_VERSION = 'beta-1.0';
+export const WELLNESS_WEIGHTS_VERSION = 'beta-1.1';
 
 export interface WellnessWeightSet {
   pollen: Record<'low' | 'mid' | 'high', number>;
@@ -25,6 +25,8 @@ export interface WellnessWeightSet {
   asitSevereReaction: number;
   clinicalScale: Record<'moderate' | 'severe' | 'uncontrolled', number>;
   crossReaction: Record<'high' | 'medium' | 'low', number>;
+  /** ARIA multimorbid: allergic rhinitis/pollinosis + asthma (Phase 3). */
+  multimorbidAriaAsthma: number;
   scoreMin: number;
   scoreMax: number;
 }
@@ -43,6 +45,7 @@ export const WELLNESS_WEIGHTS: WellnessWeightSet = {
   asitSevereReaction: 12,
   clinicalScale: { moderate: 8, severe: 16, uncontrolled: 22 },
   crossReaction: { high: 12, medium: 8, low: 4 },
+  multimorbidAriaAsthma: 10,
   scoreMin: 5,
   scoreMax: 100,
 };

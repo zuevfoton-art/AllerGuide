@@ -358,6 +358,8 @@ export function formatFoodEntrySummary(answers: Record<string, string>): string 
   const cross = answers.crossReactions?.trim();
   if (cross) parts.push(`перекрёстные: ${cross}`);
   if (reaction) parts.push(`реакция: ${reaction}`);
+  const coded = answers.reactionCodedSummary?.trim();
+  if (coded) parts.push(coded);
   if (source) parts.push(source);
 
   return parts.length ? parts.join(' · ') : 'Питание';

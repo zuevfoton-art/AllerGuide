@@ -354,7 +354,7 @@ export function formatConditionHistoryReportText(history: ConditionHistory | nul
     return 'Хронология аллергических состояний не указана.';
   }
 
-  return history.episodes
+  const episodeText = history.episodes
     .map((episode) => {
       const typeLabel = getConditionType(episode.conditionId)?.label ?? episode.conditionId;
       const lines = [
@@ -367,12 +367,35 @@ export function formatConditionHistoryReportText(history: ConditionHistory | nul
       if (episode.foodSymptomTiming) {
         lines.push(`  Время симптомов после еды: ${FOOD_SYMPTOM_TIMING_LABELS[episode.foodSymptomTiming]}`);
       }
+      if (episode.ocularSymptoms) {
+        lines.push('  Глазные симптомы: да');
+      }
       if (episode.notes) {
         lines.push(`  Заметки: ${episode.notes}`);
       }
       return lines.join('\n');
     })
     .join('\n\n');
+
+  const linkLines = formatComorbidityLinksReportText(history.comorbidityLinks);
+  if (!linkLines) return episodeText;
+
+  return `${episodeText}\n\nСвязи коморbidности:\n${linkLines}`;
+}
+
+export function formatComorbidityLinksReportText(links: ComorbidityLink[] | undefined): string {
+  if (!links?.length) return '';
+
+  return links
+    .map((link) => {
+      const from = getConditionType(link.fromConditionId)?.label ?? link.fromConditionId;
+      const to = getConditionType(link.toConditionId)?.label ?? link.toConditionId;
+      if (link.relation === 'concurrent') {
+        return `• ${from} и ${to} — примерно одновременно`;
+      }
+      return `• ${from} появилось раньше, чем ${to}`;
+    })
+    .join('\n');
 }
 
 export function conditionHistoryToDraftMap(

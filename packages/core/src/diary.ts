@@ -1,6 +1,6 @@
 import { formatScaleSummary } from './clinical-scales';
 import { enrichSeverityAnswers, formatSeveritySummary, normalizeSeverity } from './diary-severity';
-import { enrichSymptomAnswers, formatCodedSymptomsSummary, getSymptomCatalogChoices, resolveSymptomCodes } from './symptom-coding';
+import { enrichSymptomAnswers, enrichFoodAnswers, formatCodedSymptomsSummary, getSymptomCatalogChoices, resolveSymptomCodes } from './symptom-coding';
 import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
@@ -560,6 +560,9 @@ export function encodeDiaryDetails(answers: Record<string, string>, sectionType?
   if (sectionType === 'Симптомы') {
     enriched = enrichSymptomAnswers(enriched);
     enriched = enrichSeverityAnswers(enriched, 'Симптомы');
+  } else if (sectionType === 'Питание') {
+    enriched = enrichFoodAnswers(enriched);
+    enriched = enrichSeverityAnswers(enriched, sectionType);
   } else if (sectionType) {
     enriched = enrichSeverityAnswers(enriched, sectionType);
   }
@@ -573,6 +576,9 @@ export function enrichDiaryAnswers(
 ): Record<string, string> {
   if (sectionType === 'Симптомы') {
     return enrichSeverityAnswers(enrichSymptomAnswers(answers), 'Симптомы');
+  }
+  if (sectionType === 'Питание') {
+    return enrichSeverityAnswers(enrichFoodAnswers(answers), sectionType);
   }
   return enrichSeverityAnswers(answers, sectionType);
 }
