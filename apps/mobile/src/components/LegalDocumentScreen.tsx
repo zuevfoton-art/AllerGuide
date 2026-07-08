@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
@@ -27,7 +28,7 @@ export function LegalDocumentScreen({ title, body }: LegalDocumentScreenProps) {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>A-Claro</Text>
+          <ScreenEyebrow />
           <Text style={ui.docTitle}>{title}</Text>
         </View>
       </View>

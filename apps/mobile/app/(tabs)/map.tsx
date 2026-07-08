@@ -2,6 +2,7 @@ import { Text, View, StyleSheet, Pressable } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -84,7 +85,7 @@ export default function MapScreen() {
     <Screen>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('map.eyebrow')}</Text>
+          <ScreenEyebrow section={t('map.eyebrow')} />
           <Text style={ui.docTitle}>{t('map.title')}</Text>
           <Text style={ui.docMeta}>{t('map.subtitle')}</Text>
           <Text style={styles.regionLabel}>{pollenRegion.name}</Text>

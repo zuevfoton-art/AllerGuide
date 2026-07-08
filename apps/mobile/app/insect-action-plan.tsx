@@ -9,6 +9,7 @@ import {
   type InsectActionPlan,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -90,7 +91,7 @@ export default function InsectActionPlanScreen() {
             <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={ui.docLabel}>AllerGuide · {t('insect.eyebrow')}</Text>
+            <ScreenEyebrow section={t('insect.eyebrow')} />
             <Text style={ui.docTitle}>{t('insect.planTitle')}</Text>
           </View>
         </View>
@@ -113,7 +114,7 @@ export default function InsectActionPlanScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('insect.eyebrow')}</Text>
+          <ScreenEyebrow section={t('insect.eyebrow')} />
           <Text style={ui.docTitle}>{t('insect.planTitle')}</Text>
           <Text style={ui.docMeta}>{t('insect.planSubtitle')}</Text>
         </View>

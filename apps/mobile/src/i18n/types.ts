@@ -40,6 +40,9 @@ export type LocaleMessages = {
     years: string;
     daysShort: string;
   };
+  brand: {
+    productName: string;
+  };
   auth: {
     loginTitle: string;
     loginSubtitle: string;

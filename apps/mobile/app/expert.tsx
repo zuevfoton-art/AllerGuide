@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { EXPERT_CATEGORIES, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandMark } from '@/src/components/brand/BrandMark';
@@ -35,7 +36,7 @@ export default function ExpertScreen() {
             <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
           </Pressable>
           <View style={styles.headerText}>
-            <Text style={ui.docLabel}>AllerGuide · {t('expert.eyebrow')}</Text>
+            <ScreenEyebrow section={t('expert.eyebrow')} />
             <Text style={ui.docTitle}>{article.title}</Text>
           </View>
         </View>
@@ -56,7 +57,7 @@ export default function ExpertScreen() {
           <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
         </Pressable>
         <View style={styles.headerText}>
-          <Text style={ui.docLabel}>AllerGuide · {t('expert.eyebrow')}</Text>
+          <ScreenEyebrow section={t('expert.eyebrow')} />
           <Text style={ui.docTitle}>{t('expert.title')}</Text>
           <Text style={ui.docMeta}>
             {localeContent.expertHero.name} · {localeContent.expertHero.role}

@@ -36,6 +36,9 @@ const it: LocaleMessages = {
     years: 'anni',
     daysShort: 'g.',
   },
+  brand: {
+    productName: 'A-Claro',
+  },
   auth: {
     loginTitle: 'Accedi',
     loginSubtitle: 'Accedi con telefono o email',

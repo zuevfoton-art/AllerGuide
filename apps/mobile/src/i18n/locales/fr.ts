@@ -36,6 +36,9 @@ const fr: LocaleMessages = {
     years: 'ans',
     daysShort: 'j.',
   },
+  brand: {
+    productName: 'A-Claro',
+  },
   auth: {
     loginTitle: 'Connexion',
     loginSubtitle: 'Connectez-vous par téléphone ou email',

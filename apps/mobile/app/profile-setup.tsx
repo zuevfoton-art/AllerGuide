@@ -24,6 +24,7 @@ import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEdito
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -164,7 +165,7 @@ export default function ProfileSetupScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={ui.docLabel}>AllerGuide · {t('profileSetup.eyebrow')}</Text>
+        <ScreenEyebrow section={t('profileSetup.eyebrow')} />
         <Text style={ui.docTitle}>{title}</Text>
         <Text style={ui.docMeta}>{subtitle}</Text>
       </View>

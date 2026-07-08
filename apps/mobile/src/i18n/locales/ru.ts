@@ -36,6 +36,9 @@ const ru: LocaleMessages = {
     years: 'лет',
     daysShort: 'дн.',
   },
+  brand: {
+    productName: 'A-Claro',
+  },
   auth: {
     loginTitle: 'Вход',
     loginSubtitle: 'Войдите по номеру телефона или email',
