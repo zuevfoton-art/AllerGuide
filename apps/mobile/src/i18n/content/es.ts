@@ -251,7 +251,36 @@ const esContent: LocaleContent = {
       summary: 'Por qué registrar el PEF y los síntomas respiratorios.',
       body:
         'Las mediciones regulares del flujo espiratorio máximo ayudan a seguir los cambios a lo largo del tiempo. ' +
-        'La aplicación visualiza los valores, pero no emite conclusiones clínicas: la interpretación corresponde a su médico tratante.',
+        'La aplicación visualiza valores y zonas orientadas a GINA respecto al mejor personal, ' +
+        'pero no emite conclusiones clínicas: la interpretación corresponde a su médico tratante.',
+    },
+    'asthma-pef-basics': {
+      title: 'Pico de flujo en el asma',
+      summary: 'Cómo medir el PEF y qué significan las zonas respecto al mejor valor.',
+      body:
+        'El PEF se mide con un picoflujómetro, normalmente por la mañana y por la noche. ' +
+        'El mejor personal lo determina el médico. Orientación GINA: verde ≥80 %, amarilla 50–79 %, roja <50 %.',
+    },
+    'asthma-act-basics': {
+      title: 'Test de control del asma (ACT)',
+      summary: 'Escala breve de autocontrol en 4 semanas.',
+      body:
+        'ACT tiene 5 preguntas sobre síntomas y limitación de actividad en las últimas 4 semanas. ' +
+        '20–25: buen control; 16–19: parcial; ≤15: no controlado (GINA). Comente el resultado con su médico.',
+    },
+    'asthma-triggers': {
+      title: 'Desencadenantes del empeoramiento del asma',
+      summary: 'Qué suele empeorar la respiración.',
+      body:
+        'Infecciones virales, alérgenos, humo, ejercicio en frío, estrés y algunos fármacos son frecuentes. ' +
+        'Registre desencadenantes en el diario para ayudar al médico.',
+    },
+    'asthma-when-to-see-doctor': {
+      title: 'Cuándo acudir al médico por asma',
+      summary: 'Señales que requieren consulta o urgencias.',
+      body:
+        'Llame a emergencias por disnea grave, labios azules o falta de alivio con el rescate prescrito. ' +
+        'Programe visita si el PEF permanece en zona amarilla o roja, ACT ≤15 o aumentan los despertares nocturnos.',
     },
     'pollen-calendar-moscow': {
       title: 'Calendario del polen: región central',

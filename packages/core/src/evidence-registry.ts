@@ -115,6 +115,36 @@ export const EVIDENCE_REGISTRY: EvidenceEntry[] = [
     reviewedAt: '2026-06-01',
     reviewedBy: 'data-steward',
   },
+  {
+    id: 'pef-zone-green',
+    thresholdKey: 'pef.zone.greenMinPercent',
+    value: '≥80% of personal best',
+    guideline: 'GINA PEF traffic-light zones (decision support)',
+    citation: 'pef-zones.ts',
+    sourceVersion: 'GINA-2024',
+    reviewedAt: '2026-07-01',
+    reviewedBy: 'allergology-panel',
+  },
+  {
+    id: 'pef-zone-yellow',
+    thresholdKey: 'pef.zone.yellowMinPercent',
+    value: '50–79% of personal best',
+    guideline: 'GINA PEF traffic-light zones (decision support)',
+    citation: 'pef-zones.ts',
+    sourceVersion: 'GINA-2024',
+    reviewedAt: '2026-07-01',
+    reviewedBy: 'allergology-panel',
+  },
+  {
+    id: 'pef-zone-red',
+    thresholdKey: 'pef.zone.redMaxPercent',
+    value: '<50% of personal best',
+    guideline: 'GINA PEF traffic-light zones (decision support)',
+    citation: 'pef-zones.ts',
+    sourceVersion: 'GINA-2024',
+    reviewedAt: '2026-07-01',
+    reviewedBy: 'allergology-panel',
+  },
 ];
 
 export function getEvidenceForThreshold(thresholdKey: string): EvidenceEntry[] {

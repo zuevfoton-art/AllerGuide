@@ -10,9 +10,11 @@ import {
   computeInsectStingSummary,
   computePefTrend,
   formatAsitReportSummary,
+  formatAsthmaReportSummary,
   formatCodedAllergiesReportHtml,
   formatFoodDrugReportSummary,
   formatInsectReportSummary,
+  formatPefTrendSummary,
   formatDiaryDate,
   formatDiaryEntrySummary,
   formatPassportHtml,
@@ -34,6 +36,7 @@ import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
+import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import type { DiaryEntry, Profile } from '@/src/types';
@@ -84,10 +87,10 @@ function renderScaleTrend(entries: DiaryEntry[]): string {
     .join('');
 }
 
-function renderPefTrend(entries: DiaryEntry[]): string {
-  const trend = computePefTrend(entries);
+function renderPefTrend(entries: DiaryEntry[], planPersonalBest?: string | null): string {
+  const trend = computePefTrend(entries, { planPersonalBest });
   if (!trend.count) return `<p style="color:${c.muted};">Нет измерений ПСВ за период.</p>`;
-  return `<p>Измерений: ${trend.count}. Min: ${trend.min ?? '—'}, Max: ${trend.max ?? '—'}, последнее: ${trend.latest ?? '—'} л/мин${trend.latestAt ? ` (${formatDiaryDate(trend.latestAt)})` : ''}.</p>`;
+  return `<p>${formatPefTrendSummary(trend).replace(/</g, '&lt;')}</p>`;
 }
 
 function renderPassportSummary(profile: Profile): string {
@@ -176,12 +179,31 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
         ).replace(/</g, '&lt;')}</pre></section>`
       : '';
 
+  const asthmaPlan = getAsthmaActionPlan(options.profileId);
+  const pefTrend = computePefTrend(periodEntries, { planPersonalBest: asthmaPlan?.personalBestPef });
+  const asthmaHtml =
+    options.blockIds.includes('asthma') && profile
+      ? `<section><h2>Бронхиальная астма</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatAsthmaReportSummary(
+          {
+            count: pefTrend.count,
+            latest: pefTrend.latest,
+            personalBest: pefTrend.personalBest,
+            latestZone: pefTrend.latestZone
+              ? { green: 'Зелёная зона', yellow: 'Жёлтая зона', red: 'Красная зона' }[pefTrend.latestZone]
+              : null,
+            latestPercentOfBest: pefTrend.latestPercentOfBest,
+          },
+          asthmaPlan,
+          { periodDays: options.periodDays },
+        ).replace(/</g, '&lt;')}</pre></section>`
+      : '';
+
   const triggerContextHtml = options.blockIds.includes('triggerContext')
     ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
     : '';
 
   const pefHtml = options.blockIds.includes('peakflow')
-    ? `<section><h2>Тренд ПСВ</h2>${renderPefTrend(periodEntries)}</section>`
+    ? `<section><h2>Тренд ПСВ</h2>${renderPefTrend(periodEntries, asthmaPlan?.personalBestPef)}</section>`
     : '';
 
   const passportHtml = profile
@@ -207,6 +229,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       <p style="font-size:12px;color:${c.muted};">${DOCTOR_REPORT_DISCLAIMER}</p>
       <hr style="border:none;border-top:1px solid ${c.border};" />
       ${pefHtml}
+      ${asthmaHtml}
       ${timelineHtml}
       ${scalesHtml}
       ${asitHtml}

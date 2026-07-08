@@ -2,17 +2,22 @@ import { useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  computePefPercentOfBest,
+  computePefZone,
   computeScaleScore,
   encodeDiaryDetails,
   enrichScaleAnswers,
   getDiaryStepAnswers,
   getScaleIdFromAnswers,
   hasSectionAnswers,
+  parsePefNumeric,
+  resolvePersonalBestPef,
   validateClinicalScale,
   validateDiarySectionStep,
   buildIntoleranceAlert,
   type DiarySection,
   type DiaryStep,
+  type PefZone,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
@@ -33,6 +38,7 @@ interface DiaryWizardProps {
   submitLabel?: string;
   allowSkipSection?: boolean;
   drugIntolerances?: string[];
+  planPersonalBestPef?: number | null;
 }
 
 export function DiaryWizard({
@@ -44,6 +50,7 @@ export function DiaryWizard({
   submitLabel,
   allowSkipSection = true,
   drugIntolerances,
+  planPersonalBestPef,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -80,6 +87,23 @@ export function DiaryWizard({
       ? (() => {
           const scaleId = getScaleIdFromAnswers(sectionAnswers);
           return scaleId ? computeScaleScore(scaleId, sectionAnswers) : null;
+        })()
+      : null;
+
+  const pefZonePreview =
+    section.type === 'Пикфлоуметрия'
+      ? (() => {
+          const value = parsePefNumeric(sectionAnswers.pefValue);
+          if (!value) return null;
+          const personalBest = resolvePersonalBestPef({
+            explicitBest: sectionAnswers.pefBest,
+            planBest: planPersonalBestPef,
+          });
+          if (!personalBest) return null;
+          const zone = computePefZone(value, personalBest);
+          if (!zone) return null;
+          const percent = computePefPercentOfBest(value, personalBest);
+          return { zone, percent };
         })()
       : null;
 
@@ -213,6 +237,10 @@ export function DiaryWizard({
         </Text>
       ) : null}
 
+      {pefZonePreview ? (
+        <PefZonePreview zone={pefZonePreview.zone} percent={pefZonePreview.percent} />
+      ) : null}
+
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View style={styles.actions}>
@@ -297,6 +325,50 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
       ) : null}
     </View>
   );
+}
+
+function PefZonePreview({ zone, percent }: { zone: PefZone; percent: number | null }) {
+  const theme = useTheme();
+  const styles = useMemo(() => createPefZoneStyles(theme), [theme]);
+  const { t } = useTranslation();
+  const color =
+    zone === 'green'
+      ? theme.colors.success
+      : zone === 'yellow'
+        ? theme.colors.warning
+        : theme.colors.danger;
+
+  return (
+    <View style={[styles.wrap, { borderColor: color, backgroundColor: `${color}14` }]}>
+      <Text style={[styles.title, { color }]}>
+        {t('diaryWizard.pefZone', { zone: t(`asthma.zone.${zone}`), percent: percent ?? '—' })}
+      </Text>
+      <Text style={styles.hint}>{t(`asthma.zoneHint.${zone}`)}</Text>
+    </View>
+  );
+}
+
+function createPefZoneStyles({ colors, fonts }: AppTheme) {
+  return StyleSheet.create({
+    wrap: {
+      marginTop: 12,
+      padding: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      gap: 4,
+    },
+    title: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    hint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+    },
+  });
 }
 
 function StepField({

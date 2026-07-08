@@ -251,7 +251,36 @@ const frContent: LocaleContent = {
       summary: 'Pourquoi enregistrer le DEP et les symptômes respiratoires.',
       body:
         'Des mesures régulières du débit expiratoire de pointe aident à suivre l\'évolution dans le temps. ' +
-        'L\'application visualise les valeurs, mais ne tire pas de conclusions cliniques — l\'interprétation relève de votre médecin traitant.',
+        'L\'application visualise les valeurs et les zones orientées GINA par rapport au meilleur personnel, ' +
+        'mais ne tire pas de conclusions cliniques — l\'interprétation relève de votre médecin traitant.',
+    },
+    'asthma-pef-basics': {
+      title: 'Débit de pointe dans l\'asthme',
+      summary: 'Comment mesurer le DEP et comprendre les zones.',
+      body:
+        'Le DEP se mesure avec un débimètre de pointe, le matin et le soir en général. ' +
+        'Le meilleur personnel est fixé par le médecin. Repères GINA : vert ≥80 %, jaune 50–79 %, rouge <50 %.',
+    },
+    'asthma-act-basics': {
+      title: 'Test de contrôle de l\'asthme (ACT)',
+      summary: 'Échelle d\'autocontrôle sur 4 semaines.',
+      body:
+        'L\'ACT comporte 5 questions sur les symptômes des 4 dernières semaines. ' +
+        '20–25 : bon contrôle ; 16–19 : partiel ; ≤15 : non contrôlé (GINA). Discutez-en avec votre médecin.',
+    },
+    'asthma-triggers': {
+      title: 'Déclencheurs d\'aggravation de l\'asthme',
+      summary: 'Ce qui aggrave souvent la respiration.',
+      body:
+        'Infections, allergènes, tabac, effort au froid, stress et certains médicaments sont fréquents. ' +
+        'Notez les déclencheurs dans le journal pour aider votre médecin.',
+    },
+    'asthma-when-to-see-doctor': {
+      title: 'Quand consulter pour l\'asthme',
+      summary: 'Signaux nécessitant consultation ou urgences.',
+      body:
+        'Appelez les secours en cas de détresse respiratoire sévère ou d\'absence d\'effet du secours prescrit. ' +
+        'Consultez si le DEP reste en zone jaune ou rouge, ACT ≤15 ou réveils nocturnes accrus.',
     },
     'pollen-calendar-moscow': {
       title: 'Calendrier pollinique : région centrale',

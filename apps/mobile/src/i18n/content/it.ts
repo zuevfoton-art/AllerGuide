@@ -251,7 +251,36 @@ const itContent: LocaleContent = {
       summary: 'Perché registrare il PEF e i sintomi respiratori.',
       body:
         'Misurazioni regolari del flusso espiratorio di picco aiutano a monitorare i cambiamenti nel tempo. ' +
-        'L\'app visualizza i valori, ma non trae conclusioni cliniche: l\'interpretazione spetta al medico curante.',
+        'L\'app visualizza valori e zone orientate GINA rispetto al migliore personale, ' +
+        'ma non trae conclusioni cliniche: l\'interpretazione spetta al medico curante.',
+    },
+    'asthma-pef-basics': {
+      title: 'Peak flow nell\'asma',
+      summary: 'Come misurare il PEF e il significato delle zone.',
+      body:
+        'Il PEF si misura con un piccoflussimetro, di solito mattina e sera. ' +
+        'Il migliore personale è definito dal medico. Orientamento GINA: verde ≥80 %, gialla 50–79 %, rossa <50 %.',
+    },
+    'asthma-act-basics': {
+      title: 'Test di controllo dell\'asma (ACT)',
+      summary: 'Breve scala di autovalutazione su 4 settimane.',
+      body:
+        'L\'ACT ha 5 domande sugli ultimi 4 settimane. ' +
+        '20–25: buon controllo; 16–19: parziale; ≤15: non controllato (GINA). Discuta il risultato con il medico.',
+    },
+    'asthma-triggers': {
+      title: 'Fattori scatenanti del peggioramento',
+      summary: 'Cosa spesso peggiora la respirazione.',
+      body:
+        'Infezioni, allergeni, fumo, sforzo al freddo, stress e alcuni farmaci sono comuni. ' +
+        'Registri i fattori scatenanti nel diario per aiutare il medico.',
+    },
+    'asthma-when-to-see-doctor': {
+      title: 'Quando consultare il medico per l\'asma',
+      summary: 'Segnali che richiedono consulto o urgenze.',
+      body:
+        'Chiami i soccorsi per dispnea grave o mancato effetto del farmaco di salvataggio prescritto. ' +
+        'Fissi un appuntamento se il PEF resta in zona gialla o rossa, ACT ≤15 o aumentano i risvegli notturni.',
     },
     'pollen-calendar-moscow': {
       title: 'Calendario del polline: regione centrale',

@@ -227,6 +227,7 @@ export type LocaleMessages = {
     entryPlaceholder: string;
     enterEntryText: string;
     scalePreview: string;
+    pefZone: string;
   };
   scanner: {
     title: string;
@@ -607,6 +608,48 @@ export type LocaleMessages = {
     disclaimer: string;
     noProfile: string;
     notEligible: string;
+  };
+  asthma: {
+    title: string;
+    eyebrow: string;
+    planTitle: string;
+    planSubtitle: string;
+    editPlan: string;
+    emptyPlan: string;
+    personalBest: string;
+    personalBestPlaceholder: string;
+    lPerMin: string;
+    reliever: string;
+    relieverMedication: string;
+    relieverMedicationPlaceholder: string;
+    controllerNotes: string;
+    controllerNotesPlaceholder: string;
+    yellowZoneSteps: string;
+    yellowZoneStepsPlaceholder: string;
+    redZoneSteps: string;
+    redZoneStepsPlaceholder: string;
+    clinicalNotes: string;
+    clinicalNotesPlaceholder: string;
+    savePlan: string;
+    disclaimer: string;
+    noProfile: string;
+    notEligible: string;
+    ginaLink: string;
+    pef30d: string;
+    latestPef: string;
+    zoneLabel: string;
+    logPef: string;
+    zoneSummary: string;
+    zone: {
+      green: string;
+      yellow: string;
+      red: string;
+    };
+    zoneHint: {
+      green: string;
+      yellow: string;
+      red: string;
+    };
   };
   foodDrug: {
     eyebrow: string;

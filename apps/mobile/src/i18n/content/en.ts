@@ -251,7 +251,44 @@ const enContent: LocaleContent = {
       summary: 'Why to record PEF and breathing symptoms.',
       body:
         'Regular peak expiratory flow measurements help track changes over time. ' +
-        'The app visualizes values but does not make clinical conclusions — interpretation is done by your treating physician.',
+        'The app visualizes values and GINA-oriented zones relative to your personal best, ' +
+        'but does not make clinical conclusions — interpretation is done by your treating physician.',
+    },
+    'asthma-pef-basics': {
+      title: 'Peak flow in asthma',
+      summary: 'How to measure PEF and what zones relative to personal best mean.',
+      body:
+        'Peak expiratory flow (PEF) is measured with a peak flow meter, usually morning and evening. ' +
+        'Personal best is your maximum during good control; your doctor determines it. ' +
+        'GINA-oriented guidance: green zone ≥80% of best, yellow 50–79%, red <50%. ' +
+        'Zones help notice worsening but do not replace your doctor\'s action plan.',
+    },
+    'asthma-act-basics': {
+      title: 'Asthma Control Test (ACT)',
+      summary: 'Brief self-monitoring scale over 4 weeks.',
+      body:
+        'ACT has 5 questions about symptoms and activity limits over the past 4 weeks. ' +
+        'Scores 20–25 suggest good control, 16–19 partial control, ≤15 uncontrolled asthma (GINA). ' +
+        'Complete the test in the diary and discuss results with your doctor.',
+    },
+    'asthma-triggers': {
+      title: 'Asthma exacerbation triggers',
+      summary: 'What commonly provokes breathing worsening.',
+      body:
+        'Common triggers include viral infections, allergens (pollen, mites, animals), ' +
+        'tobacco smoke, exercise in cold air, stress, and some medicines. ' +
+        'Log triggers in your diary to help your doctor adjust prevention. ' +
+        'The list is individual; an allergist creates your avoidance plan.',
+    },
+    'asthma-when-to-see-doctor': {
+      title: 'When to see a doctor for asthma',
+      summary: 'Signals requiring consultation or emergency care.',
+      body:
+        'Call emergency services for severe breathlessness, blue lips, inability to speak full sentences, ' +
+        'or no relief from reliever medication as prescribed. ' +
+        'Schedule a visit if PEF stays in yellow or red zones, ACT ≤15, ' +
+        'night waking from cough or breathlessness increases, or reliever use rises. ' +
+        'The app reminds about scales but does not replace medical care.',
     },
     'pollen-calendar-moscow': {
       title: 'Pollen calendar: Central region',

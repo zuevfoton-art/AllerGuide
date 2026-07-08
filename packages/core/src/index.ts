@@ -31,6 +31,8 @@ export * from './reminder-policy';
 export * from './pollen-reminder';
 export * from './food-drug-allergy';
 export * from './insect-allergy';
+export * from './pef-zones';
+export * from './asthma-action-plan';
 export * from './diary-profile';
 export * from './diary-triggers';
 export * from './wellness';

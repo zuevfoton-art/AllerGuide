@@ -251,7 +251,37 @@ const deContent: LocaleContent = {
       summary: 'Warum PEF und Atemwegsymptome dokumentieren.',
       body:
         'Regelmäßige Messungen des exspiratorischen Spitzenflusses helfen, Veränderungen im Zeitverlauf zu verfolgen. ' +
-        'Die App visualisiert die Werte, zieht aber keine klinischen Schlüsse — die Interpretation obliegt Ihrem behandelnden Arzt.',
+        'Die App visualisiert Werte und GINA-orientierte Zonen relativ zum Bestwert, ' +
+        'zieht aber keine klinischen Schlüsse — die Interpretation obliegt Ihrem behandelnden Arzt.',
+    },
+    'asthma-pef-basics': {
+      title: 'Peak-Flow bei Asthma',
+      summary: 'PEF messen und Bedeutung der Zonen relativ zum Bestwert.',
+      body:
+        'Der exspiratorische Spitzenfluss wird mit einem Peak-Flow-Meter gemessen, meist morgens und abends. ' +
+        'Der Bestwert ist Ihr Maximum bei guter Kontrolle; er wird vom Arzt festgelegt. ' +
+        'GINA-orientiert: grüne Zone ≥80 %, gelbe 50–79 %, rote <50 %. Zonen ersetzen nicht den Aktionsplan des Arztes.',
+    },
+    'asthma-act-basics': {
+      title: 'Asthma-Kontrolltest (ACT)',
+      summary: 'Kurze Selbstkontrollskala über 4 Wochen.',
+      body:
+        'ACT umfasst 5 Fragen zu Symptomen und Aktivitätseinschränkung der letzten 4 Wochen. ' +
+        '20–25 Punkte: gute Kontrolle, 16–19: teilweise, ≤15: unkontrolliert (GINA). Besprechen Sie das Ergebnis mit Ihrem Arzt.',
+    },
+    'asthma-triggers': {
+      title: 'Auslöser von Asthmaverschlechterungen',
+      summary: 'Was häufig Atemwegsbeschwerden verschlimmert.',
+      body:
+        'Häufige Auslöser: Virusinfekte, Allergene, Rauch, Kältebelastung, Stress, manche Medikamente. ' +
+        'Dokumentieren Sie Auslöser im Tagebuch — das hilft dem Arzt bei der Prävention.',
+    },
+    'asthma-when-to-see-doctor': {
+      title: 'Wann zum Arzt bei Asthma',
+      summary: 'Warnsignale für Konsultation oder Notfall.',
+      body:
+        'Notruf bei schwerer Atemnot, blauen Lippen oder fehlender Wirkung des Notfallmedikaments. ' +
+        'Termin, wenn PEF dauerhaft in gelber/roter Zone, ACT ≤15 oder nächtliches Erwachen zunimmt.',
     },
     'pollen-calendar-moscow': {
       title: 'Pollenkalender: Zentralregion',

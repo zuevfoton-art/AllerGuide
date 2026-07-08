@@ -24,6 +24,8 @@ import {
   profileEnablesDrugFocus,
   profileEnablesFoodFocus,
   profileEnablesInsectFocus,
+  profileEnablesPeakFlow,
+  getAsthmaPlanPersonalBest,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
@@ -37,12 +39,14 @@ import { getProfileConditions } from '@/src/services/profile-conditions-service'
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
+import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
+import { AsthmaCard } from '@/src/components/AsthmaCard';
 import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
@@ -145,6 +149,7 @@ export default function DiaryScreen() {
         : false,
     [profileConditions, activeProfile],
   );
+  const peakFlowEnabled = useMemo(() => profileEnablesPeakFlow(profileConditions), [profileConditions]);
   const foodDrugRegistry = useMemo(
     () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
     [activeProfileId],
@@ -164,6 +169,14 @@ export default function DiaryScreen() {
   const insectActionPlan = useMemo(
     () => (activeProfileId ? getInsectActionPlan(activeProfileId) : null),
     [activeProfileId],
+  );
+  const asthmaActionPlan = useMemo(
+    () => (activeProfileId ? getAsthmaActionPlan(activeProfileId) : null),
+    [activeProfileId],
+  );
+  const planPersonalBestPef = useMemo(
+    () => getAsthmaPlanPersonalBest(asthmaActionPlan),
+    [asthmaActionPlan],
   );
 
   const openSection = async (sectionType: string) => {
@@ -324,6 +337,7 @@ export default function DiaryScreen() {
         <DiaryWizard
           sections={visibleSections}
           drugIntolerances={drugIntolerances}
+          planPersonalBestPef={planPersonalBestPef}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -360,6 +374,7 @@ export default function DiaryScreen() {
           initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
           allowSkipSection={false}
           drugIntolerances={drugIntolerances}
+          planPersonalBestPef={planPersonalBestPef}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {
@@ -442,6 +457,14 @@ export default function DiaryScreen() {
           plan={insectActionPlan}
           entries={list}
           onLogSting={() => void openSection('Укус насекомого')}
+        />
+      ) : null}
+
+      {peakFlowEnabled ? (
+        <AsthmaCard
+          plan={asthmaActionPlan}
+          entries={list}
+          onLogPef={() => void openSection('Пикфлоуметрия')}
         />
       ) : null}
 

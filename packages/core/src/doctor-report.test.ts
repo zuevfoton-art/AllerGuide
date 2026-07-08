@@ -3,6 +3,7 @@ import { encodeDiaryDetails } from './diary';
 import {
   DOCTOR_REPORT_BLOCKS,
   computePefTrend,
+  formatPefTrendSummary,
   getDefaultReportBlockIds,
   getReportDiaryTypes,
   periodToDays,
@@ -13,7 +14,7 @@ describe('doctor report helpers', () => {
     const trend = computePefTrend([
       {
         type: 'Пикфлоуметрия',
-        details: encodeDiaryDetails({ pefValue: '320' }),
+        details: encodeDiaryDetails({ pefValue: '320', pefBest: '400' }),
         createdAt: '2026-06-20T08:00:00',
       },
       {
@@ -27,6 +28,39 @@ describe('doctor report helpers', () => {
     expect(trend.min).toBe(280);
     expect(trend.max).toBe(320);
     expect(trend.latest).toBe(320);
+    expect(trend.personalBest).toBe(400);
+    expect(trend.latestZone).toBe('green');
+    expect(trend.latestPercentOfBest).toBe(80);
+  });
+
+  it('uses plan personal best when entry best is missing', () => {
+    const trend = computePefTrend(
+      [
+        {
+          type: 'Пикфлоуметрия',
+          details: encodeDiaryDetails({ pefValue: '180' }),
+          createdAt: '2026-06-20T08:00:00',
+        },
+      ],
+      { planPersonalBest: '400' },
+    );
+    expect(trend.latestZone).toBe('red');
+    expect(trend.personalBest).toBe(400);
+  });
+
+  it('formats PEF trend summary with zone', () => {
+    const summary = formatPefTrendSummary({
+      count: 1,
+      min: 280,
+      max: 280,
+      latest: 280,
+      latestAt: '2026-06-20',
+      personalBest: 400,
+      latestPercentOfBest: 70,
+      latestZone: 'yellow',
+    });
+    expect(summary).toContain('Жёлтая зона');
+    expect(summary).toContain('70%');
   });
 
   it('includes scales block in default report configuration', () => {
@@ -53,5 +87,6 @@ describe('doctor report helpers', () => {
 
   it('includes triggerContext in default report blocks', () => {
     expect(getDefaultReportBlockIds()).toContain('triggerContext');
+    expect(getDefaultReportBlockIds()).toContain('asthma');
   });
 });

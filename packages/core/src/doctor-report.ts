@@ -1,3 +1,12 @@
+import {
+  computePefPercentOfBest,
+  computePefZone,
+  formatPefZoneLabel,
+  parsePefNumeric,
+  resolvePersonalBestPef,
+  type PefZone,
+} from './pef-zones';
+
 export type DoctorReportPeriod = 7 | 14 | 30 | 'custom';
 
 export interface DoctorReportBlock {
@@ -26,6 +35,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
     defaultEnabled: true,
   },
   { id: 'peakflow', label: 'Пикфлоуметрия', diaryTypes: ['Пикфлоуметрия'], defaultEnabled: true },
+  {
+    id: 'asthma',
+    label: 'Бронхиальная астма',
+    diaryTypes: [],
+    defaultEnabled: true,
+  },
   { id: 'asit', label: 'АСИТ', diaryTypes: ['АСИТ'], defaultEnabled: true },
   {
     id: 'foodDrug',
@@ -56,40 +71,98 @@ export interface PefTrendSummary {
   max: number | null;
   latest: number | null;
   latestAt: string | null;
+  personalBest: number | null;
+  latestPercentOfBest: number | null;
+  latestZone: PefZone | null;
+}
+
+interface PefDiaryReading {
+  value: number;
+  best: string | null;
+  createdAt: string;
+}
+
+function parsePefDiaryEntry(entry: { type: string; details: string; createdAt: string }): PefDiaryReading | null {
+  if (entry.type !== 'Пикфлоуметрия') return null;
+  try {
+    const parsed = JSON.parse(entry.details) as { v?: number; answers?: Record<string, string> };
+    const value = parsePefNumeric(parsed?.answers?.pefValue ?? '');
+    if (!value) return null;
+    const best = parsed?.answers?.pefBest?.trim() || null;
+    return { value, best, createdAt: entry.createdAt };
+  } catch {
+    return null;
+  }
 }
 
 export function computePefTrend(
   entries: { type: string; details: string; createdAt: string }[],
+  options: { planPersonalBest?: string | number | null } = {},
 ): PefTrendSummary {
-  const values: { value: number; createdAt: string }[] = [];
+  const readings = entries
+    .map((entry) => parsePefDiaryEntry(entry))
+    .filter((item): item is PefDiaryReading => item != null);
 
-  for (const entry of entries) {
-    if (entry.type !== 'Пикфлоуметрия') continue;
-    try {
-      const parsed = JSON.parse(entry.details) as { v?: number; answers?: Record<string, string> };
-      const raw = parsed?.answers?.pefValue ?? '';
-      const num = Number(String(raw).replace(/[^\d.]/g, ''));
-      if (Number.isFinite(num) && num > 0) {
-        values.push({ value: num, createdAt: entry.createdAt });
-      }
-    } catch {
-      // skip malformed
-    }
+  if (!readings.length) {
+    return {
+      count: 0,
+      min: null,
+      max: null,
+      latest: null,
+      latestAt: null,
+      personalBest: null,
+      latestPercentOfBest: null,
+      latestZone: null,
+    };
   }
 
-  if (!values.length) {
-    return { count: 0, min: null, max: null, latest: null, latestAt: null };
-  }
+  const nums = readings.map((item) => item.value);
+  const latest = readings[0];
+  const personalBest = resolvePersonalBestPef({
+    explicitBest: latest.best,
+    planBest: options.planPersonalBest,
+    entryBests: readings.map((item) => item.best),
+    historicalValues: nums,
+  });
+  const latestPercentOfBest =
+    personalBest && latest.value ? computePefPercentOfBest(latest.value, personalBest) : null;
+  const latestZone =
+    personalBest && latest.value ? computePefZone(latest.value, personalBest) : null;
 
-  const nums = values.map((v) => v.value);
-  const latest = values[0];
   return {
-    count: values.length,
+    count: readings.length,
     min: Math.min(...nums),
     max: Math.max(...nums),
     latest: latest.value,
     latestAt: latest.createdAt,
+    personalBest,
+    latestPercentOfBest,
+    latestZone,
   };
+}
+
+export function formatPefTrendSummary(trend: PefTrendSummary): string {
+  if (!trend.count) return 'Нет измерений ПСВ за период.';
+
+  const parts = [
+    `Измерений: ${trend.count}`,
+    `Min: ${trend.min ?? '—'}`,
+    `Max: ${trend.max ?? '—'}`,
+    `Последнее: ${trend.latest ?? '—'} л/мин`,
+  ];
+  if (trend.personalBest) {
+    parts.push(`Лучшее (ориентир): ${trend.personalBest} л/мин`);
+  }
+  if (trend.latestPercentOfBest != null) {
+    parts.push(`${trend.latestPercentOfBest}% от лучшего`);
+  }
+  if (trend.latestZone) {
+    parts.push(formatPefZoneLabel(trend.latestZone));
+  }
+  if (trend.latestAt) {
+    parts.push(`(${trend.latestAt})`);
+  }
+  return `${parts.join('. ')}.`;
 }
 
 export function getDefaultReportBlockIds(): string[] {
