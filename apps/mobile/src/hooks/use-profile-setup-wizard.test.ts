@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildProfileSetupWizardNavOptions,
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
+  reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
-  shouldSkipConditionHistoryStep,
+  shouldSkipComorbidityStep,
+  shouldSkipPhenotypeSummaryStep,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardDraft,
@@ -17,29 +20,44 @@ const baseDraft = (): ProfileSetupWizardDraft => ({
   confirmations: {},
   conditions: [],
   conditionHistoryDrafts: {},
+  comorbidityLinks: [],
   contacts: [],
   childConsent: false,
   profileType: 'self',
 });
 
 describe('profile setup wizard', () => {
-  it('defines six ordered steps including condition history', () => {
-    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(6);
+  it('defines eight ordered steps including comorbidity and phenotype summary', () => {
+    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(8);
     expect(getNextProfileSetupWizardStep('name')).toBe('birthYear');
     expect(getNextProfileSetupWizardStep('conditions')).toBe('conditionHistory');
+    expect(getNextProfileSetupWizardStep('conditionHistory')).toBe('comorbidity');
+    expect(getNextProfileSetupWizardStep('allergens')).toBe('phenotypeSummary');
     expect(getNextProfileSetupWizardStep('contacts')).toBeNull();
-    expect(getPreviousProfileSetupWizardStep('allergens')).toBe('conditionHistory');
+    const fullNav = buildProfileSetupWizardNavOptions({
+      conditions: ['food', 'asthma'],
+    });
+    expect(getPreviousProfileSetupWizardStep('allergens', fullNav)).toBe('comorbidity');
     expect(getPreviousProfileSetupWizardStep('name')).toBeNull();
   });
 
   it('skips condition history when no conditions selected', () => {
-    expect(shouldSkipConditionHistoryStep({ conditions: [] })).toBe(true);
-    expect(getNextProfileSetupWizardStep('conditions', { skipConditionHistory: true })).toBe(
-      'allergens',
-    );
-    expect(getPreviousProfileSetupWizardStep('allergens', { skipConditionHistory: true })).toBe(
-      'conditions',
-    );
+    const nav = buildProfileSetupWizardNavOptions({ conditions: [] });
+    expect(nav.skipConditionHistory).toBe(true);
+    expect(getNextProfileSetupWizardStep('conditions', nav)).toBe('allergens');
+    expect(getPreviousProfileSetupWizardStep('allergens', nav)).toBe('conditions');
+  });
+
+  it('skips comorbidity when fewer than two conditions', () => {
+    expect(shouldSkipComorbidityStep({ conditions: ['food'] })).toBe(true);
+    const nav = buildProfileSetupWizardNavOptions({ conditions: ['food'] });
+    expect(getNextProfileSetupWizardStep('conditionHistory', nav)).toBe('allergens');
+  });
+
+  it('skips phenotype summary when no conditions', () => {
+    expect(shouldSkipPhenotypeSummaryStep({ conditions: [] })).toBe(true);
+    const nav = buildProfileSetupWizardNavOptions({ conditions: [] });
+    expect(getNextProfileSetupWizardStep('allergens', nav)).toBe('contacts');
   });
 
   it('validates name step', () => {
@@ -88,5 +106,13 @@ describe('profile setup wizard', () => {
     });
     expect(Object.keys(drafts)).toEqual(['food', 'asthma']);
     expect(drafts.asthma?.onsetKind).toBe('unknown');
+  });
+
+  it('reconciles comorbidity links when conditions change', () => {
+    const links = reconcileComorbidityLinks(
+      ['food'],
+      [{ fromConditionId: 'food', toConditionId: 'asthma', relation: 'preceded' }],
+    );
+    expect(links).toEqual([]);
   });
 });

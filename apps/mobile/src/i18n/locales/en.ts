@@ -172,6 +172,7 @@ const en: LocaleMessages = {
     marketplaceEmpty: 'Pick a profile with allergens to see personalized picks.',
     marketplaceOpen: 'Open marketplace',
     disclaimer: 'The index is advisory and does not replace consultation with an allergist.',
+    phenotypeHintsTitle: 'Profile recommendations',
   },
   diary: {
     title: 'Diary',
@@ -563,6 +564,22 @@ const en: LocaleMessages = {
         'over-2h': 'Over 2 h',
         unknown: 'Unknown',
       },
+      ocularSymptoms: 'Notable eye symptoms (itching, watering)',
+    },
+    comorbidity: {
+      title: 'Which appeared first?',
+      hint: 'If you remember the order of conditions, it helps identify a clinical phenotype. You can skip.',
+      empty: 'Select at least two allergy types on previous steps.',
+      pairQuestion: '{{a}} and {{b}}',
+      leftFirst: '{{name}} first',
+      concurrent: 'About the same time',
+      unknown: 'Not sure',
+    },
+    phenotype: {
+      title: 'Your clinical phenotype',
+      hint: 'Based on selected types, timeline and allergens. Informational — not a diagnosis.',
+      empty: 'Not enough data to determine a phenotype yet.',
+      disclaimer: 'Phenotypes are recommendations only and do not restrict scanner, map or diary access.',
     },
     consent:
       'I confirm that I am the parent or legal guardian of this child and am authorized to enter their health information.',

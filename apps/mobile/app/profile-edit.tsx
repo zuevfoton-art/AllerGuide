@@ -19,12 +19,15 @@ import {
 } from '@/src/services/profile-conditions-service';
 import {
   getConditionHistoryDrafts,
+  getStoredConditionHistory,
   saveConditionHistoryFromOnboarding,
 } from '@/src/services/condition-history-service';
 import {
   ConditionHistoryEditor,
   type ConditionHistoryDrafts,
 } from '@/src/components/ConditionHistoryEditor';
+import { ComorbidityEditor } from '@/src/components/ComorbidityEditor';
+import type { ComorbidityLink } from '@allerguide/core';
 import {
   listEmergencyContacts,
   normalizeEmergencyContactDrafts,
@@ -39,7 +42,7 @@ import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { reconcileConditionHistoryDrafts } from '@/src/hooks/use-profile-setup-wizard';
+import { reconcileComorbidityLinks, reconcileConditionHistoryDrafts } from '@/src/hooks/use-profile-setup-wizard';
 import { useTranslation } from '@/src/store/locale-store';
 
 export default function ProfileEditScreen() {
@@ -57,6 +60,7 @@ export default function ProfileEditScreen() {
   const [childConsent, setChildConsent] = useState(true);
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
   const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
+  const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -90,6 +94,7 @@ export default function ProfileEditScreen() {
       const storedConditions = getStoredProfileConditions(profileId);
       setConditions(storedConditions);
       setConditionHistoryDrafts(getConditionHistoryDrafts(profileId));
+      setComorbidityLinks(getStoredConditionHistory(profileId)?.comorbidityLinks ?? []);
       setLoading(false);
     });
   }, [profileId]);
@@ -118,7 +123,7 @@ export default function ProfileEditScreen() {
     }
 
     setStoredProfileConditions(profileId, conditions);
-    saveConditionHistoryFromOnboarding(profileId, conditions, conditionHistoryDrafts);
+    saveConditionHistoryFromOnboarding(profileId, conditions, conditionHistoryDrafts, comorbidityLinks);
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     router.back();
   };
@@ -200,6 +205,7 @@ export default function ProfileEditScreen() {
               onChange={(next) => {
                 setConditions(next);
                 setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
+                setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
               }}
             />
           </GlassCard>
@@ -211,6 +217,17 @@ export default function ProfileEditScreen() {
                 conditionIds={conditions}
                 drafts={conditionHistoryDrafts}
                 onChange={setConditionHistoryDrafts}
+              />
+            </GlassCard>
+          ) : null}
+
+          {conditions.length >= 2 ? (
+            <GlassCard style={styles.section}>
+              <Text style={ui.sectionLabel}>{t('profileSetup.comorbidity.title')}</Text>
+              <ComorbidityEditor
+                conditionIds={conditions}
+                links={comorbidityLinks}
+                onChange={setComorbidityLinks}
               />
             </GlassCard>
           ) : null}

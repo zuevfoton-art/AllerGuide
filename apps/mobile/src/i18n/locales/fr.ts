@@ -172,6 +172,7 @@ const fr: LocaleMessages = {
     marketplaceEmpty: 'Choisissez un profil avec des allergènes pour voir des suggestions personnalisées.',
     marketplaceOpen: 'Ouvrir le marketplace',
     disclaimer: "L'indice est indicatif et ne remplace pas une consultation allergologique.",
+    phenotypeHintsTitle: 'Recommandations du profil',
   },
   diary: {
     title: 'Journal',
@@ -557,6 +558,22 @@ const fr: LocaleMessages = {
         'over-2h': 'Plus de 2 h',
         unknown: 'Inconnu',
       },
+      ocularSymptoms: 'Symptômes oculaires marqués (démangeaisons, larmoiement)',
+    },
+    comorbidity: {
+      title: 'Qu’est-ce qui est apparu en premier ?',
+      hint: 'L’ordre d’apparition aide à identifier un phénotype clinique. Optionnel.',
+      empty: 'Sélectionnez au moins deux types d’allergie aux étapes précédentes.',
+      pairQuestion: '{{a}} et {{b}}',
+      leftFirst: '{{name}} en premier',
+      concurrent: 'À peu près en même temps',
+      unknown: 'Je ne sais pas',
+    },
+    phenotype: {
+      title: 'Votre phénotype clinique',
+      hint: 'Basé sur les types, la chronologie et les allergènes. Informatif — pas un diagnostic.',
+      empty: 'Pas assez de données pour déterminer un phénotype.',
+      disclaimer: 'Les phénotypes sont informatifs et ne limitent pas l’accès au scanner, à la carte ou au journal.',
     },
     consent:
       'Je confirme être le parent ou le représentant légal de cet enfant et être autorisé à saisir ses informations de santé.',

@@ -172,6 +172,7 @@ const es: LocaleMessages = {
     marketplaceEmpty: 'Elija un perfil con alérgenos para ver recomendaciones personalizadas.',
     marketplaceOpen: 'Abrir marketplace',
     disclaimer: 'El índice es orientativo y no sustituye la consulta con un alergólogo.',
+    phenotypeHintsTitle: 'Recomendaciones del perfil',
   },
   diary: {
     title: 'Diario',
@@ -557,6 +558,22 @@ const es: LocaleMessages = {
         'over-2h': 'Más de 2 h',
         unknown: 'Desconocido',
       },
+      ocularSymptoms: 'Síntomas oculares marcados (picor, lagrimeo)',
+    },
+    comorbidity: {
+      title: '¿Qué apareció antes?',
+      hint: 'El orden ayuda a identificar el fenotipo clínico. Opcional.',
+      empty: 'Seleccione al menos dos tipos de alergia en pasos anteriores.',
+      pairQuestion: '{{a}} y {{b}}',
+      leftFirst: '{{name}} antes',
+      concurrent: 'Aproximadamente al mismo tiempo',
+      unknown: 'No recuerdo',
+    },
+    phenotype: {
+      title: 'Su fenotipo clínico',
+      hint: 'Basado en tipos, cronología y alérgenos. Informativo — no es un diagnóstico.',
+      empty: 'Aún no hay datos suficientes para un fenotipo.',
+      disclaimer: 'Los fenotipos son recomendaciones y no restringen el escáner, mapa o diario.',
     },
     consent:
       'Confirmo que soy el padre, la madre o tutor legal de este niño y estoy autorizado a introducir su información de salud.',

@@ -19,6 +19,7 @@ export * from './regulatory-allergens';
 export * from './allergy-conditions';
 export * from './condition-allergen-map';
 export * from './condition-history';
+export * from './clinical-phenotypes';
 export * from './expert-content';
 export * from './adair-catalog';
 export * from './pollen-taxonomy';

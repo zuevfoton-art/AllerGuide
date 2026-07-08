@@ -193,13 +193,13 @@ type ClinicalPhenotypeId =
 
 | ID | Задача | Файлы |
 |----|--------|-------|
-| 2.1 | `clinical-phenotypes.ts` + `resolveClinicalPhenotypes()` | core |
-| 2.2 | `ComorbidityLink` в condition history | core |
-| 2.3 | Wizard step «Что появилось раньше?» (≥2 types) | mobile wizard |
-| 2.4 | Карточка «Ваш фенотип» (информационная) | profile-setup summary |
-| 2.5 | Расширить `ProfileCapabilities`: `phenotypeIds`, `reassessmentHints` | `profile-capabilities.ts` |
-| 2.6 | Тесты P1–P10 | `clinical-phenotypes.test.ts` |
-| 2.7 | FR-PROF-15..16 | docs |
+| 2.1 | `clinical-phenotypes.ts` + `resolveClinicalPhenotypes()` | ✅ Done |
+| 2.2 | `ComorbidityLink` в condition history | ✅ Done |
+| 2.3 | Wizard step «Что появилось раньше?» (≥2 types) | ✅ Done |
+| 2.4 | Карточка «Ваш фенотип» (информационная) | ✅ Done |
+| 2.5 | `clinical-phenotype-service.ts` + hints на главной | ✅ Done |
+| 2.6 | Тесты P1–P10 | ✅ Done |
+| 2.7 | FR-PROF-15..16 | ✅ Done |
 
 **Критерий готовности:** при профиле «АтД + поллиноз + астма» определяется `atopic-march-child` + `aria-asthma`; подсказки на главной / дневнике без нового gating.
 

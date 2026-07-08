@@ -21,6 +21,7 @@ import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -89,6 +90,11 @@ export default function HomeScreen() {
   const confidenceBadge = wellness
     ? badgeStyle(confidenceBadgeKind(wellness.confidence), theme)
     : null;
+
+  const phenotypeHints = useMemo(
+    () => (profile ? getProfileReassessmentHints(profile) : []),
+    [profile],
+  );
 
   const todayLabel = useMemo(() => {
     try {
@@ -211,6 +217,17 @@ export default function HomeScreen() {
           </View>
         ))}
       </GlassCard>
+
+      {phenotypeHints.length ? (
+        <GlassCard style={styles.recCard}>
+          <Text style={styles.recTitle}>{t('home.phenotypeHintsTitle')}</Text>
+          {phenotypeHints.map((hint) => (
+            <Text key={hint} style={styles.recText}>
+              • {hint}
+            </Text>
+          ))}
+        </GlassCard>
+      ) : null}
 
       {wellness?.recommendations[0] ? (
         <GlassCard style={styles.recCard}>
