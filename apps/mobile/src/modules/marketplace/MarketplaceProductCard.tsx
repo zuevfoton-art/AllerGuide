@@ -2,11 +2,14 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { CatalogProduct } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useMemo } from 'react';
 import { getProductColor } from '@/src/modules/marketplace/product-theme';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useTranslation } from '@/src/store/locale-store';
+import { MARKETPLACE_CHECKOUT_ENABLED } from '@/src/constants/features';
+import { useCartStore } from '@/src/store/cart-store';
 
 interface MarketplaceProductCardProps {
   item: CatalogProduct;
@@ -18,11 +21,17 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
   const styles = useMemo(() => createStyles(theme, compact), [theme, compact]);
   const color = getProductColor(theme, item.colorKey);
   const { t } = useTranslation();
+  const addProduct = useCartStore((s) => s.addProduct);
 
   const openAffiliate = () => {
     if (!item.affiliateUrl) return;
     trackEvent('market_click', { productId: item.id });
     void Linking.openURL(item.affiliateUrl);
+  };
+
+  const addToCart = () => {
+    addProduct(item.id);
+    trackEvent('market_add_to_cart', { productId: item.id });
   };
 
   const content = (
@@ -46,6 +55,15 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
           <Pressable onPress={openAffiliate} accessibilityRole="link">
             <Text style={styles.buyLink}>{t('market.buyLink')} →</Text>
           </Pressable>
+        ) : null}
+        {MARKETPLACE_CHECKOUT_ENABLED && !compact ? (
+          <Button
+            testID={`market-add-${item.id}`}
+            label={t('market.addToCart')}
+            variant="secondary"
+            size="sm"
+            onPress={addToCart}
+          />
         ) : null}
       </View>
       {!compact ? (
