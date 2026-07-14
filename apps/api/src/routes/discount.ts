@@ -9,12 +9,22 @@ interface ValidateDiscountBody {
 
 export function registerDiscountRoutes(app: Express) {
   app.post('/api/discounts/validate', (req: Request, res: Response) => {
-    const body = req.body as ValidateDiscountBody;
+    const body = (req.body ?? {}) as ValidateDiscountBody;
     const code = typeof body.code === 'string' ? body.code : '';
-    const subtotalMinor = Number(body.subtotalMinor);
+    const subtotalMinor = body.subtotalMinor;
+    const currency = body.currency ?? 'RUB';
 
-    if (!Number.isFinite(subtotalMinor) || subtotalMinor < 0) {
+    if (
+      typeof subtotalMinor !== 'number' ||
+      !Number.isSafeInteger(subtotalMinor) ||
+      subtotalMinor < 0
+    ) {
       res.status(400).json({ ok: false, error: 'invalid_subtotal' });
+      return;
+    }
+
+    if (currency !== 'RUB') {
+      res.status(400).json({ ok: false, error: 'unsupported_currency' });
       return;
     }
 
@@ -34,7 +44,7 @@ export function registerDiscountRoutes(app: Express) {
       discountMinor: result.discountMinor,
       totalMinor: result.totalMinor,
       subtotalMinor,
-      currency: body.currency ?? 'RUB',
+      currency,
       description: result.description,
     });
   });

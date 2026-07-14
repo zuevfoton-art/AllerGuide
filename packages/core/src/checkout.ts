@@ -5,9 +5,9 @@ export const CATALOG_PRODUCT_PRICES_MINOR: Record<string, number> = {
   'air-purifier': 12_999_00,
   'hypo-cream': 890_00,
   'bed-covers': 3_490_00,
-  'nasal-rinse': 650_00,
-  'epi-case': 1_290_00,
   'oat-milk': 189_00,
+  'sunflower-spread': 650_00,
+  'epipen-case': 1_290_00,
 };
 
 export interface CheckoutLineItem {
@@ -23,8 +23,8 @@ export interface CheckoutSummary {
   discountCode?: string;
 }
 
-export function getCatalogProductPriceMinor(productId: string): number {
-  return CATALOG_PRODUCT_PRICES_MINOR[productId] ?? 999_00;
+export function getCatalogProductPriceMinor(productId: string): number | null {
+  return CATALOG_PRODUCT_PRICES_MINOR[productId] ?? null;
 }
 
 export function calculateSubtotalMinor(items: CheckoutLineItem[]): number {

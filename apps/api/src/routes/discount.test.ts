@@ -36,14 +36,24 @@ describe('discount routes', () => {
     expect(response.body).toEqual({ ok: false, error: 'not_found' });
   });
 
-  it('returns 400 for invalid subtotal', async () => {
+  it.each([-1, 100.5, null, '1000'])('returns 400 for invalid subtotal %j', async (subtotal) => {
     const app = await createApp({ withReplitAuth: false });
     const response = await request(app)
       .post('/api/discounts/validate')
-      .send({ code: 'WELCOME10', subtotalMinor: -1 });
+      .send({ code: 'WELCOME10', subtotalMinor: subtotal });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ ok: false, error: 'invalid_subtotal' });
+  });
+
+  it('rejects currencies that do not match the RUB discount catalog', async () => {
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app)
+      .post('/api/discounts/validate')
+      .send({ code: 'WELCOME10', subtotalMinor: 150_000, currency: 'USD' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ ok: false, error: 'unsupported_currency' });
   });
 
   it('returns 404 when subtotal is below minimum', async () => {

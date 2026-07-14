@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { CATALOG_PRODUCTS, formatMoneyMinor } from '@allerguide/core';
+import {
+  CATALOG_PRODUCTS,
+  buildCheckoutSummary,
+  calculateSubtotalMinor,
+  formatMoneyMinor,
+} from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -11,6 +16,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useCartStore } from '@/src/store/cart-store';
+import { validateCheckoutDiscount } from '@/src/services/discount-service';
 
 export default function MarketCheckoutScreen() {
   const theme = useTheme();
@@ -18,41 +24,60 @@ export default function MarketCheckoutScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const items = useCartStore((s) => s.items);
+  const appliedDiscount = useCartStore((s) => s.appliedDiscount);
   const hydrate = useCartStore((s) => s.hydrate);
-  const applyDiscountCode = useCartStore((s) => s.applyDiscountCode);
+  const setDiscountResult = useCartStore((s) => s.setDiscountResult);
   const clear = useCartStore((s) => s.clear);
-  const getSummary = useCartStore((s) => s.getSummary);
   const [discountInput, setDiscountInput] = useState('');
   const [discountError, setDiscountError] = useState('');
+  const [discountPending, setDiscountPending] = useState(false);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  const summary = getSummary();
+  const summary = useMemo(
+    () => buildCheckoutSummary(items, appliedDiscount ?? undefined),
+    [appliedDiscount, items],
+  );
   const productById = useMemo(
     () => new Map(CATALOG_PRODUCTS.map((product) => [product.id, product])),
     [],
   );
 
-  const handleApplyDiscount = () => {
+  const handleApplyDiscount = async () => {
     setDiscountError('');
-    const result = applyDiscountCode(discountInput);
-    if (!result.ok) {
-      setDiscountError(t(`checkout.errors.${result.error}`));
+    setDiscountPending(true);
+    try {
+      const result = await validateCheckoutDiscount(discountInput, calculateSubtotalMinor(items));
+      setDiscountResult(result);
+      if (!result.ok) {
+        setDiscountError(t(`checkout.errors.${result.error}`));
+      }
+    } finally {
+      setDiscountPending(false);
     }
   };
 
+  const completeOrder = () => {
+    clear();
+    if (router.canGoBack()) router.back();
+    else router.replace('/(tabs)/market' as any);
+  };
+
   const handleConfirm = () => {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined' && window.confirm(t('checkout.confirmMessage'))) {
+        completeOrder();
+      }
+      return;
+    }
+
     Alert.alert(t('checkout.confirmTitle'), t('checkout.confirmMessage'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('checkout.confirmOrder'),
-        onPress: () => {
-          clear();
-          if (router.canGoBack()) router.back();
-          else router.replace('/(tabs)/market' as any);
-        },
+        onPress: completeOrder,
       },
     ]);
   };
@@ -123,7 +148,8 @@ export default function MarketCheckoutScreen() {
           label={t('checkout.applyDiscount')}
           variant="secondary"
           size="sm"
-          onPress={handleApplyDiscount}
+          disabled={discountPending}
+          onPress={() => void handleApplyDiscount()}
         />
       </GlassCard>
 

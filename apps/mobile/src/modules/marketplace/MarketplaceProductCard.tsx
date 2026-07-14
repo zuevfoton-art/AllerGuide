@@ -76,11 +76,7 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
     return <View style={styles.card}>{content}</View>;
   }
 
-  return (
-    <Pressable onPress={item.affiliateUrl ? openAffiliate : undefined} accessibilityRole="button">
-      <GlassCard style={styles.card}>{content}</GlassCard>
-    </Pressable>
-  );
+  return <GlassCard style={styles.card}>{content}</GlassCard>;
 }
 
 function createStyles({ colors, fonts }: AppTheme, compact: boolean) {

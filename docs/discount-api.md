@@ -13,8 +13,8 @@ Validates a promo code against an order subtotal in minor currency units (kopeck
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `code` | string | yes | Promo code (case-insensitive) |
-| `subtotalMinor` | number | yes | Order subtotal in minor units (≥ 0) |
-| `currency` | string | no | Display currency hint (default `RUB`) |
+| `subtotalMinor` | integer | yes | Order subtotal in minor units (≥ 0) |
+| `currency` | string | no | Discount currency; only `RUB` is supported (default `RUB`) |
 
 **Success — `200 OK`**
 
@@ -36,7 +36,8 @@ Validates a promo code against an order subtotal in minor currency units (kopeck
 
 | HTTP | `error` | When |
 |------|---------|------|
-| 400 | `invalid_subtotal` | `subtotalMinor` missing or negative |
+| 400 | `invalid_subtotal` | `subtotalMinor` missing, fractional, non-numeric, or negative |
+| 400 | `unsupported_currency` | `currency` is not `RUB` |
 | 400 | `empty_code` | Blank code |
 | 404 | `not_found` | Unknown code |
 | 404 | `expired` | Code past `expiresAt` |

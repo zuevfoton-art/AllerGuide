@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildCheckoutSummary, calculateSubtotalMinor, formatMoneyMinor } from './checkout';
+import {
+  CATALOG_PRODUCT_PRICES_MINOR,
+  buildCheckoutSummary,
+  calculateSubtotalMinor,
+  formatMoneyMinor,
+  getCatalogProductPriceMinor,
+} from './checkout';
+import { CATALOG_PRODUCTS } from './catalog';
 import { validateDiscountCode } from './discount';
 
 describe('checkout', () => {
@@ -26,5 +33,14 @@ describe('checkout', () => {
 
   it('formats RUB amounts', () => {
     expect(formatMoneyMinor(1_299_00)).toMatch(/1\s?299/);
+  });
+
+  it('defines a price for every bundled catalog product and rejects unknown SKUs', () => {
+    expect(Object.keys(CATALOG_PRODUCT_PRICES_MINOR).sort()).toEqual(
+      CATALOG_PRODUCTS.map((product) => product.id).sort(),
+    );
+    expect(getCatalogProductPriceMinor('sunflower-spread')).toBe(650_00);
+    expect(getCatalogProductPriceMinor('epipen-case')).toBe(1_290_00);
+    expect(getCatalogProductPriceMinor('unknown-product')).toBeNull();
   });
 });
