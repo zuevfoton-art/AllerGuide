@@ -5,7 +5,6 @@ import {
   extractInsectAllergensFromProfile,
   getConsolidatedInsectList,
   parseAllergies,
-  profileEnablesInsectFocus,
   type InsectActionPlan,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
@@ -18,7 +17,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { Ionicons } from '@expo/vector-icons';
-import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import {
   createEmptyInsectActionPlan,
   getInsectActionPlan,
@@ -48,7 +47,7 @@ export default function InsectActionPlanScreen() {
 
   const insectEnabled = useMemo(() => {
     if (!profile) return false;
-    return profileEnablesInsectFocus(getProfileConditions(profile), parseAllergies(profile.allergies));
+    return getProfileCapabilities(profile).modules.insectSting;
   }, [profile]);
 
   const profileInsects = useMemo(

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Alert, View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  getMissingConditionsForAllergens,
   getWizardStep,
   needsChildConsent,
   normalizeAllergyConfirmations,
@@ -20,6 +21,7 @@ import {
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -119,10 +121,38 @@ export default function ProfileSetupScreen() {
 
   const wizardNav = buildProfileSetupWizardNavOptions(draft);
 
-  const handleConditionsChange = (next: AllergyConditionId[]) => {
+  const suggestedConditions = useMemo(
+    () => getMissingConditionsForAllergens(selected, conditions),
+    [selected, conditions],
+  );
+
+  const applyConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
     setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
     setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
+  };
+
+  const handleConditionsChange = (next: AllergyConditionId[]) => {
+    const removed = conditions.filter((item) => !next.includes(item));
+    const gatedRemoved = removed.filter(
+      (item) =>
+        item === 'asthma' ||
+        item === 'insect' ||
+        item === 'dermatitis' ||
+        ['pollinosis', 'rhinitis', 'household', 'animal'].includes(item),
+    );
+    if (gatedRemoved.length > 0) {
+      Alert.alert(
+        t('profileSetup.conditionRemoveTitle'),
+        t('profileSetup.conditionRemoveMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('common.save'), onPress: () => applyConditionsChange(next) },
+        ],
+      );
+      return;
+    }
+    applyConditionsChange(next);
   };
 
   const resetForm = () => {
@@ -179,6 +209,7 @@ export default function ProfileSetupScreen() {
 
     setActiveProfileId(id);
     const profiles = listProfiles();
+    void reconcileAllReminders();
 
     if (isAddingProfile) {
       markOnboardingComplete();
@@ -291,6 +322,12 @@ export default function ProfileSetupScreen() {
           onSelectedChange={setSelected}
           confirmations={confirmations}
           onConfirmationsChange={setConfirmations}
+          suggestedConditionIds={suggestedConditions}
+          onAddSuggestedCondition={(conditionId) =>
+            applyConditionsChange(
+              conditions.includes(conditionId) ? conditions : [...conditions, conditionId],
+            )
+          }
         />
       ) : null}
 

@@ -1,9 +1,13 @@
 import {
+  buildProfileCapabilities,
   getGatingConditions,
+  parseAllergies,
   parseConditionIds,
   type AllergyConditionId,
   type Profile,
+  type ProfileCapabilities,
 } from '@allerguide/core';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 
 function conditionsKey(profileId: number) {
@@ -22,3 +26,15 @@ export function setStoredProfileConditions(profileId: number, conditions: Allerg
 export function getProfileConditions(profile: Profile): AllergyConditionId[] {
   return getGatingConditions(getStoredProfileConditions(profile.id));
 }
+
+export function getProfileCapabilities(profile: Profile): ProfileCapabilities {
+  const explicit = getStoredProfileConditions(profile.id);
+  const passport = getAllergyPassport(profile.id);
+  return buildProfileCapabilities({
+    profile,
+    explicitConditions: explicit,
+    passport,
+  });
+}
+
+export { parseAllergies };

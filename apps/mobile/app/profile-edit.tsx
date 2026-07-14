@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { Alert, View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  getMissingConditionsForAllergens,
   normalizeAllergyConfirmations,
   parseAllergyConfirmations,
   parseProfileAllergenIds,
@@ -35,6 +36,7 @@ import {
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
 import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
+import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -99,11 +101,50 @@ export default function ProfileEditScreen() {
     });
   }, [profileId]);
 
+  const suggestedConditions = useMemo(
+    () => getMissingConditionsForAllergens(selected, conditions),
+    [selected, conditions],
+  );
+
+  const applyConditionsChange = (next: AllergyConditionId[]) => {
+    setConditions(next);
+    setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
+    setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
+  };
+
+  const handleConditionsChange = (next: AllergyConditionId[]) => {
+    const removed = conditions.filter((item) => !next.includes(item));
+    const gatedRemoved = removed.filter(
+      (item) =>
+        item === 'asthma' ||
+        item === 'insect' ||
+        item === 'dermatitis' ||
+        ['pollinosis', 'rhinitis', 'household', 'animal'].includes(item),
+    );
+    if (gatedRemoved.length > 0) {
+      Alert.alert(
+        t('profileSetup.conditionRemoveTitle'),
+        t('profileSetup.conditionRemoveMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('common.save'), onPress: () => applyConditionsChange(next) },
+        ],
+      );
+      return;
+    }
+    applyConditionsChange(next);
+  };
+
   const save = async () => {
     const trimmedName = name.trim();
     const year = Number(birthYear);
 
     setError('');
+
+    if (conditions.length === 0) {
+      setError(t('profileSetup.errors.conditionsRequired'));
+      return;
+    }
     try {
       await updateProfile(profileId, {
         name: trimmedName,
@@ -125,6 +166,7 @@ export default function ProfileEditScreen() {
     setStoredProfileConditions(profileId, conditions);
     saveConditionHistoryFromOnboarding(profileId, conditions, conditionHistoryDrafts, comorbidityLinks);
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
+    void reconcileAllReminders();
     router.back();
   };
 
@@ -200,14 +242,7 @@ export default function ProfileEditScreen() {
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-            <ConditionPicker
-              selected={conditions}
-              onChange={(next) => {
-                setConditions(next);
-                setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
-                setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
-              }}
-            />
+            <ConditionPicker selected={conditions} onChange={handleConditionsChange} />
           </GlassCard>
 
           {conditions.length > 0 ? (
@@ -236,6 +271,10 @@ export default function ProfileEditScreen() {
             <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
             <AllergenPicker
               selected={selected}
+              suggestedConditionIds={suggestedConditions}
+              onAddSuggestedCondition={(conditionId) =>
+                setConditions((prev) => (prev.includes(conditionId) ? prev : [...prev, conditionId]))
+              }
               onChange={(ids) => {
                 setSelected(ids);
                 setConfirmations((prev) => normalizeAllergyConfirmations(ids, prev));

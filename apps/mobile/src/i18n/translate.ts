@@ -66,6 +66,7 @@ const PROFILE_ERROR_KEY_MAP: Record<string, keyof LocaleMessages['profileSetup']
   name_required: 'nameRequired',
   birth_year_invalid: 'birthYearInvalid',
   allergen_required: 'allergenRequired',
+  conditions_required: 'conditionsRequired',
   child_consent_required: 'consentRequired',
   'Укажите имя профиля.': 'nameRequired',
   'Укажите корректный год рождения.': 'birthYearInvalid',

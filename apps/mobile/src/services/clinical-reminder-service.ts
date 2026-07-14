@@ -6,7 +6,7 @@ import {
   type ScheduledReminderTrigger,
 } from '@allerguide/core';
 import { listAllDiaryEntries } from '@/src/services/diary-service';
-import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import {
   getActReminderNotificationContent,
   getDoctorVisitReminderNotificationContent,
@@ -62,8 +62,15 @@ export async function reconcileClinicalReminders(): Promise<void> {
   if (actEnabled) {
     for (const profile of profiles) {
       const profileEntries = entries.filter((entry) => entry.profileId === profile.id);
+      const capabilities = getProfileCapabilities(profile);
+      if (!capabilities.modules.peakFlow) continue;
       triggers.push(
-        ...collectActReminderTriggers(profile.id, profileEntries, getProfileConditions(profile), now),
+        ...collectActReminderTriggers(
+          profile.id,
+          profileEntries,
+          capabilities.gatingConditions,
+          now,
+        ),
       );
     }
   }

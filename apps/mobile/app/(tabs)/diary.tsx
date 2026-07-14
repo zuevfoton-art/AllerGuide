@@ -16,15 +16,9 @@ import {
   getClinicalScaleSection,
   getDiaryEntryAnswers,
   getDiarySection,
-  getRecommendedScalesForConditions,
   isActPromptDue,
   isAsitCourseConfigured,
   parseAllergies,
-  profileEnablesAsit,
-  profileEnablesDrugFocus,
-  profileEnablesFoodFocus,
-  profileEnablesInsectFocus,
-  profileEnablesPeakFlow,
   getAsthmaPlanPersonalBest,
   type ClinicalScaleId,
 } from '@allerguide/core';
@@ -35,7 +29,7 @@ import {
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
-import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
@@ -106,9 +100,13 @@ export default function DiaryScreen() {
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
   );
-  const profileConditions = useMemo(
-    () => (activeProfile ? getProfileConditions(activeProfile) : []),
+  const profileCapabilities = useMemo(
+    () => (activeProfile ? getProfileCapabilities(activeProfile) : null),
     [activeProfile],
+  );
+  const profileConditions = useMemo(
+    () => profileCapabilities?.gatingConditions ?? [],
+    [profileCapabilities],
   );
   const phenotypeHints = useMemo(
     () => (activeProfile ? getProfileReassessmentHints(activeProfile) : []),
@@ -119,8 +117,8 @@ export default function DiaryScreen() {
     [localizedSections, profileConditions],
   );
   const recommendedScaleIds = useMemo(
-    () => getRecommendedScalesForConditions(profileConditions),
-    [profileConditions],
+    () => profileCapabilities?.recommendedScaleIds ?? [],
+    [profileCapabilities],
   );
   const recommendedScales = useMemo(
     () => CLINICAL_SCALES.filter((scale) => recommendedScaleIds.includes(scale.id)),
@@ -131,30 +129,11 @@ export default function DiaryScreen() {
     [recommendedScaleIds],
   );
   const scaleTrends = useMemo(() => collectLatestScaleTrends(list), [list]);
-  const asitEnabled = useMemo(
-    () => profileEnablesAsit(profileConditions),
-    [profileConditions],
-  );
-  const foodFocusEnabled = useMemo(
-    () =>
-      activeProfile
-        ? profileEnablesFoodFocus(profileConditions, parseAllergies(activeProfile.allergies))
-        : false,
-    [profileConditions, activeProfile],
-  );
-  const drugFocusEnabled = useMemo(() => {
-    if (!activeProfileId) return false;
-    const passport = getAllergyPassport(activeProfileId);
-    return profileEnablesDrugFocus(profileConditions, passport.drugIntolerances);
-  }, [profileConditions, activeProfileId]);
-  const insectFocusEnabled = useMemo(
-    () =>
-      activeProfile
-        ? profileEnablesInsectFocus(profileConditions, parseAllergies(activeProfile.allergies))
-        : false,
-    [profileConditions, activeProfile],
-  );
-  const peakFlowEnabled = useMemo(() => profileEnablesPeakFlow(profileConditions), [profileConditions]);
+  const asitEnabled = profileCapabilities?.modules.asit ?? false;
+  const foodFocusEnabled = profileCapabilities?.modules.foodFocus ?? false;
+  const drugFocusEnabled = profileCapabilities?.modules.drugFocus ?? false;
+  const insectFocusEnabled = profileCapabilities?.modules.insectSting ?? false;
+  const peakFlowEnabled = profileCapabilities?.modules.peakFlow ?? false;
   const foodDrugRegistry = useMemo(
     () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
     [activeProfileId],
