@@ -18,7 +18,7 @@ const baseDraft = (): ProfileSetupWizardDraft => ({
   birthYear: '1990',
   selectedAllergenIds: ['milk'],
   confirmations: {},
-  conditions: [],
+  conditions: ['food'],
   conditionHistoryDrafts: {},
   comorbidityLinks: [],
   contacts: [],
