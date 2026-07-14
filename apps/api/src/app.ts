@@ -23,6 +23,7 @@ import { registerAirQualityRoutes } from './routes/air-quality';
 import { registerMapsRoutes } from './routes/maps';
 import { registerPlacesRoutes } from './routes/places';
 import { registerMarketRoutes } from './routes/market';
+import { registerDiscountRoutes } from './routes/discount';
 import {
   buildCorsOptions,
   installRateLimiters,
@@ -62,6 +63,7 @@ export async function createApp(): Promise<Express> {
   registerAirQualityRoutes(app);
   registerMapsRoutes(app);
   registerPlacesRoutes(app);
+  registerDiscountRoutes(app);
 
   app.get('/api/health', async (_req, res) => {
     const health = await buildHealthPayload();

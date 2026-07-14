@@ -149,3 +149,12 @@ export const MARKET_LIVE_CATALOG_ENABLED = isDefaultOnPublicFlag(
 export const MARKET_MEDICINES_ENABLED = isDefaultOnPublicFlag(
   process.env.EXPO_PUBLIC_MARKET_MEDICINES,
 );
+
+/** Marketplace cart + checkout with promo codes (offline-capable). */
+export const MARKETPLACE_CHECKOUT_ENABLED =
+  process.env.EXPO_PUBLIC_MARKETPLACE_CHECKOUT === 'true' ||
+  process.env.EXPO_PUBLIC_MAESTRO_TEST_CHECKOUT === 'true';
+
+/** Validate promo codes via API when URL is configured (falls back to core offline). */
+export const MARKETPLACE_CHECKOUT_API_ENABLED =
+  MARKETPLACE_CHECKOUT_ENABLED && Boolean(process.env.EXPO_PUBLIC_API_URL);

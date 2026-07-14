@@ -7,6 +7,7 @@ import {
   type MarketplaceProduct,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useMemo, useState } from 'react';
 import { CATEGORY_LABEL_KEYS } from '@/src/modules/marketplace/category-labels';
@@ -14,6 +15,8 @@ import { getProductColor } from '@/src/modules/marketplace/product-theme';
 import { trackEvent } from '@/src/services/analytics-service';
 import { resolveYandexMarketOffer } from '@/src/services/market-api';
 import { useTranslation } from '@/src/store/locale-store';
+import { MARKETPLACE_CHECKOUT_ENABLED } from '@/src/constants/features';
+import { useCartStore } from '@/src/store/cart-store';
 
 interface MarketplaceProductCardProps {
   item: MarketplaceProduct;
@@ -27,6 +30,7 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
   const { t } = useTranslation();
   const [opening, setOpening] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const addProduct = useCartStore((s) => s.addProduct);
 
   const primary = getMarketplacePrimaryOffer(item);
   const isMedicine = item.kind === 'medicine';
@@ -70,6 +74,11 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
     }
   };
 
+  const addToCart = () => {
+    addProduct(item.id);
+    trackEvent('market_add_to_cart', { productId: item.id });
+  };
+
   const photo = !imageFailed && item.imageUrl ? (
     <Image
       source={{ uri: item.imageUrl }}
@@ -101,6 +110,15 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
       {!compact && primary ? (
         <Text style={styles.buyLink}>{buyLabel(primary)} →</Text>
       ) : null}
+      {MARKETPLACE_CHECKOUT_ENABLED && !compact ? (
+        <Button
+          testID={`market-add-${item.id}`}
+          label={t('market.addToCart')}
+          variant="secondary"
+          size="sm"
+          onPress={addToCart}
+        />
+      ) : null}
     </View>
   );
 
@@ -116,6 +134,15 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
         {photo}
         {info}
       </Pressable>
+    );
+  }
+
+  if (MARKETPLACE_CHECKOUT_ENABLED) {
+    return (
+      <GlassCard style={styles.card} padded={false}>
+        {photo}
+        <View style={styles.infoPad}>{info}</View>
+      </GlassCard>
     );
   }
 
