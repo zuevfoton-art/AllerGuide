@@ -170,6 +170,10 @@ export type LocaleMessages = {
     foodSub: string;
     medicine: string;
     medicineSub: string;
+    peakFlow: string;
+    peakFlowSub: string;
+    asit: string;
+    asitSub: string;
     expert: string;
     marketplaceTitle: string;
     marketplaceSub: string;
@@ -553,6 +557,11 @@ export type LocaleMessages = {
       empty: string;
       disclaimer: string;
     };
+    conditionsOther: string;
+    conditionHintTitle: string;
+    conditionHintAdd: string;
+    conditionRemoveTitle: string;
+    conditionRemoveMessage: string;
     consent: string;
     confirmationLabel: string;
     confirmationHint: string;
@@ -569,6 +578,7 @@ export type LocaleMessages = {
       nameRequired: string;
       birthYearInvalid: string;
       allergenRequired: string;
+      conditionsRequired: string;
       consentRequired: string;
       saveFailed: string;
     };

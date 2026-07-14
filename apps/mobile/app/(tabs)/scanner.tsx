@@ -4,7 +4,14 @@ import { useFocusEffect } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
-import { computeScanTrends, formatDiaryDate, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
+import {
+  computeScanTrends,
+  formatDiaryDate,
+  type SafeProduct,
+  type ScanHistoryEntry,
+  type ScannerMode,
+} from '@allerguide/core';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -41,7 +48,7 @@ const MODES = [
   { key: 'cosmetics', labelKey: 'scanner.cosmetics', icon: 'flask' },
 ] as const;
 
-type ScanMode = (typeof MODES)[number]['key'];
+type ScanMode = ScannerMode;
 
 export default function ScannerScreen() {
   const theme = useTheme();
@@ -68,6 +75,16 @@ export default function ScannerScreen() {
   const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticResultRef = useRef<ScanResult | null>(null);
+
+  const profileCapabilities = useMemo(
+    () => (profile ? getProfileCapabilities(profile) : null),
+    [profile],
+  );
+
+  useEffect(() => {
+    if (!profileCapabilities?.defaultScannerMode) return;
+    setMode(profileCapabilities.defaultScannerMode);
+  }, [activeProfileId, profileCapabilities?.defaultScannerMode]);
 
   const scanTrends = useMemo(() => computeScanTrends(history), [history]);
 

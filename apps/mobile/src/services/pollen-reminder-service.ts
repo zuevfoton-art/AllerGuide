@@ -20,6 +20,7 @@ import {
   setPollenReminderId,
 } from '@/src/services/notification-service';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { listProfiles } from '@/src/services/profile-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { Platform } from 'react-native';
@@ -102,6 +103,11 @@ export async function reconcilePollenReminders(): Promise<void> {
 
   const profiles = listProfiles();
   for (const profile of profiles) {
+    const capabilities = getProfileCapabilities(profile);
+    if (!capabilities.reminders.pollen) {
+      await cancelPollenReminder(profile.id);
+      continue;
+    }
     const matches = readPollenCache(profile.id);
     if (!matches) continue;
     await syncPollenReminderForProfile(profile.id, profile.name, matches, true);

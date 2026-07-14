@@ -29,8 +29,7 @@ import {
 } from '@/src/services/asit-course-service';
 import { ensureNotificationPermission, syncAsitReminder } from '@/src/services/asit-reminder-service';
 import { getAsitReminderNotificationContent } from '@/src/services/notification-content-service';
-import { profileEnablesAsit } from '@allerguide/core';
-import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 
 const ROUTES: AsitRoute[] = ['slit', 'scit'];
 const PHASES: AsitPhase[] = ['buildup', 'maintenance'];
@@ -46,8 +45,13 @@ export default function AsitCourseScreen() {
 
   const asitEnabled = useMemo(() => {
     if (!profile) return false;
-    return profileEnablesAsit(getProfileConditions(profile));
+    return getProfileCapabilities(profile).modules.asit;
   }, [profile]);
+
+  useEffect(() => {
+    if (!profileId || asitEnabled) return;
+    void syncAsitReminder(profileId, null, getAsitReminderNotificationContent(createEmptyAsitCourse()));
+  }, [profileId, asitEnabled]);
 
   useEffect(() => {
     if (!profileId) return;

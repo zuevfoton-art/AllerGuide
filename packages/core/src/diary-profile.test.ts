@@ -16,8 +16,12 @@ describe('diary-profile', () => {
     expect(ids).toContain('rhinitis');
   });
 
-  it('recommends ARIA and ACT scales for mixed profile', () => {
-    const scales = getRecommendedScalesForProfile(['Пыльца берёзы'], ['asthma']);
+  it('recommends scales only for explicit gating conditions', () => {
+    expect(getRecommendedScalesForProfile(['Молоко'], ['food'])).toEqual([]);
+  });
+
+  it('recommends ARIA and ACT scales for mixed explicit profile', () => {
+    const scales = getRecommendedScalesForProfile(['Пыльца берёзы'], ['asthma', 'pollinosis']);
     expect(scales).toEqual(expect.arrayContaining(['aria-lite', 'act']));
   });
 
@@ -31,20 +35,22 @@ describe('diary-profile', () => {
     expect(scales).toContain('uas7');
   });
 
-  it('falls back to all RAACI scales when conditions unknown', () => {
-    expect(getRecommendedScalesForProfile(['Молоко'])).toEqual([
-      'aria-lite',
-      'act',
-      'scorad-lite',
-    ]);
+  it('does not fallback to all RAACI scales when conditions unknown', () => {
+    expect(getRecommendedScalesForProfile(['Молоко'], [])).toEqual([]);
   });
 
   it('hides peak flow without asthma and ASIT without eligible conditions', () => {
-    const foodOnly = resolveProfileConditions(['Молоко'], []);
+    const foodOnly = resolveProfileConditions(['Молоко'], ['food']);
     const visible = filterDiarySections(DIARY_SECTIONS, foodOnly).map((s) => s.type);
     expect(visible).not.toContain('Пикфлоуметрия');
     expect(visible).not.toContain('АСИТ');
     expect(visible).toContain('Симптомы');
+  });
+
+  it('does not show ASIT when only pollen allergen inferred without explicit type', () => {
+    const visible = filterDiarySections(DIARY_SECTIONS, []).map((s) => s.type);
+    expect(visible).not.toContain('АСИТ');
+    expect(visible).not.toContain('Пикфлоуметрия');
   });
 
   it('shows peak flow for asthma profile', () => {

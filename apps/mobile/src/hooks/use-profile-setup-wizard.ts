@@ -29,6 +29,7 @@ export type ProfileSetupWizardErrorCode =
   | 'name_required'
   | 'birth_year_invalid'
   | 'child_consent_required'
+  | 'conditions_required'
   | 'allergen_required';
 
 export interface ProfileSetupWizardDraft {
@@ -70,6 +71,8 @@ export function validateProfileSetupWizardStep(
       return null;
     }
     case 'conditions':
+      if (draft.conditions.length === 0) return 'conditions_required';
+      return null;
     case 'conditionHistory':
     case 'comorbidity':
     case 'phenotypeSummary':

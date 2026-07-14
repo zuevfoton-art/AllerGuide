@@ -1,10 +1,12 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo } from 'react';
+import type { HomeQuickAction } from '@allerguide/core';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
@@ -45,6 +47,11 @@ export default function HomeScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
 
+  const profileCapabilities = useMemo(
+    () => (profile ? getProfileCapabilities(profile) : null),
+    [profile],
+  );
+
   const wellnessState = useAsyncState<WellnessSnapshot | null>(async () => {
     if (!activeProfileId || !profile) return null;
     const entries = await getDiaryEntries(activeProfileId);
@@ -67,24 +74,79 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    if (!wellness || !activeProfileId || !profile) return;
+    if (!wellness || !activeProfileId || !profile || !profileCapabilities) return;
+    if (!profileCapabilities.reminders.pollen) {
+      void syncPollenReminderForProfile(activeProfileId, profile.name, [], false);
+      return;
+    }
     void syncPollenReminderForProfile(
       activeProfileId,
       profile.name,
       wellness.pollenMatches,
       wellness.envDataAvailable,
     );
-  }, [wellness, activeProfileId, profile]);
+  }, [wellness, activeProfileId, profile, profileCapabilities]);
 
-  const diaryRows = useMemo(
-    () =>
-      [
-        { label: t('home.symptoms'), icon: 'pulse', route: '/(tabs)/diary', sub: t('home.symptomsSub') },
-        { label: t('home.food'), icon: 'restaurant', route: '/(tabs)/diary', sub: t('home.foodSub') },
-        { label: t('home.medicine'), icon: 'medkit', route: '/(tabs)/diary', sub: t('home.medicineSub') },
-      ] as const,
-    [t],
+  const diaryActionMeta: Record<
+    HomeQuickAction,
+    { labelKey: string; icon: string; subKey: string; route: string }
+  > = useMemo(
+    () => ({
+      symptoms: {
+        labelKey: 'home.symptoms',
+        icon: 'pulse',
+        subKey: 'home.symptomsSub',
+        route: '/(tabs)/diary',
+      },
+      food: {
+        labelKey: 'home.food',
+        icon: 'restaurant',
+        subKey: 'home.foodSub',
+        route: '/(tabs)/diary',
+      },
+      medicine: {
+        labelKey: 'home.medicine',
+        icon: 'medkit',
+        subKey: 'home.medicineSub',
+        route: '/(tabs)/diary',
+      },
+      peakFlow: {
+        labelKey: 'home.peakFlow',
+        icon: 'speedometer',
+        subKey: 'home.peakFlowSub',
+        route: '/(tabs)/diary',
+      },
+      asit: {
+        labelKey: 'home.asit',
+        icon: 'fitness',
+        subKey: 'home.asitSub',
+        route: '/asit-course',
+      },
+    }),
+    [],
   );
+
+  const diaryRows = useMemo(() => {
+    const actions = profileCapabilities?.homeQuickActions ?? ['symptoms', 'food', 'medicine'];
+    return actions.map((action) => {
+      const meta = diaryActionMeta[action];
+      return {
+        action,
+        label: t(meta.labelKey as 'home.symptoms'),
+        icon: meta.icon,
+        route: meta.route,
+        sub: t(meta.subKey as 'home.symptomsSub'),
+      };
+    });
+  }, [profileCapabilities, diaryActionMeta, t]);
+
+  const primaryRecommendation = useMemo(() => {
+    if (!wellness?.recommendations.length) return null;
+    const recs = profileCapabilities?.reminders.pollen
+      ? wellness.recommendations
+      : wellness.recommendations.filter((rec) => rec.icon !== '🌿' && rec.icon !== '📅');
+    return recs[0] ?? null;
+  }, [wellness, profileCapabilities]);
 
   const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;
   const confidenceBadge = wellness
@@ -229,10 +291,10 @@ export default function HomeScreen() {
         </GlassCard>
       ) : null}
 
-      {wellness?.recommendations[0] ? (
+      {primaryRecommendation ? (
         <GlassCard variant="calm" style={styles.recCard}>
-          <Text style={styles.recTitle}>{wellness.recommendations[0].title}</Text>
-          <Text style={styles.recText}>{wellness.recommendations[0].text}</Text>
+          <Text style={styles.recTitle}>{primaryRecommendation.title}</Text>
+          <Text style={styles.recText}>{primaryRecommendation.text}</Text>
         </GlassCard>
       ) : null}
 

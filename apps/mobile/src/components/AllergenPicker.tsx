@@ -3,22 +3,32 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   findAllergenById,
+  getConditionType,
   getCrossReactionsForSelection,
   getPopularAllergens,
+  type AllergyConditionId,
   type CrossReactionMatch,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
 import { useTranslation } from '@/src/store/locale-store';
 import { formatCrossReactionLabel } from '@/src/i18n/cross-reactions';
+import { formatTemplate } from '@/src/i18n/translate';
 
 interface AllergenPickerProps {
   /** Canonical allergen ids (`milk`, `birch-pollen`, …). */
   selected: string[];
   onChange: (selected: string[]) => void;
+  suggestedConditionIds?: AllergyConditionId[];
+  onAddSuggestedCondition?: (id: AllergyConditionId) => void;
 }
 
-export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
+export function AllergenPicker({
+  selected,
+  onChange,
+  suggestedConditionIds = [],
+  onAddSuggestedCondition,
+}: AllergenPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
@@ -83,6 +93,30 @@ export function AllergenPicker({ selected, onChange }: AllergenPickerProps) {
         <Text style={styles.catalogBtnText}>{t('allergens.openCatalog')}</Text>
         <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
       </Pressable>
+
+      {suggestedConditionIds.length > 0 ? (
+        <View style={styles.crossCard}>
+          <View style={styles.crossHeader}>
+            <Ionicons name="information-circle-outline" size={18} color={theme.colors.accent} />
+            <Text style={styles.crossTitle}>{t('profileSetup.conditionHintTitle')}</Text>
+          </View>
+          <View style={styles.chipGrid}>
+            {suggestedConditionIds.map((conditionId) => {
+              const label = getConditionType(conditionId)?.label ?? conditionId;
+              return (
+                <Pressable
+                  key={conditionId}
+                  style={styles.crossBtn}
+                  onPress={() => onAddSuggestedCondition?.(conditionId)}>
+                  <Text style={styles.crossBtnText}>
+                    {formatTemplate(t('profileSetup.conditionHintAdd'), { label })}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      ) : null}
 
       {crossSuggestions.length > 0 ? (
         <View style={styles.crossCard}>

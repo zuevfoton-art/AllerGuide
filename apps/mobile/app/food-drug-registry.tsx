@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   extractFoodAllergensFromProfile,
   parseAllergies,
-  profileEnablesFoodFocus,
   type FoodDrugRegistry,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
@@ -17,7 +16,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { Ionicons } from '@expo/vector-icons';
-import { getProfileConditions } from '@/src/services/profile-conditions-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import {
   createEmptyFoodDrugRegistry,
   getFoodDrugRegistry,
@@ -47,7 +46,7 @@ export default function FoodDrugRegistryScreen() {
 
   const foodEnabled = useMemo(() => {
     if (!profile) return false;
-    return profileEnablesFoodFocus(getProfileConditions(profile), parseAllergies(profile.allergies));
+    return getProfileCapabilities(profile).modules.foodFocus;
   }, [profile]);
 
   const profileFoodAllergens = useMemo(

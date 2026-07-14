@@ -5,7 +5,6 @@ import {
   profileEnablesAsit,
   profileEnablesPeakFlow,
 } from './allergy-conditions';
-import { profileEnablesInsectFocus } from './insect-allergy';
 import {
   CLINICAL_SCALES,
   computeScaleScore,
@@ -97,11 +96,8 @@ export function resolveProfileConditions(
   allergies: string[],
   explicit: AllergyConditionId[] = [],
 ): AllergyConditionId[] {
-  const merged = new Set<AllergyConditionId>([
-    ...explicit,
-    ...inferConditionIdsFromAllergies(allergies),
-  ]);
-  return [...merged];
+  void allergies;
+  return [...explicit];
 }
 
 export function getRecommendedScalesForConditions(
@@ -112,7 +108,6 @@ export function getRecommendedScalesForConditions(
     const scaleId = SCALE_BY_CONDITION[conditionId];
     if (scaleId) scales.add(scaleId);
   }
-  if (!scales.size) return [...RAACI_SCALE_IDS];
   return [...scales];
 }
 
@@ -127,7 +122,7 @@ export function getRecommendedScalesForProfile(
   allergies: string[],
   explicit: AllergyConditionId[] = [],
 ): ClinicalScaleId[] {
-  const scales = new Set(getRecommendedScalesForConditions(resolveProfileConditions(allergies, explicit)));
+  const scales = new Set(getRecommendedScalesForConditions(explicit));
   if (profileSuggestsUas7(allergies) || explicit.includes('urticaria')) scales.add('uas7');
   return [...scales];
 }
@@ -139,7 +134,9 @@ export function isDiarySectionVisible(
   if (ALWAYS_VISIBLE_SECTIONS.has(sectionType)) return true;
   if (sectionType === 'Пикфлоуметрия') return profileEnablesPeakFlow(conditions);
   if (sectionType === 'АСИТ') return profileEnablesAsit(conditions);
-  if (sectionType === 'Укус насекомого') return profileEnablesInsectFocus(conditions);
+  if (sectionType === 'Укус насекомого') {
+    return conditions.includes('insect');
+  }
   return true;
 }
 

@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { DOCTOR_REPORT_BLOCKS as BLOCKS, getDefaultReportBlockIds } from '@allerguide/core';
+import { useEffect, useMemo, useState } from 'react';
+import { DOCTOR_REPORT_BLOCKS as BLOCKS } from '@allerguide/core';
 import { generateDoctorReportPdf } from '@/src/services/doctor-report-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -26,8 +27,22 @@ export default function DoctorReportScreen() {
   const { t, content } = useTranslation();
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
+  const activeProfile = useAppStore((s) => s.activeProfile);
+  const profileCapabilities = useMemo(
+    () => (activeProfile ? getProfileCapabilities(activeProfile) : null),
+    [activeProfile],
+  );
   const [period, setPeriod] = useState<ReportPeriod>(30);
-  const [blockIds, setBlockIds] = useState<string[]>(getDefaultReportBlockIds());
+  const [blockIds, setBlockIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!profileCapabilities) {
+      setBlockIds([]);
+      return;
+    }
+    setBlockIds(profileCapabilities.reportBlockIds);
+  }, [activeProfileId, profileCapabilities]);
+
   const [loading, setLoading] = useState(false);
 
   const toggleBlock = (id: string) => {

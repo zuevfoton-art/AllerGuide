@@ -1,4 +1,4 @@
-import type { AllergyConfirmationSource } from '@allerguide/core';
+import type { AllergyConfirmationSource, AllergyConditionId } from '@allerguide/core';
 import { normalizeAllergyConfirmations } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
@@ -12,6 +12,8 @@ interface ProfileSetupAllergensStepProps {
   onSelectedChange: (ids: string[]) => void;
   confirmations: Record<string, AllergyConfirmationSource>;
   onConfirmationsChange: (value: Record<string, AllergyConfirmationSource>) => void;
+  suggestedConditionIds?: AllergyConditionId[];
+  onAddSuggestedCondition?: (id: AllergyConditionId) => void;
 }
 
 export function ProfileSetupAllergensStep({
@@ -19,6 +21,8 @@ export function ProfileSetupAllergensStep({
   onSelectedChange,
   confirmations,
   onConfirmationsChange,
+  suggestedConditionIds = [],
+  onAddSuggestedCondition,
 }: ProfileSetupAllergensStepProps) {
   const ui = useUiStyles();
   const { t } = useTranslation();
@@ -28,6 +32,8 @@ export function ProfileSetupAllergensStep({
       <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
       <AllergenPicker
         selected={selected}
+        suggestedConditionIds={suggestedConditionIds}
+        onAddSuggestedCondition={onAddSuggestedCondition}
         onChange={(ids) => {
           onSelectedChange(ids);
           onConfirmationsChange(normalizeAllergyConfirmations(ids, confirmations));
