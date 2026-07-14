@@ -1,9 +1,7 @@
 import { create } from 'zustand';
 import {
   buildCheckoutSummary,
-  calculateSubtotalMinor,
   getCatalogProductPriceMinor,
-  validateDiscountCode,
   type CheckoutLineItem,
   type CheckoutSummary,
   type DiscountValidationResult,
@@ -34,7 +32,7 @@ interface CartState {
   addProduct: (productId: string) => void;
   removeProduct: (productId: string) => void;
   clear: () => void;
-  applyDiscountCode: (code: string) => DiscountValidationResult;
+  setDiscountResult: (result: DiscountValidationResult) => void;
   clearDiscount: () => void;
   getSummary: () => CheckoutSummary;
   totalQuantity: () => number;
@@ -48,6 +46,7 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   addProduct: (productId) => {
     const price = getCatalogProductPriceMinor(productId);
+    if (price === null) return;
     const items = [...get().items];
     const existing = items.find((item) => item.productId === productId);
     if (existing) {
@@ -70,12 +69,9 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ items: [], appliedDiscount: null });
   },
 
-  applyDiscountCode: (code) => {
-    const subtotalMinor = calculateSubtotalMinor(get().items);
-    const result = validateDiscountCode({ code, subtotalMinor });
+  setDiscountResult: (result) => {
     if (result.ok) set({ appliedDiscount: result });
     else set({ appliedDiscount: null });
-    return result;
   },
 
   clearDiscount: () => set({ appliedDiscount: null }),
