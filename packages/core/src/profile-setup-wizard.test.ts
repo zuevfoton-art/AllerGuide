@@ -11,7 +11,7 @@ import {
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardDraft,
-} from './use-profile-setup-wizard';
+} from './profile-setup-wizard';
 
 const baseDraft = (): ProfileSetupWizardDraft => ({
   name: 'Анна',
@@ -87,7 +87,10 @@ describe('profile setup wizard', () => {
     ).toBeNull();
   });
 
-  it('requires at least one allergen', () => {
+  it('requires at least one condition and allergen', () => {
+    expect(
+      validateProfileSetupWizardStep('conditions', { ...baseDraft(), conditions: [] }, {}),
+    ).toBe('conditions_required');
     expect(
       validateProfileSetupWizardStep('allergens', { ...baseDraft(), selectedAllergenIds: [] }, {}),
     ).toBe('allergen_required');
@@ -98,6 +101,9 @@ describe('profile setup wizard', () => {
     expect(
       validateProfileSetupWizardDraft({ ...baseDraft(), selectedAllergenIds: [] }, {}),
     ).toBe('allergen_required');
+    expect(
+      validateProfileSetupWizardDraft({ ...baseDraft(), conditions: [] }, {}),
+    ).toBe('conditions_required');
   });
 
   it('reconciles condition history drafts when conditions change', () => {

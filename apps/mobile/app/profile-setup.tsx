@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import {
   getMissingConditionsForAllergens,
   getWizardStep,
+  getGatedConditionRemovals,
   needsChildConsent,
   normalizeAllergyConfirmations,
   shouldCompleteOnboarding,
@@ -133,14 +134,7 @@ export default function ProfileSetupScreen() {
   };
 
   const handleConditionsChange = (next: AllergyConditionId[]) => {
-    const removed = conditions.filter((item) => !next.includes(item));
-    const gatedRemoved = removed.filter(
-      (item) =>
-        item === 'asthma' ||
-        item === 'insect' ||
-        item === 'dermatitis' ||
-        ['pollinosis', 'rhinitis', 'household', 'animal'].includes(item),
-    );
+    const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
       Alert.alert(
         t('profileSetup.conditionRemoveTitle'),
