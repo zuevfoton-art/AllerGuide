@@ -11,7 +11,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 **Before writing or changing code**, read and follow:
 
 1. [`docs/architecture.md`](docs/architecture.md) — system design, layers, data flows, feature flags
-2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist
+2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist, Code Complete §10
 
 Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
 
