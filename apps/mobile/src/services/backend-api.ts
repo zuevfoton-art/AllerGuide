@@ -9,6 +9,7 @@ import {
   getSensitiveSetting,
   setSensitiveSettingSync,
 } from '@/src/services/secure-settings-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 const AUTH_TOKEN_KEY = 'authToken';
 const AUTH_USER_JSON_KEY = 'authUserJson';
@@ -44,7 +45,8 @@ export function getCachedAuthUser(): AuthUser | null {
   if (!raw) return null;
   try {
     return JSON.parse(raw) as AuthUser;
-  } catch {
+  } catch (error) {
+    logCaughtError('getCachedAuthUser', error, { level: 'warn' });
     return null;
   }
 }

@@ -11,6 +11,7 @@ import {
   scanCacheKey,
   setCachedScan,
 } from '../lib/scan-cache';
+import { logCaughtError } from '../lib/log-caught-error';
 
 interface ScanRequestBody {
   mode?: ScanMode;
@@ -155,7 +156,8 @@ export function registerScanRoutes(app: Express) {
 
       await setCachedScan(cacheKey, result);
       res.json({ ok: true, result, cached: false });
-    } catch {
+    } catch (error) {
+      logCaughtError('scan.analyze', error);
       res.status(500).json({ ok: false, error: 'Scan failed' });
     }
   });

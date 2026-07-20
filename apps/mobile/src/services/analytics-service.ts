@@ -6,6 +6,7 @@ import {
   type AnalyticsEventProps,
 } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 const CLIENT_ID_KEY = 'analyticsClientId';
 let analyticsEnabled = false;
@@ -71,7 +72,9 @@ async function sendPayload(payload: ReturnType<typeof buildAnalyticsPayload>) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-  }).catch(() => undefined);
+  }).catch((error) => {
+    logCaughtError('sendAnalyticsPayload', error, { level: 'warn' });
+  });
 }
 
 export function trackEvent(name: string, props?: AnalyticsEventProps) {

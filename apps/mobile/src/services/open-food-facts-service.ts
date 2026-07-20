@@ -1,4 +1,5 @@
 import { mapExternalAllergenIds } from '@allerguide/core';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 export interface OpenFoodFactsProduct {
   name: string;
@@ -50,7 +51,8 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
       allergenTags: mapExternalAllergenIds(data.product.allergens_tags ?? []),
       traceTags: mapExternalAllergenIds(data.product.traces_tags ?? []),
     };
-  } catch {
+  } catch (error) {
+    logCaughtError('fetchProductByBarcode', error, { extra: { barcode: normalized } });
     return null;
   }
 }

@@ -1,4 +1,5 @@
 import { decryptString, encryptString, isEncryptionAvailable } from '@allerguide/core';
+import { logCaughtError } from '@/src/services/error-reporting';
 import { getSetting } from '@/src/services/settings-service';
 import { getSensitiveSetting, setSensitiveSettingSync } from '@/src/services/secure-settings-service';
 
@@ -137,7 +138,8 @@ export async function encryptBackup(
   try {
     const passphrase = options?.passphrase ?? getBackupPassphrase();
     return await encryptString(plaintext, passphrase);
-  } catch {
+  } catch (error) {
+    logCaughtError('encryptBackup', error);
     return null;
   }
 }

@@ -6,6 +6,7 @@ import {
   normalizeAnalyticsBody,
 } from '../lib/analytics-store';
 import { forwardAnalyticsToPostHog } from '../lib/posthog-forward';
+import { logCaughtError } from '../lib/log-caught-error';
 
 function analyticsEnabled(): boolean {
   return process.env.ANALYTICS_INGEST_ENABLED !== 'false';
@@ -44,7 +45,9 @@ export function registerAnalyticsRoutes(app: Express) {
     }
 
     const accepted = ingestAnalyticsEvents(parsed);
-    void forwardAnalyticsToPostHog(parsed).catch(() => undefined);
+    void forwardAnalyticsToPostHog(parsed).catch((error) => {
+      logCaughtError('analytics.forwardToPostHog', error);
+    });
 
     res.json({ ok: true, accepted });
   });

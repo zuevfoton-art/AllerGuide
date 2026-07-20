@@ -29,6 +29,7 @@ import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatTemplate } from '@/src/i18n/translate';
 import type { AppLocale } from '@/src/i18n/types';
 import { trackEvent } from '@/src/services/analytics-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 import { getStoredProfileConditions } from '@/src/services/profile-conditions-service';
 
 export type WellnessConfidence = 'high' | 'medium' | 'low';
@@ -243,7 +244,8 @@ export async function fetchWellnessSnapshot(
       taxonId: reading.taxonId as (typeof OPEN_METEO_POLLEN_TAXON_IDS)[number],
       allergenId: reading.allergenId,
     }));
-  } catch {
+  } catch (error) {
+    logCaughtError('fetchWellnessEnvironment', error, { level: 'warn' });
     envDataAvailable = false;
   }
 
