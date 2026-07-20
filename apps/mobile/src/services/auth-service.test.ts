@@ -86,6 +86,10 @@ vi.mock('@/src/constants/features', () => ({
   BACKEND_AUTH_ENABLED: true,
 }));
 
+vi.mock('@/src/services/app-lock-service', () => ({
+  disableBiometricLogin: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('restoreAuthSession', () => {
   beforeEach(() => {
     settings.clear();

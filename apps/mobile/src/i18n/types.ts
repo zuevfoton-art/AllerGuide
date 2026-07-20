@@ -102,6 +102,18 @@ export type LocaleMessages = {
       successMessage: string;
       invalidToken: string;
     };
+    biometric: {
+      enableTitle: string;
+      enableMessage: string;
+      enableConfirm: string;
+      enableSkip: string;
+      enableReason: string;
+      unlockReason: string;
+      loginFace: string;
+      loginFingerprint: string;
+      loginGeneric: string;
+      failed: string;
+    };
   };
   profiles: {
     title: string;
@@ -384,6 +396,8 @@ export type LocaleMessages = {
     appLockHint: string;
     appLockEnable: string;
     appLockDisable: string;
+    appLockUnlock: string;
+    appLockUnlockReason: string;
     aboutTitle: string;
     aboutHint: string;
   };

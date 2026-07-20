@@ -161,6 +161,34 @@ export function AuthForgotLink({ text, onPress }: { text: string; onPress: () =>
   );
 }
 
+export function AuthBiometricButton({
+  label,
+  onPress,
+  loading,
+  testID,
+}: {
+  label: string;
+  onPress: () => void;
+  loading?: boolean;
+  testID?: string;
+}) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  return (
+    <Pressable
+      testID={testID}
+      style={[styles.biometricButton, loading && styles.buttonDisabled]}
+      onPress={onPress}
+      disabled={loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}>
+      <Ionicons name="scan-outline" size={20} color={theme.colors.accent} />
+      <Text style={styles.biometricText}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function AuthHero({ title, subtitle }: { title: string; subtitle: string }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -328,5 +356,24 @@ function createStyles({ colors, fonts }: AppTheme) {
     linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.accent, fontWeight: '600' },
     forgotWrap: { alignItems: 'flex-end', marginTop: -4 },
     forgotText: { fontFamily: fonts.sans, fontSize: 13, color: colors.accent },
+    biometricButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 6,
+      borderWidth: 1.5,
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+      minHeight: 48,
+    },
+    biometricText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.accent,
+    },
   });
 }

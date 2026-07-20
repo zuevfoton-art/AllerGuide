@@ -20,8 +20,11 @@ import { CloudBackupCard } from '@/src/components/CloudBackupCard';
 import { LocalBackupCard } from '@/src/components/LocalBackupCard';
 import { RecoveryKeyBanner } from '@/src/components/RecoveryKeyBanner';
 import {
+  authenticateBiometric,
   canUseBiometricLock,
+  disableBiometricLogin,
   isAppLockEnabled,
+  isBiometricLoginEnabled,
   setAppLockEnabled,
 } from '@/src/services/app-lock-service';
 import {
@@ -38,10 +41,12 @@ export default function ProfileScreen() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [emergencyNumber, setEmergencyNumberState] = useState('103');
   const [appLockAvailable, setAppLockAvailable] = useState(false);
+  const [appLockOn, setAppLockOn] = useState(false);
 
   const refresh = useCallback(() => {
     setProfiles(listProfiles());
     setEmergencyNumberState(getEmergencyNumber());
+    setAppLockOn(isAppLockEnabled() || isBiometricLoginEnabled());
     void canUseBiometricLock().then(setAppLockAvailable);
   }, []);
 
@@ -187,10 +192,23 @@ export default function ProfileScreen() {
           <GlassCard>
             <Text style={styles.cardHint}>{t('settings.appLockHint')}</Text>
             <Button
-              label={isAppLockEnabled() ? t('settings.appLockDisable') : t('settings.appLockEnable')}
+              label={appLockOn ? t('settings.appLockDisable') : t('settings.appLockEnable')}
               variant="secondary"
               block
-              onPress={() => setAppLockEnabled(!isAppLockEnabled())}
+              testID="profile-app-lock-toggle"
+              onPress={() => {
+                void (async () => {
+                  if (appLockOn) {
+                    await disableBiometricLogin();
+                    setAppLockOn(false);
+                    return;
+                  }
+                  const confirmed = await authenticateBiometric(t('settings.appLockUnlockReason'));
+                  if (!confirmed) return;
+                  setAppLockEnabled(true);
+                  setAppLockOn(true);
+                })();
+              }}
             />
           </GlassCard>
         </>

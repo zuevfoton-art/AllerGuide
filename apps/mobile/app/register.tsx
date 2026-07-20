@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import type { LoginType } from '@allerguide/core';
 import { registerUser } from '@/src/services/auth-service';
+import { promptEnableBiometricLogin } from '@/src/services/app-lock-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
 import { useTranslation } from '@/src/store/locale-store';
@@ -33,6 +34,17 @@ export default function RegisterScreen() {
       setError(tAuthError(result.error));
       return;
     }
+
+    await promptEnableBiometricLogin(
+      { loginType, login: login.trim(), password },
+      {
+        title: t('auth.biometric.enableTitle'),
+        message: t('auth.biometric.enableMessage'),
+        enable: t('auth.biometric.enableConfirm'),
+        skip: t('auth.biometric.enableSkip'),
+        reason: t('auth.biometric.enableReason'),
+      },
+    );
 
     router.replace('/');
   };

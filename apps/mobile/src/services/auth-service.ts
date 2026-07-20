@@ -28,6 +28,7 @@ import {
   syncProfilesFromBackend,
 } from '@/src/services/backend-api';
 import { trackEvent } from '@/src/services/analytics-service';
+import { disableBiometricLogin } from '@/src/services/app-lock-service';
 import { useAppStore } from '@/src/store/app-store';
 import { clearRecoveryKey } from '@/src/services/backup-crypto';
 
@@ -272,6 +273,7 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
   clearSessionUserId();
   clearCachedAuthUser();
   void clearAuthToken();
+  await disableBiometricLogin();
   useAppStore.getState().resetAppState();
   return { ok: true };
 }
