@@ -76,6 +76,7 @@ const es: LocaleMessages = {
       createFailed: 'No se pudo crear la cuenta.',
     },
     forgot: {
+      link: '¿Olvidaste tu contraseña?',
       title: 'Restablecer contraseña',
       subtitle: 'Introduce tu email y te enviaremos un enlace de restablecimiento',
       emailLabel: 'Email',
@@ -86,6 +87,7 @@ const es: LocaleMessages = {
       backToLogin: 'Volver al inicio de sesión',
       emailOnlyHint: 'El restablecimiento de contraseña solo está disponible para cuentas registradas con email.',
       backendRequired: 'El restablecimiento requiere cuenta en el servidor (backend auth). No disponible en modo offline.',
+      recoverHint: '¿No recuerdas la contraseña? Recupera el acceso por email.',
     },
     resetPassword: {
       title: 'Nueva contraseña',

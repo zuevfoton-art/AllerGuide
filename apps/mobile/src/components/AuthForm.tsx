@@ -150,12 +150,20 @@ export function AuthLink({
   );
 }
 
-export function AuthForgotLink({ text, onPress }: { text: string; onPress: () => void }) {
+export function AuthForgotLink({
+  text,
+  onPress,
+  testID,
+}: {
+  text: string;
+  onPress: () => void;
+  testID?: string;
+}) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable style={styles.forgotWrap} onPress={onPress}>
+    <Pressable testID={testID} style={styles.forgotWrap} onPress={onPress} accessibilityRole="link">
       <Text style={styles.forgotText}>{text}</Text>
     </Pressable>
   );

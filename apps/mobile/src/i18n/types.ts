@@ -81,6 +81,7 @@ export type LocaleMessages = {
       createFailed: string;
     };
     forgot: {
+      link: string;
       title: string;
       subtitle: string;
       emailLabel: string;
@@ -91,6 +92,7 @@ export type LocaleMessages = {
       backToLogin: string;
       emailOnlyHint: string;
       backendRequired: string;
+      recoverHint: string;
     };
     resetPassword: {
       title: string;

@@ -76,6 +76,7 @@ const it: LocaleMessages = {
       createFailed: "Impossibile creare l'account.",
     },
     forgot: {
+      link: 'Password dimenticata?',
       title: 'Reimposta password',
       subtitle: 'Inserisci la tua email e ti invieremo un link di reimpostazione',
       emailLabel: 'Email',
@@ -86,6 +87,7 @@ const it: LocaleMessages = {
       backToLogin: 'Torna al login',
       emailOnlyHint: 'La reimpostazione della password è disponibile solo per account registrati con email.',
       backendRequired: 'Il reset richiede un account server (backend auth). Non disponibile in modalità offline.',
+      recoverHint: 'Non ricordi la password? Recupera l\'accesso via email.',
     },
     resetPassword: {
       title: 'Nuova password',

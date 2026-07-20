@@ -77,6 +77,7 @@ const ru: LocaleMessages = {
       createFailed: 'Не удалось создать аккаунт.',
     },
     forgot: {
+      link: 'Забыли пароль?',
       title: 'Сброс пароля',
       subtitle: 'Введите email, и мы отправим ссылку для сброса пароля',
       emailLabel: 'Email',
@@ -87,6 +88,7 @@ const ru: LocaleMessages = {
       backToLogin: 'Вернуться ко входу',
       emailOnlyHint: 'Сброс пароля доступен только для аккаунтов, зарегистрированных по email.',
       backendRequired: 'Сброс пароля доступен только при входе через сервер (backend auth). В offline-режиме восстановление недоступно.',
+      recoverHint: 'Не помните пароль? Восстановите доступ по email.',
     },
     resetPassword: {
       title: 'Новый пароль',

@@ -76,6 +76,7 @@ const fr: LocaleMessages = {
       createFailed: 'Impossible de créer le compte.',
     },
     forgot: {
+      link: 'Mot de passe oublié ?',
       title: 'Réinitialiser le mot de passe',
       subtitle: 'Entrez votre email et nous vous enverrons un lien de réinitialisation',
       emailLabel: 'Email',
@@ -86,6 +87,7 @@ const fr: LocaleMessages = {
       backToLogin: 'Retour à la connexion',
       emailOnlyHint: 'La réinitialisation du mot de passe est uniquement disponible pour les comptes enregistrés avec un email.',
       backendRequired: 'La réinitialisation nécessite un compte serveur (backend auth). Indisponible en mode hors ligne.',
+      recoverHint: 'Mot de passe oublié ? Récupérez l\'accès par email.',
     },
     resetPassword: {
       title: 'Nouveau mot de passe',

@@ -77,6 +77,7 @@ const de: LocaleMessages = {
       createFailed: 'Konto konnte nicht erstellt werden.',
     },
     forgot: {
+      link: 'Passwort vergessen?',
       title: 'Passwort zurücksetzen',
       subtitle: 'Geben Sie Ihre E-Mail ein und wir senden Ihnen einen Reset-Link',
       emailLabel: 'E-Mail',
@@ -87,6 +88,7 @@ const de: LocaleMessages = {
       backToLogin: 'Zurück zur Anmeldung',
       emailOnlyHint: 'Das Zurücksetzen des Passworts ist nur für mit E-Mail registrierte Konten verfügbar.',
       backendRequired: 'Passwort-Reset erfordert Server-Konto (Backend-Auth). Im Offline-Modus nicht verfügbar.',
+      recoverHint: 'Passwort vergessen? Stellen Sie den Zugang per E-Mail wieder her.',
     },
     resetPassword: {
       title: 'Neues Passwort',
