@@ -1,4 +1,5 @@
 import { mapExternalAllergenIds } from '@allerguide/core';
+import { logCaughtError } from '../lib/log-caught-error';
 
 export interface NormalizedProduct {
   barcode: string;
@@ -83,7 +84,8 @@ export async function fetchOpenFoodFactsProduct(
     if (data.status !== 1 || !data.product) return null;
 
     return normalize(data.product, normalized);
-  } catch {
+  } catch (error) {
+    logCaughtError('fetchOpenFoodFactsProduct', error, { barcode: normalized });
     return null;
   }
 }
@@ -126,7 +128,8 @@ export async function searchOpenFoodFacts(
       results.push(normalizedProduct);
     }
     return results;
-  } catch {
+  } catch (error) {
+    logCaughtError('searchOpenFoodFacts', error, { query: term });
     return [];
   }
 }

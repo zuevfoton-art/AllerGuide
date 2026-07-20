@@ -1,5 +1,6 @@
 import { getDb } from '@/src/db/init';
 import { normalizeBarcode, type BarcodeProduct } from '@allerguide/core';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 export type BarcodeCacheEntry = BarcodeProduct & {
   originSource: string;
@@ -26,7 +27,8 @@ function parseIdJson(raw: string | null): string[] {
   try {
     const parsed = JSON.parse(raw) as string[];
     return Array.isArray(parsed) ? parsed : [];
-  } catch {
+  } catch (error) {
+    logCaughtError('parseIdJson', error, { level: 'warn' });
     return [];
   }
 }

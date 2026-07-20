@@ -1,6 +1,8 @@
 import { BRAND_LOG_PREFIX } from '@/src/constants/brand';
 
-type ErrorContext = Record<string, string>;
+export type ErrorContext = Record<string, string>;
+
+export type LogCaughtErrorLevel = 'error' | 'warn';
 
 const SENSITIVE_EXTRA_KEYS = [
   'token',
@@ -115,6 +117,26 @@ export function captureMessage(message: string, context?: ErrorContext) {
     return;
   }
   console.warn(`[${BRAND_LOG_PREFIX}]`, message, safeContext);
+}
+
+export function toError(value: unknown): Error {
+  if (value instanceof Error) return value;
+  return new Error(typeof value === 'string' ? value : String(value));
+}
+
+/** Log a caught exception without swallowing the cause (Code Complete §10). */
+export function logCaughtError(
+  context: string,
+  error: unknown,
+  options?: { level?: LogCaughtErrorLevel; extra?: ErrorContext },
+): void {
+  const normalized = toError(error);
+  const safeContext = scrubErrorContext({ operation: context, ...options?.extra });
+  if (options?.level === 'warn') {
+    captureMessage(`${context}: ${normalized.message}`, safeContext);
+    return;
+  }
+  captureError(normalized, safeContext);
 }
 
 /** Test-only helper for verifying Sentry wiring without sending events. */

@@ -1,3 +1,5 @@
+import { logCaughtError } from '@/src/services/error-reporting';
+
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
 
 /** Abort a backend request after this long so the UI never hangs on "Подождите…". */
@@ -43,7 +45,8 @@ export async function apiRequest<T>(
     }
 
     return { ok: true, data: payload };
-  } catch {
+  } catch (error) {
+    logCaughtError('apiRequest', error, { extra: { path, method } });
     return { ok: false, error: 'Не удалось подключиться к серверу', status: 0 };
   } finally {
     clearTimeout(timeout);

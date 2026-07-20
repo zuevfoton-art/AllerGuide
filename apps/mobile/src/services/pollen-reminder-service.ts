@@ -23,6 +23,7 @@ import { getSetting, setSetting } from '@/src/services/settings-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { listProfiles } from '@/src/services/profile-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 import { Platform } from 'react-native';
 
 function pollenCacheKey(profileId: number) {
@@ -35,7 +36,8 @@ function readPollenCache(profileId: number): PollenMatchLike[] | null {
   try {
     const parsed = JSON.parse(raw) as { matches?: PollenMatchLike[] };
     return Array.isArray(parsed.matches) ? parsed.matches : null;
-  } catch {
+  } catch (error) {
+    logCaughtError('readPollenCache', error, { level: 'warn', extra: { profileId: String(profileId) } });
     return null;
   }
 }

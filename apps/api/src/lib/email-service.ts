@@ -2,6 +2,8 @@
  * Transactional email for password reset (Resend API when configured).
  */
 
+import { logCaughtError } from './log-caught-error';
+
 function passwordResetAppUrl(): string {
   return (
     process.env.PASSWORD_RESET_APP_URL?.trim() ||
@@ -42,7 +44,8 @@ export async function sendPasswordResetEmail(to: string, token: string): Promise
       body: JSON.stringify({ from, to, subject, html }),
     });
     return response.ok;
-  } catch {
+  } catch (error) {
+    logCaughtError('sendPasswordResetEmail', error, { to });
     return false;
   }
 }

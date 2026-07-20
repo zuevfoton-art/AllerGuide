@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { getDefaultPollenRegion, POLLEN_REGIONS, resolvePollenRegion } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 const LOCATION_CACHE_KEY = 'wellnessLocationCache';
 const MANUAL_REGION_KEY = 'manualPollenRegionId';
@@ -32,7 +33,8 @@ function readCache(): CachedLocation | null {
     const age = Date.now() - Date.parse(parsed.cachedAt);
     if (Number.isNaN(age) || age > CACHE_TTL_MS) return null;
     return parsed;
-  } catch {
+  } catch (error) {
+    logCaughtError('readLocationCache', error, { level: 'warn' });
     return null;
   }
 }
@@ -125,7 +127,8 @@ export async function getCurrentLocation(options?: {
     };
     writeCache(resolved);
     return resolved;
-  } catch {
+  } catch (error) {
+    logCaughtError('getCurrentLocation', error, { level: 'warn' });
     return getDefaultResolvedLocation();
   }
 }
