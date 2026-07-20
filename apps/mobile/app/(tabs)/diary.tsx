@@ -52,7 +52,6 @@ import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
-import { MarketplaceModule } from '@/src/modules/marketplace';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 
 const TYPE_ICONS: Record<string, string> = {
@@ -514,8 +513,6 @@ export default function DiaryScreen() {
           ))}
         </GlassCard>
       ) : null}
-
-      <MarketplaceModule variant="embedded" />
 
       {list.length === 0 ? (
         <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
