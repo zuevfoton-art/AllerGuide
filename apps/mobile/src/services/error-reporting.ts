@@ -1,6 +1,8 @@
 import { BRAND_LOG_PREFIX } from '@/src/constants/brand';
 
-type ErrorContext = Record<string, string>;
+export type ErrorContext = Record<string, string>;
+
+export type LogCaughtErrorLevel = 'error' | 'warn';
 
 const SENSITIVE_EXTRA_KEYS = [
   'token',
@@ -117,7 +119,10 @@ export function captureMessage(message: string, context?: ErrorContext) {
   console.warn(`[${BRAND_LOG_PREFIX}]`, message, safeContext);
 }
 
-type LogCaughtErrorLevel = 'error' | 'warn';
+export function toError(value: unknown): Error {
+  if (value instanceof Error) return value;
+  return new Error(typeof value === 'string' ? value : String(value));
+}
 
 /** Log a caught exception without swallowing the cause (Code Complete §10). */
 export function logCaughtError(
@@ -125,7 +130,7 @@ export function logCaughtError(
   error: unknown,
   options?: { level?: LogCaughtErrorLevel; extra?: ErrorContext },
 ): void {
-  const normalized = error instanceof Error ? error : new Error(String(error));
+  const normalized = toError(error);
   const safeContext = scrubErrorContext({ operation: context, ...options?.extra });
   if (options?.level === 'warn') {
     captureMessage(`${context}: ${normalized.message}`, safeContext);

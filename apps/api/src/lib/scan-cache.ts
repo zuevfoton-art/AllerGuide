@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { ScanResult } from '@allerguide/ai';
 import { getRedisClient, isRedisConfigured } from './redis-client';
+import { logCaughtError } from './log-caught-error';
 
 interface CacheEntry {
   value: ScanResult;
@@ -60,7 +61,8 @@ async function getRedisCachedScan(key: string): Promise<ScanResult | null> {
       return null;
     }
     return entry.value;
-  } catch {
+  } catch (error) {
+    logCaughtError('scanCache.parseRedisEntry', error, { key });
     return null;
   }
 }

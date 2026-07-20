@@ -1,13 +1,14 @@
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 /** No-op on web — haptics require native hardware. */
 async function run(fn: () => Promise<void>): Promise<void> {
   if (Platform.OS === 'web') return;
   try {
     await fn();
-  } catch {
-    // Haptics unavailable on some devices/simulators — non-fatal.
+  } catch (error) {
+    logCaughtError('haptics', error, { level: 'warn' });
   }
 }
 

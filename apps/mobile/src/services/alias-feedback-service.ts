@@ -1,6 +1,7 @@
 import { getDb } from '@/src/db/init';
 import { enqueueAliasFeedback, type AliasFeedbackEntry, type AliasFeedbackInput } from '@allerguide/core';
 import { apiRequest } from '@/src/services/api-client';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry {
   const entry = enqueueAliasFeedback(input);
@@ -30,7 +31,9 @@ export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry
       profileId: entry.profileId,
       scanInput: entry.scanInput,
     },
-  }).catch(() => undefined);
+  }).catch((error) => {
+    logCaughtError('submitAliasFeedback', error, { level: 'warn', extra: { term: entry.term } });
+  });
 
   return entry;
 }

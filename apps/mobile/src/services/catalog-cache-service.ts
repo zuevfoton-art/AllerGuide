@@ -10,6 +10,7 @@ import {
 } from '@allerguide/core';
 import { getDb } from '@/src/db/init';
 import { loadJson, saveJson } from '@/src/db/web-store';
+import { logCaughtError } from '@/src/services/error-reporting';
 import type { CatalogProduct } from '@/src/services/catalog-api';
 
 const WEB_ALLERGENS_KEY = 'ag_catalog_allergens';
@@ -55,7 +56,8 @@ export function getCachedAllergenCatalog(): CachedCatalogAllergens | null {
       source: row.source as CachedCatalogAllergens['source'],
       allergens,
     };
-  } catch {
+  } catch (error) {
+    logCaughtError('getCachedAllergenCatalog.parsePayload', error, { level: 'warn' });
     return null;
   }
 }
@@ -111,12 +113,20 @@ export function getCachedCatalogProduct(barcode: string): CachedCatalogProduct |
   let traceTags: string[] = [];
   try {
     allergenTags = JSON.parse(row.allergen_tags) as string[];
-  } catch {
+  } catch (error) {
+    logCaughtError('getCachedCatalogProduct.parseAllergenTags', error, {
+      level: 'warn',
+      extra: { barcode: normalized },
+    });
     allergenTags = [];
   }
   try {
     traceTags = JSON.parse(row.trace_tags ?? '[]') as string[];
-  } catch {
+  } catch (error) {
+    logCaughtError('getCachedCatalogProduct.parseTraceTags', error, {
+      level: 'warn',
+      extra: { barcode: normalized },
+    });
     traceTags = [];
   }
 

@@ -85,4 +85,33 @@ describe('error-reporting', () => {
 
     expect(captureException).toHaveBeenCalledWith(error, { extra: { screen: 'login' } });
   });
+
+  it('logCaughtError forwards errors to captureError by default', async () => {
+    vi.stubEnv('EXPO_PUBLIC_SENTRY_DSN', 'https://example@sentry.io/1');
+
+    const { initErrorReporting, logCaughtError } = await import('./error-reporting');
+    initErrorReporting();
+
+    const error = new Error('network down');
+    logCaughtError('uploadBackup', error, { extra: { userId: '1' } });
+
+    expect(captureException).toHaveBeenCalledWith(error, {
+      extra: { operation: 'uploadBackup', userId: '1' },
+    });
+  });
+
+  it('logCaughtError uses captureMessage for warn level', async () => {
+    vi.stubEnv('EXPO_PUBLIC_SENTRY_DSN', 'https://example@sentry.io/1');
+
+    const { initErrorReporting, logCaughtError } = await import('./error-reporting');
+    initErrorReporting();
+
+    logCaughtError('readPollenCache', new Error('bad json'), { level: 'warn' });
+
+    expect(captureMessage).toHaveBeenCalledWith('readPollenCache: bad json', {
+      level: 'warning',
+      extra: { operation: 'readPollenCache' },
+    });
+    expect(captureException).not.toHaveBeenCalled();
+  });
 });

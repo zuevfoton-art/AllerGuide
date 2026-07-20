@@ -8,6 +8,7 @@ import {
   searchOpenFoodFacts,
   type NormalizedProduct,
 } from '../services/open-food-facts';
+import { logCaughtError } from '../lib/log-caught-error';
 
 function databaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
@@ -68,7 +69,8 @@ export function registerCatalogRoutes(app: Express) {
         return;
       }
       res.json({ ok: true, source: 'db', allergens: rows });
-    } catch {
+    } catch (error) {
+      logCaughtError('catalog.listAllergens', error);
       res.json({ ok: true, source: 'static', allergens: getAllAllergens() });
     }
   });
@@ -107,7 +109,8 @@ export function registerCatalogRoutes(app: Express) {
       }
 
       res.json({ ok: true, source: 'openfoodfacts', count: saved.length, products: saved });
-    } catch {
+    } catch (error) {
+      logCaughtError('catalog.searchProducts', error, { query });
       res.status(500).json({ ok: false, error: 'Search failed' });
     }
   });
@@ -143,7 +146,8 @@ export function registerCatalogRoutes(app: Express) {
       }
 
       res.status(404).json({ ok: false, error: 'Product not found' });
-    } catch {
+    } catch (error) {
+      logCaughtError('catalog.lookupProduct', error, { barcode });
       res.status(500).json({ ok: false, error: 'Lookup failed' });
     }
   });

@@ -1,4 +1,5 @@
 import { createClient, type RedisClientType } from 'redis';
+import { logCaughtError } from './log-caught-error';
 
 let client: RedisClientType | null = null;
 let connectPromise: Promise<RedisClientType | null> | null = null;
@@ -16,11 +17,16 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
   if (!connectPromise) {
     connectPromise = (async () => {
       const next = createClient({ url });
-      next.on('error', () => undefined);
+      next.on('error', (error) => {
+        logCaughtError('redis.clientError', error);
+      });
       await next.connect();
       client = next;
       return client;
-    })().catch(() => null);
+    })().catch((error) => {
+      logCaughtError('redis.connect', error);
+      return null;
+    });
   }
 
   return connectPromise;

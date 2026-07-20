@@ -22,6 +22,7 @@ import { getDb } from '@/src/db/init';
 import { applySyncPayload } from '@/src/services/sync-restore';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
@@ -140,7 +141,8 @@ export async function uploadBackup(): Promise<SyncResult> {
 
     trackEvent('sync_upload');
     return { ok: true };
-  } catch {
+  } catch (error) {
+    logCaughtError('uploadBackup', error);
     return { ok: false, error: 'Не удалось подключиться к серверу', code: 'server_unreachable' };
   }
 }
@@ -220,7 +222,8 @@ export async function downloadBackup(options?: {
     void reconcileAllReminders();
     trackEvent('sync_download');
     return { ok: true };
-  } catch {
+  } catch (error) {
+    logCaughtError('downloadBackup', error);
     return { ok: false, error: 'Не удалось загрузить резервную копию', code: 'server_unreachable' };
   }
 }

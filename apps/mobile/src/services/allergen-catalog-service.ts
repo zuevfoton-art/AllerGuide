@@ -1,5 +1,6 @@
 import { getAllAllergens, type AllergenRecord } from '@allerguide/core';
 import { getApiBaseUrl } from '@/src/services/api-client';
+import { logCaughtError } from '@/src/services/error-reporting';
 import {
   getCachedAllergenCatalog,
   getResolvedAllergenCatalog,
@@ -32,8 +33,8 @@ export async function resolveAllergenCatalog(): Promise<{
         return { allergens: data.allergens, source: 'api' };
       }
     }
-  } catch {
-    // offline — fall through to static taxonomy
+  } catch (error) {
+    logCaughtError('resolveAllergenCatalog', error, { level: 'warn' });
   }
 
   const staticAllergens = getAllAllergens();

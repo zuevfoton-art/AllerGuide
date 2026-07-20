@@ -1,6 +1,7 @@
 import type { Express, NextFunction, Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { verifyAuthToken } from '../lib/jwt';
+import { logCaughtError } from '../lib/log-caught-error';
 import { db } from '../db';
 import { syncBackups } from '../db/schema';
 
@@ -140,7 +141,8 @@ export function registerSyncRoutes(app: Express) {
         raw: JSON.stringify({ ...body, userId }),
       });
       res.json({ ok: true, exportedAt: body.exportedAt });
-    } catch {
+    } catch (error) {
+      logCaughtError('sync.persistBackup', error, { userId: String(userId) });
       res.status(500).json({ ok: false, error: 'Failed to store backup' });
     }
   });
@@ -160,7 +162,8 @@ export function registerSyncRoutes(app: Express) {
         return;
       }
       res.type('application/json').send(raw);
-    } catch {
+    } catch (error) {
+      logCaughtError('sync.loadBackup', error, { userId: String(userId) });
       res.status(500).json({ ok: false, error: 'Failed to load backup' });
     }
   });

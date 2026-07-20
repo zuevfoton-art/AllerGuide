@@ -43,6 +43,7 @@ import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export type DoctorReportOptions = {
@@ -78,8 +79,8 @@ function renderScaleTrend(entries: DiaryEntry[]): string {
       const parsed = JSON.parse(entry.details) as { answers?: Record<string, string> };
       const scaleId = parsed?.answers?.scaleId ?? 'unknown';
       if (!byType.has(scaleId)) byType.set(scaleId, entry);
-    } catch {
-      // skip
+    } catch (error) {
+      logCaughtError('renderScaleTrend.parseEntry', error, { level: 'warn' });
     }
   }
 
