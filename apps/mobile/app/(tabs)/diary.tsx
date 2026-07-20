@@ -3,12 +3,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
-  buildAsitPrefill,
-  buildFoodPrefill,
-  buildInsectStingPrefill,
-  buildMedicinePrefill,
   buildScaleInitialAnswers,
-  buildTriggerPrefill,
   collectLatestScaleTrends,
   filterDiarySections,
   formatDiaryDate,
@@ -17,9 +12,8 @@ import {
   getDiaryEntryAnswers,
   getDiarySection,
   isActPromptDue,
-  isAsitCourseConfigured,
-  parseAllergies,
   getAsthmaPlanPersonalBest,
+  parseAllergies,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
@@ -28,20 +22,18 @@ import {
   getDiaryEntries,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
-import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
-import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
-import { getAsitCourse } from '@/src/services/asit-course-service';
-import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
-import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
-import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
-import { getAllergyPassport } from '@/src/services/sos-passport-service';
-import { listScanHistory } from '@/src/services/scan-history-service';
+import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
 import { AsthmaCard } from '@/src/components/AsthmaCard';
-import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
+import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -164,69 +156,13 @@ export default function DiaryScreen() {
   );
 
   const openSection = async (sectionType: string) => {
-    if (sectionType === 'АСИТ' && activeProfileId) {
-      const course = getAsitCourse(activeProfileId);
-      if (course && isAsitCourseConfigured(course)) {
-        setEditor({
-          mode: 'section',
-          sectionType,
-          prefill: { АСИТ: buildAsitPrefill(course) },
-        });
-        return;
-      }
-    }
-    if (sectionType === 'Питание' && activeProfile) {
-      const allergies = parseAllergies(activeProfile.allergies);
-      const registry = activeProfileId ? getFoodDrugRegistry(activeProfileId) : null;
-      const scans = activeProfileId ? listScanHistory(activeProfileId) : [];
-      const recentFoodScan = scans.find((scan) => scan.mode === 'product' || scan.mode === 'menu');
-      const withinDay =
-        recentFoodScan &&
-        Date.now() - new Date(recentFoodScan.createdAt).getTime() <= 24 * 3_600_000;
-      const prefill = buildFoodPrefill(
-        allergies,
-        registry,
-        withinDay
-          ? {
-              productName: recentFoodScan.productName,
-              verdict: recentFoodScan.verdict,
-              level: recentFoodScan.level,
-              matches: (() => {
-                try {
-                  return JSON.parse(recentFoodScan.matches) as string[];
-                } catch {
-                  return [];
-                }
-              })(),
-              createdAt: recentFoodScan.createdAt,
-            }
-          : null,
-      );
-      setEditor({ mode: 'section', sectionType, prefill: { Питание: prefill } });
-      return;
-    }
-    if (sectionType === 'Лекарство' && activeProfileId) {
-      const passport = getAllergyPassport(activeProfileId);
-      const prefill = buildMedicinePrefill(passport.drugIntolerances);
-      setEditor({ mode: 'section', sectionType, prefill: { Лекарство: prefill } });
-      return;
-    }
-    if (sectionType === 'Укус насекомого' && activeProfile) {
-      const allergies = parseAllergies(activeProfile.allergies);
-      const plan = activeProfileId ? getInsectActionPlan(activeProfileId) : null;
-      const prefill = buildInsectStingPrefill(allergies, plan);
-      setEditor({ mode: 'section', sectionType, prefill: { 'Укус насекомого': prefill } });
-      return;
-    }
-    if (sectionType === 'Триггер' && activeProfileId) {
-      const allergiesJson = activeProfile?.allergies ?? '[]';
-      const wellness = await fetchWellnessSnapshot(allergiesJson, [], locale).catch(() => null);
-      const context = await loadDiaryTriggerContext(activeProfileId, wellness?.factors);
-      const prefill = { Триггер: buildTriggerPrefill(context) };
-      setEditor({ mode: 'section', sectionType, prefill });
-      return;
-    }
-    setEditor({ mode: 'section', sectionType });
+    const editorState = await buildDiarySectionEditorState({
+      sectionType,
+      profileId: activeProfileId,
+      profileAllergiesJson: activeProfile?.allergies ?? '[]',
+      locale,
+    });
+    setEditor(editorState);
   };
 
   const load = useCallback(async () => {

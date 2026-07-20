@@ -117,6 +117,23 @@ export function captureMessage(message: string, context?: ErrorContext) {
   console.warn(`[${BRAND_LOG_PREFIX}]`, message, safeContext);
 }
 
+type LogCaughtErrorLevel = 'error' | 'warn';
+
+/** Log a caught exception without swallowing the cause (Code Complete §10). */
+export function logCaughtError(
+  context: string,
+  error: unknown,
+  options?: { level?: LogCaughtErrorLevel; extra?: ErrorContext },
+): void {
+  const normalized = error instanceof Error ? error : new Error(String(error));
+  const safeContext = scrubErrorContext({ operation: context, ...options?.extra });
+  if (options?.level === 'warn') {
+    captureMessage(`${context}: ${normalized.message}`, safeContext);
+    return;
+  }
+  captureError(normalized, safeContext);
+}
+
 /** Test-only helper for verifying Sentry wiring without sending events. */
 export function __resetErrorReportingForTests() {
   reportingEnabled = false;
