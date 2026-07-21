@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AllerGuide — Clinical Calm Mockup</title>
+  <title>A-Claro — Dual Calm UI Mockup</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
@@ -11,9 +11,12 @@
     :root {
       --bg: #f4f6f9;
       --card: #ffffff;
-      --accent: #2563eb;
-      --accent-light: #eff6ff;
-      --accent-mid: #bfdbfe;
+      --accent: #2A9D8F;
+      --accent-light: #E6F6F4;
+      --accent-mid: #9FD9D1;
+      --calm-wash: #EFF4FF;
+      --calm-mist: #DBEAFE;
+      --info: #2563EB;
       --head: #1e3a5f;
       --text: #0f172a;
       --text-secondary: #475569;
@@ -47,9 +50,12 @@
     [data-theme='dark'] {
       --bg: #0b1120;
       --card: #151d2e;
-      --accent: #3b82f6;
-      --accent-light: #1e3a5f;
-      --accent-mid: #1d4ed8;
+      --accent: #2A9D8F;
+      --accent-light: #1a3d38;
+      --accent-mid: #2A9D8F;
+      --calm-wash: #1e293b;
+      --calm-mist: #334155;
+      --info: #3b82f6;
       --head: #e2e8f0;
       --text: #f8fafc;
       --text-secondary: #cbd5e1;
@@ -497,7 +503,7 @@
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 72px; background: var(--card);
       border-top: 1px solid var(--border);
-      display: grid; grid-template-columns: repeat(5, 1fr);
+      display: grid; grid-template-columns: repeat(6, 1fr);
       padding: 8px 2px 16px; z-index: 15;
     }
 
@@ -506,7 +512,7 @@
       gap: 2px; font-size: 9px; font-weight: 600; color: var(--text-muted); cursor: pointer;
     }
 
-    .tab.active { color: var(--accent); }
+    .tab.active { color: var(--accent); background: var(--calm-wash); border: 1px solid var(--calm-mist); border-radius: 16px; }
     .tab.sos.active { color: var(--danger); }
     .tab-icon { font-size: 20px; line-height: 1; }
 
@@ -600,14 +606,34 @@
     .action-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .action-row .btn { flex: 1; }
     .warn-text { font-size: 12px; color: var(--warning); font-weight: 600; margin: 8px 0; }
+
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      background: var(--accent); color: #fff; display: grid; place-items: center;
+      font-weight: 700; font-size: 17px; letter-spacing: -0.5px;
+    }
+    .brand-mark.lg { width: 44px; height: 44px; border-radius: 12px; font-size: 22px; }
+    .word-claro { font-weight: 700; color: var(--head); letter-spacing: -0.3px; }
+    .word-endorse { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .hero-calm {
+      background: linear-gradient(135deg, var(--calm-wash) 0%, var(--card) 100%);
+      border: 1px solid var(--calm-mist); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 12px;
+    }
+    .wizard-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .wizard-step {
+      font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: 999px;
+      border: 1px solid var(--border); color: var(--text-muted); background: var(--card);
+    }
+    .wizard-step.active { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+
     .collapse-panel[hidden] { display: none; }
   </style>
 </head>
 <body>
   <div class="page">
     <aside class="sidebar">
-      <h1>AllerGuide</h1>
-      <p>Интерактивный HTML-макет <strong>Concept A — Clinical Calm</strong>. Синхронизирован с <code>apps/mobile</code>: вкладка «Карта», эксперт на главной, маркетплейс в дневнике, единый экран профиля.</p>
+      <h1>A‑Claro</h1>
+      <p>Интерактивный HTML-макет <strong>Dual Calm</strong> (ambient blue + Claro teal). Синхронизирован с <code>apps/mobile</code>: 6 вкладок, wizard профиля (8 шагов), capability-gating дневника, уведомления отдельным экраном.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -618,6 +644,8 @@
         <button class="btn-nav" data-screen="login">Вход</button>
         <button class="btn-nav" data-screen="onboarding-intro">Intro</button>
         <button class="btn-nav" data-screen="onboarding">Онбординг</button>
+        <button class="btn-nav" data-screen="profile-setup">Wizard профиля</button>
+        <button class="btn-nav" data-screen="notifications">Уведомления</button>
         <button class="btn-nav active" data-screen="home">Главная</button>
         <button class="btn-nav" data-screen="map">Карта</button>
         <button class="btn-nav" data-screen="diary">Дневник</button>
@@ -631,26 +659,23 @@
       </div>
 
       <div class="legend">
-        <strong>Clinical Calm</strong><br />
-        Фон <code>#F4F6F9</code> · KPI/заголовки <code>#1E3A5F</code> · Actions <code>#2563EB</code> · SOS <code>#B91C1C</code><br /><br />
+        <strong>Dual Calm</strong><br />
+        Фон <code>#F4F6F9</code> · KPI <code>#1E3A5F</code> · CTA <code>#2A9D8F</code> · Ambient <code>#2563EB</code> · SOS <code>#B91C1C</code><br /><br />
         <strong>Клинический roadmap (РААКИ)</strong><br />
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
-        <strong>Радиусы</strong> — кнопки/input 8px · карточки 12px · бейджи 6px<br />
-        <strong>Логотип</strong> — shield + cross на <code>#2563EB</code>, wordmark Aller/Guide<br />
-        <strong>Tab bar</strong> — 5 вкладок: Главная · Дневник · Сканер · Карта · SOS<br />
-        <strong>Профиль</strong> — кнопка в шапке табов → профили + настройки<br />
-        <strong>Маркет</strong> — embedded в дневнике; полный экран — скрытый маршрут<br />
-        <strong>Главная</strong> — wellness v2 + дневник + раздел «Эксперт»<br />
-        <strong>Дневник</strong> — ACT-напоминание + маркетплейс + модальный редактор<br />
-        <strong>Intro</strong> — горизонтальный свайп (5 слайдов)<br />
-        <strong>SOS</strong> — закреплённая панель 103 + контакт<br />
-        <strong>v2</strong> — паспорт SOS · шкалы · отчёт · OFF+cache · textMuted #5E6B7C
+        <strong>Логотип</strong> — monogram A (teal) + wordmark A‑Claro · endorser Aclearo<br />
+        <strong>Tab bar</strong> — 6 вкладок: Главная · Дневник · Сканер · Маркет · Карта · SOS<br />
+        <strong>Профиль</strong> — шапка табов → профили · backup · тема · аккаунт<br />
+        <strong>Wizard</strong> — 8 шагов: имя → год → типы → история → коморб. → аллергены → фенотип → контакты<br />
+        <strong>Дневник</strong> — модули по <code>profileCapabilities</code> (ACT, пищевая, АСИТ, насекомые, ПСВ)<br />
+        <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
+        <strong>Обновлено</strong> — июль 2026 · PR #136 core wizard + diary-section-service
         <div class="swatch-row">
           <span class="swatch" style="background:#F4F6F9" title="bg"></span>
           <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
           <span class="swatch" style="background:#1E3A5F" title="head"></span>
-          <span class="swatch" style="background:#2563EB" title="accent"></span>
+          <span class="swatch" style="background:#2A9D8F" title="accent"></span>
           <span class="swatch" style="background:#B91C1C" title="danger"></span>
         </div>
       </div>
@@ -664,11 +689,8 @@
         <!-- LOGIN -->
         <section class="screen" id="screen-login">
           <div class="hero-logo">
-            <svg width="64" height="64" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <rect width="44" height="44" rx="10" fill="#2563EB"/>
-              <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
+            <div class="brand-mark lg" style="margin:0 auto">A</div>
+            <div class="word-claro" style="text-align:center;margin-top:8px">A‑Claro</div>
           </div>
           <div class="doc-header" style="text-align:center;margin-bottom:20px">
             <div class="doc-title">Вход</div>
@@ -691,41 +713,37 @@
         <!-- INTRO -->
         <section class="screen" id="screen-onboarding-intro">
           <div class="brand-row" style="justify-content:center;margin-bottom:8px">
-            <svg width="40" height="40" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <rect width="44" height="44" rx="10" fill="#2563EB"/>
-              <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
-            <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
+            <div class="brand-mark">A</div>
+            <div><span class="word-claro">A‑Claro</span><div class="word-endorse">Aclearo</div></div>
           </div>
           <div class="progress-dots" id="intro-dots">
             <span class="dot active" data-intro="0"></span><span class="dot" data-intro="1"></span><span class="dot" data-intro="2"></span><span class="dot" data-intro="3"></span><span class="dot" data-intro="4"></span>
           </div>
           <div class="intro-carousel" id="intro-carousel">
             <div class="intro-slide">
-              <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">📔</div>
-              <div class="doc-title">Персональный дневник</div>
-              <div class="doc-meta">Симптомы, питание, лекарства, пикфлоуметрия, АСИТ и отчёты для врача</div>
+              <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">👤</div>
+              <div class="doc-title">Создайте профиль аллергика</div>
+              <div class="doc-meta">Аллергены, симптомы и экстренные контакты — всё в одном защищённом месте.</div>
             </div>
             <div class="intro-slide">
-              <div class="intro-icon" style="background:var(--tip-bg);color:var(--info,#0369A1)">📷</div>
-              <div class="doc-title">Умный сканер</div>
-              <div class="doc-meta">Проверка состава по профилю аллергий — продукт, меню, лекарства</div>
+              <div class="intro-icon" style="background:var(--calm-wash);color:var(--info)">📷</div>
+              <div class="doc-title">Сканируйте перед едой</div>
+              <div class="doc-meta">Проверяйте продукты, меню и косметику по вашему профилю за секунды.</div>
             </div>
             <div class="intro-slide">
-              <div class="intro-icon" style="background:var(--success-light);color:var(--success)">🛒</div>
-              <div class="doc-title">Маркетплейс</div>
-              <div class="doc-meta">Персональные подборки товаров для аллергиков</div>
+              <div class="intro-icon" style="background:var(--success-light);color:var(--success)">🛡</div>
+              <div class="doc-title">Защита каждый день</div>
+              <div class="doc-meta">Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.</div>
             </div>
             <div class="intro-slide">
               <div class="intro-icon" style="background:var(--surface-muted);color:var(--head)">🗺</div>
-              <div class="doc-title">Карта мест</div>
-              <div class="doc-meta">Рестораны, карта пыления и клиники АДАИР</div>
+              <div class="doc-title">Карта и среда</div>
+              <div class="doc-meta">Безопасные места, календарь пыления и клиники рядом с вами.</div>
             </div>
             <div class="intro-slide">
-              <div class="intro-icon" style="background:var(--accent-light);color:var(--accent)">⭐</div>
-              <div class="doc-title">Эксперт: проф. Смолкин Ю.С.</div>
-              <div class="doc-meta">Материалы и рекомендации АДАИР в доступном формате</div>
+              <div class="intro-icon" style="background:var(--danger-light);color:var(--danger)">🚑</div>
+              <div class="doc-title">Экстренный SOS</div>
+              <div class="doc-meta">Аллергопаспорт, план действий и контакты экстренной помощи.</div>
             </div>
           </div>
           <p class="disclaimer" style="margin-bottom:8px;font-size:12px">← свайп →</p>
@@ -735,48 +753,44 @@
 
         <!-- ONBOARDING -->
         <section class="screen" id="screen-onboarding">
-          <div class="hero-logo">
-            <svg width="64" height="64" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-              <rect width="44" height="44" rx="10" fill="#2563EB"/>
-              <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-              <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="doc-header" style="text-align:center;margin-bottom:16px">
-            <div class="doc-title">AllerGuide</div>
-            <div class="doc-meta">Персональный помощник в контроле аллергии</div>
+          <div class="hero-calm" style="text-align:center;margin-bottom:16px">
+            <div class="brand-mark lg" style="margin:0 auto 8px">A</div>
+            <div class="doc-title">A‑Claro</div>
+            <div class="doc-meta">Аллергия. Ясно.</div>
+            <div class="word-endorse" style="margin-top:4px">Aclearo</div>
           </div>
           <div class="section-label">Для кого ведём записи?</div>
-          <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer">
-            <div class="feed-icon">👤</div>
-            <div style="flex:1"><strong>Только для себя</strong><div class="feed-sub">Личный дневник и сканер</div></div>
-            <span style="color:var(--text-muted)">›</span>
-          </div>
           <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer;border-color:var(--accent)">
-            <div class="feed-icon">👨‍👩‍👧</div>
-            <div style="flex:1"><strong>Для себя и ребёнка</strong><div class="feed-sub">Несколько профилей</div></div>
+            <div class="feed-icon">👤</div>
+            <div style="flex:1"><strong>Только для себя</strong><div class="feed-sub">Личный дневник и сканер аллергенов</div></div>
             <span style="color:var(--text-muted)">›</span>
           </div>
-          <p class="disclaimer">Информация носит рекомендательный характер и не заменяет консультацию врача.</p>
+          <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer">
+            <div class="feed-icon">👶</div>
+            <div style="flex:1"><strong>Только для ребёнка</strong><div class="feed-sub">Профиль и контроль для вашего ребёнка</div></div>
+            <span style="color:var(--text-muted)">›</span>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;cursor:pointer">
+            <div class="feed-icon">👨‍👩‍👧</div>
+            <div style="flex:1"><strong>Для себя и ребёнка</strong><div class="feed-sub">Несколько профилей в одном приложении</div></div>
+            <span style="color:var(--text-muted)">›</span>
+          </div>
+          <p class="disclaimer">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>
         </section>
 
         <!-- HOME -->
         <section class="screen active" id="screen-home">
           <div class="top-bar">
             <div class="brand-row">
-              <svg width="32" height="32" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-                <rect width="44" height="44" rx="10" fill="#2563EB"/>
-                <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
-              <span class="wordmark"><span class="word-aller">Aller</span><span class="word-guide">Guide</span></span>
+              <div class="brand-mark">A</div>
+              <div><span class="word-claro">A‑Claro</span><div class="word-endorse">Aclearo</div></div>
             </div>
             <div class="top-bar-actions">
               <div class="profile-btn" title="Профиль">А</div>
               <div class="sos-top-btn">🚑</div>
             </div>
           </div>
-          <div class="doc-header">
+          <div class="hero-calm doc-header" style="margin-bottom:12px">
             <div class="doc-title">Сегодня</div>
             <div class="doc-meta" id="home-meta">20 июня · Профиль: Анна</div>
           </div>
@@ -852,7 +866,7 @@
         <section class="screen" id="screen-diary">
           <div class="doc-header row">
             <div>
-              <div class="doc-label">AllerGuide · Наблюдения</div>
+              <div class="doc-label">A‑Claro · Наблюдения</div>
               <div class="doc-title">Дневник</div>
               <div class="doc-meta">Симптомы, питание, лекарства, шкалы, АСИТ и отчёты</div>
             </div>
@@ -885,6 +899,20 @@
               <span style="font-size:11px;color:var(--accent)">Изменить</span>
             </div>
             <div class="feed-sub">Сталораль · берёза · 8 приёмов за 30 дн.</div>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>🐝 Укус насекомого</strong>
+              <span style="font-size:11px;color:var(--accent)">План действий</span>
+            </div>
+            <div class="feed-sub">Оса · адреналин в сумке · 1 запись за 30 дн.</div>
+          </div>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <strong>🌬 Бронхиальная астма · ПСВ</strong>
+              <span style="font-size:11px;color:var(--accent)">Зоны GINA</span>
+            </div>
+            <div class="feed-sub">ПСВ 420 л/мин · зелёная зона · план действий</div>
           </div>
           <button class="btn btn-primary">＋ Новая запись</button>
           <button class="btn btn-secondary" style="margin-top:8px">Быстрая запись</button>
@@ -974,7 +1002,7 @@
         <!-- DIARY EDITOR MODAL -->
         <section class="screen" id="screen-diary-editor" style="position:relative">
           <div class="doc-header">
-            <div class="doc-label">AllerGuide · Наблюдения</div>
+            <div class="doc-label">A‑Claro · Наблюдения</div>
             <div class="doc-title">Дневник</div>
             <div class="doc-meta">Список записей остаётся на экране</div>
           </div>
@@ -1023,7 +1051,7 @@
           <div class="back-row">
             <div class="back-btn">‹</div>
             <div>
-              <div class="doc-label">AllerGuide · Отчёт</div>
+              <div class="doc-label">A‑Claro · Отчёт</div>
               <div class="doc-title">Отчёт для врача</div>
               <div class="doc-meta">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</div>
             </div>
@@ -1063,7 +1091,7 @@
         <section class="screen" id="screen-scanner">
           <div class="doc-header row">
             <div>
-              <div class="doc-label">AllerGuide · Сканер</div>
+              <div class="doc-label">A‑Claro · Сканер</div>
               <div class="doc-title">Умный сканер</div>
               <div class="doc-meta">Проверка состава по профилю аллергий</div>
             </div>
@@ -1092,8 +1120,8 @@
             <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
           </div>
           <div class="result-danger">
-            <strong>⚠ Есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
-            Обнаружено: <strong>Молоко</strong>. Результат не заменяет чтение этикетки.
+            <strong>Claro: есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
+            Claro: <strong>Молоко</strong> · уровень высокий. Результат не заменяет чтение этикетки.
           </div>
           <div class="section-label">Безопасные продукты</div>
           <div class="card flush">
@@ -1114,7 +1142,7 @@
         <section class="screen" id="screen-market">
           <div class="doc-header row">
             <div>
-              <div class="doc-label">AllerGuide · Маркет</div>
+              <div class="doc-label">A‑Claro · Маркет</div>
               <div class="doc-title">Маркет</div>
               <div class="doc-meta">Товары для аллергиков · скрытый маршрут</div>
             </div>
@@ -1135,7 +1163,7 @@
         <section class="screen" id="screen-map">
           <div class="doc-header row">
             <div>
-              <div class="doc-label">AllerGuide · Карта</div>
+              <div class="doc-label">A‑Claro · Карта</div>
               <div class="doc-title">Карта мест</div>
               <div class="doc-meta">3 слоя по ТЗ v13</div>
               <div class="doc-meta" style="margin-top:2px;font-weight:600">Москва и Московская область</div>
@@ -1168,7 +1196,7 @@
           <div class="back-row">
             <div class="back-btn">‹</div>
             <div>
-              <div class="doc-label">AllerGuide · Эксперт</div>
+              <div class="doc-label">A‑Claro · Эксперт</div>
               <div class="doc-title">Эксперт</div>
               <div class="doc-meta">проф. Смолкин Ю.С. · АДАИР</div>
             </div>
@@ -1181,7 +1209,7 @@
                 <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
             </div>
-            <div class="feed-sub">Главный медицинский эксперт AllerGuide</div>
+            <div class="feed-sub">Главный медицинский эксперт A‑Claro</div>
           </div>
           <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px">
             <span class="chip active">Рекомендации</span><span class="chip">Пыление</span><span class="chip">АСИТ</span>
@@ -1193,8 +1221,8 @@
             <div class="feed-sub">Председатель консультативного совета · АДАИР, НККЦ</div>
             <div class="feed-sub" style="margin-top:6px;font-weight:600;color:var(--text)">Панель аллергологов АДАИР</div>
             <div class="feed-sub">Клинический рецензент · АДАИР</div>
-            <div class="feed-sub" style="margin-top:6px;font-weight:600;color:var(--text)">AllerGuide Clinical Data Steward</div>
-            <div class="feed-sub">Куратор evidence registry · AllerGuide</div>
+            <div class="feed-sub" style="margin-top:6px;font-weight:600;color:var(--text)">A‑Claro Clinical Data Steward</div>
+            <div class="feed-sub">Куратор evidence registry · Aclearo</div>
           </div>
           <div class="card"><strong>Рекомендации по поллинозу</strong><div class="feed-sub">Сезонные советы</div></div>
           <div class="card"><strong>Календарь пыления</strong><div class="feed-sub">По регионам России</div></div>
@@ -1205,7 +1233,7 @@
         <section class="screen" id="screen-sos">
           <div class="doc-header row">
             <div>
-              <div class="doc-label">AllerGuide · SOS</div>
+              <div class="doc-label">A‑Claro · SOS</div>
               <div class="doc-title">SOS</div>
               <div class="doc-meta">Экстренная информация</div>
             </div>
@@ -1312,23 +1340,80 @@
           <p class="disclaimer">Информация на экране SOS внесена пользователем и не является медицинским назначением.</p>
         </section>
 
+
+        <!-- PROFILE SETUP WIZARD -->
+        <section class="screen" id="screen-profile-setup">
+          <div class="back-row">
+            <div class="back-btn">‹</div>
+            <div>
+              <div class="doc-label">A‑Claro · Профиль</div>
+              <div class="doc-title">Создание профиля</div>
+              <div class="doc-meta">Шаг 3 из 8 · типы аллергических состояний</div>
+            </div>
+          </div>
+          <div class="wizard-steps">
+            <span class="wizard-step">Имя</span>
+            <span class="wizard-step">Год</span>
+            <span class="wizard-step active">Типы</span>
+            <span class="wizard-step">История</span>
+            <span class="wizard-step">Коморб.</span>
+            <span class="wizard-step">Аллергены</span>
+            <span class="wizard-step">Фенотип</span>
+            <span class="wizard-step">Контакты</span>
+          </div>
+          <div class="section-label">Какая у тебя аллергия?</div>
+          <div class="chip-row-wrap" style="margin-bottom:12px">
+            <span class="chip active">Пищевая</span>
+            <span class="chip active">Астма</span>
+            <span class="chip">Поллиноз</span>
+            <span class="chip">Ринит</span>
+            <span class="chip">Кожа</span>
+          </div>
+          <div class="tip-card">Снятие типа «Астма» или «Поллиноз» влияет на разделы дневника — подтверждение через <code>getGatedConditionRemovals()</code>.</div>
+          <button class="btn btn-primary">Далее</button>
+          <button class="btn btn-secondary" style="margin-top:8px">Назад</button>
+        </section>
+
+        <!-- NOTIFICATIONS -->
+        <section class="screen" id="screen-notifications">
+          <div class="back-row">
+            <div class="back-btn">‹</div>
+            <div>
+              <div class="doc-label">A‑Claro · Настройки</div>
+              <div class="doc-title">Уведомления</div>
+              <div class="doc-meta">Дневник · ACT · пыльца · эпинефрин</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div><div class="feed-title">Напоминание о дневнике</div><div class="feed-sub">Ежедневно в 20:00</div></div>
+            <div class="toggle active" style="min-width:44px;text-align:center">Вкл</div>
+          </div>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div><div class="feed-title">ACT / шкалы</div><div class="feed-sub">При просрочке контроля астмы</div></div>
+            <div class="toggle active" style="min-width:44px;text-align:center">Вкл</div>
+          </div>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div><div class="feed-title">Пыльца</div><div class="feed-sub">При высоком индексе в регионе</div></div>
+            <div class="toggle" style="min-width:44px;text-align:center">Выкл</div>
+          </div>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div><div class="feed-title">Тихие часы</div><div class="feed-sub">22:00 — 07:00</div></div>
+            <div class="toggle active" style="min-width:44px;text-align:center">Вкл</div>
+          </div>
+        </section>
+
         <!-- PROFILE (profiles + settings) -->
         <section class="screen" id="screen-profile">
           <div class="back-row">
             <div class="back-btn">‹</div>
             <div>
-              <div class="doc-label">AllerGuide · Профили</div>
+              <div class="doc-label">A‑Claro · Профили</div>
               <div class="doc-title">Мои профили</div>
               <div class="doc-meta">Редактирование и удаление</div>
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-title" style="margin-bottom:8px">Язык</div>
-            <div class="toggle-row">
-              <div class="toggle active">Русский</div><div class="toggle">English</div><div class="toggle">Deutsch</div>
-            </div>
-          </div>
+          <div class="tip-card" style="margin-bottom:12px">Язык — в шапке приложения (6 локалей: ru · en · es · fr · de · it)</div>
 
           <div class="section-label">Список профилей</div>
           <div class="card flush">
@@ -1362,20 +1447,21 @@
             <button class="btn btn-primary" style="margin-top:10px">Сохранить номер</button>
           </div>
 
-          <div class="section-label">Облачная копия</div>
+          <div class="section-label">Резервные копии</div>
           <div class="card">
-            <div class="feed-sub" style="margin-bottom:8px">Шифрованная резервная копия (zero-knowledge)</div>
-            <button class="btn btn-primary">Загрузить резервную копию</button>
-            <button class="btn btn-secondary" style="margin-top:8px">Скачать резервную копию</button>
+            <div class="feed-sub" style="margin-bottom:8px">Локальный файл JSON + облачная копия (AES-GCM, zero-knowledge)</div>
+            <button class="btn btn-secondary" style="width:100%;margin-bottom:8px">Экспорт на устройство</button>
+            <button class="btn btn-primary" style="width:100%;margin-bottom:8px">Загрузить в облако</button>
+            <button class="btn btn-secondary" style="width:100%">Ключ восстановления</button>
           </div>
 
-          <div class="section-label">Напоминание о дневнике</div>
+          <div class="section-label">Уведомления</div>
           <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
             <div>
-              <div class="feed-title">Ежедневное напоминание</div>
-              <div class="feed-sub">Локальное уведомление (нативные платформы)</div>
+              <div class="feed-title">Центр уведомлений</div>
+              <div class="feed-sub">Дневник · ACT · пыльца · эпинефрин → экран «Уведомления»</div>
             </div>
-            <div class="toggle" style="min-width:44px;text-align:center">Выкл</div>
+            <span style="color:var(--text-muted)">›</span>
           </div>
 
           <div class="section-label">Тема</div>
@@ -1395,6 +1481,7 @@
           <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Главная</div>
           <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Дневник</div>
           <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Сканер</div>
+          <div class="tab" data-screen="market"><span class="tab-icon">🛒</span>Маркет</div>
           <div class="tab" data-screen="map"><span class="tab-icon">🗺</span>Карта</div>
           <div class="tab sos" data-screen="sos"><span class="tab-icon">🚑</span>SOS</div>
         </nav>
@@ -1404,8 +1491,8 @@
 
   <script>
     const phone = document.getElementById('phone');
-    const tabScreens = new Set(['home', 'diary', 'scanner', 'map', 'sos']);
-    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profile', 'doctor-report', 'expert', 'market', 'diary-editor']);
+    const tabScreens = new Set(['home', 'diary', 'scanner', 'market', 'map', 'sos']);
+    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profile-setup', 'notifications', 'profile', 'doctor-report', 'expert', 'diary-editor']);
 
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
