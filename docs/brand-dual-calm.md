@@ -107,7 +107,7 @@ flowchart LR
 | **P3.1** | этот PR | `calm.*` tokens, `info` → blue, `getCalmGradient()` | ✅ |
 | **P3.2** | этот PR | Onboarding waves, home wellness + hero — ambient blue | ✅ |
 | **P3.3** | этот PR | Tab pill `calmWash`, `GlassCard variant="calm"` на клинических экранах | ✅ |
-| **P3.4** | опц. | Store screenshots, `design-mockup.html` sync | ☐ |
+| **P3.4** | опц. | Store screenshots, `design-mockup.html` sync | ☑ (июль 2026) |
 | **P3.5** | опц. | QA checklist: accent teal + calm blue | ☐ |
 
 ---
