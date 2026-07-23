@@ -231,6 +231,11 @@ const de: LocaleMessages = {
     enterEntryText: 'Eintragstext eingeben.',
     scalePreview: 'Vorläufige Bewertung: {{score}} Punkte — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % des besten PEF',
+    dishEnterFoodFirst: 'Geben Sie zuerst das Gericht oder Lebensmittel ein — danach können wir die Zutaten auflisten.',
+    dishUnknown: 'Gericht noch nicht im Katalog. Allergene können Sie in den nächsten Schritten manuell notieren.',
+    dishMatched: 'Erkannt: {{dish}}',
+    dishHint: 'Deaktivieren Sie Zutaten, die in dieser Portion fehlten. Treffer mit Ihrem Allergieprofil sind hervorgehoben.',
+    dishConflicts: 'Profilkonflikte: {{list}}',
   },
   scanner: {
     title: 'Smart Scanner',

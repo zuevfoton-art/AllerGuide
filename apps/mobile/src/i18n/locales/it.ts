@@ -230,6 +230,11 @@ const it: LocaleMessages = {
     enterEntryText: 'Inserisci il testo della voce.',
     scalePreview: 'Punteggio preliminare: {{score}} — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % del miglior PEF',
+    dishEnterFoodFirst: 'Inserisci prima il piatto o l\'alimento: poi suddividiamo gli ingredienti.',
+    dishUnknown: 'Piatto non ancora in catalogo. Puoi annotare gli allergeni manualmente nei passaggi successivi.',
+    dishMatched: 'Riconosciuto: {{dish}}',
+    dishHint: 'Deseleziona gli ingredienti assenti in questa porzione. Le corrispondenze con il profilo allergie sono evidenziate.',
+    dishConflicts: 'Conflitti con il profilo: {{list}}',
   },
   scanner: {
     title: 'Scanner intelligente',

@@ -63,6 +63,9 @@ const enContent: LocaleContent = {
           label: 'What was eaten?',
           placeholder: 'Dishes, foods, drinks',
         },
+        foodComponents: {
+          label: 'Dish ingredients',
+        },
         allergens: {
           label: 'Possible allergens in food',
           placeholder: 'Milk, nuts, gluten…',

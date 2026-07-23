@@ -365,6 +365,8 @@ export function formatFoodEntrySummary(answers: Record<string, string>): string 
 
   if (food) parts.push(food);
   if (allergens) parts.push(allergens);
+  const conflicts = answers.foodComponentConflicts?.trim();
+  if (conflicts) parts.push(`⚠ ${conflicts}`);
   const cross = answers.crossReactions?.trim();
   if (cross) parts.push(`перекрёстные: ${cross}`);
   if (reaction) parts.push(`реакция: ${reaction}`);

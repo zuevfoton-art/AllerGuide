@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  applyDishBreakdownToAnswers,
+  buildDishBreakdown,
+  buildIntoleranceAlert,
   computePefPercentOfBest,
   computePefZone,
   computeScaleScore,
@@ -11,10 +14,11 @@ import {
   getScaleIdFromAnswers,
   hasSectionAnswers,
   parsePefNumeric,
+  parseSelectedComponentIds,
   resolvePersonalBestPef,
+  serializeSelectedComponentIds,
   validateClinicalScale,
   validateDiarySectionStep,
-  buildIntoleranceAlert,
   type DiarySection,
   type DiaryStep,
   type PefZone,
@@ -39,6 +43,8 @@ interface DiaryWizardProps {
   allowSkipSection?: boolean;
   drugIntolerances?: string[];
   planPersonalBestPef?: number | null;
+  /** JSON allergies from active profile — used for dish component conflict warnings. */
+  profileAllergiesJson?: string;
 }
 
 export function DiaryWizard({
@@ -51,6 +57,7 @@ export function DiaryWizard({
   allowSkipSection = true,
   drugIntolerances,
   planPersonalBestPef,
+  profileAllergiesJson = '[]',
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -109,7 +116,7 @@ export function DiaryWizard({
 
   const setAnswer = (stepId: string, value: string) => {
     setAnswersBySection((prev) => {
-      const nextSectionAnswers = {
+      let nextSectionAnswers = {
         ...(prev[section.type] ?? {}),
         [stepId]: value,
       };
@@ -118,10 +125,24 @@ export function DiaryWizard({
         if (alert) nextSectionAnswers.intoleranceAlert = alert;
         else delete nextSectionAnswers.intoleranceAlert;
       }
+      if (stepId === 'food' && section.type === 'Питание') {
+        // Reset selection so a new dish gets a fresh full checklist.
+        delete nextSectionAnswers.foodComponents;
+        nextSectionAnswers = applyDishBreakdownToAnswers(nextSectionAnswers, profileAllergiesJson);
+      }
       return {
         ...prev,
         [section.type]: nextSectionAnswers,
       };
+    });
+  };
+
+  const setFoodComponentSelection = (selectedIds: string[]) => {
+    setAnswersBySection((prev) => {
+      const current = { ...(prev['Питание'] ?? {}) };
+      current.foodComponents = serializeSelectedComponentIds(selectedIds);
+      const next = applyDishBreakdownToAnswers(current, profileAllergiesJson);
+      return { ...prev, Питание: next };
     });
   };
 
@@ -222,11 +243,21 @@ export function DiaryWizard({
       </View>
 
       <Text style={styles.stepLabel}>{step.label}</Text>
-      <StepField
-        step={step}
-        value={sectionAnswers[step.id] ?? ''}
-        onChange={(value) => setAnswer(step.id, value)}
-      />
+      {step.field === 'checklist' && step.id === 'foodComponents' ? (
+        <DishComponentsField
+          foodText={sectionAnswers.food ?? ''}
+          selectedRaw={sectionAnswers.foodComponents ?? ''}
+          conflictsSummary={sectionAnswers.foodComponentConflicts ?? ''}
+          profileAllergiesJson={profileAllergiesJson}
+          onChangeSelection={setFoodComponentSelection}
+        />
+      ) : (
+        <StepField
+          step={step}
+          value={sectionAnswers[step.id] ?? ''}
+          onChange={(value) => setAnswer(step.id, value)}
+        />
+      )}
 
       {scalePreview ? (
         <Text style={styles.scalePreview}>
@@ -369,6 +400,94 @@ function createPefZoneStyles({ colors, fonts }: AppTheme) {
       lineHeight: 17,
     },
   });
+}
+
+function DishComponentsField({
+  foodText,
+  selectedRaw,
+  conflictsSummary,
+  profileAllergiesJson,
+  onChangeSelection,
+}: {
+  foodText: string;
+  selectedRaw: string;
+  conflictsSummary: string;
+  profileAllergiesJson: string;
+  onChangeSelection: (ids: string[]) => void;
+}) {
+  const theme = useTheme();
+  const styles = useMemo(() => createFieldStyles(theme), [theme]);
+  const { t } = useTranslation();
+
+  const selectedIds = parseSelectedComponentIds(selectedRaw);
+  const breakdown = buildDishBreakdown(
+    foodText,
+    profileAllergiesJson,
+    selectedRaw ? selectedIds : undefined,
+  );
+
+  if (!foodText.trim()) {
+    return <Text style={styles.checklistHint}>{t('diaryWizard.dishEnterFoodFirst')}</Text>;
+  }
+
+  if (!breakdown.components.length) {
+    return <Text style={styles.checklistHint}>{t('diaryWizard.dishUnknown')}</Text>;
+  }
+
+  const toggle = (id: string) => {
+    const current = new Set(
+      selectedRaw ? selectedIds : breakdown.components.map((item) => item.id),
+    );
+    if (current.has(id)) current.delete(id);
+    else current.add(id);
+    onChangeSelection(Array.from(current));
+  };
+
+  return (
+    <View style={styles.checklistWrap} testID="diary-dish-checklist">
+      {breakdown.dishName ? (
+        <Text style={styles.checklistDish}>
+          {t('diaryWizard.dishMatched', { dish: breakdown.dishName })}
+        </Text>
+      ) : null}
+      <Text style={styles.checklistHint}>{t('diaryWizard.dishHint')}</Text>
+      <View style={styles.choiceGrid}>
+        {breakdown.components.map((component) => {
+          const active = component.selected;
+          const conflict = component.conflict;
+          return (
+            <Pressable
+              key={component.id}
+              testID={`diary-dish-component-${component.id}`}
+              style={[
+                styles.choiceChip,
+                active && styles.choiceChipActive,
+                conflict === 'direct' && styles.conflictDirect,
+                conflict === 'cross' && styles.conflictCross,
+              ]}
+              onPress={() => toggle(component.id)}>
+              <Text
+                style={[
+                  styles.choiceText,
+                  active && styles.choiceTextActive,
+                  conflict === 'direct' && styles.conflictText,
+                  conflict === 'cross' && styles.conflictCrossText,
+                ]}>
+                {active ? '✓ ' : ''}
+                {component.nameRu}
+                {conflict === 'direct' ? ' ⚠' : conflict === 'cross' ? ' ~' : ''}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {conflictsSummary ? (
+        <Text style={styles.conflictBanner} testID="diary-dish-conflicts">
+          {t('diaryWizard.dishConflicts', { list: conflictsSummary })}
+        </Text>
+      ) : null}
+    </View>
+  );
 }
 
 function StepField({
@@ -518,6 +637,40 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     choiceTextActive: { color: colors.accent },
+    checklistWrap: { gap: 10 },
+    checklistDish: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    checklistHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    conflictDirect: {
+      borderColor: colors.danger,
+      backgroundColor: colors.dangerLight,
+    },
+    conflictCross: {
+      borderColor: colors.warning,
+      backgroundColor: colors.warningLight,
+    },
+    conflictText: {
+      color: colors.danger,
+    },
+    conflictCrossText: {
+      color: colors.warning,
+    },
+    conflictBanner: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.danger,
+      lineHeight: 18,
+      marginTop: 4,
+    },
   });
 }
 

@@ -233,6 +233,11 @@ export type LocaleMessages = {
     enterEntryText: string;
     scalePreview: string;
     pefZone: string;
+    dishEnterFoodFirst: string;
+    dishUnknown: string;
+    dishMatched: string;
+    dishHint: string;
+    dishConflicts: string;
   };
   scanner: {
     title: string;

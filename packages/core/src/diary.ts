@@ -5,7 +5,7 @@ import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
 
-export type DiaryStepField = 'text' | 'choice';
+export type DiaryStepField = 'text' | 'choice' | 'checklist';
 
 export interface DiaryStep {
   id: string;
@@ -155,6 +155,12 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'text',
         multiline: true,
         required: true,
+      },
+      {
+        id: 'foodComponents',
+        label: 'Состав блюда',
+        field: 'checklist',
+        required: false,
       },
       {
         id: 'foodSource',
