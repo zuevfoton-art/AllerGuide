@@ -3,7 +3,7 @@
 Runbook для развёртывания `apps/api` на staging: Neon Postgres, хостинг, DNS, CI smoke.
 
 **Обзорный план инфраструктуры:** [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md)  
-**Yandex Cloud (РФ, private Postgres):** [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)  
+**Yandex Cloud (РФ, private Postgres):** [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) · **консоль по полям:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md)  
 **Связанные задачи:** P1.1a–e · [`roadmap-to-prod.md`](./roadmap-to-prod.md) · [`apps/api/.env.staging.example`](../apps/api/.env.staging.example)
 
 ---

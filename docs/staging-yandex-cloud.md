@@ -2,7 +2,7 @@
 
 Runbook для развёртывания `apps/api` на **Yandex Cloud** (`ru-central1`): приватный Managed PostgreSQL (без публичного IP), Serverless Container, API Gateway, TLS, CI/CD и EAS-сборки mobile.
 
-**Связанные документы:** [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md)
+**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md)
 
 ---
 
@@ -399,6 +399,7 @@ pnpm build:staging:ios
 
 | Тип | Путь |
 |-----|------|
+| Console UI (поля) | [`docs/staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) |
 | Dockerfile | [`Dockerfile`](../Dockerfile) |
 | Terraform | [`infra/yandex/staging/`](../infra/yandex/staging/) |
 | Bootstrap | [`scripts/yc-staging-bootstrap.sh`](../scripts/yc-staging-bootstrap.sh) |
