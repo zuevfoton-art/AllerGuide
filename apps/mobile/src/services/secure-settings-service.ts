@@ -9,6 +9,7 @@ export const SENSITIVE_SETTING_KEYS = [
   'recoveryKey',
   'backupSecret',
   'recoveryKeyConfirmed',
+  'biometricLoginPayload',
 ] as const;
 
 export type SensitiveSettingKey = (typeof SENSITIVE_SETTING_KEYS)[number];

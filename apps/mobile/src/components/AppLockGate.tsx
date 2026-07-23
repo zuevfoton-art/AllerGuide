@@ -13,13 +13,25 @@ export function AppLockGate({ children }: Props) {
   const theme = useTheme();
   const { t } = useTranslation();
   const styles = createStyles(theme);
-  const [locked, setLocked] = useState(false);
-  const lockReason = t('settings.appLockTitle');
+  const [locked, setLocked] = useState(() => Platform.OS !== 'web' && isAppLockEnabled());
+  const [checkedColdStart, setCheckedColdStart] = useState(false);
+  const lockReason = t('settings.appLockUnlockReason');
 
   const tryUnlock = async () => {
     const ok = await requireAppUnlock(lockReason);
     setLocked(!ok);
   };
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || checkedColdStart) return;
+    setCheckedColdStart(true);
+    if (!isAppLockEnabled()) {
+      setLocked(false);
+      return;
+    }
+    setLocked(true);
+    void requireAppUnlock(lockReason).then((ok) => setLocked(!ok));
+  }, [checkedColdStart, lockReason]);
 
   useEffect(() => {
     if (Platform.OS === 'web' || !isAppLockEnabled()) return;
@@ -50,7 +62,7 @@ export function AppLockGate({ children }: Props) {
         <Text style={styles.title}>{t('settings.appLockTitle')}</Text>
         <Text style={styles.hint}>{t('settings.appLockHint')}</Text>
         <Pressable style={styles.button} onPress={() => void tryUnlock()} testID="app-lock-unlock">
-          <Text style={styles.buttonText}>{t('settings.appLockEnable')}</Text>
+          <Text style={styles.buttonText}>{t('settings.appLockUnlock')}</Text>
         </Pressable>
       </View>
     </View>
