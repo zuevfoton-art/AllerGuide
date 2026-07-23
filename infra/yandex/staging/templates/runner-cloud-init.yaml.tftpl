@@ -1,0 +1,30 @@
+#cloud-config
+package_update: true
+packages:
+  - curl
+  - git
+  - jq
+  - build-essential
+
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+
+write_files:
+  - path: /etc/aclearo/runner-labels
+    content: |
+      yc-staging-vpc
+      linux
+      x64
+    permissions: "0644"
+
+runcmd:
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - apt-get install -y nodejs
+  - corepack enable
+  - corepack prepare pnpm@10.34.4 --activate
+  - mkdir -p /opt/actions-runner && chown ubuntu:ubuntu /opt/actions-runner
+  - echo "Register GitHub runner: see docs/staging-yandex-cloud.md"

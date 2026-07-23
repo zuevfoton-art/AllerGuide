@@ -1,0 +1,13 @@
+# Copy to terraform.tfvars and fill in (never commit terraform.tfvars).
+# Usage: TF_VAR_pg_password='...' ./scripts/yc-staging-bootstrap.sh
+
+folder_id = "b1gxxxxxxxxxxxxxxxx"
+
+# openssl rand -base64 24
+pg_password = "CHANGE_ME_STRONG_PASSWORD"
+
+# ssh-ed25519 AAAA... (for runner VM access)
+runner_ssh_public_key = "ssh-ed25519 AAAAC3... ops@aclearo"
+
+api_staging_fqdn    = "api.staging.aclearo.com"
+api_staging_fqdn_ru = "api.staging.aclearo.ru"

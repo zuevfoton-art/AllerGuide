@@ -1,0 +1,177 @@
+name: Deploy staging (Yandex Cloud)
+
+# Builds API image → YCR → Serverless Container revision.
+# Migrations run on a self-hosted runner inside the VPC (private Postgres, no public IP).
+# After smoke: EAS staging builds for Android + iOS.
+#
+# Runbook: docs/staging-yandex-cloud.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_mobile:
+        description: Skip EAS mobile builds
+        type: boolean
+        default: false
+  push:
+    branches: [staging]
+
+concurrency:
+  group: deploy-staging-yandex
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: aclearo-api
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.34.4"
+
+jobs:
+  build-push:
+    if: ${{ secrets.YC_SA_JSON != '' && secrets.YC_REGISTRY_ID != '' }}
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Yandex Cloud credentials
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+        run: |
+          echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
+          yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
+
+      - name: Login to Yandex Container Registry
+        env:
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+        run: |
+          echo '${{ secrets.YC_SA_JSON }}' | docker login \
+            --username json_key \
+            --password-stdin \
+            "cr.yandex"
+
+      - name: Build and push API image
+        env:
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+        run: |
+          IMAGE="cr.yandex/${YC_REGISTRY_ID}/${IMAGE_NAME}"
+          docker build -t "${IMAGE}:${{ github.sha }}" -t "${IMAGE}:staging" .
+          docker push "${IMAGE}:${{ github.sha }}"
+          docker push "${IMAGE}:staging"
+
+  deploy:
+    needs: [build-push]
+    if: ${{ needs.build-push.result == 'success' && secrets.YC_CONTAINER_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy serverless container revision
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+          YC_CONTAINER_ID: ${{ secrets.YC_CONTAINER_ID }}
+          YC_LOCKBOX_SECRET_ID: ${{ secrets.YC_LOCKBOX_SECRET_ID }}
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
+          echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
+          yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
+
+          IMAGE="cr.yandex/${YC_REGISTRY_ID}/${IMAGE_NAME}:${{ github.sha }}"
+          DEPLOY_ARGS=(
+            --container-id "$YC_CONTAINER_ID"
+            --image "$IMAGE"
+            --cores 1
+            --memory 512MB
+            --execution-timeout 30s
+            --environment "API_PORT=3001,NODE_ENV=production"
+          )
+
+          if [ -n "${YC_LOCKBOX_SECRET_ID:-}" ]; then
+            for key in DATABASE_URL DIRECT_DATABASE_URL JWT_SECRET SESSION_SECRET OPENAI_API_KEY; do
+              DEPLOY_ARGS+=(--secret "environment-variable=${key},id=${YC_LOCKBOX_SECRET_ID},key=${key},version-id=latest")
+            done
+          fi
+
+          yc serverless container revision deploy "${DEPLOY_ARGS[@]}"
+
+  migrate:
+    needs: [deploy]
+    if: ${{ needs.deploy.result == 'success' }}
+    runs-on: [self-hosted, yc-staging-vpc]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations (private Postgres via VPC)
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:migrate
+
+  smoke:
+    needs: [migrate]
+    if: ${{ always() && needs.migrate.result == 'success' && secrets.STAGING_API_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Staging preflight
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          chmod +x scripts/staging-*.sh
+          ./scripts/staging-preflight.sh
+
+  mobile-android:
+    needs: [smoke]
+    if: ${{ needs.smoke.result == 'success' && github.event.inputs.skip_mobile != 'true' && secrets.EXPO_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: EAS Build staging (Android)
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: pnpm exec eas build --profile staging --platform android --non-interactive
+
+  mobile-ios:
+    needs: [smoke]
+    if: ${{ needs.smoke.result == 'success' && github.event.inputs.skip_mobile != 'true' && secrets.EXPO_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: EAS Build staging (iOS)
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: pnpm exec eas build --profile staging --platform ios --non-interactive
