@@ -63,6 +63,9 @@ const itContent: LocaleContent = {
           label: 'Cosa è stato mangiato?',
           placeholder: 'Piatti, alimenti, bevande',
         },
+        foodComponents: {
+          label: 'Ingredienti del piatto',
+        },
         allergens: {
           label: 'Possibili allergeni negli alimenti',
           placeholder: 'Latte, frutta a guscio, glutine…',

@@ -63,6 +63,9 @@ const esContent: LocaleContent = {
           label: '¿Qué comió?',
           placeholder: 'Platos, alimentos, bebidas',
         },
+        foodComponents: {
+          label: 'Ingredientes del plato',
+        },
         allergens: {
           label: 'Posibles alérgenos en los alimentos',
           placeholder: 'Leche, frutos secos, gluten…',

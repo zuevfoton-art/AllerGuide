@@ -236,6 +236,13 @@ const ru: LocaleMessages = {
     photoLibrary: 'Галерея',
     photoRemove: 'Удалить фото',
     photoEmpty: 'Фото пока не добавлены',
+    dishEnterFoodFirst: 'Сначала укажите блюдо или продукт — затем разберём состав.',
+    dishUnknown: 'Блюдо пока нет в каталоге. Аллергены можно указать вручную на следующих шагах.',
+    dishMatched: 'Распознано: {{dish}}',
+    dishHint: 'Снимите галочки с ингредиентов, которых не было в порции. Совпадения с профилем аллергий подсвечены.',
+    dishConflicts: 'Совпадения с профилем: {{list}}',
+    dishOffLoading: 'Ищем состав в Open Food Facts…',
+    dishOffEnriched: 'Дополнено из Open Food Facts: {{product}}',
   },
   scanner: {
     title: 'Умный сканер',

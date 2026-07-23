@@ -235,6 +235,13 @@ const en: LocaleMessages = {
     photoLibrary: 'Gallery',
     photoRemove: 'Remove photo',
     photoEmpty: 'No photos yet',
+    dishEnterFoodFirst: 'Enter the dish or food first — then we can break it into ingredients.',
+    dishUnknown: 'Dish not in the catalog yet. You can still note allergens manually on the next steps.',
+    dishMatched: 'Matched: {{dish}}',
+    dishHint: 'Uncheck ingredients that were not in this serving. Matches with your allergy profile are highlighted.',
+    dishConflicts: 'Profile conflicts: {{list}}',
+    dishOffLoading: 'Looking up ingredients in Open Food Facts…',
+    dishOffEnriched: 'Enriched from Open Food Facts: {{product}}',
   },
   scanner: {
     title: 'Smart scanner',

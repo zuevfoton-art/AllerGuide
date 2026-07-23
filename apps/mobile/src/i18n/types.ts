@@ -223,22 +223,29 @@ export type LocaleMessages = {
     heatmapTitle: string;
     temporalCorrelationTitle: string;
   };
-    diaryWizard: {
-      stepOf: string;
-      skipSection: string;
-      deleteEntry: string;
-      fillOneSection: string;
-      editEntry: string;
-      entryPlaceholder: string;
-      enterEntryText: string;
-      scalePreview: string;
-      pefZone: string;
-      photoHint: string;
-      photoCamera: string;
-      photoLibrary: string;
-      photoRemove: string;
-      photoEmpty: string;
-    };
+  diaryWizard: {
+    stepOf: string;
+    skipSection: string;
+    deleteEntry: string;
+    fillOneSection: string;
+    editEntry: string;
+    entryPlaceholder: string;
+    enterEntryText: string;
+    scalePreview: string;
+    pefZone: string;
+    photoHint: string;
+    photoCamera: string;
+    photoLibrary: string;
+    photoRemove: string;
+    photoEmpty: string;
+    dishEnterFoodFirst: string;
+    dishUnknown: string;
+    dishMatched: string;
+    dishHint: string;
+    dishConflicts: string;
+    dishOffLoading: string;
+    dishOffEnriched: string;
+  };
   scanner: {
     title: string;
     subtitle: string;

@@ -236,6 +236,13 @@ const de: LocaleMessages = {
     photoLibrary: 'Galerie',
     photoRemove: 'Foto entfernen',
     photoEmpty: 'Noch keine Fotos',
+    dishEnterFoodFirst: 'Geben Sie zuerst das Gericht oder Lebensmittel ein — danach können wir die Zutaten auflisten.',
+    dishUnknown: 'Gericht noch nicht im Katalog. Allergene können Sie in den nächsten Schritten manuell notieren.',
+    dishMatched: 'Erkannt: {{dish}}',
+    dishHint: 'Deaktivieren Sie Zutaten, die in dieser Portion fehlten. Treffer mit Ihrem Allergieprofil sind hervorgehoben.',
+    dishConflicts: 'Profilkonflikte: {{list}}',
+    dishOffLoading: 'Zutaten werden in Open Food Facts gesucht…',
+    dishOffEnriched: 'Ergänzt aus Open Food Facts: {{product}}',
   },
   scanner: {
     title: 'Smart Scanner',

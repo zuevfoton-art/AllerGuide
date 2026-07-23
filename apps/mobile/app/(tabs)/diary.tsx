@@ -273,6 +273,7 @@ export default function DiaryScreen() {
           sections={visibleSections}
           drugIntolerances={drugIntolerances}
           planPersonalBestPef={planPersonalBestPef}
+          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -286,6 +287,7 @@ export default function DiaryScreen() {
           sections={[section]}
           initialAnswersBySection={{ Шкала: buildScaleInitialAnswers(editor.scaleId) }}
           allowSkipSection={false}
+          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -313,6 +315,7 @@ export default function DiaryScreen() {
           allowSkipSection={false}
           drugIntolerances={drugIntolerances}
           planPersonalBestPef={planPersonalBestPef}
+          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {

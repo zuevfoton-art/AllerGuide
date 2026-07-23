@@ -63,6 +63,9 @@ const frContent: LocaleContent = {
           label: 'Qu\'a-t-on mangé ?',
           placeholder: 'Plats, aliments, boissons',
         },
+        foodComponents: {
+          label: 'Ingrédients du plat',
+        },
         allergens: {
           label: 'Allergènes alimentaires possibles',
           placeholder: 'Lait, fruits à coque, gluten…',
