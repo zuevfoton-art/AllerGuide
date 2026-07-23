@@ -231,6 +231,16 @@ const es: LocaleMessages = {
     scalePreview: 'Puntuación preliminar: {{score}} — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % del mejor PEF',
   },
+  voiceNote: {
+    title: 'Entrada de voz',
+    tapToSpeak: 'Toca el micrófono y dicta',
+    listening: 'Escuchando… toca para parar',
+    startRecording: 'Iniciar entrada de voz',
+    stopRecording: 'Detener entrada de voz',
+    permissionDenied: 'Se necesita permiso de micrófono para la entrada de voz.',
+    notSupported: 'La entrada de voz no está disponible en este navegador o dispositivo.',
+    failed: 'No se pudo reconocer el habla. Inténtalo de nuevo o escribe el texto.',
+  },
   scanner: {
     title: 'Escáner inteligente',
     subtitle: 'Comprobación según perfil de alergias',

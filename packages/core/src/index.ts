@@ -48,6 +48,7 @@ export * from './pollen-thresholds';
 export * from './wellness-cross-reactions';
 export * from './symptom-coding';
 export * from './diary-severity';
+export * from './voice-diary';
 export * from './doctor-report-timeline';
 export * from './cross-reactions';
 export * from './scan-risk';

@@ -234,6 +234,16 @@ export type LocaleMessages = {
     scalePreview: string;
     pefZone: string;
   };
+  voiceNote: {
+    title: string;
+    tapToSpeak: string;
+    listening: string;
+    startRecording: string;
+    stopRecording: string;
+    permissionDenied: string;
+    notSupported: string;
+    failed: string;
+  };
   scanner: {
     title: string;
     subtitle: string;

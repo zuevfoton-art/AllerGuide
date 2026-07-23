@@ -11,6 +11,8 @@ import {
   getScaleIdFromAnswers,
   hasSectionAnswers,
   parsePefNumeric,
+  parseVoiceDiaryUtterance,
+  applyVoiceParseToAnswers,
   resolvePersonalBestPef,
   validateClinicalScale,
   validateDiarySectionStep,
@@ -23,6 +25,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections } from '@/src/i18n/content';
+import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 
 export interface DiaryWizardResult {
   type: string;
@@ -121,6 +124,33 @@ export function DiaryWizard({
       return {
         ...prev,
         [section.type]: nextSectionAnswers,
+      };
+    });
+  };
+
+  const handleVoiceTranscript = (transcript: string) => {
+    setAnswersBySection((prev) => {
+      const current = { ...(prev[section.type] ?? {}) };
+      if (section.type === 'Симптомы') {
+        const parsed = parseVoiceDiaryUtterance(transcript);
+        return {
+          ...prev,
+          [section.type]: applyVoiceParseToAnswers(current, parsed, {
+            sectionType: 'Симптомы',
+            targetStepId: step.id,
+          }),
+        };
+      }
+      return {
+        ...prev,
+        [section.type]: {
+          ...current,
+          [step.id]: applyVoiceParseToAnswers(
+            { [step.id]: current[step.id] ?? '' },
+            { transcript },
+            { targetStepId: step.id },
+          )[step.id],
+        },
       };
     });
   };
@@ -227,6 +257,12 @@ export function DiaryWizard({
         value={sectionAnswers[step.id] ?? ''}
         onChange={(value) => setAnswer(step.id, value)}
       />
+      {step.field === 'text' ? (
+        <VoiceNoteButton
+          testID="diary-wizard-voice"
+          onTranscript={handleVoiceTranscript}
+        />
+      ) : null}
 
       {scalePreview ? (
         <Text style={styles.scalePreview}>
@@ -312,6 +348,14 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
         placeholderTextColor={theme.colors.textMuted}
         multiline
         textAlignVertical="top"
+      />
+      <VoiceNoteButton
+        testID="diary-legacy-voice"
+        onTranscript={(transcript) => {
+          setText((prev) =>
+            applyVoiceParseToAnswers({ text: prev }, { transcript }, { targetStepId: 'text' }).text,
+          );
+        }}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable style={styles.primaryBtn} onPress={handleSave}>

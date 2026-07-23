@@ -231,6 +231,16 @@ const en: LocaleMessages = {
     scalePreview: 'Preliminary score: {{score}} points — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}}% of personal best PEF',
   },
+  voiceNote: {
+    title: 'Voice input',
+    tapToSpeak: 'Tap the mic and dictate',
+    listening: 'Listening… tap to stop',
+    startRecording: 'Start voice input',
+    stopRecording: 'Stop voice input',
+    permissionDenied: 'Microphone permission is required for voice input.',
+    notSupported: 'Voice input is not available in this browser or device.',
+    failed: 'Could not recognize speech. Try again or type the text.',
+  },
   scanner: {
     title: 'Smart scanner',
     subtitle: 'Ingredient check against allergy profile',
