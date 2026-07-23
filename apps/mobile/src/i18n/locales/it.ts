@@ -243,6 +243,16 @@ const it: LocaleMessages = {
     dishOffLoading: 'Cerco gli ingredienti su Open Food Facts…',
     dishOffEnriched: 'Arricchito da Open Food Facts: {{product}}',
   },
+  voiceNote: {
+    title: 'Input vocale',
+    tapToSpeak: 'Tocca il microfono e detta',
+    listening: 'In ascolto… tocca per fermare',
+    startRecording: 'Avvia input vocale',
+    stopRecording: 'Ferma input vocale',
+    permissionDenied: 'Serve l\'autorizzazione al microfono per l\'input vocale.',
+    notSupported: 'L\'input vocale non è disponibile in questo browser o dispositivo.',
+    failed: 'Impossibile riconoscere il parlato. Riprova o digita il testo.',
+  },
   scanner: {
     title: 'Scanner intelligente',
     subtitle: 'Verifica in base al profilo allergie',

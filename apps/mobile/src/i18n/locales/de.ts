@@ -244,6 +244,16 @@ const de: LocaleMessages = {
     dishOffLoading: 'Zutaten werden in Open Food Facts gesucht…',
     dishOffEnriched: 'Ergänzt aus Open Food Facts: {{product}}',
   },
+  voiceNote: {
+    title: 'Spracheingabe',
+    tapToSpeak: 'Mikrofon tippen und diktieren',
+    listening: 'Höre zu… tippen zum Stoppen',
+    startRecording: 'Spracheingabe starten',
+    stopRecording: 'Spracheingabe stoppen',
+    permissionDenied: 'Mikrofonzugriff ist für die Spracheingabe erforderlich.',
+    notSupported: 'Spracheingabe ist in diesem Browser oder Gerät nicht verfügbar.',
+    failed: 'Sprache konnte nicht erkannt werden. Erneut versuchen oder Text eingeben.',
+  },
   scanner: {
     title: 'Smart Scanner',
     subtitle: 'Prüfung nach Allergieprofil',

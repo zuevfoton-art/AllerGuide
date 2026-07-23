@@ -18,6 +18,8 @@ import {
   parsePefNumeric,
   parseSelectedComponentIds,
   parseDishComponentDefs,
+  parseVoiceDiaryUtterance,
+  applyVoiceParseToAnswers,
   resolvePersonalBestPef,
   resolveSelectedIdsForEnrichment,
   serializeSelectedComponentIds,
@@ -39,6 +41,7 @@ import {
   removePhotoUri,
 } from '@/src/services/diary-photo-picker';
 import { enrichDishFromOpenFoods } from '@/src/services/dish-off-enrichment-service';
+import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 
 export interface DiaryWizardResult {
   type: string;
@@ -233,6 +236,33 @@ export function DiaryWizard({
     });
   };
 
+  const handleVoiceTranscript = (transcript: string) => {
+    setAnswersBySection((prev) => {
+      const current = { ...(prev[section.type] ?? {}) };
+      if (section.type === 'Симптомы') {
+        const parsed = parseVoiceDiaryUtterance(transcript);
+        return {
+          ...prev,
+          [section.type]: applyVoiceParseToAnswers(current, parsed, {
+            sectionType: 'Симптомы',
+            targetStepId: step.id,
+          }),
+        };
+      }
+      return {
+        ...prev,
+        [section.type]: {
+          ...current,
+          [step.id]: applyVoiceParseToAnswers(
+            { [step.id]: current[step.id] ?? '' },
+            { transcript },
+            { targetStepId: step.id },
+          )[step.id],
+        },
+      };
+    });
+  };
+
   const goNext = () => {
     const validationError =
       section.type === 'Шкала' && isLastStep
@@ -352,11 +382,19 @@ export function DiaryWizard({
           onChangeSelection={setFoodComponentSelection}
         />
       ) : (
-        <StepField
-          step={step}
-          value={sectionAnswers[step.id] ?? ''}
-          onChange={(value) => setAnswer(step.id, value)}
-        />
+        <>
+          <StepField
+            step={step}
+            value={sectionAnswers[step.id] ?? ''}
+            onChange={(value) => setAnswer(step.id, value)}
+          />
+          {step.field === 'text' ? (
+            <VoiceNoteButton
+              testID="diary-wizard-voice"
+              onTranscript={handleVoiceTranscript}
+            />
+          ) : null}
+        </>
       )}
 
       {scalePreview ? (
@@ -443,6 +481,14 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
         placeholderTextColor={theme.colors.textMuted}
         multiline
         textAlignVertical="top"
+      />
+      <VoiceNoteButton
+        testID="diary-legacy-voice"
+        onTranscript={(transcript) => {
+          setText((prev) =>
+            applyVoiceParseToAnswers({ text: prev }, { transcript }, { targetStepId: 'text' }).text,
+          );
+        }}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Pressable style={styles.primaryBtn} onPress={handleSave}>

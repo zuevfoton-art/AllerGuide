@@ -244,6 +244,16 @@ const ru: LocaleMessages = {
     dishOffLoading: 'Ищем состав в Open Food Facts…',
     dishOffEnriched: 'Дополнено из Open Food Facts: {{product}}',
   },
+  voiceNote: {
+    title: 'Голосовой ввод',
+    tapToSpeak: 'Нажмите на микрофон и продиктуйте',
+    listening: 'Слушаю… нажмите, чтобы остановить',
+    startRecording: 'Начать голосовой ввод',
+    stopRecording: 'Остановить голосовой ввод',
+    permissionDenied: 'Нужен доступ к микрофону для голосового ввода.',
+    notSupported: 'Голосовой ввод недоступен в этом браузере или на устройстве.',
+    failed: 'Не удалось распознать речь. Попробуйте ещё раз или введите текст.',
+  },
   scanner: {
     title: 'Умный сканер',
     subtitle: 'Проверка состава по профилю аллергий',

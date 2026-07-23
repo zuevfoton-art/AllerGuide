@@ -243,6 +243,16 @@ const fr: LocaleMessages = {
     dishOffLoading: 'Recherche des ingrédients dans Open Food Facts…',
     dishOffEnriched: 'Enrichi via Open Food Facts : {{product}}',
   },
+  voiceNote: {
+    title: 'Saisie vocale',
+    tapToSpeak: 'Touchez le micro et dictez',
+    listening: 'Écoute… touchez pour arrêter',
+    startRecording: 'Démarrer la saisie vocale',
+    stopRecording: 'Arrêter la saisie vocale',
+    permissionDenied: 'L\'accès au microphone est requis pour la saisie vocale.',
+    notSupported: 'La saisie vocale n\'est pas disponible sur ce navigateur ou appareil.',
+    failed: 'Impossible de reconnaître la parole. Réessayez ou saisissez le texte.',
+  },
   scanner: {
     title: 'Scanner intelligent',
     subtitle: 'Vérification selon le profil d\'allergies',
