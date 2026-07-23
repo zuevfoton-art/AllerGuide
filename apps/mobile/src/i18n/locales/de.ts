@@ -231,6 +231,11 @@ const de: LocaleMessages = {
     enterEntryText: 'Eintragstext eingeben.',
     scalePreview: 'Vorläufige Bewertung: {{score}} Punkte — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % des besten PEF',
+    photoHint: 'Bis zu 5 Fotos von Ausschlag, Schwellung oder anderen Zeichen. Fotos bleiben auf dem Gerät und erscheinen im PDF-Bericht.',
+    photoCamera: 'Kamera',
+    photoLibrary: 'Galerie',
+    photoRemove: 'Foto entfernen',
+    photoEmpty: 'Noch keine Fotos',
   },
   scanner: {
     title: 'Smart Scanner',

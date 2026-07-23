@@ -2,15 +2,46 @@ import { Platform } from 'react-native';
 import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
 import { doctorReportPdfFooterRu, doctorReportTitleRu } from '@/src/constants/brand';
-import { formatDiaryDate, formatDiaryEntrySummary } from '@allerguide/core';
+import {
+  formatDiaryDate,
+  formatDiaryEntrySummary,
+  getDiaryPhotoUrisFromAnswers,
+  getDiaryEntryAnswers,
+  parseDiaryPhotoUris,
+} from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
+import {
+  deleteDiaryAttachmentsForEntry,
+  listDiaryAttachments,
+  replaceDiaryPhotos,
+} from '@/src/services/diary-attachment-service';
 import type { DiaryEntry, Profile } from '@/src/types';
+
+function resolveInsertedEntryId(profileId: number, type: string, createdAt: string): number | null {
+  const db = getDb();
+  const row = db.getFirstSync<{ id: number }>(
+    'SELECT id FROM diary_entries WHERE profileId = ? AND type = ? AND createdAt = ? ORDER BY id DESC LIMIT 1',
+    [profileId, type, createdAt],
+  );
+  return row?.id ?? null;
+}
+
+async function syncPhotosFromDetails(entryId: number, details: string, type: string): Promise<void> {
+  const answers = getDiaryEntryAnswers(type, details);
+  // Photos are stripped from encoded details — callers pass pending URIs separately via answers overlay.
+  // Fallback: parse if still present (legacy / in-memory before strip).
+  const fromAnswers = answers ? getDiaryPhotoUrisFromAnswers(answers) : [];
+  if (fromAnswers.length) {
+    await replaceDiaryPhotos(entryId, fromAnswers);
+  }
+}
 
 export async function addDiaryEntry(input: {
   profileId: number;
   type: string;
   details: string;
   createdAt: string;
+  photoUris?: string[];
 }) {
   const db = getDb();
   db.runSync('INSERT INTO diary_entries (profileId, type, details, createdAt) VALUES (?, ?, ?, ?)', [
@@ -20,15 +51,28 @@ export async function addDiaryEntry(input: {
     input.createdAt,
   ]);
   trackEvent('diary_entry_saved', { entry_type: input.type });
+
+  const entryId = resolveInsertedEntryId(input.profileId, input.type, input.createdAt);
+  if (entryId != null && input.photoUris?.length) {
+    await replaceDiaryPhotos(entryId, input.photoUris);
+  } else if (entryId != null) {
+    await syncPhotosFromDetails(entryId, input.details, input.type);
+  }
 }
 
 export async function addDiaryEntries(
   profileId: number,
-  entries: { type: string; details: string }[],
+  entries: { type: string; details: string; photoUris?: string[] }[],
   createdAt = new Date().toISOString(),
 ) {
   for (const entry of entries) {
-    await addDiaryEntry({ profileId, type: entry.type, details: entry.details, createdAt });
+    await addDiaryEntry({
+      profileId,
+      type: entry.type,
+      details: entry.details,
+      createdAt,
+      photoUris: entry.photoUris,
+    });
   }
 }
 
@@ -39,7 +83,7 @@ export async function getDiaryEntries(profileId: number) {
 
 export async function updateDiaryEntry(
   id: number,
-  input: { type: string; details: string },
+  input: { type: string; details: string; photoUris?: string[] },
 ) {
   const db = getDb();
   db.runSync('UPDATE diary_entries SET type = ?, details = ? WHERE id = ?', [
@@ -47,9 +91,13 @@ export async function updateDiaryEntry(
     input.details,
     id,
   ]);
+  if (input.photoUris) {
+    await replaceDiaryPhotos(id, input.photoUris);
+  }
 }
 
 export async function deleteDiaryEntry(id: number) {
+  await deleteDiaryAttachmentsForEntry(id);
   const db = getDb();
   db.runSync('DELETE FROM diary_entries WHERE id = ?', [id]);
 }
@@ -58,6 +106,25 @@ export function listAllDiaryEntries(): DiaryEntry[] {
   const db = getDb();
   return db.getAllSync<DiaryEntry>('SELECT * FROM diary_entries ORDER BY id DESC', []);
 }
+
+export function getEntryPhotoUris(entryId: number): string[] {
+  return listDiaryAttachments(entryId).map((item) => item.localPath);
+}
+
+/** Merge stored attachment URIs into answers for wizard edit. */
+export function mergePhotosIntoAnswers(
+  answers: Record<string, string>,
+  entryId: number,
+): Record<string, string> {
+  const uris = getEntryPhotoUris(entryId);
+  if (!uris.length) return answers;
+  return {
+    ...answers,
+    skinPhotos: JSON.stringify(uris),
+  };
+}
+
+export { parseDiaryPhotoUris };
 
 export async function generateDoctorPdf(profileId: number) {
   const db = getDb();

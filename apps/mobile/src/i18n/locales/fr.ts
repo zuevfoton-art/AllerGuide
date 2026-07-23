@@ -230,6 +230,11 @@ const fr: LocaleMessages = {
     enterEntryText: 'Entrez le texte de l\'entrée.',
     scalePreview: 'Score préliminaire : {{score}} — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % du meilleur DEP',
+    photoHint: 'Ajoutez jusqu’à 5 photos d’éruption, gonflement ou autres signes. Les photos restent sur l’appareil et apparaissent dans le PDF.',
+    photoCamera: 'Caméra',
+    photoLibrary: 'Galerie',
+    photoRemove: 'Supprimer la photo',
+    photoEmpty: 'Aucune photo pour l’instant',
   },
   scanner: {
     title: 'Scanner intelligent',

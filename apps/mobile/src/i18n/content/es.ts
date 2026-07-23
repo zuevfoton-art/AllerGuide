@@ -105,6 +105,9 @@ const esContent: LocaleContent = {
           label: 'Intensidad del picor',
           choices: ['Ninguno', 'Leve', 'Moderado', 'Grave'],
         },
+        skinPhotos: {
+          label: 'Fotos de las manifestaciones',
+        },
         skinNotes: {
           label: '¿Qué mejoró o empeoró el estado?',
         },

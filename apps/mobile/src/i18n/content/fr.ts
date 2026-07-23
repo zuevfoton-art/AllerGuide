@@ -105,6 +105,9 @@ const frContent: LocaleContent = {
           label: 'Intensité des démangeaisons',
           choices: ['Aucune', 'Légère', 'Modérée', 'Sévère'],
         },
+        skinPhotos: {
+          label: 'Photos des manifestations',
+        },
         skinNotes: {
           label: 'Qu\'est-ce qui a amélioré ou aggravé l\'état ?',
         },

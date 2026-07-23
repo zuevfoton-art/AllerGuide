@@ -231,6 +231,11 @@ const ru: LocaleMessages = {
     enterEntryText: 'Введите текст записи.',
     scalePreview: 'Предварительная оценка: {{score}} баллов — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}}% от лучшего ПСВ',
+    photoHint: 'Добавьте до 5 фото сыпи, отёка или других проявлений. Фото сохраняются на устройстве и попадут в PDF-отчёт.',
+    photoCamera: 'Камера',
+    photoLibrary: 'Галерея',
+    photoRemove: 'Удалить фото',
+    photoEmpty: 'Фото пока не добавлены',
   },
   scanner: {
     title: 'Умный сканер',

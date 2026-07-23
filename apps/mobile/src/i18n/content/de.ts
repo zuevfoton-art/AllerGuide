@@ -105,6 +105,9 @@ const deContent: LocaleContent = {
           label: 'Juckreizintensität',
           choices: ['Keiner', 'Leicht', 'Mäßig', 'Schwer'],
         },
+        skinPhotos: {
+          label: 'Fotos der Hautveränderungen',
+        },
         skinNotes: {
           label: 'Was hat den Zustand verbessert oder verschlechtert?',
         },

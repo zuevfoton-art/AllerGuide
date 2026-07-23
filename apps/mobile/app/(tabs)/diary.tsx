@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -20,8 +20,10 @@ import {
   addDiaryEntries,
   deleteDiaryEntry,
   getDiaryEntries,
+  mergePhotosIntoAnswers,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
+import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
 import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
@@ -84,6 +86,7 @@ export default function DiaryScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
   const [list, setList] = useState<DiaryEntry[]>([]);
+  const [photoUrisByEntry, setPhotoUrisByEntry] = useState<Record<number, string[]>>({});
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -166,18 +169,26 @@ export default function DiaryScreen() {
 
   const load = useCallback(async () => {
     if (!activeProfileId) return;
-    setList(await getDiaryEntries(activeProfileId));
+    const entries = await getDiaryEntries(activeProfileId);
+    setList(entries);
+    const attachments = listDiaryAttachmentsForEntries(entries.map((e) => e.id));
+    const map: Record<number, string[]> = {};
+    for (const item of attachments) {
+      if (!map[item.entryId]) map[item.entryId] = [];
+      map[item.entryId].push(item.localPath);
+    }
+    setPhotoUrisByEntry(map);
   }, [activeProfileId]);
 
   const refresh = useCallback(async () => {
     if (!activeProfileId) return;
     setRefreshing(true);
     try {
-      setList(await getDiaryEntries(activeProfileId));
+      await load();
     } finally {
       setRefreshing(false);
     }
-  }, [activeProfileId]);
+  }, [activeProfileId, load]);
 
   useFocusEffect(
     useCallback(() => {
@@ -193,7 +204,7 @@ export default function DiaryScreen() {
 
   const closeEditor = () => setEditor(null);
 
-  const handleCreate = async (entries: { type: string; details: string }[]) => {
+  const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     if (!activeProfileId) return;
     await addDiaryEntries(activeProfileId, entries);
     closeEditor();
@@ -201,8 +212,13 @@ export default function DiaryScreen() {
     void reconcileAllReminders();
   };
 
-  const handleUpdate = async (entry: DiaryEntry, type: string, details: string) => {
-    await updateDiaryEntry(entry.id, { type, details });
+  const handleUpdate = async (
+    entry: DiaryEntry,
+    type: string,
+    details: string,
+    photoUris?: string[],
+  ) => {
+    await updateDiaryEntry(entry.id, { type, details, photoUris });
     closeEditor();
     await load();
     void reconcileAllReminders();
@@ -282,7 +298,10 @@ export default function DiaryScreen() {
 
     const initialAnswers =
       editor.mode === 'edit'
-        ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details)
+        ? mergePhotosIntoAnswers(
+            getDiaryEntryAnswers(editor.entry.type, editor.entry.details) ?? {},
+            editor.entry.id,
+          )
         : editor.mode === 'section'
           ? editor.prefill?.[section.type]
           : null;
@@ -300,7 +319,7 @@ export default function DiaryScreen() {
             const [entry] = entries;
             if (!entry) return;
             if (editor.mode === 'edit') {
-              void handleUpdate(editor.entry, entry.type, entry.details);
+              void handleUpdate(editor.entry, entry.type, entry.details, entry.photoUris ?? []);
               return;
             }
             void handleCreate(entries);
@@ -525,6 +544,7 @@ export default function DiaryScreen() {
           {list.map((item, index) => {
             const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
+            const photos = photoUrisByEntry[item.id] ?? [];
             return (
               <Pressable
                 key={item.id}
@@ -536,6 +556,16 @@ export default function DiaryScreen() {
                 <View style={ui.feedBody}>
                   <Text style={ui.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
                   <Text style={ui.feedSub}>{summary}</Text>
+                  {photos.length ? (
+                    <View style={styles.photoRow}>
+                      {photos.slice(0, 3).map((uri) => (
+                        <Image key={uri} source={{ uri }} style={styles.photoThumb} />
+                      ))}
+                      {photos.length > 3 ? (
+                        <Text style={styles.photoMore}>+{photos.length - 3}</Text>
+                      ) : null}
+                    </View>
+                  ) : null}
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
@@ -652,6 +682,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
+    },
+    photoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
+    photoThumb: { width: 40, height: 40, borderRadius: 6, backgroundColor: colors.surfaceMuted },
+    photoMore: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textMuted,
     },
     hintsCard: { gap: 8 },
     hintText: {

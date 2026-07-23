@@ -105,6 +105,9 @@ const enContent: LocaleContent = {
           label: 'Itch intensity',
           choices: ['None', 'Mild', 'Moderate', 'Severe'],
         },
+        skinPhotos: {
+          label: 'Photos of manifestations',
+        },
         skinNotes: {
           label: 'What helped or worsened the condition?',
         },

@@ -44,6 +44,10 @@ import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getEmergencyNumber, getProfileAge } from '@/src/services/sos-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { logCaughtError } from '@/src/services/error-reporting';
+import {
+  listDiaryAttachments,
+  readDiaryAttachmentAsDataUri,
+} from '@/src/services/diary-attachment-service';
 import type { DiaryEntry, Profile } from '@/src/types';
 
 export type DoctorReportOptions = {
@@ -123,20 +127,40 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
   const allowedTypes = getReportDiaryTypes(options.blockIds);
   const entries = periodEntries.filter((e) => allowedTypes.includes(e.type));
 
-  const blocksHtml = DOCTOR_REPORT_BLOCKS.filter((b) => options.blockIds.includes(b.id))
-    .map((block: DoctorReportBlock) => {
-      const blockEntries = entries.filter((e) => block.diaryTypes.includes(e.type));
-      if (!blockEntries.length) {
-        return `<section><h2>${block.label}</h2><p style="color:${c.muted};">Нет записей за период.</p></section>`;
-      }
-      return `<section><h2>${block.label}</h2>${blockEntries
-        .map(
-          (e) =>
-            `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${e.type}</strong><p>${formatDiaryEntrySummary(e.type, e.details || '')}</p><small>${formatDiaryDate(e.createdAt)}</small></div>`,
-        )
-        .join('')}</section>`;
-    })
-    .join('');
+  const blocksHtml = (
+    await Promise.all(
+      DOCTOR_REPORT_BLOCKS.filter((b) => options.blockIds.includes(b.id)).map(async (block: DoctorReportBlock) => {
+        const blockEntries = entries.filter((e) => block.diaryTypes.includes(e.type));
+        if (!blockEntries.length) {
+          return `<section><h2>${block.label}</h2><p style="color:${c.muted};">Нет записей за период.</p></section>`;
+        }
+        const itemsHtml = (
+          await Promise.all(
+            blockEntries.map(async (e) => {
+              const summary = formatDiaryEntrySummary(e.type, e.details || '');
+              let photosHtml = '';
+              if (block.id === 'skin' || e.type === 'Кожа') {
+                const attachments = listDiaryAttachments(e.id);
+                const dataUris = (
+                  await Promise.all(attachments.map((a) => readDiaryAttachmentAsDataUri(a.localPath)))
+                ).filter((uri): uri is string => Boolean(uri));
+                if (dataUris.length) {
+                  photosHtml = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">${dataUris
+                    .map(
+                      (uri) =>
+                        `<img src="${uri}" alt="skin" style="max-width:180px;max-height:180px;border-radius:8px;border:1px solid ${c.border};object-fit:cover;" />`,
+                    )
+                    .join('')}</div>`;
+                }
+              }
+              return `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${e.type}</strong><p>${summary}</p>${photosHtml}<small>${formatDiaryDate(e.createdAt)}</small></div>`;
+            }),
+          )
+        ).join('');
+        return `<section><h2>${block.label}</h2>${itemsHtml}</section>`;
+      }),
+    )
+  ).join('');
 
   const timelineHtml = options.blockIds.includes('timeline')
     ? `<section><h2>Хронология записей</h2>${renderTimeline(periodEntries)}</section>`

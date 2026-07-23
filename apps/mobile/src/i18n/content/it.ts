@@ -105,6 +105,9 @@ const itContent: LocaleContent = {
           label: 'Intensità del prurito',
           choices: ['Nessuno', 'Lieve', 'Moderato', 'Grave'],
         },
+        skinPhotos: {
+          label: 'Foto delle manifestazioni',
+        },
         skinNotes: {
           label: 'Cosa ha migliorato o peggiorato lo stato?',
         },

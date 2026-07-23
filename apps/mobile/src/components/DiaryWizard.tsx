@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   computePefPercentOfBest,
@@ -7,9 +7,11 @@ import {
   computeScaleScore,
   encodeDiaryDetails,
   enrichScaleAnswers,
+  getDiaryPhotoUrisFromAnswers,
   getDiaryStepAnswers,
   getScaleIdFromAnswers,
   hasSectionAnswers,
+  parseDiaryPhotoUris,
   parsePefNumeric,
   resolvePersonalBestPef,
   validateClinicalScale,
@@ -23,10 +25,18 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections } from '@/src/i18n/content';
+import {
+  addPhotoUri,
+  canAddMorePhotos,
+  captureDiaryPhoto,
+  pickDiaryPhotoFromLibrary,
+  removePhotoUri,
+} from '@/src/services/diary-photo-picker';
 
 export interface DiaryWizardResult {
   type: string;
   details: string;
+  photoUris?: string[];
 }
 
 interface DiaryWizardProps {
@@ -186,7 +196,14 @@ export function DiaryWizard({
         return [{ type: item.type, details: encodeDiaryDetails(enriched, item.type) }];
       }
 
-      return [{ type: item.type, details: encodeDiaryDetails(answers, item.type) }];
+      const photoUris = getDiaryPhotoUrisFromAnswers(answers);
+      return [
+        {
+          type: item.type,
+          details: encodeDiaryDetails(answers, item.type),
+          photoUris: photoUris.length ? photoUris : undefined,
+        },
+      ];
     });
 
     if (entries.length === 0) {
@@ -382,6 +399,65 @@ function StepField({
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createFieldStyles(theme), [theme]);
+  const { t } = useTranslation();
+
+  if (step.field === 'photo') {
+    const uris = parseDiaryPhotoUris(value);
+    const canAdd = canAddMorePhotos(value);
+
+    const addFromLibrary = async () => {
+      const uri = await pickDiaryPhotoFromLibrary();
+      if (uri) onChange(addPhotoUri(value, uri));
+    };
+    const addFromCamera = async () => {
+      const uri = await captureDiaryPhoto();
+      if (uri) onChange(addPhotoUri(value, uri));
+    };
+
+    return (
+      <View style={styles.photoWrap} testID="diary-photo-step">
+        <Text style={styles.photoHint}>{t('diaryWizard.photoHint')}</Text>
+        <View style={styles.photoActions}>
+          {Platform.OS !== 'web' ? (
+            <Pressable
+              style={[styles.photoBtn, !canAdd && styles.btnDisabled]}
+              disabled={!canAdd}
+              onPress={() => void addFromCamera()}
+              testID="diary-photo-camera">
+              <Ionicons name="camera-outline" size={18} color={theme.colors.accent} />
+              <Text style={styles.photoBtnText}>{t('diaryWizard.photoCamera')}</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            style={[styles.photoBtn, !canAdd && styles.btnDisabled]}
+            disabled={!canAdd}
+            onPress={() => void addFromLibrary()}
+            testID="diary-photo-library">
+            <Ionicons name="images-outline" size={18} color={theme.colors.accent} />
+            <Text style={styles.photoBtnText}>{t('diaryWizard.photoLibrary')}</Text>
+          </Pressable>
+        </View>
+        {uris.length ? (
+          <View style={styles.photoGrid}>
+            {uris.map((uri) => (
+              <View key={uri} style={styles.photoThumbWrap}>
+                <Image source={{ uri }} style={styles.photoThumb} />
+                <Pressable
+                  style={styles.photoRemove}
+                  onPress={() => onChange(removePhotoUri(value, uri))}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('diaryWizard.photoRemove')}>
+                  <Ionicons name="close-circle" size={22} color={theme.colors.danger} />
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.photoEmpty}>{t('diaryWizard.photoEmpty')}</Text>
+        )}
+      </View>
+    );
+  }
 
   if (step.field === 'choice' && step.choices) {
     return (
@@ -518,6 +594,41 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     choiceTextActive: { color: colors.accent },
+    photoWrap: { gap: 10 },
+    photoHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    photoActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    photoBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+    },
+    photoBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+    },
+    photoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    photoThumbWrap: { width: 88, height: 88, borderRadius: 8, overflow: 'hidden' },
+    photoThumb: { width: '100%', height: '100%' },
+    photoRemove: { position: 'absolute', top: 2, right: 2 },
+    photoEmpty: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textMuted,
+    },
+    btnDisabled: { opacity: 0.45 },
   });
 }
 

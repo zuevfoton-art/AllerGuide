@@ -230,6 +230,11 @@ const en: LocaleMessages = {
     enterEntryText: 'Enter entry text.',
     scalePreview: 'Preliminary score: {{score}} points — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}}% of personal best PEF',
+    photoHint: 'Add up to 5 photos of rash, swelling, or other signs. Photos stay on device and appear in the doctor PDF.',
+    photoCamera: 'Camera',
+    photoLibrary: 'Gallery',
+    photoRemove: 'Remove photo',
+    photoEmpty: 'No photos yet',
   },
   scanner: {
     title: 'Smart scanner',
