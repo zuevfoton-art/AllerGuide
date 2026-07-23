@@ -235,6 +235,8 @@ const es: LocaleMessages = {
     dishMatched: 'Detectado: {{dish}}',
     dishHint: 'Desmarca ingredientes que no hubo en esta ración. Las coincidencias con tu perfil de alergias están resaltadas.',
     dishConflicts: 'Conflictos con el perfil: {{list}}',
+    dishOffLoading: 'Buscando ingredientes en Open Food Facts…',
+    dishOffEnriched: 'Enriquecido con Open Food Facts: {{product}}',
   },
   scanner: {
     title: 'Escáner inteligente',

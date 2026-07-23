@@ -235,6 +235,8 @@ const en: LocaleMessages = {
     dishMatched: 'Matched: {{dish}}',
     dishHint: 'Uncheck ingredients that were not in this serving. Matches with your allergy profile are highlighted.',
     dishConflicts: 'Profile conflicts: {{list}}',
+    dishOffLoading: 'Looking up ingredients in Open Food Facts…',
+    dishOffEnriched: 'Enriched from Open Food Facts: {{product}}',
   },
   scanner: {
     title: 'Smart scanner',

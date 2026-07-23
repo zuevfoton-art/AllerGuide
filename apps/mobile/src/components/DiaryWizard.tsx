@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   applyDishBreakdownToAnswers,
@@ -15,7 +15,9 @@ import {
   hasSectionAnswers,
   parsePefNumeric,
   parseSelectedComponentIds,
+  parseDishComponentDefs,
   resolvePersonalBestPef,
+  resolveSelectedIdsForEnrichment,
   serializeSelectedComponentIds,
   validateClinicalScale,
   validateDiarySectionStep,
@@ -27,6 +29,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections } from '@/src/i18n/content';
+import { enrichDishFromOpenFoods } from '@/src/services/dish-off-enrichment-service';
 
 export interface DiaryWizardResult {
   type: string;
@@ -72,6 +75,8 @@ export function DiaryWizard({
     initialAnswersBySection ?? {},
   );
   const [error, setError] = useState('');
+  const [offEnriching, setOffEnriching] = useState(false);
+  const foodComponentsTouchedRef = useRef(false);
 
   const section = sections[sectionIndex];
   const step = section.steps[stepIndex];
@@ -88,6 +93,67 @@ export function DiaryWizard({
     allowSkipSection &&
     totalSections > 1 &&
     (!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0);
+
+  const nutritionFood = section.type === 'Питание' ? (sectionAnswers.food ?? '').trim() : '';
+
+  useEffect(() => {
+    if (section.type !== 'Питание') return;
+    const food = nutritionFood;
+    if (food.length < 2) {
+      setOffEnriching(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      setOffEnriching(true);
+      void enrichDishFromOpenFoods(food)
+        .then((enrichment) => {
+          if (cancelled || !enrichment) return;
+          // Local-only result is already applied synchronously on food change.
+          if (enrichment.source === 'local') return;
+
+          setAnswersBySection((prev) => {
+            const current = { ...(prev['Питание'] ?? {}) };
+            if ((current.food ?? '').trim() !== food) return prev;
+
+            let nextAnswers = { ...current };
+            if (foodComponentsTouchedRef.current && enrichment.previousAvailableIds) {
+              const merged = resolveSelectedIdsForEnrichment(
+                parseSelectedComponentIds(current.foodComponents),
+                enrichment.previousAvailableIds,
+                enrichment.components,
+              );
+              if (merged) {
+                nextAnswers.foodComponents = serializeSelectedComponentIds(merged);
+              }
+            } else if (!foodComponentsTouchedRef.current) {
+              delete nextAnswers.foodComponents;
+            }
+
+            return {
+              ...prev,
+              Питание: applyDishBreakdownToAnswers(nextAnswers, profileAllergiesJson, {
+                components: enrichment.components,
+                dishId: enrichment.dishId,
+                dishName: enrichment.dishName,
+                source: enrichment.source,
+                productBarcode: enrichment.productBarcode,
+                productName: enrichment.productName,
+              }),
+            };
+          });
+        })
+        .finally(() => {
+          if (!cancelled) setOffEnriching(false);
+        });
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [nutritionFood, profileAllergiesJson, section.type]);
 
   const scalePreview =
     section.type === 'Шкала' && isLastStep
@@ -127,8 +193,18 @@ export function DiaryWizard({
       }
       if (stepId === 'food' && section.type === 'Питание') {
         // Reset selection so a new dish gets a fresh full checklist.
+        foodComponentsTouchedRef.current = false;
         delete nextSectionAnswers.foodComponents;
-        nextSectionAnswers = applyDishBreakdownToAnswers(nextSectionAnswers, profileAllergiesJson);
+        delete nextSectionAnswers.foodComponentsDef;
+        delete nextSectionAnswers.foodDishId;
+        delete nextSectionAnswers.foodDishName;
+        delete nextSectionAnswers.foodOffSource;
+        delete nextSectionAnswers.foodOffBarcode;
+        delete nextSectionAnswers.foodOffName;
+        delete nextSectionAnswers.foodComponentConflicts;
+        nextSectionAnswers = applyDishBreakdownToAnswers(nextSectionAnswers, profileAllergiesJson, {
+          source: 'local',
+        });
       }
       return {
         ...prev,
@@ -138,6 +214,7 @@ export function DiaryWizard({
   };
 
   const setFoodComponentSelection = (selectedIds: string[]) => {
+    foodComponentsTouchedRef.current = true;
     setAnswersBySection((prev) => {
       const current = { ...(prev['Питание'] ?? {}) };
       current.foodComponents = serializeSelectedComponentIds(selectedIds);
@@ -247,8 +324,14 @@ export function DiaryWizard({
         <DishComponentsField
           foodText={sectionAnswers.food ?? ''}
           selectedRaw={sectionAnswers.foodComponents ?? ''}
+          componentsDefRaw={sectionAnswers.foodComponentsDef ?? ''}
+          dishId={sectionAnswers.foodDishId ?? ''}
+          dishName={sectionAnswers.foodDishName ?? ''}
           conflictsSummary={sectionAnswers.foodComponentConflicts ?? ''}
           profileAllergiesJson={profileAllergiesJson}
+          offEnriching={offEnriching}
+          offSource={sectionAnswers.foodOffSource ?? ''}
+          offProductName={sectionAnswers.foodOffName ?? ''}
           onChangeSelection={setFoodComponentSelection}
         />
       ) : (
@@ -405,14 +488,26 @@ function createPefZoneStyles({ colors, fonts }: AppTheme) {
 function DishComponentsField({
   foodText,
   selectedRaw,
+  componentsDefRaw,
+  dishId,
+  dishName,
   conflictsSummary,
   profileAllergiesJson,
+  offEnriching,
+  offSource,
+  offProductName,
   onChangeSelection,
 }: {
   foodText: string;
   selectedRaw: string;
+  componentsDefRaw: string;
+  dishId: string;
+  dishName: string;
   conflictsSummary: string;
   profileAllergiesJson: string;
+  offEnriching: boolean;
+  offSource: string;
+  offProductName: string;
   onChangeSelection: (ids: string[]) => void;
 }) {
   const theme = useTheme();
@@ -420,18 +515,33 @@ function DishComponentsField({
   const { t } = useTranslation();
 
   const selectedIds = parseSelectedComponentIds(selectedRaw);
+  const storedDefs = parseDishComponentDefs(componentsDefRaw);
   const breakdown = buildDishBreakdown(
     foodText,
     profileAllergiesJson,
     selectedRaw ? selectedIds : undefined,
+    {
+      components: storedDefs.length ? storedDefs : undefined,
+      dishId: dishId || null,
+      dishName: dishName || null,
+    },
   );
 
   if (!foodText.trim()) {
     return <Text style={styles.checklistHint}>{t('diaryWizard.dishEnterFoodFirst')}</Text>;
   }
 
-  if (!breakdown.components.length) {
+  if (!breakdown.components.length && !offEnriching) {
     return <Text style={styles.checklistHint}>{t('diaryWizard.dishUnknown')}</Text>;
+  }
+
+  if (!breakdown.components.length && offEnriching) {
+    return (
+      <View style={styles.checklistWrap} testID="diary-dish-off-loading">
+        <ActivityIndicator color={theme.colors.accent} />
+        <Text style={styles.checklistHint}>{t('diaryWizard.dishOffLoading')}</Text>
+      </View>
+    );
   }
 
   const toggle = (id: string) => {
@@ -443,12 +553,27 @@ function DishComponentsField({
     onChangeSelection(Array.from(current));
   };
 
+  const showOffBadge = offSource === 'openfoodfacts' || offSource === 'catalog' || offSource === 'mixed';
+
   return (
     <View style={styles.checklistWrap} testID="diary-dish-checklist">
       {breakdown.dishName ? (
         <Text style={styles.checklistDish}>
           {t('diaryWizard.dishMatched', { dish: breakdown.dishName })}
         </Text>
+      ) : null}
+      {showOffBadge ? (
+        <Text style={styles.offSource} testID="diary-dish-off-source">
+          {t('diaryWizard.dishOffEnriched', {
+            product: offProductName || breakdown.dishName || 'Open Food Facts',
+          })}
+        </Text>
+      ) : null}
+      {offEnriching ? (
+        <View style={styles.offLoadingRow}>
+          <ActivityIndicator size="small" color={theme.colors.accent} />
+          <Text style={styles.checklistHint}>{t('diaryWizard.dishOffLoading')}</Text>
+        </View>
       ) : null}
       <Text style={styles.checklistHint}>{t('diaryWizard.dishHint')}</Text>
       <View style={styles.choiceGrid}>
@@ -649,6 +774,17 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
+    },
+    offSource: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.accent,
+      lineHeight: 16,
+    },
+    offLoadingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
     },
     conflictDirect: {
       borderColor: colors.danger,

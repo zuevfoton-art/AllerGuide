@@ -1,4 +1,5 @@
 import { findAllergenById } from './allergen-database';
+import { mapExternalAllergenIds } from './allergen-aliases';
 import { getCrossReactionsForSelection, type CrossReactionMatch } from './cross-reactions';
 import { parseProfileAllergenIds, resolveAllergenId } from './profile-allergens';
 
@@ -293,6 +294,20 @@ function normalizeText(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
+/** Unique ingredient defs used across the static catalog (for ingredients_text matching). */
+export const KNOWN_DISH_COMPONENTS: DishComponentDef[] = (() => {
+  const seen = new Set<string>();
+  const out: DishComponentDef[] = [];
+  for (const recipe of DISH_CATALOG) {
+    for (const component of recipe.components) {
+      if (seen.has(component.id)) continue;
+      seen.add(component.id);
+      out.push(component);
+    }
+  }
+  return out;
+})();
+
 export function findDishRecipe(foodText: string): DishRecipe | null {
   const normalized = normalizeText(foodText);
   if (!normalized) return null;
@@ -314,15 +329,169 @@ export function findDishRecipe(foodText: string): DishRecipe | null {
 export function resolveDishComponents(foodText: string): DishComponentDef[] {
   const recipe = findDishRecipe(foodText);
   if (!recipe) return [];
-  // Deduplicate by id while preserving order
+  return mergeDishComponents(recipe.components);
+}
+
+/** Deduplicate component lists by id, preserving first-seen order. */
+export function mergeDishComponents(...lists: DishComponentDef[][]): DishComponentDef[] {
   const seen = new Set<string>();
   const result: DishComponentDef[] = [];
-  for (const component of recipe.components) {
-    if (seen.has(component.id)) continue;
-    seen.add(component.id);
-    result.push(component);
+  for (const list of lists) {
+    for (const component of list) {
+      if (seen.has(component.id)) continue;
+      seen.add(component.id);
+      result.push(component);
+    }
   }
   return result;
+}
+
+/** Map canonical allergen ids (e.g. from OFF allergens_tags) to dish components. */
+export function allergenIdsToDishComponents(allergenIds: string[]): DishComponentDef[] {
+  const out: DishComponentDef[] = [];
+  const seen = new Set<string>();
+  for (const raw of allergenIds) {
+    const id = resolveAllergenId(raw) ?? raw;
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    const exact = KNOWN_DISH_COMPONENTS.find((item) => item.id === id);
+    if (exact) {
+      out.push(exact);
+      continue;
+    }
+    // Prefer a component whose primary allergen is this id and whose id equals allergenId
+    // (e.g. milk → milk, not sour-cream which also links allergenId:milk).
+    const primary = KNOWN_DISH_COMPONENTS.find((item) => item.allergenId === id && item.id === id);
+    if (primary) {
+      out.push(primary);
+      continue;
+    }
+    const record = findAllergenById(id);
+    out.push({
+      id,
+      nameRu: record?.name ?? id,
+      allergenId: id,
+    });
+  }
+  return out;
+}
+
+/**
+ * Scan free-text ingredients (e.g. OFF ingredients_text) for known catalog components.
+ * Matches by Russian name substrings (normalized).
+ */
+export function extractComponentsFromIngredientsText(ingredientsText: string): DishComponentDef[] {
+  const normalized = normalizeText(ingredientsText);
+  if (!normalized) return [];
+
+  // Prefer longer names first so «растительное масло» wins over «масло».
+  const ranked = [...KNOWN_DISH_COMPONENTS].sort(
+    (a, b) => normalizeText(b.nameRu).length - normalizeText(a.nameRu).length,
+  );
+  const matched: DishComponentDef[] = [];
+  const seen = new Set<string>();
+  for (const component of ranked) {
+    const needle = normalizeText(component.nameRu);
+    if (!needle || needle.length < 3) continue;
+    if (!normalized.includes(needle)) continue;
+    if (seen.has(component.id)) continue;
+    seen.add(component.id);
+    matched.push(component);
+  }
+  return matched;
+}
+
+export type ProductDishInput = {
+  name?: string;
+  ingredients?: string;
+  allergenTags?: string[];
+  traceTags?: string[];
+  barcode?: string;
+};
+
+/**
+ * Build ingredient checklist from an Open Food Facts / catalog product.
+ * Declared allergens + ingredients_text heuristics; traces are included as components too
+ * (user can deselect), tagged via allergenId for profile conflict checks.
+ */
+export function buildComponentsFromProduct(product: ProductDishInput): DishComponentDef[] {
+  const fromAllergens = allergenIdsToDishComponents(
+    mapExternalAllergenIds([...(product.allergenTags ?? []), ...(product.traceTags ?? [])]),
+  );
+  const fromIngredients = extractComponentsFromIngredientsText(product.ingredients ?? '');
+  return mergeDishComponents(fromAllergens, fromIngredients);
+}
+
+/**
+ * When enriching a local recipe with OFF data: keep recipe order, append new OFF components.
+ */
+export function enrichLocalComponentsWithProduct(
+  localComponents: DishComponentDef[],
+  product: ProductDishInput,
+): DishComponentDef[] {
+  return mergeDishComponents(localComponents, buildComponentsFromProduct(product));
+}
+
+/**
+ * Preserve user deselections when the component list grows (e.g. OFF enrichment).
+ * New components default to selected; previously known ids keep prior selection state.
+ */
+export function resolveSelectedIdsForEnrichment(
+  previousSelected: string[] | undefined,
+  previousAvailableIds: string[] | undefined,
+  nextComponents: DishComponentDef[],
+): string[] | undefined {
+  if (!previousSelected || !previousAvailableIds) return undefined;
+  const selected = new Set(previousSelected);
+  const previous = new Set(previousAvailableIds);
+  return nextComponents
+    .map((item) => item.id)
+    .filter((id) => (previous.has(id) ? selected.has(id) : true));
+}
+
+export function serializeDishComponentDefs(components: DishComponentDef[]): string {
+  return JSON.stringify(
+    components.map((item) => ({
+      id: item.id,
+      nameRu: item.nameRu,
+      ...(item.allergenId ? { allergenId: item.allergenId } : {}),
+    })),
+  );
+}
+
+export function parseDishComponentDefs(raw: string | undefined | null): DishComponentDef[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is DishComponentDef => {
+      if (!item || typeof item !== 'object') return false;
+      const row = item as Record<string, unknown>;
+      return typeof row.id === 'string' && typeof row.nameRu === 'string';
+    });
+  } catch {
+    return [];
+  }
+}
+
+export function buildDishBreakdownFromComponents(
+  components: DishComponentDef[],
+  profileAllergiesJsonOrIds: string | string[],
+  meta: { dishId?: string | null; dishName?: string | null } = {},
+  selectedIds?: string[],
+): DishBreakdownResult {
+  const matched = matchComponentsToProfile(components, profileAllergiesJsonOrIds, selectedIds);
+  const selected = matched.filter((item) => item.selected);
+  return {
+    dishId: meta.dishId ?? null,
+    dishName: meta.dishName ?? null,
+    components: matched,
+    allergensSummary: selected.map((item) => item.nameRu).join(', '),
+    conflictsSummary: selected
+      .filter((item) => item.conflict)
+      .map((item) => item.conflictLabel ?? item.nameRu)
+      .join('; '),
+  };
 }
 
 function profileHasAllergen(
@@ -380,30 +549,34 @@ export function buildDishBreakdown(
   foodText: string,
   profileAllergiesJsonOrIds: string | string[],
   selectedIds?: string[],
+  options?: {
+    components?: DishComponentDef[];
+    dishId?: string | null;
+    dishName?: string | null;
+  },
 ): DishBreakdownResult {
+  if (options?.components?.length) {
+    return buildDishBreakdownFromComponents(
+      options.components,
+      profileAllergiesJsonOrIds,
+      {
+        dishId: options.dishId ?? null,
+        dishName: options.dishName ?? null,
+      },
+      selectedIds,
+    );
+  }
+
   const recipe = findDishRecipe(foodText);
-  const components = matchComponentsToProfile(
+  return buildDishBreakdownFromComponents(
     resolveDishComponents(foodText),
     profileAllergiesJsonOrIds,
+    {
+      dishId: options?.dishId ?? recipe?.id ?? null,
+      dishName: options?.dishName ?? recipe?.names[0] ?? null,
+    },
     selectedIds,
   );
-
-  const selected = components.filter((item) => item.selected);
-  const allergensSummary = selected
-    .map((item) => item.nameRu)
-    .join(', ');
-  const conflictsSummary = selected
-    .filter((item) => item.conflict)
-    .map((item) => item.conflictLabel ?? item.nameRu)
-    .join('; ');
-
-  return {
-    dishId: recipe?.id ?? null,
-    dishName: recipe?.names[0] ?? null,
-    components,
-    allergensSummary,
-    conflictsSummary,
-  };
 }
 
 export function parseSelectedComponentIds(raw: string | undefined | null): string[] {
@@ -426,35 +599,74 @@ export function serializeSelectedComponentIds(ids: string[]): string {
   return JSON.stringify(ids);
 }
 
+export type ApplyDishBreakdownOptions = {
+  components?: DishComponentDef[];
+  dishId?: string | null;
+  dishName?: string | null;
+  /** openfoodfacts | catalog | local | mixed */
+  source?: string;
+  productBarcode?: string;
+  productName?: string;
+};
+
 /** Apply dish breakdown into diary nutrition answers. */
 export function applyDishBreakdownToAnswers(
   answers: Record<string, string>,
   profileAllergiesJsonOrIds: string | string[],
+  options?: ApplyDishBreakdownOptions,
 ): Record<string, string> {
   const food = answers.food?.trim() ?? '';
   if (!food) return answers;
 
+  const storedDefs = options?.components?.length
+    ? options.components
+    : parseDishComponentDefs(answers.foodComponentsDef);
   const existingSelected = answers.foodComponents
     ? parseSelectedComponentIds(answers.foodComponents)
     : undefined;
-  const breakdown = buildDishBreakdown(food, profileAllergiesJsonOrIds, existingSelected);
+
+  const recipe = findDishRecipe(food);
+  const breakdown = buildDishBreakdown(food, profileAllergiesJsonOrIds, existingSelected, {
+    components: storedDefs.length ? storedDefs : undefined,
+    dishId: options?.dishId ?? (answers.foodDishId || recipe?.id || null),
+    dishName:
+      options?.dishName ??
+      (answers.foodDishName || recipe?.names[0] || null),
+  });
 
   if (!breakdown.components.length) {
     return {
       ...answers,
       foodDishId: '',
+      foodDishName: '',
       foodComponents: '[]',
+      foodComponentsDef: '[]',
       foodComponentConflicts: '',
+      foodOffSource: '',
+      foodOffBarcode: '',
+      foodOffName: '',
     };
   }
 
   const selectedIds = breakdown.components.filter((c) => c.selected).map((c) => c.id);
+  const defs = breakdown.components.map(({ id, nameRu, allergenId }) => ({
+    id,
+    nameRu,
+    ...(allergenId ? { allergenId } : {}),
+  }));
 
   return {
     ...answers,
     foodDishId: breakdown.dishId ?? '',
+    foodDishName: breakdown.dishName ?? '',
     foodComponents: serializeSelectedComponentIds(selectedIds),
+    foodComponentsDef: serializeDishComponentDefs(defs),
     allergens: breakdown.allergensSummary || answers.allergens || '',
     foodComponentConflicts: breakdown.conflictsSummary,
+    ...(options?.source !== undefined ? { foodOffSource: options.source } : {}),
+    ...(options?.productBarcode !== undefined
+      ? { foodOffBarcode: options.productBarcode }
+      : {}),
+    ...(options?.productName !== undefined ? { foodOffName: options.productName } : {}),
   };
 }

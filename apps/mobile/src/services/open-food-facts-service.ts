@@ -10,7 +10,43 @@ export interface OpenFoodFactsProduct {
 }
 
 const PRODUCT_FIELDS =
-  'code,product_name,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags';
+  'code,product_name,product_name_ru,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags';
+
+const OFF_USER_AGENT = 'A-Claro/1.0 (support@aclearo.com)';
+
+function headers(): Record<string, string> {
+  return { 'User-Agent': OFF_USER_AGENT, Accept: 'application/json' };
+}
+
+type OffProductPayload = {
+  product_name?: string;
+  product_name_ru?: string;
+  ingredients_text?: string;
+  ingredients_text_ru?: string;
+  code?: string;
+  allergens_tags?: string[];
+  traces_tags?: string[];
+};
+
+function normalizeOffProduct(
+  product: OffProductPayload,
+  fallbackBarcode = '',
+): OpenFoodFactsProduct | null {
+  const ingredients =
+    product.ingredients_text_ru?.trim() || product.ingredients_text?.trim() || '';
+  const name = product.product_name_ru?.trim() || product.product_name?.trim() || '';
+  const barcode = product.code?.trim() || fallbackBarcode;
+
+  if (!barcode || (!name && !ingredients)) return null;
+
+  return {
+    name: name || `Продукт ${barcode}`,
+    ingredients: ingredients || name,
+    barcode,
+    allergenTags: mapExternalAllergenIds(product.allergens_tags ?? []),
+    traceTags: mapExternalAllergenIds(product.traces_tags ?? []),
+  };
+}
 
 export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFactsProduct | null> {
   const normalized = barcode.replace(/\D/g, '');
@@ -19,40 +55,58 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
   try {
     const response = await fetch(
       `https://world.openfoodfacts.org/api/v2/product/${normalized}.json?fields=${PRODUCT_FIELDS}`,
+      { headers: headers() },
     );
 
     if (!response.ok) return null;
 
-    const data = (await response.json()) as {
-      status?: number;
-      product?: {
-        product_name?: string;
-        ingredients_text?: string;
-        ingredients_text_ru?: string;
-        code?: string;
-        allergens_tags?: string[];
-        traces_tags?: string[];
-      };
-    };
-
+    const data = (await response.json()) as { status?: number; product?: OffProductPayload };
     if (data.status !== 1 || !data.product) return null;
 
-    const ingredients =
-      data.product.ingredients_text_ru?.trim() ||
-      data.product.ingredients_text?.trim() ||
-      '';
-
-    if (!ingredients && !data.product.product_name) return null;
-
-    return {
-      name: data.product.product_name?.trim() || `Продукт ${normalized}`,
-      ingredients: ingredients || data.product.product_name || '',
-      barcode: data.product.code || normalized,
-      allergenTags: mapExternalAllergenIds(data.product.allergens_tags ?? []),
-      traceTags: mapExternalAllergenIds(data.product.traces_tags ?? []),
-    };
+    return normalizeOffProduct(data.product, normalized);
   } catch (error) {
     logCaughtError('fetchProductByBarcode', error, { extra: { barcode: normalized } });
     return null;
+  }
+}
+
+/** Full-text product search against Open Food Facts (cgi/search.pl). */
+export async function searchProductsByName(
+  query: string,
+  pageSize = 8,
+): Promise<OpenFoodFactsProduct[]> {
+  const term = query.trim();
+  if (term.length < 2) return [];
+
+  const params = new URLSearchParams({
+    search_terms: term,
+    search_simple: '1',
+    action: 'process',
+    json: '1',
+    page_size: String(Math.min(Math.max(pageSize, 1), 20)),
+    fields: PRODUCT_FIELDS,
+  });
+
+  try {
+    const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?${params}`, {
+      headers: headers(),
+    });
+    if (!response.ok) return [];
+
+    const data = (await response.json()) as { products?: OffProductPayload[] };
+    if (!Array.isArray(data.products)) return [];
+
+    const seen = new Set<string>();
+    const results: OpenFoodFactsProduct[] = [];
+    for (const product of data.products) {
+      const normalized = normalizeOffProduct(product);
+      if (!normalized || seen.has(normalized.barcode)) continue;
+      seen.add(normalized.barcode);
+      results.push(normalized);
+    }
+    return results;
+  } catch (error) {
+    logCaughtError('searchProductsByName', error, { extra: { query: term } });
+    return [];
   }
 }

@@ -236,6 +236,8 @@ const ru: LocaleMessages = {
     dishMatched: 'Распознано: {{dish}}',
     dishHint: 'Снимите галочки с ингредиентов, которых не было в порции. Совпадения с профилем аллергий подсвечены.',
     dishConflicts: 'Совпадения с профилем: {{list}}',
+    dishOffLoading: 'Ищем состав в Open Food Facts…',
+    dishOffEnriched: 'Дополнено из Open Food Facts: {{product}}',
   },
   scanner: {
     title: 'Умный сканер',

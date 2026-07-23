@@ -75,14 +75,10 @@ export function registerCatalogRoutes(app: Express) {
     }
   });
 
-  // Fuzzy product search by name (backed by the pg_trgm GIN index).
+  // Fuzzy product search by name (backed by the pg_trgm GIN index when DB is up).
+  // Falls back to Open Food Facts when the local catalog has no hits (or DB is off).
   // NOTE: must be registered before `/:barcode` so it is not shadowed.
   app.get('/api/products/search', async (req: Request, res: Response) => {
-    if (!databaseConfigured()) {
-      res.status(503).json({ ok: false, error: 'Product database is not configured' });
-      return;
-    }
-
     const query = String(req.query.q ?? '').trim();
     if (query.length < 2) {
       res.status(400).json({ ok: false, error: 'Query too short' });
@@ -90,25 +86,39 @@ export function registerCatalogRoutes(app: Express) {
     }
 
     try {
-      const local = await readDb
-        .select()
-        .from(products)
-        .where(ilike(products.name, `%${query}%`))
-        .limit(20);
+      if (databaseConfigured()) {
+        const local = await readDb
+          .select()
+          .from(products)
+          .where(ilike(products.name, `%${query}%`))
+          .limit(20);
 
-      if (local.length > 0 || !offFallbackEnabled()) {
-        res.json({ ok: true, source: 'cache', count: local.length, products: local });
+        if (local.length > 0 || !offFallbackEnabled()) {
+          res.json({ ok: true, source: 'cache', count: local.length, products: local });
+          return;
+        }
+      } else if (!offFallbackEnabled()) {
+        res.status(503).json({ ok: false, error: 'Product database is not configured' });
         return;
       }
 
-      // On-demand: nothing cached locally -> query Open Food Facts and cache it.
+      // On-demand: nothing cached locally -> query Open Food Facts and cache when possible.
       const offResults = await searchOpenFoodFacts(query);
-      const saved: ProductRow[] = [];
-      for (const product of offResults) {
-        saved.push(await cacheOffProduct(product));
+      if (databaseConfigured()) {
+        const saved: ProductRow[] = [];
+        for (const product of offResults) {
+          saved.push(await cacheOffProduct(product));
+        }
+        res.json({ ok: true, source: 'openfoodfacts', count: saved.length, products: saved });
+        return;
       }
 
-      res.json({ ok: true, source: 'openfoodfacts', count: saved.length, products: saved });
+      res.json({
+        ok: true,
+        source: 'openfoodfacts',
+        count: offResults.length,
+        products: offResults,
+      });
     } catch (error) {
       logCaughtError('catalog.searchProducts', error, { query });
       res.status(500).json({ ok: false, error: 'Search failed' });

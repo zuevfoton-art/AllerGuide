@@ -238,6 +238,8 @@ export type LocaleMessages = {
     dishMatched: string;
     dishHint: string;
     dishConflicts: string;
+    dishOffLoading: string;
+    dishOffEnriched: string;
   };
   scanner: {
     title: string;
