@@ -427,6 +427,23 @@ export default function DiaryScreen() {
           {visibleSections.map((section) => (
               <Pressable
                 key={section.type}
+                testID={`diary-chip-${
+                  (
+                    {
+                      Симптомы: 'symptoms',
+                      Лекарство: 'medicine',
+                      Питание: 'food',
+                      Триггер: 'trigger',
+                      Кожа: 'skin',
+                      Пикфлоуметрия: 'pef',
+                      АСИТ: 'asit',
+                      'Визит к врачу': 'visit',
+                      Заметка: 'note',
+                      'Укус насекомого': 'insect',
+                      Шкала: 'scale',
+                    } as Record<string, string>
+                  )[section.type] ?? 'other'
+                }`}
                 style={styles.chip}
                 onPress={() => void openSection(section.type)}
                 accessibilityRole="button"

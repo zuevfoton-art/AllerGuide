@@ -135,6 +135,12 @@
 | 5.7 | Чип «Шкала»: ARIA / ACT / SCORAD / UAS7 | ☐ | ☐ | ☐ | |
 | 5.8 | Триггер: автоподстановка пыльцы, скана, ЛС | ☐ | ☐ | ☐ | нужен интернет для пыльцы |
 | 5.9 | Disclaimer на экране | ☐ | ☐ | ☐ | |
+| 5.10 | **§7.3 photo:** секция «Кожа» → шаг фото → камера/галерея, превью, удаление | ☐ | ☐ | ☐ | FR-DIARY-photo; web: gallery |
+| 5.11 | **§7.3 photo:** фото видно в ленте и в PDF отчёта | ☐ | ☐ | ☐ | лимит ≤5, JPEG |
+| 5.12 | **§7.3 dish:** «борщ» → чеклист ингредиентов; снятие галочки обновляет аллергены | ☐ | ☐ | ☐ | FR-DIARY-dish-breakdown |
+| 5.13 | **§7.3 dish:** конфликт с профилем подсвечен; OFF enrichment (если сеть) | ☐ | ☐ | ☐ | offline: локальный каталог |
+| 5.14 | **§7.3 voice:** микрофон на text-шаге → текст в поле | ☐ | ☐ | ☐ | FR-DIARY-voice; Chromium web |
+| 5.15 | **§7.3 voice:** отказ permission / unsupported → wizard остаётся usable | ☐ | ☐ | ☐ | text-fallback |
 
 ---
 
@@ -463,13 +469,15 @@
 |------|------|----------|
 | Onboarding | `onboarding-smoke.yaml` | register → profile → `tab-home` |
 | Diary | `diary-smoke.yaml` | быстрая запись симптомов |
+| Diary dish | `diary-dish-smoke.yaml` | «борщ» → `diary-dish-checklist` → save |
+| Diary photo | `diary-photo-smoke.yaml` | «Кожа» → шаг `diary-photo-step` |
 | Scanner | `scanner-smoke.yaml` | ручной ввод «молоко» → `scanner-result` |
 | SOS | `sos-smoke.yaml` | `sos-profile-card`, паспорт |
 | Settings | `settings-smoke.yaml` | `/profile`, номер 112 |
 
 ### Итог P2.1a
 
-☐ Все 5 flows green на Android emulator  
+☐ Offline smoke green на Android emulator (включая diary dish/photo)  
 ☐ `testID` стабильны (не зависят от локали)  
 ☐ Документация локального запуска актуальна
 

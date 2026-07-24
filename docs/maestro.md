@@ -30,6 +30,8 @@ apps/mobile/.maestro/
   flows/
     _offline-bootstrap.yaml
     onboarding-smoke.yaml … settings-smoke.yaml
+    diary-dish-smoke.yaml          # §7.3 — борщ → checklist
+    diary-photo-smoke.yaml         # §7.3 — skin photo step UI
     smoke-all.yaml                 # P2.1a — все offline
     _staging-bootstrap.yaml
     staging-auth-smoke.yaml        # P2.1b — logout → login

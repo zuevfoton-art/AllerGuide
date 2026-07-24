@@ -169,6 +169,17 @@
 - `packages/core/src/doctor-report-timeline.ts` — chronological merge
 - `timeline` block in doctor PDF (`doctor-report-service.ts`)
 
+### Diary UX §7.3 (product — phases A–D)
+
+Продуктовые пробелы картинки §7.3 (голос / разбор блюда / фото) закрыты отдельно от клинической Phase C выше. Трассировка: [Functional Requirements §8.4](./functional-requirements.md) · QA: `qa-checklist.md` 5.10–5.15 · Maestro: `diary-dish-smoke.yaml`, `diary-photo-smoke.yaml`.
+
+| Фаза | FR | Статус |
+|------|-----|--------|
+| A — фото кожи | `FR-DIARY-photo` | ✅ Done |
+| B — состав блюда (+ OFF) | `FR-DIARY-dish-breakdown` | ✅ Done |
+| C — голос в wizard | `FR-DIARY-voice` | ✅ Done |
+| D — FR / QA / Maestro | docs + smoke | ✅ Done |
+
 ### Phase D — Scanner v2
 
 | ID | Задача | Статус |

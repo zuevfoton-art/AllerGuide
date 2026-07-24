@@ -1,0 +1,53 @@
+# §7.3 — diary: dish breakdown checklist (offline catalog)
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-diary
+- tapOn:
+    id: diary-chip-food
+- extendedWaitUntil:
+    visible:
+      id: diary-wizard-primary
+    timeout: 10000
+# food text
+- tapOn:
+    id: diary-wizard-field
+- inputText: борщ
+- tapOn:
+    id: diary-wizard-primary
+# foodComponents checklist (local catalog; OFF enrichment optional)
+- extendedWaitUntil:
+    visible:
+      id: diary-dish-checklist
+    timeout: 15000
+- tapOn:
+    id: diary-dish-component-beet
+- tapOn:
+    id: diary-wizard-primary
+# foodSource (optional) — skip via next
+- tapOn:
+    id: diary-wizard-primary
+# allergens (optional)
+- tapOn:
+    id: diary-wizard-primary
+# crossReactions (optional)
+- tapOn:
+    id: diary-wizard-primary
+# scanRef (optional)
+- tapOn:
+    id: diary-wizard-primary
+# reaction (required)
+- tapOn:
+    text: "Нет реакции"
+- tapOn:
+    id: diary-wizard-primary
+# reactionType (optional) — save
+- tapOn:
+    id: diary-wizard-primary
+- extendedWaitUntil:
+    notVisible:
+      id: diary-wizard-primary
+    timeout: 10000
+- assertVisible:
+    id: diary-chip-food

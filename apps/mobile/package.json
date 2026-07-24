@@ -24,6 +24,8 @@
     "maestro:test": "maestro test .maestro/flows/smoke-all.yaml",
     "maestro:onboarding": "maestro test .maestro/flows/onboarding-smoke.yaml",
     "maestro:diary": "maestro test .maestro/flows/diary-smoke.yaml",
+    "maestro:diary-dish": "maestro test .maestro/flows/diary-dish-smoke.yaml",
+    "maestro:diary-photo": "maestro test .maestro/flows/diary-photo-smoke.yaml",
     "maestro:scanner": "maestro test .maestro/flows/scanner-smoke.yaml",
     "maestro:sos": "maestro test .maestro/flows/sos-smoke.yaml",
     "maestro:settings": "maestro test .maestro/flows/settings-smoke.yaml",
