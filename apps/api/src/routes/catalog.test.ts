@@ -31,7 +31,8 @@ describe('catalog routes', () => {
     expect(response.status).toBe(503);
   });
 
-  it('returns 503 for product search without a database', async () => {
+  it('returns 503 for product search without a database when OFF fallback is off', async () => {
+    process.env.PRODUCT_OFF_FALLBACK = 'false';
     const app = await createApp({ withReplitAuth: false });
     const response = await request(app).get('/api/products/search?q=milk');
     expect(response.status).toBe(503);
