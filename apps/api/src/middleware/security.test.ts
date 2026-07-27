@@ -41,7 +41,7 @@ describe('security middleware', () => {
     return Promise.all([
       expect(allowed('https://app.allerguide.io')).resolves.toBe(true),
       expect(allowed(undefined)).resolves.toBe(true),
-      expect(allowed('https://evil.example.com')).rejects.toThrow(),
+      expect(allowed('https://evil.example.com')).resolves.toBe(false),
     ]);
   });
 
