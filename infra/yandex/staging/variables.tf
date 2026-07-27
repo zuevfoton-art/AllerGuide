@@ -112,7 +112,7 @@ variable "bootstrap_source_image" {
 }
 
 variable "runtime_service_account_id" {
-  description = "SA attached to Serverless Container + API Gateway (must already have editor or puller on the folder)"
+  description = "Override SA for Serverless Container + API Gateway invoke. Empty = aclearo-staging-api from iam.tf."
   type        = string
-  default     = "ajeid44fj1ud0n90m01h" # aclearo-staging-bootstrap
+  default     = ""
 }

@@ -1,6 +1,6 @@
 # Serverless Container — image required by Yandex provider (>=0.130).
-# Uses bootstrap SA (editor) at create time; switch to aclearo-staging-api after
-# granting it container-registry.images.puller + lockbox.payloadViewer in console.
+# Runtime SA = aclearo-staging-api (IAM in iam.tf). CI replaces the image; TF
+# must not roll it back to the bootstrap tag.
 
 resource "yandex_serverless_container" "api" {
   name               = var.container_name
@@ -18,12 +18,19 @@ resource "yandex_serverless_container" "api" {
     network_id = yandex_vpc_network.staging.id
   }
 
-  depends_on = [null_resource.push_bootstrap_image]
+  depends_on = [
+    null_resource.push_bootstrap_image,
+    yandex_resourcemanager_folder_iam_member.api_puller,
+    yandex_lockbox_secret_iam_member.api_payload,
+  ]
+
+  lifecycle {
+    ignore_changes = [image]
+  }
 }
 
 # Lockbox secret placeholder — populate values after apply (see runbook).
-# IAM on the secret: grant lockbox.payloadViewer to runtime SA in console
-# (bootstrap SA with only `editor` cannot set Lockbox access bindings).
+# Payload bindings: yandex_lockbox_secret_iam_member in iam.tf.
 resource "yandex_lockbox_secret" "api_env" {
   name                = "aclearo-staging-api-env"
   description         = "Staging API environment (DATABASE_URL, JWT_SECRET, OPENAI_API_KEY, …)"

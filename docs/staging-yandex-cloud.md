@@ -191,6 +191,8 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
 
 > **OpenAI из РФ:** `api.openai.com` может быть недоступен с YC. Варианты: исходящий прокси (`OPENAI_BASE_URL`), YandexGPT (адаптер), или `AI_SCAN_ENABLED=false` на staging.
 
+После заполнения Lockbox revision Serverless Container читает env через `--secret` (не plaintext). Runtime SA — `aclearo-staging-api` (`lockbox.payloadViewer` + `container-registry.images.puller`). Роли задаются в [`iam.tf`](../infra/yandex/staging/iam.tf); для `terraform apply` у применяющего SA нужна роль **`admin`** на folder.
+
 ---
 
 ## 4. DNS и TLS
