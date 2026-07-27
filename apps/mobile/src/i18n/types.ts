@@ -286,6 +286,13 @@ export type LocaleMessages = {
     scanLabelDesc: string;
     labelPlaceholder: string;
     barcodeWebHint: string;
+    takePhoto: string;
+    pickFromGallery: string;
+    cropTitle: string;
+    cropHint: string;
+    cropConfirm: string;
+    cropRetake: string;
+    cropFailed: string;
     productPlaceholder: string;
     menuPlaceholder: string;
     matches: string;

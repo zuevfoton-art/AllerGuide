@@ -1,7 +1,6 @@
 import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { ScanResult } from '@allerguide/ai';
 import {
@@ -21,6 +20,7 @@ import { Button } from '@/src/components/Button';
 import { ErrorState } from '@/src/components/ErrorState';
 import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -33,6 +33,12 @@ import {
   listSafeProducts,
   removeSafeProduct,
 } from '@/src/services/safe-products-service';
+import {
+  captureScanPhotoViaPicker,
+  pickScanPhotoFromLibrary,
+  type CapturedScanPhoto,
+  type CroppedScanPhoto,
+} from '@/src/services/scanner-photo-service';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
@@ -70,11 +76,16 @@ export default function ScannerScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const [pendingPhoto, setPendingPhoto] = useState<CapturedScanPhoto | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
   const lastScanRef = useRef<(() => void) | null>(null);
   const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticResultRef = useRef<ScanResult | null>(null);
+
+  const isPhotoMode = mode === 'menu' || mode === 'medicine' || mode === 'cosmetics';
 
   const profileCapabilities = useMemo(
     () => (profile ? getProfileCapabilities(profile) : null),
@@ -245,22 +256,15 @@ export default function ScannerScreen() {
     }
   }, [refreshHistory]);
 
+  const beginCrop = (photo: CapturedScanPhoto) => {
+    setCameraOpen(false);
+    setPendingPhoto(photo);
+  };
+
   const pickMenuImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) return;
-
-    const picked = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-      base64: true,
-    });
-    if (picked.canceled || !picked.assets?.[0]) return;
-
-    const asset = picked.assets[0];
-    await runOcrCapture(undefined, {
-      base64: asset.base64,
-      mimeType: asset.mimeType || 'image/jpeg',
-    });
+    const photo = await pickScanPhotoFromLibrary();
+    if (!photo) return;
+    beginCrop(photo);
   };
 
   const selectMode = (next: ScanMode) => {
@@ -269,15 +273,23 @@ export default function ScannerScreen() {
     setResult(null);
     setOcrHint(null);
     setScanError(false);
+    setPendingPhoto(null);
     lastHapticResultRef.current = null;
   };
 
   const openCamera = async () => {
+    if (isPhotoMode && Platform.OS === 'web') {
+      const photo = await captureScanPhotoViaPicker();
+      if (photo) beginCrop(photo);
+      return;
+    }
+
     if (!permission?.granted) {
       const res = await requestPermission();
       if (!res.granted) return;
     }
     setScanned(false);
+    setCapturing(false);
     setCameraOpen(true);
   };
 
@@ -289,26 +301,73 @@ export default function ScannerScreen() {
     void runCheck(data, true);
   };
 
-  const handleLabelPhoto = async () => {
-    await runOcrCapture(input.trim() || undefined);
-    setCameraOpen(false);
+  const capturePhotoFrame = async () => {
+    if (capturing) return;
+    setCapturing(true);
+    try {
+      const picture = await cameraRef.current?.takePictureAsync({
+        quality: 0.85,
+      });
+      if (!picture?.uri) return;
+      beginCrop({
+        uri: picture.uri,
+        width: picture.width || 0,
+        height: picture.height || 0,
+      });
+    } catch {
+      const fallback = await captureScanPhotoViaPicker();
+      if (fallback) beginCrop(fallback);
+    } finally {
+      setCapturing(false);
+    }
+  };
+
+  const handleCropConfirm = async (cropped: CroppedScanPhoto) => {
+    setPendingPhoto(null);
+    await runOcrCapture(undefined, {
+      base64: cropped.base64,
+      mimeType: cropped.mimeType,
+    });
+  };
+
+  const handleCropRetake = () => {
+    setPendingPhoto(null);
+    void openCamera();
   };
 
   const openScanAction = () => {
-    if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
-      void pickMenuImage();
-      return;
-    }
     void openCamera();
   };
+
+  if (pendingPhoto) {
+    return (
+      <ImageCropEditor
+        photo={pendingPhoto}
+        title={t('scanner.cropTitle')}
+        hint={t('scanner.cropHint')}
+        confirmLabel={t('scanner.cropConfirm')}
+        cancelLabel={t('common.cancel')}
+        retakeLabel={t('scanner.cropRetake')}
+        errorLabel={t('scanner.cropFailed')}
+        onCancel={() => setPendingPhoto(null)}
+        onRetake={handleCropRetake}
+        onConfirm={(cropped) => void handleCropConfirm(cropped)}
+      />
+    );
+  }
 
   if (cameraOpen) {
     return (
       <View style={styles.cameraContainer}>
         <CameraView
+          ref={cameraRef}
           style={StyleSheet.absoluteFillObject}
           facing="back"
-          barcodeScannerSettings={{ barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }}
+          barcodeScannerSettings={
+            mode === 'product'
+              ? { barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }
+              : undefined
+          }
           onBarcodeScanned={mode === 'product' ? handleBarcode : undefined}
         />
 
@@ -324,11 +383,21 @@ export default function ScannerScreen() {
                   ? t('scanner.cameraScanMenu')
                   : t('scanner.cameraScanLabel')}
             </Text>
-            <View style={{ width: 40 }} />
+            {isPhotoMode ? (
+              <Pressable
+                style={styles.closeBtn}
+                onPress={() => void pickMenuImage()}
+                accessibilityRole="button"
+                accessibilityLabel={t('scanner.pickFromGallery')}>
+                <Ionicons name="images-outline" size={22} color={theme.colors.onAccent} />
+              </Pressable>
+            ) : (
+              <View style={{ width: 40 }} />
+            )}
           </View>
 
           <View style={styles.viewfinderWrap}>
-            <View style={styles.viewfinder}>
+            <View style={[styles.viewfinder, isPhotoMode && styles.viewfinderPhoto]}>
               <View style={[styles.corner, styles.cornerTL]} />
               <View style={[styles.corner, styles.cornerTR]} />
               <View style={[styles.corner, styles.cornerBL]} />
@@ -343,24 +412,30 @@ export default function ScannerScreen() {
             </Text>
           </View>
 
-          {mode !== 'product' ? (
-            <Pressable style={styles.menuScanBtn} onPress={handleLabelPhoto} disabled={loading}>
-              {loading ? (
-                <ActivityIndicator color={theme.colors.onAccent} />
-              ) : (
-                <Text style={styles.menuScanBtnText}>
-                  {mode === 'menu' ? t('scanner.analyzeMenu') : t('scanner.analyzeLabel')}
-                </Text>
-              )}
-            </Pressable>
+          {isPhotoMode ? (
+            <View style={styles.shutterRow}>
+              <Pressable
+                style={styles.shutterBtn}
+                onPress={() => void capturePhotoFrame()}
+                disabled={capturing}
+                testID="scanner-shutter"
+                accessibilityRole="button"
+                accessibilityLabel={t('scanner.takePhoto')}>
+                {capturing ? (
+                  <ActivityIndicator color={theme.colors.onAccent} />
+                ) : (
+                  <View style={styles.shutterInner} />
+                )}
+              </Pressable>
+            </View>
           ) : null}
 
-          {Platform.OS === 'web' && (
+          {Platform.OS === 'web' && mode === 'product' ? (
             <View style={styles.webHint}>
               <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.7)" />
               <Text style={styles.webHintText}>{t('scanner.barcodeWebHint')}</Text>
             </View>
-          )}
+          ) : null}
 
           <Pressable style={styles.cancelBtn} onPress={() => setCameraOpen(false)}>
             <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
@@ -884,6 +959,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     viewfinderWrap: { alignItems: 'center', gap: 20 },
     viewfinder: { width: 260, height: 180, position: 'relative' },
+    viewfinderPhoto: { width: 280, height: 360 },
     corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.accent, borderWidth: 3 },
     cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
     cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
@@ -896,20 +972,26 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '500',
       paddingHorizontal: 24,
     },
-    menuScanBtn: {
-      marginHorizontal: 24,
-      backgroundColor: colors.accent,
-      borderRadius: 6,
-      padding: 14,
+    shutterRow: {
       alignItems: 'center',
-      minHeight: 48,
       justifyContent: 'center',
+      marginBottom: 8,
     },
-    menuScanBtnText: {
-      fontFamily: fonts.sansSemiBold,
-      color: colors.onAccent,
-      fontWeight: '600',
-      fontSize: 15,
+    shutterBtn: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      borderWidth: 4,
+      borderColor: colors.onAccent,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0,0,0,0.35)',
+    },
+    shutterInner: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.onAccent,
     },
     webHint: {
       flexDirection: 'row',
