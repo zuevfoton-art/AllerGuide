@@ -90,11 +90,26 @@ flowchart TB
 |------------|--------|
 | [Yandex Cloud CLI](https://cloud.yandex.ru/docs/cli/quickstart) | latest |
 | [Terraform](https://developer.hashicorp.com/terraform/install) | ≥ 1.5 |
-| Docker | для локальной проверки образа |
+| [crane](https://github.com/google/go-containerregistry) или Docker | для push bootstrap-образа в YCR |
 | Аккаунт YC | billing, folder |
 | Домены | `aclearo.com`, `aclearo.ru` (NS → Yandex Cloud DNS) |
 | GitHub | secrets admin |
 | Expo | `EXPO_TOKEN`, credentials Android/iOS |
+
+### Service Account для bootstrap
+
+SA (например `aclearo-staging-bootstrap`) должен иметь роль **`admin`** на каталог — не только `editor`.
+
+Причина: Terraform назначает IAM-роли другим SA (`folder_iam_member`, Lockbox bindings). Роль `editor` это запрещает → `PermissionDenied`.
+
+```bash
+FOLDER_ID=b1glkbb9i8ufp6bsdn4u
+SA_ID=ajeid44fj1ud0n90m01h   # aclearo-staging-bootstrap
+
+yc resource-manager folder add-access-binding "$FOLDER_ID" \
+  --role admin \
+  --subject serviceAccount:"$SA_ID"
+```
 
 ```bash
 yc init

@@ -29,6 +29,10 @@ output "container_registry_url" {
   value = "cr.yandex/${yandex_container_registry.staging.id}"
 }
 
+output "registry_image_base" {
+  value = local.registry_image_base
+}
+
 output "serverless_container_id" {
   value = yandex_serverless_container.api.id
 }
@@ -85,11 +89,15 @@ output "github_runner_private_ip" {
 output "next_steps" {
   value = <<-EOT
     1. Add certificate DNS challenges (output certificate_dns_challenges) in Yandex Cloud DNS.
-    2. After cert ISSUED: yc api-gateway add-domain --domain ${var.api_staging_fqdn} --certificate-id <cert-id>
-    3. CNAME ${var.api_staging_fqdn} → ${yandex_api_gateway.api.domain}
-    3. Populate Lockbox secret ${yandex_lockbox_secret.api_env.name} with DATABASE_URL, JWT_SECRET, …
-    4. Register GitHub self-hosted runner on VM ${yandex_compute_instance.gh_runner.name} (tag: yc-staging-vpc).
-    5. Store GitHub Secrets: YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_DATABASE_URL, STAGING_API_URL, EXPO_TOKEN.
-    6. Push to branch staging → deploy-staging-yandex.yml
+    2. After cert ISSUED: yc serverless api-gateway add-domain --id <gw> --domain ${var.api_staging_fqdn} --certificate-id <cert-id>
+    3. CNAME ${var.api_staging_fqdn} → API Gateway domain
+    4. Populate Lockbox ${yandex_lockbox_secret.api_env.name} with DATABASE_URL, JWT_SECRET, …
+    5. (Optional, for CI) In console → folder access, grant:
+         - ${yandex_iam_service_account.api.name}: container-registry.images.puller, lockbox.payloadViewer
+         - ${yandex_iam_service_account.deploy.name}: container-registry.images.pusher, serverless.containers.admin, lockbox.payloadViewer
+       Then set container service_account_id to the api SA.
+    6. Register GitHub self-hosted runner on VM ${yandex_compute_instance.gh_runner.name} (label: yc-staging-vpc).
+    7. Store GitHub Secrets: YC_SA_JSON, YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_*, EXPO_TOKEN.
+    8. Push branch staging → deploy-staging-yandex.yml
   EOT
 }

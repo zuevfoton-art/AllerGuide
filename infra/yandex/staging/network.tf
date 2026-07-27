@@ -4,7 +4,8 @@ resource "yandex_vpc_network" "staging" {
 }
 
 resource "yandex_vpc_subnet" "staging" {
-  name           = "${var.network_name}-subnet-a"
+  # Reuse folder default subnet in ru-central1-a (imported if already present).
+  name           = "default-ru-central1-a"
   zone           = var.zone
   network_id     = yandex_vpc_network.staging.id
   v4_cidr_blocks = [var.subnet_cidr]

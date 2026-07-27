@@ -15,8 +15,13 @@ resource "yandex_mdb_postgresql_cluster" "staging" {
       disk_size          = 20
     }
 
+    access {
+      # Allow connections from Serverless Containers
+      serverless = true
+    }
+
     postgresql_config = {
-      max_connections = 100
+      max_connections = "100"
     }
   }
 
