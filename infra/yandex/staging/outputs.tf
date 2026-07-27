@@ -92,12 +92,9 @@ output "next_steps" {
     2. After cert ISSUED: yc serverless api-gateway add-domain --id <gw> --domain ${var.api_staging_fqdn} --certificate-id <cert-id>
     3. CNAME ${var.api_staging_fqdn} → API Gateway domain
     4. Populate Lockbox ${yandex_lockbox_secret.api_env.name} with DATABASE_URL, JWT_SECRET, …
-    5. (Optional, for CI) In console → folder access, grant:
-         - ${yandex_iam_service_account.api.name}: container-registry.images.puller, lockbox.payloadViewer
-         - ${yandex_iam_service_account.deploy.name}: container-registry.images.pusher, serverless.containers.admin, lockbox.payloadViewer
-       Then set container service_account_id to the api SA.
+    5. IAM for ${yandex_iam_service_account.api.name} / ${yandex_iam_service_account.deploy.name} is managed in iam.tf (folder admin required on apply principal).
     6. Register GitHub self-hosted runner on VM ${yandex_compute_instance.gh_runner.name} (label: yc-staging-vpc).
-    7. Store GitHub Secrets: YC_SA_JSON, YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_*, EXPO_TOKEN.
+    7. Store GitHub Secrets: YC_SA_JSON (= terraform output deploy_service_account_key), YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_*, EXPO_TOKEN.
     8. Push branch staging → deploy-staging-yandex.yml
   EOT
 }

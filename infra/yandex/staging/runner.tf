@@ -46,4 +46,9 @@ resource "yandex_compute_instance" "gh_runner" {
     role    = "github-runner"
     project = "aclearo-staging"
   }
+
+  # Family resolves to a newer image_id over time; do not rebuild the runner VM.
+  lifecycle {
+    ignore_changes = [boot_disk[0].initialize_params[0].image_id]
+  }
 }

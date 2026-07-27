@@ -2,16 +2,16 @@ resource "yandex_container_registry" "staging" {
   name = var.registry_name
 }
 
-# Dedicated SAs for later CI (roles granted manually in console — bootstrap SA
-# only has `editor`, which cannot update folder IAM bindings).
+# Runtime SA: pull images + read Lockbox + invoke (API Gateway → container).
 resource "yandex_iam_service_account" "api" {
   name        = "aclearo-staging-api"
-  description = "Runtime SA for Serverless Container (grant puller + lockbox in console)"
+  description = "Runtime SA for Serverless Container + API Gateway invoke"
 }
 
+# Deploy SA: CI push to YCR + deploy container revisions.
 resource "yandex_iam_service_account" "deploy" {
   name        = "aclearo-staging-deploy"
-  description = "GitHub Actions: registry push + serverless deploy (grant roles in console)"
+  description = "GitHub Actions: registry push + serverless deploy"
 }
 
 resource "yandex_iam_service_account_key" "deploy" {
@@ -19,10 +19,76 @@ resource "yandex_iam_service_account_key" "deploy" {
   description        = "GitHub Actions — store JSON as secret YC_SA_JSON"
 }
 
+# Folder roles (requires folder `admin` on the applying principal / bootstrap SA).
+resource "yandex_resourcemanager_folder_iam_member" "api_puller" {
+  folder_id = var.folder_id
+  role      = "container-registry.images.puller"
+  member    = "serviceAccount:${yandex_iam_service_account.api.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "api_lockbox" {
+  folder_id = var.folder_id
+  role      = "lockbox.payloadViewer"
+  member    = "serviceAccount:${yandex_iam_service_account.api.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "api_invoker" {
+  folder_id = var.folder_id
+  role      = "serverless.containers.invoker"
+  member    = "serviceAccount:${yandex_iam_service_account.api.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "deploy_pusher" {
+  folder_id = var.folder_id
+  role      = "container-registry.images.pusher"
+  member    = "serviceAccount:${yandex_iam_service_account.deploy.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "deploy_containers" {
+  folder_id = var.folder_id
+  role      = "serverless.containers.admin"
+  member    = "serviceAccount:${yandex_iam_service_account.deploy.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "deploy_lockbox" {
+  folder_id = var.folder_id
+  role      = "lockbox.payloadViewer"
+  member    = "serviceAccount:${yandex_iam_service_account.deploy.id}"
+}
+
+resource "yandex_lockbox_secret_iam_member" "api_payload" {
+  secret_id = yandex_lockbox_secret.api_env.id
+  role      = "lockbox.payloadViewer"
+  member    = "serviceAccount:${yandex_iam_service_account.api.id}"
+}
+
+resource "yandex_lockbox_secret_iam_member" "deploy_payload" {
+  secret_id = yandex_lockbox_secret.api_env.id
+  role      = "lockbox.payloadViewer"
+  member    = "serviceAccount:${yandex_iam_service_account.deploy.id}"
+}
+
+# Registry-scoped bindings (folder-level puller/pusher above are enough for CI;
+# these keep least-privilege if folder roles are later narrowed).
+resource "yandex_container_registry_iam_binding" "api_puller" {
+  registry_id = yandex_container_registry.staging.id
+  role        = "container-registry.images.puller"
+  members     = ["serviceAccount:${yandex_iam_service_account.api.id}"]
+}
+
+resource "yandex_container_registry_iam_binding" "deploy_pusher" {
+  registry_id = yandex_container_registry.staging.id
+  role        = "container-registry.images.pusher"
+  members     = ["serviceAccount:${yandex_iam_service_account.deploy.id}"]
+}
+
 locals {
   registry_image_base = "cr.yandex/${yandex_container_registry.staging.id}/aclearo-api"
-  # editor on folder is enough for pull/invoke during bootstrap
-  runtime_service_account_id = var.runtime_service_account_id
+  # Prefer dedicated api SA; override via var only for emergency bootstrap.
+  runtime_service_account_id = coalesce(
+    var.runtime_service_account_id != "" ? var.runtime_service_account_id : null,
+    yandex_iam_service_account.api.id,
+  )
 }
 
 # Placeholder image so Serverless Container can be created before the first CI build.
