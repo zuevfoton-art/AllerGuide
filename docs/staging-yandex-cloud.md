@@ -185,7 +185,7 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
 | `SYNC_ENABLED` | `true` |
 | `AI_SCAN_ENABLED` | `true` |
 | `SCAN_REQUIRE_AUTH` | `true` |
-| `CORS_ORIGINS` | `https://staging.aclearo.com,https://aclearo.com` |
+| `CORS_ORIGINS` | `http://localhost:5000,http://127.0.0.1:5000,https://staging.aclearo.com,https://staging.aclearo.ru,https://aclearo.com,https://aclearo.ru` |
 | `DB_SSL` | `require` |
 | `METRO_URL` | **не задавать** |
 

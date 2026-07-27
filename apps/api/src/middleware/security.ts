@@ -35,7 +35,8 @@ export function buildCorsOptions(): CorsOptions {
         callback(null, true);
         return;
       }
-      callback(new Error('Origin not allowed by CORS'));
+      // Deny without throwing — cors package turns Error into HTTP 500.
+      callback(null, false);
     },
   };
 }
