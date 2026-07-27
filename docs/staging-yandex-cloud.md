@@ -193,6 +193,8 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
 
 После заполнения Lockbox revision Serverless Container читает env через `--secret` (не plaintext). Runtime SA — `aclearo-staging-api` (`lockbox.payloadViewer` + `container-registry.images.puller`). Роли задаются в [`iam.tf`](../infra/yandex/staging/iam.tf); для `terraform apply` у применяющего SA нужна роль **`admin`** на folder.
 
+**Yandex AI:** Phase 0 credentials + Phase 1 `/api/scan` — [`docs/staging-yandex-ai.md`](./staging-yandex-ai.md).
+
 ---
 
 ## 4. DNS и TLS

@@ -20,6 +20,7 @@ function mockLlm() {
 describe('scan caching, budget and auth', () => {
   beforeEach(() => {
     process.env.AI_SCAN_ENABLED = 'true';
+    process.env.AI_PROVIDER = 'openai';
     process.env.RATE_LIMIT_DISABLED = 'true';
     process.env.OPENAI_API_KEY = 'test-key';
     delete process.env.SCAN_REQUIRE_AUTH;
@@ -104,5 +105,36 @@ describe('scan caching, budget and auth', () => {
     expect(metrics.cacheMisses).toBe(51);
     expect(metrics.budgetRejections).toBe(1);
     expect(metrics.hitRate).toBe(0);
+  });
+
+  it('uses YandexGPT when AI_PROVIDER=yandex', async () => {
+    process.env.AI_PROVIDER = 'yandex';
+    process.env.YC_AI_API_KEY = 'yc-test';
+    process.env.YC_FOLDER_ID = 'b1gtest';
+    delete process.env.OPENAI_API_KEY;
+
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          result: {
+            alternatives: [{ message: { text: LLM_CONTENT } }],
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app)
+      .post('/api/scan')
+      .send({ mode: 'product', text: 'молоко yandex', allergens: ['Молоко'] });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
+      expect.anything(),
+    );
   });
 });
