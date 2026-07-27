@@ -31,13 +31,13 @@ resource "yandex_api_gateway" "api" {
           x-yc-apigateway-integration:
             type: serverless_containers
             container_id: ${yandex_serverless_container.api.id}
-            service_account_id: ${yandex_iam_service_account.api.id}
+            service_account_id: ${local.runtime_service_account_id}
       /:
         x-yc-apigateway-any-method:
           x-yc-apigateway-integration:
             type: serverless_containers
             container_id: ${yandex_serverless_container.api.id}
-            service_account_id: ${yandex_iam_service_account.api.id}
+            service_account_id: ${local.runtime_service_account_id}
   OPENAPI
 }
 
