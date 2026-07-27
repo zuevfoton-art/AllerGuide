@@ -8,9 +8,17 @@ vi.mock('@allerguide/ai', () => ({
   buildOcrScanProductName: vi.fn(),
   prepareScanTextFromOcr: vi.fn(),
   simulateOcrFromCapture: vi.fn(),
+  asVisionOcrResult: vi.fn((prepared) => prepared),
 }));
 
-vi.mock('@/src/constants/features', () => ({ AI_SCAN_ENABLED: true }));
+vi.mock('@/src/constants/features', () => ({
+  AI_SCAN_ENABLED: true,
+  YC_OCR_ENABLED: false,
+}));
+
+vi.mock('@/src/services/ocr-api-service', () => ({
+  recognizeImageViaApi: vi.fn(async () => null),
+}));
 
 vi.mock('@/src/services/auth-service', () => ({
   getBackendAuthToken: () => mockGetBackendAuthToken(),

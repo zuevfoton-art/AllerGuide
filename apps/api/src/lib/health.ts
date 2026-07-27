@@ -21,6 +21,7 @@ export interface HealthCheckResult {
     sync: boolean;
     aiScan: boolean;
     aiScanProvider?: 'yandex' | 'openai';
+    ycOcr?: boolean;
   };
   scan?: ScanHealthMetrics;
   database?: {
@@ -81,10 +82,14 @@ function resolveAiScanProviderLabel(): 'yandex' | 'openai' | undefined {
 function buildFeatures() {
   const aiScan = process.env.AI_SCAN_ENABLED === 'true';
   const provider = resolveAiScanProviderLabel();
+  const ycOcr =
+    process.env.YC_OCR_ENABLED === 'true' &&
+    Boolean(process.env.YC_AI_API_KEY && process.env.YC_FOLDER_ID);
   return {
     sync: process.env.SYNC_ENABLED === 'true',
     aiScan,
     ...(aiScan && provider ? { aiScanProvider: provider } : {}),
+    ...(ycOcr ? { ycOcr: true } : {}),
   };
 }
 

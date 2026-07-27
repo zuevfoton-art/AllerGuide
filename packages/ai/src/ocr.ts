@@ -2,7 +2,7 @@ import type { ScanMode } from './scan';
 
 export interface OcrExtractionResult {
   text: string;
-  source: 'manual' | 'demo' | 'normalized';
+  source: 'manual' | 'demo' | 'normalized' | 'vision';
   ingredientsBlock?: string;
   warnings: string[];
 }
@@ -116,12 +116,24 @@ export function buildOcrScanProductName(mode: ScanMode): string {
 }
 
 /**
- * Future native OCR entry point (P5.1). When `@react-native-ml-kit/text-recognition`
- * or similar is integrated, implement here and fall back to `simulateOcrFromCapture`.
+ * Local fallback only. Cloud Vision OCR is `POST /api/ocr` (mobile `ocr-api-service`).
+ * Screens must not call Yandex directly — keep offline demo when the API is off.
  */
 export async function runOcrFromImageUri(
   _imageUri: string,
   mode: ScanMode,
 ): Promise<OcrExtractionResult> {
   return simulateOcrFromCapture(mode);
+}
+
+/** Mark prepared OCR text as coming from cloud Vision (after API success). */
+export function asVisionOcrResult(
+  prepared: OcrExtractionResult,
+  extraWarnings: string[] = [],
+): OcrExtractionResult {
+  return {
+    ...prepared,
+    source: 'vision',
+    warnings: [...prepared.warnings, ...extraWarnings],
+  };
 }

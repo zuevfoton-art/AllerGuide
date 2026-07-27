@@ -235,7 +235,7 @@ URL образов: `cr.yandex/<REGISTRY_ID>/aclearo-api:staging`.
 | `AI_SCAN_ENABLED` | `true` или `false` (если OpenAI недоступен из РФ) |
 | `SCAN_REQUIRE_AUTH` | `true` |
 | `SCAN_DAILY_BUDGET` | `50` |
-| `CORS_ORIGINS` | `https://staging.aclearo.com,https://aclearo.com` |
+| `CORS_ORIGINS` | `http://localhost:5000,http://127.0.0.1:5000,https://staging.aclearo.com,https://staging.aclearo.ru,https://aclearo.com,https://aclearo.ru` |
 | `PRODUCT_OFF_FALLBACK` | `true` |
 | `OPENFOODFACTS_USER_AGENT` | `A-Claro/1.0-staging (support@aclearo.com)` |
 | `RATE_LIMIT_DISABLED` | `false` |

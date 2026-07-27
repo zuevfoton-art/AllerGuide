@@ -59,6 +59,11 @@ output "lockbox_secret_id" {
   value = yandex_lockbox_secret.api_env.id
 }
 
+output "ai_service_account_id" {
+  description = "SA for YandexGPT / Vision / SpeechKit / Search (Phase 0+)"
+  value       = yandex_iam_service_account.ai.id
+}
+
 output "api_gateway_default_domain" {
   description = "Default *.apigw.yandexcloud.net domain — CNAME api.staging.aclearo.com here after cert ISSUED"
   value       = yandex_api_gateway.api.domain

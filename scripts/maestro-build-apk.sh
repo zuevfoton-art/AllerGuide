@@ -24,7 +24,7 @@ case "$PROFILE" in
     export EXPO_PUBLIC_API_URL="${MAESTRO_API_URL:-http://10.0.2.2:3001}"
     export EXPO_PUBLIC_BACKEND_AUTH=true
     export EXPO_PUBLIC_CLOUD_SYNC=true
-    export EXPO_PUBLIC_AI_SCAN_ENABLED=false
+    export EXPO_PUBLIC_AI_SCAN_ENABLED=true
     export EXPO_PUBLIC_PRODUCT_DB=false
     export EXPO_PUBLIC_ANALYTICS_ENABLED=false
     export EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY="${MAESTRO_TEST_RECOVERY_KEY:-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}"

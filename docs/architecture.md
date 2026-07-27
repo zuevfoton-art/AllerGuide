@@ -220,6 +220,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `BACKEND_AUTH_ENABLED` | `EXPO_PUBLIC_BACKEND_AUTH` | JWT + серверные профили |
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
+| `YC_OCR` (API: `YC_OCR_ENABLED`) | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 
 ---
@@ -330,7 +331,7 @@ sequenceDiagram
 1. **`runSmartScan`** — если задан `llmEndpoint` и сервер доступен → LLM; иначе fallback
 2. **`runMockScan`** — keyword-match по аллергенам профиля + перекрёстные реакции из `@allerguide/core`
 3. Уровни риска: `low` | `medium` | `high`
-4. **OCR** (`ocr.ts`): `simulateOcrFromCapture` (demo-тексты), `prepareScanTextFromOcr`, `buildOcrScanProductName` — нативный OCR SDK пока не подключён
+4. **OCR** (`ocr.ts` + optional `/api/ocr`): demo/`simulateOcrFromCapture` offline; при `EXPO_PUBLIC_YC_OCR` mobile шлёт фото на `POST /api/ocr` (Yandex Vision), затем `prepareScanTextFromOcr` / `runSmartScan`
 
 ### Источники результата (`source`)
 
@@ -409,6 +410,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
 | `routes/scan.ts` | `POST /api/scan` |
+| `routes/ocr.ts` | `POST /api/ocr` (Yandex Vision) |
 | `routes/sync.ts` | `POST /api/sync/backup`, `GET /api/sync/backup/:userId` |
 | Replit auth | `GET /api/login`, `/api/callback`, `/api/logout`, `/api/auth/user`, `/api/auth/replit-exchange` |
 | — | `GET /api/health` |
@@ -451,6 +453,12 @@ Drizzle-объекты схемо-квалифицированы — код за
   - **yandex:** `YC_AI_API_KEY`, `YC_FOLDER_ID`, опционально `YC_GPT_MODEL` (default `yandexgpt-lite`) — Foundation Models completion
   - **openai:** `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` (OpenAI-compatible)
 - Реализация: `services/llm-scan-provider.ts` → `routes/scan.ts`
+
+### Vision OCR (`routes/ocr.ts`, `services/yandex-vision-ocr.ts`)
+
+- `YC_OCR_ENABLED=true` + `YC_AI_API_KEY` / `YC_FOLDER_ID`
+- Mobile: `EXPO_PUBLIC_YC_OCR` → `ocr-api-service` → фото из галереи
+- Offline fallback: demo OCR / ручной ввод
 
 ### Облачная синхронизация (`routes/sync.ts`)
 
@@ -520,7 +528,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 |--------|------------|
 | `scan.ts` | `runMockScan` — keyword + cross-reactions |
 | `smart-scan.ts` | `runSmartScan`, LLM prompt/parse, fallback на mock |
-| `ocr.ts` | Нормализация OCR-текста, demo capture, извлечение блока состава |
+| `ocr.ts` | Нормализация OCR-текста, demo capture, `asVisionOcrResult` |
 
 ### `@allerguide/ui` (`packages/ui/`)
 
@@ -628,6 +636,7 @@ pnpm --filter mobile lint
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` | JWT auth + server profiles |
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | Backend catalog lookup |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | LLM scan via API |
+| `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | Encrypted cloud backup |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_SENTRY_DSN` | — | Crash reporting |
@@ -646,6 +655,7 @@ pnpm --filter mobile lint
 | `PRODUCT_OFF_FALLBACK` | OFF write-through on catalog miss |
 | `OPENFOODFACTS_USER_AGENT` | Required by OFF API |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan (`yandex` или OpenAI-compatible) |
+| `YC_OCR_ENABLED` | Vision OCR (`POST /api/ocr`) |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `REPL_ID`, `ISSUER_URL` | Replit OIDC |
 | `METRO_URL` | Dev proxy to Expo |

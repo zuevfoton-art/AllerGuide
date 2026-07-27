@@ -185,7 +185,7 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
 | `SYNC_ENABLED` | `true` |
 | `AI_SCAN_ENABLED` | `true` |
 | `SCAN_REQUIRE_AUTH` | `true` |
-| `CORS_ORIGINS` | `https://staging.aclearo.com,https://aclearo.com` |
+| `CORS_ORIGINS` | `http://localhost:5000,http://127.0.0.1:5000,https://staging.aclearo.com,https://staging.aclearo.ru,https://aclearo.com,https://aclearo.ru` |
 | `DB_SSL` | `require` |
 | `METRO_URL` | **не задавать** |
 
@@ -193,7 +193,7 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
 
 После заполнения Lockbox revision Serverless Container читает env через `--secret` (не plaintext). Runtime SA — `aclearo-staging-api` (`lockbox.payloadViewer` + `container-registry.images.puller`). Роли задаются в [`iam.tf`](../infra/yandex/staging/iam.tf); для `terraform apply` у применяющего SA нужна роль **`admin`** на folder.
 
-**Yandex AI:** Phase 0 credentials + Phase 1 `/api/scan` — [`docs/staging-yandex-ai.md`](./staging-yandex-ai.md).
+**Yandex AI:** Phase 0 credentials (`aclearo-staging-ai`, smoke) + Phase 1 `/api/scan` + Phase 2 `/api/ocr` — [`docs/staging-yandex-ai.md`](./staging-yandex-ai.md), `./scripts/yc-ai-phase0-smoke.sh --from-lockbox`.
 
 ---
 
