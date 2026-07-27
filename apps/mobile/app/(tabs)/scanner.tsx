@@ -86,6 +86,8 @@ export default function ScannerScreen() {
   const lastHapticResultRef = useRef<ScanResult | null>(null);
 
   const isPhotoMode = mode === 'menu' || mode === 'medicine' || mode === 'cosmetics';
+  /** All scanner modes can photograph a label; product also scans barcodes live. */
+  const supportsPhotoCapture = true;
 
   const profileCapabilities = useMemo(
     () => (profile ? getProfileCapabilities(profile) : null),
@@ -278,7 +280,9 @@ export default function ScannerScreen() {
   };
 
   const openCamera = async () => {
-    if (isPhotoMode && Platform.OS === 'web') {
+    // Web: OCR/label modes use the system picker, then the in-app crop editor.
+    // Product still opens the camera UI for barcode attempt + gallery/shutter.
+    if (Platform.OS === 'web' && isPhotoMode) {
       const photo = await captureScanPhotoViaPicker();
       if (photo) beginCrop(photo);
       return;
@@ -378,12 +382,14 @@ export default function ScannerScreen() {
             </Pressable>
             <Text style={styles.cameraTitle}>
               {mode === 'product'
-                ? t('scanner.cameraScanBarcode')
+                ? t('scanner.cameraScanProduct')
                 : mode === 'menu'
                   ? t('scanner.cameraScanMenu')
-                  : t('scanner.cameraScanLabel')}
+                  : mode === 'medicine'
+                    ? t('scanner.cameraScanMedicine')
+                    : t('scanner.cameraScanHousehold')}
             </Text>
-            {isPhotoMode ? (
+            {supportsPhotoCapture ? (
               <Pressable
                 style={styles.closeBtn}
                 onPress={() => void pickMenuImage()}
@@ -397,7 +403,11 @@ export default function ScannerScreen() {
           </View>
 
           <View style={styles.viewfinderWrap}>
-            <View style={[styles.viewfinder, isPhotoMode && styles.viewfinderPhoto]}>
+            <View
+              style={[
+                styles.viewfinder,
+                (isPhotoMode || mode === 'product') && styles.viewfinderPhoto,
+              ]}>
               <View style={[styles.corner, styles.cornerTL]} />
               <View style={[styles.corner, styles.cornerTR]} />
               <View style={[styles.corner, styles.cornerBL]} />
@@ -405,14 +415,16 @@ export default function ScannerScreen() {
             </View>
             <Text style={styles.viewfinderHint}>
               {mode === 'product'
-                ? t('scanner.cameraBarcodeHint')
+                ? t('scanner.cameraProductHint')
                 : mode === 'menu'
                   ? t('scanner.cameraMenuHint')
-                  : t('scanner.cameraLabelHint')}
+                  : mode === 'medicine'
+                    ? t('scanner.cameraMedicineHint')
+                    : t('scanner.cameraHouseholdHint')}
             </Text>
           </View>
 
-          {isPhotoMode ? (
+          {supportsPhotoCapture ? (
             <View style={styles.shutterRow}>
               <Pressable
                 style={styles.shutterBtn}
@@ -505,17 +517,21 @@ export default function ScannerScreen() {
           <View style={styles.scanBody}>
             <Text style={styles.scanTitle}>
               {mode === 'product'
-                ? t('scanner.scanBarcode')
+                ? t('scanner.scanProduct')
                 : mode === 'menu'
                   ? t('scanner.scanMenu')
-                  : t('scanner.scanLabel')}
+                  : mode === 'medicine'
+                    ? t('scanner.scanMedicine')
+                    : t('scanner.scanHousehold')}
             </Text>
             <Text style={styles.scanDesc}>
               {mode === 'product'
-                ? t('scanner.scanBarcodeDesc')
+                ? t('scanner.scanProductDesc')
                 : mode === 'menu'
                   ? t('scanner.scanMenuDesc')
-                  : t('scanner.scanLabelDesc')}
+                  : mode === 'medicine'
+                    ? t('scanner.scanMedicineDesc')
+                    : t('scanner.scanHouseholdDesc')}
             </Text>
           </View>
           <Button label={t('scanner.openAction')} variant="secondary" size="sm" onPress={openScanAction} />
@@ -532,7 +548,9 @@ export default function ScannerScreen() {
             ? t('scanner.productPlaceholder')
             : mode === 'menu'
               ? t('scanner.menuPlaceholder')
-              : t('scanner.labelPlaceholder')
+              : mode === 'medicine'
+                ? t('scanner.medicinePlaceholder')
+                : t('scanner.householdPlaceholder')
         }
         placeholderTextColor={theme.colors.textMuted}
         multiline
