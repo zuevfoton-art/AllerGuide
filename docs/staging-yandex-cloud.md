@@ -339,6 +339,7 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 
 | Job | Runner | Действие |
 |-----|--------|----------|
+| `gate` | `ubuntu-latest` | Проверка секретов через `env` (нельзя `secrets.*` в job-level `if`) |
 | `build-push` | `ubuntu-latest` | `docker build` → YCR |
 | `deploy` | `ubuntu-latest` | `yc serverless container revision deploy` + Lockbox secrets |
 | `migrate` | **`self-hosted, yc-staging-vpc`** | `pnpm --filter api db:migrate` |

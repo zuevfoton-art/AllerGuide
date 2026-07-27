@@ -5,6 +5,9 @@ name: Deploy staging (Yandex Cloud)
 # After smoke: EAS staging builds for Android + iOS.
 #
 # Runbook: docs/staging-yandex-cloud.md
+#
+# Note: GitHub Actions forbids `secrets.*` in job-level `if:`. Presence checks live in
+# the `gate` job (env + step outputs), then downstream jobs branch on those outputs.
 
 on:
   workflow_dispatch:
@@ -26,8 +29,59 @@ env:
   PNPM_VERSION: "10.34.4"
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.check.outputs.deploy }}
+      smoke: ${{ steps.check.outputs.smoke }}
+      mobile: ${{ steps.check.outputs.mobile }}
+    steps:
+      - id: check
+        name: Evaluate required secrets (without job-level secrets context)
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+          YC_CONTAINER_ID: ${{ secrets.YC_CONTAINER_ID }}
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          SKIP_MOBILE: ${{ github.event.inputs.skip_mobile }}
+        run: |
+          set -euo pipefail
+          deploy=false
+          smoke=false
+          mobile=false
+
+          if [ -n "${YC_SA_JSON}" ] && [ -n "${YC_REGISTRY_ID}" ] && [ -n "${YC_CONTAINER_ID}" ]; then
+            deploy=true
+          else
+            echo "::error::Missing YC_SA_JSON, YC_REGISTRY_ID, and/or YC_CONTAINER_ID"
+          fi
+
+          if [ -n "${STAGING_API_URL}" ]; then
+            smoke=true
+          else
+            echo "::warning::STAGING_API_URL empty — smoke job will be skipped"
+          fi
+
+          if [ -n "${EXPO_TOKEN}" ] && [ "${SKIP_MOBILE:-false}" != "true" ]; then
+            mobile=true
+          else
+            echo "::notice::EAS mobile builds skipped (no EXPO_TOKEN or skip_mobile=true)"
+          fi
+
+          {
+            echo "deploy=${deploy}"
+            echo "smoke=${smoke}"
+            echo "mobile=${mobile}"
+          } >> "${GITHUB_OUTPUT}"
+
+          if [ "${deploy}" != "true" ]; then
+            exit 1
+          fi
+
   build-push:
-    if: ${{ secrets.YC_SA_JSON != '' && secrets.YC_REGISTRY_ID != '' }}
+    needs: [gate]
+    if: needs.gate.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ github.sha }}
@@ -45,9 +99,9 @@ jobs:
 
       - name: Login to Yandex Container Registry
         env:
-          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
         run: |
-          echo '${{ secrets.YC_SA_JSON }}' | docker login \
+          echo "$YC_SA_JSON" | docker login \
             --username json_key \
             --password-stdin \
             "cr.yandex"
@@ -62,8 +116,8 @@ jobs:
           docker push "${IMAGE}:staging"
 
   deploy:
-    needs: [build-push]
-    if: ${{ needs.build-push.result == 'success' && secrets.YC_CONTAINER_ID != '' }}
+    needs: [gate, build-push]
+    if: needs.gate.outputs.deploy == 'true' && needs.build-push.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy serverless container revision
@@ -89,12 +143,7 @@ jobs:
           )
 
           if [ -n "${YC_LOCKBOX_SECRET_ID:-}" ]; then
-            for key in \
-              DATABASE_URL DIRECT_DATABASE_URL JWT_SECRET SESSION_SECRET \
-              AI_SCAN_ENABLED AI_PROVIDER YC_FOLDER_ID YC_AI_API_KEY YC_OCR_ENABLED \
-              SCAN_REQUIRE_AUTH SYNC_ENABLED CORS_ORIGINS DB_SSL \
-              OPENFOODFACTS_USER_AGENT
-            do
+            for key in DATABASE_URL DIRECT_DATABASE_URL JWT_SECRET SESSION_SECRET OPENAI_API_KEY; do
               DEPLOY_ARGS+=(--secret "environment-variable=${key},id=${YC_LOCKBOX_SECRET_ID},key=${key},version-id=latest")
             done
           fi
@@ -103,7 +152,7 @@ jobs:
 
   migrate:
     needs: [deploy]
-    if: ${{ needs.deploy.result == 'success' }}
+    if: needs.deploy.result == 'success'
     runs-on: [self-hosted, yc-staging-vpc]
     steps:
       - uses: actions/checkout@v4
@@ -128,8 +177,8 @@ jobs:
         run: pnpm --filter api db:migrate
 
   smoke:
-    needs: [migrate]
-    if: ${{ always() && needs.migrate.result == 'success' && secrets.STAGING_API_URL != '' }}
+    needs: [gate, migrate]
+    if: always() && needs.migrate.result == 'success' && needs.gate.outputs.smoke == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -142,8 +191,8 @@ jobs:
           ./scripts/staging-preflight.sh
 
   mobile-android:
-    needs: [smoke]
-    if: ${{ needs.smoke.result == 'success' && github.event.inputs.skip_mobile != 'true' && secrets.EXPO_TOKEN != '' }}
+    needs: [gate, smoke]
+    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -162,8 +211,8 @@ jobs:
         run: pnpm exec eas build --profile staging --platform android --non-interactive
 
   mobile-ios:
-    needs: [smoke]
-    if: ${{ needs.smoke.result == 'success' && github.event.inputs.skip_mobile != 'true' && secrets.EXPO_TOKEN != '' }}
+    needs: [gate, smoke]
+    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
