@@ -92,9 +92,11 @@ export async function createScanRateLimiter(): Promise<RateLimitRequestHandler> 
   });
 }
 
-/** Install global/auth/scan rate limiters (Redis-backed when REDIS_URL is set). */
+/** Install global/auth/scan/ocr rate limiters (Redis-backed when REDIS_URL is set). */
 export async function installRateLimiters(app: Express): Promise<void> {
   app.use(await createGlobalRateLimiter());
   app.use('/api/auth', await createAuthRateLimiter());
-  app.use('/api/scan', await createScanRateLimiter());
+  const scanLimiter = await createScanRateLimiter();
+  app.use('/api/scan', scanLimiter);
+  app.use('/api/ocr', scanLimiter);
 }

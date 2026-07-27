@@ -26,7 +26,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
-import { scanBarcode, scanFromOcr, scanText, extractOcrText } from '@/src/services/scanner-service';
+import { scanBarcode, scanFromOcr, scanText } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 import {
   addSafeProduct,
@@ -207,22 +207,25 @@ export default function ScannerScreen() {
     }
   };
 
-  const runOcrCapture = async (manualText?: string) => {
-    lastScanRef.current = () => void runOcrCapture(manualText);
+  const runOcrCapture = async (manualText?: string, image?: { base64?: string | null; mimeType?: string }) => {
+    lastScanRef.current = () => void runOcrCapture(manualText, image);
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
     try {
-      const extraction = extractOcrText(mode, manualText);
-      setInput(extraction.text);
       const scanResult = await scanFromOcr({
         mode,
-        ocrText: extraction.text,
+        manualText,
+        imageBase64: image?.base64 ?? undefined,
+        mimeType: image?.mimeType,
         profile,
       });
+      if (scanResult.ocr?.text) {
+        setInput(scanResult.ocr.text);
+      }
       setResult(scanResult);
-      if (extraction.warnings.length) {
-        setOcrHint(extraction.warnings.join(' '));
+      if (scanResult.ocr?.warnings.length) {
+        setOcrHint(scanResult.ocr.warnings.join(' '));
       }
     } catch {
       setResult(null);
@@ -248,16 +251,16 @@ export default function ScannerScreen() {
 
     const picked = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      quality: 0.8,
+      quality: 0.7,
+      base64: true,
     });
-    if (picked.canceled) return;
+    if (picked.canceled || !picked.assets?.[0]) return;
 
-    setLoading(true);
-    try {
-      await runOcrCapture();
-    } finally {
-      setLoading(false);
-    }
+    const asset = picked.assets[0];
+    await runOcrCapture(undefined, {
+      base64: asset.base64,
+      mimeType: asset.mimeType || 'image/jpeg',
+    });
   };
 
   const selectMode = (next: ScanMode) => {

@@ -61,6 +61,7 @@
         "EXPO_PUBLIC_BACKEND_AUTH": "true",
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
+        "EXPO_PUBLIC_YC_OCR": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "staging",
