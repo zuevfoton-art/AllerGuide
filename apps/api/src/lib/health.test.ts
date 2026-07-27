@@ -32,11 +32,12 @@ describe('buildHealthPayload', () => {
   it('exposes staging feature flags in health payload', async () => {
     process.env.SYNC_ENABLED = 'true';
     process.env.AI_SCAN_ENABLED = 'true';
+    process.env.AI_PROVIDER = 'yandex';
     delete process.env.DATABASE_URL;
 
     const { buildHealthPayload } = await import('./health');
     const payload = await buildHealthPayload();
-    expect(payload.features).toEqual({ sync: true, aiScan: true });
+    expect(payload.features).toEqual({ sync: true, aiScan: true, aiScanProvider: 'yandex' });
     expect(payload.scan?.enabled).toBe(true);
     expect(payload.scan?.dailyBudget).toBe(100);
   });

@@ -447,7 +447,10 @@ Drizzle-объекты схемо-квалифицированы — код за
 - Кэш результатов (ключ — хэш режима/текста/аллергенов)
 - Дневной бюджет на user/IP; биллится только промах кэша
 - `SCAN_REQUIRE_AUTH` — опциональное требование JWT
-- OpenAI-compatible: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
+- Провайдер: `AI_PROVIDER=yandex|openai` (default `openai`)
+  - **yandex:** `YC_AI_API_KEY`, `YC_FOLDER_ID`, опционально `YC_GPT_MODEL` (default `yandexgpt-lite`) — Foundation Models completion
+  - **openai:** `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` (OpenAI-compatible)
+- Реализация: `services/llm-scan-provider.ts` → `routes/scan.ts`
 
 ### Облачная синхронизация (`routes/sync.ts`)
 
@@ -642,7 +645,7 @@ pnpm --filter mobile lint
 | `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK` | OFF write-through on catalog miss |
 | `OPENFOODFACTS_USER_AGENT` | Required by OFF API |
-| `AI_SCAN_ENABLED`, `OPENAI_*` | LLM scan provider |
+| `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan (`yandex` или OpenAI-compatible) |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `REPL_ID`, `ISSUER_URL` | Replit OIDC |
 | `METRO_URL` | Dev proxy to Expo |
