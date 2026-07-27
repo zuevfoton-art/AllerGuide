@@ -98,3 +98,15 @@ variable "api_staging_fqdn_ru" {
   type        = string
   default     = "api.staging.aclearo.ru"
 }
+
+variable "bootstrap_image_tag" {
+  description = "YCR tag for the placeholder image used at first container create"
+  type        = string
+  default     = "bootstrap"
+}
+
+variable "bootstrap_source_image" {
+  description = "Public image copied into YCR as a placeholder (replaced by CI with apps/api)"
+  type        = string
+  default     = "node:20-alpine"
+}

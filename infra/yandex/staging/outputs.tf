@@ -29,6 +29,10 @@ output "container_registry_url" {
   value = "cr.yandex/${yandex_container_registry.staging.id}"
 }
 
+output "registry_image_base" {
+  value = local.registry_image_base
+}
+
 output "serverless_container_id" {
   value = yandex_serverless_container.api.id
 }
