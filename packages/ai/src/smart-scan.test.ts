@@ -31,4 +31,13 @@ describe('smart scan', () => {
     expect(result?.matches).toEqual(['Молоко']);
     expect(result?.source).toBe('llm');
   });
+
+  it('parses markdown-fenced json from YandexGPT-style replies', () => {
+    const fenced = `\`\`\`
+{"verdict":"high","reason":"direct match","matches":["молоко"],"crossMatches":[],"level":"high"}
+\`\`\``;
+    const result = parseLlmScanResponse(fenced, 'product', ['milk']);
+    expect(result?.level).toBe('high');
+    expect(result?.source).toBe('llm');
+  });
 });

@@ -4,7 +4,7 @@
  */
 
 const SYSTEM_INSTRUCTION =
-  'You analyze food and medicine ingredient lists for allergens. Reply with JSON only.';
+  'You analyze food and medicine ingredient lists for allergens. Reply with a single JSON object only. No markdown fences, no commentary.';
 
 const YANDEX_COMPLETION_URL =
   'https://llm.api.cloud.yandex.net/foundationModels/v1/completion';
