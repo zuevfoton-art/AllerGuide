@@ -3,6 +3,7 @@ import {
   buildOcrScanProductName,
   prepareScanTextFromOcr,
   simulateOcrFromCapture,
+  asVisionOcrResult,
   type ScanMode,
   type ScanResult,
   type OcrExtractionResult,
@@ -11,6 +12,7 @@ import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
+import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
@@ -124,20 +126,64 @@ export function extractOcrText(mode: ScanMode, manualText?: string): OcrExtracti
   return simulateOcrFromCapture(mode, manualText);
 }
 
+/**
+ * Prefer cloud Vision when flagged; fall back to demo/manual so offline still works.
+ */
+export async function extractOcrFromImage(input: {
+  mode: ScanMode;
+  imageBase64?: string;
+  mimeType?: string;
+  manualText?: string;
+}): Promise<OcrExtractionResult> {
+  if (input.manualText?.trim()) {
+    return prepareScanTextFromOcr(input.manualText, input.mode);
+  }
+
+  if (input.imageBase64?.trim()) {
+    try {
+      const cloud = await recognizeImageViaApi({
+        imageBase64: input.imageBase64,
+        mimeType: input.mimeType,
+      });
+      if (cloud?.ok) {
+        return asVisionOcrResult(prepareScanTextFromOcr(cloud.text, input.mode));
+      }
+      if (cloud && !cloud.ok) {
+        const demo = simulateOcrFromCapture(input.mode);
+        return {
+          ...demo,
+          warnings: [
+            ...demo.warnings,
+            `Облачный OCR недоступен (${cloud.error}). Показан демо-текст — лучше ввести состав вручную.`,
+          ],
+        };
+      }
+    } catch {
+      // Network errors → demo below
+    }
+  }
+
+  return simulateOcrFromCapture(input.mode, input.manualText);
+}
+
 export async function scanFromOcr({
   mode,
   ocrText,
   profile,
   manualText,
+  imageBase64,
+  mimeType,
 }: {
   mode: ScanMode;
   ocrText?: string;
   manualText?: string;
+  imageBase64?: string;
+  mimeType?: string;
   profile?: Profile | null;
 }): Promise<ScanResult & { ocr?: OcrExtractionResult }> {
   const extraction = ocrText?.trim()
     ? prepareScanTextFromOcr(ocrText, mode)
-    : simulateOcrFromCapture(mode, manualText);
+    : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
 
   const productName = buildOcrScanProductName(mode);
   const ocrNote =
