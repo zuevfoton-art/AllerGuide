@@ -97,9 +97,6 @@ export function PollenMapLayer({
   const levelColor = selectedReading
     ? getLevelColor(selectedReading.level, theme)
     : theme.colors.textMuted;
-  const levelBackground = selectedReading
-    ? getLevelBackground(selectedReading.level, theme)
-    : theme.colors.surfaceMuted;
 
   return (
     <>
@@ -136,13 +133,21 @@ export function PollenMapLayer({
         height={300}
         interactive={false}
         overlay={
-          <View style={styles.mapLevelOverlay}>
+          <View
+            style={[styles.mapLevelOverlay, { borderColor: levelColor }]}
+            accessibilityRole="summary">
             <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
             <View style={styles.mapLevelCopy}>
-              <Text style={styles.mapLevelText}>
+              <Text style={styles.mapLevelTaxon}>
+                {t(TAXON_LABEL_KEYS[selectedTaxonId])}
+                {selectedReading?.profileRelevant ? ` · ${t('map.pollenForYou')}` : ''}
+              </Text>
+              <Text style={[styles.mapLevelText, { color: levelColor }]}>
                 {selectedReading
                   ? t(LEVEL_LABEL_KEYS[selectedReading.level])
-                  : t('map.pollenUnavailable')}
+                  : snapshot
+                    ? t('map.pollenUnavailable')
+                    : t('map.pollenLoading')}
               </Text>
               {selectedReading ? (
                 <Text style={styles.mapLevelValue}>
@@ -153,7 +158,16 @@ export function PollenMapLayer({
           </View>
         }
       />
-      <Text style={styles.attribution}>{t('map.pollenMapAttribution')}</Text>
+      <Text style={styles.attribution}>
+        {t('map.pollenMapAttribution')}
+        {snapshot && !isCalendarFallback
+          ? ` · ${
+              snapshot.source === 'cache'
+                ? t('map.pollenSourceCache')
+                : t('map.pollenSourceOpenMeteo')
+            }`
+          : ''}
+      </Text>
       <Text style={styles.scaleHint}>{t(SCALE_HINT_KEYS[mapScale])}</Text>
 
       <View style={styles.taxonRow}>
@@ -198,45 +212,6 @@ export function PollenMapLayer({
         })}
       </View>
 
-      {!snapshot ? (
-        <GlassCard style={styles.statusCard}>
-          <Text style={styles.statusText}>{t('map.pollenLoading')}</Text>
-        </GlassCard>
-      ) : null}
-
-      {snapshot && !isCalendarFallback ? (
-        <GlassCard style={styles.readingCard}>
-          <View style={[styles.levelIcon, { backgroundColor: levelBackground }]}>
-            <Ionicons name="flower-outline" size={24} color={levelColor} />
-          </View>
-          <View style={styles.readingBody}>
-            <View style={styles.readingTitleRow}>
-              <Text style={styles.readingTitle}>{t(TAXON_LABEL_KEYS[selectedTaxonId])}</Text>
-              {selectedReading?.profileRelevant ? (
-                <Text style={styles.profileLabel}>{t('map.pollenForYou')}</Text>
-              ) : null}
-            </View>
-            {selectedReading ? (
-              <>
-                <Text style={[styles.levelText, { color: levelColor }]}>
-                  {t(LEVEL_LABEL_KEYS[selectedReading.level])}
-                </Text>
-                <Text style={styles.valueText}>
-                  {t('map.pollenValue', { value: selectedReading.value.toFixed(1) })}
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.unavailableText}>{t('map.pollenUnavailable')}</Text>
-            )}
-            <Text style={styles.sourceText}>
-              {snapshot.source === 'cache'
-                ? t('map.pollenSourceCache')
-                : t('map.pollenSourceOpenMeteo')}
-            </Text>
-          </View>
-        </GlassCard>
-      ) : null}
-
       {isCalendarFallback ? (
         <GlassCard style={styles.calendarCard}>
           <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
@@ -280,12 +255,6 @@ function getLevelColor(level: PollenTierLevel, theme: AppTheme): string {
   return theme.colors.success;
 }
 
-function getLevelBackground(level: PollenTierLevel, theme: AppTheme): string {
-  if (level === 'high') return theme.colors.dangerLight;
-  if (level === 'mid') return theme.colors.warningLight;
-  return theme.colors.successLight;
-}
-
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     heading: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -322,12 +291,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       top: 8,
       right: 8,
       minHeight: 42,
-      maxWidth: 180,
+      maxWidth: 200,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
       borderRadius: 8,
-      borderWidth: 1,
+      borderWidth: 1.5,
       borderColor: colors.border,
       backgroundColor: colors.card,
       paddingHorizontal: 10,
@@ -335,9 +304,14 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     mapLevelDot: { width: 10, height: 10, borderRadius: 5 },
     mapLevelCopy: { flexShrink: 1, gap: 1 },
+    mapLevelTaxon: {
+      fontFamily: fonts.sans,
+      fontSize: 10,
+      color: colors.textMuted,
+    },
     mapLevelText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
+      fontSize: 13,
       color: colors.text,
     },
     mapLevelValue: {
@@ -398,42 +372,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'center',
       paddingHorizontal: 12,
     },
-    statusCard: { alignItems: 'center', justifyContent: 'center' },
-    statusText: { fontFamily: fonts.sans, fontSize: 13, color: colors.textMuted },
-    readingCard: { flexDirection: 'row', alignItems: 'center', gap: 14 },
     calendarCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
-    levelIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     readingBody: { flex: 1, gap: 4 },
-    readingTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
     readingTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 15,
       fontWeight: '600',
       color: colors.text,
     },
-    profileLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 10,
-      color: colors.accent,
-      backgroundColor: colors.accentLight,
-      borderRadius: 4,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-    },
-    levelText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-    },
     valueText: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
-    unavailableText: { fontFamily: fonts.sans, fontSize: 13, color: colors.textMuted },
-    sourceText: { fontFamily: fonts.sans, fontSize: 10, color: colors.textMuted },
     yandexButton: {
       flexDirection: 'row',
       alignItems: 'center',

@@ -163,22 +163,36 @@ flowchart LR
 
 ### 4.4. Открытые / API-источники пыльцевого слоя (альтернативы Яндексу)
 
+Публичный API Яндекс Погоды **не отдаёт** параметры пыльцы и raster-тайлы allergies.
+Ниже — источники с документированной интеграцией, пригодные для настоящего слоя на карте.
+
 | Источник | Что даёт | API / интеграция | Лицензия / доступ | Fit для AllerGuide |
 |----------|----------|------------------|-------------------|--------------------|
-| **Open-Meteo Air Quality** (уже в приложении) | Точка: `birch/grass/ragweed/alder/mugwort/olive` grains/m³ | REST, multi-lat/lon | CC BY 4.0, free non-commercial | Primary для числа; heatmap нет |
-| **Google Pollen API** | Forecast + **heatmapTiles** `TREE_UPI` / `GRASS_UPI` / `WEED_UPI` (PNG tiles z/x/y) | `pollen.googleapis.com` REST | Платный Google Maps Platform, ключ | Лучший готовый heatmap-слой; покрывает 65+ стран (проверить РФ) |
-| **Copernicus CAMS** | Европейский ensemble pollen (те же таксоны, что OM) | Atmosphere Data Store API | Открытые данные ЕС | Сырые поля / NetCDF; tiles нужно рендерить самим |
-| **SILAM (FMI)** | Модель пыльцы по Европе, UI + научный forecast | THREDDS / WMS-каталог FMI | Open-code research; контакт для модели | WMS-слой возможен; не clinical-grade |
+| **Open-Meteo Air Quality** (уже в приложении) | Точка: `birch/grass/ragweed/alder/mugwort/olive` grains/m³ | REST `air-quality-api.open-meteo.com/v1/air-quality` (multi lat/lon) | CC BY 4.0, free non-commercial | Primary для **одного** числа; heatmap нет |
+| **Google Pollen API** | Forecast + **heatmapTiles** `TREE_UPI` / `GRASS_UPI` / `WEED_UPI` (PNG z/x/y) | `pollen.googleapis.com/v1/mapTypes/{mapType}/heatmapTiles/{z}/{x}/{y}` | Платный Google Maps Platform, ключ | Лучший готовый heatmap; покрытие 65+ стран (**проверить РФ**) |
+| **Copernicus CAMS** | Европейский ensemble pollen (те же таксоны, что OM) | Atmosphere Data Store (CDS) API → NetCDF/GRIB | Открытые данные ЕС | Сырые поля; tiles нужно рендерить в `apps/api` |
+| **SILAM (FMI)** | Модель пыльцы по Европе | THREDDS / **WMS** каталог FMI (`thredds.fmi.fi`) | Open-code research | WMS-overlay на MapLibre; не clinical-grade |
 | **Tomorrow.io / Ambee** | Коммерческие pollen index / timeline | REST + ключ | Платно | Быстрый path, не «open» |
 | **Яндекс Погода B2B** | Consumer heatmap RU | Нет публичного pollen API | Коммерческий запрос | Только после договора |
 
-**Практическая рекомендация следующего шага для настоящего слоя на карте:**
+#### Как интегрировать слой (следующие шаги)
 
-1. **Короткий путь к heatmap:** Google Pollen `heatmapTiles` поверх Leaflet/MapLibre или Google Maps (не Яндекс-виджет) — готовые PNG по zoom.
-2. **Open / EU path:** CAMS ADS или SILAM WMS → собственный tile proxy в `apps/api` → overlay на MapLibre; базовая карта может остаться Яндекс JS API или OSM.
-3. **Оставить Open-Meteo** как источник **одного** числа уровня (как сейчас) и wellness; heatmap — отдельный провайдер за флагом.
+1. **Google Pollen `heatmapTiles` (короткий путь к heatmap)**  
+   - Endpoint: `GET https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heatmapTiles/{z}/{x}/{y}?key=API_KEY`  
+   - Клиент: MapLibre / Google Maps `TileOverlay` (не `map-widget` Яндекса — виджет не принимает произвольные тайлы).  
+   - Флаг: `EXPO_PUBLIC_POLLEN_HEATMAP=google` + серверный ключ только в `apps/api` proxy (не в бандле).  
+   - Ограничение: UPI = tree/grass/weed группы, не отдельные берёза/амброзия; покрытие РФ нужно валидировать.
+
+2. **SILAM / CAMS open path (без Google)**  
+   - SILAM: WMS `GetMap` с слоями pollen → tile-proxy `GET /api/pollen/tiles/:z/:x/:y` в `apps/api`.  
+   - CAMS ADS: периодический ingest NetCDF → rasterize (например GDAL/Mapnik) → тот же tile endpoint.  
+   - Overlay на MapLibre; базовая карта — OSM или Яндекс JS API с `controls: []`.
+
+3. **Оставить Open-Meteo** как источник **одного** числа уровня (как сейчас: точка / среднее города / пик региона) и wellness; heatmap — отдельный провайдер за feature flag (**FR-MAP-18**).
 
 Не подходит как open heatmap API: скрейпинг UI Яндекс Погоды / SILAM HTML.
+
+**Рекомендация продукта:** сейчас — Open-Meteo (одно значение × масштаб). Следующий инкремент heatmap — Google tiles *или* SILAM WMS proxy; выбор по покрытию РФ и бюджету ключа.
 
 ---
 
