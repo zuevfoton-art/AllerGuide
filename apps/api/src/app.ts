@@ -14,6 +14,7 @@ import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerPollenRoutes } from './routes/pollen';
+import { registerMarketRoutes } from './routes/market';
 import {
   buildCorsOptions,
   installRateLimiters,
@@ -41,6 +42,7 @@ export async function createApp(
   registerScanRoutes(app);
   registerOcrRoutes(app);
   registerCatalogRoutes(app);
+  registerMarketRoutes(app);
   registerAliasFeedbackRoutes(app);
   registerGovernanceRoutes(app);
   registerAnalyticsRoutes(app);

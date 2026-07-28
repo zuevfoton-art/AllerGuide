@@ -342,6 +342,7 @@ const en: LocaleMessages = {
     empty: 'Nothing found. Try another search.',
     disclaimer: 'Recommendations are based on general product traits and do not replace medical advice.',
     buyLink: 'View product',
+    buyOnYandex: 'Buy on Yandex Market',
   },
   map: {
     title: 'Places map',

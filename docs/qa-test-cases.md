@@ -870,6 +870,23 @@
 - **Шаги:** Переключить профиль
 - **Ожидаемый результат:** ProfileSwitcher работает
 
+### TC-136 — CTA Яндекс.Маркет
+- **Приоритет:** P1 | **Платформа:** All
+- **Предусловия:** Market, товар с `offers` merchant=`yandex_market`
+- **Шаги:** Нажать «Купить на Яндекс Маркете»
+- **Ожидаемый результат:** Открывается URL `market.yandex.ru` (seed или resolved); событие `market_click` с `merchant=yandex_market`
+
+### TC-137 — Resolve без секретов (static fallback)
+- **Приоритет:** P1 | **Платформа:** API
+- **Предусловия:** `YANDEX_MARKET_CLID` не задан
+- **Шаги:** `POST /api/market/offers/yandex/resolve` с `productId=air-purifier`
+- **Ожидаемый результат:** `200`, `source=static`, `affiliateUrl` содержит market.yandex.ru
+
+### TC-138 — Draft search выключен по умолчанию
+- **Приоритет:** P2 | **Платформа:** API
+- **Шаги:** `GET /api/market/offers/yandex/draft-search?q=hepa`
+- **Ожидаемый результат:** `503` (кураторский контур не для пользователей)
+
 ---
 
 ## 14. Отчёт для врача

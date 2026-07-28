@@ -341,6 +341,7 @@ const de: LocaleMessages = {
     empty: 'Nichts gefunden. Andere Suche versuchen.',
     disclaimer: 'Empfehlungen ersetzen keine ärztliche Verordnung.',
     buyLink: 'View product',
+    buyOnYandex: 'Buy on Yandex Market',
   },
   map: {
     title: 'Orte-Karte',

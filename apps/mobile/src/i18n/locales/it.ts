@@ -340,6 +340,7 @@ const it: LocaleMessages = {
     empty: 'Nessun risultato. Prova un\'altra ricerca.',
     disclaimer: 'Le raccomandazioni non sostituiscono prescrizioni mediche.',
     buyLink: 'View product',
+    buyOnYandex: 'Buy on Yandex Market',
   },
   map: {
     title: 'Mappa luoghi',
