@@ -3,6 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockRunSmartScan = vi.fn();
 const mockGetBackendAuthToken = vi.fn();
 
+vi.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
 vi.mock('@allerguide/ai', () => ({
   runSmartScan: (...args: unknown[]) => mockRunSmartScan(...args),
   buildOcrScanProductName: vi.fn(),

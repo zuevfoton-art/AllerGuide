@@ -54,6 +54,12 @@ vi.mock('@/src/db/init', () => ({
   getDb: () => ({ runSync, getAllSync, getFirstSync: vi.fn() }),
 }));
 
+vi.mock('@/src/services/diary-attachment-service', () => ({
+  deleteDiaryAttachmentsForEntry: vi.fn(),
+  listDiaryAttachments: vi.fn(() => []),
+  replaceDiaryPhotos: vi.fn(),
+}));
+
 describe('diary-service', () => {
   beforeEach(() => {
     diaryRows.length = 0;

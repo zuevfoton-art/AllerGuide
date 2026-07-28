@@ -37,7 +37,7 @@ describe('buildHealthPayload', () => {
 
     const { buildHealthPayload } = await import('./health');
     const payload = await buildHealthPayload();
-    expect(payload.features).toEqual({ sync: true, aiScan: true, aiScanProvider: 'yandex' });
+    expect(payload.features).toEqual({ sync: true, aiScan: true, aiScanProvider: 'yandex', pollenHeatmap: false });
     expect(payload.scan?.enabled).toBe(true);
     expect(payload.scan?.dailyBudget).toBe(100);
   });
