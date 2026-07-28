@@ -23,6 +23,10 @@ export type DishEnrichmentResult = {
   source: DishEnrichmentSource;
   productBarcode?: string;
   productName?: string;
+  /** Packaged-product ingredients when resolved via catalog/OFF. */
+  ingredients?: string;
+  allergenTags?: string[];
+  traceTags?: string[];
   /** Component ids from the local catalog before OFF merge (for selection preserve). */
   previousAvailableIds?: string[];
 };
@@ -135,6 +139,10 @@ export async function enrichDishFromOpenFoods(
       dishId: recipe!.id,
       dishName: recipe!.names[0],
       source: 'local',
+      ingredients: localComponents.map((item) => item.nameRu).join(', '),
+      allergenTags: localComponents
+        .map((item) => item.allergenId)
+        .filter((id): id is string => Boolean(id)),
     };
   }
 
@@ -148,6 +156,9 @@ export async function enrichDishFromOpenFoods(
       source: usefulOff.source,
       productBarcode: usefulOff.barcode,
       productName: usefulOff.name,
+      ingredients: usefulOff.ingredients || usefulOff.name,
+      allergenTags: usefulOff.allergenTags ?? [],
+      traceTags: usefulOff.traceTags ?? [],
     };
   }
 
@@ -161,5 +172,8 @@ export async function enrichDishFromOpenFoods(
     productBarcode: usefulOff!.barcode,
     productName: usefulOff!.name,
     previousAvailableIds,
+    ingredients: usefulOff!.ingredients || components.map((item) => item.nameRu).join(', '),
+    allergenTags: usefulOff!.allergenTags ?? [],
+    traceTags: usefulOff!.traceTags ?? [],
   };
 }

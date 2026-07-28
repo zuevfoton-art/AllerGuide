@@ -13,6 +13,7 @@ import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
+import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
@@ -184,6 +185,43 @@ export async function scanFromOcr({
   const extraction = ocrText?.trim()
     ? prepareScanTextFromOcr(ocrText, mode)
     : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
+
+  // Product photos: OCR dish/product name → Open Food Facts / local dish catalog.
+  if (mode === 'product') {
+    try {
+      const dishLookup = await lookupDishIngredientsForScan(extraction.text);
+      if (dishLookup) {
+        const ocrNote =
+          extraction.source === 'demo'
+            ? extraction.warnings.join(' ')
+            : extraction.warnings.length
+              ? extraction.warnings.join(' ')
+              : undefined;
+        const offNote =
+          dishLookup.source === 'openfoodfacts' || dishLookup.source === 'catalog_api'
+            ? `Состав найден в Open Food Facts / каталоге по запросу «${dishLookup.query}».`
+            : `Состав блюда «${dishLookup.productName}» из локального справочника.`;
+
+        const result = await analyzeText({
+          mode,
+          text: dishLookup.ingredients,
+          profile,
+          productName: dishLookup.productName,
+          source: dishLookup.source,
+          ocrNote: [ocrNote, offNote].filter(Boolean).join(' '),
+          declaredAllergenIds: dishLookup.declaredAllergenIds,
+          traceAllergenIds: dishLookup.traceAllergenIds,
+        });
+
+        if (profile) {
+          saveScanHistory(profile.id, dishLookup.ingredients, result, dishLookup.productName);
+        }
+        return { ...result, ocr: extraction };
+      }
+    } catch {
+      // Fall through to plain OCR text analysis.
+    }
+  }
 
   const productName = buildOcrScanProductName(mode);
   const ocrNote =

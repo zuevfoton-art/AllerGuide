@@ -20,11 +20,11 @@ const DEMO_OCR_SAMPLES: Record<ScanMode, string> = {
   menu:
     'Паста карбонара (сливки, сыр пармезан), салат с орехами и молочной заправкой, тирамису (яйца, молоко).',
   product:
-    'Состав: вода, сахар, молоко сухое обезжиренное, какао, арахис, глютен пшеницы, соевый лецитин.',
+    'Блюдо: оливье.\nСостав: картофель, морковь, яйца, зелёный горошек, майонез, курица.',
   medicine:
     'Действующее вещество: ибупрофен 200 мг. Вспомогательные вещества: лактоза, крахмал, магния стеарат.',
   cosmetics:
-    'Состав: Aqua, Parfum, Limonene, Linalool, Lanolin, Glycerin, Phenoxyethanol, CI 77891.',
+    'Состав: Aqua, Sodium Laureth Sulfate, Parfum, Limonene, Linalool, Methylisothiazolinone, Benzyl Alcohol, Lanolin.',
 };
 
 export function normalizeOcrText(text: string): string {
@@ -109,7 +109,7 @@ export function buildOcrScanProductName(mode: ScanMode): string {
     case 'medicine':
       return 'Упаковка ЛС (OCR)';
     case 'cosmetics':
-      return 'Косметика (OCR)';
+      return 'Косметика / бытовая химия (OCR)';
     default:
       return 'Продукт (OCR)';
   }
