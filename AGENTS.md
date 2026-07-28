@@ -50,6 +50,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
 - `pnpm yc-stage-phase2` — Stage clients must target YC only (EAS `staging`, not Replit); see same doc §Phase 2
 - `pnpm yc-stage-phase3` — Replit deploy artifacts removed from repo; see same doc §Phase 3
+- `pnpm yc-stage-phase4` — Secrets/data hygiene (Lockbox/GH/EAS policy); see same doc §Phase 4 · [`docs/staging-secrets-inventory.md`](docs/staging-secrets-inventory.md)
 
 ### Backend API (optional) — `apps/api`
 - Not wired to the mobile app by default. Run with `pnpm --filter api dev` (port 3001). Requires PostgreSQL (`DATABASE_URL`) + `JWT_SECRET` to boot the auth/sync/scan features.

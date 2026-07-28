@@ -407,11 +407,13 @@ pnpm build:staging:ios
 Актуальный live-inventory (health / DNS / gaps): [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) § «Статус что уже поднято на YC».
 
 - [x] `terraform apply` — VPC, private PG, registry, container, API GW, runner VM *(косвенно: live health+DB+TLS на apigw)*
-- [ ] Lockbox заполнен полностью (`DATABASE_URL`, `JWT_SECRET`, … + **pollen** keys)
+- [x] Lockbox заполнен (`DATABASE_URL`, `JWT_SECRET`, … + **pollen** keys) — see [`staging-secrets-inventory.md`](./staging-secrets-inventory.md)
 - [x] DNS: certificate challenges + CNAME `api.staging` → API GW
 - [x] `curl https://api.staging.aclearo.com/api/health` → 200
 - [ ] GitHub runner зарегистрирован с label `yc-staging-vpc`
-- [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN` (deploy workflow recently fails at gate)
+- [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN` (deploy workflow gate)
+- [ ] Rotation checklist after agent key exposure: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md)
+- [ ] `pnpm yc-stage-phase4` Pass
 - [ ] Push в `staging` → workflow green
 - [ ] `./scripts/staging-preflight.sh` → Pass (auth smoke уже Pass отдельно)
 - [ ] `pnpm yc-stage-phase0` Pass без `ALLOW_MISSING_POLLEN_HEATMAP`

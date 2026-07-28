@@ -16,7 +16,7 @@ Replit (`aller-guide.replit.app`) — legacy до фаз 3–5; stage-клиен
 | 1 | Lockbox / pollen / полный env на YC API | [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §3 |
 | 2 | Клиенты только на YC URL | EAS `staging`, web stage origins |
 | 3 | Вырезать Replit из репо (profile, docs, OIDC) | PR cleanup |
-| 4 | Данные/секреты только Lockbox + ротация | Ops |
+| 4 | Данные/секреты только Lockbox + ротация | inventory + `yc-stage-phase4` |
 | 5 | Приёмка: Replit paused, gate + preflight зелёные | Closed beta |
 
 ---
@@ -155,7 +155,9 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [x] Auth smoke (`./scripts/staging-auth-smoke.sh`)
 - [x] EAS `staging` → YC URL (не Replit)
 - [x] Stage scripts/workflows без `replit.app`
-- [x] Phase 2: `.env.staging.example` + deprecated `build:replit:*` + `pnpm yc-stage-phase2`
+- [x] Phase 2: `.env.staging.example` + `pnpm yc-stage-phase2`
+- [x] Phase 3: Replit deploy artifacts removed
+- [x] Phase 4: secrets inventory + `pnpm yc-stage-phase4` (ops rotation checklist remaining)
 - [x] Lockbox: `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` → `features.pollenHeatmap: true`
 - [x] Pollen tile HTTP 200 PNG **или** JSON 404 от proxy (не HTML) — `./scripts/staging-pollen-smoke.sh`
 - [x] Image с `registerPollenRoutes` задеплоен (`BUILD_PUSH=1` / branch `staging`)
@@ -298,7 +300,37 @@ OIDC: **оставить** `apps/api/src/replit_integrations` за флагом 
 
 ### 4 — Данные и секреты
 
-Чистый Managed PG или одноразовый import; секреты только Lockbox + GitHub Actions; ротация ключей, светившихся вне Lockbox.
+**Цель:** единственные stores для stage secrets — **Lockbox** + **GitHub Actions** + **EAS Sensitive** (client Maps only); YC Managed PG — SoT данных; ключи, светившиеся вне stores, ротированы.
+
+Автопроверка: `./scripts/yc-stage-phase4-gate.sh` / `pnpm yc-stage-phase4`  
+Inventory: [`staging-secrets-inventory.md`](./staging-secrets-inventory.md)  
+Rotation ops: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md)
+
+#### P4 критерии
+
+| ID | Проверка | Ожидание |
+|----|----------|----------|
+| **P4.1** | Git hygiene | нет private key / live `AIza…` в tracked files; нет committed `.env` |
+| **P4.2** | `lockbox-staging.keys` | содержит DB/JWT/sync/AI/pollen key **names** |
+| **P4.3** | Client bundle | нет `EXPO_PUBLIC_*` для pollen/JWT/DB/YC AI; eas.json без pollen server key |
+| **P4.4** | Docs | inventory + rotation checklist present |
+| **P4.5** | Lockbox live (optional) | при настроенном `yc` — pollen/DB/JWT key names в payload |
+| **P4.6** | Data policy | YC PG SoT; Replit DB не импортировать по умолчанию |
+
+#### Ops (вручную)
+
+1. Пройти [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md) (pollen key + YC authorized key из agent sessions).  
+2. Убедиться, что GitHub Secrets §2 inventory заполнены → зелёный `deploy-staging-yandex`.  
+3. EAS Sensitive: только `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`.  
+4. Не тащить Helium/Neon Replit в YC PG без явного dump-плана.
+
+#### Чеклист Phase 4
+
+- [x] Inventory + rotation checklist в docs  
+- [x] `pnpm yc-stage-phase4` gate (repo hygiene)  
+- [ ] Rotation A–C выполнена оператором (см. checklist)  
+- [ ] GitHub `YC_*` / `STAGING_*` полные  
+- [ ] EAS Maps Sensitive задан  
 
 ### 5 — Приёмка
 
@@ -321,6 +353,9 @@ Phase 0 gate + preflight зелёные; Replit deployment paused; в stage-flow
 | [`scripts/staging-preflight.sh`](../scripts/staging-preflight.sh) | P1.7 smokes |
 | [`scripts/yc-stage-phase3-gate.sh`](../scripts/yc-stage-phase3-gate.sh) | Автоgate Phase 3 (Replit cleanup) |
 | [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md) | Archived Replit deploy (do not use) |
+| [`scripts/yc-stage-phase4-gate.sh`](../scripts/yc-stage-phase4-gate.sh) | Автоgate Phase 4 (secrets hygiene) |
+| [`docs/staging-secrets-inventory.md`](./staging-secrets-inventory.md) | Canonical secret stores |
+| [`docs/staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md) | Ops rotation after leaks |
 | [`docs/staging-yandex-cloud.md`](./staging-yandex-cloud.md) | Deploy YC |
 | [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md) | GCP + Lockbox pollen |
 | [`apps/mobile/eas.json`](../apps/mobile/eas.json) | Profile `staging` |
