@@ -22,7 +22,11 @@ export function YandexMap({ url, height = 220, overlay }: YandexMapProps) {
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
-        {overlay ? <View style={styles.overlay}>{overlay}</View> : null}
+        {overlay ? (
+          <View pointerEvents="none" style={styles.overlay}>
+            {overlay}
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -40,7 +44,11 @@ export function YandexMap({ url, height = 220, overlay }: YandexMapProps) {
         javaScriptEnabled
         domStorageEnabled
       />
-      {overlay ? <View style={styles.overlay}>{overlay}</View> : null}
+      {overlay ? (
+        <View pointerEvents="none" style={styles.overlay}>
+          {overlay}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -65,9 +73,7 @@ function createStyles({ colors }: AppTheme, height: number) {
       borderWidth: 0,
     } as object,
     overlay: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
+      ...StyleSheet.absoluteFillObject,
       zIndex: 2,
     },
   });

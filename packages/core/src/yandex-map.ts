@@ -1,5 +1,4 @@
 import type { CatalogPlace } from './catalog';
-import type { PollenTierLevel } from './pollen-thresholds';
 
 /** Центр карты: Москва и ближайшая Московская область. */
 export const MOSCOW_REGION_CENTER = {
@@ -80,15 +79,8 @@ export function buildLocationMapUrl(latitude: number, longitude: number): string
   });
 }
 
-const POLLEN_LEVEL_MARKER_STYLE: Record<PollenTierLevel, string> = {
-  low: 'pm2gnm',
-  mid: 'pm2orm',
-  high: 'pm2rdm',
-};
-
 export function buildPollenRiskMapUrl(options: {
   center: { latitude: number; longitude: number };
-  points: Array<{ latitude: number; longitude: number; level: PollenTierLevel }>;
 }): string {
   return buildYandexMapWidgetUrl({
     center: options.center,
@@ -99,11 +91,6 @@ export function buildPollenRiskMapUrl(options: {
         longitude: options.center.longitude,
         style: 'pm2blm',
       },
-      ...options.points.map((point) => ({
-        latitude: point.latitude,
-        longitude: point.longitude,
-        style: POLLEN_LEVEL_MARKER_STYLE[point.level],
-      })),
     ],
   });
 }

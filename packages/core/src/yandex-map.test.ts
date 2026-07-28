@@ -39,17 +39,16 @@ describe('yandex-map', () => {
     expect(url).toContain('pt=30.32%2C59.93%2Cpm2blm');
   });
 
-  it('adds color-coded pollen risk samples without traffic layers', () => {
+  it('keeps only the user marker on the pollen basemap', () => {
     const url = buildPollenRiskMapUrl({
       center: { latitude: 55.75, longitude: 37.62 },
-      points: [
-        { latitude: 55.9, longitude: 37.62, level: 'low' },
-        { latitude: 55.6, longitude: 37.62, level: 'high' },
-      ],
     });
+    const points = new URL(url).searchParams.get('pt');
 
-    expect(url).toContain('pm2gnm');
-    expect(url).toContain('pm2rdm');
+    expect(points).toBe('37.62,55.75,pm2blm');
+    expect(url).not.toContain('pm2gnm');
+    expect(url).not.toContain('pm2orm');
+    expect(url).not.toContain('pm2rdm');
     expect(url).not.toContain('traffic');
   });
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   buildPollenRiskMapUrl,
@@ -58,6 +58,17 @@ const DIRECTION_LABEL_KEYS: Record<PollenMapDirection, string> = {
   northWest: 'map.pollenNorthWest',
 };
 
+const SAMPLE_MARKER_POSITIONS: Record<PollenMapDirection, ViewStyle> = {
+  north: { top: '20%', left: '50%' },
+  northEast: { top: '28%', left: '72%' },
+  east: { top: '50%', left: '80%' },
+  southEast: { top: '70%', left: '72%' },
+  south: { top: '76%', left: '50%' },
+  southWest: { top: '70%', left: '20%' },
+  west: { top: '50%', left: '12%' },
+  northWest: { top: '28%', left: '20%' },
+};
+
 export function PollenMapLayer({
   latitude,
   longitude,
@@ -81,14 +92,8 @@ export function PollenMapLayer({
     () =>
       buildPollenRiskMapUrl({
         center: { latitude, longitude },
-        points: (snapshot?.nearbyLocations ?? []).flatMap((location) => {
-          const reading = location.readings.find((item) => item.taxonId === selectedTaxonId);
-          return reading
-            ? [{ latitude: location.latitude, longitude: location.longitude, level: reading.level }]
-            : [];
-        }),
       }),
-    [latitude, longitude, selectedTaxonId, snapshot?.nearbyLocations],
+    [latitude, longitude],
   );
   const isCalendarFallback = snapshot?.source === 'calendar';
 
@@ -115,13 +120,33 @@ export function PollenMapLayer({
         url={mapUrl}
         height={300}
         overlay={
-          <View style={styles.mapLevelOverlay}>
-            <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
-            <Text style={styles.mapLevelText}>
-              {selectedReading
-                ? t(LEVEL_LABEL_KEYS[selectedReading.level])
-                : t('map.pollenUnavailable')}
-            </Text>
+          <View style={styles.mapOverlay}>
+            {(snapshot?.nearbyLocations ?? []).map((location) => {
+              const reading = location.readings.find(
+                (item) => item.taxonId === selectedTaxonId,
+              );
+              if (!reading) return null;
+
+              return (
+                <View
+                  key={location.direction}
+                  style={[
+                    styles.sampleMarker,
+                    SAMPLE_MARKER_POSITIONS[location.direction],
+                    { backgroundColor: getLevelColor(reading.level, theme) },
+                  ]}>
+                  <Text style={styles.sampleMarkerText}>{reading.value.toFixed(1)}</Text>
+                </View>
+              );
+            })}
+            <View style={styles.mapLevelOverlay}>
+              <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
+              <Text style={styles.mapLevelText}>
+                {selectedReading
+                  ? t(LEVEL_LABEL_KEYS[selectedReading.level])
+                  : t('map.pollenUnavailable')}
+              </Text>
+            </View>
           </View>
         }
       />
@@ -345,7 +370,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textMuted,
       marginTop: -8,
     },
+    mapOverlay: {
+      ...StyleSheet.absoluteFillObject,
+    },
     mapLevelOverlay: {
+      position: 'absolute',
+      top: 8,
+      right: 8,
       minHeight: 34,
       maxWidth: 170,
       flexDirection: 'row',
@@ -357,6 +388,24 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
       paddingHorizontal: 10,
       paddingVertical: 7,
+    },
+    sampleMarker: {
+      position: 'absolute',
+      width: 38,
+      height: 38,
+      marginLeft: -19,
+      marginTop: -19,
+      borderRadius: 19,
+      borderWidth: 2,
+      borderColor: colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sampleMarkerText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 10,
+      fontWeight: '600',
+      color: colors.card,
     },
     mapLevelDot: { width: 9, height: 9, borderRadius: 5 },
     mapLevelText: {
