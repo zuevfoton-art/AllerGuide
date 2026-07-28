@@ -46,6 +46,8 @@ export * from './diary-triggers';
 export * from './wellness';
 export * from './wellness-weights';
 export * from './pollen-thresholds';
+export * from './pollen-map';
+export * from './google-pollen-heatmap';
 export * from './wellness-cross-reactions';
 export * from './symptom-coding';
 export * from './diary-severity';

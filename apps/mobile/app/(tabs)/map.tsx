@@ -18,6 +18,7 @@ import {
   getPlaceLevelLabel,
   getPollenPeaksForMonth,
   formatPollenMonth,
+  POLLEN_MAP_TAXON_IDS,
   resolvePollenRegion,
   type CatalogPlace,
 } from '@allerguide/core';
@@ -27,6 +28,11 @@ import { useTranslation } from '@/src/store/locale-store';
 import { getRecommendedPlaces } from '@/src/services/place-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { PollenMapLayer } from '@/src/components/PollenMapLayer';
+import {
+  fetchPollenMapSnapshot,
+  type PollenMapSnapshot,
+} from '@/src/services/pollen-map-service';
 
 const LAYERS = [
   { key: 'places', labelKey: 'map.places' },
@@ -45,6 +51,7 @@ export default function MapScreen() {
   const [layer, setLayer] = useState<MapLayer>('places');
   const [places, setPlaces] = useState<CatalogPlace[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pollenSnapshot, setPollenSnapshot] = useState<PollenMapSnapshot | null>(null);
 
   const [coords, setCoords] = useState({ lat: 55.75, lon: 37.62, label: '' });
 
@@ -56,6 +63,9 @@ export default function MapScreen() {
         latitude: location.lat,
         longitude: location.lon,
       }),
+    );
+    setPollenSnapshot(
+      await fetchPollenMapSnapshot(location, profile?.allergies ?? '[]'),
     );
   }, [profile]);
 
@@ -69,7 +79,9 @@ export default function MapScreen() {
   const mapUrl = useMemo(() => buildPlacesMapUrl(places, selectedId), [places, selectedId]);
   const pollenMonth = new Date().getMonth() + 1;
   const pollenRegion = resolvePollenRegion(coords.lat, coords.lon);
-  const pollenPeaks = getPollenPeaksForMonth(pollenMonth, pollenRegion.id);
+  const pollenPeaks = getPollenPeaksForMonth(pollenMonth, pollenRegion.id).filter((peak) =>
+    POLLEN_MAP_TAXON_IDS.some((taxonId) => taxonId === peak.taxonId),
+  );
 
   const levelBg = useMemo(
     () =>
@@ -163,34 +175,14 @@ export default function MapScreen() {
       ) : null}
 
       {layer === 'pollen' ? (
-        <>
-          <GlassCard style={styles.pollenHero}>
-            <Ionicons name="leaf" size={24} color={theme.colors.success} />
-            <Text style={styles.pollenTitle}>
-              {t('map.pollenMapTitle', { month: formatPollenMonth(pollenMonth) })}
-            </Text>
-            <Text style={styles.pollenSub}>{t('map.pollenMapSub')}</Text>
-          </GlassCard>
-          {pollenPeaks.map((peak) => (
-            <GlassCard key={peak.taxonId} style={styles.card}>
-              <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{peak.label}</Text>
-                <Text style={styles.cardNote}>
-                  {t('map.peakSeason', {
-                    month: formatPollenMonth(peak.peakMonth),
-                    region: pollenRegion.name,
-                  })}
-                </Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: theme.colors.warningLight }]}>
-                <Text style={[styles.badgeText, { color: theme.colors.warning }]}>
-                  {t('map.season')}
-                </Text>
-              </View>
-            </GlassCard>
-          ))}
-          <Disclaimer>{t('map.disclaimerPollen')}</Disclaimer>
-        </>
+        <PollenMapLayer
+          latitude={coords.lat}
+          longitude={coords.lon}
+          regionName={coords.label || pollenRegion.name}
+          snapshot={pollenSnapshot}
+          calendarPeaks={pollenPeaks}
+          formatMonth={formatPollenMonth}
+        />
       ) : null}
 
       {layer === 'adair' ? (
@@ -255,20 +247,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.accent,
       marginTop: 4,
-    },
-    pollenHero: { alignItems: 'center', gap: 6 },
-    pollenTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.head,
-      textAlign: 'center',
-    },
-    pollenSub: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textSecondary,
-      textAlign: 'center',
     },
     mapPlaceholder: {
       height: 160,

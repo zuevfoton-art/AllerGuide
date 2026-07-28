@@ -22,6 +22,7 @@ export interface HealthCheckResult {
     aiScan: boolean;
     aiScanProvider?: 'yandex' | 'openai';
     ycOcr?: boolean;
+    pollenHeatmap?: boolean;
   };
   scan?: ScanHealthMetrics;
   database?: {
@@ -88,6 +89,9 @@ function buildFeatures() {
   return {
     sync: process.env.SYNC_ENABLED === 'true',
     aiScan,
+    pollenHeatmap:
+      process.env.POLLEN_HEATMAP_ENABLED === 'true' &&
+      Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
     ...(aiScan && provider ? { aiScanProvider: provider } : {}),
     ...(ycOcr ? { ycOcr: true } : {}),
   };
