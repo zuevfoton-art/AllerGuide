@@ -16,7 +16,8 @@
     "rc-gate": "node scripts/rc-gate-check.mjs",
     "rc-gate:quick": "node scripts/rc-gate-check.mjs --quick",
     "yc-stage-phase0": "bash scripts/yc-stage-phase0-gate.sh",
-    "yc-stage-phase1": "bash scripts/yc-stage-phase1-enable-pollen.sh"
+    "yc-stage-phase1": "bash scripts/yc-stage-phase1-enable-pollen.sh",
+    "yc-stage-phase2": "bash scripts/yc-stage-phase2-gate.sh"
   },
   "pnpm": {
     "overrides": {

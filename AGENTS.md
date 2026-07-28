@@ -48,6 +48,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage must run on Yandex Cloud (no Replit dependency); see [`docs/migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
+- `pnpm yc-stage-phase2` — Stage clients must target YC only (EAS `staging`, not Replit); see same doc §Phase 2
 
 ### Backend API (optional) — `apps/api`
 - Not wired to the mobile app by default. Run with `pnpm --filter api dev` (port 3001). Requires PostgreSQL (`DATABASE_URL`) + `JWT_SECRET` to boot the auth/sync/scan features.
@@ -68,8 +69,8 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - Local Android build (Node.js + Gradle) and Android Studio verification: see [`docs/android-local-build.md`](docs/android-local-build.md). Quick path from `apps/mobile`: `pnpm android` (= `expo run:android`) or `cd android && ./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`. The native `apps/mobile/android/` project is committed (Gradle 8.13, Hermes, JDK 17).
 - **Stage APK without local SDK (Cursor Cloud / CI):** prefer **EAS Build** — [`docs/android-stage-build.md`](docs/android-stage-build.md) · GitHub → EAS: `.github/workflows/eas-staging-android.yml` · Gradle-on-GitHub alternative: `.github/workflows/staging-apk-gradle.yml`.
 - EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
-- EAS staging (backend flags on): [`docs/eas-staging-build.md`](docs/eas-staging-build.md) · `pnpm --filter mobile build:staging:android`.
-- Replit deploy (web): see [`docs/replit-deploy.md`](docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true`, `scripts/replit-db-env.sh`, and `scripts/replit-deploy-build.sh`. «Invalid Neon production database» is usually a stale **deployment production DB** binding on Replit's side (not dev Secrets); see replit-deploy.md.
+- EAS staging (backend flags on): [`docs/eas-staging-build.md`](docs/eas-staging-build.md) · `pnpm --filter mobile build:staging:android`. Do **not** use `build:replit:*` (deprecated Phase 2).
+- Replit deploy (web, legacy): see [`docs/replit-deploy.md`](docs/replit-deploy.md). Stage API is YC (`api.staging.aclearo.com`); Replit removal is Phase 3–5 in [`migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md).
 - QA regression: [`docs/qa-checklist.md`](docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.

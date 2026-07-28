@@ -117,7 +117,8 @@ https://staging.aclearo.ru/*
 ```
 
 Добавьте ваш реальный web-origin staging, если он другой.  
-Для Replit/preview — соответствующий `https://….replit.app/*` при необходимости.
+Для **stage web** используйте referrers `http://localhost:5000/*`, `https://staging.aclearo.com/*`, `https://staging.aclearo.ru/*` (и prod при необходимости).  
+`*.replit.app` для stage **не** добавлять — stage clients → YC ([`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 2). Preview/legacy Replit — только если явно нужен старый web host.
 
 4. **API restrictions** → только **Maps JavaScript API**.
 5. **Save**.

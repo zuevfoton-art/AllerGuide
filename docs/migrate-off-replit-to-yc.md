@@ -154,6 +154,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [x] Auth smoke (`./scripts/staging-auth-smoke.sh`)
 - [x] EAS `staging` → YC URL (не Replit)
 - [x] Stage scripts/workflows без `replit.app`
+- [x] Phase 2: `.env.staging.example` + deprecated `build:replit:*` + `pnpm yc-stage-phase2`
 - [x] Lockbox: `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` → `features.pollenHeatmap: true`
 - [x] Pollen tile HTTP 200 PNG **или** JSON 404 от proxy (не HTML) — `./scripts/staging-pollen-smoke.sh`
 - [x] Image с `registerPollenRoutes` задеплоен (`BUILD_PUSH=1` / branch `staging`)
@@ -224,19 +225,51 @@ pnpm yc-stage-phase0   # P0.4 должен стать PASS
 
 #### 1.4 Чеклист Phase 1
 
-- [ ] `GOOGLE_POLLEN_API_KEY` в Lockbox (не в git/EAS)
-- [ ] `POLLEN_HEATMAP_ENABLED=true` в Lockbox
-- [ ] Image с pollen routes задеплоен (`BUILD_PUSH=1` или push в `staging`)
-- [ ] Revision монтирует pollen keys (`yc-lockbox-deploy-secrets.sh`)
-- [ ] `curl …/api/health | jq .features.pollenHeatmap` → `true`
-- [ ] `./scripts/staging-pollen-smoke.sh` Pass
-- [ ] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
+- [x] `GOOGLE_POLLEN_API_KEY` в Lockbox (не в git/EAS)
+- [x] `POLLEN_HEATMAP_ENABLED=true` в Lockbox
+- [x] Image с pollen routes задеплоен (`BUILD_PUSH=1` или push в `staging`)
+- [x] Revision монтирует pollen keys (`yc-lockbox-deploy-secrets.sh`)
+- [x] `curl …/api/health | jq .features.pollenHeatmap` → `true`
+- [x] `./scripts/staging-pollen-smoke.sh` Pass
+- [x] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
 
-### 2 — Клиенты
+### 2 — Клиенты (только YC)
 
-- Билды: только `eas build --profile staging` (не `replit`).
-- EAS Sensitive: `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`.
-- Web stage (если есть): API = YC; GCP JS referrers без опоры на `*.replit.app`.
+**Цель:** любые stage-сборки и локальные backend-сборки бьют в `https://api.staging.aclearo.com`, не в `*.replit.app`.
+
+Автопроверка: `./scripts/yc-stage-phase2-gate.sh` / `pnpm yc-stage-phase2`.
+
+#### P2 критерии
+
+| ID | Проверка | Ожидание |
+|----|----------|----------|
+| **P2.1** | EAS profile `staging` | `EXPO_PUBLIC_API_URL=https://api.staging.aclearo.com`, auth on, pollen=`google` |
+| **P2.2** | `apps/mobile/.env.staging.example` | тот же API URL, без `replit.app` |
+| **P2.3** | npm scripts | `build:staging*` живы; `build:replit*` — deprecated stub (exit 1) |
+| **P2.4** | CI client workflows | `eas-staging-*` / `staging-apk-*` без replit targets |
+| **P2.5** | Live API | health 200 на YC (pollen желателен после Phase 1) |
+| **P2.6** | Docs | stage path описывает YC, не Replit как primary |
+
+#### Что сделать оператору
+
+1. Stage APK только так:
+   ```bash
+   pnpm --filter mobile build:staging:android
+   # или Actions → EAS staging Android
+   ```
+2. EAS env (Sensitive, не Secret): `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` = Maps Android key.
+3. Локально: `cp apps/mobile/.env.staging.example apps/mobile/.env` (не `.env.replit.example`).
+4. GCP Maps JS referrers: `localhost` + `staging.aclearo.*` — без опоры на `*.replit.app` для stage web.
+5. Не вызывать `build:replit:*` (скрипты падают с DEPRECATED).
+
+#### Чеклист Phase 2
+
+- [x] `.env.staging.example` + docs stage → YC
+- [x] `build:replit:*` deprecated stubs
+- [x] `pnpm yc-stage-phase2` gate
+- [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` задан в expo.dev
+- [ ] Staging APK установлен, login/sync/пыление против YC
+- [ ] (Phase 3) удалить EAS profile `replit` / `.replit` / OIDC
 
 ### 3 — Cleanup репо
 
@@ -262,6 +295,8 @@ Phase 0 gate + preflight зелёные; Replit deployment paused; в stage-flow
 | [`scripts/yc-lockbox-deploy-secrets.sh`](../scripts/yc-lockbox-deploy-secrets.sh) | Mount `lockbox-staging.keys` |
 | [`scripts/staging-pollen-smoke.sh`](../scripts/staging-pollen-smoke.sh) | Health + tile smoke |
 | [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys) | Keys to mount from Lockbox |
+| [`scripts/yc-stage-phase2-gate.sh`](../scripts/yc-stage-phase2-gate.sh) | Автоgate Phase 2 (clients → YC) |
+| [`apps/mobile/.env.staging.example`](../apps/mobile/.env.staging.example) | Локальный stage env → YC |
 | [`scripts/staging-preflight.sh`](../scripts/staging-preflight.sh) | P1.7 smokes |
 | [`docs/staging-yandex-cloud.md`](./staging-yandex-cloud.md) | Deploy YC |
 | [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md) | GCP + Lockbox pollen |
