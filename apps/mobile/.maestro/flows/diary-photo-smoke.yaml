@@ -1,0 +1,48 @@
+# §7.3 — diary: skin photo step is reachable (gallery/camera UI)
+# Does not require actually picking a photo (permission-dependent on CI).
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-diary
+- tapOn:
+    id: diary-chip-skin
+- extendedWaitUntil:
+    visible:
+      id: diary-wizard-primary
+    timeout: 10000
+# skinArea
+- tapOn:
+    id: diary-wizard-field
+- inputText: лицо
+- tapOn:
+    id: diary-wizard-primary
+# appearance
+- tapOn:
+    id: diary-wizard-field
+- inputText: покраснение
+- tapOn:
+    id: diary-wizard-primary
+# itching
+- tapOn:
+    text: "Слабый"
+- tapOn:
+    id: diary-wizard-primary
+# photo step
+- extendedWaitUntil:
+    visible:
+      id: diary-photo-step
+    timeout: 10000
+- assertVisible:
+    id: diary-photo-library
+# Skip photos (optional) and finish notes
+- tapOn:
+    id: diary-wizard-primary
+- tapOn:
+    id: diary-wizard-primary
+- extendedWaitUntil:
+    notVisible:
+      id: diary-wizard-primary
+    timeout: 10000
+- assertVisible:
+    id: diary-chip-skin

@@ -8,6 +8,8 @@ import {
   getDiaryEntryAnswers,
   getDiarySection,
   hasSectionAnswers,
+  parseDiaryPhotoUris,
+  serializeDiaryPhotoUris,
   validateDiarySectionStep,
 } from './diary';
 
@@ -76,6 +78,32 @@ describe('diary schema', () => {
     const section = DIARY_SECTIONS[2];
     expect(hasSectionAnswers(section, {})).toBe(false);
     expect(hasSectionAnswers(section, { food: 'Суп' })).toBe(true);
+  });
+
+  it('includes optional photo step on skin section', () => {
+    const skin = getDiarySection('Кожа');
+    expect(skin?.steps.some((step) => step.id === 'skinPhotos' && step.field === 'photo')).toBe(true);
+  });
+
+  it('skips photo uris in skin entry summaries and strips them from encoded details', () => {
+    const details = encodeDiaryDetails(
+      {
+        skinArea: 'Лицо',
+        appearance: 'Сыпь',
+        itching: 'Сильный',
+        skinPhotos: JSON.stringify(['file:///tmp/a.jpg']),
+      },
+      'Кожа',
+    );
+    const summary = formatDiaryEntrySummary('Кожа', details);
+    expect(summary).toContain('Лицо');
+    expect(summary).not.toContain('file://');
+    expect(decodeDiaryDetails(details)?.answers.skinPhotos).toBeUndefined();
+  });
+
+  it('serializes and parses diary photo uris with a max of 5', () => {
+    const raw = serializeDiaryPhotoUris(['a', 'b', 'c', 'd', 'e', 'f']);
+    expect(parseDiaryPhotoUris(raw)).toEqual(['a', 'b', 'c', 'd', 'e']);
   });
 
   it('formats diary dates for history cards', () => {

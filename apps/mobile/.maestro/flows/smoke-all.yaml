@@ -3,6 +3,8 @@ appId: com.aclearo.app
 ---
 - runFlow: onboarding-smoke.yaml
 - runFlow: diary-smoke.yaml
+- runFlow: diary-dish-smoke.yaml
+- runFlow: diary-photo-smoke.yaml
 - runFlow: scanner-smoke.yaml
 - runFlow: sos-smoke.yaml
 - runFlow: settings-smoke.yaml

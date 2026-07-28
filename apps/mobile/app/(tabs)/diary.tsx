@@ -1,14 +1,9 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
-  buildAsitPrefill,
-  buildFoodPrefill,
-  buildInsectStingPrefill,
-  buildMedicinePrefill,
   buildScaleInitialAnswers,
-  buildTriggerPrefill,
   collectLatestScaleTrends,
   filterDiarySections,
   formatDiaryDate,
@@ -17,31 +12,30 @@ import {
   getDiaryEntryAnswers,
   getDiarySection,
   isActPromptDue,
-  isAsitCourseConfigured,
-  parseAllergies,
   getAsthmaPlanPersonalBest,
+  parseAllergies,
   type ClinicalScaleId,
 } from '@allerguide/core';
 import {
   addDiaryEntries,
   deleteDiaryEntry,
   getDiaryEntries,
+  mergePhotosIntoAnswers,
   updateDiaryEntry,
 } from '@/src/services/diary-service';
-import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
-import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
-import { getAsitCourse } from '@/src/services/asit-course-service';
-import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
-import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
-import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
-import { getAllergyPassport } from '@/src/services/sos-passport-service';
-import { listScanHistory } from '@/src/services/scan-history-service';
+import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
+import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
 import { AsthmaCard } from '@/src/components/AsthmaCard';
-import { fetchWellnessSnapshot } from '@/src/services/wellness-service';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
+import { getAllergyPassport } from '@/src/services/sos-passport-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
+import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -60,7 +54,6 @@ import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
-import { MarketplaceModule } from '@/src/modules/marketplace';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 
 const TYPE_ICONS: Record<string, string> = {
@@ -93,6 +86,7 @@ export default function DiaryScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
   const [list, setList] = useState<DiaryEntry[]>([]);
+  const [photoUrisByEntry, setPhotoUrisByEntry] = useState<Record<number, string[]>>({});
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -164,85 +158,37 @@ export default function DiaryScreen() {
   );
 
   const openSection = async (sectionType: string) => {
-    if (sectionType === 'АСИТ' && activeProfileId) {
-      const course = getAsitCourse(activeProfileId);
-      if (course && isAsitCourseConfigured(course)) {
-        setEditor({
-          mode: 'section',
-          sectionType,
-          prefill: { АСИТ: buildAsitPrefill(course) },
-        });
-        return;
-      }
-    }
-    if (sectionType === 'Питание' && activeProfile) {
-      const allergies = parseAllergies(activeProfile.allergies);
-      const registry = activeProfileId ? getFoodDrugRegistry(activeProfileId) : null;
-      const scans = activeProfileId ? listScanHistory(activeProfileId) : [];
-      const recentFoodScan = scans.find((scan) => scan.mode === 'product' || scan.mode === 'menu');
-      const withinDay =
-        recentFoodScan &&
-        Date.now() - new Date(recentFoodScan.createdAt).getTime() <= 24 * 3_600_000;
-      const prefill = buildFoodPrefill(
-        allergies,
-        registry,
-        withinDay
-          ? {
-              productName: recentFoodScan.productName,
-              verdict: recentFoodScan.verdict,
-              level: recentFoodScan.level,
-              matches: (() => {
-                try {
-                  return JSON.parse(recentFoodScan.matches) as string[];
-                } catch {
-                  return [];
-                }
-              })(),
-              createdAt: recentFoodScan.createdAt,
-            }
-          : null,
-      );
-      setEditor({ mode: 'section', sectionType, prefill: { Питание: prefill } });
-      return;
-    }
-    if (sectionType === 'Лекарство' && activeProfileId) {
-      const passport = getAllergyPassport(activeProfileId);
-      const prefill = buildMedicinePrefill(passport.drugIntolerances);
-      setEditor({ mode: 'section', sectionType, prefill: { Лекарство: prefill } });
-      return;
-    }
-    if (sectionType === 'Укус насекомого' && activeProfile) {
-      const allergies = parseAllergies(activeProfile.allergies);
-      const plan = activeProfileId ? getInsectActionPlan(activeProfileId) : null;
-      const prefill = buildInsectStingPrefill(allergies, plan);
-      setEditor({ mode: 'section', sectionType, prefill: { 'Укус насекомого': prefill } });
-      return;
-    }
-    if (sectionType === 'Триггер' && activeProfileId) {
-      const allergiesJson = activeProfile?.allergies ?? '[]';
-      const wellness = await fetchWellnessSnapshot(allergiesJson, [], locale).catch(() => null);
-      const context = await loadDiaryTriggerContext(activeProfileId, wellness?.factors);
-      const prefill = { Триггер: buildTriggerPrefill(context) };
-      setEditor({ mode: 'section', sectionType, prefill });
-      return;
-    }
-    setEditor({ mode: 'section', sectionType });
+    const editorState = await buildDiarySectionEditorState({
+      sectionType,
+      profileId: activeProfileId,
+      profileAllergiesJson: activeProfile?.allergies ?? '[]',
+      locale,
+    });
+    setEditor(editorState);
   };
 
   const load = useCallback(async () => {
     if (!activeProfileId) return;
-    setList(await getDiaryEntries(activeProfileId));
+    const entries = await getDiaryEntries(activeProfileId);
+    setList(entries);
+    const attachments = listDiaryAttachmentsForEntries(entries.map((e) => e.id));
+    const map: Record<number, string[]> = {};
+    for (const item of attachments) {
+      if (!map[item.entryId]) map[item.entryId] = [];
+      map[item.entryId].push(item.localPath);
+    }
+    setPhotoUrisByEntry(map);
   }, [activeProfileId]);
 
   const refresh = useCallback(async () => {
     if (!activeProfileId) return;
     setRefreshing(true);
     try {
-      setList(await getDiaryEntries(activeProfileId));
+      await load();
     } finally {
       setRefreshing(false);
     }
-  }, [activeProfileId]);
+  }, [activeProfileId, load]);
 
   useFocusEffect(
     useCallback(() => {
@@ -258,7 +204,7 @@ export default function DiaryScreen() {
 
   const closeEditor = () => setEditor(null);
 
-  const handleCreate = async (entries: { type: string; details: string }[]) => {
+  const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     if (!activeProfileId) return;
     await addDiaryEntries(activeProfileId, entries);
     closeEditor();
@@ -266,8 +212,13 @@ export default function DiaryScreen() {
     void reconcileAllReminders();
   };
 
-  const handleUpdate = async (entry: DiaryEntry, type: string, details: string) => {
-    await updateDiaryEntry(entry.id, { type, details });
+  const handleUpdate = async (
+    entry: DiaryEntry,
+    type: string,
+    details: string,
+    photoUris?: string[],
+  ) => {
+    await updateDiaryEntry(entry.id, { type, details, photoUris });
     closeEditor();
     await load();
     void reconcileAllReminders();
@@ -322,6 +273,7 @@ export default function DiaryScreen() {
           sections={visibleSections}
           drugIntolerances={drugIntolerances}
           planPersonalBestPef={planPersonalBestPef}
+          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -335,6 +287,7 @@ export default function DiaryScreen() {
           sections={[section]}
           initialAnswersBySection={{ Шкала: buildScaleInitialAnswers(editor.scaleId) }}
           allowSkipSection={false}
+          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           onCancel={closeEditor}
           onComplete={(entries) => void handleCreate(entries)}
         />
@@ -347,7 +300,10 @@ export default function DiaryScreen() {
 
     const initialAnswers =
       editor.mode === 'edit'
-        ? getDiaryEntryAnswers(editor.entry.type, editor.entry.details)
+        ? mergePhotosIntoAnswers(
+            getDiaryEntryAnswers(editor.entry.type, editor.entry.details) ?? {},
+            editor.entry.id,
+          )
         : editor.mode === 'section'
           ? editor.prefill?.[section.type]
           : null;
@@ -359,13 +315,14 @@ export default function DiaryScreen() {
           allowSkipSection={false}
           drugIntolerances={drugIntolerances}
           planPersonalBestPef={planPersonalBestPef}
+          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {
             const [entry] = entries;
             if (!entry) return;
             if (editor.mode === 'edit') {
-              void handleUpdate(editor.entry, entry.type, entry.details);
+              void handleUpdate(editor.entry, entry.type, entry.details, entry.photoUris ?? []);
               return;
             }
             void handleCreate(entries);
@@ -470,6 +427,23 @@ export default function DiaryScreen() {
           {visibleSections.map((section) => (
               <Pressable
                 key={section.type}
+                testID={`diary-chip-${
+                  (
+                    {
+                      Симптомы: 'symptoms',
+                      Лекарство: 'medicine',
+                      Питание: 'food',
+                      Триггер: 'trigger',
+                      Кожа: 'skin',
+                      Пикфлоуметрия: 'pef',
+                      АСИТ: 'asit',
+                      'Визит к врачу': 'visit',
+                      Заметка: 'note',
+                      'Укус насекомого': 'insect',
+                      Шкала: 'scale',
+                    } as Record<string, string>
+                  )[section.type] ?? 'other'
+                }`}
                 style={styles.chip}
                 onPress={() => void openSection(section.type)}
                 accessibilityRole="button"
@@ -579,8 +553,6 @@ export default function DiaryScreen() {
         </GlassCard>
       ) : null}
 
-      <MarketplaceModule variant="embedded" />
-
       {list.length === 0 ? (
         <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
       ) : (
@@ -592,6 +564,7 @@ export default function DiaryScreen() {
           {list.map((item, index) => {
             const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
+            const photos = photoUrisByEntry[item.id] ?? [];
             return (
               <Pressable
                 key={item.id}
@@ -603,6 +576,16 @@ export default function DiaryScreen() {
                 <View style={ui.feedBody}>
                   <Text style={ui.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
                   <Text style={ui.feedSub}>{summary}</Text>
+                  {photos.length ? (
+                    <View style={styles.photoRow}>
+                      {photos.slice(0, 3).map((uri) => (
+                        <Image key={uri} source={{ uri }} style={styles.photoThumb} />
+                      ))}
+                      {photos.length > 3 ? (
+                        <Text style={styles.photoMore}>+{photos.length - 3}</Text>
+                      ) : null}
+                    </View>
+                  ) : null}
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
@@ -719,6 +702,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
+    },
+    photoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
+    photoThumb: { width: 40, height: 40, borderRadius: 6, backgroundColor: colors.surfaceMuted },
+    photoMore: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textMuted,
     },
     hintsCard: { gap: 8 },
     hintText: {

@@ -5,7 +5,7 @@ import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
 
-export type DiaryStepField = 'text' | 'choice';
+export type DiaryStepField = 'text' | 'choice' | 'photo' | 'checklist';
 
 export interface DiaryStep {
   id: string;
@@ -157,6 +157,12 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: true,
       },
       {
+        id: 'foodComponents',
+        label: 'Состав блюда',
+        field: 'checklist',
+        required: false,
+      },
+      {
         id: 'foodSource',
         label: 'Источник записи',
         field: 'choice',
@@ -284,6 +290,12 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'choice',
         choices: ['Нет', 'Слабый', 'Умеренный', 'Сильный'],
         required: true,
+      },
+      {
+        id: 'skinPhotos',
+        label: 'Фото проявлений',
+        field: 'photo',
+        required: false,
       },
       {
         id: 'skinNotes',
@@ -555,8 +567,34 @@ export function getDiaryStepLabel(section: DiarySection, stepId: string): string
   return section.steps.find((step) => step.id === stepId)?.label ?? stepId;
 }
 
+export function parseDiaryPhotoUris(raw: string | undefined | null): string[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  } catch {
+    return [];
+  }
+}
+
+export function serializeDiaryPhotoUris(uris: string[]): string {
+  return JSON.stringify(uris.slice(0, 5));
+}
+
+export function getDiaryPhotoUrisFromAnswers(answers: Record<string, string>): string[] {
+  return parseDiaryPhotoUris(answers.skinPhotos);
+}
+
+/** Remove photo payloads from answers so summaries / PDF text stay clean. */
+export function stripDiaryPhotoAnswers(answers: Record<string, string>): Record<string, string> {
+  const next = { ...answers };
+  delete next.skinPhotos;
+  return next;
+}
+
 export function encodeDiaryDetails(answers: Record<string, string>, sectionType?: string): string {
-  let enriched = { ...answers };
+  let enriched = stripDiaryPhotoAnswers({ ...answers });
   if (sectionType === 'Симптомы') {
     enriched = enrichSymptomAnswers(enriched);
     enriched = enrichSeverityAnswers(enriched, 'Симптомы');
@@ -649,6 +687,7 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
 
   return section.steps
     .map((step) => {
+      if (step.field === 'photo') return null;
       const value = structured.answers[step.id]?.trim();
       if (!value) return null;
       return `${step.label}: ${value}`;

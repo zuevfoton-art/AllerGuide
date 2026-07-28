@@ -3,8 +3,8 @@ import type { DbLike } from './types';
 import { CURRENT_SCHEMA_VERSION, runMigrations } from './migrations';
 
 describe('runMigrations', () => {
-  it('exposes schema version 7 with safe_products migration', () => {
-    expect(CURRENT_SCHEMA_VERSION).toBe(7);
+  it('exposes schema version 8 with diary_attachments migration', () => {
+    expect(CURRENT_SCHEMA_VERSION).toBe(8);
   });
 
   it('creates safe_products when upgrading from schema version 6', () => {
@@ -23,6 +23,26 @@ describe('runMigrations', () => {
     runMigrations(db);
 
     expect(executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS safe_products'))).toBe(true);
-    expect(runSync).toHaveBeenCalledWith('UPDATE schema_version SET version = ?', [7]);
+    expect(executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS diary_attachments'))).toBe(true);
+    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [8]);
+  });
+
+  it('creates diary_attachments when upgrading from schema version 7', () => {
+    const executed: string[] = [];
+    const runSync = vi.fn();
+
+    const db: DbLike = {
+      execSync: (sql) => {
+        executed.push(sql);
+      },
+      runSync,
+      getFirstSync: <T>() => ({ version: 7 }) as T,
+      getAllSync: () => [],
+    };
+
+    runMigrations(db);
+
+    expect(executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS diary_attachments'))).toBe(true);
+    expect(runSync).toHaveBeenCalledWith('UPDATE schema_version SET version = ?', [8]);
   });
 });

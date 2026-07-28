@@ -132,6 +132,20 @@ export function enrichLlmScanResult(
   };
 }
 
+/** Strip optional ``` / ```json fences models often add despite the prompt. */
+export function stripLlmJsonFence(raw: string): string {
+  const trimmed = raw.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if (fenced?.[1]) return fenced[1].trim();
+
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    return trimmed.slice(start, end + 1);
+  }
+  return trimmed;
+}
+
 export function parseLlmScanResponse(
   raw: string,
   mode: ScanMode,
@@ -139,7 +153,7 @@ export function parseLlmScanResponse(
   productName?: string,
 ): ScanResult | null {
   try {
-    const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+    const cleaned = stripLlmJsonFence(raw);
     const parsed = JSON.parse(cleaned) as LlmScanResponse;
     if (!parsed?.verdict || !parsed?.reason || !parsed?.level) return null;
 

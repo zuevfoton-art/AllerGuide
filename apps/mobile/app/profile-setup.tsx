@@ -1,19 +1,28 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  allergenIdsFromConditionOptions,
+  createEmptySymptomBaseline,
   getMissingConditionsForAllergens,
   getWizardStep,
+  getGatedConditionRemovals,
+  isSymptomBaselineEmpty,
+  mergePreSeededAllergens,
   needsChildConsent,
   normalizeAllergyConfirmations,
+  reconcileConditionOptionSelections,
   shouldCompleteOnboarding,
   type AllergyConditionId,
   type AllergyConfirmationSource,
   type ComorbidityLink,
+  type ConditionOptionSelections,
+  type ProfileSymptomBaseline,
   type ProfileType,
 } from '@allerguide/core';
 import { createProfile, listProfiles, ProfileValidationError } from '@/src/services/profile-service';
 import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
+import { setStoredSymptomBaseline } from '@/src/services/profile-symptom-baseline-service';
 import { saveConditionHistoryFromOnboarding } from '@/src/services/condition-history-service';
 import {
   normalizeEmergencyContactDrafts,
@@ -22,6 +31,7 @@ import {
 } from '@/src/services/emergency-contact-service';
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -34,14 +44,16 @@ import { ProfileSetupNameStep } from '@/src/components/profile-setup/ProfileSetu
 import { ProfileSetupBirthYearStep } from '@/src/components/profile-setup/ProfileSetupBirthYearStep';
 import { ProfileSetupConditionsStep } from '@/src/components/profile-setup/ProfileSetupConditionsStep';
 import { ProfileSetupAllergensStep } from '@/src/components/profile-setup/ProfileSetupAllergensStep';
+import { ProfileSetupCrossReactionsStep } from '@/src/components/profile-setup/ProfileSetupCrossReactionsStep';
+import { ProfileSetupSymptomsStep } from '@/src/components/profile-setup/ProfileSetupSymptomsStep';
 import { ProfileSetupConditionHistoryStep } from '@/src/components/profile-setup/ProfileSetupConditionHistoryStep';
 import type { ConditionHistoryDrafts } from '@/src/components/ConditionHistoryEditor';
 import {
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
-  PROFILE_SETUP_WIZARD_STEP_COUNT,
-  PROFILE_SETUP_WIZARD_STEPS,
+  getVisibleProfileSetupStepProgress,
   buildProfileSetupWizardNavOptions,
+  mergeCrossReactionAllergenIds,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
   validateProfileSetupWizardDraft,
@@ -66,9 +78,16 @@ export default function ProfileSetupScreen() {
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
+  const [conditionOptionSelections, setConditionOptionSelections] =
+    useState<ConditionOptionSelections>({});
+  const optionSeedRef = useRef<string[]>([]);
+  const [symptomBaseline, setSymptomBaseline] = useState<ProfileSymptomBaseline>(() =>
+    createEmptySymptomBaseline(),
+  );
   const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
   const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
+  const [crossPendingIds, setCrossPendingIds] = useState<string[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState<ProfileSetupWizardStep>('name');
@@ -90,10 +109,42 @@ export default function ProfileSetupScreen() {
         ? t('profileSetup.titleSelf')
         : t('profileSetup.titleCreate');
 
-  const stepIndex = PROFILE_SETUP_WIZARD_STEPS.indexOf(currentStep);
+  const draft = useMemo(
+    () => ({
+      name,
+      birthYear,
+      selectedAllergenIds: selected,
+      confirmations,
+      conditions,
+      conditionOptionSelections,
+      symptomBaseline,
+      conditionHistoryDrafts,
+      comorbidityLinks,
+      contacts,
+      childConsent,
+      profileType: effectiveType,
+    }),
+    [
+      name,
+      birthYear,
+      selected,
+      confirmations,
+      conditions,
+      conditionOptionSelections,
+      symptomBaseline,
+      conditionHistoryDrafts,
+      comorbidityLinks,
+      contacts,
+      childConsent,
+      effectiveType,
+    ],
+  );
+
+  const wizardNav = buildProfileSetupWizardNavOptions(draft);
+  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft);
   const stepProgress = t('profileSetup.stepProgress', {
-    current: stepIndex + 1,
-    total: PROFILE_SETUP_WIZARD_STEP_COUNT,
+    current: stepProgressMeta.current,
+    total: stepProgressMeta.total,
   });
 
   const subtitle =
@@ -103,44 +154,36 @@ export default function ProfileSetupScreen() {
         ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
         : t('profileSetup.subtitleDefault', { step: stepProgress });
 
-  const draft = useMemo(
-    () => ({
-      name,
-      birthYear,
-      selectedAllergenIds: selected,
-      confirmations,
-      conditions,
-      conditionHistoryDrafts,
-      comorbidityLinks,
-      contacts,
-      childConsent,
-      profileType: effectiveType,
-    }),
-    [name, birthYear, selected, confirmations, conditions, conditionHistoryDrafts, comorbidityLinks, contacts, childConsent, effectiveType],
-  );
-
-  const wizardNav = buildProfileSetupWizardNavOptions(draft);
-
   const suggestedConditions = useMemo(
     () => getMissingConditionsForAllergens(selected, conditions),
     [selected, conditions],
   );
 
+  useEffect(() => {
+    trackEvent('profile_setup_step_view', { step: currentStep });
+  }, [currentStep]);
+
+  const applyOptionPreSeed = (nextSelections: ConditionOptionSelections) => {
+    const nextSeed = allergenIdsFromConditionOptions(nextSelections);
+    setSelected((prev) => {
+      const merged = mergePreSeededAllergens(prev, optionSeedRef.current, nextSeed);
+      setConfirmations((conf) => normalizeAllergyConfirmations(merged, conf));
+      return merged;
+    });
+    optionSeedRef.current = nextSeed;
+    setConditionOptionSelections(nextSelections);
+  };
+
   const applyConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
     setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
     setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
+    const nextOptions = reconcileConditionOptionSelections(next, conditionOptionSelections);
+    applyOptionPreSeed(nextOptions);
   };
 
   const handleConditionsChange = (next: AllergyConditionId[]) => {
-    const removed = conditions.filter((item) => !next.includes(item));
-    const gatedRemoved = removed.filter(
-      (item) =>
-        item === 'asthma' ||
-        item === 'insect' ||
-        item === 'dermatitis' ||
-        ['pollinosis', 'rhinitis', 'household', 'animal'].includes(item),
-    );
+    const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
       Alert.alert(
         t('profileSetup.conditionRemoveTitle'),
@@ -160,10 +203,14 @@ export default function ProfileSetupScreen() {
     setBirthYear('');
     setSelected([]);
     setConditions([]);
+    setConditionOptionSelections({});
+    optionSeedRef.current = [];
+    setSymptomBaseline(createEmptySymptomBaseline());
     setConditionHistoryDrafts({});
     setComorbidityLinks([]);
     setContacts([]);
     setConfirmations({});
+    setCrossPendingIds([]);
     setChildConsent(false);
     setCurrentStep('name');
     setError('');
@@ -204,6 +251,7 @@ export default function ProfileSetupScreen() {
     }
 
     setStoredProfileConditions(id, conditions);
+    setStoredSymptomBaseline(id, isSymptomBaselineEmpty(symptomBaseline) ? null : symptomBaseline);
     saveConditionHistoryFromOnboarding(id, conditions, conditionHistoryDrafts, comorbidityLinks);
     syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
 
@@ -239,8 +287,38 @@ export default function ProfileSetupScreen() {
     }
 
     setError('');
-    const next = getNextProfileSetupWizardStep(currentStep, wizardNav);
+
+    let nextSelected = selected;
+    if (currentStep === 'crossReactions') {
+      if (crossPendingIds.length > 0) {
+        nextSelected = mergeCrossReactionAllergenIds(selected, crossPendingIds);
+        setSelected(nextSelected);
+        setConfirmations((prev) => normalizeAllergyConfirmations(nextSelected, prev));
+        trackEvent('profile_setup_step_complete', {
+          step: 'crossReactions',
+          added: crossPendingIds.length,
+        });
+      } else {
+        trackEvent('profile_setup_step_skip', { step: 'crossReactions' });
+      }
+      setCrossPendingIds([]);
+    } else if (currentStep === 'symptomBaseline') {
+      if (isSymptomBaselineEmpty(symptomBaseline)) {
+        trackEvent('profile_setup_step_skip', { step: 'symptomBaseline' });
+      } else {
+        trackEvent('profile_setup_step_complete', { step: 'symptomBaseline' });
+      }
+    } else {
+      trackEvent('profile_setup_step_complete', { step: currentStep });
+    }
+
+    const nextNav = buildProfileSetupWizardNavOptions({
+      conditions,
+      selectedAllergenIds: nextSelected,
+    });
+    const next = getNextProfileSetupWizardStep(currentStep, nextNav);
     if (next) {
+      if (next === 'crossReactions') setCrossPendingIds([]);
       setCurrentStep(next);
       return;
     }
@@ -251,17 +329,22 @@ export default function ProfileSetupScreen() {
   const goBack = () => {
     setError('');
     const previous = getPreviousProfileSetupWizardStep(currentStep, wizardNav);
-    if (previous) setCurrentStep(previous);
+    if (previous) {
+      if (currentStep === 'crossReactions') setCrossPendingIds([]);
+      setCurrentStep(previous);
+    }
   };
 
   const isLastStep = currentStep === 'contacts';
-  const showBack = stepIndex > 0;
+  const showBack = stepProgressMeta.current > 1;
 
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
       ? t('profileSetup.nextChild')
       : t('profileSetup.saveProfile')
-    : t('profileSetup.next');
+    : currentStep === 'crossReactions' && crossPendingIds.length > 0
+      ? t('profileSetup.crossReactions.addNext')
+      : t('profileSetup.next');
 
   return (
     <Screen>
@@ -296,7 +379,43 @@ export default function ProfileSetupScreen() {
         <ProfileSetupConditionsStep
           selected={conditions}
           onChange={handleConditionsChange}
+          optionSelections={conditionOptionSelections}
+          onOptionSelectionsChange={applyOptionPreSeed}
           profileType={effectiveType}
+        />
+      ) : null}
+
+      {currentStep === 'allergens' ? (
+        <ProfileSetupAllergensStep
+          selected={selected}
+          onSelectedChange={(ids) => {
+            setSelected(ids);
+            setCrossPendingIds([]);
+          }}
+          confirmations={confirmations}
+          onConfirmationsChange={setConfirmations}
+          suggestedConditionIds={suggestedConditions}
+          onAddSuggestedCondition={(conditionId) =>
+            applyConditionsChange(
+              conditions.includes(conditionId) ? conditions : [...conditions, conditionId],
+            )
+          }
+        />
+      ) : null}
+
+      {currentStep === 'crossReactions' ? (
+        <ProfileSetupCrossReactionsStep
+          selectedAllergenIds={selected}
+          pendingIds={crossPendingIds}
+          onPendingChange={setCrossPendingIds}
+        />
+      ) : null}
+
+      {currentStep === 'symptomBaseline' ? (
+        <ProfileSetupSymptomsStep
+          conditions={conditions}
+          baseline={symptomBaseline}
+          onChange={setSymptomBaseline}
         />
       ) : null}
 
@@ -313,21 +432,6 @@ export default function ProfileSetupScreen() {
           conditions={conditions}
           links={comorbidityLinks}
           onChange={setComorbidityLinks}
-        />
-      ) : null}
-
-      {currentStep === 'allergens' ? (
-        <ProfileSetupAllergensStep
-          selected={selected}
-          onSelectedChange={setSelected}
-          confirmations={confirmations}
-          onConfirmationsChange={setConfirmations}
-          suggestedConditionIds={suggestedConditions}
-          onAddSuggestedCondition={(conditionId) =>
-            applyConditionsChange(
-              conditions.includes(conditionId) ? conditions : [...conditions, conditionId],
-            )
-          }
         />
       ) : null}
 

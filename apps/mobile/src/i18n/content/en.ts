@@ -63,6 +63,9 @@ const enContent: LocaleContent = {
           label: 'What was eaten?',
           placeholder: 'Dishes, foods, drinks',
         },
+        foodComponents: {
+          label: 'Dish ingredients',
+        },
         allergens: {
           label: 'Possible allergens in food',
           placeholder: 'Milk, nuts, gluten…',
@@ -104,6 +107,9 @@ const enContent: LocaleContent = {
         itching: {
           label: 'Itch intensity',
           choices: ['None', 'Mild', 'Moderate', 'Severe'],
+        },
+        skinPhotos: {
+          label: 'Photos of manifestations',
         },
         skinNotes: {
           label: 'What helped or worsened the condition?',

@@ -37,6 +37,13 @@
           "color": "#2A9D8F"
         }
       ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "A-Claro использует микрофон для голосового ввода в дневнике.",
+          "speechRecognitionPermission": "A-Claro распознаёт речь на устройстве, чтобы заполнять записи дневника."
+        }
+      ],
       "expo-asset"
     ],
     "experiments": {
@@ -60,7 +67,9 @@
         "CFBundleDisplayName": "A-Claro",
         "NSCameraUsageDescription": "A-Claro использует камеру для сканирования штрихкодов продуктов.",
         "NSPhotoLibraryUsageDescription": "A-Claro использует фото для загрузки меню и состава продуктов.",
-        "NSLocationWhenInUseUsageDescription": "A-Claro использует геолокацию для показа аллерго-дружелюбных мест рядом."
+        "NSLocationWhenInUseUsageDescription": "A-Claro использует геолокацию для показа аллерго-дружелюбных мест рядом.",
+        "NSMicrophoneUsageDescription": "A-Claro использует микрофон для голосового ввода в дневнике.",
+        "NSSpeechRecognitionUsageDescription": "A-Claro распознаёт речь на устройстве, чтобы заполнять записи дневника."
       }
     },
     "android": {

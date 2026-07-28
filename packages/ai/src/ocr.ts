@@ -2,7 +2,7 @@ import type { ScanMode } from './scan';
 
 export interface OcrExtractionResult {
   text: string;
-  source: 'manual' | 'demo' | 'normalized';
+  source: 'manual' | 'demo' | 'normalized' | 'vision';
   ingredientsBlock?: string;
   warnings: string[];
 }
@@ -20,11 +20,11 @@ const DEMO_OCR_SAMPLES: Record<ScanMode, string> = {
   menu:
     'Паста карбонара (сливки, сыр пармезан), салат с орехами и молочной заправкой, тирамису (яйца, молоко).',
   product:
-    'Состав: вода, сахар, молоко сухое обезжиренное, какао, арахис, глютен пшеницы, соевый лецитин.',
+    'Блюдо: оливье.\nСостав: картофель, морковь, яйца, зелёный горошек, майонез, курица.',
   medicine:
     'Действующее вещество: ибупрофен 200 мг. Вспомогательные вещества: лактоза, крахмал, магния стеарат.',
   cosmetics:
-    'Состав: Aqua, Parfum, Limonene, Linalool, Lanolin, Glycerin, Phenoxyethanol, CI 77891.',
+    'Состав: Aqua, Sodium Laureth Sulfate, Parfum, Limonene, Linalool, Methylisothiazolinone, Benzyl Alcohol, Lanolin.',
 };
 
 export function normalizeOcrText(text: string): string {
@@ -109,19 +109,31 @@ export function buildOcrScanProductName(mode: ScanMode): string {
     case 'medicine':
       return 'Упаковка ЛС (OCR)';
     case 'cosmetics':
-      return 'Косметика (OCR)';
+      return 'Косметика / бытовая химия (OCR)';
     default:
       return 'Продукт (OCR)';
   }
 }
 
 /**
- * Future native OCR entry point (P5.1). When `@react-native-ml-kit/text-recognition`
- * or similar is integrated, implement here and fall back to `simulateOcrFromCapture`.
+ * Local fallback only. Cloud Vision OCR is `POST /api/ocr` (mobile `ocr-api-service`).
+ * Screens must not call Yandex directly — keep offline demo when the API is off.
  */
 export async function runOcrFromImageUri(
   _imageUri: string,
   mode: ScanMode,
 ): Promise<OcrExtractionResult> {
   return simulateOcrFromCapture(mode);
+}
+
+/** Mark prepared OCR text as coming from cloud Vision (after API success). */
+export function asVisionOcrResult(
+  prepared: OcrExtractionResult,
+  extraWarnings: string[] = [],
+): OcrExtractionResult {
+  return {
+    ...prepared,
+    source: 'vision',
+    warnings: [...prepared.warnings, ...extraWarnings],
+  };
 }

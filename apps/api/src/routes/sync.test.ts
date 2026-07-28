@@ -6,6 +6,8 @@ describe('sync routes', () => {
   beforeEach(() => {
     process.env.SYNC_ENABLED = 'true';
     process.env.SYNC_API_KEY = 'test-key';
+    delete process.env.DATABASE_URL;
+    delete process.env.JWT_SECRET;
   });
 
   it('rejects sync when disabled', async () => {

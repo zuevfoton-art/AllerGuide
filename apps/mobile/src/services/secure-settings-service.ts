@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 /** Keys stored in OS secure enclave on native (never mirrored to SQLite). */
 export const SENSITIVE_SETTING_KEYS = [
@@ -36,7 +37,9 @@ export async function deleteSensitiveSetting(key: SensitiveSettingKey | string):
   }
   cache.delete(key);
   setSetting(key, '');
-  await SecureStore.deleteItemAsync(key).catch(() => undefined);
+  await SecureStore.deleteItemAsync(key).catch((error) => {
+    logCaughtError('deleteSensitiveSetting', error, { level: 'warn', extra: { key } });
+  });
 }
 
 /** Load secure values from SecureStore; migrate legacy SQLite copies. Call before auth/sync. */

@@ -9,9 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --accent: #2563eb;
-      --accent-light: #eff6ff;
-      --accent-mid: #bfdbfe;
+      --accent: #2a9d8f;
+      --accent-light: #E6F6F4;
+      --accent-mid: #9FD9D1;
       --head: #1e3a5f;
       --text: #0f172a;
       --text-secondary: #475569;
@@ -22,7 +22,7 @@
       --stroke: #0f172a;
       --sans: 'Inter', system-ui, sans-serif;
       --serif: 'Source Serif 4', Georgia, serif;
-      --shadow-phone: 0 24px 64px rgba(37, 99, 235, 0.18);
+      --shadow-phone: 0 24px 64px rgba(42, 157, 143, 0.18);
       --shadow-card: 0 8px 32px rgba(15, 23, 42, 0.08);
     }
 
@@ -31,7 +31,7 @@
     body {
       font-family: var(--sans);
       color: var(--text);
-      background: linear-gradient(165deg, #dbeafe 0%, #eff6ff 35%, #f8fafc 100%);
+      background: linear-gradient(165deg, #e6f6f4 0%, #d8f3ef 35%, #f8fafc 100%);
       min-height: 100vh;
       padding: 32px 20px 56px;
     }
@@ -469,23 +469,23 @@
 <body>
   <div class="page">
     <header>
-      <h1>AllerGuide — онбординг (line-art)</h1>
+      <h1>A‑Claro — онбординг (Dual Calm)</h1>
       <p>
-        Mockup онбординга AllerGuide: 3 intro-слайда + экран сценария.
+        Mockup онбординга A‑Claro: 5 intro-слайдов + экран сценария (как в apps/mobile).
         Локально: <code>cd docs && python3 -m http.server 8080</code> →
         <code>http://127.0.0.1:8080/onboarding-mockup.html</code>.
         При ошибке загрузки WebP mockup подставит локальный PNG.
       </p>
       <div class="meta">
         <span class="pill"><strong>Файл</strong> docs/onboarding-mockup.html</span>
-        <span class="pill"><strong>Accent</strong> #2563EB</span>
+        <span class="pill"><strong>Accent</strong> #2A9D8F</span>
         <span class="pill"><strong>Card radius</strong> 28px</span>
-        <span class="pill"><strong>Slides</strong> 3 + сценарий</span>
+        <span class="pill"><strong>Slides</strong> 5 + сценарий</span>
         <span class="pill"><strong>Art</strong> PNG reference illustrations</span>
       </div>
     </header>
 
-    <h2 class="section-title">Intro carousel <span>3 экрана</span></h2>
+    <h2 class="section-title">Intro carousel <span>5 экранов</span></h2>
     <div class="showcase-stage">
       <button class="showcase-arrow left" type="button" aria-label="Предыдущий" id="showcase-prev">‹</button>
       <button class="showcase-arrow right" type="button" aria-label="Следующий" id="showcase-next">›</button>
@@ -495,9 +495,9 @@
         <span class="showcase-label">1 · Профиль</span>
         <div class="phone">
           <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
-            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
-            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2563eb" opacity="0.12"/>
-            <circle cx="88%" cy="12%" r="56" fill="#eff6ff" opacity="0.45"/>
+            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#e6f6f4" opacity="0.55"/>
+            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2a9d8f" opacity="0.12"/>
+            <circle cx="88%" cy="12%" r="56" fill="#e6f6f4" opacity="0.45"/>
           </svg>
           <div class="phone-inner">
             <div class="illus">
@@ -521,8 +521,8 @@
         <span class="showcase-label">2 · Сканер</span>
         <div class="phone">
           <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
-            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
-            <circle cx="8%" cy="78%" r="42" fill="#2563eb" opacity="0.1"/>
+            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#e6f6f4" opacity="0.55"/>
+            <circle cx="8%" cy="78%" r="42" fill="#2a9d8f" opacity="0.1"/>
           </svg>
           <div class="phone-inner">
             <div class="illus">
@@ -546,8 +546,8 @@
         <span class="showcase-label">3 · Защита</span>
         <div class="phone">
           <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
-            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2563eb" opacity="0.12"/>
-            <circle cx="88%" cy="12%" r="56" fill="#eff6ff" opacity="0.45"/>
+            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2a9d8f" opacity="0.12"/>
+            <circle cx="88%" cy="12%" r="56" fill="#e6f6f4" opacity="0.45"/>
           </svg>
           <div class="phone-inner">
             <div class="illus">
@@ -572,13 +572,13 @@
         <span class="showcase-label">4 · Сценарий</span>
         <div class="phone wide">
           <svg class="phone-waves" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
-            <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
-            <circle cx="6%" cy="82%" r="48" fill="#2563eb" opacity="0.1"/>
+            <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#e6f6f4" opacity="0.55"/>
+            <circle cx="6%" cy="82%" r="48" fill="#2a9d8f" opacity="0.1"/>
           </svg>
           <div class="phone-inner" style="overflow-y:auto;padding-top:16px">
             <div class="brand-row">
               <svg width="36" height="36" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <rect width="44" height="44" rx="10" fill="#2A9D8F"/>
                 <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
@@ -587,7 +587,7 @@
             <div class="illus" style="flex:0;min-height:140px">
               <img class="illus-img" src="./assets/onboarding/profile.webp" alt="" width="220" height="140" loading="lazy" />
             </div>
-            <p class="tagline">Персональный помощник в контроле аллергии</p>
+            <p class="tagline">Аллергия. Ясно.</p>
             <p class="section-label">Для кого ведём записи?</p>
             <div class="scenario-card">
               <div class="scenario-icon">👤</div>
@@ -617,6 +617,8 @@
         <button class="ctrl-btn active" data-slide="0">1 — Профиль</button>
         <button class="ctrl-btn" data-slide="1">2 — Сканер</button>
         <button class="ctrl-btn" data-slide="2">3 — Защита</button>
+        <button class="ctrl-btn" data-slide="3">4 — Карта</button>
+        <button class="ctrl-btn" data-slide="4">5 — SOS</button>
         <hr style="border:none;border-top:1px solid var(--border);margin:14px 0" />
         <button class="ctrl-btn" data-screen="scenario">Сценарий (после intro)</button>
       </div>
@@ -624,10 +626,10 @@
       <div class="preview-phone">
         <div class="phone wide" id="live-phone">
           <svg class="phone-waves" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
-            <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#eff6ff" opacity="0.55"/>
-            <path d="M-40 280 C120 180, 220 340, 450 250 S720 180, 600 320 S240 420, -40 360 Z" fill="#2563eb" opacity="0.12"/>
-            <circle cx="88%" cy="10%" r="64" fill="#eff6ff" opacity="0.45"/>
-            <circle cx="6%" cy="82%" r="48" fill="#2563eb" opacity="0.1"/>
+            <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#e6f6f4" opacity="0.55"/>
+            <path d="M-40 280 C120 180, 220 340, 450 250 S720 180, 600 320 S240 420, -40 360 Z" fill="#2a9d8f" opacity="0.12"/>
+            <circle cx="88%" cy="10%" r="64" fill="#e6f6f4" opacity="0.45"/>
+            <circle cx="6%" cy="82%" r="48" fill="#2a9d8f" opacity="0.1"/>
           </svg>
           <div class="phone-inner" id="live-intro">
             <div class="illus" id="live-illus"></div>
@@ -638,7 +640,7 @@
           <div class="phone-inner" id="live-scenario" hidden style="padding-top:16px;overflow-y:auto">
             <div class="brand-row">
               <svg width="36" height="36" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <rect width="44" height="44" rx="10" fill="#2A9D8F"/>
                 <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
@@ -647,7 +649,7 @@
             <div class="illus" style="flex:0;min-height:140px">
               <img class="illus-img" src="./assets/onboarding/profile.webp" alt="" width="220" height="140" loading="lazy" />
             </div>
-            <p class="tagline">Персональный помощник в контроле аллергии</p>
+            <p class="tagline">Аллергия. Ясно.</p>
             <p class="section-label">Для кого ведём записи?</p>
             <div class="scenario-card">
               <div class="scenario-icon">👤</div>
@@ -674,7 +676,7 @@
     <div class="spec-grid">
       <div class="spec-card">
         <strong>Фон экрана</strong>
-        Solid <code>#2563EB</code> + SVG-волны (<code>accentLight</code> 55%, <code>accent</code> 12% opacity)
+        Claro teal waves (<code>accentLight</code> <code>#E6F6F4</code> 55%, <code>accent</code> <code>#2A9D8F</code> 12% opacity) + CTA <code>#2A9D8F</code>
       </div>
       <div class="spec-card">
         <strong>Карточка контента</strong>
@@ -699,7 +701,7 @@
     </div>
 
     <footer>
-      Mockup · <a href="design-mockup.html">Clinical Calm (полный)</a> ·
+      Mockup · <a href="design-mockup.html">Dual Calm (полный UI)</a> ·
       <a href="https://github.com/zuevfoton-art/AllerGuide/pull/107">PR #107</a>
     </footer>
   </div>
@@ -752,6 +754,16 @@
         title: 'Защита каждый день',
         desc: 'Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.',
       },
+      {
+        key: 'scanner',
+        title: 'Карта и среда',
+        desc: 'Безопасные места, календарь пыления и клиники рядом с вами.',
+      },
+      {
+        key: 'care',
+        title: 'Экстренный SOS',
+        desc: 'Аллергопаспорт, план действий и контакты экстренной помощи.',
+      },
     ];
 
     document.querySelectorAll('[data-illus]').forEach((node) => {
@@ -779,7 +791,7 @@
     }
 
     function renderChrome(index) {
-      const isLast = index === 2;
+      const isLast = index === SLIDES.length - 1;
       if (isLast) {
         return renderDots(index, true) +
           '<button class="btn-pill">Начать настройку</button>' +

@@ -21,6 +21,11 @@ interface AllergenPickerProps {
   onChange: (selected: string[]) => void;
   suggestedConditionIds?: AllergyConditionId[];
   onAddSuggestedCondition?: (id: AllergyConditionId) => void;
+  /**
+   * Inline cross-reaction CTA. Disabled in profile-setup (dedicated step);
+   * kept on for profile-edit by default.
+   */
+  showCrossReactions?: boolean;
 }
 
 export function AllergenPicker({
@@ -28,6 +33,7 @@ export function AllergenPicker({
   onChange,
   suggestedConditionIds = [],
   onAddSuggestedCondition,
+  showCrossReactions = true,
 }: AllergenPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -36,7 +42,10 @@ export function AllergenPicker({
 
   const popularIds = useMemo(() => new Set(getPopularAllergens().map((item) => item.id)), []);
   const extraSelected = selected.filter((id) => !popularIds.has(id));
-  const crossSuggestions = useMemo(() => getCrossReactionsForSelection(selected), [selected]);
+  const crossSuggestions = useMemo(
+    () => (showCrossReactions ? getCrossReactionsForSelection(selected) : []),
+    [selected, showCrossReactions],
+  );
 
   const toggle = (id: string) => {
     onChange(selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id]);

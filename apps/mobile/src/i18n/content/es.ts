@@ -63,6 +63,9 @@ const esContent: LocaleContent = {
           label: '¿Qué comió?',
           placeholder: 'Platos, alimentos, bebidas',
         },
+        foodComponents: {
+          label: 'Ingredientes del plato',
+        },
         allergens: {
           label: 'Posibles alérgenos en los alimentos',
           placeholder: 'Leche, frutos secos, gluten…',
@@ -104,6 +107,9 @@ const esContent: LocaleContent = {
         itching: {
           label: 'Intensidad del picor',
           choices: ['Ninguno', 'Leve', 'Moderado', 'Grave'],
+        },
+        skinPhotos: {
+          label: 'Fotos de las manifestaciones',
         },
         skinNotes: {
           label: '¿Qué mejoró o empeoró el estado?',

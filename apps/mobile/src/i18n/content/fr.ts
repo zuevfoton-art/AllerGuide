@@ -63,6 +63,9 @@ const frContent: LocaleContent = {
           label: 'Qu\'a-t-on mangé ?',
           placeholder: 'Plats, aliments, boissons',
         },
+        foodComponents: {
+          label: 'Ingrédients du plat',
+        },
         allergens: {
           label: 'Allergènes alimentaires possibles',
           placeholder: 'Lait, fruits à coque, gluten…',
@@ -104,6 +107,9 @@ const frContent: LocaleContent = {
         itching: {
           label: 'Intensité des démangeaisons',
           choices: ['Aucune', 'Légère', 'Modérée', 'Sévère'],
+        },
+        skinPhotos: {
+          label: 'Photos des manifestations',
         },
         skinNotes: {
           label: 'Qu\'est-ce qui a amélioré ou aggravé l\'état ?',

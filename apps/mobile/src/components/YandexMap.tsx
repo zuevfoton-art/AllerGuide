@@ -1,13 +1,15 @@
 import { Platform, StyleSheet, View } from 'react-native';
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 type YandexMapProps = {
   url: string;
   height?: number;
+  overlay?: ReactNode;
+  interactive?: boolean;
 };
 
-export function YandexMap({ url, height = 220 }: YandexMapProps) {
+export function YandexMap({ url, height = 220, overlay, interactive = true }: YandexMapProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, height), [theme, height]);
 
@@ -17,10 +19,18 @@ export function YandexMap({ url, height = 220 }: YandexMapProps) {
         <iframe
           src={url}
           title="Yandex Map"
-          style={styles.iframe as object}
+          style={StyleSheet.flatten([
+            styles.iframe,
+            !interactive && styles.nonInteractive,
+          ]) as object}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
+        {overlay ? (
+          <View pointerEvents="none" style={styles.overlay}>
+            {overlay}
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -33,11 +43,17 @@ export function YandexMap({ url, height = 220 }: YandexMapProps) {
       <WebView
         source={{ uri: url }}
         style={styles.webview}
-        scrollEnabled={false}
+        pointerEvents={interactive ? 'auto' : 'none'}
+        scrollEnabled={interactive}
         originWhitelist={['https://*']}
         javaScriptEnabled
         domStorageEnabled
       />
+      {overlay ? (
+        <View pointerEvents="none" style={styles.overlay}>
+          {overlay}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -61,5 +77,12 @@ function createStyles({ colors }: AppTheme, height: number) {
       height: '100%',
       borderWidth: 0,
     } as object,
+    nonInteractive: {
+      pointerEvents: 'none',
+    } as object,
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: 2,
+    },
   });
 }

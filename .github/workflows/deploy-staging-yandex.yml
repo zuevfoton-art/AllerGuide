@@ -1,0 +1,235 @@
+name: Deploy staging (Yandex Cloud)
+
+# Builds API image → YCR → Serverless Container revision.
+# Migrations run on a self-hosted runner inside the VPC (private Postgres, no public IP).
+# After smoke: EAS staging builds for Android + iOS.
+#
+# Runbook: docs/staging-yandex-cloud.md
+#
+# Note: GitHub Actions forbids `secrets.*` in job-level `if:`. Presence checks live in
+# the `gate` job (env + step outputs), then downstream jobs branch on those outputs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_mobile:
+        description: Skip EAS mobile builds
+        type: boolean
+        default: false
+  push:
+    branches: [staging]
+
+concurrency:
+  group: deploy-staging-yandex
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: aclearo-api
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.34.4"
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.check.outputs.deploy }}
+      smoke: ${{ steps.check.outputs.smoke }}
+      mobile: ${{ steps.check.outputs.mobile }}
+    steps:
+      - id: check
+        name: Evaluate required secrets (without job-level secrets context)
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+          YC_CONTAINER_ID: ${{ secrets.YC_CONTAINER_ID }}
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          SKIP_MOBILE: ${{ github.event.inputs.skip_mobile }}
+        run: |
+          set -euo pipefail
+          deploy=false
+          smoke=false
+          mobile=false
+
+          if [ -n "${YC_SA_JSON}" ] && [ -n "${YC_REGISTRY_ID}" ] && [ -n "${YC_CONTAINER_ID}" ]; then
+            deploy=true
+          else
+            echo "::error::Missing YC_SA_JSON, YC_REGISTRY_ID, and/or YC_CONTAINER_ID"
+          fi
+
+          if [ -n "${STAGING_API_URL}" ]; then
+            smoke=true
+          else
+            echo "::warning::STAGING_API_URL empty — smoke job will be skipped"
+          fi
+
+          if [ -n "${EXPO_TOKEN}" ] && [ "${SKIP_MOBILE:-false}" != "true" ]; then
+            mobile=true
+          else
+            echo "::notice::EAS mobile builds skipped (no EXPO_TOKEN or skip_mobile=true)"
+          fi
+
+          {
+            echo "deploy=${deploy}"
+            echo "smoke=${smoke}"
+            echo "mobile=${mobile}"
+          } >> "${GITHUB_OUTPUT}"
+
+          if [ "${deploy}" != "true" ]; then
+            exit 1
+          fi
+
+  build-push:
+    needs: [gate]
+    if: needs.gate.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Yandex Cloud credentials
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+        run: |
+          echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
+          yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
+
+      - name: Login to Yandex Container Registry
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+        run: |
+          echo "$YC_SA_JSON" | docker login \
+            --username json_key \
+            --password-stdin \
+            "cr.yandex"
+
+      - name: Build and push API image
+        env:
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+        run: |
+          IMAGE="cr.yandex/${YC_REGISTRY_ID}/${IMAGE_NAME}"
+          docker build -t "${IMAGE}:${{ github.sha }}" -t "${IMAGE}:staging" .
+          docker push "${IMAGE}:${{ github.sha }}"
+          docker push "${IMAGE}:staging"
+
+  deploy:
+    needs: [gate, build-push]
+    if: needs.gate.outputs.deploy == 'true' && needs.build-push.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy serverless container revision
+        env:
+          YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
+          YC_REGISTRY_ID: ${{ secrets.YC_REGISTRY_ID }}
+          YC_CONTAINER_ID: ${{ secrets.YC_CONTAINER_ID }}
+          YC_LOCKBOX_SECRET_ID: ${{ secrets.YC_LOCKBOX_SECRET_ID }}
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH="$HOME/yandex-cloud/bin:$PATH"
+          echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
+          yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
+
+          export YC_REGISTRY_ID YC_CONTAINER_ID
+          export YC_LOCKBOX_SECRET_ID="${YC_LOCKBOX_SECRET_ID:-}"
+          export IMAGE="cr.yandex/${YC_REGISTRY_ID}/${IMAGE_NAME}:${{ github.sha }}"
+          export IMAGE_TAG="${{ github.sha }}"
+          chmod +x scripts/yc-lockbox-deploy-secrets.sh
+
+          if [ -z "${YC_LOCKBOX_SECRET_ID}" ]; then
+            echo "::error::YC_LOCKBOX_SECRET_ID is required to mount staging secrets (incl. pollen)"
+            exit 1
+          fi
+
+          # Mount all present Lockbox keys from apps/api/lockbox-staging.keys
+          # (skips missing keys so partial Lockbox still deploys).
+          REQUIRE_POLLEN="${REQUIRE_POLLEN:-0}" \
+            ./scripts/yc-lockbox-deploy-secrets.sh
+
+  migrate:
+    needs: [deploy]
+    if: needs.deploy.result == 'success'
+    runs-on: [self-hosted, yc-staging-vpc]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply migrations (private Postgres via VPC)
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:migrate
+
+  smoke:
+    needs: [gate, migrate]
+    if: always() && needs.migrate.result == 'success' && needs.gate.outputs.smoke == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Staging preflight
+        env:
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          chmod +x scripts/staging-*.sh
+          ./scripts/staging-preflight.sh
+          ./scripts/staging-pollen-smoke.sh || {
+            echo "::warning::Pollen smoke failed — ensure Lockbox has POLLEN_HEATMAP_ENABLED + GOOGLE_POLLEN_API_KEY and image includes pollen routes"
+            exit 1
+          }
+
+  mobile-android:
+    needs: [gate, smoke]
+    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: EAS Build staging (Android)
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: pnpm exec eas build --profile staging --platform android --non-interactive
+
+  mobile-ios:
+    needs: [gate, smoke]
+    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: EAS Build staging (iOS)
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: pnpm exec eas build --profile staging --platform ios --non-interactive

@@ -7,6 +7,8 @@ export type ProfileValidationErrorCode =
   | 'allergen_required'
   | 'child_consent_required';
 
+export const PROFILE_BIRTH_YEAR_MIN = 1900;
+
 export interface ProfileValidationInput {
   name: string;
   birthYear: number;
@@ -29,7 +31,7 @@ export function validateProfileInput(input: ProfileValidationInput): ProfileVali
 
   const year = Number(input.birthYear);
   const currentYear = new Date().getFullYear();
-  if (!Number.isFinite(year) || year < 1900 || year > currentYear) {
+  if (!Number.isFinite(year) || year < PROFILE_BIRTH_YEAR_MIN || year > currentYear) {
     return 'birth_year_invalid';
   }
 

@@ -106,6 +106,22 @@ class WebDb implements DbLike {
     saveJson('ag_safe_products', items);
   }
 
+  private getDiaryAttachments(): {
+    id: number;
+    entryId: number;
+    kind: string;
+    localPath: string;
+    createdAt: string;
+  }[] {
+    return loadJson('ag_diary_attachments', []);
+  }
+
+  private saveDiaryAttachments(
+    items: { id: number; entryId: number; kind: string; localPath: string; createdAt: string }[],
+  ) {
+    saveJson('ag_diary_attachments', items);
+  }
+
   execSync(_sql: string) {}
 
   runSync(sql: string, params?: unknown[]) {
@@ -364,6 +380,26 @@ class WebDb implements DbLike {
       return;
     }
 
+    if (s.startsWith('insert into diary_attachments')) {
+      const items = this.getDiaryAttachments();
+      const id = items.length > 0 ? Math.max(...items.map((item) => item.id)) + 1 : 1;
+      items.push({
+        id,
+        entryId: params![0] as number,
+        kind: params![1] as string,
+        localPath: params![2] as string,
+        createdAt: params![3] as string,
+      });
+      this.saveDiaryAttachments(items);
+      return;
+    }
+
+    if (s.startsWith('delete from diary_attachments where entryid =')) {
+      const items = this.getDiaryAttachments();
+      this.saveDiaryAttachments(items.filter((item) => item.entryId !== params![0]));
+      return;
+    }
+
     if (s.startsWith('insert or replace into app_settings')) {
       const settings = this.getSettings();
       settings[params![0] as string] = params![1] as string;
@@ -440,6 +476,17 @@ class WebDb implements DbLike {
       return notes != null ? ({ notes } as T) : null;
     }
 
+    if (s.includes('from diary_entries') && s.includes('where profileid =') && s.includes('and type =')) {
+      const entries = this.getDiaryEntries();
+      const match = entries
+        .filter(
+          (e) =>
+            e.profileId === params![0] && e.type === params![1] && e.createdAt === params![2],
+        )
+        .sort((a, b) => b.id - a.id)[0];
+      return (match || null) as T | null;
+    }
+
     if (s.includes('from diary_entries') && s.includes('where profileid =')) {
       const entries = this.getDiaryEntries();
       return (entries.find((e) => e.profileId === params![0]) || null) as T | null;
@@ -468,6 +515,17 @@ class WebDb implements DbLike {
 
     if (s.includes('from profiles')) {
       return [...this.getProfiles()].reverse() as T[];
+    }
+
+    if (s.includes('from diary_attachments') && s.includes('where entryid in')) {
+      const items = this.getDiaryAttachments();
+      const ids = new Set((params ?? []) as number[]);
+      return items.filter((item) => ids.has(item.entryId)) as T[];
+    }
+
+    if (s.includes('from diary_attachments') && s.includes('where entryid =')) {
+      const items = this.getDiaryAttachments();
+      return items.filter((item) => item.entryId === params![0]) as T[];
     }
 
     if (s.includes('from diary_entries') && s.includes('where profileid =')) {

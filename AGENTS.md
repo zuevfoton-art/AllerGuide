@@ -11,7 +11,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 **Before writing or changing code**, read and follow:
 
 1. [`docs/architecture.md`](docs/architecture.md) — system design, layers, data flows, feature flags
-2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist
+2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist, Code Complete §10
 
 Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
 
@@ -46,6 +46,12 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
+- `pnpm yc-stage-phase0` — Stage must run on Yandex Cloud (no Replit dependency); see [`docs/migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md)
+- `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
+- `pnpm yc-stage-phase2` — Stage clients must target YC only (EAS `staging`, not Replit); see same doc §Phase 2
+- `pnpm yc-stage-phase3` — Replit deploy artifacts removed from repo; see same doc §Phase 3
+- `pnpm yc-stage-phase4` — Secrets/data hygiene (Lockbox/GH/EAS policy); see same doc §Phase 4 · [`docs/staging-secrets-inventory.md`](docs/staging-secrets-inventory.md)
+- `pnpm yc-stage-phase5` — Final acceptance (YC green + Replit paused); `REQUIRE_REPLIT_PAUSED=1` for strict pause check
 
 ### Backend API (optional) — `apps/api`
 - Not wired to the mobile app by default. Run with `pnpm --filter api dev` (port 3001). Requires PostgreSQL (`DATABASE_URL`) + `JWT_SECRET` to boot the auth/sync/scan features.
@@ -64,8 +70,10 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 
 ### Production builds (internal alpha)
 - Local Android build (Node.js + Gradle) and Android Studio verification: see [`docs/android-local-build.md`](docs/android-local-build.md). Quick path from `apps/mobile`: `pnpm android` (= `expo run:android`) or `cd android && ./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`. The native `apps/mobile/android/` project is committed (Gradle 8.13, Hermes, JDK 17).
+- **Stage APK without local SDK (Cursor Cloud / CI):** prefer **EAS Build** — [`docs/android-stage-build.md`](docs/android-stage-build.md) · GitHub → EAS: `.github/workflows/eas-staging-android.yml` · Gradle-on-GitHub alternative: `.github/workflows/staging-apk-gradle.yml`.
 - EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
-- Replit deploy (web): see [`docs/replit-deploy.md`](docs/replit-deploy.md). `.replit` uses `ignoreDatabaseMigrations = true`, `scripts/replit-db-env.sh`, and `scripts/replit-deploy-build.sh`. «Invalid Neon production database» is usually a stale **deployment production DB** binding on Replit's side (not dev Secrets); see replit-deploy.md.
+- EAS staging (backend flags on): [`docs/eas-staging-build.md`](docs/eas-staging-build.md) · `pnpm --filter mobile build:staging:android`.
+- Stage API is YC (`api.staging.aclearo.com`). Former Replit deploy docs: [`docs/archive/replit-deploy.md`](docs/archive/replit-deploy.md). Migration: [`migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md).
 - QA regression: [`docs/qa-checklist.md`](docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.

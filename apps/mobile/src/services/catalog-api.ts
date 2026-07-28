@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/src/services/api-client';
+import { logCaughtError } from '@/src/services/error-reporting';
 import {
   cachedCatalogProductToDto,
   getCachedCatalogProduct,
@@ -67,7 +68,8 @@ export async function fetchProductFromCatalog(barcode: string): Promise<CatalogP
 
     saveCachedCatalogProduct(product, data.source ?? 'api');
     return product;
-  } catch {
+  } catch (error) {
+    logCaughtError('fetchProductFromCatalog', error, { extra: { barcode: normalized } });
     return null;
   }
 }
@@ -99,7 +101,8 @@ export async function searchProductsFromCatalog(query: string): Promise<CatalogP
         return product;
       })
       .filter((product): product is CatalogProduct => product !== null);
-  } catch {
+  } catch (error) {
+    logCaughtError('searchProductsFromCatalog', error, { extra: { query: term } });
     return [];
   }
 }

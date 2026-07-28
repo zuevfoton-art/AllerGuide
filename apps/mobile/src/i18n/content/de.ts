@@ -63,6 +63,9 @@ const deContent: LocaleContent = {
           label: 'Was wurde gegessen?',
           placeholder: 'Gerichte, Lebensmittel, Getränke',
         },
+        foodComponents: {
+          label: 'Zutaten des Gerichts',
+        },
         allergens: {
           label: 'Mögliche Allergene in den Lebensmitteln',
           placeholder: 'Milch, Nüsse, Gluten…',
@@ -104,6 +107,9 @@ const deContent: LocaleContent = {
         itching: {
           label: 'Juckreizintensität',
           choices: ['Keiner', 'Leicht', 'Mäßig', 'Schwer'],
+        },
+        skinPhotos: {
+          label: 'Fotos der Hautveränderungen',
         },
         skinNotes: {
           label: 'Was hat den Zustand verbessert oder verschlechtert?',

@@ -20,6 +20,9 @@ export interface HealthCheckResult {
   features?: {
     sync: boolean;
     aiScan: boolean;
+    aiScanProvider?: 'yandex' | 'openai';
+    ycOcr?: boolean;
+    pollenHeatmap?: boolean;
   };
   scan?: ScanHealthMetrics;
   database?: {
@@ -71,6 +74,29 @@ function buildScanHealth(): ScanHealthMetrics | undefined {
   return { enabled: true, ...metrics };
 }
 
+function resolveAiScanProviderLabel(): 'yandex' | 'openai' | undefined {
+  if (process.env.AI_SCAN_ENABLED !== 'true') return undefined;
+  const raw = (process.env.AI_PROVIDER || 'openai').trim().toLowerCase();
+  return raw === 'yandex' ? 'yandex' : 'openai';
+}
+
+function buildFeatures() {
+  const aiScan = process.env.AI_SCAN_ENABLED === 'true';
+  const provider = resolveAiScanProviderLabel();
+  const ycOcr =
+    process.env.YC_OCR_ENABLED === 'true' &&
+    Boolean(process.env.YC_AI_API_KEY && process.env.YC_FOLDER_ID);
+  return {
+    sync: process.env.SYNC_ENABLED === 'true',
+    aiScan,
+    pollenHeatmap:
+      process.env.POLLEN_HEATMAP_ENABLED === 'true' &&
+      Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
+    ...(aiScan && provider ? { aiScanProvider: provider } : {}),
+    ...(ycOcr ? { ycOcr: true } : {}),
+  };
+}
+
 export async function buildHealthPayload(): Promise<HealthCheckResult> {
   const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
   const authDatabase = hasDatabaseUrl && Boolean(process.env.JWT_SECRET);
@@ -79,10 +105,7 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
     return {
       ok: true,
       authDatabase: false,
-      features: {
-        sync: process.env.SYNC_ENABLED === 'true',
-        aiScan: process.env.AI_SCAN_ENABLED === 'true',
-      },
+      features: buildFeatures(),
       scan: buildScanHealth(),
       rateLimit: { store: resolveRateLimitStoreKind() },
     };
@@ -109,10 +132,7 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
   return {
     ok,
     authDatabase,
-    features: {
-      sync: process.env.SYNC_ENABLED === 'true',
-      aiScan: process.env.AI_SCAN_ENABLED === 'true',
-    },
+    features: buildFeatures(),
     scan: buildScanHealth(),
     database: {
       ...database,

@@ -12,6 +12,8 @@ afterEach(() => {
 
 describe('security middleware', () => {
   it('sets helmet security headers', async () => {
+    delete process.env.DATABASE_URL;
+    delete process.env.JWT_SECRET;
     const app = await createApp({ withReplitAuth: false });
     const response = await request(app).get('/api/health');
     expect(response.status).toBe(200);
@@ -41,7 +43,7 @@ describe('security middleware', () => {
     return Promise.all([
       expect(allowed('https://app.allerguide.io')).resolves.toBe(true),
       expect(allowed(undefined)).resolves.toBe(true),
-      expect(allowed('https://evil.example.com')).rejects.toThrow(),
+      expect(allowed('https://evil.example.com')).resolves.toBe(false),
     ]);
   });
 

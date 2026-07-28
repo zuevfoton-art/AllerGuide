@@ -2,7 +2,7 @@ import http from 'http';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { createApp } from './app';
 
-const PORT = process.env.API_PORT || 5000;
+const PORT = process.env.PORT || process.env.API_PORT || 5000;
 const METRO_URL = process.env.METRO_URL;
 
 async function main() {

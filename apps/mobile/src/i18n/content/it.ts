@@ -63,6 +63,9 @@ const itContent: LocaleContent = {
           label: 'Cosa è stato mangiato?',
           placeholder: 'Piatti, alimenti, bevande',
         },
+        foodComponents: {
+          label: 'Ingredienti del piatto',
+        },
         allergens: {
           label: 'Possibili allergeni negli alimenti',
           placeholder: 'Latte, frutta a guscio, glutine…',
@@ -104,6 +107,9 @@ const itContent: LocaleContent = {
         itching: {
           label: 'Intensità del prurito',
           choices: ['Nessuno', 'Lieve', 'Moderato', 'Grave'],
+        },
+        skinPhotos: {
+          label: 'Foto delle manifestazioni',
         },
         skinNotes: {
           label: 'Cosa ha migliorato o peggiorato lo stato?',

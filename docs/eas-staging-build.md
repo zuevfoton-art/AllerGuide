@@ -5,6 +5,9 @@
 
 Internal-сборка для closed beta: **backend auth, cloud sync и AI scan включены**. Требует живой staging API ([`staging-deploy.md`](staging-deploy.md), план: [`staging-infrastructure-plan.md`](staging-infrastructure-plan.md)).
 
+> **Android APK для stage / Google pollen heatmap:** preferred path = **EAS Build** (не локальный SDK в Cursor VM).  
+> Сравнение EAS vs GitHub Actions: [`android-stage-build.md`](android-stage-build.md).
+
 > Offline-only smoke без сервера — используйте профиль [`preview`](eas-internal-preview.md).
 
 ---
@@ -18,6 +21,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | **`true`** |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | **`true`** |
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | `false` |
+| `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | **`google`** (нужен EAS secret Maps key) |
 | EAS channel | `preview` | `staging` |
 
 ---
@@ -27,6 +31,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 1. Staging API доступен: `curl https://api.staging.aclearo.com/api/health` → 200 ([P1.1c](staging-deploy.md))
 2. `eas login` и реальный `projectId` в [`app.json`](../apps/mobile/app.json) (см. [preview runbook](eas-internal-preview.md))
 3. Apple/Google credentials для internal distribution (те же, что для preview)
+4. Для pollen heatmap: пошагово создать GCP keys — [`gcp-pollen-maps-keys.md`](gcp-pollen-maps-keys.md); Maps key в **EAS Sensitive** `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (не Secret visibility); API — Lockbox `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` (Phase 1). Stage clients: [`migrate-off-replit-to-yc.md`](migrate-off-replit-to-yc.md) Phase 2.
 
 ---
 
@@ -46,6 +51,9 @@ pnpm exec eas login
 pnpm build:staging:android
 ```
 
+**Через GitHub (без локального `eas login`):** Actions → **EAS staging Android** → Run workflow  
+([`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml), secret `EXPO_TOKEN`). Подробности: [`android-stage-build.md`](android-stage-build.md).
+
 ---
 
 ## Сборка
@@ -56,6 +64,16 @@ cd apps/mobile
 pnpm build:staging              # iOS + Android
 pnpm build:staging:android      # APK (рекомендуется для первого smoke)
 pnpm build:staging:ios          # TestFlight internal
+```
+
+Maps key (один раз на проект Expo):
+
+```bash
+cd apps/mobile
+pnpm exec eas secret:create --scope project \
+  --name EXPO_PUBLIC_GOOGLE_MAPS_API_KEY \
+  --value "YOUR_RESTRICTED_MAPS_KEY" \
+  --type string
 ```
 
 ---
@@ -79,6 +97,7 @@ API smoke (без устройства):
 3. **Login** после logout (S.2)
 4. **Create profile** — dual-write на сервер (S.4)
 5. **Manual scan** — ручной ввод состава → источник «ИИ-анализ» (P1.5b / C.1)
+6. **Пыление (если GCP keys)** — Google basemap + UPI heatmap + OM-бейдж ([android-stage-build.md](android-stage-build.md))
 
 Далее для closed beta: cross-device backup (P1.4c).
 
@@ -103,7 +122,9 @@ Closed beta: [`closed-beta-p17.md`](closed-beta-p17.md).
 | Register/login «Сервер недоступен» | Проверьте P1.1c, URL в `eas.json` staging env |
 | Sync «недоступна» | API: `SYNC_ENABLED=true`; на клиенте флаг уже `true` в staging |
 | AI scan fallback на mock | API: `AI_SCAN_ENABLED=true`, `OPENAI_API_KEY`, JWT |
+| Пыление остаётся на Яндексе | Нет EAS secret Maps key / пустой `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`; или API pollen выключен |
 | Build fails | Запускайте из `apps/mobile`; см. [preview troubleshooting](eas-internal-preview.md) |
+| Нужен APK без EAS | [`android-stage-build.md`](android-stage-build.md) §C — Gradle on GitHub |
 
 ---
 
@@ -111,5 +132,6 @@ Closed beta: [`closed-beta-p17.md`](closed-beta-p17.md).
 
 - [`apps/mobile/eas.json`](../apps/mobile/eas.json)
 - [`apps/mobile/src/constants/features.ts`](../apps/mobile/src/constants/features.ts)
+- [`docs/android-stage-build.md`](android-stage-build.md) — EAS vs GitHub
 - [`docs/staging-deploy.md`](staging-deploy.md)
 - [`docs/adr/001-dual-write.md`](adr/001-dual-write.md)

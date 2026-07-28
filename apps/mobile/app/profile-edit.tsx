@@ -3,6 +3,7 @@ import { Alert, View, Text, TextInput, Pressable, StyleSheet } from 'react-nativ
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   getMissingConditionsForAllergens,
+  getGatedConditionRemovals,
   normalizeAllergyConfirmations,
   parseAllergyConfirmations,
   parseProfileAllergenIds,
@@ -113,14 +114,7 @@ export default function ProfileEditScreen() {
   };
 
   const handleConditionsChange = (next: AllergyConditionId[]) => {
-    const removed = conditions.filter((item) => !next.includes(item));
-    const gatedRemoved = removed.filter(
-      (item) =>
-        item === 'asthma' ||
-        item === 'insect' ||
-        item === 'dermatitis' ||
-        ['pollinosis', 'rhinitis', 'household', 'animal'].includes(item),
-    );
+    const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
       Alert.alert(
         t('profileSetup.conditionRemoveTitle'),
@@ -242,7 +236,7 @@ export default function ProfileEditScreen() {
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-            <ConditionPicker selected={conditions} onChange={handleConditionsChange} />
+            <ConditionPicker selected={conditions} onChange={handleConditionsChange} showOptions={false} />
           </GlassCard>
 
           {conditions.length > 0 ? (

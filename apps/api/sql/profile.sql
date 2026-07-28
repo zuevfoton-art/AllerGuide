@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS profile.profiles (
     birth_year integer,
     type       varchar(16)  NOT NULL,           -- 'self' | 'child'
     allergies  text NOT NULL DEFAULT '[]',      -- JSON array of allergen names
+    allergy_confirmations text NOT NULL DEFAULT '{}', -- JSON map allergenId → confirmation source
     created_at timestamptz  NOT NULL DEFAULT now(),
     updated_at timestamptz  NOT NULL DEFAULT now()
 );

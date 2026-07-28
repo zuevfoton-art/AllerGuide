@@ -7,6 +7,12 @@ export const CLOUD_SYNC_ENABLED = process.env.EXPO_PUBLIC_CLOUD_SYNC === 'true';
 /** Smart LLM scan via AllerGuide API (/api/scan). Requires AI_SCAN_ENABLED on server. */
 export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true';
 
+/**
+ * Cloud Vision OCR via API (/api/ocr → Yandex Vision). Offline demo OCR remains
+ * when false or when the API is unreachable.
+ */
+export const YC_OCR_ENABLED = process.env.EXPO_PUBLIC_YC_OCR === 'true';
+
 /** Use PostgreSQL backend for users and profiles (JWT auth). */
 export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'true';
 
@@ -21,3 +27,10 @@ export const MARKETPLACE_CHECKOUT_ENABLED =
 /** Validate promo codes via API when URL is configured (falls back to core offline). */
 export const MARKETPLACE_CHECKOUT_API_ENABLED =
   MARKETPLACE_CHECKOUT_ENABLED && Boolean(process.env.EXPO_PUBLIC_API_URL);
+
+/**
+ * Google Maps basemap + Google Pollen UPI tiles on the pollen layer.
+ * The Yandex/Open-Meteo view remains the default and offline-safe fallback.
+ */
+export const GOOGLE_POLLEN_HEATMAP_ENABLED =
+  process.env.EXPO_PUBLIC_POLLEN_HEATMAP === 'google';

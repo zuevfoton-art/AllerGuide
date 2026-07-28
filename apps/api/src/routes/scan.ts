@@ -11,6 +11,8 @@ import {
   scanCacheKey,
   setCachedScan,
 } from '../lib/scan-cache';
+import { logCaughtError } from '../lib/log-caught-error';
+import { callScanLlm } from '../services/llm-scan-provider';
 
 interface ScanRequestBody {
   mode?: ScanMode;
@@ -44,41 +46,6 @@ function logScanCacheEvent(hit: boolean): void {
   console.info(
     `[scan] cache_${hit ? 'hit' : 'miss'} hits=${metrics.cacheHits} misses=${metrics.cacheMisses} hitRate=${metrics.hitRate ?? 'n/a'}`,
   );
-}
-
-async function callOpenAiCompatible(prompt: string): Promise<string | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-
-  if (!apiKey) return null;
-
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      messages: [
-        {
-          role: 'system',
-          content: 'You analyze food and medicine ingredient lists for allergens. Reply with JSON only.',
-        },
-        { role: 'user', content: prompt },
-      ],
-    }),
-  });
-
-  if (!response.ok) return null;
-
-  const payload = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-
-  return payload.choices?.[0]?.message?.content ?? null;
 }
 
 export function registerScanRoutes(app: Express) {
@@ -141,7 +108,7 @@ export function registerScanRoutes(app: Express) {
       });
 
     try {
-      const content = await callOpenAiCompatible(prompt);
+      const content = await callScanLlm(prompt);
       if (!content) {
         res.status(502).json({ ok: false, error: 'LLM provider unavailable' });
         return;
@@ -155,7 +122,8 @@ export function registerScanRoutes(app: Express) {
 
       await setCachedScan(cacheKey, result);
       res.json({ ok: true, result, cached: false });
-    } catch {
+    } catch (error) {
+      logCaughtError('scan.analyze', error);
       res.status(500).json({ ok: false, error: 'Scan failed' });
     }
   });

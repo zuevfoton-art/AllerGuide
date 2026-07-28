@@ -6,6 +6,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { setupAuth, registerAuthRoutes } from './replit_integrations/auth';
 import { registerSyncRoutes } from './routes/sync';
 import { registerScanRoutes } from './routes/scan';
+import { registerOcrRoutes } from './routes/ocr';
 import { registerMobileAuthRoutes } from './routes/mobile-auth';
 import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
@@ -13,6 +14,8 @@ import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerDiscountRoutes } from './routes/discount';
+import { registerPollenRoutes } from './routes/pollen';
+import { registerMarketRoutes } from './routes/market';
 import {
   buildCorsOptions,
   installRateLimiters,
@@ -31,18 +34,21 @@ export async function createApp(
   const isDev = Boolean(process.env.METRO_URL);
   app.use(helmet({ contentSecurityPolicy: isDev ? false : undefined }));
   app.use(cors(buildCorsOptions()));
-  app.use(express.json({ limit: '2mb' }));
+  app.use(express.json({ limit: '8mb' }));
   await installRateLimiters(app);
 
   registerMobileAuthRoutes(app);
   registerProfileRoutes(app);
   registerSyncRoutes(app);
   registerScanRoutes(app);
+  registerOcrRoutes(app);
   registerCatalogRoutes(app);
+  registerMarketRoutes(app);
   registerAliasFeedbackRoutes(app);
   registerGovernanceRoutes(app);
   registerAnalyticsRoutes(app);
   registerDiscountRoutes(app);
+  registerPollenRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);

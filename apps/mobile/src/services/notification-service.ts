@@ -16,6 +16,7 @@ import {
   type ReminderNotificationContent,
 } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 if (Platform.OS !== 'web') {
   Notifications.setNotificationHandler({
@@ -69,7 +70,8 @@ function readClinicalReminderIds(): string[] {
   try {
     const parsed = JSON.parse(raw) as unknown;
     return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
-  } catch {
+  } catch (error) {
+    logCaughtError('readClinicalReminderIds', error, { level: 'warn' });
     return [];
   }
 }
@@ -185,8 +187,11 @@ export async function cancelPollenReminder(profileId: number): Promise<void> {
   if (existing) {
     try {
       await Notifications.cancelScheduledNotificationAsync(existing);
-    } catch {
-      /* ignore */
+    } catch (error) {
+      logCaughtError('cancelPollenReminder', error, {
+        level: 'warn',
+        extra: { profileId: String(profileId), notificationId: existing },
+      });
     }
     setSetting(pollenReminderIdKey(profileId), '');
   }

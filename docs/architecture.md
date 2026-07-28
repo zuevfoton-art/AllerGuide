@@ -26,6 +26,8 @@ AllerGuide — offline-first приложение для управления а
 
 **План MVP → prod (Phase 1–2):** детальные GitHub issues с зависимостями — [`docs/phase1-phase2-issues.md`](./phase1-phase2-issues.md) · сводка фаз — [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md).
 
+**Карта пыления (Яндекс + геолокация):** план интеграции берёзы / злаковых / амброзии — [`docs/yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md). Замена basemap на Google + `heatmapTiles` (слой «Пыление», бейдж Open-Meteo) — §4.5–4.6 того же документа. Stage APK без локального SDK: [`docs/android-stage-build.md`](./android-stage-build.md) (EAS preferred · GitHub Actions).
+
 ---
 
 ## Структура monorepo
@@ -40,7 +42,7 @@ AllerGuide — offline-first приложение для управления а
 │   ├── ai/              # Сканер, OCR-подготовка, LLM-клиент
 │   └── ui/              # Общие RN-компоненты (минимальный набор)
 ├── docs/                # Архитектура, QA, деплой, клинические фичи
-├── scripts/             # Сборка APK, Replit deploy
+├── scripts/             # Staging smokes, YC Lockbox/deploy, APK helpers
 ├── .github/workflows/   # CI, Neon preview branches
 ├── turbo.json           # Граф задач Turborepo (build, lint, typecheck, test)
 └── package.json         # Корневые скрипты: pnpm typecheck | test | lint
@@ -220,6 +222,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `BACKEND_AUTH_ENABLED` | `EXPO_PUBLIC_BACKEND_AUTH` | JWT + серверные профили |
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
+| `YC_OCR` (API: `YC_OCR_ENABLED`) | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 
 ---
@@ -330,7 +333,7 @@ sequenceDiagram
 1. **`runSmartScan`** — если задан `llmEndpoint` и сервер доступен → LLM; иначе fallback
 2. **`runMockScan`** — keyword-match по аллергенам профиля + перекрёстные реакции из `@allerguide/core`
 3. Уровни риска: `low` | `medium` | `high`
-4. **OCR** (`ocr.ts`): `simulateOcrFromCapture` (demo-тексты), `prepareScanTextFromOcr`, `buildOcrScanProductName` — нативный OCR SDK пока не подключён
+4. **OCR** (`ocr.ts` + optional `/api/ocr`): demo/`simulateOcrFromCapture` offline; при `EXPO_PUBLIC_YC_OCR` mobile шлёт фото на `POST /api/ocr` (Yandex Vision), затем `prepareScanTextFromOcr` / `runSmartScan`
 
 ### Источники результата (`source`)
 
@@ -409,6 +412,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
 | `routes/scan.ts` | `POST /api/scan` |
+| `routes/ocr.ts` | `POST /api/ocr` (Yandex Vision) |
 | `routes/sync.ts` | `POST /api/sync/backup`, `GET /api/sync/backup/:userId` |
 | Replit auth | `GET /api/login`, `/api/callback`, `/api/logout`, `/api/auth/user`, `/api/auth/replit-exchange` |
 | — | `GET /api/health` |
@@ -447,7 +451,16 @@ Drizzle-объекты схемо-квалифицированы — код за
 - Кэш результатов (ключ — хэш режима/текста/аллергенов)
 - Дневной бюджет на user/IP; биллится только промах кэша
 - `SCAN_REQUIRE_AUTH` — опциональное требование JWT
-- OpenAI-compatible: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
+- Провайдер: `AI_PROVIDER=yandex|openai` (default `openai`)
+  - **yandex:** `YC_AI_API_KEY`, `YC_FOLDER_ID`, опционально `YC_GPT_MODEL` (default `yandexgpt-lite`) — Foundation Models completion
+  - **openai:** `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` (OpenAI-compatible)
+- Реализация: `services/llm-scan-provider.ts` → `routes/scan.ts`
+
+### Vision OCR (`routes/ocr.ts`, `services/yandex-vision-ocr.ts`)
+
+- `YC_OCR_ENABLED=true` + `YC_AI_API_KEY` / `YC_FOLDER_ID`
+- Mobile: `EXPO_PUBLIC_YC_OCR` → `ocr-api-service` → фото из галереи
+- Offline fallback: demo OCR / ручной ввод
 
 ### Облачная синхронизация (`routes/sync.ts`)
 
@@ -517,7 +530,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 |--------|------------|
 | `scan.ts` | `runMockScan` — keyword + cross-reactions |
 | `smart-scan.ts` | `runSmartScan`, LLM prompt/parse, fallback на mock |
-| `ocr.ts` | Нормализация OCR-текста, demo capture, извлечение блока состава |
+| `ocr.ts` | Нормализация OCR-текста, demo capture, `asVisionOcrResult` |
 
 ### `@allerguide/ui` (`packages/ui/`)
 
@@ -564,12 +577,12 @@ pnpm test        # Vitest: core, ai, mobile, api
 pnpm --filter mobile lint
 ```
 
-### Replit
+### Replit (archived)
 
-- `.replit` — autoscale deploy, `ignoreDatabaseMigrations`
-- `scripts/replit-deploy-build.sh` — install → `db:migrate` → `expo export`
-- API отдаёт static web + опционально Metro proxy
-- Подробнее: `docs/replit-deploy.md`
+Deploy на Replit **снят с поддержки** для stage (Phase 3). Исторический runbook: [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md).
+
+- Stage API: Yandex Cloud — [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)
+- Optional legacy web OIDC: `apps/api/src/replit_integrations` only when `REPL_ID` is set (never on YC staging Lockbox)
 
 ### Android APK (preview)
 
@@ -625,6 +638,7 @@ pnpm --filter mobile lint
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` | JWT auth + server profiles |
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | Backend catalog lookup |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | LLM scan via API |
+| `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | Encrypted cloud backup |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_SENTRY_DSN` | — | Crash reporting |
@@ -642,7 +656,8 @@ pnpm --filter mobile lint
 | `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK` | OFF write-through on catalog miss |
 | `OPENFOODFACTS_USER_AGENT` | Required by OFF API |
-| `AI_SCAN_ENABLED`, `OPENAI_*` | LLM scan provider |
+| `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan (`yandex` или OpenAI-compatible) |
+| `YC_OCR_ENABLED` | Vision OCR (`POST /api/ocr`) |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `REPL_ID`, `ISSUER_URL` | Replit OIDC |
 | `METRO_URL` | Dev proxy to Expo |
@@ -658,7 +673,9 @@ pnpm --filter mobile lint
 | `AGENTS.md` | Инструкции для разработки / Cloud Agent |
 | `docs/functional-requirements.md` | Функциональные требования |
 | `docs/clinical-features-raaci.md` | Клинические фичи (RAACI) |
-| `docs/replit-deploy.md` | Деплой на Replit |
+| `docs/archive/replit-deploy.md` | Archived Replit deploy (do not use for stage) |
+| `docs/migrate-off-replit-to-yc.md` | Stage без Replit (Phase 0–5 gates) |
+| `docs/staging-yandex-cloud.md` | Staging API на Yandex Cloud |
 | `docs/eas-internal-preview.md` | EAS / preview builds |
 | `docs/qa-checklist.md` | QA чеклист |
 | `docs/roadmap-to-prod.md` | Roadmap к production |

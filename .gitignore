@@ -45,7 +45,6 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.staging.example
-!.env.replit.example
 
 # TypeScript
 *.tsbuildinfo

@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import { exportLocalBackup, importLocalBackup } from '@/src/services/sync-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 async function shareOnWeb(json: string): Promise<{ ok: true } | { ok: false; error: string }> {
   if (typeof document === 'undefined') {
@@ -74,7 +75,8 @@ export async function shareLocalBackupFile(): Promise<{ ok: true } | { ok: false
 
     trackEvent('backup_exported');
     return { ok: true };
-  } catch {
+  } catch (error) {
+    logCaughtError('shareLocalBackupFile', error);
     return { ok: false, error: 'Не удалось экспортировать данные' };
   }
 }
@@ -98,7 +100,8 @@ export async function pickAndImportLocalBackup(): Promise<{ ok: true } | { ok: f
     const importResult = importLocalBackup(raw);
     if (importResult.ok) trackEvent('backup_imported');
     return importResult;
-  } catch {
+  } catch (error) {
+    logCaughtError('pickAndImportLocalBackup', error);
     return { ok: false, error: 'Не удалось импортировать файл' };
   }
 }

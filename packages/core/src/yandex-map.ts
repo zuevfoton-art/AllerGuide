@@ -70,3 +70,28 @@ export function buildPlacesMapUrl(
     })),
   });
 }
+
+export function buildLocationMapUrl(latitude: number, longitude: number): string {
+  return buildYandexMapWidgetUrl({
+    center: { latitude, longitude },
+    zoom: MOSCOW_PLACE_ZOOM,
+    markers: [{ latitude, longitude, style: 'pm2blm' }],
+  });
+}
+
+export function buildPollenRiskMapUrl(options: {
+  center: { latitude: number; longitude: number };
+  zoom?: number;
+}): string {
+  return buildYandexMapWidgetUrl({
+    center: options.center,
+    zoom: options.zoom ?? MOSCOW_REGION_ZOOM,
+    markers: [
+      {
+        latitude: options.center.latitude,
+        longitude: options.center.longitude,
+        style: 'pm2blm',
+      },
+    ],
+  });
+}

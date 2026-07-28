@@ -35,7 +35,8 @@ export function buildCorsOptions(): CorsOptions {
         callback(null, true);
         return;
       }
-      callback(new Error('Origin not allowed by CORS'));
+      // Deny without throwing — cors package turns Error into HTTP 500.
+      callback(null, false);
     },
   };
 }
@@ -92,9 +93,21 @@ export async function createScanRateLimiter(): Promise<RateLimitRequestHandler> 
   });
 }
 
-/** Install global/auth/scan rate limiters (Redis-backed when REDIS_URL is set). */
+/** Dedicated limiter for bursty, billable Google Pollen tile requests. */
+export async function createPollenRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('pollen', {
+    windowMs: parseNumber(process.env.POLLEN_RATE_LIMIT_WINDOW_MS, 60 * 1000),
+    max: parseNumber(process.env.POLLEN_RATE_LIMIT_MAX, 120),
+    message: 'Too many pollen tile requests',
+  });
+}
+
+/** Install endpoint rate limiters (Redis-backed when REDIS_URL is set). */
 export async function installRateLimiters(app: Express): Promise<void> {
   app.use(await createGlobalRateLimiter());
   app.use('/api/auth', await createAuthRateLimiter());
-  app.use('/api/scan', await createScanRateLimiter());
+  const scanLimiter = await createScanRateLimiter();
+  app.use('/api/scan', scanLimiter);
+  app.use('/api/ocr', scanLimiter);
+  app.use('/api/pollen', await createPollenRateLimiter());
 }
