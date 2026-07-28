@@ -273,7 +273,7 @@ Baseline также включает **индекс самочувствия 0�
 - **FR-MAP-15.** Одно значение уровня выбранного аллергена на карте; масштаб (точка / город / регион) меняет zoom и способ агрегации CAMS/Open-Meteo-данных (бейдж сохраняется и при Google heatmap).
 - **FR-MAP-16.** ~~Список ближайших модельных точек~~ — заменён масштабируемым единым уровнем (см. FR-MAP-15).
 - **FR-MAP-17.** Дополнительные live-таксоны: ольха, полынь и олива (если доступны в CAMS).
-- **FR-MAP-18.** (план) Google pollen heatmap на Google basemap за stage-флагом; OM-бейдж primary для числа; см. `yandex-pollen-map-integration.md` §4.5–4.6. Альтернатива без Google Maps — CAMS/SILAM WMS.
+- **FR-MAP-18.** Google pollen heatmap foundation реализован на Google basemap за stage-флагом; OM-бейдж остаётся primary для числа. Включение на staging ожидает GCP keys и device QA; см. `yandex-pollen-map-integration.md` §4.5–4.6.
 
 Архитектура и сравнение источников: [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md).
 

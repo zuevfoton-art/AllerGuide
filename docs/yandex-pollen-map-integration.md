@@ -196,9 +196,9 @@ flowchart LR
 Следующий инкремент heatmap: **Google basemap + `heatmapTiles` + OM-бейдж** (§4.6), не overlay на Яндекс.  
 SILAM/CAMS — только если нужен слой **без** Google Maps ToS.
 
-### 4.5. Feasibility: Google `heatmapTiles` на staging (без реализации)
+### 4.5. Feasibility: Google `heatmapTiles` на staging
 
-Проверка возможности stage-сценария **без кода**. Источники: [coverage](https://developers.google.com/maps/documentation/pollen/coverage), [heatmap tiles](https://developers.google.com/maps/documentation/pollen/heatmap-tiles), [policies](https://developers.google.com/maps/documentation/pollen/policies), [billing](https://developers.google.com/maps/documentation/pollen/usage-and-billing).
+Источники: [coverage](https://developers.google.com/maps/documentation/pollen/coverage), [heatmap tiles](https://developers.google.com/maps/documentation/pollen/heatmap-tiles), [policies](https://developers.google.com/maps/documentation/pollen/policies), [billing](https://developers.google.com/maps/documentation/pollen/usage-and-billing).
 
 #### Вердикт
 
@@ -229,7 +229,7 @@ GET https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heat
 4. Billing обязателен на GCP-проекте; SKU **Pollen Usage** (Pro): ~5 000 вызовов/мес free, далее ~$10 / 1 000 (см. актуальный прайс GMP).  
    Один pan/zoom viewport ≈ десятки tile-запросов → на stage нужен жёсткий quota + rate limit.
 
-#### Что нужно для stage (чеклист ops, без кода)
+#### Что нужно для stage (чеклист ops)
 
 | # | Шаг | Где |
 |---|-----|-----|
@@ -254,7 +254,8 @@ GET https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heat
 Минимальный stage-scope: Google basemap + `TREE_UPI`/`GRASS_UPI`/`WEED_UPI` overlay + атрибуция; бейдж уровня оставить Open-Meteo.  
 **Не делать:** overlay Google-тайлов на Яндекс-виджет; клиентский ключ Pollen без ограничений; кэш PNG в БД.
 
-Код heatmap **не начинать**, пока нет staging-секретов GCP и явного go на смену basemap.
+Foundation реализован за default-off флагом. Для визуального stage QA остаются GCP billing,
+ограниченные ключи и включение API env.
 
 ### 4.6. План: Google basemap + pollen heatmap (бейдж Open-Meteo)
 
@@ -290,9 +291,9 @@ GET https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heat
 
 | Платформа | Basemap | Tile overlay | Готовность репо |
 |-----------|---------|--------------|-----------------|
-| **Android** | `react-native-maps` + `PROVIDER_GOOGLE` | `<UrlTile urlTemplate=…/{z}/{x}/{y} />` | Пакет **уже** в `apps/mobile` (`^1.20.1`), **не используется**; нужен plugin + API key в `app.json` |
-| **iOS** | то же + `PROVIDER_GOOGLE` (иначе Apple Maps — **ToS-нарушение** для pollen tiles) | `UrlTile` | Нужен Maps SDK for iOS key |
-| **Web** | Maps JavaScript API | `google.maps.ImageMapType` / overlayMapTypes | `react-native-maps` **без** web; нужен отдельный путь (см. §4.6.4) |
+| **Android** | `react-native-maps` + `PROVIDER_GOOGLE` | `<UrlTile urlTemplate=…/{z}/{x}/{y} />` | **Реализовано**; ключ через manifest placeholder / Expo config |
+| **iOS** | то же + `PROVIDER_GOOGLE` (иначе Apple Maps — **ToS-нарушение** для pollen tiles) | `UrlTile` | **Реализовано**; Google pod + `GMSServices`, ключ из Info.plist build setting |
+| **Web** | Maps JavaScript API | `google.maps.ImageMapType` / overlayMapTypes | **Реализовано** отдельным `.web.tsx`; нужен referrer-restricted key |
 
 **Итог:** замена на pollen-слое **реализуема**; web — отдельный адаптер; places-слой может остаться на Яндексе до отдельного решения.
 
@@ -394,14 +395,18 @@ ragweed_pollen, mugwort_pollen            → WEED_UPI
 
 Places / АДАИР: без изменений в этом плане (Яндекс / списки).
 
-#### 4.6.8. Инкременты реализации (когда будет go)
+#### 4.6.8. Статус инкрементов
 
-1. **Spike (native Android staging):** `MapView` + `PROVIDER_GOOGLE` + один `UrlTile` `TREE_UPI` через proxy; OM-бейдж поверх; без web.
-2. **Core + flags:** маппинг UPI, `features.ts`, `.env.example`, API route + rate limit.
-3. **PollenMapLayer switch:** флаг → `GooglePollenMap` else `YandexMap`.
-4. **Web adapter** Maps JS + тот же proxy URL template.
-5. **iOS** key + `PROVIDER_GOOGLE` + EAS staging rebuild.
-6. **QA:** Москва/СПб visual; quota smoke; offline; ToS attribution checklist.
+1. ✅ **Android foundation:** `MapView` + `PROVIDER_GOOGLE` + `UrlTile`; OM-бейдж поверх.
+2. ✅ **Core + flags:** UPI mapping, env defaults, proxy route, PNG validation, `no-store`, rate limit.
+3. ✅ **PollenMapLayer switch:** flag+keys → `GooglePollenMap`, иначе `YandexMap`.
+4. ✅ **Web adapter:** Maps JS + `ImageMapType` + тот же proxy.
+5. ✅ **iOS wiring:** Google pod + `PROVIDER_GOOGLE` + build-time key.
+6. ⏳ **Stage QA с реальными ключами:** Москва/СПб visual, quota smoke, Android/iOS EAS.
+
+Автоматически проверено: 18 focused tests, typecheck, lint, enabled web export, Expo config
+для Android/iOS. Android APK в Cursor Cloud не собран: в образе нет Android SDK /
+`ANDROID_HOME`; fallback без Google credentials проверен вручную.
 
 **Вне scope первого инкремента:** миграция places на Google; отказ от Яндекс deep-link; Google Forecast вместо OM-бейджа; кэш тайлов.
 
