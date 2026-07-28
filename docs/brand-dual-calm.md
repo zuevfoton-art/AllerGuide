@@ -88,7 +88,8 @@ flowchart LR
 | Элемент | Токен |
 |---------|--------|
 | Screen background | `bg` |
-| Hero / waves / wellness atmosphere | `calm*` + `getCalmGradient` |
+| Hero / wellness atmosphere (home, clinical) | `calm*` + `getCalmGradient` |
+| Onboarding waves (`OnboardingWaveBackground`) | `accentLight` + `accent` (Claro teal) |
 | H1, KPI numbers | `head` |
 | Primary button, active tab icon, links | `accent` |
 | Tab pill background (план P3.3) | `calmWash` |
@@ -105,7 +106,7 @@ flowchart LR
 |------|-----|------------|--------|
 | **P3.0** | этот PR | `brand-dual-calm.md`, cross-link в rollout, dual palette в `brand-preview.html` | ✅ |
 | **P3.1** | этот PR | `calm.*` tokens, `info` → blue, `getCalmGradient()` | ✅ |
-| **P3.2** | этот PR | Onboarding waves, home wellness + hero — ambient blue | ✅ |
+| **P3.2** | этот PR | Home wellness + hero — ambient blue; onboarding waves — Claro teal | ✅ |
 | **P3.3** | этот PR | Tab pill `calmWash`, `GlassCard variant="calm"` на клинических экранах | ✅ |
 | **P3.4** | опц. | Store screenshots, `design-mockup.html` sync | ☑ (июль 2026) |
 | **P3.5** | опц. | QA checklist: accent teal + calm blue | ☐ |
@@ -114,7 +115,7 @@ flowchart LR
 
 ## Быстрый визуальный тест (P3.2 preview)
 
-В `OnboardingWaveBackground` временно подставить `calmWash` / `calmMid` вместо `accentLight` / `accent` — CTA и `BrandLogo` оставить teal. Если atmosphere «медицинская» вернулась, модель подтверждена.
+Onboarding waves используют `accentLight` / `accent` (Claro teal), в одном ключе с CTA и `BrandLogo`. Home / wellness / clinical surfaces оставляют Medical Calm (`calmWash` / `calmMid`).
 
 ---
 

@@ -96,8 +96,8 @@ export default function OnboardingIntroScreen() {
   return (
     <View style={styles.root}>
       <OnboardingWaveBackground
-        calmMid={theme.colors.calmMid}
-        calmWash={theme.colors.calmWash}
+        accent={theme.colors.accent}
+        accentLight={theme.colors.accentLight}
       />
       <SafeAreaView style={styles.safe}>
         <View style={[styles.card, { maxWidth: layout.contentMaxWidth }]}>
