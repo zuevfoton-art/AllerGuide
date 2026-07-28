@@ -5,6 +5,7 @@ import type { LoginType } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
+import { logCaughtError } from '@/src/services/error-reporting';
 import { useTranslation } from '@/src/store/locale-store';
 import {
   AuthDivider,
@@ -39,15 +40,23 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setLoading(true);
     setError('');
-    const result = await loginUser({ loginType, login, password });
-    setLoading(false);
+    try {
+      const result = await loginUser({ loginType, login, password });
 
-    if (!result.ok) {
-      setError(tAuthError(result.error));
-      return;
+      if (!result.ok) {
+        setError(tAuthError(result.error));
+        return;
+      }
+
+      router.replace('/');
+    } catch (error) {
+      logCaughtError('LoginScreen.handleLogin', error, {
+        extra: { loginType },
+      });
+      setError(t('auth.errors.unexpected'));
+    } finally {
+      setLoading(false);
     }
-
-    router.replace('/');
   };
 
   const forgotLabel = FORGOT_LABELS[locale] ?? FORGOT_LABELS.en;

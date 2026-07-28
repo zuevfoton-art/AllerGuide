@@ -74,6 +74,7 @@ const en: LocaleMessages = {
       emailTaken: 'An account with this email already exists.',
       phoneTaken: 'An account with this phone number already exists.',
       createFailed: 'Could not create account.',
+      unexpected: 'An unexpected error occurred. Please try again.',
     },
     forgot: {
       title: 'Reset password',

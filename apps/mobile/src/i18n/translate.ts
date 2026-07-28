@@ -54,6 +54,7 @@ const AUTH_ERROR_KEY_MAP: Record<string, keyof LocaleMessages['auth']['errors']>
   'Пользователь с таким email уже зарегистрирован.': 'emailTaken',
   'Пользователь с таким номером уже зарегистрирован.': 'phoneTaken',
   'Не удалось создать аккаунт.': 'createFailed',
+  'Произошла непредвиденная ошибка. Попробуйте ещё раз.': 'unexpected',
 };
 
 export function translateAuthError(messages: LocaleMessages, error: string): string {
