@@ -74,6 +74,7 @@ const it: LocaleMessages = {
       emailTaken: 'Esiste già un account con questa email.',
       phoneTaken: 'Esiste già un account con questo numero.',
       createFailed: "Impossibile creare l'account.",
+      unexpected: 'Si è verificato un errore imprevisto. Riprova.',
     },
     forgot: {
       title: 'Reimposta password',

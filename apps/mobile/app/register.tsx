@@ -4,6 +4,7 @@ import type { LoginType } from '@allerguide/core';
 import { registerUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
+import { logCaughtError } from '@/src/services/error-reporting';
 import { useTranslation } from '@/src/store/locale-store';
 import {
   AuthError,
@@ -26,15 +27,23 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     setLoading(true);
     setError('');
-    const result = await registerUser({ loginType, login, password, confirmPassword });
-    setLoading(false);
+    try {
+      const result = await registerUser({ loginType, login, password, confirmPassword });
 
-    if (!result.ok) {
-      setError(tAuthError(result.error));
-      return;
+      if (!result.ok) {
+        setError(tAuthError(result.error));
+        return;
+      }
+
+      router.replace('/');
+    } catch (error) {
+      logCaughtError('RegisterScreen.handleRegister', error, {
+        extra: { loginType },
+      });
+      setError(t('auth.errors.unexpected'));
+    } finally {
+      setLoading(false);
     }
-
-    router.replace('/');
   };
 
   return (

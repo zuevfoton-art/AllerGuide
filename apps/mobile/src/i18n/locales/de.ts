@@ -75,6 +75,7 @@ const de: LocaleMessages = {
       emailTaken: 'Konto mit dieser E-Mail existiert bereits.',
       phoneTaken: 'Konto mit dieser Nummer existiert bereits.',
       createFailed: 'Konto konnte nicht erstellt werden.',
+      unexpected: 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
     },
     forgot: {
       title: 'Passwort zurücksetzen',

@@ -79,6 +79,7 @@ export type LocaleMessages = {
       emailTaken: string;
       phoneTaken: string;
       createFailed: string;
+      unexpected: string;
     };
     forgot: {
       title: string;

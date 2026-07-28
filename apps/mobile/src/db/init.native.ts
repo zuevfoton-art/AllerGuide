@@ -2,8 +2,11 @@ import * as SQLite from 'expo-sqlite';
 import { runMigrations } from './migrations';
 
 const db = SQLite.openDatabaseSync('allerguide.db');
+let initialized = false;
 
 export function initDb() {
+  if (initialized) return db;
+
   db.execSync(`
     CREATE TABLE IF NOT EXISTS profiles (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,9 +93,10 @@ export function initDb() {
   `);
 
   runMigrations(db as unknown as import('./types').DbLike);
+  initialized = true;
+  return db;
 }
 
 export function getDb() {
-  initDb();
-  return db;
+  return initDb();
 }

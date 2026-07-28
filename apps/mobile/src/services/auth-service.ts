@@ -154,9 +154,11 @@ export async function registerUser(input: {
     if (!response.ok) return { ok: false, error: response.error };
 
     await setAuthToken(response.data.token);
+
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
+
     trackEvent('auth_register', { login_type: input.loginType, source: 'backend' });
     return { ok: true, user: response.data.user };
   }

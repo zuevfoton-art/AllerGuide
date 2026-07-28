@@ -161,7 +161,22 @@ export function replaceLocalProfilesForUser(userId: number, items: Profile[]) {
 
 export async function syncProfilesFromBackend(userId: number, token: string) {
   const response = await backendListProfiles(token);
-  if (!response.ok) return response;
-  replaceLocalProfilesForUser(userId, response.data.profiles);
+  if (!response.ok) {
+    logCaughtError('syncProfilesFromBackend.backendListProfiles', new Error(response.error), {
+      level: 'warn',
+      extra: { userId: String(userId), status: String(response.status) },
+    });
+    return response;
+  }
+
+  try {
+    replaceLocalProfilesForUser(userId, response.data.profiles);
+  } catch (error) {
+    logCaughtError('syncProfilesFromBackend.replaceLocalProfilesForUser', error, {
+      level: 'warn',
+      extra: { userId: String(userId), profileCount: String(response.data.profiles.length) },
+    });
+    return { ok: false as const, error: 'Local profile sync failed', status: 0 };
+  }
   return { ok: true as const };
 }
