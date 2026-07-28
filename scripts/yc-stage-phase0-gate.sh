@@ -67,9 +67,11 @@ EAS_POLLEN_FLAG="$(
 )"
 echo "  info  EAS staging EXPO_PUBLIC_POLLEN_HEATMAP=$EAS_POLLEN_FLAG"
 
-# Legacy replit profile may still exist until Phase 3.
+# EAS replit profile must be gone after Phase 3.
 if node -e 'const e=require("./apps/mobile/eas.json"); process.exit(e.build?.replit ? 0 : 1)'; then
-  warn "eas.json still has profile \"replit\" (remove in Phase 3)"
+  fail "eas.json still has profile \"replit\" (remove in Phase 3)"
+else
+  pass "eas.json has no profile \"replit\""
 fi
 
 echo ""

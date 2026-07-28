@@ -73,7 +73,7 @@ Exit code `0` = Phase 0 критерии выполнены; иначе — сп
 | P0.4 | ✅ | `features.pollenHeatmap: true` (Lockbox + image `phase1-418801c`) |
 | P0.5 | ✅ | EAS `staging` → `https://api.staging.aclearo.com` |
 | P0.6 | ✅ | staging scripts/workflows без `replit.app` |
-| — | ⚠️ | EAS profile `replit` ещё в репо → **фаза 3** |
+| — | ✅ | EAS profile `replit` removed (Phase 3) |
 
 Пока pollen не в Lockbox: `ALLOW_MISSING_POLLEN_HEATMAP=1 pnpm yc-stage-phase0` (временный обход для остальных checks).
 
@@ -143,7 +143,8 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 | Workflow `deploy-staging-yandex.yml` | ⚠️ active, recent runs **fail** | Gate: нужны `YC_SA_JSON`, `YC_REGISTRY_ID`, `YC_CONTAINER_ID` (0s failure = secrets missing/incomplete на событии) |
 | Trigger | push `staging` / `workflow_dispatch` | Не каждый PR |
 | EAS profile `staging` | ✅ в репо | URL = YC |
-| EAS profile `replit` | ⚠️ legacy | Убрать в фазе 3 |
+| EAS profile `replit` | ✅ removed (Phase 3) | — |
+| Replit (host) | ⚠️ may still respond | Pause in Phase 5; not in repo anymore |
 | Phase 0 gate script | ✅ | `pnpm yc-stage-phase0` |
 
 ### E. Сводный чеклист (PR / ops)
@@ -163,10 +164,10 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [ ] Self-hosted runner `yc-staging-vpc` Idle (migrate)
 - [ ] `STAGING_RUN_SMOKES=1` preflight (sync + scan)
 - [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + staging APK QA
+- [x] Удалить EAS `replit` / docs hooks (фаза 3)
 - [ ] Pause Replit deployment (фаза 5)
-- [ ] Удалить EAS `replit` / docs hooks (фаза 3)
 
-**Вывод:** YC stage **уже несёт** API + DB + auth + sync + Yandex AI/OCR. Для закрытия Phase 0 без оговорок остаётся **pollen Lockbox (фаза 1)**; CI deploy secrets и Replit cleanup — следующие фазы.
+**Вывод:** YC stage несёт API + DB + auth + sync + Yandex AI/OCR + pollen. Replit deploy artifacts removed (Phase 3). Остаётся: GitHub `YC_*` CI secrets, EAS Maps key + APK QA, Pause Replit host (Phase 5).
 
 ---
 
@@ -245,7 +246,7 @@ pnpm yc-stage-phase0   # P0.4 должен стать PASS
 |----|----------|----------|
 | **P2.1** | EAS profile `staging` | `EXPO_PUBLIC_API_URL=https://api.staging.aclearo.com`, auth on, pollen=`google` |
 | **P2.2** | `apps/mobile/.env.staging.example` | тот же API URL, без `replit.app` |
-| **P2.3** | npm scripts | `build:staging*` живы; `build:replit*` — deprecated stub (exit 1) |
+| **P2.3** | npm scripts | `build:staging*` живы; `build:replit*` **отсутствуют** (после Phase 3) |
 | **P2.4** | CI client workflows | `eas-staging-*` / `staging-apk-*` без replit targets |
 | **P2.5** | Live API | health 200 на YC (pollen желателен после Phase 1) |
 | **P2.6** | Docs | stage path описывает YC, не Replit как primary |
@@ -258,22 +259,42 @@ pnpm yc-stage-phase0   # P0.4 должен стать PASS
    # или Actions → EAS staging Android
    ```
 2. EAS env (Sensitive, не Secret): `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` = Maps Android key.
-3. Локально: `cp apps/mobile/.env.staging.example apps/mobile/.env` (не `.env.replit.example`).
+3. Локально: `cp apps/mobile/.env.staging.example apps/mobile/.env`.
 4. GCP Maps JS referrers: `localhost` + `staging.aclearo.*` — без опоры на `*.replit.app` для stage web.
-5. Не вызывать `build:replit:*` (скрипты падают с DEPRECATED).
+5. Не использовать удалённые `build:replit:*` (Phase 3).
 
 #### Чеклист Phase 2
 
 - [x] `.env.staging.example` + docs stage → YC
-- [x] `build:replit:*` deprecated stubs
+- [x] `build:replit:*` removed (Phase 3; were deprecated stubs in Phase 2)
 - [x] `pnpm yc-stage-phase2` gate
 - [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` задан в expo.dev
 - [ ] Staging APK установлен, login/sync/пыление против YC
-- [ ] (Phase 3) удалить EAS profile `replit` / `.replit` / OIDC
+- [x] (Phase 3) удалить EAS profile `replit` / `.replit` / archive deploy docs; OIDC opt-in only
 
 ### 3 — Cleanup репо
 
-Удалить/архивировать: EAS `replit`, `build:replit:*`, `.replit`, `scripts/replit-*`, устаревшие ссылки в docs; решить судьбу Replit OIDC в `apps/api`.
+**Цель:** в репозитории нет Replit deploy/EAS profile; stage docs указывают только на YC.  
+OIDC: **оставить** `apps/api/src/replit_integrations` за флагом `REPL_ID` (на YC не задаётся) — полный выпил OIDC/mobile `replit-exchange` отдельным follow-up, если web-login через Replit больше не нужен.
+
+Автопроверка: `./scripts/yc-stage-phase3-gate.sh` / `pnpm yc-stage-phase3`.
+
+#### P3 критерии
+
+| ID | Проверка | Ожидание |
+|----|----------|----------|
+| **P3.1** | EAS / npm | нет `build.replit`; нет `build:replit:*`; есть `build:staging*` |
+| **P3.2** | Deploy artifacts | нет `.replit`, `scripts/replit-*`, `.env.replit.example`, `.replit_integration_files` |
+| **P3.3** | Docs | `replit-deploy.md` в `docs/archive/` с banner «do not use for staging» |
+| **P3.4** | OIDC | код может остаться; `REPL_ID` не включается в `.env.staging.example` |
+
+#### Сделано в Phase 3
+
+- [x] Удалён EAS profile `replit`
+- [x] Удалены `build:replit:*`, `.replit`, `scripts/replit-*`, `.env.replit.example`, `.replit_integration_files`
+- [x] `docs/replit-deploy.md` → [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md)
+- [x] `pnpm yc-stage-phase3` gate
+- [x] OIDC: keep behind `REPL_ID` (off on YC staging)
 
 ### 4 — Данные и секреты
 
@@ -298,6 +319,8 @@ Phase 0 gate + preflight зелёные; Replit deployment paused; в stage-flow
 | [`scripts/yc-stage-phase2-gate.sh`](../scripts/yc-stage-phase2-gate.sh) | Автоgate Phase 2 (clients → YC) |
 | [`apps/mobile/.env.staging.example`](../apps/mobile/.env.staging.example) | Локальный stage env → YC |
 | [`scripts/staging-preflight.sh`](../scripts/staging-preflight.sh) | P1.7 smokes |
+| [`scripts/yc-stage-phase3-gate.sh`](../scripts/yc-stage-phase3-gate.sh) | Автоgate Phase 3 (Replit cleanup) |
+| [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md) | Archived Replit deploy (do not use) |
 | [`docs/staging-yandex-cloud.md`](./staging-yandex-cloud.md) | Deploy YC |
 | [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md) | GCP + Lockbox pollen |
 | [`apps/mobile/eas.json`](../apps/mobile/eas.json) | Profile `staging` |

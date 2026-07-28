@@ -16,8 +16,6 @@
     "build:preview": "eas build --profile preview --platform all",
     "build:preview:android": "eas build --profile preview --platform android",
     "build:preview:ios": "eas build --profile preview --platform ios",
-    "build:replit:android": "node -e \"console.error('DEPRECATED (Phase 2): use pnpm build:staging:android — API is api.staging.aclearo.com (YC). EAS profile replit removed in Phase 3.'); process.exit(1)\"",
-    "build:replit:ios": "node -e \"console.error('DEPRECATED (Phase 2): use pnpm build:staging:ios — API is api.staging.aclearo.com (YC). EAS profile replit removed in Phase 3.'); process.exit(1)\"",
     "build:staging": "eas build --profile staging --platform all",
     "build:staging:android": "eas build --profile staging --platform android",
     "build:staging:ios": "eas build --profile staging --platform ios",

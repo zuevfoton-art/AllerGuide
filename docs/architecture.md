@@ -42,7 +42,7 @@ AllerGuide — offline-first приложение для управления а
 │   ├── ai/              # Сканер, OCR-подготовка, LLM-клиент
 │   └── ui/              # Общие RN-компоненты (минимальный набор)
 ├── docs/                # Архитектура, QA, деплой, клинические фичи
-├── scripts/             # Сборка APK, Replit deploy
+├── scripts/             # Staging smokes, YC Lockbox/deploy, APK helpers
 ├── .github/workflows/   # CI, Neon preview branches
 ├── turbo.json           # Граф задач Turborepo (build, lint, typecheck, test)
 └── package.json         # Корневые скрипты: pnpm typecheck | test | lint
@@ -577,12 +577,12 @@ pnpm test        # Vitest: core, ai, mobile, api
 pnpm --filter mobile lint
 ```
 
-### Replit
+### Replit (archived)
 
-- `.replit` — autoscale deploy, `ignoreDatabaseMigrations`
-- `scripts/replit-deploy-build.sh` — install → `db:migrate` → `expo export`
-- API отдаёт static web + опционально Metro proxy
-- Подробнее: `docs/replit-deploy.md`
+Deploy на Replit **снят с поддержки** для stage (Phase 3). Исторический runbook: [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md).
+
+- Stage API: Yandex Cloud — [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)
+- Optional legacy web OIDC: `apps/api/src/replit_integrations` only when `REPL_ID` is set (never on YC staging Lockbox)
 
 ### Android APK (preview)
 
@@ -673,8 +673,8 @@ pnpm --filter mobile lint
 | `AGENTS.md` | Инструкции для разработки / Cloud Agent |
 | `docs/functional-requirements.md` | Функциональные требования |
 | `docs/clinical-features-raaci.md` | Клинические фичи (RAACI) |
-| `docs/replit-deploy.md` | Деплой на Replit (legacy; stage → YC) |
-| `docs/migrate-off-replit-to-yc.md` | Критерий Stage без Replit (Phase 0 gate) |
+| `docs/archive/replit-deploy.md` | Archived Replit deploy (do not use for stage) |
+| `docs/migrate-off-replit-to-yc.md` | Stage без Replit (Phase 0–5 gates) |
 | `docs/staging-yandex-cloud.md` | Staging API на Yandex Cloud |
 | `docs/eas-internal-preview.md` | EAS / preview builds |
 | `docs/qa-checklist.md` | QA чеклист |

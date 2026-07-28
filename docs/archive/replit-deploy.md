@@ -1,3 +1,11 @@
+# Archived Replit deploy runbook (Phase 3 — migrate-off-replit-to-yc).
+#
+# **Do not use for staging.** Canonical stage API is Yandex Cloud:
+#   docs/staging-yandex-cloud.md · api.staging.aclearo.com
+#
+# Historical reference for the former aller-guide.replit.app Autoscale + Expo export path.
+# Replit OIDC in apps/api remains opt-in behind `REPL_ID` (unset on YC).
+
 # Публикация через Replit
 
 Replit поддерживает два сценария для AllerGuide:

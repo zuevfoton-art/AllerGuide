@@ -97,16 +97,17 @@ node -e '
   for (const n of ["build:replit:android", "build:replit:ios"]) {
     const body = String(s[n] || "");
     if (!body) {
-      console.log("  PASS  " + n + " removed");
+      console.log("  PASS  " + n + " removed (Phase 3)");
       continue;
     }
     if (/DEPRECATED|process\.exit\(1\)|yc-stage-phase2/i.test(body)) {
-      console.log("  PASS  " + n + " deprecated stub");
+      console.log("  WARN  " + n + " deprecated stub still present — remove in Phase 3");
     } else if (body.includes("--profile replit")) {
-      console.log("  FAIL  " + n + " still invokes eas profile replit (deprecate in Phase 2)");
+      console.log("  FAIL  " + n + " still invokes eas profile replit");
       bad++;
     } else {
-      console.log("  WARN  " + n + " present but not a clear deprecation stub");
+      console.log("  FAIL  " + n + " unexpected; remove in Phase 3");
+      bad++;
     }
   }
   process.exit(bad ? 1 : 0);
@@ -175,9 +176,11 @@ else
   fail "missing Phase 2 section in migrate-off-replit-to-yc.md"
 fi
 
-# Legacy eas replit profile may remain until Phase 3
+# Legacy eas replit profile must be gone after Phase 3
 if node -e 'const e=require("./apps/mobile/eas.json"); process.exit(e.build?.replit ? 0 : 1)'; then
-  warn "eas.json still has profile \"replit\" (delete in Phase 3)"
+  fail "eas.json still has profile \"replit\" (Phase 3 should delete it)"
+else
+  pass "eas.json has no profile \"replit\""
 fi
 
 echo ""
