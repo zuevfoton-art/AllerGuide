@@ -2,6 +2,7 @@
   "expo": {
     "name": "A-Claro",
     "slug": "aclearo",
+    "owner": "zuevfoton2",
     "scheme": "aclearo",
     "version": "1.0.4",
     "orientation": "portrait",
@@ -94,7 +95,7 @@
       },
       "privacyPolicyUrl": "https://aclearo.com/legal",
       "eas": {
-        "projectId": "a7a65ba6-58c0-494e-abcd-0803dc0ed5a0"
+        "projectId": "9bd805c2-aece-4281-8a3d-3042dacf86b8"
       }
     }
   }
