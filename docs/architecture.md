@@ -26,6 +26,8 @@ AllerGuide — offline-first приложение для управления а
 
 **План MVP → prod (Phase 1–2):** детальные GitHub issues с зависимостями — [`docs/phase1-phase2-issues.md`](./phase1-phase2-issues.md) · сводка фаз — [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md).
 
+**Карта пыления (Яндекс + геолокация):** план интеграции берёзы / злаковых / амброзии — [`docs/yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md).
+
 ---
 
 ## Структура monorepo
