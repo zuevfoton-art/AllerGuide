@@ -2,7 +2,7 @@
 
 Как собрать **staging APK** для проверки Google pollen heatmap (`EXPO_PUBLIC_POLLEN_HEATMAP=google`), когда в Cursor Cloud VM **нет Android SDK**.
 
-Связанные документы: [`eas-staging-build.md`](./eas-staging-build.md) · [`android-local-build.md`](./android-local-build.md) · [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md) §4.5–4.6 · GCP keys ops в том же §4.6.5.
+Связанные документы: [`eas-staging-build.md`](./eas-staging-build.md) · [`android-local-build.md`](./android-local-build.md) · [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md) §4.5–4.6 · **пошаговые GCP keys:** [`gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md).
 
 ---
 

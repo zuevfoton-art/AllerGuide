@@ -31,7 +31,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 1. Staging API доступен: `curl https://api.staging.aclearo.com/api/health` → 200 ([P1.1c](staging-deploy.md))
 2. `eas login` и реальный `projectId` в [`app.json`](../apps/mobile/app.json) (см. [preview runbook](eas-internal-preview.md))
 3. Apple/Google credentials для internal distribution (те же, что для preview)
-4. Для pollen heatmap: GCP Maps key в **EAS project secret** `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`; API — `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` ([§4.6.5](yandex-pollen-map-integration.md))
+4. Для pollen heatmap: пошагово создать GCP keys — [`gcp-pollen-maps-keys.md`](gcp-pollen-maps-keys.md); Maps key в **EAS project secret** `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`; API — `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY`.
 
 ---
 

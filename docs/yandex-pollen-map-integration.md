@@ -358,12 +358,14 @@ Stage-минимум: **A** — web Maps JS + native `react-native-maps`.
 
 #### 4.6.5. Ключи, billing, proxy
 
+**Пошаговый runbook консоли GCP:** [`gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md).
+
 | Ключ | APIs | Restriction | Где |
 |------|------|-------------|-----|
-| Maps Android | Maps SDK for Android | package `com.aclearo.app` + SHA-1 | `react-native-maps` plugin `androidGoogleMapsApiKey` |
-| Maps iOS | Maps SDK for iOS | bundle `com.aclearo.app` | `iosGoogleMapsApiKey` |
-| Maps JS (web) | Maps JavaScript API | HTTP referrer staging/prod | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` |
-| Pollen tiles | Pollen API | IP (server) **или** referrer/app | `GOOGLE_POLLEN_API_KEY` на API |
+| Maps Android | Maps SDK for Android | package `com.aclearo.app` + SHA-1 | EAS secret / `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` |
+| Maps iOS | Maps SDK for iOS | bundle `com.aclearo.app` | EAS / app.config iOS |
+| Maps JS (web) | Maps JavaScript API | HTTP referrer staging/prod | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (web) |
+| Pollen tiles | Pollen API | IP staging API **или** None + API-only restrict | `GOOGLE_POLLEN_API_KEY` на API **только** |
 
 - Billing на GCP обязателен (Maps + Pollen SKU).
 - **Не** класть Pollen server key в Expo-бандл.
