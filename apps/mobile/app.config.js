@@ -1,30 +1,9 @@
-module.exports = ({ config }) => {
-  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
-  if (!googleMapsApiKey) return config;
-
-  return {
-    ...config,
-    android: {
-      ...config.android,
-      config: {
-        ...config.android?.config,
-        googleMaps: { apiKey: googleMapsApiKey },
-      },
-    },
-    ios: {
-      ...config.ios,
-      config: {
-        ...config.ios?.config,
-        googleMapsApiKey,
-      },
-    },
-  };
-};
 const base = require('./app.json');
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = ({ config }) => {
   const plugins = [...base.expo.plugins];
+  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
 
   if (process.env.SENTRY_ORG && process.env.SENTRY_PROJECT) {
     plugins.push([
@@ -44,6 +23,28 @@ module.exports = ({ config }) => {
       ...config?.expo,
       ...base.expo,
       plugins,
+      android: {
+        ...base.expo.android,
+        ...(googleMapsApiKey
+          ? {
+              config: {
+                ...base.expo.android?.config,
+                googleMaps: { apiKey: googleMapsApiKey },
+              },
+            }
+          : {}),
+      },
+      ios: {
+        ...base.expo.ios,
+        ...(googleMapsApiKey
+          ? {
+              config: {
+                ...base.expo.ios?.config,
+                googleMapsApiKey,
+              },
+            }
+          : {}),
+      },
     },
   };
 };

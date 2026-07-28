@@ -61,6 +61,7 @@ export function registerPollenRoutes(app: Express): void {
         res.set({
           'Content-Type': PNG_CONTENT_TYPE,
           'Cache-Control': 'private, no-store',
+          'Cross-Origin-Resource-Policy': 'cross-origin',
           'Content-Length': String(tile.byteLength),
         });
         res.send(tile);

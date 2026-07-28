@@ -55,6 +55,7 @@ describe('pollen heatmap routes', () => {
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toContain('image/png');
     expect(response.headers['cache-control']).toBe('private, no-store');
+    expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
     expect(response.body).toEqual(Buffer.from(PNG_SIGNATURE));
     expect(fetchMock).toHaveBeenCalledWith(
       'https://pollen.googleapis.com/v1/mapTypes/TREE_UPI/heatmapTiles/6/38/20?key=stage%20test%20key',
