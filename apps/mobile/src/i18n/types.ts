@@ -335,6 +335,16 @@ export type LocaleMessages = {
     removedFromSafe: string;
     trendsTitle: string;
     repeatUnsafeWarning: string;
+    /** Prominent camera button label for medicine/cosmetics modes */
+    scanWithCamera: string;
+    /** Barcode lookup outcome labels */
+    statusNotFound: string;
+    statusInsufficientComposition: string;
+    statusNoAllergens: string;
+    /** Menu scan outcome labels */
+    menuStatusMatch: string;
+    menuStatusIncomplete: string;
+    menuStatusNoMatch: string;
   };
   market: {
     title: string;
@@ -540,6 +550,8 @@ export type LocaleMessages = {
     asitPushTitle: string;
     asitPushBody: string;
     asitDrugFallback: string;
+    therapyPushTitle: string;
+    therapyPushBody: string;
     asitAllergenFallback: string;
     denied: string;
     unavailable: string;
@@ -648,8 +660,8 @@ export type LocaleMessages = {
       hint: string;
       empty: string;
       onsetLabel: string;
-      onsetYearLabel: string;
-      onsetYearPlaceholder: string;
+      onsetAgeLabel: string;
+      onsetAgePlaceholder: string;
       statusLabel: string;
       confirmedBy: string;
       foodTimingLabel: string;
@@ -677,6 +689,13 @@ export type LocaleMessages = {
       hint: string;
       empty: string;
       disclaimer: string;
+      icd10Ref: string;
+      icd10Disclaimer: string;
+    };
+    allergenConfirmations: {
+      title: string;
+      hint: string;
+      skipHint: string;
     };
     conditionsOther: string;
     conditionHintTitle: string;
@@ -729,8 +748,21 @@ export type LocaleMessages = {
     missed: string;
     allergenLabel: string;
     allergenPlaceholder: string;
+    allergenFromCatalog: string;
+    allergenChange: string;
     drugLabel: string;
     drugPlaceholder: string;
+    uploadPrescription: string;
+    uploadPhoto: string;
+    uploadPdf: string;
+    uploadPhotoAttached: string;
+    uploadPdfAttached: string;
+    ocrParse: string;
+    ocrParsing: string;
+    verifyTitle: string;
+    verifySubtitle: string;
+    verifyConfirm: string;
+    verifyStagesEmpty: string;
     routeLabel: string;
     phaseLabel: string;
     startDateLabel: string;
@@ -748,6 +780,50 @@ export type LocaleMessages = {
     reminderMinute: string;
     reminderHint: string;
     reminderAt: string;
+    reviewTitle: string;
+    reviewConfirm: string;
+  };
+  prescribedTherapy: {
+    title: string;
+    eyebrow: string;
+    courseTitle: string;
+    courseSubtitle: string;
+    setupCourse: string;
+    editCourse: string;
+    logDose: string;
+    emptyCourse: string;
+    doses30d: string;
+    onTime: string;
+    missed: string;
+    drugLabel: string;
+    drugPlaceholder: string;
+    dosageLabel: string;
+    dosagePlaceholder: string;
+    routeLabel: string;
+    startDateLabel: string;
+    endDateLabel: string;
+    scheduleLabel: string;
+    schedulePlaceholder: string;
+    uploadPrescription: string;
+    uploadPhoto: string;
+    uploadPdf: string;
+    ocrParse: string;
+    verifyTitle: string;
+    verifyConfirm: string;
+    saveCourse: string;
+    disclaimer: string;
+    noProfile: string;
+    reminderLabel: string;
+    reminderOn: string;
+    reminderOff: string;
+    reminderHour: string;
+    reminderMinute: string;
+    reminderHint: string;
+    reminderAt: string;
+    reviewTitle: string;
+    reviewConfirm: string;
+    notesLabel: string;
+    notesPlaceholder: string;
   };
   insect: {
     title: string;
@@ -914,6 +990,9 @@ export type LocaleMessages = {
     subtitle: string;
     eyebrow: string;
     period: string;
+    customPeriod: string;
+    fromDate: string;
+    toDate: string;
     blocks: string;
     generating: string;
     generate: string;

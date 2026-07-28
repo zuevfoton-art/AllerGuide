@@ -2,8 +2,11 @@ import { useMemo } from 'react';
 import { Text, StyleSheet, View } from 'react-native';
 import {
   buildConditionHistoryFromOnboarding,
+  formatIcd10Codes,
+  getPhenotypeIcd10,
   resolveClinicalPhenotypes,
   type AllergyConditionId,
+  type ClinicalPhenotypeId,
   type ComorbidityLink,
   type ProfileType,
 } from '@allerguide/core';
@@ -71,13 +74,22 @@ export function ClinicalPhenotypeCard({
 
       {result.phenotypes.length ? (
         <View style={styles.list}>
-          {result.phenotypes.map((item) => (
-            <View key={item.id} style={styles.item}>
-              <Text style={styles.itemTitle}>{item.label}</Text>
-              <Text style={styles.itemSource}>{item.source}</Text>
-              <Text style={styles.itemDesc}>{item.description}</Text>
-            </View>
-          ))}
+          {result.phenotypes.map((item) => {
+            const icd10Entries = getPhenotypeIcd10(item.id as ClinicalPhenotypeId);
+            const icd10Text = icd10Entries.length ? formatIcd10Codes(icd10Entries) : null;
+            return (
+              <View key={item.id} style={styles.item}>
+                <Text style={styles.itemTitle}>{item.label}</Text>
+                <Text style={styles.itemSource}>{item.source}</Text>
+                <Text style={styles.itemDesc}>{item.description}</Text>
+                {icd10Text ? (
+                  <Text style={styles.itemIcd10}>
+                    {t('profileSetup.phenotype.icd10Ref')} {icd10Text}
+                  </Text>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
       ) : (
         <Text style={styles.empty}>{t('profileSetup.phenotype.empty')}</Text>
@@ -93,6 +105,7 @@ export function ClinicalPhenotypeCard({
         </View>
       ) : null}
 
+      <Text style={styles.icd10DisclaimerText}>{t('profileSetup.phenotype.icd10Disclaimer')}</Text>
       <Disclaimer>{t('profileSetup.phenotype.disclaimer')}</Disclaimer>
     </GlassCard>
   );
@@ -134,6 +147,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 14,
       color: colors.textSecondary,
+    },
+    itemIcd10: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    icd10DisclaimerText: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      lineHeight: 15,
+      fontStyle: 'italic',
     },
     hints: { gap: 6 },
     hintItem: {

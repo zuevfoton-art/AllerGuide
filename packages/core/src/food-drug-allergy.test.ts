@@ -43,13 +43,14 @@ describe('food-drug-allergy', () => {
     expect(buildIntoleranceAlert('Нурофен', ['Ибупрофен'])).toContain('Ибупрофен');
   });
 
-  it('builds food prefill with cross-reactions from profile', () => {
+  it('builds food prefill from profile without allergen/cross steps', () => {
     const prefill = buildFoodPrefillFromProfile(['Молоко'], null);
-    expect(prefill.allergens).toContain('Молоко');
-    expect(prefill.crossReactions).toBeDefined();
+    expect(prefill.foodSource).toBe('Вручную');
+    expect(prefill.allergens).toBeUndefined();
+    expect(prefill.crossReactions).toBeUndefined();
   });
 
-  it('builds unified food prefill from scan and profile with cross-reactions', () => {
+  it('builds unified food prefill from scan without allergen dump', () => {
     const prefill = buildFoodPrefill(
       ['Молоко'],
       null,
@@ -63,8 +64,8 @@ describe('food-drug-allergy', () => {
     );
     expect(prefill.food).toBe('Йогурт');
     expect(prefill.foodSource).toBe('Сканер');
-    expect(prefill.allergens).toContain('Молоко');
-    expect(prefill.crossReactions).toBeDefined();
+    expect(prefill.allergens).toBeUndefined();
+    expect(prefill.crossReactions).toBeUndefined();
   });
 
   it('builds food prefill from scan', () => {
@@ -77,7 +78,7 @@ describe('food-drug-allergy', () => {
     });
     expect(prefill.food).toBe('Йогурт');
     expect(prefill.foodSource).toBe('Сканер');
-    expect(prefill.allergens).toBe('Молоко');
+    expect(prefill.allergens).toBeUndefined();
   });
 
   it('computes food and drug summary', () => {

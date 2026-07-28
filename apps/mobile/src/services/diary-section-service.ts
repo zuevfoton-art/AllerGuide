@@ -1,14 +1,22 @@
 import {
-  buildAsitPrefill,
+  buildAsitPrefillWithDoseNumber,
   buildFoodPrefill,
   buildInsectStingPrefill,
   buildMedicinePrefill,
   buildTriggerPrefill,
+  buildPrescribedTherapyPrefill,
+  getDiarySection,
   isAsitCourseConfigured,
+  isPrescribedCourseConfigured,
   parseAllergies,
+  ASIT_SIMPLIFIED_STEP_IDS,
+  PRESCRIBED_SIMPLIFIED_STEP_IDS,
+  type DiarySection,
   type FoodDrugScanRef,
 } from '@allerguide/core';
 import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
+import { getDiaryEntries } from '@/src/services/diary-service';
 import { loadDiaryTriggerContext } from '@/src/services/diary-context-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
@@ -54,22 +62,39 @@ function findRecentFoodScan(profileId: number): FoodDrugScanRef | null {
   };
 }
 
+export type DiarySectionEditorStateWithSection = DiarySectionEditorState & {
+  section?: DiarySection;
+};
+
 /** Builds diary section editor state with domain prefills (orchestration only — logic in core). */
 export async function buildDiarySectionEditorState(input: {
   sectionType: string;
   profileId: number | null;
   profileAllergiesJson: string;
   locale: AppLocale;
-}): Promise<DiarySectionEditorState> {
+}): Promise<DiarySectionEditorStateWithSection> {
   const { sectionType, profileId, profileAllergiesJson, locale } = input;
 
   if (sectionType === 'АСИТ' && profileId) {
     const course = getAsitCourse(profileId);
     if (course && isAsitCourseConfigured(course)) {
+      const entries = await getDiaryEntries(profileId);
+      const asitDoseCount = entries.filter((e) => e.type === 'АСИТ').length;
+      const prefill = buildAsitPrefillWithDoseNumber(course, asitDoseCount);
+      const fullSection = getDiarySection('АСИТ');
+      const simplifiedSection: DiarySection | undefined = fullSection
+        ? {
+            ...fullSection,
+            steps: fullSection.steps.filter((s) =>
+              (ASIT_SIMPLIFIED_STEP_IDS as readonly string[]).includes(s.id),
+            ),
+          }
+        : undefined;
       return {
         mode: 'section',
         sectionType,
-        prefill: { АСИТ: buildAsitPrefill(course) },
+        prefill: { АСИТ: prefill },
+        section: simplifiedSection,
       };
     }
   }
@@ -93,6 +118,27 @@ export async function buildDiarySectionEditorState(input: {
     const plan = getInsectActionPlan(profileId);
     const prefill = buildInsectStingPrefill(allergies, plan);
     return { mode: 'section', sectionType, prefill: { 'Укус насекомого': prefill } };
+  }
+
+  if (sectionType === 'Терапия' && profileId) {
+    const course = getPrescribedCourse(profileId);
+    if (course && isPrescribedCourseConfigured(course)) {
+      const fullSection = getDiarySection('Терапия');
+      const simplifiedSection: DiarySection | undefined = fullSection
+        ? {
+            ...fullSection,
+            steps: fullSection.steps.filter((s) =>
+              (PRESCRIBED_SIMPLIFIED_STEP_IDS as readonly string[]).includes(s.id),
+            ),
+          }
+        : undefined;
+      return {
+        mode: 'section',
+        sectionType,
+        prefill: { Терапия: buildPrescribedTherapyPrefill(course) },
+        section: simplifiedSection,
+      };
+    }
   }
 
   if (sectionType === 'Триггер' && profileId) {

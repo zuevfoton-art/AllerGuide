@@ -53,13 +53,13 @@ import {
   getPreviousProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
   buildProfileSetupWizardNavOptions,
-  mergeCrossReactionAllergenIds,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardStep,
 } from '@/src/hooks/use-profile-setup-wizard';
+import { ProfileSetupAllergenConfirmationsStep } from '@/src/components/profile-setup/ProfileSetupAllergenConfirmationsStep';
 import { ProfileSetupContactsStep } from '@/src/components/profile-setup/ProfileSetupContactsStep';
 import { ProfileSetupComorbidityStep } from '@/src/components/profile-setup/ProfileSetupComorbidityStep';
 import { ProfileSetupPhenotypeStep } from '@/src/components/profile-setup/ProfileSetupPhenotypeStep';
@@ -88,6 +88,7 @@ export default function ProfileSetupScreen() {
   const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
   const [crossPendingIds, setCrossPendingIds] = useState<string[]>([]);
+  const [crossReactionAllergenIds, setCrossReactionAllergenIds] = useState<string[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState<ProfileSetupWizardStep>('name');
@@ -114,6 +115,7 @@ export default function ProfileSetupScreen() {
       name,
       birthYear,
       selectedAllergenIds: selected,
+      crossReactionAllergenIds,
       confirmations,
       conditions,
       conditionOptionSelections,
@@ -128,6 +130,7 @@ export default function ProfileSetupScreen() {
       name,
       birthYear,
       selected,
+      crossReactionAllergenIds,
       confirmations,
       conditions,
       conditionOptionSelections,
@@ -152,7 +155,9 @@ export default function ProfileSetupScreen() {
       ? t('profileSetup.subtitleChildStep', { step: stepProgress })
       : scenario === 'both'
         ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
-        : t('profileSetup.subtitleDefault', { step: stepProgress });
+        : currentStep === 'phenotypeSummary'
+          ? stepProgress
+          : t('profileSetup.subtitleDefault', { step: stepProgress });
 
   const suggestedConditions = useMemo(
     () => getMissingConditionsForAllergens(selected, conditions),
@@ -202,6 +207,7 @@ export default function ProfileSetupScreen() {
     setName('');
     setBirthYear('');
     setSelected([]);
+    setCrossReactionAllergenIds([]);
     setConditions([]);
     setConditionOptionSelections({});
     optionSeedRef.current = [];
@@ -233,6 +239,7 @@ export default function ProfileSetupScreen() {
         type: effectiveType,
         allergies: selected,
         allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
+        crossReactionAllergies: crossReactionAllergenIds,
         childConsent,
         scenario: scenario ?? undefined,
       });
@@ -288,17 +295,16 @@ export default function ProfileSetupScreen() {
 
     setError('');
 
-    let nextSelected = selected;
+    const nextSelected = selected;
     if (currentStep === 'crossReactions') {
       if (crossPendingIds.length > 0) {
-        nextSelected = mergeCrossReactionAllergenIds(selected, crossPendingIds);
-        setSelected(nextSelected);
-        setConfirmations((prev) => normalizeAllergyConfirmations(nextSelected, prev));
+        setCrossReactionAllergenIds(crossPendingIds);
         trackEvent('profile_setup_step_complete', {
           step: 'crossReactions',
           added: crossPendingIds.length,
         });
       } else {
+        setCrossReactionAllergenIds([]);
         trackEvent('profile_setup_step_skip', { step: 'crossReactions' });
       }
       setCrossPendingIds([]);
@@ -411,6 +417,14 @@ export default function ProfileSetupScreen() {
         />
       ) : null}
 
+      {currentStep === 'allergenConfirmations' ? (
+        <ProfileSetupAllergenConfirmationsStep
+          selectedAllergenIds={selected}
+          confirmations={confirmations}
+          onConfirmationsChange={setConfirmations}
+        />
+      ) : null}
+
       {currentStep === 'symptomBaseline' ? (
         <ProfileSetupSymptomsStep
           conditions={conditions}
@@ -424,6 +438,7 @@ export default function ProfileSetupScreen() {
           conditions={conditions}
           drafts={conditionHistoryDrafts}
           onChange={setConditionHistoryDrafts}
+          birthYear={birthYear}
         />
       ) : null}
 

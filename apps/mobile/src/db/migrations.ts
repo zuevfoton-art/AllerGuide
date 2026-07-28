@@ -1,7 +1,7 @@
 import type { DbLike } from './types';
 import { migrateProfileAllergiesJson, type Profile } from '@allerguide/core';
 
-export const CURRENT_SCHEMA_VERSION = 8;
+export const CURRENT_SCHEMA_VERSION = 9;
 
 const MIGRATIONS: Record<number, (db: DbLike) => void> = {
   1: (db) => {
@@ -113,6 +113,12 @@ const MIGRATIONS: Record<number, (db: DbLike) => void> = {
         createdAt TEXT NOT NULL
       );
     `);
+  },
+  9: (db) => {
+    const columns = db.getAllSync<{ name: string }>('PRAGMA table_info(profiles)');
+    if (!columns.some((column) => column.name === 'crossReactionAllergies')) {
+      db.execSync("ALTER TABLE profiles ADD COLUMN crossReactionAllergies TEXT NOT NULL DEFAULT '[]'");
+    }
   },
 };
 

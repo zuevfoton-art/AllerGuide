@@ -10,8 +10,8 @@ export const ALLERGY_CONFIRMATION_SOURCES: AllergyConfirmationSource[] = [
 ];
 
 export const ALLERGY_CONFIRMATION_LABELS: Record<AllergyConfirmationSource, string> = {
-  self_reported: 'Самоотчёт',
-  specific_ige: 'Специфический IgE',
+  self_reported: 'Самонаблюдение',
+  specific_ige: 'Подтверждено анализами',
   clinician: 'Подтверждено врачом',
 };
 

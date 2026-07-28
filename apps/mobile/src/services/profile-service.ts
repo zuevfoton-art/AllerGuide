@@ -56,7 +56,10 @@ function normalizeProfilePayload(input: ProfileInput) {
   const allergyConfirmationsJson = serializeAllergyConfirmations(
     normalizeAllergyConfirmations(allergenIds, input.allergyConfirmations),
   );
-  return { allergenIds, allergiesJson, allergyConfirmationsJson };
+  const crossReactionAllergiesJson = JSON.stringify(
+    [...new Set(input.crossReactionAllergies ?? [])],
+  );
+  return { allergenIds, allergiesJson, allergyConfirmationsJson, crossReactionAllergiesJson };
 }
 
 function assertValidProfileInput(input: ProfileInput) {
@@ -124,7 +127,8 @@ export async function refreshProfilesFromBackend(): Promise<
 export async function createProfile(input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const { allergenIds, allergiesJson, allergyConfirmationsJson } = normalizeProfilePayload(input);
+  const { allergenIds, allergiesJson, allergyConfirmationsJson, crossReactionAllergiesJson } =
+    normalizeProfilePayload(input);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -145,8 +149,16 @@ export async function createProfile(input: ProfileInput) {
 
   const db = getDb();
   db.runSync(
-    'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations) VALUES (?, ?, ?, ?, ?, ?)',
-    [userId, input.name, input.birthYear, input.type, allergiesJson, allergyConfirmationsJson],
+    'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations, crossReactionAllergies) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [
+      userId,
+      input.name,
+      input.birthYear,
+      input.type,
+      allergiesJson,
+      allergyConfirmationsJson,
+      crossReactionAllergiesJson,
+    ],
   );
   const row = db.getFirstSync<{ id: number }>('SELECT id FROM profiles ORDER BY id DESC LIMIT 1');
   if (!row?.id) return null;
@@ -159,7 +171,8 @@ export async function createProfile(input: ProfileInput) {
 export async function updateProfile(id: number, input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const { allergenIds, allergiesJson, allergyConfirmationsJson } = normalizeProfilePayload(input);
+  const { allergenIds, allergiesJson, allergyConfirmationsJson, crossReactionAllergiesJson } =
+    normalizeProfilePayload(input);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -180,8 +193,17 @@ export async function updateProfile(id: number, input: ProfileInput) {
 
   const db = getDb();
   db.runSync(
-    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ? WHERE id = ?',
-    [userId, input.name, input.birthYear, input.type, allergiesJson, allergyConfirmationsJson, id],
+    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ?',
+    [
+      userId,
+      input.name,
+      input.birthYear,
+      input.type,
+      allergiesJson,
+      allergyConfirmationsJson,
+      crossReactionAllergiesJson,
+      id,
+    ],
   );
   const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
   const { activeProfileId, setActiveProfile } = useAppStore.getState();

@@ -7,31 +7,31 @@ import {
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   shouldSkipCrossReactionsStep,
   validateProfileSetupWizardDraft,
-  type ProfileSetupWizardDraft,
 } from './use-profile-setup-wizard';
 
-const baseDraft = (): ProfileSetupWizardDraft => ({
+const baseDraft = () => ({
   ...createEmptyProfileSetupWizardDraft('self'),
   name: 'Анна',
   birthYear: '1990',
   selectedAllergenIds: ['milk'],
-  conditions: ['food'],
+  conditions: ['food' as const],
 });
 
 describe('profile setup wizard (mobile re-export)', () => {
-  it('includes symptomBaseline after crossReactions', () => {
-    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(10);
-    expect(getNextProfileSetupWizardStep('crossReactions')).toBe('symptomBaseline');
+  it('includes allergenConfirmations after crossReactions', () => {
+    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(11);
+    expect(getNextProfileSetupWizardStep('crossReactions')).toBe('allergenConfirmations');
+    expect(getNextProfileSetupWizardStep('allergenConfirmations')).toBe('symptomBaseline');
     expect(shouldSkipCrossReactionsStep({ selectedAllergenIds: ['milk'] })).toBe(false);
   });
 
-  it('computes visible progress with symptom step', () => {
+  it('computes visible progress including allergenConfirmations', () => {
     expect(
       getVisibleProfileSetupStepProgress('allergens', {
         conditions: [],
         selectedAllergenIds: ['unknown-allergen-xyz'],
       }),
-    ).toEqual({ current: 4, total: 6 });
+    ).toEqual({ current: 4, total: 7 });
   });
 
   it('validates full draft', () => {

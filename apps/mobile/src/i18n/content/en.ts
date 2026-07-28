@@ -158,6 +158,17 @@ const enContent: LocaleContent = {
         },
       },
     },
+    Терапия: {
+      title: 'Prescribed therapy',
+      steps: {
+        therapyDrug: { label: 'Medication', placeholder: 'As prescribed by your doctor' },
+        therapyDosage: { label: 'Dosage', placeholder: 'e.g. 1 tablet, 2 puffs' },
+        therapyTakenAt: { label: 'Date and time taken', placeholder: 'June 18, 10:00' },
+        therapyStatus: { label: 'Schedule adherence', choices: ['On time', 'Late', 'Missed'] },
+        therapyReaction: { label: 'Reaction / side effect', choices: ['None', 'Mild', 'Moderate', 'Severe'] },
+        therapyComment: { label: 'Comment', placeholder: 'Well-being, special circumstances…' },
+      },
+    },
     'Визит к врачу': {
       title: 'Doctor visit',
       steps: {
@@ -197,6 +208,7 @@ const enContent: LocaleContent = {
     Кожа: 'Skin',
     Пикфлоуметрия: 'Peak flow',
     АСИТ: 'SCIT',
+    Терапия: 'Prescribed therapy',
     'Визит к врачу': 'Doctor visit',
     Заметка: 'Note',
   },
@@ -209,6 +221,7 @@ const enContent: LocaleContent = {
     asit: 'SCIT',
     skin: 'Skin manifestations',
     notes: 'Notes',
+    therapy: 'Therapy',
   },
   emergencyRelations: {
     relative: 'Relative',

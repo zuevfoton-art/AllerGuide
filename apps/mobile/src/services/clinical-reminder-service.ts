@@ -63,7 +63,7 @@ export async function reconcileClinicalReminders(): Promise<void> {
     for (const profile of profiles) {
       const profileEntries = entries.filter((entry) => entry.profileId === profile.id);
       const capabilities = getProfileCapabilities(profile);
-      if (!capabilities.modules.peakFlow) continue;
+      if (!capabilities.modules.act) continue;
       triggers.push(
         ...collectActReminderTriggers(
           profile.id,

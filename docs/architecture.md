@@ -162,9 +162,7 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 | SOS | `sos.tsx` | Карточка SOS, паспорт, контакты |
 | *(скрыты)* | `market.tsx`, `map.tsx` | Маркетплейс, карта (`href: null`) |
 
-**Дополнительные экраны (stack):**
-
-`expert.tsx`, `doctor-report.tsx`, `asit-course.tsx`, `insect-action-plan.tsx`, `food-drug-registry.tsx`, `sos-edit.tsx`, `legal/terms.tsx`, `legal/privacy.tsx`
+**Дополнительные экраны (stack):** `expert.tsx`, `doctor-report.tsx`, `asit-course.tsx`, `prescribed-therapy.tsx`, `insect-action-plan.tsx`, `food-drug-registry.tsx`, `sos-edit.tsx`, `legal/terms.tsx`, `legal/privacy.tsx`.
 
 ### Onboarding
 
@@ -205,8 +203,9 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `sync-restore.ts` | Восстановление payload в локальную БД |
 | `backup-crypto.ts` | AES-GCM через `@allerguide/core` |
 | `diary-service.ts` | Записи дневника |
-| `doctor-report-service.ts` | PDF-отчёт для врача |
 | `asit-course-service.ts`, `asit-reminder-service.ts` | Курс АСИТ + локальные напоминания |
+| `prescribed-therapy-service.ts` | Терапия по назначению врача |
+| `doctor-report-service.ts` | PDF-отчёт для врача |
 | `insect-action-plan-service.ts` | План действий при укусе насекомого |
 | `sos-passport-service.ts`, `emergency-contact-service.ts` | SOS и контакты |
 | `wellness-service.ts` | Wellness score на главной |
@@ -516,7 +515,8 @@ Drizzle-объекты схемо-квалифицированы — код за
 | `onboarding.ts` | `resolveBootstrapRoute`, wizard steps |
 | `diary.ts`, `diary-stats.ts`, `diary-profile.ts`, `diary-triggers.ts` | Структурированный дневник, инсайты, триггеры |
 | `clinical-scales.ts` | ARIA-lite, ACT, SCORAD-lite, UAS7 |
-| `asit-therapy.ts`, `insect-allergy.ts`, `food-drug-allergy.ts` | Клинические модули P3–P5 |
+| `asit-therapy.ts`, `prescribed-therapy.ts`, `insect-allergy.ts`, `food-drug-allergy.ts` | Клинические модули P3–P5 + терапия |
+| `phone.ts`, `icd10-reference.ts` | Телефон E.164/маска; справочные коды МКБ-10 |
 | `allergy-passport.ts`, `emergency-contacts.ts` | SOS-паспорт, контакты |
 | `doctor-report.ts` | Блоки отчёта для врача |
 | `sync.ts`, `crypto.ts` | Sync payload, AES-GCM бэкап |

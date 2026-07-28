@@ -1,11 +1,13 @@
-import type { AllergyConditionId } from '@allerguide/core';
+import type {
+  AllergyConditionId,
+  AllergyConfirmationSource,
+} from '@allerguide/core';
 import { normalizeAllergyConfirmations } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { GlassCard } from '@/src/components/GlassCard';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Text } from 'react-native';
 import { useTranslation } from '@/src/store/locale-store';
-import type { AllergyConfirmationSource } from '@allerguide/core';
 
 interface ProfileSetupAllergensStepProps {
   selected: string[];

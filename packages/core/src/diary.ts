@@ -4,6 +4,7 @@ import { enrichSymptomAnswers, enrichFoodAnswers, formatCodedSymptomsSummary, ge
 import { formatAsitSummary } from './asit-therapy';
 import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-allergy';
 import { formatInsectStingEntrySummary } from './insect-allergy';
+import { buildPrescribedTherapyDiarySummary } from './prescribed-therapy';
 
 export type DiaryStepField = 'text' | 'choice' | 'photo' | 'checklist';
 
@@ -15,6 +16,8 @@ export interface DiaryStep {
   choices?: string[];
   multiline?: boolean;
   required?: boolean;
+  /** Optional clinical / help text (tooltip-level). */
+  hint?: string;
 }
 
 export interface DiarySection {
@@ -170,20 +173,6 @@ export const DIARY_SECTIONS: DiarySection[] = [
         required: false,
       },
       {
-        id: 'allergens',
-        label: 'Возможные аллергены в еде',
-        placeholder: 'Молоко, орехи, глютен…',
-        field: 'text',
-        required: false,
-      },
-      {
-        id: 'crossReactions',
-        label: 'Перекрёстные реакции (справочно)',
-        placeholder: 'Подставляется из справочника аллергенов профиля',
-        field: 'text',
-        required: false,
-      },
-      {
         id: 'scanRef',
         label: 'Сканирование (авто)',
         placeholder: 'Подставляется из сканера',
@@ -199,17 +188,18 @@ export const DIARY_SECTIONS: DiarySection[] = [
       },
       {
         id: 'reactionType',
-        label: 'Тип реакции (клинический)',
+        label: 'Тип реакции',
         field: 'choice',
         choices: [
           'Нет',
-          'Ораллергический синдром',
+          'Реакция во рту и горле',
           'ЖКТ',
           'Кожа',
           'Дыхание',
           'Анафилаксия',
         ],
         required: false,
+        hint: '«Реакция во рту и горле» — ораллергический синдром (OAS)',
       },
     ],
   },
@@ -504,6 +494,14 @@ export const DIARY_SECTIONS: DiarySection[] = [
         choices: ['Нет реакции', 'Лёгкая', 'Умеренная', 'Сильная'],
         required: true,
       },
+      {
+        id: 'asitComment',
+        label: 'Комментарий',
+        placeholder: 'Самочувствие, особые обстоятельства…',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
     ],
   },
   {
@@ -554,6 +552,56 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'text',
         multiline: true,
         required: true,
+      },
+    ],
+  },
+  {
+    type: 'Терапия',
+    title: 'Назначенная терапия',
+    icon: 'medical',
+    steps: [
+      {
+        id: 'therapyDrug',
+        label: 'Препарат',
+        placeholder: 'Как указал врач',
+        field: 'text',
+        required: true,
+      },
+      {
+        id: 'therapyDosage',
+        label: 'Дозировка',
+        placeholder: 'Например: 1 таблетка, 2 вдоха',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'therapyTakenAt',
+        label: 'Дата и время приёма',
+        placeholder: '18 июня, 10:00',
+        field: 'text',
+        required: true,
+      },
+      {
+        id: 'therapyStatus',
+        label: 'Соблюдение графика',
+        field: 'choice',
+        choices: ['В срок', 'С опозданием', 'Пропущена'],
+        required: true,
+      },
+      {
+        id: 'therapyReaction',
+        label: 'Реакция / побочный эффект',
+        field: 'choice',
+        choices: ['Нет', 'Лёгкая', 'Умеренная', 'Сильная'],
+        required: false,
+      },
+      {
+        id: 'therapyComment',
+        label: 'Комментарий',
+        placeholder: 'Самочувствие, особые обстоятельства…',
+        field: 'text',
+        multiline: true,
+        required: false,
       },
     ],
   },
@@ -653,6 +701,10 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
 
   if (type === 'АСИТ') {
     return formatAsitSummary(structured.answers);
+  }
+
+  if (type === 'Терапия') {
+    return buildPrescribedTherapyDiarySummary(structured.answers);
   }
 
   if (type === 'Питание') {

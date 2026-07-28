@@ -1,7 +1,7 @@
 import { DEFAULT_LOCALE } from '@/src/i18n/types';
 import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatMessage, translate } from '@/src/i18n/translate';
-import type { AsitCourse } from '@allerguide/core';
+import type { AsitCourse, PrescribedCourse } from '@allerguide/core';
 import { getLocale } from '@/src/services/settings-service';
 
 function resolveLocale() {
@@ -23,6 +23,17 @@ export function getAsitReminderNotificationContent(course: AsitCourse): { title:
   return {
     title: translate(messages, 'notifications.asitPushTitle'),
     body: formatMessage(translate(messages, 'notifications.asitPushBody'), { drug, allergen }),
+  };
+}
+
+export function getPrescribedTherapyReminderNotificationContent(
+  course: PrescribedCourse,
+): { title: string; body: string } {
+  const messages = LOCALE_MESSAGES[resolveLocale()];
+  const drug = course.drug.trim() || translate(messages, 'notifications.asitDrugFallback');
+  return {
+    title: translate(messages, 'notifications.therapyPushTitle'),
+    body: formatMessage(translate(messages, 'notifications.therapyPushBody'), { drug }),
   };
 }
 

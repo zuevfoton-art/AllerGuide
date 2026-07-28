@@ -45,7 +45,7 @@ describe('clinical coding crosswalk', () => {
 
     expect(lines).toHaveLength(2);
     expect(lines[0].name).toBe('Молоко');
-    expect(lines[0].confirmedByLabel).toBe('Специфический IgE');
+    expect(lines[0].confirmedByLabel).toBe('Подтверждено анализами');
     expect(lines[1].confirmedBy).toBe('clinician');
   });
 
@@ -56,6 +56,6 @@ describe('clinical coding crosswalk', () => {
     expect(text).toContain('Молоко');
     expect(text).toContain('ICD-11: CA08.3');
     expect(text).toContain('SNOMED CT 425525006');
-    expect(text).toContain('Самоотчёт');
+    expect(text).toContain('Самонаблюдение');
   });
 });

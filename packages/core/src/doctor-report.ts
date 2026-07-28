@@ -16,8 +16,7 @@ export interface DoctorReportBlock {
   defaultEnabled: boolean;
 }
 
-export const DOCTOR_REPORT_TITLE =
-  'Разработано под научным руководством проф. Смолкина Ю.С., Президента АДАИР';
+export const DOCTOR_REPORT_TITLE = 'A-Claro — отчёт для врача';
 
 export const DOCTOR_REPORT_DISCLAIMER =
   'Отчёт сформирован пользователем/родителем на основе самостоятельно введённых данных. ' +
@@ -69,6 +68,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
     defaultEnabled: true,
   },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },
+  {
+    id: 'therapy',
+    label: 'Терапия',
+    diaryTypes: ['Терапия'],
+    defaultEnabled: false,
+  },
 ];
 
 export interface PefTrendSummary {

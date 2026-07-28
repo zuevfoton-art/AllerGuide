@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { AppLogoMark } from '@/src/components/AppLogo';
+import { BrandLogo } from '@/src/components/brand/BrandLogo';
 
 interface AuthModeToggleProps {
   loginType: LoginType;
@@ -164,17 +164,13 @@ export function AuthForgotLink({ text, onPress }: { text: string; onPress: () =>
 export function AuthHero({ title, subtitle }: { title: string; subtitle: string }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { t } = useTranslation();
 
   return (
     <View style={styles.hero}>
-      <AppLogoMark size={72} />
-      <View style={styles.heroWordmark}>
-        <Text style={styles.heroTitle}>
-          <Text>Aller</Text>
-          <Text style={{ color: theme.colors.accent }}>Guide</Text>
-        </Text>
-        <Text style={styles.heroTagline}>ALLERGY MANAGEMENT</Text>
-      </View>
+      <BrandLogo size={56} showWordmark showEndorser />
+      <Text style={styles.heroTagline}>{t('onboarding.tagline')}</Text>
+      <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>
   );
@@ -229,20 +225,21 @@ export function AuthReplitButton({ onPress }: { onPress: () => void }) {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
-    heroWordmark: { alignItems: 'center', gap: 2, marginTop: 2 },
+    heroTagline: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
+      letterSpacing: 0.2,
+      marginBottom: 4,
+    },
     heroTitle: {
       fontFamily: fonts.serifBold,
-      fontSize: 28,
+      fontSize: 22,
       fontWeight: '700',
       color: colors.head,
       letterSpacing: -0.3,
-    },
-    heroTagline: {
-      fontFamily: fonts.sans,
-      fontSize: 10,
-      color: colors.textMuted,
-      letterSpacing: 1.8,
-      textTransform: 'uppercase',
+      textAlign: 'center',
     },
     heroSubtitle: {
       fontFamily: fonts.sans,

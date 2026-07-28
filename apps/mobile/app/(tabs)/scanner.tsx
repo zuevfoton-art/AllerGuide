@@ -1,8 +1,7 @@
-import { Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { Image, Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import type { ScanResult } from '@allerguide/ai';
 import {
   computeScanTrends,
   formatDiaryDate,
@@ -26,7 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
-import { scanBarcode, scanFromOcr, scanText } from '@/src/services/scanner-service';
+import { scanBarcode, scanFromOcr, scanText, type ScanResultExtended } from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 import {
   addSafeProduct,
@@ -66,7 +65,7 @@ export default function ScannerScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('');
   const [mode, setMode] = useState<ScanMode>('product');
-  const [result, setResult] = useState<ScanResult | null>(null);
+  const [result, setResult] = useState<ScanResultExtended | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [safeList, setSafeList] = useState<SafeProduct[]>([]);
   const [loading, setLoading] = useState(false);
@@ -83,7 +82,7 @@ export default function ScannerScreen() {
   const lastScanRef = useRef<(() => void) | null>(null);
   const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastHapticResultRef = useRef<ScanResult | null>(null);
+  const lastHapticResultRef = useRef<ScanResultExtended | null>(null);
 
   const isPhotoMode = mode === 'menu' || mode === 'medicine' || mode === 'cosmetics';
   /** All scanner modes can photograph a label; product also scans barcodes live. */
@@ -193,7 +192,7 @@ export default function ScannerScreen() {
       if (barcodeMode && mode === 'product') {
         const scanResult = await scanBarcode({ barcode: text, profile });
         setResult(scanResult);
-        setRepeatUnsafe(Boolean((scanResult as { repeatUnsafe?: boolean }).repeatUnsafe));
+        setRepeatUnsafe(Boolean(scanResult.repeatUnsafe));
         return;
       }
 
@@ -536,6 +535,18 @@ export default function ScannerScreen() {
           </View>
           <Button label={t('scanner.openAction')} variant="secondary" size="sm" onPress={openScanAction} />
         </View>
+
+        {/* Prominent camera CTA for photo-based modes */}
+        {(mode === 'medicine' || mode === 'cosmetics') ? (
+          <Pressable
+            style={styles.photoCta}
+            onPress={openScanAction}
+            accessibilityRole="button"
+            accessibilityLabel={t('scanner.takePhoto')}>
+            <Ionicons name="camera" size={22} color={theme.colors.onAccent} />
+            <Text style={styles.photoCtaText}>{t('scanner.scanWithCamera')}</Text>
+          </Pressable>
+        ) : null}
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('scanner.manualDivider')}</Text>
@@ -586,10 +597,54 @@ export default function ScannerScreen() {
         <View
           testID="scanner-result"
           style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
+          {/* Product identity row (image + name/brand) */}
+          {(result?.productBrand || result?.productImageUrl || displayResult.productName) ? (
+            <View style={styles.productIdentityRow}>
+              {result?.productImageUrl ? (
+                <Image
+                  source={{ uri: result.productImageUrl }}
+                  style={styles.productImage}
+                  accessibilityLabel={displayResult.productName ?? ''}
+                  resizeMode="contain"
+                />
+              ) : null}
+              <View style={styles.productIdentityBody}>
+                {displayResult.productName ? (
+                  <Text style={styles.productName}>{displayResult.productName}</Text>
+                ) : null}
+                {result?.productBrand ? (
+                  <Text style={styles.productBrand}>{result.productBrand}</Text>
+                ) : null}
+              </View>
+            </View>
+          ) : null}
+
           <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
             {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
           </Text>
-          {displayResult.productName ? <Text style={styles.productName}>{displayResult.productName}</Text> : null}
+
+          {/* Barcode scan status badge */}
+          {result?.barcodeScanStatus && result.barcodeScanStatus !== 'found_match' ? (
+            <Text style={styles.statusBadge}>
+              {result.barcodeScanStatus === 'not_found'
+                ? t('scanner.statusNotFound')
+                : result.barcodeScanStatus === 'found_insufficient_composition'
+                  ? t('scanner.statusInsufficientComposition')
+                  : t('scanner.statusNoAllergens')}
+            </Text>
+          ) : null}
+
+          {/* Menu scan status badge */}
+          {result?.menuScanStatus ? (
+            <Text style={styles.statusBadge}>
+              {result.menuScanStatus === 'text_match'
+                ? t('scanner.menuStatusMatch')
+                : result.menuScanStatus === 'incomplete_composition'
+                  ? t('scanner.menuStatusIncomplete')
+                  : t('scanner.menuStatusNoMatch')}
+            </Text>
+          ) : null}
+
           <Text style={styles.reason}>{displayResult.reason}</Text>
           {displayResult.matches?.length > 0 ? (
             <View style={styles.matchesBadge}>
@@ -829,6 +884,46 @@ function createStyles({ colors, fonts }: AppTheme) {
     resultCard: { borderRadius: 8, padding: 16, gap: 8, borderWidth: 1 },
     resultSafe: { backgroundColor: colors.successLight, borderColor: colors.successBorder },
     resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+    productIdentityRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    productIdentityBody: { flex: 1, gap: 2 },
+    productImage: {
+      width: 56,
+      height: 56,
+      borderRadius: 6,
+      backgroundColor: colors.surfaceMuted,
+    },
+    productBrand: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+    },
+    statusBadge: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      backgroundColor: colors.surfaceMuted,
+      paddingVertical: 3,
+      paddingHorizontal: 8,
+      borderRadius: 4,
+      alignSelf: 'flex-start',
+    },
+    photoCta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      marginTop: 10,
+      paddingVertical: 12,
+      borderRadius: 8,
+      backgroundColor: colors.accent,
+    },
+    photoCtaText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.onAccent,
+    },
     repeatWarning: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,

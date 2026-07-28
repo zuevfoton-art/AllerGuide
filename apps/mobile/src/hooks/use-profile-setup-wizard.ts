@@ -15,6 +15,7 @@ export {
   mergeCrossReactionAllergenIds,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
+  shouldSkipAllergenConfirmationsStep,
   shouldSkipComorbidityStep,
   shouldSkipConditionHistoryStep,
   shouldSkipCrossReactionsStep,
@@ -31,6 +32,8 @@ export interface ProfileSetupWizardDraft {
   name: string;
   birthYear: string;
   selectedAllergenIds: string[];
+  /** Allergen ids accepted from cross-reactions step — stored separately from primary allergens. */
+  crossReactionAllergenIds: string[];
   confirmations: Record<string, AllergyConfirmationSource>;
   conditions: AllergyConditionId[];
   conditionOptionSelections: import('@allerguide/core').ConditionOptionSelections;

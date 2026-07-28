@@ -10,11 +10,33 @@ import {
 
 export type BarcodeLookupSource = 'barcodes_db' | 'catalog_api' | 'openfoodfacts';
 
+/**
+ * High-level lookup outcome for barcode scans.
+ * - not_found: product not in any source
+ * - found_insufficient_composition: found but composition is too short to analyse reliably
+ * - found_no_allergens: found with adequate composition, no matches for this profile
+ * - found_match: found and at least one allergen matched
+ */
+export type BarcodeScanStatus =
+  | 'not_found'
+  | 'found_insufficient_composition'
+  | 'found_no_allergens'
+  | 'found_match';
+
+/**
+ * High-level outcome for menu/OCR scans.
+ * - text_match: allergens found in the scanned text
+ * - incomplete_composition: text too short or no structured composition detected
+ * - no_match: composition parsed, no matches for this profile
+ */
+export type MenuScanStatus = 'text_match' | 'incomplete_composition' | 'no_match';
+
 export type ResolvedBarcodeProduct = {
   barcode: string;
   name: string;
   ingredients: string;
   brand?: string;
+  imageUrl?: string;
   source: BarcodeLookupSource;
   declaredAllergenIds: string[];
   traceAllergenIds: string[];
@@ -66,6 +88,7 @@ export async function resolveProductByBarcode(
         barcode: catalogProduct.barcode,
         name: catalogProduct.name,
         ingredients,
+        brand: (catalogProduct as { brand?: string }).brand,
         source: 'catalog_api',
         declaredAllergenIds: declared,
         traceAllergenIds: traces,
@@ -91,6 +114,7 @@ export async function resolveProductByBarcode(
     barcode: remote.barcode,
     name: remote.name,
     ingredients,
+    brand: remote.brand,
     originSource: 'openfoodfacts',
     declaredAllergenIds: remote.allergenTags,
     traceAllergenIds: remote.traceTags,
@@ -100,6 +124,8 @@ export async function resolveProductByBarcode(
     barcode: remote.barcode,
     name: remote.name,
     ingredients,
+    brand: remote.brand,
+    imageUrl: remote.imageUrl,
     source: 'openfoodfacts',
     declaredAllergenIds: remote.allergenTags,
     traceAllergenIds: remote.traceTags,

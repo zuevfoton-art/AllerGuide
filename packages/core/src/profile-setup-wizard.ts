@@ -14,7 +14,7 @@ import type { ProfileType, Scenario } from './types';
 
 /**
  * Profile setup wizard steps (UX split P1–P3).
- * Clinical: conditions → allergens → cross → symptoms → history → …
+ * Clinical: conditions → allergens → cross → allergenConfirmations → symptoms → history → …
  */
 export const PROFILE_SETUP_WIZARD_STEPS = [
   'name',
@@ -22,6 +22,7 @@ export const PROFILE_SETUP_WIZARD_STEPS = [
   'conditions',
   'allergens',
   'crossReactions',
+  'allergenConfirmations',
   'symptomBaseline',
   'conditionHistory',
   'comorbidity',
@@ -55,6 +56,8 @@ export interface ProfileSetupWizardDraft {
   name: string;
   birthYear: string;
   selectedAllergenIds: string[];
+  /** Allergen ids accepted from cross-reactions step — stored separately from primary allergens. */
+  crossReactionAllergenIds: string[];
   confirmations: Record<string, AllergyConfirmationSource>;
   conditions: AllergyConditionId[];
   /** FR-PROF-03 sub-options for selected condition types (pre-seed allergens). */
@@ -72,6 +75,7 @@ export interface ProfileSetupWizardNavOptions {
   skipComorbidity?: boolean;
   skipPhenotypeSummary?: boolean;
   skipCrossReactions?: boolean;
+  skipAllergenConfirmations?: boolean;
 }
 
 export function createEmptyProfileSetupWizardDraft(
@@ -81,6 +85,7 @@ export function createEmptyProfileSetupWizardDraft(
     name: '',
     birthYear: '',
     selectedAllergenIds: [],
+    crossReactionAllergenIds: [],
     confirmations: {},
     conditions: [],
     conditionOptionSelections: {},
@@ -124,6 +129,7 @@ export function validateProfileSetupWizardStep(
       if (draft.selectedAllergenIds.length === 0) return 'allergen_required';
       return null;
     case 'crossReactions':
+    case 'allergenConfirmations':
     case 'symptomBaseline':
     case 'conditionHistory':
     case 'comorbidity':
@@ -155,6 +161,13 @@ export function shouldSkipCrossReactionsStep(
   return getCrossReactionsForSelection(draft.selectedAllergenIds).length === 0;
 }
 
+/** Skip allergen confirmations when no primary allergens are selected. */
+export function shouldSkipAllergenConfirmationsStep(
+  draft: Pick<ProfileSetupWizardDraft, 'selectedAllergenIds'>,
+): boolean {
+  return draft.selectedAllergenIds.length === 0;
+}
+
 export function buildProfileSetupWizardNavOptions(
   draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
 ): ProfileSetupWizardNavOptions {
@@ -163,6 +176,7 @@ export function buildProfileSetupWizardNavOptions(
     skipComorbidity: shouldSkipComorbidityStep(draft),
     skipPhenotypeSummary: shouldSkipPhenotypeSummaryStep(draft),
     skipCrossReactions: shouldSkipCrossReactionsStep(draft),
+    skipAllergenConfirmations: shouldSkipAllergenConfirmationsStep(draft),
   };
 }
 
@@ -171,6 +185,7 @@ function shouldSkipStep(step: ProfileSetupWizardStep, nav: ProfileSetupWizardNav
   if (step === 'comorbidity' && nav.skipComorbidity) return true;
   if (step === 'phenotypeSummary' && nav.skipPhenotypeSummary) return true;
   if (step === 'crossReactions' && nav.skipCrossReactions) return true;
+  if (step === 'allergenConfirmations' && nav.skipAllergenConfirmations) return true;
   return false;
 }
 

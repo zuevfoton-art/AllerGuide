@@ -35,6 +35,7 @@ const ALWAYS_VISIBLE_SECTIONS = new Set([
   'Кожа',
   'Заметка',
   'Визит к врачу',
+  'Терапия',
 ]);
 
 const POLLEN_PATTERN =

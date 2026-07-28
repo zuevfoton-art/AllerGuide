@@ -11,7 +11,9 @@ export function initDb() {
       name TEXT NOT NULL,
       birthYear INTEGER,
       type TEXT,
-      allergies TEXT
+      allergies TEXT,
+      allergyConfirmations TEXT NOT NULL DEFAULT '{}',
+      crossReactionAllergies TEXT NOT NULL DEFAULT '[]'
     );
     CREATE TABLE IF NOT EXISTS diary_entries (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

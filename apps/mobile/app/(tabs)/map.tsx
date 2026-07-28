@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, Pressable } from 'react-native';
+import { Text, View, StyleSheet, Pressable, Linking } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
@@ -14,6 +14,7 @@ import {
   ADAIR_DOCTORS,
   ADAIR_SPECIALIZATION_LABELS,
   buildPlacesMapUrl,
+  buildYandexMapWidgetUrl,
   getPlaceLevelColor,
   getPlaceLevelLabel,
   getPollenPeaksForMonth,
@@ -122,14 +123,23 @@ export default function MapScreen() {
 
       {layer === 'places' ? (
         <>
-          {places.length > 0 ? (
-            <YandexMap url={mapUrl} />
-          ) : (
-            <View style={styles.mapPlaceholder}>
-              <Ionicons name="map" size={40} color={theme.colors.textMuted} />
-              <Text style={styles.mapText}>{t('map.emptyPlaces')}</Text>
+          {/* Always render the basemap — fall back to user coords when no places found */}
+          <YandexMap
+            url={
+              places.length > 0
+                ? mapUrl
+                : buildYandexMapWidgetUrl({
+                    center: { latitude: coords.lat, longitude: coords.lon },
+                  })
+            }
+          />
+
+          {places.length === 0 ? (
+            <View style={styles.emptyPlacesHint}>
+              <Ionicons name="information-circle-outline" size={16} color={theme.colors.textMuted} />
+              <Text style={styles.emptyPlacesText}>{t('map.emptyPlaces')}</Text>
             </View>
-          )}
+          ) : null}
 
           <Text style={styles.mapAttribution}>{t('map.yandexAttribution')}</Text>
 
@@ -195,7 +205,12 @@ export default function MapScreen() {
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{clinic.name}</Text>
                 <Text style={styles.cardNote}>{clinic.address}</Text>
-                <Text style={styles.tags}>{clinic.phone}</Text>
+                <Pressable
+                  onPress={() => void Linking.openURL(`tel:${clinic.phone}`)}
+                  accessibilityRole="link"
+                  accessibilityLabel={clinic.phone}>
+                  <Text style={[styles.tags, styles.phoneLink]}>{clinic.phone}</Text>
+                </Pressable>
               </View>
               {clinic.isNkcc ? (
                 <View style={[styles.badge, { backgroundColor: theme.colors.accentLight }]}>
@@ -217,6 +232,14 @@ export default function MapScreen() {
                 <Text style={styles.tags}>
                   {ADAIR_SPECIALIZATION_LABELS[doctor.specialization]}
                 </Text>
+                {doctor.phone ? (
+                  <Pressable
+                    onPress={() => void Linking.openURL(`tel:${doctor.phone!}`)}
+                    accessibilityRole="link"
+                    accessibilityLabel={doctor.phone}>
+                    <Text style={[styles.tags, styles.phoneLink]}>{doctor.phone}</Text>
+                  </Pressable>
+                ) : null}
                 {doctor.isChiefExpert ? (
                   <Text style={[styles.tags, { color: theme.colors.accent }]}>
                     {t('map.chiefExpert')}
@@ -265,6 +288,22 @@ function createStyles({ colors, fonts }: AppTheme) {
       textAlign: 'center',
       paddingHorizontal: 24,
       lineHeight: 20,
+    },
+    emptyPlacesHint: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 6,
+    },
+    emptyPlacesText: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      flex: 1,
+    },
+    phoneLink: {
+      color: colors.accent,
+      textDecorationLine: 'underline',
     },
     mapAttribution: {
       fontFamily: fonts.sans,
