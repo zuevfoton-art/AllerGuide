@@ -388,14 +388,17 @@ pnpm build:staging:ios
 
 ## 9. Чеклист
 
-- [ ] `terraform apply` — VPC, private PG, registry, container, API GW, runner VM
-- [ ] Lockbox заполнен (`DATABASE_URL`, `JWT_SECRET`, `OPENAI_API_KEY`, …)
-- [ ] DNS: certificate challenges + CNAME `api.staging` → API GW
-- [ ] `curl https://api.staging.aclearo.com/api/health` → 200
+Актуальный live-inventory (health / DNS / gaps): [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) § «Статус что уже поднято на YC».
+
+- [x] `terraform apply` — VPC, private PG, registry, container, API GW, runner VM *(косвенно: live health+DB+TLS на apigw)*
+- [ ] Lockbox заполнен полностью (`DATABASE_URL`, `JWT_SECRET`, … + **pollen** keys)
+- [x] DNS: certificate challenges + CNAME `api.staging` → API GW
+- [x] `curl https://api.staging.aclearo.com/api/health` → 200
 - [ ] GitHub runner зарегистрирован с label `yc-staging-vpc`
-- [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN`
+- [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN` (deploy workflow recently fails at gate)
 - [ ] Push в `staging` → workflow green
-- [ ] `./scripts/staging-preflight.sh` → Pass
+- [ ] `./scripts/staging-preflight.sh` → Pass (auth smoke уже Pass отдельно)
+- [ ] `pnpm yc-stage-phase0` Pass без `ALLOW_MISSING_POLLEN_HEATMAP`
 - [ ] EAS staging APK + iOS установлены, smoke S.1–S.4
 
 ---

@@ -62,7 +62,7 @@ ALLOW_MISSING_POLLEN_HEATMAP=1 ./scripts/yc-stage-phase0-gate.sh
 
 Exit code `0` = Phase 0 критерии выполнены; иначе — список failed checks в stderr.
 
-### Текущий снимок (live)
+### Текущий снимок Phase 0 gate
 
 Прогон `./scripts/yc-stage-phase0-gate.sh` против YC:
 
@@ -82,6 +82,89 @@ Exit code `0` = Phase 0 критерии выполнены; иначе — сп
 `staging-preflight.sh` — функциональные smokes перед closed beta.  
 Phase 0 gate — **инфраструктурный** критерий «YC = единственный stage URL».  
 Оба должны быть зелёными перед раздачей EAS `staging` как «официального» stage.
+
+---
+
+## Статус «что уже поднято на YC» (inventory)
+
+Проверено **2026-07-28** из CI/agent VM: live HTTP/DNS/TLS + auth smoke.  
+`terraform output` / `yc` CLI в этой среде **недоступны** (нет local state и `yc` binary) — IDs ресурсов сверяйте локально:
+
+```bash
+cd infra/yandex/staging
+terraform output
+# sensitive:
+terraform output -raw database_url   # не печатать в чат/PR
+terraform output lockbox_secret_id container_registry_id serverless_container_id api_gateway_id
+```
+
+### A. Edge / DNS / TLS
+
+| Компонент | Статус | Доказательство |
+|-----------|--------|----------------|
+| `api.staging.aclearo.com` | ✅ live | CNAME → `*.apigw.yandexcloud.net`, `GET /api/health` 200 |
+| `api.staging.aclearo.ru` | ✅ live | Тот же GW IP / health 200 |
+| TLS | ✅ | LE cert `CN=api.staging.aclearo.com` (valid ~Jul–Oct 2026) |
+| Helmet / rate limit | ✅ | HSTS + `ratelimit-*` headers на health |
+
+### B. API runtime (Serverless behind GW)
+
+| Компонент | Статус | Доказательство |
+|-----------|--------|----------------|
+| Process / routing | ✅ | JSON health, не Replit HTML |
+| Postgres connectivity | ✅ | `database.ok: true`, latency ~50 ms, `pooler: false` |
+| JWT auth | ✅ | `authDatabase: true`; `staging-auth-smoke.sh` register/login/me **Pass** |
+| Cloud sync flag | ✅ | `features.sync: true` |
+| AI scan | ✅ | `features.aiScan: true`, `aiScanProvider: "yandex"`, dailyBudget 100 |
+| YC OCR | ✅ | `features.ycOcr: true` |
+| Google pollen heatmap | ❌ | Нет `features.pollenHeatmap`; tile `GET .../api/pollen/heatmap/...` → **404** |
+| Replit (legacy) | ⚠️ still up | `aller-guide.replit.app/api/health` → урезанный `{ok, authDatabase}` без YC features |
+
+### C. Инфра Terraform (ожидаемые ресурсы)
+
+Код: [`infra/yandex/staging/`](../infra/yandex/staging/). По live API **косвенно** видно, что VPC+PG+Container+GW+TLS уже работали (health+DB+JWT). Прямой `terraform output` здесь не снят — чеклист для владельца folder:
+
+| Ресурс (output) | Нужен для | Локально проверить |
+|-----------------|-----------|--------------------|
+| `network_id` / `subnet_id` | VPC | `terraform output` |
+| `postgresql_fqdn` / `database_url` | private PG | только VPC / Lockbox |
+| `container_registry_id` | YCR images | + GitHub `YC_REGISTRY_ID` |
+| `serverless_container_id` | API runtime | + GitHub `YC_CONTAINER_ID` |
+| `lockbox_secret_id` | env API | pollen keys ещё не отражены в health |
+| `api_gateway_id` / `api_gateway_default_domain` | публичный HTTPS | DNS уже указывает на apigw |
+| `certificate_id` | TLS custom domains | cert ISSUED (см. openssl) |
+| `github_runner_public_ip` | migrate job | self-hosted `yc-staging-vpc` |
+| `deploy_service_account_key` | CI push/deploy | GitHub `YC_SA_JSON` |
+
+### D. CI / automation
+
+| Item | Статус | Комментарий |
+|------|--------|-------------|
+| Workflow `deploy-staging-yandex.yml` | ⚠️ active, recent runs **fail** | Gate: нужны `YC_SA_JSON`, `YC_REGISTRY_ID`, `YC_CONTAINER_ID` (0s failure = secrets missing/incomplete на событии) |
+| Trigger | push `staging` / `workflow_dispatch` | Не каждый PR |
+| EAS profile `staging` | ✅ в репо | URL = YC |
+| EAS profile `replit` | ⚠️ legacy | Убрать в фазе 3 |
+| Phase 0 gate script | ✅ | `pnpm yc-stage-phase0` |
+
+### E. Сводный чеклист (PR / ops)
+
+- [x] DNS + TLS `api.staging.aclearo.com` / `.ru` на API Gateway
+- [x] Health 200, `database.ok`, `authDatabase`
+- [x] `features.sync` + `features.aiScan` (+ Yandex AI / `ycOcr`)
+- [x] Auth smoke (`./scripts/staging-auth-smoke.sh`)
+- [x] EAS `staging` → YC URL (не Replit)
+- [x] Stage scripts/workflows без `replit.app`
+- [ ] Lockbox: `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` → `features.pollenHeatmap: true`
+- [ ] Pollen tile HTTP 200 PNG
+- [ ] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
+- [ ] GitHub Secrets `YC_*` полные → зелёный `deploy-staging-yandex`
+- [ ] Self-hosted runner `yc-staging-vpc` Idle (migrate)
+- [ ] `STAGING_RUN_SMOKES=1` preflight (sync + scan)
+- [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + staging APK QA
+- [ ] Pause Replit deployment (фаза 5)
+- [ ] Удалить EAS `replit` / docs hooks (фаза 3)
+
+**Вывод:** YC stage **уже несёт** API + DB + auth + sync + Yandex AI/OCR. Для закрытия Phase 0 без оговорок остаётся **pollen Lockbox (фаза 1)**; CI deploy secrets и Replit cleanup — следующие фазы.
 
 ---
 
