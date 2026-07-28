@@ -94,6 +94,10 @@ export async function backendForgotPassword(input: { login: string; loginType: '
   });
 }
 
+export async function backendVerifyResetToken(token: string) {
+  return apiRequest<{ ok: true }>(`/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
+}
+
 export async function backendResetPassword(input: { token: string; password: string; confirmPassword: string }) {
   return apiRequest<{ ok: true }>('/api/auth/reset-password', {
     method: 'POST',

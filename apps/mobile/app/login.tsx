@@ -18,43 +18,39 @@ import {
   AuthReplitButton,
 } from '@/src/components/AuthForm';
 
-const FORGOT_LABELS: Record<string, string> = {
-  ru: 'Забыли пароль?',
-  en: 'Forgot password?',
-  es: '¿Olvidaste tu contraseña?',
-  fr: 'Mot de passe oublié ?',
-  de: 'Passwort vergessen?',
-  it: 'Password dimenticata?',
-};
-
 export default function LoginScreen() {
-  const { t, tAuthError, locale } = useTranslation();
+  const { t, tAuthError } = useTranslation();
   const [loginType, setLoginType] = useState<LoginType>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRecoverHint, setShowRecoverHint] = useState(false);
+
+  const openForgotPassword = () => {
+    const emailPrefill = loginType === 'email' ? login.trim() : '';
+    router.push({
+      pathname: '/forgot-password',
+      params: emailPrefill ? { email: emailPrefill } : undefined,
+    });
+  };
 
   const handleLogin = async () => {
     setLoading(true);
     setError('');
+    setShowRecoverHint(false);
     const result = await loginUser({ loginType, login, password });
     setLoading(false);
 
     if (!result.ok) {
       setError(tAuthError(result.error));
+      if (result.error === 'Неверный логин или пароль.' || result.error === 'wrongCredentials') {
+        setShowRecoverHint(true);
+      }
       return;
     }
 
     router.replace('/');
-  };
-
-  const forgotLabel = FORGOT_LABELS[locale] ?? FORGOT_LABELS.en;
-
-  const handleReplitLogin = () => {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/api/login';
-    }
   };
 
   return (
@@ -78,8 +74,19 @@ export default function LoginScreen() {
         secureTextEntry
         testID="auth-password-input"
       />
-      <AuthForgotLink text={forgotLabel} onPress={() => router.push('/forgot-password')} />
+      <AuthForgotLink
+        text={t('auth.forgot.link')}
+        onPress={openForgotPassword}
+        testID="auth-forgot-link"
+      />
       <AuthError message={error} />
+      {showRecoverHint ? (
+        <AuthForgotLink
+          text={t('auth.forgot.recoverHint')}
+          onPress={openForgotPassword}
+          testID="auth-forgot-recover-hint"
+        />
+      ) : null}
       <AuthPrimaryButton
         label={t('auth.loginButton')}
         onPress={handleLogin}
@@ -95,7 +102,11 @@ export default function LoginScreen() {
       {Platform.OS === 'web' && (
         <>
           <AuthDivider />
-          <AuthReplitButton onPress={handleReplitLogin} />
+          <AuthReplitButton onPress={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = '/api/login';
+            }
+          }} />
         </>
       )}
     </Screen>

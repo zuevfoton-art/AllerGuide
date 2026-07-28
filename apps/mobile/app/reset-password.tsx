@@ -1,8 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { backendResetPassword } from '@/src/services/backend-api';
+import { backendResetPassword, backendVerifyResetToken } from '@/src/services/backend-api';
 import { Screen } from '@/src/components/Screen';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -24,10 +24,39 @@ export default function ResetPasswordScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(Boolean(token));
+  const [tokenValid, setTokenValid] = useState(Boolean(token));
   const [done, setDone] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function verify() {
+      if (!token) {
+        setTokenValid(false);
+        setVerifying(false);
+        return;
+      }
+
+      setVerifying(true);
+      const result = await backendVerifyResetToken(token);
+      if (cancelled) return;
+
+      setTokenValid(result.ok);
+      if (!result.ok) {
+        setError(t('auth.resetPassword.invalidToken'));
+      }
+      setVerifying(false);
+    }
+
+    void verify();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, t]);
+
   const handleSubmit = async () => {
-    if (!token) {
+    if (!token || !tokenValid) {
       setError(t('auth.resetPassword.invalidToken'));
       return;
     }
@@ -72,7 +101,18 @@ export default function ResetPasswordScreen() {
           text=""
           linkText={t('auth.loginLink')}
           onPress={() => router.replace('/login')}
+          testID="auth-reset-login-link"
         />
+      </Screen>
+    );
+  }
+
+  if (verifying) {
+    return (
+      <Screen>
+        <View style={styles.loadingBox}>
+          <ActivityIndicator color={theme.colors.accent} />
+        </View>
       </Screen>
     );
   }
@@ -80,7 +120,7 @@ export default function ResetPasswordScreen() {
   return (
     <Screen>
       <AuthHero title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle')} />
-      {!token && (
+      {!tokenValid && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{t('auth.resetPassword.invalidToken')}</Text>
         </View>
@@ -91,6 +131,7 @@ export default function ResetPasswordScreen() {
         onChangeText={setPassword}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
+        testID="auth-reset-password"
       />
       <AuthField
         label={t('auth.resetPassword.confirmPassword')}
@@ -98,17 +139,20 @@ export default function ResetPasswordScreen() {
         onChangeText={setConfirmPassword}
         placeholder={t('auth.confirmPasswordPlaceholder')}
         secureTextEntry
+        testID="auth-reset-confirm"
       />
       <AuthError message={error} />
       <AuthPrimaryButton
         label={t('auth.resetPassword.submitButton')}
         onPress={handleSubmit}
         loading={loading}
+        testID="auth-reset-submit"
       />
       <AuthLink
         text=""
         linkText={t('auth.forgot.backToLogin')}
         onPress={() => router.replace('/login')}
+        testID="auth-reset-back-login"
       />
     </Screen>
   );
@@ -132,6 +176,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.textSecondary,
       textAlign: 'center',
+    },
+    loadingBox: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 48,
     },
     errorBox: {
       backgroundColor: colors.dangerLight,

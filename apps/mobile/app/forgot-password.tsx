@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,14 +19,22 @@ export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const params = useLocalSearchParams<{ email?: string }>();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(
+    typeof params.email === 'string' ? params.email : '',
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resetToken, setResetToken] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async () => {
+    if (!BACKEND_AUTH_ENABLED) {
+      setError(t('auth.forgot.backendRequired'));
+      return;
+    }
+
     const trimmed = email.trim();
     if (!trimmed) {
       setError(t('auth.errors.emailRequired'));
@@ -67,6 +75,7 @@ export default function ForgotPasswordScreen() {
             <View style={styles.tokenBox}>
               <Text style={styles.tokenLabel}>Ссылка для сброса (dev):</Text>
               <Text
+                testID="auth-forgot-dev-reset-link"
                 style={styles.tokenLink}
                 onPress={() =>
                   router.push({ pathname: '/reset-password', params: { token: resetToken } })
@@ -80,6 +89,7 @@ export default function ForgotPasswordScreen() {
           text=""
           linkText={t('auth.forgot.backToLogin')}
           onPress={() => router.replace('/login')}
+          testID="auth-forgot-back-login"
         />
       </Screen>
     );
@@ -88,6 +98,9 @@ export default function ForgotPasswordScreen() {
   return (
     <Screen>
       <AuthHero title={t('auth.forgot.title')} subtitle={t('auth.forgot.subtitle')} />
+      <View style={styles.hintBox}>
+        <Text style={styles.hintText}>{t('auth.forgot.emailOnlyHint')}</Text>
+      </View>
       {!BACKEND_AUTH_ENABLED ? (
         <View style={styles.offlineBox}>
           <Text style={styles.offlineText}>{t('auth.forgot.backendRequired')}</Text>
@@ -99,17 +112,20 @@ export default function ForgotPasswordScreen() {
         onChangeText={setEmail}
         placeholder={t('auth.forgot.emailPlaceholder')}
         keyboardType="email-address"
+        testID="auth-forgot-email"
       />
       <AuthError message={error} />
       <AuthPrimaryButton
         label={t('auth.forgot.submitButton')}
         onPress={handleSubmit}
         loading={loading}
+        testID="auth-forgot-submit"
       />
       <AuthLink
         text=""
         linkText={t('auth.forgot.backToLogin')}
         onPress={() => router.back()}
+        testID="auth-forgot-back"
       />
     </Screen>
   );
@@ -154,6 +170,20 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.accent,
       fontWeight: '600',
+    },
+    hintBox: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    hintText: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
     offlineBox: {
       backgroundColor: colors.warningLight,

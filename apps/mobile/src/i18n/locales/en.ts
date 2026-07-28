@@ -76,6 +76,7 @@ const en: LocaleMessages = {
       createFailed: 'Could not create account.',
     },
     forgot: {
+      link: 'Forgot password?',
       title: 'Reset password',
       subtitle: 'Enter your email and we will send you a reset link',
       emailLabel: 'Email',
@@ -86,6 +87,7 @@ const en: LocaleMessages = {
       backToLogin: 'Back to sign in',
       emailOnlyHint: 'Password reset is only available for accounts registered with email.',
       backendRequired: 'Password reset requires server account (backend auth). Not available in offline-only mode.',
+      recoverHint: 'Forgot your password? Recover access via email.',
     },
     resetPassword: {
       title: 'New password',
