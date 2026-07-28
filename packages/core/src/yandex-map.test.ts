@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CATALOG_PLACES } from './catalog';
 import {
+  buildLocationMapUrl,
   buildPlacesMapUrl,
   buildYandexMapWidgetUrl,
   getPlaceMarkerStyle,
@@ -28,6 +29,13 @@ describe('yandex-map', () => {
     const url = buildPlacesMapUrl(CATALOG_PLACES, place.id);
     expect(url).toContain(`ll=${place.lng}%2C${place.lat}`);
     expect(url).toContain('z=13');
+  });
+
+  it('centers the pollen basemap on the user location', () => {
+    const url = buildLocationMapUrl(59.93, 30.32);
+
+    expect(url).toContain('ll=30.32%2C59.93');
+    expect(url).toContain('pt=30.32%2C59.93%2Cpm2blm');
   });
 
   it('maps place levels to marker colors', () => {

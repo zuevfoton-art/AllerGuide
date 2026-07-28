@@ -70,3 +70,11 @@ export function buildPlacesMapUrl(
     })),
   });
 }
+
+export function buildLocationMapUrl(latitude: number, longitude: number): string {
+  return buildYandexMapWidgetUrl({
+    center: { latitude, longitude },
+    zoom: MOSCOW_PLACE_ZOOM,
+    markers: [{ latitude, longitude, style: 'pm2blm' }],
+  });
+}
