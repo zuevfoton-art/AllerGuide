@@ -8,6 +8,7 @@ export const CATALOG_PRODUCT_PRICES_MINOR: Record<string, number> = {
   'oat-milk': 189_00,
   'sunflower-spread': 650_00,
   'epipen-case': 1_290_00,
+  'nasal-rinse': 650_00,
 };
 
 export interface CheckoutLineItem {
