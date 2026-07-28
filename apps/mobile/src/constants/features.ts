@@ -19,6 +19,15 @@ export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'tr
 /** Look up barcodes in the backend product catalog before Open Food Facts. */
 export const PRODUCT_DB_ENABLED = process.env.EXPO_PUBLIC_PRODUCT_DB === 'true';
 
+/** Marketplace cart + checkout with promo codes (offline-capable). */
+export const MARKETPLACE_CHECKOUT_ENABLED =
+  process.env.EXPO_PUBLIC_MARKETPLACE_CHECKOUT === 'true' ||
+  process.env.EXPO_PUBLIC_MAESTRO_TEST_CHECKOUT === 'true';
+
+/** Validate promo codes via API when URL is configured (falls back to core offline). */
+export const MARKETPLACE_CHECKOUT_API_ENABLED =
+  MARKETPLACE_CHECKOUT_ENABLED && Boolean(process.env.EXPO_PUBLIC_API_URL);
+
 /**
  * Google Maps basemap + Google Pollen UPI tiles on the pollen layer.
  * The Yandex/Open-Meteo view remains the default and offline-safe fallback.

@@ -346,6 +346,32 @@ export type LocaleMessages = {
     disclaimer: string;
     buyLink: string;
     buyOnYandex: string;
+    addToCart: string;
+    checkout: string;
+  };
+  checkout: {
+    title: string;
+    subtitle: string;
+    eyebrow: string;
+    emptyCart: string;
+    subtotal: string;
+    discount: string;
+    total: string;
+    discountLabel: string;
+    discountPlaceholder: string;
+    applyDiscount: string;
+    discountApplied: string;
+    confirmOrder: string;
+    confirmTitle: string;
+    confirmMessage: string;
+    disclaimer: string;
+    errors: {
+      empty_code: string;
+      not_found: string;
+      expired: string;
+      below_minimum: string;
+      invalid_subtotal: string;
+    };
   };
   map: {
     title: string;

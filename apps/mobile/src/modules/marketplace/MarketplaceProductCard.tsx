@@ -8,12 +8,15 @@ import {
   type MarketOffer,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useMemo, useState } from 'react';
 import { getProductColor } from '@/src/modules/marketplace/product-theme';
 import { trackEvent } from '@/src/services/analytics-service';
 import { resolveYandexMarketOffer } from '@/src/services/market-api';
 import { useTranslation } from '@/src/store/locale-store';
+import { MARKETPLACE_CHECKOUT_ENABLED } from '@/src/constants/features';
+import { useCartStore } from '@/src/store/cart-store';
 
 interface MarketplaceProductCardProps {
   item: CatalogProduct;
@@ -25,6 +28,7 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
   const styles = useMemo(() => createStyles(theme, compact), [theme, compact]);
   const color = getProductColor(theme, item.colorKey);
   const { t } = useTranslation();
+  const addProduct = useCartStore((s) => s.addProduct);
   const [opening, setOpening] = useState(false);
 
   const offers = getProductOffers(item);
@@ -67,6 +71,11 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
     }
   };
 
+  const addToCart = () => {
+    addProduct(item.id);
+    trackEvent('market_add_to_cart', { productId: item.id });
+  };
+
   const content = (
     <>
       <View style={[styles.cardIcon, { backgroundColor: `${color}18` }]}>
@@ -100,6 +109,15 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
             ))}
           </View>
         ) : null}
+        {MARKETPLACE_CHECKOUT_ENABLED && !compact ? (
+          <Button
+            testID={`market-add-${item.id}`}
+            label={t('market.addToCart')}
+            variant="secondary"
+            size="sm"
+            onPress={addToCart}
+          />
+        ) : null}
       </View>
       {!compact ? (
         <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
@@ -109,6 +127,12 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
 
   if (compact) {
     return <View style={styles.card}>{content}</View>;
+  }
+
+  // The checkout button is an explicit action; avoid nesting it inside the
+  // card-level offer Pressable when the checkout preview is enabled.
+  if (MARKETPLACE_CHECKOUT_ENABLED) {
+    return <GlassCard style={styles.card}>{content}</GlassCard>;
   }
 
   return (

@@ -1,0 +1,31 @@
+# P2.5 — marketplace checkout with promo code (requires EXPO_PUBLIC_MAESTRO_TEST_CHECKOUT=true in build)
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-market
+- extendedWaitUntil:
+    visible:
+      id: market-add-air-purifier
+    timeout: 15000
+- tapOn:
+    id: market-add-air-purifier
+- tapOn:
+    id: market-open-checkout
+- extendedWaitUntil:
+    visible:
+      id: checkout-discount-input
+    timeout: 10000
+- tapOn:
+    id: checkout-discount-input
+- inputText: WELCOME10
+- tapOn:
+    id: checkout-apply-discount
+- extendedWaitUntil:
+    visible:
+      id: checkout-discount-applied
+    timeout: 5000
+- assertVisible:
+    id: checkout-discount-amount
+- assertVisible:
+    id: checkout-total

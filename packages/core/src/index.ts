@@ -13,6 +13,8 @@ export * from './password';
 export * from './emergency-contacts';
 export * from './diary';
 export * from './catalog';
+export * from './discount';
+export * from './checkout';
 export * from './market-offers';
 export * from './diary-stats';
 export * from './sync';

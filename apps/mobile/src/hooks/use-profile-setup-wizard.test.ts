@@ -16,6 +16,7 @@ const baseDraft = (): ProfileSetupWizardDraft => ({
   birthYear: '1990',
   selectedAllergenIds: ['milk'],
   conditions: ['food'],
+  contacts: [],
 });
 
 describe('profile setup wizard (mobile re-export)', () => {
