@@ -362,7 +362,7 @@ const es: LocaleMessages = {
     pollenNoSeason: 'Sin pico estacional para estos alérgenos',
     openYandexPollen: 'Abrir mapa de polen de Yandex',
     openYandexPollenHint: 'Mapa regional y previsión de 10 días',
-    safePollenPlaces: 'Dónde la exposición es menor',
+    safePollenPlaces: 'Puntos con exposición baja',
     safePollenPlacesHint: 'Puntos modelados a unos 20 km; no garantizan aire sin polen.',
     noSafePollenPlaces: 'No hay puntos cercanos con nivel modelado bajo',
     pollenDistance: '{{distance}} km',

@@ -362,7 +362,7 @@ const it: LocaleMessages = {
     pollenNoSeason: 'Nessun picco stagionale per questi allergeni',
     openYandexPollen: 'Apri la mappa pollini Yandex',
     openYandexPollenHint: 'Mappa regionale e previsione a 10 giorni',
-    safePollenPlaces: 'Dove l’esposizione è minore',
+    safePollenPlaces: 'Punti con esposizione bassa',
     safePollenPlacesHint: 'Punti modellati a circa 20 km; non garantiscono aria senza polline.',
     noSafePollenPlaces: 'Nessun punto vicino con livello modellato basso',
     pollenDistance: '{{distance}} km',

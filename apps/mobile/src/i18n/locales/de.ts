@@ -363,7 +363,7 @@ const de: LocaleMessages = {
     pollenNoSeason: 'Kein Saisonhöhepunkt für diese Allergene',
     openYandexPollen: 'Yandex-Pollenkarte öffnen',
     openYandexPollenHint: 'Regionale Karte und 10-Tage-Prognose',
-    safePollenPlaces: 'Wo die Belastung niedriger ist',
+    safePollenPlaces: 'Modellpunkte mit niedriger Belastung',
     safePollenPlacesHint: 'Modellpunkte etwa 20 km entfernt; keine Garantie für pollenfreie Luft.',
     noSafePollenPlaces: 'Kein naher Punkt mit niedrigem Modellwert',
     pollenDistance: '{{distance}} km',

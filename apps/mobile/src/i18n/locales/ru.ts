@@ -363,7 +363,7 @@ const ru: LocaleMessages = {
     pollenNoSeason: 'Для выбранных аллергенов сейчас нет сезонного пика',
     openYandexPollen: 'Открыть карту пыльцы Яндекса',
     openYandexPollenHint: 'Региональная карта и прогноз на 10 дней',
-    safePollenPlaces: 'Где нагрузка ниже',
+    safePollenPlaces: 'Точки с низкой нагрузкой',
     safePollenPlacesHint: 'Модельные точки примерно в 20 км; это не гарантия отсутствия пыльцы.',
     noSafePollenPlaces: 'Рядом не найдено точек с низким модельным уровнем',
     pollenDistance: '{{distance}} км',
