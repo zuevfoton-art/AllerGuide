@@ -148,6 +148,16 @@ POLLEN_RATE_LIMIT_MAX=120
 POLLEN_RATE_LIMIT_WINDOW_MS=60000
 ```
 
+На **Yandex Cloud staging** предпочтительно:
+
+```bash
+export GOOGLE_POLLEN_API_KEY='…'
+export YC_CONTAINER_ID=… YC_REGISTRY_ID=…
+BUILD_PUSH=1 ./scripts/yc-stage-phase1-enable-pollen.sh
+```
+
+См. [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 1.
+
 Проверка:
 
 ```bash

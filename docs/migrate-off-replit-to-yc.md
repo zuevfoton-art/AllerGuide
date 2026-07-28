@@ -117,7 +117,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 | Cloud sync flag | ✅ | `features.sync: true` |
 | AI scan | ✅ | `features.aiScan: true`, `aiScanProvider: "yandex"`, dailyBudget 100 |
 | YC OCR | ✅ | `features.ycOcr: true` |
-| Google pollen heatmap | ❌ | Нет `features.pollenHeatmap`; tile `GET .../api/pollen/heatmap/...` → **404** |
+| Google pollen heatmap | ❌ → Phase 1 | Нет `features.pollenHeatmap`; tile HTML **404** (routes/env not on revision). Enable: `BUILD_PUSH=1 pnpm yc-stage-phase1` |
 | Replit (legacy) | ⚠️ still up | `aller-guide.replit.app/api/health` → урезанный `{ok, authDatabase}` без YC features |
 
 ### C. Инфра Terraform (ожидаемые ресурсы)
@@ -155,9 +155,10 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [x] EAS `staging` → YC URL (не Replit)
 - [x] Stage scripts/workflows без `replit.app`
 - [ ] Lockbox: `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` → `features.pollenHeatmap: true`
-- [ ] Pollen tile HTTP 200 PNG
+- [ ] Pollen tile HTTP 200 PNG **или** JSON 404 от proxy (не HTML) — `./scripts/staging-pollen-smoke.sh`
+- [ ] Image с `registerPollenRoutes` задеплоен (`BUILD_PUSH=1` / branch `staging`)
 - [ ] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
-- [ ] GitHub Secrets `YC_*` полные → зелёный `deploy-staging-yandex`
+- [ ] GitHub Secrets `YC_*` + `YC_LOCKBOX_SECRET_ID` полные → зелёный `deploy-staging-yandex`
 - [ ] Self-hosted runner `yc-staging-vpc` Idle (migrate)
 - [ ] `STAGING_RUN_SMOKES=1` preflight (sync + scan)
 - [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + staging APK QA
@@ -168,18 +169,68 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 
 ---
 
-## Фазы 1–5 (кратко)
+## Фазы 1–5
 
-### 1 — YC API env
+### 1 — YC API env: Lockbox pollen + полный mount + redeploy
 
-Lockbox: полный список из [`apps/api/.env.staging.example`](../apps/api/.env.staging.example), включая:
+**Цель:** `features.pollenHeatmap: true` на `api.staging.aclearo.com` и живой proxy `/api/pollen/heatmap/...`.
+
+Live (до Phase 1 apply): tile отдаёт **HTML 404** — на revision нет pollen routes и/или нет Lockbox keys. Нужны **оба**: свежий image (`apps/api` с `registerPollenRoutes`) **и** env.
+
+#### 1.1 Lockbox keys
+
+Список mount: [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys).  
+Обязательно добавить/обновить:
 
 ```text
 POLLEN_HEATMAP_ENABLED=true
 GOOGLE_POLLEN_API_KEY=<pollen server key>
+POLLEN_RATE_LIMIT_WINDOW_MS=60000
+POLLEN_RATE_LIMIT_MAX=120
 ```
 
-Не класть pollen key в EAS / `EXPO_PUBLIC_*`. Redeploy Serverless revision после новой версии Lockbox.
+Не класть pollen key в EAS / `EXPO_PUBLIC_*`.
+
+#### 1.2 Команда (локально с `yc`)
+
+```bash
+# yc уже с SA (lockbox + serverless containers)
+export GOOGLE_POLLEN_API_KEY='…'          # только Pollen API
+export YC_LOCKBOX_SECRET_ID=e6qs399v1b3unstfh5rj   # или terraform output
+export YC_CONTAINER_ID=…                 # terraform / console
+export YC_REGISTRY_ID=…
+
+# Upsert Lockbox + build/push image + deploy + smoke
+BUILD_PUSH=1 pnpm yc-stage-phase1
+# = ./scripts/yc-stage-phase1-enable-pollen.sh
+```
+
+Только Lockbox (без deploy): `SKIP_DEPLOY=1 pnpm yc-stage-phase1`
+
+Проверка:
+
+```bash
+./scripts/staging-pollen-smoke.sh
+pnpm yc-stage-phase0   # P0.4 должен стать PASS
+```
+
+#### 1.3 CI
+
+[`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml):
+
+- Deploy монтирует **все присутствующие** ключи из `lockbox-staging.keys` (не только JWT/DB).
+- Smoke вызывает `staging-pollen-smoke.sh` после preflight.
+- Нужны GitHub Secrets: `YC_SA_JSON`, `YC_REGISTRY_ID`, `YC_CONTAINER_ID`, `YC_LOCKBOX_SECRET_ID`, `STAGING_API_URL`.
+
+#### 1.4 Чеклист Phase 1
+
+- [ ] `GOOGLE_POLLEN_API_KEY` в Lockbox (не в git/EAS)
+- [ ] `POLLEN_HEATMAP_ENABLED=true` в Lockbox
+- [ ] Image с pollen routes задеплоен (`BUILD_PUSH=1` или push в `staging`)
+- [ ] Revision монтирует pollen keys (`yc-lockbox-deploy-secrets.sh`)
+- [ ] `curl …/api/health | jq .features.pollenHeatmap` → `true`
+- [ ] `./scripts/staging-pollen-smoke.sh` Pass
+- [ ] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
 
 ### 2 — Клиенты
 
@@ -206,6 +257,11 @@ Phase 0 gate + preflight зелёные; Replit deployment paused; в stage-flow
 | Путь | Роль |
 |------|------|
 | [`scripts/yc-stage-phase0-gate.sh`](../scripts/yc-stage-phase0-gate.sh) | Автоgate Phase 0 |
+| [`scripts/yc-stage-phase1-enable-pollen.sh`](../scripts/yc-stage-phase1-enable-pollen.sh) | Phase 1 Lockbox pollen + deploy |
+| [`scripts/yc-lockbox-upsert.sh`](../scripts/yc-lockbox-upsert.sh) | Merge keys → Lockbox version |
+| [`scripts/yc-lockbox-deploy-secrets.sh`](../scripts/yc-lockbox-deploy-secrets.sh) | Mount `lockbox-staging.keys` |
+| [`scripts/staging-pollen-smoke.sh`](../scripts/staging-pollen-smoke.sh) | Health + tile smoke |
+| [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys) | Keys to mount from Lockbox |
 | [`scripts/staging-preflight.sh`](../scripts/staging-preflight.sh) | P1.7 smokes |
 | [`docs/staging-yandex-cloud.md`](./staging-yandex-cloud.md) | Deploy YC |
 | [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md) | GCP + Lockbox pollen |

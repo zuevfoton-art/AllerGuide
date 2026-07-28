@@ -163,7 +163,21 @@ terraform output lockbox_secret_id
 
 ## 3. Lockbox — секреты API
 
-После `terraform apply` заполните секрет `aclearo-staging-api-env`:
+После `terraform apply` заполните секрет `aclearo-staging-api-env`.
+
+**Pollen (Phase 1):** upsert без потери остальных ключей:
+
+```bash
+export GOOGLE_POLLEN_API_KEY='…'   # GCP Pollen API only — never EXPO_PUBLIC_*
+export YC_LOCKBOX_SECRET_ID=$(cd infra/yandex/staging && terraform output -raw lockbox_secret_id)
+export YC_CONTAINER_ID=$(cd infra/yandex/staging && terraform output -raw serverless_container_id)
+export YC_REGISTRY_ID=$(cd infra/yandex/staging && terraform output -raw container_registry_id)
+BUILD_PUSH=1 ./scripts/yc-stage-phase1-enable-pollen.sh
+```
+
+Ключи для mount: [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys). Runbook: [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 1.
+
+Либо вручную новая версия Lockbox:
 
 ```bash
 LOCKBOX_ID=$(cd infra/yandex/staging && terraform output -raw lockbox_secret_id)
@@ -177,6 +191,8 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
   {\"key\": \"OPENAI_API_KEY\", \"text_value\": \"sk-...\"}
 ]"
 ```
+
+> Предпочтительнее `yc-lockbox-upsert.sh` / `yc-stage-phase1-enable-pollen.sh` — они **мержат** payload и не затирают уже лежащие `YC_AI_*` / `SYNC_*`.
 
 Полный список переменных — [`apps/api/.env.staging.example`](../apps/api/.env.staging.example):
 

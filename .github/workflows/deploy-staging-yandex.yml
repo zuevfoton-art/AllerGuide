@@ -120,6 +120,8 @@ jobs:
     if: needs.gate.outputs.deploy == 'true' && needs.build-push.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - name: Deploy serverless container revision
         env:
           YC_SA_JSON: ${{ secrets.YC_SA_JSON }}
@@ -132,23 +134,21 @@ jobs:
           echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
           yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
 
-          IMAGE="cr.yandex/${YC_REGISTRY_ID}/${IMAGE_NAME}:${{ github.sha }}"
-          DEPLOY_ARGS=(
-            --container-id "$YC_CONTAINER_ID"
-            --image "$IMAGE"
-            --cores 1
-            --memory 512MB
-            --execution-timeout 30s
-            --environment "API_PORT=3001,NODE_ENV=production"
-          )
+          export YC_REGISTRY_ID YC_CONTAINER_ID
+          export YC_LOCKBOX_SECRET_ID="${YC_LOCKBOX_SECRET_ID:-}"
+          export IMAGE="cr.yandex/${YC_REGISTRY_ID}/${IMAGE_NAME}:${{ github.sha }}"
+          export IMAGE_TAG="${{ github.sha }}"
+          chmod +x scripts/yc-lockbox-deploy-secrets.sh
 
-          if [ -n "${YC_LOCKBOX_SECRET_ID:-}" ]; then
-            for key in DATABASE_URL DIRECT_DATABASE_URL JWT_SECRET SESSION_SECRET OPENAI_API_KEY; do
-              DEPLOY_ARGS+=(--secret "environment-variable=${key},id=${YC_LOCKBOX_SECRET_ID},key=${key},version-id=latest")
-            done
+          if [ -z "${YC_LOCKBOX_SECRET_ID}" ]; then
+            echo "::error::YC_LOCKBOX_SECRET_ID is required to mount staging secrets (incl. pollen)"
+            exit 1
           fi
 
-          yc serverless container revision deploy "${DEPLOY_ARGS[@]}"
+          # Mount all present Lockbox keys from apps/api/lockbox-staging.keys
+          # (skips missing keys so partial Lockbox still deploys).
+          REQUIRE_POLLEN="${REQUIRE_POLLEN:-0}" \
+            ./scripts/yc-lockbox-deploy-secrets.sh
 
   migrate:
     needs: [deploy]
@@ -189,6 +189,10 @@ jobs:
         run: |
           chmod +x scripts/staging-*.sh
           ./scripts/staging-preflight.sh
+          ./scripts/staging-pollen-smoke.sh || {
+            echo "::warning::Pollen smoke failed — ensure Lockbox has POLLEN_HEATMAP_ENABLED + GOOGLE_POLLEN_API_KEY and image includes pollen routes"
+            exit 1
+          }
 
   mobile-android:
     needs: [gate, smoke]

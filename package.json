@@ -15,7 +15,8 @@
     "test": "pnpm --filter @allerguide/core test && pnpm --filter @allerguide/ai test && pnpm --filter mobile test && pnpm --filter api test",
     "rc-gate": "node scripts/rc-gate-check.mjs",
     "rc-gate:quick": "node scripts/rc-gate-check.mjs --quick",
-    "yc-stage-phase0": "bash scripts/yc-stage-phase0-gate.sh"
+    "yc-stage-phase0": "bash scripts/yc-stage-phase0-gate.sh",
+    "yc-stage-phase1": "bash scripts/yc-stage-phase1-enable-pollen.sh"
   },
   "pnpm": {
     "overrides": {
