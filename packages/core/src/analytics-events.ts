@@ -20,6 +20,9 @@ export const ANALYTICS_EVENT_NAMES = [
   'sos_opened',
   'wellness_refreshed',
   'settings_changed',
+  'profile_setup_step_view',
+  'profile_setup_step_complete',
+  'profile_setup_step_skip',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

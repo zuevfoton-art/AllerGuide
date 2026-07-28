@@ -1,11 +1,11 @@
-import type { AllergyConfirmationSource, AllergyConditionId } from '@allerguide/core';
+import type { AllergyConditionId } from '@allerguide/core';
 import { normalizeAllergyConfirmations } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
-import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
 import { GlassCard } from '@/src/components/GlassCard';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Text } from 'react-native';
 import { useTranslation } from '@/src/store/locale-store';
+import type { AllergyConfirmationSource } from '@allerguide/core';
 
 interface ProfileSetupAllergensStepProps {
   selected: string[];
@@ -16,6 +16,10 @@ interface ProfileSetupAllergensStepProps {
   onAddSuggestedCondition?: (id: AllergyConditionId) => void;
 }
 
+/**
+ * Allergens-only step (P1): catalog pick + default self_reported confirmations.
+ * Cross-reactions move to ProfileSetupCrossReactionsStep.
+ */
 export function ProfileSetupAllergensStep({
   selected,
   onSelectedChange,
@@ -30,19 +34,16 @@ export function ProfileSetupAllergensStep({
   return (
     <GlassCard style={{ gap: 8 }}>
       <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
+      <Text style={ui.docMeta}>{t('profileSetup.allergensHint')}</Text>
       <AllergenPicker
         selected={selected}
+        showCrossReactions={false}
         suggestedConditionIds={suggestedConditionIds}
         onAddSuggestedCondition={onAddSuggestedCondition}
         onChange={(ids) => {
           onSelectedChange(ids);
           onConfirmationsChange(normalizeAllergyConfirmations(ids, confirmations));
         }}
-      />
-      <AllergyConfirmationEditor
-        selected={selected}
-        confirmations={confirmations}
-        onChange={onConfirmationsChange}
       />
     </GlassCard>
   );

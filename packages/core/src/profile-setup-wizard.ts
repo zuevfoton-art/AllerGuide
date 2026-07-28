@@ -1,18 +1,24 @@
 import type { AllergyConfirmationSource } from './allergy-confirmations';
 import type { AllergyConditionId } from './allergy-conditions';
 import type { ComorbidityLink, ConditionEpisodeInput } from './condition-history';
+import { getCrossReactionsForSelection } from './cross-reactions';
 import type { EmergencyContactRelation } from './emergency-contacts';
 import { needsChildConsent } from './profile-validation';
 import { PROFILE_BIRTH_YEAR_MIN } from './profile-validation';
 import type { ProfileType, Scenario } from './types';
 
+/**
+ * Profile setup wizard steps (P1 UX split).
+ * Clinical block: conditions → allergens → crossReactions → history → …
+ */
 export const PROFILE_SETUP_WIZARD_STEPS = [
   'name',
   'birthYear',
   'conditions',
+  'allergens',
+  'crossReactions',
   'conditionHistory',
   'comorbidity',
-  'allergens',
   'phenotypeSummary',
   'contacts',
 ] as const;
@@ -56,6 +62,7 @@ export interface ProfileSetupWizardNavOptions {
   skipConditionHistory?: boolean;
   skipComorbidity?: boolean;
   skipPhenotypeSummary?: boolean;
+  skipCrossReactions?: boolean;
 }
 
 export function validateProfileSetupWizardStep(
@@ -85,32 +92,18 @@ export function validateProfileSetupWizardStep(
     case 'conditions':
       if (draft.conditions.length === 0) return 'conditions_required';
       return null;
-    case 'conditionHistory':
-    case 'comorbidity':
-    case 'phenotypeSummary':
-      return null;
     case 'allergens':
       if (draft.selectedAllergenIds.length === 0) return 'allergen_required';
       return null;
+    case 'crossReactions':
+    case 'conditionHistory':
+    case 'comorbidity':
+    case 'phenotypeSummary':
     case 'contacts':
       return null;
     default:
       return null;
   }
-}
-
-export function validateProfileSetupWizardDraft(
-  draft: ProfileSetupWizardDraft,
-  options: { scenario?: Scenario | null },
-): ProfileSetupWizardErrorCode | null {
-  for (const step of PROFILE_SETUP_WIZARD_STEPS) {
-    if (step === 'conditionHistory' && shouldSkipConditionHistoryStep(draft)) continue;
-    if (step === 'comorbidity' && shouldSkipComorbidityStep(draft)) continue;
-    if (step === 'phenotypeSummary' && shouldSkipPhenotypeSummaryStep(draft)) continue;
-    const error = validateProfileSetupWizardStep(step, draft, options);
-    if (error) return error;
-  }
-  return null;
 }
 
 export function shouldSkipConditionHistoryStep(draft: Pick<ProfileSetupWizardDraft, 'conditions'>) {
@@ -125,15 +118,68 @@ export function shouldSkipPhenotypeSummaryStep(draft: Pick<ProfileSetupWizardDra
   return draft.conditions.length === 0;
 }
 
-export function getProfileSetupWizardStepIndex(step: ProfileSetupWizardStep): number {
-  return PROFILE_SETUP_WIZARD_STEPS.indexOf(step);
+/** Auto-skip when there are no related allergens to review. */
+export function shouldSkipCrossReactionsStep(
+  draft: Pick<ProfileSetupWizardDraft, 'selectedAllergenIds'>,
+) {
+  if (draft.selectedAllergenIds.length === 0) return true;
+  return getCrossReactionsForSelection(draft.selectedAllergenIds).length === 0;
+}
+
+export function buildProfileSetupWizardNavOptions(
+  draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
+): ProfileSetupWizardNavOptions {
+  return {
+    skipConditionHistory: shouldSkipConditionHistoryStep(draft),
+    skipComorbidity: shouldSkipComorbidityStep(draft),
+    skipPhenotypeSummary: shouldSkipPhenotypeSummaryStep(draft),
+    skipCrossReactions: shouldSkipCrossReactionsStep(draft),
+  };
 }
 
 function shouldSkipStep(step: ProfileSetupWizardStep, nav: ProfileSetupWizardNavOptions): boolean {
   if (step === 'conditionHistory' && nav.skipConditionHistory) return true;
   if (step === 'comorbidity' && nav.skipComorbidity) return true;
   if (step === 'phenotypeSummary' && nav.skipPhenotypeSummary) return true;
+  if (step === 'crossReactions' && nav.skipCrossReactions) return true;
   return false;
+}
+
+/** Steps the user will actually see for the current draft (skips applied). */
+export function getVisibleProfileSetupSteps(
+  draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
+): ProfileSetupWizardStep[] {
+  const nav = buildProfileSetupWizardNavOptions(draft);
+  return PROFILE_SETUP_WIZARD_STEPS.filter((step) => !shouldSkipStep(step, nav));
+}
+
+export function getVisibleProfileSetupStepProgress(
+  current: ProfileSetupWizardStep,
+  draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
+): { current: number; total: number } {
+  const visible = getVisibleProfileSetupSteps(draft);
+  const index = visible.indexOf(current);
+  return {
+    current: index >= 0 ? index + 1 : 1,
+    total: Math.max(visible.length, 1),
+  };
+}
+
+export function validateProfileSetupWizardDraft(
+  draft: ProfileSetupWizardDraft,
+  options: { scenario?: Scenario | null },
+): ProfileSetupWizardErrorCode | null {
+  const nav = buildProfileSetupWizardNavOptions(draft);
+  for (const step of PROFILE_SETUP_WIZARD_STEPS) {
+    if (shouldSkipStep(step, nav)) continue;
+    const error = validateProfileSetupWizardStep(step, draft, options);
+    if (error) return error;
+  }
+  return null;
+}
+
+export function getProfileSetupWizardStepIndex(step: ProfileSetupWizardStep): number {
+  return PROFILE_SETUP_WIZARD_STEPS.indexOf(step);
 }
 
 export function getNextProfileSetupWizardStep(
@@ -191,12 +237,10 @@ export function reconcileComorbidityLinks(
   );
 }
 
-export function buildProfileSetupWizardNavOptions(
-  draft: Pick<ProfileSetupWizardDraft, 'conditions'>,
-): ProfileSetupWizardNavOptions {
-  return {
-    skipConditionHistory: shouldSkipConditionHistoryStep(draft),
-    skipComorbidity: shouldSkipComorbidityStep(draft),
-    skipPhenotypeSummary: shouldSkipPhenotypeSummaryStep(draft),
-  };
+/** Merge accepted cross-reaction allergen ids into the selection (deduped). */
+export function mergeCrossReactionAllergenIds(
+  selectedAllergenIds: string[],
+  acceptedRelatedIds: string[],
+): string[] {
+  return [...new Set([...selectedAllergenIds, ...acceptedRelatedIds])];
 }

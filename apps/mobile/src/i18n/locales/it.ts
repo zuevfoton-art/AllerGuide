@@ -547,11 +547,21 @@ const it: LocaleMessages = {
     profileSelfLocked: 'Il tuo profilo',
     profileChildLocked: 'Profilo del bambino',
     allergensLabel: 'Allergeni',
+    allergensHint:
+      'Scegli gli allergeni dall\'elenco o dal catalogo. Le reazioni crociate verranno proposte nel passo successivo.',
     conditionsLabel: 'Tipi di allergia',
     conditionsQuestion: 'Quali allergie hai?',
     conditionsQuestionChild: 'Quali allergie ha tuo figlio?',
     conditionsHint:
       'Seleziona tutti i tipi pertinenti — il diario adatterà scale e sezioni (picco di flusso per l\'asma, AIT per la pollinosi, ecc.).',
+    crossReactions: {
+      title: 'Reazioni crociate',
+      hint: 'In base agli allergeni scelti, spesso si considerano sostanze correlate. Seleziona cosa aggiungere — oppure salta il passo.',
+      skipHint: 'Niente selezionato — tocca Avanti per saltare.',
+      addNext: 'Aggiungi e continua',
+      disclaimer:
+        'I suggerimenti sulle reazioni crociate sono informativi e non costituiscono una diagnosi. Consulta il medico.',
+    },
     conditionHistory: {
       title: 'Quando è iniziata l\'allergia?',
       hint: 'Indica il periodo approssimativo di insorgenza per ogni tipo. I campi sono facoltativi.',
