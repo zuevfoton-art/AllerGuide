@@ -28,18 +28,36 @@ describe('pollen-map-service', () => {
   it('returns current Open-Meteo readings for the three target taxa', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        json: async () => ({
-          current: { time: '2026-07-28T10:00' },
-          hourly: {
-            time: ['2026-07-28T09:00', '2026-07-28T10:00'],
-            birch_pollen: [1, 20],
-            grass_pollen: [1, 6],
-            ragweed_pollen: [1, 31],
-          },
-        }),
-      })),
+      vi.fn(async (url: string) => {
+        if (url.includes('%2C') || url.match(/latitude=[^&]*,/)) {
+          return {
+            ok: true,
+            json: async () =>
+              Array.from({ length: 8 }, (_, index) => ({
+                current: {
+                  birch_pollen: index,
+                  grass_pollen: index + 1,
+                  ragweed_pollen: index + 2,
+                  alder_pollen: index,
+                  mugwort_pollen: index,
+                  olive_pollen: index,
+                },
+              })),
+          };
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            current: { time: '2026-07-28T10:00' },
+            hourly: {
+              time: ['2026-07-28T09:00', '2026-07-28T10:00'],
+              birch_pollen: [1, 20],
+              grass_pollen: [1, 6],
+              ragweed_pollen: [1, 31],
+            },
+          }),
+        };
+      }),
     );
 
     const { fetchPollenMapSnapshot } = await import('./pollen-map-service');
@@ -52,6 +70,7 @@ describe('pollen-map-service', () => {
       value: 20,
       profileRelevant: true,
     });
+    expect(snapshot.nearbyLocations).toHaveLength(8);
     expect(snapshot.yandexPollenUrl).toContain('/moscow/allergies');
   });
 
@@ -93,6 +112,10 @@ describe('pollen-map-service', () => {
     const { fetchPollenMapSnapshot } = await import('./pollen-map-service');
     const snapshot = await fetchPollenMapSnapshot(location, '[]');
 
-    expect(snapshot).toMatchObject({ source: 'calendar', readings: [] });
+    expect(snapshot).toMatchObject({
+      source: 'calendar',
+      readings: [],
+      nearbyLocations: [],
+    });
   });
 });

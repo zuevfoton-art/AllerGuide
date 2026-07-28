@@ -3,6 +3,7 @@ import { CATALOG_PLACES } from './catalog';
 import {
   buildLocationMapUrl,
   buildPlacesMapUrl,
+  buildPollenRiskMapUrl,
   buildYandexMapWidgetUrl,
   getPlaceMarkerStyle,
   MOSCOW_REGION_CENTER,
@@ -36,6 +37,20 @@ describe('yandex-map', () => {
 
     expect(url).toContain('ll=30.32%2C59.93');
     expect(url).toContain('pt=30.32%2C59.93%2Cpm2blm');
+  });
+
+  it('adds color-coded pollen risk samples without traffic layers', () => {
+    const url = buildPollenRiskMapUrl({
+      center: { latitude: 55.75, longitude: 37.62 },
+      points: [
+        { latitude: 55.9, longitude: 37.62, level: 'low' },
+        { latitude: 55.6, longitude: 37.62, level: 'high' },
+      ],
+    });
+
+    expect(url).toContain('pm2grm');
+    expect(url).toContain('pm2rdm');
+    expect(url).not.toContain('traffic');
   });
 
   it('maps place levels to marker colors', () => {

@@ -13,7 +13,6 @@ import {
   ADAIR_CLINICS,
   ADAIR_DOCTORS,
   ADAIR_SPECIALIZATION_LABELS,
-  buildLocationMapUrl,
   buildPlacesMapUrl,
   getPlaceLevelColor,
   getPlaceLevelLabel,
@@ -78,10 +77,6 @@ export default function MapScreen() {
 
   const selected = places.find((place) => place.id === selectedId) ?? places[0] ?? null;
   const mapUrl = useMemo(() => buildPlacesMapUrl(places, selectedId), [places, selectedId]);
-  const pollenMapUrl = useMemo(
-    () => buildLocationMapUrl(coords.lat, coords.lon),
-    [coords.lat, coords.lon],
-  );
   const pollenMonth = new Date().getMonth() + 1;
   const pollenRegion = resolvePollenRegion(coords.lat, coords.lon);
   const pollenPeaks = getPollenPeaksForMonth(pollenMonth, pollenRegion.id).filter((peak) =>
@@ -181,7 +176,8 @@ export default function MapScreen() {
 
       {layer === 'pollen' ? (
         <PollenMapLayer
-          mapUrl={pollenMapUrl}
+          latitude={coords.lat}
+          longitude={coords.lon}
           regionName={coords.label || pollenRegion.name}
           snapshot={pollenSnapshot}
           calendarPeaks={pollenPeaks}

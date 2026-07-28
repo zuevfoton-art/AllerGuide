@@ -6,13 +6,33 @@ import {
 } from './pollen-taxonomy';
 import type { ProfileAllergenId } from './profile-allergens';
 
-export const POLLEN_MAP_TAXON_IDS = [
+export const PRIMARY_POLLEN_MAP_TAXON_IDS = [
   'birch_pollen',
   'grass_pollen',
   'ragweed_pollen',
 ] as const satisfies readonly OpenMeteoPollenTaxonId[];
 
+export const SECONDARY_POLLEN_MAP_TAXON_IDS = [
+  'alder_pollen',
+  'mugwort_pollen',
+  'olive_pollen',
+] as const satisfies readonly OpenMeteoPollenTaxonId[];
+
+export const POLLEN_MAP_TAXON_IDS = [
+  ...PRIMARY_POLLEN_MAP_TAXON_IDS,
+  ...SECONDARY_POLLEN_MAP_TAXON_IDS,
+] as const;
+
 export type PollenMapTaxonId = (typeof POLLEN_MAP_TAXON_IDS)[number];
+export type PollenMapDirection =
+  | 'north'
+  | 'northEast'
+  | 'east'
+  | 'southEast'
+  | 'south'
+  | 'southWest'
+  | 'west'
+  | 'northWest';
 
 export interface PollenMapReading {
   taxonId: PollenMapTaxonId;
@@ -27,7 +47,44 @@ export interface OpenMeteoPollenHourly {
   birch_pollen?: Array<number | null>;
   grass_pollen?: Array<number | null>;
   ragweed_pollen?: Array<number | null>;
+  alder_pollen?: Array<number | null>;
+  mugwort_pollen?: Array<number | null>;
+  olive_pollen?: Array<number | null>;
 }
+
+export type OpenMeteoCurrentPollen = Partial<Record<PollenMapTaxonId, number | null>> & {
+  time?: string;
+};
+
+export interface NearbyPollenSamplePoint {
+  latitude: number;
+  longitude: number;
+  distanceKm: number;
+  direction: PollenMapDirection;
+}
+
+export interface NearbyPollenLocation extends NearbyPollenSamplePoint {
+  readings: PollenMapReading[];
+}
+
+const SAFE_LOCATION_RADIUS_KM = 20;
+const KILOMETERS_PER_LATITUDE_DEGREE = 111.32;
+const MIN_LONGITUDE_SCALE = 0.2;
+
+const SAMPLE_DIRECTIONS: Array<{
+  direction: PollenMapDirection;
+  latitudeFactor: number;
+  longitudeFactor: number;
+}> = [
+  { direction: 'north', latitudeFactor: 1, longitudeFactor: 0 },
+  { direction: 'northEast', latitudeFactor: Math.SQRT1_2, longitudeFactor: Math.SQRT1_2 },
+  { direction: 'east', latitudeFactor: 0, longitudeFactor: 1 },
+  { direction: 'southEast', latitudeFactor: -Math.SQRT1_2, longitudeFactor: Math.SQRT1_2 },
+  { direction: 'south', latitudeFactor: -1, longitudeFactor: 0 },
+  { direction: 'southWest', latitudeFactor: -Math.SQRT1_2, longitudeFactor: -Math.SQRT1_2 },
+  { direction: 'west', latitudeFactor: 0, longitudeFactor: -1 },
+  { direction: 'northWest', latitudeFactor: Math.SQRT1_2, longitudeFactor: -Math.SQRT1_2 },
+];
 
 const YANDEX_WEATHER_REGION_SLUGS: Record<string, string> = {
   moscow: 'moscow',
@@ -54,15 +111,22 @@ export function parseCurrentPollenMapReadings(
   for (const taxonId of POLLEN_MAP_TAXON_IDS) {
     const value = hourly[taxonId]?.[timeIndex];
     if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+    readings.push(buildPollenReading(taxonId, value, profileAllergenIds));
+  }
 
-    const taxon = getPollenTaxon(taxonId);
-    readings.push({
-      taxonId,
-      allergenId: taxon?.allergenId ?? null,
-      value,
-      level: classifyPollenConcentration(value, taxonId),
-      profileRelevant: profileMatchesPollenTaxon(profileAllergenIds, taxonId),
-    });
+  return readings;
+}
+
+export function parseOpenMeteoCurrentPollen(
+  current: OpenMeteoCurrentPollen,
+  profileAllergenIds: ProfileAllergenId[],
+): PollenMapReading[] {
+  const readings: PollenMapReading[] = [];
+
+  for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+    const value = current[taxonId];
+    if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+    readings.push(buildPollenReading(taxonId, value, profileAllergenIds));
   }
 
   return readings;
@@ -71,6 +135,41 @@ export function parseCurrentPollenMapReadings(
 export function buildYandexPollenUrl(regionId: string): string {
   const slug = YANDEX_WEATHER_REGION_SLUGS[regionId] ?? YANDEX_WEATHER_REGION_SLUGS.moscow;
   return `https://yandex.ru/pogoda/ru/${slug}/allergies`;
+}
+
+export function buildNearbyPollenSamplePoints(
+  latitude: number,
+  longitude: number,
+): NearbyPollenSamplePoint[] {
+  const latitudeDelta = SAFE_LOCATION_RADIUS_KM / KILOMETERS_PER_LATITUDE_DEGREE;
+  const longitudeScale = Math.max(
+    Math.cos((latitude * Math.PI) / 180),
+    MIN_LONGITUDE_SCALE,
+  );
+  const longitudeDelta =
+    SAFE_LOCATION_RADIUS_KM / (KILOMETERS_PER_LATITUDE_DEGREE * longitudeScale);
+
+  return SAMPLE_DIRECTIONS.map(({ direction, latitudeFactor, longitudeFactor }) => ({
+    latitude: latitude + latitudeDelta * latitudeFactor,
+    longitude: longitude + longitudeDelta * longitudeFactor,
+    distanceKm: SAFE_LOCATION_RADIUS_KM,
+    direction,
+  }));
+}
+
+export function selectLowPollenLocations(
+  locations: NearbyPollenLocation[],
+  taxonId: PollenMapTaxonId,
+  limit = 3,
+): NearbyPollenLocation[] {
+  return locations
+    .filter((location) =>
+      location.readings.some(
+        (reading) => reading.taxonId === taxonId && reading.level === 'low',
+      ),
+    )
+    .sort((left, right) => readingValue(left, taxonId) - readingValue(right, taxonId))
+    .slice(0, Math.max(0, limit));
 }
 
 function resolveCurrentTimeIndex(times: string[] | undefined, currentTime: string | undefined): number {
@@ -83,4 +182,26 @@ function resolveCurrentTimeIndex(times: string[] | undefined, currentTime: strin
   const currentHour = currentTime.slice(0, 13);
   const sameHourIndex = times.findIndex((time) => time.slice(0, 13) === currentHour);
   return sameHourIndex >= 0 ? sameHourIndex : 0;
+}
+
+function readingValue(location: NearbyPollenLocation, taxonId: PollenMapTaxonId): number {
+  return (
+    location.readings.find((reading) => reading.taxonId === taxonId)?.value ??
+    Number.POSITIVE_INFINITY
+  );
+}
+
+function buildPollenReading(
+  taxonId: PollenMapTaxonId,
+  value: number,
+  profileAllergenIds: ProfileAllergenId[],
+): PollenMapReading {
+  const taxon = getPollenTaxon(taxonId);
+  return {
+    taxonId,
+    allergenId: taxon?.allergenId ?? null,
+    value,
+    level: classifyPollenConcentration(value, taxonId),
+    profileRelevant: profileMatchesPollenTaxon(profileAllergenIds, taxonId),
+  };
 }
