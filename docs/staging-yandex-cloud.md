@@ -2,7 +2,7 @@
 
 Runbook для развёртывания `apps/api` на **Yandex Cloud** (`ru-central1`): приватный Managed PostgreSQL (без публичного IP), Serverless Container, API Gateway, TLS, CI/CD и EAS-сборки mobile.
 
-**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md)
+**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md) · [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) (Phase 0 gate: Replit → YC)
 
 ---
 
@@ -426,3 +426,4 @@ pnpm build:staging:ios
 | CI | [`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml) |
 | Env template | [`apps/api/.env.staging.example`](../apps/api/.env.staging.example) |
 | Migrate script | [`scripts/staging-migrate.sh`](../scripts/staging-migrate.sh) |
+| Phase 0 (без Replit) | [`docs/migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) · [`scripts/yc-stage-phase0-gate.sh`](../scripts/yc-stage-phase0-gate.sh) |

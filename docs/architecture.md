@@ -673,7 +673,9 @@ pnpm --filter mobile lint
 | `AGENTS.md` | Инструкции для разработки / Cloud Agent |
 | `docs/functional-requirements.md` | Функциональные требования |
 | `docs/clinical-features-raaci.md` | Клинические фичи (RAACI) |
-| `docs/replit-deploy.md` | Деплой на Replit |
+| `docs/replit-deploy.md` | Деплой на Replit (legacy; stage → YC) |
+| `docs/migrate-off-replit-to-yc.md` | Критерий Stage без Replit (Phase 0 gate) |
+| `docs/staging-yandex-cloud.md` | Staging API на Yandex Cloud |
 | `docs/eas-internal-preview.md` | EAS / preview builds |
 | `docs/qa-checklist.md` | QA чеклист |
 | `docs/roadmap-to-prod.md` | Roadmap к production |
