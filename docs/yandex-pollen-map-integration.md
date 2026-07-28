@@ -192,9 +192,9 @@ flowchart LR
 
 Не подходит как open heatmap API: скрейпинг UI Яндекс Погоды / SILAM HTML.
 
-**Рекомендация продукта:** сейчас — Open-Meteo (одно значение × масштаб).  
-Google `heatmapTiles` на stage **технически возможен**, но по ToS требует **Google Maps** как basemap (не Яндекс/OSM) — см. §4.5.  
-SILAM/CAMS — путь без Google Maps ToS, если нужен слой поверх Яндекса/MapLibre.
+**Рекомендация продукта:** сейчас — Open-Meteo (одно значение × масштаб) на Яндекс-подложке.  
+Следующий инкремент heatmap: **Google basemap + `heatmapTiles` + OM-бейдж** (§4.6), не overlay на Яндекс.  
+SILAM/CAMS — только если нужен слой **без** Google Maps ToS.
 
 ### 4.5. Feasibility: Google `heatmapTiles` на staging (без реализации)
 
@@ -255,6 +255,173 @@ GET https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heat
 **Не делать:** overlay Google-тайлов на Яндекс-виджет; клиентский ключ Pollen без ограничений; кэш PNG в БД.
 
 Код heatmap **не начинать**, пока нет staging-секретов GCP и явного go на смену basemap.
+
+### 4.6. План: Google basemap + pollen heatmap (бейдж Open-Meteo)
+
+Цель: на слое **«Пыление»** заменить Яндекс-виджет на **Google Maps basemap**, наложить **Google `heatmapTiles`**, **оставить** текущий бейдж уровня из Open-Meteo/CAMS (точка / город / регион).  
+Слой **«Рестораны»** и deep-link «Открыть карту пыльцы Яндекса» **не** обязаны мигрировать в том же инкременте.
+
+#### 4.6.1. Целевая композиция экрана
+
+```
+[ Точка | Город | Регион ]     ← zoom region MapView + агрегация OM-бейджа
+┌─────────────────────────────────────┐
+│  Google Maps (PROVIDER_GOOGLE)      │
+│  + UrlTile TREE|GRASS|WEED_UPI      │
+│                          ┌────────┐ │
+│                          │ OM badge│ │  ← без изменений логики resolveScaled*
+│                          └────────┘ │
+└─────────────────────────────────────┘
+«Карта: Google · пыльца: Google UPI · уровень: Open-Meteo / CAMS»
+[ Берёза | Злаки | Амброзия ]  (+ ольха / полынь / олива)
+[ Открыть карту пыльцы Яндекса ]  ← secondary deep-link, опционально
+```
+
+| Элемент | Источник | Меняется? |
+|---------|----------|-----------|
+| Basemap | Google Maps SDK / JS | **Да** (вместо `YandexMap`) |
+| Heatmap overlay | Google Pollen `heatmapTiles` | **Да** (новый) |
+| Бейдж low/mid/high + зёрен/м³ | Open-Meteo (как сейчас) | **Нет** (логика `resolveScaledPollenReading`) |
+| Масштаб Точка/Город/Регион | `POLLEN_MAP_SCALE_ZOOM` → `region` MapView | Да (API карты), семантика та же |
+| Таксоны UI | core taxonomy | Нет; heatmap маппится в UPI-группу |
+| Offline / calendar fallback | АДАИР calendar | Нет; heatmap скрыт без сети/ключа |
+
+#### 4.6.2. Вердикт реализуемости
+
+| Платформа | Basemap | Tile overlay | Готовность репо |
+|-----------|---------|--------------|-----------------|
+| **Android** | `react-native-maps` + `PROVIDER_GOOGLE` | `<UrlTile urlTemplate=…/{z}/{x}/{y} />` | Пакет **уже** в `apps/mobile` (`^1.20.1`), **не используется**; нужен plugin + API key в `app.json` |
+| **iOS** | то же + `PROVIDER_GOOGLE` (иначе Apple Maps — **ToS-нарушение** для pollen tiles) | `UrlTile` | Нужен Maps SDK for iOS key |
+| **Web** | Maps JavaScript API | `google.maps.ImageMapType` / overlayMapTypes | `react-native-maps` **без** web; нужен отдельный путь (см. §4.6.4) |
+
+**Итог:** замена на pollen-слое **реализуема**; web — отдельный адаптер; places-слой может остаться на Яндексе до отдельного решения.
+
+#### 4.6.3. Архитектура слоёв (куда класть код)
+
+```mermaid
+flowchart LR
+  subgraph ui ["apps/mobile"]
+    PML["PollenMapLayer"]
+    GPM["GooglePollenMap NEW"]
+    Badge["OM level badge overlay"]
+    Feat["features.POLLEN_HEATMAP_GOOGLE"]
+  end
+  subgraph svc ["services"]
+    PMS["pollen-map-service — OM badge only"]
+    TileURL["buildPollenHeatmapTileUrl — template string"]
+  end
+  subgraph core ["packages/core"]
+    MapUPI["taxonId → TREE_UPI | GRASS_UPI | WEED_UPI"]
+    Scaled["resolveScaledPollenReading — unchanged"]
+  end
+  subgraph api ["apps/api optional"]
+    Proxy["GET /api/pollen/heatmap/:mapType/:z/:x/:y"]
+  end
+  subgraph google ["Google"]
+    Maps["Maps SDK / JS"]
+    Pollen["pollen.googleapis.com heatmapTiles"]
+  end
+
+  PML --> Feat
+  Feat -->|on| GPM
+  Feat -->|off| YandexFallback["YandexMap current"]
+  GPM --> Maps
+  GPM --> TileURL
+  TileURL --> Proxy
+  Proxy --> Pollen
+  PML --> Badge
+  Badge --> PMS
+  PMS --> Scaled
+  MapUPI --> TileURL
+```
+
+| Слой | Ответственность |
+|------|-----------------|
+| `packages/core` | `pollenTaxonToGoogleMapType(taxonId)`, типы UPI; **без** HTTP |
+| `apps/api` | Proxy тайлов + rate limit; `GOOGLE_POLLEN_API_KEY` только здесь (предпочтительно) |
+| `apps/mobile/src/services` | Сборка `urlTemplate` на proxy (или прямой Google URL с client key — хуже); OM snapshot без изменений |
+| `apps/mobile/src/components` | `GooglePollenMap.tsx` (native MapView + UrlTile); `GooglePollenMap.web.tsx` (JS API); бейдж остаётся в `PollenMapLayer` |
+| Feature flags | `EXPO_PUBLIC_POLLEN_HEATMAP=google` (default **off**); API `POLLEN_HEATMAP_ENABLED=true` |
+
+#### 4.6.4. Web-стратегия (обязательный выбор до кода)
+
+Текущий продукт активно гоняется на **Expo web** (`localhost:5000`). Варианты:
+
+| Вариант | Плюсы | Минусы | Рекомендация |
+|---------|-------|--------|--------------|
+| **A. Platform-split** `GooglePollenMap.web.tsx` на Maps JS (`iframe`/div + `ImageMapType`) | ToS-compliant; полный контроль overlay | Дублирование UI native/web | **Preferred для stage** |
+| **B. Alias** `@teovilla/react-native-web-maps` / `expo-web-maps` | Один `MapView` API | Зрелость UrlTile на web неполная; лишняя зависимость | Оценка spike |
+| **C. WebView с HTML Maps JS** | Быстрый прототип | Хуже жесты/a11y; ключ в HTML | Только throwaway spike |
+
+Stage-минимум: **A** — web Maps JS + native `react-native-maps`.
+
+#### 4.6.5. Ключи, billing, proxy
+
+| Ключ | APIs | Restriction | Где |
+|------|------|-------------|-----|
+| Maps Android | Maps SDK for Android | package `com.aclearo.app` + SHA-1 | `react-native-maps` plugin `androidGoogleMapsApiKey` |
+| Maps iOS | Maps SDK for iOS | bundle `com.aclearo.app` | `iosGoogleMapsApiKey` |
+| Maps JS (web) | Maps JavaScript API | HTTP referrer staging/prod | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` |
+| Pollen tiles | Pollen API | IP (server) **или** referrer/app | `GOOGLE_POLLEN_API_KEY` на API |
+
+- Billing на GCP обязателен (Maps + Pollen SKU).
+- **Не** класть Pollen server key в Expo-бандл.
+- Proxy: `Cache-Control: no-store` (ToS: no content caching); rate limit строже, чем у catalog.
+- Опционально: client-restricted Pollen key только для stage web spike — не для prod.
+
+#### 4.6.6. UX-правила (taxon ↔ UPI)
+
+```
+birch_pollen, alder_pollen, olive_pollen  → TREE_UPI
+grass_pollen                              → GRASS_UPI
+ragweed_pollen, mugwort_pollen            → WEED_UPI
+```
+
+- При переключении Берёза ↔ Ольха ↔ Олива heatmap **не** меняется (та же `TREE_UPI`); меняется только OM-бейдж.
+- Под картой короткая подпись: «Слой карты: деревья (UPI)» / злаки / сорняки — чтобы не ожидать heatmap «только берёза».
+- Масштаб Точка/Город/Регион: `animateToRegion` / `initialRegion` span из текущих zoom 13/11/9; бейдж пересчитывается как сейчас.
+- Карта снова **интерактивна** (pan/zoom); бейдж — абсолютный overlay `pointerEvents="none"` (как сейчас).
+- Атрибуция: Google Maps logo/text + «Source: Includes pollen data from Google» + «уровни: Open-Meteo / CAMS».
+
+#### 4.6.7. Поведение флагов и fallback
+
+| Состояние | UI |
+|-----------|-----|
+| Флаг off / нет ключей | Текущий `YandexMap` + OM-бейдж (prod-safe) |
+| Флаг on, сеть ok | Google basemap + UPI tiles + OM-бейдж |
+| Флаг on, tiles 403/quota | Basemap Google + бейдж OM + toast/hint «слой пыльцы недоступен» |
+| Offline | Без тайлов; calendar fallback как сейчас; basemap может быть пустым/кэшем ОС |
+
+Places / АДАИР: без изменений в этом плане (Яндекс / списки).
+
+#### 4.6.8. Инкременты реализации (когда будет go)
+
+1. **Spike (native Android staging):** `MapView` + `PROVIDER_GOOGLE` + один `UrlTile` `TREE_UPI` через proxy; OM-бейдж поверх; без web.
+2. **Core + flags:** маппинг UPI, `features.ts`, `.env.example`, API route + rate limit.
+3. **PollenMapLayer switch:** флаг → `GooglePollenMap` else `YandexMap`.
+4. **Web adapter** Maps JS + тот же proxy URL template.
+5. **iOS** key + `PROVIDER_GOOGLE` + EAS staging rebuild.
+6. **QA:** Москва/СПб visual; quota smoke; offline; ToS attribution checklist.
+
+**Вне scope первого инкремента:** миграция places на Google; отказ от Яндекс deep-link; Google Forecast вместо OM-бейджа; кэш тайлов.
+
+#### 4.6.9. Риски и решения
+
+| Риск | Митигация |
+|------|-----------|
+| ToS: pollen не на Google Map | Только `PROVIDER_GOOGLE` / Maps JS; запрет Apple Maps / Yandex / OSM под pollen tiles |
+| Два провайдера на табе Карта | Acceptable: places=Yandex, pollen=Google; единый Google — отдельный эпик |
+| Стоимость tile storm | Zoom debounce; maxZoom 12–14; stage quota alert; proxy rate limit |
+| Web gap `react-native-maps` | Platform file `.web.tsx` (§4.6.4 A) |
+| UPI ≠ taxon | Copy + hint (§4.6.6) |
+| Dev client / Expo Go | Google keys требуют **dev/preview build**, не голый Expo Go для store-like проверки |
+| РФ GCP billing | Ops gate до spike |
+
+#### 4.6.10. Рекомендация
+
+**Делать** замену basemap **только на слое «Пыление»** за флагом stage: Google Map + UPI heatmap + **сохранить Open-Meteo бейдж**.  
+Яндекс оставить для places и как secondary deep-link allergies.  
+Код начинать после: (1) GCP billing + 4 ключа, (2) go на web-стратегию A, (3) лимит бюджета Pollen на stage.
 
 ---
 
