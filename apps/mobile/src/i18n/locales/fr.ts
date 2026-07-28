@@ -554,6 +554,8 @@ const fr: LocaleMessages = {
     conditionsQuestionChild: 'Quelles allergies a ton enfant ?',
     conditionsHint:
       'Sélectionnez tous les types concernés — le journal adaptera échelles et sections (débit de pointe pour l\'asthme, AIT pour le pollinose, etc.).',
+    conditionOptionsTitle: 'Préciser : {{label}}',
+    conditionOptionsHint: 'Choisissez des allergènes précis — ils apparaîtront à l\'étape suivante.',
     crossReactions: {
       title: 'Réactions croisées',
       hint: 'D\'après vos allergènes, des substances liées sont souvent prises en compte. Cochez ce qu\'il faut ajouter — ou ignorez l\'étape.',
@@ -561,6 +563,28 @@ const fr: LocaleMessages = {
       addNext: 'Ajouter et continuer',
       disclaimer:
         'Les suggestions de réactions croisées sont informatives et ne constituent pas un diagnostic. Demandez conseil à votre médecin.',
+    },
+    symptoms: {
+      title: 'Qu\'est-ce qui gêne habituellement ?',
+      hint: 'Profil de symptômes court — pas une entrée du journal. Détails plus tard dans le journal.',
+      zonesLabel: 'Zones',
+      severityLabel: 'Intensité habituelle',
+      typicalLabel: 'Symptômes typiques',
+      skipHint: 'Vous pouvez ignorer et remplir plus tard.',
+      disclaimer: 'Les symptômes de base personnalisent le journal et ne remplacent pas un avis médical.',
+      zones: {
+        nose: 'Nez',
+        eyes: 'Yeux',
+        skin: 'Peau',
+        lungs: 'Respiration',
+        gi: 'Digestif',
+        systemic: 'Généraux',
+      },
+      severity: {
+        mild: 'Légers',
+        moderate: 'Modérés',
+        severe: 'Intenses',
+      },
     },
     conditionHistory: {
       title: 'Quand l\'allergie a-t-elle commencé ?',

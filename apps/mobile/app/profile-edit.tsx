@@ -236,7 +236,7 @@ export default function ProfileEditScreen() {
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-            <ConditionPicker selected={conditions} onChange={handleConditionsChange} />
+            <ConditionPicker selected={conditions} onChange={handleConditionsChange} showOptions={false} />
           </GlassCard>
 
           {conditions.length > 0 ? (

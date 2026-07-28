@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import { Text, StyleSheet } from 'react-native';
-import type { AllergyConditionId, ProfileType } from '@allerguide/core';
+import type {
+  AllergyConditionId,
+  ConditionOptionSelections,
+  ProfileType,
+} from '@allerguide/core';
 import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { GlassCard } from '@/src/components/GlassCard';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -10,12 +14,16 @@ import { useTranslation } from '@/src/store/locale-store';
 interface ProfileSetupConditionsStepProps {
   selected: AllergyConditionId[];
   onChange: (selected: AllergyConditionId[]) => void;
+  optionSelections: ConditionOptionSelections;
+  onOptionSelectionsChange: (selections: ConditionOptionSelections) => void;
   profileType: ProfileType;
 }
 
 export function ProfileSetupConditionsStep({
   selected,
   onChange,
+  optionSelections,
+  onOptionSelectionsChange,
   profileType,
 }: ProfileSetupConditionsStepProps) {
   const theme = useTheme();
@@ -32,7 +40,13 @@ export function ProfileSetupConditionsStep({
     <GlassCard style={styles.section}>
       <Text style={ui.sectionLabel}>{question}</Text>
       <Text style={styles.hint}>{t('profileSetup.conditionsHint')}</Text>
-      <ConditionPicker selected={selected} onChange={onChange} />
+      <ConditionPicker
+        selected={selected}
+        onChange={onChange}
+        optionSelections={optionSelections}
+        onOptionSelectionsChange={onOptionSelectionsChange}
+        showOptions
+      />
     </GlassCard>
   );
 }

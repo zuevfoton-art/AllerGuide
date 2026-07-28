@@ -143,7 +143,9 @@ AllerGuide — мобильное приложение-помощник для �
 - **FR-PROF-15.** При **≥2 типах** состояний пользователь может указать **связи коморbidности** (что появилось раньше / одновременно). Хранение: `conditionHistory` v:2 → `comorbidityLinks[]`.
 - **FR-PROF-16.** На основе типов, хронологии, аллергенов и SOS (анафилаксия) приложение **выводит клинические фенотипы** (`resolveClinicalPhenotypes`) — только рекомендации и подсказки на главной и в дневнике; **не влияет** на gating сканера, карты, маркетплейса или модулей дневника.
 - **FR-PROF-17.** PDF-отчёт для врача включает блок **«Хронология и фенотипы профиля»** (`conditionPhenotypes`) при наличии данных.
-- **FR-PROF-18.** Wizard `/profile-setup`: после аллергенов — отдельный шаг **перекрёстных реакций** (`crossReactions`); auto-skip если совпадений нет; пользователь явно отмечает related ids. Confirmations на онбординге по умолчанию `self_reported`. Прогресс — по видимым шагам. Порядок клинического блока: types → allergens → cross → history → comorbidity → phenotype.
+- **FR-PROF-18.** Wizard `/profile-setup`: после аллергенов — отдельный шаг **перекрёстных реакций** (`crossReactions`); auto-skip если совпадений нет; пользователь явно отмечает related ids. Confirmations на онбординге по умолчанию `self_reported`. Прогресс — по видимым шагам. Порядок клинического блока: types → allergens → cross → **symptoms** → history → comorbidity → phenotype.
+- **FR-PROF-19.** На шаге типов доступны **подкатегории / options** (FR-PROF-03); выбор option pre-seed’ит канонические allergen ids через `condition-allergen-map` на шаг аллергенов.
+- **FR-PROF-20.** Шаг **симптоматики профиля** (`symptomBaseline`): зоны, usual severity, до 8 кодов из `SYMPTOM_CATALOG`; опционален (Skip). Хранение: `app_settings` → `symptomBaseline:{profileId}`. Не является записью дневника.
 
 ---
 

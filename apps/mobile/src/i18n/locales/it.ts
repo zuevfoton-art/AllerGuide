@@ -554,6 +554,8 @@ const it: LocaleMessages = {
     conditionsQuestionChild: 'Quali allergie ha tuo figlio?',
     conditionsHint:
       'Seleziona tutti i tipi pertinenti — il diario adatterà scale e sezioni (picco di flusso per l\'asma, AIT per la pollinosi, ecc.).',
+    conditionOptionsTitle: 'Specifica: {{label}}',
+    conditionOptionsHint: 'Scegli allergeni specifici — compariranno nel passo successivo.',
     crossReactions: {
       title: 'Reazioni crociate',
       hint: 'In base agli allergeni scelti, spesso si considerano sostanze correlate. Seleziona cosa aggiungere — oppure salta il passo.',
@@ -561,6 +563,28 @@ const it: LocaleMessages = {
       addNext: 'Aggiungi e continua',
       disclaimer:
         'I suggerimenti sulle reazioni crociate sono informativi e non costituiscono una diagnosi. Consulta il medico.',
+    },
+    symptoms: {
+      title: 'Cosa di solito dà fastidio?',
+      hint: 'Profilo sintomi breve — non è una voce del diario. Dettagli dopo nel diario.',
+      zonesLabel: 'Zone',
+      severityLabel: 'Intensità abituale',
+      typicalLabel: 'Sintomi tipici',
+      skipHint: 'Puoi saltare e compilare più tardi.',
+      disclaimer: 'I sintomi di base personalizzano il diario e non sostituiscono il parere medico.',
+      zones: {
+        nose: 'Naso',
+        eyes: 'Occhi',
+        skin: 'Pelle',
+        lungs: 'Respiro',
+        gi: 'Gastro',
+        systemic: 'Generali',
+      },
+      severity: {
+        mild: 'Lievi',
+        moderate: 'Moderati',
+        severe: 'Forti',
+      },
     },
     conditionHistory: {
       title: 'Quando è iniziata l\'allergia?',

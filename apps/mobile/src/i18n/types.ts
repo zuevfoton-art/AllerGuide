@@ -545,12 +545,36 @@ export type LocaleMessages = {
     conditionsQuestion: string;
     conditionsQuestionChild: string;
     conditionsHint: string;
+    conditionOptionsTitle: string;
+    conditionOptionsHint: string;
     crossReactions: {
       title: string;
       hint: string;
       skipHint: string;
       addNext: string;
       disclaimer: string;
+    };
+    symptoms: {
+      title: string;
+      hint: string;
+      zonesLabel: string;
+      severityLabel: string;
+      typicalLabel: string;
+      skipHint: string;
+      disclaimer: string;
+      zones: {
+        nose: string;
+        eyes: string;
+        skin: string;
+        lungs: string;
+        gi: string;
+        systemic: string;
+      };
+      severity: {
+        mild: string;
+        moderate: string;
+        severe: string;
+      };
     };
     conditionHistory: {
       title: string;

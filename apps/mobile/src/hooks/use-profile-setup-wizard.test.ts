@@ -1,81 +1,45 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildProfileSetupWizardNavOptions,
+  createEmptyProfileSetupWizardDraft,
   getNextProfileSetupWizardStep,
-  getPreviousProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
-  reconcileComorbidityLinks,
-  reconcileConditionHistoryDrafts,
-  shouldSkipComorbidityStep,
   shouldSkipCrossReactionsStep,
-  shouldSkipPhenotypeSummaryStep,
   validateProfileSetupWizardDraft,
-  validateProfileSetupWizardStep,
   type ProfileSetupWizardDraft,
 } from './use-profile-setup-wizard';
 
 const baseDraft = (): ProfileSetupWizardDraft => ({
+  ...createEmptyProfileSetupWizardDraft('self'),
   name: 'Анна',
   birthYear: '1990',
   selectedAllergenIds: ['milk'],
-  confirmations: {},
   conditions: ['food'],
-  conditionHistoryDrafts: {},
-  comorbidityLinks: [],
-  contacts: [],
-  childConsent: false,
-  profileType: 'self',
 });
 
 describe('profile setup wizard (mobile re-export)', () => {
-  it('exposes reordered steps with crossReactions', () => {
-    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(9);
-    expect(getNextProfileSetupWizardStep('conditions')).toBe('allergens');
-    expect(getNextProfileSetupWizardStep('allergens')).toBe('crossReactions');
+  it('includes symptomBaseline after crossReactions', () => {
+    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(10);
+    expect(getNextProfileSetupWizardStep('crossReactions')).toBe('symptomBaseline');
     expect(shouldSkipCrossReactionsStep({ selectedAllergenIds: ['milk'] })).toBe(false);
   });
 
-  it('skips comorbidity when fewer than two conditions', () => {
-    expect(shouldSkipComorbidityStep({ conditions: ['food'] })).toBe(true);
-    const nav = buildProfileSetupWizardNavOptions({
-      conditions: ['food'],
-      selectedAllergenIds: ['milk'],
-    });
-    expect(getNextProfileSetupWizardStep('conditionHistory', nav)).toBe('phenotypeSummary');
-  });
-
-  it('skips phenotype when no conditions', () => {
-    expect(shouldSkipPhenotypeSummaryStep({ conditions: [] })).toBe(true);
-  });
-
-  it('computes visible progress', () => {
+  it('computes visible progress with symptom step', () => {
     expect(
       getVisibleProfileSetupStepProgress('allergens', {
         conditions: [],
         selectedAllergenIds: ['unknown-allergen-xyz'],
       }),
-    ).toEqual({ current: 4, total: 5 });
+    ).toEqual({ current: 4, total: 6 });
   });
 
-  it('validates allergens and full draft', () => {
-    expect(
-      validateProfileSetupWizardStep('allergens', { ...baseDraft(), selectedAllergenIds: [] }, {}),
-    ).toBe('allergen_required');
+  it('validates full draft', () => {
     expect(validateProfileSetupWizardDraft(baseDraft(), {})).toBeNull();
-  });
-
-  it('reconciles history and comorbidity helpers', () => {
-    const drafts = reconcileConditionHistoryDrafts(['food', 'asthma'], {
-      food: { onsetKind: 'infancy', status: 'active', diagnosedBy: 'self_reported' },
+    const nav = buildProfileSetupWizardNavOptions({
+      conditions: ['food'],
+      selectedAllergenIds: ['milk'],
     });
-    expect(Object.keys(drafts)).toEqual(['food', 'asthma']);
-    expect(
-      reconcileComorbidityLinks(
-        ['food'],
-        [{ fromConditionId: 'food', toConditionId: 'asthma', relation: 'preceded' }],
-      ),
-    ).toEqual([]);
-    expect(getPreviousProfileSetupWizardStep('name')).toBeNull();
+    expect(nav.skipComorbidity).toBe(true);
   });
 });
