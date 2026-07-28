@@ -307,6 +307,7 @@ DNS API token (зона allerguide.app) — опционально
 |-----|------|
 | Env template | `apps/api/.env.staging.example` |
 | Deploy runbook (Yandex Cloud) | [`docs/staging-yandex-cloud.md`](staging-yandex-cloud.md) |
+| Migrate off Replit (Phase 0) | [`docs/migrate-off-replit-to-yc.md`](migrate-off-replit-to-yc.md) · `scripts/yc-stage-phase0-gate.sh` |
 | Deploy runbook (generic) | `docs/staging-deploy.md` |
 | EAS staging | `docs/eas-staging-build.md` |
 | Closed beta | `docs/closed-beta-p17.md` |

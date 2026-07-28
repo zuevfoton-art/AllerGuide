@@ -32,28 +32,6 @@
       },
       "pnpm": "10.34.4"
     },
-    "replit": {
-      "distribution": "internal",
-      "channel": "replit",
-      "node": "22.14.0",
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://aller-guide.replit.app",
-        "EXPO_PUBLIC_BACKEND_AUTH": "true",
-        "EXPO_PUBLIC_CLOUD_SYNC": "false",
-        "EXPO_PUBLIC_AI_SCAN_ENABLED": "false",
-        "EXPO_PUBLIC_PRODUCT_DB": "false",
-        "EXPO_PUBLIC_POLLEN_HEATMAP": "off",
-        "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
-        "NODE_OPTIONS": "--max-old-space-size=8192"
-      },
-      "android": {
-        "buildType": "apk"
-      },
-      "ios": {
-        "simulator": false
-      },
-      "pnpm": "10.34.4"
-    },
     "staging": {
       "distribution": "internal",
       "channel": "staging",

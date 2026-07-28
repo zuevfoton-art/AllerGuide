@@ -210,26 +210,29 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 5а. Подключение приложения к backend (Replit)
+## 5а. Подключение приложения к staging backend (Yandex Cloud)
 
-По умолчанию сборка работает **offline** (локальная регистрация в SQLite). Чтобы регистрация/вход шли на сервер `https://aller-guide.replit.app`, нужно задать две `EXPO_PUBLIC_*` переменные и **пересобрать** приложение.
+По умолчанию сборка работает **offline** (локальная регистрация в SQLite). Чтобы регистрация/вход шли на **stage API** `https://api.staging.aclearo.com`, задайте `EXPO_PUBLIC_*` и **пересоберите** приложение.
 
-> ⚠️ Важно: `EXPO_PUBLIC_*` встраиваются в JS-бандл **во время сборки**. В приложении нет экрана для смены адреса сервера — уже установленный APK переключить нельзя, нужна новая сборка. На native (в отличие от web) URL должен быть **абсолютным** — относительные пути (`/api/...`) на телефоне не работают, из-за этого экран регистрации виснет на «Подождите…».
+> **Stage = YC only** ([`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 2–3). Former Replit host / EAS profile `replit` removed from the repo.
+
+> ⚠️ `EXPO_PUBLIC_*` встраиваются в JS-бандл **во время сборки**. В приложении нет экрана смены адреса сервера — нужна новая сборка. На native URL должен быть **абсолютным**.
 
 | Переменная | Значение |
 |------------|----------|
-| `EXPO_PUBLIC_API_URL` | `https://aller-guide.replit.app` |
+| `EXPO_PUBLIC_API_URL` | `https://api.staging.aclearo.com` |
 | `EXPO_PUBLIC_BACKEND_AUTH` | `true` |
+| `EXPO_PUBLIC_POLLEN_HEATMAP` | `google` (нужен Maps key) |
 
-### Вариант 1 — файл `.env` (для локальной сборки)
+### Вариант 1 — файл `.env` (локальная сборка)
 
-Есть готовый шаблон [`apps/mobile/.env.replit.example`](../apps/mobile/.env.replit.example):
+Шаблон [`apps/mobile/.env.staging.example`](../apps/mobile/.env.staging.example):
 
 ```bash
-cp apps/mobile/.env.replit.example apps/mobile/.env
+cp apps/mobile/.env.staging.example apps/mobile/.env
 ```
 
-Expo автоматически подхватит `apps/mobile/.env` и для Metro (debug), и для `export:embed` (release). После этого пересоберите (раздел 4 или 5), например:
+Expo подхватит `apps/mobile/.env` для Metro и `export:embed`. Затем пересоберите (раздел 4 или 5):
 
 ```bash
 cd apps/mobile/android && ./gradlew assembleRelease
@@ -239,34 +242,45 @@ cd apps/mobile/android && ./gradlew assembleRelease
 
 ```bash
 cd apps/mobile
-export EXPO_PUBLIC_API_URL=https://aller-guide.replit.app
+export EXPO_PUBLIC_API_URL=https://api.staging.aclearo.com
 export EXPO_PUBLIC_BACKEND_AUTH=true
-cd android && ./gradlew assembleRelease     # Windows PowerShell: $env:EXPO_PUBLIC_API_URL="..."; $env:EXPO_PUBLIC_BACKEND_AUTH="true"
+export EXPO_PUBLIC_POLLEN_HEATMAP=google
+# export EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=…   # Maps Android key
+cd android && ./gradlew assembleRelease
 ```
 
-### Вариант 3 — облачная сборка EAS
+### Вариант 3 — облачная сборка EAS (рекомендуется)
 
-В [`apps/mobile/eas.json`](../apps/mobile/eas.json) есть профиль **`replit`** с этими переменными:
+Профиль **`staging`** в [`eas.json`](../apps/mobile/eas.json) уже указывает на YC:
 
 ```bash
-pnpm --filter mobile build:replit:android     # eas build --profile replit --platform android
+pnpm --filter mobile build:staging:android
+# или GitHub Actions → «EAS staging Android» (secret EXPO_TOKEN)
 ```
+
+Maps key один раз в Expo (Sensitive, не Secret):
+
+```bash
+cd apps/mobile
+pnpm exec eas env:create --name EXPO_PUBLIC_GOOGLE_MAPS_API_KEY \
+  --value "YOUR_MAPS_ANDROID_KEY" --visibility sensitive \
+  --environment preview --environment production
+```
+
+См. [`eas-staging-build.md`](./eas-staging-build.md) · [`android-stage-build.md`](./android-stage-build.md).
 
 ### Проверка, что URL вшит в сборку
 
 ```bash
-# в собранном APK должен встречаться адрес сервера
 unzip -p apps/mobile/android/app/build/outputs/apk/release/app-release.apk assets/index.android.bundle \
-  | strings | grep -m1 aller-guide.replit.app
+  | strings | grep -m1 api.staging.aclearo.com
 ```
 
-Backend должен отвечать (проверка живости):
+Backend:
 
 ```bash
-curl -s https://aller-guide.replit.app/api/health      # {"ok":true,"authDatabase":true}
+curl -s https://api.staging.aclearo.com/api/health | jq '{ok, features}'
 ```
-
-После установки такой сборки регистрация создаёт пользователя на сервере и возвращает JWT — экран больше не зависает на «Подождите…».
 
 ---
 

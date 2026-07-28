@@ -117,7 +117,8 @@ https://staging.aclearo.ru/*
 ```
 
 Добавьте ваш реальный web-origin staging, если он другой.  
-Для Replit/preview — соответствующий `https://….replit.app/*` при необходимости.
+Для **stage web** используйте referrers `http://localhost:5000/*`, `https://staging.aclearo.com/*`, `https://staging.aclearo.ru/*` (и prod при необходимости).  
+`*.replit.app` для stage **не** добавлять — stage clients → YC ([`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md)).
 
 4. **API restrictions** → только **Maps JavaScript API**.
 5. **Save**.
@@ -147,6 +148,16 @@ GOOGLE_POLLEN_API_KEY=<aclearo-staging-pollen-server>
 POLLEN_RATE_LIMIT_MAX=120
 POLLEN_RATE_LIMIT_WINDOW_MS=60000
 ```
+
+На **Yandex Cloud staging** предпочтительно:
+
+```bash
+export GOOGLE_POLLEN_API_KEY='…'
+export YC_CONTAINER_ID=… YC_REGISTRY_ID=…
+BUILD_PUSH=1 ./scripts/yc-stage-phase1-enable-pollen.sh
+```
+
+См. [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 1.
 
 Проверка:
 

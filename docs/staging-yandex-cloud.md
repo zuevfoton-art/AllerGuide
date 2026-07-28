@@ -2,7 +2,7 @@
 
 Runbook для развёртывания `apps/api` на **Yandex Cloud** (`ru-central1`): приватный Managed PostgreSQL (без публичного IP), Serverless Container, API Gateway, TLS, CI/CD и EAS-сборки mobile.
 
-**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md)
+**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md) · [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) (Phase 0 gate: Replit → YC)
 
 ---
 
@@ -163,7 +163,21 @@ terraform output lockbox_secret_id
 
 ## 3. Lockbox — секреты API
 
-После `terraform apply` заполните секрет `aclearo-staging-api-env`:
+После `terraform apply` заполните секрет `aclearo-staging-api-env`.
+
+**Pollen (Phase 1):** upsert без потери остальных ключей:
+
+```bash
+export GOOGLE_POLLEN_API_KEY='…'   # GCP Pollen API only — never EXPO_PUBLIC_*
+export YC_LOCKBOX_SECRET_ID=$(cd infra/yandex/staging && terraform output -raw lockbox_secret_id)
+export YC_CONTAINER_ID=$(cd infra/yandex/staging && terraform output -raw serverless_container_id)
+export YC_REGISTRY_ID=$(cd infra/yandex/staging && terraform output -raw container_registry_id)
+BUILD_PUSH=1 ./scripts/yc-stage-phase1-enable-pollen.sh
+```
+
+Ключи для mount: [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys). Runbook: [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 1.
+
+Либо вручную новая версия Lockbox:
 
 ```bash
 LOCKBOX_ID=$(cd infra/yandex/staging && terraform output -raw lockbox_secret_id)
@@ -177,6 +191,8 @@ yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "[
   {\"key\": \"OPENAI_API_KEY\", \"text_value\": \"sk-...\"}
 ]"
 ```
+
+> Предпочтительнее `yc-lockbox-upsert.sh` / `yc-stage-phase1-enable-pollen.sh` — они **мержат** payload и не затирают уже лежащие `YC_AI_*` / `SYNC_*`.
 
 Полный список переменных — [`apps/api/.env.staging.example`](../apps/api/.env.staging.example):
 
@@ -388,14 +404,19 @@ pnpm build:staging:ios
 
 ## 9. Чеклист
 
-- [ ] `terraform apply` — VPC, private PG, registry, container, API GW, runner VM
-- [ ] Lockbox заполнен (`DATABASE_URL`, `JWT_SECRET`, `OPENAI_API_KEY`, …)
-- [ ] DNS: certificate challenges + CNAME `api.staging` → API GW
-- [ ] `curl https://api.staging.aclearo.com/api/health` → 200
+Актуальный live-inventory (health / DNS / gaps): [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) § «Статус что уже поднято на YC».
+
+- [x] `terraform apply` — VPC, private PG, registry, container, API GW, runner VM *(косвенно: live health+DB+TLS на apigw)*
+- [x] Lockbox заполнен (`DATABASE_URL`, `JWT_SECRET`, … + **pollen** keys) — see [`staging-secrets-inventory.md`](./staging-secrets-inventory.md)
+- [x] DNS: certificate challenges + CNAME `api.staging` → API GW
+- [x] `curl https://api.staging.aclearo.com/api/health` → 200
 - [ ] GitHub runner зарегистрирован с label `yc-staging-vpc`
-- [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN`
+- [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN` (deploy workflow gate)
+- [ ] Rotation checklist after agent key exposure: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md)
+- [ ] `pnpm yc-stage-phase4` Pass
 - [ ] Push в `staging` → workflow green
-- [ ] `./scripts/staging-preflight.sh` → Pass
+- [ ] `./scripts/staging-preflight.sh` → Pass (auth smoke уже Pass отдельно)
+- [ ] `pnpm yc-stage-phase0` Pass без `ALLOW_MISSING_POLLEN_HEATMAP`
 - [ ] EAS staging APK + iOS установлены, smoke S.1–S.4
 
 ---
@@ -426,3 +447,4 @@ pnpm build:staging:ios
 | CI | [`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml) |
 | Env template | [`apps/api/.env.staging.example`](../apps/api/.env.staging.example) |
 | Migrate script | [`scripts/staging-migrate.sh`](../scripts/staging-migrate.sh) |
+| Phase 0 (без Replit) | [`docs/migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) · [`scripts/yc-stage-phase0-gate.sh`](../scripts/yc-stage-phase0-gate.sh) |
