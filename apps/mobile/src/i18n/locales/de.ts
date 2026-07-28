@@ -622,6 +622,8 @@ const de: LocaleMessages = {
     conditionsQuestionChild: 'Welche Allergien hat dein Kind?',
     conditionsHint:
       'Wählen Sie alle zutreffenden Typen — das Tagebuch passt Skalen und Abschnitte an (PSF bei Asthma, AIT bei Pollinose usw.).',
+    conditionOptionsTitle: 'Präzisieren: {{label}}',
+    conditionOptionsHint: 'Wählen Sie konkrete Allergene — sie erscheinen im nächsten Schritt.',
     crossReactions: {
       title: 'Kreuzreaktionen',
       hint: 'Zu Ihren Allergenen passen oft verwandte Stoffe. Markieren Sie, was Sie hinzufügen möchten — oder überspringen Sie den Schritt.',
@@ -629,6 +631,28 @@ const de: LocaleMessages = {
       addNext: 'Hinzufügen und weiter',
       disclaimer:
         'Hinweise zu Kreuzreaktionen sind informativ und keine Diagnose. Klären Sie dies mit Ihrem Arzt.',
+    },
+    symptoms: {
+      title: 'Was stört gewöhnlich?',
+      hint: 'Kurzes Symptomprofil — kein Tagebucheintrag. Details später im Tagebuch.',
+      zonesLabel: 'Zonen',
+      severityLabel: 'Übliche Intensität',
+      typicalLabel: 'Typische Symptome',
+      skipHint: 'Kann übersprungen und später ausgefüllt werden.',
+      disclaimer: 'Basis-Symptome personalisieren das Tagebuch und ersetzen keinen Arztbesuch.',
+      zones: {
+        nose: 'Nase',
+        eyes: 'Augen',
+        skin: 'Haut',
+        lungs: 'Atmung',
+        gi: 'Magen-Darm',
+        systemic: 'Allgemein',
+      },
+      severity: {
+        mild: 'Leicht',
+        moderate: 'Mittel',
+        severe: 'Stark',
+      },
     },
     conditionHistory: {
       title: 'Wann begann die Allergie?',

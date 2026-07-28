@@ -629,6 +629,8 @@ const en: LocaleMessages = {
     conditionsQuestionChild: "What allergies does your child have?",
     conditionsHint:
       'Select all that apply — the diary will tailor scales and sections (peak flow for asthma, AIT for pollinosis, etc.).',
+    conditionOptionsTitle: 'Specify: {{label}}',
+    conditionOptionsHint: 'Pick specific allergens — they will appear on the next step.',
     crossReactions: {
       title: 'Cross-reactions',
       hint: 'Based on your allergens, related foods and substances are often considered. Check what to add — or skip this step.',
@@ -636,6 +638,28 @@ const en: LocaleMessages = {
       addNext: 'Add and continue',
       disclaimer:
         'Cross-reaction hints are informational and not a diagnosis. Confirm with your clinician.',
+    },
+    symptoms: {
+      title: 'What usually bothers you?',
+      hint: 'A short symptom baseline — not a diary entry. You can add details later in the diary.',
+      zonesLabel: 'Zones',
+      severityLabel: 'Usual intensity',
+      typicalLabel: 'Typical symptoms',
+      skipHint: 'You can skip and fill this in later.',
+      disclaimer: 'Baseline symptoms help personalize the diary and do not replace medical advice.',
+      zones: {
+        nose: 'Nose',
+        eyes: 'Eyes',
+        skin: 'Skin',
+        lungs: 'Breathing',
+        gi: 'GI',
+        systemic: 'Systemic',
+      },
+      severity: {
+        mild: 'Mild',
+        moderate: 'Moderate',
+        severe: 'Severe',
+      },
     },
     conditionHistory: {
       title: 'When did the allergy start?',

@@ -280,7 +280,7 @@
 
 | # | Сценарий | iOS | Android | Web | Phenotype / FR |
 |---|----------|-----|---------|-----|----------------|
-| 16.1 | Онбординг: wizard (conditions → allergens → crossReactions → history → comorbidity → phenotype) | ☐ | ☐ | ☐ | FR-PROF-14..16, UX P1 |
+| 16.1 | Онбординг: wizard (conditions+options → allergens → crossReactions → symptomBaseline → history → comorbidity → phenotype) | ☐ | ☐ | ☐ | FR-PROF-14..20, UX P1–P3 |
 | 16.2 | **S1** atopic-march-child: АтД + поллиноз + астма + порядок в comorbidity | ☐ | ☐ | ☐ | S1 |
 | 16.3 | **S2** aria-asthma: ринит + астма → hints на главной | ☐ | ☐ | ☐ | S2, wellness |
 | 16.4 | **S3** aria-conjunctivitis: ринит + ocularSymptoms | ☐ | ☐ | ☐ | S3 |

@@ -21,6 +21,9 @@ export * from './allergen-aliases';
 export * from './regulatory-allergens';
 export * from './allergy-conditions';
 export * from './condition-allergen-map';
+export * from './condition-option-selections';
+export * from './profile-symptom-baseline';
+
 export * from './condition-history';
 export * from './clinical-phenotypes';
 export * from './expert-content';

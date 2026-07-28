@@ -6,6 +6,7 @@ export {
   PROFILE_SETUP_WIZARD_STEPS,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   buildProfileSetupWizardNavOptions,
+  createEmptyProfileSetupWizardDraft,
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   getProfileSetupWizardStepIndex,
@@ -32,6 +33,8 @@ export interface ProfileSetupWizardDraft {
   selectedAllergenIds: string[];
   confirmations: Record<string, AllergyConfirmationSource>;
   conditions: AllergyConditionId[];
+  conditionOptionSelections: import('@allerguide/core').ConditionOptionSelections;
+  symptomBaseline: import('@allerguide/core').ProfileSymptomBaseline;
   conditionHistoryDrafts: ConditionHistoryDrafts;
   comorbidityLinks: import('@allerguide/core').ComorbidityLink[];
   contacts: EmergencyContactDraft[];

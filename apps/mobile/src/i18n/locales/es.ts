@@ -621,6 +621,8 @@ const es: LocaleMessages = {
     conditionsQuestionChild: '¿Qué alergias tiene tu hijo?',
     conditionsHint:
       'Selecciona todos los que correspondan — el diario adaptará escalas y secciones (flujo máximo con asma, AIT con polinosis, etc.).',
+    conditionOptionsTitle: 'Especifica: {{label}}',
+    conditionOptionsHint: 'Elige alérgenos concretos — aparecerán en el siguiente paso.',
     crossReactions: {
       title: 'Reacciones cruzadas',
       hint: 'Según tus alérgenos, a menudo se consideran sustancias relacionadas. Marca qué añadir — o omite el paso.',
@@ -628,6 +630,28 @@ const es: LocaleMessages = {
       addNext: 'Añadir y continuar',
       disclaimer:
         'Las pistas de reacciones cruzadas son informativas y no son un diagnóstico. Consúltelo con su médico.',
+    },
+    symptoms: {
+      title: '¿Qué suele molestarte?',
+      hint: 'Perfil breve de síntomas — no es una entrada del diario. Detalles después en el diario.',
+      zonesLabel: 'Zonas',
+      severityLabel: 'Intensidad habitual',
+      typicalLabel: 'Síntomas típicos',
+      skipHint: 'Puedes omitirlo y completarlo más tarde.',
+      disclaimer: 'Los síntomas base personalizan el diario y no sustituyen consejo médico.',
+      zones: {
+        nose: 'Nariz',
+        eyes: 'Ojos',
+        skin: 'Piel',
+        lungs: 'Respiración',
+        gi: 'Digestivo',
+        systemic: 'Generales',
+      },
+      severity: {
+        mild: 'Leves',
+        moderate: 'Moderados',
+        severe: 'Intensos',
+      },
     },
     conditionHistory: {
       title: '¿Cuándo empezó la alergia?',

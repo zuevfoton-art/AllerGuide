@@ -1,15 +1,20 @@
 import type { AllergyConfirmationSource } from './allergy-confirmations';
 import type { AllergyConditionId } from './allergy-conditions';
 import type { ComorbidityLink, ConditionEpisodeInput } from './condition-history';
+import type { ConditionOptionSelections } from './condition-option-selections';
 import { getCrossReactionsForSelection } from './cross-reactions';
 import type { EmergencyContactRelation } from './emergency-contacts';
+import {
+  createEmptySymptomBaseline,
+  type ProfileSymptomBaseline,
+} from './profile-symptom-baseline';
 import { needsChildConsent } from './profile-validation';
 import { PROFILE_BIRTH_YEAR_MIN } from './profile-validation';
 import type { ProfileType, Scenario } from './types';
 
 /**
- * Profile setup wizard steps (P1 UX split).
- * Clinical block: conditions → allergens → crossReactions → history → …
+ * Profile setup wizard steps (UX split P1–P3).
+ * Clinical: conditions → allergens → cross → symptoms → history → …
  */
 export const PROFILE_SETUP_WIZARD_STEPS = [
   'name',
@@ -17,6 +22,7 @@ export const PROFILE_SETUP_WIZARD_STEPS = [
   'conditions',
   'allergens',
   'crossReactions',
+  'symptomBaseline',
   'conditionHistory',
   'comorbidity',
   'phenotypeSummary',
@@ -51,6 +57,9 @@ export interface ProfileSetupWizardDraft {
   selectedAllergenIds: string[];
   confirmations: Record<string, AllergyConfirmationSource>;
   conditions: AllergyConditionId[];
+  /** FR-PROF-03 sub-options for selected condition types (pre-seed allergens). */
+  conditionOptionSelections: ConditionOptionSelections;
+  symptomBaseline: ProfileSymptomBaseline;
   conditionHistoryDrafts: ProfileSetupConditionHistoryDrafts;
   comorbidityLinks: ComorbidityLink[];
   contacts: ProfileSetupContactDraft[];
@@ -63,6 +72,25 @@ export interface ProfileSetupWizardNavOptions {
   skipComorbidity?: boolean;
   skipPhenotypeSummary?: boolean;
   skipCrossReactions?: boolean;
+}
+
+export function createEmptyProfileSetupWizardDraft(
+  profileType: ProfileType = 'self',
+): ProfileSetupWizardDraft {
+  return {
+    name: '',
+    birthYear: '',
+    selectedAllergenIds: [],
+    confirmations: {},
+    conditions: [],
+    conditionOptionSelections: {},
+    symptomBaseline: createEmptySymptomBaseline(),
+    conditionHistoryDrafts: {},
+    comorbidityLinks: [],
+    contacts: [],
+    childConsent: false,
+    profileType,
+  };
 }
 
 export function validateProfileSetupWizardStep(
@@ -96,6 +124,7 @@ export function validateProfileSetupWizardStep(
       if (draft.selectedAllergenIds.length === 0) return 'allergen_required';
       return null;
     case 'crossReactions':
+    case 'symptomBaseline':
     case 'conditionHistory':
     case 'comorbidity':
     case 'phenotypeSummary':
