@@ -615,11 +615,21 @@ const de: LocaleMessages = {
     profileSelfLocked: 'Ihr Profil',
     profileChildLocked: 'Kinderprofil',
     allergensLabel: 'Allergene',
+    allergensHint:
+      'Wählen Sie Allergene aus der Liste oder dem Katalog. Kreuzreaktionen folgen im nächsten Schritt.',
     conditionsLabel: 'Allergiezustände',
     conditionsQuestion: 'Welche Allergien hast du?',
     conditionsQuestionChild: 'Welche Allergien hat dein Kind?',
     conditionsHint:
       'Wählen Sie alle zutreffenden Typen — das Tagebuch passt Skalen und Abschnitte an (PSF bei Asthma, AIT bei Pollinose usw.).',
+    crossReactions: {
+      title: 'Kreuzreaktionen',
+      hint: 'Zu Ihren Allergenen passen oft verwandte Stoffe. Markieren Sie, was Sie hinzufügen möchten — oder überspringen Sie den Schritt.',
+      skipHint: 'Nichts ausgewählt — tippen Sie auf Weiter zum Überspringen.',
+      addNext: 'Hinzufügen und weiter',
+      disclaimer:
+        'Hinweise zu Kreuzreaktionen sind informativ und keine Diagnose. Klären Sie dies mit Ihrem Arzt.',
+    },
     conditionHistory: {
       title: 'Wann begann die Allergie?',
       hint: 'Geben Sie den ungefähren Beginn für jeden Typ an. Felder können übersprungen werden.',

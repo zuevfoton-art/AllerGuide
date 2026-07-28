@@ -614,11 +614,21 @@ const fr: LocaleMessages = {
     profileSelfLocked: 'Votre profil',
     profileChildLocked: 'Profil de l\'enfant',
     allergensLabel: 'Allergènes',
+    allergensHint:
+      'Choisissez des allergènes dans la liste ou le catalogue. Les réactions croisées seront proposées à l\'étape suivante.',
     conditionsLabel: 'Types d\'allergie',
     conditionsQuestion: 'Quelles allergies as-tu ?',
     conditionsQuestionChild: 'Quelles allergies a ton enfant ?',
     conditionsHint:
       'Sélectionnez tous les types concernés — le journal adaptera échelles et sections (débit de pointe pour l\'asthme, AIT pour le pollinose, etc.).',
+    crossReactions: {
+      title: 'Réactions croisées',
+      hint: 'D\'après vos allergènes, des substances liées sont souvent prises en compte. Cochez ce qu\'il faut ajouter — ou ignorez l\'étape.',
+      skipHint: 'Rien de coché — appuyez sur Suivant pour passer.',
+      addNext: 'Ajouter et continuer',
+      disclaimer:
+        'Les suggestions de réactions croisées sont informatives et ne constituent pas un diagnostic. Demandez conseil à votre médecin.',
+    },
     conditionHistory: {
       title: 'Quand l\'allergie a-t-elle commencé ?',
       hint: 'Indiquez la période approximative de début pour chaque type. Champs optionnels.',

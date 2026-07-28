@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Alert, View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@/src/services/emergency-contact-service';
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -35,14 +36,15 @@ import { ProfileSetupNameStep } from '@/src/components/profile-setup/ProfileSetu
 import { ProfileSetupBirthYearStep } from '@/src/components/profile-setup/ProfileSetupBirthYearStep';
 import { ProfileSetupConditionsStep } from '@/src/components/profile-setup/ProfileSetupConditionsStep';
 import { ProfileSetupAllergensStep } from '@/src/components/profile-setup/ProfileSetupAllergensStep';
+import { ProfileSetupCrossReactionsStep } from '@/src/components/profile-setup/ProfileSetupCrossReactionsStep';
 import { ProfileSetupConditionHistoryStep } from '@/src/components/profile-setup/ProfileSetupConditionHistoryStep';
 import type { ConditionHistoryDrafts } from '@/src/components/ConditionHistoryEditor';
 import {
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
-  PROFILE_SETUP_WIZARD_STEP_COUNT,
-  PROFILE_SETUP_WIZARD_STEPS,
+  getVisibleProfileSetupStepProgress,
   buildProfileSetupWizardNavOptions,
+  mergeCrossReactionAllergenIds,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
   validateProfileSetupWizardDraft,
@@ -70,6 +72,7 @@ export default function ProfileSetupScreen() {
   const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
   const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
+  const [crossPendingIds, setCrossPendingIds] = useState<string[]>([]);
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState<ProfileSetupWizardStep>('name');
@@ -91,19 +94,6 @@ export default function ProfileSetupScreen() {
         ? t('profileSetup.titleSelf')
         : t('profileSetup.titleCreate');
 
-  const stepIndex = PROFILE_SETUP_WIZARD_STEPS.indexOf(currentStep);
-  const stepProgress = t('profileSetup.stepProgress', {
-    current: stepIndex + 1,
-    total: PROFILE_SETUP_WIZARD_STEP_COUNT,
-  });
-
-  const subtitle =
-    scenario === 'both' && wizardStep === 'child'
-      ? t('profileSetup.subtitleChildStep', { step: stepProgress })
-      : scenario === 'both'
-        ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
-        : t('profileSetup.subtitleDefault', { step: stepProgress });
-
   const draft = useMemo(
     () => ({
       name,
@@ -117,15 +107,42 @@ export default function ProfileSetupScreen() {
       childConsent,
       profileType: effectiveType,
     }),
-    [name, birthYear, selected, confirmations, conditions, conditionHistoryDrafts, comorbidityLinks, contacts, childConsent, effectiveType],
+    [
+      name,
+      birthYear,
+      selected,
+      confirmations,
+      conditions,
+      conditionHistoryDrafts,
+      comorbidityLinks,
+      contacts,
+      childConsent,
+      effectiveType,
+    ],
   );
 
   const wizardNav = buildProfileSetupWizardNavOptions(draft);
+  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft);
+  const stepProgress = t('profileSetup.stepProgress', {
+    current: stepProgressMeta.current,
+    total: stepProgressMeta.total,
+  });
+
+  const subtitle =
+    scenario === 'both' && wizardStep === 'child'
+      ? t('profileSetup.subtitleChildStep', { step: stepProgress })
+      : scenario === 'both'
+        ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
+        : t('profileSetup.subtitleDefault', { step: stepProgress });
 
   const suggestedConditions = useMemo(
     () => getMissingConditionsForAllergens(selected, conditions),
     [selected, conditions],
   );
+
+  useEffect(() => {
+    trackEvent('profile_setup_step_view', { step: currentStep });
+  }, [currentStep]);
 
   const applyConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
@@ -158,6 +175,7 @@ export default function ProfileSetupScreen() {
     setComorbidityLinks([]);
     setContacts([]);
     setConfirmations({});
+    setCrossPendingIds([]);
     setChildConsent(false);
     setCurrentStep('name');
     setError('');
@@ -233,8 +251,32 @@ export default function ProfileSetupScreen() {
     }
 
     setError('');
-    const next = getNextProfileSetupWizardStep(currentStep, wizardNav);
+
+    let nextSelected = selected;
+    if (currentStep === 'crossReactions') {
+      if (crossPendingIds.length > 0) {
+        nextSelected = mergeCrossReactionAllergenIds(selected, crossPendingIds);
+        setSelected(nextSelected);
+        setConfirmations((prev) => normalizeAllergyConfirmations(nextSelected, prev));
+        trackEvent('profile_setup_step_complete', {
+          step: 'crossReactions',
+          added: crossPendingIds.length,
+        });
+      } else {
+        trackEvent('profile_setup_step_skip', { step: 'crossReactions' });
+      }
+      setCrossPendingIds([]);
+    } else {
+      trackEvent('profile_setup_step_complete', { step: currentStep });
+    }
+
+    const nextNav = buildProfileSetupWizardNavOptions({
+      conditions,
+      selectedAllergenIds: nextSelected,
+    });
+    const next = getNextProfileSetupWizardStep(currentStep, nextNav);
     if (next) {
+      if (next === 'crossReactions') setCrossPendingIds([]);
       setCurrentStep(next);
       return;
     }
@@ -245,17 +287,22 @@ export default function ProfileSetupScreen() {
   const goBack = () => {
     setError('');
     const previous = getPreviousProfileSetupWizardStep(currentStep, wizardNav);
-    if (previous) setCurrentStep(previous);
+    if (previous) {
+      if (currentStep === 'crossReactions') setCrossPendingIds([]);
+      setCurrentStep(previous);
+    }
   };
 
   const isLastStep = currentStep === 'contacts';
-  const showBack = stepIndex > 0;
+  const showBack = stepProgressMeta.current > 1;
 
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
       ? t('profileSetup.nextChild')
       : t('profileSetup.saveProfile')
-    : t('profileSetup.next');
+    : currentStep === 'crossReactions' && crossPendingIds.length > 0
+      ? t('profileSetup.crossReactions.addNext')
+      : t('profileSetup.next');
 
   return (
     <Screen>
@@ -294,6 +341,32 @@ export default function ProfileSetupScreen() {
         />
       ) : null}
 
+      {currentStep === 'allergens' ? (
+        <ProfileSetupAllergensStep
+          selected={selected}
+          onSelectedChange={(ids) => {
+            setSelected(ids);
+            setCrossPendingIds([]);
+          }}
+          confirmations={confirmations}
+          onConfirmationsChange={setConfirmations}
+          suggestedConditionIds={suggestedConditions}
+          onAddSuggestedCondition={(conditionId) =>
+            applyConditionsChange(
+              conditions.includes(conditionId) ? conditions : [...conditions, conditionId],
+            )
+          }
+        />
+      ) : null}
+
+      {currentStep === 'crossReactions' ? (
+        <ProfileSetupCrossReactionsStep
+          selectedAllergenIds={selected}
+          pendingIds={crossPendingIds}
+          onPendingChange={setCrossPendingIds}
+        />
+      ) : null}
+
       {currentStep === 'conditionHistory' ? (
         <ProfileSetupConditionHistoryStep
           conditions={conditions}
@@ -307,21 +380,6 @@ export default function ProfileSetupScreen() {
           conditions={conditions}
           links={comorbidityLinks}
           onChange={setComorbidityLinks}
-        />
-      ) : null}
-
-      {currentStep === 'allergens' ? (
-        <ProfileSetupAllergensStep
-          selected={selected}
-          onSelectedChange={setSelected}
-          confirmations={confirmations}
-          onConfirmationsChange={setConfirmations}
-          suggestedConditionIds={suggestedConditions}
-          onAddSuggestedCondition={(conditionId) =>
-            applyConditionsChange(
-              conditions.includes(conditionId) ? conditions : [...conditions, conditionId],
-            )
-          }
         />
       ) : null}
 

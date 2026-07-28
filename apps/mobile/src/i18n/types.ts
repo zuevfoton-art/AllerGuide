@@ -607,10 +607,18 @@ export type LocaleMessages = {
     profileSelfLocked: string;
     profileChildLocked: string;
     allergensLabel: string;
+    allergensHint: string;
     conditionsLabel: string;
     conditionsQuestion: string;
     conditionsQuestionChild: string;
     conditionsHint: string;
+    crossReactions: {
+      title: string;
+      hint: string;
+      skipHint: string;
+      addNext: string;
+      disclaimer: string;
+    };
     conditionHistory: {
       title: string;
       hint: string;

@@ -622,11 +622,21 @@ const en: LocaleMessages = {
     profileSelfLocked: 'Your profile',
     profileChildLocked: "Child's profile",
     allergensLabel: 'Allergens',
+    allergensHint:
+      'Pick allergens from the list or catalog. We will suggest cross-reactions on the next step.',
     conditionsLabel: 'Allergy condition types',
     conditionsQuestion: 'What allergies do you have?',
     conditionsQuestionChild: "What allergies does your child have?",
     conditionsHint:
       'Select all that apply — the diary will tailor scales and sections (peak flow for asthma, AIT for pollinosis, etc.).',
+    crossReactions: {
+      title: 'Cross-reactions',
+      hint: 'Based on your allergens, related foods and substances are often considered. Check what to add — or skip this step.',
+      skipHint: 'Nothing selected — tap Next to skip.',
+      addNext: 'Add and continue',
+      disclaimer:
+        'Cross-reaction hints are informational and not a diagnosis. Confirm with your clinician.',
+    },
     conditionHistory: {
       title: 'When did the allergy start?',
       hint: 'Enter an approximate onset period for each type. Optional fields can be skipped.',

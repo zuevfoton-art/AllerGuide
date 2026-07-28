@@ -21,6 +21,9 @@ export const ANALYTICS_EVENT_NAMES = [
   'wellness_refreshed',
   'settings_changed',
   'market_click',
+  'profile_setup_step_view',
+  'profile_setup_step_complete',
+  'profile_setup_step_skip',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
