@@ -6,6 +6,7 @@ import {
   POLLEN_MAP_SCALES,
   POLLEN_MAP_SCALE_ZOOM,
   PRIMARY_POLLEN_MAP_TAXON_IDS,
+  pollenTaxonToGoogleMapType,
   resolveScaledPollenReading,
   SECONDARY_POLLEN_MAP_TAXON_IDS,
   type PollenMapScale,
@@ -14,10 +15,12 @@ import {
 } from '@allerguide/core';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { GlassCard } from '@/src/components/GlassCard';
+import { GooglePollenMap } from '@/src/components/GooglePollenMap';
 import { YandexMap } from '@/src/components/YandexMap';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import type { PollenMapSnapshot } from '@/src/services/pollen-map-service';
+import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
 
 interface CalendarPeak {
   taxonId: string;
@@ -61,6 +64,12 @@ const SCALE_HINT_KEYS: Record<PollenMapScale, string> = {
   region: 'map.pollenScaleRegionHint',
 };
 
+const GOOGLE_HEATMAP_HINT_KEYS = {
+  TREE_UPI: 'map.pollenHeatmapTreeHint',
+  GRASS_UPI: 'map.pollenHeatmapGrassHint',
+  WEED_UPI: 'map.pollenHeatmapWeedHint',
+} as const;
+
 export function PollenMapLayer({
   latitude,
   longitude,
@@ -93,10 +102,37 @@ export function PollenMapLayer({
     [latitude, longitude, mapScale],
   );
   const isCalendarFallback = snapshot?.source === 'calendar';
+  const isGoogleHeatmapEnabled = isGooglePollenHeatmapAvailable();
+  const googleMapType = pollenTaxonToGoogleMapType(selectedTaxonId);
 
   const levelColor = selectedReading
     ? getLevelColor(selectedReading.level, theme)
     : theme.colors.textMuted;
+  const levelBadge = (
+    <View
+      style={[styles.mapLevelOverlay, { borderColor: levelColor }]}
+      accessibilityRole="summary">
+      <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
+      <View style={styles.mapLevelCopy}>
+        <Text style={styles.mapLevelTaxon}>
+          {t(TAXON_LABEL_KEYS[selectedTaxonId])}
+          {selectedReading?.profileRelevant ? ` · ${t('map.pollenForYou')}` : ''}
+        </Text>
+        <Text style={[styles.mapLevelText, { color: levelColor }]}>
+          {selectedReading
+            ? t(LEVEL_LABEL_KEYS[selectedReading.level])
+            : snapshot
+              ? t('map.pollenUnavailable')
+              : t('map.pollenLoading')}
+        </Text>
+        {selectedReading ? (
+          <Text style={styles.mapLevelValue}>
+            {t('map.pollenValue', { value: selectedReading.value.toFixed(1) })}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
 
   return (
     <>
@@ -128,38 +164,29 @@ export function PollenMapLayer({
         })}
       </View>
 
-      <YandexMap
-        url={mapUrl}
-        height={300}
-        interactive={false}
-        overlay={
-          <View
-            style={[styles.mapLevelOverlay, { borderColor: levelColor }]}
-            accessibilityRole="summary">
-            <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
-            <View style={styles.mapLevelCopy}>
-              <Text style={styles.mapLevelTaxon}>
-                {t(TAXON_LABEL_KEYS[selectedTaxonId])}
-                {selectedReading?.profileRelevant ? ` · ${t('map.pollenForYou')}` : ''}
-              </Text>
-              <Text style={[styles.mapLevelText, { color: levelColor }]}>
-                {selectedReading
-                  ? t(LEVEL_LABEL_KEYS[selectedReading.level])
-                  : snapshot
-                    ? t('map.pollenUnavailable')
-                    : t('map.pollenLoading')}
-              </Text>
-              {selectedReading ? (
-                <Text style={styles.mapLevelValue}>
-                  {t('map.pollenValue', { value: selectedReading.value.toFixed(1) })}
-                </Text>
-              ) : null}
-            </View>
-          </View>
-        }
-      />
+      {isGoogleHeatmapEnabled ? (
+        <GooglePollenMap
+          latitude={latitude}
+          longitude={longitude}
+          zoom={POLLEN_MAP_SCALE_ZOOM[mapScale]}
+          mapType={googleMapType}
+          height={300}
+          overlay={levelBadge}
+        />
+      ) : (
+        <YandexMap
+          url={mapUrl}
+          height={300}
+          interactive={false}
+          overlay={levelBadge}
+        />
+      )}
       <Text style={styles.attribution}>
-        {t('map.pollenMapAttribution')}
+        {t(
+          isGoogleHeatmapEnabled
+            ? 'map.pollenGoogleMapAttribution'
+            : 'map.pollenMapAttribution',
+        )}
         {snapshot && !isCalendarFallback
           ? ` · ${
               snapshot.source === 'cache'
@@ -168,6 +195,9 @@ export function PollenMapLayer({
             }`
           : ''}
       </Text>
+      {isGoogleHeatmapEnabled ? (
+        <Text style={styles.heatmapHint}>{t(GOOGLE_HEATMAP_HINT_KEYS[googleMapType])}</Text>
+      ) : null}
       <Text style={styles.scaleHint}>{t(SCALE_HINT_KEYS[mapScale])}</Text>
 
       <View style={styles.taxonRow}>
@@ -281,6 +311,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       marginTop: -8,
     },
     scaleHint: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textSecondary,
+      marginTop: -4,
+    },
+    heatmapHint: {
       fontFamily: fonts.sans,
       fontSize: 11,
       color: colors.textSecondary,

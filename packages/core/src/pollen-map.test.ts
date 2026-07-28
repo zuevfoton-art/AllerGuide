@@ -8,6 +8,11 @@ import {
   resolveScaledPollenReading,
   selectLowPollenLocations,
 } from './pollen-map';
+import {
+  isGooglePollenMapType,
+  parsePollenHeatmapTileCoordinates,
+  pollenTaxonToGoogleMapType,
+} from './google-pollen-heatmap';
 
 describe('pollen-map', () => {
   it('parses the current hour for all supported map taxa', () => {
@@ -105,5 +110,27 @@ describe('pollen-map', () => {
     expect(resolveScaledPollenReading(center, nearby, 'birch_pollen', 'place')?.value).toBe(10);
     expect(resolveScaledPollenReading(center, nearby, 'birch_pollen', 'city')?.value).toBe(23.3);
     expect(resolveScaledPollenReading(center, nearby, 'birch_pollen', 'region')?.value).toBe(40);
+  });
+
+  it('maps individual pollen taxa to Google UPI heatmap groups', () => {
+    expect(pollenTaxonToGoogleMapType('birch_pollen')).toBe('TREE_UPI');
+    expect(pollenTaxonToGoogleMapType('alder_pollen')).toBe('TREE_UPI');
+    expect(pollenTaxonToGoogleMapType('olive_pollen')).toBe('TREE_UPI');
+    expect(pollenTaxonToGoogleMapType('grass_pollen')).toBe('GRASS_UPI');
+    expect(pollenTaxonToGoogleMapType('ragweed_pollen')).toBe('WEED_UPI');
+    expect(pollenTaxonToGoogleMapType('mugwort_pollen')).toBe('WEED_UPI');
+  });
+
+  it('validates Google pollen map types and slippy-map tile coordinates', () => {
+    expect(isGooglePollenMapType('TREE_UPI')).toBe(true);
+    expect(isGooglePollenMapType('BIRCH_UPI')).toBe(false);
+    expect(parsePollenHeatmapTileCoordinates('6', '38', '20')).toEqual({
+      zoom: 6,
+      x: 38,
+      y: 20,
+    });
+    expect(parsePollenHeatmapTileCoordinates('17', '0', '0')).toBeNull();
+    expect(parsePollenHeatmapTileCoordinates('6', '64', '0')).toBeNull();
+    expect(parsePollenHeatmapTileCoordinates('6', '1.5', '0')).toBeNull();
   });
 });

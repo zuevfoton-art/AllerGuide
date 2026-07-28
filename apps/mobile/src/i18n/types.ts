@@ -346,6 +346,10 @@ export type LocaleMessages = {
     season: string;
     pollenLiveTitle: string;
     pollenMapAttribution: string;
+    pollenGoogleMapAttribution: string;
+    pollenHeatmapTreeHint: string;
+    pollenHeatmapGrassHint: string;
+    pollenHeatmapWeedHint: string;
     pollenBirch: string;
     pollenGrass: string;
     pollenRagweed: string;

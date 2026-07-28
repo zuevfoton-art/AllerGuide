@@ -13,6 +13,7 @@ import { registerCatalogRoutes } from './routes/catalog';
 import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
+import { registerPollenRoutes } from './routes/pollen';
 import {
   buildCorsOptions,
   installRateLimiters,
@@ -43,6 +44,7 @@ export async function createApp(
   registerAliasFeedbackRoutes(app);
   registerGovernanceRoutes(app);
   registerAnalyticsRoutes(app);
+  registerPollenRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);

@@ -18,3 +18,10 @@ export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'tr
 
 /** Look up barcodes in the backend product catalog before Open Food Facts. */
 export const PRODUCT_DB_ENABLED = process.env.EXPO_PUBLIC_PRODUCT_DB === 'true';
+
+/**
+ * Google Maps basemap + Google Pollen UPI tiles on the pollen layer.
+ * The Yandex/Open-Meteo view remains the default and offline-safe fallback.
+ */
+export const GOOGLE_POLLEN_HEATMAP_ENABLED =
+  process.env.EXPO_PUBLIC_POLLEN_HEATMAP === 'google';
