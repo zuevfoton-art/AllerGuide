@@ -192,7 +192,69 @@ flowchart LR
 
 Не подходит как open heatmap API: скрейпинг UI Яндекс Погоды / SILAM HTML.
 
-**Рекомендация продукта:** сейчас — Open-Meteo (одно значение × масштаб). Следующий инкремент heatmap — Google tiles *или* SILAM WMS proxy; выбор по покрытию РФ и бюджету ключа.
+**Рекомендация продукта:** сейчас — Open-Meteo (одно значение × масштаб).  
+Google `heatmapTiles` на stage **технически возможен**, но по ToS требует **Google Maps** как basemap (не Яндекс/OSM) — см. §4.5.  
+SILAM/CAMS — путь без Google Maps ToS, если нужен слой поверх Яндекса/MapLibre.
+
+### 4.5. Feasibility: Google `heatmapTiles` на staging (без реализации)
+
+Проверка возможности stage-сценария **без кода**. Источники: [coverage](https://developers.google.com/maps/documentation/pollen/coverage), [heatmap tiles](https://developers.google.com/maps/documentation/pollen/heatmap-tiles), [policies](https://developers.google.com/maps/documentation/pollen/policies), [billing](https://developers.google.com/maps/documentation/pollen/usage-and-billing).
+
+#### Вердикт
+
+| Вопрос | Ответ |
+|--------|--------|
+| Можно ли на stage? | **Да, условно** — после GCP billing + ключей + смены basemap на Google Maps |
+| Можно ли поверх текущего `map-widget` Яндекса? | **Нет** (виджет не принимает тайлы + **запрещено ToS**) |
+| Покрыта ли РФ? | **Да** (`RU`: grass, trees, weeds; растения: birch, olive, grasses, ragweed, alder, mugwort) |
+| Endpoint доступен из среды? | Да: без ключа → `403`; невалидный ключ → `400 API key not valid` (Москва z=6 x=38 y=20) |
+
+#### Что даёт API
+
+```
+GET https://pollen.googleapis.com/v1/mapTypes/{TREE_UPI|GRASS_UPI|WEED_UPI}/heatmapTiles/{z}/{x}/{y}?key=KEY
+→ PNG 256×256, zoom 0–16
+```
+
+- Heatmap только по **трём группам** UPI (tree / grass / weed), **не** по отдельной берёзе/амброзии.
+- Маппинг UI AllerGuide → слой: `birch_*`/`alder_*`/`olive_*` → `TREE_UPI`; `grass_*` → `GRASS_UPI`; `ragweed_*`/`mugwort_*` → `WEED_UPI`.
+- Число зёрен/м³ на бейдже можно оставить Open-Meteo **или** брать из Google Forecast API (plant codes `BIRCH`, `GRAMINALES`, `RAGWEED`…); heatmap и бейдж тогда на разных шкалах, если смешивать провайдеров.
+
+#### Блокеры / жёсткие ToS
+
+1. **Basemap только Google Maps**, если данные Pollen API показываются на карте («using non-Google maps is prohibited»).  
+   → Stage: `react-native-maps` (Google) / Maps JS API на web; **не** `YandexMap` iframe и не MapLibre+OSM.
+2. **Кэш/prefetch тайлов запрещён** (кроме place IDs). Proxy в `apps/api` может только pass-through / short-lived edge, не долговременный store.
+3. Атрибуция: логотип/текст Google Maps + *"Source: Includes pollen data from Google"*.
+4. Billing обязателен на GCP-проекте; SKU **Pollen Usage** (Pro): ~5 000 вызовов/мес free, далее ~$10 / 1 000 (см. актуальный прайс GMP).  
+   Один pan/zoom viewport ≈ десятки tile-запросов → на stage нужен жёсткий quota + rate limit.
+
+#### Что нужно для stage (чеклист ops, без кода)
+
+| # | Шаг | Где |
+|---|-----|-----|
+| 1 | GCP project + billing + enable **Pollen API** (+ **Maps JavaScript API** / Maps SDK) | Google Cloud Console |
+| 2 | API key(s): server (IP-restricted) для proxy **или** client key с HTTP referrer / Android package / iOS bundle | Secrets staging |
+| 3 | Env (план): `GOOGLE_POLLEN_API_KEY` на API; `EXPO_PUBLIC_POLLEN_HEATMAP=google` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` на mobile (EAS `staging`) | `.env.staging` / EAS |
+| 4 | Route-proxy (план): `GET /api/pollen/heatmap/:mapType/:z/:x/:y` → Google; ключ не в бандле; rate limit per IP/JWT | `apps/api` |
+| 5 | UI (план): при флаге — Google Map + `TileOverlay`/`overlayMapTypes`; иначе текущий Яндекс + Open-Meteo бейдж | `PollenMapLayer` |
+| 6 | Offline-first: флаг **off** по умолчанию; без сети — календарь, без тайлов | FR-MAP-14/18 |
+| 7 | Smoke: запрос тайла Москвы + визуальный overlay на staging web/APK | QA |
+
+#### Риски stage
+
+- **Продуктовый UX:** heatmap = группа растений, а переключатели — отдельные таксоны → нужна подпись «деревья / злаки / сорняки (UPI)».
+- **Стоимость:** активное тестирование карты быстро съест free tier.
+- **Дублирование карт:** Яндекс остаётся на «Рестораны»/прочих слоях; слой «Пыление» при флаге — отдельный Google Map (два провайдера на одном табе).
+- **РФ billing/аккаунт:** нужен действующий GCP billing account; ограничения оплаты/региона — ops-проверка до старта.
+
+#### Рекомендация по stage
+
+**Реализуемо** как opt-in stage-флаг после появления GCP-ключей.  
+Минимальный stage-scope: Google basemap + `TREE_UPI`/`GRASS_UPI`/`WEED_UPI` overlay + атрибуция; бейдж уровня оставить Open-Meteo.  
+**Не делать:** overlay Google-тайлов на Яндекс-виджет; клиентский ключ Pollen без ограничений; кэш PNG в БД.
+
+Код heatmap **не начинать**, пока нет staging-секретов GCP и явного go на смену basemap.
 
 ---
 
