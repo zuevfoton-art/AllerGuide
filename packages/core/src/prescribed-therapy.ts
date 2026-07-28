@@ -60,6 +60,8 @@ export function createDefaultPrescribedCourse(): PrescribedCourse {
     endDate: '',
     scheduleNotes: '',
     notes: '',
+    activated: false,
+    verified: false,
   };
 }
 
@@ -79,8 +81,11 @@ export function serializePrescribedCourse(course: PrescribedCourse): string {
   return JSON.stringify(course);
 }
 
+/** Ready for diary logging after final review confirm (`activated`). Legacy without flag stays ok. */
 export function isPrescribedCourseConfigured(course: PrescribedCourse | null): course is PrescribedCourse {
-  return Boolean(course?.active && course.drug.trim());
+  if (!course?.active || !course.drug.trim()) return false;
+  if (course.activated === false) return false;
+  return true;
 }
 
 export function isPrescribedReminderConfigured(course: PrescribedCourse | null): boolean {
@@ -92,6 +97,35 @@ export function formatPrescribedReminderTime(hour: number, minute = 0): string {
   const h = String(hour).padStart(2, '0');
   const m = String(minute).padStart(2, '0');
   return `${h}:${m}`;
+}
+
+export function buildPrescribedReminderContent(course: PrescribedCourse): {
+  title: string;
+  body: string;
+} {
+  const drug = course.drug.trim() || 'препарат';
+  return {
+    title: 'Напоминание о приёме',
+    body: `Время приёма: ${drug}${course.dosage.trim() ? ` (${course.dosage.trim()})` : ''}`,
+  };
+}
+
+/** Diary steps when a prescribed course is already configured. */
+export const PRESCRIBED_SIMPLIFIED_STEP_IDS = [
+  'therapyTakenAt',
+  'therapyStatus',
+  'therapyReaction',
+  'therapyComment',
+] as const;
+
+export function normalizeTherapyDoseStatus(
+  value: string | undefined,
+): PrescribedDoseStatus | null {
+  const normalized = value?.trim() ?? '';
+  if (normalized === 'on-time' || normalized === 'В срок') return 'on-time';
+  if (normalized === 'late' || normalized === 'С опозданием') return 'late';
+  if (normalized === 'missed' || normalized === 'Пропущена') return 'missed';
+  return null;
 }
 
 export interface PrescribedComplianceSummary {
@@ -125,7 +159,7 @@ export function computePrescribedCompliance(
     if (!payload) continue;
 
     summary.totalDoses += 1;
-    const status = payload.answers.therapyStatus?.trim();
+    const status = normalizeTherapyDoseStatus(payload.answers.therapyStatus);
     if (status === 'on-time') summary.onTime += 1;
     else if (status === 'late') summary.late += 1;
     else if (status === 'missed') summary.missed += 1;
@@ -150,7 +184,9 @@ export function buildPrescribedTherapyDiarySummary(answers: Record<string, strin
 
   if (drug) parts.push(drug);
   if (takenAt) parts.push(takenAt);
-  if (status) parts.push(PRESCRIBED_THERAPY_DOSE_STATUS_LABELS[status as PrescribedDoseStatus] ?? status);
+  const statusKey = normalizeTherapyDoseStatus(status);
+  if (statusKey) parts.push(PRESCRIBED_THERAPY_DOSE_STATUS_LABELS[statusKey]);
+  else if (status) parts.push(status);
   if (reaction && reaction !== 'Нет') parts.push(`реакция: ${reaction}`);
 
   return parts.length ? parts.join(' · ') : 'Приём препарата';

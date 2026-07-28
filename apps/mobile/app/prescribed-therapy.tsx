@@ -102,10 +102,25 @@ export default function PrescribedTherapyScreen() {
     setStep('review');
   };
 
-  const save = () => {
+  const save = async () => {
     if (!profileId) return;
-    savePrescribedCourse(profileId, { ...course, activated: true });
+    const toSave: PrescribedCourse = {
+      ...course,
+      verified: course.stages?.length ? Boolean(course.verified) : true,
+      activated: true,
+      active: true,
+    };
+    savePrescribedCourse(profileId, toSave);
     router.back();
+  };
+
+  const goToNextFromForm = () => {
+    if (!course.drug.trim()) return;
+    if (course.stages && course.stages.length > 0 && !course.verified) {
+      setStep('verify');
+      return;
+    }
+    setStep('review');
   };
 
   const reminderEnabled = isPrescribedReminderConfigured(course);
@@ -154,7 +169,7 @@ export default function PrescribedTherapyScreen() {
       styles={styles}
       course={course}
       setCourse={setCourse}
-      onBack={() => setStep('verify')}
+      onBack={() => setStep(course.stages && course.stages.length > 0 ? 'verify' : 'form')}
       onSave={save}
       reminderEnabled={reminderEnabled}
       toggleReminder={toggleReminder}
@@ -286,18 +301,11 @@ export default function PrescribedTherapyScreen() {
       ) : null}
 
       <Button
-        label={isPrescribedReminderConfigured(course) ? t('prescribedTherapy.reviewTitle') : t('prescribedTherapy.saveCourse')}
+        label={t('prescribedTherapy.reviewTitle')}
         variant="primary"
         block
-        onPress={() => {
-          if (course.stages && course.stages.length > 0 && !course.verified) {
-            setStep('verify');
-          } else if (isPrescribedReminderConfigured(course)) {
-            setStep('review');
-          } else {
-            save();
-          }
-        }}
+        disabled={!course.drug.trim()}
+        onPress={goToNextFromForm}
       />
 
       <Disclaimer>{t('prescribedTherapy.disclaimer')}</Disclaimer>
@@ -396,7 +404,7 @@ interface ReviewStepPTProps {
   course: PrescribedCourse;
   setCourse: React.Dispatch<React.SetStateAction<PrescribedCourse>>;
   onBack: () => void;
-  onSave: () => void;
+  onSave: () => void | Promise<void>;
   reminderEnabled: boolean;
   toggleReminder: (enabled: boolean) => void;
   t: (key: string, params?: Record<string, string>) => string;
@@ -484,7 +492,12 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
         )}
       </GlassCard>
 
-      <Button label={t('prescribedTherapy.reviewConfirm')} variant="primary" block onPress={onSave} />
+      <Button
+        label={t('prescribedTherapy.reviewConfirm')}
+        variant="primary"
+        block
+        onPress={() => void onSave()}
+      />
       <Disclaimer>{t('prescribedTherapy.disclaimer')}</Disclaimer>
     </Screen>
   );

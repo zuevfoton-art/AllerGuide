@@ -544,6 +544,8 @@ const es: LocaleMessages = {
     asitOpenCourse: 'Abrir curso AIT',
     asitPushTitle: 'Recordatorio AIT',
     asitPushBody: 'Hora de la dosis: {{drug}} ({{allergen}})',
+    therapyPushTitle: 'Recordatorio de medicación',
+    therapyPushBody: 'Hora de tomar: {{drug}}',
     asitDrugFallback: 'medicamento',
     asitAllergenFallback: 'curso AIT',
     denied: 'Permita las notificaciones en los ajustes del dispositivo.',

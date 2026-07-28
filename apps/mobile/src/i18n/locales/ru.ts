@@ -547,6 +547,8 @@ const ru: LocaleMessages = {
     asitOpenCourse: 'Открыть курс АСИТ',
     asitPushTitle: 'Напоминание АСИТ',
     asitPushBody: 'Время приёма: {{drug}} ({{allergen}})',
+    therapyPushTitle: 'Напоминание о приёме',
+    therapyPushBody: 'Время приёма: {{drug}}',
     asitDrugFallback: 'препарат',
     asitAllergenFallback: 'курс АСИТ',
     denied: 'Разрешите уведомления в настройках устройства.',

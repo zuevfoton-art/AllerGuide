@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
+  ASIT_SIMPLIFIED_STEP_IDS,
   buildAsitPrefill,
   buildAsitReminderContent,
   computeAsitCompliance,
+  computeAsitDoseNumber,
   createDefaultAsitCourse,
   formatAsitReminderTime,
   formatAsitReportSummary,
@@ -52,8 +54,33 @@ describe('asit-therapy', () => {
         ...createDefaultAsitCourse(),
         allergen: 'Берёза',
         drug: 'Сталораль',
+        activated: false,
+      }),
+    ).toBe(false);
+    expect(
+      isAsitCourseConfigured({
+        ...createDefaultAsitCourse(),
+        allergen: 'Берёза',
+        drug: 'Сталораль',
+        activated: true,
       }),
     ).toBe(true);
+  });
+
+  it('computes dose number from start date and existing logs', () => {
+    const course = {
+      ...createDefaultAsitCourse(),
+      allergen: 'Берёза',
+      drug: 'Сталораль',
+      startDate: '2026-07-01',
+      activated: true,
+      scheduleStages: [
+        { from: '2026-07-01', to: '2026-07-31', dose: '1 доза' },
+      ],
+    };
+    expect(computeAsitDoseNumber(course, 0, new Date(2026, 6, 1))).toBe(1);
+    expect(computeAsitDoseNumber(course, 2, new Date(2026, 6, 5))).toBeGreaterThanOrEqual(3);
+    expect(ASIT_SIMPLIFIED_STEP_IDS).toContain('asitComment');
   });
 
   it('formats compact ASIT diary summary', () => {
@@ -110,6 +137,7 @@ describe('asit-therapy', () => {
       route: 'slit' as const,
       phase: 'maintenance' as const,
       scheduleNotes: 'Ежедневно',
+      activated: true,
     };
     const text = formatAsitReportSummary(
       {

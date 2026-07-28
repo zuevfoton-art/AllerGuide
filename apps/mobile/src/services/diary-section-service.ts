@@ -10,6 +10,7 @@ import {
   isPrescribedCourseConfigured,
   parseAllergies,
   ASIT_SIMPLIFIED_STEP_IDS,
+  PRESCRIBED_SIMPLIFIED_STEP_IDS,
   type DiarySection,
   type FoodDrugScanRef,
 } from '@allerguide/core';
@@ -122,10 +123,20 @@ export async function buildDiarySectionEditorState(input: {
   if (sectionType === 'Терапия' && profileId) {
     const course = getPrescribedCourse(profileId);
     if (course && isPrescribedCourseConfigured(course)) {
+      const fullSection = getDiarySection('Терапия');
+      const simplifiedSection: DiarySection | undefined = fullSection
+        ? {
+            ...fullSection,
+            steps: fullSection.steps.filter((s) =>
+              (PRESCRIBED_SIMPLIFIED_STEP_IDS as readonly string[]).includes(s.id),
+            ),
+          }
+        : undefined;
       return {
         mode: 'section',
         sectionType,
         prefill: { Терапия: buildPrescribedTherapyPrefill(course) },
+        section: simplifiedSection,
       };
     }
   }

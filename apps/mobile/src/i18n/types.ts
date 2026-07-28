@@ -550,6 +550,8 @@ export type LocaleMessages = {
     asitPushTitle: string;
     asitPushBody: string;
     asitDrugFallback: string;
+    therapyPushTitle: string;
+    therapyPushBody: string;
     asitAllergenFallback: string;
     denied: string;
     unavailable: string;

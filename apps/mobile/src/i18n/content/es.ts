@@ -158,6 +158,17 @@ const esContent: LocaleContent = {
         },
       },
     },
+    Терапия: {
+      title: 'Terapia prescrita',
+      steps: {
+        therapyDrug: { label: 'Medicamento', placeholder: 'Según lo indicado por el médico' },
+        therapyDosage: { label: 'Dosis', placeholder: 'p. ej. 1 comprimido, 2 inhalaciones' },
+        therapyTakenAt: { label: 'Fecha y hora de la toma', placeholder: '18 de junio, 10:00' },
+        therapyStatus: { label: 'Cumplimiento del esquema', choices: ['A tiempo', 'Con retraso', 'Omitida'] },
+        therapyReaction: { label: 'Reacción / efecto secundario', choices: ['Ninguna', 'Leve', 'Moderada', 'Grave'] },
+        therapyComment: { label: 'Comentario', placeholder: 'Estado, circunstancias especiales…' },
+      },
+    },
     'Визит к врачу': {
       title: 'Visita médica',
       steps: {
@@ -197,6 +208,7 @@ const esContent: LocaleContent = {
     Кожа: 'Piel',
     Пикфлоуметрия: 'Pico de flujo',
     АСИТ: 'Inmunoterapia',
+    Терапия: 'Terapia prescrita',
     'Визит к врачу': 'Visita médica',
     Заметка: 'Nota',
   },

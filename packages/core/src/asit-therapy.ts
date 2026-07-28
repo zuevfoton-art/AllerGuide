@@ -90,6 +90,8 @@ export function createDefaultAsitCourse(): AsitCourse {
     phase: 'buildup',
     startDate: '',
     scheduleNotes: '',
+    activated: false,
+    verified: false,
   };
 }
 
@@ -109,20 +111,49 @@ export function serializeAsitCourse(course: AsitCourse): string {
   return JSON.stringify(course);
 }
 
+/**
+ * Course is ready for diary logging when drug+allergen are set and the user
+ * confirmed the final review (`activated`). Legacy courses without the flag
+ * stay configured if they were already active.
+ */
 export function isAsitCourseConfigured(course: AsitCourse | null): course is AsitCourse {
-  return Boolean(course?.active && course.drug.trim() && course.allergen.trim());
+  if (!course?.active || !course.drug.trim() || !course.allergen.trim()) return false;
+  if (course.activated === false) return false;
+  return true;
+}
+
+function parseIsoDateOnly(value: string): Date | null {
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 /**
- * Computes the sequential dose number based on the number of
- * existing ASIT diary entries for the current course.
- * Returns null when startDate is absent.
+ * Estimates the sequential dose number from course start + existing logs.
+ * When schedule stages exist, advances by calendar days since start (1 dose/day
+ * heuristic for SLIT-style courses); otherwise uses existingDoseCount + 1.
+ * Manual override remains available in the diary wizard.
  */
 export function computeAsitDoseNumber(
   course: AsitCourse,
   existingDoseCount: number,
+  asOf: Date = new Date(),
 ): number | null {
   if (!course.startDate?.trim()) return null;
+
+  const start = parseIsoDateOnly(course.startDate);
+  if (!start) return existingDoseCount + 1;
+
+  const stages = course.scheduleStages?.filter((s) => s.from && s.to) ?? [];
+  if (stages.length > 0) {
+    const dayMs = 86_400_000;
+    const daysSinceStart = Math.floor((asOf.getTime() - start.getTime()) / dayMs);
+    if (daysSinceStart < 0) return 1;
+    // Prefer logged count when user started mid-course; otherwise calendar-based.
+    return Math.max(existingDoseCount + 1, daysSinceStart + 1);
+  }
+
   return existingDoseCount + 1;
 }
 
@@ -162,6 +193,7 @@ export const ASIT_SIMPLIFIED_STEP_IDS = [
   'asitOnSchedule',
   'asitLocalReaction',
   'asitReaction',
+  'asitComment',
 ] as const;
 
 export function formatAsitSummary(answers: Record<string, string>): string {

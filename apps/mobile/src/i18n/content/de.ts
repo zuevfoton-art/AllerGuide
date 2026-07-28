@@ -158,6 +158,17 @@ const deContent: LocaleContent = {
         },
       },
     },
+    Терапия: {
+      title: 'Verordnete Therapie',
+      steps: {
+        therapyDrug: { label: 'Medikament', placeholder: 'Wie vom Arzt verordnet' },
+        therapyDosage: { label: 'Dosierung', placeholder: 'z. B. 1 Tablette, 2 Hübe' },
+        therapyTakenAt: { label: 'Datum und Uhrzeit', placeholder: '18. Juni, 10:00' },
+        therapyStatus: { label: 'Einnahmetreue', choices: ['Pünktlich', 'Verspätet', 'Ausgelassen'] },
+        therapyReaction: { label: 'Reaktion / Nebenwirkung', choices: ['Keine', 'Leicht', 'Mäßig', 'Stark'] },
+        therapyComment: { label: 'Kommentar', placeholder: 'Befinden, besondere Umstände…' },
+      },
+    },
     'Визит к врачу': {
       title: 'Arztbesuch',
       steps: {
@@ -197,6 +208,7 @@ const deContent: LocaleContent = {
     Кожа: 'Haut',
     Пикфлоуметрия: 'Peak-Flow',
     АСИТ: 'Hyposensibilisierung',
+    Терапия: 'Verordnete Therapie',
     'Визит к врачу': 'Arztbesuch',
     Заметка: 'Notiz',
   },

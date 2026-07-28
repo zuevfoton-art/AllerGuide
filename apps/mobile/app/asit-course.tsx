@@ -131,12 +131,27 @@ export default function AsitCourseScreen() {
 
   const save = async () => {
     if (!profileId) return;
-    const toSave: AsitCourse = { ...course, activated: true };
+    const toSave: AsitCourse = {
+      ...course,
+      verified: course.scheduleStages?.length ? Boolean(course.verified) : true,
+      activated: true,
+      active: true,
+    };
     saveAsitCourse(profileId, toSave);
     if (isAsitReminderConfigured(toSave)) {
       await ensureNotificationPermission();
     }
+    await syncAsitReminder(profileId, toSave, getAsitReminderNotificationContent(toSave));
     router.back();
+  };
+
+  const goToNextFromForm = () => {
+    if (!course.allergen.trim() || !course.drug.trim()) return;
+    if (course.scheduleStages && course.scheduleStages.length > 0 && !course.verified) {
+      setStep('verify');
+      return;
+    }
+    setStep('review');
   };
 
   const reminderEnabled = isAsitReminderConfigured(course);
@@ -203,7 +218,9 @@ export default function AsitCourseScreen() {
       ui={ui}
       styles={styles}
       course={course}
-      onBack={() => setStep('verify')}
+      onBack={() =>
+        setStep(course.scheduleStages && course.scheduleStages.length > 0 ? 'verify' : 'form')
+      }
       onSave={save}
       reminderEnabled={reminderEnabled}
       toggleReminder={toggleReminder}
@@ -341,18 +358,11 @@ export default function AsitCourseScreen() {
       ) : null}
 
       <Button
-        label={isAsitReminderConfigured(course) ? t('asit.reviewTitle') : t('asit.saveCourse')}
+        label={t('asit.reviewTitle')}
         variant="primary"
         block
-        onPress={() => {
-          if (course.scheduleStages && course.scheduleStages.length > 0 && !course.verified) {
-            setStep('verify');
-          } else if (isAsitReminderConfigured(course)) {
-            setStep('review');
-          } else {
-            void save();
-          }
-        }}
+        disabled={!course.allergen.trim() || !course.drug.trim()}
+        onPress={goToNextFromForm}
       />
 
       <Disclaimer>{t('asit.disclaimer')}</Disclaimer>

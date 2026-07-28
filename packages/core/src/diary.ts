@@ -494,6 +494,14 @@ export const DIARY_SECTIONS: DiarySection[] = [
         choices: ['Нет реакции', 'Лёгкая', 'Умеренная', 'Сильная'],
         required: true,
       },
+      {
+        id: 'asitComment',
+        label: 'Комментарий',
+        placeholder: 'Самочувствие, особые обстоятельства…',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
     ],
   },
   {
@@ -577,7 +585,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         id: 'therapyStatus',
         label: 'Соблюдение графика',
         field: 'choice',
-        choices: ['on-time', 'late', 'missed'],
+        choices: ['В срок', 'С опозданием', 'Пропущена'],
         required: true,
       },
       {
