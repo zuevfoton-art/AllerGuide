@@ -36,7 +36,10 @@ export interface ComorbidityLink {
 export interface ConditionEpisode {
   conditionId: AllergyConditionId;
   onsetKind: ConditionOnsetKind;
+  /** Calendar year when the condition first appeared (stored, displayed in reports). */
   onsetYear?: number;
+  /** Age at onset in full years — UI-facing; onsetYear is derived from profile birthYear + onsetAgeYears. */
+  onsetAgeYears?: number;
   status: ConditionEpisodeStatus;
   diagnosedBy: ConditionDiagnosedBy;
   /** EAACI food history: time from ingestion to symptoms (food type only). */
@@ -52,9 +55,19 @@ export interface ConditionHistory {
   comorbidityLinks?: ComorbidityLink[];
 }
 
-export type ConditionEpisodeInput = Omit<ConditionEpisode, 'conditionId' | 'onsetYear'> & {
+export type ConditionEpisodeInput = Omit<ConditionEpisode, 'conditionId' | 'onsetYear' | 'onsetAgeYears'> & {
   onsetYear?: number | string;
+  /** Age at onset entered by the user; onsetYear is computed from birthYear + onsetAgeYears. */
+  onsetAgeYears?: number | string;
 };
+
+/**
+ * Derive the calendar year a condition began given the person's birth year and
+ * their age (in full years) when it first appeared.
+ */
+export function computeOnsetYear(birthYear: number, onsetAgeYears: number): number {
+  return birthYear + Math.trunc(onsetAgeYears);
+}
 
 export const CONDITION_ONSET_KINDS: ConditionOnsetKind[] = [
   'infancy',
@@ -136,6 +149,17 @@ function parseOnsetYear(value: unknown): number | undefined {
   return undefined;
 }
 
+function parseOnsetAgeYears(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 120) {
+    return Math.trunc(value);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const age = Number(value.trim());
+    if (Number.isFinite(age) && age >= 0 && age <= 120) return Math.trunc(age);
+  }
+  return undefined;
+}
+
 function isOnsetKind(value: unknown): value is ConditionOnsetKind {
   return typeof value === 'string' && CONDITION_ONSET_KINDS.includes(value as ConditionOnsetKind);
 }
@@ -165,6 +189,7 @@ function normalizeEpisode(raw: unknown): ConditionEpisode | null {
   const status = isEpisodeStatus(item.status) ? item.status : 'active';
   const diagnosedBy = isDiagnosedBy(item.diagnosedBy) ? item.diagnosedBy : 'self_reported';
   const onsetYear = parseOnsetYear(item.onsetYear);
+  const onsetAgeYears = parseOnsetAgeYears(item.onsetAgeYears);
   const foodSymptomTiming =
     item.conditionId === 'food' && isFoodSymptomTiming(item.foodSymptomTiming)
       ? item.foodSymptomTiming
@@ -179,6 +204,7 @@ function normalizeEpisode(raw: unknown): ConditionEpisode | null {
     status,
     diagnosedBy,
     ...(onsetYear !== undefined ? { onsetYear } : {}),
+    ...(onsetAgeYears !== undefined ? { onsetAgeYears } : {}),
     ...(foodSymptomTiming ? { foodSymptomTiming } : {}),
     ...(ocularSymptoms ? { ocularSymptoms } : {}),
     ...(notes ? { notes } : {}),
@@ -255,6 +281,7 @@ export function normalizeConditionEpisodeInput(
 ): ConditionEpisode {
   const base = createDefaultConditionEpisode(conditionId);
   const onsetYear = parseOnsetYear(input.onsetYear);
+  const onsetAgeYears = parseOnsetAgeYears(input.onsetAgeYears);
 
   return {
     ...base,
@@ -262,6 +289,7 @@ export function normalizeConditionEpisodeInput(
     status: isEpisodeStatus(input.status) ? input.status : base.status,
     diagnosedBy: isDiagnosedBy(input.diagnosedBy) ? input.diagnosedBy : base.diagnosedBy,
     ...(onsetYear !== undefined ? { onsetYear } : {}),
+    ...(onsetAgeYears !== undefined ? { onsetAgeYears } : {}),
     ...(conditionId === 'food' && isFoodSymptomTiming(input.foodSymptomTiming)
       ? { foodSymptomTiming: input.foodSymptomTiming }
       : {}),
@@ -406,6 +434,7 @@ export function conditionHistoryToDraftMap(
     map[episode.conditionId] = {
       onsetKind: episode.onsetKind,
       onsetYear: episode.onsetYear,
+      onsetAgeYears: episode.onsetAgeYears,
       status: episode.status,
       diagnosedBy: episode.diagnosedBy,
       foodSymptomTiming: episode.foodSymptomTiming,

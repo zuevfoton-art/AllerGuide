@@ -5,6 +5,7 @@ import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
+import { PhoneInput } from '@/src/components/PhoneInput';
 import { Ionicons } from '@expo/vector-icons';
 import {
   DEFAULT_SHOCK_KIT,
@@ -247,13 +248,11 @@ export default function SosEditScreen() {
             placeholder={t('sosEdit.doctorNamePlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
           />
-          <TextInput
-            style={styles.input}
+          <PhoneInput
             value={doctorPhone}
             onChangeText={setDoctorPhone}
             placeholder={t('sosEdit.doctorPhonePlaceholder')}
-            placeholderTextColor={theme.colors.textMuted}
-            keyboardType="phone-pad"
+            testID="sos-doctor-phone"
           />
           <Pressable style={styles.checkRow} onPress={() => setAnaphylaxisHistory((v) => !v)}>
             <Ionicons
@@ -328,13 +327,11 @@ export default function SosEditScreen() {
           placeholder={t('common.name')}
           placeholderTextColor={theme.colors.textMuted}
         />
-        <TextInput
-          style={styles.input}
+        <PhoneInput
           value={phone}
           onChangeText={setPhone}
           placeholder={t('common.phone')}
-          placeholderTextColor={theme.colors.textMuted}
-          keyboardType="phone-pad"
+          testID="sos-contact-phone"
         />
         <TextInput
           style={styles.input}

@@ -13,6 +13,8 @@ export interface Profile {
   allergies: string;
   /** JSON map allergenId → confirmation source (`self_reported` | `specific_ige` | `clinician`). */
   allergyConfirmations?: string;
+  /** JSON array of allergen ids accepted as cross-reactions — stored separately from primary allergies. */
+  crossReactionAllergies?: string;
 }
 
 export interface DiaryEntry {
@@ -53,6 +55,8 @@ export interface ProfileInput {
   allergies: string[];
   /** Per-allergen verification source (defaults to `self_reported`). */
   allergyConfirmations?: Record<string, import('./allergy-confirmations').AllergyConfirmationSource>;
+  /** Allergen ids accepted by the user as cross-reactions — stored separately from primary allergies. */
+  crossReactionAllergies?: string[];
   /** Required when `type === 'child'` or onboarding scenario is `child`. */
   childConsent?: boolean;
   /** Onboarding scenario hint for consent validation. */

@@ -52,13 +52,52 @@ import type { DiaryEntry, Profile } from '@/src/types';
 
 export type DoctorReportOptions = {
   profileId: number;
-  periodDays: 7 | 14 | 30;
+  periodDays?: 7 | 14 | 30;
+  /** Inclusive ISO date `YYYY-MM-DD` for custom range. */
+  fromDate?: string;
+  toDate?: string;
   blockIds: string[];
 };
 
-function filterEntriesByPeriod(entries: DiaryEntry[], days: number): DiaryEntry[] {
+function startOfDayMs(isoDate: string): number {
+  return new Date(`${isoDate}T00:00:00`).getTime();
+}
+
+function endOfDayMs(isoDate: string): number {
+  return new Date(`${isoDate}T23:59:59.999`).getTime();
+}
+
+function filterEntriesByPeriod(
+  entries: DiaryEntry[],
+  options: Pick<DoctorReportOptions, 'periodDays' | 'fromDate' | 'toDate'>,
+): DiaryEntry[] {
+  if (options.fromDate && options.toDate) {
+    const from = startOfDayMs(options.fromDate);
+    const to = endOfDayMs(options.toDate);
+    return entries.filter((e) => {
+      const ts = new Date(e.createdAt).getTime();
+      return ts >= from && ts <= to;
+    });
+  }
+  const days = options.periodDays ?? 30;
   const cutoff = Date.now() - days * 86_400_000;
   return entries.filter((e) => new Date(e.createdAt).getTime() >= cutoff);
+}
+
+function formatPeriodLabel(options: DoctorReportOptions): string {
+  if (options.fromDate && options.toDate) {
+    return `${options.fromDate} — ${options.toDate}`;
+  }
+  return `${options.periodDays ?? 30} дней`;
+}
+
+/** Effective day span for summary helpers that still take periodDays. */
+function resolvePeriodDays(options: DoctorReportOptions): number {
+  if (options.fromDate && options.toDate) {
+    const ms = endOfDayMs(options.toDate) - startOfDayMs(options.fromDate);
+    return Math.max(1, Math.ceil(ms / 86_400_000));
+  }
+  return options.periodDays ?? 30;
 }
 
 function renderTimeline(entries: DiaryEntry[]): string {
@@ -123,7 +162,8 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     [options.profileId],
   );
 
-  const periodEntries = filterEntriesByPeriod(allEntries, options.periodDays);
+  const periodEntries = filterEntriesByPeriod(allEntries, options);
+  const periodDays = resolvePeriodDays(options);
   const allowedTypes = getReportDiaryTypes(options.blockIds);
   const entries = periodEntries.filter((e) => allowedTypes.includes(e.type));
 
@@ -184,15 +224,15 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
 
   const asitHtml = options.blockIds.includes('asit')
     ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatAsitReportSummary(
-        computeAsitCompliance(periodEntries, options.periodDays),
+        computeAsitCompliance(periodEntries, periodDays),
         getAsitCourse(options.profileId),
-        options.periodDays,
+        periodDays,
       ).replace(/</g, '&lt;')}</pre></section>`
     : '';
 
   const foodDrugHtml = options.blockIds.includes('foodDrug') && profile
     ? `<section><h2>Пищевая и лекарственная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatFoodDrugReportSummary(
-        computeFoodDrugSummary(periodEntries, options.periodDays),
+        computeFoodDrugSummary(periodEntries, periodDays),
         {
           avoidFoods: getConsolidatedFoodAvoidList(
             parseAllergies(profile.allergies),
@@ -200,7 +240,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
           ),
           drugIntolerances: getAllergyPassport(options.profileId).drugIntolerances,
           clinicalNotes: getFoodDrugRegistry(options.profileId)?.clinicalNotes,
-          periodDays: options.periodDays,
+          periodDays: periodDays,
         },
       ).replace(/</g, '&lt;')}</pre></section>`
     : '';
@@ -209,13 +249,13 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
   const insectHtml =
     options.blockIds.includes('insect') && profile
       ? `<section><h2>Инсектная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatInsectReportSummary(
-          computeInsectStingSummary(periodEntries, options.periodDays),
+          computeInsectStingSummary(periodEntries, periodDays),
           {
             knownInsects: getConsolidatedInsectList(parseAllergies(profile.allergies), insectPlan),
             adrenalineLocation: insectPlan?.adrenalineLocation,
             emergencySteps: insectPlan?.emergencySteps,
             clinicalNotes: insectPlan?.clinicalNotes,
-            periodDays: options.periodDays,
+            periodDays: periodDays,
           },
         ).replace(/</g, '&lt;')}</pre></section>`
       : '';
@@ -235,7 +275,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
             latestPercentOfBest: pefTrend.latestPercentOfBest,
           },
           asthmaPlan,
-          { periodDays: options.periodDays },
+          { periodDays: periodDays },
         ).replace(/</g, '&lt;')}</pre></section>`
       : '';
 
@@ -266,7 +306,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       <p style="font-size:13px;color:${c.head};font-weight:700;">${DOCTOR_REPORT_TITLE}</p>
       <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
       <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
-      <p><strong>Период:</strong> ${options.periodDays} дней</p>
+      <p><strong>Период:</strong> ${formatPeriodLabel(options)}</p>
       <p style="font-size:12px;color:${c.muted};">${DOCTOR_REPORT_DISCLAIMER}</p>
       <hr style="border:none;border-top:1px solid ${c.border};" />
       ${pefHtml}
@@ -293,7 +333,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       win.document.close();
       win.print();
     }
-    trackEvent('diary_report_exported', { period_days: options.periodDays, platform: 'web' });
+    trackEvent('diary_report_exported', { period_days: periodDays, platform: 'web' });
     return;
   }
 
@@ -301,7 +341,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
   const Sharing = await import('expo-sharing');
   const { uri } = await Print.printToFileAsync({ html });
   await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
-  trackEvent('diary_report_exported', { period_days: options.periodDays, platform: Platform.OS });
+  trackEvent('diary_report_exported', { period_days: periodDays, platform: Platform.OS });
 }
 
 export async function exportPassportPdf(profile: Profile) {

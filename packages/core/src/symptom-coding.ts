@@ -274,6 +274,7 @@ const FOOD_REACTION_TYPE_SYMPTOM_MAP: Record<string, string[]> = {
   ЖКТ: ['nausea', 'vomiting', 'diarrhea', 'gi-symptoms'],
   Кожа: ['urticaria', 'pruritus', 'angioedema'],
   Дыхание: ['wheeze', 'cough', 'chest-tightness'],
+  'Реакция во рту и горле': ['angioedema', 'pruritus'],
   'Ораллергический синдром': ['angioedema', 'pruritus'],
 };
 

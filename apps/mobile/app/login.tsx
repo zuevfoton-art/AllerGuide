@@ -17,6 +17,7 @@ import {
   AuthPrimaryButton,
   AuthReplitButton,
 } from '@/src/components/AuthForm';
+import { PhoneInput } from '@/src/components/PhoneInput';
 
 const FORGOT_LABELS: Record<string, string> = {
   ru: 'Забыли пароль?',
@@ -62,14 +63,23 @@ export default function LoginScreen() {
       <LanguagePicker compact />
       <AuthHero title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')} />
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
-      <AuthField
-        label={loginType === 'phone' ? t('auth.phoneLabel') : t('common.email')}
-        value={login}
-        onChangeText={setLogin}
-        placeholder={loginType === 'phone' ? t('auth.phonePlaceholder') : 'name@example.com'}
-        keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
-        testID="auth-login-input"
-      />
+      {loginType === 'phone' ? (
+        <PhoneInput
+          label={t('auth.phoneLabel')}
+          value={login}
+          onChangeText={setLogin}
+          testID="auth-login-input"
+        />
+      ) : (
+        <AuthField
+          label={t('common.email')}
+          value={login}
+          onChangeText={setLogin}
+          placeholder="name@example.com"
+          keyboardType="email-address"
+          testID="auth-login-input"
+        />
+      )}
       <AuthField
         label={t('common.password')}
         value={password}

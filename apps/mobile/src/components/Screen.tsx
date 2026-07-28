@@ -1,5 +1,13 @@
 import { PropsWithChildren, useMemo } from 'react';
-import { Platform, RefreshControl, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
@@ -48,9 +56,6 @@ export function Screen({
           paddingHorizontal: layout.horizontalPadding,
           gap: 16,
         },
-        // In non-scroll mode the content must fill the SafeAreaView so flex
-        // children (e.g. the onboarding carousel / legal doc scroller) get a
-        // bounded height instead of collapsing to zero.
         contentFill: {
           flex: 1,
         },
@@ -74,9 +79,11 @@ export function Screen({
 
   const body = <View style={styles.content}>{children}</View>;
 
+  const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : undefined;
+
   if (scroll) {
     return (
-      <View style={styles.root}>
+      <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior} keyboardVerticalOffset={0}>
         {pinnedTop ? <View style={styles.pinned}>{pinnedTop}</View> : null}
         <ScrollView
           style={styles.scrollOuter}
@@ -96,13 +103,15 @@ export function Screen({
           }>
           {body}
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={[styles.content, styles.contentFill]}>{children}</View>
-    </SafeAreaView>
+    <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior}>
+      <SafeAreaView style={styles.safe}>
+        <View style={[styles.content, styles.contentFill]}>{children}</View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }

@@ -3,15 +3,35 @@ import { decodeDiaryDetails } from './diary';
 export type AsitRoute = 'slit' | 'scit';
 export type AsitPhase = 'buildup' | 'maintenance';
 
+export interface AsitScheduleStage {
+  from: string;
+  to: string;
+  dose: string;
+}
+
 export interface AsitCourse {
   v: 1;
   active: boolean;
+  /** Display name of the allergen (free text or resolved from catalog). */
   allergen: string;
+  /** Canonical allergen id from catalog, if chosen via picker. */
+  allergenId?: string;
   drug: string;
   route: AsitRoute;
   phase: AsitPhase;
+  /** ISO date string YYYY-MM-DD. */
   startDate: string;
   scheduleNotes: string;
+  /** Structured schedule stages parsed from prescription OCR. */
+  scheduleStages?: AsitScheduleStage[];
+  /** URI of prescription photo attached by user. */
+  prescriptionPhotoUri?: string;
+  /** URI of prescription PDF document attached by user. */
+  prescriptionDocUri?: string;
+  /** User has reviewed and confirmed the schedule stages. */
+  verified?: boolean;
+  /** Course is active and reminders are live. */
+  activated?: boolean;
   reminderHour?: number;
   reminderMinute?: number;
 }
@@ -93,6 +113,35 @@ export function isAsitCourseConfigured(course: AsitCourse | null): course is Asi
   return Boolean(course?.active && course.drug.trim() && course.allergen.trim());
 }
 
+/**
+ * Computes the sequential dose number based on the number of
+ * existing ASIT diary entries for the current course.
+ * Returns null when startDate is absent.
+ */
+export function computeAsitDoseNumber(
+  course: AsitCourse,
+  existingDoseCount: number,
+): number | null {
+  if (!course.startDate?.trim()) return null;
+  return existingDoseCount + 1;
+}
+
+/**
+ * Returns an answers prefill that includes auto-generated doseNumber when
+ * a course is configured, so the diary wizard can surface it.
+ */
+export function buildAsitPrefillWithDoseNumber(
+  course: AsitCourse,
+  existingDoseCount: number,
+): Record<string, string> {
+  const base = buildAsitPrefill(course);
+  const doseNum = computeAsitDoseNumber(course, existingDoseCount);
+  if (doseNum !== null) {
+    base.asitDoseNumber = `${doseNum}-й приём`;
+  }
+  return base;
+}
+
 export function buildAsitPrefill(course: AsitCourse): Record<string, string> {
   return {
     asitAllergen: course.allergen,
@@ -102,6 +151,18 @@ export function buildAsitPrefill(course: AsitCourse): Record<string, string> {
     asitSchedule: course.scheduleNotes,
   };
 }
+
+/**
+ * Step ids shown to the user when a course is already configured.
+ * Allergen, drug, route, phase, and schedule are pre-filled and skipped.
+ */
+export const ASIT_SIMPLIFIED_STEP_IDS = [
+  'asitTakenAt',
+  'asitDoseNumber',
+  'asitOnSchedule',
+  'asitLocalReaction',
+  'asitReaction',
+] as const;
 
 export function formatAsitSummary(answers: Record<string, string>): string {
   const parts: string[] = [];
@@ -193,6 +254,12 @@ export function formatAsitReportSummary(
     );
     if (course.scheduleNotes.trim()) {
       lines.push(`Схема (по словам врача): ${course.scheduleNotes.trim()}`);
+    }
+    if (course.scheduleStages?.length) {
+      const stageSummary = course.scheduleStages
+        .map((s) => `${s.from}–${s.to}: ${s.dose}`)
+        .join('; ');
+      lines.push(`Этапы: ${stageSummary}`);
     }
   }
 

@@ -11,6 +11,7 @@ import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { DateTimeField } from '@/src/components/DateTimeField';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -18,7 +19,17 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeReportBlockLabel } from '@/src/i18n/content';
 
 const PERIODS = [7, 14, 30] as const;
-type ReportPeriod = (typeof PERIODS)[number];
+type QuickPeriod = (typeof PERIODS)[number];
+
+function isoToday(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function isoDaysAgo(days: number): string {
+  const d = new Date(Date.now() - days * 86_400_000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 export default function DoctorReportScreen() {
   const theme = useTheme();
@@ -32,7 +43,9 @@ export default function DoctorReportScreen() {
     () => (activeProfile ? getProfileCapabilities(activeProfile) : null),
     [activeProfile],
   );
-  const [period, setPeriod] = useState<ReportPeriod>(30);
+  const [quickPeriod, setQuickPeriod] = useState<QuickPeriod | 'custom'>(30);
+  const [fromDate, setFromDate] = useState(isoDaysAgo(30));
+  const [toDate, setToDate] = useState(isoToday());
   const [blockIds, setBlockIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -49,11 +62,30 @@ export default function DoctorReportScreen() {
     setBlockIds((prev) => (prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]));
   };
 
+  const selectQuick = (days: QuickPeriod) => {
+    setQuickPeriod(days);
+    setFromDate(isoDaysAgo(days));
+    setToDate(isoToday());
+  };
+
   const generate = async () => {
     if (!activeProfileId || blockIds.length === 0) return;
     setLoading(true);
     try {
-      await generateDoctorReportPdf({ profileId: activeProfileId, periodDays: period, blockIds });
+      if (quickPeriod === 'custom') {
+        await generateDoctorReportPdf({
+          profileId: activeProfileId,
+          fromDate,
+          toDate,
+          blockIds,
+        });
+      } else {
+        await generateDoctorReportPdf({
+          profileId: activeProfileId,
+          periodDays: quickPeriod,
+          blockIds,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -83,14 +115,42 @@ export default function DoctorReportScreen() {
         {PERIODS.map((days) => (
           <Pressable
             key={days}
-            style={[ui.toggle, period === days && ui.toggleActive]}
-            onPress={() => setPeriod(days)}>
-            <Text style={[ui.toggleText, period === days && ui.toggleTextActive]}>
+            style={[ui.toggle, quickPeriod === days && ui.toggleActive]}
+            onPress={() => selectQuick(days)}>
+            <Text style={[ui.toggleText, quickPeriod === days && ui.toggleTextActive]}>
               {days} {t('common.daysShort')}
             </Text>
           </Pressable>
         ))}
+        <Pressable
+          style={[ui.toggle, quickPeriod === 'custom' && ui.toggleActive]}
+          onPress={() => setQuickPeriod('custom')}>
+          <Text style={[ui.toggleText, quickPeriod === 'custom' && ui.toggleTextActive]}>
+            {t('doctorReport.customPeriod')}
+          </Text>
+        </Pressable>
       </View>
+
+      {quickPeriod === 'custom' ? (
+        <View style={styles.rangeRow}>
+          <DateTimeField
+            label={t('doctorReport.fromDate')}
+            value={fromDate}
+            onChange={setFromDate}
+            mode="date"
+            maxYear={new Date().getFullYear()}
+            testID="report-from-date"
+          />
+          <DateTimeField
+            label={t('doctorReport.toDate')}
+            value={toDate}
+            onChange={setToDate}
+            mode="date"
+            maxYear={new Date().getFullYear()}
+            testID="report-to-date"
+          />
+        </View>
+      ) : null}
 
       <Text style={ui.sectionLabel}>{t('doctorReport.blocks')}</Text>
       <GlassCard padded={false}>
@@ -148,5 +208,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.text,
       flex: 1,
     },
+    rangeRow: { gap: 12 },
   });
 }

@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import {
   ALLERGY_CONDITION_TYPES,
+  ALLERGY_CONFIRMATION_SOURCES,
   CONDITION_EPISODE_STATUSES,
   CONDITION_ONSET_KINDS,
   FOOD_SYMPTOM_TIMINGS,
+  computeOnsetYear,
   type AllergyConditionId,
+  type AllergyConfirmationSource,
   type ConditionDiagnosedBy,
   type ConditionEpisodeInput,
   type ConditionEpisodeStatus,
@@ -22,6 +24,8 @@ interface ConditionHistoryEditorProps {
   conditionIds: AllergyConditionId[];
   drafts: ConditionHistoryDrafts;
   onChange: (drafts: ConditionHistoryDrafts) => void;
+  /** Profile birth year — used to derive onsetYear from age input. */
+  birthYear?: string;
 }
 
 function defaultEpisodeInput(): ConditionEpisodeInput {
@@ -39,14 +43,26 @@ function getDraft(
   return { ...defaultEpisodeInput(), ...drafts[conditionId] };
 }
 
+function diagnosedByKey(source: ConditionDiagnosedBy): 'Self' | 'Ige' | 'Clinician' {
+  if (source === 'specific_ige') return 'Ige';
+  if (source === 'clinician') return 'Clinician';
+  return 'Self';
+}
+
 export function ConditionHistoryEditor({
   conditionIds,
   drafts,
   onChange,
+  birthYear,
 }: ConditionHistoryEditorProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+
+  const parsedBirthYear = useMemo(() => {
+    const year = Number(birthYear);
+    return Number.isFinite(year) && year > 1900 ? year : undefined;
+  }, [birthYear]);
 
   if (!conditionIds.length) {
     return <Text style={styles.empty}>{t('profileSetup.conditionHistory.empty')}</Text>;
@@ -62,10 +78,18 @@ export function ConditionHistoryEditor({
     });
   };
 
-  const cycleDiagnosedBy = (current: ConditionDiagnosedBy): ConditionDiagnosedBy => {
-    if (current === 'self_reported') return 'specific_ige';
-    if (current === 'specific_ige') return 'clinician';
-    return 'self_reported';
+  const handleAgeChange = (conditionId: AllergyConditionId, text: string) => {
+    const ageRaw = text.trim();
+    const age = Number(ageRaw);
+    const patch: Partial<ConditionEpisodeInput> = { onsetAgeYears: ageRaw };
+
+    if (ageRaw && Number.isFinite(age) && age >= 0 && parsedBirthYear !== undefined) {
+      patch.onsetYear = computeOnsetYear(parsedBirthYear, age);
+    } else if (!ageRaw) {
+      patch.onsetYear = undefined;
+    }
+
+    updateEpisode(conditionId, patch);
   };
 
   return (
@@ -88,11 +112,13 @@ export function ConditionHistoryEditor({
               onSelect={(value) => updateEpisode(conditionId, { onsetKind: value })}
             />
 
-            <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.onsetYearLabel')}</Text>
+            <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.onsetAgeLabel')}</Text>
             <TextInput
-              value={episode.onsetYear !== undefined ? String(episode.onsetYear) : ''}
-              onChangeText={(text) => updateEpisode(conditionId, { onsetYear: text })}
-              placeholder={t('profileSetup.conditionHistory.onsetYearPlaceholder')}
+              value={
+                episode.onsetAgeYears !== undefined ? String(episode.onsetAgeYears) : ''
+              }
+              onChangeText={(text) => handleAgeChange(conditionId, text)}
+              placeholder={t('profileSetup.conditionHistory.onsetAgePlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               keyboardType="numeric"
               style={styles.input}
@@ -108,19 +134,17 @@ export function ConditionHistoryEditor({
               onSelect={(value) => updateEpisode(conditionId, { status: value })}
             />
 
-            <Pressable
-              style={styles.confirmationRow}
-              onPress={() =>
-                updateEpisode(conditionId, {
-                  diagnosedBy: cycleDiagnosedBy(episode.diagnosedBy),
-                })
-              }>
-              <Ionicons name="shield-checkmark-outline" size={16} color={theme.colors.accent} />
-              <Text style={styles.confirmationText}>
-                {t('profileSetup.conditionHistory.confirmedBy')}:{' '}
-                {t(`profileSetup.confirmation${diagnosedByKey(episode.diagnosedBy)}`)}
-              </Text>
-            </Pressable>
+            <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.confirmedBy')}</Text>
+            <ChipRow
+              options={ALLERGY_CONFIRMATION_SOURCES}
+              selected={episode.diagnosedBy}
+              labelFor={(value) =>
+                t(`profileSetup.confirmation${diagnosedByKey(value as AllergyConfirmationSource)}`)
+              }
+              onSelect={(value) =>
+                updateEpisode(conditionId, { diagnosedBy: value as ConditionDiagnosedBy })
+              }
+            />
 
             {conditionId === 'food' ? (
               <>
@@ -140,18 +164,14 @@ export function ConditionHistoryEditor({
 
             {conditionId === 'rhinitis' ? (
               <Pressable
-                style={styles.confirmationRow}
+                style={styles.checkRow}
                 onPress={() =>
                   updateEpisode(conditionId, {
                     ocularSymptoms: !episode.ocularSymptoms,
                   })
                 }>
-                <Ionicons
-                  name={episode.ocularSymptoms ? 'checkbox' : 'square-outline'}
-                  size={16}
-                  color={theme.colors.accent}
-                />
-                <Text style={styles.confirmationText}>
+                <View style={[styles.checkbox, episode.ocularSymptoms && styles.checkboxActive]} />
+                <Text style={styles.checkText}>
                   {t('profileSetup.conditionHistory.ocularSymptoms')}
                 </Text>
               </Pressable>
@@ -171,12 +191,6 @@ export function ConditionHistoryEditor({
       })}
     </View>
   );
-}
-
-function diagnosedByKey(source: ConditionDiagnosedBy): 'Self' | 'Ige' | 'Clinician' {
-  if (source === 'specific_ige') return 'Ige';
-  if (source === 'clinician') return 'Clinician';
-  return 'Self';
 }
 
 interface ChipRowProps<T extends string> {
@@ -250,17 +264,30 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.borderInput,
     },
     notesInput: { minHeight: 72, textAlignVertical: 'top' },
-    confirmationRow: {
+    checkRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      paddingVertical: 4,
+      gap: 10,
+      paddingVertical: 6,
     },
-    confirmationText: {
+    checkbox: {
+      width: 18,
+      height: 18,
+      borderRadius: 4,
+      borderWidth: 2,
+      borderColor: colors.borderInput,
+      backgroundColor: colors.bg,
+    },
+    checkboxActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accent,
+    },
+    checkText: {
       flex: 1,
       fontFamily: fonts.sans,
       fontSize: 13,
       color: colors.textSecondary,
+      lineHeight: 18,
     },
   });
 }

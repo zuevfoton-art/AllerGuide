@@ -14,12 +14,14 @@ interface ProfileSetupConditionHistoryStepProps {
   conditions: AllergyConditionId[];
   drafts: ConditionHistoryDrafts;
   onChange: (drafts: ConditionHistoryDrafts) => void;
+  birthYear?: string;
 }
 
 export function ProfileSetupConditionHistoryStep({
   conditions,
   drafts,
   onChange,
+  birthYear,
 }: ProfileSetupConditionHistoryStepProps) {
   const theme = useTheme();
   const ui = useUiStyles();
@@ -30,7 +32,12 @@ export function ProfileSetupConditionHistoryStep({
     <GlassCard style={styles.section}>
       <Text style={ui.sectionLabel}>{t('profileSetup.conditionHistory.title')}</Text>
       <Text style={styles.hint}>{t('profileSetup.conditionHistory.hint')}</Text>
-      <ConditionHistoryEditor conditionIds={conditions} drafts={drafts} onChange={onChange} />
+      <ConditionHistoryEditor
+        conditionIds={conditions}
+        drafts={drafts}
+        onChange={onChange}
+        birthYear={birthYear}
+      />
     </GlassCard>
   );
 }

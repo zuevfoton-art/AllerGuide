@@ -13,6 +13,7 @@ import {
   AuthModeToggle,
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
+import { PhoneInput } from '@/src/components/PhoneInput';
 
 export default function RegisterScreen() {
   const { t, tAuthError } = useTranslation();
@@ -42,14 +43,23 @@ export default function RegisterScreen() {
       <LanguagePicker compact />
       <AuthHero title={t('auth.registerTitle')} subtitle={t('auth.registerSubtitle')} />
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
-      <AuthField
-        label={loginType === 'phone' ? t('auth.phoneLabel') : t('common.email')}
-        value={login}
-        onChangeText={setLogin}
-        placeholder={loginType === 'phone' ? t('auth.phonePlaceholder') : 'name@example.com'}
-        keyboardType={loginType === 'phone' ? 'phone-pad' : 'email-address'}
-        testID="auth-login-input"
-      />
+      {loginType === 'phone' ? (
+        <PhoneInput
+          label={t('auth.phoneLabel')}
+          value={login}
+          onChangeText={setLogin}
+          testID="auth-login-input"
+        />
+      ) : (
+        <AuthField
+          label={t('common.email')}
+          value={login}
+          onChangeText={setLogin}
+          placeholder="name@example.com"
+          keyboardType="email-address"
+          testID="auth-login-input"
+        />
+      )}
       <AuthField
         label={t('common.password')}
         value={password}

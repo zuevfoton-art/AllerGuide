@@ -171,7 +171,10 @@ export default function HomeScreen() {
       onRefresh={activeProfileId ? () => void wellnessState.refresh() : undefined}
       refreshing={wellnessState.refreshing}>
       <View style={styles.topBar}>
-        <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
+        <View style={styles.brandBlock}>
+          <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
+          <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
+        </View>
         <View style={styles.topBarActions}>
           <ProfileHeaderButton />
           <Pressable
@@ -327,8 +330,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       alignItems: 'center',
     },
+    brandBlock: {
+      flexShrink: 1,
+      gap: 2,
+    },
     topBarLogo: {
       flexShrink: 1,
+    },
+    tagline: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+      letterSpacing: 0.2,
     },
     topBarActions: {
       flexDirection: 'row',

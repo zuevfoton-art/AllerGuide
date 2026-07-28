@@ -367,6 +367,7 @@ export function DiaryWizard({
       </View>
 
       <Text style={styles.stepLabel}>{step.label}</Text>
+      {step.hint ? <Text style={styles.stepHint}>{step.hint}</Text> : null}
       {step.field === 'checklist' && step.id === 'foodComponents' ? (
         <DishComponentsField
           foodText={sectionAnswers.food ?? ''}
@@ -1021,6 +1022,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
       lineHeight: 24,
+    },
+    stepHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+      marginBottom: 4,
     },
     scalePreview: {
       fontFamily: fonts.sans,

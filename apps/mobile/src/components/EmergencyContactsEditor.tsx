@@ -11,6 +11,7 @@ import {
   DEFAULT_EMERGENCY_CONTACT_RELATION,
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
+import { PhoneInput } from '@/src/components/PhoneInput';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeEmergencyRelation } from '@/src/i18n/content';
 
@@ -70,13 +71,10 @@ export function EmergencyContactsEditor({ contacts, onChange }: EmergencyContact
           />
 
           <Text style={styles.fieldLabel}>{t('emergencyContacts.phoneLabel')}</Text>
-          <TextInput
-            style={styles.input}
+          <PhoneInput
             value={contact.phone}
             onChangeText={(phone) => updateContact(index, { phone })}
-            placeholder="+7 900 000-00-00"
-            placeholderTextColor={theme.colors.textMuted}
-            keyboardType="phone-pad"
+            testID={`emergency-phone-${index}`}
           />
 
           <Text style={styles.fieldLabel}>{t('emergencyContacts.relationLabel')}</Text>

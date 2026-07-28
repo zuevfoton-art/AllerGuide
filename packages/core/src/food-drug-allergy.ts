@@ -20,11 +20,17 @@ export interface FoodDrugScanRef {
 
 export const FOOD_REACTION_TYPE_CHOICES = [
   'Нет',
-  'Ораллергический синдром',
+  'Реакция во рту и горле',
   'ЖКТ',
   'Кожа',
   'Дыхание',
   'Анафилаксия',
+] as const;
+
+/** Legacy diary values still accepted when summarizing history. */
+export const FOOD_ORAL_REACTION_LABELS = [
+  'Реакция во рту и горле',
+  'Ораллергический синдром',
 ] as const;
 
 export const DRUG_SIDE_EFFECT_CHOICES = ['Нет', 'Лёгкая', 'Умеренная', 'Сильная'] as const;
@@ -159,9 +165,6 @@ export function buildFoodPrefillFromScan(scan: FoodDrugScanRef): Record<string, 
   };
   const product = scan.productName?.trim();
   if (product) prefill.food = product;
-  if (scan.matches?.length) {
-    prefill.allergens = scan.matches.join(', ');
-  }
   prefill.scanRef = `${product || 'продукт'}: ${scan.verdict} (${scan.level})`;
   return prefill;
 }
@@ -187,44 +190,28 @@ export function enrichFoodPrefillWithCrossReactions(
   return { ...prefill, crossReactions: cross };
 }
 
-/** Единый префилл «Питание»: профиль + опционально скан за 24 ч + перекрёстные реакции. */
+/** Единый префилл «Питание»: без allergens/cross steps в быстром сценарии. */
 export function buildFoodPrefill(
   profileAllergies: string[],
   registry: FoodDrugRegistry | null,
   scan?: FoodDrugScanRef | null,
 ): Record<string, string> {
   const profilePart = buildFoodPrefillFromProfile(profileAllergies, registry);
-
   if (!scan) return profilePart;
 
   const scanPart = buildFoodPrefillFromScan(scan);
-  const mergedAllergens = [scanPart.allergens, profilePart.allergens]
-    .filter((value): value is string => Boolean(value?.trim()))
-    .join('; ');
-
-  const merged: Record<string, string> = {
+  return {
     ...profilePart,
     ...scanPart,
+    food: scanPart.food || profilePart.food || '',
   };
-  if (mergedAllergens) merged.allergens = mergedAllergens;
-
-  return enrichFoodPrefillWithCrossReactions(merged, profileAllergies, registry);
 }
 
 export function buildFoodPrefillFromProfile(
-  profileAllergies: string[],
-  registry: FoodDrugRegistry | null,
+  _profileAllergies: string[],
+  _registry: FoodDrugRegistry | null,
 ): Record<string, string> {
-  const avoidList = getConsolidatedFoodAvoidList(profileAllergies, registry);
-  const prefill: Record<string, string> = { foodSource: 'Вручную' };
-  if (!avoidList.length) return prefill;
-
-  prefill.allergens = avoidList.join(', ');
-
-  const cross = formatCrossReactionsHint(avoidList);
-  if (cross) prefill.crossReactions = cross;
-
-  return prefill;
+  return { foodSource: 'Вручную' };
 }
 
 export function buildMedicinePrefill(intolerances: string[], medicineDraft = ''): Record<string, string> {
@@ -247,7 +234,13 @@ export interface FoodDrugEpisodeSummary {
 function mapFoodReaction(value: string | undefined): keyof FoodDrugEpisodeSummary['foodReactions'] {
   const normalized = value?.trim() ?? '';
   if (!normalized || normalized === 'Нет реакции' || normalized === 'Нет') return 'none';
-  if (normalized === 'Лёгкая' || normalized === 'Ораллергический синдром') return 'mild';
+  if (
+    normalized === 'Лёгкая' ||
+    normalized === 'Ораллергический синдром' ||
+    normalized === 'Реакция во рту и горле'
+  ) {
+    return 'mild';
+  }
   if (normalized === 'Умеренная' || normalized === 'ЖКТ' || normalized === 'Кожа' || normalized === 'Дыхание') {
     return 'moderate';
   }

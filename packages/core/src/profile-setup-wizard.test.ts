@@ -12,6 +12,7 @@ import {
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
+  shouldSkipAllergenConfirmationsStep,
   shouldSkipComorbidityStep,
   shouldSkipCrossReactionsStep,
   shouldSkipPhenotypeSummaryStep,
@@ -29,11 +30,12 @@ const baseDraft = (): ProfileSetupWizardDraft => ({
 });
 
 describe('profile setup wizard', () => {
-  it('orders clinical steps including symptom baseline', () => {
-    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(10);
+  it('orders clinical steps including allergenConfirmations and symptom baseline', () => {
+    expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(11);
     expect(getNextProfileSetupWizardStep('conditions')).toBe('allergens');
     expect(getNextProfileSetupWizardStep('allergens')).toBe('crossReactions');
-    expect(getNextProfileSetupWizardStep('crossReactions')).toBe('symptomBaseline');
+    expect(getNextProfileSetupWizardStep('crossReactions')).toBe('allergenConfirmations');
+    expect(getNextProfileSetupWizardStep('allergenConfirmations')).toBe('symptomBaseline');
     expect(getNextProfileSetupWizardStep('symptomBaseline')).toBe('conditionHistory');
 
     const fullNav = buildProfileSetupWizardNavOptions({
@@ -49,6 +51,11 @@ describe('profile setup wizard', () => {
       true,
     );
     expect(shouldSkipCrossReactionsStep({ selectedAllergenIds: ['milk'] })).toBe(false);
+  });
+
+  it('skips allergen confirmations when no allergens selected', () => {
+    expect(shouldSkipAllergenConfirmationsStep({ selectedAllergenIds: [] })).toBe(true);
+    expect(shouldSkipAllergenConfirmationsStep({ selectedAllergenIds: ['milk'] })).toBe(false);
   });
 
   it('skips condition history when no conditions selected', () => {
@@ -79,17 +86,21 @@ describe('profile setup wizard', () => {
       selectedAllergenIds: ['unknown-allergen-xyz'],
     };
     const visible = getVisibleProfileSetupSteps(draft);
+    // crossReactions skipped (no cross-reactions for unknown allergen)
+    // allergenConfirmations NOT skipped (selectedAllergenIds.length > 0)
+    // conditionHistory / comorbidity / phenotypeSummary skipped (no conditions)
     expect(visible).toEqual([
       'name',
       'birthYear',
       'conditions',
       'allergens',
+      'allergenConfirmations',
       'symptomBaseline',
       'contacts',
     ]);
     expect(getVisibleProfileSetupStepProgress('allergens', draft)).toEqual({
       current: 4,
-      total: 6,
+      total: 7,
     });
   });
 

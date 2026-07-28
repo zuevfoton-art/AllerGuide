@@ -3,6 +3,10 @@ import {
   profileEnablesAsit,
   profileEnablesPeakFlow,
 } from './allergy-conditions';
+
+function profileEnablesAct(conditionIds: AllergyConditionId[]): boolean {
+  return conditionIds.includes('asthma');
+}
 import type { AllergyPassport } from './allergy-passport';
 import type { ClinicalScaleId } from './clinical-scales';
 import { DIARY_SECTIONS } from './diary';
@@ -47,6 +51,8 @@ export interface ProfileCapabilities {
 
   modules: {
     peakFlow: boolean;
+    /** ACT questionnaire (asthma-gated, independent of PEF meter). */
+    act: boolean;
     asit: boolean;
     insectSting: boolean;
     foodFocus: boolean;
@@ -205,6 +211,7 @@ export function buildProfileCapabilities(
 
   const modules = {
     peakFlow: profileEnablesPeakFlow(gatingConditions),
+    act: profileEnablesAct(gatingConditions),
     asit: profileEnablesAsit(gatingConditions),
     insectSting: profileEnablesInsectStingGating(gatingConditions),
     foodFocus: profileEnablesFoodFocus(gatingConditions, allergyLabels),
@@ -232,7 +239,7 @@ export function buildProfileCapabilities(
     reminders: {
       pollen: profileSuggestsPollenReminders(gatingConditions, allergenIds),
       asit: modules.asit,
-      act: modules.peakFlow,
+      act: modules.act,
       epinephrine:
         modules.insectSting ||
         gatingConditions.includes('food') ||

@@ -26,6 +26,7 @@ import {
 import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
 import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
+import { PrescribedTherapyCard } from '@/src/components/PrescribedTherapyCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
@@ -34,6 +35,7 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
@@ -68,11 +70,12 @@ const TYPE_ICONS: Record<string, string> = {
   'Визит к врачу': 'calendar',
   Заметка: 'create',
   Шкала: 'analytics',
+  Терапия: 'medical',
 };
 
 type EditorState =
   | { mode: 'full' }
-  | { mode: 'section'; sectionType: string; prefill?: Record<string, Record<string, string>> }
+  | { mode: 'section'; sectionType: string; prefill?: Record<string, Record<string, string>>; simplifiedSection?: import('@allerguide/core').DiarySection }
   | { mode: 'scale'; scaleId: ClinicalScaleId }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
@@ -140,6 +143,10 @@ export default function DiaryScreen() {
     () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
     [activeProfileId],
   );
+  const prescribedCourse = useMemo(
+    () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
+    [activeProfileId],
+  );
   const actPromptDue = useMemo(
     () => isActPromptDue(list, profileConditions),
     [list, profileConditions],
@@ -164,7 +171,12 @@ export default function DiaryScreen() {
       profileAllergiesJson: activeProfile?.allergies ?? '[]',
       locale,
     });
-    setEditor(editorState);
+    setEditor({
+      mode: 'section',
+      sectionType: editorState.sectionType,
+      prefill: editorState.prefill,
+      simplifiedSection: editorState.section,
+    });
   };
 
   const load = useCallback(async () => {
@@ -295,8 +307,11 @@ export default function DiaryScreen() {
     }
 
     const sectionType = editor.mode === 'section' ? editor.sectionType : editor.entry.type;
-    const section = localizedSections.find((s) => s.type === sectionType) ?? getDiarySection(sectionType);
-    if (!section) return null;
+    const baseSection = localizedSections.find((s) => s.type === sectionType) ?? getDiarySection(sectionType);
+    if (!baseSection) return null;
+    // Use simplified ASIT section (fewer steps) when provided by diary-section-service.
+    const section =
+      editor.mode === 'section' && editor.simplifiedSection ? editor.simplifiedSection : baseSection;
 
     const initialAnswers =
       editor.mode === 'edit'
@@ -305,7 +320,7 @@ export default function DiaryScreen() {
             editor.entry.id,
           )
         : editor.mode === 'section'
-          ? editor.prefill?.[section.type]
+          ? editor.prefill?.[baseSection.type]
           : null;
 
     return (
@@ -367,6 +382,12 @@ export default function DiaryScreen() {
           onLogDose={() => void openSection('АСИТ')}
         />
       ) : null}
+
+      <PrescribedTherapyCard
+        course={prescribedCourse}
+        entries={list}
+        onLogDose={() => void openSection('Терапия')}
+      />
 
       {foodFocusEnabled && activeProfile ? (
         <FoodDrugAllergyCard
