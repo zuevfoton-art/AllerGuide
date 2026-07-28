@@ -22,7 +22,7 @@ describe('yandex-map', () => {
   it('adds markers for places', () => {
     const url = buildPlacesMapUrl(CATALOG_PLACES);
     expect(url).toContain('pt=');
-    expect(url).toContain('pm2grm');
+    expect(url).toContain('pm2gnm');
   });
 
   it('centers on selected place', () => {

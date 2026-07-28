@@ -81,8 +81,8 @@ export function buildLocationMapUrl(latitude: number, longitude: number): string
 }
 
 const POLLEN_LEVEL_MARKER_STYLE: Record<PollenTierLevel, string> = {
-  low: 'pm2grm',
-  mid: 'pm2orgm',
+  low: 'pm2gnm',
+  mid: 'pm2orm',
   high: 'pm2rdm',
 };
 
@@ -92,7 +92,7 @@ export function buildPollenRiskMapUrl(options: {
 }): string {
   return buildYandexMapWidgetUrl({
     center: options.center,
-    zoom: 10,
+    zoom: MOSCOW_REGION_ZOOM,
     markers: [
       {
         latitude: options.center.latitude,
