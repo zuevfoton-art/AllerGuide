@@ -19,7 +19,8 @@
     "yc-stage-phase1": "bash scripts/yc-stage-phase1-enable-pollen.sh",
     "yc-stage-phase2": "bash scripts/yc-stage-phase2-gate.sh",
     "yc-stage-phase3": "bash scripts/yc-stage-phase3-gate.sh",
-    "yc-stage-phase4": "bash scripts/yc-stage-phase4-gate.sh"
+    "yc-stage-phase4": "bash scripts/yc-stage-phase4-gate.sh",
+    "yc-stage-phase5": "bash scripts/yc-stage-phase5-gate.sh"
   },
   "pnpm": {
     "overrides": {

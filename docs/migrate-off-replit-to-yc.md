@@ -17,7 +17,7 @@ Replit (`aller-guide.replit.app`) — legacy до фаз 3–5; stage-клиен
 | 2 | Клиенты только на YC URL | EAS `staging`, web stage origins |
 | 3 | Вырезать Replit из репо (profile, docs, OIDC) | PR cleanup |
 | 4 | Данные/секреты только Lockbox + ротация | inventory + `yc-stage-phase4` |
-| 5 | Приёмка: Replit paused, gate + preflight зелёные | Closed beta |
+| 5 | Приёмка: Replit paused, gates зелёные | `yc-stage-phase5` |
 
 ---
 
@@ -144,7 +144,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 | Trigger | push `staging` / `workflow_dispatch` | Не каждый PR |
 | EAS profile `staging` | ✅ в репо | URL = YC |
 | EAS profile `replit` | ✅ removed (Phase 3) | — |
-| Replit (host) | ⚠️ may still respond | Pause in Phase 5; not in repo anymore |
+| Replit (host) | ⚠️ still HTTP 200 | Pause in Phase 5 UI; `REQUIRE_REPLIT_PAUSED=1` |
 | Phase 0 gate script | ✅ | `pnpm yc-stage-phase0` |
 
 ### E. Сводный чеклист (PR / ops)
@@ -167,9 +167,10 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [ ] `STAGING_RUN_SMOKES=1` preflight (sync + scan)
 - [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + staging APK QA
 - [x] Удалить EAS `replit` / docs hooks (фаза 3)
-- [ ] Pause Replit deployment (фаза 5)
+- [x] Phase 5 gate + YC acceptance smokes
+- [ ] Pause Replit deployment (фаза 5 UI) → `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5`
 
-**Вывод:** YC stage несёт API + DB + auth + sync + Yandex AI/OCR + pollen. Replit deploy artifacts removed (Phase 3). Остаётся: GitHub `YC_*` CI secrets, EAS Maps key + APK QA, Pause Replit host (Phase 5).
+**Вывод:** YC stage несёт API + DB + auth + sync + Yandex AI/OCR + pollen. Replit deploy artifacts removed (Phase 3). Secrets policy documented (Phase 4). **Phase 5:** pause Replit host in UI, then `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5`.
 
 ---
 
@@ -332,9 +333,56 @@ Rotation ops: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotati
 - [ ] GitHub `YC_*` / `STAGING_*` полные  
 - [ ] EAS Maps Sensitive задан  
 
-### 5 — Приёмка
+### 5 — Приёмка (pause Replit + final acceptance)
 
-Phase 0 gate + preflight зелёные; Replit deployment paused; в stage-flow нет `replit.app`.
+**Цель:** stage официально только на YC; Replit host не обслуживает API; все phase gates зелёные.
+
+Автопроверка: `./scripts/yc-stage-phase5-gate.sh` / `pnpm yc-stage-phase5`
+
+```bash
+# Soft on Replit still-up (warn):
+pnpm yc-stage-phase5
+
+# Strict — fail until Replit paused:
+REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5
+
+# + auth/sync/scan:
+STAGING_RUN_SMOKES=1 pnpm yc-stage-phase5
+```
+
+#### P5 критерии
+
+| ID | Проверка | Ожидание |
+|----|----------|----------|
+| **P5.1** | Phase 0, 2, 3, 4 gates | Pass |
+| **P5.2** | YC live | health ok + sync/aiScan/pollen; pollen smoke Pass |
+| **P5.3** | Repo stage paths | нет `aller-guide.replit.app` / EAS `replit` / `.replit` |
+| **P5.4** | Replit host | `/api/health` **не** 200 (paused/unpublished/down) |
+
+#### Pause Replit (ops UI)
+
+Agent **не** имеет доступа к Replit Deployments. Сделайте вручную:
+
+1. Откройте [replit.com](https://replit.com) → проект AllerGuide / A-Claro.  
+2. **Deployments** (или Published App) → **Pause** / **Stop** / **Unpublish**.  
+3. Опционально: отключите Always On / Autoscale; удалите production DB binding, если больше не нужен.  
+4. Проверка:
+   ```bash
+   curl -sS -o /dev/null -w '%{http_code}\n' https://aller-guide.replit.app/api/health
+   # ожидайте не-200 (000/404/502/…)
+   REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5
+   ```
+
+DNS для `*.replit.app` трогать не обязательно — достаточно pause deployment.
+
+#### Чеклист Phase 5
+
+- [x] `pnpm yc-stage-phase5` gate в репо  
+- [x] YC health + pollen smoke (приёмка агентом)  
+- [ ] **Pause Replit** в UI (ещё HTTP 200 на `aller-guide.replit.app` на момент прогона)  
+- [ ] `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` Pass  
+- [ ] (рекомендуется) `STAGING_RUN_SMOKES=1` preflight Pass  
+- [ ] EAS staging APK QA на устройстве  
 
 ---
 
@@ -356,6 +404,7 @@ Phase 0 gate + preflight зелёные; Replit deployment paused; в stage-flow
 | [`scripts/yc-stage-phase4-gate.sh`](../scripts/yc-stage-phase4-gate.sh) | Автоgate Phase 4 (secrets hygiene) |
 | [`docs/staging-secrets-inventory.md`](./staging-secrets-inventory.md) | Canonical secret stores |
 | [`docs/staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md) | Ops rotation after leaks |
+| [`scripts/yc-stage-phase5-gate.sh`](../scripts/yc-stage-phase5-gate.sh) | Автоgate Phase 5 (final acceptance) |
 | [`docs/staging-yandex-cloud.md`](./staging-yandex-cloud.md) | Deploy YC |
 | [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md) | GCP + Lockbox pollen |
 | [`apps/mobile/eas.json`](../apps/mobile/eas.json) | Profile `staging` |
