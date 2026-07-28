@@ -119,6 +119,7 @@ export function PollenMapLayer({
       <YandexMap
         url={mapUrl}
         height={300}
+        interactive={false}
         overlay={
           <View style={styles.mapOverlay}>
             {(snapshot?.nearbyLocations ?? []).map((location) => {

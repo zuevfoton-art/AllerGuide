@@ -6,9 +6,10 @@ type YandexMapProps = {
   url: string;
   height?: number;
   overlay?: ReactNode;
+  interactive?: boolean;
 };
 
-export function YandexMap({ url, height = 220, overlay }: YandexMapProps) {
+export function YandexMap({ url, height = 220, overlay, interactive = true }: YandexMapProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, height), [theme, height]);
 
@@ -18,7 +19,10 @@ export function YandexMap({ url, height = 220, overlay }: YandexMapProps) {
         <iframe
           src={url}
           title="Yandex Map"
-          style={styles.iframe as object}
+          style={StyleSheet.flatten([
+            styles.iframe,
+            !interactive && styles.nonInteractive,
+          ]) as object}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
@@ -39,7 +43,8 @@ export function YandexMap({ url, height = 220, overlay }: YandexMapProps) {
       <WebView
         source={{ uri: url }}
         style={styles.webview}
-        scrollEnabled={false}
+        pointerEvents={interactive ? 'auto' : 'none'}
+        scrollEnabled={interactive}
         originWhitelist={['https://*']}
         javaScriptEnabled
         domStorageEnabled
@@ -71,6 +76,9 @@ function createStyles({ colors }: AppTheme, height: number) {
       width: '100%',
       height: '100%',
       borderWidth: 0,
+    } as object,
+    nonInteractive: {
+      pointerEvents: 'none',
     } as object,
     overlay: {
       ...StyleSheet.absoluteFillObject,
