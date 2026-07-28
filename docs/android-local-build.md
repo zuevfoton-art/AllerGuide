@@ -23,6 +23,9 @@ cd android && ./gradlew assembleDebug
 # APK: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+**Нет Android SDK (Cursor Cloud / CI без SDK)?** Не ставьте SDK в агентскую VM ради stage.  
+Используйте **EAS Build** или GitHub → EAS: [`docs/android-stage-build.md`](android-stage-build.md).
+
 Дальше — подробно, включая установку окружения и открытие проекта в Android Studio.
 
 ---
@@ -317,4 +320,5 @@ curl -s https://aller-guide.replit.app/api/health      # {"ok":true,"authDatabas
 - [`apps/mobile/android/gradle.properties`](../apps/mobile/android/gradle.properties) — Hermes, архитектуры ABI, память Gradle
 - [`apps/mobile/app.json`](../apps/mobile/app.json) — package, версии, permissions, иконки
 - [`docs/eas-internal-preview.md`](eas-internal-preview.md) — облачная сборка через EAS
+- [`docs/android-stage-build.md`](android-stage-build.md) — stage APK: EAS (preferred) vs GitHub Actions
 - [`docs/qa-checklist.md`](qa-checklist.md) — полный регрессионный чеклист

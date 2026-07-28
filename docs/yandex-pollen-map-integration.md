@@ -405,8 +405,18 @@ Places / АДАИР: без изменений в этом плане (Янде�
 6. ⏳ **Stage QA с реальными ключами:** Москва/СПб visual, quota smoke, Android/iOS EAS.
 
 Автоматически проверено: 18 focused tests, typecheck, lint, enabled web export, Expo config
-для Android/iOS. Android APK в Cursor Cloud не собран: в образе нет Android SDK /
-`ANDROID_HOME`; fallback без Google credentials проверен вручную.
+для Android/iOS. **Android APK не собирается в Cursor Cloud** (нет SDK/`ANDROID_HOME`) —
+это ожидаемо; stage-путь зафиксирован как **EAS Build** (опционально через GitHub Actions),
+см. [`android-stage-build.md`](./android-stage-build.md). Fallback без Google credentials проверен вручную.
+
+#### 4.6.8a. Сборка stage APK (без SDK в агенте)
+
+| Путь | Документ / workflow | Рекомендация |
+|------|---------------------|--------------|
+| **EAS Build (CLI)** | [`eas-staging-build.md`](./eas-staging-build.md) | **Preferred** для pollen heatmap |
+| **GitHub → EAS** | `.github/workflows/eas-staging-android.yml` | Preferred CI (secret `EXPO_TOKEN`) |
+| **GitHub → Gradle** | `.github/workflows/staging-apk-gradle.yml` | Альтернатива, если нужен Release asset |
+| Локальный Gradle | [`android-local-build.md`](./android-local-build.md) | Только при наличии Android Studio/SDK |
 
 **Вне scope первого инкремента:** миграция places на Google; отказ от Яндекс deep-link; Google Forecast вместо OM-бейджа; кэш тайлов.
 
