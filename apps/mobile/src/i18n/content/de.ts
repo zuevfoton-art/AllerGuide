@@ -209,6 +209,7 @@ const deContent: LocaleContent = {
     asit: 'Hyposensibilisierung',
     skin: 'Hautmanifestationen',
     notes: 'Notizen',
+    therapy: 'Therapie',
   },
   emergencyRelations: {
     relative: 'Verwandter',

@@ -333,6 +333,13 @@ const ru: LocaleMessages = {
     removedFromSafe: 'Убрано из безопасных',
     trendsTitle: 'Тренды сканирования (30 дней)',
     repeatUnsafeWarning: 'Вы уже сканировали этот продукт как высокий риск.',
+    scanWithCamera: 'Сканировать камерой',
+    statusNotFound: 'Продукт не найден',
+    statusInsufficientComposition: 'Состав не распознан полностью',
+    statusNoAllergens: 'Аллергенов не обнаружено',
+    menuStatusMatch: 'Найдено совпадение в тексте меню',
+    menuStatusIncomplete: 'Текст меню слишком короткий',
+    menuStatusNoMatch: 'Совпадений не найдено',
   },
   market: {
     title: 'Маркет',

@@ -335,6 +335,16 @@ export type LocaleMessages = {
     removedFromSafe: string;
     trendsTitle: string;
     repeatUnsafeWarning: string;
+    /** Prominent camera button label for medicine/cosmetics modes */
+    scanWithCamera: string;
+    /** Barcode lookup outcome labels */
+    statusNotFound: string;
+    statusInsufficientComposition: string;
+    statusNoAllergens: string;
+    /** Menu scan outcome labels */
+    menuStatusMatch: string;
+    menuStatusIncomplete: string;
+    menuStatusNoMatch: string;
   };
   market: {
     title: string;

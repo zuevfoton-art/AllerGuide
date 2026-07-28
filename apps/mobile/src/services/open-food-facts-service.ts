@@ -5,12 +5,14 @@ export interface OpenFoodFactsProduct {
   name: string;
   ingredients: string;
   barcode: string;
+  brand?: string;
+  imageUrl?: string;
   allergenTags: string[];
   traceTags: string[];
 }
 
 const PRODUCT_FIELDS =
-  'code,product_name,product_name_ru,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags';
+  'code,product_name,product_name_ru,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags,brands,image_front_small_url';
 
 const OFF_USER_AGENT = 'A-Claro/1.0 (support@aclearo.com)';
 
@@ -26,6 +28,8 @@ type OffProductPayload = {
   code?: string;
   allergens_tags?: string[];
   traces_tags?: string[];
+  brands?: string;
+  image_front_small_url?: string;
 };
 
 function normalizeOffProduct(
@@ -39,10 +43,15 @@ function normalizeOffProduct(
 
   if (!barcode || (!name && !ingredients)) return null;
 
+  const brand = product.brands?.split(',')[0]?.trim() || undefined;
+  const imageUrl = product.image_front_small_url?.trim() || undefined;
+
   return {
     name: name || `Продукт ${barcode}`,
     ingredients: ingredients || name,
     barcode,
+    brand,
+    imageUrl,
     allergenTags: mapExternalAllergenIds(product.allergens_tags ?? []),
     traceTags: mapExternalAllergenIds(product.traces_tags ?? []),
   };

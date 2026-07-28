@@ -68,6 +68,12 @@ export const DOCTOR_REPORT_BLOCKS: DoctorReportBlock[] = [
     defaultEnabled: true,
   },
   { id: 'notes', label: 'Заметки', diaryTypes: ['Заметка', 'Визит к врачу'], defaultEnabled: false },
+  {
+    id: 'therapy',
+    label: 'Терапия',
+    diaryTypes: ['Терапия'],
+    defaultEnabled: false,
+  },
 ];
 
 export interface PefTrendSummary {

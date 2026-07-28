@@ -330,6 +330,13 @@ const es: LocaleMessages = {
     removedFromSafe: 'Removed from safe list',
     trendsTitle: 'Scan trends (30 days)',
     repeatUnsafeWarning: 'Previously scanned as high risk.',
+    scanWithCamera: 'Escanear con cámara',
+    statusNotFound: 'Producto no encontrado',
+    statusInsufficientComposition: 'Composición no reconocida completamente',
+    statusNoAllergens: 'Sin alérgenos detectados',
+    menuStatusMatch: 'Coincidencia encontrada en el menú',
+    menuStatusIncomplete: 'Texto del menú demasiado corto',
+    menuStatusNoMatch: 'Sin coincidencias encontradas',
   },
   market: {
     title: 'Mercado',

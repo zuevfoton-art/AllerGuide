@@ -11,12 +11,29 @@ import {
 import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
-import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
+import {
+  resolveProductByBarcode,
+  type BarcodeScanStatus,
+  type MenuScanStatus,
+} from '@/src/services/barcode-lookup-service';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
+
+/** Extended fields attached to scan results in the mobile service layer. */
+export type ScanResultExtended = ScanResult & {
+  lookupFailed?: boolean;
+  repeatUnsafe?: boolean;
+  barcodeScanStatus?: BarcodeScanStatus;
+  menuScanStatus?: MenuScanStatus;
+  productBrand?: string;
+  productImageUrl?: string;
+  ocr?: OcrExtractionResult;
+};
+
+const INSUFFICIENT_INGREDIENTS_LENGTH = 15;
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -70,7 +87,7 @@ export async function scanBarcode({
 }: {
   barcode: string;
   profile?: Profile | null;
-}): Promise<ScanResult & { lookupFailed?: boolean; repeatUnsafe?: boolean }> {
+}): Promise<ScanResultExtended> {
   trackEvent('scan_barcode', { lookup: 'pending' });
   const history = profile ? listScanHistory(profile.id) : [];
   const repeatUnsafe = wasBarcodePreviouslyHighRisk(history, barcode);
@@ -83,11 +100,12 @@ export async function scanBarcode({
       profile,
       source: 'barcode',
     });
-    const result = {
+    const result: ScanResultExtended = {
       ...fallback,
       reason:
         'Продукт не найден в локальном кэше, каталоге и Open Food Facts. Проверка выполнена по штрихкоду как тексту.',
       lookupFailed: true,
+      barcodeScanStatus: 'not_found',
     };
     if (profile) saveScanHistory(profile.id, barcode, result);
     return { ...result, repeatUnsafe };
@@ -105,8 +123,28 @@ export async function scanBarcode({
     declaredAllergenIds: product.declaredAllergenIds,
     traceAllergenIds: product.traceAllergenIds,
   });
+
+  const hasMatches =
+    result.matches.length > 0 ||
+    result.crossMatches.length > 0 ||
+    (result.traceMatches?.length ?? 0) > 0;
+  const isShortIngredients = product.ingredients.trim().length < INSUFFICIENT_INGREDIENTS_LENGTH;
+
+  const barcodeScanStatus: BarcodeScanStatus = hasMatches
+    ? 'found_match'
+    : isShortIngredients
+      ? 'found_insufficient_composition'
+      : 'found_no_allergens';
+
   if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
-  return { ...result, repeatUnsafe };
+
+  return {
+    ...result,
+    repeatUnsafe,
+    barcodeScanStatus,
+    productBrand: product.brand,
+    productImageUrl: product.imageUrl,
+  };
 }
 
 export async function scanText({
@@ -117,7 +155,7 @@ export async function scanText({
   mode: ScanMode;
   text: string;
   profile?: Profile | null;
-}): Promise<ScanResult> {
+}): Promise<ScanResultExtended> {
   const result = await analyzeText({ mode, text, profile, source: 'manual' });
   if (profile) saveScanHistory(profile.id, text, result);
   return result;
@@ -181,7 +219,7 @@ export async function scanFromOcr({
   imageBase64?: string;
   mimeType?: string;
   profile?: Profile | null;
-}): Promise<ScanResult & { ocr?: OcrExtractionResult }> {
+}): Promise<ScanResultExtended> {
   const extraction = ocrText?.trim()
     ? prepareScanTextFromOcr(ocrText, mode)
     : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
@@ -231,17 +269,34 @@ export async function scanFromOcr({
         ? extraction.warnings.join(' ')
         : undefined;
 
+  // For menu mode scan the FULL normalized text so all dish names/descriptions
+  // are checked against the allergen list — not only an extracted composition block.
+  const scanText = mode === 'menu' ? (extraction.ingredientsBlock
+    ? `${extraction.text}\n${extraction.ingredientsBlock}`
+    : extraction.text) : extraction.text;
+
   const result = await analyzeText({
     mode,
-    text: extraction.text,
+    text: scanText,
     profile,
     productName,
     source: 'ocr',
     ocrNote,
   });
 
+  const menuScanStatus: MenuScanStatus | undefined =
+    mode === 'menu'
+      ? result.matches.length > 0 ||
+        result.crossMatches.length > 0 ||
+        (result.traceMatches?.length ?? 0) > 0
+        ? 'text_match'
+        : scanText.trim().length < INSUFFICIENT_INGREDIENTS_LENGTH
+          ? 'incomplete_composition'
+          : 'no_match'
+      : undefined;
+
   if (profile) saveScanHistory(profile.id, extraction.text, result, productName);
-  return { ...result, ocr: extraction };
+  return { ...result, ocr: extraction, menuScanStatus };
 }
 
 export async function scanMenuPhoto({
@@ -250,7 +305,7 @@ export async function scanMenuPhoto({
 }: {
   profile?: Profile | null;
   ocrText?: string;
-}): Promise<ScanResult> {
+}): Promise<ScanResultExtended> {
   return scanFromOcr({ mode: 'menu', ocrText, profile });
 }
 
@@ -262,6 +317,6 @@ export async function scanLabelPhoto({
   mode: 'medicine' | 'cosmetics';
   profile?: Profile | null;
   ocrText?: string;
-}): Promise<ScanResult> {
+}): Promise<ScanResultExtended> {
   return scanFromOcr({ mode, ocrText, profile });
 }

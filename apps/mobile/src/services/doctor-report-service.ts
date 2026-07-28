@@ -9,6 +9,7 @@ import {
   computeFoodDrugSummary,
   computeInsectStingSummary,
   computePefTrend,
+  computePrescribedCompliance,
   formatAsitReportSummary,
   formatAsthmaReportSummary,
   formatCodedAllergiesReportHtml,
@@ -31,6 +32,7 @@ import {
   parseProfileAllergenIds,
   type DoctorReportBlock,
 } from '@allerguide/core';
+import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { getDb } from '@/src/db/init';
 import { brandReportColors as c } from '@/src/constants/layout';
 import { doctorReportPdfFooterRu, doctorReportTitleRu } from '@/src/constants/brand';
@@ -279,6 +281,32 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
         ).replace(/</g, '&lt;')}</pre></section>`
       : '';
 
+  const therapyCourse = getPrescribedCourse(options.profileId);
+  const therapyCompliance = computePrescribedCompliance(periodEntries, periodDays);
+  const therapyHtml =
+    options.blockIds.includes('therapy')
+      ? (() => {
+          const lines: string[] = [];
+          if (therapyCourse?.drug) {
+            lines.push(`Препарат: ${therapyCourse.drug}`);
+            if (therapyCourse.dosage) lines.push(`Дозировка: ${therapyCourse.dosage}`);
+            if (therapyCourse.scheduleNotes) lines.push(`Схема: ${therapyCourse.scheduleNotes}`);
+            if (therapyCourse.startDate) lines.push(`Начало: ${therapyCourse.startDate}`);
+            if (therapyCourse.endDate) lines.push(`Окончание: ${therapyCourse.endDate}`);
+            if (therapyCourse.notes) lines.push(`Заметки: ${therapyCourse.notes}`);
+          }
+          if (therapyCompliance.totalDoses > 0) {
+            lines.push(`\nПриёмов за период: ${therapyCompliance.totalDoses}`);
+            lines.push(`В срок: ${therapyCompliance.onTime}`);
+            if (therapyCompliance.late) lines.push(`С опозданием: ${therapyCompliance.late}`);
+            if (therapyCompliance.missed) lines.push(`Пропущено: ${therapyCompliance.missed}`);
+            if (therapyCompliance.reactions) lines.push(`Реакций: ${therapyCompliance.reactions}`);
+          }
+          const body = lines.join('\n').replace(/</g, '&lt;');
+          return `<section><h2>Терапия</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${body || 'Данные о терапии не введены.'}</pre></section>`;
+        })()
+      : '';
+
   const triggerContextHtml = options.blockIds.includes('triggerContext')
     ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
     : '';
@@ -315,6 +343,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${conditionPhenotypesHtml}
       ${scalesHtml}
       ${asitHtml}
+      ${therapyHtml}
       ${foodDrugHtml}
       ${insectHtml}
       ${triggerContextHtml}

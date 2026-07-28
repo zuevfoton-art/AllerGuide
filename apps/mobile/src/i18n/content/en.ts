@@ -209,6 +209,7 @@ const enContent: LocaleContent = {
     asit: 'SCIT',
     skin: 'Skin manifestations',
     notes: 'Notes',
+    therapy: 'Therapy',
   },
   emergencyRelations: {
     relative: 'Relative',

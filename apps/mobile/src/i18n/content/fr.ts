@@ -209,6 +209,7 @@ const frContent: LocaleContent = {
     asit: 'Immunothérapie',
     skin: 'Manifestations cutanées',
     notes: 'Notes',
+    therapy: 'Thérapie',
   },
   emergencyRelations: {
     relative: 'Proche',

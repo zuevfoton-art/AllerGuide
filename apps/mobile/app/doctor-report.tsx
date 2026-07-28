@@ -1,9 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { DOCTOR_REPORT_BLOCKS as BLOCKS } from '@allerguide/core';
+import { DOCTOR_REPORT_BLOCKS } from '@allerguide/core';
 import { generateDoctorReportPdf } from '@/src/services/doctor-report-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -43,6 +44,32 @@ export default function DoctorReportScreen() {
     () => (activeProfile ? getProfileCapabilities(activeProfile) : null),
     [activeProfile],
   );
+
+  /**
+   * Blocks visible in the UI = those whose id appears in profileCapabilities.reportBlockIds
+   * PLUS blocks that are always shown regardless (notes, therapy when course exists).
+   * Blocks absent from capabilities are hidden by default to reduce noise.
+   */
+  const visibleBlocks = useMemo(() => {
+    if (!profileCapabilities) return DOCTOR_REPORT_BLOCKS;
+    const capabilityIds = new Set(profileCapabilities.reportBlockIds);
+
+    const hasTherapyCourse = activeProfileId
+      ? Boolean(getPrescribedCourse(activeProfileId)?.drug?.trim())
+      : false;
+
+    return DOCTOR_REPORT_BLOCKS.filter((block) => {
+      if (capabilityIds.has(block.id)) return true;
+      // Always show therapy block when user has an active prescribed course
+      if (block.id === 'therapy' && hasTherapyCourse) return true;
+      // Always show notes — low-priority but not condition-gated
+      if (block.id === 'notes') return true;
+      // conditionPhenotypes and timeline are always useful
+      if (block.id === 'conditionPhenotypes' || block.id === 'timeline') return true;
+      return false;
+    });
+  }, [profileCapabilities, activeProfileId]);
+
   const [quickPeriod, setQuickPeriod] = useState<QuickPeriod | 'custom'>(30);
   const [fromDate, setFromDate] = useState(isoDaysAgo(30));
   const [toDate, setToDate] = useState(isoToday());
@@ -53,8 +80,10 @@ export default function DoctorReportScreen() {
       setBlockIds([]);
       return;
     }
-    setBlockIds(profileCapabilities.reportBlockIds);
-  }, [activeProfileId, profileCapabilities]);
+    const capabilityIds = new Set(profileCapabilities.reportBlockIds);
+    // Pre-select only blocks visible in the UI
+    setBlockIds(visibleBlocks.filter((b) => capabilityIds.has(b.id)).map((b) => b.id));
+  }, [activeProfileId, profileCapabilities, visibleBlocks]);
 
   const [loading, setLoading] = useState(false);
 
@@ -154,12 +183,12 @@ export default function DoctorReportScreen() {
 
       <Text style={ui.sectionLabel}>{t('doctorReport.blocks')}</Text>
       <GlassCard padded={false}>
-        {BLOCKS.map((block, index) => (
+        {visibleBlocks.map((block, index) => (
           <Pressable
             key={block.id}
             style={[
               ui.feedRow,
-              index < BLOCKS.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
+              index < visibleBlocks.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.colors.border },
             ]}
             onPress={() => toggleBlock(block.id)}>
             <Ionicons
