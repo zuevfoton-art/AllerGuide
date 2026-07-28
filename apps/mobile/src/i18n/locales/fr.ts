@@ -319,6 +319,7 @@ const fr: LocaleMessages = {
     empty: 'Rien trouvé. Essayez une autre recherche.',
     disclaimer: 'Les recommandations ne remplacent pas une prescription médicale.',
     buyLink: 'View product',
+    buyOnYandex: 'Buy on Yandex Market',
   },
   map: {
     title: 'Carte des lieux',

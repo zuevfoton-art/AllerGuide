@@ -20,6 +20,7 @@ export const ANALYTICS_EVENT_NAMES = [
   'sos_opened',
   'wellness_refreshed',
   'settings_changed',
+  'market_click',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

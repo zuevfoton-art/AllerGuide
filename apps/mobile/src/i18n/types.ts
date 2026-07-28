@@ -324,6 +324,7 @@ export type LocaleMessages = {
     empty: string;
     disclaimer: string;
     buyLink: string;
+    buyOnYandex: string;
   };
   map: {
     title: string;

@@ -1,3 +1,10 @@
+import { parseAllergies } from './profile-allergens';
+import {
+  DEFAULT_MARKET_MERCHANT_PRIORITY,
+  type MarketMerchant,
+  type MarketOffer,
+} from './market-offers';
+
 export interface CatalogProduct {
   id: string;
   title: string;
@@ -7,8 +14,13 @@ export interface CatalogProduct {
   colorKey: 'purple' | 'pink' | 'accent' | 'success' | 'warning';
   forAllergens: string[];
   containsAllergens: string[];
-  /** Optional affiliate / product deeplink (P5.5). */
+  /**
+   * Optional legacy single deeplink (P5.5). Prefer `offers` for multi-merchant CTAs.
+   * Kept for backward compatibility with older clients.
+   */
   affiliateUrl?: string;
+  /** Curated merchant offers (Yandex Market first for RU). */
+  offers?: MarketOffer[];
 }
 
 export interface CatalogPlace {
@@ -22,6 +34,13 @@ export interface CatalogPlace {
   tags: string[];
 }
 
+function yandexSearch(query: string): MarketOffer {
+  return {
+    merchant: 'yandex_market',
+    url: `https://market.yandex.ru/search?text=${encodeURIComponent(query)}`,
+  };
+}
+
 export const CATALOG_PRODUCTS: CatalogProduct[] = [
   {
     id: 'air-purifier',
@@ -33,6 +52,13 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пылевые клещи', 'Бытовая аллергия'],
     containsAllergens: [],
     affiliateUrl: 'https://www.iherb.com/search?kw=hepa+air+purifier',
+    offers: [
+      yandexSearch('очиститель воздуха HEPA'),
+      {
+        merchant: 'iherb',
+        url: 'https://www.iherb.com/search?kw=hepa+air+purifier',
+      },
+    ],
   },
   {
     id: 'hypo-cream',
@@ -43,6 +69,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     colorKey: 'pink',
     forAllergens: ['Атопический дерматит', 'Молоко'],
     containsAllergens: ['Молоко', 'Соя'],
+    offers: [yandexSearch('гипоаллергенный крем без отдушек')],
   },
   {
     id: 'bed-covers',
@@ -53,6 +80,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     colorKey: 'accent',
     forAllergens: ['Пылевые клещи', 'Бытовая аллергия'],
     containsAllergens: [],
+    offers: [yandexSearch('чехол anti dust mite матрас')],
   },
   {
     id: 'oat-milk',
@@ -63,6 +91,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     colorKey: 'success',
     forAllergens: ['Молоко'],
     containsAllergens: ['Молоко', 'Орехи'],
+    offers: [yandexSearch('овсяное молоко без глютена')],
   },
   {
     id: 'sunflower-spread',
@@ -73,6 +102,7 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     colorKey: 'warning',
     forAllergens: ['Арахис', 'Орехи'],
     containsAllergens: ['Арахис', 'Орехи', 'Соя'],
+    offers: [yandexSearch('подсолнечная паста без арахиса')],
   },
   {
     id: 'epipen-case',
@@ -83,6 +113,18 @@ export const CATALOG_PRODUCTS: CatalogProduct[] = [
     colorKey: 'purple',
     forAllergens: [],
     containsAllergens: [],
+    offers: [yandexSearch('чехол для автоинжектора эпинефрин')],
+  },
+  {
+    id: 'nasal-rinse',
+    title: 'Назальный ирригатор',
+    why: 'Промывание носа при поллинозе и рините',
+    icon: 'water',
+    tag: 'Воздух',
+    colorKey: 'accent',
+    forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пыльца злаков'],
+    containsAllergens: [],
+    offers: [yandexSearch('назальный ирригатор для промывания носа')],
   },
 ];
 
@@ -189,8 +231,6 @@ export const CATALOG_PLACES: CatalogPlace[] = [
   },
 ];
 
-import { parseAllergies } from './profile-allergens';
-
 export function parseProfileAllergens(allergiesJson: string): string[] {
   return parseAllergies(allergiesJson);
 }
@@ -207,6 +247,45 @@ export function filterProductsForProfile(
     if (product.forAllergens.length === 0) return true;
     return product.forAllergens.some((allergen) => profileAllergens.includes(allergen));
   });
+}
+
+/** Normalize offers: explicit `offers` plus legacy `affiliateUrl` as `other`/`iherb`. */
+export function getProductOffers(product: CatalogProduct): MarketOffer[] {
+  if (product.offers && product.offers.length > 0) {
+    return product.offers;
+  }
+  if (product.affiliateUrl) {
+    const merchant: MarketMerchant = /iherb\.com/i.test(product.affiliateUrl)
+      ? 'iherb'
+      : 'other';
+    return [{ merchant, url: product.affiliateUrl }];
+  }
+  return [];
+}
+
+export function getPrimaryOffer(
+  product: CatalogProduct,
+  preferred: MarketMerchant = 'yandex_market',
+  priority: readonly MarketMerchant[] = DEFAULT_MARKET_MERCHANT_PRIORITY,
+): MarketOffer | undefined {
+  const offers = getProductOffers(product);
+  if (offers.length === 0) return undefined;
+
+  const preferredHit = offers.find((offer) => offer.merchant === preferred);
+  if (preferredHit) return preferredHit;
+
+  for (const merchant of priority) {
+    const hit = offers.find((offer) => offer.merchant === merchant);
+    if (hit) return hit;
+  }
+  return offers[0];
+}
+
+export function resolveProductBuyUrl(
+  product: CatalogProduct,
+  preferred: MarketMerchant = 'yandex_market',
+): string | undefined {
+  return getPrimaryOffer(product, preferred)?.url ?? product.affiliateUrl;
 }
 
 export function filterPlacesForProfile(

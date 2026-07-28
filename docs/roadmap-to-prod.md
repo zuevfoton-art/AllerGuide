@@ -238,7 +238,7 @@ flowchart TB
 | P1 | P5.2 | Персонализированные push-напоминания |
 | P1 | P5.3 | Вкладка «Ещё» (Map, Market, Settings) |
 | P2 | P5.4 | Live карта мест (partner API) |
-| P2 | P5.5 | Маркетплейс (affiliate / deep links) |
+| P2 | P5.5 | Маркетплейс (affiliate / deep links) — Яндекс.Маркет curated offers + resolve |
 | P2 | P5.6 | Масштабирование: Redis scan cache, read replicas |
 
 ---
