@@ -70,7 +70,7 @@ Exit code `0` = Phase 0 критерии выполнены; иначе — сп
 |----|--------|-------------|
 | P0.1 / P0.2 | ✅ | `api.staging.aclearo.com` и `.ru` — `ok`, DB, auth |
 | P0.3 | ✅ | `sync` + `aiScan` (Yandex provider) |
-| P0.4 | ❌ | `features.pollenHeatmap` отсутствует → **фаза 1** (Lockbox) |
+| P0.4 | ✅ | `features.pollenHeatmap: true` (Lockbox + image `phase1-418801c`) |
 | P0.5 | ✅ | EAS `staging` → `https://api.staging.aclearo.com` |
 | P0.6 | ✅ | staging scripts/workflows без `replit.app` |
 | — | ⚠️ | EAS profile `replit` ещё в репо → **фаза 3** |
@@ -117,7 +117,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 | Cloud sync flag | ✅ | `features.sync: true` |
 | AI scan | ✅ | `features.aiScan: true`, `aiScanProvider: "yandex"`, dailyBudget 100 |
 | YC OCR | ✅ | `features.ycOcr: true` |
-| Google pollen heatmap | ❌ → Phase 1 | Нет `features.pollenHeatmap`; tile HTML **404** (routes/env not on revision). Enable: `BUILD_PUSH=1 pnpm yc-stage-phase1` |
+| Google pollen heatmap | ✅ (2026-07-28) | `features.pollenHeatmap: true`; tile HTTP 200 PNG; image `aclearo-api:phase1-418801c` |
 | Replit (legacy) | ⚠️ still up | `aller-guide.replit.app/api/health` → урезанный `{ok, authDatabase}` без YC features |
 
 ### C. Инфра Terraform (ожидаемые ресурсы)
@@ -154,10 +154,10 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [x] Auth smoke (`./scripts/staging-auth-smoke.sh`)
 - [x] EAS `staging` → YC URL (не Replit)
 - [x] Stage scripts/workflows без `replit.app`
-- [ ] Lockbox: `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` → `features.pollenHeatmap: true`
-- [ ] Pollen tile HTTP 200 PNG **или** JSON 404 от proxy (не HTML) — `./scripts/staging-pollen-smoke.sh`
-- [ ] Image с `registerPollenRoutes` задеплоен (`BUILD_PUSH=1` / branch `staging`)
-- [ ] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
+- [x] Lockbox: `POLLEN_HEATMAP_ENABLED=true` + `GOOGLE_POLLEN_API_KEY` → `features.pollenHeatmap: true`
+- [x] Pollen tile HTTP 200 PNG **или** JSON 404 от proxy (не HTML) — `./scripts/staging-pollen-smoke.sh`
+- [x] Image с `registerPollenRoutes` задеплоен (`BUILD_PUSH=1` / branch `staging`)
+- [x] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
 - [ ] GitHub Secrets `YC_*` + `YC_LOCKBOX_SECRET_ID` полные → зелёный `deploy-staging-yandex`
 - [ ] Self-hosted runner `yc-staging-vpc` Idle (migrate)
 - [ ] `STAGING_RUN_SMOKES=1` preflight (sync + scan)

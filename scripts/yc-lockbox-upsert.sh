@@ -21,7 +21,8 @@ need_yc() {
 
 entries_to_json_pairs() {
   # stdin: lines key=value  →  JSON array of {key,text_value}
-  python3 - <<'PY'
+  # Use -c (not heredoc) so a pipe can feed stdin.
+  python3 -c '
 import json, sys
 out = []
 for raw in sys.stdin:
@@ -31,7 +32,7 @@ for raw in sys.stdin:
     key, value = line.split("=", 1)
     out.append({"key": key, "text_value": value})
 print(json.dumps(out))
-PY
+'
 }
 
 merge_payload() {
