@@ -5,6 +5,7 @@ import {
   parseOpenMeteoCurrentPollen,
   parseCurrentPollenMapReadings,
   POLLEN_MAP_TAXON_IDS,
+  resolveScaledPollenReading,
   selectLowPollenLocations,
 } from './pollen-map';
 
@@ -80,5 +81,29 @@ describe('pollen-map', () => {
     const selected = selectLowPollenLocations(locations, 'grass_pollen');
 
     expect(selected.map((location) => location.direction)).toEqual(['south', 'north']);
+  });
+
+  it('resolves one pollen level from the current map scale', () => {
+    const center = parseOpenMeteoCurrentPollen({ birch_pollen: 10 }, ['birch-pollen']);
+    const nearby = [
+      {
+        latitude: 1,
+        longitude: 1,
+        distanceKm: 20,
+        direction: 'north' as const,
+        readings: parseOpenMeteoCurrentPollen({ birch_pollen: 40 }, []),
+      },
+      {
+        latitude: 2,
+        longitude: 2,
+        distanceKm: 20,
+        direction: 'south' as const,
+        readings: parseOpenMeteoCurrentPollen({ birch_pollen: 20 }, []),
+      },
+    ];
+
+    expect(resolveScaledPollenReading(center, nearby, 'birch_pollen', 'place')?.value).toBe(10);
+    expect(resolveScaledPollenReading(center, nearby, 'birch_pollen', 'city')?.value).toBe(23.3);
+    expect(resolveScaledPollenReading(center, nearby, 'birch_pollen', 'region')?.value).toBe(40);
   });
 });

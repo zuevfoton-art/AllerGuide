@@ -24,6 +24,7 @@ export const POLLEN_MAP_TAXON_IDS = [
 ] as const;
 
 export type PollenMapTaxonId = (typeof POLLEN_MAP_TAXON_IDS)[number];
+export type PollenMapScale = 'place' | 'city' | 'region';
 export type PollenMapDirection =
   | 'north'
   | 'northEast'
@@ -33,6 +34,15 @@ export type PollenMapDirection =
   | 'southWest'
   | 'west'
   | 'northWest';
+
+/** Widget zoom for each pollen map scale control. */
+export const POLLEN_MAP_SCALE_ZOOM: Record<PollenMapScale, number> = {
+  place: 13,
+  city: 11,
+  region: 9,
+};
+
+export const POLLEN_MAP_SCALES = ['place', 'city', 'region'] as const satisfies readonly PollenMapScale[];
 
 export interface PollenMapReading {
   taxonId: PollenMapTaxonId;
@@ -170,6 +180,44 @@ export function selectLowPollenLocations(
     )
     .sort((left, right) => readingValue(left, taxonId) - readingValue(right, taxonId))
     .slice(0, Math.max(0, limit));
+}
+
+/**
+ * One on-screen pollen level for the current map scale:
+ * place = local point, city = area average, region = area peak.
+ */
+export function resolveScaledPollenReading(
+  centerReadings: PollenMapReading[],
+  nearbyLocations: NearbyPollenLocation[],
+  taxonId: PollenMapTaxonId,
+  scale: PollenMapScale,
+): PollenMapReading | null {
+  const center = centerReadings.find((reading) => reading.taxonId === taxonId) ?? null;
+  const nearbyValues = nearbyLocations
+    .map((location) => location.readings.find((reading) => reading.taxonId === taxonId)?.value)
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+
+  if (scale === 'place') {
+    return center;
+  }
+
+  const values = [
+    ...(center && Number.isFinite(center.value) ? [center.value] : []),
+    ...nearbyValues,
+  ];
+  if (values.length === 0) return center;
+
+  const value =
+    scale === 'region'
+      ? Math.max(...values)
+      : values.reduce((sum, item) => sum + item, 0) / values.length;
+
+  const reading = buildPollenReading(taxonId, Number(value.toFixed(1)), []);
+  return {
+    ...reading,
+    allergenId: center?.allergenId ?? reading.allergenId,
+    profileRelevant: center?.profileRelevant ?? false,
+  };
 }
 
 function resolveCurrentTimeIndex(times: string[] | undefined, currentTime: string | undefined): number {

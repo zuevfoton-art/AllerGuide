@@ -354,6 +354,12 @@ export type LocaleMessages = {
     pollenOlive: string;
     pollenYou: string;
     otherPollenAllergens: string;
+    pollenScalePlace: string;
+    pollenScaleCity: string;
+    pollenScaleRegion: string;
+    pollenScalePlaceHint: string;
+    pollenScaleCityHint: string;
+    pollenScaleRegionHint: string;
     pollenLow: string;
     pollenModerate: string;
     pollenHigh: string;

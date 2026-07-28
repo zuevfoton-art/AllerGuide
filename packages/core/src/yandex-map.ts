@@ -81,10 +81,11 @@ export function buildLocationMapUrl(latitude: number, longitude: number): string
 
 export function buildPollenRiskMapUrl(options: {
   center: { latitude: number; longitude: number };
+  zoom?: number;
 }): string {
   return buildYandexMapWidgetUrl({
     center: options.center,
-    zoom: MOSCOW_REGION_ZOOM,
+    zoom: options.zoom ?? MOSCOW_REGION_ZOOM,
     markers: [
       {
         latitude: options.center.latitude,

@@ -42,13 +42,12 @@ describe('yandex-map', () => {
   it('keeps only the user marker on the pollen basemap', () => {
     const url = buildPollenRiskMapUrl({
       center: { latitude: 55.75, longitude: 37.62 },
+      zoom: 11,
     });
-    const points = new URL(url).searchParams.get('pt');
+    const params = new URL(url).searchParams;
 
-    expect(points).toBe('37.62,55.75,pm2blm');
-    expect(url).not.toContain('pm2gnm');
-    expect(url).not.toContain('pm2orm');
-    expect(url).not.toContain('pm2rdm');
+    expect(params.get('pt')).toBe('37.62,55.75,pm2blm');
+    expect(params.get('z')).toBe('11');
     expect(url).not.toContain('traffic');
   });
 

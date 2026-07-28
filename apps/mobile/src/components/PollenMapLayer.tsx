@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   buildPollenRiskMapUrl,
+  POLLEN_MAP_SCALES,
+  POLLEN_MAP_SCALE_ZOOM,
   PRIMARY_POLLEN_MAP_TAXON_IDS,
+  resolveScaledPollenReading,
   SECONDARY_POLLEN_MAP_TAXON_IDS,
-  selectLowPollenLocations,
-  type PollenMapDirection,
+  type PollenMapScale,
   type PollenMapTaxonId,
   type PollenTierLevel,
 } from '@allerguide/core';
@@ -47,26 +49,16 @@ const LEVEL_LABEL_KEYS: Record<PollenTierLevel, string> = {
   high: 'map.pollenHigh',
 };
 
-const DIRECTION_LABEL_KEYS: Record<PollenMapDirection, string> = {
-  north: 'map.pollenNorth',
-  northEast: 'map.pollenNorthEast',
-  east: 'map.pollenEast',
-  southEast: 'map.pollenSouthEast',
-  south: 'map.pollenSouth',
-  southWest: 'map.pollenSouthWest',
-  west: 'map.pollenWest',
-  northWest: 'map.pollenNorthWest',
+const SCALE_LABEL_KEYS: Record<PollenMapScale, string> = {
+  place: 'map.pollenScalePlace',
+  city: 'map.pollenScaleCity',
+  region: 'map.pollenScaleRegion',
 };
 
-const SAMPLE_MARKER_POSITIONS: Record<PollenMapDirection, ViewStyle> = {
-  north: { top: '20%', left: '50%' },
-  northEast: { top: '28%', left: '72%' },
-  east: { top: '50%', left: '80%' },
-  southEast: { top: '70%', left: '72%' },
-  south: { top: '76%', left: '50%' },
-  southWest: { top: '70%', left: '20%' },
-  west: { top: '50%', left: '12%' },
-  northWest: { top: '28%', left: '20%' },
+const SCALE_HINT_KEYS: Record<PollenMapScale, string> = {
+  place: 'map.pollenScalePlaceHint',
+  city: 'map.pollenScaleCityHint',
+  region: 'map.pollenScaleRegionHint',
 };
 
 export function PollenMapLayer({
@@ -81,19 +73,24 @@ export function PollenMapLayer({
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [selectedTaxonId, setSelectedTaxonId] = useState<PollenMapTaxonId>('birch_pollen');
-  const selectedReading = snapshot?.readings.find(
-    (reading) => reading.taxonId === selectedTaxonId,
-  );
-  const safeLocations = useMemo(
-    () => selectLowPollenLocations(snapshot?.nearbyLocations ?? [], selectedTaxonId),
-    [selectedTaxonId, snapshot?.nearbyLocations],
+  const [mapScale, setMapScale] = useState<PollenMapScale>('city');
+  const selectedReading = useMemo(
+    () =>
+      resolveScaledPollenReading(
+        snapshot?.readings ?? [],
+        snapshot?.nearbyLocations ?? [],
+        selectedTaxonId,
+        mapScale,
+      ),
+    [mapScale, selectedTaxonId, snapshot?.nearbyLocations, snapshot?.readings],
   );
   const mapUrl = useMemo(
     () =>
       buildPollenRiskMapUrl({
         center: { latitude, longitude },
+        zoom: POLLEN_MAP_SCALE_ZOOM[mapScale],
       }),
-    [latitude, longitude],
+    [latitude, longitude, mapScale],
   );
   const isCalendarFallback = snapshot?.source === 'calendar';
 
@@ -116,48 +113,48 @@ export function PollenMapLayer({
         </View>
       </View>
 
+      <View style={styles.scaleRow}>
+        {POLLEN_MAP_SCALES.map((scale) => {
+          const isSelected = mapScale === scale;
+          return (
+            <Pressable
+              key={scale}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              style={[styles.scaleButton, isSelected && styles.taxonButtonSelected]}
+              onPress={() => setMapScale(scale)}>
+              <Text style={[styles.taxonText, isSelected && styles.taxonTextSelected]}>
+                {t(SCALE_LABEL_KEYS[scale])}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <YandexMap
         url={mapUrl}
         height={300}
         interactive={false}
         overlay={
-          <View style={styles.mapOverlay}>
-            {(snapshot?.nearbyLocations ?? []).map((location) => {
-              const reading = location.readings.find(
-                (item) => item.taxonId === selectedTaxonId,
-              );
-              if (!reading) return null;
-
-              return (
-                <View
-                  key={location.direction}
-                  style={[
-                    styles.sampleMarker,
-                    SAMPLE_MARKER_POSITIONS[location.direction],
-                    { backgroundColor: getLevelColor(reading.level, theme) },
-                  ]}>
-                  <Text style={styles.sampleMarkerText}>{reading.value.toFixed(1)}</Text>
-                </View>
-              );
-            })}
-            <View style={styles.mapLevelOverlay}>
-              <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
+          <View style={styles.mapLevelOverlay}>
+            <View style={[styles.mapLevelDot, { backgroundColor: levelColor }]} />
+            <View style={styles.mapLevelCopy}>
               <Text style={styles.mapLevelText}>
                 {selectedReading
                   ? t(LEVEL_LABEL_KEYS[selectedReading.level])
                   : t('map.pollenUnavailable')}
               </Text>
+              {selectedReading ? (
+                <Text style={styles.mapLevelValue}>
+                  {t('map.pollenValue', { value: selectedReading.value.toFixed(1) })}
+                </Text>
+              ) : null}
             </View>
           </View>
         }
       />
       <Text style={styles.attribution}>{t('map.pollenMapAttribution')}</Text>
-      <View style={styles.legendRow}>
-        <LegendItem color={theme.colors.accent} label={t('map.pollenYou')} styles={styles} />
-        <LegendItem color={theme.colors.success} label={t('map.pollenLow')} styles={styles} />
-        <LegendItem color={theme.colors.warning} label={t('map.pollenModerate')} styles={styles} />
-        <LegendItem color={theme.colors.danger} label={t('map.pollenHigh')} styles={styles} />
-      </View>
+      <Text style={styles.scaleHint}>{t(SCALE_HINT_KEYS[mapScale])}</Text>
 
       <View style={styles.taxonRow}>
         {PRIMARY_POLLEN_MAP_TAXON_IDS.map((taxonId) => {
@@ -240,46 +237,6 @@ export function PollenMapLayer({
         </GlassCard>
       ) : null}
 
-      {snapshot && !isCalendarFallback ? (
-        <View style={styles.safeSection}>
-          <View style={styles.safeHeading}>
-            <Ionicons name="navigate-circle-outline" size={22} color={theme.colors.success} />
-            <View style={styles.readingBody}>
-              <Text style={styles.readingTitle}>{t('map.safePollenPlaces')}</Text>
-              <Text style={styles.safeHint}>{t('map.safePollenPlacesHint')}</Text>
-            </View>
-          </View>
-          {safeLocations.length > 0 ? (
-            safeLocations.map((location) => {
-              const reading = location.readings.find(
-                (item) => item.taxonId === selectedTaxonId,
-              );
-              return (
-                <GlassCard
-                  key={`${location.latitude}-${location.longitude}`}
-                  style={styles.safeCard}>
-                  <View style={styles.safeMarker}>
-                    <Ionicons name="leaf-outline" size={18} color={theme.colors.success} />
-                  </View>
-                  <View style={styles.readingBody}>
-                    <Text style={styles.safeTitle}>
-                      {t(DIRECTION_LABEL_KEYS[location.direction])} ·{' '}
-                      {t('map.pollenDistance', { distance: location.distanceKm })}
-                    </Text>
-                    <Text style={styles.valueText}>
-                      {t('map.pollenValue', { value: reading?.value.toFixed(1) ?? '—' })}
-                    </Text>
-                  </View>
-                  <Text style={styles.lowBadge}>{t('map.pollenLow')}</Text>
-                </GlassCard>
-              );
-            })
-          ) : (
-            <Text style={styles.unavailableText}>{t('map.noSafePollenPlaces')}</Text>
-          )}
-        </View>
-      ) : null}
-
       {isCalendarFallback ? (
         <GlassCard style={styles.calendarCard}>
           <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
@@ -314,23 +271,6 @@ export function PollenMapLayer({
 
       <Disclaimer>{t('map.disclaimerPollen')}</Disclaimer>
     </>
-  );
-}
-
-function LegendItem({
-  color,
-  label,
-  styles,
-}: {
-  color: string;
-  label: string;
-  styles: ReturnType<typeof createStyles>;
-}) {
-  return (
-    <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { backgroundColor: color }]} />
-      <Text style={styles.legendText}>{label}</Text>
-    </View>
   );
 }
 
@@ -371,54 +311,52 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textMuted,
       marginTop: -8,
     },
-    mapOverlay: {
-      ...StyleSheet.absoluteFillObject,
+    scaleHint: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textSecondary,
+      marginTop: -4,
     },
     mapLevelOverlay: {
       position: 'absolute',
       top: 8,
       right: 8,
-      minHeight: 34,
-      maxWidth: 170,
+      minHeight: 42,
+      maxWidth: 180,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 7,
-      borderRadius: 7,
+      gap: 8,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
       paddingHorizontal: 10,
-      paddingVertical: 7,
+      paddingVertical: 8,
     },
-    sampleMarker: {
-      position: 'absolute',
-      width: 38,
-      height: 38,
-      marginLeft: -19,
-      marginTop: -19,
-      borderRadius: 19,
-      borderWidth: 2,
-      borderColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    sampleMarkerText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 10,
-      fontWeight: '600',
-      color: colors.card,
-    },
-    mapLevelDot: { width: 9, height: 9, borderRadius: 5 },
+    mapLevelDot: { width: 10, height: 10, borderRadius: 5 },
+    mapLevelCopy: { flexShrink: 1, gap: 1 },
     mapLevelText: {
-      flexShrink: 1,
       fontFamily: fonts.sansSemiBold,
       fontSize: 11,
       color: colors.text,
     },
-    legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    legendDot: { width: 7, height: 7, borderRadius: 4 },
-    legendText: { fontFamily: fonts.sans, fontSize: 10, color: colors.textMuted },
+    mapLevelValue: {
+      fontFamily: fonts.sans,
+      fontSize: 10,
+      color: colors.textMuted,
+    },
+    scaleRow: { flexDirection: 'row', gap: 8 },
+    scaleButton: {
+      flex: 1,
+      minHeight: 36,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 8,
+    },
     taxonRow: { flexDirection: 'row', gap: 8 },
     taxonButton: {
       flex: 1,
@@ -496,37 +434,6 @@ function createStyles({ colors, fonts }: AppTheme) {
     valueText: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
     unavailableText: { fontFamily: fonts.sans, fontSize: 13, color: colors.textMuted },
     sourceText: { fontFamily: fonts.sans, fontSize: 10, color: colors.textMuted },
-    safeSection: { gap: 8 },
-    safeHeading: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    safeHint: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      lineHeight: 15,
-      color: colors.textMuted,
-    },
-    safeCard: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    safeMarker: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.successLight,
-    },
-    safeTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      color: colors.text,
-    },
-    lowBadge: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 10,
-      color: colors.success,
-      backgroundColor: colors.successLight,
-      borderRadius: 5,
-      paddingHorizontal: 7,
-      paddingVertical: 3,
-    },
     yandexButton: {
       flexDirection: 'row',
       alignItems: 'center',
