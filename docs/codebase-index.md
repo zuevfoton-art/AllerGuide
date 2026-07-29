@@ -122,7 +122,7 @@ src/modules/marketplace/
 |------|------------|
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
-| `(tabs)/home.tsx` | Dashboard / wellness |
+| `(tabs)/home.tsx` | Dashboard / wellness / home-insights |
 | `(tabs)/diary.tsx` | Дневник + clinical cards |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |
