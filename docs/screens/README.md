@@ -1,70 +1,67 @@
-# Экранные формы — Cursor Canvas → handoff
+# Экранные формы — Canvas (Desktop) → handoff
 
-As-is макеты существующих экранов AllerGuide / A-Claro для визуальных правок в **Cursor Canvas** и последующего переноса в `apps/mobile`.
+As-is макеты существующих экранов AllerGuide / A-Claro.
+
+- **Cursor Desktop (Agent Window)** — редактируемые mockup-canvas (телефон + поля копирайта).
+- **HTML** — `docs/screens/*.html` (источник для sync / браузер / Cloud web fallback).
 
 Связано: [`../architecture.md`](../architecture.md) · [`../development-rules.md`](../development-rules.md) · [`../design-mockup.html`](../design-mockup.html) · [`../brand-dual-calm.md`](../brand-dual-calm.md)
 
 ---
 
-## Состав пакета
+## Cursor Desktop Canvas (рекомендуется)
 
-| Файл | Назначение |
-|------|------------|
-| [`index.html`](./index.html) | Оглавление: макет → route → код |
-| [`_tokens.css`](./_tokens.css) | Dual Calm токены (= `theme.ts`) |
-| [`_phone-frame.css`](./_phone-frame.css) | Рамка телефона + примитивы UI |
-| [`sos.html`](./sos.html) | `/(tabs)/sos` |
-| [`home.html`](./home.html) | `/(tabs)/home` |
-| [`diary.html`](./diary.html) | `/(tabs)/diary` |
-| [`scanner.html`](./scanner.html) | `/(tabs)/scanner` |
+Требуется Cursor Desktop **≥ 3.13** (билд `31e8d61…` подходит). Откройте canvas рядом с чатом:
+
+| Canvas | Назначение |
+|--------|------------|
+| [a-claro-mockups.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/a-claro-mockups.canvas.tsx) | Каталог + live edit copy + preview |
+| [mockup-sos.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-sos.canvas.tsx) | SOS (default / empty) |
+| [mockup-home.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-home.canvas.tsx) | Home (default / loading) |
+| [mockup-diary.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-diary.canvas.tsx) | Diary (default / empty) |
+| [mockup-scanner.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-scanner.canvas.tsx) | Scanner (default / safe / error) |
+
+**Как редактировать**
+
+1. Откройте нужный `.canvas.tsx` (клик по ссылке в чате).
+2. Меняйте тексты в полях слева — preview справа обновляется сразу (состояние сохраняется).
+3. Переключайте состояния (default / empty / …).
+4. Для правок layout: кнопка Ask agent to edit или запрос в чат.
+5. Утвердили → sync в HTML `docs/screens/<screen>.html` → handoff PR в `apps/mobile`.
+
+Canvas живёт в managed-папке агента `~/.cursor/projects/<workspace>/canvases/` (не в git). HTML в `docs/screens/` — в репозитории.
 
 ---
 
-## Как править макеты
+## HTML-пакет (в репо)
 
-1. Откройте нужный файл (`sos.html` …) в браузере или редакторе.
-2. Для навигации по экранам / чеклисту handoff используйте [`board.html`](./board.html) (надёжно в Cloud Agent; Cursor `.canvas.tsx` может не грузиться в web).
-3. Меняйте только HTML/CSS макета — **не** правьте `app/**/*.tsx` «на глаз».
-4. Цвета / радиусы / шрифты — только переменные из `_tokens.css`.
-5. Блоки помечены `data-component="…"` — сохраняйте эти имена (handoff к компонентам).
-6. Ширина контента — phone frame **390×844** (как web phone preview).
-7. Утвердили визуал → отдельный PR на код **одного** экрана.
+| Файл | Назначение |
+|------|------------|
+| [`index.html`](./index.html) | Оглавление |
+| [`board.html`](./board.html) | Доска handoff в браузере (fallback) |
+| [`_tokens.css`](./_tokens.css) | Dual Calm токены (= `theme.ts`) |
+| [`_phone-frame.css`](./_phone-frame.css) | Рамка + примитивы |
+| `sos.html` · `home.html` · `diary.html` · `scanner.html` | As-is HTML |
 
 ---
 
 ## Чеклист handoff в код
 
-- [ ] Макет утверждён (состояние: default / empty / …)
-- [ ] Дельты записаны (что меняется относительно as-is)
-- [ ] UI только в `app/*.tsx` + `src/components/*`; домен не трогаем
-- [ ] Новые цвета/отступы сначала в `theme.ts`, затем в `_tokens.css`
-- [ ] Строки через `useTranslation()` + все 6 локалей + `types.ts`
-- [ ] Empty / error / loading — `EmptyState` / `ErrorState` / `Skeleton`
+- [ ] Макет утверждён (состояние отмечено)
+- [ ] Дельты записаны относительно as-is
+- [ ] UI только в `app/*.tsx` + `src/components/*`
+- [ ] Новые цвета/отступы: `theme.ts` → `_tokens.css`
+- [ ] Строки через `useTranslation()` + 6 локалей
+- [ ] Empty / error / loading — общие компоненты
 - [ ] Сверка: web `localhost:5000` ↔ макет
-- [ ] Offline-first и слои не нарушены (нет DB/API в экране)
-
-### Формат записи в PR
+- [ ] Offline-first: нет DB/API в экране
 
 ```
-Макет: docs/screens/sos.html (состояние: default)
+Макет: docs/screens/sos.html + mockup-sos.canvas.tsx (состояние: default)
 Код:   app/(tabs)/sos.tsx, SosEmergencyBar.tsx
 Дельты: …
 ```
 
----
+## Приоритет
 
-## Приоритет экранов
-
-1. SOS  
-2. Home  
-3. Diary  
-4. Scanner  
-
----
-
-## Чего не делать
-
-- Не сливать все экраны в один HTML.
-- Не вводить schema-builder / Storybook в этом пакете.
-- Не копировать хардкод строк из макета в TSX без i18n.
-- Не считать HTML источником правды **после** merge — после handoff правда в коде.
+1. SOS · 2. Home · 3. Diary · 4. Scanner
