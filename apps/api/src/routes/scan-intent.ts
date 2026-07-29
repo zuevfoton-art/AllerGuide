@@ -1,0 +1,72 @@
+import type { Express, Request, Response } from 'express';
+import {
+  buildScanIntentPrompt,
+  resolveScanIntentClassification,
+  type ScanMode,
+} from '@allerguide/ai';
+import { verifyAuthToken } from '../lib/jwt';
+import { logCaughtError } from '../lib/log-caught-error';
+import { callScanLlm } from '../services/llm-scan-provider';
+
+interface IntentRequestBody {
+  text?: string;
+  fallbackMode?: ScanMode;
+}
+
+function intentLlmEnabled(): boolean {
+  return (
+    process.env.YC_SCAN_INTENT_LLM === 'true' && process.env.AI_SCAN_ENABLED === 'true'
+  );
+}
+
+async function resolveIdentity(req: Request): Promise<string | null> {
+  const header = req.header('authorization');
+  if (header?.startsWith('Bearer ')) {
+    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+    if (payload) return `user:${payload.sub}`;
+  }
+  if (process.env.SCAN_REQUIRE_AUTH === 'true') return null;
+  return `ip:${req.ip ?? 'unknown'}`;
+}
+
+/** Option B: YandexGPT/OpenAI classifies OCR text → label_or_menu | visual_product. */
+export function registerScanIntentRoutes(app: Express) {
+  app.post('/api/scan/intent', async (req: Request, res: Response) => {
+    if (!intentLlmEnabled()) {
+      res.status(503).json({ ok: false, error: 'Scan intent LLM is disabled on this server' });
+      return;
+    }
+
+    const identity = await resolveIdentity(req);
+    if (!identity) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+
+    const body = req.body as IntentRequestBody;
+    const text = body.text?.trim() ?? '';
+    if (!text) {
+      res.status(400).json({ ok: false, error: 'Missing text' });
+      return;
+    }
+
+    try {
+      const llmRaw = await callScanLlm(buildScanIntentPrompt(text));
+      const classification = resolveScanIntentClassification({
+        extraction: { text, source: 'vision', warnings: [] },
+        fallbackMode: body.fallbackMode ?? 'product',
+        llmRaw,
+      });
+
+      res.json({
+        ok: true,
+        intent: classification.intent,
+        mode: classification.mode,
+        source: classification.source,
+      });
+    } catch (error) {
+      logCaughtError('scan.intent', error);
+      res.status(500).json({ ok: false, error: 'Intent classification failed' });
+    }
+  });
+}

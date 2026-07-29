@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { YandexMap } from '@/src/components/YandexMap';
@@ -105,8 +104,6 @@ export default function MapScreen() {
         </View>
         <ProfileHeaderButton />
       </View>
-
-      <ProfileSwitcher />
 
       <View style={ui.toggleRow}>
         {LAYERS.map((item) => (

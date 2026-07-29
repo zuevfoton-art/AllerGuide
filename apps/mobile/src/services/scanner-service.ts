@@ -4,6 +4,7 @@ import {
   prepareScanTextFromOcr,
   simulateOcrFromCapture,
   asVisionOcrResult,
+  classifyScanIntentHeuristic,
   type ScanMode,
   type ScanResult,
   type OcrExtractionResult,
@@ -17,6 +18,7 @@ import {
   type MenuScanStatus,
 } from '@/src/services/barcode-lookup-service';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
+import { classifyScanIntentViaApi } from '@/src/services/scan-intent-api-service';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
@@ -224,8 +226,17 @@ export async function scanFromOcr({
     ? prepareScanTextFromOcr(ocrText, mode)
     : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
 
-  // Product photos: OCR dish/product name → Open Food Facts / local dish catalog.
-  if (mode === 'product') {
+  // A: heuristic intent. B (flag): YandexGPT intent via /api/scan/intent.
+  const llmIntent = await classifyScanIntentViaApi({
+    text: extraction.text,
+    fallbackMode: mode,
+  });
+  const classification =
+    llmIntent ?? classifyScanIntentHeuristic(extraction, mode);
+  const intent = classification.intent;
+  const analysisMode = classification.mode;
+
+  if (intent === 'visual_product') {
     try {
       const dishLookup = await lookupDishIngredientsForScan(extraction.text);
       if (dishLookup) {
@@ -237,11 +248,11 @@ export async function scanFromOcr({
               : undefined;
         const offNote =
           dishLookup.source === 'openfoodfacts' || dishLookup.source === 'catalog_api'
-            ? `Состав найден в Open Food Facts / каталоге по запросу «${dishLookup.query}».`
-            : `Состав блюда «${dishLookup.productName}» из локального справочника.`;
+            ? `Умный поиск: состав найден в Open Food Facts / каталоге по запросу «${dishLookup.query}».`
+            : `Умный поиск: состав блюда «${dishLookup.productName}» из локального справочника.`;
 
         const result = await analyzeText({
-          mode,
+          mode: analysisMode === 'menu' ? 'product' : analysisMode,
           text: dishLookup.ingredients,
           profile,
           productName: dishLookup.productName,
@@ -261,7 +272,7 @@ export async function scanFromOcr({
     }
   }
 
-  const productName = buildOcrScanProductName(mode);
+  const productName = buildOcrScanProductName(analysisMode);
   const ocrNote =
     extraction.source === 'demo'
       ? extraction.warnings.join(' ')
@@ -269,14 +280,16 @@ export async function scanFromOcr({
         ? extraction.warnings.join(' ')
         : undefined;
 
-  // For menu mode scan the FULL normalized text so all dish names/descriptions
-  // are checked against the allergen list — not only an extracted composition block.
-  const scanText = mode === 'menu' ? (extraction.ingredientsBlock
-    ? `${extraction.text}\n${extraction.ingredientsBlock}`
-    : extraction.text) : extraction.text;
+  // Menu: scan full normalized text so dish names/descriptions are checked.
+  const scanText =
+    analysisMode === 'menu'
+      ? extraction.ingredientsBlock
+        ? `${extraction.text}\n${extraction.ingredientsBlock}`
+        : extraction.text
+      : extraction.text;
 
   const result = await analyzeText({
-    mode,
+    mode: analysisMode,
     text: scanText,
     profile,
     productName,
@@ -285,7 +298,7 @@ export async function scanFromOcr({
   });
 
   const menuScanStatus: MenuScanStatus | undefined =
-    mode === 'menu'
+    analysisMode === 'menu'
       ? result.matches.length > 0 ||
         result.crossMatches.length > 0 ||
         (result.traceMatches?.length ?? 0) > 0

@@ -137,3 +137,45 @@ export function asVisionOcrResult(
     warnings: [...prepared.warnings, ...extraWarnings],
   };
 }
+
+/** How to continue after Vision OCR / demo OCR on a captured photo. */
+export type ScanImageIntent = 'label_or_menu' | 'visual_product';
+
+const LABEL_HINT =
+  /состав|ингредиент|ingredients|composition|действующ|вспомогательн|active\s+substance|aqua\s*,|sodium\s+/i;
+const MENU_HINT = /меню|menu|порци|руб\.?|₽|grill|салат|паста|суп/i;
+const MIN_LABEL_CHARS = 40;
+const MIN_LABEL_WORDS = 6;
+
+/**
+ * Decide OCR-analysis vs smart product search from recognized text density.
+ * Dense / composition-like text → label or menu (OCR + YandexGPT on text).
+ * Sparse / name-only → visual product (dish/OFF smart search).
+ */
+export function classifyScanImageIntent(extraction: OcrExtractionResult): ScanImageIntent {
+  const text = extraction.text.trim();
+  if (!text) return 'visual_product';
+
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  const hasIngredients = Boolean(extraction.ingredientsBlock?.trim());
+  const looksLikeLabel = hasIngredients || LABEL_HINT.test(text);
+  const looksLikeMenu = MENU_HINT.test(text) && wordCount >= MIN_LABEL_WORDS;
+  const substantial = text.length >= MIN_LABEL_CHARS || wordCount >= MIN_LABEL_WORDS;
+
+  if (looksLikeLabel || looksLikeMenu || (substantial && text.length >= 80)) {
+    return 'label_or_menu';
+  }
+  return 'visual_product';
+}
+
+export function resolveScanModeForIntent(
+  intent: ScanImageIntent,
+  extraction: OcrExtractionResult,
+  fallback: ScanMode,
+): ScanMode {
+  if (intent !== 'label_or_menu') return fallback === 'menu' ? 'product' : fallback;
+  if (MENU_HINT.test(extraction.text)) return 'menu';
+  if (/действующ|таблет|мг\b|лекарств/i.test(extraction.text)) return 'medicine';
+  if (/aqua|parfum|sodium|косметик/i.test(extraction.text)) return 'cosmetics';
+  return fallback === 'menu' ? 'product' : fallback;
+}

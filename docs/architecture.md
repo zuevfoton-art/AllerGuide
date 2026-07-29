@@ -223,6 +223,8 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
 | `YC_OCR` (API: `YC_OCR_ENABLED`) | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
+| `YC_SCAN_INTENT_LLM` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | GPT-классификатор OCR → `/api/scan/intent` (B) |
+| `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Yandex Search состав → `/api/search/ingredients` (C) |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 
 ---

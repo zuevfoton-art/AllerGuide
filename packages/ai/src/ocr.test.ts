@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  classifyScanImageIntent,
   extractIngredientsBlock,
   getDemoOcrText,
   normalizeOcrText,
   prepareScanTextFromOcr,
+  resolveScanModeForIntent,
   simulateOcrFromCapture,
 } from './ocr';
 
@@ -44,5 +46,32 @@ describe('ocr', () => {
   it('provides demo samples per mode', () => {
     expect(getDemoOcrText('cosmetics')).toContain('Aqua');
     expect(getDemoOcrText('medicine')).toContain('ибупрофен');
+  });
+
+  it('classifies dense composition text as label_or_menu', () => {
+    const prepared = prepareScanTextFromOcr(
+      'Состав: вода, сахар, молоко, арахис, яичный порошок, лецитин соевый.',
+      'product',
+    );
+    expect(classifyScanImageIntent(prepared)).toBe('label_or_menu');
+  });
+
+  it('classifies short dish names as visual_product', () => {
+    expect(
+      classifyScanImageIntent({
+        text: 'Оливье',
+        source: 'vision',
+        warnings: [],
+      }),
+    ).toBe('visual_product');
+  });
+
+  it('resolves menu mode from menu-like OCR text', () => {
+    const extraction = {
+      text: 'Меню: паста карбонара, салат цезарь, тирамису',
+      source: 'vision' as const,
+      warnings: [],
+    };
+    expect(resolveScanModeForIntent('label_or_menu', extraction, 'product')).toBe('menu');
   });
 });
