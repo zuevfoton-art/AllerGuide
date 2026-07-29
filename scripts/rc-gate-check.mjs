@@ -119,6 +119,11 @@ function checkSoakLogStarted() {
     return;
   }
   const content = fs.readFileSync(soakPath, 'utf8');
+  const blocked = /\*\*Status:\s*BLOCKED\*\*/i.test(content);
+  if (blocked) {
+    log('staging-soak-log.md: Status BLOCKED (manual G3/G5/G7 not signed off)');
+    return;
+  }
   if (content.includes('_YYYY-MM-DD_')) {
     warnings.push('staging-soak-log.md: set soak start/end dates when RC soak begins');
   }
