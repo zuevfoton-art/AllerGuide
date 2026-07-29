@@ -12,6 +12,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 
 1. [`docs/architecture.md`](docs/architecture.md) — system design, layers, data flows, feature flags
 2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist, Code Complete §10
+3. [`docs/codebase-index.md`](docs/codebase-index.md) — file map: routes, services, packages, «where to change X»
 
 Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
 

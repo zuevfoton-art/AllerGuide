@@ -13,6 +13,7 @@
 | 1 | [`docs/architecture.md`](./architecture.md) | Куда класть код, слои, потоки данных, флаги |
 | 2 | **Этот файл** | Конкретные правила и антипаттерны |
 | 2.1 | **Этот файл §10** | Стиль и качество кода (Code Complete) |
+| 2.2 | [`docs/codebase-index.md`](./codebase-index.md) | Быстрая карта файлов: маршруты, сервисы, «куда менять X» |
 | 3 | [`docs/functional-requirements.md`](./functional-requirements.md) | Что должен делать продукт (FR-*) |
 | 4 | [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md) | В какой фазе задача, критерии готовности |
 | 5 | [`AGENTS.md`](../AGENTS.md) | Команды, env, operational gotchas |
