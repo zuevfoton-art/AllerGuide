@@ -13,6 +13,19 @@ export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true
  */
 export const YC_OCR_ENABLED = process.env.EXPO_PUBLIC_YC_OCR === 'true';
 
+/**
+ * Option B: YandexGPT classifies OCR snippet (label/menu vs visual product)
+ * via POST /api/scan/intent. Falls back to local heuristic when off/unavailable.
+ */
+export const YC_SCAN_INTENT_LLM_ENABLED =
+  process.env.EXPO_PUBLIC_YC_SCAN_INTENT_LLM === 'true';
+
+/**
+ * Option C: Yandex Search API ingredients lookup via POST /api/search/ingredients
+ * when Open Food Facts / local catalog miss.
+ */
+export const YC_SEARCH_ENABLED = process.env.EXPO_PUBLIC_YC_SEARCH === 'true';
+
 /** Use PostgreSQL backend for users and profiles (JWT auth). */
 export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'true';
 

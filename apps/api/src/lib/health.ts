@@ -22,6 +22,8 @@ export interface HealthCheckResult {
     aiScan: boolean;
     aiScanProvider?: 'yandex' | 'openai';
     ycOcr?: boolean;
+    ycScanIntentLlm?: boolean;
+    ycSearch?: boolean;
     pollenHeatmap?: boolean;
   };
   scan?: ScanHealthMetrics;
@@ -83,9 +85,11 @@ function resolveAiScanProviderLabel(): 'yandex' | 'openai' | undefined {
 function buildFeatures() {
   const aiScan = process.env.AI_SCAN_ENABLED === 'true';
   const provider = resolveAiScanProviderLabel();
-  const ycOcr =
-    process.env.YC_OCR_ENABLED === 'true' &&
-    Boolean(process.env.YC_AI_API_KEY && process.env.YC_FOLDER_ID);
+  const ycCreds = Boolean(process.env.YC_AI_API_KEY && process.env.YC_FOLDER_ID);
+  const ycOcr = process.env.YC_OCR_ENABLED === 'true' && ycCreds;
+  // Intent LLM uses the same provider as /api/scan (YandexGPT or OpenAI).
+  const ycScanIntentLlm = process.env.YC_SCAN_INTENT_LLM === 'true' && aiScan;
+  const ycSearch = process.env.YC_SEARCH_ENABLED === 'true' && ycCreds;
   return {
     sync: process.env.SYNC_ENABLED === 'true',
     aiScan,
@@ -94,6 +98,8 @@ function buildFeatures() {
       Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
     ...(aiScan && provider ? { aiScanProvider: provider } : {}),
     ...(ycOcr ? { ycOcr: true } : {}),
+    ...(ycScanIntentLlm ? { ycScanIntentLlm: true } : {}),
+    ...(ycSearch ? { ycSearch: true } : {}),
   };
 }
 

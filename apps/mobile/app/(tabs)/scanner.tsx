@@ -1,4 +1,4 @@
-import { Image, Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, ScrollView, Alert } from 'react-native';
+import { Image, Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -9,7 +9,6 @@ import {
   type ScanHistoryEntry,
   type ScannerMode,
 } from '@allerguide/core';
-import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -45,12 +44,20 @@ const UNDO_MS = 5000;
 
 type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
-const MODES = [
-  { key: 'product', labelKey: 'scanner.product', icon: 'nutrition' },
-  { key: 'menu', labelKey: 'scanner.menu', icon: 'restaurant' },
-  { key: 'medicine', labelKey: 'scanner.medicine', icon: 'medkit' },
-  { key: 'cosmetics', labelKey: 'scanner.cosmetics', icon: 'flask' },
-] as const;
+/** Camera entry chips on the scanner tab (both open the device camera). */
+type CameraEntryMode = 'barcode' | 'scanner';
+
+const ENTRY_MODES = [
+  { key: 'barcode' as const, labelKey: 'scanner.modeBarcode', icon: 'barcode-outline' },
+  { key: 'scanner' as const, labelKey: 'scanner.modeScanner', icon: 'scan-outline' },
+];
+
+const SAFE_MODE_LABEL_KEYS: Record<ScannerMode, 'scanner.product' | 'scanner.menu' | 'scanner.medicine' | 'scanner.cosmetics'> = {
+  product: 'scanner.product',
+  menu: 'scanner.menu',
+  medicine: 'scanner.medicine',
+  cosmetics: 'scanner.cosmetics',
+};
 
 type ScanMode = ScannerMode;
 
@@ -63,7 +70,9 @@ export default function ScannerScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('');
+  /** Domain analysis mode (product / menu / …). Camera chips use `entryMode`. */
   const [mode, setMode] = useState<ScanMode>('product');
+  const [entryMode, setEntryMode] = useState<CameraEntryMode>('barcode');
   const [result, setResult] = useState<ScanResultExtended | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [safeList, setSafeList] = useState<SafeProduct[]>([]);
@@ -73,6 +82,7 @@ export default function ScannerScreen() {
   const [repeatUnsafe, setRepeatUnsafe] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<CapturedScanPhoto | null>(null);
@@ -83,19 +93,8 @@ export default function ScannerScreen() {
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticResultRef = useRef<ScanResultExtended | null>(null);
 
-  const isPhotoMode = mode === 'menu' || mode === 'medicine' || mode === 'cosmetics';
-  /** All scanner modes can photograph a label; product also scans barcodes live. */
-  const supportsPhotoCapture = true;
-
-  const profileCapabilities = useMemo(
-    () => (profile ? getProfileCapabilities(profile) : null),
-    [profile],
-  );
-
-  useEffect(() => {
-    if (!profileCapabilities?.defaultScannerMode) return;
-    setMode(profileCapabilities.defaultScannerMode);
-  }, [activeProfileId, profileCapabilities?.defaultScannerMode]);
+  const isBarcodeEntry = entryMode === 'barcode';
+  const supportsPhotoCapture = entryMode === 'scanner';
 
   const scanTrends = useMemo(() => computeScanTrends(history), [history]);
 
@@ -267,20 +266,10 @@ export default function ScannerScreen() {
     beginCrop(photo);
   };
 
-  const selectMode = (next: ScanMode) => {
-    if (next === mode) return;
-    setMode(next);
-    setResult(null);
-    setOcrHint(null);
-    setScanError(false);
-    setPendingPhoto(null);
-    lastHapticResultRef.current = null;
-  };
-
-  const openCamera = async () => {
-    // Web: OCR/label modes use the system picker, then the in-app crop editor.
-    // Product still opens the camera UI for barcode attempt + gallery/shutter.
-    if (Platform.OS === 'web' && isPhotoMode) {
+  const openCamera = async (nextEntry: CameraEntryMode = entryMode) => {
+    setEntryMode(nextEntry);
+    // Web photo scanner: system picker → crop editor (no live barcode on web).
+    if (Platform.OS === 'web' && nextEntry === 'scanner') {
       const photo = await captureScanPhotoViaPicker();
       if (photo) beginCrop(photo);
       return;
@@ -292,12 +281,24 @@ export default function ScannerScreen() {
     }
     setScanned(false);
     setCapturing(false);
+    setTorchOn(false);
     setCameraOpen(true);
+  };
+
+  const selectEntryMode = (next: CameraEntryMode) => {
+    setMode('product');
+    setResult(null);
+    setOcrHint(null);
+    setScanError(false);
+    setPendingPhoto(null);
+    lastHapticResultRef.current = null;
+    void openCamera(next);
   };
 
   const handleBarcode = ({ data }: { data: string }) => {
     if (scanned) return;
     setScanned(true);
+    setTorchOn(false);
     setCameraOpen(false);
     setInput(data);
     void runCheck(data, true);
@@ -334,11 +335,12 @@ export default function ScannerScreen() {
 
   const handleCropRetake = () => {
     setPendingPhoto(null);
-    void openCamera();
+    void openCamera('scanner');
   };
 
-  const openScanAction = () => {
-    void openCamera();
+  const closeCamera = () => {
+    setTorchOn(false);
+    setCameraOpen(false);
   };
 
   if (pendingPhoto) {
@@ -365,65 +367,62 @@ export default function ScannerScreen() {
           ref={cameraRef}
           style={StyleSheet.absoluteFillObject}
           facing="back"
+          enableTorch={torchOn}
           barcodeScannerSettings={
-            mode === 'product'
+            isBarcodeEntry
               ? { barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }
               : undefined
           }
-          onBarcodeScanned={mode === 'product' ? handleBarcode : undefined}
+          onBarcodeScanned={isBarcodeEntry ? handleBarcode : undefined}
         />
 
         <View style={styles.cameraOverlay}>
           <View style={styles.cameraTopBar}>
-            <Pressable style={styles.closeBtn} onPress={() => setCameraOpen(false)}>
-              <Ionicons name="close" size={24} color={theme.colors.onAccent} />
+            <Pressable
+              style={styles.closeBtn}
+              onPress={() => setTorchOn((v) => !v)}
+              accessibilityRole="button"
+              accessibilityLabel={t('scanner.flashToggle')}
+              accessibilityState={{ selected: torchOn }}>
+              <Ionicons
+                name={torchOn ? 'flash' : 'flash-outline'}
+                size={22}
+                color={theme.colors.onAccent}
+              />
             </Pressable>
             <Text style={styles.cameraTitle}>
-              {mode === 'product'
-                ? t('scanner.cameraScanProduct')
-                : mode === 'menu'
-                  ? t('scanner.cameraScanMenu')
-                  : mode === 'medicine'
-                    ? t('scanner.cameraScanMedicine')
-                    : t('scanner.cameraScanHousehold')}
+              {isBarcodeEntry ? t('scanner.cameraScanBarcode') : t('scanner.cameraScanSimple')}
             </Text>
-            {supportsPhotoCapture ? (
-              <Pressable
-                style={styles.closeBtn}
-                onPress={() => void pickMenuImage()}
-                accessibilityRole="button"
-                accessibilityLabel={t('scanner.pickFromGallery')}>
-                <Ionicons name="images-outline" size={22} color={theme.colors.onAccent} />
-              </Pressable>
-            ) : (
-              <View style={{ width: 40 }} />
-            )}
+            <Pressable
+              style={styles.closeBtn}
+              onPress={closeCamera}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.cancel')}>
+              <Ionicons name="close" size={24} color={theme.colors.onAccent} />
+            </Pressable>
           </View>
 
           <View style={styles.viewfinderWrap}>
-            <View
-              style={[
-                styles.viewfinder,
-                (isPhotoMode || mode === 'product') && styles.viewfinderPhoto,
-              ]}>
+            <View style={[styles.viewfinder, !isBarcodeEntry && styles.viewfinderPhoto]}>
               <View style={[styles.corner, styles.cornerTL]} />
               <View style={[styles.corner, styles.cornerTR]} />
               <View style={[styles.corner, styles.cornerBL]} />
               <View style={[styles.corner, styles.cornerBR]} />
             </View>
             <Text style={styles.viewfinderHint}>
-              {mode === 'product'
-                ? t('scanner.cameraProductHint')
-                : mode === 'menu'
-                  ? t('scanner.cameraMenuHint')
-                  : mode === 'medicine'
-                    ? t('scanner.cameraMedicineHint')
-                    : t('scanner.cameraHouseholdHint')}
+              {isBarcodeEntry ? t('scanner.cameraBarcodeHint') : t('scanner.cameraScannerHint')}
             </Text>
           </View>
 
           {supportsPhotoCapture ? (
             <View style={styles.shutterRow}>
+              <Pressable
+                style={styles.galleryBtn}
+                onPress={() => void pickMenuImage()}
+                accessibilityRole="button"
+                accessibilityLabel={t('scanner.pickFromGallery')}>
+                <Ionicons name="images-outline" size={22} color={theme.colors.onAccent} />
+              </Pressable>
               <Pressable
                 style={styles.shutterBtn}
                 onPress={() => void capturePhotoFrame()}
@@ -437,19 +436,16 @@ export default function ScannerScreen() {
                   <View style={styles.shutterInner} />
                 )}
               </Pressable>
+              <View style={styles.galleryBtn} />
             </View>
           ) : null}
 
-          {Platform.OS === 'web' && mode === 'product' ? (
+          {Platform.OS === 'web' && isBarcodeEntry ? (
             <View style={styles.webHint}>
               <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.7)" />
               <Text style={styles.webHintText}>{t('scanner.barcodeWebHint')}</Text>
             </View>
           ) : null}
-
-          <Pressable style={styles.cancelBtn} onPress={() => setCameraOpen(false)}>
-            <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
-          </Pressable>
         </View>
       </View>
     );
@@ -465,101 +461,40 @@ export default function ScannerScreen() {
           <Text style={ui.docTitle}>{t('scanner.title')}</Text>
           <Text style={ui.docMeta}>{t('scanner.subtitle')}</Text>
         </View>
-        <View style={styles.headerActions}>
-          <ProfileHeaderButton />
-          <Pressable style={styles.cameraBtn} onPress={openScanAction} accessibilityRole="button">
-            <Ionicons name="camera-outline" size={20} color={theme.colors.accent} />
-          </Pressable>
-        </View>
+        <ProfileHeaderButton />
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.modeRow}>
-        {MODES.map((m) => {
-          const active = mode === m.key;
+      <View style={styles.entryRow}>
+        {ENTRY_MODES.map((m) => {
+          const active = entryMode === m.key;
           return (
             <Pressable
               key={m.key}
-              style={[styles.modeChip, active && styles.modeChipActive]}
-              onPress={() => selectMode(m.key)}
+              style={[styles.entryChip, active && styles.entryChipActive]}
+              onPress={() => selectEntryMode(m.key)}
+              testID={`scanner-entry-${m.key}`}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
               accessibilityLabel={t(m.labelKey)}>
               <Ionicons
                 name={m.icon as any}
-                size={14}
-                color={active ? theme.colors.accent : theme.colors.textSecondary}
+                size={18}
+                color={active ? theme.colors.onAccent : theme.colors.accent}
               />
-              <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>{t(m.labelKey)}</Text>
+              <Text style={[styles.entryChipText, active && styles.entryChipTextActive]}>
+                {t(m.labelKey)}
+              </Text>
             </Pressable>
           );
         })}
-      </ScrollView>
-
-      <GlassCard>
-        <View style={styles.scanRow}>
-          <View style={ui.feedIcon}>
-            <Ionicons
-              name={
-                mode === 'product'
-                  ? 'barcode-outline'
-                  : mode === 'menu'
-                    ? 'restaurant-outline'
-                    : 'medkit-outline'
-              }
-              size={18}
-              color={theme.colors.textSecondary}
-            />
-          </View>
-          <View style={styles.scanBody}>
-            <Text style={styles.scanTitle}>
-              {mode === 'product'
-                ? t('scanner.scanProduct')
-                : mode === 'menu'
-                  ? t('scanner.scanMenu')
-                  : mode === 'medicine'
-                    ? t('scanner.scanMedicine')
-                    : t('scanner.scanHousehold')}
-            </Text>
-            <Text style={styles.scanDesc}>
-              {mode === 'product'
-                ? t('scanner.scanProductDesc')
-                : mode === 'menu'
-                  ? t('scanner.scanMenuDesc')
-                  : mode === 'medicine'
-                    ? t('scanner.scanMedicineDesc')
-                    : t('scanner.scanHouseholdDesc')}
-            </Text>
-          </View>
-          <Button label={t('scanner.openAction')} variant="secondary" size="sm" onPress={openScanAction} />
-        </View>
-
-        {/* Prominent camera CTA for photo-based modes */}
-        {(mode === 'medicine' || mode === 'cosmetics') ? (
-          <Pressable
-            style={styles.photoCta}
-            onPress={openScanAction}
-            accessibilityRole="button"
-            accessibilityLabel={t('scanner.takePhoto')}>
-            <Ionicons name="camera" size={22} color={theme.colors.onAccent} />
-            <Text style={styles.photoCtaText}>{t('scanner.scanWithCamera')}</Text>
-          </Pressable>
-        ) : null}
-      </GlassCard>
+      </View>
 
       <Text style={ui.sectionLabel}>{t('scanner.manualDivider')}</Text>
       <TextInput
         testID="scanner-input"
         value={input}
         onChangeText={setInput}
-        placeholder={
-          mode === 'product'
-            ? t('scanner.productPlaceholder')
-            : mode === 'menu'
-              ? t('scanner.menuPlaceholder')
-              : mode === 'medicine'
-                ? t('scanner.medicinePlaceholder')
-                : t('scanner.householdPlaceholder')
-        }
+        placeholder={t('scanner.productPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
         multiline
         style={styles.input}
@@ -573,7 +508,7 @@ export default function ScannerScreen() {
         disabled={loading}
         onPress={() => {
           const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
-          void runCheck(input.trim(), looksLikeBarcode && mode === 'product');
+          void runCheck(input.trim(), looksLikeBarcode);
         }}
       />
       {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
@@ -726,7 +661,10 @@ export default function ScannerScreen() {
         <GlassCard>
           <Text style={ui.cardTitle}>{t('scanner.trendsTitle')}</Text>
           <Text style={styles.trendMeta}>
-            {scanTrends.totalScans} scans · {scanTrends.highRiskCount} high risk
+            {t('scanner.historyMeta', {
+              total: String(scanTrends.totalScans),
+              highRisk: String(scanTrends.highRiskCount),
+            })}
           </Text>
           {scanTrends.topAllergens.map((item) => (
             <Text key={item.allergenId} style={styles.trendRow}>
@@ -758,7 +696,7 @@ export default function ScannerScreen() {
         <GlassCard padded={false}>
           <Text style={[ui.cardTitle, styles.historyHead]}>{t('scanner.safeList')}</Text>
           {safeList.map((item, index) => {
-            const modeLabel = MODES.find((m) => m.key === item.mode);
+            const modeLabelKey = SAFE_MODE_LABEL_KEYS[item.mode as ScannerMode];
             return (
               <View
                 key={item.id}
@@ -769,7 +707,7 @@ export default function ScannerScreen() {
                 <View style={ui.feedBody}>
                   <Text style={ui.feedTitle}>{item.name}</Text>
                   <Text style={ui.feedSub}>
-                    {modeLabel ? t(modeLabel.labelKey) : item.mode}
+                    {modeLabelKey ? t(modeLabelKey) : item.mode}
                     {' · '}
                     {formatDiaryDate(item.savedAt)}
                   </Text>
@@ -811,58 +749,36 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
-    headerActions: {
+    entryRow: {
       flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
+      gap: 10,
     },
-    cameraBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
+    entryChip: {
+      flex: 1,
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 2,
-    },
-    modeRow: { gap: 6, paddingRight: 4 },
-    modeChip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingVertical: 8,
+      gap: 8,
+      paddingVertical: 14,
       paddingHorizontal: 12,
-      borderRadius: 6,
+      borderRadius: 999,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.borderInput,
-    },
-    modeChipActive: {
       borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
+      minHeight: 48,
     },
-    modeChipText: {
+    entryChipActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    entryChipText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: 15,
       fontWeight: '600',
-      color: colors.textSecondary,
+      color: colors.accent,
     },
-    modeChipTextActive: { color: colors.accent },
-    scanRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    scanBody: { flex: 1, gap: 2, minWidth: 0 },
-    scanTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    scanDesc: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textMuted,
-      lineHeight: 16,
+    entryChipTextActive: {
+      color: colors.onAccent,
     },
     input: {
       backgroundColor: colors.card,
@@ -904,22 +820,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 8,
       borderRadius: 4,
       alignSelf: 'flex-start',
-    },
-    photoCta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 10,
-      marginTop: 10,
-      paddingVertical: 12,
-      borderRadius: 8,
-      backgroundColor: colors.accent,
-    },
-    photoCtaText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.onAccent,
     },
     repeatWarning: {
       fontFamily: fonts.sansSemiBold,
@@ -1083,9 +983,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 24,
     },
     shutterRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 40,
+      marginBottom: 8,
+    },
+    galleryBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 8,
+      backgroundColor: 'rgba(0,0,0,0.35)',
     },
     shutterBtn: {
       width: 72,
@@ -1113,20 +1023,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       padding: 10,
     },
     webHintText: { color: 'rgba(255,255,255,0.7)', fontSize: 12, flex: 1 },
-    cancelBtn: {
-      marginHorizontal: 24,
-      backgroundColor: 'rgba(255,255,255,0.12)',
-      borderRadius: 6,
-      padding: 14,
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.2)',
-    },
-    cancelBtnText: {
-      fontFamily: fonts.sansSemiBold,
-      color: colors.onAccent,
-      fontWeight: '600',
-      fontSize: 15,
-    },
   });
 }
