@@ -21,6 +21,8 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `SYNC_ENABLED` | Cloud backup | `true` on staging |
 | `AI_SCAN_ENABLED` / `AI_PROVIDER` | Scan | `yandex` on staging |
 | `YC_FOLDER_ID` / `YC_AI_API_KEY` / `YC_OCR_ENABLED` | Yandex AI | API key ≠ authorized key JSON |
+| `YC_SCAN_INTENT_LLM` | GPT intent `/api/scan/intent` | `true` (+ `AI_SCAN_ENABLED`) → health `ycScanIntentLlm` |
+| `YC_SEARCH_ENABLED` | Search `/api/search/ingredients` | `true` (+ `YC_AI_*`) → health `ycSearch` |
 | `SCAN_REQUIRE_AUTH` | Scan auth | `true` |
 | `CORS_ORIGINS` | Web CORS | staging.aclearo.* + localhost |
 | `POLLEN_HEATMAP_ENABLED` | Pollen proxy | `true` |
