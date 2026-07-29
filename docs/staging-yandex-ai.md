@@ -124,6 +124,14 @@ curl -sS -X POST "$STAGING_API_URL/api/scan/intent" \
 
 `GET /api/health` → `features.ycScanIntentLlm: true` when enabled.
 
+Enable B+C on YC staging (Lockbox + redeploy):
+
+```bash
+export YC_CONTAINER_ID=bba700s2t35i2khgmiit
+export YC_REGISTRY_ID=crpf0kl3mrg2qnnd374l
+BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
+```
+
 ### C — Yandex Search ingredients (flag)
 
 | Item | Detail |
