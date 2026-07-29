@@ -236,6 +236,7 @@ const ru: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Шаг {{current}} из {{total}}',
+    stepOfSection: 'Шаг {{current}} из {{total}} · {{section}}',
     skipSection: 'Пропустить раздел',
     deleteEntry: 'Удалить запись',
     fillOneSection: 'Заполните хотя бы один раздел дневника.',

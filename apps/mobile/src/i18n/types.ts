@@ -238,6 +238,7 @@ export type LocaleMessages = {
   };
   diaryWizard: {
     stepOf: string;
+    stepOfSection: string;
     skipSection: string;
     deleteEntry: string;
     fillOneSection: string;

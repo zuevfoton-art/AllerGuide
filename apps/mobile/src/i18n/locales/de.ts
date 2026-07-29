@@ -236,6 +236,7 @@ const de: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Schritt {{current}} von {{total}}',
+    stepOfSection: 'Schritt {{current}} von {{total}} · {{section}}',
     skipSection: 'Abschnitt überspringen',
     deleteEntry: 'Eintrag löschen',
     fillOneSection: 'Füllen Sie mindestens einen Tagebuchabschnitt aus.',

@@ -235,6 +235,7 @@ const it: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Passo {{current}} di {{total}}',
+    stepOfSection: 'Passo {{current}} di {{total}} · {{section}}',
     skipSection: 'Salta sezione',
     deleteEntry: 'Elimina voce',
     fillOneSection: 'Compila almeno una sezione del diario.',
