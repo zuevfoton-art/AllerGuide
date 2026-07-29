@@ -182,6 +182,18 @@ export type LocaleMessages = {
     marketplaceOpen: string;
     disclaimer: string;
     phenotypeHintsTitle: string;
+    insightsTitle: string;
+    insightsEmpty: string;
+    insightsSelectProfileTitle: string;
+    insightsSelectProfileText: string;
+    insightsOpenProfiles: string;
+    insightsDiaryTitle: string;
+    insightsDiaryText: string;
+    insightsOpenDiary: string;
+    insightsActTitle: string;
+    insightsActText: string;
+    insightsOpenAct: string;
+    insightsOpenProfile: string;
   };
   diary: {
     title: string;

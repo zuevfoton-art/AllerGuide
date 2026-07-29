@@ -1,16 +1,19 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useMemo } from 'react';
-import type { HomeQuickAction } from '@allerguide/core';
-import { getDiaryEntries } from '@/src/services/diary-service';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { DiaryEntry } from '@allerguide/core';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import {
+  buildHomeInsightItems,
+  loadDiaryEntriesForHome,
+  type HomeInsightItem,
+} from '@/src/services/home-insights-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Skeleton } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
@@ -24,6 +27,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
+import { getDiaryEntries } from '@/src/services/diary-service';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -46,6 +50,7 @@ export default function HomeScreen() {
   const { t, locale } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
 
   const profileCapabilities = useMemo(
     () => (profile ? getProfileCapabilities(profile) : null),
@@ -66,11 +71,20 @@ export default function HomeScreen() {
   const loadingWellness = wellnessState.loading;
   const reloadWellness = wellnessState.reload;
 
+  const reloadHomeData = useCallback(() => {
+    void reloadWellness();
+    if (!activeProfileId) {
+      setDiaryEntries([]);
+      return;
+    }
+    void loadDiaryEntriesForHome(activeProfileId).then(setDiaryEntries);
+  }, [reloadWellness, activeProfileId]);
+
   useFocusEffect(
     useCallback(() => {
-      void reloadWellness();
+      reloadHomeData();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [reloadWellness, activeProfileId, locale]),
+    }, [reloadHomeData, locale]),
   );
 
   useEffect(() => {
@@ -87,67 +101,6 @@ export default function HomeScreen() {
     );
   }, [wellness, activeProfileId, profile, profileCapabilities]);
 
-  const diaryActionMeta: Record<
-    HomeQuickAction,
-    { labelKey: string; icon: string; subKey: string; route: string }
-  > = useMemo(
-    () => ({
-      symptoms: {
-        labelKey: 'home.symptoms',
-        icon: 'pulse',
-        subKey: 'home.symptomsSub',
-        route: '/(tabs)/diary',
-      },
-      food: {
-        labelKey: 'home.food',
-        icon: 'restaurant',
-        subKey: 'home.foodSub',
-        route: '/(tabs)/diary',
-      },
-      medicine: {
-        labelKey: 'home.medicine',
-        icon: 'medkit',
-        subKey: 'home.medicineSub',
-        route: '/(tabs)/diary',
-      },
-      peakFlow: {
-        labelKey: 'home.peakFlow',
-        icon: 'speedometer',
-        subKey: 'home.peakFlowSub',
-        route: '/(tabs)/diary',
-      },
-      asit: {
-        labelKey: 'home.asit',
-        icon: 'fitness',
-        subKey: 'home.asitSub',
-        route: '/asit-course',
-      },
-    }),
-    [],
-  );
-
-  const diaryRows = useMemo(() => {
-    const actions = profileCapabilities?.homeQuickActions ?? ['symptoms', 'food', 'medicine'];
-    return actions.map((action) => {
-      const meta = diaryActionMeta[action];
-      return {
-        action,
-        label: t(meta.labelKey as 'home.symptoms'),
-        icon: meta.icon,
-        route: meta.route,
-        sub: t(meta.subKey as 'home.symptomsSub'),
-      };
-    });
-  }, [profileCapabilities, diaryActionMeta, t]);
-
-  const primaryRecommendation = useMemo(() => {
-    if (!wellness?.recommendations.length) return null;
-    const recs = profileCapabilities?.reminders.pollen
-      ? wellness.recommendations
-      : wellness.recommendations.filter((rec) => rec.icon !== '🌿' && rec.icon !== '📅');
-    return recs[0] ?? null;
-  }, [wellness, profileCapabilities]);
-
   const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;
   const confidenceBadge = wellness
     ? badgeStyle(confidenceBadgeKind(wellness.confidence), theme)
@@ -158,17 +111,28 @@ export default function HomeScreen() {
     [profile],
   );
 
-  const todayLabel = useMemo(() => {
-    try {
-      return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date());
-    } catch {
-      return t('home.today');
-    }
-  }, [locale, t]);
+  const insightItems = useMemo(
+    () =>
+      buildHomeInsightItems({
+        profile,
+        diaryEntries,
+        wellness,
+        phenotypeHints,
+        t,
+      }),
+    [profile, diaryEntries, wellness, phenotypeHints, t],
+  );
 
   return (
     <Screen
-      onRefresh={activeProfileId ? () => void wellnessState.refresh() : undefined}
+      onRefresh={
+        activeProfileId
+          ? () => {
+              void wellnessState.refresh();
+              void loadDiaryEntriesForHome(activeProfileId).then(setDiaryEntries);
+            }
+          : undefined
+      }
       refreshing={wellnessState.refreshing}>
       <View style={styles.topBar}>
         <View style={styles.brandBlock}>
@@ -186,16 +150,6 @@ export default function HomeScreen() {
           </Pressable>
         </View>
       </View>
-
-      <View style={styles.heroCalm}>
-        <Text style={ui.docTitle}>{t('home.today')}</Text>
-        <Text style={ui.docMeta}>
-          {todayLabel}
-          {profile?.name ? ` · ${t('home.profilePrefix')}: ${profile.name}` : ` · ${t('home.selectProfile')}`}
-        </Text>
-      </View>
-
-      <ProfileSwitcher />
 
       <GlassCard variant="calm">
         <View style={ui.cardHead}>
@@ -257,49 +211,25 @@ export default function HomeScreen() {
 
       <GlassCard padded={false}>
         <View style={[styles.listHead, styles.listHeadPad]}>
-          <Text style={ui.cardTitle}>{t('home.diary')}</Text>
-          <Pressable onPress={() => router.push('/(tabs)/diary')}>
-            <Text style={ui.sectionLink}>{t('common.more')}</Text>
-          </Pressable>
+          <Text style={ui.cardTitle}>{t('home.insightsTitle')}</Text>
         </View>
-        {diaryRows.map((row, index) => (
-          <View
-            key={row.label}
-            style={[styles.listRow, index < diaryRows.length - 1 && styles.listRowBorder]}>
-            <View style={ui.feedIcon}>
-              <Ionicons name={row.icon as any} size={16} color={theme.colors.textSecondary} />
-            </View>
-            <View style={ui.feedBody}>
-              <Text style={ui.feedTitle}>{row.label}</Text>
-              <Text style={ui.feedSub}>{row.sub}</Text>
-            </View>
-            <Button
-              label={t('home.addEntry')}
-              variant="primary"
-              size="sm"
-              onPress={() => router.push(row.route as any)}
-            />
+        {insightItems.length === 0 ? (
+          <View style={styles.emptyInsights}>
+            <Text style={styles.emptyInsightsText}>{t('home.insightsEmpty')}</Text>
           </View>
-        ))}
+        ) : (
+          insightItems.map((item, index) => (
+            <InsightRow
+              key={item.id}
+              item={item}
+              bordered={index < insightItems.length - 1}
+              styles={styles}
+              ui={ui}
+              theme={theme}
+            />
+          ))
+        )}
       </GlassCard>
-
-      {phenotypeHints.length ? (
-        <GlassCard variant="calm" style={styles.recCard}>
-          <Text style={styles.recTitle}>{t('home.phenotypeHintsTitle')}</Text>
-          {phenotypeHints.map((hint) => (
-            <Text key={hint} style={styles.recText}>
-              • {hint}
-            </Text>
-          ))}
-        </GlassCard>
-      ) : null}
-
-      {primaryRecommendation ? (
-        <GlassCard variant="calm" style={styles.recCard}>
-          <Text style={styles.recTitle}>{primaryRecommendation.title}</Text>
-          <Text style={styles.recText}>{primaryRecommendation.text}</Text>
-        </GlassCard>
-      ) : null}
 
       <GlassCard padded={false}>
         <Pressable
@@ -320,6 +250,40 @@ export default function HomeScreen() {
 
       <Disclaimer showMdrFootnote>{t('home.disclaimer')}</Disclaimer>
     </Screen>
+  );
+}
+
+function InsightRow({
+  item,
+  bordered,
+  styles,
+  ui,
+  theme,
+}: {
+  item: HomeInsightItem;
+  bordered: boolean;
+  styles: ReturnType<typeof createStyles>;
+  ui: ReturnType<typeof useUiStyles>;
+  theme: AppTheme;
+}) {
+  return (
+    <View style={[styles.listRow, bordered && styles.listRowBorder]}>
+      <View style={ui.feedIcon}>
+        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={16} color={theme.colors.textSecondary} />
+      </View>
+      <View style={ui.feedBody}>
+        <Text style={ui.feedTitle}>{item.title}</Text>
+        <Text style={ui.feedSub}>{item.text}</Text>
+      </View>
+      {item.action ? (
+        <Button
+          label={item.action.label}
+          variant="primary"
+          size="sm"
+          onPress={() => router.push(item.action!.href as never)}
+        />
+      ) : null}
+    </View>
   );
 }
 
@@ -358,15 +322,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: colors.dangerBorder,
-    },
-    heroCalm: {
-      gap: 4,
-      backgroundColor: colors.calmWash,
-      borderRadius: radii.lg,
-      borderWidth: 1,
-      borderColor: colors.calmMist,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
     },
     skeletonWrap: { gap: 10, paddingVertical: 12 },
     cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -415,14 +370,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 12,
     },
     listRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    recCard: { gap: 6 },
-    recTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
+    emptyInsights: {
+      paddingHorizontal: 16,
+      paddingVertical: 16,
     },
-    recText: {
+    emptyInsightsText: {
       fontFamily: fonts.sans,
       fontSize: 13,
       color: colors.textSecondary,

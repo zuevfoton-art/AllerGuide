@@ -47,6 +47,7 @@ export * from './pef-zones';
 export * from './asthma-action-plan';
 export * from './diary-profile';
 export * from './profile-capabilities';
+export * from './home-insights';
 export * from './diary-triggers';
 export * from './wellness';
 export * from './wellness-weights';
