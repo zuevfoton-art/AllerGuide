@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOS — A-Claro screen mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_tokens.css" />
+  <link rel="stylesheet" href="_phone-frame.css" />
+</head>
+<body>
+  <header class="page-meta">
+    <div>
+      <h1>SOS</h1>
+      <p>As-is · <code>app/(tabs)/sos.tsx</code> · <a href="index.html">← оглавление</a></p>
+      <div class="state-switch" role="group" aria-label="Состояние макета">
+        <button type="button" class="active" data-show="default">default</button>
+        <button type="button" data-show="empty">empty profile</button>
+      </div>
+    </div>
+    <div class="meta-badges">
+      <span class="badge">route <code>/(tabs)/sos</code></span>
+      <span class="badge">pinned <code>SosEmergencyBar</code></span>
+    </div>
+  </header>
+
+  <div class="device-wrap">
+    <div class="phone" data-component="Screen">
+      <div class="notch" aria-hidden="true"></div>
+      <div class="status-bar"><span>9:41</span><span>LTE</span></div>
+
+      <div class="screen-body" data-state="default" id="state-default">
+        <div class="pinned-top" data-component="SosEmergencyBar">
+          <div class="sos-bar">
+            <button type="button" class="call-main">Позвонить 103</button>
+            <div class="contact">
+              <div>
+                <strong>Анна · мама</strong><br />
+                <span style="opacity:.85">+7 900 000-00-00</span>
+              </div>
+              <button type="button" class="btn">Позвонить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-scroll">
+          <div class="header-row" data-component="ScreenHeader">
+            <div>
+              <div class="screen-eyebrow" data-component="ScreenEyebrow">A-Claro · SOS</div>
+              <h2 class="screen-title">SOS</h2>
+              <p class="screen-subtitle">Экстренная информация</p>
+            </div>
+            <div class="header-actions">
+              <div class="icon-btn" data-component="ProfileHeaderButton" title="Профиль">👤</div>
+              <button type="button" class="btn btn-sm btn-ghost">Изменить</button>
+            </div>
+          </div>
+
+          <div class="profile-switcher" data-component="ProfileSwitcher">
+            <div class="profile-pill active">Маша</div>
+            <div class="profile-pill">Папа</div>
+            <div class="profile-pill">+</div>
+          </div>
+
+          <div class="glass-card danger-tint" data-component="EpiHintCard">
+            <div class="row">
+              <div>
+                <div style="font-weight:700;color:var(--danger);font-size:14px;">Автоинъектор адреналина</div>
+                <p class="muted" style="margin-top:4px;">Укажите наличие и место хранения в паспорте.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline">Изменить</button>
+            </div>
+          </div>
+
+          <div class="glass-card" data-component="ProfileKpiCard">
+            <div class="kpi-row">
+              <div class="kpi"><div class="label">Имя</div><div class="value">Маша</div></div>
+              <div class="kpi"><div class="label">Возраст</div><div class="value">8</div></div>
+            </div>
+            <div class="chips" style="margin-top:10px;">
+              <span class="chip danger">молоко</span>
+              <span class="chip danger">арахис</span>
+              <span class="chip">пыльца берёзы</span>
+            </div>
+          </div>
+
+          <div data-component="PassportCollapse">
+            <div class="collapse-head">Паспорт аллергика <span class="muted">▾</span></div>
+            <div class="glass-card" style="margin-top:8px;">
+              <p class="muted">Группа крови, диагнозы, лекарства — кратко.</p>
+              <div class="row" style="margin-top:10px;">
+                <button type="button" class="btn btn-sm btn-outline">Поделиться</button>
+                <button type="button" class="btn btn-sm btn-outline">PDF</button>
+              </div>
+            </div>
+          </div>
+
+          <div data-component="AnaphylaxisCollapse">
+            <div class="collapse-head">Алгоритм анафилаксии <span class="muted">▾</span></div>
+          </div>
+
+          <div class="glass-card padded-none" data-component="ContactsCard">
+            <div class="card-title-inset">Контакты</div>
+            <div class="list-row">
+              <div class="icon">📞</div>
+              <div class="body">
+                <div class="title">Анна</div>
+                <div class="sub">мама · +7 900 000-00-00</div>
+              </div>
+              <button type="button" class="btn btn-sm btn-danger">Позвонить</button>
+            </div>
+            <div class="list-row">
+              <div class="icon">📞</div>
+              <div class="body">
+                <div class="title">Игорь</div>
+                <div class="sub">папа · +7 900 111-11-11</div>
+              </div>
+              <button type="button" class="btn btn-sm btn-danger">Позвонить</button>
+            </div>
+          </div>
+
+          <a href="#" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;">Настройки SOS и уведомлений →</a>
+
+          <div class="glass-card calm" style="font-size:12px;color:var(--tip-text);border-color:var(--tip-border);background:var(--tip-bg);">
+            В экстренной ситуации сначала вызов 103, затем контакты из списка.
+          </div>
+
+          <p class="disclaimer" data-component="Disclaimer">Не заменяет консультацию врача. При угрозе жизни вызывайте скорую.</p>
+        </div>
+      </div>
+
+      <div class="screen-body" data-state="empty" id="state-empty">
+        <div class="screen-scroll">
+          <div class="header-row">
+            <div>
+              <div class="screen-eyebrow">A-Claro · SOS</div>
+              <h2 class="screen-title">SOS</h2>
+              <p class="screen-subtitle">Экстренная информация</p>
+            </div>
+          </div>
+          <div class="glass-card empty-state" data-component="EmptyState">
+            <div class="title">Нет профиля</div>
+            <p class="muted" style="margin-bottom:12px;">Создайте профиль, чтобы заполнить SOS-паспорт и контакты.</p>
+            <button type="button" class="btn btn-accent">Создать профиль</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="tabbar" data-component="TabBar" aria-label="Вкладки">
+        <div class="tab"><span class="glyph">⌂</span>Главная</div>
+        <div class="tab"><span class="glyph">▤</span>Дневник</div>
+        <div class="tab"><span class="glyph">⌕</span>Сканер</div>
+        <div class="tab"><span class="glyph">▣</span>Маркет</div>
+        <div class="tab"><span class="glyph">◎</span>Карта</div>
+        <div class="tab sos active"><span class="glyph">!</span>SOS</div>
+      </nav>
+    </div>
+  </div>
+
+  <p class="handoff-note">
+    Handoff: <code>SosEmergencyBar</code> остаётся <strong>pinned</strong> над скроллом.
+    CTA «Позвонить 103» — крупный touch-target. Код: <code>app/(tabs)/sos.tsx</code>,
+    <code>src/components/SosEmergencyBar.tsx</code>.
+  </p>
+
+  <script>
+    const buttons = document.querySelectorAll(".state-switch button");
+    const states = document.querySelectorAll("[data-state]");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const id = btn.getAttribute("data-show");
+        states.forEach((el) => {
+          el.classList.toggle("visible", el.getAttribute("data-state") === id);
+        });
+      });
+    });
+    document.getElementById("state-default").classList.add("visible");
+  </script>
+</body>
+</html>
