@@ -579,6 +579,8 @@ const en: LocaleMessages = {
     add: 'Profile',
     hint: 'Tap the active profile again to edit',
     manage: 'My profiles & account',
+    switchTitle: 'Switch profile',
+    switchEmpty: 'No profiles yet. Create one to use the diary and SOS.',
   },
   onboarding: {
     tagline: 'A for clarity.',

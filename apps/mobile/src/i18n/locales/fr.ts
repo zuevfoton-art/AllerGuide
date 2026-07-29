@@ -577,6 +577,8 @@ const fr: LocaleMessages = {
     add: 'Profil',
     hint: 'Appuyez à nouveau sur le profil actif pour modifier',
     manage: 'Mes profils et compte',
+    switchTitle: 'Changer de profil',
+    switchEmpty: 'Aucun profil pour l’instant. Créez-en un pour le journal et le SOS.',
   },
   onboarding: {
     tagline: 'A for clarity.',

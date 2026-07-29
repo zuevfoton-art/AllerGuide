@@ -577,6 +577,8 @@ const it: LocaleMessages = {
     add: 'Profilo',
     hint: 'Tocca di nuovo il profilo attivo per modificare',
     manage: 'I miei profili e account',
+    switchTitle: 'Cambia profilo',
+    switchEmpty: 'Nessun profilo ancora. Creane uno per diario e SOS.',
   },
   onboarding: {
     tagline: 'Alergia. Claro.',
