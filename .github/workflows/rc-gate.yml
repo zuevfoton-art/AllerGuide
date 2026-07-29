@@ -33,7 +33,8 @@ jobs:
 
       - name: RC gate checks (P2.8)
         env:
-          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+          # Prefer repo secret; fall back to canonical YC staging URL (public health endpoint).
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL != '' && secrets.STAGING_API_URL || 'https://api.staging.aclearo.com' }}
         run: node scripts/rc-gate-check.mjs
 
       - name: Gate summary
@@ -42,4 +43,6 @@ jobs:
           echo "## RC Gate" >> "$GITHUB_STEP_SUMMARY"
           echo "See [docs/rc-gate.md](docs/rc-gate.md) and [staging-soak-log.md](docs/staging-soak-log.md)." >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Manual: Maestro nightly green, Sentry crash-free ≥99%, soak sign-off." >> "$GITHUB_STEP_SUMMARY"
+          echo "Automated: typecheck/lint/test + staging health." >> "$GITHUB_STEP_SUMMARY"
+          echo "Manual (soak): Maestro nightly green, Sentry crash-free ≥99%, soak sign-off." >> "$GITHUB_STEP_SUMMARY"
+          echo "If soak is **BLOCKED**, Phase 2 milestone stays open." >> "$GITHUB_STEP_SUMMARY"
