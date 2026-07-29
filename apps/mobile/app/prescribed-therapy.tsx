@@ -13,7 +13,11 @@ import {
   type PrescribedTherapyRoute,
   type PrescribedTherapyStage,
 } from '@allerguide/core';
-import { getDemoPrescriptionParse, parsePrescriptionText } from '@allerguide/ai';
+import {
+  applyPrescriptionParseToCourse,
+  getDemoPrescriptionParse,
+  parsePrescriptionText,
+} from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -77,19 +81,7 @@ export default function PrescribedTherapyScreen() {
       const parsed = parseText.trim()
         ? parsePrescriptionText(parseText)
         : getDemoPrescriptionParse();
-      const update: Partial<PrescribedCourse> = {};
-      if (parsed.drug && !course.drug.trim()) update.drug = parsed.drug;
-      if (parsed.dosage && !course.dosage.trim()) update.dosage = parsed.dosage;
-      if (parsed.startDate && !course.startDate.trim()) update.startDate = parsed.startDate;
-      if (parsed.notes && !course.scheduleNotes.trim()) update.scheduleNotes = parsed.notes;
-      if (parsed.scheduleStages.length > 0) {
-        update.stages = parsed.scheduleStages.map((s) => ({
-          from: s.from,
-          to: s.to,
-          dose: s.dose,
-        }));
-      }
-      setCourse((prev) => ({ ...prev, ...update }));
+      setCourse((prev) => applyPrescriptionParseToCourse(prev, parsed));
       setParseTextOpen(false);
       if (parsed.scheduleStages.length > 0) setStep('verify');
     } finally {
@@ -191,8 +183,58 @@ export default function PrescribedTherapyScreen() {
       </View>
 
       <GlassCard style={styles.section}>
+        {/* Prescription upload + OCR — top of form so recognition can prefill fields below */}
+        <Text style={ui.sectionLabel}>{t('prescribedTherapy.uploadPrescription')}</Text>
+        <View style={styles.uploadRow}>
+          <Pressable
+            style={[styles.uploadChip, course.prescriptionPhotoUri ? styles.uploadChipActive : null]}
+            onPress={() => void pickPhoto()}
+            accessibilityRole="button"
+            accessibilityLabel={t('prescribedTherapy.uploadPhoto')}>
+            <Ionicons
+              name="camera"
+              size={15}
+              color={course.prescriptionPhotoUri ? theme.colors.accent : theme.colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.uploadChipText,
+                course.prescriptionPhotoUri ? styles.uploadChipTextActive : null,
+              ]}>
+              {t('prescribedTherapy.uploadPhoto')}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.uploadChip, course.prescriptionDocUri ? styles.uploadChipActive : null]}
+            onPress={() => void pickPdf()}
+            accessibilityRole="button"
+            accessibilityLabel={t('prescribedTherapy.uploadPdf')}>
+            <Ionicons
+              name="document"
+              size={15}
+              color={course.prescriptionDocUri ? theme.colors.accent : theme.colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.uploadChipText,
+                course.prescriptionDocUri ? styles.uploadChipTextActive : null,
+              ]}>
+              {t('prescribedTherapy.uploadPdf')}
+            </Text>
+          </Pressable>
+        </View>
+
+        <Pressable
+          style={styles.ocrBtn}
+          onPress={() => setParseTextOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('prescribedTherapy.ocrParse')}>
+          <Ionicons name="scan-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.ocrBtnText}>{t('prescribedTherapy.ocrParse')}</Text>
+        </Pressable>
+
         {/* Drug */}
-        <Text style={ui.sectionLabel}>{t('prescribedTherapy.drugLabel')}</Text>
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.drugLabel')}</Text>
         <TextInput
           style={styles.input}
           value={course.drug}
@@ -211,19 +253,25 @@ export default function PrescribedTherapyScreen() {
           placeholderTextColor={theme.colors.textMuted}
         />
 
-        {/* Route */}
+        {/* Route — bubble chips */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.routeLabel')}</Text>
-        <View style={[ui.toggleRow, styles.routeGrid]}>
-          {ROUTES.map((route) => (
-            <Pressable
-              key={route}
-              style={[ui.toggle, styles.routeToggle, course.route === route && ui.toggleActive]}
-              onPress={() => setCourse((prev) => ({ ...prev, route }))}>
-              <Text style={[ui.toggleText, course.route === route && ui.toggleTextActive]}>
-                {PRESCRIBED_THERAPY_ROUTE_LABELS[route]}
-              </Text>
-            </Pressable>
-          ))}
+        <View style={styles.routeBubbles}>
+          {ROUTES.map((route) => {
+            const active = course.route === route;
+            return (
+              <Pressable
+                key={route}
+                style={[styles.routeBubble, active && styles.routeBubbleActive]}
+                onPress={() => setCourse((prev) => ({ ...prev, route }))}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={PRESCRIBED_THERAPY_ROUTE_LABELS[route]}>
+                <Text style={[styles.routeBubbleText, active && styles.routeBubbleTextActive]}>
+                  {PRESCRIBED_THERAPY_ROUTE_LABELS[route]}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Start / End dates */}
@@ -259,29 +307,6 @@ export default function PrescribedTherapyScreen() {
           multiline
           textAlignVertical="top"
         />
-
-        {/* Prescription upload */}
-        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.uploadPrescription')}</Text>
-        <View style={ui.toggleRow}>
-          <Pressable style={[ui.toggle, course.prescriptionPhotoUri ? ui.toggleActive : null]} onPress={() => void pickPhoto()}>
-            <Ionicons name="camera" size={15} color={course.prescriptionPhotoUri ? theme.colors.accent : theme.colors.textSecondary} />
-            <Text style={[ui.toggleText, course.prescriptionPhotoUri ? ui.toggleTextActive : null]}>
-              {t('prescribedTherapy.uploadPhoto')}
-            </Text>
-          </Pressable>
-          <Pressable style={[ui.toggle, course.prescriptionDocUri ? ui.toggleActive : null]} onPress={() => void pickPdf()}>
-            <Ionicons name="document" size={15} color={course.prescriptionDocUri ? theme.colors.accent : theme.colors.textSecondary} />
-            <Text style={[ui.toggleText, course.prescriptionDocUri ? ui.toggleTextActive : null]}>
-              {t('prescribedTherapy.uploadPdf')}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* OCR */}
-        <Pressable style={styles.ocrBtn} onPress={() => setParseTextOpen(true)}>
-          <Ionicons name="scan-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.ocrBtnText}>{t('prescribedTherapy.ocrParse')}</Text>
-        </Pressable>
 
         {/* Notes */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.notesLabel')}</Text>
@@ -519,16 +544,70 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, fontFamily: fonts.sans, color: colors.text,
     },
     inputMultiline: { minHeight: 80, lineHeight: 22 },
-    routeGrid: { flexWrap: 'wrap' },
-    routeToggle: { marginBottom: 6 },
+    uploadRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    uploadChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 9,
+      paddingHorizontal: 12,
+      borderRadius: 999,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+    },
+    uploadChipActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+    },
+    uploadChipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    uploadChipTextActive: { color: colors.accent },
+    routeBubbles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    routeBubble: {
+      paddingVertical: 9,
+      paddingHorizontal: 14,
+      borderRadius: 999,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+    },
+    routeBubbleActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accent,
+    },
+    routeBubbleText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    routeBubbleTextActive: { color: colors.card },
     dateRow: { flexDirection: 'row', gap: 8 },
     dateField: { flex: 1 },
     ocrBtn: {
-      flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12,
-      paddingVertical: 10, paddingHorizontal: 14, borderRadius: 6,
-      backgroundColor: colors.accentLight, borderWidth: 1, borderColor: colors.accent,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      marginTop: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderRadius: 6,
+      backgroundColor: colors.accentLight,
+      borderWidth: 1,
+      borderColor: colors.accent,
     },
-    ocrBtnText: { fontFamily: fonts.sansSemiBold, fontSize: 14, fontWeight: '600', color: colors.accent },
+    ocrBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     stageCard: { gap: 8, marginBottom: 8 },
     stageLabel: { fontFamily: fonts.sansSemiBold, fontSize: 13, fontWeight: '600', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
     stageDateRow: { flexDirection: 'row', gap: 8 },
