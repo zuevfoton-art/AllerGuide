@@ -35,6 +35,7 @@
 | `YC_AI_API_KEY_ID` | id ключа (ротация) |
 | `AI_PROVIDER` | `yandex` |
 | `AI_SCAN_ENABLED` / `YC_OCR_ENABLED` | флаги Phase 1–2 |
+| `YC_SCAN_INTENT_LLM` / `YC_SEARCH_ENABLED` | опции B/C (default off) |
 
 Smoke credentials:
 
@@ -92,33 +93,64 @@ curl -sS -X POST "$STAGING_API_URL/api/ocr" \
 
 ---
 
-## Scanner photo routing (mobile)
+## Scanner photo routing
 
 После фото в режиме «Сканер»:
 
-1. **Yandex Vision OCR** (`POST /api/ocr`) — текст с кадра  
-2. **`classifyScanImageIntent`** (`@allerguide/ai`) — плотный текст / «Состав» → `label_or_menu`; короткое имя блюда → `visual_product`  
-3. **label_or_menu** → анализ текста через `POST /api/scan` (YandexGPT)  
-4. **visual_product** → умный поиск состава (Open Food Facts / каталог) → затем YandexGPT / mock  
+### A — default (всегда)
 
-Мультимодальный «GPT смотрит на картинку» в репозитории пока не подключён.
+1. **Yandex Vision OCR** (`POST /api/ocr`) или demo OCR offline  
+2. **Heuristic** `classifyScanIntentHeuristic` — плотный текст / «Состав» → `label_or_menu`; короткое имя → `visual_product`  
+3. **label_or_menu** → `POST /api/scan` (YandexGPT) / mock  
+4. **visual_product** → OFF / локальный каталог → затем GPT/mock  
 
-### Варианты Yandex AI для следующего шага
+Флаги mobile: `EXPO_PUBLIC_YC_OCR`, `EXPO_PUBLIC_AI_SCAN_ENABLED` (оба могут быть off — тогда demo + mock).
 
-| Вариант | Что даёт | Когда брать |
-|---------|----------|-------------|
-| **A. Vision OCR + YandexGPT (текущий)** | Текст с этикетки/меню → LLM-вердикт; без текста → OFF/каталог | Staging сейчас; offline-first с demo OCR |
-| **B. YandexGPT + Vision как классификатор** | Отдельный prompt: «этикетка / меню / блюдо / упаковка ЛС» по OCR-сниппету | Уточнить intent без multimodal |
-| **C. Yandex Search API** | Поиск состава по названию блюда/препарата в вебе | Когда OFF/каталог пуст (`search-api` уже в Phase 0 SA) |
-| **D. Multimodal foundation model** (когда появится в YC) | Прямой разбор фото без отдельного OCR | Только после появления API; не ломать offline |
+### B — GPT intent classifier (flag)
 
-Рекомендация: держать **A** как default; добавить **B+C** за флагами, если растёт доля «фото без текста».
+| Item | Detail |
+|------|--------|
+| API | `POST /api/scan/intent` · `YC_SCAN_INTENT_LLM=true` + `AI_SCAN_ENABLED=true` |
+| Mobile | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM=true` · `scan-intent-api-service.ts` |
+| Domain | `buildScanIntentPrompt` / `parseScanIntentResponse` in `@allerguide/ai` |
+| Fallback | Heuristic A при флаге off / 5xx / invalid JSON |
+
+```bash
+curl -sS -X POST "$STAGING_API_URL/api/scan/intent" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"Меню: паста карбонара, салат цезарь"}'
+```
+
+`GET /api/health` → `features.ycScanIntentLlm: true` when enabled.
+
+### C — Yandex Search ingredients (flag)
+
+| Item | Detail |
+|------|--------|
+| API | `POST /api/search/ingredients` · `YC_SEARCH_ENABLED=true` + `YC_AI_*` |
+| Mobile | `EXPO_PUBLIC_YC_SEARCH=true` · after OFF/catalog miss in `lookupDishIngredientsForScan` |
+| Provider | Generative search → web search snippets |
+| Fallback | Skip (continue OCR text analysis) when off / 404 |
+
+```bash
+curl -sS -X POST "$STAGING_API_URL/api/search/ingredients" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"оливье"}'
+```
+
+`GET /api/health` → `features.ycSearch: true` when enabled.
+
+### D — multimodal (future)
+
+Прямой разбор фото без отдельного OCR — не реализован; не ломать offline-first.
 
 ---
 
 ## Next
 
 - Phase 3: SpeechKit STT fallback  
-- Phase 4: Search API (в т.ч. для visual_product fallback)  
+- Phase 4: tune Search API prompts / caching for option C  
 
-Offline-first и feature flags: без флагов приложение работает как раньше.
+Offline-first и feature flags: без флагов приложение работает как раньше (A heuristic + demo OCR + mock).

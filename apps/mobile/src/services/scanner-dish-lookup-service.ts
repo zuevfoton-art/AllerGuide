@@ -4,6 +4,7 @@ import {
   enrichDishFromOpenFoods,
   type DishEnrichmentResult,
 } from '@/src/services/dish-off-enrichment-service';
+import { searchIngredientsViaApi } from '@/src/services/search-ingredients-api-service';
 import { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
 
 export { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
@@ -15,7 +16,7 @@ export type DishScanLookup = {
   declaredAllergenIds: string[];
   traceAllergenIds: string[];
   source: NonNullable<ScanResult['source']>;
-  enrichment: DishEnrichmentResult;
+  enrichment?: DishEnrichmentResult;
 };
 
 function buildIngredientsText(
@@ -39,7 +40,8 @@ function mapEnrichmentSource(
 }
 
 /**
- * OCR/dish name → local dish catalog and/or Open Food Facts ingredients for product scan.
+ * OCR/dish name → local dish catalog and/or Open Food Facts ingredients.
+ * Option C (flag): Yandex Search API when catalog/OFF miss.
  */
 export async function lookupDishIngredientsForScan(
   ocrText: string,
@@ -48,26 +50,38 @@ export async function lookupDishIngredientsForScan(
   if (query.length < 2) return null;
 
   const enrichment = await enrichDishFromOpenFoods(query);
-  if (!enrichment) return null;
+  if (enrichment) {
+    const declared =
+      enrichment.allergenTags ??
+      enrichment.components
+        .map((item) => item.allergenId)
+        .filter((id): id is string => Boolean(id));
+    const traces = enrichment.traceTags ?? [];
+    const base =
+      enrichment.ingredients?.trim() ||
+      enrichment.components.map((item) => item.nameRu).join(', ');
+    if (base.trim()) {
+      return {
+        query,
+        productName: enrichment.productName || enrichment.dishName,
+        ingredients: buildIngredientsText(base, declared, traces),
+        declaredAllergenIds: declared,
+        traceAllergenIds: traces,
+        source: mapEnrichmentSource(enrichment.source),
+        enrichment,
+      };
+    }
+  }
 
-  const declared =
-    enrichment.allergenTags ??
-    enrichment.components
-      .map((item) => item.allergenId)
-      .filter((id): id is string => Boolean(id));
-  const traces = enrichment.traceTags ?? [];
-  const base =
-    enrichment.ingredients?.trim() ||
-    enrichment.components.map((item) => item.nameRu).join(', ');
-  if (!base.trim()) return null;
+  const yandex = await searchIngredientsViaApi(query);
+  if (!yandex) return null;
 
   return {
-    query,
-    productName: enrichment.productName || enrichment.dishName,
-    ingredients: buildIngredientsText(base, declared, traces),
-    declaredAllergenIds: declared,
-    traceAllergenIds: traces,
-    source: mapEnrichmentSource(enrichment.source),
-    enrichment,
+    query: yandex.query,
+    productName: yandex.productName,
+    ingredients: yandex.ingredients,
+    declaredAllergenIds: [],
+    traceAllergenIds: [],
+    source: 'ocr',
   };
 }

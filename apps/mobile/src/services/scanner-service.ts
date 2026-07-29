@@ -4,8 +4,7 @@ import {
   prepareScanTextFromOcr,
   simulateOcrFromCapture,
   asVisionOcrResult,
-  classifyScanImageIntent,
-  resolveScanModeForIntent,
+  classifyScanIntentHeuristic,
   type ScanMode,
   type ScanResult,
   type OcrExtractionResult,
@@ -19,6 +18,7 @@ import {
   type MenuScanStatus,
 } from '@/src/services/barcode-lookup-service';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
+import { classifyScanIntentViaApi } from '@/src/services/scan-intent-api-service';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
@@ -226,10 +226,15 @@ export async function scanFromOcr({
     ? prepareScanTextFromOcr(ocrText, mode)
     : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
 
-  // After Vision OCR (or demo): dense label/menu text → LLM/OCR analysis;
-  // sparse name-only photo → smart dish/product search (OFF / catalog).
-  const intent = classifyScanImageIntent(extraction);
-  const analysisMode = resolveScanModeForIntent(intent, extraction, mode);
+  // A: heuristic intent. B (flag): YandexGPT intent via /api/scan/intent.
+  const llmIntent = await classifyScanIntentViaApi({
+    text: extraction.text,
+    fallbackMode: mode,
+  });
+  const classification =
+    llmIntent ?? classifyScanIntentHeuristic(extraction, mode);
+  const intent = classification.intent;
+  const analysisMode = classification.mode;
 
   if (intent === 'visual_product') {
     try {
