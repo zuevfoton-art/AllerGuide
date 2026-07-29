@@ -18,7 +18,7 @@ Unlocked after [RC gate](./rc-gate.md) and [2-week staging soak](./staging-soak-
 
 | Artifact | Status (2026-07-29) |
 |----------|---------------------|
-| CI green on `main` | ⚠️ Required — remote Actions **billing blocked**; local `pnpm rc-gate` PASS |
+| CI green on `main` | ✅ Required — green again 2026-07-29 (billing mitigated) |
 | Maestro E2E nightly | ❌ Required — **BLOCKED** (see [staging-soak-log.md](./staging-soak-log.md)) |
 | Sentry + analytics staging | ❌ Required — crash-free soak metrics not recorded |
 | Security audits 0 critical | ✅ |

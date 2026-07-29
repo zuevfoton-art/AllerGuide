@@ -6,9 +6,9 @@ Gate before closing **Phase 2** and starting **Phase 3** (store readiness).
 
 | # | Criterion | Automated | Owner | Status (2026-07-29) |
 |---|-----------|-----------|-------|---------------------|
-| G1 | `pnpm typecheck` + `lint` + `test` green | ✅ `rc-gate-check.mjs` | CI | ✅ local PASS · ⚠️ remote CI blocked (Actions billing) |
-| G2 | Mobile unit tests ≥30 | ✅ `mobile-test-gate.mjs` | CI | ✅ local PASS |
-| G3 | Maestro nightly green (offline + staging) | Manual — [Maestro Nightly](../.github/workflows/maestro-nightly.yml) | QA | ❌ **BLOCKED** (Actions billing; 0 green days) |
+| G1 | `pnpm typecheck` + `lint` + `test` green | ✅ `rc-gate-check.mjs` | CI | ✅ local PASS · ✅ CI on `main` green again (2026-07-29) |
+| G2 | Mobile unit tests ≥30 | ✅ `mobile-test-gate.mjs` | CI | ✅ |
+| G3 | Maestro nightly green (offline + staging) | Manual — [Maestro Nightly](../.github/workflows/maestro-nightly.yml) | QA | ❌ **BLOCKED** (0 green days in soak window) |
 | G4 | Staging API health `200` | ✅ when `STAGING_API_URL` set | DevOps | ✅ `https://api.staging.aclearo.com` |
 | G5 | Sentry staging crash-free **≥99%** over soak window | Manual — [soak log](./staging-soak-log.md) | Product | ❌ **BLOCKED** (no metrics recorded) |
 | G6 | Security audits **0 critical** open | ✅ parses audit docs when present | Security | ✅ |
@@ -33,7 +33,7 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 - **Nightly:** [Maestro Nightly](../.github/workflows/maestro-nightly.yml) — E2E offline + staging
 - **Weekly / manual:** [RC Gate](../.github/workflows/rc-gate.yml) — full automated gate + staging health
 
-**Ops note (2026-07-29):** GitHub Actions jobs fail to start while org billing / spending limit is unresolved. Local `pnpm rc-gate` remains the automated gate until Actions runs again.
+**Ops note (2026-07-29):** Actions billing blocked runners for most of the soak window; evening CI on `main` is green again. Manual soak criteria (G3/G5/G7) remain **BLOCKED**.
 
 ## RC build (staging soak)
 
@@ -50,10 +50,10 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 ## Sign-off checklist
 
 - [x] Automated `rc-gate-check` green locally (2026-07-29)
-- [ ] Automated RC Gate workflow green on GitHub (blocked — Actions billing)
+- [ ] Automated RC Gate workflow green on GitHub (re-run after PR paths trigger / weekly schedule)
 - [ ] Maestro nightly green ≥7 consecutive days during soak
 - [ ] Sentry crash-free ≥99% (staging, 14-day window)
-- [ ] Security audit docs: 0 critical
+- [x] Security audit docs: 0 critical
 - [ ] QA regression ([qa-checklist.md](./qa-checklist.md)) Pass on RC build
 - [ ] Product sign-off in soak log
 

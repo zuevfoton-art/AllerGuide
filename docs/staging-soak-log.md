@@ -9,7 +9,7 @@
 | Soak start (planned) | 2026-07-04 |
 | Soak end | **BLOCKED** 2026-07-29 |
 | RC version | EAS profile `staging` → `https://api.staging.aclearo.com` |
-| RC commit (at block) | `be51e9e` (`main`) |
+| RC commit (at block) | `083f99f` (`main`) |
 | Testers | 0 enrolled (closed-beta cohort not signed into this log) |
 | Product owner | _pending_ |
 
@@ -19,10 +19,10 @@ Soak cannot be completed or signed off until all items below are cleared:
 
 | # | Blocker | Evidence (2026-07-29) | Owner |
 |---|---------|----------------------|-------|
-| B1 | **GitHub Actions billing / spending limit** | Jobs fail to start with: *“The job was not started because recent account payments have failed or your spending limit needs to be increased.”* — CI, [RC Gate](https://github.com/zuevfoton-art/AllerGuide/actions/workflows/rc-gate.yml), [Maestro Nightly](https://github.com/zuevfoton-art/AllerGuide/actions/workflows/maestro-nightly.yml) | Org admin |
-| B2 | **Maestro nightly never green in window** | 10 consecutive `failure` runs 2026-07-20 … 2026-07-29 (same billing root cause; 0 consecutive green days) | DevOps / QA |
-| B3 | **Sentry crash-free ≥99% unavailable** | No staging crash-free % recorded in this log; `EXPO_PUBLIC_SENTRY_DSN` metrics not accessible to close G5 | Mobile / Product |
-| B4 | **No active soak testers** | Daily headcount empty; P1.7 closed-beta gate-out not reflected here | Product |
+| B1 | **Maestro nightly — no green soak streak** | Nightly runs 2026-07-20 … 2026-07-29 all `failure` (billing outage prevented runners). 0 consecutive green days in the soak window. Need ≥7 green nights after Actions is stable. | DevOps / QA |
+| B2 | **Sentry crash-free ≥99% unavailable** | No staging crash-free % recorded in this log; `EXPO_PUBLIC_SENTRY_DSN` metrics not available to close G5 | Mobile / Product |
+| B3 | **No active soak testers** | Daily headcount empty; P1.7 closed-beta gate-out not reflected here | Product |
+| B4 | ~~GitHub Actions billing~~ (mitigated) | Mid-window jobs failed to start (*spending limit*). As of 2026-07-29 evening, CI on `main` runs again ([run 30489891864](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30489891864) `success`). Does **not** unlock G3/G5/G7 alone. | Org admin |
 
 **Automated RC gate (local):** `STAGING_API_URL=https://api.staging.aclearo.com pnpm rc-gate` → **PASSED** on 2026-07-29 (typecheck, lint, test, mobile ≥30, Maestro flow artifacts, security audits 0 critical, staging health OK). This does **not** replace G3/G5/G7.
 
@@ -44,7 +44,7 @@ Soak cannot be completed or signed off until all items below are cleared:
 | 12 | 2026-07-15 | — | — | — | — | ☐ blocked | |
 | 13 | 2026-07-16 | — | — | — | — | ☐ blocked | |
 | 14 | 2026-07-17 | — | — | — | — | ☐ blocked | Planned day 14 — **not completed** |
-| — | 2026-07-20…29 | — | — | — | — | ✗ billing | Maestro Nightly fails at job start (no runner) |
+| — | 2026-07-20…29 | — | — | — | — | ✗ no green | Maestro Nightly `failure` streak; CI billing mitigated late on 2026-07-29 |
 
 ### How to resume after unblock
 
@@ -56,7 +56,7 @@ Soak cannot be completed or signed off until all items below are cleared:
 
 **Maestro nightly**
 
-1. Fix GitHub Actions billing / spending limit.
+1. Confirm GitHub Actions billing remains healthy.
 2. GitHub → Actions → [Maestro Nightly](../.github/workflows/maestro-nightly.yml).
 3. Mark green when both `maestro-offline` and `maestro-staging` succeed.
 4. Restart a fresh 14-day window (update start/end + clear **BLOCKED** status).
@@ -70,10 +70,10 @@ Soak cannot be completed or signed off until all items below are cleared:
 
 | ID | Severity | Summary | Status | Fix commit |
 |----|----------|---------|--------|------------|
-| SOAK-B1 | Blocker | GitHub Actions billing prevents CI / RC Gate / Maestro | open | — |
-| SOAK-B2 | Blocker | No Maestro green streak in soak window | open | — |
-| SOAK-B3 | Blocker | Sentry crash-free not recorded | open | — |
-| SOAK-B4 | Blocker | No enrolled soak testers | open | — |
+| SOAK-B1 | Blocker | No Maestro green streak in soak window | open | — |
+| SOAK-B2 | Blocker | Sentry crash-free not recorded | open | — |
+| SOAK-B3 | Blocker | No enrolled soak testers | open | — |
+| SOAK-B4 | Mitigated | GitHub Actions billing blocked runners mid-window | mitigated (CI green again 2026-07-29) | — |
 
 ## Sign-off
 
