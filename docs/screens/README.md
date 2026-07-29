@@ -1,67 +1,61 @@
-# Экранные формы — Canvas (Desktop) → handoff
+# Экранные формы — Desktop Canvas → handoff
 
-As-is макеты существующих экранов AllerGuide / A-Claro.
+## Важно: «failed to load» в Cloud Agent
 
-- **Cursor Desktop (Agent Window)** — редактируемые mockup-canvas (телефон + поля копирайта).
-- **HTML** — `docs/screens/*.html` (источник для sync / браузер / Cloud web fallback).
+Cursor Canvas **не хостится** в Cloud Agent (ни web, ни Desktop→cloud). В логах агента нет canvas host — поэтому панель показывает **failed to load**. Это ограничение среды, не ошибка макетов.
 
-Связано: [`../architecture.md`](../architecture.md) · [`../development-rules.md`](../development-rules.md) · [`../design-mockup.html`](../design-mockup.html) · [`../brand-dual-calm.md`](../brand-dual-calm.md)
+### Как открыть Canvas на Windows Desktop (локально)
+
+1. Откройте репозиторий AllerGuide **локально** в Cursor Desktop (File → Open Folder), не Cloud Agent.
+2. В PowerShell из корня репо:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File docs/screens/canvas/install-windows.ps1
+```
+
+3. Запустите **local** Agent chat.
+4. Откройте сначала smoke-тест:
+
+`%USERPROFILE%\.cursor\projects\<slug>\canvases\smoke.canvas.tsx`
+
+5. Если видно «Canvas OK» — открывайте:
+
+- `a-claro-mockups.canvas.tsx` — каталог + live edit
+- `mockup-sos.canvas.tsx` / `mockup-home` / `mockup-diary` / `mockup-scanner`
+
+Исходники canvas лежат в репо: [`docs/screens/canvas/`](./canvas/).
+
+### Пока работаете в этом Cloud Agent
+
+Используйте HTML:
+
+- [`board.html`](./board.html) — доска + чеклист
+- [`sos.html`](./sos.html) · [`home.html`](./home.html) · [`diary.html`](./diary.html) · [`scanner.html`](./scanner.html)
 
 ---
 
-## Cursor Desktop Canvas (рекомендуется)
-
-Требуется Cursor Desktop **≥ 3.13** (билд `31e8d61…` подходит). Откройте canvas рядом с чатом:
-
-| Canvas | Назначение |
-|--------|------------|
-| [a-claro-mockups.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/a-claro-mockups.canvas.tsx) | Каталог + live edit copy + preview |
-| [mockup-sos.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-sos.canvas.tsx) | SOS (default / empty) |
-| [mockup-home.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-home.canvas.tsx) | Home (default / loading) |
-| [mockup-diary.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-diary.canvas.tsx) | Diary (default / empty) |
-| [mockup-scanner.canvas.tsx](/home/ubuntu/.cursor/projects/workspace/canvases/mockup-scanner.canvas.tsx) | Scanner (default / safe / error) |
-
-**Как редактировать**
-
-1. Откройте нужный `.canvas.tsx` (клик по ссылке в чате).
-2. Меняйте тексты в полях слева — preview справа обновляется сразу (состояние сохраняется).
-3. Переключайте состояния (default / empty / …).
-4. Для правок layout: кнопка Ask agent to edit или запрос в чат.
-5. Утвердили → sync в HTML `docs/screens/<screen>.html` → handoff PR в `apps/mobile`.
-
-Canvas живёт в managed-папке агента `~/.cursor/projects/<workspace>/canvases/` (не в git). HTML в `docs/screens/` — в репозитории.
-
----
-
-## HTML-пакет (в репо)
+## HTML-пакет
 
 | Файл | Назначение |
 |------|------------|
 | [`index.html`](./index.html) | Оглавление |
-| [`board.html`](./board.html) | Доска handoff в браузере (fallback) |
-| [`_tokens.css`](./_tokens.css) | Dual Calm токены (= `theme.ts`) |
-| [`_phone-frame.css`](./_phone-frame.css) | Рамка + примитивы |
-| `sos.html` · `home.html` · `diary.html` · `scanner.html` | As-is HTML |
+| [`board.html`](./board.html) | Handoff board (браузер) |
+| [`_tokens.css`](./_tokens.css) | Dual Calm (= `theme.ts`) |
+| [`_phone-frame.css`](./_phone-frame.css) | Phone frame |
+| `sos.html` · `home.html` · `diary.html` · `scanner.html` | As-is макеты |
+| [`canvas/`](./canvas/) | Portable `.canvas.tsx` + install scripts |
 
 ---
 
-## Чеклист handoff в код
+## Чеклист handoff
 
-- [ ] Макет утверждён (состояние отмечено)
-- [ ] Дельты записаны относительно as-is
-- [ ] UI только в `app/*.tsx` + `src/components/*`
-- [ ] Новые цвета/отступы: `theme.ts` → `_tokens.css`
-- [ ] Строки через `useTranslation()` + 6 локалей
-- [ ] Empty / error / loading — общие компоненты
-- [ ] Сверка: web `localhost:5000` ↔ макет
-- [ ] Offline-first: нет DB/API в экране
+- [ ] Макет утверждён
+- [ ] Дельты записаны
+- [ ] UI в `app/*.tsx` + `src/components/*`
+- [ ] Токены: `theme.ts` → `_tokens.css`
+- [ ] i18n: 6 локалей
+- [ ] Empty/error/loading
+- [ ] Сверка localhost:5000
+- [ ] Offline-first
 
-```
-Макет: docs/screens/sos.html + mockup-sos.canvas.tsx (состояние: default)
-Код:   app/(tabs)/sos.tsx, SosEmergencyBar.tsx
-Дельты: …
-```
-
-## Приоритет
-
-1. SOS · 2. Home · 3. Diary · 4. Scanner
+Приоритет: SOS → Home → Diary → Scanner
