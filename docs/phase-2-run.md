@@ -19,7 +19,7 @@
 | P2.7a | Done | `startup-metrics.ts`, deferred allergen warm, [`performance-cold-start.md`](./performance-cold-start.md) |
 | P2.7b | Done | Redis rate-limit, health DB/redis, [`performance-api-infra.md`](./performance-api-infra.md) |
 | P2.7c | Done | `web-store.test.ts`, idle flush, [`performance-web-store.md`](./performance-web-store.md) |
-| P2.8 | **BLOCKED** | [`rc-gate.md`](./rc-gate.md), [`staging-soak-log.md`](./staging-soak-log.md) (**BLOCKED** 2026-07-29), `rc-gate-check.mjs` local PASS; CI on `main` green again; Maestro/Sentry/testers still block soak sign-off |
+| P2.8 | **BLOCKED** | Soak **BLOCKED** 2026-07-29; automated `pnpm rc-gate` + [RC Gate CI](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30490654726) **green**; Maestro/Sentry/testers still block sign-off |
 
 **Далее:** Maestro green streak → Sentry ≥99% → testers → sign-off → [Phase 3 readiness](./phase-3-readiness.md). Phase 3 **не** авторизован.
 

@@ -50,7 +50,7 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 ## Sign-off checklist
 
 - [x] Automated `rc-gate-check` green locally (2026-07-29)
-- [ ] Automated RC Gate workflow green on GitHub (re-run after PR paths trigger / weekly schedule)
+- [x] Automated RC Gate workflow green on GitHub ([run 30490654726](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30490654726))
 - [ ] Maestro nightly green ≥7 consecutive days during soak
 - [ ] Sentry crash-free ≥99% (staging, 14-day window)
 - [x] Security audit docs: 0 critical

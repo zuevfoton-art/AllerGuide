@@ -24,7 +24,12 @@ Soak cannot be completed or signed off until all items below are cleared:
 | B3 | **No active soak testers** | Daily headcount empty; P1.7 closed-beta gate-out not reflected here | Product |
 | B4 | ~~GitHub Actions billing~~ (mitigated) | Mid-window jobs failed to start (*spending limit*). As of 2026-07-29 evening, CI on `main` runs again ([run 30489891864](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30489891864) `success`). Does **not** unlock G3/G5/G7 alone. | Org admin |
 
-**Automated RC gate (local):** `STAGING_API_URL=https://api.staging.aclearo.com pnpm rc-gate` → **PASSED** on 2026-07-29 (typecheck, lint, test, mobile ≥30, Maestro flow artifacts, security audits 0 critical, staging health OK). This does **not** replace G3/G5/G7.
+**Automated RC gate:**
+
+- Local: `STAGING_API_URL=https://api.staging.aclearo.com pnpm rc-gate` → **PASSED** on 2026-07-29
+- GitHub [RC Gate](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30490654726) (PR) → **success** on 2026-07-29
+
+Automated G1/G2/G4/G6 do **not** replace manual G3/G5/G7.
 
 ## Daily log
 
