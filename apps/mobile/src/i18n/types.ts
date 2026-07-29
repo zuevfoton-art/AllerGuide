@@ -182,6 +182,18 @@ export type LocaleMessages = {
     marketplaceOpen: string;
     disclaimer: string;
     phenotypeHintsTitle: string;
+    insightsTitle: string;
+    insightsEmpty: string;
+    insightsSelectProfileTitle: string;
+    insightsSelectProfileText: string;
+    insightsOpenProfiles: string;
+    insightsDiaryTitle: string;
+    insightsDiaryText: string;
+    insightsOpenDiary: string;
+    insightsActTitle: string;
+    insightsActText: string;
+    insightsOpenAct: string;
+    insightsOpenProfile: string;
   };
   diary: {
     title: string;
@@ -226,6 +238,7 @@ export type LocaleMessages = {
   };
   diaryWizard: {
     stepOf: string;
+    stepOfSection: string;
     skipSection: string;
     deleteEntry: string;
     fillOneSection: string;
@@ -576,6 +589,8 @@ export type LocaleMessages = {
     add: string;
     hint: string;
     manage: string;
+    switchTitle: string;
+    switchEmpty: string;
   };
   onboarding: {
     tagline: string;

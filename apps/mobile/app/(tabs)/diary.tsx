@@ -41,7 +41,6 @@ import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
@@ -359,8 +358,6 @@ export default function DiaryScreen() {
         </View>
         <ProfileHeaderButton />
       </View>
-
-      <ProfileSwitcher />
 
       {actPromptDue ? (
         <GlassCard variant="calm" style={styles.actPromptCard}>

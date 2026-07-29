@@ -2,7 +2,6 @@ import { Text, View, StyleSheet } from 'react-native';
 import { useMemo } from 'react';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -25,8 +24,6 @@ export default function MarketScreen() {
         </View>
         <ProfileHeaderButton />
       </View>
-
-      <ProfileSwitcher />
 
       <MarketplaceModule variant="full" />
     </Screen>

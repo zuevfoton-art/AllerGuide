@@ -66,7 +66,7 @@ interface DiaryWizardProps {
 export function DiaryWizard({
   sections: sectionsProp,
   initialAnswersBySection,
-  onCancel,
+  onCancel: _onCancel,
   onComplete,
   onDelete,
   submitLabel,
@@ -344,26 +344,18 @@ export function DiaryWizard({
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.topRow}>
-        <Text style={styles.progressText}>
-          {t('diaryWizard.stepOf', { current: overallStepNumber, total: overallStepsTotal })}
-        </Text>
-        <Pressable onPress={onCancel}>
-          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-        </Pressable>
-      </View>
+      <Text style={styles.progressText} testID="diary-wizard-step-label">
+        {t('diaryWizard.stepOfSection', {
+          current: overallStepNumber,
+          total: overallStepsTotal,
+          section: section.title,
+        })}
+      </Text>
 
       <View style={styles.progressTrack}>
         <View
           style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
         />
-      </View>
-
-      <View style={styles.sectionBadge}>
-        <Ionicons name={section.icon as any} size={16} color={theme.colors.accent} />
-        <Text style={styles.sectionBadgeText}>
-          {section.title} · {stepIndex + 1}/{totalStepsInSection}
-        </Text>
       </View>
 
       <Text style={styles.stepLabel}>{step.label}</Text>
@@ -978,18 +970,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.border,
     },
-    topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     progressText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
       fontWeight: '600',
       color: colors.textSecondary,
-    },
-    cancelText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.accent,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     progressTrack: {
       height: 4,
@@ -998,24 +985,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       overflow: 'hidden',
     },
     progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: 999 },
-    sectionBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      alignSelf: 'flex-start',
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: 6,
-      backgroundColor: colors.accentLight,
-      borderWidth: 1,
-      borderColor: colors.accentMid,
-    },
-    sectionBadgeText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.accent,
-    },
     stepLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 17,
