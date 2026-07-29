@@ -43,7 +43,7 @@ yc lockbox secret get --id e6qs399v1b3unstfh5rj --format json \
 
 ## 2. GitHub Actions (repo secrets)
 
-Required for [`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml):
+Required for [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml):
 
 | Secret | Source |
 |--------|--------|

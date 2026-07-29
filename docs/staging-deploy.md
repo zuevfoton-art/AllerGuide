@@ -149,12 +149,12 @@ pnpm --filter api db:seed-allergens
 
 ## P1.1e — CI/CD
 
-Workflow [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml):
+Канонический workflow: [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) — **Deploy staging (Yandex Cloud)**.
 
 - **Trigger:** `workflow_dispatch` или push в ветку `staging`
-- **Шаги:** migrate против `STAGING_*` secrets → smoke `STAGING_API_URL/api/health`
+- **Шаги:** build/push YCR → Serverless Container + Lockbox → migrate (VPC runner) → `staging-preflight.sh` → optional EAS mobile
 
-Деплой на хостинг остаётся в build hook провайдера (push `main`/`staging` → auto deploy). Workflow в CI гарантирует миграции и post-deploy smoke.
+Подробности: [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §7. Legacy Neon/Railway deploy workflow удалён.
 
 ---
 

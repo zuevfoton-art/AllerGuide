@@ -312,7 +312,7 @@ DNS API token (зона allerguide.app) — опционально
 | EAS staging | `docs/eas-staging-build.md` |
 | Closed beta | `docs/closed-beta-p17.md` |
 | QA чеклисты | `docs/qa-checklist.md` (§ Staging, P1.2e–P1.7) |
-| CI deploy | `.github/workflows/deploy-staging.yml` |
+| CI deploy | `.github/workflows/deploy-staging.yml` — **Deploy staging (Yandex Cloud)** |
 | CI integration tests | `.github/workflows/ci.yml` → `api-integration` |
 | Neon PR preview | `.github/workflows/neon-preview.yml` |
 | Скрипты | `scripts/staging-*.sh`, `scripts/staging-*-smoke.ts`, `scripts/first-staging-build.sh` |

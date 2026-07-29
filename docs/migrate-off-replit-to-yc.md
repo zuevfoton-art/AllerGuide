@@ -140,7 +140,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 
 | Item | Статус | Комментарий |
 |------|--------|-------------|
-| Workflow `deploy-staging-yandex.yml` | ⚠️ active, recent runs **fail** | Gate: нужны `YC_SA_JSON`, `YC_REGISTRY_ID`, `YC_CONTAINER_ID` (0s failure = secrets missing/incomplete на событии) |
+| Workflow `deploy-staging.yml` | ⚠️ active, recent runs **fail** | Gate: нужны `YC_SA_JSON`, `YC_REGISTRY_ID`, `YC_CONTAINER_ID` (0s failure = secrets missing/incomplete на событии) |
 | Trigger | push `staging` / `workflow_dispatch` | Не каждый PR |
 | EAS profile `staging` | ✅ в репо | URL = YC |
 | EAS profile `replit` | ✅ removed (Phase 3) | — |
@@ -162,7 +162,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [x] Pollen tile HTTP 200 PNG **или** JSON 404 от proxy (не HTML) — `./scripts/staging-pollen-smoke.sh`
 - [x] Image с `registerPollenRoutes` задеплоен (`BUILD_PUSH=1` / branch `staging`)
 - [x] `pnpm yc-stage-phase0` без `ALLOW_MISSING_POLLEN_HEATMAP`
-- [ ] GitHub Secrets `YC_*` + `YC_LOCKBOX_SECRET_ID` полные → зелёный `deploy-staging-yandex`
+- [ ] GitHub Secrets `YC_*` + `YC_LOCKBOX_SECRET_ID` полные → зелёный `deploy-staging`
 - [ ] Self-hosted runner `yc-staging-vpc` Idle (migrate)
 - [ ] `STAGING_RUN_SMOKES=1` preflight (sync + scan)
 - [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + staging APK QA
@@ -221,7 +221,7 @@ pnpm yc-stage-phase0   # P0.4 должен стать PASS
 
 #### 1.3 CI
 
-[`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml):
+[`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml):
 
 - Deploy монтирует **все присутствующие** ключи из `lockbox-staging.keys` (не только JWT/DB).
 - Smoke вызывает `staging-pollen-smoke.sh` после preflight.
@@ -321,7 +321,7 @@ Rotation ops: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotati
 #### Ops (вручную)
 
 1. Пройти [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md) (pollen key + YC authorized key из agent sessions).  
-2. Убедиться, что GitHub Secrets §2 inventory заполнены → зелёный `deploy-staging-yandex`.  
+2. Убедиться, что GitHub Secrets §2 inventory заполнены → зелёный `deploy-staging`.  
 3. EAS Sensitive: только `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`.  
 4. Не тащить Helium/Neon Replit в YC PG без явного dump-плана.
 

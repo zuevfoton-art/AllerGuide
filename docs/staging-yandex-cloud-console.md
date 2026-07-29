@@ -510,7 +510,7 @@ GitHub → репозиторий → **Settings** → **Secrets and variables**
 | `STAGING_API_URL` | `https://api.staging.aclearo.com` |
 | `EXPO_TOKEN` | expo.dev → Access Tokens |
 
-Дальше push в ветку `staging` → workflow `deploy-staging-yandex.yml`.
+Дальше push в ветку `staging` → workflow `deploy-staging.yml`.
 
 ---
 

@@ -88,7 +88,7 @@ Workflow: [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas
 | `EXPO_TOKEN` | [expo.dev → Access tokens](https://expo.dev/settings/access-tokens) — bot/CI token |
 | *(опционально)* sync Maps key в EAS Secrets заранее | Ключ лучше держать в **EAS project secrets**, не дублировать в GH |
 
-Уже используется тот же `EXPO_TOKEN` в [`deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml) (`mobile-android` job).
+Уже используется тот же `EXPO_TOKEN` в [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) (`mobile-android` job).
 
 ### Запуск
 
@@ -167,4 +167,4 @@ Runner **не** ставит Android SDK; только `pnpm install` + `eas bui
 | [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml) | GH → EAS |
 | [`.github/workflows/staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) | GH → Gradle |
 | [`.github/workflows/release-apk.yml`](../.github/workflows/release-apk.yml) | tag/preview Gradle release |
-| [`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml) | полный stage deploy + optional EAS mobile |
+| [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | полный stage deploy + optional EAS mobile |
