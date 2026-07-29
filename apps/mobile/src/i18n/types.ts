@@ -266,6 +266,10 @@ export type LocaleMessages = {
     menu: string;
     medicine: string;
     cosmetics: string;
+    /** Camera entry chip: live barcode scan */
+    modeBarcode: string;
+    /** Camera entry chip: photo → OCR / smart search */
+    modeScanner: string;
     scanBarcode: string;
     scanBarcodeDesc: string;
     scanProduct: string;
@@ -282,17 +286,20 @@ export type LocaleMessages = {
     history: string;
     disclaimer: string;
     cameraScanBarcode: string;
+    cameraScanSimple: string;
     cameraScanProduct: string;
     cameraScanMenu: string;
     cameraScanLabel: string;
     cameraScanMedicine: string;
     cameraScanHousehold: string;
     cameraBarcodeHint: string;
+    cameraScannerHint: string;
     cameraProductHint: string;
     cameraMenuHint: string;
     cameraLabelHint: string;
     cameraMedicineHint: string;
     cameraHouseholdHint: string;
+    flashToggle: string;
     analyzeMenu: string;
     analyzeLabel: string;
     scanLabel: string;
@@ -335,6 +342,7 @@ export type LocaleMessages = {
     removeSafeMessage: string;
     removedFromSafe: string;
     trendsTitle: string;
+    historyMeta: string;
     repeatUnsafeWarning: string;
     /** Prominent camera button label for medicine/cosmetics modes */
     scanWithCamera: string;

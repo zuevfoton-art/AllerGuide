@@ -92,9 +92,33 @@ curl -sS -X POST "$STAGING_API_URL/api/ocr" \
 
 ---
 
+## Scanner photo routing (mobile)
+
+После фото в режиме «Сканер»:
+
+1. **Yandex Vision OCR** (`POST /api/ocr`) — текст с кадра  
+2. **`classifyScanImageIntent`** (`@allerguide/ai`) — плотный текст / «Состав» → `label_or_menu`; короткое имя блюда → `visual_product`  
+3. **label_or_menu** → анализ текста через `POST /api/scan` (YandexGPT)  
+4. **visual_product** → умный поиск состава (Open Food Facts / каталог) → затем YandexGPT / mock  
+
+Мультимодальный «GPT смотрит на картинку» в репозитории пока не подключён.
+
+### Варианты Yandex AI для следующего шага
+
+| Вариант | Что даёт | Когда брать |
+|---------|----------|-------------|
+| **A. Vision OCR + YandexGPT (текущий)** | Текст с этикетки/меню → LLM-вердикт; без текста → OFF/каталог | Staging сейчас; offline-first с demo OCR |
+| **B. YandexGPT + Vision как классификатор** | Отдельный prompt: «этикетка / меню / блюдо / упаковка ЛС» по OCR-сниппету | Уточнить intent без multimodal |
+| **C. Yandex Search API** | Поиск состава по названию блюда/препарата в вебе | Когда OFF/каталог пуст (`search-api` уже в Phase 0 SA) |
+| **D. Multimodal foundation model** (когда появится в YC) | Прямой разбор фото без отдельного OCR | Только после появления API; не ломать offline |
+
+Рекомендация: держать **A** как default; добавить **B+C** за флагами, если растёт доля «фото без текста».
+
+---
+
 ## Next
 
 - Phase 3: SpeechKit STT fallback  
-- Phase 4: Search API  
+- Phase 4: Search API (в т.ч. для visual_product fallback)  
 
 Offline-first и feature flags: без флагов приложение работает как раньше.
