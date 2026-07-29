@@ -317,6 +317,22 @@
 
     .segment-item.active { background: var(--card); color: var(--accent); box-shadow: var(--shadow-sm); }
 
+    .entry-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .entry-chip {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 12px; border-radius: 999px; border: 1px solid var(--accent);
+      background: var(--card); font-size: 15px; font-weight: 600; color: var(--accent); cursor: pointer;
+      min-height: 48px;
+    }
+    .entry-chip.active { background: var(--accent); color: #fff; }
+
+    .bubble-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .bubble {
+      padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border-input);
+      background: var(--card); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer;
+    }
+    .bubble.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
     .feed-row {
       display: flex; align-items: center; gap: 12px;
       padding: 14px 16px; border-bottom: 1px solid var(--border);
@@ -666,11 +682,12 @@
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Логотип</strong> — monogram A (teal) + wordmark A‑Claro · endorser Aclearo<br />
         <strong>Tab bar</strong> — 6 вкладок: Главная · Дневник · Сканер · Маркет · Карта · SOS<br />
-        <strong>Профиль</strong> — шапка табов → профили · backup · тема · аккаунт<br />
-        <strong>Wizard</strong> — 8 шагов: имя → год → типы → история → коморб. → аллергены → фенотип → контакты<br />
-        <strong>Дневник</strong> — модули по <code>profileCapabilities</code> (ACT, пищевая, АСИТ, насекомые, ПСВ)<br />
+        <strong>Профиль</strong> — кнопка в шапке = быстрый switch (модалка); данные профиля только на SOS<br />
+        <strong>Главная</strong> — wellness + рекомендации/напоминания (без «Сегодня» и strip профилей)<br />
+        <strong>Сканер</strong> — «Штрих-код» / «Сканер» → камера; OCR A + флаги B/C (Yandex)<br />
+        <strong>Дневник</strong> — модули по <code>profileCapabilities</code>; запись в bottom-sheet модале<br />
         <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
-        <strong>Обновлено</strong> — июль 2026 · PR #136 core wizard + diary-section-service
+        <strong>Обновлено</strong> — 29 июля 2026 · combined UI (home · scanner · therapy · profile switch)
         <div class="swatch-row">
           <span class="swatch" style="background:#F4F6F9" title="bg"></span>
           <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
@@ -790,17 +807,6 @@
               <div class="sos-top-btn">🚑</div>
             </div>
           </div>
-          <div class="hero-calm doc-header" style="margin-bottom:12px">
-            <div class="doc-title">Сегодня</div>
-            <div class="doc-meta" id="home-meta">20 июня · Профиль: Анна</div>
-          </div>
-
-          <div class="segment">
-            <div class="segment-item active">Анна</div>
-            <div class="segment-item">Миша</div>
-            <div class="segment-item">＋</div>
-          </div>
-
           <div class="card" id="wellness-card">
             <div class="card-head">
               <span class="card-title">Сводка самочувствия</span>
@@ -824,29 +830,31 @@
 
           <div class="card flush">
             <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px">
-              <span class="card-title">Дневник</span>
-              <span class="section-link">Больше</span>
+              <span class="card-title">Рекомендации и напоминания</span>
+            </div>
+            <div class="feed-row">
+              <div class="feed-icon">📝</div>
+              <div class="feed-body">
+                <div class="feed-title">Нет записи за сегодня</div>
+                <div class="feed-sub">Короткая отметка в дневнике уточнит самочувствие</div>
+              </div>
+              <span class="section-link">Дневник</span>
+            </div>
+            <div class="feed-row" id="rec-card" hidden>
+              <div class="feed-icon">🌿</div>
+              <div class="feed-body">
+                <div class="feed-title" id="rec-title">—</div>
+                <div class="feed-sub" id="rec-text">—</div>
+              </div>
             </div>
             <div class="feed-row">
               <div class="feed-icon">💓</div>
-              <div class="feed-body"><div class="feed-title">Симптомы</div><div class="feed-sub">Зуд кожи · 14:30</div></div>
-              <button class="btn btn-primary btn-sm">+ Запись</button>
+              <div class="feed-body">
+                <div class="feed-title">Пора заполнить ACT</div>
+                <div class="feed-sub">Прошло 4+ недели с последней оценки (GINA)</div>
+              </div>
+              <span class="section-link">Открыть</span>
             </div>
-            <div class="feed-row">
-              <div class="feed-icon">🍽</div>
-              <div class="feed-body"><div class="feed-title">Питание</div><div class="feed-sub">Овсянка, яблоко · 09:15</div></div>
-              <button class="btn btn-primary btn-sm">+ Запись</button>
-            </div>
-            <div class="feed-row">
-              <div class="feed-icon">💊</div>
-              <div class="feed-body"><div class="feed-title">Лекарство</div><div class="feed-sub">Отметить приём</div></div>
-              <button class="btn btn-primary btn-sm">+ Запись</button>
-            </div>
-          </div>
-
-          <div class="card rec-card" id="rec-card" hidden>
-            <div class="rec-title" id="rec-title">—</div>
-            <div class="rec-text" id="rec-text">—</div>
           </div>
 
           <div class="card flush">
@@ -870,9 +878,8 @@
               <div class="doc-title">Дневник</div>
               <div class="doc-meta">Симптомы, питание, лекарства, шкалы, АСИТ и отчёты</div>
             </div>
-            <div class="profile-btn" title="Профиль">А</div>
+            <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <div class="segment"><div class="segment-item active">Анна</div><div class="segment-item">Миша</div></div>
           <div class="card banner-warn">
             <div class="card-title" style="margin-bottom:4px">Пора заполнить ACT</div>
             <div class="feed-sub" style="margin-bottom:8px">Прошло 4+ недели с последней оценки контроля астмы. Рекомендуем заполнить шкалу ACT.</div>
@@ -1006,7 +1013,6 @@
             <div class="doc-title">Дневник</div>
             <div class="doc-meta">Список записей остаётся на экране</div>
           </div>
-          <div class="segment"><div class="segment-item active">Анна</div></div>
           <button class="btn btn-primary">＋ Новая запись</button>
           <div class="section-label">История</div>
           <div class="card flush" style="opacity:0.45;pointer-events:none">
@@ -1056,7 +1062,6 @@
               <div class="doc-meta">PDF с логотипом АДАИР · проф. Смолкин Ю.С.</div>
             </div>
           </div>
-          <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="section-label">Период</div>
           <div class="toggle-row">
             <div class="toggle">7 дн.</div><div class="toggle">14 дн.</div><div class="toggle active">30 дн.</div>
@@ -1095,33 +1100,24 @@
               <div class="doc-title">Умный сканер</div>
               <div class="doc-meta">Проверка состава по профилю аллергий</div>
             </div>
-            <div class="header-actions">
-              <div class="profile-btn" title="Профиль">А</div>
-              <div class="header-icon-btn" title="Камера">📷</div>
-            </div>
+            <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <div class="segment"><div class="segment-item active">Анна</div></div>
-          <div class="toggle-row">
-            <div class="toggle active">Продукт</div><div class="toggle">Меню</div><div class="toggle">Лекарство</div><div class="toggle">Косметика</div>
-          </div>
-          <div class="card" style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <strong>Сканировать штрихкод</strong>
-              <div class="feed-sub">Поиск в Open Food Facts, повторные сканы — из локального кэша</div>
-            </div>
-            <span style="color:var(--text-muted)">›</span>
-          </div>
-          <div class="source-chain">
-            <strong>Цепочка поиска:</strong> локальный кэш → catalog API → Open Food Facts
+          <div class="entry-row">
+            <div class="entry-chip active">▮▮ Штрих-код</div>
+            <div class="entry-chip">⬚ Сканер</div>
           </div>
           <div class="card">
             <div class="section-label">или введите вручную</div>
-            <input class="input" placeholder="Введите состав или штрихкод…" readonly />
+            <input class="input" placeholder="Штрихкод или состав продукта…" readonly />
             <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
           </div>
           <div class="result-danger">
             <strong>Claro: есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
             Claro: <strong>Молоко</strong> · уровень высокий. Результат не заменяет чтение этикетки.
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:6px">История сканирования (30 дней)</div>
+            <div class="feed-sub">2 скана · 0 высокий риск</div>
           </div>
           <div class="section-label">Безопасные продукты</div>
           <div class="card flush">
@@ -1130,10 +1126,6 @@
               <div class="feed-body"><div class="feed-title">Овсяное молоко</div><div class="feed-sub">Продукт · вчера</div></div>
               <span style="color:var(--text-muted);font-size:22px;padding:8px">⊗</span>
             </div>
-          </div>
-          <div class="undo-banner">
-            <span>Удалено из безопасных</span>
-            <button type="button">Отменить</button>
           </div>
           <p class="disclaimer">Результат носит предварительный характер и не исключает индивидуальной реакции.</p>
         </section>
@@ -1146,9 +1138,8 @@
               <div class="doc-title">Маркет</div>
               <div class="doc-meta">Товары для аллергиков · скрытый маршрут</div>
             </div>
-            <div class="profile-btn" title="Профиль">А</div>
+            <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="card" style="padding:12px"><input class="input" style="border-radius:var(--radius-md)" placeholder="Поиск по каталогу…" readonly /></div>
           <div class="card banner-warn">⭐ Подборка на основе профиля аллергий</div>
           <div class="card" style="display:flex;gap:14px;align-items:center">
@@ -1168,9 +1159,8 @@
               <div class="doc-meta">3 слоя по ТЗ v13</div>
               <div class="doc-meta" style="margin-top:2px;font-weight:600">Москва и Московская область</div>
             </div>
-            <div class="profile-btn" title="Профиль">А</div>
+            <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <div class="segment"><div class="segment-item active">Анна</div></div>
           <div class="toggle-row">
             <div class="toggle active">Рестораны</div><div class="toggle">Пыление</div><div class="toggle">АДАИР</div>
           </div>
