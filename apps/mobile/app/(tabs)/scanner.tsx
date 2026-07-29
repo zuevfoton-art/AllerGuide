@@ -13,7 +13,6 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { ErrorState } from '@/src/components/ErrorState';
@@ -473,8 +472,6 @@ export default function ScannerScreen() {
           </Pressable>
         </View>
       </View>
-
-      <ProfileSwitcher />
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.modeRow}>
         {MODES.map((m) => {

@@ -588,6 +588,8 @@ export type LocaleMessages = {
     add: string;
     hint: string;
     manage: string;
+    switchTitle: string;
+    switchEmpty: string;
   };
   onboarding: {
     tagline: string;

@@ -584,6 +584,8 @@ const de: LocaleMessages = {
     add: 'Profil',
     hint: 'Aktives Profil erneut tippen zum Bearbeiten',
     manage: 'Meine Profile & Konto',
+    switchTitle: 'Profil wechseln',
+    switchEmpty: 'Noch keine Profile. Legen Sie eines an für Tagebuch und SOS.',
   },
   onboarding: {
     tagline: 'A for clarity.',

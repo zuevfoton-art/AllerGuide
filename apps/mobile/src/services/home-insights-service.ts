@@ -62,7 +62,7 @@ export function buildHomeInsightItems(input: {
         text: input.t('home.insightsSelectProfileText'),
         action: {
           label: input.t('home.insightsOpenProfiles'),
-          href: '/profiles',
+          href: '/(tabs)/sos',
         },
       });
       continue;
@@ -117,7 +117,7 @@ export function buildHomeInsightItems(input: {
       text: hint,
       action: {
         label: input.t('home.insightsOpenProfile'),
-        href: '/profile',
+        href: '/(tabs)/sos',
       },
     });
   }

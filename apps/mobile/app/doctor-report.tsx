@@ -8,7 +8,7 @@ import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -135,9 +135,8 @@ export default function DoctorReportScreen() {
           <Text style={ui.docTitle}>{t('doctorReport.title')}</Text>
           <Text style={ui.docMeta}>{t('doctorReport.subtitle')}</Text>
         </View>
+        <ProfileHeaderButton />
       </View>
-
-      <ProfileSwitcher />
 
       <Text style={ui.sectionLabel}>{t('doctorReport.period')}</Text>
       <View style={ui.toggleRow}>
