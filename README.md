@@ -8,6 +8,7 @@
 |----------|------------|
 | [`docs/architecture.md`](docs/architecture.md) | Архитектура системы |
 | [`docs/development-rules.md`](docs/development-rules.md) | **Правила разработки** (обязательно перед кодом) |
+| [`docs/codebase-index.md`](docs/codebase-index.md) | Навигационный индекс: экраны, сервисы, «куда менять X» |
 | [`docs/functional-requirements.md`](docs/functional-requirements.md) | Функциональные требования |
 | [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) | Roadmap к production |
 | [`docs/git-bash-roadmap.md`](docs/git-bash-roadmap.md) | Git Bash: milestones, issues, ветки, PR |
