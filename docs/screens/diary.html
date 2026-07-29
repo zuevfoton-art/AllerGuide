@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diary — A-Claro screen mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_tokens.css" />
+  <link rel="stylesheet" href="_phone-frame.css" />
+</head>
+<body>
+  <header class="page-meta">
+    <div>
+      <h1>Дневник</h1>
+      <p>As-is · <code>app/(tabs)/diary.tsx</code> · <a href="index.html">← оглавление</a></p>
+      <div class="state-switch" role="group" aria-label="Состояние макета">
+        <button type="button" class="active" data-show="default">default</button>
+        <button type="button" data-show="empty">empty history</button>
+      </div>
+    </div>
+    <div class="meta-badges">
+      <span class="badge">route <code>/(tabs)/diary</code></span>
+      <span class="badge">editors = overlay</span>
+    </div>
+  </header>
+
+  <div class="device-wrap">
+    <div class="phone" data-component="Screen">
+      <div class="notch" aria-hidden="true"></div>
+      <div class="status-bar"><span>9:41</span><span>LTE</span></div>
+
+      <div class="screen-body" data-state="default" id="state-default">
+        <div class="screen-scroll">
+          <div class="header-row" data-component="ScreenHeader">
+            <div>
+              <div class="screen-eyebrow" data-component="ScreenEyebrow">A-Claro · Наблюдения</div>
+              <h2 class="screen-title">Дневник</h2>
+              <p class="screen-subtitle">Пошаговые записи наблюдений</p>
+            </div>
+            <div class="header-actions">
+              <div class="icon-btn" data-component="ProfileHeaderButton">👤</div>
+            </div>
+          </div>
+
+          <div class="profile-switcher" data-component="ProfileSwitcher">
+            <div class="profile-pill active">Маша</div>
+            <div class="profile-pill">Папа</div>
+          </div>
+
+          <div class="glass-card calm" data-component="ActPromptCard">
+            <div class="row">
+              <div>
+                <div style="font-weight:700;color:var(--head);font-size:14px;">Пора заполнить ACT</div>
+                <p class="muted" style="margin-top:4px;">Контроль астмы · раз в 4 недели (GINA)</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-accent">Заполнить ACT</button>
+            </div>
+          </div>
+
+          <div class="glass-card" data-component="AsthmaCard" style="padding:12px 14px;">
+            <div class="row">
+              <div>
+                <div style="font-weight:700;color:var(--head);">Астма · ПСВ</div>
+                <p class="muted">Зелёная зона</p>
+              </div>
+              <span class="chip success">OK</span>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-accent btn-block" data-component="NewEntryCta">+ Новая запись по шагам</button>
+          <button type="button" class="btn btn-outline btn-block" data-component="QuickEntryCta">Быстрая запись</button>
+
+          <div class="glass-card" data-component="QuickAddCard">
+            <div class="card-title">Быстрое добавление</div>
+            <div class="chips">
+              <span class="chip">Симптомы</span>
+              <span class="chip">Еда</span>
+              <span class="chip">Лекарства</span>
+              <span class="chip">ПСВ</span>
+              <span class="chip active">Шкала</span>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-ghost btn-block" data-component="DoctorReportLink">Отчёт для врача →</button>
+
+          <div class="glass-card" data-component="DiaryInsightsCard">
+            <div class="card-title">Инсайты</div>
+            <p class="muted">За 7 дней: симптомы чаще после прогулок. Связь с пыльцой — вероятна.</p>
+          </div>
+
+          <div class="glass-card padded-none" data-component="HistoryList">
+            <div class="card-title-inset">История</div>
+            <div class="list-row">
+              <div class="icon">✚</div>
+              <div class="body">
+                <div class="title">Симптомы</div>
+                <div class="sub">ринит · 👍 · сегодня 08:20</div>
+              </div>
+              <span class="muted">›</span>
+            </div>
+            <div class="list-row">
+              <div class="icon">🍽</div>
+              <div class="body">
+                <div class="title">Еда</div>
+                <div class="sub">завтрак · вчера 09:10</div>
+              </div>
+              <span class="muted">›</span>
+            </div>
+            <div class="list-row">
+              <div class="icon">💨</div>
+              <div class="body">
+                <div class="title">Пикфлоу</div>
+                <div class="sub">320 л/мин · 27 июл</div>
+              </div>
+              <span class="muted">›</span>
+            </div>
+          </div>
+
+          <p class="disclaimer" data-component="Disclaimer">Записи помогают врачу, но не ставят диагноз.</p>
+        </div>
+      </div>
+
+      <div class="screen-body" data-state="empty" id="state-empty">
+        <div class="screen-scroll">
+          <div class="header-row">
+            <div>
+              <div class="screen-eyebrow">A-Claro · Наблюдения</div>
+              <h2 class="screen-title">Дневник</h2>
+              <p class="screen-subtitle">Пошаговые записи наблюдений</p>
+            </div>
+            <div class="header-actions"><div class="icon-btn">👤</div></div>
+          </div>
+          <div class="profile-switcher">
+            <div class="profile-pill active">Маша</div>
+          </div>
+          <button type="button" class="btn btn-accent btn-block">+ Новая запись по шагам</button>
+          <button type="button" class="btn btn-outline btn-block">Быстрая запись</button>
+          <div class="glass-card empty-state" data-component="EmptyState">
+            <div class="title">Пока нет записей</div>
+            <p class="muted" style="margin-bottom:12px;">Добавьте первую запись симптомов, еды или лекарств.</p>
+            <button type="button" class="btn btn-accent">+ Новая запись</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="tabbar" data-component="TabBar" aria-label="Вкладки">
+        <div class="tab"><span class="glyph">⌂</span>Главная</div>
+        <div class="tab active"><span class="glyph">▤</span>Дневник</div>
+        <div class="tab"><span class="glyph">⌕</span>Сканер</div>
+        <div class="tab"><span class="glyph">▣</span>Маркет</div>
+        <div class="tab"><span class="glyph">◎</span>Карта</div>
+        <div class="tab sos"><span class="glyph">!</span>SOS</div>
+      </nav>
+    </div>
+  </div>
+
+  <p class="handoff-note">
+    Handoff: <code>DiaryEditorModal</code> / <code>DiaryWizard</code> — overlay, не часть скролла.
+    Не заменять весь экран инлайновым редактором без отдельного макета.
+    Код: <code>app/(tabs)/diary.tsx</code>.
+  </p>
+
+  <script>
+    const buttons = document.querySelectorAll(".state-switch button");
+    const states = document.querySelectorAll("[data-state]");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const id = btn.getAttribute("data-show");
+        states.forEach((el) => {
+          el.classList.toggle("visible", el.getAttribute("data-state") === id);
+        });
+      });
+    });
+    document.getElementById("state-default").classList.add("visible");
+  </script>
+</body>
+</html>
