@@ -291,7 +291,7 @@ sudo ./svc.sh install ubuntu
 sudo ./svc.sh start
 ```
 
-**Обязательный label:** `yc-staging-vpc` — используется в [`deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml) для job `migrate`.
+**Обязательный label:** `yc-staging-vpc` — используется в [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) для job `migrate`.
 
 Проверка: в GitHub → Actions → Runners статус **Idle**, labels включают `yc-staging-vpc`.
 
@@ -349,7 +349,7 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 
 ## 7. CI/CD workflow
 
-Файл: [`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml)
+Файл: [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml)
 
 **Триггер:** push в ветку `staging` или `workflow_dispatch`.
 
@@ -375,7 +375,7 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 | `STAGING_API_URL` | `https://api.staging.aclearo.com` |
 | `EXPO_TOKEN` | expo.dev → Access Tokens |
 
-> Старый workflow [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) (Neon) можно отключить после перехода на YC.
+> Единственный staging deploy workflow: [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) — **Deploy staging (Yandex Cloud)**.
 
 ---
 
@@ -444,7 +444,7 @@ pnpm build:staging:ios
 | Dockerfile | [`Dockerfile`](../Dockerfile) |
 | Terraform | [`infra/yandex/staging/`](../infra/yandex/staging/) |
 | Bootstrap | [`scripts/yc-staging-bootstrap.sh`](../scripts/yc-staging-bootstrap.sh) |
-| CI | [`.github/workflows/deploy-staging-yandex.yml`](../.github/workflows/deploy-staging-yandex.yml) |
+| CI | [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) |
 | Env template | [`apps/api/.env.staging.example`](../apps/api/.env.staging.example) |
 | Migrate script | [`scripts/staging-migrate.sh`](../scripts/staging-migrate.sh) |
 | Phase 0 (без Replit) | [`docs/migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) · [`scripts/yc-stage-phase0-gate.sh`](../scripts/yc-stage-phase0-gate.sh) |

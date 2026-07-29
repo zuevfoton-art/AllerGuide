@@ -100,6 +100,6 @@ output "next_steps" {
     5. IAM for ${yandex_iam_service_account.api.name} / ${yandex_iam_service_account.deploy.name} is managed in iam.tf (folder admin required on apply principal).
     6. Register GitHub self-hosted runner on VM ${yandex_compute_instance.gh_runner.name} (label: yc-staging-vpc).
     7. Store GitHub Secrets: YC_SA_JSON (= terraform output deploy_service_account_key), YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_*, EXPO_TOKEN.
-    8. Push branch staging → deploy-staging-yandex.yml
+    8. Push branch staging → Deploy staging (Yandex Cloud) (.github/workflows/deploy-staging.yml)
   EOT
 }
