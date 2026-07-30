@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  filterFilledScheduleStages,
   insertScheduleLineAfter,
+  isScheduleStageFilled,
   normalizeScheduleLines,
   removeScheduleLine,
   scheduleLinesToNotes,
@@ -27,5 +29,15 @@ describe('therapy-schedule', () => {
     expect(updateScheduleLine(['a', 'b'], 1, 'c')).toEqual(['a', 'c']);
     expect(removeScheduleLine(['a'], 0)).toEqual(['']);
     expect(removeScheduleLine(['a', 'b'], 0)).toEqual(['b']);
+  });
+
+  it('filters blank schedule stages used as editor seeds', () => {
+    expect(isScheduleStageFilled({ from: '', to: '', dose: '' })).toBe(false);
+    expect(
+      filterFilledScheduleStages([
+        { from: '', to: '', dose: '' },
+        { from: '2026-01-01', to: '2026-02-01', dose: 'утро' },
+      ]),
+    ).toEqual([{ from: '2026-01-01', to: '2026-02-01', dose: 'утро' }]);
   });
 });

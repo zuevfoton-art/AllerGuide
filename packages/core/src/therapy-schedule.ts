@@ -2,6 +2,23 @@
  * Multi-row «схема приёма» helpers shared by ASIT and prescribed therapy.
  */
 
+export type ScheduleStageLike = {
+  from: string;
+  to: string;
+  dose: string;
+};
+
+export function isScheduleStageFilled(stage: ScheduleStageLike): boolean {
+  return Boolean(stage.from.trim() || stage.to.trim() || stage.dose.trim());
+}
+
+/** Drop blank stage rows so an empty editor seed does not block save/verify. */
+export function filterFilledScheduleStages<T extends ScheduleStageLike>(
+  stages: T[] | null | undefined,
+): T[] {
+  return (stages ?? []).filter(isScheduleStageFilled);
+}
+
 /** At least one editable row; drop trailing empties except a single blank seed. */
 export function normalizeScheduleLines(lines?: string[] | null, notesFallback?: string | null): string[] {
   const fromArray = (lines ?? []).map((line) => line.replace(/\s+$/g, ''));
