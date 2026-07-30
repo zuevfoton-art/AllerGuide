@@ -231,3 +231,31 @@ export function applyPrescriptionParseToCourse<T extends {
 
   return next;
 }
+
+/**
+ * Merge OCR parse into an ASIT course draft.
+ * Does not map prescribed-therapy routes (oral/…) onto SLIT/SCIT.
+ */
+export function applyPrescriptionParseToAsitCourse<T extends {
+  drug: string;
+  startDate: string;
+  scheduleNotes: string;
+  scheduleStages?: AsitScheduleStage[];
+}>(course: T, parsed: PrescriptionParseResult): T {
+  const next: T = { ...course };
+
+  if (parsed.drug) next.drug = parsed.drug;
+  if (parsed.startDate) next.startDate = parsed.startDate;
+  if (parsed.scheduleNotes) next.scheduleNotes = parsed.scheduleNotes;
+  else if (parsed.notes && !course.scheduleNotes.trim()) next.scheduleNotes = parsed.notes;
+  else if (parsed.dosage && !course.scheduleNotes.trim()) next.scheduleNotes = parsed.dosage;
+  if (parsed.scheduleStages.length > 0) {
+    next.scheduleStages = parsed.scheduleStages.map((s) => ({
+      from: s.from,
+      to: s.to,
+      dose: s.dose,
+    }));
+  }
+
+  return next;
+}

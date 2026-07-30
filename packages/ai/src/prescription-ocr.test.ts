@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyPrescriptionParseToAsitCourse,
   applyPrescriptionParseToCourse,
   getDemoPrescriptionParse,
   parsePrescriptionText,
@@ -98,5 +99,35 @@ describe('prescription-ocr', () => {
     expect(applied.scheduleNotes).toBe('ежедневно');
     expect(applied.notes).toBe('комментарий');
     expect(applied.stages).toHaveLength(1);
+  });
+
+  it('applies OCR fields onto an ASIT course without changing SLIT/SCIT route', () => {
+    const applied = applyPrescriptionParseToAsitCourse(
+      {
+        drug: '',
+        startDate: '',
+        scheduleNotes: '',
+        scheduleStages: undefined as
+          | Array<{ from: string; to: string; dose: string }>
+          | undefined,
+      },
+      {
+        drug: 'Сталораль',
+        dosage: '2 нажатия',
+        route: 'oral',
+        scheduleStages: [{ from: '2026-01-01', to: '2026-02-01', dose: 'утро' }],
+        startDate: '2026-01-01',
+        endDate: '2026-12-01',
+        scheduleNotes: 'ежедневно',
+        notes: '',
+        source: 'text',
+        warnings: [],
+      },
+    );
+
+    expect(applied.drug).toBe('Сталораль');
+    expect(applied.startDate).toBe('2026-01-01');
+    expect(applied.scheduleNotes).toBe('ежедневно');
+    expect(applied.scheduleStages).toHaveLength(1);
   });
 });

@@ -1,8 +1,6 @@
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
 import {
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
@@ -16,7 +14,7 @@ import {
   type AsitRoute,
   type AsitScheduleStage,
 } from '@allerguide/core';
-import { getDemoPrescriptionParse, parsePrescriptionText } from '@allerguide/ai';
+import { applyPrescriptionParseToAsitCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -24,6 +22,7 @@ import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
+import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCapture';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -37,6 +36,11 @@ import {
 import { ensureNotificationPermission, syncAsitReminder } from '@/src/services/asit-reminder-service';
 import { getAsitReminderNotificationContent } from '@/src/services/notification-content-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { pickPrescriptionPdf } from '@/src/services/prescription-photo-service';
+import {
+  recognizePrescription,
+  type PrescriptionOcrHintCode,
+} from '@/src/services/prescription-ocr-service';
 
 const ROUTES: AsitRoute[] = ['slit', 'scit'];
 const PHASES: AsitPhase[] = ['buildup', 'maintenance'];
@@ -56,6 +60,8 @@ export default function AsitCourseScreen() {
   const [parsing, setParsing] = useState(false);
   const [parseText, setParseText] = useState('');
   const [parseTextOpen, setParseTextOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [ocrHint, setOcrHint] = useState<string | null>(null);
 
   const asitEnabled = useMemo(() => {
     if (!profile) return false;
@@ -86,42 +92,58 @@ export default function AsitCourseScreen() {
     [],
   );
 
-  const pickPhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.85,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setCourse((prev) => ({ ...prev, prescriptionPhotoUri: result.assets[0]!.uri }));
-    }
-  };
+  const hintFromCode = useCallback(
+    (code: PrescriptionOcrHintCode | undefined, cloudError?: string) => {
+      if (!code) return null;
+      if (code === 'cloud_failed') {
+        return t('asit.ocrCloudFailed', { error: cloudError || 'error' });
+      }
+      if (code === 'cloud_disabled') return t('asit.ocrCloudDisabled');
+      if (code === 'empty_media') return t('asit.ocrEmptyMedia');
+      return t('asit.ocrDemoHint');
+    },
+    [t],
+  );
+
+  const onPhotoCaptured = useCallback((uri: string) => {
+    setCameraOpen(false);
+    setCourse((prev) => ({ ...prev, prescriptionPhotoUri: uri }));
+    setOcrHint(null);
+  }, []);
 
   const pickPdf = async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (!result.canceled && result.assets[0]) {
-      setCourse((prev) => ({ ...prev, prescriptionDocUri: result.assets[0]!.uri }));
-    }
+    const uri = await pickPrescriptionPdf();
+    if (!uri) return;
+    setCourse((prev) => ({ ...prev, prescriptionDocUri: uri }));
+    setOcrHint(null);
   };
 
-  const parseOcr = async () => {
+  const applyOcrOutcome = async (manualText?: string) => {
     setParsing(true);
+    setOcrHint(null);
     try {
-      const parsed = parseText.trim()
-        ? parsePrescriptionText(parseText)
-        : getDemoPrescriptionParse();
-      const update: Partial<AsitCourse> = {};
-      if (parsed.drug && !course.drug.trim()) update.drug = parsed.drug;
-      if (parsed.startDate && !course.startDate.trim()) update.startDate = parsed.startDate;
-      if (parsed.scheduleStages.length > 0) update.scheduleStages = parsed.scheduleStages;
-      if (parsed.notes && !course.scheduleNotes.trim()) update.scheduleNotes = parsed.notes;
-      setCourse((prev) => ({ ...prev, ...update }));
+      const outcome = await recognizePrescription({
+        photoUri: course.prescriptionPhotoUri,
+        pdfUri: course.prescriptionDocUri,
+        manualText,
+      });
+      setCourse((prev) => applyPrescriptionParseToAsitCourse(prev, outcome.parsed));
+      if (outcome.text) setParseText(outcome.text);
+      setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
       setParseTextOpen(false);
-      if (parsed.scheduleStages.length > 0) {
-        setStep('verify');
-      }
+      if (outcome.parsed.scheduleStages.length > 0) setStep('verify');
     } finally {
       setParsing(false);
     }
+  };
+
+  const startRecognize = () => {
+    const hasMedia = Boolean(course.prescriptionPhotoUri || course.prescriptionDocUri);
+    if (hasMedia) {
+      void applyOcrOutcome();
+      return;
+    }
+    setParseTextOpen(true);
   };
 
   const confirmVerify = () => {
@@ -177,6 +199,21 @@ export default function AsitCourseScreen() {
       <Screen>
         <Text style={styles.empty}>{t('asit.noProfile')}</Text>
       </Screen>
+    );
+  }
+
+  if (cameraOpen) {
+    return (
+      <PrescriptionCameraCapture
+        visible
+        title={t('asit.cameraTitle')}
+        hint={t('asit.cameraHint')}
+        galleryLabel={t('scanner.pickFromGallery')}
+        shutterLabel={t('scanner.takePhoto')}
+        cancelLabel={t('common.cancel')}
+        onCancel={() => setCameraOpen(false)}
+        onCaptured={onPhotoCaptured}
+      />
     );
   }
 
@@ -270,16 +307,26 @@ export default function AsitCourseScreen() {
           placeholderTextColor={theme.colors.textMuted}
         />
 
-        {/* Prescription upload */}
+        {/* Prescription upload — photo opens device camera (gallery optional), like Scanner */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.uploadPrescription')}</Text>
         <View style={ui.toggleRow}>
-          <Pressable style={[ui.toggle, course.prescriptionPhotoUri ? ui.toggleActive : null]} onPress={() => void pickPhoto()}>
+          <Pressable
+            style={[ui.toggle, course.prescriptionPhotoUri ? ui.toggleActive : null]}
+            onPress={() => setCameraOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('asit.uploadPhoto')}
+            testID="asit-course-photo">
             <Ionicons name="camera" size={15} color={course.prescriptionPhotoUri ? theme.colors.accent : theme.colors.textSecondary} />
             <Text style={[ui.toggleText, course.prescriptionPhotoUri ? ui.toggleTextActive : null]}>
               {course.prescriptionPhotoUri ? t('asit.uploadPhotoAttached') : t('asit.uploadPhoto')}
             </Text>
           </Pressable>
-          <Pressable style={[ui.toggle, course.prescriptionDocUri ? ui.toggleActive : null]} onPress={() => void pickPdf()}>
+          <Pressable
+            style={[ui.toggle, course.prescriptionDocUri ? ui.toggleActive : null]}
+            onPress={() => void pickPdf()}
+            accessibilityRole="button"
+            accessibilityLabel={t('asit.uploadPdf')}
+            testID="asit-course-pdf">
             <Ionicons name="document" size={15} color={course.prescriptionDocUri ? theme.colors.accent : theme.colors.textSecondary} />
             <Text style={[ui.toggleText, course.prescriptionDocUri ? ui.toggleTextActive : null]}>
               {course.prescriptionDocUri ? t('asit.uploadPdfAttached') : t('asit.uploadPdf')}
@@ -287,11 +334,19 @@ export default function AsitCourseScreen() {
           </Pressable>
         </View>
 
-        {/* OCR parse */}
-        <Pressable style={[styles.ocrBtn]} onPress={() => setParseTextOpen(true)}>
+        <Pressable
+          style={styles.ocrBtn}
+          onPress={startRecognize}
+          disabled={parsing}
+          accessibilityRole="button"
+          accessibilityLabel={t('asit.ocrParse')}
+          testID="asit-course-ocr">
           <Ionicons name="scan-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.ocrBtnText}>{t('asit.ocrParse')}</Text>
+          <Text style={styles.ocrBtnText}>
+            {parsing ? t('asit.ocrParsing') : t('asit.ocrParse')}
+          </Text>
         </Pressable>
+        {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
         {/* Route */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.routeLabel')}</Text>
@@ -384,7 +439,7 @@ export default function AsitCourseScreen() {
                 <Text style={styles.modalCancel}>{t('common.cancel')}</Text>
               </Pressable>
               <Text style={styles.modalTitle}>{t('asit.ocrParse')}</Text>
-              <Pressable onPress={() => void parseOcr()} disabled={parsing}>
+              <Pressable onPress={() => void applyOcrOutcome(parseText)} disabled={parsing}>
                 <Text style={[styles.modalDone, parsing && styles.modalDoneDisabled]}>
                   {parsing ? t('asit.ocrParsing') : t('common.done')}
                 </Text>
@@ -394,7 +449,7 @@ export default function AsitCourseScreen() {
               style={styles.parseInput}
               value={parseText}
               onChangeText={setParseText}
-              placeholder="Вставьте текст назначения или оставьте пустым для демо…"
+              placeholder={t('asit.ocrManualPlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               multiline
               textAlignVertical="top"
@@ -656,6 +711,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.accent,
     },
     ocrBtnText: { fontFamily: fonts.sansSemiBold, fontSize: 14, fontWeight: '600', color: colors.accent },
+    ocrHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+      marginTop: 8,
+    },
     reminderRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 8 },
     reminderField: { flex: 1, gap: 4 },
     reminderFieldLabel: { fontFamily: fonts.sans, fontSize: 12, color: colors.textMuted },

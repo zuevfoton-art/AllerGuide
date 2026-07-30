@@ -1,8 +1,6 @@
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { useMemo, useState, useEffect } from 'react';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   DEFAULT_ASIT_REMINDER_HOUR,
   DEFAULT_ASIT_REMINDER_MINUTE,
@@ -13,17 +11,14 @@ import {
   type PrescribedTherapyRoute,
   type PrescribedTherapyStage,
 } from '@allerguide/core';
-import {
-  applyPrescriptionParseToCourse,
-  getDemoPrescriptionParse,
-  parsePrescriptionText,
-} from '@allerguide/ai';
+import { applyPrescriptionParseToCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
+import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCapture';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -34,6 +29,11 @@ import {
   getPrescribedCourse,
   savePrescribedCourse,
 } from '@/src/services/prescribed-therapy-service';
+import { pickPrescriptionPdf } from '@/src/services/prescription-photo-service';
+import {
+  recognizePrescription,
+  type PrescriptionOcrHintCode,
+} from '@/src/services/prescription-ocr-service';
 
 const ROUTES = Object.keys(PRESCRIBED_THERAPY_ROUTE_LABELS) as PrescribedTherapyRoute[];
 
@@ -51,6 +51,8 @@ export default function PrescribedTherapyScreen() {
   const [parsing, setParsing] = useState(false);
   const [parseText, setParseText] = useState('');
   const [parseTextOpen, setParseTextOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [ocrHint, setOcrHint] = useState<string | null>(null);
 
   useEffect(() => {
     if (!profileId) return;
@@ -58,35 +60,58 @@ export default function PrescribedTherapyScreen() {
     if (existing) setCourse(existing);
   }, [profileId]);
 
-  const pickPhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.85,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setCourse((prev) => ({ ...prev, prescriptionPhotoUri: result.assets[0]!.uri }));
-    }
-  };
+  const hintFromCode = useCallback(
+    (code: PrescriptionOcrHintCode | undefined, cloudError?: string) => {
+      if (!code) return null;
+      if (code === 'cloud_failed') {
+        return t('prescribedTherapy.ocrCloudFailed', { error: cloudError || 'error' });
+      }
+      if (code === 'cloud_disabled') return t('prescribedTherapy.ocrCloudDisabled');
+      if (code === 'empty_media') return t('prescribedTherapy.ocrEmptyMedia');
+      return t('prescribedTherapy.ocrDemoHint');
+    },
+    [t],
+  );
+
+  const onPhotoCaptured = useCallback((uri: string) => {
+    setCameraOpen(false);
+    setCourse((prev) => ({ ...prev, prescriptionPhotoUri: uri }));
+    setOcrHint(null);
+  }, []);
 
   const pickPdf = async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (!result.canceled && result.assets[0]) {
-      setCourse((prev) => ({ ...prev, prescriptionDocUri: result.assets[0]!.uri }));
-    }
+    const uri = await pickPrescriptionPdf();
+    if (!uri) return;
+    setCourse((prev) => ({ ...prev, prescriptionDocUri: uri }));
+    setOcrHint(null);
   };
 
-  const parseOcr = async () => {
+  const applyOcrOutcome = async (manualText?: string) => {
     setParsing(true);
+    setOcrHint(null);
     try {
-      const parsed = parseText.trim()
-        ? parsePrescriptionText(parseText)
-        : getDemoPrescriptionParse();
-      setCourse((prev) => applyPrescriptionParseToCourse(prev, parsed));
+      const outcome = await recognizePrescription({
+        photoUri: course.prescriptionPhotoUri,
+        pdfUri: course.prescriptionDocUri,
+        manualText,
+      });
+      setCourse((prev) => applyPrescriptionParseToCourse(prev, outcome.parsed));
+      if (outcome.text) setParseText(outcome.text);
+      setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
       setParseTextOpen(false);
-      if (parsed.scheduleStages.length > 0) setStep('verify');
+      if (outcome.parsed.scheduleStages.length > 0) setStep('verify');
     } finally {
       setParsing(false);
     }
+  };
+
+  const startRecognize = () => {
+    const hasMedia = Boolean(course.prescriptionPhotoUri || course.prescriptionDocUri);
+    if (hasMedia) {
+      void applyOcrOutcome();
+      return;
+    }
+    setParseTextOpen(true);
   };
 
   const confirmVerify = () => {
@@ -141,6 +166,21 @@ export default function PrescribedTherapyScreen() {
     );
   }
 
+  if (cameraOpen) {
+    return (
+      <PrescriptionCameraCapture
+        visible
+        title={t('prescribedTherapy.cameraTitle')}
+        hint={t('prescribedTherapy.cameraHint')}
+        galleryLabel={t('scanner.pickFromGallery')}
+        shutterLabel={t('scanner.takePhoto')}
+        cancelLabel={t('common.cancel')}
+        onCancel={() => setCameraOpen(false)}
+        onCaptured={onPhotoCaptured}
+      />
+    );
+  }
+
   if (step === 'verify') {
     return <VerifyStepPT
       theme={theme}
@@ -188,9 +228,10 @@ export default function PrescribedTherapyScreen() {
         <View style={styles.uploadRow}>
           <Pressable
             style={[styles.uploadChip, course.prescriptionPhotoUri ? styles.uploadChipActive : null]}
-            onPress={() => void pickPhoto()}
+            onPress={() => setCameraOpen(true)}
             accessibilityRole="button"
-            accessibilityLabel={t('prescribedTherapy.uploadPhoto')}>
+            accessibilityLabel={t('prescribedTherapy.uploadPhoto')}
+            testID="prescribed-therapy-photo">
             <Ionicons
               name="camera"
               size={15}
@@ -201,14 +242,17 @@ export default function PrescribedTherapyScreen() {
                 styles.uploadChipText,
                 course.prescriptionPhotoUri ? styles.uploadChipTextActive : null,
               ]}>
-              {t('prescribedTherapy.uploadPhoto')}
+              {course.prescriptionPhotoUri
+                ? t('prescribedTherapy.uploadPhotoAttached')
+                : t('prescribedTherapy.uploadPhoto')}
             </Text>
           </Pressable>
           <Pressable
             style={[styles.uploadChip, course.prescriptionDocUri ? styles.uploadChipActive : null]}
             onPress={() => void pickPdf()}
             accessibilityRole="button"
-            accessibilityLabel={t('prescribedTherapy.uploadPdf')}>
+            accessibilityLabel={t('prescribedTherapy.uploadPdf')}
+            testID="prescribed-therapy-pdf">
             <Ionicons
               name="document"
               size={15}
@@ -219,19 +263,26 @@ export default function PrescribedTherapyScreen() {
                 styles.uploadChipText,
                 course.prescriptionDocUri ? styles.uploadChipTextActive : null,
               ]}>
-              {t('prescribedTherapy.uploadPdf')}
+              {course.prescriptionDocUri
+                ? t('prescribedTherapy.uploadPdfAttached')
+                : t('prescribedTherapy.uploadPdf')}
             </Text>
           </Pressable>
         </View>
 
         <Pressable
           style={styles.ocrBtn}
-          onPress={() => setParseTextOpen(true)}
+          onPress={startRecognize}
+          disabled={parsing}
           accessibilityRole="button"
-          accessibilityLabel={t('prescribedTherapy.ocrParse')}>
+          accessibilityLabel={t('prescribedTherapy.ocrParse')}
+          testID="prescribed-therapy-ocr">
           <Ionicons name="scan-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.ocrBtnText}>{t('prescribedTherapy.ocrParse')}</Text>
+          <Text style={styles.ocrBtnText}>
+            {parsing ? t('prescribedTherapy.ocrParsing') : t('prescribedTherapy.ocrParse')}
+          </Text>
         </Pressable>
+        {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
         {/* Drug */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.drugLabel')}</Text>
@@ -343,9 +394,9 @@ export default function PrescribedTherapyScreen() {
                 <Text style={styles.modalCancel}>{t('common.cancel')}</Text>
               </Pressable>
               <Text style={styles.modalTitle}>{t('prescribedTherapy.ocrParse')}</Text>
-              <Pressable onPress={() => void parseOcr()} disabled={parsing}>
+              <Pressable onPress={() => void applyOcrOutcome(parseText)} disabled={parsing}>
                 <Text style={[styles.modalDone, parsing && styles.modalDoneDisabled]}>
-                  {t('common.done')}
+                  {parsing ? t('prescribedTherapy.ocrParsing') : t('common.done')}
                 </Text>
               </Pressable>
             </View>
@@ -353,7 +404,7 @@ export default function PrescribedTherapyScreen() {
               style={styles.parseInput}
               value={parseText}
               onChangeText={setParseText}
-              placeholder="Вставьте текст назначения или оставьте пустым для демо…"
+              placeholder={t('prescribedTherapy.ocrManualPlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               multiline
               textAlignVertical="top"
@@ -607,6 +658,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       fontWeight: '600',
       color: colors.accent,
+    },
+    ocrHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+      marginTop: 8,
     },
     stageCard: { gap: 8, marginBottom: 8 },
     stageLabel: { fontFamily: fonts.sansSemiBold, fontSize: 13, fontWeight: '600', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
