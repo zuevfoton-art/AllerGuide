@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   DEFAULT_ASIT_REMINDER_HOUR,
   DEFAULT_ASIT_REMINDER_MINUTE,
+  filterFilledScheduleStages,
   formatPrescribedReminderTime,
   isPrescribedReminderConfigured,
   normalizeScheduleLines,
@@ -133,11 +134,13 @@ export default function PrescribedTherapyScreen() {
   const save = async () => {
     if (!profileId) return;
     const lines = normalizeScheduleLines(course.scheduleLines, course.scheduleNotes);
+    const stages = filterFilledScheduleStages(course.stages);
     const toSave: PrescribedCourse = {
       ...course,
       scheduleLines: lines,
       scheduleNotes: scheduleLinesToNotes(lines),
-      verified: course.stages?.length ? Boolean(course.verified) : true,
+      stages,
+      verified: stages.length ? Boolean(course.verified) : true,
       activated: true,
       active: true,
     };
@@ -147,7 +150,8 @@ export default function PrescribedTherapyScreen() {
 
   const goToNextFromForm = () => {
     if (!course.drug.trim()) return;
-    if (course.stages && course.stages.length > 0 && !course.verified) {
+    const filledStages = filterFilledScheduleStages(course.stages);
+    if (filledStages.length > 0 && !course.verified) {
       setStep('verify');
       return;
     }
@@ -215,7 +219,7 @@ export default function PrescribedTherapyScreen() {
       styles={styles}
       course={course}
       setCourse={setCourse}
-      onBack={() => setStep(course.stages && course.stages.length > 0 ? 'verify' : 'form')}
+      onBack={() => setStep(filterFilledScheduleStages(course.stages).length > 0 ? 'verify' : 'form')}
       onSave={save}
       reminderEnabled={reminderEnabled}
       toggleReminder={toggleReminder}
@@ -397,7 +401,7 @@ export default function PrescribedTherapyScreen() {
         />
       </GlassCard>
 
-      {course.stages && course.stages.length > 0 && !course.verified ? (
+      {filterFilledScheduleStages(course.stages).length > 0 && !course.verified ? (
         <Button label={t('prescribedTherapy.verifyTitle')} variant="secondary" block onPress={() => setStep('verify')} />
       ) : null}
 
@@ -533,10 +537,10 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
             </Text>
           ))}
 
-        {course.stages && course.stages.length > 0 ? (
+        {filterFilledScheduleStages(course.stages).length > 0 ? (
           <>
             <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.stagesLabel')}</Text>
-            {course.stages.map((s, i) => (
+            {filterFilledScheduleStages(course.stages).map((s, i) => (
               <Text key={i} style={styles.stageRow}>
                 {i + 1}. {s.from} – {s.to}: {s.dose}
               </Text>

@@ -7,6 +7,7 @@ import {
   DEFAULT_ASIT_REMINDER_HOUR,
   DEFAULT_ASIT_REMINDER_MINUTE,
   createEmptyAsitClinicalDiagnosis,
+  filterFilledScheduleStages,
   findAllergenById,
   formatAsitReminderTime,
   isAsitReminderConfigured,
@@ -179,11 +180,13 @@ export default function AsitCourseScreen() {
   const save = async () => {
     if (!profileId) return;
     const lines = normalizeScheduleLines(course.scheduleLines, course.scheduleNotes);
+    const scheduleStages = filterFilledScheduleStages(course.scheduleStages);
     const toSave: AsitCourse = {
       ...course,
       scheduleLines: lines,
       scheduleNotes: scheduleLinesToNotes(lines),
-      verified: course.scheduleStages?.length ? Boolean(course.verified) : true,
+      scheduleStages,
+      verified: scheduleStages.length ? Boolean(course.verified) : true,
       activated: true,
       active: true,
     };
@@ -197,7 +200,8 @@ export default function AsitCourseScreen() {
 
   const goToNextFromForm = () => {
     if (!course.allergen.trim() || !course.drug.trim()) return;
-    if (course.scheduleStages && course.scheduleStages.length > 0 && !course.verified) {
+    const filledStages = filterFilledScheduleStages(course.scheduleStages);
+    if (filledStages.length > 0 && !course.verified) {
       setStep('verify');
       return;
     }
@@ -283,13 +287,13 @@ export default function AsitCourseScreen() {
       ui={ui}
       styles={styles}
       course={course}
+      setCourse={setCourse}
       onBack={() =>
-        setStep(course.scheduleStages && course.scheduleStages.length > 0 ? 'verify' : 'form')
+        setStep(filterFilledScheduleStages(course.scheduleStages).length > 0 ? 'verify' : 'form')
       }
       onSave={save}
       reminderEnabled={reminderEnabled}
       toggleReminder={toggleReminder}
-      setCourse={setCourse}
       t={t}
     />;
   }
@@ -490,7 +494,7 @@ export default function AsitCourseScreen() {
       </GlassCard>
 
       {/* If stages already parsed, show verify button */}
-      {course.scheduleStages && course.scheduleStages.length > 0 && !course.verified ? (
+      {filterFilledScheduleStages(course.scheduleStages).length > 0 && !course.verified ? (
         <Button
           label={t('asit.verifyTitle')}
           variant="secondary"
@@ -647,10 +651,10 @@ function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, remi
             </Text>
           ))}
 
-        {course.scheduleStages && course.scheduleStages.length > 0 ? (
+        {filterFilledScheduleStages(course.scheduleStages).length > 0 ? (
           <>
             <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.stagesLabel')}</Text>
-            {course.scheduleStages.map((s, i) => (
+            {filterFilledScheduleStages(course.scheduleStages).map((s, i) => (
               <Text key={i} style={styles.stageRow}>
                 {i + 1}. {s.from} – {s.to}: {s.dose}
               </Text>
