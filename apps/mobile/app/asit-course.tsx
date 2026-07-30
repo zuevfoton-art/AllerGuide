@@ -6,13 +6,16 @@ import {
   ASIT_ROUTE_LABELS,
   DEFAULT_ASIT_REMINDER_HOUR,
   DEFAULT_ASIT_REMINDER_MINUTE,
+  createEmptyAsitClinicalDiagnosis,
   findAllergenById,
   formatAsitReminderTime,
   isAsitReminderConfigured,
+  normalizeScheduleLines,
+  scheduleLinesToNotes,
+  type AsitClinicalDiagnosis,
   type AsitCourse,
   type AsitPhase,
   type AsitRoute,
-  type AsitScheduleStage,
 } from '@allerguide/core';
 import { applyPrescriptionParseToAsitCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
@@ -23,6 +26,8 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
 import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCapture';
+import { ScheduleLinesEditor } from '@/src/components/ScheduleLinesEditor';
+import { ScheduleStagesEditor } from '@/src/components/ScheduleStagesEditor';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -131,10 +136,30 @@ export default function AsitCourseScreen() {
       if (outcome.text) setParseText(outcome.text);
       setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
       setParseTextOpen(false);
-      if (outcome.parsed.scheduleStages.length > 0) setStep('verify');
+      // Stay on the form so prefilled fields (incl. clinical diagnosis) are visible.
     } finally {
       setParsing(false);
     }
+  };
+
+  const setScheduleLines = (scheduleLines: string[]) => {
+    const lines = normalizeScheduleLines(scheduleLines);
+    setCourse((prev) => ({
+      ...prev,
+      scheduleLines: lines,
+      scheduleNotes: scheduleLinesToNotes(lines),
+    }));
+  };
+
+  const setClinicalField = (key: keyof AsitClinicalDiagnosis, value: string) => {
+    setCourse((prev) => ({
+      ...prev,
+      clinicalDiagnosis: {
+        ...createEmptyAsitClinicalDiagnosis(),
+        ...(prev.clinicalDiagnosis ?? {}),
+        [key]: value,
+      },
+    }));
   };
 
   const startRecognize = () => {
@@ -153,8 +178,11 @@ export default function AsitCourseScreen() {
 
   const save = async () => {
     if (!profileId) return;
+    const lines = normalizeScheduleLines(course.scheduleLines, course.scheduleNotes);
     const toSave: AsitCourse = {
       ...course,
+      scheduleLines: lines,
+      scheduleNotes: scheduleLinesToNotes(lines),
       verified: course.scheduleStages?.length ? Boolean(course.verified) : true,
       activated: true,
       active: true,
@@ -307,6 +335,15 @@ export default function AsitCourseScreen() {
           placeholderTextColor={theme.colors.textMuted}
         />
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.dosageLabel')}</Text>
+        <TextInput
+          style={styles.input}
+          value={course.dosage ?? ''}
+          onChangeText={(dosage) => setCourse((prev) => ({ ...prev, dosage }))}
+          placeholder={t('asit.dosagePlaceholder')}
+          placeholderTextColor={theme.colors.textMuted}
+        />
+
         {/* Prescription upload — photo opens device camera (gallery optional), like Scanner */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.uploadPrescription')}</Text>
         <View style={ui.toggleRow}>
@@ -378,28 +415,78 @@ export default function AsitCourseScreen() {
           ))}
         </View>
 
-        {/* Start date */}
-        <View style={styles.fieldGap}>
-          <DateTimeField
-            label={t('asit.startDateLabel')}
-            value={course.startDate}
-            onChange={(startDate) => setCourse((prev) => ({ ...prev, startDate }))}
-            mode="date"
-            minYear={2020}
-          />
+        {/* Start / end dates */}
+        <View style={[styles.fieldGap, styles.dateRow]}>
+          <View style={styles.dateField}>
+            <DateTimeField
+              label={t('asit.startDateLabel')}
+              value={course.startDate}
+              onChange={(startDate) => setCourse((prev) => ({ ...prev, startDate }))}
+              mode="date"
+              minYear={2020}
+            />
+          </View>
+          <View style={styles.dateField}>
+            <DateTimeField
+              label={t('asit.endDateLabel')}
+              value={course.endDate ?? ''}
+              onChange={(endDate) => setCourse((prev) => ({ ...prev, endDate }))}
+              mode="date"
+              minYear={2020}
+            />
+          </View>
         </View>
 
-        {/* Schedule notes */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.scheduleLabel')}</Text>
-        <TextInput
-          style={[styles.input, styles.inputMultiline]}
-          value={course.scheduleNotes}
-          onChangeText={(scheduleNotes) => setCourse((prev) => ({ ...prev, scheduleNotes }))}
+        <ScheduleLinesEditor
+          lines={course.scheduleLines}
+          notesFallback={course.scheduleNotes}
           placeholder={t('asit.schedulePlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          multiline
-          textAlignVertical="top"
+          addRowLabel={t('asit.addScheduleRow')}
+          onChange={setScheduleLines}
+          testID="asit-schedule-lines"
         />
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.stagesLabel')}</Text>
+        <ScheduleStagesEditor
+          stages={course.scheduleStages ?? []}
+          doseLabel={t('asit.stageDose')}
+          dosePlaceholder={t('asit.dosagePlaceholder')}
+          addRowLabel={t('asit.addScheduleRow')}
+          stageLabel={(index) => t('asit.stageLabel', { n: String(index + 1) })}
+          fromLabel={t('asit.stageFrom')}
+          toLabel={t('asit.stageTo')}
+          onChange={(scheduleStages) =>
+            setCourse((prev) => ({ ...prev, scheduleStages, verified: false }))
+          }
+          testID="asit-schedule-stages"
+        />
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.clinicalTitle')}</Text>
+        {(
+          [
+            ['primaryDisease', 'asit.clinicalPrimary'],
+            ['concomitantDisease', 'asit.clinicalConcomitant'],
+            ['recommendations', 'asit.clinicalRecommendations'],
+            ['diet', 'asit.clinicalDiet'],
+            ['examPlan', 'asit.clinicalExamPlan'],
+            ['other', 'asit.clinicalOther'],
+          ] as const
+        ).map(([key, labelKey]) => (
+          <View key={key} style={styles.clinicalField}>
+            <Text style={ui.sectionLabel}>{t(labelKey)}</Text>
+            <TextInput
+              style={[styles.input, styles.inputMultiline]}
+              value={course.clinicalDiagnosis?.[key] ?? ''}
+              onChangeText={(value) => setClinicalField(key, value)}
+              placeholder={t(labelKey)}
+              placeholderTextColor={theme.colors.textMuted}
+              multiline
+              textAlignVertical="top"
+              testID={`asit-clinical-${key}`}
+            />
+          </View>
+        ))}
       </GlassCard>
 
       {/* If stages already parsed, show verify button */}
@@ -474,16 +561,6 @@ interface VerifyStepProps {
 }
 
 function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepProps) {
-  const stages = course.scheduleStages ?? [];
-
-  const updateStage = (index: number, field: keyof AsitScheduleStage, value: string) => {
-    setCourse((prev) => {
-      const next = [...(prev.scheduleStages ?? [])];
-      next[index] = { ...next[index]!, [field]: value };
-      return { ...prev, scheduleStages: next };
-    });
-  };
-
   return (
     <Screen>
       <View style={styles.header}>
@@ -497,40 +574,22 @@ function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t
         </View>
       </View>
 
-      {stages.length === 0 ? (
-        <GlassCard>
+      <GlassCard style={styles.section}>
+        {(course.scheduleStages ?? []).length === 0 ? (
           <Text style={styles.hint}>{t('asit.verifyStagesEmpty')}</Text>
-        </GlassCard>
-      ) : (
-        stages.map((stage, i) => (
-          <GlassCard key={i} style={styles.stageCard}>
-            <Text style={styles.stageLabel}>Этап {i + 1}</Text>
-            <View style={styles.stageDateRow}>
-              <DateTimeField
-                label="С"
-                value={stage.from}
-                onChange={(v) => updateStage(i, 'from', v)}
-                mode="date"
-                minYear={2020}
-              />
-              <DateTimeField
-                label="По"
-                value={stage.to}
-                onChange={(v) => updateStage(i, 'to', v)}
-                mode="date"
-                minYear={2020}
-              />
-            </View>
-            <TextInput
-              style={styles.input}
-              value={stage.dose}
-              onChangeText={(v) => updateStage(i, 'dose', v)}
-              placeholder="Доза / описание"
-              placeholderTextColor={theme.colors.textMuted}
-            />
-          </GlassCard>
-        ))
-      )}
+        ) : null}
+        <ScheduleStagesEditor
+          stages={course.scheduleStages ?? []}
+          doseLabel={t('asit.stageDose')}
+          dosePlaceholder={t('asit.dosagePlaceholder')}
+          addRowLabel={t('asit.addScheduleRow')}
+          stageLabel={(index) => t('asit.stageLabel', { n: String(index + 1) })}
+          fromLabel={t('asit.stageFrom')}
+          toLabel={t('asit.stageTo')}
+          onChange={(scheduleStages) => setCourse((prev) => ({ ...prev, scheduleStages }))}
+          testID="asit-verify-stages"
+        />
+      </GlassCard>
 
       <Button label={t('asit.verifyConfirm')} variant="primary" block onPress={onConfirm} />
     </Screen>
@@ -570,17 +629,57 @@ function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, remi
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.drugLabel')}</Text>
         <Text style={styles.reviewValue}>{course.drug || '—'}</Text>
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.dosageLabel')}</Text>
+        <Text style={styles.reviewValue}>{course.dosage?.trim() || '—'}</Text>
+
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.startDateLabel')}</Text>
         <Text style={styles.reviewValue}>{course.startDate || '—'}</Text>
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.endDateLabel')}</Text>
+        <Text style={styles.reviewValue}>{course.endDate?.trim() || '—'}</Text>
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.scheduleLabel')}</Text>
+        {normalizeScheduleLines(course.scheduleLines, course.scheduleNotes)
+          .filter((line) => line.trim())
+          .map((line, i) => (
+            <Text key={`sched-${i}`} style={styles.stageRow}>
+              {i + 1}. {line}
+            </Text>
+          ))}
+
         {course.scheduleStages && course.scheduleStages.length > 0 ? (
           <>
-            <Text style={[ui.sectionLabel, styles.fieldGap]}>Этапы схемы</Text>
+            <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.stagesLabel')}</Text>
             {course.scheduleStages.map((s, i) => (
               <Text key={i} style={styles.stageRow}>
                 {i + 1}. {s.from} – {s.to}: {s.dose}
               </Text>
             ))}
+          </>
+        ) : null}
+
+        {course.clinicalDiagnosis &&
+        Object.values(course.clinicalDiagnosis).some((value) => value.trim()) ? (
+          <>
+            <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.clinicalTitle')}</Text>
+            {(
+              [
+                ['primaryDisease', 'asit.clinicalPrimary'],
+                ['concomitantDisease', 'asit.clinicalConcomitant'],
+                ['recommendations', 'asit.clinicalRecommendations'],
+                ['diet', 'asit.clinicalDiet'],
+                ['examPlan', 'asit.clinicalExamPlan'],
+                ['other', 'asit.clinicalOther'],
+              ] as const
+            ).map(([key, labelKey]) => {
+              const value = course.clinicalDiagnosis?.[key]?.trim();
+              if (!value) return null;
+              return (
+                <Text key={key} style={styles.stageRow}>
+                  {t(labelKey)}: {value}
+                </Text>
+              );
+            })}
           </>
         ) : null}
 
@@ -672,6 +771,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     headerText: { flex: 1, gap: 2 },
     section: { gap: 4, marginBottom: 12 },
     fieldGap: { marginTop: 12 },
+    dateRow: { flexDirection: 'row', gap: 8 },
+    dateField: { flex: 1 },
+    clinicalField: { marginTop: 10, gap: 6 },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,

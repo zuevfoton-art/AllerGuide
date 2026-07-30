@@ -6,10 +6,11 @@ import {
   DEFAULT_ASIT_REMINDER_MINUTE,
   formatPrescribedReminderTime,
   isPrescribedReminderConfigured,
+  normalizeScheduleLines,
   PRESCRIBED_THERAPY_ROUTE_LABELS,
+  scheduleLinesToNotes,
   type PrescribedCourse,
   type PrescribedTherapyRoute,
-  type PrescribedTherapyStage,
 } from '@allerguide/core';
 import { applyPrescriptionParseToCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
@@ -19,6 +20,8 @@ import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
 import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCapture';
+import { ScheduleLinesEditor } from '@/src/components/ScheduleLinesEditor';
+import { ScheduleStagesEditor } from '@/src/components/ScheduleStagesEditor';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -99,10 +102,18 @@ export default function PrescribedTherapyScreen() {
       if (outcome.text) setParseText(outcome.text);
       setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
       setParseTextOpen(false);
-      if (outcome.parsed.scheduleStages.length > 0) setStep('verify');
     } finally {
       setParsing(false);
     }
+  };
+
+  const setScheduleLines = (scheduleLines: string[]) => {
+    const lines = normalizeScheduleLines(scheduleLines);
+    setCourse((prev) => ({
+      ...prev,
+      scheduleLines: lines,
+      scheduleNotes: scheduleLinesToNotes(lines),
+    }));
   };
 
   const startRecognize = () => {
@@ -121,8 +132,11 @@ export default function PrescribedTherapyScreen() {
 
   const save = async () => {
     if (!profileId) return;
+    const lines = normalizeScheduleLines(course.scheduleLines, course.scheduleNotes);
     const toSave: PrescribedCourse = {
       ...course,
+      scheduleLines: lines,
+      scheduleNotes: scheduleLinesToNotes(lines),
       verified: course.stages?.length ? Boolean(course.verified) : true,
       activated: true,
       active: true,
@@ -347,16 +361,27 @@ export default function PrescribedTherapyScreen() {
           </View>
         </View>
 
-        {/* Schedule notes */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.scheduleLabel')}</Text>
-        <TextInput
-          style={[styles.input, styles.inputMultiline]}
-          value={course.scheduleNotes}
-          onChangeText={(scheduleNotes) => setCourse((prev) => ({ ...prev, scheduleNotes }))}
+        <ScheduleLinesEditor
+          lines={course.scheduleLines}
+          notesFallback={course.scheduleNotes}
           placeholder={t('prescribedTherapy.schedulePlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          multiline
-          textAlignVertical="top"
+          addRowLabel={t('prescribedTherapy.addScheduleRow')}
+          onChange={setScheduleLines}
+          testID="prescribed-schedule-lines"
+        />
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.stagesLabel')}</Text>
+        <ScheduleStagesEditor
+          stages={course.stages ?? []}
+          doseLabel={t('prescribedTherapy.stageDose')}
+          dosePlaceholder={t('prescribedTherapy.dosagePlaceholder')}
+          addRowLabel={t('prescribedTherapy.addScheduleRow')}
+          stageLabel={(index) => t('prescribedTherapy.stageLabel', { n: String(index + 1) })}
+          fromLabel={t('prescribedTherapy.stageFrom')}
+          toLabel={t('prescribedTherapy.stageTo')}
+          onChange={(stages) => setCourse((prev) => ({ ...prev, stages, verified: false }))}
+          testID="prescribed-schedule-stages"
         />
 
         {/* Notes */}
@@ -429,16 +454,6 @@ interface VerifyStepPTProps {
 }
 
 function VerifyStepPT({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepPTProps) {
-  const stages = course.stages ?? [];
-
-  const updateStage = (index: number, field: keyof PrescribedTherapyStage, value: string) => {
-    setCourse((prev) => {
-      const next = [...(prev.stages ?? [])];
-      next[index] = { ...next[index]!, [field]: value };
-      return { ...prev, stages: next };
-    });
-  };
-
   return (
     <Screen>
       <View style={styles.header}>
@@ -451,22 +466,19 @@ function VerifyStepPT({ theme, ui, styles, course, setCourse, onBack, onConfirm,
         </View>
       </View>
 
-      {stages.map((stage, i) => (
-        <GlassCard key={i} style={styles.stageCard}>
-          <Text style={styles.stageLabel}>Этап {i + 1}</Text>
-          <View style={styles.stageDateRow}>
-            <DateTimeField label="С" value={stage.from} onChange={(v) => updateStage(i, 'from', v)} mode="date" minYear={2020} />
-            <DateTimeField label="По" value={stage.to} onChange={(v) => updateStage(i, 'to', v)} mode="date" minYear={2020} />
-          </View>
-          <TextInput
-            style={styles.input}
-            value={stage.dose}
-            onChangeText={(v) => updateStage(i, 'dose', v)}
-            placeholder="Доза / описание"
-            placeholderTextColor={theme.colors.textMuted}
-          />
-        </GlassCard>
-      ))}
+      <GlassCard style={styles.section}>
+        <ScheduleStagesEditor
+          stages={course.stages ?? []}
+          doseLabel={t('prescribedTherapy.stageDose')}
+          dosePlaceholder={t('prescribedTherapy.dosagePlaceholder')}
+          addRowLabel={t('prescribedTherapy.addScheduleRow')}
+          stageLabel={(index) => t('prescribedTherapy.stageLabel', { n: String(index + 1) })}
+          fromLabel={t('prescribedTherapy.stageFrom')}
+          toLabel={t('prescribedTherapy.stageTo')}
+          onChange={(stages) => setCourse((prev) => ({ ...prev, stages }))}
+          testID="prescribed-verify-stages"
+        />
+      </GlassCard>
 
       <Button label={t('prescribedTherapy.verifyConfirm')} variant="primary" block onPress={onConfirm} />
     </Screen>
@@ -503,12 +515,27 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
         <Text style={ui.sectionLabel}>{t('prescribedTherapy.drugLabel')}</Text>
         <Text style={styles.reviewValue}>{course.drug || '—'}</Text>
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.dosageLabel')}</Text>
+        <Text style={styles.reviewValue}>{course.dosage || '—'}</Text>
+
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.startDateLabel')}</Text>
         <Text style={styles.reviewValue}>{course.startDate || '—'}</Text>
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.endDateLabel')}</Text>
+        <Text style={styles.reviewValue}>{course.endDate || '—'}</Text>
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.scheduleLabel')}</Text>
+        {normalizeScheduleLines(course.scheduleLines, course.scheduleNotes)
+          .filter((line) => line.trim())
+          .map((line, i) => (
+            <Text key={`sched-${i}`} style={styles.stageRow}>
+              {i + 1}. {line}
+            </Text>
+          ))}
+
         {course.stages && course.stages.length > 0 ? (
           <>
-            <Text style={[ui.sectionLabel, styles.fieldGap]}>Этапы схемы</Text>
+            <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('prescribedTherapy.stagesLabel')}</Text>
             {course.stages.map((s, i) => (
               <Text key={i} style={styles.stageRow}>
                 {i + 1}. {s.from} – {s.to}: {s.dose}

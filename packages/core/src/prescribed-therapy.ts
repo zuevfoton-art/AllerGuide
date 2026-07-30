@@ -30,6 +30,8 @@ export interface PrescribedCourse {
   /** ISO date YYYY-MM-DD */
   endDate: string;
   scheduleNotes: string;
+  /** Multi-row «схема приёма»; preferred over a single multiline notes blob. */
+  scheduleLines?: string[];
   stages?: PrescribedTherapyStage[];
   prescriptionPhotoUri?: string;
   prescriptionDocUri?: string;
@@ -59,6 +61,7 @@ export function createDefaultPrescribedCourse(): PrescribedCourse {
     startDate: '',
     endDate: '',
     scheduleNotes: '',
+    scheduleLines: [''],
     notes: '',
     activated: false,
     verified: false,
