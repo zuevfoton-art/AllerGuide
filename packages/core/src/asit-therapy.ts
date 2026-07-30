@@ -9,6 +9,27 @@ export interface AsitScheduleStage {
   dose: string;
 }
 
+/** Clinical diagnosis block from an ASIT prescription / epicrisis photo. */
+export interface AsitClinicalDiagnosis {
+  primaryDisease: string;
+  concomitantDisease: string;
+  recommendations: string;
+  diet: string;
+  examPlan: string;
+  other: string;
+}
+
+export function createEmptyAsitClinicalDiagnosis(): AsitClinicalDiagnosis {
+  return {
+    primaryDisease: '',
+    concomitantDisease: '',
+    recommendations: '',
+    diet: '',
+    examPlan: '',
+    other: '',
+  };
+}
+
 export interface AsitCourse {
   v: 1;
   active: boolean;
@@ -17,13 +38,21 @@ export interface AsitCourse {
   /** Canonical allergen id from catalog, if chosen via picker. */
   allergenId?: string;
   drug: string;
+  /** Dose text from prescription OCR (optional). */
+  dosage?: string;
   route: AsitRoute;
   phase: AsitPhase;
   /** ISO date string YYYY-MM-DD. */
   startDate: string;
+  /** ISO date string YYYY-MM-DD (optional end of course). */
+  endDate?: string;
   scheduleNotes: string;
+  /** Multi-row «схема приёма»; preferred over a single multiline notes blob. */
+  scheduleLines?: string[];
   /** Structured schedule stages parsed from prescription OCR. */
   scheduleStages?: AsitScheduleStage[];
+  /** Clinical diagnosis sections extracted from the prescription photo. */
+  clinicalDiagnosis?: AsitClinicalDiagnosis;
   /** URI of prescription photo attached by user. */
   prescriptionPhotoUri?: string;
   /** URI of prescription PDF document attached by user. */
@@ -86,10 +115,14 @@ export function createDefaultAsitCourse(): AsitCourse {
     active: true,
     allergen: '',
     drug: '',
+    dosage: '',
     route: 'slit',
     phase: 'buildup',
     startDate: '',
+    endDate: '',
     scheduleNotes: '',
+    scheduleLines: [''],
+    clinicalDiagnosis: createEmptyAsitClinicalDiagnosis(),
     activated: false,
     verified: false,
   };

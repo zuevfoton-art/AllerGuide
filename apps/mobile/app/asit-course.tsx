@@ -1,22 +1,23 @@
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
 import {
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
   DEFAULT_ASIT_REMINDER_HOUR,
   DEFAULT_ASIT_REMINDER_MINUTE,
+  createEmptyAsitClinicalDiagnosis,
   findAllergenById,
   formatAsitReminderTime,
   isAsitReminderConfigured,
+  normalizeScheduleLines,
+  scheduleLinesToNotes,
+  type AsitClinicalDiagnosis,
   type AsitCourse,
   type AsitPhase,
   type AsitRoute,
-  type AsitScheduleStage,
 } from '@allerguide/core';
-import { getDemoPrescriptionParse, parsePrescriptionText } from '@allerguide/ai';
+import { applyPrescriptionParseToAsitCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -24,6 +25,9 @@ import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
+import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCapture';
+import { ScheduleLinesEditor } from '@/src/components/ScheduleLinesEditor';
+import { ScheduleStagesEditor } from '@/src/components/ScheduleStagesEditor';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -37,6 +41,11 @@ import {
 import { ensureNotificationPermission, syncAsitReminder } from '@/src/services/asit-reminder-service';
 import { getAsitReminderNotificationContent } from '@/src/services/notification-content-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { pickPrescriptionPdf } from '@/src/services/prescription-photo-service';
+import {
+  recognizePrescription,
+  type PrescriptionOcrHintCode,
+} from '@/src/services/prescription-ocr-service';
 
 const ROUTES: AsitRoute[] = ['slit', 'scit'];
 const PHASES: AsitPhase[] = ['buildup', 'maintenance'];
@@ -56,6 +65,8 @@ export default function AsitCourseScreen() {
   const [parsing, setParsing] = useState(false);
   const [parseText, setParseText] = useState('');
   const [parseTextOpen, setParseTextOpen] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [ocrHint, setOcrHint] = useState<string | null>(null);
 
   const asitEnabled = useMemo(() => {
     if (!profile) return false;
@@ -86,42 +97,78 @@ export default function AsitCourseScreen() {
     [],
   );
 
-  const pickPhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.85,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setCourse((prev) => ({ ...prev, prescriptionPhotoUri: result.assets[0]!.uri }));
-    }
-  };
+  const hintFromCode = useCallback(
+    (code: PrescriptionOcrHintCode | undefined, cloudError?: string) => {
+      if (!code) return null;
+      if (code === 'cloud_failed') {
+        return t('asit.ocrCloudFailed', { error: cloudError || 'error' });
+      }
+      if (code === 'cloud_disabled') return t('asit.ocrCloudDisabled');
+      if (code === 'empty_media') return t('asit.ocrEmptyMedia');
+      return t('asit.ocrDemoHint');
+    },
+    [t],
+  );
+
+  const onPhotoCaptured = useCallback((uri: string) => {
+    setCameraOpen(false);
+    setCourse((prev) => ({ ...prev, prescriptionPhotoUri: uri }));
+    setOcrHint(null);
+  }, []);
 
   const pickPdf = async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf' });
-    if (!result.canceled && result.assets[0]) {
-      setCourse((prev) => ({ ...prev, prescriptionDocUri: result.assets[0]!.uri }));
-    }
+    const uri = await pickPrescriptionPdf();
+    if (!uri) return;
+    setCourse((prev) => ({ ...prev, prescriptionDocUri: uri }));
+    setOcrHint(null);
   };
 
-  const parseOcr = async () => {
+  const applyOcrOutcome = async (manualText?: string) => {
     setParsing(true);
+    setOcrHint(null);
     try {
-      const parsed = parseText.trim()
-        ? parsePrescriptionText(parseText)
-        : getDemoPrescriptionParse();
-      const update: Partial<AsitCourse> = {};
-      if (parsed.drug && !course.drug.trim()) update.drug = parsed.drug;
-      if (parsed.startDate && !course.startDate.trim()) update.startDate = parsed.startDate;
-      if (parsed.scheduleStages.length > 0) update.scheduleStages = parsed.scheduleStages;
-      if (parsed.notes && !course.scheduleNotes.trim()) update.scheduleNotes = parsed.notes;
-      setCourse((prev) => ({ ...prev, ...update }));
+      const outcome = await recognizePrescription({
+        photoUri: course.prescriptionPhotoUri,
+        pdfUri: course.prescriptionDocUri,
+        manualText,
+      });
+      setCourse((prev) => applyPrescriptionParseToAsitCourse(prev, outcome.parsed));
+      if (outcome.text) setParseText(outcome.text);
+      setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
       setParseTextOpen(false);
-      if (parsed.scheduleStages.length > 0) {
-        setStep('verify');
-      }
+      // Stay on the form so prefilled fields (incl. clinical diagnosis) are visible.
     } finally {
       setParsing(false);
     }
+  };
+
+  const setScheduleLines = (scheduleLines: string[]) => {
+    const lines = normalizeScheduleLines(scheduleLines);
+    setCourse((prev) => ({
+      ...prev,
+      scheduleLines: lines,
+      scheduleNotes: scheduleLinesToNotes(lines),
+    }));
+  };
+
+  const setClinicalField = (key: keyof AsitClinicalDiagnosis, value: string) => {
+    setCourse((prev) => ({
+      ...prev,
+      clinicalDiagnosis: {
+        ...createEmptyAsitClinicalDiagnosis(),
+        ...(prev.clinicalDiagnosis ?? {}),
+        [key]: value,
+      },
+    }));
+  };
+
+  const startRecognize = () => {
+    const hasMedia = Boolean(course.prescriptionPhotoUri || course.prescriptionDocUri);
+    if (hasMedia) {
+      void applyOcrOutcome();
+      return;
+    }
+    setParseTextOpen(true);
   };
 
   const confirmVerify = () => {
@@ -131,8 +178,11 @@ export default function AsitCourseScreen() {
 
   const save = async () => {
     if (!profileId) return;
+    const lines = normalizeScheduleLines(course.scheduleLines, course.scheduleNotes);
     const toSave: AsitCourse = {
       ...course,
+      scheduleLines: lines,
+      scheduleNotes: scheduleLinesToNotes(lines),
       verified: course.scheduleStages?.length ? Boolean(course.verified) : true,
       activated: true,
       active: true,
@@ -177,6 +227,21 @@ export default function AsitCourseScreen() {
       <Screen>
         <Text style={styles.empty}>{t('asit.noProfile')}</Text>
       </Screen>
+    );
+  }
+
+  if (cameraOpen) {
+    return (
+      <PrescriptionCameraCapture
+        visible
+        title={t('asit.cameraTitle')}
+        hint={t('asit.cameraHint')}
+        galleryLabel={t('scanner.pickFromGallery')}
+        shutterLabel={t('scanner.takePhoto')}
+        cancelLabel={t('common.cancel')}
+        onCancel={() => setCameraOpen(false)}
+        onCaptured={onPhotoCaptured}
+      />
     );
   }
 
@@ -270,16 +335,35 @@ export default function AsitCourseScreen() {
           placeholderTextColor={theme.colors.textMuted}
         />
 
-        {/* Prescription upload */}
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.dosageLabel')}</Text>
+        <TextInput
+          style={styles.input}
+          value={course.dosage ?? ''}
+          onChangeText={(dosage) => setCourse((prev) => ({ ...prev, dosage }))}
+          placeholder={t('asit.dosagePlaceholder')}
+          placeholderTextColor={theme.colors.textMuted}
+        />
+
+        {/* Prescription upload — photo opens device camera (gallery optional), like Scanner */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.uploadPrescription')}</Text>
         <View style={ui.toggleRow}>
-          <Pressable style={[ui.toggle, course.prescriptionPhotoUri ? ui.toggleActive : null]} onPress={() => void pickPhoto()}>
+          <Pressable
+            style={[ui.toggle, course.prescriptionPhotoUri ? ui.toggleActive : null]}
+            onPress={() => setCameraOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('asit.uploadPhoto')}
+            testID="asit-course-photo">
             <Ionicons name="camera" size={15} color={course.prescriptionPhotoUri ? theme.colors.accent : theme.colors.textSecondary} />
             <Text style={[ui.toggleText, course.prescriptionPhotoUri ? ui.toggleTextActive : null]}>
               {course.prescriptionPhotoUri ? t('asit.uploadPhotoAttached') : t('asit.uploadPhoto')}
             </Text>
           </Pressable>
-          <Pressable style={[ui.toggle, course.prescriptionDocUri ? ui.toggleActive : null]} onPress={() => void pickPdf()}>
+          <Pressable
+            style={[ui.toggle, course.prescriptionDocUri ? ui.toggleActive : null]}
+            onPress={() => void pickPdf()}
+            accessibilityRole="button"
+            accessibilityLabel={t('asit.uploadPdf')}
+            testID="asit-course-pdf">
             <Ionicons name="document" size={15} color={course.prescriptionDocUri ? theme.colors.accent : theme.colors.textSecondary} />
             <Text style={[ui.toggleText, course.prescriptionDocUri ? ui.toggleTextActive : null]}>
               {course.prescriptionDocUri ? t('asit.uploadPdfAttached') : t('asit.uploadPdf')}
@@ -287,11 +371,19 @@ export default function AsitCourseScreen() {
           </Pressable>
         </View>
 
-        {/* OCR parse */}
-        <Pressable style={[styles.ocrBtn]} onPress={() => setParseTextOpen(true)}>
+        <Pressable
+          style={styles.ocrBtn}
+          onPress={startRecognize}
+          disabled={parsing}
+          accessibilityRole="button"
+          accessibilityLabel={t('asit.ocrParse')}
+          testID="asit-course-ocr">
           <Ionicons name="scan-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.ocrBtnText}>{t('asit.ocrParse')}</Text>
+          <Text style={styles.ocrBtnText}>
+            {parsing ? t('asit.ocrParsing') : t('asit.ocrParse')}
+          </Text>
         </Pressable>
+        {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
         {/* Route */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.routeLabel')}</Text>
@@ -323,28 +415,78 @@ export default function AsitCourseScreen() {
           ))}
         </View>
 
-        {/* Start date */}
-        <View style={styles.fieldGap}>
-          <DateTimeField
-            label={t('asit.startDateLabel')}
-            value={course.startDate}
-            onChange={(startDate) => setCourse((prev) => ({ ...prev, startDate }))}
-            mode="date"
-            minYear={2020}
-          />
+        {/* Start / end dates */}
+        <View style={[styles.fieldGap, styles.dateRow]}>
+          <View style={styles.dateField}>
+            <DateTimeField
+              label={t('asit.startDateLabel')}
+              value={course.startDate}
+              onChange={(startDate) => setCourse((prev) => ({ ...prev, startDate }))}
+              mode="date"
+              minYear={2020}
+            />
+          </View>
+          <View style={styles.dateField}>
+            <DateTimeField
+              label={t('asit.endDateLabel')}
+              value={course.endDate ?? ''}
+              onChange={(endDate) => setCourse((prev) => ({ ...prev, endDate }))}
+              mode="date"
+              minYear={2020}
+            />
+          </View>
         </View>
 
-        {/* Schedule notes */}
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.scheduleLabel')}</Text>
-        <TextInput
-          style={[styles.input, styles.inputMultiline]}
-          value={course.scheduleNotes}
-          onChangeText={(scheduleNotes) => setCourse((prev) => ({ ...prev, scheduleNotes }))}
+        <ScheduleLinesEditor
+          lines={course.scheduleLines}
+          notesFallback={course.scheduleNotes}
           placeholder={t('asit.schedulePlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
-          multiline
-          textAlignVertical="top"
+          addRowLabel={t('asit.addScheduleRow')}
+          onChange={setScheduleLines}
+          testID="asit-schedule-lines"
         />
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.stagesLabel')}</Text>
+        <ScheduleStagesEditor
+          stages={course.scheduleStages ?? []}
+          doseLabel={t('asit.stageDose')}
+          dosePlaceholder={t('asit.dosagePlaceholder')}
+          addRowLabel={t('asit.addScheduleRow')}
+          stageLabel={(index) => t('asit.stageLabel', { n: String(index + 1) })}
+          fromLabel={t('asit.stageFrom')}
+          toLabel={t('asit.stageTo')}
+          onChange={(scheduleStages) =>
+            setCourse((prev) => ({ ...prev, scheduleStages, verified: false }))
+          }
+          testID="asit-schedule-stages"
+        />
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.clinicalTitle')}</Text>
+        {(
+          [
+            ['primaryDisease', 'asit.clinicalPrimary'],
+            ['concomitantDisease', 'asit.clinicalConcomitant'],
+            ['recommendations', 'asit.clinicalRecommendations'],
+            ['diet', 'asit.clinicalDiet'],
+            ['examPlan', 'asit.clinicalExamPlan'],
+            ['other', 'asit.clinicalOther'],
+          ] as const
+        ).map(([key, labelKey]) => (
+          <View key={key} style={styles.clinicalField}>
+            <Text style={ui.sectionLabel}>{t(labelKey)}</Text>
+            <TextInput
+              style={[styles.input, styles.inputMultiline]}
+              value={course.clinicalDiagnosis?.[key] ?? ''}
+              onChangeText={(value) => setClinicalField(key, value)}
+              placeholder={t(labelKey)}
+              placeholderTextColor={theme.colors.textMuted}
+              multiline
+              textAlignVertical="top"
+              testID={`asit-clinical-${key}`}
+            />
+          </View>
+        ))}
       </GlassCard>
 
       {/* If stages already parsed, show verify button */}
@@ -384,7 +526,7 @@ export default function AsitCourseScreen() {
                 <Text style={styles.modalCancel}>{t('common.cancel')}</Text>
               </Pressable>
               <Text style={styles.modalTitle}>{t('asit.ocrParse')}</Text>
-              <Pressable onPress={() => void parseOcr()} disabled={parsing}>
+              <Pressable onPress={() => void applyOcrOutcome(parseText)} disabled={parsing}>
                 <Text style={[styles.modalDone, parsing && styles.modalDoneDisabled]}>
                   {parsing ? t('asit.ocrParsing') : t('common.done')}
                 </Text>
@@ -394,7 +536,7 @@ export default function AsitCourseScreen() {
               style={styles.parseInput}
               value={parseText}
               onChangeText={setParseText}
-              placeholder="Вставьте текст назначения или оставьте пустым для демо…"
+              placeholder={t('asit.ocrManualPlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               multiline
               textAlignVertical="top"
@@ -419,16 +561,6 @@ interface VerifyStepProps {
 }
 
 function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepProps) {
-  const stages = course.scheduleStages ?? [];
-
-  const updateStage = (index: number, field: keyof AsitScheduleStage, value: string) => {
-    setCourse((prev) => {
-      const next = [...(prev.scheduleStages ?? [])];
-      next[index] = { ...next[index]!, [field]: value };
-      return { ...prev, scheduleStages: next };
-    });
-  };
-
   return (
     <Screen>
       <View style={styles.header}>
@@ -442,40 +574,22 @@ function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t
         </View>
       </View>
 
-      {stages.length === 0 ? (
-        <GlassCard>
+      <GlassCard style={styles.section}>
+        {(course.scheduleStages ?? []).length === 0 ? (
           <Text style={styles.hint}>{t('asit.verifyStagesEmpty')}</Text>
-        </GlassCard>
-      ) : (
-        stages.map((stage, i) => (
-          <GlassCard key={i} style={styles.stageCard}>
-            <Text style={styles.stageLabel}>Этап {i + 1}</Text>
-            <View style={styles.stageDateRow}>
-              <DateTimeField
-                label="С"
-                value={stage.from}
-                onChange={(v) => updateStage(i, 'from', v)}
-                mode="date"
-                minYear={2020}
-              />
-              <DateTimeField
-                label="По"
-                value={stage.to}
-                onChange={(v) => updateStage(i, 'to', v)}
-                mode="date"
-                minYear={2020}
-              />
-            </View>
-            <TextInput
-              style={styles.input}
-              value={stage.dose}
-              onChangeText={(v) => updateStage(i, 'dose', v)}
-              placeholder="Доза / описание"
-              placeholderTextColor={theme.colors.textMuted}
-            />
-          </GlassCard>
-        ))
-      )}
+        ) : null}
+        <ScheduleStagesEditor
+          stages={course.scheduleStages ?? []}
+          doseLabel={t('asit.stageDose')}
+          dosePlaceholder={t('asit.dosagePlaceholder')}
+          addRowLabel={t('asit.addScheduleRow')}
+          stageLabel={(index) => t('asit.stageLabel', { n: String(index + 1) })}
+          fromLabel={t('asit.stageFrom')}
+          toLabel={t('asit.stageTo')}
+          onChange={(scheduleStages) => setCourse((prev) => ({ ...prev, scheduleStages }))}
+          testID="asit-verify-stages"
+        />
+      </GlassCard>
 
       <Button label={t('asit.verifyConfirm')} variant="primary" block onPress={onConfirm} />
     </Screen>
@@ -515,17 +629,57 @@ function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, remi
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.drugLabel')}</Text>
         <Text style={styles.reviewValue}>{course.drug || '—'}</Text>
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.dosageLabel')}</Text>
+        <Text style={styles.reviewValue}>{course.dosage?.trim() || '—'}</Text>
+
         <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.startDateLabel')}</Text>
         <Text style={styles.reviewValue}>{course.startDate || '—'}</Text>
 
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.endDateLabel')}</Text>
+        <Text style={styles.reviewValue}>{course.endDate?.trim() || '—'}</Text>
+
+        <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.scheduleLabel')}</Text>
+        {normalizeScheduleLines(course.scheduleLines, course.scheduleNotes)
+          .filter((line) => line.trim())
+          .map((line, i) => (
+            <Text key={`sched-${i}`} style={styles.stageRow}>
+              {i + 1}. {line}
+            </Text>
+          ))}
+
         {course.scheduleStages && course.scheduleStages.length > 0 ? (
           <>
-            <Text style={[ui.sectionLabel, styles.fieldGap]}>Этапы схемы</Text>
+            <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.stagesLabel')}</Text>
             {course.scheduleStages.map((s, i) => (
               <Text key={i} style={styles.stageRow}>
                 {i + 1}. {s.from} – {s.to}: {s.dose}
               </Text>
             ))}
+          </>
+        ) : null}
+
+        {course.clinicalDiagnosis &&
+        Object.values(course.clinicalDiagnosis).some((value) => value.trim()) ? (
+          <>
+            <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('asit.clinicalTitle')}</Text>
+            {(
+              [
+                ['primaryDisease', 'asit.clinicalPrimary'],
+                ['concomitantDisease', 'asit.clinicalConcomitant'],
+                ['recommendations', 'asit.clinicalRecommendations'],
+                ['diet', 'asit.clinicalDiet'],
+                ['examPlan', 'asit.clinicalExamPlan'],
+                ['other', 'asit.clinicalOther'],
+              ] as const
+            ).map(([key, labelKey]) => {
+              const value = course.clinicalDiagnosis?.[key]?.trim();
+              if (!value) return null;
+              return (
+                <Text key={key} style={styles.stageRow}>
+                  {t(labelKey)}: {value}
+                </Text>
+              );
+            })}
           </>
         ) : null}
 
@@ -617,6 +771,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     headerText: { flex: 1, gap: 2 },
     section: { gap: 4, marginBottom: 12 },
     fieldGap: { marginTop: 12 },
+    dateRow: { flexDirection: 'row', gap: 8 },
+    dateField: { flex: 1 },
+    clinicalField: { marginTop: 10, gap: 6 },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,
@@ -656,6 +813,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.accent,
     },
     ocrBtnText: { fontFamily: fonts.sansSemiBold, fontSize: 14, fontWeight: '600', color: colors.accent },
+    ocrHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textSecondary,
+      lineHeight: 17,
+      marginTop: 8,
+    },
     reminderRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 8 },
     reminderField: { flex: 1, gap: 4 },
     reminderFieldLabel: { fontFamily: fonts.sans, fontSize: 12, color: colors.textMuted },

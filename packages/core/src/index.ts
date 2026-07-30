@@ -36,6 +36,7 @@ export * from './doctor-report';
 export * from './allergy-passport';
 export * from './clinical-scales';
 export * from './asit-therapy';
+export * from './therapy-schedule';
 export * from './diary-reminder';
 export * from './reminder-policy';
 export * from './pollen-reminder';
