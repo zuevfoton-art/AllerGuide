@@ -9,12 +9,12 @@ type GlassCardProps = PropsWithChildren<{
   testID?: string;
   /**
    * Soft Claro teal surface (wellness / clinical hints).
-   * Wired to product `accentLight` / `accentMid` — not medical blue.
+   * `calm` is a deprecated alias for `soft` (Dual Calm naming removed).
    */
-  variant?: 'default' | 'calm';
+  variant?: 'default' | 'soft' | 'calm';
 }>;
 
-/** Clinical card surface (formerly GlassCard). */
+/** Clinical card surface. */
 export function GlassCard({
   children,
   style,
@@ -24,11 +24,12 @@ export function GlassCard({
 }: GlassCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const isSoft = variant === 'soft' || variant === 'calm';
 
   return (
     <View
       testID={testID}
-      style={[styles.card, variant === 'calm' && styles.calm, padded && styles.padded, style]}>
+      style={[styles.card, isSoft && styles.soft, padded && styles.padded, style]}>
       {children}
     </View>
   );
@@ -45,7 +46,7 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderColor: colors.border,
       ...(shadows.sm as object),
     },
-    calm: {
+    soft: {
       backgroundColor: colors.accentLight,
       borderColor: colors.accentMid,
     },

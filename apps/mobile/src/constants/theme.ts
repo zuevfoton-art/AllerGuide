@@ -1,15 +1,21 @@
 import { Platform } from 'react-native';
 
-import { getCalmGradient, type CalmGradient } from '@/src/constants/calm-gradient';
+import {
+  getClaroGradient,
+  getCalmGradient,
+  type ClaroGradient,
+  type CalmGradient,
+} from '@/src/constants/claro-gradient';
 
-export type { CalmGradient };
-export { getCalmGradient };
+export type { ClaroGradient, CalmGradient };
+export { getClaroGradient, getCalmGradient };
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * Clinical Calm design tokens — Claro green: calm.* / info / tip alias the teal product family.
- * Keep hex values in sync with LIGHT_CALM_TOKENS / DARK_CALM_TOKENS in calm-gradient.ts.
+ * Claro Green design tokens — product accent family only (no medical blue / calm.*).
+ * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
+ * Policy: docs/brand-claro-green.md
  */
 export type ThemeColors = {
   bg: string;
@@ -18,12 +24,6 @@ export type ThemeColors = {
   accent: string;
   accentLight: string;
   accentMid: string;
-  /** Ambient surfaces — same Claro teal family (no medical blue) */
-  calmDeep: string;
-  calmMid: string;
-  calmLight: string;
-  calmWash: string;
-  calmMist: string;
   /** Dark text / KPI — navy for contrast (not ambient fill) */
   head: string;
   text: string;
@@ -78,11 +78,6 @@ export const lightColors: ThemeColors = {
   accent: '#2A9D8F',
   accentLight: '#E6F6F4',
   accentMid: '#9FD9D1',
-  calmDeep: '#1F6B62',
-  calmMid: '#2A9D8F',
-  calmLight: '#9FD9D1',
-  calmWash: '#E6F6F4',
-  calmMist: '#9FD9D1',
   head: '#1E3A5F',
   text: '#0F172A',
   textSecondary: '#475569',
@@ -131,11 +126,6 @@ export const darkColors: ThemeColors = {
   accent: '#3DB8A8',
   accentLight: '#134E48',
   accentMid: '#2A9D8F',
-  calmDeep: '#0B1120',
-  calmMid: '#3DB8A8',
-  calmLight: '#3DB8A8',
-  calmWash: '#134E48',
-  calmMist: '#2A9D8F',
   head: '#E2E8F0',
   text: '#F8FAFC',
   textSecondary: '#CBD5E1',
