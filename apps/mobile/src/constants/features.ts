@@ -26,6 +26,12 @@ export const YC_SCAN_INTENT_LLM_ENABLED =
  */
 export const YC_SEARCH_ENABLED = process.env.EXPO_PUBLIC_YC_SEARCH === 'true';
 
+/**
+ * Phase 3: Yandex SpeechKit STT via POST /api/stt when OS speech recognition
+ * is unavailable. Offline / flag-off keeps expo-speech-recognition only.
+ */
+export const YC_STT_ENABLED = process.env.EXPO_PUBLIC_YC_STT === 'true';
+
 /** Use PostgreSQL backend for users and profiles (JWT auth). */
 export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'true';
 

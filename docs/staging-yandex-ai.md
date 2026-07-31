@@ -1,5 +1,16 @@
 # Staging — Yandex AI
 
+**Status (staging):** Phase **0–2 done**; options **A / B / C enabled**; Phase **3 STT** implemented (default **off**); Phase **4 Search** cache + prompt tune **in code** (needs API redeploy for cache); option **D multimodal** deferred.
+
+| Layer | Staging state |
+|-------|----------------|
+| Lockbox / health | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH` → `true` |
+| Model | `YC_GPT_MODEL=yandexgpt-lite` (explicit; A/B via Lockbox only) |
+| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH` = `true`; `YC_STT` = off |
+| Production EAS | OCR / intent / search / STT **off** until staging QA green |
+
+---
+
 ## Phase 0 — credentials
 
 | Ресурс | Значение |
@@ -34,8 +45,11 @@
 | `YC_AI_API_KEY` | секрет API-ключа |
 | `YC_AI_API_KEY_ID` | id ключа (ротация) |
 | `AI_PROVIDER` | `yandex` |
-| `AI_SCAN_ENABLED` / `YC_OCR_ENABLED` | флаги Phase 1–2 |
-| `YC_SCAN_INTENT_LLM` / `YC_SEARCH_ENABLED` | опции B/C (default off) |
+| `AI_SCAN_ENABLED` / `YC_OCR_ENABLED` | Phase 1–2 (**on** staging) |
+| `YC_GPT_MODEL` | default `yandexgpt-lite` (explicit) |
+| `SCAN_DAILY_BUDGET` | e.g. `100` |
+| `YC_SCAN_INTENT_LLM` / `YC_SEARCH_ENABLED` | options B/C (**on** staging) |
+| `YC_STT_ENABLED` | Phase 3 SpeechKit (**off** until QA) |
 
 Smoke credentials:
 
@@ -55,7 +69,7 @@ Smoke credentials:
 |------|--------|
 | Code | `apps/api/src/services/llm-scan-provider.ts` |
 | Route | `POST /api/scan` → `callScanLlm()` |
-| Env | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED=true`, `YC_AI_API_KEY`, `YC_FOLDER_ID` |
+| Env | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED=true`, `YC_AI_API_KEY`, `YC_FOLDER_ID`, `YC_GPT_MODEL` |
 | Fallback | Mobile `runSmartScan` → mock при 502 / флаге off |
 | OpenAI | `AI_PROVIDER=openai` + `OPENAI_*` (default для локальных тестов) |
 
@@ -67,6 +81,19 @@ curl -sS -X POST "$STAGING_API_URL/api/scan" \
 ```
 
 `GET /api/health` → `features.aiScan: true`, `features.aiScanProvider: "yandex"`.
+
+### Model A/B (optional)
+
+Keep **`yandexgpt-lite`** as default. To experiment without new code:
+
+```bash
+./scripts/yc-lockbox-upsert.sh YC_GPT_MODEL=yandexgpt   # or aliceai-llm if in folder catalog
+# redeploy Serverless revision, then:
+./scripts/staging-scan-smoke.sh
+./scripts/staging-yandex-ai-smoke.sh
+```
+
+Compare invalid-JSON rate, latency, and cost; revert to `yandexgpt-lite` if worse. Do **not** change `AI_PROVIDER`.
 
 ---
 
@@ -80,14 +107,6 @@ curl -sS -X POST "$STAGING_API_URL/api/scan" \
 | Env mobile | `EXPO_PUBLIC_YC_OCR=true` |
 | Auth | Same as scan (`SCAN_REQUIRE_AUTH` / `OCR_REQUIRE_AUTH`) |
 | Fallback | Demo OCR + manual text when flag off or API fails |
-
-```bash
-B64=… # image base64
-curl -sS -X POST "$STAGING_API_URL/api/ocr" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d "{\"imageBase64\":\"$B64\",\"mimeType\":\"image/png\"}"
-```
 
 `GET /api/health` → `features.ycOcr: true` when enabled.
 
@@ -106,7 +125,7 @@ curl -sS -X POST "$STAGING_API_URL/api/ocr" \
 
 Флаги mobile: `EXPO_PUBLIC_YC_OCR`, `EXPO_PUBLIC_AI_SCAN_ENABLED` (оба могут быть off — тогда demo + mock).
 
-### B — GPT intent classifier (flag)
+### B — GPT intent classifier (flag) — **on staging**
 
 | Item | Detail |
 |------|--------|
@@ -115,16 +134,9 @@ curl -sS -X POST "$STAGING_API_URL/api/ocr" \
 | Domain | `buildScanIntentPrompt` / `parseScanIntentResponse` in `@allerguide/ai` |
 | Fallback | Heuristic A при флаге off / 5xx / invalid JSON |
 
-```bash
-curl -sS -X POST "$STAGING_API_URL/api/scan/intent" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"text":"Меню: паста карбонара, салат цезарь"}'
-```
+`GET /api/health` → `features.ycScanIntentLlm: true`.
 
-`GET /api/health` → `features.ycScanIntentLlm: true` when enabled.
-
-Enable B+C on YC staging (Lockbox + redeploy):
+Enable/re-enable B+C on YC staging:
 
 ```bash
 export YC_CONTAINER_ID=bba700s2t35i2khgmiit
@@ -132,33 +144,77 @@ export YC_REGISTRY_ID=crpf0kl3mrg2qnnd374l
 BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 ```
 
-### C — Yandex Search ingredients (flag)
+### C — Yandex Search ingredients (flag) — **on staging**
 
 | Item | Detail |
 |------|--------|
 | API | `POST /api/search/ingredients` · `YC_SEARCH_ENABLED=true` + `YC_AI_*` |
 | Mobile | `EXPO_PUBLIC_YC_SEARCH=true` · after OFF/catalog miss in `lookupDishIngredientsForScan` |
 | Provider | Generative search → web search snippets |
+| Cache | In-memory (+ Redis if configured); `SEARCH_CACHE_TTL_MS` / `SEARCH_DAILY_BUDGET` (fallback to scan limits) |
 | Fallback | Skip (continue OCR text analysis) when off / 404 |
 
+`GET /api/health` → `features.ycSearch: true`.
+
+### D — multimodal (deferred)
+
+Прямой разбор фото без отдельного OCR — **не реализован**. Не начинать до стабильного клиентского QA A–C и SpeechKit. Offline-first не ломать.
+
+---
+
+## Phase 3 — SpeechKit STT (`POST /api/stt`)
+
+| Item | Detail |
+|------|--------|
+| Code | `apps/api/src/services/yandex-speechkit-stt.ts`, `routes/stt.ts` |
+| Mobile | `stt-api-service.ts` → `recognizeSpeechViaApi` (OS speech remains default via `expo-speech-recognition`) |
+| Env API | `YC_STT_ENABLED=true` + `YC_AI_*` |
+| Env mobile | `EXPO_PUBLIC_YC_STT=true` |
+| Auth | Inherits `SCAN_REQUIRE_AUTH` unless `STT_REQUIRE_AUTH` set |
+| Fallback | Flag off / 5xx → keep local voice or manual text |
+
+Staging default: **off** (`features.ycStt` absent). Enable after Search QA:
+
 ```bash
-curl -sS -X POST "$STAGING_API_URL/api/search/ingredients" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"оливье"}'
+./scripts/yc-lockbox-upsert.sh YC_STT_ENABLED=true
+# redeploy, then set EXPO_PUBLIC_YC_STT=true on next EAS staging build
 ```
 
-`GET /api/health` → `features.ycSearch: true` when enabled.
+Не путать с **навыком Алисы (Диалоги)** — отдельный продукт.
 
-### D — multimodal (future)
+---
 
-Прямой разбор фото без отдельного OCR — не реализован; не ломать offline-first.
+## Phase 4 — Search tune / cache
+
+Done in code:
+
+- Stronger composition query + passage scoring in `@allerguide/ai` `search-ingredients.ts`
+- Cache + daily budget in `apps/api/src/lib/search-ingredients-cache.ts`
+- Route returns `cached: true|false`
+
+Redeploy API to pick up cache behavior on staging.
+
+---
+
+## Smokes
+
+```bash
+./scripts/yc-ai-phase0-smoke.sh --from-lockbox   # credentials
+./scripts/staging-scan-smoke.sh                  # JWT + scan cache
+./scripts/staging-yandex-ai-smoke.sh             # intent + search + ocr + scan
+./scripts/staging-preflight.sh                   # includes yandex-ai smoke
+```
+
+Manual APK (EAS `staging`): see [`qa-checklist.md`](./qa-checklist.md) § «Yandex AI scanner staging».
 
 ---
 
 ## Next
 
-- Phase 3: SpeechKit STT fallback  
-- Phase 4: tune Search API prompts / caching for option C  
+1. **Client QA** on EAS staging APK (label OCR → intent → scan; dish → search; airplane mock)
+2. Redeploy API if search-cache revision not live yet
+3. Optional `YC_GPT_MODEL` A/B after metrics
+4. Enable Phase 3 STT on staging when voice fallback is needed
+5. Option D multimodal — later
 
 Offline-first и feature flags: без флагов приложение работает как раньше (A heuristic + demo OCR + mock).

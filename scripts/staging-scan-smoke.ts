@@ -1,7 +1,8 @@
 /**
  * Staging API smoke: JWT auth + AI scan cache hit (P1.5b).
- * Requires staging API with AI_SCAN_ENABLED=true and OPENAI_API_KEY set.
+ * Requires staging API with AI_SCAN_ENABLED=true and AI_PROVIDER=yandex (or OPENAI_*).
  * Run: pnpm --filter api exec tsx ../../scripts/staging-scan-smoke.ts
+ * Broader Yandex AI checks: scripts/staging-yandex-ai-smoke.ts
  */
 const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.aclearo.com').replace(/\/$/, '');
 const RAND = process.env.RAND ?? String(Date.now());
@@ -72,7 +73,7 @@ async function main() {
   );
 
   if (!first.body.ok || !first.body.result?.verdict) {
-    throw new Error('First scan failed — check OPENAI_API_KEY on staging (P1.5a)');
+    throw new Error('First scan failed — check YC_AI_* / OPENAI_API_KEY on staging (P1.5a)');
   }
   if (first.body.cached) {
     throw new Error('Expected cache miss on first scan');

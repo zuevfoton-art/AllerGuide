@@ -425,6 +425,33 @@
 
 ---
 
+## Yandex AI scanner staging (Phases 1–2 + B/C)
+
+**Doc:** [staging-yandex-ai.md](staging-yandex-ai.md) · **Профиль:** EAS `staging`  
+**API health:** `aiScanProvider=yandex`, `ycOcr`, `ycScanIntentLlm`, `ycSearch`
+
+Перед mobile smoke:
+
+```bash
+./scripts/staging-yandex-ai-smoke.sh
+```
+
+| ID | Сценарий | iOS | Android | Web | Критерий Pass |
+|----|----------|-----|---------|-----|---------------|
+| **Y.1** | Фото этикетки с «Состав: …» | ☐ | ☐ | ☐ | OCR → intent label/menu → LLM verdict (не только mock) |
+| **Y.2** | Фото / имя блюда без OFF hit | ☐ | ☐ | ☐ | Search ingredients и/или LLM; без crash при 404 |
+| **Y.3** | Airplane mode → фото / ручной текст | ☐ | ☐ | N/A | Demo OCR + mock scan |
+| **Y.4** | API 5xx (airplane mid-scan) | ☐ | ☐ | ☐ | Graceful mock / error, app usable |
+| **Y.5** | Повтор того же состава | ☐ | ☐ | ☐ | Быстрее (scan cache) |
+
+### Итог Yandex AI
+
+☐ `staging-yandex-ai-smoke.sh` Pass  
+☐ Y.1 + Y.3 Pass на **Android или iOS**  
+☐ Production EAS: OCR/intent/search всё ещё **off**
+
+---
+
 ## P1.7 — Closed beta gate (координатор)
 
 **Runbook:** [closed-beta-p17.md](closed-beta-p17.md) · **Бриф тестерам:** [beta-tester-brief-ru.md](beta-tester-brief-ru.md)
