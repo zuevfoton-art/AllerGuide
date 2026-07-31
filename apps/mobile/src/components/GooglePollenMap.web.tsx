@@ -18,6 +18,9 @@ export function GooglePollenMap({
   mapType,
   height = 300,
   interactive = true,
+  markers = [],
+  selectedMarkerId,
+  onMarkerPress,
   overlay,
 }: GooglePollenMapProps) {
   const theme = useTheme();
@@ -25,6 +28,10 @@ export function GooglePollenMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const tileOverlayRef = useRef<google.maps.ImageMapType | null>(null);
+  const markerRefs = useRef<google.maps.Marker[]>([]);
+  const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const onMarkerPressRef = useRef(onMarkerPress);
+  onMarkerPressRef.current = onMarkerPress;
 
   useEffect(() => {
     let isCancelled = false;
@@ -55,31 +62,63 @@ export function GooglePollenMap({
           .getArray()
           .indexOf(tileOverlayRef.current);
         if (existingIndex >= 0) map.overlayMapTypes.removeAt(existingIndex);
+        tileOverlayRef.current = null;
       }
 
-      const tileUrlTemplate = buildPollenHeatmapTileUrlTemplate(mapType);
-      const tileOverlay = new google.maps.ImageMapType({
-        getTileUrl: (coordinate, tileZoom) =>
-          resolvePollenHeatmapTileUrl(
-            tileUrlTemplate,
-            tileZoom,
-            coordinate.x,
-            coordinate.y,
-          ),
-        tileSize: new google.maps.Size(GOOGLE_TILE_SIZE, GOOGLE_TILE_SIZE),
-        maxZoom: 16,
-        minZoom: 0,
-        name: mapType,
-        opacity: 0.8,
+      if (mapType) {
+        const tileUrlTemplate = buildPollenHeatmapTileUrlTemplate(mapType);
+        const tileOverlay = new google.maps.ImageMapType({
+          getTileUrl: (coordinate, tileZoom) =>
+            resolvePollenHeatmapTileUrl(
+              tileUrlTemplate,
+              tileZoom,
+              coordinate.x,
+              coordinate.y,
+            ),
+          tileSize: new google.maps.Size(GOOGLE_TILE_SIZE, GOOGLE_TILE_SIZE),
+          maxZoom: 16,
+          minZoom: 0,
+          name: mapType,
+          opacity: 0.8,
+        });
+        map.overlayMapTypes.insertAt(0, tileOverlay);
+        tileOverlayRef.current = tileOverlay;
+      }
+
+      if (!userMarkerRef.current) {
+        userMarkerRef.current = new google.maps.Marker({
+          map,
+          position: { lat: latitude, lng: longitude },
+        });
+      } else {
+        userMarkerRef.current.setPosition({ lat: latitude, lng: longitude });
+      }
+
+      for (const marker of markerRefs.current) marker.setMap(null);
+      markerRefs.current = markers.map((item) => {
+        const marker = new google.maps.Marker({
+          map,
+          position: { lat: item.latitude, lng: item.longitude },
+          title: item.title,
+          opacity: item.id === selectedMarkerId ? 1 : 0.85,
+        });
+        marker.addListener('click', () => onMarkerPressRef.current?.(item.id));
+        return marker;
       });
-      map.overlayMapTypes.insertAt(0, tileOverlay);
-      tileOverlayRef.current = tileOverlay;
     });
 
     return () => {
       isCancelled = true;
     };
-  }, [interactive, latitude, longitude, mapType, zoom]);
+  }, [
+    interactive,
+    latitude,
+    longitude,
+    mapType,
+    markers,
+    selectedMarkerId,
+    zoom,
+  ]);
 
   return (
     <View style={styles.wrap}>

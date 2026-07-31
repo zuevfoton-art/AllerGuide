@@ -1,19 +1,29 @@
 import {
   buildNearbyPollenSamplePoints,
+  buildPollenPlantDetail,
   buildYandexPollenUrl,
   parseOpenMeteoCurrentPollen,
   parseCurrentPollenMapReadings,
+  parseDailyPollenForecast,
   parseProfileAllergenIds,
   POLLEN_MAP_TAXON_IDS,
+  POLLEN_OPEN_METEO_FORECAST_DAYS,
+  readingToUpiSnapshot,
   type NearbyPollenLocation,
   type NearbyPollenSamplePoint,
   type OpenMeteoCurrentPollen,
   type OpenMeteoPollenHourly,
+  type PollenForecastDay,
   type PollenMapReading,
+  type PollenMapTaxonId,
+  type PollenPlantDetail,
+  type PollenUpiSnapshot,
 } from '@allerguide/core';
 import type { ResolvedLocation } from '@/src/services/location-service';
+import { apiRequest, getApiBaseUrl } from '@/src/services/api-client';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 import { logCaughtError } from '@/src/services/error-reporting';
+import { GOOGLE_POLLEN_HEATMAP_ENABLED } from '@/src/constants/features';
 
 export type PollenMapSource = 'open-meteo' | 'cache' | 'calendar';
 
@@ -21,6 +31,10 @@ export interface PollenMapSnapshot {
   source: PollenMapSource;
   readings: PollenMapReading[];
   nearbyLocations: NearbyPollenLocation[];
+  forecastDays: PollenForecastDay[];
+  /** UPI per taxon for today (Google Forecast preferred, else Open-Meteo approx). */
+  upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+  plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
   updatedAt: string | null;
   yandexPollenUrl: string;
 }
@@ -28,6 +42,9 @@ export interface PollenMapSnapshot {
 interface CachedPollenMapSnapshot {
   readings: PollenMapReading[];
   nearbyLocations: NearbyPollenLocation[];
+  forecastDays: PollenForecastDay[];
+  upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+  plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
   updatedAt: string;
 }
 
@@ -38,6 +55,19 @@ interface OpenMeteoPollenResponse {
 
 interface OpenMeteoNearbyResponse {
   current?: OpenMeteoCurrentPollen;
+}
+
+interface GoogleForecastApiDay {
+  date: string;
+  typeIndexes?: Partial<Record<'TREE' | 'GRASS' | 'WEED', PollenUpiSnapshot>>;
+  plantIndexes?: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+  plants?: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
+}
+
+interface GoogleForecastApiResult {
+  regionCode?: string | null;
+  days?: GoogleForecastApiDay[];
+  plants?: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
 }
 
 const POLLEN_CACHE_PREFIX = 'pollenMapSnapshot';
@@ -63,16 +93,31 @@ export async function fetchPollenMapSnapshot(
     );
     if (readings.length === 0) throw new Error('Open-Meteo returned no pollen data');
 
+    const forecastDays = parseDailyPollenForecast(payload.hourly ?? {}, profileAllergenIds);
     const nearbyLocations = await fetchNearbyPollenLocations(
       location,
       profileAllergenIds,
     );
+    const google = await fetchGoogleForecastEnrichment(location.lat, location.lon);
+    const upiByTaxon = buildUpiByTaxon(readings, google?.days?.[0]);
+    const plants = buildPlantsMap(readings, google?.plants);
+
     const updatedAt = new Date().toISOString();
-    writeCache(cacheKey, { readings, nearbyLocations, updatedAt });
+    writeCache(cacheKey, {
+      readings,
+      nearbyLocations,
+      forecastDays,
+      upiByTaxon,
+      plants,
+      updatedAt,
+    });
     return {
       source: 'open-meteo',
       readings,
       nearbyLocations,
+      forecastDays,
+      upiByTaxon,
+      plants,
       updatedAt,
       yandexPollenUrl,
     };
@@ -89,6 +134,12 @@ export async function fetchPollenMapSnapshot(
         ...nearbyLocation,
         readings: applyProfileRelevance(nearbyLocation.readings, profileAllergenIds),
       })),
+      forecastDays: cached.forecastDays.map((day) => ({
+        ...day,
+        readings: applyProfileRelevance(day.readings, profileAllergenIds),
+      })),
+      upiByTaxon: cached.upiByTaxon,
+      plants: cached.plants,
       updatedAt: cached.updatedAt,
       yandexPollenUrl,
     };
@@ -98,6 +149,9 @@ export async function fetchPollenMapSnapshot(
     source: 'calendar',
     readings: [],
     nearbyLocations: [],
+    forecastDays: [],
+    upiByTaxon: {},
+    plants: {},
     updatedAt: null,
     yandexPollenUrl,
   };
@@ -108,7 +162,7 @@ function buildOpenMeteoUrl(location: ResolvedLocation): string {
   const timezone = encodeURIComponent('auto');
   return (
     `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.lat}` +
-    `&longitude=${location.lon}&timezone=${timezone}&forecast_days=1` +
+    `&longitude=${location.lon}&timezone=${timezone}&forecast_days=${POLLEN_OPEN_METEO_FORECAST_DAYS}` +
     `&current=${taxa}&hourly=${taxa}`
   );
 }
@@ -153,6 +207,67 @@ function buildNearbyOpenMeteoUrl(points: NearbyPollenSamplePoint[]): string {
   );
 }
 
+async function fetchGoogleForecastEnrichment(
+  latitude: number,
+  longitude: number,
+): Promise<GoogleForecastApiResult | null> {
+  if (!GOOGLE_POLLEN_HEATMAP_ENABLED || !getApiBaseUrl().trim()) return null;
+
+  const response = await apiRequest<{ ok?: boolean; forecast?: GoogleForecastApiResult }>(
+    `/api/pollen/forecast?lat=${latitude}&lon=${longitude}`,
+  );
+  if (!response.ok || !response.data.forecast) return null;
+  return response.data.forecast;
+}
+
+function buildUpiByTaxon(
+  readings: PollenMapReading[],
+  googleToday: GoogleForecastApiDay | undefined,
+): Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>> {
+  const result: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>> = {};
+
+  for (const reading of readings) {
+    const plantUpi = googleToday?.plantIndexes?.[reading.taxonId];
+    if (plantUpi) {
+      result[reading.taxonId] = plantUpi;
+      continue;
+    }
+
+    const typeKey =
+      reading.taxonId === 'grass_pollen'
+        ? 'GRASS'
+        : reading.taxonId === 'ragweed_pollen' || reading.taxonId === 'mugwort_pollen'
+          ? 'WEED'
+          : 'TREE';
+    const typeUpi = googleToday?.typeIndexes?.[typeKey];
+    if (typeUpi) {
+      result[reading.taxonId] = typeUpi;
+      continue;
+    }
+
+    result[reading.taxonId] = readingToUpiSnapshot(reading);
+  }
+
+  return result;
+}
+
+function buildPlantsMap(
+  readings: PollenMapReading[],
+  googlePlants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>> | undefined,
+): Partial<Record<PollenMapTaxonId, PollenPlantDetail>> {
+  const plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>> = {
+    ...(googlePlants ?? {}),
+  };
+
+  for (const reading of readings) {
+    if (!plants[reading.taxonId]) {
+      plants[reading.taxonId] = buildPollenPlantDetail(reading.taxonId);
+    }
+  }
+
+  return plants;
+}
+
 function readCache(cacheKey: string): CachedPollenMapSnapshot | null {
   const raw = getSetting(cacheKey);
   if (!raw) return null;
@@ -166,6 +281,9 @@ function readCache(cacheKey: string): CachedPollenMapSnapshot | null {
     return {
       ...cached,
       nearbyLocations: Array.isArray(cached.nearbyLocations) ? cached.nearbyLocations : [],
+      forecastDays: Array.isArray(cached.forecastDays) ? cached.forecastDays : [],
+      upiByTaxon: cached.upiByTaxon ?? {},
+      plants: cached.plants ?? {},
     };
   } catch (error) {
     logCaughtError('readPollenMapCache', error, { level: 'warn' });

@@ -5,6 +5,10 @@ import {
   type OpenMeteoPollenTaxonId,
 } from './pollen-taxonomy';
 import type { ProfileAllergenId } from './profile-allergens';
+import {
+  pollenUpiFromConcentration,
+  type PollenUpiIndex,
+} from './pollen-upi';
 
 export const PRIMARY_POLLEN_MAP_TAXON_IDS = [
   'birch_pollen',
@@ -77,6 +81,22 @@ export interface NearbyPollenLocation extends NearbyPollenSamplePoint {
   readings: PollenMapReading[];
 }
 
+/** One calendar day of pollen levels (daily peak from Open-Meteo hourly). */
+export interface PollenForecastDay {
+  date: string;
+  readings: PollenMapReading[];
+}
+
+export interface PollenUpiSnapshot {
+  /** Selected taxon UPI 0–5 (Google Forecast or approximated from grains/m³). */
+  index: PollenUpiIndex;
+  category?: string;
+  source: 'google' | 'open-meteo';
+}
+
+/** How many calendar days Open-Meteo pollen hourly typically covers. */
+export const POLLEN_OPEN_METEO_FORECAST_DAYS = 4;
+
 const SAFE_LOCATION_RADIUS_KM = 20;
 const KILOMETERS_PER_LATITUDE_DEGREE = 111.32;
 const MIN_LONGITUDE_SCALE = 0.2;
@@ -140,6 +160,61 @@ export function parseOpenMeteoCurrentPollen(
   }
 
   return readings;
+}
+
+/**
+ * Collapse Open-Meteo hourly series into daily peak readings per taxon.
+ * Used for the multi-day forecast strip when Google Forecast is offline.
+ */
+export function parseDailyPollenForecast(
+  hourly: OpenMeteoPollenHourly,
+  profileAllergenIds: ProfileAllergenId[],
+): PollenForecastDay[] {
+  const times = hourly.time ?? [];
+  if (times.length === 0) return [];
+
+  const byDate = new Map<string, Map<PollenMapTaxonId, number>>();
+
+  for (let index = 0; index < times.length; index += 1) {
+    const date = times[index]?.slice(0, 10);
+    if (!date) continue;
+
+    let dayPeaks = byDate.get(date);
+    if (!dayPeaks) {
+      dayPeaks = new Map();
+      byDate.set(date, dayPeaks);
+    }
+
+    for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+      const value = hourly[taxonId]?.[index];
+      if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+      const previous = dayPeaks.get(taxonId);
+      if (previous === undefined || value > previous) {
+        dayPeaks.set(taxonId, value);
+      }
+    }
+  }
+
+  return [...byDate.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([date, peaks]) => ({
+      date,
+      readings: POLLEN_MAP_TAXON_IDS.flatMap((taxonId) => {
+        const value = peaks.get(taxonId);
+        return value === undefined
+          ? []
+          : [buildPollenReading(taxonId, value, profileAllergenIds)];
+      }),
+    }))
+    .filter((day) => day.readings.length > 0);
+}
+
+/** Approximate UPI for a reading (Open-Meteo fallback path). */
+export function readingToUpiSnapshot(reading: PollenMapReading): PollenUpiSnapshot {
+  return {
+    index: pollenUpiFromConcentration(reading.value, reading.taxonId),
+    source: 'open-meteo',
+  };
 }
 
 export function buildYandexPollenUrl(regionId: string): string {

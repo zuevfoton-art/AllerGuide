@@ -18,11 +18,11 @@
 
 **Не цель v1:** заменить Open-Meteo в wellness целиком; парсить HTML/JS Яндекс Погоды; хранить API-ключи на клиенте.
 
-**Статус:** гибридный контур A реализован: Яндекс.Карты по локации, **одно**
-live-значение Open-Meteo в зависимости от масштаба (точка / город / регион),
-ссылка на карту Яндекс Погоды, кэш и календарный fallback. Добавлены ольха,
-полынь и олива. Контур B / tile heatmap ожидает Google Pollen, CAMS/SILAM WMS
-или официальный B2B API Яндекса (см. §4.4).
+**Статус:** единый map UX (чипы аллергенов, multi-day прогноз, UPI, plant card, POI)
+использует **Google Maps** как primary basemap при флагах; Open-Meteo — primary
+числовой feed; Google Pollen heatmapTiles + forecast:lookup — через API proxy;
+Яндекс — fallback-подложка и deep-link 10-дневного прогноза (без scrape).
+См. также [`gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md).
 
 ---
 

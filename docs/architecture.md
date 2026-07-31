@@ -27,7 +27,7 @@ AllerGuide — offline-first приложение для управления а
 
 **План MVP → prod (Phase 1–2):** детальные GitHub issues с зависимостями — [`docs/phase1-phase2-issues.md`](./phase1-phase2-issues.md) · сводка фаз — [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md).
 
-**Карта пыления (Яндекс + геолокация):** план интеграции берёзы / злаковых / амброзии — [`docs/yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md). Замена basemap на Google + `heatmapTiles` (слой «Пыление», бейдж Open-Meteo) — §4.5–4.6 того же документа. Stage APK без локального SDK: [`docs/android-stage-build.md`](./android-stage-build.md) (EAS preferred · GitHub Actions).
+**Карта (Google + пыление + POI):** единый экран [`apps/mobile/app/(tabs)/map.tsx`](../apps/mobile/app/(tabs)/map.tsx) — чипы аллергенов, Google basemap/heatmap (флаги), multi-day прогноз, UPI, карточка растения, пины ресторанов/клиник. План источников — [`docs/yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md). Ключи GCP — [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md). Stage APK: [`docs/android-stage-build.md`](./android-stage-build.md).
 
 ---
 
@@ -226,7 +226,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `home-insights-service.ts` | Инсайты на главной (`@allerguide/core` `home-insights`) |
 | `wellness-service.ts` | Wellness score |
 | `pollen-map-service.ts` / `pollen-heatmap-service.ts` | Open-Meteo + Google pollen tiles |
-| `location-service.ts` / `place-service.ts` | Гео / allergy-friendly места (`EXPO_PUBLIC_LIVE_MAP`) |
+| `location-service.ts` / `place-service.ts` | Гео / POI (`EXPO_PUBLIC_MAP_PLACES` / catalog + ADAIR fallback) |
 | `market-api.ts` | Yandex Market affiliate offers |
 | `asit-*-service.ts`, `prescribed-therapy*-service.ts` | АСИТ / терапия + напоминания |
 | `asthma-action-plan-service.ts`, `insect-action-plan-service.ts`, `food-drug-registry-service.ts` | Клинические планы |
@@ -251,8 +251,9 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
-| `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles |
-| `place-service.ts` | `EXPO_PUBLIC_LIVE_MAP` | Live places на карте |
+| `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
+| `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
+| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` | Live Places Nearby через API |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
 | `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
 
@@ -540,7 +541,8 @@ Drizzle-объекты схемо-квалифицированы — код за
 ### Pollen heatmap (`routes/pollen.ts`)
 
 - Proxy Google Pollen UPI tiles при `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY`
-- Mobile: `EXPO_PUBLIC_POLLEN_HEATMAP=google` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
+- Proxy Google Pollen Forecast (`GET /api/pollen/forecast`) и Places Nearby (`GET /api/places/nearby`)
+- Mobile: `EXPO_PUBLIC_POLLEN_HEATMAP=google` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (+ optional `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_PLACES`)
 - Default / offline-safe: Yandex map + Open-Meteo через `pollen-map-service`
 
 ### Market (`routes/market.ts`)
@@ -735,9 +737,11 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
 | `EXPO_PUBLIC_YC_SEARCH` | `false` | Ingredients search via `/api/search/ingredients` |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | Encrypted cloud backup |
-| `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer |
+| `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |
-| `EXPO_PUBLIC_LIVE_MAP` | `false` | Live places on map |
+| `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | Google как primary basemap map tab |
+| `EXPO_PUBLIC_MAP_PLACES` | `false` | Live Places Nearby via API |
+| `EXPO_PUBLIC_LIVE_MAP` | `false` | Alias of `EXPO_PUBLIC_MAP_PLACES` |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_ANALYTICS_ENDPOINT` | — | Optional analytics HTTP sink |
 | `EXPO_PUBLIC_SENTRY_DSN` | — | Crash reporting |
@@ -759,7 +763,8 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `YC_OCR_ENABLED` | Vision OCR |
 | `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED` | Intent + search ingredients |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
-| `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile proxy |
+| `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy |
+| `MAP_PLACES_ENABLED`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places Nearby proxy |
 | `YANDEX_MARKET_*` | Market affiliate |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `PASSWORD_RESET_*` | Password reset email |
 | `ALIAS_FEEDBACK_ADMIN_KEY` | Alias feedback admin |

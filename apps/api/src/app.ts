@@ -16,6 +16,7 @@ import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerPollenRoutes } from './routes/pollen';
+import { registerPlacesRoutes } from './routes/places';
 import { registerMarketRoutes } from './routes/market';
 import {
   buildCorsOptions,
@@ -51,6 +52,7 @@ export async function createApp(
   registerGovernanceRoutes(app);
   registerAnalyticsRoutes(app);
   registerPollenRoutes(app);
+  registerPlacesRoutes(app);
 
   if (withReplitAuth) {
     await setupAuth(app);
