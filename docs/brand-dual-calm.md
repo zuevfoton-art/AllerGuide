@@ -1,85 +1,74 @@
-# Dual Calm — Medical blue × Claro teal
+# Claro Green — единая teal-палитра
 
-**Статус:** P3.0 (документ) + P3.1 (токены) — в коде  
+**Статус:** Фаза 1 (токены) — medical blue ambient снят  
 **Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts)
+
+> Ранее документ описывал **Dual Calm** (Medical blue × Claro teal). Решение продукта: **уходим от синего света**, ambient и product — одна семья Claro teal. Имена токенов `calm.*` сохранены как aliases, чтобы не ломать вызовы; значения = teal.
 
 ---
 
 ## Зачем
 
-После ребренда A-Claro продуктовый accent стал **Claro Teal** (`#2A9D8F`). Каркас **Clinical Calm** (типографика, радиусы, плоские карточки, navy-заголовки) сохранился, но **синяя атмосфера доверия** ушла вместе с заменой `#2563EB` на teal во всех ролях.
+После онбординга (#160, #186) chrome и иллюстрации стали teal, но wellness/tab/`GlassCard`/`info` оставались на `#2563EB` / `#EFF4FF`. Два конкурирующих accent ломали бренд.
 
-**Dual Calm** возвращает Medical Calm как **ambient-слой** (фон, градиенты, wellness, клинические подсказки), не откатывая бренд:
-
-| Слой | Цвет | Роль |
-|------|------|------|
-| **Medical Calm** (синий) | navy → blue | Среда, доверие, клинический контекст |
-| **Claro** (teal) | `#2A9D8F` | CTA, активные табы, ссылки, monogram, «Claro: …» |
+**Claro Green:** один продуктовый цвет для CTA, ambient, info и градиентов.
 
 ```mermaid
 flowchart LR
-  subgraph ambient [Ambient — Medical Calm]
-    bg[bg #F4F6F9]
-    calm[calm gradient]
-    info[info blue]
+  subgraph claro [Claro teal family]
+    deep[calmDeep / tipText]
+    accent[accent / calmMid / info]
+    wash[accentLight / calmWash / infoLight]
   end
-  subgraph product [Product — Claro]
-    accent[accent teal]
-    mark[monogram A]
+  subgraph text [Typography]
+    head[head navy — contrast only]
   end
-  ambient --> product
+  claro --> UI[Surfaces + CTA]
+  head --> Type[H1 / KPI]
 ```
 
 ---
 
 ## Палитра
 
-### Claro (product) — без изменений
-
-| Token | Light | Dark |
-|-------|-------|------|
-| `accent` | `#2A9D8F` | `#3DB8A8` |
-| `accentLight` | `#E6F6F4` | `#134E48` |
-| `accentMid` | `#9FD9D1` | `#2A9D8F` |
-
-### Medical Calm (ambient) — `calm.*`
+### Claro (product + ambient)
 
 | Token | Light | Dark | Роль |
 |-------|-------|------|------|
-| `calmDeep` | `#1E3A5F` | `#0B1120` | Глубина градиента (= `head` light) |
-| `calmMid` | `#2563EB` | `#1D4ED8` | Середина градиента, бывший primary |
-| `calmLight` | `#3B82F6` | `#3B82F6` | Hover, светлый край градиента |
-| `calmWash` | `#EFF4FF` | `#0F172A` | Фон wellness-карточек, мягкие зоны |
-| `calmMist` | `#DBEAFE` | `#1E293B` | Бордеры, вторичные ambient-поверхности |
+| `accent` | `#2A9D8F` | `#3DB8A8` | CTA, табы, ссылки, monogram |
+| `accentLight` | `#E6F6F4` | `#134E48` | Мягкий фон |
+| `accentMid` | `#9FD9D1` | `#2A9D8F` | Бордеры / mid fill |
+| `calmDeep` | `#1F6B62` | `#0B1120` | Глубина градиента (= `tipText` light) |
+| `calmMid` | `#2A9D8F` | `#3DB8A8` | = `accent` |
+| `calmLight` | `#9FD9D1` | `#3DB8A8` | Светлый край градиента |
+| `calmWash` | `#E6F6F4` | `#134E48` | = `accentLight` — wellness / tab pill |
+| `calmMist` | `#9FD9D1` | `#2A9D8F` | = `accentMid` — ambient border |
+| `info` | `#2A9D8F` | `#3DB8A8` | = `accent` (клинические подсказки) |
+| `infoLight` | `#E6F6F4` | `#134E48` | = `accentLight` |
 
-### Info (клиническая информация)
+### Общие
 
-| Token | Light | Dark |
-|-------|-------|------|
-| `info` | `#2563EB` | `#3B82F6` |
-| `infoLight` | `#EFF4FF` | `#0C4A6E` |
-
-### Общие (без изменений)
-
-- `head` light: `#1E3A5F` · `bg`: `#F4F6F9` · `danger` / SOS: `#B91C1C`
+- `head` light: `#1E3A5F` — **только типографика** (не ambient fill)
+- `bg`: `#F4F6F9` · `danger` / SOS: `#B91C1C`
+- `success` / traffic-light — без изменений
 
 ### Градиент
 
-`getCalmGradient(isDark)` в [`calm-gradient.ts`](../apps/mobile/src/constants/calm-gradient.ts) (re-export из `theme.ts`):
+`getCalmGradient(isDark)` в [`calm-gradient.ts`](../apps/mobile/src/constants/calm-gradient.ts):
 
-- **Light:** `#1E3A5F` → `#2563EB` → `#3B82F6` (135°)
-- **Dark:** `#0B1120` → `#1E3A5F` → `#1D4ED8`
+- **Light:** `#1F6B62` → `#2A9D8F` → `#9FD9D1`
+- **Dark:** `#0B1120` → `#134E48` → `#2A9D8F`
 
 ---
 
 ## Правила (non-negotiable)
 
-1. **CTA, активные табы, ссылки** — только `accent` (teal), не `calmMid`.
-2. **SOS** — только `danger`, не blue/teal.
-3. **Синий** — не более ~25% площади экрана (фон, hero, wellness atmosphere).
-4. **Не смешивать** teal и blue в одной кнопке или badge.
-5. **Icon / store asset** — monogram A на teal; синий — in-app atmosphere, не icon fill.
-6. **Запрещённые написания бренда** — см. [`brand-rollout.md`](./brand-rollout.md).
+1. **CTA, табы, ссылки, ambient wash, info** — Claro teal family. Нет `#2563EB` / `#3B82F6` / `#EFF4FF` / `#DBEAFE` в fills.
+2. **SOS** — только `danger`, не teal.
+3. **Не вводить второй «медицинский» hue** рядом с accent.
+4. **Icon / store** — monogram A на teal.
+5. **Запрещённые написания бренда** — см. [`brand-rollout.md`](./brand-rollout.md).
+6. Внешние карты (Google/Yandex tiles) — исключение, не бренд-токены.
 
 ---
 
@@ -88,49 +77,42 @@ flowchart LR
 | Элемент | Токен |
 |---------|--------|
 | Screen background | `bg` |
-| Hero / wellness atmosphere (home, clinical) | `calm*` + `getCalmGradient` |
-| Onboarding waves (`OnboardingWaveBackground`) | `accentLight` + `accent` (Claro teal) |
-| H1, KPI numbers | `head` |
-| Primary button, active tab icon, links | `accent` |
-| Tab pill background (план P3.3) | `calmWash` |
-| Info banners, clinical hints | `info` / `infoLight` |
+| Hero / wellness / `GlassCard variant="calm"` | `calmWash` / `calmMist` (= teal) |
+| Onboarding waves | `accentLight` + `accent` |
+| H1, KPI | `head` |
+| Primary button, active tab, links | `accent` |
+| Tab pill | `calmWash` |
+| Info banners | `info` / `infoLight` |
 | Scanner «Claro: …» | `accent` |
-| Safe scan / success | `success` |
+| Safe scan | `success` |
 | SOS | `danger` |
 
 ---
 
-## Roadmap внедрения
+## Roadmap
 
-| Фаза | PR | Содержание | Статус |
-|------|-----|------------|--------|
-| **P3.0** | этот PR | `brand-dual-calm.md`, cross-link в rollout, dual palette в `brand-preview.html` | ✅ |
-| **P3.1** | этот PR | `calm.*` tokens, `info` → blue, `getCalmGradient()` | ✅ |
-| **P3.2** | этот PR | Home wellness + hero — ambient blue; onboarding waves — Claro teal | ✅ |
-| **P3.3** | этот PR | Tab pill `calmWash`, `GlassCard variant="calm"` на клинических экранах | ✅ |
-| **P3.4** | опц. | Store screenshots, `design-mockup.html` sync | ☑ (июль 2026) |
-| **P3.5** | опц. | QA checklist: accent teal + calm blue | ☐ |
-
----
-
-## Быстрый визуальный тест (P3.2 preview)
-
-Onboarding waves используют `accentLight` / `accent` (Claro teal), в одном ключе с CTA и `BrandLogo`. Home / wellness / clinical surfaces оставляют Medical Calm (`calmWash` / `calmMid`).
+| Фаза | Содержание | Статус |
+|------|------------|--------|
+| **P3.x Dual Calm** | blue ambient + teal CTA | ✅ historical |
+| **Фаза 1** | `calm.*` + `info` + gradient → teal; docs/tests | ✅ этот PR |
+| **Фаза 2** | Визуальный sweep экранов (должен быть no-op после токенов) | ☐ |
+| **Фаза 3** | Онбординг map/sos арты; mockup sync | ☐ |
+| **Фаза 4** | Rename `calm*` → aliases / deprecate Dual Calm naming | ☐ |
 
 ---
 
-## QA-чеклист (после P3.2+)
+## QA-чеклист
 
-- [ ] Контраст WCAG: белый на `calmMid` / `calmDeep`
-- [ ] Dark mode: градиент не пересвечивает OLED
-- [ ] Color-blind: teal CTA отличим от blue wash
-- [ ] Бренд: A-Claro, endorser, «Claro: …» на месте
-- [ ] `pnpm typecheck` / mobile tests green
+- [ ] Нет medical blue hex в `theme.ts` / `calm-gradient.ts` (кроме `head` navy)
+- [ ] Tab pill + `GlassCard` calm = mint/teal wash, не голубой
+- [ ] Info icons на SOS/клинике — teal, не blue
+- [ ] Dark mode: градиент не синий
+- [ ] `pnpm --filter mobile test` / typecheck green
 
 ---
 
 ## Ссылки
 
-- Референс Clinical Calm (legacy blue): [`design-mockup.html`](./design-mockup.html)
-- Актуальный brand kit: [`brand/brand-preview.html`](./brand/brand-preview.html)
+- Brand kit: [`brand/brand-preview.html`](./brand/brand-preview.html)
 - Токены: [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts)
+- Градиент: [`apps/mobile/src/constants/calm-gradient.ts`](../apps/mobile/src/constants/calm-gradient.ts)

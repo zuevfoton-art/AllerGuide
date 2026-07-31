@@ -7,7 +7,7 @@ export { getCalmGradient };
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-/** Clinical Calm design tokens — Dual Calm: calm.* (medical blue ambient) + accent (Claro teal product) */
+/** Clinical Calm design tokens — Claro green: calm.* ambient aliases the teal product family */
 export type ThemeColors = {
   bg: string;
   card: string;
@@ -15,13 +15,13 @@ export type ThemeColors = {
   accent: string;
   accentLight: string;
   accentMid: string;
-  /** Medical Calm ambient — navy → blue gradient family */
+  /** Ambient surfaces — same Claro teal family (no medical blue) */
   calmDeep: string;
   calmMid: string;
   calmLight: string;
   calmWash: string;
   calmMist: string;
-  /** Navy — KPI numbers, document headings */
+  /** Dark text / KPI — navy for contrast (not ambient fill) */
   head: string;
   text: string;
   textSecondary: string;
@@ -75,11 +75,11 @@ export const lightColors: ThemeColors = {
   accent: '#2A9D8F',
   accentLight: '#E6F6F4',
   accentMid: '#9FD9D1',
-  calmDeep: '#1E3A5F',
-  calmMid: '#2563EB',
-  calmLight: '#3B82F6',
-  calmWash: '#EFF4FF',
-  calmMist: '#DBEAFE',
+  calmDeep: '#1F6B62',
+  calmMid: '#2A9D8F',
+  calmLight: '#9FD9D1',
+  calmWash: '#E6F6F4',
+  calmMist: '#9FD9D1',
   head: '#1E3A5F',
   text: '#0F172A',
   textSecondary: '#475569',
@@ -118,8 +118,8 @@ export const lightColors: ThemeColors = {
   teal: '#2A9D8F',
   tealLight: '#E6F6F4',
   surfaceMuted: '#F1F5F9',
-  info: '#2563EB',
-  infoLight: '#EFF4FF',
+  info: '#2A9D8F',
+  infoLight: '#E6F6F4',
 };
 
 export const darkColors: ThemeColors = {
@@ -129,10 +129,10 @@ export const darkColors: ThemeColors = {
   accentLight: '#134E48',
   accentMid: '#2A9D8F',
   calmDeep: '#0B1120',
-  calmMid: '#1D4ED8',
-  calmLight: '#3B82F6',
-  calmWash: '#0F172A',
-  calmMist: '#1E293B',
+  calmMid: '#3DB8A8',
+  calmLight: '#3DB8A8',
+  calmWash: '#134E48',
+  calmMist: '#2A9D8F',
   head: '#E2E8F0',
   text: '#F8FAFC',
   textSecondary: '#CBD5E1',
@@ -171,8 +171,8 @@ export const darkColors: ThemeColors = {
   teal: '#3DB8A8',
   tealLight: '#134E48',
   surfaceMuted: '#1E293B',
-  info: '#3B82F6',
-  infoLight: '#0C4A6E',
+  info: '#3DB8A8',
+  infoLight: '#134E48',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {

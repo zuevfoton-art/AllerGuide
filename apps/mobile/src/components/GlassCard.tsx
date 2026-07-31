@@ -7,7 +7,7 @@ type GlassCardProps = PropsWithChildren<{
   style?: ViewStyle;
   padded?: boolean;
   testID?: string;
-  /** Medical Calm ambient surface — calmWash background */
+  /** Claro teal ambient surface — calmWash (= accentLight) background */
   variant?: 'default' | 'calm';
 }>;
 
