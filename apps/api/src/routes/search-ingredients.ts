@@ -2,6 +2,15 @@ import type { Express, Request, Response } from 'express';
 import { verifyAuthToken } from '../lib/jwt';
 import { logCaughtError } from '../lib/log-caught-error';
 import {
+  consumeSearchBudget,
+  getCachedIngredients,
+  recordSearchBudgetRejection,
+  recordSearchCacheHit,
+  recordSearchCacheMiss,
+  searchIngredientsCacheKey,
+  setCachedIngredients,
+} from '../lib/search-ingredients-cache';
+import {
   searchIngredientsWithYandex,
   yandexSearchConfigured,
 } from '../services/yandex-search-ingredients';
@@ -41,13 +50,29 @@ export function registerSearchIngredientsRoutes(app: Express) {
       return;
     }
 
+    const cacheKey = searchIngredientsCacheKey(query);
+    const cached = await getCachedIngredients(cacheKey);
+    if (cached) {
+      recordSearchCacheHit();
+      res.json({ ok: true, ...cached, cached: true });
+      return;
+    }
+
+    recordSearchCacheMiss();
+    if (!consumeSearchBudget(identity)) {
+      recordSearchBudgetRejection();
+      res.status(429).json({ ok: false, error: 'Daily search budget exceeded' });
+      return;
+    }
+
     try {
       const result = await searchIngredientsWithYandex(query);
       if (!result) {
         res.status(404).json({ ok: false, error: 'Ingredients not found' });
         return;
       }
-      res.json({ ok: true, ...result });
+      await setCachedIngredients(cacheKey, result);
+      res.json({ ok: true, ...result, cached: false });
     } catch (error) {
       logCaughtError('search.ingredients', error);
       res.status(500).json({ ok: false, error: 'Search failed' });

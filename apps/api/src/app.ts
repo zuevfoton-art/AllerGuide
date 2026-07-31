@@ -9,6 +9,7 @@ import { registerScanRoutes } from './routes/scan';
 import { registerScanIntentRoutes } from './routes/scan-intent';
 import { registerOcrRoutes } from './routes/ocr';
 import { registerSearchIngredientsRoutes } from './routes/search-ingredients';
+import { registerSttRoutes } from './routes/stt';
 import { registerMobileAuthRoutes } from './routes/mobile-auth';
 import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
@@ -46,6 +47,7 @@ export async function createApp(
   registerScanIntentRoutes(app);
   registerOcrRoutes(app);
   registerSearchIngredientsRoutes(app);
+  registerSttRoutes(app);
   registerCatalogRoutes(app);
   registerMarketRoutes(app);
   registerAliasFeedbackRoutes(app);

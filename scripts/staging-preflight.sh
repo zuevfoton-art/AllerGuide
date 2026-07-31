@@ -12,7 +12,7 @@ echo "=== AllerGuide staging preflight (P1.7) ==="
 echo "Target: $STAGING_API_URL"
 echo ""
 
-for script in staging-smoke.sh staging-auth-smoke.sh staging-sync-smoke.sh staging-scan-smoke.sh; do
+for script in staging-smoke.sh staging-auth-smoke.sh staging-sync-smoke.sh staging-scan-smoke.sh staging-yandex-ai-smoke.sh; do
   path="$ROOT/scripts/$script"
   if [[ ! -x "$path" ]]; then
     chmod +x "$path"

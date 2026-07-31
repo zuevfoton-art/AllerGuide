@@ -250,6 +250,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `YC_OCR_ENABLED` | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
+| `YC_STT_ENABLED` | `EXPO_PUBLIC_YC_STT` | SpeechKit STT через `/api/stt` (default off) |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 | `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
@@ -528,7 +529,8 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Route | Flag | Сервис |
 |-------|------|--------|
 | `POST /api/scan/intent` | `YC_SCAN_INTENT_LLM` | классификация OCR-сниппета (label/menu vs visual product) |
-| `POST /api/search/ingredients` | `YC_SEARCH_ENABLED` | Yandex Search API → состав при промахе OFF/каталога |
+| `POST /api/search/ingredients` | `YC_SEARCH_ENABLED` | Yandex Search API → состав при промахе OFF/каталога (+ cache/budget) |
+| `POST /api/stt` | `YC_STT_ENABLED` | SpeechKit STT (Phase 3; default off) |
 
 Доменная логика / нормализация — `@allerguide/ai` (`scan-intent.ts`, `search-ingredients.ts`); HTTP — `routes/scan-intent.ts`, `routes/search-ingredients.ts` + `services/yandex-search-ingredients.ts`.
 
@@ -736,6 +738,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
 | `EXPO_PUBLIC_YC_SEARCH` | `false` | Ingredients search via `/api/search/ingredients` |
+| `EXPO_PUBLIC_YC_STT` | `false` | SpeechKit STT via `/api/stt` |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | Encrypted cloud backup |
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |
@@ -761,7 +764,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
 | `YC_OCR_ENABLED` | Vision OCR |
-| `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED` | Intent + search ingredients |
+| `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy |
 | `MAP_PLACES_ENABLED`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places Nearby proxy |

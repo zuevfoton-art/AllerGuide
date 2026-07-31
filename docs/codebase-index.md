@@ -150,7 +150,7 @@ src/modules/marketplace/
 | Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors` |
 | Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service` |
 | Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-photo-picker` |
-| Scanner / catalog | `scanner-service`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scanner-photo-*`, `scanner-dish-*`, `dish-off-enrichment-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `alias-feedback-service` |
+| Scanner / catalog | `scanner-service`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scanner-photo-*`, `scanner-dish-*`, `dish-off-enrichment-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service` |
 | Home | `home-insights-service`, `wellness-service` |
 | SOS / reports | `sos-service`, `sos-passport-service`, `doctor-report-service` |
 | Clinical | `asit-*-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy*-service`, `clinical-reminder-service`, `reminder-reconcile-service` |
@@ -201,7 +201,8 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
 | `ocr.ts` | Yandex Vision OCR (`YC_OCR_ENABLED`) |
-| `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) |
+| `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
+| `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
 | `market.ts` | Yandex Market affiliate |
 | `pollen.ts` | Google pollen heatmap proxy |
@@ -224,7 +225,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 ### Middleware / services
 
 - Middleware: `security.ts` (helmet/CORS/rate limit), `require-jwt.ts`
-- Services: `open-food-facts`, `llm-scan-provider`, `yandex-vision-ocr`, `google-pollen-heatmap`, `yandex-market-affiliate`, `app-user-service`, `profile-service`, …
+- Services: `open-food-facts`, `llm-scan-provider`, `yandex-vision-ocr`, `yandex-speechkit-stt`, `yandex-search-ingredients`, `google-pollen-heatmap`, `yandex-market-affiliate`, `app-user-service`, `profile-service`, …
 
 ---
 

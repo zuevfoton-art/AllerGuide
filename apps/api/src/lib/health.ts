@@ -24,6 +24,7 @@ export interface HealthCheckResult {
     ycOcr?: boolean;
     ycScanIntentLlm?: boolean;
     ycSearch?: boolean;
+    ycStt?: boolean;
     pollenHeatmap?: boolean;
   };
   scan?: ScanHealthMetrics;
@@ -90,6 +91,7 @@ function buildFeatures() {
   // Intent LLM uses the same provider as /api/scan (YandexGPT or OpenAI).
   const ycScanIntentLlm = process.env.YC_SCAN_INTENT_LLM === 'true' && aiScan;
   const ycSearch = process.env.YC_SEARCH_ENABLED === 'true' && ycCreds;
+  const ycStt = process.env.YC_STT_ENABLED === 'true' && ycCreds;
   return {
     sync: process.env.SYNC_ENABLED === 'true',
     aiScan,
@@ -100,6 +102,7 @@ function buildFeatures() {
     ...(ycOcr ? { ycOcr: true } : {}),
     ...(ycScanIntentLlm ? { ycScanIntentLlm: true } : {}),
     ...(ycSearch ? { ycSearch: true } : {}),
+    ...(ycStt ? { ycStt: true } : {}),
   };
 }
 

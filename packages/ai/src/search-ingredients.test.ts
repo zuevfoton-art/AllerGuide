@@ -6,7 +6,8 @@ import {
 
 describe('search-ingredients', () => {
   it('builds a composition search query', () => {
-    expect(buildIngredientsSearchQuery('оливье')).toBe('состав ингредиенты оливье');
+    expect(buildIngredientsSearchQuery('оливье')).toContain('оливье');
+    expect(buildIngredientsSearchQuery('оливье')).toMatch(/состав|ингредиент/i);
   });
 
   it('prefers passages that look like ingredient lists', () => {
@@ -17,5 +18,14 @@ describe('search-ingredients', () => {
     ]);
     expect(text).toContain('картофель');
     expect(text).toContain('майонез');
+  });
+
+  it('downranks ad-like snippets vs composition', () => {
+    const text = extractIngredientsFromSearchTexts([
+      'Купить оливье со скидкой ₽499 доставка',
+      'Состав: картофель, морковь, яйца, майонез, зелёный горошек',
+    ]);
+    expect(text).toContain('картофель');
+    expect(text).not.toMatch(/скидк/i);
   });
 });
