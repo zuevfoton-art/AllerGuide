@@ -42,7 +42,7 @@ const en: LocaleMessages = {
   },
   errorBoundary: {
     title: 'Something went wrong',
-    message: 'The app hit an unexpected error. Try again or restart A-Claro.',
+    message: 'The app hit an unexpected error. Try again or restart the app.',
     retry: 'Try again',
   },
   auth: {
@@ -500,11 +500,11 @@ const en: LocaleMessages = {
     appLockEnable: 'Enable',
     appLockDisable: 'Disable',
     aboutTitle: 'About',
-    aboutHint: 'A-Claro · an Aclearo app',
+    aboutHint: 'an Aclearo app',
   },
   about: {
     eyebrow: 'About',
-    title: 'A-Claro',
+    title: 'About',
     subtitle: 'Allergy companion — offline-first',
     version: 'Version',
     developer: 'Developer',
@@ -514,7 +514,7 @@ const en: LocaleMessages = {
     privacy: 'Privacy policy',
     terms: 'Terms of use',
     disclaimer:
-      'A-Claro is for informational purposes only and does not replace medical advice. Not a medical device.',
+      'This app is for informational purposes only and does not replace medical advice. Not a medical device.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',
@@ -541,7 +541,7 @@ const en: LocaleMessages = {
     diaryHour: 'Hour',
     diaryMinute: 'Min',
     diaryAt: 'Every day at {{time}}',
-    diaryPushTitle: 'A-Claro',
+    diaryPushTitle: 'Diary',
     diaryPushBody: "Don't forget to log how you feel in the diary",
     diarySkipHint: 'Skipped when there is already a diary entry for today',
     preview: 'Show preview',

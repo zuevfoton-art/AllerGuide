@@ -42,7 +42,7 @@ const fr: LocaleMessages = {
   },
   errorBoundary: {
     title: 'Une erreur est survenue',
-    message: "L'application a rencontré une erreur inattendue. Réessayez ou redémarrez A-Claro.",
+    message: 'L\'application a rencontré une erreur inattendue. Réessayez ou redémarrez l\'application.',
     retry: 'Réessayer',
   },
   auth: {
@@ -498,11 +498,11 @@ const fr: LocaleMessages = {
     appLockEnable: 'Enable',
     appLockDisable: 'Disable',
     aboutTitle: 'À propos',
-    aboutHint: 'A-Claro · une application Aclearo',
+    aboutHint: 'une application Aclearo',
   },
   about: {
     eyebrow: 'À propos',
-    title: 'A-Claro',
+    title: 'À propos',
     subtitle: 'Compagnon allergie — offline-first',
     version: 'Version',
     developer: 'Développeur',
@@ -512,7 +512,7 @@ const fr: LocaleMessages = {
     privacy: 'Politique de confidentialité',
     terms: "Conditions d'utilisation",
     disclaimer:
-      "A-Claro est informatif uniquement et ne remplace pas un avis médical. Ce n'est pas un dispositif médical.",
+      'L\'application est informative uniquement et ne remplace pas un avis médical. Ce n\'est pas un dispositif médical.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',
@@ -539,7 +539,7 @@ const fr: LocaleMessages = {
     diaryHour: 'Heure',
     diaryMinute: 'Min',
     diaryAt: 'Chaque jour à {{time}}',
-    diaryPushTitle: 'A-Claro',
+    diaryPushTitle: 'Journal',
     diaryPushBody: 'N\'oubliez pas de noter votre ressenti dans le journal',
     diarySkipHint: 'Pas de rappel si une entrée existe déjà pour aujourd\'hui',
     preview: 'Afficher un exemple',

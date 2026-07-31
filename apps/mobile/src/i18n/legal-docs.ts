@@ -10,13 +10,13 @@ export type LegalDocs = {
 const RU: LegalDocs = {
   privacyTitle: 'Политика конфиденциальности',
   termsTitle: 'Условия использования',
-  privacyBody: `# Политика конфиденциальности Aclearo (A-Claro)
+  privacyBody: `# Политика конфиденциальности Aclearo
 
 **Дата вступления в силу:** 4 июля 2026 г.
 
 ## 1. Общие положения
 
-**A-Claro** — приложение компании **Aclearo**. Оно помогает вести дневник аллергии, проверять продукты и хранить экстренную информацию. Данные о здоровье обрабатываются конфиденциально.
+Приложение компании **Aclearo**. Оно помогает вести дневник аллергии, проверять продукты и хранить экстренную информацию. Данные о здоровье обрабатываются конфиденциально.
 
 ## 2. Какие данные мы обрабатываем
 
@@ -34,18 +34,18 @@ const RU: LegalDocs = {
 
 ## 5. Медицинский disclaimer
 
-A-Claro не является медицинским изделием и не заменяет консультацию врача.
+Приложение не является медицинским изделием и не заменяет консультацию врача.
 
 ## 6. Контакты
 
 support@aclearo.com`,
-  termsBody: `# Условия использования A-Claro (Aclearo)
+  termsBody: `# Условия использования Aclearo
 
 **Дата вступления в силу:** 4 июля 2026 г.
 
 ## 1. Принятие условий
 
-Используя A-Claro, вы соглашаетесь с настоящими Условиями и Политикой конфиденциальности Aclearo.
+Используя приложение, вы соглашаетесь с настоящими Условиями и Политикой конфиденциальности Aclearo.
 
 ## 2. Назначение
 
@@ -67,13 +67,13 @@ support@aclearo.com`,
 const EN: LegalDocs = {
   privacyTitle: 'Privacy Policy',
   termsTitle: 'Terms of Service',
-  privacyBody: `# Aclearo Privacy Policy (A-Claro)
+  privacyBody: `# Aclearo Privacy Policy
 
 **Effective date:** July 4, 2026
 
 ## 1. Overview
 
-**A-Claro** is an Aclearo allergy companion app. It helps you manage allergies offline-first. Health data is treated as sensitive.
+This Aclearo allergy companion helps you manage allergies offline-first. Health data is treated as sensitive.
 
 ## 2. Data we process
 
@@ -91,18 +91,18 @@ Delete profiles or your full account in Settings. Server-side profiles and backu
 
 ## 5. Medical disclaimer
 
-A-Claro is not a medical device and does not replace professional care.
+The app is not a medical device and does not replace professional care.
 
 ## 6. Contact
 
 support@aclearo.com`,
-  termsBody: `# A-Claro Terms of Service (Aclearo)
+  termsBody: `# Aclearo Terms of Service
 
 **Effective date:** July 4, 2026
 
 ## 1. Acceptance
 
-By using A-Claro you agree to these Terms and the Aclearo Privacy Policy.
+By using the app you agree to these Terms and the Aclearo Privacy Policy.
 
 ## 2. Purpose
 

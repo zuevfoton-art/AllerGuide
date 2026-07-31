@@ -136,7 +136,7 @@ export default function HomeScreen() {
       refreshing={wellnessState.refreshing}>
       <View style={styles.topBar}>
         <View style={styles.brandBlock}>
-          <BrandLogo size={32} showWordmark style={styles.topBarLogo} />
+          <BrandLogo size={32} style={styles.topBarLogo} />
           <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
         </View>
         <View style={styles.topBarActions}>

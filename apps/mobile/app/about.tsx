@@ -14,7 +14,6 @@ import { useTranslation } from '@/src/store/locale-store';
 import {
   BRAND_LEGAL_URL,
   BRAND_MASTER_NAME,
-  BRAND_PRODUCT_NAME,
   BRAND_SUPPORT_EMAIL,
   BRAND_WEBSITE_URL,
 } from '@/src/constants/brand';
@@ -60,10 +59,6 @@ export default function AboutScreen() {
         <View style={styles.metaRow}>
           <Text style={styles.metaLabel}>{t('about.developer')}</Text>
           <Text style={styles.metaValue}>{BRAND_MASTER_NAME}</Text>
-        </View>
-        <View style={styles.metaRow}>
-          <Text style={styles.metaLabel}>{t('about.product')}</Text>
-          <Text style={styles.metaValue}>{BRAND_PRODUCT_NAME}</Text>
         </View>
       </GlassCard>
 

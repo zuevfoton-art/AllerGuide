@@ -43,7 +43,7 @@ const de: LocaleMessages = {
   errorBoundary: {
     title: 'Etwas ist schiefgelaufen',
     message:
-      'Die App ist auf einen unerwarteten Fehler gestoßen. Versuchen Sie es erneut oder starten Sie A-Claro neu.',
+      'Die App ist auf einen unerwarteten Fehler gestoßen. Versuchen Sie es erneut oder starten Sie die App neu.',
     retry: 'Erneut versuchen',
   },
   auth: {
@@ -499,11 +499,11 @@ const de: LocaleMessages = {
     appLockEnable: 'Enable',
     appLockDisable: 'Disable',
     aboutTitle: 'Über die App',
-    aboutHint: 'A-Claro · eine Aclearo-App',
+    aboutHint: 'eine Aclearo-App',
   },
   about: {
     eyebrow: 'Über die App',
-    title: 'A-Claro',
+    title: 'Über die App',
     subtitle: 'Allergie-Begleiter — offline-first',
     version: 'Version',
     developer: 'Entwickler',
@@ -513,7 +513,7 @@ const de: LocaleMessages = {
     privacy: 'Datenschutzerklärung',
     terms: 'Nutzungsbedingungen',
     disclaimer:
-      'A-Claro dient nur zur Information und ersetzt keine ärztliche Beratung. Kein Medizinprodukt.',
+      'Die App dient nur zur Information und ersetzt keine ärztliche Beratung. Kein Medizinprodukt.',
   },
   legal: {
     privacyTitle: 'Privacy Policy',
@@ -540,7 +540,7 @@ const de: LocaleMessages = {
     diaryHour: 'Stunde',
     diaryMinute: 'Min',
     diaryAt: 'Jeden Tag um {{time}}',
-    diaryPushTitle: 'A-Claro',
+    diaryPushTitle: 'Tagebuch',
     diaryPushBody: 'Vergessen Sie nicht, Ihr Befinden im Tagebuch zu notieren',
     diarySkipHint: 'Keine Erinnerung, wenn heute bereits ein Tagebucheintrag existiert',
     preview: 'Vorschau anzeigen',

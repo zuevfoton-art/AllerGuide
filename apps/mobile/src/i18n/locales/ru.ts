@@ -43,7 +43,7 @@ const ru: LocaleMessages = {
   errorBoundary: {
     title: 'Что-то пошло не так',
     message:
-      'Приложение столкнулось с неожиданной ошибкой. Попробуйте снова или перезапустите A-Claro.',
+      'Приложение столкнулось с неожиданной ошибкой. Попробуйте снова или перезапустите приложение.',
     retry: 'Попробовать снова',
   },
   auth: {
@@ -502,11 +502,11 @@ const ru: LocaleMessages = {
     appLockEnable: 'Включить',
     appLockDisable: 'Отключить',
     aboutTitle: 'О приложении',
-    aboutHint: 'A-Claro · приложение Aclearo',
+    aboutHint: 'приложение Aclearo',
   },
   about: {
     eyebrow: 'О приложении',
-    title: 'A-Claro',
+    title: 'О приложении',
     subtitle: 'Помощник при аллергии — offline-first',
     version: 'Версия',
     developer: 'Разработчик',
@@ -516,7 +516,7 @@ const ru: LocaleMessages = {
     privacy: 'Политика конфиденциальности',
     terms: 'Условия использования',
     disclaimer:
-      'A-Claro носит информационный характер и не заменяет консультацию врача. Не является медицинским изделием.',
+      'Приложение носит информационный характер и не заменяет консультацию врача. Не является медицинским изделием.',
   },
   legal: {
     privacyTitle: 'Политика конфиденциальности',
@@ -543,7 +543,7 @@ const ru: LocaleMessages = {
     diaryHour: 'Час',
     diaryMinute: 'Мин',
     diaryAt: 'Каждый день в {{time}}',
-    diaryPushTitle: 'A-Claro',
+    diaryPushTitle: 'Дневник',
     diaryPushBody: 'Не забудьте записать самочувствие в дневник',
     diarySkipHint: 'Не напоминаем, если за сегодня уже есть запись в дневнике',
     preview: 'Показать пример',
