@@ -755,12 +755,12 @@
         desc: 'Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.',
       },
       {
-        key: 'scanner',
+        key: 'map',
         title: 'Карта и среда',
         desc: 'Безопасные места, календарь пыления и клиники рядом с вами.',
       },
       {
-        key: 'care',
+        key: 'sos',
         title: 'Экстренный SOS',
         desc: 'Аллергопаспорт, план действий и контакты экстренной помощи.',
       },
@@ -786,7 +786,7 @@
 
     function renderDots(active, centered) {
       return '<div class="dots' + (centered ? ' dots-center' : '') + '">' +
-        [0, 1, 2].map((i) => '<span class="dot' + (i === active ? ' active' : '') + '"></span>').join('') +
+        SLIDES.map((_, i) => '<span class="dot' + (i === active ? ' active' : '') + '"></span>').join('') +
         '</div>';
     }
 

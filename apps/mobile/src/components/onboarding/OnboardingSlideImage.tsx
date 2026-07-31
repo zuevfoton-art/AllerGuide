@@ -6,8 +6,8 @@ const SLIDE_IMAGES: Record<OnboardingSlideKey, number> = {
   profile: require('../../../assets/onboarding/profile.png'),
   scanner: require('../../../assets/onboarding/scanner.png'),
   care: require('../../../assets/onboarding/care.png'),
-  map: require('../../../assets/onboarding/scanner.png'),
-  sos: require('../../../assets/onboarding/care.png'),
+  map: require('../../../assets/onboarding/map.png'),
+  sos: require('../../../assets/onboarding/sos.png'),
 };
 
 type OnboardingSlideImageProps = {
@@ -16,7 +16,7 @@ type OnboardingSlideImageProps = {
   height?: number;
 };
 
-/** Raster onboarding art (reference illustrations) */
+/** Raster onboarding art — one dedicated Claro teal illustration per slide. */
 export function OnboardingSlideImage({ slide, width = 280, height = 220 }: OnboardingSlideImageProps) {
   return (
     <View style={[styles.frame, { width, height }]}>
