@@ -94,20 +94,21 @@ flowchart LR
 | Фаза | Содержание | Статус |
 |------|------------|--------|
 | **P3.x Dual Calm** | blue ambient + teal CTA | ✅ historical |
-| **Фаза 1** | `calm.*` + `info` + gradient → teal; docs/tests | ✅ этот PR |
-| **Фаза 2** | Визуальный sweep экранов (должен быть no-op после токенов) | ☐ |
-| **Фаза 3** | Онбординг map/sos арты; mockup sync | ☐ |
+| **Фаза 1** | `calm.*` + `info` + gradient → teal; docs/tests | ✅ |
+| **Фаза 2** | UI sweep: `GlassCard`/tabs → `accent*`, SOS tip → `tip*`, `design-mockup.html`, regression tests | ✅ этот PR |
+| **Фаза 3** | Онбординг map/sos арты; remaining mockup polish | ☐ |
 | **Фаза 4** | Rename `calm*` → aliases / deprecate Dual Calm naming | ☐ |
 
 ---
 
 ## QA-чеклист
 
-- [ ] Нет medical blue hex в `theme.ts` / `calm-gradient.ts` (кроме `head` navy)
-- [ ] Tab pill + `GlassCard` calm = mint/teal wash, не голубой
-- [ ] Info icons на SOS/клинике — teal, не blue
-- [ ] Dark mode: градиент не синий
-- [ ] `pnpm --filter mobile test` / typecheck green
+- [x] Нет medical blue hex в `theme.ts` / `calm-gradient.ts` (кроме `head` navy)
+- [x] Tab pill + `GlassCard` calm → `accentLight` / `accentMid`
+- [x] SOS tip → `tipBg` / `tipBorder` / `tipText` + icon `accent`
+- [x] `design-mockup.html` sync (light + dark)
+- [ ] Dark mode smoke на device
+- [x] `calm-gradient.test.ts` (Phase 1–2 alias + no medical blue)
 
 ---
 

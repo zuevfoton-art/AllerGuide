@@ -40,9 +40,9 @@ function TabBarButton({
       style={[
         tabBarStyles.button,
         focused && {
-          backgroundColor: colors.calmWash,
+          backgroundColor: colors.accentLight,
           borderWidth: 1,
-          borderColor: colors.calmMist,
+          borderColor: colors.accentMid,
         },
         style,
       ]}>
