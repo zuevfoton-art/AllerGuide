@@ -190,14 +190,12 @@ async function main() {
         lang: 'ru-RU',
       }),
     },
-    { allowStatuses: [422, 502] },
+    { allowStatuses: [422] },
   );
   if (stt.status === 200 && stt.body.ok) {
     console.log('PASS stt: transcript', stt.body.text?.slice(0, 40) ?? '');
   } else if (stt.status === 422) {
     console.log('PASS stt: no speech (HTTP 422) — provider OK');
-  } else if (stt.status === 502) {
-    throw new Error('stt HTTP 502 — SpeechKit unavailable (unexpected on staging)');
   } else {
     throw new Error(`stt unexpected HTTP ${stt.status}`);
   }
