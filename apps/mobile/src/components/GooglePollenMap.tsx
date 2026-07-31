@@ -20,6 +20,9 @@ export function GooglePollenMap({
   mapType,
   height = 300,
   interactive = true,
+  markers = [],
+  selectedMarkerId,
+  onMarkerPress,
   overlay,
 }: GooglePollenMapProps) {
   const theme = useTheme();
@@ -30,7 +33,7 @@ export function GooglePollenMap({
     [latitude, longitude, zoom],
   );
   const tileUrlTemplate = useMemo(
-    () => buildPollenHeatmapTileUrlTemplate(mapType),
+    () => (mapType ? buildPollenHeatmapTileUrlTemplate(mapType) : null),
     [mapType],
   );
 
@@ -50,14 +53,29 @@ export function GooglePollenMap({
         pitchEnabled={false}
         rotateEnabled={false}
         toolbarEnabled={false}>
-        <UrlTile
-          urlTemplate={tileUrlTemplate}
-          tileSize={TILE_SIZE}
-          maximumZ={16}
-          zIndex={1}
-          opacity={0.8}
-        />
-        <Marker coordinate={{ latitude, longitude }} />
+        {tileUrlTemplate ? (
+          <UrlTile
+            urlTemplate={tileUrlTemplate}
+            tileSize={TILE_SIZE}
+            maximumZ={16}
+            zIndex={1}
+            opacity={0.8}
+          />
+        ) : null}
+        <Marker coordinate={{ latitude, longitude }} pinColor={theme.colors.danger} />
+        {markers.map((marker) => (
+          <Marker
+            key={marker.id}
+            coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+            title={marker.title}
+            pinColor={
+              marker.id === selectedMarkerId
+                ? theme.colors.accent
+                : marker.color ?? theme.colors.success
+            }
+            onPress={() => onMarkerPress?.(marker.id)}
+          />
+        ))}
       </MapView>
       {overlay ? (
         <View pointerEvents="none" style={styles.overlay}>

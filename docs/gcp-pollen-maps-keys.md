@@ -18,7 +18,8 @@
 | `aclearo-staging-maps-android` | EAS project secret | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` *(или отдельный android-only; см. §5)* |
 | `aclearo-staging-maps-ios` | EAS / app.config iOS | тот же или отдельный iOS secret |
 | `aclearo-staging-maps-js` | EAS / web staging env | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` для web |
-| `aclearo-staging-pollen-server` | API staging secrets **только** | `GOOGLE_POLLEN_API_KEY` + `POLLEN_HEATMAP_ENABLED=true` |
+| `aclearo-staging-pollen-server` | API staging secrets **только** | `GOOGLE_POLLEN_API_KEY` + `POLLEN_HEATMAP_ENABLED=true` (heatmap **и** forecast) |
+| `aclearo-staging-places-server` | API staging secrets **только** | `GOOGLE_PLACES_API_KEY` + `MAP_PLACES_ENABLED=true` (или reuse pollen/maps server key) |
 
 Минимум для Android stage smoke: **Maps Android + Pollen server**.  
 iOS и JS — когда понадобится TestFlight / web heatmap.
@@ -65,7 +66,8 @@ Pollen Usage — Pro SKU (~5 000 free/мес, далее платно за 1�
 | **Maps SDK for Android** | Basemap в staging APK |
 | **Maps SDK for iOS** | Basemap в staging iOS |
 | **Maps JavaScript API** | Basemap + overlay на web |
-| **Pollen API** | `heatmapTiles` через наш proxy |
+| **Pollen API** | `heatmapTiles` + `forecast:lookup` через наш proxy |
+| **Places API** (Nearby Search) | Live рестораны / hospital / pharmacy через `/api/places/nearby` |
 
 3. Проверка: **Enabled APIs & services** — все четыре в списке.
 

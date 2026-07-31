@@ -38,3 +38,18 @@ export const PRODUCT_DB_ENABLED = process.env.EXPO_PUBLIC_PRODUCT_DB === 'true';
  */
 export const GOOGLE_POLLEN_HEATMAP_ENABLED =
   process.env.EXPO_PUBLIC_POLLEN_HEATMAP === 'google';
+
+/**
+ * Prefer Google Maps as the primary interactive basemap for the unified map tab
+ * when a Maps API key is present (pins + optional heatmap).
+ */
+export const GOOGLE_MAP_PRIMARY_ENABLED =
+  process.env.EXPO_PUBLIC_GOOGLE_MAP_PRIMARY === 'true';
+
+/**
+ * Fetch live restaurants / medical POIs via the API Places proxy.
+ * Offline catalog + ADAIR remain the fallback when false or unreachable.
+ */
+export const MAP_PLACES_ENABLED =
+  process.env.EXPO_PUBLIC_MAP_PLACES === 'true' ||
+  process.env.EXPO_PUBLIC_LIVE_MAP === 'true';

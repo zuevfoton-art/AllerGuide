@@ -65,6 +65,9 @@ describe('pollen-map-service', () => {
 
     expect(snapshot.source).toBe('open-meteo');
     expect(snapshot.readings).toHaveLength(3);
+    expect(snapshot.forecastDays.length).toBeGreaterThanOrEqual(1);
+    expect(snapshot.upiByTaxon.birch_pollen?.index).toBeGreaterThan(0);
+    expect(snapshot.plants.birch_pollen?.crossReactionLabels.length).toBeGreaterThan(0);
     expect(snapshot.readings[0]).toMatchObject({
       taxonId: 'birch_pollen',
       value: 20,
@@ -116,6 +119,7 @@ describe('pollen-map-service', () => {
       source: 'calendar',
       readings: [],
       nearbyLocations: [],
+      forecastDays: [],
     });
   });
 });

@@ -8,6 +8,10 @@ import {
   fetchGooglePollenHeatmapTile,
   isGooglePollenHeatmapConfigured,
 } from '../services/google-pollen-heatmap';
+import {
+  fetchGooglePollenForecast,
+  isGooglePollenForecastConfigured,
+} from '../services/google-pollen-forecast';
 
 const PNG_CONTENT_TYPE = 'image/png';
 
@@ -71,4 +75,37 @@ export function registerPollenRoutes(app: Express): void {
       }
     },
   );
+
+  app.get('/api/pollen/forecast', async (req: Request, res: Response) => {
+    if (!isGooglePollenForecastConfigured()) {
+      res.status(503).json({ ok: false, error: 'Pollen forecast is disabled' });
+      return;
+    }
+
+    const latitude = parseCoord(req.query.lat);
+    const longitude = parseCoord(req.query.lon ?? req.query.lng);
+    if (latitude === null || longitude === null) {
+      res.status(400).json({ ok: false, error: 'lat and lon are required' });
+      return;
+    }
+    if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+      res.status(400).json({ ok: false, error: 'Invalid coordinates' });
+      return;
+    }
+
+    try {
+      const forecast = await fetchGooglePollenForecast(latitude, longitude);
+      res.set({ 'Cache-Control': 'private, max-age=600' });
+      res.json({ ok: true, forecast });
+    } catch (error) {
+      logCaughtError('pollen.forecast', error, { latitude, longitude });
+      res.status(502).json({ ok: false, error: 'Unable to fetch pollen forecast' });
+    }
+  });
+}
+
+function parseCoord(raw: unknown): number | null {
+  if (typeof raw !== 'string' && typeof raw !== 'number') return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
 }
