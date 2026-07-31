@@ -24,6 +24,9 @@ concurrency:
   group: staging-apk-gradle
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 env:
   # Keep in sync with apps/mobile/eas.json → build.staging.env
   EXPO_PUBLIC_API_URL: https://api.staging.aclearo.com
