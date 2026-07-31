@@ -111,7 +111,16 @@ Runner **не** ставит Android SDK; только `pnpm install` + `eas bui
 Подходит, если нужен **файл APK в GitHub Releases** и вы готовы к более долгому job (скачивание SDK на runner).
 
 Базовый шаблон уже есть: [`.github/workflows/release-apk.yml`](../.github/workflows/release-apk.yml) (preview/tag).  
-Для **staging + Google Maps** используйте [`.github/workflows/staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml).
+Для **staging + Google Maps** используйте [`.github/workflows/staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml):
+
+```bash
+# из актуального main — запускает Gradle job и публикует Release asset
+git tag android-staging-1.0.4
+git push origin android-staging-1.0.4
+```
+
+Либо Actions → **Staging Android APK (Gradle on GitHub)** → **Run workflow**.  
+Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/OCR/intent/search/pollen).
 
 ### Отличия от EAS
 
