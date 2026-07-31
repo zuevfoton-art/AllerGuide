@@ -59,6 +59,7 @@ async function main() {
   if (!feat.ycOcr) throw new Error('Expected ycOcr=true on staging');
   if (!feat.ycScanIntentLlm) throw new Error('Expected ycScanIntentLlm=true on staging');
   if (!feat.ycSearch) throw new Error('Expected ycSearch=true on staging');
+  if (!feat.ycStt) throw new Error('Expected ycStt=true on staging (Phase 3)');
 
   const register = await api<{ token: string }>('/api/auth/register', {
     method: 'POST',
@@ -175,7 +176,33 @@ async function main() {
     throw new Error('Second scan failed');
   }
 
-  console.log('Yandex AI smoke passed (intent + search + ocr + scan).');
+  // Phase 3 STT — silent LPCM should reach SpeechKit (often empty → 422).
+  const silentPcm = Buffer.alloc(16000 * 2 * 0.3).toString('base64'); // 0.3s silence @16kHz mono
+  const stt = await api<{ ok?: boolean; error?: string; text?: string }>(
+    '/api/stt',
+    {
+      method: 'POST',
+      headers: auth,
+      body: JSON.stringify({
+        audioBase64: silentPcm,
+        format: 'lpcm',
+        sampleRateHertz: 16000,
+        lang: 'ru-RU',
+      }),
+    },
+    { allowStatuses: [422, 502] },
+  );
+  if (stt.status === 200 && stt.body.ok) {
+    console.log('PASS stt: transcript', stt.body.text?.slice(0, 40) ?? '');
+  } else if (stt.status === 422) {
+    console.log('PASS stt: no speech (HTTP 422) — provider OK');
+  } else if (stt.status === 502) {
+    throw new Error('stt HTTP 502 — SpeechKit unavailable (unexpected on staging)');
+  } else {
+    throw new Error(`stt unexpected HTTP ${stt.status}`);
+  }
+
+  console.log('Yandex AI smoke passed (intent + search + ocr + scan + stt).');
   console.log('Manual APK still required: photo label → OCR → intent → scan; airplane mock.');
 }
 

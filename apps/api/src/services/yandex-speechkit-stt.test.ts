@@ -41,4 +41,24 @@ describe('yandex-speechkit-stt', () => {
     expect(url).toContain('folderId=b1gfolder');
     expect(url).toContain('format=lpcm');
   });
+
+  it('returns empty string when SpeechKit hears no speech', async () => {
+    process.env.YC_STT_ENABLED = 'true';
+    process.env.YC_AI_API_KEY = 'yc-key';
+    process.env.YC_FOLDER_ID = 'b1gfolder';
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ result: '' }),
+      }),
+    );
+
+    const text = await recognizeSpeechWithYandexSpeechkit({
+      audioBase64: Buffer.from('fake-audio-bytes-long-enough').toString('base64'),
+      format: 'lpcm',
+    });
+    expect(text).toBe('');
+  });
 });

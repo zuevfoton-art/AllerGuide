@@ -1,12 +1,12 @@
 # Staging — Yandex AI
 
-**Status (staging):** Phase **0–2 done**; options **A / B / C enabled**; Phase **3 STT** implemented (default **off**); Phase **4 Search** cache + prompt tune **in code** (needs API redeploy for cache); option **D multimodal** deferred.
+**Status (staging):** Phase **0–2 done**; options **A / B / C enabled**; Phase **3 STT on**; Phase **4 Search** cache + prompt tune **on**; option **D multimodal** deferred.
 
 | Layer | Staging state |
 |-------|----------------|
-| Lockbox / health | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH` → `true` |
+| Lockbox / health | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT` → `true` |
 | Model | `YC_GPT_MODEL=yandexgpt-lite` (explicit; A/B via Lockbox only) |
-| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH` = `true`; `YC_STT` = off |
+| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT` = `true` |
 | Production EAS | OCR / intent / search / STT **off** until staging QA green |
 
 ---
@@ -162,37 +162,80 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 
 ---
 
-## Phase 3 — SpeechKit STT (`POST /api/stt`)
+## Phase 3 — SpeechKit STT (`POST /api/stt`) — **on staging**
 
-| Item | Detail |
-|------|--------|
-| Code | `apps/api/src/services/yandex-speechkit-stt.ts`, `routes/stt.ts` |
-| Mobile | `stt-api-service.ts` → `recognizeSpeechViaApi` (OS speech remains default via `expo-speech-recognition`) |
-| Env API | `YC_STT_ENABLED=true` + `YC_AI_*` |
-| Env mobile | `EXPO_PUBLIC_YC_STT=true` |
-| Auth | Inherits `SCAN_REQUIRE_AUTH` unless `STT_REQUIRE_AUTH` set |
-| Fallback | Flag off / 5xx → keep local voice or manual text |
+Голосовой fallback для текста (сканер / дневник), когда OS speech recognition недоступен или нужен облачный STT.
 
-Staging default: **off** (`features.ycStt` absent). Enable after Search QA:
+### Что сделано
+
+| Слой | Файл | Поведение |
+|------|------|-----------|
+| API service | [`apps/api/src/services/yandex-speechkit-stt.ts`](../apps/api/src/services/yandex-speechkit-stt.ts) | `POST https://stt.api.cloud.yandex.net/speech/v1/stt:recognize` (`Api-Key`, `folderId`) |
+| Route | [`apps/api/src/routes/stt.ts`](../apps/api/src/routes/stt.ts) | `POST /api/stt` body: `{ audioBase64, lang?, format?: 'lpcm'\|'oggopus', sampleRateHertz? }` |
+| Health | `features.ycStt: true` когда `YC_STT_ENABLED=true` + `YC_AI_*` | |
+| Mobile | [`stt-api-service.ts`](../apps/mobile/src/services/stt-api-service.ts) | `recognizeSpeechViaApi` → `/api/stt`; `null` если флаг off |
+| Flag mobile | `EXPO_PUBLIC_YC_STT` | EAS `staging` = `true` |
+| Auth | как scan (`SCAN_REQUIRE_AUTH`, override `STT_REQUIRE_AUTH`) | |
+| Fallback | флаг off / 5xx → OS `expo-speech-recognition` или ручной ввод | |
+
+Не путать с **навыком Алисы (Диалоги)** — это in-app API, не колонка.
+
+### Как тестировать на stage
+
+**API (curl):**
 
 ```bash
-./scripts/yc-lockbox-upsert.sh YC_STT_ENABLED=true
-# redeploy, then set EXPO_PUBLIC_YC_STT=true on next EAS staging build
+# register / login → TOKEN
+# 0.3s silence LPCM (reachability; often HTTP 422 No speech)
+python3 - <<'PY'
+import wave, base64
+with wave.open("/tmp/stt-silent.wav","w") as w:
+    w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
+    w.writeframes(b"\x00\x00"*4800)
+print(base64.b64encode(open("/tmp/stt-silent.wav","rb").read()).decode())
+PY
+# put B64 into:
+curl -sS -X POST "$STAGING_API_URL/api/stt" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"audioBase64":"…","format":"lpcm","sampleRateHertz":16000,"lang":"ru-RU"}'
+# Expect: 200 {ok,text} | 422 No speech | 502 provider (not 503 disabled)
 ```
 
-Не путать с **навыком Алисы (Диалоги)** — отдельный продукт.
+**Mobile:** новая EAS `staging` сборка с `EXPO_PUBLIC_YC_STT=true`. OS recognition остаётся primary; cloud STT — через `recognizeSpeechViaApi` (запись аудио → base64 → API). Полный UI recording → STT можно донастроить на `VoiceNoteButton` при необходимости.
+
+**Критерий Pass:** health `ycStt: true`; `/api/stt` не 503; silent/real audio → 200 или 422.
 
 ---
 
-## Phase 4 — Search tune / cache
+## Phase 4 — Search tune / cache — **on staging**
 
-Done in code:
+Улучшение option C: меньше рекламных сниппетов, кэш и бюджет на `/api/search/ingredients`.
 
-- Stronger composition query + passage scoring in `@allerguide/ai` `search-ingredients.ts`
-- Cache + daily budget in `apps/api/src/lib/search-ingredients-cache.ts`
-- Route returns `cached: true|false`
+### Что сделано
 
-Redeploy API to pick up cache behavior on staging.
+| Слой | Файл | Поведение |
+|------|------|-----------|
+| Domain query | [`packages/ai/src/search-ingredients.ts`](../packages/ai/src/search-ingredients.ts) | Запрос вида «состав ингредиенты блюда…»; scoring: composition/allergen hints ↑, ads/скидки ↓ |
+| Cache | [`apps/api/src/lib/search-ingredients-cache.ts`](../apps/api/src/lib/search-ingredients-cache.ts) | SHA key по нормализованному query; memory + optional Redis; TTL `SEARCH_CACHE_TTL_MS` (fallback `SCAN_CACHE_TTL_MS`) |
+| Budget | same | `SEARCH_DAILY_BUDGET` (fallback `SCAN_DAILY_BUDGET`) на identity; 429 при превышении |
+| Route | [`search-ingredients.ts`](../apps/api/src/routes/search-ingredients.ts) | cache hit → `{ ok, …, cached: true }` без Yandex call; miss → Search API → store → `cached: false` |
+| Mobile | уже `EXPO_PUBLIC_YC_SEARCH=true` на EAS staging | `searchIngredientsViaApi` после OFF/catalog miss |
+
+### Как тестировать на stage
+
+```bash
+curl -sS -X POST "$STAGING_API_URL/api/search/ingredients" \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"query":"оливье"}'
+# 200 { ok, ingredients, source: yandex_gen|yandex_web, cached: false }
+# повтор того же query → cached: true (на том же instance; memory store)
+
+./scripts/staging-yandex-ai-smoke.sh   # includes search + cache WARN if multi-instance
+```
+
+**Mobile:** сканер → визуальное блюдо без OFF → должен уйти в search → затем LLM/mock по составу.
+
+**Критерий Pass:** health `ycSearch: true`; первый запрос 200 или 404 (не 503); при 200 повтор → `cached: true` или WARN multi-instance.
 
 ---
 
@@ -201,20 +244,21 @@ Redeploy API to pick up cache behavior on staging.
 ```bash
 ./scripts/yc-ai-phase0-smoke.sh --from-lockbox   # credentials
 ./scripts/staging-scan-smoke.sh                  # JWT + scan cache
-./scripts/staging-yandex-ai-smoke.sh             # intent + search + ocr + scan
+./scripts/staging-yandex-ai-smoke.sh             # intent + search + ocr + scan + stt
 ./scripts/staging-preflight.sh                   # includes yandex-ai smoke
 ```
 
-Manual APK (EAS `staging`): see [`qa-checklist.md`](./qa-checklist.md) § «Yandex AI scanner staging».
+Manual APK (EAS `staging`): see [`qa-checklist.md`](./qa-checklist.md) § «Yandex AI scanner staging» (+ STT when build has `EXPO_PUBLIC_YC_STT`).
+
+**Deployed image (this roll-out):** `cr.yandex/crpf0kl3mrg2qnnd374l/aclearo-api` tag commit with Phase 3+4; Lockbox `YC_STT_ENABLED=true`.
 
 ---
 
 ## Next
 
-1. **Client QA** on EAS staging APK (label OCR → intent → scan; dish → search; airplane mock)
-2. Redeploy API if search-cache revision not live yet
-3. Optional `YC_GPT_MODEL` A/B after metrics
-4. Enable Phase 3 STT on staging when voice fallback is needed
-5. Option D multimodal — later
+1. **Client QA** on EAS staging APK (Y.1–Y.5 + STT reachability)
+2. Optional `YC_GPT_MODEL` A/B after metrics
+3. Option D multimodal — later
+4. Wire `VoiceNoteButton` → record → `recognizeSpeechViaApi` when OS speech unsupported
 
 Offline-first и feature flags: без флагов приложение работает как раньше (A heuristic + demo OCR + mock).

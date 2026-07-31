@@ -57,6 +57,6 @@ export async function recognizeSpeechWithYandexSpeechkit(input: {
   if (!response.ok) return null;
 
   const payload = (await response.json()) as { result?: string };
-  const text = payload.result?.trim();
-  return text ? text : null;
+  // Empty transcript is a successful recognition with no speech — not a provider outage.
+  return (payload.result ?? '').trim();
 }
