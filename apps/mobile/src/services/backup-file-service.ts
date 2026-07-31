@@ -70,7 +70,7 @@ export async function shareLocalBackupFile(): Promise<{ ok: true } | { ok: false
 
     await Sharing.shareAsync(uri, {
       mimeType: 'application/json',
-      dialogTitle: 'Экспорт данных A-Claro',
+      dialogTitle: 'Экспорт данных',
     });
 
     trackEvent('backup_exported');
