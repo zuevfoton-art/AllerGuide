@@ -95,8 +95,8 @@ flowchart LR
 |------|------------|--------|
 | **P3.x Dual Calm** | blue ambient + teal CTA | ✅ historical |
 | **Фаза 1** | `calm.*` + `info` + gradient → teal; docs/tests | ✅ |
-| **Фаза 2** | UI sweep: `GlassCard`/tabs → `accent*`, SOS tip → `tip*`, `design-mockup.html`, regression tests | ✅ этот PR |
-| **Фаза 3** | Онбординг map/sos арты; remaining mockup polish | ☐ |
+| **Фаза 2** | UI sweep: `GlassCard`/tabs → `accent*`, SOS tip → `tip*`, `design-mockup.html`, regression tests | ✅ |
+| **Фаза 3** | Отдельные онбординг-арты `map` / `sos` (Claro teal; SOS button = danger) + mockup keys | ✅ этот PR |
 | **Фаза 4** | Rename `calm*` → aliases / deprecate Dual Calm naming | ☐ |
 
 ---
@@ -109,6 +109,8 @@ flowchart LR
 - [x] `design-mockup.html` sync (light + dark)
 - [ ] Dark mode smoke на device
 - [x] `calm-gradient.test.ts` (Phase 1–2 alias + no medical blue)
+- [x] `map.png` / `sos.png` dedicated (no scanner/care reuse)
+- [x] Onboarding mockup SLIDES keys → `map` / `sos`
 
 ---
 
