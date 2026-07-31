@@ -390,7 +390,7 @@ export default function SosScreen() {
       </Pressable>
 
       <View style={styles.tipCard}>
-        <Ionicons name="information-circle-outline" size={18} color={theme.colors.info} />
+        <Ionicons name="information-circle-outline" size={18} color={theme.colors.accent} />
         <Text style={styles.tipText}>{t('sos.tip')}</Text>
       </View>
 
@@ -579,16 +579,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'flex-start',
       gap: 10,
-      backgroundColor: colors.infoLight,
+      backgroundColor: colors.tipBg,
       borderRadius: 8,
       padding: 12,
       borderWidth: 1,
-      borderColor: colors.border,
+      borderColor: colors.tipBorder,
     },
     tipText: {
       fontFamily: fonts.sans,
       fontSize: 13,
-      color: colors.textSecondary,
+      color: colors.tipText,
       lineHeight: 18,
       flex: 1,
     },

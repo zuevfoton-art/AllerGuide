@@ -1,13 +1,22 @@
 import { Platform } from 'react-native';
 
-import { getCalmGradient, type CalmGradient } from '@/src/constants/calm-gradient';
+import {
+  getClaroGradient,
+  getCalmGradient,
+  type ClaroGradient,
+  type CalmGradient,
+} from '@/src/constants/claro-gradient';
 
-export type { CalmGradient };
-export { getCalmGradient };
+export type { ClaroGradient, CalmGradient };
+export { getClaroGradient, getCalmGradient };
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-/** Clinical Calm design tokens — Dual Calm: calm.* (medical blue ambient) + accent (Claro teal product) */
+/**
+ * Claro Green design tokens — product accent family only (no medical blue / calm.*).
+ * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
+ * Policy: docs/brand-claro-green.md
+ */
 export type ThemeColors = {
   bg: string;
   card: string;
@@ -15,13 +24,7 @@ export type ThemeColors = {
   accent: string;
   accentLight: string;
   accentMid: string;
-  /** Medical Calm ambient — navy → blue gradient family */
-  calmDeep: string;
-  calmMid: string;
-  calmLight: string;
-  calmWash: string;
-  calmMist: string;
-  /** Navy — KPI numbers, document headings */
+  /** Dark text / KPI — navy for contrast (not ambient fill) */
   head: string;
   text: string;
   textSecondary: string;
@@ -75,11 +78,6 @@ export const lightColors: ThemeColors = {
   accent: '#2A9D8F',
   accentLight: '#E6F6F4',
   accentMid: '#9FD9D1',
-  calmDeep: '#1E3A5F',
-  calmMid: '#2563EB',
-  calmLight: '#3B82F6',
-  calmWash: '#EFF4FF',
-  calmMist: '#DBEAFE',
   head: '#1E3A5F',
   text: '#0F172A',
   textSecondary: '#475569',
@@ -118,8 +116,8 @@ export const lightColors: ThemeColors = {
   teal: '#2A9D8F',
   tealLight: '#E6F6F4',
   surfaceMuted: '#F1F5F9',
-  info: '#2563EB',
-  infoLight: '#EFF4FF',
+  info: '#2A9D8F',
+  infoLight: '#E6F6F4',
 };
 
 export const darkColors: ThemeColors = {
@@ -128,11 +126,6 @@ export const darkColors: ThemeColors = {
   accent: '#3DB8A8',
   accentLight: '#134E48',
   accentMid: '#2A9D8F',
-  calmDeep: '#0B1120',
-  calmMid: '#1D4ED8',
-  calmLight: '#3B82F6',
-  calmWash: '#0F172A',
-  calmMist: '#1E293B',
   head: '#E2E8F0',
   text: '#F8FAFC',
   textSecondary: '#CBD5E1',
@@ -171,8 +164,8 @@ export const darkColors: ThemeColors = {
   teal: '#3DB8A8',
   tealLight: '#134E48',
   surfaceMuted: '#1E293B',
-  info: '#3B82F6',
-  infoLight: '#0C4A6E',
+  info: '#3DB8A8',
+  infoLight: '#134E48',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {

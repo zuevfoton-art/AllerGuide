@@ -151,7 +151,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <GlassCard variant="calm">
+      <GlassCard variant="soft">
         <View style={ui.cardHead}>
           <Text style={ui.cardTitle}>{t('home.wellnessTitle')}</Text>
           <View style={styles.cardHeadRight}>

@@ -469,7 +469,7 @@
 <body>
   <div class="page">
     <header>
-      <h1>A‑Claro — онбординг (Dual Calm)</h1>
+      <h1>A‑Claro — онбординг (Claro Green)</h1>
       <p>
         Mockup онбординга A‑Claro: 5 intro-слайдов + экран сценария (как в apps/mobile).
         Локально: <code>cd docs && python3 -m http.server 8080</code> →
@@ -676,7 +676,7 @@
     <div class="spec-grid">
       <div class="spec-card">
         <strong>Фон экрана</strong>
-        Claro teal waves (<code>accentLight</code> <code>#E6F6F4</code> 55%, <code>accent</code> <code>#2A9D8F</code> 12% opacity) + CTA <code>#2A9D8F</code>
+        Claro teal waves (<code>accentLight</code> <code>#E6F6F4</code> 55%, <code>accent</code> <code>#2A9D8F</code> 12% opacity) + CTA <code>#2A9D8F</code>. Слайды 4–5: dedicated <code>map</code> / <code>sos</code> art (SOS button = <code>danger</code>)
       </div>
       <div class="spec-card">
         <strong>Карточка контента</strong>
@@ -701,7 +701,7 @@
     </div>
 
     <footer>
-      Mockup · <a href="design-mockup.html">Dual Calm (полный UI)</a> ·
+      Mockup · <a href="design-mockup.html">Claro Green (полный UI)</a> ·
       <a href="https://github.com/zuevfoton-art/AllerGuide/pull/107">PR #107</a>
     </footer>
   </div>
@@ -755,12 +755,12 @@
         desc: 'Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.',
       },
       {
-        key: 'scanner',
+        key: 'map',
         title: 'Карта и среда',
         desc: 'Безопасные места, календарь пыления и клиники рядом с вами.',
       },
       {
-        key: 'care',
+        key: 'sos',
         title: 'Экстренный SOS',
         desc: 'Аллергопаспорт, план действий и контакты экстренной помощи.',
       },
@@ -786,7 +786,7 @@
 
     function renderDots(active, centered) {
       return '<div class="dots' + (centered ? ' dots-center' : '') + '">' +
-        [0, 1, 2].map((i) => '<span class="dot' + (i === active ? ' active' : '') + '"></span>').join('') +
+        SLIDES.map((_, i) => '<span class="dot' + (i === active ? ' active' : '') + '"></span>').join('') +
         '</div>';
     }
 

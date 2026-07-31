@@ -219,7 +219,7 @@
 |---|----------|-----|---------|-----|------------|
 | 11.1 | Переключение ru → en: все основные экраны | ☐ | ☐ | ☐ | smoke 2 языка минимум |
 | 11.2 | Флаги в language picker | ☐ | ☐ | ☐ | |
-| 11.3 | Светлая тема: Clinical Calm tokens | ☐ | ☐ | ☐ | bg #F4F6F9, accent #2563EB |
+| 11.3 | Светлая тема: Claro Green tokens | ☐ | ☐ | ☐ | bg #F4F6F9, accent/info #2A9D8F, accentLight #E6F6F4; нет medical blue ([brand-claro-green.md](./brand-claro-green.md)) |
 | 11.4 | Тёмная тема: читаемость, контраст | ☐ | ☐ | ☐ | |
 | 11.5 | System theme следует OS | ☐ | ☐ | N/A | |
 

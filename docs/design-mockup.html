@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<<<<<<< HEAD
   <title>Dual Calm UI Mockup</title>
+=======
+  <title>A-Claro — Claro Green UI Mockup</title>
+>>>>>>> origin/main
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
@@ -14,9 +18,9 @@
       --accent: #2A9D8F;
       --accent-light: #E6F6F4;
       --accent-mid: #9FD9D1;
-      --calm-wash: #EFF4FF;
-      --calm-mist: #DBEAFE;
-      --info: #2563EB;
+      --calm-wash: #E6F6F4; /* alias → accent-light (legacy CSS name) */
+      --calm-mist: #9FD9D1; /* alias → accent-mid */
+      --info: #2A9D8F;
       --head: #1e3a5f;
       --text: #0f172a;
       --text-secondary: #475569;
@@ -34,9 +38,9 @@
       --warning-border: #fde68a;
       --purple: #6366f1;
       --surface-muted: #f1f5f9;
-      --tip-bg: #eff6ff;
-      --tip-border: #bfdbfe;
-      --tip-text: #1e40af;
+      --tip-bg: #E6F6F4;
+      --tip-border: #9FD9D1;
+      --tip-text: #1F6B62;
       --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
       --phone-border: #e2e8f0;
       --radius-sm: 6px;
@@ -50,12 +54,12 @@
     [data-theme='dark'] {
       --bg: #0b1120;
       --card: #151d2e;
-      --accent: #2A9D8F;
-      --accent-light: #1a3d38;
+      --accent: #3DB8A8;
+      --accent-light: #134E48;
       --accent-mid: #2A9D8F;
-      --calm-wash: #1e293b;
-      --calm-mist: #334155;
-      --info: #3b82f6;
+      --calm-wash: #134E48; /* alias → accent-light */
+      --calm-mist: #2A9D8F; /* alias → accent-mid */
+      --info: #3DB8A8;
       --head: #e2e8f0;
       --text: #f8fafc;
       --text-secondary: #cbd5e1;
@@ -69,9 +73,9 @@
       --warning-light: #451a03;
       --warning-border: #92400e;
       --surface-muted: #1e293b;
-      --tip-bg: #1e3a5f;
-      --tip-border: #1d4ed8;
-      --tip-text: #93c5fd;
+      --tip-bg: #134E48;
+      --tip-border: #2A9D8F;
+      --tip-text: #9FD9D1;
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
       --phone-border: #334155;
     }
@@ -648,8 +652,13 @@
 <body>
   <div class="page">
     <aside class="sidebar">
+<<<<<<< HEAD
       <h1>UI Mockup</h1>
       <p>Интерактивный HTML-макет <strong>Dual Calm</strong> (ambient blue + Claro teal). Синхронизирован с <code>apps/mobile</code>: 6 вкладок, wizard профиля (8 шагов), capability-gating дневника, уведомления отдельным экраном.</p>
+=======
+      <h1>A‑Claro</h1>
+      <p>Интерактивный HTML-макет <strong>Claro Green</strong> (ambient = product teal). Синхронизирован с <code>apps/mobile</code>: 6 вкладок, wizard профиля (8 шагов), capability-gating дневника, уведомления отдельным экраном.</p>
+>>>>>>> origin/main
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -675,8 +684,8 @@
       </div>
 
       <div class="legend">
-        <strong>Dual Calm</strong><br />
-        Фон <code>#F4F6F9</code> · KPI <code>#1E3A5F</code> · CTA <code>#2A9D8F</code> · Ambient <code>#2563EB</code> · SOS <code>#B91C1C</code><br /><br />
+        <strong>Claro Green</strong><br />
+        Фон <code>#F4F6F9</code> · KPI <code>#1E3A5F</code> · CTA/ambient/info <code>#2A9D8F</code> · wash <code>#E6F6F4</code> · SOS <code>#B91C1C</code><br /><br />
         <strong>Клинический roadmap (РААКИ)</strong><br />
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
@@ -1194,7 +1203,7 @@
           <div class="card" style="text-align:center">
             <div class="hero-logo" style="width:48px;height:48px;margin:0 auto 8px">
               <svg width="48" height="48" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-                <rect width="44" height="44" rx="10" fill="#2563EB"/>
+                <rect width="44" height="44" rx="10" fill="#2A9D8F"/>
                 <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
