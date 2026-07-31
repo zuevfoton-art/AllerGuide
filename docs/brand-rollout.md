@@ -70,7 +70,7 @@ eas metadata:push --profile production
 | 3.2 | Accent Claro Teal `#2A9D8F` | `theme.ts`, `generate-assets.mjs` |
 | 3.3 | Splash = A-Claro lockup | `assets/splash-icon.png`, `BrandLogo`, `AppSplash` |
 | 3.4 | Brand SVG reference | `docs/brand/logo-mark.svg` |
-| 3.5 | **Claro Green** (`calm.*` / `info` = teal; medical blue снят) | [`brand-dual-calm.md`](./brand-dual-calm.md) · `theme.ts` / `calm-gradient.ts` |
+| 3.5 | **Claro Green** (политика + токены; medical blue снят; `GlassCard soft`) | [`brand-claro-green.md`](./brand-claro-green.md) · `theme.ts` / `claro-gradient.ts` |
 
 Регенерация PNG:
 
