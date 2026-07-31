@@ -7,11 +7,14 @@ type GlassCardProps = PropsWithChildren<{
   style?: ViewStyle;
   padded?: boolean;
   testID?: string;
-  /** Claro teal ambient surface — calmWash (= accentLight) background */
+  /**
+   * Soft Claro teal surface (wellness / clinical hints).
+   * Wired to product `accentLight` / `accentMid` — not medical blue.
+   */
   variant?: 'default' | 'calm';
 }>;
 
-/** Clinical Calm card surface (formerly GlassCard). */
+/** Clinical card surface (formerly GlassCard). */
 export function GlassCard({
   children,
   style,
@@ -43,8 +46,8 @@ function createStyles({ colors, shadows }: AppTheme) {
       ...(shadows.sm as object),
     },
     calm: {
-      backgroundColor: colors.calmWash,
-      borderColor: colors.calmMist,
+      backgroundColor: colors.accentLight,
+      borderColor: colors.accentMid,
     },
     padded: {
       padding: space[4],

@@ -7,7 +7,10 @@ export { getCalmGradient };
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-/** Clinical Calm design tokens — Claro green: calm.* ambient aliases the teal product family */
+/**
+ * Clinical Calm design tokens — Claro green: calm.* / info / tip alias the teal product family.
+ * Keep hex values in sync with LIGHT_CALM_TOKENS / DARK_CALM_TOKENS in calm-gradient.ts.
+ */
 export type ThemeColors = {
   bg: string;
   card: string;
