@@ -1,8 +1,20 @@
 /**
  * Device-microphone recording for cloud STT (Yandex SpeechKit).
  * Always uses the system mic — never DocumentPicker / gallery / files.
+ *
+ * Uses `expo-audio` (the maintained SDK 53 replacement for the deprecated
+ * `expo-av`). `expo-av` failed to install its JSI bindings on release builds
+ * ("Cannot install JSI bindings for AV module"), which crashed the app with a
+ * native SIGSEGV in libexpo-modules-core.so on first module access.
  */
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
+import {
+  AudioRecorder,
+  RecordingPresets,
+  setAudioModeAsync,
+  IOSOutputFormat,
+  AudioQuality,
+  type RecordingOptions,
+} from 'expo-audio';
 import * as FileSystem from 'expo-file-system';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { logCaughtError } from '@/src/services/error-reporting';
@@ -17,57 +29,54 @@ export type MicRecordingResult = {
   sampleRateHertz: number;
 };
 
-let activeRecording: Audio.Recording | null = null;
+let activeRecorder: AudioRecorder | null = null;
 
-/**
- * SpeechKit-compatible capture options.
- * Avoid undocumented Android MediaRecorder constants (e.g. OGG/OPUS magic numbers):
- * invalid combos can native-crash and bypass JS try/catch.
- */
-function sttRecordingOptions(): Audio.RecordingOptions {
-  if (Platform.OS === 'ios') {
-    return {
-      isMeteringEnabled: true,
-      android: Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
-      ios: {
-        extension: '.wav',
-        outputFormat: Audio.IOSOutputFormat.LINEARPCM,
-        audioQuality: Audio.IOSAudioQuality.HIGH,
-        sampleRate: STT_SAMPLE_RATE_HZ,
-        numberOfChannels: 1,
-        bitRate: 256_000,
-        linearPCMBitDepth: 16,
-        linearPCMIsBigEndian: false,
-        linearPCMIsFloat: false,
-      },
-      web: {
-        mimeType: 'audio/webm;codecs=opus',
-        bitsPerSecond: 24_000,
-      },
-    };
-  }
-
-  // Android / web fallback: only documented expo-av presets (MPEG4/AAC on Android).
-  // AAC is not SpeechKit sync-format; OS speech is preferred on Android.
+/** SpeechKit-friendly capture options for expo-audio. */
+function sttRecordingOptions(): RecordingOptions {
+  const base = RecordingPresets.HIGH_QUALITY;
   return {
-    isMeteringEnabled: true,
-    ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
+    ...base,
+    extension: Platform.OS === 'ios' ? '.wav' : base.extension,
+    sampleRate: STT_SAMPLE_RATE_HZ,
+    numberOfChannels: 1,
+    bitRate: 64_000,
     android: {
-      ...Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
+      ...base.android,
       sampleRate: STT_SAMPLE_RATE_HZ,
-      numberOfChannels: 1,
-      bitRate: 64_000,
     },
     ios: {
-      ...Audio.RecordingOptionsPresets.HIGH_QUALITY.ios,
+      ...base.ios,
+      extension: '.wav',
+      outputFormat: IOSOutputFormat.LINEARPCM,
+      audioQuality: AudioQuality.HIGH,
       sampleRate: STT_SAMPLE_RATE_HZ,
-      numberOfChannels: 1,
-    },
-    web: {
-      mimeType: 'audio/webm;codecs=opus',
-      bitsPerSecond: 24_000,
+      linearPCMBitDepth: 16,
+      linearPCMIsBigEndian: false,
+      linearPCMIsFloat: false,
     },
   };
+}
+
+async function activateRecordingAudioMode(): Promise<void> {
+  await setAudioModeAsync({
+    allowsRecording: true,
+    playsInSilentMode: true,
+    shouldPlayInBackground: false,
+    interruptionMode: 'doNotMix',
+    interruptionModeAndroid: 'doNotMix',
+    shouldRouteThroughEarpiece: false,
+  });
+}
+
+async function deactivateRecordingAudioMode(): Promise<void> {
+  await setAudioModeAsync({
+    allowsRecording: false,
+    playsInSilentMode: true,
+    shouldPlayInBackground: false,
+    interruptionMode: 'doNotMix',
+    interruptionModeAndroid: 'doNotMix',
+    shouldRouteThroughEarpiece: false,
+  });
 }
 
 /** Strip RIFF/WAVE header so SpeechKit `format=lpcm` receives raw PCM. */
@@ -123,15 +132,23 @@ export function stripWavHeaderToPcmBase64(wavBase64: string): string {
 }
 
 export function isMicRecordingActive(): boolean {
-  return activeRecording !== null;
+  return activeRecorder !== null;
 }
 
 function uriLooksLikeWav(uri: string): boolean {
   return /\.wav($|\?)/i.test(uri);
 }
 
-function uriLooksLikeOgg(uri: string): boolean {
-  return /\.ogg($|\?)/i.test(uri) || /\.opus($|\?)/i.test(uri);
+async function requestRecordAudioPermission(): Promise<boolean> {
+  // Android: request via RN core PermissionsAndroid (avoids the expo-modules
+  // permission JSI path). iOS/web are handled by expo-audio recording itself.
+  if (Platform.OS === 'android') {
+    const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
+    if (await PermissionsAndroid.check(permission)) return true;
+    const result = await PermissionsAndroid.request(permission);
+    return result === PermissionsAndroid.RESULTS.GRANTED;
+  }
+  return true;
 }
 
 /**
@@ -139,50 +156,20 @@ function uriLooksLikeOgg(uri: string): boolean {
  * Throws VOICE_PERMISSION_DENIED when the user denies mic access.
  */
 export async function startMicRecording(): Promise<void> {
-  if (activeRecording) {
+  if (activeRecorder) {
     await cancelMicRecording();
   }
 
-  // On Android request via RN core PermissionsAndroid: resolving an
-  // expo-modules-core (SDK 53) promise after the permission activity
-  // round-trip can SIGSEGV (see ensureRecordAudioPermission in
-  // voice-dictation-service). Elsewhere use expo-av permissions.
-  let granted = false;
-  if (Platform.OS === 'android') {
-    const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
-    granted =
-      (await PermissionsAndroid.check(permission)) ||
-      (await PermissionsAndroid.request(permission)) === PermissionsAndroid.RESULTS.GRANTED;
-  } else {
-    try {
-      const current = await Audio.getPermissionsAsync();
-      granted = current.granted;
-    } catch (error) {
-      logCaughtError('startMicRecording.getPermissions', error, { level: 'warn' });
-    }
-    if (!granted) {
-      const permission = await Audio.requestPermissionsAsync();
-      granted = permission.granted;
-    }
-  }
-  if (!granted) {
+  if (!(await requestRecordAudioPermission())) {
     throw new Error('VOICE_PERMISSION_DENIED');
   }
 
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: true,
-    playsInSilentModeIOS: true,
-    staysActiveInBackground: false,
-    interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-    interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-    shouldDuckAndroid: true,
-    playThroughEarpieceAndroid: false,
-  });
+  await activateRecordingAudioMode();
 
-  const recording = new Audio.Recording();
-  await recording.prepareToRecordAsync(sttRecordingOptions());
-  await recording.startAsync();
-  activeRecording = recording;
+  const recorder = new AudioRecorder(sttRecordingOptions());
+  await recorder.prepareToRecordAsync();
+  recorder.record();
+  activeRecorder = recorder;
 }
 
 /**
@@ -190,20 +177,21 @@ export async function startMicRecording(): Promise<void> {
  * Does not read from the user file store / gallery.
  */
 export async function stopMicRecording(): Promise<MicRecordingResult> {
-  const recording = activeRecording;
-  if (!recording) {
+  const recorder = activeRecorder;
+  if (!recorder) {
     throw new Error('VOICE_RECOGNITION_FAILED');
   }
 
-  activeRecording = null;
+  activeRecorder = null;
   try {
-    await recording.stopAndUnloadAsync();
+    await recorder.stop();
   } catch (error) {
     logCaughtError('stopMicRecording.stop', error, { level: 'warn' });
   }
 
-  const uri = recording.getURI();
+  const uri = recorder.uri;
   if (!uri) {
+    await deactivateRecordingAudioMode();
     throw new Error('VOICE_RECOGNITION_FAILED');
   }
 
@@ -218,15 +206,7 @@ export async function stopMicRecording(): Promise<MicRecordingResult> {
     logCaughtError('stopMicRecording.cleanup', error, { level: 'warn' });
   }
 
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: false,
-    playsInSilentModeIOS: true,
-    staysActiveInBackground: false,
-    interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-    interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-    shouldDuckAndroid: true,
-    playThroughEarpieceAndroid: false,
-  });
+  await deactivateRecordingAudioMode();
 
   if (Platform.OS === 'ios' || uriLooksLikeWav(uri)) {
     return {
@@ -236,15 +216,8 @@ export async function stopMicRecording(): Promise<MicRecordingResult> {
     };
   }
 
-  if (uriLooksLikeOgg(uri) || Platform.OS === 'web') {
-    return {
-      audioBase64: rawBase64,
-      format: 'oggopus',
-      sampleRateHertz: STT_SAMPLE_RATE_HZ,
-    };
-  }
-
-  // Android HIGH_QUALITY is typically AAC/m4a — not a SpeechKit sync format.
+  // Android HIGH_QUALITY is AAC/m4a — not a SpeechKit sync format. OS speech
+  // recognition is the primary Android path; cloud mic here is best-effort.
   logCaughtError(
     'stopMicRecording.unsupportedFormat',
     new Error(`Unsupported mic capture URI for SpeechKit: ${uri}`),
@@ -255,20 +228,17 @@ export async function stopMicRecording(): Promise<MicRecordingResult> {
 
 /** Aborts capture without returning audio. */
 export async function cancelMicRecording(): Promise<void> {
-  const recording = activeRecording;
-  activeRecording = null;
-  if (!recording) return;
+  const recorder = activeRecorder;
+  activeRecorder = null;
+  if (!recorder) return;
 
   try {
-    const status = await recording.getStatusAsync();
-    if (status.isRecording || status.canRecord) {
-      await recording.stopAndUnloadAsync();
-    }
+    await recorder.stop();
   } catch (error) {
     logCaughtError('cancelMicRecording', error, { level: 'warn' });
   }
 
-  const uri = recording.getURI();
+  const uri = recorder.uri;
   if (uri) {
     try {
       await FileSystem.deleteAsync(uri, { idempotent: true });
@@ -278,15 +248,7 @@ export async function cancelMicRecording(): Promise<void> {
   }
 
   try {
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
-    });
+    await deactivateRecordingAudioMode();
   } catch (error) {
     logCaughtError('cancelMicRecording.audioMode', error, { level: 'warn' });
   }
