@@ -681,7 +681,7 @@ const es: LocaleMessages = {
     conditionsQuestion: '¿Qué alergias tienes?',
     conditionsQuestionChild: '¿Qué alergias tiene tu hijo?',
     conditionsHint:
-      'Selecciona todos los que correspondan — el diario adaptará escalas y secciones (flujo máximo con asma, AIT con polinosis, etc.).',
+      'Selecciona todos los que correspondan. El flujo máximo solo con asma, AIT solo con polinosis; el resto del diario se adapta a los tipos elegidos.',
     conditionOptionsTitle: 'Especifica: {{label}}',
     conditionOptionsHint: 'Elige alérgenos concretos — aparecerán en el siguiente paso.',
     crossReactions: {
@@ -870,7 +870,7 @@ const es: LocaleMessages = {
     saveCourse: 'Guardar curso',
     disclaimer: 'La AIT solo la prescribe el médico. La app no ajusta dosis.',
     noProfile: 'Seleccione un perfil en la pantalla principal.',
-    notEligible: 'AIT disponible con polinosis, rinitis, alergia doméstica o a animales.',
+    notEligible: 'AIT disponible cuando en el perfil está seleccionada la polinosis.',
     reminderLabel: 'Recordatorio diario',
     reminderOn: 'Activado',
     reminderOff: 'Desactivado',

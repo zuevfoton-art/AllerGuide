@@ -681,7 +681,7 @@ const fr: LocaleMessages = {
     conditionsQuestion: 'Quelles allergies as-tu ?',
     conditionsQuestionChild: 'Quelles allergies a ton enfant ?',
     conditionsHint:
-      'Sélectionnez tous les types concernés — le journal adaptera échelles et sections (débit de pointe pour l\'asthme, AIT pour le pollinose, etc.).',
+      'Sélectionnez tous les types concernés. Débit de pointe uniquement pour l\'asthme, AIT uniquement pour la pollinose ; le reste du journal s\'adapte aux types choisis.',
     conditionOptionsTitle: 'Préciser : {{label}}',
     conditionOptionsHint: 'Choisissez des allergènes précis — ils apparaîtront à l\'étape suivante.',
     crossReactions: {
@@ -870,7 +870,7 @@ const fr: LocaleMessages = {
     saveCourse: 'Enregistrer le cours',
     disclaimer: 'L\'AIT est prescrite uniquement par un médecin. L\'app ne modifie pas les doses.',
     noProfile: 'Sélectionnez un profil sur l\'écran d\'accueil.',
-    notEligible: 'AIT disponible pour pollinose, rhinite, allergie domestique ou animale.',
+    notEligible: 'AIT disponible lorsque le type « Pollinose » est sélectionné dans le profil.',
     reminderLabel: 'Rappel quotidien',
     reminderOn: 'Activé',
     reminderOff: 'Désactivé',

@@ -682,7 +682,7 @@ const de: LocaleMessages = {
     conditionsQuestion: 'Welche Allergien hast du?',
     conditionsQuestionChild: 'Welche Allergien hat dein Kind?',
     conditionsHint:
-      'Wählen Sie alle zutreffenden Typen — das Tagebuch passt Skalen und Abschnitte an (PSF bei Asthma, AIT bei Pollinose usw.).',
+      'Wählen Sie alle zutreffenden Typen. PSF nur bei Asthma, AIT nur bei Pollinose; andere Tagebuchbereiche richten sich nach den gewählten Typen.',
     conditionOptionsTitle: 'Präzisieren: {{label}}',
     conditionOptionsHint: 'Wählen Sie konkrete Allergene — sie erscheinen im nächsten Schritt.',
     crossReactions: {
@@ -871,7 +871,7 @@ const de: LocaleMessages = {
     saveCourse: 'Kurs speichern',
     disclaimer: 'AIT wird nur vom Arzt verordnet. Die App passt keine Dosen an.',
     noProfile: 'Wählen Sie ein Profil auf dem Startbildschirm.',
-    notEligible: 'AIT ist bei Pollinose, Rhinitis, Haus- oder Tierallergie im Profil verfügbar.',
+    notEligible: 'AIT ist verfügbar, wenn im Profil „Pollinose“ gewählt ist.',
     reminderLabel: 'Tägliche Erinnerung',
     reminderOn: 'An',
     reminderOff: 'Aus',

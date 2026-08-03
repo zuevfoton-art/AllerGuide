@@ -10,6 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { useAppStore } from '@/src/store/app-store';
+import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getDiaryReminderNotificationContent } from '@/src/services/notification-content-service';
 import { listAllDiaryEntries } from '@/src/services/diary-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
@@ -48,6 +50,11 @@ export default function NotificationsScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const isWeb = Platform.OS === 'web';
+  const activeProfile = useAppStore((s) => s.activeProfile);
+  const asitEnabled = useMemo(
+    () => (activeProfile ? getProfileCapabilities(activeProfile).modules.asit : false),
+    [activeProfile],
+  );
 
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [actEnabled, setActEnabled] = useState(false);
@@ -487,16 +494,20 @@ export default function NotificationsScreen() {
         </View>
       </GlassCard>
 
-      <Text style={ui.sectionLabel}>{t('notifications.asitSection')}</Text>
-      <GlassCard>
-        <Text style={styles.hint}>{t('notifications.asitHint')}</Text>
-        <Button
-          label={t('notifications.asitOpenCourse')}
-          variant="secondary"
-          block
-          onPress={() => router.push('/asit-course' as any)}
-        />
-      </GlassCard>
+      {asitEnabled ? (
+        <>
+          <Text style={ui.sectionLabel}>{t('notifications.asitSection')}</Text>
+          <GlassCard>
+            <Text style={styles.hint}>{t('notifications.asitHint')}</Text>
+            <Button
+              label={t('notifications.asitOpenCourse')}
+              variant="secondary"
+              block
+              onPress={() => router.push('/asit-course' as any)}
+            />
+          </GlassCard>
+        </>
+      ) : null}
     </Screen>
   );
 }

@@ -689,7 +689,7 @@ const en: LocaleMessages = {
     conditionsQuestion: 'What allergies do you have?',
     conditionsQuestionChild: "What allergies does your child have?",
     conditionsHint:
-      'Select all that apply — the diary will tailor scales and sections (peak flow for asthma, AIT for pollinosis, etc.).',
+      'Select all that apply. Peak flow is available only for asthma, AIT only for pollinosis; other diary sections adapt to the selected types.',
     conditionOptionsTitle: 'Specify: {{label}}',
     conditionOptionsHint: 'Pick specific allergens — they will appear on the next step.',
     crossReactions: {
@@ -878,7 +878,7 @@ const en: LocaleMessages = {
     saveCourse: 'Save course',
     disclaimer: 'AIT is prescribed by a doctor only. The app does not adjust doses.',
     noProfile: 'Select a profile on the home screen.',
-    notEligible: 'AIT is available for pollinosis, rhinitis, household or animal allergy in the profile.',
+    notEligible: 'AIT is available when Pollinosis is selected in the profile.',
     reminderLabel: 'Daily reminder',
     reminderOn: 'On',
     reminderOff: 'Off',
