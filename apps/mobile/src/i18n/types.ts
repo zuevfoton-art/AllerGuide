@@ -368,6 +368,46 @@ export type LocaleMessages = {
     menuStatusMatch: string;
     menuStatusIncomplete: string;
     menuStatusNoMatch: string;
+    /** Short screen title */
+    titleShort: string;
+    /** Three-state verdict hero */
+    verdictStop: string;
+    verdictCaution: string;
+    verdictClear: string;
+    verdictStopHint: string;
+    verdictCautionHint: string;
+    verdictClearHint: string;
+    profileChipAllergens: string;
+    profileChipNone: string;
+    noProfileTitle: string;
+    noProfileText: string;
+    noProfileCta: string;
+    pointCamera: string;
+    photoIngredients: string;
+    enterManually: string;
+    hideManual: string;
+    emptyHint: string;
+    trustLine: string;
+    scanAgain: string;
+    confirmSafeTitle: string;
+    confirmSafeMessage: string;
+    confirmSafeAction: string;
+    ingredientsLabel: string;
+    ingredientsShow: string;
+    ingredientsHide: string;
+    categoryLabel: string;
+    recentTab: string;
+    savedTab: string;
+    trendsShow: string;
+    trendsHide: string;
+    failForwardPhoto: string;
+    failForwardManual: string;
+    barcodeWebFailForward: string;
+    matchAlias: string;
+    verifyPackageHint: string;
+    resultTrustStrip: string;
+    rescanHistory: string;
+    sourceCatalogApi: string;
   };
   market: {
     title: string;

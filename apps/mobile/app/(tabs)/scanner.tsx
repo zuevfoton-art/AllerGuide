@@ -1,10 +1,23 @@
-import { Image, Text, TextInput, Pressable, StyleSheet, View, Platform, ActivityIndicator, Alert } from 'react-native';
+import {
+  Image,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  View,
+  Platform,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import {
   computeScanTrends,
   formatDiaryDate,
+  parseProfileAllergenIds,
+  findAllergenById,
+  type RiskLevel,
   type SafeProduct,
   type ScanHistoryEntry,
   type ScannerMode,
@@ -39,27 +52,67 @@ import {
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
+import { resolveMatchAliasKeyword } from '@/src/services/scan-match-display';
 
 const UNDO_MS = 5000;
 
 type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
-
-/** Camera entry chips on the scanner tab (both open the device camera). */
 type CameraEntryMode = 'barcode' | 'scanner';
+type ScanMode = ScannerMode;
+type ListTab = 'recent' | 'saved';
 
-const ENTRY_MODES = [
-  { key: 'barcode' as const, labelKey: 'scanner.modeBarcode', icon: 'barcode-outline' },
-  { key: 'scanner' as const, labelKey: 'scanner.modeScanner', icon: 'scan-outline' },
+const DOMAIN_MODES: { key: ScanMode; labelKey: 'scanner.product' | 'scanner.menu' | 'scanner.medicine' | 'scanner.cosmetics' }[] = [
+  { key: 'product', labelKey: 'scanner.product' },
+  { key: 'menu', labelKey: 'scanner.menu' },
+  { key: 'medicine', labelKey: 'scanner.medicine' },
+  { key: 'cosmetics', labelKey: 'scanner.cosmetics' },
 ];
 
-const SAFE_MODE_LABEL_KEYS: Record<ScannerMode, 'scanner.product' | 'scanner.menu' | 'scanner.medicine' | 'scanner.cosmetics'> = {
+const SAFE_MODE_LABEL_KEYS: Record<
+  ScannerMode,
+  'scanner.product' | 'scanner.menu' | 'scanner.medicine' | 'scanner.cosmetics'
+> = {
   product: 'scanner.product',
   menu: 'scanner.menu',
   medicine: 'scanner.medicine',
   cosmetics: 'scanner.cosmetics',
 };
 
-type ScanMode = ScannerMode;
+function placeholderKeyForMode(
+  mode: ScanMode,
+): 'scanner.productPlaceholder' | 'scanner.menuPlaceholder' | 'scanner.medicinePlaceholder' | 'scanner.householdPlaceholder' {
+  if (mode === 'menu') return 'scanner.menuPlaceholder';
+  if (mode === 'medicine') return 'scanner.medicinePlaceholder';
+  if (mode === 'cosmetics') return 'scanner.householdPlaceholder';
+  return 'scanner.productPlaceholder';
+}
+
+function historyToResult(item: ScanHistoryEntry): ScanResultExtended {
+  let matches: string[] = [];
+  try {
+    const parsed = JSON.parse(item.matches) as unknown;
+    if (Array.isArray(parsed)) matches = parsed.filter((m): m is string => typeof m === 'string');
+  } catch {
+    matches = [];
+  }
+  const level = (item.level === 'high' || item.level === 'medium' || item.level === 'low'
+    ? item.level
+    : 'low') as RiskLevel;
+  const mode = (['product', 'menu', 'medicine', 'cosmetics'].includes(item.mode)
+    ? item.mode
+    : 'product') as ScanMode;
+
+  return {
+    verdict: item.verdict,
+    reason: '',
+    matches,
+    crossMatches: [],
+    mode,
+    level,
+    productName: item.productName ?? undefined,
+    source: (item.source as ScanResultExtended['source']) ?? 'manual',
+  };
+}
 
 export default function ScannerScreen() {
   const theme = useTheme();
@@ -70,9 +123,12 @@ export default function ScannerScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('');
-  /** Domain analysis mode (product / menu / …). Camera chips use `entryMode`. */
   const [mode, setMode] = useState<ScanMode>('product');
   const [entryMode, setEntryMode] = useState<CameraEntryMode>('barcode');
+  const [manualOpen, setManualOpen] = useState(false);
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
+  const [trendsOpen, setTrendsOpen] = useState(false);
+  const [listTab, setListTab] = useState<ListTab>('recent');
   const [result, setResult] = useState<ScanResultExtended | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const [safeList, setSafeList] = useState<SafeProduct[]>([]);
@@ -95,6 +151,7 @@ export default function ScannerScreen() {
 
   const isBarcodeEntry = entryMode === 'barcode';
   const supportsPhotoCapture = entryMode === 'scanner';
+  const primaryIsBarcode = mode === 'product';
 
   const scanTrends = useMemo(() => computeScanTrends(history), [history]);
 
@@ -103,7 +160,26 @@ export default function ScannerScreen() {
     [result, localeContent],
   );
 
-  const isDanger = displayResult != null && displayResult.level !== 'low';
+  const riskLevel: RiskLevel | null = displayResult?.level ?? null;
+  const isHigh = riskLevel === 'high';
+  const isMedium = riskLevel === 'medium';
+  const isLow = riskLevel === 'low';
+  const isCautionOrWorse = isHigh || isMedium;
+
+  const profileAllergenNames = useMemo(() => {
+    if (!profile?.allergies) return [] as string[];
+    return parseProfileAllergenIds(profile.allergies)
+      .map((id) => findAllergenById(id)?.name ?? id)
+      .filter(Boolean);
+  }, [profile]);
+
+  const profileChipDetail = useMemo(() => {
+    if (profileAllergenNames.length === 0) return t('scanner.profileChipNone');
+    if (profileAllergenNames.length <= 2) return profileAllergenNames.join(', ');
+    return t('scanner.profileChipAllergens', { count: String(profileAllergenNames.length) });
+  }, [profileAllergenNames, t]);
+
+  const compositionText = result?.productIngredients?.trim() || input.trim();
 
   const refreshHistory = useCallback(() => {
     if (!activeProfileId) {
@@ -133,8 +209,8 @@ export default function ScannerScreen() {
     if (loading || !result) return;
     if (lastHapticResultRef.current === result) return;
     lastHapticResultRef.current = result;
-    if (isDanger) void hapticDanger();
-  }, [result, loading, isDanger]);
+    if (isCautionOrWorse) void hapticDanger();
+  }, [result, loading, isCautionOrWorse]);
 
   const clearUndo = useCallback(() => {
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
@@ -186,6 +262,7 @@ export default function ScannerScreen() {
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
+    setIngredientsOpen(false);
     try {
       if (barcodeMode && mode === 'product') {
         const scanResult = await scanBarcode({ barcode: text, profile });
@@ -217,11 +294,15 @@ export default function ScannerScreen() {
     }
   };
 
-  const runOcrCapture = async (manualText?: string, image?: { base64?: string | null; mimeType?: string }) => {
+  const runOcrCapture = async (
+    manualText?: string,
+    image?: { base64?: string | null; mimeType?: string },
+  ) => {
     lastScanRef.current = () => void runOcrCapture(manualText, image);
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
+    setIngredientsOpen(false);
     try {
       const scanResult = await scanFromOcr({
         mode,
@@ -268,7 +349,20 @@ export default function ScannerScreen() {
 
   const openCamera = async (nextEntry: CameraEntryMode = entryMode) => {
     setEntryMode(nextEntry);
-    // Web photo scanner: system picker → crop editor (no live barcode on web).
+
+    if (Platform.OS === 'web' && nextEntry === 'barcode') {
+      setManualOpen(true);
+      Alert.alert(t('scanner.modeBarcode'), t('scanner.barcodeWebFailForward'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('scanner.failForwardPhoto'),
+          onPress: () => void openCamera('scanner'),
+        },
+        { text: t('scanner.failForwardManual'), onPress: () => setManualOpen(true) },
+      ]);
+      return;
+    }
+
     if (Platform.OS === 'web' && nextEntry === 'scanner') {
       const photo = await captureScanPhotoViaPicker();
       if (photo) beginCrop(photo);
@@ -285,14 +379,15 @@ export default function ScannerScreen() {
     setCameraOpen(true);
   };
 
-  const selectEntryMode = (next: CameraEntryMode) => {
-    setMode('product');
+  const selectDomainMode = (next: ScanMode) => {
+    setMode(next);
+    setEntryMode(next === 'product' ? 'barcode' : 'scanner');
     setResult(null);
     setOcrHint(null);
     setScanError(false);
     setPendingPhoto(null);
+    setRepeatUnsafe(false);
     lastHapticResultRef.current = null;
-    void openCamera(next);
   };
 
   const handleBarcode = ({ data }: { data: string }) => {
@@ -342,6 +437,65 @@ export default function ScannerScreen() {
     setTorchOn(false);
     setCameraOpen(false);
   };
+
+  const sourceLabel = (source?: ScanResultExtended['source']) => {
+    if (source === 'openfoodfacts') return t('scanner.sourceOpenFoodFacts');
+    if (source === 'barcodes_db') return t('scanner.sourceBarcodesDb');
+    if (source === 'barcode') return t('scanner.sourceBarcode');
+    if (source === 'ocr') return t('scanner.sourceOcr');
+    if (source === 'llm') return t('scanner.sourceLlm');
+    if (source === 'catalog_api') return t('scanner.sourceCatalogApi');
+    return t('scanner.sourceManual');
+  };
+
+  const confirmSaveSafe = () => {
+    if (!activeProfileId || !result) return;
+    const name = result.productName || input.trim().slice(0, 60);
+    const perform = () => {
+      addSafeProduct(activeProfileId, name, mode, input.trim());
+      void hapticSuccess();
+      refreshHistory();
+      setListTab('saved');
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${t('scanner.confirmSafeTitle')}\n\n${t('scanner.confirmSafeMessage', { name })}`)) {
+        perform();
+      }
+      return;
+    }
+
+    Alert.alert(t('scanner.confirmSafeTitle'), t('scanner.confirmSafeMessage', { name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('scanner.confirmSafeAction'), onPress: perform },
+    ]);
+  };
+
+  const openHistoryItem = (item: ScanHistoryEntry) => {
+    const nextMode = (['product', 'menu', 'medicine', 'cosmetics'].includes(item.mode)
+      ? item.mode
+      : 'product') as ScanMode;
+    setMode(nextMode);
+    setInput(item.input);
+    setResult(historyToResult(item));
+    setRepeatUnsafe(false);
+    setIngredientsOpen(false);
+    lastHapticResultRef.current = null;
+  };
+
+  const formatMatchChip = (label: string, allergenId?: string) => {
+    const keyword = resolveMatchAliasKeyword(allergenId, label, compositionText);
+    if (!keyword) return label;
+    return t('scanner.matchAlias', { keyword, allergen: label });
+  };
+
+  const matchIdByLabel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const m of result?.structuredMatches ?? []) {
+      map.set(m.label, m.allergenId);
+    }
+    return map;
+  }, [result?.structuredMatches]);
 
   if (pendingPhoto) {
     return (
@@ -410,7 +564,15 @@ export default function ScannerScreen() {
               <View style={[styles.corner, styles.cornerBR]} />
             </View>
             <Text style={styles.viewfinderHint}>
-              {isBarcodeEntry ? t('scanner.cameraBarcodeHint') : t('scanner.cameraScannerHint')}
+              {isBarcodeEntry
+                ? t('scanner.cameraBarcodeHint')
+                : mode === 'menu'
+                  ? t('scanner.cameraMenuHint')
+                  : mode === 'medicine'
+                    ? t('scanner.cameraMedicineHint')
+                    : mode === 'cosmetics'
+                      ? t('scanner.cameraHouseholdHint')
+                      : t('scanner.cameraScannerHint')}
             </Text>
           </View>
 
@@ -439,49 +601,60 @@ export default function ScannerScreen() {
               <View style={styles.galleryBtn} />
             </View>
           ) : null}
-
-          {Platform.OS === 'web' && isBarcodeEntry ? (
-            <View style={styles.webHint}>
-              <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.7)" />
-              <Text style={styles.webHintText}>{t('scanner.barcodeWebHint')}</Text>
-            </View>
-          ) : null}
         </View>
       </View>
     );
   }
 
+  if (!activeProfileId) {
+    return (
+      <Screen>
+        <ScreenEyebrow section={t('scanner.eyebrow')} />
+        <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
+        <GlassCard>
+          <Text style={ui.cardTitle}>{t('scanner.noProfileTitle')}</Text>
+          <Text style={styles.emptyBody}>{t('scanner.noProfileText')}</Text>
+          <Button
+            label={t('scanner.noProfileCta')}
+            variant="primary"
+            block
+            onPress={() => router.push('/profile-setup')}
+          />
+        </GlassCard>
+        <Disclaimer>{t('scanner.disclaimer')}</Disclaimer>
+      </Screen>
+    );
+  }
+
   return (
     <Screen
-      onRefresh={activeProfileId ? () => refresh() : undefined}
+      onRefresh={() => refresh()}
       refreshing={refreshing}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('scanner.eyebrow')} />
-          <Text style={ui.docTitle}>{t('scanner.title')}</Text>
-          <Text style={ui.docMeta}>{t('scanner.subtitle')}</Text>
+          <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         </View>
-        <ProfileHeaderButton />
       </View>
 
-      <View style={styles.entryRow}>
-        {ENTRY_MODES.map((m) => {
-          const active = entryMode === m.key;
+      <ProfileHeaderButton
+        variant="chip"
+        chipTitle={profile?.name ?? t('home.selectProfile')}
+        chipDetail={profileChipDetail}
+      />
+
+      <View style={styles.modeRow} testID="scanner-mode-row">
+        {DOMAIN_MODES.map((m) => {
+          const active = mode === m.key;
           return (
             <Pressable
               key={m.key}
-              style={[styles.entryChip, active && styles.entryChipActive]}
-              onPress={() => selectEntryMode(m.key)}
-              testID={`scanner-entry-${m.key}`}
+              style={[styles.modeChip, active && styles.modeChipActive]}
+              onPress={() => selectDomainMode(m.key)}
+              testID={`scanner-mode-${m.key}`}
               accessibilityRole="button"
-              accessibilityState={{ selected: active }}
-              accessibilityLabel={t(m.labelKey)}>
-              <Ionicons
-                name={m.icon as any}
-                size={18}
-                color={active ? theme.colors.onAccent : theme.colors.accent}
-              />
-              <Text style={[styles.entryChipText, active && styles.entryChipTextActive]}>
+              accessibilityState={{ selected: active }}>
+              <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>
                 {t(m.labelKey)}
               </Text>
             </Pressable>
@@ -489,28 +662,67 @@ export default function ScannerScreen() {
         })}
       </View>
 
-      <Text style={ui.sectionLabel}>{t('scanner.manualDivider')}</Text>
-      <TextInput
-        testID="scanner-input"
-        value={input}
-        onChangeText={setInput}
-        placeholder={t('scanner.productPlaceholder')}
-        placeholderTextColor={theme.colors.textMuted}
-        multiline
-        style={styles.input}
-      />
-
       <Button
-        testID="scanner-check"
-        label={t('scanner.check')}
+        testID="scanner-primary-camera"
+        label={t('scanner.pointCamera')}
         variant="primary"
         block
         disabled={loading}
-        onPress={() => {
-          const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
-          void runCheck(input.trim(), looksLikeBarcode);
-        }}
+        onPress={() => void openCamera(primaryIsBarcode ? 'barcode' : 'scanner')}
       />
+
+      <View style={styles.secondaryRow}>
+        <Pressable
+          style={styles.secondaryBtn}
+          onPress={() => void openCamera('scanner')}
+          testID="scanner-photo-ingredients"
+          accessibilityRole="button">
+          <Ionicons name="camera-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.secondaryBtnText}>{t('scanner.photoIngredients')}</Text>
+        </Pressable>
+        <Pressable
+          style={styles.secondaryBtn}
+          onPress={() => setManualOpen((v) => !v)}
+          testID="scanner-toggle-manual"
+          accessibilityRole="button"
+          accessibilityState={{ expanded: manualOpen }}>
+          <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.secondaryBtnText}>
+            {manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
+          </Text>
+        </Pressable>
+      </View>
+
+      {!displayResult && !loading ? (
+        <Text style={styles.emptyHint}>{t('scanner.emptyHint')}</Text>
+      ) : null}
+      <Text style={styles.trustLine}>{t('scanner.trustLine')}</Text>
+
+      {manualOpen ? (
+        <View style={styles.manualBlock}>
+          <TextInput
+            testID="scanner-input"
+            value={input}
+            onChangeText={setInput}
+            placeholder={t(placeholderKeyForMode(mode))}
+            placeholderTextColor={theme.colors.textMuted}
+            multiline
+            style={styles.input}
+          />
+          <Button
+            testID="scanner-check"
+            label={t('scanner.check')}
+            variant="primary"
+            block
+            disabled={loading || !input.trim()}
+            onPress={() => {
+              const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
+              void runCheck(input.trim(), looksLikeBarcode && mode === 'product');
+            }}
+          />
+        </View>
+      ) : null}
+
       {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
       {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
@@ -522,15 +734,51 @@ export default function ScannerScreen() {
       ) : null}
 
       {repeatUnsafe ? (
-        <Text style={styles.repeatWarning}>{t('scanner.repeatUnsafeWarning')}</Text>
+        <Text style={[styles.repeatWarning, isMedium && styles.repeatWarningCaution]}>
+          {t('scanner.repeatUnsafeWarning')}
+        </Text>
       ) : null}
 
       {displayResult ? (
-        <View
-          testID="scanner-result"
-          style={[styles.resultCard, isDanger ? styles.resultDanger : styles.resultSafe]}>
-          {/* Product identity row (image + name/brand) */}
-          {(result?.productBrand || result?.productImageUrl || displayResult.productName) ? (
+        <View testID="scanner-result" style={styles.resultStack}>
+          <View
+            style={[
+              styles.verdictHero,
+              isHigh && styles.verdictHeroHigh,
+              isMedium && styles.verdictHeroMedium,
+              isLow && styles.verdictHeroLow,
+            ]}>
+            <Text
+              style={[
+                styles.verdictHeroTitle,
+                isHigh && styles.verdictHeroTitleHigh,
+                isMedium && styles.verdictHeroTitleMedium,
+                isLow && styles.verdictHeroTitleLow,
+              ]}>
+              {isHigh
+                ? t('scanner.verdictStop')
+                : isMedium
+                  ? t('scanner.verdictCaution')
+                  : t('scanner.verdictClear')}
+            </Text>
+            <Text style={styles.verdictHeroHint}>
+              {isHigh
+                ? t('scanner.verdictStopHint')
+                : isMedium
+                  ? t('scanner.verdictCautionHint')
+                  : t('scanner.verdictClearHint')}
+            </Text>
+            <Text style={styles.verdictClaro}>
+              {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
+            </Text>
+          </View>
+
+          <Text style={styles.resultTrust}>{t('scanner.resultTrustStrip')}</Text>
+
+          {(result?.productBrand ||
+            result?.productImageUrl ||
+            displayResult.productName ||
+            result?.productCategory) ? (
             <View style={styles.productIdentityRow}>
               {result?.productImageUrl ? (
                 <Image
@@ -547,15 +795,15 @@ export default function ScannerScreen() {
                 {result?.productBrand ? (
                   <Text style={styles.productBrand}>{result.productBrand}</Text>
                 ) : null}
+                {result?.productCategory ? (
+                  <Text style={styles.productBrand}>
+                    {t('scanner.categoryLabel')}: {result.productCategory}
+                  </Text>
+                ) : null}
               </View>
             </View>
           ) : null}
 
-          <Text style={[styles.verdict, isDanger ? styles.verdictDanger : styles.verdictSafe]}>
-            {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
-          </Text>
-
-          {/* Barcode scan status badge */}
           {result?.barcodeScanStatus && result.barcodeScanStatus !== 'found_match' ? (
             <Text style={styles.statusBadge}>
               {result.barcodeScanStatus === 'not_found'
@@ -566,7 +814,6 @@ export default function ScannerScreen() {
             </Text>
           ) : null}
 
-          {/* Menu scan status badge */}
           {result?.menuScanStatus ? (
             <Text style={styles.statusBadge}>
               {result.menuScanStatus === 'text_match'
@@ -577,124 +824,226 @@ export default function ScannerScreen() {
             </Text>
           ) : null}
 
-          <Text style={styles.reason}>{displayResult.reason}</Text>
+          {result?.barcodeScanStatus === 'not_found' || result?.lookupFailed ? (
+            <View style={styles.failForwardRow}>
+              <Button
+                label={t('scanner.failForwardPhoto')}
+                variant="secondary"
+                block
+                onPress={() => void openCamera('scanner')}
+              />
+              <Button
+                label={t('scanner.failForwardManual')}
+                variant="secondary"
+                block
+                onPress={() => setManualOpen(true)}
+              />
+            </View>
+          ) : null}
+
+          {displayResult.reason ? <Text style={styles.reason}>{displayResult.reason}</Text> : null}
+
           {displayResult.matches?.length > 0 ? (
-            <View style={styles.matchesBadge}>
-              <Text style={styles.matchesText}>
-                {t('scanner.claroMatches', { items: displayResult.matches.join(', ') })}
-              </Text>
+            <View style={styles.chipWrap}>
+              {displayResult.matches.map((label) => (
+                <View key={`m-${label}`} style={styles.matchesBadge}>
+                  <Text style={styles.matchesText}>
+                    {formatMatchChip(label, matchIdByLabel.get(label))}
+                  </Text>
+                </View>
+              ))}
             </View>
           ) : null}
           {(displayResult.crossMatches?.length ?? 0) > 0 ? (
-            <View style={styles.crossBadge}>
-              <Text style={styles.crossText}>
-                {t('scanner.crossMatches')} {displayResult.crossMatches.join(', ')}
-              </Text>
+            <View style={styles.chipWrap}>
+              <Text style={styles.chipSectionLabel}>{t('scanner.crossMatches')}</Text>
+              {displayResult.crossMatches.map((label) => (
+                <View key={`c-${label}`} style={styles.crossBadge}>
+                  <Text style={styles.crossText}>
+                    {formatMatchChip(label, matchIdByLabel.get(label))}
+                  </Text>
+                </View>
+              ))}
             </View>
           ) : null}
           {(displayResult.traceMatches?.length ?? 0) > 0 ? (
-            <View style={styles.traceBadge}>
-              <Text style={styles.traceText}>
-                {t('scanner.traceMatches')} {displayResult.traceMatches!.join(', ')}
-              </Text>
+            <View style={styles.chipWrap}>
+              <Text style={styles.chipSectionLabel}>{t('scanner.traceMatches')}</Text>
+              {displayResult.traceMatches!.map((label) => (
+                <View key={`t-${label}`} style={styles.traceBadge}>
+                  <Text style={styles.traceText}>{label}</Text>
+                </View>
+              ))}
             </View>
           ) : null}
+
+          {compositionText.length > 20 ? (
+            <View style={styles.ingredientsBlock}>
+              <Pressable
+                onPress={() => setIngredientsOpen((v) => !v)}
+                accessibilityRole="button"
+                style={styles.ingredientsToggle}>
+                <Text style={styles.ingredientsToggleText}>
+                  {ingredientsOpen ? t('scanner.ingredientsHide') : t('scanner.ingredientsShow')}
+                </Text>
+                <Ionicons
+                  name={ingredientsOpen ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  color={theme.colors.accent}
+                />
+              </Pressable>
+              {ingredientsOpen ? (
+                <Text style={styles.ingredientsBody}>
+                  {t('scanner.ingredientsLabel')}: {compositionText}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+
           {displayResult.source ? (
             <Text style={styles.sourceMeta}>
-              {t('scanner.source')}{' '}
-              {displayResult.source === 'openfoodfacts'
-                ? t('scanner.sourceOpenFoodFacts')
-                : displayResult.source === 'barcodes_db'
-                  ? t('scanner.sourceBarcodesDb')
-                  : displayResult.source === 'barcode'
-                    ? t('scanner.sourceBarcode')
-                    : displayResult.source === 'ocr'
-                      ? t('scanner.sourceOcr')
-                      : displayResult.source === 'llm'
-                        ? t('scanner.sourceLlm')
-                        : t('scanner.sourceManual')}
+              {t('scanner.source')} {sourceLabel(displayResult.source)}
             </Text>
           ) : null}
-          {displayResult && activeProfileId ? (
-            <Pressable
-              style={styles.reportBtn}
-              onPress={() => {
-                const term =
-                  result?.unknownMatches?.[0] ??
-                  [...(result?.matches ?? []), ...(result?.crossMatches ?? [])][0] ??
-                  input.trim().slice(0, 80);
-                saveAliasFeedback({
-                  term,
-                  context: result?.productName ?? mode,
-                  profileId: activeProfileId,
-                  scanInput: input.trim(),
-                });
-                Alert.alert(t('scanner.reportIncorrect'), t('scanner.reportThanks'));
-                void hapticLight();
-              }}
-              accessibilityRole="button">
-              <Text style={styles.reportBtnText}>{t('scanner.reportIncorrect')}</Text>
-            </Pressable>
-          ) : null}
-        </View>
-      ) : null}
 
-      {displayResult && !isDanger && activeProfileId ? (
-        isCurrentInputSaved ? (
-          <Button label={t('scanner.savedToSafe')} variant="secondary" block disabled />
-        ) : (
-          <Button
-            label={t('scanner.saveToSafe')}
-            variant="secondary"
-            block
-            onPress={() => {
-              const name = result?.productName || input.trim().slice(0, 60);
-              addSafeProduct(activeProfileId, name, mode, input.trim());
-              void hapticSuccess();
-              refreshHistory();
-            }}
-          />
-        )
+          <Text style={styles.verifyHint}>{t('scanner.verifyPackageHint')}</Text>
+
+          <View style={styles.actionCol}>
+            {isLow && activeProfileId ? (
+              isCurrentInputSaved ? (
+                <Button label={t('scanner.savedToSafe')} variant="secondary" block disabled />
+              ) : (
+                <Button
+                  label={t('scanner.saveToSafe')}
+                  variant="secondary"
+                  block
+                  onPress={confirmSaveSafe}
+                />
+              )
+            ) : null}
+            {activeProfileId ? (
+              <Pressable
+                style={styles.reportBtn}
+                onPress={() => {
+                  const term =
+                    result?.unknownMatches?.[0] ??
+                    [...(result?.matches ?? []), ...(result?.crossMatches ?? [])][0] ??
+                    input.trim().slice(0, 80);
+                  saveAliasFeedback({
+                    term,
+                    context: result?.productName ?? mode,
+                    profileId: activeProfileId,
+                    scanInput: input.trim(),
+                  });
+                  Alert.alert(t('scanner.reportIncorrect'), t('scanner.reportThanks'));
+                  void hapticLight();
+                }}
+                accessibilityRole="button">
+                <Text style={styles.reportBtnText}>{t('scanner.reportIncorrect')}</Text>
+              </Pressable>
+            ) : null}
+            <Button
+              label={t('scanner.scanAgain')}
+              variant="secondary"
+              block
+              onPress={() => {
+                setResult(null);
+                setRepeatUnsafe(false);
+                void openCamera(primaryIsBarcode ? 'barcode' : 'scanner');
+              }}
+            />
+          </View>
+        </View>
       ) : null}
 
       {scanTrends.totalScans > 0 ? (
         <GlassCard>
-          <Text style={ui.cardTitle}>{t('scanner.trendsTitle')}</Text>
-          <Text style={styles.trendMeta}>
-            {t('scanner.historyMeta', {
-              total: String(scanTrends.totalScans),
-              highRisk: String(scanTrends.highRiskCount),
-            })}
-          </Text>
-          {scanTrends.topAllergens.map((item) => (
-            <Text key={item.allergenId} style={styles.trendRow}>
-              {item.label}: {item.count}
+          <Pressable
+            onPress={() => setTrendsOpen((v) => !v)}
+            style={styles.trendsToggle}
+            accessibilityRole="button">
+            <Text style={ui.cardTitle}>
+              {trendsOpen ? t('scanner.trendsHide') : t('scanner.trendsShow')}
             </Text>
-          ))}
-        </GlassCard>
-      ) : null}
-
-      {history.length > 0 ? (
-        <GlassCard padded={false}>
-          <Text style={[ui.cardTitle, styles.historyHead]}>{t('scanner.history')}</Text>
-          {history.map((item, index) => (
-            <View
-              key={item.id}
-              style={[styles.historyRow, index < history.length - 1 && styles.historyRowBorder]}>
-              <View style={ui.feedBody}>
-                <Text style={ui.feedTitle}>{item.productName || item.verdict}</Text>
-                <Text style={ui.feedSub}>
-                  {formatDiaryDate(item.createdAt)} · {item.source}
+            <Ionicons
+              name={trendsOpen ? 'chevron-up' : 'chevron-down'}
+              size={18}
+              color={theme.colors.textMuted}
+            />
+          </Pressable>
+          {trendsOpen ? (
+            <>
+              <Text style={styles.trendMeta}>
+                {t('scanner.historyMeta', {
+                  total: String(scanTrends.totalScans),
+                  highRisk: String(scanTrends.highRiskCount),
+                })}
+              </Text>
+              {scanTrends.topAllergens.map((item) => (
+                <Text key={item.allergenId} style={styles.trendRow}>
+                  {item.label}: {item.count}
                 </Text>
-              </View>
-            </View>
-          ))}
+              ))}
+            </>
+          ) : null}
         </GlassCard>
       ) : null}
 
-      {safeList.length > 0 ? (
+      <View style={styles.tabRow}>
+        <Pressable
+          style={[styles.tabChip, listTab === 'recent' && styles.tabChipActive]}
+          onPress={() => setListTab('recent')}
+          accessibilityRole="button"
+          accessibilityState={{ selected: listTab === 'recent' }}>
+          <Text style={[styles.tabChipText, listTab === 'recent' && styles.tabChipTextActive]}>
+            {t('scanner.recentTab')}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tabChip, listTab === 'saved' && styles.tabChipActive]}
+          onPress={() => setListTab('saved')}
+          accessibilityRole="button"
+          accessibilityState={{ selected: listTab === 'saved' }}>
+          <Text style={[styles.tabChipText, listTab === 'saved' && styles.tabChipTextActive]}>
+            {t('scanner.savedTab')}
+          </Text>
+        </Pressable>
+      </View>
+
+      {listTab === 'recent' ? (
+        history.length > 0 ? (
+          <GlassCard padded={false}>
+            {history.map((item, index) => {
+              const levelColor =
+                item.level === 'high'
+                  ? theme.colors.danger
+                  : item.level === 'medium'
+                    ? theme.colors.warning
+                    : theme.colors.success;
+              return (
+                <Pressable
+                  key={item.id}
+                  testID={`scanner-history-${item.id}`}
+                  onPress={() => openHistoryItem(item)}
+                  style={[styles.historyRow, index < history.length - 1 && styles.historyRowBorder]}
+                  accessibilityRole="button">
+                  <View style={[styles.levelDot, { backgroundColor: levelColor }]} />
+                  <View style={ui.feedBody}>
+                    <Text style={ui.feedTitle}>{item.productName || item.verdict}</Text>
+                    <Text style={ui.feedSub}>
+                      {formatDiaryDate(item.createdAt)} · {sourceLabel(item.source as ScanResultExtended['source'])}
+                    </Text>
+                  </View>
+                  <Text style={styles.rescanLink}>{t('scanner.rescanHistory')}</Text>
+                </Pressable>
+              );
+            })}
+          </GlassCard>
+        ) : (
+          <Text style={styles.emptyHint}>{t('scanner.emptyHint')}</Text>
+        )
+      ) : safeList.length > 0 ? (
         <GlassCard padded={false}>
-          <Text style={[ui.cardTitle, styles.historyHead]}>{t('scanner.safeList')}</Text>
           {safeList.map((item, index) => {
             const modeLabelKey = SAFE_MODE_LABEL_KEYS[item.mode as ScannerMode];
             return (
@@ -724,7 +1073,9 @@ export default function ScannerScreen() {
             );
           })}
         </GlassCard>
-      ) : null}
+      ) : (
+        <Text style={styles.emptyHint}>{t('scanner.safeListEmpty')}</Text>
+      )}
 
       {undoItem ? (
         <UndoBanner
@@ -749,37 +1100,70 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
-    entryRow: {
+    modeRow: {
       flexDirection: 'row',
-      gap: 10,
+      flexWrap: 'wrap',
+      gap: 8,
     },
-    entryChip: {
+    modeChip: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    modeChipActive: {
+      backgroundColor: colors.accentLight,
+      borderColor: colors.accent,
+    },
+    modeChipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    modeChipTextActive: { color: colors.accent },
+    secondaryRow: { flexDirection: 'row', gap: 10 },
+    secondaryBtn: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      paddingVertical: 14,
-      paddingHorizontal: 12,
-      borderRadius: 999,
+      gap: 6,
+      paddingVertical: 12,
+      borderRadius: 8,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.accent,
-      minHeight: 48,
+      minHeight: 44,
     },
-    entryChipActive: {
-      backgroundColor: colors.accent,
-      borderColor: colors.accent,
-    },
-    entryChipText: {
+    secondaryBtnText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
+      fontSize: 13,
       fontWeight: '600',
       color: colors.accent,
     },
-    entryChipTextActive: {
-      color: colors.onAccent,
+    emptyHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
+    trustLine: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 16,
+    },
+    emptyBody: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.textSecondary,
+      lineHeight: 20,
+      marginBottom: 12,
+    },
+    manualBlock: { gap: 10 },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,
@@ -794,9 +1178,54 @@ function createStyles({ colors, fonts }: AppTheme) {
       textAlignVertical: 'top',
       lineHeight: 22,
     },
-    resultCard: { borderRadius: 8, padding: 16, gap: 8, borderWidth: 1 },
-    resultSafe: { backgroundColor: colors.successLight, borderColor: colors.successBorder },
-    resultDanger: { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+    resultStack: { gap: 10 },
+    verdictHero: {
+      borderRadius: 10,
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+      borderWidth: 1,
+      gap: 6,
+    },
+    verdictHeroHigh: {
+      backgroundColor: colors.scannerDangerIconBg,
+      borderColor: colors.scannerDangerBorder,
+    },
+    verdictHeroMedium: {
+      backgroundColor: colors.warningLight,
+      borderColor: colors.warningBorder,
+    },
+    verdictHeroLow: {
+      backgroundColor: colors.scannerSafeIconBg,
+      borderColor: colors.scannerSafeBorder,
+    },
+    verdictHeroTitle: {
+      fontFamily: fonts.sansBold,
+      fontSize: 22,
+      fontWeight: '700',
+      letterSpacing: 0.4,
+    },
+    verdictHeroTitleHigh: { color: colors.danger },
+    verdictHeroTitleMedium: { color: colors.warning },
+    verdictHeroTitleLow: { color: colors.scannerSafeText },
+    verdictHeroHint: {
+      fontFamily: fonts.sans,
+      fontSize: 14,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+    verdictClaro: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textMuted,
+      marginTop: 2,
+    },
+    resultTrust: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 16,
+    },
     productIdentityRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     productIdentityBody: { flex: 1, gap: 2 },
     productImage: {
@@ -810,6 +1239,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
     },
+    productName: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.text,
+    },
     statusBadge: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 11,
@@ -821,12 +1256,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderRadius: 4,
       alignSelf: 'flex-start',
     },
+    failForwardRow: { gap: 8 },
     repeatWarning: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       color: colors.danger,
-      marginBottom: 8,
     },
+    repeatWarningCaution: { color: colors.warning },
     trendMeta: {
       fontFamily: fonts.sans,
       fontSize: 12,
@@ -839,17 +1275,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       marginBottom: 2,
     },
-    verdict: {
-      fontFamily: fonts.sansBold,
-      fontSize: 16,
-      fontWeight: '700',
-    },
-    verdictSafe: { color: colors.success },
-    verdictDanger: { color: colors.danger },
-    productName: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
+    trendsToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 8,
     },
     reason: {
       fontFamily: fonts.sans,
@@ -857,8 +1287,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
+    chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
+    chipSectionLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textMuted,
+      width: '100%',
+    },
     matchesBadge: {
-      alignSelf: 'flex-start',
       backgroundColor: colors.dangerLight,
       borderWidth: 1,
       borderColor: colors.dangerBorder,
@@ -873,7 +1310,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
     },
     crossBadge: {
-      alignSelf: 'flex-start',
       backgroundColor: colors.warningLight,
       borderWidth: 1,
       borderColor: colors.warningBorder,
@@ -888,7 +1324,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
     },
     traceBadge: {
-      alignSelf: 'flex-start',
       backgroundColor: colors.surfaceMuted,
       borderWidth: 1,
       borderColor: colors.border,
@@ -902,10 +1337,26 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       fontWeight: '600',
     },
-    reportBtn: {
-      marginTop: 8,
+    ingredientsBlock: { gap: 6 },
+    ingredientsToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
       alignSelf: 'flex-start',
     },
+    ingredientsToggleText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+    },
+    ingredientsBody: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 19,
+    },
+    reportBtn: { alignSelf: 'flex-start', paddingVertical: 4 },
     reportBtnText: {
       fontFamily: fonts.sans,
       fontSize: 12,
@@ -917,14 +1368,47 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
     },
+    verifyHint: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    actionCol: { gap: 8 },
     ocrHint: {
       fontFamily: fonts.sans,
       fontSize: 12,
       color: colors.textSecondary,
       lineHeight: 17,
     },
-    historyHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
-    historyRow: { paddingHorizontal: 16, paddingVertical: 12 },
+    tabRow: { flexDirection: 'row', gap: 8 },
+    tabChip: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 10,
+      borderRadius: 8,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    tabChipActive: {
+      backgroundColor: colors.accentLight,
+      borderColor: colors.accent,
+    },
+    tabChipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    tabChipTextActive: { color: colors.accent },
+    historyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
     listRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -933,6 +1417,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 12,
     },
     historyRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    levelDot: { width: 10, height: 10, borderRadius: 5 },
+    rescanLink: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     removeBtn: {
       width: 44,
       height: 44,
@@ -1013,15 +1504,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderRadius: 28,
       backgroundColor: colors.onAccent,
     },
-    webHint: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      marginHorizontal: 24,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      borderRadius: 6,
-      padding: 10,
-    },
-    webHintText: { color: 'rgba(255,255,255,0.7)', fontSize: 12, flex: 1 },
   });
 }

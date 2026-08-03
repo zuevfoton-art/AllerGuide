@@ -32,6 +32,10 @@ export type ScanResultExtended = ScanResult & {
   menuScanStatus?: MenuScanStatus;
   productBrand?: string;
   productImageUrl?: string;
+  /** Full composition text when known (barcode / OFF). */
+  productIngredients?: string;
+  /** Product category when the lookup source provides it. */
+  productCategory?: string;
   ocr?: OcrExtractionResult;
 };
 
@@ -146,6 +150,7 @@ export async function scanBarcode({
     barcodeScanStatus,
     productBrand: product.brand,
     productImageUrl: product.imageUrl,
+    productIngredients: product.ingredients,
   };
 }
 
