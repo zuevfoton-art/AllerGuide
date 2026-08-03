@@ -1,7 +1,36 @@
-import type { Profile, Scenario } from './types';
+import type { Profile, ProfileType, Scenario } from './types';
 export { parseAllergies } from './profile-allergens';
 
 export type BootstrapRoute = '/onboarding' | '/profile-setup' | '/(tabs)/home';
+
+/**
+ * Preferred active profile for an authenticated session.
+ * Parent / «Я» (`self`) wins over child; stable tie-break by ascending id.
+ */
+export function resolvePreferredActiveProfile<T extends { id: number; type: ProfileType }>(
+  profiles: T[],
+): T | null {
+  if (!profiles.length) return null;
+
+  const byIdAsc = (a: T, b: T) => a.id - b.id;
+  const selfProfiles = profiles.filter((profile) => profile.type === 'self').sort(byIdAsc);
+  if (selfProfiles[0]) return selfProfiles[0];
+
+  return [...profiles].sort(byIdAsc)[0] ?? null;
+}
+
+/** Self/parent first, then remaining profiles by id — for switchers and lists. */
+export function sortProfilesForDisplay<T extends { id: number; type: ProfileType }>(
+  profiles: T[],
+): T[] {
+  return [...profiles].sort((a, b) => {
+    if (a.type !== b.type) {
+      if (a.type === 'self') return -1;
+      if (b.type === 'self') return 1;
+    }
+    return a.id - b.id;
+  });
+}
 
 export function getWizardStep(scenario: Scenario | null, profiles: Profile[]): 'self' | 'child' | null {
   if (scenario !== 'both') return null;

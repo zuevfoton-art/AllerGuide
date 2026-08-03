@@ -46,6 +46,7 @@ vi.mock('@/src/services/secure-settings-service', () => ({
 const backendFetchMe = vi.fn();
 const getAuthToken = vi.fn();
 const clearAuthToken = vi.fn();
+const syncProfilesFromBackend = vi.fn().mockResolvedValue({ ok: true });
 
 vi.mock('@/src/services/backend-api', () => ({
   backendFetchMe: (...args: unknown[]) => backendFetchMe(...args),
@@ -73,7 +74,7 @@ vi.mock('@/src/services/backend-api', () => ({
   backendLogin: vi.fn(),
   backendDeleteAccount: vi.fn(),
   backendReplitExchange: vi.fn(),
-  syncProfilesFromBackend: vi.fn().mockResolvedValue(undefined),
+  syncProfilesFromBackend: (...args: unknown[]) => syncProfilesFromBackend(...args),
 }));
 
 vi.mock('@/src/store/app-store', () => ({
@@ -93,6 +94,7 @@ describe('restoreAuthSession', () => {
     backendFetchMe.mockReset();
     getAuthToken.mockReset();
     clearAuthToken.mockReset();
+    syncProfilesFromBackend.mockClear();
   });
 
   afterEach(() => {
@@ -110,6 +112,7 @@ describe('restoreAuthSession', () => {
 
     expect(backendFetchMe).not.toHaveBeenCalled();
     expect(settings.get('authUserId')).toBe('42');
+    expect(syncProfilesFromBackend).toHaveBeenCalledWith(42, 'jwt-token');
   });
 
   it('hydrates userId from SecureStore into settings', async () => {
@@ -123,6 +126,7 @@ describe('restoreAuthSession', () => {
     expect(settings.get('authUserId')).toBe('7');
     expect(settings.has('authToken')).toBe(false);
     expect(backendFetchMe).not.toHaveBeenCalled();
+    expect(syncProfilesFromBackend).toHaveBeenCalledWith(7, 'secure-jwt');
   });
 
   it('fetches /me when token exists but cache is missing', async () => {
@@ -137,6 +141,7 @@ describe('restoreAuthSession', () => {
 
     expect(backendFetchMe).toHaveBeenCalledWith('jwt-token');
     expect(settings.get('authUserId')).toBe('9');
+    expect(syncProfilesFromBackend).toHaveBeenCalledWith(9, 'jwt-token');
   });
 
   it('clears session when token is missing but cache remains', async () => {
