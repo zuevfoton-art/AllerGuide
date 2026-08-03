@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import {
   ExpoSpeechRecognitionModule,
   addSpeechRecognitionListener,
@@ -133,24 +133,35 @@ export function buildOsSpeechStartOptions(locale: string): OsSpeechStartOptions 
 }
 
 /**
- * Requests RECORD_AUDIO only when not already granted. On Android 16 the
- * permission dialog result can be delivered twice (expo/expo#39480), so we
- * avoid redundant requests to minimize exposure to that OS bug.
+ * Ensures RECORD_AUDIO is granted.
+ *
+ * On Android the request goes through React Native core `PermissionsAndroid`:
+ * resolving an expo-modules-core (SDK 53) promise right after the permission
+ * activity round-trip can SIGSEGV in libexpo-modules-core.so (JSI callback
+ * use-after-free) — reproduced via logcat on the staging APK. RN core uses a
+ * different native path and is unaffected.
  */
-async function ensureOsSpeechPermission(): Promise<boolean> {
+export async function ensureRecordAudioPermission(): Promise<boolean> {
+  if (Platform.OS === 'android') {
+    const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
+    if (await PermissionsAndroid.check(permission)) return true;
+    const result = await PermissionsAndroid.request(permission);
+    return result === PermissionsAndroid.RESULTS.GRANTED;
+  }
+
   try {
     const current = await ExpoSpeechRecognitionModule.getPermissionsAsync();
     if (current.granted) return true;
     if (!current.canAskAgain) return false;
   } catch (error) {
-    logCaughtError('ensureOsSpeechPermission.get', error, { level: 'warn' });
+    logCaughtError('ensureRecordAudioPermission.get', error, { level: 'warn' });
   }
   const requested = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
   return requested.granted;
 }
 
 async function startOsSpeechDictation(locale: string): Promise<void> {
-  const granted = await ensureOsSpeechPermission();
+  const granted = await ensureRecordAudioPermission();
   if (!granted) {
     throw new Error('VOICE_PERMISSION_DENIED');
   }

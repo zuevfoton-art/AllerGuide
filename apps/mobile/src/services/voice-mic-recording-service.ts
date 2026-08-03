@@ -4,7 +4,7 @@
  */
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
-import { Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { logCaughtError } from '@/src/services/error-reporting';
 
 const STT_SAMPLE_RATE_HZ = 16_000;
@@ -143,18 +143,27 @@ export async function startMicRecording(): Promise<void> {
     await cancelMicRecording();
   }
 
-  // Ask only when needed: Android 16 can deliver the permission dialog result
-  // twice (expo/expo#39480), so skip the request when already granted.
+  // On Android request via RN core PermissionsAndroid: resolving an
+  // expo-modules-core (SDK 53) promise after the permission activity
+  // round-trip can SIGSEGV (see ensureRecordAudioPermission in
+  // voice-dictation-service). Elsewhere use expo-av permissions.
   let granted = false;
-  try {
-    const current = await Audio.getPermissionsAsync();
-    granted = current.granted;
-  } catch (error) {
-    logCaughtError('startMicRecording.getPermissions', error, { level: 'warn' });
-  }
-  if (!granted) {
-    const permission = await Audio.requestPermissionsAsync();
-    granted = permission.granted;
+  if (Platform.OS === 'android') {
+    const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
+    granted =
+      (await PermissionsAndroid.check(permission)) ||
+      (await PermissionsAndroid.request(permission)) === PermissionsAndroid.RESULTS.GRANTED;
+  } else {
+    try {
+      const current = await Audio.getPermissionsAsync();
+      granted = current.granted;
+    } catch (error) {
+      logCaughtError('startMicRecording.getPermissions', error, { level: 'warn' });
+    }
+    if (!granted) {
+      const permission = await Audio.requestPermissionsAsync();
+      granted = permission.granted;
+    }
   }
   if (!granted) {
     throw new Error('VOICE_PERMISSION_DENIED');
