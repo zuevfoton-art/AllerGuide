@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import {
   ExpoSpeechRecognitionModule,
   addSpeechRecognitionListener,
+  getSpeechRecognitionServices,
   isRecognitionAvailable,
   supportsOnDeviceRecognition,
 } from 'expo-speech-recognition';
@@ -22,6 +23,8 @@ export type VoiceDictationMode = 'os' | 'cloud-mic';
 type FinalResultHandler = (transcript: string) => void;
 type ErrorHandler = (code: string) => void;
 type StateHandler = (state: VoiceDictationState) => void;
+
+type OsSpeechStartOptions = Parameters<typeof ExpoSpeechRecognitionModule.start>[0];
 
 let resultSub: { remove: () => void } | null = null;
 let errorSub: { remove: () => void } | null = null;
@@ -90,6 +93,45 @@ function preferOnDevice(): boolean {
   }
 }
 
+function preferAndroidRecognitionPackage(): string | undefined {
+  if (Platform.OS !== 'android') return undefined;
+  try {
+    const services = getSpeechRecognitionServices();
+    if (services.includes('com.google.android.tts')) {
+      return 'com.google.android.tts';
+    }
+    if (services.includes('com.google.android.googlequicksearchbox')) {
+      return 'com.google.android.googlequicksearchbox';
+    }
+  } catch (error) {
+    logCaughtError('preferAndroidRecognitionPackage', error, { level: 'warn' });
+  }
+  return undefined;
+}
+
+/**
+ * Platform-safe options for expo-speech-recognition.
+ * Android: `continuous` / `addsPunctuation` are unsupported or crash-prone on many devices
+ * (custom AudioRecord path; punctuation only with on-device API 33+).
+ */
+export function buildOsSpeechStartOptions(locale: string): OsSpeechStartOptions {
+  const isAndroid = Platform.OS === 'android';
+  const options: OsSpeechStartOptions = {
+    lang: resolveSpeechLocale(locale),
+    interimResults: true,
+    continuous: !isAndroid,
+    requiresOnDeviceRecognition: preferOnDevice(),
+    addsPunctuation: !isAndroid,
+  };
+
+  const androidPackage = preferAndroidRecognitionPackage();
+  if (androidPackage) {
+    options.androidRecognitionServicePackage = androidPackage;
+  }
+
+  return options;
+}
+
 async function startOsSpeechDictation(locale: string): Promise<void> {
   const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
   if (!permission.granted) {
@@ -130,13 +172,15 @@ async function startOsSpeechDictation(locale: string): Promise<void> {
 
   setListening(true);
   activeMode = 'os';
-  ExpoSpeechRecognitionModule.start({
-    lang: resolveSpeechLocale(locale),
-    interimResults: true,
-    continuous: true,
-    requiresOnDeviceRecognition: preferOnDevice(),
-    addsPunctuation: true,
-  });
+  try {
+    ExpoSpeechRecognitionModule.start(buildOsSpeechStartOptions(locale));
+  } catch (error) {
+    setListening(false);
+    activeMode = null;
+    clearListeners();
+    logCaughtError('startOsSpeechDictation.start', error, { level: 'warn' });
+    throw error instanceof Error ? error : new Error('VOICE_RECOGNITION_FAILED');
+  }
 }
 
 async function startCloudMicDictation(locale: string): Promise<void> {
@@ -174,8 +218,15 @@ export async function startVoiceDictation(
   }
 
   if (mode === 'os') {
-    await startOsSpeechDictation(locale);
-    return mode;
+    try {
+      await startOsSpeechDictation(locale);
+      return mode;
+    } catch (error) {
+      if (!YC_STT_ENABLED) throw error;
+      logCaughtError('startVoiceDictation.osFallbackToCloud', error, { level: 'warn' });
+      await startCloudMicDictation(locale);
+      return 'cloud-mic';
+    }
   }
 
   await startCloudMicDictation(locale);
