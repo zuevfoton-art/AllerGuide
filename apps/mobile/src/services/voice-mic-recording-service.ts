@@ -7,11 +7,6 @@ import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 import { logCaughtError } from '@/src/services/error-reporting';
 
-/** Android MediaRecorder OutputFormat.OGG (API 29+) — not in expo-av enum yet. */
-const ANDROID_OUTPUT_OGG = 11;
-/** Android MediaRecorder AudioEncoder.OPUS (API 29+). */
-const ANDROID_ENCODER_OPUS = 7;
-
 const STT_SAMPLE_RATE_HZ = 16_000;
 
 export type MicRecordingFormat = 'lpcm' | 'oggopus';
@@ -24,31 +19,51 @@ export type MicRecordingResult = {
 
 let activeRecording: Audio.Recording | null = null;
 
+/**
+ * SpeechKit-compatible capture options.
+ * Avoid undocumented Android MediaRecorder constants (e.g. OGG/OPUS magic numbers):
+ * invalid combos can native-crash and bypass JS try/catch.
+ */
 function sttRecordingOptions(): Audio.RecordingOptions {
+  if (Platform.OS === 'ios') {
+    return {
+      isMeteringEnabled: true,
+      android: Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
+      ios: {
+        extension: '.wav',
+        outputFormat: Audio.IOSOutputFormat.LINEARPCM,
+        audioQuality: Audio.IOSAudioQuality.HIGH,
+        sampleRate: STT_SAMPLE_RATE_HZ,
+        numberOfChannels: 1,
+        bitRate: 256_000,
+        linearPCMBitDepth: 16,
+        linearPCMIsBigEndian: false,
+        linearPCMIsFloat: false,
+      },
+      web: {
+        mimeType: 'audio/webm;codecs=opus',
+        bitsPerSecond: 24_000,
+      },
+    };
+  }
+
+  // Android / web fallback: only documented expo-av presets (MPEG4/AAC on Android).
+  // AAC is not SpeechKit sync-format; OS speech is preferred on Android.
   return {
     isMeteringEnabled: true,
+    ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
     android: {
-      // Prefer OggOpus for SpeechKit sync STT on Android 10+.
-      extension: '.ogg',
-      outputFormat: ANDROID_OUTPUT_OGG as Audio.AndroidOutputFormat,
-      audioEncoder: ANDROID_ENCODER_OPUS as Audio.AndroidAudioEncoder,
+      ...Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
       sampleRate: STT_SAMPLE_RATE_HZ,
       numberOfChannels: 1,
-      bitRate: 24_000,
+      bitRate: 64_000,
     },
     ios: {
-      extension: '.wav',
-      outputFormat: Audio.IOSOutputFormat.LINEARPCM,
-      audioQuality: Audio.IOSAudioQuality.HIGH,
+      ...Audio.RecordingOptionsPresets.HIGH_QUALITY.ios,
       sampleRate: STT_SAMPLE_RATE_HZ,
       numberOfChannels: 1,
-      bitRate: 256_000,
-      linearPCMBitDepth: 16,
-      linearPCMIsBigEndian: false,
-      linearPCMIsFloat: false,
     },
     web: {
-      // Best-effort; Chromium typically records Opus in WebM.
       mimeType: 'audio/webm;codecs=opus',
       bitsPerSecond: 24_000,
     },
@@ -111,6 +126,14 @@ export function isMicRecordingActive(): boolean {
   return activeRecording !== null;
 }
 
+function uriLooksLikeWav(uri: string): boolean {
+  return /\.wav($|\?)/i.test(uri);
+}
+
+function uriLooksLikeOgg(uri: string): boolean {
+  return /\.ogg($|\?)/i.test(uri) || /\.opus($|\?)/i.test(uri);
+}
+
 /**
  * Starts capturing audio from the device microphone.
  * Throws VOICE_PERMISSION_DENIED when the user denies mic access.
@@ -136,27 +159,7 @@ export async function startMicRecording(): Promise<void> {
   });
 
   const recording = new Audio.Recording();
-  try {
-    await recording.prepareToRecordAsync(sttRecordingOptions());
-  } catch (error) {
-    // Older Android without OGG/OPUS — fall back to AAC/m4a (API may reject; OS STT is preferred).
-    logCaughtError('startMicRecording.prepareOgg', error, { level: 'warn' });
-    await recording.prepareToRecordAsync({
-      ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      android: {
-        ...Audio.RecordingOptionsPresets.HIGH_QUALITY.android,
-        sampleRate: STT_SAMPLE_RATE_HZ,
-        numberOfChannels: 1,
-        bitRate: 64_000,
-      },
-      ios: {
-        ...Audio.RecordingOptionsPresets.HIGH_QUALITY.ios,
-        sampleRate: STT_SAMPLE_RATE_HZ,
-        numberOfChannels: 1,
-      },
-    });
-  }
-
+  await recording.prepareToRecordAsync(sttRecordingOptions());
   await recording.startAsync();
   activeRecording = recording;
 }
@@ -204,7 +207,7 @@ export async function stopMicRecording(): Promise<MicRecordingResult> {
     playThroughEarpieceAndroid: false,
   });
 
-  if (Platform.OS === 'ios' || uri.endsWith('.wav')) {
+  if (Platform.OS === 'ios' || uriLooksLikeWav(uri)) {
     return {
       audioBase64: stripWavHeaderToPcmBase64(rawBase64),
       format: 'lpcm',
@@ -212,11 +215,21 @@ export async function stopMicRecording(): Promise<MicRecordingResult> {
     };
   }
 
-  return {
-    audioBase64: rawBase64,
-    format: 'oggopus',
-    sampleRateHertz: STT_SAMPLE_RATE_HZ,
-  };
+  if (uriLooksLikeOgg(uri) || Platform.OS === 'web') {
+    return {
+      audioBase64: rawBase64,
+      format: 'oggopus',
+      sampleRateHertz: STT_SAMPLE_RATE_HZ,
+    };
+  }
+
+  // Android HIGH_QUALITY is typically AAC/m4a — not a SpeechKit sync format.
+  logCaughtError(
+    'stopMicRecording.unsupportedFormat',
+    new Error(`Unsupported mic capture URI for SpeechKit: ${uri}`),
+    { level: 'warn' },
+  );
+  throw new Error('VOICE_RECOGNITION_FAILED');
 }
 
 /** Aborts capture without returning audio. */
@@ -239,7 +252,7 @@ export async function cancelMicRecording(): Promise<void> {
     try {
       await FileSystem.deleteAsync(uri, { idempotent: true });
     } catch {
-      // ignore
+      // ignore cleanup failures for temp mic files
     }
   }
 
