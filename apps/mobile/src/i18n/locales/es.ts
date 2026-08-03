@@ -261,6 +261,7 @@ const es: LocaleMessages = {
     title: 'Entrada de voz',
     tapToSpeak: 'Toca el micrófono y dicta',
     listening: 'Escuchando… toca para parar',
+    processing: 'Reconociendo el habla…',
     startRecording: 'Iniciar entrada de voz',
     stopRecording: 'Detener entrada de voz',
     permissionDenied: 'Se necesita permiso de micrófono para la entrada de voz.',

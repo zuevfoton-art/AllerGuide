@@ -156,7 +156,7 @@ src/modules/marketplace/
 | Clinical | `asit-*-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy*-service`, `clinical-reminder-service`, `reminder-reconcile-service` |
 | Pollen / map | `pollen-map-service`, `pollen-heatmap-service`, `pollen-reminder-service`, `location-service`, `place-service`, `wellness-service` |
 | Sync / backup | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` |
-| Settings / ops | `settings-service`, `secure-settings-service`, `notification-*-service`, `app-lock-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `market-api` |
+| Settings / ops | `settings-service`, `secure-settings-service`, `notification-*-service`, `app-lock-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api` |
 
 ### DB / store / i18n
 

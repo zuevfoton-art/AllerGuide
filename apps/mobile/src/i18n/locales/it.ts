@@ -261,6 +261,7 @@ const it: LocaleMessages = {
     title: 'Input vocale',
     tapToSpeak: 'Tocca il microfono e detta',
     listening: 'In ascolto… tocca per fermare',
+    processing: 'Riconoscimento vocale…',
     startRecording: 'Avvia input vocale',
     stopRecording: 'Ferma input vocale',
     permissionDenied: 'Serve l\'autorizzazione al microfono per l\'input vocale.',

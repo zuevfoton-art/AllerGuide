@@ -42,8 +42,11 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
   const toggle = useCallback(async () => {
     if (disabled || !supported) return;
 
+    if (state === 'processing') return;
+
     if (state === 'listening') {
-      await stopVoiceDictation();
+      // Cloud mic path sets `processing` via onStateChange; OS speech stays listening until `end`.
+      await stopVoiceDictation(locale);
       return;
     }
 
@@ -54,6 +57,7 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
           if (transcript.trim()) onTranscript(transcript.trim());
         },
         onError: handleError,
+        onStateChange: setState,
       });
       setState('listening');
     } catch (error) {
@@ -76,25 +80,43 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
   }
 
   const isListening = state === 'listening';
+  const isProcessing = state === 'processing';
 
   return (
     <View style={styles.wrap} testID={testID}>
       <Pressable
-        style={[styles.micBtn, isListening && styles.micBtnActive, disabled && styles.micBtnDisabled]}
-        disabled={disabled}
+        style={[
+          styles.micBtn,
+          isListening && styles.micBtnActive,
+          (disabled || isProcessing) && styles.micBtnDisabled,
+        ]}
+        disabled={disabled || isProcessing}
         onPress={() => void toggle()}
         accessibilityRole="button"
         accessibilityLabel={
-          isListening ? t('voiceNote.stopRecording') : t('voiceNote.startRecording')
+          isListening
+            ? t('voiceNote.stopRecording')
+            : isProcessing
+              ? t('voiceNote.processing')
+              : t('voiceNote.startRecording')
         }
         testID={testID ? `${testID}-mic` : 'voice-note-mic'}>
-        {isListening ? (
-          <ActivityIndicator color={theme.colors.danger} size="small" />
+        {isListening || isProcessing ? (
+          <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.accent} size="small" />
         ) : (
           <Ionicons name="mic" size={20} color={theme.colors.accent} />
         )}
-        <Text style={[styles.micLabel, isListening && styles.micLabelRecording]}>
-          {isListening ? t('voiceNote.listening') : t('voiceNote.tapToSpeak')}
+        <Text
+          style={[
+            styles.micLabel,
+            isListening && styles.micLabelRecording,
+            isProcessing && styles.micLabelProcessing,
+          ]}>
+          {isProcessing
+            ? t('voiceNote.processing')
+            : isListening
+              ? t('voiceNote.listening')
+              : t('voiceNote.tapToSpeak')}
         </Text>
       </Pressable>
       {isListening ? (
@@ -139,6 +161,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
     },
     micLabelRecording: { color: colors.danger },
+    micLabelProcessing: { color: colors.accent },
     cancelBtn: { alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 4 },
     cancelText: {
       fontFamily: fonts.sansSemiBold,

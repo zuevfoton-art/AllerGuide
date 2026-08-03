@@ -28,7 +28,8 @@ export const YC_SEARCH_ENABLED = process.env.EXPO_PUBLIC_YC_SEARCH === 'true';
 
 /**
  * Phase 3: Yandex SpeechKit STT via POST /api/stt when OS speech recognition
- * is unavailable. Offline / flag-off keeps expo-speech-recognition only.
+ * is unavailable. Mic capture uses expo-av (never a file picker). Offline /
+ * flag-off keeps expo-speech-recognition only.
  */
 export const YC_STT_ENABLED = process.env.EXPO_PUBLIC_YC_STT === 'true';
 

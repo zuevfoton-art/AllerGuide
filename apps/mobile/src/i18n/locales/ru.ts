@@ -262,6 +262,7 @@ const ru: LocaleMessages = {
     title: 'Голосовой ввод',
     tapToSpeak: 'Нажмите на микрофон и продиктуйте',
     listening: 'Слушаю… нажмите, чтобы остановить',
+    processing: 'Распознаём речь…',
     startRecording: 'Начать голосовой ввод',
     stopRecording: 'Остановить голосовой ввод',
     permissionDenied: 'Нужен доступ к микрофону для голосового ввода.',

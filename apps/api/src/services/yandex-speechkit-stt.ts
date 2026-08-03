@@ -15,6 +15,29 @@ export function yandexSpeechkitSttConfigured(): boolean {
   );
 }
 
+/** SpeechKit `lpcm` expects raw PCM; clients may still send a RIFF/WAVE wrapper. */
+export function stripWavHeaderIfPresent(audio: Buffer): Buffer {
+  if (
+    audio.length < 12 ||
+    audio.subarray(0, 4).toString('ascii') !== 'RIFF' ||
+    audio.subarray(8, 12).toString('ascii') !== 'WAVE'
+  ) {
+    return audio;
+  }
+
+  let offset = 12;
+  while (offset + 8 <= audio.length) {
+    const id = audio.subarray(offset, offset + 4).toString('ascii');
+    const size = audio.readUInt32LE(offset + 4);
+    const dataStart = offset + 8;
+    if (id === 'data') {
+      return audio.subarray(dataStart, Math.min(dataStart + size, audio.length));
+    }
+    offset = dataStart + size;
+  }
+  return audio;
+}
+
 export async function recognizeSpeechWithYandexSpeechkit(input: {
   audioBase64: string;
   lang?: string;
@@ -34,6 +57,9 @@ export async function recognizeSpeechWithYandexSpeechkit(input: {
     audio = Buffer.from(input.audioBase64.trim(), 'base64');
   } catch {
     return null;
+  }
+  if (format === 'lpcm') {
+    audio = stripWavHeaderIfPresent(audio);
   }
   if (audio.length < 16) return null;
 

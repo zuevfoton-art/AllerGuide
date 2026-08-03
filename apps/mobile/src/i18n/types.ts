@@ -264,6 +264,7 @@ export type LocaleMessages = {
     title: string;
     tapToSpeak: string;
     listening: string;
+    processing: string;
     startRecording: string;
     stopRecording: string;
     permissionDenied: string;
