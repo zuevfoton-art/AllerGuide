@@ -2,14 +2,21 @@ import { describe, expect, it } from 'vitest';
 import {
   PRESCRIBED_SIMPLIFIED_STEP_IDS,
   PRESCRIBED_THERAPY_DOSE_STATUS_LABELS,
+  addPrescribedReminderTime,
   buildPrescribedTherapyDiarySummary,
   buildPrescribedTherapyPrefill,
   computePrescribedCompliance,
   createDefaultPrescribedCourse,
+  formatPrescribedReminderTimes,
+  getPrescribedReminderTimes,
   isPrescribedCourseConfigured,
+  isPrescribedReminderConfigured,
   normalizeTherapyDoseStatus,
   parsePrescribedCourse,
+  removePrescribedReminderTimeAt,
   serializePrescribedCourse,
+  setPrescribedReminderEnabled,
+  updatePrescribedReminderTimeAt,
 } from './prescribed-therapy';
 import { encodeDiaryDetails } from './diary';
 
@@ -105,5 +112,30 @@ describe('prescribed-therapy', () => {
     });
     expect(summary).toContain('Сингуляр');
     expect(summary).toContain(PRESCRIBED_THERAPY_DOSE_STATUS_LABELS['on-time']);
+  });
+
+  it('supports multiple daily reminder times with legacy fallback', () => {
+    const legacy = {
+      ...createDefaultPrescribedCourse(),
+      drug: 'Симбикорт',
+      reminderHour: 8,
+      reminderMinute: 0,
+    };
+    expect(isPrescribedReminderConfigured(legacy)).toBe(true);
+    expect(getPrescribedReminderTimes(legacy)).toEqual([{ hour: 8, minute: 0 }]);
+
+    let course = setPrescribedReminderEnabled(createDefaultPrescribedCourse(), true);
+    course = addPrescribedReminderTime(course);
+    expect(getPrescribedReminderTimes(course)).toHaveLength(2);
+    course = updatePrescribedReminderTimeAt(course, 1, { hour: 20, minute: 30 });
+    expect(formatPrescribedReminderTimes(getPrescribedReminderTimes(course))).toContain('20:30');
+    course = removePrescribedReminderTimeAt(course, 0);
+    expect(getPrescribedReminderTimes(course)).toEqual([{ hour: 20, minute: 30 }]);
+    expect(course.reminderHour).toBe(20);
+    expect(course.reminderMinute).toBe(30);
+
+    course = setPrescribedReminderEnabled(course, false);
+    expect(isPrescribedReminderConfigured(course)).toBe(false);
+    expect(course.reminderTimes).toBeUndefined();
   });
 });

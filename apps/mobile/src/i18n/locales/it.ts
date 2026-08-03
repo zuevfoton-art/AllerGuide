@@ -934,6 +934,8 @@ const it: LocaleMessages = {
     reminderMinute: 'Min',
     reminderHint: 'Il promemoria aiuta a seguire lo schema di assunzione.',
     reminderAt: 'Promemoria alle {{time}}',
+    addReminderTime: 'Aggiungi orario',
+    removeReminderTime: 'Rimuovi promemoria',
     reviewTitle: 'Riepilogo finale',
     reviewConfirm: 'Attiva corso',
     notesLabel: 'Note per il medico',

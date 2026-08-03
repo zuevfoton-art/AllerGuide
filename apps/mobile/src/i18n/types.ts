@@ -912,6 +912,8 @@ export type LocaleMessages = {
     reminderMinute: string;
     reminderHint: string;
     reminderAt: string;
+    addReminderTime: string;
+    removeReminderTime: string;
     reviewTitle: string;
     reviewConfirm: string;
     notesLabel: string;

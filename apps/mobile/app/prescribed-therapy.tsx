@@ -2,14 +2,18 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { router } from 'expo-router';
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
-  DEFAULT_ASIT_REMINDER_HOUR,
-  DEFAULT_ASIT_REMINDER_MINUTE,
+  MAX_PRESCRIBED_REMINDER_TIMES,
+  addPrescribedReminderTime,
   filterFilledScheduleStages,
   formatPrescribedReminderTime,
+  getPrescribedReminderTimes,
   isPrescribedReminderConfigured,
   normalizeScheduleLines,
   PRESCRIBED_THERAPY_ROUTE_LABELS,
+  removePrescribedReminderTimeAt,
   scheduleLinesToNotes,
+  setPrescribedReminderEnabled,
+  updatePrescribedReminderTimeAt,
   type PrescribedCourse,
   type PrescribedTherapyRoute,
 } from '@allerguide/core';
@@ -161,19 +165,7 @@ export default function PrescribedTherapyScreen() {
   const reminderEnabled = isPrescribedReminderConfigured(course);
 
   const toggleReminder = (enabled: boolean) => {
-    setCourse((prev) => {
-      if (!enabled) {
-        const next = { ...prev };
-        delete next.reminderHour;
-        delete next.reminderMinute;
-        return next;
-      }
-      return {
-        ...prev,
-        reminderHour: prev.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR,
-        reminderMinute: prev.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE,
-      };
-    });
+    setCourse((prev) => setPrescribedReminderEnabled(prev, enabled));
   };
 
   if (!profile) {
@@ -503,6 +495,8 @@ interface ReviewStepPTProps {
 }
 
 function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, reminderEnabled, toggleReminder, t }: ReviewStepPTProps) {
+  const reminderTimes = getPrescribedReminderTimes(course);
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -559,40 +553,67 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
         </View>
 
         {reminderEnabled ? (
-          <View style={styles.reminderRow}>
-            <View style={styles.reminderField}>
-              <Text style={styles.reminderFieldLabel}>{t('prescribedTherapy.reminderHour')}</Text>
-              <TextInput
-                style={styles.input}
-                value={String(course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR)}
-                onChangeText={(v) => {
-                  const hour = Number(v.replace(/\D/g, ''));
-                  if (!Number.isFinite(hour)) return;
-                  setCourse((prev) => ({ ...prev, reminderHour: Math.min(23, Math.max(0, hour)) }));
-                }}
-                keyboardType="number-pad"
-                maxLength={2}
-                placeholderTextColor={theme.colors.textMuted}
-              />
-            </View>
-            <View style={styles.reminderField}>
-              <Text style={styles.reminderFieldLabel}>{t('prescribedTherapy.reminderMinute')}</Text>
-              <TextInput
-                style={styles.input}
-                value={String(course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE)}
-                onChangeText={(v) => {
-                  const minute = Number(v.replace(/\D/g, ''));
-                  if (!Number.isFinite(minute)) return;
-                  setCourse((prev) => ({ ...prev, reminderMinute: Math.min(59, Math.max(0, minute)) }));
-                }}
-                keyboardType="number-pad"
-                maxLength={2}
-                placeholderTextColor={theme.colors.textMuted}
-              />
-            </View>
-            <Text style={styles.reminderPreview}>
-              {formatPrescribedReminderTime(course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR, course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE)}
-            </Text>
+          <View style={styles.reminderList} testID="prescribed-reminder-times">
+            {reminderTimes.map((time, index) => (
+              <View key={`reminder-${index}`} style={styles.reminderRow} testID={`prescribed-reminder-row-${index}`}>
+                <View style={styles.reminderField}>
+                  <Text style={styles.reminderFieldLabel}>{t('prescribedTherapy.reminderHour')}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={String(time.hour)}
+                    onChangeText={(v) => {
+                      const hour = Number(v.replace(/\D/g, ''));
+                      if (!Number.isFinite(hour)) return;
+                      setCourse((prev) => updatePrescribedReminderTimeAt(prev, index, { hour }));
+                    }}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    placeholderTextColor={theme.colors.textMuted}
+                  />
+                </View>
+                <View style={styles.reminderField}>
+                  <Text style={styles.reminderFieldLabel}>{t('prescribedTherapy.reminderMinute')}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={String(time.minute)}
+                    onChangeText={(v) => {
+                      const minute = Number(v.replace(/\D/g, ''));
+                      if (!Number.isFinite(minute)) return;
+                      setCourse((prev) => updatePrescribedReminderTimeAt(prev, index, { minute }));
+                    }}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                    placeholderTextColor={theme.colors.textMuted}
+                  />
+                </View>
+                <Text style={styles.reminderPreview}>
+                  {formatPrescribedReminderTime(time.hour, time.minute)}
+                </Text>
+                {reminderTimes.length > 1 ? (
+                  <Pressable
+                    style={styles.reminderIconBtn}
+                    onPress={() => setCourse((prev) => removePrescribedReminderTimeAt(prev, index))}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('prescribedTherapy.removeReminderTime')}
+                    testID={`prescribed-reminder-remove-${index}`}>
+                    <Ionicons name="close" size={20} color={theme.colors.textMuted} />
+                  </Pressable>
+                ) : (
+                  <View style={styles.reminderIconBtnSpacer} />
+                )}
+              </View>
+            ))}
+            {reminderTimes.length < MAX_PRESCRIBED_REMINDER_TIMES ? (
+              <Pressable
+                style={styles.addReminderBtn}
+                onPress={() => setCourse((prev) => addPrescribedReminderTime(prev))}
+                accessibilityRole="button"
+                accessibilityLabel={t('prescribedTherapy.addReminderTime')}
+                testID="prescribed-reminder-add">
+                <Ionicons name="add" size={18} color={theme.colors.accent} />
+                <Text style={styles.addReminderText}>{t('prescribedTherapy.addReminderTime')}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : (
           <Text style={styles.hint}>{t('prescribedTherapy.reminderHint')}</Text>
@@ -702,10 +723,45 @@ function createStyles({ colors, fonts }: AppTheme) {
     stageDateRow: { flexDirection: 'row', gap: 8 },
     stageRow: { fontFamily: fonts.sans, fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
     reviewValue: { fontFamily: fonts.sansSemiBold, fontSize: 15, fontWeight: '600', color: colors.text },
-    reminderRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginTop: 8 },
+    reminderList: { gap: 8, marginTop: 8 },
+    reminderRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
     reminderField: { flex: 1, gap: 4 },
     reminderFieldLabel: { fontFamily: fonts.sans, fontSize: 12, color: colors.textMuted },
-    reminderPreview: { fontFamily: fonts.sansSemiBold, fontSize: 16, fontWeight: '600', color: colors.accent, paddingBottom: 12 },
+    reminderPreview: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.accent,
+      paddingBottom: 12,
+      minWidth: 52,
+      textAlign: 'right',
+    },
+    reminderIconBtn: {
+      width: 40,
+      height: 44,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      marginBottom: 0,
+    },
+    reminderIconBtnSpacer: { width: 40, height: 44 },
+    addReminderBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      alignSelf: 'flex-start',
+      paddingVertical: 8,
+      paddingHorizontal: 4,
+    },
+    addReminderText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     empty: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary, textAlign: 'center', paddingVertical: 24 },
     hint: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
     modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },

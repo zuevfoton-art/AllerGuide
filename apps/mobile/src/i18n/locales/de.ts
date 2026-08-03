@@ -935,6 +935,8 @@ const de: LocaleMessages = {
     reminderMinute: 'Min',
     reminderHint: 'Erinnerung hilft, das Einnahmeschema einzuhalten.',
     reminderAt: 'Erinnerung um {{time}}',
+    addReminderTime: 'Zeit hinzufügen',
+    removeReminderTime: 'Erinnerung entfernen',
     reviewTitle: 'Abschlussübersicht',
     reviewConfirm: 'Kurs aktivieren',
     notesLabel: 'Notizen für den Arzt',
