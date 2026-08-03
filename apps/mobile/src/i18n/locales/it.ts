@@ -681,7 +681,7 @@ const it: LocaleMessages = {
     conditionsQuestion: 'Quali allergie hai?',
     conditionsQuestionChild: 'Quali allergie ha tuo figlio?',
     conditionsHint:
-      'Seleziona tutti i tipi pertinenti — il diario adatterà scale e sezioni (picco di flusso per l\'asma, AIT per la pollinosi, ecc.).',
+      'Seleziona tutti i tipi pertinenti. Picco di flusso solo con asma, AIT solo con pollinosi; le altre sezioni del diario si adattano ai tipi scelti.',
     otherConditionLabel: 'Altri tipi di allergia',
     otherConditionHint: 'Scrivi il nome dell\'allergia o dell\'allergene.',
     otherConditionPlaceholder: 'Ad esempio: lattice, nichel…',
@@ -873,7 +873,7 @@ const it: LocaleMessages = {
     saveCourse: 'Salva corso',
     disclaimer: 'L\'AIT è prescritta solo dal medico. L\'app non modifica le dosi.',
     noProfile: 'Seleziona un profilo nella schermata principale.',
-    notEligible: 'AIT disponibile per pollinosi, rinite, allergia domestica o agli animali.',
+    notEligible: 'AIT disponibile quando nel profilo è selezionata la pollinosi.',
     reminderLabel: 'Promemoria giornaliero',
     reminderOn: 'Attivo',
     reminderOff: 'Disattivo',

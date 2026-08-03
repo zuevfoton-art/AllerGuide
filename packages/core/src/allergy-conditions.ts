@@ -76,7 +76,6 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
     id: 'rhinitis',
     label: 'Аллергический ринит',
     description: 'Воспаление слизистой носа',
-    enablesAsit: true,
   },
   {
     id: 'dermatitis',
@@ -97,7 +96,6 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
       { id: 'dust-mites', label: 'Клещ домашней пыли' },
       { id: 'mold', label: 'Плесень' },
     ],
-    enablesAsit: true,
   },
   {
     id: 'animal',
@@ -111,7 +109,6 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
       { id: 'horse', label: 'Лошади' },
       { id: 'rabbit', label: 'Кролики' },
     ],
-    enablesAsit: true,
   },
   {
     id: 'drug',
@@ -150,14 +147,23 @@ export function normalizeOtherConditionLabel(raw: string | null | undefined): st
 }
 
 export function profileEnablesPeakFlow(conditionIds: AllergyConditionId[]): boolean {
-  return conditionIds.some((id) => getConditionType(id)?.enablesPeakFlow);
+  return conditionIds.includes('asthma');
 }
 
 export function profileEnablesAsit(conditionIds: AllergyConditionId[]): boolean {
-  return conditionIds.some((id) => getConditionType(id)?.enablesAsit);
+  return conditionIds.includes('pollinosis');
 }
+
+const KNOWN_CONDITION_IDS = new Set<string>(ALLERGY_CONDITION_TYPES.map((item) => item.id));
 
 export function parseConditionIds(raw: string | null | undefined): AllergyConditionId[] {
   if (!raw?.trim()) return [];
-  return raw.split(',').map((s) => s.trim()).filter(Boolean) as AllergyConditionId[];
+  const unique: AllergyConditionId[] = [];
+  for (const part of raw.split(',')) {
+    const id = part.trim();
+    if (!KNOWN_CONDITION_IDS.has(id)) continue;
+    if (unique.includes(id as AllergyConditionId)) continue;
+    unique.push(id as AllergyConditionId);
+  }
+  return unique;
 }

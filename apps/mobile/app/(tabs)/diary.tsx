@@ -96,9 +96,12 @@ export default function DiaryScreen() {
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
   );
+  /** Bump on focus so condition gating re-reads app_settings after profile edit. */
+  const [capabilitiesTick, setCapabilitiesTick] = useState(0);
   const profileCapabilities = useMemo(
     () => (activeProfile ? getProfileCapabilities(activeProfile) : null),
-    [activeProfile],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick forces re-read of profileConditions settings
+    [activeProfile, capabilitiesTick],
   );
   const profileConditions = useMemo(
     () => profileCapabilities?.gatingConditions ?? [],
@@ -203,6 +206,7 @@ export default function DiaryScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setCapabilitiesTick((tick) => tick + 1);
       void load();
     }, [load]),
   );

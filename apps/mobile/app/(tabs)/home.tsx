@@ -52,9 +52,11 @@ export default function HomeScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
 
+  const [capabilitiesTick, setCapabilitiesTick] = useState(0);
   const profileCapabilities = useMemo(
     () => (profile ? getProfileCapabilities(profile) : null),
-    [profile],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick re-reads condition gating from settings
+    [profile, capabilitiesTick],
   );
 
   const wellnessState = useAsyncState<WellnessSnapshot | null>(async () => {
@@ -82,6 +84,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setCapabilitiesTick((tick) => tick + 1);
       reloadHomeData();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [reloadHomeData, locale]),
