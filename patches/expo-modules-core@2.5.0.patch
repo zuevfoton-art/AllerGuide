@@ -24,19 +24,27 @@ index d2e13efa5dff73823732df2f14bb1b1978b366c5..cd34883f422878fbb30557876ba8c11d
  
      body()
 diff --git a/common/cpp/LazyObject.cpp b/common/cpp/LazyObject.cpp
-index 862a97dc5082a0391d45688e11bfd41ed6f17563..4ac80b612419b452d0d7e874dca1ce171c3d136a 100644
+index 862a97dc5082a0391d45688e11bfd41ed6f17563..af8ee7b69413e8dee5a837f910e837f27a03b77b 100644
 --- a/common/cpp/LazyObject.cpp
 +++ b/common/cpp/LazyObject.cpp
-@@ -49,6 +49,15 @@ const jsi::Object &LazyObject::unwrapObjectIfNecessary(jsi::Runtime &runtime, co
+@@ -46,9 +46,23 @@ const jsi::Object &LazyObject::unwrapObjectIfNecessary(jsi::Runtime &runtime, co
+   if (object.isHostObject<LazyObject>(runtime)) {
+     LazyObject::Shared lazyObject = object.getHostObject<LazyObject>(runtime);
+ 
++    // Patched (AllerGuide): guard against null instead of dereferencing.
++    // Reproduced native SIGSEGV (fault addr 0x10, JS thread) at this function
++    // when tapping the voice dictation button: `getHostObject<LazyObject>` can
++    // return null (native runtime torn down, or an AV/audio module that failed
++    // to install its JSI bindings), and reading `lazyObject->backedObject` then
++    // dereferences a null pointer, bypassing JS try/catch. Also guard the case
++    // where the backed object itself never initializes. `get`/`set` already
++    // null-check the backed object; mirror that here for both pointers.
++    if (!lazyObject) {
++      return object;
++    }
      if (!lazyObject->backedObject) {
        lazyObject->initializeBackedObject(runtime);
      }
-+    // Patched (AllerGuide): guard against a null backed object instead of
-+    // dereferencing it. When a module's LazyObject fails to initialize (e.g. the
-+    // native runtime is being torn down, or an AV/audio module cannot install its
-+    // JSI bindings), backedObject stays null and `*backedObject` hard-crashes with
-+    // a native SIGSEGV in the JS thread (fault addr 0x10), bypassing JS try/catch.
-+    // `LazyObject::get`/`set` already null-check; mirror that here.
 +    if (!lazyObject->backedObject) {
 +      return object;
 +    }
