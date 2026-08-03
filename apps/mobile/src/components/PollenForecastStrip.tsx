@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { PollenForecastDay, PollenMapTaxonId, PollenTierLevel } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -7,6 +7,9 @@ import { useTranslation } from '@/src/store/locale-store';
 interface PollenForecastStripProps {
   days: PollenForecastDay[];
   taxonId: PollenMapTaxonId;
+  /** Index into `days`, or null for “today” (no day selected). */
+  selectedDayIndex?: number | null;
+  onSelectDay?: (index: number | null) => void;
 }
 
 const WEEKDAY_KEYS = [
@@ -19,7 +22,12 @@ const WEEKDAY_KEYS = [
   'map.weekdaySat',
 ] as const;
 
-export function PollenForecastStrip({ days, taxonId }: PollenForecastStripProps) {
+export function PollenForecastStrip({
+  days,
+  taxonId,
+  selectedDayIndex = null,
+  onSelectDay,
+}: PollenForecastStripProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
@@ -40,17 +48,29 @@ export function PollenForecastStrip({ days, taxonId }: PollenForecastStripProps)
   );
 
   return (
-    <View style={styles.wrap}>
+    <View style={styles.wrap} testID="map-forecast-strip">
       <Text style={styles.title}>{t('map.forecastTitle')}</Text>
       <View style={styles.row}>
-        {days.map((day) => {
+        {days.map((day, index) => {
           const reading = day.readings.find((item) => item.taxonId === taxonId);
           const level = reading?.level ?? null;
           const value = reading?.value ?? 0;
           const height = 12 + Math.round((value / maxValue) * 36);
           const weekday = weekdayLabel(day.date, t);
+          const selected = selectedDayIndex === index;
+          const DayWrap = onSelectDay ? Pressable : View;
           return (
-            <View key={day.date} style={styles.day}>
+            <DayWrap
+              key={day.date}
+              style={[styles.day, selected && styles.daySelected]}
+              {...(onSelectDay
+                ? {
+                    onPress: () => onSelectDay(selected ? null : index),
+                    accessibilityRole: 'button' as const,
+                    accessibilityState: { selected },
+                    testID: `map-forecast-day-${index}`,
+                  }
+                : {})}>
               <View
                 style={[
                   styles.bar,
@@ -60,8 +80,8 @@ export function PollenForecastStrip({ days, taxonId }: PollenForecastStripProps)
                   },
                 ]}
               />
-              <Text style={styles.weekday}>{weekday}</Text>
-            </View>
+              <Text style={[styles.weekday, selected && styles.weekdaySelected]}>{weekday}</Text>
+            </DayWrap>
           );
         })}
       </View>
@@ -97,7 +117,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 6,
       minHeight: 64,
     },
-    day: { flex: 1, alignItems: 'center', gap: 6 },
+    day: {
+      flex: 1,
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 4,
+      borderRadius: 6,
+    },
+    daySelected: {
+      backgroundColor: colors.accentLight,
+    },
     bar: {
       width: '70%',
       maxWidth: 28,
@@ -108,6 +137,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 11,
       color: colors.textMuted,
+    },
+    weekdaySelected: {
+      fontFamily: fonts.sansSemiBold,
+      fontWeight: '600',
+      color: colors.accent,
     },
     empty: {
       paddingVertical: 8,
