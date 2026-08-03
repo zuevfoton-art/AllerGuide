@@ -148,9 +148,10 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 
 1. `initDb()` — создание таблиц / загрузка IndexedDB
 2. Replit callback (`?replit_auth=1` на web) → `loginWithReplitExchange()` → JWT
-3. `restoreAuthSession()` — гидратация токена из SecureStore / settings
+3. `restoreAuthSession()` — гидратация токена из SecureStore / settings и **await** `syncProfilesFromBackend` (при backend auth)
 4. Проверка `isAuthenticated()` → иначе `/login`
-5. `resolveAuthedBootstrapRoute()` из `@allerguide/core` (intro + onboarding + home)
+5. `refreshProfilesFromBackend()` + `ensureActiveProfileLoaded({ preferSelf: true })` — активный профиль сразу в store; при нескольких профилях выбирается родитель (`self`)
+6. `resolveAuthedBootstrapRoute()` из `@allerguide/core` (intro + onboarding + home)
 
 **Стек аутентификации и onboarding:**
 

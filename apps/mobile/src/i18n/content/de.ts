@@ -5,6 +5,9 @@ const deContent: LocaleContent = {
     Симптомы: {
       title: 'Symptome',
       steps: {
+        symptomCode: {
+          label: 'Symptome (aus dem Katalog)',
+        },
         symptoms: {
           label: 'Welche Symptome liegen vor?',
           placeholder: 'Zum Beispiel: Juckreiz, Lippenschwellung, Husten',

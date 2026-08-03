@@ -10,7 +10,12 @@ import {
   loginWithReplitExchange,
   restoreAuthSession,
 } from '@/src/services/auth-service';
-import { listProfiles, migrateLegacyProfilesToUser } from '@/src/services/profile-service';
+import {
+  ensureActiveProfileLoaded,
+  listProfiles,
+  migrateLegacyProfilesToUser,
+  refreshProfilesFromBackend,
+} from '@/src/services/profile-service';
 import {
   getStoredScenario,
   isIntroComplete,
@@ -37,14 +42,20 @@ export default function Index() {
         typeof window !== 'undefined' &&
         window.location.search.includes('replit_auth=1');
 
-      function continueBootstrap() {
+      async function continueBootstrap() {
         const userId = getCurrentUserId();
         if (userId) migrateLegacyProfilesToUser(userId);
+
+        // Best-effort cloud refresh (local DB already filled by login/restore when online).
+        await refreshProfilesFromBackend();
+        // Parent (`self`) becomes active when several profiles exist; full row in store.
+        ensureActiveProfileLoaded({ preferSelf: true });
 
         const profiles = listProfiles();
         const scenario = getStoredScenario();
         if (scenario) setScenario(scenario);
 
+        if (!mounted) return;
         setTarget(
           resolveAuthedBootstrapRoute(
             profiles,
@@ -63,7 +74,7 @@ export default function Index() {
           setTarget('/login');
           return;
         }
-        continueBootstrap();
+        await continueBootstrap();
         return;
       }
 
@@ -75,7 +86,7 @@ export default function Index() {
         return;
       }
 
-      continueBootstrap();
+      await continueBootstrap();
     })();
 
     return () => {

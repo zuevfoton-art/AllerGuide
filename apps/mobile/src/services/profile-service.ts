@@ -17,8 +17,10 @@ import {
   migrateProfileAllergiesJson,
   normalizeAllergyConfirmations,
   parseAllergyConfirmations,
+  resolvePreferredActiveProfile,
   serializeAllergyConfirmations,
   serializeProfileAllergenIds,
+  sortProfilesForDisplay,
   validateProfileInput,
   type Profile,
   type ProfileInput,
@@ -74,16 +76,34 @@ function assertValidProfileInput(input: ProfileInput) {
   if (error) throw new ProfileValidationError(error);
 }
 
-function syncActiveProfileAfterList(profiles: Profile[]) {
-  const { activeProfileId, setActiveProfile, setActiveProfileId } = useAppStore.getState();
+function syncActiveProfileAfterList(profiles: Profile[], options?: { preferSelf?: boolean }) {
+  const { activeProfileId, setActiveProfile } = useAppStore.getState();
   if (profiles.length === 0) {
-    setActiveProfileId(null);
     setActiveProfile(null);
     return;
   }
-  const active = profiles.find((p) => p.id === activeProfileId) ?? profiles[0];
-  setActiveProfileId(active.id);
+
+  const preferred = resolvePreferredActiveProfile(profiles);
+  const keepCurrent =
+    !options?.preferSelf &&
+    activeProfileId != null &&
+    profiles.some((profile) => profile.id === activeProfileId);
+
+  const active = keepCurrent
+    ? profiles.find((profile) => profile.id === activeProfileId) ?? preferred
+    : preferred;
+
   setActiveProfile(active);
+}
+
+/**
+ * Load profiles for the signed-in user and activate the preferred one
+ * (parent / `self` when present). Call on app bootstrap and after login.
+ */
+export function ensureActiveProfileLoaded(options?: { preferSelf?: boolean }): Profile | null {
+  const profiles = listProfiles();
+  syncActiveProfileAfterList(profiles, { preferSelf: options?.preferSelf ?? true });
+  return useAppStore.getState().activeProfile;
 }
 
 function throwOnBackendError(response: { ok: false; error: string; status: number }): never {
@@ -96,7 +116,11 @@ export function listProfiles() {
   if (!userId) return [];
 
   const db = getDb();
-  return db.getAllSync<Profile>('SELECT * FROM profiles WHERE userId = ? ORDER BY id DESC', [userId]);
+  const rows = db.getAllSync<Profile>(
+    'SELECT * FROM profiles WHERE userId = ? ORDER BY id ASC',
+    [userId],
+  );
+  return sortProfilesForDisplay(rows);
 }
 
 /** Pull server profiles into local DB (P1.2d). Best-effort; returns error code without throwing. */
@@ -120,7 +144,7 @@ export async function refreshProfilesFromBackend(): Promise<
 
   replaceLocalProfilesForUser(userId, response.data.profiles);
   const profiles = listProfiles();
-  syncActiveProfileAfterList(profiles);
+  syncActiveProfileAfterList(profiles, { preferSelf: true });
   return { ok: true, profiles };
 }
 
@@ -228,12 +252,9 @@ export async function deleteProfile(id: number) {
   db.runSync('DELETE FROM safe_products WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profiles WHERE id = ?', [id]);
 
-  const { activeProfileId, setActiveProfileId, setActiveProfile } = useAppStore.getState();
+  const { activeProfileId } = useAppStore.getState();
   if (activeProfileId === id) {
-    const remaining = listProfiles();
-    const next = remaining[0] ?? null;
-    setActiveProfileId(next?.id ?? null);
-    setActiveProfile(next);
+    syncActiveProfileAfterList(listProfiles(), { preferSelf: true });
   }
 }
 

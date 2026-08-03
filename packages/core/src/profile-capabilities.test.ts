@@ -106,14 +106,26 @@ describe('profile-capabilities explicit-first gating', () => {
     expect(caps.recommendedScaleIds).toContain('scorad-lite');
   });
 
-  it('S8: household without pollen allergens skips pollen reminders', () => {
+  it('S8: household without pollen allergens skips ASIT and pollen reminders', () => {
     const caps = buildProfileCapabilities({
       profile: profile(['dust-mite']),
       explicitConditions: ['household'],
     });
 
-    expect(caps.modules.asit).toBe(true);
+    expect(caps.modules.asit).toBe(false);
+    expect(caps.modules.peakFlow).toBe(false);
     expect(caps.reminders.pollen).toBe(false);
+  });
+
+  it('food-only never enables ASIT or peak flow', () => {
+    const caps = buildProfileCapabilities({
+      profile: profile(['milk', 'egg']),
+      explicitConditions: ['food'],
+    });
+    expect(caps.modules.asit).toBe(false);
+    expect(caps.modules.peakFlow).toBe(false);
+    expect(caps.homeQuickActions).not.toContain('asit');
+    expect(caps.homeQuickActions).not.toContain('peakFlow');
   });
 
   it('infers conditions for hints but does not gate modules', () => {

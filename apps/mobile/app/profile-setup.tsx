@@ -21,7 +21,10 @@ import {
   type ProfileType,
 } from '@allerguide/core';
 import { createProfile, listProfiles, ProfileValidationError } from '@/src/services/profile-service';
-import { setStoredProfileConditions } from '@/src/services/profile-conditions-service';
+import {
+  setStoredOtherConditionLabel,
+  setStoredProfileConditions,
+} from '@/src/services/profile-conditions-service';
 import { setStoredSymptomBaseline } from '@/src/services/profile-symptom-baseline-service';
 import { saveConditionHistoryFromOnboarding } from '@/src/services/condition-history-service';
 import {
@@ -78,6 +81,7 @@ export default function ProfileSetupScreen() {
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
+  const [otherConditionLabel, setOtherConditionLabel] = useState('');
   const [conditionOptionSelections, setConditionOptionSelections] =
     useState<ConditionOptionSelections>({});
   const optionSeedRef = useRef<string[]>([]);
@@ -181,6 +185,7 @@ export default function ProfileSetupScreen() {
 
   const applyConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
+    if (!next.includes('other')) setOtherConditionLabel('');
     setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
     setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
     const nextOptions = reconcileConditionOptionSelections(next, conditionOptionSelections);
@@ -209,6 +214,7 @@ export default function ProfileSetupScreen() {
     setSelected([]);
     setCrossReactionAllergenIds([]);
     setConditions([]);
+    setOtherConditionLabel('');
     setConditionOptionSelections({});
     optionSeedRef.current = [];
     setSymptomBaseline(createEmptySymptomBaseline());
@@ -258,6 +264,10 @@ export default function ProfileSetupScreen() {
     }
 
     setStoredProfileConditions(id, conditions);
+    setStoredOtherConditionLabel(
+      id,
+      conditions.includes('other') ? otherConditionLabel : '',
+    );
     setStoredSymptomBaseline(id, isSymptomBaselineEmpty(symptomBaseline) ? null : symptomBaseline);
     saveConditionHistoryFromOnboarding(id, conditions, conditionHistoryDrafts, comorbidityLinks);
     syncEmergencyContacts(id, normalizeEmergencyContactDrafts(contacts));
@@ -385,8 +395,8 @@ export default function ProfileSetupScreen() {
         <ProfileSetupConditionsStep
           selected={conditions}
           onChange={handleConditionsChange}
-          optionSelections={conditionOptionSelections}
-          onOptionSelectionsChange={applyOptionPreSeed}
+          otherLabel={otherConditionLabel}
+          onOtherLabelChange={setOtherConditionLabel}
           profileType={effectiveType}
         />
       ) : null}

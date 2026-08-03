@@ -37,6 +37,13 @@ describe('voice-diary', () => {
     expect(parsed.symptomCode).toMatch(/Кашель|Одышка/);
   });
 
+  it('stores multiple catalog labels in symptomCode when several are inferred', () => {
+    const parsed = parseVoiceDiaryUtterance('зуд глаз и чихание');
+    expect(parsed.symptomCode?.split('\n')).toEqual(
+      expect.arrayContaining(['Зуд глаз', 'Чихание']),
+    );
+  });
+
   it('applies parse into empty structured symptom answers', () => {
     const parsed = parseVoiceDiaryUtterance('Умеренный насморк и чихание с вечера вчера');
     const next = applyVoiceParseToAnswers({}, parsed, {

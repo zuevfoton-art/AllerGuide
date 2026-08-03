@@ -5,6 +5,9 @@ const esContent: LocaleContent = {
     Симптомы: {
       title: 'Síntomas',
       steps: {
+        symptomCode: {
+          label: 'Síntomas (del catálogo)',
+        },
         symptoms: {
           label: '¿Qué síntomas presenta?',
           placeholder: 'Por ejemplo: picor, hinchazón de labios, tos',

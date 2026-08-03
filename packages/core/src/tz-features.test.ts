@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   profileEnablesAsit,
   profileEnablesPeakFlow,
+  parseConditionIds,
   ALLERGY_CONDITION_TYPES,
 } from './allergy-conditions';
 import { computeWellnessScore, wellnessStatusFromScore } from './wellness';
@@ -13,15 +14,22 @@ describe('allergy-conditions', () => {
     expect(profileEnablesPeakFlow(['food'])).toBe(false);
   });
 
-  it('enables ASIT for pollinosis and rhinitis', () => {
+  it('enables ASIT only for pollinosis', () => {
     expect(profileEnablesAsit(['pollinosis'])).toBe(true);
-    expect(profileEnablesAsit(['rhinitis'])).toBe(true);
+    expect(profileEnablesAsit(['rhinitis'])).toBe(false);
+    expect(profileEnablesAsit(['household'])).toBe(false);
     expect(profileEnablesAsit(['food'])).toBe(false);
+    expect(profileEnablesAsit(['asthma'])).toBe(false);
   });
 
   it('defines 11 condition types including urticaria', () => {
     expect(ALLERGY_CONDITION_TYPES.length).toBe(11);
     expect(ALLERGY_CONDITION_TYPES.some((item) => item.id === 'urticaria')).toBe(true);
+  });
+
+  it('parseConditionIds keeps only known ids', () => {
+    expect(parseConditionIds('food,asthma,not-a-type,food')).toEqual(['food', 'asthma']);
+    expect(parseConditionIds('')).toEqual([]);
   });
 });
 

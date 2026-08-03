@@ -677,6 +677,9 @@ export type LocaleMessages = {
     conditionsQuestion: string;
     conditionsQuestionChild: string;
     conditionsHint: string;
+    otherConditionLabel: string;
+    otherConditionHint: string;
+    otherConditionPlaceholder: string;
     conditionOptionsTitle: string;
     conditionOptionsHint: string;
     crossReactions: {
@@ -912,6 +915,8 @@ export type LocaleMessages = {
     reminderMinute: string;
     reminderHint: string;
     reminderAt: string;
+    addReminderTime: string;
+    removeReminderTime: string;
     reviewTitle: string;
     reviewConfirm: string;
     notesLabel: string;

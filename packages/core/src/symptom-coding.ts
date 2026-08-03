@@ -203,12 +203,23 @@ export function inferSymptomCodesFromText(text: string): string[] {
   return [...found];
 }
 
+/**
+ * Labels from the catalog multi-select step (`symptomCode`), newline-separated
+ * for multi-select or a single legacy label.
+ */
+export function parseSymptomCodeLabels(raw: string | undefined | null): string[] {
+  if (!raw?.trim()) return [];
+  return raw
+    .split(/\n/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 export function resolveSymptomCodes(answers: Record<string, string>): string[] {
   const codes = new Set<string>();
 
-  const primary = answers.symptomCode?.trim();
-  if (primary) {
-    const id = symptomIdFromChoiceLabel(primary);
+  for (const label of parseSymptomCodeLabels(answers.symptomCode)) {
+    const id = symptomIdFromChoiceLabel(label);
     if (id) codes.add(id);
   }
 

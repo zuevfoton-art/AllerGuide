@@ -16,7 +16,6 @@ export function ProfileHeaderButton() {
   const [open, setOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const setActiveProfile = useAppStore((s) => s.setActiveProfile);
 
   useEffect(() => {
@@ -26,7 +25,6 @@ export function ProfileHeaderButton() {
 
   const selectProfile = (profile: Profile) => {
     if (activeProfileId !== profile.id) {
-      setActiveProfileId(profile.id);
       setActiveProfile(profile);
       trackEvent('profile_switched', { profile_type: profile.type, source: 'header' });
     }
