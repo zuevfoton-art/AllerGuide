@@ -10,7 +10,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
 type ProfileHeaderButtonProps = {
-  /** Chip trigger with name + detail (scanner chrome); default is icon-only. */
+  /** Chip trigger with name + detail (scanner/map chrome); default is icon-only. */
   variant?: 'icon' | 'chip';
   chipTitle?: string;
   chipDetail?: string;
@@ -168,7 +168,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       borderWidth: 1,
       borderColor: colors.accentMid,
+<<<<<<< HEAD
       maxWidth: '100%',
+=======
+      maxWidth: '58%',
+>>>>>>> origin/cursor/map-ux-improvements-ccf0
     },
     chipTextCol: { flex: 1, gap: 1, minWidth: 0 },
     chipTitle: {
