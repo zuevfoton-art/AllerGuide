@@ -101,4 +101,29 @@ describe('recognizePrescription', () => {
     expect(outcome.hintCode).toBe('cloud_disabled');
     expect(recognizeImageViaApi).not.toHaveBeenCalled();
   });
+
+  it('flags fields_incomplete when OCR text has no usable drug', async () => {
+    vi.mocked(recognizeImageViaApi).mockResolvedValue({
+      ok: true,
+      text: '12.03.2026\nподпись врача',
+    });
+
+    const outcome = await recognizePrescription({ photoUri: 'file://rx.jpg' });
+    expect(outcome.source).toBe('photo');
+    expect(outcome.parsed.drug).toBe('');
+    expect(outcome.hintCode).toBe('fields_incomplete');
+    expect(outcome.text).toContain('подпись');
+  });
+
+  it('fills drug from unlabeled photo OCR without fields_incomplete', async () => {
+    vi.mocked(recognizeImageViaApi).mockResolvedValue({
+      ok: true,
+      text: ['Монтелукаст 10 мг', '1 раз в сутки вечером'].join('\n'),
+    });
+
+    const outcome = await recognizePrescription({ photoUri: 'file://rx.jpg' });
+    expect(outcome.source).toBe('photo');
+    expect(outcome.parsed.drug).toMatch(/Монтелукаст/);
+    expect(outcome.hintCode).toBeUndefined();
+  });
 });

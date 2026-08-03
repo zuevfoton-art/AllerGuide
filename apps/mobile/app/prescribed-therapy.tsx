@@ -76,6 +76,8 @@ export default function PrescribedTherapyScreen() {
       }
       if (code === 'cloud_disabled') return t('prescribedTherapy.ocrCloudDisabled');
       if (code === 'empty_media') return t('prescribedTherapy.ocrEmptyMedia');
+      if (code === 'fields_incomplete') return t('prescribedTherapy.ocrFieldsIncomplete');
+      if (code === 'parse_error') return t('prescribedTherapy.ocrParseError');
       return t('prescribedTherapy.ocrDemoHint');
     },
     [t],
@@ -106,7 +108,14 @@ export default function PrescribedTherapyScreen() {
       setCourse((prev) => applyPrescriptionParseToCourse(prev, outcome.parsed));
       if (outcome.text) setParseText(outcome.text);
       setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
-      setParseTextOpen(false);
+      if (outcome.hintCode === 'fields_incomplete' && outcome.text.trim()) {
+        setParseTextOpen(true);
+      } else {
+        setParseTextOpen(false);
+      }
+    } catch {
+      setOcrHint(t('prescribedTherapy.ocrParseError'));
+      setParseTextOpen(true);
     } finally {
       setParsing(false);
     }

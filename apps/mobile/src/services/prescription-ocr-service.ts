@@ -16,7 +16,10 @@ export type PrescriptionOcrHintCode =
   | 'cloud_failed'
   | 'cloud_disabled'
   | 'demo'
-  | 'empty_media';
+  | 'empty_media'
+  /** Cloud OCR returned text, but structured fields (drug) stayed empty. */
+  | 'fields_incomplete'
+  | 'parse_error';
 
 export interface PrescriptionOcrOutcome {
   parsed: PrescriptionParseResult;
@@ -109,10 +112,12 @@ export async function recognizePrescription(input: {
   });
 
   if (media && 'text' in media) {
+    const parsed = parsePrescriptionText(media.text);
     return {
-      parsed: parsePrescriptionText(media.text),
+      parsed,
       source: media.source,
       text: media.text,
+      hintCode: parsed.drug.trim() ? undefined : 'fields_incomplete',
     };
   }
 

@@ -86,8 +86,34 @@ describe('prescription-ocr', () => {
   it('returns warnings when fields are missing', () => {
     const parsed = parsePrescriptionText('просто текст без полей');
     expect(parsed.warnings.length).toBeGreaterThan(0);
-    expect(parsed.drug).toBe('');
+    // Unlabeled heuristics treat the first substance-like line as the drug.
+    expect(parsed.drug).toContain('просто');
     expect(parsed.route).toBe('');
+  });
+
+  it('infers drug, dosage and schedule from unlabeled RU OCR text', () => {
+    const parsed = parsePrescriptionText(
+      [
+        'Рецепт',
+        'Rp: Монтелукаст 10 мг',
+        'по 1 таблетке вечером',
+        '1 раз в сутки',
+        'курс 30 дней',
+      ].join('\n'),
+    );
+    expect(parsed.drug).toMatch(/Монтелукаст/);
+    expect(parsed.dosage.length).toBeGreaterThan(0);
+    expect(parsed.scheduleLines.some((line) => /раз в сутки|вечером|курс/i.test(line))).toBe(
+      true,
+    );
+  });
+
+  it('infers drug from plain multiline OCR without Rp label', () => {
+    const parsed = parsePrescriptionText(
+      ['Фексофенадин', '180 мг 1 раз в день', 'утром'].join('\n'),
+    );
+    expect(parsed.drug).toContain('Фексофенадин');
+    expect(parsed.dosage).toMatch(/180|раз в день/i);
   });
 
   it('provides a demo prescription parse with clinical diagnosis', () => {
