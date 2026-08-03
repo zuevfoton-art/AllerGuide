@@ -9,7 +9,18 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
-export function ProfileHeaderButton() {
+type ProfileHeaderButtonProps = {
+  /** Chip trigger with name + detail (scanner chrome); default is icon-only. */
+  variant?: 'icon' | 'chip';
+  chipTitle?: string;
+  chipDetail?: string;
+};
+
+export function ProfileHeaderButton({
+  variant = 'icon',
+  chipTitle,
+  chipDetail,
+}: ProfileHeaderButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
@@ -38,14 +49,36 @@ export function ProfileHeaderButton() {
 
   return (
     <>
-      <Pressable
-        testID="profile-header-button"
-        style={styles.button}
-        onPress={() => setOpen(true)}
-        accessibilityRole="button"
-        accessibilityLabel={t('profileSwitcher.switchTitle')}>
-        <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
-      </Pressable>
+      {variant === 'chip' && chipTitle ? (
+        <Pressable
+          testID="profile-header-chip"
+          style={styles.chip}
+          onPress={() => setOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('profileSwitcher.switchTitle')}>
+          <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
+          <View style={styles.chipTextCol}>
+            <Text style={styles.chipTitle} numberOfLines={1}>
+              {chipTitle}
+            </Text>
+            {chipDetail ? (
+              <Text style={styles.chipDetail} numberOfLines={1}>
+                {chipDetail}
+              </Text>
+            ) : null}
+          </View>
+          <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
+        </Pressable>
+      ) : (
+        <Pressable
+          testID="profile-header-button"
+          style={styles.button}
+          onPress={() => setOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('profileSwitcher.switchTitle')}>
+          <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
+        </Pressable>
+      )}
 
       <Modal
         visible={open}
@@ -124,6 +157,30 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      backgroundColor: colors.accentLight,
+      borderWidth: 1,
+      borderColor: colors.accentMid,
+      maxWidth: '100%',
+    },
+    chipTextCol: { flex: 1, gap: 1, minWidth: 0 },
+    chipTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    chipDetail: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
     },
     backdrop: {
       flex: 1,
