@@ -58,6 +58,7 @@ describe('voice-dictation-service', () => {
     vi.resetModules();
     vi.clearAllMocks();
     delete process.env.EXPO_PUBLIC_YC_STT;
+    delete process.env.EXPO_PUBLIC_YC_STT_MIC;
     isRecognitionAvailableMock.mockReturnValue(false);
     getSpeechRecognitionServicesMock.mockReturnValue(['com.google.android.tts']);
     getPermissionsMock.mockResolvedValue({ granted: false, canAskAgain: true });
@@ -66,8 +67,9 @@ describe('voice-dictation-service', () => {
     permissionsRequestMock.mockResolvedValue('granted');
   });
 
-  it('uses cloud mic when OS speech is unavailable and YC_STT is on', async () => {
+  it('uses cloud mic when OS speech is unavailable and cloud mic is enabled', async () => {
     process.env.EXPO_PUBLIC_YC_STT = 'true';
+    process.env.EXPO_PUBLIC_YC_STT_MIC = 'true';
     const { resolveVoiceDictationMode, isVoiceInputSupported, startVoiceDictation } =
       await import('./voice-dictation-service');
     const { startMicRecording } = await import('./voice-mic-recording-service');
@@ -82,7 +84,16 @@ describe('voice-dictation-service', () => {
     expect(startMicRecording).toHaveBeenCalledOnce();
   });
 
-  it('is unsupported when OS speech and YC_STT are both off', async () => {
+  it('does not select cloud mic when only YC_STT is on (cloud mic gated off)', async () => {
+    process.env.EXPO_PUBLIC_YC_STT = 'true';
+    // EXPO_PUBLIC_YC_STT_MIC intentionally unset — cloud mic disabled by default.
+    const { isVoiceInputSupported, resolveVoiceDictationMode } =
+      await import('./voice-dictation-service');
+    expect(isVoiceInputSupported()).toBe(false);
+    expect(resolveVoiceDictationMode()).toBeNull();
+  });
+
+  it('is unsupported when OS speech and cloud mic are both off', async () => {
     process.env.EXPO_PUBLIC_YC_STT = 'false';
     const { isVoiceInputSupported, resolveVoiceDictationMode } =
       await import('./voice-dictation-service');
@@ -147,8 +158,9 @@ describe('voice-dictation-service', () => {
     );
   });
 
-  it('falls back to cloud mic when OS start throws and YC_STT is on', async () => {
+  it('falls back to cloud mic when OS start throws and cloud mic is enabled', async () => {
     process.env.EXPO_PUBLIC_YC_STT = 'true';
+    process.env.EXPO_PUBLIC_YC_STT_MIC = 'true';
     isRecognitionAvailableMock.mockReturnValue(true);
     startMock.mockImplementationOnce(() => {
       throw new Error('native-start-failed');

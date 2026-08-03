@@ -7,7 +7,7 @@ import {
   supportsOnDeviceRecognition,
 } from 'expo-speech-recognition';
 import { appendTranscript, resolveSpeechLocale } from '@allerguide/core';
-import { YC_STT_ENABLED } from '@/src/constants/features';
+import { YC_STT_MIC_ENABLED } from '@/src/constants/features';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { recognizeSpeechViaApi } from '@/src/services/stt-api-service';
 import {
@@ -74,13 +74,13 @@ export function isOsSpeechRecognitionSupported(): boolean {
  * or cloud SpeechKit STT is enabled (mic → /api/stt).
  */
 export function isVoiceInputSupported(): boolean {
-  return isOsSpeechRecognitionSupported() || YC_STT_ENABLED;
+  return isOsSpeechRecognitionSupported() || YC_STT_MIC_ENABLED;
 }
 
 /** Which capture path will be used on the next start. */
 export function resolveVoiceDictationMode(): VoiceDictationMode | null {
   if (isOsSpeechRecognitionSupported()) return 'os';
-  if (YC_STT_ENABLED) return 'cloud-mic';
+  if (YC_STT_MIC_ENABLED) return 'cloud-mic';
   return null;
 }
 
@@ -250,7 +250,7 @@ export async function startVoiceDictation(
       await startOsSpeechDictation(locale);
       return mode;
     } catch (error) {
-      if (!YC_STT_ENABLED) throw error;
+      if (!YC_STT_MIC_ENABLED) throw error;
       logCaughtError('startVoiceDictation.osFallbackToCloud', error, { level: 'warn' });
       await startCloudMicDictation(locale);
       return 'cloud-mic';
