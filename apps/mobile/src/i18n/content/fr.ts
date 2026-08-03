@@ -5,6 +5,9 @@ const frContent: LocaleContent = {
     Симптомы: {
       title: 'Symptômes',
       steps: {
+        symptomCode: {
+          label: 'Symptômes (du référentiel)',
+        },
         symptoms: {
           label: 'Quels symptômes sont présents ?',
           placeholder: 'Par exemple : démangeaisons, gonflement des lèvres, toux',

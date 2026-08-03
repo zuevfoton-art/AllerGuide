@@ -9,7 +9,9 @@ import {
   getDiarySection,
   hasSectionAnswers,
   parseDiaryPhotoUris,
+  parseMultiChoiceValue,
   serializeDiaryPhotoUris,
+  toggleMultiChoiceValue,
   validateDiarySectionStep,
 } from './diary';
 
@@ -37,6 +39,34 @@ describe('diary schema', () => {
     const decoded = decodeDiaryDetails(encoded);
     expect(decoded?.answers.symptoms).toBe('чихание');
     expect(decoded?.answers.severity).toBe('2');
+    expect(decoded?.answers.symptomCodes).toContain('sneezing');
+  });
+
+  it('allows multi-select on the catalog symptom step', () => {
+    const section = getDiarySection('Симптомы')!;
+    const step = section.steps.find((item) => item.id === 'symptomCode');
+    expect(step?.multiSelect).toBe(true);
+    expect(step?.label).toMatch(/Симптом/);
+  });
+
+  it('toggles multi-choice labels without losing prior selections', () => {
+    const once = toggleMultiChoiceValue('', 'Чихание');
+    const twice = toggleMultiChoiceValue(once, 'Зуд глаз');
+    expect(parseMultiChoiceValue(twice)).toEqual(['Чихание', 'Зуд глаз']);
+    expect(parseMultiChoiceValue(toggleMultiChoiceValue(twice, 'Чихание'))).toEqual(['Зуд глаз']);
+  });
+
+  it('encodes multi-select symptom labels into coded fields', () => {
+    const encoded = encodeDiaryDetails(
+      {
+        symptoms: 'зуд глаз и чихание',
+        symptomCode: 'Зуд глаз\nЧихание',
+        severity0_3: '2 — умеренная',
+      },
+      'Симптомы',
+    );
+    const decoded = decodeDiaryDetails(encoded);
+    expect(decoded?.answers.symptomCodes).toContain('ocular-itching');
     expect(decoded?.answers.symptomCodes).toContain('sneezing');
   });
 

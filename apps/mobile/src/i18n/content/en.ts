@@ -5,6 +5,9 @@ const enContent: LocaleContent = {
     Симптомы: {
       title: 'Symptoms',
       steps: {
+        symptomCode: {
+          label: 'Symptoms (from catalog)',
+        },
         symptoms: {
           label: 'What symptoms are present?',
           placeholder: 'For example: itching, lip swelling, cough',

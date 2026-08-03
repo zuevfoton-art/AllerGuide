@@ -5,6 +5,9 @@ const itContent: LocaleContent = {
     Симптомы: {
       title: 'Sintomi',
       steps: {
+        symptomCode: {
+          label: 'Sintomi (dal catalogo)',
+        },
         symptoms: {
           label: 'Quali sintomi sono presenti?',
           placeholder: 'Ad esempio: prurito, gonfiore alle labbra, tosse',
