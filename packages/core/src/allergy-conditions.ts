@@ -140,6 +140,15 @@ export function getConditionType(id: AllergyConditionId): AllergyConditionType |
   return ALLERGY_CONDITION_TYPES.find((c) => c.id === id);
 }
 
+/** Max length for free-text name when condition type `other` is selected. */
+export const OTHER_CONDITION_LABEL_MAX_LENGTH = 120;
+
+/** Trim and clamp the free-text label for «Другие виды аллергии». */
+export function normalizeOtherConditionLabel(raw: string | null | undefined): string {
+  if (!raw) return '';
+  return raw.trim().slice(0, OTHER_CONDITION_LABEL_MAX_LENGTH);
+}
+
 export function profileEnablesPeakFlow(conditionIds: AllergyConditionId[]): boolean {
   return conditionIds.some((id) => getConditionType(id)?.enablesPeakFlow);
 }

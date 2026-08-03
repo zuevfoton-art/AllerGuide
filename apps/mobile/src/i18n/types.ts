@@ -677,6 +677,9 @@ export type LocaleMessages = {
     conditionsQuestion: string;
     conditionsQuestionChild: string;
     conditionsHint: string;
+    otherConditionLabel: string;
+    otherConditionHint: string;
+    otherConditionPlaceholder: string;
     conditionOptionsTitle: string;
     conditionOptionsHint: string;
     crossReactions: {

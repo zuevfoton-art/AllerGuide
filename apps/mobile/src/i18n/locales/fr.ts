@@ -682,6 +682,9 @@ const fr: LocaleMessages = {
     conditionsQuestionChild: 'Quelles allergies a ton enfant ?',
     conditionsHint:
       'Sélectionnez tous les types concernés — le journal adaptera échelles et sections (débit de pointe pour l\'asthme, AIT pour le pollinose, etc.).',
+    otherConditionLabel: 'Autres types d\'allergie',
+    otherConditionHint: 'Indiquez le nom de l\'allergie ou de l\'allergène.',
+    otherConditionPlaceholder: 'Par exemple : latex, nickel…',
     conditionOptionsTitle: 'Préciser : {{label}}',
     conditionOptionsHint: 'Choisissez des allergènes précis — ils apparaîtront à l\'étape suivante.',
     crossReactions: {

@@ -690,6 +690,9 @@ const en: LocaleMessages = {
     conditionsQuestionChild: "What allergies does your child have?",
     conditionsHint:
       'Select all that apply — the diary will tailor scales and sections (peak flow for asthma, AIT for pollinosis, etc.).',
+    otherConditionLabel: 'Other allergy types',
+    otherConditionHint: 'Enter the name of the allergy or allergen.',
+    otherConditionPlaceholder: 'For example: latex, nickel…',
     conditionOptionsTitle: 'Specify: {{label}}',
     conditionOptionsHint: 'Pick specific allergens — they will appear on the next step.',
     crossReactions: {

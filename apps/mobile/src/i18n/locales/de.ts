@@ -683,6 +683,9 @@ const de: LocaleMessages = {
     conditionsQuestionChild: 'Welche Allergien hat dein Kind?',
     conditionsHint:
       'Wählen Sie alle zutreffenden Typen — das Tagebuch passt Skalen und Abschnitte an (PSF bei Asthma, AIT bei Pollinose usw.).',
+    otherConditionLabel: 'Andere Allergietypen',
+    otherConditionHint: 'Geben Sie den Namen der Allergie oder des Allergens an.',
+    otherConditionPlaceholder: 'Zum Beispiel: Latex, Nickel…',
     conditionOptionsTitle: 'Präzisieren: {{label}}',
     conditionOptionsHint: 'Wählen Sie konkrete Allergene — sie erscheinen im nächsten Schritt.',
     crossReactions: {
