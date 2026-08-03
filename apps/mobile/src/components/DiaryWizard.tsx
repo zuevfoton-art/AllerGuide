@@ -15,6 +15,7 @@ import {
   getScaleIdFromAnswers,
   hasSectionAnswers,
   parseDiaryPhotoUris,
+  parseMultiChoiceValue,
   parsePefNumeric,
   parseSelectedComponentIds,
   parseDishComponentDefs,
@@ -23,6 +24,7 @@ import {
   resolvePersonalBestPef,
   resolveSelectedIdsForEnrichment,
   serializeSelectedComponentIds,
+  toggleMultiChoiceValue,
   validateClinicalScale,
   validateDiarySectionStep,
   type DiarySection,
@@ -743,16 +745,23 @@ function StepField({
   }
 
   if (step.field === 'choice' && step.choices) {
+    const selected = step.multiSelect ? parseMultiChoiceValue(value) : [];
     return (
-      <View style={styles.choiceGrid}>
+      <View style={styles.choiceGrid} testID={step.multiSelect ? 'diary-multi-choice' : undefined}>
         {step.choices.map((choice) => {
-          const active = value === choice;
+          const active = step.multiSelect ? selected.includes(choice) : value === choice;
           return (
             <Pressable
               key={choice}
+              testID={step.multiSelect ? `diary-multi-choice-${choice}` : undefined}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
-              onPress={() => onChange(choice)}>
-              <Text style={[styles.choiceText, active && styles.choiceTextActive]}>{choice}</Text>
+              onPress={() =>
+                onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice)
+              }>
+              <Text style={[styles.choiceText, active && styles.choiceTextActive]}>
+                {step.multiSelect && active ? '✓ ' : ''}
+                {choice}
+              </Text>
             </Pressable>
           );
         })}

@@ -15,9 +15,46 @@ export interface DiaryStep {
   field: DiaryStepField;
   choices?: string[];
   multiline?: boolean;
+  /**
+   * For `choice` fields: allow selecting several chips.
+   * Values are stored as labels joined by {@link MULTI_CHOICE_SEPARATOR}.
+   */
+  multiSelect?: boolean;
   required?: boolean;
   /** Optional clinical / help text (tooltip-level). */
   hint?: string;
+}
+
+/** Separator for multi-select diary choice answers (labels never contain it). */
+export const MULTI_CHOICE_SEPARATOR = '\n';
+
+export function parseMultiChoiceValue(raw: string | undefined | null): string[] {
+  if (!raw?.trim()) return [];
+  return raw
+    .split(MULTI_CHOICE_SEPARATOR)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+export function serializeMultiChoiceValue(values: string[]): string {
+  const unique: string[] = [];
+  for (const value of values) {
+    const trimmed = value.trim();
+    if (!trimmed || unique.includes(trimmed)) continue;
+    unique.push(trimmed);
+  }
+  return unique.join(MULTI_CHOICE_SEPARATOR);
+}
+
+export function toggleMultiChoiceValue(
+  raw: string | undefined | null,
+  choice: string,
+): string {
+  const current = parseMultiChoiceValue(raw);
+  const next = current.includes(choice)
+    ? current.filter((item) => item !== choice)
+    : [...current, choice];
+  return serializeMultiChoiceValue(next);
 }
 
 export interface DiarySection {
@@ -40,9 +77,10 @@ export const DIARY_SECTIONS: DiarySection[] = [
     steps: [
       {
         id: 'symptomCode',
-        label: 'Основной симптом (из справочника)',
+        label: 'Симптомы (из справочника)',
         field: 'choice',
         choices: getSymptomCatalogChoices(),
+        multiSelect: true,
         required: false,
       },
       {

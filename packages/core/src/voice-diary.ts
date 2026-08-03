@@ -146,7 +146,9 @@ export function parseVoiceDiaryUtterance(text: string): VoiceDiaryParseResult {
 
   const lower = transcript.toLowerCase().replace(/ё/g, 'е');
   const codes = inferSymptomCodesFromText(transcript);
-  const primary = codes[0] ? getSymptomConcept(codes[0]) : undefined;
+  const labels = codes
+    .map((id) => getSymptomConcept(id)?.labelRu)
+    .filter((label): label is string => Boolean(label));
 
   const severity = detectSeverity(lower);
   const onset = detectOnset(lower);
@@ -157,8 +159,8 @@ export function parseVoiceDiaryUtterance(text: string): VoiceDiaryParseResult {
   if (codes.length || /симптом|зуд|кашел|от[её]к|насморк|чих|сып|одыш/.test(lower)) {
     result.symptoms = transcript;
   }
-  if (primary) {
-    result.symptomCode = primary.labelRu;
+  if (labels.length) {
+    result.symptomCode = labels.join('\n');
   }
   if (severity !== null) {
     result.severity0_3 = SEVERITY_0_3_CHOICES[severity];
@@ -202,16 +204,20 @@ export function applyVoiceParseToAnswers(
       next.symptomAreas = parsed.symptomAreas;
     }
     if (parsed.symptomCode) {
-      const id = SYMPTOM_CATALOG.find((item) => item.labelRu === parsed.symptomCode)?.id;
-      if (id) {
-        const existing = (next.symptomCodes ?? '')
-          .split(',')
-          .map((part) => part.trim())
-          .filter(Boolean);
-        if (!existing.includes(id)) {
-          next.symptomCodes = [...existing, id].join(',');
-        }
+      const labels = parsed.symptomCode
+        .split(/\n/)
+        .map((part) => part.trim())
+        .filter(Boolean);
+      const existing = (next.symptomCodes ?? '')
+        .split(',')
+        .map((part) => part.trim())
+        .filter(Boolean);
+      const merged = [...existing];
+      for (const label of labels) {
+        const id = SYMPTOM_CATALOG.find((item) => item.labelRu === label)?.id;
+        if (id && !merged.includes(id)) merged.push(id);
       }
+      if (merged.length) next.symptomCodes = merged.join(',');
     }
   }
 

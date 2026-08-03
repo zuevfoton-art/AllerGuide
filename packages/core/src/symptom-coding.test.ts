@@ -47,6 +47,26 @@ describe('symptom-coding (C.1)', () => {
     expect(formatCodedSymptomsSummary(codes)).toContain('SNOMED');
   });
 
+  it('resolves multiple catalog labels from multi-select symptomCode', () => {
+    const codes = resolveSymptomCodes({
+      symptomCode: 'Зуд глаз\nЧихание\nКашель',
+    });
+    expect(codes).toEqual(
+      expect.arrayContaining(['ocular-itching', 'sneezing', 'cough']),
+    );
+  });
+
+  it('enriches multi-select catalog answers with all codes', () => {
+    const enriched = enrichSymptomAnswers({
+      symptoms: 'зуд глаз и чихание',
+      symptomCode: 'Зуд глаз\nЧихание',
+    });
+    expect(enriched.symptomCodes).toContain('ocular-itching');
+    expect(enriched.symptomCodes).toContain('sneezing');
+    expect(enriched.symptomCodedSummary).toContain('Зуд глаз');
+    expect(enriched.symptomCodedSummary).toContain('Чихание');
+  });
+
   it('maps food reactionType anaphylaxis to SNOMED (Phase 3)', () => {
     expect(mapFoodReactionTypeToSymptomCodes('Анафилаксия')).toEqual(['anaphylaxis']);
     const enriched = enrichFoodAnswers({ food: 'Орехи', reactionType: 'Анафилаксия' });
