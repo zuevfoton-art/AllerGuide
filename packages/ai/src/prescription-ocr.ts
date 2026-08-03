@@ -313,6 +313,104 @@ function buildScheduleLines(
   return normalizeScheduleLines(lines);
 }
 
+/** Vision OCR often returns plain lines without «Препарат:» labels. */
+const RX_HEADER_LINE =
+  /^(?:рецепт|назначение|пациент|фио|врач|дата|клиник|диагноз|поликлиник|больниц|лпу|подпись|м\.?\s*п\.?|возраст|адрес)(?:\s|$|[:.,;])/i;
+
+const RX_DOSAGE_UNIT =
+  /(?:\d+(?:[.,]\d+)?\s*(?:мг|г|мл|ме|ед\.?|%|таб(?:л(?:етк[аиу])?)?|капс?(?:ул[аы])?|кап(?:ел(?:ь|и)?)?|нажат(?:и[ея]|ий)?|вдох(?:а|ов)?|пшик(?:а|ов)?))/i;
+
+const RX_SCHEDULE_HINT =
+  /\d+\s*раз[а]?\s*в\s*(?:день|сутки|неделю)|ежедневн|утром|вечером|на ночь|через\s+\d+\s*час|курс\s+\d+/i;
+
+function splitPrescriptionLines(text: string): string[] {
+  return text
+    .split(/\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function looksLikeDrugLine(line: string): boolean {
+  if (line.length < 2 || line.length > 120) return false;
+  if (RX_HEADER_LINE.test(line)) return false;
+  if (/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(line)) return false;
+  if (/^(?:дни|этап|схема|режим|дозировка|dose|dosage|по)(?:\s|$|[:.,;])/i.test(line)) {
+    return false;
+  }
+  if (/^\d/.test(line)) return false;
+  if (!/[A-Za-zА-Яа-яЁё]{3,}/.test(line)) return false;
+  return true;
+}
+
+/**
+ * Infer drug name from unlabeled OCR (Rp / first substance-like line).
+ */
+function inferDrugFromUnlabeledText(text: string): string {
+  const lines = splitPrescriptionLines(text);
+
+  for (const line of lines) {
+    const rp = line.match(/^r[pр]\.?\s*[:.\-]?\s*(.+)$/i);
+    if (rp?.[1] && looksLikeDrugLine(rp[1])) return rp[1].trim();
+
+    const assigned = line.match(
+      /^(?:назначено|лекарство|medication|medicine)\s*[:.\-]?\s*(.+)$/i,
+    );
+    if (assigned?.[1] && looksLikeDrugLine(assigned[1])) return assigned[1].trim();
+  }
+
+  // Prefer "Drug 10 mg" over a following pure dosage/schedule line.
+  for (const line of lines) {
+    if (
+      looksLikeDrugLine(line) &&
+      RX_DOSAGE_UNIT.test(line) &&
+      !/^(?:по\s+)/i.test(line)
+    ) {
+      return line;
+    }
+  }
+
+  for (const line of lines) {
+    if (
+      looksLikeDrugLine(line) &&
+      !RX_SCHEDULE_HINT.test(line) &&
+      !RX_DOSAGE_UNIT.test(line)
+    ) {
+      return line;
+    }
+  }
+
+  return '';
+}
+
+function inferDosageFromUnlabeledText(text: string, drugLine: string): string {
+  const lines = splitPrescriptionLines(text);
+
+  for (const line of lines) {
+    if (drugLine && line === drugLine) continue;
+    if (RX_HEADER_LINE.test(line)) continue;
+    if (
+      /^(по\s+)?\d/.test(line) &&
+      (RX_DOSAGE_UNIT.test(line) || RX_SCHEDULE_HINT.test(line))
+    ) {
+      return line;
+    }
+    if (RX_DOSAGE_UNIT.test(line) && line.length < 100) return line;
+  }
+
+  if (drugLine) {
+    const fromDrug = drugLine.match(
+      /(\d+(?:[.,]\d+)?\s*(?:мг|г|мл|ме|ед\.?|таб(?:л(?:етк[аиу])?)?|капс?(?:ул[аы])?|нажат(?:и[ея]|ий)?|вдох(?:а|ов)?).*)/i,
+    );
+    if (fromDrug?.[1]) return fromDrug[1].trim();
+  }
+
+  return '';
+}
+
+function inferScheduleLinesFromUnlabeledText(text: string): string[] {
+  return splitPrescriptionLines(text).filter((line) => RX_SCHEDULE_HINT.test(line));
+}
+
 /**
  * Parse prescription text (from OCR or manual input) into structured fields.
  * Always returns a result; missing fields are empty strings with a warning.
@@ -321,8 +419,19 @@ export function parsePrescriptionText(text: string): PrescriptionParseResult {
   const normalized = text.replace(/\r\n/g, '\n').trim();
   const warnings: string[] = [];
 
-  const drug = extractField(normalized, ['Препарат', 'Drug', 'Наименование', 'Название']);
-  const dosage = extractField(normalized, ['Дозировка', 'Dosage', 'Доза', 'Dose']);
+  let drug = extractField(normalized, [
+    'Препарат',
+    'Drug',
+    'Наименование',
+    'Название',
+    'Лекарство',
+    'Medication',
+  ]);
+  if (!drug) drug = inferDrugFromUnlabeledText(normalized);
+
+  let dosage = extractField(normalized, ['Дозировка', 'Dosage', 'Доза', 'Dose']);
+  if (!dosage) dosage = inferDosageFromUnlabeledText(normalized, drug);
+
   const route = parseRoute(normalized);
   const asitRoute = parseAsitRoute(normalized);
   const startDate =
@@ -345,7 +454,10 @@ export function parsePrescriptionText(text: string): PrescriptionParseResult {
     'Regimen',
   ]);
   const scheduleStages = parseScheduleStages(normalized);
-  const bulletLines = extractScheduleBulletLines(normalized);
+  let bulletLines = extractScheduleBulletLines(normalized);
+  if (bulletLines.length === 0) {
+    bulletLines = inferScheduleLinesFromUnlabeledText(normalized);
+  }
   const scheduleLines = buildScheduleLines(scheduleStages, scheduleNotesLine, bulletLines);
   const scheduleNotes = scheduleLinesToNotes(scheduleLines) || scheduleNotesLine;
   const notes = extractField(normalized, ['Заметки', 'Notes', 'Примечание', 'Комментарий']);

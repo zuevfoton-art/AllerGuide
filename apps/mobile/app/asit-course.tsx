@@ -106,6 +106,8 @@ export default function AsitCourseScreen() {
       }
       if (code === 'cloud_disabled') return t('asit.ocrCloudDisabled');
       if (code === 'empty_media') return t('asit.ocrEmptyMedia');
+      if (code === 'fields_incomplete') return t('asit.ocrFieldsIncomplete');
+      if (code === 'parse_error') return t('asit.ocrParseError');
       return t('asit.ocrDemoHint');
     },
     [t],
@@ -136,8 +138,15 @@ export default function AsitCourseScreen() {
       setCourse((prev) => applyPrescriptionParseToAsitCourse(prev, outcome.parsed));
       if (outcome.text) setParseText(outcome.text);
       setOcrHint(hintFromCode(outcome.hintCode, outcome.cloudError));
-      setParseTextOpen(false);
+      if (outcome.hintCode === 'fields_incomplete' && outcome.text.trim()) {
+        setParseTextOpen(true);
+      } else {
+        setParseTextOpen(false);
+      }
       // Stay on the form so prefilled fields (incl. clinical diagnosis) are visible.
+    } catch {
+      setOcrHint(t('asit.ocrParseError'));
+      setParseTextOpen(true);
     } finally {
       setParsing(false);
     }

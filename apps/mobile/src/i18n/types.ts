@@ -824,6 +824,8 @@ export type LocaleMessages = {
     ocrCloudDisabled: string;
     ocrEmptyMedia: string;
     ocrDemoHint: string;
+    ocrFieldsIncomplete: string;
+    ocrParseError: string;
     verifyTitle: string;
     verifySubtitle: string;
     verifyConfirm: string;
@@ -903,6 +905,8 @@ export type LocaleMessages = {
     ocrCloudDisabled: string;
     ocrEmptyMedia: string;
     ocrDemoHint: string;
+    ocrFieldsIncomplete: string;
+    ocrParseError: string;
     verifyTitle: string;
     verifyConfirm: string;
     saveCourse: string;
