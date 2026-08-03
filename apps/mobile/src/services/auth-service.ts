@@ -12,7 +12,6 @@ import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 import { hydrateSensitiveSettings } from '@/src/services/secure-settings-service';
-import { logCaughtError } from '@/src/services/error-reporting';
 import {
   backendDeleteAccount,
   backendLogin,
@@ -100,9 +99,8 @@ export async function restoreAuthSession(): Promise<void> {
 
   if (getCachedAuthUser() && getSessionUserId()) {
     const userId = getSessionUserId()!;
-    void syncProfilesFromBackend(userId, token).catch((error) => {
-      logCaughtError('syncProfilesFromBackend', error, { level: 'warn' });
-    });
+    // Await pull so bootstrap can activate a real local profile immediately.
+    await syncProfilesFromBackend(userId, token);
     return;
   }
 
@@ -114,6 +112,7 @@ export async function restoreAuthSession(): Promise<void> {
 
   cacheAuthUser(me.data.user);
   setSessionUserId(me.data.user.id);
+  await syncProfilesFromBackend(me.data.user.id, token);
 }
 
 export function isAuthenticated(): boolean {

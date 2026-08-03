@@ -17,7 +17,11 @@ export const useAppStore = create<AppState>((set) => ({
   activeProfile: null,
   setScenario: (scenario) => set({ scenario }),
   setActiveProfileId: (activeProfileId) => set({ activeProfileId }),
-  setActiveProfile: (activeProfile) => set({ activeProfile }),
+  setActiveProfile: (activeProfile) =>
+    set({
+      activeProfile,
+      activeProfileId: activeProfile?.id ?? null,
+    }),
   resetAppState: () => set({ scenario: null, activeProfileId: null, activeProfile: null }),
 }));
 

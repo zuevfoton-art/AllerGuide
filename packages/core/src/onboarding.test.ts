@@ -4,7 +4,9 @@ import {
   parseAllergies,
   resolveAuthedBootstrapRoute,
   resolveBootstrapRoute,
+  resolvePreferredActiveProfile,
   shouldCompleteOnboarding,
+  sortProfilesForDisplay,
 } from './onboarding';
 
 const selfProfile = { id: 1, name: 'A', birthYear: 1990, type: 'self' as const, allergies: '[]' };
@@ -88,6 +90,28 @@ describe('resolveAuthedBootstrapRoute', () => {
     expect(resolveAuthedBootstrapRoute([selfProfile, childProfile], 'both', false, true)).toBe(
       '/(tabs)/home',
     );
+  });
+});
+
+describe('resolvePreferredActiveProfile', () => {
+  it('prefers self/parent over a newer child profile', () => {
+    expect(resolvePreferredActiveProfile([childProfile, selfProfile])).toEqual(selfProfile);
+  });
+
+  it('falls back to the oldest child when no self profile exists', () => {
+    const olderChild = { ...childProfile, id: 3, name: 'C' };
+    expect(resolvePreferredActiveProfile([olderChild, childProfile])).toEqual(childProfile);
+  });
+
+  it('returns null for an empty list', () => {
+    expect(resolvePreferredActiveProfile([])).toBeNull();
+  });
+
+  it('sorts self first for display', () => {
+    expect(sortProfilesForDisplay([childProfile, selfProfile]).map((p) => p.type)).toEqual([
+      'self',
+      'child',
+    ]);
   });
 });
 

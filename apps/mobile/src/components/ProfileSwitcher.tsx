@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { listProfiles } from '@/src/services/profile-service';
+import { ensureActiveProfileLoaded, listProfiles } from '@/src/services/profile-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -15,7 +15,6 @@ export function ProfileSwitcher() {
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const setActiveProfileId = useAppStore((s) => s.setActiveProfileId);
   const setActiveProfile = useAppStore((s) => s.setActiveProfile);
 
   useEffect(() => {
@@ -26,11 +25,10 @@ export function ProfileSwitcher() {
 
     const activeExists = nextProfiles.some((profile) => profile.id === activeProfileId);
     if (!activeProfileId || !activeExists) {
-      const first = nextProfiles[0];
-      setActiveProfileId(first.id);
-      setActiveProfile(first);
+      // Prefer parent (`self`) when nothing valid is selected yet.
+      ensureActiveProfileLoaded({ preferSelf: true });
     }
-  }, [activeProfileId, setActiveProfile, setActiveProfileId]);
+  }, [activeProfileId]);
 
   const handleProfilePress = (profile: Profile) => {
     if (activeProfileId === profile.id) {
@@ -38,7 +36,6 @@ export function ProfileSwitcher() {
       return;
     }
 
-    setActiveProfileId(profile.id);
     setActiveProfile(profile);
     trackEvent('profile_switched', { profile_type: profile.type });
   };
