@@ -1,0 +1,25 @@
+diff --git a/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt b/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt
+index d2e13efa5dff73823732df2f14bb1b1978b366c5..cd34883f422878fbb30557876ba8c11d8013b481 100644
+--- a/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt
++++ b/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt
+@@ -64,14 +64,15 @@ class PromiseImpl @DoNotStrip internal constructor(
+       val exception = PromiseAlreadySettledException(fullFunctionName ?: "unknown")
+       val errorManager = appContextHolder?.get()?.errorManager
+       // We want to report that a promise was settled twice in the development build.
+-      // However, in production, the app should crash.
+       if (BuildConfig.DEBUG && errorManager != null) {
+         errorManager.reportExceptionToLogBox(exception)
+-        logger.error("Trying to resolve promise that was already settled", exception)
+-        return
+       }
+-
+-      throw exception
++      // Patched (AllerGuide): never throw on double settle. Android 16 (2025-09 security
++      // patch) can deliver onRequestPermissionsResult twice, which settled permission
++      // promises twice and crashed production builds (e.g. RECORD_AUDIO request from the
++      // voice dictation button). Upstream: facebook/react-native#53898, expo/expo#39480.
++      logger.error("Trying to settle promise that was already settled", exception)
++      return
+     }
+ 
+     body()

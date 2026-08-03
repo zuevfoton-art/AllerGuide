@@ -132,9 +132,26 @@ export function buildOsSpeechStartOptions(locale: string): OsSpeechStartOptions 
   return options;
 }
 
+/**
+ * Requests RECORD_AUDIO only when not already granted. On Android 16 the
+ * permission dialog result can be delivered twice (expo/expo#39480), so we
+ * avoid redundant requests to minimize exposure to that OS bug.
+ */
+async function ensureOsSpeechPermission(): Promise<boolean> {
+  try {
+    const current = await ExpoSpeechRecognitionModule.getPermissionsAsync();
+    if (current.granted) return true;
+    if (!current.canAskAgain) return false;
+  } catch (error) {
+    logCaughtError('ensureOsSpeechPermission.get', error, { level: 'warn' });
+  }
+  const requested = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+  return requested.granted;
+}
+
 async function startOsSpeechDictation(locale: string): Promise<void> {
-  const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-  if (!permission.granted) {
+  const granted = await ensureOsSpeechPermission();
+  if (!granted) {
     throw new Error('VOICE_PERMISSION_DENIED');
   }
 

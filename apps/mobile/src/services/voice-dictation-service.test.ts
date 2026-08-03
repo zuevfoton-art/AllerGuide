@@ -4,9 +4,13 @@ const startMock = vi.fn();
 const getSpeechRecognitionServicesMock = vi.fn(() => ['com.google.android.tts']);
 const isRecognitionAvailableMock = vi.fn(() => false);
 
+const getPermissionsMock = vi.fn(async () => ({ granted: false, canAskAgain: true }));
+const requestPermissionsMock = vi.fn(async () => ({ granted: true }));
+
 vi.mock('expo-speech-recognition', () => ({
   ExpoSpeechRecognitionModule: {
-    requestPermissionsAsync: vi.fn(async () => ({ granted: true })),
+    getPermissionsAsync: (...args: unknown[]) => getPermissionsMock(...(args as [])),
+    requestPermissionsAsync: (...args: unknown[]) => requestPermissionsMock(...(args as [])),
     start: (...args: unknown[]) => startMock(...args),
     stop: vi.fn(),
     abort: vi.fn(),
@@ -47,6 +51,8 @@ describe('voice-dictation-service', () => {
     delete process.env.EXPO_PUBLIC_YC_STT;
     isRecognitionAvailableMock.mockReturnValue(false);
     getSpeechRecognitionServicesMock.mockReturnValue(['com.google.android.tts']);
+    getPermissionsMock.mockResolvedValue({ granted: false, canAskAgain: true });
+    requestPermissionsMock.mockResolvedValue({ granted: true });
   });
 
   it('uses cloud mic when OS speech is unavailable and YC_STT is on', async () => {
@@ -94,6 +100,17 @@ describe('voice-dictation-service', () => {
         androidRecognitionServicePackage: 'com.google.android.tts',
       }),
     );
+  });
+
+  it('does not re-request RECORD_AUDIO when already granted', async () => {
+    isRecognitionAvailableMock.mockReturnValue(true);
+    getPermissionsMock.mockResolvedValue({ granted: true, canAskAgain: true });
+
+    const { startVoiceDictation } = await import('./voice-dictation-service');
+    await startVoiceDictation('ru', { onResult: vi.fn() });
+
+    expect(getPermissionsMock).toHaveBeenCalledOnce();
+    expect(requestPermissionsMock).not.toHaveBeenCalled();
   });
 
   it('falls back to cloud mic when OS start throws and YC_STT is on', async () => {

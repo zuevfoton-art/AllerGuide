@@ -143,8 +143,20 @@ export async function startMicRecording(): Promise<void> {
     await cancelMicRecording();
   }
 
-  const permission = await Audio.requestPermissionsAsync();
-  if (!permission.granted) {
+  // Ask only when needed: Android 16 can deliver the permission dialog result
+  // twice (expo/expo#39480), so skip the request when already granted.
+  let granted = false;
+  try {
+    const current = await Audio.getPermissionsAsync();
+    granted = current.granted;
+  } catch (error) {
+    logCaughtError('startMicRecording.getPermissions', error, { level: 'warn' });
+  }
+  if (!granted) {
+    const permission = await Audio.requestPermissionsAsync();
+    granted = permission.granted;
+  }
+  if (!granted) {
     throw new Error('VOICE_PERMISSION_DENIED');
   }
 
