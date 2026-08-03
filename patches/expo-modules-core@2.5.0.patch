@@ -23,3 +23,23 @@ index d2e13efa5dff73823732df2f14bb1b1978b366c5..cd34883f422878fbb30557876ba8c11d
      }
  
      body()
+diff --git a/common/cpp/LazyObject.cpp b/common/cpp/LazyObject.cpp
+index 862a97dc5082a0391d45688e11bfd41ed6f17563..4ac80b612419b452d0d7e874dca1ce171c3d136a 100644
+--- a/common/cpp/LazyObject.cpp
++++ b/common/cpp/LazyObject.cpp
+@@ -49,6 +49,15 @@ const jsi::Object &LazyObject::unwrapObjectIfNecessary(jsi::Runtime &runtime, co
+     if (!lazyObject->backedObject) {
+       lazyObject->initializeBackedObject(runtime);
+     }
++    // Patched (AllerGuide): guard against a null backed object instead of
++    // dereferencing it. When a module's LazyObject fails to initialize (e.g. the
++    // native runtime is being torn down, or an AV/audio module cannot install its
++    // JSI bindings), backedObject stays null and `*backedObject` hard-crashes with
++    // a native SIGSEGV in the JS thread (fault addr 0x10), bypassing JS try/catch.
++    // `LazyObject::get`/`set` already null-check; mirror that here.
++    if (!lazyObject->backedObject) {
++      return object;
++    }
+     return *lazyObject->backedObject;
+   }
+   return object;
