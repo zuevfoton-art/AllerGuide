@@ -261,6 +261,7 @@ const fr: LocaleMessages = {
     title: 'Saisie vocale',
     tapToSpeak: 'Touchez le micro et dictez',
     listening: 'Écoute… touchez pour arrêter',
+    processing: 'Reconnaissance de la parole…',
     startRecording: 'Démarrer la saisie vocale',
     stopRecording: 'Arrêter la saisie vocale',
     permissionDenied: 'L\'accès au microphone est requis pour la saisie vocale.',

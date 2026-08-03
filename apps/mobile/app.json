@@ -45,6 +45,12 @@
           "speechRecognitionPermission": "A-Claro распознаёт речь на устройстве, чтобы заполнять записи дневника."
         }
       ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "A-Claro использует микрофон для голосового ввода в дневнике."
+        }
+      ],
       "expo-asset"
     ],
     "experiments": {

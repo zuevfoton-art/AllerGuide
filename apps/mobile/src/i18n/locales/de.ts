@@ -262,6 +262,7 @@ const de: LocaleMessages = {
     title: 'Spracheingabe',
     tapToSpeak: 'Mikrofon tippen und diktieren',
     listening: 'Höre zu… tippen zum Stoppen',
+    processing: 'Sprache wird erkannt…',
     startRecording: 'Spracheingabe starten',
     stopRecording: 'Spracheingabe stoppen',
     permissionDenied: 'Mikrofonzugriff ist für die Spracheingabe erforderlich.',

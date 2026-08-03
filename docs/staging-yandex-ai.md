@@ -201,7 +201,11 @@ curl -sS -X POST "$STAGING_API_URL/api/stt" \
 # Expect: 200 {ok,text} | 422 No speech | 502 provider (not 503 disabled)
 ```
 
-**Mobile:** новая EAS `staging` сборка с `EXPO_PUBLIC_YC_STT=true`. OS recognition остаётся primary; cloud STT — через `recognizeSpeechViaApi` (запись аудио → base64 → API). Полный UI recording → STT можно донастроить на `VoiceNoteButton` при необходимости.
+**Mobile:** EAS/`Gradle` `staging` с `EXPO_PUBLIC_YC_STT=true`.  
+`VoiceNoteButton` всегда открывает **микрофон устройства** (не файловый picker):
+
+1. Primary — OS `expo-speech-recognition` (если доступен)
+2. Fallback — `expo-av` mic capture → `recognizeSpeechViaApi` → `POST /api/stt` (когда OS STT нет и флаг on)
 
 **Критерий Pass:** health `ycStt: true`; `/api/stt` не 503; silent/real audio → 200 или 422.
 
@@ -259,6 +263,6 @@ Manual APK (EAS `staging`): see [`qa-checklist.md`](./qa-checklist.md) § «Yand
 1. **Client QA** on EAS staging APK (Y.1–Y.5 + STT reachability)
 2. Optional `YC_GPT_MODEL` A/B after metrics
 3. Option D multimodal — later
-4. Wire `VoiceNoteButton` → record → `recognizeSpeechViaApi` when OS speech unsupported
+4. ~~Wire `VoiceNoteButton` → mic → `recognizeSpeechViaApi`~~ **done** (`voice-mic-recording-service` + dictation orchestration)
 
 Offline-first и feature flags: без флагов приложение работает как раньше (A heuristic + demo OCR + mock).

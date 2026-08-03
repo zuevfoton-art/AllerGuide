@@ -261,6 +261,7 @@ const en: LocaleMessages = {
     title: 'Voice input',
     tapToSpeak: 'Tap the mic and dictate',
     listening: 'Listening… tap to stop',
+    processing: 'Recognizing speech…',
     startRecording: 'Start voice input',
     stopRecording: 'Stop voice input',
     permissionDenied: 'Microphone permission is required for voice input.',
