@@ -28,10 +28,19 @@ export const YC_SEARCH_ENABLED = process.env.EXPO_PUBLIC_YC_SEARCH === 'true';
 
 /**
  * Phase 3: Yandex SpeechKit STT via POST /api/stt when OS speech recognition
- * is unavailable. Mic capture uses expo-audio (never a file picker). Offline /
- * flag-off keeps expo-speech-recognition only.
+ * is unavailable. Offline / flag-off keeps expo-speech-recognition only.
  */
 export const YC_STT_ENABLED = process.env.EXPO_PUBLIC_YC_STT === 'true';
+
+/**
+ * Cloud mic capture (expo-audio → /api/stt) as a fallback when OS speech
+ * recognition is unavailable. Default OFF: the expo AV/audio native module
+ * fails to install JSI bindings on the SDK 53 old-architecture release build
+ * and hard-crashes (native SIGSEGV in libexpo-modules-core.so) on first use.
+ * OS speech recognition covers devices with Google/Samsung recognizers.
+ */
+export const YC_STT_MIC_ENABLED =
+  process.env.EXPO_PUBLIC_YC_STT === 'true' && process.env.EXPO_PUBLIC_YC_STT_MIC === 'true';
 
 /** Use PostgreSQL backend for users and profiles (JWT auth). */
 export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'true';
