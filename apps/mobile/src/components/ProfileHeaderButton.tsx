@@ -168,11 +168,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       borderWidth: 1,
       borderColor: colors.accentMid,
-<<<<<<< HEAD
-      maxWidth: '100%',
-=======
       maxWidth: '58%',
->>>>>>> origin/cursor/map-ux-improvements-ccf0
     },
     chipTextCol: { flex: 1, gap: 1, minWidth: 0 },
     chipTitle: {
