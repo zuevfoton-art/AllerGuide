@@ -947,6 +947,8 @@ const ru: LocaleMessages = {
     reminderMinute: 'Мин',
     reminderHint: 'Напоминание поможет не пропустить приём.',
     reminderAt: 'Напоминание в {{time}}',
+    addReminderTime: 'Добавить время',
+    removeReminderTime: 'Удалить напоминание',
     reviewTitle: 'Итоговый обзор',
     reviewConfirm: 'Активировать курс',
     notesLabel: 'Заметки для врача',

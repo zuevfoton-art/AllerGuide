@@ -937,6 +937,8 @@ const fr: LocaleMessages = {
     reminderMinute: 'Min',
     reminderHint: 'Le rappel aide à suivre le schéma de prise.',
     reminderAt: 'Rappel à {{time}}',
+    addReminderTime: 'Ajouter une heure',
+    removeReminderTime: 'Supprimer le rappel',
     reviewTitle: 'Bilan final',
     reviewConfirm: 'Activer le cours',
     notesLabel: 'Notes pour le médecin',

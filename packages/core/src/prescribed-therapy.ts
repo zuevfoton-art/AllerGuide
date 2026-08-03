@@ -18,6 +18,11 @@ export interface PrescribedTherapyStage {
   dose: string;
 }
 
+export interface PrescribedReminderTime {
+  hour: number;
+  minute: number;
+}
+
 export interface PrescribedCourse {
   v: 1;
   active: boolean;
@@ -38,9 +43,21 @@ export interface PrescribedCourse {
   verified?: boolean;
   activated?: boolean;
   notes: string;
+  /**
+   * Daily reminder times (multi-dose). Preferred over legacy single hour/minute.
+   * When set, `reminderHour` / `reminderMinute` mirror the first entry for older clients.
+   */
+  reminderTimes?: PrescribedReminderTime[];
+  /** @deprecated Prefer `reminderTimes`; kept for backward-compatible storage. */
   reminderHour?: number;
+  /** @deprecated Prefer `reminderTimes`; kept for backward-compatible storage. */
   reminderMinute?: number;
 }
+
+/** Max daily reminder rows on the therapy review screen. */
+export const MAX_PRESCRIBED_REMINDER_TIMES = 6;
+export const DEFAULT_PRESCRIBED_REMINDER_HOUR = 8;
+export const DEFAULT_PRESCRIBED_REMINDER_MINUTE = 0;
 
 export const PRESCRIBED_THERAPY_DOSE_STATUS_LABELS: Record<PrescribedDoseStatus, string> = {
   'on-time': 'В срок',
@@ -91,15 +108,164 @@ export function isPrescribedCourseConfigured(course: PrescribedCourse | null): c
   return true;
 }
 
+function clampReminderHour(value: number): number {
+  return Math.min(23, Math.max(0, Math.trunc(value)));
+}
+
+function clampReminderMinute(value: number): number {
+  return Math.min(59, Math.max(0, Math.trunc(value)));
+}
+
+function isValidReminderTime(time: PrescribedReminderTime | null | undefined): time is PrescribedReminderTime {
+  return (
+    typeof time?.hour === 'number' &&
+    Number.isFinite(time.hour) &&
+    time.hour >= 0 &&
+    time.hour <= 23 &&
+    typeof time.minute === 'number' &&
+    Number.isFinite(time.minute) &&
+    time.minute >= 0 &&
+    time.minute <= 59
+  );
+}
+
+/** Normalize, dedupe, sort, and cap reminder times. */
+export function normalizePrescribedReminderTimes(
+  times: PrescribedReminderTime[] | null | undefined,
+): PrescribedReminderTime[] {
+  if (!times?.length) return [];
+  const seen = new Set<string>();
+  const normalized: PrescribedReminderTime[] = [];
+  for (const time of times) {
+    if (!isValidReminderTime(time)) continue;
+    const hour = clampReminderHour(time.hour);
+    const minute = clampReminderMinute(time.minute);
+    const key = `${hour}:${minute}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push({ hour, minute });
+    if (normalized.length >= MAX_PRESCRIBED_REMINDER_TIMES) break;
+  }
+  return normalized.sort((a, b) => a.hour - b.hour || a.minute - b.minute);
+}
+
+/**
+ * Resolve configured reminder times, including legacy single hour/minute fields.
+ */
+export function getPrescribedReminderTimes(course: PrescribedCourse | null): PrescribedReminderTime[] {
+  if (!course?.active) return [];
+  if (course.reminderTimes?.length) {
+    return normalizePrescribedReminderTimes(course.reminderTimes);
+  }
+  if (typeof course.reminderHour === 'number' && course.reminderHour >= 0 && course.reminderHour <= 23) {
+    return [
+      {
+        hour: clampReminderHour(course.reminderHour),
+        minute: clampReminderMinute(course.reminderMinute ?? DEFAULT_PRESCRIBED_REMINDER_MINUTE),
+      },
+    ];
+  }
+  return [];
+}
+
+export function applyPrescribedReminderTimes(
+  course: PrescribedCourse,
+  times: PrescribedReminderTime[],
+): PrescribedCourse {
+  const normalized = normalizePrescribedReminderTimes(times);
+  if (!normalized.length) {
+    const next = { ...course };
+    delete next.reminderTimes;
+    delete next.reminderHour;
+    delete next.reminderMinute;
+    return next;
+  }
+  return {
+    ...course,
+    reminderTimes: normalized,
+    reminderHour: normalized[0].hour,
+    reminderMinute: normalized[0].minute,
+  };
+}
+
+export function setPrescribedReminderEnabled(
+  course: PrescribedCourse,
+  enabled: boolean,
+): PrescribedCourse {
+  if (!enabled) return applyPrescribedReminderTimes(course, []);
+  const existing = getPrescribedReminderTimes({ ...course, active: true });
+  if (existing.length) return applyPrescribedReminderTimes(course, existing);
+  return applyPrescribedReminderTimes(course, [
+    {
+      hour: DEFAULT_PRESCRIBED_REMINDER_HOUR,
+      minute: DEFAULT_PRESCRIBED_REMINDER_MINUTE,
+    },
+  ]);
+}
+
+export function addPrescribedReminderTime(course: PrescribedCourse): PrescribedCourse {
+  const times = getPrescribedReminderTimes({ ...course, active: true });
+  if (times.length >= MAX_PRESCRIBED_REMINDER_TIMES) return course;
+  const last = times[times.length - 1] ?? {
+    hour: DEFAULT_PRESCRIBED_REMINDER_HOUR,
+    minute: DEFAULT_PRESCRIBED_REMINDER_MINUTE,
+  };
+  return applyPrescribedReminderTimes(course, [
+    ...times,
+    { hour: (last.hour + 12) % 24, minute: last.minute },
+  ]);
+}
+
+export function updatePrescribedReminderTimeAt(
+  course: PrescribedCourse,
+  index: number,
+  patch: Partial<PrescribedReminderTime>,
+): PrescribedCourse {
+  const times = getPrescribedReminderTimes({ ...course, active: true });
+  if (index < 0 || index >= times.length) return course;
+  // Keep row order while typing — sort/dedupe happens on add/enable/save.
+  const next = times.map((time, i) => {
+    if (i !== index) return time;
+    return {
+      hour: patch.hour === undefined ? time.hour : clampReminderHour(patch.hour),
+      minute: patch.minute === undefined ? time.minute : clampReminderMinute(patch.minute),
+    };
+  });
+  return {
+    ...course,
+    reminderTimes: next,
+    reminderHour: next[0]?.hour,
+    reminderMinute: next[0]?.minute,
+  };
+}
+
+export function removePrescribedReminderTimeAt(
+  course: PrescribedCourse,
+  index: number,
+): PrescribedCourse {
+  const times = getPrescribedReminderTimes({ ...course, active: true });
+  if (times.length <= 1 || index < 0 || index >= times.length) return course;
+  return applyPrescribedReminderTimes(
+    course,
+    times.filter((_, i) => i !== index),
+  );
+}
+
 export function isPrescribedReminderConfigured(course: PrescribedCourse | null): boolean {
-  if (!course?.active) return false;
-  return typeof course.reminderHour === 'number' && course.reminderHour >= 0 && course.reminderHour <= 23;
+  return getPrescribedReminderTimes(course).length > 0;
 }
 
 export function formatPrescribedReminderTime(hour: number, minute = 0): string {
-  const h = String(hour).padStart(2, '0');
-  const m = String(minute).padStart(2, '0');
+  const h = String(clampReminderHour(hour)).padStart(2, '0');
+  const m = String(clampReminderMinute(minute)).padStart(2, '0');
   return `${h}:${m}`;
+}
+
+/** Comma-separated list for cards / summary lines. */
+export function formatPrescribedReminderTimes(times: PrescribedReminderTime[]): string {
+  return normalizePrescribedReminderTimes(times)
+    .map((time) => formatPrescribedReminderTime(time.hour, time.minute))
+    .join(', ');
 }
 
 export function buildPrescribedReminderContent(course: PrescribedCourse): {

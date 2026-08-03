@@ -4,9 +4,10 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import {
   computePrescribedCompliance,
+  formatPrescribedReminderTimes,
+  getPrescribedReminderTimes,
   isPrescribedCourseConfigured,
   isPrescribedReminderConfigured,
-  formatPrescribedReminderTime,
   PRESCRIBED_THERAPY_DISCLAIMER,
   PRESCRIBED_THERAPY_ROUTE_LABELS,
   type PrescribedCourse,
@@ -67,7 +68,7 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
       {isPrescribedReminderConfigured(course) ? (
         <Text style={styles.reminder}>
           {t('prescribedTherapy.reminderAt', {
-            time: formatPrescribedReminderTime(course.reminderHour ?? 8, course.reminderMinute ?? 0),
+            time: formatPrescribedReminderTimes(getPrescribedReminderTimes(course)),
           })}
         </Text>
       ) : null}

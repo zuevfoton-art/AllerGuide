@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import {
+  getPrescribedReminderTimes,
   isPrescribedReminderConfigured,
   type PrescribedCourse,
 } from '@allerguide/core';
@@ -11,14 +12,38 @@ function reminderIdKey(profileId: number) {
   return `prescribedTherapyReminderId:${profileId}`;
 }
 
+function reminderIdsKey(profileId: number) {
+  return `prescribedTherapyReminderIds:${profileId}`;
+}
+
+function readStoredReminderIds(profileId: number): string[] {
+  const multi = getSetting(reminderIdsKey(profileId));
+  if (multi?.trim()) {
+    try {
+      const parsed = JSON.parse(multi) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.map((id) => String(id).trim()).filter(Boolean);
+      }
+    } catch {
+      // fall through to legacy single id
+    }
+  }
+  const legacy = getSetting(reminderIdKey(profileId))?.trim();
+  return legacy ? [legacy] : [];
+}
+
+async function cancelStoredReminderIds(profileId: number) {
+  const ids = readStoredReminderIds(profileId);
+  for (const id of ids) {
+    await Notifications.cancelScheduledNotificationAsync(id);
+  }
+  setSetting(reminderIdsKey(profileId), '');
+  setSetting(reminderIdKey(profileId), '');
+}
+
 export async function cancelPrescribedTherapyReminder(profileId: number) {
   if (Platform.OS === 'web') return;
-
-  const existing = getSetting(reminderIdKey(profileId));
-  if (existing) {
-    await Notifications.cancelScheduledNotificationAsync(existing);
-    setSetting(reminderIdKey(profileId), '');
-  }
+  await cancelStoredReminderIds(profileId);
 }
 
 export async function schedulePrescribedTherapyReminder(
@@ -37,24 +62,28 @@ export async function schedulePrescribedTherapyReminder(
 
   await cancelPrescribedTherapyReminder(profileId);
 
-  const hour = course.reminderHour ?? 8;
-  const minute = course.reminderMinute ?? 0;
+  const times = getPrescribedReminderTimes(course);
+  const ids: string[] = [];
+  for (const time of times) {
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: content.title,
+        body: content.body,
+        data: { type: 'prescribed-therapy', profileId, hour: time.hour, minute: time.minute },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: time.hour,
+        minute: time.minute,
+      },
+    });
+    ids.push(id);
+  }
 
-  const id = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: content.title,
-      body: content.body,
-      data: { type: 'prescribed-therapy', profileId },
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour,
-      minute,
-    },
-  });
-
-  setSetting(reminderIdKey(profileId), id);
-  return true;
+  setSetting(reminderIdsKey(profileId), JSON.stringify(ids));
+  // Keep legacy key pointing at the first id for older reconciles / debug.
+  setSetting(reminderIdKey(profileId), ids[0] ?? '');
+  return ids.length > 0;
 }
 
 export async function syncPrescribedTherapyReminder(
