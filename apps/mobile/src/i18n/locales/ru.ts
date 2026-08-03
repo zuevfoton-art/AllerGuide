@@ -692,6 +692,9 @@ const ru: LocaleMessages = {
     conditionsQuestionChild: 'Какая аллергия у ребёнка?',
     conditionsHint:
       'Выберите все подходящие типы — дневник подстроит шкалы и разделы (ПСВ при астме, АСИТ при поллинозе и др.).',
+    otherConditionLabel: 'Другие виды аллергии',
+    otherConditionHint: 'Напишите название аллергии или аллергена.',
+    otherConditionPlaceholder: 'Например: латекс, никель…',
     conditionOptionsTitle: 'Уточните: {{label}}',
     conditionOptionsHint: 'Отметьте конкретные аллергены — они появятся на следующем шаге.',
     crossReactions: {

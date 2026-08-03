@@ -1,34 +1,42 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   ALLERGY_CONDITION_TYPES,
+  OTHER_CONDITION_LABEL_MAX_LENGTH,
   type AllergyConditionId,
   type ConditionOptionSelections,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
 
 interface ConditionPickerProps {
   selected: AllergyConditionId[];
   onChange: (selected: AllergyConditionId[]) => void;
-  /** FR-PROF-03: sub-options for selected types (setup / edit). */
+  /** Free-text name when `other` is selected. */
+  otherLabel?: string;
+  onOtherLabelChange?: (value: string) => void;
+  /** FR-PROF-03 legacy: sub-options for selected types. Default off — allergens are picked on the next step. */
   optionSelections?: ConditionOptionSelections;
   onOptionSelectionsChange?: (selections: ConditionOptionSelections) => void;
-  /** When false, hides option expanders (legacy compact mode). Default true. */
+  /** When true, shows option expanders. Default false. */
   showOptions?: boolean;
 }
 
 export function ConditionPicker({
   selected,
   onChange,
+  otherLabel = '',
+  onOtherLabelChange,
   optionSelections = {},
   onOptionSelectionsChange,
-  showOptions = true,
+  showOptions = false,
 }: ConditionPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const otherSelected = selected.includes('other');
 
   const toggle = (id: AllergyConditionId) => {
     onChange(selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id]);
@@ -65,6 +73,23 @@ export function ConditionPicker({
           );
         })}
       </View>
+
+      {otherSelected ? (
+        <View style={styles.otherBlock} testID="condition-other-label">
+          <Text style={styles.optionsTitle}>{t('profileSetup.otherConditionLabel')}</Text>
+          <Text style={styles.optionsHint}>{t('profileSetup.otherConditionHint')}</Text>
+          <TextInput
+            testID="condition-other-input"
+            value={otherLabel}
+            onChangeText={(value) =>
+              onOtherLabelChange?.(value.slice(0, OTHER_CONDITION_LABEL_MAX_LENGTH))
+            }
+            placeholder={t('profileSetup.otherConditionPlaceholder')}
+            placeholderTextColor={theme.colors.textMuted}
+            style={styles.otherInput}
+          />
+        </View>
+      ) : null}
 
       {showOptions
         ? ALLERGY_CONDITION_TYPES.filter(
@@ -139,6 +164,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     chipTextActive: { color: colors.accent },
     optionsBlock: { gap: 6 },
+    otherBlock: { gap: 6 },
     optionsTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
@@ -150,6 +176,17 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 16,
+    },
+    otherInput: {
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontFamily: fonts.sans,
+      fontSize: WEB_INPUT_FONT_SIZE,
+      color: colors.text,
+      backgroundColor: colors.card,
     },
   });
 }

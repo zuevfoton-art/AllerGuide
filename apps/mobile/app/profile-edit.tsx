@@ -17,7 +17,9 @@ import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationE
 import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
 import {
+  getStoredOtherConditionLabel,
   getStoredProfileConditions,
+  setStoredOtherConditionLabel,
   setStoredProfileConditions,
 } from '@/src/services/profile-conditions-service';
 import {
@@ -62,6 +64,7 @@ export default function ProfileEditScreen() {
   const [confirmations, setConfirmations] = useState<Record<string, AllergyConfirmationSource>>({});
   const [childConsent, setChildConsent] = useState(true);
   const [conditions, setConditions] = useState<AllergyConditionId[]>([]);
+  const [otherConditionLabel, setOtherConditionLabel] = useState('');
   const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
   const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
@@ -96,6 +99,9 @@ export default function ProfileEditScreen() {
       );
       const storedConditions = getStoredProfileConditions(profileId);
       setConditions(storedConditions);
+      setOtherConditionLabel(
+        storedConditions.includes('other') ? getStoredOtherConditionLabel(profileId) : '',
+      );
       setConditionHistoryDrafts(getConditionHistoryDrafts(profileId));
       setComorbidityLinks(getStoredConditionHistory(profileId)?.comorbidityLinks ?? []);
       setLoading(false);
@@ -109,6 +115,7 @@ export default function ProfileEditScreen() {
 
   const applyConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
+    if (!next.includes('other')) setOtherConditionLabel('');
     setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
     setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
   };
@@ -158,6 +165,10 @@ export default function ProfileEditScreen() {
     }
 
     setStoredProfileConditions(profileId, conditions);
+    setStoredOtherConditionLabel(
+      profileId,
+      conditions.includes('other') ? otherConditionLabel : '',
+    );
     saveConditionHistoryFromOnboarding(profileId, conditions, conditionHistoryDrafts, comorbidityLinks);
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     void reconcileAllReminders();
@@ -236,7 +247,12 @@ export default function ProfileEditScreen() {
 
           <GlassCard style={styles.section}>
             <Text style={ui.sectionLabel}>{t('profileSetup.conditionsLabel')}</Text>
-            <ConditionPicker selected={conditions} onChange={handleConditionsChange} showOptions={false} />
+            <ConditionPicker
+              selected={conditions}
+              onChange={handleConditionsChange}
+              otherLabel={otherConditionLabel}
+              onOtherLabelChange={setOtherConditionLabel}
+            />
           </GlassCard>
 
           {conditions.length > 0 ? (

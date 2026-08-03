@@ -682,6 +682,9 @@ const it: LocaleMessages = {
     conditionsQuestionChild: 'Quali allergie ha tuo figlio?',
     conditionsHint:
       'Seleziona tutti i tipi pertinenti — il diario adatterà scale e sezioni (picco di flusso per l\'asma, AIT per la pollinosi, ecc.).',
+    otherConditionLabel: 'Altri tipi di allergia',
+    otherConditionHint: 'Scrivi il nome dell\'allergia o dell\'allergene.',
+    otherConditionPlaceholder: 'Ad esempio: lattice, nichel…',
     conditionOptionsTitle: 'Specifica: {{label}}',
     conditionOptionsHint: 'Scegli allergeni specifici — compariranno nel passo successivo.',
     crossReactions: {
