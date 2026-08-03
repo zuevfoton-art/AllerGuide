@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { PermissionsAndroid, Platform } from 'react-native';
 import {
   ExpoSpeechRecognitionModule,
   addSpeechRecognitionListener,
@@ -132,9 +132,37 @@ export function buildOsSpeechStartOptions(locale: string): OsSpeechStartOptions 
   return options;
 }
 
+/**
+ * Ensures RECORD_AUDIO is granted.
+ *
+ * On Android the request goes through React Native core `PermissionsAndroid`:
+ * resolving an expo-modules-core (SDK 53) promise right after the permission
+ * activity round-trip can SIGSEGV in libexpo-modules-core.so (JSI callback
+ * use-after-free) — reproduced via logcat on the staging APK. RN core uses a
+ * different native path and is unaffected.
+ */
+export async function ensureRecordAudioPermission(): Promise<boolean> {
+  if (Platform.OS === 'android') {
+    const permission = PermissionsAndroid.PERMISSIONS.RECORD_AUDIO;
+    if (await PermissionsAndroid.check(permission)) return true;
+    const result = await PermissionsAndroid.request(permission);
+    return result === PermissionsAndroid.RESULTS.GRANTED;
+  }
+
+  try {
+    const current = await ExpoSpeechRecognitionModule.getPermissionsAsync();
+    if (current.granted) return true;
+    if (!current.canAskAgain) return false;
+  } catch (error) {
+    logCaughtError('ensureRecordAudioPermission.get', error, { level: 'warn' });
+  }
+  const requested = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+  return requested.granted;
+}
+
 async function startOsSpeechDictation(locale: string): Promise<void> {
-  const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-  if (!permission.granted) {
+  const granted = await ensureRecordAudioPermission();
+  if (!granted) {
     throw new Error('VOICE_PERMISSION_DENIED');
   }
 

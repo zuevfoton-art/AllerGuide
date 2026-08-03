@@ -4,9 +4,13 @@ const startMock = vi.fn();
 const getSpeechRecognitionServicesMock = vi.fn(() => ['com.google.android.tts']);
 const isRecognitionAvailableMock = vi.fn(() => false);
 
+const getPermissionsMock = vi.fn(async () => ({ granted: false, canAskAgain: true }));
+const requestPermissionsMock = vi.fn(async () => ({ granted: true }));
+
 vi.mock('expo-speech-recognition', () => ({
   ExpoSpeechRecognitionModule: {
-    requestPermissionsAsync: vi.fn(async () => ({ granted: true })),
+    getPermissionsAsync: (...args: unknown[]) => getPermissionsMock(...(args as [])),
+    requestPermissionsAsync: (...args: unknown[]) => requestPermissionsMock(...(args as [])),
     start: (...args: unknown[]) => startMock(...args),
     stop: vi.fn(),
     abort: vi.fn(),
@@ -17,8 +21,17 @@ vi.mock('expo-speech-recognition', () => ({
   supportsOnDeviceRecognition: vi.fn(() => false),
 }));
 
+const permissionsCheckMock = vi.fn(async () => false);
+const permissionsRequestMock = vi.fn(async () => 'granted');
+
 vi.mock('react-native', () => ({
   Platform: { OS: 'android' },
+  PermissionsAndroid: {
+    PERMISSIONS: { RECORD_AUDIO: 'android.permission.RECORD_AUDIO' },
+    RESULTS: { GRANTED: 'granted' },
+    check: (...args: unknown[]) => permissionsCheckMock(...(args as [])),
+    request: (...args: unknown[]) => permissionsRequestMock(...(args as [])),
+  },
 }));
 
 vi.mock('@/src/services/error-reporting', () => ({
@@ -47,6 +60,10 @@ describe('voice-dictation-service', () => {
     delete process.env.EXPO_PUBLIC_YC_STT;
     isRecognitionAvailableMock.mockReturnValue(false);
     getSpeechRecognitionServicesMock.mockReturnValue(['com.google.android.tts']);
+    getPermissionsMock.mockResolvedValue({ granted: false, canAskAgain: true });
+    requestPermissionsMock.mockResolvedValue({ granted: true });
+    permissionsCheckMock.mockResolvedValue(false);
+    permissionsRequestMock.mockResolvedValue('granted');
   });
 
   it('uses cloud mic when OS speech is unavailable and YC_STT is on', async () => {
@@ -93,6 +110,40 @@ describe('voice-dictation-service', () => {
         addsPunctuation: false,
         androidRecognitionServicePackage: 'com.google.android.tts',
       }),
+    );
+  });
+
+  it('uses RN PermissionsAndroid on Android and skips expo permission modules', async () => {
+    isRecognitionAvailableMock.mockReturnValue(true);
+
+    const { startVoiceDictation } = await import('./voice-dictation-service');
+    const mode = await startVoiceDictation('ru', { onResult: vi.fn() });
+
+    expect(mode).toBe('os');
+    expect(permissionsCheckMock).toHaveBeenCalledOnce();
+    expect(permissionsRequestMock).toHaveBeenCalledOnce();
+    expect(getPermissionsMock).not.toHaveBeenCalled();
+    expect(requestPermissionsMock).not.toHaveBeenCalled();
+  });
+
+  it('does not re-request RECORD_AUDIO when already granted', async () => {
+    isRecognitionAvailableMock.mockReturnValue(true);
+    permissionsCheckMock.mockResolvedValue(true);
+
+    const { startVoiceDictation } = await import('./voice-dictation-service');
+    await startVoiceDictation('ru', { onResult: vi.fn() });
+
+    expect(permissionsCheckMock).toHaveBeenCalledOnce();
+    expect(permissionsRequestMock).not.toHaveBeenCalled();
+  });
+
+  it('throws VOICE_PERMISSION_DENIED when Android permission is denied', async () => {
+    isRecognitionAvailableMock.mockReturnValue(true);
+    permissionsRequestMock.mockResolvedValue('denied');
+
+    const { startVoiceDictation } = await import('./voice-dictation-service');
+    await expect(startVoiceDictation('ru', { onResult: vi.fn() })).rejects.toThrow(
+      'VOICE_PERMISSION_DENIED',
     );
   });
 
