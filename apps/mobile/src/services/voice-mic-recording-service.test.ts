@@ -1,18 +1,13 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-vi.mock('expo-av', () => ({
-  Audio: {
-    requestPermissionsAsync: vi.fn(),
-    setAudioModeAsync: vi.fn(),
-    Recording: vi.fn(),
-    RecordingOptionsPresets: { HIGH_QUALITY: { android: {}, ios: {} } },
-    IOSOutputFormat: { LINEARPCM: 'lpcm' },
-    IOSAudioQuality: { HIGH: 96 },
-    AndroidOutputFormat: {},
-    AndroidAudioEncoder: {},
+vi.mock('expo-audio', () => ({
+  AudioRecorder: vi.fn(),
+  RecordingPresets: {
+    HIGH_QUALITY: { extension: '.m4a', android: {}, ios: {} },
   },
-  InterruptionModeAndroid: { DoNotMix: 1 },
-  InterruptionModeIOS: { DoNotMix: 1 },
+  setAudioModeAsync: vi.fn(),
+  IOSOutputFormat: { LINEARPCM: 'lpcm' },
+  AudioQuality: { HIGH: 96 },
 }));
 
 vi.mock('expo-file-system', () => ({
@@ -22,6 +17,12 @@ vi.mock('expo-file-system', () => ({
 
 vi.mock('react-native', () => ({
   Platform: { OS: 'ios' },
+  PermissionsAndroid: {
+    PERMISSIONS: { RECORD_AUDIO: 'android.permission.RECORD_AUDIO' },
+    RESULTS: { GRANTED: 'granted' },
+    check: vi.fn(async () => false),
+    request: vi.fn(async () => 'granted'),
+  },
 }));
 
 vi.mock('@/src/services/error-reporting', () => ({
