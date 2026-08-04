@@ -1,5 +1,6 @@
 import {
   POLLEN_MAP_TAXON_IDS,
+  readingToUpiSnapshot,
   type PollenForecastDay,
   type PollenMapReading,
   type PollenMapTaxonId,
@@ -11,11 +12,29 @@ import { pollenTierFromUpi, type PollenUpiIndex } from './pollen-upi';
 
 export type GooglePollenTypeKey = 'TREE' | 'GRASS' | 'WEED';
 
+/**
+ * Tree species that share Google heatmap `TREE_UPI` but must use plant-level
+ * Forecast indexes (BIRCH/ALDER/OLIVE) — never the aggregated TREE type UPI.
+ */
+export const TREE_SPECIES_POLLEN_TAXON_IDS = [
+  'birch_pollen',
+  'alder_pollen',
+  'olive_pollen',
+] as const satisfies readonly PollenMapTaxonId[];
+
+export type TreeSpeciesPollenTaxonId = (typeof TREE_SPECIES_POLLEN_TAXON_IDS)[number];
+
 /** Minimal day shape shared by API proxy and mobile client. */
 export interface GoogleForecastDayInput {
   date: string;
   typeIndexes?: Partial<Record<GooglePollenTypeKey, PollenUpiSnapshot>>;
   plantIndexes?: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+}
+
+export function isTreeSpeciesPollenTaxon(
+  taxonId: PollenMapTaxonId,
+): taxonId is TreeSpeciesPollenTaxonId {
+  return (TREE_SPECIES_POLLEN_TAXON_IDS as readonly string[]).includes(taxonId);
 }
 
 export function googleTypeKeyForTaxon(taxonId: PollenMapTaxonId): GooglePollenTypeKey {
@@ -24,7 +43,10 @@ export function googleTypeKeyForTaxon(taxonId: PollenMapTaxonId): GooglePollenTy
   return 'TREE';
 }
 
-/** Prefer plant UPI, then TREE/GRASS/WEED type index for the taxon's group. */
+/**
+ * Prefer plant UPI. For birch/alder/olive never fall back to aggregated TREE
+ * (that would make all three look identical). Grass/weed may use type UPI.
+ */
 export function resolveGoogleUpiForTaxon(
   taxonId: PollenMapTaxonId,
   day: GoogleForecastDayInput | undefined,
@@ -32,6 +54,7 @@ export function resolveGoogleUpiForTaxon(
   if (!day) return null;
   const plantUpi = day.plantIndexes?.[taxonId];
   if (plantUpi) return plantUpi;
+  if (isTreeSpeciesPollenTaxon(taxonId)) return null;
   const typeUpi = day.typeIndexes?.[googleTypeKeyForTaxon(taxonId)];
   return typeUpi ?? null;
 }
@@ -73,6 +96,42 @@ export function buildUpiByTaxonFromGoogleDay(
     if (upi) result[taxonId] = upi;
   }
   return result;
+}
+
+/**
+ * Merge Google plant/type readings with Open-Meteo species readings.
+ * Prefer Google plant (or non-tree type) UPI; fill gaps from Open-Meteo.
+ */
+export function mergeGoogleAndOpenMeteoMapReadings(
+  googleDay: GoogleForecastDayInput | undefined,
+  openMeteoReadings: PollenMapReading[],
+  profileAllergenIds: ProfileAllergenId[],
+): {
+  readings: PollenMapReading[];
+  upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+} {
+  const omByTaxon = new Map(openMeteoReadings.map((reading) => [reading.taxonId, reading]));
+  const upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>> = {};
+  const readings: PollenMapReading[] = [];
+
+  for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+    const googleUpi = resolveGoogleUpiForTaxon(taxonId, googleDay);
+    if (googleUpi) {
+      upiByTaxon[taxonId] = googleUpi;
+      readings.push(readingFromUpi(taxonId, googleUpi.index, profileAllergenIds));
+      continue;
+    }
+    const omReading = omByTaxon.get(taxonId);
+    if (omReading) {
+      upiByTaxon[taxonId] = readingToUpiSnapshot(omReading);
+      readings.push({
+        ...omReading,
+        profileRelevant: profileMatchesPollenTaxon(profileAllergenIds, taxonId),
+      });
+    }
+  }
+
+  return { readings, upiByTaxon };
 }
 
 function readingFromUpi(

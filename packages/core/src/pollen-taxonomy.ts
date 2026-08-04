@@ -37,7 +37,7 @@ export interface PollenTaxon {
 export const POLLEN_TAXA: PollenTaxon[] = [
   {
     id: 'alder_pollen',
-    allergenId: null,
+    allergenId: 'alder-pollen',
     labelRu: 'Ольха',
     openMeteoHourlyKey: 'alder_pollen',
   },
@@ -101,7 +101,7 @@ export const POLLEN_TAXA: PollenTaxon[] = [
   },
   {
     id: 'olive_pollen',
-    allergenId: null,
+    allergenId: 'olive-pollen',
     labelRu: 'Олива',
     openMeteoHourlyKey: 'olive_pollen',
   },

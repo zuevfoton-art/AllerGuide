@@ -22,6 +22,8 @@ describe('pollen taxonomy', () => {
     expect(profileMatchesPollenTaxon(['milk'], 'birch_pollen')).toBe(false);
     expect(profileMatchesPollenTaxon(['birch-pollen'], 'oak_pollen')).toBe(true);
     expect(profileMatchesPollenTaxon(['milk'], 'oak_pollen')).toBe(false);
+    expect(profileMatchesPollenTaxon(['alder-pollen'], 'alder_pollen')).toBe(true);
+    expect(profileMatchesPollenTaxon(['olive-pollen'], 'olive_pollen')).toBe(true);
   });
 
   it('parses Open-Meteo hourly data by taxon id', () => {

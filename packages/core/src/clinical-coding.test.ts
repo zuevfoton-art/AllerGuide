@@ -35,6 +35,8 @@ describe('clinical coding crosswalk', () => {
     const birch = getClinicalCoding('birch-pollen');
     expect(birch?.icd11).toBe('CA08.4');
     expect(birch?.snomed).toBeTruthy();
+    expect(getClinicalCoding('alder-pollen')?.icd11).toBe('CA08.4');
+    expect(getClinicalCoding('olive-pollen')?.icd11).toBe('CA08.4');
   });
 
   it('builds coded lines with confirmation labels', () => {

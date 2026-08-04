@@ -2,17 +2,14 @@ import {
   buildForecastDaysFromGoogle,
   buildNearbyPollenSamplePoints,
   buildPollenPlantDetail,
-  buildReadingsFromGoogleForecastDay,
-  buildUpiByTaxonFromGoogleDay,
   buildYandexPollenUrl,
+  mergeGoogleAndOpenMeteoMapReadings,
   parseOpenMeteoCurrentPollen,
   parseCurrentPollenMapReadings,
   parseDailyPollenForecast,
   parseProfileAllergenIds,
   POLLEN_MAP_TAXON_IDS,
   POLLEN_OPEN_METEO_FORECAST_DAYS,
-  readingToUpiSnapshot,
-  resolveGoogleUpiForTaxon,
   type GoogleForecastDayInput,
   type NearbyPollenLocation,
   type NearbyPollenSamplePoint,
@@ -140,31 +137,36 @@ async function tryFetchGooglePrimarySnapshot(
     if (!google?.days?.length) return null;
 
     const today = google.days[0]!;
-    const readings = buildReadingsFromGoogleForecastDay(today, profileAllergenIds);
-    if (readings.length === 0) return null;
+    // OM fills birch/alder/olive when Google plantInfo has no indexInfo.
+    const openMeteoReadings = await fetchOpenMeteoCenterReadings(location, profileAllergenIds);
+    const merged = mergeGoogleAndOpenMeteoMapReadings(
+      today,
+      openMeteoReadings,
+      profileAllergenIds,
+    );
+    if (merged.readings.length === 0) return null;
 
     const forecastDays = buildForecastDaysFromGoogle(google.days, profileAllergenIds);
-    const upiByTaxon = buildUpiByTaxonFromGoogleDay(today);
-    const plants = buildPlantsMap(readings, google.plants);
+    const plants = buildPlantsMap(merged.readings, google.plants);
     // Secondary: Open-Meteo ring samples for “safe nearby” (not Google × N lookups).
     const nearbyLocations = await fetchNearbyPollenLocations(location, profileAllergenIds);
     const updatedAt = new Date().toISOString();
 
     writeCache(cacheKey, {
-      readings,
+      readings: merged.readings,
       nearbyLocations,
       forecastDays,
-      upiByTaxon,
+      upiByTaxon: merged.upiByTaxon,
       plants,
       updatedAt,
     });
 
     return {
       source: 'google',
-      readings,
+      readings: merged.readings,
       nearbyLocations,
       forecastDays,
-      upiByTaxon,
+      upiByTaxon: merged.upiByTaxon,
       plants,
       updatedAt,
       yandexPollenUrl,
@@ -195,28 +197,52 @@ async function fetchOpenMeteoSnapshot(
   const forecastDays = parseDailyPollenForecast(payload.hourly ?? {}, profileAllergenIds);
   const nearbyLocations = await fetchNearbyPollenLocations(location, profileAllergenIds);
   const google = await fetchGoogleForecast(location.lat, location.lon);
-  const upiByTaxon = buildUpiByTaxon(readings, google?.days?.[0]);
-  const plants = buildPlantsMap(readings, google?.plants);
+  // Prefer Google plant UPI; synthesize chips for plant-only taxa missing from OM.
+  const merged = mergeGoogleAndOpenMeteoMapReadings(
+    google?.days?.[0],
+    readings,
+    profileAllergenIds,
+  );
+  const plants = buildPlantsMap(merged.readings, google?.plants);
 
   const updatedAt = new Date().toISOString();
   writeCache(cacheKey, {
-    readings,
+    readings: merged.readings,
     nearbyLocations,
     forecastDays,
-    upiByTaxon,
+    upiByTaxon: merged.upiByTaxon,
     plants,
     updatedAt,
   });
   return {
     source: 'open-meteo',
-    readings,
+    readings: merged.readings,
     nearbyLocations,
     forecastDays,
-    upiByTaxon,
+    upiByTaxon: merged.upiByTaxon,
     plants,
     updatedAt,
     yandexPollenUrl,
   };
+}
+
+async function fetchOpenMeteoCenterReadings(
+  location: ResolvedLocation,
+  profileAllergenIds: string[],
+): Promise<PollenMapReading[]> {
+  try {
+    const response = await fetch(buildOpenMeteoUrl(location));
+    if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
+    const payload = (await response.json()) as OpenMeteoPollenResponse;
+    return parseCurrentPollenMapReadings(
+      payload.hourly ?? {},
+      payload.current?.time,
+      profileAllergenIds,
+    );
+  } catch (error) {
+    logCaughtError('fetchOpenMeteoCenterReadings', error, { level: 'warn' });
+    return [];
+  }
 }
 
 function readCachedOrCalendar(
@@ -324,20 +350,6 @@ async function fetchGoogleForecast(
   );
   if (!response.ok || !response.data.forecast) return null;
   return response.data.forecast;
-}
-
-function buildUpiByTaxon(
-  readings: PollenMapReading[],
-  googleToday: GoogleForecastApiDay | undefined,
-): Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>> {
-  const result: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>> = {};
-
-  for (const reading of readings) {
-    const googleUpi = resolveGoogleUpiForTaxon(reading.taxonId, googleToday);
-    result[reading.taxonId] = googleUpi ?? readingToUpiSnapshot(reading);
-  }
-
-  return result;
 }
 
 function buildPlantsMap(

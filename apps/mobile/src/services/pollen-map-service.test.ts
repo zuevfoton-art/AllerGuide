@@ -99,8 +99,12 @@ describe('pollen-map-service', () => {
 
   it('uses Google forecast as primary and OM nearby as secondary', async () => {
     const fetchMock = vi.fn(async (url: string) => {
-      // Primary forecast must not hit Open-Meteo AQ center URL without multi-lat nearby.
-      if (String(url).includes('air-quality-api.open-meteo.com') && String(url).includes(',')) {
+      const href = String(url);
+      // Nearby uses multi-lat query (`latitude=a,b,c`); taxa commas alone must not match.
+      if (
+        href.includes('air-quality-api.open-meteo.com') &&
+        /latitude=[^&]*,/.test(href)
+      ) {
         return {
           ok: true,
           json: async () =>
@@ -114,6 +118,24 @@ describe('pollen-map-service', () => {
                 olive_pollen: 1,
               },
             })),
+        };
+      }
+      // Center OM fills alder/olive when Google plantInfo has no index.
+      if (href.includes('air-quality-api.open-meteo.com')) {
+        return {
+          ok: true,
+          json: async () => ({
+            current: { time: '2026-08-04T10:00' },
+            hourly: {
+              time: ['2026-08-04T10:00'],
+              birch_pollen: [10],
+              alder_pollen: [40],
+              olive_pollen: [5],
+              grass_pollen: [6],
+              ragweed_pollen: [1],
+              mugwort_pollen: [1],
+            },
+          }),
         };
       }
       throw new Error(`Unexpected fetch: ${url}`);
@@ -166,8 +188,11 @@ describe('pollen-map-service', () => {
       level: 'high',
       profileRelevant: true,
     });
-    expect(snapshot.forecastDays.length).toBeGreaterThanOrEqual(1);
     expect(snapshot.upiByTaxon.birch_pollen?.source).toBe('google');
+    expect(snapshot.upiByTaxon.alder_pollen?.source).toBe('open-meteo');
+    expect(snapshot.upiByTaxon.olive_pollen?.source).toBe('open-meteo');
+    expect(snapshot.readings.find((item) => item.taxonId === 'alder_pollen')?.value).toBe(40);
+    expect(snapshot.forecastDays.length).toBeGreaterThanOrEqual(1);
     expect(snapshot.nearbyLocations).toHaveLength(8);
     expect(fetchMock).toHaveBeenCalled();
   });
