@@ -47,17 +47,27 @@ Built with `expo prebuild --clean` and **did not launch**. Mitigation: **stop us
 
 ### 1.0.14 — `@expo/dom-webview` SDK mismatch (confirmed via logcat)
 
-Cold start still crashed:
-
 ```
 java.lang.NoClassDefFoundError: Failed resolution of: Lexpo/modules/kotlin/types/AnyTypeCache;
   at expo.modules.webview.DomWebViewModule.definition(...)
-Caused by: java.lang.ClassNotFoundException: expo.modules.kotlin.types.AnyTypeCache
 ```
 
 Cause: optional peer `@expo/dom-webview: *` on `expo@55` resolved to **56.0.5**, which expects `AnyTypeCache` from `expo-modules-core` 56+. SDK 55 ships `expo-modules-core@55.0.25` without that class.
 
 Fix: pin `@expo/dom-webview` to **55.0.6** (direct dep in `apps/mobile` + root `pnpm.overrides`).
+
+### 1.0.15 — expo-router `No routes found`
+
+Native modules loaded; JS crashed:
+
+```
+JavascriptException: Error: No routes found
+  at ContextNavigator / ExpoRoot
+```
+
+Cause: Gradle `entryFile` was switched to `expo-router/entry` while `react.root` stays at the **workspace** root. Expo Router then looks for `app/` at the repo root (missing) instead of `apps/mobile/app`.
+
+Fix: restore monorepo entry `apps/mobile/index.js` (`require.context('./app', …)`), which is what SDK 54 staging used successfully.
 
 Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch) until a post-fix SDK 55 APK passes smoke.
 
@@ -111,7 +121,7 @@ adb logcat -c && adb shell am start -n com.aclearo.app/.MainActivity && adb logc
 
 - **Do not** run `expo prebuild --clean` for Gradle staging APKs — it wiped monorepo `android/` wiring and produced a non-launching 1.0.13 build.
 - Assemble from committed `apps/mobile/android/` (`ExpoReactHostFactory`, monorepo `root`/`bundleConfig`).
-- Entry via `expo/scripts/resolveAppEntry` → `expo-router/entry` (not custom `index.js`).
+- Entry must be `apps/mobile/index.js` (not `expo-router/entry`) while `react.root` is the workspace root.
 - Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` from CI.
 - `NODE_ENV=production` for `assembleRelease`.
 

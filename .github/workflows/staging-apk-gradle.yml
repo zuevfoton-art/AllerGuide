@@ -167,9 +167,11 @@ jobs:
           GRADLE="android/app/build.gradle"
           grep -q 'ExpoReactHostFactory.getDefaultReactHost' "$MAIN_APP"
           grep -q 'bundleConfig = file("${projectRoot}/metro.config.js")' "$GRADLE"
+          grep -q 'entryFile = file("${projectRoot}/index.js")' "$GRADLE"
+          test -f index.js
           grep -q 'com.google.android.geo.API_KEY' "$MANIFEST"
           grep -q 'GOOGLE_MAPS_API_KEY' "$GRADLE"
-          echo "Native host OK (committed android/; maps key via Gradle manifestPlaceholders)"
+          echo "Native host OK (committed android/; maps key via Gradle manifestPlaceholders; entry=index.js)"
 
       - name: Assemble release APK
         working-directory: apps/mobile/android
