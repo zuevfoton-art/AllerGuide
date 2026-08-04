@@ -4,7 +4,7 @@ import {
   AppState,
   type AppStateStatus,
 } from 'react-native';
-import type { PollenUpiIndex, PollenUpiSnapshot } from '@allerguide/core';
+import { clampPollenUpiIndex, type PollenUpiIndex, type PollenUpiSnapshot } from '@allerguide/core';
 import type { GoogleMapCircle, GoogleMapPolyline } from '@/src/components/google-pollen-map.types';
 import {
   interpolateMapUpi,
@@ -22,6 +22,8 @@ type UsePollenPlumeParams = {
   originLongitude: number;
   todayUpi: PollenUpiSnapshot | null | undefined;
   tomorrowUpi: PollenUpiSnapshot | null | undefined;
+  /** Optional near-real-time UPI from Open-Meteo hourly series (secondary). */
+  hourlyUpi?: PollenUpiIndex | null;
   wind: WindSnapshot | null;
   accentColor: string;
 };
@@ -32,6 +34,7 @@ export function usePollenPlume({
   originLongitude,
   todayUpi,
   tomorrowUpi,
+  hourlyUpi,
   wind,
   accentColor,
 }: UsePollenPlumeParams): {
@@ -40,10 +43,10 @@ export function usePollenPlume({
   upiIndex: PollenUpiIndex;
   reduceMotion: boolean;
 } {
-  const upiIndex = useMemo(
-    () => interpolateMapUpi(todayUpi, tomorrowUpi),
-    [todayUpi, tomorrowUpi],
-  );
+  const upiIndex = useMemo(() => {
+    if (typeof hourlyUpi === 'number') return clampPollenUpiIndex(hourlyUpi);
+    return interpolateMapUpi(todayUpi, tomorrowUpi);
+  }, [hourlyUpi, todayUpi, tomorrowUpi]);
   const [particles, setParticles] = useState<PlumeParticle[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [active, setActive] = useState(AppState.currentState === 'active');

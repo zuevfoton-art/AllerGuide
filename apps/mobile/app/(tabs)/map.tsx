@@ -38,6 +38,7 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
 import { YandexMap } from '@/src/components/YandexMap';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
+import { YandexInteractiveMap } from '@/src/components/YandexInteractiveMap';
 import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
 import { PollenIndexCard } from '@/src/components/PollenIndexCard';
 import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
@@ -57,12 +58,19 @@ import {
   type PollenMapSnapshot,
 } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
+import {
+  fetchPollenHourlySeries,
+  resolveHourlyUpi,
+  type PollenHourlySeries,
+} from '@/src/services/pollen-hourly-service';
 import { fetchWindSnapshot, type WindSnapshot } from '@/src/services/wind-service';
+import { getApiBaseUrl } from '@/src/services/api-client';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
   GOOGLE_POLLEN_HEATMAP_ENABLED,
   MAP_POLLEN_GOOGLE_PRIMARY,
   MAP_POLLEN_PLUME_ENABLED,
+  YANDEX_MAP_INTERACTIVE_ENABLED,
 } from '@/src/constants/features';
 
 type MapLayerMode = 'pollen' | 'places' | 'both';
@@ -129,22 +137,27 @@ export default function MapScreen() {
   const [allergenPickerOpen, setAllergenPickerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [wind, setWind] = useState<WindSnapshot | null>(null);
+  const [pollenHourly, setPollenHourly] = useState<PollenHourlySeries | null>(null);
 
   const refresh = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
     try {
       const location = await getCurrentLocation();
       setCoords({ lat: location.lat, lon: location.lon, label: location.label });
-      const [snapshot, mapPois, windSnapshot] = await Promise.all([
+      const [snapshot, mapPois, windSnapshot, hourlySeries] = await Promise.all([
         fetchPollenMapSnapshot(location, profile?.allergies ?? '[]'),
         getMapPois(profile, { latitude: location.lat, longitude: location.lon }, poiCategories),
         MAP_POLLEN_PLUME_ENABLED
           ? fetchWindSnapshot(location.lat, location.lon)
           : Promise.resolve(null),
+        MAP_POLLEN_PLUME_ENABLED
+          ? fetchPollenHourlySeries(location.lat, location.lon)
+          : Promise.resolve(null),
       ]);
       setPollenSnapshot(snapshot);
       setPois(mapPois);
       setWind(windSnapshot);
+      setPollenHourly(hourlySeries);
       setSelectedPoiId((current) =>
         current && mapPois.some((poi) => poi.id === current)
           ? current
@@ -188,14 +201,22 @@ export default function MapScreen() {
   const statusReading = forecastReading ?? selectedReading;
   const statusLevel = statusReading?.level ?? null;
 
+  const useYandexInteractive =
+    YANDEX_MAP_INTERACTIVE_ENABLED && Boolean(getApiBaseUrl().trim());
   const useGoogleMap =
+    !useYandexInteractive &&
     (GOOGLE_MAP_PRIMARY_ENABLED || GOOGLE_POLLEN_HEATMAP_ENABLED) &&
     Boolean(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim());
   const useHeatmap = isGooglePollenHeatmapAvailable() && layerMode !== 'places';
   const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
   const showPlaceMarkers = layerMode === 'places' || layerMode === 'both';
-  const showPlume =
+  // Geo plume Circles need Google Maps primitives; Yandex path keeps caption only.
+  const showPlumeGeo =
     MAP_POLLEN_PLUME_ENABLED && useGoogleMap && layerMode !== 'places';
+  const showPlumeCaption =
+    MAP_POLLEN_PLUME_ENABLED &&
+    layerMode !== 'places' &&
+    (useGoogleMap || useYandexInteractive);
 
   const tomorrowUpi = useMemo((): PollenUpiSnapshot | null => {
     const reading = pollenSnapshot?.forecastDays[1]?.readings.find(
@@ -211,12 +232,18 @@ export default function MapScreen() {
     return readingToUpiSnapshot(reading);
   }, [pollenSnapshot?.forecastDays, pollenSnapshot?.source, selectedTaxonId]);
 
+  const hourlyUpi = useMemo(
+    () => resolveHourlyUpi(pollenHourly, selectedTaxonId),
+    [pollenHourly, selectedTaxonId],
+  );
+
   const plume = usePollenPlume({
-    enabled: showPlume,
+    enabled: showPlumeGeo,
     originLatitude: coords.lat,
     originLongitude: coords.lon,
     todayUpi: selectedUpi,
     tomorrowUpi,
+    hourlyUpi,
     wind,
     accentColor: theme.colors.accent,
   });
@@ -359,18 +386,20 @@ export default function MapScreen() {
     </View>
   );
 
+  const plumeCaptionVisible =
+    showPlumeCaption && (hourlyUpi ?? selectedUpi?.index ?? plume.upiIndex) > 0;
+
   const mapOverlay =
     layerMode === 'places' ? undefined : (
       <>
-        {showPlume && plume.upiIndex > 0 ? (
-          <PollenPlumeOverlay groupHint={plumeGroupHint} />
-        ) : null}
+        {plumeCaptionVisible ? <PollenPlumeOverlay groupHint={plumeGroupHint} /> : null}
         {mapLevelOverlay}
       </>
     );
 
-  const mapAttributionKey =
-    useGoogleMap
+  const mapAttributionKey = useYandexInteractive
+    ? 'map.pollenYandexInteractiveAttribution'
+    : useGoogleMap
       ? pollenSnapshot?.source === 'google' || MAP_POLLEN_GOOGLE_PRIMARY
         ? 'map.pollenGooglePrimaryAttribution'
         : 'map.pollenGoogleMapAttribution'
@@ -486,7 +515,18 @@ export default function MapScreen() {
         onClose={() => setAllergenPickerOpen(false)}
       />
 
-      {useGoogleMap ? (
+      {useYandexInteractive ? (
+        <YandexInteractiveMap
+          latitude={coords.lat}
+          longitude={coords.lon}
+          zoom={POLLEN_MAP_SCALE_ZOOM.city}
+          height={MAP_HERO_HEIGHT}
+          markers={showPlaceMarkers ? markers : []}
+          selectedMarkerId={selectedPoiId}
+          onMarkerPress={setSelectedPoiId}
+          overlay={mapOverlay}
+        />
+      ) : useGoogleMap ? (
         <GooglePollenMap
           latitude={coords.lat}
           longitude={coords.lon}
@@ -495,8 +535,8 @@ export default function MapScreen() {
           height={MAP_HERO_HEIGHT}
           interactive
           markers={markers}
-          circles={showPlume ? plume.circles : []}
-          polylines={showPlume ? plume.polylines : []}
+          circles={showPlumeGeo ? plume.circles : []}
+          polylines={showPlumeGeo ? plume.polylines : []}
           selectedMarkerId={selectedPoiId}
           onMarkerPress={setSelectedPoiId}
           overlay={mapOverlay}
@@ -518,7 +558,7 @@ export default function MapScreen() {
         {t(mapAttributionKey)}
       </Text>
 
-      {!useGoogleMap ? (
+      {!useGoogleMap && !useYandexInteractive ? (
         <Pressable
           style={styles.yandexBanner}
           onPress={() => {

@@ -32,12 +32,12 @@
 
 ## 3. Критерии решения (checklist)
 
-- [ ] Можно pan/zoom in-app на Android staging  
-- [ ] POI маркеры кликабельны  
-- [ ] Offline: fallback на кэш snapshot + статичная/последняя подложка или Google  
-- [ ] Ключ не утекает в клиентский bundle без restrict  
-- [ ] Нет запросов к HTML Яндекс Погоды allergies  
-- [ ] Feature flag выключает Яндекс → Google path без регрессий  
+- [x] Можно pan/zoom in-app (JS API 2.1 WebView / iframe) — **код готов**; staging smoke после ключа  
+- [x] POI маркеры кликабельны (postMessage bridge → `onMarkerPress`)  
+- [x] Offline: pollen snapshot кэш/календарь как раньше; без ключа/флага → Google / static Yandex widget  
+- [x] Ключ не утекает в клиентский bundle — только `YANDEX_MAPS_JS_API_KEY` на API  
+- [x] Нет запросов к HTML Яндекс Погоды allergies  
+- [x] Feature flag выключает Яндекс → Google path  
 
 ---
 
@@ -46,10 +46,17 @@
 - B2B pollen Яндекса (если появится договор — отдельный epic)  
 - Замена wellness Open-Meteo  
 - Парсинг UI Погоды  
+- Native MapKit (вариант B)
 
 ---
 
-## 5. Следующий PR после spike
+## 5. Реализация (вариант A) — done in code
 
-Если A ок: тонкий `YandexInteractiveMap` + флаг; `map.tsx` выбирает Google vs Yandex basemap; pollen/plume остаются Google.  
-Если A нет: закрыть Phase 4 как «Google-only» и оставить deep-link secondary.
+| Слой | Путь |
+|------|------|
+| API HTML embed | `apps/api/src/services/yandex-maps-embed.ts` · `GET /api/maps/yandex-interactive` |
+| Mobile | `apps/mobile/src/components/YandexInteractiveMap.tsx` |
+| Flag | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` + server `YANDEX_MAPS_INTERACTIVE_ENABLED` |
+| Выбор basemap | `map.tsx`: Yandex interactive → Google → static Yandex widget |
+
+**Включить на stage:** Lockbox `YANDEX_MAPS_JS_API_KEY` + `YANDEX_MAPS_INTERACTIVE_ENABLED=true`, EAS `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true`, `EXPO_PUBLIC_API_URL` на YC.

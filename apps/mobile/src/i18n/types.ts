@@ -443,6 +443,7 @@ export type LocaleMessages = {
     pollenMapAttribution: string;
     pollenGoogleMapAttribution: string;
     pollenGooglePrimaryAttribution: string;
+    pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenHeatmapGrassHint: string;
     pollenHeatmapWeedHint: string;

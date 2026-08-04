@@ -183,14 +183,17 @@ flowchart LR
 | 6 | ToS attribution footer | **Done** — `map.pollenGooglePrimaryAttribution` under hero map |
 | 7 | Observability | **Done** — `map_pollen_refreshed` / `map_pollen_fallback` analytics (+ existing `logCaughtError`) |
 | 8 | Не трогать wellness Google | **Kept** |
+| 9 | `YandexInteractiveMap` (вариант A) | **Done** — API embed + mobile WebView/iframe; флаг `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` (default off) |
+| 10 | Hourly wind/pollen series | **Done** — `hourly-series` + wind hourly interpolate + OM pollen hourly → plume `hourlyUpi` |
+| 11 | Ops alert на fallback rate | **Done** — `map-pollen-ops` + `GET /api/ops/map-pollen-health` + `pnpm map-pollen-ops-check` (+ optional `OPS_ALERT_WEBHOOK_URL`) |
 
 ### Осталось / follow-up
 
 | Шаг | Зачем |
 |-----|--------|
-| Внедрить `YandexInteractiveMap` по итогам spike (флаг) | RU-premium basemap in-app |
-| Hourly Google/wind series (если API даст) вместо daily UPI blend | Точнее near-real-time |
-| Dashboard alert на высокий `map_pollen_fallback` rate на stage | Ops |
+| Включить Яндекс interactive на stage (Lockbox `YANDEX_MAPS_JS_API_KEY` + EAS flag) | RU-premium after key provisioning |
+| Native MapKit (вариант B) если WebView UX недостаточен | Perf / gestures |
+| Hourly Google Pollen (если API даст) вместо OM secondary для plume | Единый провайдер |
 
 ### Флаги
 
@@ -200,11 +203,15 @@ flowchart LR
 | `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` | — | `true` |
 | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | `true` | `true` |
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `off` | `google` |
+| `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` | — | off until JS key in Lockbox |
 
 ### Код (ориентиры)
 
 - Map Google primary: `apps/mobile/src/services/pollen-map-service.ts`
 - Google → readings: `packages/core/src/pollen-google-forecast.ts`
 - Plume math: `packages/core/src/pollen-plume.ts` · hook: `use-pollen-plume.ts` · caption: `PollenPlumeOverlay.tsx`
-- Wind: `apps/mobile/src/services/wind-service.ts` (Open-Meteo Forecast, не AQ)
+- Wind: `apps/mobile/src/services/wind-service.ts` (Open-Meteo Forecast hourly + interpolate)
+- Hourly pollen (plume secondary): `pollen-hourly-service.ts` · core `hourly-series.ts`
+- Yandex interactive: `YandexInteractiveMap.tsx` · API `routes/maps.ts` + `yandex-maps-embed.ts`
+- Ops: `apps/api/src/lib/map-pollen-ops.ts` · `scripts/check-map-pollen-fallback.sh`
 - Analytics: `map_pollen_refreshed`, `map_pollen_fallback`

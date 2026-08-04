@@ -433,6 +433,8 @@ const en: LocaleMessages = {
     pollenMapAttribution: 'Map: Yandex Maps · levels: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Map and UPI layer: Google Maps · levels: Open-Meteo / CAMS',
     pollenGooglePrimaryAttribution: 'Map and pollen forecast: Google Maps / Google Pollen',
+    pollenYandexInteractiveAttribution:
+      'Map: Yandex Maps (interactive) · pollen forecast: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint: 'Map layer: tree pollen (UPI), not only the selected species',
     pollenHeatmapGrassHint: 'Map layer: grass pollen (UPI)',
     pollenHeatmapWeedHint: 'Map layer: weed pollen (UPI), not only the selected species',

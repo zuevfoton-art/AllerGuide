@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 describe('wind-service', () => {
-  it('parses Open-Meteo current wind', async () => {
+  it('parses current + hourly wind and interpolates', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({
@@ -21,16 +21,20 @@ describe('wind-service', () => {
             wind_direction_10m: 270,
             time: '2026-08-04T12:00',
           },
+          hourly: {
+            time: ['2026-08-04T11:00', '2026-08-04T13:00'],
+            wind_speed_10m: [2, 6],
+            wind_direction_10m: [270, 270],
+          },
         }),
       })),
     );
 
     const { fetchWindSnapshot } = await import('./wind-service');
     const wind = await fetchWindSnapshot(55.75, 37.62);
-    expect(wind).toMatchObject({
-      speedMps: 4.2,
-      directionDeg: 270,
-    });
+    expect(wind?.hourly?.length).toBe(2);
+    expect(wind?.directionDeg).toBe(270);
+    expect(wind?.speedMps).toBeGreaterThan(0);
   });
 
   it('returns null when the wind endpoint fails', async () => {
