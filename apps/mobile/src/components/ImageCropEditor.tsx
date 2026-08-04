@@ -219,9 +219,8 @@ export function ImageCropEditor({
       <View style={styles.stage} onLayout={onStageLayout}>
         <View style={styles.stageClip}>
           {layout ? (
-            <Image
+            <View
               pointerEvents="none"
-              source={{ uri: photo.uri }}
               style={{
                 position: 'absolute',
                 left: layout.offsetX,
@@ -229,17 +228,23 @@ export function ImageCropEditor({
                 width: layout.displayWidth,
                 height: layout.displayHeight,
               }}
-              resizeMode="stretch"
-              onLoad={onImageLoad}
-            />
+            >
+              <Image
+                source={{ uri: photo.uri }}
+                style={StyleSheet.absoluteFillObject}
+                resizeMode="stretch"
+                onLoad={onImageLoad}
+              />
+            </View>
           ) : (
-            <Image
-              pointerEvents="none"
-              source={{ uri: photo.uri }}
-              style={StyleSheet.absoluteFillObject}
-              resizeMode="contain"
-              onLoad={onImageLoad}
-            />
+            <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+              <Image
+                source={{ uri: photo.uri }}
+                style={StyleSheet.absoluteFillObject}
+                resizeMode="contain"
+                onLoad={onImageLoad}
+              />
+            </View>
           )}
 
           {crop && layout ? (
