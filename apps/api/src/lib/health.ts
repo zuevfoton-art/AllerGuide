@@ -3,6 +3,7 @@ import { buildConnectionOptions, isNeonPoolerUrl, resolveRuntimeUrl } from '../d
 import { getScanMetrics } from './scan-cache';
 import { pingRedis } from './redis-client';
 import { resolveRateLimitStoreKind } from './rate-limit-store';
+import { dishVisionConfigured } from '../services/llm-dish-vision-provider';
 
 export interface ScanHealthMetrics {
   enabled: boolean;
@@ -25,6 +26,7 @@ export interface HealthCheckResult {
     ycScanIntentLlm?: boolean;
     ycSearch?: boolean;
     ycStt?: boolean;
+    aiDishVision?: boolean;
     pollenHeatmap?: boolean;
     yandexMapsInteractive?: boolean;
   };
@@ -93,6 +95,7 @@ function buildFeatures() {
   const ycScanIntentLlm = process.env.YC_SCAN_INTENT_LLM === 'true' && aiScan;
   const ycSearch = process.env.YC_SEARCH_ENABLED === 'true' && ycCreds;
   const ycStt = process.env.YC_STT_ENABLED === 'true' && ycCreds;
+  const aiDishVision = dishVisionConfigured();
   return {
     sync: process.env.SYNC_ENABLED === 'true',
     aiScan,
@@ -107,6 +110,7 @@ function buildFeatures() {
     ...(ycScanIntentLlm ? { ycScanIntentLlm: true } : {}),
     ...(ycSearch ? { ycSearch: true } : {}),
     ...(ycStt ? { ycStt: true } : {}),
+    ...(aiDishVision ? { aiDishVision: true } : {}),
   };
 }
 

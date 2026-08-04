@@ -341,6 +341,11 @@ const de: LocaleMessages = {
     sourceManual: 'manuelle Eingabe',
     sourceOcr: 'OCR',
     sourceLlm: 'KI-Analyse',
+    sourceDishVision: 'Gerichtsfoto (KI-Schätzung)',
+    trustLineDishVision:
+      'Nur Schätzung anhand des Fotos — kein Labortest. Bitte echte Zutaten prüfen, wenn möglich.',
+    dishVisionDisclaimer:
+      'Gerichtserkennung vom Tellerfoto ist eine KI-Schätzung von Name und typischen Zutaten. Saucen, Austausche und Kreuzkontakte können fehlen. Das ersetzt weder Etikett noch Rückfrage in der Küche und schließt individuelle Reaktionen nicht aus.',
     safeList: 'Sichere Produkte',
     saveToSafe: '✓ In sichere Liste speichern',
     savedToSafe: '✓ Gespeichert',

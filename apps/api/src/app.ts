@@ -7,6 +7,7 @@ import { setupAuth, registerAuthRoutes } from './replit_integrations/auth';
 import { registerSyncRoutes } from './routes/sync';
 import { registerScanRoutes } from './routes/scan';
 import { registerScanIntentRoutes } from './routes/scan-intent';
+import { registerScanDishVisionRoutes } from './routes/scan-dish-vision';
 import { registerOcrRoutes } from './routes/ocr';
 import { registerSearchIngredientsRoutes } from './routes/search-ingredients';
 import { registerSttRoutes } from './routes/stt';
@@ -46,6 +47,7 @@ export async function createApp(
   registerSyncRoutes(app);
   registerScanRoutes(app);
   registerScanIntentRoutes(app);
+  registerScanDishVisionRoutes(app);
   registerOcrRoutes(app);
   registerSearchIngredientsRoutes(app);
   registerSttRoutes(app);

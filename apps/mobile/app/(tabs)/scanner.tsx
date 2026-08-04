@@ -414,9 +414,13 @@ export default function ScannerScreen() {
     if (source === 'barcode') return t('scanner.sourceBarcode');
     if (source === 'ocr') return t('scanner.sourceOcr');
     if (source === 'llm') return t('scanner.sourceLlm');
+    if (source === 'dish_vision') return t('scanner.sourceDishVision');
     if (source === 'catalog_api') return t('scanner.sourceCatalogApi');
     return t('scanner.sourceManual');
   };
+
+  const isDishVisionResult =
+    result?.source === 'dish_vision' || Boolean(result?.dishVision);
 
   const confirmSaveSafe = () => {
     if (!activeProfileId || !result) return;
@@ -657,7 +661,9 @@ export default function ScannerScreen() {
       {!displayResult && !loading ? (
         <Text style={styles.emptyHint}>{t('scanner.emptyHint')}</Text>
       ) : null}
-      <Text style={styles.trustLine}>{t('scanner.trustLine')}</Text>
+      <Text style={styles.trustLine}>
+        {isDishVisionResult ? t('scanner.trustLineDishVision') : t('scanner.trustLine')}
+      </Text>
 
       {manualOpen ? (
         <View style={styles.manualBlock}>
@@ -1047,7 +1053,9 @@ export default function ScannerScreen() {
         />
       ) : null}
 
-      <Disclaimer>{t('scanner.disclaimer')}</Disclaimer>
+      <Disclaimer>
+        {isDishVisionResult ? t('scanner.dishVisionDisclaimer') : t('scanner.disclaimer')}
+      </Disclaimer>
     </Screen>
   );
 }
