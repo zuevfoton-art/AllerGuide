@@ -8,6 +8,7 @@ WORKDIR /app
 
 # Workspace manifests (layer cache)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches patches
 COPY apps/api/package.json apps/api/
 COPY packages/core/package.json packages/core/
 COPY packages/ai/package.json packages/ai/
