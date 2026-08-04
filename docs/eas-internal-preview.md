@@ -139,7 +139,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 
 | Настройка | Значение | Почему |
 |-----------|----------|--------|
-| `newArchEnabled` (`app.json` + `android/gradle.properties` + `ios/Podfile.properties.json`) | **`false`** | Phase A SDK 54 остаётся на Legacy Architecture. New Arch — отдельная Phase B перед SDK 55 (там New Arch обязателен). |
+| `newArchEnabled` (`app.json` + `android/gradle.properties` + `ios/Podfile.properties.json`) | **`true`** (Phase B on SDK 54) | Включено после SDK 54 old-arch soak. Обязательный smoke на release APK перед SDK 55 (там Legacy Arch удалён). Откат: `false` во всех трёх местах + пересборка. |
 | `react-native-quick-crypto` | **не используется** | Его нативный `install()` аварийно завершал процесс **при запуске** на Android (native/JNI abort, который JS `try/catch` не ловит). Полностью удалён. |
 | Криптография (хэш паролей, PBKDF2/SHA-256) | **чистый JS `@noble/hashes`** в `@allerguide/core` (`src/password.ts`) | Не грузит нативный крипто-модуль на старте; формат хэшей не изменился (старые хэши проверяются). |
 | Резервное шифрование (AES-GCM) | Web Crypto, с мягкой деградацией | На нативе `crypto.subtle` отсутствует → `isEncryptionAvailable() === false`, облачный бэкап (по умолчанию выключен) просто не шифруется. |

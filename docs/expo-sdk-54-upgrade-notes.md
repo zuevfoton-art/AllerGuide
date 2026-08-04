@@ -32,7 +32,26 @@ Drop the patch only after upstream lands both fixes and release APK cloud-mic is
 - Preview/production leave mic flag unset (OS speech only) until device logcat confirms no SIGSEGV.
 - Residual: this Cloud Agent environment has **no Android SDK**, so `assembleRelease` / device logcat could not be run here. Gradle wrapper is verified at **8.14.3**. Device acceptance: EAS `staging` APK + `adb logcat` around diary voice (OS + cloud-mic).
 
-## Follow-ups (not in this PR)
+## Phase B — New Arch on SDK 54
 
-- **Phase B:** `newArchEnabled=true` on SDK 54; smoke launch/diary/scanner/map/voice/SOS.
-- **Phase C:** Expo 54 → 55 (RN 0.83 / React 19.2 / New Arch only) after Phase B is green.
+Enabled in:
+
+- `apps/mobile/app.json` → `newArchEnabled: true`
+- `apps/mobile/android/gradle.properties` → `newArchEnabled=true`
+- `apps/mobile/ios/Podfile.properties.json` → `"newArchEnabled": "true"`
+
+### Release smoke checklist (device / EAS staging APK)
+
+1. Cold start (no native abort in `adb logcat *:E`)
+2. Auth / profile select
+3. Diary create + voice (OS speech and cloud-mic when flag on)
+4. Scanner (camera + barcode)
+5. Map (Google pollen / Yandex fallback)
+6. SOS
+7. Kill app → reopen (SQLite persistence)
+
+If maps/sentry/speech abort — pin compatible versions **before** Phase C (SDK 55).
+
+## Phase C — SDK 54 → 55
+
+Follow-up after Phase B green: Expo 55 / RN 0.83 / React 19.2; remove `newArchEnabled` from config (New Arch only).

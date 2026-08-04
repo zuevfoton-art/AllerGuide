@@ -70,7 +70,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`) to console/HTTP; `EXPO_PUBLIC_SENTRY_DSN` enables crash reporting. Both off by default.
 
 ### Production builds (internal alpha)
-- Local Android build (Node.js + Gradle) and Android Studio verification: see [`docs/android-local-build.md`](docs/android-local-build.md). Quick path from `apps/mobile`: `pnpm android` (= `expo run:android`) or `cd android && ./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`. The native `apps/mobile/android/` project is committed (Gradle 8.14.3, Hermes, JDK 17, Expo SDK 54 / RN 0.81, New Arch off).
+- Local Android build (Node.js + Gradle) and Android Studio verification: see [`docs/android-local-build.md`](docs/android-local-build.md). Quick path from `apps/mobile`: `pnpm android` (= `expo run:android`) or `cd android && ./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`. The native `apps/mobile/android/` project is committed (Gradle 8.14.3, Hermes, JDK 17, Expo SDK 54 / RN 0.81, New Arch on).
 - **Stage APK without local SDK (Cursor Cloud / CI):** prefer **EAS Build** — [`docs/android-stage-build.md`](docs/android-stage-build.md) · GitHub → EAS: `.github/workflows/eas-staging-android.yml` · Gradle-on-GitHub alternative: `.github/workflows/staging-apk-gradle.yml`.
 - EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
 - EAS staging (backend flags on): [`docs/eas-staging-build.md`](docs/eas-staging-build.md) · `pnpm --filter mobile build:staging:android`.

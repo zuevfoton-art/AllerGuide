@@ -35,7 +35,7 @@ cd android && ./gradlew assembleDebug
 - `apps/mobile` — Expo / React Native приложение (managed-проект с уже сгенерированной нативной папкой `android/`).
 - JS-движок: **Hermes**. Архитектура: классическая (New Architecture выключена).
 - Версии в проекте: **Node 22.14.0**, **Gradle 8.14.3**, **Expo SDK 54 / React Native 0.81**, **JDK 17**.
-- New Architecture: **выключена** (`newArchEnabled=false`) до отдельной Phase B валидации.
+- New Architecture: **включена** на SDK 54 (Phase B). Smoke release APK перед SDK 55 обязателен.
 - Package / applicationId: `com.aclearo.app`.
 
 Backend не нужен — приложение offline-first, все основные сценарии работают без сети.
