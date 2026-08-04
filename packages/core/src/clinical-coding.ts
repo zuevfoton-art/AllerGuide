@@ -112,6 +112,20 @@ export const ALLERGEN_CLINICAL_CODES: Record<string, ClinicalCoding> = {
     snomed: '260152009',
     snomedLabel: 'Birch pollen allergy',
   },
+  'alder-pollen': {
+    allergenId: 'alder-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — alder pollen',
+    snomed: '256259004',
+    snomedLabel: 'Alder pollen allergy',
+  },
+  'olive-pollen': {
+    allergenId: 'olive-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — olive pollen',
+    snomed: '256352005',
+    snomedLabel: 'Olive pollen allergy',
+  },
   'grass-pollen': {
     allergenId: 'grass-pollen',
     icd11: 'CA08.4',

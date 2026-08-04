@@ -434,7 +434,10 @@ const de: LocaleMessages = {
     pollenGooglePrimaryAttribution: 'Karte und Pollenprognose: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Karte: Yandex Maps (interaktiv) · Pollenprognose: Google Pollen / Open-Meteo',
-    pollenHeatmapTreeHint: 'Kartenebene: Baumpollen (UPI), nicht nur die gewählte Art',
+    pollenHeatmapTreeHint:
+      'Untergrund: Baumpollen (Google UPI). Birke, Erle und Olive haben eigene Werte in den Chips',
+    pollenTreeSpeciesLevelsHint:
+      'Die Kartenebene gilt für Bäume insgesamt. Werte für Birke / Erle / Olive kommen aus der Artprognose (Google oder Open-Meteo).',
     pollenHeatmapGrassHint: 'Kartenebene: Gräserpollen (UPI)',
     pollenHeatmapWeedHint: 'Kartenebene: Kräuterpollen (UPI), nicht nur die gewählte Art',
     pollenBirch: 'Birke',

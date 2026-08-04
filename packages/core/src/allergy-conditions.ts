@@ -55,6 +55,7 @@ export const ALLERGY_CONDITION_TYPES: AllergyConditionType[] = [
       { id: 'ash', label: 'Ясень', season: 'spring' },
       { id: 'willow', label: 'Ива', season: 'spring' },
       { id: 'poplar', label: 'Тополь', season: 'spring' },
+      { id: 'olive-pollen', label: 'Олива', season: 'spring' },
       { id: 'timothy', label: 'Тимофеевка', season: 'summer' },
       { id: 'meadow', label: 'Мятлик', season: 'summer' },
       { id: 'fescue', label: 'Овсяница', season: 'summer' },

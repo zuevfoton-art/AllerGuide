@@ -4,8 +4,11 @@ import {
   buildReadingsFromGoogleForecastDay,
   buildUpiByTaxonFromGoogleDay,
   googleTypeKeyForTaxon,
+  isTreeSpeciesPollenTaxon,
+  mergeGoogleAndOpenMeteoMapReadings,
   resolveGoogleUpiForTaxon,
 } from './pollen-google-forecast';
+import type { PollenMapReading } from './pollen-map';
 
 describe('pollen-google-forecast', () => {
   const day = {
@@ -25,9 +28,17 @@ describe('pollen-google-forecast', () => {
     expect(googleTypeKeyForTaxon('ragweed_pollen')).toBe('WEED');
   });
 
-  it('prefers plant UPI over type UPI', () => {
+  it('identifies tree species taxa', () => {
+    expect(isTreeSpeciesPollenTaxon('birch_pollen')).toBe(true);
+    expect(isTreeSpeciesPollenTaxon('alder_pollen')).toBe(true);
+    expect(isTreeSpeciesPollenTaxon('olive_pollen')).toBe(true);
+    expect(isTreeSpeciesPollenTaxon('grass_pollen')).toBe(false);
+  });
+
+  it('prefers plant UPI and does not use TREE for alder/olive', () => {
     expect(resolveGoogleUpiForTaxon('birch_pollen', day)?.index).toBe(4);
-    expect(resolveGoogleUpiForTaxon('alder_pollen', day)?.index).toBe(3);
+    expect(resolveGoogleUpiForTaxon('alder_pollen', day)).toBeNull();
+    expect(resolveGoogleUpiForTaxon('olive_pollen', day)).toBeNull();
     expect(resolveGoogleUpiForTaxon('grass_pollen', day)?.index).toBe(2);
   });
 
@@ -39,11 +50,41 @@ describe('pollen-google-forecast', () => {
       level: 'high',
       profileRelevant: true,
     });
+    expect(readings.find((item) => item.taxonId === 'alder_pollen')).toBeUndefined();
   });
 
   it('builds multi-day forecast and upi map', () => {
     const days = buildForecastDaysFromGoogle([day, { ...day, date: '2026-08-05' }], []);
     expect(days).toHaveLength(2);
     expect(buildUpiByTaxonFromGoogleDay(day).birch_pollen?.source).toBe('google');
+    expect(buildUpiByTaxonFromGoogleDay(day).alder_pollen).toBeUndefined();
+  });
+
+  it('merges Open-Meteo species readings when Google plant UPI is missing', () => {
+    const openMeteoReadings: PollenMapReading[] = [
+      {
+        taxonId: 'alder_pollen',
+        allergenId: 'alder-pollen',
+        value: 40,
+        level: 'mid',
+        profileRelevant: false,
+      },
+      {
+        taxonId: 'olive_pollen',
+        allergenId: 'olive-pollen',
+        value: 5,
+        level: 'low',
+        profileRelevant: false,
+      },
+    ];
+
+    const merged = mergeGoogleAndOpenMeteoMapReadings(day, openMeteoReadings, ['birch-pollen']);
+    expect(merged.upiByTaxon.birch_pollen).toMatchObject({ index: 4, source: 'google' });
+    expect(merged.upiByTaxon.alder_pollen?.source).toBe('open-meteo');
+    expect(merged.upiByTaxon.olive_pollen?.source).toBe('open-meteo');
+    expect(merged.readings.find((item) => item.taxonId === 'alder_pollen')?.value).toBe(40);
+    expect(merged.readings.find((item) => item.taxonId === 'birch_pollen')?.profileRelevant).toBe(
+      true,
+    );
   });
 });

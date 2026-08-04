@@ -54,13 +54,16 @@ describe('condition-allergen-map', () => {
     expect(resolveConditionOptionAllergenId('drug', 'paracetamol')).toBe('paracetamol');
   });
 
-  it('returns null for calendar-only pollinosis options without allergen row', () => {
-    expect(resolveConditionOptionAllergenId('pollinosis', 'alder')).toBeNull();
+  it('maps alder/olive pollinosis options to dedicated allergen rows', () => {
+    expect(resolveConditionOptionAllergenId('pollinosis', 'alder')).toBe('alder-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'olive-pollen')).toBe('olive-pollen');
     expect(resolveConditionOptionPollenTaxonId('pollinosis', 'alder')).toBe('alder_pollen');
-    expect(resolveConditionOptionPollenTaxonId('pollinosis', 'hazel')).toBe('hazel_pollen');
-    expect(resolveConditionOptionPollenTaxonId('pollinosis', 'maple')).toBe('maple_pollen');
+    expect(resolveConditionOptionPollenTaxonId('pollinosis', 'olive-pollen')).toBe('olive_pollen');
+    expect(isCalendarOnlyPollenOption('alder')).toBe(false);
     expect(isCalendarOnlyPollenOption('oak')).toBe(true);
     expect(isCalendarOnlyPollenOption('birch-pollen')).toBe(false);
+    expect(resolveConditionOptionPollenTaxonId('pollinosis', 'hazel')).toBe('hazel_pollen');
+    expect(resolveConditionOptionPollenTaxonId('pollinosis', 'maple')).toBe('maple_pollen');
   });
 
   it('deduplicates allergen ids from multiple grass options', () => {

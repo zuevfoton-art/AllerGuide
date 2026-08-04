@@ -22,6 +22,7 @@ import {
   POLLEN_MAP_TAXON_IDS,
   PRIMARY_POLLEN_MAP_TAXON_IDS,
   SECONDARY_POLLEN_MAP_TAXON_IDS,
+  isTreeSpeciesPollenTaxon,
   pollenTaxonToGoogleMapType,
   readingToUpiSnapshot,
   resolvePollenRegion,
@@ -561,6 +562,11 @@ export default function MapScreen() {
       <Text style={styles.mapAttribution} testID="map-attribution">
         {t(mapAttributionKey)}
       </Text>
+      {useGoogleMap && useHeatmap && isTreeSpeciesPollenTaxon(selectedTaxonId) ? (
+        <Text style={styles.treeSpeciesHint} testID="map-tree-heatmap-hint">
+          {t('map.pollenHeatmapTreeHint')}
+        </Text>
+      ) : null}
 
       {!useGoogleMap && !useYandexInteractive ? (
         <Pressable
@@ -867,6 +873,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       lineHeight: 14,
+    },
+    treeSpeciesHint: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      lineHeight: 15,
+      marginTop: 2,
+      marginBottom: 4,
     },
     mapLevelOverlay: {
       position: 'absolute',

@@ -18,6 +18,8 @@ export const CONDITION_OPTION_ALLERGEN_MAP: Partial<
   },
   pollinosis: {
     'birch-pollen': 'birch-pollen',
+    alder: 'alder-pollen',
+    'olive-pollen': 'olive-pollen',
     'ragweed-pollen': 'ragweed-pollen',
     'mugwort-pollen': 'mugwort-pollen',
     timothy: 'grass-pollen',
@@ -75,12 +77,12 @@ export const CONDITION_OPTION_POLLEN_TAXON_MAP: Partial<
     'mugwort-pollen': 'mugwort_pollen',
     saltwort: 'saltwort_pollen',
     'ragweed-pollen': 'ragweed_pollen',
+    'olive-pollen': 'olive_pollen',
   },
 };
 
 /** Pollinosis sub-options with calendar/Open-Meteo taxon but no dedicated allergen row. */
 export const CALENDAR_ONLY_POLLEN_OPTION_IDS = new Set([
-  'alder',
   'hazel',
   'oak',
   'maple',
