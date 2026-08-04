@@ -15,8 +15,6 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import {
   computeScanTrends,
   formatDiaryDate,
-  parseProfileAllergenIds,
-  findAllergenById,
   type RiskLevel,
   type SafeProduct,
   type ScanHistoryEntry,
@@ -60,13 +58,6 @@ type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 type CameraEntryMode = 'barcode' | 'scanner';
 type ScanMode = ScannerMode;
 type ListTab = 'recent' | 'saved';
-
-const DOMAIN_MODES: { key: ScanMode; labelKey: 'scanner.product' | 'scanner.menu' | 'scanner.medicine' | 'scanner.cosmetics' }[] = [
-  { key: 'product', labelKey: 'scanner.product' },
-  { key: 'menu', labelKey: 'scanner.menu' },
-  { key: 'medicine', labelKey: 'scanner.medicine' },
-  { key: 'cosmetics', labelKey: 'scanner.cosmetics' },
-];
 
 const SAFE_MODE_LABEL_KEYS: Record<
   ScannerMode,
@@ -165,19 +156,6 @@ export default function ScannerScreen() {
   const isMedium = riskLevel === 'medium';
   const isLow = riskLevel === 'low';
   const isCautionOrWorse = isHigh || isMedium;
-
-  const profileAllergenNames = useMemo(() => {
-    if (!profile?.allergies) return [] as string[];
-    return parseProfileAllergenIds(profile.allergies)
-      .map((id) => findAllergenById(id)?.name ?? id)
-      .filter(Boolean);
-  }, [profile]);
-
-  const profileChipDetail = useMemo(() => {
-    if (profileAllergenNames.length === 0) return t('scanner.profileChipNone');
-    if (profileAllergenNames.length <= 2) return profileAllergenNames.join(', ');
-    return t('scanner.profileChipAllergens', { count: String(profileAllergenNames.length) });
-  }, [profileAllergenNames, t]);
 
   const compositionText = result?.productIngredients?.trim() || input.trim();
 
@@ -377,17 +355,6 @@ export default function ScannerScreen() {
     setCapturing(false);
     setTorchOn(false);
     setCameraOpen(true);
-  };
-
-  const selectDomainMode = (next: ScanMode) => {
-    setMode(next);
-    setEntryMode(next === 'product' ? 'barcode' : 'scanner');
-    setResult(null);
-    setOcrHint(null);
-    setScanError(false);
-    setPendingPhoto(null);
-    setRepeatUnsafe(false);
-    lastHapticResultRef.current = null;
   };
 
   const handleBarcode = ({ data }: { data: string }) => {
@@ -635,31 +602,7 @@ export default function ScannerScreen() {
           <ScreenEyebrow section={t('scanner.eyebrow')} />
           <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         </View>
-      </View>
-
-      <ProfileHeaderButton
-        variant="chip"
-        chipTitle={profile?.name ?? t('home.selectProfile')}
-        chipDetail={profileChipDetail}
-      />
-
-      <View style={styles.modeRow} testID="scanner-mode-row">
-        {DOMAIN_MODES.map((m) => {
-          const active = mode === m.key;
-          return (
-            <Pressable
-              key={m.key}
-              style={[styles.modeChip, active && styles.modeChipActive]}
-              onPress={() => selectDomainMode(m.key)}
-              testID={`scanner-mode-${m.key}`}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}>
-              <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>
-                {t(m.labelKey)}
-              </Text>
-            </Pressable>
-          );
-        })}
+        <ProfileHeaderButton />
       </View>
 
       <Button
@@ -1100,30 +1043,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
-    modeRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-    modeChip: {
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 8,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    modeChipActive: {
-      backgroundColor: colors.accentLight,
-      borderColor: colors.accent,
-    },
-    modeChipText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    modeChipTextActive: { color: colors.accent },
     secondaryRow: { flexDirection: 'row', gap: 10 },
     secondaryBtn: {
       flex: 1,
