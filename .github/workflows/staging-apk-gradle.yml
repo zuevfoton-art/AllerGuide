@@ -157,10 +157,36 @@ jobs:
 
       - name: Prebuild Android (inject Google Maps key via app.config.js)
         working-directory: apps/mobile
+        # --clean regenerates android/ from expo-template-bare-minimum@sdk-55.
+        # MainApplication/MainActivity match that template (ExpoReactHostFactory);
+        # custom monorepo metro wiring is re-applied by plugins/withAndroidMonorepoGradle.
+        # Google Maps meta-data is injected by Expo's react-native-maps plugin when
+        # EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is set (literal key, not ${GOOGLE_MAPS_API_KEY}).
         run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Verify native host after prebuild
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          MAIN_APP="android/app/src/main/java/com/aclearo/app/MainApplication.kt"
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          GRADLE="android/app/build.gradle"
+          grep -q 'ExpoReactHostFactory.getDefaultReactHost' "$MAIN_APP"
+          grep -q 'bundleConfig = file("${projectRoot}/metro.config.js")' "$GRADLE"
+          if [ -n "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}" ]; then
+            grep -q 'com.google.android.geo.API_KEY' "$MANIFEST"
+            if grep -q '\${GOOGLE_MAPS_API_KEY}' "$MANIFEST"; then
+              echo "::error::Manifest still uses unresolved \${GOOGLE_MAPS_API_KEY} placeholder after prebuild"
+              exit 1
+            fi
+          fi
+          echo "Native host OK (ExpoReactHostFactory + metro bundleConfig; maps key present=$( [[ -n "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}" ]] && echo yes || echo no ))"
 
       - name: Assemble release APK
         working-directory: apps/mobile/android
+        env:
+          # Required so Expo/Metro embed EXPO_PUBLIC_* as production release values.
+          NODE_ENV: production
         # Job/workflow EXPO_PUBLIC_* + resolved Maps key (GITHUB_ENV) must be present
         # when Metro bundles JS during assembleRelease.
         run: ./gradlew assembleRelease --no-daemon
