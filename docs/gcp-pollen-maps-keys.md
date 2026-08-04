@@ -210,6 +210,8 @@ Pollen **всегда** отдельным ключом.
 
 ## 5. Как взять SHA-1 для Android
 
+### 5.1. EAS staging / preview
+
 После первого EAS staging build:
 
 ```bash
@@ -219,6 +221,19 @@ pnpm exec eas credentials -p android
 ```
 
 Вставьте SHA-1 в ключ §3.1 → Save → пересоберите APK (если карта уже была серой).
+
+### 5.2. GitHub Actions Gradle APK (path C)
+
+Staging Gradle APKs are signed with the committed `apps/mobile/android/app/debug.keystore` (release build type uses the debug signing config).
+
+| Field | Value |
+|-------|--------|
+| Package | `com.aclearo.app` |
+| SHA-1 | `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` |
+
+Add this fingerprint as a **second** Android app item on `aclearo-staging-maps-android` (keep the EAS SHA-1 too). Put the same key value in GitHub Actions secret `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (must start with `AIza`).
+
+Without this SHA-1 (or with a non-`AIza` value baked into the APK) the device shows a **blank beige map with the Google logo** while pollen numbers still load.
 
 ---
 
@@ -241,7 +256,8 @@ pnpm exec eas credentials -p android
 
 | Симптом | Причина | Что сделать |
 |---------|---------|-------------|
-| Серый / пустой Google map в APK | Неверный SHA-1 / package / Maps Android API не enabled | Проверить §3.1 и credentials EAS |
+| Серый / пустой Google map в APK (логотип Google есть) | Неверный SHA-1 / package / Maps Android API не enabled / в APK попал не-`AIza` ключ | §3.1 + §5; для Gradle CI добавьте SHA-1 из §5.2; секреты только `AIza…` |
+| В APK `geo.API_KEY` = текст ошибки (`The bearer token is invalid.`) | CI принял stdout от `eas env:get` без валидации | Workflow должен требовать `AIza…`; починить `EXPO_TOKEN` / задать GH secret |
 | Tile proxy 403 | Billing / Pollen API / ключ / IP restriction | Проверить §1–3.4 и логи API |
 | Пыление всё ещё Яндекс | Нет Maps key в EAS или `EXPO_PUBLIC_POLLEN_HEATMAP` ≠ `google` | Secret + rebuild; профиль staging |
 | Огромный счёт | Один unrestricted key + кэш/prefetch (запрещён ToS) | Разнести ключи; budget; rate limit API |

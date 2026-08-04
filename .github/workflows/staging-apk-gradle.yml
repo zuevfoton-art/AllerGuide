@@ -79,9 +79,9 @@ jobs:
         working-directory: apps/mobile
         run: pnpm generate-assets || true
 
-      # Google pollen heatmap needs EXPO_PUBLIC_GOOGLE_MAPS_API_KEY in the JS bundle
-      # and native Maps config. Prefer GH secret; otherwise pull from EAS (same store
-      # as profile staging / eas-staging-android.yml).
+      # Google basemap/heatmap needs a real Maps Android key (AIza…) in the JS bundle
+      # and native manifest. Prefer GH secret; otherwise pull from EAS.
+      # Never bake CLI/auth error text into the APK (blank map + Google logo).
       - name: Resolve Google Maps API key
         working-directory: apps/mobile
         env:
@@ -89,36 +89,70 @@ jobs:
           EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
         run: |
           set -euo pipefail
-          KEY="${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}"
-          if [ -n "$KEY" ]; then
-            echo "Using EXPO_PUBLIC_GOOGLE_MAPS_API_KEY from GitHub Actions secrets."
-          elif [ -n "${EXPO_TOKEN:-}" ]; then
-            echo "GH Maps key empty — trying EAS project env…"
+
+          is_google_maps_api_key() {
+            # Google API keys are AIza… (typically 39 chars). Reject spaces / error prose.
+            [[ "${1:-}" =~ ^AIza[0-9A-Za-z_-]{20,}$ ]]
+          }
+
+          KEY=""
+          SOURCE=""
+          CANDIDATE="${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}"
+          if is_google_maps_api_key "$CANDIDATE"; then
+            KEY="$CANDIDATE"
+            SOURCE="github-secret"
+            echo "Using valid EXPO_PUBLIC_GOOGLE_MAPS_API_KEY from GitHub Actions secrets."
+          elif [ -n "${CANDIDATE}" ]; then
+            echo "::warning::GitHub secret EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is set but is not a Google API key (expected AIza…)."
+          fi
+
+          if [ -z "$KEY" ] && [ -n "${EXPO_TOKEN:-}" ]; then
+            echo "Trying EAS project env for Maps key…"
             for ENV_NAME in preview production development; do
+              set +e
               VAL="$(
                 pnpm exec eas env:get "$ENV_NAME" \
                   --variable-name EXPO_PUBLIC_GOOGLE_MAPS_API_KEY \
                   --format short \
-                  --non-interactive 2>/dev/null | tr -d '\r' || true
+                  --non-interactive 2>/tmp/eas-maps-key.err | tr -d '\r'
               )"
-              if [ -n "${VAL:-}" ] && [ "$VAL" != "null" ]; then
+              EAS_RC=$?
+              set -e
+              VAL="$(printf '%s' "${VAL:-}" | tail -n 1 | tr -d '[:space:]')"
+              if [ "$EAS_RC" -ne 0 ]; then
+                echo "EAS env:get ${ENV_NAME} failed (rc=${EAS_RC}): $(tr '\n' ' ' </tmp/eas-maps-key.err | head -c 200)"
+                continue
+              fi
+              if is_google_maps_api_key "$VAL"; then
                 KEY="$VAL"
-                echo "Resolved Maps key from EAS environment=${ENV_NAME}."
+                SOURCE="eas:${ENV_NAME}"
+                echo "Resolved valid Maps key from EAS environment=${ENV_NAME}."
                 break
+              fi
+              if [ -n "${VAL}" ]; then
+                echo "::warning::EAS ${ENV_NAME} returned a non-key value (len=${#VAL}); ignoring."
               fi
             done
           fi
-          if [ -z "${KEY:-}" ]; then
-            echo "::error::EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is required for staging Google pollen map."
-            echo "Set repo secret EXPO_PUBLIC_GOOGLE_MAPS_API_KEY, or EAS Sensitive env + EXPO_TOKEN."
-            echo "See docs/android-stage-build.md §C and docs/gcp-pollen-maps-keys.md"
-            exit 1
+
+          if [ -n "$KEY" ]; then
+            {
+              echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY<<EOF"
+              echo "$KEY"
+              echo "EOF"
+              echo "STAGING_MAPS_KEY_SOURCE=${SOURCE}"
+            } >> "$GITHUB_ENV"
+            echo "Google basemap enabled (source=${SOURCE})."
+            echo "Gradle CI signing SHA-1 (add to GCP Android key restrictions): 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25"
+          else
+            {
+              echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY="
+              echo "STAGING_MAPS_KEY_SOURCE=none"
+            } >> "$GITHUB_ENV"
+            echo "::warning::No valid Google Maps API key (AIza…). APK will use Yandex interactive basemap; Google pollen numbers still work via staging API."
+            echo "Set repo secret EXPO_PUBLIC_GOOGLE_MAPS_API_KEY to a Maps Android key, and allowlist package com.aclearo.app + SHA-1 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25 (debug.keystore)."
+            echo "See docs/gcp-pollen-maps-keys.md §3.1 / §5 and docs/android-stage-build.md §C."
           fi
-          {
-            echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY<<EOF"
-            echo "$KEY"
-            echo "EOF"
-          } >> "$GITHUB_ENV"
 
       - name: Prebuild Android (inject Google Maps key via app.config.js)
         working-directory: apps/mobile
@@ -162,10 +196,10 @@ jobs:
           body: |
             Staging APK built from `${{ github.sha }}` via Gradle on GitHub Actions.
 
-            - Profile env aligned with `eas.json` → `staging` (incl. Google pollen / plume / Yandex interactive)
-            - Google Maps key injected from GH secret or EAS Sensitive env
-            - API: `https://api.staging.aclearo.com`
-            - Package: `com.aclearo.app` (CI/debug-style signing — internal testing only)
+            - Profile env aligned with `eas.json` → `staging` (Google pollen / plume / Yandex interactive)
+            - Google Maps key source: must be a real `AIza…` key (GH secret or EAS); otherwise Yandex interactive basemap
+            - CI signing SHA-1 for GCP Android key allowlist: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`
+            - Package: `com.aclearo.app` · API: `https://api.staging.aclearo.com`
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

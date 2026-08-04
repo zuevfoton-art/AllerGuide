@@ -136,17 +136,18 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 
 | Secret | Назначение |
 |--------|------------|
-| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps Android key (package + SHA-1 debug/CI). **Required** for Google pollen basemap/heatmap in the Gradle APK (job fails if missing). |
-| `EXPO_TOKEN` | Fallback: pull the same Maps key from EAS Sensitive when the GH secret is empty |
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps Android key (`AIza…`, package + SHA-1). Without a **valid** key the job still builds, but the APK uses **Yandex interactive** basemap (Google pollen numbers via API remain). |
+| `EXPO_TOKEN` | Fallback: pull the same Maps key from EAS Sensitive when the GH secret is empty (token must be valid — error text must not be baked into the APK) |
 | *(опционально)* `GOOGLE_POLLEN` уже на API | клиент бьёт в `api.staging.aclearo.com` |
 
-Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`, `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE`). Google basemap wins when the Maps key is present; Yandex interactive is the fallback.
+Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`, `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE`). Google basemap wins only when a valid `AIza…` key is present; otherwise Yandex interactive.
 
 ### Ограничения C
 
-1. SHA-1 debug keystore CI ≠ Play App Signing — Maps key restriction должен включать CI SHA-1 **или** используйте отдельный unrestricted-for-API-only stage key с package restriction.
+1. SHA-1 debug keystore CI ≠ EAS/Play — allowlist CI SHA-1 from [`gcp-pollen-maps-keys.md` §5.2](./gcp-pollen-maps-keys.md) on the Maps Android key, **or** use EAS builds (path A/B).
 2. Не заменяет EAS для TestFlight / единообразного staging канала.
 3. JDK: **17** (как в [`android-local-build.md`](./android-local-build.md)), не 21.
+4. CI rejects non-`AIza` values (e.g. `The bearer token is invalid.`) so a blank Google map is not shipped by mistake.
 
 ---
 
