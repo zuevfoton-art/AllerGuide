@@ -13,7 +13,7 @@ describe('condition-option-selections', () => {
         food: ['milk', 'peanut'],
         pollinosis: ['birch-pollen', 'alder'],
       }),
-    ).toEqual(['milk', 'peanut', 'birch-pollen']);
+    ).toEqual(['milk', 'peanut', 'birch-pollen', 'alder-pollen']);
   });
 
   it('merges pre-seed without removing manual picks', () => {

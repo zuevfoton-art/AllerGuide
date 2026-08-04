@@ -433,7 +433,10 @@ const it: LocaleMessages = {
     pollenGooglePrimaryAttribution: 'Mappa e previsione polline: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Mappa: Yandex Maps (interattiva) · previsione polline: Google Pollen / Open-Meteo',
-    pollenHeatmapTreeHint: 'Livello mappa: polline degli alberi (UPI), non solo la specie scelta',
+    pollenHeatmapTreeHint:
+      'Sfondo: polline degli alberi (Google UPI). Betulla, ontano e olivo hanno livelli separati nei chip',
+    pollenTreeSpeciesLevelsHint:
+      'Lo strato mappa è comune agli alberi. I numeri di betulla / ontano / olivo vengono dalla previsione per specie (Google o Open-Meteo).',
     pollenHeatmapGrassHint: 'Livello mappa: polline delle graminacee (UPI)',
     pollenHeatmapWeedHint: 'Livello mappa: polline delle infestanti (UPI), non solo la specie scelta',
     pollenBirch: 'Betulla',

@@ -437,7 +437,10 @@ const ru: LocaleMessages = {
     pollenGooglePrimaryAttribution: 'Карта и прогноз пыльцы: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Карта: Яндекс Карты (интерактив) · прогноз пыльцы: Google Pollen / Open-Meteo',
-    pollenHeatmapTreeHint: 'Слой карты: пыльца деревьев (UPI), не только выбранный вид',
+    pollenHeatmapTreeHint:
+      'Подложка: пыльца деревьев (Google UPI). Уровень берёзы, ольхи и оливы — отдельно в чипах',
+    pollenTreeSpeciesLevelsHint:
+      'Слой карты общий для деревьев. Числа берёзы / ольхи / оливы берутся из прогноза по виду (Google или Open-Meteo).',
     pollenHeatmapGrassHint: 'Слой карты: пыльца злаков (UPI)',
     pollenHeatmapWeedHint: 'Слой карты: пыльца сорняков (UPI), не только выбранный вид',
     pollenBirch: 'Берёза',

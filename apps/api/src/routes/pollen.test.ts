@@ -135,6 +135,10 @@ describe('pollen forecast routes', () => {
                     crossReaction: 'Apple, hazelnut',
                   },
                 },
+                {
+                  code: 'OLIVE',
+                  displayName: 'Olive',
+                },
               ],
             },
           ],
@@ -151,6 +155,10 @@ describe('pollen forecast routes', () => {
     expect(response.body.ok).toBe(true);
     expect(response.body.forecast.days[0].plantIndexes.birch_pollen.index).toBe(2);
     expect(response.body.forecast.plants.birch_pollen.family).toBe('Betulaceae');
+    expect(response.body.forecast.days[0].plantCoverage).toEqual([
+      { code: 'BIRCH', taxonId: 'birch_pollen', hasIndex: true },
+      { code: 'OLIVE', taxonId: 'olive_pollen', hasIndex: false },
+    ]);
     expect(fetchMock).toHaveBeenCalled();
   });
 });

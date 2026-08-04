@@ -11,11 +11,19 @@ const GOOGLE_POLLEN_API_BASE_URL = 'https://pollen.googleapis.com/v1';
 const FORECAST_CACHE_TTL_MS = 30 * 60 * 1000;
 const FORECAST_DAYS = 5;
 
+export type GooglePlantCoverageEntry = {
+  code: string;
+  taxonId: PollenMapTaxonId | null;
+  hasIndex: boolean;
+};
+
 export interface GooglePollenForecastDay {
   date: string;
   typeIndexes: Partial<Record<'TREE' | 'GRASS' | 'WEED', PollenUpiSnapshot>>;
   plantIndexes: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
   plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
+  /** Raw plantInfo codes for staging debug (with/without indexInfo). */
+  plantCoverage: GooglePlantCoverageEntry[];
 }
 
 export interface GooglePollenForecastResult {
@@ -137,15 +145,22 @@ function normalizeGoogleForecast(payload: GoogleForecastPayload): GooglePollenFo
 
     const plantIndexes: GooglePollenForecastDay['plantIndexes'] = {};
     const dayPlants: GooglePollenForecastDay['plants'] = {};
+    const plantCoverage: GooglePlantCoverageEntry[] = [];
 
     for (const plant of dayInfo.plantInfo ?? []) {
-      const taxonId = plant.code ? googlePlantCodeToTaxon(plant.code) : null;
+      const code = typeof plant.code === 'string' ? plant.code.trim().toUpperCase() : '';
+      if (!code) continue;
+      const taxonId = googlePlantCodeToTaxon(code);
+      const indexValue = plant.indexInfo?.value;
+      const hasIndex = typeof indexValue === 'number';
+      plantCoverage.push({ code, taxonId, hasIndex });
+
       if (!taxonId) continue;
 
-      if (typeof plant.indexInfo?.value === 'number') {
+      if (hasIndex) {
         plantIndexes[taxonId] = {
-          index: clampPollenUpiIndex(plant.indexInfo.value),
-          category: plant.indexInfo.category,
+          index: clampPollenUpiIndex(indexValue),
+          category: plant.indexInfo?.category,
           source: 'google',
         };
       }
@@ -163,7 +178,7 @@ function normalizeGoogleForecast(payload: GoogleForecastPayload): GooglePollenFo
       if (!plants[taxonId]) plants[taxonId] = detail;
     }
 
-    days.push({ date, typeIndexes, plantIndexes, plants: dayPlants });
+    days.push({ date, typeIndexes, plantIndexes, plants: dayPlants, plantCoverage });
   }
 
   return {

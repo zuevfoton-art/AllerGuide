@@ -435,7 +435,10 @@ const en: LocaleMessages = {
     pollenGooglePrimaryAttribution: 'Map and pollen forecast: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Map: Yandex Maps (interactive) · pollen forecast: Google Pollen / Open-Meteo',
-    pollenHeatmapTreeHint: 'Map layer: tree pollen (UPI), not only the selected species',
+    pollenHeatmapTreeHint:
+      'Basemap: tree pollen (Google UPI). Birch, alder, and olive levels are separate in the chips',
+    pollenTreeSpeciesLevelsHint:
+      'The map layer is shared for trees. Birch / alder / olive numbers come from species forecast (Google or Open-Meteo).',
     pollenHeatmapGrassHint: 'Map layer: grass pollen (UPI)',
     pollenHeatmapWeedHint: 'Map layer: weed pollen (UPI), not only the selected species',
     pollenBirch: 'Birch',

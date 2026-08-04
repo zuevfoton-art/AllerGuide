@@ -105,50 +105,55 @@ export function MapPollenAllergenModal({
             {infoTaxonId ? (
               <PollenPlantSheet detail={plants[infoTaxonId] ?? null} />
             ) : (
-              items.map((item) => {
-                const isSelected = item.taxonId === selectedTaxonId;
-                const dotColor = levelColor(item.level, theme);
-                return (
-                  <View
-                    key={item.taxonId}
-                    style={[styles.row, isSelected && styles.rowSelected]}>
-                    <Pressable
-                      style={styles.rowMain}
-                      onPress={() => {
-                        onSelect(item.taxonId);
-                        onClose();
-                      }}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
-                      testID={`map-allergen-option-${item.taxonId}`}>
-                      <View style={[styles.dot, { backgroundColor: dotColor }]} />
-                      <Text style={[styles.label, isSelected && styles.labelSelected]}>
-                        {labelForTaxon(item.taxonId)}
-                      </Text>
-                      {item.profileRelevant ? (
-                        <Text style={styles.you}>{t('map.pollenYou')}</Text>
-                      ) : null}
-                      {isSelected ? (
-                        <Ionicons name="checkmark" size={18} color={theme.colors.accent} />
-                      ) : null}
-                    </Pressable>
-                    <Pressable
-                      style={styles.infoBtn}
-                      onPress={() => setInfoTaxonId(item.taxonId)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t('map.allergenInfoA11y', {
-                        taxon: labelForTaxon(item.taxonId),
-                      })}
-                      testID={`map-allergen-info-${item.taxonId}`}>
-                      <Ionicons
-                        name="help-circle-outline"
-                        size={22}
-                        color={theme.colors.accent}
-                      />
-                    </Pressable>
-                  </View>
-                );
-              })
+              <>
+                {items.map((item) => {
+                  const isSelected = item.taxonId === selectedTaxonId;
+                  const dotColor = levelColor(item.level, theme);
+                  return (
+                    <View
+                      key={item.taxonId}
+                      style={[styles.row, isSelected && styles.rowSelected]}>
+                      <Pressable
+                        style={styles.rowMain}
+                        onPress={() => {
+                          onSelect(item.taxonId);
+                          onClose();
+                        }}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected }}
+                        testID={`map-allergen-option-${item.taxonId}`}>
+                        <View style={[styles.dot, { backgroundColor: dotColor }]} />
+                        <Text style={[styles.label, isSelected && styles.labelSelected]}>
+                          {labelForTaxon(item.taxonId)}
+                        </Text>
+                        {item.profileRelevant ? (
+                          <Text style={styles.you}>{t('map.pollenYou')}</Text>
+                        ) : null}
+                        {isSelected ? (
+                          <Ionicons name="checkmark" size={18} color={theme.colors.accent} />
+                        ) : null}
+                      </Pressable>
+                      <Pressable
+                        style={styles.infoBtn}
+                        onPress={() => setInfoTaxonId(item.taxonId)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('map.allergenInfoA11y', {
+                          taxon: labelForTaxon(item.taxonId),
+                        })}
+                        testID={`map-allergen-info-${item.taxonId}`}>
+                        <Ionicons
+                          name="help-circle-outline"
+                          size={22}
+                          color={theme.colors.accent}
+                        />
+                      </Pressable>
+                    </View>
+                  );
+                })}
+                <Text style={styles.treeHint} testID="map-tree-species-levels-hint">
+                  {t('map.pollenTreeSpeciesLevelsHint')}
+                </Text>
+              </>
             )}
           </ScrollView>
         </View>
@@ -257,6 +262,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       height: 44,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    treeHint: {
+      marginTop: 8,
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      lineHeight: 17,
+      color: colors.textMuted,
     },
   });
 }

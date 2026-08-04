@@ -248,6 +248,20 @@ export const ALLERGENS: AllergenRecord[] = [
     keywords: ['берёз', 'берез'],
   },
   {
+    id: 'alder-pollen',
+    name: 'Пыльца ольхи',
+    category: 'environmental',
+    popular: false,
+    keywords: ['ольх'],
+  },
+  {
+    id: 'olive-pollen',
+    name: 'Пыльца оливы',
+    category: 'environmental',
+    popular: false,
+    keywords: ['олив', 'маслин'],
+  },
+  {
     id: 'ragweed-pollen',
     name: 'Пыльца амброзии',
     category: 'environmental',
