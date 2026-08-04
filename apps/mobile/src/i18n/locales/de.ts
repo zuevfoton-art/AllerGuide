@@ -431,6 +431,7 @@ const de: LocaleMessages = {
     pollenLiveTitle: 'Pollen in Ihrer Nähe',
     pollenMapAttribution: 'Karte: Yandex Maps · Werte: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Karte und UPI-Ebene: Google Maps · Werte: Open-Meteo / CAMS',
+    pollenGooglePrimaryAttribution: 'Karte und Pollenprognose: Google Maps / Google Pollen',
     pollenHeatmapTreeHint: 'Kartenebene: Baumpollen (UPI), nicht nur die gewählte Art',
     pollenHeatmapGrassHint: 'Kartenebene: Gräserpollen (UPI)',
     pollenHeatmapWeedHint: 'Kartenebene: Kräuterpollen (UPI), nicht nur die gewählte Art',

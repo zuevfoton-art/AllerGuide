@@ -3,8 +3,10 @@
 Связано с экраном `apps/mobile/app/(tabs)/map.tsx` и [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md).  
 Цель: заменить статичную обзорную подложку на **интерактивную** карту (pan/zoom, слои уровней пыльцы, пины POI) без скрейпинга и без ключей в клиенте.
 
-**Статус (код):** Phase **2** и **3a** реализованы за флагами  
-`EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` / `EXPO_PUBLIC_MAP_POLLEN_PLUME` (default off; **on** в EAS `staging`).  
+**Статус (код):** Phase **2**, **3a** и next-steps §7 (1–4, 6–7) реализованы.  
+Флаги `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` / `EXPO_PUBLIC_MAP_POLLEN_PLUME` / `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`  
+(default off в `.env.example`; **on** в EAS `staging` + `production`; preview — Google basemap).  
+Phase 4 spike: [`yandex-interactive-basemap-spike.md`](./yandex-interactive-basemap-spike.md).  
 Wellness/Home по-прежнему на Open-Meteo.
 
 ---
@@ -169,31 +171,40 @@ flowchart LR
 
 ---
 
-## 7. Следующие шаги (после Phase 2 / 3a)
+## 7. Следующие шаги — статус реализации
 
-| # | Шаг | Зачем |
+| # | Шаг | Статус |
 |---|-----|--------|
-| 1 | **Phase 1 дожать:** default interactive Google basemap вне staging (ключ Maps + `GOOGLE_MAP_PRIMARY` в preview/prod по готовности) | Иначе plume/heatmap видны только при уже включённом Google map |
-| 2 | **Гео-привязка шлейфа:** particles в lat/lng (Map polyline / Circle / Skia) вместо screen-space overlay | Сейчас шлейф — экранный слой; не следует за pan/zoom карты |
-| 3 | **Интерполяция forecast hours** + refresh wind/pollen 15–60 мин (background pause уже есть) | Ближе к «near-real-time» из Phase 3a |
-| 4 | **Nearby / «безопасные точки»** на Google-primary пути: либо Google grid proxy, либо редкий OM nearby только как secondary | Сейчас при `source: google` `nearbyLocations` пустой |
-| 5 | **Phase 4 spike:** Яндекс JS API / SDK vs deep-link; без scrape allergies | RU basemap premium |
-| 6 | **Атрибуция ToS** мелким footer на карте (Google Pollen / Maps) когда primary | Юридическая чистота |
-| 7 | **Observability:** счётчики fallback OM→calendar на map; алерт если Google forecast error rate высок на stage | Операционка |
-| 8 | **Не делать:** перенос Home/wellness на Google без отдельного продуктового решения | Разделение источников сохраняем |
+| 1 | Phase 1: Google basemap вне staging | **Done** — EAS `preview` + `production` `GOOGLE_MAP_PRIMARY=true` (Maps key via EAS secrets) |
+| 2 | Гео-привязка шлейфа | **Done** — `Circle`/`Polyline` на `GooglePollenMap`; math в `pollen-plume.ts` (lat/lng) |
+| 3 | Интерполяция + refresh 15–60 мин | **Done** — `interpolateUpiIndex` day-fraction; focus interval 15 мин + AppState pause |
+| 4 | Nearby на Google-primary | **Done** — OM ring samples secondary после Google snapshot |
+| 5 | Phase 4 Yandex spike | **Done (doc)** — [`yandex-interactive-basemap-spike.md`](./yandex-interactive-basemap-spike.md) |
+| 6 | ToS attribution footer | **Done** — `map.pollenGooglePrimaryAttribution` under hero map |
+| 7 | Observability | **Done** — `map_pollen_refreshed` / `map_pollen_fallback` analytics (+ existing `logCaughtError`) |
+| 8 | Не трогать wellness Google | **Kept** |
+
+### Осталось / follow-up
+
+| Шаг | Зачем |
+|-----|--------|
+| Внедрить `YandexInteractiveMap` по итогам spike (флаг) | RU-premium basemap in-app |
+| Hourly Google/wind series (если API даст) вместо daily UPI blend | Точнее near-real-time |
+| Dashboard alert на высокий `map_pollen_fallback` rate на stage | Ops |
 
 ### Флаги
 
-| Env | Default | Staging EAS |
-|-----|---------|-------------|
-| `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | `false` | `true` |
-| `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` | `true` |
-| `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | `true` |
-| `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` |
+| Env | Default | Preview | Staging / Production |
+|-----|---------|---------|----------------------|
+| `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | `false` | — | `true` |
+| `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` | — | `true` |
+| `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | `true` | `true` |
+| `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `off` | `google` |
 
 ### Код (ориентиры)
 
 - Map Google primary: `apps/mobile/src/services/pollen-map-service.ts`
 - Google → readings: `packages/core/src/pollen-google-forecast.ts`
-- Plume math: `packages/core/src/pollen-plume.ts` · UI: `PollenPlumeOverlay.tsx`
+- Plume math: `packages/core/src/pollen-plume.ts` · hook: `use-pollen-plume.ts` · caption: `PollenPlumeOverlay.tsx`
 - Wind: `apps/mobile/src/services/wind-service.ts` (Open-Meteo Forecast, не AQ)
+- Analytics: `map_pollen_refreshed`, `map_pollen_fallback`

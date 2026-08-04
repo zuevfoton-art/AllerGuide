@@ -28,6 +28,7 @@ import type { ResolvedLocation } from '@/src/services/location-service';
 import { apiRequest, getApiBaseUrl } from '@/src/services/api-client';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 import { logCaughtError } from '@/src/services/error-reporting';
+import { trackEvent } from '@/src/services/analytics-service';
 import {
   GOOGLE_POLLEN_HEATMAP_ENABLED,
   MAP_POLLEN_GOOGLE_PRIMARY,
@@ -93,7 +94,11 @@ export async function fetchPollenMapSnapshot(
       cacheKey,
       yandexPollenUrl,
     );
-    if (googleSnapshot) return googleSnapshot;
+    if (googleSnapshot) {
+      trackEvent('map_pollen_refreshed', { source: 'google', nearby: googleSnapshot.nearbyLocations.length });
+      return googleSnapshot;
+    }
+    trackEvent('map_pollen_fallback', { from: 'google', reason: 'google_unavailable' });
     // Emergency fallback: Open-Meteo only when Google primary fails.
   }
 
@@ -104,12 +109,24 @@ export async function fetchPollenMapSnapshot(
       cacheKey,
       yandexPollenUrl,
     );
+    trackEvent('map_pollen_refreshed', {
+      source: 'open-meteo',
+      nearby: openMeteoSnapshot.nearbyLocations.length,
+      google_primary: MAP_POLLEN_GOOGLE_PRIMARY,
+    });
     return openMeteoSnapshot;
   } catch (error) {
     logCaughtError('fetchPollenMapSnapshot', error, { level: 'warn' });
   }
 
-  return readCachedOrCalendar(cacheKey, profileAllergenIds, yandexPollenUrl);
+  const fallback = readCachedOrCalendar(cacheKey, profileAllergenIds, yandexPollenUrl);
+  trackEvent('map_pollen_fallback', {
+    from: MAP_POLLEN_GOOGLE_PRIMARY ? 'google' : 'open-meteo',
+    to: fallback.source,
+    reason: fallback.source === 'cache' ? 'network_cache' : 'calendar',
+  });
+  trackEvent('map_pollen_refreshed', { source: fallback.source, nearby: fallback.nearbyLocations.length });
+  return fallback;
 }
 
 async function tryFetchGooglePrimarySnapshot(
@@ -129,11 +146,13 @@ async function tryFetchGooglePrimarySnapshot(
     const forecastDays = buildForecastDaysFromGoogle(google.days, profileAllergenIds);
     const upiByTaxon = buildUpiByTaxonFromGoogleDay(today);
     const plants = buildPlantsMap(readings, google.plants);
+    // Secondary: Open-Meteo ring samples for “safe nearby” (not Google × N lookups).
+    const nearbyLocations = await fetchNearbyPollenLocations(location, profileAllergenIds);
     const updatedAt = new Date().toISOString();
 
     writeCache(cacheKey, {
       readings,
-      nearbyLocations: [],
+      nearbyLocations,
       forecastDays,
       upiByTaxon,
       plants,
@@ -143,7 +162,7 @@ async function tryFetchGooglePrimarySnapshot(
     return {
       source: 'google',
       readings,
-      nearbyLocations: [],
+      nearbyLocations,
       forecastDays,
       upiByTaxon,
       plants,

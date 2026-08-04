@@ -11,6 +11,10 @@ vi.mock('@/src/services/error-reporting', () => ({
   logCaughtError: vi.fn(),
 }));
 
+vi.mock('@/src/services/analytics-service', () => ({
+  trackEvent: vi.fn(),
+}));
+
 vi.mock('@/src/services/api-client', () => ({
   getApiBaseUrl: vi.fn(() => 'https://api.test'),
   apiRequest: vi.fn(),
@@ -93,9 +97,26 @@ describe('pollen-map-service', () => {
     expect(snapshot.yandexPollenUrl).toContain('/moscow/allergies');
   });
 
-  it('uses Google forecast as primary without calling Open-Meteo when flagged', async () => {
-    const fetchMock = vi.fn(async () => {
-      throw new Error('Open-Meteo must not be called');
+  it('uses Google forecast as primary and OM nearby as secondary', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      // Primary forecast must not hit Open-Meteo AQ center URL without multi-lat nearby.
+      if (String(url).includes('air-quality-api.open-meteo.com') && String(url).includes(',')) {
+        return {
+          ok: true,
+          json: async () =>
+            Array.from({ length: 8 }, () => ({
+              current: {
+                birch_pollen: 2,
+                grass_pollen: 1,
+                ragweed_pollen: 1,
+                alder_pollen: 1,
+                mugwort_pollen: 1,
+                olive_pollen: 1,
+              },
+            })),
+        };
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
     });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -140,7 +161,6 @@ describe('pollen-map-service', () => {
     const snapshot = await fetchPollenMapSnapshot(location, '["birch-pollen"]');
 
     expect(snapshot.source).toBe('google');
-    expect(fetchMock).not.toHaveBeenCalled();
     expect(snapshot.readings.find((item) => item.taxonId === 'birch_pollen')).toMatchObject({
       value: 4,
       level: 'high',
@@ -148,7 +168,8 @@ describe('pollen-map-service', () => {
     });
     expect(snapshot.forecastDays.length).toBeGreaterThanOrEqual(1);
     expect(snapshot.upiByTaxon.birch_pollen?.source).toBe('google');
-    expect(snapshot.nearbyLocations).toEqual([]);
+    expect(snapshot.nearbyLocations).toHaveLength(8);
+    expect(fetchMock).toHaveBeenCalled();
   });
 
   it('uses the location cache after a network failure', async () => {

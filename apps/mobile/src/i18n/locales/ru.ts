@@ -434,6 +434,7 @@ const ru: LocaleMessages = {
     pollenLiveTitle: 'Пыльца рядом с вами',
     pollenMapAttribution: 'Карта: Яндекс Карты · уровни: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Карта и слой UPI: Google Maps · уровни: Open-Meteo / CAMS',
+    pollenGooglePrimaryAttribution: 'Карта и прогноз пыльцы: Google Maps / Google Pollen',
     pollenHeatmapTreeHint: 'Слой карты: пыльца деревьев (UPI), не только выбранный вид',
     pollenHeatmapGrassHint: 'Слой карты: пыльца злаков (UPI)',
     pollenHeatmapWeedHint: 'Слой карты: пыльца сорняков (UPI), не только выбранный вид',

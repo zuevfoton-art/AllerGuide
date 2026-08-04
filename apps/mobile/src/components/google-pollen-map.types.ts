@@ -9,6 +9,24 @@ export interface GoogleMapMarker {
   color?: string;
 }
 
+export interface GoogleMapCircle {
+  id: string;
+  latitude: number;
+  longitude: number;
+  radiusM: number;
+  color: string;
+  opacity: number;
+  strokeOpacity?: number;
+}
+
+export interface GoogleMapPolyline {
+  id: string;
+  path: Array<{ latitude: number; longitude: number }>;
+  color: string;
+  width?: number;
+  opacity?: number;
+}
+
 export interface GooglePollenMapProps {
   latitude: number;
   longitude: number;
@@ -17,6 +35,8 @@ export interface GooglePollenMapProps {
   height?: number;
   interactive?: boolean;
   markers?: GoogleMapMarker[];
+  circles?: GoogleMapCircle[];
+  polylines?: GoogleMapPolyline[];
   selectedMarkerId?: string | null;
   onMarkerPress?: (markerId: string) => void;
   overlay?: ReactNode;

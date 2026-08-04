@@ -24,6 +24,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'profile_setup_step_view',
   'profile_setup_step_complete',
   'profile_setup_step_skip',
+  'map_pollen_refreshed',
+  'map_pollen_fallback',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

@@ -1,4 +1,12 @@
-import { ActivityIndicator, Text, View, StyleSheet, Pressable, Linking } from 'react-native';
+import {
+  ActivityIndicator,
+  AppState,
+  Text,
+  View,
+  StyleSheet,
+  Pressable,
+  Linking,
+} from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import {
@@ -7,6 +15,7 @@ import {
   buildPlacesMapUrl,
   buildPollenRiskMapUrl,
   buildYandexMapWidgetUrl,
+  clampPollenUpiIndex,
   getPollenPeaksForMonth,
   formatPollenMonth,
   POLLEN_MAP_SCALE_ZOOM,
@@ -14,11 +23,13 @@ import {
   PRIMARY_POLLEN_MAP_TAXON_IDS,
   SECONDARY_POLLEN_MAP_TAXON_IDS,
   pollenTaxonToGoogleMapType,
+  readingToUpiSnapshot,
   resolvePollenRegion,
   type MapPoiCategory,
   type PollenMapDirection,
   type PollenMapTaxonId,
   type PollenTierLevel,
+  type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -33,6 +44,7 @@ import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal'
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
@@ -49,10 +61,14 @@ import { fetchWindSnapshot, type WindSnapshot } from '@/src/services/wind-servic
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
   GOOGLE_POLLEN_HEATMAP_ENABLED,
+  MAP_POLLEN_GOOGLE_PRIMARY,
   MAP_POLLEN_PLUME_ENABLED,
 } from '@/src/constants/features';
 
 type MapLayerMode = 'pollen' | 'places' | 'both';
+
+/** Near-real-time refresh while the Map tab is focused. */
+const MAP_LIVE_REFRESH_MS = 15 * 60 * 1000;
 
 const TAXON_LABEL_KEYS: Record<PollenMapTaxonId, string> = {
   birch_pollen: 'map.pollenBirch',
@@ -114,8 +130,8 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [wind, setWind] = useState<WindSnapshot | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
     try {
       const location = await getCurrentLocation();
       setCoords({ lat: location.lat, lon: location.lon, label: location.label });
@@ -135,13 +151,19 @@ export default function MapScreen() {
           : mapPois[0]?.id ?? null,
       );
     } finally {
-      setLoading(false);
+      if (!options?.silent) setLoading(false);
     }
   }, [poiCategories, profile]);
 
   useFocusEffect(
     useCallback(() => {
       void refresh();
+      const timer = setInterval(() => {
+        if (AppState.currentState === 'active') {
+          void refresh({ silent: true });
+        }
+      }, MAP_LIVE_REFRESH_MS);
+      return () => clearInterval(timer);
     }, [refresh]),
   );
 
@@ -173,10 +195,31 @@ export default function MapScreen() {
   const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
   const showPlaceMarkers = layerMode === 'places' || layerMode === 'both';
   const showPlume =
-    MAP_POLLEN_PLUME_ENABLED &&
-    useGoogleMap &&
-    layerMode !== 'places' &&
-    (selectedUpi?.index ?? 0) > 0;
+    MAP_POLLEN_PLUME_ENABLED && useGoogleMap && layerMode !== 'places';
+
+  const tomorrowUpi = useMemo((): PollenUpiSnapshot | null => {
+    const reading = pollenSnapshot?.forecastDays[1]?.readings.find(
+      (item) => item.taxonId === selectedTaxonId,
+    );
+    if (!reading) return null;
+    if (pollenSnapshot?.source === 'google') {
+      return {
+        index: clampPollenUpiIndex(reading.value),
+        source: 'google',
+      };
+    }
+    return readingToUpiSnapshot(reading);
+  }, [pollenSnapshot?.forecastDays, pollenSnapshot?.source, selectedTaxonId]);
+
+  const plume = usePollenPlume({
+    enabled: showPlume,
+    originLatitude: coords.lat,
+    originLongitude: coords.lon,
+    todayUpi: selectedUpi,
+    tomorrowUpi,
+    wind,
+    accentColor: theme.colors.accent,
+  });
 
   const chipItems = useMemo(() => {
     const ids = [...PRIMARY_POLLEN_MAP_TAXON_IDS, ...SECONDARY_POLLEN_MAP_TAXON_IDS];
@@ -319,16 +362,19 @@ export default function MapScreen() {
   const mapOverlay =
     layerMode === 'places' ? undefined : (
       <>
-        {showPlume ? (
-          <PollenPlumeOverlay
-            upiIndex={selectedUpi?.index ?? 0}
-            wind={wind}
-            groupHint={plumeGroupHint}
-          />
+        {showPlume && plume.upiIndex > 0 ? (
+          <PollenPlumeOverlay groupHint={plumeGroupHint} />
         ) : null}
         {mapLevelOverlay}
       </>
     );
+
+  const mapAttributionKey =
+    useGoogleMap
+      ? pollenSnapshot?.source === 'google' || MAP_POLLEN_GOOGLE_PRIMARY
+        ? 'map.pollenGooglePrimaryAttribution'
+        : 'map.pollenGoogleMapAttribution'
+      : 'map.pollenMapAttribution';
 
   const safeNearby = useMemo(() => {
     const locations = pollenSnapshot?.nearbyLocations ?? [];
@@ -447,7 +493,10 @@ export default function MapScreen() {
           zoom={POLLEN_MAP_SCALE_ZOOM.city}
           mapType={googleMapType}
           height={MAP_HERO_HEIGHT}
+          interactive
           markers={markers}
+          circles={showPlume ? plume.circles : []}
+          polylines={showPlume ? plume.polylines : []}
           selectedMarkerId={selectedPoiId}
           onMarkerPress={setSelectedPoiId}
           overlay={mapOverlay}
@@ -464,6 +513,10 @@ export default function MapScreen() {
           overlay={mapOverlay}
         />
       )}
+
+      <Text style={styles.mapAttribution} testID="map-attribution">
+        {t(mapAttributionKey)}
+      </Text>
 
       {!useGoogleMap ? (
         <Pressable
@@ -764,6 +817,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: 14,
+    },
+    mapAttribution: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      lineHeight: 14,
     },
     mapLevelOverlay: {
       position: 'absolute',

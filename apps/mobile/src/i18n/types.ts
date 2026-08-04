@@ -442,6 +442,7 @@ export type LocaleMessages = {
     pollenLiveTitle: string;
     pollenMapAttribution: string;
     pollenGoogleMapAttribution: string;
+    pollenGooglePrimaryAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenHeatmapGrassHint: string;
     pollenHeatmapWeedHint: string;
