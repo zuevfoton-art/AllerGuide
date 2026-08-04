@@ -530,6 +530,10 @@ const es: LocaleMessages = {
     listFirstHint: 'Los lugares están abajo; este mapa no se puede ampliar.',
     pollenSourceCalendar: 'calendario de temporada',
     pollenSourceGoogle: 'Google Pollen',
+    allergenPickerTitle: 'Alérgeno de polen',
+    allergenPickerBack: 'Atrás',
+    allergenPickerButton: '{{taxon}}',
+    allergenInfoA11y: 'Sobre {{taxon}}',
   },
   settings: {
     title: 'Ajustes',

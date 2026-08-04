@@ -27,10 +27,9 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
 import { YandexMap } from '@/src/components/YandexMap';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
-import { MapAllergenChips } from '@/src/components/MapAllergenChips';
 import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
 import { PollenIndexCard } from '@/src/components/PollenIndexCard';
-import { PollenPlantSheet } from '@/src/components/PollenPlantSheet';
+import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -108,6 +107,7 @@ export default function MapScreen() {
   const [layerMode, setLayerMode] = useState<MapLayerMode>('pollen');
   const [selectedForecastDay, setSelectedForecastDay] = useState<number | null>(null);
   const [doctorsOpen, setDoctorsOpen] = useState(false);
+  const [allergenPickerOpen, setAllergenPickerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -146,7 +146,6 @@ export default function MapScreen() {
   const selectedReading =
     pollenSnapshot?.readings.find((reading) => reading.taxonId === selectedTaxonId) ?? null;
   const selectedUpi = pollenSnapshot?.upiByTaxon[selectedTaxonId] ?? null;
-  const plantDetail = pollenSnapshot?.plants[selectedTaxonId] ?? null;
   const isCalendarFallback = pollenSnapshot?.source === 'calendar';
   const isCacheSource = pollenSnapshot?.source === 'cache';
 
@@ -313,11 +312,7 @@ export default function MapScreen() {
           <ScreenEyebrow section={t('map.eyebrow')} />
           <Text style={ui.docTitle}>{t('map.titleShort')}</Text>
         </View>
-        <ProfileHeaderButton
-          variant="chip"
-          chipTitle={profile?.name ?? t('home.selectProfile')}
-          chipDetail={coords.label || pollenRegion.name}
-        />
+        <ProfileHeaderButton />
       </View>
 
       <View
@@ -354,42 +349,60 @@ export default function MapScreen() {
         ) : null}
       </View>
 
-      <View style={styles.layerRow} testID="map-layers">
-        {(
-          [
-            ['pollen', 'map.layerPollen'],
-            ['places', 'map.layerPlaces'],
-            ['both', 'map.layerBoth'],
-          ] as const
-        ).map(([key, labelKey]) => {
-          const active = layerMode === key;
-          return (
-            <Pressable
-              key={key}
-              testID={`map-layer-${key}`}
-              style={[styles.layerChip, active && styles.layerChipActive]}
-              onPress={() => setLayerMode(key)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}>
-              <Text style={[styles.layerChipText, active && styles.layerChipTextActive]}>
-                {t(labelKey)}
-              </Text>
-            </Pressable>
-          );
-        })}
+      <View style={styles.layerBlock}>
+        <View style={styles.layerRow} testID="map-layers">
+          {(
+            [
+              ['pollen', 'map.layerPollen'],
+              ['places', 'map.layerPlaces'],
+              ['both', 'map.layerBoth'],
+            ] as const
+          ).map(([key, labelKey]) => {
+            const active = layerMode === key;
+            return (
+              <Pressable
+                key={key}
+                testID={`map-layer-${key}`}
+                style={[styles.layerChip, active && styles.layerChipActive]}
+                onPress={() => setLayerMode(key)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}>
+                <Text style={[styles.layerChipText, active && styles.layerChipTextActive]}>
+                  {t(labelKey)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {layerMode !== 'places' ? (
+          <Pressable
+            testID="map-allergen-picker"
+            style={styles.allergenPickerBtn}
+            onPress={() => setAllergenPickerOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel={t('map.allergenPickerTitle')}>
+            <View style={[styles.allergenPickerDot, { backgroundColor: levelColor }]} />
+            <Text style={styles.allergenPickerLabel} numberOfLines={1}>
+              {t('map.allergenPickerButton', { taxon: taxonLabel })}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={theme.colors.accent} />
+          </Pressable>
+        ) : null}
       </View>
 
-      {layerMode !== 'places' ? (
-        <MapAllergenChips
-          items={chipItems}
-          selectedTaxonId={selectedTaxonId}
-          onSelect={(taxonId) => {
-            setSelectedTaxonId(taxonId);
-            setSelectedForecastDay(null);
-          }}
-          labelForTaxon={(taxonId) => t(TAXON_LABEL_KEYS[taxonId] as 'map.pollenBirch')}
-        />
-      ) : null}
+      <MapPollenAllergenModal
+        visible={allergenPickerOpen}
+        items={chipItems}
+        selectedTaxonId={selectedTaxonId}
+        plants={pollenSnapshot?.plants ?? {}}
+        labelForTaxon={(taxonId) => t(TAXON_LABEL_KEYS[taxonId] as 'map.pollenBirch')}
+        onSelect={(taxonId) => {
+          setSelectedTaxonId(taxonId);
+          setSelectedForecastDay(null);
+        }}
+        onClose={() => setAllergenPickerOpen(false)}
+      />
 
       {useGoogleMap ? (
         <GooglePollenMap
@@ -433,17 +446,15 @@ export default function MapScreen() {
         <Text style={styles.listFirstHint}>{t('map.listFirstHint')}</Text>
       ) : null}
 
-      <Text style={styles.legendTitle}>
-        {layerMode === 'places'
-          ? t('map.legendTitlePlaces')
-          : t('map.legendTitlePollen', { taxon: taxonLabel })}
-      </Text>
       {layerMode === 'places' ? (
-        <View style={styles.legendRow}>
-          <LegendDot color={theme.colors.success} label={t('map.legendRestaurant')} />
-          <LegendDot color={theme.colors.accent} label={t('map.legendMedical')} />
-          <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
-        </View>
+        <>
+          <Text style={styles.legendTitle}>{t('map.legendTitlePlaces')}</Text>
+          <View style={styles.legendRow}>
+            <LegendDot color={theme.colors.success} label={t('map.legendRestaurant')} />
+            <LegendDot color={theme.colors.accent} label={t('map.legendMedical')} />
+            <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
+          </View>
+        </>
       ) : (
         <View style={styles.legendRow}>
           <LegendDot color={theme.colors.danger} label={t('map.legendHigh')} />
@@ -451,25 +462,6 @@ export default function MapScreen() {
           <LegendDot color={theme.colors.success} label={t('map.legendLow')} />
         </View>
       )}
-
-      <Text style={styles.mapAttribution}>
-        {t(
-          useGoogleMap
-            ? 'map.pollenGoogleMapAttribution'
-            : 'map.pollenMapAttribution',
-        )}
-      </Text>
-      {useHeatmap && googleMapType ? (
-        <Text style={styles.mapAttribution}>
-          {t(
-            googleMapType === 'GRASS_UPI'
-              ? 'map.pollenHeatmapGrassHint'
-              : googleMapType === 'WEED_UPI'
-                ? 'map.pollenHeatmapWeedHint'
-                : 'map.pollenHeatmapTreeHint',
-          )}
-        </Text>
-      ) : null}
 
       {showActionTip ? (
         <GlassCard style={styles.tipCard}>
@@ -521,9 +513,6 @@ export default function MapScreen() {
               </View>
             </GlassCard>
           ) : null}
-
-          <Text style={styles.sectionTitle}>{t('map.plantTitle')}</Text>
-          <PollenPlantSheet detail={plantDetail} />
 
           {safeNearby.length > 0 ? (
             <GlassCard>
@@ -604,20 +593,6 @@ export default function MapScreen() {
           ))
         : null}
 
-      <Pressable
-        accessibilityRole="link"
-        style={({ pressed }) => [styles.yandexButton, pressed && styles.pressed]}
-        onPress={() => {
-          if (pollenSnapshot) void Linking.openURL(pollenSnapshot.yandexPollenUrl);
-        }}
-        disabled={!pollenSnapshot}>
-        <View style={styles.yandexButtonText}>
-          <Text style={styles.yandexButtonTitle}>{t('map.openYandexPollen')}</Text>
-          <Text style={styles.yandexButtonSubtitle}>{t('map.openYandexPollenHint')}</Text>
-        </View>
-        <Ionicons name="open-outline" size={20} color={theme.colors.accent} />
-      </Pressable>
-
       <Disclaimer>{t('map.disclaimerUnified')}</Disclaimer>
     </Screen>
   );
@@ -696,6 +671,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 3,
       overflow: 'hidden',
     },
+    layerBlock: { gap: 8 },
     layerRow: { flexDirection: 'row', gap: 8 },
     layerChip: {
       flex: 1,
@@ -717,6 +693,26 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     layerChipTextActive: { color: colors.accent },
+    allergenPickerBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      minHeight: 44,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+    },
+    allergenPickerDot: { width: 8, height: 8, borderRadius: 4 },
+    allergenPickerLabel: {
+      flex: 1,
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     legendTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
@@ -728,11 +724,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: 14,
-    },
-    mapAttribution: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
     },
     mapLevelOverlay: {
       position: 'absolute',
@@ -866,29 +857,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.accent,
       textDecorationLine: 'underline',
     },
-    yandexButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-    },
-    yandexButtonText: { flex: 1, gap: 2 },
-    yandexButtonTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    yandexButtonSubtitle: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-    },
-    pressed: { opacity: 0.75 },
   });
 }

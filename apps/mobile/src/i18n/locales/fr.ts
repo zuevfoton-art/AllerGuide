@@ -530,6 +530,10 @@ const fr: LocaleMessages = {
     listFirstHint: 'Les lieux sont listés ci-dessous ; cette carte n’est pas zoomable.',
     pollenSourceCalendar: 'calendrier saisonnier',
     pollenSourceGoogle: 'Google Pollen',
+    allergenPickerTitle: 'Allergène pollinique',
+    allergenPickerBack: 'Retour',
+    allergenPickerButton: '{{taxon}}',
+    allergenInfoA11y: 'À propos de {{taxon}}',
   },
   settings: {
     title: 'Paramètres',

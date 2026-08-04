@@ -531,6 +531,10 @@ const de: LocaleMessages = {
     listFirstHint: 'Orte stehen unten; diese Karte ist nicht zoombar.',
     pollenSourceCalendar: 'Saisonkalender',
     pollenSourceGoogle: 'Google Pollen',
+    allergenPickerTitle: 'Pollenallergen',
+    allergenPickerBack: 'Zurück',
+    allergenPickerButton: '{{taxon}}',
+    allergenInfoA11y: 'Über {{taxon}}',
   },
   settings: {
     title: 'Einstellungen',

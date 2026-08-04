@@ -534,6 +534,10 @@ const ru: LocaleMessages = {
     listFirstHint: 'Список мест ниже; на этой карте нельзя масштабировать.',
     pollenSourceCalendar: 'календарь сезона',
     pollenSourceGoogle: 'Google Pollen',
+    allergenPickerTitle: 'Аллерген пыльцы',
+    allergenPickerBack: 'Назад',
+    allergenPickerButton: '{{taxon}}',
+    allergenInfoA11y: 'Об аллергене {{taxon}}',
   },
   settings: {
     title: 'Настройки',

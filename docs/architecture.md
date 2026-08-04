@@ -27,7 +27,7 @@ AllerGuide — offline-first приложение для управления а
 
 **План MVP → prod (Phase 1–2):** детальные GitHub issues с зависимостями — [`docs/phase1-phase2-issues.md`](./phase1-phase2-issues.md) · сводка фаз — [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md).
 
-**Карта (Google + пыление + POI):** единый экран [`apps/mobile/app/(tabs)/map.tsx`](../apps/mobile/app/(tabs)/map.tsx) — чипы аллергенов, Google basemap/heatmap (флаги), multi-day прогноз, UPI, карточка растения, пины ресторанов/клиник. План источников — [`docs/yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md). Ключи GCP — [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md). Stage APK: [`docs/android-stage-build.md`](./android-stage-build.md).
+**Карта (Google + пыление + POI):** единый экран [`apps/mobile/app/(tabs)/map.tsx`](../apps/mobile/app/(tabs)/map.tsx) — выбор аллергена в модалке под слоем «Пыльца», Google basemap/heatmap (флаги), multi-day прогноз, UPI, пины ресторанов/клиник. План источников — [`docs/yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md). План интерактивной карты — [`docs/interactive-pollen-map-plan.md`](./interactive-pollen-map-plan.md). Ключи GCP — [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md). Stage APK: [`docs/android-stage-build.md`](./android-stage-build.md).
 
 ---
 

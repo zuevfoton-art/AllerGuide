@@ -532,6 +532,10 @@ const en: LocaleMessages = {
     listFirstHint: 'Places are listed below; this map cannot be zoomed.',
     pollenSourceCalendar: 'season calendar',
     pollenSourceGoogle: 'Google Pollen',
+    allergenPickerTitle: 'Pollen allergen',
+    allergenPickerBack: 'Back',
+    allergenPickerButton: '{{taxon}}',
+    allergenInfoA11y: 'About {{taxon}}',
   },
   settings: {
     title: 'Settings',

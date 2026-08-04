@@ -541,6 +541,10 @@ export type LocaleMessages = {
     listFirstHint: string;
     pollenSourceCalendar: string;
     pollenSourceGoogle: string;
+    allergenPickerTitle: string;
+    allergenPickerBack: string;
+    allergenPickerButton: string;
+    allergenInfoA11y: string;
   };
   settings: {
     title: string;
