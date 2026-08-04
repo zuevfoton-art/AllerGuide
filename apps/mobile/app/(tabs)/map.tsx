@@ -58,6 +58,7 @@ import {
   type PollenMapSnapshot,
 } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
+import { resolveMapBasemap } from '@/src/services/map-basemap';
 import {
   fetchPollenHourlySeries,
   resolveHourlyUpi,
@@ -201,12 +202,15 @@ export default function MapScreen() {
   const statusReading = forecastReading ?? selectedReading;
   const statusLevel = statusReading?.level ?? null;
 
-  const useYandexInteractive =
-    YANDEX_MAP_INTERACTIVE_ENABLED && Boolean(getApiBaseUrl().trim());
-  const useGoogleMap =
-    !useYandexInteractive &&
-    (GOOGLE_MAP_PRIMARY_ENABLED || GOOGLE_POLLEN_HEATMAP_ENABLED) &&
-    Boolean(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim());
+  const mapBasemap = resolveMapBasemap({
+    googleMapsApiKeyPresent: Boolean(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim()),
+    apiBaseUrlPresent: Boolean(getApiBaseUrl().trim()),
+    googleMapPrimaryEnabled: GOOGLE_MAP_PRIMARY_ENABLED,
+    googlePollenHeatmapEnabled: GOOGLE_POLLEN_HEATMAP_ENABLED,
+    yandexInteractiveEnabled: YANDEX_MAP_INTERACTIVE_ENABLED,
+  });
+  const useGoogleMap = mapBasemap === 'google';
+  const useYandexInteractive = mapBasemap === 'yandex-interactive';
   const useHeatmap = isGooglePollenHeatmapAvailable() && layerMode !== 'places';
   const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
   const showPlaceMarkers = layerMode === 'places' || layerMode === 'both';
