@@ -31,6 +31,7 @@ import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
 import { PollenIndexCard } from '@/src/components/PollenIndexCard';
 import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
+import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -44,9 +45,11 @@ import {
   type PollenMapSnapshot,
 } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
+import { fetchWindSnapshot, type WindSnapshot } from '@/src/services/wind-service';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
   GOOGLE_POLLEN_HEATMAP_ENABLED,
+  MAP_POLLEN_PLUME_ENABLED,
 } from '@/src/constants/features';
 
 type MapLayerMode = 'pollen' | 'places' | 'both';
@@ -109,18 +112,23 @@ export default function MapScreen() {
   const [doctorsOpen, setDoctorsOpen] = useState(false);
   const [allergenPickerOpen, setAllergenPickerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [wind, setWind] = useState<WindSnapshot | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const location = await getCurrentLocation();
       setCoords({ lat: location.lat, lon: location.lon, label: location.label });
-      const [snapshot, mapPois] = await Promise.all([
+      const [snapshot, mapPois, windSnapshot] = await Promise.all([
         fetchPollenMapSnapshot(location, profile?.allergies ?? '[]'),
         getMapPois(profile, { latitude: location.lat, longitude: location.lon }, poiCategories),
+        MAP_POLLEN_PLUME_ENABLED
+          ? fetchWindSnapshot(location.lat, location.lon)
+          : Promise.resolve(null),
       ]);
       setPollenSnapshot(snapshot);
       setPois(mapPois);
+      setWind(windSnapshot);
       setSelectedPoiId((current) =>
         current && mapPois.some((poi) => poi.id === current)
           ? current
@@ -164,6 +172,11 @@ export default function MapScreen() {
   const useHeatmap = isGooglePollenHeatmapAvailable() && layerMode !== 'places';
   const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
   const showPlaceMarkers = layerMode === 'places' || layerMode === 'both';
+  const showPlume =
+    MAP_POLLEN_PLUME_ENABLED &&
+    useGoogleMap &&
+    layerMode !== 'places' &&
+    (selectedUpi?.index ?? 0) > 0;
 
   const chipItems = useMemo(() => {
     const ids = [...PRIMARY_POLLEN_MAP_TAXON_IDS, ...SECONDARY_POLLEN_MAP_TAXON_IDS];
@@ -257,9 +270,18 @@ export default function MapScreen() {
     if (!pollenSnapshot) return '';
     if (pollenSnapshot.source === 'calendar') return t('map.pollenSourceCalendar');
     if (pollenSnapshot.source === 'cache') return t('map.pollenSourceCache');
-    if (selectedUpi?.source === 'google') return t('map.pollenSourceGoogle');
+    if (pollenSnapshot.source === 'google' || selectedUpi?.source === 'google') {
+      return t('map.pollenSourceGoogle');
+    }
     return t('map.pollenSourceOpenMeteo');
   }, [pollenSnapshot, selectedUpi?.source, t]);
+
+  const plumeGroupHint = useMemo(() => {
+    const mapType = pollenTaxonToGoogleMapType(selectedTaxonId);
+    if (mapType === 'GRASS_UPI') return t('map.plumeGroupGrass');
+    if (mapType === 'WEED_UPI') return t('map.plumeGroupWeed');
+    return t('map.plumeGroupTree');
+  }, [selectedTaxonId, t]);
 
   const updatedLabel = useMemo(() => {
     if (!pollenSnapshot?.updatedAt) return null;
@@ -293,6 +315,20 @@ export default function MapScreen() {
       </View>
     </View>
   );
+
+  const mapOverlay =
+    layerMode === 'places' ? undefined : (
+      <>
+        {showPlume ? (
+          <PollenPlumeOverlay
+            upiIndex={selectedUpi?.index ?? 0}
+            wind={wind}
+            groupHint={plumeGroupHint}
+          />
+        ) : null}
+        {mapLevelOverlay}
+      </>
+    );
 
   const safeNearby = useMemo(() => {
     const locations = pollenSnapshot?.nearbyLocations ?? [];
@@ -414,7 +450,7 @@ export default function MapScreen() {
           markers={markers}
           selectedMarkerId={selectedPoiId}
           onMarkerPress={setSelectedPoiId}
-          overlay={layerMode !== 'places' ? mapLevelOverlay : undefined}
+          overlay={mapOverlay}
         />
       ) : (
         <YandexMap
@@ -425,7 +461,7 @@ export default function MapScreen() {
           }
           height={MAP_HERO_HEIGHT}
           interactive={false}
-          overlay={layerMode !== 'places' ? mapLevelOverlay : undefined}
+          overlay={mapOverlay}
         />
       )}
 
@@ -485,7 +521,11 @@ export default function MapScreen() {
           <PollenIndexCard
             taxonLabel={taxonLabel}
             upi={selectedUpi}
-            grainsPerM3={selectedReading?.value ?? null}
+            grainsPerM3={
+              pollenSnapshot?.source === 'google' || selectedUpi?.source === 'google'
+                ? null
+                : selectedReading?.value ?? null
+            }
             levelLabel={selectedReading ? t(LEVEL_LABEL_KEYS[selectedReading.level]) : null}
           />
 

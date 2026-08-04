@@ -545,6 +545,10 @@ export type LocaleMessages = {
     allergenPickerBack: string;
     allergenPickerButton: string;
     allergenInfoA11y: string;
+    plumeHint: string;
+    plumeGroupTree: string;
+    plumeGroupGrass: string;
+    plumeGroupWeed: string;
   };
   settings: {
     title: string;

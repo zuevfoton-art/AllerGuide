@@ -534,6 +534,10 @@ const es: LocaleMessages = {
     allergenPickerBack: 'Atrás',
     allergenPickerButton: '{{taxon}}',
     allergenInfoA11y: 'Sobre {{taxon}}',
+    plumeHint: 'Pluma · {{group}}',
+    plumeGroupTree: 'grupo de árboles',
+    plumeGroupGrass: 'grupo de gramíneas',
+    plumeGroupWeed: 'grupo de malezas',
   },
   settings: {
     title: 'Ajustes',

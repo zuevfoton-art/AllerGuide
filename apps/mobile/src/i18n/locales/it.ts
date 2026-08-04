@@ -534,6 +534,10 @@ const it: LocaleMessages = {
     allergenPickerBack: 'Indietro',
     allergenPickerButton: '{{taxon}}',
     allergenInfoA11y: 'Info su {{taxon}}',
+    plumeHint: 'Scia · {{group}}',
+    plumeGroupTree: 'gruppo alberi',
+    plumeGroupGrass: 'gruppo graminacee',
+    plumeGroupWeed: 'gruppo erbacce',
   },
   settings: {
     title: 'Impostazioni',

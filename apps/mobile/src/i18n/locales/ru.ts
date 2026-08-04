@@ -538,6 +538,10 @@ const ru: LocaleMessages = {
     allergenPickerBack: 'Назад',
     allergenPickerButton: '{{taxon}}',
     allergenInfoA11y: 'Об аллергене {{taxon}}',
+    plumeHint: 'Шлейф · {{group}}',
+    plumeGroupTree: 'группа деревьев',
+    plumeGroupGrass: 'группа злаков',
+    plumeGroupWeed: 'группа сорных',
   },
   settings: {
     title: 'Настройки',
