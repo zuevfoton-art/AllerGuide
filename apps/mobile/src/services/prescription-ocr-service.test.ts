@@ -14,7 +14,7 @@ vi.mock('@/src/services/ocr-api-service', () => ({
   recognizeImageViaApi: vi.fn(),
 }));
 
-vi.mock('expo-file-system', () => ({
+vi.mock('expo-file-system/legacy', () => ({
   readAsStringAsync: vi.fn(async () => 'pdf-base64'),
 }));
 

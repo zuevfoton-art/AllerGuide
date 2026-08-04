@@ -1,11 +1,5 @@
 import { PermissionsAndroid, Platform } from 'react-native';
-import {
-  ExpoSpeechRecognitionModule,
-  addSpeechRecognitionListener,
-  getSpeechRecognitionServices,
-  isRecognitionAvailable,
-  supportsOnDeviceRecognition,
-} from 'expo-speech-recognition';
+import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 import { appendTranscript, resolveSpeechLocale } from '@allerguide/core';
 import { YC_STT_MIC_ENABLED } from '@/src/constants/features';
 import { logCaughtError } from '@/src/services/error-reporting';
@@ -62,7 +56,7 @@ export function isOsSpeechRecognitionSupported(): boolean {
       };
       return Boolean(win.SpeechRecognition || win.webkitSpeechRecognition);
     }
-    return isRecognitionAvailable();
+    return ExpoSpeechRecognitionModule.isRecognitionAvailable();
   } catch (error) {
     logCaughtError('isOsSpeechRecognitionSupported', error, { level: 'warn' });
     return false;
@@ -86,7 +80,7 @@ export function resolveVoiceDictationMode(): VoiceDictationMode | null {
 
 function preferOnDevice(): boolean {
   try {
-    if (Platform.OS === 'ios') return supportsOnDeviceRecognition();
+    if (Platform.OS === 'ios') return ExpoSpeechRecognitionModule.supportsOnDeviceRecognition();
     return false;
   } catch {
     return false;
@@ -96,7 +90,7 @@ function preferOnDevice(): boolean {
 function preferAndroidRecognitionPackage(): string | undefined {
   if (Platform.OS !== 'android') return undefined;
   try {
-    const services = getSpeechRecognitionServices();
+    const services = ExpoSpeechRecognitionModule.getSpeechRecognitionServices();
     if (services.includes('com.google.android.tts')) {
       return 'com.google.android.tts';
     }
@@ -136,10 +130,11 @@ export function buildOsSpeechStartOptions(locale: string): OsSpeechStartOptions 
  * Ensures RECORD_AUDIO is granted.
  *
  * On Android the request goes through React Native core `PermissionsAndroid`:
- * resolving an expo-modules-core (SDK 53) promise right after the permission
- * activity round-trip can SIGSEGV in libexpo-modules-core.so (JSI callback
+ * resolving an expo-modules-core promise right after the permission activity
+ * round-trip can SIGSEGV in libexpo-modules-core.so (JSI callback
  * use-after-free) — reproduced via logcat on the staging APK. RN core uses a
- * different native path and is unaffected.
+ * different native path and is unaffected. SDK 54 keeps a Promise double-settle
+ * patch (expo#43094) as defense in depth.
  */
 export async function ensureRecordAudioPermission(): Promise<boolean> {
   if (Platform.OS === 'android') {
@@ -169,7 +164,7 @@ async function startOsSpeechDictation(locale: string): Promise<void> {
   clearListeners();
   latestTranscript = '';
 
-  resultSub = addSpeechRecognitionListener('result', (event) => {
+  resultSub = ExpoSpeechRecognitionModule.addListener('result', (event) => {
     const parts: string[] = [];
     for (const result of event.results ?? []) {
       const transcript = result?.transcript?.trim();
@@ -180,7 +175,7 @@ async function startOsSpeechDictation(locale: string): Promise<void> {
     }
   });
 
-  errorSub = addSpeechRecognitionListener('error', (event) => {
+  errorSub = ExpoSpeechRecognitionModule.addListener('error', (event) => {
     setListening(false);
     activeMode = null;
     const code = event.error === 'not-allowed' ? 'VOICE_PERMISSION_DENIED' : 'VOICE_RECOGNITION_FAILED';
@@ -188,7 +183,7 @@ async function startOsSpeechDictation(locale: string): Promise<void> {
     clearListeners();
   });
 
-  endSub = addSpeechRecognitionListener('end', () => {
+  endSub = ExpoSpeechRecognitionModule.addListener('end', () => {
     setListening(false);
     activeMode = null;
     const text = latestTranscript.trim();

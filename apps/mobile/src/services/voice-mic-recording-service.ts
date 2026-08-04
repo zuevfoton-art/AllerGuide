@@ -2,20 +2,20 @@
  * Device-microphone recording for cloud STT (Yandex SpeechKit).
  * Always uses the system mic — never DocumentPicker / gallery / files.
  *
- * Uses `expo-audio` (the maintained SDK 53 replacement for the deprecated
- * `expo-av`). `expo-av` failed to install its JSI bindings on release builds
- * ("Cannot install JSI bindings for AV module"), which crashed the app with a
- * native SIGSEGV in libexpo-modules-core.so on first module access.
+ * Uses `expo-audio` (replacement for deprecated `expo-av`). Construct via
+ * `AudioModule.AudioRecorder` — the `AudioRecorder` type export is type-only
+ * on SDK 54 and cannot be constructed with `new`.
  */
 import {
-  AudioRecorder,
+  AudioModule,
   RecordingPresets,
   setAudioModeAsync,
   IOSOutputFormat,
   AudioQuality,
+  type AudioRecorder,
   type RecordingOptions,
 } from 'expo-audio';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { logCaughtError } from '@/src/services/error-reporting';
 
@@ -166,7 +166,11 @@ export async function startMicRecording(): Promise<void> {
 
   await activateRecordingAudioMode();
 
-  const recorder = new AudioRecorder(sttRecordingOptions());
+  // Runtime constructor lives on the native module object (not a named export).
+  const nativeAudio = AudioModule as unknown as {
+    AudioRecorder: new (options: RecordingOptions) => AudioRecorder;
+  };
+  const recorder = new nativeAudio.AudioRecorder(sttRecordingOptions());
   await recorder.prepareToRecordAsync();
   recorder.record();
   activeRecorder = recorder;

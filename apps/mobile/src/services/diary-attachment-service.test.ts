@@ -14,7 +14,7 @@ vi.mock('react-native', () => ({
   Platform: { OS: 'web' },
 }));
 
-vi.mock('expo-file-system', () => ({
+vi.mock('expo-file-system/legacy', () => ({
   documentDirectory: null,
   getInfoAsync: vi.fn(),
   makeDirectoryAsync: vi.fn(),

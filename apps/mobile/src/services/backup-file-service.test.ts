@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { exportLocalBackup, importLocalBackup } from '@/src/services/sync-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 vi.mock('@/src/services/sync-service', () => ({
   exportLocalBackup: vi.fn(() => '{"profiles":[]}'),
@@ -18,7 +18,7 @@ vi.mock('react-native', () => ({
   Platform: { OS: 'ios' },
 }));
 
-vi.mock('expo-file-system', () => ({
+vi.mock('expo-file-system/legacy', () => ({
   cacheDirectory: '/cache/',
   writeAsStringAsync: vi.fn(async () => undefined),
 }));
