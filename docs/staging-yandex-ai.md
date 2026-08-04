@@ -156,9 +156,23 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 
 `GET /api/health` → `features.ycSearch: true`.
 
-### D — multimodal (deferred)
+### D — multimodal dish vision (`POST /api/scan/dish-vision`)
 
-Прямой разбор фото без отдельного OCR — **не реализован**. Не начинать до стабильного клиентского QA A–C и SpeechKit. Offline-first не ломать.
+Прямой разбор **фото блюда без текста** (как в калорийных приложениях): модель возвращает `dishName` + `ingredients[]`, затем mobile сверяет состав с профилем через `runSmartScan`.
+
+| Слой | Файл | Поведение |
+|------|------|-----------|
+| Domain | [`packages/ai/src/dish-vision.ts`](../packages/ai/src/dish-vision.ts) | prompt / parse / `dishVisionToScanText` |
+| Provider | [`apps/api/src/services/llm-dish-vision-provider.ts`](../apps/api/src/services/llm-dish-vision-provider.ts) | OpenAI vision или Yandex OpenAI-compatible chat + image |
+| Route | [`apps/api/src/routes/scan-dish-vision.ts`](../apps/api/src/routes/scan-dish-vision.ts) | cache + shared scan daily budget |
+| Mobile | [`scanner-service.ts`](../apps/mobile/src/services/scanner-service.ts) + `dish-vision-api-service.ts` | OCR empty / visual_product miss → dish vision |
+| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | default **off** offline-safe |
+| Yandex model | `YC_VISION_MODEL` (default `gemma-3-27b-it`) | text-only `yandexgpt-lite` **не** подходит |
+| UX | усиленный disclaimer / trust line (`dishVisionDisclaimer`) | source `dish_vision` |
+
+`GET /api/health` → `features.aiDishVision: true` когда сконфигурировано.
+
+**Stage enable:** Lockbox `AI_DISH_VISION_ENABLED=true` (+ optional `YC_VISION_MODEL`) → redeploy revision; EAS staging already sets `EXPO_PUBLIC_AI_DISH_VISION=true` (no-op until API flag on).
 
 ---
 
@@ -262,7 +276,7 @@ Manual APK (EAS `staging`): see [`qa-checklist.md`](./qa-checklist.md) § «Yand
 
 1. **Client QA** on EAS staging APK (Y.1–Y.5 + STT reachability)
 2. Optional `YC_GPT_MODEL` A/B after metrics
-3. Option D multimodal — later
+3. Option D multimodal — **implemented** (enable Lockbox `AI_DISH_VISION_ENABLED` + VL model)
 4. ~~Wire `VoiceNoteButton` → mic → `recognizeSpeechViaApi`~~ **done** (`voice-mic-recording-service` + dictation orchestration)
 
 Offline-first и feature flags: без флагов приложение работает как раньше (A heuristic + demo OCR + mock).

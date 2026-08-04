@@ -31,7 +31,15 @@ export interface ScanResult {
   mode: ScanMode;
   level: RiskLevel;
   productName?: string;
-  source?: 'manual' | 'barcode' | 'openfoodfacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm';
+  source?:
+    | 'manual'
+    | 'barcode'
+    | 'openfoodfacts'
+    | 'barcodes_db'
+    | 'catalog_api'
+    | 'ocr'
+    | 'llm'
+    | 'dish_vision';
 }
 
 function parseProfileAllergens(profile?: Pick<Profile, 'allergies'> | null): string[] {

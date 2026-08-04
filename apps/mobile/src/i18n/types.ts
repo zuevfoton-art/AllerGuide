@@ -347,6 +347,12 @@ export type LocaleMessages = {
     sourceManual: string;
     sourceOcr: string;
     sourceLlm: string;
+    /** Multimodal plate photo → estimated dish + ingredients */
+    sourceDishVision: string;
+    /** Stronger trust line when result came from dish vision (no label text). */
+    trustLineDishVision: string;
+    /** Bottom disclaimer for dish-vision estimates. */
+    dishVisionDisclaimer: string;
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;

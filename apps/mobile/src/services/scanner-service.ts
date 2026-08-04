@@ -5,18 +5,22 @@ import {
   simulateOcrFromCapture,
   asVisionOcrResult,
   classifyScanIntentHeuristic,
+  dishVisionToScanText,
+  shouldUseDishVisionForOcrText,
+  type DishVisionResult,
   type ScanMode,
   type ScanResult,
   type OcrExtractionResult,
 } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
-import { AI_SCAN_ENABLED } from '@/src/constants/features';
+import { AI_DISH_VISION_ENABLED, AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
 import {
   resolveProductByBarcode,
   type BarcodeScanStatus,
   type MenuScanStatus,
 } from '@/src/services/barcode-lookup-service';
+import { recognizeDishViaApi } from '@/src/services/dish-vision-api-service';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 import { classifyScanIntentViaApi } from '@/src/services/scan-intent-api-service';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
@@ -37,6 +41,8 @@ export type ScanResultExtended = ScanResult & {
   /** Product category when the lookup source provides it. */
   productCategory?: string;
   ocr?: OcrExtractionResult;
+  /** Multimodal plate-only estimate (Option D). */
+  dishVision?: DishVisionResult;
 };
 
 const INSUFFICIENT_INGREDIENTS_LENGTH = 15;
@@ -172,8 +178,18 @@ export function extractOcrText(mode: ScanMode, manualText?: string): OcrExtracti
   return simulateOcrFromCapture(mode, manualText);
 }
 
+function emptyVisionOcrResult(warning?: string): OcrExtractionResult {
+  return {
+    text: '',
+    ingredientsBlock: '',
+    source: 'vision',
+    warnings: warning ? [warning] : [],
+  };
+}
+
 /**
  * Prefer cloud Vision when flagged; fall back to demo/manual so offline still works.
+ * When OCR finds no text, return an empty vision result (dish-vision can take over).
  */
 export async function extractOcrFromImage(input: {
   mode: ScanMode;
@@ -195,6 +211,17 @@ export async function extractOcrFromImage(input: {
         return asVisionOcrResult(prepareScanTextFromOcr(cloud.text, input.mode));
       }
       if (cloud && !cloud.ok) {
+        const noText =
+          cloud.status === 422 ||
+          /no text/i.test(cloud.error) ||
+          cloud.error === 'No text recognized';
+        if (noText || AI_DISH_VISION_ENABLED) {
+          return emptyVisionOcrResult(
+            noText
+              ? 'На фото нет читаемого текста — пробуем распознать блюдо по виду.'
+              : `Облачный OCR недоступен (${cloud.error}).`,
+          );
+        }
         const demo = simulateOcrFromCapture(input.mode);
         return {
           ...demo,
@@ -205,11 +232,74 @@ export async function extractOcrFromImage(input: {
         };
       }
     } catch {
-      // Network errors → demo below
+      // Network errors → demo below (or empty when dish vision can run)
+      if (AI_DISH_VISION_ENABLED) {
+        return emptyVisionOcrResult('Облачный OCR недоступен.');
+      }
     }
   }
 
   return simulateOcrFromCapture(input.mode, input.manualText);
+}
+
+async function scanFromDishVision(input: {
+  mode: ScanMode;
+  imageBase64: string;
+  mimeType?: string;
+  profile?: Profile | null;
+  extraction: OcrExtractionResult;
+}): Promise<ScanResultExtended | null> {
+  if (!AI_DISH_VISION_ENABLED) return null;
+
+  try {
+    const vision = await recognizeDishViaApi({
+      imageBase64: input.imageBase64,
+      mimeType: input.mimeType,
+    });
+    if (!vision?.ok) return null;
+
+    const scanText = dishVisionToScanText(vision.result);
+    if (!scanText.trim()) return null;
+
+    const confidenceNote =
+      vision.result.confidence === 'low'
+        ? 'Уверенность модели низкая.'
+        : vision.result.confidence === 'medium'
+          ? 'Уверенность модели средняя.'
+          : 'Уверенность модели высокая.';
+    const modelNotes = vision.result.notes?.trim();
+    const ocrNote = [
+      'Оценка по фото блюда (без этикетки): название и вероятный состав определены моделью — это не лабораторный анализ и не замена состава на упаковке.',
+      confidenceNote,
+      modelNotes,
+      ...input.extraction.warnings,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    const result = await analyzeText({
+      mode: input.mode === 'menu' ? 'product' : input.mode,
+      text: scanText,
+      profile: input.profile,
+      productName: vision.result.dishName,
+      source: 'dish_vision',
+      ocrNote,
+    });
+
+    if (input.profile) {
+      saveScanHistory(input.profile.id, scanText, result, vision.result.dishName);
+    }
+
+    trackEvent('scan_dish_vision', {
+      confidence: vision.result.confidence,
+      ingredients: vision.result.ingredients.length,
+      cached: Boolean(vision.cached),
+    });
+
+    return { ...result, ocr: input.extraction, dishVision: vision.result };
+  } catch {
+    return null;
+  }
 }
 
 export async function scanFromOcr({
@@ -273,7 +363,22 @@ export async function scanFromOcr({
         return { ...result, ocr: extraction };
       }
     } catch {
-      // Fall through to plain OCR text analysis.
+      // Fall through — try dish vision or plain OCR text analysis.
+    }
+
+    // Plate-only photo (no usable OCR / catalog hit): multimodal name + ingredients.
+    if (
+      imageBase64?.trim() &&
+      (shouldUseDishVisionForOcrText(extraction.text) || extraction.text.trim().length < 40)
+    ) {
+      const visionScan = await scanFromDishVision({
+        mode: analysisMode,
+        imageBase64,
+        mimeType,
+        profile,
+        extraction,
+      });
+      if (visionScan) return visionScan;
     }
   }
 

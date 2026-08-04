@@ -248,6 +248,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `BACKEND_AUTH_ENABLED` | `EXPO_PUBLIC_BACKEND_AUTH` | JWT + серверные профили |
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
+| `AI_DISH_VISION_ENABLED` | `EXPO_PUBLIC_AI_DISH_VISION` | Multimodal фото блюда → `/api/scan/dish-vision` |
 | `YC_OCR_ENABLED` | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
@@ -381,10 +382,11 @@ sequenceDiagram
 
 ### OCR-поток (меню / этикетка)
 
-1. `extractOcrFromImage` / demo OCR → текст
+1. `extractOcrFromImage` / demo OCR → текст (пустой OCR → empty vision result, без demo, если включён dish vision)
 2. Intent: `classifyScanIntentViaApi` (`YC_SCAN_INTENT_LLM`) или `classifyScanIntentHeuristic` (`@allerguide/ai`)
 3. Если `visual_product` → `lookupDishIngredientsForScan` (OFF + опционально `searchIngredientsViaApi` при `YC_SEARCH`)
-4. Иначе / после обогащения → `runSmartScan` → история
+4. Если lookup не дал состава и есть фото + `AI_DISH_VISION` → `POST /api/scan/dish-vision` (название + вероятные ингредиенты) → `runSmartScan` + усиленный disclaimer
+5. Иначе / после обогащения → `runSmartScan` → история
 
 ### Анализ текста (`@allerguide/ai`)
 
@@ -403,9 +405,10 @@ sequenceDiagram
 | `barcode` | Общий barcode-путь (UI) |
 | `ocr` | Распознанный текст упаковки/меню |
 | `llm` | Вердикт LLM-скана |
+| `dish_vision` | Оценка блюда по фото (multimodal, без этикетки) |
 | `manual` | Ручной ввод |
 
-Тип в `@allerguide/ai` `scan.ts`: `'manual' | 'barcode' | 'openfoodfacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm'`.
+Тип в `@allerguide/ai` `scan.ts`: `'manual' | 'barcode' | 'openfoodfacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm' | 'dish_vision'`.
 
 ### Маппинг аллергенов
 
@@ -737,6 +740,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` | JWT auth + server profiles |
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | Backend catalog lookup |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | LLM scan via API |
+| `EXPO_PUBLIC_AI_DISH_VISION` | `false` | Multimodal plate photo → dish + ingredients |
 | `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
 | `EXPO_PUBLIC_YC_SEARCH` | `false` | Ingredients search via `/api/search/ingredients` |
@@ -766,6 +770,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
+| `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |
 | `YC_OCR_ENABLED` | Vision OCR |
 | `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |

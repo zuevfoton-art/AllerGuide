@@ -82,7 +82,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 
 | Фича | Экраны | Services | Domain / API |
 |------|--------|----------|--------------|
-| **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, dish/photo | `@allerguide/ai` (scan, intent, search); API `scan.ts`, `scan-intent.ts`, `ocr.ts`, `search-ingredients.ts` |
+| **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context | core `diary*` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
@@ -199,6 +199,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `profiles.ts` | Profile CRUD (JWT) |
 | `sync.ts` | Encrypted backup (`SYNC_ENABLED`) |
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
+| `scan-dish-vision.ts` | Multimodal dish photo (`AI_DISH_VISION_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
 | `ocr.ts` | Yandex Vision OCR (`YC_OCR_ENABLED`) |
 | `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
@@ -273,6 +274,7 @@ Barrel: `index.ts`. Pure TS.
 | `BACKEND_AUTH` | `features.ts` | `JWT_SECRET` + `DATABASE_URL` |
 | `CLOUD_SYNC` | `features.ts` | `SYNC_ENABLED` |
 | `AI_SCAN_ENABLED` | `features.ts` | `AI_SCAN_ENABLED` + LLM keys |
+| `AI_DISH_VISION_ENABLED` | `features.ts` (`EXPO_PUBLIC_AI_DISH_VISION`) | `AI_DISH_VISION_ENABLED` + VL model |
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |

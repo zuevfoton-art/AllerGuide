@@ -13,11 +13,21 @@ vi.mock('@allerguide/ai', () => ({
   prepareScanTextFromOcr: vi.fn(),
   simulateOcrFromCapture: vi.fn(),
   asVisionOcrResult: vi.fn((prepared) => prepared),
+  classifyScanIntentHeuristic: vi.fn(() => ({ intent: 'label_or_menu', mode: 'product' })),
+  dishVisionToScanText: vi.fn((result: { dishName: string; ingredients: string[] }) =>
+    [result.dishName, ...result.ingredients].join(', '),
+  ),
+  shouldUseDishVisionForOcrText: vi.fn((text: string) => text.trim().length < 2),
 }));
 
 vi.mock('@/src/constants/features', () => ({
   AI_SCAN_ENABLED: true,
+  AI_DISH_VISION_ENABLED: false,
   YC_OCR_ENABLED: false,
+}));
+
+vi.mock('@/src/services/dish-vision-api-service', () => ({
+  recognizeDishViaApi: vi.fn(async () => null),
 }));
 
 vi.mock('@/src/services/ocr-api-service', () => ({
