@@ -64,7 +64,7 @@ const tabBarStyles = StyleSheet.create({
 
 export default function TabsLayout() {
   const { colors } = useTheme();
-  const { isCompact, showTabLabels, tabBarHeight } = useResponsiveLayout();
+  const { isCompact, showTabLabels, tabBarHeight, tabBarPaddingBottom } = useResponsiveLayout();
   const { t } = useTranslation();
   const iconSize = isCompact ? 22 : 24;
 
@@ -72,6 +72,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Absolute tab bar disables React Navigation's default inset handling —
+        // apply safe-area bottom padding ourselves (Android system nav overlap).
         tabBarStyle: {
           position: 'absolute',
           left: 0,
@@ -82,7 +84,7 @@ export default function TabsLayout() {
           borderTopColor: colors.border,
           borderTopWidth: 1,
           borderRadius: 0,
-          paddingBottom: Platform.OS === 'ios' ? 22 : Platform.OS === 'web' ? 8 : 6,
+          paddingBottom: tabBarPaddingBottom,
           paddingTop: 8,
           paddingHorizontal: 4,
           ...(Platform.OS === 'web'
