@@ -61,6 +61,7 @@ Required for [`.github/workflows/deploy-staging.yml`](../.github/workflows/deplo
 | `STAGING_DIRECT_DATABASE_URL` | same |
 | `STAGING_API_URL` | `https://api.staging.aclearo.com` |
 | `EXPO_TOKEN` | expo.dev (mobile jobs) |
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps Android key for [`.github/workflows/staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml). Optional if the same value is already in EAS Sensitive and `EXPO_TOKEN` can pull it. |
 
 Do **not** put `GOOGLE_POLLEN_API_KEY` in GitHub unless a dedicated upsert workflow needs it (prefer local `yc-lockbox-upsert` / Phase 1 script).
 

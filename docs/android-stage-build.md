@@ -136,8 +136,11 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 
 | Secret | Назначение |
 |--------|------------|
-| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps Android key (package + SHA-1 debug/CI) |
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps Android key (package + SHA-1 debug/CI). **Required** for Google pollen basemap/heatmap in the Gradle APK (job fails if missing). |
+| `EXPO_TOKEN` | Fallback: pull the same Maps key from EAS Sensitive when the GH secret is empty |
 | *(опционально)* `GOOGLE_POLLEN` уже на API | клиент бьёт в `api.staging.aclearo.com` |
+
+Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`, `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE`). Google basemap wins when the Maps key is present; Yandex interactive is the fallback.
 
 ### Ограничения C
 
@@ -161,7 +164,8 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 - [ ] Restricted Maps key(s) + server Pollen key
 - [ ] API staging: `POLLEN_HEATMAP_ENABLED=true`, health `features.pollenHeatmap: true`
 - [ ] EAS secret `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
-- [ ] GitHub secret `EXPO_TOKEN` (для пути B)
+- [ ] GitHub secret `EXPO_TOKEN` (для пути B; также fallback Maps key для пути C)
+- [ ] GitHub secret `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (путь C; или EAS pull через `EXPO_TOKEN`)
 - [ ] `eas build` или Actions → **EAS staging Android**
 - [ ] Device smoke: Google map + UPI + OM badge
 

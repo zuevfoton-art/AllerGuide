@@ -39,6 +39,10 @@ env:
   EXPO_PUBLIC_YC_STT: 'true'
   EXPO_PUBLIC_PRODUCT_DB: 'false'
   EXPO_PUBLIC_POLLEN_HEATMAP: google
+  EXPO_PUBLIC_GOOGLE_MAP_PRIMARY: 'true'
+  EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY: 'true'
+  EXPO_PUBLIC_MAP_POLLEN_PLUME: 'true'
+  EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE: 'true'
   EXPO_PUBLIC_ANALYTICS_ENABLED: 'true'
   EXPO_PUBLIC_APP_ENV: staging
   EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -75,21 +79,55 @@ jobs:
         working-directory: apps/mobile
         run: pnpm generate-assets || true
 
-      - name: Prebuild Android (inject Google Maps key via app.config.js)
+      # Google pollen heatmap needs EXPO_PUBLIC_GOOGLE_MAPS_API_KEY in the JS bundle
+      # and native Maps config. Prefer GH secret; otherwise pull from EAS (same store
+      # as profile staging / eas-staging-android.yml).
+      - name: Resolve Google Maps API key
         working-directory: apps/mobile
         env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
         run: |
-          if [ -z "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}" ]; then
-            echo "::warning::EXPO_PUBLIC_GOOGLE_MAPS_API_KEY secret is empty — Google basemap will be blank; pollen tiles still work via staging API when key missing at runtime."
+          set -euo pipefail
+          KEY="${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}"
+          if [ -n "$KEY" ]; then
+            echo "Using EXPO_PUBLIC_GOOGLE_MAPS_API_KEY from GitHub Actions secrets."
+          elif [ -n "${EXPO_TOKEN:-}" ]; then
+            echo "GH Maps key empty — trying EAS project env…"
+            for ENV_NAME in preview production development; do
+              VAL="$(
+                pnpm exec eas env:get "$ENV_NAME" \
+                  --variable-name EXPO_PUBLIC_GOOGLE_MAPS_API_KEY \
+                  --format short \
+                  --non-interactive 2>/dev/null | tr -d '\r' || true
+              )"
+              if [ -n "${VAL:-}" ] && [ "$VAL" != "null" ]; then
+                KEY="$VAL"
+                echo "Resolved Maps key from EAS environment=${ENV_NAME}."
+                break
+              fi
+            done
           fi
-          npx expo prebuild --platform android --clean --no-install
+          if [ -z "${KEY:-}" ]; then
+            echo "::error::EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is required for staging Google pollen map."
+            echo "Set repo secret EXPO_PUBLIC_GOOGLE_MAPS_API_KEY, or EAS Sensitive env + EXPO_TOKEN."
+            echo "See docs/android-stage-build.md §C and docs/gcp-pollen-maps-keys.md"
+            exit 1
+          fi
+          {
+            echo "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY<<EOF"
+            echo "$KEY"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Prebuild Android (inject Google Maps key via app.config.js)
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --clean --no-install
 
       - name: Assemble release APK
         working-directory: apps/mobile/android
-        env:
-          # Metro bundles JS at assemble time — staging flags must be present here.
-          EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
+        # Job/workflow EXPO_PUBLIC_* + resolved Maps key (GITHUB_ENV) must be present
+        # when Metro bundles JS during assembleRelease.
         run: ./gradlew assembleRelease --no-daemon
 
       - name: Stage APK
@@ -124,7 +162,8 @@ jobs:
           body: |
             Staging APK built from `${{ github.sha }}` via Gradle on GitHub Actions.
 
-            - Profile env aligned with `eas.json` → `staging`
+            - Profile env aligned with `eas.json` → `staging` (incl. Google pollen / plume / Yandex interactive)
+            - Google Maps key injected from GH secret or EAS Sensitive env
             - API: `https://api.staging.aclearo.com`
             - Package: `com.aclearo.app` (CI/debug-style signing — internal testing only)
           generate_release_notes: true
