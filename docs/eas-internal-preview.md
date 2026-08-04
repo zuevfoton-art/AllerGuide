@@ -139,7 +139,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 
 | Настройка | Значение | Почему |
 |-----------|----------|--------|
-| `newArchEnabled` (`app.json` + `android/gradle.properties`) | **`false`** | Часть нативных модулей нестабильна на New Architecture в этом наборе зависимостей. |
+| `newArchEnabled` (`app.json` + `android/gradle.properties` + `ios/Podfile.properties.json`) | **`false`** | Phase A SDK 54 остаётся на Legacy Architecture. New Arch — отдельная Phase B перед SDK 55 (там New Arch обязателен). |
 | `react-native-quick-crypto` | **не используется** | Его нативный `install()` аварийно завершал процесс **при запуске** на Android (native/JNI abort, который JS `try/catch` не ловит). Полностью удалён. |
 | Криптография (хэш паролей, PBKDF2/SHA-256) | **чистый JS `@noble/hashes`** в `@allerguide/core` (`src/password.ts`) | Не грузит нативный крипто-модуль на старте; формат хэшей не изменился (старые хэши проверяются). |
 | Резервное шифрование (AES-GCM) | Web Crypto, с мягкой деградацией | На нативе `crypto.subtle` отсутствует → `isEncryptionAvailable() === false`, облачный бэкап (по умолчанию выключен) просто не шифруется. |
@@ -196,7 +196,8 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | Android: краш сразу при запуске | Не подключайте `react-native-quick-crypto` и не включайте `newArchEnabled` без проверки на устройстве (см. «Нативные ограничения сборки»). Соберите свежий APK и снимите `adb logcat *:E`. |
 | Build fails on monorepo | Запускайте из `apps/mobile`; EAS определяет root автоматически |
 | `pnpm add pnpm@10.34.4` exit code 1 | Не пиньте `"pnpm"` в `eas.json` — используйте `packageManager` в корневом `package.json` + `.npmrc` с `node-linker=hoisted` |
-| Expo SDK warnings | Ожидаемы на Expo 53; не блокируют preview |
+| Expo SDK warnings | Ожидаемы на Expo 54; не блокируют preview |
+| Cloud mic SIGSEGV (release) | Staging включает `EXPO_PUBLIC_YC_STT_MIC` после SDK 54 + `expo-modules-core@3.0.30` patch. Если logcat снова показывает crash в `libexpo-modules-core.so` — выключите флаг и см. [`docs/expo-sdk-54-upgrade-notes.md`](expo-sdk-54-upgrade-notes.md) |
 
 ---
 

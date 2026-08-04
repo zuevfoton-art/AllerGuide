@@ -6,7 +6,7 @@
 |-------|----------------|
 | Lockbox / health | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT` → `true` |
 | Model | `YC_GPT_MODEL=yandexgpt-lite` (explicit; A/B via Lockbox only) |
-| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT` = `true` |
+| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT`, `YC_STT_MIC` = `true` |
 | Production EAS | OCR / intent / search / STT **off** until staging QA green |
 
 ---
@@ -201,7 +201,7 @@ curl -sS -X POST "$STAGING_API_URL/api/stt" \
 # Expect: 200 {ok,text} | 422 No speech | 502 provider (not 503 disabled)
 ```
 
-**Mobile:** EAS/`Gradle` `staging` с `EXPO_PUBLIC_YC_STT=true`.  
+**Mobile:** EAS/`Gradle` `staging` с `EXPO_PUBLIC_YC_STT=true` и `EXPO_PUBLIC_YC_STT_MIC=true` (SDK 54 cloud-mic; см. [`expo-sdk-54-upgrade-notes.md`](expo-sdk-54-upgrade-notes.md)).  
 `VoiceNoteButton` всегда открывает **микрофон устройства** (не файловый picker):
 
 1. Primary — OS `expo-speech-recognition` (если доступен)

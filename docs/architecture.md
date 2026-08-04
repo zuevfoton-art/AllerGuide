@@ -123,7 +123,7 @@ flowchart TB
 
 ## Mobile-приложение
 
-Каталог: `apps/mobile/`. Стек: Expo 53, React Native 0.79, Expo Router 5, Zustand, expo-sqlite / IndexedDB.
+Каталог: `apps/mobile/`. Стек: Expo 54, React Native 0.81, Expo Router 6, Zustand, expo-sqlite / IndexedDB. New Architecture пока выключена (Phase B follow-up перед SDK 55).
 
 ### Слои
 
@@ -252,6 +252,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
 | `YC_STT_ENABLED` | `EXPO_PUBLIC_YC_STT` | SpeechKit STT через `/api/stt` (default off) |
+| `YC_STT_MIC_ENABLED` | `EXPO_PUBLIC_YC_STT` + `EXPO_PUBLIC_YC_STT_MIC` | Cloud mic (`expo-audio` → `/api/stt`); staging on after SDK 54 |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 | `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
@@ -740,6 +741,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
 | `EXPO_PUBLIC_YC_SEARCH` | `false` | Ingredients search via `/api/search/ingredients` |
 | `EXPO_PUBLIC_YC_STT` | `false` | SpeechKit STT via `/api/stt` |
+| `EXPO_PUBLIC_YC_STT_MIC` | `false` (staging `true`) | Cloud mic fallback when OS speech unavailable |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | Encrypted cloud backup |
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |

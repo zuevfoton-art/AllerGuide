@@ -34,8 +34,9 @@ cd android && ./gradlew assembleDebug
 
 - `apps/mobile` — Expo / React Native приложение (managed-проект с уже сгенерированной нативной папкой `android/`).
 - JS-движок: **Hermes**. Архитектура: классическая (New Architecture выключена).
-- Версии в проекте: **Node 22.14.0**, **Gradle 8.13**, **Expo SDK 53 / React Native 0.79**, **JDK 17**.
-- Package / applicationId: `com.allerguide.app`.
+- Версии в проекте: **Node 22.14.0**, **Gradle 8.14.3**, **Expo SDK 54 / React Native 0.81**, **JDK 17**.
+- New Architecture: **выключена** (`newArchEnabled=false`) до отдельной Phase B валидации.
+- Package / applicationId: `com.aclearo.app`.
 
 Backend не нужен — приложение offline-first, все основные сценарии работают без сети.
 
@@ -62,7 +63,7 @@ pnpm --version    # 10.34.4
 
 ### 1.2 JDK 17
 
-Android Gradle Plugin для RN 0.79 требует **JDK 17**.
+Android Gradle Plugin для RN 0.81 требует **JDK 17**.
 
 - Проще всего — поставить **JDK из комплекта Android Studio** (Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK → встроенный JBR 17).
 - Либо отдельный Temurin/OpenJDK 17 и `JAVA_HOME` на него.
@@ -168,7 +169,7 @@ pnpm android -- --variant release
 # или прямой Gradle: см. раздел 5
 ```
 
-> Первая сборка качает Gradle 8.13 и зависимости — это долго. Последующие сборки кешируются.
+> Первая сборка качает Gradle 8.14.3 и зависимости — это долго. Последующие сборки кешируются.
 
 ---
 
@@ -319,7 +320,7 @@ curl -s https://api.staging.aclearo.com/api/health | jq '{ok, features}'
 | `Unsupported class file major version` / ошибки JDK | Используйте **JDK 17** (встроенный JBR из Android Studio) |
 | `Unable to resolve "@allerguide/core"` | Запустите `pnpm install` из **корня**; не удаляйте `node-linker=hoisted` из `.npmrc` |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | Удалите ранее установленное приложение с тем же package: `adb uninstall com.allerguide.app` |
-| Долгая первая сборка / таймаут скачивания Gradle | Это нормально (качается Gradle 8.13 + зависимости); повторный запуск использует кеш |
+| Долгая первая сборка / таймаут скачивания Gradle | Это нормально (качается Gradle 8.14.3 + зависимости); повторный запуск использует кеш |
 | `adb: no devices/emulators found` | Запустите эмулятор или подключите телефон с включённой USB-отладкой; проверьте `adb devices` |
 | Приложение зависает на splash в debug | Не поднят Metro — запустите `pnpm --filter mobile start`, либо собирайте `release` |
 | Регистрация висит на «Подождите…» | Включён backend-auth, но URL сервера не задан/недоступен. Задайте абсолютный `EXPO_PUBLIC_API_URL` и пересоберите (раздел 5а). Запрос теперь прерывается по таймауту (15 c) с ошибкой «Не удалось подключиться к серверу» |

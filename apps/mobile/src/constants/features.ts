@@ -34,10 +34,10 @@ export const YC_STT_ENABLED = process.env.EXPO_PUBLIC_YC_STT === 'true';
 
 /**
  * Cloud mic capture (expo-audio → /api/stt) as a fallback when OS speech
- * recognition is unavailable. Default OFF: the expo AV/audio native module
- * fails to install JSI bindings on the SDK 53 old-architecture release build
- * and hard-crashes (native SIGSEGV in libexpo-modules-core.so) on first use.
- * OS speech recognition covers devices with Google/Samsung recognizers.
+ * recognition is unavailable. Requires both `EXPO_PUBLIC_YC_STT` and
+ * `EXPO_PUBLIC_YC_STT_MIC`. Staging enables the mic flag after the SDK 54
+ * upgrade + `expo-modules-core@3.0.30` patch (LazyObject null-guard + Promise
+ * double-settle; see expo#43094). OS speech remains the primary path.
  */
 export const YC_STT_MIC_ENABLED =
   process.env.EXPO_PUBLIC_YC_STT === 'true' && process.env.EXPO_PUBLIC_YC_STT_MIC === 'true';

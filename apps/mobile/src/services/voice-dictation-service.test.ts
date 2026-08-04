@@ -14,11 +14,11 @@ vi.mock('expo-speech-recognition', () => ({
     start: (...args: unknown[]) => startMock(...args),
     stop: vi.fn(),
     abort: vi.fn(),
+    addListener: vi.fn(() => ({ remove: vi.fn() })),
+    getSpeechRecognitionServices: () => getSpeechRecognitionServicesMock(),
+    isRecognitionAvailable: () => isRecognitionAvailableMock(),
+    supportsOnDeviceRecognition: vi.fn(() => false),
   },
-  addSpeechRecognitionListener: vi.fn(() => ({ remove: vi.fn() })),
-  getSpeechRecognitionServices: () => getSpeechRecognitionServicesMock(),
-  isRecognitionAvailable: () => isRecognitionAvailableMock(),
-  supportsOnDeviceRecognition: vi.fn(() => false),
 }));
 
 const permissionsCheckMock = vi.fn(async () => false);

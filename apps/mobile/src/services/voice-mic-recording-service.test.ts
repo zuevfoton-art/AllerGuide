@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 vi.mock('expo-audio', () => ({
-  AudioRecorder: vi.fn(),
+  AudioModule: {
+    AudioRecorder: vi.fn(),
+  },
   RecordingPresets: {
     HIGH_QUALITY: { extension: '.m4a', android: {}, ios: {} },
   },
@@ -10,7 +12,7 @@ vi.mock('expo-audio', () => ({
   AudioQuality: { HIGH: 96 },
 }));
 
-vi.mock('expo-file-system', () => ({
+vi.mock('expo-file-system/legacy', () => ({
   readAsStringAsync: vi.fn(),
   deleteAsync: vi.fn(),
 }));
