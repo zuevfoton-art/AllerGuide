@@ -1,0 +1,42 @@
+diff --git a/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt b/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt
+index bfa10e9caf2067bb4cf0682e3187996e5522b862..f4f3a27cc143471f3d0054150e8de3b70268468e 100644
+--- a/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt
++++ b/android/src/main/java/expo/modules/kotlin/jni/PromiseImpl.kt
+@@ -63,15 +63,13 @@ class PromiseImpl @DoNotStrip internal constructor(
+     if (wasSettled) {
+       val exception = PromiseAlreadySettledException(fullFunctionName ?: "unknown")
+       val jsLogger = appContextHolder?.get()?.jsLogger
+-      // We want to report that a promise was settled twice in the development build.
+-      // However, in production, the app should crash.
+-      if (BuildConfig.DEBUG && jsLogger != null) {
+-        jsLogger.error("Trying to resolve promise that was already settled", exception)
+-        logger.error("Trying to resolve promise that was already settled", exception)
+-        return
++      // Patched (AllerGuide): never throw on double settle. Android 16 can deliver
++      // onRequestPermissionsResult twice (RECORD_AUDIO). Upstream: expo/expo#43094.
++      if (jsLogger != null) {
++        jsLogger.error("Trying to settle promise that was already settled", exception)
+       }
+-
+-      throw exception
++      logger.error("Trying to settle promise that was already settled", exception)
++      return
+     }
+ 
+     body()
+diff --git a/common/cpp/LazyObject.cpp b/common/cpp/LazyObject.cpp
+index 4d44451ba92c3a59c334f28eb57127ae185922cd..14a045c571d399cf12fa596900369c14f05354ed 100644
+--- a/common/cpp/LazyObject.cpp
++++ b/common/cpp/LazyObject.cpp
+@@ -54,6 +54,11 @@ const jsi::Object &LazyObject::unwrapObjectIfNecessary(jsi::Runtime &runtime, co
+     if (!lazyObject->backedObject) {
+       lazyObject->initializeBackedObject(runtime);
+     }
++    // Patched (AllerGuide): guard against a null backed object instead of
++    // dereferencing it (SIGSEGV when AV/audio JSI bindings fail to install).
++    if (!lazyObject->backedObject) {
++      throw jsi::JSError(runtime, "The object is no longer associated with native representation");
++    }
+     return *lazyObject->backedObject;
+   }
+   return object;

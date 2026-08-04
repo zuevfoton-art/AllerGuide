@@ -123,7 +123,7 @@ flowchart TB
 
 ## Mobile-приложение
 
-Каталог: `apps/mobile/`. Стек: Expo 54, React Native 0.81, Expo Router 6, Zustand, expo-sqlite / IndexedDB. New Architecture включена (Phase B на SDK 54 перед переходом на SDK 55).
+Каталог: `apps/mobile/`. Стек: Expo 55, React Native 0.83, Expo Router 55, Zustand, expo-sqlite / IndexedDB. New Architecture обязательна (SDK 55+).
 
 ### Слои
 

@@ -27,8 +27,8 @@
   },
   "pnpm": {
     "overrides": {
-      "react": "19.1.0",
-      "react-dom": "19.1.0",
+      "react": "19.2.0",
+      "react-dom": "19.2.0",
       "@xmldom/xmldom": "0.9.10",
       "ws": "8.21.0",
       "undici": "7.28.0",
@@ -49,7 +49,7 @@
       "drizzle-orm": "0.45.2"
     },
     "patchedDependencies": {
-      "expo-modules-core@3.0.30": "patches/expo-modules-core@3.0.30.patch"
+      "expo-modules-core@55.0.25": "patches/expo-modules-core@55.0.25.patch"
     }
   },
   "devDependencies": {

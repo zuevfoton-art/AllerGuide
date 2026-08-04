@@ -100,7 +100,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 
 ## apps/mobile
 
-Каталог: `apps/mobile/`. Expo 54 · RN 0.81 · Expo Router 6 · Zustand · SQLite / IndexedDB.
+Каталог: `apps/mobile/`. Expo 55 · RN 0.83 · Expo Router 55 · Zustand · SQLite / IndexedDB.
 
 ### Структура
 
