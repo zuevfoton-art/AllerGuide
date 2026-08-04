@@ -166,13 +166,13 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 | Provider | [`apps/api/src/services/llm-dish-vision-provider.ts`](../apps/api/src/services/llm-dish-vision-provider.ts) | OpenAI vision или Yandex OpenAI-compatible chat + image |
 | Route | [`apps/api/src/routes/scan-dish-vision.ts`](../apps/api/src/routes/scan-dish-vision.ts) | cache + shared scan daily budget |
 | Mobile | [`scanner-service.ts`](../apps/mobile/src/services/scanner-service.ts) + `dish-vision-api-service.ts` | OCR empty / visual_product miss → dish vision |
-| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | default **off** offline-safe |
+| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | **on** staging; off by default offline-safe elsewhere |
 | Yandex model | `YC_VISION_MODEL` (default `gemma-3-27b-it`) | text-only `yandexgpt-lite` **не** подходит |
 | UX | усиленный disclaimer / trust line (`dishVisionDisclaimer`) | source `dish_vision` |
 
 `GET /api/health` → `features.aiDishVision: true` когда сконфигурировано.
 
-**Stage enable:** Lockbox `AI_DISH_VISION_ENABLED=true` (+ optional `YC_VISION_MODEL`) → redeploy revision; EAS staging already sets `EXPO_PUBLIC_AI_DISH_VISION=true` (no-op until API flag on).
+**Stage enable:** `BUILD_PUSH=0 ./scripts/yc-stage-enable-dish-vision.sh` (Lockbox `AI_DISH_VISION_ENABLED` + `AI_SCAN_ENABLED` → redeploy). Mobile Gradle/EAS staging set `EXPO_PUBLIC_AI_DISH_VISION=true`.
 
 ---
 
