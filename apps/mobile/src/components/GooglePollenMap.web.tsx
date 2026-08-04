@@ -19,6 +19,8 @@ export function GooglePollenMap({
   height = 300,
   interactive = true,
   markers = [],
+  circles = [],
+  polylines = [],
   selectedMarkerId,
   onMarkerPress,
   overlay,
@@ -29,6 +31,8 @@ export function GooglePollenMap({
   const mapRef = useRef<google.maps.Map | null>(null);
   const tileOverlayRef = useRef<google.maps.ImageMapType | null>(null);
   const markerRefs = useRef<google.maps.Marker[]>([]);
+  const circleRefs = useRef<google.maps.Circle[]>([]);
+  const polylineRefs = useRef<google.maps.Polyline[]>([]);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
   const onMarkerPressRef = useRef(onMarkerPress);
   onMarkerPressRef.current = onMarkerPress;
@@ -105,17 +109,51 @@ export function GooglePollenMap({
         marker.addListener('click', () => onMarkerPressRef.current?.(item.id));
         return marker;
       });
+
+      for (const circle of circleRefs.current) circle.setMap(null);
+      circleRefs.current = circles.map(
+        (item) =>
+          new google.maps.Circle({
+            map,
+            center: { lat: item.latitude, lng: item.longitude },
+            radius: item.radiusM,
+            fillColor: item.color,
+            fillOpacity: item.opacity,
+            strokeColor: item.color,
+            strokeOpacity: item.strokeOpacity ?? item.opacity * 0.85,
+            strokeWeight: 1,
+            clickable: false,
+          }),
+      );
+
+      for (const line of polylineRefs.current) line.setMap(null);
+      polylineRefs.current = polylines.map(
+        (item) =>
+          new google.maps.Polyline({
+            map,
+            path: item.path.map((point) => ({
+              lat: point.latitude,
+              lng: point.longitude,
+            })),
+            strokeColor: item.color,
+            strokeOpacity: item.opacity ?? 0.55,
+            strokeWeight: item.width ?? 3,
+            clickable: false,
+          }),
+      );
     });
 
     return () => {
       isCancelled = true;
     };
   }, [
+    circles,
     interactive,
     latitude,
     longitude,
     mapType,
     markers,
+    polylines,
     selectedMarkerId,
     zoom,
   ]);

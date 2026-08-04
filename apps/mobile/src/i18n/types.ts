@@ -442,6 +442,8 @@ export type LocaleMessages = {
     pollenLiveTitle: string;
     pollenMapAttribution: string;
     pollenGoogleMapAttribution: string;
+    pollenGooglePrimaryAttribution: string;
+    pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenHeatmapGrassHint: string;
     pollenHeatmapWeedHint: string;
@@ -541,6 +543,14 @@ export type LocaleMessages = {
     listFirstHint: string;
     pollenSourceCalendar: string;
     pollenSourceGoogle: string;
+    allergenPickerTitle: string;
+    allergenPickerBack: string;
+    allergenPickerButton: string;
+    allergenInfoA11y: string;
+    plumeHint: string;
+    plumeGroupTree: string;
+    plumeGroupGrass: string;
+    plumeGroupWeed: string;
   };
   settings: {
     title: string;

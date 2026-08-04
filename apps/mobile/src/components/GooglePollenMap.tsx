@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, {
+  Circle,
   Marker,
+  Polyline,
   PROVIDER_GOOGLE,
   UrlTile,
   type Region,
@@ -21,6 +23,8 @@ export function GooglePollenMap({
   height = 300,
   interactive = true,
   markers = [],
+  circles = [],
+  polylines = [],
   selectedMarkerId,
   onMarkerPress,
   overlay,
@@ -62,6 +66,26 @@ export function GooglePollenMap({
             opacity={0.8}
           />
         ) : null}
+        {polylines.map((line) => (
+          <Polyline
+            key={line.id}
+            coordinates={line.path}
+            strokeColor={withAlpha(line.color, line.opacity ?? 0.55)}
+            strokeWidth={line.width ?? 3}
+            zIndex={2}
+          />
+        ))}
+        {circles.map((circle) => (
+          <Circle
+            key={circle.id}
+            center={{ latitude: circle.latitude, longitude: circle.longitude }}
+            radius={circle.radiusM}
+            fillColor={withAlpha(circle.color, circle.opacity)}
+            strokeColor={withAlpha(circle.color, circle.strokeOpacity ?? circle.opacity * 0.8)}
+            strokeWidth={1}
+            zIndex={3}
+          />
+        ))}
         <Marker coordinate={{ latitude, longitude }} pinColor={theme.colors.danger} />
         {markers.map((marker) => (
           <Marker
@@ -84,6 +108,14 @@ export function GooglePollenMap({
       ) : null}
     </View>
   );
+}
+
+function withAlpha(color: string, alpha: number): string {
+  if (color.startsWith('#') && color.length === 7) {
+    const clamped = Math.round(Math.min(1, Math.max(0, alpha)) * 255);
+    return `${color}${clamped.toString(16).padStart(2, '0')}`;
+  }
+  return color;
 }
 
 function buildRegion(latitude: number, longitude: number, zoom: number): Region {

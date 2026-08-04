@@ -111,6 +111,15 @@ export async function createPlacesRateLimiter(): Promise<RateLimitRequestHandler
   });
 }
 
+/** Limiter for Yandex JS embed HTML (keyed map loads). */
+export async function createMapsRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('maps', {
+    windowMs: parseNumber(process.env.MAPS_RATE_LIMIT_WINDOW_MS, 60 * 1000),
+    max: parseNumber(process.env.MAPS_RATE_LIMIT_MAX, 60),
+    message: 'Too many map embed requests',
+  });
+}
+
 /** Install endpoint rate limiters (Redis-backed when REDIS_URL is set). */
 export async function installRateLimiters(app: Express): Promise<void> {
   app.use(await createGlobalRateLimiter());
@@ -120,4 +129,5 @@ export async function installRateLimiters(app: Express): Promise<void> {
   app.use('/api/ocr', scanLimiter);
   app.use('/api/pollen', await createPollenRateLimiter());
   app.use('/api/places', await createPlacesRateLimiter());
+  app.use('/api/maps', await createMapsRateLimiter());
 }

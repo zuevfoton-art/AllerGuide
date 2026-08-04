@@ -87,7 +87,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context | core `diary*` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx`, `sos-edit.tsx` | `sos-service`, `sos-passport-service`, `emergency-contact-service` | core `allergy-passport`, `emergency-contacts` |
-| **Pollen / map** | `(tabs)/map.tsx` | `pollen-map-service`, `pollen-heatmap-service`, `location-service`, `place-service` | core pollen*; API `pollen.ts`; comps `YandexMap`, `GooglePollenMap*` |
+| **Pollen / map** | `(tabs)/map.tsx` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `location-service`, `place-service` | core pollen*, `hourly-series`; API `pollen.ts`, `maps.ts`; comps `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `secure-settings` | core `auth`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` |
 | **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`; API `catalog.ts` |
@@ -177,7 +177,7 @@ src/modules/marketplace/
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `Button`, `EmptyState`, `ErrorBoundary`, `AppLockGate`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
 - **Diary:** `DiaryWizard`, `DiaryEditorModal`, `diary/*`
-- **Maps:** `YandexMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
+- **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
 - **Folders:** `brand/`, `onboarding/`, `profile-setup/`
 

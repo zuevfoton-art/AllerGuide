@@ -7,6 +7,10 @@ import {
 } from '../lib/analytics-store';
 import { forwardAnalyticsToPostHog } from '../lib/posthog-forward';
 import { logCaughtError } from '../lib/log-caught-error';
+import {
+  buildMapPollenOpsHealth,
+  maybeAlertMapPollenFallback,
+} from '../lib/map-pollen-ops';
 
 function analyticsEnabled(): boolean {
   return process.env.ANALYTICS_INGEST_ENABLED !== 'false';
@@ -49,7 +53,25 @@ export function registerAnalyticsRoutes(app: Express) {
       logCaughtError('analytics.forwardToPostHog', error);
     });
 
+    if (parsed.some((item) => item.event === 'map_pollen_fallback')) {
+      void maybeAlertMapPollenFallback().catch((error) => {
+        logCaughtError('analytics.mapPollenOps', error);
+      });
+    }
+
     res.json({ ok: true, accepted });
+  });
+
+  app.get('/api/ops/map-pollen-health', (req: Request, res: Response) => {
+    if (!dashboardEnabled()) {
+      res.status(404).json({ ok: false, error: 'Ops health disabled' });
+      return;
+    }
+    if (!dashboardAuthorized(req)) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+    res.json({ ok: true, health: buildMapPollenOpsHealth() });
   });
 
   app.get('/api/analytics/dashboard', (req: Request, res: Response) => {

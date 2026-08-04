@@ -17,6 +17,7 @@ import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerPollenRoutes } from './routes/pollen';
+import { registerMapsRoutes } from './routes/maps';
 import { registerPlacesRoutes } from './routes/places';
 import { registerMarketRoutes } from './routes/market';
 import {
@@ -54,6 +55,7 @@ export async function createApp(
   registerGovernanceRoutes(app);
   registerAnalyticsRoutes(app);
   registerPollenRoutes(app);
+  registerMapsRoutes(app);
   registerPlacesRoutes(app);
 
   if (withReplitAuth) {

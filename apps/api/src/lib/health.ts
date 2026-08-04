@@ -26,6 +26,7 @@ export interface HealthCheckResult {
     ycSearch?: boolean;
     ycStt?: boolean;
     pollenHeatmap?: boolean;
+    yandexMapsInteractive?: boolean;
   };
   scan?: ScanHealthMetrics;
   database?: {
@@ -98,6 +99,9 @@ function buildFeatures() {
     pollenHeatmap:
       process.env.POLLEN_HEATMAP_ENABLED === 'true' &&
       Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
+    yandexMapsInteractive:
+      process.env.YANDEX_MAPS_INTERACTIVE_ENABLED === 'true' &&
+      Boolean(process.env.YANDEX_MAPS_JS_API_KEY?.trim()),
     ...(aiScan && provider ? { aiScanProvider: provider } : {}),
     ...(ycOcr ? { ycOcr: true } : {}),
     ...(ycScanIntentLlm ? { ycScanIntentLlm: true } : {}),

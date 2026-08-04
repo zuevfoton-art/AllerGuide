@@ -31,6 +31,9 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `POLLEN_HEATMAP_ENABLED` | Pollen proxy | `true` |
 | `GOOGLE_POLLEN_API_KEY` | Google Pollen API | **server only**; never EAS |
 | `POLLEN_RATE_LIMIT_*` | Rate limits | optional defaults |
+| `YANDEX_MAPS_INTERACTIVE_ENABLED` | In-app Yandex JS embed | `true` on staging |
+| `YANDEX_MAPS_JS_API_KEY` | Yandex Maps JS API | **server only**; never EAS / `EXPO_PUBLIC_*` |
+| `MAPS_RATE_LIMIT_*` | Embed HTML rate limits | optional defaults |
 
 Mount list for Serverless: [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys).  
 Upsert without wipe: `./scripts/yc-lockbox-upsert.sh KEY=VALUE`.
@@ -68,9 +71,9 @@ Do **not** put `GOOGLE_POLLEN_API_KEY` in GitHub unless a dedicated upsert workf
 | Name | Visibility | Value |
 |------|------------|--------|
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | **Sensitive** (not Secret) | Maps Android (or JS) restricted key |
-| Profile `staging` env | in `eas.json` | API URL = YC; no server pollen key |
+| Profile `staging` env | in `eas.json` | API URL = YC; `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true`; no server maps/pollen keys |
 
-Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `JWT_SECRET`, `DATABASE_URL`, YC AI keys.
+Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `YANDEX_MAPS_JS_API_KEY`, `JWT_SECRET`, `DATABASE_URL`, YC AI keys.
 
 ---
 

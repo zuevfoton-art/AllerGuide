@@ -63,6 +63,26 @@ export const GOOGLE_MAP_PRIMARY_ENABLED =
   process.env.EXPO_PUBLIC_GOOGLE_MAP_PRIMARY === 'true';
 
 /**
+ * Phase 2: Map tab uses Google Pollen forecast as the primary numeric/forecast feed.
+ * Wellness / Home stay on Open-Meteo. Requires API `/api/pollen/forecast`.
+ */
+export const MAP_POLLEN_GOOGLE_PRIMARY =
+  process.env.EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY === 'true';
+
+/**
+ * Phase 3a: near-real-time pollen plume animation overlay on the interactive map.
+ */
+export const MAP_POLLEN_PLUME_ENABLED =
+  process.env.EXPO_PUBLIC_MAP_POLLEN_PLUME === 'true';
+
+/**
+ * Phase 4: interactive Yandex basemap via API-hosted JS embed.
+ * Pollen numbers/plume stay on Google/OM; requires API YANDEX_MAPS_* + EXPO_PUBLIC_API_URL.
+ */
+export const YANDEX_MAP_INTERACTIVE_ENABLED =
+  process.env.EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE === 'true';
+
+/**
  * Fetch live restaurants / medical POIs via the API Places proxy.
  * Offline catalog + ADAIR remain the fallback when false or unreachable.
  */

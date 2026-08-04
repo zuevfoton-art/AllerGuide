@@ -21,6 +21,7 @@
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "false",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
         "EXPO_PUBLIC_POLLEN_HEATMAP": "off",
+        "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
         "NODE_OPTIONS": "--max-old-space-size=8192"
       },
@@ -47,6 +48,10 @@
         "EXPO_PUBLIC_YC_STT": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
         "EXPO_PUBLIC_POLLEN_HEATMAP": "google",
+        "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
+        "EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY": "true",
+        "EXPO_PUBLIC_MAP_POLLEN_PLUME": "true",
+        "EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE": "true",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "staging",
         "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
@@ -67,6 +72,10 @@
         "EXPO_PUBLIC_BACKEND_AUTH": "true",
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
+        "EXPO_PUBLIC_POLLEN_HEATMAP": "google",
+        "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
+        "EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY": "true",
+        "EXPO_PUBLIC_MAP_POLLEN_PLUME": "true",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "production"
       }

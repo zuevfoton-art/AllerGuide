@@ -1,6 +1,9 @@
 import {
+  buildForecastDaysFromGoogle,
   buildNearbyPollenSamplePoints,
   buildPollenPlantDetail,
+  buildReadingsFromGoogleForecastDay,
+  buildUpiByTaxonFromGoogleDay,
   buildYandexPollenUrl,
   parseOpenMeteoCurrentPollen,
   parseCurrentPollenMapReadings,
@@ -9,6 +12,8 @@ import {
   POLLEN_MAP_TAXON_IDS,
   POLLEN_OPEN_METEO_FORECAST_DAYS,
   readingToUpiSnapshot,
+  resolveGoogleUpiForTaxon,
+  type GoogleForecastDayInput,
   type NearbyPollenLocation,
   type NearbyPollenSamplePoint,
   type OpenMeteoCurrentPollen,
@@ -23,16 +28,20 @@ import type { ResolvedLocation } from '@/src/services/location-service';
 import { apiRequest, getApiBaseUrl } from '@/src/services/api-client';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 import { logCaughtError } from '@/src/services/error-reporting';
-import { GOOGLE_POLLEN_HEATMAP_ENABLED } from '@/src/constants/features';
+import { trackEvent } from '@/src/services/analytics-service';
+import {
+  GOOGLE_POLLEN_HEATMAP_ENABLED,
+  MAP_POLLEN_GOOGLE_PRIMARY,
+} from '@/src/constants/features';
 
-export type PollenMapSource = 'open-meteo' | 'cache' | 'calendar';
+export type PollenMapSource = 'google' | 'open-meteo' | 'cache' | 'calendar';
 
 export interface PollenMapSnapshot {
   source: PollenMapSource;
   readings: PollenMapReading[];
   nearbyLocations: NearbyPollenLocation[];
   forecastDays: PollenForecastDay[];
-  /** UPI per taxon for today (Google Forecast preferred, else Open-Meteo approx). */
+  /** UPI per taxon for today (Google Forecast preferred). */
   upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
   plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
   updatedAt: string | null;
@@ -57,10 +66,7 @@ interface OpenMeteoNearbyResponse {
   current?: OpenMeteoCurrentPollen;
 }
 
-interface GoogleForecastApiDay {
-  date: string;
-  typeIndexes?: Partial<Record<'TREE' | 'GRASS' | 'WEED', PollenUpiSnapshot>>;
-  plantIndexes?: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+interface GoogleForecastApiDay extends GoogleForecastDayInput {
   plants?: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
 }
 
@@ -81,28 +87,69 @@ export async function fetchPollenMapSnapshot(
   const profileAllergenIds = parseProfileAllergenIds(profileAllergiesJson);
   const cacheKey = buildCacheKey(location.lat, location.lon);
 
-  try {
-    const response = await fetch(buildOpenMeteoUrl(location));
-    if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
-
-    const payload = (await response.json()) as OpenMeteoPollenResponse;
-    const readings = parseCurrentPollenMapReadings(
-      payload.hourly ?? {},
-      payload.current?.time,
-      profileAllergenIds,
-    );
-    if (readings.length === 0) throw new Error('Open-Meteo returned no pollen data');
-
-    const forecastDays = parseDailyPollenForecast(payload.hourly ?? {}, profileAllergenIds);
-    const nearbyLocations = await fetchNearbyPollenLocations(
+  if (MAP_POLLEN_GOOGLE_PRIMARY) {
+    const googleSnapshot = await tryFetchGooglePrimarySnapshot(
       location,
       profileAllergenIds,
+      cacheKey,
+      yandexPollenUrl,
     );
-    const google = await fetchGoogleForecastEnrichment(location.lat, location.lon);
-    const upiByTaxon = buildUpiByTaxon(readings, google?.days?.[0]);
-    const plants = buildPlantsMap(readings, google?.plants);
+    if (googleSnapshot) {
+      trackEvent('map_pollen_refreshed', { source: 'google', nearby: googleSnapshot.nearbyLocations.length });
+      return googleSnapshot;
+    }
+    trackEvent('map_pollen_fallback', { from: 'google', reason: 'google_unavailable' });
+    // Emergency fallback: Open-Meteo only when Google primary fails.
+  }
 
+  try {
+    const openMeteoSnapshot = await fetchOpenMeteoSnapshot(
+      location,
+      profileAllergenIds,
+      cacheKey,
+      yandexPollenUrl,
+    );
+    trackEvent('map_pollen_refreshed', {
+      source: 'open-meteo',
+      nearby: openMeteoSnapshot.nearbyLocations.length,
+      google_primary: MAP_POLLEN_GOOGLE_PRIMARY,
+    });
+    return openMeteoSnapshot;
+  } catch (error) {
+    logCaughtError('fetchPollenMapSnapshot', error, { level: 'warn' });
+  }
+
+  const fallback = readCachedOrCalendar(cacheKey, profileAllergenIds, yandexPollenUrl);
+  trackEvent('map_pollen_fallback', {
+    from: MAP_POLLEN_GOOGLE_PRIMARY ? 'google' : 'open-meteo',
+    to: fallback.source,
+    reason: fallback.source === 'cache' ? 'network_cache' : 'calendar',
+  });
+  trackEvent('map_pollen_refreshed', { source: fallback.source, nearby: fallback.nearbyLocations.length });
+  return fallback;
+}
+
+async function tryFetchGooglePrimarySnapshot(
+  location: ResolvedLocation,
+  profileAllergenIds: string[],
+  cacheKey: string,
+  yandexPollenUrl: string,
+): Promise<PollenMapSnapshot | null> {
+  try {
+    const google = await fetchGoogleForecast(location.lat, location.lon);
+    if (!google?.days?.length) return null;
+
+    const today = google.days[0]!;
+    const readings = buildReadingsFromGoogleForecastDay(today, profileAllergenIds);
+    if (readings.length === 0) return null;
+
+    const forecastDays = buildForecastDaysFromGoogle(google.days, profileAllergenIds);
+    const upiByTaxon = buildUpiByTaxonFromGoogleDay(today);
+    const plants = buildPlantsMap(readings, google.plants);
+    // Secondary: Open-Meteo ring samples for “safe nearby” (not Google × N lookups).
+    const nearbyLocations = await fetchNearbyPollenLocations(location, profileAllergenIds);
     const updatedAt = new Date().toISOString();
+
     writeCache(cacheKey, {
       readings,
       nearbyLocations,
@@ -111,8 +158,9 @@ export async function fetchPollenMapSnapshot(
       plants,
       updatedAt,
     });
+
     return {
-      source: 'open-meteo',
+      source: 'google',
       readings,
       nearbyLocations,
       forecastDays,
@@ -122,9 +170,60 @@ export async function fetchPollenMapSnapshot(
       yandexPollenUrl,
     };
   } catch (error) {
-    logCaughtError('fetchPollenMapSnapshot', error, { level: 'warn' });
+    logCaughtError('tryFetchGooglePrimarySnapshot', error, { level: 'warn' });
+    return null;
   }
+}
 
+async function fetchOpenMeteoSnapshot(
+  location: ResolvedLocation,
+  profileAllergenIds: string[],
+  cacheKey: string,
+  yandexPollenUrl: string,
+): Promise<PollenMapSnapshot> {
+  const response = await fetch(buildOpenMeteoUrl(location));
+  if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
+
+  const payload = (await response.json()) as OpenMeteoPollenResponse;
+  const readings = parseCurrentPollenMapReadings(
+    payload.hourly ?? {},
+    payload.current?.time,
+    profileAllergenIds,
+  );
+  if (readings.length === 0) throw new Error('Open-Meteo returned no pollen data');
+
+  const forecastDays = parseDailyPollenForecast(payload.hourly ?? {}, profileAllergenIds);
+  const nearbyLocations = await fetchNearbyPollenLocations(location, profileAllergenIds);
+  const google = await fetchGoogleForecast(location.lat, location.lon);
+  const upiByTaxon = buildUpiByTaxon(readings, google?.days?.[0]);
+  const plants = buildPlantsMap(readings, google?.plants);
+
+  const updatedAt = new Date().toISOString();
+  writeCache(cacheKey, {
+    readings,
+    nearbyLocations,
+    forecastDays,
+    upiByTaxon,
+    plants,
+    updatedAt,
+  });
+  return {
+    source: 'open-meteo',
+    readings,
+    nearbyLocations,
+    forecastDays,
+    upiByTaxon,
+    plants,
+    updatedAt,
+    yandexPollenUrl,
+  };
+}
+
+function readCachedOrCalendar(
+  cacheKey: string,
+  profileAllergenIds: string[],
+  yandexPollenUrl: string,
+): PollenMapSnapshot {
   const cached = readCache(cacheKey);
   if (cached) {
     return {
@@ -207,11 +306,18 @@ function buildNearbyOpenMeteoUrl(points: NearbyPollenSamplePoint[]): string {
   );
 }
 
-async function fetchGoogleForecastEnrichment(
+function isGoogleForecastClientEnabled(): boolean {
+  return (
+    (MAP_POLLEN_GOOGLE_PRIMARY || GOOGLE_POLLEN_HEATMAP_ENABLED) &&
+    Boolean(getApiBaseUrl().trim())
+  );
+}
+
+async function fetchGoogleForecast(
   latitude: number,
   longitude: number,
 ): Promise<GoogleForecastApiResult | null> {
-  if (!GOOGLE_POLLEN_HEATMAP_ENABLED || !getApiBaseUrl().trim()) return null;
+  if (!isGoogleForecastClientEnabled()) return null;
 
   const response = await apiRequest<{ ok?: boolean; forecast?: GoogleForecastApiResult }>(
     `/api/pollen/forecast?lat=${latitude}&lon=${longitude}`,
@@ -227,25 +333,8 @@ function buildUpiByTaxon(
   const result: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>> = {};
 
   for (const reading of readings) {
-    const plantUpi = googleToday?.plantIndexes?.[reading.taxonId];
-    if (plantUpi) {
-      result[reading.taxonId] = plantUpi;
-      continue;
-    }
-
-    const typeKey =
-      reading.taxonId === 'grass_pollen'
-        ? 'GRASS'
-        : reading.taxonId === 'ragweed_pollen' || reading.taxonId === 'mugwort_pollen'
-          ? 'WEED'
-          : 'TREE';
-    const typeUpi = googleToday?.typeIndexes?.[typeKey];
-    if (typeUpi) {
-      result[reading.taxonId] = typeUpi;
-      continue;
-    }
-
-    result[reading.taxonId] = readingToUpiSnapshot(reading);
+    const googleUpi = resolveGoogleUpiForTaxon(reading.taxonId, googleToday);
+    result[reading.taxonId] = googleUpi ?? readingToUpiSnapshot(reading);
   }
 
   return result;
