@@ -43,7 +43,7 @@ Drop when upstream lands both.
 
 ### 1.0.13 — `prebuild --clean`
 
-Built with `expo prebuild --clean` and **did not launch**. Mitigation: **stop using `prebuild --clean`** for Gradle staging APKs; assemble from committed `apps/mobile/android/` and inject Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`. Entry file uses `expo/scripts/resolveAppEntry` → `expo-router/entry`.
+Built with `expo prebuild --clean` and **did not launch**. Mitigation: **stop using `prebuild --clean`** for Gradle staging APKs; assemble from committed `apps/mobile/android/` and inject Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`.
 
 ### 1.0.14 — `@expo/dom-webview` SDK mismatch (confirmed via logcat)
 
