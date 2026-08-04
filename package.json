@@ -46,7 +46,8 @@
       "postcss": "8.5.10",
       "tar": "7.5.16",
       "@babel/core": "7.29.7",
-      "drizzle-orm": "0.45.2"
+      "drizzle-orm": "0.45.2",
+      "@expo/dom-webview": "55.0.6"
     },
     "patchedDependencies": {
       "expo-modules-core@55.0.25": "patches/expo-modules-core@55.0.25.patch"

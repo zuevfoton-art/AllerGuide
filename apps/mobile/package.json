@@ -37,6 +37,7 @@
     "@allerguide/ui": "workspace:*",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/source-serif-4": "^0.4.1",
+    "@expo/dom-webview": "55.0.6",
     "@expo/metro-runtime": "^55.0.12",
     "@expo/vector-icons": "^15.1.1",
     "@sentry/react-native": "^7.11.0",

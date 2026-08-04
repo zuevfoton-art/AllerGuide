@@ -39,13 +39,27 @@ Drop when upstream lands both.
 - iOS `AppDelegate`: `@main` + `internal import Expo`; drop `bindReactNativeFactory`
 - Podfile: drop Legacy Arch env toggles; optional Hermes v1 flag
 
-## Acceptance residual / launch crash (1.0.13)
+## Acceptance residual / launch crash
 
-`android-staging-1.0.13-sdk55-*` (built with `expo prebuild --clean`) **did not launch** on device.
+### 1.0.13 — `prebuild --clean`
 
-Mitigation in CI: **stop using `prebuild --clean`** for Gradle staging APKs; assemble from committed `apps/mobile/android/` (monorepo `root`/`bundleConfig`/`ExpoReactHostFactory`) and inject Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`. Entry file uses `expo/scripts/resolveAppEntry` → `expo-router/entry`.
+Built with `expo prebuild --clean` and **did not launch**. Mitigation: **stop using `prebuild --clean`** for Gradle staging APKs; assemble from committed `apps/mobile/android/` and inject Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`. Entry file uses `expo/scripts/resolveAppEntry` → `expo-router/entry`.
 
-If a rebuilt APK still aborts: capture `adb logcat *:E` around cold start (likely New Arch / native module). Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch, known launchable).
+### 1.0.14 — `@expo/dom-webview` SDK mismatch (confirmed via logcat)
+
+Cold start still crashed:
+
+```
+java.lang.NoClassDefFoundError: Failed resolution of: Lexpo/modules/kotlin/types/AnyTypeCache;
+  at expo.modules.webview.DomWebViewModule.definition(...)
+Caused by: java.lang.ClassNotFoundException: expo.modules.kotlin.types.AnyTypeCache
+```
+
+Cause: optional peer `@expo/dom-webview: *` on `expo@55` resolved to **56.0.5**, which expects `AnyTypeCache` from `expo-modules-core` 56+. SDK 55 ships `expo-modules-core@55.0.25` without that class.
+
+Fix: pin `@expo/dom-webview` to **55.0.6** (direct dep in `apps/mobile` + root `pnpm.overrides`).
+
+Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch) until a post-fix SDK 55 APK passes smoke.
 
 ## Staging APK launch investigation (Gradle CI)
 
