@@ -340,6 +340,11 @@ const fr: LocaleMessages = {
     sourceManual: 'saisie manuelle',
     sourceOcr: 'OCR',
     sourceLlm: 'analyse IA',
+    sourceDishVision: 'photo du plat (estimation IA)',
+    trustLineDishVision:
+      'Estimation à partir de la photo uniquement — pas une analyse de laboratoire. Vérifiez les vrais ingrédients quand c’est possible.',
+    dishVisionDisclaimer:
+      'La reconnaissance du plat sur photo est une estimation IA du nom et des ingrédients typiques. Sauces, substitutions et contamination croisée peuvent manquer. Cela ne remplace ni l’étiquette ni une demande en cuisine, et n’exclut pas une réaction individuelle.',
     safeList: 'Produits sûrs',
     saveToSafe: '✓ Enregistrer comme sûr',
     savedToSafe: '✓ Enregistré',

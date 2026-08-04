@@ -82,7 +82,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 
 | Фича | Экраны | Services | Domain / API |
 |------|--------|----------|--------------|
-| **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, dish/photo | `@allerguide/ai` (scan, intent, search); API `scan.ts`, `scan-intent.ts`, `ocr.ts`, `search-ingredients.ts` |
+| **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context | core `diary*` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |

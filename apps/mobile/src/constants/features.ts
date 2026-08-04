@@ -8,6 +8,13 @@ export const CLOUD_SYNC_ENABLED = process.env.EXPO_PUBLIC_CLOUD_SYNC === 'true';
 export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true';
 
 /**
+ * Option D: multimodal dish photo → name + likely ingredients via
+ * POST /api/scan/dish-vision. Used when OCR finds little/no text (plate-only photo).
+ * Requires AI_DISH_VISION_ENABLED + AI_SCAN_ENABLED on the API.
+ */
+export const AI_DISH_VISION_ENABLED = process.env.EXPO_PUBLIC_AI_DISH_VISION === 'true';
+
+/**
  * Cloud Vision OCR via API (/api/ocr → Yandex Vision). Offline demo OCR remains
  * when false or when the API is unreachable.
  */
