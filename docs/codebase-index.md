@@ -199,6 +199,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `profiles.ts` | Profile CRUD (JWT) |
 | `sync.ts` | Encrypted backup (`SYNC_ENABLED`) |
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
+| `scan-dish-vision.ts` | Multimodal dish photo (`AI_DISH_VISION_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
 | `ocr.ts` | Yandex Vision OCR (`YC_OCR_ENABLED`) |
 | `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
@@ -273,6 +274,7 @@ Barrel: `index.ts`. Pure TS.
 | `BACKEND_AUTH` | `features.ts` | `JWT_SECRET` + `DATABASE_URL` |
 | `CLOUD_SYNC` | `features.ts` | `SYNC_ENABLED` |
 | `AI_SCAN_ENABLED` | `features.ts` | `AI_SCAN_ENABLED` + LLM keys |
+| `AI_DISH_VISION_ENABLED` | `features.ts` (`EXPO_PUBLIC_AI_DISH_VISION`) | `AI_DISH_VISION_ENABLED` + VL model |
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |
