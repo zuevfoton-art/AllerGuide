@@ -71,6 +71,10 @@ Fix: restore monorepo entry `apps/mobile/index.js` (`require.context('./app', �
 
 Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch) until a post-fix SDK 55 APK passes smoke.
 
+### 1.0.16+ — scanner camera frame at bottom
+
+After launch worked, barcode camera UI sat low (absolute tab bar + overlay `space-between` with no shutter). Fix: fullscreen `Modal`, centered viewfinder, safe-area chrome (`apps/mobile/app/(tabs)/scanner.tsx`).
+
 ## Staging APK launch investigation (Gradle CI)
 
 Context: tag `android-staging-1.0.13-sdk55-*` builds via [`.github/workflows/staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) (`npx expo prebuild --platform android --clean` → `assembleRelease`) and does not launch on device. Last known-good Gradle staging APK was `android-staging-1.0.11-*` (**old architecture**, `newArchEnabled=false`). Phase B New Arch APK (`1.0.12-newarch`) was cancelled before device smoke.
