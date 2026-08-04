@@ -217,9 +217,10 @@ export function ImageCropEditor({
       </View>
 
       <View style={styles.stage} onLayout={onStageLayout}>
-        <View style={styles.stageClip} pointerEvents="none">
+        <View style={styles.stageClip}>
           {layout ? (
             <Image
+              pointerEvents="none"
               source={{ uri: photo.uri }}
               style={{
                 position: 'absolute',
@@ -233,6 +234,7 @@ export function ImageCropEditor({
             />
           ) : (
             <Image
+              pointerEvents="none"
               source={{ uri: photo.uri }}
               style={StyleSheet.absoluteFillObject}
               resizeMode="contain"
@@ -242,8 +244,12 @@ export function ImageCropEditor({
 
           {crop && layout ? (
             <>
-              <View style={[styles.dim, { top: 0, left: 0, right: 0, height: crop.y }]} />
               <View
+                pointerEvents="none"
+                style={[styles.dim, { top: 0, left: 0, right: 0, height: crop.y }]}
+              />
+              <View
+                pointerEvents="none"
                 style={[
                   styles.dim,
                   {
@@ -255,6 +261,7 @@ export function ImageCropEditor({
                 ]}
               />
               <View
+                pointerEvents="none"
                 style={[
                   styles.dim,
                   {
@@ -266,6 +273,7 @@ export function ImageCropEditor({
                 ]}
               />
               <View
+                pointerEvents="none"
                 style={[
                   styles.dim,
                   {
