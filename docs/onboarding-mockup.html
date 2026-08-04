@@ -127,32 +127,34 @@
     .showcase-arrow.right { right: 0; }
 
     .showcase {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 24px;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 20px;
       align-items: end;
+      max-width: 100%;
+      padding: 4px 4px 12px;
+      scrollbar-width: thin;
     }
 
+    .showcase::-webkit-scrollbar { height: 6px; }
+    .showcase::-webkit-scrollbar-thumb { background: var(--accent-mid); border-radius: 999px; }
+    .showcase-item { flex: 0 0 min(100%, 280px); scroll-snap-align: center; }
+
     .showcase.scenario-grid {
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       max-width: 720px;
       margin-top: 8px;
+      overflow: visible;
+      padding-bottom: 0;
     }
+    .showcase.scenario-grid .showcase-item { flex: unset; }
 
     @media (max-width: 1024px) {
       .showcase-stage { padding: 0; }
       .showcase-arrow { display: grid; }
-      .showcase {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 16px;
-        max-width: 100%;
-        padding-bottom: 8px;
-        scrollbar-width: none;
-      }
-      .showcase::-webkit-scrollbar { display: none; }
-      .showcase-item { flex: 0 0 min(100%, 320px); scroll-snap-align: center; }
+      .showcase-item { flex: 0 0 min(100%, 320px); }
       .showcase.scenario-grid { display: grid; overflow: visible; }
     }
 
@@ -481,7 +483,8 @@
         <span class="pill"><strong>Accent</strong> #2A9D8F</span>
         <span class="pill"><strong>Card radius</strong> 28px</span>
         <span class="pill"><strong>Slides</strong> 5 + сценарий</span>
-        <span class="pill"><strong>Art</strong> PNG reference illustrations</span>
+        <span class="pill"><strong>Art</strong> profile · scanner · care · map · sos</span>
+        <span class="pill"><strong>Policy</strong> <a href="brand-claro-green.md">Claro Green</a></span>
       </div>
     </header>
 
@@ -507,7 +510,7 @@
             <p class="slide-desc">Аллергены, симптомы и экстренные контакты — всё в одном защищённом месте.</p>
             <div class="chrome">
               <div class="chrome-row">
-                <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+                <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
                 <button class="btn-circle" aria-label="Далее">→</button>
               </div>
               <p class="skip">Пропустить</p>
@@ -532,7 +535,7 @@
             <p class="slide-desc">Проверяйте продукты, меню и косметику по вашему профилю за секунды.</p>
             <div class="chrome">
               <div class="chrome-row">
-                <div class="dots"><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+                <div class="dots"><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
                 <button class="btn-circle" aria-label="Далее">→</button>
               </div>
               <p class="skip">Пропустить</p>
@@ -556,7 +559,57 @@
             <h3 class="slide-title">Защита каждый день</h3>
             <p class="slide-desc">Дневник, оповещения о пылении и отчёты для врача — уверенный контроль аллергии.</p>
             <div class="chrome">
-              <div class="dots dots-center"><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
+              <div class="chrome-row">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+                <button class="btn-circle" aria-label="Далее">→</button>
+              </div>
+              <p class="skip">Пропустить</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4 · Map -->
+      <div class="showcase-item">
+        <span class="showcase-label">4 · Карта</span>
+        <div class="phone">
+          <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
+            <path d="M-20 120 C80 40, 180 200, 320 90 S520 30, 420 180 S120 260, -20 200 Z" fill="#e6f6f4" opacity="0.55"/>
+            <circle cx="88%" cy="14%" r="48" fill="#2a9d8f" opacity="0.1"/>
+          </svg>
+          <div class="phone-inner">
+            <div class="illus">
+              <img class="illus-img" src="./assets/onboarding/map.webp" alt="" width="260" height="200" loading="lazy" />
+            </div>
+            <h3 class="slide-title">Карта и среда</h3>
+            <p class="slide-desc">Безопасные места, календарь пыления и клиники рядом с вами.</p>
+            <div class="chrome">
+              <div class="chrome-row">
+                <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span><span class="dot"></span></div>
+                <button class="btn-circle" aria-label="Далее">→</button>
+              </div>
+              <p class="skip">Пропустить</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5 · SOS -->
+      <div class="showcase-item">
+        <span class="showcase-label">5 · SOS</span>
+        <div class="phone">
+          <svg class="phone-waves" viewBox="0 0 320 700" preserveAspectRatio="xMidYMid slice">
+            <path d="M-40 280 C120 180, 220 340, 380 250 S620 180, 500 320 S200 420, -40 360 Z" fill="#2a9d8f" opacity="0.12"/>
+            <circle cx="10%" cy="80%" r="40" fill="#e6f6f4" opacity="0.5"/>
+          </svg>
+          <div class="phone-inner">
+            <div class="illus">
+              <img class="illus-img" src="./assets/onboarding/sos.webp" alt="" width="260" height="200" loading="lazy" />
+            </div>
+            <h3 class="slide-title">Экстренный SOS</h3>
+            <p class="slide-desc">Аллергопаспорт, план действий и контакты экстренной помощи.</p>
+            <div class="chrome">
+              <div class="dots dots-center"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot active"></span></div>
               <button class="btn-pill">Начать настройку</button>
               <p class="disclaimer">Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.</p>
             </div>
@@ -569,7 +622,7 @@
     <h2 class="section-title">Выбор сценария <span>после intro</span></h2>
     <div class="showcase scenario-grid">
       <div class="showcase-item" style="grid-column:1/-1;max-width:390px;margin:0 auto;width:100%">
-        <span class="showcase-label">4 · Сценарий</span>
+        <span class="showcase-label">6 · Сценарий</span>
         <div class="phone wide">
           <svg class="phone-waves" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice">
             <path d="M-20 120 C80 40, 180 200, 390 90 S580 30, 480 180 S150 260, -20 200 Z" fill="#e6f6f4" opacity="0.55"/>
