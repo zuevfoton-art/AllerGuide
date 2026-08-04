@@ -59,4 +59,12 @@
 | Flag | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` + server `YANDEX_MAPS_INTERACTIVE_ENABLED` |
 | Выбор basemap | `map.tsx`: Yandex interactive → Google → static Yandex widget |
 
-**Включить на stage:** Lockbox `YANDEX_MAPS_JS_API_KEY` + `YANDEX_MAPS_INTERACTIVE_ENABLED=true`, EAS `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true`, `EXPO_PUBLIC_API_URL` на YC.
+**Включить на stage:**
+
+```bash
+export YANDEX_MAPS_JS_API_KEY=…   # developer.tech.yandex.ru — JS API
+pnpm yc-stage-enable-yandex-maps  # Lockbox upsert + container remount
+# then rebuild EAS staging (eas.json already has EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true)
+```
+
+Smoke: `curl https://api.staging.aclearo.com/api/maps/yandex-status` → `interactive: true`; health `features.yandexMapsInteractive: true`.

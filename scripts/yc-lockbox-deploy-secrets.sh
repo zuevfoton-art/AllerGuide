@@ -93,6 +93,20 @@ if [[ "${REQUIRE_POLLEN:-}" == "1" ]]; then
   fi
 fi
 
+if [[ "${REQUIRE_YANDEX_MAPS:-}" == "1" ]]; then
+  for required in YANDEX_MAPS_INTERACTIVE_ENABLED YANDEX_MAPS_JS_API_KEY; do
+    if ! printf '%s\n' "$AVAILABLE" | grep -qx "$required"; then
+      echo "ERROR: REQUIRE_YANDEX_MAPS=1 but Lockbox missing $required" >&2
+      exit 1
+    fi
+  done
+  yandex_flag="$(yc lockbox payload get --id "$LOCKBOX_ID" --format json | python3 -c 'import json,sys; e={x["key"]:x.get("text_value","") for x in json.load(sys.stdin).get("entries") or []}; print(e.get("YANDEX_MAPS_INTERACTIVE_ENABLED",""))')"
+  if [[ "$yandex_flag" != "true" ]]; then
+    echo "ERROR: YANDEX_MAPS_INTERACTIVE_ENABLED must be true (got: $yandex_flag)" >&2
+    exit 1
+  fi
+fi
+
 echo "Deploying $IMAGE → container $YC_CONTAINER_ID (mounted $MOUNTED Lockbox keys, version $VERSION_ID, sa $RUNTIME_SA_ID, network $NETWORK_ID)"
 yc serverless container revision deploy "${DEPLOY_ARGS[@]}"
 echo "Deploy requested."

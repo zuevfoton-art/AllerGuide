@@ -191,7 +191,7 @@ flowchart LR
 
 | Шаг | Зачем |
 |-----|--------|
-| Включить Яндекс interactive на stage (Lockbox `YANDEX_MAPS_JS_API_KEY` + EAS flag) | RU-premium after key provisioning |
+| Включить Яндекс interactive на stage (Lockbox `YANDEX_MAPS_JS_API_KEY` + EAS flag) | **In progress** — EAS staging flag on; Lockbox via `pnpm yc-stage-enable-yandex-maps` (needs JS API key) |
 | Native MapKit (вариант B) если WebView UX недостаточен | Perf / gestures |
 | Hourly Google Pollen (если API даст) вместо OM secondary для plume | Единый провайдер |
 
@@ -203,7 +203,7 @@ flowchart LR
 | `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` | — | `true` |
 | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | `true` | `true` |
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `off` | `google` |
-| `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` | — | off until JS key in Lockbox |
+| `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` | — | **staging `true`** (prod off until QA) |
 
 ### Код (ориентиры)
 
