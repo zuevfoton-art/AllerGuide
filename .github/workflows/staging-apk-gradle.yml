@@ -155,16 +155,10 @@ jobs:
             echo "See docs/gcp-pollen-maps-keys.md §3.1 / §5 and docs/android-stage-build.md §C."
           fi
 
-      - name: Prebuild Android (inject Google Maps key via app.config.js)
-        working-directory: apps/mobile
-        # --clean regenerates android/ from expo-template-bare-minimum@sdk-55.
-        # MainApplication/MainActivity match that template (ExpoReactHostFactory);
-        # custom monorepo metro wiring is re-applied by plugins/withAndroidMonorepoGradle.
-        # Google Maps meta-data is injected by Expo's react-native-maps plugin when
-        # EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is set (literal key, not ${GOOGLE_MAPS_API_KEY}).
-        run: npx expo prebuild --platform android --clean --no-install
-
-      - name: Verify native host after prebuild
+      # Prefer committed apps/mobile/android (monorepo Gradle + ExpoReactHostFactory).
+      # `prebuild --clean` wiped that wiring and produced a non-launching SDK 55 APK
+      # (1.0.13). Maps key is injected via manifestPlaceholders + EXPO_PUBLIC_GOOGLE_MAPS_API_KEY.
+      - name: Verify committed native host
         working-directory: apps/mobile
         run: |
           set -euo pipefail
@@ -173,22 +167,17 @@ jobs:
           GRADLE="android/app/build.gradle"
           grep -q 'ExpoReactHostFactory.getDefaultReactHost' "$MAIN_APP"
           grep -q 'bundleConfig = file("${projectRoot}/metro.config.js")' "$GRADLE"
-          if [ -n "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}" ]; then
-            grep -q 'com.google.android.geo.API_KEY' "$MANIFEST"
-            if grep -q '\${GOOGLE_MAPS_API_KEY}' "$MANIFEST"; then
-              echo "::error::Manifest still uses unresolved \${GOOGLE_MAPS_API_KEY} placeholder after prebuild"
-              exit 1
-            fi
-          fi
-          echo "Native host OK (ExpoReactHostFactory + metro bundleConfig; maps key present=$( [[ -n "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY:-}" ]] && echo yes || echo no ))"
+          grep -q 'com.google.android.geo.API_KEY' "$MANIFEST"
+          grep -q 'GOOGLE_MAPS_API_KEY' "$GRADLE"
+          echo "Native host OK (committed android/; maps key via Gradle manifestPlaceholders)"
 
       - name: Assemble release APK
         working-directory: apps/mobile/android
         env:
           # Required so Expo/Metro embed EXPO_PUBLIC_* as production release values.
           NODE_ENV: production
-        # Job/workflow EXPO_PUBLIC_* + resolved Maps key (GITHUB_ENV) must be present
-        # when Metro bundles JS during assembleRelease.
+        # Job/workflow EXPO_PUBLIC_* + Maps key from prior step (GITHUB_ENV) must be
+        # present for Metro embed + android/app/build.gradle manifestPlaceholders.
         run: ./gradlew assembleRelease --no-daemon
 
       - name: Stage APK

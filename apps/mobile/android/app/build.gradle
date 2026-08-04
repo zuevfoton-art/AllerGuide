@@ -10,8 +10,11 @@ def workspaceRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().ge
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
+    // Monorepo: workspace root so Metro can resolve @allerguide/* packages.
     root = file(workspaceRoot)
-    entryFile = file("${workspaceRoot}/apps/mobile/index.js")
+    // Official Expo Router entry (SDK 55). Do not force apps/mobile/index.js —
+    // that custom bootstrap diverges from expo-router/entry-classic.
+    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
     reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
     hermesCommand = new File(["node", "--print", "require.resolve('hermes-compiler/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/hermesc/%OS-BIN%/hermesc"
     codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()

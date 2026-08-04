@@ -39,9 +39,13 @@ Drop when upstream lands both.
 - iOS `AppDelegate`: `@main` + `internal import Expo`; drop `bindReactNativeFactory`
 - Podfile: drop Legacy Arch env toggles; optional Hermes v1 flag
 
-## Acceptance residual
+## Acceptance residual / launch crash (1.0.13)
 
-Cloud Agent has no Android SDK — device smoke (cold start, diary+voice, scanner, map, SOS, sqlite) must run on EAS staging APK after merge.
+`android-staging-1.0.13-sdk55-*` (built with `expo prebuild --clean`) **did not launch** on device.
+
+Mitigation in CI: **stop using `prebuild --clean`** for Gradle staging APKs; assemble from committed `apps/mobile/android/` (monorepo `root`/`bundleConfig`/`ExpoReactHostFactory`) and inject Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`. Entry file uses `expo/scripts/resolveAppEntry` → `expo-router/entry`.
+
+If a rebuilt APK still aborts: capture `adb logcat *:E` around cold start (likely New Arch / native module). Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch, known launchable).
 
 ## Staging APK launch investigation (Gradle CI)
 
@@ -89,12 +93,13 @@ Context: tag `android-staging-1.0.13-sdk55-*` builds via [`.github/workflows/sta
 adb logcat -c && adb shell am start -n com.aclearo.app/.MainActivity && adb logcat *:E
 ```
 
-**B. Workflow / prebuild hardening (landed on this branch)**
+**B. Workflow hardening (updated after 1.0.13 no-launch)**
 
-- Keep `prebuild --clean` (correct SDK 55 template).
-- Re-apply monorepo `bundleConfig → metro.config.js` via `apps/mobile/plugins/withAndroidMonorepoGradle.js`.
-- CI verify step asserts `ExpoReactHostFactory` + `bundleConfig` + literal Maps meta-data.
-- Set `NODE_ENV=production` for `assembleRelease`.
+- **Do not** run `expo prebuild --clean` for Gradle staging APKs — it wiped monorepo `android/` wiring and produced a non-launching 1.0.13 build.
+- Assemble from committed `apps/mobile/android/` (`ExpoReactHostFactory`, monorepo `root`/`bundleConfig`).
+- Entry via `expo/scripts/resolveAppEntry` → `expo-router/entry` (not custom `index.js`).
+- Maps key via `manifestPlaceholders` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` from CI.
+- `NODE_ENV=production` for `assembleRelease`.
 
 **C. If logcat shows a native abort in a specific package** — smallest bisect:
 
