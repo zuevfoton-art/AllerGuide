@@ -4,11 +4,14 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import type { ImageCropRect } from '@/src/services/scanner-photo-geometry';
 
 export type {
+  DisplayCropBox,
+  DisplayCropDragKind,
   DisplayLayout,
   ImageCropRect,
 } from '@/src/services/scanner-photo-geometry';
 
 export {
+  applyDisplayCropDrag,
   computeContainLayout,
   initialCropInDisplay,
   mapDisplayCropToImagePixels,

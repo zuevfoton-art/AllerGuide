@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Image,
   PanResponder,
-  type PanResponderGestureState,
   Pressable,
   StyleSheet,
   Text,
@@ -13,23 +12,25 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import {
+  applyDisplayCropDrag,
   computeContainLayout,
   cropImageToBase64,
   initialCropInDisplay,
   mapDisplayCropToImagePixels,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
+  type DisplayCropBox,
+  type DisplayCropDragKind,
   type DisplayLayout,
 } from '@/src/services/scanner-photo-service';
 
 const HANDLE_SIZE = 28;
 const MIN_CROP_DISPLAY = 64;
 
-type CropBox = { x: number; y: number; width: number; height: number };
-
-type DragMode =
-  | { kind: 'move'; start: CropBox }
-  | { kind: 'corner'; corner: 'tl' | 'tr' | 'bl' | 'br'; start: CropBox };
+type DragMode = {
+  kind: DisplayCropDragKind;
+  start: DisplayCropBox;
+};
 
 type ImageCropEditorProps = {
   photo: CapturedScanPhoto;
@@ -63,7 +64,7 @@ export function ImageCropEditor({
     width: photo.width || 0,
     height: photo.height || 0,
   });
-  const [crop, setCrop] = useState<CropBox | null>(null);
+  const [crop, setCrop] = useState<DisplayCropBox | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
 
@@ -73,7 +74,7 @@ export function ImageCropEditor({
     offsetX: 0,
     offsetY: 0,
   });
-  const cropRef = useRef<CropBox | null>(null);
+  const cropRef = useRef<DisplayCropBox | null>(null);
   const dragRef = useRef<DragMode | null>(null);
 
   const layout = useMemo(() => {
@@ -118,91 +119,44 @@ export function ImageCropEditor({
     setImageSize({ width, height });
   };
 
-  const clampCrop = (box: CropBox, bounds: DisplayLayout): CropBox => {
-    const minX = bounds.offsetX;
-    const minY = bounds.offsetY;
-    const maxX = bounds.offsetX + bounds.displayWidth;
-    const maxY = bounds.offsetY + bounds.displayHeight;
-
-    let { x, y, width, height } = box;
-    width = Math.max(MIN_CROP_DISPLAY, Math.min(width, bounds.displayWidth));
-    height = Math.max(MIN_CROP_DISPLAY, Math.min(height, bounds.displayHeight));
-    x = Math.min(Math.max(x, minX), maxX - width);
-    y = Math.min(Math.max(y, minY), maxY - height);
-    return { x, y, width, height };
-  };
-
-  const applyDrag = (gesture: PanResponderGestureState) => {
+  const applyDrag = (dx: number, dy: number) => {
     const mode = dragRef.current;
     const bounds = layoutRef.current;
     if (!mode || bounds.displayWidth <= 0) return;
 
-    let next: CropBox = { ...mode.start };
-    if (mode.kind === 'move') {
-      next = {
-        ...mode.start,
-        x: mode.start.x + gesture.dx,
-        y: mode.start.y + gesture.dy,
-      };
-    } else {
-      const { corner, start } = mode;
-      const right = start.x + start.width;
-      const bottom = start.y + start.height;
-      if (corner === 'tl') {
-        next = {
-          x: start.x + gesture.dx,
-          y: start.y + gesture.dy,
-          width: right - (start.x + gesture.dx),
-          height: bottom - (start.y + gesture.dy),
-        };
-      } else if (corner === 'tr') {
-        next = {
-          x: start.x,
-          y: start.y + gesture.dy,
-          width: start.width + gesture.dx,
-          height: bottom - (start.y + gesture.dy),
-        };
-      } else if (corner === 'bl') {
-        next = {
-          x: start.x + gesture.dx,
-          y: start.y,
-          width: right - (start.x + gesture.dx),
-          height: start.height + gesture.dy,
-        };
-      } else {
-        next = {
-          x: start.x,
-          y: start.y,
-          width: start.width + gesture.dx,
-          height: start.height + gesture.dy,
-        };
-      }
-    }
+    const next = applyDisplayCropDrag({
+      start: mode.start,
+      kind: mode.kind,
+      dx,
+      dy,
+      bounds,
+      minSize: MIN_CROP_DISPLAY,
+    });
+    cropRef.current = next;
+    setCrop(next);
+  };
 
-    const clamped = clampCrop(next, bounds);
-    cropRef.current = clamped;
-    setCrop(clamped);
+  const beginDrag = (kind: DisplayCropDragKind) => {
+    if (!cropRef.current) return;
+    dragRef.current = { kind, start: cropRef.current };
+  };
+
+  const endDrag = () => {
+    dragRef.current = null;
   };
 
   const moveResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => {
-          if (!cropRef.current) return;
-          dragRef.current = { kind: 'move', start: cropRef.current };
-        },
-        onPanResponderMove: (_evt, gesture) => applyDrag(gesture),
-        onPanResponderRelease: () => {
-          dragRef.current = null;
-        },
-        onPanResponderTerminate: () => {
-          dragRef.current = null;
-        },
+        // Do not capture on touch start — corner handles are siblings and need the gesture.
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_evt, gesture) =>
+          Math.abs(gesture.dx) > 2 || Math.abs(gesture.dy) > 2,
+        onPanResponderGrant: () => beginDrag('move'),
+        onPanResponderMove: (_evt, gesture) => applyDrag(gesture.dx, gesture.dy),
+        onPanResponderRelease: endDrag,
+        onPanResponderTerminate: endDrag,
       }),
-    // applyDrag reads refs only
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -210,17 +164,11 @@ export function ImageCropEditor({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        if (!cropRef.current) return;
-        dragRef.current = { kind: 'corner', corner, start: cropRef.current };
-      },
-      onPanResponderMove: (_evt, gesture) => applyDrag(gesture),
-      onPanResponderRelease: () => {
-        dragRef.current = null;
-      },
-      onPanResponderTerminate: () => {
-        dragRef.current = null;
-      },
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: () => beginDrag(corner),
+      onPanResponderMove: (_evt, gesture) => applyDrag(gesture.dx, gesture.dy),
+      onPanResponderRelease: endDrag,
+      onPanResponderTerminate: endDrag,
     });
 
   const cornerResponders = useMemo(
@@ -230,7 +178,6 @@ export function ImageCropEditor({
       bl: makeCornerResponder('bl'),
       br: makeCornerResponder('br'),
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
@@ -257,6 +204,8 @@ export function ImageCropEditor({
     }
   };
 
+  const handleHalf = HANDLE_SIZE / 2;
+
   return (
     <View style={styles.root} testID="scanner-crop-editor">
       <View style={styles.topBar}>
@@ -268,71 +217,71 @@ export function ImageCropEditor({
       </View>
 
       <View style={styles.stage} onLayout={onStageLayout}>
-        {layout ? (
-          <Image
-            source={{ uri: photo.uri }}
-            style={{
-              position: 'absolute',
-              left: layout.offsetX,
-              top: layout.offsetY,
-              width: layout.displayWidth,
-              height: layout.displayHeight,
-            }}
-            resizeMode="stretch"
-            onLoad={onImageLoad}
-          />
-        ) : (
-          <Image
-            source={{ uri: photo.uri }}
-            style={StyleSheet.absoluteFillObject}
-            resizeMode="contain"
-            onLoad={onImageLoad}
-          />
-        )}
+        <View style={styles.stageClip} pointerEvents="none">
+          {layout ? (
+            <Image
+              source={{ uri: photo.uri }}
+              style={{
+                position: 'absolute',
+                left: layout.offsetX,
+                top: layout.offsetY,
+                width: layout.displayWidth,
+                height: layout.displayHeight,
+              }}
+              resizeMode="stretch"
+              onLoad={onImageLoad}
+            />
+          ) : (
+            <Image
+              source={{ uri: photo.uri }}
+              style={StyleSheet.absoluteFillObject}
+              resizeMode="contain"
+              onLoad={onImageLoad}
+            />
+          )}
+
+          {crop && layout ? (
+            <>
+              <View style={[styles.dim, { top: 0, left: 0, right: 0, height: crop.y }]} />
+              <View
+                style={[
+                  styles.dim,
+                  {
+                    top: crop.y + crop.height,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.dim,
+                  {
+                    top: crop.y,
+                    left: 0,
+                    width: crop.x,
+                    height: crop.height,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.dim,
+                  {
+                    top: crop.y,
+                    left: crop.x + crop.width,
+                    right: 0,
+                    height: crop.height,
+                  },
+                ]}
+              />
+            </>
+          ) : null}
+        </View>
 
         {crop && layout ? (
           <>
-            <View
-              pointerEvents="none"
-              style={[styles.dim, { top: 0, left: 0, right: 0, height: crop.y }]}
-            />
-            <View
-              pointerEvents="none"
-              style={[
-                styles.dim,
-                {
-                  top: crop.y + crop.height,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                },
-              ]}
-            />
-            <View
-              pointerEvents="none"
-              style={[
-                styles.dim,
-                {
-                  top: crop.y,
-                  left: 0,
-                  width: crop.x,
-                  height: crop.height,
-                },
-              ]}
-            />
-            <View
-              pointerEvents="none"
-              style={[
-                styles.dim,
-                {
-                  top: crop.y,
-                  left: crop.x + crop.width,
-                  right: 0,
-                  height: crop.height,
-                },
-              ]}
-            />
-
             <View
               style={[
                 styles.cropBox,
@@ -343,12 +292,42 @@ export function ImageCropEditor({
                   height: crop.height,
                 },
               ]}
-              {...moveResponder.panHandlers}>
-              <View style={[styles.handle, styles.handleTL]} {...cornerResponders.tl.panHandlers} />
-              <View style={[styles.handle, styles.handleTR]} {...cornerResponders.tr.panHandlers} />
-              <View style={[styles.handle, styles.handleBL]} {...cornerResponders.bl.panHandlers} />
-              <View style={[styles.handle, styles.handleBR]} {...cornerResponders.br.panHandlers} />
-            </View>
+              {...moveResponder.panHandlers}
+            />
+
+            {/* Corner handles are siblings so move PanResponder cannot steal resize gestures. */}
+            <View
+              testID="crop-handle-tl"
+              style={[styles.handle, { left: crop.x - handleHalf, top: crop.y - handleHalf }]}
+              {...cornerResponders.tl.panHandlers}
+            />
+            <View
+              testID="crop-handle-tr"
+              style={[
+                styles.handle,
+                { left: crop.x + crop.width - handleHalf, top: crop.y - handleHalf },
+              ]}
+              {...cornerResponders.tr.panHandlers}
+            />
+            <View
+              testID="crop-handle-bl"
+              style={[
+                styles.handle,
+                { left: crop.x - handleHalf, top: crop.y + crop.height - handleHalf },
+              ]}
+              {...cornerResponders.bl.panHandlers}
+            />
+            <View
+              testID="crop-handle-br"
+              style={[
+                styles.handle,
+                {
+                  left: crop.x + crop.width - handleHalf,
+                  top: crop.y + crop.height - handleHalf,
+                },
+              ]}
+              {...cornerResponders.br.panHandlers}
+            />
           </>
         ) : null}
       </View>
@@ -413,8 +392,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
       marginHorizontal: 12,
       borderRadius: 8,
-      overflow: 'hidden',
       backgroundColor: '#000',
+      // Keep overflow visible so corner handles remain touchable near edges.
+      overflow: 'visible',
+    },
+    stageClip: {
+      ...StyleSheet.absoluteFillObject,
+      borderRadius: 8,
+      overflow: 'hidden',
     },
     dim: {
       position: 'absolute',
@@ -425,6 +410,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 2,
       borderColor: colors.accent,
       backgroundColor: 'transparent',
+      zIndex: 1,
     },
     handle: {
       position: 'absolute',
@@ -434,11 +420,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accent,
       borderWidth: 2,
       borderColor: colors.onAccent,
+      zIndex: 2,
     },
-    handleTL: { top: -HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2 },
-    handleTR: { top: -HANDLE_SIZE / 2, right: -HANDLE_SIZE / 2 },
-    handleBL: { bottom: -HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2 },
-    handleBR: { bottom: -HANDLE_SIZE / 2, right: -HANDLE_SIZE / 2 },
     hint: {
       color: 'rgba(255,255,255,0.85)',
       fontSize: 13,
