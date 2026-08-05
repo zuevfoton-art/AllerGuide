@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — Press Kit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="gtm-styles.css" />
+  <style>
+    body { padding: 32px 20px 64px; }
+    .wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 28px; }
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 40px 32px;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: 36px;
+      margin: 16px 0 8px;
+    }
+    .hero .lead { font-size: 16px; opacity: 0.9; max-width: 560px; line-height: 1.6; }
+    .hero .meta { margin-top: 20px; font-size: 13px; opacity: 0.75; }
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 1px 3px rgba(15,23,42,.06);
+    }
+    section > h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    section h3 { font-size: 16px; color: var(--head); margin: 16px 0 8px; }
+    section p, section li { font-size: 14px; color: #475569; line-height: 1.6; }
+    section ul { padding-left: 20px; margin: 8px 0; }
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .fact {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .fact .num {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .fact .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .boilerplate {
+      background: var(--bg);
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #334155;
+    }
+    .boilerplate em { font-style: normal; color: var(--head); font-weight: 600; }
+    .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+    }
+    .asset {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .asset img { margin-bottom: 8px; }
+    .asset span { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .palette { display: flex; gap: 12px; flex-wrap: wrap; }
+    .swatch { text-align: center; font-size: 10px; color: var(--muted); }
+    .swatch div {
+      width: 64px; height: 48px; border-radius: 6px;
+      border: 1px solid var(--border); margin-bottom: 6px;
+    }
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .do, .dont {
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .do { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .dont { background: #fef2f2; border: 1px solid #fecaca; }
+    .do h4 { color: var(--success); margin-bottom: 8px; }
+    .dont h4 { color: var(--danger); margin-bottom: 8px; }
+    .do li, .dont li { margin-bottom: 4px; color: #334155; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .contact-card {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .contact-card strong { display: block; color: var(--head); margin-bottom: 4px; }
+    .contact-card span { font-size: 13px; color: var(--muted); }
+    .tabs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .tabs-row span {
+      background: #eff6ff;
+      color: var(--head);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    @media print {
+      body { padding: 0; }
+      section { break-inside: avoid; box-shadow: none; }
+      .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="wordmark">
+        <img src="../brand/logo-mark.svg" width="48" height="48" alt="" style="border-radius:8px" />
+        <div class="wordmark-text" style="font-size:28px;">
+          <span class="aller" style="color:#fff">Aller</span><span class="guide" style="color:#93c5fd">Guide</span>
+        </div>
+      </div>
+      <h1>Press Kit</h1>
+      <p class="lead">
+        Мобильный помощник для людей с аллергией и их родителей.
+        Стиль бренда — <strong>Clinical Calm</strong>: клиническая надёжность без тревожности.
+      </p>
+      <p class="meta">App v1.0.4 · Август 2026 · allerguide.app · Для СМИ и партнёров</p>
+    </header>
+
+    <section>
+      <h2>Ключевые факты (текущее приложение)</h2>
+      <div class="facts">
+        <div class="fact"><div class="num">6</div><div class="label">вкладок: Главная, Дневник, Сканер, Маркет, Карта, SOS</div></div>
+        <div class="fact"><div class="num">6</div><div class="label">языков интерфейса (RU по умолчанию)</div></div>
+        <div class="fact"><div class="num">10</div><div class="label">типов аллергических состояний в профиле</div></div>
+        <div class="fact"><div class="num">10</div><div class="label">типов записей дневника + клинические шкалы</div></div>
+        <div class="fact"><div class="num">4</div><div class="label">режима сканера: продукт, меню, лекарство, косметика</div></div>
+        <div class="fact"><div class="num">0</div><div class="label">обязательный интернет для core flows</div></div>
+      </div>
+      <div class="tabs-row">
+        <span>Главная</span><span>Дневник</span><span>Сканер</span><span>Маркет</span><span>Карта</span><span>SOS</span>
+        <span style="background:#fef2f2;color:#b91c1c;">+ Эксперт АДАИР</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Boilerplate (копировать в публикации)</h2>
+      <div class="boilerplate">
+        <p><em>AllerGuide</em> — мобильное приложение-помощник для людей с аллергией и их родителей.
+        Продукт объединяет умный сканер состава, структурированный дневник наблюдений с клиническими шкалами,
+        персональный индекс самочувствия (пыльца и воздух), карту мест и клиник АДАИР, подборку товаров
+        по профилю аллергий, аллергопаспорт SOS и PDF-отчёт для визита к врачу (включая коды ICD-11 / SNOMED).
+        Научный руководитель — д.м.н., проф. Юрий Соломонович Смолкин, Президент АДАИР.
+        AllerGuide работает offline-first: основные функции доступны без интернета.
+        Приложение не ставит диагноз и не заменяет консультацию врача.
+        Доступно на iOS и Android (также Web). Сайт: allerguide.app</p>
+      </div>
+      <h3>Короткая версия</h3>
+      <p>AllerGuide — помощник при аллергии: сканер, дневник, карта АДАИР, SOS-паспорт и отчёт для врача. Offline-first. allerguide.app</p>
+      <h3>Заголовок для пресс-релиза</h3>
+      <p style="font-family:var(--serif);font-size:18px;color:var(--head);">
+        AllerGuide: мобильный помощник аллергика с экспертизой АДАИР — от сканера до SOS-паспорта
+      </p>
+    </section>
+
+    <section>
+      <h2>О продукте</h2>
+      <h3>Проблема</h3>
+      <p>
+        Люди с аллергией ежедневно принимают решения о продуктах, местах и лекарствах без системной поддержки.
+        Бумажные дневники теряются; врачи получают субъективные описания вместо структурированной истории.
+        Родители детей с пищевой аллергией нуждаются в аллергопаспорте «здесь и сейчас».
+      </p>
+      <h3>Решение (что уже в приложении v1.0.4)</h3>
+      <ul>
+        <li><strong>Сканер</strong> — штрихкод (Open Food Facts) и состав; 4 режима; учёт перекрёстных реакций и следов</li>
+        <li><strong>Дневник</strong> — 10 типов записей + ACT / ARIA / SCORAD / UAS7</li>
+        <li><strong>Главная</strong> — wellness index на основе пыльцы, воздуха и дневника</li>
+        <li><strong>Карта</strong> — места, календарь пыления, клиники и врачи АДАИР</li>
+        <li><strong>Маркет</strong> — персональная подборка товаров по профилю (без checkout)</li>
+        <li><strong>SOS</strong> — аллергопаспорт с адреналином, степенями анафилаксии, share / PDF</li>
+        <li><strong>Отчёт врачу</strong> — PDF 7/14/30 дней, timeline, ICD/SNOMED</li>
+        <li><strong>Эксперт</strong> — справочные материалы АДАИР</li>
+      </ul>
+      <h3>Отличия от конкурентов</h3>
+      <ul>
+        <li>Специализация на аллергии (не generic food scanner)</li>
+        <li>Экспертный контент и клиники АДАИР в карте</li>
+        <li>Offline-first — данные на устройстве</li>
+        <li>Клиническая структура: ACT, ARIA, SCORAD, canonical allergen taxonomy</li>
+        <li>Полный SOS-паспорт и child profiles — фокус на семьях</li>
+      </ul>
+      <h3>Что ещё не заявлять как готовое</h3>
+      <ul>
+        <li>Полноценный OCR меню / этикеток (режим есть, распознавание — в развитии)</li>
+        <li>Marketplace с корзиной и оплатой (сейчас — каталог и партнёрские ссылки)</li>
+        <li>Облачный sync и AI-скан по умолчанию (за feature flags)</li>
+        <li>Телемедицина / онлайн-запись</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Руководство и эксперты</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 0;font-weight:600;color:var(--head);width:200px;">Юрий Соломонович Смолкин</td>
+          <td style="padding:12px 0;color:#475569;">д.м.н., проф. · Президент АДАИР · научный руководитель НККЦ · Главный медицинский эксперт AllerGuide</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 0;font-weight:600;color:var(--head);">АДАИР</td>
+          <td style="padding:12px 0;color:#475569;">Ассоциация врачей-аллергологов и клинических иммунологов · экспертный контент, клиники и врачи в карте приложения</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 0;font-weight:600;color:var(--head);">НККЦ</td>
+          <td style="padding:12px 0;color:#475569;">Национальный клинический консультативный центр — отмечен в каталоге клиник АДАИР (Москва)</td>
+        </tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Brand Kit — Clinical Calm</h2>
+      <p style="margin-bottom:16px;">
+        Концепция <strong>Shield Chart</strong>: щит (защита) + галочка чек-листа (наблюдения, отчёт).
+        Ассоциации: клиническая надёжность, персональный контроль, спокойствие.
+      </p>
+
+      <h3>Логотип и иконки вкладок</h3>
+      <div class="assets-grid">
+        <div class="asset">
+          <img src="../../apps/mobile/assets/icon.png" width="64" height="64" alt="" style="border-radius:14px" />
+          <span>App Icon</span>
+        </div>
+        <div class="asset">
+          <img src="../brand/logo-mark.svg" width="48" height="48" alt="" />
+          <span>Logomark</span>
+        </div>
+        <div class="asset">
+          <img src="../brand/logo-wordmark-light.svg" width="120" height="32" alt="" />
+          <span>Wordmark</span>
+        </div>
+        <div class="asset"><img src="../brand/icons/home.svg" width="28" height="28" alt="" /><span>Home</span></div>
+        <div class="asset"><img src="../brand/icons/diary.svg" width="28" height="28" alt="" /><span>Diary</span></div>
+        <div class="asset"><img src="../brand/icons/scanner.svg" width="28" height="28" alt="" /><span>Scanner</span></div>
+        <div class="asset"><img src="../brand/icons/market.svg" width="28" height="28" alt="" /><span>Market</span></div>
+        <div class="asset"><img src="../brand/icons/map.svg" width="28" height="28" alt="" /><span>Map</span></div>
+        <div class="asset"><img src="../brand/icons/sos.svg" width="28" height="28" alt="" style="filter:invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" /><span>SOS</span></div>
+        <div class="asset"><img src="../brand/icons/expert.svg" width="28" height="28" alt="" /><span>Expert</span></div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;">
+        Исходники: <code>docs/brand/</code> · Полный preview: <code>docs/brand/brand-preview.html</code>
+      </p>
+
+      <h3>Цветовая палитра</h3>
+      <div class="palette">
+        <div class="swatch"><div style="background:#F4F6F9"></div>#F4F6F9<br />bg</div>
+        <div class="swatch"><div style="background:#FFFFFF"></div>#FFFFFF<br />card</div>
+        <div class="swatch"><div style="background:#1E3A5F"></div>#1E3A5F<br />head</div>
+        <div class="swatch"><div style="background:#2563EB"></div>#2563EB<br />accent</div>
+        <div class="swatch"><div style="background:#B91C1C"></div>#B91C1C<br />SOS</div>
+        <div class="swatch"><div style="background:#15803D"></div>#15803D<br />success</div>
+      </div>
+
+      <h3>Типографика</h3>
+      <p><strong>Source Serif 4</strong> — «Aller» в wordmark, заголовки · <strong>Inter</strong> — UI, body, «Guide»</p>
+
+      <h3>Do / Don't</h3>
+      <div class="do-dont">
+        <div class="do">
+          <h4>✓ Do</h4>
+          <ul>
+            <li>Использовать «Clinical Calm» — спокойный, точный тон</li>
+            <li>Указывать disclaimer: не заменяет врача</li>
+            <li>Упоминать АДАИР как партнёра по экспертизе</li>
+            <li>Показывать реальные экраны (все 6 вкладок)</li>
+            <li>Акцент на семьях и SOS-паспорте для детей</li>
+          </ul>
+        </div>
+        <div class="dont">
+          <h4>✗ Don't</h4>
+          <ul>
+            <li>Claims «лечит», «диагностирует», «100% безопасно»</li>
+            <li>Обещать полноценный OCR или магазин с оплатой</li>
+            <li>Искажать логотип (цвета, пропорции)</li>
+            <li>Стиль «страшилок» или медицинского запугивания</li>
+            <li>Imply endorsement врача без согласия</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Ключевые сообщения</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="background:var(--bg);">
+            <th style="padding:10px;text-align:left;border:1px solid var(--border);">Аудитория</th>
+            <th style="padding:10px;text-align:left;border:1px solid var(--border);">Headline</th>
+            <th style="padding:10px;text-align:left;border:1px solid var(--border);">Proof в продукте</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:10px;border:1px solid var(--border);">Родители</td>
+            <td style="padding:10px;border:1px solid var(--border);">«Спокойствие при каждом перекусе»</td>
+            <td style="padding:10px;border:1px solid var(--border);">Scanner + child profile + SOS-паспорт</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;border:1px solid var(--border);">Взрослые</td>
+            <td style="padding:10px;border:1px solid var(--border);">«Знайте, когда ждать обострение»</td>
+            <td style="padding:10px;border:1px solid var(--border);">Wellness index + карта пыления</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;border:1px solid var(--border);">Врачи</td>
+            <td style="padding:10px;border:1px solid var(--border);">«Структурированный отчёт вместо «ну, вроде хуже»»</td>
+            <td style="padding:10px;border:1px solid var(--border);">PDF с ICD/SNOMED + timeline</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;border:1px solid var(--border);">СМИ</td>
+            <td style="padding:10px;border:1px solid var(--border);">«Цифровой помощник с экспертизой АДАИР»</td>
+            <td style="padding:10px;border:1px solid var(--border);">проф. Смолкин + offline-first + 6 вкладок</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Контакты для прессы</h2>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <strong>Пресс-служба</strong>
+          <span>press@allerguide.app</span>
+        </div>
+        <div class="contact-card">
+          <strong>Партнёрства / ADAIR</strong>
+          <span>partners@allerguide.app</span>
+        </div>
+        <div class="contact-card">
+          <strong>Сайт</strong>
+          <span>allerguide.app</span>
+        </div>
+        <div class="contact-card">
+          <strong>GitHub (техн.)</strong>
+          <span>github.com/zuevfoton-art/AllerGuide</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Дополнительные материалы</h2>
+      <ul>
+        <li><a href="patient-one-pager.html">One-pager для пациента</a> — листовка A4</li>
+        <li><a href="doctor-brief.html">Бриф для врача</a> — PDF 3 стр.</li>
+        <li><a href="../brand/brand-preview.html">Brand Kit preview</a> — полный бренд-кит</li>
+        <li><a href="../functional-requirements.md">Функциональные требования</a> — спецификация продукта</li>
+        <li><a href="../roadmap-to-prod.md">Roadmap to Production</a> — план релиза</li>
+      </ul>
+      <p class="disclaimer" style="margin-top:20px;">
+        Скриншоты приложения для публикации — по запросу press@allerguide.app.
+        Перед публикацией материалов с упоминанием АДАИР необходимо co-marketing соглашение.
+        Материал синхронизирован с app v1.0.4 (6 вкладок, включая Карту и Маркет).
+      </p>
+    </section>
+  </div>
+</body>
+</html>
