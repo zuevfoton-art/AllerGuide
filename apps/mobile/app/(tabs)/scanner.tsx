@@ -15,6 +15,10 @@ import { useFocusEffect, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import {
+  resolveCameraChromePaddingBottom,
+  resolveCameraChromePaddingTop,
+} from '@/src/hooks/camera-chrome-metrics';
+import {
   computeScanTrends,
   formatDiaryDate,
   type RiskLevel,
@@ -500,11 +504,12 @@ export default function ScannerScreen() {
   }
 
   if (cameraOpen) {
-    // Fullscreen Modal covers the absolute tab bar. Overlay chrome is pinned to
-    // safe-area edges; viewfinder stays centered (barcode mode has no shutter,
-    // so space-between previously dumped the frame to the bottom).
-    const topPad = Math.max(insets.top, 12) + 8;
-    const bottomPad = Math.max(insets.bottom, 12) + 8;
+    // Fullscreen Modal covers the absolute tab bar. Overlay chrome is pinned
+    // above system bars (Android Modal often reports insets.bottom === 0 while
+    // still drawing under 3-button / gesture nav). Viewfinder stays centered
+    // (barcode mode has no shutter — space-between used to dump it to bottom).
+    const topPad = resolveCameraChromePaddingTop(insets.top);
+    const bottomPad = resolveCameraChromePaddingBottom(insets.bottom);
 
     return (
       <Modal
@@ -512,6 +517,7 @@ export default function ScannerScreen() {
         animationType="fade"
         presentationStyle="fullScreen"
         statusBarTranslucent
+        navigationBarTranslucent
         onRequestClose={closeCamera}>
         <View style={styles.cameraContainer} testID="scanner-camera">
           <CameraView
