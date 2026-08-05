@@ -1,89 +1,37 @@
 /**
  * Staging smoke for Option D dish vision (Yandex VL).
- * JWT → small PNG with image_url → expect 200 + result.dishName.
+ * JWT → food JPEG → expect 200 + result.dishName.
  *
  * Run: pnpm exec tsx scripts/staging-dish-vision-smoke.ts
  *      ./scripts/staging-dish-vision-smoke.sh
  *
  * Health aiDishVision=true only means flags/creds are mounted — this script is the readiness check.
  */
-import { deflateSync } from 'node:zlib';
 import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.aclearo.com').replace(/\/$/, '');
 const RAND = process.env.RAND ?? String(Date.now());
 const EMAIL = `staging-dish-vl-${RAND}@example.com`;
 const PASSWORD = 'SmokeTest1!';
 
-/** PNG CRC32 (ITU-T V.42). */
-function pngCrc32(data: Buffer): number {
-  let c = 0xffffffff;
-  for (let i = 0; i < data.length; i += 1) {
-    c ^= data[i]!;
-    for (let k = 0; k < 8; k += 1) {
-      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    }
-  }
-  return (c ^ 0xffffffff) >>> 0;
-}
+/** Real food JPEG fixture (abstract shapes are correctly rejected as non-food). */
+function loadSmokeImage(): { base64: string; mimeType: string } {
+  const candidates = [
+    process.env.DISH_VISION_SMOKE_IMAGE_PATH,
+    join(process.cwd(), 'scripts/fixtures/dish-vision-smoke.jpg'),
+    join(process.cwd(), 'fixtures/dish-vision-smoke.jpg'),
+  ].filter((p): p is string => Boolean(p));
 
-function chunk(type: string, data: Buffer): Buffer {
-  const typeBuf = Buffer.from(type, 'ascii');
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(data.length, 0);
-  const crcBuf = Buffer.alloc(4);
-  crcBuf.writeUInt32BE(pngCrc32(Buffer.concat([typeBuf, data])), 0);
-  return Buffer.concat([len, typeBuf, data, crcBuf]);
-}
-
-/** Synthetic 64×64 “plate” PNG so VL has something to look at. */
-function buildSmokePngBase64(): string {
-  const fromFile = process.env.DISH_VISION_SMOKE_PNG_PATH;
-  if (fromFile && existsSync(fromFile)) {
-    return readFileSync(fromFile).toString('base64');
+  for (const path of candidates) {
+    if (!existsSync(path)) continue;
+    const lower = path.toLowerCase();
+    const mimeType = lower.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    return { base64: readFileSync(path).toString('base64'), mimeType };
   }
-
-  const size = 64;
-  const rows: Buffer[] = [];
-  for (let y = 0; y < size; y += 1) {
-    const row = Buffer.alloc(1 + size * 3);
-    row[0] = 0;
-    for (let x = 0; x < size; x += 1) {
-      const dx = x - 32;
-      const dy = y - 32;
-      const r2 = dx * dx + dy * dy;
-      let r = 40;
-      let g = 120;
-      let b = 40;
-      if (r2 < 100) {
-        r = 200;
-        g = 40;
-        b = 40;
-      } else if (r2 < 700) {
-        r = 230;
-        g = 200;
-        b = 80;
-      }
-      const o = 1 + x * 3;
-      row[o] = r;
-      row[o + 1] = g;
-      row[o + 2] = b;
-    }
-    rows.push(row);
-  }
-  const raw = Buffer.concat(rows);
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 2;
-  const png = Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', deflateSync(raw, { level: 9 })),
-    chunk('IEND', Buffer.alloc(0)),
-  ]);
-  return png.toString('base64');
+  throw new Error(
+    'Missing smoke fixture scripts/fixtures/dish-vision-smoke.jpg (or set DISH_VISION_SMOKE_IMAGE_PATH)',
+  );
 }
 
 async function api<T>(
@@ -133,7 +81,7 @@ async function main() {
   if (!token) throw new Error('Register failed: no token');
   const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-  const imageBase64 = buildSmokePngBase64();
+  const image = loadSmokeImage();
   const vision = await api<{
     ok?: boolean;
     result?: { dishName?: string; ingredients?: string[] };
@@ -145,7 +93,7 @@ async function main() {
     {
       method: 'POST',
       headers: auth,
-      body: JSON.stringify({ imageBase64, mimeType: 'image/png' }),
+      body: JSON.stringify({ imageBase64: image.base64, mimeType: image.mimeType }),
     },
     { allowStatuses: [502, 503] },
   );
