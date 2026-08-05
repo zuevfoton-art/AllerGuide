@@ -72,6 +72,9 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Keep the absolute tab bar from competing with the software keyboard
+        // on diary / login-adjacent forms (Expo keyboard handling guide).
+        tabBarHideOnKeyboard: true,
         // Absolute tab bar disables React Navigation's default inset handling —
         // apply safe-area bottom padding ourselves (Android system nav overlap).
         tabBarStyle: {

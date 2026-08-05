@@ -2,6 +2,10 @@ package com.aclearo.app
 
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -17,6 +21,16 @@ class MainActivity : ReactActivity() {
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null)
+
+    // Android 15 / targetSdk 35+: edge-to-edge enforcement breaks
+    // windowSoftInputMode=adjustResize, so the IME covers TextInputs.
+    // Re-apply IME bottom inset on the activity content root.
+    val content = findViewById<View>(android.R.id.content)
+    ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
+      val imeBottom = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+      view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, imeBottom)
+      insets
+    }
   }
 
   /**

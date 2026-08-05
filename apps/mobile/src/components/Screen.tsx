@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
+import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
 
 type ScreenProps = {
   scroll?: boolean;
@@ -29,6 +30,12 @@ export function Screen({
 }: PropsWithChildren<ScreenProps>) {
   const { colors } = useTheme();
   const layout = useResponsiveLayout();
+  const keyboardInset = useKeyboardBottomInset();
+  // Android API 35+: `adjustResize` often no longer shrinks the window. Extra
+  // bottom content inset lets ScrollView bring focused fields (e.g. password)
+  // above the IME. iOS keeps using KeyboardAvoidingView padding instead.
+  const androidKeyboardPad = Platform.OS === 'android' ? keyboardInset : 0;
+  const scrollBottomPad = layout.bottomPadding + androidKeyboardPad;
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -46,7 +53,7 @@ export function Screen({
           flexGrow: 1,
           backgroundColor: colors.bg,
           paddingTop: pinnedTop ? 0 : layout.topPadding,
-          paddingBottom: layout.bottomPadding,
+          paddingBottom: scrollBottomPad,
           gap: 16,
         },
         content: {
@@ -64,21 +71,25 @@ export function Screen({
           backgroundColor: colors.bg,
           paddingHorizontal: layout.horizontalPadding,
           paddingTop: layout.topPadding,
-          paddingBottom: layout.bottomPadding,
+          paddingBottom: layout.bottomPadding + androidKeyboardPad,
         },
       }),
     [
+      androidKeyboardPad,
       colors.bg,
       layout.bottomPadding,
       layout.contentMaxWidth,
       layout.horizontalPadding,
       layout.topPadding,
       pinnedTop,
+      scrollBottomPad,
     ],
   );
 
   const body = <View style={styles.content}>{children}</View>;
 
+  // iOS: padding. Android: undefined — root IME insets (MainActivity) + scroll
+  // content pad above handle the software keyboard without double-offset.
   const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : undefined;
 
   if (scroll) {
@@ -91,6 +102,7 @@ export function Screen({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
           refreshControl={
             onRefresh ? (
               <RefreshControl
