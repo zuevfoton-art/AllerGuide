@@ -112,6 +112,20 @@
     }
     .contact-card strong { display: block; color: var(--head); margin-bottom: 4px; }
     .contact-card span { font-size: 13px; color: var(--muted); }
+    .tabs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .tabs-row span {
+      background: #eff6ff;
+      color: var(--head);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
     @media print {
       body { padding: 0; }
       section { break-inside: avoid; box-shadow: none; }
@@ -133,18 +147,22 @@
         Мобильный помощник для людей с аллергией и их родителей.
         Стиль бренда — <strong>Clinical Calm</strong>: клиническая надёжность без тревожности.
       </p>
-      <p class="meta">Версия 1.0 · Июль 2026 · allerguide.app · Для СМИ и партнёров</p>
+      <p class="meta">App v1.0.4 · Август 2026 · allerguide.app · Для СМИ и партнёров</p>
     </header>
 
     <section>
-      <h2>Ключевые факты</h2>
+      <h2>Ключевые факты (текущее приложение)</h2>
       <div class="facts">
-        <div class="fact"><div class="num">20+</div><div class="label">экранов в приложении</div></div>
-        <div class="fact"><div class="num">6</div><div class="label">языков интерфейса</div></div>
-        <div class="fact"><div class="num">10</div><div class="label">типов аллергических состояний</div></div>
-        <div class="fact"><div class="num">9</div><div class="label">типов записей дневника</div></div>
-        <div class="fact"><div class="num">3</div><div class="label">платформы: iOS, Android, Web</div></div>
+        <div class="fact"><div class="num">6</div><div class="label">вкладок: Главная, Дневник, Сканер, Маркет, Карта, SOS</div></div>
+        <div class="fact"><div class="num">6</div><div class="label">языков интерфейса (RU по умолчанию)</div></div>
+        <div class="fact"><div class="num">10</div><div class="label">типов аллергических состояний в профиле</div></div>
+        <div class="fact"><div class="num">10</div><div class="label">типов записей дневника + клинические шкалы</div></div>
+        <div class="fact"><div class="num">4</div><div class="label">режима сканера: продукт, меню, лекарство, косметика</div></div>
         <div class="fact"><div class="num">0</div><div class="label">обязательный интернет для core flows</div></div>
+      </div>
+      <div class="tabs-row">
+        <span>Главная</span><span>Дневник</span><span>Сканер</span><span>Маркет</span><span>Карта</span><span>SOS</span>
+        <span style="background:#fef2f2;color:#b91c1c;">+ Эксперт АДАИР</span>
       </div>
     </section>
 
@@ -152,18 +170,19 @@
       <h2>Boilerplate (копировать в публикации)</h2>
       <div class="boilerplate">
         <p><em>AllerGuide</em> — мобильное приложение-помощник для людей с аллергией и их родителей.
-        Продукт помогает вести персональный дневник наблюдений, проверять продукты и состав на совпадение
-        с профилем аллергий, формировать PDF-отчёты для визита к врачу и быстро показывать экстренную
-        медицинскую информацию. Приложение разработано при участии Ассоциации врачей-аллергологов и
-        клинических иммунологов (АДАИР); научный руководитель — д.м.н., проф. Юрий Соломонович Смолкин.
-        AllerGuide работает offline-first: основные функции доступны без интернета. Приложение не ставит
-        диагноз и не заменяет консультацию врача. Доступно на iOS и Android. Сайт: allerguide.app</p>
+        Продукт объединяет умный сканер состава, структурированный дневник наблюдений с клиническими шкалами,
+        персональный индекс самочувствия (пыльца и воздух), карту мест и клиник АДАИР, подборку товаров
+        по профилю аллергий, аллергопаспорт SOS и PDF-отчёт для визита к врачу (включая коды ICD-11 / SNOMED).
+        Научный руководитель — д.м.н., проф. Юрий Соломонович Смолкин, Президент АДАИР.
+        AllerGuide работает offline-first: основные функции доступны без интернета.
+        Приложение не ставит диагноз и не заменяет консультацию врача.
+        Доступно на iOS и Android (также Web). Сайт: allerguide.app</p>
       </div>
-      <h3>Короткая версия (140 символов для соцсетей)</h3>
-      <p>AllerGuide — умный помощник при аллергии: сканер, дневник, SOS и отчёт для врача. С экспертизой АДАИР. allerguide.app</p>
+      <h3>Короткая версия</h3>
+      <p>AllerGuide — помощник при аллергии: сканер, дневник, карта АДАИР, SOS-паспорт и отчёт для врача. Offline-first. allerguide.app</p>
       <h3>Заголовок для пресс-релиза</h3>
       <p style="font-family:var(--serif);font-size:18px;color:var(--head);">
-        AllerGuide запускает мобильный помощник для аллергиков с экспертизой АДАИР
+        AllerGuide: мобильный помощник аллергика с экспертизой АДАИР — от сканера до SOS-паспорта
       </p>
     </section>
 
@@ -171,23 +190,35 @@
       <h2>О продукте</h2>
       <h3>Проблема</h3>
       <p>
-        Миллионы людей с аллергией ежедневно принимают решения о продуктах, местах и лекарствах без
-        системной поддержки. Бумажные дневники теряются; врачи получают субъективные описания вместо
-        структурированной истории. Родители детей с пищевой аллергией живут в постоянной тревоге.
+        Люди с аллергией ежедневно принимают решения о продуктах, местах и лекарствах без системной поддержки.
+        Бумажные дневники теряются; врачи получают субъективные описания вместо структурированной истории.
+        Родители детей с пищевой аллергией нуждаются в аллергопаспорте «здесь и сейчас».
       </p>
-      <h3>Решение</h3>
-      <p>
-        AllerGuide объединяет в одном приложении: умный сканер (штрихкод + состав + перекрёстные реакции),
-        структурированный дневник с клиническими шкалами, персональный индекс самочувствия (пыльца, воздух, симптомы),
-        SOS-экран для экстренных ситуаций и PDF-отчёт с кодами ICD/SNOMED для аллерголога.
-      </p>
+      <h3>Решение (что уже в приложении v1.0.4)</h3>
+      <ul>
+        <li><strong>Сканер</strong> — штрихкод (Open Food Facts) и состав; 4 режима; учёт перекрёстных реакций и следов</li>
+        <li><strong>Дневник</strong> — 10 типов записей + ACT / ARIA / SCORAD / UAS7</li>
+        <li><strong>Главная</strong> — wellness index на основе пыльцы, воздуха и дневника</li>
+        <li><strong>Карта</strong> — места, календарь пыления, клиники и врачи АДАИР</li>
+        <li><strong>Маркет</strong> — персональная подборка товаров по профилю (без checkout)</li>
+        <li><strong>SOS</strong> — аллергопаспорт с адреналином, степенями анафилаксии, share / PDF</li>
+        <li><strong>Отчёт врачу</strong> — PDF 7/14/30 дней, timeline, ICD/SNOMED</li>
+        <li><strong>Эксперт</strong> — справочные материалы АДАИР</li>
+      </ul>
       <h3>Отличия от конкурентов</h3>
       <ul>
         <li>Специализация на аллергии (не generic food scanner)</li>
-        <li>Экспертный контент и клиники АДАИР</li>
+        <li>Экспертный контент и клиники АДАИР в карте</li>
         <li>Offline-first — данные на устройстве</li>
         <li>Клиническая структура: ACT, ARIA, SCORAD, canonical allergen taxonomy</li>
-        <li>SOS и child profiles — фокус на семьях</li>
+        <li>Полный SOS-паспорт и child profiles — фокус на семьях</li>
+      </ul>
+      <h3>Что ещё не заявлять как готовое</h3>
+      <ul>
+        <li>Полноценный OCR меню / этикеток (режим есть, распознавание — в развитии)</li>
+        <li>Marketplace с корзиной и оплатой (сейчас — каталог и партнёрские ссылки)</li>
+        <li>Облачный sync и AI-скан по умолчанию (за feature flags)</li>
+        <li>Телемедицина / онлайн-запись</li>
       </ul>
     </section>
 
@@ -196,11 +227,15 @@
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <tr style="border-bottom:1px solid var(--border);">
           <td style="padding:12px 0;font-weight:600;color:var(--head);width:200px;">Юрий Соломонович Смолкин</td>
-          <td style="padding:12px 0;color:#475569;">д.м.н., проф. · Президент АДАИР · Научный руководитель AllerGuide · Главный медицинский эксперт</td>
+          <td style="padding:12px 0;color:#475569;">д.м.н., проф. · Президент АДАИР · научный руководитель НККЦ · Главный медицинский эксперт AllerGuide</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:12px 0;font-weight:600;color:var(--head);">АДАИР</td>
+          <td style="padding:12px 0;color:#475569;">Ассоциация врачей-аллергологов и клинических иммунологов · экспертный контент, клиники и врачи в карте приложения</td>
         </tr>
         <tr>
-          <td style="padding:12px 0;font-weight:600;color:var(--head);">АДАИР</td>
-          <td style="padding:12px 0;color:#475569;">Ассоциация врачей-аллергологов и клинических иммунологов · партнёр по экспертному контенту и клинической карте</td>
+          <td style="padding:12px 0;font-weight:600;color:var(--head);">НККЦ</td>
+          <td style="padding:12px 0;color:#475569;">Национальный клинический консультативный центр — отмечен в каталоге клиник АДАИР (Москва)</td>
         </tr>
       </table>
     </section>
@@ -212,7 +247,7 @@
         Ассоциации: клиническая надёжность, персональный контроль, спокойствие.
       </p>
 
-      <h3>Логотип и иконки</h3>
+      <h3>Логотип и иконки вкладок</h3>
       <div class="assets-grid">
         <div class="asset">
           <img src="../../apps/mobile/assets/icon.png" width="64" height="64" alt="" style="border-radius:14px" />
@@ -229,10 +264,10 @@
         <div class="asset"><img src="../brand/icons/home.svg" width="28" height="28" alt="" /><span>Home</span></div>
         <div class="asset"><img src="../brand/icons/diary.svg" width="28" height="28" alt="" /><span>Diary</span></div>
         <div class="asset"><img src="../brand/icons/scanner.svg" width="28" height="28" alt="" /><span>Scanner</span></div>
+        <div class="asset"><img src="../brand/icons/market.svg" width="28" height="28" alt="" /><span>Market</span></div>
+        <div class="asset"><img src="../brand/icons/map.svg" width="28" height="28" alt="" /><span>Map</span></div>
         <div class="asset"><img src="../brand/icons/sos.svg" width="28" height="28" alt="" style="filter:invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" /><span>SOS</span></div>
         <div class="asset"><img src="../brand/icons/expert.svg" width="28" height="28" alt="" /><span>Expert</span></div>
-        <div class="asset"><img src="../brand/icons/map.svg" width="28" height="28" alt="" /><span>Map</span></div>
-        <div class="asset"><img src="../brand/icons/market.svg" width="28" height="28" alt="" /><span>Market</span></div>
       </div>
       <p style="font-size:12px;color:var(--muted);margin-top:12px;">
         Исходники: <code>docs/brand/</code> · Полный preview: <code>docs/brand/brand-preview.html</code>
@@ -259,18 +294,18 @@
             <li>Использовать «Clinical Calm» — спокойный, точный тон</li>
             <li>Указывать disclaimer: не заменяет врача</li>
             <li>Упоминать АДАИР как партнёра по экспертизе</li>
-            <li>Показывать реальные экраны приложения</li>
-            <li>Акцент на семьях и SOS для детей</li>
+            <li>Показывать реальные экраны (все 6 вкладок)</li>
+            <li>Акцент на семьях и SOS-паспорте для детей</li>
           </ul>
         </div>
         <div class="dont">
           <h4>✗ Don't</h4>
           <ul>
             <li>Claims «лечит», «диагностирует», «100% безопасно»</li>
+            <li>Обещать полноценный OCR или магазин с оплатой</li>
             <li>Искажать логотип (цвета, пропорции)</li>
             <li>Стиль «страшилок» или медицинского запугивания</li>
-            <li>Импly endorsement врача без согласия</li>
-            <li>Сравнение с лекарствами / замена терапии</li>
+            <li>Imply endorsement врача без согласия</li>
           </ul>
         </div>
       </div>
@@ -283,29 +318,29 @@
           <tr style="background:var(--bg);">
             <th style="padding:10px;text-align:left;border:1px solid var(--border);">Аудитория</th>
             <th style="padding:10px;text-align:left;border:1px solid var(--border);">Headline</th>
-            <th style="padding:10px;text-align:left;border:1px solid var(--border);">Proof</th>
+            <th style="padding:10px;text-align:left;border:1px solid var(--border);">Proof в продукте</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td style="padding:10px;border:1px solid var(--border);">Родители</td>
             <td style="padding:10px;border:1px solid var(--border);">«Спокойствие при каждом перекусе»</td>
-            <td style="padding:10px;border:1px solid var(--border);">Scanner + child profile + SOS</td>
+            <td style="padding:10px;border:1px solid var(--border);">Scanner + child profile + SOS-паспорт</td>
           </tr>
           <tr>
             <td style="padding:10px;border:1px solid var(--border);">Взрослые</td>
             <td style="padding:10px;border:1px solid var(--border);">«Знайте, когда ждать обострение»</td>
-            <td style="padding:10px;border:1px solid var(--border);">Wellness index + pollen calendar</td>
+            <td style="padding:10px;border:1px solid var(--border);">Wellness index + карта пыления</td>
           </tr>
           <tr>
             <td style="padding:10px;border:1px solid var(--border);">Врачи</td>
             <td style="padding:10px;border:1px solid var(--border);">«Структурированный отчёт вместо «ну, вроде хуже»»</td>
-            <td style="padding:10px;border:1px solid var(--border);">PDF с ICD/SNOMED</td>
+            <td style="padding:10px;border:1px solid var(--border);">PDF с ICD/SNOMED + timeline</td>
           </tr>
           <tr>
             <td style="padding:10px;border:1px solid var(--border);">СМИ</td>
             <td style="padding:10px;border:1px solid var(--border);">«Цифровой помощник с экспертизой АДАИР»</td>
-            <td style="padding:10px;border:1px solid var(--border);">prof. Смолкин + offline-first</td>
+            <td style="padding:10px;border:1px solid var(--border);">проф. Смолкин + offline-first + 6 вкладок</td>
           </tr>
         </tbody>
       </table>
@@ -345,6 +380,7 @@
       <p class="disclaimer" style="margin-top:20px;">
         Скриншоты приложения для публикации — по запросу press@allerguide.app.
         Перед публикацией материалов с упоминанием АДАИР необходимо co-marketing соглашение.
+        Материал синхронизирован с app v1.0.4 (6 вкладок, включая Карту и Маркет).
       </p>
     </section>
   </div>

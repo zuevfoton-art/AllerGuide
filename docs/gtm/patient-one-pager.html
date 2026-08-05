@@ -25,27 +25,33 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 16px;
-      margin-bottom: 18px;
-      padding-bottom: 14px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 2px solid var(--head);
     }
     .hero h1 {
       font-family: var(--serif);
-      font-size: 26px;
+      font-size: 24px;
       color: var(--head);
       line-height: 1.2;
       margin: 10px 0 6px;
     }
     .hero .tagline {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--accent);
       font-weight: 600;
     }
     .hero .lead {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--muted);
       margin-top: 8px;
       max-width: 420px;
+      line-height: 1.45;
+    }
+    .version {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
     }
     .cta-box {
       text-align: center;
@@ -57,7 +63,7 @@
     }
     .cta-box p { font-size: 11px; color: var(--muted); margin-top: 6px; }
     .cta-box strong { font-size: 12px; color: var(--head); display: block; }
-    section { margin-bottom: 16px; }
+    section { margin-bottom: 14px; }
     section h2 {
       font-size: 11px;
       text-transform: uppercase;
@@ -69,28 +75,28 @@
     .benefits {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      gap: 8px;
     }
     .benefit {
       background: var(--bg);
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px;
       text-align: center;
     }
-    .benefit img { margin-bottom: 6px; }
+    .benefit img { margin-bottom: 4px; }
     .benefit h3 { font-size: 12px; color: var(--head); margin-bottom: 4px; }
-    .benefit p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .benefit p { font-size: 10px; color: var(--muted); line-height: 1.35; }
     .for-whom {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .for-whom span {
       background: #eff6ff;
       color: var(--head);
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
     footer {
@@ -98,8 +104,8 @@
       justify-content: space-between;
       align-items: flex-end;
       gap: 16px;
-      margin-top: 14px;
-      padding-top: 12px;
+      margin-top: 12px;
+      padding-top: 10px;
       border-top: 1px solid var(--border);
     }
     footer .expert {
@@ -126,12 +132,13 @@
           <span class="badge badge-adair">АДАИР</span>
         </div>
         <h1>Ваш умный помощник в контроле аллергии</h1>
-        <p class="tagline">Сканируйте · Ведите дневник · Будьте готовы к экстренной ситуации</p>
+        <p class="tagline">Сканер · Дневник · Карта · Маркет · SOS</p>
         <p class="lead">
           AllerGuide помогает людям с аллергией и их родителям безопаснее выбирать продукты,
-          отслеживать симптомы и быстро показать врачу или медработнику нужную информацию.
-          Работает без интернета — данные хранятся на вашем устройстве.
+          вести наблюдения, ориентироваться в среде и быстро показать медработнику аллергопаспорт.
+          Основные функции работают без интернета — данные хранятся на вашем устройстве.
         </p>
+        <p class="version">iOS · Android · Web · v1.0.4</p>
       </div>
       <div class="cta-box">
         <div class="qr-placeholder">QR-код<br />App Store /<br />Google Play</div>
@@ -141,37 +148,37 @@
     </header>
 
     <section>
-      <h2>Что вы получаете</h2>
+      <h2>Что есть в приложении</h2>
       <div class="benefits">
         <div class="benefit">
-          <img src="../brand/icons/scanner.svg" width="28" height="28" alt="" />
+          <img src="../brand/icons/scanner.svg" width="26" height="26" alt="" />
           <h3>Сканер</h3>
-          <p>Проверка продуктов по штрихкоду и составу с учётом ваших аллергенов и перекрёстных реакций</p>
+          <p>Продукты, меню, лекарства и косметика — штрихкод или состав с учётом ваших аллергенов и перекрёстных реакций</p>
         </div>
         <div class="benefit">
-          <img src="../brand/icons/diary.svg" width="28" height="28" alt="" />
+          <img src="../brand/icons/diary.svg" width="26" height="26" alt="" />
           <h3>Дневник</h3>
-          <p>Симптомы, питание, лекарства, пикфлоуметрия, АСИТ — структурированные записи за секунды</p>
+          <p>Симптомы, питание, лекарства, ПСВ, АСИТ, кожа, укусы — плюс шкалы ACT / ARIA и PDF-отчёт для врача</p>
         </div>
         <div class="benefit">
-          <img src="../brand/icons/sos.svg" width="28" height="28" alt="" style="filter: invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" />
+          <img src="../brand/icons/sos.svg" width="26" height="26" alt="" style="filter: invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" />
           <h3>SOS</h3>
-          <p>Аллергопаспорт, план действий и экстренные контакты — покажите экран медработнику</p>
+          <p>Аллергопаспорт, адреналин, план действий, контакты и звонок 103 — можно показать и отправить PDF</p>
         </div>
         <div class="benefit">
-          <img src="../brand/icons/home.svg" width="28" height="28" alt="" />
-          <h3>Индекс дня</h3>
-          <p>Персональная сводка: пыльца, качество воздуха и записи дневника — что учитывать сегодня</p>
+          <img src="../brand/icons/home.svg" width="26" height="26" alt="" />
+          <h3>Главная</h3>
+          <p>Индекс дня: пыльца, качество воздуха и записи дневника — что учитывать сегодня</p>
         </div>
         <div class="benefit">
-          <img src="../brand/icons/expert.svg" width="28" height="28" alt="" />
-          <h3>Эксперт</h3>
-          <p>Материалы АДАИР: рекомендации, календарь пыления, справочник аллергенов</p>
+          <img src="../brand/icons/map.svg" width="26" height="26" alt="" />
+          <h3>Карта</h3>
+          <p>Безопасные места, календарь пыления и клиники АДАИР рядом с вами</p>
         </div>
         <div class="benefit">
-          <img src="../brand/icons/diary.svg" width="28" height="28" alt="" />
-          <h3>Отчёт врачу</h3>
-          <p>PDF за 7 / 14 / 30 дней — структурированная история для приёма у аллерголога</p>
+          <img src="../brand/icons/market.svg" width="26" height="26" alt="" />
+          <h3>Маркет</h3>
+          <p>Подборка товаров по вашему профилю аллергий — без конфликтующих аллергенов</p>
         </div>
       </div>
     </section>
@@ -183,7 +190,7 @@
           <span class="step-num">1</span>
           <div>
             <strong>Скачайте и создайте профиль</strong>
-            <p style="font-size:12px;color:var(--muted);">Укажите аллергены из каталога — для себя или ребёнка</p>
+            <p style="font-size:12px;color:var(--muted);">Для себя или ребёнка — выберите аллергены из каталога</p>
           </div>
         </div>
         <div class="step">
@@ -196,8 +203,8 @@
         <div class="step">
           <span class="step-num">3</span>
           <div>
-            <strong>Заполните SOS и добавьте контакты</strong>
-            <p style="font-size:12px;color:var(--muted);">Готовность к экстренной ситуации — особенно важно для детей</p>
+            <strong>Заполните SOS и экстренные контакты</strong>
+            <p style="font-size:12px;color:var(--muted);">Особенно важно для детей — аллергопаспорт всегда под рукой</p>
           </div>
         </div>
       </div>
@@ -211,13 +218,15 @@
         <span>Поллиноз и ринит</span>
         <span>Бронхиальная астма</span>
         <span>Пациенты на АСИТ</span>
+        <span>Инсектная аллергия</span>
       </div>
     </section>
 
     <footer>
       <div class="expert">
         <strong>Научный руководитель:</strong> д.м.н., проф. Юрий Соломонович Смолкин<br />
-        Президент АДАИР · Главный медицинский эксперт AllerGuide
+        Президент АДАИР · Главный медицинский эксперт AllerGuide<br />
+        <span style="font-size:10px;">Экспертные материалы АДАИР — в разделе «Эксперт» приложения</span>
       </div>
       <div class="disclaimer" style="max-width:280px;margin-top:0;">
         AllerGuide не ставит диагноз и не назначает лечение. Информация носит рекомендательный характер и не заменяет консультацию врача.
