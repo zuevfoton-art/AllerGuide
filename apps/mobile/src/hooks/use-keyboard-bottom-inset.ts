@@ -30,9 +30,3 @@ export function useKeyboardBottomInset(): number {
 
   return bottomInset;
 }
-
-/** KeyboardAvoidingView behavior that lifts chrome on both native platforms. */
-export function resolveKeyboardAvoidingBehavior(): 'padding' | undefined {
-  if (Platform.OS === 'web') return undefined;
-  return 'padding';
-}

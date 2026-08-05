@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -10,9 +9,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
 
 interface DiaryEditorModalProps {
   visible: boolean;
@@ -24,14 +23,8 @@ interface DiaryEditorModalProps {
 export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModalProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const keyboardInset = useKeyboardBottomInset();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  // Modal is a separate Android window — Activity IME padding does not apply.
-  // iOS: KeyboardAvoidingView padding. Android API 35+: KAV is unreliable, so
-  // lift the sheet with an explicit keyboard-height margin instead.
-  const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : undefined;
-  const sheetMarginBottom = Platform.OS === 'android' ? keyboardInset : 0;
 
   return (
     <Modal
@@ -41,50 +34,49 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.root}
-        behavior={keyboardBehavior}
-        keyboardVerticalOffset={0}>
-        <Pressable
-          style={styles.backdrop}
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.cancel')}
-        />
-        <View
-          style={[
-            styles.sheet,
-            {
-              paddingBottom: Math.max(insets.bottom, 16),
-              marginBottom: sheetMarginBottom,
-            },
-          ]}
-          accessibilityViewIsModal>
-          <View style={styles.grabberWrap}>
-            <View style={styles.grabber} />
-          </View>
-          <View style={styles.header}>
+      <ModalKeyboardAvoid style={styles.root}>
+        {({ liftStyle }) => (
+          <>
             <Pressable
-              style={styles.headerBtn}
+              style={styles.backdrop}
               onPress={onClose}
               accessibilityRole="button"
-              accessibilityLabel={t('common.cancel')}>
-              <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
-            </Pressable>
-            <Text style={styles.headerTitle}>{t('diary.title')}</Text>
-            <View style={styles.headerBtn} />
-          </View>
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-            bounces={false}>
-            {children}
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
+              accessibilityLabel={t('common.cancel')}
+            />
+            <View
+              style={[
+                styles.sheet,
+                { paddingBottom: Math.max(insets.bottom, 16) },
+                liftStyle,
+              ]}
+              accessibilityViewIsModal>
+              <View style={styles.grabberWrap}>
+                <View style={styles.grabber} />
+              </View>
+              <View style={styles.header}>
+                <Pressable
+                  style={styles.headerBtn}
+                  onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common.cancel')}>
+                  <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
+                </Pressable>
+                <Text style={styles.headerTitle}>{t('diary.title')}</Text>
+                <View style={styles.headerBtn} />
+              </View>
+              <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+                bounces={false}>
+                {children}
+              </ScrollView>
+            </View>
+          </>
+        )}
+      </ModalKeyboardAvoid>
     </Modal>
   );
 }

@@ -75,7 +75,7 @@ Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch) until a post-fix S
 
 After launch worked, barcode camera UI sat low (absolute tab bar + overlay `space-between` with no shutter). Fix: fullscreen `Modal`, centered viewfinder, safe-area chrome (`apps/mobile/app/(tabs)/scanner.tsx`). Follow-up: Android shutter/gallery sat under 3-button nav because Modal `statusBarTranslucent` draws edge-to-edge while `insets.bottom` stays 0 — use `navigationBarTranslucent` + `resolveCameraChromePaddingBottom` floor (48dp) in `camera-chrome-metrics.ts`.
 
-Keyboard: Android 15 / targetSdk 35 breaks `adjustResize` (IME covers diary editor + login password). Fix: `MainActivity` IME bottom inset (`withAndroidImeInsets` plugin), `Screen` Android scroll `paddingBottom` via `useKeyboardBottomInset`, diary `Modal` sheet `marginBottom` = keyboard height, `tabBarHideOnKeyboard`.
+Keyboard: Android 15 / targetSdk 35 breaks `adjustResize` (IME covers diary editor + login password). Fix: `MainActivity` IME bottom inset (`withAndroidImeInsets` plugin), `Screen` Android scroll `paddingBottom` via `useKeyboardBottomInset`, `ModalKeyboardAvoid` / `useModalKeyboardAvoidance` for Modal TextInputs (diary, recovery key, allergen catalog, ASIT/prescribed OCR sheets), `tabBarHideOnKeyboard`.
 
 ## Staging APK launch investigation (Gradle CI)
 
