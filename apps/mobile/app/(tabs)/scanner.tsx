@@ -8,9 +8,11 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import {
   computeScanTrends,
@@ -114,6 +116,7 @@ function historyToResult(item: ScanHistoryEntry): ScanResultExtended {
 export default function ScannerScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, content } = useTranslation();
   const localeContent = content();
@@ -497,94 +500,109 @@ export default function ScannerScreen() {
   }
 
   if (cameraOpen) {
+    // Fullscreen Modal covers the absolute tab bar. Overlay chrome is pinned to
+    // safe-area edges; viewfinder stays centered (barcode mode has no shutter,
+    // so space-between previously dumped the frame to the bottom).
+    const topPad = Math.max(insets.top, 12) + 8;
+    const bottomPad = Math.max(insets.bottom, 12) + 8;
+
     return (
-      <View style={styles.cameraContainer}>
-        <CameraView
-          ref={cameraRef}
-          style={StyleSheet.absoluteFillObject}
-          facing="back"
-          enableTorch={torchOn}
-          barcodeScannerSettings={
-            isBarcodeEntry
-              ? { barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }
-              : undefined
-          }
-          onBarcodeScanned={isBarcodeEntry ? handleBarcode : undefined}
-        />
+      <Modal
+        visible
+        animationType="fade"
+        presentationStyle="fullScreen"
+        statusBarTranslucent
+        onRequestClose={closeCamera}>
+        <View style={styles.cameraContainer} testID="scanner-camera">
+          <CameraView
+            ref={cameraRef}
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            enableTorch={torchOn}
+            barcodeScannerSettings={
+              isBarcodeEntry
+                ? { barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }
+                : undefined
+            }
+            onBarcodeScanned={isBarcodeEntry ? handleBarcode : undefined}
+          />
 
-        <View style={styles.cameraOverlay}>
-          <View style={styles.cameraTopBar}>
-            <Pressable
-              style={styles.closeBtn}
-              onPress={() => setTorchOn((v) => !v)}
-              accessibilityRole="button"
-              accessibilityLabel={t('scanner.flashToggle')}
-              accessibilityState={{ selected: torchOn }}>
-              <Ionicons
-                name={torchOn ? 'flash' : 'flash-outline'}
-                size={22}
-                color={theme.colors.onAccent}
-              />
-            </Pressable>
-            <Text style={styles.cameraTitle}>
-              {isBarcodeEntry ? t('scanner.cameraScanBarcode') : t('scanner.cameraScanSimple')}
-            </Text>
-            <Pressable
-              style={styles.closeBtn}
-              onPress={closeCamera}
-              accessibilityRole="button"
-              accessibilityLabel={t('common.cancel')}>
-              <Ionicons name="close" size={24} color={theme.colors.onAccent} />
-            </Pressable>
-          </View>
-
-          <View style={styles.viewfinderWrap}>
-            <View style={[styles.viewfinder, !isBarcodeEntry && styles.viewfinderPhoto]}>
-              <View style={[styles.corner, styles.cornerTL]} />
-              <View style={[styles.corner, styles.cornerTR]} />
-              <View style={[styles.corner, styles.cornerBL]} />
-              <View style={[styles.corner, styles.cornerBR]} />
-            </View>
-            <Text style={styles.viewfinderHint}>
-              {isBarcodeEntry
-                ? t('scanner.cameraBarcodeHint')
-                : mode === 'menu'
-                  ? t('scanner.cameraMenuHint')
-                  : mode === 'medicine'
-                    ? t('scanner.cameraMedicineHint')
-                    : mode === 'cosmetics'
-                      ? t('scanner.cameraHouseholdHint')
-                      : t('scanner.cameraScannerHint')}
-            </Text>
-          </View>
-
-          {supportsPhotoCapture ? (
-            <View style={styles.shutterRow}>
+          <View style={styles.cameraOverlay} pointerEvents="box-none">
+            <View style={[styles.cameraTopBar, { paddingTop: topPad }]}>
               <Pressable
-                style={styles.galleryBtn}
-                onPress={() => void pickMenuImage()}
+                style={styles.closeBtn}
+                onPress={() => setTorchOn((v) => !v)}
                 accessibilityRole="button"
-                accessibilityLabel={t('scanner.pickFromGallery')}>
-                <Ionicons name="images-outline" size={22} color={theme.colors.onAccent} />
+                accessibilityLabel={t('scanner.flashToggle')}
+                accessibilityState={{ selected: torchOn }}>
+                <Ionicons
+                  name={torchOn ? 'flash' : 'flash-outline'}
+                  size={22}
+                  color={theme.colors.onAccent}
+                />
               </Pressable>
+              <Text style={styles.cameraTitle}>
+                {isBarcodeEntry ? t('scanner.cameraScanBarcode') : t('scanner.cameraScanSimple')}
+              </Text>
               <Pressable
-                style={styles.shutterBtn}
-                onPress={() => void capturePhotoFrame()}
-                disabled={capturing}
-                testID="scanner-shutter"
+                style={styles.closeBtn}
+                onPress={closeCamera}
                 accessibilityRole="button"
-                accessibilityLabel={t('scanner.takePhoto')}>
-                {capturing ? (
-                  <ActivityIndicator color={theme.colors.onAccent} />
-                ) : (
-                  <View style={styles.shutterInner} />
-                )}
+                accessibilityLabel={t('common.cancel')}>
+                <Ionicons name="close" size={24} color={theme.colors.onAccent} />
               </Pressable>
-              <View style={styles.galleryBtn} />
             </View>
-          ) : null}
+
+            <View style={styles.viewfinderCenter} pointerEvents="box-none">
+              <View style={styles.viewfinderWrap}>
+                <View style={[styles.viewfinder, !isBarcodeEntry && styles.viewfinderPhoto]}>
+                  <View style={[styles.corner, styles.cornerTL]} />
+                  <View style={[styles.corner, styles.cornerTR]} />
+                  <View style={[styles.corner, styles.cornerBL]} />
+                  <View style={[styles.corner, styles.cornerBR]} />
+                </View>
+                <Text style={styles.viewfinderHint}>
+                  {isBarcodeEntry
+                    ? t('scanner.cameraBarcodeHint')
+                    : mode === 'menu'
+                      ? t('scanner.cameraMenuHint')
+                      : mode === 'medicine'
+                        ? t('scanner.cameraMedicineHint')
+                        : mode === 'cosmetics'
+                          ? t('scanner.cameraHouseholdHint')
+                          : t('scanner.cameraScannerHint')}
+                </Text>
+              </View>
+            </View>
+
+            {supportsPhotoCapture ? (
+              <View style={[styles.shutterRow, { paddingBottom: bottomPad }]}>
+                <Pressable
+                  style={styles.galleryBtn}
+                  onPress={() => void pickMenuImage()}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('scanner.pickFromGallery')}>
+                  <Ionicons name="images-outline" size={22} color={theme.colors.onAccent} />
+                </Pressable>
+                <Pressable
+                  style={styles.shutterBtn}
+                  onPress={() => void capturePhotoFrame()}
+                  disabled={capturing}
+                  testID="scanner-shutter"
+                  accessibilityRole="button"
+                  accessibilityLabel={t('scanner.takePhoto')}>
+                  {capturing ? (
+                    <ActivityIndicator color={theme.colors.onAccent} />
+                  ) : (
+                    <View style={styles.shutterInner} />
+                  )}
+                </Pressable>
+                <View style={styles.galleryBtn} />
+              </View>
+            ) : null}
+          </View>
         </View>
-      </View>
+      </Modal>
     );
   }
 
@@ -1369,18 +1387,21 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'center',
       marginRight: -8,
     },
-    cameraContainer: { flex: 1, backgroundColor: colors.overlay },
+    cameraContainer: { flex: 1, backgroundColor: '#000' },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,
-      justifyContent: 'space-between',
-      paddingBottom: 48,
     },
     cameraTopBar: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingTop: 56,
       paddingHorizontal: 20,
+      paddingBottom: 8,
     },
     closeBtn: {
       width: 40,
@@ -1395,6 +1416,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.onAccent,
       fontSize: 15,
       fontWeight: '600',
+    },
+    viewfinderCenter: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
     },
     viewfinderWrap: { alignItems: 'center', gap: 20 },
     viewfinder: { width: 260, height: 180, position: 'relative' },
@@ -1412,11 +1439,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 24,
     },
     shutterRow: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 40,
-      marginBottom: 8,
+      paddingTop: 8,
     },
     galleryBtn: {
       width: 44,

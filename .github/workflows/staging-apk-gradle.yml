@@ -33,6 +33,7 @@ env:
   EXPO_PUBLIC_BACKEND_AUTH: 'true'
   EXPO_PUBLIC_CLOUD_SYNC: 'true'
   EXPO_PUBLIC_AI_SCAN_ENABLED: 'true'
+  EXPO_PUBLIC_AI_DISH_VISION: 'true'
   EXPO_PUBLIC_YC_OCR: 'true'
   EXPO_PUBLIC_YC_SCAN_INTENT_LLM: 'true'
   EXPO_PUBLIC_YC_SEARCH: 'true'
@@ -155,14 +156,31 @@ jobs:
             echo "See docs/gcp-pollen-maps-keys.md §3.1 / §5 and docs/android-stage-build.md §C."
           fi
 
-      - name: Prebuild Android (inject Google Maps key via app.config.js)
+      # Prefer committed apps/mobile/android (monorepo Gradle + ExpoReactHostFactory).
+      # `prebuild --clean` wiped that wiring and produced a non-launching SDK 55 APK
+      # (1.0.13). Maps key is injected via manifestPlaceholders + EXPO_PUBLIC_GOOGLE_MAPS_API_KEY.
+      - name: Verify committed native host
         working-directory: apps/mobile
-        run: npx expo prebuild --platform android --clean --no-install
+        run: |
+          set -euo pipefail
+          MAIN_APP="android/app/src/main/java/com/aclearo/app/MainApplication.kt"
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          GRADLE="android/app/build.gradle"
+          grep -q 'ExpoReactHostFactory.getDefaultReactHost' "$MAIN_APP"
+          grep -q 'bundleConfig = file("${projectRoot}/metro.config.js")' "$GRADLE"
+          grep -q 'entryFile = file("${projectRoot}/index.js")' "$GRADLE"
+          test -f index.js
+          grep -q 'com.google.android.geo.API_KEY' "$MANIFEST"
+          grep -q 'GOOGLE_MAPS_API_KEY' "$GRADLE"
+          echo "Native host OK (committed android/; maps key via Gradle manifestPlaceholders; entry=index.js)"
 
       - name: Assemble release APK
         working-directory: apps/mobile/android
-        # Job/workflow EXPO_PUBLIC_* + resolved Maps key (GITHUB_ENV) must be present
-        # when Metro bundles JS during assembleRelease.
+        env:
+          # Required so Expo/Metro embed EXPO_PUBLIC_* as production release values.
+          NODE_ENV: production
+        # Job/workflow EXPO_PUBLIC_* + Maps key from prior step (GITHUB_ENV) must be
+        # present for Metro embed + android/app/build.gradle manifestPlaceholders.
         run: ./gradlew assembleRelease --no-daemon
 
       - name: Stage APK

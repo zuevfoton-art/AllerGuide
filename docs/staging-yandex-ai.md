@@ -166,7 +166,7 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 | Provider | [`apps/api/src/services/llm-dish-vision-provider.ts`](../apps/api/src/services/llm-dish-vision-provider.ts) | Yandex AI Studio OpenAI-compatible chat + `image_url` (`https://ai.api.cloud.yandex.net/v1/chat/completions`) |
 | Route | [`apps/api/src/routes/scan-dish-vision.ts`](../apps/api/src/routes/scan-dish-vision.ts) | cache + shared scan daily budget; при fail — `502` + `providerStatus` |
 | Mobile | [`scanner-service.ts`](../apps/mobile/src/services/scanner-service.ts) + `dish-vision-api-service.ts` | OCR empty / visual_product miss → dish vision; fail → `scanner.dishVisionFailed` (не пустой clear) |
-| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | default **off** offline-safe |
+| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | **on** staging; off by default offline-safe elsewhere |
 | Yandex model | `YC_VISION_MODEL` | **только multimodal** из каталога folder; text-only `yandexgpt-lite` **не** подходит |
 | UX | усиленный disclaimer / trust line (`dishVisionDisclaimer`) | source `dish_vision` |
 
@@ -194,13 +194,18 @@ pnpm exec tsx scripts/staging-dish-vision-smoke.ts
 **Stage enable / rotate model:**
 
 ```bash
+# preferred helper (flags + redeploy)
+./scripts/yc-stage-enable-dish-vision.sh
+# or Lockbox only:
 ./scripts/yc-lockbox-upsert.sh \
   "AI_DISH_VISION_ENABLED=true" \
+  "AI_SCAN_ENABLED=true" \
   "YC_VISION_MODEL=qwen3.6-35b-a3b/latest"
 # затем redeploy API revision (Lockbox payload → container env)
 ```
 
-После UI-фиксов (`dishVisionFailed`) нужен **EAS staging APK rebuild** (`EXPO_PUBLIC_AI_DISH_VISION=true` уже в EAS profile).
+Mobile Gradle/EAS staging set `EXPO_PUBLIC_AI_DISH_VISION=true`. После UI-фиксов (`dishVisionFailed`) нужен staging APK rebuild.
+
 
 ---
 

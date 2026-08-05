@@ -10,10 +10,14 @@ def workspaceRoot = rootDir.getAbsoluteFile().getParentFile().getParentFile().ge
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
+    // Monorepo: workspace root so Metro can resolve @allerguide/* packages.
+    // Pair with apps/mobile/index.js (explicit require.context('./app')).
+    // Do NOT use expo-router/entry here — with root=workspaceRoot it looks for
+    // app/ at the repo root and crashes with "No routes found" (1.0.15).
     root = file(workspaceRoot)
-    entryFile = file("${workspaceRoot}/apps/mobile/index.js")
+    entryFile = file("${projectRoot}/index.js")
     reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+    hermesCommand = new File(["node", "--print", "require.resolve('hermes-compiler/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/hermesc/%OS-BIN%/hermesc"
     codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
 
     enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()

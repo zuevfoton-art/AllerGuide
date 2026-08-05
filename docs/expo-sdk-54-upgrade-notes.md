@@ -54,4 +54,4 @@ If maps/sentry/speech abort — pin compatible versions **before** Phase C (SDK 
 
 ## Phase C — SDK 54 → 55
 
-Follow-up after Phase B green: Expo 55 / RN 0.83 / React 19.2; remove `newArchEnabled` from config (New Arch only).
+See [`docs/expo-sdk-55-upgrade-notes.md`](expo-sdk-55-upgrade-notes.md).
