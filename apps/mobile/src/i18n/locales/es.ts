@@ -345,6 +345,8 @@ const es: LocaleMessages = {
       'Estimación solo por la foto — no es un análisis de laboratorio. Verifique los ingredientes reales cuando pueda.',
     dishVisionDisclaimer:
       'El reconocimiento del plato por foto es una estimación de IA del nombre y de los ingredientes típicos. Puede omitir salsas, sustituciones y contaminación cruzada. No sustituye leer la etiqueta ni preguntar en cocina, ni descarta una reacción individual.',
+    dishVisionFailed:
+      'No se pudo reconocer el plato en la foto. Compruebe la conexión e inténtelo de nuevo, o introduzca los ingredientes manualmente.',
     safeList: 'Productos seguros',
     saveToSafe: '✓ Guardar como seguro',
     savedToSafe: '✓ Guardado',

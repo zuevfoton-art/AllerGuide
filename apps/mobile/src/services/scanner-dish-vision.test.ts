@@ -106,4 +106,24 @@ describe('scanner dish vision (Option D)', () => {
     expect(result.dishVision?.dishName).toBe('Оливье');
     expect(result.reason).toMatch(/не лабораторный анализ/i);
   });
+
+  it('throws DishVisionScanError instead of empty analyzeText when vision fails', async () => {
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'Forbidden',
+      status: 502,
+      providerStatus: 403,
+    });
+
+    const { DishVisionScanError, scanFromOcr } = await import('./scanner-service');
+    await expect(
+      scanFromOcr({
+        mode: 'product',
+        imageBase64: 'aGVsbG8=',
+        mimeType: 'image/jpeg',
+        profile: { id: 'p1', allergies: '[]' } as never,
+      }),
+    ).rejects.toBeInstanceOf(DishVisionScanError);
+    expect(mockRunSmartScan).not.toHaveBeenCalled();
+  });
 });

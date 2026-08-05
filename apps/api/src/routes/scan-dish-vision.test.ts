@@ -5,17 +5,23 @@ import { resetDishVisionCache } from '../lib/dish-vision-cache';
 import { resetScanState } from '../lib/scan-cache';
 import { registerScanDishVisionRoutes } from './scan-dish-vision';
 
-vi.mock('../services/llm-dish-vision-provider', () => ({
-  dishVisionConfigured: vi.fn(() => true),
-  callDishVisionLlm: vi.fn(async () =>
-    JSON.stringify({
-      dishName: 'Оливье',
-      ingredients: ['картофель', 'яйцо', 'майонез'],
-      confidence: 'medium',
-      notes: 'Оценка по фото',
-    }),
-  ),
-}));
+vi.mock('../services/llm-dish-vision-provider', async () => {
+  const actual = await vi.importActual<typeof import('../services/llm-dish-vision-provider')>(
+    '../services/llm-dish-vision-provider',
+  );
+  return {
+    ...actual,
+    dishVisionConfigured: vi.fn(() => true),
+    callDishVisionLlm: vi.fn(async () =>
+      JSON.stringify({
+        dishName: 'Оливье',
+        ingredients: ['картофель', 'яйцо', 'майонез'],
+        confidence: 'medium',
+        notes: 'Оценка по фото',
+      }),
+    ),
+  };
+});
 
 vi.mock('../lib/jwt', () => ({
   verifyAuthToken: vi.fn(async () => ({ sub: 'user-1' })),
@@ -74,5 +80,26 @@ describe('POST /api/scan/dish-vision', () => {
 
     const response = await request(app).post('/api/scan/dish-vision').send({});
     expect(response.status).toBe(400);
+  });
+
+  it('surfaces providerStatus when the vision provider returns 403', async () => {
+    const { callDishVisionLlm, DishVisionProviderError } = await import(
+      '../services/llm-dish-vision-provider'
+    );
+    vi.mocked(callDishVisionLlm).mockRejectedValueOnce(
+      new DishVisionProviderError(403, 'Forbidden'),
+    );
+
+    const app = express();
+    app.use(express.json());
+    registerScanDishVisionRoutes(app);
+
+    const response = await request(app)
+      .post('/api/scan/dish-vision')
+      .send({ imageBase64: 'aGVsbG8=' });
+    expect(response.status).toBe(502);
+    expect(response.body.ok).toBe(false);
+    expect(response.body.providerStatus).toBe(403);
+    expect(response.body.error).toMatch(/Forbidden/i);
   });
 });

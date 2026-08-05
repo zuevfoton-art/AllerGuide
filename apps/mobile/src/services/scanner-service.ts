@@ -49,6 +49,23 @@ const INSUFFICIENT_INGREDIENTS_LENGTH = 15;
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
+/** Thrown when plate-only dish vision was required but the API/provider failed. */
+export class DishVisionScanError extends Error {
+  readonly status?: number;
+  readonly providerStatus?: number;
+
+  constructor(message = 'DISH_VISION_FAILED', opts?: { status?: number; providerStatus?: number }) {
+    super(message);
+    this.name = 'DishVisionScanError';
+    this.status = opts?.status;
+    this.providerStatus = opts?.providerStatus;
+  }
+}
+
+export function isDishVisionScanError(error: unknown): error is DishVisionScanError {
+  return error instanceof DishVisionScanError || (error as { name?: string })?.name === 'DishVisionScanError';
+}
+
 function getLlmEndpoint(): string | undefined {
   if (!AI_SCAN_ENABLED) return undefined;
   return `${API_BASE}/api/scan`;
@@ -256,10 +273,18 @@ async function scanFromDishVision(input: {
       imageBase64: input.imageBase64,
       mimeType: input.mimeType,
     });
-    if (!vision?.ok) return null;
+    if (vision === null) return null;
+    if (!vision.ok) {
+      throw new DishVisionScanError(vision.error || 'DISH_VISION_FAILED', {
+        status: vision.status,
+        providerStatus: vision.providerStatus,
+      });
+    }
 
     const scanText = dishVisionToScanText(vision.result);
-    if (!scanText.trim()) return null;
+    if (!scanText.trim()) {
+      throw new DishVisionScanError('DISH_VISION_EMPTY_RESULT');
+    }
 
     const confidenceNote =
       vision.result.confidence === 'low'
@@ -297,8 +322,9 @@ async function scanFromDishVision(input: {
     });
 
     return { ...result, ocr: input.extraction, dishVision: vision.result };
-  } catch {
-    return null;
+  } catch (error) {
+    if (isDishVisionScanError(error)) throw error;
+    throw new DishVisionScanError('DISH_VISION_FAILED');
   }
 }
 
@@ -379,6 +405,7 @@ export async function scanFromOcr({
         extraction,
       });
       if (visionScan) return visionScan;
+      // Flag off → fall through. Failures throw DishVisionScanError (no empty analyzeText).
     }
   }
 
@@ -397,6 +424,16 @@ export async function scanFromOcr({
         ? `${extraction.text}\n${extraction.ingredientsBlock}`
         : extraction.text
       : extraction.text;
+
+  // Plate-only path already tried dish vision; do not show an empty "clear" card.
+  if (
+    AI_DISH_VISION_ENABLED &&
+    imageBase64?.trim() &&
+    shouldUseDishVisionForOcrText(extraction.text) &&
+    !scanText.trim()
+  ) {
+    throw new DishVisionScanError('DISH_VISION_FAILED');
+  }
 
   const result = await analyzeText({
     mode: analysisMode,

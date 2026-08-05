@@ -14,6 +14,7 @@ import { logCaughtError } from '../lib/log-caught-error';
 import {
   callDishVisionLlm,
   dishVisionConfigured,
+  DishVisionProviderError,
 } from '../services/llm-dish-vision-provider';
 
 interface DishVisionRequestBody {
@@ -80,10 +81,6 @@ export function registerScanDishVisionRoutes(app: Express) {
         imageBase64,
         mimeType: body.mimeType,
       });
-      if (!content) {
-        res.status(502).json({ ok: false, error: 'Dish vision provider unavailable' });
-        return;
-      }
 
       const result = parseDishVisionResponse(content);
       if (!result) {
@@ -94,6 +91,15 @@ export function registerScanDishVisionRoutes(app: Express) {
       setCachedDishVision(cacheKey, result);
       res.json({ ok: true, result, cached: false });
     } catch (error) {
+      if (error instanceof DishVisionProviderError) {
+        logCaughtError('scan.dishVision.provider', error);
+        res.status(502).json({
+          ok: false,
+          error: error.providerError || 'Dish vision provider unavailable',
+          providerStatus: error.status,
+        });
+        return;
+      }
       logCaughtError('scan.dishVision', error);
       res.status(500).json({ ok: false, error: 'Dish vision failed' });
     }
