@@ -380,13 +380,18 @@ sequenceDiagram
   end
 ```
 
-### OCR-поток (меню / этикетка)
+### OCR / dish-vision поток (фото)
 
-1. `extractOcrFromImage` / demo OCR → текст (пустой OCR → empty vision result, без demo, если включён dish vision)
-2. Intent: `classifyScanIntentViaApi` (`YC_SCAN_INTENT_LLM`) или `classifyScanIntentHeuristic` (`@allerguide/ai`)
-3. Если `visual_product` → `lookupDishIngredientsForScan` (OFF + опционально `searchIngredientsViaApi` при `YC_SEARCH`)
-4. Если lookup не дал состава и есть фото + `AI_DISH_VISION` → `POST /api/scan/dish-vision` (название + вероятные ингредиенты) → `runSmartScan` + усиленный disclaimer
-5. Иначе / после обогащения → `runSmartScan` → история
+**Штрихкод** (`scanBarcode`) — отдельный путь, без VL/OCR-перестановки.
+
+**Фото продукта** (`mode=product`, `AI_DISH_VISION`):
+
+1. Сначала `POST /api/scan/dish-vision` (VL: название + вероятные ингредиенты)
+2. Затем `extractOcrFromImage` / `POST /api/ocr` — проверка читаемого текста на фото
+3. Если OCR-текст ≥ порога (~40 символов) → OCR-путь (intent → lookup → `runSmartScan`), VL-оценка отбрасывается
+4. Если текста нет / мало → результат VL + disclaimer; при сбое VL — явная ошибка (не пустой clear)
+
+**Меню / этикетка** (`menu` / `medicine` / `cosmetics`): OCR-first (без VL-first); intent → lookup при `visual_product` → `runSmartScan`.
 
 ### Анализ текста (`@allerguide/ai`)
 

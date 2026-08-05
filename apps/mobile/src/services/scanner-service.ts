@@ -46,6 +46,8 @@ export type ScanResultExtended = ScanResult & {
 };
 
 const INSUFFICIENT_INGREDIENTS_LENGTH = 15;
+/** OCR text at/above this length means “label/menu text present” → prefer OCR over VL. */
+const READABLE_OCR_TEXT_MIN_CHARS = 40;
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -205,8 +207,8 @@ function emptyVisionOcrResult(warning?: string): OcrExtractionResult {
 }
 
 /**
- * Prefer cloud Vision when flagged; fall back to demo/manual so offline still works.
- * When OCR finds no text, return an empty vision result (dish-vision can take over).
+ * Cloud Vision OCR when flagged; demo/manual offline fallback.
+ * Empty / no-text results stay empty so the VL-first photo path can keep a plate estimate.
  */
 export async function extractOcrFromImage(input: {
   mode: ScanMode;
@@ -235,7 +237,7 @@ export async function extractOcrFromImage(input: {
         if (noText || AI_DISH_VISION_ENABLED) {
           return emptyVisionOcrResult(
             noText
-              ? 'На фото нет читаемого текста — пробуем распознать блюдо по виду.'
+              ? 'На фото нет читаемого текста — используем распознавание блюда по виду.'
               : `Облачный OCR недоступен (${cloud.error}).`,
           );
         }
@@ -257,6 +259,32 @@ export async function extractOcrFromImage(input: {
   }
 
   return simulateOcrFromCapture(input.mode, input.manualText);
+}
+
+function hasReadableOcrText(text: string): boolean {
+  return text.trim().length >= READABLE_OCR_TEXT_MIN_CHARS;
+}
+
+/** Soft VL attempt so OCR can still run when the photo has readable text. */
+async function tryDishVisionFirst(input: {
+  mode: ScanMode;
+  imageBase64: string;
+  mimeType?: string;
+  profile?: Profile | null;
+}): Promise<{ result: ScanResultExtended | null; error?: DishVisionScanError }> {
+  try {
+    const result = await scanFromDishVision({
+      mode: input.mode,
+      imageBase64: input.imageBase64,
+      mimeType: input.mimeType,
+      profile: input.profile,
+      extraction: emptyVisionOcrResult(),
+    });
+    return { result };
+  } catch (error) {
+    if (isDishVisionScanError(error)) return { result: null, error };
+    throw error;
+  }
 }
 
 async function scanFromDishVision(input: {
@@ -343,9 +371,44 @@ export async function scanFromOcr({
   mimeType?: string;
   profile?: Profile | null;
 }): Promise<ScanResultExtended> {
+  // Photo product scans: VL first; OCR only wins when readable text is on the photo.
+  // Barcode path (`scanBarcode`) is separate and unchanged.
+  const shouldTryVlFirst =
+    AI_DISH_VISION_ENABLED &&
+    mode === 'product' &&
+    Boolean(imageBase64?.trim()) &&
+    !ocrText?.trim() &&
+    !manualText?.trim();
+
+  let dishVisionResult: ScanResultExtended | null = null;
+  let dishVisionError: DishVisionScanError | undefined;
+  if (shouldTryVlFirst) {
+    const attempted = await tryDishVisionFirst({
+      mode,
+      imageBase64: imageBase64!,
+      mimeType,
+      profile,
+    });
+    dishVisionResult = attempted.result;
+    dishVisionError = attempted.error;
+  }
+
   const extraction = ocrText?.trim()
     ? prepareScanTextFromOcr(ocrText, mode)
     : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
+
+  const readableOcrText = hasReadableOcrText(extraction.text);
+
+  // Plate-only (no label text): keep VL result or surface VL failure — never empty clear.
+  if (shouldTryVlFirst && !readableOcrText) {
+    if (dishVisionResult) {
+      return { ...dishVisionResult, ocr: extraction };
+    }
+    if (dishVisionError) throw dishVisionError;
+    if (shouldUseDishVisionForOcrText(extraction.text)) {
+      throw new DishVisionScanError('DISH_VISION_FAILED');
+    }
+  }
 
   // A: heuristic intent. B (flag): YandexGPT intent via /api/scan/intent.
   const llmIntent = await classifyScanIntentViaApi({
@@ -389,23 +452,16 @@ export async function scanFromOcr({
         return { ...result, ocr: extraction };
       }
     } catch {
-      // Fall through — try dish vision or plain OCR text analysis.
+      // Fall through — plain OCR text analysis (VL already attempted above when enabled).
     }
 
-    // Plate-only photo (no usable OCR / catalog hit): multimodal name + ingredients.
+    // Short OCR name without catalog hit: reuse VL if we already ran it for this photo.
     if (
-      imageBase64?.trim() &&
-      (shouldUseDishVisionForOcrText(extraction.text) || extraction.text.trim().length < 40)
+      dishVisionResult &&
+      (shouldUseDishVisionForOcrText(extraction.text) ||
+        extraction.text.trim().length < READABLE_OCR_TEXT_MIN_CHARS)
     ) {
-      const visionScan = await scanFromDishVision({
-        mode: analysisMode,
-        imageBase64,
-        mimeType,
-        profile,
-        extraction,
-      });
-      if (visionScan) return visionScan;
-      // Flag off → fall through. Failures throw DishVisionScanError (no empty analyzeText).
+      return { ...dishVisionResult, ocr: extraction };
     }
   }
 
@@ -424,16 +480,6 @@ export async function scanFromOcr({
         ? `${extraction.text}\n${extraction.ingredientsBlock}`
         : extraction.text
       : extraction.text;
-
-  // Plate-only path already tried dish vision; do not show an empty "clear" card.
-  if (
-    AI_DISH_VISION_ENABLED &&
-    imageBase64?.trim() &&
-    shouldUseDishVisionForOcrText(extraction.text) &&
-    !scanText.trim()
-  ) {
-    throw new DishVisionScanError('DISH_VISION_FAILED');
-  }
 
   const result = await analyzeText({
     mode: analysisMode,
