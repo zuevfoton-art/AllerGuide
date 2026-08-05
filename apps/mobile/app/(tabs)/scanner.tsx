@@ -36,7 +36,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
-import { scanBarcode, scanFromOcr, scanText, type ScanResultExtended } from '@/src/services/scanner-service';
+import {
+  isDishVisionScanError,
+  scanBarcode,
+  scanFromOcr,
+  scanText,
+  type ScanResultExtended,
+} from '@/src/services/scanner-service';
 import { listScanHistory } from '@/src/services/scan-history-service';
 import {
   addSafeProduct,
@@ -129,6 +135,7 @@ export default function ScannerScreen() {
   const [loading, setLoading] = useState(false);
   const [ocrHint, setOcrHint] = useState<string | null>(null);
   const [scanError, setScanError] = useState(false);
+  const [scanErrorIsDishVision, setScanErrorIsDishVision] = useState(false);
   const [repeatUnsafe, setRepeatUnsafe] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -243,6 +250,7 @@ export default function ScannerScreen() {
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
+    setScanErrorIsDishVision(false);
     setIngredientsOpen(false);
     try {
       if (barcodeMode && mode === 'product') {
@@ -266,9 +274,10 @@ export default function ScannerScreen() {
       }
 
       setResult(await scanText({ mode, text, profile }));
-    } catch {
+    } catch (error) {
       setResult(null);
       setScanError(true);
+      setScanErrorIsDishVision(isDishVisionScanError(error));
     } finally {
       setLoading(false);
       refreshHistory();
@@ -283,6 +292,7 @@ export default function ScannerScreen() {
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
+    setScanErrorIsDishVision(false);
     setIngredientsOpen(false);
     try {
       const scanResult = await scanFromOcr({
@@ -299,9 +309,10 @@ export default function ScannerScreen() {
       if (scanResult.ocr?.warnings.length) {
         setOcrHint(scanResult.ocr.warnings.join(' '));
       }
-    } catch {
+    } catch (error) {
       setResult(null);
       setScanError(true);
+      setScanErrorIsDishVision(isDishVisionScanError(error));
     } finally {
       setLoading(false);
       refreshHistory();
@@ -695,7 +706,7 @@ export default function ScannerScreen() {
 
       {scanError && !loading ? (
         <ErrorState
-          message={t('scanner.checkFailed')}
+          message={t(scanErrorIsDishVision ? 'scanner.dishVisionFailed' : 'scanner.checkFailed')}
           onRetry={() => lastScanRef.current?.()}
         />
       ) : null}

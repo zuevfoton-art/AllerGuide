@@ -163,16 +163,49 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 | Слой | Файл | Поведение |
 |------|------|-----------|
 | Domain | [`packages/ai/src/dish-vision.ts`](../packages/ai/src/dish-vision.ts) | prompt / parse / `dishVisionToScanText` |
-| Provider | [`apps/api/src/services/llm-dish-vision-provider.ts`](../apps/api/src/services/llm-dish-vision-provider.ts) | OpenAI vision или Yandex OpenAI-compatible chat + image |
-| Route | [`apps/api/src/routes/scan-dish-vision.ts`](../apps/api/src/routes/scan-dish-vision.ts) | cache + shared scan daily budget |
-| Mobile | [`scanner-service.ts`](../apps/mobile/src/services/scanner-service.ts) + `dish-vision-api-service.ts` | OCR empty / visual_product miss → dish vision |
+| Provider | [`apps/api/src/services/llm-dish-vision-provider.ts`](../apps/api/src/services/llm-dish-vision-provider.ts) | Yandex AI Studio OpenAI-compatible chat + `image_url` (`https://ai.api.cloud.yandex.net/v1/chat/completions`) |
+| Route | [`apps/api/src/routes/scan-dish-vision.ts`](../apps/api/src/routes/scan-dish-vision.ts) | cache + shared scan daily budget; при fail — `502` + `providerStatus` |
+| Mobile | [`scanner-service.ts`](../apps/mobile/src/services/scanner-service.ts) + `dish-vision-api-service.ts` | OCR empty / visual_product miss → dish vision; fail → `scanner.dishVisionFailed` (не пустой clear) |
 | Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | **on** staging; off by default offline-safe elsewhere |
-| Yandex model | `YC_VISION_MODEL` (default `gemma-3-27b-it`) | text-only `yandexgpt-lite` **не** подходит |
+| Yandex model | `YC_VISION_MODEL` | **только multimodal** из каталога folder; text-only `yandexgpt-lite` **не** подходит |
 | UX | усиленный disclaimer / trust line (`dishVisionDisclaimer`) | source `dish_vision` |
 
-`GET /api/health` → `features.aiDishVision: true` когда сконфигурировано.
+#### Модели staging folder (`b1glkbb9i8ufp6bsdn4u`)
 
-**Stage enable:** `BUILD_PUSH=0 ./scripts/yc-stage-enable-dish-vision.sh` (Lockbox `AI_DISH_VISION_ENABLED` + `AI_SCAN_ENABLED` → redeploy). Mobile Gradle/EAS staging set `EXPO_PUBLIC_AI_DISH_VISION=true`.
+| Роль | Model id (Lockbox / env) | Замечание |
+|------|--------------------------|-----------|
+| **Primary** | `qwen3.6-35b-a3b/latest` | Подтверждён image smoke (`image_url` → HTTP 200 + JSON). Каталог AI Studio на 2026-08; отдельного `qwen2.5-vl-*` в folder **нет**. |
+| Alternate | `gpt-oss-20b/latest` / др. multimodal из `/v1/models` | Только после отдельного image smoke; не считать vision без проверки. |
+| Deprecated | `gemma-3-27b-it` | Нет в доступном каталоге → **403 Forbidden** — не использовать. |
+| Не использовать | Llama 3.3 / `qwen2.5-vl-*` | В этом folder id отсутствуют (`Failed to get model`). |
+
+OpenAI vision **не** подключаем как stage fallback. Endpoint override: `YC_VISION_BASE_URL` (default `https://ai.api.cloud.yandex.net/v1/chat/completions`).
+
+`GET /api/health` → `features.aiDishVision: true` только значит, что флаги/креды смонтированы. Критерий готовности — smoke:
+
+```bash
+pnpm exec tsx scripts/staging-dish-vision-smoke.ts
+# или
+./scripts/staging-dish-vision-smoke.sh
+```
+
+Ожидание: JWT → PNG/JPEG → `POST /api/scan/dish-vision` → **200** + `result.dishName` / `ingredients`. Тело с `providerStatus: 403` — явный красный.
+
+**Stage enable / rotate model:**
+
+```bash
+# preferred helper (flags + redeploy)
+./scripts/yc-stage-enable-dish-vision.sh
+# or Lockbox only:
+./scripts/yc-lockbox-upsert.sh \
+  "AI_DISH_VISION_ENABLED=true" \
+  "AI_SCAN_ENABLED=true" \
+  "YC_VISION_MODEL=qwen3.6-35b-a3b/latest"
+# затем redeploy API revision (Lockbox payload → container env)
+```
+
+Mobile Gradle/EAS staging set `EXPO_PUBLIC_AI_DISH_VISION=true`. После UI-фиксов (`dishVisionFailed`) нужен staging APK rebuild.
+
 
 ---
 

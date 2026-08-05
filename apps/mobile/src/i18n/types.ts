@@ -353,6 +353,8 @@ export type LocaleMessages = {
     trustLineDishVision: string;
     /** Bottom disclaimer for dish-vision estimates. */
     dishVisionDisclaimer: string;
+    /** Visible error when plate-only multimodal vision fails (not empty clear). */
+    dishVisionFailed: string;
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
