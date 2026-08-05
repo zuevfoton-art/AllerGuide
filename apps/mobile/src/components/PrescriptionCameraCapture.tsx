@@ -7,9 +7,14 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import {
+  resolveCameraChromePaddingBottom,
+  resolveCameraChromePaddingTop,
+} from '@/src/hooks/camera-chrome-metrics';
 import {
   capturePrescriptionPhotoViaPicker,
   pickPrescriptionPhotoFromLibrary,
@@ -42,8 +47,11 @@ export function PrescriptionCameraCapture({
   onCaptured,
 }: Props) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const cameraRef = useRef<CameraView>(null);
+  const topPad = resolveCameraChromePaddingTop(insets.top);
+  const bottomPad = resolveCameraChromePaddingBottom(insets.bottom);
   const [permission, requestPermission] = useCameraPermissions();
   const [capturing, setCapturing] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
@@ -138,8 +146,8 @@ export function PrescriptionCameraCapture({
         enableTorch={torchOn}
       />
 
-      <View style={styles.cameraOverlay}>
-        <View style={styles.cameraTopBar}>
+      <View style={styles.cameraOverlay} pointerEvents="box-none">
+        <View style={[styles.cameraTopBar, { paddingTop: topPad }]}>
           <Pressable
             style={styles.closeBtn}
             onPress={() => setTorchOn((v) => !v)}
@@ -161,17 +169,19 @@ export function PrescriptionCameraCapture({
           </Pressable>
         </View>
 
-        <View style={styles.viewfinderWrap}>
-          <View style={styles.viewfinder}>
-            <View style={[styles.corner, styles.cornerTL]} />
-            <View style={[styles.corner, styles.cornerTR]} />
-            <View style={[styles.corner, styles.cornerBL]} />
-            <View style={[styles.corner, styles.cornerBR]} />
+        <View style={styles.viewfinderCenter} pointerEvents="box-none">
+          <View style={styles.viewfinderWrap}>
+            <View style={styles.viewfinder}>
+              <View style={[styles.corner, styles.cornerTL]} />
+              <View style={[styles.corner, styles.cornerTR]} />
+              <View style={[styles.corner, styles.cornerBL]} />
+              <View style={[styles.corner, styles.cornerBR]} />
+            </View>
+            <Text style={styles.viewfinderHint}>{hint}</Text>
           </View>
-          <Text style={styles.viewfinderHint}>{hint}</Text>
         </View>
 
-        <View style={styles.shutterRow}>
+        <View style={[styles.shutterRow, { paddingBottom: bottomPad }]}>
           <Pressable
             style={styles.galleryBtn}
             onPress={() => void pickGallery()}
@@ -205,15 +215,18 @@ function createStyles({ colors, fonts }: AppTheme) {
     cameraContainer: { flex: 1, backgroundColor: colors.overlay },
     cameraOverlay: {
       ...StyleSheet.absoluteFillObject,
-      justifyContent: 'space-between',
-      paddingBottom: 48,
     },
     cameraTopBar: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingTop: 56,
       paddingHorizontal: 20,
+      paddingBottom: 8,
     },
     closeBtn: {
       width: 40,
@@ -228,6 +241,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.onAccent,
       fontSize: 15,
       fontWeight: '600',
+    },
+    viewfinderCenter: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
     },
     viewfinderWrap: { alignItems: 'center', gap: 20 },
     viewfinder: { width: 280, height: 360, position: 'relative' },
@@ -250,11 +269,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 24,
     },
     shutterRow: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 40,
-      marginBottom: 8,
+      paddingTop: 8,
     },
     galleryBtn: {
       width: 44,

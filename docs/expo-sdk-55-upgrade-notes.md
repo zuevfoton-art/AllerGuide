@@ -73,7 +73,7 @@ Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch) until a post-fix S
 
 ### 1.0.16+ — scanner camera frame at bottom
 
-After launch worked, barcode camera UI sat low (absolute tab bar + overlay `space-between` with no shutter). Fix: fullscreen `Modal`, centered viewfinder, safe-area chrome (`apps/mobile/app/(tabs)/scanner.tsx`).
+After launch worked, barcode camera UI sat low (absolute tab bar + overlay `space-between` with no shutter). Fix: fullscreen `Modal`, centered viewfinder, safe-area chrome (`apps/mobile/app/(tabs)/scanner.tsx`). Follow-up: Android shutter/gallery sat under 3-button nav because Modal `statusBarTranslucent` draws edge-to-edge while `insets.bottom` stays 0 — use `navigationBarTranslucent` + `resolveCameraChromePaddingBottom` floor (48dp) in `camera-chrome-metrics.ts`.
 
 ## Staging APK launch investigation (Gradle CI)
 
