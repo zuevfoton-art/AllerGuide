@@ -82,6 +82,7 @@
       "package": "com.aclearo.app",
       "versionCode": 4,
       "allowBackup": false,
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2A9D8F"

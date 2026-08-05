@@ -2,7 +2,11 @@ const base = require('./app.json');
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = ({ config }) => {
-  const plugins = [...base.expo.plugins, './plugins/withAndroidMonorepoGradle'];
+  const plugins = [
+    ...base.expo.plugins,
+    './plugins/withAndroidMonorepoGradle',
+    './plugins/withAndroidImeInsets',
+  ];
   const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
 
   if (process.env.SENTRY_ORG && process.env.SENTRY_PROJECT) {

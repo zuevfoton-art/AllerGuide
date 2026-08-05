@@ -26,6 +26,7 @@ import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
+import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCapture';
 import { ScheduleLinesEditor } from '@/src/components/ScheduleLinesEditor';
 import { ScheduleStagesEditor } from '@/src/components/ScheduleStagesEditor';
@@ -532,31 +533,33 @@ export default function AsitCourseScreen() {
 
       {/* OCR text input modal */}
       <Modal visible={parseTextOpen} transparent animationType="slide" onRequestClose={() => setParseTextOpen(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Pressable onPress={() => setParseTextOpen(false)}>
-                <Text style={styles.modalCancel}>{t('common.cancel')}</Text>
-              </Pressable>
-              <Text style={styles.modalTitle}>{t('asit.ocrParse')}</Text>
-              <Pressable onPress={() => void applyOcrOutcome(parseText)} disabled={parsing}>
-                <Text style={[styles.modalDone, parsing && styles.modalDoneDisabled]}>
-                  {parsing ? t('asit.ocrParsing') : t('common.done')}
-                </Text>
-              </Pressable>
+        <ModalKeyboardAvoid style={styles.modalBackdrop}>
+          {({ liftStyle }) => (
+            <View style={[styles.modalSheet, liftStyle]}>
+              <View style={styles.modalHeader}>
+                <Pressable onPress={() => setParseTextOpen(false)}>
+                  <Text style={styles.modalCancel}>{t('common.cancel')}</Text>
+                </Pressable>
+                <Text style={styles.modalTitle}>{t('asit.ocrParse')}</Text>
+                <Pressable onPress={() => void applyOcrOutcome(parseText)} disabled={parsing}>
+                  <Text style={[styles.modalDone, parsing && styles.modalDoneDisabled]}>
+                    {parsing ? t('asit.ocrParsing') : t('common.done')}
+                  </Text>
+                </Pressable>
+              </View>
+              <TextInput
+                style={styles.parseInput}
+                value={parseText}
+                onChangeText={setParseText}
+                placeholder={t('asit.ocrManualPlaceholder')}
+                placeholderTextColor={theme.colors.textMuted}
+                multiline
+                textAlignVertical="top"
+                autoFocus
+              />
             </View>
-            <TextInput
-              style={styles.parseInput}
-              value={parseText}
-              onChangeText={setParseText}
-              placeholder={t('asit.ocrManualPlaceholder')}
-              placeholderTextColor={theme.colors.textMuted}
-              multiline
-              textAlignVertical="top"
-              autoFocus
-            />
-          </View>
-        </View>
+          )}
+        </ModalKeyboardAvoid>
       </Modal>
     </Screen>
   );

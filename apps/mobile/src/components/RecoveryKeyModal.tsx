@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Button } from '@/src/components/Button';
+import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { fontSizes } from '@/src/constants/typography';
 import { radii } from '@/src/constants/layout';
@@ -71,58 +72,60 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.desc}>{description}</Text>
+      <ModalKeyboardAvoid style={styles.backdrop}>
+        {({ liftStyle }) => (
+          <View style={[styles.card, liftStyle]}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.desc}>{description}</Text>
 
-          {mode === 'enter' ? (
-            <TextInput
-              testID="recovery-key-input"
-              style={styles.input}
-              value={enteredKey}
-              onChangeText={setEnteredKey}
-              placeholder={t('settings.recoveryKeyEnterPlaceholder')}
-              placeholderTextColor={theme.colors.textMuted}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          ) : (
-            <>
-              <Text style={styles.keyLabel}>{t('settings.recoveryKeyDisplayLabel')}</Text>
-              <Text testID="recovery-key-display" selectable style={styles.keyValue}>
-                {displayKey}
-              </Text>
-              <Text style={styles.hint}>{t('settings.recoveryKeyCopyHint')}</Text>
-              <Pressable
-                testID="recovery-key-saved-ack"
-                style={styles.checkRow}
-                onPress={() => setSavedAck((v) => !v)}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: savedAck }}>
-                <View style={[styles.checkbox, savedAck && styles.checkboxOn]} />
-                <Text style={styles.checkLabel}>{t('settings.recoveryKeyConfirmSaved')}</Text>
-              </Pressable>
-            </>
-          )}
+            {mode === 'enter' ? (
+              <TextInput
+                testID="recovery-key-input"
+                style={styles.input}
+                value={enteredKey}
+                onChangeText={setEnteredKey}
+                placeholder={t('settings.recoveryKeyEnterPlaceholder')}
+                placeholderTextColor={theme.colors.textMuted}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            ) : (
+              <>
+                <Text style={styles.keyLabel}>{t('settings.recoveryKeyDisplayLabel')}</Text>
+                <Text testID="recovery-key-display" selectable style={styles.keyValue}>
+                  {displayKey}
+                </Text>
+                <Text style={styles.hint}>{t('settings.recoveryKeyCopyHint')}</Text>
+                <Pressable
+                  testID="recovery-key-saved-ack"
+                  style={styles.checkRow}
+                  onPress={() => setSavedAck((v) => !v)}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: savedAck }}>
+                  <View style={[styles.checkbox, savedAck && styles.checkboxOn]} />
+                  <Text style={styles.checkLabel}>{t('settings.recoveryKeyConfirmSaved')}</Text>
+                </Pressable>
+              </>
+            )}
 
-          <View style={styles.actions}>
-            <Button
-              testID="recovery-key-cancel"
-              label={t('common.cancel')}
-              variant="secondary"
-              onPress={onClose}
-            />
-            <Button
-              testID="recovery-key-confirm"
-              label={t('common.next')}
-              variant="primary"
-              disabled={mode === 'enter' ? !normalizeRecoveryKey(enteredKey) : !savedAck}
-              onPress={handleConfirm}
-            />
+            <View style={styles.actions}>
+              <Button
+                testID="recovery-key-cancel"
+                label={t('common.cancel')}
+                variant="secondary"
+                onPress={onClose}
+              />
+              <Button
+                testID="recovery-key-confirm"
+                label={t('common.next')}
+                variant="primary"
+                disabled={mode === 'enter' ? !normalizeRecoveryKey(enteredKey) : !savedAck}
+                onPress={handleConfirm}
+              />
+            </View>
           </View>
-        </View>
-      </View>
+        )}
+      </ModalKeyboardAvoid>
     </Modal>
   );
 }

@@ -75,6 +75,8 @@ Fallback QA APK: `android-staging-1.0.11-*` (SDK 54 old-arch) until a post-fix S
 
 After launch worked, barcode camera UI sat low (absolute tab bar + overlay `space-between` with no shutter). Fix: fullscreen `Modal`, centered viewfinder, safe-area chrome (`apps/mobile/app/(tabs)/scanner.tsx`). Follow-up: Android shutter/gallery sat under 3-button nav because Modal `statusBarTranslucent` draws edge-to-edge while `insets.bottom` stays 0 — use `navigationBarTranslucent` + `resolveCameraChromePaddingBottom` floor (48dp) in `camera-chrome-metrics.ts`.
 
+Keyboard: Android 15 / targetSdk 35 breaks `adjustResize` (IME covers diary editor + login password). Fix: `MainActivity` IME bottom inset (`withAndroidImeInsets` plugin), `Screen` Android scroll `paddingBottom` via `useKeyboardBottomInset`, `ModalKeyboardAvoid` / `useModalKeyboardAvoidance` for Modal TextInputs (diary, recovery key, allergen catalog, ASIT/prescribed OCR sheets), `tabBarHideOnKeyboard`.
+
 ## Staging APK launch investigation (Gradle CI)
 
 Context: tag `android-staging-1.0.13-sdk55-*` builds via [`.github/workflows/staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) (`npx expo prebuild --platform android --clean` → `assembleRelease`) and does not launch on device. Last known-good Gradle staging APK was `android-staging-1.0.11-*` (**old architecture**, `newArchEnabled=false`). Phase B New Arch APK (`1.0.12-newarch`) was cancelled before device smoke.

@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import {
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,6 +17,7 @@ import {
   type AllergenRecord,
 } from '@allerguide/core';
 import { getAllergenCatalogSnapshot, resolveAllergenCatalog } from '@/src/services/allergen-catalog-service';
+import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeAllergenCategory } from '@/src/i18n/content';
@@ -133,42 +135,50 @@ export function AllergenCatalogModal({
       presentationStyle="pageSheet"
       onShow={openModal}
       onRequestClose={onClose}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable style={styles.headerBtn} onPress={onClose}>
-            <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
-          </Pressable>
-          <Text style={styles.headerTitle}>{t('allergens.catalogTitle')}</Text>
-          <Pressable
-            style={styles.headerBtn}
-            onPress={() => {
-              onApply(draft);
-              onClose();
-            }}>
-            <Text style={[styles.headerBtnText, styles.headerBtnPrimary]}>{t('common.done')}</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.searchRow}>
-          <Ionicons name="search" size={18} color={theme.colors.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t('allergens.searchPlaceholder')}
-            placeholderTextColor={theme.colors.textMuted}
-          />
-        </View>
-
-        <ScrollView contentContainerStyle={styles.list} keyboardShouldPersistTaps="handled">
-          {grouped.map((section) => (
-            <View key={section.category} style={styles.section}>
-              <Text style={styles.sectionLabel}>{section.label}</Text>
-              {section.items.map(renderItem)}
+      <ModalKeyboardAvoid>
+        {({ insetStyle }) => (
+          <View style={[styles.container, insetStyle]}>
+            <View style={styles.header}>
+              <Pressable style={styles.headerBtn} onPress={onClose}>
+                <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
+              </Pressable>
+              <Text style={styles.headerTitle}>{t('allergens.catalogTitle')}</Text>
+              <Pressable
+                style={styles.headerBtn}
+                onPress={() => {
+                  onApply(draft);
+                  onClose();
+                }}>
+                <Text style={[styles.headerBtnText, styles.headerBtnPrimary]}>{t('common.done')}</Text>
+              </Pressable>
             </View>
-          ))}
-        </ScrollView>
-      </View>
+
+            <View style={styles.searchRow}>
+              <Ionicons name="search" size={18} color={theme.colors.textMuted} />
+              <TextInput
+                style={styles.searchInput}
+                value={query}
+                onChangeText={setQuery}
+                placeholder={t('allergens.searchPlaceholder')}
+                placeholderTextColor={theme.colors.textMuted}
+              />
+            </View>
+
+            <ScrollView
+              contentContainerStyle={styles.list}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+              automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}>
+              {grouped.map((section) => (
+                <View key={section.category} style={styles.section}>
+                  <Text style={styles.sectionLabel}>{section.label}</Text>
+                  {section.items.map(renderItem)}
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </ModalKeyboardAvoid>
     </Modal>
   );
 }
