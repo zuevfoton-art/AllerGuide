@@ -14,6 +14,8 @@ export interface DishVisionApiFailure {
   ok: false;
   error: string;
   status?: number;
+  /** Upstream VL HTTP status when API returns 502 with providerStatus. */
+  providerStatus?: number;
 }
 
 function stripDataUrlPrefix(base64: string): string {
@@ -53,6 +55,7 @@ export async function recognizeDishViaApi(input: {
     result?: DishVisionResult;
     cached?: boolean;
     error?: string;
+    providerStatus?: number;
   };
 
   if (!response.ok || !payload.ok || !payload.result) {
@@ -60,6 +63,9 @@ export async function recognizeDishViaApi(input: {
       ok: false,
       error: payload.error || `Dish vision HTTP ${response.status}`,
       status: response.status,
+      ...(typeof payload.providerStatus === 'number'
+        ? { providerStatus: payload.providerStatus }
+        : {}),
     };
   }
 

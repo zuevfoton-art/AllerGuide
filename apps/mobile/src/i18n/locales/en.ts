@@ -347,6 +347,8 @@ const en: LocaleMessages = {
       'Estimate from the photo only — not a lab test. Always verify real ingredients when you can.',
     dishVisionDisclaimer:
       'Dish recognition from a plate photo is an AI estimate of the likely name and typical ingredients. It can miss sauces, substitutions, and cross-contact. It does not replace reading a label or asking the kitchen, and does not rule out an individual reaction.',
+    dishVisionFailed:
+      'Could not recognize the dish from the photo. Check your connection and try again — or enter the ingredients manually.',
     safeList: 'Safe Products',
     saveToSafe: '✓ Save to safe list',
     savedToSafe: '✓ Saved',
