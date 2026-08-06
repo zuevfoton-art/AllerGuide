@@ -75,6 +75,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts` |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
+| CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
 
 ---
 
@@ -301,6 +302,7 @@ Barrel: `index.ts`. Pure TS.
 | Команды / gotchas | [`../AGENTS.md`](../AGENTS.md) |
 | RC gate | [`rc-gate.md`](./rc-gate.md) |
 | QA | [`qa-checklist.md`](./qa-checklist.md) |
+| CJM + сценарии (профиль, дневник, capabilities) | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
 | YC stage | [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) |
 | ADR | [`adr/`](./adr/) |
