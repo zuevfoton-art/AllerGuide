@@ -17,6 +17,7 @@ offline-first архитектуры:
 - `apps/mobile/src/services/profile-service.ts`;
 - `apps/mobile/src/services/backend-api.ts`;
 - `apps/mobile/src/db/init.ts`;
+- `apps/mobile/src/utils/confirm-delete-profile.ts`;
 - `apps/api/src/routes/profiles.ts`;
 - новый parser `apps/api/src/routes/profile-input.ts`;
 - регрессионные тесты mobile/API.
@@ -166,7 +167,27 @@ Parser проверяет:
 Так route остаётся тонким, а parser тестируется без Express и БД
 (**Single Responsibility Principle**).
 
-### 6. DRY в HTTP-маршрутах
+### 6. Рабочее подтверждение удаления на web
+
+Ручной тест выявил, что реализация `Alert.alert()` в `react-native-web` является
+no-op: callback destructive-кнопки не вызывается. Confirmation вынесен в
+`confirm-delete-profile.ts`:
+
+```ts
+if (Platform.OS === 'web') {
+  if (window.confirm(`${title}\n\n${message}`)) {
+    void onConfirm();
+  }
+  return;
+}
+
+Alert.alert(title, message, nativeButtons);
+```
+
+Web использует нативный browser confirm, а iOS/Android сохраняют привычный
+destructive `Alert`. Utility покрыт тестами confirm/cancel/native.
+
+### 7. DRY в HTTP-маршрутах
 
 Одинаковый код POST/PATCH заменён вызовом `parseProfileInput`. Проверка id
 выполняется через `readProfileId`, а unexpected errors — через
@@ -181,7 +202,7 @@ res.status(500).json({ ok: false, error: 'Profile operation failed' });
 
 Это уменьшает риск раскрытия SQL, структуры БД или деталей конфигурации.
 
-### 7. Тестируемость
+### 8. Тестируемость
 
 Добавлены тесты для:
 
@@ -193,6 +214,7 @@ res.status(500).json({ ok: false, error: 'Profile operation failed' });
 - нормализации имени и cross-reaction аллергенов;
 - удаления вложений до записей дневника;
 - одинакового сохранения полей в `WebDb`.
+- web/native подтверждения удаления профиля.
 
 ## Возможные побочные эффекты и компромиссы
 
