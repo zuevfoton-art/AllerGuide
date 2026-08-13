@@ -224,7 +224,23 @@ export async function createProfile(input: ProfileInput) {
 export async function updateProfile(id: number, input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const normalized = normalizeProfilePayload(input);
+  const db = getDb();
+  const existingProfile = db.getFirstSync<Profile>(
+    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
+    [id, userId],
+  );
+  if (!BACKEND_AUTH_ENABLED && !existingProfile) return null;
+
+  const inputWithPreservedCrossReactions =
+    input.crossReactionAllergies === undefined && existingProfile?.crossReactionAllergies
+      ? {
+          ...input,
+          crossReactionAllergies: parseProfileAllergenIds(
+            existingProfile.crossReactionAllergies,
+          ),
+        }
+      : input;
+  const normalized = normalizeProfilePayload(inputWithPreservedCrossReactions);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -251,7 +267,6 @@ export async function updateProfile(id: number, input: ProfileInput) {
     return localProfile;
   }
 
-  const db = getDb();
   db.runSync(
     'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ? AND userId = ?',
     [

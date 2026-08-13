@@ -95,6 +95,10 @@ type NormalizedProfilePayload = {
 - сериализует поля один раз.
 
 Это применение **Information Hiding**: формат хранения скрыт от create/update.
+При edit-пути отсутствующее `crossReactionAllergies` теперь означает
+«сохранить текущее значение», а не «очистить массив». Inline cross-reaction CTA
+в обычном `AllergenPicker` на edit-экране отключён, чтобы связанные аллергены
+не смешивались с primary-списком.
 
 ### 2. Защита локальных операций по `userId`
 

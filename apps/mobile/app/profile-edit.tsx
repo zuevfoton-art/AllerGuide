@@ -281,6 +281,7 @@ export default function ProfileEditScreen() {
             <Text style={ui.sectionLabel}>{t('profileSetup.allergensLabel')}</Text>
             <AllergenPicker
               selected={selected}
+              showCrossReactions={false}
               suggestedConditionIds={suggestedConditions}
               onAddSuggestedCondition={(conditionId) =>
                 setConditions((prev) => (prev.includes(conditionId) ? prev : [...prev, conditionId]))

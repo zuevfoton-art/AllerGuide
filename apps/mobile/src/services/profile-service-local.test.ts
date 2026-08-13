@@ -175,6 +175,21 @@ describe('profile-service local ownership and persistence', () => {
     expect(created?.crossReactionAllergies).toBe('["goat-milk"]');
   });
 
+  it('preserves stored cross-reactions when edit input omits the field', async () => {
+    profiles[0]!.crossReactionAllergies = '["goat-milk"]';
+    const { updateProfile } = await import('./profile-service');
+
+    const updated = await updateProfile(1, {
+      name: 'Owner updated',
+      birthYear: 1990,
+      type: 'self',
+      allergies: ['milk'],
+    });
+
+    expect(updated?.name).toBe('Owner updated');
+    expect(updated?.crossReactionAllergies).toBe('["goat-milk"]');
+  });
+
   it('deletes diary attachments before deleting an owned profile', async () => {
     const { deleteProfile } = await import('./profile-service');
 
