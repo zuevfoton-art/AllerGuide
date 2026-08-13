@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies, type Profile } from '@allerguide/core';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
+import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -52,17 +53,16 @@ export default function ProfileScreen() {
   );
 
   const confirmDelete = (id: number, name: string) => {
-    Alert.alert(t('profiles.deleteTitle'), t('profiles.deleteMessage', { name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteProfile(id);
-          refresh();
-        },
+    confirmDeleteProfile({
+      title: t('profiles.deleteTitle'),
+      message: t('profiles.deleteMessage', { name }),
+      cancelLabel: t('common.cancel'),
+      deleteLabel: t('common.delete'),
+      onConfirm: async () => {
+        await deleteProfile(id);
+        refresh();
       },
-    ]);
+    });
   };
 
   const openEdit = (id: number) => {
