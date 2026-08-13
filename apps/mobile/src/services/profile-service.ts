@@ -17,6 +17,7 @@ import {
   migrateProfileAllergiesJson,
   normalizeAllergyConfirmations,
   parseAllergyConfirmations,
+  parseProfileAllergenIds,
   resolvePreferredActiveProfile,
   serializeAllergyConfirmations,
   serializeProfileAllergenIds,
@@ -52,16 +53,31 @@ function requireUserId(): number {
   return userId;
 }
 
-function normalizeProfilePayload(input: ProfileInput) {
+type NormalizedProfilePayload = {
+  name: string;
+  allergenIds: string[];
+  allergiesJson: string;
+  allergyConfirmationsJson: string;
+  crossReactionAllergiesJson: string;
+};
+
+function normalizeProfilePayload(input: ProfileInput): NormalizedProfilePayload {
   const allergenIds = dedupeAllergenIds(input.allergies);
   const allergiesJson = serializeProfileAllergenIds(allergenIds);
   const allergyConfirmationsJson = serializeAllergyConfirmations(
     normalizeAllergyConfirmations(allergenIds, input.allergyConfirmations),
   );
-  const crossReactionAllergiesJson = JSON.stringify(
-    [...new Set(input.crossReactionAllergies ?? [])],
+  const crossReactionAllergiesJson = serializeProfileAllergenIds(
+    dedupeAllergenIds(input.crossReactionAllergies ?? []),
   );
-  return { allergenIds, allergiesJson, allergyConfirmationsJson, crossReactionAllergiesJson };
+
+  return {
+    name: input.name.trim(),
+    allergenIds,
+    allergiesJson,
+    allergyConfirmationsJson,
+    crossReactionAllergiesJson,
+  };
 }
 
 function assertValidProfileInput(input: ProfileInput) {
@@ -111,7 +127,7 @@ function throwOnBackendError(response: { ok: false; error: string; status: numbe
   throw new ProfileServiceError(code, apiErrorMessage(code, response.error));
 }
 
-export function listProfiles() {
+export function listProfiles(): Profile[] {
   const userId = getCurrentUserId();
   if (!userId) return [];
 
@@ -151,8 +167,7 @@ export async function refreshProfilesFromBackend(): Promise<
 export async function createProfile(input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const { allergenIds, allergiesJson, allergyConfirmationsJson, crossReactionAllergiesJson } =
-    normalizeProfilePayload(input);
+  const normalized = normalizeProfilePayload(input);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -160,13 +175,21 @@ export async function createProfile(input: ProfileInput) {
 
     const response = await backendCreateProfile(token, {
       ...input,
-      allergies: allergenIds,
-      allergyConfirmations: parseAllergyConfirmations(allergyConfirmationsJson),
+      name: normalized.name,
+      allergies: normalized.allergenIds,
+      allergyConfirmations: parseAllergyConfirmations(normalized.allergyConfirmationsJson),
+      crossReactionAllergies: parseProfileAllergenIds(normalized.crossReactionAllergiesJson),
     });
     if (!response.ok) throwOnBackendError(response);
 
-    upsertLocalProfile({ ...response.data.profile, userId });
-    useAppStore.getState().setActiveProfile(response.data.profile);
+    const localProfile = {
+      ...response.data.profile,
+      userId,
+      crossReactionAllergies:
+        response.data.profile.crossReactionAllergies ?? normalized.crossReactionAllergiesJson,
+    };
+    upsertLocalProfile(localProfile);
+    useAppStore.getState().setActiveProfile(localProfile);
     trackEvent('profile_created', { type: input.type, source: 'backend' });
     return response.data.profile.id;
   }
@@ -176,17 +199,23 @@ export async function createProfile(input: ProfileInput) {
     'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations, crossReactionAllergies) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [
       userId,
-      input.name,
+      normalized.name,
       input.birthYear,
       input.type,
-      allergiesJson,
-      allergyConfirmationsJson,
-      crossReactionAllergiesJson,
+      normalized.allergiesJson,
+      normalized.allergyConfirmationsJson,
+      normalized.crossReactionAllergiesJson,
     ],
   );
-  const row = db.getFirstSync<{ id: number }>('SELECT id FROM profiles ORDER BY id DESC LIMIT 1');
+  const row = db.getFirstSync<{ id: number }>(
+    'SELECT id FROM profiles WHERE userId = ? ORDER BY id DESC LIMIT 1',
+    [userId],
+  );
   if (!row?.id) return null;
-  const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [row.id]);
+  const profile = db.getFirstSync<Profile>(
+    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
+    [row.id, userId],
+  );
   useAppStore.getState().setActiveProfile(profile || null);
   trackEvent('profile_created', { type: input.type, source: 'local' });
   return row.id;
@@ -195,8 +224,7 @@ export async function createProfile(input: ProfileInput) {
 export async function updateProfile(id: number, input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const { allergenIds, allergiesJson, allergyConfirmationsJson, crossReactionAllergiesJson } =
-    normalizeProfilePayload(input);
+  const normalized = normalizeProfilePayload(input);
 
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
@@ -204,38 +232,52 @@ export async function updateProfile(id: number, input: ProfileInput) {
 
     const response = await backendUpdateProfile(token, id, {
       ...input,
-      allergies: allergenIds,
-      allergyConfirmations: parseAllergyConfirmations(allergyConfirmationsJson),
+      name: normalized.name,
+      allergies: normalized.allergenIds,
+      allergyConfirmations: parseAllergyConfirmations(normalized.allergyConfirmationsJson),
+      crossReactionAllergies: parseProfileAllergenIds(normalized.crossReactionAllergiesJson),
     });
     if (!response.ok) throwOnBackendError(response);
 
-    upsertLocalProfile({ ...response.data.profile, userId });
+    const localProfile = {
+      ...response.data.profile,
+      userId,
+      crossReactionAllergies:
+        response.data.profile.crossReactionAllergies ?? normalized.crossReactionAllergiesJson,
+    };
+    upsertLocalProfile(localProfile);
     const { activeProfileId, setActiveProfile } = useAppStore.getState();
-    if (activeProfileId === id) setActiveProfile(response.data.profile);
-    return response.data.profile;
+    if (activeProfileId === id) setActiveProfile(localProfile);
+    return localProfile;
   }
 
   const db = getDb();
   db.runSync(
-    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ?',
+    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ? AND userId = ?',
     [
       userId,
-      input.name,
+      normalized.name,
       input.birthYear,
       input.type,
-      allergiesJson,
-      allergyConfirmationsJson,
-      crossReactionAllergiesJson,
+      normalized.allergiesJson,
+      normalized.allergyConfirmationsJson,
+      normalized.crossReactionAllergiesJson,
       id,
+      userId,
     ],
   );
-  const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
+  const profile = db.getFirstSync<Profile>(
+    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
+    [id, userId],
+  );
   const { activeProfileId, setActiveProfile } = useAppStore.getState();
   if (activeProfileId === id) setActiveProfile(profile || null);
   return profile;
 }
 
 export async function deleteProfile(id: number) {
+  const userId = requireUserId();
+
   if (BACKEND_AUTH_ENABLED) {
     const token = await getBackendAuthToken();
     if (!token) throw new ProfileServiceError('session_expired');
@@ -245,17 +287,32 @@ export async function deleteProfile(id: number) {
   }
 
   const db = getDb();
+  const ownedProfile = db.getFirstSync<{ id: number }>(
+    'SELECT id FROM profiles WHERE id = ? AND userId = ?',
+    [id, userId],
+  );
+  if (!ownedProfile) return false;
+
+  const diaryEntries = db.getAllSync<{ id: number }>(
+    'SELECT id FROM diary_entries WHERE profileId = ?',
+    [id],
+  );
+  for (const entry of diaryEntries) {
+    db.runSync('DELETE FROM diary_attachments WHERE entryId = ?', [entry.id]);
+  }
+
   db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM scan_history WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [id]);
   db.runSync('DELETE FROM safe_products WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM profiles WHERE id = ?', [id]);
+  db.runSync('DELETE FROM profiles WHERE id = ? AND userId = ?', [id, userId]);
 
   const { activeProfileId } = useAppStore.getState();
   if (activeProfileId === id) {
     syncActiveProfileAfterList(listProfiles(), { preferSelf: true });
   }
+  return true;
 }
 
 export async function getProfile(id: number) {
@@ -263,9 +320,10 @@ export async function getProfile(id: number) {
   if (!userId) return null;
 
   const db = getDb();
-  const profile = db.getFirstSync<Profile>('SELECT * FROM profiles WHERE id = ?', [id]);
-  if (!profile || profile.userId !== userId) return null;
-  return profile;
+  return db.getFirstSync<Profile>(
+    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
+    [id, userId],
+  );
 }
 
 export function countProfilesByType(type: ProfileType) {

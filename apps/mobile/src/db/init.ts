@@ -138,6 +138,7 @@ class WebDb implements DbLike {
         type: params![3] as Profile['type'],
         allergies: params![4] as string,
         allergyConfirmations: (params![5] as string | undefined) ?? '{}',
+        crossReactionAllergies: (params![6] as string | undefined) ?? '[]',
       });
       this.saveProfiles(profiles);
       return;
@@ -154,6 +155,7 @@ class WebDb implements DbLike {
         type: params![4] as Profile['type'],
         allergies: params![5] as string,
         allergyConfirmations: (params![6] as string | undefined) ?? '{}',
+        crossReactionAllergies: (params![7] as string | undefined) ?? '[]',
       };
       const index = profiles.findIndex((profile) => profile.id === id);
       if (index >= 0) profiles[index] = next;
@@ -220,8 +222,16 @@ class WebDb implements DbLike {
 
     if (s.startsWith('update profiles')) {
       const profiles = this.getProfiles();
-      const id = params![6] as number;
-      const index = profiles.findIndex((p) => p.id === id);
+      const hasCrossReactionAllergies = s.includes('crossreactionallergies');
+      const idIndex = hasCrossReactionAllergies ? 7 : 6;
+      const id = params![idIndex] as number;
+      const ownerId =
+        hasCrossReactionAllergies && s.includes('and userid =')
+          ? (params![idIndex + 1] as number)
+          : undefined;
+      const index = profiles.findIndex(
+        (profile) => profile.id === id && (ownerId === undefined || profile.userId === ownerId),
+      );
       if (index >= 0) {
         profiles[index] = {
           ...profiles[index],
@@ -231,6 +241,9 @@ class WebDb implements DbLike {
           type: params![3] as Profile['type'],
           allergies: params![4] as string,
           allergyConfirmations: (params![5] as string | undefined) ?? profiles[index].allergyConfirmations ?? '{}',
+          crossReactionAllergies: hasCrossReactionAllergies
+            ? ((params![6] as string | undefined) ?? '[]')
+            : (profiles[index].crossReactionAllergies ?? '[]'),
         };
         this.saveProfiles(profiles);
       }
@@ -310,17 +323,25 @@ class WebDb implements DbLike {
 
     if (s.startsWith('delete from profiles')) {
       const profiles = this.getProfiles();
-      this.saveProfiles(profiles.filter((p) => p.id !== params![0]));
+      const profileId = params![0] as number;
+      const ownerId = s.includes('and userid =') ? (params![1] as number) : undefined;
+      const canDelete = profiles.some(
+        (profile) =>
+          profile.id === profileId && (ownerId === undefined || profile.userId === ownerId),
+      );
+      if (!canDelete) return;
+
+      this.saveProfiles(profiles.filter((profile) => profile.id !== profileId));
       const contacts = this.getEmergencyContacts();
-      this.saveEmergencyContacts(contacts.filter((item) => item.profileId !== params![0]));
+      this.saveEmergencyContacts(contacts.filter((item) => item.profileId !== profileId));
       const diary = this.getDiaryEntries();
-      this.saveDiaryEntries(diary.filter((entry) => entry.profileId !== params![0]));
+      this.saveDiaryEntries(diary.filter((entry) => entry.profileId !== profileId));
       const scans = this.getScanHistory();
-      this.saveScanHistory(scans.filter((entry) => entry.profileId !== params![0]));
+      this.saveScanHistory(scans.filter((entry) => entry.profileId !== profileId));
       const safeProducts = this.getSafeProducts();
-      this.saveSafeProducts(safeProducts.filter((item) => item.profileId !== params![0]));
+      this.saveSafeProducts(safeProducts.filter((item) => item.profileId !== profileId));
       const sos = this.getProfileSos();
-      delete sos[params![0] as number];
+      delete sos[profileId];
       this.saveProfileSos(sos);
       return;
     }
@@ -462,12 +483,23 @@ class WebDb implements DbLike {
 
     if (s.includes('from profiles') && s.includes('order by id desc limit 1')) {
       const profiles = this.getProfiles();
-      return (profiles[profiles.length - 1] || null) as T | null;
+      const ownerId = s.includes('where userid =') ? (params![0] as number) : undefined;
+      const profile = profiles
+        .filter((item) => ownerId === undefined || item.userId === ownerId)
+        .sort((left, right) => right.id - left.id)[0];
+      return (profile || null) as T | null;
     }
 
     if (s.includes('from profiles') && s.includes('where id =')) {
       const profiles = this.getProfiles();
-      return (profiles.find((p) => p.id === params![0]) || null) as T | null;
+      const ownerId = s.includes('and userid =') ? (params![1] as number) : undefined;
+      return (
+        profiles.find(
+          (profile) =>
+            profile.id === params![0] &&
+            (ownerId === undefined || profile.userId === ownerId),
+        ) || null
+      ) as T | null;
     }
 
     if (s.includes('from profile_sos')) {

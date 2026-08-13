@@ -134,16 +134,25 @@ export async function backendDeleteProfile(token: string, id: number) {
 
 export function upsertLocalProfile(profile: Profile) {
   const db = getDb();
+  const userId = profile.userId ?? 0;
+  const existing = db.getFirstSync<Pick<Profile, 'crossReactionAllergies'>>(
+    'SELECT crossReactionAllergies FROM profiles WHERE id = ? AND userId = ?',
+    [profile.id, userId],
+  );
+  const crossReactionAllergies =
+    profile.crossReactionAllergies ?? existing?.crossReactionAllergies ?? '[]';
+
   db.runSync(
-    'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies, allergyConfirmations) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    'INSERT OR REPLACE INTO profiles (id, userId, name, birthYear, type, allergies, allergyConfirmations, crossReactionAllergies) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     [
       profile.id,
-      profile.userId ?? 0,
+      userId,
       profile.name,
       profile.birthYear,
       profile.type,
       profile.allergies,
       profile.allergyConfirmations ?? '{}',
+      crossReactionAllergies,
     ],
   );
 }

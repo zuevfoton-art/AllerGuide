@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express';
-import type { AllergyConfirmationSource } from '@allerguide/core';
 import { requireJwt } from '../middleware/require-jwt';
+import { logCaughtError } from '../lib/log-caught-error';
 import {
   createProfileForUser,
   deleteProfileForUser,
@@ -9,38 +9,44 @@ import {
   updateProfileForUser,
   validateProfilePayload,
 } from '../services/profile-service';
+import { parseProfileId, parseProfileInput } from './profile-input';
+
+const INVALID_PROFILE_PAYLOAD = 'Invalid profile payload';
+const PROFILE_NOT_FOUND = 'Profile not found';
+
+function sendUnexpectedError(
+  res: Response,
+  context: string,
+  error: unknown,
+): void {
+  logCaughtError(context, error);
+  res.status(500).json({ ok: false, error: 'Profile operation failed' });
+}
+
+function readProfileId(req: Request, res: Response): number | null {
+  const profileId = parseProfileId(req.params.id);
+  if (profileId !== null) return profileId;
+
+  res.status(400).json({ ok: false, error: 'Invalid profile id' });
+  return null;
+}
 
 export function registerProfileRoutes(app: Express) {
   app.get('/api/profiles', requireJwt, async (req: Request, res: Response) => {
-    const items = await listProfilesForUser(req.authUser!.sub);
-    res.json({ ok: true, profiles: items });
+    try {
+      const items = await listProfilesForUser(req.authUser!.sub);
+      res.json({ ok: true, profiles: items });
+    } catch (error) {
+      sendUnexpectedError(res, 'profiles.list', error);
+    }
   });
 
   app.post('/api/profiles', requireJwt, async (req: Request, res: Response) => {
-    const body = req.body as {
-      name?: string;
-      birthYear?: number;
-      type?: 'self' | 'child';
-      allergies?: string[];
-      allergyConfirmations?: Record<string, AllergyConfirmationSource>;
-      childConsent?: boolean;
-      scenario?: 'self' | 'child' | 'both';
-    };
-
-    if (!body.name?.trim() || !body.type || !Array.isArray(body.allergies)) {
-      res.status(400).json({ ok: false, error: 'Invalid profile payload' });
+    const input = parseProfileInput(req.body);
+    if (!input) {
+      res.status(400).json({ ok: false, error: INVALID_PROFILE_PAYLOAD });
       return;
     }
-
-    const input = {
-      name: body.name.trim(),
-      birthYear: Number(body.birthYear) || new Date().getFullYear(),
-      type: body.type,
-      allergies: body.allergies,
-      allergyConfirmations: body.allergyConfirmations,
-      childConsent: body.childConsent,
-      scenario: body.scenario,
-    };
 
     const validationError = validateProfilePayload(input);
     if (validationError) {
@@ -52,49 +58,35 @@ export function registerProfileRoutes(app: Express) {
       const profile = await createProfileForUser(req.authUser!.sub, input);
       res.status(201).json({ ok: true, profile });
     } catch (error) {
-      res.status(400).json({
-        ok: false,
-        error: error instanceof Error ? error.message : 'Failed to create profile',
-      });
+      sendUnexpectedError(res, 'profiles.create', error);
     }
   });
 
   app.get('/api/profiles/:id', requireJwt, async (req: Request, res: Response) => {
-    const profileId = Number(req.params.id);
-    const profile = await getProfileForUser(req.authUser!.sub, profileId);
-    if (!profile) {
-      res.status(404).json({ ok: false, error: 'Profile not found' });
-      return;
+    const profileId = readProfileId(req, res);
+    if (profileId === null) return;
+
+    try {
+      const profile = await getProfileForUser(req.authUser!.sub, profileId);
+      if (!profile) {
+        res.status(404).json({ ok: false, error: PROFILE_NOT_FOUND });
+        return;
+      }
+      res.json({ ok: true, profile });
+    } catch (error) {
+      sendUnexpectedError(res, 'profiles.get', error);
     }
-    res.json({ ok: true, profile });
   });
 
   app.patch('/api/profiles/:id', requireJwt, async (req: Request, res: Response) => {
-    const profileId = Number(req.params.id);
-    const body = req.body as {
-      name?: string;
-      birthYear?: number;
-      type?: 'self' | 'child';
-      allergies?: string[];
-      allergyConfirmations?: Record<string, AllergyConfirmationSource>;
-      childConsent?: boolean;
-      scenario?: 'self' | 'child' | 'both';
-    };
+    const profileId = readProfileId(req, res);
+    if (profileId === null) return;
 
-    if (!body.name?.trim() || !body.type || !Array.isArray(body.allergies)) {
-      res.status(400).json({ ok: false, error: 'Invalid profile payload' });
+    const input = parseProfileInput(req.body);
+    if (!input) {
+      res.status(400).json({ ok: false, error: INVALID_PROFILE_PAYLOAD });
       return;
     }
-
-    const input = {
-      name: body.name.trim(),
-      birthYear: Number(body.birthYear) || new Date().getFullYear(),
-      type: body.type,
-      allergies: body.allergies,
-      allergyConfirmations: body.allergyConfirmations,
-      childConsent: body.childConsent,
-      scenario: body.scenario,
-    };
 
     const validationError = validateProfilePayload(input);
     if (validationError) {
@@ -105,25 +97,28 @@ export function registerProfileRoutes(app: Express) {
     try {
       const profile = await updateProfileForUser(req.authUser!.sub, profileId, input);
       if (!profile) {
-        res.status(404).json({ ok: false, error: 'Profile not found' });
+        res.status(404).json({ ok: false, error: PROFILE_NOT_FOUND });
         return;
       }
       res.json({ ok: true, profile });
     } catch (error) {
-      res.status(400).json({
-        ok: false,
-        error: error instanceof Error ? error.message : 'Failed to update profile',
-      });
+      sendUnexpectedError(res, 'profiles.update', error);
     }
   });
 
   app.delete('/api/profiles/:id', requireJwt, async (req: Request, res: Response) => {
-    const profileId = Number(req.params.id);
-    const deleted = await deleteProfileForUser(req.authUser!.sub, profileId);
-    if (!deleted) {
-      res.status(404).json({ ok: false, error: 'Profile not found' });
-      return;
+    const profileId = readProfileId(req, res);
+    if (profileId === null) return;
+
+    try {
+      const deleted = await deleteProfileForUser(req.authUser!.sub, profileId);
+      if (!deleted) {
+        res.status(404).json({ ok: false, error: PROFILE_NOT_FOUND });
+        return;
+      }
+      res.json({ ok: true });
+    } catch (error) {
+      sendUnexpectedError(res, 'profiles.delete', error);
     }
-    res.json({ ok: true });
   });
 }
