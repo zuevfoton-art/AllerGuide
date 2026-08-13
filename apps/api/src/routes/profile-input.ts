@@ -39,7 +39,8 @@ function parseConfirmations(
   return confirmations;
 }
 
-export function parseProfileId(rawId: string): number | null {
+export function parseProfileId(rawId: unknown): number | null {
+  if (typeof rawId !== 'string') return null;
   if (!/^[1-9]\d*$/.test(rawId)) return null;
   const profileId = Number(rawId);
   return Number.isSafeInteger(profileId) ? profileId : null;
