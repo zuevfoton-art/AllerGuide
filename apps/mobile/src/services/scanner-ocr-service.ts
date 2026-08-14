@@ -26,7 +26,6 @@ import {
 } from '@/src/services/scan-analysis';
 import {
   DishVisionScanError,
-  isDishVisionScanError,
   tryDishVisionFirst,
 } from '@/src/services/scanner-dish-vision-service';
 
