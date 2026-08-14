@@ -1,9 +1,9 @@
 import {
   clampPollenUpiIndex,
   interpolateUpiAt,
+  OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   parseHourlyTimestamp,
   pollenUpiFromConcentration,
-  POLLEN_MAP_TAXON_IDS,
   type HourlySample,
   type PollenMapTaxonId,
   type PollenUpiIndex,
@@ -21,7 +21,7 @@ export async function fetchPollenHourlySeries(
   longitude: number,
 ): Promise<PollenHourlySeries | null> {
   try {
-    const taxa = POLLEN_MAP_TAXON_IDS.join(',');
+    const taxa = OPEN_METEO_POLLEN_MAP_TAXON_IDS.join(',');
     const url =
       `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}` +
       `&longitude=${longitude}&timezone=auto&forecast_days=2&hourly=${taxa}`;
@@ -34,7 +34,7 @@ export async function fetchPollenHourlySeries(
     const times = (payload.hourly?.time as string[] | undefined) ?? [];
     const series: PollenHourlySeries = {};
 
-    for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+    for (const taxonId of OPEN_METEO_POLLEN_MAP_TAXON_IDS) {
       const values = payload.hourly?.[taxonId] as (number | null)[] | undefined;
       if (!values) continue;
       const samples: HourlySample<number>[] = [];

@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   buildNearbyPollenSamplePoints,
   buildYandexPollenUrl,
+  OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   parseOpenMeteoCurrentPollen,
   parseCurrentPollenMapReadings,
   POLLEN_MAP_TAXON_IDS,
+  POLLEN_TYPE_GROUP_BY_TAXON,
   resolveScaledPollenReading,
   selectLowPollenLocations,
 } from './pollen-map';
@@ -30,7 +32,9 @@ describe('pollen-map', () => {
       ['birch-pollen'],
     );
 
-    expect(readings.map((reading) => reading.taxonId)).toEqual(POLLEN_MAP_TAXON_IDS);
+    expect(readings.map((reading) => reading.taxonId)).toEqual(
+      OPEN_METEO_POLLEN_MAP_TAXON_IDS,
+    );
     expect(readings.map((reading) => reading.level)).toEqual([
       'high',
       'mid',
@@ -116,9 +120,18 @@ describe('pollen-map', () => {
     expect(pollenTaxonToGoogleMapType('birch_pollen')).toBe('TREE_UPI');
     expect(pollenTaxonToGoogleMapType('alder_pollen')).toBe('TREE_UPI');
     expect(pollenTaxonToGoogleMapType('olive_pollen')).toBe('TREE_UPI');
+    expect(pollenTaxonToGoogleMapType('oak_pollen')).toBe('TREE_UPI');
+    expect(pollenTaxonToGoogleMapType('japanese_cedar_pollen')).toBe('TREE_UPI');
     expect(pollenTaxonToGoogleMapType('grass_pollen')).toBe('GRASS_UPI');
     expect(pollenTaxonToGoogleMapType('ragweed_pollen')).toBe('WEED_UPI');
     expect(pollenTaxonToGoogleMapType('mugwort_pollen')).toBe('WEED_UPI');
+  });
+
+  it('assigns a TREE/GRASS/WEED group to every map taxon', () => {
+    for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+      expect(['TREE', 'GRASS', 'WEED']).toContain(POLLEN_TYPE_GROUP_BY_TAXON[taxonId]);
+    }
+    expect(POLLEN_MAP_TAXON_IDS).toHaveLength(17);
   });
 
   it('validates Google pollen map types and slippy-map tile coordinates', () => {

@@ -9,11 +9,20 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import type { PollenMapTaxonId, PollenPlantDetail, PollenTierLevel } from '@allerguide/core';
+import {
+  POLLEN_TYPE_GROUP_BY_TAXON,
+  type PollenMapTaxonId,
+  type PollenPlantDetail,
+  type PollenTierLevel,
+  type PollenTypeGroup,
+} from '@allerguide/core';
 import { PollenPlantSheet } from '@/src/components/PollenPlantSheet';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { POLLEN_TYPE_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 import type { MapAllergenChipItem } from '@/src/components/MapAllergenChips';
+
+const TYPE_GROUP_ORDER: PollenTypeGroup[] = ['TREE', 'GRASS', 'WEED'];
 
 interface MapPollenAllergenModalProps {
   visible: boolean;
@@ -43,6 +52,17 @@ export function MapPollenAllergenModal({
   useEffect(() => {
     if (!visible) setInfoTaxonId(null);
   }, [visible]);
+
+  const groupedItems = useMemo(
+    () =>
+      TYPE_GROUP_ORDER.map((group) => ({
+        group,
+        items: items.filter(
+          (item) => POLLEN_TYPE_GROUP_BY_TAXON[item.taxonId] === group,
+        ),
+      })).filter((section) => section.items.length > 0),
+    [items],
+  );
 
   return (
     <Modal
@@ -106,50 +126,59 @@ export function MapPollenAllergenModal({
               <PollenPlantSheet detail={plants[infoTaxonId] ?? null} />
             ) : (
               <>
-                {items.map((item) => {
-                  const isSelected = item.taxonId === selectedTaxonId;
-                  const dotColor = levelColor(item.level, theme);
-                  return (
-                    <View
-                      key={item.taxonId}
-                      style={[styles.row, isSelected && styles.rowSelected]}>
-                      <Pressable
-                        style={styles.rowMain}
-                        onPress={() => {
-                          onSelect(item.taxonId);
-                          onClose();
-                        }}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: isSelected }}
-                        testID={`map-allergen-option-${item.taxonId}`}>
-                        <View style={[styles.dot, { backgroundColor: dotColor }]} />
-                        <Text style={[styles.label, isSelected && styles.labelSelected]}>
-                          {labelForTaxon(item.taxonId)}
-                        </Text>
-                        {item.profileRelevant ? (
-                          <Text style={styles.you}>{t('map.pollenYou')}</Text>
-                        ) : null}
-                        {isSelected ? (
-                          <Ionicons name="checkmark" size={18} color={theme.colors.accent} />
-                        ) : null}
-                      </Pressable>
-                      <Pressable
-                        style={styles.infoBtn}
-                        onPress={() => setInfoTaxonId(item.taxonId)}
-                        accessibilityRole="button"
-                        accessibilityLabel={t('map.allergenInfoA11y', {
-                          taxon: labelForTaxon(item.taxonId),
-                        })}
-                        testID={`map-allergen-info-${item.taxonId}`}>
-                        <Ionicons
-                          name="help-circle-outline"
-                          size={22}
-                          color={theme.colors.accent}
-                        />
-                      </Pressable>
-                    </View>
-                  );
-                })}
+                {groupedItems.map((section) => (
+                  <View key={section.group} style={styles.groupBlock}>
+                    <Text
+                      style={styles.groupTitle}
+                      testID={`map-allergen-group-${section.group.toLowerCase()}`}>
+                      {t(POLLEN_TYPE_LABEL_KEYS[section.group] as 'map.pollenTypeTree')}
+                    </Text>
+                    {section.items.map((item) => {
+                      const isSelected = item.taxonId === selectedTaxonId;
+                      const dotColor = levelColor(item.level, theme);
+                      return (
+                        <View
+                          key={item.taxonId}
+                          style={[styles.row, isSelected && styles.rowSelected]}>
+                          <Pressable
+                            style={styles.rowMain}
+                            onPress={() => {
+                              onSelect(item.taxonId);
+                              onClose();
+                            }}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: isSelected }}
+                            testID={`map-allergen-option-${item.taxonId}`}>
+                            <View style={[styles.dot, { backgroundColor: dotColor }]} />
+                            <Text style={[styles.label, isSelected && styles.labelSelected]}>
+                              {labelForTaxon(item.taxonId)}
+                            </Text>
+                            {item.profileRelevant ? (
+                              <Text style={styles.you}>{t('map.pollenYou')}</Text>
+                            ) : null}
+                            {isSelected ? (
+                              <Ionicons name="checkmark" size={18} color={theme.colors.accent} />
+                            ) : null}
+                          </Pressable>
+                          <Pressable
+                            style={styles.infoBtn}
+                            onPress={() => setInfoTaxonId(item.taxonId)}
+                            accessibilityRole="button"
+                            accessibilityLabel={t('map.allergenInfoA11y', {
+                              taxon: labelForTaxon(item.taxonId),
+                            })}
+                            testID={`map-allergen-info-${item.taxonId}`}>
+                            <Ionicons
+                              name="help-circle-outline"
+                              size={22}
+                              color={theme.colors.accent}
+                            />
+                          </Pressable>
+                        </View>
+                      );
+                    })}
+                  </View>
+                ))}
                 <Text style={styles.treeHint} testID="map-tree-species-levels-hint">
                   {t('map.pollenTreeSpeciesLevelsHint')}
                 </Text>
@@ -222,6 +251,15 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     scroll: { flexGrow: 0 },
     scrollContent: { gap: 8, paddingBottom: 8 },
+    groupBlock: { gap: 8 },
+    groupTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+      marginTop: 4,
+    },
     row: {
       flexDirection: 'row',
       alignItems: 'center',

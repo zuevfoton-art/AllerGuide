@@ -5,8 +5,17 @@ import {
   pollenUpiCategory,
   pollenUpiFromConcentration,
 } from './pollen-upi';
-import { parseDailyPollenForecast, readingToUpiSnapshot } from './pollen-map';
-import { buildPollenPlantDetail, googlePlantCodeToTaxon } from './pollen-plant-detail';
+import {
+  parseDailyPollenForecast,
+  POLLEN_TYPE_GROUP_BY_TAXON,
+  readingToUpiSnapshot,
+} from './pollen-map';
+import {
+  buildPollenPlantDetail,
+  GOOGLE_POLLEN_PLANT_CODES,
+  googlePlantCodeToTaxon,
+} from './pollen-plant-detail';
+import { getPollenTaxon } from './pollen-taxonomy';
 import {
   adairClinicToMapPoi,
   catalogPlaceToMapPoi,
@@ -55,6 +64,20 @@ describe('parseDailyPollenForecast', () => {
 });
 
 describe('pollen-plant-detail', () => {
+  it('resolves every documented Google plant code to a known taxon', () => {
+    expect(GOOGLE_POLLEN_PLANT_CODES).toHaveLength(17);
+    for (const code of GOOGLE_POLLEN_PLANT_CODES) {
+      const taxonId = googlePlantCodeToTaxon(code);
+      expect(taxonId, `plant code ${code} must map to a taxon`).not.toBeNull();
+      expect(getPollenTaxon(taxonId!)?.labelRu).toBeTruthy();
+      expect(POLLEN_TYPE_GROUP_BY_TAXON[taxonId!]).toBeTruthy();
+    }
+    expect(googlePlantCodeToTaxon('COTTONWOOD')).toBe('poplar_pollen');
+    expect(googlePlantCodeToTaxon('ASH')).toBe('ash_pollen');
+    expect(googlePlantCodeToTaxon('JAPANESE_CEDAR')).toBe('japanese_cedar_pollen');
+    expect(googlePlantCodeToTaxon('UNKNOWN_PLANT')).toBeNull();
+  });
+
   it('maps Google plant codes and attaches core cross-reactions', () => {
     expect(googlePlantCodeToTaxon('BIRCH')).toBe('birch_pollen');
     const detail = buildPollenPlantDetail('birch_pollen', {

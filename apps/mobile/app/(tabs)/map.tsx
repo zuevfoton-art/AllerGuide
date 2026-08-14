@@ -7,7 +7,7 @@ import {
   Pressable,
   Linking,
 } from 'react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import {
   ADAIR_DOCTORS,
@@ -18,10 +18,9 @@ import {
   clampPollenUpiIndex,
   getPollenPeaksForMonth,
   formatPollenMonth,
+  OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_MAP_SCALE_ZOOM,
   POLLEN_MAP_TAXON_IDS,
-  PRIMARY_POLLEN_MAP_TAXON_IDS,
-  SECONDARY_POLLEN_MAP_TAXON_IDS,
   isTreeSpeciesPollenTaxon,
   pollenTaxonToGoogleMapType,
   readingToUpiSnapshot,
@@ -74,20 +73,12 @@ import {
   MAP_POLLEN_PLUME_ENABLED,
   YANDEX_MAP_INTERACTIVE_ENABLED,
 } from '@/src/constants/features';
+import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 
 type MapLayerMode = 'pollen' | 'places' | 'both';
 
 /** Near-real-time refresh while the Map tab is focused. */
 const MAP_LIVE_REFRESH_MS = 15 * 60 * 1000;
-
-const TAXON_LABEL_KEYS: Record<PollenMapTaxonId, string> = {
-  birch_pollen: 'map.pollenBirch',
-  grass_pollen: 'map.pollenGrass',
-  ragweed_pollen: 'map.pollenRagweed',
-  alder_pollen: 'map.pollenAlder',
-  mugwort_pollen: 'map.pollenMugwort',
-  olive_pollen: 'map.pollenOlive',
-};
 
 const LEVEL_LABEL_KEYS: Record<PollenTierLevel, string> = {
   low: 'map.pollenLow',
@@ -254,8 +245,17 @@ export default function MapScreen() {
   });
 
   const chipItems = useMemo(() => {
-    const ids = [...PRIMARY_POLLEN_MAP_TAXON_IDS, ...SECONDARY_POLLEN_MAP_TAXON_IDS];
-    return ids.map((taxonId) => {
+    // Open-Meteo species are always listed; Google-only species (oak, pine, …)
+    // appear only when the current snapshot actually carries their data.
+    const taxaWithData = new Set<string>([
+      ...Object.keys(pollenSnapshot?.upiByTaxon ?? {}),
+      ...(pollenSnapshot?.readings.map((reading) => reading.taxonId) ?? []),
+    ]);
+    return POLLEN_MAP_TAXON_IDS.filter(
+      (taxonId) =>
+        (OPEN_METEO_POLLEN_MAP_TAXON_IDS as readonly string[]).includes(taxonId) ||
+        taxaWithData.has(taxonId),
+    ).map((taxonId) => {
       const reading = pollenSnapshot?.readings.find((item) => item.taxonId === taxonId);
       return {
         taxonId,
@@ -264,6 +264,15 @@ export default function MapScreen() {
       };
     });
   }, [pollenSnapshot]);
+
+  useEffect(() => {
+    // A Google-only species can disappear when the snapshot falls back to
+    // Open-Meteo; reset the selection so the UI never points at a hidden chip.
+    if (pollenSnapshot && !chipItems.some((item) => item.taxonId === selectedTaxonId)) {
+      setSelectedTaxonId('birch_pollen');
+      setSelectedForecastDay(null);
+    }
+  }, [chipItems, pollenSnapshot, selectedTaxonId]);
 
   const markers = useMemo(() => {
     if (!showPlaceMarkers) return [];

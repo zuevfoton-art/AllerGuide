@@ -3,6 +3,7 @@ import {
   getPollenTaxon,
   profileMatchesPollenTaxon,
   type OpenMeteoPollenTaxonId,
+  type PollenTaxonId,
 } from './pollen-taxonomy';
 import type { ProfileAllergenId } from './profile-allergens';
 import {
@@ -22,12 +23,67 @@ export const SECONDARY_POLLEN_MAP_TAXON_IDS = [
   'olive_pollen',
 ] as const satisfies readonly OpenMeteoPollenTaxonId[];
 
-export const POLLEN_MAP_TAXON_IDS = [
+/** Taxa with Open-Meteo hourly coverage — the only ones we may request from Open-Meteo. */
+export const OPEN_METEO_POLLEN_MAP_TAXON_IDS = [
   ...PRIMARY_POLLEN_MAP_TAXON_IDS,
   ...SECONDARY_POLLEN_MAP_TAXON_IDS,
 ] as const;
 
+/**
+ * Taxa observable only through Google Pollen API plant codes (forecast
+ * `plantIndexes`); Open-Meteo has no hourly series for them.
+ */
+export const GOOGLE_PLANT_POLLEN_MAP_TAXON_IDS = [
+  'oak_pollen',
+  'hazel_pollen',
+  'maple_pollen',
+  'ash_pollen',
+  'poplar_pollen',
+  'elm_pollen',
+  'juniper_pollen',
+  'pine_pollen',
+  'cypress_pine_pollen',
+  'japanese_cedar_pollen',
+  'japanese_cypress_pollen',
+] as const satisfies readonly PollenTaxonId[];
+
+export const POLLEN_MAP_TAXON_IDS = [
+  ...OPEN_METEO_POLLEN_MAP_TAXON_IDS,
+  ...GOOGLE_PLANT_POLLEN_MAP_TAXON_IDS,
+] as const;
+
 export type PollenMapTaxonId = (typeof POLLEN_MAP_TAXON_IDS)[number];
+
+export type PollenTypeGroup = 'TREE' | 'GRASS' | 'WEED';
+
+/** Google Pollen type (TREE/GRASS/WEED) each map taxon belongs to. */
+export const POLLEN_TYPE_GROUP_BY_TAXON: Record<PollenMapTaxonId, PollenTypeGroup> = {
+  birch_pollen: 'TREE',
+  alder_pollen: 'TREE',
+  olive_pollen: 'TREE',
+  oak_pollen: 'TREE',
+  hazel_pollen: 'TREE',
+  maple_pollen: 'TREE',
+  ash_pollen: 'TREE',
+  poplar_pollen: 'TREE',
+  elm_pollen: 'TREE',
+  juniper_pollen: 'TREE',
+  pine_pollen: 'TREE',
+  cypress_pine_pollen: 'TREE',
+  japanese_cedar_pollen: 'TREE',
+  japanese_cypress_pollen: 'TREE',
+  grass_pollen: 'GRASS',
+  ragweed_pollen: 'WEED',
+  mugwort_pollen: 'WEED',
+};
+
+export function pollenMapTaxonTypeGroup(taxonId: PollenMapTaxonId): PollenTypeGroup {
+  return POLLEN_TYPE_GROUP_BY_TAXON[taxonId];
+}
+
+export function isPollenMapTaxonId(value: string): value is PollenMapTaxonId {
+  return (POLLEN_MAP_TAXON_IDS as readonly string[]).includes(value);
+}
 export type PollenMapScale = 'place' | 'city' | 'region';
 export type PollenMapDirection =
   | 'north'
@@ -138,7 +194,7 @@ export function parseCurrentPollenMapReadings(
 
   const readings: PollenMapReading[] = [];
 
-  for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+  for (const taxonId of OPEN_METEO_POLLEN_MAP_TAXON_IDS) {
     const value = hourly[taxonId]?.[timeIndex];
     if (typeof value !== 'number' || !Number.isFinite(value)) continue;
     readings.push(buildPollenReading(taxonId, value, profileAllergenIds));
@@ -153,7 +209,7 @@ export function parseOpenMeteoCurrentPollen(
 ): PollenMapReading[] {
   const readings: PollenMapReading[] = [];
 
-  for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+  for (const taxonId of OPEN_METEO_POLLEN_MAP_TAXON_IDS) {
     const value = current[taxonId];
     if (typeof value !== 'number' || !Number.isFinite(value)) continue;
     readings.push(buildPollenReading(taxonId, value, profileAllergenIds));
@@ -185,7 +241,7 @@ export function parseDailyPollenForecast(
       byDate.set(date, dayPeaks);
     }
 
-    for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+    for (const taxonId of OPEN_METEO_POLLEN_MAP_TAXON_IDS) {
       const value = hourly[taxonId]?.[index];
       if (typeof value !== 'number' || !Number.isFinite(value)) continue;
       const previous = dayPeaks.get(taxonId);
@@ -199,7 +255,7 @@ export function parseDailyPollenForecast(
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([date, peaks]) => ({
       date,
-      readings: POLLEN_MAP_TAXON_IDS.flatMap((taxonId) => {
+      readings: OPEN_METEO_POLLEN_MAP_TAXON_IDS.flatMap((taxonId) => {
         const value = peaks.get(taxonId);
         return value === undefined
           ? []

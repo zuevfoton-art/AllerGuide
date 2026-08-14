@@ -8,7 +8,7 @@ import {
   parseCurrentPollenMapReadings,
   parseDailyPollenForecast,
   parseProfileAllergenIds,
-  POLLEN_MAP_TAXON_IDS,
+  OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_OPEN_METEO_FORECAST_DAYS,
   type GoogleForecastDayInput,
   type NearbyPollenLocation,
@@ -283,7 +283,7 @@ function readCachedOrCalendar(
 }
 
 function buildOpenMeteoUrl(location: ResolvedLocation): string {
-  const taxa = POLLEN_MAP_TAXON_IDS.join(',');
+  const taxa = OPEN_METEO_POLLEN_MAP_TAXON_IDS.join(',');
   const timezone = encodeURIComponent('auto');
   return (
     `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.lat}` +
@@ -325,7 +325,7 @@ async function fetchNearbyPollenLocations(
 function buildNearbyOpenMeteoUrl(points: NearbyPollenSamplePoint[]): string {
   const latitudes = points.map((point) => point.latitude.toFixed(4)).join(',');
   const longitudes = points.map((point) => point.longitude.toFixed(4)).join(',');
-  const taxa = POLLEN_MAP_TAXON_IDS.join(',');
+  const taxa = OPEN_METEO_POLLEN_MAP_TAXON_IDS.join(',');
   return (
     `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitudes}` +
     `&longitude=${longitudes}&timezone=auto&forecast_days=1&current=${taxa}`

@@ -2,13 +2,51 @@ import { getCrossReactionsFor } from './cross-reactions';
 import { getPollenTaxon, type OpenMeteoPollenTaxonId } from './pollen-taxonomy';
 import type { PollenMapTaxonId } from './pollen-map';
 
-/** Google Pollen API plant codes we map onto Open-Meteo taxa. */
+/**
+ * All plant codes documented by the Google Pollen API (Pollen Index page).
+ * COTTONWOOD is the Populus genus, so it maps onto our poplar taxon.
+ */
+export const GOOGLE_POLLEN_PLANT_CODES = [
+  'ALDER',
+  'ASH',
+  'BIRCH',
+  'COTTONWOOD',
+  'ELM',
+  'MAPLE',
+  'OLIVE',
+  'JUNIPER',
+  'OAK',
+  'PINE',
+  'CYPRESS_PINE',
+  'HAZEL',
+  'GRAMINALES',
+  'JAPANESE_CEDAR',
+  'JAPANESE_CYPRESS',
+  'RAGWEED',
+  'MUGWORT',
+] as const;
+
+export type GooglePollenPlantCode = (typeof GOOGLE_POLLEN_PLANT_CODES)[number];
+
+/** Google Pollen API plant codes mapped onto canonical pollen taxa. */
 export const GOOGLE_PLANT_CODE_TO_TAXON: Record<string, PollenMapTaxonId> = {
-  BIRCH: 'birch_pollen',
   ALDER: 'alder_pollen',
+  ASH: 'ash_pollen',
+  BIRCH: 'birch_pollen',
+  COTTONWOOD: 'poplar_pollen',
+  ELM: 'elm_pollen',
+  MAPLE: 'maple_pollen',
   OLIVE: 'olive_pollen',
+  JUNIPER: 'juniper_pollen',
+  OAK: 'oak_pollen',
+  PINE: 'pine_pollen',
+  CYPRESS_PINE: 'cypress_pine_pollen',
+  HAZEL: 'hazel_pollen',
+  // GRASS is not in Google's documented plant enum but appears in practice.
   GRASS: 'grass_pollen',
   GRAMINALES: 'grass_pollen',
+  JAPANESE_CEDAR: 'japanese_cedar_pollen',
+  JAPANESE_CYPRESS: 'japanese_cypress_pollen',
   RAGWEED: 'ragweed_pollen',
   MUGWORT: 'mugwort_pollen',
 };
