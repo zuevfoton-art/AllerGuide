@@ -161,7 +161,8 @@ describe('pollen forecast routes', () => {
       { code: 'OLIVE', taxonId: 'olive_pollen', hasIndex: false },
     ]);
     expect(fetchMock).toHaveBeenCalled();
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('languageCode=en');
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    expect(String(calls[0]?.[0])).toContain('languageCode=en');
   });
 
   it('passes a supported lang through to Google and caches per language', async () => {
@@ -179,7 +180,8 @@ describe('pollen forecast routes', () => {
     await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62&lang=xx');
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('languageCode=ru');
-    expect(String(fetchMock.mock.calls[1]?.[0])).toContain('languageCode=en');
+    const calls = fetchMock.mock.calls as unknown as [string][];
+    expect(String(calls[0]?.[0])).toContain('languageCode=ru');
+    expect(String(calls[1]?.[0])).toContain('languageCode=en');
   });
 });
