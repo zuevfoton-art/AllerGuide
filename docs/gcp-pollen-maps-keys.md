@@ -67,9 +67,10 @@ Pollen Usage — Pro SKU (~5 000 free/мес, далее платно за 1�
 | **Maps SDK for iOS** | Basemap в staging iOS |
 | **Maps JavaScript API** | Basemap + overlay на web |
 | **Pollen API** | `heatmapTiles` + `forecast:lookup` через наш proxy |
-| **Places API** (Nearby Search) | Live рестораны / hospital / pharmacy через `/api/places/nearby` |
+| **Places API (New)** | Live рестораны / кафе / медицина / аптеки через `/api/places/nearby` (`places:searchNearby`). Legacy «Places API» недоступен для новых проектов с 01.03.2025 |
+| **Air Quality API** | `currentConditions:lookup` + AQ heatmap tiles через `/api/air-quality/*` (флаг `AIR_QUALITY_ENABLED`) |
 
-3. Проверка: **Enabled APIs & services** — все четыре в списке.
+3. Проверка: **Enabled APIs & services** — все шесть в списке.
 
 ---
 
