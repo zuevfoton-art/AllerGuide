@@ -1,6 +1,6 @@
-import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CLINICAL_SCALES,
   buildScaleInitialAnswers,
@@ -56,6 +56,8 @@ import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
+import { logCaughtError } from '@/src/services/error-reporting';
+import { confirmDestructiveAction } from '@/src/utils/confirm-destructive-action';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -92,6 +94,7 @@ export default function DiaryScreen() {
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [scalePickerOpen, setScalePickerOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const loadRequestId = useRef(0);
   const localizedSections = useMemo(
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
@@ -182,8 +185,17 @@ export default function DiaryScreen() {
   };
 
   const load = useCallback(async () => {
-    if (!activeProfileId) return;
+    const requestId = loadRequestId.current + 1;
+    loadRequestId.current = requestId;
+    if (!activeProfileId) {
+      setList([]);
+      setPhotoUrisByEntry({});
+      return;
+    }
+
     const entries = await getDiaryEntries(activeProfileId);
+    if (requestId !== loadRequestId.current) return;
+
     setList(entries);
     const attachments = listDiaryAttachmentsForEntries(entries.map((e) => e.id));
     const map: Record<number, string[]> = {};
@@ -208,6 +220,9 @@ export default function DiaryScreen() {
     useCallback(() => {
       setCapabilitiesTick((tick) => tick + 1);
       void load();
+      return () => {
+        loadRequestId.current += 1;
+      };
     }, [load]),
   );
 
@@ -221,7 +236,12 @@ export default function DiaryScreen() {
 
   const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     if (!activeProfileId) return;
-    await addDiaryEntries(activeProfileId, entries);
+    const results = await addDiaryEntries(activeProfileId, entries);
+    const failed = results.find((result) => !result.ok);
+    if (failed && !failed.ok) {
+      logCaughtError('DiaryScreen.handleCreate', new Error(failed.code));
+      return;
+    }
     closeEditor();
     await load();
     void reconcileAllReminders();
@@ -233,30 +253,35 @@ export default function DiaryScreen() {
     details: string,
     photoUris?: string[],
   ) => {
-    await updateDiaryEntry(entry.id, { type, details, photoUris });
+    const result = await updateDiaryEntry(entry.id, { type, details, photoUris });
+    if (!result.ok) {
+      logCaughtError('DiaryScreen.handleUpdate', new Error(result.code));
+      return;
+    }
     closeEditor();
     await load();
     void reconcileAllReminders();
   };
 
   const confirmDelete = (entry: DiaryEntry) => {
-    Alert.alert(
-      t('diary.deleteTitle'),
-      t('diary.deleteMessage', { type: localizeDiaryType(entry.type, localeContent) }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteDiaryEntry(entry.id);
-            closeEditor();
-            await load();
-            void reconcileAllReminders();
-          },
-        },
-      ],
-    );
+    confirmDestructiveAction({
+      title: t('diary.deleteTitle'),
+      message: t('diary.deleteMessage', {
+        type: localizeDiaryType(entry.type, localeContent),
+      }),
+      cancelLabel: t('common.cancel'),
+      confirmLabel: t('common.delete'),
+      onConfirm: async () => {
+        const result = await deleteDiaryEntry(entry.id);
+        if (!result.ok) throw new Error(result.code);
+        closeEditor();
+        await load();
+        void reconcileAllReminders();
+      },
+      onError: (error) => {
+        logCaughtError('DiaryScreen.confirmDelete', error);
+      },
+    });
   };
 
   const openEdit = (entry: DiaryEntry) => {

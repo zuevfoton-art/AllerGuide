@@ -7,6 +7,12 @@ const diaryRows: {
   details: string;
   createdAt: string;
 }[] = [];
+const profiles = [
+  { id: 1, userId: 7 },
+  { id: 3, userId: 7 },
+  { id: 5, userId: 7 },
+  { id: 9, userId: 8 },
+];
 
 let nextId = 1;
 
@@ -17,8 +23,10 @@ const runSync = vi.fn((sql: string, params: unknown[] = []) => {
     return;
   }
   if (sql.startsWith('UPDATE diary_entries')) {
-    const [type, details, id] = params as [string, string, number];
-    const row = diaryRows.find((entry) => entry.id === id);
+    const [type, details, id, profileId] = params as [string, string, number, number];
+    const row = diaryRows.find(
+      (entry) => entry.id === id && entry.profileId === profileId,
+    );
     if (row) {
       row.type = type;
       row.details = details;
@@ -26,13 +34,18 @@ const runSync = vi.fn((sql: string, params: unknown[] = []) => {
     return;
   }
   if (sql.startsWith('DELETE FROM diary_entries')) {
-    const [id] = params as [number];
-    const index = diaryRows.findIndex((entry) => entry.id === id);
+    const [id, profileId] = params as [number, number];
+    const index = diaryRows.findIndex(
+      (entry) => entry.id === id && entry.profileId === profileId,
+    );
     if (index >= 0) diaryRows.splice(index, 1);
   }
 });
 
 const getAllSync = vi.fn((sql: string, params: unknown[] = []) => {
+  if (sql.includes('FROM profiles WHERE userId = ?')) {
+    return profiles.filter((profile) => profile.userId === params[0]);
+  }
   if (sql.includes('WHERE profileId = ?')) {
     const [profileId] = params as [number];
     return diaryRows
@@ -40,6 +53,25 @@ const getAllSync = vi.fn((sql: string, params: unknown[] = []) => {
       .sort((a, b) => b.id - a.id);
   }
   return [...diaryRows].sort((a, b) => b.id - a.id);
+});
+
+const getFirstSync = vi.fn((sql: string, params: unknown[] = []) => {
+  if (sql.includes('WHERE profileId = ?') && sql.includes('AND type = ?')) {
+    return (
+      diaryRows
+        .filter(
+          (entry) =>
+            entry.profileId === params[0] &&
+            entry.type === params[1] &&
+            entry.createdAt === params[2],
+        )
+        .sort((left, right) => right.id - left.id)[0] ?? null
+    );
+  }
+  if (sql.includes('FROM diary_entries WHERE id = ?')) {
+    return diaryRows.find((entry) => entry.id === params[0]) ?? null;
+  }
+  return null;
 });
 
 vi.mock('react-native', () => ({
@@ -50,8 +82,12 @@ vi.mock('@/src/services/analytics-service', () => ({
   trackEvent: vi.fn(),
 }));
 
+vi.mock('@/src/services/auth-service', () => ({
+  getCurrentUserId: () => 7,
+}));
+
 vi.mock('@/src/db/init', () => ({
-  getDb: () => ({ runSync, getAllSync, getFirstSync: vi.fn() }),
+  getDb: () => ({ runSync, getAllSync, getFirstSync }),
 }));
 
 vi.mock('@/src/services/diary-attachment-service', () => ({
@@ -66,6 +102,7 @@ describe('diary-service', () => {
     nextId = 1;
     runSync.mockClear();
     getAllSync.mockClear();
+    getFirstSync.mockClear();
   });
 
   it('adds a diary entry for the profile', async () => {
@@ -139,5 +176,43 @@ describe('diary-service', () => {
     });
 
     expect(listAllDiaryEntries()).toHaveLength(2);
+  });
+
+  it('rejects access to another users profile and diary entry', async () => {
+    diaryRows.push({
+      id: 40,
+      profileId: 9,
+      type: 'Заметка',
+      details: '{"v":1,"answers":{"noteBody":"private"}}',
+      createdAt: '2026-06-20T09:00:00.000Z',
+    });
+    const {
+      addDiaryEntry,
+      deleteDiaryEntry,
+      getDiaryEntries,
+      listAllDiaryEntries,
+      updateDiaryEntry,
+    } = await import('./diary-service');
+
+    await expect(
+      addDiaryEntry({
+        profileId: 9,
+        type: 'Заметка',
+        details: '{}',
+        createdAt: '2026-06-20T10:00:00.000Z',
+      }),
+    ).resolves.toEqual({ ok: false, code: 'profile_not_found' });
+    await expect(
+      updateDiaryEntry(40, { type: 'Заметка', details: 'changed' }),
+    ).resolves.toEqual({ ok: false, code: 'entry_not_found' });
+    await expect(deleteDiaryEntry(40)).resolves.toEqual({
+      ok: false,
+      code: 'entry_not_found',
+    });
+    await expect(getDiaryEntries(9)).resolves.toEqual([]);
+    expect(listAllDiaryEntries()).not.toContainEqual(
+      expect.objectContaining({ id: 40 }),
+    );
+    expect(diaryRows.find((entry) => entry.id === 40)?.details).toContain('private');
   });
 });
