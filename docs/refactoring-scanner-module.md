@@ -25,7 +25,7 @@ OCR / dish-vision), но сделать границы данных и ввод�
 - `apps/mobile/src/services/scan-history-service.ts`;
 - `apps/mobile/src/services/safe-products-service.ts`;
 - `apps/mobile/src/services/alias-feedback-service.ts`;
-- `apps/mobile/src/services/scanner-service.ts`;
+- `apps/mobile/src/services/scanner-service.ts` (баррель; реализация в `scan-analysis` / `scanner-barcode-service` / `scanner-ocr-service` / `scanner-dish-vision-service`);
 - `apps/mobile/src/services/owned-profiles.ts`;
 - `apps/mobile/app/(tabs)/scanner.tsx`;
 - `apps/mobile/src/db/init.ts` / `web-store.ts`;
@@ -191,8 +191,12 @@ LLM не утекают.
 
 Плюсы: ниже связность, проще тестировать ветки.
 Минусы: высокий риск регрессий VL-first пути, который уже покрыт golden /
-dish-vision тестами. Для этой итерации важнее границы данных, а не
+dish-vision тестами. Для той итерации важнее были границы данных, а не
 перестановка pipeline.
+
+Позже сделано без смены поведения: `scan-analysis` / `scanner-barcode-service` /
+`scanner-ocr-service` / `scanner-dish-vision-service`, баррель `scanner-service.ts`
+(PR #236). VL-first путь и публичный импорт экрана не менялись.
 
 ### C. Оставить клиентский `prompt` в кэше «для гибкости»
 

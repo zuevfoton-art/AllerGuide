@@ -281,12 +281,17 @@ Barrel: `index.ts`. Pure TS.
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |
+| `YC_STT` | `features.ts` | `YC_STT_ENABLED` |
+| `YC_STT_MIC` | `features.ts` | `YC_STT` + `/api/stt` (cloud mic) |
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |
+| `MAP_POLLEN_GOOGLE_PRIMARY` | `features.ts` | `/api/pollen/forecast` |
+| `MAP_POLLEN_PLUME` | `features.ts` | hourly plume overlay |
+| `YANDEX_MAP_INTERACTIVE` | `features.ts` | `YANDEX_MAPS_INTERACTIVE_ENABLED` + JS key |
 | `MAP_PLACES` | `features.ts` / `place-service.ts` | `MAP_PLACES_ENABLED` + `GOOGLE_PLACES_API_KEY` (не Pollen-only) |
+| `LIVE_MAP` | `features.ts` (alias `MAP_PLACES`) | `MAP_PLACES_ENABLED` |
 | `AIR_QUALITY=google` | `features.ts` | `AIR_QUALITY_ENABLED` + `GOOGLE_AIR_QUALITY_API_KEY` (не Pollen-only) |
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
-| `LIVE_MAP` | `place-service.ts` | — |
 | `SENTRY_DSN` | `error-reporting.ts` | — |
 | `API_URL` | `api-client` и др. | — |
 

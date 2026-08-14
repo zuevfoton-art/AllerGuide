@@ -49,6 +49,8 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage must run on Yandex Cloud (no Replit dependency); see [`docs/migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
+- `pnpm yc-stage-enable-places-air-quality` — Lockbox Places + Air Quality (`GOOGLE_PLACES_API_KEY` / `GOOGLE_AIR_QUALITY_API_KEY`, not the Pollen-only key); see [`docs/gcp-pollen-maps-keys.md`](docs/gcp-pollen-maps-keys.md)
+- `pnpm yc-stage-enable-yandex-maps` / `yc-stage-enable-scan-intent-search` / `yc-stage-enable-dish-vision` — other Lockbox feature enable scripts
 - `pnpm yc-stage-phase2` — Stage clients must target YC only (EAS `staging`, not Replit); see same doc §Phase 2
 - `pnpm yc-stage-phase3` — Replit deploy artifacts removed from repo; see same doc §Phase 3
 - `pnpm yc-stage-phase4` — Secrets/data hygiene (Lockbox/GH/EAS policy); see same doc §Phase 4 · [`docs/staging-secrets-inventory.md`](docs/staging-secrets-inventory.md)

@@ -29,7 +29,7 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `SCAN_REQUIRE_AUTH` | Scan auth | `true` |
 | `CORS_ORIGINS` | Web CORS | staging.aclearo.* + localhost |
 | `POLLEN_HEATMAP_ENABLED` | Pollen proxy | `true` |
-| `GOOGLE_POLLEN_API_KEY` | Google Pollen API | **server only**; never EAS |
+| `GOOGLE_POLLEN_API_KEY` | Google Pollen API | **server only**; never EAS; not used for Places/AQ |
 | `POLLEN_RATE_LIMIT_*` | Rate limits | optional defaults |
 | `MAP_PLACES_ENABLED` | Places API (New) proxy | `true` on staging |
 | `GOOGLE_PLACES_API_KEY` | Places API (New) | **server only**; never EAS / `EXPO_PUBLIC_*` |

@@ -261,6 +261,9 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 | `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
+| `MAP_POLLEN_GOOGLE_PRIMARY` | `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | Числа/прогноз карты с Google Pollen (`/api/pollen/forecast`); wellness остаётся на Open-Meteo |
+| `MAP_POLLEN_PLUME_ENABLED` | `EXPO_PUBLIC_MAP_POLLEN_PLUME` | Geo-шлейф + hourly series на карте |
+| `YANDEX_MAP_INTERACTIVE_ENABLED` | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | Интерактивный Yandex JS embed (через API) |
 | `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` | Live Places API (New) searchNearby через API (рестораны / кафе / медицина / аптеки) |
 | `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY=google` | Google Air Quality (UAQI + советы) через API proxy |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
@@ -335,6 +338,8 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 ---
 
 ## Сканер: сквозной поток
+
+Публичный импорт экрана — `scanner-service` (баррель). Реализация: `scanner-barcode-service` (`scanBarcode` / `scanText`), `scanner-ocr-service` (`scanFromOcr` / OCR), `scanner-dish-vision-service` (VL), `scan-analysis` (`analyzeText`).
 
 ### Режимы
 
@@ -558,9 +563,17 @@ Drizzle-объекты схемо-квалифицированы — код за
 ### Pollen heatmap (`routes/pollen.ts`)
 
 - Proxy Google Pollen UPI tiles при `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY`
-- Proxy Google Pollen Forecast (`GET /api/pollen/forecast`) и Places Nearby (`GET /api/places/nearby`)
-- Mobile: `EXPO_PUBLIC_POLLEN_HEATMAP=google` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (+ optional `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_PLACES`)
+- Proxy Google Pollen Forecast (`GET /api/pollen/forecast`) — тот же `GOOGLE_POLLEN_API_KEY`
+- Mobile: `EXPO_PUBLIC_POLLEN_HEATMAP=google` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (+ optional `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`)
 - Default / offline-safe: Yandex map + Open-Meteo через `pollen-map-service`
+
+### Places + Air Quality (`routes/places.ts`, `routes/air-quality.ts`)
+
+- Places Nearby (`GET /api/places/nearby`) при `MAP_PLACES_ENABLED` + `GOOGLE_PLACES_API_KEY` (или общий `GOOGLE_MAPS_SERVER_API_KEY`)
+- Air Quality current + heatmap (`GET /api/air-quality/*`) при `AIR_QUALITY_ENABLED` + `GOOGLE_AIR_QUALITY_API_KEY` (или тот же `GOOGLE_MAPS_SERVER_API_KEY`)
+- `GOOGLE_POLLEN_API_KEY` **не** используется как Places/AQ credential (Pollen-only restriction)
+- Mobile: `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_AIR_QUALITY=google`
+- Staging Lockbox: `pnpm yc-stage-enable-places-air-quality`
 
 ### Market (`routes/market.ts`)
 
@@ -760,6 +773,9 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |
 | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | Google как primary basemap map tab |
+| `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | `false` | Google Pollen как числовой/прогнозный фид карты |
+| `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` | Plume overlay на интерактивной карте |
+| `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` | Yandex JS embed basemap через API |
 | `EXPO_PUBLIC_MAP_PLACES` | `false` | Live Places (New) searchNearby via API |
 | `EXPO_PUBLIC_LIVE_MAP` | `false` | Alias of `EXPO_PUBLIC_MAP_PLACES` |
 | `EXPO_PUBLIC_AIR_QUALITY` | `off` | `google` включает Google Air Quality (wellness + AQ-слой карты) |
@@ -777,7 +793,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `JWT_SECRET` | Mobile JWT signing |
 | `SESSION_SECRET` | Replit session cookies |
 | `CORS_ORIGINS` | CORS allowlist |
-| `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
+| `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*`, `PLACES_RATE_LIMIT_*` | Rate limiting |
 | `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
@@ -785,9 +801,10 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `YC_OCR_ENABLED` | Vision OCR |
 | `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
-| `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy |
-| `MAP_PLACES_ENABLED`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy |
-| `AIR_QUALITY_ENABLED`, `GOOGLE_AIR_QUALITY_API_KEY` | Air Quality current + heatmap proxy |
+| `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy (не Places/AQ) |
+| `MAP_PLACES_ENABLED`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy (не Pollen-only key) |
+| `AIR_QUALITY_ENABLED`, `GOOGLE_AIR_QUALITY_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Air Quality current + heatmap proxy (не Pollen-only key) |
+| `YANDEX_MAPS_INTERACTIVE_ENABLED`, `YANDEX_MAPS_JS_API_KEY`, `MAPS_RATE_LIMIT_*` | Yandex JS embed basemap proxy |
 | `YANDEX_MARKET_*` | Market affiliate |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `PASSWORD_RESET_*` | Password reset email |
 | `ALIAS_FEEDBACK_ADMIN_KEY` | Alias feedback admin |

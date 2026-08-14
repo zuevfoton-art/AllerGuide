@@ -163,7 +163,9 @@ BUILD_PUSH=1 ./scripts/yc-stage-phase1-enable-pollen.sh
 
 См. [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 1.
 
-Places API (New) + Air Quality (отдельный Maps Platform server key, не Pollen-only):
+Places API (New) + Air Quality (отдельный Maps Platform server key, не Pollen-only).
+Код **не** подставляет `GOOGLE_POLLEN_API_KEY` в Places/AQ: нужен `GOOGLE_PLACES_API_KEY` /
+`GOOGLE_AIR_QUALITY_API_KEY` или общий `GOOGLE_MAPS_SERVER_API_KEY`.
 
 ```bash
 export MAPS_PLATFORM_API_KEY_FILE=/path/to/Maps_Platform_API_Key.txt
