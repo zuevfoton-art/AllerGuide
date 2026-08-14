@@ -66,6 +66,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Доменные правила, таксономия, валидация | `packages/core/src/*` |
 | Matching скана / OCR parse / LLM prompt | `packages/ai/src/*` |
 | Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
+| Places / Air Quality staging keys | `pnpm yc-stage-enable-places-air-quality` + Lockbox `GOOGLE_PLACES_API_KEY` / `GOOGLE_AIR_QUALITY_API_KEY` (не `GOOGLE_POLLEN_API_KEY`) |
 | Строка UI (все 6 локалей) | `apps/mobile/src/i18n/types.ts` + `locales/{ru,en,es,fr,de,it}.ts` |
 | Feature flag | `apps/mobile/src/constants/features.ts` + корневой `.env.example` + `eas.json` |
 | Локальная схема SQLite | `apps/mobile/src/db/init.native.ts` + `migrations.ts` |
@@ -282,6 +283,8 @@ Barrel: `index.ts`. Pure TS.
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |
+| `MAP_PLACES` | `features.ts` / `place-service.ts` | `MAP_PLACES_ENABLED` + `GOOGLE_PLACES_API_KEY` (не Pollen-only) |
+| `AIR_QUALITY=google` | `features.ts` | `AIR_QUALITY_ENABLED` + `GOOGLE_AIR_QUALITY_API_KEY` (не Pollen-only) |
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
 | `LIVE_MAP` | `place-service.ts` | — |
 | `SENTRY_DSN` | `error-reporting.ts` | — |

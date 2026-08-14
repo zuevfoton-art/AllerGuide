@@ -33,20 +33,17 @@ const placesCache = new Map<string, CacheEntry>();
 
 export function isGooglePlacesNearbyConfigured(): boolean {
   if (process.env.MAP_PLACES_ENABLED !== 'true') return false;
-  return Boolean(
-    process.env.GOOGLE_PLACES_API_KEY?.trim() ||
-      process.env.GOOGLE_POLLEN_API_KEY?.trim() ||
-      process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim(),
-  );
+  return Boolean(resolvePlacesApiKey({ optional: true }));
 }
 
-function resolvePlacesApiKey(): string {
+function resolvePlacesApiKey(options?: { optional?: boolean }): string | null {
   const key =
     process.env.GOOGLE_PLACES_API_KEY?.trim() ||
-    process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
-    process.env.GOOGLE_POLLEN_API_KEY?.trim();
-  if (!key) throw new Error('Google Places API key is not configured');
-  return key;
+    process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim();
+  if (!key && !options?.optional) {
+    throw new Error('Google Places API key is not configured');
+  }
+  return key ?? null;
 }
 
 export function buildGooglePlacesNearbyRequest(
@@ -55,12 +52,13 @@ export function buildGooglePlacesNearbyRequest(
   type: GooglePlacesNearbyType,
   radiusMeters = DEFAULT_RADIUS_M,
 ): { url: string; headers: Record<string, string>; body: string } {
+  const apiKey = resolvePlacesApiKey();
   return {
     url: GOOGLE_PLACES_SEARCH_NEARBY_URL,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      'X-Goog-Api-Key': resolvePlacesApiKey(),
+      'X-Goog-Api-Key': apiKey!,
       'X-Goog-FieldMask': PLACES_FIELD_MASK,
     },
     body: JSON.stringify({

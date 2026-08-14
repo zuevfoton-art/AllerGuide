@@ -29,8 +29,7 @@ export function isGoogleAirQualityConfigured(): boolean {
 function resolveAirQualityApiKey(options?: { optional?: boolean }): string | null {
   const key =
     process.env.GOOGLE_AIR_QUALITY_API_KEY?.trim() ||
-    process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
-    process.env.GOOGLE_POLLEN_API_KEY?.trim();
+    process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim();
   if (!key && !options?.optional) {
     throw new Error('Google Air Quality API key is not configured');
   }

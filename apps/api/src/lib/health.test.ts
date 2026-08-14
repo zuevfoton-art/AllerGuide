@@ -62,4 +62,21 @@ describe('buildHealthPayload', () => {
     expect(payload.features?.mapPlaces).toBe(true);
     expect(payload.features?.airQuality).toBe(true);
   });
+
+  it('does not treat the Pollen-only key as a Places or Air Quality credential', async () => {
+    process.env.POLLEN_HEATMAP_ENABLED = 'true';
+    process.env.MAP_PLACES_ENABLED = 'true';
+    process.env.AIR_QUALITY_ENABLED = 'true';
+    process.env.GOOGLE_POLLEN_API_KEY = 'pollen-only-key';
+    delete process.env.GOOGLE_PLACES_API_KEY;
+    delete process.env.GOOGLE_AIR_QUALITY_API_KEY;
+    delete process.env.GOOGLE_MAPS_SERVER_API_KEY;
+    delete process.env.DATABASE_URL;
+
+    const { buildHealthPayload } = await import('./health');
+    const payload = await buildHealthPayload();
+    expect(payload.features?.pollenHeatmap).toBe(true);
+    expect(payload.features?.mapPlaces).toBe(false);
+    expect(payload.features?.airQuality).toBe(false);
+  });
 });
