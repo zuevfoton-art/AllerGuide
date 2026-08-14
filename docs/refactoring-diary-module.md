@@ -191,7 +191,31 @@ Utility не зависит от дневника и пригоден для д�
 после переключения активного профиля. При отсутствии профиля список и карта
 вложений очищаются.
 
-### 9. High Cohesion
+Transient Zustand state может быть пуст после web reload/HMR, хотя профиль уже
+есть в IndexedDB. `getOrLoadActiveProfileId()` восстанавливает persisted
+профиль при focus и непосредственно перед Save. Дневник больше не показывает
+рабочий wizard, который затем молча отбрасывает запись из-за `null` profile id.
+
+### 9. Явная граница durable persistence
+
+`WebDb` использует in-memory cache и отложенную IndexedDB запись. Раньше UI
+сообщал об успехе до срабатывания debounce (~120 мс), поэтому немедленный
+refresh мог потерять только что созданную/изменённую запись.
+
+В platform DB adapters добавлен единый контракт:
+
+```ts
+await persistDbWrites();
+```
+
+- web вызывает `flushWebStore()` и ждёт завершения IndexedDB transaction;
+- native возвращает resolved Promise, потому что `runSync` уже закоммитил
+  SQLite операцию.
+
+Create/update/delete ждут эту границу до возврата `ok: true`. Компенсирующее
+удаление при ошибке вложений также flush-ится до проброса ошибки.
+
+### 10. High Cohesion
 
 Неиспользуемый `generateDoctorPdf()` удалён из `diary-service`. Генерация и
 share отчётов остаются в специализированном `doctor-report-service.ts`.
@@ -199,7 +223,7 @@ share отчётов остаются в специализированном `d
 Это уменьшает зависимости diary CRUD от `Platform`, Expo Print/Sharing,
 цветов и HTML.
 
-### 10. Тестируемость
+### 11. Тестируемость
 
 Добавлены проверки:
 
@@ -208,6 +232,8 @@ share отчётов остаются в специализированном `d
 - WebDb update/delete по паре `entryId + profileId`;
 - web cancel/confirm и native destructive alert;
 - доставка rejected action в `onError`;
+- немедленный flush diary write без ожидания debounce timer;
+- восстановление persisted active profile при пустом Zustand state;
 - существующие create/batch/update/delete сценарии.
 
 ## Возможные побочные эффекты и компромиссы
