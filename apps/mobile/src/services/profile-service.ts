@@ -106,6 +106,14 @@ export function ensureActiveProfileLoaded(options?: { preferSelf?: boolean }): P
   return useAppStore.getState().activeProfile;
 }
 
+/** Recover the persisted profile when transient Zustand state is empty (for example after web HMR). */
+export function getOrLoadActiveProfileId(): number | null {
+  const activeProfileId = useAppStore.getState().activeProfileId;
+  if (activeProfileId != null) return activeProfileId;
+
+  return ensureActiveProfileLoaded({ preferSelf: true })?.id ?? null;
+}
+
 function throwOnBackendError(response: { ok: false; error: string; status: number }): never {
   const code = resolveApiErrorCode(response.status);
   throw new ProfileServiceError(code, apiErrorMessage(code, response.error));

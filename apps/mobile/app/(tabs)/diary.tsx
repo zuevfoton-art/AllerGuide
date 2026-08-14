@@ -58,6 +58,7 @@ import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-s
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { confirmDestructiveAction } from '@/src/utils/confirm-destructive-action';
+import { getOrLoadActiveProfileId } from '@/src/services/profile-service';
 
 const TYPE_ICONS: Record<string, string> = {
   Симптомы: 'pulse',
@@ -184,16 +185,16 @@ export default function DiaryScreen() {
     });
   };
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (profileId = activeProfileId) => {
     const requestId = loadRequestId.current + 1;
     loadRequestId.current = requestId;
-    if (!activeProfileId) {
+    if (!profileId) {
       setList([]);
       setPhotoUrisByEntry({});
       return;
     }
 
-    const entries = await getDiaryEntries(activeProfileId);
+    const entries = await getDiaryEntries(profileId);
     if (requestId !== loadRequestId.current) return;
 
     setList(entries);
@@ -219,7 +220,8 @@ export default function DiaryScreen() {
   useFocusEffect(
     useCallback(() => {
       setCapabilitiesTick((tick) => tick + 1);
-      void load();
+      const profileId = getOrLoadActiveProfileId();
+      void load(profileId);
       return () => {
         loadRequestId.current += 1;
       };
@@ -235,15 +237,16 @@ export default function DiaryScreen() {
   const closeEditor = () => setEditor(null);
 
   const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
-    if (!activeProfileId) return;
-    const results = await addDiaryEntries(activeProfileId, entries);
+    const profileId = activeProfileId ?? getOrLoadActiveProfileId();
+    if (!profileId) return;
+    const results = await addDiaryEntries(profileId, entries);
     const failed = results.find((result) => !result.ok);
     if (failed && !failed.ok) {
       logCaughtError('DiaryScreen.handleCreate', new Error(failed.code));
       return;
     }
     closeEditor();
-    await load();
+    await load(profileId);
     void reconcileAllReminders();
   };
 
