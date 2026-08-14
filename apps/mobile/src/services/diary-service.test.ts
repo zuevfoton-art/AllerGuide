@@ -9,6 +9,7 @@ const diaryRows: {
 }[] = [];
 const profiles = [
   { id: 1, userId: 7 },
+  { id: 2, userId: 7 },
   { id: 3, userId: 7 },
   { id: 5, userId: 7 },
   { id: 9, userId: 8 },
