@@ -42,6 +42,7 @@ describe('buildHealthPayload', () => {
       aiScan: true,
       aiScanProvider: 'yandex',
       pollenHeatmap: false,
+      airQuality: false,
       yandexMapsInteractive: false,
     });
     expect(payload.scan?.enabled).toBe(true);

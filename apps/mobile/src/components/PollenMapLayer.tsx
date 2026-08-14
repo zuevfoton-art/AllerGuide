@@ -15,6 +15,7 @@ import {
 } from '@allerguide/core';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { GlassCard } from '@/src/components/GlassCard';
+import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
 import { YandexMap } from '@/src/components/YandexMap';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -36,15 +37,6 @@ interface PollenMapLayerProps {
   calendarPeaks: CalendarPeak[];
   formatMonth: (month: number) => string;
 }
-
-const TAXON_LABEL_KEYS: Record<PollenMapTaxonId, string> = {
-  birch_pollen: 'map.pollenBirch',
-  grass_pollen: 'map.pollenGrass',
-  ragweed_pollen: 'map.pollenRagweed',
-  alder_pollen: 'map.pollenAlder',
-  mugwort_pollen: 'map.pollenMugwort',
-  olive_pollen: 'map.pollenOlive',
-};
 
 const LEVEL_LABEL_KEYS: Record<PollenTierLevel, string> = {
   low: 'map.pollenLow',

@@ -1,12 +1,28 @@
-import { googlePlaceToMapPoi, type MapPoi } from '@allerguide/core';
+import { googlePlaceToMapPoi, type MapPoi, type MapPoiCategory } from '@allerguide/core';
 
-const GOOGLE_PLACES_NEARBY_URL =
-  'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
+/**
+ * Places API (New) Nearby Search. The legacy `nearbysearch` endpoint became
+ * Legacy on 2025-03-01 and cannot be enabled in new Google Cloud projects.
+ * @see https://developers.google.com/maps/documentation/places/web-service/nearby-search
+ */
+const GOOGLE_PLACES_SEARCH_NEARBY_URL =
+  'https://places.googleapis.com/v1/places:searchNearby';
+const PLACES_FIELD_MASK =
+  'places.id,places.displayName,places.formattedAddress,places.location,places.types,places.rating';
 const PLACES_CACHE_TTL_MS = 15 * 60 * 1000;
 const DEFAULT_RADIUS_M = 3000;
 const MAX_RESULTS = 20;
+const PLACES_LANGUAGE_CODE = 'ru';
 
-export type GooglePlacesNearbyType = 'restaurant' | 'hospital' | 'pharmacy';
+export type GooglePlacesNearbyType = MapPoiCategory;
+
+/** Places API (New) `includedTypes` per product category. */
+const INCLUDED_TYPES_BY_CATEGORY: Record<GooglePlacesNearbyType, string[]> = {
+  restaurant: ['restaurant'],
+  cafe: ['cafe', 'coffee_shop', 'bakery'],
+  medical: ['hospital', 'doctor'],
+  pharmacy: ['pharmacy', 'drugstore'],
+};
 
 interface CacheEntry {
   expiresAt: number;
@@ -33,19 +49,32 @@ function resolvePlacesApiKey(): string {
   return key;
 }
 
-export function buildGooglePlacesNearbyUrl(
+export function buildGooglePlacesNearbyRequest(
   latitude: number,
   longitude: number,
   type: GooglePlacesNearbyType,
   radiusMeters = DEFAULT_RADIUS_M,
-): string {
-  const params = new URLSearchParams({
-    location: `${latitude},${longitude}`,
-    radius: String(radiusMeters),
-    type,
-    key: resolvePlacesApiKey(),
-  });
-  return `${GOOGLE_PLACES_NEARBY_URL}?${params.toString()}`;
+): { url: string; headers: Record<string, string>; body: string } {
+  return {
+    url: GOOGLE_PLACES_SEARCH_NEARBY_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'X-Goog-Api-Key': resolvePlacesApiKey(),
+      'X-Goog-FieldMask': PLACES_FIELD_MASK,
+    },
+    body: JSON.stringify({
+      includedTypes: INCLUDED_TYPES_BY_CATEGORY[type],
+      maxResultCount: MAX_RESULTS,
+      languageCode: PLACES_LANGUAGE_CODE,
+      locationRestriction: {
+        circle: {
+          center: { latitude, longitude },
+          radius: radiusMeters,
+        },
+      },
+    }),
+  };
 }
 
 export async function fetchGooglePlacesNearby(
@@ -59,27 +88,22 @@ export async function fetchGooglePlacesNearby(
     return cached.value;
   }
 
-  const response = await fetch(buildGooglePlacesNearbyUrl(latitude, longitude, type), {
-    headers: { Accept: 'application/json' },
-  });
+  const { url, headers, body } = buildGooglePlacesNearbyRequest(latitude, longitude, type);
+  const response = await fetch(url, { method: 'POST', headers, body });
   if (!response.ok) {
     throw new Error(`Google Places Nearby HTTP ${response.status}`);
   }
 
-  const payload = (await response.json()) as GooglePlacesNearbyPayload;
-  if (payload.status && payload.status !== 'OK' && payload.status !== 'ZERO_RESULTS') {
-    throw new Error(`Google Places Nearby status ${payload.status}`);
-  }
-
-  const places = (payload.results ?? [])
+  const payload = (await response.json()) as GooglePlacesSearchNearbyPayload;
+  const places = (payload.places ?? [])
     .slice(0, MAX_RESULTS)
     .map((result) =>
       googlePlaceToMapPoi({
-        placeId: result.place_id ?? '',
-        name: result.name ?? '',
-        vicinity: result.vicinity,
-        lat: result.geometry?.location?.lat ?? Number.NaN,
-        lng: result.geometry?.location?.lng ?? Number.NaN,
+        placeId: result.id ?? '',
+        name: result.displayName?.text ?? '',
+        vicinity: result.formattedAddress,
+        lat: result.location?.latitude ?? Number.NaN,
+        lng: result.location?.longitude ?? Number.NaN,
         types: result.types,
         rating: result.rating,
       }),
@@ -97,20 +121,23 @@ export function clearGooglePlacesNearbyCache(): void {
   placesCache.clear();
 }
 
-interface GooglePlacesNearbyPayload {
-  status?: string;
-  results?: Array<{
-    place_id?: string;
-    name?: string;
-    vicinity?: string;
+interface GooglePlacesSearchNearbyPayload {
+  places?: Array<{
+    id?: string;
+    displayName?: { text?: string; languageCode?: string };
+    formattedAddress?: string;
     rating?: number;
     types?: string[];
-    geometry?: { location?: { lat?: number; lng?: number } };
+    location?: { latitude?: number; longitude?: number };
   }>;
 }
 
 export function parsePlacesNearbyType(raw: string): GooglePlacesNearbyType | null {
-  if (raw === 'restaurant' || raw === 'hospital' || raw === 'pharmacy') return raw;
+  if (raw === 'restaurant' || raw === 'cafe' || raw === 'medical' || raw === 'pharmacy') {
+    return raw;
+  }
+  // Legacy alias kept for older clients that requested the raw Google type.
+  if (raw === 'hospital') return 'medical';
   return null;
 }
 

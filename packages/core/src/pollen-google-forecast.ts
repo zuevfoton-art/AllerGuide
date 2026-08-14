@@ -1,5 +1,6 @@
 import {
   POLLEN_MAP_TAXON_IDS,
+  POLLEN_TYPE_GROUP_BY_TAXON,
   readingToUpiSnapshot,
   type PollenForecastDay,
   type PollenMapReading,
@@ -13,14 +14,13 @@ import { pollenTierFromUpi, type PollenUpiIndex } from './pollen-upi';
 export type GooglePollenTypeKey = 'TREE' | 'GRASS' | 'WEED';
 
 /**
- * Tree species that share Google heatmap `TREE_UPI` but must use plant-level
- * Forecast indexes (BIRCH/ALDER/OLIVE) — never the aggregated TREE type UPI.
+ * Tree species share Google heatmap `TREE_UPI` but must use plant-level
+ * Forecast indexes (BIRCH/OAK/…) — never the aggregated TREE type UPI,
+ * which would make every tree species look identical.
  */
-export const TREE_SPECIES_POLLEN_TAXON_IDS = [
-  'birch_pollen',
-  'alder_pollen',
-  'olive_pollen',
-] as const satisfies readonly PollenMapTaxonId[];
+export const TREE_SPECIES_POLLEN_TAXON_IDS = POLLEN_MAP_TAXON_IDS.filter(
+  (taxonId) => POLLEN_TYPE_GROUP_BY_TAXON[taxonId] === 'TREE',
+);
 
 export type TreeSpeciesPollenTaxonId = (typeof TREE_SPECIES_POLLEN_TAXON_IDS)[number];
 
@@ -38,9 +38,7 @@ export function isTreeSpeciesPollenTaxon(
 }
 
 export function googleTypeKeyForTaxon(taxonId: PollenMapTaxonId): GooglePollenTypeKey {
-  if (taxonId === 'grass_pollen') return 'GRASS';
-  if (taxonId === 'ragweed_pollen' || taxonId === 'mugwort_pollen') return 'WEED';
-  return 'TREE';
+  return POLLEN_TYPE_GROUP_BY_TAXON[taxonId];
 }
 
 /**

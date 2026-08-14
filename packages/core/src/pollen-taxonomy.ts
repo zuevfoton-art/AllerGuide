@@ -23,7 +23,22 @@ export type CalendarPollenTaxonId =
   | 'poplar_pollen'
   | 'saltwort_pollen';
 
-export type PollenTaxonId = OpenMeteoPollenTaxonId | CalendarPollenTaxonId;
+/**
+ * Taxa only observable via Google Pollen API plant codes
+ * (no Open-Meteo hourly key and no regional calendar entry).
+ */
+export type GooglePlantPollenTaxonId =
+  | 'elm_pollen'
+  | 'juniper_pollen'
+  | 'pine_pollen'
+  | 'cypress_pine_pollen'
+  | 'japanese_cedar_pollen'
+  | 'japanese_cypress_pollen';
+
+export type PollenTaxonId =
+  | OpenMeteoPollenTaxonId
+  | CalendarPollenTaxonId
+  | GooglePlantPollenTaxonId;
 
 export interface PollenTaxon {
   id: PollenTaxonId;
@@ -110,6 +125,36 @@ export const POLLEN_TAXA: PollenTaxon[] = [
     allergenId: 'ragweed-pollen',
     labelRu: 'Амброзия',
     openMeteoHourlyKey: 'ragweed_pollen',
+  },
+  {
+    id: 'elm_pollen',
+    allergenId: null,
+    labelRu: 'Вяз',
+  },
+  {
+    id: 'juniper_pollen',
+    allergenId: null,
+    labelRu: 'Можжевельник',
+  },
+  {
+    id: 'pine_pollen',
+    allergenId: null,
+    labelRu: 'Сосна',
+  },
+  {
+    id: 'cypress_pine_pollen',
+    allergenId: null,
+    labelRu: 'Кипарисовая сосна',
+  },
+  {
+    id: 'japanese_cedar_pollen',
+    allergenId: null,
+    labelRu: 'Криптомерия (японский кедр)',
+  },
+  {
+    id: 'japanese_cypress_pollen',
+    allergenId: null,
+    labelRu: 'Японский кипарис',
   },
 ];
 

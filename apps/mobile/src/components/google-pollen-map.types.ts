@@ -32,6 +32,8 @@ export interface GooglePollenMapProps {
   longitude: number;
   zoom: number;
   mapType: GooglePollenMapType | null;
+  /** Overrides the pollen tile layer (e.g. air quality heatmap tiles). */
+  tileUrlTemplate?: string | null;
   height?: number;
   interactive?: boolean;
   markers?: GoogleMapMarker[];
@@ -39,5 +41,7 @@ export interface GooglePollenMapProps {
   polylines?: GoogleMapPolyline[];
   selectedMarkerId?: string | null;
   onMarkerPress?: (markerId: string) => void;
+  /** Fires when the user finishes panning/zooming (map center in degrees). */
+  onRegionChange?: (latitude: number, longitude: number) => void;
   overlay?: ReactNode;
 }

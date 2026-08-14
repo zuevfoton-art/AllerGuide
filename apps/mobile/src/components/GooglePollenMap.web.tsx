@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import {
   buildPollenHeatmapTileUrlTemplate,
@@ -7,7 +8,6 @@ import {
 } from '@/src/services/pollen-heatmap-service';
 import type { GooglePollenMapProps } from './google-pollen-map.types';
 
-const GOOGLE_MAPS_SCRIPT_ID = 'allerguide-google-maps';
 const GOOGLE_TILE_SIZE = 256;
 let googleMapsLoader: Promise<void> | null = null;
 
@@ -16,6 +16,7 @@ export function GooglePollenMap({
   longitude,
   zoom,
   mapType,
+  tileUrlTemplate: tileUrlTemplateOverride,
   height = 300,
   interactive = true,
   markers = [],
@@ -23,6 +24,7 @@ export function GooglePollenMap({
   polylines = [],
   selectedMarkerId,
   onMarkerPress,
+  onRegionChange,
   overlay,
 }: GooglePollenMapProps) {
   const theme = useTheme();
@@ -36,6 +38,9 @@ export function GooglePollenMap({
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
   const onMarkerPressRef = useRef(onMarkerPress);
   onMarkerPressRef.current = onMarkerPress;
+  const onRegionChangeRef = useRef(onRegionChange);
+  onRegionChangeRef.current = onRegionChange;
+  const lastRequestedCenterRef = useRef<string | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -45,9 +50,9 @@ export function GooglePollenMap({
     void loadGoogleMaps(apiKey).then(() => {
       if (isCancelled || !containerRef.current) return;
 
-      const map =
-        mapRef.current ??
-        new google.maps.Map(containerRef.current, {
+      let map = mapRef.current;
+      if (!map) {
+        map = new google.maps.Map(containerRef.current, {
           center: { lat: latitude, lng: longitude },
           zoom,
           clickableIcons: false,
@@ -56,9 +61,20 @@ export function GooglePollenMap({
           streetViewControl: false,
           gestureHandling: interactive ? 'auto' : 'none',
         });
+        map.addListener('idle', () => {
+          const center = mapRef.current?.getCenter();
+          if (center) onRegionChangeRef.current?.(center.lat(), center.lng());
+        });
+      }
       mapRef.current = map;
-      map.setCenter({ lat: latitude, lng: longitude });
-      map.setZoom(zoom);
+      // Recenter only when the requested coordinates change; otherwise marker
+      // refreshes (e.g. "search this area") would snap the map back.
+      const requestedCenter = `${latitude.toFixed(5)}:${longitude.toFixed(5)}:${zoom}`;
+      if (lastRequestedCenterRef.current !== requestedCenter) {
+        lastRequestedCenterRef.current = requestedCenter;
+        map.setCenter({ lat: latitude, lng: longitude });
+        map.setZoom(zoom);
+      }
       map.setOptions({ gestureHandling: interactive ? 'auto' : 'none' });
 
       if (tileOverlayRef.current) {
@@ -69,8 +85,10 @@ export function GooglePollenMap({
         tileOverlayRef.current = null;
       }
 
-      if (mapType) {
-        const tileUrlTemplate = buildPollenHeatmapTileUrlTemplate(mapType);
+      const tileUrlTemplate =
+        tileUrlTemplateOverride ??
+        (mapType ? buildPollenHeatmapTileUrlTemplate(mapType) : null);
+      if (tileUrlTemplate) {
         const tileOverlay = new google.maps.ImageMapType({
           getTileUrl: (coordinate, tileZoom) =>
             resolvePollenHeatmapTileUrl(
@@ -82,7 +100,7 @@ export function GooglePollenMap({
           tileSize: new google.maps.Size(GOOGLE_TILE_SIZE, GOOGLE_TILE_SIZE),
           maxZoom: 16,
           minZoom: 0,
-          name: mapType,
+          name: mapType ?? 'tiles',
           opacity: 0.8,
         });
         map.overlayMapTypes.insertAt(0, tileOverlay);
@@ -155,6 +173,7 @@ export function GooglePollenMap({
     markers,
     polylines,
     selectedMarkerId,
+    tileUrlTemplateOverride,
     zoom,
   ]);
 
@@ -170,33 +189,26 @@ export function GooglePollenMap({
   );
 }
 
+/**
+ * Loads the Maps JavaScript API through the official `@googlemaps/js-api-loader`
+ * (dynamic library import). Legacy `google.maps.Marker` lives in the `marker`
+ * library, everything else the component touches lives in `maps`.
+ */
 function loadGoogleMaps(apiKey: string): Promise<void> {
-  if (typeof google !== 'undefined' && google.maps) return Promise.resolve();
+  if (typeof google !== 'undefined' && google.maps?.Map && google.maps.Marker) {
+    return Promise.resolve();
+  }
   if (googleMapsLoader) return googleMapsLoader;
 
-  googleMapsLoader = new Promise<void>((resolve, reject) => {
-    const existingScript = document.getElementById(
-      GOOGLE_MAPS_SCRIPT_ID,
-    ) as HTMLScriptElement | null;
-    const script = existingScript ?? document.createElement('script');
-
-    script.addEventListener('load', () => resolve(), { once: true });
-    script.addEventListener(
-      'error',
-      () => {
-        googleMapsLoader = null;
-        reject(new Error('Unable to load Google Maps JavaScript API'));
-      },
-      { once: true },
-    );
-
-    if (!existingScript) {
-      script.id = GOOGLE_MAPS_SCRIPT_ID;
-      script.async = true;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
-      document.head.appendChild(script);
-    }
-  });
+  setOptions({ key: apiKey });
+  googleMapsLoader = Promise.all([importLibrary('maps'), importLibrary('marker')])
+    .then(() => undefined)
+    .catch((error: unknown) => {
+      googleMapsLoader = null;
+      throw error instanceof Error
+        ? error
+        : new Error('Unable to load Google Maps JavaScript API');
+    });
 
   return googleMapsLoader;
 }

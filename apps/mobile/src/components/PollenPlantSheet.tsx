@@ -1,8 +1,13 @@
 import { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import type { PollenPlantDetail } from '@allerguide/core';
+import {
+  OPEN_METEO_POLLEN_MAP_TAXON_IDS,
+  POLLEN_TYPE_GROUP_BY_TAXON,
+  type PollenPlantDetail,
+} from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+import { POLLEN_TYPE_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 
 interface PollenPlantSheetProps {
   detail: PollenPlantDetail | null;
@@ -21,6 +26,11 @@ export function PollenPlantSheet({ detail }: PollenPlantSheetProps) {
     );
   }
 
+  const typeGroup = POLLEN_TYPE_GROUP_BY_TAXON[detail.taxonId];
+  const isGoogleOnlyTaxon = !(OPEN_METEO_POLLEN_MAP_TAXON_IDS as readonly string[]).includes(
+    detail.taxonId,
+  );
+
   return (
     <View style={styles.card}>
       {detail.pictureUrl ? (
@@ -30,7 +40,17 @@ export function PollenPlantSheet({ detail }: PollenPlantSheetProps) {
           accessibilityIgnoresInvertColors
         />
       ) : null}
-      <Text style={styles.title}>{detail.displayName}</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{detail.displayName}</Text>
+        {typeGroup ? (
+          <Text style={styles.typeBadge} testID="plant-type-badge">
+            {t(POLLEN_TYPE_LABEL_KEYS[typeGroup] as 'map.pollenTypeTree')}
+          </Text>
+        ) : null}
+      </View>
+      {isGoogleOnlyTaxon ? (
+        <Text style={styles.meta}>{t('map.pollenGoogleOnlyHint')}</Text>
+      ) : null}
       {detail.family ? (
         <Text style={styles.meta}>
           {t('map.plantFamily')}: {detail.family}
@@ -80,10 +100,27 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderRadius: 6,
       backgroundColor: colors.surfaceMuted,
     },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 8,
+    },
     title: {
+      flexShrink: 1,
       fontFamily: fonts.sansSemiBold,
       fontSize: 16,
       color: colors.head,
+    },
+    typeBadge: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 11,
+      color: colors.accent,
+      backgroundColor: colors.accentLight,
+      borderRadius: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      overflow: 'hidden',
     },
     meta: {
       fontFamily: fonts.sans,

@@ -36,19 +36,18 @@ describe('places nearby routes', () => {
     expect(response.status).toBe(400);
   });
 
-  it('proxies Google Places Nearby into MapPoi DTOs', async () => {
+  it('proxies Places API (New) searchNearby into MapPoi DTOs', async () => {
     const fetchMock = vi.fn(async () =>
       new Response(
         JSON.stringify({
-          status: 'OK',
-          results: [
+          places: [
             {
-              place_id: 'p1',
-              name: 'Safe Bowl',
-              vicinity: 'Moscow',
+              id: 'p1',
+              displayName: { text: 'Safe Bowl', languageCode: 'ru' },
+              formattedAddress: 'Москва, Тверская 1',
               rating: 4.6,
               types: ['restaurant', 'food'],
-              geometry: { location: { lat: 55.75, lng: 37.62 } },
+              location: { latitude: 55.75, longitude: 37.62 },
             },
           ],
         }),
@@ -67,8 +66,80 @@ describe('places nearby routes', () => {
     expect(response.body.places[0]).toMatchObject({
       id: 'google:p1',
       title: 'Safe Bowl',
+      note: 'Москва, Тверская 1',
       category: 'restaurant',
       source: 'google-places',
     });
+
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://places.googleapis.com/v1/places:searchNearby');
+    expect(init.method).toBe('POST');
+    const headers = init.headers as Record<string, string>;
+    expect(headers['X-Goog-Api-Key']).toBe('places test key');
+    expect(headers['X-Goog-FieldMask']).toContain('places.displayName');
+    const body = JSON.parse(String(init.body)) as {
+      includedTypes: string[];
+      locationRestriction: { circle: { center: { latitude: number } } };
+    };
+    expect(body.includedTypes).toEqual(['restaurant']);
+    expect(body.locationRestriction.circle.center.latitude).toBe(55.75);
+  });
+
+  it('fetches cafes as a dedicated category', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          places: [
+            {
+              id: 'c1',
+              displayName: { text: 'Coffee Lab' },
+              formattedAddress: 'Москва, Арбат 10',
+              rating: 4.8,
+              types: ['cafe', 'coffee_shop'],
+              location: { latitude: 55.75, longitude: 37.59 },
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp({ withReplitAuth: false });
+
+    const response = await request(app).get(
+      '/api/places/nearby?lat=55.75&lon=37.62&type=cafe',
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.places[0]).toMatchObject({
+      id: 'google:c1',
+      category: 'cafe',
+      icon: 'cafe',
+    });
+    const body = JSON.parse(
+      String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body),
+    ) as { includedTypes: string[] };
+    expect(body.includedTypes).toEqual(['cafe', 'coffee_shop', 'bakery']);
+  });
+
+  it('maps the legacy hospital type alias to medical', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ places: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp({ withReplitAuth: false });
+
+    const response = await request(app).get(
+      '/api/places/nearby?lat=55.75&lon=37.62&type=hospital',
+    );
+
+    expect(response.status).toBe(200);
+    const body = JSON.parse(
+      String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body),
+    ) as { includedTypes: string[] };
+    expect(body.includedTypes).toEqual(['hospital', 'doctor']);
   });
 });

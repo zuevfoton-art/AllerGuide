@@ -1,4 +1,4 @@
-import type { PollenMapTaxonId } from './pollen-map';
+import { POLLEN_TYPE_GROUP_BY_TAXON, type PollenMapTaxonId } from './pollen-map';
 
 export const GOOGLE_POLLEN_MAP_TYPES = ['TREE_UPI', 'GRASS_UPI', 'WEED_UPI'] as const;
 
@@ -6,15 +6,6 @@ export type GooglePollenMapType = (typeof GOOGLE_POLLEN_MAP_TYPES)[number];
 
 export const GOOGLE_POLLEN_HEATMAP_MIN_ZOOM = 0;
 export const GOOGLE_POLLEN_HEATMAP_MAX_ZOOM = 16;
-
-const GOOGLE_MAP_TYPE_BY_TAXON: Record<PollenMapTaxonId, GooglePollenMapType> = {
-  birch_pollen: 'TREE_UPI',
-  alder_pollen: 'TREE_UPI',
-  olive_pollen: 'TREE_UPI',
-  grass_pollen: 'GRASS_UPI',
-  ragweed_pollen: 'WEED_UPI',
-  mugwort_pollen: 'WEED_UPI',
-};
 
 export interface PollenHeatmapTileCoordinates {
   zoom: number;
@@ -25,7 +16,7 @@ export interface PollenHeatmapTileCoordinates {
 export function pollenTaxonToGoogleMapType(
   taxonId: PollenMapTaxonId,
 ): GooglePollenMapType {
-  return GOOGLE_MAP_TYPE_BY_TAXON[taxonId];
+  return `${POLLEN_TYPE_GROUP_BY_TAXON[taxonId]}_UPI`;
 }
 
 export function isGooglePollenMapType(value: string): value is GooglePollenMapType {
