@@ -6,7 +6,7 @@ import type {
   SafeProduct,
   ScanHistoryEntry,
 } from '@allerguide/core';
-import { hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
+import { flushWebStore, hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -258,14 +258,26 @@ class WebDb implements DbLike {
 
     if (s.startsWith('delete from diary_entries where id')) {
       const entries = this.getDiaryEntries();
-      this.saveDiaryEntries(entries.filter((e) => e.id !== params![0]));
+      const profileId = s.includes('and profileid =') ? params![1] : undefined;
+      this.saveDiaryEntries(
+        entries.filter(
+          (entry) =>
+            entry.id !== params![0] ||
+            (profileId !== undefined && entry.profileId !== profileId),
+        ),
+      );
       return;
     }
 
     if (s.startsWith('update diary_entries')) {
       const entries = this.getDiaryEntries();
       const id = params![2] as number;
-      const index = entries.findIndex((entry) => entry.id === id);
+      const profileId = s.includes('and profileid =') ? params![3] : undefined;
+      const index = entries.findIndex(
+        (entry) =>
+          entry.id === id &&
+          (profileId === undefined || entry.profileId === profileId),
+      );
       if (index >= 0) {
         entries[index] = {
           ...entries[index],
@@ -524,6 +536,11 @@ class WebDb implements DbLike {
       return (entries.find((e) => e.profileId === params![0]) || null) as T | null;
     }
 
+    if (s.includes('from diary_entries') && s.includes('where id =')) {
+      const entries = this.getDiaryEntries();
+      return (entries.find((entry) => entry.id === params![0]) || null) as T | null;
+    }
+
     if (s.includes('from barcode_cache') && s.includes('where barcode =')) {
       const rows = this.getBarcodeCache();
       return (rows.find((row) => row.barcode === params![0]) || null) as T | null;
@@ -597,6 +614,10 @@ const db: DbLike = new WebDb();
 
 export async function initDb() {
   await hydrateWebStore();
+}
+
+export function persistDbWrites(): Promise<void> {
+  return flushWebStore();
 }
 
 export function getDb() {

@@ -143,6 +143,11 @@ async function flush(): Promise<void> {
   }
 }
 
+/** Commit pending writes before a user-visible mutation reports success. */
+export async function flushWebStore(): Promise<void> {
+  await flush();
+}
+
 function readAll(db: IDBDatabase): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
