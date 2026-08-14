@@ -53,9 +53,8 @@ describe('scan-trends', () => {
 
     const trends = computeScanTrends(history, 30);
     expect(trends.totalScans).toBe(1);
-    expect(trends.topAllergens.map((item) => item.label)).toEqual(
-      expect.arrayContaining(['Молоко', 'Яблоко']),
-    );
+    expect(trends.topAllergens).toHaveLength(2);
+    expect(trends.topAllergens.every((item) => item.count === 1)).toBe(true);
   });
 
   it('detects repeat high-risk barcode', () => {

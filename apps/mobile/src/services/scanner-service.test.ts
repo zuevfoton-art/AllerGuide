@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ScanHistoryEntry } from '@allerguide/core';
 
 const mockRunSmartScan = vi.fn();
 const mockGetBackendAuthToken = vi.fn();
@@ -40,15 +41,15 @@ vi.mock('@/src/services/auth-service', () => ({
 
 const mockResolveProductByBarcode = vi.fn();
 const mockSaveScanHistory = vi.fn();
-const mockListScanHistory = vi.fn(() => []);
+const mockListScanHistory = vi.fn((): ScanHistoryEntry[] => []);
 
 vi.mock('@/src/services/barcode-lookup-service', () => ({
-  resolveProductByBarcode: (...args: unknown[]) => mockResolveProductByBarcode(...args),
+  resolveProductByBarcode: mockResolveProductByBarcode,
 }));
 
 vi.mock('@/src/services/scan-history-service', () => ({
-  saveScanHistory: (...args: unknown[]) => mockSaveScanHistory(...args),
-  listScanHistory: (...args: unknown[]) => mockListScanHistory(...args),
+  saveScanHistory: mockSaveScanHistory,
+  listScanHistory: mockListScanHistory,
 }));
 
 vi.mock('@/src/services/analytics-service', () => ({

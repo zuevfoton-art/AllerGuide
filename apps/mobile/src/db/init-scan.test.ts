@@ -44,10 +44,12 @@ describe('WebDb scanner persistence', () => {
       ['alias-1', 'молочко', null, 'product', 7, 'молоко', 'pending', '2026-08-14T08:00:00.000Z'],
     );
 
-    const pending = db.getAllSync<{ id: string; term: string }>(
+    const pending = db.getAllSync<{ id: string; term: string; status: string }>(
       `SELECT id, term FROM alias_feedback WHERE status = 'pending' ORDER BY created_at DESC`,
     );
-    expect(pending).toEqual([{ id: 'alias-1', term: 'молочко' }]);
+    expect(pending).toEqual([
+      expect.objectContaining({ id: 'alias-1', term: 'молочко', status: 'pending' }),
+    ]);
   });
 
   it('stores scan history rows for later structured restore', async () => {
