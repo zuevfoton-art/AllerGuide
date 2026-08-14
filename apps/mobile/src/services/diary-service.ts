@@ -5,6 +5,7 @@ import {
   parseDiaryPhotoUris,
 } from '@allerguide/core';
 import { getCurrentUserId } from '@/src/services/auth-service';
+import { getOwnedProfileIds, isOwnedProfile } from '@/src/services/owned-profiles';
 import { trackEvent } from '@/src/services/analytics-service';
 import {
   deleteDiaryAttachmentsForEntry,
@@ -30,20 +31,6 @@ type DiaryEntryInput = {
   createdAt: string;
   photoUris?: string[];
 };
-
-function getOwnedProfileIds(): number[] {
-  const userId = getCurrentUserId();
-  if (!userId) return [];
-
-  const db = getDb();
-  return db
-    .getAllSync<{ id: number }>('SELECT id FROM profiles WHERE userId = ?', [userId])
-    .map((profile) => profile.id);
-}
-
-function isOwnedProfile(profileId: number): boolean {
-  return getOwnedProfileIds().includes(profileId);
-}
 
 function getOwnedDiaryEntry(entryId: number): DiaryEntry | null {
   if (!Number.isSafeInteger(entryId) || entryId <= 0) return null;

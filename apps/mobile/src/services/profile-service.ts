@@ -1,4 +1,4 @@
-import { getDb } from '@/src/db/init';
+import { getDb, persistDbWrites } from '@/src/db/init';
 import { useAppStore } from '@/src/store/app-store';
 import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getCurrentUserId, getBackendAuthToken } from '@/src/services/auth-service';
@@ -126,7 +126,6 @@ export function ensureActiveProfileLoaded(options?: { preferSelf?: boolean }): P
 export function getOrLoadActiveProfileId(): number | null {
   const activeProfileId = useAppStore.getState().activeProfileId;
   if (activeProfileId != null) return activeProfileId;
-
   return ensureActiveProfileLoaded({ preferSelf: true })?.id ?? null;
 }
 
@@ -198,6 +197,7 @@ export async function createProfile(input: ProfileInput) {
     };
     upsertLocalProfile(localProfile);
     useAppStore.getState().setActiveProfile(localProfile);
+    await persistDbWrites();
     trackEvent('profile_created', { type: input.type, source: 'backend' });
     return response.data.profile.id;
   }
@@ -225,6 +225,7 @@ export async function createProfile(input: ProfileInput) {
     [row.id, userId],
   );
   useAppStore.getState().setActiveProfile(profile || null);
+  await persistDbWrites();
   trackEvent('profile_created', { type: input.type, source: 'local' });
   return row.id;
 }
@@ -272,6 +273,7 @@ export async function updateProfile(id: number, input: ProfileInput) {
     upsertLocalProfile(localProfile);
     const { activeProfileId, setActiveProfile } = useAppStore.getState();
     if (activeProfileId === id) setActiveProfile(localProfile);
+    await persistDbWrites();
     return localProfile;
   }
 
@@ -295,6 +297,7 @@ export async function updateProfile(id: number, input: ProfileInput) {
   );
   const { activeProfileId, setActiveProfile } = useAppStore.getState();
   if (activeProfileId === id) setActiveProfile(profile || null);
+  await persistDbWrites();
   return profile;
 }
 
@@ -335,6 +338,7 @@ export async function deleteProfile(id: number) {
   if (activeProfileId === id) {
     syncActiveProfileAfterList(listProfiles(), { preferSelf: true });
   }
+  await persistDbWrites();
   return true;
 }
 

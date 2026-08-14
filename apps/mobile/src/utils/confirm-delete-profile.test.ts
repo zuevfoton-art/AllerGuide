@@ -19,7 +19,7 @@ describe('confirmDeleteProfile', () => {
     alertMock.mockClear();
     confirmMock.mockReset();
     platformMock.OS = 'web';
-    vi.stubGlobal('window', { confirm: confirmMock });
+    vi.stubGlobal('confirm', confirmMock);
   });
 
   it('deletes after browser confirmation on web', () => {

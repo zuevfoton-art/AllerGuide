@@ -2,16 +2,11 @@ import type { Express, Request, Response } from 'express';
 import {
   buildScanIntentPrompt,
   resolveScanIntentClassification,
-  type ScanMode,
 } from '@allerguide/ai';
 import { verifyAuthToken } from '../lib/jwt';
 import { logCaughtError } from '../lib/log-caught-error';
 import { callScanLlm } from '../services/llm-scan-provider';
-
-interface IntentRequestBody {
-  text?: string;
-  fallbackMode?: ScanMode;
-}
+import { parseScanIntentInput } from './scan-input';
 
 function intentLlmEnabled(): boolean {
   return (
@@ -43,18 +38,17 @@ export function registerScanIntentRoutes(app: Express) {
       return;
     }
 
-    const body = req.body as IntentRequestBody;
-    const text = body.text?.trim() ?? '';
-    if (!text) {
-      res.status(400).json({ ok: false, error: 'Missing text' });
+    const input = parseScanIntentInput(req.body);
+    if (!input) {
+      res.status(400).json({ ok: false, error: 'Invalid scan intent payload' });
       return;
     }
 
     try {
-      const llmRaw = await callScanLlm(buildScanIntentPrompt(text));
+      const llmRaw = await callScanLlm(buildScanIntentPrompt(input.text));
       const classification = resolveScanIntentClassification({
-        extraction: { text, source: 'vision', warnings: [] },
-        fallbackMode: body.fallbackMode ?? 'product',
+        extraction: { text: input.text, source: 'vision', warnings: [] },
+        fallbackMode: input.fallbackMode,
         llmRaw,
       });
 

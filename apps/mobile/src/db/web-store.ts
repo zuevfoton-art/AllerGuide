@@ -25,6 +25,9 @@ const KNOWN_KEYS = [
   'ag_settings',
   'ag_users',
   'ag_emergency_contacts',
+  'ag_safe_products',
+  'ag_alias_feedback',
+  'ag_diary_attachments',
 ] as const;
 
 const memory = new Map<string, unknown>();
@@ -119,6 +122,11 @@ async function ensureWriteDb(): Promise<IDBDatabase> {
   return writeDb;
 }
 
+/** Await pending IndexedDB write-through before reporting a mutation as saved. */
+export async function flushWebStore(): Promise<void> {
+  await flush();
+}
+
 async function flush(): Promise<void> {
   if (dirty.size === 0) return;
 
@@ -141,11 +149,6 @@ async function flush(): Promise<void> {
     // Re-queue so a later write retries persistence.
     for (const key of keys) dirty.add(key);
   }
-}
-
-/** Commit pending writes before a user-visible mutation reports success. */
-export async function flushWebStore(): Promise<void> {
-  await flush();
 }
 
 function readAll(db: IDBDatabase): Promise<Record<string, unknown>> {

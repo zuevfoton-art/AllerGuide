@@ -1,4 +1,4 @@
-import { Alert, Platform } from 'react-native';
+import { confirmDestructiveAction } from './confirm-action';
 
 type ConfirmDeleteProfileOptions = {
   title: string;
@@ -15,21 +15,11 @@ export function confirmDeleteProfile({
   deleteLabel,
   onConfirm,
 }: ConfirmDeleteProfileOptions): void {
-  if (Platform.OS === 'web') {
-    if (window.confirm(`${title}\n\n${message}`)) {
-      void onConfirm();
-    }
-    return;
-  }
-
-  Alert.alert(title, message, [
-    { text: cancelLabel, style: 'cancel' },
-    {
-      text: deleteLabel,
-      style: 'destructive',
-      onPress: () => {
-        void onConfirm();
-      },
-    },
-  ]);
+  confirmDestructiveAction({
+    title,
+    message,
+    cancelLabel,
+    confirmLabel: deleteLabel,
+    onConfirm,
+  });
 }

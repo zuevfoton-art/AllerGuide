@@ -95,7 +95,10 @@ vi.mock('@/src/services/auth-service', () => ({
   getCurrentUserId: () => 7,
   getBackendAuthToken: vi.fn(),
 }));
-vi.mock('@/src/db/init', () => ({ getDb: () => db }));
+vi.mock('@/src/db/init', () => ({
+  getDb: () => db,
+  persistDbWrites: vi.fn(async () => undefined),
+}));
 vi.mock('@/src/store/app-store', () => ({
   useAppStore: { getState: () => appState },
 }));

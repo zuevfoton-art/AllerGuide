@@ -9,6 +9,7 @@ import {
   isAsitCourseConfigured,
   isPrescribedCourseConfigured,
   parseAllergies,
+  parseScanHistoryMatchLabels,
   ASIT_SIMPLIFIED_STEP_IDS,
   PRESCRIBED_SIMPLIFIED_STEP_IDS,
   type DiarySection,
@@ -36,13 +37,7 @@ export type DiarySectionEditorState = {
 };
 
 function parseScanMatchIds(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw) as string[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    logCaughtError('parseScanMatchIds', error, { level: 'warn' });
-    return [];
-  }
+  return parseScanHistoryMatchLabels(raw);
 }
 
 function findRecentFoodScan(profileId: number): FoodDrugScanRef | null {

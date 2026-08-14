@@ -50,6 +50,7 @@ vi.mock('@/src/db/init', () => ({
     runSync: vi.fn(),
     getFirstSync: vi.fn(),
   }),
+  persistDbWrites: vi.fn(async () => undefined),
 }));
 
 vi.mock('@/src/services/analytics-service', () => ({ trackEvent: vi.fn() }));
