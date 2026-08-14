@@ -1,4 +1,4 @@
-import { getDb } from '@/src/db/init';
+import { getDb, persistDbWrites } from '@/src/db/init';
 import {
   getDiaryPhotoUrisFromAnswers,
   getDiaryEntryAnswers,
@@ -117,9 +117,11 @@ async function insertDiaryEntry(input: DiaryEntryInput): Promise<DiaryMutationRe
       entryId,
       input.profileId,
     ]);
+    await persistDbWrites();
     throw error;
   }
 
+  await persistDbWrites();
   trackEvent('diary_entry_saved', { entry_type: input.type });
   return { ok: true, entryId };
 }
@@ -173,7 +175,10 @@ export async function addDiaryEntries(
 export async function getDiaryEntries(profileId: number) {
   if (!isOwnedProfile(profileId)) return [];
   const db = getDb();
-  return db.getAllSync<DiaryEntry>('SELECT * FROM diary_entries WHERE profileId = ? ORDER BY id DESC', [profileId]);
+  return db.getAllSync<DiaryEntry>(
+    'SELECT * FROM diary_entries WHERE profileId = ? ORDER BY id DESC',
+    [profileId],
+  );
 }
 
 export async function updateDiaryEntry(
@@ -197,6 +202,7 @@ export async function updateDiaryEntry(
   if (input.photoUris) {
     await replaceDiaryPhotos(id, input.photoUris);
   }
+  await persistDbWrites();
   return { ok: true, entryId: id };
 }
 
@@ -210,6 +216,7 @@ export async function deleteDiaryEntry(id: number): Promise<DiaryMutationResult>
     id,
     existing.profileId,
   ]);
+  await persistDbWrites();
   return { ok: true, entryId: id };
 }
 

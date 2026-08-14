@@ -6,7 +6,7 @@ import type {
   SafeProduct,
   ScanHistoryEntry,
 } from '@allerguide/core';
-import { hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
+import { flushWebStore, hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -582,6 +582,10 @@ const db: DbLike = new WebDb();
 
 export async function initDb() {
   await hydrateWebStore();
+}
+
+export function persistDbWrites(): Promise<void> {
+  return flushWebStore();
 }
 
 export function getDb() {

@@ -16,6 +16,7 @@ const profiles = [
 ];
 
 let nextId = 1;
+const persistDbWrites = vi.fn(async () => undefined);
 
 const runSync = vi.fn((sql: string, params: unknown[] = []) => {
   if (sql.startsWith('INSERT INTO diary_entries')) {
@@ -89,6 +90,7 @@ vi.mock('@/src/services/auth-service', () => ({
 
 vi.mock('@/src/db/init', () => ({
   getDb: () => ({ runSync, getAllSync, getFirstSync }),
+  persistDbWrites,
 }));
 
 vi.mock('@/src/services/diary-attachment-service', () => ({
@@ -104,6 +106,7 @@ describe('diary-service', () => {
     runSync.mockClear();
     getAllSync.mockClear();
     getFirstSync.mockClear();
+    persistDbWrites.mockClear();
   });
 
   it('adds a diary entry for the profile', async () => {
@@ -116,6 +119,7 @@ describe('diary-service', () => {
     const entries = await getDiaryEntries(3);
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ profileId: 3, type: 'Симптомы', details, createdAt });
+    expect(persistDbWrites).toHaveBeenCalledOnce();
   });
 
   it('adds multiple entries in batch', async () => {
@@ -158,6 +162,7 @@ describe('diary-service', () => {
     await deleteDiaryEntry(entry.id);
     entries = await getDiaryEntries(1);
     expect(entries).toHaveLength(0);
+    expect(persistDbWrites).toHaveBeenCalledTimes(3);
   });
 
   it('lists all diary entries across profiles', async () => {

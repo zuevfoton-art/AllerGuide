@@ -4,6 +4,7 @@ import type { DiaryEntry } from '@allerguide/core';
 const store = new Map<string, unknown>();
 
 vi.mock('@/src/db/web-store', () => ({
+  flushWebStore: vi.fn(async () => undefined),
   hydrateWebStore: vi.fn(async () => undefined),
   loadJson: <T>(key: string, fallback: T): T => (store.get(key) as T | undefined) ?? fallback,
   saveJson: (key: string, value: unknown) => {
