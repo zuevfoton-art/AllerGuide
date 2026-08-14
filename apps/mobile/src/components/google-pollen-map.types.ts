@@ -39,5 +39,7 @@ export interface GooglePollenMapProps {
   polylines?: GoogleMapPolyline[];
   selectedMarkerId?: string | null;
   onMarkerPress?: (markerId: string) => void;
+  /** Fires when the user finishes panning/zooming (map center in degrees). */
+  onRegionChange?: (latitude: number, longitude: number) => void;
   overlay?: ReactNode;
 }

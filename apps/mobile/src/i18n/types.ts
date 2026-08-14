@@ -527,6 +527,7 @@ export type LocaleMessages = {
     plantNoCross: string;
     poiTitle: string;
     poiRestaurants: string;
+    poiCafes: string;
     poiMedical: string;
     poiPharmacy: string;
     adairDoctors: string;
@@ -551,8 +552,10 @@ export type LocaleMessages = {
     legendTitlePollen: string;
     legendTitlePlaces: string;
     legendRestaurant: string;
+    legendCafe: string;
     legendMedical: string;
     legendPharmacy: string;
+    searchThisArea: string;
     poiLevelHigh: string;
     poiLevelMedium: string;
     poiLevelLow: string;

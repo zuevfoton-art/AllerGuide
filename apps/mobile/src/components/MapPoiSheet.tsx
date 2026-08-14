@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { MapPoi, MapPoiCategory } from '@allerguide/core';
+import { MAP_POI_CATEGORIES, type MapPoi, type MapPoiCategory } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -19,6 +19,7 @@ interface MapPoiSheetProps {
 
 const CATEGORY_KEYS: Record<MapPoiCategory, string> = {
   restaurant: 'map.poiRestaurants',
+  cafe: 'map.poiCafes',
   medical: 'map.poiMedical',
   pharmacy: 'map.poiPharmacy',
 };
@@ -39,7 +40,7 @@ export function MapPoiFilters({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const all: MapPoiCategory[] = ['restaurant', 'medical', 'pharmacy'];
+  const all: readonly MapPoiCategory[] = MAP_POI_CATEGORIES;
 
   return (
     <View style={styles.filterRow}>

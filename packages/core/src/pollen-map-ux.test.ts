@@ -121,4 +121,25 @@ describe('map-poi', () => {
       clinic,
     ]);
   });
+
+  it('classifies cafes from Google place types', () => {
+    const cafe = googlePlaceToMapPoi({
+      placeId: 'cafe1',
+      name: 'Coffee Lab',
+      lat: 55.75,
+      lng: 37.59,
+      types: ['cafe', 'coffee_shop', 'food'],
+      rating: 4.8,
+    });
+    expect(cafe).toMatchObject({ category: 'cafe', icon: 'cafe' });
+
+    const bakery = googlePlaceToMapPoi({
+      placeId: 'bak1',
+      name: 'Bread & Co',
+      lat: 55.75,
+      lng: 37.6,
+      types: ['bakery'],
+    });
+    expect(bakery?.category).toBe('cafe');
+  });
 });

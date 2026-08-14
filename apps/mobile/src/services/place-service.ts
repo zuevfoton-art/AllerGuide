@@ -71,7 +71,7 @@ function attachDistances(
 export async function getMapPois(
   profile?: Profile | null,
   origin?: { latitude: number; longitude: number } | null,
-  categories: readonly MapPoiCategory[] = ['restaurant', 'medical', 'pharmacy'],
+  categories: readonly MapPoiCategory[] = ['restaurant', 'cafe', 'medical', 'pharmacy'],
 ): Promise<MapPoiWithDistance[]> {
   const live = origin ? await fetchLiveMapPois(origin) : null;
   const catalogPois = catalogAsPois(profile);
@@ -106,7 +106,7 @@ export async function getRecommendedPlacesAsync(
   profile?: Profile | null,
   origin?: { latitude: number; longitude: number } | null,
 ): Promise<PlaceWithDistance[]> {
-  const pois = await getMapPois(profile, origin, ['restaurant', 'pharmacy']);
+  const pois = await getMapPois(profile, origin, ['restaurant', 'cafe', 'pharmacy']);
   return pois.map((poi) => ({
     id: poi.id,
     title: poi.title,

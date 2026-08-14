@@ -97,8 +97,15 @@ const DIRECTION_KEYS: Record<PollenMapDirection, 'map.pollenNorth' | 'map.pollen
   northWest: 'map.pollenNorthWest',
 };
 
-const DEFAULT_POI_CATEGORIES: MapPoiCategory[] = ['restaurant', 'medical', 'pharmacy'];
+const DEFAULT_POI_CATEGORIES: MapPoiCategory[] = [
+  'restaurant',
+  'cafe',
+  'medical',
+  'pharmacy',
+];
 const MAP_HERO_HEIGHT = 380;
+/** How far (degrees) the map center must move before "search this area" shows. */
+const SEARCH_AREA_MIN_DELTA_DEG = 0.01;
 
 const WEEKDAY_KEYS = [
   'map.weekdaySun',
@@ -131,15 +138,19 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [wind, setWind] = useState<WindSnapshot | null>(null);
   const [pollenHourly, setPollenHourly] = useState<PollenHourlySeries | null>(null);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number } | null>(null);
+  const [poiOrigin, setPoiOrigin] = useState<{ lat: number; lon: number } | null>(null);
+  const [searchingArea, setSearchingArea] = useState(false);
 
   const refresh = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
     try {
       const location = await getCurrentLocation();
       setCoords({ lat: location.lat, lon: location.lon, label: location.label });
+      const origin = poiOrigin ?? { lat: location.lat, lon: location.lon };
       const [snapshot, mapPois, windSnapshot, hourlySeries] = await Promise.all([
         fetchPollenMapSnapshot(location, profile?.allergies ?? '[]'),
-        getMapPois(profile, { latitude: location.lat, longitude: location.lon }, poiCategories),
+        getMapPois(profile, { latitude: origin.lat, longitude: origin.lon }, poiCategories),
         MAP_POLLEN_PLUME_ENABLED
           ? fetchWindSnapshot(location.lat, location.lon)
           : Promise.resolve(null),
@@ -159,7 +170,25 @@ export default function MapScreen() {
     } finally {
       if (!options?.silent) setLoading(false);
     }
-  }, [poiCategories, profile]);
+  }, [poiCategories, poiOrigin, profile]);
+
+  const searchThisArea = useCallback(async () => {
+    if (!mapCenter) return;
+    setSearchingArea(true);
+    try {
+      const origin = { lat: mapCenter.lat, lon: mapCenter.lon };
+      setPoiOrigin(origin);
+      const mapPois = await getMapPois(
+        profile,
+        { latitude: origin.lat, longitude: origin.lon },
+        poiCategories,
+      );
+      setPois(mapPois);
+      setSelectedPoiId(mapPois[0]?.id ?? null);
+    } finally {
+      setSearchingArea(false);
+    }
+  }, [mapCenter, poiCategories, profile]);
 
   useFocusEffect(
     useCallback(() => {
@@ -284,11 +313,26 @@ export default function MapScreen() {
       color:
         poi.category === 'restaurant'
           ? theme.colors.success
-          : poi.category === 'pharmacy'
-            ? theme.colors.warning
-            : theme.colors.accent,
+          : poi.category === 'cafe'
+            ? theme.colors.warningText
+            : poi.category === 'pharmacy'
+              ? theme.colors.warning
+              : theme.colors.accent,
     }));
   }, [pois, showPlaceMarkers, theme.colors]);
+
+  const showSearchAreaButton = useMemo(() => {
+    if (!showPlaceMarkers || !mapCenter) return false;
+    const origin = poiOrigin ?? { lat: coords.lat, lon: coords.lon };
+    return (
+      Math.abs(mapCenter.lat - origin.lat) > SEARCH_AREA_MIN_DELTA_DEG ||
+      Math.abs(mapCenter.lon - origin.lon) > SEARCH_AREA_MIN_DELTA_DEG
+    );
+  }, [coords.lat, coords.lon, mapCenter, poiOrigin, showPlaceMarkers]);
+
+  const handleRegionChange = useCallback((latitude: number, longitude: number) => {
+    setMapCenter({ lat: latitude, lon: longitude });
+  }, []);
 
   const yandexPlacesUrl = useMemo(() => {
     if (pois.length === 0) {
@@ -553,6 +597,7 @@ export default function MapScreen() {
           polylines={showPlumeGeo ? plume.polylines : []}
           selectedMarkerId={selectedPoiId}
           onMarkerPress={setSelectedPoiId}
+          onRegionChange={handleRegionChange}
           overlay={mapOverlay}
         />
       ) : (
@@ -567,6 +612,23 @@ export default function MapScreen() {
           overlay={mapOverlay}
         />
       )}
+
+      {showSearchAreaButton ? (
+        <Pressable
+          testID="map-search-area"
+          style={styles.searchAreaBtn}
+          onPress={() => void searchThisArea()}
+          disabled={searchingArea}
+          accessibilityRole="button"
+          accessibilityLabel={t('map.searchThisArea')}>
+          {searchingArea ? (
+            <ActivityIndicator size="small" color={theme.colors.accent} />
+          ) : (
+            <Ionicons name="search" size={16} color={theme.colors.accent} />
+          )}
+          <Text style={styles.searchAreaText}>{t('map.searchThisArea')}</Text>
+        </Pressable>
+      ) : null}
 
       <Text style={styles.mapAttribution} testID="map-attribution">
         {t(mapAttributionKey)}
@@ -599,6 +661,7 @@ export default function MapScreen() {
           <Text style={styles.legendTitle}>{t('map.legendTitlePlaces')}</Text>
           <View style={styles.legendRow}>
             <LegendDot color={theme.colors.success} label={t('map.legendRestaurant')} />
+            <LegendDot color={theme.colors.warningText} label={t('map.legendCafe')} />
             <LegendDot color={theme.colors.accent} label={t('map.legendMedical')} />
             <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
           </View>
@@ -858,6 +921,26 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 10,
     },
     allergenPickerDot: { width: 8, height: 8, borderRadius: 4 },
+    searchAreaBtn: {
+      alignSelf: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      minHeight: 40,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      backgroundColor: colors.card,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      marginTop: 4,
+    },
+    searchAreaText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     allergenPickerLabel: {
       flex: 1,
       fontFamily: fonts.sansSemiBold,

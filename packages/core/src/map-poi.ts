@@ -1,7 +1,14 @@
 import { ADAIR_CLINICS, type AdairClinic } from './adair-catalog';
 import type { CatalogPlace } from './catalog';
 
-export type MapPoiCategory = 'restaurant' | 'medical' | 'pharmacy';
+export type MapPoiCategory = 'restaurant' | 'cafe' | 'medical' | 'pharmacy';
+
+export const MAP_POI_CATEGORIES: readonly MapPoiCategory[] = [
+  'restaurant',
+  'cafe',
+  'medical',
+  'pharmacy',
+];
 export type MapPoiSource = 'catalog' | 'adair' | 'google-places';
 
 export interface MapPoi {
@@ -21,12 +28,14 @@ export interface MapPoi {
 
 const PHARMACY_TAG = 'pharmacy';
 const MEDICAL_TAGS = new Set(['pharmacy', 'clinic', 'hospital', 'medical']);
+const CAFE_TAGS = new Set(['cafe', 'coffee', 'bakery', 'coffee_shop']);
 
 /** Infer POI category from catalog place tags/icon. */
 export function catalogPlaceCategory(place: CatalogPlace): MapPoiCategory {
   const tags = place.tags.map((tag) => tag.toLowerCase());
   if (tags.includes(PHARMACY_TAG) || place.icon === 'medkit') return 'pharmacy';
   if (tags.some((tag) => MEDICAL_TAGS.has(tag))) return 'medical';
+  if (place.icon === 'cafe' || tags.some((tag) => CAFE_TAGS.has(tag))) return 'cafe';
   return 'restaurant';
 }
 
@@ -101,11 +110,18 @@ export function googlePlaceToMapPoi(input: {
     lat: input.lat,
     lng: input.lng,
     level,
-    icon: category === 'restaurant' ? 'restaurant' : category === 'pharmacy' ? 'medkit' : 'medical',
+    icon: MAP_POI_CATEGORY_ICONS[category],
     tags: types.slice(0, 4),
     source: 'google-places',
   };
 }
+
+const MAP_POI_CATEGORY_ICONS: Record<MapPoiCategory, string> = {
+  restaurant: 'restaurant',
+  cafe: 'cafe',
+  medical: 'medical',
+  pharmacy: 'medkit',
+};
 
 export function filterMapPoisByCategory(
   pois: MapPoi[],
@@ -122,9 +138,17 @@ function resolveGooglePlaceCategory(types: string[]): MapPoiCategory {
     types.includes('hospital') ||
     types.includes('doctor') ||
     types.includes('health') ||
-    types.includes('clinic')
+    types.includes('clinic') ||
+    types.includes('dental_clinic')
   ) {
     return 'medical';
+  }
+  if (
+    types.includes('cafe') ||
+    types.includes('coffee_shop') ||
+    types.includes('bakery')
+  ) {
+    return 'cafe';
   }
   return 'restaurant';
 }

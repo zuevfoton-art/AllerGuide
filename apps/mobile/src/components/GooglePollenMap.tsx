@@ -27,11 +27,14 @@ export function GooglePollenMap({
   polylines = [],
   selectedMarkerId,
   onMarkerPress,
+  onRegionChange,
   overlay,
 }: GooglePollenMapProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, height), [height, theme]);
   const mapRef = useRef<MapView>(null);
+  const onRegionChangeRef = useRef(onRegionChange);
+  onRegionChangeRef.current = onRegionChange;
   const region = useMemo(
     () => buildRegion(latitude, longitude, zoom),
     [latitude, longitude, zoom],
@@ -56,7 +59,10 @@ export function GooglePollenMap({
         zoomEnabled={interactive}
         pitchEnabled={false}
         rotateEnabled={false}
-        toolbarEnabled={false}>
+        toolbarEnabled={false}
+        onRegionChangeComplete={(nextRegion) =>
+          onRegionChangeRef.current?.(nextRegion.latitude, nextRegion.longitude)
+        }>
         {tileUrlTemplate ? (
           <UrlTile
             urlTemplate={tileUrlTemplate}

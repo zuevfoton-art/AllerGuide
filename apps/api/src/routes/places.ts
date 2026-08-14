@@ -8,7 +8,7 @@ import {
   type GooglePlacesNearbyType,
 } from '../services/google-places-nearby';
 
-const DEFAULT_TYPES: GooglePlacesNearbyType[] = ['restaurant', 'hospital', 'pharmacy'];
+const DEFAULT_TYPES: GooglePlacesNearbyType[] = ['restaurant', 'cafe', 'medical', 'pharmacy'];
 
 export function registerPlacesRoutes(app: Express): void {
   app.get('/api/places/nearby', async (req: Request, res: Response) => {
