@@ -175,6 +175,10 @@ await deleteDiaryAttachmentsForEntry(entryId);
 - максимум пять файлов обрабатываются параллельно;
 - одинаковое поведение web/native.
 
+При редактировании `photoUris: undefined` теперь означает «сохранить
+существующие вложения». Пустой массив передаётся только при явной очистке фото.
+Это устраняет неявное удаление вложений через `entry.photoUris ?? []`.
+
 ### 7. Cross-platform destructive confirmation
 
 `confirmDestructiveAction()` использует:
@@ -235,6 +239,14 @@ share отчётов остаются в специализированном `d
 - немедленный flush diary write без ожидания debounce timer;
 - восстановление persisted active profile при пустом Zustand state;
 - существующие create/batch/update/delete сценарии.
+
+### 12. Полная валидация wizard
+
+`finishWizard()` проверяет каждую непустую секцию через
+`validateDiarySection()` (для шкал — `validateClinicalScale()`). `skipSection`
+также блокирует переход, если пользователь частично заполнил секцию, но
+пропустил обязательное поле. Частично заполненная «Лекарство» или «Питание»
+больше не сохраняется в обход пошаговой валидации.
 
 ## Возможные побочные эффекты и компромиссы
 

@@ -16,6 +16,7 @@ const profiles = [
 ];
 
 let nextId = 1;
+const replaceDiaryPhotos = vi.fn();
 const persistDbWrites = vi.fn(async () => undefined);
 
 const runSync = vi.fn((sql: string, params: unknown[] = []) => {
@@ -96,7 +97,7 @@ vi.mock('@/src/db/init', () => ({
 vi.mock('@/src/services/diary-attachment-service', () => ({
   deleteDiaryAttachmentsForEntry: vi.fn(),
   listDiaryAttachments: vi.fn(() => []),
-  replaceDiaryPhotos: vi.fn(),
+  replaceDiaryPhotos,
 }));
 
 describe('diary-service', () => {
@@ -106,6 +107,7 @@ describe('diary-service', () => {
     runSync.mockClear();
     getAllSync.mockClear();
     getFirstSync.mockClear();
+    replaceDiaryPhotos.mockReset();
     persistDbWrites.mockClear();
   });
 
@@ -220,5 +222,31 @@ describe('diary-service', () => {
       expect.objectContaining({ id: 40 }),
     );
     expect(diaryRows.find((entry) => entry.id === 40)?.details).toContain('private');
+  });
+
+  it('preserves photos when update omits photoUris and clears them only explicitly', async () => {
+    const { addDiaryEntry, updateDiaryEntry } = await import('./diary-service');
+    const created = await addDiaryEntry({
+      profileId: 1,
+      type: 'Кожа',
+      details: '{"v":1,"answers":{"skinArea":"рука"}}',
+      createdAt: '2026-06-20T11:00:00.000Z',
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) return;
+
+    replaceDiaryPhotos.mockClear();
+    await updateDiaryEntry(created.entryId, {
+      type: 'Кожа',
+      details: '{"v":1,"answers":{"skinArea":"лицо"}}',
+    });
+    expect(replaceDiaryPhotos).not.toHaveBeenCalled();
+
+    await updateDiaryEntry(created.entryId, {
+      type: 'Кожа',
+      details: '{"v":1,"answers":{"skinArea":"лицо"}}',
+      photoUris: [],
+    });
+    expect(replaceDiaryPhotos).toHaveBeenCalledWith(created.entryId, []);
   });
 });

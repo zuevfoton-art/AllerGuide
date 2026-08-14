@@ -26,6 +26,7 @@ import {
   serializeSelectedComponentIds,
   toggleMultiChoiceValue,
   validateClinicalScale,
+  validateDiarySection,
   validateDiarySectionStep,
   type DiarySection,
   type DiaryStep,
@@ -304,6 +305,17 @@ export function DiaryWizard({
   };
 
   const skipSection = () => {
+    if (hasSectionAnswers(section, sectionAnswers)) {
+      const validationError =
+        section.type === 'Шкала'
+          ? validateClinicalScale(sectionAnswers)
+          : validateDiarySection(section, sectionAnswers);
+      if (validationError) {
+        setError(tDiaryError(validationError));
+        return;
+      }
+    }
+
     setError('');
     if (sectionIndex < totalSections - 1) {
       setSectionIndex((value) => value + 1);
@@ -314,16 +326,25 @@ export function DiaryWizard({
   };
 
   const finishWizard = () => {
-    let scaleError: string | null = null;
+    let sectionError: string | null = null;
     const entries = sections.flatMap((item) => {
       const answers = answersBySection[item.type] ?? {};
       if (!hasSectionAnswers(item, answers)) return [];
 
       if (item.type === 'Шкала') {
-        scaleError = validateClinicalScale(answers);
-        if (scaleError) return [];
+        const validationError = validateClinicalScale(answers);
+        if (validationError) {
+          sectionError ??= validationError;
+          return [];
+        }
         const enriched = enrichScaleAnswers(answers);
         return [{ type: item.type, details: encodeDiaryDetails(enriched, item.type) }];
+      }
+
+      const validationError = validateDiarySection(item, answers);
+      if (validationError) {
+        sectionError ??= validationError;
+        return [];
       }
 
       const photoUris = getDiaryPhotoUrisFromAnswers(answers);
@@ -336,8 +357,13 @@ export function DiaryWizard({
       ];
     });
 
+    if (sectionError) {
+      setError(tDiaryError(sectionError));
+      return;
+    }
+
     if (entries.length === 0) {
-      setError(scaleError ? tDiaryError(scaleError) : t('diaryWizard.fillOneSection'));
+      setError(t('diaryWizard.fillOneSection'));
       return;
     }
 

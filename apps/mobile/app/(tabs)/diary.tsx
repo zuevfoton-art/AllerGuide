@@ -368,7 +368,7 @@ export default function DiaryScreen() {
             const [entry] = entries;
             if (!entry) return;
             if (editor.mode === 'edit') {
-              void handleUpdate(editor.entry, entry.type, entry.details, entry.photoUris ?? []);
+              void handleUpdate(editor.entry, entry.type, entry.details, entry.photoUris);
               return;
             }
             void handleCreate(entries);
