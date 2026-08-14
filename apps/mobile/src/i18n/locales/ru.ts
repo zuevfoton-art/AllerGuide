@@ -551,6 +551,7 @@ const ru: LocaleMessages = {
     legendMedical: 'клиника',
     legendPharmacy: 'аптека',
     searchThisArea: 'Искать в этой области',
+    airLayerToggle: 'Качество воздуха',
     poiLevelHigh: 'высокий',
     poiLevelMedium: 'средний',
     poiLevelLow: 'низкий',

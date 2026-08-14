@@ -18,12 +18,15 @@ import {
   parseProfileAllergenIds,
   pollenTier,
   resolvePollenRegion,
+  airQualityRiskFromUaqi,
   wellnessStatusFromScore,
   WELLNESS_WEIGHTS_VERSION,
+  type AirQualitySnapshot,
   type DiaryEntry,
   type PollenMatchLike,
   type WellnessRecommendation,
 } from '@allerguide/core';
+import { fetchAirQualitySnapshot } from '@/src/services/air-quality-service';
 import { getLocaleContent } from '@/src/i18n/content';
 import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatTemplate } from '@/src/i18n/translate';
@@ -52,6 +55,13 @@ export type WellnessSnapshot = {
   pollenMatches: PollenMatchLike[];
 };
 
+function formatGoogleAirFactorValue(snapshot: AirQualitySnapshot): string {
+  const index = snapshot.local ?? snapshot.universal;
+  if (!index) return '—';
+  const name = index.code === 'uaqi' ? 'UAQI' : (index.displayName ?? 'AQI');
+  return index.category ? `${name} ${index.aqi} · ${index.category}` : `${name} ${index.aqi}`;
+}
+
 function labelForPollenTaxon(
   taxonId: string,
   content: ReturnType<typeof getLocaleContent>,
@@ -65,6 +75,7 @@ function buildRecommendations(
   envDataAvailable: boolean,
   seasonalAlerts: { label: string }[],
   crossReactionNames: string[],
+  googleAirQuality?: AirQualitySnapshot | null,
 ): WellnessRecommendation[] {
   const content = getLocaleContent(locale);
   const recs: WellnessRecommendation[] = [];
@@ -102,14 +113,28 @@ function buildRecommendations(
     }
   }
 
-  const aqi = aqiTier(input.europeanAqi);
-  if (envDataAvailable && aqi.level !== 'low') {
-    const tierLabel = (content.wellness.aqiTier[aqi.level] ?? aqi.label).toLowerCase();
+  // Google health recommendation (already localized via languageCode) takes
+  // priority over the generic Open-Meteo AQI tier hint.
+  const googleAqRecommendation =
+    googleAirQuality?.healthRecommendations?.sensitive ??
+    googleAirQuality?.healthRecommendations?.general;
+  const googleAqRisk = airQualityRiskFromUaqi(googleAirQuality?.universal?.aqi ?? null);
+  if (googleAirQuality?.universal && googleAqRecommendation && googleAqRisk !== 'low') {
     recs.push({
       icon: '💨',
       title: content.wellness.recommendations.aqi.title,
-      text: formatTemplate(content.wellness.recommendations.aqi.text, { tier: tierLabel }),
+      text: googleAqRecommendation,
     });
+  } else {
+    const aqi = aqiTier(input.europeanAqi);
+    if (envDataAvailable && aqi.level !== 'low') {
+      const tierLabel = (content.wellness.aqiTier[aqi.level] ?? aqi.label).toLowerCase();
+      recs.push({
+        icon: '💨',
+        title: content.wellness.recommendations.aqi.title,
+        text: formatTemplate(content.wellness.recommendations.aqi.text, { tier: tierLabel }),
+      });
+    }
   }
 
   if (input.diary.symptomDays >= 2) {
@@ -214,6 +239,14 @@ export async function fetchWellnessSnapshot(
     `&longitude=${resolvedLocation.lon}&timezone=${timezone}&forecast_days=1` +
     `&current=european_aqi,pm2_5&hourly=${pollenHourly}`;
 
+  // Optional Google Air Quality enrichment (UAQI + localized health advice).
+  // The wellness score keeps using Open-Meteo values for stability.
+  const googleAirQualityPromise = fetchAirQualitySnapshot(
+    resolvedLocation.lat,
+    resolvedLocation.lon,
+    locale,
+  );
+
   let europeanAqi: number | null = null;
   let pm25: number | null = null;
   let envDataAvailable = false;
@@ -248,6 +281,8 @@ export async function fetchWellnessSnapshot(
     logCaughtError('fetchWellnessEnvironment', error, { level: 'warn' });
     envDataAvailable = false;
   }
+
+  const googleAirQuality = await googleAirQualityPromise;
 
   const foodAllergens = getFoodAllergenLabels(profileAllergenIds);
   const asitCompliance = computeAsitCompliance(diaryEntries, 30);
@@ -290,8 +325,14 @@ export async function fetchWellnessSnapshot(
           })),
         {
           label: messages.wellness.airLabel,
-          value: pm25 != null ? `PM2.5 ${pm25.toFixed(1)} µg/m³` : '—',
-          level: aqiTier(europeanAqi).level,
+          value: googleAirQuality?.universal
+            ? formatGoogleAirFactorValue(googleAirQuality)
+            : pm25 != null
+              ? `PM2.5 ${pm25.toFixed(1)} µg/m³`
+              : '—',
+          level: googleAirQuality?.universal
+            ? airQualityRiskFromUaqi(googleAirQuality.universal.aqi)
+            : aqiTier(europeanAqi).level,
         },
         {
           label: messages.wellness.diaryLabel,
@@ -307,8 +348,12 @@ export async function fetchWellnessSnapshot(
     : [
         {
           label: messages.wellness.airLabel,
-          value: messages.wellness.envUnavailable,
-          level: 'mid' as const,
+          value: googleAirQuality?.universal
+            ? formatGoogleAirFactorValue(googleAirQuality)
+            : messages.wellness.envUnavailable,
+          level: googleAirQuality?.universal
+            ? airQualityRiskFromUaqi(googleAirQuality.universal.aqi)
+            : ('mid' as const),
         },
         {
           label: messages.wellness.diaryLabel,
@@ -343,6 +388,7 @@ export async function fetchWellnessSnapshot(
       envDataAvailable,
       seasonalAlerts,
       crossReactionNames,
+      googleAirQuality,
     ),
     updatedAt: new Date().toISOString(),
     locationLabel: resolvedLocation.label,

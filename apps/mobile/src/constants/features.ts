@@ -96,3 +96,11 @@ export const YANDEX_MAP_INTERACTIVE_ENABLED =
 export const MAP_PLACES_ENABLED =
   process.env.EXPO_PUBLIC_MAP_PLACES === 'true' ||
   process.env.EXPO_PUBLIC_LIVE_MAP === 'true';
+
+/**
+ * Google Air Quality API enrichment (UAQI + health recommendations) via the
+ * API proxy `/api/air-quality/*`. Open-Meteo stays the offline-safe fallback
+ * and keeps feeding the wellness score.
+ */
+export const AIR_QUALITY_GOOGLE_ENABLED =
+  process.env.EXPO_PUBLIC_AIR_QUALITY === 'google';

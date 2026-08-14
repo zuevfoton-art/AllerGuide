@@ -18,6 +18,7 @@ import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
 import { registerAnalyticsRoutes } from './routes/analytics';
 import { registerPollenRoutes } from './routes/pollen';
+import { registerAirQualityRoutes } from './routes/air-quality';
 import { registerMapsRoutes } from './routes/maps';
 import { registerPlacesRoutes } from './routes/places';
 import { registerMarketRoutes } from './routes/market';
@@ -57,6 +58,7 @@ export async function createApp(
   registerGovernanceRoutes(app);
   registerAnalyticsRoutes(app);
   registerPollenRoutes(app);
+  registerAirQualityRoutes(app);
   registerMapsRoutes(app);
   registerPlacesRoutes(app);
 

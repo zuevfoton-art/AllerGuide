@@ -32,6 +32,8 @@ export interface GooglePollenMapProps {
   longitude: number;
   zoom: number;
   mapType: GooglePollenMapType | null;
+  /** Overrides the pollen tile layer (e.g. air quality heatmap tiles). */
+  tileUrlTemplate?: string | null;
   height?: number;
   interactive?: boolean;
   markers?: GoogleMapMarker[];

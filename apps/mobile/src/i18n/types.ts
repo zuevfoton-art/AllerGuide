@@ -556,6 +556,7 @@ export type LocaleMessages = {
     legendMedical: string;
     legendPharmacy: string;
     searchThisArea: string;
+    airLayerToggle: string;
     poiLevelHigh: string;
     poiLevelMedium: string;
     poiLevelLow: string;

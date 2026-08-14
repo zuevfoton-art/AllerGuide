@@ -16,6 +16,7 @@ export function GooglePollenMap({
   longitude,
   zoom,
   mapType,
+  tileUrlTemplate: tileUrlTemplateOverride,
   height = 300,
   interactive = true,
   markers = [],
@@ -84,8 +85,10 @@ export function GooglePollenMap({
         tileOverlayRef.current = null;
       }
 
-      if (mapType) {
-        const tileUrlTemplate = buildPollenHeatmapTileUrlTemplate(mapType);
+      const tileUrlTemplate =
+        tileUrlTemplateOverride ??
+        (mapType ? buildPollenHeatmapTileUrlTemplate(mapType) : null);
+      if (tileUrlTemplate) {
         const tileOverlay = new google.maps.ImageMapType({
           getTileUrl: (coordinate, tileZoom) =>
             resolvePollenHeatmapTileUrl(
@@ -97,7 +100,7 @@ export function GooglePollenMap({
           tileSize: new google.maps.Size(GOOGLE_TILE_SIZE, GOOGLE_TILE_SIZE),
           maxZoom: 16,
           minZoom: 0,
-          name: mapType,
+          name: mapType ?? 'tiles',
           opacity: 0.8,
         });
         map.overlayMapTypes.insertAt(0, tileOverlay);
@@ -170,6 +173,7 @@ export function GooglePollenMap({
     markers,
     polylines,
     selectedMarkerId,
+    tileUrlTemplateOverride,
     zoom,
   ]);
 

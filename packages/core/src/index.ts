@@ -61,6 +61,7 @@ export * from './pollen-plume';
 export * from './hourly-series';
 export * from './map-poi';
 export * from './google-pollen-heatmap';
+export * from './air-quality';
 export * from './wellness-cross-reactions';
 export * from './symptom-coding';
 export * from './diary-severity';

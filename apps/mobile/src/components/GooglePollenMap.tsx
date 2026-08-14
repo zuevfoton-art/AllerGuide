@@ -20,6 +20,7 @@ export function GooglePollenMap({
   longitude,
   zoom,
   mapType,
+  tileUrlTemplate: tileUrlTemplateOverride,
   height = 300,
   interactive = true,
   markers = [],
@@ -40,8 +41,10 @@ export function GooglePollenMap({
     [latitude, longitude, zoom],
   );
   const tileUrlTemplate = useMemo(
-    () => (mapType ? buildPollenHeatmapTileUrlTemplate(mapType) : null),
-    [mapType],
+    () =>
+      tileUrlTemplateOverride ??
+      (mapType ? buildPollenHeatmapTileUrlTemplate(mapType) : null),
+    [mapType, tileUrlTemplateOverride],
   );
 
   useEffect(() => {

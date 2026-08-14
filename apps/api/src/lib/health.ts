@@ -28,6 +28,7 @@ export interface HealthCheckResult {
     ycStt?: boolean;
     aiDishVision?: boolean;
     pollenHeatmap?: boolean;
+    airQuality?: boolean;
     yandexMapsInteractive?: boolean;
   };
   scan?: ScanHealthMetrics;
@@ -102,6 +103,13 @@ function buildFeatures() {
     pollenHeatmap:
       process.env.POLLEN_HEATMAP_ENABLED === 'true' &&
       Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
+    airQuality:
+      process.env.AIR_QUALITY_ENABLED === 'true' &&
+      Boolean(
+        process.env.GOOGLE_AIR_QUALITY_API_KEY?.trim() ||
+          process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
+          process.env.GOOGLE_POLLEN_API_KEY?.trim(),
+      ),
     yandexMapsInteractive:
       process.env.YANDEX_MAPS_INTERACTIVE_ENABLED === 'true' &&
       Boolean(process.env.YANDEX_MAPS_JS_API_KEY?.trim()),
