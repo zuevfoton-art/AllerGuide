@@ -1,9 +1,24 @@
-import { getDb } from '@/src/db/init';
+import { getDb, persistDbWrites } from '@/src/db/init';
 import { enqueueAliasFeedback, type AliasFeedbackEntry, type AliasFeedbackInput } from '@allerguide/core';
 import { apiRequest } from '@/src/services/api-client';
 import { logCaughtError } from '@/src/services/error-reporting';
+import { isOwnedProfile } from '@/src/services/owned-profiles';
 
-export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry {
+export type AliasFeedbackMutationResult =
+  | { ok: true; entry: AliasFeedbackEntry }
+  | { ok: false; code: 'invalid_input' | 'profile_not_found' };
+
+export async function saveAliasFeedback(
+  input: AliasFeedbackInput,
+): Promise<AliasFeedbackMutationResult> {
+  const term = input.term.trim();
+  if (!term) {
+    return { ok: false, code: 'invalid_input' };
+  }
+  if (input.profileId != null && !isOwnedProfile(input.profileId)) {
+    return { ok: false, code: 'profile_not_found' };
+  }
+
   const entry = enqueueAliasFeedback(input);
 
   getDb().runSync(
@@ -21,6 +36,7 @@ export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry
       entry.createdAt,
     ],
   );
+  await persistDbWrites();
 
   void apiRequest('/api/alias-feedback', {
     method: 'POST',
@@ -35,7 +51,7 @@ export function saveAliasFeedback(input: AliasFeedbackInput): AliasFeedbackEntry
     logCaughtError('submitAliasFeedback', error, { level: 'warn', extra: { term: entry.term } });
   });
 
-  return entry;
+  return { ok: true, entry };
 }
 
 export function listPendingAliasFeedback(): AliasFeedbackEntry[] {

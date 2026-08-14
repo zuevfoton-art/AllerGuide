@@ -38,6 +38,26 @@ describe('scan-trends', () => {
     expect(trends.topAllergens.length).toBeGreaterThan(0);
   });
 
+  it('counts structured cross matches without dropping them', () => {
+    const history: ScanHistoryEntry[] = [
+      entry({
+        profileId: 1,
+        matches: JSON.stringify({
+          direct: ['Молоко'],
+          cross: ['Яблоко'],
+          trace: [],
+        }),
+        level: 'medium',
+      }),
+    ];
+
+    const trends = computeScanTrends(history, 30);
+    expect(trends.totalScans).toBe(1);
+    expect(trends.topAllergens.map((item) => item.label)).toEqual(
+      expect.arrayContaining(['Молоко', 'Яблоко']),
+    );
+  });
+
   it('detects repeat high-risk barcode', () => {
     const history: ScanHistoryEntry[] = [
       entry({ profileId: 1, input: '4601234567890', level: 'high', mode: 'product' }),

@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from 'express';
-import { buildScanPrompt, parseLlmScanResponse, type ScanMode } from '@allerguide/ai';
+import { buildScanPrompt, parseLlmScanResponse } from '@allerguide/ai';
 import { verifyAuthToken } from '../lib/jwt';
 import {
   consumeScanBudget,
@@ -13,14 +13,7 @@ import {
 } from '../lib/scan-cache';
 import { logCaughtError } from '../lib/log-caught-error';
 import { callScanLlm } from '../services/llm-scan-provider';
-
-interface ScanRequestBody {
-  mode?: ScanMode;
-  text?: string;
-  allergens?: string[];
-  productName?: string;
-  prompt?: string;
-}
+import { parseScanInput } from './scan-input';
 
 function isScanEnabled(): boolean {
   return process.env.AI_SCAN_ENABLED === 'true';
@@ -61,22 +54,19 @@ export function registerScanRoutes(app: Express) {
       return;
     }
 
-    const body = req.body as ScanRequestBody;
-    const mode = body.mode ?? 'product';
-    const text = body.text?.trim();
-    const allergens = Array.isArray(body.allergens) ? body.allergens.map(String) : [];
-
-    if (!text) {
-      res.status(400).json({ ok: false, error: 'Missing text' });
+    const input = parseScanInput(req.body);
+    if (!input) {
+      res.status(400).json({ ok: false, error: 'Invalid scan payload' });
       return;
     }
+
+    const { mode, text, allergens, productName } = input;
 
     const cacheKey = scanCacheKey({
       mode,
       text,
       allergens,
-      productName: body.productName,
-      prompt: body.prompt,
+      productName,
     });
 
     const cached = await getCachedScan(cacheKey);
@@ -98,14 +88,12 @@ export function registerScanRoutes(app: Express) {
 
     logScanCacheEvent(false);
 
-    const prompt =
-      body.prompt ??
-      buildScanPrompt({
-        mode,
-        text,
-        allergens,
-        productName: body.productName,
-      });
+    const prompt = buildScanPrompt({
+      mode,
+      text,
+      allergens,
+      productName,
+    });
 
     try {
       const content = await callScanLlm(prompt);
@@ -114,7 +102,7 @@ export function registerScanRoutes(app: Express) {
         return;
       }
 
-      const result = parseLlmScanResponse(content, mode, allergens, body.productName);
+      const result = parseLlmScanResponse(content, mode, allergens, productName);
       if (!result) {
         res.status(502).json({ ok: false, error: 'Invalid LLM response' });
         return;

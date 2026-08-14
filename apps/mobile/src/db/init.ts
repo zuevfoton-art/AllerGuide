@@ -6,7 +6,7 @@ import type {
   SafeProduct,
   ScanHistoryEntry,
 } from '@allerguide/core';
-import { hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
+import { flushWebStore, hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -18,6 +18,17 @@ interface DbLike {
   runSync: (sql: string, params?: unknown[]) => void;
   getFirstSync: <T>(sql: string, params?: unknown[]) => T | null;
   getAllSync: <T>(sql: string, params?: unknown[]) => T[];
+}
+
+interface StoredAliasFeedback {
+  id: string;
+  term: string;
+  suggested_allergen_id: string | null;
+  context: string | null;
+  profile_id: number | null;
+  scan_input: string | null;
+  status: string;
+  created_at: string;
 }
 
 interface BarcodeCacheRow {
@@ -104,6 +115,14 @@ class WebDb implements DbLike {
 
   private saveSafeProducts(items: SafeProduct[]) {
     saveJson('ag_safe_products', items);
+  }
+
+  private getAliasFeedback(): StoredAliasFeedback[] {
+    return loadJson<StoredAliasFeedback[]>('ag_alias_feedback', []);
+  }
+
+  private saveAliasFeedback(items: StoredAliasFeedback[]) {
+    saveJson('ag_alias_feedback', items);
   }
 
   private getDiaryAttachments(): {
@@ -354,9 +373,41 @@ class WebDb implements DbLike {
       return;
     }
 
+    if (s.startsWith('delete from safe_products where id =') && s.includes('and profileid')) {
+      const items = this.getSafeProducts();
+      this.saveSafeProducts(
+        items.filter((item) => !(item.id === params![0] && item.profileId === params![1])),
+      );
+      return;
+    }
+
     if (s.startsWith('delete from safe_products where id =')) {
       const items = this.getSafeProducts();
       this.saveSafeProducts(items.filter((item) => item.id !== params![0]));
+      return;
+    }
+
+    if (s.startsWith('insert into alias_feedback')) {
+      const items = this.getAliasFeedback();
+      const next: StoredAliasFeedback = {
+        id: params![0] as string,
+        term: params![1] as string,
+        suggested_allergen_id: (params![2] as string | null) ?? null,
+        context: (params![3] as string | null) ?? null,
+        profile_id: (params![4] as number | null) ?? null,
+        scan_input: (params![5] as string | null) ?? null,
+        status: params![6] as string,
+        created_at: params![7] as string,
+      };
+      const index = items.findIndex((item) => item.id === next.id);
+      if (index >= 0) items[index] = next;
+      else items.push(next);
+      this.saveAliasFeedback(items);
+      return;
+    }
+
+    if (s === 'delete from alias_feedback' || s.startsWith('delete from alias_feedback;')) {
+      this.saveAliasFeedback([]);
       return;
     }
 
@@ -548,6 +599,17 @@ class WebDb implements DbLike {
       return items.filter((item) => item.profileId === params![0]).reverse() as T[];
     }
 
+    if (s.includes('from alias_feedback') && s.includes("where status = 'pending'")) {
+      const items = this.getAliasFeedback();
+      return items
+        .filter((item) => item.status === 'pending')
+        .sort((left, right) => right.created_at.localeCompare(left.created_at)) as T[];
+    }
+
+    if (s.includes('from alias_feedback')) {
+      return [...this.getAliasFeedback()] as T[];
+    }
+
     if (s.includes('from app_settings')) {
       const settings = this.getSettings();
       return Object.entries(settings).map(([key, value]) => ({ key, value })) as T[];
@@ -565,6 +627,10 @@ const db: DbLike = new WebDb();
 
 export async function initDb() {
   await hydrateWebStore();
+}
+
+export function persistDbWrites(): Promise<void> {
+  return flushWebStore();
 }
 
 export function getDb() {

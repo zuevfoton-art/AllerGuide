@@ -79,6 +79,7 @@ export * from './analytics-events';
 export * from './geo';
 export * from './yandex-map';
 export * from './barcodes';
+export * from './scan-history-matches';
 export * from './scan-trends';
 export * from './icd10-reference';
 export * from './prescribed-therapy';
