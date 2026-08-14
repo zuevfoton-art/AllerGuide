@@ -34,12 +34,19 @@ For each item: create new credential → update store → smoke → **delete old
 - [ ] If Maps still uses API keys (not SA): confirm Android/iOS/JS keys unchanged  
 - [ ] No SA JSON in Cursor uploads / repo  
 
-### D. Optional app secrets
+### D. Google Places / Air Quality Maps Platform key (server)
+
+- [ ] GCP Console → create a new key restricted to **Places API (New)** + **Air Quality API**  
+- [ ] `MAPS_PLATFORM_API_KEY_FILE=<new> ./scripts/yc-stage-enable-places-air-quality.sh`  
+- [ ] `./scripts/staging-places-air-quality-smoke.sh` Pass  
+- [ ] Delete **old** Maps Platform key in GCP (especially if it was uploaded in chat)
+
+### E. Optional app secrets
 
 - [ ] Rotate `JWT_SECRET` / `SESSION_SECRET` in Lockbox if leaked (forces re-login)  
 - [ ] Redeploy Serverless revision after Lockbox version bump  
 
-### E. Verify stores
+### F. Verify stores
 
 - [ ] Lockbox payload keys match [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys) (names)  
 - [ ] GitHub Actions secrets present (see inventory §2)  

@@ -107,6 +107,21 @@ if [[ "${REQUIRE_YANDEX_MAPS:-}" == "1" ]]; then
   fi
 fi
 
+if [[ "${REQUIRE_PLACES_AIR_QUALITY:-}" == "1" ]]; then
+  for required in MAP_PLACES_ENABLED GOOGLE_PLACES_API_KEY AIR_QUALITY_ENABLED GOOGLE_AIR_QUALITY_API_KEY; do
+    if ! printf '%s\n' "$AVAILABLE" | grep -qx "$required"; then
+      echo "ERROR: REQUIRE_PLACES_AIR_QUALITY=1 but Lockbox missing $required" >&2
+      exit 1
+    fi
+  done
+  places_aq_flags="$(yc lockbox payload get --id "$LOCKBOX_ID" --format json | python3 -c 'import json,sys; e={x["key"]:x.get("text_value","") for x in json.load(sys.stdin).get("entries") or []}; print(e.get("MAP_PLACES_ENABLED",""), e.get("AIR_QUALITY_ENABLED",""))')"
+  read -r places_flag aq_flag <<<"$places_aq_flags"
+  if [[ "$places_flag" != "true" || "$aq_flag" != "true" ]]; then
+    echo "ERROR: MAP_PLACES_ENABLED and AIR_QUALITY_ENABLED must be true (got: $places_aq_flags)" >&2
+    exit 1
+  fi
+fi
+
 echo "Deploying $IMAGE → container $YC_CONTAINER_ID (mounted $MOUNTED Lockbox keys, version $VERSION_ID, sa $RUNTIME_SA_ID, network $NETWORK_ID)"
 yc serverless container revision deploy "${DEPLOY_ARGS[@]}"
 echo "Deploy requested."

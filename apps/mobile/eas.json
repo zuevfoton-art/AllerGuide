@@ -54,6 +54,8 @@
         "EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY": "true",
         "EXPO_PUBLIC_MAP_POLLEN_PLUME": "true",
         "EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE": "true",
+        "EXPO_PUBLIC_MAP_PLACES": "true",
+        "EXPO_PUBLIC_AIR_QUALITY": "google",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "staging",
         "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

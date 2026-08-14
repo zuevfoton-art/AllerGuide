@@ -31,6 +31,11 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `POLLEN_HEATMAP_ENABLED` | Pollen proxy | `true` |
 | `GOOGLE_POLLEN_API_KEY` | Google Pollen API | **server only**; never EAS |
 | `POLLEN_RATE_LIMIT_*` | Rate limits | optional defaults |
+| `MAP_PLACES_ENABLED` | Places API (New) proxy | `true` on staging |
+| `GOOGLE_PLACES_API_KEY` | Places API (New) | **server only**; never EAS / `EXPO_PUBLIC_*` |
+| `PLACES_RATE_LIMIT_*` | Nearby search limits | optional defaults |
+| `AIR_QUALITY_ENABLED` | Air Quality proxy | `true` on staging |
+| `GOOGLE_AIR_QUALITY_API_KEY` | Air Quality API | **server only**; never EAS; may share a Maps Platform key with Places, not the Pollen-only key |
 | `YANDEX_MAPS_INTERACTIVE_ENABLED` | In-app Yandex JS embed | `true` on staging |
 | `YANDEX_MAPS_JS_API_KEY` | Yandex Maps JS API | **server only**; never EAS / `EXPO_PUBLIC_*` |
 | `MAPS_RATE_LIMIT_*` | Embed HTML rate limits | optional defaults |
@@ -72,9 +77,9 @@ Do **not** put `GOOGLE_POLLEN_API_KEY` in GitHub unless a dedicated upsert workf
 | Name | Visibility | Value |
 |------|------------|--------|
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | **Sensitive** (not Secret) | Maps Android (or JS) restricted key |
-| Profile `staging` env | in `eas.json` | API URL = YC; `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true`; no server maps/pollen keys |
+| Profile `staging` env | in `eas.json` | API URL = YC; `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true`; `EXPO_PUBLIC_MAP_PLACES=true`; `EXPO_PUBLIC_AIR_QUALITY=google`; no server maps/pollen/places/AQ keys |
 
-Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `YANDEX_MAPS_JS_API_KEY`, `JWT_SECRET`, `DATABASE_URL`, YC AI keys.
+Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_AIR_QUALITY_API_KEY`, `YANDEX_MAPS_JS_API_KEY`, `JWT_SECRET`, `DATABASE_URL`, YC AI keys.
 
 ---
 
@@ -104,6 +109,7 @@ If a key was pasted in chat, Cursor uploads, or a laptop clipboard, **rotate** i
 High priority from migrate sessions:
 
 1. **GCP Pollen API key** (server) — recreate in Google Cloud Console → update Lockbox → redeploy revision  
+1b. **GCP Places / Air Quality Maps Platform key** (server) — if uploaded in chat, rotate after Lockbox upsert (`pnpm yc-stage-enable-places-air-quality`)  
 2. **YC authorized key** used by agents (`aclearo-staging-bootstrap` / deploy) — delete key id in IAM → create new JSON → update GitHub `YC_SA_JSON` if deploy key  
 3. **GCP service account JSON** (Maps/audit) — delete key in GCP IAM if uploaded to chat  
 4. Optional: `JWT_SECRET` / `SESSION_SECRET` if ever shared

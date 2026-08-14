@@ -18,6 +18,7 @@
     "yc-stage-phase0": "bash scripts/yc-stage-phase0-gate.sh",
     "yc-stage-phase1": "bash scripts/yc-stage-phase1-enable-pollen.sh",
     "yc-stage-enable-yandex-maps": "bash scripts/yc-stage-enable-yandex-maps.sh",
+    "yc-stage-enable-places-air-quality": "bash scripts/yc-stage-enable-places-air-quality.sh",
     "yc-stage-enable-scan-intent-search": "bash scripts/yc-stage-enable-scan-intent-search.sh",
     "yc-stage-enable-dish-vision": "bash scripts/yc-stage-enable-dish-vision.sh",
     "yc-stage-phase2": "bash scripts/yc-stage-phase2-gate.sh",
