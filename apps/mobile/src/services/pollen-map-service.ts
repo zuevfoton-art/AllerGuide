@@ -23,7 +23,7 @@ import {
 } from '@allerguide/core';
 import type { ResolvedLocation } from '@/src/services/location-service';
 import { apiRequest, getApiBaseUrl } from '@/src/services/api-client';
-import { getSetting, setSetting } from '@/src/services/settings-service';
+import { getLocale, getSetting, setSetting } from '@/src/services/settings-service';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { trackEvent } from '@/src/services/analytics-service';
 import {
@@ -345,8 +345,10 @@ async function fetchGoogleForecast(
 ): Promise<GoogleForecastApiResult | null> {
   if (!isGoogleForecastClientEnabled()) return null;
 
+  // App locale localizes Google plant names/descriptions (plant sheet).
+  const lang = getLocale() ?? 'ru';
   const response = await apiRequest<{ ok?: boolean; forecast?: GoogleForecastApiResult }>(
-    `/api/pollen/forecast?lat=${latitude}&lon=${longitude}`,
+    `/api/pollen/forecast?lat=${latitude}&lon=${longitude}&lang=${lang}`,
   );
   if (!response.ok || !response.data.forecast) return null;
   return response.data.forecast;

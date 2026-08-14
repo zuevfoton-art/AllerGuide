@@ -88,6 +88,7 @@ describe('pollen forecast routes', () => {
     process.env.POLLEN_HEATMAP_ENABLED = 'true';
     process.env.GOOGLE_POLLEN_API_KEY = 'stage test key';
     process.env.RATE_LIMIT_DISABLED = 'true';
+    clearGooglePollenForecastCache();
   });
 
   afterEach(() => {
@@ -160,5 +161,25 @@ describe('pollen forecast routes', () => {
       { code: 'OLIVE', taxonId: 'olive_pollen', hasIndex: false },
     ]);
     expect(fetchMock).toHaveBeenCalled();
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('languageCode=en');
+  });
+
+  it('passes a supported lang through to Google and caches per language', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ regionCode: 'RU', dailyInfo: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp({ withReplitAuth: false });
+
+    await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62&lang=ru');
+    await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62&lang=ru');
+    await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62&lang=xx');
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('languageCode=ru');
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain('languageCode=en');
   });
 });

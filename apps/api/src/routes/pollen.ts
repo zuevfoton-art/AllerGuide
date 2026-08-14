@@ -14,6 +14,7 @@ import {
 } from '../services/google-pollen-forecast';
 
 const PNG_CONTENT_TYPE = 'image/png';
+const SUPPORTED_FORECAST_LANGUAGES = new Set(['ru', 'en', 'es', 'fr', 'de', 'it']);
 
 export function registerPollenRoutes(app: Express): void {
   app.get(
@@ -93,8 +94,11 @@ export function registerPollenRoutes(app: Express): void {
       return;
     }
 
+    const langRaw = typeof req.query.lang === 'string' ? req.query.lang.toLowerCase() : '';
+    const languageCode = SUPPORTED_FORECAST_LANGUAGES.has(langRaw) ? langRaw : 'en';
+
     try {
-      const forecast = await fetchGooglePollenForecast(latitude, longitude);
+      const forecast = await fetchGooglePollenForecast(latitude, longitude, languageCode);
       res.set({ 'Cache-Control': 'private, max-age=600' });
       res.json({ ok: true, forecast });
     } catch (error) {

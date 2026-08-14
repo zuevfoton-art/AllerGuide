@@ -5,6 +5,7 @@ const settings = new Map<string, string>();
 vi.mock('@/src/services/settings-service', () => ({
   getSetting: vi.fn((key: string) => settings.get(key) ?? null),
   setSetting: vi.fn((key: string, value: string) => settings.set(key, value)),
+  getLocale: vi.fn(() => 'ru'),
 }));
 
 vi.mock('@/src/services/error-reporting', () => ({
