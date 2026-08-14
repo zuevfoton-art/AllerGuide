@@ -19,7 +19,8 @@
 | `aclearo-staging-maps-ios` | EAS / app.config iOS | тот же или отдельный iOS secret |
 | `aclearo-staging-maps-js` | EAS / web staging env | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` для web |
 | `aclearo-staging-pollen-server` | API staging secrets **только** | `GOOGLE_POLLEN_API_KEY` + `POLLEN_HEATMAP_ENABLED=true` (heatmap **и** forecast) |
-| `aclearo-staging-places-server` | API staging secrets **только** | `GOOGLE_PLACES_API_KEY` + `MAP_PLACES_ENABLED=true` (или reuse pollen/maps server key) |
+| `aclearo-staging-places-server` | API staging secrets **только** | `GOOGLE_PLACES_API_KEY` + `MAP_PLACES_ENABLED=true` |
+| `aclearo-staging-air-quality-server` | API staging secrets **только** | `GOOGLE_AIR_QUALITY_API_KEY` + `AIR_QUALITY_ENABLED=true` (один Maps Platform key может закрыть Places + AQ, **не** Pollen-only) |
 
 Минимум для Android stage smoke: **Maps Android + Pollen server**.  
 iOS и JS — когда понадобится TestFlight / web heatmap.
@@ -162,6 +163,16 @@ BUILD_PUSH=1 ./scripts/yc-stage-phase1-enable-pollen.sh
 
 См. [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 1.
 
+Places API (New) + Air Quality (отдельный Maps Platform server key, не Pollen-only):
+
+```bash
+export MAPS_PLATFORM_API_KEY_FILE=/path/to/Maps_Platform_API_Key.txt
+# or: export GOOGLE_PLACES_API_KEY='…' GOOGLE_AIR_QUALITY_API_KEY='…'
+export YC_CONTAINER_ID=… YC_REGISTRY_ID=…
+# BUILD_PUSH=1 if the live image does not yet include /api/places and /api/air-quality
+./scripts/yc-stage-enable-places-air-quality.sh
+```
+
 Проверка:
 
 ```bash
@@ -172,6 +183,11 @@ curl -sI "https://api.staging.aclearo.com/api/pollen/heatmap/TREE_UPI/6/38/20" |
 # HTTP/2 200
 # content-type: image/png
 # cache-control: private, no-store
+
+curl -s https://api.staging.aclearo.com/api/health | jq '.features | {mapPlaces, airQuality}'
+# {"mapPlaces":true,"airQuality":true}
+
+./scripts/staging-places-air-quality-smoke.sh
 ```
 
 ### 4.2. Mobile (EAS)
@@ -184,7 +200,7 @@ pnpm exec eas secret:create --scope project \
   --type string
 ```
 
-Профиль `staging` уже ставит `EXPO_PUBLIC_POLLEN_HEATMAP=google` в [`eas.json`](../apps/mobile/eas.json).
+Профиль `staging` уже ставит `EXPO_PUBLIC_POLLEN_HEATMAP=google`, `EXPO_PUBLIC_MAP_PLACES=true` и `EXPO_PUBLIC_AIR_QUALITY=google` в [`eas.json`](../apps/mobile/eas.json). Клиентский Maps SDK key (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`) — отдельный; server Places/AQ keys в Lockbox.
 
 Сборка:
 
@@ -242,12 +258,13 @@ Without this SHA-1 (or with a non-`AIza` value baked into the APK) the device sh
 
 - [ ] Проект `aclearo-staging` + billing linked
 - [ ] Budget alert включён
-- [ ] 4 API enabled
+- [ ] 6 API enabled (Maps Android/iOS/JS + Pollen + Places New + Air Quality)
 - [ ] Maps Android key + package + SHA-1
 - [ ] Maps iOS key + bundle (если нужен iOS)
 - [ ] Maps JS key + referrers (если нужен web)
 - [ ] Pollen server key + API restriction только Pollen
 - [ ] API env: `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` → health / tile 200
+- [ ] Lockbox Places + AQ: `pnpm yc-stage-enable-places-air-quality` → health `mapPlaces`/`airQuality` + smoke
 - [ ] EAS secret Maps key → `eas build --profile staging --platform android`
 - [ ] На устройстве: Карта → Пыление → Google map + UPI слой + OM-бейдж
 
@@ -270,4 +287,4 @@ Without this SHA-1 (or with a non-`AIza` value baked into the APK) the device sh
 
 - Значения API keys
 - SHA-1 вместе с приватным keystore (SHA-1 fingerprint публичен — ок в docs команды; ключ — нет)
-- `GOOGLE_POLLEN_API_KEY` в `EXPO_PUBLIC_*` или клиентский бандл
+- `GOOGLE_POLLEN_API_KEY` / `GOOGLE_PLACES_API_KEY` / `GOOGLE_AIR_QUALITY_API_KEY` в `EXPO_PUBLIC_*` или клиентский бандл

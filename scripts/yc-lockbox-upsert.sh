@@ -5,6 +5,7 @@
 #   ./scripts/yc-lockbox-upsert.sh KEY=VALUE [KEY=VALUE ...]
 #   GOOGLE_POLLEN_API_KEY=... ./scripts/yc-lockbox-upsert.sh --pollen
 #   YANDEX_MAPS_JS_API_KEY=... ./scripts/yc-lockbox-upsert.sh --yandex-maps
+#   GOOGLE_PLACES_API_KEY=... GOOGLE_AIR_QUALITY_API_KEY=... ./scripts/yc-lockbox-upsert.sh --places-air-quality
 #
 # Env:
 #   YC_LOCKBOX_SECRET_ID  (default: staging id from yc-ai-phase0-smoke)
@@ -78,19 +79,32 @@ while [[ $# -gt 0 ]]; do
       )
       shift
       ;;
+    --places-air-quality)
+      : "${GOOGLE_PLACES_API_KEY:?Set GOOGLE_PLACES_API_KEY (Places API New server key)}"
+      : "${GOOGLE_AIR_QUALITY_API_KEY:?Set GOOGLE_AIR_QUALITY_API_KEY (Air Quality API server key)}"
+      UPDATES+=(
+        "MAP_PLACES_ENABLED=true"
+        "GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}"
+        "PLACES_RATE_LIMIT_WINDOW_MS=${PLACES_RATE_LIMIT_WINDOW_MS:-60000}"
+        "PLACES_RATE_LIMIT_MAX=${PLACES_RATE_LIMIT_MAX:-60}"
+        "AIR_QUALITY_ENABLED=true"
+        "GOOGLE_AIR_QUALITY_API_KEY=${GOOGLE_AIR_QUALITY_API_KEY}"
+      )
+      shift
+      ;;
     *=*)
       UPDATES+=("$1")
       shift
       ;;
     *)
-      echo "Expected --pollen | --yandex-maps | KEY=VALUE, got: $1" >&2
+      echo "Expected --pollen | --yandex-maps | --places-air-quality | KEY=VALUE, got: $1" >&2
       exit 2
       ;;
   esac
 done
 
 if [[ "${#UPDATES[@]}" -eq 0 ]]; then
-  echo "Usage: $0 --pollen | --yandex-maps | KEY=VALUE ..." >&2
+  echo "Usage: $0 --pollen | --yandex-maps | --places-air-quality | KEY=VALUE ..." >&2
   exit 2
 fi
 

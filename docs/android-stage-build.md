@@ -140,7 +140,7 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 | `EXPO_TOKEN` | Fallback: pull the same Maps key from EAS Sensitive when the GH secret is empty (token must be valid — error text must not be baked into the APK) |
 | *(опционально)* `GOOGLE_POLLEN` уже на API | клиент бьёт в `api.staging.aclearo.com` |
 
-Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`, `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE`). Google basemap wins only when a valid `AIza…` key is present; otherwise Yandex interactive.
+Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`, `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE`, `EXPO_PUBLIC_MAP_PLACES`, `EXPO_PUBLIC_AIR_QUALITY`). Google basemap wins only when a valid `AIza…` key is present; otherwise Yandex interactive.
 
 ### Ограничения C
 
