@@ -16,7 +16,6 @@ import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
-import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';

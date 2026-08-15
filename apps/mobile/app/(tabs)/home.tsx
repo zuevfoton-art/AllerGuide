@@ -53,10 +53,7 @@ export default function HomeScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const prescribedCourse = useMemo(
-    () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
-    [activeProfileId, diaryEntries],
-  );
+  const prescribedCourse = activeProfileId ? getPrescribedCourse(activeProfileId) : null;
 
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
   const profileCapabilities = useMemo(

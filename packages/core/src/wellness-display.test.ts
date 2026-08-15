@@ -17,7 +17,8 @@ describe('wellness-display', () => {
 
   it('maps pollen 0 to none and PM2.5 35.6 to moderate', () => {
     expect(verbalizePollenValue(0)).toBe('none');
-    expect(verbalizePm25(35.6)).toBe('moderate');
+    expect(verbalizePm25(35)).toBe('moderate');
+    expect(verbalizePm25(35.6)).toBe('high');
     expect(verbalizeDiaryDays(0)).toBe('none');
   });
 
