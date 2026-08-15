@@ -63,6 +63,9 @@ const it: LocaleMessages = {
     registerLink: 'Registrati',
     hasAccount: 'Hai già un account?',
     loginLink: 'Accedi',
+    forgotLink: 'Password dimenticata?',
+    countryCode: 'Prefisso internazionale',
+    countryCodeTitle: 'Prefisso internazionale',
     errors: {
       emailRequired: "Inserisci l'email.",
       phoneRequired: 'Inserisci il numero di telefono.',

@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, type TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { backendResetPassword } from '@/src/services/backend-api';
 import { Screen } from '@/src/components/Screen';
@@ -13,6 +13,7 @@ import {
   AuthLink,
   AuthError,
 } from '@/src/components/AuthForm';
+import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function ResetPasswordScreen() {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export default function ResetPasswordScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const confirmRef = useRef<TextInput>(null);
 
   const handleSubmit = async () => {
     if (!token) {
@@ -91,13 +93,22 @@ export default function ResetPasswordScreen() {
         onChangeText={setPassword}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => confirmRef.current?.focus()}
+        {...authPasswordInputProps('new')}
       />
       <AuthField
+        ref={confirmRef}
         label={t('auth.resetPassword.confirmPassword')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         placeholder={t('auth.confirmPasswordPlaceholder')}
         secureTextEntry
+        returnKeyType="go"
+        submitBehavior="blurAndSubmit"
+        onSubmitEditing={() => void handleSubmit()}
+        {...authPasswordInputProps('new')}
       />
       <AuthError message={error} />
       <AuthPrimaryButton

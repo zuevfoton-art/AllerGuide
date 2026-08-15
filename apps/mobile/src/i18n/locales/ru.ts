@@ -64,6 +64,9 @@ const ru: LocaleMessages = {
     registerLink: 'Зарегистрироваться',
     hasAccount: 'Уже есть аккаунт?',
     loginLink: 'Войти',
+    forgotLink: 'Забыли пароль?',
+    countryCode: 'Код страны',
+    countryCodeTitle: 'Код страны',
     errors: {
       emailRequired: 'Введите email.',
       phoneRequired: 'Введите номер телефона.',

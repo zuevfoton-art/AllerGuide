@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, forwardRef } from 'react';
 import {
   Modal,
   Pressable,
@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   View,
+  type TextInputProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -20,6 +21,7 @@ import {
   type PhoneCountry,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 
 export interface PhoneInputProps {
@@ -31,18 +33,36 @@ export interface PhoneInputProps {
   placeholder?: string;
   testID?: string;
   defaultCountryIso2?: string;
+  returnKeyType?: TextInputProps['returnKeyType'];
+  onSubmitEditing?: TextInputProps['onSubmitEditing'];
+  submitBehavior?: TextInputProps['submitBehavior'];
+  textContentType?: TextInputProps['textContentType'];
+  autoComplete?: TextInputProps['autoComplete'];
+  autoCorrect?: boolean;
+  accessibilityLabel?: string;
 }
 
-export function PhoneInput({
-  label,
-  value,
-  onChangeText,
-  emitE164 = true,
-  placeholder,
-  testID,
-  defaultCountryIso2 = DEFAULT_PHONE_COUNTRY_ISO2,
-}: PhoneInputProps) {
+export const PhoneInput = forwardRef<TextInput, PhoneInputProps>(function PhoneInput(
+  {
+    label,
+    value,
+    onChangeText,
+    emitE164 = true,
+    placeholder,
+    testID,
+    defaultCountryIso2 = DEFAULT_PHONE_COUNTRY_ISO2,
+    returnKeyType,
+    onSubmitEditing,
+    submitBehavior,
+    textContentType,
+    autoComplete,
+    autoCorrect,
+    accessibilityLabel,
+  },
+  ref,
+) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -73,11 +93,12 @@ export function PhoneInput({
           style={styles.countryBtn}
           onPress={() => setPickerOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel="Country code">
+          accessibilityLabel={t('auth.countryCode')}>
           <Text style={styles.dialCode}>+{country.dialCode}</Text>
           <Ionicons name="chevron-down" size={14} color={theme.colors.textSecondary} />
         </Pressable>
         <TextInput
+          ref={ref}
           testID={testID}
           style={styles.input}
           value={parsed.nationalDigits ? formatNationalNumber(parsed.nationalDigits, country.iso2) : ''}
@@ -85,6 +106,13 @@ export function PhoneInput({
           placeholder={placeholder ?? formatNationalNumber('9991234567', country.iso2)}
           placeholderTextColor={theme.colors.textMuted}
           keyboardType="phone-pad"
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
+          submitBehavior={submitBehavior}
+          textContentType={textContentType}
+          autoComplete={autoComplete}
+          autoCorrect={autoCorrect}
+          accessibilityLabel={accessibilityLabel ?? label}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />
@@ -96,7 +124,7 @@ export function PhoneInput({
       <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setPickerOpen(false)}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Код страны</Text>
+            <Text style={styles.modalTitle}>{t('auth.countryCodeTitle')}</Text>
             <ScrollView style={styles.modalList}>
               {PHONE_COUNTRIES.map((item) => {
                 const active = item.iso2 === country.iso2;
@@ -120,7 +148,7 @@ export function PhoneInput({
       </Modal>
     </View>
   );
-}
+});
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({

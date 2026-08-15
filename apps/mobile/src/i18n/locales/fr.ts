@@ -63,6 +63,9 @@ const fr: LocaleMessages = {
     registerLink: "S'inscrire",
     hasAccount: 'Déjà un compte ?',
     loginLink: 'Se connecter',
+    forgotLink: 'Mot de passe oublié ?',
+    countryCode: 'Indicatif pays',
+    countryCodeTitle: 'Indicatif pays',
     errors: {
       emailRequired: "Entrez l'email.",
       phoneRequired: 'Entrez le numéro de téléphone.',
