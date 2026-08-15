@@ -47,6 +47,38 @@ if [[ "$places_ok" != "true" ]]; then
 fi
 echo "PASS: places nearby HTTP 200 (count=$places_count)"
 
+search_tmp="$(mktemp)"
+search_code="$(curl -sS -o "$search_tmp" -w '%{http_code}' --max-time 45 \
+  "${BASE}/api/places/search?q=%D0%B0%D0%BF%D1%82%D0%B5%D0%BA%D0%B0&lat=${LAT}&lon=${LON}&categories=pharmacy" || true)"
+if [[ "$search_code" != "200" ]]; then
+  echo "FAIL: places search HTTP $search_code" >&2
+  head -c 400 "$search_tmp" >&2 || true
+  rm -f "$search_tmp"
+  exit 1
+fi
+search_ok="$(jq -r '.ok // false' "$search_tmp")"
+search_place_id="$(jq -r '.places[0].googlePlaceId // .places[0].id // empty' "$search_tmp" | sed 's/^google://')"
+rm -f "$search_tmp"
+if [[ "$search_ok" != "true" ]]; then
+  echo "FAIL: places search ok!=true" >&2
+  exit 1
+fi
+echo "PASS: places text search HTTP 200"
+
+if [[ -n "$search_place_id" ]]; then
+  details_tmp="$(mktemp)"
+  details_code="$(curl -sS -o "$details_tmp" -w '%{http_code}' --max-time 45 \
+    "${BASE}/api/places/${search_place_id}?lang=ru" || true)"
+  details_ok="$(jq -r '.ok // false' "$details_tmp")"
+  # Do not print phone / session / address payloads.
+  rm -f "$details_tmp"
+  if [[ "$details_code" != "200" || "$details_ok" != "true" ]]; then
+    echo "FAIL: places details HTTP $details_code" >&2
+    exit 1
+  fi
+  echo "PASS: places details HTTP 200"
+fi
+
 aq_tmp="$(mktemp)"
 aq_code="$(curl -sS -o "$aq_tmp" -w '%{http_code}' --max-time 45 \
   "${BASE}/api/air-quality/current?lat=${LAT}&lon=${LON}&lang=ru" || true)"

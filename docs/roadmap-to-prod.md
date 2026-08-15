@@ -237,8 +237,8 @@ flowchart TB
 | P1 | P5.1 | Реальный OCR меню |
 | P1 | P5.2 | Персонализированные push-напоминания |
 | P1 | P5.3 | Вкладка «Ещё» (Map, Market, Settings) |
-| P2 | P5.4 | Live карта мест (partner API) |
-| P2 | P5.4b | Карта пыления: берёза / злаки / амброзия + Яндекс + геолокация — [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md) |
+| P2 | P5.4 | Live карта мест: Google Places Nearby / Autocomplete / Text / Details; catalog только как региональный offline fallback |
+| P2 | P5.4b | Карта пыления: 17 Google taxa, UPI 0–5, 3 групповых heatmap, UAQI card — species heatmap no-go ([`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md)) |
 | P2 | P5.5 | Маркетплейс (affiliate / deep links) — Яндекс.Маркет curated offers + resolve |
 | P2 | P5.6 | Масштабирование: Redis scan cache, read replicas |
 
