@@ -368,6 +368,9 @@ const fr: LocaleMessages = {
     dishVisionFailed:
       'Impossible de reconnaître le plat sur la photo. Vérifiez la connexion et réessayez — ou saisissez les ingrédients manuellement.',
     cloudAuthRequired: 'Le scanner cloud nécessite une connexion. Connectez-vous et reprenez la photo — ou saisissez les ingrédients manuellement.',
+    dishVisionDishLabel: 'Plat possible',
+    dishVisionIngredientsLabel: 'Ingrédients probables',
+    dishVisionPhotoLabel: 'Photo du plat',
     safeList: 'Produits sûrs',
     saveToSafe: '✓ Enregistrer comme sûr',
     savedToSafe: '✓ Enregistré',
