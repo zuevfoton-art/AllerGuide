@@ -19,7 +19,7 @@ import {
 } from '@allerguide/core';
 import { applyPrescriptionParseToCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -203,8 +203,6 @@ export default function PrescribedTherapyScreen() {
 
   if (step === 'verify') {
     return <VerifyStepPT
-      theme={theme}
-      ui={ui}
       styles={styles}
       course={course}
       setCourse={setCourse}
@@ -231,16 +229,13 @@ export default function PrescribedTherapyScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
-          <Text style={ui.docTitle}>{t('prescribedTherapy.courseTitle')}</Text>
-          <Text style={ui.docMeta}>{t('prescribedTherapy.courseSubtitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('prescribedTherapy.eyebrow')}
+        title={t('prescribedTherapy.courseTitle')}
+        subtitle={t('prescribedTherapy.courseSubtitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         {/* Prescription upload + OCR — top of form so recognition can prefill fields below */}
@@ -451,8 +446,6 @@ export default function PrescribedTherapyScreen() {
 }
 
 interface VerifyStepPTProps {
-  theme: ReturnType<typeof useTheme>;
-  ui: ReturnType<typeof useUiStyles>;
   styles: ReturnType<typeof createStyles>;
   course: PrescribedCourse;
   setCourse: React.Dispatch<React.SetStateAction<PrescribedCourse>>;
@@ -461,18 +454,15 @@ interface VerifyStepPTProps {
   t: (key: string, params?: Record<string, string>) => string;
 }
 
-function VerifyStepPT({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepPTProps) {
+function VerifyStepPT({ styles, course, setCourse, onBack, onConfirm, t }: VerifyStepPTProps) {
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
-          <Text style={ui.docTitle}>{t('prescribedTherapy.verifyTitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={onBack}
+        eyebrow={t('prescribedTherapy.eyebrow')}
+        title={t('prescribedTherapy.verifyTitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         <ScheduleStagesEditor
@@ -511,15 +501,12 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
-          <Text style={ui.docTitle}>{t('prescribedTherapy.reviewTitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={onBack}
+        eyebrow={t('prescribedTherapy.eyebrow')}
+        title={t('prescribedTherapy.reviewTitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         <Text style={ui.sectionLabel}>{t('prescribedTherapy.drugLabel')}</Text>
@@ -645,13 +632,6 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
-    backBtn: {
-      width: 40, height: 40, borderRadius: 6,
-      backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center',
-      borderWidth: 1, borderColor: colors.border, marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     section: { gap: 4, marginBottom: 12 },
     fieldGap: { marginTop: 12 },
     input: {

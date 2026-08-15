@@ -4,11 +4,10 @@ import { useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import appJson from '../app.json';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import {
@@ -22,7 +21,6 @@ const APP_VERSION = appJson.expo.version;
 
 export default function AboutScreen() {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
 
@@ -32,20 +30,12 @@ export default function AboutScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('about.eyebrow')} />
-          <Text style={ui.docTitle}>{t('about.title')}</Text>
-          <Text style={ui.docMeta}>{t('about.subtitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('about.eyebrow')}
+        title={t('about.title')}
+        subtitle={t('about.subtitle')}
+      />
 
       <View style={styles.hero}>
         <BrandLogo size={56} showWordmark showEndorser />
@@ -128,20 +118,6 @@ export default function AboutScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-      flexShrink: 0,
-    },
-    headerText: { flex: 1, gap: 2, minWidth: 0 },
     hero: { alignItems: 'center', paddingVertical: 8 },
     metaRow: {
       flexDirection: 'row',

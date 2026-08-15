@@ -7,7 +7,7 @@ import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
 import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
@@ -78,21 +78,14 @@ export default function ProfileScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('profiles.eyebrow')} />
-          <Text testID="profile-screen-title" style={ui.docTitle}>{t('profiles.title')}</Text>
-          <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
-        </View>
-        <LanguagePicker header />
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('profiles.eyebrow')}
+        title={t('profiles.title')}
+        subtitle={t('profiles.subtitle')}
+        right={<LanguagePicker header />}
+        titleTestID="profile-screen-title"
+      />
 
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>
       <GlassCard padded={false}>
@@ -275,20 +268,6 @@ export default function ProfileScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-      flexShrink: 0,
-    },
-    headerText: { flex: 1, gap: 2, minWidth: 0 },
     listHeadPad: { paddingHorizontal: 16, paddingVertical: 16 },
     row: {
       flexDirection: 'row',

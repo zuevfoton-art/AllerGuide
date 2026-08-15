@@ -41,7 +41,7 @@ import {
 import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Ionicons } from '@expo/vector-icons';
@@ -177,20 +177,12 @@ export default function ProfileEditScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('profiles.eyebrow')} />
-          <Text style={ui.docTitle}>{t('profileEdit.title')}</Text>
-          <Text style={ui.docMeta}>{t('profileEdit.subtitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('profiles.eyebrow')}
+        title={t('profileEdit.title')}
+        subtitle={t('profileEdit.subtitle')}
+      />
 
       {loading ? (
         <Text style={styles.loadingText}>{t('common.loading')}</Text>
@@ -325,19 +317,6 @@ export default function ProfileEditScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     loadingText: {
       fontFamily: fonts.sans,
       fontSize: 15,
