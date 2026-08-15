@@ -26,3 +26,5 @@
 | 46–48 | История | Только выбранные значения; шкалы скрыть из ленты | done |
 | 49 | Дисклеймер дневника | Текст из DOCX | done |
 | 50–55 | SOS / профиль | SOS emergency-only; управление через иконку профиля | done |
+
+Документы синхронизированы с кодом при лендинге PR #238: FR-HOME/FR-DIARY/FR-SOS, `architecture.md`, `codebase-index.md`, `cjm-profile-diary.md`, `qa-test-cases.md`, `brand-rollout.md`, `clinical-features-raaci.md`.

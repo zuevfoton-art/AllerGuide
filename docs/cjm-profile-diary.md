@@ -36,7 +36,7 @@
 | Типы состояний (11) | [`allergy-conditions.ts`](../packages/core/src/allergy-conditions.ts) |
 | Capabilities | [`profile-capabilities.ts`](../packages/core/src/profile-capabilities.ts), тесты S1–S8 |
 | Секции дневника | [`diary.ts`](../packages/core/src/diary.ts), [`diary-profile.ts`](../packages/core/src/diary-profile.ts) |
-| UI | [`profile-setup.tsx`](../apps/mobile/app/profile-setup.tsx), [`(tabs)/diary.tsx`](../apps/mobile/app/(tabs)/diary.tsx) |
+| UI | [`profile-setup.tsx`](../apps/mobile/app/profile-setup.tsx), [`(tabs)/diary.tsx`](../apps/mobile/app/(tabs)/diary.tsx), [`clinical-scales.tsx`](../apps/mobile/app/clinical-scales.tsx) |
 
 ---
 
@@ -180,7 +180,7 @@ flowchart TB
 | Этап | Действие | Система | Критерий успеха |
 |------|----------|---------|-----------------|
 | Open | Tab «Дневник» | `getDiaryEntries(activeProfileId)` | список / EmptyState; chips = матрица §4 |
-| Entry | full / quick / chip / scale / card | `EditorState` mode | открыт wizard |
+| Entry | full / short / «Что добавить» / visit / scales / card | `EditorState` mode или `/clinical-scales` | открыт wizard / экран шкал |
 | Fill | required поля секции | `validateDiarySectionStep` | null error |
 | Save create | Сохранить | `addDiaryEntries` + photos | INSERT; `closeEditor`; `load`; event `diary_entry_saved` (если analytics) |
 | Save update | Сохранить | `updateDiaryEntry` | UPDATE; close+load; **без** analytics |
@@ -191,10 +191,11 @@ flowchart TB
 
 | Режим | Как открыть | Исход editor |
 |-------|-------------|--------------|
-| full | «Новая запись» | все `visibleSections` |
-| quick | «Быстрая запись» | Симптомы (или первая visible) |
-| section | horizontal chip | одна секция (+ prefill) |
-| scale | chip «Шкала» | clinical scale wizard |
+| full | «Новая запись» | адаптивный маршрут (`buildAdaptiveDiaryWizardSections`): без PEF/АСИТ/визита/терапии и без auto-шагов |
+| short | «Короткая запись» | Симптомы (или первая visible) |
+| section | «Что добавить» | одна секция (+ prefill) |
+| visit | «Предстоящий визит к врачу» | секция визита |
+| scale | «Клинические оценки» | `/clinical-scales` |
 | edit structured | tap row | prefilled answers |
 | edit legacy | tap row с plain details | `DiaryLegacyEditor` |
 
@@ -206,7 +207,7 @@ flowchart TB
 | Therapy course | терапия настроена | упрощённые шаги «Терапия» |
 | Food prefill | food allergens / scan 24h | prefill Питание |
 | Med intolerance | SOS drugIntolerances | `intoleranceAlert` в Лекарство |
-| Trigger prefill | wellness / today's medicine / recent scan | автополя Триггер |
+| Trigger / auto metadata | wellness / today's medicine / recent scan | скрытые поля при save (`attachDiaryAutoMetadata`), не шаги wizard |
 | Profile switch | 2+ профиля | другой `profileId` → другие chips и история |
 
 ---
@@ -271,7 +272,7 @@ flowchart TB
 | CAP-asthma-01 | `[asthma]` | diary + home | chip Пикфлоуметрия; scales ⊇ `act`; home содержит `peakFlow`; ASIT off |
 | CAP-rhinitis-01 | `[rhinitis]` | diary | scales ⊇ `aria-lite`; chip АСИТ **отсутствует**; pollen reminder on |
 | CAP-dermatitis-01 | `[dermatitis]` (+ опц. `milk`) | home / scanner default | skinFocus; scorad-lite; scanner `cosmetics` |
-| CAP-urticaria-01 | `[urticaria]` | scales chip | recommended ⊇ `uas7` |
+| CAP-urticaria-01 | `[urticaria]` | `/clinical-scales` | recommended ⊇ `uas7` |
 | CAP-urticaria-02 | `[food]`, allergy label содержит «крапивница» | scales | `uas7` есть; gated-секции как у food (без ASIT/PEF/insect) |
 | CAP-household-01 | `[household]` + только dust | reminders | `pollen` **off**; ASIT off |
 | CAP-household-02 | `[household]` + `birch-pollen` | reminders | `pollen` **on**; ASIT **off** |
@@ -291,9 +292,9 @@ flowchart TB
 
 | ID | Предусловия | Шаги | Исход |
 |----|-------------|------|-------|
-| D-VIEW-01 | activeProfileId, ≥1 запись | открыть tab diary | `getDiaryEntries(profileId)`; новые сверху (`ORDER BY id DESC`) |
+| D-VIEW-01 | activeProfileId, ≥1 запись | открыть tab diary | видимая история без типа `Шкала`; новые сверху (`ORDER BY id DESC`) |
 | D-VIEW-02 | 0 записей | открыть diary | EmptyState |
-| D-CRT-01 | профиль есть | Быстрая запись → Симптомы: `symptoms="зуд"`, `severity0_3="2 — умеренная"` → Save | INSERT `type=Симптомы`; structured `answers`; editor закрыт; список обновлён |
+| D-CRT-01 | профиль есть | «Короткая запись» → Симптомы: `symptoms="зуд"`, `severity0_3="2 — умеренная"` → Save | INSERT `type=Симптомы`; structured `answers`; editor закрыт; список обновлён |
 | D-CRT-02 | wizard Симптомы | заполнить symptoms, **не** severity → завершить | ошибка «Укажите выраженность симптомов (0–3).»; INSERT нет |
 | D-CRT-03 | chip Лекарство | `medicine="цетиризин"`, `dosage="10 мг"` → Save | INSERT `type=Лекарство` |
 | D-CRT-04 | chip Питание | `food="борщ"`; при checklist отметить компоненты → Save | INSERT `Питание`; answers содержат `food` (+ `foodComponents` если чеклист пройден) |
@@ -320,7 +321,7 @@ flowchart TB
 
 | ID | Шаги | Исход |
 |----|------|-------|
-| D-SCL-01 | chip Шкала → ACT; все 5 ответов `5` → Save | INSERT `type=Шкала`; interpretation содержит «Хороший контроль»; total 25 |
+| D-SCL-01 | diary → «Клинические оценки» → ACT; все 5 ответов `5` → Save | INSERT `type=Шкала`; interpretation содержит «Хороший контроль»; total 25; в ленте дневника запись **не** видна |
 | D-SCL-02 | ACT: заполнены 2 из 5 → завершить | валидация `validateClinicalScale`; INSERT нет |
 
 ### 8.4. Prefill / курсы
@@ -342,8 +343,8 @@ flowchart TB
 | Структура профиля, 11 типов | FR-PROF-01…03 | `allergy-conditions.ts` |
 | Wizard порядок / skip | FR-PROF-18…20 | `profile-setup-wizard.ts` |
 | Capabilities / gating дневника | FR-PROF-12…13 | `profile-capabilities.ts`, `diary-profile.ts` |
-| Дневник CRUD / секции | FR-DIARY-01…07 | `diary.ts`, `diary.tsx` |
-| Шкалы / ACT | FR-DIARY-14 | `clinical-scales.ts`, `gina-asthma.ts` |
+| Дневник CRUD / секции | FR-DIARY-01…07 | `diary.ts`, `diary-wizard-route.ts`, `diary.tsx` |
+| Шкалы / ACT | FR-DIARY-14 | `clinical-scales.tsx`, `clinical-scales.ts`, `gina-asthma.ts` |
 | PDF блоки | FR-DIARY-08…12 | `doctor-report.ts` |
 | Unit эталоны CAP | — | `profile-capabilities.test.ts` S1–S8 |
 | QA TC (частично устарели) | — | `qa-test-cases.md` TC-030… / TC-070… |
