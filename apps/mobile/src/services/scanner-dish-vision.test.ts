@@ -188,6 +188,46 @@ describe('scanner dish vision (Option D)', () => {
     );
   });
 
+  it('analyzes short label OCR when VL says the photo is not a dish', async () => {
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'Invalid dish vision response',
+      status: 502,
+    });
+    mockRecognizeImageViaApi.mockResolvedValueOnce({
+      ok: true,
+      text: 'Состав: молоко, сахар',
+    });
+    mockRunSmartScan.mockResolvedValueOnce({
+      verdict: 'осторожно',
+      reason: 'Найдено молоко',
+      matches: ['Молоко'],
+      crossMatches: [],
+      mode: 'product',
+      level: 'high',
+      source: 'ocr',
+      productName: 'Этикетка',
+    });
+
+    const { scanFromOcr } = await import('./scanner-service');
+    const result = await scanFromOcr({
+      mode: 'product',
+      imageBase64: 'aGVsbG8=',
+      mimeType: 'image/jpeg',
+      profile: { id: 'p1', allergies: '["milk"]' } as never,
+    });
+
+    expect(result.source).toBe('ocr');
+    expect(result.ocr?.text).toMatch(/молоко/i);
+    expect(result.ocr?.warnings.some((warning) => /частично/i.test(warning))).toBe(true);
+    expect(mockRunSmartScan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining('молоко'),
+        source: 'ocr',
+      }),
+    );
+  });
+
   it('throws DishVisionScanError instead of empty analyzeText when vision fails and no OCR text', async () => {
     mockRecognizeDishViaApi.mockResolvedValueOnce({
       ok: false,

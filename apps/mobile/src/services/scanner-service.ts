@@ -485,9 +485,11 @@ export async function scanFromOcr({
   }
 
   const readableOcrText = hasReadableOcrText(extraction.text);
+  const hasLabelOcrSnippet = !shouldUseDishVisionForOcrText(extraction.text);
 
   // Plate-only (no label text): keep VL result or surface VL failure — never empty clear.
-  if (shouldTryVlFirst && !readableOcrText) {
+  // Short OCR from a label must continue to the OCR path: VL often says “not a dish”.
+  if (shouldTryVlFirst && !readableOcrText && !hasLabelOcrSnippet) {
     if (dishVisionResult) {
       return { ...dishVisionResult, ocr: extraction };
     }
@@ -501,12 +503,20 @@ export async function scanFromOcr({
       }
       throw dishVisionError;
     }
-    if (shouldUseDishVisionForOcrText(extraction.text)) {
-      if (extractionLooksLikeCloudOcrOutage(extraction)) {
-        return analyzeWithDemoOcrFallback({ mode, profile, extraction });
-      }
-      throw new DishVisionScanError('DISH_VISION_FAILED');
+    if (extractionLooksLikeCloudOcrOutage(extraction)) {
+      return analyzeWithDemoOcrFallback({ mode, profile, extraction });
     }
+    throw new DishVisionScanError('DISH_VISION_FAILED');
+  }
+
+  if (shouldTryVlFirst && !readableOcrText && hasLabelOcrSnippet && !dishVisionResult) {
+    extraction = {
+      ...extraction,
+      warnings: [
+        ...extraction.warnings,
+        'Текст этикетки распознан частично — сверьте упаковку или введите состав вручную.',
+      ],
+    };
   }
 
   // A: heuristic intent. B (flag): YandexGPT intent via /api/scan/intent.
