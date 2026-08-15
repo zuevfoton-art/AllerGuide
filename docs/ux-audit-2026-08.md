@@ -10,13 +10,12 @@
 
 | Поле | Значение |
 |------|----------|
-| Ветка | [`cursor/aug7-remarks-ccf0`](https://github.com/zuevfoton-art/AllerGuide/tree/cursor/aug7-remarks-ccf0) |
-| Коммит | `e18aae2` — `docs: sync FR, architecture, CJM, and QA with August 7 flows` |
-| PR | [#238](https://github.com/zuevfoton-art/AllerGuide/pull/238) (черновик: «Замечания 7 августа: бренд, wellness, дневник, SOS») |
+| Снимок экранов | `e18aae2` — `docs: sync FR, architecture, CJM, and QA with August 7 flows` |
+| PR | [#238](https://github.com/zuevfoton-art/AllerGuide/pull/238) («Замечания 7 августа: бренд, wellness, дневник, SOS»), влит в `main` как `97fdcaa` |
 | Метод | Разбор исходников экранов и примитивов, без изменения продукта |
 | Референс высоты | 667 pt (iPhone SE / compact), таббар ~83 pt, `Screen` `topPadding` 56 на native |
 
-Аудировать `main` нельзя: #238 переписывает ровно те экраны, которые здесь разбираются (`diary.tsx`, `home.tsx`, `sos.tsx`, все шесть вкладок получают `ScreenBrandHeader`, новый маршрут `/clinical-scales`). Документ на `main` устареет в момент мержа.
+База — состояние после мержа #238, а не более ранний `main`. Именно этот PR переписал аудируемые экраны (`diary.tsx`, `home.tsx`, `sos.tsx`, `ScreenBrandHeader` на всех шести вкладках, маршрут `/clinical-scales`). Позднейшие коммиты `main` после `97fdcaa` (например карта в #235) в поэкранный разбор не входили; `ScreenBrandHeader`, `MAP_HERO_HEIGHT = 380` и условный SOS-`pinnedTop` на текущем `main` сохранены.
 
 Рамки те же, что у дизайн-системы Clinical Calm: палитра Claro Green, Inter + Source Serif 4, `GlassCard`, `Screen`, шесть вкладок. Предложения — перестановка, отступы, размеры целей и атрибуты ввода внутри токенов [`layout.ts`](../apps/mobile/src/constants/layout.ts) и [`typography.ts`](../apps/mobile/src/constants/typography.ts).
 
