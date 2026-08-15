@@ -8,6 +8,7 @@ import {
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -15,7 +16,6 @@ import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { Ionicons } from '@expo/vector-icons';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import {
   createEmptyFoodDrugRegistry,
@@ -76,6 +76,7 @@ export default function FoodDrugRegistryScreen() {
   if (!profile) {
     return (
       <Screen>
+        <ScreenBackBrandHeader />
         <Text style={styles.empty}>{t('foodDrug.noProfile')}</Text>
       </Screen>
     );
@@ -84,14 +85,10 @@ export default function FoodDrugRegistryScreen() {
   if (!foodEnabled) {
     return (
       <Screen>
-        <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-          <View style={styles.headerText}>
-            <ScreenEyebrow section={t('foodDrug.eyebrow')} />
-            <Text style={ui.docTitle}>{t('foodDrug.registryTitle')}</Text>
-          </View>
+        <ScreenBackBrandHeader />
+        <View style={styles.headerText}>
+          <ScreenEyebrow section={t('foodDrug.eyebrow')} />
+          <Text style={ui.docTitle}>{t('foodDrug.registryTitle')}</Text>
         </View>
         <GlassCard>
           <Text style={styles.hint}>{t('foodDrug.notEligibleFood')}</Text>
@@ -102,15 +99,11 @@ export default function FoodDrugRegistryScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('foodDrug.eyebrow')} />
-          <Text style={ui.docTitle}>{t('foodDrug.registryTitle')}</Text>
-          <Text style={ui.docMeta}>{t('foodDrug.registrySubtitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('foodDrug.eyebrow')} />
+        <Text style={ui.docTitle}>{t('foodDrug.registryTitle')}</Text>
+        <Text style={ui.docMeta}>{t('foodDrug.registrySubtitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>

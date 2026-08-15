@@ -8,6 +8,7 @@ import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
@@ -122,20 +123,11 @@ export default function DoctorReportScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('doctorReport.eyebrow')} />
-          <Text style={ui.docTitle}>{t('doctorReport.title')}</Text>
-          <Text style={ui.docMeta}>{t('doctorReport.subtitle')}</Text>
-        </View>
-        <ProfileHeaderButton />
+      <ScreenBackBrandHeader right={<ProfileHeaderButton />} />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('doctorReport.eyebrow')} />
+        <Text style={ui.docTitle}>{t('doctorReport.title')}</Text>
+        <Text style={ui.docMeta}>{t('doctorReport.subtitle')}</Text>
       </View>
 
       <Text style={ui.sectionLabel}>{t('doctorReport.period')}</Text>

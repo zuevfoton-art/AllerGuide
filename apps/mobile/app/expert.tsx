@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { EXPERT_CATEGORIES, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandMark } from '@/src/components/brand/BrandMark';
@@ -27,18 +28,10 @@ export default function ExpertScreen() {
   if (article) {
     return (
       <Screen>
-        <View style={styles.header}>
-          <Pressable
-            style={styles.backBtn}
-            onPress={() => setArticleId(null)}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-          <View style={styles.headerText}>
-            <ScreenEyebrow section={t('expert.eyebrow')} />
-            <Text style={ui.docTitle}>{article.title}</Text>
-          </View>
+        <ScreenBackBrandHeader onBack={() => setArticleId(null)} />
+        <View style={styles.headerText}>
+          <ScreenEyebrow section={t('expert.eyebrow')} />
+          <Text style={ui.docTitle}>{article.title}</Text>
         </View>
         <Text style={styles.articleBody}>{article.body}</Text>
         <Disclaimer showMdrFootnote>{localeContent.expertDisclaimer}</Disclaimer>
@@ -48,21 +41,13 @@ export default function ExpertScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('expert.eyebrow')} />
-          <Text style={ui.docTitle}>{t('expert.title')}</Text>
-          <Text style={ui.docMeta}>
-            {localeContent.expertHero.name} · {localeContent.expertHero.role}
-          </Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('expert.eyebrow')} />
+        <Text style={ui.docTitle}>{t('expert.title')}</Text>
+        <Text style={ui.docMeta}>
+          {localeContent.expertHero.name} · {localeContent.expertHero.role}
+        </Text>
       </View>
 
       <GlassCard variant="soft" style={styles.hero}>

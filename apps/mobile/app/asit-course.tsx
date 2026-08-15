@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -21,6 +21,7 @@ import {
 import { applyPrescriptionParseToAsitCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -239,6 +240,7 @@ export default function AsitCourseScreen() {
   if (!profile) {
     return (
       <Screen>
+        <ScreenBackBrandHeader />
         <Text style={styles.empty}>{t('asit.noProfile')}</Text>
       </Screen>
     );
@@ -262,14 +264,10 @@ export default function AsitCourseScreen() {
   if (!asitEnabled) {
     return (
       <Screen>
-        <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-          <View style={styles.headerText}>
-            <ScreenEyebrow section={t('asit.eyebrow')} />
-            <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
-          </View>
+        <ScreenBackBrandHeader />
+        <View style={styles.headerText}>
+          <ScreenEyebrow section={t('asit.eyebrow')} />
+          <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
         </View>
         <GlassCard>
           <Text style={styles.hint}>{t('asit.notEligible')}</Text>
@@ -310,15 +308,11 @@ export default function AsitCourseScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('asit.eyebrow')} />
-          <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
-          <Text style={ui.docMeta}>{t('asit.courseSubtitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('asit.eyebrow')} />
+        <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
+        <Text style={ui.docMeta}>{t('asit.courseSubtitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>
@@ -534,7 +528,7 @@ export default function AsitCourseScreen() {
       {/* OCR text input modal */}
       <Modal visible={parseTextOpen} transparent animationType="slide" onRequestClose={() => setParseTextOpen(false)}>
         <ModalKeyboardAvoid style={styles.modalBackdrop}>
-          {({ liftStyle }) => (
+          {({ liftStyle, keyboardInset }) => (
             <View style={[styles.modalSheet, liftStyle]}>
               <View style={styles.modalHeader}>
                 <Pressable onPress={() => setParseTextOpen(false)}>
@@ -547,16 +541,20 @@ export default function AsitCourseScreen() {
                   </Text>
                 </Pressable>
               </View>
-              <TextInput
-                style={styles.parseInput}
-                value={parseText}
-                onChangeText={setParseText}
-                placeholder={t('asit.ocrManualPlaceholder')}
-                placeholderTextColor={theme.colors.textMuted}
-                multiline
-                textAlignVertical="top"
-                autoFocus
-              />
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: keyboardInset }}>
+                <TextInput
+                  style={styles.parseInput}
+                  value={parseText}
+                  onChangeText={setParseText}
+                  placeholder={t('asit.ocrManualPlaceholder')}
+                  placeholderTextColor={theme.colors.textMuted}
+                  multiline
+                  textAlignVertical="top"
+                  autoFocus
+                />
+              </ScrollView>
             </View>
           )}
         </ModalKeyboardAvoid>
@@ -579,15 +577,11 @@ interface VerifyStepProps {
 function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepProps) {
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('asit.eyebrow')} />
-          <Text style={ui.docTitle}>{t('asit.verifyTitle')}</Text>
-          <Text style={ui.docMeta}>{t('asit.verifySubtitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader onBack={onBack} />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('asit.eyebrow')} />
+        <Text style={ui.docTitle}>{t('asit.verifyTitle')}</Text>
+        <Text style={ui.docMeta}>{t('asit.verifySubtitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>
@@ -628,14 +622,10 @@ interface ReviewStepProps {
 function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, reminderEnabled, toggleReminder, t }: ReviewStepProps) {
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('asit.eyebrow')} />
-          <Text style={ui.docTitle}>{t('asit.reviewTitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader onBack={onBack} />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('asit.eyebrow')} />
+        <Text style={ui.docTitle}>{t('asit.reviewTitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>

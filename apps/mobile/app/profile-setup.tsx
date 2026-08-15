@@ -38,6 +38,7 @@ import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -364,6 +365,7 @@ export default function ProfileSetupScreen() {
 
   return (
     <Screen>
+      <ScreenBackBrandHeader />
       <View style={styles.header}>
         <ScreenEyebrow section={t('profileSetup.eyebrow')} />
         <Text style={ui.docTitle}>{title}</Text>

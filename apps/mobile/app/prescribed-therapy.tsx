@@ -1,4 +1,4 @@
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
@@ -20,6 +20,7 @@ import {
 import { applyPrescriptionParseToCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -181,6 +182,7 @@ export default function PrescribedTherapyScreen() {
   if (!profile) {
     return (
       <Screen>
+        <ScreenBackBrandHeader />
         <Text style={styles.empty}>{t('prescribedTherapy.noProfile')}</Text>
       </Screen>
     );
@@ -231,15 +233,11 @@ export default function PrescribedTherapyScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
-          <Text style={ui.docTitle}>{t('prescribedTherapy.courseTitle')}</Text>
-          <Text style={ui.docMeta}>{t('prescribedTherapy.courseSubtitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
+        <Text style={ui.docTitle}>{t('prescribedTherapy.courseTitle')}</Text>
+        <Text style={ui.docMeta}>{t('prescribedTherapy.courseSubtitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>
@@ -419,7 +417,7 @@ export default function PrescribedTherapyScreen() {
 
       <Modal visible={parseTextOpen} transparent animationType="slide" onRequestClose={() => setParseTextOpen(false)}>
         <ModalKeyboardAvoid style={styles.modalBackdrop}>
-          {({ liftStyle }) => (
+          {({ liftStyle, keyboardInset }) => (
             <View style={[styles.modalSheet, liftStyle]}>
               <View style={styles.modalHeader}>
                 <Pressable onPress={() => setParseTextOpen(false)}>
@@ -432,16 +430,20 @@ export default function PrescribedTherapyScreen() {
                   </Text>
                 </Pressable>
               </View>
-              <TextInput
-                style={styles.parseInput}
-                value={parseText}
-                onChangeText={setParseText}
-                placeholder={t('prescribedTherapy.ocrManualPlaceholder')}
-                placeholderTextColor={theme.colors.textMuted}
-                multiline
-                textAlignVertical="top"
-                autoFocus
-              />
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: keyboardInset }}>
+                <TextInput
+                  style={styles.parseInput}
+                  value={parseText}
+                  onChangeText={setParseText}
+                  placeholder={t('prescribedTherapy.ocrManualPlaceholder')}
+                  placeholderTextColor={theme.colors.textMuted}
+                  multiline
+                  textAlignVertical="top"
+                  autoFocus
+                />
+              </ScrollView>
             </View>
           )}
         </ModalKeyboardAvoid>
@@ -464,14 +466,10 @@ interface VerifyStepPTProps {
 function VerifyStepPT({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepPTProps) {
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
-          <Text style={ui.docTitle}>{t('prescribedTherapy.verifyTitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader onBack={onBack} />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
+        <Text style={ui.docTitle}>{t('prescribedTherapy.verifyTitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>
@@ -511,14 +509,10 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
-          <Text style={ui.docTitle}>{t('prescribedTherapy.reviewTitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader onBack={onBack} />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('prescribedTherapy.eyebrow')} />
+        <Text style={ui.docTitle}>{t('prescribedTherapy.reviewTitle')}</Text>
       </View>
 
       <GlassCard style={styles.section}>
