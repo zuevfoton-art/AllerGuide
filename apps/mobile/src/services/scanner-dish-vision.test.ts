@@ -188,6 +188,46 @@ describe('scanner dish vision (Option D)', () => {
     );
   });
 
+  it('analyzes short label OCR when VL says the photo is not a dish', async () => {
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'Invalid dish vision response',
+      status: 502,
+    });
+    mockRecognizeImageViaApi.mockResolvedValueOnce({
+      ok: true,
+      text: 'Состав: молоко, сахар',
+    });
+    mockRunSmartScan.mockResolvedValueOnce({
+      verdict: 'осторожно',
+      reason: 'Найдено молоко',
+      matches: ['Молоко'],
+      crossMatches: [],
+      mode: 'product',
+      level: 'high',
+      source: 'ocr',
+      productName: 'Этикетка',
+    });
+
+    const { scanFromOcr } = await import('./scanner-service');
+    const result = await scanFromOcr({
+      mode: 'product',
+      imageBase64: 'aGVsbG8=',
+      mimeType: 'image/jpeg',
+      profile: { id: 'p1', allergies: '["milk"]' } as never,
+    });
+
+    expect(result.source).toBe('ocr');
+    expect(result.ocr?.text).toMatch(/молоко/i);
+    expect(result.ocr?.warnings.some((warning) => /частично/i.test(warning))).toBe(true);
+    expect(mockRunSmartScan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining('молоко'),
+        source: 'ocr',
+      }),
+    );
+  });
+
   it('throws DishVisionScanError instead of empty analyzeText when vision fails and no OCR text', async () => {
     mockRecognizeDishViaApi.mockResolvedValueOnce({
       ok: false,
@@ -207,6 +247,94 @@ describe('scanner dish vision (Option D)', () => {
     ).rejects.toBeInstanceOf(DishVisionScanError);
     expect(mockRecognizeImageViaApi).toHaveBeenCalled();
     expect(mockRunSmartScan).not.toHaveBeenCalled();
+  });
+
+  it('throws ScanCloudAuthError when dish-vision returns 401', async () => {
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'Unauthorized',
+      status: 401,
+    });
+
+    const { ScanCloudAuthError, scanFromOcr } = await import('./scanner-service');
+    await expect(
+      scanFromOcr({
+        mode: 'product',
+        imageBase64: 'aGVsbG8=',
+        mimeType: 'image/jpeg',
+        profile: { id: 'p1', allergies: '[]' } as never,
+      }),
+    ).rejects.toBeInstanceOf(ScanCloudAuthError);
+    expect(mockRunSmartScan).not.toHaveBeenCalled();
+  });
+
+  it('throws ScanCloudAuthError when OCR returns 401 before label analysis', async () => {
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: true,
+      result: {
+        dishName: 'Ignored',
+        ingredients: ['x'],
+        confidence: 'low',
+      },
+    });
+    // Force VL-first path to skip by making VL return null? Actually VL runs first.
+    // For OCR 401 we need VL to succeed or fail soft, then OCR throws.
+    // Simpler: VL fails non-auth, OCR 401.
+    mockRecognizeDishViaApi.mockReset();
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'provider down',
+      status: 502,
+    });
+    mockRecognizeImageViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'Unauthorized',
+      status: 401,
+    });
+
+    const { ScanCloudAuthError, scanFromOcr } = await import('./scanner-service');
+    await expect(
+      scanFromOcr({
+        mode: 'product',
+        imageBase64: 'aGVsbG8=',
+        mimeType: 'image/jpeg',
+        profile: { id: 'p1', allergies: '[]' } as never,
+      }),
+    ).rejects.toBeInstanceOf(ScanCloudAuthError);
+  });
+
+  it('falls back to demo OCR when cloud OCR outage and VL fails', async () => {
+    mockRecognizeDishViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'Dish vision provider unavailable',
+      status: 502,
+    });
+    mockRecognizeImageViaApi.mockResolvedValueOnce({
+      ok: false,
+      error: 'OCR HTTP 503',
+      status: 503,
+    });
+    mockRunSmartScan.mockResolvedValueOnce({
+      verdict: 'ок',
+      reason: 'Демо',
+      matches: [],
+      crossMatches: [],
+      mode: 'product',
+      level: 'low',
+      source: 'ocr',
+    });
+
+    const { scanFromOcr } = await import('./scanner-service');
+    const result = await scanFromOcr({
+      mode: 'product',
+      imageBase64: 'aGVsbG8=',
+      mimeType: 'image/jpeg',
+      profile: { id: 'p1', allergies: '[]' } as never,
+    });
+
+    expect(result.source).toBe('ocr');
+    expect(result.ocr?.warnings.some((w) => /демо/i.test(w))).toBe(true);
+    expect(mockRunSmartScan).toHaveBeenCalled();
   });
 
   it('does not run VL first for menu mode (OCR-oriented)', async () => {

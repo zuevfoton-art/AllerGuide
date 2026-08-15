@@ -391,7 +391,8 @@ sequenceDiagram
 1. Сначала `POST /api/scan/dish-vision` (VL: название + вероятные ингредиенты)
 2. Затем `extractOcrFromImage` / `POST /api/ocr` — проверка читаемого текста на фото
 3. Если OCR-текст ≥ порога (~40 символов) → OCR-путь (intent → lookup → `runSmartScan`), VL-оценка отбрасывается
-4. Если текста нет / мало → результат VL + disclaimer; при сбое VL — явная ошибка (не пустой clear)
+4. Если OCR вернул короткий сниппет этикетки (есть текст, но < порога) → OCR-путь по сниппету, даже если VL ответил «не блюдо»
+5. Если текста нет → результат VL + disclaimer; при сбое VL — явная ошибка (не пустой clear)
 
 **Меню / этикетка** (`menu` / `medicine` / `cosmetics`): OCR-first (без VL-first); intent → lookup при `visual_product` → `runSmartScan`.
 

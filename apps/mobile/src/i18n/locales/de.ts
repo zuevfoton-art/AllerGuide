@@ -368,6 +368,7 @@ const de: LocaleMessages = {
       'Gerichtserkennung vom Tellerfoto ist eine KI-Schätzung von Name und typischen Zutaten. Saucen, Austausche und Kreuzkontakte können fehlen. Das ersetzt weder Etikett noch Rückfrage in der Küche und schließt individuelle Reaktionen nicht aus.',
     dishVisionFailed:
       'Das Gericht konnte anhand des Fotos nicht erkannt werden. Prüfen Sie die Verbindung und versuchen Sie es erneut — oder geben Sie die Zutaten manuell ein.',
+    cloudAuthRequired: 'Cloud-Scanner erfordert Anmeldung. Melden Sie sich an und fotografieren Sie erneut — oder geben Sie die Zutaten manuell ein.',
     safeList: 'Sichere Produkte',
     saveToSafe: '✓ In sichere Liste speichern',
     savedToSafe: '✓ Gespeichert',
