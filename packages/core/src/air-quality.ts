@@ -5,13 +5,23 @@
 
 export type AirQualityRiskLevel = 'low' | 'mid' | 'high';
 
+export interface AirQualityIndexColor {
+  red?: number;
+  green?: number;
+  blue?: number;
+}
+
 export interface AirQualityIndexSnapshot {
   /** Index code, e.g. `uaqi` or a local index like `rus_mecoenr`. */
   code: string;
   displayName?: string;
   aqi: number;
+  /** Google `aqiDisplay` string when present (localized gauge label). */
+  aqiDisplay?: string;
   category?: string;
   dominantPollutant?: string;
+  /** Hex color from Google `color` when present. */
+  color?: string;
 }
 
 export interface AirQualityPollutantSnapshot {
@@ -69,6 +79,7 @@ interface GoogleAirQualityIndexPayload {
   aqiDisplay?: string;
   category?: string;
   dominantPollutant?: string;
+  color?: AirQualityIndexColor;
 }
 
 export interface GoogleAirQualityCurrentPayload {
@@ -89,6 +100,22 @@ export interface GoogleAirQualityCurrentPayload {
   };
 }
 
+function airQualityColorToHex(color?: AirQualityIndexColor): string | undefined {
+  if (!color) return undefined;
+  const channels = [color.red, color.green, color.blue];
+  if (channels.some((channel) => typeof channel !== 'number' || !Number.isFinite(channel))) {
+    return undefined;
+  }
+  const hex = channels
+    .map((channel) => {
+      const unit = channel! <= 1 ? channel! : channel! / 255;
+      const byte = Math.round(Math.min(1, Math.max(0, unit)) * 255);
+      return byte.toString(16).padStart(2, '0');
+    })
+    .join('');
+  return `#${hex}`.toUpperCase();
+}
+
 function normalizeIndex(
   index: GoogleAirQualityIndexPayload | undefined,
 ): AirQualityIndexSnapshot | null {
@@ -97,8 +124,10 @@ function normalizeIndex(
     code: index.code,
     displayName: index.displayName?.trim() || undefined,
     aqi: index.aqi,
+    aqiDisplay: index.aqiDisplay?.trim() || undefined,
     category: index.category?.trim() || undefined,
     dominantPollutant: index.dominantPollutant?.trim() || undefined,
+    color: airQualityColorToHex(index.color),
   };
 }
 

@@ -7,6 +7,8 @@ import {
 } from './pollen-taxonomy';
 import type { ProfileAllergenId } from './profile-allergens';
 import {
+  pollenUpiCategory,
+  pollenUpiFallbackColor,
   pollenUpiFromConcentration,
   type PollenUpiIndex,
 } from './pollen-upi';
@@ -146,7 +148,10 @@ export interface PollenForecastDay {
 export interface PollenUpiSnapshot {
   /** Selected taxon UPI 0–5 (Google Forecast or approximated from grains/m³). */
   index: PollenUpiIndex;
+  /** Google `indexInfo.category` when present; UI falls back to computed 0–5. */
   category?: string;
+  /** Hex color from Google `indexInfo.color` or official UPI fallback. */
+  color?: string;
   source: 'google' | 'open-meteo';
 }
 
@@ -267,8 +272,11 @@ export function parseDailyPollenForecast(
 
 /** Approximate UPI for a reading (Open-Meteo fallback path). */
 export function readingToUpiSnapshot(reading: PollenMapReading): PollenUpiSnapshot {
+  const index = pollenUpiFromConcentration(reading.value, reading.taxonId);
   return {
-    index: pollenUpiFromConcentration(reading.value, reading.taxonId),
+    index,
+    category: pollenUpiCategory(index),
+    color: pollenUpiFallbackColor(index),
     source: 'open-meteo',
   };
 }

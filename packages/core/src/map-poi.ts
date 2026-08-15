@@ -1,5 +1,6 @@
 import { ADAIR_CLINICS, type AdairClinic } from './adair-catalog';
 import type { CatalogPlace } from './catalog';
+import { haversineDistanceKm } from './geo';
 
 export type MapPoiCategory = 'restaurant' | 'cafe' | 'medical' | 'pharmacy';
 
@@ -10,6 +11,7 @@ export const MAP_POI_CATEGORIES: readonly MapPoiCategory[] = [
   'pharmacy',
 ];
 export type MapPoiSource = 'catalog' | 'adair' | 'google-places';
+export type AllergySafety = 'unknown' | 'curated' | 'verified';
 
 export interface MapPoi {
   id: string;
@@ -18,17 +20,49 @@ export interface MapPoi {
   category: MapPoiCategory;
   lat: number;
   lng: number;
+  /**
+   * Visual pin weight for curated/ADAIR rows only. Google Places must not map
+   * rating onto this field as if it were allergy safety.
+   */
   level: 'high' | 'medium' | 'low';
   icon: string;
   tags: string[];
   phone?: string;
   bookingUrl?: string;
   source: MapPoiSource;
+  /** Google star rating when present — never treat as allergen safety. */
+  rating?: number;
+  allergySafety: AllergySafety;
+  googlePlaceId?: string;
 }
+
+export interface PlaceAutocompleteSuggestion {
+  placeId: string;
+  primaryText: string;
+  secondaryText?: string;
+  distanceMeters?: number;
+}
+
+export interface MapPoiDetails extends MapPoi {
+  googleMapsUri?: string;
+  websiteUri?: string;
+  openingHours?: string;
+}
+
+/** Curated Moscow-area catalog is only honest near this origin. */
+export const CATALOG_PLACES_ORIGIN = { latitude: 55.7558, longitude: 37.6173 };
+export const CATALOG_PLACES_REGION_KM = 80;
 
 const PHARMACY_TAG = 'pharmacy';
 const MEDICAL_TAGS = new Set(['pharmacy', 'clinic', 'hospital', 'medical']);
 const CAFE_TAGS = new Set(['cafe', 'coffee', 'bakery', 'coffee_shop']);
+
+const MAP_POI_CATEGORY_ICONS: Record<MapPoiCategory, string> = {
+  restaurant: 'restaurant',
+  cafe: 'cafe',
+  medical: 'medical',
+  pharmacy: 'medkit',
+};
 
 /** Infer POI category from catalog place tags/icon. */
 export function catalogPlaceCategory(place: CatalogPlace): MapPoiCategory {
@@ -51,6 +85,7 @@ export function catalogPlaceToMapPoi(place: CatalogPlace): MapPoi {
     icon: place.icon,
     tags: place.tags,
     source: 'catalog',
+    allergySafety: 'curated',
   };
 }
 
@@ -68,6 +103,7 @@ export function adairClinicToMapPoi(clinic: AdairClinic): MapPoi {
     phone: clinic.phone,
     bookingUrl: clinic.bookingUrl,
     source: 'adair',
+    allergySafety: clinic.verified ? 'verified' : 'curated',
   };
 }
 
@@ -75,9 +111,22 @@ export function adairClinicsAsMapPois(clinics: AdairClinic[] = ADAIR_CLINICS): M
   return clinics.map(adairClinicToMapPoi);
 }
 
+export function isOriginInCatalogRegion(
+  latitude: number,
+  longitude: number,
+  radiusKm = CATALOG_PLACES_REGION_KM,
+): boolean {
+  return (
+    haversineDistanceKm(
+      { latitude, longitude },
+      CATALOG_PLACES_ORIGIN,
+    ) <= radiusKm
+  );
+}
+
 /**
- * Normalize a Google Places Nearby result into MapPoi.
- * Unknown types default to restaurant so food venues still appear.
+ * Normalize a Google Places result into MapPoi.
+ * Rating is stored separately; allergy safety stays unknown until curated data exists.
  */
 export function googlePlaceToMapPoi(input: {
   placeId: string;
@@ -87,6 +136,9 @@ export function googlePlaceToMapPoi(input: {
   lng: number;
   types?: string[];
   rating?: number;
+  phone?: string;
+  websiteUri?: string;
+  googleMapsUri?: string;
 }): MapPoi | null {
   const placeId = input.placeId.trim();
   const name = input.name.trim();
@@ -95,12 +147,6 @@ export function googlePlaceToMapPoi(input: {
 
   const types = (input.types ?? []).map((type) => type.toLowerCase());
   const category = resolveGooglePlaceCategory(types);
-  const level =
-    typeof input.rating === 'number' && input.rating >= 4.2
-      ? 'high'
-      : typeof input.rating === 'number' && input.rating >= 3.5
-        ? 'medium'
-        : 'low';
 
   return {
     id: `google:${placeId}`,
@@ -109,19 +155,72 @@ export function googlePlaceToMapPoi(input: {
     category,
     lat: input.lat,
     lng: input.lng,
-    level,
+    level: 'medium',
     icon: MAP_POI_CATEGORY_ICONS[category],
     tags: types.slice(0, 4),
+    phone: input.phone?.trim() || undefined,
+    bookingUrl: input.websiteUri?.trim() || undefined,
     source: 'google-places',
+    rating: typeof input.rating === 'number' && Number.isFinite(input.rating) ? input.rating : undefined,
+    allergySafety: 'unknown',
+    googlePlaceId: placeId,
   };
 }
 
-const MAP_POI_CATEGORY_ICONS: Record<MapPoiCategory, string> = {
-  restaurant: 'restaurant',
-  cafe: 'cafe',
-  medical: 'medical',
-  pharmacy: 'medkit',
-};
+export function googlePlaceDetailsToMapPoi(input: {
+  placeId: string;
+  name: string;
+  vicinity?: string;
+  lat: number;
+  lng: number;
+  types?: string[];
+  rating?: number;
+  phone?: string;
+  websiteUri?: string;
+  googleMapsUri?: string;
+  openingHours?: string;
+}): MapPoiDetails | null {
+  const poi = googlePlaceToMapPoi(input);
+  if (!poi) return null;
+  return {
+    ...poi,
+    googleMapsUri: input.googleMapsUri?.trim() || undefined,
+    websiteUri: input.websiteUri?.trim() || undefined,
+    openingHours: input.openingHours?.trim() || undefined,
+  };
+}
+
+export function normalizePlaceAutocompleteSuggestion(input: {
+  placeId?: string;
+  primaryText?: string;
+  secondaryText?: string;
+  distanceMeters?: number;
+}): PlaceAutocompleteSuggestion | null {
+  const placeId = input.placeId?.trim() ?? '';
+  const primaryText = input.primaryText?.trim() ?? '';
+  if (!placeId || !primaryText) return null;
+  return {
+    placeId,
+    primaryText,
+    secondaryText: input.secondaryText?.trim() || undefined,
+    distanceMeters:
+      typeof input.distanceMeters === 'number' && Number.isFinite(input.distanceMeters)
+        ? input.distanceMeters
+        : undefined,
+  };
+}
+
+export function dedupeMapPoisByPlaceId(pois: MapPoi[]): MapPoi[] {
+  const seen = new Set<string>();
+  const result: MapPoi[] = [];
+  for (const poi of pois) {
+    const key = poi.googlePlaceId ?? poi.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(poi);
+  }
+  return result;
+}
 
 export function filterMapPoisByCategory(
   pois: MapPoi[],

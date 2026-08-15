@@ -64,6 +64,14 @@ export interface PollenPlantDetail {
   /** Canonical allergen ids from `@allerguide/core` cross-reaction graph. */
   crossReactionAllergenIds: string[];
   crossReactionLabels: string[];
+  /** Google `inSeason` for the current forecast day, when provided. */
+  inSeason?: boolean;
+  /** Google `indexInfo.indexDescription` — keep as source text, do not localize here. */
+  indexDescription?: string;
+  /** Hex color from Google `indexInfo.color` or official UPI fallback. */
+  indexColor?: string;
+  /** Google plant/type health recommendations for the selected day. */
+  healthRecommendations?: string[];
 }
 
 export function googlePlantCodeToTaxon(code: string): PollenMapTaxonId | null {
@@ -72,7 +80,7 @@ export function googlePlantCodeToTaxon(code: string): PollenMapTaxonId | null {
 
 /**
  * Build plant education card from core taxonomy + cross-reactions,
- * optionally enriched with Google `plantDescription` fields.
+ * optionally enriched with Google `plantDescription` and index fields.
  */
 export function buildPollenPlantDetail(
   taxonId: PollenMapTaxonId | OpenMeteoPollenTaxonId,
@@ -84,11 +92,18 @@ export function buildPollenPlantDetail(
     specialShapes?: string;
     picture?: string;
     crossReaction?: string;
+    inSeason?: boolean;
+    indexDescription?: string;
+    indexColor?: string;
+    healthRecommendations?: string[];
   },
 ): PollenPlantDetail {
   const taxon = getPollenTaxon(taxonId);
   const allergenId = taxon?.allergenId ?? null;
   const matches = allergenId ? getCrossReactionsFor(allergenId) : [];
+  const recommendations = (google?.healthRecommendations ?? [])
+    .map((item) => item.trim())
+    .filter(Boolean);
 
   return {
     taxonId: taxonId as PollenMapTaxonId,
@@ -101,5 +116,9 @@ export function buildPollenPlantDetail(
     crossReactionNote: google?.crossReaction?.trim() || undefined,
     crossReactionAllergenIds: matches.map((match) => match.allergen.id),
     crossReactionLabels: matches.map((match) => match.allergen.name),
+    inSeason: typeof google?.inSeason === 'boolean' ? google.inSeason : undefined,
+    indexDescription: google?.indexDescription?.trim() || undefined,
+    indexColor: google?.indexColor?.trim() || undefined,
+    healthRecommendations: recommendations.length > 0 ? recommendations : undefined,
   };
 }
