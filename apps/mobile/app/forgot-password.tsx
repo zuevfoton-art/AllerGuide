@@ -14,6 +14,7 @@ import {
   AuthLink,
   AuthError,
 } from '@/src/components/AuthForm';
+import { authEmailInputProps } from '@/src/constants/auth-input-props';
 
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
@@ -98,7 +99,10 @@ export default function ForgotPasswordScreen() {
         value={email}
         onChangeText={setEmail}
         placeholder={t('auth.forgot.emailPlaceholder')}
-        keyboardType="email-address"
+        returnKeyType="send"
+        submitBehavior="blurAndSubmit"
+        onSubmitEditing={() => void handleSubmit()}
+        {...authEmailInputProps()}
       />
       <AuthError message={error} />
       <AuthPrimaryButton

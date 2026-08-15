@@ -69,6 +69,9 @@ export type LocaleMessages = {
     registerLink: string;
     hasAccount: string;
     loginLink: string;
+    forgotLink: string;
+    countryCode: string;
+    countryCodeTitle: string;
     errors: {
       emailRequired: string;
       phoneRequired: string;

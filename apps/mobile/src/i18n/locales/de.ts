@@ -64,6 +64,9 @@ const de: LocaleMessages = {
     registerLink: 'Registrieren',
     hasAccount: 'Bereits ein Konto?',
     loginLink: 'Anmelden',
+    forgotLink: 'Passwort vergessen?',
+    countryCode: 'Ländervorwahl',
+    countryCodeTitle: 'Ländervorwahl',
     errors: {
       emailRequired: 'E-Mail eingeben.',
       phoneRequired: 'Telefonnummer eingeben.',

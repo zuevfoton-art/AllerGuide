@@ -63,6 +63,9 @@ const en: LocaleMessages = {
     registerLink: 'Sign up',
     hasAccount: 'Already have an account?',
     loginLink: 'Sign in',
+    forgotLink: 'Forgot password?',
+    countryCode: 'Country code',
+    countryCodeTitle: 'Country code',
     errors: {
       emailRequired: 'Enter your email.',
       phoneRequired: 'Enter your phone number.',

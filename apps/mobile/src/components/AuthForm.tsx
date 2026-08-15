@@ -1,5 +1,13 @@
-import { useState, useRef, useMemo } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Animated } from 'react-native';
+import { useState, useRef, useMemo, forwardRef } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  Animated,
+  type TextInputProps,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { LoginType } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -44,27 +52,44 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
   );
 }
 
-interface AuthFieldProps {
+export interface AuthFieldProps {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
   placeholder: string;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'phone-pad';
-  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  keyboardType?: TextInputProps['keyboardType'];
+  autoCapitalize?: TextInputProps['autoCapitalize'];
+  returnKeyType?: TextInputProps['returnKeyType'];
+  onSubmitEditing?: TextInputProps['onSubmitEditing'];
+  submitBehavior?: TextInputProps['submitBehavior'];
+  textContentType?: TextInputProps['textContentType'];
+  autoComplete?: TextInputProps['autoComplete'];
+  autoCorrect?: boolean;
+  accessibilityLabel?: string;
   testID?: string;
 }
 
-export function AuthField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry,
-  keyboardType = 'default',
-  autoCapitalize = 'none',
-  testID,
-}: AuthFieldProps) {
+export const AuthField = forwardRef<TextInput, AuthFieldProps>(function AuthField(
+  {
+    label,
+    value,
+    onChangeText,
+    placeholder,
+    secureTextEntry,
+    keyboardType = 'default',
+    autoCapitalize = 'none',
+    returnKeyType,
+    onSubmitEditing,
+    submitBehavior,
+    textContentType,
+    autoComplete,
+    autoCorrect,
+    accessibilityLabel,
+    testID,
+  },
+  ref,
+) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [focused, setFocused] = useState(false);
@@ -73,6 +98,7 @@ export function AuthField({
     <View style={styles.fieldWrap}>
       <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
       <TextInput
+        ref={ref}
         testID={testID}
         value={value}
         onChangeText={onChangeText}
@@ -81,13 +107,20 @@ export function AuthField({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
+        returnKeyType={returnKeyType}
+        onSubmitEditing={onSubmitEditing}
+        submitBehavior={submitBehavior}
+        textContentType={textContentType}
+        autoComplete={autoComplete}
+        autoCorrect={autoCorrect}
+        accessibilityLabel={accessibilityLabel ?? label}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         style={[styles.input, focused && styles.inputFocused]}
       />
     </View>
   );
-}
+});
 
 export function AuthPrimaryButton({
   label,
@@ -142,7 +175,7 @@ export function AuthLink({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable testID={testID} style={styles.linkWrap} onPress={onPress}>
+    <Pressable testID={testID} style={styles.linkWrap} onPress={onPress} hitSlop={12}>
       <Text style={styles.linkText}>
         {text} <Text style={styles.linkAccent}>{linkText}</Text>
       </Text>
@@ -155,7 +188,7 @@ export function AuthForgotLink({ text, onPress }: { text: string; onPress: () =>
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable style={styles.forgotWrap} onPress={onPress}>
+    <Pressable style={styles.forgotWrap} onPress={onPress} hitSlop={12}>
       <Text style={styles.forgotText}>{text}</Text>
     </Pressable>
   );
