@@ -62,7 +62,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     photo: {
       width: '100%',
-      aspectRatio: 4 / 3,
+      height: 220,
       borderRadius: 8,
       backgroundColor: colors.card,
     },
