@@ -35,7 +35,6 @@ import {
   type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
@@ -54,7 +53,6 @@ import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -142,7 +140,6 @@ const WEEKDAY_KEYS = [
 export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
 
@@ -595,15 +592,20 @@ export default function MapScreen() {
   const showActionTip = statusLevel === 'mid' || statusLevel === 'high';
   const showPlacesPanel = layerMode === 'places' || layerMode === 'both';
 
+  const statusMetaLine = [
+    selectedReading?.profileRelevant && profile?.name
+      ? `${t('map.statusForProfile', { name: profile.name })} · ${t('map.pollenYou')}`
+      : null,
+    [coords.label || pollenRegion.name, sourceLabel, updatedLabel].filter(Boolean).join(' · '),
+    isCalendarFallback ? t('map.pollenCalendarFallback') : null,
+    isCacheSource ? t('map.pollenSourceCache') : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <Screen>
       <ScreenBrandHeader right={<ProfileHeaderButton />} />
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('map.eyebrow')} />
-          <Text style={ui.docTitle}>{t('map.titleShort')}</Text>
-        </View>
-      </View>
 
       <View
         testID="map-status"
@@ -619,25 +621,72 @@ export default function MapScreen() {
           ) : (
             <View style={[styles.statusDot, { backgroundColor: levelColor }]} />
           )}
-          <Text style={styles.statusHeadline}>{statusHeadline}</Text>
+          <Text style={styles.statusHeadline} numberOfLines={1}>
+            {statusHeadline}
+          </Text>
         </View>
-        {selectedReading?.profileRelevant && profile?.name ? (
-          <Text style={styles.statusMeta}>
-            {t('map.statusForProfile', { name: profile.name })} · {t('map.pollenYou')}
+        {statusMetaLine ? (
+          <Text style={styles.statusMeta} numberOfLines={1}>
+            {statusMetaLine}
           </Text>
         ) : null}
-        <Text style={styles.statusMeta}>
-          {[coords.label || pollenRegion.name, sourceLabel, updatedLabel]
-            .filter(Boolean)
-            .join(' · ')}
-        </Text>
-        {isCalendarFallback ? (
-          <Text style={styles.statusBadge}>{t('map.pollenCalendarFallback')}</Text>
-        ) : null}
-        {isCacheSource ? (
-          <Text style={styles.statusBadge}>{t('map.pollenSourceCache')}</Text>
-        ) : null}
       </View>
+
+      <MapPollenAllergenModal
+        visible={allergenPickerOpen}
+        items={chipItems}
+        selectedTaxonId={selectedTaxonId}
+        plants={pollenSnapshot?.plants ?? {}}
+        upiByTaxon={pollenSnapshot?.upiByTaxon ?? {}}
+        labelForTaxon={(taxonId) => t(TAXON_LABEL_KEYS[taxonId] as 'map.pollenBirch')}
+        onSelect={(taxonId) => {
+          setSelectedTaxonId(taxonId);
+          setSelectedForecastDay(null);
+        }}
+        onClose={() => setAllergenPickerOpen(false)}
+      />
+
+      {useYandexInteractive ? (
+        <YandexInteractiveMap
+          latitude={coords.lat}
+          longitude={coords.lon}
+          zoom={POLLEN_MAP_SCALE_ZOOM.city}
+          height={MAP_HERO_HEIGHT}
+          markers={showPlaceMarkers ? markers : []}
+          selectedMarkerId={selectedPoiId}
+          onMarkerPress={setSelectedPoiId}
+          onRegionChange={handleRegionChange}
+          overlay={mapOverlay}
+        />
+      ) : useGoogleMap ? (
+        <GooglePollenMap
+          latitude={coords.lat}
+          longitude={coords.lon}
+          zoom={POLLEN_MAP_SCALE_ZOOM.city}
+          mapType={googleMapType}
+          tileUrlTemplate={airTileUrlTemplate}
+          height={MAP_HERO_HEIGHT}
+          interactive
+          markers={markers}
+          circles={showPlumeGeo ? plume.circles : []}
+          polylines={showPlumeGeo ? plume.polylines : []}
+          selectedMarkerId={selectedPoiId}
+          onMarkerPress={setSelectedPoiId}
+          onRegionChange={handleRegionChange}
+          overlay={mapOverlay}
+        />
+      ) : (
+        <YandexMap
+          url={
+            showPlaceMarkers
+              ? yandexPlacesUrl || yandexPollenUrl
+              : yandexPollenUrl || yandexPlacesUrl
+          }
+          height={MAP_HERO_HEIGHT}
+          interactive={false}
+          overlay={mapOverlay}
+        />
+      )}
 
       <View style={styles.layerBlock}>
         <View style={styles.layerRow} testID="map-layers">
@@ -699,62 +748,6 @@ export default function MapScreen() {
           </Pressable>
         ) : null}
       </View>
-
-      <MapPollenAllergenModal
-        visible={allergenPickerOpen}
-        items={chipItems}
-        selectedTaxonId={selectedTaxonId}
-        plants={pollenSnapshot?.plants ?? {}}
-        upiByTaxon={pollenSnapshot?.upiByTaxon ?? {}}
-        labelForTaxon={(taxonId) => t(TAXON_LABEL_KEYS[taxonId] as 'map.pollenBirch')}
-        onSelect={(taxonId) => {
-          setSelectedTaxonId(taxonId);
-          setSelectedForecastDay(null);
-        }}
-        onClose={() => setAllergenPickerOpen(false)}
-      />
-
-      {useYandexInteractive ? (
-        <YandexInteractiveMap
-          latitude={coords.lat}
-          longitude={coords.lon}
-          zoom={POLLEN_MAP_SCALE_ZOOM.city}
-          height={MAP_HERO_HEIGHT}
-          markers={showPlaceMarkers ? markers : []}
-          selectedMarkerId={selectedPoiId}
-          onMarkerPress={setSelectedPoiId}
-          onRegionChange={handleRegionChange}
-          overlay={mapOverlay}
-        />
-      ) : useGoogleMap ? (
-        <GooglePollenMap
-          latitude={coords.lat}
-          longitude={coords.lon}
-          zoom={POLLEN_MAP_SCALE_ZOOM.city}
-          mapType={googleMapType}
-          tileUrlTemplate={airTileUrlTemplate}
-          height={MAP_HERO_HEIGHT}
-          interactive
-          markers={markers}
-          circles={showPlumeGeo ? plume.circles : []}
-          polylines={showPlumeGeo ? plume.polylines : []}
-          selectedMarkerId={selectedPoiId}
-          onMarkerPress={setSelectedPoiId}
-          onRegionChange={handleRegionChange}
-          overlay={mapOverlay}
-        />
-      ) : (
-        <YandexMap
-          url={
-            showPlaceMarkers
-              ? yandexPlacesUrl || yandexPollenUrl
-              : yandexPollenUrl || yandexPlacesUrl
-          }
-          height={MAP_HERO_HEIGHT}
-          interactive={false}
-          overlay={mapOverlay}
-        />
-      )}
 
       {showSearchAreaButton ? (
         <Pressable
@@ -1014,20 +1007,14 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 12,
-    },
-    headerText: { flex: 1, gap: 2 },
     statusCard: {
       borderRadius: 10,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
-      padding: 14,
-      gap: 6,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      gap: 4,
     },
     statusHigh: {
       backgroundColor: colors.dangerLight,
@@ -1046,7 +1033,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     statusHeadline: {
       flex: 1,
       fontFamily: fonts.sansBold,
-      fontSize: 17,
+      fontSize: 16,
       fontWeight: '700',
       color: colors.text,
     },
@@ -1055,18 +1042,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textSecondary,
       lineHeight: 16,
-    },
-    statusBadge: {
-      alignSelf: 'flex-start',
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.warningText,
-      backgroundColor: colors.warningLight,
-      borderRadius: 4,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      overflow: 'hidden',
     },
     layerBlock: { gap: 8 },
     layerRow: { flexDirection: 'row', gap: 8 },
