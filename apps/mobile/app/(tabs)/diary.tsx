@@ -414,7 +414,8 @@ export default function DiaryScreen() {
                 style={styles.chip}
                 onPress={() => void openSection(section.type)}
                 accessibilityRole="button"
-                accessibilityLabel={section.title}>
+                accessibilityLabel={section.title}
+                hitSlop={8}>
                 <Ionicons
                   name={(TYPE_ICONS[section.type] ?? section.icon) as any}
                   size={14}

@@ -507,6 +507,7 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
         onChangeText={setText}
         placeholder={t('diaryWizard.entryPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
+        accessibilityLabel={t('diaryWizard.editEntry')}
         multiline
         textAlignVertical="top"
       />
@@ -681,6 +682,7 @@ function DishComponentsField({
                 conflict === 'direct' && styles.conflictDirect,
                 conflict === 'cross' && styles.conflictCross,
               ]}
+              hitSlop={8}
               onPress={() => toggle(component.id)}>
               <Text
                 style={[
@@ -801,6 +803,7 @@ function StepField({
               key={choice}
               testID={step.multiSelect ? `diary-multi-choice-${choice}` : undefined}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
+              hitSlop={8}
               onPress={() =>
                 onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice)
               }>
@@ -823,6 +826,7 @@ function StepField({
       onChangeText={onChange}
       placeholder={step.placeholder}
       placeholderTextColor={theme.colors.textMuted}
+      accessibilityLabel={step.label}
       multiline={step.multiline}
       textAlignVertical={step.multiline ? 'top' : 'center'}
     />

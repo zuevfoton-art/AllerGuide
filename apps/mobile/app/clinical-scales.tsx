@@ -89,7 +89,8 @@ export default function ClinicalScalesScreen() {
           <Pressable
             onPress={() => router.back()}
             accessibilityRole="button"
-            accessibilityLabel={t('common.back')}>
+            accessibilityLabel={t('common.back')}
+            hitSlop={8}>
             <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
           </Pressable>
         }
@@ -111,7 +112,8 @@ export default function ClinicalScalesScreen() {
                   style={[styles.chip, styles.chipAccent]}
                   onPress={() => setScaleId(scale.id)}
                   accessibilityRole="button"
-                  accessibilityLabel={scale.shortLabel}>
+                  accessibilityLabel={scale.shortLabel}
+                  hitSlop={8}>
                   <Text style={styles.chipText}>{scale.shortLabel}</Text>
                 </Pressable>
               ))}
@@ -125,7 +127,8 @@ export default function ClinicalScalesScreen() {
               style={styles.chip}
               onPress={() => setScaleId(scale.id)}
               accessibilityRole="button"
-              accessibilityLabel={scale.shortLabel}>
+              accessibilityLabel={scale.shortLabel}
+              hitSlop={8}>
               <Text style={styles.chipText}>{scale.shortLabel}</Text>
             </Pressable>
           ))}

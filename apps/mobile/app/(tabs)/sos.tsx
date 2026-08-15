@@ -200,6 +200,7 @@ export default function SosScreen() {
           <Pressable
             testID="sos-passport-toggle"
             style={styles.collapseHead}
+            hitSlop={8}
             onPress={() => setPassportOpen((v) => !v)}
             accessibilityRole="button"
             accessibilityState={{ expanded: passportOpen }}
@@ -278,6 +279,7 @@ export default function SosScreen() {
 
           <Pressable
             style={styles.collapseHead}
+            hitSlop={8}
             onPress={() => setAnaphylaxisOpen((v) => !v)}
             accessibilityRole="button"
             accessibilityState={{ expanded: anaphylaxisOpen }}
