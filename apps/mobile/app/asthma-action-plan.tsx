@@ -54,7 +54,7 @@ export default function AsthmaActionPlanScreen() {
   if (!profile) {
     return (
       <Screen>
-        <ScreenBackBrandHeader />
+        <ScreenHeader onBack={() => router.back()} title={t('asthma.noProfile')} />
         <Text style={styles.empty}>{t('asthma.noProfile')}</Text>
       </Screen>
     );

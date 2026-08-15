@@ -181,7 +181,7 @@ export default function PrescribedTherapyScreen() {
   if (!profile) {
     return (
       <Screen>
-        <ScreenBackBrandHeader />
+        <ScreenHeader onBack={() => router.back()} title={t('prescribedTherapy.noProfile')} />
         <Text style={styles.empty}>{t('prescribedTherapy.noProfile')}</Text>
       </Screen>
     );

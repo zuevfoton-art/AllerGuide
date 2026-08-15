@@ -239,7 +239,7 @@ export default function AsitCourseScreen() {
   if (!profile) {
     return (
       <Screen>
-        <ScreenBackBrandHeader />
+        <ScreenHeader onBack={() => router.back()} title={t('asit.noProfile')} />
         <Text style={styles.empty}>{t('asit.noProfile')}</Text>
       </Screen>
     );

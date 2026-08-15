@@ -76,7 +76,7 @@ export default function InsectActionPlanScreen() {
   if (!profile) {
     return (
       <Screen>
-        <ScreenBackBrandHeader />
+        <ScreenHeader onBack={() => router.back()} title={t('insect.noProfile')} />
         <Text style={styles.empty}>{t('insect.noProfile')}</Text>
       </Screen>
     );

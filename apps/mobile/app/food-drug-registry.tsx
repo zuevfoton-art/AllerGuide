@@ -75,7 +75,7 @@ export default function FoodDrugRegistryScreen() {
   if (!profile) {
     return (
       <Screen>
-        <ScreenBackBrandHeader />
+        <ScreenHeader onBack={() => router.back()} title={t('foodDrug.noProfile')} />
         <Text style={styles.empty}>{t('foodDrug.noProfile')}</Text>
       </Screen>
     );
