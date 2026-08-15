@@ -462,7 +462,6 @@ const ru: LocaleMessages = {
     pollenLiveTitle: 'Пыльца рядом с вами',
     pollenMapAttribution: 'Карта: Яндекс Карты · уровни: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Карта и слой UPI: Google Maps · уровни: Open-Meteo / CAMS',
-    pollenGooglePrimaryAttribution: 'Карта и прогноз пыльцы: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Карта: Яндекс Карты (интерактив) · прогноз пыльцы: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
@@ -604,8 +603,6 @@ const ru: LocaleMessages = {
     upiLevelDescription: 'Категория UPI: {{category}}',
     heatmapLegendTitle: 'Легенда слоя пыльцы (UPI 0–5)',
     heatmapOfficialGroup: 'Официальная карта группы',
-    heatmapNoSpeciesLayer:
-      'Google не даёт heatmap по отдельному виду — на карте слой деревьев, злаков или сорных.',
     plantInSeason: 'Сейчас в сезоне',
     plantOutOfSeason: 'Сейчас вне сезона',
     plantNoLiveData: 'Нет текущих данных по этому виду',

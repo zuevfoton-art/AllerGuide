@@ -460,7 +460,6 @@ const en: LocaleMessages = {
     pollenLiveTitle: 'Pollen near you',
     pollenMapAttribution: 'Map: Yandex Maps · levels: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Map and UPI layer: Google Maps · levels: Open-Meteo / CAMS',
-    pollenGooglePrimaryAttribution: 'Map and pollen forecast: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Map: Yandex Maps (interactive) · pollen forecast: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
@@ -602,8 +601,6 @@ const en: LocaleMessages = {
     upiLevelDescription: 'UPI category: {{category}}',
     heatmapLegendTitle: 'Pollen layer legend (UPI 0–5)',
     heatmapOfficialGroup: 'Official group map',
-    heatmapNoSpeciesLayer:
-      'Google does not offer a per-species heatmap — the map shows the tree, grass, or weed layer.',
     plantInSeason: 'In season now',
     plantOutOfSeason: 'Out of season now',
     plantNoLiveData: 'No current data for this species',

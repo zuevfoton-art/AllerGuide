@@ -21,7 +21,6 @@ import {
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_MAP_SCALE_ZOOM,
   POLLEN_MAP_TAXON_IDS,
-  POLLEN_TYPE_GROUP_BY_TAXON,
   pollenMapTaxonTypeGroup,
   pollenTaxonToGoogleMapType,
   readingToUpiSnapshot,
@@ -577,7 +576,7 @@ export default function MapScreen() {
     ? 'map.pollenYandexInteractiveAttribution'
     : useGoogleMap
       ? pollenSnapshot?.source === 'google' || MAP_POLLEN_GOOGLE_PRIMARY
-        ? 'map.pollenGooglePrimaryAttribution'
+        ? null
         : 'map.pollenGoogleMapAttribution'
       : 'map.pollenMapAttribution';
 
@@ -770,16 +769,9 @@ export default function MapScreen() {
         </Pressable>
       ) : null}
 
-      <Text style={styles.mapAttribution} testID="map-attribution">
-        {t(mapAttributionKey)}
-      </Text>
-      {useGoogleMap && useHeatmap && !showAirLayer ? (
-        <Text style={styles.treeSpeciesHint} testID="map-group-heatmap-hint">
-          {POLLEN_TYPE_GROUP_BY_TAXON[selectedTaxonId] === 'GRASS'
-            ? t('map.pollenHeatmapGrassHint')
-            : POLLEN_TYPE_GROUP_BY_TAXON[selectedTaxonId] === 'WEED'
-              ? t('map.pollenHeatmapWeedHint')
-              : t('map.pollenHeatmapTreeHint')}
+      {mapAttributionKey ? (
+        <Text style={styles.mapAttribution} testID="map-attribution">
+          {t(mapAttributionKey)}
         </Text>
       ) : null}
 
@@ -1152,14 +1144,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       lineHeight: 14,
-    },
-    treeSpeciesHint: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      lineHeight: 15,
-      marginTop: 2,
-      marginBottom: 4,
     },
     mapLevelOverlay: {
       position: 'absolute',

@@ -472,7 +472,6 @@ export type LocaleMessages = {
     pollenLiveTitle: string;
     pollenMapAttribution: string;
     pollenGoogleMapAttribution: string;
-    pollenGooglePrimaryAttribution: string;
     pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenTreeSpeciesLevelsHint: string;
@@ -610,7 +609,6 @@ export type LocaleMessages = {
     upiLevelDescription: string;
     heatmapLegendTitle: string;
     heatmapOfficialGroup: string;
-    heatmapNoSpeciesLayer: string;
     plantInSeason: string;
     plantOutOfSeason: string;
     plantNoLiveData: string;

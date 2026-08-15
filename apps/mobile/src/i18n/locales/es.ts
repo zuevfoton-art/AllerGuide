@@ -458,7 +458,6 @@ const es: LocaleMessages = {
     pollenLiveTitle: 'Polen cerca de ti',
     pollenMapAttribution: 'Mapa: Yandex Maps · niveles: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Mapa y capa UPI: Google Maps · niveles: Open-Meteo / CAMS',
-    pollenGooglePrimaryAttribution: 'Mapa y previsión de polen: Google Maps / Google Pollen',
     pollenYandexInteractiveAttribution:
       'Mapa: Yandex Maps (interactivo) · previsión de polen: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
@@ -600,8 +599,6 @@ const es: LocaleMessages = {
     upiLevelDescription: 'Categoría UPI: {{category}}',
     heatmapLegendTitle: 'Leyenda de polen (UPI 0–5)',
     heatmapOfficialGroup: 'Mapa oficial del grupo',
-    heatmapNoSpeciesLayer:
-      'Google no ofrece un mapa de calor por especie: el mapa muestra la capa de árboles, gramíneas o malezas.',
     plantInSeason: 'En temporada ahora',
     plantOutOfSeason: 'Fuera de temporada ahora',
     plantNoLiveData: 'No hay datos actuales para esta especie',
