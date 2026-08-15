@@ -24,10 +24,11 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
-import { BrandLogo } from '@/src/components/brand/BrandLogo';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
+import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
@@ -51,6 +52,11 @@ export default function HomeScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const prescribedCourse = useMemo(
+    () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
+    [activeProfileId, diaryEntries],
+  );
 
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
   const profileCapabilities = useMemo(
@@ -121,9 +127,10 @@ export default function HomeScreen() {
         diaryEntries,
         wellness,
         phenotypeHints,
+        prescribedCourse,
         t,
       }),
-    [profile, diaryEntries, wellness, phenotypeHints, t],
+    [profile, diaryEntries, wellness, phenotypeHints, prescribedCourse, t],
   );
 
   return (
@@ -137,22 +144,20 @@ export default function HomeScreen() {
           : undefined
       }
       refreshing={wellnessState.refreshing}>
-      <View style={styles.topBar}>
-        <View style={styles.brandBlock}>
-          <BrandLogo size={32} style={styles.topBarLogo} />
-          <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
-        </View>
-        <View style={styles.topBarActions}>
-          <ProfileHeaderButton />
-          <Pressable
-            onPress={() => router.push('/(tabs)/sos')}
-            style={styles.sosBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('tabs.sos')}>
-            <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
-          </Pressable>
-        </View>
-      </View>
+      <ScreenBrandHeader
+        right={
+          <>
+            <ProfileHeaderButton destination="hub" />
+            <Pressable
+              onPress={() => router.push('/(tabs)/sos')}
+              style={styles.sosBtn}
+              accessibilityRole="button"
+              accessibilityLabel={t('tabs.sos')}>
+              <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
+            </Pressable>
+          </>
+        }
+      />
 
       <GlassCard variant="soft">
         <View style={ui.cardHead}>
@@ -187,25 +192,53 @@ export default function HomeScreen() {
               {confidenceBadge ? (
                 <View style={[ui.badge, confidenceBadge.container, styles.confidenceBadge]}>
                   <Text style={[ui.badgeText, confidenceBadge.text]}>
-                    {t(`wellness.confidence.${wellness.confidence}`)}
+                    {t(`wellness.verbal.${wellness.display.indexTier}`)}
                   </Text>
                 </View>
               ) : null}
-              {!wellness.envDataAvailable ? (
-                <Text style={styles.envHint}>{t('wellness.envUnavailable')}</Text>
-              ) : null}
+              <Text style={styles.envHint}>
+                {t(`wellness.confidence.${wellness.confidence}`)}
+              </Text>
             </View>
 
-            {wellness.factors.slice(0, 3).map((factor) => (
-              <View key={factor.label} style={ui.kpiRow}>
-                <Text style={ui.kpiLabel}>
-                  {factor.label.replace(' · Open-Meteo', '').replace(' · EAQI', '')}
-                </Text>
-                <Text style={ui.kpiValue}>{factor.value}</Text>
-              </View>
-            ))}
+            <View style={ui.kpiRow}>
+              <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
+              <Text style={ui.kpiValue}>{t(`wellness.verbal.${wellness.display.pollenTier}`)}</Text>
+            </View>
+            <View style={ui.kpiRow}>
+              <Text style={ui.kpiLabel}>{t('home.air')}</Text>
+              <Text style={ui.kpiValue}>{t(`wellness.verbal.${wellness.display.airTier}`)}</Text>
+            </View>
+            <View style={ui.kpiRow}>
+              <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
+              <Text style={ui.kpiValue}>{t(`wellness.verbal.${wellness.display.diaryTier}`)}</Text>
+            </View>
+            <Text style={styles.interpret}>
+              {t('home.primaryFactorLabel')}: {t(`wellness.primaryFactor.${wellness.display.primaryFactorId}`)}
+            </Text>
 
-            <Text style={styles.interpret}>{wellness.statusSummary}</Text>
+            <Pressable
+              onPress={() => setDetailsOpen((open) => !open)}
+              accessibilityRole="button"
+              testID="home-wellness-details">
+              <Text style={styles.detailsToggle}>
+                {detailsOpen ? t('home.wellnessHideDetails') : t('home.wellnessDetails')}
+              </Text>
+            </Pressable>
+
+            {detailsOpen ? (
+              <>
+                {wellness.factors.map((factor) => (
+                  <View key={factor.label} style={ui.kpiRow}>
+                    <Text style={ui.kpiLabel}>
+                      {factor.label.replace(' · Open-Meteo', '').replace(' · EAQI', '')}
+                    </Text>
+                    <Text style={ui.kpiValue}>{factor.value}</Text>
+                  </View>
+                ))}
+                <Text style={styles.interpret}>{wellness.statusSummary}</Text>
+              </>
+            ) : null}
           </>
         ) : (
           <Text style={styles.interpret}>{t('home.selectProfile')}</Text>
@@ -348,6 +381,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 12,
       color: colors.textSecondary,
+    },
+    detailsToggle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+      marginTop: 10,
     },
     interpret: {
       fontFamily: fonts.sans,

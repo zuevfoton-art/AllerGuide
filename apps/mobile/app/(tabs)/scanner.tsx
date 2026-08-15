@@ -62,6 +62,7 @@ import {
   type CroppedScanPhoto,
 } from '@/src/services/scanner-photo-service';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 import { resolveMatchAliasKeyword } from '@/src/services/scan-match-display';
@@ -644,12 +645,12 @@ export default function ScannerScreen() {
     <Screen
       onRefresh={() => refresh()}
       refreshing={refreshing}>
+      <ScreenBrandHeader right={<ProfileHeaderButton />} />
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('scanner.eyebrow')} />
           <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         </View>
-        <ProfileHeaderButton />
       </View>
 
       <Button

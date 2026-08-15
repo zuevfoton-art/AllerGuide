@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ProfileSwitcher } from '@/src/components/ProfileSwitcher';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
@@ -26,7 +26,6 @@ import {
   exportPassportPdf,
   sharePassportText,
 } from '@/src/services/doctor-report-service';
-import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { isProfileEpinephrineEligible } from '@/src/services/clinical-phenotype-service';
 import {
@@ -156,29 +155,18 @@ export default function SosScreen() {
           />
         ) : undefined
       }>
+      <ScreenBrandHeader />
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('sos.eyebrow')} />
           <Text style={ui.docTitle}>{t('sos.title')}</Text>
           <Text style={ui.docMeta}>{t('sos.subtitle')}</Text>
         </View>
-        <View style={styles.headerActions}>
-          <ProfileHeaderButton />
-          <Button label={t('sos.edit')} variant="secondary" size="sm" onPress={() => router.push('/sos-edit' as any)} />
-        </View>
       </View>
-
-      <ProfileSwitcher />
 
       {epinephrineHint ? (
         <GlassCard style={styles.epiHintCard}>
           <Text style={styles.epiHintText}>{epinephrineHint}</Text>
-          <Button
-            label={t('sos.edit')}
-            variant="secondary"
-            size="sm"
-            onPress={() => router.push('/sos-edit' as any)}
-          />
         </GlassCard>
       ) : null}
 
@@ -380,14 +368,6 @@ export default function SosScreen() {
           <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
         </GlassCard>
       ) : null}
-
-      <Pressable
-        style={styles.settingsLink}
-        onPress={() => router.push('/profile' as any)}
-        accessibilityRole="button"
-        accessibilityLabel={t('sos.settingsLink')}>
-        <Text style={styles.settingsLinkText}>{t('sos.settingsLink')}</Text>
-      </Pressable>
 
       <View style={styles.tipCard}>
         <Ionicons name="information-circle-outline" size={18} color={theme.colors.accent} />

@@ -45,6 +45,7 @@ import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal'
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -485,12 +486,12 @@ export default function MapScreen() {
 
   return (
     <Screen>
+      <ScreenBrandHeader right={<ProfileHeaderButton />} />
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('map.eyebrow')} />
           <Text style={ui.docTitle}>{t('map.titleShort')}</Text>
         </View>
-        <ProfileHeaderButton />
       </View>
 
       <View

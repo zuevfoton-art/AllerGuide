@@ -3,7 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  computeNextPrescribedIntake,
   computePrescribedCompliance,
+  formatPrescribedReminderTime,
   formatPrescribedReminderTimes,
   getPrescribedReminderTimes,
   isPrescribedCourseConfigured,
@@ -31,6 +33,7 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const compliance = useMemo(() => computePrescribedCompliance(entries, 30), [entries]);
+  const nextIntake = useMemo(() => computeNextPrescribedIntake(course), [course]);
 
   if (!course || !isPrescribedCourseConfigured(course)) {
     return (
@@ -61,6 +64,15 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
       </View>
 
       <Text style={styles.drug}>{course.drug}</Text>
+      <Text style={styles.meta}>{t('prescribedTherapy.statusActive')}</Text>
+      {course.startDate || course.endDate ? (
+        <Text style={styles.meta}>
+          {t('prescribedTherapy.activePeriod', {
+            start: course.startDate || '—',
+            end: course.endDate || '—',
+          })}
+        </Text>
+      ) : null}
       {course.dosage ? <Text style={styles.meta}>{course.dosage} · {PRESCRIBED_THERAPY_ROUTE_LABELS[course.route]}</Text> : null}
       {course.scheduleNotes.trim() ? (
         <Text style={styles.schedule}>{course.scheduleNotes.trim()}</Text>
@@ -69,6 +81,13 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
         <Text style={styles.reminder}>
           {t('prescribedTherapy.reminderAt', {
             time: formatPrescribedReminderTimes(getPrescribedReminderTimes(course)),
+          })}
+        </Text>
+      ) : null}
+      {nextIntake ? (
+        <Text style={styles.reminder}>
+          {t('prescribedTherapy.nextDose', {
+            time: formatPrescribedReminderTime(nextIntake.hour, nextIntake.minute),
           })}
         </Text>
       ) : null}

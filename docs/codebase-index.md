@@ -85,7 +85,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 |------|--------|----------|--------------|
 | **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*` |
-| **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context | core `diary*` |
+| **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context | core `diary*`, `diary-wizard-route` |
+| **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx`, `sos-edit.tsx` | `sos-service`, `sos-passport-service`, `emergency-contact-service` | core `allergy-passport`, `emergency-contacts` |
 | **Pollen / map** | `(tabs)/map.tsx` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `location-service`, `place-service` | core pollen*, `hourly-series`; API `pollen.ts`, `maps.ts`; comps `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
@@ -124,7 +125,8 @@ src/modules/marketplace/
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
 | `(tabs)/home.tsx` | Dashboard / wellness / home-insights |
-| `(tabs)/diary.tsx` | Дневник + clinical cards |
+| `(tabs)/diary.tsx` | Дневник + observation modules |
+| `clinical-scales.tsx` | Клинические шкалы |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |
 | `(tabs)/market.tsx` | Safe-product marketplace |
@@ -243,7 +245,7 @@ Barrel: `index.ts`. Pure TS.
 | Profiles | `profile-*`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding` |
 | Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `voice-diary`, `home-insights` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
-| Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales` |
+| Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `wellness-display`, `diary-wizard-route` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
 | Pollen / geo | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map` |
 | Sync / crypto | `sync`, `crypto` |

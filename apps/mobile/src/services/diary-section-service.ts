@@ -40,7 +40,7 @@ function parseScanMatchIds(raw: string): string[] {
   return parseScanHistoryMatchLabels(raw);
 }
 
-function findRecentFoodScan(profileId: number): FoodDrugScanRef | null {
+export function findRecentFoodScanForProfile(profileId: number): FoodDrugScanRef | null {
   const scans = listScanHistory(profileId);
   const recentFoodScan = scans.find((scan) => scan.mode === 'product' || scan.mode === 'menu');
   if (!recentFoodScan) return null;
@@ -97,7 +97,7 @@ export async function buildDiarySectionEditorState(input: {
   if (sectionType === 'Питание' && profileId) {
     const allergies = parseAllergies(profileAllergiesJson);
     const registry = getFoodDrugRegistry(profileId);
-    const scanRef = findRecentFoodScan(profileId);
+    const scanRef = findRecentFoodScanForProfile(profileId);
     const prefill = buildFoodPrefill(allergies, registry, scanRef);
     return { mode: 'section', sectionType, prefill: { Питание: prefill } };
   }

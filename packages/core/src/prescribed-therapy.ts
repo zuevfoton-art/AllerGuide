@@ -255,6 +255,58 @@ export function isPrescribedReminderConfigured(course: PrescribedCourse | null):
   return getPrescribedReminderTimes(course).length > 0;
 }
 
+export interface NextPrescribedIntake {
+  at: Date;
+  hour: number;
+  minute: number;
+}
+
+function parseCourseDateBoundary(value: string, endOfDay: boolean): Date | null {
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (!year || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const boundary = new Date(year, month - 1, day);
+  if (endOfDay) boundary.setHours(23, 59, 59, 999);
+  else boundary.setHours(0, 0, 0, 0);
+  return boundary;
+}
+
+/**
+ * Next scheduled intake from reminder times. Respects course start/end dates.
+ * Returns null when the course is inactive, has no times, or the window has ended.
+ */
+export function computeNextPrescribedIntake(
+  course: PrescribedCourse | null,
+  now: Date = new Date(),
+): NextPrescribedIntake | null {
+  if (!isPrescribedCourseConfigured(course)) return null;
+  const times = getPrescribedReminderTimes(course);
+  if (!times.length) return null;
+
+  const start = course.startDate ? parseCourseDateBoundary(course.startDate, false) : null;
+  const end = course.endDate ? parseCourseDateBoundary(course.endDate, true) : null;
+  if (end && now.getTime() > end.getTime()) return null;
+
+  const searchFrom = start && now.getTime() < start.getTime() ? start : now;
+
+  for (let dayOffset = 0; dayOffset <= 1; dayOffset += 1) {
+    for (const time of times) {
+      const candidate = new Date(searchFrom);
+      candidate.setDate(searchFrom.getDate() + dayOffset);
+      candidate.setHours(time.hour, time.minute, 0, 0);
+      if (candidate.getTime() <= now.getTime()) continue;
+      if (end && candidate.getTime() > end.getTime()) continue;
+      if (start && candidate.getTime() < start.getTime()) continue;
+      return { at: candidate, hour: time.hour, minute: time.minute };
+    }
+  }
+
+  return null;
+}
+
 export function formatPrescribedReminderTime(hour: number, minute = 0): string {
   const h = String(clampReminderHour(hour)).padStart(2, '0');
   const m = String(clampReminderMinute(minute)).padStart(2, '0');

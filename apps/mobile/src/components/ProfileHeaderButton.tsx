@@ -14,12 +14,15 @@ type ProfileHeaderButtonProps = {
   variant?: 'icon' | 'chip';
   chipTitle?: string;
   chipDetail?: string;
+  /** `hub` opens profile management; `switcher` keeps the quick switch sheet. */
+  destination?: 'switcher' | 'hub';
 };
 
 export function ProfileHeaderButton({
   variant = 'icon',
   chipTitle,
   chipDetail,
+  destination = 'switcher',
 }: ProfileHeaderButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -47,13 +50,21 @@ export function ProfileHeaderButton({
     router.push('/profile-setup?mode=add');
   };
 
+  const openTrigger = () => {
+    if (destination === 'hub') {
+      router.push('/profile');
+      return;
+    }
+    setOpen(true);
+  };
+
   return (
     <>
       {variant === 'chip' && chipTitle ? (
         <Pressable
           testID="profile-header-chip"
           style={styles.chip}
-          onPress={() => setOpen(true)}
+          onPress={openTrigger}
           accessibilityRole="button"
           accessibilityLabel={t('profileSwitcher.switchTitle')}>
           <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
@@ -73,9 +84,11 @@ export function ProfileHeaderButton({
         <Pressable
           testID="profile-header-button"
           style={styles.button}
-          onPress={() => setOpen(true)}
+          onPress={openTrigger}
           accessibilityRole="button"
-          accessibilityLabel={t('profileSwitcher.switchTitle')}>
+          accessibilityLabel={
+            destination === 'hub' ? t('profiles.title') : t('profileSwitcher.switchTitle')
+          }>
           <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
         </Pressable>
       )}
@@ -139,6 +152,16 @@ export function ProfileHeaderButton({
                 })}
               </ScrollView>
             )}
+            <Pressable
+              style={styles.manageRow}
+              onPress={() => {
+                setOpen(false);
+                router.push('/profile');
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={t('profileSwitcher.manage')}>
+              <Text style={styles.manageText}>{t('profileSwitcher.manage')}</Text>
+            </Pressable>
           </Pressable>
         </Pressable>
       </Modal>
@@ -255,5 +278,17 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.accent,
     },
     optionSpacer: { width: 18 },
+    manageRow: {
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    manageText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
+    },
   });
 }

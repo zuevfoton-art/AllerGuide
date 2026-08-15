@@ -28,10 +28,13 @@ import {
   validateClinicalScale,
   validateDiarySection,
   validateDiarySectionStep,
+  attachDiaryAutoMetadata,
+  type DiaryAutoMetadata,
   type DiarySection,
   type DiaryStep,
   type PefZone,
 } from '@allerguide/core';
+import { DateTimeField } from '@/src/components/DateTimeField';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
@@ -64,6 +67,8 @@ interface DiaryWizardProps {
   planPersonalBestPef?: number | null;
   /** JSON allergies from active profile — used for dish component conflict warnings. */
   profileAllergiesJson?: string;
+  /** Hidden pollen/scan/meds metadata merged on save. */
+  autoMetadata?: DiaryAutoMetadata;
 }
 
 export function DiaryWizard({
@@ -77,6 +82,7 @@ export function DiaryWizard({
   drugIntolerances,
   planPersonalBestPef,
   profileAllergiesJson = '[]',
+  autoMetadata,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -348,10 +354,11 @@ export function DiaryWizard({
       }
 
       const photoUris = getDiaryPhotoUrisFromAnswers(answers);
+      const withAuto = attachDiaryAutoMetadata(answers, autoMetadata ?? {});
       return [
         {
           type: item.type,
-          details: encodeDiaryDetails(answers, item.type),
+          details: encodeDiaryDetails(withAuto, item.type),
           photoUris: photoUris.length ? photoUris : undefined,
         },
       ];
@@ -767,6 +774,19 @@ function StepField({
           <Text style={styles.photoEmpty}>{t('diaryWizard.photoEmpty')}</Text>
         )}
       </View>
+    );
+  }
+
+  if (step.field === 'time' || step.field === 'datetime') {
+    return (
+      <DateTimeField
+        label={step.label}
+        value={value}
+        mode={step.field}
+        placeholder={step.placeholder}
+        onChange={onChange}
+        testID={`diary-field-${step.id}`}
+      />
     );
   }
 

@@ -6,7 +6,25 @@ import { formatFoodEntrySummary, formatMedicineEntrySummary } from './food-drug-
 import { formatInsectStingEntrySummary } from './insect-allergy';
 import { buildPrescribedTherapyDiarySummary } from './prescribed-therapy';
 
-export type DiaryStepField = 'text' | 'choice' | 'photo' | 'checklist';
+export type DiaryStepField = 'text' | 'choice' | 'photo' | 'checklist' | 'time' | 'datetime';
+
+/** Auto/duplicate steps: collected on save, never shown in the full wizard or history. */
+export const DIARY_AUTO_STEP_IDS = new Set([
+  'symptomAreas',
+  'intoleranceAlert',
+  'sideEffectSeverity',
+  'effect',
+  'pollenContext',
+  'recentScan',
+  'todayMeds',
+  'scanRef',
+]);
+
+export const DIARY_HISTORY_HIDDEN_TYPES = new Set(['Шкала']);
+
+export function isDiaryHistoryVisible(type: string): boolean {
+  return !DIARY_HISTORY_HIDDEN_TYPES.has(type);
+}
 
 export interface DiaryStep {
   id: string;
@@ -155,8 +173,8 @@ export const DIARY_SECTIONS: DiarySection[] = [
       {
         id: 'takenAt',
         label: 'Время приёма',
-        placeholder: 'Например: 08:30',
-        field: 'text',
+        placeholder: 'Выберите время',
+        field: 'time',
         required: false,
       },
       {
@@ -500,8 +518,8 @@ export const DIARY_SECTIONS: DiarySection[] = [
       {
         id: 'asitTakenAt',
         label: 'Дата и время приёма',
-        placeholder: '18 июня, 10:00',
-        field: 'text',
+        placeholder: 'Выберите дату и время',
+        field: 'datetime',
         required: true,
       },
       {
@@ -615,8 +633,8 @@ export const DIARY_SECTIONS: DiarySection[] = [
       {
         id: 'therapyTakenAt',
         label: 'Дата и время приёма',
-        placeholder: '18 июня, 10:00',
-        field: 'text',
+        placeholder: 'Выберите дату и время',
+        field: 'datetime',
         required: true,
       },
       {
@@ -778,6 +796,7 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
   return section.steps
     .map((step) => {
       if (step.field === 'photo') return null;
+      if (DIARY_AUTO_STEP_IDS.has(step.id)) return null;
       const value = structured.answers[step.id]?.trim();
       if (!value) return null;
       return `${step.label}: ${value}`;

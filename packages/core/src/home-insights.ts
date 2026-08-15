@@ -11,6 +11,7 @@ export type PlannedHomeInsightKind =
   | 'select-profile'
   | 'diary-missing-today'
   | 'act-due'
+  | 'therapy-reminder'
   | 'wellness'
   | 'phenotype';
 
@@ -30,6 +31,7 @@ export type PlanHomeInsightsInput = {
   enableActReminder: boolean;
   wellnessCount: number;
   phenotypeCount: number;
+  hasTherapyReminder?: boolean;
   now?: Date;
   maxItems?: number;
 };
@@ -58,6 +60,10 @@ export function planHomeInsights(input: PlanHomeInsightsInput): PlannedHomeInsig
 
   if (input.enableActReminder && shouldScheduleActReminder(input.diaryEntries, input.conditions)) {
     planned.push({ id: 'act-due', kind: 'act-due', priority: 2 });
+  }
+
+  if (input.hasTherapyReminder) {
+    planned.push({ id: 'therapy-reminder', kind: 'therapy-reminder', priority: 3 });
   }
 
   for (let index = 0; index < input.wellnessCount; index += 1) {
