@@ -1,0 +1,99 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/src/services/settings-service', () => ({
+  getLocale: vi.fn(() => 'ru'),
+}));
+
+vi.mock('@/src/services/error-reporting', () => ({
+  logCaughtError: vi.fn(),
+}));
+
+vi.mock('@/src/services/api-client', () => ({
+  apiRequest: vi.fn(),
+}));
+
+vi.mock('@/src/constants/features', () => ({
+  MAP_PLACES_ENABLED: true,
+}));
+
+const moscow = { latitude: 55.75, longitude: 37.62 };
+const london = { latitude: 51.5, longitude: -0.12 };
+
+beforeEach(async () => {
+  vi.resetModules();
+  const { apiRequest } = await import('@/src/services/api-client');
+  vi.mocked(apiRequest).mockReset();
+});
+
+describe('place-service', () => {
+  it('returns live nearby results without mixing catalog pins', async () => {
+    const { apiRequest } = await import('@/src/services/api-client');
+    vi.mocked(apiRequest).mockResolvedValue({
+      ok: true,
+      data: {
+        places: [
+          {
+            id: 'google:p1',
+            title: 'Аптека',
+            note: 'Москва',
+            category: 'pharmacy',
+            lat: 55.75,
+            lng: 37.62,
+            level: 'medium',
+            icon: 'medkit',
+            tags: ['pharmacy'],
+            source: 'google-places',
+            allergySafety: 'unknown',
+          },
+        ],
+      },
+    } as never);
+
+    const { searchMapPlaces } = await import('./place-service');
+    const result = await searchMapPlaces(null, moscow, ['pharmacy']);
+    expect(result.source).toBe('google-places');
+    expect(result.pois).toHaveLength(1);
+    expect(result.pois[0]?.allergySafety).toBe('unknown');
+  });
+
+  it('keeps an empty live result empty instead of injecting Moscow catalog', async () => {
+    const { apiRequest } = await import('@/src/services/api-client');
+    vi.mocked(apiRequest).mockResolvedValue({
+      ok: true,
+      data: { places: [] },
+    } as never);
+
+    const { searchMapPlaces } = await import('./place-service');
+    const result = await searchMapPlaces(null, moscow, ['restaurant']);
+    expect(result.liveEmpty).toBe(true);
+    expect(result.pois).toEqual([]);
+  });
+
+  it('does not show Moscow catalog pins when the origin is outside the region', async () => {
+    vi.doMock('@/src/constants/features', () => ({
+      MAP_PLACES_ENABLED: false,
+    }));
+    const { searchMapPlaces } = await import('./place-service');
+    const result = await searchMapPlaces(null, london, ['restaurant', 'cafe']);
+    expect(result.pois.every((poi) => poi.source !== 'catalog')).toBe(true);
+  });
+
+  it('passes locale and categories to text search', async () => {
+    vi.doMock('@/src/constants/features', () => ({
+      MAP_PLACES_ENABLED: true,
+    }));
+    const { apiRequest } = await import('@/src/services/api-client');
+    vi.mocked(apiRequest).mockResolvedValue({
+      ok: true,
+      data: { places: [] },
+    } as never);
+
+    const { searchLiveMapPlaces } = await import('./place-service');
+    await searchLiveMapPlaces(moscow, 'аптека', ['pharmacy']);
+    expect(apiRequest).toHaveBeenCalledWith(
+      expect.stringContaining('/api/places/search?q=%D0%B0%D0%BF%D1%82%D0%B5%D0%BA%D0%B0'),
+    );
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining('categories=pharmacy'));
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining('lang=ru'));
+  });
+});

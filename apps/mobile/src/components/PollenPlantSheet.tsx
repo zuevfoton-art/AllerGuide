@@ -4,6 +4,7 @@ import {
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_TYPE_GROUP_BY_TAXON,
   type PollenPlantDetail,
+  type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -11,9 +12,10 @@ import { POLLEN_TYPE_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 
 interface PollenPlantSheetProps {
   detail: PollenPlantDetail | null;
+  upi?: PollenUpiSnapshot | null;
 }
 
-export function PollenPlantSheet({ detail }: PollenPlantSheetProps) {
+export function PollenPlantSheet({ detail, upi }: PollenPlantSheetProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
@@ -30,9 +32,15 @@ export function PollenPlantSheet({ detail }: PollenPlantSheetProps) {
   const isGoogleOnlyTaxon = !(OPEN_METEO_POLLEN_MAP_TAXON_IDS as readonly string[]).includes(
     detail.taxonId,
   );
+  const groupHintKey =
+    typeGroup === 'GRASS'
+      ? 'map.pollenHeatmapGrassHint'
+      : typeGroup === 'WEED'
+        ? 'map.pollenHeatmapWeedHint'
+        : 'map.pollenHeatmapTreeHint';
 
   return (
-    <View style={styles.card}>
+    <View style={styles.card} testID="pollen-plant-sheet">
       {detail.pictureUrl ? (
         <Image
           source={{ uri: detail.pictureUrl }}
@@ -48,9 +56,28 @@ export function PollenPlantSheet({ detail }: PollenPlantSheetProps) {
           </Text>
         ) : null}
       </View>
+      {typeof detail.inSeason === 'boolean' ? (
+        <Text style={styles.meta}>
+          {detail.inSeason ? t('map.plantInSeason') : t('map.plantOutOfSeason')}
+        </Text>
+      ) : null}
+      {upi ? (
+        <Text style={styles.meta}>
+          {t('map.upiTitle')}: {upi.index}/5
+          {upi.category ? ` · ${upi.category}` : ''}
+        </Text>
+      ) : (
+        <Text style={styles.meta}>{t('map.plantNoLiveData')}</Text>
+      )}
+      {detail.indexDescription ? (
+        <Text style={styles.body}>
+          {t('map.plantIndexDescription')}: {detail.indexDescription}
+        </Text>
+      ) : null}
       {isGoogleOnlyTaxon ? (
         <Text style={styles.meta}>{t('map.pollenGoogleOnlyHint')}</Text>
       ) : null}
+      <Text style={styles.meta}>{t(groupHintKey)}</Text>
       {detail.family ? (
         <Text style={styles.meta}>
           {t('map.plantFamily')}: {detail.family}
@@ -66,6 +93,11 @@ export function PollenPlantSheet({ detail }: PollenPlantSheetProps) {
       ) : null}
       {detail.specialShapes ? (
         <Text style={styles.body}>{detail.specialShapes}</Text>
+      ) : null}
+      {detail.healthRecommendations?.length ? (
+        <Text style={styles.body}>
+          {t('map.plantHealthRecommendation')}: {detail.healthRecommendations.join(' ')}
+        </Text>
       ) : null}
       {detail.crossReactionNote || detail.crossReactionLabels.length > 0 ? (
         <View style={styles.crossBlock}>

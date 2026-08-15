@@ -4,10 +4,13 @@ import type { PollenMapTaxonId, PollenTierLevel } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
+export type MapAllergenDataStatus = 'live' | 'google-only' | 'none';
+
 export interface MapAllergenChipItem {
   taxonId: PollenMapTaxonId;
   level?: PollenTierLevel | null;
   profileRelevant?: boolean;
+  dataStatus?: MapAllergenDataStatus;
 }
 
 interface MapAllergenChipsProps {

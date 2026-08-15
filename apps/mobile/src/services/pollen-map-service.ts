@@ -9,6 +9,7 @@ import {
   parseDailyPollenForecast,
   parseProfileAllergenIds,
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
+  POLLEN_MAP_TAXON_IDS,
   POLLEN_OPEN_METEO_FORECAST_DAYS,
   type GoogleForecastDayInput,
   type NearbyPollenLocation,
@@ -361,6 +362,12 @@ function buildPlantsMap(
   const plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>> = {
     ...(googlePlants ?? {}),
   };
+
+  for (const taxonId of POLLEN_MAP_TAXON_IDS) {
+    if (!plants[taxonId]) {
+      plants[taxonId] = buildPollenPlantDetail(taxonId);
+    }
+  }
 
   for (const reading of readings) {
     if (!plants[reading.taxonId]) {
