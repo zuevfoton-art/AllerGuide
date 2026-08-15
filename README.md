@@ -14,6 +14,7 @@
 | [`docs/git-bash-roadmap.md`](docs/git-bash-roadmap.md) | Git Bash: milestones, issues, ветки, PR |
 | [`docs/android-local-build.md`](docs/android-local-build.md) | Локальная сборка Android (Node.js + Gradle) и проверка в Android Studio |
 | [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md) | Облачная сборка (EAS) для internal alpha |
+| [`docs/gtm/`](docs/gtm/) | GTM: OKR, one-pager, doctor brief, press kit (A-Claro) |
 | [`AGENTS.md`](AGENTS.md) | Команды, env, инструкции для агентов |
 
 ## Стек

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A-Claro — Бриф для врача</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="gtm-styles.css" />
+  <style>
+    @page { size: A4 portrait; margin: 16mm; }
+    body { padding: 0; }
+    .page {
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 16mm;
+      background: #fff;
+      page-break-after: always;
+    }
+    .page:last-child { page-break-after: auto; }
+    @media screen {
+      body { padding: 24px; background: var(--bg); }
+      .page { box-shadow: 0 4px 24px rgba(15,23,42,.08); border-radius: 8px; margin-bottom: 24px; }
+    }
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--head);
+    }
+    .doc-title { font-family: var(--serif); font-size: 22px; color: var(--head); margin-top: 8px; }
+    .doc-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    h2 {
+      font-size: 14px;
+      color: var(--head);
+      margin: 20px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 13px; color: var(--head); margin: 14px 0 6px; }
+    p, li { font-size: 13px; color: #334155; line-height: 1.55; }
+    ul { padding-left: 20px; margin: 8px 0; }
+    li { margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+    th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--bg); color: var(--head); font-weight: 600; }
+    .highlight-box {
+      background: var(--accent-light);
+      border: 1px solid #9fd9d1;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .highlight-box strong { color: var(--head); }
+    .recommend-block {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 8px;
+    }
+    .page-num { text-align: center; font-size: 11px; color: var(--muted); margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <p class="no-print" style="text-align:center;padding:12px;color:#64748b;font-size:13px;">
+    Бриф для врачей · A-Claro v1.0.4 · OKR O1 · <kbd>Ctrl+P</kbd> → PDF
+  </p>
+
+  <article class="page">
+    <header class="doc-header">
+      <div>
+        <div class="wordmark">
+          <img src="../brand/logo-mark.svg" width="40" height="40" alt="" />
+          <div>
+            <div class="wordmark-text">A-Claro</div>
+            <span style="font-size:11px;font-weight:600;color:var(--accent);">приложение Aclearo</span>
+          </div>
+          <span class="badge badge-adair">АДАИР</span>
+        </div>
+        <h1 class="doc-title">A-Claro для практикующего аллерголога</h1>
+        <p class="doc-subtitle">Дневник, сканер, карта пыльцы/мест, SOS-паспорт, PDF для приёма · v1.0.4</p>
+      </div>
+      <div class="qr-placeholder">QR для<br />пациента</div>
+    </header>
+
+    <div class="highlight-box">
+      <strong>Кратко:</strong> A-Claro — мобильное приложение Aclearo (iOS, Android; Web с ограничениями).
+      Помогает пациентам вести структурированные наблюдения, проверять продукты, смотреть пыльцу и качество воздуха,
+      пользоваться картой клиник АДАИР и формировать PDF для визита.
+      <strong>Не ставит диагноз</strong> и <strong>не заменяет назначения</strong>. Offline-first.
+      Экспертный контент АДАИР; научный руководитель направления — д.м.н., проф. Ю.С. Смолкин.
+    </div>
+
+    <h2>Зачем рекомендовать пациенту</h2>
+    <ul>
+      <li><strong>Дневник</strong> — адаптивный wizard; шкалы ACT / ARIA / SCORAD / UAS7 на отдельном экране; АСИТ и терапия по назначению с напоминаниями</li>
+      <li><strong>PDF-отчёт</strong> — 7 / 14 / 30 дней или произвольный период; блоки по профилю; ICD-11 / SNOMED; timeline</li>
+      <li><strong>SOS-паспорт</strong> — экстренный экран без отвлечений; emergency card даже при блокировке приложения</li>
+      <li><strong>Сканер</strong> — 4 режима; риск с учётом primary и перекрёстных аллергенов</li>
+      <li><strong>Карта</strong> — UPI пыльцы, UAQI, места и клиники АДАИР; CTA «клиники рядом» при высокой пыльце</li>
+      <li><strong>Offline-first</strong> — ядро на устройстве</li>
+    </ul>
+
+    <h2>Клинические возможности</h2>
+    <table>
+      <thead>
+        <tr><th>Модуль</th><th>Что есть сейчас</th><th>Ценность на приёме</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Дневник</strong></td>
+          <td>Симптомы 0–3, питание (компоненты), лекарства, триггеры, кожа+фото, ПСВ, укус, АСИТ, визит, заметка; голос STT; шкалы вне ленты</td>
+          <td>Структурированная история; корреляции; ACT-prompt при астме</td>
+        </tr>
+        <tr>
+          <td><strong>PDF</strong></td>
+          <td>Период + блоки; timeline; коды; хронология/фенотипы профиля при наличии; брендинг A-Claro</td>
+          <td>Экономия времени приёма</td>
+        </tr>
+        <tr>
+          <td><strong>Сканер</strong></td>
+          <td>Штрихкод OFF + текст/OCR-режимы; direct / cross / traces</td>
+          <td>Снижение случайного контакта; не заменяет пробы</td>
+        </tr>
+        <tr>
+          <td><strong>Wellness / карта</strong></td>
+          <td>Индекс 0–100 (понятный язык на главной); UPI 0–5; UAQI; 17 taxa picker</td>
+          <td>Контекст среды к симптомам пациента</td>
+        </tr>
+        <tr>
+          <td><strong>SOS</strong></td>
+          <td>Паспорт, адреналин, анафилаксия 1–3, контакты, 103; edit из профиля</td>
+          <td>Готовность в экстренной ситуации</td>
+        </tr>
+        <tr>
+          <td><strong>Профиль</strong></td>
+          <td>10 типов; canonical ids; confirmedBy; коморбидность; gating модулей по явным типам</td>
+          <td>Персонализация без ложных модулей</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="page-num">1 / 3</p>
+  </article>
+
+  <article class="page">
+    <h2>Навигация (6 вкладок)</h2>
+    <table>
+      <thead><tr><th>Вкладка</th><th>Содержание</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Главная</strong></td><td>Сводка самочувствия (2 слоя), рекомендации простым языком, быстрые действия, бренд-header A-Claro</td></tr>
+        <tr><td><strong>Дневник</strong></td><td>Новая / короткая запись, история, модули наблюдения, визит, клинические шкалы</td></tr>
+        <tr><td><strong>Сканер</strong></td><td>4 режима + история / «безопасные»</td></tr>
+        <tr><td><strong>Маркет</strong></td><td>Каталог + deep-link Яндекс Маркет (не checkout в приложении)</td></tr>
+        <tr><td><strong>Карта</strong></td><td>Пыльца / Места / Оба; UPI; UAQI; поиск мест; АДАИР POI</td></tr>
+        <tr><td><strong>SOS</strong></td><td>Только экстренный просмотр</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--muted);">«Эксперт» (АДАИР) — отдельный экран, не вкладка. Управление профилем — иконка профиля.</p>
+
+    <h2>Как рекомендовать</h2>
+    <ol style="padding-left:20px;font-size:13px;color:#334155;">
+      <li style="margin-bottom:6px;">QR или one-pager пациента (A-Claro)</li>
+      <li style="margin-bottom:6px;">Профиль с актуальными типами и аллергенами</li>
+      <li style="margin-bottom:6px;">«Принесите PDF за 14–30 дней на следующий визит»</li>
+      <li style="margin-bottom:6px;">Для детей — заполнить SOS-паспорт (адреналин, контакты)</li>
+    </ol>
+
+    <h2>Ограничения (озвучить пациенту)</h2>
+    <ul>
+      <li>Сканер и OCR — <strong>предварительные</strong>; возможны следы / индивидуальная реакция</li>
+      <li>PDF — <strong>не медицинская документация</strong></li>
+      <li>Индекс и UPI/UAQI — ориентир, не клинический вердикт</li>
+      <li>Маркет — подборка и партнёрские ссылки, не назначение</li>
+      <li>Экспертный контент АДАИР — справочный</li>
+    </ul>
+    <p class="page-num">2 / 3</p>
+  </article>
+
+  <article class="page">
+    <h2>Техническая информация</h2>
+    <table>
+      <tbody>
+        <tr><th style="width:160px;">Продукт</th><td><strong>A-Claro</strong> · Aclearo · v1.0.4</td></tr>
+        <tr><th>Платформы</th><td>iOS, Android; Web (без камеры штрихкодов)</td></tr>
+        <tr><th>Данные</th><td>SQLite / IndexedDB; опциональный encrypted sync (flag)</td></tr>
+        <tr><th>Языки</th><td>RU, EN, ES, FR, DE, IT</td></tr>
+        <tr><th>Интеграции</th><td>Open Food Facts, Open-Meteo, Google Pollen/AQ/Places (keys), Яндекс карты/Маркет</td></tr>
+        <tr><th>Сайт / API</th><td>aclearo.com · api.aclearo.com</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Контакты</h2>
+    <table>
+      <tbody>
+        <tr><th style="width:160px;">Пациенты</th><td>support@aclearo.com</td></tr>
+        <tr><th>Врачи / клиники</th><td>partners@aclearo.com</td></tr>
+        <tr><th>АДАИР в приложении</th><td>Карта → medical POI · раздел «Эксперт»</td></tr>
+      </tbody>
+    </table>
+
+    <div class="recommend-block">
+      <div>
+        <h3 style="margin-top:0;">Рекомендуйте A-Claro</h3>
+        <p style="font-size:12px;color:var(--muted);">
+          QR на ресепшене или one-pager. Целевой OKR: доля referral installs из клиник ≥25% на soft launch.
+        </p>
+      </div>
+      <div class="qr-placeholder">QR<br />скачивания</div>
+    </div>
+
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong> A-Claro — информационный помощник. Не для диагностики и лечения.
+      Упоминание проф. Смолкина и АДАИР требует co-marketing соглашения и не означает endorsement каждой функции.
+    </div>
+
+    <footer style="margin-top:24px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div class="wordmark">
+        <img src="../brand/logo-mark.svg" width="32" height="32" alt="" />
+        <div class="wordmark-text" style="font-size:18px;">A-Claro</div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);">© Aclearo · Claro Green · v1.0.4</p>
+    </footer>
+    <p class="page-num">3 / 3</p>
+  </article>
+</body>
+</html>
