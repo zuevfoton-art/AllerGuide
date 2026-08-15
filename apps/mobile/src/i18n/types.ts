@@ -44,6 +44,8 @@ export type LocaleMessages = {
     productName: string;
     /** Co-brand lockup under wordmark, e.g. «приложение Aclearo» */
     endorser: string;
+    /** Centered header slogan, e.g. «Aclearo — когда важна ясность» */
+    slogan: string;
   };
   errorBoundary: {
     title: string;
@@ -128,6 +130,8 @@ export type LocaleMessages = {
     deleteAccountTitle: string;
     deleteAccountMessage: string;
     deleteAccountConfirm: string;
+    sosPassport: string;
+    sosContacts: string;
   };
   theme: {
     title: string;
@@ -194,6 +198,12 @@ export type LocaleMessages = {
     insightsActText: string;
     insightsOpenAct: string;
     insightsOpenProfile: string;
+    insightsTherapyTitle: string;
+    insightsTherapyText: string;
+    insightsOpenTherapy: string;
+    wellnessDetails: string;
+    wellnessHideDetails: string;
+    primaryFactorLabel: string;
   };
   diary: {
     title: string;
@@ -235,6 +245,16 @@ export type LocaleMessages = {
     trendsTitle: string;
     heatmapTitle: string;
     temporalCorrelationTitle: string;
+    modulesTitle: string;
+    doctorVisit: string;
+    clinicalScalesOpen: string;
+    timePlaceholder: string;
+    dateTimePlaceholder: string;
+  };
+  clinicalScales: {
+    title: string;
+    subtitle: string;
+    eyebrow: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -676,6 +696,8 @@ export type LocaleMessages = {
     appLockHint: string;
     appLockEnable: string;
     appLockDisable: string;
+    appLockEmergency: string;
+    appLockEmergencyHint: string;
     aboutTitle: string;
     aboutHint: string;
   };
@@ -1003,6 +1025,7 @@ export type LocaleMessages = {
     reminderMinute: string;
     reminderHint: string;
     reminderAt: string;
+    reminderTime: string;
     reviewTitle: string;
     reviewConfirm: string;
   };
@@ -1067,6 +1090,9 @@ export type LocaleMessages = {
     reviewConfirm: string;
     notesLabel: string;
     notesPlaceholder: string;
+    nextDose: string;
+    activePeriod: string;
+    statusActive: string;
   };
   insect: {
     title: string;
@@ -1285,6 +1311,21 @@ export type LocaleMessages = {
       high: string;
       medium: string;
       low: string;
+    };
+    verbal: {
+      none: string;
+      low: string;
+      moderate: string;
+      high: string;
+      unknown: string;
+    };
+    primaryFactor: {
+      pollen: string;
+      air: string;
+      diary: string;
+      clinical: string;
+      asit: string;
+      none: string;
     };
   };
   errors: {

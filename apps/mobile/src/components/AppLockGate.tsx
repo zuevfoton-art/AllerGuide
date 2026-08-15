@@ -1,6 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { AppState, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { parseAllergies } from '@allerguide/core';
 import { isAppLockEnabled, requireAppUnlock } from '@/src/services/app-lock-service';
+import { getEmergencyNumber, listEmergencyContacts } from '@/src/services/sos-service';
+import { useAppStore } from '@/src/store/app-store';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { fontSizes } from '@/src/constants/typography';
@@ -14,11 +17,17 @@ export function AppLockGate({ children }: Props) {
   const { t } = useTranslation();
   const styles = createStyles(theme);
   const [locked, setLocked] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
   const lockReason = t('settings.appLockTitle');
+  const profile = useAppStore((s) => s.activeProfile);
+  const allergies = profile ? parseAllergies(profile.allergies) : [];
+  const emergencyNumber = getEmergencyNumber();
+  const firstContact = profile ? listEmergencyContacts(profile.id)[0] : null;
 
   const tryUnlock = async () => {
     const ok = await requireAppUnlock(lockReason);
     setLocked(!ok);
+    if (ok) setEmergencyOpen(false);
   };
 
   useEffect(() => {
@@ -34,6 +43,7 @@ export function AppLockGate({ children }: Props) {
       if (state === 'active' && backgrounded && isAppLockEnabled()) {
         backgrounded = false;
         setLocked(true);
+        setEmergencyOpen(false);
         void requireAppUnlock(lockReason).then((ok) => setLocked(!ok));
       }
     });
@@ -47,11 +57,46 @@ export function AppLockGate({ children }: Props) {
     <View style={styles.root}>
       {children}
       <View style={styles.overlay} testID="app-lock-overlay">
-        <Text style={styles.title}>{t('settings.appLockTitle')}</Text>
-        <Text style={styles.hint}>{t('settings.appLockHint')}</Text>
-        <Pressable style={styles.button} onPress={() => void tryUnlock()} testID="app-lock-unlock">
-          <Text style={styles.buttonText}>{t('settings.appLockEnable')}</Text>
-        </Pressable>
+        {emergencyOpen ? (
+          <>
+            <Text style={styles.title}>{t('settings.appLockEmergency')}</Text>
+            <Text style={styles.hint}>{t('settings.appLockEmergencyHint')}</Text>
+            {profile ? <Text style={styles.meta}>{profile.name}</Text> : null}
+            {allergies.length ? <Text style={styles.meta}>{allergies.join(', ')}</Text> : null}
+            <Pressable
+              style={styles.button}
+              onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}
+              testID="app-lock-call-emergency">
+              <Text style={styles.buttonText}>{t('sos.call', { number: emergencyNumber })}</Text>
+            </Pressable>
+            {firstContact ? (
+              <Pressable
+                style={styles.secondary}
+                onPress={() => void Linking.openURL(`tel:${firstContact.phone.replace(/\s/g, '')}`)}>
+                <Text style={styles.secondaryText}>
+                  {t('sos.callContact')}: {firstContact.name}
+                </Text>
+              </Pressable>
+            ) : null}
+            <Pressable style={styles.secondary} onPress={() => setEmergencyOpen(false)}>
+              <Text style={styles.secondaryText}>{t('common.back')}</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Text style={styles.title}>{t('settings.appLockTitle')}</Text>
+            <Text style={styles.hint}>{t('settings.appLockHint')}</Text>
+            <Pressable style={styles.button} onPress={() => void tryUnlock()} testID="app-lock-unlock">
+              <Text style={styles.buttonText}>{t('settings.appLockEnable')}</Text>
+            </Pressable>
+            <Pressable
+              style={styles.secondary}
+              onPress={() => setEmergencyOpen(true)}
+              testID="app-lock-emergency">
+              <Text style={styles.secondaryText}>{t('settings.appLockEmergency')}</Text>
+            </Pressable>
+          </>
+        )}
       </View>
     </View>
   );
@@ -80,6 +125,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       textAlign: 'center',
     },
+    meta: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.body,
+      color: colors.head,
+      textAlign: 'center',
+    },
     button: {
       marginTop: 8,
       backgroundColor: colors.accent,
@@ -91,6 +142,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
       color: '#fff',
+      fontWeight: '600',
+    },
+    secondary: {
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
+    secondaryText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.bodySm,
+      color: colors.accent,
       fontWeight: '600',
     },
   });

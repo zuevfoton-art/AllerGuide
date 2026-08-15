@@ -517,7 +517,7 @@ export default function AsitCourseScreen() {
         label={t('asit.reviewTitle')}
         variant="primary"
         block
-        disabled={!course.allergen.trim() || !course.drug.trim()}
+        disabled={!course.allergen.trim() || !course.drug.trim() || !course.startDate.trim()}
         onPress={goToNextFromForm}
       />
 
@@ -718,47 +718,27 @@ function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, remi
         </View>
 
         {reminderEnabled ? (
-          <View style={styles.reminderRow}>
-            <View style={styles.reminderField}>
-              <Text style={styles.reminderFieldLabel}>{t('asit.reminderHour')}</Text>
-              <TextInput
-                style={styles.input}
-                value={String(course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR)}
-                onChangeText={(value) => {
-                  const hour = Number(value.replace(/\D/g, ''));
-                  if (!Number.isFinite(hour)) return;
-                  setCourse((prev) => ({ ...prev, reminderHour: Math.min(23, Math.max(0, hour)) }));
-                }}
-                keyboardType="number-pad"
-                maxLength={2}
-                placeholderTextColor={theme.colors.textMuted}
-              />
-            </View>
-            <View style={styles.reminderField}>
-              <Text style={styles.reminderFieldLabel}>{t('asit.reminderMinute')}</Text>
-              <TextInput
-                style={styles.input}
-                value={String(course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE)}
-                onChangeText={(value) => {
-                  const minute = Number(value.replace(/\D/g, ''));
-                  if (!Number.isFinite(minute)) return;
-                  setCourse((prev) => ({
-                    ...prev,
-                    reminderMinute: Math.min(59, Math.max(0, minute)),
-                  }));
-                }}
-                keyboardType="number-pad"
-                maxLength={2}
-                placeholderTextColor={theme.colors.textMuted}
-              />
-            </View>
-            <Text style={styles.reminderPreview}>
-              {formatAsitReminderTime(
-                course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR,
-                course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE,
-              )}
-            </Text>
-          </View>
+          <DateTimeField
+            label={t('asit.reminderTime')}
+            mode="time"
+            placeholder={t('diary.timePlaceholder')}
+            value={formatAsitReminderTime(
+              course.reminderHour ?? DEFAULT_ASIT_REMINDER_HOUR,
+              course.reminderMinute ?? DEFAULT_ASIT_REMINDER_MINUTE,
+            )}
+            onChange={(time) => {
+              const [hourText, minuteText] = time.split(':');
+              const hour = Number(hourText);
+              const minute = Number(minuteText);
+              if (!Number.isFinite(hour) || !Number.isFinite(minute)) return;
+              setCourse((prev) => ({
+                ...prev,
+                reminderHour: Math.min(23, Math.max(0, hour)),
+                reminderMinute: Math.min(59, Math.max(0, minute)),
+              }));
+            }}
+            testID="asit-reminder-time"
+          />
         ) : (
           <Text style={styles.hint}>{t('asit.reminderHint')}</Text>
         )}

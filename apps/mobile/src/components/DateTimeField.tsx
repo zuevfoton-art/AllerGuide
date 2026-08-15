@@ -22,6 +22,7 @@ export interface DateTimeFieldProps {
   minYear?: number;
   maxYear?: number;
   testID?: string;
+  placeholder?: string;
 }
 
 const MONTHS_RU = [
@@ -94,6 +95,7 @@ export function DateTimeField({
   minYear = 1950,
   maxYear = new Date().getFullYear() + 5,
   testID,
+  placeholder,
 }: DateTimeFieldProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -123,7 +125,10 @@ export function DateTimeField({
     return Array.from({ length: max }, (_, i) => i + 1);
   }, [draft.year, draft.month]);
 
-  const display = formatDisplay(value, mode) || (mode === 'time' ? 'Выберите время' : 'Выберите дату');
+  const emptyLabel =
+    placeholder ??
+    (mode === 'time' ? 'Выберите время' : mode === 'datetime' ? 'Выберите дату и время' : 'Выберите дату');
+  const display = formatDisplay(value, mode) || emptyLabel;
 
   return (
     <View style={styles.wrap}>

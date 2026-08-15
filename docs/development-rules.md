@@ -71,9 +71,9 @@ apps/api        — HTTP-маршруты, Drizzle, интеграции (OFF, O
 | Экспертные статьи | `expert-content.ts` — id из `GINA_ASTHMA_EXPERT_ARTICLE_IDS`, упоминание GINA в body/tags |
 | Evidence registry | `evidence-registry.ts` — guideline `GINA`, citation `gina-asthma.ts` |
 
-**Запрещено:** произвольные пороги ACT/ПСВ в mobile или API; парсинг сайта GINA; встраивание PDF без лицензии.
+**Запрещено:** произвольные пороги ACT/ПСВ в mobile или API; парсинг сайта GINA; встраивание PDF без лицензии; пользовательские тексты главной, называющие ACT/ARIA/GINA (логика остаётся в core, copy — plain-language, `home-insights` + `wellness-display`).
 
-**Обязательно:** при новой астма-фиче — зарегистрировать id в `GINA_ASTHMA_FEATURE_IDS`, добавить тест в `gina-asthma.test.ts`, обновить evidence при изменении порогов.
+**Обязательно:** при новой астма-фиче — зарегистрировать id в `GINA_ASTHMA_FEATURE_IDS`, добавить тест в `gina-asthma.test.ts`, обновить evidence при изменении порогов. Пользовательский ввод шкал — экран `/clinical-scales`, не полный wizard дневника.
 
 ---
 

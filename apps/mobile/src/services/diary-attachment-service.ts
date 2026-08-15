@@ -84,13 +84,16 @@ function blobToDataUrl(blob: Blob): Promise<string> {
 }
 
 export async function replaceDiaryPhotos(entryId: number, sourceUris: string[]): Promise<void> {
+  const limited = sourceUris.slice(0, MAX_PHOTOS);
+  const persistedPaths = await Promise.all(
+    limited.map((sourceUri, index) => persistPhotoFile(sourceUri, entryId, index)),
+  );
+
   await deleteDiaryAttachmentsForEntry(entryId);
   const db = getDb();
-  const limited = sourceUris.slice(0, MAX_PHOTOS);
   const now = new Date().toISOString();
 
-  for (let i = 0; i < limited.length; i += 1) {
-    const localPath = await persistPhotoFile(limited[i], entryId, i);
+  for (const localPath of persistedPaths) {
     db.runSync(
       'INSERT INTO diary_attachments (entryId, kind, localPath, createdAt) VALUES (?, ?, ?, ?)',
       [entryId, 'photo', localPath, now],

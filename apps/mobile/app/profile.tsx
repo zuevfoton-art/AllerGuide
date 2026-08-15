@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies, type Profile } from '@allerguide/core';
 import { deleteProfile, listProfiles } from '@/src/services/profile-service';
 import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
+import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
@@ -52,17 +53,16 @@ export default function ProfileScreen() {
   );
 
   const confirmDelete = (id: number, name: string) => {
-    Alert.alert(t('profiles.deleteTitle'), t('profiles.deleteMessage', { name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteProfile(id);
-          refresh();
-        },
+    confirmDeleteProfile({
+      title: t('profiles.deleteTitle'),
+      message: t('profiles.deleteMessage', { name }),
+      cancelLabel: t('common.cancel'),
+      deleteLabel: t('common.delete'),
+      onConfirm: async () => {
+        await deleteProfile(id);
+        refresh();
       },
-    ]);
+    });
   };
 
   const openEdit = (id: number) => {
@@ -134,6 +134,23 @@ export default function ProfileScreen() {
         )}
       </GlassCard>
       <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
+
+      <Text style={ui.sectionLabel}>{t('sos.title')}</Text>
+      <GlassCard>
+        <Text style={styles.cardHint}>{t('sos.subtitle')}</Text>
+        <Button
+          label={t('profiles.sosPassport')}
+          variant="secondary"
+          block
+          onPress={() => router.push('/sos-edit' as any)}
+        />
+        <Button
+          label={t('profiles.sosContacts')}
+          variant="secondary"
+          block
+          onPress={() => router.push('/sos-edit' as any)}
+        />
+      </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('settings.emergencyNumber')}</Text>
       <GlassCard>

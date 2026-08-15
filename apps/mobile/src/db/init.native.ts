@@ -99,6 +99,11 @@ export function initDb() {
   return db;
 }
 
+export function persistDbWrites(): Promise<void> {
+  // SQLite runSync commits before returning.
+  return Promise.resolve();
+}
+
 export function getDb() {
   return initDb();
 }

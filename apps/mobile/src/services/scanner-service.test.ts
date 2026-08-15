@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ScanHistoryEntry } from '@allerguide/core';
 
 const mockRunSmartScan = vi.fn();
 const mockGetBackendAuthToken = vi.fn();
@@ -38,12 +39,17 @@ vi.mock('@/src/services/auth-service', () => ({
   getBackendAuthToken: () => mockGetBackendAuthToken(),
 }));
 
+const mockResolveProductByBarcode = vi.fn();
+const mockSaveScanHistory = vi.fn();
+const mockListScanHistory = vi.fn((): ScanHistoryEntry[] => []);
+
 vi.mock('@/src/services/barcode-lookup-service', () => ({
-  resolveProductByBarcode: vi.fn(),
+  resolveProductByBarcode: mockResolveProductByBarcode,
 }));
 
 vi.mock('@/src/services/scan-history-service', () => ({
-  saveScanHistory: vi.fn(),
+  saveScanHistory: mockSaveScanHistory,
+  listScanHistory: mockListScanHistory,
 }));
 
 vi.mock('@/src/services/analytics-service', () => ({
@@ -75,6 +81,60 @@ describe('scanner-service AI scan auth', () => {
         llmEndpoint: expect.stringContaining('/api/scan'),
         llmApiKey: 'jwt-token',
       }),
+    );
+  });
+
+  it('stores the barcode as history input so repeat-risk can match later', async () => {
+    mockListScanHistory.mockReturnValue([
+      {
+        id: 1,
+        profileId: 7,
+        mode: 'product',
+        input: '4601234567890',
+        verdict: 'осторожно',
+        matches: '[]',
+        level: 'high',
+        productName: 'Йогурт',
+        source: 'barcode',
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    mockResolveProductByBarcode.mockResolvedValue({
+      name: 'Йогурт',
+      ingredients: 'молоко, сахар',
+      source: 'openfoodfacts',
+      brand: 'Домик',
+      imageUrl: null,
+    });
+    mockRunSmartScan.mockResolvedValue({
+      verdict: 'осторожно',
+      reason: 'молоко',
+      matches: ['Молоко'],
+      crossMatches: [],
+      mode: 'product',
+      level: 'high',
+      source: 'openfoodfacts',
+    });
+
+    const { scanBarcode } = await import('./scanner-service');
+    const result = await scanBarcode({
+      barcode: '4601234567890',
+      profile: {
+        id: 7,
+        name: 'Анна',
+        birthYear: 1990,
+        type: 'self',
+        allergies: '["milk"]',
+      },
+    });
+
+    expect(result.repeatUnsafe).toBe(true);
+    expect(mockSaveScanHistory).toHaveBeenCalledWith(
+      7,
+      '4601234567890',
+      expect.objectContaining({ level: 'high' }),
+      'Йогурт',
+      { composition: 'молоко, сахар' },
     );
   });
 });

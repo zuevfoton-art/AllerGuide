@@ -21,6 +21,7 @@ import {
 import {
   computeScanTrends,
   formatDiaryDate,
+  type Profile,
   type RiskLevel,
   type SafeProduct,
   type ScanHistoryEntry,
@@ -47,9 +48,10 @@ import {
   scanText,
   type ScanResultExtended,
 } from '@/src/services/scanner-service';
-import { listScanHistory } from '@/src/services/scan-history-service';
+import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
 import {
   addSafeProduct,
+  isSafeProductSaved,
   listSafeProducts,
   removeSafeProduct,
 } from '@/src/services/safe-products-service';
@@ -60,11 +62,19 @@ import {
   type CroppedScanPhoto,
 } from '@/src/services/scanner-photo-service';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 import { resolveMatchAliasKeyword } from '@/src/services/scan-match-display';
+import {
+  ensureActiveProfileLoaded,
+  getOrLoadActiveProfileId,
+} from '@/src/services/profile-service';
+import { confirmAction, confirmDestructiveAction } from '@/src/utils/confirm-action';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 const UNDO_MS = 5000;
+const HISTORY_DISPLAY_LIMIT = 5;
 
 type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 type CameraEntryMode = 'barcode' | 'scanner';
@@ -90,31 +100,8 @@ function placeholderKeyForMode(
   return 'scanner.productPlaceholder';
 }
 
-function historyToResult(item: ScanHistoryEntry): ScanResultExtended {
-  let matches: string[] = [];
-  try {
-    const parsed = JSON.parse(item.matches) as unknown;
-    if (Array.isArray(parsed)) matches = parsed.filter((m): m is string => typeof m === 'string');
-  } catch {
-    matches = [];
-  }
-  const level = (item.level === 'high' || item.level === 'medium' || item.level === 'low'
-    ? item.level
-    : 'low') as RiskLevel;
-  const mode = (['product', 'menu', 'medicine', 'cosmetics'].includes(item.mode)
-    ? item.mode
-    : 'product') as ScanMode;
-
-  return {
-    verdict: item.verdict,
-    reason: '',
-    matches,
-    crossMatches: [],
-    mode,
-    level,
-    productName: item.productName ?? undefined,
-    source: (item.source as ScanResultExtended['source']) ?? 'manual',
-  };
+function resolveScanProfile(): Profile | null {
+  return useAppStore.getState().activeProfile ?? ensureActiveProfileLoaded();
 }
 
 export default function ScannerScreen() {
@@ -124,7 +111,6 @@ export default function ScannerScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, content } = useTranslation();
   const localeContent = content();
-  const profile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('');
   const [mode, setMode] = useState<ScanMode>('product');
@@ -150,6 +136,7 @@ export default function ScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const lastScanRef = useRef<(() => void) | null>(null);
+  const scanRequestIdRef = useRef(0);
   const [undoItem, setUndoItem] = useState<UndoSnapshot | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHapticResultRef = useRef<ScanResultExtended | null>(null);
@@ -174,25 +161,32 @@ export default function ScannerScreen() {
   const compositionText = result?.productIngredients?.trim() || input.trim();
 
   const refreshHistory = useCallback(() => {
-    if (!activeProfileId) {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId) {
       setHistory([]);
       setSafeList([]);
       return;
     }
-    setHistory(listScanHistory(activeProfileId).slice(0, 5));
-    setSafeList(listSafeProducts(activeProfileId));
+    setHistory(listScanHistory(profileId));
+    setSafeList(listSafeProducts(profileId));
   }, [activeProfileId]);
+
+  const recentHistory = useMemo(
+    () => history.slice(0, HISTORY_DISPLAY_LIMIT),
+    [history],
+  );
 
   const isCurrentInputSaved = useMemo(
     () =>
       result != null && activeProfileId != null
-        ? safeList.some((p) => p.input.trim().toLowerCase() === input.trim().toLowerCase())
+        ? isSafeProductSaved(safeList, input, mode)
         : false,
-    [safeList, result, input, activeProfileId],
+    [safeList, result, input, mode, activeProfileId],
   );
 
   useFocusEffect(
     useCallback(() => {
+      ensureActiveProfileLoaded();
       refreshHistory();
     }, [refreshHistory]),
   );
@@ -213,78 +207,87 @@ export default function ScannerScreen() {
   useEffect(() => () => clearUndo(), [clearUndo]);
 
   const confirmRemoveSafe = (item: SafeProduct) => {
-    const title = t('scanner.removeSafeTitle');
-    const message = t('scanner.removeSafeMessage', { name: item.name });
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId) return;
 
-    const performRemove = () => {
-      removeSafeProduct(item.id);
-      void hapticLight();
-      refreshHistory();
-      setUndoItem({
-        name: item.name,
-        mode: item.mode,
-        input: item.input,
-        savedAt: item.savedAt,
-      });
-      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
-      undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
-    };
-
-    if (Platform.OS === 'web') {
-      if (window.confirm(`${title}\n\n${message}`)) performRemove();
-      return;
-    }
-
-    Alert.alert(title, message, [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.delete'), style: 'destructive', onPress: performRemove },
-    ]);
+    confirmDestructiveAction({
+      title: t('scanner.removeSafeTitle'),
+      message: t('scanner.removeSafeMessage', { name: item.name }),
+      cancelLabel: t('common.cancel'),
+      confirmLabel: t('common.delete'),
+      onConfirm: async () => {
+        const removed = await removeSafeProduct(item.id, profileId);
+        if (!removed.ok) {
+          logCaughtError('ScannerScreen.confirmRemoveSafe', new Error(removed.code));
+          return;
+        }
+        void hapticLight();
+        refreshHistory();
+        setUndoItem({
+          name: item.name,
+          mode: item.mode,
+          input: item.input,
+          savedAt: item.savedAt,
+        });
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+        undoTimerRef.current = setTimeout(() => setUndoItem(null), UNDO_MS);
+      },
+      onError: (error) => logCaughtError('ScannerScreen.confirmRemoveSafe', error),
+    });
   };
 
-  const handleUndoRemove = () => {
-    if (!undoItem || !activeProfileId) return;
-    addSafeProduct(activeProfileId, undoItem.name, undoItem.mode, undoItem.input);
+  const handleUndoRemove = async () => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!undoItem || !profileId) return;
+    const restored = await addSafeProduct(profileId, undoItem.name, undoItem.mode, undoItem.input);
+    if (!restored.ok) {
+      logCaughtError('ScannerScreen.handleUndoRemove', new Error(restored.code));
+      return;
+    }
     clearUndo();
     refreshHistory();
     void hapticSuccess();
   };
 
   const runCheck = async (text: string, barcodeMode = false) => {
+    const requestId = ++scanRequestIdRef.current;
     lastScanRef.current = () => void runCheck(text, barcodeMode);
+    const scanProfile = resolveScanProfile();
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
     setScanErrorIsDishVision(false);
     setIngredientsOpen(false);
     try {
+      let scanResult: ScanResultExtended;
       if (barcodeMode && mode === 'product') {
-        const scanResult = await scanBarcode({ barcode: text, profile });
-        setResult(scanResult);
-        setRepeatUnsafe(Boolean(scanResult.repeatUnsafe));
-        return;
-      }
-
-      if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
-        const scanResult = await scanFromOcr({
+        scanResult = await scanBarcode({ barcode: text, profile: scanProfile });
+      } else if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
+        scanResult = await scanFromOcr({
           mode,
           ocrText: text,
-          profile,
+          profile: scanProfile,
         });
-        setResult(scanResult);
-        if (scanResult.ocr?.warnings.length) {
-          setOcrHint(scanResult.ocr.warnings.join(' '));
-        }
-        return;
+      } else {
+        scanResult = await scanText({ mode, text, profile: scanProfile });
       }
 
-      setResult(await scanText({ mode, text, profile }));
+      if (requestId !== scanRequestIdRef.current) return;
+      setResult(scanResult);
+      setRepeatUnsafe(Boolean(scanResult.repeatUnsafe));
+      if (scanResult.ocr?.warnings.length) {
+        setOcrHint(scanResult.ocr.warnings.join(' '));
+      }
     } catch (error) {
+      if (requestId !== scanRequestIdRef.current) return;
       setResult(null);
       setScanError(true);
       setScanErrorIsDishVision(isDishVisionScanError(error));
     } finally {
-      setLoading(false);
-      refreshHistory();
+      if (requestId === scanRequestIdRef.current) {
+        setLoading(false);
+        refreshHistory();
+      }
     }
   };
 
@@ -292,7 +295,9 @@ export default function ScannerScreen() {
     manualText?: string,
     image?: { base64?: string | null; mimeType?: string },
   ) => {
+    const requestId = ++scanRequestIdRef.current;
     lastScanRef.current = () => void runOcrCapture(manualText, image);
+    const scanProfile = resolveScanProfile();
     setLoading(true);
     setOcrHint(null);
     setScanError(false);
@@ -304,8 +309,9 @@ export default function ScannerScreen() {
         manualText,
         imageBase64: image?.base64 ?? undefined,
         mimeType: image?.mimeType,
-        profile,
+        profile: scanProfile,
       });
+      if (requestId !== scanRequestIdRef.current) return;
       if (scanResult.ocr?.text) {
         setInput(scanResult.ocr.text);
       }
@@ -314,12 +320,15 @@ export default function ScannerScreen() {
         setOcrHint(scanResult.ocr.warnings.join(' '));
       }
     } catch (error) {
+      if (requestId !== scanRequestIdRef.current) return;
       setResult(null);
       setScanError(true);
       setScanErrorIsDishVision(isDishVisionScanError(error));
     } finally {
-      setLoading(false);
-      refreshHistory();
+      if (requestId === scanRequestIdRef.current) {
+        setLoading(false);
+        refreshHistory();
+      }
     }
   };
 
@@ -397,7 +406,8 @@ export default function ScannerScreen() {
         width: picture.width || 0,
         height: picture.height || 0,
       });
-    } catch {
+    } catch (error) {
+      logCaughtError('ScannerScreen.capturePhotoFrame', error, { level: 'warn' });
       const fallback = await captureScanPhotoViaPicker();
       if (fallback) beginCrop(fallback);
     } finally {
@@ -438,35 +448,34 @@ export default function ScannerScreen() {
     result?.source === 'dish_vision' || Boolean(result?.dishVision);
 
   const confirmSaveSafe = () => {
-    if (!activeProfileId || !result) return;
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
     const name = result.productName || input.trim().slice(0, 60);
-    const perform = () => {
-      addSafeProduct(activeProfileId, name, mode, input.trim());
-      void hapticSuccess();
-      refreshHistory();
-      setListTab('saved');
-    };
 
-    if (Platform.OS === 'web') {
-      if (window.confirm(`${t('scanner.confirmSafeTitle')}\n\n${t('scanner.confirmSafeMessage', { name })}`)) {
-        perform();
-      }
-      return;
-    }
-
-    Alert.alert(t('scanner.confirmSafeTitle'), t('scanner.confirmSafeMessage', { name }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('scanner.confirmSafeAction'), onPress: perform },
-    ]);
+    confirmAction({
+      title: t('scanner.confirmSafeTitle'),
+      message: t('scanner.confirmSafeMessage', { name }),
+      cancelLabel: t('common.cancel'),
+      confirmLabel: t('scanner.confirmSafeAction'),
+      onConfirm: async () => {
+        const saved = await addSafeProduct(profileId, name, mode, input.trim());
+        if (!saved.ok) {
+          logCaughtError('ScannerScreen.confirmSaveSafe', new Error(saved.code));
+          return;
+        }
+        void hapticSuccess();
+        refreshHistory();
+        setListTab('saved');
+      },
+      onError: (error) => logCaughtError('ScannerScreen.confirmSaveSafe', error),
+    });
   };
 
   const openHistoryItem = (item: ScanHistoryEntry) => {
-    const nextMode = (['product', 'menu', 'medicine', 'cosmetics'].includes(item.mode)
-      ? item.mode
-      : 'product') as ScanMode;
-    setMode(nextMode);
+    const restored = historyEntryToScanResult(item);
+    setMode(restored.mode);
     setInput(item.input);
-    setResult(historyToResult(item));
+    setResult(restored);
     setRepeatUnsafe(false);
     setIngredientsOpen(false);
     lastHapticResultRef.current = null;
@@ -636,12 +645,12 @@ export default function ScannerScreen() {
     <Screen
       onRefresh={() => refresh()}
       refreshing={refreshing}>
+      <ScreenBrandHeader right={<ProfileHeaderButton />} />
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('scanner.eyebrow')} />
           <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         </View>
-        <ProfileHeaderButton />
       </View>
 
       <Button
@@ -913,14 +922,19 @@ export default function ScannerScreen() {
                     result?.unknownMatches?.[0] ??
                     [...(result?.matches ?? []), ...(result?.crossMatches ?? [])][0] ??
                     input.trim().slice(0, 80);
-                  saveAliasFeedback({
+                  void saveAliasFeedback({
                     term,
                     context: result?.productName ?? mode,
                     profileId: activeProfileId,
                     scanInput: input.trim(),
+                  }).then((saved) => {
+                    if (!saved.ok) {
+                      logCaughtError('ScannerScreen.reportAlias', new Error(saved.code));
+                      return;
+                    }
+                    Alert.alert(t('scanner.reportIncorrect'), t('scanner.reportThanks'));
+                    void hapticLight();
                   });
-                  Alert.alert(t('scanner.reportIncorrect'), t('scanner.reportThanks'));
-                  void hapticLight();
                 }}
                 accessibilityRole="button">
                 <Text style={styles.reportBtnText}>{t('scanner.reportIncorrect')}</Text>
@@ -997,7 +1011,7 @@ export default function ScannerScreen() {
       {listTab === 'recent' ? (
         history.length > 0 ? (
           <GlassCard padded={false}>
-            {history.map((item, index) => {
+            {recentHistory.map((item, index) => {
               const levelColor =
                 item.level === 'high'
                   ? theme.colors.danger

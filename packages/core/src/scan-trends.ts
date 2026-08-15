@@ -1,5 +1,6 @@
 import type { ScanHistoryEntry } from './types';
 import { findAllergenById } from './allergen-database';
+import { parseScanHistoryMatchLabels } from './scan-history-matches';
 
 export interface ScanTrendItem {
   allergenId: string;
@@ -15,14 +16,7 @@ export interface ScanTrendsSummary {
 }
 
 function parseMatchLabels(raw: string): string[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (Array.isArray(parsed)) return parsed.map(String);
-  } catch {
-    // fall through
-  }
-  return raw.split(',').map((part) => part.trim()).filter(Boolean);
+  return parseScanHistoryMatchLabels(raw);
 }
 
 /**

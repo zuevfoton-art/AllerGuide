@@ -26,11 +26,15 @@ import {
   serializeSelectedComponentIds,
   toggleMultiChoiceValue,
   validateClinicalScale,
+  validateDiarySection,
   validateDiarySectionStep,
+  attachDiaryAutoMetadata,
+  type DiaryAutoMetadata,
   type DiarySection,
   type DiaryStep,
   type PefZone,
 } from '@allerguide/core';
+import { DateTimeField } from '@/src/components/DateTimeField';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
@@ -63,6 +67,8 @@ interface DiaryWizardProps {
   planPersonalBestPef?: number | null;
   /** JSON allergies from active profile — used for dish component conflict warnings. */
   profileAllergiesJson?: string;
+  /** Hidden pollen/scan/meds metadata merged on save. */
+  autoMetadata?: DiaryAutoMetadata;
 }
 
 export function DiaryWizard({
@@ -76,6 +82,7 @@ export function DiaryWizard({
   drugIntolerances,
   planPersonalBestPef,
   profileAllergiesJson = '[]',
+  autoMetadata,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -304,6 +311,17 @@ export function DiaryWizard({
   };
 
   const skipSection = () => {
+    if (hasSectionAnswers(section, sectionAnswers)) {
+      const validationError =
+        section.type === 'Шкала'
+          ? validateClinicalScale(sectionAnswers)
+          : validateDiarySection(section, sectionAnswers);
+      if (validationError) {
+        setError(tDiaryError(validationError));
+        return;
+      }
+    }
+
     setError('');
     if (sectionIndex < totalSections - 1) {
       setSectionIndex((value) => value + 1);
@@ -314,30 +332,45 @@ export function DiaryWizard({
   };
 
   const finishWizard = () => {
-    let scaleError: string | null = null;
+    let sectionError: string | null = null;
     const entries = sections.flatMap((item) => {
       const answers = answersBySection[item.type] ?? {};
       if (!hasSectionAnswers(item, answers)) return [];
 
       if (item.type === 'Шкала') {
-        scaleError = validateClinicalScale(answers);
-        if (scaleError) return [];
+        const validationError = validateClinicalScale(answers);
+        if (validationError) {
+          sectionError ??= validationError;
+          return [];
+        }
         const enriched = enrichScaleAnswers(answers);
         return [{ type: item.type, details: encodeDiaryDetails(enriched, item.type) }];
       }
 
+      const validationError = validateDiarySection(item, answers);
+      if (validationError) {
+        sectionError ??= validationError;
+        return [];
+      }
+
       const photoUris = getDiaryPhotoUrisFromAnswers(answers);
+      const withAuto = attachDiaryAutoMetadata(answers, autoMetadata ?? {});
       return [
         {
           type: item.type,
-          details: encodeDiaryDetails(answers, item.type),
+          details: encodeDiaryDetails(withAuto, item.type),
           photoUris: photoUris.length ? photoUris : undefined,
         },
       ];
     });
 
+    if (sectionError) {
+      setError(tDiaryError(sectionError));
+      return;
+    }
+
     if (entries.length === 0) {
-      setError(scaleError ? tDiaryError(scaleError) : t('diaryWizard.fillOneSection'));
+      setError(t('diaryWizard.fillOneSection'));
       return;
     }
 
@@ -741,6 +774,19 @@ function StepField({
           <Text style={styles.photoEmpty}>{t('diaryWizard.photoEmpty')}</Text>
         )}
       </View>
+    );
+  }
+
+  if (step.field === 'time' || step.field === 'datetime') {
+    return (
+      <DateTimeField
+        label={step.label}
+        value={value}
+        mode={step.field}
+        placeholder={step.placeholder}
+        onChange={onChange}
+        testID={`diary-field-${step.id}`}
+      />
     );
   }
 

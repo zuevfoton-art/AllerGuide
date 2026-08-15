@@ -170,14 +170,14 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 
 | Вкладка | Файл | Функция |
 |---------|------|---------|
-| Главная | `home.tsx` | Дашборд, wellness, home-insights, быстрые действия |
-| Дневник | `diary.tsx` | Записи + wizard + clinical cards |
+| Главная | `home.tsx` | `ScreenBrandHeader`, двухслойный wellness, plain-language insights, reminder терапии |
+| Дневник | `diary.tsx` | Записи сверху, адаптивный wizard, модули наблюдения снизу |
 | Сканер | `scanner.tsx` | Штрихкод, OCR, ручной ввод |
 | Маркет | `market.tsx` | Safe-product marketplace (Yandex Market) |
 | Карта | `map.tsx` | Пыление / места (Yandex; опц. Google heatmap) |
-| SOS | `sos.tsx` | Карточка SOS, паспорт, контакты |
+| SOS | `sos.tsx` | Emergency-only: паспорт и контакты только для чтения |
 
-**Дополнительные экраны (stack):** `about.tsx`, `notifications.tsx`, `expert.tsx`, `doctor-report.tsx`, `asit-course.tsx`, `prescribed-therapy.tsx`, `asthma-action-plan.tsx`, `insect-action-plan.tsx`, `food-drug-registry.tsx`, `sos-edit.tsx`, `legal/terms.tsx`, `legal/privacy.tsx`.
+**Дополнительные экраны (stack):** `about.tsx`, `notifications.tsx`, `expert.tsx`, `doctor-report.tsx`, `clinical-scales.tsx`, `asit-course.tsx`, `prescribed-therapy.tsx`, `asthma-action-plan.tsx`, `insect-action-plan.tsx`, `food-drug-registry.tsx`, `sos-edit.tsx` (вход из `/profile`), `legal/terms.tsx`, `legal/privacy.tsx`.
 
 ### Onboarding
 
@@ -224,8 +224,9 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `sync-service.ts` / `sync-restore.ts` | Шифрованный облачный бэкап |
 | `backup-crypto.ts` / `backup-file-service.ts` | AES-GCM + локальные файлы бэкапа |
 | `diary-service.ts` (+ section/context/attachment) | Дневник |
-| `home-insights-service.ts` | Инсайты на главной (`@allerguide/core` `home-insights`) |
-| `wellness-service.ts` | Wellness score |
+| `home-insights-service.ts` | Инсайты на главной (`@allerguide/core` `home-insights`; без пользовательских ACT/ARIA/GINA) |
+| `wellness-service.ts` | Wellness score + `wellness-display` (словесные категории) |
+| `diary-auto-metadata-service.ts` | Скрытые pollen/scan/meds metadata при save |
 | `pollen-map-service.ts` / `pollen-heatmap-service.ts` | Open-Meteo + Google pollen tiles |
 | `location-service.ts` / `place-service.ts` | Гео / POI (`EXPO_PUBLIC_MAP_PLACES` / catalog + ADAIR fallback) |
 | `market-api.ts` | Yandex Market affiliate offers |
@@ -613,7 +614,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 |---------|-------------------|
 | Types / allergens | `types`, `allergens` (обёртка над `allergen-database`), `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` |
 | Profiles | `profile-allergens`, `allergy-confirmations`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `condition-*`, `clinical-phenotypes` |
-| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `voice-diary`, `home-insights` |
+| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `icd10-reference` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |

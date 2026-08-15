@@ -111,4 +111,15 @@ describe('web-store', () => {
     const second = loadJson('ag_settings', {});
     expect(first).toBe(second);
   });
+
+  it('commits a diary write without waiting for the deferred timer', async () => {
+    const { flushWebStore, hydrateWebStore, saveJson, getWebStoreDiagnostics } =
+      await import('./web-store');
+    await hydrateWebStore();
+
+    saveJson('ag_diary', [{ id: 1, profileId: 1 }]);
+    await flushWebStore();
+
+    expect(getWebStoreDiagnostics()).toMatchObject({ dirtyKeys: 0 });
+  });
 });

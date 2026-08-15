@@ -27,6 +27,7 @@ import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { wasBarcodePreviouslyHighRisk } from '@allerguide/core';
 import { trackEvent } from '@/src/services/analytics-service';
+import { logCaughtError } from '@/src/services/error-reporting';
 
 /** Extended fields attached to scan results in the mobile service layer. */
 export type ScanResultExtended = ScanResult & {
@@ -138,7 +139,7 @@ export async function scanBarcode({
       lookupFailed: true,
       barcodeScanStatus: 'not_found',
     };
-    if (profile) saveScanHistory(profile.id, barcode, result);
+    if (profile) await saveScanHistory(profile.id, barcode, result);
     return { ...result, repeatUnsafe };
   }
 
@@ -167,7 +168,11 @@ export async function scanBarcode({
       ? 'found_insufficient_composition'
       : 'found_no_allergens';
 
-  if (profile) saveScanHistory(profile.id, product.ingredients, result, product.name);
+  if (profile) {
+    await saveScanHistory(profile.id, barcode, result, product.name, {
+      composition: product.ingredients,
+    });
+  }
 
   return {
     ...result,
@@ -189,7 +194,7 @@ export async function scanText({
   profile?: Profile | null;
 }): Promise<ScanResultExtended> {
   const result = await analyzeText({ mode, text, profile, source: 'manual' });
-  if (profile) saveScanHistory(profile.id, text, result);
+  if (profile) await saveScanHistory(profile.id, text, result);
   return result;
 }
 
@@ -250,8 +255,8 @@ export async function extractOcrFromImage(input: {
           ],
         };
       }
-    } catch {
-      // Network errors → demo below (or empty when dish vision can run)
+    } catch (error) {
+      logCaughtError('scanner.extractOcrFromImage', error, { level: 'warn' });
       if (AI_DISH_VISION_ENABLED) {
         return emptyVisionOcrResult('Облачный OCR недоступен.');
       }
@@ -340,7 +345,7 @@ async function scanFromDishVision(input: {
     });
 
     if (input.profile) {
-      saveScanHistory(input.profile.id, scanText, result, vision.result.dishName);
+      await saveScanHistory(input.profile.id, scanText, result, vision.result.dishName);
     }
 
     trackEvent('scan_dish_vision', {
@@ -447,12 +452,12 @@ export async function scanFromOcr({
         });
 
         if (profile) {
-          saveScanHistory(profile.id, dishLookup.ingredients, result, dishLookup.productName);
+          await saveScanHistory(profile.id, dishLookup.ingredients, result, dishLookup.productName);
         }
         return { ...result, ocr: extraction };
       }
-    } catch {
-      // Fall through — plain OCR text analysis (VL already attempted above when enabled).
+    } catch (error) {
+      logCaughtError('scanner.lookupDishIngredients', error, { level: 'warn' });
     }
 
     // Short OCR name without catalog hit: reuse VL if we already ran it for this photo.
@@ -501,7 +506,7 @@ export async function scanFromOcr({
           : 'no_match'
       : undefined;
 
-  if (profile) saveScanHistory(profile.id, extraction.text, result, productName);
+  if (profile) await saveScanHistory(profile.id, extraction.text, result, productName);
   return { ...result, ocr: extraction, menuScanStatus };
 }
 

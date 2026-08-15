@@ -15,7 +15,7 @@ function navigateFromNotification(data: NotificationPayload | undefined) {
       return;
     case 'act':
       router.push({
-        pathname: '/(tabs)/diary',
+        pathname: '/clinical-scales',
         params: { openScale: data.scaleId ?? 'act', profileId: data.profileId ? String(data.profileId) : undefined },
       } as any);
       return;

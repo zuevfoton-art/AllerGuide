@@ -7,6 +7,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { MarketplaceModule } from '@/src/modules/marketplace';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 
 export default function MarketScreen() {
   const theme = useTheme();
@@ -16,13 +17,13 @@ export default function MarketScreen() {
 
   return (
     <Screen>
+      <ScreenBrandHeader right={<ProfileHeaderButton />} />
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('market.eyebrow')} />
           <Text style={ui.docTitle}>{t('market.title')}</Text>
           <Text style={ui.docMeta}>{t('market.subtitle')}</Text>
         </View>
-        <ProfileHeaderButton />
       </View>
 
       <MarketplaceModule variant="full" />

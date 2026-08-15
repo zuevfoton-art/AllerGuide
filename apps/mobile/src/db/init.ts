@@ -6,7 +6,7 @@ import type {
   SafeProduct,
   ScanHistoryEntry,
 } from '@allerguide/core';
-import { hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
+import { flushWebStore, hydrateWebStore, loadJson, saveJson } from '@/src/db/web-store';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -18,6 +18,17 @@ interface DbLike {
   runSync: (sql: string, params?: unknown[]) => void;
   getFirstSync: <T>(sql: string, params?: unknown[]) => T | null;
   getAllSync: <T>(sql: string, params?: unknown[]) => T[];
+}
+
+interface StoredAliasFeedback {
+  id: string;
+  term: string;
+  suggested_allergen_id: string | null;
+  context: string | null;
+  profile_id: number | null;
+  scan_input: string | null;
+  status: string;
+  created_at: string;
 }
 
 interface BarcodeCacheRow {
@@ -106,6 +117,14 @@ class WebDb implements DbLike {
     saveJson('ag_safe_products', items);
   }
 
+  private getAliasFeedback(): StoredAliasFeedback[] {
+    return loadJson<StoredAliasFeedback[]>('ag_alias_feedback', []);
+  }
+
+  private saveAliasFeedback(items: StoredAliasFeedback[]) {
+    saveJson('ag_alias_feedback', items);
+  }
+
   private getDiaryAttachments(): {
     id: number;
     entryId: number;
@@ -138,6 +157,7 @@ class WebDb implements DbLike {
         type: params![3] as Profile['type'],
         allergies: params![4] as string,
         allergyConfirmations: (params![5] as string | undefined) ?? '{}',
+        crossReactionAllergies: (params![6] as string | undefined) ?? '[]',
       });
       this.saveProfiles(profiles);
       return;
@@ -154,6 +174,7 @@ class WebDb implements DbLike {
         type: params![4] as Profile['type'],
         allergies: params![5] as string,
         allergyConfirmations: (params![6] as string | undefined) ?? '{}',
+        crossReactionAllergies: (params![7] as string | undefined) ?? '[]',
       };
       const index = profiles.findIndex((profile) => profile.id === id);
       if (index >= 0) profiles[index] = next;
@@ -220,8 +241,16 @@ class WebDb implements DbLike {
 
     if (s.startsWith('update profiles')) {
       const profiles = this.getProfiles();
-      const id = params![6] as number;
-      const index = profiles.findIndex((p) => p.id === id);
+      const hasCrossReactionAllergies = s.includes('crossreactionallergies');
+      const idIndex = hasCrossReactionAllergies ? 7 : 6;
+      const id = params![idIndex] as number;
+      const ownerId =
+        hasCrossReactionAllergies && s.includes('and userid =')
+          ? (params![idIndex + 1] as number)
+          : undefined;
+      const index = profiles.findIndex(
+        (profile) => profile.id === id && (ownerId === undefined || profile.userId === ownerId),
+      );
       if (index >= 0) {
         profiles[index] = {
           ...profiles[index],
@@ -231,6 +260,9 @@ class WebDb implements DbLike {
           type: params![3] as Profile['type'],
           allergies: params![4] as string,
           allergyConfirmations: (params![5] as string | undefined) ?? profiles[index].allergyConfirmations ?? '{}',
+          crossReactionAllergies: hasCrossReactionAllergies
+            ? ((params![6] as string | undefined) ?? '[]')
+            : (profiles[index].crossReactionAllergies ?? '[]'),
         };
         this.saveProfiles(profiles);
       }
@@ -245,14 +277,26 @@ class WebDb implements DbLike {
 
     if (s.startsWith('delete from diary_entries where id')) {
       const entries = this.getDiaryEntries();
-      this.saveDiaryEntries(entries.filter((e) => e.id !== params![0]));
+      const profileId = s.includes('and profileid =') ? params![1] : undefined;
+      this.saveDiaryEntries(
+        entries.filter(
+          (entry) =>
+            entry.id !== params![0] ||
+            (profileId !== undefined && entry.profileId !== profileId),
+        ),
+      );
       return;
     }
 
     if (s.startsWith('update diary_entries')) {
       const entries = this.getDiaryEntries();
       const id = params![2] as number;
-      const index = entries.findIndex((entry) => entry.id === id);
+      const profileId = s.includes('and profileid =') ? params![3] : undefined;
+      const index = entries.findIndex(
+        (entry) =>
+          entry.id === id &&
+          (profileId === undefined || entry.profileId === profileId),
+      );
       if (index >= 0) {
         entries[index] = {
           ...entries[index],
@@ -310,17 +354,25 @@ class WebDb implements DbLike {
 
     if (s.startsWith('delete from profiles')) {
       const profiles = this.getProfiles();
-      this.saveProfiles(profiles.filter((p) => p.id !== params![0]));
+      const profileId = params![0] as number;
+      const ownerId = s.includes('and userid =') ? (params![1] as number) : undefined;
+      const canDelete = profiles.some(
+        (profile) =>
+          profile.id === profileId && (ownerId === undefined || profile.userId === ownerId),
+      );
+      if (!canDelete) return;
+
+      this.saveProfiles(profiles.filter((profile) => profile.id !== profileId));
       const contacts = this.getEmergencyContacts();
-      this.saveEmergencyContacts(contacts.filter((item) => item.profileId !== params![0]));
+      this.saveEmergencyContacts(contacts.filter((item) => item.profileId !== profileId));
       const diary = this.getDiaryEntries();
-      this.saveDiaryEntries(diary.filter((entry) => entry.profileId !== params![0]));
+      this.saveDiaryEntries(diary.filter((entry) => entry.profileId !== profileId));
       const scans = this.getScanHistory();
-      this.saveScanHistory(scans.filter((entry) => entry.profileId !== params![0]));
+      this.saveScanHistory(scans.filter((entry) => entry.profileId !== profileId));
       const safeProducts = this.getSafeProducts();
-      this.saveSafeProducts(safeProducts.filter((item) => item.profileId !== params![0]));
+      this.saveSafeProducts(safeProducts.filter((item) => item.profileId !== profileId));
       const sos = this.getProfileSos();
-      delete sos[params![0] as number];
+      delete sos[profileId];
       this.saveProfileSos(sos);
       return;
     }
@@ -354,9 +406,41 @@ class WebDb implements DbLike {
       return;
     }
 
+    if (s.startsWith('delete from safe_products where id =') && s.includes('and profileid')) {
+      const items = this.getSafeProducts();
+      this.saveSafeProducts(
+        items.filter((item) => !(item.id === params![0] && item.profileId === params![1])),
+      );
+      return;
+    }
+
     if (s.startsWith('delete from safe_products where id =')) {
       const items = this.getSafeProducts();
       this.saveSafeProducts(items.filter((item) => item.id !== params![0]));
+      return;
+    }
+
+    if (s.startsWith('insert into alias_feedback')) {
+      const items = this.getAliasFeedback();
+      const next: StoredAliasFeedback = {
+        id: params![0] as string,
+        term: params![1] as string,
+        suggested_allergen_id: (params![2] as string | null) ?? null,
+        context: (params![3] as string | null) ?? null,
+        profile_id: (params![4] as number | null) ?? null,
+        scan_input: (params![5] as string | null) ?? null,
+        status: params![6] as string,
+        created_at: params![7] as string,
+      };
+      const index = items.findIndex((item) => item.id === next.id);
+      if (index >= 0) items[index] = next;
+      else items.push(next);
+      this.saveAliasFeedback(items);
+      return;
+    }
+
+    if (s === 'delete from alias_feedback' || s.startsWith('delete from alias_feedback;')) {
+      this.saveAliasFeedback([]);
       return;
     }
 
@@ -462,12 +546,23 @@ class WebDb implements DbLike {
 
     if (s.includes('from profiles') && s.includes('order by id desc limit 1')) {
       const profiles = this.getProfiles();
-      return (profiles[profiles.length - 1] || null) as T | null;
+      const ownerId = s.includes('where userid =') ? (params![0] as number) : undefined;
+      const profile = profiles
+        .filter((item) => ownerId === undefined || item.userId === ownerId)
+        .sort((left, right) => right.id - left.id)[0];
+      return (profile || null) as T | null;
     }
 
     if (s.includes('from profiles') && s.includes('where id =')) {
       const profiles = this.getProfiles();
-      return (profiles.find((p) => p.id === params![0]) || null) as T | null;
+      const ownerId = s.includes('and userid =') ? (params![1] as number) : undefined;
+      return (
+        profiles.find(
+          (profile) =>
+            profile.id === params![0] &&
+            (ownerId === undefined || profile.userId === ownerId),
+        ) || null
+      ) as T | null;
     }
 
     if (s.includes('from profile_sos')) {
@@ -490,6 +585,11 @@ class WebDb implements DbLike {
     if (s.includes('from diary_entries') && s.includes('where profileid =')) {
       const entries = this.getDiaryEntries();
       return (entries.find((e) => e.profileId === params![0]) || null) as T | null;
+    }
+
+    if (s.includes('from diary_entries') && s.includes('where id =')) {
+      const entries = this.getDiaryEntries();
+      return (entries.find((entry) => entry.id === params![0]) || null) as T | null;
     }
 
     if (s.includes('from barcode_cache') && s.includes('where barcode =')) {
@@ -548,6 +648,17 @@ class WebDb implements DbLike {
       return items.filter((item) => item.profileId === params![0]).reverse() as T[];
     }
 
+    if (s.includes('from alias_feedback') && s.includes("where status = 'pending'")) {
+      const items = this.getAliasFeedback();
+      return items
+        .filter((item) => item.status === 'pending')
+        .sort((left, right) => right.created_at.localeCompare(left.created_at)) as T[];
+    }
+
+    if (s.includes('from alias_feedback')) {
+      return [...this.getAliasFeedback()] as T[];
+    }
+
     if (s.includes('from app_settings')) {
       const settings = this.getSettings();
       return Object.entries(settings).map(([key, value]) => ({ key, value })) as T[];
@@ -565,6 +676,10 @@ const db: DbLike = new WebDb();
 
 export async function initDb() {
   await hydrateWebStore();
+}
+
+export function persistDbWrites(): Promise<void> {
+  return flushWebStore();
 }
 
 export function getDb() {

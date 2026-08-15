@@ -50,6 +50,7 @@ vi.mock('@/src/db/init', () => ({
     runSync: vi.fn(),
     getFirstSync: vi.fn(),
   }),
+  persistDbWrites: vi.fn(async () => undefined),
 }));
 
 vi.mock('@/src/services/analytics-service', () => ({ trackEvent: vi.fn() }));
@@ -139,5 +140,21 @@ describe('ensureActiveProfileLoaded', () => {
     const { ensureActiveProfileLoaded } = await import('./profile-service');
     const active = ensureActiveProfileLoaded({ preferSelf: false });
     expect(active?.id).toBe(childProfile.id);
+  });
+
+  it('recovers a persisted profile id when transient app state is empty', async () => {
+    const { getOrLoadActiveProfileId } = await import('./profile-service');
+
+    expect(getOrLoadActiveProfileId()).toBe(selfProfile.id);
+    expect(appState.activeProfile).toEqual(selfProfile);
+  });
+
+  it('preserves an already selected profile id', async () => {
+    appState.activeProfileId = childProfile.id;
+    appState.activeProfile = childProfile;
+    const { getOrLoadActiveProfileId } = await import('./profile-service');
+
+    expect(getOrLoadActiveProfileId()).toBe(childProfile.id);
+    expect(appState.activeProfile).toEqual(childProfile);
   });
 });

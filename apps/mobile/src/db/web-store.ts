@@ -25,6 +25,9 @@ const KNOWN_KEYS = [
   'ag_settings',
   'ag_users',
   'ag_emergency_contacts',
+  'ag_safe_products',
+  'ag_alias_feedback',
+  'ag_diary_attachments',
 ] as const;
 
 const memory = new Map<string, unknown>();
@@ -117,6 +120,11 @@ function openDb(): Promise<IDBDatabase> {
 async function ensureWriteDb(): Promise<IDBDatabase> {
   if (!writeDb) writeDb = await openDb();
   return writeDb;
+}
+
+/** Await pending IndexedDB write-through before reporting a mutation as saved. */
+export async function flushWebStore(): Promise<void> {
+  await flush();
 }
 
 async function flush(): Promise<void> {

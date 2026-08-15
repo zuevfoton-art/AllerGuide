@@ -32,6 +32,18 @@ describe('POST /api/scan/intent', () => {
     expect(response.status).toBe(503);
   });
 
+  it('rejects an invalid intent payload', async () => {
+    const app = express();
+    app.use(express.json());
+    registerScanIntentRoutes(app);
+
+    const response = await request(app)
+      .post('/api/scan/intent')
+      .send({ text: '', fallbackMode: 'recipe' });
+    expect(response.status).toBe(400);
+    expect(response.body.ok).toBe(false);
+  });
+
   it('classifies OCR text when enabled', async () => {
     const app = express();
     app.use(express.json());

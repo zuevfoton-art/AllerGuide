@@ -24,10 +24,6 @@ appId: com.aclearo.app
     id: diary-wizard-primary
 - tapOn:
     id: diary-wizard-primary
-- tapOn:
-    id: diary-wizard-primary
-- tapOn:
-    id: diary-wizard-primary
 - extendedWaitUntil:
     notVisible:
       id: diary-wizard-primary
