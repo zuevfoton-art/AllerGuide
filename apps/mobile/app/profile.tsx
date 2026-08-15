@@ -156,6 +156,7 @@ export default function ProfileScreen() {
           onChangeText={setEmergencyNumberState}
           placeholder="103"
           placeholderTextColor={theme.colors.textMuted}
+          accessibilityLabel={t('settings.emergencyNumber')}
           keyboardType="phone-pad"
         />
         <Button

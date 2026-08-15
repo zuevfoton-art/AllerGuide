@@ -92,6 +92,7 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
                 onPress={() => void openOffer(offer)}
                 accessibilityRole="link"
                 disabled={opening}
+                hitSlop={8}
               >
                 <Text style={styles.buyLink}>
                   {buyLabel(offer)} →

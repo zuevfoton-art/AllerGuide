@@ -699,6 +699,7 @@ export default function ScannerScreen() {
             onChangeText={setInput}
             placeholder={t(placeholderKeyForMode(mode))}
             placeholderTextColor={theme.colors.textMuted}
+            accessibilityLabel={t(placeholderKeyForMode(mode))}
             multiline
             style={styles.input}
           />
@@ -875,7 +876,8 @@ export default function ScannerScreen() {
               <Pressable
                 onPress={() => setIngredientsOpen((v) => !v)}
                 accessibilityRole="button"
-                style={styles.ingredientsToggle}>
+                style={styles.ingredientsToggle}
+                hitSlop={8}>
                 <Text style={styles.ingredientsToggleText}>
                   {ingredientsOpen ? t('scanner.ingredientsHide') : t('scanner.ingredientsShow')}
                 </Text>
@@ -917,6 +919,7 @@ export default function ScannerScreen() {
             {activeProfileId ? (
               <Pressable
                 style={styles.reportBtn}
+                hitSlop={8}
                 onPress={() => {
                   const term =
                     result?.unknownMatches?.[0] ??
@@ -959,7 +962,8 @@ export default function ScannerScreen() {
           <Pressable
             onPress={() => setTrendsOpen((v) => !v)}
             style={styles.trendsToggle}
-            accessibilityRole="button">
+            accessibilityRole="button"
+            hitSlop={8}>
             <Text style={ui.cardTitle}>
               {trendsOpen ? t('scanner.trendsHide') : t('scanner.trendsShow')}
             </Text>
@@ -992,7 +996,8 @@ export default function ScannerScreen() {
           style={[styles.tabChip, listTab === 'recent' && styles.tabChipActive]}
           onPress={() => setListTab('recent')}
           accessibilityRole="button"
-          accessibilityState={{ selected: listTab === 'recent' }}>
+          accessibilityState={{ selected: listTab === 'recent' }}
+          hitSlop={8}>
           <Text style={[styles.tabChipText, listTab === 'recent' && styles.tabChipTextActive]}>
             {t('scanner.recentTab')}
           </Text>
@@ -1001,7 +1006,8 @@ export default function ScannerScreen() {
           style={[styles.tabChip, listTab === 'saved' && styles.tabChipActive]}
           onPress={() => setListTab('saved')}
           accessibilityRole="button"
-          accessibilityState={{ selected: listTab === 'saved' }}>
+          accessibilityState={{ selected: listTab === 'saved' }}
+          hitSlop={8}>
           <Text style={[styles.tabChipText, listTab === 'saved' && styles.tabChipTextActive]}>
             {t('scanner.savedTab')}
           </Text>

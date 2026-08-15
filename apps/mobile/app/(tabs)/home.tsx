@@ -149,7 +149,8 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/sos')}
               style={styles.sosBtn}
               accessibilityRole="button"
-              accessibilityLabel={t('tabs.sos')}>
+              accessibilityLabel={t('tabs.sos')}
+              hitSlop={8}>
               <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
             </Pressable>
           </>

@@ -18,7 +18,7 @@ export function ScreenBrandHeader({ left, right }: ScreenBrandHeaderProps) {
   return (
     <View style={styles.wrap} testID="screen-brand-header">
       <View style={styles.side}>{left}</View>
-      <View style={styles.center} pointerEvents="none">
+      <View style={styles.center} pointerEvents="none" accessibilityRole="header">
         <BrandLogo size={36} />
         <Text style={styles.slogan}>{t('brand.slogan')}</Text>
       </View>

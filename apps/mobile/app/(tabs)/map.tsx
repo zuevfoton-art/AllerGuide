@@ -705,7 +705,8 @@ export default function MapScreen() {
                 style={[styles.layerChip, active && styles.layerChipActive]}
                 onPress={() => setLayerMode(key)}
                 accessibilityRole="button"
-                accessibilityState={{ selected: active }}>
+                accessibilityState={{ selected: active }}
+                hitSlop={8}>
                 <Text style={[styles.layerChipText, active && styles.layerChipTextActive]}>
                   {t(labelKey)}
                 </Text>
@@ -720,7 +721,8 @@ export default function MapScreen() {
             style={styles.allergenPickerBtn}
             onPress={() => setAllergenPickerOpen(true)}
             accessibilityRole="button"
-            accessibilityLabel={t('map.allergenPickerTitle')}>
+            accessibilityLabel={t('map.allergenPickerTitle')}
+            hitSlop={8}>
             <View style={[styles.allergenPickerDot, { backgroundColor: levelColor }]} />
             <Text style={styles.allergenPickerLabel} numberOfLines={1}>
               {t('map.allergenPickerButton', { taxon: taxonLabel })}
@@ -735,7 +737,8 @@ export default function MapScreen() {
             style={[styles.airLayerBtn, showAirLayer && styles.airLayerBtnActive]}
             onPress={() => setAirLayerOn((value) => !value)}
             accessibilityRole="button"
-            accessibilityState={{ selected: showAirLayer }}>
+            accessibilityState={{ selected: showAirLayer }}
+            hitSlop={8}>
             <Ionicons
               name="cloud-outline"
               size={16}
@@ -756,7 +759,8 @@ export default function MapScreen() {
           onPress={() => void searchThisArea()}
           disabled={searchingArea}
           accessibilityRole="button"
-          accessibilityLabel={t('map.searchThisArea')}>
+          accessibilityLabel={t('map.searchThisArea')}
+          hitSlop={8}>
           {searchingArea ? (
             <ActivityIndicator size="small" color={theme.colors.accent} />
           ) : (
@@ -967,14 +971,16 @@ export default function MapScreen() {
                 {doctor.phone ? (
                   <Pressable
                     onPress={() => void Linking.openURL(`tel:${doctor.phone!}`)}
-                    accessibilityRole="link">
+                    accessibilityRole="link"
+                    hitSlop={8}>
                     <Text style={[styles.tags, styles.phoneLink]}>{doctor.phone}</Text>
                   </Pressable>
                 ) : null}
                 {doctor.bookingUrl ? (
                   <Pressable
                     onPress={() => void Linking.openURL(doctor.bookingUrl!)}
-                    accessibilityRole="link">
+                    accessibilityRole="link"
+                    hitSlop={8}>
                     <Text style={styles.phoneLink}>{t('map.poiBook')}</Text>
                   </Pressable>
                 ) : null}
