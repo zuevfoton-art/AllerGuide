@@ -44,7 +44,6 @@ import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
 import { PollenIndexCard } from '@/src/components/PollenIndexCard';
 import { PollenHeatmapLegend } from '@/src/components/PollenHeatmapLegend';
 import { AirQualityCard } from '@/src/components/AirQualityCard';
-import { AirQualityLegend } from '@/src/components/AirQualityLegend';
 import { PlaceSearchBar } from '@/src/components/PlaceSearchBar';
 import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
@@ -71,9 +70,7 @@ import {
 } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
 import {
-  buildAirQualityHeatmapTileUrlTemplate,
   fetchAirQualitySnapshot,
-  isAirQualityHeatmapAvailable,
   isGoogleAirQualityAvailable,
 } from '@/src/services/air-quality-service';
 import { getLocale } from '@/src/services/settings-service';
@@ -159,7 +156,6 @@ export default function MapScreen() {
   const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number } | null>(null);
   const [poiOrigin, setPoiOrigin] = useState<{ lat: number; lon: number } | null>(null);
   const [searchingArea, setSearchingArea] = useState(false);
-  const [airLayerOn, setAirLayerOn] = useState(false);
   const [airQuality, setAirQuality] = useState<AirQualitySnapshot | null>(null);
   const [airQualityLoading, setAirQualityLoading] = useState(false);
   const [placeInput, setPlaceInput] = useState('');
@@ -279,11 +275,7 @@ export default function MapScreen() {
   const useGoogleMap = mapBasemap === 'google';
   const useYandexInteractive = mapBasemap === 'yandex-interactive';
   const useHeatmap = isGooglePollenHeatmapAvailable() && layerMode !== 'places';
-  const airHeatmapAvailable = isAirQualityHeatmapAvailable() && layerMode !== 'places';
-  const showAirLayer = airHeatmapAvailable && airLayerOn;
-  const googleMapType =
-    useHeatmap && !showAirLayer ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
-  const airTileUrlTemplate = showAirLayer ? buildAirQualityHeatmapTileUrlTemplate() : null;
+  const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
   const showPlaceMarkers = layerMode === 'places' || layerMode === 'both';
   // Geo plume Circles need Google Maps primitives; Yandex path keeps caption only.
   const showPlumeGeo =
@@ -663,7 +655,6 @@ export default function MapScreen() {
           longitude={coords.lon}
           zoom={POLLEN_MAP_SCALE_ZOOM.city}
           mapType={googleMapType}
-          tileUrlTemplate={airTileUrlTemplate}
           height={MAP_HERO_HEIGHT}
           interactive
           markers={markers}
@@ -729,26 +720,6 @@ export default function MapScreen() {
             <Ionicons name="chevron-down" size={18} color={theme.colors.accent} />
           </Pressable>
         ) : null}
-
-        {airHeatmapAvailable ? (
-          <Pressable
-            testID="map-air-layer-toggle"
-            style={[styles.airLayerBtn, showAirLayer && styles.airLayerBtnActive]}
-            onPress={() => setAirLayerOn((value) => !value)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: showAirLayer }}
-            hitSlop={8}>
-            <Ionicons
-              name="cloud-outline"
-              size={16}
-              color={showAirLayer ? theme.colors.accent : theme.colors.textSecondary}
-            />
-            <Text
-              style={[styles.airLayerText, showAirLayer && styles.airLayerTextActive]}>
-              {t('map.airLayerToggle')}
-            </Text>
-          </Pressable>
-        ) : null}
       </View>
 
       {showSearchAreaButton ? (
@@ -802,8 +773,6 @@ export default function MapScreen() {
             <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
           </View>
         </>
-      ) : showAirLayer ? (
-        <AirQualityLegend />
       ) : (
         <PollenHeatmapLegend group={pollenMapTaxonTypeGroup(selectedTaxonId)} />
       )}
@@ -1096,30 +1065,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.accent,
     },
-    airLayerBtn: {
-      alignSelf: 'flex-start',
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      minHeight: 36,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-    },
-    airLayerBtnActive: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
-    },
-    airLayerText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    airLayerTextActive: { color: colors.accent },
     allergenPickerLabel: {
       flex: 1,
       fontFamily: fonts.sansSemiBold,

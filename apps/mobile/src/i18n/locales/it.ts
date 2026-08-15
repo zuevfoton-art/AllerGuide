@@ -567,7 +567,6 @@ const it: LocaleMessages = {
     legendMedical: 'clinica',
     legendPharmacy: 'farmacia',
     searchThisArea: 'Cerca in questa zona',
-    airLayerToggle: 'Qualità dell’aria',
     poiLevelHigh: 'alto',
     poiLevelMedium: 'medio',
     poiLevelLow: 'basso',
