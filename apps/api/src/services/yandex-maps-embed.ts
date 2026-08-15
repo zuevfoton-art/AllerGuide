@@ -91,6 +91,11 @@ export function buildYandexInteractiveMapHtml(options: {
           map.geoObjects.add(place);
         });
 
+        map.events.add('actionend', function () {
+          var center = map.getCenter();
+          post('region_change', { latitude: center[0], longitude: center[1] });
+        });
+
         post('ready', { markerCount: (cfg.markers || []).length });
       });
     })();

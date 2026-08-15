@@ -1,110 +1,119 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { POLLEN_UPI_MAX, type PollenUpiSnapshot } from '@allerguide/core';
+import {
+  POLLEN_UPI_FALLBACK_COLORS,
+  POLLEN_UPI_MAX,
+  resolvePollenUpiDisplay,
+  type PollenUpiIndex,
+  type PollenUpiSnapshot,
+} from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
+
+const UPI_SEGMENTS: PollenUpiIndex[] = [0, 1, 2, 3, 4, 5];
+
+const CATEGORY_KEYS = {
+  none: 'map.upiCategoryNone',
+  very_low: 'map.upiCategoryVeryLow',
+  low: 'map.upiCategoryLow',
+  moderate: 'map.upiCategoryModerate',
+  high: 'map.upiCategoryHigh',
+  very_high: 'map.upiCategoryVeryHigh',
+} as const;
 
 interface PollenIndexCardProps {
   taxonLabel: string;
   upi: PollenUpiSnapshot | null;
   grainsPerM3?: number | null;
-  levelLabel?: string | null;
 }
 
-export function PollenIndexCard({
-  taxonLabel,
-  upi,
-  grainsPerM3,
-  levelLabel,
-}: PollenIndexCardProps) {
+export function PollenIndexCard({ taxonLabel, upi, grainsPerM3 }: PollenIndexCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const index = upi?.index ?? 0;
-  const progress = index / POLLEN_UPI_MAX;
+
+  if (!upi) {
+    return (
+      <View style={styles.card} testID="pollen-index-card">
+        <Text style={styles.title}>{t('map.upiTitle')}</Text>
+        <Text style={styles.subtitle}>{taxonLabel}</Text>
+        <Text style={styles.meta}>{t('map.pollenUnavailable')}</Text>
+      </View>
+    );
+  }
+
+  const display = resolvePollenUpiDisplay(upi);
+  const categoryLabel = t(CATEGORY_KEYS[display.category]);
 
   return (
-    <View style={styles.card}>
-      <View style={styles.gaugeWrap}>
-        <View style={styles.gaugeTrack}>
+    <View style={styles.card} testID="pollen-index-card">
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('map.upiTitle')}</Text>
+        <Text style={[styles.value, { color: display.color }]}>
+          {display.index}/{POLLEN_UPI_MAX}
+        </Text>
+      </View>
+      <Text style={[styles.subtitle, { color: display.color }]}>
+        {taxonLabel} · {categoryLabel}
+      </Text>
+      <View style={styles.scale} accessibilityRole="adjustable">
+        {UPI_SEGMENTS.map((index) => (
           <View
+            key={index}
             style={[
-              styles.gaugeFill,
+              styles.segment,
               {
-                width: `${Math.round(progress * 100)}%`,
-                backgroundColor: upiColor(index, theme),
+                backgroundColor: POLLEN_UPI_FALLBACK_COLORS[index],
+                opacity: index === display.index ? 1 : 0.35,
               },
             ]}
           />
-        </View>
-        <Text style={styles.gaugeValue}>
-          {index}/{POLLEN_UPI_MAX}
-        </Text>
+        ))}
       </View>
-      <View style={styles.copy}>
-        <Text style={styles.title}>{t('map.upiTitle')}</Text>
-        <Text style={[styles.subtitle, { color: upiColor(index, theme) }]}>
-          {taxonLabel}
-          {levelLabel ? ` · ${levelLabel}` : ''}
+      <Text style={styles.meta}>{t('map.upiLevelDescription', { category: categoryLabel })}</Text>
+      {typeof grainsPerM3 === 'number' && upi.source !== 'google' ? (
+        <Text style={styles.meta}>
+          {t('map.pollenValue', { value: grainsPerM3.toFixed(1) })}
         </Text>
-        {typeof grainsPerM3 === 'number' ? (
-          <Text style={styles.meta}>
-            {t('map.pollenValue', { value: grainsPerM3.toFixed(1) })}
-          </Text>
-        ) : null}
-        {upi?.source === 'google' ? (
-          <Text style={styles.meta}>{t('map.upiSourceGoogle')}</Text>
-        ) : (
-          <Text style={styles.meta}>{t('map.upiSourceOpenMeteo')}</Text>
-        )}
-      </View>
+      ) : null}
+      <Text style={styles.meta}>
+        {upi.source === 'google' ? t('map.upiSourceGoogle') : t('map.upiSourceOpenMeteo')}
+      </Text>
     </View>
   );
-}
-
-function upiColor(index: number, theme: AppTheme): string {
-  if (index >= 4) return theme.colors.danger;
-  if (index === 3) return theme.colors.warning;
-  if (index >= 1) return theme.colors.success;
-  return theme.colors.textMuted;
 }
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     card: {
-      flexDirection: 'row',
-      gap: 14,
-      alignItems: 'center',
+      gap: 6,
       borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
       padding: 14,
     },
-    gaugeWrap: { width: 72, alignItems: 'center', gap: 6 },
-    gaugeTrack: {
-      width: '100%',
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: colors.surfaceMuted,
-      overflow: 'hidden',
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
-    gaugeFill: { height: '100%', borderRadius: 4 },
-    gaugeValue: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 18,
-      color: colors.head,
-    },
-    copy: { flex: 1, gap: 2 },
     title: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
+      color: colors.head,
+    },
+    value: {
+      fontFamily: fonts.sansBold,
+      fontSize: 20,
       color: colors.head,
     },
     subtitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
     },
+    scale: { flexDirection: 'row', gap: 3, height: 8 },
+    segment: { flex: 1, borderRadius: 4 },
     meta: {
       fontFamily: fonts.sans,
       fontSize: 11,

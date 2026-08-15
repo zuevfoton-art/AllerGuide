@@ -102,12 +102,21 @@ export async function createPollenRateLimiter(): Promise<RateLimitRequestHandler
   });
 }
 
-/** Dedicated limiter for Google Places Nearby (billable). */
+/** Dedicated limiter for Google Places Nearby / Text / Details (billable). */
 export async function createPlacesRateLimiter(): Promise<RateLimitRequestHandler> {
   return buildLimiter('places', {
     windowMs: parseNumber(process.env.PLACES_RATE_LIMIT_WINDOW_MS, 60 * 1000),
     max: parseNumber(process.env.PLACES_RATE_LIMIT_MAX, 60),
     message: 'Too many places requests',
+  });
+}
+
+/** Tighter limiter for Autocomplete (New) keystroke traffic. */
+export async function createPlacesAutocompleteRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('places-autocomplete', {
+    windowMs: parseNumber(process.env.PLACES_AUTOCOMPLETE_RATE_LIMIT_WINDOW_MS, 60 * 1000),
+    max: parseNumber(process.env.PLACES_AUTOCOMPLETE_RATE_LIMIT_MAX, 30),
+    message: 'Too many place suggestion requests',
   });
 }
 
@@ -130,6 +139,7 @@ export async function installRateLimiters(app: Express): Promise<void> {
   app.use('/api/pollen', await createPollenRateLimiter());
   // Air quality shares the pollen limiter profile (forecast + tile traffic).
   app.use('/api/air-quality', await createPollenRateLimiter());
+  app.use('/api/places/autocomplete', await createPlacesAutocompleteRateLimiter());
   app.use('/api/places', await createPlacesRateLimiter());
   app.use('/api/maps', await createMapsRateLimiter());
 }

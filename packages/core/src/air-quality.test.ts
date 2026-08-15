@@ -11,7 +11,14 @@ describe('air-quality', () => {
       dateTime: '2026-08-14T09:00:00Z',
       regionCode: 'ru',
       indexes: [
-        { code: 'uaqi', displayName: 'Universal AQI', aqi: 74, category: 'Good air quality' },
+        {
+          code: 'uaqi',
+          displayName: 'Universal AQI',
+          aqi: 74,
+          aqiDisplay: '74',
+          category: 'Good air quality',
+          color: { red: 0.2, green: 0.8, blue: 0.3 },
+        },
         { code: 'rus_mecoenr', displayName: 'AQI (RU)', aqi: 22, dominantPollutant: 'pm25' },
       ],
       pollutants: [
@@ -24,7 +31,12 @@ describe('air-quality', () => {
       },
     });
 
-    expect(snapshot.universal).toMatchObject({ code: 'uaqi', aqi: 74 });
+    expect(snapshot.universal).toMatchObject({
+      code: 'uaqi',
+      aqi: 74,
+      aqiDisplay: '74',
+      color: '#33CC4D',
+    });
     expect(snapshot.local).toMatchObject({ code: 'rus_mecoenr', aqi: 22 });
     expect(snapshot.pollutants).toEqual([
       expect.objectContaining({ code: 'pm25', value: 11.4 }),

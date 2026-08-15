@@ -4,6 +4,7 @@ import {
   pollenTierFromUpi,
   pollenUpiCategory,
   pollenUpiFromConcentration,
+  resolvePollenUpiDisplay,
 } from './pollen-upi';
 import {
   parseDailyPollenForecast,
@@ -19,6 +20,7 @@ import { getPollenTaxon } from './pollen-taxonomy';
 import {
   adairClinicToMapPoi,
   catalogPlaceToMapPoi,
+  dedupeMapPoisByPlaceId,
   filterMapPoisByCategory,
   googlePlaceToMapPoi,
 } from './map-poi';
@@ -28,8 +30,24 @@ import { ADAIR_CLINICS } from './adair-catalog';
 describe('pollen-upi', () => {
   it('clamps Google index values into 0–5', () => {
     expect(clampPollenUpiIndex(-1)).toBe(0);
+    expect(clampPollenUpiIndex(0)).toBe(0);
     expect(clampPollenUpiIndex(1.4)).toBe(1);
+    expect(clampPollenUpiIndex(2.5)).toBe(3);
+    expect(clampPollenUpiIndex(5)).toBe(5);
     expect(clampPollenUpiIndex(9)).toBe(5);
+    expect(pollenUpiCategory(0)).toBe('none');
+    expect(pollenUpiCategory(5)).toBe('very_high');
+  });
+
+  it('prefers Google category labels in the display contract', () => {
+    const display = resolvePollenUpiDisplay({
+      index: 3,
+      category: 'Moderate',
+      source: 'google',
+    });
+    expect(display.category).toBe('moderate');
+    expect(display.categorySource).toBe('google');
+    expect(display.color).toMatch(/^#/);
   });
 
   it('maps concentration to an approximate UPI', () => {
@@ -116,7 +134,11 @@ describe('map-poi', () => {
     expect(pharmacy.category).toBe('pharmacy');
     expect(clinic.source).toBe('adair');
     expect(clinic.lat).toBe(ADAIR_CLINICS[0]!.latitude);
-    expect(google?.level).toBe('high');
+    expect(google?.level).toBe('medium');
+    expect(google?.rating).toBe(4.5);
+    expect(google?.allergySafety).toBe('unknown');
+    expect(restaurant.allergySafety).toBe('curated');
+    expect(clinic.allergySafety).toBe('verified');
     expect(filterMapPoisByCategory([restaurant, pharmacy, clinic], ['medical'])).toEqual([
       clinic,
     ]);
@@ -141,5 +163,24 @@ describe('map-poi', () => {
       types: ['bakery'],
     });
     expect(bakery?.category).toBe('cafe');
+  });
+
+  it('dedupes Google POIs by place id and does not treat rating as safety', () => {
+    const first = googlePlaceToMapPoi({
+      placeId: 'abc',
+      name: 'Cafe A',
+      lat: 55.75,
+      lng: 37.62,
+      rating: 4.9,
+    });
+    const duplicate = googlePlaceToMapPoi({
+      placeId: 'abc',
+      name: 'Cafe A copy',
+      lat: 55.75,
+      lng: 37.62,
+      rating: 1,
+    });
+    expect(dedupeMapPoisByPlaceId([first!, duplicate!])).toHaveLength(1);
+    expect(first?.allergySafety).toBe('unknown');
   });
 });

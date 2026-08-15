@@ -61,6 +61,10 @@ REQUIRED_KEYS=(
   AI_SCAN_ENABLED
   POLLEN_HEATMAP_ENABLED
   GOOGLE_POLLEN_API_KEY
+  MAP_PLACES_ENABLED
+  GOOGLE_PLACES_API_KEY
+  AIR_QUALITY_ENABLED
+  GOOGLE_AIR_QUALITY_API_KEY
 )
 if [[ ! -f "$KEYS_FILE" ]]; then
   fail "missing $KEYS_FILE"
@@ -95,10 +99,10 @@ else
   echo "$BAD_EXPO_FILTERED"
 fi
 
-if grep -n 'GOOGLE_POLLEN_API_KEY' apps/mobile/eas.json >/dev/null 2>&1; then
-  fail "eas.json must not contain GOOGLE_POLLEN_API_KEY"
+if grep -nE 'GOOGLE_(POLLEN|PLACES|AIR_QUALITY)_API_KEY' apps/mobile/eas.json >/dev/null 2>&1; then
+  fail "eas.json must not contain server Google API keys"
 else
-  pass "eas.json has no GOOGLE_POLLEN_API_KEY"
+  pass "eas.json has no server Google API keys"
 fi
 
 echo ""

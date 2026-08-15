@@ -14,6 +14,7 @@ export type YandexInteractiveMapProps = {
   markers?: GoogleMapMarker[];
   selectedMarkerId?: string | null;
   onMarkerPress?: (markerId: string) => void;
+  onRegionChange?: (latitude: number, longitude: number) => void;
   overlay?: ReactNode;
 };
 
@@ -30,12 +31,15 @@ export function YandexInteractiveMap({
   markers = [],
   selectedMarkerId,
   onMarkerPress,
+  onRegionChange,
   overlay,
 }: YandexInteractiveMapProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, height), [theme, height]);
   const onMarkerPressRef = useRef(onMarkerPress);
   onMarkerPressRef.current = onMarkerPress;
+  const onRegionChangeRef = useRef(onRegionChange);
+  onRegionChangeRef.current = onRegionChange;
 
   const src = useMemo(
     () =>
@@ -52,7 +56,11 @@ export function YandexInteractiveMap({
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return undefined;
     const onMessage = (event: MessageEvent) => {
-      handleBridgeMessage(String(event.data ?? ''), onMarkerPressRef.current);
+      handleBridgeMessage(
+        String(event.data ?? ''),
+        onMarkerPressRef.current,
+        onRegionChangeRef.current,
+      );
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
@@ -93,7 +101,11 @@ export function YandexInteractiveMap({
         javaScriptEnabled
         domStorageEnabled
         onMessage={(event) => {
-          handleBridgeMessage(event.nativeEvent.data, onMarkerPressRef.current);
+          handleBridgeMessage(
+            event.nativeEvent.data,
+            onMarkerPressRef.current,
+            onRegionChangeRef.current,
+          );
         }}
       />
       {overlay ? (
@@ -108,16 +120,24 @@ export function YandexInteractiveMap({
 function handleBridgeMessage(
   raw: string,
   onMarkerPress?: ((markerId: string) => void) | null,
+  onRegionChange?: ((latitude: number, longitude: number) => void) | null,
 ) {
   try {
     const parsed = JSON.parse(raw) as {
       source?: string;
       type?: string;
-      data?: { id?: string };
+      data?: { id?: string; latitude?: number; longitude?: number };
     };
     if (parsed.source !== 'allerguide-yandex-map') return;
     if (parsed.type === 'marker_press' && parsed.data?.id) {
       onMarkerPress?.(parsed.data.id);
+    }
+    if (
+      parsed.type === 'region_change' &&
+      typeof parsed.data?.latitude === 'number' &&
+      typeof parsed.data?.longitude === 'number'
+    ) {
+      onRegionChange?.(parsed.data.latitude, parsed.data.longitude);
     }
   } catch {
     // ignore non-JSON

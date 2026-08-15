@@ -274,7 +274,7 @@ Baseline также включает **индекс самочувствия 0�
 - **FR-MAP-02.** Интерактивная карта с маркерами: Google Maps при наличии ключа/`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`; иначе виджет Яндекс.
 - **FR-MAP-03.** Геолокация пользователя (с разрешением).
 - **FR-MAP-04.** Список рекомендованных мест с уровнем: высокий / средний / низкий (badge в списке и легенда типов при слое «Места»).
-- **FR-MAP-05.** Фильтрация curated-мест по аллергенам профиля; live Places — опционально через `EXPO_PUBLIC_MAP_PLACES` / API proxy.
+- **FR-MAP-05.** Фильтрация curated-мест по аллергенам профиля; live Places — Nearby / Autocomplete / Text Search / Details через `EXPO_PUBLIC_MAP_PLACES` / API proxy. Google rating не является allergy safety (`allergySafety=unknown`). Hardcoded catalog — только маркированный региональный offline fallback.
 - **FR-MAP-08.** Клиники АДАИР отображаются как medical POI (адрес, телефон, запись) и в списке.
 - **FR-MAP-09.** Список врачей: ФИО, степень, специализация.
 - **FR-MAP-10.** Отметка НККЦ и главного медицинского эксперта (badges в списке POI / специалистов).
@@ -288,10 +288,12 @@ Baseline также включает **индекс самочувствия 0�
 - **FR-MAP-12.** Чипы выбора таксона с цветовой точкой уровня; релевантные профилю отмечены.
 - **FR-MAP-13.** Подложка: Google Maps primary при `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` или `EXPO_PUBLIC_POLLEN_HEATMAP=google`; Яндекс — fallback. Heatmap UPI через API proxy. Deep-link на 10-дневный прогноз Яндекс Погоды.
 - **FR-MAP-14.** При недоступности live-данных — кэш или региональный календарь без блокировки экрана.
-- **FR-MAP-15.** Универсальный индекс пыльцы (UPI 0–5): Google Forecast proxy при наличии ключа, иначе оценка из Open-Meteo grains/m³.
+- **FR-MAP-15.** Универсальный индекс пыльцы (UPI 0–5): официальные категории Google (`Нет` … `Очень высокий`). Google Forecast proxy при наличии ключа, иначе оценка из Open-Meteo grains/m³. Не подписывать Google UPI как зёрна/м³.
 - **FR-MAP-16.** Полоса multi-day прогноза (Open-Meteo hourly → daily peaks; до ~4 дней; Google Forecast до 5 при флаге).
-- **FR-MAP-17.** Дополнительные live-таксоны: ольха, полынь и олива (если доступны в CAMS).
-- **FR-MAP-18.** Google pollen heatmap + forecast foundation за stage-флагами; OM остаётся primary числовым feed offline-first.
+- **FR-MAP-17.** Picker всегда показывает 17 Google map taxa (14 TREE, 1 GRASS, 2 WEED) по группам, независимо от сезона; вид без данных остаётся выбранным с no-data state.
+- **FR-MAP-18.** Google pollen heatmap — только три групповых слоя (`TREE_UPI` / `GRASS_UPI` / `WEED_UPI`) с легендой. Per-species heatmap нет (spike: [`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md), решение no-go).
+- **FR-MAP-19.** Карточка Google UAQI 0–100 (чем выше, тем чище), загрязнители и рекомендация; AQ overlay взаимоисключающ с pollen heatmap.
+- **FR-MAP-20.** Карточка вида: имя, группа, in-season, family/season, признаки, перекрёстные реакции, UPI и health recommendation либо честный «нет текущих данных».
 
 Архитектура и сравнение источников: [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md).
 

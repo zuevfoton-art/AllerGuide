@@ -109,11 +109,21 @@ export function MapPoiSheet({
               <View style={styles.body}>
                 <View style={styles.titleRow}>
                   <Text style={styles.rowTitle}>{poi.title}</Text>
-                  <View style={[styles.levelBadge, { borderColor: levelColor }]}>
-                    <Text style={[styles.levelBadgeText, { color: levelColor }]}>
-                      {t(LEVEL_KEYS[poi.level])}
-                    </Text>
-                  </View>
+                  {poi.source === 'google-places' ? (
+                    typeof poi.rating === 'number' ? (
+                      <Text style={styles.meta}>
+                        {t('map.placeRating', { rating: poi.rating.toFixed(1) })}
+                      </Text>
+                    ) : (
+                      <Text style={styles.meta}>{t('map.placeAllergyUnknown')}</Text>
+                    )
+                  ) : (
+                    <View style={[styles.levelBadge, { borderColor: levelColor }]}>
+                      <Text style={[styles.levelBadgeText, { color: levelColor }]}>
+                        {t(LEVEL_KEYS[poi.level])}
+                      </Text>
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.note}>{poi.note}</Text>
                 <View style={styles.metaRow}>

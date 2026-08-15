@@ -7,7 +7,7 @@ import {
   Pressable,
   Linking,
 } from 'react-native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import {
   ADAIR_DOCTORS,
@@ -21,11 +21,14 @@ import {
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_MAP_SCALE_ZOOM,
   POLLEN_MAP_TAXON_IDS,
-  isTreeSpeciesPollenTaxon,
+  POLLEN_TYPE_GROUP_BY_TAXON,
+  pollenMapTaxonTypeGroup,
   pollenTaxonToGoogleMapType,
   readingToUpiSnapshot,
   resolvePollenRegion,
+  type AirQualitySnapshot,
   type MapPoiCategory,
+  type PlaceAutocompleteSuggestion,
   type PollenMapDirection,
   type PollenMapTaxonId,
   type PollenTierLevel,
@@ -41,6 +44,10 @@ import { GooglePollenMap } from '@/src/components/GooglePollenMap';
 import { YandexInteractiveMap } from '@/src/components/YandexInteractiveMap';
 import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
 import { PollenIndexCard } from '@/src/components/PollenIndexCard';
+import { PollenHeatmapLegend } from '@/src/components/PollenHeatmapLegend';
+import { AirQualityCard } from '@/src/components/AirQualityCard';
+import { AirQualityLegend } from '@/src/components/AirQualityLegend';
+import { PlaceSearchBar } from '@/src/components/PlaceSearchBar';
 import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
@@ -52,7 +59,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { getMapPois, type MapPoiWithDistance } from '@/src/services/place-service';
+import {
+  autocompleteMapPlaces,
+  createPlacesSessionToken,
+  fetchMapPlaceDetails,
+  searchMapPlaces,
+  type MapPoiWithDistance,
+  type PlacesResultSource,
+} from '@/src/services/place-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import {
   fetchPollenMapSnapshot,
@@ -61,8 +75,11 @@ import {
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
 import {
   buildAirQualityHeatmapTileUrlTemplate,
+  fetchAirQualitySnapshot,
   isAirQualityHeatmapAvailable,
+  isGoogleAirQualityAvailable,
 } from '@/src/services/air-quality-service';
+import { getLocale } from '@/src/services/settings-service';
 import { resolveMapBasemap } from '@/src/services/map-basemap';
 import {
   fetchPollenHourlySeries,
@@ -147,6 +164,15 @@ export default function MapScreen() {
   const [poiOrigin, setPoiOrigin] = useState<{ lat: number; lon: number } | null>(null);
   const [searchingArea, setSearchingArea] = useState(false);
   const [airLayerOn, setAirLayerOn] = useState(false);
+  const [airQuality, setAirQuality] = useState<AirQualitySnapshot | null>(null);
+  const [airQualityLoading, setAirQualityLoading] = useState(false);
+  const [placeInput, setPlaceInput] = useState('');
+  const [placeQuery, setPlaceQuery] = useState('');
+  const [placeSuggestions, setPlaceSuggestions] = useState<PlaceAutocompleteSuggestion[]>([]);
+  const [placeSearchLoading, setPlaceSearchLoading] = useState(false);
+  const [placeSearchError, setPlaceSearchError] = useState<string | null>(null);
+  const [placesSource, setPlacesSource] = useState<PlacesResultSource>('empty');
+  const [placeSessionToken, setPlaceSessionToken] = useState(createPlacesSessionToken);
 
   const refresh = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -154,29 +180,44 @@ export default function MapScreen() {
       const location = await getCurrentLocation();
       setCoords({ lat: location.lat, lon: location.lon, label: location.label });
       const origin = poiOrigin ?? { lat: location.lat, lon: location.lon };
-      const [snapshot, mapPois, windSnapshot, hourlySeries] = await Promise.all([
+      setAirQualityLoading(true);
+      const [snapshot, placesResult, windSnapshot, hourlySeries, airSnapshot] = await Promise.all([
         fetchPollenMapSnapshot(location, profile?.allergies ?? '[]'),
-        getMapPois(profile, { latitude: origin.lat, longitude: origin.lon }, poiCategories),
+        searchMapPlaces(
+          profile,
+          { latitude: origin.lat, longitude: origin.lon },
+          poiCategories,
+          placeQuery,
+        ),
         MAP_POLLEN_PLUME_ENABLED
           ? fetchWindSnapshot(location.lat, location.lon)
           : Promise.resolve(null),
         MAP_POLLEN_PLUME_ENABLED
           ? fetchPollenHourlySeries(location.lat, location.lon)
           : Promise.resolve(null),
+        isGoogleAirQualityAvailable()
+          ? fetchAirQualitySnapshot(location.lat, location.lon, getLocale() ?? 'ru')
+          : Promise.resolve(null),
       ]);
       setPollenSnapshot(snapshot);
-      setPois(mapPois);
+      setPois(placesResult.pois);
+      setPlacesSource(placesResult.source);
+      setPlaceSearchError(
+        placesResult.liveEmpty ? 'empty' : placesResult.source === 'empty' ? 'empty' : null,
+      );
       setWind(windSnapshot);
       setPollenHourly(hourlySeries);
+      setAirQuality(airSnapshot);
+      setAirQualityLoading(false);
       setSelectedPoiId((current) =>
-        current && mapPois.some((poi) => poi.id === current)
+        current && placesResult.pois.some((poi) => poi.id === current)
           ? current
-          : mapPois[0]?.id ?? null,
+          : placesResult.pois[0]?.id ?? null,
       );
     } finally {
       if (!options?.silent) setLoading(false);
     }
-  }, [poiCategories, poiOrigin, profile]);
+  }, [placeQuery, poiCategories, poiOrigin, profile]);
 
   const searchThisArea = useCallback(async () => {
     if (!mapCenter) return;
@@ -184,17 +225,20 @@ export default function MapScreen() {
     try {
       const origin = { lat: mapCenter.lat, lon: mapCenter.lon };
       setPoiOrigin(origin);
-      const mapPois = await getMapPois(
+      const placesResult = await searchMapPlaces(
         profile,
         { latitude: origin.lat, longitude: origin.lon },
         poiCategories,
+        placeQuery,
       );
-      setPois(mapPois);
-      setSelectedPoiId(mapPois[0]?.id ?? null);
+      setPois(placesResult.pois);
+      setPlacesSource(placesResult.source);
+      setPlaceSearchError(placesResult.liveEmpty ? 'empty' : null);
+      setSelectedPoiId(placesResult.pois[0]?.id ?? null);
     } finally {
       setSearchingArea(false);
     }
-  }, [mapCenter, poiCategories, profile]);
+  }, [mapCenter, placeQuery, poiCategories, profile]);
 
   useFocusEffect(
     useCallback(() => {
@@ -284,34 +328,24 @@ export default function MapScreen() {
   });
 
   const chipItems = useMemo(() => {
-    // Open-Meteo species are always listed; Google-only species (oak, pine, …)
-    // appear only when the current snapshot actually carries their data.
-    const taxaWithData = new Set<string>([
-      ...Object.keys(pollenSnapshot?.upiByTaxon ?? {}),
-      ...(pollenSnapshot?.readings.map((reading) => reading.taxonId) ?? []),
-    ]);
-    return POLLEN_MAP_TAXON_IDS.filter(
-      (taxonId) =>
-        (OPEN_METEO_POLLEN_MAP_TAXON_IDS as readonly string[]).includes(taxonId) ||
-        taxaWithData.has(taxonId),
-    ).map((taxonId) => {
+    return POLLEN_MAP_TAXON_IDS.map((taxonId) => {
       const reading = pollenSnapshot?.readings.find((item) => item.taxonId === taxonId);
+      const upi = pollenSnapshot?.upiByTaxon[taxonId];
+      const isOpenMeteo = (OPEN_METEO_POLLEN_MAP_TAXON_IDS as readonly string[]).includes(taxonId);
+      const dataStatus: 'live' | 'google-only' | 'none' =
+        upi?.source === 'google' || reading
+          ? 'live'
+          : isOpenMeteo
+            ? 'none'
+            : 'google-only';
       return {
         taxonId,
         level: reading?.level ?? null,
         profileRelevant: reading?.profileRelevant ?? false,
+        dataStatus,
       };
     });
   }, [pollenSnapshot]);
-
-  useEffect(() => {
-    // A Google-only species can disappear when the snapshot falls back to
-    // Open-Meteo; reset the selection so the UI never points at a hidden chip.
-    if (pollenSnapshot && !chipItems.some((item) => item.taxonId === selectedTaxonId)) {
-      setSelectedTaxonId('birch_pollen');
-      setSelectedForecastDay(null);
-    }
-  }, [chipItems, pollenSnapshot, selectedTaxonId]);
 
   const markers = useMemo(() => {
     if (!showPlaceMarkers) return [];
@@ -343,6 +377,79 @@ export default function MapScreen() {
   const handleRegionChange = useCallback((latitude: number, longitude: number) => {
     setMapCenter({ lat: latitude, lon: longitude });
   }, []);
+
+  const autocompleteRequestId = useRef(0);
+  useEffect(() => {
+    if (!showPlaceMarkers) {
+      setPlaceSuggestions([]);
+      return;
+    }
+    const query = placeInput.trim();
+    if (query.length < 2) {
+      setPlaceSuggestions([]);
+      return;
+    }
+    const origin = mapCenter ?? { lat: coords.lat, lon: coords.lon };
+    const requestId = autocompleteRequestId.current + 1;
+    autocompleteRequestId.current = requestId;
+    const timer = setTimeout(() => {
+      void autocompleteMapPlaces(
+        { latitude: origin.lat, longitude: origin.lon },
+        query,
+        poiCategories,
+        placeSessionToken,
+      ).then((suggestions) => {
+        if (autocompleteRequestId.current !== requestId) return;
+        setPlaceSuggestions(suggestions);
+      });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [coords.lat, coords.lon, mapCenter, placeInput, placeSessionToken, poiCategories, showPlaceMarkers]);
+
+  const runPlaceSearch = useCallback(
+    async (query: string) => {
+      const origin = mapCenter ?? poiOrigin ?? { lat: coords.lat, lon: coords.lon };
+      setPlaceQuery(query);
+      setPlaceSearchLoading(true);
+      setPlaceSuggestions([]);
+      try {
+        const placesResult = await searchMapPlaces(
+          profile,
+          { latitude: origin.lat, longitude: origin.lon },
+          poiCategories,
+          query,
+        );
+        setPois(placesResult.pois);
+        setPlacesSource(placesResult.source);
+        setPlaceSearchError(placesResult.liveEmpty ? 'empty' : null);
+        setSelectedPoiId(placesResult.pois[0]?.id ?? null);
+      } finally {
+        setPlaceSearchLoading(false);
+      }
+    },
+    [coords.lat, coords.lon, mapCenter, poiCategories, poiOrigin, profile],
+  );
+
+  const handleSelectSuggestion = useCallback(
+    async (suggestion: PlaceAutocompleteSuggestion) => {
+      setPlaceInput(suggestion.primaryText);
+      setPlaceSuggestions([]);
+      const details = await fetchMapPlaceDetails(suggestion.placeId, placeSessionToken);
+      setPlaceSessionToken(createPlacesSessionToken());
+      if (details) {
+        setPois((current) => {
+          const next = [details, ...current.filter((poi) => poi.id !== details.id)];
+          return next;
+        });
+        setSelectedPoiId(details.id);
+        setMapCenter({ lat: details.lat, lon: details.lng });
+        setPlacesSource('google-places');
+        return;
+      }
+      await runPlaceSearch(suggestion.primaryText);
+    },
+    [placeSessionToken, runPlaceSearch],
+  );
 
   const yandexPlacesUrl = useMemo(() => {
     if (pois.length === 0) {
@@ -385,7 +492,11 @@ export default function MapScreen() {
   }, []);
 
   const taxonLabel = t(TAXON_LABEL_KEYS[selectedTaxonId] as 'map.pollenBirch');
-  const levelLabel = statusLevel ? t(LEVEL_LABEL_KEYS[statusLevel]) : t('map.pollenLoading');
+  const levelLabel = statusLevel
+    ? t(LEVEL_LABEL_KEYS[statusLevel])
+    : loading && !pollenSnapshot
+      ? t('map.pollenLoading')
+      : t('map.pollenUnavailable');
 
   const statusHeadline = useMemo(() => {
     if (loading && !pollenSnapshot) return t('map.pollenLoading');
@@ -594,6 +705,7 @@ export default function MapScreen() {
         items={chipItems}
         selectedTaxonId={selectedTaxonId}
         plants={pollenSnapshot?.plants ?? {}}
+        upiByTaxon={pollenSnapshot?.upiByTaxon ?? {}}
         labelForTaxon={(taxonId) => t(TAXON_LABEL_KEYS[taxonId] as 'map.pollenBirch')}
         onSelect={(taxonId) => {
           setSelectedTaxonId(taxonId);
@@ -611,6 +723,7 @@ export default function MapScreen() {
           markers={showPlaceMarkers ? markers : []}
           selectedMarkerId={selectedPoiId}
           onMarkerPress={setSelectedPoiId}
+          onRegionChange={handleRegionChange}
           overlay={mapOverlay}
         />
       ) : useGoogleMap ? (
@@ -663,9 +776,13 @@ export default function MapScreen() {
       <Text style={styles.mapAttribution} testID="map-attribution">
         {t(mapAttributionKey)}
       </Text>
-      {useGoogleMap && useHeatmap && isTreeSpeciesPollenTaxon(selectedTaxonId) ? (
-        <Text style={styles.treeSpeciesHint} testID="map-tree-heatmap-hint">
-          {t('map.pollenHeatmapTreeHint')}
+      {useGoogleMap && useHeatmap && !showAirLayer ? (
+        <Text style={styles.treeSpeciesHint} testID="map-group-heatmap-hint">
+          {POLLEN_TYPE_GROUP_BY_TAXON[selectedTaxonId] === 'GRASS'
+            ? t('map.pollenHeatmapGrassHint')
+            : POLLEN_TYPE_GROUP_BY_TAXON[selectedTaxonId] === 'WEED'
+              ? t('map.pollenHeatmapWeedHint')
+              : t('map.pollenHeatmapTreeHint')}
         </Text>
       ) : null}
 
@@ -696,12 +813,10 @@ export default function MapScreen() {
             <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
           </View>
         </>
+      ) : showAirLayer ? (
+        <AirQualityLegend />
       ) : (
-        <View style={styles.legendRow}>
-          <LegendDot color={theme.colors.danger} label={t('map.legendHigh')} />
-          <LegendDot color={theme.colors.warning} label={t('map.legendModerate')} />
-          <LegendDot color={theme.colors.success} label={t('map.legendLow')} />
-        </View>
+        <PollenHeatmapLegend group={pollenMapTaxonTypeGroup(selectedTaxonId)} />
       )}
 
       {showActionTip ? (
@@ -731,8 +846,10 @@ export default function MapScreen() {
                 ? null
                 : selectedReading?.value ?? null
             }
-            levelLabel={selectedReading ? t(LEVEL_LABEL_KEYS[selectedReading.level]) : null}
           />
+          {isGoogleAirQualityAvailable() ? (
+            <AirQualityCard snapshot={airQuality} loading={airQualityLoading} />
+          ) : null}
 
           <PollenForecastStrip
             days={pollenSnapshot?.forecastDays ?? []}
@@ -780,13 +897,48 @@ export default function MapScreen() {
       ) : null}
 
       {showPlacesPanel ? (
-        <MapPoiSheet
-          pois={pois}
-          selectedId={selectedPoiId}
-          categories={poiCategories}
-          onSelect={setSelectedPoiId}
-          onToggleCategory={toggleCategory}
-        />
+        <>
+          <PlaceSearchBar
+            value={placeInput}
+            suggestions={placeSuggestions}
+            loading={placeSearchLoading}
+            error={
+              placeSearchError === 'empty'
+                ? t('map.placeSearchNothingFound')
+                : null
+            }
+            sourceLabel={
+              placesSource === 'catalog'
+                ? t('map.placeSearchOfflineCatalog')
+                : placesSource === 'google-places'
+                  ? t('map.placeSourceGoogle')
+                  : placesSource === 'adair'
+                    ? t('map.placeSourceCatalog')
+                    : null
+            }
+            onChange={setPlaceInput}
+            onSubmit={(value) => {
+              void runPlaceSearch(value);
+            }}
+            onSelectSuggestion={(suggestion) => {
+              void handleSelectSuggestion(suggestion);
+            }}
+            onClear={() => {
+              setPlaceInput('');
+              setPlaceQuery('');
+              setPlaceSuggestions([]);
+              setPlaceSessionToken(createPlacesSessionToken());
+              void runPlaceSearch('');
+            }}
+          />
+          <MapPoiSheet
+            pois={pois}
+            selectedId={selectedPoiId}
+            categories={poiCategories}
+            onSelect={setSelectedPoiId}
+            onToggleCategory={toggleCategory}
+          />
+        </>
       ) : null}
 
       <Pressable

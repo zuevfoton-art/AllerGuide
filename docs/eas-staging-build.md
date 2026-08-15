@@ -26,6 +26,8 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | `false` |
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | **`google`** (нужен EAS secret Maps key) |
 | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | (нет) | **`true`** (нужен Lockbox `YANDEX_MAPS_*` — `pnpm yc-stage-enable-yandex-maps`) |
+| `EXPO_PUBLIC_MAP_PLACES` | (нет) | **`true`** (нужен Lockbox Places — `pnpm yc-stage-enable-places-air-quality`) |
+| `EXPO_PUBLIC_AIR_QUALITY` | (нет) | **`google`** (нужен Lockbox Air Quality — тот же enable script) |
 | EAS channel | `preview` | `staging` |
 
 ---
@@ -102,6 +104,7 @@ API smoke (без устройства):
 4. **Create profile** — dual-write на сервер (S.4)
 5. **Manual scan** — ручной ввод состава → источник «ИИ-анализ» (P1.5b / C.1)
 6. **Пыление (если GCP keys)** — Google basemap + UPI heatmap + OM-бейдж ([android-stage-build.md](android-stage-build.md))
+7. **Места / воздух (если Lockbox Places+AQ)** — live кафе/медицина + Google UAQI ([gcp-pollen-maps-keys.md](gcp-pollen-maps-keys.md))
 
 Далее для closed beta: cross-device backup (P1.4c).
 

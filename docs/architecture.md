@@ -258,7 +258,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 | `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
-| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` | Live Places API (New) searchNearby через API (рестораны / кафе / медицина / аптеки) |
+| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
 | `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY=google` | Google Air Quality (UAQI + советы) через API proxy |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
 | `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
@@ -554,7 +554,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 
 ### Pollen heatmap (`routes/pollen.ts`)
 
-- Proxy Google Pollen UPI tiles при `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY`
+- Proxy Google Pollen UPI tiles при `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY`. Species heatmap spike: [`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md) (**no-go**).
 - Proxy Google Pollen Forecast (`GET /api/pollen/forecast`) и Places Nearby (`GET /api/places/nearby`)
 - Mobile: `EXPO_PUBLIC_POLLEN_HEATMAP=google` + `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (+ optional `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_PLACES`)
 - Default / offline-safe: Yandex map + Open-Meteo через `pollen-map-service`

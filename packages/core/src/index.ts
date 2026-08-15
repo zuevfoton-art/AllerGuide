@@ -59,6 +59,8 @@ export * from './pollen-map';
 export * from './pollen-upi';
 export * from './pollen-plant-detail';
 export * from './pollen-google-forecast';
+export * from './pollen-google-normalize';
+export * from './pollen-species-heatmap';
 export * from './pollen-plume';
 export * from './hourly-series';
 export * from './map-poi';

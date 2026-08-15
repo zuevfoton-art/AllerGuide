@@ -42,10 +42,25 @@ describe('buildHealthPayload', () => {
       aiScan: true,
       aiScanProvider: 'yandex',
       pollenHeatmap: false,
+      pollenSpeciesHeatmap: false,
       airQuality: false,
+      mapPlaces: false,
       yandexMapsInteractive: false,
     });
     expect(payload.scan?.enabled).toBe(true);
     expect(payload.scan?.dailyBudget).toBe(100);
+  });
+
+  it('exposes Places and Air Quality when flags and keys are set', async () => {
+    process.env.MAP_PLACES_ENABLED = 'true';
+    process.env.GOOGLE_PLACES_API_KEY = 'places-test-key';
+    process.env.AIR_QUALITY_ENABLED = 'true';
+    process.env.GOOGLE_AIR_QUALITY_API_KEY = 'aq-test-key';
+    delete process.env.DATABASE_URL;
+
+    const { buildHealthPayload } = await import('./health');
+    const payload = await buildHealthPayload();
+    expect(payload.features?.mapPlaces).toBe(true);
+    expect(payload.features?.airQuality).toBe(true);
   });
 });

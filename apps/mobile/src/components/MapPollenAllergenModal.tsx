@@ -15,6 +15,7 @@ import {
   type PollenPlantDetail,
   type PollenTierLevel,
   type PollenTypeGroup,
+  type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { PollenPlantSheet } from '@/src/components/PollenPlantSheet';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -29,6 +30,7 @@ interface MapPollenAllergenModalProps {
   items: MapAllergenChipItem[];
   selectedTaxonId: PollenMapTaxonId;
   plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
+  upiByTaxon?: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
   labelForTaxon: (taxonId: PollenMapTaxonId) => string;
   onSelect: (taxonId: PollenMapTaxonId) => void;
   onClose: () => void;
@@ -39,6 +41,7 @@ export function MapPollenAllergenModal({
   items,
   selectedTaxonId,
   plants,
+  upiByTaxon,
   labelForTaxon,
   onSelect,
   onClose,
@@ -123,7 +126,10 @@ export function MapPollenAllergenModal({
             contentContainerStyle={styles.scrollContent}
             bounces={false}>
             {infoTaxonId ? (
-              <PollenPlantSheet detail={plants[infoTaxonId] ?? null} />
+              <PollenPlantSheet
+                detail={plants[infoTaxonId] ?? null}
+                upi={upiByTaxon?.[infoTaxonId] ?? null}
+              />
             ) : (
               <>
                 {groupedItems.map((section) => (
@@ -132,6 +138,8 @@ export function MapPollenAllergenModal({
                       style={styles.groupTitle}
                       testID={`map-allergen-group-${section.group.toLowerCase()}`}>
                       {t(POLLEN_TYPE_LABEL_KEYS[section.group] as 'map.pollenTypeTree')}
+                      {' · '}
+                      {t('map.groupCount', { count: String(section.items.length) })}
                     </Text>
                     {section.items.map((item) => {
                       const isSelected = item.taxonId === selectedTaxonId;
@@ -156,6 +164,13 @@ export function MapPollenAllergenModal({
                             {item.profileRelevant ? (
                               <Text style={styles.you}>{t('map.pollenYou')}</Text>
                             ) : null}
+                            <Text style={styles.status}>
+                              {item.dataStatus === 'live'
+                                ? t('map.dataStatusLive')
+                                : item.dataStatus === 'google-only'
+                                  ? t('map.dataStatusGoogleOnly')
+                                  : t('map.dataStatusNone')}
+                            </Text>
                             {isSelected ? (
                               <Ionicons name="checkmark" size={18} color={theme.colors.accent} />
                             ) : null}
@@ -294,6 +309,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 11,
       color: colors.accent,
+    },
+    status: {
+      marginLeft: 'auto',
+      fontFamily: fonts.sans,
+      fontSize: 10,
+      color: colors.textMuted,
     },
     infoBtn: {
       width: 44,
