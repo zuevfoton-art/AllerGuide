@@ -374,6 +374,7 @@ export default function DiaryScreen() {
         </View>
       </View>
 
+      <Text style={ui.sectionLabel}>{t('diary.entriesTitle')}</Text>
       <Button label={t('diary.newEntry')} variant="primary" block onPress={() => void openFullWizard()} />
       <Button
         testID="diary-quick-entry"
@@ -570,13 +571,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
-    actPromptCard: { gap: 8 },
-    actPromptText: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
     chip: {
       flexDirection: 'row',

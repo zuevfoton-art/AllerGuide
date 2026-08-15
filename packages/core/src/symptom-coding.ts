@@ -215,7 +215,10 @@ export function parseSymptomCodeLabels(raw: string | undefined | null): string[]
     .filter(Boolean);
 }
 
-export function resolveSymptomCodes(answers: Record<string, string>): string[] {
+export function resolveSymptomCodes(
+  answers: Record<string, string>,
+  options?: { inferFromText?: boolean },
+): string[] {
   const codes = new Set<string>();
 
   for (const label of parseSymptomCodeLabels(answers.symptomCode)) {
@@ -231,8 +234,10 @@ export function resolveSymptomCodes(answers: Record<string, string>): string[] {
     }
   }
 
-  for (const id of inferSymptomCodesFromText(answers.symptoms ?? '')) {
-    codes.add(id);
+  if (options?.inferFromText !== false) {
+    for (const id of inferSymptomCodesFromText(answers.symptoms ?? '')) {
+      codes.add(id);
+    }
   }
 
   return [...codes];

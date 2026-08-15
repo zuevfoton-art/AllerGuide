@@ -70,6 +70,28 @@ describe('diary schema', () => {
     expect(decoded?.answers.symptomCodes).toContain('sneezing');
   });
 
+  it('shows only user-selected values in symptom and food history', () => {
+    const symptomDetails = encodeDiaryDetails({
+      symptoms: 'зуд и кашель',
+      severity0_3: '2',
+    });
+    const symptomSummary = formatDiaryEntrySummary('Симптомы', symptomDetails);
+    expect(symptomSummary).toContain('зуд и кашель');
+    expect(symptomSummary).not.toMatch(/SNOMED|кашель \( /);
+
+    const foodDetails = encodeDiaryDetails({
+      food: 'борщ',
+      allergens: 'молоко',
+      foodSource: 'Вручную',
+      reactionCodedSummary: 'OAS',
+    });
+    const foodSummary = formatDiaryEntrySummary('Питание', foodDetails);
+    expect(foodSummary).toBe('борщ');
+    expect(foodSummary).not.toContain('молоко');
+    expect(foodSummary).not.toContain('Вручную');
+    expect(foodSummary).not.toContain('OAS');
+  });
+
   it('formats structured summary for history cards', () => {
     const details = encodeDiaryDetails({
       medicine: 'Цетиризин',

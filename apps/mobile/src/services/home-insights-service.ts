@@ -63,7 +63,9 @@ export function buildHomeInsightItems(input: {
     enableActReminder: Boolean(capabilities?.reminders.act),
     wellnessCount: wellnessRecs.length,
     phenotypeCount: input.phenotypeHints.length,
-    hasTherapyReminder: Boolean(nextIntake && input.prescribedCourse),
+    hasTherapyReminder: Boolean(
+      input.prescribedCourse && isPrescribedCourseConfigured(input.prescribedCourse),
+    ),
   });
 
   const items: HomeInsightItem[] = [];
@@ -111,15 +113,19 @@ export function buildHomeInsightItems(input: {
       continue;
     }
 
-    if (item.kind === 'therapy-reminder' && input.prescribedCourse && nextIntake) {
+    if (item.kind === 'therapy-reminder' && input.prescribedCourse) {
       items.push({
         id: item.id,
         icon: 'alarm-outline',
         title: input.t('home.insightsTherapyTitle'),
-        text: input.t('home.insightsTherapyText', {
-          drug: input.prescribedCourse.drug,
-          time: formatPrescribedReminderTime(nextIntake.hour, nextIntake.minute),
-        }),
+        text: nextIntake
+          ? input.t('home.insightsTherapyText', {
+              drug: input.prescribedCourse.drug,
+              time: formatPrescribedReminderTime(nextIntake.hour, nextIntake.minute),
+            })
+          : input.t('home.insightsTherapyActiveText', {
+              drug: input.prescribedCourse.drug,
+            }),
         action: {
           label: input.t('home.insightsOpenTherapy'),
           href: '/(tabs)/diary',

@@ -67,6 +67,7 @@ export type WellnessSnapshot = {
     diaryTier: WellnessVerbalTier;
     primaryFactorId: WellnessPrimaryFactorId;
     pollenValue: number | null;
+    pollenAllergenLabel: string | null;
     pm25: number | null;
     symptomDays: number;
   };
@@ -331,58 +332,45 @@ export async function fetchWellnessSnapshot(
 
   const crossReactionNames = breakdown.crossReactionMatches.map((m) => m.allergen.name);
 
-  const factors = envDataAvailable
-    ? [
-        ...pollenMatches
-          .filter((m) => m.profileRelevant)
-          .map((m) => ({
-            label: `${messages.wellness.pollenLabel} · ${m.label}`,
-            value: `${m.value.toFixed(1)} ${messages.wellness.grains}`,
-            level: pollenTier(m.value, m.taxonId).level,
-          })),
-        {
-          label: messages.wellness.airLabel,
-          value: googleAirQuality?.universal
-            ? formatGoogleAirFactorValue(googleAirQuality)
-            : pm25 != null
-              ? `PM2.5 ${pm25.toFixed(1)} µg/m³`
-              : '—',
-          level: googleAirQuality?.universal
-            ? airQualityRiskFromUaqi(googleAirQuality.universal.aqi)
-            : aqiTier(europeanAqi).level,
-        },
-        {
-          label: messages.wellness.diaryLabel,
-          value:
-            diarySeries.symptomDays > 0
-              ? formatTemplate(messages.wellness.symptomDays, {
-                  days: String(diarySeries.symptomDays),
-                })
-              : messages.wellness.calm,
-          level: diarySeries.symptomDays >= 3 ? ('high' as const) : diarySeries.symptomDays >= 1 ? ('mid' as const) : ('low' as const),
-        },
-      ]
-    : [
-        {
-          label: messages.wellness.airLabel,
-          value: googleAirQuality?.universal
-            ? formatGoogleAirFactorValue(googleAirQuality)
-            : messages.wellness.envUnavailable,
-          level: googleAirQuality?.universal
-            ? airQualityRiskFromUaqi(googleAirQuality.universal.aqi)
-            : ('mid' as const),
-        },
-        {
-          label: messages.wellness.diaryLabel,
-          value:
-            diarySeries.symptomDays > 0
-              ? formatTemplate(messages.wellness.symptomDays, {
-                  days: String(diarySeries.symptomDays),
-                })
-              : messages.wellness.calm,
-          level: diarySeries.symptomDays >= 3 ? ('high' as const) : diarySeries.symptomDays >= 1 ? ('mid' as const) : ('low' as const),
-        },
-      ];
+  const primaryPollen = envDataAvailable
+    ? pollenMatches.find((match) => match.profileRelevant) ?? pollenMatches[0] ?? null
+    : null;
+  const pollenExactValue = primaryPollen
+    ? `${primaryPollen.label} — ${primaryPollen.value.toFixed(1)} ${messages.wellness.grains}`
+    : messages.wellness.envUnavailable;
+  const airExactValue = googleAirQuality?.universal
+    ? formatGoogleAirFactorValue(googleAirQuality)
+    : envDataAvailable && pm25 != null
+      ? `PM2.5 — ${pm25.toFixed(1)} µg/m³`
+      : messages.wellness.envUnavailable;
+  const diaryExactValue =
+    diarySeries.symptomDays > 0
+      ? formatTemplate(messages.wellness.symptomDays, {
+          days: String(diarySeries.symptomDays),
+        })
+      : messages.wellness.calm;
+
+  const factors = [
+    {
+      label: messages.wellness.pollenLabel,
+      value: pollenExactValue,
+      level: primaryPollen ? pollenTier(primaryPollen.value, primaryPollen.taxonId).level : ('mid' as const),
+    },
+    {
+      label: messages.wellness.airLabel,
+      value: airExactValue,
+      level: googleAirQuality?.universal
+        ? airQualityRiskFromUaqi(googleAirQuality.universal.aqi)
+        : envDataAvailable
+          ? aqiTier(europeanAqi).level
+          : ('mid' as const),
+    },
+    {
+      label: messages.wellness.diaryLabel,
+      value: diaryExactValue,
+      level: diarySeries.symptomDays >= 3 ? ('high' as const) : diarySeries.symptomDays >= 1 ? ('mid' as const) : ('low' as const),
+    },
+  ];
 
   trackEvent('wellness_refreshed', {
     score,
@@ -416,21 +404,12 @@ export async function fetchWellnessSnapshot(
     pollenMatches: envDataAvailable ? pollenMatches : [],
     display: {
       indexTier: verbalizeWellnessIndex(score),
-      pollenTier: verbalizePollenValue(
-        envDataAvailable
-          ? pollenMatches.find((match) => match.profileRelevant)?.value ??
-              pollenMatches[0]?.value ??
-              null
-          : null,
-      ),
+      pollenTier: verbalizePollenValue(primaryPollen?.value ?? null),
       airTier: verbalizePm25(envDataAvailable ? pm25 : null),
       diaryTier: verbalizeDiaryDays(diarySeries.symptomDays),
       primaryFactorId: derivePrimaryWellnessFactor(breakdown).id,
-      pollenValue: envDataAvailable
-        ? pollenMatches.find((match) => match.profileRelevant)?.value ??
-          pollenMatches[0]?.value ??
-          null
-        : null,
+      pollenValue: primaryPollen?.value ?? null,
+      pollenAllergenLabel: primaryPollen?.label ?? null,
       pm25: envDataAvailable ? pm25 : null,
       symptomDays: diarySeries.symptomDays,
     },

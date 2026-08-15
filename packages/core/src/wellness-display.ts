@@ -43,6 +43,12 @@ export function verbalizeDiaryDays(symptomDays: number): WellnessVerbalTier {
   return 'high';
 }
 
+export type WellnessForecastTier = 'high' | 'medium' | 'low';
+
+export function verbalizeConfidence(confidence: WellnessForecastTier): WellnessForecastTier {
+  return confidence;
+}
+
 export function derivePrimaryWellnessFactor(breakdown: WellnessScoreBreakdown): WellnessPrimaryFactor {
   const candidates: WellnessPrimaryFactor[] = [
     { id: 'pollen', penalty: breakdown.pollenPenalty + breakdown.crossReactionPenalty },

@@ -781,7 +781,9 @@ export function formatDiaryEntrySummary(type: string, details: string): string {
     if (symptoms) parts.push(symptoms);
     const severity = normalizeSeverity(structured.answers, 'Симптомы');
     if (severity !== null) parts.push(`тяжесть ${formatSeveritySummary(severity)}`);
-    const coded = formatCodedSymptomsSummary(resolveSymptomCodes(structured.answers));
+    const coded = formatCodedSymptomsSummary(
+      resolveSymptomCodes(structured.answers, { inferFromText: false }),
+    );
     if (coded) parts.push(coded);
     return parts.length ? parts.join(' · ') : 'Симптомы';
   }
