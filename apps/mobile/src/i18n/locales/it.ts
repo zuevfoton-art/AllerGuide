@@ -367,6 +367,7 @@ const it: LocaleMessages = {
       'Il riconoscimento del piatto dalla foto è una stima IA del nome e degli ingredienti tipici. Salse, sostituzioni e contaminazioni crociate possono mancare. Non sostituisce l’etichetta né una domanda in cucina e non esclude una reazione individuale.',
     dishVisionFailed:
       'Impossibile riconoscere il piatto dalla foto. Controllate la connessione e riprovate — oppure inserite gli ingredienti manualmente.',
+    cloudAuthRequired: 'Lo scanner cloud richiede l’accesso. Accedi e ripeti la foto — oppure inserisci gli ingredienti manualmente.',
     safeList: 'Prodotti sicuri',
     saveToSafe: '✓ Salva come sicuro',
     savedToSafe: '✓ Salvato',

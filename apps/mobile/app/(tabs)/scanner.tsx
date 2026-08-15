@@ -43,6 +43,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
 import {
   isDishVisionScanError,
+  isScanCloudAuthError,
   scanBarcode,
   scanFromOcr,
   scanText,
@@ -126,6 +127,7 @@ export default function ScannerScreen() {
   const [ocrHint, setOcrHint] = useState<string | null>(null);
   const [scanError, setScanError] = useState(false);
   const [scanErrorIsDishVision, setScanErrorIsDishVision] = useState(false);
+  const [scanErrorIsCloudAuth, setScanErrorIsCloudAuth] = useState(false);
   const [repeatUnsafe, setRepeatUnsafe] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -257,6 +259,7 @@ export default function ScannerScreen() {
     setOcrHint(null);
     setScanError(false);
     setScanErrorIsDishVision(false);
+    setScanErrorIsCloudAuth(false);
     setIngredientsOpen(false);
     try {
       let scanResult: ScanResultExtended;
@@ -282,6 +285,7 @@ export default function ScannerScreen() {
       if (requestId !== scanRequestIdRef.current) return;
       setResult(null);
       setScanError(true);
+      setScanErrorIsCloudAuth(isScanCloudAuthError(error));
       setScanErrorIsDishVision(isDishVisionScanError(error));
     } finally {
       if (requestId === scanRequestIdRef.current) {
@@ -302,6 +306,7 @@ export default function ScannerScreen() {
     setOcrHint(null);
     setScanError(false);
     setScanErrorIsDishVision(false);
+    setScanErrorIsCloudAuth(false);
     setIngredientsOpen(false);
     try {
       const scanResult = await scanFromOcr({
@@ -323,6 +328,7 @@ export default function ScannerScreen() {
       if (requestId !== scanRequestIdRef.current) return;
       setResult(null);
       setScanError(true);
+      setScanErrorIsCloudAuth(isScanCloudAuthError(error));
       setScanErrorIsDishVision(isDishVisionScanError(error));
     } finally {
       if (requestId === scanRequestIdRef.current) {
@@ -721,7 +727,13 @@ export default function ScannerScreen() {
 
       {scanError && !loading ? (
         <ErrorState
-          message={t(scanErrorIsDishVision ? 'scanner.dishVisionFailed' : 'scanner.checkFailed')}
+          message={t(
+            scanErrorIsCloudAuth
+              ? 'scanner.cloudAuthRequired'
+              : scanErrorIsDishVision
+                ? 'scanner.dishVisionFailed'
+                : 'scanner.checkFailed',
+          )}
           onRetry={() => lastScanRef.current?.()}
         />
       ) : null}

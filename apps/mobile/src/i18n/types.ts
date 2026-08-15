@@ -375,6 +375,7 @@ export type LocaleMessages = {
     dishVisionDisclaimer: string;
     /** Visible error when plate-only multimodal vision fails (not empty clear). */
     dishVisionFailed: string;
+    cloudAuthRequired: string;
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
