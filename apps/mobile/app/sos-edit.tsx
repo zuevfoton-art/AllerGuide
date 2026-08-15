@@ -1,5 +1,5 @@
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';

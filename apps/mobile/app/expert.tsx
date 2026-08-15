@@ -1,4 +1,5 @@
 import { ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { EXPERT_CATEGORIES, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
