@@ -28,7 +28,6 @@ import {
   type AirQualitySnapshot,
   type MapPoiCategory,
   type PlaceAutocompleteSuggestion,
-  type PollenMapDirection,
   type PollenMapTaxonId,
   type PollenTierLevel,
   type PollenUpiSnapshot,
@@ -100,17 +99,6 @@ const LEVEL_LABEL_KEYS: Record<PollenTierLevel, string> = {
   low: 'map.pollenLow',
   mid: 'map.pollenModerate',
   high: 'map.pollenHigh',
-};
-
-const DIRECTION_KEYS: Record<PollenMapDirection, 'map.pollenNorth' | 'map.pollenNorthEast' | 'map.pollenEast' | 'map.pollenSouthEast' | 'map.pollenSouth' | 'map.pollenSouthWest' | 'map.pollenWest' | 'map.pollenNorthWest'> = {
-  north: 'map.pollenNorth',
-  northEast: 'map.pollenNorthEast',
-  east: 'map.pollenEast',
-  southEast: 'map.pollenSouthEast',
-  south: 'map.pollenSouth',
-  southWest: 'map.pollenSouthWest',
-  west: 'map.pollenWest',
-  northWest: 'map.pollenNorthWest',
 };
 
 const DEFAULT_POI_CATEGORIES: MapPoiCategory[] = [
@@ -572,14 +560,6 @@ export default function MapScreen() {
         : 'map.pollenGoogleMapAttribution'
       : 'map.pollenMapAttribution';
 
-  const safeNearby = useMemo(() => {
-    const locations = pollenSnapshot?.nearbyLocations ?? [];
-    return locations.filter((location) => {
-      const reading = location.readings.find((item) => item.taxonId === selectedTaxonId);
-      return reading?.level === 'low';
-    });
-  }, [pollenSnapshot?.nearbyLocations, selectedTaxonId]);
-
   const showActionTip = statusLevel === 'mid' || statusLevel === 'high';
   const showPlacesPanel = layerMode === 'places' || layerMode === 'both';
 
@@ -831,24 +811,6 @@ export default function MapScreen() {
                   <Text style={styles.calendarText}>{t('map.pollenNoSeason')}</Text>
                 )}
               </View>
-            </GlassCard>
-          ) : null}
-
-          {safeNearby.length > 0 ? (
-            <GlassCard>
-              <Text style={styles.calendarTitle}>{t('map.safePollenPlaces')}</Text>
-              <Text style={styles.calendarText}>{t('map.safePollenPlacesHint')}</Text>
-              {safeNearby.slice(0, 4).map((location) => (
-                <Text
-                  key={`${location.latitude}-${location.longitude}`}
-                  style={styles.safePoint}>
-                  {t(DIRECTION_KEYS[location.direction])}
-                  {' · '}
-                  {t('map.pollenDistance', {
-                    distance: String(Math.round(location.distanceKm)),
-                  })}
-                </Text>
-              ))}
             </GlassCard>
           ) : null}
         </>
@@ -1162,12 +1124,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.text,
     },
     calendarText: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
-    safePoint: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      marginTop: 4,
-    },
     doctorsToggle: {
       flexDirection: 'row',
       alignItems: 'center',

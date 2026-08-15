@@ -519,18 +519,6 @@ export type LocaleMessages = {
     pollenNoSeason: string;
     openYandexPollen: string;
     openYandexPollenHint: string;
-    safePollenPlaces: string;
-    safePollenPlacesHint: string;
-    noSafePollenPlaces: string;
-    pollenDistance: string;
-    pollenNorth: string;
-    pollenNorthEast: string;
-    pollenEast: string;
-    pollenSouthEast: string;
-    pollenSouth: string;
-    pollenSouthWest: string;
-    pollenWest: string;
-    pollenNorthWest: string;
     nkcc: string;
     chiefExpert: string;
     subtitleUnified: string;
