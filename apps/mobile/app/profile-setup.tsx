@@ -278,6 +278,7 @@ export default function ProfileSetupScreen() {
 
     if (isAddingProfile) {
       markOnboardingComplete();
+      trackEvent('onboarding_completed', { flow: 'add_profile', scenario: scenario ?? 'none' });
       if (router.canGoBack()) {
         router.back();
       } else {
@@ -288,6 +289,7 @@ export default function ProfileSetupScreen() {
 
     if (shouldCompleteOnboarding(scenario, profiles)) {
       markOnboardingComplete();
+      trackEvent('onboarding_completed', { flow: 'first_run', scenario: scenario ?? 'none' });
       router.replace('/(tabs)/home');
       return;
     }
