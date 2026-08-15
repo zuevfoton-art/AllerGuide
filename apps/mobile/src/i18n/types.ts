@@ -1202,8 +1202,11 @@ export type LocaleMessages = {
     medicalNotes: string;
     actionPlan: string;
     emptyProfile: string;
+    emptyProfileHint: string;
     contactsTitle: string;
     contactsHint: string;
+    editPassport: string;
+    editContacts: string;
     callContact: string;
     call: string;
     settingsLink: string;

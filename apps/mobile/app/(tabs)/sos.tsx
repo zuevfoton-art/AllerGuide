@@ -34,6 +34,7 @@ import {
   getSosActionPlan,
   getSosNotes,
   listEmergencyContacts,
+  resolveSosEmergencyBar,
 } from '@/src/services/sos-service';
 import { trackEvent } from '@/src/services/analytics-service';
 
@@ -133,27 +134,32 @@ export default function SosScreen() {
   };
 
   const firstContact = contacts[0] ?? null;
+  const emergencyBar = resolveSosEmergencyBar({
+    profileId: profile?.id ?? null,
+    emergencyNumber,
+    firstContact,
+  });
 
   return (
     <Screen
       onRefresh={() => handleRefresh()}
       refreshing={refreshing}
       pinnedTop={
-        profile ? (
-          <SosEmergencyBar
-            emergencyLabel={t('sos.call', { number: emergencyNumber })}
-            contactName={firstContact?.name}
-            contactPhone={firstContact?.phone}
-            contactRelation={
-              firstContact
-                ? localizeEmergencyRelation(firstContact.relation, localeContent)
-                : undefined
-            }
-            callContactLabel={t('sos.callContact')}
-            onCallEmergency={() => void Linking.openURL(`tel:${emergencyNumber}`)}
-            onCallContact={() => firstContact && callPhone(firstContact.phone)}
-          />
-        ) : undefined
+        <SosEmergencyBar
+          emergencyLabel={t('sos.call', { number: emergencyBar.emergencyNumber })}
+          contactName={emergencyBar.firstContact?.name}
+          contactPhone={emergencyBar.firstContact?.phone}
+          contactRelation={
+            emergencyBar.firstContact
+              ? localizeEmergencyRelation(emergencyBar.firstContact.relation, localeContent)
+              : undefined
+          }
+          callContactLabel={t('sos.callContact')}
+          onCallEmergency={() => void Linking.openURL(`tel:${emergencyBar.emergencyNumber}`)}
+          onCallContact={() =>
+            emergencyBar.firstContact && callPhone(emergencyBar.firstContact.phone)
+          }
+        />
       }>
       <ScreenBrandHeader />
       <View style={styles.headerRow}>
@@ -259,6 +265,14 @@ export default function SosScreen() {
               ) : (
                 <Text style={styles.hintText}>{t('sos.passportEmpty')}</Text>
               )}
+              {!hasPassportDetails ? (
+                <Button
+                  testID="sos-edit-passport"
+                  label={t('sos.editPassport')}
+                  variant="secondary"
+                  onPress={() => router.push('/sos-edit' as any)}
+                />
+              ) : null}
               <View style={styles.exportRow}>
                 <Button
                   label={sharing ? t('sos.sharing') : t('sos.sharePassport')}
@@ -336,6 +350,7 @@ export default function SosScreen() {
         <EmptyState
           icon="person-add-outline"
           title={t('sos.emptyProfile')}
+          description={t('sos.emptyProfileHint')}
           actionLabel={t('common.createProfile')}
           onAction={() => router.push('/profile-setup?mode=add')}
         />
@@ -364,8 +379,14 @@ export default function SosScreen() {
           ))}
         </GlassCard>
       ) : profile ? (
-        <GlassCard>
+        <GlassCard style={styles.contactsHintCard}>
           <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
+          <Button
+            testID="sos-edit-contacts"
+            label={t('sos.editContacts')}
+            variant="secondary"
+            onPress={() => router.push('/sos-edit' as any)}
+          />
         </GlassCard>
       ) : null}
 
@@ -541,13 +562,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
-    settingsLink: { alignItems: 'center', paddingVertical: 4 },
-    settingsLinkText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.accent,
-    },
+    contactsHintCard: { gap: 10 },
     epiHintCard: { gap: 10, borderColor: colors.dangerBorder, backgroundColor: colors.dangerLight },
     epiHintText: {
       fontFamily: fonts.sans,

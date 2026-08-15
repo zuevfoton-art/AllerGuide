@@ -122,6 +122,7 @@ export default function ProfileScreen() {
                     onPress={() => openEdit(profile.id)}
                   />
                   <Pressable
+                    testID="profile-delete"
                     style={styles.deleteLink}
                     onPress={() => confirmDelete(profile.id, profile.name)}
                     accessibilityRole="button">

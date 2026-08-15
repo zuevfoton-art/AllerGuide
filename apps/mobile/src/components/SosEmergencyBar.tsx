@@ -29,7 +29,11 @@ export function SosEmergencyBar({
   const hasContact = Boolean(contactName && contactPhone);
 
   return (
-    <View style={styles.wrap} accessibilityRole="toolbar" accessibilityLabel={emergencyLabel}>
+    <View
+      testID="sos-emergency-bar"
+      style={styles.wrap}
+      accessibilityRole="toolbar"
+      accessibilityLabel={emergencyLabel}>
       <Button label={emergencyLabel} variant="danger" block onPress={onCallEmergency} />
       {hasContact ? (
         <View style={styles.contactRow}>
