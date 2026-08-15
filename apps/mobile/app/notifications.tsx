@@ -4,9 +4,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { formatReminderClock } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
-import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -243,19 +243,11 @@ export default function NotificationsScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('notifications.eyebrow')} />
-          <Text style={ui.docTitle}>{t('notifications.title')}</Text>
-          <Text style={ui.docMeta}>{t('notifications.subtitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('notifications.eyebrow')} />
+        <Text style={ui.docTitle}>{t('notifications.title')}</Text>
+        <Text style={ui.docMeta}>{t('notifications.subtitle')}</Text>
       </View>
 
       <Text style={ui.sectionLabel}>{t('notifications.permissionTitle')}</Text>

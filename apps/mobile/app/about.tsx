@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import appJson from '../app.json';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
@@ -32,19 +33,11 @@ export default function AboutScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('about.eyebrow')} />
-          <Text style={ui.docTitle}>{t('about.title')}</Text>
-          <Text style={ui.docMeta}>{t('about.subtitle')}</Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('about.eyebrow')} />
+        <Text style={ui.docTitle}>{t('about.title')}</Text>
+        <Text style={ui.docMeta}>{t('about.subtitle')}</Text>
       </View>
 
       <View style={styles.hero}>

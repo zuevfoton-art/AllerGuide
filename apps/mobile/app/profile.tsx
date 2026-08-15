@@ -8,6 +8,7 @@ import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
@@ -78,20 +79,11 @@ export default function ProfileScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('profiles.eyebrow')} />
-          <Text testID="profile-screen-title" style={ui.docTitle}>{t('profiles.title')}</Text>
-          <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
-        </View>
-        <LanguagePicker header />
+      <ScreenBackBrandHeader right={<LanguagePicker header />} />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('profiles.eyebrow')} />
+        <Text testID="profile-screen-title" style={ui.docTitle}>{t('profiles.title')}</Text>
+        <Text style={ui.docMeta}>{t('profiles.subtitle')}</Text>
       </View>
 
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>

@@ -32,7 +32,7 @@ describe('clinical-phenotypes', () => {
     });
 
     expect(result.phenotypeIds).toContain('aria-asthma');
-    expect(result.reassessmentHints.some((hint) => hint.includes('ACT'))).toBe(true);
+    expect(result.reassessmentHints.some((hint) => hint.includes('оценок'))).toBe(true);
   });
 
   it('P3: aria-conjunctivitis — rhinitis with ocular symptoms', () => {

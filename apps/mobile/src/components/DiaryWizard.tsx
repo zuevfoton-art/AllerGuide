@@ -111,6 +111,10 @@ export function DiaryWizard({
     1;
   const overallStepsTotal = sections.reduce((sum, item) => sum + item.steps.length, 0);
   const isLastStep = sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1;
+  const canAdvanceCurrentStep =
+    section.type === 'Шкала' && isLastStep
+      ? !validateClinicalScale(sectionAnswers)
+      : !step.required || Boolean(sectionAnswers[step.id]?.trim());
   const canSkipSection =
     allowSkipSection &&
     totalSections > 1 &&
@@ -447,7 +451,11 @@ export function DiaryWizard({
           onPress={goBack}>
           <Text style={styles.secondaryText}>{t('common.back')}</Text>
         </Pressable>
-        <Pressable style={styles.primaryBtn} onPress={goNext} testID="diary-wizard-primary">
+        <Pressable
+          style={[styles.primaryBtn, !canAdvanceCurrentStep && styles.btnDisabled]}
+          disabled={!canAdvanceCurrentStep}
+          onPress={goNext}
+          testID="diary-wizard-primary">
           <Text style={styles.primaryText}>
             {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
           </Text>

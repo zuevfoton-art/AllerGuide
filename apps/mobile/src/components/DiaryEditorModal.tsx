@@ -35,7 +35,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
       navigationBarTranslucent
       onRequestClose={onClose}>
       <ModalKeyboardAvoid style={styles.root}>
-        {({ liftStyle }) => (
+        {({ liftStyle, keyboardInset }) => (
           <>
             <Pressable
               style={styles.backdrop}
@@ -66,7 +66,10 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               </View>
               <ScrollView
                 style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[
+                  styles.scrollContent,
+                  { paddingBottom: 8 + keyboardInset },
+                ]}
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
                 automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}

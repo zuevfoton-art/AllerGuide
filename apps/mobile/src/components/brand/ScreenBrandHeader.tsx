@@ -18,7 +18,7 @@ export function ScreenBrandHeader({ left, right }: ScreenBrandHeaderProps) {
   return (
     <View style={styles.wrap} testID="screen-brand-header">
       <View style={styles.side}>{left}</View>
-      <View style={styles.center}>
+      <View style={styles.center} pointerEvents="none">
         <BrandLogo size={36} />
         <Text style={styles.slogan}>{t('brand.slogan')}</Text>
       </View>
@@ -30,13 +30,16 @@ export function ScreenBrandHeader({ left, right }: ScreenBrandHeaderProps) {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     wrap: {
+      position: 'relative',
+      minHeight: 56,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: 8,
     },
     side: {
+      zIndex: 1,
       minWidth: 48,
+      minHeight: 40,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
@@ -45,7 +48,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'flex-end',
     },
     center: {
-      flex: 1,
+      position: 'absolute',
+      left: 0,
+      right: 0,
       alignItems: 'center',
       gap: 4,
     },

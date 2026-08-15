@@ -1,8 +1,9 @@
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { PhoneInput } from '@/src/components/PhoneInput';
@@ -184,19 +185,11 @@ export default function SosEditScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('sosEdit.eyebrow')} />
-          <Text style={ui.docTitle}>{t('sosEdit.title')}</Text>
-          <Text style={ui.docMeta}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
-        </View>
+      <ScreenBackBrandHeader />
+      <View style={styles.headerText}>
+        <ScreenEyebrow section={t('sosEdit.eyebrow')} />
+        <Text style={ui.docTitle}>{t('sosEdit.title')}</Text>
+        <Text style={ui.docMeta}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
       </View>
 
       <Pressable style={styles.collapseHead} onPress={() => setPassportOpen((v) => !v)}>

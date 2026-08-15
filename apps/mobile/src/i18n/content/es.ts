@@ -389,7 +389,7 @@ const esContent: LocaleContent = {
         text: 'Síntomas registrados en {days} de los últimos 7 días. Siga la evolución; contacte con su médico si empeoran.',
       },
       clinicalScale: {
-        title: 'Escala {label}',
+        title: 'Puntuación {label}',
         text: 'Última puntuación: {total} ({level}). Comente el control con su médico.',
       },
       crossReaction: {

@@ -169,7 +169,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
   return (
     <View style={styles.hero}>
       <BrandLogo size={56} showWordmark showEndorser />
-      <Text style={styles.heroTagline}>{t('onboarding.tagline')}</Text>
+      <Text style={styles.heroTagline}>{t('brand.slogan')}</Text>
       <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>

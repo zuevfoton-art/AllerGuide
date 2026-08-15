@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   derivePrimaryWellnessFactor,
+  verbalizeConfidence,
   verbalizeDiaryDays,
   verbalizePm25,
   verbalizePollenValue,
@@ -20,6 +21,11 @@ describe('wellness-display', () => {
     expect(verbalizePm25(35)).toBe('moderate');
     expect(verbalizePm25(35.6)).toBe('high');
     expect(verbalizeDiaryDays(0)).toBe('none');
+  });
+
+  it('keeps forecast confidence as a verbal tier', () => {
+    expect(verbalizeConfidence('high')).toBe('high');
+    expect(verbalizeConfidence('low')).toBe('low');
   });
 
   it('picks the strongest penalty as the primary factor', () => {

@@ -1,6 +1,6 @@
 import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
@@ -334,10 +334,9 @@ export default function SosScreen() {
         </>
       ) : (
         <EmptyState
-          icon="person-add-outline"
+          icon="person-outline"
           title={t('sos.emptyProfile')}
-          actionLabel={t('common.createProfile')}
-          onAction={() => router.push('/profile-setup?mode=add')}
+          description={t('sos.emptyProfileHint')}
         />
       )}
 
@@ -540,13 +539,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
-    },
-    settingsLink: { alignItems: 'center', paddingVertical: 4 },
-    settingsLinkText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.accent,
     },
     epiHintCard: { gap: 10, borderColor: colors.dangerBorder, backgroundColor: colors.dangerLight },
     epiHintText: {

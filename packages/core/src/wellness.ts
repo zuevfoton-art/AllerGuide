@@ -322,7 +322,7 @@ export function buildWellnessRecommendations(input: WellnessInput): WellnessReco
     if (scale.level !== 'good') {
       recs.push({
         icon: '📊',
-        title: `Шкала ${scale.label}`,
+        title: scale.label,
         text: `Последняя оценка: ${scale.total} баллов (${scale.level}). Обсудите контроль с врачом.`,
       });
     }
@@ -365,7 +365,7 @@ export function buildWellnessRecommendations(input: WellnessInput): WellnessReco
     recs.push({
       icon: '🫁',
       title: 'Ринит и астма',
-      text: 'При сочетании аллергического ринита/поллиноза и астмы полезно заполнять шкалы ACT и ARIA и обсудить единый план лечения с врачом.',
+      text: 'При сочетании аллергического ринита/поллиноза и астмы полезно регулярно отмечать самочувствие в разделе оценок и обсудить единый план лечения с врачом.',
     });
   }
 

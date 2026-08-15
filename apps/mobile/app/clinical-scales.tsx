@@ -14,12 +14,11 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
+import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
@@ -84,16 +83,7 @@ export default function ClinicalScalesScreen() {
 
   return (
     <Screen>
-      <ScreenBrandHeader
-        left={
-          <Pressable
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-        }
-      />
+      <ScreenBackBrandHeader />
       <ScreenEyebrow section={t('clinicalScales.eyebrow')} />
       <Text style={ui.docTitle}>{t('clinicalScales.title')}</Text>
       <Text style={ui.docMeta}>{t('clinicalScales.subtitle')}</Text>

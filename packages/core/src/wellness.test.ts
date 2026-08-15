@@ -4,6 +4,7 @@ import {
   buildClinicalScalesFromTrends,
   buildDiarySeriesFromInsights,
   computeWellnessConfidence,
+  buildWellnessRecommendations,
   computeWellnessScore,
   computeWellnessScoreBreakdown,
   pollenTier,
@@ -99,6 +100,16 @@ describe('wellness v2 (B.4–B.9)', () => {
   it('maps score to status labels', () => {
     expect(wellnessStatusFromScore(85).level).toBe('good');
     expect(wellnessStatusFromScore(55).level).toBe('attention');
+  });
+
+  it('keeps multimorbid recommendation free of clinical acronyms', () => {
+    const recs = buildWellnessRecommendations({
+      ...baseInput,
+      multimorbidAriaAsthma: true,
+    });
+    const text = recs.map((item) => `${item.title} ${item.text}`).join(' ');
+    expect(text).not.toMatch(/\bACT\b|\bARIA\b|\bGINA\b/);
+    expect(text).not.toMatch(/шкал/i);
   });
 
   it('applies multimorbid ARIA+asthma penalty (Phase 3)', () => {
