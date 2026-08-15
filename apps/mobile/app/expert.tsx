@@ -2,8 +2,7 @@ import { ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { EXPERT_CATEGORIES, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandMark } from '@/src/components/brand/BrandMark';
@@ -27,11 +26,11 @@ export default function ExpertScreen() {
   if (article) {
     return (
       <Screen>
-        <ScreenBackBrandHeader onBack={() => setArticleId(null)} />
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('expert.eyebrow')} />
-          <Text style={ui.docTitle}>{article.title}</Text>
-        </View>
+        <ScreenHeader
+          onBack={() => setArticleId(null)}
+          eyebrow={t('expert.eyebrow')}
+          title={article.title}
+        />
         <Text style={styles.articleBody}>{article.body}</Text>
         <Disclaimer showMdrFootnote>{localeContent.expertDisclaimer}</Disclaimer>
       </Screen>
@@ -40,14 +39,12 @@ export default function ExpertScreen() {
 
   return (
     <Screen>
-      <ScreenBackBrandHeader />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('expert.eyebrow')} />
-        <Text style={ui.docTitle}>{t('expert.title')}</Text>
-        <Text style={ui.docMeta}>
-          {localeContent.expertHero.name} · {localeContent.expertHero.role}
-        </Text>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('expert.eyebrow')}
+        title={t('expert.title')}
+        subtitle={`${localeContent.expertHero.name} · ${localeContent.expertHero.role}`}
+      />
 
       <GlassCard variant="soft" style={styles.hero}>
         <View style={styles.heroIcon}>
@@ -114,19 +111,6 @@ export default function ExpertScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     hero: { alignItems: 'center', gap: 8 },
     heroIcon: {
       width: 48,

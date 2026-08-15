@@ -6,8 +6,7 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
@@ -122,12 +121,13 @@ export default function DoctorReportScreen() {
 
   return (
     <Screen>
-      <ScreenBackBrandHeader right={<ProfileHeaderButton />} />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('doctorReport.eyebrow')} />
-        <Text style={ui.docTitle}>{t('doctorReport.title')}</Text>
-        <Text style={ui.docMeta}>{t('doctorReport.subtitle')}</Text>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('doctorReport.eyebrow')}
+        title={t('doctorReport.title')}
+        subtitle={t('doctorReport.subtitle')}
+        right={<ProfileHeaderButton />}
+      />
 
       <Text style={ui.sectionLabel}>{t('doctorReport.period')}</Text>
       <View style={ui.toggleRow}>
@@ -208,19 +208,6 @@ export default function DoctorReportScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     checkLabel: {
       fontFamily: fonts.sans,
       fontSize: 15,

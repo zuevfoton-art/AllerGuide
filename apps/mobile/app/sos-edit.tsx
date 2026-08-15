@@ -2,8 +2,7 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { PhoneInput } from '@/src/components/PhoneInput';
@@ -185,12 +184,12 @@ export default function SosEditScreen() {
 
   return (
     <Screen>
-      <ScreenBackBrandHeader />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('sosEdit.eyebrow')} />
-        <Text style={ui.docTitle}>{t('sosEdit.title')}</Text>
-        <Text style={ui.docMeta}>{profile ? profile.name : t('sosEdit.noProfile')}</Text>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('sosEdit.eyebrow')}
+        title={t('sosEdit.title')}
+        subtitle={profile ? profile.name : t('sosEdit.noProfile')}
+      />
 
       <Pressable style={styles.collapseHead} onPress={() => setPassportOpen((v) => !v)}>
         <Text style={ui.sectionLabel}>{t('sosEdit.passportLabel')}</Text>
@@ -348,19 +347,6 @@ export default function SosEditScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     collapseHead: {
       flexDirection: 'row',
       alignItems: 'center',

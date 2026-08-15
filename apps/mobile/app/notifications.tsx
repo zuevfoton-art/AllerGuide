@@ -3,8 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { formatReminderClock } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -243,12 +242,12 @@ export default function NotificationsScreen() {
 
   return (
     <Screen>
-      <ScreenBackBrandHeader />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('notifications.eyebrow')} />
-        <Text style={ui.docTitle}>{t('notifications.title')}</Text>
-        <Text style={ui.docMeta}>{t('notifications.subtitle')}</Text>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('notifications.eyebrow')}
+        title={t('notifications.title')}
+        subtitle={t('notifications.subtitle')}
+      />
 
       <Text style={ui.sectionLabel}>{t('notifications.permissionTitle')}</Text>
       <GlassCard>
@@ -506,19 +505,6 @@ export default function NotificationsScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     statusText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 15,

@@ -20,8 +20,7 @@ import {
 } from '@allerguide/core';
 import { applyPrescriptionParseToAsitCourse } from '@allerguide/ai';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBackBrandHeader } from '@/src/components/brand/ScreenBackBrandHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -264,11 +263,12 @@ export default function AsitCourseScreen() {
   if (!asitEnabled) {
     return (
       <Screen>
-        <ScreenBackBrandHeader />
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('asit.eyebrow')} />
-          <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
-        </View>
+        <ScreenHeader
+          onBack={() => router.back()}
+          eyebrow={t('asit.eyebrow')}
+          title={t('asit.courseTitle')}
+          style={{ marginBottom: 12 }}
+        />
         <GlassCard>
           <Text style={styles.hint}>{t('asit.notEligible')}</Text>
         </GlassCard>
@@ -278,8 +278,6 @@ export default function AsitCourseScreen() {
 
   if (step === 'verify') {
     return <VerifyStep
-      theme={theme}
-      ui={ui}
       styles={styles}
       course={course}
       setCourse={setCourse}
@@ -291,7 +289,6 @@ export default function AsitCourseScreen() {
 
   if (step === 'review') {
     return <ReviewStep
-      theme={theme}
       ui={ui}
       styles={styles}
       course={course}
@@ -308,12 +305,13 @@ export default function AsitCourseScreen() {
 
   return (
     <Screen>
-      <ScreenBackBrandHeader />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('asit.eyebrow')} />
-        <Text style={ui.docTitle}>{t('asit.courseTitle')}</Text>
-        <Text style={ui.docMeta}>{t('asit.courseSubtitle')}</Text>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('asit.eyebrow')}
+        title={t('asit.courseTitle')}
+        subtitle={t('asit.courseSubtitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         {/* Allergen picker */}
@@ -564,8 +562,6 @@ export default function AsitCourseScreen() {
 }
 
 interface VerifyStepProps {
-  theme: ReturnType<typeof useTheme>;
-  ui: ReturnType<typeof useUiStyles>;
   styles: ReturnType<typeof createStyles>;
   course: AsitCourse;
   setCourse: React.Dispatch<React.SetStateAction<AsitCourse>>;
@@ -574,15 +570,16 @@ interface VerifyStepProps {
   t: (key: string, params?: Record<string, string>) => string;
 }
 
-function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t }: VerifyStepProps) {
+function VerifyStep({ styles, course, setCourse, onBack, onConfirm, t }: VerifyStepProps) {
   return (
     <Screen>
-      <ScreenBackBrandHeader onBack={onBack} />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('asit.eyebrow')} />
-        <Text style={ui.docTitle}>{t('asit.verifyTitle')}</Text>
-        <Text style={ui.docMeta}>{t('asit.verifySubtitle')}</Text>
-      </View>
+      <ScreenHeader
+        onBack={onBack}
+        eyebrow={t('asit.eyebrow')}
+        title={t('asit.verifyTitle')}
+        subtitle={t('asit.verifySubtitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         {(course.scheduleStages ?? []).length === 0 ? (
@@ -607,7 +604,6 @@ function VerifyStep({ theme, ui, styles, course, setCourse, onBack, onConfirm, t
 }
 
 interface ReviewStepProps {
-  theme: ReturnType<typeof useTheme>;
   ui: ReturnType<typeof useUiStyles>;
   styles: ReturnType<typeof createStyles>;
   course: AsitCourse;
@@ -619,14 +615,15 @@ interface ReviewStepProps {
   t: (key: string, params?: Record<string, string>) => string;
 }
 
-function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, reminderEnabled, toggleReminder, t }: ReviewStepProps) {
+function ReviewStep({ ui, styles, course, setCourse, onBack, onSave, reminderEnabled, toggleReminder, t }: ReviewStepProps) {
   return (
     <Screen>
-      <ScreenBackBrandHeader onBack={onBack} />
-      <View style={styles.headerText}>
-        <ScreenEyebrow section={t('asit.eyebrow')} />
-        <Text style={ui.docTitle}>{t('asit.reviewTitle')}</Text>
-      </View>
+      <ScreenHeader
+        onBack={onBack}
+        eyebrow={t('asit.eyebrow')}
+        title={t('asit.reviewTitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         <Text style={ui.sectionLabel}>{t('asit.allergenLabel')}</Text>
@@ -742,19 +739,6 @@ function ReviewStep({ theme, ui, styles, course, setCourse, onBack, onSave, remi
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     section: { gap: 4, marginBottom: 12 },
     fieldGap: { marginTop: 12 },
     dateRow: { flexDirection: 'row', gap: 8 },
