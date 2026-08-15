@@ -217,9 +217,34 @@ describe('places nearby routes', () => {
     expect((init.headers as Record<string, string>)['X-Goog-FieldMask']).toContain(
       'suggestions.placePrediction.placeId',
     );
-    const body = JSON.parse(String(init.body)) as { sessionToken?: string; input: string };
+    const body = JSON.parse(String(init.body)) as {
+      sessionToken?: string;
+      input: string;
+      includedPrimaryTypes?: string[];
+    };
     expect(body.sessionToken).toBe('ps-test-session-1');
     expect(body.input).toBe('аптека');
+    expect(body.includedPrimaryTypes).toEqual(['pharmacy', 'drugstore']);
+  });
+
+  it('omits Autocomplete includedPrimaryTypes when all map categories are selected', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ suggestions: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp({ withReplitAuth: false });
+
+    const response = await request(app).get(
+      '/api/places/autocomplete?q=аптека&lat=55.75&lon=37.62&sessionToken=ps-test-session-2&categories=restaurant,cafe,medical,pharmacy',
+    );
+    expect(response.status).toBe(200);
+    const body = JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body)) as {
+      includedPrimaryTypes?: string[];
+    };
+    expect(body.includedPrimaryTypes).toBeUndefined();
   });
 
   it('proxies Text Search (New) and Place Details without photos', async () => {

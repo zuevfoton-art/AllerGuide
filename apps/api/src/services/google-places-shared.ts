@@ -27,6 +27,8 @@ export const PLACES_DETAILS_FIELD_MASK =
 
 export const DEFAULT_PLACES_RADIUS_M = 3000;
 export const MAX_PLACES_RESULTS = 20;
+/** Places Autocomplete (New) rejects more than five `includedPrimaryTypes`. */
+export const MAX_PLACES_AUTOCOMPLETE_PRIMARY_TYPES = 5;
 export const MIN_PLACES_QUERY_LENGTH = 2;
 export const MAX_PLACES_QUERY_LENGTH = 80;
 export const PLACES_REQUEST_TIMEOUT_MS = 8000;
@@ -129,4 +131,20 @@ export async function fetchGooglePlacesJson(
 
 export function includedTypesForCategories(categories: readonly GooglePlacesCategory[]): string[] {
   return [...new Set(categories.flatMap((category) => INCLUDED_TYPES_BY_CATEGORY[category]))];
+}
+
+/**
+ * Autocomplete (New) allows at most five primary types. The four product
+ * categories expand to eight Google types, which Google rejects with HTTP 400.
+ * When the request would exceed the cap, omit the filter and let the query
+ * string rank suggestions.
+ */
+export function includedPrimaryTypesForAutocomplete(
+  categories: readonly GooglePlacesCategory[],
+): string[] | undefined {
+  const types = includedTypesForCategories(categories);
+  if (types.length === 0 || types.length > MAX_PLACES_AUTOCOMPLETE_PRIMARY_TYPES) {
+    return undefined;
+  }
+  return types;
 }
