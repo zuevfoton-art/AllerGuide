@@ -1,50 +1,32 @@
 # A-Claro — GTM-материалы
 
-Go-to-market collateral для продукта **A-Claro** (master brand **Aclearo**).  
-**Стратегия в формате OKR:** [`okr.md`](./okr.md)
+Go-to-market для **A-Claro** (master brand **Aclearo**).
 
-**Синхронизировано с приложением:** mobile **v1.0.4** · store name A-Claro · slogan «Aclearo — когда важна ясность»  
-**Бренд:** Claro Green ([`brand-claro-green.md`](../brand-claro-green.md), accent `#2A9D8F`) · rollout [`brand-rollout.md`](../brand-rollout.md)
+| Документ | Назначение |
+|----------|------------|
+| [`strategy.md`](./strategy.md) | Полная GTM-стратегия (позиционирование, фазы, каналы) |
+| [`okr.md`](./okr.md) | **OKR** O1–O6 и KR |
+| [`adair-co-marketing-agreement-draft.md`](./adair-co-marketing-agreement-draft.md) | Черновик co-marketing с АДАИР |
+| [`patient-one-pager.html`](./patient-one-pager.html) | Листовка A4 для пациентов |
+| [`doctor-brief.html`](./doctor-brief.html) | Бриф для врачей |
+| [`press-kit.html`](./press-kit.html) | Пресс-кит + brand |
+| [`landing/index.html`](./landing/index.html) | Waitlist landing (beta) |
+| [`analytics-beta.md`](./analytics-beta.md) | Analytics checklist для beta |
+| [`pricing-discovery.md`](./pricing-discovery.md) | Скрипт customer discovery / WTP |
+| [`store-metadata.md`](./store-metadata.md) | Store listings + medical disclaimer |
+| [`beta-cohort.md`](./beta-cohort.md) | План closed beta 200–500 |
+| [`launch-playbook.md`](./launch-playbook.md) | Launch week |
+| [`gtm-styles.css`](./gtm-styles.css) | Claro Green styles |
 
-## Снимок продукта (для копирайтеров)
+**App:** v1.0.4 · accent `#2A9D8F` · domain `aclearo.com`  
+**Brand rollout:** [`../brand-rollout.md`](../brand-rollout.md)
 
-| Область | Текущее состояние |
-|---------|-------------------|
-| Бренд | **A-Claro** / Aclearo · `aclearo.com` · bundle `com.aclearo.app` |
-| Вкладки | **6:** Главная, Дневник, Сканер, Маркет, Карта, SOS |
-| Главная | Двухслойный wellness index; рекомендации без названий ACT/ARIA в UI |
-| Сканер | 4 режима; штрихкод OFF; OCR/vision — с оговорками / флагами |
-| Дневник | Адаптивный wizard; шкалы на `/clinical-scales`; голос; фото кожи; АСИТ + терапия по назначению |
-| Карта | Единый экран: пыльца (UPI, 17 taxa) + места + АДАИР; UAQI; Places API за флагами |
-| Маркет | Каталог + affiliate Яндекс Маркет (без корзины в приложении) |
-| SOS | Только экстренный просмотр; паспорт; emergency card при App Lock |
-| Отчёт врачу | PDF 7/14/30/custom; ICD/SNOMED; брендинг A-Claro |
-| Offline-first | Ядро локально; сеть = пыльца/AQ/OFF/Places/sync |
-| Flags OFF по умолчанию | Backend auth, AI-scan, cloud sync, analytics |
+## Снимок продукта
 
-**Не заявлять как готовое:** полноценный OCR «везде», telemedicine, cloud sync из коробки, checkout внутри приложения, per-species pollen heatmap.
+6 вкладок (Главная, Дневник, Сканер, Маркет, Карта, SOS) · UPI/UAQI карта · Яндекс Маркет affiliate · offline-first · flags OFF по умолчанию.
 
-## Файлы
+Не заявлять: полный OCR везде, telemedicine, cloud sync из коробки, in-app checkout.
 
-| Файл | Назначение | Аудитория |
-|------|------------|-----------|
-| [`okr.md`](./okr.md) | **GTM как OKR** (O1–O6, KR, scorecard) | Product / leadership |
-| [`patient-one-pager.html`](./patient-one-pager.html) | Листовка A4 | Пациенты, клиники |
-| [`doctor-brief.html`](./doctor-brief.html) | Бриф 3 стр. | Аллергологи |
-| [`press-kit.html`](./press-kit.html) | Пресс-кит + brand | СМИ, партнёры |
-| [`gtm-styles.css`](./gtm-styles.css) | Claro Green styles | — |
+## Экспорт HTML → PDF
 
-## Экспорт в PDF
-
-1. Откройте HTML в Chrome / Edge.  
-2. `Ctrl+P` / `⌘P` → «Сохранить как PDF», A4, фон включён.
-
-## Перед печатью / публикацией
-
-- QR → реальные App Store / Google Play (A-Claro).  
-- Email: `support@aclearo.com`, `press@aclearo.com`, `partners@aclearo.com`.  
-- Co-marketing соглашение с АДАИР обязательно для публичного использования бренда АДАИР.
-
-## Обновление
-
-При смене вкладок, бренда или launch targets — обновите [`okr.md`](./okr.md) и HTML; держите версию app в шапке README.
+Chrome → Print → Save as PDF (A4). QR на one-pager заменить на store / TestFlight перед печатью.

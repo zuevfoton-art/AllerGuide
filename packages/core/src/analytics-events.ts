@@ -27,6 +27,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'profile_setup_step_view',
   'profile_setup_step_complete',
   'profile_setup_step_skip',
+  'onboarding_scenario_selected',
+  'onboarding_completed',
   'map_pollen_refreshed',
   'map_pollen_fallback',
   'scan_dish_vision',
@@ -34,6 +36,7 @@ export const ANALYTICS_EVENT_NAMES = [
   'hint_tour_started',
   'hint_tour_completed',
   'hint_tour_skipped',
+  'waitlist_joined',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
