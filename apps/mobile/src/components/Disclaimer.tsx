@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, type TextStyle, View } from 'react-native';
 import { formatDisclaimerFootnote } from '@allerguide/core';
+import { fontSizes, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 type DisclaimerProps = {
@@ -15,9 +16,9 @@ export function Disclaimer({ children, style, showMdrFootnote = false }: Disclai
   const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.text, style]}>{children}</Text>
+      <Text {...scaledTextProps} style={[styles.text, style]}>{children}</Text>
       {showMdrFootnote ? (
-        <Text style={styles.footnote}>{formatDisclaimerFootnote()}</Text>
+        <Text {...scaledTextProps} style={styles.footnote}>{formatDisclaimerFootnote()}</Text>
       ) : null}
     </View>
   );
@@ -30,15 +31,15 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     text: {
       fontFamily: fonts.sans,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       lineHeight: 16,
       color: colors.textMuted,
       textAlign: 'center',
     },
     footnote: {
       fontFamily: fonts.sans,
-      fontSize: 9,
-      lineHeight: 12,
+      fontSize: fontSizes.caption,
+      lineHeight: 16,
       color: colors.textMuted,
       textAlign: 'center',
       opacity: 0.85,

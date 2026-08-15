@@ -95,6 +95,15 @@
 | D3 | Модальный редактор дневника (`DiaryEditorModal`) | `DiaryEditorModal.tsx`, `diary.tsx` |
 | D4 | Быстрые ссылки на главной → «Ещё» вместо скрытых вкладок | `home.tsx` |
 
+### Этап E — Полировка и документация (аудит август 2026)
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| E9 | AuthForm на токены `Button` / `radii` / `fontSizes` | `AuthForm.tsx`, `PhoneInput.tsx` |
+| E10 | Политика Dynamic Type + токены в Disclaimer | `typography.ts`, `Disclaimer.tsx`, `Button.tsx` |
+| E11 | `eslint-plugin-react-native-a11y` (подписи у тач-элементов, warn) | `eslint.config.js` |
+| E12 | QA 4.8 — 6 вкладок; FR-ONB-01 — актуальные слайды intro | `qa-checklist.md`, `functional-requirements.md` |
+
 Каждый этап — отдельная ветка и PR; на UI-этапах обязательны `pnpm typecheck`, `pnpm --filter mobile lint` и ручная проверка web-сборки на светлой/тёмной теме.
 
 ---
@@ -116,3 +125,4 @@
 | B — UX-примитивы | Готово (PR) |
 | C — Безопасность взаимодействия | Готово (PR) |
 | D — Навигация и онбординг | Готово (PR) |
+| E — Полировка и документация | Готово (PR) |

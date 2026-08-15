@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, type PressableProps, type ViewStyle } from 'react-native';
 import { radii } from '@/src/constants/layout';
-import { fontSizes } from '@/src/constants/typography';
+import { fontSizes, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -48,6 +48,7 @@ export function Button({
       ]}
       {...rest}>
       <Text
+        {...scaledTextProps}
         style={[
           styles.text,
           size === 'sm' && styles.textSm,

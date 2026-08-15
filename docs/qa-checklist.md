@@ -2,7 +2,7 @@
 
 **Roadmap:** [P0.1](roadmap-to-prod.md#phase-0--stabilization-mvp--internal-alpha)  
 **Архитектура:** [architecture.md](./architecture.md) · [development-rules.md](./development-rules.md)  
-**Версия чеклиста:** 1.2  
+**Версия чеклиста:** 1.3  
 **Целевые платформы:** iOS · Android · Web (Expo)
 
 Чеклист для ручного прогона перед internal-сборкой (EAS preview) и перед включением backend / store submission.  
@@ -67,7 +67,7 @@
 
 | # | Сценарий | iOS | Android | Web | Примечания |
 |---|----------|-----|---------|-----|------------|
-| 2.1 | Intro: 5 слайдов (дневник, сканер, маркет, карта, эксперт) | ☐ | ☐ | ☐ | |
+| 2.1 | Intro: 5 слайдов (профиль, сканер, ежедневная защита, карта, SOS) | ☐ | ☐ | ☐ | `profile` / `scanner` / `care` / `map` / `sos` |
 | 2.2 | Intro можно пропустить | ☐ | ☐ | ☐ | |
 | 2.3 | Повторный вход не показывает intro | ☐ | ☐ | ☐ | |
 | 2.4 | Выбор сценария: только я / только ребёнок / я + ребёнок | ☐ | ☐ | ☐ | |
@@ -114,7 +114,7 @@
 | 4.5 | Блок дневника: quick-add кнопки по профилю (S1: симптомы+питание) | ☐ | ☐ | ☐ | ProfileCapabilities |
 | 4.6 | Quick actions: Сканер, Карта | ☐ | ☐ | ☐ | |
 | 4.7 | Двухстрочный disclaimer из ТЗ (информационный характер, не заменяет врача) | ☐ | ☐ | ☐ | |
-| 4.8 | Tab bar: 4 вкладки (Home, Diary, Scanner, SOS) | ☐ | ☐ | ☐ | Map/Market скрыты |
+| 4.8 | Tab bar: 6 вкладок (Home, Diary, Scanner, Market, Map, SOS) | ☐ | ☐ | ☐ | FR-UX-04 |
 | 4.9 | Блок подсказок фенотипа / reassessment hints (при ≥1 phenotype) | ☐ | ☐ | ☐ | FR-PROF-16 |
 
 ---

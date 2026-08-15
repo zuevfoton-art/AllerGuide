@@ -22,7 +22,8 @@ import {
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 
 export interface PhoneInputProps {
   label?: string;
@@ -155,7 +156,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     wrap: { gap: 6 },
     label: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
       fontWeight: '600',
     },
@@ -165,9 +166,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 12,
+      borderRadius: radii.md,
       backgroundColor: colors.card,
       overflow: 'hidden',
+      minHeight: 44,
     },
     rowFocused: { borderColor: colors.accent },
     countryBtn: {
@@ -181,7 +183,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     dialCode: {
       fontFamily: fonts.sans,
-      fontSize: 16,
+      fontSize: WEB_INPUT_FONT_SIZE,
       color: colors.text,
       fontWeight: '600',
     },
@@ -195,7 +197,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     hint: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textMuted,
     },
     modalBackdrop: {
@@ -206,14 +208,14 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     modalCard: {
       backgroundColor: colors.card,
-      borderRadius: 16,
+      borderRadius: radii.xl,
       maxHeight: '70%',
       padding: 16,
       gap: 8,
     },
     modalTitle: {
       fontFamily: fonts.sans,
-      fontSize: 16,
+      fontSize: fontSizes.body,
       fontWeight: '700',
       color: colors.text,
       marginBottom: 4,
@@ -224,11 +226,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       paddingVertical: 12,
       paddingHorizontal: 8,
-      borderRadius: 8,
+      borderRadius: radii.md,
     },
     countryRowActive: { backgroundColor: `${colors.accent}18` },
-    countryName: { fontFamily: fonts.sans, fontSize: 15, color: colors.text },
+    countryName: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.text },
     countryNameActive: { color: colors.accent, fontWeight: '600' },
-    countryDial: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary },
+    countryDial: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.textSecondary },
   });
 }
