@@ -1203,6 +1203,8 @@ export type LocaleMessages = {
     emptyProfileHint: string;
     contactsTitle: string;
     contactsHint: string;
+    editPassport: string;
+    editContacts: string;
     callContact: string;
     call: string;
     tip: string;
