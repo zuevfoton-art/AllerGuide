@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A-Claro — One-pager для пациента</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="gtm-styles.css" />
+  <style>
+    @page { size: A4 portrait; margin: 14mm; }
+    body { padding: 0; }
+    .page {
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 14mm;
+      background: #fff;
+    }
+    @media screen {
+      body { padding: 24px; background: var(--bg); }
+      .page { box-shadow: 0 4px 24px rgba(15,23,42,.08); border-radius: 8px; margin-bottom: 24px; }
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--head);
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: 24px;
+      color: var(--head);
+      line-height: 1.2;
+      margin: 10px 0 6px;
+    }
+    .hero .tagline { font-size: 14px; color: var(--accent); font-weight: 600; }
+    .hero .lead { font-size: 12px; color: var(--muted); margin-top: 8px; max-width: 420px; line-height: 1.45; }
+    .version { font-size: 10px; color: var(--muted); margin-top: 6px; }
+    .cta-box {
+      text-align: center;
+      padding: 10px;
+      background: var(--accent-light);
+      border-radius: 8px;
+      border: 1px solid #9fd9d1;
+      flex-shrink: 0;
+    }
+    .cta-box p { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .cta-box strong { font-size: 12px; color: var(--head); display: block; }
+    section { margin-bottom: 14px; }
+    section h2 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .benefit {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .benefit img { margin-bottom: 4px; }
+    .benefit h3 { font-size: 12px; color: var(--head); margin-bottom: 4px; }
+    .benefit p { font-size: 10px; color: var(--muted); line-height: 1.35; }
+    .for-whom { display: flex; gap: 8px; flex-wrap: wrap; }
+    .for-whom span {
+      background: var(--accent-light);
+      color: #1f6b62;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    footer .expert { font-size: 11px; color: var(--muted); max-width: 360px; }
+    footer .expert strong { color: var(--head); }
+  </style>
+</head>
+<body>
+  <p class="no-print" style="text-align:center;padding:12px;color:#64748b;font-size:13px;">
+    Печать / PDF: <kbd>Ctrl+P</kbd> / <kbd>⌘P</kbd> · A4 · OKR: <a href="okr.md">okr.md</a>
+  </p>
+
+  <article class="page">
+    <header>
+      <div class="hero">
+        <div class="wordmark">
+          <img src="../brand/logo-mark.svg" width="44" height="44" alt="" />
+          <div>
+            <div class="wordmark-text"><span class="product">A-Claro</span></div>
+            <span class="co" style="font-size:11px;font-weight:600;color:var(--accent);">приложение Aclearo</span>
+          </div>
+          <span class="badge badge-adair">АДАИР</span>
+        </div>
+        <h1>Когда важна ясность при аллергии</h1>
+        <p class="tagline">Сканер · Дневник · Карта пыльцы · Маркет · SOS</p>
+        <p class="lead">
+          A-Claro помогает людям с аллергией и их родителям проверять продукты, вести наблюдения,
+          следить за пыльцой и качеством воздуха и быстро показать медработнику аллергопаспорт.
+          Основные функции работают без интернета.
+        </p>
+        <p class="version">iOS · Android · Web · v1.0.4 · aclearo.com</p>
+      </div>
+      <div class="cta-box">
+        <div class="qr-placeholder">QR-код<br />App Store /<br />Google Play</div>
+        <strong>Скачайте бесплатно</strong>
+        <p>A-Claro · aclearo.com</p>
+      </div>
+    </header>
+
+    <section>
+      <h2>Что есть в приложении</h2>
+      <div class="benefits">
+        <div class="benefit">
+          <img src="../brand/icons/scanner.svg" width="26" height="26" alt="" />
+          <h3>Сканер</h3>
+          <p>Продукты, меню, лекарства и косметика — штрихкод или состав с учётом ваших аллергенов</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/diary.svg" width="26" height="26" alt="" />
+          <h3>Дневник</h3>
+          <p>Симптомы, питание, лекарства, АСИТ, фото кожи, голос — и PDF-отчёт для врача</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/sos.svg" width="26" height="26" alt="" style="filter: invert(16%) sepia(85%) saturate(3574%) hue-rotate(350deg)" />
+          <h3>SOS</h3>
+          <p>Аллергопаспорт, план действий, контакты и вызов 103 — покажите экран медработнику</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/home.svg" width="26" height="26" alt="" />
+          <h3>Главная</h3>
+          <p>Понятная сводка дня: пыльца, воздух и записи дневника — без сложных медицинских ярлыков</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/map.svg" width="26" height="26" alt="" />
+          <h3>Карта</h3>
+          <p>Пыльца (индекс UPI), качество воздуха, места рядом и клиники АДАИР</p>
+        </div>
+        <div class="benefit">
+          <img src="../brand/icons/market.svg" width="26" height="26" alt="" />
+          <h3>Маркет</h3>
+          <p>Подборка товаров по профилю — покупка через партнёров (Яндекс Маркет)</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Начните за 3 минуты</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div>
+            <strong>Скачайте A-Claro и создайте профиль</strong>
+            <p style="font-size:12px;color:var(--muted);">Для себя или ребёнка — укажите типы аллергии и аллергены</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div>
+            <strong>Отсканируйте продукт или откройте карту пыльцы</strong>
+            <p style="font-size:12px;color:var(--muted);">Штрихкод в магазине или сводка среды на главной и карте</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div>
+            <strong>Заполните SOS-паспорт</strong>
+            <p style="font-size:12px;color:var(--muted);">Особенно важно для детей — данные всегда под рукой</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Для кого</h2>
+      <div class="for-whom">
+        <span>Родители детей с аллергией</span>
+        <span>Пищевая аллергия</span>
+        <span>Поллиноз</span>
+        <span>Бронхиальная астма</span>
+        <span>АСИТ</span>
+        <span>Инсектная аллергия</span>
+      </div>
+    </section>
+
+    <footer>
+      <div class="expert">
+        <strong>Экспертный контент АДАИР</strong> · научный руководитель направления —
+        д.м.н., проф. Ю.С. Смолкин, Президент АДАИР<br />
+        <span style="font-size:10px;">Раздел «Эксперт» в приложении</span>
+      </div>
+      <div class="disclaimer" style="max-width:280px;margin-top:0;">
+        A-Claro не ставит диагноз и не назначает лечение. Информация носит рекомендательный характер и не заменяет консультацию врача.
+      </div>
+    </footer>
+  </article>
+</body>
+</html>
