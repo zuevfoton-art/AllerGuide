@@ -5,6 +5,7 @@ import {
   addPrescribedReminderTime,
   buildPrescribedTherapyDiarySummary,
   buildPrescribedTherapyPrefill,
+  computeNextPrescribedIntake,
   computePrescribedCompliance,
   createDefaultPrescribedCourse,
   formatPrescribedReminderTimes,
@@ -137,5 +138,27 @@ describe('prescribed-therapy', () => {
     course = setPrescribedReminderEnabled(course, false);
     expect(isPrescribedReminderConfigured(course)).toBe(false);
     expect(course.reminderTimes).toBeUndefined();
+  });
+
+  it('computes the next intake after the current time', () => {
+    const course = {
+      ...createDefaultPrescribedCourse(),
+      drug: 'Сингуляр',
+      activated: true,
+      reminderTimes: [
+        { hour: 8, minute: 0 },
+        { hour: 20, minute: 0 },
+      ],
+    };
+    const morning = new Date(2026, 7, 15, 9, 0, 0);
+    const next = computeNextPrescribedIntake(course, morning);
+    expect(next?.hour).toBe(20);
+    expect(next?.minute).toBe(0);
+
+    const ended = computeNextPrescribedIntake(
+      { ...course, endDate: '2026-08-14' },
+      morning,
+    );
+    expect(ended).toBeNull();
   });
 });

@@ -58,6 +58,7 @@ eas metadata:push --profile production
 
 - `app.json`: name, slug, scheme, bundle
 - i18n onboarding taglines (6 локалей)
+- Единый header: центрированный знак + слоган «Aclearo — когда важна ясность» (`brand.slogan`, `ScreenBrandHeader`)
 - Android package + Maestro `appId`
 
 ---
@@ -87,6 +88,8 @@ PR: «Aclearo releases A-Claro»; материалы АДАИР под Aclearo.
 ---
 
 ## Региональная матрица taglines
+
+In-app slogan (`brand.slogan` / `ScreenBrandHeader`) — «Aclearo — когда важна ясность» и локализованные эквиваленты во всех 6 локалях. Ниже — onboarding taglines (отдельный ключ).
 
 | Locale | Onboarding tagline |
 |--------|-------------------|

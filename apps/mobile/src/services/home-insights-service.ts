@@ -1,4 +1,12 @@
-import { planHomeInsights, type DiaryEntry, type Profile } from '@allerguide/core';
+import {
+  computeNextPrescribedIntake,
+  formatPrescribedReminderTime,
+  isPrescribedCourseConfigured,
+  planHomeInsights,
+  type DiaryEntry,
+  type PrescribedCourse,
+  type Profile,
+} from '@allerguide/core';
 import { getStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import type { WellnessSnapshot } from '@/src/services/wellness-service';
@@ -33,6 +41,7 @@ export function buildHomeInsightItems(input: {
   diaryEntries: DiaryEntry[];
   wellness: WellnessSnapshot | null;
   phenotypeHints: string[];
+  prescribedCourse?: PrescribedCourse | null;
   t: Translate;
 }): HomeInsightItem[] {
   const capabilities = input.profile ? getProfileCapabilities(input.profile) : null;
@@ -42,6 +51,11 @@ export function buildHomeInsightItems(input: {
     Boolean(capabilities?.reminders.pollen),
   );
 
+  const nextIntake =
+    input.prescribedCourse && isPrescribedCourseConfigured(input.prescribedCourse)
+      ? computeNextPrescribedIntake(input.prescribedCourse)
+      : null;
+
   const planned = planHomeInsights({
     hasProfile: Boolean(input.profile),
     diaryEntries: input.diaryEntries,
@@ -49,6 +63,7 @@ export function buildHomeInsightItems(input: {
     enableActReminder: Boolean(capabilities?.reminders.act),
     wellnessCount: wellnessRecs.length,
     phenotypeCount: input.phenotypeHints.length,
+    hasTherapyReminder: Boolean(nextIntake && input.prescribedCourse),
   });
 
   const items: HomeInsightItem[] = [];
@@ -62,7 +77,7 @@ export function buildHomeInsightItems(input: {
         text: input.t('home.insightsSelectProfileText'),
         action: {
           label: input.t('home.insightsOpenProfiles'),
-          href: '/(tabs)/sos',
+          href: '/profile',
         },
       });
       continue;
@@ -90,6 +105,23 @@ export function buildHomeInsightItems(input: {
         text: input.t('home.insightsActText'),
         action: {
           label: input.t('home.insightsOpenAct'),
+          href: '/clinical-scales',
+        },
+      });
+      continue;
+    }
+
+    if (item.kind === 'therapy-reminder' && input.prescribedCourse && nextIntake) {
+      items.push({
+        id: item.id,
+        icon: 'alarm-outline',
+        title: input.t('home.insightsTherapyTitle'),
+        text: input.t('home.insightsTherapyText', {
+          drug: input.prescribedCourse.drug,
+          time: formatPrescribedReminderTime(nextIntake.hour, nextIntake.minute),
+        }),
+        action: {
+          label: input.t('home.insightsOpenTherapy'),
           href: '/(tabs)/diary',
         },
       });
@@ -117,7 +149,7 @@ export function buildHomeInsightItems(input: {
       text: hint,
       action: {
         label: input.t('home.insightsOpenProfile'),
-        href: '/(tabs)/sos',
+        href: '/profile',
       },
     });
   }

@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  ASIT_DISCLAIMER,
   ASIT_PHASE_LABELS,
   ASIT_ROUTE_LABELS,
   computeAsitCompliance,
@@ -94,7 +93,7 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
         <Button label={t('asit.logDose')} variant="primary" size="sm" onPress={onLogDose} />
       </View>
 
-      <Text style={styles.disclaimer}>{ASIT_DISCLAIMER}</Text>
+      <Text style={styles.disclaimer}>{t('asit.disclaimer')}</Text>
     </GlassCard>
   );
 }

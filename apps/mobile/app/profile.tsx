@@ -135,6 +135,23 @@ export default function ProfileScreen() {
       </GlassCard>
       <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
 
+      <Text style={ui.sectionLabel}>{t('sos.title')}</Text>
+      <GlassCard>
+        <Text style={styles.cardHint}>{t('sos.subtitle')}</Text>
+        <Button
+          label={t('profiles.sosPassport')}
+          variant="secondary"
+          block
+          onPress={() => router.push('/sos-edit' as any)}
+        />
+        <Button
+          label={t('profiles.sosContacts')}
+          variant="secondary"
+          block
+          onPress={() => router.push('/sos-edit' as any)}
+        />
+      </GlassCard>
+
       <Text style={ui.sectionLabel}>{t('settings.emergencyNumber')}</Text>
       <GlassCard>
         <Text style={styles.cardHint}>{t('settings.emergencyHint')}</Text>

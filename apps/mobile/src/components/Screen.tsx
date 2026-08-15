@@ -34,8 +34,8 @@ export function Screen({
   // Android API 35+: `adjustResize` often no longer shrinks the window. Extra
   // bottom content inset lets ScrollView bring focused fields (e.g. password)
   // above the IME. iOS keeps using KeyboardAvoidingView padding instead.
-  const androidKeyboardPad = Platform.OS === 'android' ? keyboardInset : 0;
-  const scrollBottomPad = layout.bottomPadding + androidKeyboardPad;
+  const extraKeyboardPad = Platform.OS === 'ios' ? 0 : keyboardInset;
+  const scrollBottomPad = layout.bottomPadding + extraKeyboardPad;
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -71,11 +71,11 @@ export function Screen({
           backgroundColor: colors.bg,
           paddingHorizontal: layout.horizontalPadding,
           paddingTop: layout.topPadding,
-          paddingBottom: layout.bottomPadding + androidKeyboardPad,
+          paddingBottom: layout.bottomPadding + extraKeyboardPad,
         },
       }),
     [
-      androidKeyboardPad,
+      extraKeyboardPad,
       colors.bg,
       layout.bottomPadding,
       layout.contentMaxWidth,

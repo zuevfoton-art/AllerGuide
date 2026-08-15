@@ -10,7 +10,21 @@ export function useKeyboardBottomInset(): number {
   const [bottomInset, setBottomInset] = useState(0);
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
+    if (Platform.OS === 'web') {
+      const viewport = typeof window !== 'undefined' ? window.visualViewport : null;
+      if (!viewport) return undefined;
+      const update = () => {
+        const occluded = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+        setBottomInset(occluded);
+      };
+      update();
+      viewport.addEventListener('resize', update);
+      viewport.addEventListener('scroll', update);
+      return () => {
+        viewport.removeEventListener('resize', update);
+        viewport.removeEventListener('scroll', update);
+      };
+    }
 
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';

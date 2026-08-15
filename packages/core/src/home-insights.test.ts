@@ -28,15 +28,16 @@ describe('planHomeInsights', () => {
       enableActReminder: true,
       wellnessCount: 2,
       phenotypeCount: 1,
+      hasTherapyReminder: true,
       now: noon,
     });
 
     expect(planned.map((item) => item.kind)).toEqual([
       'diary-missing-today',
       'act-due',
+      'therapy-reminder',
       'wellness',
       'wellness',
-      'phenotype',
     ]);
   });
 

@@ -21,10 +21,17 @@ import {
   airQualityRiskFromUaqi,
   wellnessStatusFromScore,
   WELLNESS_WEIGHTS_VERSION,
+  derivePrimaryWellnessFactor,
+  verbalizeDiaryDays,
+  verbalizePm25,
+  verbalizePollenValue,
+  verbalizeWellnessIndex,
   type AirQualitySnapshot,
   type DiaryEntry,
   type PollenMatchLike,
+  type WellnessPrimaryFactorId,
   type WellnessRecommendation,
+  type WellnessVerbalTier,
 } from '@allerguide/core';
 import { fetchAirQualitySnapshot } from '@/src/services/air-quality-service';
 import { getLocaleContent } from '@/src/i18n/content';
@@ -53,6 +60,16 @@ export type WellnessSnapshot = {
   confidence: WellnessConfidence;
   weightsVersion: string;
   pollenMatches: PollenMatchLike[];
+  display: {
+    indexTier: WellnessVerbalTier;
+    pollenTier: WellnessVerbalTier;
+    airTier: WellnessVerbalTier;
+    diaryTier: WellnessVerbalTier;
+    primaryFactorId: WellnessPrimaryFactorId;
+    pollenValue: number | null;
+    pm25: number | null;
+    symptomDays: number;
+  };
 };
 
 function formatGoogleAirFactorValue(snapshot: AirQualitySnapshot): string {
@@ -397,5 +414,25 @@ export async function fetchWellnessSnapshot(
     confidence,
     weightsVersion: WELLNESS_WEIGHTS_VERSION,
     pollenMatches: envDataAvailable ? pollenMatches : [],
+    display: {
+      indexTier: verbalizeWellnessIndex(score),
+      pollenTier: verbalizePollenValue(
+        envDataAvailable
+          ? pollenMatches.find((match) => match.profileRelevant)?.value ??
+              pollenMatches[0]?.value ??
+              null
+          : null,
+      ),
+      airTier: verbalizePm25(envDataAvailable ? pm25 : null),
+      diaryTier: verbalizeDiaryDays(diarySeries.symptomDays),
+      primaryFactorId: derivePrimaryWellnessFactor(breakdown).id,
+      pollenValue: envDataAvailable
+        ? pollenMatches.find((match) => match.profileRelevant)?.value ??
+          pollenMatches[0]?.value ??
+          null
+        : null,
+      pm25: envDataAvailable ? pm25 : null,
+      symptomDays: diarySeries.symptomDays,
+    },
   };
 }
