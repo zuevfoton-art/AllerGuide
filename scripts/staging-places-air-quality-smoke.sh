@@ -65,6 +65,18 @@ if [[ "$search_ok" != "true" ]]; then
 fi
 echo "PASS: places text search HTTP 200"
 
+ac_tmp="$(mktemp)"
+ac_code="$(curl -sS -o "$ac_tmp" -w '%{http_code}' --max-time 45 \
+  "${BASE}/api/places/autocomplete?q=%D0%B0%D0%BF%D1%82%D0%B5%D0%BA%D0%B0&lat=${LAT}&lon=${LON}&categories=restaurant,cafe,medical,pharmacy&sessionToken=ps-stage-smoke-1&lang=ru" || true)"
+ac_ok="$(jq -r '.ok // false' "$ac_tmp")"
+ac_count="$(jq -r '.suggestions | length' "$ac_tmp")"
+rm -f "$ac_tmp"
+if [[ "$ac_code" != "200" || "$ac_ok" != "true" ]]; then
+  echo "FAIL: places autocomplete HTTP $ac_code" >&2
+  exit 1
+fi
+echo "PASS: places autocomplete HTTP 200 (count=$ac_count)"
+
 if [[ -n "$search_place_id" ]]; then
   details_tmp="$(mktemp)"
   details_code="$(curl -sS -o "$details_tmp" -w '%{http_code}' --max-time 45 \

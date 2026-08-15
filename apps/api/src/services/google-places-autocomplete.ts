@@ -6,7 +6,7 @@ import {
   DEFAULT_PLACES_RADIUS_M,
   PLACES_AUTOCOMPLETE_FIELD_MASK,
   fetchGooglePlacesJson,
-  includedTypesForCategories,
+  includedPrimaryTypesForAutocomplete,
   placesAuthHeaders,
   type GooglePlacesCategory,
 } from './google-places-shared';
@@ -22,13 +22,14 @@ export function buildGooglePlacesAutocompleteRequest(input: {
   sessionToken?: string;
   categories: readonly GooglePlacesCategory[];
 }): { url: string; headers: Record<string, string>; body: string } {
+  const includedPrimaryTypes = includedPrimaryTypesForAutocomplete(input.categories);
   return {
     url: GOOGLE_PLACES_AUTOCOMPLETE_URL,
     headers: placesAuthHeaders(PLACES_AUTOCOMPLETE_FIELD_MASK),
     body: JSON.stringify({
       input: input.query,
       languageCode: input.languageCode,
-      includedPrimaryTypes: includedTypesForCategories(input.categories),
+      ...(includedPrimaryTypes ? { includedPrimaryTypes } : {}),
       ...(input.sessionToken ? { sessionToken: input.sessionToken } : {}),
       locationBias: {
         circle: {
