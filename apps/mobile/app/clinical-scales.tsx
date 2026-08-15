@@ -14,7 +14,6 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
