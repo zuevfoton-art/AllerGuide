@@ -369,6 +369,10 @@ const en: LocaleMessages = {
       'Dish recognition from a plate photo is an AI estimate of the likely name and typical ingredients. It can miss sauces, substitutions, and cross-contact. It does not replace reading a label or asking the kitchen, and does not rule out an individual reaction.',
     dishVisionFailed:
       'Could not recognize the dish from the photo. Check your connection and try again — or enter the ingredients manually.',
+    cloudAuthRequired: 'Cloud scanner requires sign-in. Log in and retake the photo — or enter ingredients manually.',
+    dishVisionDishLabel: 'Possible dish',
+    dishVisionIngredientsLabel: 'Likely ingredients',
+    dishVisionPhotoLabel: 'Dish photo',
     safeList: 'Safe Products',
     saveToSafe: '✓ Save to safe list',
     savedToSafe: '✓ Saved',

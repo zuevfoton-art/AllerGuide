@@ -367,6 +367,10 @@ const fr: LocaleMessages = {
       'La reconnaissance du plat sur photo est une estimation IA du nom et des ingrédients typiques. Sauces, substitutions et contamination croisée peuvent manquer. Cela ne remplace ni l’étiquette ni une demande en cuisine, et n’exclut pas une réaction individuelle.',
     dishVisionFailed:
       'Impossible de reconnaître le plat sur la photo. Vérifiez la connexion et réessayez — ou saisissez les ingrédients manuellement.',
+    cloudAuthRequired: 'Le scanner cloud nécessite une connexion. Connectez-vous et reprenez la photo — ou saisissez les ingrédients manuellement.',
+    dishVisionDishLabel: 'Plat possible',
+    dishVisionIngredientsLabel: 'Ingrédients probables',
+    dishVisionPhotoLabel: 'Photo du plat',
     safeList: 'Produits sûrs',
     saveToSafe: '✓ Enregistrer comme sûr',
     savedToSafe: '✓ Enregistré',

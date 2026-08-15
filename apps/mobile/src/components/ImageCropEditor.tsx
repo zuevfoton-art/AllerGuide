@@ -110,9 +110,14 @@ export function ImageCropEditor({
     setContainer({ width, height });
   };
 
-  const onImageLoad = (event: { nativeEvent: { source: { width: number; height: number } } }) => {
-    const width = event.nativeEvent.source.width || photo.width;
-    const height = event.nativeEvent.source.height || photo.height;
+  const onImageLoad = (event: {
+    nativeEvent: { source: { width: number; height: number } };
+  }) => {
+    const source = event.nativeEvent?.source;
+    const target = (event as { currentTarget?: { naturalWidth?: number; naturalHeight?: number } })
+      .currentTarget;
+    const width = source?.width || target?.naturalWidth || photo.width;
+    const height = source?.height || target?.naturalHeight || photo.height;
     if (!width || !height) return;
     cropRef.current = null;
     setCrop(null);

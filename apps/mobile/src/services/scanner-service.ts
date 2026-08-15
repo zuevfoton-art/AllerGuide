@@ -65,8 +65,41 @@ export class DishVisionScanError extends Error {
   }
 }
 
+/**
+ * Staging/prod scan OCR + dish-vision require JWT when SCAN_REQUIRE_AUTH=true.
+ * Surface a login hint instead of a generic “scanner failed” banner.
+ */
+export class ScanCloudAuthError extends Error {
+  readonly status = 401;
+
+  constructor(message = 'SCAN_CLOUD_AUTH_REQUIRED') {
+    super(message);
+    this.name = 'ScanCloudAuthError';
+  }
+}
+
 export function isDishVisionScanError(error: unknown): error is DishVisionScanError {
   return error instanceof DishVisionScanError || (error as { name?: string })?.name === 'DishVisionScanError';
+}
+
+export function isScanCloudAuthError(error: unknown): error is ScanCloudAuthError {
+  return (
+    error instanceof ScanCloudAuthError || (error as { name?: string })?.name === 'ScanCloudAuthError'
+  );
+}
+
+function isUnauthorizedCloudStatus(status?: number, error?: string): boolean {
+  if (status === 401) return true;
+  return /unauthorized|auth required|login required/i.test(error ?? '');
+}
+
+function isNoTextOcrFailure(status?: number, error?: string): boolean {
+  if (status === 422) return true;
+  return /no text/i.test(error ?? '') || error === 'No text recognized';
+}
+
+function extractionLooksLikeCloudOcrOutage(extraction: OcrExtractionResult): boolean {
+  return extraction.warnings.some((warning) => /Облачный OCR недоступен/i.test(warning));
 }
 
 function getLlmEndpoint(): string | undefined {
@@ -213,7 +246,8 @@ function emptyVisionOcrResult(warning?: string): OcrExtractionResult {
 
 /**
  * Cloud Vision OCR when flagged; demo/manual offline fallback.
- * Empty / no-text results stay empty so the VL-first photo path can keep a plate estimate.
+ * Empty / no-text (422) stays empty so the VL-first photo path can keep a plate estimate.
+ * Auth failures throw ScanCloudAuthError — do not pretend the photo had no text.
  */
 export async function extractOcrFromImage(input: {
   mode: ScanMode;
@@ -235,16 +269,19 @@ export async function extractOcrFromImage(input: {
         return asVisionOcrResult(prepareScanTextFromOcr(cloud.text, input.mode));
       }
       if (cloud && !cloud.ok) {
-        const noText =
-          cloud.status === 422 ||
-          /no text/i.test(cloud.error) ||
-          cloud.error === 'No text recognized';
-        if (noText || AI_DISH_VISION_ENABLED) {
+        if (isUnauthorizedCloudStatus(cloud.status, cloud.error)) {
+          throw new ScanCloudAuthError();
+        }
+        const noText = isNoTextOcrFailure(cloud.status, cloud.error);
+        if (noText) {
           return emptyVisionOcrResult(
-            noText
-              ? 'На фото нет читаемого текста — используем распознавание блюда по виду.'
-              : `Облачный OCR недоступен (${cloud.error}).`,
+            'На фото нет читаемого текста — используем распознавание блюда по виду.',
           );
+        }
+        // Soft outage while VL is on: empty text lets plate VL try; scanFromOcr
+        // falls back to demo OCR if VL also fails (label photos stay usable offline).
+        if (AI_DISH_VISION_ENABLED) {
+          return emptyVisionOcrResult(`Облачный OCR недоступен (${cloud.error}).`);
         }
         const demo = simulateOcrFromCapture(input.mode);
         return {
@@ -256,6 +293,7 @@ export async function extractOcrFromImage(input: {
         };
       }
     } catch (error) {
+      if (isScanCloudAuthError(error)) throw error;
       logCaughtError('scanner.extractOcrFromImage', error, { level: 'warn' });
       if (AI_DISH_VISION_ENABLED) {
         return emptyVisionOcrResult('Облачный OCR недоступен.');
@@ -308,6 +346,9 @@ async function scanFromDishVision(input: {
     });
     if (vision === null) return null;
     if (!vision.ok) {
+      if (isUnauthorizedCloudStatus(vision.status, vision.error)) {
+        throw new ScanCloudAuthError();
+      }
       throw new DishVisionScanError(vision.error || 'DISH_VISION_FAILED', {
         status: vision.status,
         providerStatus: vision.providerStatus,
@@ -356,9 +397,38 @@ async function scanFromDishVision(input: {
 
     return { ...result, ocr: input.extraction, dishVision: vision.result };
   } catch (error) {
-    if (isDishVisionScanError(error)) throw error;
+    if (isScanCloudAuthError(error) || isDishVisionScanError(error)) throw error;
     throw new DishVisionScanError('DISH_VISION_FAILED');
   }
+}
+
+async function analyzeWithDemoOcrFallback(input: {
+  mode: ScanMode;
+  profile?: Profile | null;
+  extraction: OcrExtractionResult;
+}): Promise<ScanResultExtended> {
+  const demo = simulateOcrFromCapture(input.mode);
+  const extraction: OcrExtractionResult = {
+    ...demo,
+    warnings: [
+      ...input.extraction.warnings,
+      ...demo.warnings,
+      'Показан демо-текст — лучше ввести состав вручную или войти для облачного OCR.',
+    ],
+  };
+  const productName = buildOcrScanProductName(input.mode);
+  const result = await analyzeText({
+    mode: input.mode,
+    text: extraction.text,
+    profile: input.profile,
+    productName,
+    source: 'ocr',
+    ocrNote: extraction.warnings.join(' '),
+  });
+  if (input.profile) {
+    await saveScanHistory(input.profile.id, extraction.text, result, productName);
+  }
+  return { ...result, ocr: extraction };
 }
 
 export async function scanFromOcr({
@@ -398,21 +468,55 @@ export async function scanFromOcr({
     dishVisionError = attempted.error;
   }
 
-  const extraction = ocrText?.trim()
-    ? prepareScanTextFromOcr(ocrText, mode)
-    : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
+  let extraction: OcrExtractionResult;
+  try {
+    extraction = ocrText?.trim()
+      ? prepareScanTextFromOcr(ocrText, mode)
+      : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
+  } catch (error) {
+    // Label OCR needs auth, but a plate VL hit can still be shown.
+    if (isScanCloudAuthError(error) && dishVisionResult) {
+      return {
+        ...dishVisionResult,
+        ocr: emptyVisionOcrResult('Для чтения текста этикетки нужен вход в аккаунт.'),
+      };
+    }
+    throw error;
+  }
 
   const readableOcrText = hasReadableOcrText(extraction.text);
+  const hasLabelOcrSnippet = !shouldUseDishVisionForOcrText(extraction.text);
 
   // Plate-only (no label text): keep VL result or surface VL failure — never empty clear.
-  if (shouldTryVlFirst && !readableOcrText) {
+  // Short OCR from a label must continue to the OCR path: VL often says “not a dish”.
+  if (shouldTryVlFirst && !readableOcrText && !hasLabelOcrSnippet) {
     if (dishVisionResult) {
       return { ...dishVisionResult, ocr: extraction };
     }
-    if (dishVisionError) throw dishVisionError;
-    if (shouldUseDishVisionForOcrText(extraction.text)) {
-      throw new DishVisionScanError('DISH_VISION_FAILED');
+    if (dishVisionError) {
+      if (isUnauthorizedCloudStatus(dishVisionError.status, dishVisionError.message)) {
+        throw new ScanCloudAuthError();
+      }
+      // OCR cloud outage (not “no text”) + VL failure → offline demo, not a hard stop.
+      if (extractionLooksLikeCloudOcrOutage(extraction)) {
+        return analyzeWithDemoOcrFallback({ mode, profile, extraction });
+      }
+      throw dishVisionError;
     }
+    if (extractionLooksLikeCloudOcrOutage(extraction)) {
+      return analyzeWithDemoOcrFallback({ mode, profile, extraction });
+    }
+    throw new DishVisionScanError('DISH_VISION_FAILED');
+  }
+
+  if (shouldTryVlFirst && !readableOcrText && hasLabelOcrSnippet && !dishVisionResult) {
+    extraction = {
+      ...extraction,
+      warnings: [
+        ...extraction.warnings,
+        'Текст этикетки распознан частично — сверьте упаковку или введите состав вручную.',
+      ],
+    };
   }
 
   // A: heuristic intent. B (flag): YandexGPT intent via /api/scan/intent.
