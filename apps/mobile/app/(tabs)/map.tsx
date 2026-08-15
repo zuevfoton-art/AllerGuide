@@ -491,7 +491,11 @@ export default function MapScreen() {
   }, []);
 
   const taxonLabel = t(TAXON_LABEL_KEYS[selectedTaxonId] as 'map.pollenBirch');
-  const levelLabel = statusLevel ? t(LEVEL_LABEL_KEYS[statusLevel]) : t('map.pollenLoading');
+  const levelLabel = statusLevel
+    ? t(LEVEL_LABEL_KEYS[statusLevel])
+    : loading && !pollenSnapshot
+      ? t('map.pollenLoading')
+      : t('map.pollenUnavailable');
 
   const statusHeadline = useMemo(() => {
     if (loading && !pollenSnapshot) return t('map.pollenLoading');
