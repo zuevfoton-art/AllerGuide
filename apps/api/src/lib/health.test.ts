@@ -42,6 +42,7 @@ describe('buildHealthPayload', () => {
       aiScan: true,
       aiScanProvider: 'yandex',
       pollenHeatmap: false,
+      pollenSpeciesHeatmap: false,
       airQuality: false,
       mapPlaces: false,
       yandexMapsInteractive: false,

@@ -185,3 +185,77 @@ describe('pollen forecast routes', () => {
     expect(String(calls[1]?.[0])).toContain('languageCode=en');
   });
 });
+
+describe('pollen species-samples spike', () => {
+  beforeEach(() => {
+    process.env.POLLEN_HEATMAP_ENABLED = 'true';
+    process.env.GOOGLE_POLLEN_API_KEY = 'stage test key';
+    process.env.POLLEN_SPECIES_HEATMAP_ENABLED = 'true';
+    process.env.RATE_LIMIT_DISABLED = 'true';
+    clearGooglePollenForecastCache();
+  });
+
+  afterEach(() => {
+    process.env = { ...ORIGINAL_ENV };
+    vi.restoreAllMocks();
+  });
+
+  it('is disabled unless the experimental flag is on', async () => {
+    process.env.POLLEN_SPECIES_HEATMAP_ENABLED = 'false';
+    const app = await createApp({ withReplitAuth: false });
+    const response = await request(app).get(
+      '/api/pollen/species-samples?north=55.76&south=55.74&east=37.64&west=37.60&zoom=12&taxon=birch_pollen',
+    );
+    expect(response.status).toBe(503);
+  });
+
+  it('rejects a species tile type that Google does not offer', async () => {
+    const app = await createApp({ withReplitAuth: false });
+    const heatmap = await request(app).get('/api/pollen/heatmap/BIRCH_UPI/6/38/20');
+    expect(heatmap.status).toBe(400);
+
+    const samples = await request(app).get(
+      '/api/pollen/species-samples?north=55.76&south=55.74&east=37.64&west=37.60&zoom=12&taxon=not_a_taxon',
+    );
+    expect(samples.status).toBe(400);
+  });
+
+  it('returns plant-only samples and never fills missing species from TREE', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          regionCode: 'RU',
+          dailyInfo: [
+            {
+              date: { year: 2026, month: 4, day: 15 },
+              pollenTypeInfo: [{ code: 'TREE', indexInfo: { value: 5, category: 'Very High' } }],
+              plantInfo: [
+                { code: 'BIRCH', indexInfo: { value: 2, category: 'Low' } },
+                { code: 'OAK' },
+              ],
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp({ withReplitAuth: false });
+
+    const birch = await request(app).get(
+      '/api/pollen/species-samples?north=55.755&south=55.745&east=37.625&west=37.615&zoom=13&taxon=birch_pollen',
+    );
+    expect(birch.status).toBe(200);
+    expect(birch.body.derived).toBe(true);
+    expect(birch.body.samples.some((sample: { hasData: boolean }) => sample.hasData)).toBe(true);
+    expect(birch.headers['cache-control']).toBe('private, no-store');
+
+    const oak = await request(app).get(
+      '/api/pollen/species-samples?north=55.755&south=55.745&east=37.625&west=37.615&zoom=13&taxon=oak_pollen',
+    );
+    expect(oak.status).toBe(200);
+    expect(oak.body.samples.every((sample: { hasData: boolean }) => sample.hasData === false)).toBe(
+      true,
+    );
+  });
+});

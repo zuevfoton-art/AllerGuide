@@ -12,6 +12,11 @@ import {
   fetchGooglePollenForecast,
   isGooglePollenForecastConfigured,
 } from '../services/google-pollen-forecast';
+import {
+  fetchPollenSpeciesSamples,
+  isPollenSpeciesHeatmapConfigured,
+  parseSpeciesSamplesQuery,
+} from '../services/google-pollen-species-samples';
 
 const PNG_CONTENT_TYPE = 'image/png';
 const SUPPORTED_FORECAST_LANGUAGES = new Set(['ru', 'en', 'es', 'fr', 'de', 'it']);
@@ -104,6 +109,36 @@ export function registerPollenRoutes(app: Express): void {
     } catch (error) {
       logCaughtError('pollen.forecast', error, { latitude, longitude });
       res.status(502).json({ ok: false, error: 'Unable to fetch pollen forecast' });
+    }
+  });
+
+  app.get('/api/pollen/species-samples', async (req: Request, res: Response) => {
+    if (!isPollenSpeciesHeatmapConfigured()) {
+      res.status(503).json({ ok: false, error: 'Pollen species heatmap is disabled' });
+      return;
+    }
+
+    const parsed = parseSpeciesSamplesQuery(req.query as Record<string, unknown>);
+    if (!parsed.ok) {
+      res.status(400).json({ ok: false, error: parsed.error });
+      return;
+    }
+
+    try {
+      const result = await fetchPollenSpeciesSamples(parsed);
+      res.set({ 'Cache-Control': 'private, no-store' });
+      res.json({
+        ok: true,
+        ...result,
+        attribution: 'Includes data from Google Maps',
+        derived: true,
+      });
+    } catch (error) {
+      logCaughtError('pollen.speciesSamples', error, {
+        taxonId: parsed.taxonId,
+        zoom: parsed.zoom,
+      });
+      res.status(502).json({ ok: false, error: 'Unable to fetch species samples' });
     }
   });
 }
