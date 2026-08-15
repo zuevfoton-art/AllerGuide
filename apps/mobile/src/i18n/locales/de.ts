@@ -369,6 +369,9 @@ const de: LocaleMessages = {
     dishVisionFailed:
       'Das Gericht konnte anhand des Fotos nicht erkannt werden. Prüfen Sie die Verbindung und versuchen Sie es erneut — oder geben Sie die Zutaten manuell ein.',
     cloudAuthRequired: 'Cloud-Scanner erfordert Anmeldung. Melden Sie sich an und fotografieren Sie erneut — oder geben Sie die Zutaten manuell ein.',
+    dishVisionDishLabel: 'Mögliches Gericht',
+    dishVisionIngredientsLabel: 'Wahrscheinliche Zutaten',
+    dishVisionPhotoLabel: 'Foto des Gerichts',
     safeList: 'Sichere Produkte',
     saveToSafe: '✓ In sichere Liste speichern',
     savedToSafe: '✓ Gespeichert',

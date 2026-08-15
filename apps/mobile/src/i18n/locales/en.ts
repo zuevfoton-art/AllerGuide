@@ -370,6 +370,9 @@ const en: LocaleMessages = {
     dishVisionFailed:
       'Could not recognize the dish from the photo. Check your connection and try again — or enter the ingredients manually.',
     cloudAuthRequired: 'Cloud scanner requires sign-in. Log in and retake the photo — or enter ingredients manually.',
+    dishVisionDishLabel: 'Possible dish',
+    dishVisionIngredientsLabel: 'Likely ingredients',
+    dishVisionPhotoLabel: 'Dish photo',
     safeList: 'Safe Products',
     saveToSafe: '✓ Save to safe list',
     savedToSafe: '✓ Saved',

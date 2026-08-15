@@ -372,6 +372,9 @@ const ru: LocaleMessages = {
     dishVisionFailed:
       'Не удалось распознать блюдо по фото. Проверьте соединение и попробуйте снова — или введите состав вручную.',
     cloudAuthRequired: 'Облачный сканер недоступен без входа. Войдите в аккаунт и повторите фото — или введите состав вручную.',
+    dishVisionDishLabel: 'Возможное блюдо',
+    dishVisionIngredientsLabel: 'Вероятный состав',
+    dishVisionPhotoLabel: 'Снимок блюда',
     safeList: 'Безопасные продукты',
     saveToSafe: '✓ Сохранить в безопасные',
     savedToSafe: '✓ Сохранено',

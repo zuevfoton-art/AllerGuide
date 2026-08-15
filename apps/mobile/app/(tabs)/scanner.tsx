@@ -36,6 +36,7 @@ import { ErrorState } from '@/src/components/ErrorState';
 import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
+import { ScannerDishVisionCard } from '@/src/components/ScannerDishVisionCard';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -62,6 +63,7 @@ import {
   type CapturedScanPhoto,
   type CroppedScanPhoto,
 } from '@/src/services/scanner-photo-service';
+import { resolveDishVisionPhotoUri } from '@/src/services/scanner-dish-vision-display';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
@@ -135,6 +137,7 @@ export default function ScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<CapturedScanPhoto | null>(null);
+  const [resultPhotoUri, setResultPhotoUri] = useState<string | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const lastScanRef = useRef<(() => void) | null>(null);
@@ -261,6 +264,7 @@ export default function ScannerScreen() {
     setScanErrorIsDishVision(false);
     setScanErrorIsCloudAuth(false);
     setIngredientsOpen(false);
+    setResultPhotoUri(null);
     try {
       let scanResult: ScanResultExtended;
       if (barcodeMode && mode === 'product') {
@@ -423,6 +427,13 @@ export default function ScannerScreen() {
 
   const handleCropConfirm = async (cropped: CroppedScanPhoto) => {
     setPendingPhoto(null);
+    setResultPhotoUri(
+      resolveDishVisionPhotoUri({
+        fileUri: cropped.uri,
+        base64: cropped.base64,
+        mimeType: cropped.mimeType,
+      }),
+    );
     await runOcrCapture(undefined, {
       base64: cropped.base64,
       mimeType: cropped.mimeType,
@@ -484,6 +495,7 @@ export default function ScannerScreen() {
     setResult(restored);
     setRepeatUnsafe(false);
     setIngredientsOpen(false);
+    setResultPhotoUri(null);
     lastHapticResultRef.current = null;
   };
 
@@ -778,9 +790,21 @@ export default function ScannerScreen() {
             </Text>
           </View>
 
+          {isDishVisionResult ? (
+            <ScannerDishVisionCard
+              photoUri={resultPhotoUri}
+              dishName={result?.dishVision?.dishName || displayResult.productName || ''}
+              ingredients={result?.dishVision?.ingredients ?? []}
+              dishLabel={t('scanner.dishVisionDishLabel')}
+              ingredientsLabel={t('scanner.dishVisionIngredientsLabel')}
+              photoLabel={t('scanner.dishVisionPhotoLabel')}
+            />
+          ) : null}
+
           <Text style={styles.resultTrust}>{t('scanner.resultTrustStrip')}</Text>
 
-          {(result?.productBrand ||
+          {!isDishVisionResult &&
+          (result?.productBrand ||
             result?.productImageUrl ||
             displayResult.productName ||
             result?.productCategory) ? (
@@ -882,7 +906,7 @@ export default function ScannerScreen() {
             </View>
           ) : null}
 
-          {compositionText.length > 20 ? (
+          {!isDishVisionResult && compositionText.length > 20 ? (
             <View style={styles.ingredientsBlock}>
               <Pressable
                 onPress={() => setIngredientsOpen((v) => !v)}
