@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LOCALE_MESSAGES } from './locales';
 
-const BLOCKED_PATTERNS: Array<{ id: string; pattern: RegExp }> = [
+const BLOCKED_PATTERNS: { id: string; pattern: RegExp }[] = [
   { id: 'ACT', pattern: /\bACT\b/ },
   { id: 'ARIA', pattern: /\bARIA\b/ },
   { id: 'GINA', pattern: /\bGINA\b/ },
@@ -15,7 +15,7 @@ const ALLOWED_PATHS = new Set(['asthma.ginaLink']);
 function flattenMessages(
   value: unknown,
   prefix = '',
-): Array<{ path: string; text: string }> {
+): { path: string; text: string }[] {
   if (typeof value === 'string') {
     return [{ path: prefix, text: value }];
   }

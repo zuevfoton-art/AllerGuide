@@ -1,5 +1,4 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { DOCTOR_REPORT_BLOCKS } from '@allerguide/core';
 import { generateDoctorReportPdf } from '@/src/services/doctor-report-service';
