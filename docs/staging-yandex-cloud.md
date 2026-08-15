@@ -359,7 +359,7 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 | `build-push` | `ubuntu-latest` | `docker build` → YCR |
 | `deploy` | `ubuntu-latest` | `yc serverless container revision deploy` + Lockbox secrets |
 | `migrate` | **`self-hosted, yc-staging-vpc`** | `pnpm --filter api db:migrate` |
-| `smoke` | `ubuntu-latest` | `staging-preflight.sh` |
+| `smoke` | `ubuntu-latest` | `pnpm install` + `staging-preflight.sh` (sync/scan/yandex-ai через `pnpm exec tsx`) |
 | `mobile-android` / `mobile-ios` | `ubuntu-latest` | `eas build --profile staging` |
 
 ### GitHub Secrets
