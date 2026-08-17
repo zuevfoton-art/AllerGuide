@@ -1,6 +1,8 @@
 import { mapExternalAllergenIds } from '@allerguide/core';
 import { logCaughtError } from '../lib/log-caught-error';
 
+export type OffFamilySource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts';
+
 export interface NormalizedProduct {
   barcode: string;
   name: string;
@@ -9,6 +11,7 @@ export interface NormalizedProduct {
   ingredients: string;
   allergenTags: string[];
   traceTags: string[];
+  source: OffFamilySource;
 }
 
 interface OffProduct {
@@ -27,8 +30,30 @@ interface OffProduct {
 const PRODUCT_FIELDS =
   'code,product_name,product_name_ru,brands,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags,image_small_url,image_url';
 
-function baseUrl(): string {
-  return process.env.OPENFOODFACTS_BASE_URL || 'https://world.openfoodfacts.org';
+const OFF_FAMILY_DATASETS: { source: OffFamilySource; envKey: string; fallback: string }[] = [
+  {
+    source: 'openfoodfacts',
+    envKey: 'OPENFOODFACTS_BASE_URL',
+    fallback: 'https://world.openfoodfacts.org',
+  },
+  {
+    source: 'openbeautyfacts',
+    envKey: 'OPENBEAUTYFACTS_BASE_URL',
+    fallback: 'https://world.openbeautyfacts.org',
+  },
+  {
+    source: 'openproductsfacts',
+    envKey: 'OPENPRODUCTSFACTS_BASE_URL',
+    fallback: 'https://world.openproductsfacts.org',
+  },
+];
+
+function datasetBaseUrl(dataset: (typeof OFF_FAMILY_DATASETS)[number]): string {
+  return process.env[dataset.envKey] || dataset.fallback;
+}
+
+function foodFactsBaseUrl(): string {
+  return datasetBaseUrl(OFF_FAMILY_DATASETS[0]);
 }
 
 /**
@@ -43,7 +68,11 @@ function headers(): Record<string, string> {
   return { 'User-Agent': userAgent(), Accept: 'application/json' };
 }
 
-function normalize(product: OffProduct, fallbackBarcode = ''): NormalizedProduct | null {
+function normalize(
+  product: OffProduct,
+  source: OffFamilySource,
+  fallbackBarcode = '',
+): NormalizedProduct | null {
   const ingredients =
     product.ingredients_text_ru?.trim() || product.ingredients_text?.trim() || '';
   const name = product.product_name_ru?.trim() || product.product_name?.trim() || '';
@@ -63,19 +92,17 @@ function normalize(product: OffProduct, fallbackBarcode = ''): NormalizedProduct
     ingredients,
     allergenTags,
     traceTags,
+    source,
   };
 }
 
-/** On-demand product lookup by barcode from the Open Food Facts API. */
-export async function fetchOpenFoodFactsProduct(
+async function fetchFromDataset(
   barcode: string,
+  dataset: (typeof OFF_FAMILY_DATASETS)[number],
 ): Promise<NormalizedProduct | null> {
-  const normalized = barcode.replace(/\D/g, '');
-  if (!normalized) return null;
-
   try {
     const response = await fetch(
-      `${baseUrl()}/api/v2/product/${normalized}.json?fields=${PRODUCT_FIELDS}`,
+      `${datasetBaseUrl(dataset)}/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`,
       { headers: headers() },
     );
     if (!response.ok) return null;
@@ -83,11 +110,28 @@ export async function fetchOpenFoodFactsProduct(
     const data = (await response.json()) as { status?: number; product?: OffProduct };
     if (data.status !== 1 || !data.product) return null;
 
-    return normalize(data.product, normalized);
+    return normalize(data.product, dataset.source, barcode);
   } catch (error) {
-    logCaughtError('fetchOpenFoodFactsProduct', error, { barcode: normalized });
+    logCaughtError('fetchOpenFoodFactsProduct', error, {
+      barcode,
+      source: dataset.source,
+    });
     return null;
   }
+}
+
+/** On-demand product lookup by barcode: OFF → Open Beauty Facts → Open Products Facts. */
+export async function fetchOpenFoodFactsProduct(
+  barcode: string,
+): Promise<NormalizedProduct | null> {
+  const normalized = barcode.replace(/\D/g, '');
+  if (!normalized) return null;
+
+  for (const dataset of OFF_FAMILY_DATASETS) {
+    const product = await fetchFromDataset(normalized, dataset);
+    if (product) return product;
+  }
+  return null;
 }
 
 /**
@@ -111,7 +155,7 @@ export async function searchOpenFoodFacts(
   });
 
   try {
-    const response = await fetch(`${baseUrl()}/cgi/search.pl?${params.toString()}`, {
+    const response = await fetch(`${foodFactsBaseUrl()}/cgi/search.pl?${params.toString()}`, {
       headers: headers(),
     });
     if (!response.ok) return [];
@@ -122,7 +166,7 @@ export async function searchOpenFoodFacts(
     const seen = new Set<string>();
     const results: NormalizedProduct[] = [];
     for (const product of data.products) {
-      const normalizedProduct = normalize(product);
+      const normalizedProduct = normalize(product, 'openfoodfacts');
       if (!normalizedProduct || seen.has(normalizedProduct.barcode)) continue;
       seen.add(normalizedProduct.barcode);
       results.push(normalizedProduct);

@@ -34,7 +34,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
       ingredients: product.ingredients,
       allergenTags: product.allergenTags,
       traceTags: product.traceTags,
-      source: 'openfoodfacts',
+      source: product.source,
     })
     .onConflictDoUpdate({
       target: products.barcode,
@@ -150,7 +150,7 @@ export function registerCatalogRoutes(app: Express) {
         const fetched = await fetchOpenFoodFactsProduct(barcode);
         if (fetched) {
           const saved = await cacheOffProduct(fetched);
-          res.json({ ok: true, product: saved, source: 'openfoodfacts' });
+          res.json({ ok: true, product: saved, source: fetched.source });
           return;
         }
       }

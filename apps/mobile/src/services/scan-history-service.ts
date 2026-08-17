@@ -19,6 +19,8 @@ const SCAN_SOURCES = new Set([
   'ocr',
   'llm',
   'dish_vision',
+  'openbeautyfacts',
+  'openproductsfacts',
 ]);
 
 export type ScanHistoryMutationResult =

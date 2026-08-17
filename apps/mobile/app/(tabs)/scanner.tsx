@@ -47,7 +47,6 @@ import {
   isScanCloudAuthError,
   scanBarcode,
   scanFromOcr,
-  scanText,
   type ScanResultExtended,
 } from '@/src/services/scanner-service';
 import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
@@ -75,9 +74,9 @@ import {
 import { confirmAction, confirmDestructiveAction } from '@/src/utils/confirm-action';
 import { logCaughtError } from '@/src/services/error-reporting';
 import {
+  isManualBarcodeInput,
   SCANNER_MODE_LABEL_KEYS,
-  SCANNER_MODES,
-  shouldClearScannerResultOnModeChange,
+  SMART_SCAN_MODE,
   shouldShowScannerPageTrustLine,
 } from '@/src/constants/scanner-mode';
 
@@ -86,19 +85,9 @@ const HISTORY_DISPLAY_LIMIT = 5;
 
 type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 type CameraEntryMode = 'barcode' | 'scanner';
-type ScanMode = ScannerMode;
 type ListTab = 'recent' | 'saved';
 
 const SAFE_MODE_LABEL_KEYS = SCANNER_MODE_LABEL_KEYS;
-
-function placeholderKeyForMode(
-  mode: ScanMode,
-): 'scanner.productPlaceholder' | 'scanner.menuPlaceholder' | 'scanner.medicinePlaceholder' | 'scanner.householdPlaceholder' {
-  if (mode === 'menu') return 'scanner.menuPlaceholder';
-  if (mode === 'medicine') return 'scanner.medicinePlaceholder';
-  if (mode === 'cosmetics') return 'scanner.householdPlaceholder';
-  return 'scanner.productPlaceholder';
-}
 
 function resolveScanProfile(): Profile | null {
   return useAppStore.getState().activeProfile ?? ensureActiveProfileLoaded();
@@ -113,8 +102,7 @@ export default function ScannerScreen() {
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('');
-  const [mode, setMode] = useState<ScanMode>('product');
-  const [entryMode, setEntryMode] = useState<CameraEntryMode>('barcode');
+  const [entryMode, setEntryMode] = useState<CameraEntryMode>('scanner');
   const [manualOpen, setManualOpen] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [trendsOpen, setTrendsOpen] = useState(false);
@@ -145,16 +133,6 @@ export default function ScannerScreen() {
 
   const isBarcodeEntry = entryMode === 'barcode';
   const supportsPhotoCapture = entryMode === 'scanner';
-  const primaryIsBarcode = mode === 'product';
-
-  const selectMode = (next: ScanMode) => {
-    if (shouldClearScannerResultOnModeChange(mode, next)) {
-      setResult(null);
-      setRepeatUnsafe(false);
-      setScanError(false);
-    }
-    setMode(next);
-  };
 
   const scanTrends = useMemo(() => computeScanTrends(history), [history]);
 
@@ -190,9 +168,9 @@ export default function ScannerScreen() {
   const isCurrentInputSaved = useMemo(
     () =>
       result != null && activeProfileId != null
-        ? isSafeProductSaved(safeList, input, mode)
+        ? isSafeProductSaved(safeList, input, SMART_SCAN_MODE)
         : false,
-    [safeList, result, input, mode, activeProfileId],
+    [safeList, result, input, activeProfileId],
   );
 
   useFocusEffect(
@@ -273,16 +251,14 @@ export default function ScannerScreen() {
     setResultPhotoUri(null);
     try {
       let scanResult: ScanResultExtended;
-      if (barcodeMode && mode === 'product') {
+      if (barcodeMode || isManualBarcodeInput(text)) {
         scanResult = await scanBarcode({ barcode: text, profile: scanProfile });
-      } else if (mode === 'menu' || mode === 'medicine' || mode === 'cosmetics') {
+      } else {
         scanResult = await scanFromOcr({
-          mode,
+          mode: SMART_SCAN_MODE,
           ocrText: text,
           profile: scanProfile,
         });
-      } else {
-        scanResult = await scanText({ mode, text, profile: scanProfile });
       }
 
       if (requestId !== scanRequestIdRef.current) return;
@@ -320,7 +296,7 @@ export default function ScannerScreen() {
     setIngredientsOpen(false);
     try {
       const scanResult = await scanFromOcr({
-        mode,
+        mode: SMART_SCAN_MODE,
         manualText,
         imageBase64: image?.base64 ?? undefined,
         mimeType: image?.mimeType,
@@ -458,6 +434,8 @@ export default function ScannerScreen() {
 
   const sourceLabel = (source?: ScanResultExtended['source']) => {
     if (source === 'openfoodfacts') return t('scanner.sourceOpenFoodFacts');
+    if (source === 'openbeautyfacts') return t('scanner.sourceOpenBeautyFacts');
+    if (source === 'openproductsfacts') return t('scanner.sourceOpenProductsFacts');
     if (source === 'barcodes_db') return t('scanner.sourceBarcodesDb');
     if (source === 'barcode') return t('scanner.sourceBarcode');
     if (source === 'ocr') return t('scanner.sourceOcr');
@@ -467,8 +445,9 @@ export default function ScannerScreen() {
     return t('scanner.sourceManual');
   };
 
-  const isDishVisionResult =
-    result?.source === 'dish_vision' || Boolean(result?.dishVision);
+  const hasVisionEvidence = Boolean(result?.dishVision);
+  const isVisionOnly = result?.source === 'dish_vision';
+  const isDishVisionResult = hasVisionEvidence || isVisionOnly;
 
   const confirmSaveSafe = () => {
     const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
@@ -481,7 +460,7 @@ export default function ScannerScreen() {
       cancelLabel: t('common.cancel'),
       confirmLabel: t('scanner.confirmSafeAction'),
       onConfirm: async () => {
-        const saved = await addSafeProduct(profileId, name, mode, input.trim());
+        const saved = await addSafeProduct(profileId, name, SMART_SCAN_MODE, input.trim());
         if (!saved.ok) {
           logCaughtError('ScannerScreen.confirmSaveSafe', new Error(saved.code));
           return;
@@ -496,7 +475,6 @@ export default function ScannerScreen() {
 
   const openHistoryItem = (item: ScanHistoryEntry) => {
     const restored = historyEntryToScanResult(item);
-    setMode(restored.mode);
     setInput(item.input);
     setResult(restored);
     setRepeatUnsafe(false);
@@ -603,13 +581,7 @@ export default function ScannerScreen() {
                 <Text style={styles.viewfinderHint}>
                   {isBarcodeEntry
                     ? t('scanner.cameraBarcodeHint')
-                    : mode === 'menu'
-                      ? t('scanner.cameraMenuHint')
-                      : mode === 'medicine'
-                        ? t('scanner.cameraMedicineHint')
-                        : mode === 'cosmetics'
-                          ? t('scanner.cameraHouseholdHint')
-                          : t('scanner.cameraScannerHint')}
+                    : t('scanner.cameraScannerHint')}
                 </Text>
               </View>
             </View>
@@ -704,42 +676,23 @@ export default function ScannerScreen() {
         </View>
       </View>
 
-      <View style={[styles.tabRow, styles.modeRow]} testID="scanner-mode-row">
-        {SCANNER_MODES.map((item) => {
-          const active = mode === item;
-          return (
-            <Pressable
-              key={item}
-              testID={`scanner-mode-${item}`}
-              style={[styles.tabChip, styles.modeChip, active && styles.tabChipActive]}
-              onPress={() => selectMode(item)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: active }}>
-              <Text style={[styles.tabChipText, active && styles.tabChipTextActive]}>
-                {t(SCANNER_MODE_LABEL_KEYS[item])}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
       <Button
         testID="scanner-primary-camera"
-        label={t('scanner.pointCamera')}
+        label={t('scanner.smartScan')}
         variant="primary"
         block
         disabled={loading}
-        onPress={() => void openCamera(primaryIsBarcode ? 'barcode' : 'scanner')}
+        onPress={() => void openCamera('scanner')}
       />
 
       <View style={styles.secondaryRow}>
         <Pressable
           style={styles.secondaryBtn}
-          onPress={() => void openCamera('scanner')}
-          testID="scanner-photo-ingredients"
+          onPress={() => void openCamera('barcode')}
+          testID="scanner-barcode"
           accessibilityRole="button">
-          <Ionicons name="camera-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>{t('scanner.photoIngredients')}</Text>
+          <Ionicons name="barcode-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
         </Pressable>
         <Pressable
           style={styles.secondaryBtn}
@@ -769,9 +722,9 @@ export default function ScannerScreen() {
             testID="scanner-input"
             value={input}
             onChangeText={setInput}
-            placeholder={t(placeholderKeyForMode(mode))}
+            placeholder={t('scanner.manualPlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
-            accessibilityLabel={t(placeholderKeyForMode(mode))}
+            accessibilityLabel={t('scanner.manualPlaceholder')}
             multiline
             style={styles.input}
           />
@@ -782,8 +735,7 @@ export default function ScannerScreen() {
             block
             disabled={loading || !input.trim()}
             onPress={() => {
-              const looksLikeBarcode = /^\d{8,14}$/.test(input.trim());
-              void runCheck(input.trim(), looksLikeBarcode && mode === 'product');
+              void runCheck(input.trim(), isManualBarcodeInput(input));
             }}
           />
         </View>
@@ -824,7 +776,7 @@ export default function ScannerScreen() {
             {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
           </Text>
 
-          {isDishVisionResult ? (
+          {hasVisionEvidence ? (
             <ScannerDishVisionCard
               photoUri={resultPhotoUri}
               dishName={result?.dishVision?.dishName || displayResult.productName || ''}
@@ -837,7 +789,7 @@ export default function ScannerScreen() {
 
           <Text style={styles.resultTrust}>{t('scanner.resultTrustStrip')}</Text>
 
-          {!isDishVisionResult &&
+          {!isVisionOnly &&
           (result?.productBrand ||
             result?.productImageUrl ||
             displayResult.productName ||
@@ -940,7 +892,7 @@ export default function ScannerScreen() {
             </View>
           ) : null}
 
-          {!isDishVisionResult && compositionText.length > 20 ? (
+          {!isVisionOnly && compositionText.length > 20 ? (
             <View style={styles.ingredientsBlock}>
               <Pressable
                 onPress={() => setIngredientsOpen((v) => !v)}
@@ -996,7 +948,7 @@ export default function ScannerScreen() {
                     input.trim().slice(0, 80);
                   void saveAliasFeedback({
                     term,
-                    context: result?.productName ?? mode,
+                    context: result?.productName ?? SMART_SCAN_MODE,
                     profileId: activeProfileId,
                     scanInput: input.trim(),
                   }).then((saved) => {
@@ -1019,7 +971,7 @@ export default function ScannerScreen() {
               onPress={() => {
                 setResult(null);
                 setRepeatUnsafe(false);
-                void openCamera(primaryIsBarcode ? 'barcode' : 'scanner');
+                void openCamera('scanner');
               }}
             />
           </View>
@@ -1436,8 +1388,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       lineHeight: 17,
     },
     tabRow: { flexDirection: 'row', gap: 8 },
-    modeRow: { flexWrap: 'wrap' },
-    modeChip: { flexGrow: 1, flexBasis: '46%', flex: 0 },
     tabChip: {
       flex: 1,
       alignItems: 'center',

@@ -342,18 +342,14 @@ export type LocaleMessages = {
     cameraBarcodeHint: string;
     cameraScannerHint: string;
     cameraProductHint: string;
-    cameraMenuHint: string;
     cameraLabelHint: string;
-    cameraMedicineHint: string;
-    cameraHouseholdHint: string;
     flashToggle: string;
     analyzeMenu: string;
     analyzeLabel: string;
     scanLabel: string;
     scanLabelDesc: string;
     labelPlaceholder: string;
-    medicinePlaceholder: string;
-    householdPlaceholder: string;
+    manualPlaceholder: string;
     barcodeWebHint: string;
     takePhoto: string;
     pickFromGallery: string;
@@ -362,8 +358,6 @@ export type LocaleMessages = {
     cropConfirm: string;
     cropRetake: string;
     cropFailed: string;
-    productPlaceholder: string;
-    menuPlaceholder: string;
     matches: string;
     /** Branded verdict line, e.g. «Claro: …» */
     claroVerdict: string;
@@ -375,6 +369,8 @@ export type LocaleMessages = {
     reportThanks: string;
     source: string;
     sourceOpenFoodFacts: string;
+    sourceOpenBeautyFacts: string;
+    sourceOpenProductsFacts: string;
     sourceBarcodesDb: string;
     sourceBarcode: string;
     sourceManual: string;
@@ -427,8 +423,7 @@ export type LocaleMessages = {
     noProfileTitle: string;
     noProfileText: string;
     noProfileCta: string;
-    pointCamera: string;
-    photoIngredients: string;
+    smartScan: string;
     enterManually: string;
     hideManual: string;
     emptyHint: string;

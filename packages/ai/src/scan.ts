@@ -39,7 +39,9 @@ export interface ScanResult {
     | 'catalog_api'
     | 'ocr'
     | 'llm'
-    | 'dish_vision';
+    | 'dish_vision'
+    | 'openbeautyfacts'
+    | 'openproductsfacts';
 }
 
 function parseProfileAllergens(profile?: Pick<Profile, 'allergies'> | null): string[] {

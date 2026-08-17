@@ -1,4 +1,11 @@
-import { runSmartScan, type DishVisionResult, type ScanMode, type ScanResult, type OcrExtractionResult } from '@allerguide/ai';
+import {
+  runSmartScan,
+  type DishVisionResult,
+  type ScanEvidenceKind,
+  type ScanMode,
+  type ScanResult,
+  type OcrExtractionResult,
+} from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
@@ -20,6 +27,8 @@ export type ScanResultExtended = ScanResult & {
   ocr?: OcrExtractionResult;
   /** Multimodal plate-only estimate (Option D). */
   dishVision?: DishVisionResult;
+  /** Whether the verdict used VL, OCR, or both. */
+  evidence?: ScanEvidenceKind;
 };
 
 export const INSUFFICIENT_INGREDIENTS_LENGTH = 15;

@@ -138,35 +138,24 @@ describe('scanner dish vision (Option D)', () => {
     expect(result.reason).toMatch(/не лабораторный анализ/i);
   });
 
-  it('prefers OCR path when the photo has readable text (after VL)', async () => {
+  it('merges VL and readable OCR into one verdict and writes history once', async () => {
+    const { saveScanHistory } = await import('./scan-history-service');
     const labelText =
       'Состав: молоко, сахар, какао-масло, лецитин соевый, ванилин. Может содержать следы орехов.';
     mockRecognizeImageViaApi.mockResolvedValueOnce({
       ok: true,
       text: labelText,
     });
-    // VL runs first (consumes one smart-scan call), then OCR path uses the second.
-    mockRunSmartScan
-      .mockResolvedValueOnce({
-        verdict: 'осторожно',
-        reason: 'VL dish',
-        matches: ['Яйцо'],
-        crossMatches: [],
-        mode: 'product',
-        level: 'high',
-        source: 'dish_vision',
-        productName: 'Оливье',
-      })
-      .mockResolvedValueOnce({
-        verdict: 'осторожно',
-        reason: 'Найдено молоко',
-        matches: ['Молоко'],
-        crossMatches: [],
-        mode: 'product',
-        level: 'high',
-        source: 'ocr',
-        productName: 'Этикетка',
-      });
+    mockRunSmartScan.mockResolvedValueOnce({
+      verdict: 'осторожно',
+      reason: 'Найдено молоко',
+      matches: ['Молоко'],
+      crossMatches: [],
+      mode: 'product',
+      level: 'high',
+      source: 'ocr',
+      productName: 'Оливье',
+    });
 
     const { scanFromOcr } = await import('./scanner-service');
     const result = await scanFromOcr({
@@ -179,13 +168,18 @@ describe('scanner dish vision (Option D)', () => {
     expect(mockRecognizeDishViaApi).toHaveBeenCalled();
     expect(mockRecognizeImageViaApi).toHaveBeenCalled();
     expect(result.source).toBe('ocr');
-    expect(result.dishVision).toBeUndefined();
-    expect(mockRunSmartScan).toHaveBeenLastCalledWith(
+    expect(result.evidence).toBe('vl_ocr');
+    expect(result.dishVision?.dishName).toBe('Оливье');
+    expect(mockRunSmartScan).toHaveBeenCalledTimes(1);
+    expect(mockRunSmartScan).toHaveBeenCalledWith(
       expect.objectContaining({
-        text: expect.stringContaining('молоко'),
+        text: expect.stringMatching(/молоко/i),
+        productName: 'Оливье',
         source: 'ocr',
       }),
     );
+    expect(mockRunSmartScan.mock.calls[0][0].text).toMatch(/яйцо|майонез|колбаса/i);
+    expect(saveScanHistory).toHaveBeenCalledTimes(1);
   });
 
   it('analyzes short label OCR when VL says the photo is not a dish', async () => {
@@ -337,7 +331,7 @@ describe('scanner dish vision (Option D)', () => {
     expect(mockRunSmartScan).toHaveBeenCalled();
   });
 
-  it('does not run VL first for menu mode (OCR-oriented)', async () => {
+  it('runs VL first for any photo, not only product mode', async () => {
     mockRecognizeImageViaApi.mockResolvedValueOnce({
       ok: true,
       text: 'Меню: паста карбонара, салат цезарь с курицей и пармезаном, суп дня',
@@ -353,13 +347,15 @@ describe('scanner dish vision (Option D)', () => {
     });
 
     const { scanFromOcr } = await import('./scanner-service');
-    await scanFromOcr({
+    const result = await scanFromOcr({
       mode: 'menu',
       imageBase64: 'aGVsbG8=',
       mimeType: 'image/jpeg',
     });
 
-    expect(mockRecognizeDishViaApi).not.toHaveBeenCalled();
+    expect(mockRecognizeDishViaApi).toHaveBeenCalled();
     expect(mockRecognizeImageViaApi).toHaveBeenCalled();
+    expect(result.dishVision?.dishName).toBe('Оливье');
+    expect(result.evidence).toBe('vl_ocr');
   });
 });
