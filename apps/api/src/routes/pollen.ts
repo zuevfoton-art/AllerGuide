@@ -84,6 +84,8 @@ export function registerPollenRoutes(app: Express): void {
   );
 
   app.get('/api/pollen/forecast', async (req: Request, res: Response) => {
+    // Same CORP as heatmap tiles: Expo web must read typeIndexes to hide empty TREE overlays.
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
     if (!isGooglePollenForecastConfigured()) {
       res.status(503).json({ ok: false, error: 'Pollen forecast is disabled' });
       return;

@@ -158,6 +158,7 @@ describe('pollen forecast routes', () => {
     const response = await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62');
 
     expect(response.status).toBe(200);
+    expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
     expect(response.body.ok).toBe(true);
     expect(response.body.forecast.days[0].plantIndexes.birch_pollen.index).toBe(2);
     expect(response.body.forecast.days[0].plantIndexes.alder_pollen.index).toBe(1);
