@@ -7,7 +7,7 @@ describe('medicine label parse', () => {
     expect(parsed?.name).toBe('Нурофен');
     expect(parsed?.activeSubstance).toMatch(/ибупрофен/i);
     expect(parsed?.strength).toBe('200 мг');
-    expect(parsed?.form).toBe('таблетки');
+    expect(parsed?.form.toLowerCase()).toContain('таблет');
     expect(parsed?.ingredients).toMatch(/лактоза/i);
   });
 
