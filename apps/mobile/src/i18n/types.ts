@@ -44,8 +44,10 @@ export type LocaleMessages = {
     productName: string;
     /** Co-brand lockup under wordmark, e.g. «приложение Aclearo» */
     endorser: string;
-    /** Centered header slogan, e.g. «Aclearo — когда важна ясность» */
+    /** Header slogan, e.g. «Aclearo — когда важна ясность» */
     slogan: string;
+    /** A11y label: tap the lockup to open Home after login */
+    goHome: string;
   };
   errorBoundary: {
     title: string;

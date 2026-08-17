@@ -40,6 +40,7 @@ const ru: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'приложение Aclearo',
     slogan: 'Aclearo — когда важна ясность',
+    goHome: 'На главную',
   },
   errorBoundary: {
     title: 'Что-то пошло не так',

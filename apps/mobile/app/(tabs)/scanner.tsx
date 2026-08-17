@@ -65,7 +65,6 @@ import {
 } from '@/src/services/scanner-photo-service';
 import { resolveDishVisionPhotoUri } from '@/src/services/scanner-dish-vision-display';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 import { resolveMatchAliasKeyword } from '@/src/services/scan-match-display';
@@ -662,8 +661,8 @@ export default function ScannerScreen() {
   return (
     <Screen
       onRefresh={() => refresh()}
-      refreshing={refreshing}>
-      <ScreenBrandHeader right={<ProfileHeaderButton />} />
+      refreshing={refreshing}
+      brandHeaderRight={<ProfileHeaderButton />}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('scanner.eyebrow')} />

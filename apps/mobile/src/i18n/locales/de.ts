@@ -40,6 +40,7 @@ const de: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'eine Aclearo-App',
     slogan: 'Aclearo — wenn Klarheit zählt',
+    goHome: 'Zur Startseite',
   },
   errorBoundary: {
     title: 'Etwas ist schiefgelaufen',

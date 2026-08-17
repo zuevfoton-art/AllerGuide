@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useMemo, type ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,6 +8,9 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { usePathname } from 'expo-router';
+import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
+import { shouldShowScreenBrandHeader } from '@/src/components/brand/brand-header-nav';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
@@ -19,6 +22,10 @@ type ScreenProps = {
   refreshing?: boolean;
   /** Content pinned above the scroll area (stays visible while scrolling). */
   pinnedTop?: React.ReactNode;
+  /** Override auto brand header (hidden on login/register). */
+  showBrandHeader?: boolean;
+  brandHeaderLeft?: ReactNode;
+  brandHeaderRight?: ReactNode;
 };
 
 export function Screen({
@@ -27,10 +34,25 @@ export function Screen({
   onRefresh,
   refreshing = false,
   pinnedTop,
+  showBrandHeader,
+  brandHeaderLeft,
+  brandHeaderRight,
 }: PropsWithChildren<ScreenProps>) {
   const { colors } = useTheme();
   const layout = useResponsiveLayout();
   const keyboardInset = useKeyboardBottomInset();
+  const pathname = usePathname();
+  const brandVisible = showBrandHeader ?? shouldShowScreenBrandHeader(pathname);
+  const brandHeader = brandVisible ? (
+    <ScreenBrandHeader left={brandHeaderLeft} right={brandHeaderRight} />
+  ) : null;
+  const hasPinned = Boolean(brandHeader || pinnedTop);
+  const pinnedContent = hasPinned ? (
+    <>
+      {brandHeader}
+      {pinnedTop}
+    </>
+  ) : null;
   // Android API 35+: `adjustResize` often no longer shrinks the window. Extra
   // bottom content inset lets ScrollView bring focused fields (e.g. password)
   // above the IME. iOS keeps using KeyboardAvoidingView padding instead.
@@ -47,12 +69,13 @@ export function Screen({
           paddingTop: layout.topPadding,
           paddingHorizontal: layout.horizontalPadding,
           paddingBottom: 8,
+          gap: 8,
         },
         scrollOuter: { flex: 1, backgroundColor: colors.bg },
         scroll: {
           flexGrow: 1,
           backgroundColor: colors.bg,
-          paddingTop: pinnedTop ? 0 : layout.topPadding,
+          paddingTop: hasPinned ? 0 : layout.topPadding,
           paddingBottom: scrollBottomPad,
           gap: 16,
         },
@@ -73,15 +96,18 @@ export function Screen({
           paddingTop: layout.topPadding,
           paddingBottom: layout.bottomPadding + extraKeyboardPad,
         },
+        nonScrollBrand: {
+          paddingBottom: 8,
+        },
       }),
     [
       extraKeyboardPad,
       colors.bg,
+      hasPinned,
       layout.bottomPadding,
       layout.contentMaxWidth,
       layout.horizontalPadding,
       layout.topPadding,
-      pinnedTop,
       scrollBottomPad,
     ],
   );
@@ -95,7 +121,7 @@ export function Screen({
   if (scroll) {
     return (
       <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior} keyboardVerticalOffset={0}>
-        {pinnedTop ? <View style={styles.pinned}>{pinnedTop}</View> : null}
+        {pinnedContent ? <View style={styles.pinned}>{pinnedContent}</View> : null}
         <ScrollView
           style={styles.scrollOuter}
           contentContainerStyle={styles.scroll}
@@ -122,6 +148,7 @@ export function Screen({
   return (
     <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior}>
       <SafeAreaView style={styles.safe}>
+        {brandHeader ? <View style={styles.nonScrollBrand}>{brandHeader}</View> : null}
         <View style={[styles.content, styles.contentFill]}>{children}</View>
       </SafeAreaView>
     </KeyboardAvoidingView>
