@@ -403,7 +403,7 @@ const en: LocaleMessages = {
     menuStatusIncomplete: 'Menu text too short',
     menuStatusNoMatch: 'No matches found',
     titleShort: 'Scanner',
-    verdictStop: 'STOP',
+    verdictStop: 'High risk',
     verdictCaution: 'CAUTION',
     verdictClear: 'No matches found',
     verdictStopHint: 'Matches your profile allergens',
