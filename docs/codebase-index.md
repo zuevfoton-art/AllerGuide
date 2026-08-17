@@ -284,11 +284,12 @@ Barrel: `index.ts`. Pure TS.
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
-| `LIVE_MAP` | `place-service.ts` | — |
+| `MAP_PLACES` / `LIVE_MAP` (default on) | `features.ts` → `place-service.ts` | `MAP_PLACES_ENABLED` (default on) + Places key |
+| `AIR_QUALITY` (default on) | `features.ts` → `air-quality-service.ts` | `AIR_QUALITY_ENABLED` (default on) + AQ key |
 | `SENTRY_DSN` | `error-reporting.ts` | — |
 | `API_URL` | `api-client` и др. | — |
 
-По умолчанию флаги **выключены** (см. `.env.example`).
+По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places** и **Air Quality** (default on; `false`/`off` выключает).
 
 ---
 

@@ -28,6 +28,38 @@ describe('air quality routes', () => {
     expect(response.status).toBe(503);
   });
 
+  it('stays enabled when the server flag is unset', async () => {
+    delete process.env.AIR_QUALITY_ENABLED;
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            dateTime: '2026-08-14T09:00:00Z',
+            regionCode: 'ru',
+            indexes: [
+              {
+                code: 'uaqi',
+                displayName: 'Universal AQI',
+                aqi: 74,
+                category: 'Good air quality',
+                dominantPollutant: 'pm25',
+              },
+            ],
+            pollutants: [],
+          }),
+          { status: 200 },
+        ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp({ withReplitAuth: false });
+
+    const response = await request(app).get('/api/air-quality/current?lat=55.75&lon=37.62');
+
+    expect(response.status).not.toBe(503);
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalled();
+  });
+
   it('requires valid coordinates', async () => {
     const app = await createApp({ withReplitAuth: false });
     const response = await request(app).get('/api/air-quality/current?lat=999&lon=37.62');

@@ -258,12 +258,12 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 | `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
-| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
-| `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY=google` | Google Air Quality (UAQI + советы) через API proxy |
+| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` (default **on**; `false`/`off` disables) | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
+| `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY` (default **on**; `false`/`off` disables) | Google Air Quality (UAQI + советы) через API proxy |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
 | `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
 
-По умолчанию все флаги **false** / `off` (см. `.env.example`).
+По умолчанию флаги **false** / `off` (см. `.env.example`), кроме **Places** и **Air Quality** — они включены, пока явно не выключены (`false` / `off`). На API те же два флага default-on; без ключей health остаётся `false`.
 
 ---
 
@@ -758,9 +758,9 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |
 | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | Google как primary basemap map tab |
-| `EXPO_PUBLIC_MAP_PLACES` | `false` | Live Places (New) searchNearby via API |
-| `EXPO_PUBLIC_LIVE_MAP` | `false` | Alias of `EXPO_PUBLIC_MAP_PLACES` |
-| `EXPO_PUBLIC_AIR_QUALITY` | `off` | `google` включает Google Air Quality (wellness + AQ-слой карты) |
+| `EXPO_PUBLIC_MAP_PLACES` | `true` (default on) | Live Places (New) searchNearby via API; `false`/`off` disables |
+| `EXPO_PUBLIC_LIVE_MAP` | alias | Same as `EXPO_PUBLIC_MAP_PLACES` when the primary flag is unset |
+| `EXPO_PUBLIC_AIR_QUALITY` | `google` (default on) | Google Air Quality (wellness + AQ card); `false`/`off` disables |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_ANALYTICS_ENDPOINT` | — | Optional analytics HTTP sink |
 | `EXPO_PUBLIC_SENTRY_DSN` | — | Crash reporting |
@@ -784,8 +784,8 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy |
-| `MAP_PLACES_ENABLED`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy |
-| `AIR_QUALITY_ENABLED`, `GOOGLE_AIR_QUALITY_API_KEY` | Air Quality current + heatmap proxy |
+| `MAP_PLACES_ENABLED` (default on), `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy |
+| `AIR_QUALITY_ENABLED` (default on), `GOOGLE_AIR_QUALITY_API_KEY` | Air Quality current + heatmap proxy |
 | `YANDEX_MARKET_*` | Market affiliate |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `PASSWORD_RESET_*` | Password reset email |
 | `ALIAS_FEEDBACK_ADMIN_KEY` | Alias feedback admin |

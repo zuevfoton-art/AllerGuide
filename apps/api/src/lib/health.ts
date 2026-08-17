@@ -4,6 +4,7 @@ import { getScanMetrics } from './scan-cache';
 import { pingRedis } from './redis-client';
 import { resolveRateLimitStoreKind } from './rate-limit-store';
 import { dishVisionConfigured } from '../services/llm-dish-vision-provider';
+import { isDefaultOnEnvFlag } from './env-flag';
 
 export interface ScanHealthMetrics {
   enabled: boolean;
@@ -110,14 +111,14 @@ function buildFeatures() {
       process.env.POLLEN_HEATMAP_ENABLED === 'true' &&
       Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
     airQuality:
-      process.env.AIR_QUALITY_ENABLED === 'true' &&
+      isDefaultOnEnvFlag(process.env.AIR_QUALITY_ENABLED) &&
       Boolean(
         process.env.GOOGLE_AIR_QUALITY_API_KEY?.trim() ||
           process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
           process.env.GOOGLE_POLLEN_API_KEY?.trim(),
       ),
     mapPlaces:
-      process.env.MAP_PLACES_ENABLED === 'true' &&
+      isDefaultOnEnvFlag(process.env.MAP_PLACES_ENABLED) &&
       Boolean(
         process.env.GOOGLE_PLACES_API_KEY?.trim() ||
           process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||

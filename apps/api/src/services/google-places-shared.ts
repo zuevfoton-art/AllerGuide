@@ -1,4 +1,5 @@
 import type { MapPoiCategory } from '@allerguide/core';
+import { isDefaultOnEnvFlag } from '../lib/env-flag';
 
 export type GooglePlacesCategory = MapPoiCategory;
 
@@ -34,7 +35,7 @@ export const MAX_PLACES_QUERY_LENGTH = 80;
 export const PLACES_REQUEST_TIMEOUT_MS = 8000;
 
 export function isGooglePlacesConfigured(): boolean {
-  if (process.env.MAP_PLACES_ENABLED !== 'true') return false;
+  if (!isDefaultOnEnvFlag(process.env.MAP_PLACES_ENABLED)) return false;
   return Boolean(
     process.env.GOOGLE_PLACES_API_KEY?.trim() ||
       process.env.GOOGLE_POLLEN_API_KEY?.trim() ||
