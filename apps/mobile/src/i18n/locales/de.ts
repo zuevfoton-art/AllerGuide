@@ -288,12 +288,18 @@ const de: LocaleMessages = {
     dishOffEnriched: 'Ergänzt aus Open Food Facts: {{product}}',
   },
   medicineScan: {
-    title: 'Packung fotografieren',
-    subtitle: 'Wir erkennen Name und Anwendung. Sie können auch manuell ausfüllen — das Tagebuch funktioniert offline.',
+    title: 'Foto oder Sprache',
+    subtitle:
+      'Fotografieren Sie die Packung oder diktieren Sie den Namen — die Felder werden vorausgefüllt. Sie können auch manuell ausfüllen.',
     photograph: 'Packung fotografieren',
+    recordVoice: 'Per Sprache aufnehmen',
     gallery: 'Aus der Galerie',
     fillManually: 'Manuell ausfüllen',
     recognizing: 'Arzneimittel wird erkannt…',
+    recognizingVoice: 'Sprachaufnahme wird ausgewertet…',
+    transcript: 'Sie haben gesagt',
+    voiceNotRecognized:
+      'Aus der Aufnahme konnte kein Arzneimittel erkannt werden. Noch einmal versuchen oder manuell ausfüllen.',
     continue: 'Weiter',
     name: 'Name',
     activeSubstance: 'Wirkstoff',

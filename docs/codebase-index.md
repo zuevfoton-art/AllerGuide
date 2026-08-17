@@ -86,7 +86,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service` | core `diary*`, `diary-wizard-route` |
-| **Medicine photo** | `MedicinePhotoStep` in diary | `medicine-recognition-service`, `medicines-api` | core `medicine-catalog`, `profile-age`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
+| **Medicine photo / voice** | `MedicinePhotoStep` in diary | `medicine-recognition-service`, `medicines-api`, `voice-dictation-service` | core `medicine-catalog`, `profile-age`; ai `medicine-vision`, `medicine-label` (`parseMedicineVoiceUtterance`); API `medicines.ts` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service` | core `allergy-passport`, `emergency-contacts` |
@@ -264,7 +264,7 @@ Barrel: `index.ts`. Pure TS.
 | `search-ingredients.ts` | Normalize search-ingredients response |
 | `prescription-ocr.ts` | Parse prescription / ASIT text |
 | `medicine-vision.ts` | VL prompt/parse for medicine packages |
-| `medicine-label.ts` | Offline OCR parse of a package label |
+| `medicine-label.ts` | Offline OCR parse of a package label; `parseMedicineVoiceUtterance` for spoken dose logs |
 
 ### `@allerguide/ui` — `packages/ui/src/`
 

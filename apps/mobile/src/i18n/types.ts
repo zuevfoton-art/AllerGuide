@@ -293,9 +293,13 @@ export type LocaleMessages = {
     title: string;
     subtitle: string;
     photograph: string;
+    recordVoice: string;
     gallery: string;
     fillManually: string;
     recognizing: string;
+    recognizingVoice: string;
+    transcript: string;
+    voiceNotRecognized: string;
     continue: string;
     name: string;
     activeSubstance: string;

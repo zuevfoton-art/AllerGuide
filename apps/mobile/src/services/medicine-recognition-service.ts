@@ -1,6 +1,7 @@
 import {
   getDemoMedicineLabelText,
   parseMedicineLabelText,
+  parseMedicineVoiceUtterance,
   type MedicineVisionResult,
 } from '@allerguide/ai';
 import {
@@ -119,6 +120,26 @@ export async function recognizeMedicinePackage(input: {
   return recognizeOffline({ ...input, ocrText, ageYears });
 }
 
+/** Spoken name/dose → same card/prefill path as a package photo. No demo fallback. */
+export async function recognizeMedicineFromVoice(input: {
+  transcript: string;
+  ageYears?: number | null;
+}): Promise<MedicineRecognitionOutcome> {
+  const transcript = input.transcript.trim();
+  if (!transcript) {
+    return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
+  }
+  const spoken = parseMedicineVoiceUtterance(transcript);
+  if (!spoken) {
+    return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
+  }
+  return recognizeMedicinePackage({
+    ocrText: transcript,
+    name: spoken.name,
+    ageYears: input.ageYears,
+  });
+}
+
 async function recognizeOffline(input: {
   imageBase64?: string;
   mimeType?: string;
@@ -126,7 +147,8 @@ async function recognizeOffline(input: {
   ageYears: number | null;
 }): Promise<MedicineRecognitionOutcome> {
   if (input.ocrText) {
-    const parsed = parseMedicineLabelText(input.ocrText);
+    const parsed =
+      parseMedicineLabelText(input.ocrText) ?? parseMedicineVoiceUtterance(input.ocrText);
     if (parsed) {
       return outcomeFromCard(cardFromVision(parsed, 'ocr'), input.ageYears, {
         hintCode: parsed.confidence === 'low' ? 'fields_incomplete' : undefined,

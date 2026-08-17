@@ -224,7 +224,7 @@ export default function DiaryScreen() {
   const continueMedicineFromPhoto = async (input: {
     card: MedicineCard;
     ageUsage: MedicineAgeResolution | null;
-    photoUri: string;
+    photoUri?: string;
   }) => {
     await openSection('Лекарство', {
       recognizedCard: input.card,

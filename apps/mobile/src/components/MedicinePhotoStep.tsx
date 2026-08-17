@@ -1,11 +1,21 @@
-import { useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import type { MedicineAgeResolution, MedicineCard } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { recognizeMedicinePackage } from '@/src/services/medicine-recognition-service';
+import {
+  recognizeMedicineFromVoice,
+  recognizeMedicinePackage,
+} from '@/src/services/medicine-recognition-service';
+import {
+  cancelVoiceDictation,
+  isVoiceInputSupported,
+  startVoiceDictation,
+  stopVoiceDictation,
+  type VoiceDictationState,
+} from '@/src/services/voice-dictation-service';
 import {
   captureScanPhotoViaPicker,
   encodeImageToBase64,
@@ -22,7 +32,7 @@ type Props = {
   onContinue: (input: {
     card: MedicineCard;
     ageUsage: MedicineAgeResolution | null;
-    photoUri: string;
+    photoUri?: string;
   }) => void;
 };
 
@@ -78,13 +88,16 @@ export function MedicineRecognitionNotice({
 export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [state, setState] = useState<StepState>('idle');
   const [pendingPhoto, setPendingPhoto] = useState<CapturedScanPhoto | null>(null);
   const [cropped, setCropped] = useState<CroppedScanPhoto | null>(null);
+  const [transcript, setTranscript] = useState('');
+  const [voiceState, setVoiceState] = useState<VoiceDictationState>('idle');
   const [card, setCard] = useState<MedicineCard | null>(null);
   const [ageUsage, setAgeUsage] = useState<MedicineAgeResolution | null>(null);
   const [error, setError] = useState('');
+  const voiceSupported = isVoiceInputSupported();
 
   const startCapture = async (fromGallery: boolean) => {
     setError('');
@@ -142,6 +155,70 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
     }
   };
 
+  const applyVoiceTranscript = useCallback(
+    async (spoken: string) => {
+      setTranscript(spoken);
+      setCropped(null);
+      setState('recognizing');
+      setError('');
+      try {
+        const outcome = await recognizeMedicineFromVoice({
+          transcript: spoken,
+          ageYears,
+        });
+        if (!outcome.card) {
+          setError(t('medicineScan.voiceNotRecognized'));
+          setState('idle');
+          return;
+        }
+        setCard(outcome.card);
+        setAgeUsage(outcome.ageUsage);
+        setState('result');
+      } catch {
+        setError(t('medicineScan.voiceNotRecognized'));
+        setState('idle');
+      }
+    },
+    [ageYears, t],
+  );
+
+  const handleVoiceError = useCallback(
+    (code: string) => {
+      const message =
+        code === 'VOICE_PERMISSION_DENIED'
+          ? t('voiceNote.permissionDenied')
+          : code === 'VOICE_NOT_SUPPORTED'
+            ? t('voiceNote.notSupported')
+            : t('voiceNote.failed');
+      Alert.alert(t('voiceNote.title'), message);
+      setVoiceState('idle');
+    },
+    [t],
+  );
+
+  const toggleVoice = useCallback(async () => {
+    if (!voiceSupported || voiceState === 'processing') return;
+    if (voiceState === 'listening') {
+      await stopVoiceDictation(locale);
+      return;
+    }
+    setError('');
+    try {
+      await startVoiceDictation(locale, {
+        onResult: (spoken) => {
+          setVoiceState('idle');
+          if (spoken.trim()) void applyVoiceTranscript(spoken.trim());
+        },
+        onError: handleVoiceError,
+        onStateChange: setVoiceState,
+      });
+      setVoiceState('listening');
+    } catch (error) {
+      const code = error instanceof Error ? error.message : 'VOICE_RECOGNITION_FAILED';
+      handleVoiceError(code);
+    }
+  }, [voiceSupported, voiceState, locale, applyVoiceTranscript, handleVoiceError]);
+
   if (state === 'crop' && pendingPhoto) {
     return (
       <ImageCropEditor
@@ -170,15 +247,23 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
     return (
       <View style={styles.wrap} testID="medicine-photo-recognizing">
         <ActivityIndicator color={theme.colors.accent} />
-        <Text style={styles.subtitle}>{t('medicineScan.recognizing')}</Text>
+        <Text style={styles.subtitle}>
+          {transcript && !cropped ? t('medicineScan.recognizingVoice') : t('medicineScan.recognizing')}
+        </Text>
       </View>
     );
   }
 
-  if (state === 'result' && card && cropped) {
+  if (state === 'result' && card && (cropped || transcript)) {
     return (
       <View style={styles.wrap} testID="medicine-photo-result">
-        <Image source={{ uri: cropped.uri }} style={styles.preview} />
+        {cropped ? <Image source={{ uri: cropped.uri }} style={styles.preview} /> : null}
+        {transcript && !cropped ? (
+          <>
+            <Text style={styles.kicker}>{t('medicineScan.transcript')}</Text>
+            <Text style={styles.body}>{transcript}</Text>
+          </>
+        ) : null}
         <MedicineRecognitionNotice card={card} ageUsage={ageUsage} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button
@@ -188,7 +273,7 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
             onContinue({
               card,
               ageUsage,
-              photoUri: cropped.uri,
+              photoUri: cropped?.uri,
             })
           }
         />
@@ -209,19 +294,49 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
       <Button
         testID="medicine-photo-camera"
         label={t('medicineScan.photograph')}
-        onPress={() => void startCapture(false)}
+        onPress={() => {
+          void cancelVoiceDictation();
+          setVoiceState('idle');
+          void startCapture(false);
+        }}
       />
+      {voiceSupported ? (
+        <Button
+          testID="medicine-photo-voice"
+          label={
+            voiceState === 'listening'
+              ? t('voiceNote.listening')
+              : voiceState === 'processing'
+                ? t('voiceNote.processing')
+                : t('medicineScan.recordVoice')
+          }
+          variant="secondary"
+          disabled={voiceState === 'processing'}
+          onPress={() => void toggleVoice()}
+        />
+      ) : (
+        <Text testID="medicine-photo-voice-unsupported" style={styles.subtitle}>
+          {t('voiceNote.notSupported')}
+        </Text>
+      )}
       <Button
         testID="medicine-photo-gallery"
         label={t('medicineScan.gallery')}
         variant="secondary"
-        onPress={() => void startCapture(true)}
+        onPress={() => {
+          void cancelVoiceDictation();
+          setVoiceState('idle');
+          void startCapture(true);
+        }}
       />
       <Button
         testID="medicine-photo-manual"
         label={t('medicineScan.fillManually')}
         variant="ghost"
-        onPress={onSkip}
+        onPress={() => {
+          void cancelVoiceDictation();
+          onSkip();
+        }}
       />
     </View>
   );

@@ -89,6 +89,76 @@ export function parseMedicineLabelText(text: string): MedicineVisionResult | nul
   };
 }
 
+const LEADING_VOICE_NOISE =
+  /^(?:я\s+)?(?:сегодня\s+|вчера\s+)?(?:утром\s+|вечером\s+|днём\s+|днем\s+|ночью\s+)?(?:принял[аои]?\s+|выпил[аои]?\s+|дал[аои]?\s+)?(?:лекарство\s+|препарат\s+)?/i;
+const TRAILING_VOICE_NOISE =
+  /\s+(?:утром|вечером|днём|днем|ночью|сегодня|вчера|в\s+\d{1,2}(?::\d{2})?)$/i;
+const VOICE_STOPWORDS = /^(привет|здравствуй(?:те)?|спасибо|ладно|хорошо|да|нет|ок|okay)$/i;
+const MIN_VOICE_NAME_LENGTH = 3;
+
+function normalizeSpokenUnits(text: string): string {
+  return text
+    .replace(/миллиграмм(?:ов|а)?/gi, 'мг')
+    .replace(/миллилитр(?:ов|а)?/gi, 'мл');
+}
+
+function stripSpokenNoise(text: string): string {
+  let next = normalizeSpokenUnits(text).trim();
+  next = next.replace(LEADING_VOICE_NOISE, '').trim();
+  next = next.replace(TRAILING_VOICE_NOISE, '').trim();
+  return next.replace(/\s+/g, ' ');
+}
+
+function stripStrengthAndForm(text: string): string {
+  return text
+    .replace(STRENGTH_PATTERN, ' ')
+    .replace(FORM_WORDS, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hadSpokenAction(text: string): boolean {
+  return /(?:принял[аои]?|выпил[аои]?|дал[аои]?)/i.test(text);
+}
+
+/**
+ * Parse a spoken diary utterance («принял нурофен 200 мг») into a medicine card.
+ * Returns null for greetings and empty speech.
+ */
+export function parseMedicineVoiceUtterance(text: string): MedicineVisionResult | null {
+  const raw = text.trim();
+  if (!raw) return null;
+
+  const spoken = stripSpokenNoise(raw);
+  if (!spoken) return null;
+
+  const labeled = parseMedicineLabelText(spoken);
+  const strength = labeled?.strength || inferStrength(spoken);
+  const form = labeled?.form || inferForm(spoken);
+  const activeSubstance = labeled?.activeSubstance ?? '';
+  const name = stripStrengthAndForm(spoken) || labeled?.name || '';
+  const hasSignal = Boolean(strength || form || activeSubstance || hadSpokenAction(raw));
+  const isSingleName = name.length >= MIN_VOICE_NAME_LENGTH && !/\s/.test(name) && !VOICE_STOPWORDS.test(name);
+
+  if (!name && !activeSubstance) return null;
+  if (!hasSignal && !isSingleName) return null;
+  if (VOICE_STOPWORDS.test(name) && !activeSubstance) return null;
+
+  return {
+    name: name || activeSubstance,
+    activeSubstance,
+    form,
+    strength,
+    manufacturer: '',
+    indications: '',
+    ageUsage: [],
+    minAgeYears: null,
+    ingredients: labeled?.ingredients ?? '',
+    allergenTags: [],
+    confidence: strength || activeSubstance ? 'medium' : 'low',
+  };
+}
+
 export function getDemoMedicineLabelText(): string {
   return [
     'Нурофен',

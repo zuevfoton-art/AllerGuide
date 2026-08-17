@@ -100,6 +100,22 @@ describe('medicine routes', () => {
     expect(response.status).toBe(503);
   });
 
+  it('parses a spoken dose from ocrText without vision', async () => {
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .post('/api/medicines/recognize')
+      .send({ ocrText: 'принял нурофен 200 миллиграмм вечером', ageYears: 30 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(response.body.source).toBe('ocr');
+    expect(response.body.medicine.name.toLowerCase()).toBe('нурофен');
+    expect(response.body.medicine.strength).toBe('200 мг');
+  });
+
   it('returns a catalog hit without calling vision', async () => {
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
     const store = await import('../services/medicine-catalog-store');

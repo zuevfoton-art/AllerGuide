@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { recognizeMedicineViaApi } from '@/src/services/medicines-api';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
-import { recognizeMedicinePackage } from '@/src/services/medicine-recognition-service';
+import {
+  recognizeMedicineFromVoice,
+  recognizeMedicinePackage,
+} from '@/src/services/medicine-recognition-service';
 
 const featureState = vi.hoisted(() => ({
   MEDICINE_DB_ENABLED: false,
@@ -90,5 +93,22 @@ describe('recognizeMedicinePackage', () => {
     expect(outcome.card?.activeSubstance).toMatch(/ибупрофен/i);
     expect(outcome.hintCode).toBe('cloud_failed');
     expect(outcome.source).toBe('ocr');
+  });
+
+  it('prefills a card from a spoken dose without calling demo fallback', async () => {
+    const outcome = await recognizeMedicineFromVoice({
+      transcript: 'принял нурофен 200 миллиграмм вечером',
+      ageYears: 30,
+    });
+    expect(outcome.card?.name.toLowerCase()).toBe('нурофен');
+    expect(outcome.card?.strength).toBe('200 мг');
+    expect(outcome.hintCode).not.toBe('demo');
+    expect(recognizeMedicineViaApi).not.toHaveBeenCalled();
+  });
+
+  it('rejects greetings on the voice path', async () => {
+    const outcome = await recognizeMedicineFromVoice({ transcript: 'привет' });
+    expect(outcome.card).toBeNull();
+    expect(outcome.hintCode).toBe('not_recognized');
   });
 });

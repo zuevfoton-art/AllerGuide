@@ -287,12 +287,18 @@ const es: LocaleMessages = {
     dishOffEnriched: 'Enriquecido con Open Food Facts: {{product}}',
   },
   medicineScan: {
-    title: 'Fotografía el envase',
-    subtitle: 'Reconoceremos el nombre y el uso. Puedes rellenarlo a mano: el diario funciona sin red.',
+    title: 'Foto o voz',
+    subtitle:
+      'Fotografía el envase o dicta el nombre: los campos se rellenarán. También puedes escribirlos a mano.',
     photograph: 'Fotografiar el envase',
+    recordVoice: 'Grabar con la voz',
     gallery: 'Desde la galería',
     fillManually: 'Rellenar a mano',
     recognizing: 'Reconociendo el medicamento…',
+    recognizingVoice: 'Analizando la nota de voz…',
+    transcript: 'Has dicho',
+    voiceNotRecognized:
+      'No se pudo reconocer un medicamento en la grabación. Inténtalo de nuevo o rellénalo a mano.',
     continue: 'Continuar',
     name: 'Nombre',
     activeSubstance: 'Principio activo',

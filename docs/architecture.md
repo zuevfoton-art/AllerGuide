@@ -250,7 +250,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
 | `AI_DISH_VISION_ENABLED` | `EXPO_PUBLIC_AI_DISH_VISION` | Multimodal фото блюда → `/api/scan/dish-vision` |
-| `MEDICINE_DB_ENABLED` | `EXPO_PUBLIC_MEDICINE_DB` | Фото упаковки лекарства → `/api/medicines/recognize` |
+| `MEDICINE_DB_ENABLED` | `EXPO_PUBLIC_MEDICINE_DB` | Фото упаковки / голос → `/api/medicines/recognize` |
 | `YC_OCR_ENABLED` | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
@@ -522,9 +522,9 @@ Drizzle-объекты схемо-квалифицированы — код за
 ### Каталог лекарств
 
 - **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото.
-- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
+- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
 - **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM.
-- **Клиент:** `EXPO_PUBLIC_MEDICINE_DB`; при флаге off / ошибке — локальный `parseMedicineLabelText` / demo.
+- **Клиент:** `EXPO_PUBLIC_MEDICINE_DB`; при флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance`. Demo-карточка только для фото без OCR, не для голоса.
 
 ### Каталог продуктов
 

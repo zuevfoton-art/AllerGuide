@@ -1,5 +1,9 @@
 import type { Express, Request, Response } from 'express';
-import { parseMedicineLabelText, parseMedicineVisionResponse } from '@allerguide/ai';
+import {
+  parseMedicineLabelText,
+  parseMedicineVisionResponse,
+  parseMedicineVoiceUtterance,
+} from '@allerguide/ai';
 import {
   normalizeMedicineName,
   resolveMedicineAgeUsage,
@@ -64,7 +68,9 @@ function parseAgeYears(value: unknown): number | null {
 function lookupNameFromBody(body: RecognizeRequestBody): string {
   const explicit = body.name?.trim() ?? '';
   if (explicit) return explicit;
-  const parsed = body.ocrText?.trim() ? parseMedicineLabelText(body.ocrText) : null;
+  if (!body.ocrText?.trim()) return '';
+  const parsed =
+    parseMedicineLabelText(body.ocrText) ?? parseMedicineVoiceUtterance(body.ocrText);
   return parsed?.name?.trim() ?? '';
 }
 
@@ -178,7 +184,8 @@ export function registerMedicineRoutes(app: Express) {
       }
 
       if (ocrText) {
-        const parsed = parseMedicineLabelText(ocrText);
+        const parsed =
+          parseMedicineLabelText(ocrText) ?? parseMedicineVoiceUtterance(ocrText);
         if (!parsed) {
           res.status(422).json({ ok: false, error: 'Could not parse medicine label' });
           return;
