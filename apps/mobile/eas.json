@@ -19,6 +19,7 @@
         "EXPO_PUBLIC_BACKEND_AUTH": "false",
         "EXPO_PUBLIC_CLOUD_SYNC": "false",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "false",
+        "EXPO_PUBLIC_AI_DISH_VISION": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
         "EXPO_PUBLIC_POLLEN_HEATMAP": "off",
         "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
@@ -38,6 +39,7 @@
     "staging": {
       "distribution": "internal",
       "channel": "staging",
+      "environment": "preview",
       "node": "22.14.0",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.staging.aclearo.com",
@@ -79,6 +81,7 @@
         "EXPO_PUBLIC_BACKEND_AUTH": "true",
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
+        "EXPO_PUBLIC_AI_DISH_VISION": "true",
         "EXPO_PUBLIC_POLLEN_HEATMAP": "google",
         "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
         "EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY": "true",

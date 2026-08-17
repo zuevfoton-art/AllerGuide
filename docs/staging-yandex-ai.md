@@ -165,8 +165,8 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 | Domain | [`packages/ai/src/dish-vision.ts`](../packages/ai/src/dish-vision.ts) | prompt / parse / `dishVisionToScanText` |
 | Provider | [`apps/api/src/services/llm-dish-vision-provider.ts`](../apps/api/src/services/llm-dish-vision-provider.ts) | Yandex AI Studio OpenAI-compatible chat + `image_url` (`https://ai.api.cloud.yandex.net/v1/chat/completions`) |
 | Route | [`apps/api/src/routes/scan-dish-vision.ts`](../apps/api/src/routes/scan-dish-vision.ts) | cache + shared scan daily budget; при fail — `502` + `providerStatus` |
-| Mobile | [`scanner-dish-vision-service.ts`](../apps/mobile/src/services/scanner-dish-vision-service.ts) + `dish-vision-api-service.ts` | product photo: VL first → OCR if readable text; fail → `scanner.dishVisionFailed` (не пустой clear) |
-| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | **on** staging; off by default offline-safe elsewhere |
+| Mobile | [`scanner-dish-vision-service.ts`](../apps/mobile/src/services/scanner-dish-vision-service.ts) + `dish-vision-api-service.ts` | any photo: VL first + OCR; verdict on combined text; fail → `scanner.dishVisionFailed` (не пустой clear) |
+| Flags | API `AI_DISH_VISION_ENABLED` (+ `AI_SCAN_ENABLED`); mobile `EXPO_PUBLIC_AI_DISH_VISION` | **on by default** (core scanner); degrades to OCR offline |
 | Yandex model | `YC_VISION_MODEL` | **только multimodal** из каталога folder; text-only `yandexgpt-lite` **не** подходит |
 | UX | усиленный disclaimer / trust line (`dishVisionDisclaimer`) | source `dish_vision` |
 

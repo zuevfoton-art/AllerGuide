@@ -58,6 +58,7 @@ vi.mock('@/src/services/open-food-facts-service', () => ({
         ingredients: 'water, sugar',
         allergenTags: ['soy'],
         traceTags: [],
+        source: 'openfoodfacts',
       };
     }
     return null;

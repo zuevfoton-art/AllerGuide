@@ -1,6 +1,8 @@
 import { mapExternalAllergenIds } from '@allerguide/core';
 import { logCaughtError } from '@/src/services/error-reporting';
 
+export type OffFamilySource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts';
+
 export interface OpenFoodFactsProduct {
   name: string;
   ingredients: string;
@@ -9,12 +11,19 @@ export interface OpenFoodFactsProduct {
   imageUrl?: string;
   allergenTags: string[];
   traceTags: string[];
+  source: OffFamilySource;
 }
 
 const PRODUCT_FIELDS =
   'code,product_name,product_name_ru,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags,brands,image_front_small_url';
 
 const OFF_USER_AGENT = 'A-Claro/1.0 (support@aclearo.com)';
+
+const OFF_FAMILY_DATASETS: { source: OffFamilySource; url: string }[] = [
+  { source: 'openfoodfacts', url: 'https://world.openfoodfacts.org' },
+  { source: 'openbeautyfacts', url: 'https://world.openbeautyfacts.org' },
+  { source: 'openproductsfacts', url: 'https://world.openproductsfacts.org' },
+];
 
 function headers(): Record<string, string> {
   return { 'User-Agent': OFF_USER_AGENT, Accept: 'application/json' };
@@ -34,6 +43,7 @@ type OffProductPayload = {
 
 function normalizeOffProduct(
   product: OffProductPayload,
+  source: OffFamilySource,
   fallbackBarcode = '',
 ): OpenFoodFactsProduct | null {
   const ingredients =
@@ -54,7 +64,25 @@ function normalizeOffProduct(
     imageUrl,
     allergenTags: mapExternalAllergenIds(product.allergens_tags ?? []),
     traceTags: mapExternalAllergenIds(product.traces_tags ?? []),
+    source,
   };
+}
+
+async function fetchFromDataset(
+  barcode: string,
+  dataset: (typeof OFF_FAMILY_DATASETS)[number],
+): Promise<OpenFoodFactsProduct | null> {
+  const response = await fetch(
+    `${dataset.url}/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`,
+    { headers: headers() },
+  );
+
+  if (!response.ok) return null;
+
+  const data = (await response.json()) as { status?: number; product?: OffProductPayload };
+  if (data.status !== 1 || !data.product) return null;
+
+  return normalizeOffProduct(data.product, dataset.source, barcode);
 }
 
 export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFactsProduct | null> {
@@ -62,17 +90,11 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
   if (!normalized) return null;
 
   try {
-    const response = await fetch(
-      `https://world.openfoodfacts.org/api/v2/product/${normalized}.json?fields=${PRODUCT_FIELDS}`,
-      { headers: headers() },
-    );
-
-    if (!response.ok) return null;
-
-    const data = (await response.json()) as { status?: number; product?: OffProductPayload };
-    if (data.status !== 1 || !data.product) return null;
-
-    return normalizeOffProduct(data.product, normalized);
+    for (const dataset of OFF_FAMILY_DATASETS) {
+      const product = await fetchFromDataset(normalized, dataset);
+      if (product) return product;
+    }
+    return null;
   } catch (error) {
     logCaughtError('fetchProductByBarcode', error, { extra: { barcode: normalized } });
     return null;
@@ -108,7 +130,7 @@ export async function searchProductsByName(
     const seen = new Set<string>();
     const results: OpenFoodFactsProduct[] = [];
     for (const product of data.products) {
-      const normalized = normalizeOffProduct(product);
+      const normalized = normalizeOffProduct(product, 'openfoodfacts');
       if (!normalized || seen.has(normalized.barcode)) continue;
       seen.add(normalized.barcode);
       results.push(normalized);

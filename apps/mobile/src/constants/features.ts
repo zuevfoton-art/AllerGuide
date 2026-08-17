@@ -10,7 +10,7 @@ export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true
 /**
  * Option D: multimodal dish photo → name + likely ingredients via
  * POST /api/scan/dish-vision. Used when OCR finds little/no text (plate-only photo).
- * Requires AI_DISH_VISION_ENABLED + AI_SCAN_ENABLED on the API.
+ * On by default (core smart scanner). Requires AI_DISH_VISION_ENABLED + AI_SCAN_ENABLED on the API.
  */
 export const AI_DISH_VISION_ENABLED = process.env.EXPO_PUBLIC_AI_DISH_VISION === 'true';
 
