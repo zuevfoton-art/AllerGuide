@@ -1,4 +1,5 @@
 import type { MapPoiCategory } from '@allerguide/core';
+import { isDefaultOnEnvFlag } from '../lib/env-flag';
 
 export type GooglePlacesCategory = MapPoiCategory;
 
@@ -42,7 +43,7 @@ function readPlacesApiKey(): string | null {
 }
 
 export function isGooglePlacesConfigured(): boolean {
-  if (process.env.MAP_PLACES_ENABLED !== 'true') return false;
+  if (!isDefaultOnEnvFlag(process.env.MAP_PLACES_ENABLED)) return false;
   return Boolean(readPlacesApiKey());
 }
 

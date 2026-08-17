@@ -39,6 +39,18 @@ describe('places nearby routes', () => {
     expect(response.status).toBe(503);
   });
 
+  it('stays enabled when the server flag is unset', async () => {
+    delete process.env.MAP_PLACES_ENABLED;
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ places: [] }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp();
+
+    const response = await request(app).get('/api/places/nearby?lat=55.75&lon=37.62');
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalled();
+  });
+
   it('rejects invalid type', async () => {
     const app = await createApp();
     const response = await request(app).get(

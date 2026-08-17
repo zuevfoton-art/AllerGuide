@@ -23,7 +23,7 @@ Task context: [`docs/functional-requirements.md`](docs/functional-requirements.m
 | **Offline-first** | Core flows work without API; network is optional enrichment |
 | **Thin adapters** | Domain logic in `packages/core` / `packages/ai`; mobile screens and API routes orchestrate only |
 | **No DB/API in screens** | `app/**/*.tsx` → `src/services/*` → `db` / `core` / optional backend |
-| **Feature flags** | Backend integration behind `EXPO_PUBLIC_*` (default off in `.env.example`) |
+| **Feature flags** | Backend integration behind `EXPO_PUBLIC_*` (default off in `.env.example`, except Places + Air Quality: default on) |
 | **i18n** | `useTranslation()` + all 6 locales + `types.ts`; not legacy i18next |
 | **Migrations** | `db:generate` + commit SQL + `db:migrate`; never `db:push` on real data |
 

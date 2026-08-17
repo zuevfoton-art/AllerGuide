@@ -4,6 +4,7 @@ import {
   type GoogleAirQualityCurrentPayload,
   type GoogleAirQualityMapType,
 } from '@allerguide/core';
+import { isDefaultOnEnvFlag } from '../lib/env-flag';
 
 /**
  * Google Air Quality API proxy (same pattern as the Pollen proxy): the mobile
@@ -22,7 +23,7 @@ interface CacheEntry {
 const currentConditionsCache = new Map<string, CacheEntry>();
 
 export function isGoogleAirQualityConfigured(): boolean {
-  if (process.env.AIR_QUALITY_ENABLED !== 'true') return false;
+  if (!isDefaultOnEnvFlag(process.env.AIR_QUALITY_ENABLED)) return false;
   return Boolean(resolveAirQualityApiKey({ optional: true }));
 }
 
