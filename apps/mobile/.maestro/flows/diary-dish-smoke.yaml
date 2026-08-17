@@ -5,7 +5,11 @@ appId: com.aclearo.app
 - tapOn:
     id: tab-diary
 - tapOn:
-    id: diary-chip-food
+    id: diary-new-entry
+- tapOn:
+    id: diary-picker-food
+- tapOn:
+    id: nutrition-enter-manual
 - extendedWaitUntil:
     visible:
       id: diary-wizard-primary
@@ -25,19 +29,8 @@ appId: com.aclearo.app
     id: diary-dish-component-beet
 - tapOn:
     id: diary-wizard-primary
-# foodSource (optional) — skip via next
-- tapOn:
-    id: diary-wizard-primary
-# allergens (optional)
-- tapOn:
-    id: diary-wizard-primary
-# crossReactions (optional)
-- tapOn:
-    id: diary-wizard-primary
-# scanRef (optional)
-- tapOn:
-    id: diary-wizard-primary
-# reaction (required)
+# reaction (required) — composition is followed by symptom level
+
 - tapOn:
     text: "Нет реакции"
 - tapOn:
@@ -50,4 +43,4 @@ appId: com.aclearo.app
       id: diary-wizard-primary
     timeout: 10000
 - assertVisible:
-    id: diary-chip-food
+    id: diary-new-entry

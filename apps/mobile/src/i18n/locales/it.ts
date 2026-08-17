@@ -315,6 +315,18 @@ const it: LocaleMessages = {
     cropTitle: 'Ritaglia la confezione',
     cropHint: 'Lascia nome, principio attivo e dosaggio',
   },
+  nutritionScan: {
+    title: 'Foto del piatto o inserimento',
+    subtitle:
+      'Fotografa il piatto o inserisci il nome: mostriamo gli ingredienti, poi il livello di reazione.',
+    photograph: 'Fotografa il piatto',
+    gallery: 'Dalla galleria',
+    enterManually: 'Inserisci a mano',
+    recognizing: 'Riconoscimento del piatto…',
+    notRecognized: 'Piatto non riconosciuto. Inserisci il nome a mano.',
+    cropTitle: 'Ritaglia il piatto',
+    cropHint: 'Lascia il piatto o l’etichetta nell’inquadratura',
+  },
   voiceNote: {
     title: 'Input vocale',
     tapToSpeak: 'Tocca il microfono e detta',

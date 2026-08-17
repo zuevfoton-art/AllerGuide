@@ -4,7 +4,7 @@ import {
   type DiaryStep,
 } from '@allerguide/core';
 import type { AppLocale } from '../types';
-import type { DiarySectionContentMap, LocaleContent } from './types';
+import type { DiarySectionContentMap, LocaleContent, LocalizedDiaryStep } from './types';
 
 export function localizeDiarySection(
   section: DiarySection,
@@ -20,12 +20,13 @@ export function localizeDiarySection(
   };
 }
 
-function localizeDiaryStep(step: DiaryStep, localized?: { label: string; placeholder?: string; choices?: string[] }) {
+function localizeDiaryStep(step: DiaryStep, localized?: LocalizedDiaryStep) {
   if (!localized) return step;
   return {
     ...step,
     label: localized.label,
     placeholder: localized.placeholder ?? step.placeholder,
+    hint: localized.hint ?? step.hint,
     choices: localized.choices ?? step.choices,
   };
 }

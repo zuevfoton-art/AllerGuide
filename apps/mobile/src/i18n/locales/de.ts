@@ -316,6 +316,18 @@ const de: LocaleMessages = {
     cropTitle: 'Packung zuschneiden',
     cropHint: 'Name, Wirkstoff und Stärke behalten',
   },
+  nutritionScan: {
+    title: 'Gericht fotografieren oder eintippen',
+    subtitle:
+      'Fotografieren Sie das Gericht oder geben Sie den Namen ein — danach Zutaten und Reaktionsstärke.',
+    photograph: 'Gericht fotografieren',
+    gallery: 'Aus der Galerie',
+    enterManually: 'Manuell eingeben',
+    recognizing: 'Gericht wird erkannt…',
+    notRecognized: 'Gericht nicht erkannt. Bitte den Namen manuell eingeben.',
+    cropTitle: 'Gericht zuschneiden',
+    cropHint: 'Teller oder Etikett im Rahmen behalten',
+  },
   voiceNote: {
     title: 'Spracheingabe',
     tapToSpeak: 'Mikrofon tippen und diktieren',

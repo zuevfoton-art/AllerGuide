@@ -23,6 +23,14 @@ describe('diary-wizard-route', () => {
       expect(stepIds).not.toContain(hidden);
     }
     expect(stepIds).toContain('takenAt');
+    expect(stepIds).not.toContain('foodSource');
+    const nutrition = route.find((section) => section.type === 'Питание');
+    expect(nutrition?.steps.map((step) => step.id)).toEqual([
+      'food',
+      'foodComponents',
+      'reaction',
+      'reactionType',
+    ]);
     expect(FULL_WIZARD_EXCLUDED_SECTION_TYPES.size).toBe(4);
   });
 

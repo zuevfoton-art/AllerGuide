@@ -3,6 +3,7 @@ import type { ExpertArticleCategory } from '@allerguide/core';
 export type LocalizedDiaryStep = {
   label: string;
   placeholder?: string;
+  hint?: string;
   choices?: string[];
 };
 

@@ -71,6 +71,7 @@ const deContent: LocaleContent = {
         food: {
           label: 'Was wurde gegessen?',
           placeholder: 'Gerichte, Lebensmittel, Getränke',
+          hint: 'Gericht manuell eingeben — die Zutaten werden wie im Scanner erkannt, danach die Reaktionsstärke.',
         },
         foodComponents: {
           label: 'Zutaten des Gerichts',

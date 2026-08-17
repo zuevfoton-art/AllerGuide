@@ -71,6 +71,7 @@ const itContent: LocaleContent = {
         food: {
           label: 'Cosa è stato mangiato?',
           placeholder: 'Piatti, alimenti, bevande',
+          hint: 'Inserisci il piatto a mano: gli ingredienti si riconoscono come nello scanner, poi il livello di reazione.',
         },
         foodComponents: {
           label: 'Ingredienti del piatto',

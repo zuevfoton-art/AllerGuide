@@ -1,6 +1,7 @@
 import {
   buildAsitPrefillWithDoseNumber,
   buildClinicalScaleEditorState,
+  applyDishBreakdownToAnswers,
   buildFoodPrefill,
   buildInsectStingPrefill,
   buildMedicinePrefill,
@@ -17,6 +18,7 @@ import {
   ASIT_SIMPLIFIED_STEP_IDS,
   PRESCRIBED_SIMPLIFIED_STEP_IDS,
   type DiarySection,
+  type DishComponentDef,
   type FoodDrugScanRef,
   type MedicineCard,
 } from '@allerguide/core';
@@ -77,6 +79,15 @@ export async function buildDiarySectionEditorState(input: {
   profileBirthYear?: number | null;
   recognizedCard?: MedicineCard;
   photoUri?: string;
+  recognizedDish?: {
+    food: string;
+    components: DishComponentDef[];
+    dishId?: string;
+    dishName?: string;
+    source?: string;
+    productBarcode?: string;
+    productName?: string;
+  };
 }): Promise<DiarySectionEditorStateWithSection> {
   const { sectionType, profileId, profileAllergiesJson, locale } = input;
 
@@ -108,7 +119,21 @@ export async function buildDiarySectionEditorState(input: {
     const allergies = parseAllergies(profileAllergiesJson);
     const registry = getFoodDrugRegistry(profileId);
     const scanRef = findRecentFoodScanForProfile(profileId);
-    const prefill = buildFoodPrefill(allergies, registry, scanRef);
+    let prefill = buildFoodPrefill(allergies, registry, scanRef);
+    if (input.recognizedDish?.food.trim()) {
+      prefill = applyDishBreakdownToAnswers(
+        { ...prefill, food: input.recognizedDish.food.trim() },
+        profileAllergiesJson,
+        {
+          components: input.recognizedDish.components,
+          dishId: input.recognizedDish.dishId,
+          dishName: input.recognizedDish.dishName,
+          source: input.recognizedDish.source,
+          productBarcode: input.recognizedDish.productBarcode,
+          productName: input.recognizedDish.productName,
+        },
+      );
+    }
     return { mode: 'section', sectionType, prefill: { Питание: prefill } };
   }
 
