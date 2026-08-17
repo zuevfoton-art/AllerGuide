@@ -71,8 +71,10 @@ describe('open food facts service', () => {
     expect(product?.name).toBe('Shampoo');
     expect(product?.source).toBe('openbeautyfacts');
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(String(fetchMock.mock.calls[0][0])).toContain('openfoodfacts.org');
-    expect(String(fetchMock.mock.calls[1][0])).toContain('openbeautyfacts.org');
+    const firstUrl = (fetchMock.mock.calls[0] as unknown as [string])[0];
+    const secondUrl = (fetchMock.mock.calls[1] as unknown as [string])[0];
+    expect(firstUrl).toContain('openfoodfacts.org');
+    expect(secondUrl).toContain('openbeautyfacts.org');
   });
 
   it('does not query OBF/OPF when OFF already has the product', async () => {
@@ -83,7 +85,8 @@ describe('open food facts service', () => {
     const product = await fetchOpenFoodFactsProduct('1');
     expect(product?.source).toBe('openfoodfacts');
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0][0])).toContain('openfoodfacts.org');
+    const offUrl = (fetchMock.mock.calls[0] as unknown as [string])[0];
+    expect(offUrl).toContain('openfoodfacts.org');
   });
 
   it('sends a descriptive User-Agent header (OFF requirement)', async () => {

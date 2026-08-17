@@ -22,6 +22,8 @@ vi.mock('@/src/constants/features', () => ({
   AI_SCAN_ENABLED: true,
   AI_DISH_VISION_ENABLED: true,
   YC_OCR_ENABLED: true,
+  YC_SCAN_INTENT_LLM_ENABLED: false,
+  YC_SEARCH_ENABLED: false,
 }));
 
 vi.mock('@/src/services/dish-vision-api-service', () => ({
