@@ -44,6 +44,7 @@ import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
 import { PollenIndexCard } from '@/src/components/PollenIndexCard';
 import { PollenHeatmapLegend } from '@/src/components/PollenHeatmapLegend';
 import { AirQualityCard } from '@/src/components/AirQualityCard';
+import { AirQualityLegend } from '@/src/components/AirQualityLegend';
 import { PlaceSearchBar } from '@/src/components/PlaceSearchBar';
 import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
@@ -70,7 +71,9 @@ import {
 } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
 import {
+  buildAirQualityHeatmapTileUrlTemplate,
   fetchAirQualitySnapshot,
+  isAirQualityHeatmapAvailable,
   isGoogleAirQualityAvailable,
 } from '@/src/services/air-quality-service';
 import { getLocale } from '@/src/services/settings-service';
@@ -91,7 +94,13 @@ import {
 } from '@/src/constants/features';
 import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 
-type MapLayerMode = 'pollen' | 'places' | 'both';
+type MapLayerMode = 'pollen' | 'air' | 'places';
+
+const MAP_LAYER_CHIPS = [
+  ['pollen', 'map.layerPollen'],
+  ['air', 'map.layerAir'],
+  ['places', 'map.layerPlaces'],
+] as const;
 
 /** Near-real-time refresh while the Map tab is focused. */
 const MAP_LIVE_REFRESH_MS = 15 * 60 * 1000;
@@ -264,15 +273,21 @@ export default function MapScreen() {
   });
   const useGoogleMap = mapBasemap === 'google';
   const useYandexInteractive = mapBasemap === 'yandex-interactive';
-  const useHeatmap = isGooglePollenHeatmapAvailable() && layerMode !== 'places';
+  const showPollenLayer = layerMode === 'pollen';
+  const showAirLayer = layerMode === 'air';
+  const showPlacesLayer = layerMode === 'places';
+  const useHeatmap = isGooglePollenHeatmapAvailable() && showPollenLayer;
   const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
-  const showPlaceMarkers = layerMode === 'places' || layerMode === 'both';
+  const airTileUrlTemplate =
+    showAirLayer && isAirQualityHeatmapAvailable()
+      ? buildAirQualityHeatmapTileUrlTemplate()
+      : null;
+  const showPlaceMarkers = showPlacesLayer;
   // Geo plume Circles need Google Maps primitives; Yandex path keeps caption only.
-  const showPlumeGeo =
-    MAP_POLLEN_PLUME_ENABLED && useGoogleMap && layerMode !== 'places';
+  const showPlumeGeo = MAP_POLLEN_PLUME_ENABLED && useGoogleMap && showPollenLayer;
   const showPlumeCaption =
     MAP_POLLEN_PLUME_ENABLED &&
-    layerMode !== 'places' &&
+    showPollenLayer &&
     (useGoogleMap || useYandexInteractive);
 
   const tomorrowUpi = useMemo((): PollenUpiSnapshot | null => {
@@ -546,13 +561,12 @@ export default function MapScreen() {
   const plumeCaptionVisible =
     showPlumeCaption && (hourlyUpi ?? selectedUpi?.index ?? plume.upiIndex) > 0;
 
-  const mapOverlay =
-    layerMode === 'places' ? undefined : (
-      <>
-        {plumeCaptionVisible ? <PollenPlumeOverlay groupHint={plumeGroupHint} /> : null}
-        {mapLevelOverlay}
-      </>
-    );
+  const mapOverlay = showPollenLayer ? (
+    <>
+      {plumeCaptionVisible ? <PollenPlumeOverlay groupHint={plumeGroupHint} /> : null}
+      {mapLevelOverlay}
+    </>
+  ) : undefined;
 
   const mapAttributionKey = useYandexInteractive
     ? 'map.pollenYandexInteractiveAttribution'
@@ -562,8 +576,8 @@ export default function MapScreen() {
         : 'map.pollenGoogleMapAttribution'
       : 'map.pollenMapAttribution';
 
-  const showActionTip = statusLevel === 'mid' || statusLevel === 'high';
-  const showPlacesPanel = layerMode === 'places' || layerMode === 'both';
+  const showActionTip = showPollenLayer && (statusLevel === 'mid' || statusLevel === 'high');
+  const showPlacesPanel = showPlacesLayer;
 
   return (
     <Screen brandHeaderRight={<ProfileHeaderButton />}>
@@ -610,23 +624,22 @@ export default function MapScreen() {
 
       <View style={styles.layerBlock}>
         <View style={styles.layerRow} testID="map-layers">
-          {(
-            [
-              ['pollen', 'map.layerPollen'],
-              ['places', 'map.layerPlaces'],
-              ['both', 'map.layerBoth'],
-            ] as const
-          ).map(([key, labelKey]) => {
+          {MAP_LAYER_CHIPS.map(([key, labelKey]) => {
             const active = layerMode === key;
             return (
               <Pressable
                 key={key}
                 testID={`map-layer-${key}`}
                 style={[styles.layerChip, active && styles.layerChipActive]}
-                onPress={() => setLayerMode(key)}
+                onPress={() => {
+                  setLayerMode(key);
+                  if (key !== 'pollen') setAllergenPickerOpen(false);
+                }}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}>
-                <Text style={[styles.layerChipText, active && styles.layerChipTextActive]}>
+                <Text
+                  style={[styles.layerChipText, active && styles.layerChipTextActive]}
+                  numberOfLines={2}>
                   {t(labelKey)}
                 </Text>
               </Pressable>
@@ -634,7 +647,7 @@ export default function MapScreen() {
           })}
         </View>
 
-        {layerMode !== 'places' ? (
+        {showPollenLayer ? (
           <Pressable
             testID="map-allergen-picker"
             style={styles.allergenPickerBtn}
@@ -682,6 +695,7 @@ export default function MapScreen() {
           longitude={coords.lon}
           zoom={POLLEN_MAP_SCALE_ZOOM.city}
           mapType={googleMapType}
+          tileUrlTemplate={airTileUrlTemplate}
           height={MAP_HERO_HEIGHT}
           interactive
           markers={markers}
@@ -745,7 +759,7 @@ export default function MapScreen() {
         <Text style={styles.listFirstHint}>{t('map.listFirstHint')}</Text>
       ) : null}
 
-      {layerMode === 'places' ? (
+      {showPlacesLayer ? (
         <>
           <Text style={styles.legendTitle}>{t('map.legendTitlePlaces')}</Text>
           <View style={styles.legendRow}>
@@ -755,6 +769,8 @@ export default function MapScreen() {
             <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
           </View>
         </>
+      ) : showAirLayer ? (
+        <AirQualityLegend />
       ) : (
         <PollenHeatmapLegend group={pollenMapTaxonTypeGroup(selectedTaxonId)} />
       )}
@@ -776,7 +792,7 @@ export default function MapScreen() {
         </GlassCard>
       ) : null}
 
-      {layerMode !== 'places' ? (
+      {showPollenLayer ? (
         <>
           <PollenIndexCard
             taxonLabel={taxonLabel}
@@ -790,7 +806,6 @@ export default function MapScreen() {
           {isGoogleAirQualityAvailable() ? (
             <AirQualityCard snapshot={airQuality} loading={airQualityLoading} />
           ) : null}
-
           <PollenForecastStrip
             days={pollenSnapshot?.forecastDays ?? []}
             taxonId={selectedTaxonId}
@@ -816,6 +831,10 @@ export default function MapScreen() {
             </GlassCard>
           ) : null}
         </>
+      ) : null}
+
+      {showAirLayer && isGoogleAirQualityAvailable() ? (
+        <AirQualityCard snapshot={airQuality} loading={airQualityLoading} />
       ) : null}
 
       {showPlacesPanel ? (
@@ -995,7 +1014,10 @@ function createStyles({ colors, fonts }: AppTheme) {
     layerChip: {
       flex: 1,
       alignItems: 'center',
-      paddingVertical: 10,
+      justifyContent: 'center',
+      minHeight: 40,
+      paddingHorizontal: 4,
+      paddingVertical: 8,
       borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
@@ -1007,8 +1029,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     layerChipText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: '600',
+      textAlign: 'center',
       color: colors.textSecondary,
     },
     layerChipTextActive: { color: colors.accent },
