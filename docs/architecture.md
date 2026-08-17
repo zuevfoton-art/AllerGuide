@@ -207,7 +207,11 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 
 | Сервис | Роль |
 |--------|------|
-| `scanner-service.ts` | Оркестрация: barcode / text / OCR → intent → dish/search → `runSmartScan` → история |
+| `scanner-service.ts` | Баррель: реэкспорт barcode / OCR / VL оркестраторов (публичный API экрана) |
+| `scan-analysis.ts` | Общий анализ: `analyzeText` → `runSmartScan` + analytics, `ScanResultExtended`, `ScanCloudAuthError` |
+| `scanner-barcode-service.ts` | `scanBarcode` / `scanText` → lookup → анализ состава → история |
+| `scanner-ocr-service.ts` | `extractOcrFromImage`, `scanFromOcr` (intent → dish/search → анализ), menu/label |
+| `scanner-dish-vision-service.ts` | VL: `scanFromDishVision`, `tryDishVisionFirst`, `DishVisionScanError` |
 | `barcode-lookup-service.ts` | Каталог → local cache → OFF (`resolveProductByBarcode`) |
 | `barcode-cache-service.ts` | Локальный кэш штрихкодов |
 | `catalog-api.ts` / `catalog-cache-service.ts` | Backend catalog + offline snapshot |
