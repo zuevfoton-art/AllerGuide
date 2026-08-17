@@ -5,7 +5,11 @@ appId: com.aclearo.app
 - tapOn:
     id: tab-diary
 - tapOn:
-    id: diary-chip-food
+    id: diary-new-entry
+- tapOn:
+    id: diary-picker-food
+- tapOn:
+    id: nutrition-enter-manual
 - extendedWaitUntil:
     visible:
       id: diary-wizard-primary
@@ -39,4 +43,4 @@ appId: com.aclearo.app
       id: diary-wizard-primary
     timeout: 10000
 - assertVisible:
-    id: diary-chip-food
+    id: diary-new-entry

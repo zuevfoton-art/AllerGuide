@@ -3,7 +3,9 @@ import {
   enrichDishFromOpenFoods,
   type DishEnrichmentResult,
 } from '@/src/services/dish-off-enrichment-service';
+import { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
+import { scanFromOcr } from '@/src/services/scanner-ocr-service';
 
 const MAX_FALLBACK_INGREDIENTS = 20;
 
@@ -57,4 +59,54 @@ export async function recognizeDiaryDish(foodText: string): Promise<DishEnrichme
   }
 
   return enrichDishFromOpenFoods(food);
+}
+
+export type RecognizedDiaryDish = {
+  food: string;
+  enrichment: DishEnrichmentResult;
+};
+
+/**
+ * Photo path: same VL/OCR pipeline as the scanner, then the manual dish lookup.
+ */
+export async function recognizeDiaryDishFromPhoto(input: {
+  imageBase64: string;
+  mimeType?: string;
+}): Promise<RecognizedDiaryDish | null> {
+  const scan = await scanFromOcr({
+    mode: 'product',
+    imageBase64: input.imageBase64,
+    mimeType: input.mimeType,
+  });
+  const food = (scan.productName?.trim() || extractDishSearchQuery(scan.ocr?.text ?? '')).trim();
+  if (!food) return null;
+
+  const enrichment = await recognizeDiaryDish(food);
+  if (enrichment) {
+    return { food: enrichment.dishName || food, enrichment };
+  }
+
+  const fromOcr = fallbackComponentsFromText(scan.ocr?.text ?? food);
+  if (!fromOcr.length) {
+    return {
+      food,
+      enrichment: {
+        components: [{ id: 'dish', nameRu: food }],
+        dishId: '',
+        dishName: food,
+        source: 'local',
+      },
+    };
+  }
+
+  return {
+    food,
+    enrichment: {
+      components: fromOcr,
+      dishId: '',
+      dishName: food,
+      source: 'local',
+      ingredients: scan.ocr?.text,
+    },
+  };
 }

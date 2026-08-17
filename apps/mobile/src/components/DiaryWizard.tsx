@@ -71,6 +71,8 @@ interface DiaryWizardProps {
   autoMetadata?: DiaryAutoMetadata;
   /** Optional recognized-medicine summary / age warning above the steps. */
   notice?: ReactNode;
+  /** Start on this step id when present in the first section. */
+  initialStepId?: string;
 }
 
 export function DiaryWizard({
@@ -86,6 +88,7 @@ export function DiaryWizard({
   profileAllergiesJson = '[]',
   autoMetadata,
   notice,
+  initialStepId,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -95,7 +98,12 @@ export function DiaryWizard({
     [sectionsProp, locale, content],
   );
   const [sectionIndex, setSectionIndex] = useState(0);
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(() => {
+    if (!initialStepId) return 0;
+    const first = (sectionsProp ?? [])[0];
+    const index = first?.steps.findIndex((item) => item.id === initialStepId) ?? -1;
+    return index >= 0 ? index : 0;
+  });
   const [answersBySection, setAnswersBySection] = useState<Record<string, Record<string, string>>>(
     initialAnswersBySection ?? {},
   );

@@ -316,6 +316,18 @@ const fr: LocaleMessages = {
     cropTitle: 'Recadrez la boîte',
     cropHint: 'Gardez le nom, le principe actif et le dosage',
   },
+  nutritionScan: {
+    title: 'Photo du plat ou saisie',
+    subtitle:
+      'Photographiez le plat ou saisissez le nom — nous afficherons la composition, puis le niveau de réaction.',
+    photograph: 'Photographier le plat',
+    gallery: 'Depuis la galerie',
+    enterManually: 'Saisir manuellement',
+    recognizing: 'Reconnaissance du plat…',
+    notRecognized: 'Plat non reconnu. Saisissez le nom à la main.',
+    cropTitle: 'Recadrez le plat',
+    cropHint: 'Gardez l’assiette ou l’étiquette dans le cadre',
+  },
   voiceNote: {
     title: 'Saisie vocale',
     tapToSpeak: 'Touchez le micro et dictez',

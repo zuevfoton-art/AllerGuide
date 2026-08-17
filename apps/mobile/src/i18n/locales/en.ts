@@ -315,6 +315,18 @@ const en: LocaleMessages = {
     cropTitle: 'Crop the package',
     cropHint: 'Keep the name, active substance, and strength',
   },
+  nutritionScan: {
+    title: 'Dish photo or type it in',
+    subtitle:
+      'Photograph the dish or enter the name — we will show the ingredients, then the reaction level.',
+    photograph: 'Photograph the dish',
+    gallery: 'From gallery',
+    enterManually: 'Enter manually',
+    recognizing: 'Recognizing the dish…',
+    notRecognized: 'Could not recognize the dish. Enter the name by hand.',
+    cropTitle: 'Crop the dish',
+    cropHint: 'Keep the plate or the label in the frame',
+  },
   voiceNote: {
     title: 'Voice input',
     tapToSpeak: 'Tap the mic and dictate',

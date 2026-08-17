@@ -72,7 +72,13 @@ export function FoodDrugAllergyCard({
           </View>
         </View>
 
-        <Button label={t('foodDrug.logFood')} variant="primary" size="sm" onPress={onLogFood} />
+        <Button
+          testID="diary-chip-food"
+          label={t('foodDrug.logFood')}
+          variant="primary"
+          size="sm"
+          onPress={onLogFood}
+        />
         <Text style={styles.disclaimer}>{FOOD_DRUG_DISCLAIMER}</Text>
       </GlassCard>
     );

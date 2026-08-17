@@ -1,10 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { recognizeDiaryDish } from '@/src/services/diary-dish-recognition-service';
+import {
+  recognizeDiaryDish,
+  recognizeDiaryDishFromPhoto,
+} from '@/src/services/diary-dish-recognition-service';
 import { enrichDishFromOpenFoods } from '@/src/services/dish-off-enrichment-service';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
+import { scanFromOcr } from '@/src/services/scanner-ocr-service';
 
 vi.mock('@/src/services/scanner-dish-lookup-service', () => ({
   lookupDishIngredientsForScan: vi.fn(),
+}));
+
+vi.mock('@/src/services/scanner-ocr-service', () => ({
+  scanFromOcr: vi.fn(),
 }));
 
 vi.mock('@/src/services/dish-off-enrichment-service', () => ({
@@ -15,6 +23,7 @@ describe('recognizeDiaryDish', () => {
   beforeEach(() => {
     vi.mocked(lookupDishIngredientsForScan).mockReset();
     vi.mocked(enrichDishFromOpenFoods).mockReset();
+    vi.mocked(scanFromOcr).mockReset();
   });
 
   it('returns scanner lookup enrichment for a typed dish name', async () => {
@@ -72,5 +81,46 @@ describe('recognizeDiaryDish', () => {
     const result = await recognizeDiaryDish('молоко');
     expect(result?.dishName).toBe('Молоко');
     expect(enrichDishFromOpenFoods).toHaveBeenCalledWith('молоко');
+  });
+
+  it('uses scanner OCR/VL product name then the same dish lookup', async () => {
+    vi.mocked(scanFromOcr).mockResolvedValue({
+      productName: 'борщ',
+      ocr: { text: 'борщ', source: 'cloud', warnings: [] },
+    } as never);
+    vi.mocked(lookupDishIngredientsForScan).mockResolvedValue({
+      query: 'борщ',
+      productName: 'Борщ',
+      ingredients: 'свекла',
+      declaredAllergenIds: [],
+      traceAllergenIds: [],
+      source: 'ocr',
+      enrichment: {
+        components: [{ id: 'beet', nameRu: 'свекла' }],
+        dishId: 'borscht',
+        dishName: 'Борщ',
+        source: 'local',
+      },
+    });
+
+    const result = await recognizeDiaryDishFromPhoto({ imageBase64: 'abc' });
+    expect(result?.food).toBe('Борщ');
+    expect(result?.enrichment.components[0]?.id).toBe('beet');
+    expect(scanFromOcr).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: 'product', imageBase64: 'abc' }),
+    );
+  });
+
+  it('builds a checklist from OCR text when the photo has no product name', async () => {
+    vi.mocked(scanFromOcr).mockResolvedValue({
+      productName: '',
+      ocr: { text: 'борщ, свекла, капуста', source: 'cloud', warnings: [] },
+    } as never);
+    vi.mocked(lookupDishIngredientsForScan).mockResolvedValue(null);
+    vi.mocked(enrichDishFromOpenFoods).mockResolvedValue(null);
+
+    const result = await recognizeDiaryDishFromPhoto({ imageBase64: 'xyz' });
+    expect(result?.food).toMatch(/борщ/i);
+    expect(result?.enrichment.components.length).toBeGreaterThan(0);
   });
 });

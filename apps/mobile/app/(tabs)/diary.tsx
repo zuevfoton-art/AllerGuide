@@ -60,6 +60,8 @@ import {
   MedicinePhotoStep,
   MedicineRecognitionNotice,
 } from '@/src/components/MedicinePhotoStep';
+import { NutritionCaptureStep } from '@/src/components/NutritionCaptureStep';
+import type { DishEnrichmentResult } from '@/src/services/dish-off-enrichment-service';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -89,12 +91,14 @@ const TYPE_ICONS: Record<string, string> = {
 
 type EditorState =
   | { mode: 'medicinePhoto' }
+  | { mode: 'nutritionCapture' }
   | {
       mode: 'section';
       sectionType: string;
       prefill?: Record<string, Record<string, string>>;
       simplifiedSection?: DiarySection;
       notice?: ReactNode;
+      initialStepId?: string;
     }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
@@ -193,7 +197,21 @@ export default function DiaryScreen() {
 
   const openSection = async (
     sectionType: string,
-    extras?: { recognizedCard?: MedicineCard; photoUri?: string; notice?: ReactNode },
+    extras?: {
+      recognizedCard?: MedicineCard;
+      photoUri?: string;
+      notice?: ReactNode;
+      recognizedDish?: {
+        food: string;
+        components: DishEnrichmentResult['components'];
+        dishId?: string;
+        dishName?: string;
+        source?: string;
+        productBarcode?: string;
+        productName?: string;
+      };
+      initialStepId?: string;
+    },
   ) => {
     const editorState = await buildDiarySectionEditorState({
       sectionType,
@@ -203,6 +221,7 @@ export default function DiaryScreen() {
       profileBirthYear: activeProfile?.birthYear,
       recognizedCard: extras?.recognizedCard,
       photoUri: extras?.photoUri,
+      recognizedDish: extras?.recognizedDish,
     });
     await loadAutoMetadata();
     setEntryPickerOpen(false);
@@ -212,12 +231,36 @@ export default function DiaryScreen() {
       prefill: editorState.prefill,
       simplifiedSection: editorState.section,
       notice: extras?.notice,
+      initialStepId: extras?.initialStepId,
     });
   };
 
   const openMedicinePhoto = () => {
     setEntryPickerOpen(false);
     setEditor({ mode: 'medicinePhoto' });
+  };
+
+  const openNutritionCapture = () => {
+    setEntryPickerOpen(false);
+    setEditor({ mode: 'nutritionCapture' });
+  };
+
+  const continueNutritionFromCapture = async (input: {
+    food: string;
+    enrichment: DishEnrichmentResult;
+  }) => {
+    await openSection('Питание', {
+      recognizedDish: {
+        food: input.food,
+        components: input.enrichment.components,
+        dishId: input.enrichment.dishId,
+        dishName: input.enrichment.dishName,
+        source: input.enrichment.source,
+        productBarcode: input.enrichment.productBarcode,
+        productName: input.enrichment.productName,
+      },
+      initialStepId: 'foodComponents',
+    });
   };
 
   const continueMedicineFromPhoto = async (input: {
@@ -362,6 +405,15 @@ export default function DiaryScreen() {
       );
     }
 
+    if (editor.mode === 'nutritionCapture') {
+      return (
+        <NutritionCaptureStep
+          onEnterManually={() => void openSection('Питание')}
+          onContinue={(input) => void continueNutritionFromCapture(input)}
+        />
+      );
+    }
+
     if (editor.mode === 'edit' && editor.legacy) {
       return (
         <DiaryLegacyEditor
@@ -404,6 +456,7 @@ export default function DiaryScreen() {
           profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           autoMetadata={autoMetadata}
           notice={editor.mode === 'section' ? editor.notice : undefined}
+          initialStepId={editor.mode === 'section' ? editor.initialStepId : undefined}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {
@@ -459,6 +512,10 @@ export default function DiaryScreen() {
         onSelectSection={(sectionType) => {
           if (sectionType === 'Лекарство') {
             openMedicinePhoto();
+            return;
+          }
+          if (sectionType === 'Питание') {
+            openNutritionCapture();
             return;
           }
           void openSection(sectionType);
@@ -556,7 +613,7 @@ export default function DiaryScreen() {
           drugIntolerances={drugIntolerances}
           registry={foodDrugRegistry}
           entries={list}
-          onLogFood={() => void openSection('Питание')}
+          onLogFood={openNutritionCapture}
           onLogMedicine={openMedicinePhoto}
         />
       ) : null}
@@ -568,7 +625,7 @@ export default function DiaryScreen() {
           drugIntolerances={drugIntolerances}
           registry={foodDrugRegistry}
           entries={list}
-          onLogFood={() => void openSection('Питание')}
+          onLogFood={openNutritionCapture}
           onLogMedicine={openMedicinePhoto}
         />
       ) : null}

@@ -318,6 +318,17 @@ export type LocaleMessages = {
     cropTitle: string;
     cropHint: string;
   };
+  nutritionScan: {
+    title: string;
+    subtitle: string;
+    photograph: string;
+    gallery: string;
+    enterManually: string;
+    recognizing: string;
+    notRecognized: string;
+    cropTitle: string;
+    cropHint: string;
+  };
   voiceNote: {
     title: string;
     tapToSpeak: string;

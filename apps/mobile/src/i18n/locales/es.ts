@@ -316,6 +316,18 @@ const es: LocaleMessages = {
     cropTitle: 'Recorta el envase',
     cropHint: 'Deja el nombre, el principio activo y la dosis',
   },
+  nutritionScan: {
+    title: 'Foto del plato o escribirlo',
+    subtitle:
+      'Fotografía el plato o escribe el nombre: mostraremos los ingredientes y luego el nivel de reacción.',
+    photograph: 'Fotografiar el plato',
+    gallery: 'Desde la galería',
+    enterManually: 'Escribir a mano',
+    recognizing: 'Reconociendo el plato…',
+    notRecognized: 'No se reconoció el plato. Escríbelo a mano.',
+    cropTitle: 'Recorta el plato',
+    cropHint: 'Deja el plato o la etiqueta en el encuadre',
+  },
   voiceNote: {
     title: 'Entrada de voz',
     tapToSpeak: 'Toca el micrófono y dicta',
