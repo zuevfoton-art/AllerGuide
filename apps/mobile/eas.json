@@ -39,6 +39,7 @@
     "staging": {
       "distribution": "internal",
       "channel": "staging",
+      "environment": "preview",
       "node": "22.14.0",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.staging.aclearo.com",
