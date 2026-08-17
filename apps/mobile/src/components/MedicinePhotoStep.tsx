@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import type { MedicineAgeResolution, MedicineCard } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
@@ -8,6 +8,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { recognizeMedicinePackage } from '@/src/services/medicine-recognition-service';
 import {
   captureScanPhotoViaPicker,
+  encodeImageToBase64,
   pickScanPhotoFromLibrary,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
@@ -91,6 +92,16 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
       ? await pickScanPhotoFromLibrary()
       : await captureScanPhotoViaPicker();
     if (!photo) return;
+    // Web file picker already chose the frame; crop often has no image size.
+    if (Platform.OS === 'web') {
+      try {
+        const encoded = await encodeImageToBase64(photo.uri);
+        await recognizeCropped(encoded);
+      } catch {
+        setError(t('medicineScan.notRecognized'));
+      }
+      return;
+    }
     setPendingPhoto(photo);
     setState('crop');
   };
