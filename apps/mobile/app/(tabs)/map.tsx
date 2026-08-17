@@ -16,6 +16,7 @@ import {
   buildPollenRiskMapUrl,
   buildYandexMapWidgetUrl,
   clampPollenUpiIndex,
+  hasGoogleGroupHeatmap,
   getPollenPeaksForMonth,
   formatPollenMonth,
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
@@ -278,6 +279,11 @@ export default function MapScreen() {
   const showPlacesLayer = layerMode === 'places';
   const useHeatmap = isGooglePollenHeatmapAvailable() && showPollenLayer;
   const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
+  const groupHeatmapActive = hasGoogleGroupHeatmap(
+    selectedTaxonId,
+    pollenSnapshot?.typeIndexes,
+  );
+  const heatmapEmpty = Boolean(showPollenLayer && pollenSnapshot && !groupHeatmapActive);
   const airTileUrlTemplate =
     showAirLayer && isAirQualityHeatmapAvailable()
       ? buildAirQualityHeatmapTileUrlTemplate()
@@ -485,8 +491,17 @@ export default function MapScreen() {
   }, []);
 
   const taxonLabel = t(TAXON_LABEL_KEYS[selectedTaxonId] as 'map.pollenBirch');
-  const levelLabel = statusLevel
-    ? t(LEVEL_LABEL_KEYS[statusLevel])
+  const selectedTypeGroup = pollenMapTaxonTypeGroup(selectedTaxonId);
+  const groupLabel =
+    selectedTypeGroup === 'GRASS'
+      ? t('map.pollenTypeGrass')
+      : selectedTypeGroup === 'WEED'
+        ? t('map.pollenTypeWeed')
+        : t('map.pollenTypeTree');
+  const displayStatusLevel =
+    heatmapEmpty && selectedUpi?.source !== 'google' ? null : statusLevel;
+  const levelLabel = displayStatusLevel
+    ? t(LEVEL_LABEL_KEYS[displayStatusLevel])
     : loading && !pollenSnapshot
       ? t('map.pollenLoading')
       : t('map.pollenUnavailable');
@@ -533,10 +548,10 @@ export default function MapScreen() {
     return t('map.statusUpdated', { time });
   }, [pollenSnapshot?.updatedAt, t]);
 
-  const levelColor = statusLevel
-    ? statusLevel === 'high'
+  const levelColor = displayStatusLevel
+    ? displayStatusLevel === 'high'
       ? theme.colors.danger
-      : statusLevel === 'mid'
+      : displayStatusLevel === 'mid'
         ? theme.colors.warning
         : theme.colors.success
     : theme.colors.textMuted;
@@ -552,7 +567,9 @@ export default function MapScreen() {
           {selectedReading?.profileRelevant ? ` · ${t('map.pollenYou')}` : ''}
         </Text>
         <Text style={[styles.mapLevelText, { color: levelColor }]}>
-          {statusLevel ? t(LEVEL_LABEL_KEYS[statusLevel]) : t('map.pollenUnavailable')}
+          {displayStatusLevel
+            ? t(LEVEL_LABEL_KEYS[displayStatusLevel])
+            : t('map.pollenUnavailable')}
         </Text>
       </View>
     </View>
@@ -565,6 +582,13 @@ export default function MapScreen() {
     <>
       {plumeCaptionVisible ? <PollenPlumeOverlay groupHint={plumeGroupHint} /> : null}
       {mapLevelOverlay}
+      {heatmapEmpty ? (
+        <View testID="map-heatmap-empty" style={styles.heatmapEmptyOverlay}>
+          <Text style={styles.heatmapEmptyText}>
+            {t('map.heatmapGroupEmpty', { taxon: taxonLabel, group: groupLabel })}
+          </Text>
+        </View>
+      ) : null}
     </>
   ) : undefined;
 
@@ -576,7 +600,8 @@ export default function MapScreen() {
         : 'map.pollenGoogleMapAttribution'
       : 'map.pollenMapAttribution';
 
-  const showActionTip = showPollenLayer && (statusLevel === 'mid' || statusLevel === 'high');
+  const showActionTip =
+    showPollenLayer && (displayStatusLevel === 'mid' || displayStatusLevel === 'high');
   const showPlacesPanel = showPlacesLayer;
 
   return (
@@ -592,9 +617,9 @@ export default function MapScreen() {
         testID="map-status"
         style={[
           styles.statusCard,
-          statusLevel === 'high' && styles.statusHigh,
-          statusLevel === 'mid' && styles.statusMid,
-          statusLevel === 'low' && styles.statusLow,
+          displayStatusLevel === 'high' && styles.statusHigh,
+          displayStatusLevel === 'mid' && styles.statusMid,
+          displayStatusLevel === 'low' && styles.statusLow,
         ]}>
         <View style={styles.statusTop}>
           {loading && !pollenSnapshot ? (
@@ -778,7 +803,7 @@ export default function MapScreen() {
       {showActionTip ? (
         <GlassCard style={styles.tipCard}>
           <Text style={styles.tipText}>
-            {statusLevel === 'high' ? t('map.actionTipHigh') : t('map.actionTipModerate')}
+            {displayStatusLevel === 'high' ? t('map.actionTipHigh') : t('map.actionTipModerate')}
           </Text>
           <Button
             label={t('map.actionTipClinicsCta')}
@@ -796,7 +821,7 @@ export default function MapScreen() {
         <>
           <PollenIndexCard
             taxonLabel={taxonLabel}
-            upi={selectedUpi}
+            upi={heatmapEmpty && selectedUpi?.source !== 'google' ? null : selectedUpi}
             grainsPerM3={
               pollenSnapshot?.source === 'google' || selectedUpi?.source === 'google'
                 ? null
@@ -1119,6 +1144,24 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       color: colors.text,
+    },
+    heatmapEmptyOverlay: {
+      position: 'absolute',
+      left: 8,
+      right: 8,
+      bottom: 8,
+      borderRadius: 8,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+    },
+    heatmapEmptyText: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      lineHeight: 16,
+      color: colors.textSecondary,
     },
     yandexBanner: {
       flexDirection: 'row',

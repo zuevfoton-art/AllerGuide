@@ -520,6 +520,8 @@ const es: LocaleMessages = {
     pollenSourceCache: 'Últimos datos guardados',
     pollenCalendarFallback: 'Sin conexión — calendario estacional',
     pollenNoSeason: 'Sin pico estacional para estos alérgenos',
+    heatmapGroupEmpty:
+      '{{taxon}}: el mapa de calor de {{group}} está vacío hoy. Google solo pinta el grupo (árboles / gramíneas / malezas), no una especie.',
     openYandexPollen: 'Abrir mapa de polen de Yandex',
     openYandexPollenHint: 'Mapa regional y previsión de 10 días',
     nkcc: 'NKCC',

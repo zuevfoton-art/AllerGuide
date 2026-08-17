@@ -524,6 +524,8 @@ const ru: LocaleMessages = {
     pollenSourceCache: 'Последние сохранённые данные',
     pollenCalendarFallback: 'Нет сети — показываем сезонный календарь',
     pollenNoSeason: 'Для выбранных аллергенов сейчас нет сезонного пика',
+    heatmapGroupEmpty:
+      '{{taxon}}: слой «{{group}}» сегодня без окраски. Google рисует только группу (деревья / злаки / сорняки), не отдельный вид.',
     openYandexPollen: 'Открыть карту пыльцы Яндекса',
     openYandexPollenHint: 'Региональная карта и прогноз на 10 дней',
     nkcc: 'НККЦ',

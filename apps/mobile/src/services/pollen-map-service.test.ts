@@ -189,6 +189,8 @@ describe('pollen-map-service', () => {
       level: 'high',
       profileRelevant: true,
     });
+    expect(snapshot.typeIndexes.TREE?.index).toBe(3);
+    expect(snapshot.typeIndexes.GRASS?.index).toBe(2);
     expect(snapshot.upiByTaxon.birch_pollen?.source).toBe('google');
     expect(snapshot.upiByTaxon.alder_pollen?.source).toBe('open-meteo');
     expect(snapshot.upiByTaxon.olive_pollen?.source).toBe('open-meteo');

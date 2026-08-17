@@ -291,7 +291,7 @@ Baseline также включает **индекс самочувствия 0�
 - **FR-MAP-15.** Универсальный индекс пыльцы (UPI 0–5): официальные категории Google (`Нет` … `Очень высокий`). Google Forecast proxy при наличии ключа, иначе оценка из Open-Meteo grains/m³. Не подписывать Google UPI как зёрна/м³.
 - **FR-MAP-16.** Полоса multi-day прогноза (Open-Meteo hourly → daily peaks; до ~4 дней; Google Forecast до 5 при флаге).
 - **FR-MAP-17.** Picker всегда показывает 17 Google map taxa (14 TREE, 1 GRASS, 2 WEED) по группам, независимо от сезона; вид без данных остаётся выбранным с no-data state.
-- **FR-MAP-18.** Google pollen heatmap — только три групповых слоя (`TREE_UPI` / `GRASS_UPI` / `WEED_UPI`) с легендой и копирайтом, что подложка деревьев суммарная. Per-species heatmap нет (spike: [`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md), решение no-go).
+- **FR-MAP-18.** Google pollen heatmap — только три групповых слоя (`TREE_UPI` / `GRASS_UPI` / `WEED_UPI`) с легендой и копирайтом, что подложка деревьев суммарная. Per-species heatmap нет (spike: [`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md), решение no-go). Если у группы нет type UPI > 0 (вне сезона, как берёза/`TREE` в августе в Москве), слой остаётся выбранным и показывается no-data, а не «сломанная» пустая заливка.
 - **FR-MAP-19.** Карточка Google UAQI 0–100 (чем выше, тем чище), загрязнители и рекомендация; AQ overlay взаимоисключающ с pollen heatmap.
 - **FR-MAP-20.** Карточка вида: имя, группа, in-season, family/season, признаки, перекрёстные реакции, UPI и health recommendation либо честный «нет текущих данных».
 

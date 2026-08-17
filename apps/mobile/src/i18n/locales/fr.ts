@@ -520,6 +520,8 @@ const fr: LocaleMessages = {
     pollenSourceCache: 'Dernières données enregistrées',
     pollenCalendarFallback: 'Hors ligne — calendrier saisonnier',
     pollenNoSeason: 'Aucun pic saisonnier pour ces allergènes',
+    heatmapGroupEmpty:
+      '{{taxon}} : la carte {{group}} est vide ici aujourd’hui. Google ne colorie que le groupe (arbres / graminées / herbacées), pas une espèce.',
     openYandexPollen: 'Ouvrir la carte pollinique Yandex',
     openYandexPollenHint: 'Carte régionale et prévision à 10 jours',
     nkcc: 'NKCC',

@@ -42,6 +42,18 @@ export function googleTypeKeyForTaxon(taxonId: PollenMapTaxonId): GooglePollenTy
 }
 
 /**
+ * Official heatmapTiles follow TREE/GRASS/WEED type indexes, not plant codes.
+ * Missing or zero type UPI means the group overlay is empty (off-season).
+ */
+export function hasGoogleGroupHeatmap(
+  taxonId: PollenMapTaxonId,
+  typeIndexes?: Partial<Record<GooglePollenTypeKey, PollenUpiSnapshot>> | null,
+): boolean {
+  const typeUpi = typeIndexes?.[googleTypeKeyForTaxon(taxonId)];
+  return Boolean(typeUpi && typeUpi.index > 0);
+}
+
+/**
  * Prefer plant UPI. For birch/alder/olive never fall back to aggregated TREE
  * (that would make all three look identical). Grass/weed may use type UPI.
  */

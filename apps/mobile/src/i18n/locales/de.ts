@@ -521,6 +521,8 @@ const de: LocaleMessages = {
     pollenSourceCache: 'Zuletzt gespeicherte Daten',
     pollenCalendarFallback: 'Offline — saisonaler Kalender',
     pollenNoSeason: 'Kein Saisonhöhepunkt für diese Allergene',
+    heatmapGroupEmpty:
+      '{{taxon}}: die {{group}}-Heatmap ist hier heute leer. Google zeichnet nur die Gruppe (Bäume / Gräser / Kräuter), nicht eine einzelne Art.',
     openYandexPollen: 'Yandex-Pollenkarte öffnen',
     openYandexPollenHint: 'Regionale Karte und 10-Tage-Prognose',
     nkcc: 'NKCC',

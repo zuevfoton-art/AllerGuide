@@ -4,6 +4,7 @@ import {
   buildReadingsFromGoogleForecastDay,
   buildUpiByTaxonFromGoogleDay,
   googleTypeKeyForTaxon,
+  hasGoogleGroupHeatmap,
   isTreeSpeciesPollenTaxon,
   mergeGoogleAndOpenMeteoMapReadings,
   resolveGoogleUpiForTaxon,
@@ -26,6 +27,18 @@ describe('pollen-google-forecast', () => {
     expect(googleTypeKeyForTaxon('birch_pollen')).toBe('TREE');
     expect(googleTypeKeyForTaxon('grass_pollen')).toBe('GRASS');
     expect(googleTypeKeyForTaxon('ragweed_pollen')).toBe('WEED');
+  });
+
+  it('treats missing or zero type UPI as an empty group heatmap', () => {
+    expect(hasGoogleGroupHeatmap('birch_pollen', day.typeIndexes)).toBe(true);
+    expect(hasGoogleGroupHeatmap('birch_pollen', { GRASS: day.typeIndexes!.GRASS })).toBe(false);
+    expect(
+      hasGoogleGroupHeatmap('birch_pollen', {
+        TREE: { index: 0 as const, source: 'google' },
+      }),
+    ).toBe(false);
+    expect(hasGoogleGroupHeatmap('grass_pollen', day.typeIndexes)).toBe(true);
+    expect(hasGoogleGroupHeatmap('ragweed_pollen', day.typeIndexes)).toBe(false);
   });
 
   it('identifies tree species taxa', () => {

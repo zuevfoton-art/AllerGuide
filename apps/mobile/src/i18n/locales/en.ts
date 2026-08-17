@@ -522,6 +522,8 @@ const en: LocaleMessages = {
     pollenSourceCache: 'Last saved data',
     pollenCalendarFallback: 'Offline — showing the seasonal calendar',
     pollenNoSeason: 'No seasonal peak for these allergens now',
+    heatmapGroupEmpty:
+      '{{taxon}}: the {{group}} heatmap is empty here today. Google only paints a group layer (trees / grasses / weeds), not a single species.',
     openYandexPollen: 'Open Yandex pollen map',
     openYandexPollenHint: 'Regional map and 10-day outlook',
     nkcc: 'NKCC',

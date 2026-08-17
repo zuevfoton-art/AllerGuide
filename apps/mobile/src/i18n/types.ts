@@ -532,6 +532,7 @@ export type LocaleMessages = {
     pollenSourceCache: string;
     pollenCalendarFallback: string;
     pollenNoSeason: string;
+    heatmapGroupEmpty: string;
     openYandexPollen: string;
     openYandexPollenHint: string;
     nkcc: string;
