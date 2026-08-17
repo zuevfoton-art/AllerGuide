@@ -55,7 +55,7 @@ chmod +x scripts/create-roadmap-issues.sh
 | API | Express + Drizzle + Postgres (схемы `profile` / `catalog`), JWT, sync, scan/OCR/intent/search/VL, health |
 | Безопасность | helmet, strict CORS, rate-limit (Redis-store), zero-knowledge бэкапы, audits без critical |
 | Приватность | `DELETE /api/auth/account` + `GET /api/auth/export`; профили/дневник/история удаляются каскадом от `app_users` |
-| Тесты | core 458, ai 52, mobile 189, api 160; 13 Maestro-файлов (offline + staging suites, включая bootstrap); CI `typecheck` + `lint` + `test` + `api-integration` |
+| Тесты | core 458, ai 52, mobile 189, api 160; 10 Maestro smoke-флоу (метрика `rc-gate`); CI `typecheck` + `lint` + `test` + `api-integration` |
 | Staging | YC Serverless Container + Managed PG + Lockbox; `Dockerfile`, `deploy-staging.yml`, EAS `staging`, Gradle APK workflow |
 | Observability | `error-reporting.ts` (Sentry) + `analytics-service` + `/api/analytics` (код готов, DSN на stage не задан) |
 
