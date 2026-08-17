@@ -73,7 +73,6 @@ vi.mock('@/src/services/backend-api', () => ({
   backendRegister: vi.fn(),
   backendLogin: vi.fn(),
   backendDeleteAccount: vi.fn(),
-  backendReplitExchange: vi.fn(),
   syncProfilesFromBackend: (...args: unknown[]) => syncProfilesFromBackend(...args),
 }));
 

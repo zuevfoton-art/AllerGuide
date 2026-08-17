@@ -42,7 +42,7 @@ describe.skipIf(!hasIntegrationDatabase)('sync integration (P1.6b)', () => {
   });
 
   it('persists encrypted backup in Postgres and enforces IDOR on download', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const userA = await registerUser(app, 'sync-a');
     const userB = await registerUser(app, 'sync-b');
 

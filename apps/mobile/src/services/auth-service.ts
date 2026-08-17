@@ -16,7 +16,6 @@ import {
   backendDeleteAccount,
   backendLogin,
   backendRegister,
-  backendReplitExchange,
   backendFetchMe,
   cacheAuthUser,
   clearAuthToken,
@@ -280,15 +279,4 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
 export async function getBackendAuthToken(): Promise<string | null> {
   if (!BACKEND_AUTH_ENABLED) return null;
   return getAuthToken();
-}
-
-export async function loginWithReplitExchange(): Promise<{ ok: true } | { ok: false; error: string }> {
-  const response = await backendReplitExchange();
-  if (!response.ok) return { ok: false, error: response.error };
-
-  await setAuthToken(response.data.token);
-  cacheAuthUser(response.data.user);
-  setSessionUserId(response.data.user.id);
-  await syncProfilesFromBackend(response.data.user.id, response.data.token);
-  return { ok: true };
 }

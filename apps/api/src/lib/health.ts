@@ -4,7 +4,8 @@ import { getScanMetrics } from './scan-cache';
 import { pingRedis } from './redis-client';
 import { resolveRateLimitStoreKind } from './rate-limit-store';
 import { dishVisionConfigured } from '../services/llm-dish-vision-provider';
-import { isDefaultOnEnvFlag } from './env-flag';
+import { isGoogleAirQualityConfigured } from '../services/google-air-quality';
+import { isGooglePlacesConfigured } from '../services/google-places-shared';
 
 export interface ScanHealthMetrics {
   enabled: boolean;
@@ -110,20 +111,8 @@ function buildFeatures() {
       process.env.POLLEN_SPECIES_HEATMAP_ENABLED === 'true' &&
       process.env.POLLEN_HEATMAP_ENABLED === 'true' &&
       Boolean(process.env.GOOGLE_POLLEN_API_KEY?.trim()),
-    airQuality:
-      isDefaultOnEnvFlag(process.env.AIR_QUALITY_ENABLED) &&
-      Boolean(
-        process.env.GOOGLE_AIR_QUALITY_API_KEY?.trim() ||
-          process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
-          process.env.GOOGLE_POLLEN_API_KEY?.trim(),
-      ),
-    mapPlaces:
-      isDefaultOnEnvFlag(process.env.MAP_PLACES_ENABLED) &&
-      Boolean(
-        process.env.GOOGLE_PLACES_API_KEY?.trim() ||
-          process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
-          process.env.GOOGLE_POLLEN_API_KEY?.trim(),
-      ),
+    airQuality: isGoogleAirQualityConfigured(),
+    mapPlaces: isGooglePlacesConfigured(),
     yandexMapsInteractive:
       process.env.YANDEX_MAPS_INTERACTIVE_ENABLED === 'true' &&
       Boolean(process.env.YANDEX_MAPS_JS_API_KEY?.trim()),

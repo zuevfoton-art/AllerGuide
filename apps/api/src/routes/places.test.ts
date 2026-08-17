@@ -21,7 +21,18 @@ describe('places nearby routes', () => {
 
   it('is disabled when the server flag is off', async () => {
     process.env.MAP_PLACES_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
+
+    const response = await request(app).get('/api/places/nearby?lat=55.75&lon=37.62');
+
+    expect(response.status).toBe(503);
+  });
+
+  it('does not use the Pollen-only key as a Places credential', async () => {
+    delete process.env.GOOGLE_PLACES_API_KEY;
+    delete process.env.GOOGLE_MAPS_SERVER_API_KEY;
+    process.env.GOOGLE_POLLEN_API_KEY = 'pollen-only-key';
+    const app = await createApp();
 
     const response = await request(app).get('/api/places/nearby?lat=55.75&lon=37.62');
 
@@ -41,7 +52,7 @@ describe('places nearby routes', () => {
   });
 
   it('rejects invalid type', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get(
       '/api/places/nearby?lat=55.75&lon=37.62&type=airport',
     );
@@ -67,7 +78,7 @@ describe('places nearby routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get(
       '/api/places/nearby?lat=55.75&lon=37.62&type=restaurant',
@@ -116,7 +127,7 @@ describe('places nearby routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get(
       '/api/places/nearby?lat=55.75&lon=37.62&type=cafe',
@@ -142,7 +153,7 @@ describe('places nearby routes', () => {
       }),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get(
       '/api/places/nearby?lat=55.75&lon=37.62&type=hospital',
@@ -174,7 +185,7 @@ describe('places nearby routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     await request(app).get('/api/places/nearby?lat=55.75&lon=37.62&type=restaurant');
     const second = await request(app).get(
@@ -211,7 +222,7 @@ describe('places nearby routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const short = await request(app).get('/api/places/autocomplete?q=а&lat=55.75&lon=37.62');
     expect(short.status).toBe(400);
@@ -247,7 +258,7 @@ describe('places nearby routes', () => {
       }),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get(
       '/api/places/autocomplete?q=аптека&lat=55.75&lon=37.62&sessionToken=ps-test-session-2&categories=restaurant,cafe,medical,pharmacy',
@@ -293,7 +304,7 @@ describe('places nearby routes', () => {
       );
     });
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const search = await request(app).get(
       '/api/places/search?q=аптека&lat=55.75&lon=37.62&categories=pharmacy',
@@ -327,7 +338,7 @@ describe('places nearby routes', () => {
       'fetch',
       vi.fn(async () => new Response('quota', { status: 429 })),
     );
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get(
       '/api/places/search?q=аптека&lat=55.75&lon=37.62',
     );

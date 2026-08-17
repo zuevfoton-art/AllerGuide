@@ -34,20 +34,21 @@ export const MIN_PLACES_QUERY_LENGTH = 2;
 export const MAX_PLACES_QUERY_LENGTH = 80;
 export const PLACES_REQUEST_TIMEOUT_MS = 8000;
 
-export function isGooglePlacesConfigured(): boolean {
-  if (!isDefaultOnEnvFlag(process.env.MAP_PLACES_ENABLED)) return false;
-  return Boolean(
+function readPlacesApiKey(): string | null {
+  return (
     process.env.GOOGLE_PLACES_API_KEY?.trim() ||
-      process.env.GOOGLE_POLLEN_API_KEY?.trim() ||
-      process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim(),
+    process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
+    null
   );
 }
 
+export function isGooglePlacesConfigured(): boolean {
+  if (!isDefaultOnEnvFlag(process.env.MAP_PLACES_ENABLED)) return false;
+  return Boolean(readPlacesApiKey());
+}
+
 export function resolvePlacesApiKey(): string {
-  const key =
-    process.env.GOOGLE_PLACES_API_KEY?.trim() ||
-    process.env.GOOGLE_MAPS_SERVER_API_KEY?.trim() ||
-    process.env.GOOGLE_POLLEN_API_KEY?.trim();
+  const key = readPlacesApiKey();
   if (!key) throw new Error('Google Places API key is not configured');
   return key;
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Phase 0 gate: staging must work on Yandex Cloud without depending on Replit.
-# See docs/migrate-off-replit-to-yc.md
+# Phase 0 gate: staging must work on Yandex Cloud.
+# See docs/yc-stage-gates.md
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -55,7 +55,7 @@ if [[ -n "$EAS_STAGING_URL" ]]; then
     fail "eas.json staging EXPO_PUBLIC_API_URL=$EAS_STAGING_URL (expected $EXPECTED_EAS_API_URL)"
   fi
   if [[ "$EAS_STAGING_URL" == *replit.app* ]]; then
-    fail "eas.json staging points at Replit"
+    fail "eas.json staging points at a foreign host"
   fi
 fi
 
@@ -76,7 +76,7 @@ fi
 
 echo ""
 
-# --- P0.6 stage automation must not target Replit ---
+# --- P0.6 stage automation must not target a foreign host ---
 echo "--- P0.6 stage scripts / workflows ---"
 REPLIT_HITS="$(
   {
@@ -182,7 +182,7 @@ fi
 echo "=== Summary ==="
 echo "Failed: $FAILED  Warnings: $WARNED"
 if [[ "$FAILED" -gt 0 ]]; then
-  echo "Phase 0 gate FAILED. See docs/migrate-off-replit-to-yc.md" >&2
+  echo "Phase 0 gate FAILED. See docs/yc-stage-gates.md" >&2
   exit 1
 fi
 

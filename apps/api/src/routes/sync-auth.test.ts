@@ -23,7 +23,7 @@ describe('JWT-authenticated sync', () => {
   });
 
   it('lets an authenticated user store and read their own backup', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const auth = await bearer(7);
 
     const upload = await request(app)
@@ -45,7 +45,7 @@ describe('JWT-authenticated sync', () => {
   });
 
   it('forbids reading another user backup', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const download = await request(app)
       .get('/api/sync/backup/999')
       .set('Authorization', await bearer(7));
@@ -53,7 +53,7 @@ describe('JWT-authenticated sync', () => {
   });
 
   it('rejects a userId mismatch on upload', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const upload = await request(app)
       .post('/api/sync/backup')
       .set('Authorization', await bearer(7))
@@ -62,7 +62,7 @@ describe('JWT-authenticated sync', () => {
   });
 
   it('stores an encrypted backup opaquely', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const auth = await bearer(7);
     const envelope = JSON.stringify({ alg: 'AES-GCM', ct: 'deadbeef' });
 
@@ -80,7 +80,7 @@ describe('JWT-authenticated sync', () => {
   });
 
   it('rejects sync without auth when JWT secret is the only mechanism', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const download = await request(app).get('/api/sync/backup/4242');
     expect(download.status).toBe(401);
   });
