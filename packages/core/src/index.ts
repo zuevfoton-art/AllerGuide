@@ -42,6 +42,8 @@ export * from './diary-reminder';
 export * from './reminder-policy';
 export * from './pollen-reminder';
 export * from './food-drug-allergy';
+export * from './profile-age';
+export * from './medicine-catalog';
 export * from './dish-components';
 export * from './insect-allergy';
 export * from './gina-asthma';

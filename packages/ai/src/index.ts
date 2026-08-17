@@ -6,3 +6,5 @@ export * from './scan-intent';
 export * from './search-ingredients';
 export * from './dish-vision';
 export * from './scan-evidence';
+export * from './medicine-vision';
+export * from './medicine-label';

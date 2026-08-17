@@ -4,12 +4,14 @@ import {
   callDishVisionLlm,
   dishVisionConfigured,
   DishVisionProviderError,
+  medicineVisionConfigured,
 } from './llm-dish-vision-provider';
 
 describe('llm-dish-vision-provider', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     delete process.env.AI_DISH_VISION_ENABLED;
+    delete process.env.AI_MEDICINE_VISION_ENABLED;
     delete process.env.AI_SCAN_ENABLED;
     delete process.env.AI_PROVIDER;
     delete process.env.OPENAI_API_KEY;
@@ -37,6 +39,16 @@ describe('llm-dish-vision-provider', () => {
     process.env.YC_AI_API_KEY = 'key';
     process.env.YC_FOLDER_ID = 'folder';
     expect(dishVisionConfigured()).toBe(true);
+  });
+
+  it('is off for medicine vision unless AI_SCAN and AI_MEDICINE_VISION are enabled', () => {
+    process.env.AI_SCAN_ENABLED = 'true';
+    process.env.OPENAI_API_KEY = 'sk-test';
+    process.env.AI_PROVIDER = 'openai';
+    expect(medicineVisionConfigured()).toBe(false);
+
+    process.env.AI_MEDICINE_VISION_ENABLED = 'true';
+    expect(medicineVisionConfigured()).toBe(true);
   });
 
   it('builds gpt:// URI and preserves /latest in catalog ids', () => {

@@ -28,6 +28,11 @@ function flattenMessages(
 }
 
 describe('user-facing locale copy', () => {
+  it('labels a high-risk scanner verdict as risk, not STOP', () => {
+    expect(LOCALE_MESSAGES.ru.scanner.verdictStop).toBe('Высокий риск');
+    expect(LOCALE_MESSAGES.en.scanner.verdictStop).toBe('High risk');
+  });
+
   it('keeps clinical acronyms and «шкал» out of user strings', () => {
     const violations: string[] = [];
 

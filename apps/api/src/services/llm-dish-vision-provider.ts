@@ -1,11 +1,13 @@
 /**
- * Multimodal LLM for POST /api/scan/dish-vision (Option D).
+ * Multimodal LLM transport for dish and medicine vision.
  * Domain prompt/parse stay in @allerguide/ai; this module only talks HTTP.
  */
 
 import {
   buildDishVisionPrompt,
+  buildMedicineVisionPrompt,
   dishVisionSystemInstruction,
+  medicineVisionSystemInstruction,
 } from '@allerguide/ai';
 import { resolveLlmScanProvider, type LlmScanProvider } from './llm-scan-provider';
 
@@ -20,21 +22,41 @@ const DEFAULT_YC_VISION_MODEL = 'qwen3.6-35b-a3b/latest';
 
 const MAX_ERROR_SNIPPET = 240;
 
+export interface VisionChatInput {
+  system: string;
+  prompt: string;
+  imageBase64: string;
+  mimeType?: string;
+}
+
 export interface DishVisionLlmInput {
   imageBase64: string;
   mimeType?: string;
 }
 
+export interface MedicineVisionLlmInput extends DishVisionLlmInput {
+  localeHint?: string;
+  ageYears?: number | null;
+}
+
 /** Structured provider failure — route maps to 502 + providerStatus. */
-export class DishVisionProviderError extends Error {
+export class VisionProviderError extends Error {
   readonly status: number;
   readonly providerError: string;
 
-  constructor(status: number, providerError: string) {
-    super(`Dish vision provider HTTP ${status}`);
-    this.name = 'DishVisionProviderError';
+  constructor(status: number, providerError: string, name = 'VisionProviderError') {
+    super(`Vision provider HTTP ${status}`);
+    this.name = name;
     this.status = status;
     this.providerError = providerError.slice(0, MAX_ERROR_SNIPPET);
+  }
+}
+
+/** Kept for dish-vision routes and existing tests. */
+export class DishVisionProviderError extends VisionProviderError {
+  constructor(status: number, providerError: string) {
+    super(status, providerError, 'DishVisionProviderError');
+    this.message = `Dish vision provider HTTP ${status}`;
   }
 }
 
@@ -104,8 +126,7 @@ function extractChatContent(payload: {
   return jsonMatch?.[0] ?? null;
 }
 
-export function dishVisionConfigured(): boolean {
-  if (process.env.AI_DISH_VISION_ENABLED !== 'true') return false;
+function visionCredentialsConfigured(): boolean {
   if (process.env.AI_SCAN_ENABLED !== 'true') return false;
   const provider = resolveLlmScanProvider();
   if (provider === 'yandex') {
@@ -114,19 +135,57 @@ export function dishVisionConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY);
 }
 
+export function dishVisionConfigured(): boolean {
+  return process.env.AI_DISH_VISION_ENABLED === 'true' && visionCredentialsConfigured();
+}
+
+export function medicineVisionConfigured(): boolean {
+  return process.env.AI_MEDICINE_VISION_ENABLED === 'true' && visionCredentialsConfigured();
+}
+
+/** Shared OpenAI / Yandex vision chat — no feature-flag check (callers gate first). */
+export async function callVisionChat(input: VisionChatInput): Promise<string> {
+  if (!visionCredentialsConfigured()) {
+    throw new VisionProviderError(503, 'Vision is not configured');
+  }
+  const provider: LlmScanProvider = resolveLlmScanProvider();
+  const dataUrl = toDataUrl(input.imageBase64, input.mimeType);
+
+  if (provider === 'yandex') {
+    return callYandexVisionChat({ system: input.system, prompt: input.prompt, dataUrl });
+  }
+  return callOpenAiVisionChat({ system: input.system, prompt: input.prompt, dataUrl });
+}
+
 export async function callDishVisionLlm(input: DishVisionLlmInput): Promise<string> {
   if (!dishVisionConfigured()) {
     throw new DishVisionProviderError(503, 'Dish vision is not configured');
   }
-  const provider: LlmScanProvider = resolveLlmScanProvider();
-  const prompt = buildDishVisionPrompt('ru');
-  const system = dishVisionSystemInstruction();
-  const dataUrl = toDataUrl(input.imageBase64, input.mimeType);
-
-  if (provider === 'yandex') {
-    return callYandexVisionChat({ system, prompt, dataUrl });
+  try {
+    return await callVisionChat({
+      system: dishVisionSystemInstruction(),
+      prompt: buildDishVisionPrompt('ru'),
+      imageBase64: input.imageBase64,
+      mimeType: input.mimeType,
+    });
+  } catch (error) {
+    if (error instanceof VisionProviderError && !(error instanceof DishVisionProviderError)) {
+      throw new DishVisionProviderError(error.status, error.providerError);
+    }
+    throw error;
   }
-  return callOpenAiVisionChat({ system, prompt, dataUrl });
+}
+
+export async function callMedicineVisionLlm(input: MedicineVisionLlmInput): Promise<string> {
+  if (!medicineVisionConfigured()) {
+    throw new VisionProviderError(503, 'Medicine vision is not configured');
+  }
+  return callVisionChat({
+    system: medicineVisionSystemInstruction(),
+    prompt: buildMedicineVisionPrompt(input.localeHint ?? 'ru', input.ageYears),
+    imageBase64: input.imageBase64,
+    mimeType: input.mimeType,
+  });
 }
 
 async function callOpenAiVisionChat(input: {

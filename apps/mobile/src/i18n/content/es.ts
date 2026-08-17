@@ -57,6 +57,12 @@ const esContent: LocaleContent = {
           label: 'Efecto o reacción adversa',
           placeholder: '¿Le ayudó? ¿Hubo efectos secundarios?',
         },
+        medicineForm: { label: 'Forma (auto)' },
+        medicineActiveSubstance: { label: 'Principio activo (auto)' },
+        medicineUsage: { label: 'Uso (auto)' },
+        medicineAgeNote: { label: 'Restricción de edad (auto)' },
+        medicineSource: { label: 'Fuente de reconocimiento (auto)' },
+        medicinePhotos: { label: 'Foto del envase' },
       },
     },
     Питание: {

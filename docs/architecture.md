@@ -253,6 +253,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
 | `AI_DISH_VISION_ENABLED` | `EXPO_PUBLIC_AI_DISH_VISION` | Multimodal фото блюда → `/api/scan/dish-vision` |
+| `MEDICINE_DB_ENABLED` | `EXPO_PUBLIC_MEDICINE_DB` | Фото упаковки / голос → `/api/medicines/recognize` |
 | `YC_OCR_ENABLED` | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
@@ -487,6 +488,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
+| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=` |
 | `routes/scan.ts` | `POST /api/scan` |
 | `routes/scan-intent.ts` | `POST /api/scan/intent` |
 | `routes/ocr.ts` | `POST /api/ocr` (Yandex Vision) |
@@ -511,10 +513,17 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | Схема | Таблицы | Файл определения |
 |-------|---------|------------------|
 | **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` | `src/db/app-schema.ts` |
-| **`catalog`** | `allergens`, `cross_reactions`, `products`, `alias_feedback` | `src/db/catalog-schema.ts` |
+| **`catalog`** | `allergens`, `cross_reactions`, `products`, `medicines`, `alias_feedback` | `src/db/catalog-schema.ts` |
 | **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
-Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0008_*`).
+Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0009_*`).
+
+### Каталог лекарств
+
+- **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото.
+- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
+- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM.
+- **Клиент:** `EXPO_PUBLIC_MEDICINE_DB`; при флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance`. Demo-карточка только для фото без OCR, не для голоса.
 
 ### Каталог продуктов
 
@@ -745,6 +754,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `EXPO_PUBLIC_API_URL` | `http://localhost:3001` | Base URL backend |
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` | JWT auth + server profiles |
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | Backend catalog lookup |
+| `EXPO_PUBLIC_MEDICINE_DB` | `false` | Medicine package recognize + catalog |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | LLM scan via API |
 | `EXPO_PUBLIC_AI_DISH_VISION` | `true` | Smart-scanner VL (деградирует в OCR без сети) |
 | `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
@@ -777,6 +787,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
 | `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |
+| `AI_MEDICINE_VISION_ENABLED` | Medicine package vision (`/api/medicines/recognize`) |
 | `YC_OCR_ENABLED` | Vision OCR |
 | `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
