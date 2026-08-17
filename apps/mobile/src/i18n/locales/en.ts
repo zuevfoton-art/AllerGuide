@@ -244,7 +244,6 @@ const en: LocaleMessages = {
     trendsTitle: 'Symptom trend (7 days)',
     heatmapTitle: 'Symptom calendar',
     temporalCorrelationTitle: 'Trigger correlations (±4h)',
-    modulesTitle: 'Additional observation modules',
     doctorVisit: 'Upcoming doctor visit',
     clinicalScalesOpen: 'Clinical scores',
     entryPickerTitle: 'What to add',

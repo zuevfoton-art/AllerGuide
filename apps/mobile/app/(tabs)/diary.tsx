@@ -31,8 +31,6 @@ import {
   buildClinicalScaleEditorState,
   buildDiarySectionEditorState,
 } from '@/src/services/diary-section-service';
-import { AsitCourseCard } from '@/src/components/AsitCourseCard';
-import { PrescribedTherapyCard } from '@/src/components/PrescribedTherapyCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
@@ -40,8 +38,6 @@ import { AsthmaCard } from '@/src/components/AsthmaCard';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
-import { getAsitCourse } from '@/src/services/asit-course-service';
-import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
@@ -149,7 +145,6 @@ export default function DiaryScreen() {
     () => buildCourseSetupOptions({ asitEnabled }),
     [asitEnabled],
   );
-  const foodFocusEnabled = profileCapabilities?.modules.foodFocus ?? false;
   const drugFocusEnabled = profileCapabilities?.modules.drugFocus ?? false;
   const insectFocusEnabled = profileCapabilities?.modules.insectSting ?? false;
   const peakFlowEnabled = profileCapabilities?.modules.peakFlow ?? false;
@@ -161,14 +156,6 @@ export default function DiaryScreen() {
     if (!activeProfileId) return [];
     return getAllergyPassport(activeProfileId).drugIntolerances;
   }, [activeProfileId]);
-  const asitCourse = useMemo(
-    () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
-    [activeProfileId],
-  );
-  const prescribedCourse = useMemo(
-    () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
-    [activeProfileId],
-  );
   const insectActionPlan = useMemo(
     () => (activeProfileId ? getInsectActionPlan(activeProfileId) : null),
     [activeProfileId],
@@ -533,33 +520,6 @@ export default function DiaryScreen() {
           })}
         </GlassCard>
       )}
-
-      <Text style={ui.sectionLabel}>{t('diary.modulesTitle')}</Text>
-      {asitEnabled ? (
-        <AsitCourseCard
-          course={asitCourse}
-          entries={list}
-          onLogDose={() => void openSection('АСИТ')}
-        />
-      ) : null}
-
-      <PrescribedTherapyCard
-        course={prescribedCourse}
-        entries={list}
-        onLogDose={() => void openSection('Терапия')}
-      />
-
-      {foodFocusEnabled && activeProfile ? (
-        <FoodDrugAllergyCard
-          mode="food"
-          profileAllergies={parseAllergies(activeProfile.allergies)}
-          drugIntolerances={drugIntolerances}
-          registry={foodDrugRegistry}
-          entries={list}
-          onLogFood={() => void openSection('Питание')}
-          onLogMedicine={openMedicinePhoto}
-        />
-      ) : null}
 
       {drugFocusEnabled ? (
         <FoodDrugAllergyCard
