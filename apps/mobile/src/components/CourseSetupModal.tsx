@@ -185,7 +185,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
     },
-    scroll: { flexGrow: 0 },
+    scroll: { maxHeight: 360 },
     scrollContent: {
       paddingHorizontal: 16,
       paddingTop: 12,

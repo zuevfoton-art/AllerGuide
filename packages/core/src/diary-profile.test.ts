@@ -73,8 +73,8 @@ describe('diary-profile', () => {
       'Триггер',
       'Кожа',
       'Заметка',
-      'Шкала',
       'Визит к врачу',
+      'Шкала',
     ]);
     expect(ids).not.toContain('АСИТ');
     expect(ids).not.toContain('Терапия');

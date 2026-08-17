@@ -299,12 +299,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
     },
-    scroll: { flexGrow: 0 },
+    scroll: { maxHeight: 440 },
     scrollContent: {
       paddingHorizontal: 16,
       paddingTop: 12,
       paddingBottom: 8,
-      gap: 8,
+      gap: 6,
     },
     hint: {
       fontFamily: fonts.sans,
@@ -325,9 +325,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: 10,
       paddingHorizontal: 12,
-      paddingVertical: 12,
+      paddingVertical: 10,
       borderRadius: 10,
       backgroundColor: colors.card,
       borderWidth: 1,
