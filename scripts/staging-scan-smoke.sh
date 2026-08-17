@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# API-level AI scan smoke for staging (P1.5b). Burns one LLM call on cache miss.
+# API-level AI scan smoke for staging (P1.5b).
+# Burns one LLM call on cache miss; a second call may miss again when the
+# in-memory store is split across Serverless instances.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
