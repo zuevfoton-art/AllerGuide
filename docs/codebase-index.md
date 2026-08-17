@@ -29,7 +29,7 @@
 ├── apps/mobile/     # Expo Router — продукт (Web + iOS + Android), offline-first
 ├── apps/api/        # Express + Drizzle + Postgres — опциональный backend
 ├── packages/core/   # Домен: типы, таксономия, правила (без React/HTTP)
-├── packages/ai/     # Сканер, OCR, scan-intent, search-ingredients, prescription parse
+├── packages/ai/     # Сканер, OCR, scan-intent, search-ingredients, prescription / medicine parse
 ├── packages/ui/     # Тонкие RN-примитивы (Badge, PrimaryButton)
 ├── docs/            # Архитектура, QA, staging, clinical
 ├── scripts/         # RC-gate, YC stage gates, staging smokes
@@ -86,6 +86,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Scanner** | `(tabs)/scanner.tsx` | `scanner-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service` | core `diary*`, `diary-wizard-route` |
+| **Medicine photo** | `MedicinePhotoStep` in diary | `medicine-recognition-service`, `medicines-api` | core `medicine-catalog`, `profile-age`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service` | core `allergy-passport`, `emergency-contacts` |
@@ -152,7 +153,7 @@ src/modules/marketplace/
 |--------|-------|
 | Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors` |
 | Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service` |
-| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-photo-picker` |
+| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-photo-picker`, `medicine-recognition-service`, `medicines-api` |
 | Scanner / catalog | `scanner-service`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scanner-photo-*`, `scanner-dish-*`, `dish-off-enrichment-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service` |
 | Home | `home-insights-service`, `wellness-service` |
 | SOS / reports | `sos-service`, `sos-passport-service`, `doctor-report-service` |
@@ -179,7 +180,7 @@ src/modules/marketplace/
 
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `Button`, `EmptyState`, `ErrorBoundary`, `AppLockGate`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
-- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `diary/*`
+- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `diary/*`
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
 - **Folders:** `brand/`, `onboarding/`, `profile-setup/`
@@ -208,6 +209,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
 | `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
+| `medicines.ts` | Medicine recognize + catalog search (`AI_MEDICINE_VISION_ENABLED`) |
 | `market.ts` | Yandex Market affiliate |
 | `pollen.ts` | Google pollen heatmap proxy |
 | `alias-feedback.ts` | Crowdsourced aliases |
@@ -220,9 +222,9 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | Файл | Schema |
 |------|--------|
 | `db/app-schema.ts` | `profile.*` — users, profiles, diary, scan_history, contacts, sos, sync_backups |
-| `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, alias_feedback |
+| `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, alias_feedback |
 | `db/config.ts` + `index.ts` | Neon-ready pools; optional `readDb` |
-| `drizzle/0000`…`0008_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
+| `drizzle/0000`…`0009_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
 
@@ -243,7 +245,7 @@ Barrel: `index.ts`. Pure TS.
 |---------|-------------------|
 | Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` |
 | Profiles | `profile-*`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding` |
-| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display` |
+| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display`, `medicine-catalog`, `profile-age` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `wellness-display`, `diary-wizard-route` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
@@ -261,6 +263,8 @@ Barrel: `index.ts`. Pure TS.
 | `scan-intent.ts` | Heuristic + normalize OCR intent |
 | `search-ingredients.ts` | Normalize search-ingredients response |
 | `prescription-ocr.ts` | Parse prescription / ASIT text |
+| `medicine-vision.ts` | VL prompt/parse for medicine packages |
+| `medicine-label.ts` | Offline OCR parse of a package label |
 
 ### `@allerguide/ui` — `packages/ui/src/`
 
@@ -282,6 +286,7 @@ Barrel: `index.ts`. Pure TS.
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
+| `MEDICINE_DB` | `features.ts` (`EXPO_PUBLIC_MEDICINE_DB`) | `AI_MEDICINE_VISION_ENABLED` + `catalog.medicines` |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
 | `LIVE_MAP` | `place-service.ts` | — |

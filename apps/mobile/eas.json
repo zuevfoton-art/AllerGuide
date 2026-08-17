@@ -49,6 +49,7 @@
         "EXPO_PUBLIC_YC_STT": "true",
         "EXPO_PUBLIC_YC_STT_MIC": "true",
         "EXPO_PUBLIC_PRODUCT_DB": "false",
+        "EXPO_PUBLIC_MEDICINE_DB": "true",
         "EXPO_PUBLIC_POLLEN_HEATMAP": "google",
         "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
         "EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY": "true",

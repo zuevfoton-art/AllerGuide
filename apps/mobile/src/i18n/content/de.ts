@@ -57,6 +57,12 @@ const deContent: LocaleContent = {
           label: 'Wirkung oder Nebenreaktion',
           placeholder: 'Hat es geholfen? Gab es Nebenwirkungen?',
         },
+        medicineForm: { label: 'Form (auto)' },
+        medicineActiveSubstance: { label: 'Wirkstoff (auto)' },
+        medicineUsage: { label: 'Anwendung (auto)' },
+        medicineAgeNote: { label: 'Altersgrenze (auto)' },
+        medicineSource: { label: 'Erkennungsquelle (auto)' },
+        medicinePhotos: { label: 'Packungsfoto' },
       },
     },
     Питание: {

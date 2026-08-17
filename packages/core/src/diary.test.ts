@@ -6,6 +6,7 @@ import {
   formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
+  getDiaryPhotoUrisFromAnswers,
   getDiarySection,
   hasSectionAnswers,
   parseDiaryPhotoUris,
@@ -113,6 +114,27 @@ describe('diary schema', () => {
   it('includes optional photo step on skin section', () => {
     const skin = getDiarySection('Кожа');
     expect(skin?.steps.some((step) => step.id === 'skinPhotos' && step.field === 'photo')).toBe(true);
+  });
+
+  it('collects medicine package photos and strips them from encoded details', () => {
+    const medicine = getDiarySection('Лекарство');
+    expect(medicine?.steps.some((step) => step.id === 'medicinePhotos' && step.field === 'photo')).toBe(
+      true,
+    );
+    const details = encodeDiaryDetails(
+      {
+        medicine: 'Нурофен',
+        dosage: '200 мг',
+        medicinePhotos: JSON.stringify(['file:///tmp/box.jpg']),
+      },
+      'Лекарство',
+    );
+    expect(decodeDiaryDetails(details)?.answers.medicinePhotos).toBeUndefined();
+    expect(
+      getDiaryPhotoUrisFromAnswers({
+        medicinePhotos: JSON.stringify(['file:///tmp/box.jpg']),
+      }),
+    ).toEqual(['file:///tmp/box.jpg']);
   });
 
   it('skips photo uris in skin entry summaries and strips them from encoded details', () => {

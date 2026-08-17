@@ -1,2 +1,2 @@
-ALTER TABLE "catalog"."products" ADD COLUMN "brand" varchar(255) DEFAULT '' NOT NULL;--> statement-breakpoint
-ALTER TABLE "catalog"."products" ADD COLUMN "image_url" text DEFAULT '' NOT NULL;
+ALTER TABLE "catalog"."products" ADD COLUMN IF NOT EXISTS "brand" varchar(255) DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE "catalog"."products" ADD COLUMN IF NOT EXISTS "image_url" text DEFAULT '' NOT NULL;

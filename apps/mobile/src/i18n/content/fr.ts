@@ -57,6 +57,12 @@ const frContent: LocaleContent = {
           label: 'Effet ou réaction indésirable',
           placeholder: 'A-t-il aidé ? Y a-t-il eu des effets secondaires ?',
         },
+        medicineForm: { label: 'Forme (auto)' },
+        medicineActiveSubstance: { label: 'Principe actif (auto)' },
+        medicineUsage: { label: 'Utilisation (auto)' },
+        medicineAgeNote: { label: 'Restriction d’âge (auto)' },
+        medicineSource: { label: 'Source de reconnaissance (auto)' },
+        medicinePhotos: { label: 'Photo de la boîte' },
       },
     },
     Питание: {
