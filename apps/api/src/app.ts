@@ -3,7 +3,6 @@ import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { setupAuth, registerAuthRoutes } from './replit_integrations/auth';
 import { registerSyncRoutes } from './routes/sync';
 import { registerScanRoutes } from './routes/scan';
 import { registerScanIntentRoutes } from './routes/scan-intent';
@@ -29,10 +28,7 @@ import {
 } from './middleware/security';
 import { buildHealthPayload } from './lib/health';
 
-export async function createApp(
-  options: { withReplitAuth?: boolean } = {},
-): Promise<Express> {
-  const withReplitAuth = options.withReplitAuth ?? Boolean(process.env.REPL_ID);
+export async function createApp(): Promise<Express> {
   const app = express();
 
   // Correct client IPs / secure cookies when running behind a load balancer.
@@ -63,11 +59,6 @@ export async function createApp(
   registerAirQualityRoutes(app);
   registerMapsRoutes(app);
   registerPlacesRoutes(app);
-
-  if (withReplitAuth) {
-    await setupAuth(app);
-    registerAuthRoutes(app);
-  }
 
   app.get('/api/health', async (_req, res) => {
     const health = await buildHealthPayload();

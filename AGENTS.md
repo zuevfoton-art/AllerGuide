@@ -23,7 +23,7 @@ Task context: [`docs/functional-requirements.md`](docs/functional-requirements.m
 | **Offline-first** | Core flows work without API; network is optional enrichment |
 | **Thin adapters** | Domain logic in `packages/core` / `packages/ai`; mobile screens and API routes orchestrate only |
 | **No DB/API in screens** | `app/**/*.tsx` → `src/services/*` → `db` / `core` / optional backend |
-| **Feature flags** | Backend integration behind `EXPO_PUBLIC_*` (default off in `.env.example`) |
+| **Feature flags** | Backend integration behind `EXPO_PUBLIC_*` (default off in `.env.example`, except Places + Air Quality: default on) |
 | **i18n** | `useTranslation()` + all 6 locales + `types.ts`; not legacy i18next |
 | **Migrations** | `db:generate` + commit SQL + `db:migrate`; never `db:push` on real data |
 
@@ -47,12 +47,12 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
-- `pnpm yc-stage-phase0` — Stage must run on Yandex Cloud (no Replit dependency); see [`docs/migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md)
+- `pnpm yc-stage-phase0` — Stage API live on Yandex Cloud; see [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
-- `pnpm yc-stage-phase2` — Stage clients must target YC only (EAS `staging`, not Replit); see same doc §Phase 2
-- `pnpm yc-stage-phase3` — Replit deploy artifacts removed from repo; see same doc §Phase 3
+- `pnpm yc-stage-phase2` — Stage clients must target YC (`api.staging.aclearo.com`); see same doc §Phase 2
+- `pnpm yc-stage-phase3` — No foreign-host deploy artifacts in repo; see same doc §Phase 3
 - `pnpm yc-stage-phase4` — Secrets/data hygiene (Lockbox/GH/EAS policy); see same doc §Phase 4 · [`docs/staging-secrets-inventory.md`](docs/staging-secrets-inventory.md)
-- `pnpm yc-stage-phase5` — Final acceptance (YC green + Replit paused); `REQUIRE_REPLIT_PAUSED=1` for strict pause check
+- `pnpm yc-stage-phase5` — Final Yandex Cloud acceptance (re-runs 0/2/3/4 + pollen smoke)
 
 ### Backend API (optional) — `apps/api`
 - Not wired to the mobile app by default. Run with `pnpm --filter api dev` (port 3001). Requires PostgreSQL (`DATABASE_URL`) + `JWT_SECRET` to boot the auth/sync/scan features.
@@ -62,7 +62,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - External allergen vocabularies (dataset tags, OFF `en:milk` tags) are mapped to the canonical RU taxonomy via `@allerguide/core` `mapExternalAllergenNames` (both at import and at OFF write-through).
 - Open Food Facts integration (`src/services/open-food-facts.ts`): on-demand `fetchOpenFoodFactsProduct(barcode)` (enriched: brand, image, ingredients, allergens+traces) and `searchOpenFoodFacts(query)` (full-text). OFF requires a `User-Agent` (`OPENFOODFACTS_USER_AGENT`). `/api/products/:barcode` and `/api/products/search?q=` query OFF on demand and cache into `catalog.products` when there's no local hit (`PRODUCT_OFF_FALLBACK=true`, default on).
 - DB connection (Neon-ready, `src/db/config.ts` + `index.ts`): runtime uses `DATABASE_URL` (Neon pooled `-pooler` endpoint), migrations use `DIRECT_DATABASE_URL` (direct, fallback to `DATABASE_URL`). Env-driven options: `DB_SSL` (`require`/`disable`), `DB_PREPARE=false` (for PgBouncer transaction pooling), `DB_POOL_MAX`/`DB_IDLE_TIMEOUT`/`DB_CONNECT_TIMEOUT`/`DB_MAX_LIFETIME`. Optional read replica via `READ_DATABASE_URL` exposes `readDb` (catalog reads route there; writes use primary `db`; falls back to primary when unset). Per-PR Neon DB branches run in `.github/workflows/neon-preview.yml` when `NEON_API_KEY` is configured.
-- DB layout: data is split into two Postgres schemas — `profile` (per-user: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`) and `catalog` (global: `allergens`, `cross_reactions`, `products`). Replit-OIDC `users`/`sessions` stay in `public`. Drizzle table objects are schema-qualified (`profileSchema`/`catalogSchema` in `db/app-schema.ts` / `db/catalog-schema.ts`), so query code is unchanged. Human-readable standalone definitions live in `apps/api/sql/{profile,catalog}.sql` (reference artifacts; the live DB is managed by migrations).
+- DB layout: data is split into two Postgres schemas — `profile` (per-user: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`) and `catalog` (global: `allergens`, `cross_reactions`, `products`). Drizzle table objects are schema-qualified (`profileSchema`/`catalogSchema` in `db/app-schema.ts` / `db/catalog-schema.ts`), so query code is unchanged. Human-readable standalone definitions live in `apps/api/sql/{profile,catalog}.sql` (reference artifacts; the live DB is managed by migrations).
 - Production hardening lives in `app.ts` + `src/middleware/security.ts`: helmet, strict CORS (`CORS_ORIGINS` allowlist), and per-IP rate limits. Set `RATE_LIMIT_DISABLED=true` to turn limits off (tests already do this where needed).
 - AI scan (`src/routes/scan.ts` + `src/lib/scan-cache.ts`): in-memory result cache + per-identity daily budget + optional `SCAN_REQUIRE_AUTH`. Enable with `AI_SCAN_ENABLED=true` + `OPENAI_API_KEY`; mobile flag `EXPO_PUBLIC_AI_SCAN_ENABLED=true`.
 - Cloud sync (`src/routes/sync.ts`): disabled by default (`SYNC_ENABLED=false`). When enabled it persists to the `sync_backups` table (in-memory fallback when no DB), authenticates via mobile JWT or the legacy `SYNC_API_KEY`, and stores payloads opaquely. The mobile client encrypts backups client-side (`@allerguide/core` `encryptString`, AES-GCM) before upload — the server is zero-knowledge. Enable on mobile with `EXPO_PUBLIC_CLOUD_SYNC=true`. NOTE: the backup key is currently device-held, so cross-device restore needs key escrow / a password-derived key (follow-up).
@@ -74,7 +74,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - **Stage APK without local SDK (Cursor Cloud / CI):** prefer **EAS Build** — [`docs/android-stage-build.md`](docs/android-stage-build.md) · GitHub → EAS: `.github/workflows/eas-staging-android.yml` · Gradle-on-GitHub alternative: `.github/workflows/staging-apk-gradle.yml`.
 - EAS preview: see [`docs/eas-internal-preview.md`](docs/eas-internal-preview.md). Run `pnpm --filter mobile build:preview:android` (or `:ios`) after `eas init`.
 - EAS staging (backend flags on): [`docs/eas-staging-build.md`](docs/eas-staging-build.md) · `pnpm --filter mobile build:staging:android`.
-- Stage API is YC (`api.staging.aclearo.com`). Former Replit deploy docs: [`docs/archive/replit-deploy.md`](docs/archive/replit-deploy.md). Migration: [`migrate-off-replit-to-yc.md`](docs/migrate-off-replit-to-yc.md).
+- Stage API is Yandex Cloud only (`api.staging.aclearo.com`). Gates: [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md).
 - QA regression: [`docs/qa-checklist.md`](docs/qa-checklist.md).
 - Store config: `apps/mobile/app.json`, EAS profiles in `apps/mobile/eas.json`.
 - Regenerate icons: `pnpm --filter mobile generate-assets`.

@@ -15,7 +15,7 @@ describe('catalog routes', () => {
   });
 
   it('serves the static allergen catalog when no database is configured', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/allergens');
 
     expect(response.status).toBe(200);
@@ -26,21 +26,21 @@ describe('catalog routes', () => {
   });
 
   it('returns 503 for product lookup without a database', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/products/12345');
     expect(response.status).toBe(503);
   });
 
   it('returns 503 for product search without a database when OFF fallback is off', async () => {
     process.env.PRODUCT_OFF_FALLBACK = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/products/search?q=milk');
     expect(response.status).toBe(503);
   });
 
   it('validates short search queries (route precedence over :barcode)', async () => {
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/products/search?q=a');
     // "search" must hit the search handler (400), not the :barcode lookup.
     expect(response.status).toBe(400);

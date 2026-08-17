@@ -27,7 +27,7 @@ AllerGuide — offline-first приложение для управления а
 
 **План MVP → prod (Phase 1–2):** детальные GitHub issues с зависимостями — [`docs/phase1-phase2-issues.md`](./phase1-phase2-issues.md) · сводка фаз — [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md).
 
-**Карта (Google + пыление + POI):** единый экран [`apps/mobile/app/(tabs)/map.tsx`](../apps/mobile/app/(tabs)/map.tsx) — выбор аллергена в модалке под слоем «Пыльца», Google basemap/heatmap (флаги), multi-day прогноз, UPI, пины ресторанов/клиник. Выбор basemap — [`resolveMapBasemap`](../apps/mobile/src/services/map-basemap.ts): Google primary при `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` / `EXPO_PUBLIC_POLLEN_HEATMAP=google`); иначе `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` (JS embed через API); иначе статичный Yandex overview. При `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` числа/прогноз карты — Google Pollen (wellness остаётся на Open-Meteo; nearby — OM secondary); при `EXPO_PUBLIC_MAP_POLLEN_PLUME` — geo-шлейф (Circle/Polyline) + hourly wind/pollen series + refresh 15 мин. Атрибуция ToS под картой; analytics `map_pollen_*`; ops `GET /api/ops/map-pollen-health` / `pnpm map-pollen-ops-check`. План — [`docs/interactive-pollen-map-plan.md`](./interactive-pollen-map-plan.md) · Phase 4 — [`docs/yandex-interactive-basemap-spike.md`](./yandex-interactive-basemap-spike.md). Ключи GCP — [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md). Stage APK: [`docs/android-stage-build.md`](./android-stage-build.md).
+**Карта (Google + пыление + POI):** единый экран [`apps/mobile/app/(tabs)/map.tsx`](../apps/mobile/app/(tabs)/map.tsx) — слои **Пыльца / Качество воздуха / Места**; выбор аллергена в модалке под слоем «Пыльца», Google basemap + pollen/UAQI heatmap (флаги), multi-day прогноз, UPI, пины ресторанов/клиник. Выбор basemap — [`resolveMapBasemap`](../apps/mobile/src/services/map-basemap.ts): Google primary при `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` / `EXPO_PUBLIC_POLLEN_HEATMAP=google`); иначе `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` (JS embed через API); иначе статичный Yandex overview. При `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` числа/прогноз карты — Google Pollen (wellness остаётся на Open-Meteo; nearby — OM secondary); при `EXPO_PUBLIC_MAP_POLLEN_PLUME` — geo-шлейф (Circle/Polyline) + hourly wind/pollen series + refresh 15 мин. Атрибуция ToS под картой; analytics `map_pollen_*`; ops `GET /api/ops/map-pollen-health` / `pnpm map-pollen-ops-check`. План — [`docs/interactive-pollen-map-plan.md`](./interactive-pollen-map-plan.md) · Phase 4 — [`docs/yandex-interactive-basemap-spike.md`](./yandex-interactive-basemap-spike.md). Ключи GCP — [`docs/gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md). Stage APK: [`docs/android-stage-build.md`](./android-stage-build.md).
 
 ---
 
@@ -147,11 +147,10 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 **Bootstrap** (`app/index.tsx`):
 
 1. `initDb()` — создание таблиц / загрузка IndexedDB
-2. Replit callback (`?replit_auth=1` на web) → `loginWithReplitExchange()` → JWT
-3. `restoreAuthSession()` — гидратация токена из SecureStore / settings и **await** `syncProfilesFromBackend` (при backend auth)
-4. Проверка `isAuthenticated()` → иначе `/login`
-5. `refreshProfilesFromBackend()` + `ensureActiveProfileLoaded({ preferSelf: true })` — активный профиль сразу в store; при нескольких профилях выбирается родитель (`self`)
-6. `resolveAuthedBootstrapRoute()` из `@allerguide/core` (intro + onboarding + home)
+2. `restoreAuthSession()` — гидратация токена из SecureStore / settings и **await** `syncProfilesFromBackend` (при backend auth)
+3. Проверка `isAuthenticated()` → иначе `/login`
+4. `refreshProfilesFromBackend()` + `ensureActiveProfileLoaded({ preferSelf: true })` — активный профиль сразу в store; при нескольких профилях выбирается родитель (`self`)
+5. `resolveAuthedBootstrapRoute()` из `@allerguide/core` (intro + onboarding + home)
 
 **Стек аутентификации и onboarding:**
 
@@ -207,7 +206,11 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 
 | Сервис | Роль |
 |--------|------|
-| `scanner-service.ts` | Оркестрация: barcode / text / OCR → intent → dish/search → `runSmartScan` → история |
+| `scanner-service.ts` | Баррель: реэкспорт barcode / OCR / VL оркестраторов (публичный API экрана) |
+| `scan-analysis.ts` | Общий анализ: `analyzeText` → `runSmartScan` + analytics, `ScanResultExtended`, `ScanCloudAuthError` |
+| `scanner-barcode-service.ts` | `scanBarcode` / `scanText` → lookup → анализ состава → история |
+| `scanner-ocr-service.ts` | `extractOcrFromImage`, `scanFromOcr` (intent → dish/search → анализ), menu/label |
+| `scanner-dish-vision-service.ts` | VL: `scanFromDishVision`, `tryDishVisionFirst`, `DishVisionScanError` |
 | `barcode-lookup-service.ts` | Каталог → local cache → OFF (`resolveProductByBarcode`) |
 | `barcode-cache-service.ts` | Локальный кэш штрихкодов |
 | `catalog-api.ts` / `catalog-cache-service.ts` | Backend catalog + offline snapshot |
@@ -259,12 +262,12 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
 | `GOOGLE_POLLEN_HEATMAP_ENABLED` | `EXPO_PUBLIC_POLLEN_HEATMAP=google` | Google Maps + pollen tiles + forecast proxy |
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
-| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
-| `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY=google` | Google Air Quality (UAQI + советы) через API proxy |
+| `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` (default **on**; `false`/`off` disables) | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
+| `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY` (default **on**; `false`/`off` disables) | Google Air Quality (UAQI + советы) через API proxy |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
 | `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
 
-По умолчанию все флаги **false** / `off` (см. `.env.example`).
+По умолчанию флаги **false** / `off` (см. `.env.example`), кроме **Places** и **Air Quality** — они включены, пока явно не выключены (`false` / `off`). На API те же два флага default-on; без ключей health остаётся `false`.
 
 ---
 
@@ -440,20 +443,14 @@ flowchart LR
     B2["JWT via secure-settings"]
     B3["syncProfilesFromBackend"]
   end
-  subgraph replit ["Replit OIDC (web, optional)"]
-    R1["GET /api/login → callback"]
-    R2["GET /api/auth/replit-exchange → JWT"]
-  end
   offline --> App
   backend --> App
-  replit --> backend
 ```
 
 | Режим | Хранение | Когда |
 |-------|----------|-------|
 | **Локальный** | `users` в SQLite/IndexedDB, `authUserId` в settings | `BACKEND_AUTH=false` |
 | **Backend JWT** | Token через `secure-settings-service` → **SecureStore** (native) / `app_settings` (web) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
-| **Replit OIDC** | Сессия в Postgres `public.sessions`, обмен на JWT для mobile | `REPL_ID` на API; web callback `?replit_auth=1` |
 
 Чувствительные ключи (`authToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
 
@@ -499,7 +496,6 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/alias-feedback.ts` | POST/GET/PATCH alias feedback |
 | `routes/analytics.ts` | `POST /api/analytics/events`, dashboard |
 | `routes/governance.ts` | `GET /api/governance` |
-| Replit auth (если `REPL_ID`) | `GET /api/login`, `/api/callback`, `/api/logout`, `/api/auth/user`, `/api/auth/replit-exchange` |
 | — | `GET /api/health` |
 
 ### Middleware
@@ -515,7 +511,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 |-------|---------|------------------|
 | **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` | `src/db/app-schema.ts` |
 | **`catalog`** | `allergens`, `cross_reactions`, `products`, `medicines`, `alias_feedback` | `src/db/catalog-schema.ts` |
-| **`public`** | `users`, `sessions` (Replit OIDC) | `src/db/auth-schema.ts` |
+| **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
 Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0009_*`).
 
@@ -610,7 +606,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | **Branching CI** | `.github/workflows/neon-preview.yml` — эфемерная ветка БД на PR |
 | **Cold start** | Ленивый синглтон подключения |
 
-`migrate.ts` совмещает Neon direct URL с `prepareReplitAuthBeforeMigrate` для legacy Replit deploy.
+`migrate.ts` применяет версионированные SQL из `drizzle/` к `DIRECT_DATABASE_URL` (или derived direct URL).
 
 ---
 
@@ -695,13 +691,12 @@ pnpm --filter mobile lint
 pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 ```
 
-### Stage / Replit
+### Stage / Yandex Cloud
 
-Deploy на Replit **снят с поддержки** для stage. Исторический runbook: [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md).
+Единственный хостинг API — **Yandex Cloud**. Stage: `https://api.staging.aclearo.com`.
 
-- Stage API: Yandex Cloud — [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)
-- Миграция: [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md)
-- Optional legacy web OIDC: `apps/api/src/replit_integrations` только при `REPL_ID` (не на YC staging Lockbox)
+- Runbook: [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)
+- Gates: [`yc-stage-gates.md`](./yc-stage-gates.md)
 
 ### Android APK
 
@@ -768,9 +763,9 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |
 | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | Google как primary basemap map tab |
-| `EXPO_PUBLIC_MAP_PLACES` | `false` | Live Places (New) searchNearby via API |
-| `EXPO_PUBLIC_LIVE_MAP` | `false` | Alias of `EXPO_PUBLIC_MAP_PLACES` |
-| `EXPO_PUBLIC_AIR_QUALITY` | `off` | `google` включает Google Air Quality (wellness + AQ-слой карты) |
+| `EXPO_PUBLIC_MAP_PLACES` | `true` (default on) | Live Places (New) searchNearby via API; `false`/`off` disables |
+| `EXPO_PUBLIC_LIVE_MAP` | alias | Same as `EXPO_PUBLIC_MAP_PLACES` when the primary flag is unset |
+| `EXPO_PUBLIC_AIR_QUALITY` | `google` (default on) | Google Air Quality (wellness + AQ card); `false`/`off` disables |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_ANALYTICS_ENDPOINT` | — | Optional analytics HTTP sink |
 | `EXPO_PUBLIC_SENTRY_DSN` | — | Crash reporting |
@@ -783,7 +778,6 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `DATABASE_URL` / `DIRECT_DATABASE_URL` / `READ_DATABASE_URL` | Postgres connections |
 | `DB_SSL`, `DB_PREPARE`, `DB_POOL_*` | Neon / PgBouncer tuning |
 | `JWT_SECRET` | Mobile JWT signing |
-| `SESSION_SECRET` | Replit session cookies |
 | `CORS_ORIGINS` | CORS allowlist |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
 | `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
@@ -795,12 +789,11 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy |
-| `MAP_PLACES_ENABLED`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy |
-| `AIR_QUALITY_ENABLED`, `GOOGLE_AIR_QUALITY_API_KEY` | Air Quality current + heatmap proxy |
+| `MAP_PLACES_ENABLED` (default on), `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy |
+| `AIR_QUALITY_ENABLED` (default on), `GOOGLE_AIR_QUALITY_API_KEY` | Air Quality current + heatmap proxy |
 | `YANDEX_MARKET_*` | Market affiliate |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `PASSWORD_RESET_*` | Password reset email |
 | `ALIAS_FEEDBACK_ADMIN_KEY` | Alias feedback admin |
-| `REPL_ID`, `ISSUER_URL` | Replit OIDC (optional) |
 | `METRO_URL` | Dev proxy to Expo |
 
 **Порты в dev:** mobile web часто на `5000` (`expo start --web --port 5000`); API в коде по умолчанию тоже `5000`, поэтому локально задавайте `API_PORT=3001` (как в `.env.example`).
@@ -817,8 +810,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `AGENTS.md` | Инструкции для разработки / Cloud Agent |
 | `docs/functional-requirements.md` | Функциональные требования |
 | `docs/clinical-features-raaci.md` | Клинические фичи (RAACI) |
-| `docs/archive/replit-deploy.md` | Archived Replit deploy (do not use for stage) |
-| `docs/migrate-off-replit-to-yc.md` | Stage без Replit (Phase 0–5 gates) |
+| `docs/yc-stage-gates.md` | Yandex Cloud stage gates (Phase 0–5) |
 | `docs/staging-yandex-cloud.md` | Staging API на Yandex Cloud |
 | `docs/eas-internal-preview.md` / `eas-staging-build.md` | EAS / preview / staging builds |
 | `docs/qa-checklist.md` | QA чеклист |

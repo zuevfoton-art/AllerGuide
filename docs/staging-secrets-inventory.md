@@ -1,9 +1,9 @@
 # Staging secrets inventory (Yandex Cloud)
 
 **Canonical stores:** Yandex Lockbox (`aclearo-staging-api-env`) + GitHub Actions secrets + EAS Sensitive env.  
-**Never:** git, `EXPO_PUBLIC_*` for server keys, Replit Secrets, chat uploads.
+**Never:** git, `EXPO_PUBLIC_*` for server keys, chat uploads. Never store stage secrets outside YC Lockbox.
 
-Related: [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 4 · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §3 · [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys)
+Related: [`yc-stage-gates.md`](./yc-stage-gates.md) Phase 4 · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §3 · [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys)
 
 ---
 
@@ -17,7 +17,7 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `DIRECT_DATABASE_URL` | Migrations | Same host OK on YC (no Neon pooler) |
 | `DB_SSL` | TLS | `require` |
 | `JWT_SECRET` | Mobile JWT | Rotate if ever leaked |
-| `SESSION_SECRET` | Cookie sessions (OIDC legacy) | Unused when `REPL_ID` unset |
+| `SESSION_SECRET` | Unused leftover | Safe to omit from new Lockbox versions |
 | `SYNC_ENABLED` | Cloud backup | `true` on staging |
 | `AI_SCAN_ENABLED` / `AI_PROVIDER` | Scan | `yandex` on staging |
 | `YC_FOLDER_ID` / `YC_AI_API_KEY` / `YC_OCR_ENABLED` | Yandex AI | API key ≠ authorized key JSON |
@@ -88,7 +88,6 @@ Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_AIR_
 | Store | Role |
 |-------|------|
 | YC Managed PostgreSQL (private IP) | **Source of truth** for staging |
-| Replit Helium / old Neon | **Do not** use; no automatic import in Phase 4 |
 
 Optional one-time ops (from VPC runner):
 
@@ -97,8 +96,6 @@ pnpm --filter api db:migrate
 pnpm --filter api db:seed-allergens
 # pnpm --filter api db:import-food-allergy   # only if catalog needed
 ```
-
-Import from Replit only with an explicit dump/restore plan (out of scope unless product asks).
 
 ---
 
@@ -112,4 +109,4 @@ High priority from migrate sessions:
 1b. **GCP Places / Air Quality Maps Platform key** (server) — if uploaded in chat, rotate after Lockbox upsert (`pnpm yc-stage-enable-places-air-quality`)  
 2. **YC authorized key** used by agents (`aclearo-staging-bootstrap` / deploy) — delete key id in IAM → create new JSON → update GitHub `YC_SA_JSON` if deploy key  
 3. **GCP service account JSON** (Maps/audit) — delete key in GCP IAM if uploaded to chat  
-4. Optional: `JWT_SECRET` / `SESSION_SECRET` if ever shared
+4. Optional: `JWT_SECRET` if ever shared

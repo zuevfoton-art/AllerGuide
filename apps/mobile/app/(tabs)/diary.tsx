@@ -66,7 +66,6 @@ import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { collectDiaryAutoMetadata } from '@/src/services/diary-auto-metadata-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { logCaughtError } from '@/src/services/error-reporting';
@@ -424,8 +423,8 @@ export default function DiaryScreen() {
   return (
     <Screen
       onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
-      refreshing={refreshing}>
-      <ScreenBrandHeader right={<ProfileHeaderButton />} />
+      refreshing={refreshing}
+      brandHeaderRight={<ProfileHeaderButton />}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('diary.eyebrow')} />

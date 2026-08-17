@@ -22,6 +22,8 @@
         "EXPO_PUBLIC_PRODUCT_DB": "false",
         "EXPO_PUBLIC_POLLEN_HEATMAP": "off",
         "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
+        "EXPO_PUBLIC_MAP_PLACES": "true",
+        "EXPO_PUBLIC_AIR_QUALITY": "google",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "false",
         "NODE_OPTIONS": "--max-old-space-size=8192"
       },
@@ -81,6 +83,8 @@
         "EXPO_PUBLIC_GOOGLE_MAP_PRIMARY": "true",
         "EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY": "true",
         "EXPO_PUBLIC_MAP_POLLEN_PLUME": "true",
+        "EXPO_PUBLIC_MAP_PLACES": "true",
+        "EXPO_PUBLIC_AIR_QUALITY": "google",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "production"
       }

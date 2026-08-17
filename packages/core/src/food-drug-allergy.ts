@@ -355,17 +355,16 @@ export function formatFoodEntrySummary(answers: Record<string, string>): string 
   const allergens = answers.allergens?.trim();
   const reaction = answers.reactionType?.trim() || answers.reaction?.trim();
   const source = answers.foodSource?.trim();
+  const selectedComponents = answers.foodComponents?.trim();
 
   if (food) parts.push(food);
-  if (allergens) parts.push(allergens);
+  if (allergens && selectedComponents) parts.push(allergens);
   const conflicts = answers.foodComponentConflicts?.trim();
-  if (conflicts) parts.push(`⚠ ${conflicts}`);
+  if (conflicts && selectedComponents) parts.push(`⚠ ${conflicts}`);
   const cross = answers.crossReactions?.trim();
   if (cross) parts.push(`перекрёстные: ${cross}`);
   if (reaction) parts.push(`реакция: ${reaction}`);
-  const coded = answers.reactionCodedSummary?.trim();
-  if (coded) parts.push(coded);
-  if (source) parts.push(source);
+  if (source && source !== 'Вручную') parts.push(source);
 
   return parts.length ? parts.join(' · ') : 'Питание';
 }
@@ -381,7 +380,6 @@ export function formatMedicineEntrySummary(answers: Record<string, string>): str
   if (dosage) parts.push(dosage);
   if (sideEffect && sideEffect !== 'Нет') parts.push(`побочно: ${sideEffect}`);
   else if (effect) parts.push(effect);
-  if (answers.intoleranceAlert?.trim()) parts.push('⚠ непереносимость');
 
   return parts.length ? parts.join(' · ') : 'Лекарство';
 }

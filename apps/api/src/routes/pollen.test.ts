@@ -21,7 +21,7 @@ describe('pollen heatmap routes', () => {
 
   it('is disabled by default when the server flag is off', async () => {
     process.env.POLLEN_HEATMAP_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/pollen/heatmap/TREE_UPI/6/38/20');
 
@@ -29,7 +29,7 @@ describe('pollen heatmap routes', () => {
   });
 
   it('rejects unknown UPI groups and invalid tile coordinates', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const mapTypeResponse = await request(app).get(
       '/api/pollen/heatmap/BIRCH_UPI/6/38/20',
@@ -50,7 +50,7 @@ describe('pollen heatmap routes', () => {
       }),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/pollen/heatmap/TREE_UPI/6/38/20');
 
@@ -75,7 +75,7 @@ describe('pollen heatmap routes', () => {
         }),
       ),
     );
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/pollen/heatmap/GRASS_UPI/6/38/20');
 
@@ -98,7 +98,7 @@ describe('pollen forecast routes', () => {
 
   it('is disabled when the server flag is off', async () => {
     process.env.POLLEN_HEATMAP_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62');
 
@@ -106,7 +106,7 @@ describe('pollen forecast routes', () => {
   });
 
   it('rejects missing coordinates', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/pollen/forecast');
     expect(response.status).toBe(400);
   });
@@ -137,6 +137,11 @@ describe('pollen forecast routes', () => {
                   },
                 },
                 {
+                  code: 'ALDER',
+                  displayName: 'Alder',
+                  indexInfo: { value: 1, category: 'Very Low' },
+                },
+                {
                   code: 'OLIVE',
                   displayName: 'Olive',
                 },
@@ -148,16 +153,20 @@ describe('pollen forecast routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62');
 
     expect(response.status).toBe(200);
+    expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
     expect(response.body.ok).toBe(true);
     expect(response.body.forecast.days[0].plantIndexes.birch_pollen.index).toBe(2);
+    expect(response.body.forecast.days[0].plantIndexes.alder_pollen.index).toBe(1);
+    expect(response.body.forecast.days[0].plantIndexes.olive_pollen).toBeUndefined();
     expect(response.body.forecast.plants.birch_pollen.family).toBe('Betulaceae');
     expect(response.body.forecast.days[0].plantCoverage).toEqual([
       { code: 'BIRCH', taxonId: 'birch_pollen', hasIndex: true },
+      { code: 'ALDER', taxonId: 'alder_pollen', hasIndex: true },
       { code: 'OLIVE', taxonId: 'olive_pollen', hasIndex: false },
     ]);
     expect(fetchMock).toHaveBeenCalled();
@@ -173,7 +182,7 @@ describe('pollen forecast routes', () => {
       }),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62&lang=ru');
     await request(app).get('/api/pollen/forecast?lat=55.75&lon=37.62&lang=ru');
@@ -202,7 +211,7 @@ describe('pollen species-samples spike', () => {
 
   it('is disabled unless the experimental flag is on', async () => {
     process.env.POLLEN_SPECIES_HEATMAP_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get(
       '/api/pollen/species-samples?north=55.76&south=55.74&east=37.64&west=37.60&zoom=12&taxon=birch_pollen',
     );
@@ -210,7 +219,7 @@ describe('pollen species-samples spike', () => {
   });
 
   it('rejects a species tile type that Google does not offer', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const heatmap = await request(app).get('/api/pollen/heatmap/BIRCH_UPI/6/38/20');
     expect(heatmap.status).toBe(400);
 
@@ -240,7 +249,7 @@ describe('pollen species-samples spike', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const birch = await request(app).get(
       '/api/pollen/species-samples?north=55.755&south=55.745&east=37.625&west=37.615&zoom=13&taxon=birch_pollen',

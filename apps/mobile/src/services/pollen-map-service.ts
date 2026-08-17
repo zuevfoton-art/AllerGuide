@@ -12,6 +12,7 @@ import {
   POLLEN_MAP_TAXON_IDS,
   POLLEN_OPEN_METEO_FORECAST_DAYS,
   type GoogleForecastDayInput,
+  type GooglePollenTypeKey,
   type NearbyPollenLocation,
   type NearbyPollenSamplePoint,
   type OpenMeteoCurrentPollen,
@@ -41,6 +42,8 @@ export interface PollenMapSnapshot {
   forecastDays: PollenForecastDay[];
   /** UPI per taxon for today (Google Forecast preferred). */
   upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+  /** Official TREE/GRASS/WEED indexes that drive heatmapTiles. */
+  typeIndexes: Partial<Record<GooglePollenTypeKey, PollenUpiSnapshot>>;
   plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
   updatedAt: string | null;
   yandexPollenUrl: string;
@@ -51,6 +54,7 @@ interface CachedPollenMapSnapshot {
   nearbyLocations: NearbyPollenLocation[];
   forecastDays: PollenForecastDay[];
   upiByTaxon: Partial<Record<PollenMapTaxonId, PollenUpiSnapshot>>;
+  typeIndexes: Partial<Record<GooglePollenTypeKey, PollenUpiSnapshot>>;
   plants: Partial<Record<PollenMapTaxonId, PollenPlantDetail>>;
   updatedAt: string;
 }
@@ -149,6 +153,7 @@ async function tryFetchGooglePrimarySnapshot(
 
     const forecastDays = buildForecastDaysFromGoogle(google.days, profileAllergenIds);
     const plants = buildPlantsMap(merged.readings, google.plants);
+    const typeIndexes = today.typeIndexes ?? {};
     // Secondary: Open-Meteo ring samples for “safe nearby” (not Google × N lookups).
     const nearbyLocations = await fetchNearbyPollenLocations(location, profileAllergenIds);
     const updatedAt = new Date().toISOString();
@@ -158,6 +163,7 @@ async function tryFetchGooglePrimarySnapshot(
       nearbyLocations,
       forecastDays,
       upiByTaxon: merged.upiByTaxon,
+      typeIndexes,
       plants,
       updatedAt,
     });
@@ -168,6 +174,7 @@ async function tryFetchGooglePrimarySnapshot(
       nearbyLocations,
       forecastDays,
       upiByTaxon: merged.upiByTaxon,
+      typeIndexes,
       plants,
       updatedAt,
       yandexPollenUrl,
@@ -205,6 +212,7 @@ async function fetchOpenMeteoSnapshot(
     profileAllergenIds,
   );
   const plants = buildPlantsMap(merged.readings, google?.plants);
+  const typeIndexes = google?.days?.[0]?.typeIndexes ?? {};
 
   const updatedAt = new Date().toISOString();
   writeCache(cacheKey, {
@@ -212,6 +220,7 @@ async function fetchOpenMeteoSnapshot(
     nearbyLocations,
     forecastDays,
     upiByTaxon: merged.upiByTaxon,
+    typeIndexes,
     plants,
     updatedAt,
   });
@@ -221,6 +230,7 @@ async function fetchOpenMeteoSnapshot(
     nearbyLocations,
     forecastDays,
     upiByTaxon: merged.upiByTaxon,
+    typeIndexes,
     plants,
     updatedAt,
     yandexPollenUrl,
@@ -265,6 +275,7 @@ function readCachedOrCalendar(
         readings: applyProfileRelevance(day.readings, profileAllergenIds),
       })),
       upiByTaxon: cached.upiByTaxon,
+      typeIndexes: cached.typeIndexes ?? {},
       plants: cached.plants,
       updatedAt: cached.updatedAt,
       yandexPollenUrl,
@@ -277,6 +288,7 @@ function readCachedOrCalendar(
     nearbyLocations: [],
     forecastDays: [],
     upiByTaxon: {},
+    typeIndexes: {},
     plants: {},
     updatedAt: null,
     yandexPollenUrl,
@@ -393,6 +405,7 @@ function readCache(cacheKey: string): CachedPollenMapSnapshot | null {
       nearbyLocations: Array.isArray(cached.nearbyLocations) ? cached.nearbyLocations : [],
       forecastDays: Array.isArray(cached.forecastDays) ? cached.forecastDays : [],
       upiByTaxon: cached.upiByTaxon ?? {},
+      typeIndexes: cached.typeIndexes ?? {},
       plants: cached.plants ?? {},
     };
   } catch (error) {

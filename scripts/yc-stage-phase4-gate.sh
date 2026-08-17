@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 4 gate: staging secrets/data hygiene (Lockbox + GH + EAS policy in docs/repo).
 # Does not print secret values. Optional live Lockbox name-audit when `yc` is configured.
-# See docs/migrate-off-replit-to-yc.md §Phase 4 · docs/staging-secrets-inventory.md
+# See docs/yc-stage-gates.md §Phase 4 · docs/staging-secrets-inventory.md
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -161,11 +161,11 @@ echo ""
 
 # --- P4.6 data policy reminder ---
 echo "--- P4.6 data policy ---"
-if grep -q 'Do not\*\* use' docs/staging-secrets-inventory.md \
-  || grep -q 'Do not' docs/staging-secrets-inventory.md; then
-  pass "Replit DB import discouraged in inventory"
+if grep -q 'Never store stage secrets outside YC Lockbox' docs/staging-secrets-inventory.md \
+  && grep -q 'YC Managed PostgreSQL' docs/staging-secrets-inventory.md; then
+  pass "inventory requires YC Lockbox + YC Managed PostgreSQL"
 else
-  warn "confirm Replit→YC import policy in inventory"
+  fail "inventory must require YC Lockbox and YC Managed PostgreSQL as SoT"
 fi
 
 # Live API still healthy (quick)

@@ -37,7 +37,7 @@ describe('scan caching, budget and auth', () => {
     const fetchMock = mockLlm();
     vi.stubGlobal('fetch', fetchMock);
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const payload = { mode: 'product', text: 'молоко, сахар', allergens: ['Молоко'] };
 
     const first = await request(app).post('/api/scan').send(payload);
@@ -56,7 +56,7 @@ describe('scan caching, budget and auth', () => {
     const fetchMock = mockLlm();
     vi.stubGlobal('fetch', fetchMock);
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const first = await request(app)
       .post('/api/scan')
@@ -73,7 +73,7 @@ describe('scan caching, budget and auth', () => {
     process.env.SCAN_REQUIRE_AUTH = 'true';
     vi.stubGlobal('fetch', mockLlm());
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app)
       .post('/api/scan')
       .send({ mode: 'product', text: 'молоко', allergens: [] });
@@ -86,7 +86,7 @@ describe('scan caching, budget and auth', () => {
     const fetchMock = mockLlm();
     vi.stubGlobal('fetch', fetchMock);
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     resetScanState();
 
     for (let i = 0; i < 50; i += 1) {
@@ -125,7 +125,7 @@ describe('scan caching, budget and auth', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app)
       .post('/api/scan')
       .send({ mode: 'product', text: 'молоко yandex', allergens: ['Молоко'] });

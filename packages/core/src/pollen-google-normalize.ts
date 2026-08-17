@@ -16,6 +16,40 @@ export type GooglePlantCoverageEntry = {
   hasIndex: boolean;
 };
 
+/** Forecast plant codes that map to birch / alder / olive chips. */
+export const GOOGLE_TREE_SPECIES_PLANT_CODES = ['BIRCH', 'ALDER', 'OLIVE'] as const;
+
+export type GoogleTreeSpeciesPlantCode = (typeof GOOGLE_TREE_SPECIES_PLANT_CODES)[number];
+
+export type GoogleTreeSpeciesCoverage = {
+  code: GoogleTreeSpeciesPlantCode;
+  present: boolean;
+  hasIndex: boolean;
+};
+
+export type GooglePlantCoverageSummary = {
+  withIndex: string[];
+  withoutIndex: string[];
+  treeSpecies: GoogleTreeSpeciesCoverage[];
+};
+
+/** Stage/debug view of which plantInfo codes arrived with or without indexInfo. */
+export function summarizeGooglePlantCoverage(
+  coverage: GooglePlantCoverageEntry[],
+): GooglePlantCoverageSummary {
+  const withIndex = coverage.filter((entry) => entry.hasIndex).map((entry) => entry.code);
+  const withoutIndex = coverage.filter((entry) => !entry.hasIndex).map((entry) => entry.code);
+  const treeSpecies = GOOGLE_TREE_SPECIES_PLANT_CODES.map((code) => {
+    const entry = coverage.find((item) => item.code === code);
+    return {
+      code,
+      present: Boolean(entry),
+      hasIndex: entry?.hasIndex ?? false,
+    };
+  });
+  return { withIndex, withoutIndex, treeSpecies };
+}
+
 export interface GooglePollenForecastDay {
   date: string;
   typeIndexes: Partial<Record<'TREE' | 'GRASS' | 'WEED', PollenUpiSnapshot>>;

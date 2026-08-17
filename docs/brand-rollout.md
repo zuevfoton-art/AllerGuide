@@ -58,7 +58,7 @@ eas metadata:push --profile production
 
 - `app.json`: name, slug, scheme, bundle
 - i18n onboarding taglines (6 локалей)
-- Единый header: центрированный знак + слоган «Aclearo — когда важна ясность» (`brand.slogan`, `ScreenBrandHeader`)
+- Единый header: знак + слоган «Aclearo — когда важна ясность» слева (`brand.slogan`, `ScreenBrandHeader`); тап после входа открывает главную. Вход/регистрация — центрированный `AuthHero`.
 - Android package + Maestro `appId`
 
 ---

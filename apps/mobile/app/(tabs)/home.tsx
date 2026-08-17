@@ -24,7 +24,6 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
@@ -140,29 +139,30 @@ export default function HomeScreen() {
             }
           : undefined
       }
-      refreshing={wellnessState.refreshing}>
-      <ScreenBrandHeader
-        right={
-          <>
-            <ProfileHeaderButton destination="hub" />
-            <Pressable
-              onPress={() => router.push('/(tabs)/sos')}
-              style={styles.sosBtn}
-              accessibilityRole="button"
-              accessibilityLabel={t('tabs.sos')}>
-              <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
-            </Pressable>
-          </>
-        }
-      />
+      refreshing={wellnessState.refreshing}
+      brandHeaderRight={
+        <>
+          <ProfileHeaderButton destination="hub" />
+          <Pressable
+            onPress={() => router.push('/(tabs)/sos')}
+            style={styles.sosBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('tabs.sos')}
+            hitSlop={8}>
+            <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
+          </Pressable>
+        </>
+      }>
 
       <GlassCard variant="soft">
         <View style={ui.cardHead}>
           <Text style={ui.cardTitle}>{t('home.wellnessTitle')}</Text>
           <View style={styles.cardHeadRight}>
-            {badge ? (
+            {badge && wellness ? (
               <View style={[ui.badge, badge.container]}>
-                <Text style={[ui.badgeText, badge.text]}>{wellness?.statusTitle}</Text>
+                <Text style={[ui.badgeText, badge.text]}>
+                  {t(`wellness.statusPhrase.${wellness.level}`)}
+                </Text>
               </View>
             ) : null}
           </View>
@@ -177,41 +177,55 @@ export default function HomeScreen() {
           </View>
         ) : wellness ? (
           <>
-            <View style={ui.heroKpi}>
-              <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
-              <Text style={ui.heroKpiNum}>
-                {wellness.score}
-                <Text style={ui.heroKpiSub}> / 100</Text>
-              </Text>
-            </View>
+            <Pressable
+              onPress={() => setDetailsOpen(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('home.index')}>
+              <View style={ui.heroKpi}>
+                <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
+                <Text style={ui.heroKpiNum}>
+                  {wellness.score}
+                  <Text style={ui.heroKpiSub}> / 100</Text>
+                </Text>
+              </View>
+            </Pressable>
 
             <View style={styles.metaRow}>
               {confidenceBadge ? (
                 <View style={[ui.badge, confidenceBadge.container, styles.confidenceBadge]}>
                   <Text style={[ui.badgeText, confidenceBadge.text]}>
-                    {t(`wellness.verbal.${wellness.display.indexTier}`)}
+                    {t(`wellness.index.${wellness.display.indexTier}`)}
                   </Text>
                 </View>
               ) : null}
               <Text style={styles.envHint}>
-                {t(`wellness.confidence.${wellness.confidence}`)}
+                {t(`wellness.forecast.${wellness.confidence}`)}
               </Text>
             </View>
 
-            <View style={ui.kpiRow}>
+            <Pressable
+              onPress={() => setDetailsOpen(true)}
+              accessibilityRole="button"
+              style={ui.kpiRow}>
               <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
-              <Text style={ui.kpiValue}>{t(`wellness.verbal.${wellness.display.pollenTier}`)}</Text>
-            </View>
-            <View style={ui.kpiRow}>
+              <Text style={ui.kpiValue}>{t(`wellness.pollen.${wellness.display.pollenTier}`)}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setDetailsOpen(true)}
+              accessibilityRole="button"
+              style={ui.kpiRow}>
               <Text style={ui.kpiLabel}>{t('home.air')}</Text>
-              <Text style={ui.kpiValue}>{t(`wellness.verbal.${wellness.display.airTier}`)}</Text>
-            </View>
-            <View style={ui.kpiRow}>
+              <Text style={ui.kpiValue}>{t(`wellness.air.${wellness.display.airTier}`)}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setDetailsOpen(true)}
+              accessibilityRole="button"
+              style={ui.kpiRow}>
               <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
-              <Text style={ui.kpiValue}>{t(`wellness.verbal.${wellness.display.diaryTier}`)}</Text>
-            </View>
+              <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
+            </Pressable>
             <Text style={styles.interpret}>
-              {t('home.primaryFactorLabel')}: {t(`wellness.primaryFactor.${wellness.display.primaryFactorId}`)}
+              {t(`wellness.primaryFactorSentence.${wellness.display.primaryFactorId}`)}
             </Text>
 
             <Pressable
@@ -225,14 +239,29 @@ export default function HomeScreen() {
 
             {detailsOpen ? (
               <>
-                {wellness.factors.map((factor) => (
-                  <View key={factor.label} style={ui.kpiRow}>
-                    <Text style={ui.kpiLabel}>
-                      {factor.label.replace(' · Open-Meteo', '').replace(' · EAQI', '')}
-                    </Text>
-                    <Text style={ui.kpiValue}>{factor.value}</Text>
-                  </View>
-                ))}
+                <View style={ui.kpiRow}>
+                  <Text style={ui.kpiLabel}>{t('home.index')}</Text>
+                  <Text style={ui.kpiValue}>
+                    {t(`wellness.index.${wellness.display.indexTier}`)} · {wellness.score}/100
+                  </Text>
+                </View>
+                {wellness.factors.map((factor) => {
+                  const category =
+                    factor.label === t('home.pollen') || factor.label === t('wellness.pollenLabel')
+                      ? t(`wellness.pollen.${wellness.display.pollenTier}`)
+                      : factor.label === t('home.air') || factor.label === t('wellness.airLabel')
+                        ? t(`wellness.air.${wellness.display.airTier}`)
+                        : t(`wellness.diaryState.${wellness.display.diaryTier}`);
+                  return (
+                    <View key={factor.label} style={styles.detailBlock}>
+                      <View style={ui.kpiRow}>
+                        <Text style={ui.kpiLabel}>{factor.label}</Text>
+                        <Text style={ui.kpiValue}>{category}</Text>
+                      </View>
+                      <Text style={styles.detailExact}>{factor.value}</Text>
+                    </View>
+                  );
+                })}
                 <Text style={styles.interpret}>{wellness.statusSummary}</Text>
               </>
             ) : null}
@@ -322,30 +351,6 @@ function InsightRow({
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    topBar: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    brandBlock: {
-      flexShrink: 1,
-      gap: 2,
-    },
-    topBarLogo: {
-      flexShrink: 1,
-    },
-    tagline: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.accent,
-      letterSpacing: 0.2,
-    },
-    topBarActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
     sosBtn: {
       width: 40,
       height: 40,
@@ -395,6 +400,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingTop: 10,
       borderTopWidth: 1,
       borderTopColor: colors.border,
+    },
+    detailBlock: {
+      marginTop: 8,
+      gap: 2,
+    },
+    detailExact: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
     },
     listHead: {
       flexDirection: 'row',

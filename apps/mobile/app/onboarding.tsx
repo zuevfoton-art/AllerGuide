@@ -50,7 +50,7 @@ export default function OnboardingScreen() {
             <View style={styles.heroArt}>
               <OnboardingSlideImage slide="profile" width={heroArtWidth} height={heroArtWidth * 0.68} />
             </View>
-            <Text style={styles.tagline}>{t('onboarding.tagline')}</Text>
+            <Text style={styles.tagline}>{t('brand.slogan')}</Text>
           </View>
 
           <Text style={styles.sectionLabel}>{t('onboarding.sectionLabel')}</Text>

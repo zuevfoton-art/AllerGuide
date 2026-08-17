@@ -1,9 +1,15 @@
 /**
- * Staging API smoke: JWT auth + AI scan cache hit (P1.5b).
+ * Staging API smoke: JWT auth + AI scan (P1.5b).
  * Requires staging API with AI_SCAN_ENABLED=true and AI_PROVIDER=yandex (or OPENAI_*).
  * Run: pnpm --filter api exec tsx ../../scripts/staging-scan-smoke.ts
  * Broader Yandex AI checks: scripts/staging-yandex-ai-smoke.ts
+ *
+ * Cache hit is required only when health.scan.store is redis. In-memory cache
+ * is per Serverless instance — a miss on the second call is accepted if the
+ * verdict matches (see scan-smoke-expectation.ts).
  */
+import { evaluateRepeatScanSmoke } from '../apps/api/src/lib/scan-smoke-expectation';
+
 const BASE = (process.env.STAGING_API_URL ?? 'https://api.staging.aclearo.com').replace(/\/$/, '');
 const RAND = process.env.RAND ?? String(Date.now());
 const EMAIL = `staging-scan-${RAND}@example.com`;
@@ -32,7 +38,7 @@ async function main() {
   const health = await api<{
     ok: boolean;
     features?: { aiScan: boolean };
-    scan?: { enabled: boolean; dailyBudget: number };
+    scan?: { enabled: boolean; dailyBudget: number; store?: string };
   }>('/api/health');
   console.log('Health:', health.body);
   if (!health.body.ok) throw new Error('Health check failed');
@@ -72,14 +78,19 @@ async function main() {
     },
   );
 
-  if (!first.body.ok || !first.body.result?.verdict) {
+  const firstVerdict = first.body.result?.verdict;
+  if (!first.body.ok || !firstVerdict) {
     throw new Error('First scan failed — check YC_AI_* / OPENAI_API_KEY on staging (P1.5a)');
   }
   if (first.body.cached) {
     throw new Error('Expected cache miss on first scan');
   }
 
-  const second = await api<{ ok: boolean; cached: boolean }>('/api/scan', {
+  const second = await api<{
+    ok: boolean;
+    cached: boolean;
+    result?: { verdict: string };
+  }>('/api/scan', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -88,11 +99,18 @@ async function main() {
     body: JSON.stringify(scanPayload),
   });
 
-  if (!second.body.ok || !second.body.cached) {
-    throw new Error('Second scan should be served from cache');
+  const repeat = evaluateRepeatScanSmoke({
+    store: health.body.scan?.store,
+    firstVerdict,
+    secondOk: Boolean(second.body.ok),
+    secondCached: Boolean(second.body.cached),
+    secondVerdict: second.body.result?.verdict,
+  });
+  if (!repeat.ok) {
+    throw new Error(repeat.message);
   }
 
-  console.log('Scan smoke passed (JWT auth, LLM miss + cache hit).');
+  console.log(repeat.message);
 }
 
 main().catch((error) => {

@@ -101,10 +101,6 @@ export async function backendResetPassword(input: { token: string; password: str
   });
 }
 
-export async function backendReplitExchange() {
-  return apiRequest<{ user: AuthUser; token: string }>('/api/auth/replit-exchange', {});
-}
-
 export async function backendListProfiles(token: string) {
   return apiRequest<{ profiles: Profile[] }>('/api/profiles', { token });
 }

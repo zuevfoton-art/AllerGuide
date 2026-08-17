@@ -395,7 +395,7 @@ const frContent: LocaleContent = {
         text: 'Symptômes enregistrés sur {days} des 7 derniers jours. Suivez l\'évolution ; contactez votre médecin s\'ils s\'aggravent.',
       },
       clinicalScale: {
-        title: 'Échelle {label}',
+        title: 'Score {label}',
         text: 'Dernière évaluation : {total} points ({level}). Discutez du contrôle avec votre médecin.',
       },
       crossReaction: {

@@ -65,7 +65,6 @@ import {
 } from '@/src/services/scanner-photo-service';
 import { resolveDishVisionPhotoUri } from '@/src/services/scanner-dish-vision-display';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 import { resolveMatchAliasKeyword } from '@/src/services/scan-match-display';
@@ -75,6 +74,12 @@ import {
 } from '@/src/services/profile-service';
 import { confirmAction, confirmDestructiveAction } from '@/src/utils/confirm-action';
 import { logCaughtError } from '@/src/services/error-reporting';
+import {
+  SCANNER_MODE_LABEL_KEYS,
+  SCANNER_MODES,
+  shouldClearScannerResultOnModeChange,
+  shouldShowScannerPageTrustLine,
+} from '@/src/constants/scanner-mode';
 
 const UNDO_MS = 5000;
 const HISTORY_DISPLAY_LIMIT = 5;
@@ -84,15 +89,7 @@ type CameraEntryMode = 'barcode' | 'scanner';
 type ScanMode = ScannerMode;
 type ListTab = 'recent' | 'saved';
 
-const SAFE_MODE_LABEL_KEYS: Record<
-  ScannerMode,
-  'scanner.product' | 'scanner.menu' | 'scanner.medicine' | 'scanner.cosmetics'
-> = {
-  product: 'scanner.product',
-  menu: 'scanner.menu',
-  medicine: 'scanner.medicine',
-  cosmetics: 'scanner.cosmetics',
-};
+const SAFE_MODE_LABEL_KEYS = SCANNER_MODE_LABEL_KEYS;
 
 function placeholderKeyForMode(
   mode: ScanMode,
@@ -149,6 +146,15 @@ export default function ScannerScreen() {
   const isBarcodeEntry = entryMode === 'barcode';
   const supportsPhotoCapture = entryMode === 'scanner';
   const primaryIsBarcode = mode === 'product';
+
+  const selectMode = (next: ScanMode) => {
+    if (shouldClearScannerResultOnModeChange(mode, next)) {
+      setResult(null);
+      setRepeatUnsafe(false);
+      setScanError(false);
+    }
+    setMode(next);
+  };
 
   const scanTrends = useMemo(() => computeScanTrends(history), [history]);
 
@@ -662,13 +668,59 @@ export default function ScannerScreen() {
   return (
     <Screen
       onRefresh={() => refresh()}
-      refreshing={refreshing}>
-      <ScreenBrandHeader right={<ProfileHeaderButton />} />
+      refreshing={refreshing}
+      brandHeaderRight={<ProfileHeaderButton />}
+      pinnedTop={
+        displayResult ? (
+          <View
+            testID="scanner-verdict-pinned"
+            style={[
+              styles.verdictHero,
+              styles.verdictPinned,
+              isHigh && styles.verdictHeroHigh,
+              isMedium && styles.verdictHeroMedium,
+              isLow && styles.verdictHeroLow,
+            ]}>
+            <Text
+              style={[
+                styles.verdictHeroTitle,
+                isHigh && styles.verdictHeroTitleHigh,
+                isMedium && styles.verdictHeroTitleMedium,
+                isLow && styles.verdictHeroTitleLow,
+              ]}>
+              {isHigh
+                ? t('scanner.verdictStop')
+                : isMedium
+                  ? t('scanner.verdictCaution')
+                  : t('scanner.verdictClear')}
+            </Text>
+          </View>
+        ) : undefined
+      }>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('scanner.eyebrow')} />
           <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         </View>
+      </View>
+
+      <View style={[styles.tabRow, styles.modeRow]} testID="scanner-mode-row">
+        {SCANNER_MODES.map((item) => {
+          const active = mode === item;
+          return (
+            <Pressable
+              key={item}
+              testID={`scanner-mode-${item}`}
+              style={[styles.tabChip, styles.modeChip, active && styles.tabChipActive]}
+              onPress={() => selectMode(item)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}>
+              <Text style={[styles.tabChipText, active && styles.tabChipTextActive]}>
+                {t(SCANNER_MODE_LABEL_KEYS[item])}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <Button
@@ -705,9 +757,11 @@ export default function ScannerScreen() {
       {!displayResult && !loading ? (
         <Text style={styles.emptyHint}>{t('scanner.emptyHint')}</Text>
       ) : null}
-      <Text style={styles.trustLine}>
-        {isDishVisionResult ? t('scanner.trustLineDishVision') : t('scanner.trustLine')}
-      </Text>
+      {shouldShowScannerPageTrustLine(Boolean(displayResult)) ? (
+        <Text style={styles.trustLine}>
+          {isDishVisionResult ? t('scanner.trustLineDishVision') : t('scanner.trustLine')}
+        </Text>
+      ) : null}
 
       {manualOpen ? (
         <View style={styles.manualBlock}>
@@ -717,6 +771,7 @@ export default function ScannerScreen() {
             onChangeText={setInput}
             placeholder={t(placeholderKeyForMode(mode))}
             placeholderTextColor={theme.colors.textMuted}
+            accessibilityLabel={t(placeholderKeyForMode(mode))}
             multiline
             style={styles.input}
           />
@@ -758,37 +813,16 @@ export default function ScannerScreen() {
 
       {displayResult ? (
         <View testID="scanner-result" style={styles.resultStack}>
-          <View
-            style={[
-              styles.verdictHero,
-              isHigh && styles.verdictHeroHigh,
-              isMedium && styles.verdictHeroMedium,
-              isLow && styles.verdictHeroLow,
-            ]}>
-            <Text
-              style={[
-                styles.verdictHeroTitle,
-                isHigh && styles.verdictHeroTitleHigh,
-                isMedium && styles.verdictHeroTitleMedium,
-                isLow && styles.verdictHeroTitleLow,
-              ]}>
-              {isHigh
-                ? t('scanner.verdictStop')
-                : isMedium
-                  ? t('scanner.verdictCaution')
-                  : t('scanner.verdictClear')}
-            </Text>
-            <Text style={styles.verdictHeroHint}>
-              {isHigh
-                ? t('scanner.verdictStopHint')
-                : isMedium
-                  ? t('scanner.verdictCautionHint')
-                  : t('scanner.verdictClearHint')}
-            </Text>
-            <Text style={styles.verdictClaro}>
-              {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
-            </Text>
-          </View>
+          <Text style={styles.verdictHeroHint}>
+            {isHigh
+              ? t('scanner.verdictStopHint')
+              : isMedium
+                ? t('scanner.verdictCautionHint')
+                : t('scanner.verdictClearHint')}
+          </Text>
+          <Text style={styles.verdictClaro}>
+            {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
+          </Text>
 
           {isDishVisionResult ? (
             <ScannerDishVisionCard
@@ -911,7 +945,8 @@ export default function ScannerScreen() {
               <Pressable
                 onPress={() => setIngredientsOpen((v) => !v)}
                 accessibilityRole="button"
-                style={styles.ingredientsToggle}>
+                style={styles.ingredientsToggle}
+                hitSlop={8}>
                 <Text style={styles.ingredientsToggleText}>
                   {ingredientsOpen ? t('scanner.ingredientsHide') : t('scanner.ingredientsShow')}
                 </Text>
@@ -953,6 +988,7 @@ export default function ScannerScreen() {
             {activeProfileId ? (
               <Pressable
                 style={styles.reportBtn}
+                hitSlop={8}
                 onPress={() => {
                   const term =
                     result?.unknownMatches?.[0] ??
@@ -995,7 +1031,8 @@ export default function ScannerScreen() {
           <Pressable
             onPress={() => setTrendsOpen((v) => !v)}
             style={styles.trendsToggle}
-            accessibilityRole="button">
+            accessibilityRole="button"
+            hitSlop={8}>
             <Text style={ui.cardTitle}>
               {trendsOpen ? t('scanner.trendsHide') : t('scanner.trendsShow')}
             </Text>
@@ -1028,7 +1065,8 @@ export default function ScannerScreen() {
           style={[styles.tabChip, listTab === 'recent' && styles.tabChipActive]}
           onPress={() => setListTab('recent')}
           accessibilityRole="button"
-          accessibilityState={{ selected: listTab === 'recent' }}>
+          accessibilityState={{ selected: listTab === 'recent' }}
+          hitSlop={8}>
           <Text style={[styles.tabChipText, listTab === 'recent' && styles.tabChipTextActive]}>
             {t('scanner.recentTab')}
           </Text>
@@ -1037,7 +1075,8 @@ export default function ScannerScreen() {
           style={[styles.tabChip, listTab === 'saved' && styles.tabChipActive]}
           onPress={() => setListTab('saved')}
           accessibilityRole="button"
-          accessibilityState={{ selected: listTab === 'saved' }}>
+          accessibilityState={{ selected: listTab === 'saved' }}
+          hitSlop={8}>
           <Text style={[styles.tabChipText, listTab === 'saved' && styles.tabChipTextActive]}>
             {t('scanner.savedTab')}
           </Text>
@@ -1191,6 +1230,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       lineHeight: 22,
     },
     resultStack: { gap: 10 },
+    verdictPinned: {
+      paddingVertical: 12,
+    },
     verdictHero: {
       borderRadius: 10,
       paddingVertical: 18,
@@ -1394,6 +1436,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       lineHeight: 17,
     },
     tabRow: { flexDirection: 'row', gap: 8 },
+    modeRow: { flexWrap: 'wrap' },
+    modeChip: { flexGrow: 1, flexBasis: '46%', flex: 0 },
     tabChip: {
       flex: 1,
       alignItems: 'center',

@@ -21,15 +21,58 @@ describe('air quality routes', () => {
 
   it('is disabled when the server flag is off', async () => {
     process.env.AIR_QUALITY_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/air-quality/current?lat=55.75&lon=37.62');
 
     expect(response.status).toBe(503);
   });
 
+  it('does not use the Pollen-only key as an Air Quality credential', async () => {
+    delete process.env.GOOGLE_AIR_QUALITY_API_KEY;
+    delete process.env.GOOGLE_MAPS_SERVER_API_KEY;
+    process.env.GOOGLE_POLLEN_API_KEY = 'pollen-only-key';
+    const app = await createApp();
+
+    const response = await request(app).get('/api/air-quality/current?lat=55.75&lon=37.62');
+
+    expect(response.status).toBe(503);
+  });
+
+  it('stays enabled when the server flag is unset', async () => {
+    delete process.env.AIR_QUALITY_ENABLED;
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            dateTime: '2026-08-14T09:00:00Z',
+            regionCode: 'ru',
+            indexes: [
+              {
+                code: 'uaqi',
+                displayName: 'Universal AQI',
+                aqi: 74,
+                category: 'Good air quality',
+                dominantPollutant: 'pm25',
+              },
+            ],
+            pollutants: [],
+          }),
+          { status: 200 },
+        ),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const app = await createApp();
+
+    const response = await request(app).get('/api/air-quality/current?lat=55.75&lon=37.62');
+
+    expect(response.status).not.toBe(503);
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalled();
+  });
+
   it('requires valid coordinates', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/air-quality/current?lat=999&lon=37.62');
     expect(response.status).toBe(400);
   });
@@ -65,7 +108,7 @@ describe('air quality routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get(
       '/api/air-quality/current?lat=55.75&lon=37.62&lang=ru',
@@ -106,7 +149,7 @@ describe('air quality routes', () => {
       ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     await request(app).get('/api/air-quality/current?lat=55.751&lon=37.621');
     await request(app).get('/api/air-quality/current?lat=55.752&lon=37.622');
@@ -120,7 +163,7 @@ describe('air quality routes', () => {
       new Response(png, { status: 200, headers: { 'Content-Type': 'image/png' } }),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const invalid = await request(app).get('/api/air-quality/heatmap/BAD_TYPE/2/1/1');
     expect(invalid.status).toBe(400);

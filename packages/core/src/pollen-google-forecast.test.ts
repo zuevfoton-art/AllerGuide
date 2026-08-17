@@ -4,6 +4,7 @@ import {
   buildReadingsFromGoogleForecastDay,
   buildUpiByTaxonFromGoogleDay,
   googleTypeKeyForTaxon,
+  hasGoogleGroupHeatmap,
   isTreeSpeciesPollenTaxon,
   mergeGoogleAndOpenMeteoMapReadings,
   resolveGoogleUpiForTaxon,
@@ -26,6 +27,19 @@ describe('pollen-google-forecast', () => {
     expect(googleTypeKeyForTaxon('birch_pollen')).toBe('TREE');
     expect(googleTypeKeyForTaxon('grass_pollen')).toBe('GRASS');
     expect(googleTypeKeyForTaxon('ragweed_pollen')).toBe('WEED');
+  });
+
+  it('treats missing or zero type UPI as an empty group heatmap', () => {
+    expect(hasGoogleGroupHeatmap('birch_pollen', day.typeIndexes)).toBe(true);
+    expect(hasGoogleGroupHeatmap('birch_pollen', { GRASS: day.typeIndexes!.GRASS })).toBe(false);
+    expect(
+      hasGoogleGroupHeatmap('birch_pollen', {
+        TREE: { index: 0 as const, source: 'google' },
+      }),
+    ).toBe(false);
+    expect(hasGoogleGroupHeatmap('grass_pollen', day.typeIndexes)).toBe(true);
+    expect(hasGoogleGroupHeatmap('ragweed_pollen', day.typeIndexes)).toBe(false);
+    expect(hasGoogleGroupHeatmap('birch_pollen', {})).toBe(false);
   });
 
   it('identifies tree species taxa', () => {
@@ -106,5 +120,54 @@ describe('pollen-google-forecast', () => {
     expect(merged.readings.find((item) => item.taxonId === 'birch_pollen')?.profileRelevant).toBe(
       true,
     );
+  });
+
+  it('keeps birch, alder and olive at distinct plant UPI and never copies TREE', () => {
+    const speciesDay = {
+      date: '2026-04-15',
+      typeIndexes: {
+        TREE: { index: 5 as const, source: 'google' as const, category: 'Very High' },
+      },
+      plantIndexes: {
+        birch_pollen: { index: 4 as const, source: 'google' as const, category: 'High' },
+        alder_pollen: { index: 2 as const, source: 'google' as const, category: 'Low' },
+        olive_pollen: { index: 1 as const, source: 'google' as const, category: 'Very Low' },
+      },
+    };
+
+    const merged = mergeGoogleAndOpenMeteoMapReadings(speciesDay, [], ['alder-pollen']);
+    expect(merged.upiByTaxon.birch_pollen).toMatchObject({ index: 4, source: 'google' });
+    expect(merged.upiByTaxon.alder_pollen).toMatchObject({ index: 2, source: 'google' });
+    expect(merged.upiByTaxon.olive_pollen).toMatchObject({ index: 1, source: 'google' });
+    expect(merged.readings.find((item) => item.taxonId === 'birch_pollen')?.value).toBe(4);
+    expect(merged.readings.find((item) => item.taxonId === 'alder_pollen')).toMatchObject({
+      value: 2,
+      profileRelevant: true,
+    });
+    expect(merged.readings.find((item) => item.taxonId === 'olive_pollen')?.value).toBe(1);
+  });
+
+  it('synthesizes a chip reading from Google plant UPI when Open-Meteo has no grains', () => {
+    const oliveOnlyDay = {
+      date: '2026-05-20',
+      typeIndexes: {
+        TREE: { index: 3 as const, source: 'google' as const },
+      },
+      plantIndexes: {
+        olive_pollen: { index: 2 as const, source: 'google' as const, category: 'Low' },
+      },
+    };
+
+    const merged = mergeGoogleAndOpenMeteoMapReadings(oliveOnlyDay, [], ['olive-pollen']);
+    expect(merged.upiByTaxon.olive_pollen).toMatchObject({ index: 2, source: 'google' });
+    expect(merged.readings.find((item) => item.taxonId === 'olive_pollen')).toMatchObject({
+      taxonId: 'olive_pollen',
+      allergenId: 'olive-pollen',
+      value: 2,
+      level: 'low',
+      profileRelevant: true,
+    });
+    expect(merged.upiByTaxon.birch_pollen).toBeUndefined();
+    expect(merged.upiByTaxon.alder_pollen).toBeUndefined();
   });
 });

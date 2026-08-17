@@ -96,17 +96,26 @@ export const YANDEX_MAP_INTERACTIVE_ENABLED =
   process.env.EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE === 'true';
 
 /**
- * Fetch live restaurants / medical POIs via the API Places proxy.
- * Offline catalog + ADAIR remain the fallback when false or unreachable.
+ * Unset / empty = on. Explicit `false` or `off` disables.
+ * Used for map Places and Air Quality, which stay on unless opted out.
  */
-export const MAP_PLACES_ENABLED =
-  process.env.EXPO_PUBLIC_MAP_PLACES === 'true' ||
-  process.env.EXPO_PUBLIC_LIVE_MAP === 'true';
+export function isDefaultOnPublicFlag(value: string | undefined): boolean {
+  return value !== 'false' && value !== 'off';
+}
+
+/**
+ * Fetch live restaurants / medical POIs via the API Places proxy.
+ * On by default; offline catalog + ADAIR remain the fallback when off or unreachable.
+ */
+export const MAP_PLACES_ENABLED = isDefaultOnPublicFlag(
+  process.env.EXPO_PUBLIC_MAP_PLACES ?? process.env.EXPO_PUBLIC_LIVE_MAP,
+);
 
 /**
  * Google Air Quality API enrichment (UAQI + health recommendations) via the
- * API proxy `/api/air-quality/*`. Open-Meteo stays the offline-safe fallback
- * and keeps feeding the wellness score.
+ * API proxy `/api/air-quality/*`. On by default; Open-Meteo stays the
+ * offline-safe fallback and keeps feeding the wellness score.
  */
-export const AIR_QUALITY_GOOGLE_ENABLED =
-  process.env.EXPO_PUBLIC_AIR_QUALITY === 'google';
+export const AIR_QUALITY_GOOGLE_ENABLED = isDefaultOnPublicFlag(
+  process.env.EXPO_PUBLIC_AIR_QUALITY,
+);

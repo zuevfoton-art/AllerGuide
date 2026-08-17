@@ -1,5 +1,5 @@
 # Lockbox keys mounted into the staging Serverless Container revision.
-# Keep in sync with apps/api/.env.staging.example and docs/migrate-off-replit-to-yc.md Phase 1.
+# Keep in sync with apps/api/.env.staging.example and docs/yc-stage-gates.md.
 # Deploy skips keys that are absent from the current Lockbox version (warning only),
 # except required runtime secrets listed in scripts/yc-lockbox-deploy-secrets.sh.
 

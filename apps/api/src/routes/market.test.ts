@@ -24,7 +24,7 @@ describe('market routes (Yandex affiliate)', () => {
   });
 
   it('serves curated seed catalog with yandex offers', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/market/catalog');
 
     expect(response.status).toBe(200);
@@ -38,7 +38,7 @@ describe('market routes (Yandex affiliate)', () => {
   });
 
   it('resolves productId via static seed URL when partner API is not configured', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app)
       .post('/api/market/offers/yandex/resolve')
       .send({ productId: 'air-purifier' });
@@ -51,7 +51,7 @@ describe('market routes (Yandex affiliate)', () => {
   });
 
   it('rejects resolve without identifiers', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/market/offers/yandex/resolve').send({});
     expect(response.status).toBe(400);
   });
@@ -73,7 +73,7 @@ describe('market routes (Yandex affiliate)', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const first = await request(app)
       .post('/api/market/offers/yandex/resolve')
       .send({ marketUrl: 'https://market.yandex.ru/search?text=hepa' });
@@ -90,7 +90,7 @@ describe('market routes (Yandex affiliate)', () => {
   });
 
   it('keeps draft search disabled by default', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/market/offers/yandex/draft-search?q=hepa');
     expect(response.status).toBe(503);
   });

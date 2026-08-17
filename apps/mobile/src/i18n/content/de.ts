@@ -396,7 +396,7 @@ const deContent: LocaleContent = {
         text: 'Symptome an {days} der letzten 7 Tage erfasst. Veränderungen beobachten; bei Verschlechterung Arzt kontaktieren.',
       },
       clinicalScale: {
-        title: 'Skala {label}',
+        title: 'Bewertung {label}',
         text: 'Letzte Bewertung: {total} Punkte ({level}). Kontrolle mit dem Arzt besprechen.',
       },
       crossReaction: {

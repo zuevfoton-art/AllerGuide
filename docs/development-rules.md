@@ -44,7 +44,7 @@ apps/api        — HTTP-маршруты, Drizzle, интеграции (OFF, O
 ### 2.3. Feature flags
 
 - Опциональная интеграция с backend **всегда** за флагом (`src/constants/features.ts` на mobile, env на API).
-- По умолчанию флаги **выключены** (см. `.env.example`).
+- По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places** и **Air Quality** — они включены, пока не поставить `false` / `off`.
 - Не хардкодить URL API и не предполагать, что Postgres/LLM доступны.
 
 ### 2.4. Один источник правды для домена
@@ -113,7 +113,7 @@ flowchart TD
 | `db/*` | Схемы `profile` / `catalog` / `public`. Миграции версионированы в `drizzle/`. |
 | `middleware/*` | Cross-cutting: security, JWT. |
 
-**Схемы Postgres:** пользовательские данные → `profile`; справочники → `catalog`; Replit OIDC → `public`. Не смешивать.
+**Схемы Postgres:** пользовательские данные → `profile`; справочники → `catalog`. Не смешивать.
 
 ### 3.4. `packages/core`
 

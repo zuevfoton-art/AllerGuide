@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  ASTHMA_ACTION_PLAN_DISCLAIMER,
   computePefTrend,
   getAsthmaPlanPersonalBest,
   isAsthmaPlanConfigured,
@@ -97,7 +96,7 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
       ) : null}
 
       <Button label={t('asthma.logPef')} variant="primary" size="sm" onPress={onLogPef} />
-      <Text style={styles.disclaimer}>{ASTHMA_ACTION_PLAN_DISCLAIMER}</Text>
+      <Text style={styles.disclaimer}>{t('asthma.cardDisclaimer')}</Text>
     </GlassCard>
   );
 }

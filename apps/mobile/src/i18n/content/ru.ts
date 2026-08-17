@@ -107,7 +107,7 @@ const ruContent: LocaleContent = {
         text: 'За последние 7 дней симптомы зафиксированы {days} дн. Отслеживайте динамику; при ухудшении обратитесь к врачу.',
       },
       clinicalScale: {
-        title: 'Шкала {label}',
+        title: 'Оценка: {label}',
         text: 'Последняя оценка: {total} баллов ({level}). Обсудите контроль с врачом.',
       },
       crossReaction: {
