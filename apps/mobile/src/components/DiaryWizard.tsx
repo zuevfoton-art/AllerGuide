@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -69,6 +69,8 @@ interface DiaryWizardProps {
   profileAllergiesJson?: string;
   /** Hidden pollen/scan/meds metadata merged on save. */
   autoMetadata?: DiaryAutoMetadata;
+  /** Optional recognized-medicine summary / age warning above the steps. */
+  notice?: ReactNode;
 }
 
 export function DiaryWizard({
@@ -83,6 +85,7 @@ export function DiaryWizard({
   planPersonalBestPef,
   profileAllergiesJson = '[]',
   autoMetadata,
+  notice,
 }: DiaryWizardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -396,6 +399,8 @@ export function DiaryWizard({
           style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
         />
       </View>
+
+      {notice ? <View style={styles.notice}>{notice}</View> : null}
 
       <Text style={styles.stepLabel}>{step.label}</Text>
       {step.hint ? <Text style={styles.stepHint}>{step.hint}</Text> : null}
@@ -1052,6 +1057,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       overflow: 'hidden',
     },
     progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: 999 },
+    notice: { marginBottom: 4 },
     stepLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 17,

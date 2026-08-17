@@ -18,7 +18,15 @@ export const DIARY_AUTO_STEP_IDS = new Set([
   'recentScan',
   'todayMeds',
   'scanRef',
+  'medicineForm',
+  'medicineActiveSubstance',
+  'medicineUsage',
+  'medicineAgeNote',
+  'medicineSource',
+  'medicinePhotos',
 ]);
+
+export const DIARY_PHOTO_ANSWER_IDS = ['skinPhotos', 'medicinePhotos'] as const;
 
 export const DIARY_HISTORY_HIDDEN_TYPES = new Set(['Шкала']);
 
@@ -198,6 +206,43 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Стало ли лучше? Были ли побочные эффекты?',
         field: 'text',
         multiline: true,
+        required: false,
+      },
+      {
+        id: 'medicineForm',
+        label: 'Форма выпуска (авто)',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'medicineActiveSubstance',
+        label: 'Действующее вещество (авто)',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'medicineUsage',
+        label: 'Применение (авто)',
+        field: 'text',
+        multiline: true,
+        required: false,
+      },
+      {
+        id: 'medicineAgeNote',
+        label: 'Возрастное ограничение (авто)',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'medicineSource',
+        label: 'Источник распознавания (авто)',
+        field: 'text',
+        required: false,
+      },
+      {
+        id: 'medicinePhotos',
+        label: 'Фото упаковки',
+        field: 'photo',
         required: false,
       },
     ],
@@ -687,13 +732,21 @@ export function serializeDiaryPhotoUris(uris: string[]): string {
 }
 
 export function getDiaryPhotoUrisFromAnswers(answers: Record<string, string>): string[] {
-  return parseDiaryPhotoUris(answers.skinPhotos);
+  const uris: string[] = [];
+  for (const key of DIARY_PHOTO_ANSWER_IDS) {
+    for (const uri of parseDiaryPhotoUris(answers[key])) {
+      if (!uris.includes(uri)) uris.push(uri);
+    }
+  }
+  return uris;
 }
 
 /** Remove photo payloads from answers so summaries / PDF text stay clean. */
 export function stripDiaryPhotoAnswers(answers: Record<string, string>): Record<string, string> {
   const next = { ...answers };
-  delete next.skinPhotos;
+  for (const key of DIARY_PHOTO_ANSWER_IDS) {
+    delete next[key];
+  }
   return next;
 }
 

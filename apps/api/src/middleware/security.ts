@@ -136,6 +136,7 @@ export async function installRateLimiters(app: Express): Promise<void> {
   const scanLimiter = await createScanRateLimiter();
   app.use('/api/scan', scanLimiter);
   app.use('/api/ocr', scanLimiter);
+  app.use('/api/medicines', scanLimiter);
   app.use('/api/pollen', await createPollenRateLimiter());
   // Air quality shares the pollen limiter profile (forecast + tile traffic).
   app.use('/api/air-quality', await createPollenRateLimiter());

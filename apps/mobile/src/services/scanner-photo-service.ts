@@ -64,6 +64,29 @@ export async function cropImageToBase64(
   };
 }
 
+/** Encode a picked photo without a crop rect (web / fallback). */
+export async function encodeImageToBase64(
+  uri: string,
+  options?: { maxWidth?: number },
+): Promise<CroppedScanPhoto> {
+  const maxWidth = options?.maxWidth ?? MAX_OUTPUT_WIDTH;
+  const result = await manipulateAsync(uri, [{ resize: { width: maxWidth } }], {
+    compress: 0.75,
+    format: SaveFormat.JPEG,
+    base64: true,
+  });
+  if (!result.base64) {
+    throw new Error('Image encode did not return base64 data');
+  }
+  return {
+    uri: result.uri,
+    base64: result.base64,
+    mimeType: 'image/jpeg',
+    width: result.width,
+    height: result.height,
+  };
+}
+
 export async function pickScanPhotoFromLibrary(): Promise<CapturedScanPhoto | null> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) return null;

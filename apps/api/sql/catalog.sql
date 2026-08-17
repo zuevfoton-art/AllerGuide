@@ -46,3 +46,29 @@ CREATE INDEX IF NOT EXISTS products_source_idx      ON catalog.products (source)
 CREATE INDEX IF NOT EXISTS products_name_trgm       ON catalog.products USING gin (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS products_ingredients_fts ON catalog.products USING gin (to_tsvector('russian', ingredients));
 CREATE INDEX IF NOT EXISTS products_allergen_tags   ON catalog.products USING gin (allergen_tags jsonb_path_ops);
+
+-- Shared medicine cards (package photo recognition, no user id / no photo) --
+CREATE TABLE IF NOT EXISTS catalog.medicines (
+    id               varchar(64)  PRIMARY KEY,
+    normalized_name  varchar(255) NOT NULL,
+    name             text         NOT NULL,
+    active_substance text         NOT NULL DEFAULT '',
+    form             varchar(128) NOT NULL DEFAULT '',
+    strength         varchar(128) NOT NULL DEFAULT '',
+    manufacturer     varchar(255) NOT NULL DEFAULT '',
+    indications      text         NOT NULL DEFAULT '',
+    age_usage        jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    min_age_years    integer,
+    ingredients      text         NOT NULL DEFAULT '',
+    allergen_tags    jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    source           varchar(32)  NOT NULL DEFAULT 'vision',
+    confidence       varchar(16)  NOT NULL DEFAULT 'low',
+    recognitions     integer      NOT NULL DEFAULT 1,
+    created_at       timestamptz  NOT NULL DEFAULT now(),
+    updated_at       timestamptz  NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS medicines_normalized_name_uidx ON catalog.medicines (normalized_name);
+CREATE INDEX IF NOT EXISTS medicines_source_idx ON catalog.medicines (source);
+CREATE INDEX IF NOT EXISTS medicines_name_trgm ON catalog.medicines USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS medicines_substance_trgm ON catalog.medicines USING gin (active_substance gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS medicines_allergen_tags ON catalog.medicines USING gin (allergen_tags jsonb_path_ops);

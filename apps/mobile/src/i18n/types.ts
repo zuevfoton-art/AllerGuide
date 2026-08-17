@@ -293,6 +293,31 @@ export type LocaleMessages = {
     dishOffLoading: string;
     dishOffEnriched: string;
   };
+  medicineScan: {
+    title: string;
+    subtitle: string;
+    photograph: string;
+    recordVoice: string;
+    gallery: string;
+    fillManually: string;
+    recognizing: string;
+    recognizingVoice: string;
+    transcript: string;
+    voiceNotRecognized: string;
+    continue: string;
+    name: string;
+    activeSubstance: string;
+    form: string;
+    strength: string;
+    usage: string;
+    manufacturer: string;
+    disclaimer: string;
+    ageWarning: string;
+    cloudOff: string;
+    notRecognized: string;
+    cropTitle: string;
+    cropHint: string;
+  };
   voiceNote: {
     title: string;
     tapToSpeak: string;
