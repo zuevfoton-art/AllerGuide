@@ -3,12 +3,11 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
-  buildScaleInitialAnswers,
   collectLatestScaleTrends,
   formatDiaryDate,
-  getClinicalScaleSection,
   type ClinicalScaleId,
 } from '@allerguide/core';
+import { buildClinicalScaleEditorState } from '@/src/services/diary-section-service';
 import { addDiaryEntries, getDiaryEntries } from '@/src/services/diary-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
@@ -68,6 +67,8 @@ export default function ClinicalScalesScreen() {
     if (match) setScaleId(match.id);
     router.setParams({ openScale: undefined } as any);
   }, [openScale]);
+
+  const scaleEditor = scaleId ? buildClinicalScaleEditorState(scaleId) : null;
 
   const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     const profileId = activeProfileId ?? getOrLoadActiveProfileId();
@@ -151,11 +152,11 @@ export default function ClinicalScalesScreen() {
         </GlassCard>
       )}
 
-      <DiaryEditorModal visible={scaleId !== null} onClose={() => setScaleId(null)}>
-        {scaleId ? (
+      <DiaryEditorModal visible={scaleEditor !== null} onClose={() => setScaleId(null)}>
+        {scaleEditor?.section ? (
           <DiaryWizard
-            sections={[getClinicalScaleSection(scaleId)]}
-            initialAnswersBySection={{ Шкала: buildScaleInitialAnswers(scaleId) }}
+            sections={[scaleEditor.section]}
+            initialAnswersBySection={scaleEditor.prefill}
             allowSkipSection={false}
             profileAllergiesJson={activeProfile?.allergies ?? '[]'}
             onCancel={() => setScaleId(null)}

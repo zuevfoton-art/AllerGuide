@@ -180,7 +180,7 @@ flowchart TB
 | Этап | Действие | Система | Критерий успеха |
 |------|----------|---------|-----------------|
 | Open | Tab «Дневник» | `getDiaryEntries(activeProfileId)` | список / EmptyState; chips = матрица §4 |
-| Entry | full / short / «Что добавить» / visit / scales / card | `EditorState` mode или `/clinical-scales` | открыт wizard / экран шкал |
+| Entry | «Новая запись» picker / «Настроить курс» / card | `EditorState` section или `/asit-course` / `/prescribed-therapy` | открыт wizard / экран курса |
 | Fill | required поля секции | `validateDiarySectionStep` | null error |
 | Save create | Сохранить | `addDiaryEntries` + photos | INSERT; `closeEditor`; `load`; event `diary_entry_saved` (если analytics) |
 | Save update | Сохранить | `updateDiaryEntry` | UPDATE; close+load; **без** analytics |
@@ -191,11 +191,10 @@ flowchart TB
 
 | Режим | Как открыть | Исход editor |
 |-------|-------------|--------------|
-| full | «Новая запись» | адаптивный маршрут (`buildAdaptiveDiaryWizardSections`): без PEF/АСИТ/визита/терапии и без auto-шагов |
-| short | «Короткая запись» | Симптомы (или первая visible) |
-| section | «Что добавить» | одна секция (+ prefill) |
-| visit | «Предстоящий визит к врачу» | секция визита |
-| scale | «Клинические оценки» | `/clinical-scales` |
+| picker | «Новая запись» | модалка «Что добавить» (`buildDiaryEntryPickerOptions`) → одна секция |
+| visit | picker → «Запись к врачу» | секция визита |
+| scale | picker → «Шкала» | `getClinicalScaleSection` в том же editor |
+| course | «Настроить курс» | модалка Терапия/АСИТ → `/prescribed-therapy` / `/asit-course` |
 | edit structured | tap row | prefilled answers |
 | edit legacy | tap row с plain details | `DiaryLegacyEditor` |
 
@@ -294,7 +293,7 @@ flowchart TB
 |----|-------------|------|-------|
 | D-VIEW-01 | activeProfileId, ≥1 запись | открыть tab diary | видимая история без типа `Шкала`; новые сверху (`ORDER BY id DESC`) |
 | D-VIEW-02 | 0 записей | открыть diary | EmptyState |
-| D-CRT-01 | профиль есть | «Короткая запись» → Симптомы: `symptoms="зуд"`, `severity0_3="2 — умеренная"` → Save | INSERT `type=Симптомы`; structured `answers`; editor закрыт; список обновлён |
+| D-CRT-01 | профиль есть | «Новая запись» → Симптомы: `symptoms="зуд"`, `severity0_3="2 — умеренная"` → Save | INSERT `type=Симптомы`; structured `answers`; editor закрыт; список обновлён |
 | D-CRT-02 | wizard Симптомы | заполнить symptoms, **не** severity → завершить | ошибка «Укажите выраженность симптомов (0–3).»; INSERT нет |
 | D-CRT-03 | chip Лекарство | `medicine="цетиризин"`, `dosage="10 мг"` → Save | INSERT `type=Лекарство` |
 | D-CRT-04 | chip Питание | `food="борщ"`; при checklist отметить компоненты → Save | INSERT `Питание`; answers содержат `food` (+ `foodComponents` если чеклист пройден) |

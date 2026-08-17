@@ -170,7 +170,7 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 | Вкладка | Файл | Функция |
 |---------|------|---------|
 | Главная | `home.tsx` | `ScreenBrandHeader`, двухслойный wellness, plain-language insights, reminder терапии |
-| Дневник | `diary.tsx` | Записи сверху, адаптивный wizard, модули наблюдения снизу |
+| Дневник | `diary.tsx` | «Новая запись» (picker → секция), «Настроить курс», история, модули наблюдения |
 | Сканер | `scanner.tsx` | Штрихкод, OCR, ручной ввод |
 | Маркет | `market.tsx` | Safe-product marketplace (Yandex Market) |
 | Карта | `map.tsx` | Пыление / места (Yandex; опц. Google heatmap) |

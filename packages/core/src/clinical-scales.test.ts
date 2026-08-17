@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildClinicalScaleEditorState,
   buildScaleInitialAnswers,
   computeScaleScore,
   enrichScaleAnswers,
@@ -13,6 +14,14 @@ describe('clinical scales', () => {
     const aria = getClinicalScaleSection('aria-lite');
     expect(aria.type).toBe('Шкала');
     expect(aria.steps.length).toBe(4);
+  });
+
+  it('builds a diary editor state for the selected scale', () => {
+    const state = buildClinicalScaleEditorState('act');
+    expect(state.sectionType).toBe('Шкала');
+    expect(state.section.type).toBe('Шкала');
+    expect(state.prefill.Шкала).toEqual({ scaleId: 'act' });
+    expect(state.section.steps.some((step) => step.id === 'actActivity')).toBe(true);
   });
 
   it('validates ARIA-lite answers', () => {

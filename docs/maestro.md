@@ -90,7 +90,7 @@ maestro test .maestro/flows/staging-smoke-all.yaml
 | Flow | Сценарий |
 |------|----------|
 | `onboarding-smoke` | регистрация → профиль → home |
-| `diary-smoke` | быстрая запись симптомов |
+| `diary-smoke` | новая запись → симптомы |
 | `scanner-smoke` | «молоко» → вердикт |
 | `sos-smoke` | карточка + паспорт |
 | `settings-smoke` | номер экстренной службы |
