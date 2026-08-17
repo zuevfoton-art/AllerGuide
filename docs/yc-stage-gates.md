@@ -53,6 +53,8 @@ EAS `staging`, `apps/mobile/.env.staging.example` и staging workflows указ�
 
 `pnpm yc-stage-phase5` заново гоняет гейты 0/2/3/4, live health и pollen smoke. Других host не проверяет.
 
+**Статус:** PASSED 2026-08-17 на `https://api.staging.aclearo.com` (health + pollen smoke).
+
 ```bash
 pnpm yc-stage-phase5
 STAGING_RUN_SMOKES=1 pnpm yc-stage-phase5

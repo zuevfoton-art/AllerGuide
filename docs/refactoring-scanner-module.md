@@ -25,7 +25,9 @@ OCR / dish-vision), но сделать границы данных и ввод�
 - `apps/mobile/src/services/scan-history-service.ts`;
 - `apps/mobile/src/services/safe-products-service.ts`;
 - `apps/mobile/src/services/alias-feedback-service.ts`;
-- `apps/mobile/src/services/scanner-service.ts`;
+- `apps/mobile/src/services/scanner-service.ts` (баррель) + `scan-analysis.ts`,
+  `scanner-barcode-service.ts`, `scanner-ocr-service.ts`,
+  `scanner-dish-vision-service.ts`;
 - `apps/mobile/src/services/owned-profiles.ts`;
 - `apps/mobile/app/(tabs)/scanner.tsx`;
 - `apps/mobile/src/db/init.ts` / `web-store.ts`;
@@ -189,10 +191,10 @@ LLM не утекают.
 
 ### B. Разрезать `scanner-service.ts` на barcode / ocr / vision оркестраторы
 
-Плюсы: ниже связность, проще тестировать ветки.
-Минусы: высокий риск регрессий VL-first пути, который уже покрыт golden /
-dish-vision тестами. Для этой итерации важнее границы данных, а не
-перестановка pipeline.
+Сделано (ребейз на `main` после #250/#251): публичный импорт остался
+`scanner-service`, VL-first и `ScanCloudAuthError` сохранены. Плюсы:
+ниже связность, проще тестировать ветки. Риск регрессий закрывается
+существующими `scanner-service` / `scanner-dish-vision` тестами.
 
 ### C. Оставить клиентский `prompt` в кэше «для гибкости»
 

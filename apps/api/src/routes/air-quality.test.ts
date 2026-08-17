@@ -28,6 +28,17 @@ describe('air quality routes', () => {
     expect(response.status).toBe(503);
   });
 
+  it('does not use the Pollen-only key as an Air Quality credential', async () => {
+    delete process.env.GOOGLE_AIR_QUALITY_API_KEY;
+    delete process.env.GOOGLE_MAPS_SERVER_API_KEY;
+    process.env.GOOGLE_POLLEN_API_KEY = 'pollen-only-key';
+    const app = await createApp();
+
+    const response = await request(app).get('/api/air-quality/current?lat=55.75&lon=37.62');
+
+    expect(response.status).toBe(503);
+  });
+
   it('requires valid coordinates', async () => {
     const app = await createApp();
     const response = await request(app).get('/api/air-quality/current?lat=999&lon=37.62');
