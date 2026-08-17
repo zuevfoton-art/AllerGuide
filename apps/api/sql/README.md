@@ -7,8 +7,8 @@ The AllerGuide backend splits its data into two Postgres schemas ("databases"):
 | `profile.sql` | `profile` | Per-user data: accounts, profiles, diary, scan results, emergency contacts, SOS notes, encrypted cloud backups. |
 | `catalog.sql` | `catalog` | Global reference data: allergen taxonomy, cross-reactions, product/barcode catalog (indexed for search). |
 
-Replit-OIDC tables (`users`, `sessions`) remain in the default `public` schema
-(third-party integration).
+Unused leftover `public.users` / `public.sessions` tables may still exist from
+early schema history; the app does not use them.
 
 ## Source of truth
 

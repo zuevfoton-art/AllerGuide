@@ -1,4 +1,3 @@
 - [Deployment static-vs-autoscale](deployment-type.md) — static type broke DB publish flow; autoscale required to properly sync dev→prod DB.
 - [API serves frontend in prod](api-static-serving.md) — Express must serve apps/mobile/dist + SPA fallback when METRO_URL is absent.
 - [Metro blockList for .local](metro-blocklist.md) — watchFolders=[workspaceRoot] must exclude .local via blockList RegExp or Metro crashes on deleted artifact dirs.
-- [EAS Build in Replit](eas-build-replit.md) — Replit main agent blocks all git ops; must bypass EAS CLI entirely and use direct API to submit builds.

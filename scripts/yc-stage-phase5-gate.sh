@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Phase 5 gate: final acceptance — YC stage green, Replit host paused/gone, no stage replit.app.
-# See docs/migrate-off-replit-to-yc.md §Phase 5
+# Phase 5 gate: final Yandex Cloud staging acceptance.
+# See docs/yc-stage-gates.md §Phase 5
 #
 # Env:
-#   REQUIRE_REPLIT_PAUSED=1  fail if aller-guide.replit.app still healthy (default: warn)
 #   STAGING_RUN_SMOKES=1     also run staging-preflight.sh
 #   SKIP_PRIOR_GATES=1       skip invoking phase 0–4 gates
 set -euo pipefail
@@ -13,8 +12,6 @@ cd "$ROOT"
 
 STAGING_API_URL="${STAGING_API_URL:-https://api.staging.aclearo.com}"
 STAGING_API_URL="${STAGING_API_URL%/}"
-REPLIT_URL="${REPLIT_HEALTH_URL:-https://aller-guide.replit.app}"
-REPLIT_URL="${REPLIT_URL%/}"
 
 FAILED=0
 WARNED=0
@@ -25,7 +22,6 @@ warn() { echo "  WARN  $*"; WARNED=$((WARNED + 1)); }
 
 echo "=== YC stage Phase 5 gate (final acceptance) ==="
 echo "YC: $STAGING_API_URL"
-echo "Replit probe: $REPLIT_URL"
 echo ""
 
 # --- P5.1 prior gates ---
@@ -102,66 +98,26 @@ fi
 
 echo ""
 
-# --- P5.3 no replit.app in active stage paths ---
-echo "--- P5.3 no replit.app in stage client/config ---"
-HITS="$(
-  {
-    grep -RIn --exclude-dir=node_modules -E 'aller-guide\.replit\.app' \
-      apps/mobile/eas.json apps/mobile/.env.staging.example \
-      scripts/staging-*.sh .github/workflows/*staging* \
-      .github/workflows/deploy-staging*.yml .github/workflows/eas-staging*.yml \
-      2>/dev/null || true
-  } | sort -u || true
-)"
-if [[ -z "${HITS//[[:space:]]/}" ]]; then
-  pass "no aller-guide.replit.app in stage configs/workflows"
+# --- P5.3 stage clients point at YC only ---
+echo "--- P5.3 stage clients → YC ---"
+if node -e 'const e=require("./apps/mobile/eas.json"); process.exit(e.build?.staging?.env?.EXPO_PUBLIC_API_URL === "https://api.staging.aclearo.com" ? 0 : 1)'; then
+  pass "eas.json staging → api.staging.aclearo.com"
 else
-  fail "replit.app still referenced:"
-  echo "$HITS"
+  fail "eas.json staging must use https://api.staging.aclearo.com"
 fi
 
-if node -e 'const e=require("./apps/mobile/eas.json"); process.exit(e.build?.replit ? 1 : 0)'; then
-  pass "eas.json has no replit profile"
+if [[ -e .replit || -e scripts/replit-deploy-build.sh || -f docs/replit-deploy.md || -f docs/archive/replit-deploy.md ]]; then
+  fail "foreign-host deploy artifacts still in repo"
 else
-  fail "eas.json still has replit profile"
-fi
-
-if [[ -e .replit || -e scripts/replit-deploy-build.sh ]]; then
-  fail "Replit deploy artifacts still in repo"
-else
-  pass "Replit deploy artifacts absent"
-fi
-
-echo ""
-
-# --- P5.4 Replit host paused ---
-echo "--- P5.4 Replit host paused ---"
-CODE="$(curl -sS -o /tmp/p5-replit-health.json -w '%{http_code}' --max-time 20 \
-  "$REPLIT_URL/api/health" || echo "000")"
-if [[ "$CODE" == "200" ]]; then
-  BODY="$(head -c 200 /tmp/p5-replit-health.json 2>/dev/null || true)"
-  MSG="Replit still healthy HTTP 200 ($REPLIT_URL) — pause/unpublish in Replit Deployments UI"
-  if [[ "${REQUIRE_REPLIT_PAUSED:-}" == "1" ]]; then
-    fail "$MSG"
-  else
-    warn "$MSG (set REQUIRE_REPLIT_PAUSED=1 to fail)"
-  fi
-  echo "  info  body: $BODY"
-elif [[ "$CODE" == "000" ]]; then
-  pass "Replit unreachable (treat as paused/down)"
-else
-  pass "Replit not serving healthy API (HTTP $CODE) — acceptable for pause"
+  pass "no foreign-host deploy artifacts"
 fi
 
 echo ""
 echo "=== Summary ==="
 echo "Failed: $FAILED  Warnings: $WARNED"
-echo "Pause runbook: docs/migrate-off-replit-to-yc.md §Phase 5"
+echo "Runbook: docs/yc-stage-gates.md §Phase 5"
 if [[ "$FAILED" -gt 0 ]]; then
   echo "Phase 5 gate FAILED." >&2
   exit 1
 fi
 echo "Phase 5 gate PASSED."
-if [[ "$WARNED" -gt 0 ]]; then
-  echo "(Replit host may still be live — complete pause ops, then REQUIRE_REPLIT_PAUSED=1)"
-fi

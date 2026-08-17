@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { randomBytes } from 'crypto';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import {
@@ -138,21 +137,4 @@ export async function consumeResetToken(token: string, newPassword: string): Pro
     .where(eq(passwordResetTokens.id, row.id));
 
   return true;
-}
-
-export async function findOrCreateReplitUser(claims: {
-  sub: string;
-}): Promise<(typeof appUsers.$inferSelect) | null> {
-  const login = `replit_${claims.sub}`;
-
-  const existing = await findUserByLogin(login);
-  if (existing) return existing;
-
-  const passwordHash = await hashPassword(randomUUID());
-  const [created] = await db
-    .insert(appUsers)
-    .values({ login, loginType: 'replit', passwordHash })
-    .returning();
-
-  return created ?? null;
 }

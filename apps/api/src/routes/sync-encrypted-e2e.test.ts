@@ -25,7 +25,7 @@ describe('encrypted sync round-trip (P1.4b)', () => {
   });
 
   it('uploads ciphertext and restores plaintext with the recovery key', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const auth = await bearer(11);
     const payload = createSyncPayload({
       userId: 11,
