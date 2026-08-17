@@ -43,7 +43,7 @@ describe('places nearby routes', () => {
     delete process.env.MAP_PLACES_ENABLED;
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({ places: [] }), { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/places/nearby?lat=55.75&lon=37.62');
 

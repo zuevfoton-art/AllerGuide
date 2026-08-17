@@ -62,7 +62,7 @@ describe('air quality routes', () => {
         ),
     );
     vi.stubGlobal('fetch', fetchMock);
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     const response = await request(app).get('/api/air-quality/current?lat=55.75&lon=37.62');
 
