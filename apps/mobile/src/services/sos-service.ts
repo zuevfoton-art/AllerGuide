@@ -5,13 +5,39 @@ import {
   deleteEmergencyContact,
   listEmergencyContacts,
 } from '@/src/services/emergency-contact-service';
+import type { EmergencyContact } from '@allerguide/core';
+
+export const DEFAULT_EMERGENCY_NUMBER = '103';
+
+export type SosEmergencyBarModel = {
+  emergencyNumber: string;
+  firstContact: EmergencyContact | null;
+};
+
+/**
+ * Always expose the emergency call. Contacts require a profile; the number does not.
+ */
+export function resolveSosEmergencyBar(input: {
+  profileId: number | null;
+  emergencyNumber: string;
+  firstContact?: EmergencyContact | null;
+}): SosEmergencyBarModel {
+  const emergencyNumber = input.emergencyNumber.trim() || DEFAULT_EMERGENCY_NUMBER;
+  if (input.profileId == null) {
+    return { emergencyNumber, firstContact: null };
+  }
+  return {
+    emergencyNumber,
+    firstContact: input.firstContact ?? null,
+  };
+}
 
 export function getEmergencyNumber(): string {
-  return getSetting('emergencyNumber') || '103';
+  return getSetting('emergencyNumber') || DEFAULT_EMERGENCY_NUMBER;
 }
 
 export function setEmergencyNumber(number: string) {
-  setSetting('emergencyNumber', number.replace(/[^\d+]/g, '') || '103');
+  setSetting('emergencyNumber', number.replace(/[^\d+]/g, '') || DEFAULT_EMERGENCY_NUMBER);
 }
 
 export function getSosNotes(profileId: number): string {

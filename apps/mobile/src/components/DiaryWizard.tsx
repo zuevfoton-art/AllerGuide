@@ -111,6 +111,10 @@ export function DiaryWizard({
     1;
   const overallStepsTotal = sections.reduce((sum, item) => sum + item.steps.length, 0);
   const isLastStep = sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1;
+  const canAdvanceCurrentStep =
+    section.type === 'Шкала' && isLastStep
+      ? !validateClinicalScale(sectionAnswers)
+      : !step.required || Boolean(sectionAnswers[step.id]?.trim());
   const canSkipSection =
     allowSkipSection &&
     totalSections > 1 &&
@@ -447,7 +451,11 @@ export function DiaryWizard({
           onPress={goBack}>
           <Text style={styles.secondaryText}>{t('common.back')}</Text>
         </Pressable>
-        <Pressable style={styles.primaryBtn} onPress={goNext} testID="diary-wizard-primary">
+        <Pressable
+          style={[styles.primaryBtn, !canAdvanceCurrentStep && styles.btnDisabled]}
+          disabled={!canAdvanceCurrentStep}
+          onPress={goNext}
+          testID="diary-wizard-primary">
           <Text style={styles.primaryText}>
             {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
           </Text>
@@ -507,6 +515,7 @@ export function DiaryLegacyEditor({ value, onCancel, onSave, onDelete }: DiaryLe
         onChangeText={setText}
         placeholder={t('diaryWizard.entryPlaceholder')}
         placeholderTextColor={theme.colors.textMuted}
+        accessibilityLabel={t('diaryWizard.editEntry')}
         multiline
         textAlignVertical="top"
       />
@@ -681,6 +690,7 @@ function DishComponentsField({
                 conflict === 'direct' && styles.conflictDirect,
                 conflict === 'cross' && styles.conflictCross,
               ]}
+              hitSlop={8}
               onPress={() => toggle(component.id)}>
               <Text
                 style={[
@@ -801,6 +811,7 @@ function StepField({
               key={choice}
               testID={step.multiSelect ? `diary-multi-choice-${choice}` : undefined}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
+              hitSlop={8}
               onPress={() =>
                 onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice)
               }>
@@ -823,6 +834,7 @@ function StepField({
       onChangeText={onChange}
       placeholder={step.placeholder}
       placeholderTextColor={theme.colors.textMuted}
+      accessibilityLabel={step.label}
       multiline={step.multiline}
       textAlignVertical={step.multiline ? 'top' : 'center'}
     />

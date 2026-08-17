@@ -67,7 +67,7 @@ Wellness/Home по-прежнему на Open-Meteo.
    - **Альтернатива без Google:** MapLibre + OSM тайлы (нет ключа Яндекса/Google) — отдельный spike.
 2. Временно оставить Open-Meteo как primary numeric feed на карте (как сейчас) — **до Phase 2**.
 3. Убрать зависимость UX от «откройте в Яндексе» (deep-link — secondary/overflow).
-4. На карте: текущая точка, цвет уровня выбранного таксона, POI-пины в режиме «Места/Оба».
+4. На карте: текущая точка, цвет уровня выбранного таксона, POI-пины в режиме «Места».
 
 **Критерий готовности:** на web + Android пользователь зумит/двигает карту; уровни и прогноз не деградируют offline (кэш/календарь).
 
@@ -180,7 +180,7 @@ flowchart LR
 | 3 | Интерполяция + refresh 15–60 мин | **Done** — `interpolateUpiIndex` day-fraction; focus interval 15 мин + AppState pause |
 | 4 | Nearby на Google-primary | **Done** — OM ring samples secondary после Google snapshot |
 | 5 | Phase 4 Yandex spike | **Done (doc)** — [`yandex-interactive-basemap-spike.md`](./yandex-interactive-basemap-spike.md) |
-| 6 | ToS attribution footer | **Done** — `map.pollenGooglePrimaryAttribution` under hero map |
+| 6 | ToS attribution footer | Google logo on the map SDK; extra product copy under the hero was removed |
 | 7 | Observability | **Done** — `map_pollen_refreshed` / `map_pollen_fallback` analytics (+ existing `logCaughtError`) |
 | 8 | Не трогать wellness Google | **Kept** |
 | 9 | `YandexInteractiveMap` (вариант A) | **Done** — API embed + mobile WebView/iframe; флаг `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` (default off) |

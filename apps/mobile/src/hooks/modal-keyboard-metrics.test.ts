@@ -16,10 +16,10 @@ describe('resolveModalKeyboardAvoidance', () => {
     expect(result.insetStyle).toBeUndefined();
   });
 
-  it('stays inert on web', () => {
+  it('applies visualViewport lift/inset on web when the keyboard is open', () => {
     const result = resolveModalKeyboardAvoidance('web', 200);
     expect(result.behavior).toBeUndefined();
-    expect(result.liftStyle).toBeUndefined();
-    expect(result.insetStyle).toBeUndefined();
+    expect(result.liftStyle).toEqual({ marginBottom: 200 });
+    expect(result.insetStyle).toEqual({ paddingBottom: 200 });
   });
 });

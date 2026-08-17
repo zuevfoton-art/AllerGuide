@@ -15,12 +15,12 @@ export function resolveModalKeyboardAvoidance(
   platform: string,
   keyboardInset: number,
 ): ModalKeyboardAvoidance {
-  const androidLift = platform === 'android' && keyboardInset > 0;
+  const liftInset = (platform === 'android' || platform === 'web') && keyboardInset > 0;
 
   return {
     behavior: platform === 'ios' ? 'padding' : undefined,
-    liftStyle: androidLift ? { marginBottom: keyboardInset } : undefined,
-    insetStyle: androidLift ? { paddingBottom: keyboardInset } : undefined,
+    liftStyle: liftInset ? { marginBottom: keyboardInset } : undefined,
+    insetStyle: liftInset ? { paddingBottom: keyboardInset } : undefined,
     keyboardInset,
   };
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, forwardRef } from 'react';
 import {
   Modal,
   Pressable,
@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   View,
+  type TextInputProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -20,7 +21,9 @@ import {
   type PhoneCountry,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { useTranslation } from '@/src/store/locale-store';
+import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 
 export interface PhoneInputProps {
   label?: string;
@@ -31,18 +34,36 @@ export interface PhoneInputProps {
   placeholder?: string;
   testID?: string;
   defaultCountryIso2?: string;
+  returnKeyType?: TextInputProps['returnKeyType'];
+  onSubmitEditing?: TextInputProps['onSubmitEditing'];
+  submitBehavior?: TextInputProps['submitBehavior'];
+  textContentType?: TextInputProps['textContentType'];
+  autoComplete?: TextInputProps['autoComplete'];
+  autoCorrect?: boolean;
+  accessibilityLabel?: string;
 }
 
-export function PhoneInput({
-  label,
-  value,
-  onChangeText,
-  emitE164 = true,
-  placeholder,
-  testID,
-  defaultCountryIso2 = DEFAULT_PHONE_COUNTRY_ISO2,
-}: PhoneInputProps) {
+export const PhoneInput = forwardRef<TextInput, PhoneInputProps>(function PhoneInput(
+  {
+    label,
+    value,
+    onChangeText,
+    emitE164 = true,
+    placeholder,
+    testID,
+    defaultCountryIso2 = DEFAULT_PHONE_COUNTRY_ISO2,
+    returnKeyType,
+    onSubmitEditing,
+    submitBehavior,
+    textContentType,
+    autoComplete,
+    autoCorrect,
+    accessibilityLabel,
+  },
+  ref,
+) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -73,11 +94,12 @@ export function PhoneInput({
           style={styles.countryBtn}
           onPress={() => setPickerOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel="Country code">
+          accessibilityLabel={t('auth.countryCode')}>
           <Text style={styles.dialCode}>+{country.dialCode}</Text>
           <Ionicons name="chevron-down" size={14} color={theme.colors.textSecondary} />
         </Pressable>
         <TextInput
+          ref={ref}
           testID={testID}
           style={styles.input}
           value={parsed.nationalDigits ? formatNationalNumber(parsed.nationalDigits, country.iso2) : ''}
@@ -85,6 +107,13 @@ export function PhoneInput({
           placeholder={placeholder ?? formatNationalNumber('9991234567', country.iso2)}
           placeholderTextColor={theme.colors.textMuted}
           keyboardType="phone-pad"
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
+          submitBehavior={submitBehavior}
+          textContentType={textContentType}
+          autoComplete={autoComplete}
+          autoCorrect={autoCorrect}
+          accessibilityLabel={accessibilityLabel ?? label}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />
@@ -96,7 +125,7 @@ export function PhoneInput({
       <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setPickerOpen(false)}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Код страны</Text>
+            <Text style={styles.modalTitle}>{t('auth.countryCodeTitle')}</Text>
             <ScrollView style={styles.modalList}>
               {PHONE_COUNTRIES.map((item) => {
                 const active = item.iso2 === country.iso2;
@@ -120,14 +149,14 @@ export function PhoneInput({
       </Modal>
     </View>
   );
-}
+});
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     wrap: { gap: 6 },
     label: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
       fontWeight: '600',
     },
@@ -137,9 +166,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 12,
+      borderRadius: radii.md,
       backgroundColor: colors.card,
       overflow: 'hidden',
+      minHeight: 44,
     },
     rowFocused: { borderColor: colors.accent },
     countryBtn: {
@@ -153,7 +183,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     dialCode: {
       fontFamily: fonts.sans,
-      fontSize: 16,
+      fontSize: WEB_INPUT_FONT_SIZE,
       color: colors.text,
       fontWeight: '600',
     },
@@ -167,7 +197,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     hint: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textMuted,
     },
     modalBackdrop: {
@@ -178,14 +208,14 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     modalCard: {
       backgroundColor: colors.card,
-      borderRadius: 16,
+      borderRadius: radii.xl,
       maxHeight: '70%',
       padding: 16,
       gap: 8,
     },
     modalTitle: {
       fontFamily: fonts.sans,
-      fontSize: 16,
+      fontSize: fontSizes.body,
       fontWeight: '700',
       color: colors.text,
       marginBottom: 4,
@@ -196,11 +226,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       paddingVertical: 12,
       paddingHorizontal: 8,
-      borderRadius: 8,
+      borderRadius: radii.md,
     },
     countryRowActive: { backgroundColor: `${colors.accent}18` },
-    countryName: { fontFamily: fonts.sans, fontSize: 15, color: colors.text },
+    countryName: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.text },
     countryNameActive: { color: colors.accent, fontWeight: '600' },
-    countryDial: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary },
+    countryDial: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.textSecondary },
   });
 }

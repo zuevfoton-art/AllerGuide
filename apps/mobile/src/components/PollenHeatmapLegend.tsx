@@ -54,7 +54,6 @@ export function PollenHeatmapLegend({ group }: PollenHeatmapLegendProps) {
       <Text style={styles.hint}>
         {UPI_SEGMENTS.map((index) => t(CATEGORY_KEYS[index])).join(' · ')}
       </Text>
-      <Text style={styles.hint}>{t('map.heatmapNoSpeciesLayer')}</Text>
     </View>
   );
 }

@@ -21,3 +21,14 @@ export const fontSizes = {
   display: 32,
   kpi: 36,
 } as const;
+
+/**
+ * Dynamic Type stays on (RN default `allowFontScaling`).
+ * Cap the multiplier so Clinical Calm layouts do not overflow on large system fonts.
+ */
+export const MAX_FONT_SIZE_MULTIPLIER = 1.4;
+
+export const scaledTextProps = {
+  allowFontScaling: true,
+  maxFontSizeMultiplier: MAX_FONT_SIZE_MULTIPLIER,
+} as const;

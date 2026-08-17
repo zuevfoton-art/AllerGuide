@@ -1,4 +1,4 @@
-import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -7,7 +7,7 @@ import {
   type AsthmaActionPlan,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -54,6 +54,7 @@ export default function AsthmaActionPlanScreen() {
   if (!profile) {
     return (
       <Screen>
+        <ScreenHeader onBack={() => router.back()} title={t('asthma.noProfile')} />
         <Text style={styles.empty}>{t('asthma.noProfile')}</Text>
       </Screen>
     );
@@ -62,15 +63,12 @@ export default function AsthmaActionPlanScreen() {
   if (!asthmaEnabled) {
     return (
       <Screen>
-        <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-          <View style={styles.headerText}>
-            <ScreenEyebrow section={t('asthma.eyebrow')} />
-            <Text style={ui.docTitle}>{t('asthma.planTitle')}</Text>
-          </View>
-        </View>
+        <ScreenHeader
+          onBack={() => router.back()}
+          eyebrow={t('asthma.eyebrow')}
+          title={t('asthma.planTitle')}
+          style={{ marginBottom: 12 }}
+        />
         <GlassCard>
           <Text style={styles.hint}>{t('asthma.notEligible')}</Text>
         </GlassCard>
@@ -80,16 +78,13 @@ export default function AsthmaActionPlanScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('asthma.eyebrow')} />
-          <Text style={ui.docTitle}>{t('asthma.planTitle')}</Text>
-          <Text style={ui.docMeta}>{t('asthma.planSubtitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('asthma.eyebrow')}
+        title={t('asthma.planTitle')}
+        subtitle={t('asthma.planSubtitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         <Text style={ui.sectionLabel}>{t('asthma.personalBest')}</Text>
@@ -170,19 +165,6 @@ export default function AsthmaActionPlanScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     section: { gap: 4, marginBottom: 12 },
     fieldGap: { marginTop: 12 },
     input: {

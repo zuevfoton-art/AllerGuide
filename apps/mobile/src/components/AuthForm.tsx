@@ -1,10 +1,20 @@
-import { useState, useRef, useMemo } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Animated } from 'react-native';
+import { useState, useMemo, forwardRef } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  type TextInputProps,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { LoginType } from '@allerguide/core';
+import { Button } from '@/src/components/Button';
+import { BrandLogo } from '@/src/components/brand/BrandLogo';
+import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { BrandLogo } from '@/src/components/brand/BrandLogo';
 
 interface AuthModeToggleProps {
   loginType: LoginType;
@@ -44,27 +54,44 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
   );
 }
 
-interface AuthFieldProps {
+export interface AuthFieldProps {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
   placeholder: string;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'phone-pad';
-  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  keyboardType?: TextInputProps['keyboardType'];
+  autoCapitalize?: TextInputProps['autoCapitalize'];
+  returnKeyType?: TextInputProps['returnKeyType'];
+  onSubmitEditing?: TextInputProps['onSubmitEditing'];
+  submitBehavior?: TextInputProps['submitBehavior'];
+  textContentType?: TextInputProps['textContentType'];
+  autoComplete?: TextInputProps['autoComplete'];
+  autoCorrect?: boolean;
+  accessibilityLabel?: string;
   testID?: string;
 }
 
-export function AuthField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry,
-  keyboardType = 'default',
-  autoCapitalize = 'none',
-  testID,
-}: AuthFieldProps) {
+export const AuthField = forwardRef<TextInput, AuthFieldProps>(function AuthField(
+  {
+    label,
+    value,
+    onChangeText,
+    placeholder,
+    secureTextEntry,
+    keyboardType = 'default',
+    autoCapitalize = 'none',
+    returnKeyType,
+    onSubmitEditing,
+    submitBehavior,
+    textContentType,
+    autoComplete,
+    autoCorrect,
+    accessibilityLabel,
+    testID,
+  },
+  ref,
+) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [focused, setFocused] = useState(false);
@@ -73,6 +100,7 @@ export function AuthField({
     <View style={styles.fieldWrap}>
       <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
       <TextInput
+        ref={ref}
         testID={testID}
         value={value}
         onChangeText={onChangeText}
@@ -81,13 +109,20 @@ export function AuthField({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
+        returnKeyType={returnKeyType}
+        onSubmitEditing={onSubmitEditing}
+        submitBehavior={submitBehavior}
+        textContentType={textContentType}
+        autoComplete={autoComplete}
+        autoCorrect={autoCorrect}
+        accessibilityLabel={accessibilityLabel ?? label}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         style={[styles.input, focused && styles.inputFocused]}
       />
     </View>
   );
-}
+});
 
 export function AuthPrimaryButton({
   label,
@@ -100,32 +135,21 @@ export function AuthPrimaryButton({
   loading?: boolean;
   testID?: string;
 }) {
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const scale = useRef(new Animated.Value(1)).current;
-
-  const handlePressIn = () => {
-    Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
-  };
-  const handlePressOut = () => {
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 4 }).start();
-  };
 
   return (
-    <Pressable
+    <Button
       testID={testID}
-      style={[styles.button, loading && styles.buttonDisabled]}
+      label={loading ? t('common.wait') : label}
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      disabled={loading}>
-      <Animated.View style={{ transform: [{ scale }] }}>
-        <Text style={styles.buttonText}>{loading ? t('common.wait') : label}</Text>
-      </Animated.View>
-    </Pressable>
+      disabled={loading}
+      block
+      style={authPrimaryButtonStyle}
+    />
   );
 }
+
+const authPrimaryButtonStyle = { marginTop: 8 };
 
 export function AuthLink({
   text,
@@ -142,7 +166,7 @@ export function AuthLink({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable testID={testID} style={styles.linkWrap} onPress={onPress}>
+    <Pressable testID={testID} style={styles.linkWrap} onPress={onPress} hitSlop={12}>
       <Text style={styles.linkText}>
         {text} <Text style={styles.linkAccent}>{linkText}</Text>
       </Text>
@@ -155,7 +179,7 @@ export function AuthForgotLink({ text, onPress }: { text: string; onPress: () =>
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable style={styles.forgotWrap} onPress={onPress}>
+    <Pressable style={styles.forgotWrap} onPress={onPress} hitSlop={12}>
       <Text style={styles.forgotText}>{text}</Text>
     </Pressable>
   );
@@ -169,7 +193,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
   return (
     <View style={styles.hero}>
       <BrandLogo size={56} showWordmark showEndorser />
-      <Text style={styles.heroTagline}>{t('onboarding.tagline')}</Text>
+      <Text style={styles.heroTagline}>{t('brand.slogan')}</Text>
       <Text style={styles.heroTitle}>{title}</Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>
@@ -178,10 +202,11 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
 
 export function AuthError({ message }: { message: string }) {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   if (!message) return null;
   return (
-    <View style={{ backgroundColor: theme.colors.dangerLight, borderRadius: 6, padding: 10, borderWidth: 1, borderColor: theme.colors.dangerBorder }}>
-      <Text style={{ color: theme.colors.danger, fontSize: 14, textAlign: 'center', fontFamily: undefined }}>{message}</Text>
+    <View style={styles.errorBox}>
+      <Text style={styles.errorText}>{message}</Text>
     </View>
   );
 }
@@ -191,7 +216,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
     heroTagline: {
       fontFamily: fonts.sans,
-      fontSize: 14,
+      fontSize: fontSizes.bodySm + 1,
       fontWeight: '600',
       color: colors.accent,
       letterSpacing: 0.2,
@@ -199,7 +224,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     heroTitle: {
       fontFamily: fonts.serifBold,
-      fontSize: 22,
+      fontSize: fontSizes.h2,
       fontWeight: '700',
       color: colors.head,
       letterSpacing: -0.3,
@@ -207,7 +232,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     heroSubtitle: {
       fontFamily: fonts.sans,
-      fontSize: 14,
+      fontSize: fontSizes.bodySm + 1,
       color: colors.textSecondary,
       textAlign: 'center',
       lineHeight: 20,
@@ -217,7 +242,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 6,
+      borderRadius: radii.md,
       overflow: 'hidden',
     },
     toggleBtn: {
@@ -228,6 +253,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 6,
       backgroundColor: colors.card,
       padding: 12,
+      minHeight: 44,
       borderRightWidth: 1,
       borderRightColor: colors.border,
     },
@@ -237,7 +263,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     toggleActive: { backgroundColor: colors.accent },
     toggleText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodySm + 1,
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -245,7 +271,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     fieldWrap: { gap: 6 },
     label: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.textSecondary,
       textTransform: 'uppercase',
@@ -257,8 +283,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     input: {
       backgroundColor: colors.card,
       padding: 14,
-      borderRadius: 6,
-      fontSize: 16,
+      minHeight: 44,
+      borderRadius: radii.md,
+      fontSize: WEB_INPUT_FONT_SIZE,
       fontFamily: fonts.sans,
       color: colors.text,
       borderWidth: 1,
@@ -268,26 +295,23 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.accent,
       borderWidth: 1.5,
     },
-    button: {
-      backgroundColor: colors.accent,
-      padding: 14,
-      borderRadius: 6,
-      alignItems: 'center',
-      marginTop: 8,
-      minHeight: 48,
-      justifyContent: 'center',
-    },
-    buttonDisabled: { opacity: 0.7 },
-    buttonText: {
-      fontFamily: fonts.sansSemiBold,
-      color: colors.onAccent,
-      fontWeight: '600',
-      fontSize: 16,
-    },
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
-    linkText: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary },
+    linkText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm + 1, color: colors.textSecondary },
     linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.accent, fontWeight: '600' },
     forgotWrap: { alignItems: 'flex-end', marginTop: -4 },
-    forgotText: { fontFamily: fonts.sans, fontSize: 13, color: colors.accent },
+    forgotText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm, color: colors.accent },
+    errorBox: {
+      backgroundColor: colors.dangerLight,
+      borderRadius: radii.md,
+      padding: 10,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+    },
+    errorText: {
+      color: colors.danger,
+      fontSize: fontSizes.bodySm + 1,
+      textAlign: 'center',
+      fontFamily: fonts.sans,
+    },
   });
 }

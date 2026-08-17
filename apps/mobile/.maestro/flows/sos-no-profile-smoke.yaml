@@ -1,0 +1,24 @@
+# SOS emergency bar remains available after the last profile is removed
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: profile-header-button
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- tapOn:
+    id: profile-delete
+- tapOn:
+    text: Удалить
+- tapOn:
+    id: tab-sos
+- extendedWaitUntil:
+    visible:
+      id: sos-emergency-bar
+    timeout: 10000
+- assertVisible:
+    id: sos-emergency-bar
+- assertVisible:
+    text: Выберите профиль, чтобы увидеть медицинскую информацию

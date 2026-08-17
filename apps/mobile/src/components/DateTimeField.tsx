@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTranslation } from '@/src/store/locale-store';
 
 type PickerMode = 'date' | 'time' | 'datetime';
 
@@ -63,12 +64,16 @@ function parseParts(value: string): {
   };
 }
 
-function formatDisplay(value: string, mode: PickerMode): string {
+function formatDisplay(value: string, mode: PickerMode, locale: string): string {
   if (!value.trim()) return '';
   const p = parseParts(value);
   if (mode === 'time') return `${pad2(p.hour)}:${pad2(p.minute)}`;
-  if (mode === 'date') return `${pad2(p.day)}.${pad2(p.month)}.${p.year}`;
-  return `${pad2(p.day)}.${pad2(p.month)}.${p.year} ${pad2(p.hour)}:${pad2(p.minute)}`;
+  const date = new Date(p.year, p.month - 1, p.day, p.hour, p.minute);
+  if (mode === 'date') {
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+  }
+  const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(date);
+  return `${dayMonth}, ${pad2(p.hour)}:${pad2(p.minute)}`;
 }
 
 function toStored(parts: ReturnType<typeof parseParts>, mode: PickerMode): string {
@@ -99,6 +104,7 @@ export function DateTimeField({
 }: DateTimeFieldProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const { locale } = useTranslation();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(() => parseParts(value));
 
@@ -128,7 +134,7 @@ export function DateTimeField({
   const emptyLabel =
     placeholder ??
     (mode === 'time' ? 'Выберите время' : mode === 'datetime' ? 'Выберите дату и время' : 'Выберите дату');
-  const display = formatDisplay(value, mode) || emptyLabel;
+  const display = formatDisplay(value, mode, locale) || emptyLabel;
 
   return (
     <View style={styles.wrap}>

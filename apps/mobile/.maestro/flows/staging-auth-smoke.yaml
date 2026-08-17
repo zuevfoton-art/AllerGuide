@@ -27,8 +27,7 @@ appId: com.aclearo.app
 - tapOn:
     id: auth-password-input
 - inputText: ${output.password}
-- tapOn:
-    id: auth-submit
+- pressKey: Enter
 - extendedWaitUntil:
     visible:
       id: tab-home

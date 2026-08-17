@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { type TextInput } from 'react-native';
 import type { LoginType } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
@@ -16,23 +17,20 @@ import {
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
 import { PhoneInput } from '@/src/components/PhoneInput';
-
-const FORGOT_LABELS: Record<string, string> = {
-  ru: 'Забыли пароль?',
-  en: 'Forgot password?',
-  es: '¿Olvidaste tu contraseña?',
-  fr: 'Mot de passe oublié ?',
-  de: 'Passwort vergessen?',
-  it: 'Password dimenticata?',
-};
+import {
+  authEmailInputProps,
+  authPasswordInputProps,
+  authPhoneInputProps,
+} from '@/src/constants/auth-input-props';
 
 export default function LoginScreen() {
-  const { t, tAuthError, locale } = useTranslation();
+  const { t, tAuthError } = useTranslation();
   const [loginType, setLoginType] = useState<LoginType>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -56,8 +54,6 @@ export default function LoginScreen() {
     }
   };
 
-  const forgotLabel = FORGOT_LABELS[locale] ?? FORGOT_LABELS.en;
-
   return (
     <Screen>
       <LanguagePicker compact />
@@ -69,26 +65,38 @@ export default function LoginScreen() {
           value={login}
           onChangeText={setLogin}
           testID="auth-login-input"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          {...authPhoneInputProps()}
         />
       ) : (
         <AuthField
           label={t('common.email')}
           value={login}
           onChangeText={setLogin}
-          placeholder="name@example.com"
-          keyboardType="email-address"
+          placeholder={t('auth.forgot.emailPlaceholder')}
           testID="auth-login-input"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          {...authEmailInputProps()}
         />
       )}
       <AuthField
+        ref={passwordRef}
         label={t('common.password')}
         value={password}
         onChangeText={setPassword}
         placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
         testID="auth-password-input"
+        returnKeyType="go"
+        submitBehavior="blurAndSubmit"
+        onSubmitEditing={() => void handleLogin()}
+        {...authPasswordInputProps('current')}
       />
-      <AuthForgotLink text={forgotLabel} onPress={() => router.push('/forgot-password')} />
+      <AuthForgotLink text={t('auth.forgotLink')} onPress={() => router.push('/forgot-password')} />
       <AuthError message={error} />
       <AuthPrimaryButton
         label={t('auth.loginButton')}
