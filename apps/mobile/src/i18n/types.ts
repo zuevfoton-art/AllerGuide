@@ -571,8 +571,8 @@ export type LocaleMessages = {
     statusForProfile: string;
     statusUpdated: string;
     layerPollen: string;
+    layerAir: string;
     layerPlaces: string;
-    layerBoth: string;
     legendTitlePollen: string;
     legendTitlePlaces: string;
     legendRestaurant: string;
