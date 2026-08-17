@@ -25,7 +25,9 @@ OCR / dish-vision), но сделать границы данных и ввод�
 - `apps/mobile/src/services/scan-history-service.ts`;
 - `apps/mobile/src/services/safe-products-service.ts`;
 - `apps/mobile/src/services/alias-feedback-service.ts`;
-- `apps/mobile/src/services/scanner-service.ts`;
+- `apps/mobile/src/services/scanner-service.ts` (баррель) + `scan-analysis.ts`,
+  `scanner-barcode-service.ts`, `scanner-ocr-service.ts`,
+  `scanner-dish-vision-service.ts`;
 - `apps/mobile/src/services/owned-profiles.ts`;
 - `apps/mobile/app/(tabs)/scanner.tsx`;
 - `apps/mobile/src/db/init.ts` / `web-store.ts`;
