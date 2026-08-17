@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildCourseSetupOptions,
+  buildDiaryEntryPickerOptions,
   collectLatestScaleTrends,
   filterDiarySections,
   getRecommendedScalesForProfile,
@@ -56,6 +58,60 @@ describe('diary-profile', () => {
   it('shows peak flow for asthma profile', () => {
     const visible = filterDiarySections(DIARY_SECTIONS, ['asthma']).map((s) => s.type);
     expect(visible).toContain('Пикфлоуметрия');
+  });
+
+  it('builds entry picker without course dose logs and gated modules', () => {
+    const options = buildDiaryEntryPickerOptions({
+      gatingConditions: ['food'],
+      recommendedScaleIds: [],
+    });
+    const ids = options.map((option) => option.id);
+    expect(ids).toEqual([
+      'Симптомы',
+      'Лекарство',
+      'Питание',
+      'Триггер',
+      'Кожа',
+      'Заметка',
+      'Шкала',
+      'Визит к врачу',
+    ]);
+    expect(ids).not.toContain('АСИТ');
+    expect(ids).not.toContain('Терапия');
+    expect(ids).not.toContain('Пикфлоуметрия');
+    expect(ids).not.toContain('Укус насекомого');
+  });
+
+  it('includes peak flow and insect sting when those conditions are explicit', () => {
+    const options = buildDiaryEntryPickerOptions({
+      gatingConditions: ['asthma', 'insect'],
+      recommendedScaleIds: ['act'],
+    });
+    const ids = options.map((option) => option.id);
+    expect(ids).toContain('Пикфлоуметрия');
+    expect(ids).toContain('Укус насекомого');
+    expect(ids).not.toContain('АСИТ');
+    const scale = options.find((option) => option.kind === 'scale');
+    expect(scale?.recommendedScaleIds).toEqual(['act']);
+  });
+
+  it('does not add ASIT to the entry picker for pollinosis', () => {
+    const ids = buildDiaryEntryPickerOptions({
+      gatingConditions: ['pollinosis'],
+    }).map((option) => option.id);
+    expect(ids).not.toContain('АСИТ');
+    expect(ids).toContain('Визит к врачу');
+  });
+
+  it('offers therapy always and ASIT only when enabled', () => {
+    expect(buildCourseSetupOptions({ asitEnabled: false })).toEqual([
+      { id: 'therapy', available: true },
+      { id: 'asit', available: false },
+    ]);
+    expect(buildCourseSetupOptions({ asitEnabled: true })).toEqual([
+      { id: 'therapy', available: true },
+      { id: 'asit', available: true },
+    ]);
   });
 
   it('collects latest RAACI scale trends from diary entries', () => {

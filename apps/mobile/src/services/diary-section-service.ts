@@ -3,8 +3,10 @@ import {
   buildFoodPrefill,
   buildInsectStingPrefill,
   buildMedicinePrefill,
+  buildScaleInitialAnswers,
   buildTriggerPrefill,
   buildPrescribedTherapyPrefill,
+  getClinicalScaleSection,
   getDiarySection,
   isAsitCourseConfigured,
   isPrescribedCourseConfigured,
@@ -12,6 +14,7 @@ import {
   parseScanHistoryMatchLabels,
   ASIT_SIMPLIFIED_STEP_IDS,
   PRESCRIBED_SIMPLIFIED_STEP_IDS,
+  type ClinicalScaleId,
   type DiarySection,
   type FoodDrugScanRef,
 } from '@allerguide/core';
@@ -60,6 +63,18 @@ export function findRecentFoodScanForProfile(profileId: number): FoodDrugScanRef
 export type DiarySectionEditorStateWithSection = DiarySectionEditorState & {
   section?: DiarySection;
 };
+
+/** Builds a single-section editor for a clinical scale (same payload as `/clinical-scales`). */
+export function buildClinicalScaleEditorState(
+  scaleId: ClinicalScaleId,
+): DiarySectionEditorStateWithSection {
+  return {
+    mode: 'section',
+    sectionType: 'Шкала',
+    prefill: { Шкала: buildScaleInitialAnswers(scaleId) },
+    section: getClinicalScaleSection(scaleId),
+  };
+}
 
 /** Builds diary section editor state with domain prefills (orchestration only — logic in core). */
 export async function buildDiarySectionEditorState(input: {

@@ -248,6 +248,15 @@ export type LocaleMessages = {
     modulesTitle: string;
     doctorVisit: string;
     clinicalScalesOpen: string;
+    entryPickerTitle: string;
+    entryPickerVisit: string;
+    setupCourse: string;
+    setupCourseTitle: string;
+    setupCourseTherapy: string;
+    setupCourseTherapyHint: string;
+    setupCourseAsit: string;
+    setupCourseAsitHint: string;
+    setupCourseAsitUnavailable: string;
     timePlaceholder: string;
     dateTimePlaceholder: string;
   };

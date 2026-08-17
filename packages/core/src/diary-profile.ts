@@ -148,6 +148,81 @@ export function filterDiarySections<T extends { type: string }>(
   return sections.filter((section) => isDiarySectionVisible(section.type, conditions));
 }
 
+/** Picker order for «Новая запись»: always-on types, then scale, then gated modules. */
+export const DIARY_ENTRY_PICKER_IDS = [
+  'Симптомы',
+  'Лекарство',
+  'Питание',
+  'Триггер',
+  'Кожа',
+  'Заметка',
+  'Шкала',
+  'Визит к врачу',
+  'Пикфлоуметрия',
+  'Укус насекомого',
+] as const;
+
+export type DiaryEntryPickerId = (typeof DIARY_ENTRY_PICKER_IDS)[number];
+
+export type DiaryEntryPickerKind = 'section' | 'scale';
+
+export interface DiaryEntryPickerOption {
+  id: DiaryEntryPickerId;
+  kind: DiaryEntryPickerKind;
+  sectionType: string;
+  recommendedScaleIds: ClinicalScaleId[];
+}
+
+export type CourseSetupId = 'therapy' | 'asit';
+
+export interface CourseSetupOption {
+  id: CourseSetupId;
+  available: boolean;
+}
+
+/**
+ * Profile-gated options for the diary «Что добавить» picker.
+ * Course dose-log types (АСИТ, Терапия) stay on module cards, not in this list.
+ */
+export function buildDiaryEntryPickerOptions(input: {
+  gatingConditions: AllergyConditionId[];
+  recommendedScaleIds?: ClinicalScaleId[];
+}): DiaryEntryPickerOption[] {
+  const recommendedScaleIds = [...(input.recommendedScaleIds ?? [])];
+  const options: DiaryEntryPickerOption[] = [];
+
+  for (const id of DIARY_ENTRY_PICKER_IDS) {
+    if (id === 'Шкала') {
+      options.push({
+        id,
+        kind: 'scale',
+        sectionType: 'Шкала',
+        recommendedScaleIds,
+      });
+      continue;
+    }
+
+    if (!isDiarySectionVisible(id, input.gatingConditions)) continue;
+
+    options.push({
+      id,
+      kind: 'section',
+      sectionType: id,
+      recommendedScaleIds: [],
+    });
+  }
+
+  return options;
+}
+
+/** Course setup choices: therapy is always offered; ASIT only when the profile enables it. */
+export function buildCourseSetupOptions(input: { asitEnabled: boolean }): CourseSetupOption[] {
+  return [
+    { id: 'therapy', available: true },
+    { id: 'asit', available: input.asitEnabled },
+  ];
+}
+
 export interface ScaleTrendEntry {
   scaleId: ClinicalScaleId;
   label: string;

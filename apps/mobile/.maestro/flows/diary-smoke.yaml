@@ -1,11 +1,13 @@
-# P2.1a — diary: quick symptoms entry (offline)
+# P2.1a — diary: new entry → symptoms (offline)
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - tapOn:
     id: tab-diary
 - tapOn:
-    id: diary-quick-entry
+    id: diary-new-entry
+- tapOn:
+    id: diary-picker-symptoms
 - extendedWaitUntil:
     visible:
       id: diary-wizard-primary
@@ -29,4 +31,4 @@ appId: com.aclearo.app
       id: diary-wizard-primary
     timeout: 10000
 - assertVisible:
-    id: diary-quick-entry
+    id: diary-new-entry
