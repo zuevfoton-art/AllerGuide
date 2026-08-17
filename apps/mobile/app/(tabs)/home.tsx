@@ -24,7 +24,6 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
 import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
@@ -140,21 +139,19 @@ export default function HomeScreen() {
             }
           : undefined
       }
-      refreshing={wellnessState.refreshing}>
-      <ScreenBrandHeader
-        right={
-          <>
-            <ProfileHeaderButton destination="hub" />
-            <Pressable
-              onPress={() => router.push('/(tabs)/sos')}
-              style={styles.sosBtn}
-              accessibilityRole="button"
-              accessibilityLabel={t('tabs.sos')}>
-              <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
-            </Pressable>
-          </>
-        }
-      />
+      refreshing={wellnessState.refreshing}
+      brandHeaderRight={
+        <>
+          <ProfileHeaderButton destination="hub" />
+          <Pressable
+            onPress={() => router.push('/(tabs)/sos')}
+            style={styles.sosBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('tabs.sos')}>
+            <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
+          </Pressable>
+        </>
+      }>
 
       <GlassCard variant="soft">
         <View style={ui.cardHead}>

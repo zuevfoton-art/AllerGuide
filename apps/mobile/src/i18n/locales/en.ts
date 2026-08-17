@@ -40,6 +40,7 @@ const en: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'an Aclearo app',
     slogan: 'Aclearo — when clarity matters',
+    goHome: 'Go to home',
   },
   errorBoundary: {
     title: 'Something went wrong',

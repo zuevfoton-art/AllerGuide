@@ -14,7 +14,6 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
@@ -83,17 +82,15 @@ export default function ClinicalScalesScreen() {
   };
 
   return (
-    <Screen>
-      <ScreenBrandHeader
-        left={
-          <Pressable
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-        }
-      />
+    <Screen
+      brandHeaderLeft={
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
+          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
+        </Pressable>
+      }>
       <ScreenEyebrow section={t('clinicalScales.eyebrow')} />
       <Text style={ui.docTitle}>{t('clinicalScales.title')}</Text>
       <Text style={ui.docMeta}>{t('clinicalScales.subtitle')}</Text>
