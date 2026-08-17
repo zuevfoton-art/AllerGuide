@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A-Claro — Aclearo · Waitlist</title>
+  <meta name="description" content="A-Claro by Aclearo — ясность при аллергии. Сканер, дневник, карта пыльцы, SOS. Запишитесь в closed beta." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f6f9; --head: #1e3a5f; --accent: #2a9d8f; --accent-light: #e6f6f4;
+      --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --danger: #b91c1c;
+      --sans: Inter, system-ui, sans-serif; --serif: 'Source Serif 4', Georgia, serif;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); }
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 48px 20px;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(42,157,143,.18), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 90% 20%, rgba(30,58,95,.12), transparent 50%),
+        var(--bg);
+    }
+    .panel {
+      max-width: 560px;
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 12px 40px rgba(15,23,42,.08);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .brand img { width: 48px; height: 48px; border-radius: 10px; }
+    .brand h1 { font-family: var(--serif); font-size: 28px; color: var(--head); line-height: 1.1; }
+    .brand .co { font-size: 12px; font-weight: 600; color: var(--accent); }
+    .slogan { font-size: 18px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+    .lead { font-size: 15px; color: var(--muted); line-height: 1.55; margin-bottom: 24px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .pills span {
+      background: var(--accent-light); color: #1f6b62;
+      padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--head); margin-bottom: 6px; }
+    input, select {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 15px; margin-bottom: 14px; font-family: inherit;
+    }
+    input:focus, select:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    button {
+      width: 100%; padding: 14px; border: none; border-radius: 8px;
+      background: var(--accent); color: #fff; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    button:hover { filter: brightness(0.95); }
+    .stores { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .store-badge {
+      flex: 1; min-width: 140px; text-align: center; padding: 12px;
+      border: 1px dashed var(--border); border-radius: 8px; font-size: 12px; color: var(--muted);
+    }
+    .disclaimer { font-size: 11px; color: var(--muted); margin-top: 20px; line-height: 1.45; }
+    .ok { display: none; background: var(--accent-light); border-radius: 8px; padding: 16px; color: #1f6b62; font-size: 14px; }
+    .ok.show { display: block; }
+    form.hide { display: none; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main class="hero">
+    <div class="panel">
+      <div class="brand">
+        <img src="../../brand/logo-mark.svg" alt="" />
+        <div>
+          <h1>A-Claro</h1>
+          <div class="co">приложение Aclearo</div>
+        </div>
+      </div>
+      <p class="slogan">Aclearo — когда важна ясность</p>
+      <p class="lead">
+        Сканер продуктов, дневник наблюдений, карта пыльцы и мест, SOS-паспорт и PDF для врача —
+        offline-first. Закрытая beta для пациентов клиник АДАИР и ранних пользователей.
+      </p>
+      <div class="pills">
+        <span>Сканер</span><span>Дневник</span><span>Карта пыльцы</span><span>SOS</span><span>PDF врачу</span>
+      </div>
+
+      <div id="ok" class="ok" role="status">
+        Спасибо! Мы отправим приглашение в TestFlight / Google Play Internal на указанный email.
+        Для клиник АДАИР укажите код клиники в письме на <a href="mailto:partners@aclearo.com">partners@aclearo.com</a>.
+      </div>
+
+      <form id="waitlist" action="mailto:beta@aclearo.com" method="post" enctype="text/plain">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required placeholder="you@example.com" autocomplete="email" />
+
+        <label for="role">Кто вы</label>
+        <select id="role" name="role">
+          <option value="parent">Родитель ребёнка с аллергией</option>
+          <option value="adult">Взрослый с аллергией</option>
+          <option value="doctor">Врач / клиника</option>
+          <option value="other">Другое</option>
+        </select>
+
+        <label for="utm">Код клиники / источник (опционально)</label>
+        <input id="utm" name="utm_content" type="text" placeholder="clinic_id или invite code" />
+
+        <input type="hidden" id="utm_source" name="utm_source" value="" />
+        <input type="hidden" name="product" value="A-Claro" />
+
+        <button type="submit">Записаться в closed beta</button>
+      </form>
+
+      <div class="stores">
+        <div class="store-badge">App Store<br /><strong>Coming soon</strong></div>
+        <div class="store-badge">Google Play<br /><strong>Coming soon</strong></div>
+      </div>
+
+      <p class="disclaimer">
+        A-Claro не ставит диагноз и не заменяет консультацию врача. Не является медицинским изделием.
+        Privacy: <a href="https://aclearo.com/legal">aclearo.com/legal</a> ·
+        Support: <a href="mailto:support@aclearo.com">support@aclearo.com</a>
+      </p>
+    </div>
+  </main>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var source = params.get('utm_source') || '';
+      var content = params.get('utm_content') || '';
+      var campaign = params.get('utm_campaign') || '';
+      document.getElementById('utm_source').value = source;
+      if (content) document.getElementById('utm').value = content;
+
+      document.getElementById('waitlist').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var email = document.getElementById('email').value.trim();
+        var role = document.getElementById('role').value;
+        var utm = document.getElementById('utm').value.trim();
+        var body = [
+          'product=A-Claro',
+          'email=' + email,
+          'role=' + role,
+          'utm_source=' + source,
+          'utm_campaign=' + campaign,
+          'utm_content=' + utm,
+          'at=' + new Date().toISOString()
+        ].join('\n');
+        // Local persistence for ops until backend waitlist exists
+        try {
+          var key = 'aclearo_waitlist';
+          var list = JSON.parse(localStorage.getItem(key) || '[]');
+          list.push({ email: email, role: role, utm_source: source, utm_content: utm, at: new Date().toISOString() });
+          localStorage.setItem(key, JSON.stringify(list));
+        } catch (err) {}
+        // Optional: POST to analytics if API available
+        try {
+          if (window.ACLEARO_ANALYTICS_ENDPOINT) {
+            fetch(window.ACLEARO_ANALYTICS_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event: 'waitlist_joined', at: new Date().toISOString(), role: role, utm_source: source || null })
+            }).catch(function () {});
+          }
+        } catch (err2) {}
+        document.getElementById('waitlist').classList.add('hide');
+        document.getElementById('ok').classList.add('show');
+        // Also open mailto as ops fallback
+        window.location.href = 'mailto:beta@aclearo.com?subject=' + encodeURIComponent('A-Claro beta waitlist') + '&body=' + encodeURIComponent(body);
+      });
+    })();
+  </script>
+</body>
+</html>

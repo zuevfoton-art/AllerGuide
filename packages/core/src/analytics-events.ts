@@ -13,6 +13,7 @@ export const ANALYTICS_EVENT_NAMES = [
   'diary_report_exported',
   'scan_completed',
   'scan_barcode',
+  'scan_dish_vision',
   'sync_upload',
   'sync_download',
   'backup_exported',
@@ -24,8 +25,12 @@ export const ANALYTICS_EVENT_NAMES = [
   'profile_setup_step_view',
   'profile_setup_step_complete',
   'profile_setup_step_skip',
+  'onboarding_scenario_selected',
+  'onboarding_completed',
   'map_pollen_refreshed',
   'map_pollen_fallback',
+  'pollen_alert_sent',
+  'waitlist_joined',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

@@ -6,7 +6,7 @@
       "en-US": {
         "title": "A-Claro",
         "subtitle": "See allergy clearly",
-        "description": "A-Claro is an Aclearo allergy companion app. Offline-first diary, explainable product scanner, pollen and air context, SOS passport, and doctor-ready PDF reports — in 6 languages.\n\nA-Claro helps you see allergy information clearly: scan barcodes, log symptoms, track environmental triggers, and share structured reports with your clinician. Not a medical device — decision support only.",
+        "description": "A-Claro is an Aclearo allergy companion app. Offline-first diary, explainable product scanner, pollen and air context, SOS passport, and doctor-ready PDF reports — in 6 languages.\n\nA-Claro helps you see allergy information clearly: scan barcodes, log symptoms, track environmental triggers, and share structured reports with your clinician.\n\nMEDICAL DISCLAIMER: A-Claro is not a medical device and does not diagnose, treat, or prevent disease. Information is educational and does not replace professional medical advice. Always consult a qualified clinician. In an emergency call local emergency services.",
         "keywords": ["allergy", "allergen", "scanner", "pollen", "diary", "food", "aclearo", "claro"],
         "marketingUrl": "https://aclearo.com",
         "supportUrl": "https://aclearo.com/support",
@@ -15,8 +15,8 @@
       "ru": {
         "title": "A-Claro",
         "subtitle": "Аллергия без тумана",
-        "description": "A-Claro — приложение Aclearo для управления аллергией. Офлайн-дневник, сканер с объяснимым риском, пыльца и воздух, SOS-паспорт и PDF для врача — на 6 языках.\n\nНе является медицинским изделием. Информационный характер.",
-        "keywords": ["аллергия", "аллерген", "сканер", "пыльца", "дневник", "aclearo"],
+        "description": "A-Claro — приложение Aclearo для управления аллергией. Офлайн-дневник, сканер с объяснимым риском, пыльца и воздух, SOS-паспорт и PDF для врача — на 6 языках.\n\nМЕДИЦИНСКИЙ DISCLAIMER: A-Claro не является медицинским изделием, не ставит диагноз и не назначает лечение. Информация носит рекомендательный характер и не заменяет консультацию врача. При угрозе жизни звоните 103.",
+        "keywords": ["аллергия", "аллерген", "сканер", "пыльца", "дневник", "aclearo", "асита"],
         "marketingUrl": "https://aclearo.com",
         "supportUrl": "https://aclearo.com/support",
         "privacyPolicyUrl": "https://aclearo.com/legal"
@@ -24,8 +24,35 @@
       "es-ES": {
         "title": "A-Claro",
         "subtitle": "Alergias, con claridad",
-        "description": "A-Claro es la app de alergias de Aclearo: diario offline, escáner explicable, polen, SOS y informes PDF — 6 idiomas.",
+        "description": "A-Claro es la app de alergias de Aclearo: diario offline, escáner explicable, polen, SOS e informes PDF — 6 idiomas.\n\nAVISO MÉDICO: A-Claro no es un dispositivo médico y no diagnostica ni trata enfermedades. La información es educativa y no sustituye el consejo médico profesional.",
         "keywords": ["alergia", "alérgeno", "escáner", "polen", "diario", "aclearo", "claro"],
+        "marketingUrl": "https://aclearo.com",
+        "supportUrl": "https://aclearo.com/support",
+        "privacyPolicyUrl": "https://aclearo.com/legal"
+      },
+      "fr-FR": {
+        "title": "A-Claro",
+        "subtitle": "L’allergie en toute clarté",
+        "description": "A-Claro, l’app Aclearo pour l’allergie : journal hors ligne, scanner explicable, pollen, SOS et rapports PDF — 6 langues.\n\nAVERTISSEMENT MÉDICAL : A-Claro n’est pas un dispositif médical et ne pose pas de diagnostic. Informations à titre éducatif uniquement ; ne remplace pas un avis médical.",
+        "keywords": ["allergie", "allergène", "scanner", "pollen", "journal", "aclearo", "claro"],
+        "marketingUrl": "https://aclearo.com",
+        "supportUrl": "https://aclearo.com/support",
+        "privacyPolicyUrl": "https://aclearo.com/legal"
+      },
+      "de-DE": {
+        "title": "A-Claro",
+        "subtitle": "Allergie klar sehen",
+        "description": "A-Claro ist die Aclearo-App bei Allergien: Offline-Tagebuch, erklärbarer Scanner, Pollen, SOS und PDF-Berichte — 6 Sprachen.\n\nMEDIZINISCHER HINWEIS: A-Claro ist kein Medizinprodukt und stellt keine Diagnose. Informationen dienen der Aufklärung und ersetzen keinen Arztbesuch.",
+        "keywords": ["Allergie", "Allergen", "Scanner", "Pollen", "Tagebuch", "aclearo", "claro"],
+        "marketingUrl": "https://aclearo.com",
+        "supportUrl": "https://aclearo.com/support",
+        "privacyPolicyUrl": "https://aclearo.com/legal"
+      },
+      "it": {
+        "title": "A-Claro",
+        "subtitle": "Allergie, con chiarezza",
+        "description": "A-Claro è l’app Aclearo per le allergie: diario offline, scanner spiegabile, polline, SOS e report PDF — 6 lingue.\n\nAVVISO MEDICO: A-Claro non è un dispositivo medico e non diagnostica né cura. Le informazioni sono educative e non sostituiscono il parere del medico.",
+        "keywords": ["allergia", "allergene", "scanner", "polline", "diario", "aclearo", "claro"],
         "marketingUrl": "https://aclearo.com",
         "supportUrl": "https://aclearo.com/support",
         "privacyPolicyUrl": "https://aclearo.com/legal"
@@ -37,13 +64,37 @@
       "en-US": {
         "title": "A-Claro",
         "shortDescription": "Allergy companion by Aclearo — clear scanner, diary, pollen & SOS",
-        "fullDescription": "A-Claro is an Aclearo allergy companion app. Offline-first diary, explainable product scanner, pollen and air context, SOS passport, and doctor-ready PDF reports — in 6 languages.\n\nNot a medical device — decision support only.",
+        "fullDescription": "A-Claro is an Aclearo allergy companion app. Offline-first diary, explainable product scanner, pollen and air context, SOS passport, and doctor-ready PDF reports — in 6 languages.\n\nMEDICAL DISCLAIMER: Not a medical device. Does not diagnose or treat disease. Educational information only — consult a clinician. In emergencies call local emergency services.",
         "developerName": "Aclearo"
       },
       "ru-RU": {
         "title": "A-Claro",
         "shortDescription": "Приложение Aclearo: дневник, сканер, пыльца и SOS — офлайн",
-        "fullDescription": "A-Claro — приложение Aclearo для управления аллергией. Офлайн-дневник, сканер с объяснимым риском, пыльца, SOS и PDF для врача.",
+        "fullDescription": "A-Claro — приложение Aclearo для управления аллергией. Офлайн-дневник, сканер с объяснимым риском, пыльца, SOS и PDF для врача.\n\nМЕДИЦИНСКИЙ DISCLAIMER: Не является медицинским изделием. Не ставит диагноз и не назначает лечение. При угрозе жизни — 103.",
+        "developerName": "Aclearo"
+      },
+      "es-ES": {
+        "title": "A-Claro",
+        "shortDescription": "App Aclearo: escáner, diario, polen y SOS",
+        "fullDescription": "A-Claro es la app de alergias de Aclearo: diario offline, escáner, polen, SOS e informes PDF.\n\nAVISO MÉDICO: No es un dispositivo médico. No diagnostica ni trata. Consulte a un profesional.",
+        "developerName": "Aclearo"
+      },
+      "fr-FR": {
+        "title": "A-Claro",
+        "shortDescription": "App Aclearo : scanner, journal, pollen et SOS",
+        "fullDescription": "A-Claro, l’app Aclearo pour l’allergie : journal hors ligne, scanner, pollen, SOS et PDF.\n\nAVERTISSEMENT : Pas un dispositif médical. Informations éducatives uniquement.",
+        "developerName": "Aclearo"
+      },
+      "de-DE": {
+        "title": "A-Claro",
+        "shortDescription": "Aclearo-App: Scanner, Tagebuch, Pollen & SOS",
+        "fullDescription": "A-Claro von Aclearo: Offline-Tagebuch, Scanner, Pollen, SOS und PDF-Berichte.\n\nHINWEIS: Kein Medizinprodukt. Ersetzt keinen Arztbesuch.",
+        "developerName": "Aclearo"
+      },
+      "it-IT": {
+        "title": "A-Claro",
+        "shortDescription": "App Aclearo: scanner, diario, polline e SOS",
+        "fullDescription": "A-Claro di Aclearo: diario offline, scanner, polline, SOS e report PDF.\n\nAVVISO: Non è un dispositivo medico. Non sostituisce il parere del medico.",
         "developerName": "Aclearo"
       }
     }

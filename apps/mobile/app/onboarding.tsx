@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { useAppStore } from '@/src/store/app-store';
 import { setStoredScenario } from '@/src/services/settings-service';
+import { trackEvent } from '@/src/services/analytics-service';
 import type { Scenario } from '@allerguide/core';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
@@ -62,6 +63,7 @@ export default function OnboardingScreen() {
               onPress={() => {
                 setScenario(item.key as Scenario);
                 setStoredScenario(item.key as Scenario);
+                trackEvent('onboarding_scenario_selected', { scenario: item.key });
                 router.push('/profile-setup');
               }}>
               <View style={styles.scenarioCard}>

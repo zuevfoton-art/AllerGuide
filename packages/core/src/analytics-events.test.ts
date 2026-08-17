@@ -49,4 +49,12 @@ describe('analytics-events', () => {
     expect(payload.client_id).toBe('c1');
     expect(payload.entry_type).toBe('Симптомы');
   });
+
+  it('includes GTM funnel events', () => {
+    expect(isAnalyticsEventName('onboarding_completed')).toBe(true);
+    expect(isAnalyticsEventName('onboarding_scenario_selected')).toBe(true);
+    expect(isAnalyticsEventName('scan_dish_vision')).toBe(true);
+    expect(isAnalyticsEventName('pollen_alert_sent')).toBe(true);
+    expect(isAnalyticsEventName('waitlist_joined')).toBe(true);
+  });
 });
