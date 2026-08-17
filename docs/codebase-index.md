@@ -304,6 +304,8 @@ Barrel: `index.ts`. Pure TS.
 | Фазы / критерии | [`roadmap-to-prod.md`](./roadmap-to-prod.md) |
 | Команды / gotchas | [`../AGENTS.md`](../AGENTS.md) |
 | RC gate | [`rc-gate.md`](./rc-gate.md) |
+| Soak / PR triage | [`staging-soak-log.md`](./staging-soak-log.md) · [`pr-triage-2026-08.md`](./pr-triage-2026-08.md) |
+| Privacy / prod YC / store permissions | [`privacy-compliance-audit.md`](./privacy-compliance-audit.md) · [`production-yc-plan.md`](./production-yc-plan.md) · [`store-permissions-justification.md`](./store-permissions-justification.md) |
 | QA | [`qa-checklist.md`](./qa-checklist.md) |
 | CJM + сценарии (профиль, дневник, capabilities) | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
