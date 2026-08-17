@@ -40,6 +40,7 @@ const fr: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'une application Aclearo',
     slogan: 'Aclearo — quand la clarté compte',
+    goHome: 'Aller à l’accueil',
   },
   errorBoundary: {
     title: 'Une erreur est survenue',
@@ -245,6 +246,15 @@ const fr: LocaleMessages = {
     modulesTitle: 'Modules d’observation supplémentaires',
     doctorVisit: 'Prochaine visite chez le médecin',
     clinicalScalesOpen: 'Scores cliniques',
+    entryPickerTitle: 'Que ajouter',
+    entryPickerVisit: 'Rendez-vous médical',
+    setupCourse: 'Configurer le cours',
+    setupCourseTitle: 'Configurer le cours',
+    setupCourseTherapy: 'Thérapie',
+    setupCourseTherapyHint: 'Cours de médicaments prescrits',
+    setupCourseAsit: 'ITA',
+    setupCourseAsitHint: 'Immunothérapie allergénique',
+    setupCourseAsitUnavailable: 'L’ITA est disponible si le profil inclut une pollinose',
     timePlaceholder: 'Choisir l’heure',
     dateTimePlaceholder: 'Choisir la date et l’heure',
   },
@@ -465,9 +475,9 @@ const fr: LocaleMessages = {
     pollenYandexInteractiveAttribution:
       'Carte : Yandex Maps (interactive) · prévision pollinique : Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
-      'Fond : pollen d’arbres (Google UPI). Bouleau, aulne et olivier ont des niveaux séparés dans les puces',
+      'Fond : pollen d’arbres (Google). Les niveaux bouleau / aulne / olivier sont séparés',
     pollenTreeSpeciesLevelsHint:
-      'La couche carte est commune aux arbres. Les chiffres bouleau / aulne / olivier viennent de la prévision par espèce (Google ou Open-Meteo).',
+      'La couche carte est commune aux arbres. Les niveaux bouleau, aulne et olivier viennent de la prévision par espèce (Google ou Open-Meteo), pas du fond.',
     pollenHeatmapGrassHint: 'Couche : pollen de graminées (UPI)',
     pollenHeatmapWeedHint: "Couche : pollen d’herbacées (UPI), pas uniquement l’espèce choisie",
     pollenBirch: 'Bouleau',

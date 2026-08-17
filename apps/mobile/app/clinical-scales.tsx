@@ -3,18 +3,16 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
-  buildScaleInitialAnswers,
   collectLatestScaleTrends,
   formatDiaryDate,
-  getClinicalScaleSection,
   type ClinicalScaleId,
 } from '@allerguide/core';
+import { buildClinicalScaleEditorState } from '@/src/services/diary-section-service';
 import { addDiaryEntries, getDiaryEntries } from '@/src/services/diary-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
@@ -69,6 +67,8 @@ export default function ClinicalScalesScreen() {
     router.setParams({ openScale: undefined } as any);
   }, [openScale]);
 
+  const scaleEditor = scaleId ? buildClinicalScaleEditorState(scaleId) : null;
+
   const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     const profileId = activeProfileId ?? getOrLoadActiveProfileId();
     if (!profileId) return;
@@ -83,17 +83,15 @@ export default function ClinicalScalesScreen() {
   };
 
   return (
-    <Screen>
-      <ScreenBrandHeader
-        left={
-          <Pressable
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-        }
-      />
+    <Screen
+      brandHeaderLeft={
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}>
+          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
+        </Pressable>
+      }>
       <ScreenEyebrow section={t('clinicalScales.eyebrow')} />
       <Text style={ui.docTitle}>{t('clinicalScales.title')}</Text>
       <Text style={ui.docMeta}>{t('clinicalScales.subtitle')}</Text>
@@ -151,11 +149,11 @@ export default function ClinicalScalesScreen() {
         </GlassCard>
       )}
 
-      <DiaryEditorModal visible={scaleId !== null} onClose={() => setScaleId(null)}>
-        {scaleId ? (
+      <DiaryEditorModal visible={scaleEditor !== null} onClose={() => setScaleId(null)}>
+        {scaleEditor?.section ? (
           <DiaryWizard
-            sections={[getClinicalScaleSection(scaleId)]}
-            initialAnswersBySection={{ Шкала: buildScaleInitialAnswers(scaleId) }}
+            sections={[scaleEditor.section]}
+            initialAnswersBySection={scaleEditor.prefill}
             allowSkipSection={false}
             profileAllergiesJson={activeProfile?.allergies ?? '[]'}
             onCancel={() => setScaleId(null)}

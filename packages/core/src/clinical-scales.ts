@@ -269,3 +269,16 @@ export function enrichScaleAnswers(answers: Record<string, string>): Record<stri
 export function buildScaleInitialAnswers(scaleId: ClinicalScaleId): Record<string, string> {
   return { scaleId };
 }
+
+/** Single-section diary editor payload for a clinical scale. */
+export function buildClinicalScaleEditorState(scaleId: ClinicalScaleId): {
+  sectionType: 'Шкала';
+  prefill: Record<string, Record<string, string>>;
+  section: DiarySection;
+} {
+  return {
+    sectionType: 'Шкала',
+    prefill: { Шкала: buildScaleInitialAnswers(scaleId) },
+    section: getClinicalScaleSection(scaleId),
+  };
+}

@@ -107,7 +107,7 @@
 
 | # | Сценарий | iOS | Android | Web | Примечания |
 |---|----------|-----|---------|-----|------------|
-| 4.1 | Центрированный бренд-header и слоган «Aclearo — когда важна ясность» | ☐ | ☐ | ☐ | `ScreenBrandHeader` |
+| 4.1 | Бренд-header слева (знак + слоган); тап по логотипу после входа → главная; вход/регистрация без левого lockup | ☐ | ☐ | ☐ | `ScreenBrandHeader` |
 | 4.2 | Кнопка SOS в шапке → экран SOS | ☐ | ☐ | ☐ | |
 | 4.3 | Wellness: слой 1 словесный + X/100, слой 2 числа по «Подробности» | ☐ | ☐ | ☐ | нужен интернет |
 | 4.4 | «Подробнее» → карта | ☐ | ☐ | ☐ | |
@@ -498,7 +498,7 @@
 | Flow | Файл | Проверка |
 |------|------|----------|
 | Onboarding | `onboarding-smoke.yaml` | register → profile → `tab-home` |
-| Diary | `diary-smoke.yaml` | быстрая запись симптомов |
+| Diary | `diary-smoke.yaml` | новая запись → симптомы |
 | Diary dish | `diary-dish-smoke.yaml` | «борщ» → `diary-dish-checklist` → save |
 | Diary photo | `diary-photo-smoke.yaml` | «Кожа» → шаг `diary-photo-step` |
 | Scanner | `scanner-smoke.yaml` | ручной ввод «молоко» → `scanner-result` |

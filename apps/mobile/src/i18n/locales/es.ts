@@ -40,6 +40,7 @@ const es: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'una app de Aclearo',
     slogan: 'Aclearo — cuando importa la claridad',
+    goHome: 'Ir al inicio',
   },
   errorBoundary: {
     title: 'Algo salió mal',
@@ -245,6 +246,15 @@ const es: LocaleMessages = {
     modulesTitle: 'Módulos adicionales de observación',
     doctorVisit: 'Próxima visita al médico',
     clinicalScalesOpen: 'Puntuaciones clínicas',
+    entryPickerTitle: 'Qué añadir',
+    entryPickerVisit: 'Cita médica',
+    setupCourse: 'Configurar curso',
+    setupCourseTitle: 'Configurar curso',
+    setupCourseTherapy: 'Terapia',
+    setupCourseTherapyHint: 'Curso de medicación prescrita',
+    setupCourseAsit: 'ITA',
+    setupCourseAsitHint: 'Inmunoterapia con alérgenos',
+    setupCourseAsitUnavailable: 'La ITA está disponible si el perfil incluye polinosis',
     timePlaceholder: 'Seleccione la hora',
     dateTimePlaceholder: 'Seleccione fecha y hora',
   },
@@ -465,9 +475,9 @@ const es: LocaleMessages = {
     pollenYandexInteractiveAttribution:
       'Mapa: Yandex Maps (interactivo) · previsión de polen: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
-      'Capa: polen de árboles (Google UPI). Abedul, aliso y olivo tienen niveles aparte en los chips',
+      'Capa: polen de árboles (Google). Los niveles de abedul / aliso / olivo van aparte',
     pollenTreeSpeciesLevelsHint:
-      'La capa del mapa es común para árboles. Los números de abedul / aliso / olivo vienen del pronóstico por especie (Google u Open-Meteo).',
+      'La capa del mapa es común para árboles. Los niveles de abedul, aliso y olivo vienen del pronóstico por especie (Google u Open-Meteo), no de la capa.',
     pollenHeatmapGrassHint: 'Capa: polen de gramíneas (UPI)',
     pollenHeatmapWeedHint: 'Capa: polen de malezas (UPI), no solo la especie elegida',
     pollenBirch: 'Abedul',

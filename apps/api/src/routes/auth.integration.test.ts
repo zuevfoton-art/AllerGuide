@@ -23,7 +23,7 @@ describe.skipIf(!hasIntegrationDatabase)('auth flow integration (P1.6a)', () => 
   });
 
   it('registers, logs in, and returns /me for the same user', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const login = uniqueLogin('auth');
     const password = 'TestPass1!';
 
@@ -54,7 +54,7 @@ describe.skipIf(!hasIntegrationDatabase)('auth flow integration (P1.6a)', () => 
   });
 
   it('rejects duplicate registration', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const login = uniqueLogin('dup');
     const password = 'TestPass1!';
     const payload = {

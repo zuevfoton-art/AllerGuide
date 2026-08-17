@@ -32,7 +32,7 @@ function sslModeFromUrl(url: string | undefined): 'require' | 'disable' | undefi
   return undefined;
 }
 
-/** True for Replit Helium internal Postgres (`@helium/` host). */
+/** True for an internal Helium Postgres host (`@helium/` in the URL). */
 export function isHeliumDatabaseUrl(url: string): boolean {
   return /@helium(?:\/|$)/.test(url) || url.includes('heliumdb');
 }

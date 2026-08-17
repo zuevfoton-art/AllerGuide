@@ -14,7 +14,7 @@ describe('security middleware', () => {
   it('sets helmet security headers', async () => {
     delete process.env.DATABASE_URL;
     delete process.env.JWT_SECRET;
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/health');
     expect(response.status).toBe(200);
     expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -49,7 +49,7 @@ describe('security middleware', () => {
 
   it('disables rate limiting when RATE_LIMIT_DISABLED is set', async () => {
     process.env.RATE_LIMIT_DISABLED = 'true';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/health');
     expect(response.headers['ratelimit-limit']).toBeUndefined();
   });
@@ -59,7 +59,7 @@ describe('security middleware', () => {
     process.env.AUTH_RATE_LIMIT_WINDOW_MS = '60000';
     delete process.env.RATE_LIMIT_DISABLED;
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const payload = { loginType: 'email', login: 'x@y.z', password: 'short' };
 
     await request(app).post('/api/auth/login').send(payload);
@@ -83,7 +83,7 @@ describe('health endpoint', () => {
   it('returns 503 when DATABASE_URL is set but JWT_SECRET is missing', async () => {
     process.env.DATABASE_URL = 'postgresql://example';
     delete process.env.JWT_SECRET;
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/health');
     expect(response.status).toBe(503);
     expect(response.body.authDatabase).toBe(false);

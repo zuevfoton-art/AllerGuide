@@ -215,7 +215,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 По умолчанию сборка работает **offline** (локальная регистрация в SQLite). Чтобы регистрация/вход шли на **stage API** `https://api.staging.aclearo.com`, задайте `EXPO_PUBLIC_*` и **пересоберите** приложение.
 
-> **Stage = YC only** ([`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) Phase 2–3). Former Replit host / EAS profile `replit` removed from the repo.
+> **Stage = Yandex Cloud only** ([`yc-stage-gates.md`](./yc-stage-gates.md) Phase 2).
 
 > ⚠️ `EXPO_PUBLIC_*` встраиваются в JS-бандл **во время сборки**. В приложении нет экрана смены адреса сервера — нужна новая сборка. На native URL должен быть **абсолютным**.
 

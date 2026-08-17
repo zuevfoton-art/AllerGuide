@@ -1,5 +1,6 @@
 import type { ProfileAllergenId } from './profile-allergens';
 import {
+  getPollenTaxon,
   profileMatchesPollenTaxon,
   type PollenTaxonId,
 } from './pollen-taxonomy';
@@ -26,49 +27,65 @@ function withRegion(regionId: string, peaks: PeakSeed[]): PollenSeasonPeak[] {
   return peaks.map((peak) => ({ ...peak, regionId }));
 }
 
+/** Season row; allergenId comes from taxonomy so alder/olive stay profile-relevant. */
+function seasonPeak(
+  taxonId: PollenTaxonId,
+  label: string,
+  months: number[],
+  peakMonth: number,
+): PeakSeed {
+  return {
+    taxonId,
+    allergenId: getPollenTaxon(taxonId)?.allergenId ?? null,
+    label,
+    months,
+    peakMonth,
+  };
+}
+
 const MOSCOW_PEAKS: PeakSeed[] = [
-  { taxonId: 'alder_pollen', allergenId: null, label: 'Ольха', months: [3, 4], peakMonth: 4 },
-  { taxonId: 'birch_pollen', allergenId: 'birch-pollen', label: 'Берёза', months: [4, 5], peakMonth: 5 },
-  { taxonId: 'oak_pollen', allergenId: 'birch-pollen', label: 'Дуб', months: [4, 5], peakMonth: 5 },
-  { taxonId: 'grass_pollen', allergenId: 'grass-pollen', label: 'Тимофеевка', months: [6, 7], peakMonth: 6 },
-  { taxonId: 'rye_pollen', allergenId: 'rye', label: 'Рожь', months: [6, 7], peakMonth: 7 },
-  { taxonId: 'mugwort_pollen', allergenId: 'mugwort-pollen', label: 'Полынь', months: [7, 8], peakMonth: 8 },
-  { taxonId: 'ragweed_pollen', allergenId: 'ragweed-pollen', label: 'Амброзия', months: [8, 9], peakMonth: 8 },
+  seasonPeak('alder_pollen', 'Ольха', [3, 4], 4),
+  seasonPeak('birch_pollen', 'Берёза', [4, 5], 5),
+  seasonPeak('oak_pollen', 'Дуб', [4, 5], 5),
+  seasonPeak('grass_pollen', 'Тимофеевка', [6, 7], 6),
+  seasonPeak('rye_pollen', 'Рожь', [6, 7], 7),
+  seasonPeak('mugwort_pollen', 'Полынь', [7, 8], 8),
+  seasonPeak('ragweed_pollen', 'Амброзия', [8, 9], 8),
 ];
 
 const SAINT_PETERSBURG_PEAKS: PeakSeed[] = [
-  { taxonId: 'alder_pollen', allergenId: null, label: 'Ольха', months: [4, 5], peakMonth: 5 },
-  { taxonId: 'birch_pollen', allergenId: 'birch-pollen', label: 'Берёза', months: [5, 6], peakMonth: 5 },
-  { taxonId: 'oak_pollen', allergenId: 'birch-pollen', label: 'Дуб', months: [5, 6], peakMonth: 6 },
-  { taxonId: 'grass_pollen', allergenId: 'grass-pollen', label: 'Тимофеевка', months: [6, 7], peakMonth: 7 },
-  { taxonId: 'rye_pollen', allergenId: 'rye', label: 'Рожь', months: [7, 8], peakMonth: 7 },
-  { taxonId: 'mugwort_pollen', allergenId: 'mugwort-pollen', label: 'Полынь', months: [8], peakMonth: 8 },
-  { taxonId: 'ragweed_pollen', allergenId: 'ragweed-pollen', label: 'Амброзия', months: [8, 9], peakMonth: 9 },
+  seasonPeak('alder_pollen', 'Ольха', [4, 5], 5),
+  seasonPeak('birch_pollen', 'Берёза', [5, 6], 5),
+  seasonPeak('oak_pollen', 'Дуб', [5, 6], 6),
+  seasonPeak('grass_pollen', 'Тимофеевка', [6, 7], 7),
+  seasonPeak('rye_pollen', 'Рожь', [7, 8], 7),
+  seasonPeak('mugwort_pollen', 'Полынь', [8], 8),
+  seasonPeak('ragweed_pollen', 'Амброзия', [8, 9], 9),
 ];
 
 const KRASNODAR_PEAKS: PeakSeed[] = [
-  { taxonId: 'alder_pollen', allergenId: null, label: 'Ольха', months: [2, 3], peakMonth: 3 },
-  { taxonId: 'birch_pollen', allergenId: 'birch-pollen', label: 'Берёза', months: [3, 4], peakMonth: 4 },
-  { taxonId: 'grass_pollen', allergenId: 'grass-pollen', label: 'Тимофеевка', months: [5, 6], peakMonth: 5 },
-  { taxonId: 'olive_pollen', allergenId: null, label: 'Олива', months: [5, 6], peakMonth: 5 },
-  { taxonId: 'mugwort_pollen', allergenId: 'mugwort-pollen', label: 'Полынь', months: [7, 8], peakMonth: 7 },
-  { taxonId: 'ragweed_pollen', allergenId: 'ragweed-pollen', label: 'Амброзия', months: [7, 8, 9], peakMonth: 8 },
+  seasonPeak('alder_pollen', 'Ольха', [2, 3], 3),
+  seasonPeak('birch_pollen', 'Берёза', [3, 4], 4),
+  seasonPeak('grass_pollen', 'Тимофеевка', [5, 6], 5),
+  seasonPeak('olive_pollen', 'Олива', [5, 6], 5),
+  seasonPeak('mugwort_pollen', 'Полынь', [7, 8], 7),
+  seasonPeak('ragweed_pollen', 'Амброзия', [7, 8, 9], 8),
 ];
 
 const NOVOSIBIRSK_PEAKS: PeakSeed[] = [
-  { taxonId: 'birch_pollen', allergenId: 'birch-pollen', label: 'Берёза', months: [5, 6], peakMonth: 6 },
-  { taxonId: 'grass_pollen', allergenId: 'grass-pollen', label: 'Тимофеевка', months: [6, 7], peakMonth: 7 },
-  { taxonId: 'rye_pollen', allergenId: 'rye', label: 'Рожь', months: [7, 8], peakMonth: 7 },
-  { taxonId: 'mugwort_pollen', allergenId: 'mugwort-pollen', label: 'Полынь', months: [8], peakMonth: 8 },
-  { taxonId: 'ragweed_pollen', allergenId: 'ragweed-pollen', label: 'Амброзия', months: [8, 9], peakMonth: 8 },
+  seasonPeak('birch_pollen', 'Берёза', [5, 6], 6),
+  seasonPeak('grass_pollen', 'Тимофеевка', [6, 7], 7),
+  seasonPeak('rye_pollen', 'Рожь', [7, 8], 7),
+  seasonPeak('mugwort_pollen', 'Полынь', [8], 8),
+  seasonPeak('ragweed_pollen', 'Амброзия', [8, 9], 8),
 ];
 
 const EKATERINBURG_PEAKS: PeakSeed[] = [
-  { taxonId: 'birch_pollen', allergenId: 'birch-pollen', label: 'Берёза', months: [5, 6], peakMonth: 5 },
-  { taxonId: 'grass_pollen', allergenId: 'grass-pollen', label: 'Тимофеевка', months: [6, 7], peakMonth: 6 },
-  { taxonId: 'rye_pollen', allergenId: 'rye', label: 'Рожь', months: [7], peakMonth: 7 },
-  { taxonId: 'mugwort_pollen', allergenId: 'mugwort-pollen', label: 'Полынь', months: [7, 8], peakMonth: 8 },
-  { taxonId: 'ragweed_pollen', allergenId: 'ragweed-pollen', label: 'Амброзия', months: [8, 9], peakMonth: 8 },
+  seasonPeak('birch_pollen', 'Берёза', [5, 6], 5),
+  seasonPeak('grass_pollen', 'Тимофеевка', [6, 7], 6),
+  seasonPeak('rye_pollen', 'Рожь', [7], 7),
+  seasonPeak('mugwort_pollen', 'Полынь', [7, 8], 8),
+  seasonPeak('ragweed_pollen', 'Амброзия', [8, 9], 8),
 ];
 
 /** Regional pollen season tables keyed by `PollenRegion.id` (B.2). */

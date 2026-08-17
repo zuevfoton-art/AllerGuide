@@ -40,6 +40,7 @@ const de: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'eine Aclearo-App',
     slogan: 'Aclearo — wenn Klarheit zählt',
+    goHome: 'Zur Startseite',
   },
   errorBoundary: {
     title: 'Etwas ist schiefgelaufen',
@@ -246,6 +247,15 @@ const de: LocaleMessages = {
     modulesTitle: 'Weitere Beobachtungsmodule',
     doctorVisit: 'Bevorstehender Arztbesuch',
     clinicalScalesOpen: 'Klinische Bewertungen',
+    entryPickerTitle: 'Was hinzufügen',
+    entryPickerVisit: 'Arzttermin',
+    setupCourse: 'Kurs einrichten',
+    setupCourseTitle: 'Kurs einrichten',
+    setupCourseTherapy: 'Therapie',
+    setupCourseTherapyHint: 'Verordnete Medikamentenkur',
+    setupCourseAsit: 'AIT',
+    setupCourseAsitHint: 'Allergen-Immuntherapie',
+    setupCourseAsitUnavailable: 'AIT ist verfügbar, wenn im Profil Pollinose gewählt ist',
     timePlaceholder: 'Zeit wählen',
     dateTimePlaceholder: 'Datum und Zeit wählen',
   },
@@ -466,9 +476,9 @@ const de: LocaleMessages = {
     pollenYandexInteractiveAttribution:
       'Karte: Yandex Maps (interaktiv) · Pollenprognose: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
-      'Untergrund: Baumpollen (Google UPI). Birke, Erle und Olive haben eigene Werte in den Chips',
+      'Untergrund: Baumpollen (Google). Werte für Birke / Erle / Olive sind separat',
     pollenTreeSpeciesLevelsHint:
-      'Die Kartenebene gilt für Bäume insgesamt. Werte für Birke / Erle / Olive kommen aus der Artprognose (Google oder Open-Meteo).',
+      'Die Kartenebene gilt für Bäume insgesamt. Werte für Birke, Erle und Olive kommen aus der Artprognose (Google oder Open-Meteo), nicht von der Unterlage.',
     pollenHeatmapGrassHint: 'Kartenebene: Gräserpollen (UPI)',
     pollenHeatmapWeedHint: 'Kartenebene: Kräuterpollen (UPI), nicht nur die gewählte Art',
     pollenBirch: 'Birke',

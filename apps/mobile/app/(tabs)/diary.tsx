@@ -3,8 +3,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   DIARY_AUTO_STEP_IDS,
-  buildAdaptiveDiaryWizardSections,
-  filterDiarySections,
+  buildCourseSetupOptions,
+  buildDiaryEntryPickerOptions,
   formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
@@ -12,6 +12,7 @@ import {
   getAsthmaPlanPersonalBest,
   isDiaryHistoryVisible,
   parseAllergies,
+  type ClinicalScaleId,
   type DiaryAutoMetadata,
   type DiarySection,
 } from '@allerguide/core';
@@ -23,7 +24,10 @@ import {
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
-import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
+import {
+  buildClinicalScaleEditorState,
+  buildDiarySectionEditorState,
+} from '@/src/services/diary-section-service';
 import { AsitCourseCard } from '@/src/components/AsitCourseCard';
 import { PrescribedTherapyCard } from '@/src/components/PrescribedTherapyCard';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
@@ -47,13 +51,14 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
+import { DiaryEntryTypePickerModal } from '@/src/components/DiaryEntryTypePickerModal';
+import { CourseSetupModal } from '@/src/components/CourseSetupModal';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { collectDiaryAutoMetadata } from '@/src/services/diary-auto-metadata-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { logCaughtError } from '@/src/services/error-reporting';
@@ -75,10 +80,7 @@ const TYPE_ICONS: Record<string, string> = {
   Терапия: 'medical',
 };
 
-const QUICK_ADD_EXCLUDED = new Set(['Шкала', 'Пикфлоуметрия', 'АСИТ', 'Визит к врачу', 'Терапия']);
-
 type EditorState =
-  | { mode: 'full' }
   | { mode: 'section'; sectionType: string; prefill?: Record<string, Record<string, string>>; simplifiedSection?: DiarySection }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
@@ -100,6 +102,8 @@ export default function DiaryScreen() {
   const [list, setList] = useState<DiaryEntry[]>([]);
   const [photoUrisByEntry, setPhotoUrisByEntry] = useState<Record<number, string[]>>({});
   const [editor, setEditor] = useState<EditorState | null>(null);
+  const [entryPickerOpen, setEntryPickerOpen] = useState(false);
+  const [coursePickerOpen, setCoursePickerOpen] = useState(false);
   const [autoMetadata, setAutoMetadata] = useState<DiaryAutoMetadata>({});
   const [refreshing, setRefreshing] = useState(false);
   const loadRequestId = useRef(0);
@@ -118,11 +122,19 @@ export default function DiaryScreen() {
     () => profileCapabilities?.gatingConditions ?? [],
     [profileCapabilities],
   );
-  const visibleSections = useMemo(
-    () => filterDiarySections(localizedSections, profileConditions),
-    [localizedSections, profileConditions],
+  const entryPickerOptions = useMemo(
+    () =>
+      buildDiaryEntryPickerOptions({
+        gatingConditions: profileConditions,
+        recommendedScaleIds: profileCapabilities?.recommendedScaleIds ?? [],
+      }),
+    [profileConditions, profileCapabilities],
   );
   const asitEnabled = profileCapabilities?.modules.asit ?? false;
+  const courseSetupOptions = useMemo(
+    () => buildCourseSetupOptions({ asitEnabled }),
+    [asitEnabled],
+  );
   const foodFocusEnabled = profileCapabilities?.modules.foodFocus ?? false;
   const drugFocusEnabled = profileCapabilities?.modules.drugFocus ?? false;
   const insectFocusEnabled = profileCapabilities?.modules.insectSting ?? false;
@@ -173,6 +185,7 @@ export default function DiaryScreen() {
       locale,
     });
     await loadAutoMetadata();
+    setEntryPickerOpen(false);
     setEditor({
       mode: 'section',
       sectionType: editorState.sectionType,
@@ -181,9 +194,16 @@ export default function DiaryScreen() {
     });
   };
 
-  const openFullWizard = async () => {
+  const openScale = async (scaleId: ClinicalScaleId) => {
+    const editorState = buildClinicalScaleEditorState(scaleId);
     await loadAutoMetadata();
-    setEditor({ mode: 'full' });
+    setEntryPickerOpen(false);
+    setEditor({
+      mode: 'section',
+      sectionType: editorState.sectionType,
+      prefill: editorState.prefill,
+      simplifiedSection: editorState.section,
+    });
   };
 
   const load = useCallback(async (profileId = activeProfileId) => {
@@ -305,22 +325,12 @@ export default function DiaryScreen() {
       );
     }
 
-    if (editor.mode === 'full') {
-      return (
-        <DiaryWizard
-          sections={buildAdaptiveDiaryWizardSections(visibleSections)}
-          autoMetadata={autoMetadata}
-          drugIntolerances={drugIntolerances}
-          planPersonalBestPef={planPersonalBestPef}
-          profileAllergiesJson={activeProfile?.allergies ?? '[]'}
-          onCancel={closeEditor}
-          onComplete={(entries) => void handleCreate(entries)}
-        />
-      );
-    }
-
     const sectionType = editor.mode === 'section' ? editor.sectionType : editor.entry.type;
-    const baseSection = localizedSections.find((s) => s.type === sectionType) ?? getDiarySection(sectionType);
+    const fallbackSection = editor.mode === 'section' ? editor.simplifiedSection : undefined;
+    const baseSection =
+      localizedSections.find((s) => s.type === sectionType) ??
+      getDiarySection(sectionType) ??
+      fallbackSection;
     if (!baseSection) return null;
     const rawSection =
       editor.mode === 'section' && editor.simplifiedSection ? editor.simplifiedSection : baseSection;
@@ -364,8 +374,8 @@ export default function DiaryScreen() {
   return (
     <Screen
       onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
-      refreshing={refreshing}>
-      <ScreenBrandHeader right={<ProfileHeaderButton />} />
+      refreshing={refreshing}
+      brandHeaderRight={<ProfileHeaderButton />}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('diary.eyebrow')} />
@@ -374,69 +384,44 @@ export default function DiaryScreen() {
         </View>
       </View>
 
-      <Button label={t('diary.newEntry')} variant="primary" block onPress={() => void openFullWizard()} />
       <Button
-        testID="diary-quick-entry"
-        label={t('diary.quickEntry')}
+        testID="diary-new-entry"
+        label={t('diary.newEntry')}
+        variant="primary"
+        block
+        onPress={() => setEntryPickerOpen(true)}
+      />
+      <Button
+        testID="diary-setup-course"
+        label={t('diary.setupCourse')}
         variant="secondary"
         block
-        onPress={() => {
-          const section = visibleSections.find((s) => s.type === 'Симптомы') ?? visibleSections[0];
-          if (section) void openSection(section.type);
+        onPress={() => setCoursePickerOpen(true)}
+      />
+
+      <DiaryEntryTypePickerModal
+        visible={entryPickerOpen}
+        options={entryPickerOptions}
+        sectionTitle={(sectionType) =>
+          localizedSections.find((section) => section.type === sectionType)?.title ??
+          localizeDiaryType(sectionType, localeContent)
+        }
+        onClose={() => setEntryPickerOpen(false)}
+        onSelectSection={(sectionType) => void openSection(sectionType)}
+        onSelectScale={(scaleId) => void openScale(scaleId)}
+      />
+      <CourseSetupModal
+        visible={coursePickerOpen}
+        options={courseSetupOptions}
+        onClose={() => setCoursePickerOpen(false)}
+        onSelect={(id) => {
+          setCoursePickerOpen(false);
+          if (id === 'asit') {
+            router.push('/asit-course' as any);
+            return;
+          }
+          router.push('/prescribed-therapy' as any);
         }}
-      />
-
-      <GlassCard>
-        <Text style={ui.cardTitle}>{t('diary.quickAdd')}</Text>
-        <View style={styles.chipRow}>
-          {visibleSections
-            .filter((section) => !QUICK_ADD_EXCLUDED.has(section.type))
-            .map((section) => (
-              <Pressable
-                key={section.type}
-                testID={`diary-chip-${
-                  (
-                    {
-                      Симптомы: 'symptoms',
-                      Лекарство: 'medicine',
-                      Питание: 'food',
-                      Триггер: 'trigger',
-                      Кожа: 'skin',
-                      Пикфлоуметрия: 'pef',
-                      АСИТ: 'asit',
-                      'Визит к врачу': 'visit',
-                      Заметка: 'note',
-                      'Укус насекомого': 'insect',
-                      Шкала: 'scale',
-                    } as Record<string, string>
-                  )[section.type] ?? 'other'
-                }`}
-                style={styles.chip}
-                onPress={() => void openSection(section.type)}
-                accessibilityRole="button"
-                accessibilityLabel={section.title}>
-                <Ionicons
-                  name={(TYPE_ICONS[section.type] ?? section.icon) as any}
-                  size={14}
-                  color={theme.colors.textSecondary}
-                />
-                <Text style={styles.chipText}>{section.title}</Text>
-              </Pressable>
-            ))}
-        </View>
-      </GlassCard>
-
-      <Button
-        label={t('diary.doctorVisit')}
-        variant="secondary"
-        block
-        onPress={() => void openSection('Визит к врачу')}
-      />
-      <Button
-        label={t('diary.clinicalScalesOpen')}
-        variant="secondary"
-        block
-        onPress={() => router.push('/clinical-scales' as any)}
       />
 
       <DiaryEditorModal visible={editor !== null} onClose={closeEditor}>
@@ -570,73 +555,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
-    actPromptCard: { gap: 8 },
-    actPromptText: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
-    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
-    chip: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-      paddingVertical: 7,
-      paddingHorizontal: 10,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.borderInput,
-    },
-    chipText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    scalePicker: { gap: 10 },
-    scaleHint: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textSecondary,
-      lineHeight: 17,
-    },
-    scaleGroupLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.6,
-    },
-    chipAccent: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
-    },
-    trendRow: {
-      paddingVertical: 8,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-      gap: 2,
-    },
-    trendRowFirst: { borderTopWidth: 0, paddingTop: 0 },
-    trendLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.head,
-    },
-    trendValue: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-    },
-    trendMeta: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-    },
     listHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -665,13 +583,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       fontWeight: '600',
       color: colors.textMuted,
-    },
-    hintsCard: { gap: 8 },
-    hintText: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
     },
   });
 }

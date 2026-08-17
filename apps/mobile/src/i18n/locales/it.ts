@@ -40,6 +40,7 @@ const it: LocaleMessages = {
     productName: 'A-Claro',
     endorser: 'un\'app Aclearo',
     slogan: 'Aclearo — quando conta la chiarezza',
+    goHome: 'Vai alla home',
   },
   errorBoundary: {
     title: 'Qualcosa è andato storto',
@@ -245,6 +246,15 @@ const it: LocaleMessages = {
     modulesTitle: 'Moduli di osservazione aggiuntivi',
     doctorVisit: 'Prossima visita dal medico',
     clinicalScalesOpen: 'Valutazioni cliniche',
+    entryPickerTitle: 'Cosa aggiungere',
+    entryPickerVisit: 'Appuntamento medico',
+    setupCourse: 'Configura corso',
+    setupCourseTitle: 'Configura corso',
+    setupCourseTherapy: 'Terapia',
+    setupCourseTherapyHint: 'Corso di farmaci prescritti',
+    setupCourseAsit: 'ITA',
+    setupCourseAsitHint: 'Immunoterapia allergenica',
+    setupCourseAsitUnavailable: 'L’ITA è disponibile se il profilo include la pollinosi',
     timePlaceholder: 'Seleziona l’ora',
     dateTimePlaceholder: 'Seleziona data e ora',
   },
@@ -465,9 +475,9 @@ const it: LocaleMessages = {
     pollenYandexInteractiveAttribution:
       'Mappa: Yandex Maps (interattiva) · previsione polline: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
-      'Sfondo: polline degli alberi (Google UPI). Betulla, ontano e olivo hanno livelli separati nei chip',
+      'Sfondo: polline degli alberi (Google). I livelli di betulla / ontano / olivo sono separati',
     pollenTreeSpeciesLevelsHint:
-      'Lo strato mappa è comune agli alberi. I numeri di betulla / ontano / olivo vengono dalla previsione per specie (Google o Open-Meteo).',
+      'Lo strato mappa è comune agli alberi. I livelli di betulla, ontano e olivo vengono dalla previsione per specie (Google o Open-Meteo), non dallo sfondo.',
     pollenHeatmapGrassHint: 'Livello mappa: polline delle graminacee (UPI)',
     pollenHeatmapWeedHint: 'Livello mappa: polline delle infestanti (UPI), non solo la specie scelta',
     pollenBirch: 'Betulla',

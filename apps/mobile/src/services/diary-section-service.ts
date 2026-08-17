@@ -1,5 +1,6 @@
 import {
   buildAsitPrefillWithDoseNumber,
+  buildClinicalScaleEditorState,
   buildFoodPrefill,
   buildInsectStingPrefill,
   buildMedicinePrefill,
@@ -60,6 +61,8 @@ export function findRecentFoodScanForProfile(profileId: number): FoodDrugScanRef
 export type DiarySectionEditorStateWithSection = DiarySectionEditorState & {
   section?: DiarySection;
 };
+
+export { buildClinicalScaleEditorState };
 
 /** Builds diary section editor state with domain prefills (orchestration only — logic in core). */
 export async function buildDiarySectionEditorState(input: {

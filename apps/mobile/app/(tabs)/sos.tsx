@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
@@ -155,7 +154,6 @@ export default function SosScreen() {
           />
         ) : undefined
       }>
-      <ScreenBrandHeader />
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('sos.eyebrow')} />
