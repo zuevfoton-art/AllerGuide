@@ -71,6 +71,7 @@ const frContent: LocaleContent = {
         food: {
           label: 'Qu\'a-t-on mangé ?',
           placeholder: 'Plats, aliments, boissons',
+          hint: 'Saisissez le plat à la main — la composition est reconnue comme dans le scanner, puis le niveau de réaction.',
         },
         foodComponents: {
           label: 'Ingrédients du plat',

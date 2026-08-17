@@ -46,7 +46,7 @@ import {
   pickDiaryPhotoFromLibrary,
   removePhotoUri,
 } from '@/src/services/diary-photo-picker';
-import { enrichDishFromOpenFoods } from '@/src/services/dish-off-enrichment-service';
+import { recognizeDiaryDish } from '@/src/services/diary-dish-recognition-service';
 import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 
 export interface DiaryWizardResult {
@@ -114,10 +114,13 @@ export function DiaryWizard({
     1;
   const overallStepsTotal = sections.reduce((sum, item) => sum + item.steps.length, 0);
   const isLastStep = sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1;
+  const waitingForDishRecognition =
+    section.type === 'Питание' && step.id === 'food' && offEnriching;
   const canAdvanceCurrentStep =
-    section.type === 'Шкала' && isLastStep
+    !waitingForDishRecognition &&
+    (section.type === 'Шкала' && isLastStep
       ? !validateClinicalScale(sectionAnswers)
-      : !step.required || Boolean(sectionAnswers[step.id]?.trim());
+      : !step.required || Boolean(sectionAnswers[step.id]?.trim()));
   const canSkipSection =
     allowSkipSection &&
     totalSections > 1 &&
@@ -136,7 +139,7 @@ export function DiaryWizard({
     let cancelled = false;
     const timer = setTimeout(() => {
       setOffEnriching(true);
-      void enrichDishFromOpenFoods(food)
+      void recognizeDiaryDish(food)
         .then((enrichment) => {
           if (cancelled || !enrichment) return;
           // Local-only result is already applied synchronously on food change.
@@ -430,6 +433,12 @@ export function DiaryWizard({
               testID="diary-wizard-voice"
               onTranscript={handleVoiceTranscript}
             />
+          ) : null}
+          {section.type === 'Питание' && step.id === 'food' && offEnriching ? (
+            <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
+              <ActivityIndicator size="small" color={theme.colors.accent} />
+              <Text style={styles.hint}>{t('diaryWizard.dishOffLoading')}</Text>
+            </View>
           ) : null}
         </>
       )}
@@ -1142,6 +1151,17 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       fontWeight: '600',
       color: colors.danger,
+    },
+    offLoadingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    hint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
     },
   });
 }

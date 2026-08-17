@@ -71,6 +71,7 @@ const enContent: LocaleContent = {
         food: {
           label: 'What was eaten?',
           placeholder: 'Dishes, foods, drinks',
+          hint: 'Enter the dish by hand — ingredients are recognized like the scanner, then the reaction level.',
         },
         foodComponents: {
           label: 'Dish ingredients',

@@ -71,6 +71,7 @@ const esContent: LocaleContent = {
         food: {
           label: '¿Qué comió?',
           placeholder: 'Platos, alimentos, bebidas',
+          hint: 'Escribe el plato a mano: los ingredientes se reconocen como en el escáner y luego el nivel de reacción.',
         },
         foodComponents: {
           label: 'Ingredientes del plato',

@@ -18,6 +18,7 @@ export const DIARY_AUTO_STEP_IDS = new Set([
   'recentScan',
   'todayMeds',
   'scanRef',
+  'foodSource',
   'medicineForm',
   'medicineActiveSubstance',
   'medicineUsage',
@@ -259,6 +260,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'text',
         multiline: true,
         required: true,
+        hint: 'Введите блюдо вручную — состав распознается как в сканере, затем уровень реакции.',
       },
       {
         id: 'foodComponents',
