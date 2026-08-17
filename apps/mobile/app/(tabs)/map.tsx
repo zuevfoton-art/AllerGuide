@@ -283,7 +283,10 @@ export default function MapScreen() {
     selectedTaxonId,
     pollenSnapshot?.typeIndexes,
   );
-  const heatmapEmpty = Boolean(showPollenLayer && pollenSnapshot && !groupHeatmapActive);
+  const hasOfficialTypeIndexes = Object.keys(pollenSnapshot?.typeIndexes ?? {}).length > 0;
+  const heatmapEmpty = Boolean(
+    showPollenLayer && pollenSnapshot && hasOfficialTypeIndexes && !groupHeatmapActive,
+  );
   const airTileUrlTemplate =
     showAirLayer && isAirQualityHeatmapAvailable()
       ? buildAirQualityHeatmapTileUrlTemplate()

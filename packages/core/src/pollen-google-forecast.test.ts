@@ -39,6 +39,7 @@ describe('pollen-google-forecast', () => {
     ).toBe(false);
     expect(hasGoogleGroupHeatmap('grass_pollen', day.typeIndexes)).toBe(true);
     expect(hasGoogleGroupHeatmap('ragweed_pollen', day.typeIndexes)).toBe(false);
+    expect(hasGoogleGroupHeatmap('birch_pollen', {})).toBe(false);
   });
 
   it('identifies tree species taxa', () => {
