@@ -137,6 +137,11 @@ describe('pollen forecast routes', () => {
                   },
                 },
                 {
+                  code: 'ALDER',
+                  displayName: 'Alder',
+                  indexInfo: { value: 1, category: 'Very Low' },
+                },
+                {
                   code: 'OLIVE',
                   displayName: 'Olive',
                 },
@@ -155,9 +160,12 @@ describe('pollen forecast routes', () => {
     expect(response.status).toBe(200);
     expect(response.body.ok).toBe(true);
     expect(response.body.forecast.days[0].plantIndexes.birch_pollen.index).toBe(2);
+    expect(response.body.forecast.days[0].plantIndexes.alder_pollen.index).toBe(1);
+    expect(response.body.forecast.days[0].plantIndexes.olive_pollen).toBeUndefined();
     expect(response.body.forecast.plants.birch_pollen.family).toBe('Betulaceae');
     expect(response.body.forecast.days[0].plantCoverage).toEqual([
       { code: 'BIRCH', taxonId: 'birch_pollen', hasIndex: true },
+      { code: 'ALDER', taxonId: 'alder_pollen', hasIndex: true },
       { code: 'OLIVE', taxonId: 'olive_pollen', hasIndex: false },
     ]);
     expect(fetchMock).toHaveBeenCalled();

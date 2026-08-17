@@ -380,8 +380,8 @@ grass_pollen                              → GRASS_UPI
 ragweed_pollen, mugwort_pollen            → WEED_UPI
 ```
 
-- При переключении Берёза ↔ Ольха ↔ Олива heatmap **не** меняется (та же `TREE_UPI`); меняется только OM-бейдж.
-- Под картой короткая подпись: «Слой карты: деревья (UPI)» / злаки / сорняки — чтобы не ожидать heatmap «только берёза».
+- При переключении Берёза ↔ Ольха ↔ Олива heatmap **не** меняется (та же `TREE_UPI`); чипы/бейдж берут видовой UPI из Google `plantInfo` (`BIRCH`/`ALDER`/`OLIVE`) или Open-Meteo, **не** общий `TREE`.
+- Под картой короткая подпись: «Подложка: пыльца деревьев (Google). Уровень берёзы/ольхи/оливы — отдельно».
 - Масштаб Точка/Город/Регион: `animateToRegion` / `initialRegion` span из текущих zoom 13/11/9; бейдж пересчитывается как сейчас.
 - Карта снова **интерактивна** (pan/zoom); бейдж — абсолютный overlay `pointerEvents="none"` (как сейчас).
 - Атрибуция: Google Maps logo/text + «Source: Includes pollen data from Google» + «уровни: Open-Meteo / CAMS».

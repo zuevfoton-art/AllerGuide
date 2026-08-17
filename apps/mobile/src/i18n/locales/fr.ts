@@ -465,9 +465,9 @@ const fr: LocaleMessages = {
     pollenYandexInteractiveAttribution:
       'Carte : Yandex Maps (interactive) · prévision pollinique : Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
-      'Fond : pollen d’arbres (Google UPI). Bouleau, aulne et olivier ont des niveaux séparés dans les puces',
+      'Fond : pollen d’arbres (Google). Les niveaux bouleau / aulne / olivier sont séparés',
     pollenTreeSpeciesLevelsHint:
-      'La couche carte est commune aux arbres. Les chiffres bouleau / aulne / olivier viennent de la prévision par espèce (Google ou Open-Meteo).',
+      'La couche carte est commune aux arbres. Les niveaux bouleau, aulne et olivier viennent de la prévision par espèce (Google ou Open-Meteo), pas du fond.',
     pollenHeatmapGrassHint: 'Couche : pollen de graminées (UPI)',
     pollenHeatmapWeedHint: "Couche : pollen d’herbacées (UPI), pas uniquement l’espèce choisie",
     pollenBirch: 'Bouleau',

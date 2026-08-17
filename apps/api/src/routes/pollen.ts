@@ -2,6 +2,7 @@ import type { Express, Request, Response } from 'express';
 import {
   isGooglePollenMapType,
   parsePollenHeatmapTileCoordinates,
+  summarizeGooglePlantCoverage,
 } from '@allerguide/core';
 import { logCaughtError } from '../lib/log-caught-error';
 import {
@@ -104,6 +105,20 @@ export function registerPollenRoutes(app: Express): void {
 
     try {
       const forecast = await fetchGooglePollenForecast(latitude, longitude, languageCode);
+      const today = forecast.days[0];
+      if (today) {
+        const coverage = summarizeGooglePlantCoverage(today.plantCoverage);
+        console.info('[pollen.forecast] plantCoverage', {
+          latitude,
+          longitude,
+          languageCode,
+          regionCode: forecast.regionCode,
+          date: today.date,
+          withIndex: coverage.withIndex,
+          withoutIndex: coverage.withoutIndex,
+          treeSpecies: coverage.treeSpecies,
+        });
+      }
       res.set({ 'Cache-Control': 'private, max-age=600' });
       res.json({ ok: true, forecast });
     } catch (error) {
