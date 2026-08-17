@@ -1,6 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   DIARY_AUTO_STEP_IDS,
   buildCourseSetupOptions,
@@ -10,11 +10,14 @@ import {
   getDiaryEntryAnswers,
   getDiarySection,
   getAsthmaPlanPersonalBest,
+  getProfileAgeYears,
   isDiaryHistoryVisible,
   parseAllergies,
   type ClinicalScaleId,
   type DiaryAutoMetadata,
   type DiarySection,
+  type MedicineAgeResolution,
+  type MedicineCard,
 } from '@allerguide/core';
 import {
   addDiaryEntries,
@@ -49,6 +52,10 @@ import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
 import { DiaryEntryTypePickerModal } from '@/src/components/DiaryEntryTypePickerModal';
 import { CourseSetupModal } from '@/src/components/CourseSetupModal';
+import {
+  MedicinePhotoStep,
+  MedicineRecognitionNotice,
+} from '@/src/components/MedicinePhotoStep';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -77,7 +84,14 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 type EditorState =
-  | { mode: 'section'; sectionType: string; prefill?: Record<string, Record<string, string>>; simplifiedSection?: DiarySection }
+  | { mode: 'medicinePhoto' }
+  | {
+      mode: 'section';
+      sectionType: string;
+      prefill?: Record<string, Record<string, string>>;
+      simplifiedSection?: DiarySection;
+      notice?: ReactNode;
+    }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
 function hideAutoSteps(section: DiarySection): DiarySection {
@@ -164,12 +178,18 @@ export default function DiaryScreen() {
     setAutoMetadata(metadata);
   };
 
-  const openSection = async (sectionType: string) => {
+  const openSection = async (
+    sectionType: string,
+    extras?: { recognizedCard?: MedicineCard; photoUri?: string; notice?: ReactNode },
+  ) => {
     const editorState = await buildDiarySectionEditorState({
       sectionType,
       profileId: activeProfileId,
       profileAllergiesJson: activeProfile?.allergies ?? '[]',
       locale,
+      profileBirthYear: activeProfile?.birthYear,
+      recognizedCard: extras?.recognizedCard,
+      photoUri: extras?.photoUri,
     });
     await loadAutoMetadata();
     setEntryPickerOpen(false);
@@ -178,6 +198,24 @@ export default function DiaryScreen() {
       sectionType: editorState.sectionType,
       prefill: editorState.prefill,
       simplifiedSection: editorState.section,
+      notice: extras?.notice,
+    });
+  };
+
+  const openMedicinePhoto = () => {
+    setEntryPickerOpen(false);
+    setEditor({ mode: 'medicinePhoto' });
+  };
+
+  const continueMedicineFromPhoto = async (input: {
+    card: MedicineCard;
+    ageUsage: MedicineAgeResolution | null;
+    photoUri?: string;
+  }) => {
+    await openSection('Лекарство', {
+      recognizedCard: input.card,
+      photoUri: input.photoUri,
+      notice: <MedicineRecognitionNotice card={input.card} ageUsage={input.ageUsage} />,
     });
   };
 
@@ -301,6 +339,16 @@ export default function DiaryScreen() {
   const renderEditor = () => {
     if (!editor) return null;
 
+    if (editor.mode === 'medicinePhoto') {
+      return (
+        <MedicinePhotoStep
+          ageYears={getProfileAgeYears(activeProfile?.birthYear)}
+          onSkip={() => void openSection('Лекарство')}
+          onContinue={(input) => void continueMedicineFromPhoto(input)}
+        />
+      );
+    }
+
     if (editor.mode === 'edit' && editor.legacy) {
       return (
         <DiaryLegacyEditor
@@ -342,6 +390,7 @@ export default function DiaryScreen() {
           planPersonalBestPef={planPersonalBestPef}
           profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           autoMetadata={autoMetadata}
+          notice={editor.mode === 'section' ? editor.notice : undefined}
           submitLabel={editor.mode === 'edit' ? t('diary.saveChanges') : t('common.save')}
           onCancel={closeEditor}
           onComplete={(entries) => {
@@ -394,7 +443,13 @@ export default function DiaryScreen() {
           localizeDiaryType(sectionType, localeContent)
         }
         onClose={() => setEntryPickerOpen(false)}
-        onSelectSection={(sectionType) => void openSection(sectionType)}
+        onSelectSection={(sectionType) => {
+          if (sectionType === 'Лекарство') {
+            openMedicinePhoto();
+            return;
+          }
+          void openSection(sectionType);
+        }}
         onSelectScale={(scaleId) => void openScale(scaleId)}
       />
       <CourseSetupModal
@@ -474,7 +529,7 @@ export default function DiaryScreen() {
           registry={foodDrugRegistry}
           entries={list}
           onLogFood={() => void openSection('Питание')}
-          onLogMedicine={() => void openSection('Лекарство')}
+          onLogMedicine={openMedicinePhoto}
         />
       ) : null}
 

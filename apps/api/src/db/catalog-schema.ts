@@ -1,3 +1,4 @@
+import type { MedicineAgeUsage } from '@allerguide/core';
 import {
   boolean,
   index,
@@ -7,13 +8,15 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core';
 
 /**
  * `catalog` database (Postgres schema) — global reference data shared by all
- * users: the allergen taxonomy, cross-reactions, and the product/barcode
- * catalog. User-specific data lives in the separate `profile` schema.
+ * users: the allergen taxonomy, cross-reactions, the product/barcode
+ * catalog, and crowd-sourced medicine cards. User-specific data lives in
+ * the separate `profile` schema.
  */
 export const catalogSchema = pgSchema('catalog');
 
@@ -61,6 +64,37 @@ export const products = catalogSchema.table(
   (table) => [index('products_source_idx').on(table.source)],
 );
 
+/**
+ * Shared medicine cards recognized from package photos.
+ * Deduped by `normalized_name`. No user id and no photo payload.
+ */
+export const medicines = catalogSchema.table(
+  'medicines',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    normalizedName: varchar('normalized_name', { length: 255 }).notNull(),
+    name: text('name').notNull(),
+    activeSubstance: text('active_substance').notNull().default(''),
+    form: varchar('form', { length: 128 }).notNull().default(''),
+    strength: varchar('strength', { length: 128 }).notNull().default(''),
+    manufacturer: varchar('manufacturer', { length: 255 }).notNull().default(''),
+    indications: text('indications').notNull().default(''),
+    ageUsage: jsonb('age_usage').$type<MedicineAgeUsage[]>().notNull().default([]),
+    minAgeYears: integer('min_age_years'),
+    ingredients: text('ingredients').notNull().default(''),
+    allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
+    source: varchar('source', { length: 32 }).notNull().default('vision'),
+    confidence: varchar('confidence', { length: 16 }).notNull().default('low'),
+    recognitions: integer('recognitions').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('medicines_normalized_name_uidx').on(table.normalizedName),
+    index('medicines_source_idx').on(table.source),
+  ],
+);
+
 /** Crowdsourced alias terms for scanner keyword enrichment (D.5 persistence). */
 export const aliasFeedback = catalogSchema.table(
   'alias_feedback',
@@ -82,3 +116,5 @@ export type NewAllergenRow = typeof allergens.$inferInsert;
 export type CrossReactionRow = typeof crossReactions.$inferSelect;
 export type ProductRow = typeof products.$inferSelect;
 export type NewProductRow = typeof products.$inferInsert;
+export type MedicineRow = typeof medicines.$inferSelect;
+export type NewMedicineRow = typeof medicines.$inferInsert;

@@ -4,17 +4,21 @@ import {
   buildFoodPrefill,
   buildInsectStingPrefill,
   buildMedicinePrefill,
+  buildMedicinePrefillFromCard,
   buildTriggerPrefill,
   buildPrescribedTherapyPrefill,
   getDiarySection,
+  getProfileAgeYears,
   isAsitCourseConfigured,
   isPrescribedCourseConfigured,
   parseAllergies,
   parseScanHistoryMatchLabels,
+  serializeDiaryPhotoUris,
   ASIT_SIMPLIFIED_STEP_IDS,
   PRESCRIBED_SIMPLIFIED_STEP_IDS,
   type DiarySection,
   type FoodDrugScanRef,
+  type MedicineCard,
 } from '@allerguide/core';
 import { getAsitCourse } from '@/src/services/asit-course-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
@@ -70,6 +74,9 @@ export async function buildDiarySectionEditorState(input: {
   profileId: number | null;
   profileAllergiesJson: string;
   locale: AppLocale;
+  profileBirthYear?: number | null;
+  recognizedCard?: MedicineCard;
+  photoUri?: string;
 }): Promise<DiarySectionEditorStateWithSection> {
   const { sectionType, profileId, profileAllergiesJson, locale } = input;
 
@@ -107,7 +114,15 @@ export async function buildDiarySectionEditorState(input: {
 
   if (sectionType === 'Лекарство' && profileId) {
     const passport = getAllergyPassport(profileId);
-    const prefill = buildMedicinePrefill(passport.drugIntolerances);
+    const ageYears = getProfileAgeYears(input.profileBirthYear);
+    const base = buildMedicinePrefill(passport.drugIntolerances);
+    const fromCard = input.recognizedCard
+      ? buildMedicinePrefillFromCard(input.recognizedCard, ageYears, passport.drugIntolerances)
+      : {};
+    const prefill = { ...base, ...fromCard };
+    if (input.photoUri) {
+      prefill.medicinePhotos = serializeDiaryPhotoUris([input.photoUri]);
+    }
     return { mode: 'section', sectionType, prefill: { Лекарство: prefill } };
   }
 

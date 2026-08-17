@@ -57,6 +57,12 @@ const enContent: LocaleContent = {
           label: 'Effect or side reaction',
           placeholder: 'Did it help? Were there any side effects?',
         },
+        medicineForm: { label: 'Form (auto)' },
+        medicineActiveSubstance: { label: 'Active substance (auto)' },
+        medicineUsage: { label: 'Usage (auto)' },
+        medicineAgeNote: { label: 'Age restriction (auto)' },
+        medicineSource: { label: 'Recognition source (auto)' },
+        medicinePhotos: { label: 'Package photo' },
       },
     },
     Питание: {

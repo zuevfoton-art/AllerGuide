@@ -56,6 +56,12 @@ export const BACKEND_AUTH_ENABLED = process.env.EXPO_PUBLIC_BACKEND_AUTH === 'tr
 export const PRODUCT_DB_ENABLED = process.env.EXPO_PUBLIC_PRODUCT_DB === 'true';
 
 /**
+ * Diary «Лекарство» photo recognition via POST /api/medicines/recognize.
+ * Catalog-first lookup + optional VL. Offline OCR/demo parse remains when off.
+ */
+export const MEDICINE_DB_ENABLED = process.env.EXPO_PUBLIC_MEDICINE_DB === 'true';
+
+/**
  * Google Maps basemap + Google Pollen UPI tiles on the pollen layer.
  * The Yandex/Open-Meteo view remains the default and offline-safe fallback.
  */
