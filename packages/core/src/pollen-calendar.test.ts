@@ -45,6 +45,18 @@ describe('regional pollen calendars', () => {
     expect(alerts.every((a) => a.allergenId === 'birch-pollen')).toBe(true);
   });
 
+  it('marks alder and olive calendar peaks as profile-relevant', () => {
+    const moscowAlder = getCurrentPollenAlerts(4, ['alder-pollen'], 'moscow');
+    expect(moscowAlder.find((peak) => peak.taxonId === 'alder_pollen')).toMatchObject({
+      allergenId: 'alder-pollen',
+    });
+
+    const krasnodarOlive = getCurrentPollenAlerts(5, ['olive-pollen'], 'krasnodar');
+    expect(krasnodarOlive.find((peak) => peak.taxonId === 'olive_pollen')).toMatchObject({
+      allergenId: 'olive-pollen',
+    });
+  });
+
   it('does not match milk profile to birch season via substring', () => {
     const alerts = getCurrentPollenAlerts(5, ['milk'], 'moscow');
     expect(alerts).toHaveLength(0);

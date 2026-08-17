@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { GOOGLE_POLLEN_PLANT_CODES } from './pollen-plant-detail';
-import { normalizeGooglePollenForecast } from './pollen-google-normalize';
+import {
+  normalizeGooglePollenForecast,
+  summarizeGooglePlantCoverage,
+} from './pollen-google-normalize';
 import { resolveGoogleUpiForTaxon } from './pollen-google-forecast';
 import { POLLEN_MAP_TAXON_IDS } from './pollen-map';
 
@@ -69,6 +72,40 @@ describe('normalizeGooglePollenForecast', () => {
     expect(day.plantIndexes.ash_pollen).toBeUndefined();
     expect(resolveGoogleUpiForTaxon('ash_pollen', day)).toBeNull();
     expect(resolveGoogleUpiForTaxon('birch_pollen', day)?.index).toBeGreaterThan(0);
+  });
+
+  it('records BIRCH / ALDER / OLIVE coverage with and without indexInfo', () => {
+    const result = normalizeGooglePollenForecast({
+      regionCode: 'RU',
+      dailyInfo: [
+        {
+          date: { year: 2026, month: 4, day: 15 },
+          pollenTypeInfo: [
+            { code: 'TREE', indexInfo: { value: 4, category: 'High' } },
+          ],
+          plantInfo: [
+            { code: 'BIRCH', indexInfo: { value: 3, category: 'Moderate' } },
+            { code: 'ALDER' },
+            { code: 'OLIVE', displayName: 'Olive' },
+          ],
+        },
+      ],
+    });
+    const day = result.days[0]!;
+    expect(day.plantIndexes.birch_pollen?.index).toBe(3);
+    expect(day.plantIndexes.alder_pollen).toBeUndefined();
+    expect(day.plantIndexes.olive_pollen).toBeUndefined();
+    expect(day.plants.alder_pollen?.displayName).toBeTruthy();
+    expect(day.plants.olive_pollen?.displayName).toBe('Olive');
+
+    const summary = summarizeGooglePlantCoverage(day.plantCoverage);
+    expect(summary.withIndex).toEqual(['BIRCH']);
+    expect(summary.withoutIndex).toEqual(['ALDER', 'OLIVE']);
+    expect(summary.treeSpecies).toEqual([
+      { code: 'BIRCH', present: true, hasIndex: true },
+      { code: 'ALDER', present: true, hasIndex: false },
+      { code: 'OLIVE', present: true, hasIndex: false },
+    ]);
   });
 
   it('allows grass and weed type fallback when the plant index is missing', () => {

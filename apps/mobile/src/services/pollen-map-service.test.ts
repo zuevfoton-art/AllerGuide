@@ -198,6 +198,67 @@ describe('pollen-map-service', () => {
     expect(fetchMock).toHaveBeenCalled();
   });
 
+  it('synthesizes birch/alder/olive chips from Google plant UPI when Open-Meteo is empty', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        const href = String(url);
+        if (href.includes('air-quality-api.open-meteo.com')) {
+          return {
+            ok: true,
+            json: async () => ({
+              current: { time: '2026-04-15T10:00' },
+              hourly: { time: ['2026-04-15T10:00'] },
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    vi.doMock('@/src/constants/features', () => ({
+      GOOGLE_POLLEN_HEATMAP_ENABLED: true,
+      MAP_POLLEN_GOOGLE_PRIMARY: true,
+    }));
+
+    const { apiRequest } = await import('@/src/services/api-client');
+    vi.mocked(apiRequest).mockResolvedValue({
+      ok: true,
+      data: {
+        forecast: {
+          days: [
+            {
+              date: '2026-04-15',
+              typeIndexes: {
+                TREE: { index: 5, source: 'google' },
+              },
+              plantIndexes: {
+                birch_pollen: { index: 4, source: 'google', category: 'High' },
+                alder_pollen: { index: 2, source: 'google', category: 'Low' },
+                olive_pollen: { index: 1, source: 'google', category: 'Very Low' },
+              },
+              plants: {},
+            },
+          ],
+          plants: {},
+        },
+      },
+    } as never);
+
+    const { fetchPollenMapSnapshot } = await import('./pollen-map-service');
+    const snapshot = await fetchPollenMapSnapshot(location, '["olive-pollen"]');
+
+    expect(snapshot.source).toBe('google');
+    expect(snapshot.upiByTaxon.birch_pollen).toMatchObject({ index: 4, source: 'google' });
+    expect(snapshot.upiByTaxon.alder_pollen).toMatchObject({ index: 2, source: 'google' });
+    expect(snapshot.upiByTaxon.olive_pollen).toMatchObject({ index: 1, source: 'google' });
+    expect(snapshot.readings.find((item) => item.taxonId === 'olive_pollen')).toMatchObject({
+      value: 1,
+      profileRelevant: true,
+    });
+    expect(snapshot.readings.find((item) => item.taxonId === 'birch_pollen')?.value).not.toBe(5);
+  });
+
   it('uses the location cache after a network failure', async () => {
     vi.doMock('@/src/constants/features', () => ({
       GOOGLE_POLLEN_HEATMAP_ENABLED: false,

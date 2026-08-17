@@ -284,14 +284,14 @@ Baseline также включает **индекс самочувствия 0�
 
 - **FR-MAP-06.** Отображение пиков пыления для текущего месяца (календарь АДАИР) при offline/пустом feed.
 - **FR-MAP-07.** Карточка аллергена: описание, сезон/семейство (Google plantInfo при наличии), перекрёстные реакции из `@allerguide/core`.
-- **FR-MAP-11.** Live-уровни берёзы, злаковых, амброзии (+ ольха, полынь, олива) из Open-Meteo по геолокации.
+- **FR-MAP-11.** Live-уровни берёзы, злаковых, амброзии (+ ольха, полынь, олива): Google `plantInfo` UPI (`BIRCH`/`ALDER`/`OLIVE`) если есть, иначе Open-Meteo grains/m³. Общий `TREE` не подставляется как уровень вида.
 - **FR-MAP-12.** Чипы выбора таксона с цветовой точкой уровня; релевантные профилю отмечены.
 - **FR-MAP-13.** Подложка: Google Maps primary при `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` или `EXPO_PUBLIC_POLLEN_HEATMAP=google`; Яндекс — fallback. Heatmap UPI через API proxy. Deep-link на 10-дневный прогноз Яндекс Погоды.
 - **FR-MAP-14.** При недоступности live-данных — кэш или региональный календарь без блокировки экрана.
 - **FR-MAP-15.** Универсальный индекс пыльцы (UPI 0–5): официальные категории Google (`Нет` … `Очень высокий`). Google Forecast proxy при наличии ключа, иначе оценка из Open-Meteo grains/m³. Не подписывать Google UPI как зёрна/м³.
 - **FR-MAP-16.** Полоса multi-day прогноза (Open-Meteo hourly → daily peaks; до ~4 дней; Google Forecast до 5 при флаге).
 - **FR-MAP-17.** Picker всегда показывает 17 Google map taxa (14 TREE, 1 GRASS, 2 WEED) по группам, независимо от сезона; вид без данных остаётся выбранным с no-data state.
-- **FR-MAP-18.** Google pollen heatmap — только три групповых слоя (`TREE_UPI` / `GRASS_UPI` / `WEED_UPI`) с легендой. Per-species heatmap нет (spike: [`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md), решение no-go).
+- **FR-MAP-18.** Google pollen heatmap — только три групповых слоя (`TREE_UPI` / `GRASS_UPI` / `WEED_UPI`) с легендой и копирайтом, что подложка деревьев суммарная. Per-species heatmap нет (spike: [`pollen-species-heatmap-spike.md`](./pollen-species-heatmap-spike.md), решение no-go).
 - **FR-MAP-19.** Карточка Google UAQI 0–100 (чем выше, тем чище), загрязнители и рекомендация; AQ overlay взаимоисключающ с pollen heatmap.
 - **FR-MAP-20.** Карточка вида: имя, группа, in-season, family/season, признаки, перекрёстные реакции, UPI и health recommendation либо честный «нет текущих данных».
 

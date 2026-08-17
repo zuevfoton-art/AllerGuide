@@ -465,9 +465,9 @@ const es: LocaleMessages = {
     pollenYandexInteractiveAttribution:
       'Mapa: Yandex Maps (interactivo) · previsión de polen: Google Pollen / Open-Meteo',
     pollenHeatmapTreeHint:
-      'Capa: polen de árboles (Google UPI). Abedul, aliso y olivo tienen niveles aparte en los chips',
+      'Capa: polen de árboles (Google). Los niveles de abedul / aliso / olivo van aparte',
     pollenTreeSpeciesLevelsHint:
-      'La capa del mapa es común para árboles. Los números de abedul / aliso / olivo vienen del pronóstico por especie (Google u Open-Meteo).',
+      'La capa del mapa es común para árboles. Los niveles de abedul, aliso y olivo vienen del pronóstico por especie (Google u Open-Meteo), no de la capa.',
     pollenHeatmapGrassHint: 'Capa: polen de gramíneas (UPI)',
     pollenHeatmapWeedHint: 'Capa: polen de malezas (UPI), no solo la especie elegida',
     pollenBirch: 'Abedul',
