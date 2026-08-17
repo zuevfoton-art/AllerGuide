@@ -1,6 +1,11 @@
 name: Maestro Nightly
 
 # P2.1c — nightly Maestro E2E (offline preview + staging auth/backup with local API).
+#
+# Schedule is inert while this workflow is disabled in the Actions UI
+# (state was `disabled_manually` after the 2026-08 failure streak).
+# After merge: Actions → Maestro Nightly → Enable workflow
+# (or `gh workflow enable maestro-nightly.yml`), then Run workflow.
 on:
   schedule:
     - cron: '0 3 * * *'
@@ -13,13 +18,23 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  MAESTRO_VERSION: '2.8.0'
+  MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+
 jobs:
   maestro-offline:
     name: Offline smoke (preview)
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - uses: pnpm/action-setup@v4
 
@@ -47,7 +62,7 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION="${MAESTRO_VERSION}" bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Run offline Maestro flows
@@ -57,6 +72,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          avd-name: maestro-avd-34
+          emulator-boot-timeout: 900
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
             adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
@@ -90,6 +108,12 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - uses: pnpm/action-setup@v4
 
@@ -125,7 +149,7 @@ jobs:
 
       - name: Install Maestro
         run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
+          curl -Ls "https://get.maestro.mobile.dev" | MAESTRO_VERSION="${MAESTRO_VERSION}" bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Run staging Maestro flows
@@ -135,6 +159,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          avd-name: maestro-avd-34
+          emulator-boot-timeout: 900
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
             adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk

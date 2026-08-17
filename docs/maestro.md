@@ -110,10 +110,12 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 
 | Job | Runner | Что делает |
 |-----|--------|------------|
-| `maestro-offline` | `macos-latest` | preview APK → `smoke-all.yaml` |
-| `maestro-staging` | `ubuntu-latest` | Postgres + API → staging APK → `staging-smoke-all.yaml` |
+| `maestro-offline` | `ubuntu-latest` + KVM | preview APK → `smoke-all.yaml` |
+| `maestro-staging` | `ubuntu-latest` + KVM | Postgres + API → staging APK → `staging-smoke-all.yaml` |
 
-Расписание: `0 3 * * *` (03:00 UTC). Ручной запуск: **Actions → Maestro Nightly → Run workflow**.
+Оба джоба: `arch: x86_64`, AVD `maestro-avd-34`, `emulator-boot-timeout: 900`, `MAESTRO_DRIVER_STARTUP_TIMEOUT=120000`, CLI pinned `MAESTRO_VERSION=2.8.0`. Offline больше не на `macos-latest` — Apple Silicon не даёт nested virtualization для x86_64 AVD.
+
+Расписание: `0 3 * * *` (03:00 UTC). Если прогонов нет — workflow, скорее всего, **disabled** в Actions UI (`disabled_manually` после серии падений 2026-08). Включить: **Actions → Maestro Nightly → Enable workflow** или `gh workflow enable maestro-nightly.yml`, затем **Run workflow**.
 
 При падении — артефакты JUnit (`maestro-offline-report`, `maestro-staging-report`). Опционально: настроить GitHub notifications / Slack webhook на failed workflow.
 
