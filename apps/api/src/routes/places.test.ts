@@ -28,6 +28,17 @@ describe('places nearby routes', () => {
     expect(response.status).toBe(503);
   });
 
+  it('does not use the Pollen-only key as a Places credential', async () => {
+    delete process.env.GOOGLE_PLACES_API_KEY;
+    delete process.env.GOOGLE_MAPS_SERVER_API_KEY;
+    process.env.GOOGLE_POLLEN_API_KEY = 'pollen-only-key';
+    const app = await createApp({ withReplitAuth: false });
+
+    const response = await request(app).get('/api/places/nearby?lat=55.75&lon=37.62');
+
+    expect(response.status).toBe(503);
+  });
+
   it('rejects invalid type', async () => {
     const app = await createApp({ withReplitAuth: false });
     const response = await request(app).get(
