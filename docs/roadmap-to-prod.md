@@ -10,13 +10,13 @@
 
 | Фаза | Статус | Что осталось |
 |------|--------|--------------|
-| Phase 0 — Stabilization MVP | ✅ кроме P0.5 | Legal только `ru` + `en` (нужны `de`, `es`, `fr`, `it`) |
+| Phase 0 — Stabilization MVP | ✅ кроме P0.5 review | Legal drafts `de`/`es`/`fr`/`it` in [#260](https://github.com/zuevfoton-art/AllerGuide/pull/260); lawyer review still required (P3.3) |
 | Phase 1 — Backend integration | ✅ | — (см. [`phase-1-run.md`](./phase-1-run.md)) |
-| Phase 2 — Quality & Security | ⚠️ P2.1–P2.7 ✅, **P2.8 BLOCKED** | Maestro nightly красный, Sentry crash-free не собран, 0 soak-тестеров |
-| Phase 3 — Compliance & Store | ⛔ не начата (гейтится P2.8) | Store credentials, prod API, legal sign-off |
+| Phase 2 — Quality & Security | ⚠️ P2.1–P2.7 ✅, **P2.8 BLOCKED** | Maestro workflow fix [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) (enable + dispatch); Sentry EAS vars; soak testers |
+| Phase 3 — Compliance & Store | 📝 prep docs | Privacy audit, prod YC plan, store permission drafts — still gated by P2.8 |
 | Phase 4 — v1.0 Launch | ⛔ не начата | — |
 | Phase 5 — Post-launch | 🔶 частично сделана досрочно | Осталось масштабирование (P5.6) |
-| YC-миграция (off Replit) | ✅ gates 0–4, ⚠️ Phase 5 | Поставить Replit host на pause → `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` |
+| YC-миграция (off Replit) | ✅ Phase 5 | `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` **PASSED** 2026-08-17 (`aller-guide.replit.app` HTTP 404) |
 
 Единственный жёсткий блокер продвижения — **P2.8** (RC gate + soak). Автоматическая часть гейта зелёная, ручная (G3/G5/G7) — нет.
 
@@ -36,7 +36,7 @@ chmod +x scripts/create-roadmap-issues.sh
 
 **Windows:** инструкция через Git Bash — [`docs/git-bash-roadmap.md`](./git-bash-roadmap.md).
 
-Отдельный долг процесса: **30 открытых PR** (часть — с 2026-07). Пока они не разобраны, «0 P0/P1» и Go/No-Go по Phase 4 не проверяемы.
+Отдельный долг процесса: **~40 открытых PR**. Разбор — [`pr-triage-2026-08.md`](./pr-triage-2026-08.md). Пока они не разобраны, «0 P0/P1» и Go/No-Go по Phase 4 не проверяемы. Merge/close — только по решению владельца.
 
 ---
 
@@ -296,41 +296,36 @@ flowchart LR
 
 ### Шаг 1 — починить Maestro nightly (разблокирует G3)
 
-Два независимых дефекта в [`maestro-nightly.yml`](../.github/workflows/maestro-nightly.yml), оба инфраструктурные, не в приложении:
+Фикс в [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259): оба джоба на `ubuntu-latest` + KVM, `MAESTRO_VERSION=2.8.0`, `MAESTRO_DRIVER_STARTUP_TIMEOUT=120000`.
 
-| Джоб | Ошибка | Направление фикса |
-|------|--------|-------------------|
-| `maestro-offline` (`macos-latest`) | `Timeout waiting for emulator to boot` | `macos-latest` теперь arm64, а в шаге задан `arch: x86_64` → перевести на `arch: arm64-v8a` либо перенести джоб на `ubuntu-latest`, где x86_64-эмулятор работает |
-| `maestro-staging` (`ubuntu-latest`) | `AndroidDriverTimeoutException: Maestro Android driver did not start up in time` | Эмулятор загружается, падает старт драйвера: закрепить версию Maestro CLI (сейчас ставится `latest` без пина), поднять таймаут/добавить один retry шага |
-
-Критерий выхода: оба джоба зелёные вручную (`workflow_dispatch`), затем ≥7 зелёных ночей подряд. Заодно проверить, почему после 2026-08-11 расписание не запускалось.
+Расписание молчало после 2026-08-11, потому что workflow в состоянии **`disabled_manually`**. После merge: `gh workflow enable maestro-nightly.yml`, затем `workflow_dispatch`. Критерий выхода: оба джоба зелёные вручную, затем ≥7 зелёных ночей.
 
 ### Шаг 2 — включить Sentry на stage (разблокирует G5)
 
-Задать `EXPO_PUBLIC_SENTRY_DSN` в EAS-секретах профиля `staging` (+ `SENTRY_ORG` / `SENTRY_PROJECT` для source maps), пересобрать RC APK, убедиться, что события доходят до проекта. Метрика для гейта — crash-free sessions ≥99% на окне soak.
+Чеклист переменных: [rc-gate.md § Pre-soak](./rc-gate.md#pre-soak-sentry-eas-variables-g5). Нужен `EXPO_TOKEN` у владельца. Метрика гейта — crash-free sessions ≥99% на окне soak.
 
 ### Шаг 3 — набрать soak-когорту (разблокирует G7)
 
-Взять когорту из [`closed-beta-p17.md`](./closed-beta-p17.md), внести в [`staging-soak-log.md`](./staging-soak-log.md) ответственного продукта и ежедневный headcount. Окно 14 дней стартует только после шагов 1–2, иначе метрики опять не соберутся.
+Когорта из [`closed-beta-p17.md`](./closed-beta-p17.md). Шаблон нового 14-дневного окна уже в [`staging-soak-log.md`](./staging-soak-log.md); строка `**Status: BLOCKED**` снимается только после подписи.
 
 ### Шаг 4 — разобрать PR backlog и пересоздать трекинг
 
-30 открытых PR делают критерий «0 P0/P1» непроверяемым. Разделить на «мержить / закрыть как устаревшие», затем пересоздать milestones и метки `phase-*` только для незакрытых задач.
+Рекомендации: [`pr-triage-2026-08.md`](./pr-triage-2026-08.md). Merge/close — только по решению владельца. Не открывать новые mega-merge ветки (#237 / #249 уже `CONFLICTING`).
 
 ### Шаг 5 — P0.5: legal на 4 локали
 
-Дописать `de`, `es`, `fr`, `it` в [`legal-docs.ts`](../apps/mobile/src/i18n/legal-docs.ts) по образцу `ru`/`en`. Это единственный незакрытый пункт Phase 0 и вход в P3.2 (store-описания на 6 языках).
+Черновики `de`/`es`/`fr`/`it` — [#260](https://github.com/zuevfoton-art/AllerGuide/pull/260), с пометкой о юридической проверке. В стор не идут без P3.3.
 
 ### Шаг 6 — подготовка Phase 3 (параллельно шагам 1–5)
 
-- **P3.1:** реальные `ascAppId` / `appleTeamId` в [`eas.json`](../apps/mobile/eas.json); production-профиль secrets отдельно от staging (не переиспользовать Maestro recovery key)
-- **P3.4:** оформить audit-документ: что именно удаляется (`DELETE /api/auth/account` + каскад от `app_users`), что отдаёт export, где остаётся зашифрованный бэкап
-- **P3.5:** тексты обоснования разрешений (camera, location, notifications)
-- **P3.7:** prod-контур на YC по образцу stage — отдельный Lockbox, отдельная Managed PG, домен `api.aclearo.com`, backups + alerting; сначала записать план, потом деплой
+- **P3.1:** реальные `ascAppId` / `appleTeamId` — владелец; плейсхолдеры пока на месте
+- **P3.4:** [`privacy-compliance-audit.md`](./privacy-compliance-audit.md)
+- **P3.5:** [`store-permissions-justification.md`](./store-permissions-justification.md)
+- **P3.7:** [`production-yc-plan.md`](./production-yc-plan.md) (без провижининга)
 
 ### Шаг 7 — закрыть YC-миграцию
 
-Поставить Replit host на pause в UI, затем `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` — это последний незакрытый гейт в [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md).
+**Сделано 2026-08-17:** `aller-guide.replit.app/api/health` → HTTP 404; `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` PASSED. Запись в [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md).
 
 ### Не делать сейчас
 

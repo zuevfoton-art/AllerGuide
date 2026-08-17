@@ -144,7 +144,7 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 | Trigger | push `staging` / `workflow_dispatch` | Не каждый PR |
 | EAS profile `staging` | ✅ в репо | URL = YC |
 | EAS profile `replit` | ✅ removed (Phase 3) | — |
-| Replit (host) | ⚠️ still HTTP 200 | Pause in Phase 5 UI; `REQUIRE_REPLIT_PAUSED=1` |
+| Replit (host) | ✅ HTTP 404 («This app isn't live yet») 2026-08-17 | `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` PASSED |
 | Phase 0 gate script | ✅ | `pnpm yc-stage-phase0` |
 
 ### E. Сводный чеклист (PR / ops)
@@ -168,9 +168,9 @@ terraform output lockbox_secret_id container_registry_id serverless_container_id
 - [ ] EAS Sensitive `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` + staging APK QA
 - [x] Удалить EAS `replit` / docs hooks (фаза 3)
 - [x] Phase 5 gate + YC acceptance smokes
-- [ ] Pause Replit deployment (фаза 5 UI) → `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5`
+- [x] Pause Replit deployment (фаза 5 UI) → `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` **PASSED** 2026-08-17 (`aller-guide.replit.app` HTTP 404)
 
-**Вывод:** YC stage несёт API + DB + auth + sync + Yandex AI/OCR + pollen. Replit deploy artifacts removed (Phase 3). Secrets policy documented (Phase 4). **Phase 5:** pause Replit host in UI, then `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5`.
+**Вывод:** YC stage несёт API + DB + auth + sync + Yandex AI/OCR + pollen + Places + AQ. Replit deploy artifacts removed (Phase 3). Secrets policy documented (Phase 4). **Phase 5 PASSED** 2026-08-17: Replit host returns HTTP 404; `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` green (phases 0/2/3/4 + pollen smoke).
 
 ---
 
@@ -379,8 +379,8 @@ DNS для `*.replit.app` трогать не обязательно — дос�
 
 - [x] `pnpm yc-stage-phase5` gate в репо  
 - [x] YC health + pollen smoke (приёмка агентом)  
-- [ ] **Pause Replit** в UI (ещё HTTP 200 на `aller-guide.replit.app` на момент прогона)  
-- [ ] `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` Pass  
+- [x] **Pause Replit** в UI — `aller-guide.replit.app/api/health` HTTP 404 (2026-08-17)  
+- [x] `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` Pass (2026-08-17)  
 - [ ] (рекомендуется) `STAGING_RUN_SMOKES=1` preflight Pass  
 - [ ] EAS staging APK QA на устройстве  
 

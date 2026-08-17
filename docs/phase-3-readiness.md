@@ -29,10 +29,10 @@ Unlocked after [RC gate](./rc-gate.md) and [2-week staging soak](./staging-soak-
 
 Ordered plan lives in [roadmap-to-prod.md §6](./roadmap-to-prod.md#6-дальнейшие-шаги). Phase 3 specific:
 
-1. Clear soak blockers (Maestro workflow fix → Sentry DSN → testers) and replace **BLOCKED** in [staging-soak-log.md](./staging-soak-log.md).
-2. Finish P0.5 (legal `de`/`es`/`fr`/`it`) — it gates store descriptions in 6 locales (P3.2).
+1. Clear soak blockers (enable Maestro after [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) → Sentry DSN → testers). Keep **BLOCKED** in [staging-soak-log.md](./staging-soak-log.md) until sign-off.
+2. Lawyer-review the `de`/`es`/`fr`/`it` legal drafts ([#260](https://github.com/zuevfoton-art/AllerGuide/pull/260)) before store copy (P3.2 / P3.3).
 3. Recreate GitHub milestones/labels, then close **Phase 2** only after soak sign-off and open **Phase 3**.
-4. Replace `ascAppId` / `appleTeamId` placeholders and create production EAS secrets (do not reuse the staging Maestro recovery key).
-5. Schedule legal review for medical disclaimer (P3.3) and write the GDPR / 152-ФЗ deletion-and-export audit note (P3.4).
+4. Replace `ascAppId` / `appleTeamId` placeholders ([store-permissions-justification.md](./store-permissions-justification.md)) and create production EAS secrets (do not reuse the staging Maestro recovery key).
+5. Use [privacy-compliance-audit.md](./privacy-compliance-audit.md) and [production-yc-plan.md](./production-yc-plan.md) as the P3.4 / P3.7 starting notes. YC migration Phase 5 is already green (Replit HTTP 404).
 
 See [roadmap-to-prod.md](./roadmap-to-prod.md#phase-3--compliance--store-readiness).
