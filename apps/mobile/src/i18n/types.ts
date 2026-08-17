@@ -485,7 +485,6 @@ export type LocaleMessages = {
     pollenLiveTitle: string;
     pollenMapAttribution: string;
     pollenGoogleMapAttribution: string;
-    pollenGooglePrimaryAttribution: string;
     pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenTreeSpeciesLevelsHint: string;
@@ -533,18 +532,6 @@ export type LocaleMessages = {
     pollenNoSeason: string;
     openYandexPollen: string;
     openYandexPollenHint: string;
-    safePollenPlaces: string;
-    safePollenPlacesHint: string;
-    noSafePollenPlaces: string;
-    pollenDistance: string;
-    pollenNorth: string;
-    pollenNorthEast: string;
-    pollenEast: string;
-    pollenSouthEast: string;
-    pollenSouth: string;
-    pollenSouthWest: string;
-    pollenWest: string;
-    pollenNorthWest: string;
     nkcc: string;
     chiefExpert: string;
     subtitleUnified: string;
@@ -591,7 +578,6 @@ export type LocaleMessages = {
     legendMedical: string;
     legendPharmacy: string;
     searchThisArea: string;
-    airLayerToggle: string;
     poiLevelHigh: string;
     poiLevelMedium: string;
     poiLevelLow: string;
@@ -623,7 +609,6 @@ export type LocaleMessages = {
     upiLevelDescription: string;
     heatmapLegendTitle: string;
     heatmapOfficialGroup: string;
-    heatmapNoSpeciesLayer: string;
     plantInSeason: string;
     plantOutOfSeason: string;
     plantNoLiveData: string;
