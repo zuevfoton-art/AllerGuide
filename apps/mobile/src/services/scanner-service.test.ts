@@ -8,23 +8,20 @@ vi.mock('react-native', () => ({
   Platform: { OS: 'ios' },
 }));
 
-vi.mock('@allerguide/ai', () => ({
-  runSmartScan: (...args: unknown[]) => mockRunSmartScan(...args),
-  buildOcrScanProductName: vi.fn(),
-  prepareScanTextFromOcr: vi.fn(),
-  simulateOcrFromCapture: vi.fn(),
-  asVisionOcrResult: vi.fn((prepared) => prepared),
-  classifyScanIntentHeuristic: vi.fn(() => ({ intent: 'label_or_menu', mode: 'product' })),
-  dishVisionToScanText: vi.fn((result: { dishName: string; ingredients: string[] }) =>
-    [result.dishName, ...result.ingredients].join(', '),
-  ),
-  shouldUseDishVisionForOcrText: vi.fn((text: string) => text.trim().length < 2),
-}));
+vi.mock('@allerguide/ai', async () => {
+  const actual = await vi.importActual<typeof import('@allerguide/ai')>('@allerguide/ai');
+  return {
+    ...actual,
+    runSmartScan: (...args: unknown[]) => mockRunSmartScan(...args),
+  };
+});
 
 vi.mock('@/src/constants/features', () => ({
   AI_SCAN_ENABLED: true,
   AI_DISH_VISION_ENABLED: false,
   YC_OCR_ENABLED: false,
+  YC_SCAN_INTENT_LLM_ENABLED: false,
+  YC_SEARCH_ENABLED: false,
 }));
 
 vi.mock('@/src/services/dish-vision-api-service', () => ({
@@ -135,6 +132,66 @@ describe('scanner-service AI scan auth', () => {
       expect.objectContaining({ level: 'high' }),
       'Йогурт',
       { composition: 'молоко, сахар' },
+    );
+  });
+
+  it('does not call dish vision on a photo when the VL flag is off', async () => {
+    const { recognizeDishViaApi } = await import('./dish-vision-api-service');
+    mockRunSmartScan.mockResolvedValue({
+      verdict: 'ок',
+      reason: 'Демо',
+      matches: [],
+      crossMatches: [],
+      mode: 'product',
+      level: 'low',
+      source: 'ocr',
+    });
+
+    const { scanFromOcr } = await import('./scanner-service');
+    const result = await scanFromOcr({
+      mode: 'product',
+      imageBase64: 'aGVsbG8=',
+      mimeType: 'image/jpeg',
+      profile: null,
+    });
+
+    expect(recognizeDishViaApi).not.toHaveBeenCalled();
+    expect(result.evidence).toBe('ocr');
+    expect(result.dishVision).toBeUndefined();
+  });
+
+  it('parses a manual composition block and returns a profile match', async () => {
+    mockRunSmartScan.mockResolvedValue({
+      verdict: 'осторожно',
+      reason: 'Найдено молоко',
+      matches: ['Молоко'],
+      crossMatches: [],
+      mode: 'product',
+      level: 'high',
+      source: 'ocr',
+    });
+
+    const { scanFromOcr } = await import('./scanner-service');
+    const result = await scanFromOcr({
+      mode: 'product',
+      ocrText: 'Состав: молоко, пшеничная мука, сахар',
+      profile: {
+        id: 7,
+        name: 'Анна',
+        birthYear: 1990,
+        type: 'self',
+        allergies: '["milk"]',
+      },
+    });
+
+    expect(result.matches).toContain('Молоко');
+    expect(result.ocr?.ingredientsBlock).toMatch(/молоко/i);
+    expect(result.evidence).toBe('ocr');
+    expect(mockRunSmartScan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringContaining('молоко'),
+        source: 'ocr',
+      }),
     );
   });
 });

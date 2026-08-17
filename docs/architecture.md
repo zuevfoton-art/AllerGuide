@@ -388,17 +388,18 @@ sequenceDiagram
 
 ### OCR / dish-vision поток (фото)
 
-**Штрихкод** (`scanBarcode`) — отдельный путь, без VL/OCR-перестановки.
+**Штрихкод** (`scanBarcode`) — отдельный путь: кэш → каталог → OFF → Open Beauty Facts → Open Products Facts.
 
-**Фото продукта** (`mode=product`, `AI_DISH_VISION`):
+**Умный сканер** (кнопка «Сканер», любое фото, `EXPO_PUBLIC_AI_DISH_VISION` on по умолчанию):
 
-1. Сначала `POST /api/scan/dish-vision` (VL: название + вероятные ингредиенты)
-2. Затем `extractOcrFromImage` / `POST /api/ocr` — проверка читаемого текста на фото
-3. Если OCR-текст ≥ порога (~40 символов) → OCR-путь (intent → lookup → `runSmartScan`), VL-оценка отбрасывается
-4. Если OCR вернул короткий сниппет этикетки (есть текст, но < порога) → OCR-путь по сниппету, даже если VL ответил «не блюдо»
-5. Если текста нет → результат VL + disclaimer; при сбое VL — явная ошибка (не пустой clear). UI: баббл риска, затем снимок + возможное блюдо + вероятный состав (`ScannerDishVisionCard`)
+1. Сначала `POST /api/scan/dish-vision` (VL: название + вероятные ингредиенты) — только сеть, без записи истории
+2. Затем `extractOcrFromImage` / `POST /api/ocr` — текст этикетки
+3. Если OCR-текст ≥ порога (~40 символов) → **один** `analyzeText` по объединённому тексту (`buildCombinedScanText`: OCR первым, ингредиенты VL с дедупликацией); `source: 'ocr'`, `evidence: 'vl_ocr'`; UI: карточка блюда **и** состав
+4. Если OCR вернул короткий сниппет этикетки → тот же объединённый путь (сниппет + VL)
+5. Если текста нет → результат VL + disclaimer (`source: 'dish_vision'`, `evidence: 'vl'`); при сбое VL — явная ошибка (не пустой clear)
+6. Если VL недоступен (нет сети / API) — прежний OCR-путь, `evidence: 'ocr'`. История и `scan_completed` / `scan_dish_vision` пишутся один раз на финальном результате
 
-**Меню / этикетка** (`menu` / `medicine` / `cosmetics`): OCR-first (без VL-first); intent → lookup при `visual_product` → `runSmartScan`.
+**Ручной ввод:** цифры 8–14 → `scanBarcode`; иначе `scanFromOcr` (нормализация состава, intent, справочник блюд).
 
 ### Анализ текста (`@allerguide/ai`)
 
@@ -414,13 +415,15 @@ sequenceDiagram
 | `catalog_api` | Каталог backend (Postgres) |
 | `barcodes_db` | Локальный / seed barcode DB |
 | `openfoodfacts` | Open Food Facts |
+| `openbeautyfacts` | Open Beauty Facts |
+| `openproductsfacts` | Open Products Facts |
 | `barcode` | Общий barcode-путь (UI) |
 | `ocr` | Распознанный текст упаковки/меню |
 | `llm` | Вердикт LLM-скана |
 | `dish_vision` | Оценка блюда по фото (multimodal, без этикетки) |
 | `manual` | Ручной ввод |
 
-Тип в `@allerguide/ai` `scan.ts`: `'manual' | 'barcode' | 'openfoodfacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm' | 'dish_vision'`.
+Тип в `@allerguide/ai` `scan.ts`: `'manual' | 'barcode' | 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm' | 'dish_vision'`.
 
 ### Маппинг аллергенов
 
@@ -753,7 +756,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | Backend catalog lookup |
 | `EXPO_PUBLIC_MEDICINE_DB` | `false` | Medicine package recognize + catalog |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | LLM scan via API |
-| `EXPO_PUBLIC_AI_DISH_VISION` | `false` | Multimodal plate photo → dish + ingredients |
+| `EXPO_PUBLIC_AI_DISH_VISION` | `true` | Smart-scanner VL (деградирует в OCR без сети) |
 | `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
 | `EXPO_PUBLIC_YC_SEARCH` | `false` | Ingredients search via `/api/search/ingredients` |

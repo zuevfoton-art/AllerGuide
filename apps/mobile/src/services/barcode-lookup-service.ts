@@ -8,7 +8,18 @@ import {
   type BarcodeCacheEntry,
 } from '@/src/services/barcode-cache-service';
 
-export type BarcodeLookupSource = 'barcodes_db' | 'catalog_api' | 'openfoodfacts';
+export type BarcodeLookupSource =
+  | 'barcodes_db'
+  | 'catalog_api'
+  | 'openfoodfacts'
+  | 'openbeautyfacts'
+  | 'openproductsfacts';
+
+const OFF_FAMILY_SOURCES = new Set<string>([
+  'openfoodfacts',
+  'openbeautyfacts',
+  'openproductsfacts',
+]);
 
 /**
  * High-level lookup outcome for barcode scans.
@@ -45,7 +56,7 @@ export type ResolvedBarcodeProduct = {
 const OFF_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function isStaleOffCache(entry: BarcodeCacheEntry): boolean {
-  if (entry.originSource !== 'openfoodfacts') return false;
+  if (!OFF_FAMILY_SOURCES.has(entry.originSource)) return false;
   const updated = Date.parse(entry.updatedAt);
   if (Number.isNaN(updated)) return false;
   return Date.now() - updated > OFF_CACHE_MAX_AGE_MS;
@@ -115,7 +126,7 @@ export async function resolveProductByBarcode(
     name: remote.name,
     ingredients,
     brand: remote.brand,
-    originSource: 'openfoodfacts',
+    originSource: remote.source,
     declaredAllergenIds: remote.allergenTags,
     traceAllergenIds: remote.traceTags,
   });
@@ -126,7 +137,7 @@ export async function resolveProductByBarcode(
     ingredients,
     brand: remote.brand,
     imageUrl: remote.imageUrl,
-    source: 'openfoodfacts',
+    source: remote.source,
     declaredAllergenIds: remote.allergenTags,
     traceAllergenIds: remote.traceTags,
   };

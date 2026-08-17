@@ -1,8 +1,7 @@
-import { dishVisionToScanText, type ScanMode, type OcrExtractionResult } from '@allerguide/ai';
+import { dishVisionToScanText, type DishVisionResult, type ScanMode, type OcrExtractionResult } from '@allerguide/ai';
 import type { Profile } from '@allerguide/core';
 import { AI_DISH_VISION_ENABLED } from '@/src/constants/features';
 import { recognizeDishViaApi } from '@/src/services/dish-vision-api-service';
-import { saveScanHistory } from '@/src/services/scan-history-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import {
   analyzeText,
@@ -30,26 +29,108 @@ export function isDishVisionScanError(error: unknown): error is DishVisionScanEr
   return error instanceof DishVisionScanError || (error as { name?: string })?.name === 'DishVisionScanError';
 }
 
-/** Soft VL attempt so OCR can still run when the photo has readable text. */
-export async function tryDishVisionFirst(input: {
-  mode: ScanMode;
+export type DishVisionEstimate = {
+  result: DishVisionResult;
+  cached: boolean;
+};
+
+function confidenceNote(confidence: DishVisionResult['confidence']): string {
+  if (confidence === 'low') return 'Уверенность модели низкая.';
+  if (confidence === 'medium') return 'Уверенность модели средняя.';
+  return 'Уверенность модели высокая.';
+}
+
+/** Network-only VL call. History and analytics stay on the final combined result. */
+export async function fetchDishVisionEstimate(input: {
   imageBase64: string;
   mimeType?: string;
-  profile?: Profile | null;
-}): Promise<{ result: ScanResultExtended | null; error?: DishVisionScanError }> {
+}): Promise<{ estimate: DishVisionEstimate | null; error?: DishVisionScanError }> {
+  if (!AI_DISH_VISION_ENABLED) return { estimate: null };
+
   try {
-    const result = await scanFromDishVision({
-      mode: input.mode,
+    const vision = await recognizeDishViaApi({
       imageBase64: input.imageBase64,
       mimeType: input.mimeType,
-      profile: input.profile,
-      extraction: emptyVisionOcrResult(),
     });
-    return { result };
+    if (vision === null) return { estimate: null };
+    if (!vision.ok) {
+      if (isUnauthorizedCloudStatus(vision.status, vision.error)) {
+        throw new ScanCloudAuthError();
+      }
+      return {
+        estimate: null,
+        error: new DishVisionScanError(vision.error || 'DISH_VISION_FAILED', {
+          status: vision.status,
+          providerStatus: vision.providerStatus,
+        }),
+      };
+    }
+
+    const scanText = dishVisionToScanText(vision.result);
+    if (!scanText.trim()) {
+      return { estimate: null, error: new DishVisionScanError('DISH_VISION_EMPTY_RESULT') };
+    }
+
+    return { estimate: { result: vision.result, cached: Boolean(vision.cached) } };
   } catch (error) {
-    if (isDishVisionScanError(error)) return { result: null, error };
-    throw error;
+    if (isScanCloudAuthError(error)) throw error;
+    if (error instanceof DishVisionScanError) return { estimate: null, error };
+    return { estimate: null, error: new DishVisionScanError('DISH_VISION_FAILED') };
   }
+}
+
+export function trackDishVisionAnalytics(estimate: DishVisionEstimate): void {
+  trackEvent('scan_dish_vision', {
+    confidence: estimate.result.confidence,
+    ingredients: estimate.result.ingredients.length,
+    cached: estimate.cached,
+  });
+}
+
+export async function analyzeDishVisionEstimate(input: {
+  mode: ScanMode;
+  estimate: DishVisionEstimate;
+  profile?: Profile | null;
+  extraction?: OcrExtractionResult;
+}): Promise<ScanResultExtended> {
+  const extraction = input.extraction ?? emptyVisionOcrResult();
+  const scanText = dishVisionToScanText(input.estimate.result);
+  const modelNotes = input.estimate.result.notes?.trim();
+  const ocrNote = [
+    'Оценка по фото блюда (без этикетки): название и вероятный состав определены моделью — это не лабораторный анализ и не замена состава на упаковке.',
+    confidenceNote(input.estimate.result.confidence),
+    modelNotes,
+    ...extraction.warnings,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const result = await analyzeText({
+    mode: input.mode === 'menu' ? 'product' : input.mode,
+    text: scanText,
+    profile: input.profile,
+    productName: input.estimate.result.dishName,
+    source: 'dish_vision',
+    ocrNote,
+  });
+
+  return {
+    ...result,
+    ocr: extraction,
+    dishVision: input.estimate.result,
+    evidence: 'vl',
+  };
+}
+
+/** Soft VL attempt so OCR can still run when the photo has readable text. */
+export async function tryDishVisionFirst(input: {
+  imageBase64: string;
+  mimeType?: string;
+}): Promise<{ estimate: DishVisionEstimate | null; error?: DishVisionScanError }> {
+  return fetchDishVisionEstimate({
+    imageBase64: input.imageBase64,
+    mimeType: input.mimeType,
+  });
 }
 
 export async function scanFromDishVision(input: {
@@ -59,67 +140,16 @@ export async function scanFromDishVision(input: {
   profile?: Profile | null;
   extraction: OcrExtractionResult;
 }): Promise<ScanResultExtended | null> {
-  if (!AI_DISH_VISION_ENABLED) return null;
-
-  try {
-    const vision = await recognizeDishViaApi({
-      imageBase64: input.imageBase64,
-      mimeType: input.mimeType,
-    });
-    if (vision === null) return null;
-    if (!vision.ok) {
-      if (isUnauthorizedCloudStatus(vision.status, vision.error)) {
-        throw new ScanCloudAuthError();
-      }
-      throw new DishVisionScanError(vision.error || 'DISH_VISION_FAILED', {
-        status: vision.status,
-        providerStatus: vision.providerStatus,
-      });
-    }
-
-    const scanText = dishVisionToScanText(vision.result);
-    if (!scanText.trim()) {
-      throw new DishVisionScanError('DISH_VISION_EMPTY_RESULT');
-    }
-
-    const confidenceNote =
-      vision.result.confidence === 'low'
-        ? 'Уверенность модели низкая.'
-        : vision.result.confidence === 'medium'
-          ? 'Уверенность модели средняя.'
-          : 'Уверенность модели высокая.';
-    const modelNotes = vision.result.notes?.trim();
-    const ocrNote = [
-      'Оценка по фото блюда (без этикетки): название и вероятный состав определены моделью — это не лабораторный анализ и не замена состава на упаковке.',
-      confidenceNote,
-      modelNotes,
-      ...input.extraction.warnings,
-    ]
-      .filter(Boolean)
-      .join(' ');
-
-    const result = await analyzeText({
-      mode: input.mode === 'menu' ? 'product' : input.mode,
-      text: scanText,
-      profile: input.profile,
-      productName: vision.result.dishName,
-      source: 'dish_vision',
-      ocrNote,
-    });
-
-    if (input.profile) {
-      await saveScanHistory(input.profile.id, scanText, result, vision.result.dishName);
-    }
-
-    trackEvent('scan_dish_vision', {
-      confidence: vision.result.confidence,
-      ingredients: vision.result.ingredients.length,
-      cached: Boolean(vision.cached),
-    });
-
-    return { ...result, ocr: input.extraction, dishVision: vision.result };
-  } catch (error) {
-    if (isScanCloudAuthError(error) || isDishVisionScanError(error)) throw error;
-    throw new DishVisionScanError('DISH_VISION_FAILED');
-  }
+  const attempted = await fetchDishVisionEstimate({
+    imageBase64: input.imageBase64,
+    mimeType: input.mimeType,
+  });
+  if (attempted.error) throw attempted.error;
+  if (!attempted.estimate) return null;
+  return analyzeDishVisionEstimate({
+    mode: input.mode,
+    estimate: attempted.estimate,
+    profile: input.profile,
+    extraction: input.extraction,
+  });
 }

@@ -1,10 +1,14 @@
 import {
+  buildCombinedScanText,
   buildOcrScanProductName,
+  dishVisionToScanText,
   prepareScanTextFromOcr,
+  resolveScanEvidenceKind,
   simulateOcrFromCapture,
   asVisionOcrResult,
   classifyScanIntentHeuristic,
   shouldUseDishVisionForOcrText,
+  type ScanEvidenceKind,
   type ScanMode,
   type OcrExtractionResult,
 } from '@allerguide/ai';
@@ -23,13 +27,15 @@ import {
   INSUFFICIENT_INGREDIENTS_LENGTH,
   isScanCloudAuthError,
   isUnauthorizedCloudStatus,
-  READABLE_OCR_TEXT_MIN_CHARS,
   ScanCloudAuthError,
   type ScanResultExtended,
 } from '@/src/services/scan-analysis';
 import {
+  analyzeDishVisionEstimate,
   DishVisionScanError,
-  tryDishVisionFirst,
+  fetchDishVisionEstimate,
+  trackDishVisionAnalytics,
+  type DishVisionEstimate,
 } from '@/src/services/scanner-dish-vision-service';
 
 function isNoTextOcrFailure(status?: number, error?: string): boolean {
@@ -39,6 +45,10 @@ function isNoTextOcrFailure(status?: number, error?: string): boolean {
 
 function extractionLooksLikeCloudOcrOutage(extraction: OcrExtractionResult): boolean {
   return extraction.warnings.some((warning) => /Облачный OCR недоступен/i.test(warning));
+}
+
+function dishVisionToHistoryInput(estimate: DishVisionEstimate): string {
+  return dishVisionToScanText(estimate.result);
 }
 
 export function extractOcrText(mode: ScanMode, manualText?: string): OcrExtractionResult {
@@ -131,7 +141,23 @@ async function analyzeWithDemoOcrFallback(input: {
   if (input.profile) {
     await saveScanHistory(input.profile.id, extraction.text, result, productName);
   }
-  return { ...result, ocr: extraction };
+  return { ...result, ocr: extraction, evidence: 'ocr' };
+}
+
+async function persistFinalScan(
+  profile: Profile | null | undefined,
+  inputText: string,
+  result: ScanResultExtended,
+  productName: string | undefined,
+  visionEstimate: DishVisionEstimate | null,
+): Promise<ScanResultExtended> {
+  if (profile) {
+    await saveScanHistory(profile.id, inputText, result, productName);
+  }
+  if (visionEstimate) {
+    trackDishVisionAnalytics(visionEstimate);
+  }
+  return result;
 }
 
 export async function scanFromOcr({
@@ -149,25 +175,22 @@ export async function scanFromOcr({
   mimeType?: string;
   profile?: Profile | null;
 }): Promise<ScanResultExtended> {
-  // Photo product scans: VL first; OCR only wins when readable text is on the photo.
+  // Photo scans: VL first for any photo; OCR is merged when the label is readable.
   // Barcode path (`scanBarcode`) is separate and unchanged.
   const shouldTryVlFirst =
     AI_DISH_VISION_ENABLED &&
-    mode === 'product' &&
     Boolean(imageBase64?.trim()) &&
     !ocrText?.trim() &&
     !manualText?.trim();
 
-  let dishVisionResult: ScanResultExtended | null = null;
+  let visionEstimate: DishVisionEstimate | null = null;
   let dishVisionError: DishVisionScanError | undefined;
   if (shouldTryVlFirst) {
-    const attempted = await tryDishVisionFirst({
-      mode,
+    const attempted = await fetchDishVisionEstimate({
       imageBase64: imageBase64!,
       mimeType,
-      profile,
     });
-    dishVisionResult = attempted.result;
+    visionEstimate = attempted.estimate;
     dishVisionError = attempted.error;
   }
 
@@ -178,11 +201,20 @@ export async function scanFromOcr({
       : await extractOcrFromImage({ mode, imageBase64, mimeType, manualText });
   } catch (error) {
     // Label OCR needs auth, but a plate VL hit can still be shown.
-    if (isScanCloudAuthError(error) && dishVisionResult) {
-      return {
-        ...dishVisionResult,
-        ocr: emptyVisionOcrResult('Для чтения текста этикетки нужен вход в аккаунт.'),
-      };
+    if (isScanCloudAuthError(error) && visionEstimate) {
+      const vlOnly = await analyzeDishVisionEstimate({
+        mode,
+        estimate: visionEstimate,
+        profile,
+        extraction: emptyVisionOcrResult('Для чтения текста этикетки нужен вход в аккаунт.'),
+      });
+      return persistFinalScan(
+        profile,
+        dishVisionToHistoryInput(visionEstimate),
+        vlOnly,
+        visionEstimate.result.dishName,
+        visionEstimate,
+      );
     }
     throw error;
   }
@@ -193,8 +225,20 @@ export async function scanFromOcr({
   // Plate-only (no label text): keep VL result or surface VL failure — never empty clear.
   // Short OCR from a label must continue to the OCR path: VL often says “not a dish”.
   if (shouldTryVlFirst && !readableOcrText && !hasLabelOcrSnippet) {
-    if (dishVisionResult) {
-      return { ...dishVisionResult, ocr: extraction };
+    if (visionEstimate) {
+      const vlOnly = await analyzeDishVisionEstimate({
+        mode,
+        estimate: visionEstimate,
+        profile,
+        extraction,
+      });
+      return persistFinalScan(
+        profile,
+        dishVisionToHistoryInput(visionEstimate),
+        vlOnly,
+        visionEstimate.result.dishName,
+        visionEstimate,
+      );
     }
     if (dishVisionError) {
       if (isUnauthorizedCloudStatus(dishVisionError.status, dishVisionError.message)) {
@@ -212,7 +256,7 @@ export async function scanFromOcr({
     throw new DishVisionScanError('DISH_VISION_FAILED');
   }
 
-  if (shouldTryVlFirst && !readableOcrText && hasLabelOcrSnippet && !dishVisionResult) {
+  if (shouldTryVlFirst && !readableOcrText && hasLabelOcrSnippet && !visionEstimate) {
     extraction = {
       ...extraction,
       warnings: [
@@ -232,7 +276,7 @@ export async function scanFromOcr({
   const intent = classification.intent;
   const analysisMode = classification.mode;
 
-  if (intent === 'visual_product') {
+  if (intent === 'visual_product' && !visionEstimate) {
     try {
       const dishLookup = await lookupDishIngredientsForScan(extraction.text);
       if (dishLookup) {
@@ -258,26 +302,19 @@ export async function scanFromOcr({
           traceAllergenIds: dishLookup.traceAllergenIds,
         });
 
-        if (profile) {
-          await saveScanHistory(profile.id, dishLookup.ingredients, result, dishLookup.productName);
-        }
-        return { ...result, ocr: extraction };
+        return persistFinalScan(
+          profile,
+          dishLookup.ingredients,
+          { ...result, ocr: extraction, evidence: 'ocr' },
+          dishLookup.productName,
+          null,
+        );
       }
     } catch (error) {
       logCaughtError('scanner.lookupDishIngredients', error, { level: 'warn' });
     }
-
-    // Short OCR name without catalog hit: reuse VL if we already ran it for this photo.
-    if (
-      dishVisionResult &&
-      (shouldUseDishVisionForOcrText(extraction.text) ||
-        extraction.text.trim().length < READABLE_OCR_TEXT_MIN_CHARS)
-    ) {
-      return { ...dishVisionResult, ocr: extraction };
-    }
   }
 
-  const productName = buildOcrScanProductName(analysisMode);
   const ocrNote =
     extraction.source === 'demo'
       ? extraction.warnings.join(' ')
@@ -286,12 +323,29 @@ export async function scanFromOcr({
         : undefined;
 
   // Menu: scan full normalized text so dish names/descriptions are checked.
-  const scanText =
+  const ocrScanText =
     analysisMode === 'menu'
       ? extraction.ingredientsBlock
         ? `${extraction.text}\n${extraction.ingredientsBlock}`
         : extraction.text
       : extraction.text;
+
+  const evidence: ScanEvidenceKind = resolveScanEvidenceKind({
+    hasVision: Boolean(visionEstimate),
+    hasReadableOcr: readableOcrText,
+  });
+
+  const scanText =
+    visionEstimate && (readableOcrText || hasLabelOcrSnippet)
+      ? buildCombinedScanText({
+          ocrText: ocrScanText,
+          visionIngredients: visionEstimate.result.ingredients,
+          dishName: visionEstimate.result.dishName,
+        })
+      : ocrScanText;
+
+  const productName =
+    visionEstimate?.result.dishName?.trim() || buildOcrScanProductName(analysisMode);
 
   const result = await analyzeText({
     mode: analysisMode,
@@ -313,8 +367,19 @@ export async function scanFromOcr({
           : 'no_match'
       : undefined;
 
-  if (profile) await saveScanHistory(profile.id, extraction.text, result, productName);
-  return { ...result, ocr: extraction, menuScanStatus };
+  return persistFinalScan(
+    profile,
+    extraction.text,
+    {
+      ...result,
+      ocr: extraction,
+      menuScanStatus,
+      evidence,
+      ...(visionEstimate ? { dishVision: visionEstimate.result } : {}),
+    },
+    productName,
+    visionEstimate,
+  );
 }
 
 export async function scanMenuPhoto({

@@ -39,6 +39,54 @@ describe('open food facts service', () => {
     // declared allergens and traces are kept separate
     expect(product!.allergenTags).toEqual(['milk', 'tree-nuts']);
     expect(product!.traceTags).toEqual(['soy']);
+    expect(product!.source).toBe('openfoodfacts');
+  });
+
+  it('falls through to Open Beauty Facts when OFF misses', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (String(url).includes('openfoodfacts.org')) {
+        return new Response(JSON.stringify({ status: 0 }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      if (String(url).includes('openbeautyfacts.org')) {
+        return new Response(
+          JSON.stringify({
+            status: 1,
+            product: {
+              code: '3010000000001',
+              product_name: 'Shampoo',
+              ingredients_text: 'Aqua, Sodium Laureth Sulfate, Lanolin',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      throw new Error(`unexpected url ${url}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const product = await fetchOpenFoodFactsProduct('3010000000001');
+    expect(product?.name).toBe('Shampoo');
+    expect(product?.source).toBe('openbeautyfacts');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const firstUrl = (fetchMock.mock.calls[0] as unknown as [string])[0];
+    const secondUrl = (fetchMock.mock.calls[1] as unknown as [string])[0];
+    expect(firstUrl).toContain('openfoodfacts.org');
+    expect(secondUrl).toContain('openbeautyfacts.org');
+  });
+
+  it('does not query OBF/OPF when OFF already has the product', async () => {
+    const fetchMock = mockJson({
+      status: 1,
+      product: { code: '1', product_name: 'Yogurt', ingredients_text: 'milk' },
+    });
+    const product = await fetchOpenFoodFactsProduct('1');
+    expect(product?.source).toBe('openfoodfacts');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const offUrl = (fetchMock.mock.calls[0] as unknown as [string])[0];
+    expect(offUrl).toContain('openfoodfacts.org');
   });
 
   it('sends a descriptive User-Agent header (OFF requirement)', async () => {

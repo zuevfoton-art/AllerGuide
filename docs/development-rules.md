@@ -44,7 +44,7 @@ apps/api        — HTTP-маршруты, Drizzle, интеграции (OFF, O
 ### 2.3. Feature flags
 
 - Опциональная интеграция с backend **всегда** за флагом (`src/constants/features.ts` на mobile, env на API).
-- По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places** и **Air Quality** — они включены, пока не поставить `false` / `off`.
+- По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и **dish vision** (`EXPO_PUBLIC_AI_DISH_VISION` / `AI_DISH_VISION_ENABLED`) — VL часть основного сценария сканера и при отсутствии сети деградирует в OCR.
 - Не хардкодить URL API и не предполагать, что Postgres/LLM доступны.
 
 ### 2.4. Один источник правды для домена
