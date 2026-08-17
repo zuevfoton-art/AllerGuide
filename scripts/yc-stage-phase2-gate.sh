@@ -158,7 +158,7 @@ echo ""
 
 # --- P2.6 Docs: stage path is Yandex Cloud ---
 echo "--- P2.6 docs stage path ---"
-if grep -n 'Подключение приложения к backend (Yandex Cloud)' docs/android-local-build.md >/dev/null 2>&1; then
+if grep -n 'Подключение приложения к staging backend (Yandex Cloud)' docs/android-local-build.md >/dev/null 2>&1; then
   pass "android-local-build.md stage section is Yandex Cloud"
 else
   fail "android-local-build.md must document Yandex Cloud as the stage backend"
