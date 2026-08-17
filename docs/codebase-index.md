@@ -306,7 +306,7 @@ Barrel: `index.ts`. Pure TS.
 | QA | [`qa-checklist.md`](./qa-checklist.md) |
 | CJM + сценарии (профиль, дневник, capabilities) | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
-| YC stage | [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) |
+| YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
 
 ---

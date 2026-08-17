@@ -113,7 +113,7 @@ flowchart TD
 | `db/*` | Схемы `profile` / `catalog` / `public`. Миграции версионированы в `drizzle/`. |
 | `middleware/*` | Cross-cutting: security, JWT. |
 
-**Схемы Postgres:** пользовательские данные → `profile`; справочники → `catalog`; Replit OIDC → `public`. Не смешивать.
+**Схемы Postgres:** пользовательские данные → `profile`; справочники → `catalog`. Не смешивать.
 
 ### 3.4. `packages/core`
 

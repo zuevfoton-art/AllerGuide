@@ -12,7 +12,7 @@ describe('analytics routes', () => {
   });
 
   it('accepts a single analytics event', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/analytics/events').send({
       event: 'screen_view',
       at: '2026-06-20T10:00:00.000Z',
@@ -27,7 +27,7 @@ describe('analytics routes', () => {
   });
 
   it('rejects invalid events', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/analytics/events').send({
       event: 'not_allowed',
       screen: '/home',
@@ -38,7 +38,7 @@ describe('analytics routes', () => {
 
   it('returns dashboard aggregates when dashboard key is provided', async () => {
     process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
 
     await request(app).post('/api/analytics/events').send({
       events: [
@@ -57,14 +57,14 @@ describe('analytics routes', () => {
 
   it('rejects dashboard without key when enabled', async () => {
     process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/analytics/dashboard');
     expect(response.status).toBe(401);
   });
 
   it('hides dashboard when disabled', async () => {
     process.env.ANALYTICS_DASHBOARD_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/analytics/dashboard');
     expect(response.status).toBe(404);
   });

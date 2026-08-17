@@ -44,7 +44,7 @@ describe('mobile auth routes', () => {
       user: { id: 1, login: 'user@example.com', loginType: 'email' },
     });
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/auth/register').send({
       loginType: 'email',
       login: 'user@example.com',
@@ -64,7 +64,7 @@ describe('mobile auth routes', () => {
       user: { id: 2, login: '+79991234567', loginType: 'phone' },
     });
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/auth/login').send({
       loginType: 'phone',
       login: '+79991234567',
@@ -93,7 +93,7 @@ describe('mobile auth routes', () => {
       loginType: 'email',
     });
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
@@ -126,7 +126,7 @@ describe('profile routes', () => {
       loginType: 'email',
     });
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app)
       .get('/api/profiles')
       .set('Authorization', `Bearer ${token}`);
@@ -151,7 +151,7 @@ describe('profile routes', () => {
       loginType: 'email',
     });
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app)
       .post('/api/profiles')
       .set('Authorization', `Bearer ${token}`)

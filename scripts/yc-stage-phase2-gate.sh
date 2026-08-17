@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Phase 2 gate: stage clients must target Yandex Cloud, not Replit.
-# See docs/migrate-off-replit-to-yc.md §Phase 2
+# Phase 2 gate: stage clients must target Yandex Cloud.
+# See docs/yc-stage-gates.md §Phase 2
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -45,7 +45,7 @@ if [[ -n "$EAS_URL" ]]; then
   else
     fail "staging EXPO_PUBLIC_API_URL=$EAS_URL (expected $EXPECTED_API_URL)"
   fi
-  [[ "$EAS_URL" == *replit.app* ]] && fail "staging profile still points at Replit"
+  [[ "$EAS_URL" == *replit.app* ]] && fail "staging profile still points at a foreign host"
 fi
 
 POLLEN="$(
@@ -156,24 +156,24 @@ fi
 
 echo ""
 
-# --- P2.6 Docs: stage path must not recommend Replit as primary ---
+# --- P2.6 Docs: stage path is Yandex Cloud ---
 echo "--- P2.6 docs stage path ---"
-if grep -n 'Подключение приложения к backend (Replit)' docs/android-local-build.md >/dev/null 2>&1; then
-  fail "android-local-build.md still titles stage backend as Replit"
+if grep -n 'Подключение приложения к backend (Yandex Cloud)' docs/android-local-build.md >/dev/null 2>&1; then
+  pass "android-local-build.md stage section is Yandex Cloud"
 else
-  pass "android-local-build.md stage section not titled Replit"
+  fail "android-local-build.md must document Yandex Cloud as the stage backend"
 fi
 
 if grep -n 'aller-guide.replit.app' docs/eas-staging-build.md >/dev/null 2>&1; then
-  fail "eas-staging-build.md must not use replit.app"
+  fail "eas-staging-build.md must not use a foreign host URL"
 else
-  pass "eas-staging-build.md has no replit.app"
+  pass "eas-staging-build.md has no foreign host URL"
 fi
 
-if [[ -f docs/migrate-off-replit-to-yc.md ]] && grep -q 'Phase 2' docs/migrate-off-replit-to-yc.md; then
-  pass "migrate-off-replit-to-yc.md documents Phase 2"
+if [[ -f docs/yc-stage-gates.md ]] && grep -q 'Phase 2' docs/yc-stage-gates.md; then
+  pass "yc-stage-gates.md documents Phase 2"
 else
-  fail "missing Phase 2 section in migrate-off-replit-to-yc.md"
+  fail "missing Phase 2 section in yc-stage-gates.md"
 fi
 
 # Legacy eas replit profile must be gone after Phase 3
@@ -187,7 +187,7 @@ echo ""
 echo "=== Summary ==="
 echo "Failed: $FAILED  Warnings: $WARNED"
 if [[ "$FAILED" -gt 0 ]]; then
-  echo "Phase 2 gate FAILED. See docs/migrate-off-replit-to-yc.md §Phase 2" >&2
+  echo "Phase 2 gate FAILED. See docs/yc-stage-gates.md §Phase 2" >&2
   exit 1
 fi
 echo "Phase 2 gate PASSED."

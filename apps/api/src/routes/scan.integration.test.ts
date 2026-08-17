@@ -41,7 +41,7 @@ describe.skipIf(!hasIntegrationDatabase)('scan integration (P1.6c)', () => {
     process.env.SCAN_DAILY_BUDGET = '2';
     vi.stubGlobal('fetch', mockLlm());
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const login = uniqueLogin('scan');
     const password = 'TestPass1!';
 

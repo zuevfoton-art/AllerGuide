@@ -19,7 +19,7 @@
 #   SKIP_SMOKE=1   skip pollen smoke after deploy
 #   STAGING_API_URL=https://api.staging.aclearo.com
 #
-# See docs/migrate-off-replit-to-yc.md Phase 1.
+# See docs/yc-stage-gates.md Phase 1.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

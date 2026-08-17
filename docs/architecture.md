@@ -147,11 +147,10 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 **Bootstrap** (`app/index.tsx`):
 
 1. `initDb()` — создание таблиц / загрузка IndexedDB
-2. Replit callback (`?replit_auth=1` на web) → `loginWithReplitExchange()` → JWT
-3. `restoreAuthSession()` — гидратация токена из SecureStore / settings и **await** `syncProfilesFromBackend` (при backend auth)
-4. Проверка `isAuthenticated()` → иначе `/login`
-5. `refreshProfilesFromBackend()` + `ensureActiveProfileLoaded({ preferSelf: true })` — активный профиль сразу в store; при нескольких профилях выбирается родитель (`self`)
-6. `resolveAuthedBootstrapRoute()` из `@allerguide/core` (intro + onboarding + home)
+2. `restoreAuthSession()` — гидратация токена из SecureStore / settings и **await** `syncProfilesFromBackend` (при backend auth)
+3. Проверка `isAuthenticated()` → иначе `/login`
+4. `refreshProfilesFromBackend()` + `ensureActiveProfileLoaded({ preferSelf: true })` — активный профиль сразу в store; при нескольких профилях выбирается родитель (`self`)
+5. `resolveAuthedBootstrapRoute()` из `@allerguide/core` (intro + onboarding + home)
 
 **Стек аутентификации и onboarding:**
 
@@ -439,20 +438,14 @@ flowchart LR
     B2["JWT via secure-settings"]
     B3["syncProfilesFromBackend"]
   end
-  subgraph replit ["Replit OIDC (web, optional)"]
-    R1["GET /api/login → callback"]
-    R2["GET /api/auth/replit-exchange → JWT"]
-  end
   offline --> App
   backend --> App
-  replit --> backend
 ```
 
 | Режим | Хранение | Когда |
 |-------|----------|-------|
 | **Локальный** | `users` в SQLite/IndexedDB, `authUserId` в settings | `BACKEND_AUTH=false` |
 | **Backend JWT** | Token через `secure-settings-service` → **SecureStore** (native) / `app_settings` (web) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
-| **Replit OIDC** | Сессия в Postgres `public.sessions`, обмен на JWT для mobile | `REPL_ID` на API; web callback `?replit_auth=1` |
 
 Чувствительные ключи (`authToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
 
@@ -497,7 +490,6 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/alias-feedback.ts` | POST/GET/PATCH alias feedback |
 | `routes/analytics.ts` | `POST /api/analytics/events`, dashboard |
 | `routes/governance.ts` | `GET /api/governance` |
-| Replit auth (если `REPL_ID`) | `GET /api/login`, `/api/callback`, `/api/logout`, `/api/auth/user`, `/api/auth/replit-exchange` |
 | — | `GET /api/health` |
 
 ### Middleware
@@ -513,7 +505,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 |-------|---------|------------------|
 | **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` | `src/db/app-schema.ts` |
 | **`catalog`** | `allergens`, `cross_reactions`, `products`, `alias_feedback` | `src/db/catalog-schema.ts` |
-| **`public`** | `users`, `sessions` (Replit OIDC) | `src/db/auth-schema.ts` |
+| **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
 Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0008_*`).
 
@@ -601,7 +593,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | **Branching CI** | `.github/workflows/neon-preview.yml` — эфемерная ветка БД на PR |
 | **Cold start** | Ленивый синглтон подключения |
 
-`migrate.ts` совмещает Neon direct URL с `prepareReplitAuthBeforeMigrate` для legacy Replit deploy.
+`migrate.ts` применяет версионированные SQL из `drizzle/` к `DIRECT_DATABASE_URL` (или derived direct URL).
 
 ---
 
@@ -686,13 +678,12 @@ pnpm --filter mobile lint
 pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 ```
 
-### Stage / Replit
+### Stage / Yandex Cloud
 
-Deploy на Replit **снят с поддержки** для stage. Исторический runbook: [`docs/archive/replit-deploy.md`](./archive/replit-deploy.md).
+Единственный хостинг API — **Yandex Cloud**. Stage: `https://api.staging.aclearo.com`.
 
-- Stage API: Yandex Cloud — [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)
-- Миграция: [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md)
-- Optional legacy web OIDC: `apps/api/src/replit_integrations` только при `REPL_ID` (не на YC staging Lockbox)
+- Runbook: [`staging-yandex-cloud.md`](./staging-yandex-cloud.md)
+- Gates: [`yc-stage-gates.md`](./yc-stage-gates.md)
 
 ### Android APK
 
@@ -773,7 +764,6 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `DATABASE_URL` / `DIRECT_DATABASE_URL` / `READ_DATABASE_URL` | Postgres connections |
 | `DB_SSL`, `DB_PREPARE`, `DB_POOL_*` | Neon / PgBouncer tuning |
 | `JWT_SECRET` | Mobile JWT signing |
-| `SESSION_SECRET` | Replit session cookies |
 | `CORS_ORIGINS` | CORS allowlist |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
 | `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
@@ -789,7 +779,6 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `YANDEX_MARKET_*` | Market affiliate |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `PASSWORD_RESET_*` | Password reset email |
 | `ALIAS_FEEDBACK_ADMIN_KEY` | Alias feedback admin |
-| `REPL_ID`, `ISSUER_URL` | Replit OIDC (optional) |
 | `METRO_URL` | Dev proxy to Expo |
 
 **Порты в dev:** mobile web часто на `5000` (`expo start --web --port 5000`); API в коде по умолчанию тоже `5000`, поэтому локально задавайте `API_PORT=3001` (как в `.env.example`).
@@ -806,8 +795,7 @@ Deploy на Replit **снят с поддержки** для stage. Истори
 | `AGENTS.md` | Инструкции для разработки / Cloud Agent |
 | `docs/functional-requirements.md` | Функциональные требования |
 | `docs/clinical-features-raaci.md` | Клинические фичи (RAACI) |
-| `docs/archive/replit-deploy.md` | Archived Replit deploy (do not use for stage) |
-| `docs/migrate-off-replit-to-yc.md` | Stage без Replit (Phase 0–5 gates) |
+| `docs/yc-stage-gates.md` | Yandex Cloud stage gates (Phase 0–5) |
 | `docs/staging-yandex-cloud.md` | Staging API на Yandex Cloud |
 | `docs/eas-internal-preview.md` / `eas-staging-build.md` | EAS / preview / staging builds |
 | `docs/qa-checklist.md` | QA чеклист |

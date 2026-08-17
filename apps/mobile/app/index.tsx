@@ -1,13 +1,11 @@
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
 import { resolveAuthedBootstrapRoute } from '@allerguide/core';
 import { AppSplash } from '@/src/components/AppSplash';
 import { initDb } from '@/src/db/init';
 import {
   isAuthenticated,
   getCurrentUserId,
-  loginWithReplitExchange,
   restoreAuthSession,
 } from '@/src/services/auth-service';
 import {
@@ -36,12 +34,6 @@ export default function Index() {
       await initDb();
       if (!mounted) return;
 
-      const isWeb = Platform.OS === 'web';
-      const hasReplitCallback =
-        isWeb &&
-        typeof window !== 'undefined' &&
-        window.location.search.includes('replit_auth=1');
-
       async function continueBootstrap() {
         const userId = getCurrentUserId();
         if (userId) migrateLegacyProfilesToUser(userId);
@@ -64,18 +56,6 @@ export default function Index() {
             isOnboardingComplete(),
           ),
         );
-      }
-
-      if (hasReplitCallback) {
-        if (window.history) window.history.replaceState({}, '', '/');
-        const result = await loginWithReplitExchange();
-        if (!mounted) return;
-        if (!result.ok) {
-          setTarget('/login');
-          return;
-        }
-        await continueBootstrap();
-        return;
       }
 
       await restoreAuthSession();

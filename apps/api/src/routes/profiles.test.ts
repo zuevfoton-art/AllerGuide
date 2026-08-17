@@ -27,7 +27,7 @@ async function authorizedRequest() {
     login: 'profile@example.com',
     loginType: 'email',
   });
-  const app = await createApp({ withReplitAuth: false });
+  const app = await createApp();
   return { app, token };
 }
 

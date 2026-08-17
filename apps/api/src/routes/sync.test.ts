@@ -12,13 +12,13 @@ describe('sync routes', () => {
 
   it('rejects sync when disabled', async () => {
     process.env.SYNC_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/sync/backup').send({});
     expect(response.status).toBe(503);
   });
 
   it('requires api key when configured', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/sync/backup').send({
       v: 2,
       userId: 1,
@@ -31,7 +31,7 @@ describe('sync routes', () => {
   });
 
   it('stores and returns backup payload', async () => {
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const payload = {
       v: 2,
       userId: 42,

@@ -21,14 +21,14 @@ describe('ocr routes', () => {
 
   it('returns 503 when OCR disabled', async () => {
     process.env.YC_OCR_ENABLED = 'false';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/ocr').send({ imageBase64: 'abc' });
     expect(response.status).toBe(503);
   });
 
   it('requires auth when SCAN_REQUIRE_AUTH is set', async () => {
     process.env.SCAN_REQUIRE_AUTH = 'true';
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app).post('/api/ocr').send({ imageBase64: 'abc' });
     expect(response.status).toBe(401);
   });
@@ -46,7 +46,7 @@ describe('ocr routes', () => {
       ),
     );
 
-    const app = await createApp({ withReplitAuth: false });
+    const app = await createApp();
     const response = await request(app)
       .post('/api/ocr')
       .send({ imageBase64: 'abc', mimeType: 'image/jpeg' });
