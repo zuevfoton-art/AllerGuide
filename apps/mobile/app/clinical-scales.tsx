@@ -12,12 +12,11 @@ import { addDiaryEntries, getDiaryEntries } from '@/src/services/diary-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
@@ -83,18 +82,13 @@ export default function ClinicalScalesScreen() {
   };
 
   return (
-    <Screen
-      brandHeaderLeft={
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-      }>
-      <ScreenEyebrow section={t('clinicalScales.eyebrow')} />
-      <Text style={ui.docTitle}>{t('clinicalScales.title')}</Text>
-      <Text style={ui.docMeta}>{t('clinicalScales.subtitle')}</Text>
+    <Screen>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('clinicalScales.eyebrow')}
+        title={t('clinicalScales.title')}
+        subtitle={t('clinicalScales.subtitle')}
+      />
 
       <GlassCard>
         <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
@@ -109,7 +103,8 @@ export default function ClinicalScalesScreen() {
                   style={[styles.chip, styles.chipAccent]}
                   onPress={() => setScaleId(scale.id)}
                   accessibilityRole="button"
-                  accessibilityLabel={scale.shortLabel}>
+                  accessibilityLabel={scale.shortLabel}
+                  hitSlop={8}>
                   <Text style={styles.chipText}>{scale.shortLabel}</Text>
                 </Pressable>
               ))}
@@ -123,7 +118,8 @@ export default function ClinicalScalesScreen() {
               style={styles.chip}
               onPress={() => setScaleId(scale.id)}
               accessibilityRole="button"
-              accessibilityLabel={scale.shortLabel}>
+              accessibilityLabel={scale.shortLabel}
+              hitSlop={8}>
               <Text style={styles.chipText}>{scale.shortLabel}</Text>
             </Pressable>
           ))}

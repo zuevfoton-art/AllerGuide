@@ -397,7 +397,7 @@ const enContent: LocaleContent = {
         text: 'Symptoms recorded on {days} of the last 7 days. Track changes; contact your doctor if they worsen.',
       },
       clinicalScale: {
-        title: 'Scale {label}',
+        title: '{label} score',
         text: 'Latest score: {total} ({level}). Discuss control with your doctor.',
       },
       crossReaction: {

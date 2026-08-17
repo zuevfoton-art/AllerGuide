@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -8,7 +8,7 @@ import {
   type InsectActionPlan,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -16,7 +16,6 @@ import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { Ionicons } from '@expo/vector-icons';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import {
   createEmptyInsectActionPlan,
@@ -77,6 +76,7 @@ export default function InsectActionPlanScreen() {
   if (!profile) {
     return (
       <Screen>
+        <ScreenHeader onBack={() => router.back()} title={t('insect.noProfile')} />
         <Text style={styles.empty}>{t('insect.noProfile')}</Text>
       </Screen>
     );
@@ -85,15 +85,12 @@ export default function InsectActionPlanScreen() {
   if (!insectEnabled) {
     return (
       <Screen>
-        <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()}>
-            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-          </Pressable>
-          <View style={styles.headerText}>
-            <ScreenEyebrow section={t('insect.eyebrow')} />
-            <Text style={ui.docTitle}>{t('insect.planTitle')}</Text>
-          </View>
-        </View>
+        <ScreenHeader
+          onBack={() => router.back()}
+          eyebrow={t('insect.eyebrow')}
+          title={t('insect.planTitle')}
+          style={{ marginBottom: 12 }}
+        />
         <GlassCard>
           <Text style={styles.hint}>{t('insect.notEligible')}</Text>
         </GlassCard>
@@ -108,16 +105,13 @@ export default function InsectActionPlanScreen() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('insect.eyebrow')} />
-          <Text style={ui.docTitle}>{t('insect.planTitle')}</Text>
-          <Text style={ui.docMeta}>{t('insect.planSubtitle')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('insect.eyebrow')}
+        title={t('insect.planTitle')}
+        subtitle={t('insect.planSubtitle')}
+        style={{ marginBottom: 12 }}
+      />
 
       <GlassCard style={styles.section}>
         <Text style={ui.sectionLabel}>{t('insect.profileInsects')}</Text>
@@ -180,19 +174,6 @@ export default function InsectActionPlanScreen() {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
-    backBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 2,
-    },
-    headerText: { flex: 1, gap: 2 },
     section: { gap: 4, marginBottom: 12 },
     fieldGap: { marginTop: 12 },
     input: {

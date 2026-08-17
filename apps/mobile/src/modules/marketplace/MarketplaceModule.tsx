@@ -95,6 +95,7 @@ export function MarketplaceModule({ variant = 'full' }: MarketplaceModuleProps) 
             onChangeText={setQuery}
             placeholder={t('market.searchPlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
+            accessibilityLabel={t('market.searchPlaceholder')}
             onSubmitEditing={refresh}
           />
         </View>

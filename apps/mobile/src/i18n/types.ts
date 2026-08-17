@@ -71,6 +71,9 @@ export type LocaleMessages = {
     registerLink: string;
     hasAccount: string;
     loginLink: string;
+    forgotLink: string;
+    countryCode: string;
+    countryCodeTitle: string;
     errors: {
       emailRequired: string;
       phoneRequired: string;
@@ -202,6 +205,7 @@ export type LocaleMessages = {
     insightsOpenProfile: string;
     insightsTherapyTitle: string;
     insightsTherapyText: string;
+    insightsTherapyActiveText: string;
     insightsOpenTherapy: string;
     wellnessDetails: string;
     wellnessHideDetails: string;
@@ -214,6 +218,7 @@ export type LocaleMessages = {
     newEntry: string;
     quickEntry: string;
     quickAdd: string;
+    entriesTitle: string;
     history: string;
     refresh: string;
     doctorReport: string;
@@ -241,9 +246,6 @@ export type LocaleMessages = {
     insightsTemporalCorSymMeds: string;
     insightsAnomalySymptomsNoTrigger: string;
     insightsCalendar: string;
-    actPromptTitle: string;
-    actPromptText: string;
-    actPromptButton: string;
     trendsTitle: string;
     heatmapTitle: string;
     temporalCorrelationTitle: string;
@@ -485,7 +487,6 @@ export type LocaleMessages = {
     pollenLiveTitle: string;
     pollenMapAttribution: string;
     pollenGoogleMapAttribution: string;
-    pollenGooglePrimaryAttribution: string;
     pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenTreeSpeciesLevelsHint: string;
@@ -533,18 +534,6 @@ export type LocaleMessages = {
     pollenNoSeason: string;
     openYandexPollen: string;
     openYandexPollenHint: string;
-    safePollenPlaces: string;
-    safePollenPlacesHint: string;
-    noSafePollenPlaces: string;
-    pollenDistance: string;
-    pollenNorth: string;
-    pollenNorthEast: string;
-    pollenEast: string;
-    pollenSouthEast: string;
-    pollenSouth: string;
-    pollenSouthWest: string;
-    pollenWest: string;
-    pollenNorthWest: string;
     nkcc: string;
     chiefExpert: string;
     subtitleUnified: string;
@@ -591,7 +580,6 @@ export type LocaleMessages = {
     legendMedical: string;
     legendPharmacy: string;
     searchThisArea: string;
-    airLayerToggle: string;
     poiLevelHigh: string;
     poiLevelMedium: string;
     poiLevelLow: string;
@@ -623,7 +611,6 @@ export type LocaleMessages = {
     upiLevelDescription: string;
     heatmapLegendTitle: string;
     heatmapOfficialGroup: string;
-    heatmapNoSpeciesLayer: string;
     plantInSeason: string;
     plantOutOfSeason: string;
     plantNoLiveData: string;
@@ -803,7 +790,6 @@ export type LocaleMessages = {
   };
   profileSwitcher: {
     add: string;
-    hint: string;
     manage: string;
     switchTitle: string;
     switchEmpty: string;
@@ -1160,6 +1146,7 @@ export type LocaleMessages = {
     clinicalNotesPlaceholder: string;
     savePlan: string;
     disclaimer: string;
+    cardDisclaimer: string;
     noProfile: string;
     notEligible: string;
     ginaLink: string;
@@ -1210,18 +1197,19 @@ export type LocaleMessages = {
     title: string;
     subtitle: string;
     eyebrow: string;
-    edit: string;
     name: string;
     age: string;
     allergies: string;
     medicalNotes: string;
     actionPlan: string;
     emptyProfile: string;
+    emptyProfileHint: string;
     contactsTitle: string;
     contactsHint: string;
+    editPassport: string;
+    editContacts: string;
     callContact: string;
     call: string;
-    settingsLink: string;
     tip: string;
     disclaimer: string;
     passportTitle: string;
@@ -1334,6 +1322,41 @@ export type LocaleMessages = {
       high: string;
       unknown: string;
     };
+    index: {
+      low: string;
+      moderate: string;
+      high: string;
+    };
+    pollen: {
+      none: string;
+      low: string;
+      moderate: string;
+      high: string;
+      unknown: string;
+    };
+    air: {
+      low: string;
+      moderate: string;
+      high: string;
+      unknown: string;
+    };
+    diaryState: {
+      none: string;
+      low: string;
+      moderate: string;
+      high: string;
+    };
+    forecast: {
+      high: string;
+      medium: string;
+      low: string;
+    };
+    statusPhrase: {
+      good: string;
+      moderate: string;
+      attention: string;
+      'high-risk': string;
+    };
     primaryFactor: {
       pollen: string;
       air: string;
@@ -1342,6 +1365,16 @@ export type LocaleMessages = {
       asit: string;
       none: string;
     };
+    primaryFactorSentence: {
+      pollen: string;
+      air: string;
+      diary: string;
+      clinical: string;
+      asit: string;
+      none: string;
+    };
+    category: string;
+    exactValue: string;
   };
   errors: {
     selectProfile: string;

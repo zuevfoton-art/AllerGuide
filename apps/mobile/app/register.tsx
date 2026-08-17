@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import type { TextInput } from 'react-native';
 import type { LoginType } from '@allerguide/core';
 import { registerUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
@@ -15,6 +16,11 @@ import {
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
 import { PhoneInput } from '@/src/components/PhoneInput';
+import {
+  authEmailInputProps,
+  authPasswordInputProps,
+  authPhoneInputProps,
+} from '@/src/constants/auth-input-props';
 
 export default function RegisterScreen() {
   const { t, tAuthError } = useTranslation();
@@ -24,6 +30,8 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmRef = useRef<TextInput>(null);
 
   const handleRegister = async () => {
     setLoading(true);
@@ -58,32 +66,49 @@ export default function RegisterScreen() {
           value={login}
           onChangeText={setLogin}
           testID="auth-login-input"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          {...authPhoneInputProps()}
         />
       ) : (
         <AuthField
           label={t('common.email')}
           value={login}
           onChangeText={setLogin}
-          placeholder="name@example.com"
-          keyboardType="email-address"
+          placeholder={t('auth.forgot.emailPlaceholder')}
           testID="auth-login-input"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          {...authEmailInputProps()}
         />
       )}
       <AuthField
+        ref={passwordRef}
         label={t('common.password')}
         value={password}
         onChangeText={setPassword}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
         testID="auth-password-input"
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => confirmRef.current?.focus()}
+        {...authPasswordInputProps('new')}
       />
       <AuthField
+        ref={confirmRef}
         label={t('auth.confirmPassword')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         placeholder={t('auth.confirmPasswordPlaceholder')}
         secureTextEntry
         testID="auth-confirm-password-input"
+        returnKeyType="go"
+        submitBehavior="blurAndSubmit"
+        onSubmitEditing={() => void handleRegister()}
+        {...authPasswordInputProps('new')}
       />
       <AuthError message={error} />
       <AuthPrimaryButton
