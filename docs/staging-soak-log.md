@@ -17,12 +17,12 @@
 
 Soak cannot be completed or signed off until all items below are cleared:
 
-| # | Blocker | Evidence (2026-07-29) | Owner |
-|---|---------|----------------------|-------|
-| B1 | **Maestro nightly — no green soak streak** | Nightly runs 2026-07-20 … 2026-07-29 all `failure` (billing outage prevented runners). 0 consecutive green days in the soak window. Need ≥7 green nights after Actions is stable. | DevOps / QA |
-| B2 | **Sentry crash-free ≥99% unavailable** | No staging crash-free % recorded in this log; `EXPO_PUBLIC_SENTRY_DSN` metrics not available to close G5 | Mobile / Product |
+| # | Blocker | Evidence (updated 2026-08-17) | Owner |
+|---|---------|------------------------------|-------|
+| B1 | **Maestro nightly — no green soak streak** | 10 consecutive `failure` runs through 2026-08-11, no runs since. Cause is no longer billing — runners start and the failures are infra-level: `maestro-offline` on `macos-latest` dies with `Timeout waiting for emulator to boot` (runner is arm64, workflow asks for `arch: x86_64`); `maestro-staging` on ubuntu boots the emulator but fails with `AndroidDriverTimeoutException: Maestro Android driver did not start up in time`. No app assertion has been reached. Need ≥7 green nights after the workflow is fixed. | DevOps / QA |
+| B2 | **Sentry crash-free ≥99% unavailable** | Root cause identified: `EXPO_PUBLIC_SENTRY_DSN` is not set in the EAS `staging` profile, so no crash-free data exists to close G5 | Mobile / Product |
 | B3 | **No active soak testers** | Daily headcount empty; P1.7 closed-beta gate-out not reflected here | Product |
-| B4 | ~~GitHub Actions billing~~ (mitigated) | Mid-window jobs failed to start (*spending limit*). As of 2026-07-29 evening, CI on `main` runs again ([run 30489891864](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30489891864) `success`). Does **not** unlock G3/G5/G7 alone. | Org admin |
+| B4 | ~~GitHub Actions billing~~ (resolved) | Mid-window jobs failed to start (*spending limit*). CI and RC Gate have run and passed on `main` since (RC Gate `success` 2026-08-17). Does **not** unlock G3/G5/G7 alone. | Org admin |
 
 **Automated RC gate:**
 
@@ -61,8 +61,8 @@ Automated G1/G2/G4/G6 do **not** replace manual G3/G5/G7.
 
 **Maestro nightly**
 
-1. Confirm GitHub Actions billing remains healthy.
-2. GitHub → Actions → [Maestro Nightly](../.github/workflows/maestro-nightly.yml).
+1. Fix the workflow itself first (emulator arch on the macOS job, Maestro driver startup on the ubuntu job) — see [roadmap-to-prod.md §6 step 1](./roadmap-to-prod.md#шаг-1--починить-maestro-nightly-разблокирует-g3).
+2. Trigger [Maestro Nightly](../.github/workflows/maestro-nightly.yml) manually (`workflow_dispatch`) until both jobs pass; also confirm the `schedule` trigger fires again.
 3. Mark green when both `maestro-offline` and `maestro-staging` succeed.
 4. Restart a fresh 14-day window (update start/end + clear **BLOCKED** status).
 
@@ -75,10 +75,10 @@ Automated G1/G2/G4/G6 do **not** replace manual G3/G5/G7.
 
 | ID | Severity | Summary | Status | Fix commit |
 |----|----------|---------|--------|------------|
-| SOAK-B1 | Blocker | No Maestro green streak in soak window | open | — |
-| SOAK-B2 | Blocker | Sentry crash-free not recorded | open | — |
+| SOAK-B1 | Blocker | Maestro nightly cannot start emulator / Android driver (arm64 runner vs `x86_64`; driver timeout) | open | — |
+| SOAK-B2 | Blocker | `EXPO_PUBLIC_SENTRY_DSN` missing on EAS `staging` → no crash-free metric | open | — |
 | SOAK-B3 | Blocker | No enrolled soak testers | open | — |
-| SOAK-B4 | Mitigated | GitHub Actions billing blocked runners mid-window | mitigated (CI green again 2026-07-29) | — |
+| SOAK-B4 | Resolved | GitHub Actions billing blocked runners mid-window | resolved (CI + RC Gate green since 2026-08) | — |
 
 ## Sign-off
 
