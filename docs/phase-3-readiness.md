@@ -33,6 +33,6 @@ Ordered plan lives in [roadmap-to-prod.md §6](./roadmap-to-prod.md#6-дальн
 2. Lawyer-review the `de`/`es`/`fr`/`it` legal drafts ([#260](https://github.com/zuevfoton-art/AllerGuide/pull/260)) before store copy (P3.2 / P3.3).
 3. Recreate GitHub milestones/labels, then close **Phase 2** only after soak sign-off and open **Phase 3**.
 4. Replace `ascAppId` / `appleTeamId` placeholders ([store-permissions-justification.md](./store-permissions-justification.md)) and create production EAS secrets (do not reuse the staging Maestro recovery key).
-5. Use [privacy-compliance-audit.md](./privacy-compliance-audit.md) and [production-yc-plan.md](./production-yc-plan.md) as the P3.4 / P3.7 starting notes. YC migration Phase 5 is already green (Replit HTTP 404).
+5. Use [privacy-compliance-audit.md](./privacy-compliance-audit.md) and [production-yc-plan.md](./production-yc-plan.md) as the P3.4 / P3.7 starting notes. YC stage Phase 5 is already green.
 
 See [roadmap-to-prod.md](./roadmap-to-prod.md#phase-3--compliance--store-readiness).

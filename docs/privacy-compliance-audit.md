@@ -56,7 +56,6 @@ Gap: a user who wants a full diary/scan export must use the in-app local export 
 | Encrypted blob is deleted with the user | Intended. There is no tombstone / grace period. |
 | Export omits diary/scans stored only on device | Document in the privacy policy (P3.3). |
 | Staging analytics is on (`eas.json` staging) | Do not copy that default to production without a consent story. |
-| Replit host | Paused (HTTP 404 on 2026-08-17). Confirm no leftover Replit Postgres with user rows. |
 
 ## Store / 152-ФЗ checklist (still open)
 

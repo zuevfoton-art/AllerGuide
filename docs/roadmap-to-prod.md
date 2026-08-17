@@ -16,7 +16,7 @@
 | Phase 3 — Compliance & Store | 📝 prep docs | Privacy audit, prod YC plan, store permission drafts — still gated by P2.8 |
 | Phase 4 — v1.0 Launch | ⛔ не начата | — |
 | Phase 5 — Post-launch | 🔶 частично сделана досрочно | Осталось масштабирование (P5.6) |
-| YC-миграция (off Replit) | ✅ Phase 5 | `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` **PASSED** 2026-08-17 (`aller-guide.replit.app` HTTP 404) |
+| YC stage | ✅ Phase 5 | `pnpm yc-stage-phase5` **PASSED** 2026-08-17 — единственный host `api.staging.aclearo.com` |
 
 Единственный жёсткий блокер продвижения — **P2.8** (RC gate + soak). Автоматическая часть гейта зелёная, ручная (G3/G5/G7) — нет.
 
@@ -169,7 +169,7 @@ flowchart TB
 
 | ID | Задача | Статус | Артефакт |
 |----|--------|--------|----------|
-| P1.1 | Deploy API staging | ✅ | YC Serverless + Managed PG; [`staging-yandex-cloud.md`](./staging-yandex-cloud.md), [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) |
+| P1.1 | Deploy API staging | ✅ | YC Serverless + Managed PG; [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | P1.2 | Backend auth E2E | ✅ | `auth-service` + `backend-api`, `refreshProfilesFromBackend` |
 | P1.3 | Ключ восстановления бэкапа | ✅ | `backup-crypto` recovery API, `RecoveryKeyModal` |
 | P1.4 | Cloud sync E2E | ✅ | `sync-encrypted-e2e.test.ts`, [ADR 002](adr/002-sync-conflict-policy.md) |
@@ -325,7 +325,7 @@ flowchart LR
 
 ### Шаг 7 — закрыть YC-миграцию
 
-**Сделано 2026-08-17:** `aller-guide.replit.app/api/health` → HTTP 404; `REQUIRE_REPLIT_PAUSED=1 pnpm yc-stage-phase5` PASSED. Запись в [`migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md).
+**Сделано 2026-08-17:** `pnpm yc-stage-phase5` PASSED — stage API только на Yandex Cloud (`api.staging.aclearo.com`).
 
 ### Не делать сейчас
 
@@ -376,7 +376,7 @@ flowchart LR
 - [`docs/staging-soak-log.md`](./staging-soak-log.md) — soak и его блокеры
 - [`docs/phase-3-readiness.md`](./phase-3-readiness.md) — вход в Phase 3
 - [`docs/closed-beta-p17.md`](./closed-beta-p17.md) — когорта закрытой беты
-- [`docs/migrate-off-replit-to-yc.md`](./migrate-off-replit-to-yc.md) — YC-миграция stage (gates 0–5)
+- [`docs/staging-yandex-cloud.md`](./staging-yandex-cloud.md) — stage API на Yandex Cloud
 - [`docs/staging-secrets-inventory.md`](./staging-secrets-inventory.md) — Lockbox / EAS / GitHub секреты
 - [`docs/architecture.md`](./architecture.md) — архитектура и production hardening
 - [`docs/development-rules.md`](./development-rules.md) — обязательные правила разработки

@@ -59,4 +59,3 @@ Do not run `pnpm yc-stage-phase*` against prod. Those gates encode staging URLs 
 - Create the prod folder, PG, Lockbox, container, DNS
 - Issue production JWT and Google/YC keys (never reuse staging keys)
 - Replace `ascAppId` / `appleTeamId` in `apps/mobile/eas.json`
-- Confirm Replit Postgres (if any) has no residual user data after the 2026-08-17 pause
