@@ -405,7 +405,7 @@ const ru: LocaleMessages = {
     menuStatusIncomplete: 'Текст меню слишком короткий',
     menuStatusNoMatch: 'Совпадений не найдено',
     titleShort: 'Сканер',
-    verdictStop: 'СТОП',
+    verdictStop: 'Высокий риск',
     verdictCaution: 'ОСТОРОЖНО',
     verdictClear: 'Совпадений не найдено',
     verdictStopHint: 'Совпадения с аллергенами профиля',

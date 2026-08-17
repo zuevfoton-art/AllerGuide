@@ -401,7 +401,7 @@ const it: LocaleMessages = {
     menuStatusIncomplete: 'Testo menu troppo corto',
     menuStatusNoMatch: 'Nessuna corrispondenza trovata',
     titleShort: 'Scanner',
-    verdictStop: 'STOP',
+    verdictStop: 'Rischio alto',
     verdictCaution: 'ATTENZIONE',
     verdictClear: 'Nessuna corrispondenza',
     verdictStopHint: 'Corrisponde agli allergeni del profilo',

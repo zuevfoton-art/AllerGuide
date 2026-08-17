@@ -402,7 +402,7 @@ const de: LocaleMessages = {
     menuStatusIncomplete: 'Menütext zu kurz',
     menuStatusNoMatch: 'Keine Übereinstimmungen gefunden',
     titleShort: 'Scanner',
-    verdictStop: 'STOPP',
+    verdictStop: 'Hohes Risiko',
     verdictCaution: 'VORSICHT',
     verdictClear: 'Keine Treffer',
     verdictStopHint: 'Treffer mit Allergenen des Profils',
