@@ -126,7 +126,7 @@ src/modules/marketplace/
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
 | `(tabs)/home.tsx` | Dashboard / двухслойный wellness / home-insights |
-| `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история, модули |
+| `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |

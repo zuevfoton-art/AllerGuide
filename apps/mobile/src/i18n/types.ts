@@ -249,7 +249,6 @@ export type LocaleMessages = {
     trendsTitle: string;
     heatmapTitle: string;
     temporalCorrelationTitle: string;
-    modulesTitle: string;
     doctorVisit: string;
     clinicalScalesOpen: string;
     entryPickerTitle: string;

@@ -245,7 +245,6 @@ const ru: LocaleMessages = {
     trendsTitle: 'Динамика симптомов (7 дней)',
     heatmapTitle: 'Календарь симптомов',
     temporalCorrelationTitle: 'Корреляции триггеров (±4 ч)',
-    modulesTitle: 'Дополнительные модули наблюдения',
     doctorVisit: 'Предстоящий визит к врачу',
     clinicalScalesOpen: 'Клинические оценки',
     entryPickerTitle: 'Что добавить',
