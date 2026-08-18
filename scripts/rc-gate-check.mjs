@@ -88,6 +88,32 @@ function checkMaestroFlows() {
   } else {
     log(`Maestro smoke flows: ${smokeFlows.length}`);
   }
+
+  const buildScript = fs.readFileSync(path.join(root, 'scripts/maestro-build-apk.sh'), 'utf8');
+  if (!buildScript.includes('gradlew assembleRelease')) {
+    failures.push('scripts/maestro-build-apk.sh must run gradlew assembleRelease (embedded JS, no Metro)');
+  }
+  if (buildScript.includes('gradlew assembleDebug')) {
+    failures.push('scripts/maestro-build-apk.sh still calls gradlew assembleDebug (nightly cannot load JS)');
+  }
+
+  const workflow = fs.readFileSync(path.join(root, '.github/workflows/maestro-nightly.yml'), 'utf8');
+  if (!workflow.includes('app-release.apk')) {
+    failures.push('maestro-nightly.yml must install app-release.apk');
+  }
+  if (workflow.includes('app-debug.apk')) {
+    failures.push('maestro-nightly.yml still installs app-debug.apk');
+  }
+
+  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (!flow.includes('auth-login-input')) {
+      failures.push(`${name}: wait for auth-login-input before register link`);
+    }
+    if (!flow.includes('scrollUntilVisible')) {
+      failures.push(`${name}: scrollUntilVisible auth-register-link (Pixel 6 fold)`);
+    }
+  }
 }
 
 async function checkStagingHealth() {
@@ -149,6 +175,7 @@ requireFile('docs/performance-api-infra.md', { optional: true });
 requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
+runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 
