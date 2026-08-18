@@ -3,33 +3,35 @@ appId: com.aclearo.app
 ---
 - launchApp:
     clearState: true
-# Login input is above the fold; register link may need a scroll on Pixel 6.
-# Release first launch on CI can exceed 30s (Hermes + SQLite init).
-- extendedWaitUntil:
-    visible:
-      id: auth-login-input
-    timeout: 90000
-- scrollUntilVisible:
-    element:
-      id: auth-register-link
-    direction: DOWN
-    timeout: 15000
-- tapOn:
-    id: auth-register-link
-- tapOn:
-    id: auth-mode-email
+- runFlow: _wait-login.yaml
+- runFlow:
+    file: _tap-by-id.yaml
+    env:
+      FIELD_ID: auth-register-link
+- runFlow:
+    file: _tap-by-id.yaml
+    env:
+      FIELD_ID: auth-mode-email
 - runScript: ../scripts/staging-credentials.js
-- tapOn:
-    id: auth-login-input
-- inputText: ${output.email}
-- tapOn:
-    id: auth-password-input
-- inputText: ${output.password}
-- tapOn:
-    id: auth-confirm-password-input
-- inputText: ${output.password}
-- tapOn:
-    id: auth-submit
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-login-input
+      FIELD_VALUE: ${output.email}
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-password-input
+      FIELD_VALUE: ${output.password}
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-confirm-password-input
+      FIELD_VALUE: ${output.password}
+- runFlow:
+    file: _tap-by-id.yaml
+    env:
+      FIELD_ID: auth-submit
 - extendedWaitUntil:
     visible:
       id: onboarding-intro-skip

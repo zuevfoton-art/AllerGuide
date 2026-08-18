@@ -21,23 +21,32 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /missing the embedded JS bundle/);
   });
 
-  it('installs the release APK in both nightly jobs', () => {
+  it('runs emulator flows via the helper that installs the release APK', () => {
     const workflow = read('.github/workflows/maestro-nightly.yml');
-    const installs = workflow.match(/adb install -r \S+/g) ?? [];
-    assert.equal(installs.length, 2, `expected 2 adb install lines, got ${installs.join(', ')}`);
-    for (const line of installs) {
-      assert.match(line, /app-release\.apk/);
-      assert.doesNotMatch(line, /app-debug\.apk/);
-    }
+    assert.match(workflow, /maestro-run-emulator\.sh preview/);
+    assert.match(workflow, /maestro-run-emulator\.sh staging/);
+    assert.doesNotMatch(workflow, /app-debug\.apk/);
+
+    const runner = read('scripts/maestro-run-emulator.sh');
+    assert.match(runner, /app-release\.apk/);
+    assert.match(runner, /pm grant/);
+    assert.match(runner, /adb logcat/);
   });
 
-  it('waits for login then scrolls to the register link', () => {
+  it('waits for auth chrome above the fold, then scrolls+hides IME for fields', () => {
+    const waitLogin = read('apps/mobile/.maestro/flows/_wait-login.yaml');
+    assert.match(waitLogin, /id: auth-mode-phone/);
+    assert.match(waitLogin, /timeout: 120000/);
+
+    const fill = read('apps/mobile/.maestro/flows/_fill-by-id.yaml');
+    assert.match(fill, /hideKeyboard/);
+    assert.match(fill, /scrollUntilVisible/);
+
     for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
-      assert.match(flow, /id: auth-login-input/);
-      assert.match(flow, /scrollUntilVisible/);
-      assert.match(flow, /id: auth-register-link/);
-      assert.match(flow, /timeout: 90000/);
+      assert.match(flow, /_wait-login\.yaml/);
+      assert.match(flow, /_fill-by-id\.yaml/);
+      assert.match(flow, /auth-confirm-password-input/);
     }
   });
 });

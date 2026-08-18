@@ -115,7 +115,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `maestro-offline` | `ubuntu-latest` + KVM | preview APK → `smoke-all.yaml` |
 | `maestro-staging` | `ubuntu-latest` + KVM | Postgres + API → staging APK → `staging-smoke-all.yaml` |
 
-Оба джоба: `arch: x86_64`, AVD `maestro-avd-34`, `emulator-boot-timeout: 900`, `MAESTRO_DRIVER_STARTUP_TIMEOUT=120000`, CLI pinned `MAESTRO_VERSION=2.8.0`, APK = `assembleRelease` (`app-release.apk`, JS вшит). Offline больше не на `macos-latest` — Apple Silicon не даёт nested virtualization для x86_64 AVD.
+Оба джоба: `arch: x86_64`, AVD `maestro-avd-34`, `emulator-boot-timeout: 900`, `MAESTRO_DRIVER_STARTUP_TIMEOUT=120000`, CLI pinned `MAESTRO_VERSION=2.8.0`, APK = `assembleRelease` (`app-release.apk`, JS вшит). Эмуляторный шаг — `scripts/maestro-run-emulator.sh` (pm grant + logcat). Offline больше не на `macos-latest` — Apple Silicon не даёт nested virtualization для x86_64 AVD.
 
 Расписание: `0 3 * * *` (03:00 UTC). Если прогонов нет — workflow, скорее всего, **disabled** в Actions UI. Включить: **Actions → Maestro Nightly → Enable workflow** или `gh workflow enable maestro-nightly.yml`, затем **Run workflow**.
 
@@ -139,6 +139,8 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Симптом | Решение |
 |---------|---------|
 | `auth-register-link` не виден (~45s) | Поставлен `assembleDebug` без Metro. Нужен `./scripts/maestro-build-apk.sh` → `app-release.apk` |
+| `auth-confirm-password-input` not found | Клавиатура перекрывает поле. Bootstrap скроллит и вызывает `hideKeyboard` (`_fill-by-id.yaml`) |
+| `auth-login-input` не виден на login | Ждать `auth-mode-phone` (выше fold), не сам input. Permissions: `maestro-run-emulator.sh` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |

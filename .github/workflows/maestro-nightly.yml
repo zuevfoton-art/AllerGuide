@@ -75,9 +75,7 @@ jobs:
           emulator-boot-timeout: 900
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
-            maestro test --format junit --output maestro-offline-report.xml --debug-output maestro-offline-debug apps/mobile/.maestro/flows/smoke-all.yaml
+          script: ./scripts/maestro-run-emulator.sh preview
 
       - name: Upload Maestro report
         if: always()
@@ -87,6 +85,7 @@ jobs:
           path: |
             maestro-offline-report.xml
             maestro-offline-debug
+            maestro-offline-logcat.txt
           if-no-files-found: ignore
 
   maestro-staging:
@@ -164,9 +163,7 @@ jobs:
           emulator-boot-timeout: 900
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            adb install -r apps/mobile/android/app/build/outputs/apk/release/app-release.apk
-            maestro test --format junit --output maestro-staging-report.xml --debug-output maestro-staging-debug apps/mobile/.maestro/flows/staging-smoke-all.yaml
+          script: ./scripts/maestro-run-emulator.sh staging
 
       - name: Upload Maestro report
         if: always()
@@ -176,6 +173,7 @@ jobs:
           path: |
             maestro-staging-report.xml
             maestro-staging-debug
+            maestro-staging-logcat.txt
           if-no-files-found: ignore
 
       - name: API log on failure
