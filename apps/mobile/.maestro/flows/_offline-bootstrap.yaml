@@ -1,12 +1,19 @@
 # Shared subflow: fresh install → register → onboarding → home (offline preview)
 appId: com.aclearo.app
 ---
-- clearState
-- launchApp
+- launchApp:
+    clearState: true
+# Login input is above the fold; register link may need a scroll on Pixel 6.
+# Release first launch on CI can exceed 30s (Hermes + SQLite init).
 - extendedWaitUntil:
     visible:
+      id: auth-login-input
+    timeout: 90000
+- scrollUntilVisible:
+    element:
       id: auth-register-link
-    timeout: 30000
+    direction: DOWN
+    timeout: 15000
 - tapOn:
     id: auth-register-link
 - runScript: ../scripts/random-phone.js

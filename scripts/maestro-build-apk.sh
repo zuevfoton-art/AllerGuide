@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-# Build Android debug APK for Maestro E2E (preview offline or staging + optional local API).
+# Build a standalone Android APK for Maestro E2E (preview offline or staging + optional local API).
+#
+# Uses `gradlew assembleRelease` (debug keystore) so Metro is not required.
+# The debug Gradle task skips JS bundling (debuggableVariants=debug) and the
+# nightly emulator then never reaches login — Maestro dies on `auth-register-link`.
+#
 # Usage: ./scripts/maestro-build-apk.sh [preview|staging]
 set -euo pipefail
 
@@ -45,9 +50,22 @@ pnpm generate-assets || true
 npx expo prebuild --platform android --no-install
 
 cd android
-./gradlew assembleDebug --no-daemon
+# Metro embeds EXPO_PUBLIC_* only when NODE_ENV=production (same as staging-apk-gradle.yml).
+# Emulator in nightly is x86_64 — skip unused ABIs.
+NODE_ENV=production ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=x86_64
 
-APK="$PWD/app/build/outputs/apk/debug/app-debug.apk"
+APK="$PWD/app/build/outputs/apk/release/app-release.apk"
+if [ ! -f "$APK" ]; then
+  echo "ERROR: expected release APK at $APK" >&2
+  exit 1
+fi
+
+if ! unzip -l "$APK" | grep -Eq 'index\.android\.bundle|index\.bundle'; then
+  echo "ERROR: APK is missing the embedded JS bundle. Maestro cannot run without Metro." >&2
+  unzip -l "$APK" | grep -Ei 'index|bundle|assets/' | head -40 >&2
+  exit 1
+fi
+
 echo ""
 echo "APK ready: $APK"
 echo "Install: adb install -r $APK"
