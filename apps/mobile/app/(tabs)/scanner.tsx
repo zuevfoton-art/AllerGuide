@@ -59,6 +59,7 @@ import {
 import {
   captureScanPhotoViaPicker,
   pickScanPhotoFromLibrary,
+  prepareScanPhotoForCrop,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
 } from '@/src/services/scanner-photo-service';
@@ -333,15 +334,16 @@ export default function ScannerScreen() {
     }
   }, [refreshHistory]);
 
-  const beginCrop = (photo: CapturedScanPhoto) => {
+  const beginCrop = async (photo: CapturedScanPhoto) => {
     setCameraOpen(false);
-    setPendingPhoto(photo);
+    const prepared = await prepareScanPhotoForCrop(photo);
+    setPendingPhoto(prepared);
   };
 
   const pickMenuImage = async () => {
     const photo = await pickScanPhotoFromLibrary();
     if (!photo) return;
-    beginCrop(photo);
+    await beginCrop(photo);
   };
 
   const openCamera = async (nextEntry: CameraEntryMode = entryMode) => {
@@ -362,7 +364,7 @@ export default function ScannerScreen() {
 
     if (Platform.OS === 'web' && nextEntry === 'scanner') {
       const photo = await captureScanPhotoViaPicker();
-      if (photo) beginCrop(photo);
+      if (photo) await beginCrop(photo);
       return;
     }
 
@@ -393,7 +395,7 @@ export default function ScannerScreen() {
         quality: 0.85,
       });
       if (!picture?.uri) return;
-      beginCrop({
+      await beginCrop({
         uri: picture.uri,
         width: picture.width || 0,
         height: picture.height || 0,
@@ -401,7 +403,7 @@ export default function ScannerScreen() {
     } catch (error) {
       logCaughtError('ScannerScreen.capturePhotoFrame', error, { level: 'warn' });
       const fallback = await captureScanPhotoViaPicker();
-      if (fallback) beginCrop(fallback);
+      if (fallback) await beginCrop(fallback);
     } finally {
       setCapturing(false);
     }

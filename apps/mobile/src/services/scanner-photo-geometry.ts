@@ -15,6 +15,26 @@ export type DisplayLayout = {
 
 const MIN_CROP_EDGE_PX = 32;
 
+function isPositiveSize(size: { width: number; height: number }): boolean {
+  return size.width > 0 && size.height > 0;
+}
+
+/**
+ * Prefer the larger pixel buffer. `<Image onLoad>` can report a downsampled
+ * decode used for display, while crop/manipulator still read the full file.
+ */
+export function preferBitmapImageSize(
+  known: { width: number; height: number },
+  candidate: { width: number; height: number },
+): { width: number; height: number } {
+  if (!isPositiveSize(candidate)) return known;
+  if (!isPositiveSize(known)) return candidate;
+  if (candidate.width * candidate.height > known.width * known.height) {
+    return candidate;
+  }
+  return known;
+}
+
 /**
  * Layout of an image drawn with `resizeMode: 'contain'` inside a box.
  */
