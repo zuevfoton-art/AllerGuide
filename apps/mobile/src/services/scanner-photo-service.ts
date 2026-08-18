@@ -1,7 +1,10 @@
-import { Platform } from 'react-native';
+import { Image, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import type { ImageCropRect } from '@/src/services/scanner-photo-geometry';
+import {
+  preferBitmapImageSize,
+  type ImageCropRect,
+} from '@/src/services/scanner-photo-geometry';
 
 export type {
   DisplayCropBox,
@@ -15,6 +18,7 @@ export {
   computeContainLayout,
   initialCropInDisplay,
   mapDisplayCropToImagePixels,
+  preferBitmapImageSize,
 } from '@/src/services/scanner-photo-geometry';
 
 export type CapturedScanPhoto = {
@@ -32,6 +36,71 @@ export type CroppedScanPhoto = {
 };
 
 const MAX_OUTPUT_WIDTH = 1600;
+
+export function resolveScanPhotoSize(
+  uri: string,
+): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (width > 0 && height > 0) {
+          resolve({ width, height });
+          return;
+        }
+        reject(new Error('Image size is zero'));
+      },
+      (error) => {
+        reject(error ?? new Error('Could not read image size'));
+      },
+    );
+  });
+}
+
+/**
+ * Resolve the bitmap that crop/manipulator will read. Image picker / camera
+ * width can be 0 (web) or disagree with EXIF-oriented `Image.getSize`.
+ */
+export async function prepareScanPhotoForCrop(
+  photo: CapturedScanPhoto,
+): Promise<CapturedScanPhoto> {
+  let measured: { width: number; height: number } | null = null;
+  try {
+    measured = await resolveScanPhotoSize(photo.uri);
+  } catch {
+    measured = null;
+  }
+
+  const bitmap = measured
+    ? preferBitmapImageSize({ width: photo.width, height: photo.height }, measured)
+    : { width: photo.width, height: photo.height };
+
+  const pickerDisagreesWithFile =
+    measured != null &&
+    photo.width > 0 &&
+    photo.height > 0 &&
+    (photo.width !== measured.width || photo.height !== measured.height);
+
+  if (pickerDisagreesWithFile) {
+    try {
+      const baked = await manipulateAsync(photo.uri, [], {
+        compress: 1,
+        format: SaveFormat.JPEG,
+      });
+      if (baked.width > 0 && baked.height > 0) {
+        return { uri: baked.uri, width: baked.width, height: baked.height };
+      }
+    } catch {
+      // Fall through to the larger of picker vs getSize on the original URI.
+    }
+  }
+
+  return {
+    uri: photo.uri,
+    width: bitmap.width || photo.width,
+    height: bitmap.height || photo.height,
+  };
+}
 
 export async function cropImageToBase64(
   uri: string,

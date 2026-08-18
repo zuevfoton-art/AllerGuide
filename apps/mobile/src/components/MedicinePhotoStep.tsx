@@ -20,6 +20,7 @@ import {
   captureScanPhotoViaPicker,
   encodeImageToBase64,
   pickScanPhotoFromLibrary,
+  prepareScanPhotoForCrop,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
 } from '@/src/services/scanner-photo-service';
@@ -115,7 +116,7 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
       }
       return;
     }
-    setPendingPhoto(photo);
+    setPendingPhoto(await prepareScanPhotoForCrop(photo));
     setState('crop');
   };
 
