@@ -98,20 +98,41 @@ function checkMaestroFlows() {
   }
 
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/maestro-nightly.yml'), 'utf8');
-  if (!workflow.includes('app-release.apk')) {
-    failures.push('maestro-nightly.yml must install app-release.apk');
+  if (!workflow.includes('maestro-run-emulator.sh')) {
+    failures.push('maestro-nightly.yml must run scripts/maestro-run-emulator.sh');
   }
   if (workflow.includes('app-debug.apk')) {
     failures.push('maestro-nightly.yml still installs app-debug.apk');
   }
 
+  const runner = fs.readFileSync(path.join(root, 'scripts/maestro-run-emulator.sh'), 'utf8');
+  if (!runner.includes('app-release.apk')) {
+    failures.push('scripts/maestro-run-emulator.sh must install app-release.apk');
+  }
+  if (!runner.includes('pm grant')) {
+    failures.push('scripts/maestro-run-emulator.sh must pre-grant runtime permissions');
+  }
+
+  const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
+  if (!waitLogin.includes('auth-mode-phone')) {
+    failures.push('_wait-login.yaml must wait for auth-mode-phone (above the hero fold)');
+  }
+
+  const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
+  if (!fillById.includes('hideKeyboard') || !fillById.includes('scrollUntilVisible')) {
+    failures.push('_fill-by-id.yaml must hideKeyboard + scrollUntilVisible');
+  }
+
   for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
     const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
-    if (!flow.includes('auth-login-input')) {
-      failures.push(`${name}: wait for auth-login-input before register link`);
+    if (!flow.includes('_wait-login.yaml')) {
+      failures.push(`${name}: must run _wait-login.yaml`);
     }
-    if (!flow.includes('scrollUntilVisible')) {
-      failures.push(`${name}: scrollUntilVisible auth-register-link (Pixel 6 fold)`);
+    if (!flow.includes('_fill-by-id.yaml')) {
+      failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
+    }
+    if (!flow.includes('auth-confirm-password-input')) {
+      failures.push(`${name}: must fill auth-confirm-password-input`);
     }
   }
 }
