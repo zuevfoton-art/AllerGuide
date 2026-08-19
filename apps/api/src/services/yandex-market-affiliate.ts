@@ -255,42 +255,14 @@ export interface CuratorDraftOffer {
 }
 
 /**
- * Optional affiliate search for curator drafts only (YM-D).
- * Disabled unless YANDEX_MARKET_CURATOR_SEARCH=true.
+ * Affiliate GET /search was retired on 2026-06-22. Curators import the official
+ * product feed instead of live search.
  */
-export async function searchYandexCuratorDrafts(query: string): Promise<CuratorDraftOffer[]> {
+export async function searchYandexCuratorDrafts(_query: string): Promise<CuratorDraftOffer[]> {
   if (!isYandexCuratorSearchEnabled()) {
     throw new Error('Curator search is disabled');
   }
-
-  const clid = getYandexMarketClid()!;
-  const endpoint = new URL(`${apiBase()}/search`);
-  endpoint.searchParams.set('text', query);
-  endpoint.searchParams.set('clid', clid);
-  endpoint.searchParams.set('geo_id', '213');
-  endpoint.searchParams.set('format', 'json');
-
-  const response = await fetch(endpoint.toString(), { headers: authHeaders() });
-  if (!response.ok) {
-    throw new Error(`Yandex search HTTP ${response.status}`);
-  }
-
-  const payload = (await response.json()) as {
-    results?: Array<{
-      title?: string;
-      modelId?: string | number;
-      prices?: { value?: number };
-      photos?: Array<{ url?: string }>;
-    }>;
-  };
-
-  return (payload.results ?? []).slice(0, 10).map((item) => ({
-    title: item.title?.trim() || 'Без названия',
-    marketArticle: item.modelId != null ? String(item.modelId) : undefined,
-    priceRub: item.prices?.value,
-    photoUrl: item.photos?.[0]?.url,
-    allergenCurated: false as const,
-  }));
+  throw new Error('Yandex Affiliate GET /search is no longer supported');
 }
 
 export function listCuratedMarketProducts(): CatalogProduct[] {

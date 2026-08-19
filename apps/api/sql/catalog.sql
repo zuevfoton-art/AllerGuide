@@ -72,3 +72,45 @@ CREATE INDEX IF NOT EXISTS medicines_source_idx ON catalog.medicines (source);
 CREATE INDEX IF NOT EXISTS medicines_name_trgm ON catalog.medicines USING gin (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS medicines_substance_trgm ON catalog.medicines USING gin (active_substance gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS medicines_allergen_tags ON catalog.medicines USING gin (allergen_tags jsonb_path_ops);
+
+-- Curated marketplace catalog (Yandex Market + OTC pharmacy) ----------
+CREATE TABLE IF NOT EXISTS catalog.market_products (
+    id                   varchar(128) PRIMARY KEY,
+    provider             varchar(32)  NOT NULL,
+    provider_sku         varchar(128) NOT NULL DEFAULT '',
+    title                text         NOT NULL,
+    why                  text         NOT NULL DEFAULT '',
+    image_url            text         NOT NULL DEFAULT '',
+    icon                 varchar(64)  NOT NULL DEFAULT 'basket',
+    category             varchar(32)  NOT NULL,
+    kind                 varchar(16)  NOT NULL DEFAULT 'regular',
+    color_key            varchar(16)  NOT NULL DEFAULT 'accent',
+    for_allergen_ids     jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    contains_allergen_ids jsonb       NOT NULL DEFAULT '[]'::jsonb,
+    moderation_status    varchar(16)  NOT NULL DEFAULT 'draft',
+    prescription_only    boolean      NOT NULL DEFAULT false,
+    show_price           boolean      NOT NULL DEFAULT true,
+    price_rub            integer,
+    refreshed_at         timestamptz  NOT NULL DEFAULT now(),
+    created_at           timestamptz  NOT NULL DEFAULT now(),
+    updated_at           timestamptz  NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS market_products_provider_sku_uidx ON catalog.market_products (provider, provider_sku);
+CREATE INDEX IF NOT EXISTS market_products_status_idx ON catalog.market_products (moderation_status);
+CREATE INDEX IF NOT EXISTS market_products_category_idx ON catalog.market_products (category);
+CREATE INDEX IF NOT EXISTS market_products_kind_idx ON catalog.market_products (kind);
+
+CREATE TABLE IF NOT EXISTS catalog.market_offers (
+    id           varchar(128) PRIMARY KEY,
+    product_id   varchar(128) NOT NULL,
+    merchant     varchar(32)  NOT NULL,
+    url          text         NOT NULL,
+    sku          varchar(128),
+    erid         varchar(128),
+    price_rub    integer,
+    photo_url    text,
+    in_stock     boolean      NOT NULL DEFAULT true,
+    refreshed_at timestamptz  NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS market_offers_product_idx ON catalog.market_offers (product_id);
+CREATE INDEX IF NOT EXISTS market_offers_merchant_idx ON catalog.market_offers (merchant);

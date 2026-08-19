@@ -21,6 +21,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'wellness_refreshed',
   'settings_changed',
   'market_click',
+  'market_impression',
+  'market_catalog_refresh',
   'profile_setup_step_view',
   'profile_setup_step_complete',
   'profile_setup_step_skip',

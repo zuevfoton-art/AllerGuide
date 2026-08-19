@@ -494,6 +494,21 @@ export type LocaleMessages = {
     disclaimer: string;
     buyLink: string;
     buyOnYandex: string;
+    buyOnPharmacy: string;
+    medicineDisclaimer: string;
+    medicineCardNote: string;
+    priceFrom: string;
+    categoryAll: string;
+    categoryAir: string;
+    categorySkin: string;
+    categoryHome: string;
+    categoryFood: string;
+    categorySos: string;
+    categoryPharmacy: string;
+    sourceLive: string;
+    sourceCache: string;
+    sourceSeed: string;
+    staleHint: string;
   };
   map: {
     title: string;

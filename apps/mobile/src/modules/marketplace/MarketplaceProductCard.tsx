@@ -1,22 +1,22 @@
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  getPrimaryOffer,
-  getProductOffers,
+  getMarketplacePrimaryOffer,
   merchantDisplayName,
-  type CatalogProduct,
-  type MarketOffer,
+  type MarketplaceOffer,
+  type MarketplaceProduct,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useMemo, useState } from 'react';
+import { CATEGORY_LABEL_KEYS } from '@/src/modules/marketplace/category-labels';
 import { getProductColor } from '@/src/modules/marketplace/product-theme';
 import { trackEvent } from '@/src/services/analytics-service';
 import { resolveYandexMarketOffer } from '@/src/services/market-api';
 import { useTranslation } from '@/src/store/locale-store';
 
 interface MarketplaceProductCardProps {
-  item: CatalogProduct;
+  item: MarketplaceProduct;
   compact?: boolean;
 }
 
@@ -26,17 +26,18 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
   const color = getProductColor(theme, item.colorKey);
   const { t } = useTranslation();
   const [opening, setOpening] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
-  const offers = getProductOffers(item);
-  const primary = getPrimaryOffer(item);
-  const hasOffers = offers.length > 0;
+  const primary = getMarketplacePrimaryOffer(item);
+  const isMedicine = item.kind === 'medicine';
 
-  const buyLabel = (offer: MarketOffer) => {
+  const buyLabel = (offer: MarketplaceOffer) => {
     if (offer.merchant === 'yandex_market') return t('market.buyOnYandex');
+    if (offer.merchant === 'pharmacy') return t('market.buyOnPharmacy');
     return `${t('market.buyLink')} · ${merchantDisplayName(offer.merchant)}`;
   };
 
-  const openOffer = async (offer: MarketOffer) => {
+  const openOffer = async (offer: MarketplaceOffer) => {
     if (opening) return;
     setOpening(true);
     try {
@@ -60,6 +61,8 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
         product_id: item.id,
         merchant,
         source,
+        product_kind: item.kind,
+        provider: item.provider,
       });
       await Linking.openURL(url);
     } finally {
@@ -67,58 +70,67 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
     }
   };
 
-  const content = (
-    <>
-      <View style={[styles.cardIcon, { backgroundColor: `${color}18` }]}>
-        <Ionicons name={item.icon as any} size={compact ? 20 : 24} color={color} />
+  const photo = !imageFailed && item.imageUrl ? (
+    <Image
+      source={{ uri: item.imageUrl }}
+      style={styles.photo}
+      accessibilityLabel={item.title}
+      onError={() => setImageFailed(true)}
+    />
+  ) : (
+    <View style={[styles.photo, styles.photoFallback, { backgroundColor: `${color}18` }]}>
+      <Ionicons name={item.icon as 'image'} size={compact ? 22 : 28} color={color} />
+    </View>
+  );
+
+  const info = (
+    <View style={styles.cardBody}>
+      <Text style={styles.cardTitle} numberOfLines={2}>
+        {item.title}
+      </Text>
+      <View style={[styles.tag, { backgroundColor: `${color}18` }]}>
+        <Text style={[styles.tagText, { color }]}>{t(`market.${CATEGORY_LABEL_KEYS[item.category]}`)}</Text>
       </View>
-      <View style={styles.cardBody}>
-        <View style={styles.cardTop}>
-          <Text style={styles.cardTitle} numberOfLines={compact ? 1 : 2}>
-            {item.title}
-          </Text>
-          <View style={[styles.tag, { backgroundColor: `${color}18` }]}>
-            <Text style={[styles.tagText, { color }]}>{item.tag}</Text>
-          </View>
-        </View>
-        <Text style={styles.cardWhy} numberOfLines={compact ? 2 : undefined}>
-          {item.why}
-        </Text>
-        {hasOffers && !compact ? (
-          <View style={styles.offerRow}>
-            {offers.slice(0, 2).map((offer) => (
-              <Pressable
-                key={`${offer.merchant}-${offer.url}`}
-                onPress={() => void openOffer(offer)}
-                accessibilityRole="link"
-                disabled={opening}
-                hitSlop={8}
-              >
-                <Text style={styles.buyLink}>
-                  {buyLabel(offer)} →
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-      </View>
-      {!compact ? (
-        <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+      <Text style={styles.cardWhy} numberOfLines={compact ? 2 : 3}>
+        {item.why}
+      </Text>
+      {item.showPrice && item.priceRub != null ? (
+        <Text style={styles.price}>{t('market.priceFrom', { price: item.priceRub })}</Text>
       ) : null}
-    </>
+      {isMedicine ? <Text style={styles.medicineNote}>{t('market.medicineCardNote')}</Text> : null}
+      {!compact && primary ? (
+        <Text style={styles.buyLink}>{buyLabel(primary)} →</Text>
+      ) : null}
+    </View>
   );
 
   if (compact) {
-    return <View style={styles.card}>{content}</View>;
+    return (
+      <Pressable
+        onPress={primary ? () => void openOffer(primary) : undefined}
+        accessibilityRole="button"
+        accessibilityLabel={item.title}
+        disabled={!primary || opening}
+        style={styles.compactRow}
+      >
+        {photo}
+        {info}
+      </Pressable>
+    );
   }
 
   return (
     <Pressable
       onPress={primary ? () => void openOffer(primary) : undefined}
       accessibilityRole="button"
+      accessibilityLabel={item.title}
       disabled={!primary || opening}
+      testID={`market-card-${item.id}`}
     >
-      <GlassCard style={styles.card}>{content}</GlassCard>
+      <GlassCard style={styles.card} padded={false}>
+        {photo}
+        <View style={styles.infoPad}>{info}</View>
+      </GlassCard>
     </Pressable>
   );
 }
@@ -126,45 +138,77 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
 function createStyles({ colors, fonts }: AppTheme, compact: boolean) {
   return StyleSheet.create({
     card: {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      overflow: 'hidden',
+      marginBottom: 0,
+    },
+    compactRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: compact ? 10 : 14,
-      marginBottom: 0,
-      paddingVertical: compact ? 10 : undefined,
-      paddingHorizontal: compact ? 12 : undefined,
+      gap: 10,
+      paddingVertical: 8,
     },
-    cardIcon: {
-      width: compact ? 36 : 44,
-      height: compact ? 36 : 44,
-      borderRadius: 6,
+    photo: compact
+      ? {
+          width: 56,
+          height: 56,
+          borderRadius: 6,
+          backgroundColor: colors.surfaceMuted,
+        }
+      : {
+          width: '100%',
+          aspectRatio: 1,
+          backgroundColor: colors.surfaceMuted,
+        },
+    photoFallback: {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    cardBody: { flex: 1, gap: compact ? 4 : 6 },
-    cardTop: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+    infoPad: {
+      paddingHorizontal: 10,
+      paddingTop: 8,
+      paddingBottom: 10,
+    },
+    cardBody: { gap: compact ? 3 : 5 },
     cardTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: compact ? 14 : 15,
+      fontSize: compact ? 13 : 14,
       fontWeight: '600',
       color: colors.text,
-      flexShrink: 1,
     },
-    tag: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 4 },
+    tag: {
+      alignSelf: 'flex-start',
+      paddingVertical: 2,
+      paddingHorizontal: 7,
+      borderRadius: 4,
+    },
     tagText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
+      fontSize: 10,
       fontWeight: '600',
     },
     cardWhy: {
       fontFamily: fonts.sans,
-      fontSize: compact ? 12 : 13,
+      fontSize: compact ? 11 : 12,
       color: colors.textSecondary,
-      lineHeight: compact ? 16 : 18,
+      lineHeight: compact ? 15 : 16,
     },
-    offerRow: { gap: 4, marginTop: 4 },
-    buyLink: {
+    price: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    medicineNote: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.warningText,
+      lineHeight: 14,
+    },
+    buyLink: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
       fontWeight: '600',
       color: colors.accent,
     },

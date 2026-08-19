@@ -16,6 +16,7 @@ export * from './diary';
 export * from './diary-wizard-route';
 export * from './catalog';
 export * from './market-offers';
+export * from './marketplace-catalog';
 export * from './diary-stats';
 export * from './sync';
 export * from './crypto';

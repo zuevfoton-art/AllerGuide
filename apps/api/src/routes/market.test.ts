@@ -94,4 +94,37 @@ describe('market routes (Yandex affiliate)', () => {
     const response = await request(app).get('/api/market/offers/yandex/draft-search?q=hepa');
     expect(response.status).toBe(503);
   });
+
+  it('reports catalog health without partner secrets', async () => {
+    const app = await createApp();
+    const response = await request(app).get('/api/market/health');
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(response.body.curatorSearchAvailable).toBe(false);
+    expect(response.body.catalog.liveCatalog).toBe(false);
+    expect(response.body.catalog.productCount).toBeGreaterThan(0);
+    expect(JSON.stringify(response.body)).not.toMatch(/YANDEX_MARKET_TOKEN|clid|secret|admitad/i);
+  });
+
+  it('returns a paginated published catalog without profile data', async () => {
+    const app = await createApp();
+    const response = await request(app).get('/api/market/catalog?limit=5&offset=0');
+    expect(response.status).toBe(200);
+    expect(response.body.source).toBe('seed');
+    expect(response.body.products).toHaveLength(5);
+    expect(typeof response.body.total).toBe('number');
+    expect(response.body.products.every((product: { status?: string }) => product.moderationStatus === 'published')).toBe(true);
+  });
+
+  it('filters catalog by category and medicine kind', async () => {
+    const app = await createApp();
+    const air = await request(app).get('/api/market/catalog?category=air');
+    expect(air.status).toBe(200);
+    expect(air.body.products.every((product: { category: string }) => product.category === 'air')).toBe(true);
+
+    const medicines = await request(app).get('/api/market/catalog?kind=medicine');
+    expect(medicines.status).toBe(200);
+    expect(medicines.body.products.every((product: { kind: string }) => product.kind === 'medicine')).toBe(true);
+    expect(medicines.body.products.every((product: { showPrice: boolean }) => product.showPrice === false)).toBe(true);
+  });
 });
