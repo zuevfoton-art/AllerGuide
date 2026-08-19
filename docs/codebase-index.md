@@ -97,7 +97,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `secure-settings` | core `auth`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` |
 | **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`; API `catalog.ts` |
-| **Market** | `(tabs)/market.tsx` | `market-api` + `modules/marketplace` | core `market-offers`; API `market.ts` |
+| **Market** | `(tabs)/market.tsx` | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
 | **Clinical** | `asit-course`, `asthma-action-plan`, `insect-action-plan`, `food-drug-registry`, `prescribed-therapy` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
 | **Doctor report** | `doctor-report.tsx` | `doctor-report-service` | core `doctor-report*` |
@@ -163,7 +163,7 @@ src/modules/marketplace/
 | Clinical | `asit-*-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy*-service`, `clinical-reminder-service`, `reminder-reconcile-service` |
 | Pollen / map | `pollen-map-service`, `pollen-heatmap-service`, `pollen-reminder-service`, `location-service`, `place-service`, `wellness-service` |
 | Sync / backup | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` |
-| Settings / ops | `settings-service`, `secure-settings-service`, `notification-*-service`, `app-lock-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api` |
+| Settings / ops | `settings-service`, `secure-settings-service`, `notification-*-service`, `app-lock-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
 
 ### DB / store / i18n
 
@@ -213,7 +213,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
 | `medicines.ts` | Medicine recognize + catalog search (`AI_MEDICINE_VISION_ENABLED`) |
-| `market.ts` | Yandex Market affiliate |
+| `market.ts` | Market catalog + Yandex resolve / retired draft-search |
 | `pollen.ts` | Google pollen heatmap proxy |
 | `alias-feedback.ts` | Crowdsourced aliases |
 | `analytics.ts` | Event ingest |
@@ -225,16 +225,16 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | Файл | Schema |
 |------|--------|
 | `db/app-schema.ts` | `profile.*` — users, profiles, diary, scan_history, contacts, sos, sync_backups |
-| `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, alias_feedback |
+| `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, market_products, market_offers, alias_feedback |
 | `db/config.ts` + `index.ts` | Neon-ready pools; optional `readDb` |
-| `drizzle/0000`…`0009_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
+| `drizzle/0000`…`0010_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
 
 ### Middleware / services
 
 - Middleware: `security.ts` (helmet/CORS/rate limit), `require-jwt.ts`
-- Services: `open-food-facts`, `llm-scan-provider`, `yandex-vision-ocr`, `yandex-speechkit-stt`, `yandex-search-ingredients`, `google-pollen-heatmap`, `yandex-market-affiliate`, `app-user-service`, `profile-service`, …
+- Services: `open-food-facts`, `llm-scan-provider`, `yandex-vision-ocr`, `yandex-speechkit-stt`, `yandex-search-ingredients`, `google-pollen-heatmap`, `yandex-market-affiliate`, `marketplace/*` (YML/pharmacy feed + store), `app-user-service`, `profile-service`, …
 
 ---
 
@@ -252,7 +252,7 @@ Barrel: `index.ts`. Pure TS.
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `wellness-display`, `diary-wizard-route` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
-| Pollen / geo | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map` |
+| Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `marketplace-catalog` |
 | Sync / crypto | `sync`, `crypto` |
 | Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy` |
 

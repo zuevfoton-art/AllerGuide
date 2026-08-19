@@ -10,6 +10,7 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed-allergens": "tsx src/db/seed-allergens.ts",
     "db:import-food-allergy": "tsx src/db/import-food-allergy.ts",
+    "db:import-market": "tsx src/db/import-market.ts",
     "lint": "eslint src --max-warnings 0",
     "db:merge-approved-aliases": "tsx src/db/merge-approved-aliases.ts",
     "typecheck": "tsc --noEmit",

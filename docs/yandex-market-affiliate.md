@@ -1,15 +1,18 @@
-# Яндекс.Маркет — партнёрский контур A-Claro
+# Яндекс.Маркет и аптечный каталог — партнёрский контур A-Claro
 
-Runbook для расширения кураторского маркета через **реферальную программу** Яндекс.Маркета (P5.5 / YM-A…D).
+Runbook для экрана «Маркет»: официальный товарный фид Яндекс Дистрибуции + курируемые OTC-карточки аптеки (Здравсити / Admitad).
 
 ## Вердикт
 
-Маркет подключается как **RU deep-link / affiliate-канал**, а не как живой каталог всего ассортимента. Фильтр аллергенов профиля всегда строится на кураторских `containsAllergens` в `@allerguide/core` — **не** на данных API Маркета.
+- **Яндекс Маркет** — основной источник SKU. Каталог строится из [товарного фида Дистрибуции](https://yandex.ru/support/market-distr/ru/product-feed) (YML, обновление каждые 6–7 часов) и `POST /partner/article/create` / `GET /partner/link/create` для партнёрских ссылок.
+- **Affiliate `GET /search` снят 22.06.2026.** Не использовать для пользовательского каталога. `GET /api/market/offers/yandex/draft-search` остаётся 503 (или 410, если флаг включён).
+- **Лекарства** — отдельный аптечный фид (Admitad / Здравсити). В MVP только прошедшие модерацию безрецептурные позиции. Рецептурные SKU, цена лекарства и терапевтические обещания запрещены.
+- Фильтр аллергенов профиля всегда строится на курированных `containsAllergenIds` в `@allerguide/core` — **не** на сырых полях фида. Импорт создаёт `draft`; `published` только после ручной модерации.
 
 ## YM-A — Регистрация (блокер продакшн-атрибуции)
 
 1. Зарегистрировать площадку A-Claro / AllerGuide в [Яндекс Дистрибуции](https://yandex.ru/support/market-distr/).
-2. Получить `clid` (отдельно для партнёрских ссылок и артикулов, если кабинет разделяет типы).
+2. Получить `clid` и доступ к product feed.
 3. Выпустить OAuth / ключ Content API для [Affiliate API](https://yandex.ru/dev/market/affiliate/ru/).
 4. Создать креативы и зафиксировать `erid` (маркировка рекламы).
 5. Прописать секреты **только на API** (не в `EXPO_PUBLIC_*`):
@@ -20,38 +23,34 @@ Runbook для расширения кураторского маркета че
 | `YANDEX_MARKET_OAUTH_TOKEN` | `Authorization: OAuth …` |
 | `YANDEX_MARKET_ERID` | Опциональный erid для static fallback URL |
 | `YANDEX_MARKET_API_BASE` | Override базы (по умолчанию `…/v3/affiliate`) |
-| `YANDEX_MARKET_CURATOR_SEARCH` | `true` только для кураторского draft-search |
+| `YANDEX_MARKET_FEED_URL` | HTTPS URL официального YML-фида |
+| `YANDEX_MARKET_CURATOR_SEARCH` | Оставить `false`. Live search больше не поддерживается |
+| `MARKET_PHARMACY_FEED_ENABLED` | `true` только после Admitad + legal review |
+| `MARKET_PHARMACY_FEED_URL` | HTTPS URL аптечного фида |
 
 Без `CLID` + OAuth приложение всё равно открывает **seed deep-link** на `market.yandex.ru` (source=`static`).
 
-## YM-B — Кураторский каталог
+## YM-B — Нормализованный каталог
 
-- Модель: `MarketOffer` + `CatalogProduct.offers` в `packages/core`.
-- Seed: ≥5 SKU с `merchant: 'yandex_market'` (поиск/карточка Маркета).
-- UI: CTA «Купить на Яндекс Маркете»; analytics `market_click` с `merchant=yandex_market`.
+- Домен: `MarketplaceProduct` / `MarketplaceOffer` в `packages/core/src/marketplace-catalog.ts`.
+- Postgres: `catalog.market_products` + `catalog.market_offers` (не смешивать с barcode `catalog.products` и `catalog.medicines`).
+- Импорт: `pnpm --filter api db:import-market` — Yandex YML + аптечный JSON/XML. Published-записи обновляют цену/фото/URL, но **не** затирают ручные `containsAllergenIds` / `forAllergenIds`.
+- Seed: ≥5 Yandex SKU + OTC-аптека с фото. Bundled seed — аварийный offline fallback.
 
-### Как добавить SKU
+### Как опубликовать SKU
 
-1. Подобрать товар / поисковый URL на `market.yandex.ru`.
-2. Проставить `containsAllergens` / `forAllergens` вручную (или по этикетке).
-3. Добавить offer:
+1. Дождаться импорта (`moderation_status=draft`) или добавить seed.
+2. Проставить `containsAllergenIds` / `forAllergenIds` вручную.
+3. Для лекарств: только OTC, `showPrice=false`, обязательный disclaimer.
+4. Сменить статус на `published`.
 
-```ts
-{
-  merchant: 'yandex_market',
-  url: 'https://market.yandex.ru/…',
-  sku: 'optional-marketArticle',
-  erid: 'optional-after-creative',
-}
-```
+## YM-C — API
 
-4. После одобрения Дистрибуции — один раз вызвать resolve (ниже), чтобы обновить URL/цену/фото.
+`GET /api/market/catalog` — пагинированный published-каталог (`db` или `seed`). Профиль на сервер **не** отправляется.
 
-## YM-C — Серверный resolve
+`GET /api/market/health` — freshness, feed flags, без секретов.
 
 `POST /api/market/offers/yandex/resolve`
-
-Body (достаточно одного поля):
 
 ```json
 { "productId": "air-purifier" }
@@ -59,32 +58,32 @@ Body (достаточно одного поля):
 { "marketArticle": "5828126315" }
 ```
 
-Поведение:
-
-1. Cache hit (TTL 7d) → `source: cache`
-2. Если настроены секреты → `GET …/partner/link/create` (по URL) или `POST …/partner/article/create`
-3. Иначе / при ошибке API → static URL (+ `clid`/`erid` query при наличии) → `source: static|fallback`
-
-Mobile: `apps/mobile/src/services/market-api.ts` вызывает resolve перед `Linking.openURL`; при офлайне открывает seed.
-
-Также: `GET /api/market/catalog` — seed-каталог + флаг `yandexConfigured`.
+Поведение: cache (TTL 7d) → partner API → static URL (+ `clid`/`erid`). Mobile: `market-api.ts` резолвит перед `Linking.openURL`; офлайн открывает seed.
 
 ## YM-D — Draft search (не для пользователей)
 
-`GET /api/market/offers/yandex/draft-search?q=…` — **503**, пока `YANDEX_MARKET_CURATOR_SEARCH!=true`.
+`GET /api/market/offers/yandex/draft-search?q=…` — **503**, пока флаг выключен; при включённом флаге **410** (Affiliate search снят). Сырую выдачу **запрещено** показывать как «безопасные товары».
 
-Ответ помечает `allergenCurated: false`. Сырую выдачу **запрещено** показывать как «безопасные товары».
+## Mobile
+
+- Флаги: `EXPO_PUBLIC_MARKET_LIVE_CATALOG` и `EXPO_PUBLIC_MARKET_MEDICINES` (default on; `false`/`off` выключает).
+- Цепочка: online snapshot → last-good SQLite/IndexedDB → bundled seed.
+- UI: две карточки в ряд, фото сверху, фильтры Все / Воздух / Кожа / Дом / Питание / SOS / Аптека.
+- Analytics: `market_click`, `market_impression`, `market_catalog_refresh` — без аллергий и профиля.
 
 ## Критерии пилота
 
 - [ ] ≥5 курированных товаров с CTA на Маркет
-- [ ] `market_click` с `merchant=yandex_market`
+- [ ] OTC-аптека с disclaimer, без цены и без рецептурных SKU
+- [ ] `market_click` с `merchant` / `product_kind` / `provider`
 - [ ] Фильтр профиля не зависит от данных Маркета
-- [ ] Offline: каталог из seed; CTA может требовать сеть
-- [ ] Секреты только на API
+- [ ] Offline: last-good snapshot или seed; CTA может требовать сеть
+- [ ] Секреты и feed URL только на API
+- [ ] Источник включается только после partner approval + legal/compliance review
 
 ## Ссылки
 
+- [Товарный фид Дистрибуции](https://yandex.ru/support/market-distr/ru/product-feed)
 - [Affiliate API](https://yandex.ru/dev/market/affiliate/ru/)
 - [Создание партнёрских ссылок](https://yandex.ru/support/market-distr/ru/partner-links/partner-links-create)
-- Код: `apps/api/src/services/yandex-market-affiliate.ts`, `packages/core/src/market-offers.ts`
+- Код: `apps/api/src/services/marketplace/`, `packages/core/src/marketplace-catalog.ts`, `apps/mobile/src/services/market-catalog-cache-service.ts`
