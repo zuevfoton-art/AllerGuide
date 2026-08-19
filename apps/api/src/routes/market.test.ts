@@ -113,7 +113,7 @@ describe('market routes (Yandex affiliate)', () => {
     expect(response.body.source).toBe('seed');
     expect(response.body.products).toHaveLength(5);
     expect(typeof response.body.total).toBe('number');
-    expect(response.body.products.every((product: { status?: string }) => product.moderationStatus === 'published')).toBe(true);
+    expect(response.body.products.every((product: { moderationStatus: string }) => product.moderationStatus === 'published')).toBe(true);
   });
 
   it('filters catalog by category and medicine kind', async () => {

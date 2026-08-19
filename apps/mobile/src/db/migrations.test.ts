@@ -3,8 +3,8 @@ import type { DbLike } from './types';
 import { CURRENT_SCHEMA_VERSION, runMigrations } from './migrations';
 
 describe('runMigrations', () => {
-  it('exposes schema version 9 with crossReactionAllergies migration', () => {
-    expect(CURRENT_SCHEMA_VERSION).toBe(9);
+  it('exposes schema version 10 with market catalog snapshot', () => {
+    expect(CURRENT_SCHEMA_VERSION).toBe(10);
   });
 
   it('creates safe_products when upgrading from schema version 6', () => {
@@ -24,7 +24,7 @@ describe('runMigrations', () => {
 
     expect(executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS safe_products'))).toBe(true);
     expect(executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS diary_attachments'))).toBe(true);
-    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [9]);
+    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [10]);
   });
 
   it('creates diary_attachments when upgrading from schema version 7', () => {
@@ -44,7 +44,7 @@ describe('runMigrations', () => {
 
     expect(executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS diary_attachments'))).toBe(true);
     expect(runSync).toHaveBeenCalledWith('UPDATE schema_version SET version = ?', [8]);
-    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [9]);
+    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [10]);
   });
 
   it('adds crossReactionAllergies column when upgrading from schema version 8', () => {
@@ -65,6 +65,25 @@ describe('runMigrations', () => {
     expect(
       executed.some((sql) => sql.includes('crossReactionAllergies')),
     ).toBe(true);
-    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [9]);
+    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [10]);
+  });
+
+  it('creates market_catalog_snapshot when upgrading from schema version 9', () => {
+    const executed: string[] = [];
+    const runSync = vi.fn();
+
+    const db: DbLike = {
+      execSync: (sql) => {
+        executed.push(sql);
+      },
+      runSync,
+      getFirstSync: <T>() => ({ version: 9 }) as T,
+      getAllSync: () => [],
+    };
+
+    runMigrations(db);
+
+    expect(executed.some((sql) => sql.includes('market_catalog_snapshot'))).toBe(true);
+    expect(runSync).toHaveBeenLastCalledWith('UPDATE schema_version SET version = ?', [10]);
   });
 });
