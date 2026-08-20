@@ -791,8 +791,6 @@ export type LocaleMessages = {
     diaryTitle: string;
     diaryHint: string;
     diaryTimeLabel: string;
-    diaryHour: string;
-    diaryMinute: string;
     diaryAt: string;
     diaryPushTitle: string;
     diaryPushBody: string;
@@ -830,8 +828,6 @@ export type LocaleMessages = {
     pollenTitle: string;
     pollenHint: string;
     pollenTimeLabel: string;
-    pollenHour: string;
-    pollenMinute: string;
     pollenAt: string;
     pollenThresholdLabel: string;
     pollenThresholdHigh: string;
@@ -1134,8 +1130,7 @@ export type LocaleMessages = {
     reminderLabel: string;
     reminderOn: string;
     reminderOff: string;
-    reminderHour: string;
-    reminderMinute: string;
+    reminderTime: string;
     reminderHint: string;
     reminderAt: string;
     addReminderTime: string;
@@ -1315,7 +1310,7 @@ export type LocaleMessages = {
     subtitle: string;
     eyebrow: string;
     period: string;
-    customPeriod: string;
+    customRange: string;
     fromDate: string;
     toDate: string;
     blocks: string;

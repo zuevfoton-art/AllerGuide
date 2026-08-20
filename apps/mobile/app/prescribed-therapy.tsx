@@ -5,7 +5,6 @@ import {
   MAX_PRESCRIBED_REMINDER_TIMES,
   addPrescribedReminderTime,
   filterFilledScheduleStages,
-  formatPrescribedReminderTime,
   getPrescribedReminderTimes,
   isPrescribedReminderConfigured,
   normalizeScheduleLines,
@@ -561,38 +560,22 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
             {reminderTimes.map((time, index) => (
               <View key={`reminder-${index}`} style={styles.reminderRow} testID={`prescribed-reminder-row-${index}`}>
                 <View style={styles.reminderField}>
-                  <Text style={styles.reminderFieldLabel}>{t('prescribedTherapy.reminderHour')}</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={String(time.hour)}
-                    onChangeText={(v) => {
-                      const hour = Number(v.replace(/\D/g, ''));
-                      if (!Number.isFinite(hour)) return;
-                      setCourse((prev) => updatePrescribedReminderTimeAt(prev, index, { hour }));
+                  <DateTimeField
+                    label={t('prescribedTherapy.reminderTime')}
+                    value={`${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}`}
+                    mode="time"
+                    onChange={(value) => {
+                      const match = value.match(/(\d{1,2}):(\d{2})/);
+                      if (!match) return;
+                      setCourse((prev) =>
+                        updatePrescribedReminderTimeAt(prev, index, {
+                          hour: Number(match[1]),
+                          minute: Number(match[2]),
+                        }),
+                      );
                     }}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    placeholderTextColor={theme.colors.textMuted}
                   />
                 </View>
-                <View style={styles.reminderField}>
-                  <Text style={styles.reminderFieldLabel}>{t('prescribedTherapy.reminderMinute')}</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={String(time.minute)}
-                    onChangeText={(v) => {
-                      const minute = Number(v.replace(/\D/g, ''));
-                      if (!Number.isFinite(minute)) return;
-                      setCourse((prev) => updatePrescribedReminderTimeAt(prev, index, { minute }));
-                    }}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    placeholderTextColor={theme.colors.textMuted}
-                  />
-                </View>
-                <Text style={styles.reminderPreview}>
-                  {formatPrescribedReminderTime(time.hour, time.minute)}
-                </Text>
                 {reminderTimes.length > 1 ? (
                   <Pressable
                     style={styles.reminderIconBtn}
@@ -651,7 +634,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 6,
       paddingVertical: 9,
       paddingHorizontal: 12,
-      borderRadius: 999,
+      borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
@@ -671,7 +654,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     routeBubble: {
       paddingVertical: 9,
       paddingHorizontal: 14,
-      borderRadius: 999,
+      borderRadius: 6,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
