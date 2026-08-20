@@ -39,6 +39,7 @@ export type LocaleMessages = {
     name: string;
     years: string;
     daysShort: string;
+    skipToContent: string;
   };
   brand: {
     productName: string;

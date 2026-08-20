@@ -39,6 +39,42 @@ select {
     font-size: 16px !important;
   }
 }
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid #2A9D8F;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(42,157,143,0.35);
+  border-radius: 6px;
+}
+
+[data-tone="danger"]:focus-visible {
+  outline-color: #B91C1C;
+  box-shadow: 0 0 0 4px rgba(185,28,28,0.35);
+}
+
+a[href="#content"] {
+  position: absolute;
+  left: 8px;
+  top: -80px;
+  z-index: 1000;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid #2A9D8F;
+  color: #2A9D8F;
+  font: 600 14px/1.2 Inter, system-ui, sans-serif;
+  text-decoration: none;
+}
+
+a[href="#content"]:focus,
+a[href="#content"]:focus-visible {
+  top: 8px;
+}
 `;
 
 export default function Root({ children }: PropsWithChildren) {

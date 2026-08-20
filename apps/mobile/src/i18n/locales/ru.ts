@@ -35,6 +35,7 @@ const ru: LocaleMessages = {
     name: 'Имя',
     years: 'лет',
     daysShort: 'дн.',
+    skipToContent: 'К содержанию',
   },
   brand: {
     productName: 'A-Claro',

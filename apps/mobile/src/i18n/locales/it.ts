@@ -35,6 +35,7 @@ const it: LocaleMessages = {
     name: 'Nome',
     years: 'anni',
     daysShort: 'g.',
+    skipToContent: 'Vai al contenuto',
   },
   brand: {
     productName: 'A-Claro',
