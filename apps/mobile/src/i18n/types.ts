@@ -168,6 +168,8 @@ export type LocaleMessages = {
     profilePrefix: string;
     selectProfile: string;
     wellnessTitle: string;
+    stateToday: string;
+    factors: string;
     details: string;
     pollen: string;
     air: string;
@@ -222,6 +224,8 @@ export type LocaleMessages = {
     history: string;
     refresh: string;
     doctorReport: string;
+    courseShort: string;
+    reportShort: string;
     empty: string;
     disclaimer: string;
     deleteTitle: string;

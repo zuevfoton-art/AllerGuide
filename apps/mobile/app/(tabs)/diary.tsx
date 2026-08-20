@@ -480,13 +480,27 @@ export default function DiaryScreen() {
         block
         onPress={() => setEntryPickerOpen(true)}
       />
-      <Button
-        testID="diary-setup-course"
-        label={t('diary.setupCourse')}
-        variant="secondary"
-        block
-        onPress={() => setCoursePickerOpen(true)}
-      />
+      <View style={styles.actionRow}>
+        <View style={styles.actionHalf}>
+          <Button
+            testID="diary-setup-course"
+            label={t('diary.courseShort')}
+            variant="secondary"
+            block
+            icon="medical"
+            onPress={() => setCoursePickerOpen(true)}
+          />
+        </View>
+        <View style={styles.actionHalf}>
+          <Button
+            label={t('diary.reportShort')}
+            variant="secondary"
+            block
+            icon="document"
+            onPress={() => router.push('/doctor-report' as any)}
+          />
+        </View>
+      </View>
 
       <DiaryEntryTypePickerModal
         visible={entryPickerOpen}
@@ -526,13 +540,6 @@ export default function DiaryScreen() {
       <DiaryEditorModal visible={editor !== null} onClose={closeEditor}>
         {renderEditor()}
       </DiaryEditorModal>
-
-      <Button
-        label={t('diary.doctorReport')}
-        variant="secondary"
-        block
-        onPress={() => router.push('/doctor-report' as any)}
-      />
 
       <DiaryInsightsCard entries={list} />
 
@@ -627,6 +634,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionHalf: {
+      flex: 1,
+    },
     listHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',

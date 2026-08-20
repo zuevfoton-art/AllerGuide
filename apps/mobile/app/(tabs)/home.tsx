@@ -15,6 +15,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { SkeletonCard } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -32,14 +33,6 @@ import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
   if (level === 'good') return 'ok';
   if (level === 'high-risk') return 'danger';
-  return 'warn';
-}
-
-function confidenceBadgeKind(
-  confidence: WellnessSnapshot['confidence'],
-): 'ok' | 'warn' | 'danger' {
-  if (confidence === 'high') return 'ok';
-  if (confidence === 'low') return 'danger';
   return 'warn';
 }
 
@@ -107,9 +100,6 @@ export default function HomeScreen() {
   }, [wellness, activeProfileId, profile, profileCapabilities]);
 
   const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;
-  const confidenceBadge = wellness
-    ? badgeStyle(confidenceBadgeKind(wellness.confidence), theme)
-    : null;
 
   const phenotypeHints = useMemo(
     () => (profile ? getProfileReassessmentHints(profile) : []),
@@ -162,18 +152,7 @@ export default function HomeScreen() {
         </>
       ) : (
       <GlassCard variant="soft">
-        <View style={ui.cardHead}>
-          <Text style={ui.cardTitle}>{t('home.wellnessTitle')}</Text>
-          <View style={styles.cardHeadRight}>
-            {badge && wellness ? (
-              <View style={[ui.badge, badge.container]}>
-                <Text style={[ui.badgeText, badge.text]}>
-                  {t(`wellness.statusPhrase.${wellness.level}`)}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </View>
+        <CardTitle>{t('home.stateToday')}</CardTitle>
 
         {wellness ? (
           <>
@@ -182,7 +161,16 @@ export default function HomeScreen() {
               accessibilityRole="button"
               accessibilityLabel={t('home.index')}>
               <View style={ui.heroKpi}>
-                <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
+                <View style={styles.heroKpiLeft}>
+                  <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
+                  {badge ? (
+                    <View style={[ui.badge, badge.container]}>
+                      <Text style={[ui.badgeText, badge.text]}>
+                        {t(`wellness.statusPhrase.${wellness.level}`)}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
                 <Text style={ui.heroKpiNum}>
                   {wellness.score}
                   <Text style={ui.heroKpiSub}> / 100</Text>
@@ -190,87 +178,83 @@ export default function HomeScreen() {
               </View>
             </Pressable>
 
-            <View style={styles.metaRow}>
-              {confidenceBadge ? (
-                <View style={[ui.badge, confidenceBadge.container, styles.confidenceBadge]}>
-                  <Text style={[ui.badgeText, confidenceBadge.text]}>
-                    {t(`wellness.index.${wellness.display.indexTier}`)}
-                  </Text>
-                </View>
-              ) : null}
-              <Text style={styles.envHint}>
-                {t(`wellness.forecast.${wellness.confidence}`)}
-              </Text>
-            </View>
-
-            <Pressable
-              onPress={() => setDetailsOpen(true)}
-              accessibilityRole="button"
-              style={ui.kpiRow}>
-              <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
-              <Text style={ui.kpiValue}>{t(`wellness.pollen.${wellness.display.pollenTier}`)}</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setDetailsOpen(true)}
-              accessibilityRole="button"
-              style={ui.kpiRow}>
-              <Text style={ui.kpiLabel}>{t('home.air')}</Text>
-              <Text style={ui.kpiValue}>{t(`wellness.air.${wellness.display.airTier}`)}</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setDetailsOpen(true)}
-              accessibilityRole="button"
-              style={ui.kpiRow}>
-              <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
-              <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
-            </Pressable>
+            <Text style={styles.envHint}>
+              {t(`wellness.forecast.${wellness.confidence}`)}
+            </Text>
             <Text style={styles.interpret}>
               {t(`wellness.primaryFactorSentence.${wellness.display.primaryFactorId}`)}
             </Text>
-
-            <Pressable
-              onPress={() => setDetailsOpen((open) => !open)}
-              accessibilityRole="button"
-              testID="home-wellness-details">
-              <Text style={styles.detailsToggle}>
-                {detailsOpen ? t('home.wellnessHideDetails') : t('home.wellnessDetails')}
-              </Text>
-            </Pressable>
-
-            {detailsOpen ? (
-              <>
-                <View style={ui.kpiRow}>
-                  <Text style={ui.kpiLabel}>{t('home.index')}</Text>
-                  <Text style={ui.kpiValue}>
-                    {t(`wellness.index.${wellness.display.indexTier}`)} · {wellness.score}/100
-                  </Text>
-                </View>
-                {wellness.factors.map((factor) => {
-                  const category =
-                    factor.label === t('home.pollen') || factor.label === t('wellness.pollenLabel')
-                      ? t(`wellness.pollen.${wellness.display.pollenTier}`)
-                      : factor.label === t('home.air') || factor.label === t('wellness.airLabel')
-                        ? t(`wellness.air.${wellness.display.airTier}`)
-                        : t(`wellness.diaryState.${wellness.display.diaryTier}`);
-                  return (
-                    <View key={factor.label} style={styles.detailBlock}>
-                      <View style={ui.kpiRow}>
-                        <Text style={ui.kpiLabel}>{factor.label}</Text>
-                        <Text style={ui.kpiValue}>{category}</Text>
-                      </View>
-                      <Text style={styles.detailExact}>{factor.value}</Text>
-                    </View>
-                  );
-                })}
-                <Text style={styles.interpret}>{wellness.statusSummary}</Text>
-              </>
-            ) : null}
           </>
         ) : (
           <Text style={styles.interpret}>{t('home.selectProfile')}</Text>
         )}
       </GlassCard>
       )}
+
+      {wellness ? (
+      <GlassCard>
+        <CardTitle>{t('home.factors')}</CardTitle>
+        <Pressable
+          onPress={() => setDetailsOpen(true)}
+          accessibilityRole="button"
+          style={ui.kpiRow}>
+          <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
+          <Text style={ui.kpiValue}>{t(`wellness.pollen.${wellness.display.pollenTier}`)}</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setDetailsOpen(true)}
+          accessibilityRole="button"
+          style={ui.kpiRow}>
+          <Text style={ui.kpiLabel}>{t('home.air')}</Text>
+          <Text style={ui.kpiValue}>{t(`wellness.air.${wellness.display.airTier}`)}</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setDetailsOpen(true)}
+          accessibilityRole="button"
+          style={ui.kpiRow}>
+          <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
+          <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => setDetailsOpen((open) => !open)}
+          accessibilityRole="button"
+          testID="home-wellness-details">
+          <Text style={styles.detailsToggle}>
+            {detailsOpen ? t('home.wellnessHideDetails') : t('home.wellnessDetails')}
+          </Text>
+        </Pressable>
+
+        {detailsOpen ? (
+          <>
+            <View style={ui.kpiRow}>
+              <Text style={ui.kpiLabel}>{t('home.index')}</Text>
+              <Text style={ui.kpiValue}>
+                {t(`wellness.index.${wellness.display.indexTier}`)} · {wellness.score}/100
+              </Text>
+            </View>
+            {wellness.factors.map((factor) => {
+              const category =
+                factor.label === t('home.pollen') || factor.label === t('wellness.pollenLabel')
+                  ? t(`wellness.pollen.${wellness.display.pollenTier}`)
+                  : factor.label === t('home.air') || factor.label === t('wellness.airLabel')
+                    ? t(`wellness.air.${wellness.display.airTier}`)
+                    : t(`wellness.diaryState.${wellness.display.diaryTier}`);
+              return (
+                <View key={factor.label} style={styles.detailBlock}>
+                  <View style={ui.kpiRow}>
+                    <Text style={ui.kpiLabel}>{factor.label}</Text>
+                    <Text style={ui.kpiValue}>{category}</Text>
+                  </View>
+                  <Text style={styles.detailExact}>{factor.value}</Text>
+                </View>
+              );
+            })}
+            <Text style={styles.interpret}>{wellness.statusSummary}</Text>
+          </>
+        ) : null}
+      </GlassCard>
+      ) : null}
 
       {loadingWellness && !wellness ? null : (
       <GlassCard padded={false}>
@@ -364,22 +348,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },
-    cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    heroKpiLeft: { gap: 8 },
     heroKpiLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
       color: colors.head,
-    },
-    metaRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      flexWrap: 'wrap',
-      marginTop: 6,
-    },
-    confidenceBadge: {
-      alignSelf: 'flex-start',
     },
     envHint: {
       fontFamily: fonts.sans,
