@@ -46,6 +46,7 @@ import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
@@ -548,7 +549,9 @@ export default function DiaryScreen() {
       ) : (
         <GlassCard padded={false}>
           <View style={styles.listHead}>
-            <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
+            <View style={styles.listHeadPad}>
+              <CardTitle>{t('diary.history')}</CardTitle>
+            </View>
           </View>
 
           {list.filter((item) => isDiaryHistoryVisible(item.type)).map((item, index, visible) => {

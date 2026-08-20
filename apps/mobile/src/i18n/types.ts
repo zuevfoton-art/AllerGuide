@@ -1272,6 +1272,11 @@ export type LocaleMessages = {
     sharePassport: string;
     exportPdf: string;
     sharing: string;
+    allContacts: string;
+    ageYears: string;
+    ageUnitOne: string;
+    ageUnitFew: string;
+    ageUnitMany: string;
   };
   sosEdit: {
     title: string;

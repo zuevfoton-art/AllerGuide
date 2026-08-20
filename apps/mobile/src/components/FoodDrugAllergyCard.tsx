@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import {
   FOOD_DRUG_DISCLAIMER,
   computeFoodDrugSummary,
@@ -9,6 +8,7 @@ import {
   type FoodDrugRegistry,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -47,13 +47,12 @@ export function FoodDrugAllergyCard({
   if (mode === 'food') {
     return (
       <GlassCard style={styles.card}>
-        <View style={styles.headerRow}>
-          <Ionicons name="restaurant" size={18} color={theme.colors.accent} />
-          <Text style={ui.cardTitle}>{t('foodDrug.foodTitle')}</Text>
-          <Pressable style={styles.editBtn} onPress={() => router.push('/food-drug-registry' as any)}>
-            <Text style={styles.editText}>{t('foodDrug.editRegistry')}</Text>
-          </Pressable>
-        </View>
+        <CardTitle
+          icon="restaurant"
+          action={t('foodDrug.editRegistry')}
+          onAction={() => router.push('/food-drug-registry' as any)}>
+          {t('foodDrug.foodTitle')}
+        </CardTitle>
 
         {avoidFoods.length ? (
           <Text style={styles.list}>{avoidFoods.join(', ')}</Text>
@@ -61,15 +60,13 @@ export function FoodDrugAllergyCard({
           <Text style={styles.hint}>{t('foodDrug.emptyFoodList')}</Text>
         )}
 
-        <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{summary.foodEntries}</Text>
-            <Text style={styles.statLabel}>{t('foodDrug.foodEntries30d')}</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{summary.foodReactions.severe + summary.foodReactions.moderate}</Text>
-            <Text style={styles.statLabel}>{t('foodDrug.foodReactions30d')}</Text>
-          </View>
+        <View style={ui.kpiRow}>
+          <Text style={ui.kpiLabel}>{t('foodDrug.foodEntries30d')}</Text>
+          <Text style={ui.kpiValue}>{summary.foodEntries}</Text>
+        </View>
+        <View style={ui.kpiRow}>
+          <Text style={ui.kpiLabel}>{t('foodDrug.foodReactions30d')}</Text>
+          <Text style={ui.kpiValue}>{summary.foodReactions.severe + summary.foodReactions.moderate}</Text>
         </View>
 
         <Button
@@ -86,13 +83,12 @@ export function FoodDrugAllergyCard({
 
   return (
     <GlassCard style={styles.card}>
-      <View style={styles.headerRow}>
-        <Ionicons name="medkit" size={18} color={theme.colors.accent} />
-        <Text style={ui.cardTitle}>{t('foodDrug.drugTitle')}</Text>
-        <Pressable style={styles.editBtn} onPress={() => router.push('/sos-edit' as any)}>
-          <Text style={styles.editText}>{t('foodDrug.editSos')}</Text>
-        </Pressable>
-      </View>
+      <CardTitle
+        icon="medkit"
+        action={t('foodDrug.editSos')}
+        onAction={() => router.push('/sos-edit' as any)}>
+        {t('foodDrug.drugTitle')}
+      </CardTitle>
 
       {drugIntolerances.length ? (
         <Text style={styles.list}>{drugIntolerances.join(', ')}</Text>
@@ -100,15 +96,13 @@ export function FoodDrugAllergyCard({
         <Text style={styles.hint}>{t('foodDrug.emptyDrugList')}</Text>
       )}
 
-      <View style={styles.statsRow}>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{summary.drugEntries}</Text>
-          <Text style={styles.statLabel}>{t('foodDrug.drugEntries30d')}</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{summary.drugWarnings}</Text>
-          <Text style={styles.statLabel}>{t('foodDrug.drugWarnings30d')}</Text>
-        </View>
+      <View style={ui.kpiRow}>
+        <Text style={ui.kpiLabel}>{t('foodDrug.drugEntries30d')}</Text>
+        <Text style={ui.kpiValue}>{summary.drugEntries}</Text>
+      </View>
+      <View style={ui.kpiRow}>
+        <Text style={ui.kpiLabel}>{t('foodDrug.drugWarnings30d')}</Text>
+        <Text style={ui.kpiValue}>{summary.drugWarnings}</Text>
       </View>
 
       <Button label={t('foodDrug.logMedicine')} variant="primary" size="sm" onPress={onLogMedicine} />
@@ -120,14 +114,6 @@ export function FoodDrugAllergyCard({
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     card: { gap: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    editBtn: { marginLeft: 'auto' },
-    editText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.accent,
-    },
     hint: {
       fontFamily: fonts.sans,
       fontSize: 13,
@@ -139,28 +125,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.text,
       lineHeight: 20,
-    },
-    statsRow: { flexDirection: 'row', gap: 8 },
-    stat: {
-      flex: 1,
-      backgroundColor: colors.surfaceMuted,
-      borderRadius: 6,
-      paddingVertical: 10,
-      paddingHorizontal: 8,
-      alignItems: 'center',
-      gap: 2,
-    },
-    statValue: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 18,
-      fontWeight: '700',
-      color: colors.head,
-    },
-    statLabel: {
-      fontFamily: fonts.sans,
-      fontSize: 10,
-      color: colors.textMuted,
-      textAlign: 'center',
     },
     disclaimer: {
       fontFamily: fonts.sans,

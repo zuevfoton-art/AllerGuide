@@ -8,12 +8,15 @@ import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Ionicons } from '@expo/vector-icons';
 import {
   ANAPHYLAXIS_GRADES,
   BIPHASIC_WARNING,
   formatEpinephrineEligibilityHint,
+  getProfileAgeYears,
   parseAllergies,
+  pluralRu,
   type EmergencyContact,
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
@@ -29,7 +32,6 @@ import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { isProfileEpinephrineEligible } from '@/src/services/clinical-phenotype-service';
 import {
   getEmergencyNumber,
-  getProfileAge,
   getSosActionPlan,
   getSosNotes,
   listEmergencyContacts,
@@ -41,7 +43,7 @@ export default function SosScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t, content } = useTranslation();
+  const { t, locale, content } = useTranslation();
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
@@ -158,6 +160,14 @@ export default function SosScreen() {
           onCallContact={() =>
             emergencyBar.firstContact && callPhone(emergencyBar.firstContact.phone)
           }
+          allContactsLabel={
+            contacts.length > 0
+              ? t('sos.allContacts', { count: contacts.length })
+              : undefined
+          }
+          onAllContacts={
+            contacts.length > 0 ? () => router.push('/sos-edit' as any) : undefined
+          }
         />
       }>
       <View style={styles.headerRow}>
@@ -184,7 +194,7 @@ export default function SosScreen() {
             {profile.birthYear ? (
               <View style={ui.kpiRow}>
                 <Text style={ui.kpiLabel}>{t('sos.age')}</Text>
-                <Text style={ui.kpiValue}>{getProfileAge(profile.birthYear)}</Text>
+                <Text style={ui.kpiValue}>{formatSosAge(profile.birthYear, locale, t)}</Text>
               </View>
             ) : null}
             {allergies.length > 0 ? (
@@ -209,7 +219,7 @@ export default function SosScreen() {
             accessibilityRole="button"
             accessibilityState={{ expanded: passportOpen }}
             accessibilityLabel={t('sos.passportTitle')}>
-            <Text style={styles.collapseTitle}>{t('sos.passportTitle')}</Text>
+            <CardTitle>{t('sos.passportTitle')}</CardTitle>
             <Ionicons
               name={passportOpen ? 'chevron-up' : 'chevron-down'}
               size={18}
@@ -296,7 +306,7 @@ export default function SosScreen() {
             accessibilityRole="button"
             accessibilityState={{ expanded: anaphylaxisOpen }}
             accessibilityLabel={t('sos.anaphylaxisTitle')}>
-            <Text style={styles.collapseTitle}>{t('sos.anaphylaxisTitle')}</Text>
+            <CardTitle>{t('sos.anaphylaxisTitle')}</CardTitle>
             <Ionicons
               name={anaphylaxisOpen ? 'chevron-up' : 'chevron-down'}
               size={18}
@@ -356,29 +366,7 @@ export default function SosScreen() {
         />
       )}
 
-      {contacts.length > 0 ? (
-        <GlassCard padded={false}>
-          <Text style={[ui.cardTitle, styles.contactsHead]}>{t('sos.contactsTitle')}</Text>
-          {contacts.map((contact, index) => (
-            <View
-              key={contact.id}
-              style={[styles.contactRow, index < contacts.length - 1 && styles.contactRowBorder]}>
-              <View style={styles.contactBody}>
-                <Text style={styles.contactName}>{contact.name}</Text>
-                <Text style={styles.contactMeta}>
-                  {localizeEmergencyRelation(contact.relation, localeContent)} · {contact.phone}
-                </Text>
-              </View>
-              <Button
-                label={t('sos.callContact')}
-                variant="primary"
-                accessibilityLabel={`${t('sos.callContact')}: ${contact.name}`}
-                onPress={() => callPhone(contact.phone)}
-              />
-            </View>
-          ))}
-        </GlassCard>
-      ) : profile ? (
+      {contacts.length > 0 ? null : profile ? (
         <GlassCard style={styles.contactsHintCard}>
           <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
           <Button
@@ -398,6 +386,22 @@ export default function SosScreen() {
       <Disclaimer>{t('sos.disclaimer')}</Disclaimer>
     </Screen>
   );
+}
+
+function formatSosAge(
+  birthYear: number,
+  locale: string,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  const years = getProfileAgeYears(birthYear);
+  if (years == null) return String(birthYear);
+  if (locale === 'ru') {
+    return t('sos.ageYears', {
+      n: years,
+      unit: pluralRu(years, t('sos.ageUnitOne'), t('sos.ageUnitFew'), t('sos.ageUnitMany')),
+    });
+  }
+  return t('sos.ageYears', { n: years });
 }
 
 function createStyles({ colors, fonts }: AppTheme) {

@@ -5,7 +5,7 @@ import {
   deleteEmergencyContact,
   listEmergencyContacts,
 } from '@/src/services/emergency-contact-service';
-import type { EmergencyContact } from '@allerguide/core';
+import { getProfileAgeYears, pluralRu, type EmergencyContact } from '@allerguide/core';
 
 export const DEFAULT_EMERGENCY_NUMBER = '103';
 
@@ -58,9 +58,9 @@ export function saveSosNotes(profileId: number, notes: string) {
 }
 
 export function getProfileAge(birthYear?: number): string {
-  if (!birthYear) return '';
-  const age = new Date().getFullYear() - birthYear;
-  return age > 0 && age < 130 ? `${age} лет` : String(birthYear);
+  const years = getProfileAgeYears(birthYear);
+  if (years == null) return birthYear ? String(birthYear) : '';
+  return `${years} ${pluralRu(years, 'год', 'года', 'лет')}`;
 }
 
 export function getSosActionPlan(profileId: number): string {

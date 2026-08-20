@@ -15,7 +15,8 @@ import {
 import { AllergenPicker } from '@/src/components/AllergenPicker';
 import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationEditor';
 import { ConditionPicker } from '@/src/components/ConditionPicker';
-import { getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
+import { deleteProfile, getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
+import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
 import {
   getStoredOtherConditionLabel,
   getStoredProfileConditions,
@@ -309,6 +310,24 @@ export default function ProfileEditScreen() {
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Button label={t('profileEdit.saveChanges')} variant="primary" block onPress={save} />
+          <Button
+            testID="profile-delete"
+            label={t('profiles.delete')}
+            variant="ghost"
+            block
+            onPress={() => {
+              confirmDeleteProfile({
+                title: t('profiles.deleteTitle'),
+                message: t('profiles.deleteMessage', { name }),
+                cancelLabel: t('common.cancel'),
+                deleteLabel: t('common.delete'),
+                onConfirm: async () => {
+                  await deleteProfile(profileId);
+                  router.back();
+                },
+              });
+            }}
+          />
         </>
       )}
     </Screen>
