@@ -769,6 +769,9 @@ const ru: LocaleMessages = {
     privacyBody: '',
     termsBody: '',
   },
+  disclaimer: {
+    details: 'Подробнее',
+  },
   notifications: {
     eyebrow: 'Уведомления',
     title: 'Уведомления',

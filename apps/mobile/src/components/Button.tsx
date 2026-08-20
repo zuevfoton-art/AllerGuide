@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, type PressableProps, type ViewStyle } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
 import { fontSizes, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -12,6 +13,7 @@ type ButtonProps = PressableProps & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   block?: boolean;
+  icon?: keyof typeof Ionicons.glyphMap;
 };
 
 const TEXT_COLORS: Record<ButtonVariant, keyof AppTheme['colors']> = {
@@ -26,12 +28,14 @@ export function Button({
   variant = 'primary',
   size = 'md',
   block = false,
+  icon,
   style,
   disabled,
   ...rest
 }: ButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const textColor = theme.colors[TEXT_COLORS[variant]];
 
   return (
     <Pressable
@@ -47,12 +51,13 @@ export function Button({
         style as ViewStyle,
       ]}
       {...rest}>
+      {icon ? <Ionicons name={icon} size={15} color={textColor} /> : null}
       <Text
         {...scaledTextProps}
         style={[
           styles.text,
           size === 'sm' && styles.textSm,
-          { color: theme.colors[TEXT_COLORS[variant]] },
+          { color: textColor },
         ]}>
         {label}
       </Text>
@@ -63,8 +68,10 @@ export function Button({
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     base: {
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
+      gap: 6,
       borderRadius: radii.md,
       minHeight: 44,
       paddingHorizontal: 16,

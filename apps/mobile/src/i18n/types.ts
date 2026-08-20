@@ -768,6 +768,9 @@ export type LocaleMessages = {
     privacyBody: string;
     termsBody: string;
   };
+  disclaimer: {
+    details: string;
+  };
   notifications: {
     eyebrow: string;
     title: string;

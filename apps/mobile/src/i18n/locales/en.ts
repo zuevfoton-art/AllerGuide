@@ -767,6 +767,9 @@ const en: LocaleMessages = {
     privacyBody: '',
     termsBody: '',
   },
+  disclaimer: {
+    details: 'Learn more',
+  },
   notifications: {
     eyebrow: 'Notifications',
     title: 'Notifications',
