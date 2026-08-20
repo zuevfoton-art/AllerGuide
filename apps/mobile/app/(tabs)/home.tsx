@@ -15,7 +15,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
-import { Skeleton } from '@/src/components/Skeleton';
+import { SkeletonCard } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
@@ -154,6 +154,13 @@ export default function HomeScreen() {
         </>
       }>
 
+      {loadingWellness && !wellness ? (
+        <>
+          <SkeletonCard hero lines={3} variant="soft" />
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={2} />
+        </>
+      ) : (
       <GlassCard variant="soft">
         <View style={ui.cardHead}>
           <Text style={ui.cardTitle}>{t('home.wellnessTitle')}</Text>
@@ -168,14 +175,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {loadingWellness && !wellness ? (
-          <View style={styles.skeletonWrap}>
-            <Skeleton width={120} height={32} />
-            <Skeleton width="100%" height={14} />
-            <Skeleton width="100%" height={14} />
-            <Skeleton width="70%" height={14} />
-          </View>
-        ) : wellness ? (
+        {wellness ? (
           <>
             <Pressable
               onPress={() => setDetailsOpen(true)}
@@ -270,7 +270,9 @@ export default function HomeScreen() {
           <Text style={styles.interpret}>{t('home.selectProfile')}</Text>
         )}
       </GlassCard>
+      )}
 
+      {loadingWellness && !wellness ? null : (
       <GlassCard padded={false}>
         <View style={[styles.listHead, styles.listHeadPad]}>
           <Text style={ui.cardTitle}>{t('home.insightsTitle')}</Text>
@@ -309,6 +311,7 @@ export default function HomeScreen() {
           <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
         </Pressable>
       </GlassCard>
+      )}
 
       <Disclaimer showMdrFootnote>{t('home.disclaimer')}</Disclaimer>
     </Screen>
@@ -361,7 +364,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },
-    skeletonWrap: { gap: 10, paddingVertical: 12 },
     cardHeadRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     heroKpiLabel: {
       fontFamily: fonts.sansSemiBold,
