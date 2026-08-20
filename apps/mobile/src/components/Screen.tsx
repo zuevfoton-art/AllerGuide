@@ -14,6 +14,7 @@ import { shouldShowScreenBrandHeader } from '@/src/components/brand/brand-header
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
+import { SkipLink } from '@/src/components/FocusRing';
 
 type ScreenProps = {
   scroll?: boolean;
@@ -112,7 +113,14 @@ export function Screen({
     ],
   );
 
-  const body = <View style={styles.content}>{children}</View>;
+  const body = (
+    <View
+      nativeID="content"
+      style={styles.content}
+      {...(Platform.OS === 'web' ? ({ tabIndex: -1 } as object) : null)}>
+      {children}
+    </View>
+  );
 
   // iOS: padding. Android: undefined — root IME insets (MainActivity) + scroll
   // content pad above handle the software keyboard without double-offset.
@@ -121,6 +129,7 @@ export function Screen({
   if (scroll) {
     return (
       <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior} keyboardVerticalOffset={0}>
+        <SkipLink />
         {pinnedContent ? <View style={styles.pinned}>{pinnedContent}</View> : null}
         <ScrollView
           style={styles.scrollOuter}
@@ -147,6 +156,7 @@ export function Screen({
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior}>
+      <SkipLink />
       <SafeAreaView style={styles.safe}>
         {brandHeader ? <View style={styles.nonScrollBrand}>{brandHeader}</View> : null}
         <View style={[styles.content, styles.contentFill]}>{children}</View>

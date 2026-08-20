@@ -70,15 +70,15 @@ export function CourseSetupModal({ visible, options, onClose, onSelect }: Course
                 <View style={styles.grabber} />
               </View>
               <View style={styles.header}>
+                <View style={styles.headerBtn} />
+                <Text style={styles.headerTitle}>{t('diary.setupCourseTitle')}</Text>
                 <Pressable
                   style={styles.headerBtn}
                   onPress={onClose}
                   accessibilityRole="button"
-                  accessibilityLabel={t('common.cancel')}>
-                  <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
+                  accessibilityLabel={t('common.done')}>
+                  <Text style={[styles.headerBtnText, styles.headerBtnTextEnd]}>{t('common.done')}</Text>
                 </Pressable>
-                <Text style={styles.headerTitle}>{t('diary.setupCourseTitle')}</Text>
-                <View style={styles.headerBtn} />
               </View>
               <ScrollView
                 style={styles.scroll}
@@ -178,6 +178,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 15,
       fontWeight: '600',
       color: colors.accent,
+    },
+    headerBtnTextEnd: {
+      textAlign: 'right',
     },
     headerTitle: {
       fontFamily: fonts.sansSemiBold,

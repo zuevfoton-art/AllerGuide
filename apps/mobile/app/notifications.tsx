@@ -1,4 +1,4 @@
-import { Alert, Platform, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { formatReminderClock } from '@allerguide/core';
@@ -6,6 +6,7 @@ import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
+import { DateTimeField } from '@/src/components/DateTimeField';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -43,6 +44,19 @@ import {
   type PollenReminderThreshold,
 } from '@/src/services/notification-service';
 
+function formatClockValue(hour: number, minute: number): string {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function parseClockValue(value: string): { hour: number; minute: number } | null {
+  const match = value.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+  return { hour, minute };
+}
+
 export default function NotificationsScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
@@ -61,11 +75,9 @@ export default function NotificationsScreen() {
   const [epiEnabled, setEpiEnabled] = useState(false);
   const [quietHoursEnabled, setQuietHoursEnabledState] = useState(true);
   const [pollenEnabled, setPollenEnabled] = useState(false);
-  const [pollenHour, setPollenHour] = useState('7');
-  const [pollenMinute, setPollenMinute] = useState('30');
+  const [pollenTime, setPollenTime] = useState('07:30');
   const [pollenThreshold, setPollenThresholdState] = useState<PollenReminderThreshold>('high');
-  const [reminderHour, setReminderHour] = useState('20');
-  const [reminderMinute, setReminderMinute] = useState('00');
+  const [reminderTime, setReminderTime] = useState('20:00');
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermissionStatus>('undetermined');
   const [loading, setLoading] = useState(false);
 
@@ -76,11 +88,9 @@ export default function NotificationsScreen() {
     setEpiEnabled(isEpinephrineReminderEnabled());
     setQuietHoursEnabledState(isQuietHoursEnabled());
     setPollenEnabled(isPollenReminderEnabled());
-    setPollenHour(String(getPollenReminderHour()));
-    setPollenMinute(String(getPollenReminderMinute()).padStart(2, '0'));
+    setPollenTime(formatClockValue(getPollenReminderHour(), getPollenReminderMinute()));
     setPollenThresholdState(getPollenReminderThreshold());
-    setReminderHour(String(getDiaryReminderHour()));
-    setReminderMinute(String(getDiaryReminderMinute()).padStart(2, '0'));
+    setReminderTime(formatClockValue(getDiaryReminderHour(), getDiaryReminderMinute()));
     setPermissionStatus(await getNotificationPermissionStatus());
   }, []);
 
@@ -91,18 +101,16 @@ export default function NotificationsScreen() {
   );
 
   const reminderTimeLabel = useMemo(() => {
-    const hour = Number(reminderHour);
-    const minute = Number(reminderMinute);
-    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return '';
-    return t('notifications.diaryAt', { time: formatReminderClock(hour, minute) });
-  }, [reminderHour, reminderMinute, t]);
+    const parsed = parseClockValue(reminderTime);
+    if (!parsed) return '';
+    return t('notifications.diaryAt', { time: formatReminderClock(parsed.hour, parsed.minute) });
+  }, [reminderTime, t]);
 
   const pollenTimeLabel = useMemo(() => {
-    const hour = Number(pollenHour);
-    const minute = Number(pollenMinute);
-    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return '';
-    return t('notifications.pollenAt', { time: formatReminderClock(hour, minute) });
-  }, [pollenHour, pollenMinute, t]);
+    const parsed = parseClockValue(pollenTime);
+    if (!parsed) return '';
+    return t('notifications.pollenAt', { time: formatReminderClock(parsed.hour, parsed.minute) });
+  }, [pollenTime, t]);
 
   const permissionLabel = useMemo(() => {
     if (permissionStatus === 'web-unavailable') return t('notifications.permissionWeb');
@@ -111,24 +119,22 @@ export default function NotificationsScreen() {
     return t('notifications.permissionUndetermined');
   }, [permissionStatus, t]);
 
-  const persistTime = (hourRaw: string, minuteRaw: string) => {
-    const hour = Number(hourRaw.replace(/\D/g, ''));
-    const minute = Number(minuteRaw.replace(/\D/g, ''));
-    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return;
-    setDiaryReminderTime(hour, minute);
+  const persistTime = (value: string) => {
+    const parsed = parseClockValue(value);
+    if (!parsed) return;
+    setDiaryReminderTime(parsed.hour, parsed.minute);
   };
 
-  const persistPollenTime = (hourRaw: string, minuteRaw: string) => {
-    const hour = Number(hourRaw.replace(/\D/g, ''));
-    const minute = Number(minuteRaw.replace(/\D/g, ''));
-    if (!Number.isFinite(hour) || !Number.isFinite(minute)) return;
-    setPollenReminderTime(hour, minute);
+  const persistPollenTime = (value: string) => {
+    const parsed = parseClockValue(value);
+    if (!parsed) return;
+    setPollenReminderTime(parsed.hour, parsed.minute);
   };
 
-  const savePollenTimeAndReschedule = async () => {
+  const savePollenTimeAndReschedule = async (nextTime = pollenTime) => {
     if (isWeb) return;
 
-    persistPollenTime(pollenHour, pollenMinute);
+    persistPollenTime(nextTime);
     if (!pollenEnabled) return;
 
     setLoading(true);
@@ -175,10 +181,10 @@ export default function NotificationsScreen() {
     }
   };
 
-  const saveTimeAndReschedule = async () => {
+  const saveTimeAndReschedule = async (nextTime = reminderTime) => {
     if (isWeb) return;
 
-    persistTime(reminderHour, reminderMinute);
+    persistTime(nextTime);
     if (!reminderEnabled) return;
 
     setLoading(true);
@@ -286,41 +292,15 @@ export default function NotificationsScreen() {
 
         {!isWeb ? (
           <>
-            <Text style={[ui.sectionLabel, styles.timeLabel]}>{t('notifications.diaryTimeLabel')}</Text>
-            <View style={styles.timeRow}>
-              <View style={styles.timeField}>
-                <Text style={styles.timeFieldLabel}>{t('notifications.diaryHour')}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={reminderHour}
-                  onChangeText={(value) => {
-                    const next = value.replace(/\D/g, '').slice(0, 2);
-                    setReminderHour(next);
-                  }}
-                  onBlur={() => void saveTimeAndReschedule()}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  editable={!loading}
-                  placeholderTextColor={theme.colors.textMuted}
-                />
-              </View>
-              <View style={styles.timeField}>
-                <Text style={styles.timeFieldLabel}>{t('notifications.diaryMinute')}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={reminderMinute}
-                  onChangeText={(value) => {
-                    const next = value.replace(/\D/g, '').slice(0, 2);
-                    setReminderMinute(next);
-                  }}
-                  onBlur={() => void saveTimeAndReschedule()}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  editable={!loading}
-                  placeholderTextColor={theme.colors.textMuted}
-                />
-              </View>
-            </View>
+            <DateTimeField
+              label={t('notifications.diaryTimeLabel')}
+              value={reminderTime}
+              mode="time"
+              onChange={(value) => {
+                setReminderTime(value);
+                void saveTimeAndReschedule(value);
+              }}
+            />
             <Button
               label={t('notifications.preview')}
               variant="secondary"
@@ -398,41 +378,15 @@ export default function NotificationsScreen() {
 
         {!isWeb ? (
           <>
-            <Text style={[ui.sectionLabel, styles.timeLabel]}>{t('notifications.pollenTimeLabel')}</Text>
-            <View style={styles.timeRow}>
-              <View style={styles.timeField}>
-                <Text style={styles.timeFieldLabel}>{t('notifications.pollenHour')}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={pollenHour}
-                  onChangeText={(value) => {
-                    const next = value.replace(/\D/g, '').slice(0, 2);
-                    setPollenHour(next);
-                  }}
-                  onBlur={() => void savePollenTimeAndReschedule()}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  editable={!loading}
-                  placeholderTextColor={theme.colors.textMuted}
-                />
-              </View>
-              <View style={styles.timeField}>
-                <Text style={styles.timeFieldLabel}>{t('notifications.pollenMinute')}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={pollenMinute}
-                  onChangeText={(value) => {
-                    const next = value.replace(/\D/g, '').slice(0, 2);
-                    setPollenMinute(next);
-                  }}
-                  onBlur={() => void savePollenTimeAndReschedule()}
-                  keyboardType="number-pad"
-                  maxLength={2}
-                  editable={!loading}
-                  placeholderTextColor={theme.colors.textMuted}
-                />
-              </View>
-            </View>
+            <DateTimeField
+              label={t('notifications.pollenTimeLabel')}
+              value={pollenTime}
+              mode="time"
+              onChange={(value) => {
+                setPollenTime(value);
+                void savePollenTimeAndReschedule(value);
+              }}
+            />
             <Text style={[ui.sectionLabel, styles.timeLabel]}>{t('notifications.pollenThresholdLabel')}</Text>
             <View style={styles.thresholdRow}>
               <Pressable
@@ -542,24 +496,6 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     switchGap: { marginTop: 14 },
     timeLabel: { marginTop: 14, marginBottom: 8 },
-    timeRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
-    timeField: { flex: 1, gap: 6 },
-    timeFieldLabel: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textMuted,
-    },
-    input: {
-      backgroundColor: colors.card,
-      borderRadius: 6,
-      borderWidth: 1,
-      borderColor: colors.borderInput,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      fontSize: 16,
-      fontFamily: fonts.sans,
-      color: colors.text,
-    },
     thresholdRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
     thresholdBtn: {
       flex: 1,

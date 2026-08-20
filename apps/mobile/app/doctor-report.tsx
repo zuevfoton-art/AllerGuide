@@ -142,14 +142,14 @@ export default function DoctorReportScreen() {
             </Text>
           </Pressable>
         ))}
-        <Pressable
-          style={[ui.toggle, quickPeriod === 'custom' && ui.toggleActive]}
-          onPress={() => setQuickPeriod('custom')}>
-          <Text style={[ui.toggleText, quickPeriod === 'custom' && ui.toggleTextActive]}>
-            {t('doctorReport.customPeriod')}
-          </Text>
-        </Pressable>
       </View>
+      <Pressable
+        style={styles.customRangeLink}
+        onPress={() => setQuickPeriod('custom')}
+        accessibilityRole="button">
+        <Ionicons name="calendar" size={15} color={theme.colors.accent} />
+        <Text style={styles.customRangeText}>{t('doctorReport.customRange')}</Text>
+      </Pressable>
 
       {quickPeriod === 'custom' ? (
         <View style={styles.rangeRow}>
@@ -202,7 +202,7 @@ export default function DoctorReportScreen() {
         onPress={() => void generate()}
       />
 
-      <Disclaimer>{t('doctorReport.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('doctorReport.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }
@@ -216,5 +216,17 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
     },
     rangeRow: { gap: 12 },
+    customRangeLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: -8,
+    },
+    customRangeText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+    },
   });
 }

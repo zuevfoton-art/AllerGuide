@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import {
   computePefTrend,
   getAsthmaPlanPersonalBest,
@@ -9,6 +8,7 @@ import {
   type AsthmaActionPlan,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -42,13 +42,12 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
 
   return (
     <GlassCard variant="soft" style={styles.card}>
-      <View style={styles.headerRow}>
-        <Ionicons name="fitness" size={18} color={theme.colors.accent} />
-        <Text style={ui.cardTitle}>{t('asthma.title')}</Text>
-        <Pressable style={styles.editBtn} onPress={() => router.push('/asthma-action-plan' as any)}>
-          <Text style={styles.editText}>{t('asthma.editPlan')}</Text>
-        </Pressable>
-      </View>
+      <CardTitle
+        icon="fitness"
+        action={t('asthma.editPlan')}
+        onAction={() => router.push('/asthma-action-plan' as any)}>
+        {t('asthma.title')}
+      </CardTitle>
 
       {!configured ? (
         <Text style={styles.hint}>{t('asthma.emptyPlan')}</Text>
@@ -67,23 +66,21 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
         </>
       )}
 
-      <View style={styles.statsRow}>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{trend.count}</Text>
-          <Text style={styles.statLabel}>{t('asthma.pef30d')}</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={[styles.statValue, { color: zoneColor(trend.latestZone, theme.colors) }]}>
-            {trend.latest ?? '—'}
-          </Text>
-          <Text style={styles.statLabel}>{t('asthma.latestPef')}</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={[styles.statValue, { color: zoneColor(trend.latestZone, theme.colors) }]}>
-            {trend.latestZone ? t(`asthma.zone.${trend.latestZone}`) : '—'}
-          </Text>
-          <Text style={styles.statLabel}>{t('asthma.zoneLabel')}</Text>
-        </View>
+      <View style={ui.kpiRow}>
+        <Text style={ui.kpiLabel}>{t('asthma.pef30d')}</Text>
+        <Text style={ui.kpiValue}>{trend.count}</Text>
+      </View>
+      <View style={ui.kpiRow}>
+        <Text style={ui.kpiLabel}>{t('asthma.latestPef')}</Text>
+        <Text style={[ui.kpiValue, { color: zoneColor(trend.latestZone, theme.colors) }]}>
+          {trend.latest ?? '—'}
+        </Text>
+      </View>
+      <View style={ui.kpiRow}>
+        <Text style={ui.kpiLabel}>{t('asthma.zoneLabel')}</Text>
+        <Text style={[ui.kpiValue, { color: zoneColor(trend.latestZone, theme.colors) }]}>
+          {trend.latestZone ? t(`asthma.zone.${trend.latestZone}`) : '—'}
+        </Text>
       </View>
 
       {trend.latestZone && trend.latestPercentOfBest != null ? (
@@ -104,14 +101,6 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     card: { gap: 10 },
-    headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    editBtn: { marginLeft: 'auto' },
-    editText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.accent,
-    },
     hint: {
       fontFamily: fonts.sans,
       fontSize: 13,
@@ -123,29 +112,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 17,
-    },
-    statsRow: { flexDirection: 'row', gap: 8 },
-    stat: {
-      flex: 1,
-      backgroundColor: colors.surfaceMuted,
-      borderRadius: 6,
-      paddingVertical: 10,
-      paddingHorizontal: 8,
-      alignItems: 'center',
-      gap: 2,
-    },
-    statValue: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 16,
-      fontWeight: '700',
-      color: colors.head,
-      textAlign: 'center',
-    },
-    statLabel: {
-      fontFamily: fonts.sans,
-      fontSize: 10,
-      color: colors.textMuted,
-      textAlign: 'center',
     },
     zoneHint: {
       fontFamily: fonts.sans,

@@ -2,9 +2,8 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies, type Profile } from '@allerguide/core';
-import { deleteProfile, listProfiles } from '@/src/services/profile-service';
+import { listProfiles } from '@/src/services/profile-service';
 import { confirmDeleteAccount } from '@/src/utils/confirm-delete-account';
-import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
 import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
@@ -52,19 +51,6 @@ export default function ProfileScreen() {
     }, [refresh]),
   );
 
-  const confirmDelete = (id: number, name: string) => {
-    confirmDeleteProfile({
-      title: t('profiles.deleteTitle'),
-      message: t('profiles.deleteMessage', { name }),
-      cancelLabel: t('common.cancel'),
-      deleteLabel: t('common.delete'),
-      onConfirm: async () => {
-        await deleteProfile(id);
-        refresh();
-      },
-    });
-  };
-
   const openEdit = (id: number) => {
     router.push({ pathname: '/profile-edit', params: { id: String(id) } });
   };
@@ -96,9 +82,12 @@ export default function ProfileScreen() {
             const allergies = parseAllergies(profile.allergies);
             const typeLabel = profile.type === 'self' ? t('profiles.self') : t('profiles.child');
             return (
-              <View
+              <Pressable
                 key={profile.id}
-                style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}>
+                style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}
+                onPress={() => openEdit(profile.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`${profile.name}, ${t('common.edit')}`}>
                 <View style={styles.rowBody}>
                   <Text style={styles.rowTitle}>
                     {profile.name} · {typeLabel}
@@ -107,22 +96,8 @@ export default function ProfileScreen() {
                     {profile.birthYear} · {allergies.join(', ') || t('profiles.noAllergens')}
                   </Text>
                 </View>
-                <View style={styles.rowActions}>
-                  <Button
-                    label={t('profiles.edit')}
-                    variant="secondary"
-                    size="sm"
-                    onPress={() => openEdit(profile.id)}
-                  />
-                  <Pressable
-                    testID="profile-delete"
-                    style={styles.deleteLink}
-                    onPress={() => confirmDelete(profile.id, profile.name)}
-                    accessibilityRole="button">
-                    <Text style={styles.deleteLinkText}>{t('profiles.delete')}</Text>
-                  </Pressable>
-                </View>
-              </View>
+                <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+              </Pressable>
             );
           })
         )}
@@ -273,7 +248,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     listHeadPad: { paddingHorizontal: 16, paddingVertical: 16 },
     row: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       gap: 12,
       paddingHorizontal: 16,
       paddingVertical: 14,
@@ -291,14 +266,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 17,
-    },
-    rowActions: { alignItems: 'flex-end', gap: 6 },
-    deleteLink: { paddingVertical: 2, paddingHorizontal: 4, minHeight: 28, justifyContent: 'center' },
-    deleteLinkText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.danger,
     },
     empty: {
       fontFamily: fonts.sans,

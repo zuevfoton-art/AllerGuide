@@ -39,6 +39,7 @@ export type LocaleMessages = {
     name: string;
     years: string;
     daysShort: string;
+    skipToContent: string;
   };
   brand: {
     productName: string;
@@ -168,6 +169,8 @@ export type LocaleMessages = {
     profilePrefix: string;
     selectProfile: string;
     wellnessTitle: string;
+    stateToday: string;
+    factors: string;
     details: string;
     pollen: string;
     air: string;
@@ -190,6 +193,7 @@ export type LocaleMessages = {
     marketplaceEmpty: string;
     marketplaceOpen: string;
     disclaimer: string;
+    disclaimerShort: string;
     phenotypeHintsTitle: string;
     insightsTitle: string;
     insightsEmpty: string;
@@ -222,8 +226,11 @@ export type LocaleMessages = {
     history: string;
     refresh: string;
     doctorReport: string;
+    courseShort: string;
+    reportShort: string;
     empty: string;
     disclaimer: string;
+    disclaimerShort: string;
     deleteTitle: string;
     deleteMessage: string;
     saveChanges: string;
@@ -768,6 +775,9 @@ export type LocaleMessages = {
     privacyBody: string;
     termsBody: string;
   };
+  disclaimer: {
+    details: string;
+  };
   notifications: {
     eyebrow: string;
     title: string;
@@ -784,8 +794,6 @@ export type LocaleMessages = {
     diaryTitle: string;
     diaryHint: string;
     diaryTimeLabel: string;
-    diaryHour: string;
-    diaryMinute: string;
     diaryAt: string;
     diaryPushTitle: string;
     diaryPushBody: string;
@@ -823,8 +831,6 @@ export type LocaleMessages = {
     pollenTitle: string;
     pollenHint: string;
     pollenTimeLabel: string;
-    pollenHour: string;
-    pollenMinute: string;
     pollenAt: string;
     pollenThresholdLabel: string;
     pollenThresholdHigh: string;
@@ -1123,12 +1129,12 @@ export type LocaleMessages = {
     verifyConfirm: string;
     saveCourse: string;
     disclaimer: string;
+    disclaimerShort: string;
     noProfile: string;
     reminderLabel: string;
     reminderOn: string;
     reminderOff: string;
-    reminderHour: string;
-    reminderMinute: string;
+    reminderTime: string;
     reminderHint: string;
     reminderAt: string;
     addReminderTime: string;
@@ -1258,6 +1264,7 @@ export type LocaleMessages = {
     call: string;
     tip: string;
     disclaimer: string;
+    disclaimerShort: string;
     passportTitle: string;
     passportEmpty: string;
     drugIntolerances: string;
@@ -1270,6 +1277,11 @@ export type LocaleMessages = {
     sharePassport: string;
     exportPdf: string;
     sharing: string;
+    allContacts: string;
+    ageYears: string;
+    ageUnitOne: string;
+    ageUnitFew: string;
+    ageUnitMany: string;
   };
   sosEdit: {
     title: string;
@@ -1308,13 +1320,14 @@ export type LocaleMessages = {
     subtitle: string;
     eyebrow: string;
     period: string;
-    customPeriod: string;
+    customRange: string;
     fromDate: string;
     toDate: string;
     blocks: string;
     generating: string;
     generate: string;
     disclaimer: string;
+    disclaimerShort: string;
   };
   expert: {
     back: string;
