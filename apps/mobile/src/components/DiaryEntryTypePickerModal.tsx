@@ -122,19 +122,27 @@ export function DiaryEntryTypePickerModal({
                 <View style={styles.grabber} />
               </View>
               <View style={styles.header}>
-                <Pressable
-                  style={styles.headerBtn}
-                  onPress={handleLeftPress}
-                  accessibilityRole="button"
-                  accessibilityLabel={scaleStep ? t('common.back') : t('common.cancel')}>
-                  <Text style={styles.headerBtnText}>
-                    {scaleStep ? t('common.back') : t('common.cancel')}
-                  </Text>
-                </Pressable>
+                {scaleStep ? (
+                  <Pressable
+                    style={styles.headerBtn}
+                    onPress={handleLeftPress}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('common.back')}>
+                    <Text style={styles.headerBtnText}>{t('common.back')}</Text>
+                  </Pressable>
+                ) : (
+                  <View style={styles.headerBtn} />
+                )}
                 <Text style={styles.headerTitle}>
                   {scaleStep ? t('diary.scalePick') : t('diary.entryPickerTitle')}
                 </Text>
-                <View style={styles.headerBtn} />
+                <Pressable
+                  style={styles.headerBtn}
+                  onPress={handleClose}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common.done')}>
+                  <Text style={[styles.headerBtnText, styles.headerBtnTextEnd]}>{t('common.done')}</Text>
+                </Pressable>
               </View>
               <ScrollView
                 style={styles.scroll}
@@ -292,6 +300,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 15,
       fontWeight: '600',
       color: colors.accent,
+    },
+    headerBtnTextEnd: {
+      textAlign: 'right',
     },
     headerTitle: {
       fontFamily: fonts.sansSemiBold,

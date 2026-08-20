@@ -467,12 +467,11 @@ export function DiaryWizard({
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View style={styles.actions}>
-        <Pressable
-          style={[styles.secondaryBtn, sectionIndex === 0 && stepIndex === 0 && styles.btnDisabled]}
-          disabled={sectionIndex === 0 && stepIndex === 0}
-          onPress={goBack}>
-          <Text style={styles.secondaryText}>{t('common.back')}</Text>
-        </Pressable>
+        {sectionIndex === 0 && stepIndex === 0 ? null : (
+          <Pressable style={styles.secondaryBtn} onPress={goBack}>
+            <Text style={styles.secondaryText}>{t('common.back')}</Text>
+          </Pressable>
+        )}
         <Pressable
           style={[styles.primaryBtn, !canAdvanceCurrentStep && styles.btnDisabled]}
           disabled={!canAdvanceCurrentStep}
