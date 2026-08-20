@@ -193,6 +193,7 @@ export type LocaleMessages = {
     marketplaceEmpty: string;
     marketplaceOpen: string;
     disclaimer: string;
+    disclaimerShort: string;
     phenotypeHintsTitle: string;
     insightsTitle: string;
     insightsEmpty: string;
@@ -229,6 +230,7 @@ export type LocaleMessages = {
     reportShort: string;
     empty: string;
     disclaimer: string;
+    disclaimerShort: string;
     deleteTitle: string;
     deleteMessage: string;
     saveChanges: string;
@@ -1127,6 +1129,7 @@ export type LocaleMessages = {
     verifyConfirm: string;
     saveCourse: string;
     disclaimer: string;
+    disclaimerShort: string;
     noProfile: string;
     reminderLabel: string;
     reminderOn: string;
@@ -1261,6 +1264,7 @@ export type LocaleMessages = {
     call: string;
     tip: string;
     disclaimer: string;
+    disclaimerShort: string;
     passportTitle: string;
     passportEmpty: string;
     drugIntolerances: string;
@@ -1323,6 +1327,7 @@ export type LocaleMessages = {
     generating: string;
     generate: string;
     disclaimer: string;
+    disclaimerShort: string;
   };
   expert: {
     back: string;

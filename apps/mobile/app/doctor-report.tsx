@@ -202,7 +202,7 @@ export default function DoctorReportScreen() {
         onPress={() => void generate()}
       />
 
-      <Disclaimer>{t('doctorReport.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('doctorReport.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }

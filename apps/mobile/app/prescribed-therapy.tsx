@@ -410,7 +410,7 @@ export default function PrescribedTherapyScreen() {
         onPress={goToNextFromForm}
       />
 
-      <Disclaimer>{t('prescribedTherapy.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('prescribedTherapy.disclaimerShort')}</Disclaimer>
 
       <Modal visible={parseTextOpen} transparent animationType="slide" onRequestClose={() => setParseTextOpen(false)}>
         <ModalKeyboardAvoid style={styles.modalBackdrop}>
@@ -613,7 +613,7 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
         block
         onPress={() => void onSave()}
       />
-      <Disclaimer>{t('prescribedTherapy.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('prescribedTherapy.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }

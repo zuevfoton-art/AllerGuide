@@ -383,7 +383,7 @@ export default function SosScreen() {
         <Text style={styles.tipText}>{t('sos.tip')}</Text>
       </View>
 
-      <Disclaimer>{t('sos.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('sos.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }

@@ -617,7 +617,7 @@ export default function DiaryScreen() {
         />
       ) : null}
 
-      <Disclaimer>{t('diary.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('diary.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }
