@@ -257,6 +257,7 @@ export default function HomeScreen() {
       ) : null}
 
       {loadingWellness && !wellness ? null : (
+      <>
       <GlassCard padded={false}>
         <View style={[styles.listHead, styles.listHeadPad]}>
           <Text style={ui.cardTitle}>{t('home.insightsTitle')}</Text>
@@ -295,6 +296,7 @@ export default function HomeScreen() {
           <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
         </Pressable>
       </GlassCard>
+      </>
       )}
 
       <Disclaimer compact>{t('home.disclaimerShort')}</Disclaimer>
