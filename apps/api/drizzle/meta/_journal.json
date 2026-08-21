@@ -71,6 +71,13 @@
       "when": 1786980000000,
       "tag": "0009_catalog_medicines",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787120000000,
+      "tag": "0010_market_catalog",
+      "breakpoints": true
     }
   ]
 }

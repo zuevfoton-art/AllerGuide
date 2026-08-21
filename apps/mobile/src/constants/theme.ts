@@ -70,6 +70,9 @@ export type ThemeColors = {
   surfaceMuted: string;
   info: string;
   infoLight: string;
+  focusRing: string;
+  skeletonBase: string;
+  skeletonSheen: string;
 };
 
 export const lightColors: ThemeColors = {
@@ -118,6 +121,9 @@ export const lightColors: ThemeColors = {
   surfaceMuted: '#F1F5F9',
   info: '#2A9D8F',
   infoLight: '#E6F6F4',
+  focusRing: 'rgba(42,157,143,0.35)',
+  skeletonBase: '#EDF1F5',
+  skeletonSheen: '#F8FAFC',
 };
 
 export const darkColors: ThemeColors = {
@@ -166,6 +172,9 @@ export const darkColors: ThemeColors = {
   surfaceMuted: '#1E293B',
   info: '#3DB8A8',
   infoLight: '#134E48',
+  focusRing: 'rgba(61,184,168,0.45)',
+  skeletonBase: '#1E293B',
+  skeletonSheen: '#263349',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {

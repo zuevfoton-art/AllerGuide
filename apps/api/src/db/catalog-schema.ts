@@ -111,6 +111,61 @@ export const aliasFeedback = catalogSchema.table(
   (table) => [index('alias_feedback_status_idx').on(table.status)],
 );
 
+/**
+ * Curated marketplace cards (Yandex Market + OTC pharmacy).
+ * Draft until a human sets allergen ids. Never store user data here.
+ */
+export const marketProducts = catalogSchema.table(
+  'market_products',
+  {
+    id: varchar('id', { length: 128 }).primaryKey(),
+    provider: varchar('provider', { length: 32 }).notNull(),
+    providerSku: varchar('provider_sku', { length: 128 }).notNull().default(''),
+    title: text('title').notNull(),
+    why: text('why').notNull().default(''),
+    imageUrl: text('image_url').notNull().default(''),
+    icon: varchar('icon', { length: 64 }).notNull().default('basket'),
+    category: varchar('category', { length: 32 }).notNull(),
+    kind: varchar('kind', { length: 16 }).notNull().default('regular'),
+    colorKey: varchar('color_key', { length: 16 }).notNull().default('accent'),
+    forAllergenIds: jsonb('for_allergen_ids').$type<string[]>().notNull().default([]),
+    containsAllergenIds: jsonb('contains_allergen_ids').$type<string[]>().notNull().default([]),
+    moderationStatus: varchar('moderation_status', { length: 16 }).notNull().default('draft'),
+    prescriptionOnly: boolean('prescription_only').notNull().default(false),
+    showPrice: boolean('show_price').notNull().default(true),
+    priceRub: integer('price_rub'),
+    refreshedAt: timestamp('refreshed_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('market_products_provider_sku_uidx').on(table.provider, table.providerSku),
+    index('market_products_status_idx').on(table.moderationStatus),
+    index('market_products_category_idx').on(table.category),
+    index('market_products_kind_idx').on(table.kind),
+  ],
+);
+
+export const marketOffers = catalogSchema.table(
+  'market_offers',
+  {
+    id: varchar('id', { length: 128 }).primaryKey(),
+    productId: varchar('product_id', { length: 128 }).notNull(),
+    merchant: varchar('merchant', { length: 32 }).notNull(),
+    url: text('url').notNull(),
+    sku: varchar('sku', { length: 128 }),
+    erid: varchar('erid', { length: 128 }),
+    priceRub: integer('price_rub'),
+    photoUrl: text('photo_url'),
+    inStock: boolean('in_stock').notNull().default(true),
+    refreshedAt: timestamp('refreshed_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('market_offers_product_idx').on(table.productId),
+    index('market_offers_merchant_idx').on(table.merchant),
+  ],
+);
+
 export type AllergenRow = typeof allergens.$inferSelect;
 export type NewAllergenRow = typeof allergens.$inferInsert;
 export type CrossReactionRow = typeof crossReactions.$inferSelect;
@@ -118,3 +173,7 @@ export type ProductRow = typeof products.$inferSelect;
 export type NewProductRow = typeof products.$inferInsert;
 export type MedicineRow = typeof medicines.$inferSelect;
 export type NewMedicineRow = typeof medicines.$inferInsert;
+export type MarketProductRow = typeof marketProducts.$inferSelect;
+export type NewMarketProductRow = typeof marketProducts.$inferInsert;
+export type MarketOfferRow = typeof marketOffers.$inferSelect;
+export type NewMarketOfferRow = typeof marketOffers.$inferInsert;

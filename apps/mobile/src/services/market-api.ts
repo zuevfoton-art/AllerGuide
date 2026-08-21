@@ -1,5 +1,5 @@
+import type { MarketMerchant, MarketplaceProduct } from '@allerguide/core';
 import { getApiBaseUrl } from '@/src/services/api-client';
-import type { MarketMerchant } from '@allerguide/core';
 
 export interface YandexResolveResponse {
   ok: boolean;
@@ -9,6 +9,14 @@ export interface YandexResolveResponse {
   title?: string;
   priceRub?: number;
   photoUrl?: string;
+  error?: string;
+}
+
+export interface MarketCatalogResponse {
+  ok: boolean;
+  source?: 'db' | 'seed';
+  products?: MarketplaceProduct[];
+  total?: number;
   error?: string;
 }
 
@@ -50,4 +58,25 @@ export async function resolveYandexMarketOffer(input: {
   }
 
   return { url: input.fallbackUrl, merchant: 'yandex_market', source: 'seed' };
+}
+
+export async function fetchMarketCatalog(options?: {
+  category?: string;
+  kind?: string;
+  limit?: number;
+}): Promise<MarketplaceProduct[] | null> {
+  const base = getApiBaseUrl().replace(/\/$/, '');
+  if (!base) return null;
+
+  const params = new URLSearchParams();
+  if (options?.category) params.set('category', options.category);
+  if (options?.kind) params.set('kind', options.kind);
+  params.set('limit', String(options?.limit ?? 80));
+
+  const response = await fetch(`${base}/api/market/catalog?${params.toString()}`);
+  const payload = (await response.json()) as MarketCatalogResponse;
+  if (!response.ok || !payload.ok || !Array.isArray(payload.products)) {
+    return null;
+  }
+  return payload.products;
 }

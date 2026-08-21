@@ -2,10 +2,8 @@ name: Maestro Nightly
 
 # P2.1c — nightly Maestro E2E (offline preview + staging auth/backup with local API).
 #
-# Schedule is inert while this workflow is disabled in the Actions UI
-# (state was `disabled_manually` after the 2026-08 failure streak).
-# After merge: Actions → Maestro Nightly → Enable workflow
-# (or `gh workflow enable maestro-nightly.yml`), then Run workflow.
+# APK must be assembleRelease (embedded JS). assembleDebug skips the Metro bundle
+# and the first flow dies on `auth-register-link` (~45s) with no login screen.
 on:
   schedule:
     - cron: '0 3 * * *'
@@ -21,6 +19,7 @@ permissions:
 env:
   MAESTRO_VERSION: '2.8.0'
   MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+  MAESTRO_CLI_NO_ANALYTICS: '1'
 
 jobs:
   maestro-offline:
@@ -76,16 +75,17 @@ jobs:
           emulator-boot-timeout: 900
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
-            maestro test --format junit --output maestro-offline-report.xml apps/mobile/.maestro/flows/smoke-all.yaml
+          script: ./scripts/maestro-run-emulator.sh preview
 
       - name: Upload Maestro report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: maestro-offline-report
-          path: maestro-offline-report.xml
+          path: |
+            maestro-offline-report.xml
+            maestro-offline-debug
+            maestro-offline-logcat.txt
           if-no-files-found: ignore
 
   maestro-staging:
@@ -163,16 +163,17 @@ jobs:
           emulator-boot-timeout: 900
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
-            maestro test --format junit --output maestro-staging-report.xml apps/mobile/.maestro/flows/staging-smoke-all.yaml
+          script: ./scripts/maestro-run-emulator.sh staging
 
       - name: Upload Maestro report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: maestro-staging-report
-          path: maestro-staging-report.xml
+          path: |
+            maestro-staging-report.xml
+            maestro-staging-debug
+            maestro-staging-logcat.txt
           if-no-files-found: ignore
 
       - name: API log on failure

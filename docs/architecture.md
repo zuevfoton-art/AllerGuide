@@ -232,7 +232,9 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `diary-auto-metadata-service.ts` | Скрытые pollen/scan/meds metadata при save |
 | `pollen-map-service.ts` / `pollen-heatmap-service.ts` | Open-Meteo + Google pollen tiles |
 | `location-service.ts` / `place-service.ts` | Гео / POI (`EXPO_PUBLIC_MAP_PLACES` / catalog + ADAIR fallback) |
-| `market-api.ts` | Yandex Market affiliate offers |
+| `market-api.ts` | Market catalog + Yandex offer resolve |
+| `market-catalog-cache-service.ts` | Last-good Market snapshot (SQLite / IndexedDB) |
+| `product-service.ts` | online → cache → seed + локальный аллергенный фильтр |
 | `asit-*-service.ts`, `prescribed-therapy*-service.ts` | АСИТ / терапия + напоминания |
 | `asthma-action-plan-service.ts`, `insect-action-plan-service.ts`, `food-drug-registry-service.ts` | Клинические планы |
 | `doctor-report-service.ts` | PDF-отчёт для врача |
@@ -264,6 +266,8 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
 | `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` (default **on**; `false`/`off` disables) | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
 | `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY` (default **on**; `false`/`off` disables) | Google Air Quality (UAQI + советы) через API proxy |
+| `MARKET_LIVE_CATALOG_ENABLED` | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` (default **on**; `false`/`off` disables) | `GET /api/market/catalog`; иначе last-good / seed |
+| `MARKET_MEDICINES_ENABLED` | `EXPO_PUBLIC_MARKET_MEDICINES` (default **on**; `false`/`off` disables) | OTC-аптечные карточки на Маркете |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
 | `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
 
@@ -570,8 +574,12 @@ Drizzle-объекты схемо-квалифицированы — код за
 
 ### Market (`routes/market.ts`)
 
-- Affiliate offers: `YANDEX_MARKET_CLID` / `OAUTH_TOKEN` / `ERID`
-- Опционально curator search: `YANDEX_MARKET_CURATOR_SEARCH`
+- Каталог: `GET /api/market/catalog` из `catalog.market_products` (published) или bundled seed
+- Импорт фидов: `YANDEX_MARKET_FEED_URL` (YML Дистрибуции) и опционально `MARKET_PHARMACY_FEED_*` (OTC only, draft)
+- Affiliate resolve: `YANDEX_MARKET_CLID` / `OAUTH_TOKEN` / `ERID`
+- Curator search снят (Affiliate `GET /search` 22.06.2026): `YANDEX_MARKET_CURATOR_SEARCH` оставить `false`
+- Mobile: `EXPO_PUBLIC_MARKET_LIVE_CATALOG` + snapshot SQLite/IndexedDB; аллергенный фильтр только локально
+- См. [`yandex-market-affiliate.md`](./yandex-market-affiliate.md)
 
 ### Облачная синхронизация (`routes/sync.ts`)
 
@@ -627,7 +635,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `icd10-reference` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
-| Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `wellness*` |
+| Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
 | Auth / sync | `auth`, `password`, `phone`, `sync`, `crypto` |
 | Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
 
@@ -714,7 +722,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | Компонент | Файл | Включение |
 |-----------|------|-----------|
 | Аналитика | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED`, опц. `EXPO_PUBLIC_ANALYTICS_ENDPOINT` |
-| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `profile_setup_step_*` |
+| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*` |
 | Crash reporting | `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN`; иначе console |
 
 ---

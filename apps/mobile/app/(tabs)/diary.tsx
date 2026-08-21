@@ -46,6 +46,7 @@ import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
@@ -480,13 +481,27 @@ export default function DiaryScreen() {
         block
         onPress={() => setEntryPickerOpen(true)}
       />
-      <Button
-        testID="diary-setup-course"
-        label={t('diary.setupCourse')}
-        variant="secondary"
-        block
-        onPress={() => setCoursePickerOpen(true)}
-      />
+      <View style={styles.actionRow}>
+        <View style={styles.actionHalf}>
+          <Button
+            testID="diary-setup-course"
+            label={t('diary.courseShort')}
+            variant="secondary"
+            block
+            icon="medical"
+            onPress={() => setCoursePickerOpen(true)}
+          />
+        </View>
+        <View style={styles.actionHalf}>
+          <Button
+            label={t('diary.reportShort')}
+            variant="secondary"
+            block
+            icon="document"
+            onPress={() => router.push('/doctor-report' as any)}
+          />
+        </View>
+      </View>
 
       <DiaryEntryTypePickerModal
         visible={entryPickerOpen}
@@ -527,13 +542,6 @@ export default function DiaryScreen() {
         {renderEditor()}
       </DiaryEditorModal>
 
-      <Button
-        label={t('diary.doctorReport')}
-        variant="secondary"
-        block
-        onPress={() => router.push('/doctor-report' as any)}
-      />
-
       <DiaryInsightsCard entries={list} />
 
       {list.filter((item) => isDiaryHistoryVisible(item.type)).length === 0 ? (
@@ -541,7 +549,9 @@ export default function DiaryScreen() {
       ) : (
         <GlassCard padded={false}>
           <View style={styles.listHead}>
-            <Text style={[ui.cardTitle, styles.listHeadPad]}>{t('diary.history')}</Text>
+            <View style={styles.listHeadPad}>
+              <CardTitle>{t('diary.history')}</CardTitle>
+            </View>
           </View>
 
           {list.filter((item) => isDiaryHistoryVisible(item.type)).map((item, index, visible) => {
@@ -607,7 +617,7 @@ export default function DiaryScreen() {
         />
       ) : null}
 
-      <Disclaimer>{t('diary.disclaimer')}</Disclaimer>
+      <Disclaimer compact>{t('diary.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }
@@ -627,6 +637,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    actionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    actionHalf: {
+      flex: 1,
+    },
     listHead: {
       flexDirection: 'row',
       justifyContent: 'space-between',

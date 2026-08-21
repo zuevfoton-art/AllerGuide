@@ -1,0 +1,11 @@
+# Scroll a control on-screen, then tap. Use after hideKeyboard so IME is gone.
+appId: com.aclearo.app
+---
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: ${FIELD_ID}
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: ${FIELD_ID}

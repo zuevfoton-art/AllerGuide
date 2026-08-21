@@ -131,7 +131,7 @@ export default function OnboardingIntroScreen() {
               onNext={next}
               onSkip={finish}
             />
-            <Disclaimer showMdrFootnote>{t('onboardingIntro.disclaimer')}</Disclaimer>
+            <Disclaimer compact>{t('onboardingIntro.disclaimer')}</Disclaimer>
           </View>
         </View>
       </SafeAreaView>

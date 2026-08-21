@@ -28,6 +28,7 @@ const KNOWN_KEYS = [
   'ag_safe_products',
   'ag_alias_feedback',
   'ag_diary_attachments',
+  'ag_market_catalog',
 ] as const;
 
 const memory = new Map<string, unknown>();

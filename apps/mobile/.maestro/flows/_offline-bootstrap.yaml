@@ -1,26 +1,33 @@
 # Shared subflow: fresh install → register → onboarding → home (offline preview)
 appId: com.aclearo.app
 ---
-- clearState
-- launchApp
-- extendedWaitUntil:
-    visible:
-      id: auth-register-link
-    timeout: 30000
-- tapOn:
-    id: auth-register-link
+- launchApp:
+    clearState: true
+- runFlow: _wait-login.yaml
+- runFlow:
+    file: _tap-by-id.yaml
+    env:
+      FIELD_ID: auth-register-link
 - runScript: ../scripts/random-phone.js
-- tapOn:
-    id: auth-login-input
-- inputText: ${output.phone}
-- tapOn:
-    id: auth-password-input
-- inputText: maestro1
-- tapOn:
-    id: auth-confirm-password-input
-- inputText: maestro1
-- tapOn:
-    id: auth-submit
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-login-input
+      FIELD_VALUE: ${output.phone}
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-password-input
+      FIELD_VALUE: maestro1
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-confirm-password-input
+      FIELD_VALUE: maestro1
+- runFlow:
+    file: _tap-by-id.yaml
+    env:
+      FIELD_ID: auth-submit
 - extendedWaitUntil:
     visible:
       id: onboarding-intro-skip

@@ -1,0 +1,14 @@
+# Scroll a field on-screen, type, then dismiss the IME.
+# Pixel 6 + AuthHero + keyboard otherwise hides confirm/password/submit.
+appId: com.aclearo.app
+---
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: ${FIELD_ID}
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: ${FIELD_ID}
+- inputText: ${FIELD_VALUE}
+- hideKeyboard

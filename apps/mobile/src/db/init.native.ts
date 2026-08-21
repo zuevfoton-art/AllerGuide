@@ -92,6 +92,12 @@ export function initDb() {
       input TEXT NOT NULL,
       savedAt TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS market_catalog_snapshot (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      payload TEXT NOT NULL,
+      fetched_at TEXT NOT NULL,
+      source TEXT NOT NULL
+    );
   `);
 
   runMigrations(db as unknown as import('./types').DbLike);

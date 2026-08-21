@@ -119,3 +119,19 @@ export const MAP_PLACES_ENABLED = isDefaultOnPublicFlag(
 export const AIR_QUALITY_GOOGLE_ENABLED = isDefaultOnPublicFlag(
   process.env.EXPO_PUBLIC_AIR_QUALITY,
 );
+
+/**
+ * Fetch the live Market catalog from GET /api/market/catalog when an API URL
+ * is configured. Offline last-good snapshot + bundled seed remain the fallback.
+ * Explicit `false` / `off` keeps the device on the bundled seed only.
+ */
+export const MARKET_LIVE_CATALOG_ENABLED = isDefaultOnPublicFlag(
+  process.env.EXPO_PUBLIC_MARKET_LIVE_CATALOG,
+);
+
+/**
+ * Show curated OTC pharmacy cards on Market. Off only when explicitly disabled.
+ */
+export const MARKET_MEDICINES_ENABLED = isDefaultOnPublicFlag(
+  process.env.EXPO_PUBLIC_MARKET_MEDICINES,
+);

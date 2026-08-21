@@ -15,6 +15,10 @@ on:
         options:
           - 'true'
           - 'false'
+  # Tag path when workflow_dispatch is unavailable (same idea as staging-apk-gradle.yml).
+  push:
+    tags:
+      - 'eas-staging-*'
 
 concurrency:
   group: eas-staging-android
@@ -52,11 +56,13 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          WAIT_FLAG="--no-wait"
-          if [ "${{ inputs.wait }}" = "true" ]; then
-            WAIT_FLAG=""
+          WAIT_FLAG=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.wait }}" = "false" ]; then
+            WAIT_FLAG="--no-wait"
           fi
-          pnpm exec eas build \
+          # eas-cli 16.x on this runner fails tarball upload:
+          # "Cannot read properties of undefined (reading 'create')".
+          npx --yes eas-cli@22.0.0 build \
             --profile staging \
             --platform android \
             --non-interactive \

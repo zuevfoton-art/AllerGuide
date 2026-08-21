@@ -4,6 +4,7 @@ import {
   computeContainLayout,
   initialCropInDisplay,
   mapDisplayCropToImagePixels,
+  preferBitmapImageSize,
 } from '@/src/services/scanner-photo-geometry';
 
 describe('scanner-photo-geometry', () => {
@@ -75,6 +76,39 @@ describe('scanner-photo-geometry', () => {
     expect(next.height).toBe(110);
     expect(next.x + next.width).toBe(220);
     expect(next.y + next.height).toBe(220);
+  });
+
+  it('keeps the larger bitmap when onLoad reports a downsampled decode', () => {
+    expect(
+      preferBitmapImageSize({ width: 4032, height: 3024 }, { width: 1080, height: 810 }),
+    ).toEqual({ width: 4032, height: 3024 });
+  });
+
+  it('fills missing picker size from a later bitmap read', () => {
+    expect(preferBitmapImageSize({ width: 0, height: 0 }, { width: 3024, height: 4032 })).toEqual({
+      width: 3024,
+      height: 4032,
+    });
+  });
+
+  it('maps a full-frame display crop to the full bitmap, not a downsampled corner', () => {
+    const bitmap = { width: 4000, height: 3000 };
+    const layout = computeContainLayout(400, 300, bitmap.width, bitmap.height);
+    const crop = initialCropInDisplay(layout, 0);
+    const pixels = mapDisplayCropToImagePixels({
+      imageWidth: bitmap.width,
+      imageHeight: bitmap.height,
+      layout,
+      cropX: crop.x,
+      cropY: crop.y,
+      cropWidth: crop.width,
+      cropHeight: crop.height,
+    });
+
+    expect(pixels.originX).toBe(0);
+    expect(pixels.originY).toBe(0);
+    expect(pixels.width).toBe(4000);
+    expect(pixels.height).toBe(3000);
   });
 
   it('enforces minimum size when shrinking a corner', () => {

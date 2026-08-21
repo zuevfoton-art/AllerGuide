@@ -4,6 +4,13 @@ import {
   type MarketMerchant,
   type MarketOffer,
 } from './market-offers';
+import {
+  MARKETPLACE_SEED_PRODUCTS,
+  publishedMarketplaceSeed,
+  toCatalogProduct,
+  type MarketplaceCategory,
+  type MarketplaceProductKind,
+} from './marketplace-catalog';
 
 export interface CatalogProduct {
   id: string;
@@ -21,6 +28,11 @@ export interface CatalogProduct {
   affiliateUrl?: string;
   /** Curated merchant offers (Yandex Market first for RU). */
   offers?: MarketOffer[];
+  imageUrl?: string;
+  kind?: MarketplaceProductKind;
+  category?: MarketplaceCategory;
+  priceRub?: number;
+  showPrice?: boolean;
 }
 
 export interface CatalogPlace {
@@ -34,99 +46,10 @@ export interface CatalogPlace {
   tags: string[];
 }
 
-function yandexSearch(query: string): MarketOffer {
-  return {
-    merchant: 'yandex_market',
-    url: `https://market.yandex.ru/search?text=${encodeURIComponent(query)}`,
-  };
-}
+export const CATALOG_PRODUCTS: CatalogProduct[] = publishedMarketplaceSeed().map(toCatalogProduct);
 
-export const CATALOG_PRODUCTS: CatalogProduct[] = [
-  {
-    id: 'air-purifier',
-    title: 'Очиститель воздуха HEPA',
-    why: 'Снижает концентрацию пыльцы и аллергенов в воздухе',
-    icon: 'cloudy',
-    tag: 'Воздух',
-    colorKey: 'purple',
-    forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пылевые клещи', 'Бытовая аллергия'],
-    containsAllergens: [],
-    affiliateUrl: 'https://www.iherb.com/search?kw=hepa+air+purifier',
-    offers: [
-      yandexSearch('очиститель воздуха HEPA'),
-      {
-        merchant: 'iherb',
-        url: 'https://www.iherb.com/search?kw=hepa+air+purifier',
-      },
-    ],
-  },
-  {
-    id: 'hypo-cream',
-    title: 'Гипоаллергенный крем',
-    why: 'Без отдушек — для чувствительной кожи',
-    icon: 'hand-left',
-    tag: 'Кожа',
-    colorKey: 'pink',
-    forAllergens: ['Атопический дерматит', 'Молоко'],
-    containsAllergens: ['Молоко', 'Соя'],
-    offers: [yandexSearch('гипоаллергенный крем без отдушек')],
-  },
-  {
-    id: 'bed-covers',
-    title: 'Чехлы anti-dust mite',
-    why: 'Защита матраса и подушек от домашних клещей',
-    icon: 'bed',
-    tag: 'Дом',
-    colorKey: 'accent',
-    forAllergens: ['Пылевые клещи', 'Бытовая аллергия'],
-    containsAllergens: [],
-    offers: [yandexSearch('чехол anti dust mite матрас')],
-  },
-  {
-    id: 'oat-milk',
-    title: 'Овсяное молоко без глютена',
-    why: 'Альтернатива коровьему молоку',
-    icon: 'nutrition',
-    tag: 'Питание',
-    colorKey: 'success',
-    forAllergens: ['Молоко'],
-    containsAllergens: ['Молоко', 'Орехи'],
-    offers: [yandexSearch('овсяное молоко без глютена')],
-  },
-  {
-    id: 'sunflower-spread',
-    title: 'Паста без арахиса',
-    why: 'Без орехов и арахиса',
-    icon: 'fast-food',
-    tag: 'Питание',
-    colorKey: 'warning',
-    forAllergens: ['Арахис', 'Орехи'],
-    containsAllergens: ['Арахис', 'Орехи', 'Соя'],
-    offers: [yandexSearch('подсолнечная паста без арахиса')],
-  },
-  {
-    id: 'epipen-case',
-    title: 'Чехол для автоинжектора',
-    why: 'Удобное хранение экстренного препарата',
-    icon: 'medkit',
-    tag: 'SOS',
-    colorKey: 'purple',
-    forAllergens: [],
-    containsAllergens: [],
-    offers: [yandexSearch('чехол для автоинжектора эпинефрин')],
-  },
-  {
-    id: 'nasal-rinse',
-    title: 'Назальный ирригатор',
-    why: 'Промывание носа при поллинозе и рините',
-    icon: 'water',
-    tag: 'Воздух',
-    colorKey: 'accent',
-    forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пыльца злаков'],
-    containsAllergens: [],
-    offers: [yandexSearch('назальный ирригатор для промывания носа')],
-  },
-];
+/** Full curated marketplace seed including medicines. */
+export const MARKETPLACE_CATALOG_PRODUCTS = MARKETPLACE_SEED_PRODUCTS;
 
 export const CATALOG_PLACES: CatalogPlace[] = [
   {

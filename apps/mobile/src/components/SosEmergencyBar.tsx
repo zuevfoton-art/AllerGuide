@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/src/components/Button';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -12,6 +13,8 @@ type SosEmergencyBarProps = {
   callContactLabel: string;
   onCallEmergency: () => void;
   onCallContact: () => void;
+  allContactsLabel?: string;
+  onAllContacts?: () => void;
 };
 
 /** Pinned emergency actions — 103 + optional first contact, always visible while scrolling. */
@@ -23,6 +26,8 @@ export function SosEmergencyBar({
   callContactLabel,
   onCallEmergency,
   onCallContact,
+  allContactsLabel,
+  onAllContacts,
 }: SosEmergencyBarProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -59,6 +64,16 @@ export function SosEmergencyBar({
           />
         </View>
       ) : null}
+      {allContactsLabel && onAllContacts ? (
+        <Pressable
+          onPress={onAllContacts}
+          style={styles.allContacts}
+          accessibilityRole="button"
+          accessibilityLabel={allContactsLabel}>
+          <Text style={styles.allContactsText}>{allContactsLabel}</Text>
+          <Ionicons name="chevron-forward" size={13} color={theme.colors.accent} />
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -89,6 +104,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 12,
       color: colors.textMuted,
+    },
+    allContacts: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+      minHeight: 36,
+    },
+    allContactsText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
     },
   });
 }

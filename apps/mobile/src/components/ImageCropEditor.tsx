@@ -17,6 +17,8 @@ import {
   cropImageToBase64,
   initialCropInDisplay,
   mapDisplayCropToImagePixels,
+  preferBitmapImageSize,
+  resolveScanPhotoSize,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
   type DisplayCropBox,
@@ -94,6 +96,18 @@ export function ImageCropEditor({
     setCrop(null);
     setImageSize({ width: photo.width || 0, height: photo.height || 0 });
     setError(false);
+
+    if (photo.width > 0 && photo.height > 0) return;
+    let cancelled = false;
+    void resolveScanPhotoSize(photo.uri)
+      .then((size) => {
+        if (cancelled) return;
+        setImageSize((current) => preferBitmapImageSize(current, size));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, [photo.uri, photo.width, photo.height]);
 
   useEffect(() => {
@@ -116,12 +130,16 @@ export function ImageCropEditor({
     const source = event.nativeEvent?.source;
     const target = (event as { currentTarget?: { naturalWidth?: number; naturalHeight?: number } })
       .currentTarget;
-    const width = source?.width || target?.naturalWidth || photo.width;
-    const height = source?.height || target?.naturalHeight || photo.height;
+    const width = target?.naturalWidth || source?.width || photo.width;
+    const height = target?.naturalHeight || source?.height || photo.height;
     if (!width || !height) return;
+    const next = preferBitmapImageSize(imageSize, { width, height });
+    if (next.width === imageSize.width && next.height === imageSize.height) {
+      return;
+    }
     cropRef.current = null;
     setCrop(null);
-    setImageSize({ width, height });
+    setImageSize(next);
   };
 
   const applyDrag = (dx: number, dy: number) => {
@@ -191,9 +209,13 @@ export function ImageCropEditor({
     setBusy(true);
     setError(false);
     try {
+      const bitmap = preferBitmapImageSize(
+        imageSize,
+        await resolveScanPhotoSize(photo.uri).catch(() => imageSize),
+      );
       const pixelCrop = mapDisplayCropToImagePixels({
-        imageWidth: imageSize.width,
-        imageHeight: imageSize.height,
+        imageWidth: bitmap.width,
+        imageHeight: bitmap.height,
         layout,
         cropX: crop.x,
         cropY: crop.y,

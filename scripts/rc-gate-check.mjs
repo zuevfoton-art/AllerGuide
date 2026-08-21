@@ -88,6 +88,53 @@ function checkMaestroFlows() {
   } else {
     log(`Maestro smoke flows: ${smokeFlows.length}`);
   }
+
+  const buildScript = fs.readFileSync(path.join(root, 'scripts/maestro-build-apk.sh'), 'utf8');
+  if (!buildScript.includes('gradlew assembleRelease')) {
+    failures.push('scripts/maestro-build-apk.sh must run gradlew assembleRelease (embedded JS, no Metro)');
+  }
+  if (buildScript.includes('gradlew assembleDebug')) {
+    failures.push('scripts/maestro-build-apk.sh still calls gradlew assembleDebug (nightly cannot load JS)');
+  }
+
+  const workflow = fs.readFileSync(path.join(root, '.github/workflows/maestro-nightly.yml'), 'utf8');
+  if (!workflow.includes('maestro-run-emulator.sh')) {
+    failures.push('maestro-nightly.yml must run scripts/maestro-run-emulator.sh');
+  }
+  if (workflow.includes('app-debug.apk')) {
+    failures.push('maestro-nightly.yml still installs app-debug.apk');
+  }
+
+  const runner = fs.readFileSync(path.join(root, 'scripts/maestro-run-emulator.sh'), 'utf8');
+  if (!runner.includes('app-release.apk')) {
+    failures.push('scripts/maestro-run-emulator.sh must install app-release.apk');
+  }
+  if (!runner.includes('pm grant')) {
+    failures.push('scripts/maestro-run-emulator.sh must pre-grant runtime permissions');
+  }
+
+  const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
+  if (!waitLogin.includes('auth-mode-phone')) {
+    failures.push('_wait-login.yaml must wait for auth-mode-phone (above the hero fold)');
+  }
+
+  const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
+  if (!fillById.includes('hideKeyboard') || !fillById.includes('scrollUntilVisible')) {
+    failures.push('_fill-by-id.yaml must hideKeyboard + scrollUntilVisible');
+  }
+
+  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (!flow.includes('_wait-login.yaml')) {
+      failures.push(`${name}: must run _wait-login.yaml`);
+    }
+    if (!flow.includes('_fill-by-id.yaml')) {
+      failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
+    }
+    if (!flow.includes('auth-confirm-password-input')) {
+      failures.push(`${name}: must fill auth-confirm-password-input`);
+    }
+  }
 }
 
 async function checkStagingHealth() {
@@ -149,6 +196,7 @@ requireFile('docs/performance-api-infra.md', { optional: true });
 requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
+runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 

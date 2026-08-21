@@ -1,0 +1,74 @@
+import { describe, expect, it } from 'vitest';
+import {
+  MARKETPLACE_SEED_PRODUCTS,
+  canPublishMarketplaceProduct,
+  filterMarketplaceProductsForProfile,
+  getMarketplacePrimaryOffer,
+  looksLikePrescriptionText,
+  publishedMarketplaceSeed,
+  searchMarketplaceProducts,
+  toCatalogProduct,
+} from './marketplace-catalog';
+
+describe('marketplace catalog', () => {
+  it('publishes curated Yandex and OTC pharmacy seed items', () => {
+    const published = publishedMarketplaceSeed();
+    expect(published.length).toBeGreaterThanOrEqual(10);
+    expect(published.every((product) => product.imageUrl.startsWith('https://'))).toBe(true);
+    expect(published.filter((product) => product.provider === 'yandex_market').length).toBeGreaterThanOrEqual(5);
+    expect(published.filter((product) => product.kind === 'medicine').length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('never publishes prescription or priced medicines', () => {
+    for (const product of publishedMarketplaceSeed()) {
+      expect(product.prescriptionOnly).toBe(false);
+      if (product.kind === 'medicine') {
+        expect(product.showPrice).toBe(false);
+        expect(product.provider).toBe('pharmacy');
+      }
+    }
+  });
+
+  it('blocks publishing a prescription medicine with a price', () => {
+    const draft = {
+      ...MARKETPLACE_SEED_PRODUCTS[0]!,
+      kind: 'medicine' as const,
+      provider: 'pharmacy' as const,
+      prescriptionOnly: true,
+      showPrice: true,
+      priceRub: 199,
+    };
+    const result = canPublishMarketplaceProduct(draft);
+    expect(result.canPublish).toBe(false);
+    expect(result.reasons).toContain('prescription_forbidden');
+    expect(result.reasons).toContain('medicine_price_forbidden');
+  });
+
+  it('filters conflicting allergens by canonical ids', () => {
+    const filtered = filterMarketplaceProductsForProfile(publishedMarketplaceSeed(), ['milk']);
+    expect(filtered.some((product) => product.containsAllergenIds.includes('milk'))).toBe(false);
+    expect(filtered.some((product) => product.id === 'oat-milk')).toBe(false);
+    expect(filtered.some((product) => product.id === 'air-purifier')).toBe(true);
+  });
+
+  it('shows the published catalog when the profile has no allergen ids', () => {
+    const filtered = filterMarketplaceProductsForProfile(publishedMarketplaceSeed(), []);
+    expect(filtered.length).toBe(publishedMarketplaceSeed().length);
+  });
+
+  it('searches title and category', () => {
+    const hits = searchMarketplaceProducts(publishedMarketplaceSeed(), 'цетиризин');
+    expect(hits.map((product) => product.id)).toContain('cetirizine-otc');
+  });
+
+  it('prefers Yandex as the primary marketplace offer', () => {
+    const air = publishedMarketplaceSeed().find((product) => product.id === 'air-purifier');
+    expect(getMarketplacePrimaryOffer(air!)?.merchant).toBe('yandex_market');
+    expect(toCatalogProduct(air!).imageUrl).toBeTruthy();
+  });
+
+  it('detects prescription wording in feed text', () => {
+    expect(looksLikePrescriptionText('Таблетки по рецепту')).toBe(true);
+    expect(looksLikePrescriptionText('Цетиризин 10 мг')).toBe(false);
+  });
+});

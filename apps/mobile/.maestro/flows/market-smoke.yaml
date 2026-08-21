@@ -1,0 +1,18 @@
+# P2 — market: two-column catalog with photos
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: tab-market
+- extendedWaitUntil:
+    visible:
+      id: market-grid
+    timeout: 15000
+- assertVisible:
+    id: market-search
+- assertVisible:
+    id: market-filters
+- tapOn:
+    id: market-filter-pharmacy
+- assertVisible:
+    id: market-card-cetirizine-otc
