@@ -229,6 +229,10 @@ export type LocaleMessages = {
     courseShort: string;
     reportShort: string;
     empty: string;
+    outcomeNone: string;
+    outcomeMild: string;
+    outcomeModerate: string;
+    outcomeSevere: string;
     disclaimer: string;
     disclaimerShort: string;
     deleteTitle: string;

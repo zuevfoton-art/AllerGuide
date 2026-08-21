@@ -23,18 +23,18 @@ import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabI
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
-import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
+import {
+  resolveZoneColors,
+  useZoneColors,
+  zoneFromWellnessLevel,
+  zoneFromWellnessVerbalTier,
+} from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
-
-function wellnessBadgeKind(level: WellnessSnapshot['level']): 'ok' | 'warn' | 'danger' {
-  if (level === 'good') return 'ok';
-  if (level === 'high-risk') return 'danger';
-  return 'warn';
-}
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -99,7 +99,14 @@ export default function HomeScreen() {
     );
   }, [wellness, activeProfileId, profile, profileCapabilities]);
 
-  const badge = wellness ? badgeStyle(wellnessBadgeKind(wellness.level), theme) : null;
+  const indexZone = wellness ? zoneFromWellnessLevel(wellness.level) : null;
+  const indexColors = useZoneColors(indexZone);
+  const pollenColors = wellness
+    ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.pollenTier), theme.colors)
+    : null;
+  const airColors = wellness
+    ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.airTier), theme.colors)
+    : null;
 
   const phenotypeHints = useMemo(
     () => (profile ? getProfileReassessmentHints(profile) : []),
@@ -151,7 +158,7 @@ export default function HomeScreen() {
           <SkeletonCard lines={2} />
         </>
       ) : (
-      <GlassCard>
+      <GlassCard zone={indexZone}>
         <CardTitle>{t('home.stateToday')}</CardTitle>
 
         {wellness ? (
@@ -163,15 +170,15 @@ export default function HomeScreen() {
               <View style={ui.heroKpi}>
                 <View style={styles.heroKpiLeft}>
                   <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
-                  {badge ? (
-                    <View style={[ui.badge, badge.container]}>
-                      <Text style={[ui.badgeText, badge.text]}>
-                        {t(`wellness.statusPhrase.${wellness.level}`)}
-                      </Text>
-                    </View>
-                  ) : null}
+                  <Text
+                    style={[
+                      styles.statusPhrase,
+                      indexColors ? { color: indexColors.fg } : null,
+                    ]}>
+                    {t(`wellness.statusPhrase.${wellness.level}`)}
+                  </Text>
                 </View>
-                <Text style={ui.heroKpiNum}>
+                <Text style={[ui.heroKpiNum, indexColors ? { color: indexColors.fg } : null]}>
                   {wellness.score}
                   <Text style={ui.heroKpiSub}> / 100</Text>
                 </Text>
@@ -199,14 +206,18 @@ export default function HomeScreen() {
           accessibilityRole="button"
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
-          <Text style={ui.kpiValue}>{t(`wellness.pollen.${wellness.display.pollenTier}`)}</Text>
+          <Text style={[ui.kpiValue, pollenColors ? { color: pollenColors.fg } : null]}>
+            {t(`wellness.pollen.${wellness.display.pollenTier}`)}
+          </Text>
         </Pressable>
         <Pressable
           onPress={() => setDetailsOpen(true)}
           accessibilityRole="button"
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.air')}</Text>
-          <Text style={ui.kpiValue}>{t(`wellness.air.${wellness.display.airTier}`)}</Text>
+          <Text style={[ui.kpiValue, airColors ? { color: airColors.fg } : null]}>
+            {t(`wellness.air.${wellness.display.airTier}`)}
+          </Text>
         </Pressable>
         <Pressable
           onPress={() => setDetailsOpen(true)}
@@ -352,6 +363,12 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     heroKpiLeft: { gap: 8 },
     heroKpiLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    statusPhrase: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',

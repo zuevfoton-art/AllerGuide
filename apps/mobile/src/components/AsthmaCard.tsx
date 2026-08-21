@@ -12,6 +12,7 @@ import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
+import { useZoneColors, zoneFromPef } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import type { DiaryEntry } from '@/src/types';
 
@@ -19,13 +20,6 @@ interface AsthmaCardProps {
   plan: AsthmaActionPlan | null;
   entries: DiaryEntry[];
   onLogPef: () => void;
-}
-
-function zoneColor(zone: 'green' | 'yellow' | 'red' | null, colors: AppTheme['colors']) {
-  if (zone === 'green') return colors.success;
-  if (zone === 'yellow') return colors.warning;
-  if (zone === 'red') return colors.danger;
-  return colors.textMuted;
 }
 
 export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
@@ -39,9 +33,11 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
     [entries, planBest],
   );
   const configured = isAsthmaPlanConfigured(plan);
+  const psvZone = zoneFromPef(trend.latestZone);
+  const zoneColors = useZoneColors(psvZone);
 
   return (
-    <GlassCard style={styles.card}>
+    <GlassCard zone={psvZone} style={styles.card}>
       <CardTitle
         icon="fitness"
         action={t('asthma.editPlan')}
@@ -70,18 +66,14 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
         <Text style={ui.kpiLabel}>{t('asthma.pef30d')}</Text>
         <Text style={ui.kpiValue}>{trend.count}</Text>
       </View>
-      <View style={ui.kpiRow}>
-        <Text style={ui.kpiLabel}>{t('asthma.latestPef')}</Text>
-        <Text style={[ui.kpiValue, { color: zoneColor(trend.latestZone, theme.colors) }]}>
-          {trend.latest ?? '—'}
-        </Text>
-      </View>
-      <View style={ui.kpiRow}>
-        <Text style={ui.kpiLabel}>{t('asthma.zoneLabel')}</Text>
-        <Text style={[ui.kpiValue, { color: zoneColor(trend.latestZone, theme.colors) }]}>
-          {trend.latestZone ? t(`asthma.zone.${trend.latestZone}`) : '—'}
-        </Text>
-      </View>
+      {zoneColors && trend.latest != null && trend.latestZone ? (
+        <>
+          <Text style={[ui.heroKpiNum, { color: zoneColors.fg }]}>{trend.latest}</Text>
+          <Text style={[styles.zoneName, { color: zoneColors.fg }]}>
+            {t(`asthma.zone.${trend.latestZone}`)}
+          </Text>
+        </>
+      ) : null}
 
       {trend.latestZone && trend.latestPercentOfBest != null ? (
         <Text style={styles.zoneHint}>
@@ -112,6 +104,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 17,
+    },
+    zoneName: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
     },
     zoneHint: {
       fontFamily: fonts.sans,
