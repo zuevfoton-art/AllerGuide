@@ -47,14 +47,14 @@ export default function ExpertScreen() {
         subtitle={`${localeContent.expertHero.name} · ${localeContent.expertHero.role}`}
       />
 
-      <GlassCard variant="soft" style={styles.hero}>
+      <GlassCard style={styles.hero}>
         <View style={styles.heroIcon}>
           <BrandMark size={48} variant="mono" color={theme.colors.onAccent} />
         </View>
         <Text style={styles.heroSubtitle}>{localeContent.expertHero.subtitle}</Text>
       </GlassCard>
 
-      <GlassCard variant="soft" style={styles.advisoryCard}>
+      <GlassCard style={styles.advisoryCard}>
         <Text style={styles.advisoryTitle}>{t('expert.advisoryTitle')}</Text>
         <Text style={styles.advisoryMeta}>{t('expert.advisorySubtitle')}</Text>
         {MEDICAL_ADVISORY_BOARD.map((member) => (

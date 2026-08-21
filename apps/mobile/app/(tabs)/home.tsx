@@ -146,12 +146,12 @@ export default function HomeScreen() {
 
       {loadingWellness && !wellness ? (
         <>
-          <SkeletonCard hero lines={3} variant="soft" />
+          <SkeletonCard hero lines={3} />
           <SkeletonCard lines={3} />
           <SkeletonCard lines={2} />
         </>
       ) : (
-      <GlassCard variant="soft">
+      <GlassCard>
         <CardTitle>{t('home.stateToday')}</CardTitle>
 
         {wellness ? (

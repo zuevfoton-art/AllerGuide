@@ -41,7 +41,7 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
   const configured = isAsthmaPlanConfigured(plan);
 
   return (
-    <GlassCard variant="soft" style={styles.card}>
+    <GlassCard style={styles.card}>
       <CardTitle
         icon="fitness"
         action={t('asthma.editPlan')}
