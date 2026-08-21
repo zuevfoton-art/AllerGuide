@@ -18,6 +18,7 @@ import {
   type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { PollenPlantSheet } from '@/src/components/PollenPlantSheet';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { POLLEN_TYPE_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
@@ -225,8 +226,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     sheet: {
       maxHeight: '78%',
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
+      borderTopLeftRadius: radii.xl,
+      borderTopRightRadius: radii.xl,
       backgroundColor: colors.bg,
       borderWidth: 1,
       borderColor: colors.border,
@@ -236,7 +237,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     grabber: {
       width: 36,
       height: 4,
-      borderRadius: 2,
+      borderRadius: radii.full,
       backgroundColor: colors.border,
     },
     header: {

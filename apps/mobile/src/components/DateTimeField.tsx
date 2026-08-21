@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -278,8 +279,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     sheet: {
       backgroundColor: colors.card,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
+      borderTopLeftRadius: radii.xl,
+      borderTopRightRadius: radii.xl,
       paddingBottom: 24,
       maxHeight: '55%',
     },

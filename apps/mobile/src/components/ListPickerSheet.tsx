@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
+import { density, radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -198,8 +199,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     sheet: {
       backgroundColor: colors.bg,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
+      borderTopLeftRadius: radii.xl,
+      borderTopRightRadius: radii.xl,
       maxHeight: '85%',
     },
     fullSheet: { flex: 1, backgroundColor: colors.bg },
@@ -207,7 +208,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     grabber: {
       width: 36,
       height: 4,
-      borderRadius: 999,
+      borderRadius: radii.full,
       backgroundColor: colors.border,
     },
     header: {
@@ -215,7 +216,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 8,
-      paddingVertical: 10,
+      paddingVertical: 8,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
@@ -246,7 +247,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       marginBottom: 4,
       paddingHorizontal: 14,
       paddingVertical: 10,
-      borderRadius: 6,
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
@@ -265,7 +266,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingBottom: 16,
       gap: 14,
     },
-    group: { gap: 8 },
+    group: { gap: density.pickerRowGap },
     groupLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 11,
@@ -277,11 +278,11 @@ function createStyles({ colors, fonts }: AppTheme) {
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      minHeight: 44,
+      minHeight: density.tapMinHeight,
       gap: 12,
       paddingHorizontal: 12,
-      paddingVertical: 10,
-      borderRadius: 6,
+      paddingVertical: density.pickerRowPaddingV,
+      borderRadius: radii.row,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
@@ -311,7 +312,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    boxMulti: { borderRadius: 4 },
+    boxMulti: { borderRadius: radii.xs },
     boxSingle: { borderRadius: 11 },
     boxChecked: {
       backgroundColor: colors.accent,
