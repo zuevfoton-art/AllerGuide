@@ -1,5 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { publishedMarketplaceSeed } from '@allerguide/core';
+import {
+  getBundledMarketplaceProducts,
+  getRecommendedMarketplaceProducts,
+  loadMarketplaceCatalog,
+  searchRecommendedMarketplaceProducts,
+} from './product-service';
 
 vi.mock('react-native', () => ({
   Platform: { OS: 'web' },
@@ -32,13 +38,6 @@ vi.mock('@/src/services/analytics-service', () => ({
 vi.mock('@/src/services/error-reporting', () => ({
   logCaughtError: vi.fn(),
 }));
-
-import {
-  getBundledMarketplaceProducts,
-  getRecommendedMarketplaceProducts,
-  loadMarketplaceCatalog,
-  searchRecommendedMarketplaceProducts,
-} from './product-service';
 
 const STAGING_LEGACY_CATALOG = [
   {
@@ -125,12 +124,12 @@ describe('product-service marketplace catalog', () => {
       fetchedAt: new Date().toISOString(),
       source: 'api',
       products: STAGING_LEGACY_CATALOG,
-    });
+    } as never);
     getCachedMarketCatalog.mockReturnValue({
       fetchedAt: new Date().toISOString(),
       source: 'api',
       products: STAGING_LEGACY_CATALOG,
-    });
+    } as never);
 
     const result = await loadMarketplaceCatalog();
     expect(result.source).toBe('seed');
