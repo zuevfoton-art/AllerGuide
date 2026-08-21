@@ -1,9 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('react-native', () => ({
-  Platform: { OS: 'web' },
-}));
-
 import { darkColors, lightColors } from '@/src/constants/theme';
 import {
   diaryOutcomeMessageKey,
@@ -15,6 +10,10 @@ import {
   zoneFromWellnessLevel,
   zoneFromWellnessVerbalTier,
 } from './zone-colors';
+
+vi.mock('react-native', () => ({
+  Platform: { OS: 'web' },
+}));
 
 describe('zone mappers', () => {
   it('maps wellness levels onto information zones', () => {
