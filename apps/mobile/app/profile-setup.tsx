@@ -484,7 +484,7 @@ export default function ProfileSetupScreen() {
             label={t('profileSetup.back')}
             variant="secondary"
             onPress={goBack}
-            style={styles.backButton}
+            style={styles.actionButton}
           />
         ) : null}
         <Button
@@ -493,7 +493,7 @@ export default function ProfileSetupScreen() {
           variant="primary"
           block={!showBack}
           onPress={goNext}
-          style={showBack ? styles.nextButton : undefined}
+          style={showBack ? styles.actionButton : styles.actionButtonSolo}
         />
       </View>
 
@@ -508,10 +508,18 @@ function createStyles({ colors, fonts }: AppTheme) {
     actions: {
       flexDirection: 'row',
       gap: 10,
-      alignItems: 'stretch',
+      width: '100%',
+      alignSelf: 'stretch',
     },
-    backButton: { flex: 1 },
-    nextButton: { flex: 2 },
+    actionButton: {
+      flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
+    },
+    actionButtonSolo: {
+      width: '100%',
+      alignSelf: 'stretch',
+    },
     error: {
       fontFamily: fonts.sans,
       color: colors.danger,
