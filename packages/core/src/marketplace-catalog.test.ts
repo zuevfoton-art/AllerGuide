@@ -4,11 +4,43 @@ import {
   canPublishMarketplaceProduct,
   filterMarketplaceProductsForProfile,
   getMarketplacePrimaryOffer,
+  isUsableLiveMarketplaceCatalog,
   looksLikePrescriptionText,
+  normalizeMarketplaceCatalog,
   publishedMarketplaceSeed,
   searchMarketplaceProducts,
   toCatalogProduct,
 } from './marketplace-catalog';
+
+/** Exact staging payload from GET /api/market/catalog (pre-#276 CatalogProduct). */
+const STAGING_LEGACY_CATALOG = [
+  {
+    id: 'air-purifier',
+    title: 'Очиститель воздуха HEPA',
+    why: 'Снижает концентрацию пыльцы и аллергенов в воздухе',
+    icon: 'cloudy',
+    tag: 'Воздух',
+    colorKey: 'purple',
+    forAllergens: ['Пыльца берёзы', 'Пыльца амброзии', 'Пылевые клещи', 'Бытовая аллергия'],
+    containsAllergens: [],
+    affiliateUrl: 'https://www.iherb.com/search?kw=hepa+air+purifier',
+    offers: [
+      { merchant: 'yandex_market', url: 'https://market.yandex.ru/search?text=hepa' },
+      { merchant: 'iherb', url: 'https://www.iherb.com/search?kw=hepa+air+purifier' },
+    ],
+  },
+  {
+    id: 'oat-milk',
+    title: 'Овсяное молоко без глютена',
+    why: 'Альтернатива коровьему молоку',
+    icon: 'nutrition',
+    tag: 'Питание',
+    colorKey: 'success',
+    forAllergens: ['Молоко'],
+    containsAllergens: ['Молоко', 'Орехи'],
+    offers: [{ merchant: 'yandex_market', url: 'https://market.yandex.ru/search?text=oat' }],
+  },
+];
 
 describe('marketplace catalog', () => {
   it('publishes curated Yandex and OTC pharmacy seed items', () => {
@@ -70,5 +102,31 @@ describe('marketplace catalog', () => {
   it('detects prescription wording in feed text', () => {
     expect(looksLikePrescriptionText('Таблетки по рецепту')).toBe(true);
     expect(looksLikePrescriptionText('Цетиризин 10 мг')).toBe(false);
+  });
+
+  it('rejects the pre-#276 staging CatalogProduct payload as unusable', () => {
+    expect(normalizeMarketplaceCatalog(STAGING_LEGACY_CATALOG)).toEqual([]);
+    expect(isUsableLiveMarketplaceCatalog(STAGING_LEGACY_CATALOG)).toBe(false);
+    expect(isUsableLiveMarketplaceCatalog([])).toBe(false);
+  });
+
+  it('accepts a curated published payload from the live API', () => {
+    const published = publishedMarketplaceSeed();
+    expect(isUsableLiveMarketplaceCatalog(published)).toBe(true);
+    expect(normalizeMarketplaceCatalog(published).map((product) => product.id)).toEqual(
+      published.map((product) => product.id),
+    );
+  });
+
+  it('keeps milk conflicts hidden and does not throw on missing containsAllergenIds', () => {
+    const incomplete = {
+      ...publishedMarketplaceSeed().find((product) => product.id === 'air-purifier')!,
+      containsAllergenIds: undefined,
+      moderationStatus: undefined,
+    };
+    expect(() =>
+      filterMarketplaceProductsForProfile([incomplete] as never, ['milk']),
+    ).not.toThrow();
+    expect(filterMarketplaceProductsForProfile([incomplete] as never, ['milk'])).toHaveLength(1);
   });
 });

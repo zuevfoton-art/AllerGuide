@@ -1,5 +1,7 @@
 import {
   filterMarketplaceProductsForProfile,
+  isUsableLiveMarketplaceCatalog,
+  normalizeMarketplaceCatalog,
   parseProfileAllergenIds,
   publishedMarketplaceSeed,
   rankMarketplaceProductsForProfile,
@@ -33,6 +35,11 @@ function applyCatalogFlags(products: MarketplaceProduct[]): MarketplaceProduct[]
   return products.filter((product) => product.kind !== 'medicine');
 }
 
+function usableLiveCatalog(raw: unknown): MarketplaceProduct[] | null {
+  if (!isUsableLiveMarketplaceCatalog(raw)) return null;
+  return applyCatalogFlags(normalizeMarketplaceCatalog(raw));
+}
+
 export function getBundledMarketplaceProducts(): MarketplaceProduct[] {
   return applyCatalogFlags(publishedMarketplaceSeed());
 }
@@ -43,10 +50,11 @@ export async function loadMarketplaceCatalog(): Promise<MarketplaceCatalogLoad> 
   if (shouldFetch) {
     try {
       const remote = await fetchMarketCatalog();
-      if (remote && remote.length > 0) {
-        saveMarketCatalogSnapshot(remote, 'api');
-        trackEvent('market_catalog_refresh', { source: 'api', count: remote.length });
-        return { items: applyCatalogFlags(remote), source: 'api', stale: false };
+      const usable = usableLiveCatalog(remote);
+      if (usable && usable.length > 0) {
+        saveMarketCatalogSnapshot(usable, 'api');
+        trackEvent('market_catalog_refresh', { source: 'api', count: usable.length });
+        return { items: usable, source: 'api', stale: false };
       }
     } catch (error) {
       logCaughtError('loadMarketplaceCatalog.fetch', error, { level: 'warn' });
@@ -54,15 +62,17 @@ export async function loadMarketplaceCatalog(): Promise<MarketplaceCatalogLoad> 
   }
 
   const fresh = getFreshMarketCatalog();
-  if (fresh && fresh.products.length > 0) {
-    trackEvent('market_catalog_refresh', { source: 'cache', count: fresh.products.length, stale: false });
-    return { items: applyCatalogFlags(fresh.products), source: 'cache', stale: false };
+  const usableFresh = usableLiveCatalog(fresh?.products);
+  if (usableFresh && usableFresh.length > 0) {
+    trackEvent('market_catalog_refresh', { source: 'cache', count: usableFresh.length, stale: false });
+    return { items: usableFresh, source: 'cache', stale: false };
   }
 
   const cached = getCachedMarketCatalog();
-  if (cached && cached.products.length > 0) {
-    trackEvent('market_catalog_refresh', { source: 'cache', count: cached.products.length, stale: true });
-    return { items: applyCatalogFlags(cached.products), source: 'cache', stale: true };
+  const usableCached = usableLiveCatalog(cached?.products);
+  if (usableCached && usableCached.length > 0) {
+    trackEvent('market_catalog_refresh', { source: 'cache', count: usableCached.length, stale: true });
+    return { items: usableCached, source: 'cache', stale: true };
   }
 
   const seed = getBundledMarketplaceProducts();
