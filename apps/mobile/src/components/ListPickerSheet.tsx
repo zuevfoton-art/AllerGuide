@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   Modal,
   Platform,
@@ -22,11 +22,15 @@ export type ListPickerItem = {
   hint?: string;
   status?: string;
   dot?: string;
+  testID?: string;
+  accessoryA11y?: string;
+  accessoryTestID?: string;
 };
 
 export type ListPickerGroup = {
   title: string;
   items: ListPickerItem[];
+  testID?: string;
 };
 
 export type ListPickerSheetProps = {
@@ -38,9 +42,15 @@ export type ListPickerSheetProps = {
   fullHeight?: boolean;
   searchPlaceholder?: string;
   footnote?: string;
+  footnoteTestID?: string;
+  testID?: string;
+  headerLeftLabel?: string;
+  onHeaderLeft?: () => void;
+  detail?: ReactNode;
   onToggle: (value: string) => void;
   onDone: () => void;
   onRequestClose?: () => void;
+  onAccessory?: (value: string) => void;
 };
 
 export function ListPickerSheet({
@@ -52,9 +62,15 @@ export function ListPickerSheet({
   fullHeight = false,
   searchPlaceholder,
   footnote,
+  footnoteTestID,
+  testID,
+  headerLeftLabel,
+  onHeaderLeft,
+  detail,
   onToggle,
   onDone,
   onRequestClose,
+  onAccessory,
 }: ListPickerSheetProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -84,24 +100,39 @@ export function ListPickerSheet({
         fullHeight ? styles.fullSheet : styles.sheet,
         { paddingBottom: Math.max(insets.bottom, 16) },
       ]}
-      accessibilityViewIsModal>
+      accessibilityViewIsModal
+      testID={testID}>
       {fullHeight ? null : (
         <View style={styles.grabberWrap}>
           <View style={styles.grabber} />
         </View>
       )}
       <View style={styles.header}>
-        <View style={styles.headerBtn} />
+        {headerLeftLabel && onHeaderLeft ? (
+          <Pressable
+            style={styles.headerBtn}
+            onPress={onHeaderLeft}
+            accessibilityRole="button"
+            accessibilityLabel={headerLeftLabel}>
+            <Text style={styles.headerBtnText}>{headerLeftLabel}</Text>
+          </Pressable>
+        ) : (
+          <View style={styles.headerBtn} />
+        )}
         <Text style={styles.headerTitle}>{title}</Text>
-        <Pressable
-          style={styles.headerBtn}
-          onPress={onDone}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.done')}>
-          <Text style={[styles.headerBtnText, styles.headerBtnTextEnd]}>{t('common.done')}</Text>
-        </Pressable>
+        {detail ? (
+          <View style={styles.headerBtn} />
+        ) : (
+          <Pressable
+            style={styles.headerBtn}
+            onPress={onDone}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.done')}>
+            <Text style={[styles.headerBtnText, styles.headerBtnTextEnd]}>{t('common.done')}</Text>
+          </Pressable>
+        )}
       </View>
-      {searchPlaceholder ? (
+      {searchPlaceholder && !detail ? (
         <View style={styles.searchRow}>
           <Ionicons name="search" size={18} color={theme.colors.textMuted} />
           <TextInput
@@ -118,42 +149,87 @@ export function ListPickerSheet({
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}>
-        {filteredGroups.map((group) => (
-          <View key={group.title} style={styles.group}>
-            <Text style={styles.groupLabel}>
-              {group.title} · {group.items.length}
-            </Text>
-            {group.items.map((item) => {
-              const checked = selected.includes(item.value);
-              return (
-                <Pressable
-                  key={item.value}
-                  style={[styles.row, checked && styles.rowSelected]}
-                  onPress={() => onToggle(item.value)}
-                  accessibilityRole={multi ? 'checkbox' : 'radio'}
-                  accessibilityState={{ checked }}>
-                  {item.dot ? <View style={[styles.dot, { backgroundColor: item.dot }]} /> : null}
-                  <View style={styles.rowText}>
-                    <Text style={styles.rowLabel}>{item.label}</Text>
-                    {item.hint ? <Text style={styles.rowHint}>{item.hint}</Text> : null}
-                    {item.status ? <Text style={styles.rowHint}>{item.status}</Text> : null}
-                  </View>
-                  <View
-                    style={[
-                      styles.box,
-                      multi ? styles.boxMulti : styles.boxSingle,
-                      checked && styles.boxChecked,
-                    ]}>
-                    {checked ? (
-                      <Ionicons name="checkmark" size={14} color={theme.colors.onAccent} />
-                    ) : null}
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        ))}
-        {footnote ? <Text style={styles.footnote}>{footnote}</Text> : null}
+        {detail ? (
+          detail
+        ) : (
+          <>
+            {filteredGroups.map((group) => (
+              <View key={group.title} style={styles.group}>
+                <Text style={styles.groupLabel} testID={group.testID}>
+                  {group.title} · {group.items.length}
+                </Text>
+                {group.items.map((item) => {
+                  const checked = selected.includes(item.value);
+                  const rowBody = (
+                    <>
+                      {item.dot ? <View style={[styles.dot, { backgroundColor: item.dot }]} /> : null}
+                      <View style={styles.rowText}>
+                        <Text style={styles.rowLabel}>{item.label}</Text>
+                        {item.hint ? <Text style={styles.rowHint}>{item.hint}</Text> : null}
+                        {item.status ? <Text style={styles.rowHint}>{item.status}</Text> : null}
+                      </View>
+                      <View
+                        style={[
+                          styles.box,
+                          multi ? styles.boxMulti : styles.boxSingle,
+                          checked && styles.boxChecked,
+                        ]}>
+                        {checked ? (
+                          <Ionicons name="checkmark" size={14} color={theme.colors.onAccent} />
+                        ) : null}
+                      </View>
+                    </>
+                  );
+                  if (onAccessory) {
+                    return (
+                      <View
+                        key={item.value}
+                        style={[styles.row, checked && styles.rowSelected]}>
+                        <Pressable
+                          style={styles.rowMain}
+                          onPress={() => onToggle(item.value)}
+                          accessibilityRole={multi ? 'checkbox' : 'radio'}
+                          accessibilityState={{ checked }}
+                          testID={item.testID}>
+                          {rowBody}
+                        </Pressable>
+                        <Pressable
+                          style={styles.accessory}
+                          onPress={() => onAccessory(item.value)}
+                          accessibilityRole="button"
+                          accessibilityLabel={item.accessoryA11y}
+                          testID={item.accessoryTestID}
+                          hitSlop={8}>
+                          <Ionicons
+                            name="help-circle-outline"
+                            size={22}
+                            color={theme.colors.accent}
+                          />
+                        </Pressable>
+                      </View>
+                    );
+                  }
+                  return (
+                    <Pressable
+                      key={item.value}
+                      style={[styles.row, checked && styles.rowSelected]}
+                      onPress={() => onToggle(item.value)}
+                      accessibilityRole={multi ? 'checkbox' : 'radio'}
+                      accessibilityState={{ checked }}
+                      testID={item.testID}>
+                      {rowBody}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
+            {footnote ? (
+              <Text style={styles.footnote} testID={footnoteTestID}>
+                {footnote}
+              </Text>
+            ) : null}
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -290,6 +366,20 @@ function createStyles({ colors, fonts }: AppTheme) {
     rowSelected: {
       backgroundColor: colors.accentLight,
       borderColor: colors.accent,
+    },
+    rowMain: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      minHeight: density.tapMinHeight,
+    },
+    accessory: {
+      width: 44,
+      height: 44,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: -8,
     },
     rowText: { flex: 1, gap: 2 },
     rowLabel: {
