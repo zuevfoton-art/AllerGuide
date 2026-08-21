@@ -1,4 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('react-native', () => ({
+  Platform: { OS: 'web' },
+}));
+
 import { darkColors, lightColors } from '@/src/constants/theme';
 import {
   diaryOutcomeMessageKey,
@@ -9,7 +14,7 @@ import {
   zoneFromScanRisk,
   zoneFromWellnessLevel,
   zoneFromWellnessVerbalTier,
-} from './use-zone-colors';
+} from './zone-colors';
 
 describe('zone mappers', () => {
   it('maps wellness levels onto information zones', () => {
@@ -101,4 +106,36 @@ describe('resolveZoneColors', () => {
     expect(resolveZoneColors('attention', darkColors)?.bg).toBe(darkColors.warningLight);
     expect(resolveZoneColors('alarm', darkColors)?.bg).toBe(darkColors.dangerLight);
   });
+
+  it('keeps zone text readable on existing light and dark fills', () => {
+    for (const colors of [lightColors, darkColors]) {
+      for (const zone of ['calm', 'attention', 'alarm'] as const) {
+        const pair = resolveZoneColors(zone, colors);
+        expect(pair).not.toBeNull();
+        expect(contrastRatio(pair!.fg, pair!.bg)).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
 });
+
+function channel(value: number): number {
+  const scaled = value / 255;
+  return scaled <= 0.03928 ? scaled / 12.92 : ((scaled + 0.055) / 1.055) ** 2.4;
+}
+
+function luminance(hex: string): number {
+  const raw = hex.replace('#', '');
+  const n = Number.parseInt(raw, 16);
+  const r = channel((n >> 16) & 255);
+  const g = channel((n >> 8) & 255);
+  const b = channel(n & 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastRatio(a: string, b: string): number {
+  const first = luminance(a);
+  const second = luminance(b);
+  const lighter = Math.max(first, second);
+  const darker = Math.min(first, second);
+  return (lighter + 0.05) / (darker + 0.05);
+}
