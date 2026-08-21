@@ -11,6 +11,7 @@ import {
 import { usePathname } from 'expo-router';
 import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { shouldShowScreenBrandHeader } from '@/src/components/brand/brand-header-nav';
+import { density } from '@/src/constants/layout';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
@@ -78,14 +79,14 @@ export function Screen({
           backgroundColor: colors.bg,
           paddingTop: hasPinned ? 0 : layout.topPadding,
           paddingBottom: scrollBottomPad,
-          gap: 16,
+          gap: density.screenGap,
         },
         content: {
           width: '100%',
           maxWidth: layout.contentMaxWidth,
           alignSelf: 'center',
           paddingHorizontal: layout.horizontalPadding,
-          gap: 16,
+          gap: density.screenGap,
         },
         contentFill: {
           flex: 1,

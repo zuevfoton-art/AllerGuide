@@ -15,6 +15,7 @@ import {
 } from '@allerguide/core';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { GlassCard } from '@/src/components/GlassCard';
+import { radii } from '@/src/constants/layout';
 import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
 import { YandexMap } from '@/src/components/YandexMap';
@@ -147,6 +148,7 @@ export function PollenMapLayer({
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
               style={[styles.scaleButton, isSelected && styles.taxonButtonSelected]}
+              hitSlop={8}
               onPress={() => setMapScale(scale)}>
               <Text style={[styles.taxonText, isSelected && styles.taxonTextSelected]}>
                 {t(SCALE_LABEL_KEYS[scale])}
@@ -202,6 +204,7 @@ export function PollenMapLayer({
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
               style={[styles.taxonButton, isSelected && styles.taxonButtonSelected]}
+              hitSlop={8}
               onPress={() => setSelectedTaxonId(taxonId)}>
               <Text style={[styles.taxonText, isSelected && styles.taxonTextSelected]}>
                 {t(TAXON_LABEL_KEYS[taxonId])}
@@ -225,6 +228,7 @@ export function PollenMapLayer({
                 styles.secondaryTaxonButton,
                 isSelected && styles.taxonButtonSelected,
               ]}
+              hitSlop={8}
               onPress={() => setSelectedTaxonId(taxonId)}>
               <Text style={[styles.taxonText, isSelected && styles.taxonTextSelected]}>
                 {t(TAXON_LABEL_KEYS[taxonId])}
@@ -347,23 +351,29 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 10,
       color: colors.textMuted,
     },
-    scaleRow: { flexDirection: 'row', gap: 8 },
+    scaleRow: {
+      flexDirection: 'row',
+      borderRadius: radii.full,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
     scaleButton: {
       flex: 1,
       minHeight: 36,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: 0,
+      borderRightWidth: 1,
+      borderRightColor: colors.border,
       backgroundColor: colors.card,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: 8,
+      paddingHorizontal: 12,
     },
     taxonRow: { flexDirection: 'row', gap: 8 },
     taxonButton: {
       flex: 1,
       minHeight: 42,
-      borderRadius: 8,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
@@ -393,7 +403,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     secondaryTaxonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     secondaryTaxonButton: {
       minHeight: 34,
-      borderRadius: 7,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
@@ -413,7 +423,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      borderRadius: 8,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,

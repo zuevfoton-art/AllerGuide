@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { CourseSetupOption } from '@allerguide/core';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -141,8 +142,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     sheet: {
       maxHeight: '88%',
       backgroundColor: colors.bg,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
+      borderTopLeftRadius: radii.xl,
+      borderTopRightRadius: radii.xl,
       borderTopWidth: 1,
       borderColor: colors.border,
       overflow: 'hidden',
@@ -155,7 +156,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     grabber: {
       width: 36,
       height: 4,
-      borderRadius: 999,
+      borderRadius: radii.full,
       backgroundColor: colors.border,
     },
     header: {
@@ -163,7 +164,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 8,
-      paddingVertical: 10,
+      paddingVertical: 8,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       backgroundColor: colors.bg,
@@ -200,8 +201,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       gap: 12,
       paddingHorizontal: 12,
-      paddingVertical: 14,
-      borderRadius: 10,
+      paddingVertical: 12,
+      borderRadius: radii.row,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,

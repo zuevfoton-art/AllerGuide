@@ -60,6 +60,7 @@ export function PlaceSearchBar({
         {value ? (
           <Pressable
             onPress={onClear}
+            hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel={t('common.cancel')}
             testID="place-search-clear">
@@ -76,6 +77,7 @@ export function PlaceSearchBar({
               key={suggestion.placeId}
               style={styles.suggestion}
               onPress={() => onSelectSuggestion(suggestion)}
+              hitSlop={8}
               accessibilityRole="button"
               testID={`place-suggestion-${suggestion.placeId}`}>
               <Text style={styles.suggestionTitle}>{suggestion.primaryText}</Text>

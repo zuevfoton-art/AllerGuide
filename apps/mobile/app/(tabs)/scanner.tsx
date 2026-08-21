@@ -39,6 +39,7 @@ import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { ScannerDishVisionCard } from '@/src/components/ScannerDishVisionCard';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
@@ -550,6 +551,7 @@ export default function ScannerScreen() {
             <View style={[styles.cameraTopBar, { paddingTop: topPad }]}>
               <Pressable
                 style={styles.closeBtn}
+                hitSlop={8}
                 onPress={() => setTorchOn((v) => !v)}
                 accessibilityRole="button"
                 accessibilityLabel={t('scanner.flashToggle')}
@@ -565,6 +567,7 @@ export default function ScannerScreen() {
               </Text>
               <Pressable
                 style={styles.closeBtn}
+                hitSlop={8}
                 onPress={closeCamera}
                 accessibilityRole="button"
                 accessibilityLabel={t('common.cancel')}>
@@ -689,7 +692,7 @@ export default function ScannerScreen() {
 
       <View style={styles.secondaryRow}>
         <Pressable
-          style={styles.secondaryBtn}
+          style={styles.barcodeBtn}
           onPress={() => void openCamera('barcode')}
           testID="scanner-barcode"
           accessibilityRole="button">
@@ -697,7 +700,7 @@ export default function ScannerScreen() {
           <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
         </Pressable>
         <Pressable
-          style={styles.secondaryBtn}
+          style={styles.manualToggleBtn}
           onPress={() => setManualOpen((v) => !v)}
           testID="scanner-toggle-manual"
           accessibilityRole="button"
@@ -1130,14 +1133,27 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     headerText: { flex: 1, gap: 2 },
     secondaryRow: { flexDirection: 'row', gap: 10 },
-    secondaryBtn: {
+    barcodeBtn: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 12,
-      borderRadius: 8,
+      borderRadius: radii.full,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      minHeight: 44,
+    },
+    manualToggleBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 12,
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.accent,
@@ -1394,7 +1410,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
       alignItems: 'center',
       paddingVertical: 10,
-      borderRadius: 8,
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,

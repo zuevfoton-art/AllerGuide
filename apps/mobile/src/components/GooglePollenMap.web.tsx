@@ -220,8 +220,8 @@ function createStyles({ colors }: AppTheme, height: number) {
       overflow: 'hidden',
       borderRadius: 8,
       borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surfaceMuted,
+      borderColor: colors.mapRoad,
+      backgroundColor: colors.mapLand,
     },
     map: { width: '100%', height: '100%' },
     overlay: {

@@ -39,8 +39,14 @@
       --phone-border: #e2e8f0;
       --radius-sm: 6px;
       --radius-md: 8px;
-      --radius-lg: 12px;
-      --radius-xl: 16px;
+      --radius-row: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+      --density-screen-gap: 10px;
+      --density-card-padding: 14px;
+      --map-land: #E4EAE8;
+      --map-road: #CBD5D2;
       --sans: 'Inter', system-ui, sans-serif;
       --serif: 'Source Serif 4', Georgia, serif;
     }
@@ -70,6 +76,8 @@
       --tip-text: #9FD9D1;
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
       --phone-border: #334155;
+      --map-land: #1B2534;
+      --map-road: #2B3648;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -207,9 +215,9 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px;
+      padding: var(--density-card-padding);
       box-shadow: var(--shadow-sm);
-      margin-bottom: 12px;
+      margin-bottom: var(--density-screen-gap);
     }
 
     .card.flush { padding: 0; overflow: hidden; }
@@ -234,7 +242,7 @@
 
     .kpi-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 0; border-top: 1px solid var(--border);
+      padding: 8px 0; border-top: 1px solid var(--border);
       font-size: 13px;
     }
 
@@ -244,7 +252,7 @@
 
     .hero-kpi {
       display: flex; justify-content: space-between; align-items: flex-end;
-      padding-bottom: 12px; margin-bottom: 4px;
+      padding-bottom: 10px; margin-bottom: 4px;
       border-bottom: 1px solid var(--border);
     }
 
@@ -266,12 +274,12 @@
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
-      border-radius: var(--radius-md); font-family: var(--sans);
+      border-radius: var(--radius-full); font-family: var(--sans);
       font-size: 15px; font-weight: 600; min-height: 44px;
-      padding: 10px 16px; border: none; cursor: pointer; width: 100%;
+      padding: 10px 20px; border: none; cursor: pointer; width: 100%;
     }
 
-    .btn-sm { min-height: 36px; padding: 7px 12px; font-size: 12px; width: auto; }
+    .btn-sm { min-height: 36px; padding: 7px 16px; font-size: 12px; width: auto; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border-input); }
     .btn-danger { background: var(--danger); color: #fff; }
@@ -286,8 +294,8 @@
 
     .toggle-row {
       display: flex; border: 1px solid var(--border);
-      border-radius: var(--radius-md); overflow: hidden;
-      background: var(--card); margin-bottom: 12px;
+      border-radius: var(--radius-full); overflow: hidden;
+      background: var(--card); margin-bottom: var(--density-screen-gap);
     }
 
     .toggle {
@@ -331,7 +339,7 @@
 
     .feed-row {
       display: flex; align-items: center; gap: 12px;
-      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
     }
 
     .feed-row:last-child { border-bottom: none; }
@@ -392,8 +400,8 @@
     }
 
     .map-box {
-      height: 160px; border-radius: var(--radius-lg); border: 1px solid var(--border);
-      background: var(--surface-muted); display: grid; place-items: center;
+      height: 160px; border-radius: var(--radius-lg); border: 1px solid var(--map-road);
+      background: var(--map-land); display: grid; place-items: center;
       color: var(--text-muted); font-size: 13px; margin-bottom: 12px;
     }
 

@@ -5,12 +5,18 @@ export const TABLET_BREAKPOINT = 768;
 export const WEB_TAB_BAR_HEIGHT = 68;
 export const WEB_INPUT_FONT_SIZE = 16;
 
-/** Clinical Calm spacing & radii — from brandbook tokens */
+/**
+ * Clinical Calm radii — round 3 geometry (handoff pairs 19–22).
+ * `full` is for ACTION pressables only (Button, period segment, emergency call).
+ * Chips, inputs and badges stay on `sm` / `md` — they hold state, they do not fire an action.
+ */
 export const radii = {
+  xs: 4,
   sm: 6,
   md: 8,
-  lg: 12,
-  xl: 16,
+  row: 10,
+  lg: 16,
+  xl: 20,
   full: 9999,
 } as const;
 
@@ -22,6 +28,21 @@ export const space = {
   6: 24,
   8: 32,
   12: 48,
+} as const;
+
+/**
+ * Compact vertical rhythm. Do not shrink tap heights — NFR-05 / WCAG 2.2 is 44pt
+ * (36 for small buttons). Tighten gaps and inner padding instead.
+ */
+export const density = {
+  screenGap: 10,
+  cardPadding: 14,
+  kpiRowPaddingV: 8,
+  listRowPaddingV: 12,
+  pickerRowPaddingV: 8,
+  pickerRowGap: 6,
+  tapMinHeight: 44,
+  tapMinHeightSm: 36,
 } as const;
 
 /** Brand hex for static HTML/PDF exports (mirrors light theme) */
