@@ -55,6 +55,7 @@ import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import {
@@ -659,6 +660,7 @@ export default function MapScreen() {
                 key={key}
                 testID={`map-layer-${key}`}
                 style={[styles.layerChip, active && styles.layerChipActive]}
+                hitSlop={8}
                 onPress={() => {
                   setLayerMode(key);
                   if (key !== 'pollen') setAllergenPickerOpen(false);
@@ -751,6 +753,7 @@ export default function MapScreen() {
         <Pressable
           testID="map-search-area"
           style={styles.searchAreaBtn}
+          hitSlop={8}
           onPress={() => void searchThisArea()}
           disabled={searchingArea}
           accessibilityRole="button"
@@ -773,6 +776,7 @@ export default function MapScreen() {
       {!useGoogleMap && !useYandexInteractive ? (
         <Pressable
           style={styles.yandexBanner}
+          hitSlop={8}
           onPress={() => {
             if (pollenSnapshot) void Linking.openURL(pollenSnapshot.yandexPollenUrl);
           }}
@@ -913,6 +917,7 @@ export default function MapScreen() {
       <Pressable
         testID="map-doctors-toggle"
         style={styles.doctorsToggle}
+        hitSlop={8}
         onPress={() => setDoctorsOpen((v) => !v)}
         accessibilityRole="button"
         accessibilityState={{ expanded: doctorsOpen }}>
@@ -943,6 +948,7 @@ export default function MapScreen() {
                 {doctor.phone ? (
                   <Pressable
                     onPress={() => void Linking.openURL(`tel:${doctor.phone!}`)}
+                    hitSlop={8}
                     accessibilityRole="link">
                     <Text style={[styles.tags, styles.phoneLink]}>{doctor.phone}</Text>
                   </Pressable>
@@ -950,6 +956,7 @@ export default function MapScreen() {
                 {doctor.bookingUrl ? (
                   <Pressable
                     onPress={() => void Linking.openURL(doctor.bookingUrl!)}
+                    hitSlop={8}
                     accessibilityRole="link">
                     <Text style={styles.phoneLink}>{t('map.poiBook')}</Text>
                   </Pressable>
@@ -1046,7 +1053,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       minHeight: 40,
       paddingHorizontal: 4,
       paddingVertical: 8,
-      borderRadius: 8,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
@@ -1068,7 +1075,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       gap: 10,
       minHeight: 44,
-      borderRadius: 8,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.accent,
       backgroundColor: colors.accentLight,
@@ -1082,7 +1089,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       gap: 8,
       minHeight: 40,
-      borderRadius: 20,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.accent,
       backgroundColor: colors.card,
@@ -1170,7 +1177,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      borderRadius: 8,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.warningBorder,
       backgroundColor: colors.warningLight,
