@@ -68,6 +68,7 @@ Runbook для экрана «Маркет»: официальный товар�
 
 - Флаги: `EXPO_PUBLIC_MARKET_LIVE_CATALOG` и `EXPO_PUBLIC_MARKET_MEDICINES` (default on; `false`/`off` выключает).
 - Цепочка: online snapshot → last-good SQLite/IndexedDB → bundled seed.
+- Пригодный snapshot — только `MarketplaceProduct` (`moderationStatus` / `forAllergenIds`). Старый `CatalogProduct` (`tag` / `forAllergens`) с pre-#276 `/api/market/catalog` не кэшируется; клиент откатывается на bundled seed, пока stage API не задеплоен.
 - UI: две карточки в ряд, фото сверху, фильтры Все / Воздух / Кожа / Дом / Питание / SOS / Аптека.
 - Analytics: `market_click`, `market_impression`, `market_catalog_refresh` — без аллергий и профиля.
 
