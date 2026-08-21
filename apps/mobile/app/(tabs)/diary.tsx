@@ -8,6 +8,7 @@ import {
   formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
+  normalizeSeverity,
   getDiarySection,
   getAsthmaPlanPersonalBest,
   getProfileAgeYears,
@@ -61,6 +62,11 @@ import { NutritionCaptureStep } from '@/src/components/NutritionCaptureStep';
 import type { DishEnrichmentResult } from '@/src/services/dish-off-enrichment-service';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import {
+  diaryOutcomeMessageKey,
+  resolveZoneColors,
+  zoneFromDiarySeverity,
+} from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
@@ -558,6 +564,10 @@ export default function DiaryScreen() {
             const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
             const photos = photoUrisByEntry[item.id] ?? [];
+            const answers = getDiaryEntryAnswers(item.type, item.details);
+            const severity = answers ? normalizeSeverity(answers, item.type) : null;
+            const outcomeZone = zoneFromDiarySeverity(severity);
+            const outcomeColors = resolveZoneColors(outcomeZone, theme.colors);
             return (
               <Pressable
                 key={item.id}
@@ -581,7 +591,13 @@ export default function DiaryScreen() {
                   ) : null}
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                {severity != null && outcomeColors ? (
+                  <Text style={[styles.outcome, { color: outcomeColors.fg }]}>
+                    {t(diaryOutcomeMessageKey(severity))}
+                  </Text>
+                ) : (
+                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                )}
               </Pressable>
             );
           })}
@@ -664,6 +680,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
+    },
+    outcome: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
     },
     photoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
     photoThumb: { width: 40, height: 40, borderRadius: 6, backgroundColor: colors.surfaceMuted },

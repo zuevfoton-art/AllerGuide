@@ -2,16 +2,14 @@ import { PropsWithChildren, useMemo } from 'react';
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { density, radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useZoneColors, type Zone } from '@/src/hooks/use-zone-colors';
 
 type GlassCardProps = PropsWithChildren<{
   style?: ViewStyle;
   padded?: boolean;
   testID?: string;
-  /**
-   * Soft Claro teal surface (wellness / clinical hints).
-   * `calm` is a deprecated alias for `soft` (Dual Calm naming removed).
-   */
-  variant?: 'default' | 'soft' | 'calm';
+  /** Clinical information fill. Omit when the card is not a state surface. */
+  zone?: Zone | null;
 }>;
 
 /** Clinical card surface. */
@@ -20,16 +18,23 @@ export function GlassCard({
   style,
   padded = true,
   testID,
-  variant = 'default',
+  zone,
 }: GlassCardProps) {
   const theme = useTheme();
+  const zoneColors = useZoneColors(zone);
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const isSoft = variant === 'soft' || variant === 'calm';
 
   return (
     <View
       testID={testID}
-      style={[styles.card, isSoft && styles.soft, padded && styles.padded, style]}>
+      style={[
+        styles.card,
+        zoneColors
+          ? { backgroundColor: zoneColors.bg, borderColor: zoneColors.border }
+          : null,
+        padded && styles.padded,
+        style,
+      ]}>
       {children}
     </View>
   );
@@ -45,10 +50,6 @@ function createStyles({ colors, shadows }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.border,
       ...(shadows.sm as object),
-    },
-    soft: {
-      backgroundColor: colors.accentLight,
-      borderColor: colors.accentMid,
     },
     padded: {
       padding: density.cardPadding,

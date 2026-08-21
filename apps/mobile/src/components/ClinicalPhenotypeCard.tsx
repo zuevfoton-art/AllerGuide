@@ -68,7 +68,7 @@ export function ClinicalPhenotypeCard({
   );
 
   return (
-    <GlassCard variant="soft" style={styles.section}>
+    <GlassCard style={styles.section}>
       <Text style={ui.sectionLabel}>{t('profileSetup.phenotype.title')}</Text>
       <Text style={styles.hint}>{t('profileSetup.phenotype.hint')}</Text>
 

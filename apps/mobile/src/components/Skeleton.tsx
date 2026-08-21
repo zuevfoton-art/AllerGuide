@@ -107,18 +107,15 @@ export function SkeletonLine({
 type SkeletonCardProps = {
   lines?: number;
   hero?: boolean;
-  variant?: 'default' | 'soft';
 };
 
-export function SkeletonCard({ lines = 3, hero = false, variant = 'default' }: SkeletonCardProps) {
+export function SkeletonCard({ lines = 3, hero = false }: SkeletonCardProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
     <View accessibilityRole="progressbar" accessibilityLabel={t('common.loading')}>
-    <GlassCard
-      variant={variant}
-    >
+    <GlassCard>
       <SkeletonLine width="42%" height={12} />
       {hero ? (
         <View style={styles.heroRow}>

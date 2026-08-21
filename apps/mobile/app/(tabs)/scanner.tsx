@@ -41,6 +41,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useZoneColors, zoneFromScanRisk } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
 import {
@@ -148,6 +149,8 @@ export default function ScannerScreen() {
   const isMedium = riskLevel === 'medium';
   const isLow = riskLevel === 'low';
   const isCautionOrWorse = isHigh || isMedium;
+  const verdictZone = riskLevel ? zoneFromScanRisk(riskLevel) : null;
+  const verdictColors = useZoneColors(verdictZone);
 
   const compositionText = result?.productIngredients?.trim() || input.trim();
 
@@ -649,21 +652,15 @@ export default function ScannerScreen() {
       brandHeaderRight={<ProfileHeaderButton />}
       pinnedTop={
         displayResult ? (
-          <View
+          <GlassCard
             testID="scanner-verdict-pinned"
-            style={[
-              styles.verdictHero,
-              styles.verdictPinned,
-              isHigh && styles.verdictHeroHigh,
-              isMedium && styles.verdictHeroMedium,
-              isLow && styles.verdictHeroLow,
-            ]}>
+            zone={verdictZone}
+            padded={false}
+            style={styles.verdictPinned}>
             <Text
               style={[
                 styles.verdictHeroTitle,
-                isHigh && styles.verdictHeroTitleHigh,
-                isMedium && styles.verdictHeroTitleMedium,
-                isLow && styles.verdictHeroTitleLow,
+                verdictColors ? { color: verdictColors.fg } : null,
               ]}>
               {isHigh
                 ? t('scanner.verdictStop')
@@ -671,7 +668,7 @@ export default function ScannerScreen() {
                   ? t('scanner.verdictCaution')
                   : t('scanner.verdictClear')}
             </Text>
-          </View>
+          </GlassCard>
         ) : undefined
       }>
       <View style={styles.header}>
@@ -1202,25 +1199,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     resultStack: { gap: 10 },
     verdictPinned: {
       paddingVertical: 12,
-    },
-    verdictHero: {
-      borderRadius: 10,
-      paddingVertical: 18,
       paddingHorizontal: 16,
-      borderWidth: 1,
-      gap: 6,
-    },
-    verdictHeroHigh: {
-      backgroundColor: colors.scannerDangerIconBg,
-      borderColor: colors.scannerDangerBorder,
-    },
-    verdictHeroMedium: {
-      backgroundColor: colors.warningLight,
-      borderColor: colors.warningBorder,
-    },
-    verdictHeroLow: {
-      backgroundColor: colors.scannerSafeIconBg,
-      borderColor: colors.scannerSafeBorder,
     },
     verdictHeroTitle: {
       fontFamily: fonts.sansBold,
@@ -1228,9 +1207,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '700',
       letterSpacing: 0.4,
     },
-    verdictHeroTitleHigh: { color: colors.danger },
-    verdictHeroTitleMedium: { color: colors.warning },
-    verdictHeroTitleLow: { color: colors.scannerSafeText },
     verdictHeroHint: {
       fontFamily: fonts.sans,
       fontSize: 14,

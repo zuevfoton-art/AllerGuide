@@ -57,6 +57,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useZoneColors, zoneFromPollen } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import {
   autocompleteMapPlaces,
@@ -504,6 +505,8 @@ export default function MapScreen() {
         : t('map.pollenTypeTree');
   const displayStatusLevel =
     heatmapEmpty && selectedUpi?.source !== 'google' ? null : statusLevel;
+  const pollenZone = displayStatusLevel ? zoneFromPollen(displayStatusLevel) : null;
+  const pollenColors = useZoneColors(pollenZone);
   const levelLabel = displayStatusLevel
     ? t(LEVEL_LABEL_KEYS[displayStatusLevel])
     : loading && !pollenSnapshot
@@ -617,21 +620,20 @@ export default function MapScreen() {
         </View>
       </View>
 
-      <View
-        testID="map-status"
-        style={[
-          styles.statusCard,
-          displayStatusLevel === 'high' && styles.statusHigh,
-          displayStatusLevel === 'mid' && styles.statusMid,
-          displayStatusLevel === 'low' && styles.statusLow,
-        ]}>
+      <GlassCard testID="map-status" zone={pollenZone} style={styles.statusCard}>
         <View style={styles.statusTop}>
           {loading && !pollenSnapshot ? (
             <ActivityIndicator color={theme.colors.accent} />
           ) : (
             <View style={[styles.statusDot, { backgroundColor: levelColor }]} />
           )}
-          <Text style={styles.statusHeadline}>{statusHeadline}</Text>
+          <Text
+            style={[
+              styles.statusHeadline,
+              pollenColors ? { color: pollenColors.fg } : null,
+            ]}>
+            {statusHeadline}
+          </Text>
         </View>
         {selectedReading?.profileRelevant && profile?.name ? (
           <Text style={styles.statusMeta}>
@@ -649,7 +651,7 @@ export default function MapScreen() {
         {isCacheSource ? (
           <Text style={styles.statusBadge}>{t('map.pollenSourceCache')}</Text>
         ) : null}
-      </View>
+      </GlassCard>
 
       <View style={styles.layerBlock}>
         <View style={styles.layerRow} testID="map-layers">
@@ -834,6 +836,7 @@ export default function MapScreen() {
                 ? null
                 : selectedReading?.value ?? null
             }
+            zone={pollenZone}
           />
           {isGoogleAirQualityAvailable() ? (
             <AirQualityCard snapshot={airQuality} loading={airQualityLoading} />
@@ -998,24 +1001,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     headerText: { flex: 1, gap: 2 },
     statusCard: {
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-      padding: 14,
       gap: 6,
-    },
-    statusHigh: {
-      backgroundColor: colors.dangerLight,
-      borderColor: colors.dangerBorder,
-    },
-    statusMid: {
-      backgroundColor: colors.warningLight,
-      borderColor: colors.warningBorder,
-    },
-    statusLow: {
-      backgroundColor: colors.successLight,
-      borderColor: colors.successBorder,
     },
     statusTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     statusDot: { width: 12, height: 12, borderRadius: 6 },
