@@ -122,6 +122,25 @@ if [[ "${REQUIRE_PLACES_AIR_QUALITY:-}" == "1" ]]; then
   fi
 fi
 
+if [[ "${REQUIRE_MARKET_FEEDS:-}" == "1" ]]; then
+  for required in YANDEX_MARKET_FEED_URL MARKET_PHARMACY_FEED_ENABLED MARKET_PHARMACY_FEED_URL; do
+    if ! printf '%s\n' "$AVAILABLE" | grep -qx "$required"; then
+      echo "ERROR: REQUIRE_MARKET_FEEDS=1 but Lockbox missing $required" >&2
+      exit 1
+    fi
+  done
+  market_flags="$(yc lockbox payload get --id "$LOCKBOX_ID" --format json | python3 -c '
+import json,sys
+e={x["key"]:x.get("text_value","") for x in json.load(sys.stdin).get("entries") or []}
+print(e.get("YANDEX_MARKET_FEED_URL","").strip().startswith("https://"), e.get("MARKET_PHARMACY_FEED_ENABLED",""), e.get("MARKET_PHARMACY_FEED_URL","").strip().startswith("https://"))
+')"
+  read -r yandex_feed pharmacy_flag pharmacy_feed <<<"$market_flags"
+  if [[ "$yandex_feed" != "True" || "$pharmacy_flag" != "true" || "$pharmacy_feed" != "True" ]]; then
+    echo "ERROR: market feed URLs must be https and MARKET_PHARMACY_FEED_ENABLED=true (got: $market_flags)" >&2
+    exit 1
+  fi
+fi
+
 echo "Deploying $IMAGE → container $YC_CONTAINER_ID (mounted $MOUNTED Lockbox keys, version $VERSION_ID, sa $RUNTIME_SA_ID, network $NETWORK_ID)"
 yc serverless container revision deploy "${DEPLOY_ARGS[@]}"
 echo "Deploy requested."
