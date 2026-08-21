@@ -298,7 +298,7 @@ export default function HomeScreen() {
           accessibilityRole="button"
           accessibilityLabel={t('home.expert')}>
           <View style={styles.expertIcon}>
-            <BrandFeatureIcon name="expert" size={20} color={theme.colors.accent} />
+            <BrandFeatureIcon name="expert" size={20} color={theme.colors.textSecondary} />
           </View>
           <View style={styles.expertBody}>
             <Text style={ui.feedTitle}>{t('home.expert')}</Text>
@@ -440,7 +440,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       width: 40,
       height: 40,
       borderRadius: 8,
-      backgroundColor: colors.accentLight,
+      backgroundColor: colors.surfaceMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },
