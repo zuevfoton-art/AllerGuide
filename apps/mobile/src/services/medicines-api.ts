@@ -87,22 +87,32 @@ export async function recognizeMedicineViaApi(input: {
   };
 }
 
+const CATALOG_SEARCH_TIMEOUT_MS = 2500;
+
 export async function searchMedicinesFromCatalog(query: string): Promise<MedicineCard[]> {
   const term = query.trim();
   const baseUrl = getApiBaseUrl();
   if (term.length < 2 || !baseUrl) return [];
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CATALOG_SEARCH_TIMEOUT_MS);
+
   try {
     const response = await fetch(
       `${baseUrl}/api/medicines/search?q=${encodeURIComponent(term)}`,
+      { signal: controller.signal },
     );
     if (!response.ok) return [];
     const data = (await response.json()) as { ok?: boolean; medicines?: MedicineCard[] };
     if (!data.ok || !Array.isArray(data.medicines)) return [];
     return data.medicines;
   } catch (error) {
-    logCaughtError('searchMedicinesFromCatalog', error, { extra: { query: term } });
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      logCaughtError('searchMedicinesFromCatalog', error, { extra: { query: term } });
+    }
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

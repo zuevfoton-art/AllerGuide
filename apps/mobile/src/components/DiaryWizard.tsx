@@ -28,6 +28,7 @@ import {
   validateDiarySection,
   validateDiarySectionStep,
   attachDiaryAutoMetadata,
+  buildMedicineCardFromDiaryAnswers,
   mergeMedicinePrefillFromCard,
   pickMedicineSuggestionForTypedName,
   type DiaryAutoMetadata,
@@ -51,8 +52,8 @@ import {
 } from '@/src/services/diary-photo-picker';
 import { recognizeDiaryDish } from '@/src/services/diary-dish-recognition-service';
 import {
+  rankLocalMedicineSuggestions,
   rememberMedicineCard,
-  resolveMedicineSuggestion,
   searchMedicineSuggestions,
 } from '@/src/services/medicine-suggest-service';
 import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
@@ -76,6 +77,8 @@ interface DiaryWizardProps {
   ageYears?: number | null;
   /** Used to rank previously saved medicines from this profile's diary. */
   profileId?: number | null;
+  /** Cards already loaded on the diary screen — shown instantly while YC search runs. */
+  localMedicineCards?: MedicineCard[];
   planPersonalBestPef?: number | null;
   /** JSON allergies from active profile — used for dish component conflict warnings. */
   profileAllergiesJson?: string;
@@ -98,6 +101,7 @@ export function DiaryWizard({
   drugIntolerances,
   ageYears = null,
   profileId = null,
+  localMedicineCards = [],
   planPersonalBestPef,
   profileAllergiesJson = '[]',
   autoMetadata,
@@ -226,12 +230,15 @@ export function DiaryWizard({
       return;
     }
 
+    const localHits = rankLocalMedicineSuggestions(medicineName, localMedicineCards);
+    setMedicineSuggestions(localHits);
+
     const requestId = medicineSearchRequestId.current + 1;
     medicineSearchRequestId.current = requestId;
     let cancelled = false;
     const timer = setTimeout(() => {
       setMedicineSearching(true);
-      void searchMedicineSuggestions(medicineName, profileId)
+      void searchMedicineSuggestions(medicineName, profileId, localMedicineCards)
         .then((hits) => {
           if (cancelled || medicineSearchRequestId.current !== requestId) return;
           setMedicineSuggestions(hits);
@@ -241,13 +248,13 @@ export function DiaryWizard({
             setMedicineSearching(false);
           }
         });
-    }, 300);
+    }, 250);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [isMedicineNameStep, medicineName, profileId]);
+  }, [isMedicineNameStep, localMedicineCards, medicineName, profileId]);
 
   const scalePreview =
     section.type === 'Шкала' && isLastStep
@@ -365,16 +372,19 @@ export function DiaryWizard({
 
     if (isMedicineNameStep) {
       const typedName = sectionAnswers.medicine ?? '';
-      const localHit = pickMedicineSuggestionForTypedName(typedName, medicineSuggestions);
+      const localHit =
+        pickMedicineSuggestionForTypedName(typedName, medicineSuggestions) ??
+        pickMedicineSuggestionForTypedName(
+          typedName,
+          rankLocalMedicineSuggestions(typedName, localMedicineCards),
+        );
       if (localHit) {
         applyMedicineCard(localHit, 'fillEmpty');
-        advanceAfterValidation();
-        return;
+      } else {
+        const stub = buildMedicineCardFromDiaryAnswers(sectionAnswers);
+        if (stub) void rememberMedicineCard(stub);
       }
-      void resolveMedicineSuggestion(typedName, profileId).then((card) => {
-        if (card) applyMedicineCard(card, 'fillEmpty');
-        advanceAfterValidation();
-      });
+      advanceAfterValidation();
       return;
     }
 

@@ -29,6 +29,7 @@ import {
 } from '@/src/services/diary-service';
 import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
 import {
+  collectMedicineCardsFromDiaryEntries,
   rememberMedicineCard,
   rememberMedicineFromDiaryAnswers,
 } from '@/src/services/medicine-suggest-service';
@@ -135,6 +136,10 @@ export default function DiaryScreen() {
   const localizedSections = useMemo(
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
+  );
+  const localMedicineCards = useMemo(
+    () => collectMedicineCardsFromDiaryEntries(list),
+    [list],
   );
   /** Bump on focus so condition gating re-reads app_settings after profile edit. */
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
@@ -462,6 +467,7 @@ export default function DiaryScreen() {
           drugIntolerances={drugIntolerances}
           ageYears={getProfileAgeYears(activeProfile?.birthYear)}
           profileId={activeProfileId}
+          localMedicineCards={localMedicineCards}
           planPersonalBestPef={planPersonalBestPef}
           profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           autoMetadata={autoMetadata}

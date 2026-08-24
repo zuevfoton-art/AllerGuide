@@ -62,19 +62,31 @@ async function loadDiaryMedicineCards(profileId?: number | null): Promise<Medici
   }
 }
 
-/** Catalog + previously found/saved cards, ranked for autocomplete. */
+export function rankLocalMedicineSuggestions(
+  query: string,
+  extraCards: MedicineCard[] = [],
+): MedicineCard[] {
+  return filterAndRankMedicineSuggestions(query, [
+    ...extraCards,
+    ...listRememberedMedicineCards(),
+  ]);
+}
+
+/** Previously saved / remembered cards first; YC catalog merges in when it answers. */
 export async function searchMedicineSuggestions(
   query: string,
   profileId?: number | null,
+  extraCards: MedicineCard[] = [],
 ): Promise<MedicineCard[]> {
   const [remote, diaryCards] = await Promise.all([
     searchMedicinesFromCatalog(query),
-    loadDiaryMedicineCards(profileId),
+    extraCards.length > 0 ? Promise.resolve([]) : loadDiaryMedicineCards(profileId),
   ]);
   for (const card of remote) rememberLocally(card);
   return filterAndRankMedicineSuggestions(query, [
     ...remote,
     ...diaryCards,
+    ...extraCards,
     ...listRememberedMedicineCards(),
   ]);
 }
@@ -82,8 +94,14 @@ export async function searchMedicineSuggestions(
 export async function resolveMedicineSuggestion(
   query: string,
   profileId?: number | null,
+  extraCards: MedicineCard[] = [],
 ): Promise<MedicineCard | null> {
-  const suggestions = await searchMedicineSuggestions(query, profileId);
+  const localHit = pickMedicineSuggestionForTypedName(
+    query,
+    rankLocalMedicineSuggestions(query, extraCards),
+  );
+  if (localHit) return localHit;
+  const suggestions = await searchMedicineSuggestions(query, profileId, extraCards);
   return pickMedicineSuggestionForTypedName(query, suggestions);
 }
 

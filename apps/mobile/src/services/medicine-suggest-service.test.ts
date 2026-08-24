@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MedicineCard } from '@allerguide/core';
+import { encodeDiaryDetails, type MedicineCard } from '@allerguide/core';
 
 const diaryEntries: { type: string; details: string }[] = [];
 
@@ -43,6 +43,22 @@ describe('medicine-suggest-service', () => {
     vi.mocked(api.rememberMedicineViaApi).mockImplementation(async (item) => item);
   });
 
+  it('rebuilds cards from encoded diary details', async () => {
+    const { collectMedicineCardsFromDiaryEntries, rankLocalMedicineSuggestions } = await import(
+      './medicine-suggest-service'
+    );
+    const details = encodeDiaryDetails(
+      { medicine: 'Цетиризин', dosage: '10 мг', medicineForm: 'таблетки' },
+      'Лекарство',
+    );
+    const cards = collectMedicineCardsFromDiaryEntries([{ type: 'Лекарство', details }]);
+    expect(cards).toHaveLength(1);
+    expect(cards[0]?.name).toBe('Цетиризин');
+    expect(rankLocalMedicineSuggestions('цет', cards).map((item) => item.name)).toEqual([
+      'Цетиризин',
+    ]);
+  });
+
   it('merges catalog hits with previously saved diary medicines', async () => {
     diaryEntries.push({
       type: 'Лекарство',
@@ -59,6 +75,14 @@ describe('medicine-suggest-service', () => {
     const { searchMedicineSuggestions } = await import('./medicine-suggest-service');
     const hits = await searchMedicineSuggestions('цет', 1);
     expect(hits.map((item) => item.name)).toEqual(['Цетиризин', 'Цетиризин-Акри']);
+  });
+
+  it('ranks previously saved cards without waiting for the catalog', async () => {
+    const { rememberMedicineCard, rankLocalMedicineSuggestions } = await import(
+      './medicine-suggest-service'
+    );
+    await rememberMedicineCard(card('Цетиризин', { strength: '10 мг', source: 'manual' }));
+    expect(rankLocalMedicineSuggestions('цет').map((item) => item.name)).toEqual(['Цетиризин']);
   });
 
   it('writes a found card through to the YC catalog', async () => {
