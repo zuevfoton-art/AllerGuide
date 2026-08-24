@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   PanResponder,
   Pressable,
   StyleSheet,
@@ -235,7 +236,20 @@ export function ImageCropEditor({
 
   const handleHalf = HANDLE_SIZE / 2;
 
+  const previewAspect =
+    imageSize.width > 0 && imageSize.height > 0
+      ? imageSize.width / imageSize.height
+      : photo.width > 0 && photo.height > 0
+        ? photo.width / photo.height
+        : 4 / 3;
+
   return (
+    <Modal
+      visible
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onCancel}>
     <View style={styles.root} testID="scanner-crop-editor">
       <View style={styles.topBar}>
         <Pressable style={styles.iconBtn} onPress={onCancel} accessibilityRole="button">
@@ -267,11 +281,11 @@ export function ImageCropEditor({
               />
             </View>
           ) : (
-            <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+            <View pointerEvents="none" style={styles.fallbackPreview}>
               <Image
                 testID="scanner-crop-preview"
                 source={{ uri: photo.uri }}
-                style={StyleSheet.absoluteFillObject}
+                style={[styles.fallbackImage, { aspectRatio: previewAspect }]}
                 resizeMode="contain"
                 onLoad={onImageLoad}
               />
@@ -400,6 +414,7 @@ export function ImageCropEditor({
         <Text style={styles.cancelBtnText}>{cancelLabel}</Text>
       </Pressable>
     </View>
+    </Modal>
   );
 }
 
@@ -409,6 +424,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
       backgroundColor: colors.overlay,
       paddingBottom: 32,
+    },
+    fallbackPreview: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    fallbackImage: {
+      width: '100%',
+      maxHeight: '100%',
     },
     topBar: {
       flexDirection: 'row',
@@ -434,6 +458,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     stage: {
       flex: 1,
+      minHeight: 280,
       marginHorizontal: 12,
       borderRadius: 8,
       backgroundColor: '#000',
