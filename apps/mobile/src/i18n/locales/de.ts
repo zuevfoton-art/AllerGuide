@@ -946,6 +946,7 @@ const de: LocaleMessages = {
     conditionHistory: {
       title: 'Wann begann die Allergie?',
       hint: 'Geben Sie den ungefähren Beginn für jeden Typ an. Felder können übersprungen werden.',
+      questionProgress: '{{condition}} · Frage {{current}} von {{total}}',
       empty: 'Wählen Sie zuerst Allergietypen im vorherigen Schritt.',
       onsetLabel: 'Erstes Auftreten',
       onsetAgeLabel: 'Alter beim Erstauftreten (Jahre)',

@@ -2,17 +2,22 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  ALLERGY_CONDITION_TYPES,
   allergenIdsFromConditionOptions,
+  clampConditionHistoryQuestionIndex,
   createEmptySymptomBaseline,
+  getConditionHistoryQuestionPage,
   getMissingConditionsForAllergens,
   getWizardStep,
   getGatedConditionRemovals,
   isSymptomBaselineEmpty,
+  listConditionHistoryQuestionPages,
   mergePreSeededAllergens,
   needsChildConsent,
   normalizeAllergyConfirmations,
   reconcileConditionOptionSelections,
   shouldCompleteOnboarding,
+  shouldPaginateConditionHistoryQuestions,
   type AllergyConditionId,
   type AllergyConfirmationSource,
   type ComorbidityLink,
@@ -96,6 +101,7 @@ export default function ProfileSetupScreen() {
   const [childConsent, setChildConsent] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState<ProfileSetupWizardStep>('name');
+  const [historyQuestionIndex, setHistoryQuestionIndex] = useState(0);
   const [, setRefreshKey] = useState(0);
 
   const wizardStep = getWizardStep(scenario, listProfiles());
@@ -186,6 +192,7 @@ export default function ProfileSetupScreen() {
   const applyConditionsChange = (next: AllergyConditionId[]) => {
     setConditions(next);
     if (!next.includes('other')) setOtherConditionLabel('');
+    setHistoryQuestionIndex(0);
     setConditionHistoryDrafts((prev) => reconcileConditionHistoryDrafts(next, prev));
     setComorbidityLinks((prev) => reconcileComorbidityLinks(next, prev));
     const nextOptions = reconcileConditionOptionSelections(next, conditionOptionSelections);
@@ -225,6 +232,7 @@ export default function ProfileSetupScreen() {
     setCrossPendingIds([]);
     setChildConsent(false);
     setCurrentStep('name');
+    setHistoryQuestionIndex(0);
     setError('');
   };
 
@@ -296,6 +304,20 @@ export default function ProfileSetupScreen() {
     setRefreshKey((key) => key + 1);
   };
 
+  const historyPages = listConditionHistoryQuestionPages(conditions);
+  const historyPage = getConditionHistoryQuestionPage(conditions, historyQuestionIndex);
+  const paginateHistory = shouldPaginateConditionHistoryQuestions(conditions);
+  const historyQuestionProgress =
+    paginateHistory && historyPage
+      ? {
+          current: clampConditionHistoryQuestionIndex(conditions, historyQuestionIndex) + 1,
+          total: historyPages.length,
+          conditionLabel:
+            ALLERGY_CONDITION_TYPES.find((item) => item.id === historyPage.conditionId)?.label ??
+            historyPage.conditionId,
+        }
+      : undefined;
+
   const goNext = () => {
     const validationError = validateProfileSetupWizardStep(currentStep, draft, { scenario });
     if (validationError) {
@@ -304,6 +326,14 @@ export default function ProfileSetupScreen() {
     }
 
     setError('');
+
+    if (currentStep === 'conditionHistory' && paginateHistory) {
+      const lastIndex = historyPages.length - 1;
+      if (historyQuestionIndex < lastIndex) {
+        setHistoryQuestionIndex((index) => index + 1);
+        return;
+      }
+    }
 
     const nextSelected = selected;
     if (currentStep === 'crossReactions') {
@@ -335,6 +365,7 @@ export default function ProfileSetupScreen() {
     const next = getNextProfileSetupWizardStep(currentStep, nextNav);
     if (next) {
       if (next === 'crossReactions') setCrossPendingIds([]);
+      if (next === 'conditionHistory') setHistoryQuestionIndex(0);
       setCurrentStep(next);
       return;
     }
@@ -344,9 +375,17 @@ export default function ProfileSetupScreen() {
 
   const goBack = () => {
     setError('');
+    if (currentStep === 'conditionHistory' && paginateHistory && historyQuestionIndex > 0) {
+      setHistoryQuestionIndex((index) => index - 1);
+      return;
+    }
     const previous = getPreviousProfileSetupWizardStep(currentStep, wizardNav);
     if (previous) {
       if (currentStep === 'crossReactions') setCrossPendingIds([]);
+      if (previous === 'conditionHistory' && shouldPaginateConditionHistoryQuestions(conditions)) {
+        const lastIndex = listConditionHistoryQuestionPages(conditions).length - 1;
+        setHistoryQuestionIndex(Math.max(0, lastIndex));
+      }
       setCurrentStep(previous);
     }
   };
@@ -449,6 +488,8 @@ export default function ProfileSetupScreen() {
           drafts={conditionHistoryDrafts}
           onChange={setConditionHistoryDrafts}
           birthYear={birthYear}
+          page={historyPage}
+          questionProgress={historyQuestionProgress}
         />
       ) : null}
 

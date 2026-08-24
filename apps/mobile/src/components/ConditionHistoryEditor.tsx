@@ -7,11 +7,14 @@ import {
   CONDITION_ONSET_KINDS,
   FOOD_SYMPTOM_TIMINGS,
   computeOnsetYear,
+  listConditionHistoryQuestionsForCondition,
   type AllergyConditionId,
   type AllergyConfirmationSource,
   type ConditionDiagnosedBy,
   type ConditionEpisodeInput,
   type ConditionEpisodeStatus,
+  type ConditionHistoryQuestionId,
+  type ConditionHistoryQuestionPage,
   type ConditionOnsetKind,
   type FoodSymptomTiming,
 } from '@allerguide/core';
@@ -26,6 +29,8 @@ interface ConditionHistoryEditorProps {
   onChange: (drafts: ConditionHistoryDrafts) => void;
   /** Profile birth year — used to derive onsetYear from age input. */
   birthYear?: string;
+  /** When set, show only that question for that type (wizard one-question screens). */
+  page?: ConditionHistoryQuestionPage | null;
 }
 
 function defaultEpisodeInput(): ConditionEpisodeInput {
@@ -54,6 +59,7 @@ export function ConditionHistoryEditor({
   drafts,
   onChange,
   birthYear,
+  page,
 }: ConditionHistoryEditorProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -92,16 +98,17 @@ export function ConditionHistoryEditor({
     updateEpisode(conditionId, patch);
   };
 
-  return (
-    <View style={styles.wrap}>
-      {conditionIds.map((conditionId) => {
-        const meta = ALLERGY_CONDITION_TYPES.find((item) => item.id === conditionId);
-        const episode = getDraft(drafts, conditionId);
+  const visibleIds = page ? [page.conditionId] : conditionIds;
 
+  const renderQuestion = (
+    conditionId: AllergyConditionId,
+    questionId: ConditionHistoryQuestionId,
+    episode: ConditionEpisodeInput,
+  ) => {
+    switch (questionId) {
+      case 'onsetKind':
         return (
-          <View key={conditionId} style={styles.card}>
-            <Text style={styles.cardTitle}>{meta?.label ?? conditionId}</Text>
-
+          <>
             <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.onsetLabel')}</Text>
             <ChipRow
               options={CONDITION_ONSET_KINDS}
@@ -111,19 +118,25 @@ export function ConditionHistoryEditor({
               }
               onSelect={(value) => updateEpisode(conditionId, { onsetKind: value })}
             />
-
+          </>
+        );
+      case 'onsetAge':
+        return (
+          <>
             <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.onsetAgeLabel')}</Text>
             <TextInput
-              value={
-                episode.onsetAgeYears !== undefined ? String(episode.onsetAgeYears) : ''
-              }
+              value={episode.onsetAgeYears !== undefined ? String(episode.onsetAgeYears) : ''}
               onChangeText={(text) => handleAgeChange(conditionId, text)}
               placeholder={t('profileSetup.conditionHistory.onsetAgePlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               keyboardType="numeric"
               style={styles.input}
             />
-
+          </>
+        );
+      case 'status':
+        return (
+          <>
             <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.statusLabel')}</Text>
             <ChipRow
               options={CONDITION_EPISODE_STATUSES}
@@ -133,7 +146,11 @@ export function ConditionHistoryEditor({
               }
               onSelect={(value) => updateEpisode(conditionId, { status: value })}
             />
-
+          </>
+        );
+      case 'diagnosedBy':
+        return (
+          <>
             <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.confirmedBy')}</Text>
             <ChipRow
               options={ALLERGY_CONFIRMATION_SOURCES}
@@ -145,38 +162,40 @@ export function ConditionHistoryEditor({
                 updateEpisode(conditionId, { diagnosedBy: value as ConditionDiagnosedBy })
               }
             />
-
-            {conditionId === 'food' ? (
-              <>
-                <Text style={styles.fieldLabel}>
-                  {t('profileSetup.conditionHistory.foodTimingLabel')}
-                </Text>
-                <ChipRow
-                  options={FOOD_SYMPTOM_TIMINGS}
-                  selected={episode.foodSymptomTiming ?? 'unknown'}
-                  labelFor={(value) =>
-                    t(`profileSetup.conditionHistory.foodTiming.${value as FoodSymptomTiming}`)
-                  }
-                  onSelect={(value) => updateEpisode(conditionId, { foodSymptomTiming: value })}
-                />
-              </>
-            ) : null}
-
-            {conditionId === 'rhinitis' ? (
-              <Pressable
-                style={styles.checkRow}
-                onPress={() =>
-                  updateEpisode(conditionId, {
-                    ocularSymptoms: !episode.ocularSymptoms,
-                  })
-                }>
-                <View style={[styles.checkbox, episode.ocularSymptoms && styles.checkboxActive]} />
-                <Text style={styles.checkText}>
-                  {t('profileSetup.conditionHistory.ocularSymptoms')}
-                </Text>
-              </Pressable>
-            ) : null}
-
+          </>
+        );
+      case 'foodSymptomTiming':
+        return (
+          <>
+            <Text style={styles.fieldLabel}>
+              {t('profileSetup.conditionHistory.foodTimingLabel')}
+            </Text>
+            <ChipRow
+              options={FOOD_SYMPTOM_TIMINGS}
+              selected={episode.foodSymptomTiming ?? 'unknown'}
+              labelFor={(value) =>
+                t(`profileSetup.conditionHistory.foodTiming.${value as FoodSymptomTiming}`)
+              }
+              onSelect={(value) => updateEpisode(conditionId, { foodSymptomTiming: value })}
+            />
+          </>
+        );
+      case 'ocularSymptoms':
+        return (
+          <Pressable
+            style={styles.checkRow}
+            onPress={() =>
+              updateEpisode(conditionId, {
+                ocularSymptoms: !episode.ocularSymptoms,
+              })
+            }>
+            <View style={[styles.checkbox, episode.ocularSymptoms && styles.checkboxActive]} />
+            <Text style={styles.checkText}>{t('profileSetup.conditionHistory.ocularSymptoms')}</Text>
+          </Pressable>
+        );
+      case 'notes':
+        return (
+          <>
             <Text style={styles.fieldLabel}>{t('profileSetup.conditionHistory.notesLabel')}</Text>
             <TextInput
               value={episode.notes ?? ''}
@@ -186,6 +205,28 @@ export function ConditionHistoryEditor({
               multiline
               style={[styles.input, styles.notesInput]}
             />
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.wrap}>
+      {visibleIds.map((conditionId) => {
+        const meta = ALLERGY_CONDITION_TYPES.find((item) => item.id === conditionId);
+        const episode = getDraft(drafts, conditionId);
+        const questions = page
+          ? [page.questionId]
+          : listConditionHistoryQuestionsForCondition(conditionId);
+
+        return (
+          <View key={conditionId} style={styles.card}>
+            <Text style={styles.cardTitle}>{meta?.label ?? conditionId}</Text>
+            {questions.map((questionId) => (
+              <View key={questionId}>{renderQuestion(conditionId, questionId, episode)}</View>
+            ))}
           </View>
         );
       })}
