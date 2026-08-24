@@ -8,6 +8,7 @@
 import { findAllergenById } from './allergen-database';
 import {
   DEFAULT_MARKET_MERCHANT_PRIORITY,
+  MARKET_MERCHANTS,
   type MarketMerchant,
   type MarketOffer,
 } from './market-offers';
@@ -84,6 +85,117 @@ export function isMarketplaceProductKind(value: string): value is MarketplacePro
   return (MARKETPLACE_PRODUCT_KINDS as readonly string[]).includes(value);
 }
 
+export function isMarketplaceProvider(value: string): value is MarketplaceProvider {
+  return (MARKETPLACE_PROVIDERS as readonly string[]).includes(value);
+}
+
+export function isMarketplaceModerationState(value: string): value is MarketplaceModerationState {
+  return (MARKETPLACE_MODERATION_STATES as readonly string[]).includes(value);
+}
+
+export function isMarketplaceColorKey(value: string): value is MarketplaceColorKey {
+  return (MARKETPLACE_COLOR_KEYS as readonly string[]).includes(value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+}
+
+/**
+ * New catalog rows have `moderationStatus` / `forAllergenIds`.
+ * Staging still serves the pre-#276 `CatalogProduct` shape (`tag`, `forAllergens`)
+ * which the client must not treat as a live snapshot.
+ */
+export function looksLikeCuratedMarketplaceProduct(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return typeof value.moderationStatus === 'string' || Array.isArray(value.forAllergenIds);
+}
+
+export function normalizeMarketplaceOffer(value: unknown): MarketplaceOffer | null {
+  if (!isRecord(value)) return null;
+  const merchant = String(value.merchant ?? '');
+  const url = typeof value.url === 'string' ? value.url.trim() : '';
+  if (!(MARKET_MERCHANTS as readonly string[]).includes(merchant) || !isHttpUrl(url)) {
+    return null;
+  }
+
+  return {
+    merchant: merchant as MarketMerchant,
+    url,
+    sku: typeof value.sku === 'string' ? value.sku : undefined,
+    erid: typeof value.erid === 'string' ? value.erid : undefined,
+    priceRub: typeof value.priceRub === 'number' ? value.priceRub : undefined,
+    photoUrl: typeof value.photoUrl === 'string' ? value.photoUrl : undefined,
+    refreshedAt: typeof value.refreshedAt === 'string' ? value.refreshedAt : undefined,
+    inStock: typeof value.inStock === 'boolean' ? value.inStock : undefined,
+  };
+}
+
+export function normalizeMarketplaceProduct(value: unknown): MarketplaceProduct | null {
+  if (!looksLikeCuratedMarketplaceProduct(value) || !isRecord(value)) return null;
+
+  const id = typeof value.id === 'string' ? value.id.trim() : '';
+  const title = typeof value.title === 'string' ? value.title.trim() : '';
+  if (!id || !title) return null;
+
+  const kind = isMarketplaceProductKind(String(value.kind ?? ''))
+    ? (value.kind as MarketplaceProductKind)
+    : 'regular';
+  const provider = isMarketplaceProvider(String(value.provider ?? ''))
+    ? (value.provider as MarketplaceProvider)
+    : kind === 'medicine'
+      ? 'pharmacy'
+      : 'yandex_market';
+
+  return {
+    id,
+    title,
+    why: typeof value.why === 'string' ? value.why : '',
+    imageUrl: typeof value.imageUrl === 'string' ? value.imageUrl : '',
+    icon: typeof value.icon === 'string' ? value.icon : 'cart',
+    category: isMarketplaceCategory(String(value.category ?? ''))
+      ? (value.category as MarketplaceCategory)
+      : 'home',
+    kind,
+    provider,
+    colorKey: isMarketplaceColorKey(String(value.colorKey ?? ''))
+      ? (value.colorKey as MarketplaceColorKey)
+      : 'accent',
+    forAllergenIds: asStringArray(value.forAllergenIds),
+    containsAllergenIds: asStringArray(value.containsAllergenIds),
+    moderationStatus: isMarketplaceModerationState(String(value.moderationStatus ?? ''))
+      ? (value.moderationStatus as MarketplaceModerationState)
+      : 'published',
+    prescriptionOnly: value.prescriptionOnly === true,
+    showPrice: value.showPrice === true,
+    priceRub: typeof value.priceRub === 'number' ? value.priceRub : undefined,
+    offers: Array.isArray(value.offers)
+      ? value.offers
+          .map(normalizeMarketplaceOffer)
+          .filter((offer): offer is MarketplaceOffer => offer !== null)
+      : [],
+    refreshedAt: typeof value.refreshedAt === 'string' ? value.refreshedAt : undefined,
+  };
+}
+
+export function normalizeMarketplaceCatalog(value: unknown): MarketplaceProduct[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map(normalizeMarketplaceProduct)
+    .filter((product): product is MarketplaceProduct => product !== null);
+}
+
+/** Live / cached payload is usable only when curated published cards survive the profile filter. */
+export function isUsableLiveMarketplaceCatalog(value: unknown): boolean {
+  const products = normalizeMarketplaceCatalog(value);
+  return filterMarketplaceProductsForProfile(products, []).length > 0;
+}
+
 export function looksLikePrescriptionText(value: string): boolean {
   const normalized = value.trim().toLowerCase();
   if (!normalized) return false;
@@ -135,10 +247,12 @@ export function filterMarketplaceProductsForProfile(
   profileAllergenIds: string[],
 ): MarketplaceProduct[] {
   return products.filter((product) => {
-    if (product.moderationStatus !== 'published') return false;
+    const status = product.moderationStatus ?? 'published';
+    if (status !== 'published') return false;
     if (product.prescriptionOnly) return false;
 
-    const containsConflict = product.containsAllergenIds.some((allergenId) =>
+    const containsIds = product.containsAllergenIds ?? [];
+    const containsConflict = containsIds.some((allergenId) =>
       profileAllergenIds.includes(allergenId),
     );
     return !containsConflict;

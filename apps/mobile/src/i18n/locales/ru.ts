@@ -225,6 +225,10 @@ const ru: LocaleMessages = {
     courseShort: 'Курс',
     reportShort: 'Отчёт',
     empty: 'Записей пока нет. Первая займёт меньше минуты.',
+    outcomeNone: 'без реакции',
+    outcomeMild: 'слабо',
+    outcomeModerate: 'умеренно',
+    outcomeSevere: 'сильно',
     disclaimer: 'Дневник помогает фиксировать наблюдения и не заменяет консультацию врача.',
     disclaimerShort: 'Дневник фиксирует наблюдения и не заменяет консультацию врача.',
     deleteTitle: 'Удалить запись?',
@@ -294,6 +298,7 @@ const ru: LocaleMessages = {
     dishConflicts: 'Совпадения с профилем: {{list}}',
     dishOffLoading: 'Ищем состав в Open Food Facts…',
     dishOffEnriched: 'Дополнено из Open Food Facts: {{product}}',
+    medicineSearching: 'Ищем препарат в каталоге…',
   },
   medicineScan: {
     title: 'Фото упаковки или голос',
@@ -950,6 +955,7 @@ const ru: LocaleMessages = {
     conditionHistory: {
       title: 'Когда появилась аллергия?',
       hint: 'Укажите примерный период дебюта для каждого типа. Можно пропустить отдельные поля.',
+      questionProgress: '{{condition}} · вопрос {{current}} из {{total}}',
       empty: 'Сначала выберите типы аллергии на предыдущем шаге.',
       onsetLabel: 'Когда впервые проявилось',
       onsetAgeLabel: 'Возраст дебюта (лет)',

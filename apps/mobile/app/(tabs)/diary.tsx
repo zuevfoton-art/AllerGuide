@@ -8,6 +8,7 @@ import {
   formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
+  normalizeSeverity,
   getDiarySection,
   getAsthmaPlanPersonalBest,
   getProfileAgeYears,
@@ -27,6 +28,11 @@ import {
   updateDiaryEntry,
 } from '@/src/services/diary-service';
 import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
+import {
+  collectMedicineCardsFromDiaryEntries,
+  rememberMedicineCard,
+  rememberMedicineFromDiaryAnswers,
+} from '@/src/services/medicine-suggest-service';
 import {
   buildClinicalScaleEditorState,
   buildDiarySectionEditorState,
@@ -61,6 +67,11 @@ import { NutritionCaptureStep } from '@/src/components/NutritionCaptureStep';
 import type { DishEnrichmentResult } from '@/src/services/dish-off-enrichment-service';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import {
+  diaryOutcomeMessageKey,
+  resolveZoneColors,
+  zoneFromDiarySeverity,
+} from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
@@ -125,6 +136,10 @@ export default function DiaryScreen() {
   const localizedSections = useMemo(
     () => localizeDiarySections(locale, localeContent),
     [locale, localeContent],
+  );
+  const localMedicineCards = useMemo(
+    () => collectMedicineCardsFromDiaryEntries(list),
+    [list],
   );
   /** Bump on focus so condition gating re-reads app_settings after profile edit. */
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
@@ -256,6 +271,7 @@ export default function DiaryScreen() {
     ageUsage: MedicineAgeResolution | null;
     photoUri?: string;
   }) => {
+    void rememberMedicineCard(input.card);
     await openSection('Лекарство', {
       recognizedCard: input.card,
       photoUri: input.photoUri,
@@ -323,6 +339,11 @@ export default function DiaryScreen() {
   const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     const profileId = activeProfileId ?? getOrLoadActiveProfileId();
     if (!profileId) return;
+    for (const entry of entries) {
+      if (entry.type !== 'Лекарство') continue;
+      const answers = getDiaryEntryAnswers(entry.type, entry.details);
+      if (answers) void rememberMedicineFromDiaryAnswers(answers);
+    }
     const results = await addDiaryEntries(profileId, entries);
     const failed = results.find((result) => !result.ok);
     if (failed && !failed.ok) {
@@ -340,6 +361,10 @@ export default function DiaryScreen() {
     details: string,
     photoUris?: string[],
   ) => {
+    if (type === 'Лекарство') {
+      const answers = getDiaryEntryAnswers(type, details);
+      if (answers) void rememberMedicineFromDiaryAnswers(answers);
+    }
     const result = await updateDiaryEntry(entry.id, { type, details, photoUris });
     if (!result.ok) {
       logCaughtError('DiaryScreen.handleUpdate', new Error(result.code));
@@ -440,6 +465,9 @@ export default function DiaryScreen() {
           initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
           allowSkipSection={false}
           drugIntolerances={drugIntolerances}
+          ageYears={getProfileAgeYears(activeProfile?.birthYear)}
+          profileId={activeProfileId}
+          localMedicineCards={localMedicineCards}
           planPersonalBestPef={planPersonalBestPef}
           profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           autoMetadata={autoMetadata}
@@ -558,6 +586,10 @@ export default function DiaryScreen() {
             const icon = TYPE_ICONS[item.type] ?? 'create';
             const summary = formatDiaryEntrySummary(item.type, item.details);
             const photos = photoUrisByEntry[item.id] ?? [];
+            const answers = getDiaryEntryAnswers(item.type, item.details);
+            const severity = answers ? normalizeSeverity(answers, item.type) : null;
+            const outcomeZone = zoneFromDiarySeverity(severity);
+            const outcomeColors = resolveZoneColors(outcomeZone, theme.colors);
             return (
               <Pressable
                 key={item.id}
@@ -581,7 +613,13 @@ export default function DiaryScreen() {
                   ) : null}
                   <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                {severity != null && outcomeColors ? (
+                  <Text style={[styles.outcome, { color: outcomeColors.fg }]}>
+                    {t(diaryOutcomeMessageKey(severity))}
+                  </Text>
+                ) : (
+                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
+                )}
               </Pressable>
             );
           })}
@@ -664,6 +702,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 11,
       color: colors.textMuted,
       marginTop: 2,
+    },
+    outcome: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
     },
     photoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
     photoThumb: { width: 40, height: 40, borderRadius: 6, backgroundColor: colors.surfaceMuted },

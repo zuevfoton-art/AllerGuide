@@ -116,6 +116,51 @@ describe('medicine routes', () => {
     expect(response.body.medicine.strength).toBe('200 мг');
   });
 
+  it('remembers a typed medicine into the catalog', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    vi.mocked(store.upsertMedicineCard).mockResolvedValueOnce({
+      id: 'med-1',
+      normalizedName: 'нурофен',
+      ...catalogHit,
+      source: 'manual',
+      recognitions: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.mocked(store.medicineRowToCard).mockReturnValueOnce({
+      ...catalogHit,
+      source: 'catalog',
+    });
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app).post('/api/medicines').send({
+      name: 'Нурофен',
+      strength: '200 мг',
+      form: 'таблетки',
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(response.body.medicine.name).toBe('Нурофен');
+    expect(store.upsertMedicineCard).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Нурофен', strength: '200 мг', source: 'manual' }),
+    );
+  });
+
+  it('rejects remember without a name', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app).post('/api/medicines').send({ strength: '10 мг' });
+    expect(response.status).toBe(400);
+  });
+
   it('returns a catalog hit without calling vision', async () => {
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
     const store = await import('../services/medicine-catalog-store');

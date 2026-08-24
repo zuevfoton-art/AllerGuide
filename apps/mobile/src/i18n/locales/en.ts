@@ -224,6 +224,10 @@ const en: LocaleMessages = {
     courseShort: 'Course',
     reportShort: 'Report',
     empty: 'No entries yet. The first one takes less than a minute.',
+    outcomeNone: 'no reaction',
+    outcomeMild: 'mild',
+    outcomeModerate: 'moderate',
+    outcomeSevere: 'severe',
     disclaimer: 'The diary helps record observations and does not replace a doctor’s consultation.',
     disclaimerShort: 'The diary records observations and does not replace a doctor’s consultation.',
     deleteTitle: 'Delete entry?',
@@ -293,6 +297,7 @@ const en: LocaleMessages = {
     dishConflicts: 'Profile conflicts: {{list}}',
     dishOffLoading: 'Looking up ingredients in Open Food Facts…',
     dishOffEnriched: 'Enriched from Open Food Facts: {{product}}',
+    medicineSearching: 'Searching the medicine catalog…',
   },
   medicineScan: {
     title: 'Photo or voice',
@@ -948,6 +953,7 @@ const en: LocaleMessages = {
     conditionHistory: {
       title: 'When did the allergy start?',
       hint: 'Enter an approximate onset period for each type. Optional fields can be skipped.',
+      questionProgress: '{{condition}} · question {{current}} of {{total}}',
       empty: 'Select allergy types on the previous step first.',
       onsetLabel: 'When symptoms first appeared',
       onsetAgeLabel: 'Age at onset (years)',

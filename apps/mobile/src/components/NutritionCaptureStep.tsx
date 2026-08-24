@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import type { DishEnrichmentResult } from '@/src/services/dish-off-enrichment-service';
 import { Button } from '@/src/components/Button';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
@@ -8,7 +8,6 @@ import { useTranslation } from '@/src/store/locale-store';
 import { recognizeDiaryDishFromPhoto } from '@/src/services/diary-dish-recognition-service';
 import {
   captureScanPhotoViaPicker,
-  encodeImageToBase64,
   pickScanPhotoFromLibrary,
   prepareScanPhotoForCrop,
   type CapturedScanPhoto,
@@ -39,15 +38,6 @@ export function NutritionCaptureStep({ onEnterManually, onContinue }: Props) {
       ? await pickScanPhotoFromLibrary()
       : await captureScanPhotoViaPicker();
     if (!photo) return;
-    if (Platform.OS === 'web') {
-      try {
-        const encoded = await encodeImageToBase64(photo.uri);
-        await recognizeCropped(encoded);
-      } catch {
-        setError(t('nutritionScan.notRecognized'));
-      }
-      return;
-    }
     setPendingPhoto(await prepareScanPhotoForCrop(photo));
     setState('crop');
   };

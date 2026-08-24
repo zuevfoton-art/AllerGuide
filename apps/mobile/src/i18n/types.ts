@@ -229,6 +229,10 @@ export type LocaleMessages = {
     courseShort: string;
     reportShort: string;
     empty: string;
+    outcomeNone: string;
+    outcomeMild: string;
+    outcomeModerate: string;
+    outcomeSevere: string;
     disclaimer: string;
     disclaimerShort: string;
     deleteTitle: string;
@@ -298,6 +302,7 @@ export type LocaleMessages = {
     dishConflicts: string;
     dishOffLoading: string;
     dishOffEnriched: string;
+    medicineSearching: string;
   };
   medicineScan: {
     title: string;
@@ -931,6 +936,7 @@ export type LocaleMessages = {
     conditionHistory: {
       title: string;
       hint: string;
+      questionProgress: string;
       empty: string;
       onsetLabel: string;
       onsetAgeLabel: string;

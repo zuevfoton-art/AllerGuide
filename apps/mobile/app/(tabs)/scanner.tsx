@@ -39,7 +39,9 @@ import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { ScannerDishVisionCard } from '@/src/components/ScannerDishVisionCard';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useZoneColors, zoneFromScanRisk } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
 import {
@@ -147,6 +149,8 @@ export default function ScannerScreen() {
   const isMedium = riskLevel === 'medium';
   const isLow = riskLevel === 'low';
   const isCautionOrWorse = isHigh || isMedium;
+  const verdictZone = riskLevel ? zoneFromScanRisk(riskLevel) : null;
+  const verdictColors = useZoneColors(verdictZone);
 
   const compositionText = result?.productIngredients?.trim() || input.trim();
 
@@ -550,6 +554,7 @@ export default function ScannerScreen() {
             <View style={[styles.cameraTopBar, { paddingTop: topPad }]}>
               <Pressable
                 style={styles.closeBtn}
+                hitSlop={8}
                 onPress={() => setTorchOn((v) => !v)}
                 accessibilityRole="button"
                 accessibilityLabel={t('scanner.flashToggle')}
@@ -565,6 +570,7 @@ export default function ScannerScreen() {
               </Text>
               <Pressable
                 style={styles.closeBtn}
+                hitSlop={8}
                 onPress={closeCamera}
                 accessibilityRole="button"
                 accessibilityLabel={t('common.cancel')}>
@@ -646,21 +652,15 @@ export default function ScannerScreen() {
       brandHeaderRight={<ProfileHeaderButton />}
       pinnedTop={
         displayResult ? (
-          <View
+          <GlassCard
             testID="scanner-verdict-pinned"
-            style={[
-              styles.verdictHero,
-              styles.verdictPinned,
-              isHigh && styles.verdictHeroHigh,
-              isMedium && styles.verdictHeroMedium,
-              isLow && styles.verdictHeroLow,
-            ]}>
+            zone={verdictZone}
+            padded={false}
+            style={styles.verdictPinned}>
             <Text
               style={[
                 styles.verdictHeroTitle,
-                isHigh && styles.verdictHeroTitleHigh,
-                isMedium && styles.verdictHeroTitleMedium,
-                isLow && styles.verdictHeroTitleLow,
+                verdictColors ? { color: verdictColors.fg } : null,
               ]}>
               {isHigh
                 ? t('scanner.verdictStop')
@@ -668,7 +668,7 @@ export default function ScannerScreen() {
                   ? t('scanner.verdictCaution')
                   : t('scanner.verdictClear')}
             </Text>
-          </View>
+          </GlassCard>
         ) : undefined
       }>
       <View style={styles.header}>
@@ -689,7 +689,7 @@ export default function ScannerScreen() {
 
       <View style={styles.secondaryRow}>
         <Pressable
-          style={styles.secondaryBtn}
+          style={styles.barcodeBtn}
           onPress={() => void openCamera('barcode')}
           testID="scanner-barcode"
           accessibilityRole="button">
@@ -697,7 +697,7 @@ export default function ScannerScreen() {
           <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
         </Pressable>
         <Pressable
-          style={styles.secondaryBtn}
+          style={styles.manualToggleBtn}
           onPress={() => setManualOpen((v) => !v)}
           testID="scanner-toggle-manual"
           accessibilityRole="button"
@@ -1130,14 +1130,27 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     headerText: { flex: 1, gap: 2 },
     secondaryRow: { flexDirection: 'row', gap: 10 },
-    secondaryBtn: {
+    barcodeBtn: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 12,
-      borderRadius: 8,
+      borderRadius: radii.full,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      minHeight: 44,
+    },
+    manualToggleBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 12,
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.accent,
@@ -1186,25 +1199,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     resultStack: { gap: 10 },
     verdictPinned: {
       paddingVertical: 12,
-    },
-    verdictHero: {
-      borderRadius: 10,
-      paddingVertical: 18,
       paddingHorizontal: 16,
-      borderWidth: 1,
-      gap: 6,
-    },
-    verdictHeroHigh: {
-      backgroundColor: colors.scannerDangerIconBg,
-      borderColor: colors.scannerDangerBorder,
-    },
-    verdictHeroMedium: {
-      backgroundColor: colors.warningLight,
-      borderColor: colors.warningBorder,
-    },
-    verdictHeroLow: {
-      backgroundColor: colors.scannerSafeIconBg,
-      borderColor: colors.scannerSafeBorder,
     },
     verdictHeroTitle: {
       fontFamily: fonts.sansBold,
@@ -1212,9 +1207,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '700',
       letterSpacing: 0.4,
     },
-    verdictHeroTitleHigh: { color: colors.danger },
-    verdictHeroTitleMedium: { color: colors.warning },
-    verdictHeroTitleLow: { color: colors.scannerSafeText },
     verdictHeroHint: {
       fontFamily: fonts.sans,
       fontSize: 14,
@@ -1394,7 +1386,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
       alignItems: 'center',
       paddingVertical: 10,
-      borderRadius: 8,
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,

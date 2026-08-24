@@ -65,8 +65,8 @@ function createStyles({ colors }: AppTheme, height: number) {
       borderRadius: 8,
       overflow: 'hidden',
       borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surfaceMuted,
+      borderColor: colors.mapRoad,
+      backgroundColor: colors.mapLand,
     },
     webview: {
       flex: 1,

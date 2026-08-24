@@ -68,7 +68,7 @@ export function ProfileHeaderButton({
           accessibilityRole="button"
           accessibilityLabel={t('profileSwitcher.switchTitle')}
           hitSlop={8}>
-          <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
+          <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
           <View style={styles.chipTextCol}>
             <Text style={styles.chipTitle} numberOfLines={1}>
               {chipTitle}
@@ -91,7 +91,7 @@ export function ProfileHeaderButton({
             destination === 'hub' ? t('profiles.title') : t('profileSwitcher.switchTitle')
           }
           hitSlop={8}>
-          <Ionicons name="person-circle-outline" size={20} color={theme.colors.accent} />
+          <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
         </Pressable>
       )}
 

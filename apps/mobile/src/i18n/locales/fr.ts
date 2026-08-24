@@ -224,6 +224,10 @@ const fr: LocaleMessages = {
     courseShort: 'Cours',
     reportShort: 'Rapport',
     empty: 'Pas encore d\'entrées. La première prend moins d\'une minute.',
+    outcomeNone: 'sans réaction',
+    outcomeMild: 'léger',
+    outcomeModerate: 'modéré',
+    outcomeSevere: 'sévère',
     disclaimer: 'Le journal aide à noter les observations et ne remplace pas une consultation.',
     disclaimerShort: 'Le journal note les observations et ne remplace pas une consultation.',
     deleteTitle: 'Supprimer l\'entrée ?',
@@ -293,6 +297,7 @@ const fr: LocaleMessages = {
     dishConflicts: 'Conflits avec le profil : {{list}}',
     dishOffLoading: 'Recherche des ingrédients dans Open Food Facts…',
     dishOffEnriched: 'Enrichi via Open Food Facts : {{product}}',
+    medicineSearching: 'Recherche du médicament dans le catalogue…',
   },
   medicineScan: {
     title: 'Photo ou voix',
@@ -941,6 +946,7 @@ const fr: LocaleMessages = {
     conditionHistory: {
       title: 'Quand l\'allergie a-t-elle commencé ?',
       hint: 'Indiquez la période approximative de début pour chaque type. Champs optionnels.',
+      questionProgress: '{{condition}} · question {{current}} sur {{total}}',
       empty: 'Sélectionnez d\'abord les types d\'allergie à l\'étape précédente.',
       onsetLabel: 'Premières manifestations',
       onsetAgeLabel: 'Âge de début (ans)',

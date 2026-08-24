@@ -224,6 +224,10 @@ const es: LocaleMessages = {
     courseShort: 'Curso',
     reportShort: 'Informe',
     empty: 'Aún no hay entradas. La primera toma menos de un minuto.',
+    outcomeNone: 'sin reacción',
+    outcomeMild: 'leve',
+    outcomeModerate: 'moderado',
+    outcomeSevere: 'grave',
     disclaimer: 'El diario ayuda a registrar observaciones y no sustituye la consulta médica.',
     disclaimerShort: 'El diario registra observaciones y no sustituye la consulta médica.',
     deleteTitle: '¿Eliminar entrada?',
@@ -293,6 +297,7 @@ const es: LocaleMessages = {
     dishConflicts: 'Conflictos con el perfil: {{list}}',
     dishOffLoading: 'Buscando ingredientes en Open Food Facts…',
     dishOffEnriched: 'Enriquecido con Open Food Facts: {{product}}',
+    medicineSearching: 'Buscando el medicamento en el catálogo…',
   },
   medicineScan: {
     title: 'Foto o voz',
@@ -941,6 +946,7 @@ const es: LocaleMessages = {
     conditionHistory: {
       title: '¿Cuándo empezó la alergia?',
       hint: 'Indica el periodo aproximado de inicio de cada tipo. Puedes omitir campos.',
+      questionProgress: '{{condition}} · pregunta {{current}} de {{total}}',
       empty: 'Primero selecciona tipos de alergia en el paso anterior.',
       onsetLabel: 'Cuándo apareció por primera vez',
       onsetAgeLabel: 'Edad de inicio (años)',

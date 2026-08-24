@@ -15,6 +15,16 @@ export type DisplayLayout = {
 
 const MIN_CROP_EDGE_PX = 32;
 
+/** Pixel crop that covers the entire decoded bitmap. */
+export function fullImageCropRect(width: number, height: number): ImageCropRect {
+  return {
+    originX: 0,
+    originY: 0,
+    width: Math.max(0, width),
+    height: Math.max(0, height),
+  };
+}
+
 function isPositiveSize(size: { width: number; height: number }): boolean {
   return size.width > 0 && size.height > 0;
 }

@@ -224,6 +224,10 @@ const it: LocaleMessages = {
     courseShort: 'Corso',
     reportShort: 'Referto',
     empty: 'Nessuna voce. La prima richiede meno di un minuto.',
+    outcomeNone: 'nessuna reazione',
+    outcomeMild: 'lieve',
+    outcomeModerate: 'moderato',
+    outcomeSevere: 'grave',
     disclaimer: 'Il diario aiuta a registrare le osservazioni e non sostituisce il consulto medico.',
     disclaimerShort: 'Il diario registra le osservazioni e non sostituisce il consulto medico.',
     deleteTitle: 'Eliminare la voce?',
@@ -293,6 +297,7 @@ const it: LocaleMessages = {
     dishConflicts: 'Conflitti con il profilo: {{list}}',
     dishOffLoading: 'Cerco gli ingredienti su Open Food Facts…',
     dishOffEnriched: 'Arricchito da Open Food Facts: {{product}}',
+    medicineSearching: 'Cerco il farmaco nel catalogo…',
   },
   medicineScan: {
     title: 'Foto o voce',
@@ -941,6 +946,7 @@ const it: LocaleMessages = {
     conditionHistory: {
       title: 'Quando è iniziata l\'allergia?',
       hint: 'Indica il periodo approssimativo di insorgenza per ogni tipo. I campi sono facoltativi.',
+      questionProgress: '{{condition}} · domanda {{current}} di {{total}}',
       empty: 'Seleziona prima i tipi di allergia nel passo precedente.',
       onsetLabel: 'Prime manifestazioni',
       onsetAgeLabel: 'Età di insorgenza (anni)',

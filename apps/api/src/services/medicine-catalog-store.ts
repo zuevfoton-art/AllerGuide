@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { eq, ilike, or, sql } from 'drizzle-orm';
 import {
+  mergeMedicineCards,
   normalizeMedicineName,
   type MedicineCard,
   type MedicineConfidence,
@@ -57,34 +58,56 @@ export async function searchMedicines(
   query: string,
   limit = DEFAULT_SEARCH_LIMIT,
 ): Promise<MedicineRow[]> {
-  const pattern = `%${escapeIlike(query)}%`;
+  const contains = `%${escapeIlike(query)}%`;
+  const prefix = `${escapeIlike(query)}%`;
+  const normalized = normalizeMedicineName(query);
+  const normalizedContains = `%${escapeIlike(normalized)}%`;
+  const normalizedPrefix = `${escapeIlike(normalized)}%`;
+
   return readDb
     .select()
     .from(medicines)
-    .where(or(ilike(medicines.name, pattern), ilike(medicines.activeSubstance, pattern)))
+    .where(
+      or(
+        ilike(medicines.name, contains),
+        ilike(medicines.activeSubstance, contains),
+        ilike(medicines.normalizedName, normalizedContains),
+      ),
+    )
+    .orderBy(
+      sql`case
+        when ${medicines.normalizedName} like ${normalizedPrefix} then 0
+        when ${medicines.name} ilike ${prefix} then 1
+        else 2
+      end`,
+      sql`${medicines.recognitions} desc`,
+      medicines.name,
+    )
     .limit(limit);
 }
 
 export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRow> {
   const normalizedName = normalizeMedicineName(card.name);
   const id = medicineRowId(normalizedName);
+  const existing = await findMedicineByNormalizedName(normalizedName);
+  const merged = existing ? mergeMedicineCards(medicineRowToCard(existing), card) : card;
   const [saved] = await db
     .insert(medicines)
     .values({
       id,
       normalizedName,
-      name: card.name,
-      activeSubstance: card.activeSubstance,
-      form: card.form,
-      strength: card.strength,
-      manufacturer: card.manufacturer,
-      indications: card.indications,
-      ageUsage: card.ageUsage,
-      minAgeYears: card.minAgeYears,
-      ingredients: card.ingredients,
-      allergenTags: card.allergenTags,
-      source: card.source,
-      confidence: card.confidence,
+      name: merged.name,
+      activeSubstance: merged.activeSubstance,
+      form: merged.form,
+      strength: merged.strength,
+      manufacturer: merged.manufacturer,
+      indications: merged.indications,
+      ageUsage: merged.ageUsage,
+      minAgeYears: merged.minAgeYears,
+      ingredients: merged.ingredients,
+      allergenTags: merged.allergenTags,
+      source: merged.source,
+      confidence: merged.confidence,
       recognitions: 1,
     })
     .onConflictDoUpdate({

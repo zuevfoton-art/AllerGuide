@@ -10,6 +10,7 @@ import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
 import { BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
+import { radii } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -86,7 +87,7 @@ function EmbeddedMarketplace() {
             <Text style={styles.moduleSub}>{t('home.marketplaceSub')}</Text>
           </View>
         </View>
-        <Pressable onPress={openFullMarket} accessibilityRole="button">
+        <Pressable onPress={openFullMarket} accessibilityRole="button" hitSlop={8}>
           <Text style={ui.sectionLink}>{t('common.more')}</Text>
         </Pressable>
       </View>
@@ -185,6 +186,7 @@ function FullMarketplace({
               onPress={() => onCategoryChange(key)}
               style={[styles.filterChip, selected && styles.filterChipActive]}
               testID={`market-filter-${key}`}
+              hitSlop={8}
             >
               <Text style={[styles.filterText, selected && styles.filterTextActive]}>
                 {t(`market.${CATEGORY_LABEL_KEYS[key]}`)}
@@ -316,7 +318,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     filterChip: {
       paddingHorizontal: 10,
       paddingVertical: 6,
-      borderRadius: 14,
+      borderRadius: radii.sm,
       backgroundColor: colors.surfaceMuted,
     },
     filterChipActive: {

@@ -73,6 +73,10 @@ export type ThemeColors = {
   focusRing: string;
   skeletonBase: string;
   skeletonSheen: string;
+  /** Map canvas stand-in while tiles load (land fill). */
+  mapLand: string;
+  /** Map canvas stand-in stroke / road. */
+  mapRoad: string;
 };
 
 export const lightColors: ThemeColors = {
@@ -124,6 +128,8 @@ export const lightColors: ThemeColors = {
   focusRing: 'rgba(42,157,143,0.35)',
   skeletonBase: '#EDF1F5',
   skeletonSheen: '#F8FAFC',
+  mapLand: '#E4EAE8',
+  mapRoad: '#CBD5D2',
 };
 
 export const darkColors: ThemeColors = {
@@ -175,6 +181,8 @@ export const darkColors: ThemeColors = {
   focusRing: 'rgba(61,184,168,0.45)',
   skeletonBase: '#1E293B',
   skeletonSheen: '#263349',
+  mapLand: '#1B2534',
+  mapRoad: '#2B3648',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {

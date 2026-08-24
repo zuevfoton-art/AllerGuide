@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MAP_POI_CATEGORIES, type MapPoi, type MapPoiCategory } from '@allerguide/core';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -52,6 +53,7 @@ export function MapPoiFilters({
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             style={[styles.filterChip, active && styles.filterChipActive]}
+            hitSlop={8}
             onPress={() => onToggleCategory(category)}>
             <Text style={[styles.filterText, active && styles.filterTextActive]}>
               {t(CATEGORY_KEYS[category] as 'map.poiRestaurants')}
@@ -166,7 +168,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     filterChip: {
       minHeight: 32,
-      borderRadius: 8,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,

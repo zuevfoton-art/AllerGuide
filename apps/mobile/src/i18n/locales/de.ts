@@ -225,6 +225,10 @@ const de: LocaleMessages = {
     courseShort: 'Kurs',
     reportShort: 'Bericht',
     empty: 'Noch keine Einträge. Der erste dauert weniger als eine Minute.',
+    outcomeNone: 'keine Reaktion',
+    outcomeMild: 'leicht',
+    outcomeModerate: 'mäßig',
+    outcomeSevere: 'stark',
     disclaimer: 'Das Tagebuch hilft, Beobachtungen festzuhalten, und ersetzt keine ärztliche Beratung.',
     disclaimerShort: 'Das Tagebuch hält Beobachtungen fest und ersetzt keine ärztliche Beratung.',
     deleteTitle: 'Eintrag löschen?',
@@ -294,6 +298,7 @@ const de: LocaleMessages = {
     dishConflicts: 'Profilkonflikte: {{list}}',
     dishOffLoading: 'Zutaten werden in Open Food Facts gesucht…',
     dishOffEnriched: 'Ergänzt aus Open Food Facts: {{product}}',
+    medicineSearching: 'Suche im Arzneimittelkatalog…',
   },
   medicineScan: {
     title: 'Foto oder Sprache',
@@ -942,6 +947,7 @@ const de: LocaleMessages = {
     conditionHistory: {
       title: 'Wann begann die Allergie?',
       hint: 'Geben Sie den ungefähren Beginn für jeden Typ an. Felder können übersprungen werden.',
+      questionProgress: '{{condition}} · Frage {{current}} von {{total}}',
       empty: 'Wählen Sie zuerst Allergietypen im vorherigen Schritt.',
       onsetLabel: 'Erstes Auftreten',
       onsetAgeLabel: 'Alter beim Erstauftreten (Jahre)',

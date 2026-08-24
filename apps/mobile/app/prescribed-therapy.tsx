@@ -28,6 +28,7 @@ import { PrescriptionCameraCapture } from '@/src/components/PrescriptionCameraCa
 import { ScheduleLinesEditor } from '@/src/components/ScheduleLinesEditor';
 import { ScheduleStagesEditor } from '@/src/components/ScheduleStagesEditor';
 import { useAppStore } from '@/src/store/app-store';
+import { radii } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -745,7 +746,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     empty: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary, textAlign: 'center', paddingVertical: 24 },
     hint: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
     modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-    modalSheet: { backgroundColor: colors.card, borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 24, maxHeight: '70%' },
+    modalSheet: { backgroundColor: colors.card, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, paddingBottom: 24, maxHeight: '70%' },
     modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
     modalTitle: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.text },
     modalCancel: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary },

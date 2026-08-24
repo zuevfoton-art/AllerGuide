@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { PollenMapTaxonId, PollenTierLevel } from '@allerguide/core';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -44,6 +45,7 @@ export function MapAllergenChips({
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
             style={[styles.chip, isSelected && styles.chipSelected]}
+            hitSlop={8}
             onPress={() => onSelect(item.taxonId)}>
             <View style={[styles.dot, { backgroundColor: dotColor }]} />
             <Text style={[styles.label, isSelected && styles.labelSelected]}>
@@ -74,7 +76,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       gap: 6,
       minHeight: 36,
-      borderRadius: 8,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,

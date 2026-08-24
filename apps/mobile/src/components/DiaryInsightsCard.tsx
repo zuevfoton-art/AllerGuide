@@ -107,7 +107,7 @@ export function DiaryInsightsCard({ entries }: Props) {
   if (entries.length === 0) return null;
 
   return (
-    <GlassCard variant="soft" style={styles.card}>
+    <GlassCard style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('diary.insights')}</Text>
         {insights.streak > 1 && (

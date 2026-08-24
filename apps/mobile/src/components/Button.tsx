@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, type PressableProps, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { radii } from '@/src/constants/layout';
+import { density, radii } from '@/src/constants/layout';
 import { fontSizes, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
@@ -72,16 +72,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
-      borderRadius: radii.md,
-      minHeight: 44,
-      paddingHorizontal: 16,
+      borderRadius: radii.full,
+      minHeight: density.tapMinHeight,
+      paddingHorizontal: 20,
       paddingVertical: 10,
     },
     sm: {
-      minHeight: 36,
-      paddingHorizontal: 12,
+      minHeight: density.tapMinHeightSm,
+      paddingHorizontal: 16,
       paddingVertical: 7,
-      borderRadius: radii.sm,
+      borderRadius: radii.full,
     },
     block: { width: '100%' },
     primary: { backgroundColor: colors.accent },

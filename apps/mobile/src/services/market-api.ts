@@ -78,5 +78,6 @@ export async function fetchMarketCatalog(options?: {
   if (!response.ok || !payload.ok || !Array.isArray(payload.products)) {
     return null;
   }
+  // Caller must normalize: staging may still return the pre-#276 CatalogProduct shape.
   return payload.products;
 }

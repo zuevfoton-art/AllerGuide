@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { radii, space } from '@/src/constants/layout';
+import { density, radii, space } from '@/src/constants/layout';
 import { fontSizes } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
@@ -54,7 +54,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       alignItems: 'center',
       gap: space[3],
       paddingHorizontal: space[4],
-      paddingVertical: 14,
+      paddingVertical: density.listRowPaddingV,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
@@ -90,10 +90,11 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     },
     primaryBtn: {
       backgroundColor: colors.accent,
-      padding: 14,
-      borderRadius: radii.md,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: radii.full,
       alignItems: 'center',
-      minHeight: 44,
+      minHeight: density.tapMinHeight,
     },
     primaryBtnText: {
       fontFamily: fonts.sansSemiBold,
@@ -105,7 +106,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       flexDirection: 'row',
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: radii.md,
+      borderRadius: radii.full,
       overflow: 'hidden',
       backgroundColor: colors.card,
     },
@@ -116,6 +117,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 11,
+      paddingHorizontal: 12,
       borderRightWidth: 1,
       borderRightColor: colors.border,
     },
@@ -149,11 +151,12 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       justifyContent: 'center',
       gap: space[2] - 2,
       backgroundColor: colors.card,
-      padding: 13,
-      borderRadius: radii.md,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.borderInput,
-      minHeight: 44,
+      minHeight: density.tapMinHeight,
     },
     secondaryBtnText: {
       fontFamily: fonts.sansSemiBold,
@@ -197,7 +200,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 10,
+      paddingVertical: density.kpiRowPaddingV,
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
@@ -218,7 +221,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-end',
-      paddingBottom: 12,
+      paddingBottom: 10,
       marginBottom: 4,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,

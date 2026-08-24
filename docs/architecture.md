@@ -266,7 +266,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
 | `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` (default **on**; `false`/`off` disables) | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
 | `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY` (default **on**; `false`/`off` disables) | Google Air Quality (UAQI + советы) через API proxy |
-| `MARKET_LIVE_CATALOG_ENABLED` | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` (default **on**; `false`/`off` disables) | `GET /api/market/catalog`; иначе last-good / seed |
+| `MARKET_LIVE_CATALOG_ENABLED` | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` (default **on**; `false`/`off` disables) | `GET /api/market/catalog` only when payload is curated `MarketplaceProduct`; legacy `CatalogProduct` / empty → last-good / seed |
 | `MARKET_MEDICINES_ENABLED` | `EXPO_PUBLIC_MARKET_MEDICINES` (default **on**; `false`/`off` disables) | OTC-аптечные карточки на Маркете |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
 | `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
@@ -492,7 +492,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
-| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=` |
+| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=`, `POST /api/medicines` |
 | `routes/scan.ts` | `POST /api/scan` |
 | `routes/scan-intent.ts` | `POST /api/scan/intent` |
 | `routes/ocr.ts` | `POST /api/ocr` (Yandex Vision) |
@@ -526,8 +526,9 @@ Drizzle-объекты схемо-квалифицированы — код за
 
 - **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото.
 - **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
-- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM.
-- **Клиент:** `EXPO_PUBLIC_MEDICINE_DB`; при флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance`. Demo-карточка только для фото без OCR, не для голоса.
+- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префиксные совпадения раньше contains; дневник подставляет их как автодополнение названия.
+- **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные).
+- **Клиент:** `EXPO_PUBLIC_MEDICINE_DB` включает VL/фото; поиск и remember идут при заданном `EXPO_PUBLIC_API_URL`. При флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance` + ранее сохранённые записи дневника. Demo-карточка только для фото без OCR, не для голоса.
 
 ### Каталог продуктов
 
