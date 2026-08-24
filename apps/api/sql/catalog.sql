@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS catalog.medicines (
     min_age_years    integer,
     ingredients      text         NOT NULL DEFAULT '',
     allergen_tags    jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    aliases          jsonb        NOT NULL DEFAULT '[]'::jsonb,
     source           varchar(32)  NOT NULL DEFAULT 'vision',
     confidence       varchar(16)  NOT NULL DEFAULT 'low',
     recognitions     integer      NOT NULL DEFAULT 1,
@@ -72,6 +73,7 @@ CREATE INDEX IF NOT EXISTS medicines_source_idx ON catalog.medicines (source);
 CREATE INDEX IF NOT EXISTS medicines_name_trgm ON catalog.medicines USING gin (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS medicines_substance_trgm ON catalog.medicines USING gin (active_substance gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS medicines_allergen_tags ON catalog.medicines USING gin (allergen_tags jsonb_path_ops);
+CREATE INDEX IF NOT EXISTS medicines_aliases_trgm ON catalog.medicines USING gin ((aliases::text) gin_trgm_ops);
 
 -- Curated marketplace catalog (Yandex Market + OTC pharmacy) ----------
 CREATE TABLE IF NOT EXISTS catalog.market_products (

@@ -20,6 +20,7 @@ type Props = {
   label: string;
   suggestions: MedicineCard[];
   loading?: boolean;
+  testID?: string;
   onChange: (value: string) => void;
   onSelect: (card: MedicineCard) => void;
 };
@@ -30,6 +31,7 @@ export function MedicineNameField({
   label,
   suggestions,
   loading,
+  testID = 'diary-medicine-name-field',
   onChange,
   onSelect,
 }: Props) {
@@ -38,7 +40,7 @@ export function MedicineNameField({
   const { t } = useTranslation();
 
   return (
-    <View style={styles.wrap} testID="diary-medicine-name-field">
+    <View style={styles.wrap} testID={testID}>
       <TextInput
         testID="diary-wizard-field"
         style={styles.input}

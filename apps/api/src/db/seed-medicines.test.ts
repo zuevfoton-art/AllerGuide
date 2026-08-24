@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { medicineCardKey } from '@allerguide/core';
+import { findAllergenById, medicineCardKey } from '@allerguide/core';
 import {
   findDuplicateKeys,
   readMedicineSeedEntries,
@@ -54,14 +54,61 @@ describe('allergy medicine dataset', () => {
     expect(card.allergenTags).toEqual([]);
   });
 
-  it('maps external allergen names onto the canonical taxonomy', () => {
+  it('maps external allergen terms onto canonical ids, like catalog.products', () => {
     const card = seedEntryToCard({
       name: 'Тестовый препарат',
       activeSubstance: 'тест',
-      allergenTags: ['Milk'],
+      allergenTags: ['Milk', 'nsaid'],
     });
-    expect(card.allergenTags.length).toBeGreaterThan(0);
-    expect(card.allergenTags).not.toContain('Milk');
+    expect(card.allergenTags).toEqual(['milk', 'nsaid']);
+  });
+
+  it('keeps manufacturer and ingredients together or leaves both empty', () => {
+    for (const entry of entries) {
+      const hasManufacturer = Boolean(entry.manufacturer?.trim());
+      const hasIngredients = Boolean(entry.ingredients?.trim());
+      expect(hasManufacturer, `${entry.name} manufacturer/ingredients must be paired`).toBe(
+        hasIngredients,
+      );
+    }
+  });
+
+  it('uses only canonical allergen ids on cards that carry tags', () => {
+    for (const entry of entries) {
+      for (const tag of entry.allergenTags ?? []) {
+        expect(findAllergenById(tag), `${entry.name} tag ${tag} must be an id`).toBeTruthy();
+      }
+    }
+  });
+
+  it('stores culprit allergen tags as taxonomy ids', () => {
+    const nurofen = entries.find((entry) => entry.name === 'Нурофен');
+    expect(nurofen?.allergenTags).toEqual(['nsaid']);
+    const amoxiclav = entries.find((entry) => entry.name === 'Амоксиклав');
+    expect(amoxiclav?.allergenTags).toEqual(['penicillin']);
+    expect(seedEntryToCard(nurofen!).allergenTags).toEqual(['nsaid']);
+  });
+
+  it('covers the OTC, culprit, topical, asthma, biologic and ASIT names', () => {
+    const names = new Set(entries.map((entry) => entry.name));
+    for (const name of [
+      'Фенкарол',
+      'Виброцил',
+      'Нурофен',
+      'Элоком',
+      'Элидел',
+      'Пульмикорт',
+      'Дупиксент',
+      'Сталораль',
+    ]) {
+      expect(names.has(name), name).toBe(true);
+    }
+  });
+
+  it('keeps a Latin alias on well-known international brands', () => {
+    const zyrtec = entries.find((entry) => entry.name === 'Зиртек');
+    expect(zyrtec?.aliases).toContain('Zyrtec');
+    expect(seedEntryToCard(zyrtec!).aliases).toContain('Zyrtec');
   });
 });
 

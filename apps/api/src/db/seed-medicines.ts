@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  mapExternalAllergenNames,
+  mapExternalAllergenIds,
   medicineCardKey,
   toMedicineCard,
   type MedicineAgeUsage,
@@ -42,6 +42,9 @@ export interface MedicineSeedEntry {
   minAgeYears?: number | null;
   ingredients?: string;
   allergenTags?: string[];
+  aliases?: string[];
+  /** Instruction URL used while curating the card. Not sent to the API. */
+  sourceUrl?: string;
   /** Dataset metadata: prescription-only cards must not carry a dose. */
   prescriptionOnly?: boolean;
   confidence?: MedicineConfidence;
@@ -74,9 +77,8 @@ export function seedEntryToCard(entry: MedicineSeedEntry): MedicineCard {
       ageUsage: entry.ageUsage ?? [],
       minAgeYears: entry.minAgeYears ?? null,
       ingredients: entry.ingredients,
-      allergenTags: entry.allergenTags?.length
-        ? mapExternalAllergenNames(entry.allergenTags)
-        : [],
+      allergenTags: entry.allergenTags?.length ? mapExternalAllergenIds(entry.allergenTags) : [],
+      aliases: entry.aliases,
       confidence: entry.confidence ?? 'medium',
     },
     'catalog',

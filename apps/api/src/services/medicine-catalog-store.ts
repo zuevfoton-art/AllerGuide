@@ -11,6 +11,8 @@ import { medicines, type MedicineRow } from '../db/catalog-schema';
 
 const MEDICINE_ID_HEX_LENGTH = 32;
 const DEFAULT_SEARCH_LIMIT = 20;
+/** pg_trgm default; catches «кларетин» → Кларитин without drowning prefix hits. */
+export const MEDICINE_TRGM_SIMILARITY_THRESHOLD = 0.3;
 
 export function medicineRowId(normalizedName: string): string {
   return createHash('sha256').update(normalizedName).digest('hex').slice(0, MEDICINE_ID_HEX_LENGTH);
@@ -33,13 +35,33 @@ export function medicineRowToCard(row: MedicineRow): MedicineCard {
     minAgeYears: row.minAgeYears,
     ingredients: row.ingredients,
     allergenTags: row.allergenTags ?? [],
+    aliases: row.aliases ?? [],
     source: 'catalog',
     confidence: asConfidence(row.confidence),
   };
 }
 
-function escapeIlike(value: string): string {
+export function escapeIlike(value: string): string {
   return value.replace(/[%_\\]/g, '\\$&');
+}
+
+export function medicineSearchTerms(query: string): {
+  contains: string;
+  prefix: string;
+  normalized: string;
+  normalizedContains: string;
+  normalizedPrefix: string;
+} {
+  const escaped = escapeIlike(query);
+  const normalized = normalizeMedicineName(query);
+  const escapedNormalized = escapeIlike(normalized);
+  return {
+    contains: `%${escaped}%`,
+    prefix: `${escaped}%`,
+    normalized,
+    normalizedContains: `%${escapedNormalized}%`,
+    normalizedPrefix: `${escapedNormalized}%`,
+  };
 }
 
 export async function findMedicineByNormalizedName(
@@ -58,28 +80,45 @@ export async function searchMedicines(
   query: string,
   limit = DEFAULT_SEARCH_LIMIT,
 ): Promise<MedicineRow[]> {
-  const contains = `%${escapeIlike(query)}%`;
-  const prefix = `${escapeIlike(query)}%`;
-  const normalized = normalizeMedicineName(query);
-  const normalizedContains = `%${escapeIlike(normalized)}%`;
-  const normalizedPrefix = `${escapeIlike(normalized)}%`;
+  const terms = medicineSearchTerms(query);
+  const aliasContains = sql`exists (
+    select 1
+    from jsonb_array_elements_text(${medicines.aliases}) as alias_name
+    where alias_name ilike ${terms.contains}
+  )`;
+  const bestSimilarity = sql`greatest(
+    similarity(${medicines.name}, ${query}),
+    similarity(${medicines.activeSubstance}, ${query}),
+    similarity(${medicines.normalizedName}, ${terms.normalized}),
+    coalesce((
+      select max(similarity(alias_name, ${query}))
+      from jsonb_array_elements_text(${medicines.aliases}) as alias_name
+    ), 0)
+  )`;
 
   return readDb
     .select()
     .from(medicines)
     .where(
       or(
-        ilike(medicines.name, contains),
-        ilike(medicines.activeSubstance, contains),
-        ilike(medicines.normalizedName, normalizedContains),
+        ilike(medicines.name, terms.contains),
+        ilike(medicines.activeSubstance, terms.contains),
+        ilike(medicines.normalizedName, terms.normalizedContains),
+        aliasContains,
+        sql`${bestSimilarity} >= ${MEDICINE_TRGM_SIMILARITY_THRESHOLD}`,
       ),
     )
     .orderBy(
       sql`case
-        when ${medicines.normalizedName} like ${normalizedPrefix} then 0
-        when ${medicines.name} ilike ${prefix} then 1
-        else 2
+        when ${medicines.normalizedName} like ${terms.normalizedPrefix} then 0
+        when ${medicines.name} ilike ${terms.prefix} then 1
+        when ${medicines.name} ilike ${terms.contains}
+          or ${medicines.activeSubstance} ilike ${terms.contains}
+          or ${medicines.normalizedName} like ${terms.normalizedContains}
+          or ${aliasContains} then 2
+        else 3
       end`,
+      sql`${bestSimilarity} desc`,
       sql`${medicines.recognitions} desc`,
       medicines.name,
     )
@@ -106,6 +145,7 @@ export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRo
       minAgeYears: merged.minAgeYears,
       ingredients: merged.ingredients,
       allergenTags: merged.allergenTags,
+      aliases: merged.aliases ?? [],
       source: merged.source,
       confidence: merged.confidence,
       recognitions: 1,
@@ -123,6 +163,7 @@ export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRo
         minAgeYears: sql`excluded.min_age_years`,
         ingredients: sql`excluded.ingredients`,
         allergenTags: sql`excluded.allergen_tags`,
+        aliases: sql`excluded.aliases`,
         source: sql`excluded.source`,
         confidence: sql`excluded.confidence`,
         recognitions: sql`${medicines.recognitions} + 1`,

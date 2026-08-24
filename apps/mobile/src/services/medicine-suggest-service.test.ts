@@ -59,6 +59,18 @@ describe('medicine-suggest-service', () => {
     ]);
   });
 
+  it('rebuilds cards from АСИТ and therapy diary entries', async () => {
+    const { collectMedicineCardsFromDiaryEntries } = await import('./medicine-suggest-service');
+    const cards = collectMedicineCardsFromDiaryEntries([
+      { type: 'АСИТ', details: encodeDiaryDetails({ asitDrug: 'Сталораль' }, 'АСИТ') },
+      {
+        type: 'Терапия',
+        details: encodeDiaryDetails({ therapyDrug: 'Пульмикорт', therapyDosage: '200 мкг' }, 'Терапия'),
+      },
+    ]);
+    expect(cards.map((item) => item.name).sort()).toEqual(['Пульмикорт', 'Сталораль']);
+  });
+
   it('merges catalog hits with previously saved diary medicines', async () => {
     diaryEntries.push({
       type: 'Лекарство',
