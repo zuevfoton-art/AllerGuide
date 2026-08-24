@@ -54,6 +54,7 @@ export function Button({
       {icon ? <Ionicons name={icon} size={15} color={textColor} /> : null}
       <Text
         {...scaledTextProps}
+        numberOfLines={1}
         style={[
           styles.text,
           size === 'sm' && styles.textSm,
@@ -74,6 +75,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 6,
       borderRadius: radii.full,
       minHeight: density.tapMinHeight,
+      minWidth: 0,
       paddingHorizontal: 20,
       paddingVertical: 10,
     },
@@ -98,6 +100,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.body,
       fontWeight: '600',
+      flexShrink: 1,
     },
     textSm: { fontSize: fontSizes.label },
   });
