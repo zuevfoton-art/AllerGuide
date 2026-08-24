@@ -88,11 +88,11 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Scanner** | `(tabs)/scanner.tsx` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service`, `diary-dish-recognition-service` | core `diary*`, `diary-wizard-route`, `dish-components` |
-| **Medicine photo / voice** | `MedicinePhotoStep` + `MedicineNameField` in diary | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service` | core `medicine-catalog`, `profile-age`; ai `medicine-vision`, `medicine-label` (`parseMedicineVoiceUtterance`); API `medicines.ts` |
+| **Medicine photo / voice** | `MedicinePhotoStep` + `MedicineNameField` in diary / ASIT / therapy / SOS | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service`, hook `use-medicine-suggestions` | core `medicine-catalog`, `food-drug-allergy`, `list-input`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
 | **Nutrition photo / manual** | `NutritionCaptureStep` in diary | `diary-dish-recognition-service` (`scanFromOcr` + `lookupDishIngredientsForScan`) | core `dish-components`, `diary-wizard-route` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
-| **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service` | core `allergy-passport`, `emergency-contacts` |
+| **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service`, `medicine-suggest-service` | core `allergy-passport`, `emergency-contacts`, `list-input` |
 | **Pollen / map** | `(tabs)/map.tsx` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `air-quality-service`, `location-service`, `place-service` | core pollen*, `hourly-series`, `air-quality`, `map-poi`, `pollen-species-heatmap`; API `pollen.ts`, `air-quality.ts`, `places.ts`, `maps.ts`; comps `AirQualityCard`, `PollenIndexCard`, `PlaceSearchBar`, `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `secure-settings` | core `auth`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` |
@@ -227,7 +227,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `db/app-schema.ts` | `profile.*` — users, profiles, diary, scan_history, contacts, sos, sync_backups |
 | `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, market_products, market_offers, alias_feedback |
 | `db/config.ts` + `index.ts` | Neon-ready pools; optional `readDb` |
-| `drizzle/0000`…`0010_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
+| `drizzle/0000`…`0011_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
 

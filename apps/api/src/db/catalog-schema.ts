@@ -83,6 +83,7 @@ export const medicines = catalogSchema.table(
     minAgeYears: integer('min_age_years'),
     ingredients: text('ingredients').notNull().default(''),
     allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
+    aliases: jsonb('aliases').$type<string[]>().notNull().default([]),
     source: varchar('source', { length: 32 }).notNull().default('vision'),
     confidence: varchar('confidence', { length: 16 }).notNull().default('low'),
     recognitions: integer('recognitions').notNull().default(1),

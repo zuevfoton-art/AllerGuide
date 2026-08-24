@@ -520,13 +520,14 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | **`catalog`** | `allergens`, `cross_reactions`, `products`, `medicines`, `alias_feedback` | `src/db/catalog-schema.ts` |
 | **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
-Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0009_*`).
+Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0011_*`).
 
 ### Каталог лекарств
 
-- **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото.
+- **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото. `aliases jsonb` — латинские/альтернативные названия (миграция `0011_medicines_aliases`).
 - **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
-- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префиксные совпадения раньше contains; дневник подставляет их как автодополнение названия.
+- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префикс → contains → `similarity()` (pg_trgm) и `aliases`; дневник, АСИТ, «Терапия» и паспорт SOS подставляют хиты как автодополнение.
+- **allergenTags:** канонические id, как у `catalog.products` (`mapExternalAllergenIds` в сиде).
 - **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные). Запись всегда требует авторизации: mobile JWT (устройство) либо `x-medicine-write-key` = `MEDICINE_WRITE_KEY` (server-to-server, сид). Без этого — 401; чтение и `recognize` остаются открытыми.
 - **Сид каталога:** `pnpm --filter api db:seed-medicines` — датасет `apps/api/data/medicines/` заливается через `POST /api/medicines` (`API_BASE_URL` + `MEDICINE_WRITE_KEY`), идемпотентно.
 - **Curator cleanup:** `DELETE /api/medicines/:name` (та же авторизация) удаляет ошибочную/тестовую карточку по нормализованному имени.

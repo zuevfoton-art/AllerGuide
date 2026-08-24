@@ -49,6 +49,7 @@ interface RememberRequestBody {
   minAgeYears?: number | null;
   ingredients?: string;
   allergenTags?: string[];
+  aliases?: string[];
   source?: MedicineSource;
   confidence?: MedicineConfidence;
 }
@@ -180,6 +181,7 @@ export function registerMedicineRoutes(app: Express) {
           minAgeYears: body.minAgeYears,
           ingredients: body.ingredients,
           allergenTags: body.allergenTags,
+          aliases: body.aliases,
           confidence: body.confidence,
         },
         body.source === 'catalog' ||

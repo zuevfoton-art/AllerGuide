@@ -44,6 +44,7 @@ export * from './diary-reminder';
 export * from './reminder-policy';
 export * from './pollen-reminder';
 export * from './food-drug-allergy';
+export * from './list-input';
 export * from './profile-age';
 export * from './plural-ru';
 export * from './medicine-catalog';

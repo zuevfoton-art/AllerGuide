@@ -16,6 +16,7 @@ const catalogHit: MedicineCard = {
   minAgeYears: 12,
   ingredients: 'ибупрофен, лактоза',
   allergenTags: ['lactose'],
+  aliases: [],
   source: 'catalog',
   confidence: 'high',
 };
@@ -28,6 +29,7 @@ vi.mock('../services/medicine-catalog-store', () => ({
     id: 'med-1',
     normalizedName: 'нурофен',
     ...card,
+    aliases: card.aliases ?? [],
     recognitions: 1,
     createdAt: new Date(),
     updatedAt: new Date(),

@@ -21,8 +21,25 @@ export interface MedicineCard {
   minAgeYears: number | null;
   ingredients: string;
   allergenTags: string[];
+  /** Latin / alternate trade names used in search (e.g. Zyrtec for Зиртек). */
+  aliases: string[];
   source: MedicineSource;
   confidence: MedicineConfidence;
+}
+
+/** Diary steps that type a medicine name and should offer catalog autocomplete. */
+export const DIARY_MEDICINE_NAME_STEP_IDS: Record<string, string> = {
+  Лекарство: 'medicine',
+  АСИТ: 'asitDrug',
+  Терапия: 'therapyDrug',
+};
+
+export function diaryMedicineNameStepId(sectionType: string): string | undefined {
+  return DIARY_MEDICINE_NAME_STEP_IDS[sectionType];
+}
+
+export function isDiaryMedicineNameStep(sectionType: string, stepId: string): boolean {
+  return diaryMedicineNameStepId(sectionType) === stepId;
 }
 
 export interface MedicineAgeResolution {
@@ -50,13 +67,32 @@ export function medicineCardKey(card: Pick<MedicineCard, 'name'>): string {
   return normalizeMedicineName(card.name);
 }
 
+/** Deduped, trimmed aliases. Empty strings and the card's own name are dropped. */
+export function normalizeMedicineAliases(
+  aliases: string[] | undefined,
+  name = '',
+): string[] {
+  const ownKey = normalizeMedicineName(name);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of aliases ?? []) {
+    const trimmed = raw.trim();
+    const key = normalizeMedicineName(trimmed);
+    if (!trimmed || !key || key === ownKey || seen.has(key)) continue;
+    seen.add(key);
+    out.push(trimmed);
+  }
+  return out;
+}
+
 /** Normalize a partial vision/OCR payload into a catalog card. */
 export function toMedicineCard(
   input: Partial<MedicineCard> & Pick<MedicineCard, 'name'>,
   source: MedicineSource,
 ): MedicineCard {
+  const name = input.name.trim();
   return {
-    name: input.name.trim(),
+    name,
     activeSubstance: input.activeSubstance?.trim() ?? '',
     form: input.form?.trim() ?? '',
     strength: input.strength?.trim() ?? '',
@@ -66,6 +102,7 @@ export function toMedicineCard(
     minAgeYears: input.minAgeYears ?? null,
     ingredients: input.ingredients?.trim() ?? '',
     allergenTags: input.allergenTags ?? [],
+    aliases: normalizeMedicineAliases(input.aliases, name),
     source,
     confidence: input.confidence ?? 'low',
   };
@@ -138,7 +175,7 @@ export function buildMedicinePrefillFromCard(
   if (card.indications.trim()) prefill.medicineUsage = card.indications.trim();
   if (age.warning) prefill.medicineAgeNote = age.warning;
 
-  const alert = buildIntoleranceAlert(card.name, drugIntolerances);
+  const alert = buildIntoleranceAlert(card.name, drugIntolerances, [card.activeSubstance]);
   if (alert) prefill.intoleranceAlert = alert;
 
   return prefill;
@@ -188,10 +225,15 @@ function pickRicherConfidence(
     : existing;
 }
 
+function mergeAliasLists(existing: MedicineCard, incoming: MedicineCard, name: string): string[] {
+  return normalizeMedicineAliases([...existing.aliases, ...incoming.aliases], name);
+}
+
 /** Keep the richer catalog card when a later find/manual save is thinner. */
 export function mergeMedicineCards(existing: MedicineCard, incoming: MedicineCard): MedicineCard {
+  const name = pickRicherText(existing.name, incoming.name) || incoming.name.trim();
   return {
-    name: pickRicherText(existing.name, incoming.name) || incoming.name.trim(),
+    name,
     activeSubstance: pickRicherText(existing.activeSubstance, incoming.activeSubstance),
     form: pickRicherText(existing.form, incoming.form),
     strength: pickRicherText(existing.strength, incoming.strength),
@@ -201,9 +243,39 @@ export function mergeMedicineCards(existing: MedicineCard, incoming: MedicineCar
     minAgeYears: incoming.minAgeYears ?? existing.minAgeYears,
     ingredients: pickRicherText(existing.ingredients, incoming.ingredients),
     allergenTags: incoming.allergenTags.length ? incoming.allergenTags : existing.allergenTags,
+    aliases: mergeAliasLists(existing, incoming, name),
     source: pickRicherSource(existing.source, incoming.source),
     confidence: pickRicherConfidence(existing.confidence, incoming.confidence),
   };
+}
+
+/**
+ * Apply a catalog suggestion to the current diary section.
+ * «Лекарство» prefills dose/form/INN; АСИТ and «Терапия» only fill the name
+ * (and therapy dose when the user has not typed one).
+ */
+export function applyMedicineCardToSectionAnswers(
+  sectionType: string,
+  current: Record<string, string>,
+  card: MedicineCard,
+  ageYears: number | null,
+  drugIntolerances: string[] = [],
+): Record<string, string> {
+  if (sectionType === 'Лекарство') {
+    return mergeMedicinePrefillFromCard(current, card, ageYears, drugIntolerances, 'replace');
+  }
+  if (sectionType === 'АСИТ') {
+    return { ...current, asitDrug: card.name.trim() };
+  }
+  if (sectionType === 'Терапия') {
+    const next: Record<string, string> = { ...current, therapyDrug: card.name.trim() };
+    if (!next.therapyDosage?.trim()) {
+      const age = resolveMedicineAgeUsage(card, ageYears);
+      if (age.dose) next.therapyDosage = age.dose;
+    }
+    return next;
+  }
+  return current;
 }
 
 /** Rebuild a catalog card from a saved / in-progress «Лекарство» answer set. */
@@ -246,13 +318,20 @@ export function formatMedicineSuggestionMeta(card: MedicineCard): string {
     .join(' · ');
 }
 
+function cardSearchKeys(card: MedicineCard): { names: string[]; substance: string } {
+  const names = [
+    normalizeMedicineName(card.name),
+    ...normalizeMedicineAliases(card.aliases, card.name).map(normalizeMedicineName),
+  ].filter(Boolean);
+  return { names, substance: normalizeMedicineName(card.activeSubstance) };
+}
+
 function suggestionRank(queryNormalized: string, card: MedicineCard): number {
-  const name = normalizeMedicineName(card.name);
-  const substance = normalizeMedicineName(card.activeSubstance);
-  if (name === queryNormalized) return 0;
-  if (name.startsWith(queryNormalized)) return 1;
+  const { names, substance } = cardSearchKeys(card);
+  if (names.includes(queryNormalized)) return 0;
+  if (names.some((name) => name.startsWith(queryNormalized))) return 1;
   if (substance.startsWith(queryNormalized)) return 2;
-  if (name.includes(queryNormalized)) return 3;
+  if (names.some((name) => name.includes(queryNormalized))) return 3;
   if (substance.includes(queryNormalized)) return 4;
   return 5;
 }

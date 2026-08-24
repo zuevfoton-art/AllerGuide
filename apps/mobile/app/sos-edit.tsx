@@ -5,15 +5,22 @@ import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
+import { MedicineNameField } from '@/src/components/MedicineNameField';
 import { PhoneInput } from '@/src/components/PhoneInput';
 import { Ionicons } from '@expo/vector-icons';
 import {
   DEFAULT_SHOCK_KIT,
+  lastListItemQuery,
+  replaceLastListItem,
+  splitListInput,
   type AllergyPassport,
   type EmergencyContact,
   type EmergencyContactRelation,
+  type MedicineCard,
   type ShockKitItem,
 } from '@allerguide/core';
+import { useMedicineSuggestions } from '@/src/hooks/use-medicine-suggestions';
+import { rememberMedicineCard } from '@/src/services/medicine-suggest-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -34,10 +41,7 @@ import {
 } from '@/src/services/sos-passport-service';
 
 function parseListInput(value: string): string[] {
-  return value
-    .split(/[,;\n]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return splitListInput(value);
 }
 
 function formatListInput(items: string[]): string {
@@ -181,6 +185,17 @@ export default function SosEditScreen() {
   };
 
   const kitItems = passport?.shockKit ?? DEFAULT_SHOCK_KIT;
+  const intoleranceQuery = lastListItemQuery(drugIntolerances);
+  const { suggestions: intoleranceSuggestions, searching: intoleranceSearching } =
+    useMedicineSuggestions(intoleranceQuery, {
+      enabled: passportOpen,
+      profileId: profile?.id,
+    });
+
+  const selectIntoleranceSuggestion = (card: MedicineCard) => {
+    setDrugIntolerances(replaceLastListItem(drugIntolerances, card.name));
+    void rememberMedicineCard(card);
+  };
 
   return (
     <Screen>
@@ -198,12 +213,15 @@ export default function SosEditScreen() {
 
       {passportOpen ? (
         <GlassCard style={styles.section}>
-          <TextInput
-            style={styles.input}
+          <MedicineNameField
             value={drugIntolerances}
-            onChangeText={setDrugIntolerances}
             placeholder={t('sosEdit.drugIntolerancesPlaceholder')}
-            placeholderTextColor={theme.colors.textMuted}
+            label={t('sosEdit.drugIntolerancesPlaceholder')}
+            suggestions={intoleranceSuggestions}
+            loading={intoleranceSearching}
+            testID="sos-drug-intolerance-field"
+            onChange={setDrugIntolerances}
+            onSelect={selectIntoleranceSuggestion}
           />
           <TextInput
             style={styles.input}
