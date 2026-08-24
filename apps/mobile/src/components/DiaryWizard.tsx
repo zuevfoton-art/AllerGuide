@@ -19,7 +19,6 @@ import {
   parsePefNumeric,
   parseSelectedComponentIds,
   parseDishComponentDefs,
-  parseVoiceDiaryUtterance,
   applyVoiceParseToAnswers,
   resolvePersonalBestPef,
   resolveSelectedIdsForEnrichment,
@@ -263,33 +262,6 @@ export function DiaryWizard({
     });
   };
 
-  const handleVoiceTranscript = (transcript: string) => {
-    setAnswersBySection((prev) => {
-      const current = { ...(prev[section.type] ?? {}) };
-      if (section.type === 'Симптомы') {
-        const parsed = parseVoiceDiaryUtterance(transcript);
-        return {
-          ...prev,
-          [section.type]: applyVoiceParseToAnswers(current, parsed, {
-            sectionType: 'Симптомы',
-            targetStepId: step.id,
-          }),
-        };
-      }
-      return {
-        ...prev,
-        [section.type]: {
-          ...current,
-          [step.id]: applyVoiceParseToAnswers(
-            { [step.id]: current[step.id] ?? '' },
-            { transcript },
-            { targetStepId: step.id },
-          )[step.id],
-        },
-      };
-    });
-  };
-
   const goNext = () => {
     const validationError =
       section.type === 'Шкала' && isLastStep
@@ -436,12 +408,6 @@ export function DiaryWizard({
             value={sectionAnswers[step.id] ?? ''}
             onChange={(value) => setAnswer(step.id, value)}
           />
-          {step.field === 'text' ? (
-            <VoiceNoteButton
-              testID="diary-wizard-voice"
-              onTranscript={handleVoiceTranscript}
-            />
-          ) : null}
           {section.type === 'Питание' && step.id === 'food' && offEnriching ? (
             <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
               <ActivityIndicator size="small" color={theme.colors.accent} />
