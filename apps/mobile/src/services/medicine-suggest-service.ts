@@ -5,6 +5,7 @@ import {
   medicineCardKey,
   mergeMedicineCards,
   pickMedicineSuggestionForTypedName,
+  toMedicineCard,
   type MedicineCard,
 } from '@allerguide/core';
 import { getDiaryEntries } from '@/src/services/diary-service';
@@ -39,10 +40,20 @@ export function collectMedicineCardsFromDiaryEntries(
 ): MedicineCard[] {
   const byKey = new Map<string, MedicineCard>();
   for (const entry of entries) {
-    if (entry.type !== 'Лекарство') continue;
     const answers = getDiaryEntryAnswers(entry.type, entry.details);
     if (!answers) continue;
-    const card = buildMedicineCardFromDiaryAnswers(answers);
+
+    let card: MedicineCard | null = null;
+    if (entry.type === 'Лекарство') {
+      card = buildMedicineCardFromDiaryAnswers(answers);
+    } else if (entry.type === 'АСИТ' && answers.asitDrug?.trim()) {
+      card = toMedicineCard({ name: answers.asitDrug }, 'manual');
+    } else if (entry.type === 'Терапия' && answers.therapyDrug?.trim()) {
+      card = toMedicineCard(
+        { name: answers.therapyDrug, strength: answers.therapyDosage },
+        'manual',
+      );
+    }
     if (!card) continue;
     const key = medicineCardKey(card);
     const previous = byKey.get(key);

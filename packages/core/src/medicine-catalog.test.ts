@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyMedicineCardToSectionAnswers,
   buildMedicineCardFromDiaryAnswers,
   buildMedicinePrefillFromCard,
   filterAndRankMedicineSuggestions,
@@ -26,6 +27,7 @@ function card(overrides: Partial<MedicineCard> = {}): MedicineCard {
     minAgeYears: 12,
     ingredients: 'ибупрофен, лактоза',
     allergenTags: ['lactose'],
+    aliases: [],
     source: 'vision',
     confidence: 'medium',
     ...overrides,
@@ -102,6 +104,36 @@ describe('medicine-catalog', () => {
     expect(merged.indications).toBe('боль, температура');
     expect(merged.strength).toBe('200 мг');
     expect(merged.source).toBe('vision');
+  });
+
+  it('warns when the selected brand matches an INN intolerance', () => {
+    const prefill = buildMedicinePrefillFromCard(card({ name: 'Зиртек', activeSubstance: 'цетиризин' }), 30, [
+      'цетиризин',
+    ]);
+    expect(prefill.intoleranceAlert).toMatch(/цетиризин/i);
+  });
+
+  it('ranks a Latin alias as an exact name hit', () => {
+    const ranked = filterAndRankMedicineSuggestions('zyrtec', [
+      card({ name: 'Зиртек', activeSubstance: 'цетиризин', aliases: ['Zyrtec'] }),
+      card({ name: 'Нурофен' }),
+    ]);
+    expect(ranked.map((item) => item.name)).toEqual(['Зиртек']);
+  });
+
+  it('fills АСИТ and therapy name fields from a catalog card', () => {
+    const asit = applyMedicineCardToSectionAnswers('АСИТ', { asitAllergen: 'берёза' }, card({ name: 'Сталораль' }), 30);
+    expect(asit.asitDrug).toBe('Сталораль');
+    expect(asit.asitAllergen).toBe('берёза');
+
+    const therapy = applyMedicineCardToSectionAnswers(
+      'Терапия',
+      { therapyDrug: '' },
+      card({ name: 'Пульмикорт', ageUsage: [{ dose: '200 мкг 2 раза в сутки' }], strength: '200 мкг' }),
+      30,
+    );
+    expect(therapy.therapyDrug).toBe('Пульмикорт');
+    expect(therapy.therapyDosage).toBe('200 мкг 2 раза в сутки');
   });
 
   it('fills empty diary fields from a card without overwriting a typed dose', () => {

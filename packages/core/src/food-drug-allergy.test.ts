@@ -41,6 +41,9 @@ describe('food-drug-allergy', () => {
     expect(matchDrugIntolerance('Нурофен 200', ['Ибупрофен'])).toBe('Ибупрофен');
     expect(matchDrugIntolerance('АЦК', ['Аспирин'])).toBe('Аспирин');
     expect(buildIntoleranceAlert('Нурофен', ['Ибупрофен'])).toContain('Ибупрофен');
+    expect(matchDrugIntolerance('Зиртек', ['цетиризин'], ['цетиризин'])).toBe('цетиризин');
+    expect(matchDrugIntolerance('Зиртек', ['цетиризин'])).toBeNull();
+    expect(buildIntoleranceAlert('Зиртек', ['цетиризин'], ['цетиризин'])).toMatch(/цетиризин/i);
   });
 
   it('builds food prefill from profile without allergen/cross steps', () => {

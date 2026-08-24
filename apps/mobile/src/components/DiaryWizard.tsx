@@ -28,9 +28,12 @@ import {
   validateDiarySection,
   validateDiarySectionStep,
   attachDiaryAutoMetadata,
+  applyMedicineCardToSectionAnswers,
   buildMedicineCardFromDiaryAnswers,
+  diaryMedicineNameStepId,
   mergeMedicinePrefillFromCard,
   pickMedicineSuggestionForTypedName,
+  toMedicineCard,
   type DiaryAutoMetadata,
   type DiarySection,
   type DiaryStep,
@@ -51,10 +54,10 @@ import {
   removePhotoUri,
 } from '@/src/services/diary-photo-picker';
 import { recognizeDiaryDish } from '@/src/services/diary-dish-recognition-service';
+import { useMedicineSuggestions } from '@/src/hooks/use-medicine-suggestions';
 import {
   rankLocalMedicineSuggestions,
   rememberMedicineCard,
-  searchMedicineSuggestions,
 } from '@/src/services/medicine-suggest-service';
 import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 
@@ -127,10 +130,7 @@ export function DiaryWizard({
   );
   const [error, setError] = useState('');
   const [offEnriching, setOffEnriching] = useState(false);
-  const [medicineSuggestions, setMedicineSuggestions] = useState<MedicineCard[]>([]);
-  const [medicineSearching, setMedicineSearching] = useState(false);
   const foodComponentsTouchedRef = useRef(false);
-  const medicineSearchRequestId = useRef(0);
 
   const section = sections[sectionIndex];
   const step = section.steps[stepIndex];
@@ -156,8 +156,13 @@ export function DiaryWizard({
     (!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0);
 
   const nutritionFood = section.type === 'Питание' ? (sectionAnswers.food ?? '').trim() : '';
-  const medicineName = section.type === 'Лекарство' ? (sectionAnswers.medicine ?? '').trim() : '';
-  const isMedicineNameStep = section.type === 'Лекарство' && step.id === 'medicine';
+  const medicineNameStepId = diaryMedicineNameStepId(section.type);
+  const isMedicineNameStep = medicineNameStepId === step.id;
+  const medicineName = medicineNameStepId ? (sectionAnswers[medicineNameStepId] ?? '').trim() : '';
+  const { suggestions: medicineSuggestions, searching: medicineSearching } = useMedicineSuggestions(
+    medicineName,
+    { enabled: isMedicineNameStep, profileId, localCards: localMedicineCards },
+  );
 
   useEffect(() => {
     if (section.type !== 'Питание') return;
@@ -218,44 +223,6 @@ export function DiaryWizard({
     };
   }, [nutritionFood, profileAllergiesJson, section.type]);
 
-  useEffect(() => {
-    if (!isMedicineNameStep) {
-      setMedicineSuggestions([]);
-      setMedicineSearching(false);
-      return;
-    }
-    if (medicineName.length < 2) {
-      setMedicineSuggestions([]);
-      setMedicineSearching(false);
-      return;
-    }
-
-    const localHits = rankLocalMedicineSuggestions(medicineName, localMedicineCards);
-    setMedicineSuggestions(localHits);
-
-    const requestId = medicineSearchRequestId.current + 1;
-    medicineSearchRequestId.current = requestId;
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      setMedicineSearching(true);
-      void searchMedicineSuggestions(medicineName, profileId, localMedicineCards)
-        .then((hits) => {
-          if (cancelled || medicineSearchRequestId.current !== requestId) return;
-          setMedicineSuggestions(hits);
-        })
-        .finally(() => {
-          if (!cancelled && medicineSearchRequestId.current === requestId) {
-            setMedicineSearching(false);
-          }
-        });
-    }, 250);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [isMedicineNameStep, localMedicineCards, medicineName, profileId]);
-
   const scalePreview =
     section.type === 'Шкала' && isLastStep
       ? (() => {
@@ -288,7 +255,9 @@ export function DiaryWizard({
         [stepId]: value,
       };
       if (stepId === 'medicine' && section.type === 'Лекарство' && drugIntolerances?.length) {
-        const alert = buildIntoleranceAlert(value, drugIntolerances);
+        const alert = buildIntoleranceAlert(value, drugIntolerances, [
+          nextSectionAnswers.medicineActiveSubstance ?? '',
+        ]);
         if (alert) nextSectionAnswers.intoleranceAlert = alert;
         else delete nextSectionAnswers.intoleranceAlert;
       }
@@ -317,21 +286,28 @@ export function DiaryWizard({
   const applyMedicineCard = (card: MedicineCard, mode: 'replace' | 'fillEmpty') => {
     setAnswersBySection((prev) => ({
       ...prev,
-      [section.type]: mergeMedicinePrefillFromCard(
-        prev[section.type] ?? {},
-        card,
-        ageYears,
-        drugIntolerances ?? [],
-        mode,
-      ),
+      [section.type]:
+        section.type === 'Лекарство'
+          ? mergeMedicinePrefillFromCard(
+              prev[section.type] ?? {},
+              card,
+              ageYears,
+              drugIntolerances ?? [],
+              mode,
+            )
+          : applyMedicineCardToSectionAnswers(
+              section.type,
+              prev[section.type] ?? {},
+              card,
+              ageYears,
+              drugIntolerances ?? [],
+            ),
     }));
     void rememberMedicineCard(card);
   };
 
   const selectMedicineSuggestion = (card: MedicineCard) => {
     applyMedicineCard(card, 'replace');
-    setMedicineSuggestions([]);
-    setMedicineSearching(false);
   };
 
   const setFoodComponentSelection = (selectedIds: string[]) => {
@@ -370,8 +346,8 @@ export function DiaryWizard({
       return;
     }
 
-    if (isMedicineNameStep) {
-      const typedName = sectionAnswers.medicine ?? '';
+    if (isMedicineNameStep && medicineNameStepId) {
+      const typedName = sectionAnswers[medicineNameStepId] ?? '';
       const localHit =
         pickMedicineSuggestionForTypedName(typedName, medicineSuggestions) ??
         pickMedicineSuggestionForTypedName(
@@ -381,8 +357,11 @@ export function DiaryWizard({
       if (localHit) {
         applyMedicineCard(localHit, 'fillEmpty');
       } else {
-        const stub = buildMedicineCardFromDiaryAnswers(sectionAnswers);
-        if (stub) void rememberMedicineCard(stub);
+        const stub =
+          section.type === 'Лекарство'
+            ? buildMedicineCardFromDiaryAnswers(sectionAnswers)
+            : toMedicineCard({ name: typedName }, 'manual');
+        if (stub?.name.trim()) void rememberMedicineCard(stub);
       }
       advanceAfterValidation();
       return;
@@ -507,14 +486,14 @@ export function DiaryWizard({
         />
       ) : (
         <>
-          {isMedicineNameStep ? (
+          {isMedicineNameStep && medicineNameStepId ? (
             <MedicineNameField
-              value={sectionAnswers.medicine ?? ''}
+              value={sectionAnswers[medicineNameStepId] ?? ''}
               placeholder={step.placeholder}
               label={step.label}
               suggestions={medicineSuggestions}
               loading={medicineSearching}
-              onChange={(value) => setAnswer('medicine', value)}
+              onChange={(value) => setAnswer(medicineNameStepId, value)}
               onSelect={selectMedicineSuggestion}
             />
           ) : (

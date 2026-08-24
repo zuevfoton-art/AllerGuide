@@ -51,6 +51,7 @@ describe('recognizeMedicinePackage', () => {
         minAgeYears: 6,
         ingredients: '',
         allergenTags: [],
+        aliases: [],
         source: 'catalog',
         confidence: 'high',
       },

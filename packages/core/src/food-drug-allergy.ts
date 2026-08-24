@@ -144,17 +144,27 @@ function drugTokensMatch(medicine: string, intolerance: string): boolean {
   );
 }
 
-export function matchDrugIntolerance(medicine: string, intolerances: string[]): string | null {
-  const name = medicine.trim();
-  if (!name || !intolerances.length) return null;
-  for (const intolerance of intolerances) {
-    if (drugTokensMatch(name, intolerance)) return intolerance;
+export function matchDrugIntolerance(
+  medicine: string,
+  intolerances: string[],
+  extraTokens: string[] = [],
+): string | null {
+  const tokens = [medicine, ...extraTokens].map((item) => item.trim()).filter(Boolean);
+  if (!tokens.length || !intolerances.length) return null;
+  for (const token of tokens) {
+    for (const intolerance of intolerances) {
+      if (drugTokensMatch(token, intolerance)) return intolerance;
+    }
   }
   return null;
 }
 
-export function buildIntoleranceAlert(medicine: string, intolerances: string[]): string | undefined {
-  const match = matchDrugIntolerance(medicine, intolerances);
+export function buildIntoleranceAlert(
+  medicine: string,
+  intolerances: string[],
+  extraTokens: string[] = [],
+): string | undefined {
+  const match = matchDrugIntolerance(medicine, intolerances, extraTokens);
   if (!match) return undefined;
   return `⚠ В паспорте SOS указана непереносимость: ${match}. Проверьте назначение с врачом.`;
 }
