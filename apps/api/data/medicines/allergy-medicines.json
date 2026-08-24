@@ -1,0 +1,819 @@
+[
+  {
+    "name": "Цетиризин",
+    "activeSubstance": "цетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "5 мг 2 раза в сутки или 10 мг 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Зиртек",
+    "activeSubstance": "цетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "5 мг 2 раза в сутки или 10 мг 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Зиртек капли",
+    "activeSubstance": "цетиризин",
+    "form": "капли для приёма внутрь",
+    "strength": "10 мг/мл",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 1,
+    "ageUsage": [
+      { "minAgeYears": 1, "maxAgeYears": 1, "dose": "2,5 мг (5 капель) 2 раза в сутки", "note": "Детям младше 1 года — только по назначению врача." },
+      { "minAgeYears": 2, "maxAgeYears": 5, "dose": "2,5 мг (5 капель) 2 раза в сутки или 5 мг (10 капель) 1 раз в сутки" },
+      { "minAgeYears": 6, "dose": "10 мг (20 капель) 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Цетрин",
+    "activeSubstance": "цетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "5 мг 2 раза в сутки или 10 мг 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Зодак",
+    "activeSubstance": "цетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "5 мг 2 раза в сутки или 10 мг 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Зодак капли",
+    "activeSubstance": "цетиризин",
+    "form": "капли для приёма внутрь",
+    "strength": "10 мг/мл",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 1,
+    "ageUsage": [
+      { "minAgeYears": 1, "maxAgeYears": 5, "dose": "2,5 мг (5 капель) 2 раза в сутки", "note": "Детям младше 1 года — только по назначению врача." },
+      { "minAgeYears": 6, "dose": "10 мг (20 капель) 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Летизен",
+    "activeSubstance": "цетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Левоцетиризин",
+    "activeSubstance": "левоцетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Ксизал",
+    "activeSubstance": "левоцетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Ксизал капли",
+    "activeSubstance": "левоцетиризин",
+    "form": "капли для приёма внутрь",
+    "strength": "5 мг/мл",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 5, "dose": "1,25 мг (5 капель) 2 раза в сутки" },
+      { "minAgeYears": 6, "dose": "5 мг (20 капель) 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Супрастинекс",
+    "activeSubstance": "левоцетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Супрастинекс капли",
+    "activeSubstance": "левоцетиризин",
+    "form": "капли для приёма внутрь",
+    "strength": "5 мг/мл",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 5, "dose": "1,25 мг (5 капель) 2 раза в сутки" },
+      { "minAgeYears": 6, "dose": "5 мг (20 капель) 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Гленцет",
+    "activeSubstance": "левоцетиризин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Лоратадин",
+    "activeSubstance": "лоратадин",
+    "form": "таблетки",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "5 мг 1 раз в сутки при массе тела до 30 кг" },
+      { "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Кларитин",
+    "activeSubstance": "лоратадин",
+    "form": "таблетки",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "5 мг 1 раз в сутки при массе тела до 30 кг" },
+      { "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Кларитин сироп",
+    "activeSubstance": "лоратадин",
+    "form": "сироп",
+    "strength": "5 мг/5 мл",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница, кожный зуд",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "5 мг (5 мл) 1 раз в сутки при массе тела до 30 кг" },
+      { "minAgeYears": 12, "dose": "10 мг (10 мл) 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Ломилан",
+    "activeSubstance": "лоратадин",
+    "form": "таблетки",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Кларотадин",
+    "activeSubstance": "лоратадин",
+    "form": "таблетки",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Лорагексал",
+    "activeSubstance": "лоратадин",
+    "form": "таблетки",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, аллергический конъюнктивит, крапивница",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Дезлоратадин",
+    "activeSubstance": "дезлоратадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Эриус",
+    "activeSubstance": "дезлоратадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Эриус сироп",
+    "activeSubstance": "дезлоратадин",
+    "form": "сироп",
+    "strength": "0,5 мг/мл",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 1,
+    "ageUsage": [
+      { "minAgeYears": 1, "maxAgeYears": 5, "dose": "1,25 мг (2,5 мл) 1 раз в сутки", "note": "Детям младше 1 года — только по назначению врача." },
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "2,5 мг (5 мл) 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "5 мг (10 мл) 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Дезал",
+    "activeSubstance": "дезлоратадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Лордестин",
+    "activeSubstance": "дезлоратадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Блогир-3",
+    "activeSubstance": "дезлоратадин",
+    "form": "таблетки диспергируемые",
+    "strength": "5 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "5 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Фексофенадин",
+    "activeSubstance": "фексофенадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "120 мг",
+    "indications": "сезонный аллергический ринит",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "120 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Аллегра",
+    "activeSubstance": "фексофенадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "120 мг",
+    "indications": "сезонный аллергический ринит",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "120 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Аллегра 180",
+    "activeSubstance": "фексофенадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "180 мг",
+    "indications": "хроническая идиопатическая крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "180 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Фексадин",
+    "activeSubstance": "фексофенадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "120 мг",
+    "indications": "сезонный аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "120 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Фексофаст",
+    "activeSubstance": "фексофенадин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "120 мг",
+    "indications": "сезонный аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "120 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Эбастин",
+    "activeSubstance": "эбастин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Кестин",
+    "activeSubstance": "эбастин",
+    "form": "таблетки, покрытые плёночной оболочкой",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Рупафин",
+    "activeSubstance": "рупатадин",
+    "form": "таблетки",
+    "strength": "10 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "10 мг 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Никсар",
+    "activeSubstance": "биластин",
+    "form": "таблетки",
+    "strength": "20 мг",
+    "indications": "аллергический ринит, крапивница",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "20 мг 1 раз в сутки за час до еды" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Хлоропирамин",
+    "activeSubstance": "хлоропирамин",
+    "form": "таблетки",
+    "strength": "25 мг",
+    "indications": "крапивница, кожный зуд, аллергический ринит, острые аллергические реакции",
+    "minAgeYears": 3,
+    "ageUsage": [
+      { "minAgeYears": 3, "maxAgeYears": 13, "dose": "1/2 таблетки 2-3 раза в сутки" },
+      { "minAgeYears": 14, "dose": "25 мг 3-4 раза в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Супрастин",
+    "activeSubstance": "хлоропирамин",
+    "form": "таблетки",
+    "strength": "25 мг",
+    "indications": "крапивница, кожный зуд, аллергический ринит, острые аллергические реакции",
+    "minAgeYears": 3,
+    "ageUsage": [
+      { "minAgeYears": 3, "maxAgeYears": 13, "dose": "1/2 таблетки 2-3 раза в сутки" },
+      { "minAgeYears": 14, "dose": "25 мг 3-4 раза в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Клемастин",
+    "activeSubstance": "клемастин",
+    "form": "таблетки",
+    "strength": "1 мг",
+    "indications": "крапивница, кожный зуд, аллергический ринит",
+    "minAgeYears": 6,
+    "ageUsage": [
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "0,5-1 мг 2 раза в сутки" },
+      { "minAgeYears": 12, "dose": "1 мг 2 раза в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Тавегил",
+    "activeSubstance": "клемастин",
+    "form": "таблетки",
+    "strength": "1 мг",
+    "indications": "крапивница, кожный зуд, аллергический ринит",
+    "minAgeYears": 6,
+    "ageUsage": [
+      { "minAgeYears": 6, "maxAgeYears": 11, "dose": "0,5-1 мг 2 раза в сутки" },
+      { "minAgeYears": 12, "dose": "1 мг 2 раза в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Фенистил капли",
+    "activeSubstance": "диметинден",
+    "form": "капли для приёма внутрь",
+    "strength": "1 мг/мл",
+    "indications": "кожный зуд, крапивница, аллергический ринит",
+    "minAgeYears": 1,
+    "ageUsage": [
+      { "minAgeYears": 1, "maxAgeYears": 2, "dose": "10-15 капель 3 раза в сутки", "note": "Детям младше 1 года — только по назначению врача." },
+      { "minAgeYears": 3, "maxAgeYears": 11, "dose": "15-20 капель 3 раза в сутки" },
+      { "minAgeYears": 12, "dose": "20-40 капель 3 раза в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Фенистил гель",
+    "activeSubstance": "диметинден",
+    "form": "гель для наружного применения",
+    "strength": "0,1%",
+    "indications": "кожный зуд, зуд после укусов насекомых, лёгкие солнечные ожоги",
+    "minAgeYears": 1,
+    "ageUsage": [{ "minAgeYears": 1, "dose": "наносить на поражённые участки 2-4 раза в сутки", "note": "Детям младше 1 года — только по назначению врача." }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Мометазон",
+    "activeSubstance": "мометазон",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "по 1 дозе в каждый носовой ход 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "по 2 дозы в каждый носовой ход 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Назонекс",
+    "activeSubstance": "мометазон",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "по 1 дозе в каждый носовой ход 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "по 2 дозы в каждый носовой ход 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Дезринит",
+    "activeSubstance": "мометазон",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "по 1 дозе в каждый носовой ход 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "по 2 дозы в каждый носовой ход 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Нозефрин",
+    "activeSubstance": "мометазон",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 2, "dose": "по 1-2 дозы в каждый носовой ход 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Фликсоназе",
+    "activeSubstance": "флутиказона пропионат",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 4,
+    "ageUsage": [
+      { "minAgeYears": 4, "maxAgeYears": 11, "dose": "по 1 дозе в каждый носовой ход 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "по 2 дозы в каждый носовой ход 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Назарел",
+    "activeSubstance": "флутиказона пропионат",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 4,
+    "ageUsage": [{ "minAgeYears": 4, "dose": "по 1-2 дозы в каждый носовой ход 1 раз в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Авамис",
+    "activeSubstance": "флутиказона фуроат",
+    "form": "спрей назальный дозированный",
+    "strength": "27,5 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 2,
+    "ageUsage": [
+      { "minAgeYears": 2, "maxAgeYears": 11, "dose": "по 1 дозе в каждый носовой ход 1 раз в сутки" },
+      { "minAgeYears": 12, "dose": "по 2 дозы в каждый носовой ход 1 раз в сутки" }
+    ],
+    "prescriptionOnly": false,
+    "confidence": "high"
+  },
+  {
+    "name": "Тафен назаль",
+    "activeSubstance": "будесонид",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "по 1-2 дозы в каждый носовой ход 1-2 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Насобек",
+    "activeSubstance": "беклометазон",
+    "form": "спрей назальный дозированный",
+    "strength": "50 мкг/дозу",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "по 1-2 дозы в каждый носовой ход 2 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Кромогексал спрей",
+    "activeSubstance": "кромоглициевая кислота",
+    "form": "спрей назальный",
+    "strength": "2%",
+    "indications": "профилактика и лечение аллергического ринита",
+    "minAgeYears": 5,
+    "ageUsage": [{ "minAgeYears": 5, "dose": "по 1 дозе в каждый носовой ход 4 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Кромогексал капли глазные",
+    "activeSubstance": "кромоглициевая кислота",
+    "form": "капли глазные",
+    "strength": "2%",
+    "indications": "аллергический конъюнктивит",
+    "minAgeYears": 4,
+    "ageUsage": [{ "minAgeYears": 4, "dose": "по 1 капле в каждый глаз 4 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Лекролин",
+    "activeSubstance": "кромоглициевая кислота",
+    "form": "капли глазные",
+    "strength": "2%",
+    "indications": "аллергический конъюнктивит",
+    "minAgeYears": 4,
+    "ageUsage": [{ "minAgeYears": 4, "dose": "по 1 капле в каждый глаз 4 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Аллергодил спрей",
+    "activeSubstance": "азеластин",
+    "form": "спрей назальный дозированный",
+    "strength": "0,1%",
+    "indications": "сезонный и круглогодичный аллергический ринит",
+    "minAgeYears": 6,
+    "ageUsage": [{ "minAgeYears": 6, "dose": "по 1 дозе в каждый носовой ход 2 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Аллергодил капли глазные",
+    "activeSubstance": "азеластин",
+    "form": "капли глазные",
+    "strength": "0,05%",
+    "indications": "аллергический конъюнктивит",
+    "minAgeYears": 4,
+    "ageUsage": [{ "minAgeYears": 4, "dose": "по 1 капле в каждый глаз 2 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Задитен капли глазные",
+    "activeSubstance": "кетотифен",
+    "form": "капли глазные",
+    "strength": "0,025%",
+    "indications": "аллергический конъюнктивит",
+    "minAgeYears": 12,
+    "ageUsage": [{ "minAgeYears": 12, "dose": "по 1 капле в каждый глаз 2 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Опатанол",
+    "activeSubstance": "олопатадин",
+    "form": "капли глазные",
+    "strength": "0,1%",
+    "indications": "аллергический конъюнктивит",
+    "minAgeYears": 3,
+    "ageUsage": [{ "minAgeYears": 3, "note": "Только по назначению врача." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Аква Марис",
+    "activeSubstance": "морская вода",
+    "form": "спрей назальный",
+    "strength": "",
+    "indications": "промывание носа при аллергическом рините, гигиена полости носа",
+    "minAgeYears": null,
+    "ageUsage": [{ "dose": "по 1-2 впрыскивания в каждый носовой ход 2-4 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Аквалор",
+    "activeSubstance": "морская вода",
+    "form": "спрей назальный",
+    "strength": "",
+    "indications": "промывание носа при аллергическом рините, гигиена полости носа",
+    "minAgeYears": null,
+    "ageUsage": [{ "dose": "промывание 2-4 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Физиомер",
+    "activeSubstance": "морская вода",
+    "form": "спрей назальный",
+    "strength": "",
+    "indications": "промывание носа при аллергическом рините, гигиена полости носа",
+    "minAgeYears": null,
+    "ageUsage": [{ "dose": "промывание 2-4 раза в сутки" }],
+    "prescriptionOnly": false,
+    "confidence": "medium"
+  },
+  {
+    "name": "Монтелукаст",
+    "activeSubstance": "монтелукаст",
+    "form": "таблетки",
+    "strength": "4 мг / 5 мг / 10 мг",
+    "indications": "бронхиальная астма, аллергический ринит — по назначению врача",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 2, "note": "Только по назначению врача. Дозу и форму подбирает врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Синглон",
+    "activeSubstance": "монтелукаст",
+    "form": "таблетки",
+    "strength": "4 мг / 5 мг / 10 мг",
+    "indications": "бронхиальная астма, аллергический ринит — по назначению врача",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 2, "note": "Только по назначению врача. Дозу и форму подбирает врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Монтелар",
+    "activeSubstance": "монтелукаст",
+    "form": "таблетки",
+    "strength": "4 мг / 5 мг / 10 мг",
+    "indications": "бронхиальная астма, аллергический ринит — по назначению врача",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 2, "note": "Только по назначению врача. Дозу и форму подбирает врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Экталуст",
+    "activeSubstance": "монтелукаст",
+    "form": "таблетки",
+    "strength": "4 мг / 5 мг / 10 мг",
+    "indications": "бронхиальная астма, аллергический ринит — по назначению врача",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 2, "note": "Только по назначению врача. Дозу и форму подбирает врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Локоид",
+    "activeSubstance": "гидрокортизона бутират",
+    "form": "крем для наружного применения",
+    "strength": "0,1%",
+    "indications": "атопический дерматит, аллергический контактный дерматит — по назначению врача",
+    "minAgeYears": 1,
+    "ageUsage": [{ "minAgeYears": 1, "note": "Только по назначению врача. Длительность курса определяет врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Адвантан",
+    "activeSubstance": "метилпреднизолона ацепонат",
+    "form": "крем для наружного применения",
+    "strength": "0,1%",
+    "indications": "атопический дерматит, аллергический контактный дерматит — по назначению врача",
+    "minAgeYears": 1,
+    "ageUsage": [{ "minAgeYears": 1, "note": "Только по назначению врача. Длительность курса определяет врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Протопик",
+    "activeSubstance": "такролимус",
+    "form": "мазь для наружного применения",
+    "strength": "0,03%",
+    "indications": "атопический дерматит средней и тяжёлой степени — по назначению врача",
+    "minAgeYears": 2,
+    "ageUsage": [{ "minAgeYears": 2, "note": "Только по назначению врача. Мазь 0,1% — с 16 лет." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Преднизолон",
+    "activeSubstance": "преднизолон",
+    "form": "таблетки",
+    "strength": "5 мг",
+    "indications": "тяжёлые аллергические реакции — по назначению врача",
+    "minAgeYears": null,
+    "ageUsage": [{ "note": "Только по назначению врача. Дозу и схему определяет врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  },
+  {
+    "name": "Эпинефрин",
+    "activeSubstance": "эпинефрин",
+    "form": "раствор для инъекций",
+    "strength": "1 мг/мл",
+    "indications": "анафилактический шок и другие острые аллергические реакции — по назначению врача",
+    "minAgeYears": null,
+    "ageUsage": [{ "note": "Только по назначению врача. Дозу и способ введения определяет врач." }],
+    "prescriptionOnly": true,
+    "confidence": "medium"
+  }
+]

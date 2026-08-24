@@ -62,6 +62,21 @@ function requireScanAuth(): boolean {
   return process.env.SCAN_REQUIRE_AUTH === 'true';
 }
 
+/**
+ * Catalog writes always need an identity: a mobile JWT (device write-through)
+ * or the shared MEDICINE_WRITE_KEY (server-to-server seeding). Reads stay open.
+ */
+async function isCatalogWriteAuthorized(req: Request): Promise<boolean> {
+  const header = req.header('authorization');
+  if (header?.startsWith('Bearer ')) {
+    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+    if (payload) return true;
+  }
+
+  const configuredKey = process.env.MEDICINE_WRITE_KEY?.trim();
+  return Boolean(configuredKey) && req.header('x-medicine-write-key') === configuredKey;
+}
+
 async function resolveScanIdentity(req: Request): Promise<string | null> {
   const header = req.header('authorization');
   if (header?.startsWith('Bearer ')) {
@@ -136,6 +151,11 @@ export function registerMedicineRoutes(app: Express) {
   app.post('/api/medicines', async (req: Request, res: Response) => {
     if (!databaseConfigured()) {
       res.status(503).json({ ok: false, error: 'Medicine catalog is not configured' });
+      return;
+    }
+
+    if (!(await isCatalogWriteAuthorized(req))) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;
     }
 

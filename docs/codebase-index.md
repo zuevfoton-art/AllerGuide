@@ -212,7 +212,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
 | `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
-| `medicines.ts` | Medicine recognize + catalog search + remember (`AI_MEDICINE_VISION_ENABLED` for VL) |
+| `medicines.ts` | Medicine recognize + catalog search + remember (VL via `AI_MEDICINE_VISION_ENABLED`; writes need JWT or `MEDICINE_WRITE_KEY`) |
 | `market.ts` | Market catalog + Yandex resolve / retired draft-search |
 | `pollen.ts` | Google pollen heatmap proxy |
 | `alias-feedback.ts` | Crowdsourced aliases |

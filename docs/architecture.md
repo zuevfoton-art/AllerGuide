@@ -527,7 +527,8 @@ Drizzle-объекты схемо-квалифицированы — код за
 - **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото.
 - **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
 - **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префиксные совпадения раньше contains; дневник подставляет их как автодополнение названия.
-- **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные).
+- **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные). Запись всегда требует авторизации: mobile JWT (устройство) либо `x-medicine-write-key` = `MEDICINE_WRITE_KEY` (server-to-server, сид). Без этого — 401; чтение и `recognize` остаются открытыми.
+- **Сид каталога:** `pnpm --filter api db:seed-medicines` — датасет `apps/api/data/medicines/` заливается через `POST /api/medicines` (`API_BASE_URL` + `MEDICINE_WRITE_KEY`), идемпотентно.
 - **Клиент:** `EXPO_PUBLIC_MEDICINE_DB` включает VL/фото; поиск и remember идут при заданном `EXPO_PUBLIC_API_URL`. При флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance` + ранее сохранённые записи дневника. Demo-карточка только для фото без OCR, не для голоса.
 
 ### Каталог продуктов
