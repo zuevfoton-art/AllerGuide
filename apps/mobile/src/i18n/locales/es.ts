@@ -297,6 +297,7 @@ const es: LocaleMessages = {
     dishConflicts: 'Conflictos con el perfil: {{list}}',
     dishOffLoading: 'Buscando ingredientes en Open Food Facts…',
     dishOffEnriched: 'Enriquecido con Open Food Facts: {{product}}',
+    medicineSearching: 'Buscando el medicamento en el catálogo…',
   },
   medicineScan: {
     title: 'Foto o voz',

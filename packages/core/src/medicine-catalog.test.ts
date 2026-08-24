@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildMedicineCardFromDiaryAnswers,
   buildMedicinePrefillFromCard,
+  filterAndRankMedicineSuggestions,
+  formatMedicineSuggestionMeta,
   medicineCardKey,
+  mergeMedicineCards,
+  mergeMedicinePrefillFromCard,
   normalizeMedicineName,
+  pickMedicineSuggestionForTypedName,
   resolveMedicineAgeUsage,
   toMedicineCard,
   type MedicineCard,
@@ -61,5 +67,64 @@ describe('medicine-catalog', () => {
     expect(normalized.activeSubstance).toBe('');
     expect(normalized.source).toBe('ocr');
     expect(normalized.confidence).toBe('low');
+  });
+
+  it('ranks autocomplete hits prefix-first and skips unrelated cards', () => {
+    const ranked = filterAndRankMedicineSuggestions('цет', [
+      card({ name: 'Нурофен' }),
+      card({ name: 'Цетиризин-Акри', activeSubstance: 'цетиризин', form: 'капли', strength: '10 мг/мл' }),
+      card({ name: 'Цетиризин', activeSubstance: 'цетиризин', form: 'таблетки', strength: '10 мг' }),
+    ]);
+    expect(ranked.map((item) => item.name)).toEqual(['Цетиризин', 'Цетиризин-Акри']);
+  });
+
+  it('picks an exact typed name or a single unique prefix', () => {
+    const cetirizine = card({ name: 'Цетиризин' });
+    const acri = card({ name: 'Цетиризин-Акри' });
+    expect(pickMedicineSuggestionForTypedName('Цетиризин', [cetirizine, acri])?.name).toBe(
+      'Цетиризин',
+    );
+    expect(pickMedicineSuggestionForTypedName('цет', [cetirizine, acri])).toBeNull();
+    expect(pickMedicineSuggestionForTypedName('цет', [cetirizine])?.name).toBe('Цетиризин');
+  });
+
+  it('rebuilds a card from diary answers and keeps richer catalog fields on merge', () => {
+    const fromDiary = buildMedicineCardFromDiaryAnswers({
+      medicine: 'Нурофен',
+      dosage: '200 мг',
+      medicineForm: 'таблетки',
+    });
+    expect(fromDiary?.strength).toBe('200 мг');
+    expect(fromDiary?.source).toBe('manual');
+
+    const merged = mergeMedicineCards(card(), fromDiary!);
+    expect(merged.activeSubstance).toBe('ибупрофен');
+    expect(merged.indications).toBe('боль, температура');
+    expect(merged.strength).toBe('200 мг');
+    expect(merged.source).toBe('vision');
+  });
+
+  it('fills empty diary fields from a card without overwriting a typed dose', () => {
+    const filled = mergeMedicinePrefillFromCard(
+      { medicine: 'нур', dosage: '1 таблетка' },
+      card(),
+      30,
+      [],
+      'fillEmpty',
+    );
+    expect(filled.medicine).toBe('нур');
+    expect(filled.dosage).toBe('1 таблетка');
+    expect(filled.medicineForm).toBe('таблетки');
+
+    const replaced = mergeMedicinePrefillFromCard(
+      { medicine: 'нур', dosage: '1 таблетка' },
+      card(),
+      30,
+      [],
+      'replace',
+    );
+    expect(replaced.medicine).toBe('Нурофен');
+    expect(replaced.dosage).toBe('200 мг');
+    expect(formatMedicineSuggestionMeta(card())).toBe('ибупрофен · таблетки · 200 мг');
   });
 });

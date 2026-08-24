@@ -298,6 +298,7 @@ const ru: LocaleMessages = {
     dishConflicts: 'Совпадения с профилем: {{list}}',
     dishOffLoading: 'Ищем состав в Open Food Facts…',
     dishOffEnriched: 'Дополнено из Open Food Facts: {{product}}',
+    medicineSearching: 'Ищем препарат в каталоге…',
   },
   medicineScan: {
     title: 'Фото упаковки или голос',

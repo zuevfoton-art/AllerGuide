@@ -9,6 +9,7 @@ import {
   resolveMedicineAgeUsage,
   toMedicineCard,
   type MedicineCard,
+  type MedicineConfidence,
   type MedicineSource,
 } from '@allerguide/core';
 import { verifyAuthToken } from '../lib/jwt';
@@ -34,6 +35,21 @@ interface RecognizeRequestBody {
   name?: string;
   ageYears?: number;
   profileType?: string;
+}
+
+interface RememberRequestBody {
+  name?: string;
+  activeSubstance?: string;
+  form?: string;
+  strength?: string;
+  manufacturer?: string;
+  indications?: string;
+  ageUsage?: MedicineCard['ageUsage'];
+  minAgeYears?: number | null;
+  ingredients?: string;
+  allergenTags?: string[];
+  source?: MedicineSource;
+  confidence?: MedicineConfidence;
 }
 
 const MIN_SEARCH_QUERY_LENGTH = 2;
@@ -114,6 +130,49 @@ export function registerMedicineRoutes(app: Express) {
     } catch (error) {
       logCaughtError('medicines.search', error, { query });
       res.status(500).json({ ok: false, error: 'Search failed' });
+    }
+  });
+
+  app.post('/api/medicines', async (req: Request, res: Response) => {
+    if (!databaseConfigured()) {
+      res.status(503).json({ ok: false, error: 'Medicine catalog is not configured' });
+      return;
+    }
+
+    const body = req.body as RememberRequestBody;
+    const name = body.name?.trim() ?? '';
+    if (name.length < MIN_SEARCH_QUERY_LENGTH) {
+      res.status(400).json({ ok: false, error: 'Medicine name is required' });
+      return;
+    }
+
+    try {
+      const card = toMedicineCard(
+        {
+          name,
+          activeSubstance: body.activeSubstance,
+          form: body.form,
+          strength: body.strength,
+          manufacturer: body.manufacturer,
+          indications: body.indications,
+          ageUsage: body.ageUsage,
+          minAgeYears: body.minAgeYears,
+          ingredients: body.ingredients,
+          allergenTags: body.allergenTags,
+          confidence: body.confidence,
+        },
+        body.source === 'catalog' ||
+          body.source === 'vision' ||
+          body.source === 'ocr' ||
+          body.source === 'manual'
+          ? body.source
+          : 'manual',
+      );
+      const saved = await upsertMedicineCard(card);
+      respondWithCard(res, medicineRowToCard(saved), 'catalog', false, null);
+    } catch (error) {
+      logCaughtError('medicines.remember', error, { name });
+      res.status(500).json({ ok: false, error: 'Could not save medicine' });
     }
   });
 

@@ -87,20 +87,55 @@ export async function recognizeMedicineViaApi(input: {
   };
 }
 
+const CATALOG_SEARCH_TIMEOUT_MS = 2500;
+
 export async function searchMedicinesFromCatalog(query: string): Promise<MedicineCard[]> {
   const term = query.trim();
-  if (term.length < 2 || !MEDICINE_DB_ENABLED) return [];
+  const baseUrl = getApiBaseUrl();
+  if (term.length < 2 || !baseUrl) return [];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CATALOG_SEARCH_TIMEOUT_MS);
 
   try {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/medicines/search?q=${encodeURIComponent(term)}`,
+      `${baseUrl}/api/medicines/search?q=${encodeURIComponent(term)}`,
+      { signal: controller.signal },
     );
     if (!response.ok) return [];
     const data = (await response.json()) as { ok?: boolean; medicines?: MedicineCard[] };
     if (!data.ok || !Array.isArray(data.medicines)) return [];
     return data.medicines;
   } catch (error) {
-    logCaughtError('searchMedicinesFromCatalog', error, { extra: { query: term } });
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      logCaughtError('searchMedicinesFromCatalog', error, { extra: { query: term } });
+    }
     return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/** Write-through a found/typed card into the YC catalog. No-op without an API URL. */
+export async function rememberMedicineViaApi(card: MedicineCard): Promise<MedicineCard | null> {
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl || !card.name.trim()) return null;
+
+  try {
+    const token = await getBackendAuthToken();
+    const response = await fetch(`${baseUrl}/api/medicines`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(card),
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { ok?: boolean; medicine?: MedicineCard };
+    return data.ok && data.medicine ? data.medicine : null;
+  } catch (error) {
+    logCaughtError('rememberMedicineViaApi', error, { extra: { name: card.name } });
+    return null;
   }
 }

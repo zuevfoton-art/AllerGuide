@@ -298,6 +298,7 @@ const de: LocaleMessages = {
     dishConflicts: 'Profilkonflikte: {{list}}',
     dishOffLoading: 'Zutaten werden in Open Food Facts gesucht…',
     dishOffEnriched: 'Ergänzt aus Open Food Facts: {{product}}',
+    medicineSearching: 'Suche im Arzneimittelkatalog…',
   },
   medicineScan: {
     title: 'Foto oder Sprache',
