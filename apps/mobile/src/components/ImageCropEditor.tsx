@@ -15,9 +15,10 @@ import {
   applyDisplayCropDrag,
   computeContainLayout,
   cropImageToBase64,
+  encodeImageToBase64,
   initialCropInDisplay,
-  mapDisplayCropToImagePixels,
   preferBitmapImageSize,
+  resolveScanPhotoCropRect,
   resolveScanPhotoSize,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
@@ -205,22 +206,23 @@ export function ImageCropEditor({
   );
 
   const handleConfirm = async () => {
-    if (!crop || !layout || !imageSize.width || !imageSize.height || busy) return;
+    if (busy) return;
     setBusy(true);
     setError(false);
     try {
       const bitmap = preferBitmapImageSize(
-        imageSize,
+        { width: imageSize.width || photo.width, height: imageSize.height || photo.height },
         await resolveScanPhotoSize(photo.uri).catch(() => imageSize),
       );
-      const pixelCrop = mapDisplayCropToImagePixels({
+      if (!bitmap.width || !bitmap.height) {
+        onConfirm(await encodeImageToBase64(photo.uri));
+        return;
+      }
+      const pixelCrop = resolveScanPhotoCropRect({
         imageWidth: bitmap.width,
         imageHeight: bitmap.height,
         layout,
-        cropX: crop.x,
-        cropY: crop.y,
-        cropWidth: crop.width,
-        cropHeight: crop.height,
+        crop,
       });
       const cropped = await cropImageToBase64(photo.uri, pixelCrop);
       onConfirm(cropped);
@@ -257,6 +259,7 @@ export function ImageCropEditor({
               }}
             >
               <Image
+                testID="scanner-crop-preview"
                 source={{ uri: photo.uri }}
                 style={StyleSheet.absoluteFillObject}
                 resizeMode="stretch"
@@ -266,6 +269,7 @@ export function ImageCropEditor({
           ) : (
             <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
               <Image
+                testID="scanner-crop-preview"
                 source={{ uri: photo.uri }}
                 style={StyleSheet.absoluteFillObject}
                 resizeMode="contain"
@@ -382,7 +386,7 @@ export function ImageCropEditor({
         <Pressable
           style={[styles.primaryBtn, busy && styles.primaryBtnDisabled]}
           onPress={() => void handleConfirm()}
-          disabled={busy || !crop}
+          disabled={busy}
           testID="scanner-crop-confirm">
           {busy ? (
             <ActivityIndicator color={theme.colors.onAccent} />

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyDisplayCropDrag,
   computeContainLayout,
+  fullImageCropRect,
   initialCropInDisplay,
   mapDisplayCropToImagePixels,
   preferBitmapImageSize,
@@ -109,6 +110,15 @@ describe('scanner-photo-geometry', () => {
     expect(pixels.originY).toBe(0);
     expect(pixels.width).toBe(4000);
     expect(pixels.height).toBe(3000);
+  });
+
+  it('covers the whole bitmap when the crop frame is missing', () => {
+    expect(fullImageCropRect(1600, 900)).toEqual({
+      originX: 0,
+      originY: 0,
+      width: 1600,
+      height: 900,
+    });
   });
 
   it('enforces minimum size when shrinking a corner', () => {
