@@ -116,18 +116,24 @@ export async function searchMedicinesFromCatalog(query: string): Promise<Medicin
   }
 }
 
-/** Write-through a found/typed card into the YC catalog. No-op without an API URL. */
+/**
+ * Write-through a found/typed card into the YC catalog. Catalog writes require a
+ * signed-in device, so without a backend token we keep the card local instead of
+ * collecting 401s on every save.
+ */
 export async function rememberMedicineViaApi(card: MedicineCard): Promise<MedicineCard | null> {
   const baseUrl = getApiBaseUrl();
   if (!baseUrl || !card.name.trim()) return null;
 
+  const token = await getBackendAuthToken();
+  if (!token) return null;
+
   try {
-    const token = await getBackendAuthToken();
     const response = await fetch(`${baseUrl}/api/medicines`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(card),
     });
