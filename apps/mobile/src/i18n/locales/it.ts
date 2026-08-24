@@ -945,6 +945,7 @@ const it: LocaleMessages = {
     conditionHistory: {
       title: 'Quando è iniziata l\'allergia?',
       hint: 'Indica il periodo approssimativo di insorgenza per ogni tipo. I campi sono facoltativi.',
+      questionProgress: '{{condition}} · domanda {{current}} di {{total}}',
       empty: 'Seleziona prima i tipi di allergia nel passo precedente.',
       onsetLabel: 'Prime manifestazioni',
       onsetAgeLabel: 'Età di insorgenza (anni)',

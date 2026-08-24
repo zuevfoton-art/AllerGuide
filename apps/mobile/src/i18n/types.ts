@@ -935,6 +935,7 @@ export type LocaleMessages = {
     conditionHistory: {
       title: string;
       hint: string;
+      questionProgress: string;
       empty: string;
       onsetLabel: string;
       onsetAgeLabel: string;
