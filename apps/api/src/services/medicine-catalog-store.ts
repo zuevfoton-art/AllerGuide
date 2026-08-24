@@ -133,6 +133,16 @@ export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRo
   return saved;
 }
 
+/** Curator cleanup: drop a wrong or test card from the shared catalog. */
+export async function deleteMedicineByNormalizedName(normalizedName: string): Promise<boolean> {
+  if (!normalizedName) return false;
+  const deleted = await db
+    .delete(medicines)
+    .where(eq(medicines.normalizedName, normalizedName))
+    .returning({ id: medicines.id });
+  return deleted.length > 0;
+}
+
 export async function bumpMedicineRecognitions(id: string): Promise<void> {
   await db
     .update(medicines)

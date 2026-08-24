@@ -22,6 +22,7 @@ import {
 } from '../services/llm-dish-vision-provider';
 import {
   bumpMedicineRecognitions,
+  deleteMedicineByNormalizedName,
   findMedicineByNormalizedName,
   medicineRowToCard,
   searchMedicines,
@@ -193,6 +194,36 @@ export function registerMedicineRoutes(app: Express) {
     } catch (error) {
       logCaughtError('medicines.remember', error, { name });
       res.status(500).json({ ok: false, error: 'Could not save medicine' });
+    }
+  });
+
+  app.delete('/api/medicines/:name', async (req: Request, res: Response) => {
+    if (!databaseConfigured()) {
+      res.status(503).json({ ok: false, error: 'Medicine catalog is not configured' });
+      return;
+    }
+
+    if (!(await isCatalogWriteAuthorized(req))) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+
+    const normalizedName = normalizeMedicineName(String(req.params.name ?? ''));
+    if (normalizedName.length < MIN_SEARCH_QUERY_LENGTH) {
+      res.status(400).json({ ok: false, error: 'Medicine name is required' });
+      return;
+    }
+
+    try {
+      const deleted = await deleteMedicineByNormalizedName(normalizedName);
+      if (!deleted) {
+        res.status(404).json({ ok: false, error: 'Medicine not found' });
+        return;
+      }
+      res.json({ ok: true, deleted: normalizedName });
+    } catch (error) {
+      logCaughtError('medicines.delete', error, { normalizedName });
+      res.status(500).json({ ok: false, error: 'Could not delete medicine' });
     }
   });
 

@@ -22,6 +22,7 @@ const catalogHit: MedicineCard = {
 
 vi.mock('../services/medicine-catalog-store', () => ({
   findMedicineByNormalizedName: vi.fn(async () => null),
+  deleteMedicineByNormalizedName: vi.fn(async () => true),
   searchMedicines: vi.fn(async () => []),
   upsertMedicineCard: vi.fn(async (card: MedicineCard) => ({
     id: 'med-1',
@@ -211,6 +212,55 @@ describe('medicine routes', () => {
     expect(store.upsertMedicineCard).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Нурофен', strength: '200 мг', source: 'manual' }),
     );
+  });
+
+  it('deletes a curated card with the write key', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    process.env.MEDICINE_WRITE_KEY = 'seed-secret';
+    const store = await import('../services/medicine-catalog-store');
+    vi.mocked(store.deleteMedicineByNormalizedName).mockResolvedValueOnce(true);
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .delete(`/api/medicines/${encodeURIComponent('Проверка защиты')}`)
+      .set('x-medicine-write-key', 'seed-secret');
+
+    expect(response.status).toBe(200);
+    expect(store.deleteMedicineByNormalizedName).toHaveBeenCalledWith('проверка защиты');
+  });
+
+  it('rejects a delete without the write key', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app).delete('/api/medicines/нурофен');
+
+    expect(response.status).toBe(401);
+    expect(store.deleteMedicineByNormalizedName).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when the deleted card is missing', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    process.env.MEDICINE_WRITE_KEY = 'seed-secret';
+    const store = await import('../services/medicine-catalog-store');
+    vi.mocked(store.deleteMedicineByNormalizedName).mockResolvedValueOnce(false);
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .delete('/api/medicines/несуществующий')
+      .set('x-medicine-write-key', 'seed-secret');
+
+    expect(response.status).toBe(404);
   });
 
   it('rejects remember without a name', async () => {
