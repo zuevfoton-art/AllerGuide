@@ -22,7 +22,7 @@ export interface MedicineCard {
   ingredients: string;
   allergenTags: string[];
   /** Latin / alternate trade names used in search (e.g. Zyrtec for Зиртек). */
-  aliases?: string[];
+  aliases: string[];
   source: MedicineSource;
   confidence: MedicineConfidence;
 }
@@ -226,7 +226,7 @@ function pickRicherConfidence(
 }
 
 function mergeAliasLists(existing: MedicineCard, incoming: MedicineCard, name: string): string[] {
-  return normalizeMedicineAliases([...(existing.aliases ?? []), ...(incoming.aliases ?? [])], name);
+  return normalizeMedicineAliases([...existing.aliases, ...incoming.aliases], name);
 }
 
 /** Keep the richer catalog card when a later find/manual save is thinner. */
@@ -268,7 +268,7 @@ export function applyMedicineCardToSectionAnswers(
     return { ...current, asitDrug: card.name.trim() };
   }
   if (sectionType === 'Терапия') {
-    const next = { ...current, therapyDrug: card.name.trim() };
+    const next: Record<string, string> = { ...current, therapyDrug: card.name.trim() };
     if (!next.therapyDosage?.trim()) {
       const age = resolveMedicineAgeUsage(card, ageYears);
       if (age.dose) next.therapyDosage = age.dose;

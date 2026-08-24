@@ -145,7 +145,7 @@ export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRo
       minAgeYears: merged.minAgeYears,
       ingredients: merged.ingredients,
       allergenTags: merged.allergenTags,
-      aliases: merged.aliases ?? [],
+      aliases: merged.aliases,
       source: merged.source,
       confidence: merged.confidence,
       recognitions: 1,

@@ -12,6 +12,7 @@ const card: MedicineCard = {
   minAgeYears: 6,
   ingredients: '',
   allergenTags: [],
+  aliases: [],
   source: 'manual',
   confidence: 'medium',
 };

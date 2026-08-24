@@ -27,6 +27,7 @@ function card(overrides: Partial<MedicineCard> = {}): MedicineCard {
     minAgeYears: 12,
     ingredients: 'ибупрофен, лактоза',
     allergenTags: ['lactose'],
+    aliases: [],
     source: 'vision',
     confidence: 'medium',
     ...overrides,

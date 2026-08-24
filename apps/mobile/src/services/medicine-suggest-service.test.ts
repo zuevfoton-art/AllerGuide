@@ -28,6 +28,7 @@ function card(name: string, extras: Partial<MedicineCard> = {}): MedicineCard {
     minAgeYears: null,
     ingredients: '',
     allergenTags: [],
+    aliases: extras.aliases ?? [],
     source: extras.source ?? 'catalog',
     confidence: extras.confidence ?? 'high',
   };
