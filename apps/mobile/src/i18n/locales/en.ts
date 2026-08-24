@@ -952,6 +952,7 @@ const en: LocaleMessages = {
     conditionHistory: {
       title: 'When did the allergy start?',
       hint: 'Enter an approximate onset period for each type. Optional fields can be skipped.',
+      questionProgress: '{{condition}} · question {{current}} of {{total}}',
       empty: 'Select allergy types on the previous step first.',
       onsetLabel: 'When symptoms first appeared',
       onsetAgeLabel: 'Age at onset (years)',

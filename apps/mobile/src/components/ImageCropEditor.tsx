@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   PanResponder,
   Pressable,
   StyleSheet,
@@ -15,9 +16,10 @@ import {
   applyDisplayCropDrag,
   computeContainLayout,
   cropImageToBase64,
+  encodeImageToBase64,
   initialCropInDisplay,
-  mapDisplayCropToImagePixels,
   preferBitmapImageSize,
+  resolveScanPhotoCropRect,
   resolveScanPhotoSize,
   type CapturedScanPhoto,
   type CroppedScanPhoto,
@@ -205,22 +207,23 @@ export function ImageCropEditor({
   );
 
   const handleConfirm = async () => {
-    if (!crop || !layout || !imageSize.width || !imageSize.height || busy) return;
+    if (busy) return;
     setBusy(true);
     setError(false);
     try {
       const bitmap = preferBitmapImageSize(
-        imageSize,
+        { width: imageSize.width || photo.width, height: imageSize.height || photo.height },
         await resolveScanPhotoSize(photo.uri).catch(() => imageSize),
       );
-      const pixelCrop = mapDisplayCropToImagePixels({
+      if (!bitmap.width || !bitmap.height) {
+        onConfirm(await encodeImageToBase64(photo.uri));
+        return;
+      }
+      const pixelCrop = resolveScanPhotoCropRect({
         imageWidth: bitmap.width,
         imageHeight: bitmap.height,
         layout,
-        cropX: crop.x,
-        cropY: crop.y,
-        cropWidth: crop.width,
-        cropHeight: crop.height,
+        crop,
       });
       const cropped = await cropImageToBase64(photo.uri, pixelCrop);
       onConfirm(cropped);
@@ -233,7 +236,20 @@ export function ImageCropEditor({
 
   const handleHalf = HANDLE_SIZE / 2;
 
+  const previewAspect =
+    imageSize.width > 0 && imageSize.height > 0
+      ? imageSize.width / imageSize.height
+      : photo.width > 0 && photo.height > 0
+        ? photo.width / photo.height
+        : 4 / 3;
+
   return (
+    <Modal
+      visible
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onCancel}>
     <View style={styles.root} testID="scanner-crop-editor">
       <View style={styles.topBar}>
         <Pressable style={styles.iconBtn} onPress={onCancel} accessibilityRole="button">
@@ -257,6 +273,7 @@ export function ImageCropEditor({
               }}
             >
               <Image
+                testID="scanner-crop-preview"
                 source={{ uri: photo.uri }}
                 style={StyleSheet.absoluteFillObject}
                 resizeMode="stretch"
@@ -264,10 +281,11 @@ export function ImageCropEditor({
               />
             </View>
           ) : (
-            <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+            <View pointerEvents="none" style={styles.fallbackPreview}>
               <Image
+                testID="scanner-crop-preview"
                 source={{ uri: photo.uri }}
-                style={StyleSheet.absoluteFillObject}
+                style={[styles.fallbackImage, { aspectRatio: previewAspect }]}
                 resizeMode="contain"
                 onLoad={onImageLoad}
               />
@@ -382,7 +400,7 @@ export function ImageCropEditor({
         <Pressable
           style={[styles.primaryBtn, busy && styles.primaryBtnDisabled]}
           onPress={() => void handleConfirm()}
-          disabled={busy || !crop}
+          disabled={busy}
           testID="scanner-crop-confirm">
           {busy ? (
             <ActivityIndicator color={theme.colors.onAccent} />
@@ -396,6 +414,7 @@ export function ImageCropEditor({
         <Text style={styles.cancelBtnText}>{cancelLabel}</Text>
       </Pressable>
     </View>
+    </Modal>
   );
 }
 
@@ -405,6 +424,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
       backgroundColor: colors.overlay,
       paddingBottom: 32,
+    },
+    fallbackPreview: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    fallbackImage: {
+      width: '100%',
+      maxHeight: '100%',
     },
     topBar: {
       flexDirection: 'row',
@@ -430,6 +458,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     stage: {
       flex: 1,
+      minHeight: 280,
       marginHorizontal: 12,
       borderRadius: 8,
       backgroundColor: '#000',

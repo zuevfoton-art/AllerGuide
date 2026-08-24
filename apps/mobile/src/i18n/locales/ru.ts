@@ -954,6 +954,7 @@ const ru: LocaleMessages = {
     conditionHistory: {
       title: 'Когда появилась аллергия?',
       hint: 'Укажите примерный период дебюта для каждого типа. Можно пропустить отдельные поля.',
+      questionProgress: '{{condition}} · вопрос {{current}} из {{total}}',
       empty: 'Сначала выберите типы аллергии на предыдущем шаге.',
       onsetLabel: 'Когда впервые проявилось',
       onsetAgeLabel: 'Возраст дебюта (лет)',

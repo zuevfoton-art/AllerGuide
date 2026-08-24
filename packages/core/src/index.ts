@@ -28,6 +28,7 @@ export * from './condition-option-selections';
 export * from './profile-symptom-baseline';
 
 export * from './condition-history';
+export * from './condition-history-questions';
 export * from './clinical-phenotypes';
 export * from './expert-content';
 export * from './adair-catalog';
