@@ -56,6 +56,7 @@ describe('medicine routes', () => {
     process.env.RATE_LIMIT_DISABLED = 'true';
     process.env.SCAN_REQUIRE_AUTH = 'false';
     delete process.env.DATABASE_URL;
+    delete process.env.MEDICINE_WRITE_KEY;
     vi.clearAllMocks();
     const vision = await import('../services/llm-dish-vision-provider');
     vi.mocked(vision.medicineVisionConfigured).mockReturnValue(false);
@@ -116,8 +117,66 @@ describe('medicine routes', () => {
     expect(response.body.medicine.strength).toBe('200 мг');
   });
 
+  it('rejects a catalog write without a token or write key', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app).post('/api/medicines').send({ name: 'Нурофен' });
+
+    expect(response.status).toBe(401);
+    expect(store.upsertMedicineCard).not.toHaveBeenCalled();
+  });
+
+  it('rejects a catalog write when the write key does not match', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    process.env.MEDICINE_WRITE_KEY = 'seed-secret';
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .post('/api/medicines')
+      .set('x-medicine-write-key', 'wrong')
+      .send({ name: 'Нурофен' });
+
+    expect(response.status).toBe(401);
+  });
+
+  it('accepts a catalog write from an authenticated device', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    vi.mocked(store.upsertMedicineCard).mockResolvedValueOnce({
+      id: 'med-1',
+      normalizedName: 'нурофен',
+      ...catalogHit,
+      source: 'manual',
+      recognitions: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.mocked(store.medicineRowToCard).mockReturnValueOnce({ ...catalogHit, source: 'catalog' });
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .post('/api/medicines')
+      .set('authorization', 'Bearer mobile-jwt')
+      .send({ name: 'Нурофен', strength: '200 мг' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.ok).toBe(true);
+    expect(store.upsertMedicineCard).toHaveBeenCalled();
+  });
+
   it('remembers a typed medicine into the catalog', async () => {
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    process.env.MEDICINE_WRITE_KEY = 'seed-secret';
     const store = await import('../services/medicine-catalog-store');
     vi.mocked(store.upsertMedicineCard).mockResolvedValueOnce({
       id: 'med-1',
@@ -137,11 +196,14 @@ describe('medicine routes', () => {
     app.use(express.json());
     registerMedicineRoutes(app);
 
-    const response = await request(app).post('/api/medicines').send({
-      name: 'Нурофен',
-      strength: '200 мг',
-      form: 'таблетки',
-    });
+    const response = await request(app)
+      .post('/api/medicines')
+      .set('x-medicine-write-key', 'seed-secret')
+      .send({
+        name: 'Нурофен',
+        strength: '200 мг',
+        form: 'таблетки',
+      });
 
     expect(response.status).toBe(200);
     expect(response.body.ok).toBe(true);
@@ -153,11 +215,15 @@ describe('medicine routes', () => {
 
   it('rejects remember without a name', async () => {
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    process.env.MEDICINE_WRITE_KEY = 'seed-secret';
     const app = express();
     app.use(express.json());
     registerMedicineRoutes(app);
 
-    const response = await request(app).post('/api/medicines').send({ strength: '10 мг' });
+    const response = await request(app)
+      .post('/api/medicines')
+      .set('x-medicine-write-key', 'seed-secret')
+      .send({ strength: '10 мг' });
     expect(response.status).toBe(400);
   });
 
