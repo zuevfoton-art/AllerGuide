@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — A-Claro screen mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_tokens.css" />
+  <link rel="stylesheet" href="_phone-frame.css" />
+  <style>
+    .skel {
+      height: 12px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--mint), var(--foam), var(--mint));
+      background-size: 200% 100%;
+      margin-bottom: 8px;
+    }
+    .skel.lg { height: 28px; width: 40%; }
+    .skel.md { width: 70%; }
+    .skel.sm { width: 55%; }
+  </style>
+</head>
+<body>
+  <header class="page-meta">
+    <div>
+      <h1>Главная</h1>
+      <p>As-is · <code>app/(tabs)/home.tsx</code> · <a href="index.html">← оглавление</a></p>
+      <div class="state-switch" role="group" aria-label="Состояние макета">
+        <button type="button" class="active" data-show="default">default</button>
+        <button type="button" data-show="loading">loading</button>
+      </div>
+    </div>
+    <div class="meta-badges">
+      <span class="badge">route <code>/(tabs)/home</code></span>
+      <span class="badge"><code>BrandLogo</code> + hero</span>
+    </div>
+  </header>
+
+  <div class="device-wrap">
+    <div class="phone" data-component="Screen">
+      <div class="notch" aria-hidden="true"></div>
+      <div class="status-bar"><span>9:41</span><span>LTE</span></div>
+
+      <div class="screen-body" data-state="default" id="state-default">
+        <div class="screen-scroll">
+          <div class="header-row" data-component="TopBar">
+            <div>
+              <div class="brand-wordmark" data-component="BrandLogo">A-Claro</div>
+              <div class="brand-tagline">Аллергия. Ясно.</div>
+            </div>
+            <div class="header-actions">
+              <div class="icon-btn" data-component="ProfileHeaderButton">👤</div>
+              <div class="icon-btn" style="color:var(--danger);border-color:var(--danger-border);background:var(--danger-light);" title="SOS">!</div>
+            </div>
+          </div>
+
+          <div class="hero-calm" data-component="HeroToday">
+            <h2 class="screen-title" style="font-size:24px;">Сегодня</h2>
+            <p class="screen-subtitle">29 июля · Профиль: Маша</p>
+          </div>
+
+          <div class="profile-switcher" data-component="ProfileSwitcher">
+            <div class="profile-pill active">Маша</div>
+            <div class="profile-pill">Папа</div>
+          </div>
+
+          <div class="glass-card calm" data-component="WellnessSummaryCard">
+            <div class="row" style="margin-bottom:10px;">
+              <div class="card-title" style="margin:0;">Сводка самочувствия</div>
+              <span class="chip success">стабильно</span>
+            </div>
+            <div class="row" style="align-items:flex-end;margin-bottom:10px;">
+              <div class="score">78 <span>/ 100</span></div>
+              <span class="chip">уверенность · средняя</span>
+            </div>
+            <p class="muted" style="margin-bottom:10px;">Среда: умеренная нагрузка пыльцы. Следите за пиковым потоком.</p>
+            <div class="list-row" style="border-top:1px solid var(--calm-mist);padding-left:0;padding-right:0;">
+              <div class="body"><div class="title">Сон</div><div class="sub">без пробуждений</div></div>
+              <span class="muted">+8</span>
+            </div>
+            <div class="list-row" style="padding-left:0;padding-right:0;">
+              <div class="body"><div class="title">Симптомы</div><div class="sub">лёгкий ринит</div></div>
+              <span class="muted">−6</span>
+            </div>
+          </div>
+
+          <div class="glass-card padded-none" data-component="DiaryShortcutsCard">
+            <div class="row" style="padding:12px 14px 4px;">
+              <div class="card-title" style="margin:0;">Дневник</div>
+              <button type="button" class="btn btn-sm btn-ghost">Больше</button>
+            </div>
+            <div class="list-row">
+              <div class="icon">✚</div>
+              <div class="body"><div class="title">Симптомы</div><div class="sub">как чувствуете себя</div></div>
+              <button type="button" class="btn btn-sm btn-accent">+ Запись</button>
+            </div>
+            <div class="list-row">
+              <div class="icon">🍽</div>
+              <div class="body"><div class="title">Еда</div><div class="sub">приём пищи</div></div>
+              <button type="button" class="btn btn-sm btn-accent">+ Запись</button>
+            </div>
+            <div class="list-row">
+              <div class="icon">💊</div>
+              <div class="body"><div class="title">Лекарства</div><div class="sub">приём терапии</div></div>
+              <button type="button" class="btn btn-sm btn-accent">+ Запись</button>
+            </div>
+          </div>
+
+          <div class="glass-card" data-component="ExpertRow" style="padding:12px 14px;">
+            <div class="row">
+              <div>
+                <div style="font-weight:700;color:var(--head);">Экспертные материалы</div>
+                <p class="muted">Статьи и памятки</p>
+              </div>
+              <span class="muted">›</span>
+            </div>
+          </div>
+
+          <p class="disclaimer" data-component="Disclaimer">Информация носит справочный характер и не заменяет врача.</p>
+        </div>
+      </div>
+
+      <div class="screen-body" data-state="loading" id="state-loading">
+        <div class="screen-scroll">
+          <div class="header-row">
+            <div>
+              <div class="brand-wordmark">A-Claro</div>
+              <div class="brand-tagline">Аллергия. Ясно.</div>
+            </div>
+            <div class="header-actions">
+              <div class="icon-btn">👤</div>
+              <div class="icon-btn" style="color:var(--danger);">!</div>
+            </div>
+          </div>
+          <div class="hero-calm">
+            <h2 class="screen-title" style="font-size:24px;">Сегодня</h2>
+            <p class="screen-subtitle">Загрузка…</p>
+          </div>
+          <div class="glass-card calm" data-component="Skeleton">
+            <div class="skel lg"></div>
+            <div class="skel md"></div>
+            <div class="skel sm"></div>
+            <div class="skel md"></div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="tabbar" data-component="TabBar" aria-label="Вкладки">
+        <div class="tab active"><span class="glyph">⌂</span>Главная</div>
+        <div class="tab"><span class="glyph">▤</span>Дневник</div>
+        <div class="tab"><span class="glyph">⌕</span>Сканер</div>
+        <div class="tab"><span class="glyph">▣</span>Маркет</div>
+        <div class="tab"><span class="glyph">◎</span>Карта</div>
+        <div class="tab sos"><span class="glyph">!</span>SOS</div>
+      </nav>
+    </div>
+  </div>
+
+  <p class="handoff-note">
+    Handoff: wellness — <code>Skeleton</code> при загрузке; empty profile — «Выберите профиль».
+    Код: <code>app/(tabs)/home.tsx</code>.
+  </p>
+
+  <script>
+    const buttons = document.querySelectorAll(".state-switch button");
+    const states = document.querySelectorAll("[data-state]");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const id = btn.getAttribute("data-show");
+        states.forEach((el) => {
+          el.classList.toggle("visible", el.getAttribute("data-state") === id);
+        });
+      });
+    });
+    document.getElementById("state-default").classList.add("visible");
+  </script>
+</body>
+</html>
