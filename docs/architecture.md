@@ -492,7 +492,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 | `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
-| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=`, `POST /api/medicines` |
+| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=`, `POST /api/medicines`, `DELETE /api/medicines/:name` |
 | `routes/scan.ts` | `POST /api/scan` |
 | `routes/scan-intent.ts` | `POST /api/scan/intent` |
 | `routes/ocr.ts` | `POST /api/ocr` (Yandex Vision) |
@@ -529,6 +529,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 - **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префиксные совпадения раньше contains; дневник подставляет их как автодополнение названия.
 - **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные). Запись всегда требует авторизации: mobile JWT (устройство) либо `x-medicine-write-key` = `MEDICINE_WRITE_KEY` (server-to-server, сид). Без этого — 401; чтение и `recognize` остаются открытыми.
 - **Сид каталога:** `pnpm --filter api db:seed-medicines` — датасет `apps/api/data/medicines/` заливается через `POST /api/medicines` (`API_BASE_URL` + `MEDICINE_WRITE_KEY`), идемпотентно.
+- **Curator cleanup:** `DELETE /api/medicines/:name` (та же авторизация) удаляет ошибочную/тестовую карточку по нормализованному имени.
 - **Клиент:** `EXPO_PUBLIC_MEDICINE_DB` включает VL/фото; поиск и remember идут при заданном `EXPO_PUBLIC_API_URL`. При флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance` + ранее сохранённые записи дневника. Demo-карточка только для фото без OCR, не для голоса.
 
 ### Каталог продуктов
