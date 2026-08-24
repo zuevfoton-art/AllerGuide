@@ -29,6 +29,10 @@ import {
 } from '@/src/services/diary-service';
 import { listDiaryAttachmentsForEntries } from '@/src/services/diary-attachment-service';
 import {
+  rememberMedicineCard,
+  rememberMedicineFromDiaryAnswers,
+} from '@/src/services/medicine-suggest-service';
+import {
   buildClinicalScaleEditorState,
   buildDiarySectionEditorState,
 } from '@/src/services/diary-section-service';
@@ -262,6 +266,7 @@ export default function DiaryScreen() {
     ageUsage: MedicineAgeResolution | null;
     photoUri?: string;
   }) => {
+    void rememberMedicineCard(input.card);
     await openSection('Лекарство', {
       recognizedCard: input.card,
       photoUri: input.photoUri,
@@ -329,6 +334,11 @@ export default function DiaryScreen() {
   const handleCreate = async (entries: { type: string; details: string; photoUris?: string[] }[]) => {
     const profileId = activeProfileId ?? getOrLoadActiveProfileId();
     if (!profileId) return;
+    for (const entry of entries) {
+      if (entry.type !== 'Лекарство') continue;
+      const answers = getDiaryEntryAnswers(entry.type, entry.details);
+      if (answers) void rememberMedicineFromDiaryAnswers(answers);
+    }
     const results = await addDiaryEntries(profileId, entries);
     const failed = results.find((result) => !result.ok);
     if (failed && !failed.ok) {
@@ -346,6 +356,10 @@ export default function DiaryScreen() {
     details: string,
     photoUris?: string[],
   ) => {
+    if (type === 'Лекарство') {
+      const answers = getDiaryEntryAnswers(type, details);
+      if (answers) void rememberMedicineFromDiaryAnswers(answers);
+    }
     const result = await updateDiaryEntry(entry.id, { type, details, photoUris });
     if (!result.ok) {
       logCaughtError('DiaryScreen.handleUpdate', new Error(result.code));
@@ -446,6 +460,8 @@ export default function DiaryScreen() {
           initialAnswersBySection={initialAnswers ? { [section.type]: initialAnswers } : undefined}
           allowSkipSection={false}
           drugIntolerances={drugIntolerances}
+          ageYears={getProfileAgeYears(activeProfile?.birthYear)}
+          profileId={activeProfileId}
           planPersonalBestPef={planPersonalBestPef}
           profileAllergiesJson={activeProfile?.allergies ?? '[]'}
           autoMetadata={autoMetadata}

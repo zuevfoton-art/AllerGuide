@@ -302,6 +302,7 @@ export type LocaleMessages = {
     dishConflicts: string;
     dishOffLoading: string;
     dishOffEnriched: string;
+    medicineSearching: string;
   };
   medicineScan: {
     title: string;

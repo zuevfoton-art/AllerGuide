@@ -88,7 +88,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Scanner** | `(tabs)/scanner.tsx` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service`, `diary-dish-recognition-service` | core `diary*`, `diary-wizard-route`, `dish-components` |
-| **Medicine photo / voice** | `MedicinePhotoStep` in diary | `medicine-recognition-service`, `medicines-api`, `voice-dictation-service` | core `medicine-catalog`, `profile-age`; ai `medicine-vision`, `medicine-label` (`parseMedicineVoiceUtterance`); API `medicines.ts` |
+| **Medicine photo / voice** | `MedicinePhotoStep` + `MedicineNameField` in diary | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service` | core `medicine-catalog`, `profile-age`; ai `medicine-vision`, `medicine-label` (`parseMedicineVoiceUtterance`); API `medicines.ts` |
 | **Nutrition photo / manual** | `NutritionCaptureStep` in diary | `diary-dish-recognition-service` (`scanFromOcr` + `lookupDishIngredientsForScan`) | core `dish-components`, `diary-wizard-route` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
@@ -156,7 +156,7 @@ src/modules/marketplace/
 |--------|-------|
 | Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors` |
 | Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service` |
-| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicines-api` |
+| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
 | Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scanner-photo-*`, `scanner-dish-*`, `dish-off-enrichment-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service` |
 | Home | `home-insights-service`, `wellness-service` |
 | SOS / reports | `sos-service`, `sos-passport-service`, `doctor-report-service` |
@@ -183,7 +183,7 @@ src/modules/marketplace/
 
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
-- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `NutritionCaptureStep`, `diary/*`
+- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `diary/*`
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
 - **Folders:** `brand/`, `onboarding/`, `profile-setup/`
@@ -212,7 +212,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
 | `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
-| `medicines.ts` | Medicine recognize + catalog search (`AI_MEDICINE_VISION_ENABLED`) |
+| `medicines.ts` | Medicine recognize + catalog search + remember (`AI_MEDICINE_VISION_ENABLED` for VL) |
 | `market.ts` | Market catalog + Yandex resolve / retired draft-search |
 | `pollen.ts` | Google pollen heatmap proxy |
 | `alias-feedback.ts` | Crowdsourced aliases |
