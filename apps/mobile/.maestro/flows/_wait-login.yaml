@@ -1,9 +1,12 @@
-# First painted auth chrome (toggle sits above the phone field / hero fold).
-# Do not wait for auth-login-input — it can sit below AuthHero on Pixel 6.
+# Hero title sits at the top of the login ScrollView — Maestro sees Text
+# testIDs reliably. The phone/email Pressable toggle is flaky as a first wait
+# (nightlies after #275 timed out on auth-mode-phone while #273 already
+# reached register via auth-login-input).
 appId: com.aclearo.app
 ---
-- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 15000
 - extendedWaitUntil:
     visible:
-      id: auth-mode-phone
+      id: auth-hero-title
     timeout: 120000
