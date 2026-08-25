@@ -35,8 +35,11 @@ CREATE TABLE IF NOT EXISTS catalog.cross_reactions (
 CREATE TABLE IF NOT EXISTS catalog.products (
     barcode       varchar(64) PRIMARY KEY,
     name          text NOT NULL,
+    brand         varchar(255) NOT NULL DEFAULT '',
+    image_url     text NOT NULL DEFAULT '',
     ingredients   text NOT NULL DEFAULT '',
     allergen_tags jsonb NOT NULL DEFAULT '[]'::jsonb,   -- canonical RU allergen names
+    trace_tags    jsonb NOT NULL DEFAULT '[]'::jsonb,
     source        varchar(32) NOT NULL DEFAULT 'manual',-- food-allergy-db | openfoodfacts | manual
     updated_at    timestamptz NOT NULL DEFAULT now()
 );
