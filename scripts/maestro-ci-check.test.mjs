@@ -31,12 +31,15 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /app-release\.apk/);
     assert.match(runner, /pm grant/);
     assert.match(runner, /adb logcat/);
+    assert.match(runner, /screencap/);
   });
 
-  it('waits for auth chrome above the fold, then scrolls+hides IME for fields', () => {
+  it('waits for the auth hero title, then scrolls+hides IME for fields', () => {
     const waitLogin = read('apps/mobile/.maestro/flows/_wait-login.yaml');
-    assert.match(waitLogin, /id: auth-mode-phone/);
+    assert.match(waitLogin, /id: auth-hero-title/);
     assert.match(waitLogin, /timeout: 120000/);
+    const hero = read('apps/mobile/src/components/AuthForm.tsx');
+    assert.match(hero, /testID="auth-hero-title"/);
 
     const fill = read('apps/mobile/.maestro/flows/_fill-by-id.yaml');
     assert.match(fill, /hideKeyboard/);

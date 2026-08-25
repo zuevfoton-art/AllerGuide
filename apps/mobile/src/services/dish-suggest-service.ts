@@ -10,18 +10,30 @@ import { getApiBaseUrl } from '@/src/services/api-client';
 
 const SEARCH_LIMIT = 8;
 
+const DISH_SEARCH_TIMEOUT_MS = 2500;
+
 async function searchDishesFromApi(query: string): Promise<DishSuggestion[]> {
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl) return [];
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DISH_SEARCH_TIMEOUT_MS);
   try {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/dishes/search?q=${encodeURIComponent(query)}`,
+      `${baseUrl}/api/dishes/search?q=${encodeURIComponent(query)}`,
+      { signal: controller.signal },
     );
     if (!response.ok) return [];
     const data = (await response.json()) as { ok?: boolean; dishes?: DishSuggestion[] };
     if (!data.ok || !Array.isArray(data.dishes)) return [];
     return data.dishes;
   } catch (error) {
-    logCaughtError('searchDishesFromApi', error, { extra: { query } });
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      logCaughtError('searchDishesFromApi', error, { extra: { query } });
+    }
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -42,12 +54,13 @@ function mergeSuggestions(groups: DishSuggestion[][]): DishSuggestion[] {
 
 export async function searchDishSuggestions(query: string): Promise<DishSuggestion[]> {
   const local = rankLocalDishSuggestions(query, SEARCH_LIMIT);
+  // Catalog already answered — skip Open Food Facts so typeahead cannot hang.
   const [apiDishes, catalogProducts, offProducts] = await Promise.all([
     searchDishesFromApi(query),
     PRODUCT_DB_ENABLED
       ? searchProductsFromCatalog(query).catch(() => [])
       : Promise.resolve([]),
-    searchProductsByName(query, 6).catch(() => []),
+    local.length > 0 ? Promise.resolve([]) : searchProductsByName(query, 6).catch(() => []),
   ]);
 
   const fromCatalog: DishSuggestion[] = catalogProducts.map((product) => ({

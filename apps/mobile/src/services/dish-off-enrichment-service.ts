@@ -111,6 +111,22 @@ export async function enrichDishFromOpenFoods(
 
   const recipe = findDishRecipe(food);
   const localComponents = resolveDishComponents(food);
+
+  // Known catalog dishes already have a recipe. Waiting on OFF/catalog search
+  // would leave the diary spinner running after the composition is on screen.
+  if (recipe && localComponents.length) {
+    return {
+      components: localComponents,
+      dishId: recipe.id,
+      dishName: recipe.names[0],
+      source: 'local',
+      ingredients: localComponents.map((item) => item.nameRu).join(', '),
+      allergenTags: localComponents
+        .map((item) => item.allergenId)
+        .filter((id): id is string => Boolean(id)),
+    };
+  }
+
   const hits = await searchProducts(food);
   const best = hits[0];
   const bestScore = best ? scoreProduct(food, best) : 0;

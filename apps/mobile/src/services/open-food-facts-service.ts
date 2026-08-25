@@ -18,6 +18,7 @@ const PRODUCT_FIELDS =
   'code,product_name,product_name_ru,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags,brands,image_front_small_url';
 
 const OFF_USER_AGENT = 'A-Claro/1.0 (support@aclearo.com)';
+const OFF_SEARCH_TIMEOUT_MS = 4000;
 
 const OFF_FAMILY_DATASETS: { source: OffFamilySource; url: string }[] = [
   { source: 'openfoodfacts', url: 'https://world.openfoodfacts.org' },
@@ -68,13 +69,22 @@ function normalizeOffProduct(
   };
 }
 
+async function fetchWithTimeout(url: string): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), OFF_SEARCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { headers: headers(), signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function fetchFromDataset(
   barcode: string,
   dataset: (typeof OFF_FAMILY_DATASETS)[number],
 ): Promise<OpenFoodFactsProduct | null> {
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${dataset.url}/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`,
-    { headers: headers() },
   );
 
   if (!response.ok) return null;
@@ -115,9 +125,7 @@ async function searchDatasetByName(
     fields: PRODUCT_FIELDS,
   });
 
-  const response = await fetch(`${dataset.url}/cgi/search.pl?${params}`, {
-    headers: headers(),
-  });
+  const response = await fetchWithTimeout(`${dataset.url}/cgi/search.pl?${params}`);
   if (!response.ok) return [];
 
   const data = (await response.json()) as { products?: OffProductPayload[] };
@@ -158,7 +166,9 @@ export async function searchProductsByName(
     }
     return results;
   } catch (error) {
-    logCaughtError('searchProductsByName', error, { extra: { query: term } });
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      logCaughtError('searchProductsByName', error, { extra: { query: term } });
+    }
     return [];
   }
 }

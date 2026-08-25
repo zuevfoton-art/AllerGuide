@@ -114,8 +114,8 @@ function checkMaestroFlows() {
   }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
-  if (!waitLogin.includes('auth-mode-phone')) {
-    failures.push('_wait-login.yaml must wait for auth-mode-phone (above the hero fold)');
+  if (!waitLogin.includes('auth-hero-title')) {
+    failures.push('_wait-login.yaml must wait for auth-hero-title (above the fold)');
   }
 
   const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');

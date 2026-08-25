@@ -30,6 +30,9 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
     <View style={styles.toggleRow}>
       <Pressable
         testID="auth-mode-phone"
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={t('common.phone')}
         style={[styles.toggleBtn, loginType === 'phone' && styles.toggleActive]}
         onPress={() => onChange('phone')}>
         <Ionicons
@@ -41,6 +44,9 @@ export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
       </Pressable>
       <Pressable
         testID="auth-mode-email"
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={t('common.email')}
         style={[styles.toggleBtn, styles.toggleBtnLast, loginType === 'email' && styles.toggleActive]}
         onPress={() => onChange('email')}>
         <Ionicons
@@ -191,10 +197,12 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle: string 
   const { t } = useTranslation();
 
   return (
-    <View style={styles.hero}>
+    <View style={styles.hero} testID="auth-hero">
       <BrandLogo size={56} showWordmark showEndorser />
       <Text style={styles.heroTagline}>{t('brand.slogan')}</Text>
-      <Text style={styles.heroTitle}>{title}</Text>
+      <Text style={styles.heroTitle} testID="auth-hero-title">
+        {title}
+      </Text>
       <Text style={styles.heroSubtitle}>{subtitle}</Text>
     </View>
   );
