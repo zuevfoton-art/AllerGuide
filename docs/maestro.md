@@ -140,7 +140,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 |---------|---------|
 | `auth-register-link` не виден (~45s) | Поставлен `assembleDebug` без Metro. Нужен `./scripts/maestro-build-apk.sh` → `app-release.apk` |
 | `auth-confirm-password-input` not found | Клавиатура перекрывает поле. Bootstrap скроллит и вызывает `hideKeyboard` (`_fill-by-id.yaml`) |
-| `auth-login-input` не виден на login | Ждать `auth-mode-phone` (выше fold), не сам input. Permissions: `maestro-run-emulator.sh` |
+| `auth-mode-phone` не виден 120s | Pressable-toggle флапает в Maestro. Ждать `auth-hero-title`. Артефакты: `*-screen.png`, `*-logcat.txt` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |

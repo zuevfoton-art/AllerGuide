@@ -86,6 +86,8 @@ jobs:
             maestro-offline-report.xml
             maestro-offline-debug
             maestro-offline-logcat.txt
+            maestro-offline-screen.png
+            maestro-offline-ui.xml
           if-no-files-found: ignore
 
   maestro-staging:
@@ -174,6 +176,8 @@ jobs:
             maestro-staging-report.xml
             maestro-staging-debug
             maestro-staging-logcat.txt
+            maestro-staging-screen.png
+            maestro-staging-ui.xml
           if-no-files-found: ignore
 
       - name: API log on failure
