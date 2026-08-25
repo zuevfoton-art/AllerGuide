@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   applyDishBreakdownToAnswers,
   buildDishBreakdown,
+  findDishRecipe,
   buildIntoleranceAlert,
   computePefPercentOfBest,
   computePefZone,
@@ -146,8 +147,14 @@ export function DiaryWizard({
     1;
   const overallStepsTotal = sections.reduce((sum, item) => sum + item.steps.length, 0);
   const isLastStep = sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1;
+  const hasLocalDishPreview = Boolean(
+    sectionAnswers.foodDishName && sectionAnswers.foodComponentsDef,
+  );
   const waitingForDishRecognition =
-    section.type === 'Питание' && step.id === 'food' && offEnriching;
+    section.type === 'Питание' &&
+    step.id === 'food' &&
+    offEnriching &&
+    !hasLocalDishPreview;
   const canAdvanceCurrentStep =
     !waitingForDishRecognition &&
     (section.type === 'Шкала' && isLastStep
@@ -182,7 +189,8 @@ export function DiaryWizard({
 
     let cancelled = false;
     const timer = setTimeout(() => {
-      setOffEnriching(true);
+      // Catalog match is already applied synchronously — do not block Next on OFF.
+      if (!findDishRecipe(food)) setOffEnriching(true);
       void recognizeDiaryDish(food)
         .then((enrichment) => {
           if (cancelled || !enrichment) return;
@@ -515,7 +523,7 @@ export function DiaryWizard({
                 placeholder={step.placeholder}
                 label={step.label}
                 suggestions={dishSuggestions}
-                loading={dishSearching || offEnriching}
+                loading={dishSearching && !hasLocalDishPreview}
                 onChange={(value) => setAnswer('food', value)}
                 onSelect={selectDishSuggestion}
               />
@@ -535,7 +543,7 @@ export function DiaryWizard({
               onChange={(value) => setAnswer(step.id, value)}
             />
           )}
-          {section.type === 'Питание' && step.id === 'food' && offEnriching ? (
+          {section.type === 'Питание' && step.id === 'food' && offEnriching && !hasLocalDishPreview ? (
             <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
               <ActivityIndicator size="small" color={theme.colors.accent} />
               <Text style={styles.hint}>{t('diaryWizard.dishOffLoading')}</Text>

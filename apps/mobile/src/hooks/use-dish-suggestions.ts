@@ -24,13 +24,15 @@ export function useDishSuggestions(
       return;
     }
 
-    setSuggestions(rankLocalDishSuggestions(query));
+    const localHits = rankLocalDishSuggestions(query);
+    setSuggestions(localHits);
 
     const nextRequestId = requestId.current + 1;
     requestId.current = nextRequestId;
     let cancelled = false;
     const timer = setTimeout(() => {
-      setSearching(true);
+      // Local catalog hits are enough to type — don't block the field on OFF/API.
+      if (localHits.length === 0) setSearching(true);
       void searchDishSuggestions(query)
         .then((hits) => {
           if (cancelled || requestId.current !== nextRequestId) return;
