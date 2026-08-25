@@ -4,10 +4,7 @@ appId: com.aclearo.app
 - launchApp:
     clearState: true
 - runFlow: _wait-login.yaml
-- runFlow:
-    file: _tap-by-id.yaml
-    env:
-      FIELD_ID: auth-register-link
+- runFlow: _tap-register.yaml
 - runFlow:
     file: _tap-by-id.yaml
     env:

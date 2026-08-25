@@ -29,6 +29,7 @@ apps/mobile/.maestro/
     staging-credentials.js
   flows/
     _offline-bootstrap.yaml
+    _tap-register.yaml             # Text testID + «Зарегистрироваться»
     onboarding-smoke.yaml … settings-smoke.yaml
     sos-no-profile-smoke.yaml      # SOS call bar after last profile is removed
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
@@ -119,7 +120,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 
 Расписание: `0 3 * * *` (03:00 UTC). Если прогонов нет — workflow, скорее всего, **disabled** в Actions UI. Включить: **Actions → Maestro Nightly → Enable workflow** или `gh workflow enable maestro-nightly.yml`, затем **Run workflow**.
 
-При падении — артефакты JUnit + `--debug-output` (`maestro-offline-report`, `maestro-staging-report`). Опционально: настроить GitHub notifications / Slack webhook на failed workflow.
+При падении — артефакты JUnit + `--debug-output` (`maestro-offline-report`, `maestro-staging-report`), плюс `*-during.png` / `*-during-focus.txt` (кадр до выхода Maestro) и `*-screen.png` / `*-ui.xml`. Опционально: настроить GitHub notifications / Slack webhook на failed workflow.
 
 ---
 
@@ -138,9 +139,11 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 
 | Симптом | Решение |
 |---------|---------|
-| `auth-register-link` не виден (~45s) | Поставлен `assembleDebug` без Metro. Нужен `./scripts/maestro-build-apk.sh` → `app-release.apk` |
+| `auth-register-link` не виден (~45s) | Раньше: `assembleDebug` без Metro. Теперь: Pressable testID флапает — `_tap-register.yaml` ждёт Text `auth-register-link` и копию «Зарегистрироваться», пока герой ещё «Вход» |
 | `auth-confirm-password-input` not found | Клавиатура перекрывает поле. Bootstrap скроллит и вызывает `hideKeyboard` (`_fill-by-id.yaml`) |
-| `auth-mode-phone` не виден 120s | Pressable-toggle флапает в Maestro. Ждать `auth-hero-title`. Артефакты: `*-screen.png`, `*-logcat.txt` |
+| `auth-hero-title` не виден 120s + ANR Pixel Launcher | Не греть через `monkey`. `am start -W -n com.aclearo.app/.MainActivity` и `dismiss_anr` (Wait / Back) |
+| Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
+| `auth-mode-phone` не виден 120s | Pressable-toggle флапает в Maestro. Ждать `auth-hero-title`. Артефакты: `*-screen.png`, `*-during.png`, `*-logcat.txt` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |

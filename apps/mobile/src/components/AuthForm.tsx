@@ -172,9 +172,16 @@ export function AuthLink({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Pressable testID={testID} style={styles.linkWrap} onPress={onPress} hitSlop={12}>
-      <Text style={styles.linkText}>
-        {text} <Text style={styles.linkAccent}>{linkText}</Text>
+    <Pressable
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={`${text} ${linkText}`}
+      style={styles.linkWrap}
+      onPress={onPress}
+      hitSlop={12}>
+      <Text testID={testID} style={styles.linkText}>
+        {text}{' '}
+        <Text style={styles.linkAccent}>{linkText}</Text>
       </Text>
     </Pressable>
   );

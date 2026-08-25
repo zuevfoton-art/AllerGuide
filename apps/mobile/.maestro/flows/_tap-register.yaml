@@ -1,0 +1,28 @@
+# Register link is a Pressable; Maestro 2.8 often misses that testID
+# (same class as auth-mode-phone). Prefer the accent Text testID, then
+# the RU link copy. Do not tap "Зарегистрироваться" after navigation —
+# the register submit button uses the same string.
+appId: com.aclearo.app
+---
+- hideKeyboard
+- runFlow:
+    when:
+      visible:
+        id: auth-register-link
+    commands:
+      - tapOn:
+          id: auth-register-link
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    when:
+      visible:
+        text: "Нет аккаунта?"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Зарегистрироваться"
+          direction: DOWN
+          timeout: 20000
+      - tapOn:
+          text: "Зарегистрироваться"
