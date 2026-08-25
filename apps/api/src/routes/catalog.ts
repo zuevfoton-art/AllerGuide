@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from 'express';
-import { eq, ilike, sql } from 'drizzle-orm';
+import { and, eq, ilike, ne, sql } from 'drizzle-orm';
 import { getAllAllergens } from '@allerguide/core';
 import { db, readDb } from '../db';
 import { allergens, products, type ProductRow } from '../db/catalog-schema';
@@ -9,6 +9,7 @@ import {
   type NormalizedProduct,
 } from '../services/open-food-facts';
 import { logCaughtError } from '../lib/log-caught-error';
+import { hasStrongLocalProductMatch, rankLocalCatalogProducts } from '../lib/product-search-rank';
 
 function databaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
@@ -35,6 +36,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
       allergenTags: product.allergenTags,
       traceTags: product.traceTags,
       source: product.source,
+      category: product.category,
     })
     .onConflictDoUpdate({
       target: products.barcode,
@@ -46,6 +48,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
         allergenTags: sql`excluded.allergen_tags`,
         traceTags: sql`excluded.trace_tags`,
         source: sql`excluded.source`,
+        category: sql`excluded.category`,
         updatedAt: new Date(),
       },
     })
@@ -90,11 +93,12 @@ export function registerCatalogRoutes(app: Express) {
         const local = await readDb
           .select()
           .from(products)
-          .where(ilike(products.name, `%${query}%`))
+          .where(and(ilike(products.name, `%${query}%`), ne(products.source, 'food-allergy-db')))
           .limit(20);
+        const usable = rankLocalCatalogProducts(local, query);
 
-        if (local.length > 0 || !offFallbackEnabled()) {
-          res.json({ ok: true, source: 'cache', count: local.length, products: local });
+        if (hasStrongLocalProductMatch(usable, query) || !offFallbackEnabled()) {
+          res.json({ ok: true, source: 'cache', count: usable.length, products: usable });
           return;
         }
       } else if (!offFallbackEnabled()) {

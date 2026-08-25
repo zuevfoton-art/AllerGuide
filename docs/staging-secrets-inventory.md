@@ -23,6 +23,7 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `YC_FOLDER_ID` / `YC_AI_API_KEY` / `YC_OCR_ENABLED` | Yandex AI | API key ≠ authorized key JSON |
 | `YC_SCAN_INTENT_LLM` | GPT intent `/api/scan/intent` | `true` (+ `AI_SCAN_ENABLED`) → health `ycScanIntentLlm` |
 | `YC_SEARCH_ENABLED` | Search `/api/search/ingredients` | `true` (+ `YC_AI_*`) → health `ycSearch` |
+| `DISH_LLM_ENABLED` | LLM resolve `/api/dishes/resolve` | `true` (+ `AI_SCAN_ENABLED`) → health `dishLlm` |
 | `YC_STT_ENABLED` | SpeechKit `/api/stt` | `true` on staging for QA |
 | `YC_GPT_MODEL` | Foundation Models URI suffix | `yandexgpt-lite` (explicit) |
 | `SCAN_DAILY_BUDGET` | LLM scan budget | e.g. `100` |

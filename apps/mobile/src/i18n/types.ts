@@ -302,6 +302,10 @@ export type LocaleMessages = {
     dishConflicts: string;
     dishOffLoading: string;
     dishOffEnriched: string;
+    dishSearching: string;
+    dishSuggestionLocal: string;
+    dishSuggestionCatalog: string;
+    dishPreviewTitle: string;
     medicineSearching: string;
   };
   medicineScan: {
@@ -480,6 +484,8 @@ export type LocaleMessages = {
     confirmSafeMessage: string;
     confirmSafeAction: string;
     ingredientsLabel: string;
+    irritantsLabel: string;
+    dishSearching: string;
     ingredientsShow: string;
     ingredientsHide: string;
     categoryLabel: string;

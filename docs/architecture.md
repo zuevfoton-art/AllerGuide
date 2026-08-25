@@ -259,6 +259,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `YC_OCR_ENABLED` | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
 | `YC_SCAN_INTENT_LLM_ENABLED` | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | LLM intent через `/api/scan/intent` |
 | `YC_SEARCH_ENABLED` | `EXPO_PUBLIC_YC_SEARCH` | Search ingredients через `/api/search/ingredients` |
+| `DISH_LLM_ENABLED` | `EXPO_PUBLIC_DISH_LLM` | LLM resolve блюда через `/api/dishes/resolve` (local/dev **off**; staging **on**) |
 | `YC_STT_ENABLED` | `EXPO_PUBLIC_YC_STT` | SpeechKit STT через `/api/stt` (default off) |
 | `YC_STT_MIC_ENABLED` | `EXPO_PUBLIC_YC_STT` + `EXPO_PUBLIC_YC_STT_MIC` | Cloud mic (`expo-audio` → `/api/stt`); staging on after SDK 54 |
 | `CLOUD_SYNC_ENABLED` | `EXPO_PUBLIC_CLOUD_SYNC` | Облачный бэкап |
@@ -559,6 +560,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 |-------|------|--------|
 | `POST /api/scan/intent` | `YC_SCAN_INTENT_LLM` | классификация OCR-сниппета (label/menu vs visual product) |
 | `POST /api/search/ingredients` | `YC_SEARCH_ENABLED` | Yandex Search API → состав при промахе OFF/каталога (+ cache/budget) |
+| `POST /api/dishes/resolve` | `DISH_LLM_ENABLED` + `AI_SCAN_ENABLED` | LLM-нормализация названия блюда + структурированный состав (local/dev **off**; staging **on**) |
 | `POST /api/stt` | `YC_STT_ENABLED` | SpeechKit STT (Phase 3; default off) |
 
 Доменная логика / нормализация — `@allerguide/ai` (`scan-intent.ts`, `search-ingredients.ts`); HTTP — `routes/scan-intent.ts`, `routes/search-ingredients.ts` + `services/yandex-search-ingredients.ts`.
@@ -636,7 +638,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Types / allergens | `types`, `allergens` (обёртка над `allergen-database`), `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` |
 | Profiles | `profile-allergens`, `allergy-confirmations`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `condition-*`, `clinical-phenotypes` |
 | Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display` |
-| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
+| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components`, `name-matching`, `inci-allergens` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `icd10-reference` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
 | Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
@@ -652,6 +654,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | `ocr.ts` | Нормализация OCR-текста, demo capture |
 | `scan-intent.ts` | Heuristic + нормализация intent (label/menu vs visual) |
 | `search-ingredients.ts` | Нормализация ответа поиска состава |
+| `dish-resolve.ts` | Промпт/парс LLM для названия блюда и типичного состава |
 | `prescription-ocr.ts` | Парсинг текста рецепта / АСИТ |
 
 ### `@allerguide/ui` (`packages/ui/`)
@@ -772,6 +775,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
 | `EXPO_PUBLIC_YC_SEARCH` | `false` | Ingredients search via `/api/search/ingredients` |
+| `EXPO_PUBLIC_DISH_LLM` | `false` (staging `true`) | LLM dish resolve via `/api/dishes/resolve` |
 | `EXPO_PUBLIC_YC_STT` | `false` | SpeechKit STT via `/api/stt` |
 | `EXPO_PUBLIC_YC_STT_MIC` | `false` (staging `true`) | Cloud mic fallback when OS speech unavailable |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` | Encrypted cloud backup |
@@ -801,7 +805,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |
 | `AI_MEDICINE_VISION_ENABLED` | Medicine package vision (`/api/medicines/recognize`) |
 | `YC_OCR_ENABLED` | Vision OCR |
-| `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + SpeechKit STT |
+| `YC_SCAN_INTENT_LLM`, `YC_SEARCH_ENABLED`, `DISH_LLM_ENABLED`, `YC_STT_ENABLED` | Intent + search ingredients + dish LLM resolve + SpeechKit STT |
 | `SCAN_REQUIRE_AUTH`, `SCAN_CACHE_*`, `SCAN_DAILY_BUDGET` | Scan cost controls |
 | `POLLEN_HEATMAP_ENABLED`, `GOOGLE_POLLEN_API_KEY` | Pollen tile + forecast proxy |
 | `MAP_PLACES_ENABLED` (default on), `GOOGLE_PLACES_API_KEY`, `GOOGLE_MAPS_SERVER_API_KEY` | Places API (New) searchNearby proxy |

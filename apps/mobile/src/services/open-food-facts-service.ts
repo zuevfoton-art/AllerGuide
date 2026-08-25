@@ -101,16 +101,13 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
   }
 }
 
-/** Full-text product search against Open Food Facts (cgi/search.pl). */
-export async function searchProductsByName(
+async function searchDatasetByName(
   query: string,
-  pageSize = 8,
+  dataset: (typeof OFF_FAMILY_DATASETS)[number],
+  pageSize: number,
 ): Promise<OpenFoodFactsProduct[]> {
-  const term = query.trim();
-  if (term.length < 2) return [];
-
   const params = new URLSearchParams({
-    search_terms: term,
+    search_terms: query,
     search_simple: '1',
     action: 'process',
     json: '1',
@@ -118,22 +115,46 @@ export async function searchProductsByName(
     fields: PRODUCT_FIELDS,
   });
 
+  const response = await fetch(`${dataset.url}/cgi/search.pl?${params}`, {
+    headers: headers(),
+  });
+  if (!response.ok) return [];
+
+  const data = (await response.json()) as { products?: OffProductPayload[] };
+  if (!Array.isArray(data.products)) return [];
+
+  const seen = new Set<string>();
+  const results: OpenFoodFactsProduct[] = [];
+  for (const product of data.products) {
+    const normalized = normalizeOffProduct(product, dataset.source);
+    if (!normalized || seen.has(normalized.barcode)) continue;
+    seen.add(normalized.barcode);
+    results.push(normalized);
+  }
+  return results;
+}
+
+/** Full-text search across OFF + Open Beauty Facts + Open Products Facts. */
+export async function searchProductsByName(
+  query: string,
+  pageSize = 8,
+): Promise<OpenFoodFactsProduct[]> {
+  const term = query.trim();
+  if (term.length < 2) return [];
+
   try {
-    const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?${params}`, {
-      headers: headers(),
-    });
-    if (!response.ok) return [];
-
-    const data = (await response.json()) as { products?: OffProductPayload[] };
-    if (!Array.isArray(data.products)) return [];
-
+    const perDataset = Math.max(3, Math.ceil(pageSize / OFF_FAMILY_DATASETS.length));
+    const batches = await Promise.all(
+      OFF_FAMILY_DATASETS.map((dataset) => searchDatasetByName(term, dataset, perDataset)),
+    );
     const seen = new Set<string>();
     const results: OpenFoodFactsProduct[] = [];
-    for (const product of data.products) {
-      const normalized = normalizeOffProduct(product, 'openfoodfacts');
-      if (!normalized || seen.has(normalized.barcode)) continue;
-      seen.add(normalized.barcode);
-      results.push(normalized);
+    for (const batch of batches) {
+      for (const product of batch) {
+        if (seen.has(product.barcode)) continue;
+        seen.add(product.barcode);
+        results.push(product);
+      }
     }
     return results;
   } catch (error) {
