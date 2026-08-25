@@ -70,7 +70,7 @@ async function searchProducts(query: string): Promise<SearchHit[]> {
   const seen = new Set<string>();
 
   const pushAll = (
-    products: Array<CatalogProduct | OpenFoodFactsProduct>,
+    products: (CatalogProduct | OpenFoodFactsProduct)[],
     source: 'catalog' | 'openfoodfacts',
   ) => {
     for (const product of products) {

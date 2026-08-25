@@ -40,12 +40,14 @@ CREATE TABLE IF NOT EXISTS catalog.products (
     ingredients   text NOT NULL DEFAULT '',
     allergen_tags jsonb NOT NULL DEFAULT '[]'::jsonb,   -- canonical RU allergen names
     trace_tags    jsonb NOT NULL DEFAULT '[]'::jsonb,
-    source        varchar(32) NOT NULL DEFAULT 'manual',-- food-allergy-db | openfoodfacts | manual
+    source        varchar(32) NOT NULL DEFAULT 'manual',-- food-allergy-db | openfoodfacts | openbeautyfacts | openproductsfacts | manual
+    category      varchar(32) NOT NULL DEFAULT 'food',  -- food | beauty | household
     updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
 -- Indexed search ------------------------------------------------------
 CREATE INDEX IF NOT EXISTS products_source_idx      ON catalog.products (source);
+CREATE INDEX IF NOT EXISTS products_category_idx    ON catalog.products (category);
 CREATE INDEX IF NOT EXISTS products_name_trgm       ON catalog.products USING gin (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS products_ingredients_fts ON catalog.products USING gin (to_tsvector('russian', ingredients));
 CREATE INDEX IF NOT EXISTS products_allergen_tags   ON catalog.products USING gin (allergen_tags jsonb_path_ops);
@@ -77,6 +79,26 @@ CREATE INDEX IF NOT EXISTS medicines_name_trgm ON catalog.medicines USING gin (n
 CREATE INDEX IF NOT EXISTS medicines_substance_trgm ON catalog.medicines USING gin (active_substance gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS medicines_allergen_tags ON catalog.medicines USING gin (allergen_tags jsonb_path_ops);
 CREATE INDEX IF NOT EXISTS medicines_aliases_trgm ON catalog.medicines USING gin ((aliases::text) gin_trgm_ops);
+
+-- Typical dish recipes (offline bundle + optional DB search) ----------
+CREATE TABLE IF NOT EXISTS catalog.dishes (
+    id               varchar(128) PRIMARY KEY,
+    name             text         NOT NULL,
+    normalized_name  varchar(255) NOT NULL,
+    aliases          jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    components       jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    ingredients      text         NOT NULL DEFAULT '',
+    allergen_tags    jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    cuisine          varchar(64)  NOT NULL DEFAULT '',
+    source           varchar(32)  NOT NULL DEFAULT 'bundled',
+    status           varchar(16)  NOT NULL DEFAULT 'published',
+    confidence       varchar(16)  NOT NULL DEFAULT 'high',
+    updated_at       timestamptz  NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS dishes_normalized_name_uidx ON catalog.dishes (normalized_name);
+CREATE INDEX IF NOT EXISTS dishes_status_idx ON catalog.dishes (status);
+CREATE INDEX IF NOT EXISTS dishes_source_idx ON catalog.dishes (source);
+CREATE INDEX IF NOT EXISTS dishes_name_trgm ON catalog.dishes USING gin (name gin_trgm_ops);
 
 -- Curated marketplace catalog (Yandex Market + OTC pharmacy) ----------
 CREATE TABLE IF NOT EXISTS catalog.market_products (

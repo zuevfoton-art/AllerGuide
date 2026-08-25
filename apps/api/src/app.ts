@@ -13,6 +13,7 @@ import { registerSttRoutes } from './routes/stt';
 import { registerMobileAuthRoutes } from './routes/mobile-auth';
 import { registerProfileRoutes } from './routes/profiles';
 import { registerCatalogRoutes } from './routes/catalog';
+import { registerDishRoutes } from './routes/dishes';
 import { registerMedicineRoutes } from './routes/medicines';
 import { registerAliasFeedbackRoutes } from './routes/alias-feedback';
 import { registerGovernanceRoutes } from './routes/governance';
@@ -50,6 +51,7 @@ export async function createApp(): Promise<Express> {
   registerSearchIngredientsRoutes(app);
   registerSttRoutes(app);
   registerCatalogRoutes(app);
+  registerDishRoutes(app);
   registerMedicineRoutes(app);
   registerMarketRoutes(app);
   registerAliasFeedbackRoutes(app);

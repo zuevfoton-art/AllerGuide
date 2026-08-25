@@ -5,6 +5,7 @@ import {
   type DishEnrichmentResult,
 } from '@/src/services/dish-off-enrichment-service';
 import { searchIngredientsViaApi } from '@/src/services/search-ingredients-api-service';
+import { resolveDishViaLlm } from '@/src/services/dish-resolve-api-service';
 import { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
 
 export { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
@@ -74,14 +75,35 @@ export async function lookupDishIngredientsForScan(
   }
 
   const yandex = await searchIngredientsViaApi(query);
-  if (!yandex) return null;
+  if (yandex) {
+    return {
+      query: yandex.query,
+      productName: yandex.productName,
+      ingredients: yandex.ingredients,
+      declaredAllergenIds: [],
+      traceAllergenIds: [],
+      source: 'ocr',
+    };
+  }
+
+  const llm = await resolveDishViaLlm(query);
+  if (!llm) return null;
 
   return {
-    query: yandex.query,
-    productName: yandex.productName,
-    ingredients: yandex.ingredients,
-    declaredAllergenIds: [],
+    query,
+    productName: llm.canonicalName,
+    ingredients: llm.ingredients,
+    declaredAllergenIds: llm.components
+      .map((item) => item.allergenId)
+      .filter((id): id is string => Boolean(id)),
     traceAllergenIds: [],
-    source: 'ocr',
+    source: 'llm',
+    enrichment: {
+      components: llm.components,
+      dishId: llm.dishId,
+      dishName: llm.canonicalName,
+      source: 'local',
+      ingredients: llm.ingredients,
+    },
   };
 }

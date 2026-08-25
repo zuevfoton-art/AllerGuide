@@ -36,6 +36,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
       allergenTags: product.allergenTags,
       traceTags: product.traceTags,
       source: product.source,
+      category: product.category,
     })
     .onConflictDoUpdate({
       target: products.barcode,
@@ -47,6 +48,7 @@ async function cacheOffProduct(product: NormalizedProduct): Promise<ProductRow> 
         allergenTags: sql`excluded.allergen_tags`,
         traceTags: sql`excluded.trace_tags`,
         source: sql`excluded.source`,
+        category: sql`excluded.category`,
         updatedAt: new Date(),
       },
     })

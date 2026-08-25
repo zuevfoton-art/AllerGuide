@@ -34,6 +34,12 @@ export const YC_SCAN_INTENT_LLM_ENABLED =
 export const YC_SEARCH_ENABLED = process.env.EXPO_PUBLIC_YC_SEARCH === 'true';
 
 /**
+ * Optional LLM dish/product resolve via POST /api/dishes/resolve.
+ * Requires DISH_LLM_ENABLED + AI_SCAN_ENABLED on the API.
+ */
+export const DISH_LLM_ENABLED = process.env.EXPO_PUBLIC_DISH_LLM === 'true';
+
+/**
  * Phase 3: Yandex SpeechKit STT via POST /api/stt when OS speech recognition
  * is unavailable. Offline / flag-off keeps expo-speech-recognition only.
  */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DISH_CATALOG,
+  DISH_COMPONENTS_BY_ID,
   applyDishBreakdownToAnswers,
   buildComponentsFromProduct,
   buildDishBreakdown,
@@ -8,14 +9,30 @@ import {
   findDishMatches,
   findDishRecipe,
   parseSelectedComponentIds,
+  rankLocalDishSuggestions,
   resolveDishComponents,
   resolveSelectedIdsForEnrichment,
   serializeSelectedComponentIds,
 } from './dish-components';
+import bundledDishes from './data/dishes.json';
 
 describe('dish-components', () => {
   it('ships a starter catalog of common dishes', () => {
-    expect(DISH_CATALOG.length).toBeGreaterThanOrEqual(30);
+    expect(DISH_CATALOG.length).toBeGreaterThanOrEqual(150);
+    expect(DISH_CATALOG.every((recipe) => recipe.components.length > 0)).toBe(true);
+    for (const row of bundledDishes) {
+      for (const id of row.components) {
+        expect(DISH_COMPONENTS_BY_ID[id], id).toBeDefined();
+      }
+    }
+  });
+
+  it('resolves spaghetti bolognese including a common typo', () => {
+    expect(findDishRecipe('спагетти болоньезе')?.id).toBe('spaghetti-bolognese');
+    expect(findDishRecipe('спагетти балоньезе')?.id).toBe('spaghetti-bolognese');
+    const suggestions = rankLocalDishSuggestions('спагетти балоньезе');
+    expect(suggestions[0]?.id).toBe('spaghetti-bolognese');
+    expect(suggestions[0]?.ingredientsPreview).toContain('говядина');
   });
 
   it('resolves borscht components including beet and cabbage', () => {

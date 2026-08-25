@@ -13,6 +13,7 @@
     "db:seed-medicines": "tsx src/db/seed-medicines.ts",
     "db:import-market": "tsx src/db/import-market.ts",
     "db:seed-market": "tsx src/db/seed-market.ts",
+    "db:seed-dishes": "tsx src/db/seed-dishes.ts",
     "db:ensure-product-columns": "tsx src/db/ensure-product-columns.ts",
     "lint": "eslint src --max-warnings 0",
     "db:merge-approved-aliases": "tsx src/db/merge-approved-aliases.ts",

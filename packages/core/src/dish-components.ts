@@ -1,6 +1,7 @@
 import { findAllergenById } from './allergen-database';
 import { mapExternalAllergenIds } from './allergen-aliases';
 import { getCrossReactionsForSelection, type CrossReactionMatch } from './cross-reactions';
+import bundledDishes from './data/dishes.json';
 import {
   NAME_MATCH_MIN_SCORE,
   normalizeSearchText,
@@ -22,6 +23,29 @@ export type DishRecipe = {
   /** RU/EN synonyms used for lookup in free-text food field. */
   names: string[];
   components: DishComponentDef[];
+  cuisine?: string;
+};
+
+export type DishRecipeJson = {
+  id: string;
+  names: string[];
+  components: string[];
+  cuisine?: string;
+  aliases?: string[];
+};
+
+export const DISH_SUGGESTION_MIN_QUERY = 2;
+export const DISH_SUGGESTION_LIMIT = 8;
+
+export type DishSuggestionSource = 'local' | 'catalog' | 'openfoodfacts' | 'llm';
+
+export type DishSuggestion = {
+  id: string;
+  name: string;
+  source: DishSuggestionSource;
+  score: number;
+  ingredientsPreview?: string;
+  barcode?: string;
 };
 
 export type DishComponentMatch = DishComponentDef & {
@@ -89,208 +113,32 @@ const C = {
   lemon: { id: 'lemon', nameRu: 'лимон', allergenId: 'citrus' },
 } as const satisfies Record<string, DishComponentDef>;
 
-export const DISH_CATALOG: DishRecipe[] = [
-  {
-    id: 'borscht',
-    names: ['борщ', 'борща', 'borscht', 'borsch'],
-    components: [C.beet, C.cabbage, C.potato, C.carrot, C.tomato, C.onion, C.beef, C.sourCream, C.garlic],
-  },
-  {
-    id: 'shchi',
-    names: ['щи', 'кислые щи'],
-    components: [C.cabbage, C.potato, C.carrot, C.onion, C.beef, C.sourCream],
-  },
-  {
-    id: 'okroshka',
-    names: ['окрошка'],
-    components: [C.potato, C.cucumber, C.eggs, C.sourCream, C.greens, C.beef],
-  },
-  {
-    id: 'solyanka',
-    names: ['солянка'],
-    components: [C.beef, C.pork, C.onion, C.tomato, C.cucumber, C.lemon],
-  },
-  {
-    id: 'chicken-soup',
-    names: ['куриный суп', 'суп с курицей', 'бульон куриный'],
-    components: [C.chicken, C.carrot, C.onion, C.potato, C.greens],
-  },
-  {
-    id: 'fish-soup',
-    names: ['уха', 'рыбный суп'],
-    components: [C.fish, C.potato, C.carrot, C.onion, C.greens],
-  },
-  {
-    id: 'olivier',
-    names: ['оливье', 'салат оливье'],
-    components: [C.potato, C.carrot, C.eggs, C.peas, C.mayo, C.cucumber, C.chicken],
-  },
-  {
-    id: 'vinaigrette',
-    names: ['винегрет'],
-    components: [C.beet, C.potato, C.carrot, C.cabbage, C.peas, C.oil, C.onion],
-  },
-  {
-    id: 'caesar',
-    names: ['цезарь', 'салат цезарь', 'caesar'],
-    components: [C.chicken, C.cheese, C.eggs, C.bread, C.oil, C.garlic],
-  },
-  {
-    id: 'greek-salad',
-    names: ['греческий салат', 'греческий'],
-    components: [C.tomato, C.cucumber, C.cheese, C.oil, C.onion],
-  },
-  {
-    id: 'plov',
-    names: ['плов'],
-    components: [C.rice, C.carrot, C.onion, C.beef, C.garlic, C.oil],
-  },
-  {
-    id: 'pelmeni',
-    names: ['пельмени', 'пельмень'],
-    components: [C.wheat, C.beef, C.pork, C.onion, C.eggs, C.sourCream],
-  },
-  {
-    id: 'vareniki',
-    names: ['вареники'],
-    components: [C.wheat, C.potato, C.eggs, C.sourCream],
-  },
-  {
-    id: 'blini',
-    names: ['блины', 'блинчики', 'блины с'],
-    components: [C.wheat, C.milk, C.eggs, C.butter],
-  },
-  {
-    id: 'omelette',
-    names: ['омлет', 'яичница', 'яичниц'],
-    components: [C.eggs, C.milk, C.butter],
-  },
-  {
-    id: 'syrniki',
-    names: ['сырники'],
-    components: [C.milk, C.eggs, C.wheat, C.sugar],
-  },
-  {
-    id: 'milk-porridge',
-    names: ['каша молочная', 'овсянка на молоке', 'манная каша', 'рисовая каша'],
-    components: [C.milk, C.sugar, C.butter],
-  },
-  {
-    id: 'buckwheat',
-    names: ['гречка', 'гречневая каша'],
-    components: [C.buckwheat, C.butter],
-  },
-  {
-    id: 'carbonara',
-    names: ['карбонара', 'pasta carbonara', 'паста карбонара'],
-    components: [C.pasta, C.eggs, C.cheese, C.pork],
-  },
-  {
-    id: 'lasagna',
-    names: ['лазанья', 'lasagna'],
-    components: [C.pasta, C.beef, C.tomato, C.cheese, C.milk],
-  },
-  {
-    id: 'pizza',
-    names: ['пицца', 'pizza'],
-    components: [C.wheat, C.tomato, C.cheese, C.oil],
-  },
-  {
-    id: 'burger',
-    names: ['бургер', 'гамбургер', 'чизбургер', 'burger'],
-    components: [C.bread, C.beef, C.cheese, C.tomato, C.onion, C.mayo],
-  },
-  {
-    id: 'shawarma',
-    names: ['шаурма', 'шаверма', 'донер'],
-    components: [C.chicken, C.bread, C.cabbage, C.tomato, C.onion, C.mayo],
-  },
-  {
-    id: 'sushi',
-    names: ['суши', 'роллы', 'ролл', 'sushi', 'сашими'],
-    components: [C.fish, C.rice, C.seafood, C.soy, C.avocado],
-  },
-  {
-    id: 'risotto',
-    names: ['ризотто', 'risotto'],
-    components: [C.rice, C.cheese, C.butter, C.onion],
-  },
-  {
-    id: 'paella',
-    names: ['паэлья', 'paella'],
-    components: [C.rice, C.seafood, C.chicken, C.tomato, C.oil],
-  },
-  {
-    id: 'steak',
-    names: ['стейк', 'steak'],
-    components: [C.beef, C.oil, C.garlic],
-  },
-  {
-    id: 'kotleti',
-    names: ['котлеты', 'котлета'],
-    components: [C.beef, C.bread, C.eggs, C.onion, C.oil],
-  },
-  {
-    id: 'zharkoye',
-    names: ['жаркое'],
-    components: [C.beef, C.potato, C.carrot, C.onion, C.oil],
-  },
-  {
-    id: 'kholodets',
-    names: ['холодец', 'студень'],
-    components: [C.beef, C.pork, C.carrot, C.garlic, C.eggs],
-  },
-  {
-    id: 'hummus',
-    names: ['хумус', 'hummus'],
-    components: [C.chickpea, C.tahini, C.lemon, C.garlic, C.oil],
-  },
-  {
-    id: 'falafel',
-    names: ['фалафель', 'falafel'],
-    components: [C.chickpea, C.onion, C.garlic, C.oil, C.wheat],
-  },
-  {
-    id: 'smoothie',
-    names: ['смузи', 'smoothie'],
-    components: [C.banana, C.apple, C.strawberry, C.milk],
-  },
-  {
-    id: 'compote',
-    names: ['компот'],
-    components: [C.apple, C.sugar],
-  },
-  {
-    id: 'ice-cream',
-    names: ['мороженое', 'ice cream', 'пломбир'],
-    components: [C.milk, C.eggs, C.sugar],
-  },
-  {
-    id: 'cake',
-    names: ['торт', 'пирожное', 'кекс'],
-    components: [C.wheat, C.eggs, C.milk, C.sugar, C.butter],
-  },
-  {
-    id: 'cappuccino',
-    names: ['капучино', 'латте', 'cappuccino', 'latte', 'кофе с молоком'],
-    components: [C.milk],
-  },
-  {
-    id: 'chocolate',
-    names: ['шоколад', 'горячий шоколад'],
-    components: [C.chocolate, C.milk, C.sugar],
-  },
-  {
-    id: 'fruit-salad',
-    names: ['фруктовый салат'],
-    components: [C.apple, C.banana, C.citrus, C.kiwi, C.strawberry],
-  },
-  {
-    id: 'mushroom-soup',
-    names: ['грибной суп'],
-    components: [C.mushrooms, C.potato, C.onion, C.sourCream],
-  },
-];
+export const DISH_COMPONENTS_BY_ID: Record<string, DishComponentDef> = Object.fromEntries(
+  Object.values(C).map((item) => [item.id, item]),
+);
+
+function hydrateDishCatalog(rows: DishRecipeJson[]): DishRecipe[] {
+  return rows.map((row) => ({
+    id: row.id,
+    names: [...row.names, ...(row.aliases ?? [])],
+    cuisine: row.cuisine,
+    components: row.components
+      .map((id) => DISH_COMPONENTS_BY_ID[id])
+      .filter((item): item is DishComponentDef => Boolean(item)),
+  }));
+}
+
+export const DISH_CATALOG: DishRecipe[] = hydrateDishCatalog(bundledDishes as DishRecipeJson[]);
+
+const RECIPE_BY_NORMALIZED_NAME = new Map<string, DishRecipe>();
+for (const recipe of DISH_CATALOG) {
+  for (const name of recipe.names) {
+    const key = normalizeSearchText(name);
+    if (key && !RECIPE_BY_NORMALIZED_NAME.has(key)) {
+      RECIPE_BY_NORMALIZED_NAME.set(key, recipe);
+    }
+  }
+}
 
 export type DishNameMatch = {
   recipe: DishRecipe;
@@ -343,7 +191,23 @@ export function findDishMatches(
 
 /** Best catalog recipe for free-text food, or null when nothing clears the score floor. */
 export function findDishRecipe(foodText: string): DishRecipe | null {
+  const exact = RECIPE_BY_NORMALIZED_NAME.get(normalizeSearchText(foodText));
+  if (exact) return exact;
   return findDishMatches(foodText, 1)[0]?.recipe ?? null;
+}
+
+export function rankLocalDishSuggestions(
+  query: string,
+  limit = DISH_SUGGESTION_LIMIT,
+): DishSuggestion[] {
+  if (query.trim().length < DISH_SUGGESTION_MIN_QUERY) return [];
+  return findDishMatches(query, limit).map((match) => ({
+    id: match.recipe.id,
+    name: match.recipe.names[0],
+    source: 'local',
+    score: match.score,
+    ingredientsPreview: match.recipe.components.map((item) => item.nameRu).join(', '),
+  }));
 }
 
 export function resolveDishComponents(foodText: string): DishComponentDef[] {

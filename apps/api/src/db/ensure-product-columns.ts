@@ -14,6 +14,10 @@ export async function ensureProductColumns(): Promise<void> {
     ALTER TABLE catalog.products
     ADD COLUMN IF NOT EXISTS image_url text DEFAULT '' NOT NULL
   `);
+  await db.execute(sql`
+    ALTER TABLE catalog.products
+    ADD COLUMN IF NOT EXISTS category varchar(32) DEFAULT 'food' NOT NULL
+  `);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

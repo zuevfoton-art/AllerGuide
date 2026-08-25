@@ -50,6 +50,7 @@ export * from './plural-ru';
 export * from './medicine-catalog';
 export * from './name-matching';
 export * from './dish-components';
+export * from './inci-allergens';
 export * from './insect-allergy';
 export * from './gina-asthma';
 export * from './pef-zones';

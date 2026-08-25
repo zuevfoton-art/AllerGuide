@@ -636,7 +636,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Types / allergens | `types`, `allergens` (обёртка над `allergen-database`), `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` |
 | Profiles | `profile-allergens`, `allergy-confirmations`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `condition-*`, `clinical-phenotypes` |
 | Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display` |
-| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
+| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components`, `name-matching`, `inci-allergens` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `icd10-reference` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
 | Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
@@ -652,6 +652,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | `ocr.ts` | Нормализация OCR-текста, demo capture |
 | `scan-intent.ts` | Heuristic + нормализация intent (label/menu vs visual) |
 | `search-ingredients.ts` | Нормализация ответа поиска состава |
+| `dish-resolve.ts` | Промпт/парс LLM для названия блюда и типичного состава |
 | `prescription-ocr.ts` | Парсинг текста рецепта / АСИТ |
 
 ### `@allerguide/ui` (`packages/ui/`)

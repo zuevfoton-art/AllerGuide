@@ -89,7 +89,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service`, `diary-dish-recognition-service` | core `diary*`, `diary-wizard-route`, `dish-components` |
 | **Medicine photo / voice** | `MedicinePhotoStep` + `MedicineNameField` in diary / ASIT / therapy / SOS | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service`, hook `use-medicine-suggestions` | core `medicine-catalog`, `food-drug-allergy`, `list-input`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
-| **Nutrition photo / manual** | `NutritionCaptureStep` in diary | `diary-dish-recognition-service` (`scanFromOcr` + `lookupDishIngredientsForScan`) | core `dish-components`, `diary-wizard-route` |
+| **Nutrition photo / manual** | `NutritionCaptureStep` + `DishNameField` in diary / scanner | `diary-dish-recognition-service`, `dish-suggest-service`, `scanner-dish-lookup-service` | core `dish-components`, `name-matching`, `data/dishes.json`; API `dishes.ts` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service`, `medicine-suggest-service` | core `allergy-passport`, `emergency-contacts`, `list-input` |
@@ -288,6 +288,7 @@ Barrel: `index.ts`. Pure TS.
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |
+| `DISH_LLM` | `features.ts` | `DISH_LLM_ENABLED` + `AI_SCAN_ENABLED` |
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
 | `MEDICINE_DB` | `features.ts` (`EXPO_PUBLIC_MEDICINE_DB`) | `AI_MEDICINE_VISION_ENABLED` + `catalog.medicines` |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |
