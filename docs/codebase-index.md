@@ -288,7 +288,7 @@ Barrel: `index.ts`. Pure TS.
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
 | `YC_SEARCH` | `features.ts` | `YC_SEARCH_ENABLED` |
-| `DISH_LLM` | `features.ts` | `DISH_LLM_ENABLED` + `AI_SCAN_ENABLED` |
+| `DISH_LLM` | `features.ts` | `DISH_LLM_ENABLED` + `AI_SCAN_ENABLED` (local/dev **off**; staging **on**) |
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
 | `MEDICINE_DB` | `features.ts` (`EXPO_PUBLIC_MEDICINE_DB`) | `AI_MEDICINE_VISION_ENABLED` + `catalog.medicines` |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |

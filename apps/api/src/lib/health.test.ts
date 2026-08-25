@@ -57,6 +57,26 @@ describe('buildHealthPayload', () => {
     expect(payload.scan?.dailyBudget).toBe(100);
   });
 
+  it('exposes dish LLM when DISH_LLM_ENABLED and AI_SCAN_ENABLED are set', async () => {
+    process.env.AI_SCAN_ENABLED = 'true';
+    process.env.DISH_LLM_ENABLED = 'true';
+    delete process.env.DATABASE_URL;
+
+    const { buildHealthPayload } = await import('./health');
+    const payload = await buildHealthPayload();
+    expect(payload.features?.dishLlm).toBe(true);
+  });
+
+  it('does not expose dish LLM when the resolve flag is off', async () => {
+    process.env.AI_SCAN_ENABLED = 'true';
+    process.env.DISH_LLM_ENABLED = 'false';
+    delete process.env.DATABASE_URL;
+
+    const { buildHealthPayload } = await import('./health');
+    const payload = await buildHealthPayload();
+    expect(payload.features?.dishLlm).toBeUndefined();
+  });
+
   it('exposes Places and Air Quality when flags and keys are set', async () => {
     process.env.MAP_PLACES_ENABLED = 'true';
     process.env.GOOGLE_PLACES_API_KEY = 'places-test-key';
