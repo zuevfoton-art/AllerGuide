@@ -141,7 +141,8 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 |---------|---------|
 | `auth-register-link` не виден (~45s) | Раньше: `assembleDebug` без Metro. Теперь: Pressable testID флапает — `_tap-register.yaml` ждёт Text `auth-register-link` и копию «Зарегистрироваться», пока герой ещё «Вход» |
 | `auth-confirm-password-input` not found | Клавиатура перекрывает поле. Bootstrap скроллит и вызывает `hideKeyboard` (`_fill-by-id.yaml`) |
-| `auth-hero-title` не виден 120s + ANR Pixel Launcher | Не греть через `monkey`. `am start -W -n com.aclearo.app/.MainActivity` и `dismiss_anr` (Wait / Back) |
+| `auth-hero-title` не виден 120s + ANR Pixel Launcher | `has_anr_dialog` должен ловить `Application Not Responding` из dumpsys (не только `isn't responding`). Wait / Back, затем `ensure_app_foreground` |
+| `auth-login-input` на app drawer | После `clearState` NexusLauncher в фокусе. Повторный `launchApp: stopApp: false` + sampler `am start` |
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
 | `auth-mode-phone` не виден 120s | Pressable-toggle флапает в Maestro. Ждать `auth-hero-title`. Артефакты: `*-screen.png`, `*-during.png`, `*-logcat.txt` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
