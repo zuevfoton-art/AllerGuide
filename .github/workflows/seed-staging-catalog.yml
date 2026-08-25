@@ -32,13 +32,39 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Seed allergens, products, and bundled market catalog
+      - name: Apply migrations
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
           DB_SSL: require
-        run: |
-          set -euo pipefail
-          pnpm --filter api db:seed-allergens
-          pnpm --filter api db:import-food-allergy
-          pnpm --filter api db:seed-market
+        run: pnpm --filter api db:migrate
+
+      # Staging journal can mark 0005 applied while catalog.products still lacks brand/image_url
+      # (WebSQL: barcode/name/ingredients/allergen_tags/source/updated_at/trace_tags).
+      - name: Ensure catalog.products OFF columns
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:ensure-product-columns
+
+      - name: Seed allergens
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:seed-allergens
+
+      - name: Import food-allergy products
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:import-food-allergy
+
+      - name: Seed bundled marketplace catalog
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:seed-market
