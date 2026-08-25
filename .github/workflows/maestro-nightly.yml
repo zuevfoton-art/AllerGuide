@@ -87,6 +87,8 @@ jobs:
             maestro-offline-debug
             maestro-offline-logcat.txt
             maestro-offline-screen.png
+            maestro-offline-during.png
+            maestro-offline-during-focus.txt
             maestro-offline-ui.xml
           if-no-files-found: ignore
 
@@ -177,6 +179,8 @@ jobs:
             maestro-staging-debug
             maestro-staging-logcat.txt
             maestro-staging-screen.png
+            maestro-staging-during.png
+            maestro-staging-during-focus.txt
             maestro-staging-ui.xml
           if-no-files-found: ignore
 

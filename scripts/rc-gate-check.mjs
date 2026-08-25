@@ -112,6 +112,18 @@ function checkMaestroFlows() {
   if (!runner.includes('pm grant')) {
     failures.push('scripts/maestro-run-emulator.sh must pre-grant runtime permissions');
   }
+  if (runner.includes('adb shell monkey')) {
+    failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
+  }
+  if (!runner.includes('am start') || !runner.includes('dismiss_anr')) {
+    failures.push('scripts/maestro-run-emulator.sh must am start + dismiss ANR');
+  }
+  if (!runner.includes('during.png')) {
+    failures.push('scripts/maestro-run-emulator.sh must capture *-during.png before Maestro exits');
+  }
+  if (!workflow.includes('during.png')) {
+    failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
+  }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
   if (!waitLogin.includes('auth-hero-title')) {
@@ -128,12 +140,20 @@ function checkMaestroFlows() {
     if (!flow.includes('_wait-login.yaml')) {
       failures.push(`${name}: must run _wait-login.yaml`);
     }
+    if (!flow.includes('_tap-register.yaml')) {
+      failures.push(`${name}: must tap register via _tap-register.yaml`);
+    }
     if (!flow.includes('_fill-by-id.yaml')) {
       failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
     }
     if (!flow.includes('auth-confirm-password-input')) {
       failures.push(`${name}: must fill auth-confirm-password-input`);
     }
+  }
+
+  const tapRegister = fs.readFileSync(path.join(flowsDir, '_tap-register.yaml'), 'utf8');
+  if (!tapRegister.includes('auth-register-link') || !tapRegister.includes('Зарегистрироваться')) {
+    failures.push('_tap-register.yaml must tap auth-register-link then RU register copy');
   }
 }
 
