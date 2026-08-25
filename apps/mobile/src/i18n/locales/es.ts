@@ -529,6 +529,7 @@ const es: LocaleMessages = {
     mapWebHint: 'Mapa interactivo disponible en la app móvil',
     regionLabel: 'Moscú y región de Moscú',
     yandexAttribution: 'Mapa: Yandex Maps',
+    basemapUnavailable: 'El mapa no cargó. Revise la red y vuelva a abrir la pantalla.',
     emptyPlaces: 'No hay lugares recomendados para mostrar en el mapa',
     disclaimerPlaces: 'La información es orientativa; confirma ingredientes en el local.',
     disclaimerPollen: 'Datos de polen aproximados. Consulta con tu médico.',

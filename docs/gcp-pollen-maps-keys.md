@@ -228,15 +228,9 @@ Pollen **всегда** отдельным ключом.
 
 ### 5.1. EAS staging / preview
 
-После первого EAS staging build:
+`preview` и `staging` в [`apps/mobile/eas.json`](../apps/mobile/eas.json) используют **`credentialsSource: local`** и committed `android/app/debug.keystore`. SHA-1 тот же, что у Gradle CI (§5.2) — отдельный EAS fingerprint в GCP не нужен.
 
-```bash
-cd apps/mobile
-pnpm exec eas credentials -p android
-# или UI: expo.dev → project → Credentials → Android → SHA-1
-```
-
-Вставьте SHA-1 в ключ §3.1 → Save → пересоберите APK (если карта уже была серой).
+`production` по-прежнему подписывается remote EAS keystore: после первого production build возьмите SHA-1 через `eas credentials -p android` (или expo.dev → Credentials) и добавьте его **вторым** Android item на prod-ключе.
 
 ### 5.2. GitHub Actions Gradle APK (path C)
 

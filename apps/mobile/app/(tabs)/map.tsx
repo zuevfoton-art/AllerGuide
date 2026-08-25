@@ -81,6 +81,7 @@ import {
 } from '@/src/services/air-quality-service';
 import { getLocale } from '@/src/services/settings-service';
 import { resolveMapBasemap } from '@/src/services/map-basemap';
+import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
 import {
   fetchPollenHourlySeries,
   resolveHourlyUpi,
@@ -268,7 +269,7 @@ export default function MapScreen() {
   const statusLevel = statusReading?.level ?? null;
 
   const mapBasemap = resolveMapBasemap({
-    googleMapsApiKeyPresent: Boolean(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim()),
+    googleMapsApiKeyPresent: isGoogleMapsApiKey(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY),
     apiBaseUrlPresent: Boolean(getApiBaseUrl().trim()),
     googleMapPrimaryEnabled: GOOGLE_MAP_PRIMARY_ENABLED,
     googlePollenHeatmapEnabled: GOOGLE_POLLEN_HEATMAP_ENABLED,
@@ -720,6 +721,7 @@ export default function MapScreen() {
           onMarkerPress={setSelectedPoiId}
           onRegionChange={handleRegionChange}
           overlay={mapOverlay}
+          unavailableLabel={t('map.basemapUnavailable')}
         />
       ) : useGoogleMap ? (
         <GooglePollenMap

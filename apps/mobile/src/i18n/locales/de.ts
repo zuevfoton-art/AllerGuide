@@ -530,6 +530,7 @@ const de: LocaleMessages = {
     mapWebHint: 'Interaktive Karte nur in der mobilen App',
     regionLabel: 'Moskau und Oblast Moskau',
     yandexAttribution: 'Karte: Yandex Maps',
+    basemapUnavailable: 'Karte nicht geladen. Netzwerk prüfen und den Bildschirm erneut öffnen.',
     emptyPlaces: 'Keine empfohlenen Orte für die Karte',
     disclaimerPlaces: 'Informationen sind orientierend; Zutaten vor Ort bestätigen.',
     disclaimerPollen: 'Pollendaten ungefähr. Mit Arzt abklären.',

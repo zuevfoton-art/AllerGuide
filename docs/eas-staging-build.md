@@ -73,15 +73,18 @@ pnpm build:staging:android      # APK (рекомендуется для пер�
 pnpm build:staging:ios          # TestFlight internal
 ```
 
-Maps key (один раз на проект Expo):
+Maps key (один раз на проект Expo, **Sensitive** / `eas env`, не Secret visibility):
 
 ```bash
 cd apps/mobile
-pnpm exec eas secret:create --scope project \
+pnpm exec eas env:create --environment preview \
   --name EXPO_PUBLIC_GOOGLE_MAPS_API_KEY \
   --value "YOUR_RESTRICTED_MAPS_KEY" \
+  --visibility sensitive \
   --type string
 ```
+
+Профиль `staging` уже указывает `"environment": "preview"`. Android staging/preview APK подписывается debug.keystore (SHA-1 как у Gradle CI) — см. [`gcp-pollen-maps-keys.md`](./gcp-pollen-maps-keys.md) §5.2. Невалидный ключ (текст ошибки CLI) в сборку не попадает.
 
 ---
 

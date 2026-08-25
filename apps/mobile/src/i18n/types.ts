@@ -539,6 +539,7 @@ export type LocaleMessages = {
     mapWebHint: string;
     regionLabel: string;
     yandexAttribution: string;
+    basemapUnavailable: string;
     emptyPlaces: string;
     disclaimerPlaces: string;
     disclaimerPollen: string;

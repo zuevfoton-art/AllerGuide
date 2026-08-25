@@ -101,8 +101,15 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        def mapsKey = System.getenv("EXPO_PUBLIC_GOOGLE_MAPS_API_KEY") ?: ""
+        if (!mapsKey) {
+            mapsKey = (findProperty("GOOGLE_MAPS_API_KEY") ?: "").toString()
+        }
+        if (!(mapsKey ==~ /^AIza[0-9A-Za-z_-]{20,}$/)) {
+            mapsKey = ""
+        }
         manifestPlaceholders = [
-            GOOGLE_MAPS_API_KEY: System.getenv("EXPO_PUBLIC_GOOGLE_MAPS_API_KEY") ?: ""
+            GOOGLE_MAPS_API_KEY: mapsKey
         ]
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""

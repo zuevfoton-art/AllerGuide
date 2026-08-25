@@ -71,6 +71,7 @@ jobs:
       - name: Next steps
         run: |
           echo "::notice::APK appears on expo.dev → Project → Builds (profile staging)."
-          echo "Ensure EAS secret EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is set for Google basemap."
+          echo "Ensure EAS preview env has Sensitive EXPO_PUBLIC_GOOGLE_MAPS_API_KEY (AIza…)."
+          echo "Staging/preview APK is signed with debug.keystore SHA-1 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25."
           echo "API must have POLLEN_HEATMAP_ENABLED=true + GOOGLE_POLLEN_API_KEY."
           echo "Docs: docs/android-stage-build.md"

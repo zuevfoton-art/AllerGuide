@@ -529,6 +529,7 @@ const fr: LocaleMessages = {
     mapWebHint: 'Carte interactive disponible sur mobile',
     regionLabel: 'Moscou et région de Moscou',
     yandexAttribution: 'Carte : Yandex Maps',
+    basemapUnavailable: 'La carte n’a pas chargé. Vérifiez le réseau et rouvrez l’écran.',
     emptyPlaces: 'Aucun lieu recommandé à afficher sur la carte',
     disclaimerPlaces: 'Informations indicatives ; confirmez les ingrédients sur place.',
     disclaimerPollen: 'Données pollen approximatives. Consultez votre médecin.',

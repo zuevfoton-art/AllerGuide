@@ -530,6 +530,7 @@ const en: LocaleMessages = {
     mapWebHint: 'Interactive map is available in the mobile app',
     regionLabel: 'Moscow and Moscow Oblast',
     yandexAttribution: 'Map: Yandex Maps',
+    basemapUnavailable: 'The map did not load. Check the network and open this screen again.',
     emptyPlaces: 'No recommended places to show on the map',
     disclaimerPlaces: 'Place information is indicative; confirm ingredients at the venue.',
     disclaimerPollen: 'Pollen data is approximate. Confirm forecasts with your doctor.',

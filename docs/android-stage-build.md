@@ -144,7 +144,7 @@ Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP
 
 ### Ограничения C
 
-1. SHA-1 debug keystore CI ≠ EAS/Play — allowlist CI SHA-1 from [`gcp-pollen-maps-keys.md` §5.2](./gcp-pollen-maps-keys.md) on the Maps Android key, **or** use EAS builds (path A/B).
+1. SHA-1: EAS `preview`/`staging` now signs with the same committed debug.keystore as Gradle CI ([`gcp-pollen-maps-keys.md` §5.2](./gcp-pollen-maps-keys.md)). Play / EAS `production` still needs its own SHA-1 on the Maps Android key.
 2. Не заменяет EAS для TestFlight / единообразного staging канала.
 3. JDK: **17** (как в [`android-local-build.md`](./android-local-build.md)), не 21.
 4. CI rejects non-`AIza` values (e.g. `The bearer token is invalid.`) so a blank Google map is not shipped by mistake.

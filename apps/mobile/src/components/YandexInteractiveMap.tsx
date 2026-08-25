@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import type { GoogleMapMarker } from '@/src/components/google-pollen-map.types';
 import { buildYandexInteractiveEmbedUrl } from '@/src/services/yandex-interactive-map-url';
@@ -16,6 +16,8 @@ export type YandexInteractiveMapProps = {
   onMarkerPress?: (markerId: string) => void;
   onRegionChange?: (latitude: number, longitude: number) => void;
   overlay?: ReactNode;
+  /** Shown instead of an empty gray box when the embed URL is missing or WebView fails. */
+  unavailableLabel?: string;
 };
 
 /**
@@ -33,6 +35,7 @@ export function YandexInteractiveMap({
   onMarkerPress,
   onRegionChange,
   overlay,
+  unavailableLabel,
 }: YandexInteractiveMapProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, height), [theme, height]);
@@ -40,6 +43,7 @@ export function YandexInteractiveMap({
   onMarkerPressRef.current = onMarkerPress;
   const onRegionChangeRef = useRef(onRegionChange);
   onRegionChangeRef.current = onRegionChange;
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const src = useMemo(
     () =>
@@ -54,6 +58,10 @@ export function YandexInteractiveMap({
   );
 
   useEffect(() => {
+    setLoadFailed(false);
+  }, [src]);
+
+  useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return undefined;
     const onMessage = (event: MessageEvent) => {
       handleBridgeMessage(
@@ -66,8 +74,12 @@ export function YandexInteractiveMap({
     return () => window.removeEventListener('message', onMessage);
   }, []);
 
-  if (!src) {
-    return <View style={styles.wrap} testID="yandex-interactive-map-missing" />;
+  if (!src || loadFailed) {
+    return (
+      <View style={styles.wrap} testID="yandex-interactive-map-missing">
+        {unavailableLabel ? <Text style={styles.unavailable}>{unavailableLabel}</Text> : null}
+      </View>
+    );
   }
 
   if (Platform.OS === 'web') {
@@ -100,6 +112,8 @@ export function YandexInteractiveMap({
         originWhitelist={['https://*', 'http://*']}
         javaScriptEnabled
         domStorageEnabled
+        onError={() => setLoadFailed(true)}
+        onHttpError={() => setLoadFailed(true)}
         onMessage={(event) => {
           handleBridgeMessage(
             event.nativeEvent.data,
@@ -163,6 +177,13 @@ function createStyles({ colors }: AppTheme, height: number) {
     overlay: {
       ...StyleSheet.absoluteFillObject,
       zIndex: 2,
+    },
+    unavailable: {
+      flex: 1,
+      paddingHorizontal: 16,
+      textAlign: 'center',
+      textAlignVertical: 'center',
+      color: colors.textSecondary,
     },
   });
 }

@@ -13,6 +13,7 @@
     "test:gate": "vitest run && node ../../scripts/mobile-test-gate.mjs",
     "generate-assets": "node scripts/generate-assets.mjs",
     "eas-build-pre-install": "bash scripts/eas-build-pre-install.sh",
+    "eas-build-post-install": "node scripts/inject-eas-maps-key.mjs",
     "build:preview": "eas build --profile preview --platform all",
     "build:preview:android": "eas build --profile preview --platform android",
     "build:preview:ios": "eas build --profile preview --platform ios",
