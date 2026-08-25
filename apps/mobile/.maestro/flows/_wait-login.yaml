@@ -10,3 +10,4 @@ appId: com.aclearo.app
     visible:
       id: auth-hero-title
     timeout: 120000
+- takeScreenshot: maestro-login-visible
