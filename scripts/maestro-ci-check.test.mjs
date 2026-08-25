@@ -37,6 +37,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /am start -W -n "\$ACTIVITY"/);
     assert.doesNotMatch(runner, /adb shell monkey/);
     assert.match(runner, /dismiss_anr/);
+    assert.match(runner, /Application Not Responding/);
+    assert.match(runner, /ensure_app_foreground/);
     assert.match(runner, /during\.png/);
     assert.match(runner, /SAMPLER_GUARD/);
   });
@@ -57,6 +59,7 @@ describe('Maestro nightly CI invariants', () => {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_wait-login\.yaml/);
       assert.match(flow, /_tap-register\.yaml/);
+      assert.match(flow, /stopApp: false/);
       assert.match(flow, /_fill-by-id\.yaml/);
       assert.match(flow, /auth-confirm-password-input/);
     }

@@ -3,8 +3,14 @@ appId: com.aclearo.app
 ---
 - launchApp:
     clearState: true
+- launchApp:
+    clearState: false
+    stopApp: false
 - runFlow: _wait-login.yaml
 - runFlow: _tap-register.yaml
+- launchApp:
+    clearState: false
+    stopApp: false
 - runFlow:
     file: _tap-by-id.yaml
     env:

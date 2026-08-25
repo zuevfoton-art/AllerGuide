@@ -118,6 +118,9 @@ function checkMaestroFlows() {
   if (!runner.includes('am start') || !runner.includes('dismiss_anr')) {
     failures.push('scripts/maestro-run-emulator.sh must am start + dismiss ANR');
   }
+  if (!runner.includes('Application Not Responding') || !runner.includes('ensure_app_foreground')) {
+    failures.push('scripts/maestro-run-emulator.sh must detect Application Not Responding and restore MainActivity');
+  }
   if (!runner.includes('during.png')) {
     failures.push('scripts/maestro-run-emulator.sh must capture *-during.png before Maestro exits');
   }
@@ -142,6 +145,9 @@ function checkMaestroFlows() {
     }
     if (!flow.includes('_tap-register.yaml')) {
       failures.push(`${name}: must tap register via _tap-register.yaml`);
+    }
+    if (!flow.includes('stopApp: false')) {
+      failures.push(`${name}: must re-launchApp without stopping after clearState`);
     }
     if (!flow.includes('_fill-by-id.yaml')) {
       failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
