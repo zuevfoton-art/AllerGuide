@@ -520,22 +520,25 @@ export default function ProfileSetupScreen() {
 
       <View style={styles.actions}>
         {showBack ? (
-          <Button
-            testID="profile-wizard-back"
-            label={t('profileSetup.back')}
-            variant="secondary"
-            onPress={goBack}
-            style={styles.backButton}
-          />
+          <View style={styles.actionSlot}>
+            <Button
+              testID="profile-wizard-back"
+              label={t('profileSetup.back')}
+              variant="secondary"
+              block
+              onPress={goBack}
+            />
+          </View>
         ) : null}
-        <Button
-          testID={isLastStep ? 'profile-save' : 'profile-wizard-next'}
-          label={primaryLabel}
-          variant="primary"
-          block={!showBack}
-          onPress={goNext}
-          style={showBack ? styles.nextButton : undefined}
-        />
+        <View style={styles.actionSlot}>
+          <Button
+            testID={isLastStep ? 'profile-save' : 'profile-wizard-next'}
+            label={primaryLabel}
+            variant="primary"
+            block
+            onPress={goNext}
+          />
+        </View>
       </View>
 
       <Disclaimer>{t('profileSetup.disclaimer')}</Disclaimer>
@@ -550,9 +553,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       gap: 10,
       alignItems: 'stretch',
+      alignSelf: 'stretch',
+      width: '100%',
     },
-    backButton: { flex: 1 },
-    nextButton: { flex: 2 },
+    actionSlot: {
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: 0,
+      minWidth: 0,
+    },
     error: {
       fontFamily: fonts.sans,
       color: colors.danger,
