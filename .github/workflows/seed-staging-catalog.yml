@@ -62,6 +62,13 @@ jobs:
           DB_SSL: require
         run: pnpm --filter api db:import-food-allergy
 
+      - name: Seed bundled dishes
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: pnpm --filter api db:seed-dishes
+
       - name: Seed bundled marketplace catalog
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}

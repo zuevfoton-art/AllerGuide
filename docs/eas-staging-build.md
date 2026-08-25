@@ -23,6 +23,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 | `EXPO_PUBLIC_YC_OCR` | (нет) | **`true`** |
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | (нет) | **`true`** (нужен API `YC_SCAN_INTENT_LLM`) |
 | `EXPO_PUBLIC_YC_SEARCH` | (нет) | **`true`** (нужен API `YC_SEARCH_ENABLED`) |
+| `EXPO_PUBLIC_DISH_LLM` | (нет) | **`true`** (нужен API `DISH_LLM_ENABLED` + `AI_SCAN_ENABLED`) |
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | `false` |
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | **`google`** (нужен EAS secret Maps key) |
 | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | (нет) | **`true`** (нужен Lockbox `YANDEX_MAPS_*` — `pnpm yc-stage-enable-yandex-maps`) |

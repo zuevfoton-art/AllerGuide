@@ -2,7 +2,10 @@ import {
   buildComponentsFromProduct,
   enrichLocalComponentsWithProduct,
   findDishRecipe,
+  isUsefulCatalogMatch,
+  normalizeSearchText,
   resolveDishComponents,
+  scoreCatalogProductHit,
   type DishComponentDef,
   type ProductDishInput,
 } from '@allerguide/core';
@@ -40,24 +43,8 @@ type SearchHit = ProductDishInput & {
 const searchCache = new Map<string, { at: number; hits: SearchHit[] }>();
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
-function normalizeQuery(value: string): string {
-  return value.trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ');
-}
-
 function scoreProduct(query: string, product: SearchHit): number {
-  const q = normalizeQuery(query);
-  const name = normalizeQuery(product.name);
-  let score = 0;
-  if (name === q) score += 100;
-  else if (name.includes(q) || q.includes(name)) score += 60;
-  else {
-    const tokens = q.split(' ').filter((t) => t.length > 2);
-    score += tokens.filter((t) => name.includes(t)).length * 15;
-  }
-  if (product.allergenTags?.length) score += 10;
-  if (product.ingredients && product.ingredients.length > 20) score += 8;
-  if (product.traceTags?.length) score += 3;
-  return score;
+  return scoreCatalogProductHit(query, product);
 }
 
 function toSearchHit(
@@ -75,7 +62,7 @@ function toSearchHit(
 }
 
 async function searchProducts(query: string): Promise<SearchHit[]> {
-  const key = normalizeQuery(query);
+  const key = normalizeSearchText(query);
   const cached = searchCache.get(key);
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.hits;
 
@@ -83,7 +70,7 @@ async function searchProducts(query: string): Promise<SearchHit[]> {
   const seen = new Set<string>();
 
   const pushAll = (
-    products: Array<CatalogProduct | OpenFoodFactsProduct>,
+    products: (CatalogProduct | OpenFoodFactsProduct)[],
     source: 'catalog' | 'openfoodfacts',
   ) => {
     for (const product of products) {
@@ -129,7 +116,7 @@ export async function enrichDishFromOpenFoods(
   const bestScore = best ? scoreProduct(food, best) : 0;
 
   // Weak name match — ignore OFF noise for known local dishes.
-  const usefulOff = best && bestScore >= 40 ? best : null;
+  const usefulOff = best && isUsefulCatalogMatch(bestScore) ? best : null;
 
   if (!localComponents.length && !usefulOff) return null;
 

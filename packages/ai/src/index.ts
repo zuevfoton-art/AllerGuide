@@ -4,6 +4,7 @@ export * from './ocr';
 export * from './prescription-ocr';
 export * from './scan-intent';
 export * from './search-ingredients';
+export * from './dish-resolve';
 export * from './dish-vision';
 export * from './scan-evidence';
 export * from './medicine-vision';

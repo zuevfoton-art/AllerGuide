@@ -1,7 +1,6 @@
 import {
   Image,
   Text,
-  TextInput,
   Pressable,
   StyleSheet,
   View,
@@ -37,6 +36,8 @@ import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { ScannerDishVisionCard } from '@/src/components/ScannerDishVisionCard';
+import { DishNameField } from '@/src/components/DishNameField';
+import { useDishSuggestions } from '@/src/hooks/use-dish-suggestions';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
@@ -107,7 +108,7 @@ export default function ScannerScreen() {
   const [input, setInput] = useState('');
   const [entryMode, setEntryMode] = useState<CameraEntryMode>('scanner');
   const [manualOpen, setManualOpen] = useState(false);
-  const [ingredientsOpen, setIngredientsOpen] = useState(false);
+  const [ingredientsOpen, setIngredientsOpen] = useState(true);
   const [trendsOpen, setTrendsOpen] = useState(false);
   const [listTab, setListTab] = useState<ListTab>('recent');
   const [result, setResult] = useState<ScanResultExtended | null>(null);
@@ -153,6 +154,9 @@ export default function ScannerScreen() {
   const verdictColors = useZoneColors(verdictZone);
 
   const compositionText = result?.productIngredients?.trim() || input.trim();
+  const { suggestions: dishSuggestions, searching: dishSearching } = useDishSuggestions(input, {
+    enabled: manualOpen,
+  });
 
   const refreshHistory = useCallback(() => {
     const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
@@ -720,15 +724,19 @@ export default function ScannerScreen() {
 
       {manualOpen ? (
         <View style={styles.manualBlock}>
-          <TextInput
-            testID="scanner-input"
+          <DishNameField
+            inputTestID="scanner-input"
             value={input}
-            onChangeText={setInput}
             placeholder={t('scanner.manualPlaceholder')}
-            placeholderTextColor={theme.colors.textMuted}
-            accessibilityLabel={t('scanner.manualPlaceholder')}
+            label={t('scanner.manualPlaceholder')}
+            suggestions={dishSuggestions}
+            loading={dishSearching}
             multiline
-            style={styles.input}
+            onChange={setInput}
+            onSelect={(suggestion) => {
+              setInput(suggestion.name);
+              void runCheck(suggestion.name, isManualBarcodeInput(suggestion.name));
+            }}
           />
           <Button
             testID="scanner-check"
@@ -894,7 +902,7 @@ export default function ScannerScreen() {
             </View>
           ) : null}
 
-          {!isVisionOnly && compositionText.length > 20 ? (
+          {!isVisionOnly && compositionText.length > 0 ? (
             <View style={styles.ingredientsBlock}>
               <Pressable
                 onPress={() => setIngredientsOpen((v) => !v)}
@@ -911,11 +919,17 @@ export default function ScannerScreen() {
                 />
               </Pressable>
               {ingredientsOpen ? (
-                <Text style={styles.ingredientsBody}>
+                <Text style={styles.ingredientsBody} testID="scanner-ingredients">
                   {t('scanner.ingredientsLabel')}: {compositionText}
                 </Text>
               ) : null}
             </View>
+          ) : null}
+
+          {result?.irritantMatches && result.irritantMatches.length > 0 ? (
+            <Text style={styles.sourceMeta} testID="scanner-irritants">
+              {t('scanner.irritantsLabel')}: {result.irritantMatches.join(', ')}
+            </Text>
           ) : null}
 
           {displayResult.source ? (

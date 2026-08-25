@@ -1,0 +1,3654 @@
+[
+  {
+    "id": "borscht",
+    "names": [
+      "борщ",
+      "борща",
+      "borscht",
+      "borsch"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beet",
+      "cabbage",
+      "potato",
+      "carrot",
+      "tomato",
+      "onion",
+      "beef",
+      "sour-cream",
+      "garlic"
+    ]
+  },
+  {
+    "id": "shchi",
+    "names": [
+      "щи",
+      "кислые щи"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "cabbage",
+      "potato",
+      "carrot",
+      "onion",
+      "beef",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "okroshka",
+    "names": [
+      "окрошка"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "cucumber",
+      "eggs",
+      "sour-cream",
+      "greens",
+      "beef"
+    ]
+  },
+  {
+    "id": "solyanka",
+    "names": [
+      "солянка"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "pork",
+      "onion",
+      "tomato",
+      "cucumber",
+      "lemon"
+    ]
+  },
+  {
+    "id": "chicken-soup",
+    "names": [
+      "куриный суп",
+      "суп с курицей",
+      "бульон куриный"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "chicken",
+      "carrot",
+      "onion",
+      "potato",
+      "greens"
+    ]
+  },
+  {
+    "id": "fish-soup",
+    "names": [
+      "уха",
+      "рыбный суп"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "fish",
+      "potato",
+      "carrot",
+      "onion",
+      "greens"
+    ]
+  },
+  {
+    "id": "olivier",
+    "names": [
+      "оливье",
+      "салат оливье"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "carrot",
+      "eggs",
+      "peas",
+      "mayo",
+      "cucumber",
+      "chicken"
+    ]
+  },
+  {
+    "id": "vinaigrette",
+    "names": [
+      "винегрет"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beet",
+      "potato",
+      "carrot",
+      "cabbage",
+      "peas",
+      "oil",
+      "onion"
+    ]
+  },
+  {
+    "id": "caesar",
+    "names": [
+      "цезарь",
+      "салат цезарь",
+      "caesar"
+    ],
+    "cuisine": "european",
+    "components": [
+      "chicken",
+      "cheese",
+      "eggs",
+      "bread",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "greek-salad",
+    "names": [
+      "греческий салат",
+      "греческий"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "tomato",
+      "cucumber",
+      "cheese",
+      "oil",
+      "onion"
+    ]
+  },
+  {
+    "id": "plov",
+    "names": [
+      "плов"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "rice",
+      "carrot",
+      "onion",
+      "beef",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "pelmeni",
+    "names": [
+      "пельмени",
+      "пельмень"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "beef",
+      "pork",
+      "onion",
+      "eggs",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "vareniki",
+    "names": [
+      "вареники"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "potato",
+      "eggs",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "blini",
+    "names": [
+      "блины",
+      "блинчики",
+      "блины с"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "milk",
+      "eggs",
+      "butter"
+    ]
+  },
+  {
+    "id": "omelette",
+    "names": [
+      "омлет",
+      "яичница",
+      "яичниц"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "eggs",
+      "milk",
+      "butter"
+    ]
+  },
+  {
+    "id": "syrniki",
+    "names": [
+      "сырники"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "milk",
+      "eggs",
+      "wheat",
+      "sugar"
+    ]
+  },
+  {
+    "id": "milk-porridge",
+    "names": [
+      "каша молочная",
+      "овсянка на молоке",
+      "манная каша",
+      "рисовая каша"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "milk",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "buckwheat",
+    "names": [
+      "гречка",
+      "гречневая каша"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "buckwheat",
+      "butter"
+    ]
+  },
+  {
+    "id": "carbonara",
+    "names": [
+      "карбонара",
+      "pasta carbonara",
+      "паста карбонара"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "eggs",
+      "cheese",
+      "pork"
+    ]
+  },
+  {
+    "id": "lasagna",
+    "names": [
+      "лазанья",
+      "lasagna"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "beef",
+      "tomato",
+      "cheese",
+      "milk"
+    ]
+  },
+  {
+    "id": "pizza",
+    "names": [
+      "пицца",
+      "pizza"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "wheat",
+      "tomato",
+      "cheese",
+      "oil"
+    ]
+  },
+  {
+    "id": "burger",
+    "names": [
+      "бургер",
+      "гамбургер",
+      "чизбургер",
+      "burger"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "bread",
+      "beef",
+      "cheese",
+      "tomato",
+      "onion",
+      "mayo"
+    ]
+  },
+  {
+    "id": "shawarma",
+    "names": [
+      "шаурма",
+      "шаверма",
+      "донер"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "chicken",
+      "bread",
+      "cabbage",
+      "tomato",
+      "onion",
+      "mayo"
+    ]
+  },
+  {
+    "id": "sushi",
+    "names": [
+      "суши",
+      "роллы",
+      "ролл",
+      "sushi",
+      "сашими"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "fish",
+      "rice",
+      "seafood",
+      "soy",
+      "avocado"
+    ]
+  },
+  {
+    "id": "risotto",
+    "names": [
+      "ризотто",
+      "risotto"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "rice",
+      "cheese",
+      "butter",
+      "onion"
+    ]
+  },
+  {
+    "id": "paella",
+    "names": [
+      "паэлья",
+      "paella"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "rice",
+      "seafood",
+      "chicken",
+      "tomato",
+      "oil"
+    ]
+  },
+  {
+    "id": "steak",
+    "names": [
+      "стейк",
+      "steak"
+    ],
+    "cuisine": "european",
+    "components": [
+      "beef",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "kotleti",
+    "names": [
+      "котлеты",
+      "котлета"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "bread",
+      "eggs",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "zharkoye",
+    "names": [
+      "жаркое"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "potato",
+      "carrot",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "kholodets",
+    "names": [
+      "холодец",
+      "студень"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "pork",
+      "carrot",
+      "garlic",
+      "eggs"
+    ]
+  },
+  {
+    "id": "hummus",
+    "names": [
+      "хумус",
+      "hummus"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "chickpea",
+      "tahini",
+      "lemon",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "falafel",
+    "names": [
+      "фалафель",
+      "falafel"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "chickpea",
+      "onion",
+      "garlic",
+      "oil",
+      "wheat"
+    ]
+  },
+  {
+    "id": "smoothie",
+    "names": [
+      "смузи",
+      "smoothie"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "banana",
+      "apple",
+      "strawberry",
+      "milk"
+    ]
+  },
+  {
+    "id": "compote",
+    "names": [
+      "компот"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "apple",
+      "sugar"
+    ]
+  },
+  {
+    "id": "ice-cream",
+    "names": [
+      "мороженое",
+      "ice cream",
+      "пломбир"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "milk",
+      "eggs",
+      "sugar"
+    ]
+  },
+  {
+    "id": "cake",
+    "names": [
+      "торт",
+      "пирожное",
+      "кекс"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "eggs",
+      "milk",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "cappuccino",
+    "names": [
+      "капучино",
+      "латте",
+      "cappuccino",
+      "latte",
+      "кофе с молоком"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "milk"
+    ]
+  },
+  {
+    "id": "chocolate",
+    "names": [
+      "шоколад",
+      "горячий шоколад"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "chocolate",
+      "milk",
+      "sugar"
+    ]
+  },
+  {
+    "id": "fruit-salad",
+    "names": [
+      "фруктовый салат"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "apple",
+      "banana",
+      "citrus",
+      "kiwi",
+      "strawberry"
+    ]
+  },
+  {
+    "id": "mushroom-soup",
+    "names": [
+      "грибной суп"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "mushrooms",
+      "potato",
+      "onion",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "spaghetti-bolognese",
+    "names": [
+      "спагетти болоньезе",
+      "паста болоньезе",
+      "spaghetti bolognese",
+      "bolognese"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "beef",
+      "tomato",
+      "onion",
+      "garlic",
+      "oil",
+      "cheese"
+    ]
+  },
+  {
+    "id": "penne-arrabbiata",
+    "names": [
+      "пенне аррабиата",
+      "аррабиата",
+      "arrabbiata"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "tomato",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "pesto-pasta",
+    "names": [
+      "паста песто",
+      "песто",
+      "pesto"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "cheese",
+      "oil",
+      "garlic",
+      "tree-nuts"
+    ]
+  },
+  {
+    "id": "aglio-olio",
+    "names": [
+      "альо олио",
+      "aglio olio",
+      "паста с чесноком"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "fettuccine-alfredo",
+    "names": [
+      "альфредо",
+      "феттуччине",
+      "alfredo"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "milk",
+      "butter",
+      "cheese"
+    ]
+  },
+  {
+    "id": "ravioli",
+    "names": [
+      "равиоли",
+      "ravioli"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "cheese",
+      "eggs",
+      "wheat"
+    ]
+  },
+  {
+    "id": "gnocchi",
+    "names": [
+      "ньокки",
+      "gnocchi"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "potato",
+      "wheat",
+      "eggs",
+      "cheese"
+    ]
+  },
+  {
+    "id": "minestrone",
+    "names": [
+      "минестроне",
+      "minestrone"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "tomato",
+      "beans",
+      "carrot",
+      "onion",
+      "celery",
+      "pasta"
+    ]
+  },
+  {
+    "id": "caprese",
+    "names": [
+      "капрезе",
+      "caprese"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "tomato",
+      "cheese",
+      "oil"
+    ]
+  },
+  {
+    "id": "bruschetta",
+    "names": [
+      "брускетта",
+      "bruschetta"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "bread",
+      "tomato",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "margherita",
+    "names": [
+      "маргарита",
+      "пицца маргарита"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "wheat",
+      "tomato",
+      "cheese",
+      "oil"
+    ]
+  },
+  {
+    "id": "pepperoni-pizza",
+    "names": [
+      "пепперони",
+      "пицца пепперони"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "wheat",
+      "tomato",
+      "cheese",
+      "pork"
+    ]
+  },
+  {
+    "id": "tiramisu",
+    "names": [
+      "тирамису",
+      "tiramisu"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "eggs",
+      "milk",
+      "wheat",
+      "sugar"
+    ]
+  },
+  {
+    "id": "panna-cotta",
+    "names": [
+      "панна котта",
+      "panna cotta"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "milk",
+      "sugar"
+    ]
+  },
+  {
+    "id": "gelato",
+    "names": [
+      "джелато",
+      "gelato"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "milk",
+      "eggs",
+      "sugar"
+    ]
+  },
+  {
+    "id": "osso-buco",
+    "names": [
+      "оссобуко",
+      "osso buco"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "beef",
+      "tomato",
+      "onion",
+      "carrot",
+      "celery"
+    ]
+  },
+  {
+    "id": "chicken-parmesan",
+    "names": [
+      "чикен пармезан",
+      "куриный пармезан"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "chicken",
+      "wheat",
+      "tomato",
+      "cheese",
+      "eggs"
+    ]
+  },
+  {
+    "id": "ragu",
+    "names": [
+      "рагу",
+      "мясное рагу"
+    ],
+    "cuisine": "european",
+    "components": [
+      "beef",
+      "tomato",
+      "onion",
+      "carrot",
+      "celery"
+    ]
+  },
+  {
+    "id": "ratatouille",
+    "names": [
+      "рататуй",
+      "ratatouille"
+    ],
+    "cuisine": "european",
+    "components": [
+      "tomato",
+      "onion",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "quiche",
+    "names": [
+      "киш",
+      "киш лорен",
+      "quiche"
+    ],
+    "cuisine": "european",
+    "components": [
+      "wheat",
+      "eggs",
+      "milk",
+      "cheese"
+    ]
+  },
+  {
+    "id": "croissant",
+    "names": [
+      "круассан",
+      "croissant"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "butter",
+      "eggs",
+      "milk"
+    ]
+  },
+  {
+    "id": "crepes",
+    "names": [
+      "крепы",
+      "блинчики французские",
+      "crepes"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "milk",
+      "eggs",
+      "butter"
+    ]
+  },
+  {
+    "id": "french-onion-soup",
+    "names": [
+      "луковый суп",
+      "french onion soup"
+    ],
+    "cuisine": "european",
+    "components": [
+      "onion",
+      "bread",
+      "cheese",
+      "butter"
+    ]
+  },
+  {
+    "id": "nicoise",
+    "names": [
+      "низаз",
+      "салат нисуаз",
+      "nicoise"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "eggs",
+      "fish",
+      "tomato",
+      "oil",
+      "potato"
+    ]
+  },
+  {
+    "id": "paella-valenciana",
+    "names": [
+      "валенсийская паэлья"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "rice",
+      "chicken",
+      "beans",
+      "oil"
+    ]
+  },
+  {
+    "id": "gazpacho",
+    "names": [
+      "гаспачо",
+      "gazpacho"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "tomato",
+      "cucumber",
+      "garlic",
+      "oil",
+      "bread"
+    ]
+  },
+  {
+    "id": "tortilla-espanola",
+    "names": [
+      "испанская тортилья",
+      "тортилья"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "eggs",
+      "potato",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "pad-thai",
+    "names": [
+      "пад тай",
+      "pad thai"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "eggs",
+      "peanut",
+      "soy",
+      "oil"
+    ]
+  },
+  {
+    "id": "pho",
+    "names": [
+      "фо бо",
+      "фо",
+      "pho"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "beef",
+      "onion",
+      "greens"
+    ]
+  },
+  {
+    "id": "ramen",
+    "names": [
+      "рамен",
+      "ramen"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "eggs",
+      "soy",
+      "pork",
+      "oil"
+    ]
+  },
+  {
+    "id": "tom-yum",
+    "names": [
+      "том ям",
+      "tom yum"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "seafood",
+      "fish",
+      "lemon",
+      "greens"
+    ]
+  },
+  {
+    "id": "green-curry",
+    "names": [
+      "зеленое карри",
+      "green curry"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "oil",
+      "rice"
+    ]
+  },
+  {
+    "id": "fried-rice",
+    "names": [
+      "жареный рис",
+      "рис с овощами"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "rice",
+      "eggs",
+      "soy",
+      "oil",
+      "onion"
+    ]
+  },
+  {
+    "id": "spring-rolls",
+    "names": [
+      "спринг роллы",
+      "весенние роллы"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "carrot",
+      "cabbage",
+      "oil"
+    ]
+  },
+  {
+    "id": "dumplings",
+    "names": [
+      "димсамы",
+      "гедза",
+      "dumpling"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "pork",
+      "cabbage",
+      "soy"
+    ]
+  },
+  {
+    "id": "bibimbap",
+    "names": [
+      "пибимпап",
+      "bibimbap"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "rice",
+      "eggs",
+      "beef",
+      "oil",
+      "greens"
+    ]
+  },
+  {
+    "id": "kimchi",
+    "names": [
+      "кимчи",
+      "kimchi"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "cabbage",
+      "garlic"
+    ]
+  },
+  {
+    "id": "miso-soup",
+    "names": [
+      "мисо суп",
+      "miso"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "soy",
+      "greens"
+    ]
+  },
+  {
+    "id": "teriyaki-chicken",
+    "names": [
+      "терияки",
+      "курица терияки"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "soy",
+      "sugar",
+      "oil"
+    ]
+  },
+  {
+    "id": "poke",
+    "names": [
+      "поке",
+      "poke"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "fish",
+      "rice",
+      "avocado",
+      "soy",
+      "sesame"
+    ]
+  },
+  {
+    "id": "udon",
+    "names": [
+      "удон",
+      "udon"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "soy",
+      "onion"
+    ]
+  },
+  {
+    "id": "soba",
+    "names": [
+      "соба",
+      "soba"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "buckwheat",
+      "soy"
+    ]
+  },
+  {
+    "id": "onigiri",
+    "names": [
+      "онигири",
+      "onigiri"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "rice",
+      "fish",
+      "soy"
+    ]
+  },
+  {
+    "id": "tempura",
+    "names": [
+      "темпура",
+      "tempura"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "eggs",
+      "oil",
+      "seafood"
+    ]
+  },
+  {
+    "id": "yakitori",
+    "names": [
+      "якитори",
+      "yakitori"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "soy",
+      "sugar"
+    ]
+  },
+  {
+    "id": "katsu",
+    "names": [
+      "кацу",
+      "тонкацу",
+      "katsu"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "pork",
+      "wheat",
+      "eggs",
+      "oil"
+    ]
+  },
+  {
+    "id": "curry-rice",
+    "names": [
+      "карри с рисом",
+      "японское карри"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "rice",
+      "beef",
+      "carrot",
+      "potato",
+      "onion"
+    ]
+  },
+  {
+    "id": "khachapuri",
+    "names": [
+      "хачапури",
+      "хачапури по-аджарски"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "cheese",
+      "eggs",
+      "butter"
+    ]
+  },
+  {
+    "id": "khinkali",
+    "names": [
+      "хинкали"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "beef",
+      "pork",
+      "onion"
+    ]
+  },
+  {
+    "id": "shashlik",
+    "names": [
+      "шашлык",
+      "шашлычок"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "lyulya",
+    "names": [
+      "люля-кебаб",
+      "люля"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "onion",
+      "greens"
+    ]
+  },
+  {
+    "id": "dolma",
+    "names": [
+      "долма"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "rice",
+      "cabbage",
+      "onion",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "lobio",
+    "names": [
+      "лобио"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beans",
+      "onion",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "adjapsandali",
+    "names": [
+      "аджапсандали"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "tomato",
+      "onion",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "chakapuli",
+    "names": [
+      "чакапули"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "greens",
+      "onion"
+    ]
+  },
+  {
+    "id": "satsivi",
+    "names": [
+      "сациви"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "chicken",
+      "tree-nuts",
+      "garlic"
+    ]
+  },
+  {
+    "id": "lagman",
+    "names": [
+      "лагман"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "wheat",
+      "beef",
+      "onion",
+      "carrot",
+      "oil"
+    ]
+  },
+  {
+    "id": "manty",
+    "names": [
+      "манты"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "wheat",
+      "beef",
+      "onion"
+    ]
+  },
+  {
+    "id": "samsa",
+    "names": [
+      "самса"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "wheat",
+      "beef",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "beshbarmak",
+    "names": [
+      "бешбармак"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "wheat",
+      "beef",
+      "onion"
+    ]
+  },
+  {
+    "id": "shurpa",
+    "names": [
+      "шурпа",
+      "сорпа"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "beef",
+      "potato",
+      "carrot",
+      "onion"
+    ]
+  },
+  {
+    "id": "mastava",
+    "names": [
+      "мастава"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "rice",
+      "beef",
+      "carrot",
+      "onion"
+    ]
+  },
+  {
+    "id": "dimlama",
+    "names": [
+      "димлама"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "beef",
+      "potato",
+      "carrot",
+      "onion",
+      "cabbage"
+    ]
+  },
+  {
+    "id": "lepyoshka",
+    "names": [
+      "лепешка",
+      "тандырная лепешка"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "wheat",
+      "oil"
+    ]
+  },
+  {
+    "id": "borscht-ukrainian",
+    "names": [
+      "украинский борщ"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beet",
+      "cabbage",
+      "potato",
+      "carrot",
+      "tomato",
+      "beans",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "draniki",
+    "names": [
+      "драники",
+      "картофельные оладьи"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "eggs",
+      "wheat",
+      "oil"
+    ]
+  },
+  {
+    "id": "syrnaya-zapekanka",
+    "names": [
+      "запеканка творожная",
+      "творожная запеканка"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "milk",
+      "eggs",
+      "sugar",
+      "wheat"
+    ]
+  },
+  {
+    "id": "golubtsy",
+    "names": [
+      "голубцы"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "cabbage",
+      "beef",
+      "rice",
+      "tomato",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "beef-stroganoff",
+    "names": [
+      "бефстроганов",
+      "строганов"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "sour-cream",
+      "onion",
+      "mustard"
+    ]
+  },
+  {
+    "id": "pozharskie",
+    "names": [
+      "пожарские котлеты"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "chicken",
+      "bread",
+      "eggs",
+      "butter"
+    ]
+  },
+  {
+    "id": "seledka-shuba",
+    "names": [
+      "селедка под шубой",
+      "шуба"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "fish",
+      "beet",
+      "potato",
+      "carrot",
+      "eggs",
+      "mayo"
+    ]
+  },
+  {
+    "id": "mimosa-salad",
+    "names": [
+      "салат мимоза"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "fish",
+      "eggs",
+      "potato",
+      "mayo",
+      "cheese"
+    ]
+  },
+  {
+    "id": "crab-salad",
+    "names": [
+      "салат крабовый"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "eggs",
+      "mayo",
+      "eggs",
+      "rice"
+    ]
+  },
+  {
+    "id": "vinegret-herring",
+    "names": [
+      "форшмак"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "fish",
+      "apple",
+      "eggs",
+      "bread",
+      "onion"
+    ]
+  },
+  {
+    "id": "kasha-pumpkin",
+    "names": [
+      "тыквенная каша"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "milk",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "oatmeal",
+    "names": [
+      "овсянка",
+      "овсяная каша"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "milk",
+      "butter"
+    ]
+  },
+  {
+    "id": "granola",
+    "names": [
+      "гранола",
+      "мюсли"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "honey",
+      "tree-nuts",
+      "milk"
+    ]
+  },
+  {
+    "id": "yogurt-bowl",
+    "names": [
+      "йогурт с фруктами",
+      "гранола боул"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "milk",
+      "banana",
+      "strawberry",
+      "honey"
+    ]
+  },
+  {
+    "id": "avocado-toast",
+    "names": [
+      "тост с авокадо",
+      "авокадо тост"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "bread",
+      "avocado",
+      "eggs",
+      "oil"
+    ]
+  },
+  {
+    "id": "pancakes",
+    "names": [
+      "панкейки",
+      "оладьи",
+      "pancakes"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "milk",
+      "eggs",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "waffles",
+    "names": [
+      "вафли",
+      "венские вафли"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "eggs",
+      "milk",
+      "butter",
+      "sugar"
+    ]
+  },
+  {
+    "id": "english-breakfast",
+    "names": [
+      "английский завтрак"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "eggs",
+      "pork",
+      "bread",
+      "tomato"
+    ]
+  },
+  {
+    "id": "shakshuka",
+    "names": [
+      "шакшука",
+      "shakshuka"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "eggs",
+      "tomato",
+      "onion",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "menemen",
+    "names": [
+      "мененмен",
+      "турецкая яичница"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "eggs",
+      "tomato",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "labneh",
+    "names": [
+      "лабне",
+      "labneh"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "milk",
+      "oil"
+    ]
+  },
+  {
+    "id": "tabbouleh",
+    "names": [
+      "табуле",
+      "tabbouleh"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "wheat",
+      "tomato",
+      "lemon",
+      "greens",
+      "oil"
+    ]
+  },
+  {
+    "id": "fattoush",
+    "names": [
+      "фаттуш",
+      "fattoush"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "bread",
+      "tomato",
+      "cucumber",
+      "oil",
+      "lemon"
+    ]
+  },
+  {
+    "id": "baba-ganoush",
+    "names": [
+      "баба гануш",
+      "baba ganoush"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "tahini",
+      "lemon",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "kebab",
+    "names": [
+      "кебаб",
+      "кебаб из курицы"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "chicken",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "kofta",
+    "names": [
+      "кюфта",
+      "кофта"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "beef",
+      "onion",
+      "wheat"
+    ]
+  },
+  {
+    "id": "mansaf",
+    "names": [
+      "мансаф"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "beef",
+      "rice",
+      "milk"
+    ]
+  },
+  {
+    "id": "mujadara",
+    "names": [
+      "муджадара"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "rice",
+      "beans",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "couscous",
+    "names": [
+      "кускус",
+      "couscous"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "wheat",
+      "carrot",
+      "oil"
+    ]
+  },
+  {
+    "id": "tajine",
+    "names": [
+      "тажин",
+      "tagine"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "chicken",
+      "onion",
+      "lemon",
+      "oil"
+    ]
+  },
+  {
+    "id": "harira",
+    "names": [
+      "харира"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "tomato",
+      "beans",
+      "celery",
+      "onion"
+    ]
+  },
+  {
+    "id": "taco",
+    "names": [
+      "тако",
+      "taco"
+    ],
+    "cuisine": "american",
+    "components": [
+      "wheat",
+      "beef",
+      "tomato",
+      "cheese"
+    ]
+  },
+  {
+    "id": "burrito",
+    "names": [
+      "буррито",
+      "burrito"
+    ],
+    "cuisine": "american",
+    "components": [
+      "wheat",
+      "rice",
+      "beans",
+      "cheese",
+      "chicken"
+    ]
+  },
+  {
+    "id": "quesadilla",
+    "names": [
+      "кесадилья",
+      "quesadilla"
+    ],
+    "cuisine": "american",
+    "components": [
+      "wheat",
+      "cheese",
+      "chicken"
+    ]
+  },
+  {
+    "id": "nachos",
+    "names": [
+      "начос",
+      "nachos"
+    ],
+    "cuisine": "american",
+    "components": [
+      "wheat",
+      "cheese",
+      "beans",
+      "tomato"
+    ]
+  },
+  {
+    "id": "chili-con-carne",
+    "names": [
+      "чили кон карне",
+      "chili"
+    ],
+    "cuisine": "american",
+    "components": [
+      "beef",
+      "beans",
+      "tomato",
+      "onion"
+    ]
+  },
+  {
+    "id": "hot-dog",
+    "names": [
+      "хот-дог",
+      "hot dog"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "bread",
+      "pork",
+      "mustard"
+    ]
+  },
+  {
+    "id": "nuggets",
+    "names": [
+      "наггетсы",
+      "куриные наггетсы"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "chicken",
+      "wheat",
+      "eggs",
+      "oil"
+    ]
+  },
+  {
+    "id": "fries",
+    "names": [
+      "картофель фри",
+      "фри"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "potato",
+      "oil"
+    ]
+  },
+  {
+    "id": "club-sandwich",
+    "names": [
+      "клаб сэндвич",
+      "сэндвич"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "bread",
+      "chicken",
+      "eggs",
+      "tomato",
+      "mayo"
+    ]
+  },
+  {
+    "id": "caesar-wrap",
+    "names": [
+      "цезарь ролл",
+      "ролл цезарь"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "wheat",
+      "chicken",
+      "cheese",
+      "mayo"
+    ]
+  },
+  {
+    "id": "fish-and-chips",
+    "names": [
+      "фиш энд чипс",
+      "fish and chips"
+    ],
+    "cuisine": "european",
+    "components": [
+      "fish",
+      "potato",
+      "wheat",
+      "eggs",
+      "oil"
+    ]
+  },
+  {
+    "id": "shepherd-pie",
+    "names": [
+      "пастуший пирог",
+      "shepherd pie"
+    ],
+    "cuisine": "european",
+    "components": [
+      "beef",
+      "potato",
+      "carrot",
+      "onion"
+    ]
+  },
+  {
+    "id": "beef-wellington",
+    "names": [
+      "веллингтон"
+    ],
+    "cuisine": "european",
+    "components": [
+      "beef",
+      "wheat",
+      "eggs",
+      "mushrooms"
+    ]
+  },
+  {
+    "id": "roast-chicken",
+    "names": [
+      "запеченная курица",
+      "курица гриль"
+    ],
+    "cuisine": "european",
+    "components": [
+      "chicken",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "mashed-potato",
+    "names": [
+      "пюре",
+      "картофельное пюре"
+    ],
+    "cuisine": "european",
+    "components": [
+      "potato",
+      "milk",
+      "butter"
+    ]
+  },
+  {
+    "id": "mac-and-cheese",
+    "names": [
+      "мак энд чиз",
+      "макароны с сыром"
+    ],
+    "cuisine": "american",
+    "components": [
+      "pasta",
+      "cheese",
+      "milk",
+      "butter"
+    ]
+  },
+  {
+    "id": "lasagna-veg",
+    "names": [
+      "овощная лазанья"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "tomato",
+      "cheese",
+      "milk"
+    ]
+  },
+  {
+    "id": "pizza-4-cheese",
+    "names": [
+      "четыре сыра",
+      "пицца четыре сыра"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "wheat",
+      "cheese",
+      "oil"
+    ]
+  },
+  {
+    "id": "carbonara-mushroom",
+    "names": [
+      "грибная карбонара"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "pasta",
+      "eggs",
+      "cheese",
+      "mushrooms"
+    ]
+  },
+  {
+    "id": "olivier-crab",
+    "names": [
+      "оливье с крабом"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "eggs",
+      "mayo",
+      "cucumber"
+    ]
+  },
+  {
+    "id": "ukha-salmon",
+    "names": [
+      "уха из лосося"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "fish",
+      "potato",
+      "carrot",
+      "onion"
+    ]
+  },
+  {
+    "id": "solyanka-fish",
+    "names": [
+      "рыбная солянка"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "fish",
+      "onion",
+      "tomato",
+      "lemon"
+    ]
+  },
+  {
+    "id": "okroshka-kvass",
+    "names": [
+      "окрошка на квасе"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "cucumber",
+      "eggs",
+      "greens"
+    ]
+  },
+  {
+    "id": "blini-caviar",
+    "names": [
+      "блины с икрой"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "milk",
+      "eggs",
+      "butter",
+      "fish"
+    ]
+  },
+  {
+    "id": "syrniki-jam",
+    "names": [
+      "сырники с вареньем"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "milk",
+      "eggs",
+      "wheat",
+      "sugar"
+    ]
+  },
+  {
+    "id": "pelmeni-chicken",
+    "names": [
+      "пельмени куриные"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "chicken",
+      "onion",
+      "eggs"
+    ]
+  },
+  {
+    "id": "vareniki-cherry",
+    "names": [
+      "вареники с вишней"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "eggs",
+      "sugar"
+    ]
+  },
+  {
+    "id": "plov-chicken",
+    "names": [
+      "плов с курицей"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "rice",
+      "chicken",
+      "carrot",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "plov-lamb",
+    "names": [
+      "плов с бараниной"
+    ],
+    "cuisine": "central-asian",
+    "components": [
+      "rice",
+      "beef",
+      "carrot",
+      "onion",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "shawarma-beef",
+    "names": [
+      "шаурма говяжья"
+    ],
+    "cuisine": "middle-eastern",
+    "components": [
+      "beef",
+      "bread",
+      "cabbage",
+      "tomato",
+      "mayo"
+    ]
+  },
+  {
+    "id": "sushi-philadelphia",
+    "names": [
+      "филадельфия",
+      "ролл филадельфия"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "fish",
+      "rice",
+      "avocado",
+      "milk"
+    ]
+  },
+  {
+    "id": "sushi-california",
+    "names": [
+      "калифорния",
+      "ролл калифорния"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "seafood",
+      "rice",
+      "avocado",
+      "cucumber"
+    ]
+  },
+  {
+    "id": "pizza-hawaii",
+    "names": [
+      "гавайская пицца",
+      "пицца гавайская"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "wheat",
+      "tomato",
+      "cheese",
+      "chicken"
+    ]
+  },
+  {
+    "id": "pizza-diablo",
+    "names": [
+      "пицца диабло"
+    ],
+    "cuisine": "italian",
+    "components": [
+      "wheat",
+      "tomato",
+      "cheese",
+      "pork"
+    ]
+  },
+  {
+    "id": "cheeseburger",
+    "names": [
+      "чизбургер двойной"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "bread",
+      "beef",
+      "cheese",
+      "cucumber",
+      "mayo"
+    ]
+  },
+  {
+    "id": "veggie-burger",
+    "names": [
+      "вегги бургер",
+      "бургер овощной"
+    ],
+    "cuisine": "fast-food",
+    "components": [
+      "bread",
+      "beans",
+      "tomato",
+      "onion"
+    ]
+  },
+  {
+    "id": "caesar-shrimp",
+    "names": [
+      "цезарь с креветками"
+    ],
+    "cuisine": "european",
+    "components": [
+      "seafood",
+      "cheese",
+      "eggs",
+      "bread",
+      "oil"
+    ]
+  },
+  {
+    "id": "greek-gyro",
+    "names": [
+      "гирос",
+      "gyro"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "chicken",
+      "bread",
+      "tomato",
+      "onion",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "moussaka",
+    "names": [
+      "мусака",
+      "moussaka"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "beef",
+      "tomato",
+      "milk",
+      "cheese",
+      "oil"
+    ]
+  },
+  {
+    "id": "spanakopita",
+    "names": [
+      "спанакопита"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "wheat",
+      "cheese",
+      "eggs",
+      "greens"
+    ]
+  },
+  {
+    "id": "tzatziki",
+    "names": [
+      "дзадзики",
+      "tzatziki"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "milk",
+      "cucumber",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "baklava",
+    "names": [
+      "пахлава",
+      "баклава",
+      "baklava"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "tree-nuts",
+      "honey",
+      "butter"
+    ]
+  },
+  {
+    "id": "cheesecake",
+    "names": [
+      "чизкейк",
+      "cheesecake"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "milk",
+      "eggs",
+      "wheat",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "brownie",
+    "names": [
+      "брауни",
+      "brownie"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "chocolate",
+      "eggs",
+      "wheat",
+      "butter",
+      "sugar"
+    ]
+  },
+  {
+    "id": "eclair",
+    "names": [
+      "эклер",
+      "eclair"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "eggs",
+      "milk",
+      "butter",
+      "sugar"
+    ]
+  },
+  {
+    "id": "napoleon",
+    "names": [
+      "наполеон"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "butter",
+      "milk",
+      "eggs",
+      "sugar"
+    ]
+  },
+  {
+    "id": "medovik",
+    "names": [
+      "медовик"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "honey",
+      "eggs",
+      "milk",
+      "butter"
+    ]
+  },
+  {
+    "id": "apple-pie",
+    "names": [
+      "яблочный пирог",
+      "шарлотка"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "apple",
+      "wheat",
+      "eggs",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "pancake-honey",
+    "names": [
+      "блины с медом"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "milk",
+      "eggs",
+      "honey"
+    ]
+  },
+  {
+    "id": "fruit-smoothie-bowl",
+    "names": [
+      "смузи боул"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "banana",
+      "strawberry",
+      "apple",
+      "milk"
+    ]
+  },
+  {
+    "id": "borscht-green",
+    "names": [
+      "зеленый борщ",
+      "щавелевый суп"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "eggs",
+      "sour-cream",
+      "greens"
+    ]
+  },
+  {
+    "id": "rassolnik",
+    "names": [
+      "рассольник"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "potato",
+      "cucumber",
+      "carrot",
+      "onion"
+    ]
+  },
+  {
+    "id": "ukrainian-vareniki",
+    "names": [
+      "вареники с картошкой"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "potato",
+      "onion",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "lard-sandwich",
+    "names": [
+      "бутерброд с салом"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "bread",
+      "pork",
+      "garlic"
+    ]
+  },
+  {
+    "id": "kvass-okroshka-kefir",
+    "names": [
+      "окрошка на кефире"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "cucumber",
+      "eggs",
+      "sour-cream",
+      "greens"
+    ]
+  },
+  {
+    "id": "chicken-kiev",
+    "names": [
+      "котлета по-киевски"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "chicken",
+      "butter",
+      "wheat",
+      "eggs"
+    ]
+  },
+  {
+    "id": "beef-az",
+    "names": [
+      "азу"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "potato",
+      "tomato",
+      "onion",
+      "cucumber"
+    ]
+  },
+  {
+    "id": "chanakhi",
+    "names": [
+      "чанахи"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "tomato",
+      "beans",
+      "onion"
+    ]
+  },
+  {
+    "id": "kharcho",
+    "names": [
+      "харчо"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "rice",
+      "tomato",
+      "garlic",
+      "greens"
+    ]
+  },
+  {
+    "id": "chakhokhbili",
+    "names": [
+      "чахохбили"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "chicken",
+      "tomato",
+      "onion",
+      "garlic"
+    ]
+  },
+  {
+    "id": "ojakhuri",
+    "names": [
+      "оджахури"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "pork",
+      "potato",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "piti",
+    "names": [
+      "пити"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "chickpea",
+      "onion"
+    ]
+  },
+  {
+    "id": "dovga",
+    "names": [
+      "довга"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "milk",
+      "greens",
+      "rice"
+    ]
+  },
+  {
+    "id": "kutab",
+    "names": [
+      "кутабы"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "greens",
+      "cheese"
+    ]
+  },
+  {
+    "id": "qutab-meat",
+    "names": [
+      "кутабы с мясом"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "beef",
+      "onion"
+    ]
+  },
+  {
+    "id": "bozbash",
+    "names": [
+      "бозбаш"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "beef",
+      "chickpea",
+      "potato",
+      "onion"
+    ]
+  },
+  {
+    "id": "saj",
+    "names": [
+      "садж"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "chicken",
+      "potato",
+      "tomato",
+      "onion"
+    ]
+  },
+  {
+    "id": "lavash-roll",
+    "names": [
+      "рулет из лаваша",
+      "лаваш с начинкой"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "cheese",
+      "greens"
+    ]
+  },
+  {
+    "id": "cheburek",
+    "names": [
+      "чебурек"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "beef",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "belyash",
+    "names": [
+      "беляш"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "beef",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "pirozhki",
+    "names": [
+      "пирожки",
+      "пирожок"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "eggs",
+      "oil"
+    ]
+  },
+  {
+    "id": "kurnik",
+    "names": [
+      "курник"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "chicken",
+      "eggs",
+      "rice"
+    ]
+  },
+  {
+    "id": "kulebyaka",
+    "names": [
+      "кулебяка"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "fish",
+      "eggs",
+      "rice"
+    ]
+  },
+  {
+    "id": "rasstegai",
+    "names": [
+      "расстегай"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "wheat",
+      "fish",
+      "eggs"
+    ]
+  },
+  {
+    "id": "oladi-zucchini",
+    "names": [
+      "оладьи из кабачков"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "eggs",
+      "wheat",
+      "oil"
+    ]
+  },
+  {
+    "id": "stuffed-pepper",
+    "names": [
+      "фаршированный перец"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "rice",
+      "tomato",
+      "sour-cream"
+    ]
+  },
+  {
+    "id": "stuffed-zucchini",
+    "names": [
+      "фаршированные кабачки"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beef",
+      "rice",
+      "tomato"
+    ]
+  },
+  {
+    "id": "eggplant-caviar",
+    "names": [
+      "баклажанная икра"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "tomato",
+      "onion",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "squash-caviar",
+    "names": [
+      "кабачковая икра"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "tomato",
+      "onion",
+      "oil"
+    ]
+  },
+  {
+    "id": "olivier-vegan",
+    "names": [
+      "оливье постный"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "potato",
+      "carrot",
+      "peas",
+      "cucumber",
+      "oil"
+    ]
+  },
+  {
+    "id": "vinaigrette-herring",
+    "names": [
+      "винегрет с селедкой"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beet",
+      "potato",
+      "carrot",
+      "fish",
+      "oil"
+    ]
+  },
+  {
+    "id": "mushroom-julienne",
+    "names": [
+      "жюльен"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "mushrooms",
+      "milk",
+      "cheese",
+      "onion"
+    ]
+  },
+  {
+    "id": "chicken-tabaka",
+    "names": [
+      "цыпленок табака"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "chicken",
+      "garlic",
+      "oil"
+    ]
+  },
+  {
+    "id": "lula-chicken",
+    "names": [
+      "люля из курицы"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "chicken",
+      "onion",
+      "greens"
+    ]
+  },
+  {
+    "id": "adjika-chicken",
+    "names": [
+      "курица в аджике"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "chicken",
+      "tomato",
+      "garlic"
+    ]
+  },
+  {
+    "id": "khachapuri-imeruli",
+    "names": [
+      "хачапури имеретинский"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "cheese",
+      "eggs"
+    ]
+  },
+  {
+    "id": "khachapuri-megrelian",
+    "names": [
+      "хачапури мегрельский"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "cheese",
+      "butter"
+    ]
+  },
+  {
+    "id": "lobiani",
+    "names": [
+      "лобиани"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "beans",
+      "onion"
+    ]
+  },
+  {
+    "id": "achma",
+    "names": [
+      "ачма"
+    ],
+    "cuisine": "caucasian",
+    "components": [
+      "wheat",
+      "cheese",
+      "butter"
+    ]
+  },
+  {
+    "id": "churchkhela",
+    "names": [
+      "чурчхела"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "tree-nuts",
+      "sugar"
+    ]
+  },
+  {
+    "id": "gozinaki",
+    "names": [
+      "гозинаки"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "tree-nuts",
+      "honey"
+    ]
+  },
+  {
+    "id": "pakhlava-walnut",
+    "names": [
+      "пахлава с грецким"
+    ],
+    "cuisine": "dessert",
+    "components": [
+      "wheat",
+      "tree-nuts",
+      "honey",
+      "butter"
+    ]
+  },
+  {
+    "id": "ice-latte",
+    "names": [
+      "айс латте",
+      "ice latte"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "milk"
+    ]
+  },
+  {
+    "id": "cocoa",
+    "names": [
+      "какао",
+      "горячее какао"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "milk",
+      "chocolate",
+      "sugar"
+    ]
+  },
+  {
+    "id": "milkshake",
+    "names": [
+      "молочный коктейль",
+      "милкшейк"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "milk",
+      "sugar",
+      "milk"
+    ]
+  },
+  {
+    "id": "kefir",
+    "names": [
+      "кефир"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "milk"
+    ]
+  },
+  {
+    "id": "ryazhenka",
+    "names": [
+      "ряженка"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "milk"
+    ]
+  },
+  {
+    "id": "compote-berry",
+    "names": [
+      "ягодный компот"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "strawberry",
+      "sugar"
+    ]
+  },
+  {
+    "id": "morse",
+    "names": [
+      "морс"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "strawberry",
+      "sugar"
+    ]
+  },
+  {
+    "id": "lemonade",
+    "names": [
+      "лимонад",
+      "домашний лимонад"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "lemon",
+      "sugar"
+    ]
+  },
+  {
+    "id": "kvass",
+    "names": [
+      "квас"
+    ],
+    "cuisine": "drinks",
+    "components": [
+      "wheat",
+      "sugar"
+    ]
+  },
+  {
+    "id": "borscht-cold",
+    "names": [
+      "холодник",
+      "холодный борщ"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beet",
+      "cucumber",
+      "eggs",
+      "sour-cream",
+      "greens"
+    ]
+  },
+  {
+    "id": "botvinya",
+    "names": [
+      "ботвинья"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "beet",
+      "fish",
+      "greens"
+    ]
+  },
+  {
+    "id": "tyurya",
+    "names": [
+      "тюря"
+    ],
+    "cuisine": "east-slavic",
+    "components": [
+      "bread",
+      "oil"
+    ]
+  },
+  {
+    "id": "kasha-millet",
+    "names": [
+      "пшенная каша"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "milk",
+      "butter",
+      "sugar"
+    ]
+  },
+  {
+    "id": "kasha-rice-milk",
+    "names": [
+      "молочная рисовая"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "rice",
+      "milk",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "kasha-semolina",
+    "names": [
+      "манка",
+      "манная"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "wheat",
+      "milk",
+      "sugar",
+      "butter"
+    ]
+  },
+  {
+    "id": "cottage-cheese",
+    "names": [
+      "творог со сметаной"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "milk",
+      "sour-cream",
+      "sugar"
+    ]
+  },
+  {
+    "id": "eggs-benedict",
+    "names": [
+      "яйца бенедикт",
+      "бенедикт"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "eggs",
+      "bread",
+      "butter"
+    ]
+  },
+  {
+    "id": "porridge-chia",
+    "names": [
+      "чиа пудинг"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "milk",
+      "honey",
+      "banana"
+    ]
+  },
+  {
+    "id": "protein-bowl",
+    "names": [
+      "боул с курицей"
+    ],
+    "cuisine": "breakfast",
+    "components": [
+      "chicken",
+      "rice",
+      "avocado",
+      "greens"
+    ]
+  },
+  {
+    "id": "caesar-salmon",
+    "names": [
+      "цезарь с лососем"
+    ],
+    "cuisine": "european",
+    "components": [
+      "fish",
+      "cheese",
+      "eggs",
+      "bread",
+      "oil"
+    ]
+  },
+  {
+    "id": "nicoise-tuna",
+    "names": [
+      "нисуаз с тунцом"
+    ],
+    "cuisine": "mediterranean",
+    "components": [
+      "fish",
+      "eggs",
+      "tomato",
+      "potato",
+      "oil"
+    ]
+  },
+  {
+    "id": "poke-salmon",
+    "names": [
+      "поке с лососем"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "fish",
+      "rice",
+      "avocado",
+      "soy",
+      "sesame"
+    ]
+  },
+  {
+    "id": "poke-tuna",
+    "names": [
+      "поке с тунцом"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "fish",
+      "rice",
+      "avocado",
+      "soy"
+    ]
+  },
+  {
+    "id": "ramen-miso",
+    "names": [
+      "мисо рамен"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "soy",
+      "eggs",
+      "oil"
+    ]
+  },
+  {
+    "id": "udon-tempura",
+    "names": [
+      "удон темпура"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "seafood",
+      "eggs",
+      "oil",
+      "soy"
+    ]
+  },
+  {
+    "id": "pad-see-ew",
+    "names": [
+      "пад си иу"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "eggs",
+      "soy",
+      "oil"
+    ]
+  },
+  {
+    "id": "som-tam",
+    "names": [
+      "сом там",
+      "салат из папайи"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "peanut",
+      "lemon",
+      "garlic"
+    ]
+  },
+  {
+    "id": "laksa",
+    "names": [
+      "лакса"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "seafood",
+      "eggs"
+    ]
+  },
+  {
+    "id": "nasi-goreng",
+    "names": [
+      "nasi goreng",
+      "наси горенг"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "rice",
+      "eggs",
+      "soy",
+      "oil"
+    ]
+  },
+  {
+    "id": "satay",
+    "names": [
+      "сатай",
+      "satay"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "peanut",
+      "soy"
+    ]
+  },
+  {
+    "id": "hainan-chicken",
+    "names": [
+      "хайнаньская курица"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "rice",
+      "oil"
+    ]
+  },
+  {
+    "id": "mapo-tofu",
+    "names": [
+      "мапо тофу"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "soy",
+      "oil",
+      "garlic"
+    ]
+  },
+  {
+    "id": "kung-pao",
+    "names": [
+      "кун пао",
+      "гунбао"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "peanut",
+      "soy",
+      "oil"
+    ]
+  },
+  {
+    "id": "sweet-sour-pork",
+    "names": [
+      "свинина в кисло-сладком"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "pork",
+      "sugar",
+      "oil"
+    ]
+  },
+  {
+    "id": "peking-duck",
+    "names": [
+      "утка по-пекински"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "chicken",
+      "wheat",
+      "onion"
+    ]
+  },
+  {
+    "id": "xiaolongbao",
+    "names": [
+      "сяолунбао"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "pork"
+    ]
+  },
+  {
+    "id": "bao",
+    "names": [
+      "бао",
+      "баоцзы"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "pork"
+    ]
+  },
+  {
+    "id": "congee",
+    "names": [
+      "конджи",
+      "рисовая каша азиатская"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "rice",
+      "chicken"
+    ]
+  },
+  {
+    "id": "banh-mi",
+    "names": [
+      "бань ми",
+      "banh mi"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "wheat",
+      "pork",
+      "carrot",
+      "mayo"
+    ]
+  },
+  {
+    "id": "bun-cha",
+    "names": [
+      "бун ча"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "pork",
+      "greens",
+      "oil"
+    ]
+  },
+  {
+    "id": "goi-cuon",
+    "names": [
+      "гой куон",
+      "вьетнамские спринг-роллы"
+    ],
+    "cuisine": "asian",
+    "components": [
+      "seafood",
+      "greens",
+      "rice"
+    ]
+  }
+]

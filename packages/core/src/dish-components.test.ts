@@ -1,20 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import {
   DISH_CATALOG,
+  DISH_COMPONENTS_BY_ID,
   applyDishBreakdownToAnswers,
   buildComponentsFromProduct,
   buildDishBreakdown,
   enrichLocalComponentsWithProduct,
+  findDishMatches,
   findDishRecipe,
   parseSelectedComponentIds,
+  rankLocalDishSuggestions,
   resolveDishComponents,
   resolveSelectedIdsForEnrichment,
   serializeSelectedComponentIds,
 } from './dish-components';
+import bundledDishes from './data/dishes.json';
 
 describe('dish-components', () => {
   it('ships a starter catalog of common dishes', () => {
-    expect(DISH_CATALOG.length).toBeGreaterThanOrEqual(30);
+    expect(DISH_CATALOG.length).toBeGreaterThanOrEqual(150);
+    expect(DISH_CATALOG.every((recipe) => recipe.components.length > 0)).toBe(true);
+    for (const row of bundledDishes) {
+      for (const id of row.components) {
+        expect(DISH_COMPONENTS_BY_ID[id], id).toBeDefined();
+      }
+    }
+  });
+
+  it('resolves spaghetti bolognese including a common typo', () => {
+    expect(findDishRecipe('спагетти болоньезе')?.id).toBe('spaghetti-bolognese');
+    expect(findDishRecipe('спагетти балоньезе')?.id).toBe('spaghetti-bolognese');
+    const suggestions = rankLocalDishSuggestions('спагетти балоньезе');
+    expect(suggestions[0]?.id).toBe('spaghetti-bolognese');
+    expect(suggestions[0]?.ingredientsPreview).toContain('говядина');
   });
 
   it('resolves borscht components including beet and cabbage', () => {
@@ -59,6 +77,43 @@ describe('dish-components', () => {
   it('returns empty components for unknown dishes', () => {
     expect(resolveDishComponents('неизвестное блюдо xyz')).toEqual([]);
     expect(findDishRecipe('неизвестное блюдо xyz')).toBeNull();
+  });
+
+  it('matches every catalog name back to its recipe', () => {
+    for (const recipe of DISH_CATALOG) {
+      for (const name of recipe.names) {
+        expect(findDishRecipe(name)?.id, name).toBe(recipe.id);
+      }
+    }
+  });
+
+  it('tolerates typos, declension, and filler around known names', () => {
+    expect(findDishRecipe('карбонора')?.id).toBe('carbonara');
+    expect(findDishRecipe('оливьэ')?.id).toBe('olivier');
+    expect(findDishRecipe('лазання')?.id).toBe('lasagna');
+    expect(findDishRecipe('пельменей')?.id).toBe('pelmeni');
+    expect(findDishRecipe('котлету')?.id).toBe('kotleti');
+    expect(findDishRecipe('Съел борщ на обед')?.id).toBe('borscht');
+    expect(findDishRecipe('«Оливье» 250 г')?.id).toBe('olivier');
+  });
+
+  it('matches Latin queries to Cyrillic catalog names', () => {
+    expect(findDishRecipe('lasagna')?.id).toBe('lasagna');
+    expect(findDishRecipe('borscht')?.id).toBe('borscht');
+    expect(findDishRecipe('plov')?.id).toBe('plov');
+    expect(findDishRecipe('carbonara')?.id).toBe('carbonara');
+  });
+
+  it('does not collapse short dish names into each other', () => {
+    expect(findDishRecipe('щи')?.id).toBe('shchi');
+    expect(findDishRecipe('уха')?.id).toBe('fish-soup');
+    expect(findDishRecipe('чай')).toBeNull();
+  });
+
+  it('returns ranked candidates instead of a single silent pick', () => {
+    const matches = findDishMatches('салат', 5);
+    expect(matches.length).toBeGreaterThan(1);
+    expect(matches.every((item) => item.score >= 40)).toBe(true);
   });
 
   it('builds components from OFF-style allergen tags and ingredients text', () => {

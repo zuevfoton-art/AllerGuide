@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enable YC scan intent (B) + Yandex Search ingredients (C) on staging via Lockbox + redeploy.
+# Enable YC scan intent (B) + Yandex Search ingredients (C) + dish LLM resolve on staging via Lockbox + redeploy.
 #
 # Prerequisites:
 #   - yc CLI authenticated (lockbox + serverless.containers.editor)
@@ -38,10 +38,11 @@ chmod +x \
   "$ROOT/scripts/yc-lockbox-upsert.sh" \
   "$ROOT/scripts/yc-lockbox-deploy-secrets.sh" 2>/dev/null || true
 
-echo "=== Lockbox: YC_SCAN_INTENT_LLM + YC_SEARCH_ENABLED ($LOCKBOX_ID) ==="
+echo "=== Lockbox: YC_SCAN_INTENT_LLM + YC_SEARCH_ENABLED + DISH_LLM_ENABLED ($LOCKBOX_ID) ==="
 "$ROOT/scripts/yc-lockbox-upsert.sh" \
   "YC_SCAN_INTENT_LLM=true" \
-  "YC_SEARCH_ENABLED=true"
+  "YC_SEARCH_ENABLED=true" \
+  "DISH_LLM_ENABLED=true"
 
 if [[ "${SKIP_DEPLOY:-}" == "1" ]]; then
   echo "SKIP_DEPLOY=1 — Lockbox updated only. Redeploy container to pick up secrets."
@@ -97,8 +98,9 @@ feat = d.get("features") or {}
 ok = d.get("ok") is True
 intent = feat.get("ycScanIntentLlm") is True
 search = feat.get("ycSearch") is True
-print(json.dumps({"ok": ok, "ycScanIntentLlm": intent, "ycSearch": search, "features": feat}, ensure_ascii=False, indent=2))
-if not (ok and intent and search):
+dish_llm = feat.get("dishLlm") is True
+print(json.dumps({"ok": ok, "ycScanIntentLlm": intent, "ycSearch": search, "dishLlm": dish_llm, "features": feat}, ensure_ascii=False, indent=2))
+if not (ok and intent and search and dish_llm):
     sys.exit(1)
 PY
 

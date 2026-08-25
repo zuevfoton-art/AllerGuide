@@ -37,10 +37,12 @@ import {
   type DiaryAutoMetadata,
   type DiarySection,
   type DiaryStep,
+  type DishSuggestion,
   type MedicineCard,
   type PefZone,
 } from '@allerguide/core';
 import { DateTimeField } from '@/src/components/DateTimeField';
+import { DishNameField } from '@/src/components/DishNameField';
 import { MedicineNameField } from '@/src/components/MedicineNameField';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
@@ -54,6 +56,7 @@ import {
   removePhotoUri,
 } from '@/src/services/diary-photo-picker';
 import { recognizeDiaryDish } from '@/src/services/diary-dish-recognition-service';
+import { useDishSuggestions } from '@/src/hooks/use-dish-suggestions';
 import { useMedicineSuggestions } from '@/src/hooks/use-medicine-suggestions';
 import {
   rankLocalMedicineSuggestions,
@@ -162,6 +165,11 @@ export function DiaryWizard({
   const { suggestions: medicineSuggestions, searching: medicineSearching } = useMedicineSuggestions(
     medicineName,
     { enabled: isMedicineNameStep, profileId, localCards: localMedicineCards },
+  );
+  const isFoodStep = section.type === 'Питание' && step.id === 'food';
+  const { suggestions: dishSuggestions, searching: dishSearching } = useDishSuggestions(
+    nutritionFood,
+    { enabled: isFoodStep },
   );
 
   useEffect(() => {
@@ -308,6 +316,10 @@ export function DiaryWizard({
 
   const selectMedicineSuggestion = (card: MedicineCard) => {
     applyMedicineCard(card, 'replace');
+  };
+
+  const selectDishSuggestion = (suggestion: DishSuggestion) => {
+    setAnswer('food', suggestion.name);
   };
 
   const setFoodComponentSelection = (selectedIds: string[]) => {
@@ -496,6 +508,26 @@ export function DiaryWizard({
               onChange={(value) => setAnswer(medicineNameStepId, value)}
               onSelect={selectMedicineSuggestion}
             />
+          ) : isFoodStep ? (
+            <>
+              <DishNameField
+                value={sectionAnswers.food ?? ''}
+                placeholder={step.placeholder}
+                label={step.label}
+                suggestions={dishSuggestions}
+                loading={dishSearching || offEnriching}
+                onChange={(value) => setAnswer('food', value)}
+                onSelect={selectDishSuggestion}
+              />
+              {sectionAnswers.foodDishName && sectionAnswers.foodComponentsDef ? (
+                <Text style={styles.hint} testID="diary-dish-preview">
+                  {t('diaryWizard.dishPreviewTitle')}:{' '}
+                  {parseDishComponentDefs(sectionAnswers.foodComponentsDef)
+                    .map((item) => item.nameRu)
+                    .join(', ')}
+                </Text>
+              ) : null}
+            </>
           ) : (
             <StepField
               step={step}

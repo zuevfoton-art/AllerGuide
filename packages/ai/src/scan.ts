@@ -7,6 +7,7 @@ import {
   mapExternalAllergenNames,
   parseProfileAllergenIds,
   extractMayContainTerms,
+  findInciIrritants,
   stripMayContainPhrases,
   computeScanRiskLevel,
   buildScanVerdict,
@@ -27,6 +28,7 @@ export interface ScanResult {
   crossMatches: string[];
   traceMatches?: string[];
   unknownMatches?: string[];
+  irritantMatches?: string[];
   structuredMatches?: ScanMatch[];
   mode: ScanMode;
   level: RiskLevel;
@@ -215,6 +217,7 @@ export function runMockScan({
   }
 
   const unknownMatches = buildUnknownMatches(text, structuredMatches);
+  const irritantMatches = findInciIrritants(text).map((item) => item.nameRu);
   const allMatches = [...structuredMatches, ...unknownMatches];
 
   const level = computeScanRiskLevel(allMatches, allergens);
@@ -229,6 +232,7 @@ export function runMockScan({
     crossMatches: legacy.crossMatches,
     traceMatches: legacy.traceMatches,
     unknownMatches: legacy.unknownMatches,
+    irritantMatches,
     structuredMatches: allMatches,
     mode,
     level,

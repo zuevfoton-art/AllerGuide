@@ -59,9 +59,40 @@ export const products = catalogSchema.table(
     allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
     traceTags: jsonb('trace_tags').$type<string[]>().notNull().default([]),
     source: varchar('source', { length: 32 }).notNull().default('manual'),
+    category: varchar('category', { length: 32 }).notNull().default('food'),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('products_source_idx').on(table.source)],
+  (table) => [
+    index('products_source_idx').on(table.source),
+    index('products_category_idx').on(table.category),
+  ],
+);
+
+/**
+ * Curated dish recipes (typical composition). Seeded from `@allerguide/core`.
+ * LLM drafts use status=draft and stay out of the offline bundle.
+ */
+export const dishes = catalogSchema.table(
+  'dishes',
+  {
+    id: varchar('id', { length: 128 }).primaryKey(),
+    name: text('name').notNull(),
+    normalizedName: varchar('normalized_name', { length: 255 }).notNull(),
+    aliases: jsonb('aliases').$type<string[]>().notNull().default([]),
+    components: jsonb('components').$type<string[]>().notNull().default([]),
+    ingredients: text('ingredients').notNull().default(''),
+    allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
+    cuisine: varchar('cuisine', { length: 64 }).notNull().default(''),
+    source: varchar('source', { length: 32 }).notNull().default('bundled'),
+    status: varchar('status', { length: 16 }).notNull().default('published'),
+    confidence: varchar('confidence', { length: 16 }).notNull().default('high'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('dishes_normalized_name_uidx').on(table.normalizedName),
+    index('dishes_status_idx').on(table.status),
+    index('dishes_source_idx').on(table.source),
+  ],
 );
 
 /**
@@ -172,6 +203,8 @@ export type NewAllergenRow = typeof allergens.$inferInsert;
 export type CrossReactionRow = typeof crossReactions.$inferSelect;
 export type ProductRow = typeof products.$inferSelect;
 export type NewProductRow = typeof products.$inferInsert;
+export type DishRow = typeof dishes.$inferSelect;
+export type NewDishRow = typeof dishes.$inferInsert;
 export type MedicineRow = typeof medicines.$inferSelect;
 export type NewMedicineRow = typeof medicines.$inferInsert;
 export type MarketProductRow = typeof marketProducts.$inferSelect;

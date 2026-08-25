@@ -30,6 +30,7 @@ export interface HealthCheckResult {
     ycOcr?: boolean;
     ycScanIntentLlm?: boolean;
     ycSearch?: boolean;
+    dishLlm?: boolean;
     ycStt?: boolean;
     aiDishVision?: boolean;
     aiMedicineVision?: boolean;
@@ -103,6 +104,7 @@ function buildFeatures() {
   // Intent LLM uses the same provider as /api/scan (YandexGPT or OpenAI).
   const ycScanIntentLlm = process.env.YC_SCAN_INTENT_LLM === 'true' && aiScan;
   const ycSearch = process.env.YC_SEARCH_ENABLED === 'true' && ycCreds;
+  const dishLlm = process.env.DISH_LLM_ENABLED === 'true' && aiScan;
   const ycStt = process.env.YC_STT_ENABLED === 'true' && ycCreds;
   const aiDishVision = dishVisionConfigured();
   const aiMedicineVision = medicineVisionConfigured();
@@ -125,6 +127,7 @@ function buildFeatures() {
     ...(ycOcr ? { ycOcr: true } : {}),
     ...(ycScanIntentLlm ? { ycScanIntentLlm: true } : {}),
     ...(ycSearch ? { ycSearch: true } : {}),
+    ...(dishLlm ? { dishLlm: true } : {}),
     ...(ycStt ? { ycStt: true } : {}),
     ...(aiDishVision ? { aiDishVision: true } : {}),
     ...(aiMedicineVision ? { aiMedicineVision: true } : {}),

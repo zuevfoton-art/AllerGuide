@@ -4,9 +4,9 @@
 
 | Layer | Staging state |
 |-------|----------------|
-| Lockbox / health | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT` → `true` |
+| Lockbox / health | `AI_PROVIDER=yandex`, `AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `DISH_LLM_ENABLED`, `YC_STT` → `true` |
 | Model | `YC_GPT_MODEL=yandexgpt-lite` (explicit; A/B via Lockbox only) |
-| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `YC_STT`, `YC_STT_MIC` = `true` |
+| Mobile EAS `staging` | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `YC_OCR`, `YC_SCAN_INTENT_LLM`, `YC_SEARCH`, `DISH_LLM`, `YC_STT`, `YC_STT_MIC` = `true` |
 | Production EAS | OCR / intent / search / STT **off** until staging QA green |
 
 ---
@@ -49,6 +49,7 @@
 | `YC_GPT_MODEL` | default `yandexgpt-lite` (explicit) |
 | `SCAN_DAILY_BUDGET` | e.g. `100` |
 | `YC_SCAN_INTENT_LLM` / `YC_SEARCH_ENABLED` | options B/C (**on** staging) |
+| `DISH_LLM_ENABLED` | LLM dish resolve `/api/dishes/resolve` (**on** staging) |
 | `YC_STT_ENABLED` | Phase 3 SpeechKit (**off** until QA) |
 
 Smoke credentials:
@@ -155,6 +156,17 @@ BUILD_PUSH=1 ./scripts/yc-stage-enable-scan-intent-search.sh
 | Fallback | Skip (continue OCR text analysis) when off / 404 |
 
 `GET /api/health` → `features.ycSearch: true`.
+
+### Dish LLM resolve (`POST /api/dishes/resolve`) — **on staging**
+
+| Item | Detail |
+|------|--------|
+| API | `POST /api/dishes/resolve` · `DISH_LLM_ENABLED=true` + `AI_SCAN_ENABLED=true` |
+| Mobile | `EXPO_PUBLIC_DISH_LLM=true` · after local + OFF + Yandex Search miss in `lookupDishIngredientsForScan` |
+| Provider | Same scan LLM as `/api/scan` (YandexGPT on stage) |
+| Fallback | Skip when off / 404 |
+
+`GET /api/health` → `features.dishLlm: true`. Local/dev `.env.example` остаётся `false`.
 
 ### D — multimodal dish vision (`POST /api/scan/dish-vision`)
 

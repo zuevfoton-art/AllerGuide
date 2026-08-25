@@ -70,4 +70,16 @@ describe('runMockScan', () => {
     expect(result.traceMatches?.some((item) => item.includes('Арахис'))).toBe(true);
     expect(result.level).toBe('high');
   });
+
+  it('lists cosmetic INCI irritants without treating them as profile matches', () => {
+    const result = runMockScan({
+      mode: 'cosmetics',
+      text: 'Aqua, Parfum, Limonene, Linalool, Methylisothiazolinone',
+      profile,
+    });
+    expect(result.irritantMatches).toEqual(
+      expect.arrayContaining(['Лимонен', 'Линалоол', 'Метилизотиазолинон']),
+    );
+    expect(result.matches).not.toContain('Лимонен');
+  });
 });
