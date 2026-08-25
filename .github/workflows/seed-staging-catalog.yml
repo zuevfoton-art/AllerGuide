@@ -1,0 +1,44 @@
+name: Seed staging catalog
+
+# Writes reference rows into YC Managed Postgres (private VPC).
+# Allergens + food-allergy products + bundled marketplace seed.
+# Trigger: tag catalog-seed-* (workflow_dispatch is often 403 from this integration).
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "catalog-seed-*"
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10.34.4"
+
+jobs:
+  seed:
+    runs-on: [self-hosted, yc-staging-vpc]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Seed allergens, products, and bundled market catalog
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          DB_SSL: require
+        run: |
+          set -euo pipefail
+          pnpm --filter api db:seed-allergens
+          pnpm --filter api db:import-food-allergy
+          pnpm --filter api db:seed-market

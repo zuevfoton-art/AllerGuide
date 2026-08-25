@@ -20,6 +20,7 @@ migrations — do not run these by hand against a managed database:
 pnpm --filter api db:migrate          # apply versioned migrations
 pnpm --filter api db:seed-allergens   # populate catalog.allergens / cross_reactions
 pnpm --filter api db:import-food-allergy  # populate catalog.products
+pnpm --filter api db:seed-market      # published bundled marketplace → catalog.market_*
 ```
 
 To bootstrap a throwaway database directly from these files instead:

@@ -54,7 +54,19 @@ export async function listPublishedMarketplaceProducts(): Promise<{
   }
 }
 
-export async function upsertMarketplaceDraft(product: MarketplaceProduct): Promise<void> {
+/** Seed / curator write: `publish` forces published; otherwise keep an already-live row live. */
+export function resolveMarketplaceWriteStatus(
+  currentStatus: string | undefined,
+  publish: boolean,
+): 'draft' | 'published' {
+  if (publish) return 'published';
+  return currentStatus === 'published' ? 'published' : 'draft';
+}
+
+export async function upsertMarketplaceDraft(
+  product: MarketplaceProduct,
+  options?: { publish?: boolean },
+): Promise<void> {
   const now = new Date();
   const existing = await db
     .select()
@@ -63,7 +75,7 @@ export async function upsertMarketplaceDraft(product: MarketplaceProduct): Promi
     .limit(1);
   const current = existing[0];
 
-  const nextStatus = current?.moderationStatus === 'published' ? 'published' : 'draft';
+  const nextStatus = resolveMarketplaceWriteStatus(current?.moderationStatus, Boolean(options?.publish));
   const forAllergenIds = current?.forAllergenIds ?? product.forAllergenIds;
   const containsAllergenIds = current?.containsAllergenIds ?? product.containsAllergenIds;
   const why = current?.why?.trim() ? current.why : product.why;
