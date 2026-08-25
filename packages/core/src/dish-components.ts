@@ -1,6 +1,12 @@
 import { findAllergenById } from './allergen-database';
 import { mapExternalAllergenIds } from './allergen-aliases';
 import { getCrossReactionsForSelection, type CrossReactionMatch } from './cross-reactions';
+import {
+  NAME_MATCH_MIN_SCORE,
+  normalizeSearchText,
+  scoreNameMatch,
+  type NameMatchKind,
+} from './name-matching';
 import { parseProfileAllergenIds, resolveAllergenId } from './profile-allergens';
 
 export type DishComponentDef = {
@@ -286,13 +292,13 @@ export const DISH_CATALOG: DishRecipe[] = [
   },
 ];
 
-function normalizeText(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/ё/g, 'е')
-    .replace(/\s+/g, ' ');
-}
+export type DishNameMatch = {
+  recipe: DishRecipe;
+  score: number;
+  matchKind: NameMatchKind;
+};
+
+const DEFAULT_DISH_MATCH_LIMIT = 8;
 
 /** Unique ingredient defs used across the static catalog (for ingredients_text matching). */
 export const KNOWN_DISH_COMPONENTS: DishComponentDef[] = (() => {
@@ -308,22 +314,36 @@ export const KNOWN_DISH_COMPONENTS: DishComponentDef[] = (() => {
   return out;
 })();
 
-export function findDishRecipe(foodText: string): DishRecipe | null {
-  const normalized = normalizeText(foodText);
-  if (!normalized) return null;
+export function findDishMatches(
+  foodText: string,
+  limit = DEFAULT_DISH_MATCH_LIMIT,
+): DishNameMatch[] {
+  const query = foodText.trim();
+  if (query.length < 2) return [];
 
-  let best: { recipe: DishRecipe; score: number } | null = null;
+  const ranked: DishNameMatch[] = [];
   for (const recipe of DISH_CATALOG) {
+    let best: DishNameMatch | null = null;
     for (const name of recipe.names) {
-      const needle = normalizeText(name);
-      if (!needle) continue;
-      if (normalized === needle || normalized.includes(needle)) {
-        const score = needle.length;
-        if (!best || score > best.score) best = { recipe, score };
+      const scored = scoreNameMatch(query, name);
+      if (!scored || scored.score < NAME_MATCH_MIN_SCORE) continue;
+      if (!best || scored.score > best.score) {
+        best = { recipe, score: scored.score, matchKind: scored.matchKind };
       }
     }
+    if (best) ranked.push(best);
   }
-  return best?.recipe ?? null;
+
+  ranked.sort((left, right) => {
+    if (right.score !== left.score) return right.score - left.score;
+    return right.recipe.names[0].length - left.recipe.names[0].length;
+  });
+  return ranked.slice(0, Math.max(1, limit));
+}
+
+/** Best catalog recipe for free-text food, or null when nothing clears the score floor. */
+export function findDishRecipe(foodText: string): DishRecipe | null {
+  return findDishMatches(foodText, 1)[0]?.recipe ?? null;
 }
 
 export function resolveDishComponents(foodText: string): DishComponentDef[] {
@@ -381,17 +401,17 @@ export function allergenIdsToDishComponents(allergenIds: string[]): DishComponen
  * Matches by Russian name substrings (normalized).
  */
 export function extractComponentsFromIngredientsText(ingredientsText: string): DishComponentDef[] {
-  const normalized = normalizeText(ingredientsText);
+  const normalized = normalizeSearchText(ingredientsText);
   if (!normalized) return [];
 
   // Prefer longer names first so «растительное масло» wins over «масло».
   const ranked = [...KNOWN_DISH_COMPONENTS].sort(
-    (a, b) => normalizeText(b.nameRu).length - normalizeText(a.nameRu).length,
+    (a, b) => normalizeSearchText(b.nameRu).length - normalizeSearchText(a.nameRu).length,
   );
   const matched: DishComponentDef[] = [];
   const seen = new Set<string>();
   for (const component of ranked) {
-    const needle = normalizeText(component.nameRu);
+    const needle = normalizeSearchText(component.nameRu);
     if (!needle || needle.length < 3) continue;
     if (!normalized.includes(needle)) continue;
     if (seen.has(component.id)) continue;

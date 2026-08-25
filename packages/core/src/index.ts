@@ -48,6 +48,7 @@ export * from './list-input';
 export * from './profile-age';
 export * from './plural-ru';
 export * from './medicine-catalog';
+export * from './name-matching';
 export * from './dish-components';
 export * from './insect-allergy';
 export * from './gina-asthma';
