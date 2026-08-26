@@ -6,6 +6,7 @@ import {
   googleTypeKeyForTaxon,
   hasGoogleGroupHeatmap,
   isTreeSpeciesPollenTaxon,
+  resolveOfficialHeatmapMapType,
   mergeGoogleAndOpenMeteoMapReadings,
   resolveGoogleUpiForTaxon,
 } from './pollen-google-forecast';
@@ -40,6 +41,11 @@ describe('pollen-google-forecast', () => {
     expect(hasGoogleGroupHeatmap('grass_pollen', day.typeIndexes)).toBe(true);
     expect(hasGoogleGroupHeatmap('ragweed_pollen', day.typeIndexes)).toBe(false);
     expect(hasGoogleGroupHeatmap('birch_pollen', {})).toBe(false);
+    expect(resolveOfficialHeatmapMapType('alder_pollen', day.typeIndexes)).toBe('TREE_UPI');
+    expect(resolveOfficialHeatmapMapType('alder_pollen', { GRASS: day.typeIndexes!.GRASS })).toBe(
+      null,
+    );
+    expect(resolveOfficialHeatmapMapType('grass_pollen', day.typeIndexes)).toBe('GRASS_UPI');
   });
 
   it('identifies tree species taxa', () => {

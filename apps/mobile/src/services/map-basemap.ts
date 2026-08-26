@@ -30,3 +30,26 @@ export function resolveMapBasemap(input: ResolveMapBasemapInput): MapBasemapKind
 
   return 'yandex-static';
 }
+
+/**
+ * After a native Google MapView fails to load tiles (empty beige canvas),
+ * fall back to the networked Yandex embed, then the static overview.
+ */
+export function resolveRuntimeMapBasemap(
+  preferred: MapBasemapKind,
+  input: {
+    googleFailed: boolean;
+    yandexInteractiveEnabled: boolean;
+    apiBaseUrlPresent: boolean;
+  },
+): MapBasemapKind {
+  if (preferred !== 'google' || !input.googleFailed) {
+    return preferred;
+  }
+
+  if (input.yandexInteractiveEnabled && input.apiBaseUrlPresent) {
+    return 'yandex-interactive';
+  }
+
+  return 'yandex-static';
+}

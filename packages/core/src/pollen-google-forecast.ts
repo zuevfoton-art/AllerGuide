@@ -1,3 +1,4 @@
+import { pollenTaxonToGoogleMapType, type GooglePollenMapType } from './google-pollen-heatmap';
 import {
   POLLEN_MAP_TAXON_IDS,
   POLLEN_TYPE_GROUP_BY_TAXON,
@@ -51,6 +52,15 @@ export function hasGoogleGroupHeatmap(
 ): boolean {
   const typeUpi = typeIndexes?.[googleTypeKeyForTaxon(taxonId)];
   return Boolean(typeUpi && typeUpi.index > 0);
+}
+
+/** Official heatmapTiles only when the group type index is present and > 0. */
+export function resolveOfficialHeatmapMapType(
+  taxonId: PollenMapTaxonId,
+  typeIndexes?: Partial<Record<GooglePollenTypeKey, PollenUpiSnapshot>> | null,
+): GooglePollenMapType | null {
+  if (!hasGoogleGroupHeatmap(taxonId, typeIndexes)) return null;
+  return pollenTaxonToGoogleMapType(taxonId);
 }
 
 /**
