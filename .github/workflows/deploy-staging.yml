@@ -212,6 +212,7 @@ jobs:
     needs: [gate, smoke]
     if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -219,19 +220,27 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          # Match eas-staging-android.yml; eas-cli 22 expects current Node.
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: EAS Build staging (Android)
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: pnpm exec eas build --profile staging --platform android --non-interactive
+        run: |
+          # pnpm exec eas resolves apps/mobile eas-cli ^16.32.0, which fails
+          # tarball upload: "Cannot read properties of undefined (reading 'create')".
+          npx --yes eas-cli@22.0.0 build \
+            --profile staging \
+            --platform android \
+            --non-interactive
 
   mobile-ios:
     needs: [gate, smoke]
     if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -239,11 +248,15 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: EAS Build staging (iOS)
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: pnpm exec eas build --profile staging --platform ios --non-interactive
+        run: |
+          npx --yes eas-cli@22.0.0 build \
+            --profile staging \
+            --platform ios \
+            --non-interactive
