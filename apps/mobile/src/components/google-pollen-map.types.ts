@@ -44,5 +44,7 @@ export interface GooglePollenMapProps {
   onMarkerPress?: (markerId: string) => void;
   /** Fires when the user finishes panning/zooming (map center in degrees). */
   onRegionChange?: (latitude: number, longitude: number) => void;
+  /** Fires when the Google basemap tiles are on screen (not the wrapper). */
+  onMapLoaded?: () => void;
   overlay?: ReactNode;
 }

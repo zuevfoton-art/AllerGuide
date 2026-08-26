@@ -267,7 +267,7 @@ Without this SHA-1 (or with a non-`AIza` value baked into the APK) the device sh
 
 | Симптом | Причина | Что сделать |
 |---------|---------|-------------|
-| Серый / пустой Google map в APK (логотип Google есть) | Неверный SHA-1 / package / Maps Android API не enabled / в APK попал не-`AIza` ключ | §3.1 + §5; для Gradle CI добавьте SHA-1 из §5.2; секреты только `AIza…` |
+| Серый / пустой Google map в APK (логотип Google есть) | Неверный SHA-1 / package / Maps Android API не enabled / в APK попал не-`AIza` ключ / ключ есть в JS `.env`, но не в `AndroidManifest` | §3.1 + §5; EAS Environments: ключ должен быть Sensitive `AIza…`; Gradle читает `.env` + `inject-eas-maps-key`; если native тайлы не пришли — клиент падает на Yandex interactive |
 | В APK `geo.API_KEY` = текст ошибки (`The bearer token is invalid.`) | CI принял stdout от `eas env:get` без валидации | Workflow должен требовать `AIza…`; починить `EXPO_TOKEN` / задать GH secret |
 | Tile proxy 403 | Billing / Pollen API / ключ / IP restriction | Проверить §1–3.4 и логи API |
 | Пыление всё ещё Яндекс | Нет Maps key в EAS или `EXPO_PUBLIC_POLLEN_HEATMAP` ≠ `google` | Secret + rebuild; профиль staging |

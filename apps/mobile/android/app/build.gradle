@@ -101,12 +101,25 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-        def mapsKey = System.getenv("EXPO_PUBLIC_GOOGLE_MAPS_API_KEY") ?: ""
-        if (!mapsKey) {
-            mapsKey = (findProperty("GOOGLE_MAPS_API_KEY") ?: "").toString()
+        def mapsKey = ""
+        try {
+            mapsKey = ["node", "scripts/inject-eas-maps-key.mjs", "--print"]
+                .execute(null, new File(projectRoot))
+                .text
+                .trim()
+        } catch (Exception ignored) {
+            mapsKey = System.getenv("EXPO_PUBLIC_GOOGLE_MAPS_API_KEY") ?: ""
+            if (!mapsKey) {
+                mapsKey = (findProperty("GOOGLE_MAPS_API_KEY") ?: "").toString()
+            }
         }
         if (!(mapsKey ==~ /^AIza[0-9A-Za-z_-]{20,}$/)) {
             mapsKey = ""
+        }
+        if (mapsKey) {
+            logger.lifecycle("Google Maps Android key present (AIza…, length=${mapsKey.length()})")
+        } else {
+            logger.lifecycle("Google Maps Android key missing — native MapView stays blank without it")
         }
         manifestPlaceholders = [
             GOOGLE_MAPS_API_KEY: mapsKey

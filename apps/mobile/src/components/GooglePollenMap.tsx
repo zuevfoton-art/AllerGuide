@@ -29,6 +29,7 @@ export function GooglePollenMap({
   selectedMarkerId,
   onMarkerPress,
   onRegionChange,
+  onMapLoaded,
   overlay,
 }: GooglePollenMapProps) {
   const theme = useTheme();
@@ -36,6 +37,8 @@ export function GooglePollenMap({
   const mapRef = useRef<MapView>(null);
   const onRegionChangeRef = useRef(onRegionChange);
   onRegionChangeRef.current = onRegionChange;
+  const onMapLoadedRef = useRef(onMapLoaded);
+  onMapLoadedRef.current = onMapLoaded;
   const region = useMemo(
     () => buildRegion(latitude, longitude, zoom),
     [latitude, longitude, zoom],
@@ -63,6 +66,7 @@ export function GooglePollenMap({
         pitchEnabled={false}
         rotateEnabled={false}
         toolbarEnabled={false}
+        onMapLoaded={() => onMapLoadedRef.current?.()}
         onRegionChangeComplete={(nextRegion) =>
           onRegionChangeRef.current?.(nextRegion.latitude, nextRegion.longitude)
         }>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveMapBasemap } from './map-basemap';
+import { resolveMapBasemap, resolveRuntimeMapBasemap } from './map-basemap';
 
 describe('resolveMapBasemap', () => {
   const base = {
@@ -53,5 +53,29 @@ describe('resolveMapBasemap', () => {
         yandexInteractiveEnabled: true,
       }),
     ).toBe('google');
+  });
+
+  it('keeps Google until native tiles fail, then uses Yandex interactive', () => {
+    expect(
+      resolveRuntimeMapBasemap('google', {
+        googleFailed: false,
+        yandexInteractiveEnabled: true,
+        apiBaseUrlPresent: true,
+      }),
+    ).toBe('google');
+    expect(
+      resolveRuntimeMapBasemap('google', {
+        googleFailed: true,
+        yandexInteractiveEnabled: true,
+        apiBaseUrlPresent: true,
+      }),
+    ).toBe('yandex-interactive');
+    expect(
+      resolveRuntimeMapBasemap('google', {
+        googleFailed: true,
+        yandexInteractiveEnabled: false,
+        apiBaseUrlPresent: true,
+      }),
+    ).toBe('yandex-static');
   });
 });

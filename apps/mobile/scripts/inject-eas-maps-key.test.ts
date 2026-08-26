@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   isGoogleMapsApiKey,
+  parseDotEnvMapsKey,
   resolveMapsApiKey,
+  resolveMapsApiKeyFromSources,
   upsertGradleMapsKey,
 } from './inject-eas-maps-key.mjs';
 
@@ -13,6 +15,29 @@ describe('inject-eas-maps-key', () => {
       key: '',
     });
     expect(resolveMapsApiKey('')).toEqual({ ok: true, key: '' });
+  });
+
+  it('reads the Maps key from dotenv text used by EAS Environments', () => {
+    expect(
+      parseDotEnvMapsKey(
+        'EXPO_PUBLIC_API_URL=https://api.staging.aclearo.com\nEXPO_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyA-valid_Google-Maps_Key12\n',
+      ),
+    ).toBe('AIzaSyA-valid_Google-Maps_Key12');
+    expect(
+      parseDotEnvMapsKey('export EXPO_PUBLIC_GOOGLE_MAPS_API_KEY="AIzaSyA-valid_Google-Maps_Key12"'),
+    ).toBe('AIzaSyA-valid_Google-Maps_Key12');
+    expect(
+      resolveMapsApiKeyFromSources({
+        envValue: '',
+        dotEnvContents: ['EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyA-valid_Google-Maps_Key12\n'],
+      }),
+    ).toEqual({ ok: true, key: 'AIzaSyA-valid_Google-Maps_Key12' });
+    expect(
+      resolveMapsApiKeyFromSources({
+        envValue: 'The bearer token is invalid.',
+        dotEnvContents: ['EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyA-valid_Google-Maps_Key12\n'],
+      }),
+    ).toEqual({ ok: false, key: '' });
   });
 
   it('upserts GOOGLE_MAPS_API_KEY in gradle.properties text', () => {
