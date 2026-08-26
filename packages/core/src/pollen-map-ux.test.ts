@@ -18,14 +18,18 @@ import {
 } from './pollen-plant-detail';
 import { getPollenTaxon } from './pollen-taxonomy';
 import {
+  DEFAULT_PLACE_FILTERS,
+  adairCatalogAsMapPois,
   adairClinicToMapPoi,
   catalogPlaceToMapPoi,
   dedupeMapPoisByPlaceId,
   filterMapPoisByCategory,
+  filterMapPoisByPlaceFilters,
   googlePlaceToMapPoi,
+  splitPlaceFilters,
 } from './map-poi';
 import { CATALOG_PLACES } from './catalog';
-import { ADAIR_CLINICS } from './adair-catalog';
+import { ADAIR_CLINICS, getAdairClinic } from './adair-catalog';
 
 describe('pollen-upi', () => {
   it('clamps Google index values into 0–5', () => {
@@ -120,7 +124,8 @@ describe('map-poi', () => {
     const pharmacy = catalogPlaceToMapPoi(
       CATALOG_PLACES.find((place) => place.icon === 'medkit')!,
     );
-    const clinic = adairClinicToMapPoi(ADAIR_CLINICS[0]!);
+    const nkcc = getAdairClinic('nkcc') ?? ADAIR_CLINICS.find((clinic) => clinic.isNkcc)!;
+    const clinic = adairClinicToMapPoi(nkcc);
     const google = googlePlaceToMapPoi({
       placeId: 'abc',
       name: 'Cafe',
@@ -132,16 +137,36 @@ describe('map-poi', () => {
 
     expect(restaurant.category).toBe('restaurant');
     expect(pharmacy.category).toBe('pharmacy');
-    expect(clinic.source).toBe('adair');
-    expect(clinic.lat).toBe(ADAIR_CLINICS[0]!.latitude);
+    expect(clinic?.source).toBe('adair');
+    expect(clinic?.tags).toEqual(expect.arrayContaining(['ADAIR', 'NKCC']));
+    expect(clinic?.lat).toBe(nkcc.latitude);
+    expect(clinic?.adairDoctorCount).toBe(2);
     expect(google?.level).toBe('medium');
     expect(google?.rating).toBe(4.5);
     expect(google?.allergySafety).toBe('unknown');
     expect(restaurant.allergySafety).toBe('curated');
-    expect(clinic.allergySafety).toBe('verified');
-    expect(filterMapPoisByCategory([restaurant, pharmacy, clinic], ['medical'])).toEqual([
+    expect(clinic?.allergySafety).toBe('verified');
+    expect(filterMapPoisByCategory([restaurant, pharmacy, clinic!], ['medical'])).toEqual([
       clinic,
     ]);
+  });
+
+  it('does not pin unconfirmed ADAIR rows and keeps adair off the category filter', () => {
+    const unconfirmed = ADAIR_CLINICS.find((clinic) => clinic.verification === 'unconfirmed')!;
+    expect(adairClinicToMapPoi(unconfirmed)).toBeNull();
+
+    const pins = adairCatalogAsMapPois();
+    expect(pins.every((poi) => poi.adairKind === 'clinic')).toBe(true);
+    expect(pins.every((poi) => poi.adairVerification !== 'unconfirmed')).toBe(true);
+    expect(pins).toHaveLength(53);
+
+    expect(splitPlaceFilters(DEFAULT_PLACE_FILTERS)).toEqual({
+      adair: true,
+      categories: ['medical'],
+    });
+    expect(filterMapPoisByPlaceFilters(pins, ['adair'])).toHaveLength(pins.length);
+    expect(filterMapPoisByPlaceFilters(pins, ['medical'])).toEqual([]);
+    expect(filterMapPoisByCategory(pins, [])).toEqual([]);
   });
 
   it('classifies cafes from Google place types', () => {

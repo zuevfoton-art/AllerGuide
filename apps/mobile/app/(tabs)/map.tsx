@@ -12,6 +12,7 @@ import { useFocusEffect } from 'expo-router';
 import {
   ADAIR_DOCTORS,
   ADAIR_SPECIALIZATION_LABELS,
+  DEFAULT_PLACE_FILTERS,
   buildPlacesMapUrl,
   buildPollenRiskMapUrl,
   buildYandexMapWidgetUrl,
@@ -27,7 +28,7 @@ import {
   readingToUpiSnapshot,
   resolvePollenRegion,
   type AirQualitySnapshot,
-  type MapPoiCategory,
+  type MapPlaceFilterId,
   type PlaceAutocompleteSuggestion,
   type PollenMapTaxonId,
   type PollenTierLevel,
@@ -115,12 +116,7 @@ const LEVEL_LABEL_KEYS: Record<PollenTierLevel, string> = {
   high: 'map.pollenHigh',
 };
 
-const DEFAULT_POI_CATEGORIES: MapPoiCategory[] = [
-  'restaurant',
-  'cafe',
-  'medical',
-  'pharmacy',
-];
+const ADAIR_PIN_COLOR = '#7C3AED';
 const MAP_HERO_HEIGHT = 380;
 /** How far (degrees) the map center must move before "search this area" shows. */
 const SEARCH_AREA_MIN_DELTA_DEG = 0.01;
@@ -147,8 +143,8 @@ export default function MapScreen() {
   const [pois, setPois] = useState<MapPoiWithDistance[]>([]);
   const [selectedTaxonId, setSelectedTaxonId] = useState<PollenMapTaxonId>('birch_pollen');
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
-  const [poiCategories, setPoiCategories] =
-    useState<MapPoiCategory[]>(DEFAULT_POI_CATEGORIES);
+  const [placeFilters, setPlaceFilters] =
+    useState<MapPlaceFilterId[]>([...DEFAULT_PLACE_FILTERS]);
   const [layerMode, setLayerMode] = useState<MapLayerMode>('pollen');
   const [selectedForecastDay, setSelectedForecastDay] = useState<number | null>(null);
   const [doctorsOpen, setDoctorsOpen] = useState(false);
@@ -181,7 +177,7 @@ export default function MapScreen() {
         searchMapPlaces(
           profile,
           { latitude: origin.lat, longitude: origin.lon },
-          poiCategories,
+          placeFilters,
           placeQuery,
         ),
         MAP_POLLEN_PLUME_ENABLED
@@ -212,7 +208,7 @@ export default function MapScreen() {
     } finally {
       if (!options?.silent) setLoading(false);
     }
-  }, [placeQuery, poiCategories, poiOrigin, profile]);
+  }, [placeQuery, placeFilters, poiOrigin, profile]);
 
   const searchThisArea = useCallback(async () => {
     if (!mapCenter) return;
@@ -223,7 +219,7 @@ export default function MapScreen() {
       const placesResult = await searchMapPlaces(
         profile,
         { latitude: origin.lat, longitude: origin.lon },
-        poiCategories,
+        placeFilters,
         placeQuery,
       );
       setPois(placesResult.pois);
@@ -233,7 +229,7 @@ export default function MapScreen() {
     } finally {
       setSearchingArea(false);
     }
-  }, [mapCenter, placeQuery, poiCategories, profile]);
+  }, [mapCenter, placeQuery, placeFilters, profile]);
 
   useFocusEffect(
     useCallback(() => {
@@ -359,14 +355,22 @@ export default function MapScreen() {
       latitude: poi.lat,
       longitude: poi.lng,
       title: poi.title,
+      kind:
+        poi.source === 'adair'
+          ? poi.adairKind === 'specialist'
+            ? ('adair-specialist' as const)
+            : ('adair-clinic' as const)
+          : ('poi' as const),
       color:
-        poi.category === 'restaurant'
-          ? theme.colors.success
-          : poi.category === 'cafe'
-            ? theme.colors.warningText
-            : poi.category === 'pharmacy'
-              ? theme.colors.warning
-              : theme.colors.accent,
+        poi.source === 'adair'
+          ? ADAIR_PIN_COLOR
+          : poi.category === 'restaurant'
+            ? theme.colors.success
+            : poi.category === 'cafe'
+              ? theme.colors.warningText
+              : poi.category === 'pharmacy'
+                ? theme.colors.warning
+                : theme.colors.accent,
     }));
   }, [pois, showPlaceMarkers, theme.colors]);
 
@@ -401,7 +405,7 @@ export default function MapScreen() {
       void autocompleteMapPlaces(
         { latitude: origin.lat, longitude: origin.lon },
         query,
-        poiCategories,
+        placeFilters,
         placeSessionToken,
       ).then((suggestions) => {
         if (autocompleteRequestId.current !== requestId) return;
@@ -409,7 +413,7 @@ export default function MapScreen() {
       });
     }, 400);
     return () => clearTimeout(timer);
-  }, [coords.lat, coords.lon, mapCenter, placeInput, placeSessionToken, poiCategories, showPlaceMarkers]);
+  }, [coords.lat, coords.lon, mapCenter, placeInput, placeSessionToken, placeFilters, showPlaceMarkers]);
 
   const runPlaceSearch = useCallback(
     async (query: string) => {
@@ -421,7 +425,7 @@ export default function MapScreen() {
         const placesResult = await searchMapPlaces(
           profile,
           { latitude: origin.lat, longitude: origin.lon },
-          poiCategories,
+          placeFilters,
           query,
         );
         setPois(placesResult.pois);
@@ -432,7 +436,7 @@ export default function MapScreen() {
         setPlaceSearchLoading(false);
       }
     },
-    [coords.lat, coords.lon, mapCenter, poiCategories, poiOrigin, profile],
+    [coords.lat, coords.lon, mapCenter, placeFilters, poiOrigin, profile],
   );
 
   const handleSelectSuggestion = useCallback(
@@ -486,13 +490,13 @@ export default function MapScreen() {
     [coords.lat, coords.lon],
   );
 
-  const toggleCategory = useCallback((category: MapPoiCategory) => {
-    setPoiCategories((current) => {
-      if (current.includes(category)) {
-        const next = current.filter((item) => item !== category);
+  const togglePlaceFilter = useCallback((filter: MapPlaceFilterId) => {
+    setPlaceFilters((current) => {
+      if (current.includes(filter)) {
+        const next = current.filter((item) => item !== filter);
         return next.length > 0 ? next : current;
       }
-      return [...current, category];
+      return [...current, filter];
     });
   }, []);
 
@@ -776,6 +780,11 @@ export default function MapScreen() {
           {t(mapAttributionKey)}
         </Text>
       ) : null}
+      {showPlacesLayer ? (
+        <Text style={styles.mapAttribution} testID="map-places-osm-attribution">
+          {t('map.placesOsmAttribution')}
+        </Text>
+      ) : null}
 
       {!useGoogleMap && !useYandexInteractive ? (
         <Pressable
@@ -799,6 +808,7 @@ export default function MapScreen() {
         <>
           <Text style={styles.legendTitle}>{t('map.legendTitlePlaces')}</Text>
           <View style={styles.legendRow}>
+            <LegendDot color={ADAIR_PIN_COLOR} label={t('map.legendAdair')} />
             <LegendDot color={theme.colors.success} label={t('map.legendRestaurant')} />
             <LegendDot color={theme.colors.warningText} label={t('map.legendCafe')} />
             <LegendDot color={theme.colors.accent} label={t('map.legendMedical')} />
@@ -822,7 +832,7 @@ export default function MapScreen() {
             block
             onPress={() => {
               setLayerMode('places');
-              setPoiCategories(['medical']);
+              setPlaceFilters(['adair', 'medical']);
             }}
           />
         </GlassCard>
@@ -912,9 +922,9 @@ export default function MapScreen() {
           <MapPoiSheet
             pois={pois}
             selectedId={selectedPoiId}
-            categories={poiCategories}
+            filters={placeFilters}
             onSelect={setSelectedPoiId}
-            onToggleCategory={toggleCategory}
+            onToggleFilter={togglePlaceFilter}
           />
         </>
       ) : null}
@@ -937,41 +947,48 @@ export default function MapScreen() {
       </Pressable>
       {doctorsOpen
         ? ADAIR_DOCTORS.map((doctor) => (
-            <GlassCard key={doctor.id} style={styles.card}>
-              <View style={[styles.cardIcon, { backgroundColor: theme.colors.successLight }]}>
-                <Ionicons name="person" size={22} color={theme.colors.success} />
-              </View>
-              <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{doctor.name}</Text>
-                <Text style={styles.cardNote}>{doctor.degree}</Text>
-                <Text style={styles.tags}>
-                  {ADAIR_SPECIALIZATION_LABELS[doctor.specialization]}
-                </Text>
-                {doctor.isChiefExpert ? (
-                  <Text style={styles.chiefBadge}>{t('map.chiefExpert')}</Text>
-                ) : null}
-                {doctor.phone ? (
-                  <Pressable
-                    onPress={() => void Linking.openURL(`tel:${doctor.phone!}`)}
-                    hitSlop={8}
-                    accessibilityRole="link">
-                    <Text style={[styles.tags, styles.phoneLink]}>{doctor.phone}</Text>
-                  </Pressable>
-                ) : null}
-                {doctor.bookingUrl ? (
-                  <Pressable
-                    onPress={() => void Linking.openURL(doctor.bookingUrl!)}
-                    hitSlop={8}
-                    accessibilityRole="link">
-                    <Text style={styles.phoneLink}>{t('map.poiBook')}</Text>
-                  </Pressable>
-                ) : null}
-              </View>
-            </GlassCard>
+            <Pressable
+              key={doctor.id}
+              onPress={() => {
+                setLayerMode('places');
+                setPlaceFilters((current) =>
+                  current.includes('adair') ? current : [...current, 'adair'],
+                );
+                setSelectedPoiId(`adair:${doctor.clinicId}`);
+              }}
+              accessibilityRole="button">
+              <GlassCard style={styles.card}>
+                <View style={[styles.cardIcon, { backgroundColor: theme.colors.successLight }]}>
+                  <Ionicons name="person" size={22} color={theme.colors.success} />
+                </View>
+                <View style={styles.cardBody}>
+                  <Text style={styles.cardTitle}>{doctor.name}</Text>
+                  {doctor.degree ? <Text style={styles.cardNote}>{doctor.degree}</Text> : null}
+                  <Text style={styles.tags}>
+                    {doctor.specialization
+                      ? ADAIR_SPECIALIZATION_LABELS[doctor.specialization]
+                      : doctor.role}
+                  </Text>
+                  {doctor.isChiefExpert ? (
+                    <Text style={styles.chiefBadge}>{t('map.chiefExpert')}</Text>
+                  ) : null}
+                  {doctor.phone ? (
+                    <Pressable
+                      onPress={() => void Linking.openURL(`tel:${doctor.phone!}`)}
+                      hitSlop={8}
+                      accessibilityRole="link">
+                      <Text style={[styles.tags, styles.phoneLink]}>{doctor.phone}</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              </GlassCard>
+            </Pressable>
           ))
         : null}
 
-      <Disclaimer>{t('map.disclaimerUnified')}</Disclaimer>
+      <Disclaimer>
+        {showPlacesLayer ? t('map.disclaimerAdair') : t('map.disclaimerUnified')}
+      </Disclaimer>
     </Screen>
   );
 }

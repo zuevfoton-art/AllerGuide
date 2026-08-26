@@ -615,6 +615,7 @@ export type LocaleMessages = {
     plantCrossReactions: string;
     plantNoCross: string;
     poiTitle: string;
+    poiAdair: string;
     poiRestaurants: string;
     poiCafes: string;
     poiMedical: string;
@@ -640,10 +641,18 @@ export type LocaleMessages = {
     layerPlaces: string;
     legendTitlePollen: string;
     legendTitlePlaces: string;
+    legendAdair: string;
     legendRestaurant: string;
     legendCafe: string;
     legendMedical: string;
     legendPharmacy: string;
+    adairBadge: string;
+    adairVerified: string;
+    adairAddressConfirmed: string;
+    adairNeedsReview: string;
+    adairUnconfirmed: string;
+    adairMorePhones: string;
+    placesOsmAttribution: string;
     searchThisArea: string;
     poiLevelHigh: string;
     poiLevelMedium: string;

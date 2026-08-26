@@ -1,8 +1,16 @@
-import { ADAIR_CLINICS, type AdairClinic } from './adair-catalog';
+import {
+  ADAIR_CLINICS,
+  clinicHasMapPin,
+  getDoctorsForClinic,
+  type AdairClinic,
+  type AdairVerification,
+} from './adair-catalog';
 import type { CatalogPlace } from './catalog';
 import { haversineDistanceKm } from './geo';
 
 export type MapPoiCategory = 'restaurant' | 'cafe' | 'medical' | 'pharmacy';
+export type MapPlaceFilterId = 'adair' | MapPoiCategory;
+export type AdairMapKind = 'clinic' | 'specialist';
 
 export const MAP_POI_CATEGORIES: readonly MapPoiCategory[] = [
   'restaurant',
@@ -10,8 +18,25 @@ export const MAP_POI_CATEGORIES: readonly MapPoiCategory[] = [
   'medical',
   'pharmacy',
 ];
+
+export const MAP_PLACE_FILTERS: readonly MapPlaceFilterId[] = [
+  'adair',
+  'restaurant',
+  'cafe',
+  'medical',
+  'pharmacy',
+];
+
+export const DEFAULT_PLACE_FILTERS: readonly MapPlaceFilterId[] = ['adair', 'medical'];
+
 export type MapPoiSource = 'catalog' | 'adair' | 'google-places';
 export type AllergySafety = 'unknown' | 'curated' | 'verified';
+
+export interface AdairPoiDoctor {
+  name: string;
+  role?: string;
+  isChiefExpert?: boolean;
+}
 
 export interface MapPoi {
   id: string;
@@ -28,12 +53,19 @@ export interface MapPoi {
   icon: string;
   tags: string[];
   phone?: string;
+  phones?: string[];
+  phonePurpose?: string;
+  phoneUsable?: boolean;
   bookingUrl?: string;
   source: MapPoiSource;
   /** Google star rating when present — never treat as allergen safety. */
   rating?: number;
   allergySafety: AllergySafety;
   googlePlaceId?: string;
+  adairKind?: AdairMapKind;
+  adairVerification?: AdairVerification;
+  adairDoctorCount?: number;
+  adairDoctors?: AdairPoiDoctor[];
 }
 
 export interface PlaceAutocompleteSuggestion {
@@ -89,7 +121,24 @@ export function catalogPlaceToMapPoi(place: CatalogPlace): MapPoi {
   };
 }
 
-export function adairClinicToMapPoi(clinic: AdairClinic): MapPoi {
+export function splitPlaceFilters(filters: readonly MapPlaceFilterId[]): {
+  adair: boolean;
+  categories: MapPoiCategory[];
+} {
+  return {
+    adair: filters.includes('adair'),
+    categories: filters.filter((filter): filter is MapPoiCategory => filter !== 'adair'),
+  };
+}
+
+export function adairClinicToMapPoi(clinic: AdairClinic): MapPoi | null {
+  if (!clinicHasMapPin(clinic) || clinic.latitude == null || clinic.longitude == null) {
+    return null;
+  }
+
+  const doctors = getDoctorsForClinic(clinic.id);
+  const tags = ['ADAIR', clinic.city, ...(clinic.isNkcc ? ['NKCC'] : [])].filter(Boolean);
+
   return {
     id: `adair:${clinic.id}`,
     title: clinic.name,
@@ -97,18 +146,49 @@ export function adairClinicToMapPoi(clinic: AdairClinic): MapPoi {
     category: 'medical',
     lat: clinic.latitude,
     lng: clinic.longitude,
-    level: clinic.verified ? 'high' : 'medium',
+    level: clinic.verification === 'confirmed' ? 'high' : 'medium',
     icon: 'medical',
-    tags: [clinic.city, ...(clinic.isNkcc ? ['NKCC'] : [])],
-    phone: clinic.phone,
+    tags,
+    phone: clinic.phoneUsable ? clinic.phone : undefined,
+    phones: clinic.phones,
+    phonePurpose: clinic.phonePurpose,
+    phoneUsable: clinic.phoneUsable,
     bookingUrl: clinic.bookingUrl,
     source: 'adair',
-    allergySafety: clinic.verified ? 'verified' : 'curated',
+    allergySafety: clinic.verification === 'confirmed' ? 'verified' : 'curated',
+    adairKind: 'clinic',
+    adairVerification: clinic.verification,
+    adairDoctorCount: doctors.length,
+    adairDoctors: doctors.map((doctor) => ({
+      name: doctor.name,
+      role: doctor.role,
+      isChiefExpert: doctor.isChiefExpert,
+    })),
   };
 }
 
 export function adairClinicsAsMapPois(clinics: AdairClinic[] = ADAIR_CLINICS): MapPoi[] {
-  return clinics.map(adairClinicToMapPoi);
+  return clinics.flatMap((clinic) => {
+    const poi = adairClinicToMapPoi(clinic);
+    return poi ? [poi] : [];
+  });
+}
+
+export function adairCatalogAsMapPois(): MapPoi[] {
+  return adairClinicsAsMapPois(ADAIR_CLINICS);
+}
+
+export function filterMapPoisByPlaceFilters(
+  pois: MapPoi[],
+  filters: readonly MapPlaceFilterId[],
+): MapPoi[] {
+  const { adair, categories } = splitPlaceFilters(filters);
+  const allowed = new Set(categories);
+  return pois.filter((poi) => {
+    if (poi.source === 'adair') return adair;
+    if (categories.length === 0) return false;
+    return allowed.has(poi.category);
+  });
 }
 
 export function isOriginInCatalogRegion(

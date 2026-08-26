@@ -1,14 +1,21 @@
 import {
   ADAIR_CLINICS,
+  adairCatalogAsMapPois,
   adairClinicsAsMapPois,
   catalogPlaceToMapPoi,
   CATALOG_PLACES,
+  DEFAULT_PLACE_FILTERS,
+  dedupeMapPoisByPlaceId,
   filterMapPoisByCategory,
+  filterMapPoisByPlaceFilters,
   filterPlacesForProfile,
   isOriginInCatalogRegion,
   parseProfileAllergens,
+  searchAdairClinics,
   sortPlacesByDistance,
+  splitPlaceFilters,
   type CatalogPlace,
+  type MapPlaceFilterId,
   type MapPoi,
   type MapPoiCategory,
   type MapPoiDetails,
@@ -43,6 +50,7 @@ async function fetchLiveNearby(
   categories: readonly MapPoiCategory[],
 ): Promise<MapPoi[] | 'disabled' | 'empty' | 'error'> {
   if (!MAP_PLACES_ENABLED) return 'disabled';
+  if (categories.length === 0) return 'empty';
 
   try {
     const response = await apiRequest<{ places?: MapPoi[] }>(
@@ -64,6 +72,7 @@ export async function searchLiveMapPlaces(
   categories: readonly MapPoiCategory[],
 ): Promise<MapPoi[] | 'disabled' | 'empty' | 'error'> {
   if (!MAP_PLACES_ENABLED) return 'disabled';
+  if (categories.length === 0) return 'empty';
 
   try {
     const response = await apiRequest<{ places?: MapPoi[] }>(
@@ -82,10 +91,11 @@ export async function searchLiveMapPlaces(
 export async function autocompleteMapPlaces(
   origin: { latitude: number; longitude: number },
   query: string,
-  categories: readonly MapPoiCategory[],
+  filters: readonly MapPlaceFilterId[],
   sessionToken: string,
 ): Promise<PlaceAutocompleteSuggestion[]> {
-  if (!MAP_PLACES_ENABLED || query.trim().length < 2) return [];
+  const { categories } = splitPlaceFilters(filters);
+  if (!MAP_PLACES_ENABLED || query.trim().length < 2 || categories.length === 0) return [];
 
   try {
     const response = await apiRequest<{ suggestions?: PlaceAutocompleteSuggestion[] }>(
@@ -148,52 +158,91 @@ function attachDistances(
   });
 }
 
-function nearbyAdair(origin: { latitude: number; longitude: number }): MapPoi[] {
-  return adairClinicsAsMapPois(ADAIR_CLINICS).filter((clinic) =>
-    isOriginInCatalogRegion(origin.latitude, origin.longitude, 120),
-  );
+function adairOverlay(query?: string): MapPoi[] {
+  const trimmed = query?.trim() ?? '';
+  if (trimmed.length < 2) return adairCatalogAsMapPois();
+  return adairClinicsAsMapPois(searchAdairClinics(trimmed));
 }
 
 function fallbackPois(
   profile: Profile | null | undefined,
   origin: { latitude: number; longitude: number },
 ): { pois: MapPoi[]; source: PlacesResultSource } {
-  if (isOriginInCatalogRegion(origin.latitude, origin.longitude)) {
-    return { pois: [...catalogAsPois(profile), ...nearbyAdair(origin)], source: 'catalog' };
-  }
-  const adair = nearbyAdair(origin);
-  return { pois: adair, source: adair.length > 0 ? 'adair' : 'empty' };
+  const catalog = isOriginInCatalogRegion(origin.latitude, origin.longitude)
+    ? catalogAsPois(profile)
+    : [];
+  if (catalog.length > 0) return { pois: catalog, source: 'catalog' };
+  return { pois: [], source: 'empty' };
+}
+
+function mergeWithAdair(
+  liveOrFallback: MapPoi[],
+  includeAdair: boolean,
+  query?: string,
+): MapPoi[] {
+  const overlay = includeAdair ? adairOverlay(query) : [];
+  return dedupeMapPoisByPlaceId([...overlay, ...liveOrFallback]);
 }
 
 export async function searchMapPlaces(
   profile: Profile | null | undefined,
   origin: { latitude: number; longitude: number },
-  categories: readonly MapPoiCategory[],
+  filters: readonly MapPlaceFilterId[],
   query?: string,
 ): Promise<MapPlacesResult> {
   const trimmed = query?.trim() ?? '';
+  const { adair: includeAdair, categories } = splitPlaceFilters(filters);
+
+  if (categories.length === 0) {
+    const overlay = includeAdair ? adairOverlay(trimmed) : [];
+    return {
+      pois: attachDistances(overlay, origin),
+      source: overlay.length > 0 ? 'adair' : 'empty',
+      liveEmpty: false,
+    };
+  }
+
   const live =
     trimmed.length >= 2
       ? await searchLiveMapPlaces(origin, trimmed, categories)
       : await fetchLiveNearby(origin, categories);
 
   if (Array.isArray(live)) {
+    const merged = mergeWithAdair(
+      filterMapPoisByCategory(live, categories),
+      includeAdair,
+      trimmed,
+    );
     return {
-      pois: attachDistances(filterMapPoisByCategory(live, categories), origin),
+      pois: attachDistances(merged, origin),
       source: 'google-places',
       liveEmpty: false,
     };
   }
 
   if (live === 'empty') {
-    return { pois: [], source: 'empty', liveEmpty: true };
+    const overlay = includeAdair ? adairOverlay(trimmed) : [];
+    return {
+      pois: attachDistances(overlay, origin),
+      source: overlay.length > 0 ? 'adair' : 'empty',
+      liveEmpty: overlay.length === 0,
+    };
   }
 
   if (live === 'disabled' || live === 'error') {
     const fallback = fallbackPois(profile, origin);
+    const merged = mergeWithAdair(
+      filterMapPoisByCategory(fallback.pois, categories),
+      includeAdair,
+      trimmed,
+    );
     return {
-      pois: attachDistances(filterMapPoisByCategory(fallback.pois, categories), origin),
-      source: fallback.source,
+      pois: attachDistances(merged, origin),
+      source: merged.some((poi) => poi.source === 'catalog')
+        ? fallback.source
+        : merged.length > 0
+          ? 'adair'
+          : fallback.source,
       liveEmpty: false,
     };
   }
@@ -203,20 +252,20 @@ export async function searchMapPlaces(
 
 /**
  * Unified POI list for the map tab: live Google Places when enabled,
- * otherwise a region-limited curated catalog / ADAIR fallback.
+ * plus a bundled ADAIR overlay when that filter is on.
  */
 export async function getMapPois(
   profile?: Profile | null,
   origin?: { latitude: number; longitude: number } | null,
-  categories: readonly MapPoiCategory[] = ['restaurant', 'cafe', 'medical', 'pharmacy'],
+  filters: readonly MapPlaceFilterId[] = DEFAULT_PLACE_FILTERS,
 ): Promise<MapPoiWithDistance[]> {
   if (!origin) {
-    return filterMapPoisByCategory(
+    return filterMapPoisByPlaceFilters(
       [...catalogAsPois(profile), ...adairClinicsAsMapPois(ADAIR_CLINICS)],
-      categories,
+      filters,
     );
   }
-  const result = await searchMapPlaces(profile, origin, categories);
+  const result = await searchMapPlaces(profile, origin, filters);
   return result.pois;
 }
 
