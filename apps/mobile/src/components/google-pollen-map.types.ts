@@ -7,6 +7,7 @@ export interface GoogleMapMarker {
   longitude: number;
   title: string;
   color?: string;
+  kind?: 'poi' | 'adair-clinic' | 'adair-specialist';
 }
 
 export interface GoogleMapCircle {

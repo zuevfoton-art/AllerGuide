@@ -246,7 +246,7 @@ Barrel: `index.ts`. Pure TS.
 
 | Область | Модули (ориентиры) |
 |---------|-------------------|
-| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` |
+| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` (`data/adair-registry.json`) |
 | Profiles | `profile-*`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding` |
 | Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display`, `medicine-catalog`, `profile-age` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |

@@ -31,6 +31,10 @@ function parseMarkers(raw: unknown): YandexEmbedMarker[] {
           longitude,
           title: typeof row.title === 'string' ? row.title : undefined,
           color: typeof row.color === 'string' ? row.color : undefined,
+          kind:
+            row.kind === 'adair-clinic' || row.kind === 'adair-specialist' || row.kind === 'poi'
+              ? row.kind
+              : undefined,
         },
       ];
     });

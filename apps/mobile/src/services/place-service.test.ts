@@ -26,7 +26,7 @@ beforeEach(async () => {
 });
 
 describe('place-service', () => {
-  it('returns live nearby results without mixing catalog pins', async () => {
+  it('merges live nearby results with the ADAIR overlay', async () => {
     const { apiRequest } = await import('@/src/services/api-client');
     vi.mocked(apiRequest).mockResolvedValue({
       ok: true,
@@ -50,13 +50,14 @@ describe('place-service', () => {
     } as never);
 
     const { searchMapPlaces } = await import('./place-service');
-    const result = await searchMapPlaces(null, moscow, ['pharmacy']);
+    const result = await searchMapPlaces(null, moscow, ['adair', 'pharmacy']);
     expect(result.source).toBe('google-places');
-    expect(result.pois).toHaveLength(1);
-    expect(result.pois[0]?.allergySafety).toBe('unknown');
+    expect(result.pois.some((poi) => poi.id === 'google:p1')).toBe(true);
+    expect(result.pois.some((poi) => poi.source === 'adair')).toBe(true);
+    expect(result.pois.find((poi) => poi.id === 'google:p1')?.allergySafety).toBe('unknown');
   });
 
-  it('keeps an empty live result empty instead of injecting Moscow catalog', async () => {
+  it('keeps an empty live result empty when ADAIR is off', async () => {
     const { apiRequest } = await import('@/src/services/api-client');
     vi.mocked(apiRequest).mockResolvedValue({
       ok: true,
@@ -67,6 +68,30 @@ describe('place-service', () => {
     const result = await searchMapPlaces(null, moscow, ['restaurant']);
     expect(result.liveEmpty).toBe(true);
     expect(result.pois).toEqual([]);
+  });
+
+  it('still shows ADAIR pins when live nearby is empty', async () => {
+    const { apiRequest } = await import('@/src/services/api-client');
+    vi.mocked(apiRequest).mockResolvedValue({
+      ok: true,
+      data: { places: [] },
+    } as never);
+
+    const { searchMapPlaces } = await import('./place-service');
+    const result = await searchMapPlaces(null, moscow, ['adair', 'medical']);
+    expect(result.liveEmpty).toBe(false);
+    expect(result.pois.some((poi) => poi.source === 'adair')).toBe(true);
+    expect(result.source).toBe('adair');
+  });
+
+  it('does not call Places when only the ADAIR filter is on', async () => {
+    const { apiRequest } = await import('@/src/services/api-client');
+    const { searchMapPlaces } = await import('./place-service');
+    const result = await searchMapPlaces(null, london, ['adair']);
+    expect(apiRequest).not.toHaveBeenCalled();
+    expect(result.source).toBe('adair');
+    expect(result.pois.every((poi) => poi.source === 'adair')).toBe(true);
+    expect(result.pois.length).toBeGreaterThan(0);
   });
 
   it('does not show Moscow catalog pins when the origin is outside the region', async () => {

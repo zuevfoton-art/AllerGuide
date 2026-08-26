@@ -4,6 +4,7 @@ export type YandexEmbedMarker = {
   longitude: number;
   title?: string;
   color?: string;
+  kind?: 'poi' | 'adair-clinic' | 'adair-specialist';
 };
 
 export function isYandexMapsInteractiveConfigured(): boolean {
@@ -77,9 +78,10 @@ export function buildYandexInteractiveMapHtml(options: {
         ));
 
         (cfg.markers || []).forEach(function (marker) {
+          var isAdair = marker.kind === 'adair-clinic' || marker.kind === 'adair-specialist';
           var preset = marker.id === cfg.selectedId
-            ? 'islands#blueIcon'
-            : 'islands#darkBlueIcon';
+            ? (isAdair ? 'islands#violetIcon' : 'islands#blueIcon')
+            : (isAdair ? 'islands#violetDotIcon' : 'islands#darkBlueIcon');
           var place = new ymaps.Placemark(
             [marker.latitude, marker.longitude],
             { balloonContent: marker.title || marker.id, hintContent: marker.title || '' },

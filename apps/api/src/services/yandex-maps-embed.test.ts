@@ -29,4 +29,23 @@ describe('yandex-maps-embed', () => {
     expect(html).toContain('Clinic');
     expect(html).toContain('marker_press');
   });
+
+  it('uses a violet preset for ADAIR clinic pins', () => {
+    const html = buildYandexInteractiveMapHtml({
+      apiKey: 'server-key',
+      latitude: 55.75,
+      longitude: 37.62,
+      zoom: 11,
+      markers: [
+        {
+          id: 'adair:nkcc',
+          latitude: 55.64,
+          longitude: 37.49,
+          title: 'НККЦ',
+          kind: 'adair-clinic',
+        },
+      ],
+    });
+    expect(html).toContain('islands#violetDotIcon');
+  });
 });
