@@ -118,11 +118,23 @@ export function GooglePollenMap({
 
       for (const marker of markerRefs.current) marker.setMap(null);
       markerRefs.current = markers.map((item) => {
+        const fill = item.color ?? '#2563EB';
+        const symbolPath = google.maps.SymbolPath?.CIRCLE;
         const marker = new google.maps.Marker({
           map,
           position: { lat: item.latitude, lng: item.longitude },
           title: item.title,
           opacity: item.id === selectedMarkerId ? 1 : 0.85,
+          icon: symbolPath
+            ? {
+                path: symbolPath,
+                scale: item.kind?.startsWith('adair') ? 11 : 8,
+                fillColor: fill,
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 2,
+              }
+            : undefined,
         });
         marker.addListener('click', () => onMarkerPressRef.current?.(item.id));
         return marker;

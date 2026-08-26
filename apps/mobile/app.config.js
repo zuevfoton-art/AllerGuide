@@ -7,7 +7,8 @@ module.exports = ({ config }) => {
     './plugins/withAndroidMonorepoGradle',
     './plugins/withAndroidImeInsets',
   ];
-  const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
+  const rawMapsKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ?? '';
+  const googleMapsApiKey = /^AIza[0-9A-Za-z_-]{20,}$/.test(rawMapsKey) ? rawMapsKey : '';
 
   if (process.env.SENTRY_ORG && process.env.SENTRY_PROJECT) {
     plugins.push([

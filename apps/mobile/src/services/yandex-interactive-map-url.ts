@@ -26,6 +26,8 @@ export function buildYandexInteractiveEmbedUrl(options: {
           latitude: marker.latitude,
           longitude: marker.longitude,
           title: marker.title,
+          color: marker.color,
+          kind: marker.kind,
         })),
       ),
     );

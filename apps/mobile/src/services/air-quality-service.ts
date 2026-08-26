@@ -2,6 +2,7 @@ import type { AirQualitySnapshot, GoogleAirQualityMapType } from '@allerguide/co
 import { AIR_QUALITY_GOOGLE_ENABLED } from '@/src/constants/features';
 import { apiRequest, getApiBaseUrl } from '@/src/services/api-client';
 import { logCaughtError } from '@/src/services/error-reporting';
+import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
 
 const DEFAULT_AIR_QUALITY_HEATMAP_TYPE: GoogleAirQualityMapType = 'UAQI_INDIGO_PERSIAN';
 
@@ -12,7 +13,7 @@ export function isGoogleAirQualityAvailable(): boolean {
 export function isAirQualityHeatmapAvailable(): boolean {
   return (
     isGoogleAirQualityAvailable() &&
-    Boolean(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim())
+    isGoogleMapsApiKey(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY)
   );
 }
 

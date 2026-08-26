@@ -1,0 +1,2298 @@
+{
+  "meta": {
+    "sourceFile": "ADAIR_clinics_doctors_addresses_2026-08-25.xlsx",
+    "sourceUrl": "https://adair.ru/struktura-adair/",
+    "coordinateSource": "Nominatim / OpenStreetMap",
+    "checkedAt": "2026-08-25",
+    "geocodedAt": "2026-08-26",
+    "phoneCheckedAt": "2026-08-26",
+    "disclaimer": "Исследовательский справочник по публичным данным, а не расписание приёма. Перед визитом подтвердите филиал и часы работы."
+  },
+  "clinics": [
+    {
+      "id": "nmits-zdorovya-detei-moskva",
+      "name": "НМИЦ здоровья детей",
+      "address": "119296, г. Москва, Ломоносовский проспект, д. 2, стр. 1",
+      "city": "Москва",
+      "orgType": "научно-клинический центр",
+      "latitude": 55.686145,
+      "longitude": 37.552008,
+      "phones": [
+        "+7 (495) 967-14-20"
+      ],
+      "phonePurpose": "Справочная / запись",
+      "phoneUsable": true,
+      "verification": "unconfirmed",
+      "geocodePrecision": "organization",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://nczd.ru/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9D%D0%B0%D1%86%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D0%BC%D0%B5%D0%B4%D0%B8%D1%86%D0%B8%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%20%D0%B8%D1%81%D1%81%D0%BB%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D0%B9%20%D1%86%D0%B5%D0%BD%D1%82%D1%80%20%D0%B7%D0%B4%D0%BE%D1%80%D0%BE%D0%B2%D1%8C%D1%8F%20%D0%B4%D0%B5%D1%82%D0%B5%D0%B9%2C%20%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0",
+        "phone": "https://nczd.ru/contact/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "nkcc",
+      "name": "НККЦ аллергологии и иммунологии",
+      "address": "117513, г. Москва, ул. Островитянова, д. 6",
+      "city": "Москва",
+      "orgType": "клиника",
+      "latitude": 55.644341,
+      "longitude": 37.490388,
+      "phones": [
+        "+7 (495) 225-45-52",
+        "+7 (495) 225-71-04"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": true,
+      "sources": {
+        "doctor": "https://alerg.ru/spetsialisty/smolkin-iurii-solomonovich/",
+        "address": "https://alerg.ru/контакты/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D1%81%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%82%D1%8F%D0%BD%D0%BE%D0%B2%D0%B0%2C%206",
+        "phone": "https://alerg.ru/контакты/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "dgkb-im-n-f-filatova-dzm-moskva",
+      "name": "ДГКБ им. Н. Ф. Филатова ДЗМ",
+      "address": "123001, г. Москва, ул. Садовая-Кудринская, д. 15",
+      "city": "Москва",
+      "orgType": "детская больница",
+      "latitude": 55.764089,
+      "longitude": 37.587771,
+      "phones": [
+        "+7 (499) 254-10-10"
+      ],
+      "phonePurpose": "Запись на консультации и обследования",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://com-neurology.ru/member/200/",
+        "address": "https://filatovskaya.ru/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0%2C%20%D0%A1%D0%B0%D0%B4%D0%BE%D0%B2%D0%B0%D1%8F-%D0%9A%D1%83%D0%B4%D1%80%D0%B8%D0%BD%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2015",
+        "phone": "https://filatovmos.ru/index.php/contacts/phones.html"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "unestablished",
+      "name": "Клиническая организация не установлена",
+      "address": "—",
+      "city": "",
+      "orgType": "",
+      "latitude": null,
+      "longitude": null,
+      "phones": [],
+      "phonePurpose": "Клиника не установлена",
+      "phoneUsable": true,
+      "verification": "unconfirmed",
+      "geocodePrecision": "none",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://adair.ru/struktura-adair/",
+        "coordinates": "—"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "zdorovoe-pokolenie-barnaul",
+      "name": "Здоровое поколение",
+      "address": "г. Барнаул, ул. Партизанская, д. 175",
+      "city": "Барнаул",
+      "orgType": "клиника",
+      "latitude": 53.333276,
+      "longitude": 83.769749,
+      "phones": [
+        "+7 (385) 255-67-00"
+      ],
+      "phonePurpose": "Единый телефон клиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://zp22.ru/doctors/shahova/",
+        "address": "https://zp22.ru/kliniki/news/zdorovoe-pokolenie-teper-v-centre/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%91%D0%B0%D1%80%D0%BD%D0%B0%D1%83%D0%BB%2C%20%D0%9F%D0%B0%D1%80%D1%82%D0%B8%D0%B7%D0%B0%D0%BD%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%20175",
+        "phone": "https://zp22.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "medsi-promeditsina-ufa",
+      "name": "МЕДСИ-Промедицина",
+      "address": "г. Уфа, ул. Акназарова, д. 21",
+      "city": "Уфа",
+      "orgType": "клиника",
+      "latitude": 54.715539,
+      "longitude": 55.997894,
+      "phones": [
+        "+7 (347) 200-12-87"
+      ],
+      "phonePurpose": "Запись / справочная",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://bashgmu.ru/about_the_university/management/3676/",
+        "address": "https://www.promedicina.clinic/adult/services/ortopediya-i-travmatologiya/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A3%D1%84%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%90%D0%BA%D0%BD%D0%B0%D0%B7%D0%B0%D1%80%D0%BE%D0%B2%D0%B0%2C%2021",
+        "phone": "https://www.promedicina.clinic/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "semeinyi-doktor-magnitogorsk",
+      "name": "Семейный доктор",
+      "address": "г. Магнитогорск, ул. 50-летия Магнитки, д. 35/1",
+      "city": "Магнитогорск",
+      "orgType": "клиника",
+      "latitude": 53.357848,
+      "longitude": 58.971161,
+      "phones": [
+        "+7 (351) 958-11-11",
+        "+7 (351) 958-14-00"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://mgn-doctor.ru/specialists/andronova-elena-vladimirovna/",
+        "address": "https://mgn-doctor.ru/about/klinika-na-50-let-magnitki/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%B0%D0%B3%D0%BD%D0%B8%D1%82%D0%BE%D0%B3%D0%BE%D1%80%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2050-%D0%BB%D0%B5%D1%82%D0%B8%D1%8F%20%D0%9C%D0%B0%D0%B3%D0%BD%D0%B8%D1%82%D0%BA%D0%B8%2C%2035%2F1",
+        "phone": "https://mgn-doctor.ru/about/klinika-na-50-let-magnitki/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "respublikanskaya-detskaya-klinicheskaya-bolnitsa-cheboksary",
+      "name": "Республиканская детская клиническая больница",
+      "address": "г. Чебоксары, ул. Фёдора Гладкова, д. 27",
+      "city": "Чебоксары",
+      "orgType": "детская больница",
+      "latitude": 56.107505,
+      "longitude": 47.240545,
+      "phones": [
+        "+7 (835) 256-31-44"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://yandex.ru/maps/org/detskaya_respublikanskaya_klinicheskaya_bolnitsa/93546631787/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A7%D0%B5%D0%B1%D0%BE%D0%BA%D1%81%D0%B0%D1%80%D1%8B%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A4%D1%91%D0%B4%D0%BE%D1%80%D0%B0%20%D0%93%D0%BB%D0%B0%D0%B4%D0%BA%D0%BE%D0%B2%D0%B0%2C%2027",
+        "phone": "https://t.me/rdkb21ru"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "mediko-hirurgicheskaya-klinika-lipetsk",
+      "name": "Медико-хирургическая клиника",
+      "address": "г. Липецк, ул. Кузнечная, д. 10А",
+      "city": "Липецк",
+      "orgType": "клиника",
+      "latitude": 52.607652,
+      "longitude": 39.596037,
+      "phones": [
+        "+7 (474) 251-59-11",
+        "+7 (474) 256-69-11"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://mhk-lipetsk.ru/iblock/doctors/allergologija/e_jarovaja_irina_vladimirovna/",
+        "address": "https://mhk-lipetsk.ru/page/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9B%D0%B8%D0%BF%D0%B5%D1%86%D0%BA%2C%20%D0%9A%D1%83%D0%B7%D0%BD%D0%B5%D1%87%D0%BD%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2010%D0%90",
+        "phone": "https://mhk-lipetsk.ru/page/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "fits-pitaniya-i-biotehnologii-moskva",
+      "name": "ФИЦ питания и биотехнологии",
+      "address": "109240, г. Москва, Устьинский проезд, д. 2/14",
+      "city": "Москва",
+      "orgType": "научно-клинический центр",
+      "latitude": 55.749644,
+      "longitude": 37.640876,
+      "phones": [
+        "+7 (495) 916-10-61"
+      ],
+      "phonePurpose": "Консультационный центр",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://pediatrics.school/expert/larkova-inna-anatolevna/",
+        "address": "https://ion.ru/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0%2C%20%D0%A3%D1%81%D1%82%D1%8C%D0%B8%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D1%80%D0%BE%D0%B5%D0%B7%D0%B4%2C%202%2F14",
+        "phone": "https://ion.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "detskaya-poliklinika-1-ioshkar-ola",
+      "name": "Детская поликлиника № 1",
+      "address": "г. Йошкар-Ола, ул. Чехова, д. 21",
+      "city": "Йошкар-Ола",
+      "orgType": "детская поликлиника",
+      "latitude": 56.644917,
+      "longitude": 47.885976,
+      "phones": [
+        "+7 (836) 223-27-75"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://mari-el.gov.ru/ministries/minzdrav/jdgb/pages/detskaya-poliklinika-1/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%99%D0%BE%D1%88%D0%BA%D0%B0%D1%80-%D0%9E%D0%BB%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A7%D0%B5%D1%85%D0%BE%D0%B2%D0%B0%2C%2021",
+        "phone": "https://mari-el.gov.ru/ministries/minzdrav/jdgb/pages/detskaya-poliklinika-1/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "murmanskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-murmansk",
+      "name": "Мурманская областная детская клиническая больница",
+      "address": "183031, г. Мурманск, ул. Свердлова, д. 18",
+      "city": "Мурманск",
+      "orgType": "детская больница",
+      "latitude": 68.995551,
+      "longitude": 33.111823,
+      "phones": [
+        "+7 (815) 278-88-01"
+      ],
+      "phonePurpose": "Справочная / платные услуги",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://murman.ru/news/2026/02/03/1819/",
+        "address": "https://modkb.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D1%83%D1%80%D0%BC%D0%B0%D0%BD%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A1%D0%B2%D0%B5%D1%80%D0%B4%D0%BB%D0%BE%D0%B2%D0%B0%2C%2018",
+        "phone": "https://mdgb.ru/ob-uchrezhdenii/realizaciya-nacionalnyh-proektov/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "nizhegorodskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-nizhnii-novgorod",
+      "name": "Нижегородская областная детская клиническая больница",
+      "address": "603136, г. Нижний Новгород, ул. Ванеева, д. 211",
+      "city": "Нижний Новгород",
+      "orgType": "детская больница",
+      "latitude": 56.286193,
+      "longitude": 44.033989,
+      "phones": [
+        "+7 (831) 468-15-60"
+      ],
+      "phonePurpose": "Приёмное отделение",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.elpub.ru/jour/article/view/98/104",
+        "address": "https://nodkb.ru/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9D%D0%B8%D0%B6%D0%BD%D0%B8%D0%B9%20%D0%9D%D0%BE%D0%B2%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%92%D0%B0%D0%BD%D0%B5%D0%B5%D0%B2%D0%B0%2C%20211",
+        "phone": "https://yandex.com/maps/org/nizhegorodskaya_oblastnaya_detskaya_klinicheskaya_bolnitsa_priyemnoye_otdeleniye/165093172302/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "poliklinika-rostgmu-rostov-na-donu",
+      "name": "Поликлиника РостГМУ",
+      "address": "г. Ростов-на-Дону, пер. Нахичеванский, д. 38",
+      "city": "Ростов-на-Дону",
+      "orgType": "университетская клиника",
+      "latitude": 47.227865,
+      "longitude": 39.738795,
+      "phones": [
+        "+7 (863) 285-32-13"
+      ],
+      "phonePurpose": "Колл-центр клиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://rostgmu-clinic.ru/specialists/2713445/",
+        "address": "https://rostgmu.ru/archives/230612",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A0%D0%BE%D1%81%D1%82%D0%BE%D0%B2-%D0%BD%D0%B0-%D0%94%D0%BE%D0%BD%D1%83%2C%20%D0%9D%D0%B0%D1%85%D0%B8%D1%87%D0%B5%D0%B2%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B5%D1%80%D0%B5%D1%83%D0%BB%D0%BE%D0%BA%2C%2038",
+        "phone": "https://rostgmu-clinic.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "detskii-meditsinskii-tsentr-doktor-ryazan",
+      "name": "Детский медицинский центр «Доктор+»",
+      "address": "390000, г. Рязань, ул. Павлова, д. 48",
+      "city": "Рязань",
+      "orgType": "клиника",
+      "latitude": 54.631703,
+      "longitude": 39.727854,
+      "phones": [
+        "+7 (491) 228-44-09",
+        "+7 (491) 228-07-20",
+        "+7 (900) 909-50-60"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://doctor-plus62.ru/",
+        "address": "https://doctor-plus62.ru/contacts",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A0%D1%8F%D0%B7%D0%B0%D0%BD%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9F%D0%B0%D0%B2%D0%BB%D0%BE%D0%B2%D0%B0%2C%2048",
+        "phone": "https://doctor-plus62.ru/contacts"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "konsultativnaya-klinika-panatseya-samara",
+      "name": "Консультативная клиника «Панацея»",
+      "address": "г. Самара, ул. Тухачевского, д. 88",
+      "city": "Самара",
+      "orgType": "клиника",
+      "latitude": 53.196705,
+      "longitude": 50.154474,
+      "phones": [
+        "+7 (846) 211-11-01"
+      ],
+      "phonePurpose": "Единый телефон клиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://panaceya-clinic.ru/migachyova-natalya-begievna/",
+        "address": "https://panaceya-clinic.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D0%B0%D0%BC%D0%B0%D1%80%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A2%D1%83%D1%85%D0%B0%D1%87%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%B3%D0%BE%2C%2088",
+        "phone": "https://panaceya-clinic.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "klinika-medial-smolensk",
+      "name": "Клиника «Медиал»",
+      "address": "г. Смоленск, ул. Фрунзе, д. 40",
+      "city": "Смоленск",
+      "orgType": "клиника",
+      "latitude": 54.807627,
+      "longitude": 32.045396,
+      "phones": [
+        "+7 (481) 263-70-33"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://medialcenter.ru/o-vrachakh/",
+        "address": "https://medialcenter.ru/kontakty-i-rekvizity/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D0%BC%D0%BE%D0%BB%D0%B5%D0%BD%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A4%D1%80%D1%83%D0%BD%D0%B7%D0%B5%2C%2040",
+        "phone": "https://medialcenter.ru/kontakty-i-rekvizity/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "klinika-pspbgmu-im-i-p-pavlova-sankt-peterburg",
+      "name": "Клиника ПСПбГМУ им. И. П. Павлова",
+      "address": "197022, г. Санкт-Петербург, ул. Льва Толстого, д. 6–8",
+      "city": "Санкт-Петербург",
+      "orgType": "университетская клиника",
+      "latitude": 59.966281,
+      "longitude": 30.329159,
+      "phones": [
+        "+7 (812) 429-03-31"
+      ],
+      "phonePurpose": "Контакт-центр клиники",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://www.1spbgmu.ru/ru/kontakty",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9B%D1%8C%D0%B2%D0%B0%20%D0%A2%D0%BE%D0%BB%D1%81%D1%82%D0%BE%D0%B3%D0%BE%2C%206-8",
+        "phone": "https://1spbgmu.ru/klinika/86-glavnaya/universitetskaya-klinika/kontakty-klinika/491-contact"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "meditsinskii-tsentr-santerra-stavropol",
+      "name": "Медицинский центр «Сантерра»",
+      "address": "355005, г. Ставрополь, ул. Серова, д. 154",
+      "city": "Ставрополь",
+      "orgType": "клиника",
+      "latitude": 45.027183,
+      "longitude": 41.957858,
+      "phones": [
+        "+7 (865) 231-56-15",
+        "+7 (962) 400-90-28"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://santerramed.ru/spisok-spetsialistov/barycheva-lyudmila-yurevna/",
+        "address": "https://santerramed.ru/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D1%82%D0%B0%D0%B2%D1%80%D0%BE%D0%BF%D0%BE%D0%BB%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A1%D0%B5%D1%80%D0%BE%D0%B2%D0%B0%2C%20154",
+        "phone": "https://santerramed.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "semeinaya-poliklinika-ugmk-zdorove-ekaterinburg",
+      "name": "Семейная поликлиника «УГМК-Здоровье»",
+      "address": "г. Екатеринбург, ул. Малышева, д. 102Б",
+      "city": "Екатеринбург",
+      "orgType": "клиника",
+      "latitude": 56.836325,
+      "longitude": 60.625443,
+      "phones": [
+        "+7 (800) 234-10-03"
+      ],
+      "phonePurpose": "Единый контакт-центр",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://www.ugmk-clinic.ru/specialist/lepeshkova-tatiana-sergeevna/",
+        "address": "https://www.ugmk-clinic.ru/family-centr/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%95%D0%BA%D0%B0%D1%82%D0%B5%D1%80%D0%B8%D0%BD%D0%B1%D1%83%D1%80%D0%B3%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9C%D0%B0%D0%BB%D1%8B%D1%88%D0%B5%D0%B2%D0%B0%2C%20102%D0%91",
+        "phone": "https://www.ugmk-clinic.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "meditsinskii-tsentr-air-kazan",
+      "name": "Медицинский центр «АИР»",
+      "address": "420133, г. Казань, ул. Маршала Чуйкова, д. 62, пом. 2",
+      "city": "Казань",
+      "orgType": "клиника",
+      "latitude": 55.835148,
+      "longitude": 49.151757,
+      "phones": [
+        "+7 (927) 249-46-03"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://airmc.ru/documents/",
+        "address": "https://airmc.ru/documents/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9C%D0%B0%D1%80%D1%88%D0%B0%D0%BB%D0%B0%20%D0%A7%D1%83%D0%B9%D0%BA%D0%BE%D0%B2%D0%B0%2C%2062",
+        "phone": "https://airmc.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "immunovital-blagoveschensk",
+      "name": "ИммуноВиталь",
+      "address": "675002, г. Благовещенск, ул. Горького, д. 56, пом. 21101",
+      "city": "Благовещенск",
+      "orgType": "клиника",
+      "latitude": 50.26273,
+      "longitude": 127.562595,
+      "phones": [
+        "+7 (416) 244-02-54",
+        "+7 (962) 284-36-18"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://иммуновиталь.рф/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%91%D0%BB%D0%B0%D0%B3%D0%BE%D0%B2%D0%B5%D1%89%D0%B5%D0%BD%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%93%D0%BE%D1%80%D1%8C%D0%BA%D0%BE%D0%B3%D0%BE%2C%2056",
+        "phone": "https://иммуновиталь.рф/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "amurskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-blagoveschensk",
+      "name": "Амурская областная детская клиническая больница",
+      "address": "г. Благовещенск, ул. Октябрьская, д. 108",
+      "city": "Благовещенск",
+      "orgType": "детская больница",
+      "latitude": 50.269335,
+      "longitude": 127.549166,
+      "phones": [
+        "+7 (416) 251-61-71",
+        "+7 (416) 249-10-07"
+      ],
+      "phonePurpose": "Справочная / регистратура",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://www.amurvisit.ru/place/blagoveshchensk/3028.html",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%91%D0%BB%D0%B0%D0%B3%D0%BE%D0%B2%D0%B5%D1%89%D0%B5%D0%BD%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8C%D1%81%D0%BA%D0%B0%D1%8F%2C%20108",
+        "phone": "https://www.amurvisit.ru/place/blagoveshchensk/3028.html"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "klinika-fomina-belgorod",
+      "name": "Клиника Фомина",
+      "address": "г. Белгород, ул. Преображенская, д. 119",
+      "city": "Белгород",
+      "orgType": "клиника",
+      "latitude": 50.600362,
+      "longitude": 36.575122,
+      "phones": [
+        "+7 (472) 242-93-01"
+      ],
+      "phonePurpose": "Единый телефон клиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://belgorod.fomin-clinic.ru/doctors/bocharova-kseniya-aleksandrovna/",
+        "address": "https://belgorod.fomin-clinic.ru/contacts/preobrazhenskaya-ul-d-119/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%91%D0%B5%D0%BB%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%2C%20%D0%9F%D1%80%D0%B5%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%20119",
+        "phone": "https://belgorod.fomin-clinic.ru/contacts/preobrazhenskaya-ul-d-119/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "medik-profi-groznyi",
+      "name": "Медик-Профи",
+      "address": "364024, г. Грозный, просп. В. В. Путина, д. 17А",
+      "city": "Грозный",
+      "orgType": "клиника",
+      "latitude": 43.319462,
+      "longitude": 45.689307,
+      "phones": [
+        "+7 (928) 015-85-37"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "organization",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://napopravku.ru/groznyj/doctor-profile/jakhjaeva-anzhelina-musaevna/",
+        "address": "https://2gis.ru/grozny/firm/70000001025391503",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%B5%D0%B4%D0%B8%D0%BA-%D0%9F%D1%80%D0%BE%D1%84%D0%B8%2C%20%D0%93%D1%80%D0%BE%D0%B7%D0%BD%D1%8B%D0%B9",
+        "phone": "https://2gis.ru/grozny/firm/70000001025391503"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "klinicheskaya-bolnitsa-4-g-groznogo-groznyi",
+      "name": "Клиническая больница № 4 г. Грозного",
+      "address": "364068, г. Грозный, ул. Социалистическая, д. 4",
+      "city": "Грозный",
+      "orgType": "больница",
+      "latitude": 43.313224,
+      "longitude": 45.659192,
+      "phones": [
+        "+7 (871) 222-20-51"
+      ],
+      "phonePurpose": "Справочная больницы",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://yandex.ru/maps/org/klinicheskaya_bolnitsa_4/233494061860/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%93%D1%80%D0%BE%D0%B7%D0%BD%D1%8B%D0%B9%2C%20%D0%A1%D0%BE%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%81%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%204",
+        "phone": "https://kb4-grozny.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "dobryi-doktor-chelyabinsk",
+      "name": "Добрый доктор",
+      "address": "г. Челябинск, Университетская наб., д. 22В",
+      "city": "Челябинск",
+      "orgType": "клиника",
+      "latitude": 55.177479,
+      "longitude": 61.362778,
+      "phones": [
+        "+7 (351) 225-71-56"
+      ],
+      "phonePurpose": "Единый телефон клиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://dobdocchel.ru/doctors/shilova-tatyana-vasilevna/",
+        "address": "https://napopravku.ru/chelyabinsk/doctor-profile/shilova-tatjana-vasilevna/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A7%D0%B5%D0%BB%D1%8F%D0%B1%D0%B8%D0%BD%D1%81%D0%BA%2C%20%D0%A3%D0%BD%D0%B8%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%82%D0%B5%D1%82%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BD%D0%B0%D0%B1%D0%B5%D1%80%D0%B5%D0%B6%D0%BD%D0%B0%D1%8F%2C%2022%D0%92",
+        "phone": "https://dobdocchel.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "ivanovskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-ivanovo",
+      "name": "Ивановская областная детская клиническая больница",
+      "address": "153040, г. Иваново, ул. Любимова, д. 7",
+      "city": "Иваново",
+      "orgType": "детская больница",
+      "latitude": 56.953303,
+      "longitude": 41.024871,
+      "phones": [
+        "+7 (493) 256-67-66"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://dz.ivanovoobl.ru/departament/uchrezhdeniya-zdravookhraneniya/ivanovskaya-odkb/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%98%D0%B2%D0%B0%D0%BD%D0%BE%D0%B2%D0%BE%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9B%D1%8E%D0%B1%D0%B8%D0%BC%D0%BE%D0%B2%D0%B0%2C%207",
+        "phone": "https://ivodkb.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "dalnevostochnyi-gosudarstvennyi-meditsinskii-universitet-habarovsk",
+      "name": "Дальневосточный государственный медицинский университет",
+      "address": "680000, г. Хабаровск, ул. Муравьёва-Амурского, д. 35",
+      "city": "Хабаровск",
+      "orgType": "образовательная организация",
+      "latitude": 48.481028,
+      "longitude": 135.070728,
+      "phones": [
+        "+7 (421) 230-53-11"
+      ],
+      "phonePurpose": "Справочная университета",
+      "phoneUsable": true,
+      "verification": "unconfirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.elpub.ru/jour/article/view/177/155",
+        "address": "https://www.fesmu.ru/contacts/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A5%D0%B0%D0%B1%D0%B0%D1%80%D0%BE%D0%B2%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9C%D1%83%D1%80%D0%B0%D0%B2%D1%8C%D1%91%D0%B2%D0%B0-%D0%90%D0%BC%D1%83%D1%80%D1%81%D0%BA%D0%BE%D0%B3%D0%BE%2C%2035",
+        "phone": "https://fesmu.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "kabinet-allergologa-tokarskoi-s-f-abakan",
+      "name": "Кабинет аллерголога Токарской С. Ф.",
+      "address": "г. Абакан, ул. Ивана Ярыгина, д. 32",
+      "city": "Абакан",
+      "orgType": "частный кабинет",
+      "latitude": 53.72454,
+      "longitude": 91.432642,
+      "phones": [
+        "+7 (913) 052-72-99"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://stallergic.ru/",
+        "address": "https://yandex.ru/maps/org/allergolog_immunolog_tokarskaya_s_f_/181500626512/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%90%D0%B1%D0%B0%D0%BA%D0%B0%D0%BD%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%98%D0%B2%D0%B0%D0%BD%D0%B0%20%D0%AF%D1%80%D1%8B%D0%B3%D0%B8%D0%BD%D0%B0%2C%2032",
+        "phone": "https://tokarskaya.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "rdmts-im-v-d-mandzhievoi-elista",
+      "name": "РДМЦ им. В. Д. Манджиевой",
+      "address": "г. Элиста, ул. Г. О. Рокчинского, д. 1",
+      "city": "Элиста",
+      "orgType": "детский медицинский центр",
+      "latitude": 46.325633,
+      "longitude": 44.273531,
+      "phones": [
+        "+7 (847) 225-00-30",
+        "+7 (847) 226-65-00"
+      ],
+      "phonePurpose": "Колл-центр",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://yandex.ru/maps/org/respublikanskiy_detskiy_meditsinskiy_tsentr_im_v_d_mandzhiyevoy/104248275625/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%AD%D0%BB%D0%B8%D1%81%D1%82%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A0%D0%BE%D0%BA%D1%87%D0%B8%D0%BD%D1%81%D0%BA%D0%BE%D0%B3%D0%BE%2C%201",
+        "phone": "https://rdmc08.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "detskaya-oblastnaya-bolnitsa-kaliningradskoi-oblasti-kaliningrad",
+      "name": "Детская областная больница Калининградской области",
+      "address": "г. Калининград, ул. Дмитрия Донского, д. 23",
+      "city": "Калининград",
+      "orgType": "детская больница",
+      "latitude": 54.714194,
+      "longitude": 20.475103,
+      "phones": [
+        "+7 (401) 221-32-56"
+      ],
+      "phonePurpose": "Справочная / колл-центр",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://napopravku.ru/kaliningrad/doctor-profile/markhajchuk-ajshat-zijabutdinovna/",
+        "address": "https://dob.infomed39.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9A%D0%B0%D0%BB%D0%B8%D0%BD%D0%B8%D0%BD%D0%B3%D1%80%D0%B0%D0%B4%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%94%D0%BC%D0%B8%D1%82%D1%80%D0%B8%D1%8F%20%D0%94%D0%BE%D0%BD%D1%81%D0%BA%D0%BE%D0%B3%D0%BE%2C%2023",
+        "phone": "https://dokb39.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "allergo-clinic-krasnoyarsk",
+      "name": "Allergo Clinic",
+      "address": "г. Красноярск, ул. Урицкого, д. 125",
+      "city": "Красноярск",
+      "orgType": "клиника",
+      "latitude": 56.00802,
+      "longitude": 92.862039,
+      "phones": [
+        "+7 (391) 274-54-03",
+        "+7 (913) 191-87-14"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://allergo-clinic.ru/nashi-sotrudniki/bychkovskaya-snezhana-vasilevna/",
+        "address": "https://allergo-clinic.ru/kontakty-allergo-clinic/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D1%8F%D1%80%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A3%D1%80%D0%B8%D1%86%D0%BA%D0%BE%D0%B3%D0%BE%2C%20125",
+        "phone": "https://allergo-clinic.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "magadanskaya-oblastnaya-detskaya-bolnitsa-magadan",
+      "name": "Магаданская областная детская больница",
+      "address": "г. Магадан, ул. Кольцевая, д. 24",
+      "city": "Магадан",
+      "orgType": "детская больница",
+      "latitude": 59.552057,
+      "longitude": 150.824058,
+      "phones": [
+        "+7 (413) 262-25-14"
+      ],
+      "phonePurpose": "Общий телефон",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://napopravku.ru/magadan/doctor-profile/vasileva-darja-aleksandrovna-pediatr/",
+        "address": "https://napopravku.ru/magadan/doctor-profile/vasileva-darja-aleksandrovna-pediatr/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%B0%D0%B3%D0%B0%D0%B4%D0%B0%D0%BD%2C%20%D0%9A%D0%BE%D0%BB%D1%8C%D1%86%D0%B5%D0%B2%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2024",
+        "phone": "https://vseoms.ru/index.php/site/viewmo/5673"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "detskaya-respublikanskaya-klinicheskaya-bolnitsa-saransk",
+      "name": "Детская республиканская клиническая больница",
+      "address": "430032, г. Саранск, ул. Розы Люксембург, д. 15",
+      "city": "Саранск",
+      "orgType": "детская больница",
+      "latitude": 54.170461,
+      "longitude": 45.123365,
+      "phones": [
+        "+7 (834) 235-32-61"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://like.doctor/saransk/vrachi/burenina-liana-vasilevna",
+        "address": "https://med-b-drkb-saransk-r13.gosweb.gosuslugi.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D0%B0%D1%80%D0%B0%D0%BD%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A0%D0%BE%D0%B7%D1%8B%20%D0%9B%D1%8E%D0%BA%D1%81%D0%B5%D0%BC%D0%B1%D1%83%D1%80%D0%B3%2C%2015",
+        "phone": "https://med-b-drkb-saransk-r13.gosweb.gosuslugi.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "sanavita-naryan-mar",
+      "name": "Санавита",
+      "address": "г. Нарьян-Мар, ул. им. В. И. Ленина, д. 19",
+      "city": "Нарьян-Мар",
+      "orgType": "клиника",
+      "latitude": 67.637871,
+      "longitude": 53.004174,
+      "phones": [
+        "+7 (911) 068-62-38",
+        "+7 (818) 532-33-99"
+      ],
+      "phonePurpose": "Архивные телефоны закрытой клиники",
+      "phoneUsable": false,
+      "verification": "unconfirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://napopravku.ru/naryan-mar/clinics/meditsinskij-tsentr-sanavita/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9D%D0%B0%D1%80%D1%8C%D1%8F%D0%BD-%D0%9C%D0%B0%D1%80%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9B%D0%B5%D0%BD%D0%B8%D0%BD%D0%B0%2C%2019",
+        "phone": "https://napopravku.ru/naryan-mar/clinics/meditsinskij-tsentr-sanavita/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "kliniko-diagnosticheskii-tsentr-klinika-akademii-piuv-penza",
+      "name": "Клинико-диагностический центр «Клиника Академии» ПИУВ",
+      "address": "г. Пенза, ул. Стасова, д. 8А",
+      "city": "Пенза",
+      "orgType": "университетская клиника",
+      "latitude": 53.228421,
+      "longitude": 44.908214,
+      "phones": [
+        "+7 (841) 243-96-66"
+      ],
+      "phonePurpose": "Регистратура клиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://piuv.ru/staff/person/32",
+        "address": "https://www.piuv.ru/kliniko_diagnosticheskij_centr",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9F%D0%B5%D0%BD%D0%B7%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A1%D1%82%D0%B0%D1%81%D0%BE%D0%B2%D0%B0%2C%208%D0%90",
+        "phone": "https://www.piuv.ru/kliniko_diagnosticheskij_centr"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "tsentr-immunologii-i-allergologii-ntsm-im-m-e-nikolaeva-yakutsk",
+      "name": "Центр иммунологии и аллергологии НЦМ им. М. Е. Николаева",
+      "address": "677008, г. Якутск, Сергеляхское шоссе, д. 4, стр. 2",
+      "city": "Якутск",
+      "orgType": "больничный центр",
+      "latitude": 62.006513,
+      "longitude": 129.678294,
+      "phones": [
+        "+7 (411) 250-09-00"
+      ],
+      "phonePurpose": "Контакт-центр",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "normalized-address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://rb1ncm.ru/en/company/czentr-immunologii-i-allergologii.html",
+        "address": "https://2gis.ru/yakutsk/firm/70000001093549808",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%AF%D0%BA%D1%83%D1%82%D1%81%D0%BA%2C%20%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%BB%D1%8F%D1%85%D1%81%D0%BA%D0%BE%D0%B5%20%D1%88%D0%BE%D1%81%D1%81%D0%B5%204%20%D0%BA%D0%BC%2C%202",
+        "phone": "https://rb1ncm.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "kraevaya-detskaya-konsultativnaya-poliklinika-stavropol",
+      "name": "Краевая детская консультативная поликлиника",
+      "address": "г. Ставрополь, ул. Семашко, д. 3",
+      "city": "Ставрополь",
+      "orgType": "детская поликлиника",
+      "latitude": 45.039449,
+      "longitude": 41.937321,
+      "phones": [
+        "+7 (865) 225-72-33",
+        "+7 (865) 271-62-07"
+      ],
+      "phonePurpose": "Регистратура КДЦ",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://yandex.ru/maps/search/Ставрополь%20Семашко%203%20детская%20поликлиника",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D1%82%D0%B0%D0%B2%D1%80%D0%BE%D0%BF%D0%BE%D0%BB%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A1%D0%B5%D0%BC%D0%B0%D1%88%D0%BA%D0%BE%2C%203",
+        "phone": "https://skkdkb.ru/glavnaya/svedeniya-o-gbuz-sk-kdkb.html"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "detskaya-klinicheskaya-bolnitsa-9-ekaterinburg",
+      "name": "Детская клиническая больница № 9",
+      "address": "620134, г. Екатеринбург, ул. Решётская, д. 51",
+      "city": "Екатеринбург",
+      "orgType": "детская больница",
+      "latitude": 56.895156,
+      "longitude": 60.480368,
+      "phones": [
+        "+7 (343) 200-20-09",
+        "+7 (343) 215-85-07"
+      ],
+      "phonePurpose": "Колл-центр",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://dmb9.ru/%D0%B0%D0%BB%D0%BB%D0%B5%D1%80%D0%B3%D0%BE%D0%BB%D0%BE%D0%B3-%D0%B8%D0%BC%D0%BC%D1%83%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3-%D0%BA%D0%B4%D0%BF/",
+        "address": "https://dmb9.ru/%D0%BA%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D1%8B/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%95%D0%BA%D0%B0%D1%82%D0%B5%D1%80%D0%B8%D0%BD%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%A0%D0%B5%D1%88%D1%91%D1%82%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2051",
+        "phone": "https://dmb9.ru/контакты/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "tomskaya-oblastnaya-detskaya-bolnitsa-tomsk",
+      "name": "Томская областная детская больница",
+      "address": "г. Томск, ул. Карла Маркса, д. 44",
+      "city": "Томск",
+      "orgType": "детская больница",
+      "latitude": 56.496799,
+      "longitude": 84.94414,
+      "phones": [
+        "+7 (382) 290-97-67"
+      ],
+      "phonePurpose": "Контакт-центр поликлиники",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://www.odbtomsk.ru/about/medical-organization/rukovodyashchij-sostav",
+        "address": "https://www.odbtomsk.ru/contacts",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A2%D0%BE%D0%BC%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9A%D0%B0%D1%80%D0%BB%D0%B0%20%D0%9C%D0%B0%D1%80%D0%BA%D1%81%D0%B0%2C%2044",
+        "phone": "https://www.odbtomsk.ru/contacts/contact-phone-numbers"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "klinika-vosstanovitelnoi-meditsiny-tver",
+      "name": "Клиника восстановительной медицины",
+      "address": "г. Тверь, Татарский пер., д. 22",
+      "city": "Тверь",
+      "orgType": "клиника",
+      "latitude": 56.854806,
+      "longitude": 35.924189,
+      "phones": [
+        "+7 (482) 278-00-60",
+        "+7 (482) 275-57-05"
+      ],
+      "phonePurpose": "Запись / подтверждение записи",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://tkvm.ru/experts/allergist-immunologist-pulmonologist/barmina-e-v",
+        "address": "https://tkvm.ru/contacts",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A2%D0%B2%D0%B5%D1%80%D1%8C%2C%20%D0%A2%D0%B0%D1%82%D0%B0%D1%80%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D0%B5%D1%80%D0%B5%D1%83%D0%BB%D0%BE%D0%BA%2C%2022",
+        "phone": "https://tkvm.ru/contacts"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "tyumenskii-nii-kraevoi-infektsionnoi-patologii-tyumen",
+      "name": "Тюменский НИИ краевой инфекционной патологии",
+      "address": "625026, г. Тюмень, ул. Республики, д. 147",
+      "city": "Тюмень",
+      "orgType": "научно-клинический институт",
+      "latitude": 57.139038,
+      "longitude": 65.568898,
+      "phones": [
+        "+7 (345) 228-99-90",
+        "+7 (345) 228-99-91"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://www.sciencemon.ru/org-info/139",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A2%D1%8E%D0%BC%D0%B5%D0%BD%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%A0%D0%B5%D1%81%D0%BF%D1%83%D0%B1%D0%BB%D0%B8%D0%BA%D0%B8%2C%20147",
+        "phone": "https://www.sciencemon.ru/org-info/139"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "allegro-izhevsk",
+      "name": "Аллегро",
+      "address": "г. Ижевск, ул. 40 лет Победы, д. 70А",
+      "city": "Ижевск",
+      "orgType": "клиника",
+      "latitude": 56.852169,
+      "longitude": 53.28448,
+      "phones": [
+        "+7 (950) 813-66-61"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://www.allegro18.ru/vrachi-new/ermakova_margarita_kuzminichna/",
+        "address": "https://www.test.allegro18.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%98%D0%B6%D0%B5%D0%B2%D1%81%D0%BA%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2040%20%D0%BB%D0%B5%D1%82%20%D0%9F%D0%BE%D0%B1%D0%B5%D0%B4%D1%8B%2C%2070%D0%90",
+        "phone": "https://www.allegro18.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "konsultativno-diagnosticheskaya-poliklinika-2-volgograd",
+      "name": "Консультативно-диагностическая поликлиника № 2",
+      "address": "400081, г. Волгоград, ул. Ангарская, д. 114А",
+      "city": "Волгоград",
+      "orgType": "поликлиника",
+      "latitude": 48.723746,
+      "longitude": 44.469602,
+      "phones": [
+        "+7 (844) 234-03-03"
+      ],
+      "phonePurpose": "Единый колл-центр",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://kdp-2.ru/staff/kabinet-vracha-allergologa-immunologa/samofalova-tatyana-viktorovna/",
+        "address": "https://kdp-2.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%2C%20%D0%90%D0%BD%D0%B3%D0%B0%D1%80%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%20114%D0%90",
+        "phone": "https://kdp-2.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "detskaya-poliklinika-3-voronezh",
+      "name": "Детская поликлиника № 3",
+      "address": "394030, г. Воронеж, ул. Кольцовская, д. 66",
+      "city": "Воронеж",
+      "orgType": "детская поликлиника",
+      "latitude": 51.663494,
+      "longitude": 39.187898,
+      "phones": [
+        "+7 (473) 202-13-52"
+      ],
+      "phonePurpose": "Колл-центр",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://napopravku.ru/voronezh/doctor-profile/studenikina-elena-viktorovna-allergolog/",
+        "address": "https://gp10.zdrav36.ru/ob-uchrezhdenii",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6%2C%20%D0%9A%D0%BE%D0%BB%D1%8C%D1%86%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2066",
+        "phone": "https://gp10.zdrav36.ru/ob-uchrezhdenii"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "donetskii-gosudarstvennyi-meditsinskii-universitet-im-m-gorkogo-donetsk",
+      "name": "Донецкий государственный медицинский университет им. М. Горького",
+      "address": "283003, г. Донецк, просп. Ильича, д. 16",
+      "city": "Донецк",
+      "orgType": "образовательная организация",
+      "latitude": 48.003084,
+      "longitude": 37.831944,
+      "phones": [
+        "+7 (856) 342-40-01"
+      ],
+      "phonePurpose": "Справочная университета",
+      "phoneUsable": true,
+      "verification": "unconfirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://cyberleninka.ru/article/n/allergen-spetsificheskaya-immunoterapiya-u-detey-soglasitelnyy-dokument-assotsiatsii-detskih-allergologov-i-immunologov-rossii",
+        "address": "https://dnmu.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%94%D0%BE%D0%BD%D0%B5%D1%86%D0%BA%2C%20%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%98%D0%BB%D1%8C%D0%B8%D1%87%D0%B0%2C%2016",
+        "phone": "https://dnmu.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "leningradskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-sankt-peterburg",
+      "name": "Ленинградская областная детская клиническая больница",
+      "address": "г. Санкт-Петербург, ул. Комсомола, д. 6",
+      "city": "Санкт-Петербург",
+      "orgType": "детская больница",
+      "latitude": 59.954013,
+      "longitude": 30.367409,
+      "phones": [
+        "+7 (812) 670-89-64",
+        "+7 (812) 542-69-42"
+      ],
+      "phonePurpose": "Колл-центр / КДЦ",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://napopravku.ru/spb/doctor-profile/orlova-olga-romanovna/",
+        "address": "https://www.lodkb.ru/contacts",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9A%D0%BE%D0%BC%D1%81%D0%BE%D0%BC%D0%BE%D0%BB%D0%B0%2C%206",
+        "phone": "https://www.lodkb.ru/contacts"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "ao-meditsina-klinika-akademika-roitberga-moskva",
+      "name": "АО «Медицина» (клиника академика Ройтберга)",
+      "address": "125047, г. Москва, 2-й Тверской-Ямской пер., д. 10",
+      "city": "Москва",
+      "orgType": "клиника",
+      "latitude": 55.773419,
+      "longitude": 37.594522,
+      "phones": [
+        "+7 (495) 126-41-31"
+      ],
+      "phonePurpose": "Единый телефон клиники",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://www.medicina.ru/kontakty/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0%2C%202-%D0%B9%20%D0%A2%D0%B2%D0%B5%D1%80%D1%81%D0%BA%D0%BE%D0%B9-%D0%AF%D0%BC%D1%81%D0%BA%D0%BE%D0%B9%20%D0%BF%D0%B5%D1%80%D0%B5%D1%83%D0%BB%D0%BE%D0%BA%2C%2010",
+        "phone": "https://www.medicina.ru/kontakty/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "pskovskaya-detskaya-gorodskaya-poliklinika-otdelenie-1-pskov",
+      "name": "Псковская детская городская поликлиника, отделение № 1",
+      "address": "г. Псков, ул. Кузнецкая, д. 21",
+      "city": "Псков",
+      "orgType": "детская поликлиника",
+      "latitude": 57.809683,
+      "longitude": 28.342484,
+      "phones": [
+        "+7 (811) 229-14-75",
+        "+7 (811) 229-14-70"
+      ],
+      "phonePurpose": "Колл-центр",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://dgp60.ru/doctors/114/",
+        "address": "https://dgp60.ru/kontakty/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9F%D1%81%D0%BA%D0%BE%D0%B2%2C%20%D0%9A%D1%83%D0%B7%D0%BD%D0%B5%D1%86%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2021",
+        "phone": "https://dgp60.ru/kontakty/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "permskii-gosudarstvennyi-meditsinskii-universitet-im-e-a-vagnera-perm",
+      "name": "Пермский государственный медицинский университет им. Е. А. Вагнера",
+      "address": "614000, г. Пермь, ул. Петропавловская, д. 26",
+      "city": "Пермь",
+      "orgType": "образовательная организация",
+      "latitude": 58.014269,
+      "longitude": 56.244124,
+      "phones": [
+        "+7 (342) 212-04-04"
+      ],
+      "phonePurpose": "Справочная университета",
+      "phoneUsable": true,
+      "verification": "unconfirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://psma.ru/universitet/fakultety/lechebnyj/kafedry/39-kafedra-detskikh-boleznej-lechebnogo-i-stomatologicheskogo-fakultetov.html",
+        "address": "https://psma.ru/contacts.html",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9F%D0%B5%D1%80%D0%BC%D1%8C%2C%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%BF%D0%B0%D0%B2%D0%BB%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%2026",
+        "phone": "https://www.psma.ru/kontaktnaya-informatsiya/8-universitet/183-kontaktnaya-informatsiya.html"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "meditsinskii-tsentr-novaya-zhizn-perm",
+      "name": "Медицинский центр «Новая жизнь»",
+      "address": "г. Пермь, ул. Луначарского, д. 15",
+      "city": "Пермь",
+      "orgType": "клиника",
+      "latitude": 58.011785,
+      "longitude": 56.256763,
+      "phones": [
+        "+7 (342) 201-10-27",
+        "+7 (912) 982-09-19"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://newlifemed.ru/vrachi",
+        "address": "https://newlifemed.ru/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9F%D0%B5%D1%80%D0%BC%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9B%D1%83%D0%BD%D0%B0%D1%87%D0%B0%D1%80%D1%81%D0%BA%D0%BE%D0%B3%D0%BE%2C%2015",
+        "phone": "https://newlifemed.ru/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "meditsinskii-tsentr-nadezhda-kemerovo",
+      "name": "Медицинский центр «Надежда»",
+      "address": "650066, г. Кемерово, Притомский просп., д. 7/1",
+      "city": "Кемерово",
+      "orgType": "клиника",
+      "latitude": 55.353922,
+      "longitude": 86.111644,
+      "phones": [
+        "+7 (384) 290-17-00",
+        "+7 (384) 290-04-03",
+        "+7 (961) 729-29-12"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://ivfhope.ru/doctor/popova-oljga-viktorovna",
+        "address": "https://ivfhope.ru/contacts",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9A%D0%B5%D0%BC%D0%B5%D1%80%D0%BE%D0%B2%D0%BE%2C%20%D0%9F%D1%80%D0%B8%D1%82%D0%BE%D0%BC%D1%81%D0%BA%D0%B8%D0%B9%20%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%2C%207%2F1",
+        "phone": "https://ivfhope.ru/contacts"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "volgogradskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-volgograd",
+      "name": "Волгоградская областная детская клиническая больница",
+      "address": "400137, г. Волгоград, ул. им. Землячки, д. 76",
+      "city": "Волгоград",
+      "orgType": "детская больница",
+      "latitude": 48.759523,
+      "longitude": 44.518792,
+      "phones": [
+        "+7 (844) 254-43-00",
+        "+7 (844) 254-43-03"
+      ],
+      "phonePurpose": "Справочная больницы",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://одкб34.рф/контакты/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%97%D0%B5%D0%BC%D0%BB%D1%8F%D1%87%D0%BA%D0%B8%2C%2076",
+        "phone": "https://vomiac.ru/lpu/gbuz-volgogradskaya-oblastnaya-detskaya-klinicheskaya-bol-nica"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "poliklinika-bryanskoi-oblastnoi-detskoi-bolnitsy-bryansk",
+      "name": "Поликлиника Брянской областной детской больницы",
+      "address": "г. Брянск, просп. Станке Димитрова, д. 100",
+      "city": "Брянск",
+      "orgType": "детская поликлиника",
+      "latitude": 53.225648,
+      "longitude": 34.316944,
+      "phones": [
+        "+7 (483) 232-04-03"
+      ],
+      "phonePurpose": "Регистратура поликлиники",
+      "phoneUsable": true,
+      "verification": "address-confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://yandex.ru/maps/org/bryanskaya_oblastnaya_detskaya_bolnitsa_poliklinika/1023187370/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%91%D1%80%D1%8F%D0%BD%D1%81%D0%BA%2C%20%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%A1%D1%82%D0%B0%D0%BD%D0%BA%D0%B5%20%D0%94%D0%B8%D0%BC%D0%B8%D1%82%D1%80%D0%BE%D0%B2%D0%B0%2C%20100",
+        "phone": "https://bodb.brkmed.ru/article/35_konsultativnaya-poliklinika/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "oblastnaya-detskaya-klinicheskaya-bolnitsa-im-n-n-silischevoi-astrahan",
+      "name": "Областная детская клиническая больница им. Н. Н. Силищевой",
+      "address": "414011, г. Астрахань, ул. Медиков, д. 6",
+      "city": "Астрахань",
+      "orgType": "детская больница",
+      "latitude": 46.352531,
+      "longitude": 48.091338,
+      "phones": [
+        "+7 (851) 261-87-50"
+      ],
+      "phonePurpose": "Справочная больницы",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://xn--30-9kcl4aw.xn--p1ai/ru/node/3",
+        "address": "https://xn--30-9kcl4aw.xn--p1ai/ru/content/kontakty",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%90%D1%81%D1%82%D1%80%D0%B0%D1%85%D0%B0%D0%BD%D1%8C%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9C%D0%B5%D0%B4%D0%B8%D0%BA%D0%BE%D0%B2%2C%206",
+        "phone": "https://xn--30-9kcl4aw.xn--p1ai/ru/content/kontakty"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "zdorovoe-pokolenie-nazran",
+      "name": "Здоровое поколение",
+      "address": "Республика Ингушетия, г. Назрань, ул. Московская, д. 1",
+      "city": "Назрань",
+      "orgType": "клиника",
+      "latitude": 43.225029,
+      "longitude": 44.764218,
+      "phones": [
+        "+7 (964) 027-87-77"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://adair.ru/struktura-adair/",
+        "address": "https://napopravku.ru/nazran/clinics/klinika-zdorovoe-pokolenie/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%9D%D0%B0%D0%B7%D1%80%D0%B0%D0%BD%D1%8C%2C%20%D0%9C%D0%BE%D1%81%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%2C%201",
+        "phone": "https://napopravku.ru/nazran/clinics/klinika-zdorovoe-pokolenie/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "vita-med-ulan-ude",
+      "name": "ВИТА-Мед",
+      "address": "670031, г. Улан-Удэ, ул. Бабушкина, д. 7",
+      "city": "Улан-Удэ",
+      "orgType": "клиника",
+      "latitude": 51.81241,
+      "longitude": 107.596574,
+      "phones": [
+        "+7 (301) 237-95-15"
+      ],
+      "phonePurpose": "Регистратура",
+      "phoneUsable": true,
+      "verification": "confirmed",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://vitamed.su/",
+        "address": "https://vitamed.su/contact",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%A3%D0%BB%D0%B0%D0%BD-%D0%A3%D0%B4%D1%8D%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%91%D0%B0%D0%B1%D1%83%D1%88%D0%BA%D0%B8%D0%BD%D0%B0%2C%207",
+        "phone": "https://vitamed.su/contact"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    },
+    {
+      "id": "mama-plus-vladikavkaz",
+      "name": "Мама Plus",
+      "address": "362039, г. Владикавказ, просп. Доватора, д. 85",
+      "city": "Владикавказ",
+      "orgType": "клиника",
+      "latitude": 43.040441,
+      "longitude": 44.643646,
+      "phones": [
+        "+7 (867) 233-31-20",
+        "+7 (867) 230-33-31"
+      ],
+      "phonePurpose": "Запись на приём",
+      "phoneUsable": true,
+      "verification": "needs-review",
+      "geocodePrecision": "address",
+      "isNkcc": false,
+      "sources": {
+        "doctor": "https://mamaplus-clinic.ru/doctors/75",
+        "address": "https://prodoctorov.ru/vladikavkaz/lpu/66350-mama-plyus/",
+        "coordinates": "https://nominatim.openstreetmap.org/ui/search.html?q=%D0%92%D0%BB%D0%B0%D0%B4%D0%B8%D0%BA%D0%B0%D0%B2%D0%BA%D0%B0%D0%B7%2C%20%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%94%D0%BE%D0%B2%D0%B0%D1%82%D0%BE%D1%80%D0%B0%2C%2085",
+        "phone": "https://mamaplus-clinic.ru/contacts/"
+      },
+      "checkedAt": "25.08.2026",
+      "geocodedAt": "2026-08-26",
+      "phoneCheckedAt": "26.08.2026"
+    }
+  ],
+  "doctors": [
+    {
+      "id": "balabolkin",
+      "name": "Балаболкин Иван Иванович",
+      "degree": "",
+      "role": "Почётный президент",
+      "section": "Руководство",
+      "clinicId": "nmits-zdorovya-detei-moskva",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (495) 967-14-20",
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "smolkin",
+      "name": "Смолкин Юрий Соломонович",
+      "degree": "",
+      "role": "Президент",
+      "section": "Руководство",
+      "clinicId": "nkcc",
+      "adairMember": true,
+      "isChiefExpert": true,
+      "phone": "+7 (495) 225-45-52",
+      "verification": "confirmed"
+    },
+    {
+      "id": "masalskii",
+      "name": "Масальский Сергей Сергеевич",
+      "degree": "",
+      "role": "Исполнительный директор",
+      "section": "Исполнительная дирекция",
+      "clinicId": "nkcc",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (495) 225-45-52",
+      "verification": "confirmed"
+    },
+    {
+      "id": "lyan",
+      "name": "Лян Наталья Анатольевна",
+      "degree": "",
+      "role": "Исполнительный директор",
+      "section": "Исполнительная дирекция",
+      "clinicId": "dgkb-im-n-f-filatova-dzm-moskva",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (499) 254-10-10",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "suhanov",
+      "name": "Суханов Станислав Олегович",
+      "degree": "",
+      "role": "Интернет-коммуникации",
+      "section": "Исполнительная дирекция",
+      "clinicId": "unestablished",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "shahova",
+      "name": "Шахова Наталья Викторовна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "zdorovoe-pokolenie-barnaul",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (385) 255-67-00",
+      "verification": "confirmed"
+    },
+    {
+      "id": "faizullina",
+      "name": "Файзуллина Резеда Мансафовна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "medsi-promeditsina-ufa",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (347) 200-12-87",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "andronova",
+      "name": "Андронова Елена Владимировна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "semeinyi-doktor-magnitogorsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (351) 958-11-11",
+      "verification": "confirmed"
+    },
+    {
+      "id": "petrova",
+      "name": "Петрова Тамара Ивановна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "respublikanskaya-detskaya-klinicheskaya-bolnitsa-cheboksary",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (835) 256-31-44",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "yarovaya",
+      "name": "Яровая Ирина Владимировна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "mediko-hirurgicheskaya-klinika-lipetsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (474) 251-59-11",
+      "verification": "confirmed"
+    },
+    {
+      "id": "larkova",
+      "name": "Ларькова Инна Анатольевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "fits-pitaniya-i-biotehnologii-moskva",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (495) 916-10-61",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "cherepanova",
+      "name": "Черепанова Вера Платоновна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "detskaya-poliklinika-1-ioshkar-ola",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (836) 223-27-75",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "sulima",
+      "name": "Сулима Екатерина Игоревна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "murmanskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-murmansk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (815) 278-88-01",
+      "verification": "confirmed"
+    },
+    {
+      "id": "timofeeva",
+      "name": "Тимофеева Елена Владимировна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "nizhegorodskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-nizhnii-novgorod",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (831) 468-15-60",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "churyukina",
+      "name": "Чурюкина Элла Витальевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "poliklinika-rostgmu-rostov-na-donu",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (863) 285-32-13",
+      "verification": "confirmed"
+    },
+    {
+      "id": "stezhkina",
+      "name": "Стежкина Елена Викторовна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "detskii-meditsinskii-tsentr-doktor-ryazan",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (491) 228-44-09",
+      "verification": "confirmed"
+    },
+    {
+      "id": "migacheva",
+      "name": "Мигачева Наталья Бегиевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "konsultativnaya-klinika-panatseya-samara",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (846) 211-11-01",
+      "verification": "confirmed"
+    },
+    {
+      "id": "meshkova",
+      "name": "Мешкова Раиса Яковлевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "klinika-medial-smolensk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (481) 263-70-33",
+      "verification": "confirmed"
+    },
+    {
+      "id": "trusova",
+      "name": "Трусова Ольга Валерьевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "klinika-pspbgmu-im-i-p-pavlova-sankt-peterburg",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (812) 429-03-31",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "barycheva",
+      "name": "Барычева Людмила Юрьевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "meditsinskii-tsentr-santerra-stavropol",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (865) 231-56-15",
+      "verification": "confirmed"
+    },
+    {
+      "id": "lepeshkova",
+      "name": "Лепешкова Татьяна Сергеевна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "semeinaya-poliklinika-ugmk-zdorove-ekaterinburg",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (800) 234-10-03",
+      "verification": "confirmed"
+    },
+    {
+      "id": "hakimova",
+      "name": "Хакимова Резеда Фидаиловна",
+      "degree": "",
+      "role": "Член президиума",
+      "section": "Президиум",
+      "clinicId": "meditsinskii-tsentr-air-kazan",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (927) 249-46-03",
+      "verification": "confirmed"
+    },
+    {
+      "id": "kubareva",
+      "name": "Кубарева Анна Викторовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "immunovital-blagoveschensk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (416) 244-02-54",
+      "verification": "confirmed"
+    },
+    {
+      "id": "grigorenko",
+      "name": "Григоренко Галина Васильевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "amurskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-blagoveschensk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (416) 251-61-71",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "bocharova",
+      "name": "Бочарова Ксения Александровна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "klinika-fomina-belgorod",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (472) 242-93-01",
+      "verification": "confirmed"
+    },
+    {
+      "id": "yahyaeva",
+      "name": "Яхьяева Анжелина Мусаевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "medik-profi-groznyi",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (928) 015-85-37",
+      "verification": "needs-review"
+    },
+    {
+      "id": "yanaeva",
+      "name": "Янаева Хеда Ахмедовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "klinicheskaya-bolnitsa-4-g-groznogo-groznyi",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (871) 222-20-51",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "shilova",
+      "name": "Шилова Татьяна Васильевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "dobryi-doktor-chelyabinsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (351) 225-71-56",
+      "verification": "confirmed"
+    },
+    {
+      "id": "lunina",
+      "name": "Лунина Елена Сергеевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "unestablished",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "smirnova",
+      "name": "Смирнова Татьяна Леонидовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "ivanovskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-ivanovo",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (493) 256-67-66",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "suprun",
+      "name": "Супрун Евгений Николаевич",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "dalnevostochnyi-gosudarstvennyi-meditsinskii-universitet-habarovsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (421) 230-53-11",
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "tokarskaya",
+      "name": "Токарская Светлана Филипповна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "kabinet-allergologa-tokarskoi-s-f-abakan",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (913) 052-72-99",
+      "verification": "confirmed"
+    },
+    {
+      "id": "nimyaeva",
+      "name": "Нимяева Екатерина Вячеславовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "rdmts-im-v-d-mandzhievoi-elista",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (847) 225-00-30",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "marhaichuk",
+      "name": "Мархайчук Айшат Зиябутдиновна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "detskaya-oblastnaya-bolnitsa-kaliningradskoi-oblasti-kaliningrad",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (401) 221-32-56",
+      "verification": "needs-review"
+    },
+    {
+      "id": "bychkovskaya",
+      "name": "Бычковская Снежана Васильевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "allergo-clinic-krasnoyarsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (391) 274-54-03",
+      "verification": "confirmed"
+    },
+    {
+      "id": "vasileva",
+      "name": "Васильева Дарья Александровна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "magadanskaya-oblastnaya-detskaya-bolnitsa-magadan",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (413) 262-25-14",
+      "verification": "needs-review"
+    },
+    {
+      "id": "burenina",
+      "name": "Буренина Лиана Васильевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "detskaya-respublikanskaya-klinicheskaya-bolnitsa-saransk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (834) 235-32-61",
+      "verification": "needs-review"
+    },
+    {
+      "id": "rozhdestvenskii",
+      "name": "Рождественский Дмитрий Викторович",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "sanavita-naryan-mar",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (911) 068-62-38",
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "alekseeva",
+      "name": "Алексеева Наталия Юрьевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "kliniko-diagnosticheskii-tsentr-klinika-akademii-piuv-penza",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (841) 243-96-66",
+      "verification": "confirmed"
+    },
+    {
+      "id": "golikova",
+      "name": "Голикова Оксана Афанасьевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "tsentr-immunologii-i-allergologii-ntsm-im-m-e-nikolaeva-yakutsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (411) 250-09-00",
+      "verification": "needs-review"
+    },
+    {
+      "id": "glushko",
+      "name": "Глушко Елена Викторовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "kraevaya-detskaya-konsultativnaya-poliklinika-stavropol",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (865) 225-72-33",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "emelina",
+      "name": "Емелина Юлия Николаевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "detskaya-klinicheskaya-bolnitsa-9-ekaterinburg",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (343) 200-20-09",
+      "verification": "confirmed"
+    },
+    {
+      "id": "kamaltynova",
+      "name": "Камалтынова Елена Михайловна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "tomskaya-oblastnaya-detskaya-bolnitsa-tomsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (382) 290-97-67",
+      "verification": "confirmed"
+    },
+    {
+      "id": "barmina",
+      "name": "Бармина Елена Владимировна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "klinika-vosstanovitelnoi-meditsiny-tver",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (482) 278-00-60",
+      "verification": "confirmed"
+    },
+    {
+      "id": "rychkova",
+      "name": "Рычкова Ольга Александровна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "tyumenskii-nii-kraevoi-infektsionnoi-patologii-tyumen",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (345) 228-99-90",
+      "verification": "needs-review"
+    },
+    {
+      "id": "ermakova",
+      "name": "Ермакова Маргарита Кузьминична",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "allegro-izhevsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (950) 813-66-61",
+      "verification": "confirmed"
+    },
+    {
+      "id": "samofalova",
+      "name": "Самофалова Татьяна Викторовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "konsultativno-diagnosticheskaya-poliklinika-2-volgograd",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (844) 234-03-03",
+      "verification": "confirmed"
+    },
+    {
+      "id": "studenikina",
+      "name": "Студеникина Елена Викторовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "detskaya-poliklinika-3-voronezh",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (473) 202-13-52",
+      "verification": "needs-review"
+    },
+    {
+      "id": "prilutskii",
+      "name": "Прилуцкий Александр Сергеевич",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "donetskii-gosudarstvennyi-meditsinskii-universitet-im-m-gorkogo-donetsk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (856) 342-40-01",
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "orlova",
+      "name": "Орлова Ольга Романовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "leningradskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-sankt-peterburg",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (812) 670-89-64",
+      "verification": "needs-review"
+    },
+    {
+      "id": "dolzhenkova",
+      "name": "Долженкова Вера Геннадьевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "ao-meditsina-klinika-akademika-roitberga-moskva",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (495) 126-41-31",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "novoselova",
+      "name": "Новоселова Марина Викторовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "pskovskaya-detskaya-gorodskaya-poliklinika-otdelenie-1-pskov",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (811) 229-14-75",
+      "verification": "confirmed"
+    },
+    {
+      "id": "minaeva",
+      "name": "Минаева Наталья Витальевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "permskii-gosudarstvennyi-meditsinskii-universitet-im-e-a-vagnera-perm",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (342) 212-04-04",
+      "verification": "unconfirmed"
+    },
+    {
+      "id": "repetskaya",
+      "name": "Репецкая Марина Николаевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "meditsinskii-tsentr-novaya-zhizn-perm",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (342) 201-10-27",
+      "verification": "confirmed"
+    },
+    {
+      "id": "popova",
+      "name": "Попова Ольга Викторовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "meditsinskii-tsentr-nadezhda-kemerovo",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (384) 290-17-00",
+      "verification": "confirmed"
+    },
+    {
+      "id": "malyuzhinskaya",
+      "name": "Малюжинская Наталья Владимировна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "volgogradskaya-oblastnaya-detskaya-klinicheskaya-bolnitsa-volgograd",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (844) 254-43-00",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "ivankova",
+      "name": "Иванькова Татьяна Георгиевна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "poliklinika-bryanskoi-oblastnoi-detskoi-bolnitsy-bryansk",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (483) 232-04-03",
+      "verification": "address-confirmed"
+    },
+    {
+      "id": "krasilova",
+      "name": "Красилова Елена Владимировна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "oblastnaya-detskaya-klinicheskaya-bolnitsa-im-n-n-silischevoi-astrahan",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (851) 261-87-50",
+      "verification": "confirmed"
+    },
+    {
+      "id": "temirbieva",
+      "name": "Темирбиева Айшет Магомедовна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "zdorovoe-pokolenie-nazran",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (964) 027-87-77",
+      "verification": "needs-review"
+    },
+    {
+      "id": "yangutova",
+      "name": "Янгутова Маргарита Михайловна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "vita-med-ulan-ude",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (301) 237-95-15",
+      "verification": "confirmed"
+    },
+    {
+      "id": "karyaeva",
+      "name": "Каряева Светлана Константиновна",
+      "degree": "",
+      "role": "Член правления",
+      "section": "Правление",
+      "clinicId": "mama-plus-vladikavkaz",
+      "adairMember": true,
+      "isChiefExpert": false,
+      "phone": "+7 (867) 233-31-20",
+      "verification": "needs-review"
+    }
+  ]
+}

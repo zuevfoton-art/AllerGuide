@@ -1,11 +1,12 @@
 import type { GooglePollenMapType } from '@allerguide/core';
 import { GOOGLE_POLLEN_HEATMAP_ENABLED } from '@/src/constants/features';
 import { getApiBaseUrl } from '@/src/services/api-client';
+import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
 
 export function isGooglePollenHeatmapAvailable(): boolean {
   return (
     GOOGLE_POLLEN_HEATMAP_ENABLED &&
-    Boolean(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim()) &&
+    isGoogleMapsApiKey(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY) &&
     Boolean(getApiBaseUrl().trim())
   );
 }
