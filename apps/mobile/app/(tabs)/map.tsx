@@ -18,6 +18,7 @@ import {
   buildYandexMapWidgetUrl,
   clampPollenUpiIndex,
   hasGoogleGroupHeatmap,
+  resolveOfficialHeatmapMapType,
   getPollenPeaksForMonth,
   formatPollenMonth,
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
@@ -81,8 +82,9 @@ import {
   isGoogleAirQualityAvailable,
 } from '@/src/services/air-quality-service';
 import { getLocale } from '@/src/services/settings-service';
-import { resolveMapBasemap } from '@/src/services/map-basemap';
+import { resolveMapBasemap, resolveRuntimeMapBasemap } from '@/src/services/map-basemap';
 import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
+import { useGoogleBasemapGuard } from '@/src/hooks/use-google-basemap-guard';
 import {
   fetchPollenHourlySeries,
   resolveHourlyUpi,
@@ -264,24 +266,33 @@ export default function MapScreen() {
   const statusReading = forecastReading ?? selectedReading;
   const statusLevel = statusReading?.level ?? null;
 
+  const apiBaseUrlPresent = Boolean(getApiBaseUrl().trim());
   const mapBasemap = resolveMapBasemap({
     googleMapsApiKeyPresent: isGoogleMapsApiKey(process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY),
-    apiBaseUrlPresent: Boolean(getApiBaseUrl().trim()),
+    apiBaseUrlPresent,
     googleMapPrimaryEnabled: GOOGLE_MAP_PRIMARY_ENABLED,
     googlePollenHeatmapEnabled: GOOGLE_POLLEN_HEATMAP_ENABLED,
     yandexInteractiveEnabled: YANDEX_MAP_INTERACTIVE_ENABLED,
   });
-  const useGoogleMap = mapBasemap === 'google';
-  const useYandexInteractive = mapBasemap === 'yandex-interactive';
+  const googleGuard = useGoogleBasemapGuard(mapBasemap === 'google');
+  const runtimeBasemap = resolveRuntimeMapBasemap(mapBasemap, {
+    googleFailed: googleGuard.failed,
+    yandexInteractiveEnabled: YANDEX_MAP_INTERACTIVE_ENABLED,
+    apiBaseUrlPresent,
+  });
+  const useGoogleMap = runtimeBasemap === 'google';
+  const useYandexInteractive = runtimeBasemap === 'yandex-interactive';
   const showPollenLayer = layerMode === 'pollen';
   const showAirLayer = layerMode === 'air';
   const showPlacesLayer = layerMode === 'places';
   const useHeatmap = isGooglePollenHeatmapAvailable() && showPollenLayer;
-  const googleMapType = useHeatmap ? pollenTaxonToGoogleMapType(selectedTaxonId) : null;
   const groupHeatmapActive = hasGoogleGroupHeatmap(
     selectedTaxonId,
     pollenSnapshot?.typeIndexes,
   );
+  const googleMapType = useHeatmap
+    ? resolveOfficialHeatmapMapType(selectedTaxonId, pollenSnapshot?.typeIndexes)
+    : null;
   const hasOfficialTypeIndexes = Object.keys(pollenSnapshot?.typeIndexes ?? {}).length > 0;
   const heatmapEmpty = Boolean(
     showPollenLayer && pollenSnapshot && hasOfficialTypeIndexes && !groupHeatmapActive,
@@ -742,6 +753,7 @@ export default function MapScreen() {
           selectedMarkerId={selectedPoiId}
           onMarkerPress={setSelectedPoiId}
           onRegionChange={handleRegionChange}
+          onMapLoaded={googleGuard.onMapLoaded}
           overlay={mapOverlay}
         />
       ) : (

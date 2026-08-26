@@ -25,6 +25,7 @@ export function GooglePollenMap({
   selectedMarkerId,
   onMarkerPress,
   onRegionChange,
+  onMapLoaded,
   overlay,
 }: GooglePollenMapProps) {
   const theme = useTheme();
@@ -40,6 +41,8 @@ export function GooglePollenMap({
   onMarkerPressRef.current = onMarkerPress;
   const onRegionChangeRef = useRef(onRegionChange);
   onRegionChangeRef.current = onRegionChange;
+  const onMapLoadedRef = useRef(onMapLoaded);
+  onMapLoadedRef.current = onMapLoaded;
   const lastRequestedCenterRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -65,6 +68,7 @@ export function GooglePollenMap({
           const center = mapRef.current?.getCenter();
           if (center) onRegionChangeRef.current?.(center.lat(), center.lng());
         });
+        map.addListener('tilesloaded', () => onMapLoadedRef.current?.());
       }
       mapRef.current = map;
       // Recenter only when the requested coordinates change; otherwise marker
