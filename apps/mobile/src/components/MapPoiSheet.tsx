@@ -119,7 +119,7 @@ export function MapPoiSheet({
           const selected = poi.id === selectedId;
           const isNkcc = poi.tags.some((tag) => tag.toUpperCase() === 'NKCC');
           const isAdair = poi.source === 'adair';
-          const extraPhoneCount = Math.max((poi.phones?.length ?? 0) - 1, 0);
+          const displayPhones = poi.phones?.length ? poi.phones : poi.phone ? [poi.phone] : [];
           const levelColor = isAdair
             ? '#7C3AED'
             : poi.level === 'high'
@@ -162,7 +162,11 @@ export function MapPoiSheet({
                 </View>
                 <Text style={styles.note}>{poi.note}</Text>
                 {poi.adairVerification ? (
-                  <Text style={styles.verification}>
+                  <Text
+                    style={[
+                      styles.verification,
+                      poi.adairVerification === 'confirmed' && styles.verificationOk,
+                    ]}>
                     {t(VERIFICATION_KEYS[poi.adairVerification])}
                   </Text>
                 ) : null}
@@ -181,21 +185,20 @@ export function MapPoiSheet({
                   ) : null}
                   {isNkcc ? <Text style={styles.badgeNkcc}>{t('map.nkcc')}</Text> : null}
                 </View>
-                {poi.phone && poi.phoneUsable !== false ? (
-                  <Pressable onPress={() => void Linking.openURL(`tel:${poi.phone}`)}>
-                    <Text style={styles.phone}>
-                      {poi.phone}
-                      {poi.phonePurpose ? ` · ${poi.phonePurpose}` : ''}
+                {displayPhones.map((phone, index) =>
+                  poi.phoneUsable !== false ? (
+                    <Pressable key={phone} onPress={() => void Linking.openURL(`tel:${phone}`)}>
+                      <Text style={styles.phone}>
+                        {phone}
+                        {index === 0 && poi.phonePurpose ? ` · ${poi.phonePurpose}` : ''}
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Text key={phone} style={styles.archivedPhone}>
+                      {phone}
                     </Text>
-                  </Pressable>
-                ) : poi.phones?.[0] ? (
-                  <Text style={styles.archivedPhone}>{poi.phones[0]}</Text>
-                ) : null}
-                {extraPhoneCount > 0 ? (
-                  <Text style={styles.meta}>
-                    {t('map.adairMorePhones', { count: extraPhoneCount })}
-                  </Text>
-                ) : null}
+                  ),
+                )}
                 {poi.bookingUrl ? (
                   <Pressable
                     onPress={() => void Linking.openURL(poi.bookingUrl!)}
@@ -302,6 +305,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 11,
       color: colors.warning,
+    },
+    verificationOk: {
+      color: colors.success,
     },
     doctorLine: {
       fontFamily: fonts.sans,
