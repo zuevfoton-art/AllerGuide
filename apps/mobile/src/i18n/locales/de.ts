@@ -295,7 +295,7 @@ const de: LocaleMessages = {
   medicineScan: {
     title: 'Foto oder Sprache',
     subtitle:
-      'Fotografieren Sie die Packung oder diktieren Sie den Namen — die Felder werden vorausgefüllt. Sie können auch manuell ausfüllen.',
+      'Fotografieren Sie die Packung, scannen Sie den Barcode oder diktieren Sie den Namen — die Felder werden vorausgefüllt. Sie können auch manuell ausfüllen.',
     photograph: 'Packung fotografieren',
     recordVoice: 'Per Sprache aufnehmen',
     gallery: 'Aus der Galerie',
@@ -319,11 +319,13 @@ const de: LocaleMessages = {
     notRecognized: 'Arzneimittel nicht erkannt. Anderes Foto versuchen oder manuell ausfüllen.',
     cropTitle: 'Packung zuschneiden',
     cropHint: 'Name, Wirkstoff und Stärke behalten',
+    barcodeNotFound:
+      'Barcode nicht im Katalog gefunden. Packung fotografieren oder manuell ausfüllen.',
   },
   nutritionScan: {
     title: 'Gericht fotografieren oder eintippen',
     subtitle:
-      'Fotografieren Sie das Gericht oder geben Sie den Namen ein — danach Zutaten und Reaktionsstärke.',
+      'Fotografieren Sie das Gericht, scannen Sie den Barcode oder geben Sie den Namen ein — danach Zutaten und Reaktionsstärke.',
     photograph: 'Gericht fotografieren',
     gallery: 'Aus der Galerie',
     enterManually: 'Manuell eingeben',
@@ -331,6 +333,8 @@ const de: LocaleMessages = {
     notRecognized: 'Gericht nicht erkannt. Bitte den Namen manuell eingeben.',
     cropTitle: 'Gericht zuschneiden',
     cropHint: 'Teller oder Etikett im Rahmen behalten',
+    barcodeNotFound:
+      'Barcode nicht im Katalog gefunden. Gericht fotografieren oder den Namen manuell eingeben.',
   },
   voiceNote: {
     title: 'Spracheingabe',
@@ -385,6 +389,7 @@ const de: LocaleMessages = {
     analyzeMenu: 'Menü analysieren',
     analyzeLabel: 'Text analysieren',
     barcodeWebHint: 'Barcode-Scan ist in der mobilen App verfügbar',
+    barcodePlaceholder: '8–14-stelliger Barcode',
     takePhoto: 'Foto aufnehmen',
     pickFromGallery: 'Aus Galerie wählen',
     cropTitle: 'Foto zuschneiden',

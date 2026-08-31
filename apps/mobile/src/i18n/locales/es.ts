@@ -294,7 +294,7 @@ const es: LocaleMessages = {
   medicineScan: {
     title: 'Foto o voz',
     subtitle:
-      'Fotografía el envase o dicta el nombre: los campos se rellenarán. También puedes escribirlos a mano.',
+      'Fotografía el envase, escanea el código de barras o dicta el nombre: los campos se rellenarán. También puedes escribirlos a mano.',
     photograph: 'Fotografiar el envase',
     recordVoice: 'Grabar con la voz',
     gallery: 'Desde la galería',
@@ -318,11 +318,13 @@ const es: LocaleMessages = {
     notRecognized: 'No se reconoció el medicamento. Prueba otra foto o rellénalo a mano.',
     cropTitle: 'Recorta el envase',
     cropHint: 'Deja el nombre, el principio activo y la dosis',
+    barcodeNotFound:
+      'Código no encontrado en el catálogo. Fotografía el envase o rellénalo a mano.',
   },
   nutritionScan: {
     title: 'Foto del plato o escribirlo',
     subtitle:
-      'Fotografía el plato o escribe el nombre: mostraremos los ingredientes y luego el nivel de reacción.',
+      'Fotografía el plato, escanea el código de barras o escribe el nombre: mostraremos los ingredientes y luego el nivel de reacción.',
     photograph: 'Fotografiar el plato',
     gallery: 'Desde la galería',
     enterManually: 'Escribir a mano',
@@ -330,6 +332,8 @@ const es: LocaleMessages = {
     notRecognized: 'No se reconoció el plato. Escríbelo a mano.',
     cropTitle: 'Recorta el plato',
     cropHint: 'Deja el plato o la etiqueta en el encuadre',
+    barcodeNotFound:
+      'Código no encontrado en el catálogo. Fotografía el plato o escríbelo a mano.',
   },
   voiceNote: {
     title: 'Entrada de voz',
@@ -384,6 +388,7 @@ const es: LocaleMessages = {
     analyzeMenu: 'Analizar menú',
     analyzeLabel: 'Analizar texto',
     barcodeWebHint: 'El escaneo de códigos está disponible en la app móvil',
+    barcodePlaceholder: 'Código de 8–14 dígitos',
     takePhoto: 'Tomar foto',
     pickFromGallery: 'Elegir de la galería',
     cropTitle: 'Recortar la foto',
