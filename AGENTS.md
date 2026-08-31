@@ -31,6 +31,24 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 
 ---
 
+## Cursor skills, rules, and MCP
+
+Procedure lives in a **skill** (loaded by `description`). Invariants live in a **rule** (auto-attached by `globs`). Navigation stays here and in `docs/development-rules.md`.
+
+| Kind | Path | When |
+|------|------|------|
+| Skill | `.cursor/skills/product-analyst/SKILL.md` | Metrics, KPI, funnels, analytics events, `FR-*` |
+| Skill | `.cursor/skills/product-designer/SKILL.md` | Screens, tokens, a11y, empty states, i18n copy |
+| Skill | `.cursor/skills/code-complete/SKILL.md` | Code construction / review quality |
+| Skill | `.cursor/skills/rework-commits/SKILL.md` | History rewrite on a feature branch |
+| Rule | `.cursor/rules/analytics-events.mdc` | `trackEvent` / taxonomy / PII |
+| Rule | `.cursor/rules/design-tokens.mdc` | Claro tokens, radii ACTION/STATE, i18n |
+| Rule | `.cursor/rules/product-roles.mdc` | Routes a product task to the matching skill |
+
+Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, Neon, staging Postgres read-only): [`.cursor/mcp.json`](.cursor/mcp.json) · setup [`docs/mcp-servers.md`](docs/mcp-servers.md). Secrets only via `${env:NAME}` or OAuth — never a prod DB URL.
+
+---
+
 ## Cursor Cloud specific instructions
 
 - Package manager is **pnpm** (`packageManager: pnpm@10.34.4`). Run `pnpm install` from the repo root before typecheck/tests.
@@ -46,7 +64,8 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm typecheck` — TypeScript across all packages
 - `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
-- `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
+- `pnpm check:analytics-taxonomy` — `trackEvent` names must match `ANALYTICS_EVENT_NAMES`; also part of `pnpm rc-gate`
+- `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + taxonomy + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage API live on Yandex Cloud; see [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
 - `pnpm yc-stage-phase2` — Stage clients must target YC (`api.staging.aclearo.com`); see same doc §Phase 2

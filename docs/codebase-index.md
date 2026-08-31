@@ -32,7 +32,8 @@
 ├── packages/ai/     # Сканер, OCR, scan-intent, search-ingredients, prescription / medicine parse
 ├── packages/ui/     # Тонкие RN-примитивы (Badge, PrimaryButton)
 ├── docs/            # Архитектура, QA, staging, clinical
-├── scripts/         # RC-gate, YC stage gates, staging smokes
+├── scripts/         # RC-gate, taxonomy check, YC stage gates
+├── .cursor/         # skills, rules, mcp.json
 └── .github/         # CI, EAS, Neon preview
 ```
 
@@ -74,7 +75,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | API endpoint | `apps/api/src/routes/*` → регистрация в `app.ts` |
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
-| Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts` |
+| Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
+| UI / токены / a11y | `constants/{theme,layout,typography}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md` |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
 | CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
@@ -320,6 +322,7 @@ Barrel: `index.ts`. Pure TS.
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
 | YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
+| Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 
 ---
 
@@ -330,7 +333,8 @@ pnpm install                 # из корня
 pnpm typecheck
 pnpm test
 pnpm --filter mobile lint
-pnpm rc-gate                 # typecheck + lint + test + doc/Maestro
+pnpm check:analytics-taxonomy
+pnpm rc-gate                 # typecheck + lint + test + taxonomy + doc/Maestro
 ```
 
 Mobile web: `cd apps/mobile && npx expo start --web --port 5000`  
