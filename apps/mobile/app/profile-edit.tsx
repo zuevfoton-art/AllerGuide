@@ -180,7 +180,6 @@ export default function ProfileEditScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('profiles.eyebrow')}
         title={t('profileEdit.title')}
         subtitle={t('profileEdit.subtitle')}
       />

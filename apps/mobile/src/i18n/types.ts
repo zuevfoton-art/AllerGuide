@@ -57,15 +57,11 @@ export type LocaleMessages = {
   };
   auth: {
     loginTitle: string;
-    loginSubtitle: string;
     registerTitle: string;
-    registerSubtitle: string;
     phoneLabel: string;
     phonePlaceholder: string;
-    passwordPlaceholder: string;
     passwordMinPlaceholder: string;
     confirmPassword: string;
-    confirmPasswordPlaceholder: string;
     loginButton: string;
     registerButton: string;
     noAccount: string;
@@ -103,7 +99,6 @@ export type LocaleMessages = {
     };
     resetPassword: {
       title: string;
-      subtitle: string;
       newPassword: string;
       confirmPassword: string;
       submitButton: string;
@@ -115,7 +110,6 @@ export type LocaleMessages = {
   profiles: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     listTitle: string;
     empty: string;
     self: string;
@@ -155,7 +149,6 @@ export type LocaleMessages = {
     sos: string;
   };
   more: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     marketDesc: string;
@@ -217,7 +210,6 @@ export type LocaleMessages = {
   };
   diary: {
     title: string;
-    subtitle: string;
     eyebrow: string;
     newEntry: string;
     quickEntry: string;
@@ -277,7 +269,6 @@ export type LocaleMessages = {
   clinicalScales: {
     title: string;
     subtitle: string;
-    eyebrow: string;
   };
   diaryWizard: {
     stepOf: string;
@@ -358,7 +349,6 @@ export type LocaleMessages = {
   scanner: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     openAction: string;
     product: string;
     menu: string;
@@ -504,8 +494,6 @@ export type LocaleMessages = {
   };
   market: {
     title: string;
-    subtitle: string;
-    eyebrow: string;
     searchPlaceholder: string;
     banner: string;
     empty: string;
@@ -531,7 +519,6 @@ export type LocaleMessages = {
   map: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     places: string;
     pollen: string;
     adair: string;
@@ -716,7 +703,6 @@ export type LocaleMessages = {
   settings: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     emergencyNumber: string;
     emergencyHint: string;
     saveNumber: string;
@@ -778,7 +764,6 @@ export type LocaleMessages = {
     aboutHint: string;
   };
   about: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     version: string;
@@ -800,7 +785,6 @@ export type LocaleMessages = {
     details: string;
   };
   notifications: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     hubTitle: string;
@@ -892,7 +876,6 @@ export type LocaleMessages = {
     };
   };
   profileSetup: {
-    eyebrow: string;
     titleSelf: string;
     titleChild: string;
     titleCreate: string;
@@ -901,14 +884,11 @@ export type LocaleMessages = {
     subtitleDefault: string;
     stepProgress: string;
     nameLabel: string;
-    namePlaceholder: string;
     birthYearLabel: string;
     birthYearPlaceholder: string;
     profileLabel: string;
     profileSelf: string;
     profileChild: string;
-    profileSelfLocked: string;
-    profileChildLocked: string;
     allergensLabel: string;
     allergensHint: string;
     conditionsLabel: string;
@@ -1199,7 +1179,6 @@ export type LocaleMessages = {
   };
   asthma: {
     title: string;
-    eyebrow: string;
     planTitle: string;
     planSubtitle: string;
     editPlan: string;
@@ -1270,7 +1249,6 @@ export type LocaleMessages = {
   sos: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     name: string;
     age: string;
     allergies: string;
@@ -1307,7 +1285,6 @@ export type LocaleMessages = {
   };
   sosEdit: {
     title: string;
-    eyebrow: string;
     noProfile: string;
     notesLabel: string;
     notesPlaceholder: string;
@@ -1340,7 +1317,6 @@ export type LocaleMessages = {
     back: string;
     title: string;
     subtitle: string;
-    eyebrow: string;
     period: string;
     customRange: string;
     fromDate: string;

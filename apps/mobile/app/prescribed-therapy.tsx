@@ -232,7 +232,6 @@ export default function PrescribedTherapyScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('prescribedTherapy.eyebrow')}
         title={t('prescribedTherapy.courseTitle')}
         subtitle={t('prescribedTherapy.courseSubtitle')}
         style={{ marginBottom: 12 }}

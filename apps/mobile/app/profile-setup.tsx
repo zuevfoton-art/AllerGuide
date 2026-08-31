@@ -42,7 +42,6 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -404,7 +403,6 @@ export default function ProfileSetupScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <ScreenEyebrow section={t('profileSetup.eyebrow')} />
         <Text style={ui.docTitle}>{title}</Text>
         <Text style={ui.docMeta}>{subtitle}</Text>
       </View>
@@ -416,7 +414,6 @@ export default function ProfileSetupScreen() {
           profileType={type}
           onProfileTypeChange={setType}
           canToggleType={canToggleType}
-          lockedType={lockedType}
         />
       ) : null}
 

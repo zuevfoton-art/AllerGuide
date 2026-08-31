@@ -42,7 +42,6 @@ export default function ExpertScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('expert.eyebrow')}
         title={t('expert.title')}
         subtitle={`${localeContent.expertHero.name} · ${localeContent.expertHero.role}`}
       />

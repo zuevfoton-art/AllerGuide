@@ -266,7 +266,6 @@ export default function AsitCourseScreen() {
       <Screen>
         <ScreenHeader
           onBack={() => router.back()}
-          eyebrow={t('asit.eyebrow')}
           title={t('asit.courseTitle')}
           style={{ marginBottom: 12 }}
         />
@@ -308,7 +307,6 @@ export default function AsitCourseScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('asit.eyebrow')}
         title={t('asit.courseTitle')}
         subtitle={t('asit.courseSubtitle')}
         style={{ marginBottom: 12 }}

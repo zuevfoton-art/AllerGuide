@@ -65,7 +65,6 @@ export default function AsthmaActionPlanScreen() {
       <Screen>
         <ScreenHeader
           onBack={() => router.back()}
-          eyebrow={t('asthma.eyebrow')}
           title={t('asthma.planTitle')}
           style={{ marginBottom: 12 }}
         />
@@ -80,7 +79,6 @@ export default function AsthmaActionPlanScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('asthma.eyebrow')}
         title={t('asthma.planTitle')}
         subtitle={t('asthma.planSubtitle')}
         style={{ marginBottom: 12 }}

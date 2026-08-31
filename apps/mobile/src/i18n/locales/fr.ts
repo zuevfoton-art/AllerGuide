@@ -50,15 +50,11 @@ const fr: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Connexion',
-    loginSubtitle: 'Connectez-vous par téléphone ou email',
     registerTitle: 'Inscription',
-    registerSubtitle: 'Créez un compte par téléphone ou email',
     phoneLabel: 'Numéro de téléphone',
     phonePlaceholder: '+33 6 12 34 56 78',
-    passwordPlaceholder: 'Entrez le mot de passe',
     passwordMinPlaceholder: 'Minimum 6 caractères',
     confirmPassword: 'Confirmer le mot de passe',
-    confirmPasswordPlaceholder: 'Répétez le mot de passe',
     loginButton: 'Se connecter',
     registerButton: "S'inscrire",
     noAccount: 'Pas de compte ?',
@@ -96,7 +92,6 @@ const fr: LocaleMessages = {
     },
     resetPassword: {
       title: 'Nouveau mot de passe',
-      subtitle: 'Créez un nouveau mot de passe pour votre compte',
       newPassword: 'Nouveau mot de passe',
       confirmPassword: 'Confirmer le mot de passe',
       submitButton: 'Enregistrer le mot de passe',
@@ -108,7 +103,6 @@ const fr: LocaleMessages = {
   profiles: {
     title: 'Mes profils',
     subtitle: 'Modifier et supprimer',
-    eyebrow: 'Profils',
     listTitle: 'Liste des profils',
     empty: 'Pas encore de profil. Ajoutez le premier — cela prend une minute.',
     self: 'Moi',
@@ -149,7 +143,6 @@ const fr: LocaleMessages = {
     sos: 'SOS',
   },
   more: {
-    eyebrow: 'Sections',
     title: 'Plus',
     subtitle: 'Marché, carte, expert et réglages',
     marketDesc: 'Produits adaptés aux allergies de votre profil',
@@ -212,7 +205,6 @@ const fr: LocaleMessages = {
   },
   diary: {
     title: 'Entrées du journal',
-    subtitle: 'Observations que vous notez vous-même',
     eyebrow: 'Observations',
     newEntry: 'Nouvelle entrée',
     quickEntry: 'Entrée courte',
@@ -272,7 +264,6 @@ const fr: LocaleMessages = {
   clinicalScales: {
     title: 'Scores cliniques',
     subtitle: 'Échelles pour suivre l’évolution. Les données restent dans les rapports.',
-    eyebrow: 'Scores',
   },
   diaryWizard: {
     stepOf: 'Étape {{current}} sur {{total}}',
@@ -357,7 +348,6 @@ const fr: LocaleMessages = {
   scanner: {
     title: 'Scanner intelligent',
     subtitle: 'Vérification selon le profil d\'allergies',
-    eyebrow: 'Scanner',
     openAction: 'Ouvrir',
     product: 'Produit',
     menu: 'Menu',
@@ -493,8 +483,6 @@ const fr: LocaleMessages = {
   },
   market: {
     title: 'Marché',
-    subtitle: 'Produits pour allergiques',
-    eyebrow: 'Marché',
     searchPlaceholder: 'Rechercher…',
     banner: 'Sélection personnalisée — produits conflictuels masqués',
     empty: 'Rien trouvé. Essayez une autre recherche.',
@@ -521,7 +509,6 @@ const fr: LocaleMessages = {
   map: {
     title: 'Carte des lieux',
     subtitle: 'Cliniques, pollen et qualité de l\'air',
-    eyebrow: 'Carte',
     places: 'Restaurants',
     pollen: 'Pollen',
     adair: 'ADAIR',
@@ -713,7 +700,6 @@ const fr: LocaleMessages = {
   settings: {
     title: 'Paramètres',
     subtitle: 'SOS, sync et rappels',
-    eyebrow: 'Paramètres',
     emergencyNumber: 'Appel d\'urgence',
     emergencyHint: 'Numéro SOS (par défaut 103)',
     saveNumber: 'Enregistrer le numéro',
@@ -777,7 +763,6 @@ const fr: LocaleMessages = {
     aboutHint: 'une application Aclearo',
   },
   about: {
-    eyebrow: 'À propos',
     title: 'À propos',
     subtitle: 'Compagnon allergie — offline-first',
     version: 'Version',
@@ -800,7 +785,6 @@ const fr: LocaleMessages = {
     details: 'En savoir plus',
   },
   notifications: {
-    eyebrow: 'Notifications',
     title: 'Notifications',
     subtitle: 'Rappels locaux sur cet appareil',
     hubTitle: 'Notifications et rappels',
@@ -901,7 +885,6 @@ const fr: LocaleMessages = {
     },
   },
   profileSetup: {
-    eyebrow: 'Profil',
     titleSelf: 'Votre profil',
     titleChild: 'Profil de l\'enfant',
     titleCreate: 'Créer un profil',
@@ -910,14 +893,11 @@ const fr: LocaleMessages = {
     subtitleDefault: '{{step}} — remplissez les informations pour la personnalisation',
     stepProgress: 'Étape {{current}} sur {{total}}',
     nameLabel: 'Nom',
-    namePlaceholder: 'Entrez le nom',
     birthYearLabel: 'Année de naissance',
     birthYearPlaceholder: 'Par exemple, 1990',
     profileLabel: 'Profil',
     profileSelf: 'Moi',
     profileChild: 'Enfant',
-    profileSelfLocked: 'Votre profil',
-    profileChildLocked: 'Profil de l\'enfant',
     allergensLabel: 'Allergènes',
     allergensHint:
       'Choisissez des allergènes dans la liste ou le catalogue. Les réactions croisées seront proposées à l\'étape suivante.',
@@ -1227,7 +1207,6 @@ const fr: LocaleMessages = {
   },
   asthma: {
     title: 'Asthme bronchique',
-    eyebrow: 'Asthme',
     planTitle: 'Plan d\'action asthme',
     planSubtitle: 'Zones DEP et étapes selon le médecin',
     editPlan: 'Plan d’action',
@@ -1295,7 +1274,6 @@ const fr: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Informations d’urgence uniquement. Gérez les profils depuis l’accueil.',
-    eyebrow: 'SOS',
     name: 'Nom :',
     age: 'Âge :',
     allergies: 'Allergies :',
@@ -1332,7 +1310,6 @@ const fr: LocaleMessages = {
   },
   sosEdit: {
     title: 'Modifier SOS',
-    eyebrow: 'SOS',
     noProfile: 'Aucun profil sélectionné',
     notesLabel: 'Notes médicales',
     notesPlaceholder: 'Médicaments, détails de réaction, instructions du médecin…',
@@ -1365,7 +1342,6 @@ const fr: LocaleMessages = {
     back: 'Journal',
     title: 'Rapport médecin',
     subtitle: 'Rapport PDF basé sur le journal et le profil',
-    eyebrow: 'Rapport',
     customRange: 'Choisir vos dates',
     fromDate: 'Du',
     toDate: 'Au',

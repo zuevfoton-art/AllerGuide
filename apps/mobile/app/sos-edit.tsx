@@ -201,7 +201,6 @@ export default function SosEditScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('sosEdit.eyebrow')}
         title={t('sosEdit.title')}
         subtitle={profile ? profile.name : t('sosEdit.noProfile')}
       />

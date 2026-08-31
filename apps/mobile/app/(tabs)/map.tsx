@@ -36,7 +36,6 @@ import {
   type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
@@ -631,7 +630,6 @@ export default function MapScreen() {
     <Screen brandHeaderRight={<ProfileHeaderButton />}>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <ScreenEyebrow section={t('map.eyebrow')} />
           <Text style={ui.docTitle}>{t('map.titleShort')}</Text>
         </View>
       </View>

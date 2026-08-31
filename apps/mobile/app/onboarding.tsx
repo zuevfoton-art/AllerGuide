@@ -50,7 +50,6 @@ export default function OnboardingScreen() {
             <View style={styles.heroArt}>
               <OnboardingSlideImage slide="profile" width={heroArtWidth} height={heroArtWidth * 0.68} />
             </View>
-            <Text style={styles.tagline}>{t('brand.slogan')}</Text>
           </View>
 
           <Text style={styles.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
@@ -115,16 +114,6 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
     heroArt: {
       marginTop: -4,
       marginBottom: -8,
-    },
-    tagline: {
-      fontFamily: fonts.sans,
-      fontSize: isCompact ? 14 : 15,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: isCompact ? 20 : 22,
-      paddingHorizontal: 4,
-      width: '100%',
-      flexShrink: 1,
     },
     sectionLabel: {
       fontFamily: fonts.sansSemiBold,

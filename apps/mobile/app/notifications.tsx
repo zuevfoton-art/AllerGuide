@@ -250,7 +250,6 @@ export default function NotificationsScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('notifications.eyebrow')}
         title={t('notifications.title')}
         subtitle={t('notifications.subtitle')}
       />
