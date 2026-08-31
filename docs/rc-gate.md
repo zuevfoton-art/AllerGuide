@@ -32,6 +32,7 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 - **Every PR / push to `main`:** [CI](../.github/workflows/ci.yml) — typecheck, lint, test, mobile gate
 - **Nightly:** [Maestro Nightly](../.github/workflows/maestro-nightly.yml) — E2E offline + staging
 - **Weekly / manual:** [RC Gate](../.github/workflows/rc-gate.yml) — full automated gate + staging health
+- **PR path-trigger** (this workflow’s `pull_request` paths): live staging health is a **warning**, so Maestro/docs PRs are not blocked when the YC API Gateway is stopped. `schedule` and `push` to `main` still hard-fail G4. Non-JSON bodies (plain `API Gateway … is stopped`) are reported with HTTP status + snippet instead of a `JSON.parse` crash.
 
 **Ops note (2026-08-17):** the earlier Actions billing outage is over — CI and RC Gate run and pass on `main` (RC Gate `success` 2026-08-17). Manual criteria G3/G5/G7 remain **BLOCKED**, now for their own reasons: Maestro nightly cannot start its Android driver/emulator, and staging has no Sentry DSN. Fix order in [roadmap-to-prod.md §6](./roadmap-to-prod.md#6-дальнейшие-шаги).
 

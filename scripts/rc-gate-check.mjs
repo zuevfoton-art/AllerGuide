@@ -189,6 +189,19 @@ function checkMaestroFlows() {
   }
 }
 
+const STAGING_HEALTH_SNIPPET_MAX = 120;
+
+function reportStagingHealthIssue(message) {
+  // Path-triggered PRs re-run this script for Maestro/docs invariants.
+  // A stopped YC API Gateway must not block those. schedule + push to main
+  // still hard-fail G4.
+  if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
+    warnings.push(`${message} (G4 warning on PRs; hard-fail on main/schedule)`);
+    return;
+  }
+  failures.push(message);
+}
+
 async function checkStagingHealth() {
   const url = process.env.STAGING_API_URL?.replace(/\/$/, '');
   if (!url) {
@@ -196,16 +209,27 @@ async function checkStagingHealth() {
     return;
   }
 
+  const healthUrl = `${url}/api/health`;
   try {
-    const response = await fetch(`${url}/api/health`);
-    const body = await response.json();
+    const response = await fetch(healthUrl);
+    const text = await response.text();
+    let body;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      const snippet = text.replace(/\s+/g, ' ').trim().slice(0, STAGING_HEALTH_SNIPPET_MAX);
+      reportStagingHealthIssue(
+        `Staging health check failed: HTTP ${response.status} non-JSON from ${healthUrl}: ${snippet}`,
+      );
+      return;
+    }
     if (!response.ok || body.ok === false) {
-      failures.push(`Staging health check failed: HTTP ${response.status}`);
+      reportStagingHealthIssue(`Staging health check failed: HTTP ${response.status}`);
       return;
     }
     log(`Staging health OK (${url})`);
   } catch (error) {
-    failures.push(
+    reportStagingHealthIssue(
       `Staging health check error: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
