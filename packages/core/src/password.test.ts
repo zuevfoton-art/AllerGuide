@@ -25,4 +25,31 @@ describe('password hashing', () => {
     expect(result.valid).toBe(true);
     expect(result.upgradedHash?.startsWith('pbkdf2-sha256:')).toBe(true);
   });
+
+  it('uses an injected CSPRNG when Web Crypto is unavailable', async () => {
+    const { setSecureRandomBytes } = await import('./secure-random');
+    const original = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: undefined,
+    });
+    setSecureRandomBytes((length) => {
+      const bytes = new Uint8Array(length);
+      for (let i = 0; i < length; i += 1) bytes[i] = i + 1;
+      return bytes;
+    });
+    try {
+      const stored = await hashPassword('secret123');
+      expect(stored.startsWith('pbkdf2-sha256:')).toBe(true);
+      const verified = await verifyPassword('secret123', stored);
+      expect(verified.valid).toBe(true);
+    } finally {
+      setSecureRandomBytes(null);
+      if (original) {
+        Object.defineProperty(globalThis, 'crypto', original);
+      } else {
+        Reflect.deleteProperty(globalThis, 'crypto');
+      }
+    }
+  });
 });
