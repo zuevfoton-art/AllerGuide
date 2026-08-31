@@ -182,7 +182,7 @@ flowchart TD
 ### 4.6. API и миграции
 
 - Prod: `db:generate` → коммит SQL → `db:migrate`. **Не** `db:push` на БД с данными.
-- Миграции на Neon: `DIRECT_DATABASE_URL`, `DB_PREPARE=false` для pooled runtime.
+- Миграции: `DIRECT_DATABASE_URL`, `DB_PREPARE=false` при пулере (YC Odyssey :6432).
 - Новые эндпоинты: rate-limit, CORS, тест в `routes/*.test.ts`.
 - Внешние теги аллергенов: всегда `mapExternalAllergenNames` перед сохранением в `catalog`.
 

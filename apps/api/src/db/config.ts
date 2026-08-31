@@ -1,13 +1,13 @@
 /**
- * Database connection configuration, kept pure/testable and Neon-aware.
+ * Database connection configuration, kept pure/testable.
  *
- * Neon notes:
- *  - Use the POOLED connection string (PgBouncer, host `...-pooler...`) for the
- *    app runtime, with `DB_PREPARE=false` (transaction pooling is incompatible
- *    with prepared statements) and `DB_SSL=require`.
- *  - Use the DIRECT (unpooled) string for migrations (`DIRECT_DATABASE_URL`).
- *  - Optionally point read-only catalog queries at a read replica
- *    (`READ_DATABASE_URL`).
+ * Staging/prod Postgres is Yandex Cloud Managed (private FQDN, typically
+ * port 6432 = Odyssey pooler). Local/dev may be plain Postgres.
+ *
+ *  - Runtime: `DATABASE_URL`. Set `DB_PREPARE=false` when a transaction
+ *    pooler sits in front (YC 6432 or a host containing `-pooler`).
+ *  - Migrations: `DIRECT_DATABASE_URL` (falls back to `DATABASE_URL`).
+ *  - Optional read replica: `READ_DATABASE_URL` → `readDb` for catalog.
  */
 type Env = Record<string, string | undefined>;
 
@@ -50,7 +50,7 @@ export function buildConnectionOptions(env: Env = process.env): PgConnectionOpti
     else if (fromUrl === 'disable') options.ssl = false;
   }
 
-  // Disable prepared statements for PgBouncer transaction pooling (Neon pooled).
+  // Disable prepared statements for transaction pooling (YC Odyssey / PgBouncer).
   if (env.DB_PREPARE === 'false') options.prepare = false;
 
   const max = positiveNumber(env.DB_POOL_MAX);
@@ -68,22 +68,23 @@ export function buildConnectionOptions(env: Env = process.env): PgConnectionOpti
   return options;
 }
 
-/** Strip Neon PgBouncer `-pooler` host suffix for direct (migration) connections. */
+/** Strip a `-pooler` host infix when deriving a direct URL from a pooled one. */
 export function deriveDirectDatabaseUrl(url: string): string {
   return url.includes('-pooler') ? url.replace('-pooler', '') : url;
 }
 
-/** True when DATABASE_URL points at a Neon PgBouncer pooler host. */
-export function isNeonPoolerUrl(url: string | undefined): boolean {
-  return Boolean(url?.includes('-pooler'));
+/** True when DATABASE_URL looks like a transaction pooler (YC Odyssey :6432 or `-pooler` host). */
+export function isPoolerUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  return url.includes('-pooler') || /:6432(?:\/|\?|$)/.test(url);
 }
 
-/** Runtime (app) connection string — the pooled endpoint on Neon. */
+/** Runtime (app) connection string. */
 export function resolveRuntimeUrl(env: Env = process.env): string | undefined {
   return env.DATABASE_URL;
 }
 
-/** Migration connection string — the direct (unpooled) endpoint on Neon. */
+/** Migration connection string — prefer DIRECT_DATABASE_URL (unpooled). */
 export function resolveMigrationUrl(env: Env = process.env): string | undefined {
   if (env.DIRECT_DATABASE_URL) return env.DIRECT_DATABASE_URL;
   const runtime = env.DATABASE_URL;

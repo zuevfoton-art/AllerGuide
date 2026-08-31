@@ -67,7 +67,7 @@
 
 ### 1.4. Стек деплоя (основа для MCP)
 
-GitHub Actions (9 workflow, включая [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml)) → Yandex Container Registry → Serverless Container; миграции — на self-hosted runner внутри VPC; мобильные сборки — EAS; инфраструктура — Terraform в [`infra/yandex/staging/`](../infra/yandex/staging/); Postgres — Yandex Cloud Managed Postgres. Neon в контуре нет.
+GitHub Actions (включая [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml)) → Yandex Container Registry → Serverless Container; миграции — на self-hosted runner внутри VPC; мобильные сборки — EAS; инфраструктура — Terraform в [`infra/yandex/staging/`](../infra/yandex/staging/); Postgres — Yandex Cloud Managed Postgres.
 
 ### 1.5. Дефект, найденный при аудите (входит в объём как тест-кейс)
 

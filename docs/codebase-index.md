@@ -228,7 +228,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 |------|--------|
 | `db/app-schema.ts` | `profile.*` — users, profiles, diary, scan_history, contacts, sos, sync_backups |
 | `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, market_products, market_offers, alias_feedback |
-| `db/config.ts` + `index.ts` | Neon-ready pools; optional `readDb` |
+| `db/config.ts` + `index.ts` | YC / local Postgres pools; optional `readDb` |
 | `drizzle/0000`…`0011_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.

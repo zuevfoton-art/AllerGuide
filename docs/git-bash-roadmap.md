@@ -404,7 +404,7 @@ gh issue list --label roadmap --limit 5
 start https://github.com/zuevfoton-art/AllerGuide/milestones
 ```
 
-После этого можно брать первую задачу **P1.1a** (Neon staging Postgres) и создавать ветку по §7.
+После этого можно брать первую задачу **P1.1a** (YC Managed Postgres staging) и создавать ветку по §7.
 
 ---
 

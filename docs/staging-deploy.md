@@ -1,6 +1,6 @@
 # Staging API deploy (Phase 1 — P1.1)
 
-Runbook для развёртывания `apps/api` на staging: Neon Postgres, хостинг, DNS, CI smoke.
+Runbook для развёртывания `apps/api` на staging: **Yandex Cloud** Managed Postgres, Serverless Container, DNS, CI smoke.
 
 **Обзорный план инфраструктуры:** [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md)  
 **Yandex Cloud (РФ, private Postgres):** [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) · **консоль по полям:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md)  
@@ -27,32 +27,32 @@ https://api.staging.allerguide.app/api/health
 
 ---
 
-## P1.1a — Neon staging Postgres + secrets
+## P1.1a — Yandex Cloud Managed Postgres + secrets
 
-### 1. Создать проект в Neon
+### 1. Кластер
 
-1. [console.neon.tech](https://console.neon.tech) → New Project → имя `allerguide-staging`
-2. Region: ближайший к хостингу API (EU/US)
-3. Скопировать **pooled** connection string (`-pooler` в hostname) → `DATABASE_URL`
-4. Скопировать **direct** connection string (без `-pooler`) → `DIRECT_DATABASE_URL`
+Staging Postgres — **Yandex Cloud Managed PostgreSQL**, private VPC, без public IP. Определение: [`infra/yandex/staging/postgresql.tf`](../infra/yandex/staging/postgresql.tf). Канонический runbook: [`staging-yandex-cloud.md`](./staging-yandex-cloud.md).
+
+Строка подключения (Odyssey, порт **6432**) уходит в Lockbox как `DATABASE_URL` / `DIRECT_DATABASE_URL`. На YC это один и тот же хост.
 
 ### 2. Обязательные переменные
 
 | Переменная | Значение |
 |------------|----------|
-| `DATABASE_URL` | Pooled Neon URL |
-| `DIRECT_DATABASE_URL` | Direct Neon URL |
+| `DATABASE_URL` | YC Managed Postgres URL (`sslmode=require`, обычно `:6432`) |
+| `DIRECT_DATABASE_URL` | Тот же URL (или прямой `:5432`, если выделен) |
 | `DB_SSL` | `require` |
-| `DB_PREPARE` | `false` |
+| `DB_PREPARE` | `false` (пулер Odyssey) |
 | `JWT_SECRET` | `openssl rand -hex 32` |
 | `SESSION_SECRET` | `openssl rand -hex 32` |
 
 ### 3. Проверка миграций локально
 
+Нужен доступ в VPC (или `yc compute ssh` на runner). Не коммитьте URL в git.
+
 ```bash
-# Экспортируйте URL из Neon (не коммитьте в git)
-export DATABASE_URL='postgresql://...-pooler...'
-export DIRECT_DATABASE_URL='postgresql://...direct...'
+export DATABASE_URL='postgresql://USER:PASSWORD@c-xxxxx.rw.mdb.yandexcloud.net:6432/allerguide?sslmode=require'
+export DIRECT_DATABASE_URL="$DATABASE_URL"
 export DB_SSL=require
 export DB_PREPARE=false
 
@@ -66,19 +66,16 @@ pnpm --filter api db:migrate
 ./scripts/staging-migrate.sh
 ```
 
-### 4. GitHub Secrets (репозиторий)
+### 4. Секреты
+
+Каноническое хранилище — **Yandex Lockbox** (`aclearo-staging-api-env`), не GitHub для `DATABASE_URL`. См. [`staging-secrets-inventory.md`](./staging-secrets-inventory.md).
 
 | Secret | Назначение |
 |--------|------------|
-| `STAGING_DATABASE_URL` | Pooled URL |
-| `STAGING_DIRECT_DATABASE_URL` | Direct URL |
-| `STAGING_JWT_SECRET` | JWT для mobile auth |
-| `STAGING_API_URL` | `https://api.staging.allerguide.app` (после P1.1c) |
-| `STAGING_OPENAI_API_KEY` | Опционально для локального smoke; на хостинге — в env провайдера |
-| `NEON_API_KEY` | Уже для PR preview (опционально тот же project) |
-| `NEON_PROJECT_ID` | Variable для neon-preview workflow |
+| `STAGING_API_URL` | `https://api.staging.aclearo.com` (smoke в CI) |
+| `YC_SA_JSON` / `YC_CONTAINER_ID` / `YC_REGISTRY_ID` | deploy-staging.yml |
 
-**Не храните секреты в коде** — только в hosting dashboard / GitHub Secrets.
+**Не храните секреты в коде.**
 
 ---
 
@@ -154,14 +151,14 @@ pnpm --filter api db:seed-allergens
 - **Trigger:** `workflow_dispatch` или push в ветку `staging`
 - **Шаги:** build/push YCR → Serverless Container + Lockbox → migrate (VPC runner) → `staging-preflight.sh` → optional EAS mobile
 
-Подробности: [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §7. Legacy Neon/Railway deploy workflow удалён.
+Подробности: [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §7.
 
 ---
 
 ## Чеклист P1.1
 
-- [ ] Neon project `allerguide-staging` создан
-- [ ] `DATABASE_URL` + `DIRECT_DATABASE_URL` в secrets хостинга
+- [ ] YC Managed PostgreSQL staging создан (`postgresql.tf`)
+- [ ] `DATABASE_URL` + `DIRECT_DATABASE_URL` в Lockbox
 - [ ] `pnpm --filter api db:migrate` успешен
 - [ ] API отвечает на `/api/health` (200, `database.ok: true`)
 - [ ] `./scripts/staging-auth-smoke.sh` — register/login/me (P1.2c)
@@ -179,7 +176,7 @@ pnpm --filter api db:seed-allergens
 | Проблема | Решение |
 |----------|---------|
 | Migrate fails on pooled URL | Используйте `DIRECT_DATABASE_URL` |
-| Health 503, `database.ok: false` | Проверьте `DATABASE_URL`, `DB_SSL=require`, Neon IP allowlist |
+| Health 503, `database.ok: false` | Проверьте `DATABASE_URL`, `DB_SSL=require`, сеть VPC |
 | Health 200 но `authDatabase: false` | Задайте `JWT_SECRET` |
 | CORS в браузере | Добавьте origin в `CORS_ORIGINS` |
-| `prepare` statement errors | `DB_PREPARE=false` на pooled Neon |
+| `prepare` statement errors | `DB_PREPARE=false` на пулере (YC `:6432`) |

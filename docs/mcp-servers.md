@@ -34,7 +34,7 @@
 | `context7` | stdio `@upstash/context7-mcp` | актуальные docs Expo SDK 55 / RN 0.83 / Drizzle | опционально `CONTEXT7_API_KEY` | публичный read |
 | `postgres-staging` | stdio `@modelcontextprotocol/server-postgres` | схемы `profile` / `catalog` на **YC Managed Postgres** (staging) | `${env:STAGING_DATABASE_URL}` | **read-only роль, только staging** |
 
-`STAGING_DATABASE_URL` — read-only строка к Yandex Cloud Managed Postgres staging (`SELECT` на `catalog`; без права на пользовательские таблицы `profile`, если аналитике каталога этого достаточно). **Никогда** не подставлять prod `DATABASE_URL`. Neon в проекте не используется — отдельного MCP для него нет.
+`STAGING_DATABASE_URL` — read-only строка к Yandex Cloud Managed Postgres staging (`SELECT` на `catalog`; без права на пользовательские таблицы `profile`, если аналитике каталога этого достаточно). **Никогда** не подставлять prod `DATABASE_URL`.
 
 ### Деплой
 

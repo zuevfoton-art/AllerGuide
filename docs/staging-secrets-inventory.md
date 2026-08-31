@@ -14,7 +14,7 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | Key | Purpose | Notes |
 |-----|---------|--------|
 | `DATABASE_URL` | Runtime PG | Private Managed PG |
-| `DIRECT_DATABASE_URL` | Migrations | Same host OK on YC (no Neon pooler) |
+| `DIRECT_DATABASE_URL` | Migrations | Same host/port as runtime on YC is OK |
 | `DB_SSL` | TLS | `require` |
 | `JWT_SECRET` | Mobile JWT | Rotate if ever leaked |
 | `SESSION_SECRET` | Unused leftover | Safe to omit from new Lockbox versions |
