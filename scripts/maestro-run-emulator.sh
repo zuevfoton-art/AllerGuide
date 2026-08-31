@@ -102,6 +102,10 @@ for perm in \
   adb shell pm grant "$PACKAGE" "$perm" || true
 done
 
+# API 34 emulator Autofill/Password Manager steals focus from Maestro inputText
+# (offline register: truncated phone + 3-char password).
+adb shell settings put secure autofill_service null || true
+
 # First process start pays dex/Hermes. `monkey` opens the app drawer and
 # ANRs Pixel Launcher on API 34 CI AVDs — start the activity directly.
 adb shell am start -W -n "$ACTIVITY" >/dev/null || true

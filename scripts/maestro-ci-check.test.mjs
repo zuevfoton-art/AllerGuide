@@ -38,6 +38,7 @@ describe('Maestro nightly CI invariants', () => {
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
     assert.match(runner, /pm grant/);
+    assert.match(runner, /autofill_service null/);
     assert.match(runner, /adb logcat/);
     assert.match(runner, /screencap/);
     assert.match(runner, /am start -W -n "\$ACTIVITY"/);
@@ -64,7 +65,24 @@ describe('Maestro nightly CI invariants', () => {
     const fill = read('apps/mobile/.maestro/flows/_fill-by-id.yaml');
     assert.match(fill, /_dismiss-ime\.yaml/);
     assert.match(fill, /scrollUntilVisible/);
+    assert.match(fill, /eraseText/);
     assert.doesNotMatch(fill, /^\s*-\s+hideKeyboard\b/m);
+
+    const randomPhone = read('apps/mobile/.maestro/scripts/random-phone.js');
+    assert.match(randomPhone, /999\$\{suffix\}/);
+    assert.doesNotMatch(randomPhone, /\+7999/);
+
+    const stagingAuth = read('apps/mobile/.maestro/flows/staging-auth-smoke.yaml');
+    assert.match(stagingAuth, /id: profile-screen-title/);
+    assert.match(stagingAuth, /scrollUntilVisible/);
+    assert.ok(
+      stagingAuth.indexOf('profile-screen-title') < stagingAuth.indexOf('id: profile-logout'),
+      'staging-auth must wait for the profile hub before scrolling to logout',
+    );
+    assert.match(
+      stagingAuth,
+      /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
+    );
 
     for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
