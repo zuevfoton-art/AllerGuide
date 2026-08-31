@@ -179,8 +179,6 @@ const it: LocaleMessages = {
     marketplaceSub: 'Prodotti in base al profilo allergologico',
     marketplaceEmpty: 'Seleziona un profilo con allergeni per vedere suggerimenti personalizzati.',
     marketplaceOpen: 'Apri marketplace',
-    disclaimer:
-      'L’indice è informativo e aiuta a stimare come i fattori possono influire sul benessere.\nNon sostituisce il consulto medico, la diagnosi o il trattamento.',
     disclaimerShort: 'L’indice è informativo e non sostituisce il consulto medico.',
     phenotypeHintsTitle: 'Raccomandazioni del profilo',
     insightsTitle: 'Raccomandazioni e promemoria',
@@ -518,7 +516,6 @@ const it: LocaleMessages = {
     yandexAttribution: 'Mappa: Yandex Maps',
     basemapUnavailable: 'La mappa non si è caricata. Controlla la rete e riapri la schermata.',
     emptyPlaces: 'Nessun luogo consigliato da mostrare sulla mappa',
-    disclaimerPlaces: 'Informazioni indicative; conferma ingredienti in loco.',
     disclaimerPollen: 'Dati polline approssimativi. Consulta il medico.',
     disclaimerAdair:
       'L’elenco cliniche ADAIR è compilato da fonti pubbliche e non è un agenda di visite. Confermare sede e orari prima della visita — i numeri possono cambiare.',
@@ -783,6 +780,8 @@ const it: LocaleMessages = {
   },
   disclaimer: {
     details: 'Scopri di più',
+    actionPlan: 'Il piano è informativo. Il trattamento è definito dal medico.',
+    mdrFootnote: 'supporto decisionale · non è un dispositivo medico',
   },
   notifications: {
     title: 'Notifiche',
@@ -860,7 +859,6 @@ const it: LocaleMessages = {
     childDesc: 'Profilo e monitoraggio per tuo figlio',
     both: 'Per me e mio figlio',
     bothDesc: 'Più profili in un\'unica app',
-    disclaimer: 'Le informazioni nell\'app sono indicative e non sostituiscono la consultazione medica.',
   },
   onboardingIntro: {
     next: 'Avanti',
@@ -991,7 +989,6 @@ const it: LocaleMessages = {
       empty: 'Dati insufficienti per determinare un fenotipo.',
       disclaimer: 'I fenotipi sono indicativi. I codici ICD-10 sono forniti come riferimento — la diagnosi spetta al medico.',
       icd10Ref: 'ICD-10:',
-      icd10Disclaimer: 'I codici ICD-10 sono informazioni di riferimento, non una diagnosi clinica.',
     },
     allergenConfirmations: {
       title: 'Come sono stati confermati i tuoi allergeni?',
@@ -1158,7 +1155,6 @@ const it: LocaleMessages = {
     verifyTitle: 'Verifica schema',
     verifyConfirm: 'Conferma schema',
     saveCourse: 'Salva corso',
-    disclaimer: 'La terapia è prescritta solo dal medico. L\'app non modifica le dosi.',
     disclaimerShort: 'La terapia la prescrive il medico. L\'app non cambia le dosi.',
     noProfile: 'Seleziona un profilo nella schermata principale.',
     reminderLabel: 'Promemoria giornaliero',
@@ -1201,7 +1197,6 @@ const it: LocaleMessages = {
     clinicalNotesPlaceholder: 'Adrenalina portata, tolleranza…',
     consolidated: 'Elenco combinato',
     savePlan: 'Salva piano',
-    disclaimer: 'Il piano è informativo. Il trattamento è definito dal medico.',
     noProfile: 'Seleziona un profilo nella schermata principale.',
     notEligible: 'Disponibile con allergia agli insetti o allergeni corrispondenti.',
   },
@@ -1226,10 +1221,7 @@ const it: LocaleMessages = {
     clinicalNotes: 'Note per il medico',
     clinicalNotesPlaceholder: 'Indicazioni individuali…',
     savePlan: 'Salva piano',
-    disclaimer: 'Il piano è informativo. Il trattamento è definito dal medico.',
     noProfile: 'Seleziona un profilo nella schermata principale.',
-    cardDisclaimer:
-      'I dati sull’asma sono informativi. Piano d’azione, terapia e soglie li definisce il medico curante',
     notEligible: 'Disponibile con asma bronchiale nelle condizioni del profilo.',
     ginaLink: 'Report GINA Strategy',
     pef30d: 'Misurazioni',
@@ -1288,7 +1280,6 @@ const it: LocaleMessages = {
     callContact: 'Chiama',
     call: 'Chiama {{number}}',
     tip: 'Mostra questa schermata al personale medico in caso di reazione anafilattica',
-    disclaimer: 'Le informazioni nella schermata SOS sono inserite dall\'utente e non costituiscono prescrizione medica.',
     disclaimerShort: 'I dati SOS li inserisce lei e non sono una prescrizione medica.',
     passportTitle: 'Passaporto allergico',
     passportEmpty: 'Compila il passaporto nella modifica SOS.',
@@ -1349,7 +1340,6 @@ const it: LocaleMessages = {
     blocks: 'Sezioni del referto',
     generating: 'Generazione…',
     generate: 'Genera PDF',
-    disclaimer: 'Il referto si basa su dati inseriti dall\'utente e non è documentazione medica.',
     disclaimerShort: 'Il referto usa i suoi dati e non è documentazione medica.',
   },
   expert: {

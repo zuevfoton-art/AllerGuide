@@ -45,9 +45,6 @@ export const DRUG_REACTION_TYPE_CHOICES = [
 
 export type DrugReactionTypeChoice = (typeof DRUG_REACTION_TYPE_CHOICES)[number];
 
-export const FOOD_DRUG_DISCLAIMER =
-  'Учёт пищевых и лекарственных реакций носит информационный характер. Назначения и исключения определяет врач.';
-
 const FOOD_ALLERGEN_NAMES = new Set(getAllergensByCategory('food').map((item) => item.name.toLowerCase()));
 const MEDICATION_KEYWORDS = getAllergensByCategory('medication').flatMap((item) => [
   item.name.toLowerCase(),

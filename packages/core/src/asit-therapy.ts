@@ -84,9 +84,6 @@ export const ASIT_SYSTEMIC_REACTION_CHOICES = [
   'Сильная',
 ] as const;
 
-export const ASIT_DISCLAIMER =
-  'АСИТ назначается только врачом. Приложение фиксирует приёмы и реакции, но не корректирует дозировки и схему.';
-
 export const DEFAULT_ASIT_REMINDER_HOUR = 8;
 export const DEFAULT_ASIT_REMINDER_MINUTE = 0;
 

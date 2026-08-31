@@ -179,8 +179,6 @@ const en: LocaleMessages = {
     marketplaceSub: 'Products matched to your allergy profile',
     marketplaceEmpty: 'Pick a profile with allergens to see personalized picks.',
     marketplaceOpen: 'Open marketplace',
-    disclaimer:
-      'The index is informational and helps estimate how factors may affect how you feel.\nIt does not replace a doctor’s consultation, diagnosis, or treatment.',
     disclaimerShort: 'The index is informational and does not replace a doctor’s consultation.',
     phenotypeHintsTitle: 'Profile recommendations',
     insightsTitle: 'Recommendations and reminders',
@@ -519,7 +517,6 @@ const en: LocaleMessages = {
     yandexAttribution: 'Map: Yandex Maps',
     basemapUnavailable: 'The map did not load. Check the network and open this screen again.',
     emptyPlaces: 'No recommended places to show on the map',
-    disclaimerPlaces: 'Place information is indicative; confirm ingredients at the venue.',
     disclaimerPollen: 'Pollen data is approximate. Confirm forecasts with your doctor.',
     disclaimerAdair:
       'The ADAIR clinic directory is compiled from public sources and is not an appointment schedule. Confirm the branch and hours before visiting — phone numbers and hours may change.',
@@ -784,6 +781,8 @@ const en: LocaleMessages = {
   },
   disclaimer: {
     details: 'Learn more',
+    actionPlan: 'The action plan is informational only. Treatment is determined by your doctor.',
+    mdrFootnote: 'decision support · not SaMD',
   },
   notifications: {
     title: 'Notifications',
@@ -861,7 +860,6 @@ const en: LocaleMessages = {
     childDesc: 'Profile and monitoring for your child',
     both: 'For me and my child',
     bothDesc: 'Multiple profiles in one app',
-    disclaimer: 'Information in the app is advisory and does not replace medical consultation.',
   },
   onboardingIntro: {
     next: 'Next',
@@ -998,7 +996,6 @@ const en: LocaleMessages = {
       empty: 'Not enough data to determine a phenotype yet.',
       disclaimer: 'Phenotypes are for reference only. ICD-10 codes are provided as a guide — diagnosis remains the responsibility of the clinician.',
       icd10Ref: 'ICD-10:',
-      icd10Disclaimer: 'ICD-10 codes are provided as reference information, not as a clinical diagnosis.',
     },
     allergenConfirmations: {
       title: 'How were your allergens confirmed?',
@@ -1165,7 +1162,6 @@ const en: LocaleMessages = {
     verifyTitle: 'Review schedule',
     verifyConfirm: 'Confirm schedule',
     saveCourse: 'Save course',
-    disclaimer: 'Therapy is prescribed by a doctor only. The app does not adjust doses.',
     disclaimerShort: 'A doctor prescribes therapy. The app does not change doses.',
     noProfile: 'Select a profile on the home screen.',
     reminderLabel: 'Daily reminder',
@@ -1208,7 +1204,6 @@ const en: LocaleMessages = {
     clinicalNotesPlaceholder: 'Carried epinephrine, sting tolerance…',
     consolidated: 'Combined list',
     savePlan: 'Save plan',
-    disclaimer: 'The action plan is informational only. Treatment is determined by your doctor.',
     noProfile: 'Select a profile on the home screen.',
     notEligible: 'Available when insect allergy or matching allergens are in the profile.',
   },
@@ -1233,9 +1228,6 @@ const en: LocaleMessages = {
     clinicalNotes: 'Notes for doctor',
     clinicalNotesPlaceholder: 'Individual instructions, tolerance…',
     savePlan: 'Save plan',
-    disclaimer: 'The action plan is informational only. Treatment is determined by your doctor.',
-    cardDisclaimer:
-      'Asthma data is informational. The action plan, therapy, and thresholds are set by the treating doctor',
     noProfile: 'Select a profile on the home screen.',
     notEligible: 'Available when bronchial asthma is selected in profile conditions.',
     ginaLink: 'GINA Strategy Report',
@@ -1299,7 +1291,6 @@ const en: LocaleMessages = {
     callContact: 'Call',
     call: 'Call {{number}}',
     tip: 'Show this screen to medical staff in case of an anaphylactic reaction',
-    disclaimer: 'SOS screen information is entered by the user and is not a medical prescription.',
     disclaimerShort: 'SOS data is entered by you and is not a medical prescription.',
     passportTitle: 'Allergy passport',
     passportEmpty: 'Fill in the passport in SOS edit — allergens, meds, first-aid kit.',
@@ -1360,7 +1351,6 @@ const en: LocaleMessages = {
     blocks: 'Report sections',
     generating: 'Generating…',
     generate: 'Generate PDF',
-    disclaimer: 'The report is based on user-entered data and is not medical documentation.',
     disclaimerShort: 'The report uses your data and is not medical documentation.',
   },
   expert: {

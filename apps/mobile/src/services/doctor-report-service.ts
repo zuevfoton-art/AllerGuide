@@ -351,7 +351,6 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
       ${blocksHtml}
       ${passportHtml}
       <hr style="border:none;border-top:1px solid ${c.border};" />
-      <p style="font-size:12px;color:${c.muted};">Информация носит рекомендательный характер и не является медицинским заключением.</p>
       <p style="font-size:11px;color:${c.muted};">${doctorReportPdfFooterRu()}</p>
     </body></html>`;
 

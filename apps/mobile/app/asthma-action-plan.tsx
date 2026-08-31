@@ -155,7 +155,7 @@ export default function AsthmaActionPlanScreen() {
       </Pressable>
 
       <Button label={t('asthma.savePlan')} variant="primary" block onPress={save} />
-      <Disclaimer>{t('asthma.disclaimer')}</Disclaimer>
+      <Disclaimer>{t('disclaimer.actionPlan')}</Disclaimer>
       <Text style={styles.attribution}>{GINA_ASTHMA_ATTRIBUTION}</Text>
     </Screen>
   );

@@ -179,8 +179,6 @@ const fr: LocaleMessages = {
     marketplaceSub: 'Produits adaptés à votre profil d’allergies',
     marketplaceEmpty: 'Choisissez un profil avec des allergènes pour voir des suggestions personnalisées.',
     marketplaceOpen: 'Ouvrir le marketplace',
-    disclaimer:
-      'L’indice est informatif et aide à estimer l’effet possible des facteurs sur le ressenti.\nIl ne remplace pas une consultation, un diagnostic ou un traitement.',
     disclaimerShort: 'L’indice est informatif et ne remplace pas une consultation.',
     phenotypeHintsTitle: 'Recommandations du profil',
     insightsTitle: 'Recommandations et rappels',
@@ -518,7 +516,6 @@ const fr: LocaleMessages = {
     yandexAttribution: 'Carte : Yandex Maps',
     basemapUnavailable: 'La carte n’a pas chargé. Vérifiez le réseau et rouvrez l’écran.',
     emptyPlaces: 'Aucun lieu recommandé à afficher sur la carte',
-    disclaimerPlaces: 'Informations indicatives ; confirmez les ingrédients sur place.',
     disclaimerPollen: 'Données pollen approximatives. Consultez votre médecin.',
     disclaimerAdair:
       'L’annuaire ADAIR est compilé à partir de sources publiques et n’est pas un planning de rendez-vous. Confirmez filiale et horaires avant la visite — les numéros peuvent changer.',
@@ -783,6 +780,8 @@ const fr: LocaleMessages = {
   },
   disclaimer: {
     details: 'En savoir plus',
+    actionPlan: 'Le plan est informatif. Le traitement est défini par le médecin.',
+    mdrFootnote: 'aide à la décision · pas un dispositif médical',
   },
   notifications: {
     title: 'Notifications',
@@ -860,7 +859,6 @@ const fr: LocaleMessages = {
     childDesc: 'Profil et suivi pour votre enfant',
     both: 'Pour moi et mon enfant',
     bothDesc: 'Plusieurs profils dans une seule app',
-    disclaimer: 'Les informations de l\'app sont indicatives et ne remplacent pas une consultation médicale.',
   },
   onboardingIntro: {
     next: 'Suivant',
@@ -991,7 +989,6 @@ const fr: LocaleMessages = {
       empty: 'Pas assez de données pour déterminer un phénotype.',
       disclaimer: 'Les phénotypes sont fournis à titre indicatif. Les codes CIM-10 sont donnés à titre de référence — le diagnostic reste du ressort du médecin.',
       icd10Ref: 'CIM-10 :',
-      icd10Disclaimer: 'Les codes CIM-10 sont des informations de référence, pas un diagnostic clinique.',
     },
     allergenConfirmations: {
       title: 'Comment vos allergènes ont-ils été confirmés ?',
@@ -1158,7 +1155,6 @@ const fr: LocaleMessages = {
     verifyTitle: 'Vérifier le schéma',
     verifyConfirm: 'Confirmer le schéma',
     saveCourse: 'Enregistrer le cours',
-    disclaimer: 'La thérapie est prescrite uniquement par un médecin. L\'app ne modifie pas les doses.',
     disclaimerShort: 'La thérapie est prescrite par un médecin. L\'app ne change pas les doses.',
     noProfile: 'Sélectionnez un profil sur l\'écran d\'accueil.',
     reminderLabel: 'Rappel quotidien',
@@ -1201,7 +1197,6 @@ const fr: LocaleMessages = {
     clinicalNotesPlaceholder: 'Adrénaline portée, tolérance…',
     consolidated: 'Liste combinée',
     savePlan: 'Enregistrer le plan',
-    disclaimer: 'Le plan est informatif. Le traitement est défini par le médecin.',
     noProfile: 'Sélectionnez un profil sur l\'écran d\'accueil.',
     notEligible: 'Disponible pour allergie aux insectes ou allergènes correspondants.',
   },
@@ -1226,10 +1221,7 @@ const fr: LocaleMessages = {
     clinicalNotes: 'Notes pour le médecin',
     clinicalNotesPlaceholder: 'Instructions individuelles…',
     savePlan: 'Enregistrer le plan',
-    disclaimer: 'Le plan est informatif. Le traitement est défini par le médecin.',
     noProfile: 'Sélectionnez un profil sur l\'écran d\'accueil.',
-    cardDisclaimer:
-      'Les données asthme sont informatives. Le plan d’action, la thérapie et les seuils sont définis par le médecin traitant',
     notEligible: 'Disponible pour asthme bronchique dans les conditions du profil.',
     ginaLink: 'Rapport GINA Strategy',
     pef30d: 'Mesures',
@@ -1288,7 +1280,6 @@ const fr: LocaleMessages = {
     callContact: 'Appeler',
     call: 'Appeler {{number}}',
     tip: 'Montrez cet écran au personnel médical en cas de réaction anaphylactique',
-    disclaimer: 'Les informations de l\'écran SOS sont saisies par l\'utilisateur et ne constituent pas une prescription médicale.',
     disclaimerShort: 'Les données SOS sont saisies par vous et ne sont pas une prescription.',
     passportTitle: 'Passeport allergique',
     passportEmpty: 'Remplissez le passeport dans l\'édition SOS.',
@@ -1349,7 +1340,6 @@ const fr: LocaleMessages = {
     blocks: 'Sections du rapport',
     generating: 'Génération…',
     generate: 'Générer le PDF',
-    disclaimer: 'Le rapport est basé sur des données saisies par l\'utilisateur et n\'est pas un document médical.',
     disclaimerShort: 'Le rapport utilise vos données et n\'est pas un document médical.',
   },
   expert: {

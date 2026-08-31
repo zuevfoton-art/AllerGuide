@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import {
-  FOOD_DRUG_DISCLAIMER,
   computeFoodDrugSummary,
   getConsolidatedFoodAvoidList,
   type FoodDrugRegistry,
@@ -76,7 +75,6 @@ export function FoodDrugAllergyCard({
           size="sm"
           onPress={onLogFood}
         />
-        <Text style={styles.disclaimer}>{FOOD_DRUG_DISCLAIMER}</Text>
       </GlassCard>
     );
   }
@@ -106,7 +104,6 @@ export function FoodDrugAllergyCard({
       </View>
 
       <Button label={t('foodDrug.logMedicine')} variant="primary" size="sm" onPress={onLogMedicine} />
-      <Text style={styles.disclaimer}>{FOOD_DRUG_DISCLAIMER}</Text>
     </GlassCard>
   );
 }
@@ -125,12 +122,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.text,
       lineHeight: 20,
-    },
-    disclaimer: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      lineHeight: 15,
     },
   });
 }

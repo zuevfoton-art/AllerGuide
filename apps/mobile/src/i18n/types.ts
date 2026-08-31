@@ -185,7 +185,6 @@ export type LocaleMessages = {
     marketplaceSub: string;
     marketplaceEmpty: string;
     marketplaceOpen: string;
-    disclaimer: string;
     disclaimerShort: string;
     phenotypeHintsTitle: string;
     insightsTitle: string;
@@ -528,7 +527,6 @@ export type LocaleMessages = {
     yandexAttribution: string;
     basemapUnavailable: string;
     emptyPlaces: string;
-    disclaimerPlaces: string;
     disclaimerPollen: string;
     disclaimerAdair: string;
     pollenMapTitle: string;
@@ -783,6 +781,10 @@ export type LocaleMessages = {
   };
   disclaimer: {
     details: string;
+    /** Shared wording for every action-plan screen (asthma, insect). */
+    actionPlan: string;
+    /** MDR classification footnote, prefixed with the disclaimer version. */
+    mdrFootnote: string;
   };
   notifications: {
     title: string;
@@ -860,7 +862,6 @@ export type LocaleMessages = {
     childDesc: string;
     both: string;
     bothDesc: string;
-    disclaimer: string;
   };
   onboardingIntro: {
     next: string;
@@ -965,7 +966,6 @@ export type LocaleMessages = {
       empty: string;
       disclaimer: string;
       icd10Ref: string;
-      icd10Disclaimer: string;
     };
     allergenConfirmations: {
       title: string;
@@ -1130,7 +1130,6 @@ export type LocaleMessages = {
     verifyTitle: string;
     verifyConfirm: string;
     saveCourse: string;
-    disclaimer: string;
     disclaimerShort: string;
     noProfile: string;
     reminderLabel: string;
@@ -1173,7 +1172,6 @@ export type LocaleMessages = {
     clinicalNotesPlaceholder: string;
     consolidated: string;
     savePlan: string;
-    disclaimer: string;
     noProfile: string;
     notEligible: string;
   };
@@ -1198,8 +1196,6 @@ export type LocaleMessages = {
     clinicalNotes: string;
     clinicalNotesPlaceholder: string;
     savePlan: string;
-    disclaimer: string;
-    cardDisclaimer: string;
     noProfile: string;
     notEligible: string;
     ginaLink: string;
@@ -1263,7 +1259,6 @@ export type LocaleMessages = {
     callContact: string;
     call: string;
     tip: string;
-    disclaimer: string;
     disclaimerShort: string;
     passportTitle: string;
     passportEmpty: string;
@@ -1324,7 +1319,6 @@ export type LocaleMessages = {
     blocks: string;
     generating: string;
     generate: string;
-    disclaimer: string;
     disclaimerShort: string;
   };
   expert: {

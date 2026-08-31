@@ -731,7 +731,6 @@ function ReviewStep({ ui, styles, course, setCourse, onBack, onSave, reminderEna
       </GlassCard>
 
       <Button label={t('asit.reviewConfirm')} variant="primary" block onPress={() => void onSave()} />
-      <Disclaimer>{t('asit.disclaimer')}</Disclaimer>
     </Screen>
   );
 }

@@ -10,7 +10,6 @@ import {
   getPrescribedReminderTimes,
   isPrescribedCourseConfigured,
   isPrescribedReminderConfigured,
-  PRESCRIBED_THERAPY_DISCLAIMER,
   PRESCRIBED_THERAPY_ROUTE_LABELS,
   type PrescribedCourse,
 } from '@allerguide/core';
@@ -110,8 +109,6 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
       <View style={styles.actions}>
         <Button label={t('prescribedTherapy.logDose')} variant="primary" size="sm" onPress={onLogDose} />
       </View>
-
-      <Text style={styles.disclaimer}>{PRESCRIBED_THERAPY_DISCLAIMER}</Text>
     </GlassCard>
   );
 }
@@ -140,6 +137,5 @@ function createStyles({ colors, fonts }: AppTheme) {
     statValue: { fontFamily: fonts.sansSemiBold, fontSize: 18, fontWeight: '700', color: colors.head },
     statLabel: { fontFamily: fonts.sans, fontSize: 10, color: colors.textMuted, textAlign: 'center' },
     actions: { flexDirection: 'row', gap: 8 },
-    disclaimer: { fontFamily: fonts.sans, fontSize: 11, color: colors.textMuted, lineHeight: 15 },
   });
 }
