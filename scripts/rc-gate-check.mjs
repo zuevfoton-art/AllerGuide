@@ -137,8 +137,16 @@ function checkMaestroFlows() {
   }
 
   const layout = fs.readFileSync(path.join(root, 'apps/mobile/app/_layout.tsx'), 'utf8');
-  if (!layout.includes('ensureCryptoGetRandomValues') || !layout.includes('expo-crypto')) {
-    failures.push('app/_layout.tsx must polyfill crypto.getRandomValues via expo-crypto');
+  if (!layout.includes('install-crypto-get-random-values')) {
+    failures.push('app/_layout.tsx must install expo-crypto CSPRNG before hashing passwords');
+  }
+  const entry = fs.readFileSync(path.join(root, 'apps/mobile/entry.js'), 'utf8');
+  if (!entry.includes('install-crypto-get-random-values') || !entry.includes('expo-router/entry')) {
+    failures.push('apps/mobile/entry.js must install CSPRNG before expo-router/entry');
+  }
+  const mobilePkg = JSON.parse(fs.readFileSync(path.join(root, 'apps/mobile/package.json'), 'utf8'));
+  if (mobilePkg.main !== './entry.js') {
+    failures.push('apps/mobile package.json main must be ./entry.js (CSPRNG before router)');
   }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
@@ -191,6 +199,18 @@ function checkMaestroFlows() {
     if (!tapThenConfirm) {
       failures.push(`${name}: must wait for auth-confirm-password-input after register tap`);
     }
+    if (!flow.includes('_complete-first-run-profile.yaml')) {
+      failures.push(`${name}: must run _complete-first-run-profile.yaml (condition-food before allergen-milk)`);
+    }
+  }
+
+  const firstRunProfile = fs.readFileSync(path.join(flowsDir, '_complete-first-run-profile.yaml'), 'utf8');
+  if (
+    !firstRunProfile.includes('condition-food') ||
+    !firstRunProfile.includes('allergen-milk') ||
+    firstRunProfile.indexOf('condition-food') > firstRunProfile.indexOf('allergen-milk')
+  ) {
+    failures.push('_complete-first-run-profile.yaml must tap condition-food before allergen-milk');
   }
 
   const tapRegister = fs.readFileSync(path.join(flowsDir, '_tap-register.yaml'), 'utf8');

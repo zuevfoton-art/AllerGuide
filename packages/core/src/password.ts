@@ -1,6 +1,6 @@
 import { pbkdf2 } from '@noble/hashes/pbkdf2';
 import { sha256 } from '@noble/hashes/sha2';
-import { randomBytes } from '@noble/hashes/utils';
+import { getSecureRandomBytes } from './secure-random';
 
 const PREFIX = 'pbkdf2-sha256';
 const ITERATIONS = 600_000;
@@ -70,7 +70,7 @@ function derivePbkdf2(password: string, salt: Uint8Array, iterations: number): U
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
+  const salt = getSecureRandomBytes(16);
   const hash = derivePbkdf2(password, salt, ITERATIONS);
   return `${PREFIX}:${ITERATIONS}:${toBase64(salt)}:${toBase64(hash)}`;
 }

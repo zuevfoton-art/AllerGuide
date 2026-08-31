@@ -73,6 +73,10 @@ describe('Maestro nightly CI invariants', () => {
       assert.doesNotMatch(flow, /stopApp: false/);
       assert.match(flow, /_fill-by-id\.yaml/);
       assert.ok(
+        flow.includes('_complete-first-run-profile.yaml'),
+        `${name} must complete first-run profile via shared subflow`,
+      );
+      assert.ok(
         flow.indexOf('_tap-register.yaml') < flow.indexOf('id: auth-confirm-password-input'),
         `${name} must wait for confirm field after register tap`,
       );
@@ -81,10 +85,21 @@ describe('Maestro nightly CI invariants', () => {
 
   it('polyfills crypto.getRandomValues so offline register can hash passwords', () => {
     const layout = read('apps/mobile/app/_layout.tsx');
-    assert.match(layout, /ensureCryptoGetRandomValues/);
-    assert.match(layout, /expo-crypto/);
+    assert.match(layout, /install-crypto-get-random-values/);
+    const entry = read('apps/mobile/entry.js');
+    assert.match(entry, /install-crypto-get-random-values/);
+    assert.match(entry, /expo-router\/entry/);
+    const pkg = JSON.parse(read('apps/mobile/package.json'));
+    assert.equal(pkg.main, './entry.js');
     const polyfill = read('apps/mobile/src/polyfill-crypto-get-random-values.ts');
     assert.match(polyfill, /export function ensureCryptoGetRandomValues/);
+    const install = read('apps/mobile/src/install-crypto-get-random-values.ts');
+    assert.match(install, /setSecureRandomBytes/);
+    assert.match(install, /expo-crypto/);
+    const profile = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
+    assert.match(profile, /id: condition-food/);
+    assert.match(profile, /id: allergen-milk/);
+    assert.ok(profile.indexOf('condition-food') < profile.indexOf('allergen-milk'));
   });
 
   it('taps register via Text testID, then RU copy while still on login', () => {

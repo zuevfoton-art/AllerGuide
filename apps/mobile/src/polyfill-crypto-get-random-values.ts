@@ -1,7 +1,7 @@
 /**
  * Hermes / React Native release builds do not implement `crypto.getRandomValues`.
- * `@noble/hashes` `randomBytes()` (used by `hashPassword`) throws without it:
- * "crypto.getRandomValues must be defined".
+ * `hashPassword` reads CSPRNG at call time (`getSecureRandomBytes`); this patch
+ * covers other callers (and the Web Crypto fallback) that still use `globalThis.crypto`.
  */
 
 export type GetRandomValuesFn = (array: Uint8Array) => Uint8Array;
@@ -20,9 +20,21 @@ export function ensureCryptoGetRandomValues(
   if (typeof existing?.getRandomValues === 'function') {
     return;
   }
-  if (existing) {
-    existing.getRandomValues = getRandomValues;
-    return;
+  let next: { getRandomValues: GetRandomValuesFn };
+  try {
+    next = existing ? Object.assign(existing, { getRandomValues }) : { getRandomValues };
+  } catch {
+    next = { getRandomValues };
   }
-  holder.crypto = { getRandomValues };
+
+  try {
+    Object.defineProperty(holder, 'crypto', {
+      configurable: true,
+      enumerable: false,
+      writable: true,
+      value: next,
+    });
+  } catch {
+    holder.crypto = next;
+  }
 }

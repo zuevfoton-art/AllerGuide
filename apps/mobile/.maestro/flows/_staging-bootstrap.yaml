@@ -42,24 +42,10 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: onboarding-scenario-self
-- tapOn:
-    id: profile-name
-- inputText: Maestro Staging
-- tapOn:
-    id: profile-wizard-next
-- tapOn:
-    id: profile-birth-year
-- inputText: "1990"
-- tapOn:
-    id: profile-wizard-next
-- tapOn:
-    id: profile-wizard-next
-- tapOn:
-    id: allergen-milk
-- tapOn:
-    id: profile-wizard-next
-- tapOn:
-    id: profile-save
+- runFlow:
+    file: _complete-first-run-profile.yaml
+    env:
+      PROFILE_NAME: Maestro Staging
 - extendedWaitUntil:
     visible:
       id: tab-home
