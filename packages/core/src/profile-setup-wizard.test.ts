@@ -8,9 +8,7 @@ import {
   getPreviousProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
   getVisibleProfileSetupSteps,
-  isProfileSetupStepFilled,
   mergeCrossReactionAllergenIds,
-  PROFILE_SETUP_OPTIONAL_STEPS,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
@@ -32,33 +30,6 @@ const baseDraft = (): ProfileSetupWizardDraft => ({
 });
 
 describe('profile setup wizard', () => {
-  it('reports empty optional steps so the primary action can offer to skip', () => {
-    const draft = baseDraft();
-
-    expect(PROFILE_SETUP_OPTIONAL_STEPS.has('crossReactions')).toBe(true);
-    expect(PROFILE_SETUP_OPTIONAL_STEPS.has('allergens')).toBe(false);
-
-    expect(isProfileSetupStepFilled('crossReactions', draft)).toBe(false);
-    expect(isProfileSetupStepFilled('symptomBaseline', draft)).toBe(false);
-    expect(isProfileSetupStepFilled('contacts', draft)).toBe(false);
-
-    expect(
-      isProfileSetupStepFilled('crossReactions', {
-        ...draft,
-        crossReactionAllergenIds: ['birch'],
-      }),
-    ).toBe(true);
-    expect(
-      isProfileSetupStepFilled('contacts', {
-        ...draft,
-        contacts: [{ name: 'Анна', phone: '+7 999 000-00-00', relation: 'parent' }],
-      }),
-    ).toBe(true);
-
-    // Required steps are never reported as skippable.
-    expect(isProfileSetupStepFilled('name', draft)).toBe(true);
-  });
-
   it('defers steps that profile editing covers out of the first run', () => {
     const draft = { conditions: ['food', 'asthma'] as AllergyConditionId[], selectedAllergenIds: ['milk'] };
 

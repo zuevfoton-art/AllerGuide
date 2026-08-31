@@ -10,13 +10,11 @@ import {
   getMissingConditionsForAllergens,
   getWizardStep,
   getGatedConditionRemovals,
-  isProfileSetupStepFilled,
   isSymptomBaselineEmpty,
   listConditionHistoryQuestionPages,
   mergePreSeededAllergens,
   needsChildConsent,
   normalizeAllergyConfirmations,
-  PROFILE_SETUP_OPTIONAL_STEPS,
   reconcileConditionOptionSelections,
   shouldCompleteOnboarding,
   shouldPaginateConditionHistoryQuestions,
@@ -391,21 +389,15 @@ export default function ProfileSetupScreen() {
   const isLastStep = getNextProfileSetupWizardStep(currentStep, wizardNav) === null;
   const showBack = stepProgressMeta.current > 1;
 
-  // Optional steps advance on the primary button, so its label says «Skip»
-  // instead of pairing «Next» with a hint that explains the same thing.
-  const canSkipCurrentStep =
-    PROFILE_SETUP_OPTIONAL_STEPS.has(currentStep) &&
-    !isProfileSetupStepFilled(currentStep, draft);
-
+  // The primary button always states what it does, which is why the optional
+  // steps no longer carry a separate «press Next to skip» hint.
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
       ? t('profileSetup.nextChild')
       : t('profileSetup.saveProfile')
     : currentStep === 'crossReactions' && crossPendingIds.length > 0
       ? t('profileSetup.crossReactions.addNext')
-      : canSkipCurrentStep
-        ? t('common.skip')
-        : t('profileSetup.next');
+      : t('profileSetup.next');
 
   return (
     <Screen>
