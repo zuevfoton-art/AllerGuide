@@ -7,6 +7,7 @@ Gate before closing **Phase 2** and starting **Phase 3** (store readiness).
 | # | Criterion | Automated | Owner | Status (2026-08-17) |
 |---|-----------|-----------|-------|---------------------|
 | G1 | `pnpm typecheck` + `lint` + `test` green | ✅ `rc-gate-check.mjs` | CI | ✅ CI on `main` green (2026-08-15) |
+| G1b | `trackEvent` names match `ANALYTICS_EVENT_NAMES` | ✅ `check-analytics-taxonomy.mjs` | Eng | ✅ wired into `pnpm rc-gate` |
 | G2 | Mobile unit tests ≥30 | ✅ `mobile-test-gate.mjs` | CI | ✅ 189 tests |
 | G3 | Maestro nightly green (offline + staging) | Manual — [Maestro Nightly](../.github/workflows/maestro-nightly.yml) | QA | ❌ **BLOCKED** — workflow is `disabled_manually` (no runs after 2026-08-11). Fix: [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) (Ubuntu + KVM). After merge: `gh workflow enable maestro-nightly.yml` + `workflow_dispatch` |
 | G4 | Staging API health `200` | ✅ when `STAGING_API_URL` set | DevOps | ✅ `https://api.staging.aclearo.com` |

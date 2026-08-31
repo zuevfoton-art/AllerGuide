@@ -223,6 +223,7 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 
