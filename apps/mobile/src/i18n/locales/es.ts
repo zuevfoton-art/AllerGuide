@@ -24,7 +24,6 @@ const es: LocaleMessages = {
     loadFailed: 'No se pudieron cargar los datos.',
     createProfile: 'Crear perfil',
     undo: 'Deshacer',
-    email: 'Email',
     phone: 'Teléfono',
     password: 'Contraseña',
     next: 'Siguiente',
@@ -51,7 +50,7 @@ const es: LocaleMessages = {
   auth: {
     loginTitle: 'Iniciar sesión',
     registerTitle: 'Registro',
-    phoneLabel: 'Número de teléfono',
+    loginLabel: 'Teléfono o correo',
     phonePlaceholder: '+34 612 345 678',
     passwordMinPlaceholder: 'Mínimo 6 caracteres',
     confirmPassword: 'Confirmar contraseña',
@@ -65,6 +64,7 @@ const es: LocaleMessages = {
     countryCode: 'Código de país',
     countryCodeTitle: 'Código de país',
     errors: {
+      loginRequired: 'Introduce tu teléfono o correo.',
       emailRequired: 'Introduce el email.',
       phoneRequired: 'Introduce el número de teléfono.',
       emailInvalid: 'Introduce un email válido.',

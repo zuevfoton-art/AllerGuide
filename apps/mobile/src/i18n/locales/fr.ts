@@ -24,7 +24,6 @@ const fr: LocaleMessages = {
     loadFailed: 'Échec du chargement des données.',
     createProfile: 'Créer un profil',
     undo: 'Annuler',
-    email: 'Email',
     phone: 'Téléphone',
     password: 'Mot de passe',
     next: 'Suivant',
@@ -51,7 +50,7 @@ const fr: LocaleMessages = {
   auth: {
     loginTitle: 'Connexion',
     registerTitle: 'Inscription',
-    phoneLabel: 'Numéro de téléphone',
+    loginLabel: 'Téléphone ou e-mail',
     phonePlaceholder: '+33 6 12 34 56 78',
     passwordMinPlaceholder: 'Minimum 6 caractères',
     confirmPassword: 'Confirmer le mot de passe',
@@ -65,6 +64,7 @@ const fr: LocaleMessages = {
     countryCode: 'Indicatif pays',
     countryCodeTitle: 'Indicatif pays',
     errors: {
+      loginRequired: 'Saisissez votre téléphone ou e-mail.',
       emailRequired: "Entrez l'email.",
       phoneRequired: 'Entrez le numéro de téléphone.',
       emailInvalid: 'Entrez un email valide.',

@@ -43,6 +43,7 @@ export function translate(
 }
 
 const AUTH_ERROR_KEY_MAP: Record<string, keyof LocaleMessages['auth']['errors']> = {
+  'Введите телефон или email.': 'loginRequired',
   'Введите email.': 'emailRequired',
   'Введите номер телефона.': 'phoneRequired',
   'Введите корректный email.': 'emailInvalid',

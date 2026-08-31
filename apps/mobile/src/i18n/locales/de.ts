@@ -24,7 +24,6 @@ const de: LocaleMessages = {
     loadFailed: 'Daten konnten nicht geladen werden.',
     createProfile: 'Profil erstellen',
     undo: 'Rückgängig',
-    email: 'E-Mail',
     phone: 'Telefon',
     password: 'Passwort',
     next: 'Weiter',
@@ -52,7 +51,7 @@ const de: LocaleMessages = {
   auth: {
     loginTitle: 'Anmelden',
     registerTitle: 'Registrierung',
-    phoneLabel: 'Telefonnummer',
+    loginLabel: 'Telefon oder E-Mail',
     phonePlaceholder: '+49 151 12345678',
     passwordMinPlaceholder: 'Mindestens 6 Zeichen',
     confirmPassword: 'Passwort bestätigen',
@@ -66,6 +65,7 @@ const de: LocaleMessages = {
     countryCode: 'Ländervorwahl',
     countryCodeTitle: 'Ländervorwahl',
     errors: {
+      loginRequired: 'Geben Sie Telefon oder E-Mail ein.',
       emailRequired: 'E-Mail eingeben.',
       phoneRequired: 'Telefonnummer eingeben.',
       emailInvalid: 'Gültige E-Mail eingeben.',

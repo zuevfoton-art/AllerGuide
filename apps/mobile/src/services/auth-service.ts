@@ -3,7 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 import {
   hashPassword,
   normalizeLogin,
-  validateAuthForm,
+  validateLoginField,
+  validatePassword,
   verifyPassword,
   type AuthUser,
   type LoginType,
@@ -144,7 +145,8 @@ export async function registerUser(input: {
   password: string;
   confirmPassword: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateAuthForm(input);
+  const validationError =
+    validateLoginField(input.login) ?? validatePassword(input.password, input.confirmPassword);
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {
@@ -196,7 +198,7 @@ export async function loginUser(input: {
   login: string;
   password: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateAuthForm(input);
+  const validationError = validateLoginField(input.login) ?? validatePassword(input.password);
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {

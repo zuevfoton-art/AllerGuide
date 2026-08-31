@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { authEmailInputProps, authPasswordInputProps, authPhoneInputProps } from './auth-input-props';
+import { authEmailInputProps, authLoginInputProps, authPasswordInputProps } from './auth-input-props';
 
 vi.mock('react-native', () => ({
   Platform: { OS: 'ios' },
@@ -22,11 +22,16 @@ describe('auth input autofill props', () => {
     expect(authPasswordInputProps('new').autoComplete).toBe('new-password');
   });
 
-  it('marks phone fields for SMS / tel autofill', () => {
-    expect(authPhoneInputProps()).toMatchObject({
+  it('marks the unified login field as a username for password managers', () => {
+    expect(authLoginInputProps('unknown')).toMatchObject({
+      keyboardType: 'email-address',
+      textContentType: 'username',
+      autoComplete: 'username',
+    });
+    expect(authLoginInputProps('phone')).toMatchObject({
       keyboardType: 'phone-pad',
-      textContentType: 'telephoneNumber',
-      autoComplete: 'tel',
+      textContentType: 'username',
+      autoComplete: 'username',
     });
   });
 });

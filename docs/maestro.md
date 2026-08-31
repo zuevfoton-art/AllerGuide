@@ -129,7 +129,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 
 | ID | Экран |
 |----|-------|
-| `auth-mode-email` / `auth-mode-phone` | переключатель login type |
+| `auth-login-input` | единое поле «Телефон или почта» |
 | `cloud-backup-upload` / `cloud-backup-download` | облачный бэкап |
 | `recovery-key-*` | модалка recovery key |
 | `profile-logout` | выход из аккаунта |
@@ -144,7 +144,6 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `auth-confirm-password-input` на экране «Вход» | `hideKeyboard` на Android = BACK. На корневом `/login` это выкидывает приложение в лаунчер, тап регистрации молча пропускается (`when:`). Лечится `_dismiss-ime.yaml` (тап `auth-hero-title`) |
 | `auth-hero-title` не виден 120s + ANR Pixel Launcher | `has_anr_dialog` должен ловить `Application Not Responding` из dumpsys (не только `isn't responding`). Wait / Back, затем `ensure_app_foreground` |
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
-| `auth-mode-phone` не виден 120s | Pressable-toggle флапает в Maestro. Ждать `auth-hero-title`. Артефакты: `*-screen.png`, `*-during.png`, `*-logcat.txt` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |
