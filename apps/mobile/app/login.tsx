@@ -56,7 +56,7 @@ export default function LoginScreen() {
   return (
     <Screen>
       <LanguagePicker compact />
-      <AuthHero title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')} />
+      <AuthHero title={t('auth.loginTitle')} />
       <LoginField
         label={t('auth.loginLabel')}
         value={login}
@@ -71,7 +71,6 @@ export default function LoginScreen() {
         label={t('common.password')}
         value={password}
         onChangeText={setPassword}
-        placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
         testID="auth-password-input"
         returnKeyType="go"
