@@ -82,7 +82,7 @@ export async function fetchDishVisionEstimate(input: {
 export function trackDishVisionAnalytics(estimate: DishVisionEstimate): void {
   trackEvent('scan_dish_vision', {
     confidence: estimate.result.confidence,
-    ingredients: estimate.result.ingredients.length,
+    ingredient_count: estimate.result.ingredients.length,
     cached: estimate.cached,
   });
 }

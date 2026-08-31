@@ -96,7 +96,7 @@ export async function syncPollenReminderForProfile(
   });
   if (id) {
     setPollenReminderId(profileId, id);
-    trackEvent('pollen_alert_sent', { profileId, level });
+    trackEvent('pollen_alert_sent', { has_profile: true, level });
   }
 }
 
