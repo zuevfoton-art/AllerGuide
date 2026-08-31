@@ -154,8 +154,11 @@ export default function ProfileSetupScreen() {
     ],
   );
 
-  const wizardNav = buildProfileSetupWizardNavOptions(draft);
-  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft);
+  // First run collects only what a usable profile needs; the rest lives in
+  // profile editing, SOS and the home screen.
+  const navOptions = { deferOptionalSteps: true };
+  const wizardNav = buildProfileSetupWizardNavOptions(draft, navOptions);
+  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft, navOptions);
   const stepProgress = t('profileSetup.stepProgress', {
     current: stepProgressMeta.current,
     total: stepProgressMeta.total,
@@ -353,10 +356,10 @@ export default function ProfileSetupScreen() {
       trackEvent('profile_setup_step_complete', { step: currentStep });
     }
 
-    const nextNav = buildProfileSetupWizardNavOptions({
-      conditions,
-      selectedAllergenIds: nextSelected,
-    });
+    const nextNav = buildProfileSetupWizardNavOptions(
+      { conditions, selectedAllergenIds: nextSelected },
+      navOptions,
+    );
     const next = getNextProfileSetupWizardStep(currentStep, nextNav);
     if (next) {
       if (next === 'crossReactions') setCrossPendingIds([]);
@@ -385,7 +388,7 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const isLastStep = currentStep === 'contacts';
+  const isLastStep = getNextProfileSetupWizardStep(currentStep, wizardNav) === null;
   const showBack = stepProgressMeta.current > 1;
 
   // Optional steps advance on the primary button, so its label says «Skip»

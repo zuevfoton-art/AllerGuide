@@ -59,6 +59,26 @@ describe('profile setup wizard', () => {
     expect(isProfileSetupStepFilled('name', draft)).toBe(true);
   });
 
+  it('defers steps that profile editing covers out of the first run', () => {
+    const draft = { conditions: ['food', 'asthma'] as AllergyConditionId[], selectedAllergenIds: ['milk'] };
+
+    expect(getVisibleProfileSetupSteps(draft, { deferOptionalSteps: true })).toEqual([
+      'name',
+      'birthYear',
+      'conditions',
+      'allergens',
+      'crossReactions',
+    ]);
+
+    // Without deferral the full clinical wizard is still available.
+    expect(getVisibleProfileSetupSteps(draft)).toContain('symptomBaseline');
+    expect(getVisibleProfileSetupSteps(draft)).toContain('contacts');
+
+    const nav = buildProfileSetupWizardNavOptions(draft, { deferOptionalSteps: true });
+    expect(getNextProfileSetupWizardStep('allergens', nav)).toBe('crossReactions');
+    expect(getNextProfileSetupWizardStep('crossReactions', nav)).toBeNull();
+  });
+
   it('orders clinical steps including allergenConfirmations and symptom baseline', () => {
     expect(PROFILE_SETUP_WIZARD_STEP_COUNT).toBe(11);
     expect(getNextProfileSetupWizardStep('conditions')).toBe('allergens');

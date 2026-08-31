@@ -67,7 +67,7 @@ export function groupDiaryStepsIntoScreens(steps: DiaryStep[]): DiaryStep[][] {
   const screens: DiaryStep[][] = [];
 
   for (const step of steps) {
-    const current = screens.at(-1);
+    const current = screens.length > 0 ? screens[screens.length - 1] : undefined;
     if (step.group && current && current[0].group === step.group) {
       current.push(step);
       continue;
