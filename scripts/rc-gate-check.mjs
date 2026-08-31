@@ -127,15 +127,38 @@ function checkMaestroFlows() {
   if (!workflow.includes('during.png')) {
     failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
   }
+  if (!workflow.includes('maestro-login-visible.png') || !workflow.includes('.maestro/tests')) {
+    failures.push('maestro-nightly.yml must upload maestro-login-visible.png and ~/.maestro/tests');
+  }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
   if (!waitLogin.includes('auth-hero-title')) {
     failures.push('_wait-login.yaml must wait for auth-hero-title (above the fold)');
   }
 
+  const dismissIme = path.join(flowsDir, '_dismiss-ime.yaml');
+  if (!fs.existsSync(dismissIme)) {
+    failures.push('_dismiss-ime.yaml missing (fold IME without BACK)');
+  } else {
+    const dismissBody = fs.readFileSync(dismissIme, 'utf8');
+    if (!dismissBody.includes('auth-hero-title')) {
+      failures.push('_dismiss-ime.yaml must tap auth-hero-title (not hideKeyboard/BACK)');
+    }
+  }
+
   const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
-  if (!fillById.includes('hideKeyboard') || !fillById.includes('scrollUntilVisible')) {
-    failures.push('_fill-by-id.yaml must hideKeyboard + scrollUntilVisible');
+  if (!fillById.includes('_dismiss-ime.yaml') || !fillById.includes('scrollUntilVisible')) {
+    failures.push('_fill-by-id.yaml must _dismiss-ime.yaml + scrollUntilVisible');
+  }
+
+  for (const name of fs.readdirSync(flowsDir).filter((file) => file.endsWith('.yaml'))) {
+    const body = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (/^\s*-\s+hideKeyboard\b/m.test(body)) {
+      failures.push(`${name}: hideKeyboard sends BACK and pops /login — use _dismiss-ime.yaml`);
+    }
+    if (/^\s*-\s+back\b/m.test(body)) {
+      failures.push(`${name}: Maestro back command is banned (same as hideKeyboard on Android)`);
+    }
   }
 
   for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
@@ -146,14 +169,17 @@ function checkMaestroFlows() {
     if (!flow.includes('_tap-register.yaml')) {
       failures.push(`${name}: must tap register via _tap-register.yaml`);
     }
-    if (!flow.includes('stopApp: false')) {
-      failures.push(`${name}: must re-launchApp without stopping after clearState`);
+    if (flow.includes('stopApp: false')) {
+      failures.push(`${name}: must not re-launchApp after clearState (masked hideKeyboard BACK)`);
     }
     if (!flow.includes('_fill-by-id.yaml')) {
       failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
     }
-    if (!flow.includes('auth-confirm-password-input')) {
-      failures.push(`${name}: must fill auth-confirm-password-input`);
+    const tapThenConfirm =
+      flow.includes('_tap-register.yaml') &&
+      flow.indexOf('_tap-register.yaml') < flow.indexOf('id: auth-confirm-password-input');
+    if (!tapThenConfirm) {
+      failures.push(`${name}: must wait for auth-confirm-password-input after register tap`);
     }
   }
 

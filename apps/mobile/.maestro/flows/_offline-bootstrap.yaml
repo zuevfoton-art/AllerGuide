@@ -3,16 +3,12 @@ appId: com.aclearo.app
 ---
 - launchApp:
     clearState: true
-# clearState can leave NexusLauncher focused; bring the task back
-# without wiping state (nightly failed on auth-login-input on the drawer).
-- launchApp:
-    clearState: false
-    stopApp: false
 - runFlow: _wait-login.yaml
 - runFlow: _tap-register.yaml
-- launchApp:
-    clearState: false
-    stopApp: false
+- extendedWaitUntil:
+    visible:
+      id: auth-confirm-password-input
+    timeout: 15000
 - runScript: ../scripts/random-phone.js
 - runFlow:
     file: _fill-by-id.yaml
