@@ -24,7 +24,6 @@ const ru: LocaleMessages = {
     loadFailed: 'Не удалось загрузить данные.',
     createProfile: 'Создать профиль',
     undo: 'Отменить',
-    email: 'Email',
     phone: 'Телефон',
     password: 'Пароль',
     next: 'Далее',
@@ -52,7 +51,7 @@ const ru: LocaleMessages = {
   auth: {
     loginTitle: 'Вход',
     registerTitle: 'Регистрация',
-    phoneLabel: 'Номер телефона',
+    loginLabel: 'Телефон или почта',
     phonePlaceholder: '+7 999 123-45-67',
     passwordMinPlaceholder: 'Минимум 6 символов',
     confirmPassword: 'Подтверждение пароля',
@@ -66,6 +65,7 @@ const ru: LocaleMessages = {
     countryCode: 'Код страны',
     countryCodeTitle: 'Код страны',
     errors: {
+      loginRequired: 'Введите телефон или email.',
       emailRequired: 'Введите email.',
       phoneRequired: 'Введите номер телефона.',
       emailInvalid: 'Введите корректный email.',

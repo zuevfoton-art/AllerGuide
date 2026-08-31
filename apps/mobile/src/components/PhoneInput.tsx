@@ -1,18 +1,8 @@
 import { useMemo, useState, forwardRef } from 'react';
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  type TextInputProps,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   DEFAULT_PHONE_COUNTRY_ISO2,
-  PHONE_COUNTRIES,
   formatNationalNumber,
   formatPhoneDisplay,
   getPhoneCountry,
@@ -24,6 +14,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { fontSizes } from '@/src/constants/typography';
+import { PhoneCountryPicker } from '@/src/components/PhoneCountryPicker';
 
 export interface PhoneInputProps {
   label?: string;
@@ -122,31 +113,12 @@ export const PhoneInput = forwardRef<TextInput, PhoneInputProps>(function PhoneI
         <Text style={styles.hint}>{displayValue}</Text>
       ) : null}
 
-      <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setPickerOpen(false)}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{t('auth.countryCodeTitle')}</Text>
-            <ScrollView style={styles.modalList}>
-              {PHONE_COUNTRIES.map((item) => {
-                const active = item.iso2 === country.iso2;
-                return (
-                  <Pressable
-                    key={`${item.iso2}-${item.dialCode}`}
-                    style={[styles.countryRow, active && styles.countryRowActive]}
-                    onPress={() => selectCountry(item)}>
-                    <Text style={[styles.countryName, active && styles.countryNameActive]}>
-                      {item.name}
-                    </Text>
-                    <Text style={[styles.countryDial, active && styles.countryNameActive]}>
-                      +{item.dialCode}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </View>
-        </Pressable>
-      </Modal>
+      <PhoneCountryPicker
+        visible={pickerOpen}
+        selectedIso2={country.iso2}
+        onSelect={selectCountry}
+        onClose={() => setPickerOpen(false)}
+      />
     </View>
   );
 });
@@ -200,37 +172,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: fontSizes.label,
       color: colors.textMuted,
     },
-    modalBackdrop: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.4)',
-      justifyContent: 'center',
-      padding: 24,
-    },
-    modalCard: {
-      backgroundColor: colors.card,
-      borderRadius: radii.xl,
-      maxHeight: '70%',
-      padding: 16,
-      gap: 8,
-    },
-    modalTitle: {
-      fontFamily: fonts.sans,
-      fontSize: fontSizes.body,
-      fontWeight: '700',
-      color: colors.text,
-      marginBottom: 4,
-    },
-    modalList: { maxHeight: 360 },
-    countryRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingVertical: 12,
-      paddingHorizontal: 8,
-      borderRadius: radii.md,
-    },
-    countryRowActive: { backgroundColor: `${colors.accent}18` },
-    countryName: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.text },
-    countryNameActive: { color: colors.accent, fontWeight: '600' },
-    countryDial: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.textSecondary },
   });
 }

@@ -20,8 +20,6 @@ appId: com.aclearo.app
       id: auth-submit
     timeout: 15000
 - tapOn:
-    id: auth-mode-email
-- tapOn:
     id: auth-login-input
 - inputText: ${output.email}
 - tapOn:

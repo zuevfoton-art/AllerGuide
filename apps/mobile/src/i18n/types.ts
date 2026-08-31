@@ -28,7 +28,6 @@ export type LocaleMessages = {
     loadFailed: string;
     createProfile: string;
     undo: string;
-    email: string;
     phone: string;
     password: string;
     next: string;
@@ -58,7 +57,7 @@ export type LocaleMessages = {
   auth: {
     loginTitle: string;
     registerTitle: string;
-    phoneLabel: string;
+    loginLabel: string;
     phonePlaceholder: string;
     passwordMinPlaceholder: string;
     confirmPassword: string;
@@ -72,6 +71,7 @@ export type LocaleMessages = {
     countryCode: string;
     countryCodeTitle: string;
     errors: {
+      loginRequired: string;
       emailRequired: string;
       phoneRequired: string;
       emailInvalid: string;

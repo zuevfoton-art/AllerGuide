@@ -24,7 +24,6 @@ const it: LocaleMessages = {
     loadFailed: 'Impossibile caricare i dati.',
     createProfile: 'Crea profilo',
     undo: 'Annulla',
-    email: 'Email',
     phone: 'Telefono',
     password: 'Password',
     next: 'Avanti',
@@ -51,7 +50,7 @@ const it: LocaleMessages = {
   auth: {
     loginTitle: 'Accedi',
     registerTitle: 'Registrazione',
-    phoneLabel: 'Numero di telefono',
+    loginLabel: 'Telefono o e-mail',
     phonePlaceholder: '+39 333 123 4567',
     passwordMinPlaceholder: 'Minimo 6 caratteri',
     confirmPassword: 'Conferma password',
@@ -65,6 +64,7 @@ const it: LocaleMessages = {
     countryCode: 'Prefisso internazionale',
     countryCodeTitle: 'Prefisso internazionale',
     errors: {
+      loginRequired: 'Inserisci telefono o email.',
       emailRequired: "Inserisci l'email.",
       phoneRequired: 'Inserisci il numero di telefono.',
       emailInvalid: 'Inserisci un email valido.',
