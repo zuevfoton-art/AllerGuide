@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Apply Drizzle migrations to staging Neon (P1.1a smoke).
+# Apply Drizzle migrations to Yandex Cloud staging Postgres.
 # Requires: DATABASE_URL, DIRECT_DATABASE_URL (and optionally DB_SSL, DB_PREPARE).
 set -euo pipefail
 
@@ -7,8 +7,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 if [ -z "${DATABASE_URL:-}" ] && [ -z "${DIRECT_DATABASE_URL:-}" ]; then
-  echo "Error: set DATABASE_URL and DIRECT_DATABASE_URL (Neon staging)." >&2
-  echo "See docs/staging-deploy.md § P1.1a" >&2
+  echo "Error: set DATABASE_URL and DIRECT_DATABASE_URL (YC Managed Postgres staging)." >&2
+  echo "See docs/staging-yandex-cloud.md" >&2
   exit 1
 fi
 

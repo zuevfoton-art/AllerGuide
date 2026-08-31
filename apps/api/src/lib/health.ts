@@ -1,5 +1,5 @@
 import postgres from 'postgres';
-import { buildConnectionOptions, isNeonPoolerUrl, resolveRuntimeUrl } from '../db/config';
+import { buildConnectionOptions, isPoolerUrl, resolveRuntimeUrl } from '../db/config';
 import { getScanMetrics } from './scan-cache';
 import { pingRedis } from './redis-client';
 import { resolveRateLimitStoreKind } from './rate-limit-store';
@@ -149,10 +149,10 @@ export async function buildHealthPayload(): Promise<HealthCheckResult> {
   }
 
   const database = await checkDatabaseConnectivity();
-  const pooler = isNeonPoolerUrl(process.env.DATABASE_URL);
+  const pooler = isPoolerUrl(process.env.DATABASE_URL);
   const poolerWarning =
     pooler && process.env.DB_PREPARE !== 'false'
-      ? 'Neon pooler detected; set DB_PREPARE=false for transaction pooling'
+      ? 'Connection pooler detected; set DB_PREPARE=false for transaction pooling'
       : undefined;
 
   const rateLimitStore = resolveRateLimitStoreKind();

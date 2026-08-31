@@ -7,9 +7,10 @@ Gate before closing **Phase 2** and starting **Phase 3** (store readiness).
 | # | Criterion | Automated | Owner | Status (2026-08-17) |
 |---|-----------|-----------|-------|---------------------|
 | G1 | `pnpm typecheck` + `lint` + `test` green | ✅ `rc-gate-check.mjs` | CI | ✅ CI on `main` green (2026-08-15) |
+| G1b | `trackEvent` names match `ANALYTICS_EVENT_NAMES` | ✅ `check-analytics-taxonomy.mjs` | Eng | ✅ wired into `pnpm rc-gate` |
 | G2 | Mobile unit tests ≥30 | ✅ `mobile-test-gate.mjs` | CI | ✅ 189 tests |
 | G3 | Maestro nightly green (offline + staging) | Manual — [Maestro Nightly](../.github/workflows/maestro-nightly.yml) | QA | ❌ **BLOCKED** — workflow is `disabled_manually` (no runs after 2026-08-11). Fix: [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) (Ubuntu + KVM). After merge: `gh workflow enable maestro-nightly.yml` + `workflow_dispatch` |
-| G4 | Staging API health `200` | ✅ when `STAGING_API_URL` set | DevOps | ✅ `https://api.staging.aclearo.com` |
+| G4 | Staging API health `200` JSON (`ok: true`) | ✅ when `STAGING_API_URL` set | DevOps | ✅ `https://api.staging.aclearo.com` — checker reports HTTP status + body snippet (YC Gateway HTML/plain text is a fail, not a JSON parse crash) |
 | G5 | Sentry staging crash-free **≥99%** over soak window | Manual — [soak log](./staging-soak-log.md) | Product | ❌ **BLOCKED** — `EXPO_PUBLIC_SENTRY_DSN` not set in EAS `staging`, so no metrics exist |
 | G6 | Security audits **0 critical** open | ✅ parses audit docs when present | Security | ✅ |
 | G7 | 2-week staging soak completed | Manual — soak log sign-off | Product | ❌ **BLOCKED** — see [staging-soak-log.md](./staging-soak-log.md) |
@@ -32,6 +33,7 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 - **Every PR / push to `main`:** [CI](../.github/workflows/ci.yml) — typecheck, lint, test, mobile gate
 - **Nightly:** [Maestro Nightly](../.github/workflows/maestro-nightly.yml) — E2E offline + staging
 - **Weekly / manual:** [RC Gate](../.github/workflows/rc-gate.yml) — full automated gate + staging health
+- **PR path-trigger** (this workflow’s `pull_request` paths): live staging health is a **warning**, so Maestro/docs PRs are not blocked when the YC API Gateway is stopped. `schedule` and `push` to `main` still hard-fail G4. Bodies are parsed by `scripts/rc-gate-health.mjs` (HTTP status + snippet, retries).
 
 **Ops note (2026-08-17):** the earlier Actions billing outage is over — CI and RC Gate run and pass on `main` (RC Gate `success` 2026-08-17). Manual criteria G3/G5/G7 remain **BLOCKED**, now for their own reasons: Maestro nightly cannot start its Android driver/emulator, and staging has no Sentry DSN. Fix order in [roadmap-to-prod.md §6](./roadmap-to-prod.md#6-дальнейшие-шаги).
 

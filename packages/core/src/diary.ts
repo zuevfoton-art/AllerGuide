@@ -11,6 +11,8 @@ export type DiaryStepField = 'text' | 'choice' | 'photo' | 'checklist' | 'time' 
 /** Auto/duplicate steps: collected on save, never shown in the full wizard or history. */
 export const DIARY_AUTO_STEP_IDS = new Set([
   'symptomAreas',
+  // Legacy 0–10 scale, superseded by severity0_3 and normalised on read.
+  'intensity',
   'intoleranceAlert',
   'sideEffectSeverity',
   'effect',
@@ -19,6 +21,9 @@ export const DIARY_AUTO_STEP_IDS = new Set([
   'todayMeds',
   'scanRef',
   'foodSource',
+  'knownInsects',
+  'adrenalineLocation',
+  'emergencyPlan',
   'medicineForm',
   'medicineActiveSubstance',
   'medicineUsage',
@@ -50,6 +55,27 @@ export interface DiaryStep {
   required?: boolean;
   /** Optional clinical / help text (tooltip-level). */
   hint?: string;
+  /** Consecutive steps sharing a group id are asked on one wizard screen. */
+  group?: string;
+}
+
+/**
+ * Split section steps into wizard screens. Consecutive steps that declare the
+ * same group are asked together, so related questions stop costing a tap each.
+ */
+export function groupDiaryStepsIntoScreens(steps: DiaryStep[]): DiaryStep[][] {
+  const screens: DiaryStep[][] = [];
+
+  for (const step of steps) {
+    const current = screens.length > 0 ? screens[screens.length - 1] : undefined;
+    if (step.group && current && current[0].group === step.group) {
+      current.push(step);
+      continue;
+    }
+    screens.push([step]);
+  }
+
+  return screens;
 }
 
 /** Separator for multi-select diary choice answers (labels never contain it). */
@@ -109,6 +135,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         choices: getSymptomCatalogChoices(),
         multiSelect: true,
         required: false,
+        group: 'symptoms',
       },
       {
         id: 'symptoms',
@@ -117,6 +144,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'text',
         multiline: true,
         required: true,
+        group: 'symptoms',
       },
       {
         id: 'severity0_3',
@@ -171,6 +199,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Например: цетиризин',
         field: 'text',
         required: true,
+        group: 'medicine',
       },
       {
         id: 'dosage',
@@ -178,6 +207,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Например: 10 мг, 1 таблетка',
         field: 'text',
         required: true,
+        group: 'medicine',
       },
       {
         id: 'takenAt',
@@ -185,6 +215,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Выберите время',
         field: 'time',
         required: false,
+        group: 'medicine',
       },
       {
         id: 'intoleranceAlert',
@@ -288,10 +319,12 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'choice',
         choices: ['Нет реакции', 'Лёгкая', 'Умеренная', 'Сильная'],
         required: true,
+        group: 'reaction',
       },
       {
         id: 'reactionType',
         label: 'Тип реакции',
+        group: 'reaction',
         field: 'choice',
         choices: [
           'Нет',
@@ -317,6 +350,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Пыльца, животное, стресс, продукт…',
         field: 'text',
         required: true,
+        group: 'trigger',
       },
       {
         id: 'context',
@@ -325,6 +359,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'text',
         multiline: true,
         required: false,
+        group: 'trigger',
       },
       {
         id: 'pollenContext',
@@ -368,6 +403,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Лицо, руки, шея…',
         field: 'text',
         required: true,
+        group: 'skin',
       },
       {
         id: 'appearance',
@@ -376,6 +412,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'text',
         multiline: true,
         required: true,
+        group: 'skin',
       },
       {
         id: 'itching',
@@ -383,6 +420,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'choice',
         choices: ['Нет', 'Слабый', 'Умеренный', 'Сильный'],
         required: true,
+        group: 'skin',
       },
       {
         id: 'skinPhotos',
@@ -410,6 +448,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         field: 'choice',
         choices: ['Утро', 'Вечер'],
         required: true,
+        group: 'pef',
       },
       {
         id: 'pefValue',
@@ -417,6 +456,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Например: 320',
         field: 'text',
         required: true,
+        group: 'pef',
       },
       {
         id: 'pefBest',

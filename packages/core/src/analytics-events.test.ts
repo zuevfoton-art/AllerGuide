@@ -10,6 +10,8 @@ import {
 describe('analytics-events', () => {
   it('defines a closed set of event names', () => {
     expect(ANALYTICS_EVENT_NAMES).toContain('screen_view');
+    expect(ANALYTICS_EVENT_NAMES).toContain('scan_dish_vision');
+    expect(ANALYTICS_EVENT_NAMES).toContain('pollen_alert_sent');
     expect(ANALYTICS_EVENT_NAMES.length).toBeGreaterThanOrEqual(10);
   });
 

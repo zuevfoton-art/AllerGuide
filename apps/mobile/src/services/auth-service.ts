@@ -3,7 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 import {
   hashPassword,
   normalizeLogin,
-  validateAuthForm,
+  validateLoginField,
+  validatePassword,
   verifyPassword,
   type AuthUser,
   type LoginType,
@@ -144,7 +145,8 @@ export async function registerUser(input: {
   password: string;
   confirmPassword: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateAuthForm(input);
+  const validationError =
+    validateLoginField(input.login) ?? validatePassword(input.password, input.confirmPassword);
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {
@@ -157,7 +159,7 @@ export async function registerUser(input: {
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
 
-    trackEvent('auth_register', { login_type: input.loginType, source: 'backend' });
+    trackEvent('auth_register', { method: input.loginType, source: 'backend' });
     return { ok: true, user: response.data.user };
   }
 
@@ -187,7 +189,7 @@ export async function registerUser(input: {
   if (!created) return { ok: false, error: 'Не удалось создать аккаунт.' };
 
   setSessionUserId(created.id);
-  trackEvent('auth_register', { login_type: input.loginType, source: 'local' });
+  trackEvent('auth_register', { method: input.loginType, source: 'local' });
   return { ok: true, user: toAuthUser(created) };
 }
 
@@ -196,7 +198,7 @@ export async function loginUser(input: {
   login: string;
   password: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateAuthForm(input);
+  const validationError = validateLoginField(input.login) ?? validatePassword(input.password);
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {
@@ -207,7 +209,7 @@ export async function loginUser(input: {
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
-    trackEvent('auth_login', { login_type: input.loginType, source: 'backend' });
+    trackEvent('auth_login', { method: input.loginType, source: 'backend' });
     return { ok: true, user: response.data.user };
   }
 
@@ -229,7 +231,7 @@ export async function loginUser(input: {
   }
 
   setSessionUserId(row.id);
-  trackEvent('auth_login', { login_type: input.loginType, source: 'local' });
+  trackEvent('auth_login', { method: input.loginType, source: 'local' });
   return { ok: true, user: toAuthUser(row) };
 }
 

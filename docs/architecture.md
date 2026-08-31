@@ -44,7 +44,7 @@ AllerGuide — offline-first приложение для управления а
 │   └── ui/              # Общие RN-компоненты (минимальный набор)
 ├── docs/                # Архитектура, QA, деплой, клинические фичи
 ├── scripts/             # Staging smokes, YC Lockbox/deploy, APK helpers, RC-gate
-├── .github/workflows/   # CI, Neon preview, staging deploy, EAS/APK, Maestro
+├── .github/workflows/   # CI, YC staging deploy, EAS/APK, Maestro
 ├── turbo.json           # Граф задач Turborepo (build, lint, typecheck, test)
 └── package.json         # Корневые скрипты: pnpm typecheck | test | lint | rc-gate
 ```
@@ -611,19 +611,19 @@ Drizzle-объекты схемо-квалифицированы — код за
 - **Stateless JWT** для mobile — горизонтальное масштабирование API
 - **Версионированные миграции:** `db:generate` → SQL в `drizzle/` (коммитится), `db:migrate` через drizzle migrator; `db:push` — только throwaway dev
 
-### Neon (serverless Postgres)
+### Postgres (Yandex Cloud Managed)
 
-Слой БД (`src/db/index.ts`, `src/db/config.ts`):
+Слой БД (`src/db/index.ts`, `src/db/config.ts`). Staging cluster: [`infra/yandex/staging/postgresql.tf`](../infra/yandex/staging/postgresql.tf) (private IP, Odyssey на `:6432`).
 
 | Аспект | Поведение |
 |--------|-----------|
-| **Pooled vs direct** | Runtime: `DATABASE_URL` (pooled `-pooler`); миграции: `DIRECT_DATABASE_URL` |
-| **Опции из env** | `DB_SSL=require`, `DB_PREPARE=false` (PgBouncer), pool tuning |
+| **Runtime vs migrate** | Runtime: `DATABASE_URL`; миграции: `DIRECT_DATABASE_URL` (fallback — `DATABASE_URL`) |
+| **Опции из env** | `DB_SSL=require` на YC; `DB_PREPARE=false` при пулере (порт 6432) |
 | **Read replica** | `READ_DATABASE_URL` → `readDb` для каталога; иначе primary |
-| **Branching CI** | `.github/workflows/neon-preview.yml` — эфемерная ветка БД на PR |
+| **CI** | Integration tests — Postgres в GitHub Actions, не отдельный cloud-branch |
 | **Cold start** | Ленивый синглтон подключения |
 
-`migrate.ts` применяет версионированные SQL из `drizzle/` к `DIRECT_DATABASE_URL` (или derived direct URL).
+`migrate.ts` применяет версионированные SQL из `drizzle/` к `DIRECT_DATABASE_URL`.
 
 ---
 
@@ -692,7 +692,6 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Workflow | Назначение |
 |----------|------------|
 | `ci.yml` | typecheck → lint → test; mobile test gate; API integration |
-| `neon-preview.yml` | Эфемерная Neon branch на PR |
 | `rc-gate.yml` | Phase 2 RC gate |
 | `deploy-staging.yml` / `deploy-staging-yandex.yml` | Staging deploy |
 | `eas-staging-android.yml` | EAS staging Android |
@@ -741,7 +740,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 - Stateless JWT для mobile
 - Read replica для каталога
 - Scan result cache + daily budget
-- Lazy DB singleton, Neon pooled/direct split
+- Lazy DB singleton, pooled/direct URL split
 - Rate limiting, helmet, CORS allowlist
 - Optional Redis rate-limit store (`redis-client.ts`)
 
@@ -795,7 +794,7 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 |------------|------------|
 | `PORT` / `API_PORT` | Listen port (code default **5000**; `.env.example` → `3001`) |
 | `DATABASE_URL` / `DIRECT_DATABASE_URL` / `READ_DATABASE_URL` | Postgres connections |
-| `DB_SSL`, `DB_PREPARE`, `DB_POOL_*` | Neon / PgBouncer tuning |
+| `DB_SSL`, `DB_PREPARE`, `DB_POOL_*` | TLS / pooler / pool tuning |
 | `JWT_SECRET` | Mobile JWT signing |
 | `CORS_ORIGINS` | CORS allowlist |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { isNeonPoolerUrl } from '../db/config';
+import { isPoolerUrl } from '../db/config';
 import { __resetRedisClientForTests } from './redis-client';
 import { resolveRateLimitStoreKind } from './rate-limit-store';
 
@@ -36,9 +36,10 @@ describe('rate-limit-store', () => {
   });
 });
 
-describe('neon pooler detection', () => {
-  it('detects pooled Neon URLs', () => {
-    expect(isNeonPoolerUrl('postgresql://user:pass@ep-foo-pooler.us-east-2.aws.neon.tech/db')).toBe(true);
-    expect(isNeonPoolerUrl('postgresql://user:pass@ep-foo.us-east-2.aws.neon.tech/db')).toBe(false);
+describe('pooler URL detection', () => {
+  it('detects -pooler hosts and YC Odyssey port 6432', () => {
+    expect(isPoolerUrl('postgresql://user:pass@db-pooler.internal.example/db')).toBe(true);
+    expect(isPoolerUrl('postgresql://user:pass@c-xxx.rw.mdb.yandexcloud.net:6432/db')).toBe(true);
+    expect(isPoolerUrl('postgresql://user:pass@db.internal.example:5432/db')).toBe(false);
   });
 });

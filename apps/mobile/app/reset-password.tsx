@@ -81,7 +81,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <Screen>
-      <AuthHero title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle')} />
+      <AuthHero title={t('auth.resetPassword.title')} />
       {!token && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{t('auth.resetPassword.invalidToken')}</Text>
@@ -103,7 +103,6 @@ export default function ResetPasswordScreen() {
         label={t('auth.resetPassword.confirmPassword')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
-        placeholder={t('auth.confirmPasswordPlaceholder')}
         secureTextEntry
         returnKeyType="go"
         submitBehavior="blurAndSubmit"

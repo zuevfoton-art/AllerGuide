@@ -266,7 +266,6 @@ export default function AsitCourseScreen() {
       <Screen>
         <ScreenHeader
           onBack={() => router.back()}
-          eyebrow={t('asit.eyebrow')}
           title={t('asit.courseTitle')}
           style={{ marginBottom: 12 }}
         />
@@ -308,7 +307,6 @@ export default function AsitCourseScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('asit.eyebrow')}
         title={t('asit.courseTitle')}
         subtitle={t('asit.courseSubtitle')}
         style={{ marginBottom: 12 }}
@@ -733,7 +731,6 @@ function ReviewStep({ ui, styles, course, setCourse, onBack, onSave, reminderEna
       </GlassCard>
 
       <Button label={t('asit.reviewConfirm')} variant="primary" block onPress={() => void onSave()} />
-      <Disclaimer>{t('asit.disclaimer')}</Disclaimer>
     </Screen>
   );
 }

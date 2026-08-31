@@ -92,8 +92,6 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
       <View style={styles.actions}>
         <Button label={t('asit.logDose')} variant="primary" size="sm" onPress={onLogDose} />
       </View>
-
-      <Text style={styles.disclaimer}>{t('asit.disclaimer')}</Text>
     </GlassCard>
   );
 }
@@ -161,11 +159,5 @@ function createStyles({ colors, fonts }: AppTheme) {
       textAlign: 'center',
     },
     actions: { flexDirection: 'row', gap: 8 },
-    disclaimer: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      lineHeight: 15,
-    },
   });
 }

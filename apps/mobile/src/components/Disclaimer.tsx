@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, type TextStyle, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { formatDisclaimerFootnote } from '@allerguide/core';
+import { MEDICAL_DISCLAIMER_VERSION } from '@allerguide/core';
 import { fontSizes, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -59,7 +59,7 @@ export function Disclaimer({
       </Text>
       {showMdrFootnote ? (
         <Text {...scaledTextProps} style={styles.footnote}>
-          {formatDisclaimerFootnote()}
+          {`${MEDICAL_DISCLAIMER_VERSION} · ${t('disclaimer.mdrFootnote')}`}
         </Text>
       ) : null}
     </View>

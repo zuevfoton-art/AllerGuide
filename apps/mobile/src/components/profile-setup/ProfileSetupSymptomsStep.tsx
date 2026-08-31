@@ -135,7 +135,6 @@ export function ProfileSetupSymptomsStep({
         })}
       </View>
 
-      <Text style={styles.skipHint}>{t('profileSetup.symptoms.skipHint')}</Text>
       <Disclaimer>{t('profileSetup.symptoms.disclaimer')}</Disclaimer>
     </GlassCard>
   );
@@ -181,12 +180,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.accent,
       fontWeight: '600',
-    },
-    skipHint: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textMuted,
-      lineHeight: 16,
     },
   });
 }

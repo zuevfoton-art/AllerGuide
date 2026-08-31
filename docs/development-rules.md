@@ -14,6 +14,8 @@
 | 2 | **Этот файл** | Конкретные правила и антипаттерны |
 | 2.1 | **Этот файл §10** | Стиль и качество кода (Code Complete) |
 | 2.2 | [`docs/codebase-index.md`](./codebase-index.md) | Быстрая карта файлов: маршруты, сервисы, «куда менять X» |
+| 2.3 | [`.cursor/skills/`](../.cursor/skills/) | Роли: `product-analyst`, `product-designer`, `code-complete` |
+| 2.4 | [`.cursor/rules/`](../.cursor/rules/) | Инварианты: таксономия событий, токены Claro |
 | 3 | [`docs/functional-requirements.md`](./functional-requirements.md) | Что должен делать продукт (FR-*) |
 | 4 | [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md) | В какой фазе задача, критерии готовности |
 | 5 | [`AGENTS.md`](../AGENTS.md) | Команды, env, operational gotchas |
@@ -180,7 +182,7 @@ flowchart TD
 ### 4.6. API и миграции
 
 - Prod: `db:generate` → коммит SQL → `db:migrate`. **Не** `db:push` на БД с данными.
-- Миграции на Neon: `DIRECT_DATABASE_URL`, `DB_PREPARE=false` для pooled runtime.
+- Миграции: `DIRECT_DATABASE_URL`, `DB_PREPARE=false` при пулере (YC Odyssey :6432).
 - Новые эндпоинты: rate-limit, CORS, тест в `routes/*.test.ts`.
 - Внешние теги аллергенов: всегда `mapExternalAllergenNames` перед сохранением в `catalog`.
 
@@ -280,6 +282,8 @@ ui     → (peer RN only)
 - [ ] Сложность и читаемость: guard clauses, без магических чисел, defensive input ([§10](./development-rules.md#10-стандарты-качества-кода-code-complete))
 - [ ] Нет unrelated изменений в diff
 - [ ] Астма-логика ссылается на `gina-asthma.ts` (см. §2.5), не дублирует пороги ACT/ПСВ
+- [ ] Новое analytics-событие есть в `ANALYTICS_EVENT_NAMES`, эмиссия в сервисе, `pnpm check:analytics-taxonomy` зелёный
+- [ ] Цвета / радиусы / отступы — из `theme.ts` / `layout.ts`, не литералы в компонентах
 
 ---
 
@@ -295,6 +299,8 @@ ui     → (peer RN only)
 | Новая фича только с backend | Offline fallback + feature flag |
 | Строки только в `ru.ts` | Все 6 локалей |
 | Дублирование OFF lookup в UI и service | Один lookup в service layer |
+| `trackEvent('foo')` без записи в `ANALYTICS_EVENT_NAMES` | Сначала таксономия + тест + `pnpm check:analytics-taxonomy` |
+| `#rrggbb` / `borderRadius: 12` в экране | `useTheme()` + `radii` / `space` из `layout.ts` |
 
 ---
 
@@ -340,3 +346,6 @@ ui     → (peer RN only)
 - [`docs/functional-requirements.md`](./functional-requirements.md) — FR-требования
 - [`docs/qa-checklist.md`](./qa-checklist.md) — регрессия
 - [`AGENTS.md`](../AGENTS.md) — команды для агентов и разработчиков
+- [`.cursor/skills/product-analyst/SKILL.md`](../.cursor/skills/product-analyst/SKILL.md) — метрики, события, FR
+- [`.cursor/skills/product-designer/SKILL.md`](../.cursor/skills/product-designer/SKILL.md) — экраны, токены, a11y
+- [`docs/mcp-servers.md`](./mcp-servers.md) — MCP для разработки и деплоя

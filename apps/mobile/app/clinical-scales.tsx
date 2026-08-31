@@ -85,7 +85,6 @@ export default function ClinicalScalesScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('clinicalScales.eyebrow')}
         title={t('clinicalScales.title')}
         subtitle={t('clinicalScales.subtitle')}
       />

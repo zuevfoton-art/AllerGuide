@@ -42,7 +42,6 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -153,21 +152,18 @@ export default function ProfileSetupScreen() {
     ],
   );
 
-  const wizardNav = buildProfileSetupWizardNavOptions(draft);
-  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft);
+  // First run collects only what a usable profile needs; the rest lives in
+  // profile editing, SOS and the home screen.
+  const navOptions = { deferOptionalSteps: true };
+  const wizardNav = buildProfileSetupWizardNavOptions(draft, navOptions);
+  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft, navOptions);
   const stepProgress = t('profileSetup.stepProgress', {
     current: stepProgressMeta.current,
     total: stepProgressMeta.total,
   });
 
-  const subtitle =
-    scenario === 'both' && wizardStep === 'child'
-      ? t('profileSetup.subtitleChildStep', { step: stepProgress })
-      : scenario === 'both'
-        ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
-        : currentStep === 'phenotypeSummary'
-          ? stepProgress
-          : t('profileSetup.subtitleDefault', { step: stepProgress });
+  // The title already says whose profile this is, so the subtitle is the counter only.
+  const subtitle = stepProgress;
 
   const suggestedConditions = useMemo(
     () => getMissingConditionsForAllergens(selected, conditions),
@@ -358,10 +354,10 @@ export default function ProfileSetupScreen() {
       trackEvent('profile_setup_step_complete', { step: currentStep });
     }
 
-    const nextNav = buildProfileSetupWizardNavOptions({
-      conditions,
-      selectedAllergenIds: nextSelected,
-    });
+    const nextNav = buildProfileSetupWizardNavOptions(
+      { conditions, selectedAllergenIds: nextSelected },
+      navOptions,
+    );
     const next = getNextProfileSetupWizardStep(currentStep, nextNav);
     if (next) {
       if (next === 'crossReactions') setCrossPendingIds([]);
@@ -390,9 +386,11 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const isLastStep = currentStep === 'contacts';
+  const isLastStep = getNextProfileSetupWizardStep(currentStep, wizardNav) === null;
   const showBack = stepProgressMeta.current > 1;
 
+  // The primary button always states what it does, which is why the optional
+  // steps no longer carry a separate «press Next to skip» hint.
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
       ? t('profileSetup.nextChild')
@@ -404,7 +402,6 @@ export default function ProfileSetupScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <ScreenEyebrow section={t('profileSetup.eyebrow')} />
         <Text style={ui.docTitle}>{title}</Text>
         <Text style={ui.docMeta}>{subtitle}</Text>
       </View>
@@ -416,7 +413,6 @@ export default function ProfileSetupScreen() {
           profileType={type}
           onProfileTypeChange={setType}
           canToggleType={canToggleType}
-          lockedType={lockedType}
         />
       ) : null}
 

@@ -24,7 +24,6 @@ const de: LocaleMessages = {
     loadFailed: 'Daten konnten nicht geladen werden.',
     createProfile: 'Profil erstellen',
     undo: 'Rückgängig',
-    email: 'E-Mail',
     phone: 'Telefon',
     password: 'Passwort',
     next: 'Weiter',
@@ -51,15 +50,11 @@ const de: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Anmelden',
-    loginSubtitle: 'Mit Telefon oder E-Mail anmelden',
     registerTitle: 'Registrierung',
-    registerSubtitle: 'Konto mit Telefon oder E-Mail erstellen',
-    phoneLabel: 'Telefonnummer',
+    loginLabel: 'Telefon oder E-Mail',
     phonePlaceholder: '+49 151 12345678',
-    passwordPlaceholder: 'Passwort eingeben',
     passwordMinPlaceholder: 'Mindestens 6 Zeichen',
     confirmPassword: 'Passwort bestätigen',
-    confirmPasswordPlaceholder: 'Passwort wiederholen',
     loginButton: 'Anmelden',
     registerButton: 'Registrieren',
     noAccount: 'Noch kein Konto?',
@@ -70,6 +65,7 @@ const de: LocaleMessages = {
     countryCode: 'Ländervorwahl',
     countryCodeTitle: 'Ländervorwahl',
     errors: {
+      loginRequired: 'Geben Sie Telefon oder E-Mail ein.',
       emailRequired: 'E-Mail eingeben.',
       phoneRequired: 'Telefonnummer eingeben.',
       emailInvalid: 'Gültige E-Mail eingeben.',
@@ -97,7 +93,6 @@ const de: LocaleMessages = {
     },
     resetPassword: {
       title: 'Neues Passwort',
-      subtitle: 'Erstellen Sie ein neues Passwort für Ihr Konto',
       newPassword: 'Neues Passwort',
       confirmPassword: 'Passwort bestätigen',
       submitButton: 'Passwort speichern',
@@ -109,7 +104,6 @@ const de: LocaleMessages = {
   profiles: {
     title: 'Meine Profile',
     subtitle: 'Bearbeiten und löschen',
-    eyebrow: 'Profile',
     listTitle: 'Profileliste',
     empty: 'Noch keine Profile. Fügen Sie das erste hinzu — dauert nur eine Minute.',
     self: 'Ich',
@@ -150,7 +144,6 @@ const de: LocaleMessages = {
     sos: 'SOS',
   },
   more: {
-    eyebrow: 'Bereiche',
     title: 'Mehr',
     subtitle: 'Markt, Karte, Experte und Einstellungen',
     marketDesc: 'Allergieprodukte passend zu Ihrem Profil',
@@ -187,8 +180,6 @@ const de: LocaleMessages = {
     marketplaceSub: 'Produkte passend zu Ihrem Allergieprofil',
     marketplaceEmpty: 'Wählen Sie ein Profil mit Allergenen für persönliche Empfehlungen.',
     marketplaceOpen: 'Marktplatz öffnen',
-    disclaimer:
-      'Der Index ist informativ und hilft einzuschätzen, wie Faktoren das Befinden beeinflussen können.\nEr ersetzt keine ärztliche Beratung, Diagnose oder Behandlung.',
     disclaimerShort: 'Der Index ist informativ und ersetzt keine ärztliche Beratung.',
     phenotypeHintsTitle: 'Profil-Empfehlungen',
     insightsTitle: 'Empfehlungen und Erinnerungen',
@@ -213,7 +204,6 @@ const de: LocaleMessages = {
   },
   diary: {
     title: 'Tagebucheinträge',
-    subtitle: 'Beobachtungen, die Sie selbst notieren',
     eyebrow: 'Beobachtungen',
     newEntry: 'Neuer Eintrag',
     quickEntry: 'Kurzer Eintrag',
@@ -273,11 +263,9 @@ const de: LocaleMessages = {
   clinicalScales: {
     title: 'Klinische Bewertungen',
     subtitle: 'Skalen zur Verlaufskontrolle. Daten bleiben in Berichten erhalten.',
-    eyebrow: 'Bewertungen',
   },
   diaryWizard: {
     stepOf: 'Schritt {{current}} von {{total}}',
-    stepOfSection: 'Schritt {{current}} von {{total}} · {{section}}',
     skipSection: 'Abschnitt überspringen',
     deleteEntry: 'Eintrag löschen',
     fillOneSection: 'Füllen Sie mindestens einen Tagebuchabschnitt aus.',
@@ -358,7 +346,6 @@ const de: LocaleMessages = {
   scanner: {
     title: 'Smart Scanner',
     subtitle: 'Prüfung nach Allergieprofil',
-    eyebrow: 'Scanner',
     openAction: 'Öffnen',
     product: 'Produkt',
     menu: 'Menü',
@@ -494,8 +481,6 @@ const de: LocaleMessages = {
   },
   market: {
     title: 'Markt',
-    subtitle: 'Produkte für Allergiker',
-    eyebrow: 'Markt',
     searchPlaceholder: 'Katalog durchsuchen…',
     banner: 'Personalisierte Auswahl — konfliktäre Allergene ausgeblendet',
     empty: 'Nichts gefunden. Andere Suche versuchen.',
@@ -522,7 +507,6 @@ const de: LocaleMessages = {
   map: {
     title: 'Orte-Karte',
     subtitle: 'Kliniken, Pollen und Luftqualität',
-    eyebrow: 'Karte',
     places: 'Restaurants',
     pollen: 'Pollen',
     adair: 'ADAIR',
@@ -532,7 +516,6 @@ const de: LocaleMessages = {
     yandexAttribution: 'Karte: Yandex Maps',
     basemapUnavailable: 'Karte nicht geladen. Netzwerk prüfen und den Bildschirm erneut öffnen.',
     emptyPlaces: 'Keine empfohlenen Orte für die Karte',
-    disclaimerPlaces: 'Informationen sind orientierend; Zutaten vor Ort bestätigen.',
     disclaimerPollen: 'Pollendaten ungefähr. Mit Arzt abklären.',
     disclaimerAdair:
       'Das ADAIR-Klinikverzeichnis stammt aus öffentlichen Quellen und ist kein Terminkalender. Filiale und Öffnungszeiten vor dem Besuch bestätigen — Nummern können sich ändern.',
@@ -714,7 +697,6 @@ const de: LocaleMessages = {
   settings: {
     title: 'Einstellungen',
     subtitle: 'SOS, Sync und Erinnerungen',
-    eyebrow: 'Einstellungen',
     emergencyNumber: 'Notruf',
     emergencyHint: 'Nummer für SOS-Taste (Standard 103)',
     saveNumber: 'Nummer speichern',
@@ -778,7 +760,6 @@ const de: LocaleMessages = {
     aboutHint: 'eine Aclearo-App',
   },
   about: {
-    eyebrow: 'Über die App',
     title: 'Über die App',
     subtitle: 'Allergie-Begleiter — offline-first',
     version: 'Version',
@@ -799,9 +780,10 @@ const de: LocaleMessages = {
   },
   disclaimer: {
     details: 'Mehr erfahren',
+    actionPlan: 'Der Aktionsplan dient nur zur Information. Die Behandlung legt der Arzt fest.',
+    mdrFootnote: 'Entscheidungsunterstützung · kein Medizinprodukt',
   },
   notifications: {
-    eyebrow: 'Benachrichtigungen',
     title: 'Benachrichtigungen',
     subtitle: 'Lokale Erinnerungen auf diesem Gerät',
     hubTitle: 'Benachrichtigungen und Erinnerungen',
@@ -877,7 +859,6 @@ const de: LocaleMessages = {
     childDesc: 'Profil und Überwachung für Ihr Kind',
     both: 'Für mich und mein Kind',
     bothDesc: 'Mehrere Profile in einer App',
-    disclaimer: 'App-Informationen sind beratend und ersetzen keine ärztliche Beratung.',
   },
   onboardingIntro: {
     next: 'Weiter',
@@ -902,23 +883,16 @@ const de: LocaleMessages = {
     },
   },
   profileSetup: {
-    eyebrow: 'Profil',
     titleSelf: 'Ihr Profil',
     titleChild: 'Kinderprofil',
     titleCreate: 'Profil erstellen',
-    subtitleSelfStep: 'Schritt 1 von 2 — Ihr Profil · {{step}}',
-    subtitleChildStep: 'Schritt 2 von 2 — Kinderprofil · {{step}}',
-    subtitleDefault: '{{step}} — Informationen zur Personalisierung ausfüllen',
     stepProgress: 'Schritt {{current}} von {{total}}',
     nameLabel: 'Name',
-    namePlaceholder: 'Name eingeben',
     birthYearLabel: 'Geburtsjahr',
     birthYearPlaceholder: 'Zum Beispiel 1990',
     profileLabel: 'Profil',
     profileSelf: 'Ich',
     profileChild: 'Kind',
-    profileSelfLocked: 'Ihr Profil',
-    profileChildLocked: 'Kinderprofil',
     allergensLabel: 'Allergene',
     allergensHint:
       'Wählen Sie Allergene aus der Liste oder dem Katalog. Kreuzreaktionen folgen im nächsten Schritt.',
@@ -935,7 +909,6 @@ const de: LocaleMessages = {
     crossReactions: {
       title: 'Kreuzreaktionen',
       hint: 'Zu Ihren Allergenen passen oft verwandte Stoffe. Markieren Sie, was Sie hinzufügen möchten — oder überspringen Sie den Schritt.',
-      skipHint: 'Nichts ausgewählt — tippen Sie auf Weiter zum Überspringen.',
       addNext: 'Hinzufügen und weiter',
       disclaimer:
         'Hinweise zu Kreuzreaktionen sind informativ und keine Diagnose. Klären Sie dies mit Ihrem Arzt.',
@@ -946,7 +919,6 @@ const de: LocaleMessages = {
       zonesLabel: 'Zonen',
       severityLabel: 'Übliche Intensität',
       typicalLabel: 'Typische Symptome',
-      skipHint: 'Kann übersprungen und später ausgefüllt werden.',
       disclaimer: 'Basis-Symptome personalisieren das Tagebuch und ersetzen keinen Arztbesuch.',
       zones: {
         nose: 'Nase',
@@ -1012,12 +984,10 @@ const de: LocaleMessages = {
       empty: 'Noch nicht genug Daten für einen Phänotyp.',
       disclaimer: 'Phänotypen dienen nur als Referenz. ICD-10-Codes werden als Orientierung angegeben — die Diagnose obliegt dem Arzt.',
       icd10Ref: 'ICD-10:',
-      icd10Disclaimer: 'ICD-10-Codes sind Referenzinformationen, keine klinische Diagnose.',
     },
     allergenConfirmations: {
       title: 'Wie wurden Ihre Allergene bestätigt?',
       hint: 'Geben Sie die Bestätigungsquelle für jedes Allergen an. Überspringen möglich — Standard ist Selbstbeobachtung.',
-      skipHint: 'Drücken Sie Weiter, um diesen Schritt zu überspringen.',
     },
     conditionsOther: 'Weitere Zustände',
     conditionHintTitle: 'Zustandstyp empfohlen',
@@ -1179,7 +1149,6 @@ const de: LocaleMessages = {
     verifyTitle: 'Schema prüfen',
     verifyConfirm: 'Schema bestätigen',
     saveCourse: 'Kurs speichern',
-    disclaimer: 'Therapie wird nur vom Arzt verordnet. Die App passt keine Dosen an.',
     disclaimerShort: 'Therapie verordnet der Arzt. Die App ändert keine Dosen.',
     noProfile: 'Wählen Sie ein Profil auf dem Startbildschirm.',
     reminderLabel: 'Tägliche Erinnerung',
@@ -1222,13 +1191,11 @@ const de: LocaleMessages = {
     clinicalNotesPlaceholder: 'Mitgeführtes Adrenalin, Verträglichkeit…',
     consolidated: 'Gesamtliste',
     savePlan: 'Plan speichern',
-    disclaimer: 'Der Notfallplan dient nur zur Information. Behandlung legt der Arzt fest.',
     noProfile: 'Profil auf dem Startbildschirm auswählen.',
     notEligible: 'Verfügbar bei Insektenallergie oder passenden Allergenen im Profil.',
   },
   asthma: {
     title: 'Bronchialasthma',
-    eyebrow: 'Asthma',
     planTitle: 'Asthma-Notfallplan',
     planSubtitle: 'PEF-Zonen und Schritte nach ärztlicher Verordnung',
     editPlan: 'Aktionsplan',
@@ -1248,10 +1215,7 @@ const de: LocaleMessages = {
     clinicalNotes: 'Notizen für den Arzt',
     clinicalNotesPlaceholder: 'Individuelle Hinweise…',
     savePlan: 'Plan speichern',
-    disclaimer: 'Der Aktionsplan dient nur zur Information. Die Behandlung legt der Arzt fest.',
     noProfile: 'Profil auf dem Startbildschirm auswählen.',
-    cardDisclaimer:
-      'Asthma-Daten sind informativ. Aktionsplan, Therapie und Schwellen legt der behandelnde Arzt fest',
     notEligible: 'Verfügbar bei Bronchialasthma in den Profilbedingungen.',
     ginaLink: 'GINA Strategy Report',
     pef30d: 'Messungen',
@@ -1296,7 +1260,6 @@ const de: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Nur Notfallinformationen. Profile verwalten Sie auf der Startseite.',
-    eyebrow: 'SOS',
     name: 'Name:',
     age: 'Alter:',
     allergies: 'Allergien:',
@@ -1311,7 +1274,6 @@ const de: LocaleMessages = {
     callContact: 'Anrufen',
     call: '{{number}} anrufen',
     tip: 'Zeigen Sie diesen Bildschirm bei anaphylaktischer Reaktion dem medizinischen Personal',
-    disclaimer: 'SOS-Informationen werden vom Nutzer eingegeben und sind keine medizinische Verordnung.',
     disclaimerShort: 'SOS-Daten geben Sie ein; sie sind keine ärztliche Verordnung.',
     passportTitle: 'Allergiepass',
     passportEmpty: 'Pass im SOS-Bearbeitungsbildschirm ausfüllen.',
@@ -1333,7 +1295,6 @@ const de: LocaleMessages = {
   },
   sosEdit: {
     title: 'SOS bearbeiten',
-    eyebrow: 'SOS',
     noProfile: 'Kein Profil ausgewählt',
     notesLabel: 'Medizinische Notizen',
     notesPlaceholder: 'Medikamente, Reaktionsdetails, Arztanweisungen…',
@@ -1366,7 +1327,6 @@ const de: LocaleMessages = {
     back: 'Tagebuch',
     title: 'Arztbericht',
     subtitle: 'PDF-Bericht aus Tagebuch und Profildaten',
-    eyebrow: 'Bericht',
     customRange: 'Eigene Daten wählen',
     fromDate: 'Von',
     toDate: 'Bis',
@@ -1374,7 +1334,6 @@ const de: LocaleMessages = {
     blocks: 'Berichtsabschnitte',
     generating: 'Wird erstellt…',
     generate: 'PDF erstellen',
-    disclaimer: 'Der Bericht basiert auf Nutzereingaben und ist keine medizinische Dokumentation.',
     disclaimerShort: 'Der Bericht nutzt Ihre Daten und ist keine medizinische Dokumentation.',
   },
   expert: {

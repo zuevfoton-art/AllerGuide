@@ -124,7 +124,6 @@ export default function DoctorReportScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('doctorReport.eyebrow')}
         title={t('doctorReport.title')}
         subtitle={t('doctorReport.subtitle')}
         right={<ProfileHeaderButton />}

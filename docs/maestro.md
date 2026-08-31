@@ -29,6 +29,7 @@ apps/mobile/.maestro/
     staging-credentials.js
   flows/
     _offline-bootstrap.yaml
+    _dismiss-ime.yaml              # tap auth-hero-title (не hideKeyboard/BACK)
     _tap-register.yaml             # Text testID + «Зарегистрироваться»
     onboarding-smoke.yaml … settings-smoke.yaml
     sos-no-profile-smoke.yaml      # SOS call bar after last profile is removed
@@ -120,7 +121,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 
 Расписание: `0 3 * * *` (03:00 UTC). Если прогонов нет — workflow, скорее всего, **disabled** в Actions UI. Включить: **Actions → Maestro Nightly → Enable workflow** или `gh workflow enable maestro-nightly.yml`, затем **Run workflow**.
 
-При падении — артефакты JUnit + `--debug-output` (`maestro-offline-report`, `maestro-staging-report`), плюс `*-during.png` / `*-during-focus.txt` (кадр до выхода Maestro) и `*-screen.png` / `*-ui.xml`. Опционально: настроить GitHub notifications / Slack webhook на failed workflow.
+При падении — артефакты JUnit + `--debug-output` (`maestro-offline-report`, `maestro-staging-report`), плюс `*-during.png` / `*-during-focus.txt` (кадр до выхода Maestro), `*-screen.png` / `*-ui.xml`, `maestro-login-visible.png` и `~/.maestro/tests`. Опционально: настроить GitHub notifications / Slack webhook на failed workflow.
 
 ---
 
@@ -128,7 +129,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 
 | ID | Экран |
 |----|-------|
-| `auth-mode-email` / `auth-mode-phone` | переключатель login type |
+| `auth-login-input` | единое поле «Телефон или почта» |
 | `cloud-backup-upload` / `cloud-backup-download` | облачный бэкап |
 | `recovery-key-*` | модалка recovery key |
 | `profile-logout` | выход из аккаунта |
@@ -140,11 +141,9 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Симптом | Решение |
 |---------|---------|
 | `auth-register-link` не виден (~45s) | Раньше: `assembleDebug` без Metro. Теперь: Pressable testID флапает — `_tap-register.yaml` ждёт Text `auth-register-link` и копию «Зарегистрироваться», пока герой ещё «Вход» |
-| `auth-confirm-password-input` not found | Клавиатура перекрывает поле. Bootstrap скроллит и вызывает `hideKeyboard` (`_fill-by-id.yaml`) |
+| `auth-confirm-password-input` на экране «Вход» | `hideKeyboard` на Android = BACK. На корневом `/login` это выкидывает приложение в лаунчер, тап регистрации молча пропускается (`when:`). Лечится `_dismiss-ime.yaml` (тап `auth-hero-title`) |
 | `auth-hero-title` не виден 120s + ANR Pixel Launcher | `has_anr_dialog` должен ловить `Application Not Responding` из dumpsys (не только `isn't responding`). Wait / Back, затем `ensure_app_foreground` |
-| `auth-login-input` на app drawer | После `clearState` NexusLauncher в фокусе. Повторный `launchApp: stopApp: false` + sampler `am start` |
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
-| `auth-mode-phone` не виден 120s | Pressable-toggle флапает в Maestro. Ждать `auth-hero-title`. Артефакты: `*-screen.png`, `*-during.png`, `*-logcat.txt` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |

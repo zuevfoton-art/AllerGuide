@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "sentry": {
+      "url": "https://mcp.sentry.dev/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "postgres-staging": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "${env:STAGING_DATABASE_URL}"]
+    },
+    "yandex-cloud-toolkit": {
+      "command": "npx",
+      "args": ["-y", "@yandex-cloud/mcp", "-s", "toolkit"]
+    },
+    "yandex-cloud-containers": {
+      "command": "npx",
+      "args": ["-y", "@yandex-cloud/mcp", "-s", "containers"]
+    },
+    "yandex-cloud-apigateway": {
+      "command": "npx",
+      "args": ["-y", "@yandex-cloud/mcp", "-s", "apigateway"]
+    },
+    "yandex-cloud-docs": {
+      "command": "npx",
+      "args": ["-y", "@yandex-cloud/mcp", "-s", "docs", "--no-auth"]
+    }
+  }
+}

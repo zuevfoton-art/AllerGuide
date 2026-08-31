@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import { useAppStore } from '@/src/store/app-store';
 import { setStoredScenario } from '@/src/services/settings-service';
 import type { Scenario } from '@allerguide/core';
-import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
 import { OnboardingSlideImage } from '@/src/components/onboarding/OnboardingSlideImage';
@@ -50,7 +49,6 @@ export default function OnboardingScreen() {
             <View style={styles.heroArt}>
               <OnboardingSlideImage slide="profile" width={heroArtWidth} height={heroArtWidth * 0.68} />
             </View>
-            <Text style={styles.tagline}>{t('brand.slogan')}</Text>
           </View>
 
           <Text style={styles.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
@@ -77,7 +75,6 @@ export default function OnboardingScreen() {
             </Pressable>
           ))}
 
-          <Disclaimer>{t('onboarding.disclaimer')}</Disclaimer>
         </View>
       </SafeAreaView>
     </View>
@@ -115,16 +112,6 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
     heroArt: {
       marginTop: -4,
       marginBottom: -8,
-    },
-    tagline: {
-      fontFamily: fonts.sans,
-      fontSize: isCompact ? 14 : 15,
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: isCompact ? 20 : 22,
-      paddingHorizontal: 4,
-      width: '100%',
-      flexShrink: 1,
     },
     sectionLabel: {
       fontFamily: fonts.sansSemiBold,

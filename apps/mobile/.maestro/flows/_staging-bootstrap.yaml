@@ -1,20 +1,15 @@
-# Shared subflow: staging register (email + API) → onboarding → home
+# Shared subflow: staging register (email + API) → onboarding → home.
+# First-run profile wizard is 5 screens (same as `_offline-bootstrap.yaml`).
 appId: com.aclearo.app
 ---
 - launchApp:
     clearState: true
-- launchApp:
-    clearState: false
-    stopApp: false
 - runFlow: _wait-login.yaml
 - runFlow: _tap-register.yaml
-- launchApp:
-    clearState: false
-    stopApp: false
-- runFlow:
-    file: _tap-by-id.yaml
-    env:
-      FIELD_ID: auth-mode-email
+- extendedWaitUntil:
+    visible:
+      id: auth-confirm-password-input
+    timeout: 15000
 - runScript: ../scripts/staging-credentials.js
 - runFlow:
     file: _fill-by-id.yaml

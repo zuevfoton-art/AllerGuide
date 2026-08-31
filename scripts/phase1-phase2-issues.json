@@ -21,8 +21,8 @@
       "effort_days": 0.5,
       "depends_on": [],
       "blocks": ["P1.1b", "P1.6d"],
-      "title": "[P1.1a] Neon staging Postgres + секреты",
-      "body": "## Родитель\nP1.1 Deploy API на staging\n\n## Зависимости\n- **Блокирует:** P1.1b, P1.6d\n- **Требует:** —\n\n## Оценка\n0.5 дня · DevOps\n\n## Задача\nСоздать Neon project `allerguide-staging`, выдать pooled `DATABASE_URL` и direct `DIRECT_DATABASE_URL`, сохранить в hosting/GitHub Secrets.\n\n## Критерии\n- [ ] Neon project создан\n- [ ] `DATABASE_URL` (pooled `-pooler`) и `DIRECT_DATABASE_URL` (direct) в Secrets\n- [ ] `DB_SSL=require`, `DB_PREPARE=false` задокументированы\n- [ ] `pnpm --filter api db:migrate` проходит локально с этими URL\n\n## Ресурсы\nNeon account, `JWT_SECRET` (openssl rand -hex 32)\n\n## Документы\n- [architecture.md](../docs/architecture.md#neon-serverless-postgres)\n- [.env.example](../.env.example)"
+      "title": "[P1.1a] YC Managed Postgres staging + секреты",
+      "body": "## Родитель\nP1.1 Deploy API на staging\n\n## Зависимости\n- **Блокирует:** P1.1b, P1.6d\n- **Требует:** —\n\n## Оценка\n0.5 дня · DevOps\n\n## Задача\nПоднять Yandex Cloud Managed PostgreSQL staging (`infra/yandex/staging/postgresql.tf`), выдать `DATABASE_URL` и `DIRECT_DATABASE_URL`, сохранить в Lockbox.\n\n## Критерии\n- [ ] Кластер YC MDB PostgreSQL создан (private IP)\n- [ ] `DATABASE_URL` и `DIRECT_DATABASE_URL` в Lockbox\n- [ ] `DB_SSL=require`, `DB_PREPARE=false` (Odyssey :6432)\n- [ ] `pnpm --filter api db:migrate` проходит с этими URL\n\n## Ресурсы\nYandex Cloud folder, `JWT_SECRET` (openssl rand -hex 32)\n\n## Документы\n- [architecture.md](../docs/architecture.md#postgres-yandex-cloud-managed)\n- [staging-yandex-cloud.md](../docs/staging-yandex-cloud.md)\n- [.env.example](../.env.example)"
     },
     {
       "id": "P1.1b",
@@ -526,7 +526,7 @@
       "depends_on": ["P2.6a"],
       "blocks": ["P2.7c"],
       "title": "[P2.7b] Infra: Redis rate-limit + health DB ping",
-      "body": "## Родитель\nP2.7 Performance profiling\n\n## Зависимости\n- **Требует:** P2.6a\n\n## Оценка\n2 дня · DevOps\n\n## Ресурсы\nUpstash Redis или managed Redis\n\n## Критерии\n- [ ] Rate-limit store не in-memory\n- [ ] `/api/health` проверяет DB connectivity\n- [ ] PgBouncer/pooled URL на runtime (Neon)"
+      "body": "## Родитель\nP2.7 Performance profiling\n\n## Зависимости\n- **Требует:** P2.6a\n\n## Оценка\n2 дня · DevOps\n\n## Ресурсы\nUpstash Redis или managed Redis\n\n## Критерии\n- [ ] Rate-limit store не in-memory\n- [ ] `/api/health` проверяет DB connectivity\n- [ ] `DB_PREPARE=false` на runtime, если стоит пулер (YC Odyssey :6432)"
     },
     {
       "id": "P2.7c",

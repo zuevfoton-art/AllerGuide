@@ -2,7 +2,6 @@ import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
@@ -172,9 +171,7 @@ export default function SosScreen() {
       }>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
-          <ScreenEyebrow section={t('sos.eyebrow')} />
           <Text style={ui.docTitle}>{t('sos.title')}</Text>
-          <Text style={ui.docMeta}>{t('sos.subtitle')}</Text>
         </View>
       </View>
 

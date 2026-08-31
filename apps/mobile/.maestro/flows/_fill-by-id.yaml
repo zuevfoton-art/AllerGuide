@@ -1,8 +1,9 @@
-# Scroll a field on-screen, type, then dismiss the IME.
+# Scroll a field on-screen, type, then fold the IME.
 # Pixel 6 + AuthHero + keyboard otherwise hides confirm/password/submit.
+# Do not use hideKeyboard — it sends BACK and pops /login (root).
 appId: com.aclearo.app
 ---
-- hideKeyboard
+- runFlow: _dismiss-ime.yaml
 - scrollUntilVisible:
     element:
       id: ${FIELD_ID}
@@ -11,4 +12,4 @@ appId: com.aclearo.app
 - tapOn:
     id: ${FIELD_ID}
 - inputText: ${FIELD_VALUE}
-- hideKeyboard
+- runFlow: _dismiss-ime.yaml

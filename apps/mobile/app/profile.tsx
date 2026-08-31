@@ -66,7 +66,6 @@ export default function ProfileScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('profiles.eyebrow')}
         title={t('profiles.title')}
         subtitle={t('profiles.subtitle')}
         right={<LanguagePicker header />}

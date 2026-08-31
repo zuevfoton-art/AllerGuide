@@ -3,16 +3,12 @@ appId: com.aclearo.app
 ---
 - launchApp:
     clearState: true
-# clearState can leave NexusLauncher focused; bring the task back
-# without wiping state (nightly failed on auth-login-input on the drawer).
-- launchApp:
-    clearState: false
-    stopApp: false
 - runFlow: _wait-login.yaml
 - runFlow: _tap-register.yaml
-- launchApp:
-    clearState: false
-    stopApp: false
+- extendedWaitUntil:
+    visible:
+      id: auth-confirm-password-input
+    timeout: 15000
 - runScript: ../scripts/random-phone.js
 - runFlow:
     file: _fill-by-id.yaml
@@ -55,12 +51,17 @@ appId: com.aclearo.app
 - inputText: "1990"
 - tapOn:
     id: profile-wizard-next
+# conditions (required)
+- tapOn:
+    id: condition-food
 - tapOn:
     id: profile-wizard-next
+# allergens (required)
 - tapOn:
     id: allergen-milk
 - tapOn:
     id: profile-wizard-next
+# cross-reactions is the last first-run step; the rest moved to profile editing
 - tapOn:
     id: profile-save
 - extendedWaitUntil:

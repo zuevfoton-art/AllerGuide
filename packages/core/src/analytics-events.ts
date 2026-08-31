@@ -28,6 +28,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'profile_setup_step_skip',
   'map_pollen_refreshed',
   'map_pollen_fallback',
+  'scan_dish_vision',
+  'pollen_alert_sent',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

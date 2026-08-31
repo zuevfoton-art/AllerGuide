@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { interpretStagingHealthResponse } from './rc-gate-health.mjs';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const quick = process.argv.includes('--quick');
@@ -127,15 +128,38 @@ function checkMaestroFlows() {
   if (!workflow.includes('during.png')) {
     failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
   }
+  if (!workflow.includes('maestro-login-visible.png') || !workflow.includes('.maestro/tests')) {
+    failures.push('maestro-nightly.yml must upload maestro-login-visible.png and ~/.maestro/tests');
+  }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
   if (!waitLogin.includes('auth-hero-title')) {
     failures.push('_wait-login.yaml must wait for auth-hero-title (above the fold)');
   }
 
+  const dismissIme = path.join(flowsDir, '_dismiss-ime.yaml');
+  if (!fs.existsSync(dismissIme)) {
+    failures.push('_dismiss-ime.yaml missing (fold IME without BACK)');
+  } else {
+    const dismissBody = fs.readFileSync(dismissIme, 'utf8');
+    if (!dismissBody.includes('auth-hero-title')) {
+      failures.push('_dismiss-ime.yaml must tap auth-hero-title (not hideKeyboard/BACK)');
+    }
+  }
+
   const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
-  if (!fillById.includes('hideKeyboard') || !fillById.includes('scrollUntilVisible')) {
-    failures.push('_fill-by-id.yaml must hideKeyboard + scrollUntilVisible');
+  if (!fillById.includes('_dismiss-ime.yaml') || !fillById.includes('scrollUntilVisible')) {
+    failures.push('_fill-by-id.yaml must _dismiss-ime.yaml + scrollUntilVisible');
+  }
+
+  for (const name of fs.readdirSync(flowsDir).filter((file) => file.endsWith('.yaml'))) {
+    const body = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (/^\s*-\s+hideKeyboard\b/m.test(body)) {
+      failures.push(`${name}: hideKeyboard sends BACK and pops /login — use _dismiss-ime.yaml`);
+    }
+    if (/^\s*-\s+back\b/m.test(body)) {
+      failures.push(`${name}: Maestro back command is banned (same as hideKeyboard on Android)`);
+    }
   }
 
   for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
@@ -146,14 +170,17 @@ function checkMaestroFlows() {
     if (!flow.includes('_tap-register.yaml')) {
       failures.push(`${name}: must tap register via _tap-register.yaml`);
     }
-    if (!flow.includes('stopApp: false')) {
-      failures.push(`${name}: must re-launchApp without stopping after clearState`);
+    if (flow.includes('stopApp: false')) {
+      failures.push(`${name}: must not re-launchApp after clearState (masked hideKeyboard BACK)`);
     }
     if (!flow.includes('_fill-by-id.yaml')) {
       failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
     }
-    if (!flow.includes('auth-confirm-password-input')) {
-      failures.push(`${name}: must fill auth-confirm-password-input`);
+    const tapThenConfirm =
+      flow.includes('_tap-register.yaml') &&
+      flow.indexOf('_tap-register.yaml') < flow.indexOf('id: auth-confirm-password-input');
+    if (!tapThenConfirm) {
+      failures.push(`${name}: must wait for auth-confirm-password-input after register tap`);
     }
   }
 
@@ -163,6 +190,24 @@ function checkMaestroFlows() {
   }
 }
 
+const STAGING_HEALTH_ATTEMPTS = 3;
+const STAGING_HEALTH_RETRY_MS = 1500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function reportStagingHealthIssue(message) {
+  // Path-triggered PRs re-run this script for Maestro/docs invariants.
+  // A stopped YC API Gateway must not block those. schedule + push to main
+  // still hard-fail G4.
+  if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
+    warnings.push(`${message} (G4 warning on PRs; hard-fail on main/schedule)`);
+    return;
+  }
+  failures.push(message);
+}
+
 async function checkStagingHealth() {
   const url = process.env.STAGING_API_URL?.replace(/\/$/, '');
   if (!url) {
@@ -170,19 +215,34 @@ async function checkStagingHealth() {
     return;
   }
 
-  try {
-    const response = await fetch(`${url}/api/health`);
-    const body = await response.json();
-    if (!response.ok || body.ok === false) {
-      failures.push(`Staging health check failed: HTTP ${response.status}`);
-      return;
+  const healthUrl = `${url}/api/health`;
+  let lastFailure = `Staging health check error: no attempt ran (${healthUrl})`;
+
+  for (let attempt = 1; attempt <= STAGING_HEALTH_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(healthUrl);
+      const bodyText = await response.text();
+      const result = interpretStagingHealthResponse({
+        status: response.status,
+        contentType: response.headers.get('content-type'),
+        bodyText,
+      });
+      if (result.ok) {
+        log(`Staging health OK (${url})`);
+        return;
+      }
+      lastFailure = result.failure;
+    } catch (error) {
+      lastFailure = `Staging health check error: ${error instanceof Error ? error.message : String(error)}`;
     }
-    log(`Staging health OK (${url})`);
-  } catch (error) {
-    failures.push(
-      `Staging health check error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+
+    if (attempt < STAGING_HEALTH_ATTEMPTS) {
+      log(`Staging health attempt ${attempt}/${STAGING_HEALTH_ATTEMPTS} failed — retrying`);
+      await sleep(STAGING_HEALTH_RETRY_MS * attempt);
+    }
   }
+
+  reportStagingHealthIssue(lastFailure);
 }
 
 function checkSoakLogStarted() {
@@ -223,6 +283,8 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
+runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 

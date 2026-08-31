@@ -12,18 +12,18 @@ appId: com.aclearo.app
     visible:
       id: diary-wizard-primary
     timeout: 10000
-# Optional symptom catalog step
+# Catalog picker and free text share one screen
 - tapOn:
-    id: diary-wizard-primary
-- tapOn:
-    id: diary-wizard-field
+    id: diary-field-symptoms
 - inputText: зуд
 - tapOn:
     id: diary-wizard-primary
+# severity
 - tapOn:
     text: "1 — лёгкая"
 - tapOn:
     id: diary-wizard-primary
+# onset (optional) — save
 - tapOn:
     id: diary-wizard-primary
 - extendedWaitUntil:

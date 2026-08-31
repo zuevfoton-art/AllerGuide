@@ -33,16 +33,16 @@ Health check reports store type:
   "ok": true,
   "latencyMs": 45,
   "pooler": true,
-  "poolerWarning": "Neon pooler detected; set DB_PREPARE=false for transaction pooling"
+  "poolerWarning": "Connection pooler detected; set DB_PREPARE=false for transaction pooling"
 }
 ```
 
-### Neon pooled runtime
+### YC Managed Postgres runtime
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | `postgresql://...@ep-xxx-pooler....neon.tech/...` |
-| `DIRECT_DATABASE_URL` | unpooled host for migrations |
+| `DATABASE_URL` | `postgresql://...@c-xxxxx.rw.mdb.yandexcloud.net:6432/...` |
+| `DIRECT_DATABASE_URL` | same host (or `:5432` if a direct endpoint is used) |
 | `DB_PREPARE` | `false` |
 | `DB_SSL` | `require` |
 

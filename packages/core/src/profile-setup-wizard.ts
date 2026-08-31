@@ -34,6 +34,19 @@ export type ProfileSetupWizardStep = (typeof PROFILE_SETUP_WIZARD_STEPS)[number]
 
 export const PROFILE_SETUP_WIZARD_STEP_COUNT = PROFILE_SETUP_WIZARD_STEPS.length;
 
+/**
+ * Steps left out of the first run: none of them block a usable profile and all
+ * are reachable later from profile editing, SOS and the home screen.
+ */
+export const PROFILE_SETUP_DEFERRED_STEPS: ReadonlySet<string> = new Set([
+  'allergenConfirmations',
+  'symptomBaseline',
+  'conditionHistory',
+  'comorbidity',
+  'phenotypeSummary',
+  'contacts',
+]);
+
 export type ProfileSetupWizardErrorCode =
   | 'name_required'
   | 'birth_year_invalid'
@@ -76,6 +89,8 @@ export interface ProfileSetupWizardNavOptions {
   skipPhenotypeSummary?: boolean;
   skipCrossReactions?: boolean;
   skipAllergenConfirmations?: boolean;
+  /** Leave {@link PROFILE_SETUP_DEFERRED_STEPS} for later, after the first run. */
+  deferOptionalSteps?: boolean;
 }
 
 export function createEmptyProfileSetupWizardDraft(
@@ -170,6 +185,7 @@ export function shouldSkipAllergenConfirmationsStep(
 
 export function buildProfileSetupWizardNavOptions(
   draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
+  options: { deferOptionalSteps?: boolean } = {},
 ): ProfileSetupWizardNavOptions {
   return {
     skipConditionHistory: shouldSkipConditionHistoryStep(draft),
@@ -177,10 +193,12 @@ export function buildProfileSetupWizardNavOptions(
     skipPhenotypeSummary: shouldSkipPhenotypeSummaryStep(draft),
     skipCrossReactions: shouldSkipCrossReactionsStep(draft),
     skipAllergenConfirmations: shouldSkipAllergenConfirmationsStep(draft),
+    deferOptionalSteps: options.deferOptionalSteps,
   };
 }
 
 function shouldSkipStep(step: ProfileSetupWizardStep, nav: ProfileSetupWizardNavOptions): boolean {
+  if (nav.deferOptionalSteps && PROFILE_SETUP_DEFERRED_STEPS.has(step)) return true;
   if (step === 'conditionHistory' && nav.skipConditionHistory) return true;
   if (step === 'comorbidity' && nav.skipComorbidity) return true;
   if (step === 'phenotypeSummary' && nav.skipPhenotypeSummary) return true;
@@ -192,16 +210,18 @@ function shouldSkipStep(step: ProfileSetupWizardStep, nav: ProfileSetupWizardNav
 /** Steps the user will actually see for the current draft (skips applied). */
 export function getVisibleProfileSetupSteps(
   draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
+  options: { deferOptionalSteps?: boolean } = {},
 ): ProfileSetupWizardStep[] {
-  const nav = buildProfileSetupWizardNavOptions(draft);
+  const nav = buildProfileSetupWizardNavOptions(draft, options);
   return PROFILE_SETUP_WIZARD_STEPS.filter((step) => !shouldSkipStep(step, nav));
 }
 
 export function getVisibleProfileSetupStepProgress(
   current: ProfileSetupWizardStep,
   draft: Pick<ProfileSetupWizardDraft, 'conditions' | 'selectedAllergenIds'>,
+  options: { deferOptionalSteps?: boolean } = {},
 ): { current: number; total: number } {
-  const visible = getVisibleProfileSetupSteps(draft);
+  const visible = getVisibleProfileSetupSteps(draft, options);
   const index = visible.indexOf(current);
   return {
     current: index >= 0 ? index + 1 : 1,

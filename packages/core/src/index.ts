@@ -10,6 +10,7 @@ export * from './allergens';
 export * from './onboarding';
 export * from './auth';
 export * from './phone';
+export * from './login-field';
 export * from './password';
 export * from './emergency-contacts';
 export * from './diary';

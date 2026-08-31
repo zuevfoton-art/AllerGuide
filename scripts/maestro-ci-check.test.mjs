@@ -5,6 +5,7 @@ import { describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const flowsDir = path.join(root, 'apps/mobile/.maestro/flows');
 
 function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
@@ -28,6 +29,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(workflow, /app-debug\.apk/);
     assert.match(workflow, /maestro-offline-during\.png/);
     assert.match(workflow, /maestro-staging-during\.png/);
+    assert.match(workflow, /maestro-login-visible\.png/);
+    assert.match(workflow, /\.maestro\/tests/);
 
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
@@ -43,7 +46,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /SAMPLER_GUARD/);
   });
 
-  it('waits for the auth hero title, then scrolls+hides IME for fields', () => {
+  it('waits for the auth hero title, then scrolls and folds IME without BACK', () => {
     const waitLogin = read('apps/mobile/.maestro/flows/_wait-login.yaml');
     assert.match(waitLogin, /id: auth-hero-title/);
     assert.match(waitLogin, /timeout: 120000/);
@@ -51,17 +54,25 @@ describe('Maestro nightly CI invariants', () => {
     const hero = read('apps/mobile/src/components/AuthForm.tsx');
     assert.match(hero, /testID="auth-hero-title"/);
 
+    const dismissIme = read('apps/mobile/.maestro/flows/_dismiss-ime.yaml');
+    assert.match(dismissIme, /id: auth-hero-title/);
+    assert.doesNotMatch(dismissIme, /^\s*-\s+hideKeyboard\b/m);
+
     const fill = read('apps/mobile/.maestro/flows/_fill-by-id.yaml');
-    assert.match(fill, /hideKeyboard/);
+    assert.match(fill, /_dismiss-ime\.yaml/);
     assert.match(fill, /scrollUntilVisible/);
+    assert.doesNotMatch(fill, /^\s*-\s+hideKeyboard\b/m);
 
     for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_wait-login\.yaml/);
       assert.match(flow, /_tap-register\.yaml/);
-      assert.match(flow, /stopApp: false/);
+      assert.doesNotMatch(flow, /stopApp: false/);
       assert.match(flow, /_fill-by-id\.yaml/);
-      assert.match(flow, /auth-confirm-password-input/);
+      assert.ok(
+        flow.indexOf('_tap-register.yaml') < flow.indexOf('id: auth-confirm-password-input'),
+        `${name} must wait for confirm field after register tap`,
+      );
     }
   });
 
@@ -70,9 +81,21 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(tapRegister, /id: auth-register-link/);
     assert.match(tapRegister, /text: "Зарегистрироваться"/);
     assert.match(tapRegister, /text: "Нет аккаунта\?"/);
+    assert.match(tapRegister, /_dismiss-ime\.yaml/);
+    assert.doesNotMatch(tapRegister, /^\s*-\s+hideKeyboard\b/m);
 
     const authForm = read('apps/mobile/src/components/AuthForm.tsx');
     assert.match(authForm, /<Text testID=\{testID\} style=\{styles\.linkText\}>/);
     assert.doesNotMatch(authForm, /<Pressable\s+testID=\{testID\}/);
+  });
+
+  it('bans hideKeyboard and the back command in every Maestro flow', () => {
+    const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
+    assert.ok(names.includes('_dismiss-ime.yaml'));
+    for (const name of names) {
+      const body = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+      assert.doesNotMatch(body, /^\s*-\s+hideKeyboard\b/m, `${name} must not use hideKeyboard`);
+      assert.doesNotMatch(body, /^\s*-\s+back\b/m, `${name} must not use the back command`);
+    }
   });
 });

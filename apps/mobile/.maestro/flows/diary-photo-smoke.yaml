@@ -11,19 +11,13 @@ appId: com.aclearo.app
     visible:
       id: diary-wizard-primary
     timeout: 10000
-# skinArea
+# skinArea + appearance + itching share one screen
 - tapOn:
-    id: diary-wizard-field
+    id: diary-field-skinArea
 - inputText: лицо
 - tapOn:
-    id: diary-wizard-primary
-# appearance
-- tapOn:
-    id: diary-wizard-field
+    id: diary-field-appearance
 - inputText: покраснение
-- tapOn:
-    id: diary-wizard-primary
-# itching
 - tapOn:
     text: "Слабый"
 - tapOn:

@@ -28,7 +28,6 @@ import {
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { ErrorState } from '@/src/components/ErrorState';
@@ -632,7 +631,6 @@ export default function ScannerScreen() {
   if (!activeProfileId) {
     return (
       <Screen>
-        <ScreenEyebrow section={t('scanner.eyebrow')} />
         <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         <GlassCard>
           <Text style={ui.cardTitle}>{t('scanner.noProfileTitle')}</Text>
@@ -677,7 +675,6 @@ export default function ScannerScreen() {
       }>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <ScreenEyebrow section={t('scanner.eyebrow')} />
           <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         </View>
       </View>

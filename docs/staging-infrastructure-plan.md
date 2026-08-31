@@ -3,7 +3,7 @@
 **Назначение:** единый план развёртывания staging для closed beta (Phase 1) и smoke перед Phase 2.  
 **Связанные runbook'и:** [deploy API](staging-deploy.md) · [EAS staging](eas-staging-build.md) · [closed beta](closed-beta-p17.md) · [roadmap P1.1](roadmap-to-prod.md)
 
-Staging = **backend-интегрированная** среда: mobile profile `staging` в EAS + API на `api.staging.allerguide.app` + Neon Postgres. Offline-only smoke — profile `preview` ([eas-internal-preview.md](eas-internal-preview.md)).
+Staging = **backend-интегрированная** среда: mobile profile `staging` в EAS + API на Yandex Cloud (`api.staging.aclearo.com`) + **YC Managed Postgres**. Канонический runbook: [`staging-yandex-cloud.md`](staging-yandex-cloud.md). Offline-only smoke — profile `preview` ([eas-internal-preview.md](eas-internal-preview.md)).
 
 ---
 
@@ -40,8 +40,8 @@ flowchart TB
   end
 
   subgraph data [Данные]
-    Neon[("Neon Postgres allerguide-staging")]
-    API --> Neon
+    YcPg[("YC Managed Postgres")]
+    API --> YcPg
   end
 
   subgraph external [Внешние API]
@@ -61,7 +61,7 @@ flowchart TB
   Web --> DNS
   DNS --> Host
   Preflight --> DNS
-  CI_INT["ci.yml api-integration"] -.->|тесты без prod DB| Neon
+  CI_INT["ci.yml api-integration"] -.->|тесты без prod DB| YcPg
 ```
 
 **Потоки данных (кратко):**
@@ -83,7 +83,7 @@ flowchart TB
 
 | # | Компонент | Провайдер (рекомендация) | Roadmap | Критерий готовности |
 |---|-----------|--------------------------|---------|---------------------|
-| S1 | **Postgres** | [Neon](https://neon.tech) project `allerguide-staging` | P1.1a | `db:migrate` OK |
+| S1 | **Postgres** | Yandex Cloud Managed PostgreSQL (`postgresql.tf`) | P1.1a | `db:migrate` OK |
 | S2 | **API runtime** | Railway / Render / Fly.io | P1.1b | `/api/health` 200 |
 | S3 | **DNS + TLS** | Cloudflare / registrar + хостинг LE | P1.1c | `curl https://api.staging.allerguide.app/api/health` |
 | S4 | **Секреты API** | Dashboard хостинга | P1.1a–b | `authDatabase: true`, `features.sync/aiScan: true` |
@@ -95,7 +95,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-  S1[S1 Neon] --> S2[S2 API host]
+  S1[S1 YC PG] --> S2[S2 API host]
   S2 --> S3[S3 DNS]
   S4[S4 API env] --> S2
   S6[S6 OpenAI] --> S2
@@ -135,8 +135,8 @@ curl -sf https://api.staging.allerguide.app/api/health | jq .
 
 | Переменная | Обязательно | Значение staging |
 |------------|-------------|------------------|
-| `DATABASE_URL` | да | Neon **pooled** (`-pooler` в host) |
-| `DIRECT_DATABASE_URL` | да | Neon **direct** (миграции) |
+| `DATABASE_URL` | да | YC Managed Postgres (`:6432` Odyssey) |
+| `DIRECT_DATABASE_URL` | да | тот же URL (миграции) |
 | `DB_SSL` | да | `require` |
 | `DB_PREPARE` | да | `false` |
 | `JWT_SECRET` | да | `openssl rand -hex 32` |
@@ -156,12 +156,10 @@ curl -sf https://api.staging.allerguide.app/api/health | jq .
 
 | Secret | Назначение |
 |--------|------------|
-| `STAGING_DATABASE_URL` | pooled Neon (migrate job) |
-| `STAGING_DIRECT_DATABASE_URL` | direct Neon |
+| `STAGING_DATABASE_URL` | не используется в CI deploy — URL в Lockbox |
+| `STAGING_DIRECT_DATABASE_URL` | не используется в CI deploy — URL в Lockbox |
 | `STAGING_JWT_SECRET` | синхрон с API (резерв) |
-| `STAGING_API_URL` | `https://api.staging.allerguide.app` |
-| `NEON_API_KEY` | PR preview DB ([neon-preview.yml](../.github/workflows/neon-preview.yml)) |
-| `NEON_PROJECT_ID` | variable, тот же Neon project |
+| `STAGING_API_URL` | `https://api.staging.aclearo.com` |
 
 ### 3.3 Mobile (EAS profile `staging`)
 
@@ -185,7 +183,7 @@ curl -sf https://api.staging.allerguide.app/api/health | jq .
 
 | Шаг | Действие | Владелец |
 |-----|----------|----------|
-| 0.1 | Аккаунт Neon + billing | DevOps |
+| 0.1 | Каталог YC + Managed PostgreSQL | DevOps |
 | 0.2 | Аккаунт хостинга API (Railway/Render/Fly) | DevOps |
 | 0.3 | Доступ к DNS зоны `allerguide.app` | DevOps |
 | 0.4 | OpenAI API key + spending limit | Backend |
@@ -195,7 +193,7 @@ curl -sf https://api.staging.allerguide.app/api/health | jq .
 
 | Шаг | Команда / действие | Документ |
 |-----|-------------------|----------|
-| 1.1 | Создать Neon `allerguide-staging`, скопировать pooled + direct URL | [staging-deploy.md § P1.1a](staging-deploy.md#p11a--neon-staging-postgres--secrets) |
+| 1.1 | Поднять YC Managed Postgres (`postgresql.tf`), URL в Lockbox | [staging-deploy.md § P1.1a](staging-deploy.md#p11a--yandex-cloud-managed-postgres--secrets) · [staging-yandex-cloud.md](staging-yandex-cloud.md) |
 | 1.2 | Сгенерировать `JWT_SECRET`, `SESSION_SECRET` | там же |
 | 1.3 | `pnpm --filter api db:migrate` | `./scripts/staging-migrate.sh` |
 | 1.4 | Задеплоить `apps/api` на хостинг (build + start) | [§ P1.1b](staging-deploy.md#p11b--deploy-api-на-хостинг) |
@@ -243,7 +241,7 @@ Runbook: [eas-staging-build.md](eas-staging-build.md). После установ
 
 - [ ] `staging-preflight.sh` — Pass  
 - [ ] CI `deploy-staging` workflow — Pass (при настроенных secrets)  
-- [ ] CI `api-integration` на `main` — Pass (Postgres в GHA, без prod Neon)
+- [ ] CI `api-integration` на `main` — Pass (Postgres в GHA)
 
 ### Gate «готов к closed beta»
 
@@ -264,7 +262,7 @@ Runbook: [eas-staging-build.md](eas-staging-build.md). После установ
 
 | Компонент | Нужный доступ | Автоматизируемо |
 |-----------|---------------|-----------------|
-| Neon project + migrate | `NEON_API_KEY` или connection strings | да |
+| YC Managed Postgres + migrate | Lockbox `DATABASE_URL` / VPC runner | да |
 | Env на API-хостинге | Railway/Render/Fly API token | да |
 | GitHub Secrets | `gh` admin на репозитории | да |
 | DNS CNAME | Cloudflare/registrar API token | да (или вручную 1 запись) |
@@ -277,8 +275,8 @@ Runbook: [eas-staging-build.md](eas-staging-build.md). После установ
 **Минимальный набор для автонастройки API:**
 
 ```text
-NEON_API_KEY  (или DATABASE_URL + DIRECT_DATABASE_URL)
-RAILWAY_TOKEN | RENDER_API_KEY | FLY_API_TOKEN
+YC Lockbox  (DATABASE_URL + DIRECT_DATABASE_URL)
+YC_SA_JSON / YC_CONTAINER_ID
 GITHUB admin  (secrets STAGING_*)
 OPENAI_API_KEY
 DNS API token (зона allerguide.app) — опционально
@@ -296,7 +294,6 @@ DNS API token (зона allerguide.app) — опционально
 | `EXPO_PUBLIC_PRODUCT_DB=true` + seed каталога | после P1.1d import | backend-first barcode |
 | `staging.allerguide.app` (web) | Phase 2 | web-тестеры |
 | Read replica `READ_DATABASE_URL` | нагрузка | каталог read-only |
-| Отдельный Neon branch на PR | уже есть | [neon-preview.yml](../.github/workflows/neon-preview.yml) |
 | Maestro E2E nightly | Phase 2 P2.1 | после P1.7 |
 
 ---
@@ -314,7 +311,6 @@ DNS API token (зона allerguide.app) — опционально
 | QA чеклисты | `docs/qa-checklist.md` (§ Staging, P1.2e–P1.7) |
 | CI deploy | `.github/workflows/deploy-staging.yml` — **Deploy staging (Yandex Cloud)** |
 | CI integration tests | `.github/workflows/ci.yml` → `api-integration` |
-| Neon PR preview | `.github/workflows/neon-preview.yml` |
 | Скрипты | `scripts/staging-*.sh`, `scripts/staging-*-smoke.ts`, `scripts/first-staging-build.sh` |
 | Phase 1 статус | `docs/phase-1-run.md` |
 
@@ -325,7 +321,7 @@ DNS API token (зона allerguide.app) — опционально
 | Симптом | Проверить |
 |---------|-----------|
 | Migrate fails | `DIRECT_DATABASE_URL`, не pooled |
-| Health 503, `database.ok: false` | `DATABASE_URL`, `DB_SSL=require`, Neon allowlist |
+| Health 503, `database.ok: false` | `DATABASE_URL`, `DB_SSL=require`, сеть VPC |
 | `authDatabase: false` | `JWT_SECRET` на API |
 | Sync 401 | `SYNC_ENABLED=true`, JWT на клиенте, не legacy `SYNC_API_KEY` |
 | Scan → mock на устройстве | `SCAN_REQUIRE_AUTH` + mobile передаёт JWT; `OPENAI_API_KEY` на API |

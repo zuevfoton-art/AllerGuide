@@ -24,7 +24,6 @@ const ru: LocaleMessages = {
     loadFailed: 'Не удалось загрузить данные.',
     createProfile: 'Создать профиль',
     undo: 'Отменить',
-    email: 'Email',
     phone: 'Телефон',
     password: 'Пароль',
     next: 'Далее',
@@ -51,15 +50,11 @@ const ru: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Вход',
-    loginSubtitle: 'Войдите по номеру телефона или email',
     registerTitle: 'Регистрация',
-    registerSubtitle: 'Создайте аккаунт по телефону или email',
-    phoneLabel: 'Номер телефона',
+    loginLabel: 'Телефон или почта',
     phonePlaceholder: '+7 999 123-45-67',
-    passwordPlaceholder: 'Введите пароль',
     passwordMinPlaceholder: 'Минимум 6 символов',
     confirmPassword: 'Подтверждение пароля',
-    confirmPasswordPlaceholder: 'Повторите пароль',
     loginButton: 'Войти',
     registerButton: 'Зарегистрироваться',
     noAccount: 'Нет аккаунта?',
@@ -70,6 +65,7 @@ const ru: LocaleMessages = {
     countryCode: 'Код страны',
     countryCodeTitle: 'Код страны',
     errors: {
+      loginRequired: 'Введите телефон или email.',
       emailRequired: 'Введите email.',
       phoneRequired: 'Введите номер телефона.',
       emailInvalid: 'Введите корректный email.',
@@ -97,7 +93,6 @@ const ru: LocaleMessages = {
     },
     resetPassword: {
       title: 'Новый пароль',
-      subtitle: 'Придумайте новый пароль для аккаунта',
       newPassword: 'Новый пароль',
       confirmPassword: 'Подтверждение пароля',
       submitButton: 'Сохранить пароль',
@@ -109,7 +104,6 @@ const ru: LocaleMessages = {
   profiles: {
     title: 'Мои профили',
     subtitle: 'Редактирование и удаление',
-    eyebrow: 'Профили',
     listTitle: 'Список профилей',
     empty: 'Профилей пока нет. Добавьте первый — это займёт пару минут.',
     self: 'Я',
@@ -150,7 +144,6 @@ const ru: LocaleMessages = {
     sos: 'SOS',
   },
   more: {
-    eyebrow: 'Разделы',
     title: 'Ещё',
     subtitle: 'Маркет, карта, эксперт и настройки',
     marketDesc: 'Товары для аллергиков по вашему профилю',
@@ -187,8 +180,6 @@ const ru: LocaleMessages = {
     marketplaceSub: 'Товары по вашему профилю аллергий',
     marketplaceEmpty: 'Подборка появится после выбора профиля с аллергенами.',
     marketplaceOpen: 'Открыть маркетплейс',
-    disclaimer:
-      'Индекс носит информационный характер и помогает оценить возможное влияние факторов на самочувствие.\nОн не заменяет консультацию врача, диагностику или лечение.',
     disclaimerShort: 'Индекс носит информационный характер и не заменяет консультацию врача.',
     phenotypeHintsTitle: 'Рекомендации по профилю',
     insightsTitle: 'Рекомендации и напоминания',
@@ -213,7 +204,6 @@ const ru: LocaleMessages = {
   },
   diary: {
     title: 'Записи в дневник',
-    subtitle: 'Наблюдения, которые вы отмечаете сами',
     eyebrow: 'Наблюдения',
     newEntry: 'Новая запись',
     quickEntry: 'Короткая запись',
@@ -273,11 +263,9 @@ const ru: LocaleMessages = {
   clinicalScales: {
     title: 'Клинические оценки',
     subtitle: 'Оценки для отслеживания динамики. Данные сохраняются в отчётах.',
-    eyebrow: 'Оценки',
   },
   diaryWizard: {
     stepOf: 'Шаг {{current}} из {{total}}',
-    stepOfSection: 'Шаг {{current}} из {{total}} · {{section}}',
     skipSection: 'Пропустить раздел',
     deleteEntry: 'Удалить запись',
     fillOneSection: 'Заполните хотя бы один раздел дневника.',
@@ -357,7 +345,6 @@ const ru: LocaleMessages = {
   scanner: {
     title: 'Умный сканер',
     subtitle: 'Проверка состава по профилю аллергий',
-    eyebrow: 'Сканер',
     openAction: 'Открыть',
     product: 'Продукт',
     menu: 'Меню',
@@ -496,8 +483,6 @@ const ru: LocaleMessages = {
   },
   market: {
     title: 'Маркет',
-    subtitle: 'Товары для аллергиков',
-    eyebrow: 'Маркет',
     searchPlaceholder: 'Поиск по каталогу…',
     banner: 'Подборка на основе профиля аллергий — скрыты товары с конфликтующими аллергенами',
     empty: 'Ничего не найдено. Попробуйте другой запрос.',
@@ -524,7 +509,6 @@ const ru: LocaleMessages = {
   map: {
     title: 'Карта мест',
     subtitle: 'Клиники, пыление и качество воздуха',
-    eyebrow: 'Карта',
     places: 'Рестораны',
     pollen: 'Пыление',
     adair: 'АДАИР',
@@ -534,7 +518,6 @@ const ru: LocaleMessages = {
     yandexAttribution: 'Карта: Яндекс Карты',
     basemapUnavailable: 'Карта не загрузилась. Проверьте сеть и откройте экран ещё раз.',
     emptyPlaces: 'Нет рекомендованных мест для отображения на карте',
-    disclaimerPlaces: 'Информация о местах носит ориентировочный характер, состав нужно уточнять в заведении.',
     disclaimerPollen: 'Данные о пылении носят ориентировочный характер. Уточняйте прогноз у лечащего врача.',
     disclaimerAdair:
       'Справочник клиник АДАИР собран по публичным данным и не является расписанием приёма. Перед визитом подтвердите филиал и часы работы — номера и режим могут меняться.',
@@ -716,7 +699,6 @@ const ru: LocaleMessages = {
   settings: {
     title: 'Настройки',
     subtitle: 'SOS, синхронизация и напоминания',
-    eyebrow: 'Настройки',
     emergencyNumber: 'Экстренный вызов',
     emergencyHint: 'Номер для кнопки SOS (по умолчанию 103)',
     saveNumber: 'Сохранить номер',
@@ -780,7 +762,6 @@ const ru: LocaleMessages = {
     aboutHint: 'приложение Aclearo',
   },
   about: {
-    eyebrow: 'О приложении',
     title: 'О приложении',
     subtitle: 'Помощник при аллергии — offline-first',
     version: 'Версия',
@@ -801,9 +782,10 @@ const ru: LocaleMessages = {
   },
   disclaimer: {
     details: 'Подробнее',
+    actionPlan: 'План действий носит информационный характер. Назначения определяет врач.',
+    mdrFootnote: 'поддержка решений · не медизделие',
   },
   notifications: {
-    eyebrow: 'Уведомления',
     title: 'Уведомления',
     subtitle: 'Локальные напоминания на устройстве',
     hubTitle: 'Уведомления и напоминания',
@@ -879,7 +861,6 @@ const ru: LocaleMessages = {
     childDesc: 'Профиль и контроль для вашего ребёнка',
     both: 'Для себя и ребёнка',
     bothDesc: 'Несколько профилей в одном приложении',
-    disclaimer: 'Информация в приложении носит рекомендательный характер и не заменяет консультацию врача.',
   },
   onboardingIntro: {
     next: 'Далее',
@@ -910,23 +891,16 @@ const ru: LocaleMessages = {
     },
   },
   profileSetup: {
-    eyebrow: 'Профиль',
     titleSelf: 'Ваш профиль',
     titleChild: 'Профиль ребёнка',
     titleCreate: 'Создание профиля',
-    subtitleSelfStep: 'Шаг 1 из 2 — ваш профиль · {{step}}',
-    subtitleChildStep: 'Шаг 2 из 2 — профиль ребёнка · {{step}}',
-    subtitleDefault: '{{step}} — заполните информацию для персонализации',
     stepProgress: 'Шаг {{current}} из {{total}}',
     nameLabel: 'Имя',
-    namePlaceholder: 'Введите имя',
     birthYearLabel: 'Год рождения',
     birthYearPlaceholder: 'Например, 1990',
     profileLabel: 'Профиль',
     profileSelf: 'Я',
     profileChild: 'Ребёнок',
-    profileSelfLocked: 'Ваш профиль',
-    profileChildLocked: 'Профиль ребёнка',
     allergensLabel: 'Аллергены',
     allergensHint:
       'Выберите аллергены из списка или каталога. Перекрёстные реакции предложим на следующем шаге.',
@@ -943,7 +917,6 @@ const ru: LocaleMessages = {
     crossReactions: {
       title: 'Перекрёстные реакции',
       hint: 'По выбранным аллергенам часто учитывают связанные продукты и вещества. Отметьте, что хотите добавить в профиль — или пропустите шаг.',
-      skipHint: 'Ничего не отмечено — нажмите «Далее», чтобы пропустить.',
       addNext: 'Добавить и далее',
       disclaimer:
         'Подсказки о перекрёстных реакциях носят справочный характер и не являются диагнозом. Уточняйте у врача.',
@@ -954,7 +927,6 @@ const ru: LocaleMessages = {
       zonesLabel: 'Зоны',
       severityLabel: 'Обычная интенсивность',
       typicalLabel: 'Типичные симптомы',
-      skipHint: 'Можно пропустить и заполнить позже.',
       disclaimer: 'Базовые симптомы помогают персонализировать дневник и не заменяют консультацию врача.',
       zones: {
         nose: 'Нос',
@@ -1020,12 +992,10 @@ const ru: LocaleMessages = {
       empty: 'Пока недостаточно данных для определения фенотипа.',
       disclaimer: 'Фенотипы носят справочный характер. Коды МКБ-10 приведены для ориентира — постановка диагноза остаётся за врачом.',
       icd10Ref: 'МКБ-10:',
-      icd10Disclaimer: 'Коды МКБ-10 приведены как справочная информация, не как клинический диагноз.',
     },
     allergenConfirmations: {
       title: 'Как подтверждены аллергены?',
       hint: 'Укажите источник подтверждения для каждого аллергена. Можно пропустить — по умолчанию самонаблюдение.',
-      skipHint: 'Нажмите «Далее», чтобы пропустить этот шаг.',
     },
     conditionsOther: 'Другие состояния',
     conditionHintTitle: 'Рекомендуем добавить тип состояния',
@@ -1187,7 +1157,6 @@ const ru: LocaleMessages = {
     verifyTitle: 'Проверьте схему',
     verifyConfirm: 'Подтвердить схему',
     saveCourse: 'Сохранить курс',
-    disclaimer: 'Терапия назначается только врачом. Приложение не корректирует дозы.',
     disclaimerShort: 'Терапию назначает врач. Приложение не меняет дозы.',
     noProfile: 'Выберите профиль на главном экране.',
     reminderLabel: 'Ежедневное напоминание',
@@ -1230,13 +1199,11 @@ const ru: LocaleMessages = {
     clinicalNotesPlaceholder: 'Носимый адреналин, переносимость укусов…',
     consolidated: 'Сводный список',
     savePlan: 'Сохранить план',
-    disclaimer: 'План действий носит информационный характер. Назначения определяет врач.',
     noProfile: 'Выберите профиль на главном экране.',
     notEligible: 'Раздел доступен при инсектной аллергии или соответствующих аллергенах в профиле.',
   },
   asthma: {
     title: 'Бронхиальная астма',
-    eyebrow: 'Астма',
     planTitle: 'План действий при астме',
     planSubtitle: 'Зоны ПСВ и шаги по назначению врача',
     editPlan: 'План действий',
@@ -1256,9 +1223,6 @@ const ru: LocaleMessages = {
     clinicalNotes: 'Заметки для врача',
     clinicalNotesPlaceholder: 'Индивидуальные указания, переносимость…',
     savePlan: 'Сохранить план',
-    disclaimer: 'План действий носит информационный характер. Назначения определяет врач.',
-    cardDisclaimer:
-      'Данные по астме носят информационный характер. План действий, терапию и пороговые значения определяет лечащий врач',
     noProfile: 'Выберите профиль на главном экране.',
     notEligible: 'Раздел доступен при бронхиальной астме в условиях профиля.',
     ginaLink: 'Отчёт GINA Strategy',
@@ -1308,7 +1272,6 @@ const ru: LocaleMessages = {
   sos: {
     title: 'SOS',
     subtitle: 'Только экстренная информация. Управление профилем — на главной.',
-    eyebrow: 'SOS',
     name: 'Имя:',
     age: 'Возраст:',
     allergies: 'Аллергии:',
@@ -1323,7 +1286,6 @@ const ru: LocaleMessages = {
     callContact: 'Позвонить',
     call: 'Позвонить {{number}}',
     tip: 'Покажите этот экран медработнику в случае анафилактической реакции',
-    disclaimer: 'Информация на экране SOS внесена пользователем и не является медицинским назначением.',
     disclaimerShort: 'Данные SOS внесены вами и не являются назначением врача.',
     passportTitle: 'Паспорт аллергика',
     passportEmpty: 'Заполните паспорт в редактировании SOS — аллергены, ЛС, набор первой помощи.',
@@ -1345,7 +1307,6 @@ const ru: LocaleMessages = {
   },
   sosEdit: {
     title: 'Редактирование SOS',
-    eyebrow: 'SOS',
     noProfile: 'Профиль не выбран',
     notesLabel: 'Медицинские заметки',
     notesPlaceholder: 'Препараты, особенности реакции, инструкции врача…',
@@ -1378,7 +1339,6 @@ const ru: LocaleMessages = {
     back: 'Дневник',
     title: 'Отчёт для врача',
     subtitle: 'PDF-отчёт по данным дневника и профиля',
-    eyebrow: 'Отчёт',
     customRange: 'Выбрать свои даты',
     fromDate: 'С даты',
     toDate: 'По дату',
@@ -1386,7 +1346,6 @@ const ru: LocaleMessages = {
     blocks: 'Блоки отчёта',
     generating: 'Формирование…',
     generate: 'Сформировать PDF',
-    disclaimer: 'Отчёт сформирован на основе самостоятельно введённых данных и не является медицинской документацией.',
     disclaimerShort: 'Отчёт собран из ваших данных и не является медицинской документацией.',
   },
   expert: {

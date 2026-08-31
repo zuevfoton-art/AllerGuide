@@ -232,7 +232,6 @@ export default function PrescribedTherapyScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('prescribedTherapy.eyebrow')}
         title={t('prescribedTherapy.courseTitle')}
         subtitle={t('prescribedTherapy.courseSubtitle')}
         style={{ marginBottom: 12 }}
@@ -614,7 +613,6 @@ function ReviewStepPT({ theme, ui, styles, course, setCourse, onBack, onSave, re
         block
         onPress={() => void onSave()}
       />
-      <Disclaimer compact>{t('prescribedTherapy.disclaimerShort')}</Disclaimer>
     </Screen>
   );
 }
