@@ -14,6 +14,7 @@ import {
   getDiaryPhotoUrisFromAnswers,
   getDiaryStepAnswers,
   getScaleIdFromAnswers,
+  groupDiaryStepsIntoScreens,
   hasSectionAnswers,
   parseDiaryPhotoUris,
   parseMultiChoiceValue,
@@ -122,11 +123,19 @@ export function DiaryWizard({
     () => sectionsProp ?? localizeDiarySections(locale, content()),
     [sectionsProp, locale, content],
   );
+  /** Wizard screens per section: grouped steps are asked together. */
+  const screensBySection = useMemo(
+    () => sections.map((item) => groupDiaryStepsIntoScreens(item.steps)),
+    [sections],
+  );
   const [sectionIndex, setSectionIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(() => {
     if (!initialStepId) return 0;
     const first = (sectionsProp ?? [])[0];
-    const index = first?.steps.findIndex((item) => item.id === initialStepId) ?? -1;
+    if (!first) return 0;
+    const index = groupDiaryStepsIntoScreens(first.steps).findIndex((screen) =>
+      screen.some((item) => item.id === initialStepId),
+    );
     return index >= 0 ? index : 0;
   });
   const [answersBySection, setAnswersBySection] = useState<Record<string, Record<string, string>>>(
@@ -137,43 +146,45 @@ export function DiaryWizard({
   const foodComponentsTouchedRef = useRef(false);
 
   const section = sections[sectionIndex];
-  const step = section.steps[stepIndex];
+  const screens = screensBySection[sectionIndex] ?? [[]];
+  const screenSteps = screens[stepIndex] ?? screens[0] ?? [];
   const sectionAnswers = answersBySection[section.type] ?? {};
   const totalSections = sections.length;
-  const totalStepsInSection = section.steps.length;
+  const totalStepsInSection = screens.length;
   const overallStepNumber =
-    sections.slice(0, sectionIndex).reduce((sum, item) => sum + item.steps.length, 0) +
+    screensBySection.slice(0, sectionIndex).reduce((sum, item) => sum + item.length, 0) +
     stepIndex +
     1;
-  const overallStepsTotal = sections.reduce((sum, item) => sum + item.steps.length, 0);
+  const overallStepsTotal = screensBySection.reduce((sum, item) => sum + item.length, 0);
   const isLastStep = sectionIndex === totalSections - 1 && stepIndex === totalStepsInSection - 1;
+  const screenHasStep = (id: string) => screenSteps.some((item) => item.id === id);
   const hasLocalDishPreview = Boolean(
     sectionAnswers.foodDishName && sectionAnswers.foodComponentsDef,
   );
   const waitingForDishRecognition =
-    section.type === 'Питание' &&
-    step.id === 'food' &&
-    offEnriching &&
-    !hasLocalDishPreview;
+    section.type === 'Питание' && screenHasStep('food') && offEnriching && !hasLocalDishPreview;
   const canAdvanceCurrentStep =
     !waitingForDishRecognition &&
-    (section.type === 'Шкала' && isLastStep
+    (section.type === 'Шкала'
       ? !validateClinicalScale(sectionAnswers)
-      : !step.required || Boolean(sectionAnswers[step.id]?.trim()));
+      : screenSteps.every(
+          (item) => !item.required || Boolean(sectionAnswers[item.id]?.trim()),
+        ));
   const canSkipSection =
     allowSkipSection &&
     totalSections > 1 &&
-    (!step.required || getDiaryStepAnswers(section, sectionAnswers).length > 0);
+    (screenSteps.every((item) => !item.required) ||
+      getDiaryStepAnswers(section, sectionAnswers).length > 0);
 
   const nutritionFood = section.type === 'Питание' ? (sectionAnswers.food ?? '').trim() : '';
   const medicineNameStepId = diaryMedicineNameStepId(section.type);
-  const isMedicineNameStep = medicineNameStepId === step.id;
+  const isMedicineNameStep = Boolean(medicineNameStepId && screenHasStep(medicineNameStepId));
   const medicineName = medicineNameStepId ? (sectionAnswers[medicineNameStepId] ?? '').trim() : '';
   const { suggestions: medicineSuggestions, searching: medicineSearching } = useMedicineSuggestions(
     medicineName,
     { enabled: isMedicineNameStep, profileId, localCards: localMedicineCards },
   );
-  const isFoodStep = section.type === 'Питание' && step.id === 'food';
+  const isFoodStep = section.type === 'Питание' && screenHasStep('food');
   const { suggestions: dishSuggestions, searching: dishSearching } = useDishSuggestions(
     nutritionFood,
     { enabled: isFoodStep },
@@ -360,7 +371,16 @@ export function DiaryWizard({
     const validationError =
       section.type === 'Шкала' && isLastStep
         ? validateClinicalScale(sectionAnswers)
-        : validateDiarySectionStep(section, stepIndex, sectionAnswers);
+        : screenSteps.reduce<string | null>(
+            (found, item) =>
+              found ??
+              validateDiarySectionStep(
+                section,
+                section.steps.findIndex((candidate) => candidate.id === item.id),
+                sectionAnswers,
+              ),
+            null,
+          );
     if (validationError) {
       setError(tDiaryError(validationError));
       return;
@@ -397,9 +417,9 @@ export function DiaryWizard({
       return;
     }
     if (sectionIndex > 0) {
-      const prevSection = sections[sectionIndex - 1];
+      const previousScreens = screensBySection[sectionIndex - 1] ?? [];
       setSectionIndex((value) => value - 1);
-      setStepIndex(prevSection.steps.length - 1);
+      setStepIndex(Math.max(0, previousScreens.length - 1));
     }
   };
 
@@ -491,40 +511,43 @@ export function DiaryWizard({
 
       {notice ? <View style={styles.notice}>{notice}</View> : null}
 
-      <Text style={styles.stepLabel}>{step.label}</Text>
-      {step.hint ? <Text style={styles.stepHint}>{step.hint}</Text> : null}
-      {step.field === 'checklist' && step.id === 'foodComponents' ? (
-        <DishComponentsField
-          foodText={sectionAnswers.food ?? ''}
-          selectedRaw={sectionAnswers.foodComponents ?? ''}
-          componentsDefRaw={sectionAnswers.foodComponentsDef ?? ''}
-          dishId={sectionAnswers.foodDishId ?? ''}
-          dishName={sectionAnswers.foodDishName ?? ''}
-          conflictsSummary={sectionAnswers.foodComponentConflicts ?? ''}
-          profileAllergiesJson={profileAllergiesJson}
-          offEnriching={offEnriching}
-          offSource={sectionAnswers.foodOffSource ?? ''}
-          offProductName={sectionAnswers.foodOffName ?? ''}
-          onChangeSelection={setFoodComponentSelection}
-        />
-      ) : (
-        <>
-          {isMedicineNameStep && medicineNameStepId ? (
+      {screenSteps.map((current) => (
+        <View key={current.id} style={styles.fieldBlock}>
+          <Text style={styles.stepLabel}>{current.label}</Text>
+          {current.hint ? <Text style={styles.stepHint}>{current.hint}</Text> : null}
+
+          {current.field === 'checklist' && current.id === 'foodComponents' ? (
+            <DishComponentsField
+              foodText={sectionAnswers.food ?? ''}
+              selectedRaw={sectionAnswers.foodComponents ?? ''}
+              componentsDefRaw={sectionAnswers.foodComponentsDef ?? ''}
+              dishId={sectionAnswers.foodDishId ?? ''}
+              dishName={sectionAnswers.foodDishName ?? ''}
+              conflictsSummary={sectionAnswers.foodComponentConflicts ?? ''}
+              profileAllergiesJson={profileAllergiesJson}
+              offEnriching={offEnriching}
+              offSource={sectionAnswers.foodOffSource ?? ''}
+              offProductName={sectionAnswers.foodOffName ?? ''}
+              onChangeSelection={setFoodComponentSelection}
+            />
+          ) : medicineNameStepId && current.id === medicineNameStepId ? (
             <MedicineNameField
               value={sectionAnswers[medicineNameStepId] ?? ''}
-              placeholder={step.placeholder}
-              label={step.label}
+              placeholder={current.placeholder}
+              label={current.label}
+              inputTestID={`diary-field-${current.id}`}
               suggestions={medicineSuggestions}
               loading={medicineSearching}
               onChange={(value) => setAnswer(medicineNameStepId, value)}
               onSelect={selectMedicineSuggestion}
             />
-          ) : isFoodStep ? (
+          ) : section.type === 'Питание' && current.id === 'food' ? (
             <>
               <DishNameField
                 value={sectionAnswers.food ?? ''}
-                placeholder={step.placeholder}
-                label={step.label}
+                placeholder={current.placeholder}
+                label={current.label}
+                inputTestID={`diary-field-${current.id}`}
                 suggestions={dishSuggestions}
                 loading={dishSearching && !hasLocalDishPreview}
                 onChange={(value) => setAnswer('food', value)}
@@ -534,26 +557,26 @@ export function DiaryWizard({
                 <Text style={styles.hint} testID="diary-dish-preview">
                   {t('diaryWizard.dishPreviewTitle')}:{' '}
                   {parseDishComponentDefs(sectionAnswers.foodComponentsDef)
-                    .map((item) => item.nameRu)
+                    .map((component) => component.nameRu)
                     .join(', ')}
                 </Text>
+              ) : null}
+              {offEnriching && !hasLocalDishPreview ? (
+                <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
+                  <ActivityIndicator size="small" color={theme.colors.accent} />
+                  <Text style={styles.hint}>{t('diaryWizard.dishOffLoading')}</Text>
+                </View>
               ) : null}
             </>
           ) : (
             <StepField
-              step={step}
-              value={sectionAnswers[step.id] ?? ''}
-              onChange={(value) => setAnswer(step.id, value)}
+              step={current}
+              value={sectionAnswers[current.id] ?? ''}
+              onChange={(value) => setAnswer(current.id, value)}
             />
           )}
-          {section.type === 'Питание' && step.id === 'food' && offEnriching && !hasLocalDishPreview ? (
-            <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
-              <ActivityIndicator size="small" color={theme.colors.accent} />
-              <Text style={styles.hint}>{t('diaryWizard.dishOffLoading')}</Text>
-            </View>
-          ) : null}
-        </>
-      )}
+        </View>
+      ))}
 
       {scalePreview ? (
         <Text style={styles.scalePreview}>
@@ -953,7 +976,7 @@ function StepField({
 
   return (
     <TextInput
-      testID="diary-wizard-field"
+      testID={`diary-field-${step.id}`}
       style={[styles.input, step.multiline && styles.inputMultiline]}
       value={value}
       onChangeText={onChange}
@@ -1178,6 +1201,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: 999 },
     notice: { marginBottom: 4 },
+    fieldBlock: { gap: 8 },
     stepLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 17,

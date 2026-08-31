@@ -16,7 +16,7 @@ appId: com.aclearo.app
     timeout: 10000
 # food text
 - tapOn:
-    id: diary-wizard-field
+    id: diary-field-food
 - inputText: борщ
 - tapOn:
     id: diary-wizard-primary
@@ -29,13 +29,9 @@ appId: com.aclearo.app
     id: diary-dish-component-beet
 - tapOn:
     id: diary-wizard-primary
-# reaction (required) — composition is followed by symptom level
-
+# reaction level and type share the last screen
 - tapOn:
     text: "Нет реакции"
-- tapOn:
-    id: diary-wizard-primary
-# reactionType (optional) — save
 - tapOn:
     id: diary-wizard-primary
 - extendedWaitUntil:
