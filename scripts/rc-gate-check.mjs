@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { interpretStagingHealthResponse } from './rc-gate-health.mjs';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const quick = process.argv.includes('--quick');
@@ -163,6 +164,13 @@ function checkMaestroFlows() {
   }
 }
 
+const STAGING_HEALTH_ATTEMPTS = 3;
+const STAGING_HEALTH_RETRY_MS = 1500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function checkStagingHealth() {
   const url = process.env.STAGING_API_URL?.replace(/\/$/, '');
   if (!url) {
@@ -170,19 +178,34 @@ async function checkStagingHealth() {
     return;
   }
 
-  try {
-    const response = await fetch(`${url}/api/health`);
-    const body = await response.json();
-    if (!response.ok || body.ok === false) {
-      failures.push(`Staging health check failed: HTTP ${response.status}`);
-      return;
+  const healthUrl = `${url}/api/health`;
+  let lastFailure = `Staging health check error: no attempt ran (${healthUrl})`;
+
+  for (let attempt = 1; attempt <= STAGING_HEALTH_ATTEMPTS; attempt++) {
+    try {
+      const response = await fetch(healthUrl);
+      const bodyText = await response.text();
+      const result = interpretStagingHealthResponse({
+        status: response.status,
+        contentType: response.headers.get('content-type'),
+        bodyText,
+      });
+      if (result.ok) {
+        log(`Staging health OK (${url})`);
+        return;
+      }
+      lastFailure = result.failure;
+    } catch (error) {
+      lastFailure = `Staging health check error: ${error instanceof Error ? error.message : String(error)}`;
     }
-    log(`Staging health OK (${url})`);
-  } catch (error) {
-    failures.push(
-      `Staging health check error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+
+    if (attempt < STAGING_HEALTH_ATTEMPTS) {
+      log(`Staging health attempt ${attempt}/${STAGING_HEALTH_ATTEMPTS} failed — retrying`);
+      await sleep(STAGING_HEALTH_RETRY_MS * attempt);
+    }
   }
+
+  failures.push(lastFailure);
 }
 
 function checkSoakLogStarted() {
@@ -223,6 +246,7 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 checkSecurityAuditDocs();
 checkSoakLogStarted();
