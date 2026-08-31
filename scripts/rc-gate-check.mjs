@@ -142,20 +142,26 @@ function checkMaestroFlows() {
     failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
   }
 
-  const layout = fs.readFileSync(path.join(root, 'apps/mobile/app/_layout.tsx'), 'utf8');
-  if (!layout.includes('install-crypto-get-random-values')) {
-    failures.push('app/_layout.tsx must install expo-crypto CSPRNG before hashing passwords');
+  const runtimePatches = fs.readFileSync(path.join(root, 'apps/mobile/src/install-runtime.ts'), 'utf8');
+  if (
+    !runtimePatches.includes('install-crypto-get-random-values') ||
+    !runtimePatches.includes('install-password-hash-cost')
+  ) {
+    failures.push('src/install-runtime.ts must install the CSPRNG and the Hermes PBKDF2 cost');
+  }
+  // Gradle pins entryFile to index.js: a patch only in entry.js never ships.
+  for (const entryPath of ['apps/mobile/index.js', 'apps/mobile/entry.js', 'apps/mobile/app/_layout.tsx']) {
+    if (!fs.readFileSync(path.join(root, entryPath), 'utf8').includes('install-runtime')) {
+      failures.push(`${entryPath} must import src/install-runtime`);
+    }
   }
   const entry = fs.readFileSync(path.join(root, 'apps/mobile/entry.js'), 'utf8');
-  if (!entry.includes('install-crypto-get-random-values') || !entry.includes('expo-router/entry')) {
-    failures.push('apps/mobile/entry.js must install CSPRNG before expo-router/entry');
-  }
-  if (!entry.includes('install-password-hash-cost')) {
-    failures.push('apps/mobile/entry.js must set the Hermes PBKDF2 cost before expo-router/entry');
+  if (!entry.includes('expo-router/entry')) {
+    failures.push('apps/mobile/entry.js must delegate to expo-router/entry');
   }
   const mobilePkg = JSON.parse(fs.readFileSync(path.join(root, 'apps/mobile/package.json'), 'utf8'));
   if (mobilePkg.main !== './entry.js') {
-    failures.push('apps/mobile package.json main must be ./entry.js (CSPRNG before router)');
+    failures.push('apps/mobile package.json main must be ./entry.js (runtime patches before router)');
   }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
