@@ -748,8 +748,6 @@ export type LocaleMessages = {
     localBackupImportMessage: string;
     recoveryKeyBannerTitle: string;
     recoveryKeyBannerDesc: string;
-    pollenRegionTitle: string;
-    pollenRegionHint: string;
     locationDefaultHint: string;
     appLockTitle: string;
     appLockHint: string;

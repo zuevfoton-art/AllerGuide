@@ -746,8 +746,6 @@ const fr: LocaleMessages = {
     localBackupImportMessage: 'Replace current data?',
     recoveryKeyBannerTitle: 'Save recovery key',
     recoveryKeyBannerDesc: 'Required for cross-device restore.',
-    pollenRegionTitle: 'Pollen region',
-    pollenRegionHint: 'When GPS unavailable',
     locationDefaultHint: 'Default region',
     appLockTitle: 'App lock',
     appLockHint: 'Biometrics for SOS and diary',
