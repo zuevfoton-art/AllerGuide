@@ -747,8 +747,6 @@ const en: LocaleMessages = {
     localBackupImportMessage: 'Current data will be replaced. Continue?',
     recoveryKeyBannerTitle: 'Save your recovery key',
     recoveryKeyBannerDesc: 'Required to restore cloud backup on another device.',
-    pollenRegionTitle: 'Pollen forecast region',
-    pollenRegionHint: 'Used when GPS is unavailable',
     locationDefaultHint: 'Using default region',
     appLockTitle: 'App lock',
     appLockHint: 'Biometrics or PIN for SOS and diary',

@@ -749,8 +749,6 @@ const ru: LocaleMessages = {
     localBackupImportMessage: 'Текущие данные будут заменены содержимым файла. Продолжить?',
     recoveryKeyBannerTitle: 'Сохраните ключ восстановления',
     recoveryKeyBannerDesc: 'Без ключа нельзя восстановить облачную копию на другом устройстве.',
-    pollenRegionTitle: 'Регион для прогноза пыльцы',
-    pollenRegionHint: 'Используется, если GPS недоступен',
     locationDefaultHint: 'Используется регион по умолчанию',
     appLockTitle: 'Защита приложения',
     appLockHint: 'Биометрия или PIN при открытии SOS и дневника',
