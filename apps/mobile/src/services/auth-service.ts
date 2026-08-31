@@ -29,6 +29,7 @@ import {
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { clearRecoveryKey } from '@/src/services/backup-crypto';
+import { yieldToRender } from '@/src/utils/yield-to-render';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -177,6 +178,7 @@ export async function registerUser(input: {
     };
   }
 
+  await yieldToRender();
   const passwordHash = await hashPassword(input.password);
   db.runSync('INSERT INTO users (login, loginType, passwordHash, createdAt) VALUES (?, ?, ?, ?)', [
     normalizedLogin,
@@ -221,6 +223,7 @@ export async function loginUser(input: {
     return { ok: false, error: 'Неверный логин или пароль.' };
   }
 
+  await yieldToRender();
   const verification = await verifyPassword(input.password, row.passwordHash);
   if (!verification.valid) {
     return { ok: false, error: 'Неверный логин или пароль.' };

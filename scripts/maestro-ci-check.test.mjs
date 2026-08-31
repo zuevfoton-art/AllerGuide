@@ -39,6 +39,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /app-release\.apk/);
     assert.match(runner, /pm grant/);
     assert.match(runner, /autofill_service null/);
+    assert.match(runner, /hide_error_dialogs 1/);
     assert.match(runner, /adb logcat/);
     assert.match(runner, /screencap/);
     assert.match(runner, /am start -W -n "\$ACTIVITY"/);
@@ -114,6 +115,10 @@ describe('Maestro nightly CI invariants', () => {
     const install = read('apps/mobile/src/install-crypto-get-random-values.ts');
     assert.match(install, /setSecureRandomBytes/);
     assert.match(install, /expo-crypto/);
+    assert.match(entry, /install-password-hash-cost/);
+    const hashCost = read('apps/mobile/src/install-password-hash-cost.ts');
+    assert.match(hashCost, /PASSWORD_HASH_ITERATIONS_INTERPRETED/);
+    assert.match(hashCost, /Platform\.OS !== 'web'/);
     const profile = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
     assert.match(profile, /id: condition-food/);
     assert.match(profile, /id: allergen-milk/);

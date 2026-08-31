@@ -105,6 +105,10 @@ done
 # API 34 emulator Autofill/Password Manager steals focus from Maestro inputText
 # (offline register: truncated phone + 3-char password).
 adb shell settings put secure autofill_service null || true
+# Pixel Launcher ANRs mid-flow on this AVD and its dialog swallows the next tap
+# (nightly 33394028058: register tap lost, still on /login). Suppress the
+# dialogs system-wide; dismiss_anr stays as a fallback for older images.
+adb shell settings put global hide_error_dialogs 1 || true
 
 # First process start pays dex/Hermes. `monkey` opens the app drawer and
 # ANRs Pixel Launcher on API 34 CI AVDs — start the activity directly.

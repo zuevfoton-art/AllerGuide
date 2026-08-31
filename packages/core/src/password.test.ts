@@ -1,7 +1,50 @@
-import { describe, expect, it } from 'vitest';
-import { hashPassword, verifyPassword } from './password';
+import { afterEach, describe, expect, it } from 'vitest';
+import {
+  PASSWORD_HASH_ITERATIONS_INTERPRETED,
+  PASSWORD_HASH_ITERATIONS_JIT,
+  getPasswordHashIterations,
+  hashPassword,
+  setPasswordHashIterations,
+  verifyPassword,
+} from './password';
+
+describe('password hash cost', () => {
+  afterEach(() => {
+    setPasswordHashIterations(PASSWORD_HASH_ITERATIONS_JIT);
+  });
+
+  it('defaults to the OWASP cost for JIT runtimes', () => {
+    expect(getPasswordHashIterations()).toBe(PASSWORD_HASH_ITERATIONS_JIT);
+  });
+
+  it('writes the configured cost into the stored hash', async () => {
+    setPasswordHashIterations(PASSWORD_HASH_ITERATIONS_INTERPRETED);
+    const stored = await hashPassword('secret123');
+    expect(stored.split(':')[1]).toBe(String(PASSWORD_HASH_ITERATIONS_INTERPRETED));
+  });
+
+  it('rejects a non-positive cost', () => {
+    expect(() => setPasswordHashIterations(0)).toThrow(/positive integer/);
+    expect(() => setPasswordHashIterations(1.5)).toThrow(/positive integer/);
+  });
+
+  it('verifies a hash written at another cost and re-hashes at the configured one', async () => {
+    setPasswordHashIterations(PASSWORD_HASH_ITERATIONS_INTERPRETED);
+    const stored = await hashPassword('secret123');
+
+    setPasswordHashIterations(20_000);
+    const result = await verifyPassword('secret123', stored);
+
+    expect(result.valid).toBe(true);
+    expect(result.upgradedHash?.split(':')[1]).toBe('20000');
+  });
+});
 
 describe('password hashing', () => {
+  afterEach(() => {
+    setPasswordHashIterations(PASSWORD_HASH_ITERATIONS_JIT);
+  });
+
   it('hashes and verifies with pbkdf2 format', async () => {
     const stored = await hashPassword('secret123');
     expect(stored.startsWith('pbkdf2-sha256:')).toBe(true);

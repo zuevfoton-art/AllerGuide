@@ -29,10 +29,11 @@ appId: com.aclearo.app
     file: _tap-by-id.yaml
     env:
       FIELD_ID: auth-submit
+# Register hashes the password with pure-JS PBKDF2 on Hermes (seconds, not ms).
 - extendedWaitUntil:
     visible:
       id: onboarding-intro-skip
-    timeout: 20000
+    timeout: 60000
 - tapOn:
     id: onboarding-intro-skip
 - extendedWaitUntil:

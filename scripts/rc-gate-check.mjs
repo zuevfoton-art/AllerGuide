@@ -116,6 +116,9 @@ function checkMaestroFlows() {
   if (!runner.includes('autofill_service null')) {
     failures.push('scripts/maestro-run-emulator.sh must disable Android Autofill (steals Maestro inputText)');
   }
+  if (!runner.includes('hide_error_dialogs 1')) {
+    failures.push('scripts/maestro-run-emulator.sh must hide system ANR dialogs (they swallow Maestro taps)');
+  }
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
@@ -146,6 +149,9 @@ function checkMaestroFlows() {
   const entry = fs.readFileSync(path.join(root, 'apps/mobile/entry.js'), 'utf8');
   if (!entry.includes('install-crypto-get-random-values') || !entry.includes('expo-router/entry')) {
     failures.push('apps/mobile/entry.js must install CSPRNG before expo-router/entry');
+  }
+  if (!entry.includes('install-password-hash-cost')) {
+    failures.push('apps/mobile/entry.js must set the Hermes PBKDF2 cost before expo-router/entry');
   }
   const mobilePkg = JSON.parse(fs.readFileSync(path.join(root, 'apps/mobile/package.json'), 'utf8'));
   if (mobilePkg.main !== './entry.js') {

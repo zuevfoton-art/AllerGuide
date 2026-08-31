@@ -455,6 +455,8 @@ flowchart LR
   backend --> App
 ```
 
+Хэш пароля — PBKDF2-SHA256 (`@allerguide/core` `password.ts`). Стоимость зависит от рантайма: 600k (`PASSWORD_HASH_ITERATIONS_JIT`) в Node/web, 50k (`PASSWORD_HASH_ITERATIONS_INTERPRETED`) на Hermes, где нет JIT и 600k блокируют JS-поток ~40 c. Значение записано в самом хэше, поэтому старые хэши проверяются, а при расхождении `verifyPassword` возвращает `upgradedHash`. Соль — `getSecureRandomBytes`; mobile инжектит expo-crypto из `entry.js`.
+
 | Режим | Хранение | Когда |
 |-------|----------|-------|
 | **Локальный** | `users` в SQLite/IndexedDB, `authUserId` в settings | `BACKEND_AUTH=false` |
