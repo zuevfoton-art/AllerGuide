@@ -1,3 +1,5 @@
+// Native entry (Gradle `entryFile`). Runtime patches first — see src/install-runtime.
+import './src/install-runtime';
 import '@expo/metro-runtime';
 
 import { Head } from 'expo-router/build/head';

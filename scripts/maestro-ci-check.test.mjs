@@ -102,23 +102,40 @@ describe('Maestro nightly CI invariants', () => {
     }
   });
 
-  it('polyfills crypto.getRandomValues so offline register can hash passwords', () => {
-    const layout = read('apps/mobile/app/_layout.tsx');
-    assert.match(layout, /install-crypto-get-random-values/);
+  it('applies the CSPRNG and PBKDF2 cost patches on both JS entries', () => {
+    // Gradle pins entryFile to index.js, so a patch added only to entry.js
+    // (package.json main) never reaches a native release bundle.
+    const gradle = read('apps/mobile/android/app/build.gradle');
+    assert.match(gradle, /entryFile = file\("\$\{projectRoot\}\/index\.js"\)/);
+
+    const runtime = read('apps/mobile/src/install-runtime.ts');
+    assert.match(runtime, /install-crypto-get-random-values/);
+    assert.match(runtime, /install-password-hash-cost/);
+
+    const nativeEntry = read('apps/mobile/index.js');
+    assert.match(nativeEntry, /install-runtime/);
+    assert.ok(
+      nativeEntry.indexOf('install-runtime') < nativeEntry.indexOf('renderRootComponent'),
+      'index.js must patch the runtime before rendering',
+    );
+
     const entry = read('apps/mobile/entry.js');
-    assert.match(entry, /install-crypto-get-random-values/);
+    assert.match(entry, /install-runtime/);
     assert.match(entry, /expo-router\/entry/);
+    assert.match(read('apps/mobile/app/_layout.tsx'), /install-runtime/);
+
     const pkg = JSON.parse(read('apps/mobile/package.json'));
     assert.equal(pkg.main, './entry.js');
+
     const polyfill = read('apps/mobile/src/polyfill-crypto-get-random-values.ts');
     assert.match(polyfill, /export function ensureCryptoGetRandomValues/);
     const install = read('apps/mobile/src/install-crypto-get-random-values.ts');
     assert.match(install, /setSecureRandomBytes/);
     assert.match(install, /expo-crypto/);
-    assert.match(entry, /install-password-hash-cost/);
     const hashCost = read('apps/mobile/src/install-password-hash-cost.ts');
     assert.match(hashCost, /PASSWORD_HASH_ITERATIONS_INTERPRETED/);
     assert.match(hashCost, /Platform\.OS !== 'web'/);
+
     const profile = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
     assert.match(profile, /id: condition-food/);
     assert.match(profile, /id: allergen-milk/);
