@@ -64,7 +64,7 @@ export interface AuthFieldProps {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
-  placeholder: string;
+  placeholder?: string;
   secureTextEntry?: boolean;
   keyboardType?: TextInputProps['keyboardType'];
   autoCapitalize?: TextInputProps['autoCapitalize'];
@@ -198,19 +198,17 @@ export function AuthForgotLink({ text, onPress }: { text: string; onPress: () =>
   );
 }
 
-export function AuthHero({ title, subtitle }: { title: string; subtitle: string }) {
+export function AuthHero({ title, subtitle }: { title: string; subtitle?: string }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t } = useTranslation();
 
   return (
     <View style={styles.hero} testID="auth-hero">
-      <BrandLogo size={56} showWordmark showEndorser />
-      <Text style={styles.heroTagline}>{t('brand.slogan')}</Text>
+      <BrandLogo size={56} showWordmark />
       <Text style={styles.heroTitle} testID="auth-hero-title">
         {title}
       </Text>
-      <Text style={styles.heroSubtitle}>{subtitle}</Text>
+      {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -229,14 +227,6 @@ export function AuthError({ message }: { message: string }) {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
-    heroTagline: {
-      fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm + 1,
-      fontWeight: '600',
-      color: colors.accent,
-      letterSpacing: 0.2,
-      marginBottom: 4,
-    },
     heroTitle: {
       fontFamily: fonts.serifBold,
       fontSize: fontSizes.h2,

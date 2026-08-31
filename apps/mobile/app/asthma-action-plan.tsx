@@ -65,7 +65,6 @@ export default function AsthmaActionPlanScreen() {
       <Screen>
         <ScreenHeader
           onBack={() => router.back()}
-          eyebrow={t('asthma.eyebrow')}
           title={t('asthma.planTitle')}
           style={{ marginBottom: 12 }}
         />
@@ -80,7 +79,6 @@ export default function AsthmaActionPlanScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('asthma.eyebrow')}
         title={t('asthma.planTitle')}
         subtitle={t('asthma.planSubtitle')}
         style={{ marginBottom: 12 }}
@@ -157,7 +155,7 @@ export default function AsthmaActionPlanScreen() {
       </Pressable>
 
       <Button label={t('asthma.savePlan')} variant="primary" block onPress={save} />
-      <Disclaimer>{t('asthma.disclaimer')}</Disclaimer>
+      <Disclaimer>{t('disclaimer.actionPlan')}</Disclaimer>
       <Text style={styles.attribution}>{GINA_ASTHMA_ATTRIBUTION}</Text>
     </Screen>
   );

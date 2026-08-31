@@ -58,7 +58,7 @@ export default function RegisterScreen() {
   return (
     <Screen>
       <LanguagePicker compact />
-      <AuthHero title={t('auth.registerTitle')} subtitle={t('auth.registerSubtitle')} />
+      <AuthHero title={t('auth.registerTitle')} />
       <AuthModeToggle loginType={loginType} onChange={setLoginType} />
       {loginType === 'phone' ? (
         <PhoneInput
@@ -102,7 +102,6 @@ export default function RegisterScreen() {
         label={t('auth.confirmPassword')}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
-        placeholder={t('auth.confirmPasswordPlaceholder')}
         secureTextEntry
         testID="auth-confirm-password-input"
         returnKeyType="go"

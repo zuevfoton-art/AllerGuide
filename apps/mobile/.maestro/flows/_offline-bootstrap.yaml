@@ -51,12 +51,17 @@ appId: com.aclearo.app
 - inputText: "1990"
 - tapOn:
     id: profile-wizard-next
+# conditions (required)
+- tapOn:
+    id: condition-food
 - tapOn:
     id: profile-wizard-next
+# allergens (required)
 - tapOn:
     id: allergen-milk
 - tapOn:
     id: profile-wizard-next
+# cross-reactions is the last first-run step; the rest moved to profile editing
 - tapOn:
     id: profile-save
 - extendedWaitUntil:

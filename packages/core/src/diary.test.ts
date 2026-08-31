@@ -8,6 +8,7 @@ import {
   getDiaryEntryAnswers,
   getDiaryPhotoUrisFromAnswers,
   getDiarySection,
+  groupDiaryStepsIntoScreens,
   hasSectionAnswers,
   parseDiaryPhotoUris,
   parseMultiChoiceValue,
@@ -22,6 +23,33 @@ describe('diary schema', () => {
     for (const section of DIARY_SECTIONS) {
       expect(section.steps.length).toBeGreaterThanOrEqual(2);
     }
+  });
+
+  it('asks grouped steps on one screen and keeps ungrouped ones separate', () => {
+    const screens = groupDiaryStepsIntoScreens([
+      { id: 'a', label: 'A', field: 'text', group: 'pair' },
+      { id: 'b', label: 'B', field: 'text', group: 'pair' },
+      { id: 'c', label: 'C', field: 'text' },
+      { id: 'd', label: 'D', field: 'text', group: 'other' },
+    ]);
+
+    expect(screens.map((screen) => screen.map((step) => step.id))).toEqual([
+      ['a', 'b'],
+      ['c'],
+      ['d'],
+    ]);
+  });
+
+  it('groups the paired questions of each section', () => {
+    const screenIds = (type: string) =>
+      groupDiaryStepsIntoScreens(getDiarySection(type)?.steps ?? []).map((screen) =>
+        screen.map((step) => step.id),
+      );
+
+    expect(screenIds('Симптомы')[0]).toEqual(['symptomCode', 'symptoms']);
+    expect(screenIds('Кожа')[0]).toEqual(['skinArea', 'appearance', 'itching']);
+    expect(screenIds('Пикфлоуметрия')[0]).toEqual(['pefTime', 'pefValue']);
+    expect(screenIds('Лекарство')[0]).toEqual(['medicine', 'dosage', 'takenAt']);
   });
 
   it('includes trigger context fields for diary-trigger linking', () => {

@@ -30,9 +30,6 @@ export const STING_SYSTEMIC_SYMPTOM_CHOICES = [
   'Падение давления',
 ] as const;
 
-export const INSECT_DISCLAIMER =
-  'Учёт укусов насекомых носит информационный характер. План действий и лечение определяет врач.';
-
 const INSECT_ALLERGEN_NAMES = new Set(getAllergensByCategory('insect').map((item) => item.name.toLowerCase()));
 const INSECT_KEYWORDS = getAllergensByCategory('insect').flatMap((item) => [
   item.name.toLowerCase(),

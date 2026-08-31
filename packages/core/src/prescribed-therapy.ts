@@ -65,9 +65,6 @@ export const PRESCRIBED_THERAPY_DOSE_STATUS_LABELS: Record<PrescribedDoseStatus,
   missed: 'Пропущена',
 };
 
-export const PRESCRIBED_THERAPY_DISCLAIMER =
-  'Терапия назначается только врачом. Приложение фиксирует приёмы, но не корректирует дозировки и схему.';
-
 export function createDefaultPrescribedCourse(): PrescribedCourse {
   return {
     v: 1,

@@ -498,7 +498,6 @@ export default function DiaryScreen() {
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('diary.eyebrow')} />
           <Text style={ui.docTitle}>{t('diary.title')}</Text>
-          <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
         </View>
       </View>
 
