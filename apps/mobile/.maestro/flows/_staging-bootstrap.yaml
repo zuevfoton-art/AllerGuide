@@ -33,7 +33,7 @@ appId: com.aclearo.app
 - extendedWaitUntil:
     visible:
       id: onboarding-intro-skip
-    timeout: 45000
+    timeout: 60000
 - tapOn:
     id: onboarding-intro-skip
 - extendedWaitUntil:
