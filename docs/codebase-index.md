@@ -67,7 +67,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Доменные правила, таксономия, валидация | `packages/core/src/*` |
 | Matching скана / OCR parse / LLM prompt | `packages/ai/src/*` |
 | Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
-| Дневник «Питание»: фото / вручную → состав | `NutritionCaptureStep` + `diary-dish-recognition-service` (тот же lookup, что сканер) |
+| Дневник «Питание»: фото / штрихкод / вручную → состав | `NutritionCaptureStep` + `DiaryBarcodeScanner` + `diary-dish-recognition-service` (тот же lookup, что сканер) |
 | Строка UI (все 6 локалей) | `apps/mobile/src/i18n/types.ts` + `locales/{ru,en,es,fr,de,it}.ts` |
 | Feature flag | `apps/mobile/src/constants/features.ts` + корневой `.env.example` + `eas.json` |
 | Локальная схема SQLite | `apps/mobile/src/db/init.native.ts` + `migrations.ts` |
@@ -90,8 +90,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Scanner** | `(tabs)/scanner.tsx` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service`, `diary-dish-recognition-service` | core `diary*`, `diary-wizard-route`, `dish-components` |
-| **Medicine photo / voice** | `MedicinePhotoStep` + `MedicineNameField` in diary / ASIT / therapy / SOS | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service`, hook `use-medicine-suggestions` | core `medicine-catalog`, `food-drug-allergy`, `list-input`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
-| **Nutrition photo / manual** | `NutritionCaptureStep` + `DishNameField` in diary / scanner | `diary-dish-recognition-service`, `dish-suggest-service`, `scanner-dish-lookup-service` | core `dish-components`, `name-matching`, `data/dishes.json`; API `dishes.ts` |
+| **Medicine photo / voice / barcode** | `MedicinePhotoStep` + `DiaryBarcodeScanner` + `MedicineNameField` in diary / ASIT / therapy / SOS | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service`, hook `use-medicine-suggestions` | core `medicine-catalog`, `food-drug-allergy`, `list-input`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
+| **Nutrition photo / barcode / manual** | `NutritionCaptureStep` + `DiaryBarcodeScanner` + `DishNameField` in diary / scanner | `diary-dish-recognition-service`, `dish-suggest-service`, `scanner-dish-lookup-service`, `barcode-lookup-service` | core `dish-components`, `name-matching`, `data/dishes.json`; API `dishes.ts` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service`, `medicine-suggest-service` | core `allergy-passport`, `emergency-contacts`, `list-input` |
@@ -185,7 +185,7 @@ src/modules/marketplace/
 
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
-- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `diary/*`
+- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
 - **Folders:** `brand/`, `onboarding/`, `profile-setup/`

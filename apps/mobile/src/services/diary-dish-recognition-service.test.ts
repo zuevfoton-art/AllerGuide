@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   recognizeDiaryDish,
+  recognizeDiaryDishFromBarcode,
   recognizeDiaryDishFromPhoto,
 } from '@/src/services/diary-dish-recognition-service';
 import { enrichDishFromOpenFoods } from '@/src/services/dish-off-enrichment-service';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
 import { scanFromOcr } from '@/src/services/scanner-ocr-service';
+import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 
 vi.mock('@/src/services/scanner-dish-lookup-service', () => ({
   lookupDishIngredientsForScan: vi.fn(),
@@ -19,11 +21,16 @@ vi.mock('@/src/services/dish-off-enrichment-service', () => ({
   enrichDishFromOpenFoods: vi.fn(),
 }));
 
+vi.mock('@/src/services/barcode-lookup-service', () => ({
+  resolveProductByBarcode: vi.fn(),
+}));
+
 describe('recognizeDiaryDish', () => {
   beforeEach(() => {
     vi.mocked(lookupDishIngredientsForScan).mockReset();
     vi.mocked(enrichDishFromOpenFoods).mockReset();
     vi.mocked(scanFromOcr).mockReset();
+    vi.mocked(resolveProductByBarcode).mockReset();
   });
 
   it('returns scanner lookup enrichment for a typed dish name', async () => {
@@ -122,5 +129,42 @@ describe('recognizeDiaryDish', () => {
     const result = await recognizeDiaryDishFromPhoto({ imageBase64: 'xyz' });
     expect(result?.food).toMatch(/борщ/i);
     expect(result?.enrichment.components.length).toBeGreaterThan(0);
+  });
+});
+
+describe('recognizeDiaryDishFromBarcode', () => {
+  beforeEach(() => {
+    vi.mocked(resolveProductByBarcode).mockReset();
+  });
+
+  it('returns null for a short or empty barcode', async () => {
+    expect(await recognizeDiaryDishFromBarcode('123')).toBeNull();
+    expect(await recognizeDiaryDishFromBarcode('')).toBeNull();
+    expect(resolveProductByBarcode).not.toHaveBeenCalled();
+  });
+
+  it('returns null when catalog/OFF miss the barcode', async () => {
+    vi.mocked(resolveProductByBarcode).mockResolvedValue(null);
+    expect(await recognizeDiaryDishFromBarcode('4601234567890')).toBeNull();
+  });
+
+  it('builds a dish checklist from the scanned product', async () => {
+    vi.mocked(resolveProductByBarcode).mockResolvedValue({
+      barcode: '4601234567890',
+      name: 'Молоко 3.2%',
+      ingredients: 'молоко цельное, сливки',
+      brand: 'Домик',
+      source: 'openfoodfacts',
+      declaredAllergenIds: ['milk'],
+      traceAllergenIds: [],
+    });
+
+    const result = await recognizeDiaryDishFromBarcode('4601234567890');
+    expect(result?.food).toBe('Молоко 3.2%');
+    expect(result?.enrichment.productBarcode).toBe('4601234567890');
+    expect(result?.enrichment.source).toBe('openfoodfacts');
+    expect(result?.enrichment.components.some((item) => item.allergenId === 'milk' || /молок/i.test(item.nameRu))).toBe(
+      true,
+    );
   });
 });

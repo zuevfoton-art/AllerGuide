@@ -5,6 +5,8 @@ import {
   type MedicineVisionResult,
 } from '@allerguide/ai';
 import {
+  isValidBarcode,
+  normalizeBarcode,
   resolveMedicineAgeUsage,
   toMedicineCard,
   type MedicineAgeResolution,
@@ -12,6 +14,7 @@ import {
   type MedicineSource,
 } from '@allerguide/core';
 import { MEDICINE_DB_ENABLED, YC_OCR_ENABLED } from '@/src/constants/features';
+import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 import { recognizeMedicineViaApi } from '@/src/services/medicines-api';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 
@@ -118,6 +121,77 @@ export async function recognizeMedicinePackage(input: {
   }
 
   return recognizeOffline({ ...input, ocrText, ageYears });
+}
+
+/**
+ * Package barcode → catalog/OFF product, then the same medicine card path as a spoken name.
+ * No demo Nurofen fallback when the barcode misses.
+ */
+export async function recognizeMedicineFromBarcode(input: {
+  barcode: string;
+  ageYears?: number | null;
+}): Promise<MedicineRecognitionOutcome> {
+  const barcode = normalizeBarcode(input.barcode);
+  const ageYears = input.ageYears ?? null;
+  if (!isValidBarcode(barcode)) {
+    return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
+  }
+
+  const product = await resolveProductByBarcode(barcode);
+  if (!product) {
+    return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
+  }
+
+  const name = product.name.trim();
+  const labelText = [product.name, product.brand, product.ingredients]
+    .filter((part) => part?.trim())
+    .join('\n');
+
+  if (MEDICINE_DB_ENABLED && (name || labelText)) {
+    try {
+      const cloud = await recognizeMedicineViaApi({
+        name: name || undefined,
+        ocrText: labelText || undefined,
+        ageYears,
+      });
+      if (cloud?.ok) {
+        return {
+          card: cloud.medicine,
+          ageUsage: cloud.ageUsage,
+          source: cloud.source,
+          cached: cloud.cached,
+        };
+      }
+    } catch {
+      // Fall through to local parse / name prefill — same as photo cloud miss.
+    }
+  }
+
+  const parsed =
+    (labelText ? parseMedicineLabelText(labelText) : null) ??
+    (name ? parseMedicineVoiceUtterance(name) : null);
+  if (parsed) {
+    return outcomeFromCard(cardFromVision(parsed, 'ocr'), ageYears);
+  }
+
+  if (!name) {
+    return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
+  }
+
+  return outcomeFromCard(
+    toMedicineCard(
+      {
+        name,
+        manufacturer: product.brand ?? '',
+        ingredients: product.ingredients,
+        allergenTags: product.declaredAllergenIds,
+        confidence: 'low',
+      },
+      'ocr',
+    ),
+    ageYears,
+    { hintCode: 'fields_incomplete' },
+  );
 }
 
 /** Spoken name/dose → same card/prefill path as a package photo. No demo fallback. */
