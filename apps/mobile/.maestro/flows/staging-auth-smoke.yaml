@@ -6,11 +6,13 @@ appId: com.aclearo.app
     id: profile-header-button
 - extendedWaitUntil:
     visible:
-      id: profile-logout
+      id: profile-screen-title
     timeout: 10000
 - scrollUntilVisible:
     element:
       id: profile-logout
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: profile-logout
 - tapOn:

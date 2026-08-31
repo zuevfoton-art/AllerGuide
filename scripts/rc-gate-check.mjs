@@ -113,6 +113,9 @@ function checkMaestroFlows() {
   if (!runner.includes('pm grant')) {
     failures.push('scripts/maestro-run-emulator.sh must pre-grant runtime permissions');
   }
+  if (!runner.includes('autofill_service null')) {
+    failures.push('scripts/maestro-run-emulator.sh must disable Android Autofill (steals Maestro inputText)');
+  }
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
@@ -216,6 +219,25 @@ function checkMaestroFlows() {
   const tapRegister = fs.readFileSync(path.join(flowsDir, '_tap-register.yaml'), 'utf8');
   if (!tapRegister.includes('auth-register-link') || !tapRegister.includes('Зарегистрироваться')) {
     failures.push('_tap-register.yaml must tap auth-register-link then RU register copy');
+  }
+
+  const randomPhone = fs.readFileSync(path.join(root, 'apps/mobile/.maestro/scripts/random-phone.js'), 'utf8');
+  if (randomPhone.includes('+7999') || !randomPhone.includes('999${suffix}')) {
+    failures.push('random-phone.js must emit 10 national digits without a +7 prefix');
+  }
+
+  const fillByIdBody = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
+  if (!fillByIdBody.includes('eraseText')) {
+    failures.push('_fill-by-id.yaml must eraseText before inputText');
+  }
+
+  const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');
+  if (
+    !stagingAuth.includes('profile-screen-title') ||
+    stagingAuth.indexOf('profile-screen-title') > stagingAuth.indexOf('id: profile-logout') ||
+    stagingAuth.indexOf('scrollUntilVisible') > stagingAuth.indexOf('id: profile-logout')
+  ) {
+    failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
   }
 }
 
