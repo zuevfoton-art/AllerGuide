@@ -1,0 +1,8 @@
+# Fold IME without sending BACK. On Android, Maestro hideKeyboard is
+# identical to the back command — at /login (root of the stack) that
+# kills the app into Pixel Launcher (nightlies after #298).
+# Tap a non-interactive Text (Maestro docs / issue #1303).
+appId: com.aclearo.app
+---
+- tapOn:
+    id: auth-hero-title
