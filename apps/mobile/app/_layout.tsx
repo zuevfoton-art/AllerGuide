@@ -2,7 +2,12 @@ import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { InteractionManager, Platform, StyleSheet, View, AppState } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { getRandomValues } from 'expo-crypto';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
+import {
+  ensureCryptoGetRandomValues,
+  type CryptoGetRandomValuesHolder,
+} from '@/src/polyfill-crypto-get-random-values';
 import { AppLockGate } from '@/src/components/AppLockGate';
 import { initDb } from '@/src/db/init';
 import { warmAllergenCatalogCache } from '@/src/services/allergen-catalog-service';
@@ -23,9 +28,12 @@ import {
 
 // NOTE: react-native-quick-crypto was removed. Its native install() crashed the
 // Android app at launch (a native/JNI abort that a JS try/catch cannot catch,
-// independent of the New Architecture flag). Password hashing now uses the
-// pure-JS `@noble/hashes` in @allerguide/core, so no native crypto module is
-// loaded at startup.
+// independent of the New Architecture flag). Password hashing uses pure-JS
+// `@noble/hashes`, which still needs `crypto.getRandomValues` for the salt.
+// Hermes release builds do not provide it — polyfill via expo-crypto.
+ensureCryptoGetRandomValues(globalThis as CryptoGetRandomValuesHolder, (array) =>
+  getRandomValues(array),
+);
 
 function WebShell({ children }: { children: ReactNode }) {
   const { colors } = useTheme();

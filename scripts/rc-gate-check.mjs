@@ -132,6 +132,15 @@ function checkMaestroFlows() {
     failures.push('maestro-nightly.yml must upload maestro-login-visible.png and ~/.maestro/tests');
   }
 
+  if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {
+    failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
+  }
+
+  const layout = fs.readFileSync(path.join(root, 'apps/mobile/app/_layout.tsx'), 'utf8');
+  if (!layout.includes('ensureCryptoGetRandomValues') || !layout.includes('expo-crypto')) {
+    failures.push('app/_layout.tsx must polyfill crypto.getRandomValues via expo-crypto');
+  }
+
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
   if (!waitLogin.includes('auth-hero-title')) {
     failures.push('_wait-login.yaml must wait for auth-hero-title (above the fold)');

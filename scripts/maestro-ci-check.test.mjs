@@ -20,6 +20,9 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /NODE_ENV=production/);
     assert.match(script, /unzip -l "\$APK"/);
     assert.match(script, /missing the embedded JS bundle/);
+    assert.match(script, /enable_emulator_http_cleartext/);
+    assert.match(script, /network_security_config/);
+    assert.match(script, /10\.0\.2\.2/);
   });
 
   it('runs emulator flows via the helper that installs the release APK', () => {
@@ -74,6 +77,14 @@ describe('Maestro nightly CI invariants', () => {
         `${name} must wait for confirm field after register tap`,
       );
     }
+  });
+
+  it('polyfills crypto.getRandomValues so offline register can hash passwords', () => {
+    const layout = read('apps/mobile/app/_layout.tsx');
+    assert.match(layout, /ensureCryptoGetRandomValues/);
+    assert.match(layout, /expo-crypto/);
+    const polyfill = read('apps/mobile/src/polyfill-crypto-get-random-values.ts');
+    assert.match(polyfill, /export function ensureCryptoGetRandomValues/);
   });
 
   it('taps register via Text testID, then RU copy while still on login', () => {
