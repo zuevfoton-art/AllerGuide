@@ -266,7 +266,6 @@ const de: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Schritt {{current}} von {{total}}',
-    stepOfSection: 'Schritt {{current}} von {{total}} · {{section}}',
     skipSection: 'Abschnitt überspringen',
     deleteEntry: 'Eintrag löschen',
     fillOneSection: 'Füllen Sie mindestens einen Tagebuchabschnitt aus.',
@@ -887,9 +886,6 @@ const de: LocaleMessages = {
     titleSelf: 'Ihr Profil',
     titleChild: 'Kinderprofil',
     titleCreate: 'Profil erstellen',
-    subtitleSelfStep: 'Schritt 1 von 2 — Ihr Profil · {{step}}',
-    subtitleChildStep: 'Schritt 2 von 2 — Kinderprofil · {{step}}',
-    subtitleDefault: '{{step}} — Informationen zur Personalisierung ausfüllen',
     stepProgress: 'Schritt {{current}} von {{total}}',
     nameLabel: 'Name',
     birthYearLabel: 'Geburtsjahr',
@@ -913,7 +909,6 @@ const de: LocaleMessages = {
     crossReactions: {
       title: 'Kreuzreaktionen',
       hint: 'Zu Ihren Allergenen passen oft verwandte Stoffe. Markieren Sie, was Sie hinzufügen möchten — oder überspringen Sie den Schritt.',
-      skipHint: 'Nichts ausgewählt — tippen Sie auf Weiter zum Überspringen.',
       addNext: 'Hinzufügen und weiter',
       disclaimer:
         'Hinweise zu Kreuzreaktionen sind informativ und keine Diagnose. Klären Sie dies mit Ihrem Arzt.',
@@ -924,7 +919,6 @@ const de: LocaleMessages = {
       zonesLabel: 'Zonen',
       severityLabel: 'Übliche Intensität',
       typicalLabel: 'Typische Symptome',
-      skipHint: 'Kann übersprungen und später ausgefüllt werden.',
       disclaimer: 'Basis-Symptome personalisieren das Tagebuch und ersetzen keinen Arztbesuch.',
       zones: {
         nose: 'Nase',
@@ -994,7 +988,6 @@ const de: LocaleMessages = {
     allergenConfirmations: {
       title: 'Wie wurden Ihre Allergene bestätigt?',
       hint: 'Geben Sie die Bestätigungsquelle für jedes Allergen an. Überspringen möglich — Standard ist Selbstbeobachtung.',
-      skipHint: 'Drücken Sie Weiter, um diesen Schritt zu überspringen.',
     },
     conditionsOther: 'Weitere Zustände',
     conditionHintTitle: 'Zustandstyp empfohlen',

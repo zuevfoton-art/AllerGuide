@@ -265,7 +265,6 @@ const en: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Step {{current}} of {{total}}',
-    stepOfSection: 'Step {{current}} of {{total}} · {{section}}',
     skipSection: 'Skip section',
     deleteEntry: 'Delete entry',
     fillOneSection: 'Fill in at least one diary section.',
@@ -893,9 +892,6 @@ const en: LocaleMessages = {
     titleSelf: 'Your profile',
     titleChild: "Child's profile",
     titleCreate: 'Create profile',
-    subtitleSelfStep: 'Step 1 of 2 — your profile · {{step}}',
-    subtitleChildStep: "Step 2 of 2 — child's profile · {{step}}",
-    subtitleDefault: '{{step}} — fill in details for personalization',
     stepProgress: 'Step {{current}} of {{total}}',
     nameLabel: 'Name',
     birthYearLabel: 'Birth year',
@@ -919,7 +915,6 @@ const en: LocaleMessages = {
     crossReactions: {
       title: 'Cross-reactions',
       hint: 'Based on your allergens, related foods and substances are often considered. Check what to add — or skip this step.',
-      skipHint: 'Nothing selected — tap Next to skip.',
       addNext: 'Add and continue',
       disclaimer:
         'Cross-reaction hints are informational and not a diagnosis. Confirm with your clinician.',
@@ -930,7 +925,6 @@ const en: LocaleMessages = {
       zonesLabel: 'Zones',
       severityLabel: 'Usual intensity',
       typicalLabel: 'Typical symptoms',
-      skipHint: 'You can skip and fill this in later.',
       disclaimer: 'Baseline symptoms help personalize the diary and do not replace medical advice.',
       zones: {
         nose: 'Nose',
@@ -1000,7 +994,6 @@ const en: LocaleMessages = {
     allergenConfirmations: {
       title: 'How were your allergens confirmed?',
       hint: 'Set the confirmation source for each allergen. You can skip — defaults to self-observation.',
-      skipHint: 'Tap Next to skip this step.',
     },
     conditionsOther: 'Other conditions',
     conditionHintTitle: 'Consider adding a condition type',

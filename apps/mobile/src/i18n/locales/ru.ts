@@ -266,7 +266,6 @@ const ru: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Шаг {{current}} из {{total}}',
-    stepOfSection: 'Шаг {{current}} из {{total}} · {{section}}',
     skipSection: 'Пропустить раздел',
     deleteEntry: 'Удалить запись',
     fillOneSection: 'Заполните хотя бы один раздел дневника.',
@@ -895,9 +894,6 @@ const ru: LocaleMessages = {
     titleSelf: 'Ваш профиль',
     titleChild: 'Профиль ребёнка',
     titleCreate: 'Создание профиля',
-    subtitleSelfStep: 'Шаг 1 из 2 — ваш профиль · {{step}}',
-    subtitleChildStep: 'Шаг 2 из 2 — профиль ребёнка · {{step}}',
-    subtitleDefault: '{{step}} — заполните информацию для персонализации',
     stepProgress: 'Шаг {{current}} из {{total}}',
     nameLabel: 'Имя',
     birthYearLabel: 'Год рождения',
@@ -921,7 +917,6 @@ const ru: LocaleMessages = {
     crossReactions: {
       title: 'Перекрёстные реакции',
       hint: 'По выбранным аллергенам часто учитывают связанные продукты и вещества. Отметьте, что хотите добавить в профиль — или пропустите шаг.',
-      skipHint: 'Ничего не отмечено — нажмите «Далее», чтобы пропустить.',
       addNext: 'Добавить и далее',
       disclaimer:
         'Подсказки о перекрёстных реакциях носят справочный характер и не являются диагнозом. Уточняйте у врача.',
@@ -932,7 +927,6 @@ const ru: LocaleMessages = {
       zonesLabel: 'Зоны',
       severityLabel: 'Обычная интенсивность',
       typicalLabel: 'Типичные симптомы',
-      skipHint: 'Можно пропустить и заполнить позже.',
       disclaimer: 'Базовые симптомы помогают персонализировать дневник и не заменяют консультацию врача.',
       zones: {
         nose: 'Нос',
@@ -1002,7 +996,6 @@ const ru: LocaleMessages = {
     allergenConfirmations: {
       title: 'Как подтверждены аллергены?',
       hint: 'Укажите источник подтверждения для каждого аллергена. Можно пропустить — по умолчанию самонаблюдение.',
-      skipHint: 'Нажмите «Далее», чтобы пропустить этот шаг.',
     },
     conditionsOther: 'Другие состояния',
     conditionHintTitle: 'Рекомендуем добавить тип состояния',

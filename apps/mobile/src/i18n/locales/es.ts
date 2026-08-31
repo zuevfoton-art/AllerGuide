@@ -265,7 +265,6 @@ const es: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Paso {{current}} de {{total}}',
-    stepOfSection: 'Paso {{current}} de {{total}} · {{section}}',
     skipSection: 'Omitir sección',
     deleteEntry: 'Eliminar entrada',
     fillOneSection: 'Completa al menos una sección del diario.',
@@ -886,9 +885,6 @@ const es: LocaleMessages = {
     titleSelf: 'Tu perfil',
     titleChild: 'Perfil del niño',
     titleCreate: 'Crear perfil',
-    subtitleSelfStep: 'Paso 1 de 2 — tu perfil · {{step}}',
-    subtitleChildStep: 'Paso 2 de 2 — perfil del niño · {{step}}',
-    subtitleDefault: '{{step}} — completa la información para personalizar',
     stepProgress: 'Paso {{current}} de {{total}}',
     nameLabel: 'Nombre',
     birthYearLabel: 'Año de nacimiento',
@@ -912,7 +908,6 @@ const es: LocaleMessages = {
     crossReactions: {
       title: 'Reacciones cruzadas',
       hint: 'Según tus alérgenos, a menudo se consideran sustancias relacionadas. Marca qué añadir — o omite el paso.',
-      skipHint: 'Nada seleccionado — pulsa Siguiente para omitir.',
       addNext: 'Añadir y continuar',
       disclaimer:
         'Las pistas de reacciones cruzadas son informativas y no son un diagnóstico. Consúltelo con su médico.',
@@ -923,7 +918,6 @@ const es: LocaleMessages = {
       zonesLabel: 'Zonas',
       severityLabel: 'Intensidad habitual',
       typicalLabel: 'Síntomas típicos',
-      skipHint: 'Puedes omitirlo y completarlo más tarde.',
       disclaimer: 'Los síntomas base personalizan el diario y no sustituyen consejo médico.',
       zones: {
         nose: 'Nariz',
@@ -993,7 +987,6 @@ const es: LocaleMessages = {
     allergenConfirmations: {
       title: '¿Cómo se confirmaron tus alérgenos?',
       hint: 'Indica la fuente de confirmación para cada alérgeno. Puedes omitir — por defecto es autoobservación.',
-      skipHint: 'Pulsa Siguiente para omitir este paso.',
     },
     conditionsOther: 'Otros estados',
     conditionHintTitle: 'Se recomienda añadir un tipo de estado',

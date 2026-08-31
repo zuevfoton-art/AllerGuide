@@ -11,6 +11,8 @@ export type DiaryStepField = 'text' | 'choice' | 'photo' | 'checklist' | 'time' 
 /** Auto/duplicate steps: collected on save, never shown in the full wizard or history. */
 export const DIARY_AUTO_STEP_IDS = new Set([
   'symptomAreas',
+  // Legacy 0–10 scale, superseded by severity0_3 and normalised on read.
+  'intensity',
   'intoleranceAlert',
   'sideEffectSeverity',
   'effect',
@@ -19,6 +21,9 @@ export const DIARY_AUTO_STEP_IDS = new Set([
   'todayMeds',
   'scanRef',
   'foodSource',
+  'knownInsects',
+  'adrenalineLocation',
+  'emergencyPlan',
   'medicineForm',
   'medicineActiveSubstance',
   'medicineUsage',

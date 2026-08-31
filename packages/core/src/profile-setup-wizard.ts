@@ -6,6 +6,7 @@ import { getCrossReactionsForSelection } from './cross-reactions';
 import type { EmergencyContactRelation } from './emergency-contacts';
 import {
   createEmptySymptomBaseline,
+  isSymptomBaselineEmpty,
   type ProfileSymptomBaseline,
 } from './profile-symptom-baseline';
 import { needsChildConsent } from './profile-validation';
@@ -33,6 +34,17 @@ export const PROFILE_SETUP_WIZARD_STEPS = [
 export type ProfileSetupWizardStep = (typeof PROFILE_SETUP_WIZARD_STEPS)[number];
 
 export const PROFILE_SETUP_WIZARD_STEP_COUNT = PROFILE_SETUP_WIZARD_STEPS.length;
+
+/** Steps the wizard advances past even when nothing was entered. */
+export const PROFILE_SETUP_OPTIONAL_STEPS: ReadonlySet<string> = new Set([
+  'crossReactions',
+  'allergenConfirmations',
+  'symptomBaseline',
+  'conditionHistory',
+  'comorbidity',
+  'phenotypeSummary',
+  'contacts',
+]);
 
 export type ProfileSetupWizardErrorCode =
   | 'name_required'
@@ -138,6 +150,29 @@ export function validateProfileSetupWizardStep(
       return null;
     default:
       return null;
+  }
+}
+
+/**
+ * Whether an optional step already holds user input. Lets the wizard label its
+ * primary action «Skip» instead of adding a second button that does the same.
+ */
+export function isProfileSetupStepFilled(
+  step: ProfileSetupWizardStep,
+  draft: Pick<
+    ProfileSetupWizardDraft,
+    'crossReactionAllergenIds' | 'symptomBaseline' | 'contacts'
+  >,
+): boolean {
+  switch (step) {
+    case 'crossReactions':
+      return draft.crossReactionAllergenIds.length > 0;
+    case 'symptomBaseline':
+      return !isSymptomBaselineEmpty(draft.symptomBaseline);
+    case 'contacts':
+      return draft.contacts.some((contact) => contact.name.trim() || contact.phone.trim());
+    default:
+      return true;
   }
 }
 

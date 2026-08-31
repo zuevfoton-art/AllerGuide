@@ -10,11 +10,13 @@ import {
   getMissingConditionsForAllergens,
   getWizardStep,
   getGatedConditionRemovals,
+  isProfileSetupStepFilled,
   isSymptomBaselineEmpty,
   listConditionHistoryQuestionPages,
   mergePreSeededAllergens,
   needsChildConsent,
   normalizeAllergyConfirmations,
+  PROFILE_SETUP_OPTIONAL_STEPS,
   reconcileConditionOptionSelections,
   shouldCompleteOnboarding,
   shouldPaginateConditionHistoryQuestions,
@@ -159,14 +161,8 @@ export default function ProfileSetupScreen() {
     total: stepProgressMeta.total,
   });
 
-  const subtitle =
-    scenario === 'both' && wizardStep === 'child'
-      ? t('profileSetup.subtitleChildStep', { step: stepProgress })
-      : scenario === 'both'
-        ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
-        : currentStep === 'phenotypeSummary'
-          ? stepProgress
-          : t('profileSetup.subtitleDefault', { step: stepProgress });
+  // The title already says whose profile this is, so the subtitle is the counter only.
+  const subtitle = stepProgress;
 
   const suggestedConditions = useMemo(
     () => getMissingConditionsForAllergens(selected, conditions),
@@ -392,13 +388,21 @@ export default function ProfileSetupScreen() {
   const isLastStep = currentStep === 'contacts';
   const showBack = stepProgressMeta.current > 1;
 
+  // Optional steps advance on the primary button, so its label says «Skip»
+  // instead of pairing «Next» with a hint that explains the same thing.
+  const canSkipCurrentStep =
+    PROFILE_SETUP_OPTIONAL_STEPS.has(currentStep) &&
+    !isProfileSetupStepFilled(currentStep, draft);
+
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
       ? t('profileSetup.nextChild')
       : t('profileSetup.saveProfile')
     : currentStep === 'crossReactions' && crossPendingIds.length > 0
       ? t('profileSetup.crossReactions.addNext')
-      : t('profileSetup.next');
+      : canSkipCurrentStep
+        ? t('common.skip')
+        : t('profileSetup.next');
 
   return (
     <Screen>

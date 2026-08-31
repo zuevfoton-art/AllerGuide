@@ -473,14 +473,17 @@ export function DiaryWizard({
   return (
     <View style={styles.wrap}>
       <Text style={styles.progressText} testID="diary-wizard-step-label">
-        {t('diaryWizard.stepOfSection', {
-          current: overallStepNumber,
-          total: overallStepsTotal,
-          section: section.title,
-        })}
+        {section.title}
       </Text>
 
-      <View style={styles.progressTrack}>
+      {/* The bar is the only progress indicator; the count stays for screen readers. */}
+      <View
+        style={styles.progressTrack}
+        accessibilityRole="progressbar"
+        accessibilityLabel={t('diaryWizard.stepOf', {
+          current: overallStepNumber,
+          total: overallStepsTotal,
+        })}>
         <View
           style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
         />

@@ -271,7 +271,6 @@ export type LocaleMessages = {
   };
   diaryWizard: {
     stepOf: string;
-    stepOfSection: string;
     skipSection: string;
     deleteEntry: string;
     fillOneSection: string;
@@ -880,9 +879,6 @@ export type LocaleMessages = {
     titleSelf: string;
     titleChild: string;
     titleCreate: string;
-    subtitleSelfStep: string;
-    subtitleChildStep: string;
-    subtitleDefault: string;
     stepProgress: string;
     nameLabel: string;
     birthYearLabel: string;
@@ -904,7 +900,6 @@ export type LocaleMessages = {
     crossReactions: {
       title: string;
       hint: string;
-      skipHint: string;
       addNext: string;
       disclaimer: string;
     };
@@ -914,7 +909,6 @@ export type LocaleMessages = {
       zonesLabel: string;
       severityLabel: string;
       typicalLabel: string;
-      skipHint: string;
       disclaimer: string;
       zones: {
         nose: string;
@@ -970,7 +964,6 @@ export type LocaleMessages = {
     allergenConfirmations: {
       title: string;
       hint: string;
-      skipHint: string;
     };
     conditionsOther: string;
     conditionHintTitle: string;

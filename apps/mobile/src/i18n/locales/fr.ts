@@ -265,7 +265,6 @@ const fr: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Étape {{current}} sur {{total}}',
-    stepOfSection: 'Étape {{current}} sur {{total}} · {{section}}',
     skipSection: 'Passer la section',
     deleteEntry: 'Supprimer l\'entrée',
     fillOneSection: 'Remplissez au moins une section du journal.',
@@ -886,9 +885,6 @@ const fr: LocaleMessages = {
     titleSelf: 'Votre profil',
     titleChild: 'Profil de l\'enfant',
     titleCreate: 'Créer un profil',
-    subtitleSelfStep: 'Étape 1 sur 2 — votre profil · {{step}}',
-    subtitleChildStep: 'Étape 2 sur 2 — profil de l\'enfant · {{step}}',
-    subtitleDefault: '{{step}} — remplissez les informations pour la personnalisation',
     stepProgress: 'Étape {{current}} sur {{total}}',
     nameLabel: 'Nom',
     birthYearLabel: 'Année de naissance',
@@ -912,7 +908,6 @@ const fr: LocaleMessages = {
     crossReactions: {
       title: 'Réactions croisées',
       hint: 'D\'après vos allergènes, des substances liées sont souvent prises en compte. Cochez ce qu\'il faut ajouter — ou ignorez l\'étape.',
-      skipHint: 'Rien de coché — appuyez sur Suivant pour passer.',
       addNext: 'Ajouter et continuer',
       disclaimer:
         'Les suggestions de réactions croisées sont informatives et ne constituent pas un diagnostic. Demandez conseil à votre médecin.',
@@ -923,7 +918,6 @@ const fr: LocaleMessages = {
       zonesLabel: 'Zones',
       severityLabel: 'Intensité habituelle',
       typicalLabel: 'Symptômes typiques',
-      skipHint: 'Vous pouvez ignorer et remplir plus tard.',
       disclaimer: 'Les symptômes de base personnalisent le journal et ne remplacent pas un avis médical.',
       zones: {
         nose: 'Nez',
@@ -993,7 +987,6 @@ const fr: LocaleMessages = {
     allergenConfirmations: {
       title: 'Comment vos allergènes ont-ils été confirmés ?',
       hint: 'Indiquez la source de confirmation pour chaque allergène. Vous pouvez ignorer — auto-observation par défaut.',
-      skipHint: 'Appuyez sur Suivant pour ignorer cette étape.',
     },
     conditionsOther: 'Autres états',
     conditionHintTitle: 'Type d’état recommandé',

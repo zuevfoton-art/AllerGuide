@@ -265,7 +265,6 @@ const it: LocaleMessages = {
   },
   diaryWizard: {
     stepOf: 'Passo {{current}} di {{total}}',
-    stepOfSection: 'Passo {{current}} di {{total}} · {{section}}',
     skipSection: 'Salta sezione',
     deleteEntry: 'Elimina voce',
     fillOneSection: 'Compila almeno una sezione del diario.',
@@ -886,9 +885,6 @@ const it: LocaleMessages = {
     titleSelf: 'Il tuo profilo',
     titleChild: 'Profilo del bambino',
     titleCreate: 'Crea profilo',
-    subtitleSelfStep: 'Passo 1 di 2 — il tuo profilo · {{step}}',
-    subtitleChildStep: 'Passo 2 di 2 — profilo del bambino · {{step}}',
-    subtitleDefault: '{{step}} — compila le informazioni per la personalizzazione',
     stepProgress: 'Passo {{current}} di {{total}}',
     nameLabel: 'Nome',
     birthYearLabel: 'Anno di nascita',
@@ -912,7 +908,6 @@ const it: LocaleMessages = {
     crossReactions: {
       title: 'Reazioni crociate',
       hint: 'In base agli allergeni scelti, spesso si considerano sostanze correlate. Seleziona cosa aggiungere — oppure salta il passo.',
-      skipHint: 'Niente selezionato — tocca Avanti per saltare.',
       addNext: 'Aggiungi e continua',
       disclaimer:
         'I suggerimenti sulle reazioni crociate sono informativi e non costituiscono una diagnosi. Consulta il medico.',
@@ -923,7 +918,6 @@ const it: LocaleMessages = {
       zonesLabel: 'Zone',
       severityLabel: 'Intensità abituale',
       typicalLabel: 'Sintomi tipici',
-      skipHint: 'Puoi saltare e compilare più tardi.',
       disclaimer: 'I sintomi di base personalizzano il diario e non sostituiscono il parere medico.',
       zones: {
         nose: 'Naso',
@@ -993,7 +987,6 @@ const it: LocaleMessages = {
     allergenConfirmations: {
       title: 'Come sono stati confermati i tuoi allergeni?',
       hint: 'Indica la fonte di conferma per ogni allergene. Puoi saltare — predefinito: autoosservazione.',
-      skipHint: 'Tocca Avanti per saltare questo passaggio.',
     },
     conditionsOther: 'Altre condizioni',
     conditionHintTitle: 'Consigliato aggiungere un tipo di condizione',
