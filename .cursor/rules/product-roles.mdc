@@ -1,0 +1,11 @@
+---
+description: Route product-analytics and product-design tasks to the matching AllerGuide skill. Use when the user asks about metrics, KPI, funnels, analytics events, UX, UI, design tokens, accessibility, or screen specs.
+alwaysApply: false
+---
+
+# Product roles
+
+- Метрики, KPI, воронки, события аналитики, `FR-*`, гипотезы → skill `product-analyst` (`.cursor/skills/product-analyst/SKILL.md`).
+- Экран, UI, UX, токены, палитра, a11y, пустые состояния, онбординг → skill `product-designer` (`.cursor/skills/product-designer/SKILL.md`).
+- Код и рефакторинг → skill `code-complete`. Слои и антипаттерны → `docs/development-rules.md`.
+- Не подменять продуктовую задачу «сразу написать JSX»: сначала метрика или спецификация экрана, затем код.

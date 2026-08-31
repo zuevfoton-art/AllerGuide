@@ -428,6 +428,8 @@ pnpm build:staging:ios
 | `migrate` job pending forever | Runner не зарегистрирован или нет label `yc-staging-vpc` |
 | `connection refused` к Postgres с runner | VM в той же subnet; проверьте SG (`6432` из VPC CIDR) |
 | Health 503, `database.ok: false` | Lockbox `DATABASE_URL`; container имеет VPC connectivity |
+| Health 403 `API Gateway is stopped` | `yc serverless api-gateway resume --id <gw>` (`aclearo-staging-api-gw`) |
+| Health 503 `EAI_AGAIN` / `CONNECT_TIMEOUT` на `*.mdb.yandexcloud.net` | Postgres остановлен: `yc managed-postgresql cluster start --name aclearo-staging-pg` |
 | TLS error на API | Дождитесь `ISSUED` сертификата; проверьте CNAME |
 | `docker login cr.yandex` fail | `YC_SA_JSON` — полный JSON authorized key deploy SA |
 | OpenAI scan 502 | Прокси / `AI_SCAN_ENABLED=false` / billing |

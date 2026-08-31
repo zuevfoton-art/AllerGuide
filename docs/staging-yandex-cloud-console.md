@@ -561,6 +561,6 @@ Profile `staging` уже использует `EXPO_PUBLIC_API_URL=https://api.s
 | Документ | Тема |
 |----------|------|
 | [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) | Terraform + CI runbook |
-| [`staging-deploy.md`](./staging-deploy.md) | общий staging (Neon / Railway) |
+| [`staging-deploy.md`](./staging-deploy.md) | общий staging runbook (Postgres = YC Managed) |
 | [`eas-staging-build.md`](./eas-staging-build.md) | mobile staging |
 | [`apps/api/.env.staging.example`](../apps/api/.env.staging.example) | полный список env |

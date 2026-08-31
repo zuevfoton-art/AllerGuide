@@ -32,8 +32,9 @@
 ├── packages/ai/     # Сканер, OCR, scan-intent, search-ingredients, prescription / medicine parse
 ├── packages/ui/     # Тонкие RN-примитивы (Badge, PrimaryButton)
 ├── docs/            # Архитектура, QA, staging, clinical
-├── scripts/         # RC-gate, YC stage gates, staging smokes
-└── .github/         # CI, EAS, Neon preview
+├── scripts/         # RC-gate, taxonomy check, YC stage gates
+├── .cursor/         # skills, rules, mcp.json
+└── .github/         # CI, EAS, YC staging
 ```
 
 | Пакет | Зависит от |
@@ -74,7 +75,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | API endpoint | `apps/api/src/routes/*` → регистрация в `app.ts` |
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
-| Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts` |
+| Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
+| UI / токены / a11y | `constants/{theme,layout,typography}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md` |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
 | CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
@@ -226,7 +228,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 |------|--------|
 | `db/app-schema.ts` | `profile.*` — users, profiles, diary, scan_history, contacts, sos, sync_backups |
 | `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, market_products, market_offers, alias_feedback |
-| `db/config.ts` + `index.ts` | Neon-ready pools; optional `readDb` |
+| `db/config.ts` + `index.ts` | YC / local Postgres pools; optional `readDb` |
 | `drizzle/0000`…`0011_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
@@ -320,6 +322,7 @@ Barrel: `index.ts`. Pure TS.
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
 | YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
+| Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 
 ---
 
@@ -330,7 +333,8 @@ pnpm install                 # из корня
 pnpm typecheck
 pnpm test
 pnpm --filter mobile lint
-pnpm rc-gate                 # typecheck + lint + test + doc/Maestro
+pnpm check:analytics-taxonomy
+pnpm rc-gate                 # typecheck + lint + test + taxonomy + doc/Maestro
 ```
 
 Mobile web: `cd apps/mobile && npx expo start --web --port 5000`  

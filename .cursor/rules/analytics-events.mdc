@@ -1,0 +1,13 @@
+---
+description: Analytics events must come from ANALYTICS_EVENT_NAMES; emit from services without PII.
+globs: packages/core/src/analytics-events.ts, apps/mobile/src/services/*.ts, apps/api/src/routes/analytics.ts, apps/api/src/lib/analytics-*.ts
+alwaysApply: false
+---
+
+# Analytics events
+
+- Имя события — только из `ANALYTICS_EVENT_NAMES` в `packages/core/src/analytics-events.ts`. `trackEvent` молча отбрасывает неизвестные имена.
+- Новое имя: запись в таксономию + тест в `analytics-events.test.ts` + `pnpm check:analytics-taxonomy`.
+- Эмиссия в `src/services/*`, не в `app/**/*.tsx`.
+- Props без PII: сверять с `ANALYTICS_FORBIDDEN_KEYS`; не слать `profileId`, аллергены, тексты дневника. Ключ props — `snake_case`, `^[a-z][a-z0-9_]{0,31}$`.
+- Процедура и шаблоны метрик: skill `product-analyst`.

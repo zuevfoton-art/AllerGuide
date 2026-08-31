@@ -34,7 +34,7 @@ chmod +x scripts/create-phase-issues.sh
 
 ```mermaid
 flowchart TD
-  P11a[P1.1a Neon] --> P11b[P1.1b Deploy API]
+  P11a[P1.1a YC Postgres] --> P11b[P1.1b Deploy API]
   P11b --> P11c[P1.1c DNS TLS]
   P11c --> P12b[P1.2b EAS staging]
   P12b --> P12c[P1.2c Auth E2E]
@@ -61,7 +61,7 @@ flowchart TD
 
 | ID | Задача | Дн. | Роль | Зависит от | Блокирует |
 |----|--------|-----|------|------------|-----------|
-| **P1.1a** | Neon staging Postgres + секреты | 0.5 | DevOps | — | P1.1b, P1.6d |
+| **P1.1a** | YC Managed Postgres staging + секреты | 0.5 | DevOps | — | P1.1b, P1.6d |
 | **P1.1b** | Deploy API на хостинг | 1 | DevOps/Backend | P1.1a | P1.1c–e, P1.5a |
 | **P1.1c** | DNS + TLS `api.staging.*` | 0.5 | DevOps | P1.1b | P1.2b–c, P1.4a, P1.5b, P2.6a |
 | **P1.1d** | `.env.staging.example` + runbook | 0.5 | Backend | P1.1b | — |
@@ -198,7 +198,7 @@ flowchart TD
 
 | Ресурс | Задачи | Когда заказать |
 |--------|--------|----------------|
-| Neon Postgres staging | P1.1a | День 1 |
+| YC Managed Postgres staging | P1.1a | День 1 |
 | API hosting (Railway/Render/Fly) | P1.1b | День 1 |
 | Домен `api.staging.allerguide.app` | P1.1c | День 2–3 |
 | OpenAI API key + billing cap | P1.5a | После P1.1b |

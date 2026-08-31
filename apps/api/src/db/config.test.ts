@@ -3,6 +3,7 @@ import {
   buildConnectionOptions,
   deriveDirectDatabaseUrl,
   isHeliumDatabaseUrl,
+  isPoolerUrl,
   resolveMigrationUrl,
   resolveReadUrl,
   resolveRuntimeUrl,
@@ -52,11 +53,17 @@ describe('db connection config', () => {
     expect(resolveReadUrl({ DATABASE_URL: 'postgres://only' })).toBeNull();
   });
 
-  it('derives direct migration URL from Neon pooled DATABASE_URL', () => {
+  it('detects YC Odyssey (:6432) and -pooler hosts as poolers', () => {
+    expect(isPoolerUrl('postgresql://u:p@c-xxx.rw.mdb.yandexcloud.net:6432/allerguide')).toBe(true);
+    expect(isPoolerUrl('postgresql://u:p@db-pooler.internal/allerguide')).toBe(true);
+    expect(isPoolerUrl('postgresql://u:p@localhost:5432/allerguide')).toBe(false);
+  });
+
+  it('derives a direct URL by stripping a -pooler host infix', () => {
     const pooled =
-      'postgres://user:pass@ep-abc-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require';
+      'postgres://user:pass@db-pooler.internal.example/allerguide?sslmode=require';
     const direct =
-      'postgres://user:pass@ep-abc.us-east-2.aws.neon.tech/neondb?sslmode=require';
+      'postgres://user:pass@db.internal.example/allerguide?sslmode=require';
     expect(deriveDirectDatabaseUrl(pooled)).toBe(direct);
     expect(resolveMigrationUrl({ DATABASE_URL: pooled })).toBe(direct);
   });

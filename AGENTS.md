@@ -31,6 +31,24 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 
 ---
 
+## Cursor skills, rules, and MCP
+
+Procedure lives in a **skill** (loaded by `description`). Invariants live in a **rule** (auto-attached by `globs`). Navigation stays here and in `docs/development-rules.md`.
+
+| Kind | Path | When |
+|------|------|------|
+| Skill | `.cursor/skills/product-analyst/SKILL.md` | Metrics, KPI, funnels, analytics events, `FR-*` |
+| Skill | `.cursor/skills/product-designer/SKILL.md` | Screens, tokens, a11y, empty states, i18n copy |
+| Skill | `.cursor/skills/code-complete/SKILL.md` | Code construction / review quality |
+| Skill | `.cursor/skills/rework-commits/SKILL.md` | History rewrite on a feature branch |
+| Rule | `.cursor/rules/analytics-events.mdc` | `trackEvent` / taxonomy / PII |
+| Rule | `.cursor/rules/design-tokens.mdc` | Claro tokens, radii ACTION/STATE, i18n |
+| Rule | `.cursor/rules/product-roles.mdc` | Routes a product task to the matching skill |
+
+Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgres read-only): [`.cursor/mcp.json`](.cursor/mcp.json) · setup [`docs/mcp-servers.md`](docs/mcp-servers.md). Secrets only via `${env:NAME}` or OAuth — never a prod DB URL.
+
+---
+
 ## Cursor Cloud specific instructions
 
 - Package manager is **pnpm** (`packageManager: pnpm@10.34.4`). Run `pnpm install` from the repo root before typecheck/tests.
@@ -46,7 +64,8 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - `pnpm typecheck` — TypeScript across all packages
 - `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
-- `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
+- `pnpm check:analytics-taxonomy` — `trackEvent` names must match `ANALYTICS_EVENT_NAMES`; also part of `pnpm rc-gate`
+- `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + taxonomy + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage API live on Yandex Cloud; see [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
 - `pnpm yc-stage-phase2` — Stage clients must target YC (`api.staging.aclearo.com`); see same doc §Phase 2
@@ -61,7 +80,7 @@ Full checklist: [`docs/development-rules.md` §8](docs/development-rules.md#8-ч
 - Catalog data: `pnpm --filter api db:seed-allergens` loads the allergen taxonomy from `@allerguide/core`; `pnpm --filter api db:import-food-allergy` imports the bundled dataset (`apps/api/data/food-allergy/`) into the `products` table. Endpoints: `GET /api/allergens` (falls back to the static core list when no DB), `GET /api/products/:barcode`, `GET /api/products/search?q=`. Mobile uses them when `EXPO_PUBLIC_PRODUCT_DB=true` (backend-first barcode lookup, Open Food Facts fallback). Medicine cards: `POST /api/medicines/recognize` (catalog lookup from photo OCR or spoken name/dose, then VL/OCR, upsert into `catalog.medicines`) and `GET /api/medicines/search?q=`. Enable with `AI_MEDICINE_VISION_ENABLED` on API and `EXPO_PUBLIC_MEDICINE_DB=true` on mobile. Photos are not stored on the server.
 - External allergen vocabularies (dataset tags, OFF `en:milk` tags) are mapped to the canonical RU taxonomy via `@allerguide/core` `mapExternalAllergenNames` (both at import and at OFF write-through).
 - Open Food Facts integration (`src/services/open-food-facts.ts`): on-demand `fetchOpenFoodFactsProduct(barcode)` (enriched: brand, image, ingredients, allergens+traces) and `searchOpenFoodFacts(query)` (full-text). OFF requires a `User-Agent` (`OPENFOODFACTS_USER_AGENT`). `/api/products/:barcode` and `/api/products/search?q=` query OFF on demand and cache into `catalog.products` when there's no local hit (`PRODUCT_OFF_FALLBACK=true`, default on).
-- DB connection (Neon-ready, `src/db/config.ts` + `index.ts`): runtime uses `DATABASE_URL` (Neon pooled `-pooler` endpoint), migrations use `DIRECT_DATABASE_URL` (direct, fallback to `DATABASE_URL`). Env-driven options: `DB_SSL` (`require`/`disable`), `DB_PREPARE=false` (for PgBouncer transaction pooling), `DB_POOL_MAX`/`DB_IDLE_TIMEOUT`/`DB_CONNECT_TIMEOUT`/`DB_MAX_LIFETIME`. Optional read replica via `READ_DATABASE_URL` exposes `readDb` (catalog reads route there; writes use primary `db`; falls back to primary when unset). Per-PR Neon DB branches run in `.github/workflows/neon-preview.yml` when `NEON_API_KEY` is configured.
+- DB connection (`src/db/config.ts` + `index.ts`): runtime uses `DATABASE_URL` (YC Managed Postgres on staging; pooled URL if a pooler is in front). Migrations use `DIRECT_DATABASE_URL` (direct, fallback to `DATABASE_URL`). Env-driven options: `DB_SSL` (`require`/`disable`), `DB_PREPARE=false` (for transaction pooling, including YC Odyssey on port 6432), `DB_POOL_MAX`/`DB_IDLE_TIMEOUT`/`DB_CONNECT_TIMEOUT`/`DB_MAX_LIFETIME`. Optional read replica via `READ_DATABASE_URL` exposes `readDb` (catalog reads route there; writes use primary `db`; falls back to primary when unset). Staging is Yandex Cloud only.
 - DB layout: data is split into two Postgres schemas — `profile` (per-user: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`) and `catalog` (global: `allergens`, `cross_reactions`, `products`). Drizzle table objects are schema-qualified (`profileSchema`/`catalogSchema` in `db/app-schema.ts` / `db/catalog-schema.ts`), so query code is unchanged. Human-readable standalone definitions live in `apps/api/sql/{profile,catalog}.sql` (reference artifacts; the live DB is managed by migrations).
 - Production hardening lives in `app.ts` + `src/middleware/security.ts`: helmet, strict CORS (`CORS_ORIGINS` allowlist), and per-IP rate limits. Set `RATE_LIMIT_DISABLED=true` to turn limits off (tests already do this where needed).
 - AI scan (`src/routes/scan.ts` + `src/lib/scan-cache.ts`): in-memory result cache + per-identity daily budget + optional `SCAN_REQUIRE_AUTH`. Enable with `AI_SCAN_ENABLED=true` + `OPENAI_API_KEY`; mobile flag `EXPO_PUBLIC_AI_SCAN_ENABLED=true`.

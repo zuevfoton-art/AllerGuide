@@ -92,7 +92,7 @@ describe('trackEvent integration', () => {
 
     const { initAnalytics, trackEvent } = await import('./analytics-service');
     initAnalytics();
-    trackEvent('auth_login', { login_type: 'email' });
+    trackEvent('auth_login', { method: 'email' });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 

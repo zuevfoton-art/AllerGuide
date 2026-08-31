@@ -11,8 +11,9 @@ import { buildConnectionOptions, resolveMigrationUrl } from './config';
  * generated with `pnpm --filter api db:generate`, committed to git, and
  * applied deterministically here.
  *
- * Runs against the DIRECT (unpooled) connection on Neon — migrations are not
- * compatible with PgBouncer transaction pooling.
+ * Runs against DIRECT_DATABASE_URL (or DATABASE_URL). Prefer a direct
+ * (non-pooler) connection for migrations — they are not compatible with
+ * transaction pooling.
  */
 async function main() {
   const url = resolveMigrationUrl();

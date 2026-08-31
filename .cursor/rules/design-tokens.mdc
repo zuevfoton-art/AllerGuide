@@ -1,0 +1,14 @@
+---
+description: UI color, radius, spacing and copy must use Claro tokens and useTranslation.
+globs: apps/mobile/src/components/**/*.tsx, apps/mobile/app/**/*.tsx, apps/mobile/src/constants/theme.ts, apps/mobile/src/constants/layout.ts
+alwaysApply: false
+---
+
+# Design tokens
+
+- Цвет только из `useTheme()` / `ThemeColors`. Не литеральный `#rrggbb` в компонентах и экранах.
+- Отступ из `space` / `density`, радиус из `radii` (`apps/mobile/src/constants/layout.ts`).
+- `radii.full` — только ACTION (кнопка, звонок, запуск действия). Чипы, табы, поля — `radii.sm` / `radii.md`.
+- Тап-цель ≥ `density.tapMinHeight` (44) или 36 + `hitSlop`. Не уменьшать высоту тапа ради плотности.
+- Пользовательский текст — `useTranslation()`; новый ключ во все 6 локалей + `i18n/types.ts`.
+- Процедура экрана: skill `product-designer`. Политика цвета: `docs/brand-claro-green.md`.
