@@ -37,13 +37,6 @@
     "yandex-cloud-docs": {
       "command": "npx",
       "args": ["-y", "@yandex-cloud/mcp", "-s", "docs", "--no-auth"]
-    },
-    "neon": {
-      "command": "npx",
-      "args": ["-y", "@neondatabase/mcp-server-neon", "start"],
-      "env": {
-        "NEON_API_KEY": "${env:NEON_API_KEY}"
-      }
     }
   }
 }

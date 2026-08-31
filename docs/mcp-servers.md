@@ -32,9 +32,9 @@
 | `playwright` | stdio `@playwright/mcp` | проверка web Expo на `http://localhost:5000` | локально | localhost |
 | `chrome-devtools` | stdio `chrome-devtools-mcp` | DOM/сеть той же web-сборки | локально | localhost |
 | `context7` | stdio `@upstash/context7-mcp` | актуальные docs Expo SDK 55 / RN 0.83 / Drizzle | опционально `CONTEXT7_API_KEY` | публичный read |
-| `postgres-staging` | stdio `@modelcontextprotocol/server-postgres` | схемы `profile` / `catalog`, счётчики каталога | `${env:STAGING_DATABASE_URL}` | **read-only роль, только staging** |
+| `postgres-staging` | stdio `@modelcontextprotocol/server-postgres` | схемы `profile` / `catalog` на **YC Managed Postgres** (staging) | `${env:STAGING_DATABASE_URL}` | **read-only роль, только staging** |
 
-`STAGING_DATABASE_URL` — отдельная строка подключения с ролью `SELECT` на `catalog` и без права на `profile` пользовательских таблиц, если аналитику каталога это покрывает. **Никогда** не подставлять prod `DATABASE_URL`.
+`STAGING_DATABASE_URL` — read-only строка к Yandex Cloud Managed Postgres staging (`SELECT` на `catalog`; без права на пользовательские таблицы `profile`, если аналитике каталога этого достаточно). **Никогда** не подставлять prod `DATABASE_URL`. Neon в проекте не используется — отдельного MCP для него нет.
 
 ### Деплой
 
@@ -44,7 +44,6 @@
 | `yandex-cloud-containers` | stdio `-s containers` | ревизии Serverless Container ([`deploy-staging.yml`](../.github/workflows/deploy-staging.yml)) | то же | `viewer`; публикация ревизии — только CI |
 | `yandex-cloud-apigateway` | stdio `-s apigateway` | API Gateway stage | то же | `viewer` |
 | `yandex-cloud-docs` | stdio `-s docs --no-auth` | документация YC при правках Terraform | нет | публичный read |
-| `neon` | stdio `@neondatabase/mcp-server-neon start` | ветки БД для PR ([`neon-preview.yml`](../.github/workflows/neon-preview.yml)) | `${env:NEON_API_KEY}` | scoped key |
 
 IAM-токен Yandex Cloud живёт максимум 12 часов. В `mcp.json` нет `Bearer` — только OAuth/CLI. Remote `https://toolkit.mcp.cloud.yandex.net/mcp` допустим локально с ротацией токена, в репозиторий его не коммитить.
 
@@ -57,8 +56,7 @@ IAM-токен Yandex Cloud живёт максимум 12 часов. В `mcp.j
 | Переменная | Сервер | Где взять |
 |------------|--------|-----------|
 | `GITHUB_TOKEN` | `github` (если не OAuth) | fine-grained PAT, без `workflow` |
-| `STAGING_DATABASE_URL` | `postgres-staging` | read-only URL staging Postgres; не prod, не Lockbox write-роль |
-| `NEON_API_KEY` | `neon` | Neon console → API keys |
+| `STAGING_DATABASE_URL` | `postgres-staging` | read-only URL **YC Managed Postgres** staging; не prod, не Lockbox write-роль |
 | `CONTEXT7_API_KEY` | `context7` | опционально, Upstash/Context7 |
 
 Ротация — [`docs/staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md). Инвентарь — [`docs/staging-secrets-inventory.md`](./staging-secrets-inventory.md). Гейт гигиены секретов: `pnpm yc-stage-phase4`.
@@ -71,7 +69,7 @@ IAM-токен Yandex Cloud живёт максимум 12 часов. В `mcp.j
 |------|----------|-------------|
 | Аналитик (`product-analyst`) | `github`, `postgres-staging` | YC write, prod DB |
 | Дизайнер (`product-designer`) | `playwright`, `chrome-devtools` | БД, облако |
-| Разработчик | `github`, `context7`, `postgres-staging`, `neon` | prod DB, `workflow`-скоуп |
+| Разработчик | `github`, `context7`, `postgres-staging` | prod DB, `workflow`-скоуп |
 | QA | `playwright`, `sentry` | облако |
 | Релиз | `github`, `yandex-cloud-*` (`viewer`) | публикация ревизии в обход CI |
 

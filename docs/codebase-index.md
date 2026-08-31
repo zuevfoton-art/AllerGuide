@@ -34,7 +34,7 @@
 ├── docs/            # Архитектура, QA, staging, clinical
 ├── scripts/         # RC-gate, taxonomy check, YC stage gates
 ├── .cursor/         # skills, rules, mcp.json
-└── .github/         # CI, EAS, Neon preview
+└── .github/         # CI, EAS, YC staging
 ```
 
 | Пакет | Зависит от |

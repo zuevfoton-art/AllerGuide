@@ -67,7 +67,7 @@
 
 ### 1.4. Стек деплоя (основа для MCP)
 
-GitHub Actions (9 workflow, включая [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml)) → Yandex Container Registry → Serverless Container; миграции — на self-hosted runner внутри VPC; мобильные сборки — EAS; инфраструктура — Terraform в [`infra/yandex/staging/`](../infra/yandex/staging/); Postgres — YC Managed / Neon для preview-веток.
+GitHub Actions (9 workflow, включая [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml)) → Yandex Container Registry → Serverless Container; миграции — на self-hosted runner внутри VPC; мобильные сборки — EAS; инфраструктура — Terraform в [`infra/yandex/staging/`](../infra/yandex/staging/); Postgres — Yandex Cloud Managed Postgres. Neon в контуре нет.
 
 ### 1.5. Дефект, найденный при аудите (входит в объём как тест-кейс)
 
@@ -246,7 +246,7 @@ description: Senior product designer for AllerGuide — проектирует �
 | Sentry | remote `https://mcp.sentry.dev/mcp` (OAuth) | разработчик, QA | crash-free для гейта G5, стектрейсы staging/prod | read-only на проект |
 | Chrome DevTools / Playwright | stdio | дизайнер, QA | проверка web-сборки Expo на `localhost:5000`, снимки состояний | локально |
 | Context7 (или аналог docs-MCP) | remote | все роли | актуальные документации Expo SDK 55 / RN 0.83 / Drizzle вместо догадок | публичный read |
-| Postgres (staging) | stdio, `DATABASE_URL` из env | разработчик API, аналитик | проверка схем `profile` / `catalog`, счётчики каталога | **read-only роль, только staging** |
+| Postgres (staging, YC Managed) | stdio, `STAGING_DATABASE_URL` | разработчик API, аналитик | проверка схем `profile` / `catalog` | **read-only роль, только YC staging** |
 
 **Tier 2 — деплой**
 
@@ -255,7 +255,6 @@ description: Senior product designer for AllerGuide — проектирует �
 | Yandex Cloud toolkit | stdio `npx -y @yandex-cloud/mcp -s toolkit` (OAuth или `-p <profile>`); remote `https://toolkit.mcp.cloud.yandex.net/mcp` с `Bearer <IAM>` | ресурсы VPC / Compute вокруг stage-контура | `viewer` на stage-каталог |
 | Yandex Cloud containers / apigateway | stdio `-s containers`, `-s apigateway` | ревизии Serverless Container и API Gateway, на которые опирается [`deploy-staging.yml`](../.github/workflows/deploy-staging.yml) | `viewer`, публикация ревизии — только через CI |
 | Yandex Cloud docs | stdio `-s docs --no-auth` | поиск по документации YC при правках Terraform | без авторизации |
-| Neon | stdio `npx -y @neondatabase/mcp-server-neon` | ветки БД для PR ([`neon-preview.yml`](../.github/workflows/neon-preview.yml)) | scoped API key |
 
 Замечания: IAM-токен YC живёт максимум 12 часов, поэтому для остающейся конфигурации предпочтителен OAuth/CLI-профиль, а не вставленный `Bearer`. Отдельного MCP для **EAS/Expo** в предложении нет: сборки остаются за `eas-cli` и workflow, а состояние читается через GitHub MCP — это сознательный отказ, а не пропуск.
 
@@ -300,7 +299,7 @@ flowchart TD
 |------|-------------|-------------|-----------|
 | Аналитик | GitHub (read) | PostHog, Postgres RO staging | запись в БД, prod-данные |
 | Дизайнер | Chrome DevTools | Figma | БД, облако |
-| Разработчик | GitHub, Context7 | Postgres RO staging, Neon | prod-БД, `workflow`-скоуп |
+| Разработчик | GitHub, Context7 | Postgres RO staging (YC) | prod-БД, `workflow`-скоуп |
 | QA | Playwright, Sentry (read) | GitHub | облако |
 | Релиз | GitHub Actions | YC containers / apigateway (`viewer`) | публикация ревизии в обход CI |
 
