@@ -78,6 +78,10 @@ UIDUMP="${PREFIX}-ui.xml"
 DURING_SCREEN="${PREFIX}-during.png"
 DURING_FOCUS="${PREFIX}-during-focus.txt"
 SAMPLER_GUARD="${PREFIX}-sampler.guard"
+# `~/.maestro/tests` never matched in upload-artifact (it does not expand `~`),
+# so per-command logs were lost on every red nightly. Copy them next to the
+# report instead.
+MAESTRO_LOGS="${PREFIX}-maestro-logs"
 
 adb logcat -c || true
 adb logcat -v time 'ReactNativeJS:V' 'ReactNative:V' 'AndroidRuntime:E' 'Expo:V' '*:S' > "$LOGCAT" &
@@ -121,6 +125,10 @@ if [ "$rc" -ne 0 ]; then
     cp "$DURING_SCREEN" "$SCREEN"
   fi
 fi
+
+rm -rf "$MAESTRO_LOGS"
+mkdir -p "$MAESTRO_LOGS"
+cp -R "$HOME/.maestro/tests/." "$MAESTRO_LOGS/" 2>/dev/null || true
 
 cleanup
 trap - EXIT

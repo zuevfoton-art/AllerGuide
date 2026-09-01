@@ -90,8 +90,8 @@ jobs:
             maestro-offline-during.png
             maestro-offline-during-focus.txt
             maestro-offline-ui.xml
+            maestro-offline-maestro-logs
             maestro-login-visible.png
-            ~/.maestro/tests
           if-no-files-found: ignore
 
   maestro-staging:
@@ -184,8 +184,8 @@ jobs:
             maestro-staging-during.png
             maestro-staging-during-focus.txt
             maestro-staging-ui.xml
+            maestro-staging-maestro-logs
             maestro-login-visible.png
-            ~/.maestro/tests
           if-no-files-found: ignore
 
       - name: API log on failure

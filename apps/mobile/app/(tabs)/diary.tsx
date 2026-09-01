@@ -226,7 +226,6 @@ export default function DiaryScreen() {
       photoUri: extras?.photoUri,
       recognizedDish: extras?.recognizedDish,
     });
-    await loadAutoMetadata();
     setEntryPickerOpen(false);
     setEditor({
       mode: 'section',
@@ -236,6 +235,9 @@ export default function DiaryScreen() {
       notice: extras?.notice,
       initialStepId: extras?.initialStepId,
     });
+    // Pollen/scan/meds metadata is hidden enrichment merged on save: fetching it
+    // must not delay the wizard, which has to open offline too.
+    void loadAutoMetadata();
   };
 
   const openMedicinePhoto = () => {

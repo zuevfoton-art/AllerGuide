@@ -41,6 +41,7 @@ import type { AppLocale } from '@/src/i18n/types';
 import { trackEvent } from '@/src/services/analytics-service';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { getStoredProfileConditions } from '@/src/services/profile-conditions-service';
+import { fetchWithTimeout } from '@/src/utils/fetch-with-timeout';
 
 export type WellnessConfidence = 'high' | 'medium' | 'low';
 
@@ -277,7 +278,7 @@ export async function fetchWellnessSnapshot(
   }[] = [];
 
   try {
-    const res = await fetch(url);
+    const res = await fetchWithTimeout(url);
     if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
     const data = await res.json();
     europeanAqi = data.current?.european_aqi ?? null;
