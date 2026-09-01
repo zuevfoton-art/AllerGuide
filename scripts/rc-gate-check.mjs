@@ -154,8 +154,18 @@ function checkMaestroFlows() {
   if (!workflow.includes('during.png')) {
     failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
   }
-  if (!workflow.includes('maestro-login-visible.png') || !workflow.includes('.maestro/tests')) {
-    failures.push('maestro-nightly.yml must upload maestro-login-visible.png and ~/.maestro/tests');
+  if (!workflow.includes('maestro-login-visible.png')) {
+    failures.push('maestro-nightly.yml must upload maestro-login-visible.png');
+  }
+  if (workflow.includes('~/.maestro/tests')) {
+    failures.push('maestro-nightly.yml must not upload ~/.maestro/tests (upload-artifact never expands ~)');
+  }
+  if (
+    !workflow.includes('maestro-offline-maestro-logs') ||
+    !workflow.includes('maestro-staging-maestro-logs') ||
+    !runner.includes('$HOME/.maestro/tests')
+  ) {
+    failures.push('maestro-nightly.yml must upload the copied per-command Maestro logs');
   }
 
   if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {

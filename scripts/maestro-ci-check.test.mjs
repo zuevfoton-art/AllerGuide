@@ -33,7 +33,11 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(workflow, /maestro-offline-during\.png/);
     assert.match(workflow, /maestro-staging-during\.png/);
     assert.match(workflow, /maestro-login-visible\.png/);
-    assert.match(workflow, /\.maestro\/tests/);
+    // `~` is not expanded by upload-artifact, so per-command logs are copied
+    // next to the report instead.
+    assert.doesNotMatch(workflow, /~\/\.maestro\/tests/);
+    assert.match(workflow, /maestro-offline-maestro-logs/);
+    assert.match(workflow, /maestro-staging-maestro-logs/);
 
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
@@ -47,6 +51,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /ensure_app_foreground/);
     assert.match(runner, /during\.png/);
     assert.match(runner, /SAMPLER_GUARD/);
+    assert.match(runner, /\$HOME\/\.maestro\/tests/);
     // The in-flow sampler observes only: restarting the activity mid-flow pops
     // expo-router back to the initial route (nightly 33414517311).
     const samplerLoop = runner.slice(
