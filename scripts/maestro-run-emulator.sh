@@ -23,73 +23,8 @@ if [ ! -f "$APK" ]; then
   exit 1
 fi
 
-# dumpsys uses "Application Not Responding: …nexuslauncher", not the
-# dialog title "Pixel Launcher isn't responding" (#296 nightly 32861098818).
-has_anr_dialog() {
-  adb shell dumpsys window 2>/dev/null | grep -Eqi \
-    'Application Not Responding|Application Error|aerr_wait|isn.t responding|Pixel Launcher isn'
-}
-
-# Prefer Wait over Close so the process can recover. dumpsys + tap only —
-# uiautomator dump races Maestro's UiAutomation connection.
-dismiss_anr() {
-  has_anr_dialog || return 0
-  echo "ANR dialog detected — tapping Wait" >&2
-  adb shell input tap "$ANR_WAIT_X" "$ANR_WAIT_Y" || true
-  sleep 1
-  if has_anr_dialog; then
-    adb shell input keyevent KEYCODE_BACK || true
-  fi
-}
-
-window_focus() {
-  adb shell dumpsys window 2>/dev/null | grep mCurrentFocus || true
-}
-
-# True when Pixel Launcher owns the foreground and there is no ANR overlay.
-launcher_is_focused() {
-  local focus
-  focus="$(window_focus)"
-  if echo "$focus" | grep -Eqi 'Application Not Responding'; then
-    return 1
-  fi
-  if echo "$focus" | grep -Eqi 'nexuslauncher'; then
-    return 0
-  fi
-  return 1
-}
-
-# After warmup/clearState the AVD often sits on NexusLauncher (app drawer).
-# Bring MainActivity back — singleTask resumes the existing task.
-ensure_app_foreground() {
-  dismiss_anr
-  if launcher_is_focused; then
-    echo "NexusLauncher in focus — am start ${ACTIVITY}" >&2
-    adb shell am start -W -n "$ACTIVITY" >/dev/null || true
-  fi
-}
-
-capture_screen() {
-  adb exec-out screencap -p > "$1" || true
-}
-
-capture_ui() {
-  adb shell uiautomator dump /sdcard/window_dump.xml >/dev/null 2>&1 || true
-  adb pull /sdcard/window_dump.xml "$1" >/dev/null 2>&1 || true
-}
-
-capture_focus() {
-  {
-    echo "=== mCurrentFocus ==="
-    adb shell dumpsys window 2>/dev/null | grep -E 'mCurrentFocus|Application Not Responding|Application Error' || true
-    echo "=== mResumedActivity ==="
-    adb shell dumpsys activity activities 2>/dev/null | grep -E 'mResumedActivity|topResumedActivity' || true
-  } > "$1" || true
-}
-
-is_post_exit_launcher() {
-  [ -f "$1" ] && grep -Eqi 'nexuslauncher|Pixel Launcher isn|com.google.android.apps.nexuslauncher' "$1"
-}
+# shellcheck source=scripts/lib/maestro-device.sh
+. "$ROOT/scripts/lib/maestro-device.sh"
 
 adb install -r "$APK"
 
@@ -148,10 +83,13 @@ adb logcat -c || true
 adb logcat -v time 'ReactNativeJS:V' 'ReactNative:V' 'AndroidRuntime:E' 'Expo:V' '*:S' > "$LOGCAT" &
 LOGCAT_PID=$!
 
+# The sampler only observes: Maestro owns app lifecycle inside a flow, and an
+# `am start` from here re-delivers the launch intent and pops expo-router back
+# to the initial route (nightly 33414517311 lost the diary wizard that way).
 touch "$SAMPLER_GUARD"
 (
   while [ -f "$SAMPLER_GUARD" ]; do
-    ensure_app_foreground
+    dismiss_anr
     capture_screen "$DURING_SCREEN"
     capture_focus "$DURING_FOCUS"
     sleep "$SAMPLER_SECONDS"

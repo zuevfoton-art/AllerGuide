@@ -122,14 +122,34 @@ function checkMaestroFlows() {
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
-  if (!runner.includes('am start') || !runner.includes('dismiss_anr')) {
-    failures.push('scripts/maestro-run-emulator.sh must am start + dismiss ANR');
-  }
-  if (!runner.includes('Application Not Responding') || !runner.includes('ensure_app_foreground')) {
-    failures.push('scripts/maestro-run-emulator.sh must detect Application Not Responding and restore MainActivity');
+  if (!runner.includes('scripts/lib/maestro-device.sh') || !runner.includes('ensure_app_foreground')) {
+    failures.push('scripts/maestro-run-emulator.sh must source scripts/lib/maestro-device.sh helpers');
   }
   if (!runner.includes('during.png')) {
     failures.push('scripts/maestro-run-emulator.sh must capture *-during.png before Maestro exits');
+  }
+
+  const samplerLoop = runner.slice(
+    runner.indexOf('while [ -f "$SAMPLER_GUARD" ]'),
+    runner.indexOf('SAMPLER_PID=$!'),
+  );
+  if (!samplerLoop || samplerLoop.includes('ensure_app_foreground')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh sampler must not restart the activity mid-flow (resets expo-router)',
+    );
+  }
+
+  const device = fs.readFileSync(path.join(root, 'scripts/lib/maestro-device.sh'), 'utf8');
+  if (!device.includes('am start') || !device.includes('dismiss_anr')) {
+    failures.push('scripts/lib/maestro-device.sh must am start + dismiss ANR');
+  }
+  if (!device.includes('Application Not Responding')) {
+    failures.push('scripts/lib/maestro-device.sh must detect Application Not Responding');
+  }
+  if (!device.includes('topResumedActivity') || device.includes('launcher_is_focused')) {
+    failures.push(
+      'scripts/lib/maestro-device.sh must read the foreground from the resumed activity, not mCurrentFocus',
+    );
   }
   if (!workflow.includes('during.png')) {
     failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
@@ -346,6 +366,7 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 checkSecurityAuditDocs();
