@@ -41,14 +41,30 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /autofill_service null/);
     assert.match(runner, /hide_error_dialogs 1/);
     assert.match(runner, /adb logcat/);
-    assert.match(runner, /screencap/);
-    assert.match(runner, /am start -W -n "\$ACTIVITY"/);
+    assert.match(runner, /scripts\/lib\/maestro-device\.sh/);
     assert.doesNotMatch(runner, /adb shell monkey/);
     assert.match(runner, /dismiss_anr/);
-    assert.match(runner, /Application Not Responding/);
     assert.match(runner, /ensure_app_foreground/);
     assert.match(runner, /during\.png/);
     assert.match(runner, /SAMPLER_GUARD/);
+    // The in-flow sampler observes only: restarting the activity mid-flow pops
+    // expo-router back to the initial route (nightly 33414517311).
+    const samplerLoop = runner.slice(
+      runner.indexOf('while [ -f "$SAMPLER_GUARD" ]'),
+      runner.indexOf('SAMPLER_PID=$!'),
+    );
+    assert.ok(samplerLoop.length > 0, 'sampler loop must exist');
+    assert.doesNotMatch(samplerLoop, /ensure_app_foreground/);
+    assert.match(samplerLoop, /capture_screen/);
+
+    const device = read('scripts/lib/maestro-device.sh');
+    assert.match(device, /screencap/);
+    assert.match(device, /am start -W -n "\$ACTIVITY"/);
+    assert.match(device, /Application Not Responding/);
+    // Foreground must come from the resumed activity: `mCurrentFocus` keeps a
+    // stale launcher line per display (nightly 33414517311).
+    assert.match(device, /topResumedActivity/);
+    assert.doesNotMatch(device, /launcher_is_focused/);
   });
 
   it('waits for the auth hero title, then scrolls and folds IME without BACK', () => {

@@ -8,6 +8,12 @@ appId: com.aclearo.app
     id: diary-new-entry
 - tapOn:
     id: diary-picker-food
+# The capture sheet gained a barcode button (#311) — wait for it to mount
+# instead of tapping into an animating sheet.
+- extendedWaitUntil:
+    visible:
+      id: nutrition-capture-step
+    timeout: 10000
 - tapOn:
     id: nutrition-enter-manual
 - extendedWaitUntil:
