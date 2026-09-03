@@ -84,6 +84,11 @@ export default function RootLayout() {
       markStartupPhase('db_ready');
       setDbReady(true);
       void reconcileAllReminders();
+      void import('@/src/services/alias-feedback-service')
+        .then(({ flushPendingAliasFeedback }) => flushPendingAliasFeedback())
+        .catch((error) => {
+          console.warn('[startup] flushPendingAliasFeedback failed:', error);
+        });
 
       const deferBackgroundWarmup = () => {
         safe('warmAllergenCatalogCache', warmAllergenCatalogCache);

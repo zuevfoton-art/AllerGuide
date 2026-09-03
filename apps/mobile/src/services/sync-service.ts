@@ -24,8 +24,11 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { trackEvent } from '@/src/services/analytics-service';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
+import { fetchWithTimeout } from '@/src/utils/fetch-with-timeout';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+/** Backup upload/download must not hang settings on a dead network. */
+const SYNC_TIMEOUT_MS = 15_000;
 
 export type SyncErrorCode =
   | 'sync_disabled'
@@ -135,13 +138,14 @@ export async function uploadBackup(): Promise<SyncResult> {
       payload: envelope,
     };
 
-    const response = await fetch(`${API_BASE}/api/sync/backup`, {
+    const response = await fetchWithTimeout(`${API_BASE}/api/sync/backup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify(body),
+      timeoutMs: SYNC_TIMEOUT_MS,
     });
 
     if (!response.ok) {
@@ -180,8 +184,9 @@ export async function downloadBackup(options?: {
 
   try {
     const token = await getAuthToken();
-    const response = await fetch(`${API_BASE}/api/sync/backup/${userId}`, {
+    const response = await fetchWithTimeout(`${API_BASE}/api/sync/backup/${userId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
+      timeoutMs: SYNC_TIMEOUT_MS,
     });
     if (!response.ok) {
       if (response.status === 503) {
