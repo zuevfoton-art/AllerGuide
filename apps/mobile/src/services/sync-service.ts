@@ -35,6 +35,7 @@ export type SyncErrorCode =
   | 'decrypt_failed'
   | 'wrong_recovery_key'
   | 'recovery_key_required'
+  | 'encryption_unavailable'
   | 'invalid_payload'
   | 'wrong_account';
 
@@ -118,10 +119,21 @@ export async function uploadBackup(): Promise<SyncResult> {
     const payload = collectUserData(userId);
     const token = await getAuthToken();
     const envelope = await encryptBackup(JSON.stringify(payload));
+    if (!envelope) {
+      return {
+        ok: false,
+        error: 'Не удалось зашифровать резервную копию',
+        code: 'encryption_unavailable',
+      };
+    }
 
-    const body = envelope
-      ? { v: 2 as const, userId, exportedAt: payload.exportedAt, encrypted: true, payload: envelope }
-      : payload;
+    const body = {
+      v: 2 as const,
+      userId,
+      exportedAt: payload.exportedAt,
+      encrypted: true,
+      payload: envelope,
+    };
 
     const response = await fetch(`${API_BASE}/api/sync/backup`, {
       method: 'POST',

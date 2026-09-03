@@ -74,8 +74,8 @@ async function loadBackup(userId: number): Promise<string | null> {
 }
 
 /**
- * Sync access requires either a valid mobile JWT (preferred — ties data to the
- * authenticated user) or the shared SYNC_API_KEY (legacy/server-to-server).
+ * Sync access requires a valid mobile JWT when `JWT_SECRET` is set (staging/prod).
+ * Legacy `SYNC_API_KEY` is only accepted when JWT is not configured (local/dev).
  */
 async function requireSyncAccess(req: Request, res: Response, next: NextFunction) {
   if (!isSyncEnabled()) {
@@ -95,19 +95,14 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
     return;
   }
 
-  const configuredKey = process.env.SYNC_API_KEY;
-  if (configuredKey) {
-    if (req.header('x-sync-api-key') !== configuredKey) {
-      res.status(401).json({ ok: false, error: 'Unauthorized' });
+  // ADR 002: JWT-only on staging/production. A shared key must not skip
+  // per-user ownership when JWT_SECRET is configured.
+  if (!process.env.JWT_SECRET) {
+    const configuredKey = process.env.SYNC_API_KEY;
+    if (configuredKey && req.header('x-sync-api-key') === configuredKey) {
+      next();
       return;
     }
-    next();
-    return;
-  }
-
-  if (process.env.JWT_SECRET) {
-    res.status(401).json({ ok: false, error: 'Authorization required' });
-    return;
   }
 
   res.status(401).json({ ok: false, error: 'Authorization required' });
@@ -123,6 +118,11 @@ export function registerSyncRoutes(app: Express) {
 
     if (!userId || (body?.v !== 1 && body?.v !== 2)) {
       res.status(400).json({ ok: false, error: 'Invalid payload' });
+      return;
+    }
+
+    if (process.env.SYNC_REQUIRE_ENCRYPTED === 'true' && body.encrypted !== true) {
+      res.status(400).json({ ok: false, error: 'Encrypted backup required' });
       return;
     }
 

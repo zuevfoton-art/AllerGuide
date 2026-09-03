@@ -745,6 +745,7 @@ const ru: LocaleMessages = {
     recoveryKeyCopyHint: 'Скопируйте ключ вручную (длинное нажатие на текст).',
     recoveryKeyWrong: 'Неверный ключ восстановления.',
     recoveryKeyRequired: 'Введите ключ восстановления.',
+    encryptionUnavailable: 'Не удалось зашифровать резервную копию. Повторите попытку или обновите приложение.',
     localBackupDesc: 'Экспорт и импорт JSON-файла на этом устройстве. Работает без интернета.',
     localBackupExportSuccess: 'Файл резервной копии сохранён.',
     localBackupImportSuccess: 'Данные восстановлены из файла.',

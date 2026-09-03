@@ -84,4 +84,31 @@ describe('JWT-authenticated sync', () => {
     const download = await request(app).get('/api/sync/backup/4242');
     expect(download.status).toBe(401);
   });
+
+  it('ignores SYNC_API_KEY when JWT_SECRET is configured', async () => {
+    process.env.SYNC_API_KEY = 'legacy-shared-key';
+    const app = await createApp();
+
+    const download = await request(app)
+      .get('/api/sync/backup/999')
+      .set('x-sync-api-key', 'legacy-shared-key');
+    expect(download.status).toBe(401);
+
+    const upload = await request(app)
+      .post('/api/sync/backup')
+      .set('x-sync-api-key', 'legacy-shared-key')
+      .send({ v: 2, userId: 999, exportedAt: new Date().toISOString(), profiles: [] });
+    expect(upload.status).toBe(401);
+  });
+
+  it('rejects plaintext upload when SYNC_REQUIRE_ENCRYPTED is true', async () => {
+    process.env.SYNC_REQUIRE_ENCRYPTED = 'true';
+    const app = await createApp();
+    const upload = await request(app)
+      .post('/api/sync/backup')
+      .set('Authorization', await bearer(7))
+      .send({ v: 2, userId: 7, exportedAt: new Date().toISOString(), profiles: [] });
+    expect(upload.status).toBe(400);
+    expect(upload.body.error).toBe('Encrypted backup required');
+  });
 });

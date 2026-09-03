@@ -13,6 +13,7 @@ import {
   type MedicineSource,
 } from '@allerguide/core';
 import { verifyAuthToken } from '../lib/jwt';
+import { resolveScanIdentity } from '../lib/scan-identity';
 import { consumeScanBudget, recordBudgetRejection } from '../lib/scan-cache';
 import { logCaughtError } from '../lib/log-caught-error';
 import {
@@ -60,10 +61,6 @@ function databaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
 }
 
-function requireScanAuth(): boolean {
-  return process.env.SCAN_REQUIRE_AUTH === 'true';
-}
-
 /**
  * Catalog writes always need an identity: a mobile JWT (device write-through)
  * or the shared MEDICINE_WRITE_KEY (server-to-server seeding). Reads stay open.
@@ -77,16 +74,6 @@ async function isCatalogWriteAuthorized(req: Request): Promise<boolean> {
 
   const configuredKey = process.env.MEDICINE_WRITE_KEY?.trim();
   return Boolean(configuredKey) && req.header('x-medicine-write-key') === configuredKey;
-}
-
-async function resolveScanIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (requireScanAuth()) return null;
-  return `ip:${req.ip ?? 'unknown'}`;
 }
 
 function parseAgeYears(value: unknown): number | null {

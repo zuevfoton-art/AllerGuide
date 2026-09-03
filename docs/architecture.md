@@ -574,7 +574,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 
 - Кэш результатов (ключ — хэш режима/текста/аллергенов)
 - Дневной бюджет на user/IP; биллится только промах кэша
-- `SCAN_REQUIRE_AUTH` — опциональное требование JWT
+- `SCAN_REQUIRE_AUTH` — JWT для billable AI; в `NODE_ENV=production` при включённых AI-флагах API не стартует без `true`
 - Провайдер: `AI_PROVIDER=yandex|openai` (default `openai`)
   - **yandex:** `YC_AI_API_KEY`, `YC_FOLDER_ID`, опционально `YC_GPT_MODEL` (default `yandexgpt-lite`)
   - **openai:** `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
@@ -616,9 +616,9 @@ Drizzle-объекты схемо-квалифицированы — код за
 ### Облачная синхронизация (`routes/sync.ts`)
 
 - Payload в `sync_backups` (in-memory fallback без БД)
-- Auth: mobile JWT **или** legacy `SYNC_API_KEY`
+- Auth: mobile JWT, когда задан `JWT_SECRET`. Legacy `SYNC_API_KEY` только без JWT (local/dev) и **не** обходит ownership
 - Владение по `userId` из токена
-- Клиент шифрует до загрузки — сервер zero-knowledge
+- Клиент шифрует AES-GCM (Web Crypto или `@noble/ciphers` на native) до загрузки; без ciphertext upload не уходит. Staging: `SYNC_REQUIRE_ENCRYPTED=true`
 
 #### Recovery key flow (cross-device restore)
 
@@ -836,7 +836,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `JWT_SECRET` | Mobile JWT signing |
 | `CORS_ORIGINS` | CORS allowlist |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
-| `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
+| `SYNC_ENABLED`, `SYNC_API_KEY`, `SYNC_REQUIRE_ENCRYPTED` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
 | `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |

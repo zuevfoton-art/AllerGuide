@@ -33,4 +33,30 @@ describe('per-user backup crypto', () => {
     const b = await encryptString('same', 'key');
     expect(a).not.toBe(b);
   });
+
+  it('round-trips via noble when SubtleCrypto is missing', async () => {
+    const cryptoObj = globalThis.crypto as Crypto;
+    const original = cryptoObj.subtle;
+    Object.defineProperty(cryptoObj, 'subtle', { configurable: true, value: undefined });
+    try {
+      const envelope = await encryptString('native-path', 'passphrase');
+      expect(isEncryptedEnvelope(envelope)).toBe(true);
+      expect(envelope).not.toContain('native-path');
+      expect(await decryptString(envelope, 'passphrase')).toBe('native-path');
+    } finally {
+      Object.defineProperty(cryptoObj, 'subtle', { configurable: true, value: original });
+    }
+  });
+
+  it('decrypts a Web Crypto envelope after SubtleCrypto is removed', async () => {
+    const envelope = await encryptString('cross-runtime', 'shared-key');
+    const cryptoObj = globalThis.crypto as Crypto;
+    const original = cryptoObj.subtle;
+    Object.defineProperty(cryptoObj, 'subtle', { configurable: true, value: undefined });
+    try {
+      expect(await decryptString(envelope, 'shared-key')).toBe('cross-runtime');
+    } finally {
+      Object.defineProperty(cryptoObj, 'subtle', { configurable: true, value: original });
+    }
+  });
 });

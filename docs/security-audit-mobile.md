@@ -40,6 +40,7 @@ Audit date: 2026-06-20 · OWASP Mobile Top 10 (2024) checklist for `apps/mobile`
 | MOB-04 | Sentry `extra` could carry secrets | `error-reporting.ts` scrubs sensitive keys + `beforeSend` |
 | MOB-05 | Android full backup may include SQLite PHI | `allowBackup=false` in `app.json` + `AndroidManifest.xml` |
 | MOB-06 | Password-reset token in deep link URL | `forgot-password.tsx` uses router params; API omits token unless `PASSWORD_RESET_TOKEN_IN_RESPONSE=true` |
+| MOB-D05 | Cloud sync plaintext fallback if `crypto.subtle` missing | `@noble/ciphers` AES-GCM on native; upload fails closed without ciphertext |
 
 ### Accepted / deferred
 
@@ -49,7 +50,6 @@ Audit date: 2026-06-20 · OWASP Mobile Top 10 (2024) checklist for `apps/mobile`
 | MOB-D02 | SQLite DB unencrypted (diary, allergies) | SQLCipher out of scope; mitigated by OS sandbox + no backup |
 | MOB-D03 | Local JSON backup export unencrypted | User-initiated export; documented in UX disclaimer |
 | MOB-D04 | Staging Maestro recovery key in EAS env | Internal E2E fixture only; not in production profile |
-| MOB-D05 | Cloud sync plaintext fallback if `crypto.subtle` missing | Blocked in practice on current Expo builds; monitor in P2.7 |
 | MOB-D06 | Cached `authUserJson` (login email) in SQLite | Needed for offline session; not synced to cloud |
 
 ## Verification

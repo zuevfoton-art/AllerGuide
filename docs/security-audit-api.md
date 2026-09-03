@@ -7,8 +7,8 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 | Severity | Open | Fixed this sprint | Accepted / deferred |
 |----------|------|-------------------|---------------------|
 | Critical | 0 | 2 | 0 |
-| High | 0 | 1 | 1 |
-| Medium | 0 | 1 | 3 |
+| High | 0 | 2 | 0 |
+| Medium | 0 | 2 | 2 |
 | Low | 0 | 0 | 2 |
 
 **Gate:** 0 critical open · regression tests in `security-pentest.test.ts`, `security.test.ts`, `sync-auth.test.ts`.
@@ -23,6 +23,7 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 | Profile IDOR (user A → profile B) | 404 | `security-pentest.test.ts` |
 | Sync IDOR (JWT user ≠ path userId) | 403 | `sync-auth.test.ts`, `sync.integration.test.ts` |
 | Sync without auth when enabled | 401 | `security-pentest.test.ts`, `sync-auth.test.ts` |
+| `SYNC_API_KEY` with `JWT_SECRET` set | 401 | `sync-auth.test.ts` |
 | Auth brute-force loop | 429 | `security.test.ts` |
 | Forgot-password token in body | absent (prod) | `security-pentest.test.ts` |
 | Analytics dashboard | 401 without key | `analytics.test.ts` |
@@ -36,15 +37,15 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 | API-01 | **Critical** | Sync open when `SYNC_ENABLED=true` but no `JWT_SECRET` / `SYNC_API_KEY` | `sync.ts` `requireSyncAccess` now always returns 401 without credentials |
 | API-02 | **Critical** | `forgot-password` returned `resetToken` in JSON | Token only when `PASSWORD_RESET_TOKEN_IN_RESPONSE=true` (dev/staging) |
 | API-03 | **High** | Analytics dashboard public when enabled | Requires `x-analytics-dashboard-key` matching `ANALYTICS_DASHBOARD_KEY` |
+| API-D01 | **High** | `SYNC_API_KEY` grants cross-user access | Key ignored when `JWT_SECRET` is set; JWT-only on staging/prod |
+| API-D04 | **Medium** | `SCAN_REQUIRE_AUTH` optional | Production boot fails if AI flags are on without `SCAN_REQUIRE_AUTH=true` |
 
 ### Accepted / deferred
 
 | ID | Severity | Finding | Rationale |
 |----|----------|---------|-----------|
-| API-D01 | High | `SYNC_API_KEY` grants cross-user access | Legacy server-to-server; disable in prod, use JWT only |
 | API-D02 | Medium | Rate limit store in-memory | P2.7b — Redis / Upstash |
 | API-D03 | Medium | `GET /api/alias-feedback` unauthenticated | Internal QA tool; disable or gate in prod deploy |
-| API-D04 | Medium | `SCAN_REQUIRE_AUTH` optional | Staging/prod env sets `true` |
 | API-D05 | Low | Health exposes feature flags | Acceptable for staging LB probes |
 | API-D06 | Low | Password min length 6 on reset | Align with product policy in Phase 3 |
 
@@ -56,8 +57,8 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password` | None (rate-limited) |
 | `GET /api/auth/me`, `DELETE /api/auth/account` | JWT |
 | `/api/profiles/*` | JWT (userId scoped in service layer) |
-| `/api/sync/*` | JWT (preferred) or `x-sync-api-key` |
-| `POST /api/scan` | JWT when `SCAN_REQUIRE_AUTH=true` |
+| `/api/sync/*` | JWT when `JWT_SECRET` is set; `x-sync-api-key` only if JWT is unset |
+| `POST /api/scan`, `/api/dishes/resolve` | JWT when `SCAN_REQUIRE_AUTH=true` |
 | `POST /api/analytics/events` | None (PII-sanitized ingest) |
 | `GET /api/analytics/dashboard` | `x-analytics-dashboard-key` when enabled |
 | `/api/allergens`, `/api/products/*`, `/api/governance` | Public by design |
@@ -87,7 +88,8 @@ done
 | Variable | Purpose |
 |----------|---------|
 | `JWT_SECRET` | Required for auth + JWT sync |
-| `SYNC_API_KEY` | Optional legacy sync key (avoid in prod) |
+| `SYNC_API_KEY` | Local/dev only; ignored when `JWT_SECRET` is set |
+| `SYNC_REQUIRE_ENCRYPTED` | `true` on staging/production |
 | `PASSWORD_RESET_TOKEN_IN_RESPONSE` | `true` only in dev/staging (no email provider yet) |
 | `ANALYTICS_DASHBOARD_KEY` | Required header secret for dashboard |
 | `RATE_LIMIT_DISABLED` | `true` only in tests |

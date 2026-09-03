@@ -744,6 +744,7 @@ const es: LocaleMessages = {
     recoveryKeyCopyHint: 'Copie la clave manualmente (pulsación larga en el texto).',
     recoveryKeyWrong: 'Clave de recuperación incorrecta.',
     recoveryKeyRequired: 'Enter your recovery key.',
+    encryptionUnavailable: 'Could not encrypt the backup. Try again or update the app.',
     localBackupDesc: 'Export/import JSON backup on this device.',
     localBackupExportSuccess: 'Backup saved.',
     localBackupImportSuccess: 'Data restored.',

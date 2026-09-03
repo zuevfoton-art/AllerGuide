@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from 'express';
-import { verifyAuthToken } from '../lib/jwt';
+import { isOverrideAuthRequired, resolveScanIdentity } from '../lib/scan-identity';
 import { logCaughtError } from '../lib/log-caught-error';
 import {
   recognizeSpeechWithYandexSpeechkit,
@@ -14,22 +14,6 @@ interface SttRequestBody {
   sampleRateHertz?: number;
 }
 
-function requireSttAuth(): boolean {
-  if (process.env.STT_REQUIRE_AUTH === 'true') return true;
-  if (process.env.STT_REQUIRE_AUTH === 'false') return false;
-  return process.env.SCAN_REQUIRE_AUTH === 'true';
-}
-
-async function resolveSttIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (requireSttAuth()) return null;
-  return `ip:${req.ip ?? 'unknown'}`;
-}
-
 /** Phase 3: SpeechKit STT — voice → text for scanner / diary fallback. */
 export function registerSttRoutes(app: Express) {
   app.post('/api/stt', async (req: Request, res: Response) => {
@@ -38,7 +22,9 @@ export function registerSttRoutes(app: Express) {
       return;
     }
 
-    const identity = await resolveSttIdentity(req);
+    const identity = await resolveScanIdentity(req, {
+      requireAuth: isOverrideAuthRequired(process.env.STT_REQUIRE_AUTH),
+    });
     if (!identity) {
       res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;
