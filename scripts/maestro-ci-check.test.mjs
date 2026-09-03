@@ -176,6 +176,32 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(authForm, /<Pressable\s+testID=\{testID\}/);
   });
 
+  it('folds diary IME via the step title before tapping Далее', () => {
+    const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
+    assert.match(dismiss, /id: diary-wizard-step-label/);
+    assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
+    assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
+    assert.match(tapPrimary, /scrollUntilVisible/);
+    assert.match(tapPrimary, /id: diary-wizard-primary/);
+
+    const fill = read('apps/mobile/.maestro/flows/_fill-wizard-field.yaml');
+    assert.match(fill, /_dismiss-wizard-ime\.yaml/);
+    assert.match(fill, /eraseText/);
+
+    for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
+      const flow = read(`apps/mobile/.maestro/flows/${name}`);
+      assert.ok(flow.includes('_tap-wizard-primary.yaml'), `${name} must tap Далее via _tap-wizard-primary`);
+      assert.ok(flow.includes('_fill-wizard-field.yaml'), `${name} must type via _fill-wizard-field`);
+      assert.doesNotMatch(
+        flow,
+        /^\s*-\s+tapOn:\s*\n\s+id: diary-wizard-primary\s*$/m,
+        `${name} must not tap diary-wizard-primary while IME may cover it`,
+      );
+    }
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));
