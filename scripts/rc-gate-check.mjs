@@ -11,6 +11,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { interpretStagingHealthResponse } from './rc-gate-health.mjs';
+import {
+  findDocFactDrift,
+  parseLatestMigrationNumber,
+  parseMobileSchemaVersion,
+} from './rc-gate-doc-facts.mjs';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const quick = process.argv.includes('--quick');
@@ -338,6 +343,33 @@ async function checkStagingHealth() {
   reportStagingHealthIssue(lastFailure);
 }
 
+/** Docs must quote the live mobile schema version and migration range. */
+function checkDocFacts() {
+  const schemaVersion = parseMobileSchemaVersion(
+    fs.readFileSync(path.join(root, 'apps/mobile/src/db/migrations.ts'), 'utf8'),
+  );
+  const latestMigration = parseLatestMigrationNumber(
+    fs.readdirSync(path.join(root, 'apps/api/drizzle')).filter((name) => name.endsWith('.sql')),
+  );
+
+  if (schemaVersion == null || latestMigration == null) {
+    failures.push('Could not read CURRENT_SCHEMA_VERSION or the newest drizzle migration');
+    return;
+  }
+
+  const docPaths = ['docs/architecture.md', 'docs/codebase-index.md'];
+  const docs = Object.fromEntries(
+    docPaths.map((docPath) => [docPath, fs.readFileSync(path.join(root, docPath), 'utf8')]),
+  );
+
+  const drift = findDocFactDrift({ schemaVersion, latestMigration, docs });
+  if (drift.length) {
+    failures.push(...drift);
+    return;
+  }
+  log(`docs match code: schema v${schemaVersion}, migrations up to ${String(latestMigration).padStart(4, '0')}`);
+}
+
 function checkSoakLogStarted() {
   const soakPath = path.join(root, 'docs/staging-soak-log.md');
   if (!fs.existsSync(soakPath)) {
@@ -378,7 +410,9 @@ checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
 runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
+runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
+checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 
