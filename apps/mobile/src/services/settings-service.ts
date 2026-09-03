@@ -62,3 +62,17 @@ export function getLocale(): AppLocale | null {
 export function setLocale(locale: AppLocale) {
   setSetting('locale', locale);
 }
+
+const ACTIVE_PROFILE_ID_KEY = 'activeProfileId';
+
+/** Last profile the user selected — durable, unlike session Zustand. */
+export function getStoredActiveProfileId(): number | null {
+  const value = getSetting(ACTIVE_PROFILE_ID_KEY);
+  if (!value) return null;
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+export function setStoredActiveProfileId(id: number | null) {
+  setSetting(ACTIVE_PROFILE_ID_KEY, id != null && id > 0 ? String(id) : '');
+}

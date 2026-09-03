@@ -86,7 +86,9 @@ export default function ScannerScreen() {
     <Screen
       onRefresh={() => scan.refresh()}
       refreshing={scan.refreshing}
-      brandHeaderRight={<ProfileHeaderButton />}
+      brandHeaderRight={
+        <ProfileHeaderButton variant="chip" chipTitle={scan.activeProfile?.name} />
+      }
       pinnedTop={
         scan.displayResult ? (
           <GlassCard

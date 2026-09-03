@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Profile, ProfileInput } from '@allerguide/core';
 
 const profiles: Profile[] = [];
+const settings: Record<string, string> = {};
 const executedStatements: { sql: string; params: unknown[] }[] = [];
 
 const db = {
@@ -17,6 +18,10 @@ const db = {
   },
   getFirstSync<T>(sql: string, params: unknown[] = []): T | null {
     const normalized = sql.toLowerCase();
+    if (normalized.includes('from app_settings') && normalized.includes('where key =')) {
+      const value = settings[String(params[0])];
+      return (value ? { value } : null) as T | null;
+    }
     if (normalized.includes('from profiles') && normalized.includes('order by id desc')) {
       const profile = profiles
         .filter((item) => item.userId === params[0])
@@ -35,6 +40,11 @@ const db = {
   runSync(sql: string, params: unknown[] = []): void {
     executedStatements.push({ sql, params });
     const normalized = sql.toLowerCase();
+
+    if (normalized.startsWith('insert or replace into app_settings')) {
+      settings[String(params[0])] = String(params[1] ?? '');
+      return;
+    }
 
     if (normalized.startsWith('insert into profiles')) {
       profiles.push({
@@ -123,6 +133,7 @@ const validInput: ProfileInput = {
 describe('profile-service local ownership and persistence', () => {
   beforeEach(() => {
     profiles.length = 0;
+    for (const key of Object.keys(settings)) delete settings[key];
     profiles.push(
       {
         id: 1,

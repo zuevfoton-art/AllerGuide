@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import type { Profile } from '@allerguide/core';
 
 const profiles: Profile[] = [];
+const settings: Record<string, string> = {};
 let backendListResponse: { ok: true; data: { profiles: Profile[] } } | { ok: false; error: string; status: number } = {
   ok: true,
   data: { profiles: [] },
@@ -47,8 +48,18 @@ vi.mock('@/src/store/app-store', () => ({
 vi.mock('@/src/db/init', () => ({
   getDb: () => ({
     getAllSync: () => profiles.filter((p) => p.userId === 7),
-    runSync: vi.fn(),
-    getFirstSync: vi.fn(),
+    runSync: (sql: string, params: unknown[] = []) => {
+      if (sql.toLowerCase().includes('app_settings')) {
+        settings[String(params[0])] = String(params[1] ?? '');
+      }
+    },
+    getFirstSync: (sql: string, params: unknown[] = []) => {
+      if (sql.toLowerCase().includes('app_settings')) {
+        const value = settings[String(params[0])];
+        return value ? { value } : null;
+      }
+      return null;
+    },
   }),
   persistDbWrites: vi.fn(async () => undefined),
 }));
@@ -76,6 +87,7 @@ const childProfile: Profile = {
 describe('refreshProfilesFromBackend', () => {
   beforeEach(() => {
     profiles.length = 0;
+    for (const key of Object.keys(settings)) delete settings[key];
     appState.activeProfileId = null;
     appState.activeProfile = null;
     backendListResponse = {
@@ -121,6 +133,7 @@ describe('ensureActiveProfileLoaded', () => {
   beforeEach(() => {
     profiles.length = 0;
     profiles.push(childProfile, selfProfile);
+    for (const key of Object.keys(settings)) delete settings[key];
     appState.activeProfileId = null;
     appState.activeProfile = null;
     vi.resetModules();
@@ -140,6 +153,43 @@ describe('ensureActiveProfileLoaded', () => {
     const { ensureActiveProfileLoaded } = await import('./profile-service');
     const active = ensureActiveProfileLoaded({ preferSelf: false });
     expect(active?.id).toBe(childProfile.id);
+  });
+
+  it('default preferSelf snaps a selected child back to parent', async () => {
+    appState.activeProfileId = childProfile.id;
+    appState.activeProfile = childProfile;
+    const { ensureActiveProfileLoaded } = await import('./profile-service');
+    const active = ensureActiveProfileLoaded();
+    expect(active?.id).toBe(selfProfile.id);
+    expect(appState.activeProfileId).toBe(selfProfile.id);
+  });
+
+  it('ensureCurrentProfileLoaded keeps a selected child', async () => {
+    appState.activeProfileId = childProfile.id;
+    appState.activeProfile = childProfile;
+    const { ensureCurrentProfileLoaded } = await import('./profile-service');
+    const active = ensureCurrentProfileLoaded();
+    expect(active?.id).toBe(childProfile.id);
+    expect(appState.activeProfile).toEqual(childProfile);
+  });
+
+  it('restores a stored child when Zustand is empty', async () => {
+    settings.activeProfileId = String(childProfile.id);
+    const { ensureCurrentProfileLoaded } = await import('./profile-service');
+    const active = ensureCurrentProfileLoaded();
+    expect(active?.id).toBe(childProfile.id);
+    expect(appState.activeProfileId).toBe(childProfile.id);
+  });
+
+  it('activateProfile writes the selection for later recovery', async () => {
+    const { activateProfile, ensureCurrentProfileLoaded } = await import('./profile-service');
+    activateProfile(childProfile);
+    expect(settings.activeProfileId).toBe(String(childProfile.id));
+
+    appState.activeProfileId = null;
+    appState.activeProfile = null;
+    const restored = ensureCurrentProfileLoaded();
+    expect(restored?.id).toBe(childProfile.id);
   });
 
   it('recovers a persisted profile id when transient app state is empty', async () => {

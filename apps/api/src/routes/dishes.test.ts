@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app';
 import { signAuthToken } from '../lib/jwt';
-import { resetScanBudget } from '../lib/scan-cache';
+import { resetScanState } from '../lib/scan-cache';
 import { callScanLlm } from '../services/llm-scan-provider';
 
 vi.mock('../services/llm-scan-provider', () => ({
@@ -25,7 +25,7 @@ describe('dish routes', () => {
     process.env.SCAN_REQUIRE_AUTH = 'true';
     process.env.SCAN_DAILY_BUDGET = '100';
     delete process.env.DATABASE_URL;
-    resetScanBudget();
+    resetScanState();
     vi.mocked(callScanLlm).mockReset();
   });
 
@@ -79,7 +79,7 @@ describe('dish routes', () => {
       }),
     );
     const app = await createApp();
-    const auth = await bearer(7);
+    const auth = await bearer(42429);
 
     const first = await request(app)
       .post('/api/dishes/resolve')
@@ -94,6 +94,7 @@ describe('dish routes', () => {
       .set('Authorization', auth)
       .send({ query: 'другое неизвестное блюдо xyz' });
     expect(second.status).toBe(429);
+    expect(second.body.error).toBe('Daily scan budget exceeded');
     expect(callScanLlm).toHaveBeenCalledTimes(1);
   });
 });

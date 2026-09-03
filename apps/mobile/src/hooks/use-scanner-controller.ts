@@ -34,7 +34,7 @@ import { saveAliasFeedback } from '@/src/services/alias-feedback-service';
 import { hapticDanger, hapticLight, hapticSuccess } from '@/src/services/haptics';
 import { resolveMatchAliasKeyword } from '@/src/services/scan-match-display';
 import {
-  ensureActiveProfileLoaded,
+  ensureCurrentProfileLoaded,
   getOrLoadActiveProfileId,
 } from '@/src/services/profile-service';
 import { confirmAction, confirmDestructiveAction } from '@/src/utils/confirm-action';
@@ -48,12 +48,13 @@ const HISTORY_DISPLAY_LIMIT = 5;
 export type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
 function resolveScanProfile(): Profile | null {
-  return useAppStore.getState().activeProfile ?? ensureActiveProfileLoaded();
+  return useAppStore.getState().activeProfile ?? ensureCurrentProfileLoaded();
 }
 
 export function useScannerController() {
   const { t, content } = useTranslation();
   const localeContent = content();
+  const activeProfile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
 
   const [input, setInput] = useState('');
@@ -124,12 +125,26 @@ export function useScannerController() {
     [safeList, result, input, activeProfileId],
   );
 
+  const resultRef = useRef(result);
+  resultRef.current = result;
+  const didMountProfileRef = useRef(false);
+
   useFocusEffect(
     useCallback(() => {
-      ensureActiveProfileLoaded();
+      ensureCurrentProfileLoaded();
       refreshHistory();
     }, [refreshHistory]),
   );
+
+  useEffect(() => {
+    if (!didMountProfileRef.current) {
+      didMountProfileRef.current = true;
+      return;
+    }
+    lastHapticResultRef.current = null;
+    refreshHistory();
+    if (resultRef.current) lastScanRef.current?.();
+  }, [activeProfileId, refreshHistory]);
 
   useEffect(() => {
     if (loading || !result) return;
@@ -441,6 +456,7 @@ export function useScannerController() {
   };
 
   return {
+    activeProfile,
     activeProfileId,
     input,
     setInput,
