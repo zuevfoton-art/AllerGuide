@@ -111,12 +111,14 @@ pending alias уходит после успешного POST; unhandled route e
 - Ownership helper для SOS / reminders / scans (дожать follow-up diary-doc).
 - Sweep `@deprecated` theme/logo/gradient aliases после короткого окна совместимости.
 
-### Wave 5 — Offline→online reconciliation
+### Wave 5 — Offline→online reconciliation (этот PR)
 
-- Mutation outbox для профилей при `BACKEND_AUTH` (ADR 001 Phase 3+).
-- Sync: retry-once на 502/503; fail-closed если encryption недоступна на stage.
-- Redis-backed scan daily budget (multi-instance).
-- Ops: enrichment fallback rates (по аналогии с `map_pollen_fallback`).
+- Mutation outbox профилей: при `BACKEND_AUTH` + network fail — локальная запись + очередь,
+  `flushProfileOutbox` на старте.
+- Sync: `fetchSyncWithRetry` (502/503 / сеть, один повтор); upload **fail-closed**
+  если `encryptBackup` вернул `null` (`encryption_unavailable`).
+- Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
+- Enrichment fallback rates — follow-up (pollen ops уже есть).
 
 ---
 
@@ -149,7 +151,8 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 
 | Волна | Статус |
 |-------|--------|
-| Wave 1 | ✅ реализована (этот PR) |
-| Wave 2–5 | 📝 запланированы |
+| Wave 1 | ✅ в `main` (#321) |
+| Wave 2–4 | отдельные PR |
+| Wave 5 | ✅ этот PR |
 
 После merge Wave 1 отметить ✅ и завести follow-up issues по Wave 2+.
