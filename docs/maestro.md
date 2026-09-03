@@ -160,5 +160,6 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
+| `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

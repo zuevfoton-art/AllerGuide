@@ -203,12 +203,18 @@ describe('Maestro nightly CI invariants', () => {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.ok(flow.includes('_tap-wizard-primary.yaml'), `${name} must tap Далее via _tap-wizard-primary`);
       assert.ok(flow.includes('_fill-wizard-field.yaml'), `${name} must type via _fill-wizard-field`);
+      assert.ok(flow.includes('diary-new-entry'), `${name} must open the entry picker from diary-new-entry`);
+      assert.doesNotMatch(flow, /diary-chip-/, `${name} must not tap removed home chips`);
       assert.doesNotMatch(
         flow,
         /^\s*-\s+tapOn:\s*\n\s+id: diary-wizard-primary\s*$/m,
         `${name} must not tap diary-wizard-primary while IME may cover it`,
       );
     }
+
+    const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
+    assert.match(photo, /id: diary-picker-skin/);
+    assert.match(photo, /id: diary-photo-step/);
   });
 
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
