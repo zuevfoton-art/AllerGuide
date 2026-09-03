@@ -95,7 +95,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 
 | Фича | Экраны | Services | Domain / API |
 |------|--------|----------|--------------|
-| **Scanner** | `(tabs)/scanner.tsx` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
+| **Scanner** | `(tabs)/scanner.tsx` + `use-scanner-controller` + `components/scanner/*` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service`, `diary-dish-recognition-service` | core `diary*`, `diary-wizard-route`, `dish-components` |
 | **Medicine photo / voice / barcode** | `MedicinePhotoStep` + `DiaryBarcodeScanner` + `MedicineNameField` in diary / ASIT / therapy / SOS | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service`, hook `use-medicine-suggestions` | core `medicine-catalog`, `food-drug-allergy`, `list-input`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
@@ -125,13 +125,13 @@ index.js              # Native-вход (Gradle entryFile) → install-runtime �
 entry.js              # Expo CLI / web / EAS вход (package.json main) → install-runtime
 src/install-runtime.ts  # Патчи до старта: CSPRNG + стоимость PBKDF2
 app/                  # Экраны (file-based routing)
-src/components/       # UI-компоненты (102 файла; brand/, diary/, onboarding/, profile-setup/)
+src/components/       # UI-компоненты (brand/, diary/, onboarding/, profile-setup/, scanner/, map/)
 src/services/         # Оркестрация (единственная точка для DB/API из UI)
 src/db/               # init, init.native, migrations, web-store, types
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
