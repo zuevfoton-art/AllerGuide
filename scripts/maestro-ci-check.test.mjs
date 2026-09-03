@@ -176,10 +176,19 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(authForm, /<Pressable\s+testID=\{testID\}/);
   });
 
-  it('folds diary IME via the step title before tapping Далее', () => {
+  it('folds diary IME via pinned editor chrome before tapping Далее', () => {
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
-    assert.match(dismiss, /id: diary-wizard-step-label/);
+    assert.match(dismiss, /id: diary-editor-title/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
+    assert.match(editorModal, /testID="diary-editor-title"/);
+    assert.match(editorModal, /collapsable=\{false\}/);
+    assert.doesNotMatch(
+      editorModal,
+      /liftStyle\s*[,}\]]/,
+      'DiaryEditorModal must not apply liftStyle to the sheet',
+    );
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);

@@ -1,6 +1,8 @@
-# Fold IME on the diary wizard without BACK / hideKeyboard.
-# Tap the non-interactive step title (same pattern as _dismiss-ime.yaml).
+# Fold IME on the diary editor without BACK / hideKeyboard.
+# Tap pinned modal chrome (outside the ScrollView). The wizard step title
+# slides under the status bar when Gboard is open, so its testID vanishes
+# from UiAutomator (Nightly 33736400731).
 appId: com.aclearo.app
 ---
 - tapOn:
-    id: diary-wizard-step-label
+    id: diary-editor-title
