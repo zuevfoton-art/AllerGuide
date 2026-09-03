@@ -18,14 +18,15 @@ import {
   backendLogin,
   backendRegister,
   backendFetchMe,
+  backendLogout,
   cacheAuthUser,
   clearAuthToken,
   clearCachedAuthUser,
   getAuthToken,
   getCachedAuthUser,
-  setAuthToken,
   syncProfilesFromBackend,
 } from '@/src/services/backend-api';
+import { applyAuthSession, getRefreshToken, refreshAccessToken } from '@/src/services/token-session';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { clearRecoveryKey } from '@/src/services/backup-crypto';
@@ -90,7 +91,10 @@ export async function restoreAuthSession(): Promise<void> {
 
   if (!BACKEND_AUTH_ENABLED) return;
 
-  const token = await getAuthToken();
+  let token = await getAuthToken();
+  if (!token && getRefreshToken()) {
+    token = await refreshAccessToken();
+  }
   if (!token) {
     if (getSessionUserId() || getCachedAuthUser()) {
       logoutUser();
@@ -154,7 +158,7 @@ export async function registerUser(input: {
     const response = await backendRegister(input);
     if (!response.ok) return { ok: false, error: response.error };
 
-    await setAuthToken(response.data.token);
+    applyAuthSession(response.data);
 
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
@@ -207,7 +211,7 @@ export async function loginUser(input: {
     const response = await backendLogin(input);
     if (!response.ok) return { ok: false, error: response.error };
 
-    await setAuthToken(response.data.token);
+    applyAuthSession(response.data);
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
@@ -240,9 +244,16 @@ export async function loginUser(input: {
 
 export function logoutUser() {
   trackEvent('auth_logout');
+  const refreshToken = getRefreshToken();
+  void (async () => {
+    const token = await getAuthToken();
+    if (token || refreshToken) {
+      await backendLogout({ token, refreshToken });
+    }
+    await clearAuthToken();
+  })();
   clearSessionUserId();
   clearCachedAuthUser();
-  void clearAuthToken();
   useAppStore.getState().resetAppState();
 }
 

@@ -29,6 +29,14 @@ import {
   searchMedicines,
   upsertMedicineCard,
 } from '../services/medicine-catalog-store';
+import {
+  deleteMedicineOverlay,
+  findMedicineOverlay,
+  mergeCatalogAndOverlayCards,
+  overlayRowToCard,
+  searchMedicineOverlays,
+  upsertMedicineOverlay,
+} from '../services/medicine-overlay-store';
 
 interface RecognizeRequestBody {
   imageBase64?: string;
@@ -61,19 +69,32 @@ function databaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
 }
 
+type MedicineWriteAccess = { type: 'key' } | { type: 'user'; userId: number };
+
 /**
- * Catalog writes always need an identity: a mobile JWT (device write-through)
- * or the shared MEDICINE_WRITE_KEY (server-to-server seeding). Reads stay open.
+ * Shared catalog writes need MEDICINE_WRITE_KEY (seed / curator).
+ * A mobile JWT may only write the caller's overlay.
  */
-async function isCatalogWriteAuthorized(req: Request): Promise<boolean> {
+async function resolveMedicineWriteAccess(req: Request): Promise<MedicineWriteAccess | null> {
+  const configuredKey = process.env.MEDICINE_WRITE_KEY?.trim();
+  if (configuredKey && req.header('x-medicine-write-key') === configuredKey) {
+    return { type: 'key' };
+  }
+
   const header = req.header('authorization');
   if (header?.startsWith('Bearer ')) {
     const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return true;
+    if (payload) return { type: 'user', userId: payload.sub };
   }
 
-  const configuredKey = process.env.MEDICINE_WRITE_KEY?.trim();
-  return Boolean(configuredKey) && req.header('x-medicine-write-key') === configuredKey;
+  return null;
+}
+
+async function resolveOptionalUserId(req: Request): Promise<number | null> {
+  const header = req.header('authorization');
+  if (!header?.startsWith('Bearer ')) return null;
+  const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+  return payload?.sub ?? null;
 }
 
 function parseAgeYears(value: unknown): number | null {
@@ -124,12 +145,17 @@ export function registerMedicineRoutes(app: Express) {
     }
 
     try {
-      const rows = await searchMedicines(query);
+      const catalog = (await searchMedicines(query)).map(medicineRowToCard);
+      const userId = await resolveOptionalUserId(req);
+      const overlays = userId
+        ? (await searchMedicineOverlays(userId, query)).map(overlayRowToCard)
+        : [];
+      const medicines = mergeCatalogAndOverlayCards(catalog, overlays);
       res.json({
         ok: true,
-        source: 'catalog',
-        count: rows.length,
-        medicines: rows.map(medicineRowToCard),
+        source: overlays.length > 0 ? 'mixed' : 'catalog',
+        count: medicines.length,
+        medicines,
       });
     } catch (error) {
       logCaughtError('medicines.search', error, { query });
@@ -143,7 +169,8 @@ export function registerMedicineRoutes(app: Express) {
       return;
     }
 
-    if (!(await isCatalogWriteAuthorized(req))) {
+    const access = await resolveMedicineWriteAccess(req);
+    if (!access) {
       res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;
     }
@@ -178,6 +205,11 @@ export function registerMedicineRoutes(app: Express) {
           ? body.source
           : 'manual',
       );
+      if (access.type === 'user') {
+        const saved = await upsertMedicineOverlay(access.userId, card);
+        respondWithCard(res, overlayRowToCard(saved), 'manual', false, null);
+        return;
+      }
       const saved = await upsertMedicineCard(card);
       respondWithCard(res, medicineRowToCard(saved), 'catalog', false, null);
     } catch (error) {
@@ -192,7 +224,8 @@ export function registerMedicineRoutes(app: Express) {
       return;
     }
 
-    if (!(await isCatalogWriteAuthorized(req))) {
+    const access = await resolveMedicineWriteAccess(req);
+    if (!access) {
       res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;
     }
@@ -204,7 +237,10 @@ export function registerMedicineRoutes(app: Express) {
     }
 
     try {
-      const deleted = await deleteMedicineByNormalizedName(normalizedName);
+      const deleted =
+        access.type === 'user'
+          ? await deleteMedicineOverlay(access.userId, normalizedName)
+          : await deleteMedicineByNormalizedName(normalizedName);
       if (!deleted) {
         res.status(404).json({ ok: false, error: 'Medicine not found' });
         return;
@@ -245,8 +281,17 @@ export function registerMedicineRoutes(app: Express) {
     const lookupName = lookupNameFromBody(body);
 
     try {
+      const userId = await resolveOptionalUserId(req);
       if (databaseConfigured() && lookupName) {
-        const hit = await findMedicineByNormalizedName(normalizeMedicineName(lookupName));
+        const normalized = normalizeMedicineName(lookupName);
+        if (userId) {
+          const overlay = await findMedicineOverlay(userId, normalized);
+          if (overlay) {
+            respondWithCard(res, overlayRowToCard(overlay), 'manual', true, ageYears);
+            return;
+          }
+        }
+        const hit = await findMedicineByNormalizedName(normalized);
         if (hit) {
           await bumpMedicineRecognitions(hit.id);
           respondWithCard(res, medicineRowToCard(hit), 'catalog', true, ageYears);
@@ -273,9 +318,9 @@ export function registerMedicineRoutes(app: Express) {
         }
 
         const card = toMedicineCard(parsed, 'vision');
-        if (databaseConfigured()) {
-          const saved = await upsertMedicineCard(card);
-          respondWithCard(res, medicineRowToCard(saved), 'vision', false, ageYears);
+        if (databaseConfigured() && userId) {
+          const saved = await upsertMedicineOverlay(userId, card);
+          respondWithCard(res, overlayRowToCard(saved), 'vision', false, ageYears);
           return;
         }
         respondWithCard(res, card, 'vision', false, ageYears);
@@ -290,9 +335,9 @@ export function registerMedicineRoutes(app: Express) {
           return;
         }
         const card = toMedicineCard(parsed, 'ocr');
-        if (databaseConfigured()) {
-          const saved = await upsertMedicineCard(card);
-          respondWithCard(res, medicineRowToCard(saved), 'ocr', false, ageYears);
+        if (databaseConfigured() && userId) {
+          const saved = await upsertMedicineOverlay(userId, card);
+          respondWithCard(res, overlayRowToCard(saved), 'ocr', false, ageYears);
           return;
         }
         respondWithCard(res, card, 'ocr', false, ageYears);

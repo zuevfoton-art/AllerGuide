@@ -1,4 +1,5 @@
 import { logCaughtError } from '@/src/services/error-reporting';
+import { refreshAccessToken } from '@/src/services/token-session';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -37,6 +38,21 @@ export async function apiRequest<T>(
     const payload = (await response.json()) as T & { error?: string; ok?: boolean };
 
     if (!response.ok) {
+      const canRefresh =
+        response.status === 401 &&
+        !path.startsWith('/api/auth/refresh') &&
+        !path.startsWith('/api/auth/login') &&
+        !path.startsWith('/api/auth/register') &&
+        !path.startsWith('/api/auth/logout') &&
+        Boolean(token);
+
+      if (canRefresh) {
+        const nextToken = await refreshAccessToken();
+        if (nextToken && nextToken !== token) {
+          return apiRequest<T>(path, { ...options, token: nextToken });
+        }
+      }
+
       return {
         ok: false,
         error: (payload as { error?: string }).error ?? 'Request failed',

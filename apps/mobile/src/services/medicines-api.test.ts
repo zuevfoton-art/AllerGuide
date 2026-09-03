@@ -61,6 +61,25 @@ describe('medicines-api', () => {
     );
   });
 
+  it('sends the bearer token when searching so overlays can merge', async () => {
+    vi.doMock('@/src/services/auth-service', () => ({
+      getBackendAuthToken: vi.fn().mockResolvedValue('tok'),
+    }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, medicines: [card] }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { searchMedicinesFromCatalog } = await import('./medicines-api');
+    const hits = await searchMedicinesFromCatalog('зирт');
+
+    expect(hits).toHaveLength(1);
+    expect((fetchMock.mock.calls[0][1] as RequestInit).headers).toEqual({
+      Authorization: 'Bearer tok',
+    });
+  });
+
   it('searches the catalog without a token', async () => {
     vi.doMock('@/src/services/auth-service', () => ({
       getBackendAuthToken: vi.fn().mockResolvedValue(null),

@@ -2,6 +2,13 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app';
 
+vi.mock('../services/refresh-token-service', () => ({
+  issueRefreshToken: vi.fn(async () => 'refresh-test'),
+  rotateRefreshToken: vi.fn(),
+  revokeRefreshToken: vi.fn(),
+  revokeRefreshTokensForUser: vi.fn(),
+}));
+
 vi.mock('../services/app-user-service', () => ({
   registerAppUser: vi.fn(),
   loginAppUser: vi.fn(),
@@ -28,6 +35,7 @@ import {
   loginAppUser,
   findUserById,
 } from '../services/app-user-service';
+import { rotateRefreshToken } from '../services/refresh-token-service';
 import { listProfilesForUser, createProfileForUser } from '../services/profile-service';
 import { signAuthToken } from '../lib/jwt';
 
@@ -55,6 +63,8 @@ describe('mobile auth routes', () => {
     expect(response.status).toBe(201);
     expect(response.body.ok).toBe(true);
     expect(response.body.token).toBeTypeOf('string');
+    expect(response.body.refreshToken).toBe('refresh-test');
+    expect(response.body.expiresIn).toBeGreaterThan(0);
     expect(response.body.user.id).toBe(1);
   });
 
@@ -73,6 +83,7 @@ describe('mobile auth routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.user.loginType).toBe('phone');
+    expect(response.body.refreshToken).toBe('refresh-test');
   });
 
   it('returns current user with bearer token', async () => {
@@ -98,6 +109,47 @@ describe('mobile auth routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.user.id).toBe(3);
+  });
+
+  it('rotates a refresh token into a new access session', async () => {
+    vi.mocked(rotateRefreshToken).mockResolvedValue({ userId: 3 });
+    vi.mocked(findUserById).mockResolvedValue({
+      id: 3,
+      login: 'user@example.com',
+      loginType: 'email',
+      email: 'user@example.com',
+      phone: null,
+      passwordHash: 'hash',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .send({ refreshToken: 'refresh-old' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.token).toBeTypeOf('string');
+    expect(response.body.refreshToken).toBe('refresh-test');
+  });
+
+  it('revokes the presented refresh token on logout', async () => {
+    const { revokeRefreshToken } = await import('../services/refresh-token-service');
+
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .send({ refreshToken: 'refresh-test' });
+
+    expect(response.status).toBe(200);
+    expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+  });
+
+  it('rejects a missing refresh token', async () => {
+    const app = await createApp();
+    const response = await request(app).post('/api/auth/refresh').send({});
+    expect(response.status).toBe(400);
   });
 });
 

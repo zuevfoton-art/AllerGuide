@@ -55,10 +55,14 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 |-------|------|
 | `GET /api/health` | None |
 | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password` | None (rate-limited) |
+| `POST /api/auth/refresh` | Opaque refresh token (rotated) |
+| `POST /api/auth/logout` | Refresh token and/or JWT |
 | `GET /api/auth/me`, `DELETE /api/auth/account` | JWT |
 | `/api/profiles/*` | JWT (userId scoped in service layer) |
 | `/api/sync/*` | JWT when `JWT_SECRET` is set; `x-sync-api-key` only if JWT is unset |
 | `POST /api/scan`, `/api/dishes/resolve` | JWT when `SCAN_REQUIRE_AUTH=true` |
+| `POST /api/medicines`, `DELETE /api/medicines/:name` | JWT → per-user overlay; `x-medicine-write-key` → public catalog |
+| `GET /api/medicines/search` | Public catalog; JWT additionally merges caller overlay |
 | `POST /api/analytics/events` | None (PII-sanitized ingest) |
 | `GET /api/analytics/dashboard` | `x-analytics-dashboard-key` when enabled |
 | `/api/allergens`, `/api/products/*`, `/api/governance` | Public by design |
@@ -88,6 +92,9 @@ done
 | Variable | Purpose |
 |----------|---------|
 | `JWT_SECRET` | Required for auth + JWT sync |
+| `ACCESS_TOKEN_TTL` / `ACCESS_TOKEN_TTL_SECONDS` | Access JWT lifetime (default 30m) |
+| `REFRESH_TOKEN_TTL_MS` | Opaque refresh lifetime (default 30 days) |
+| `MEDICINE_WRITE_KEY` | Server-to-server public catalog writes |
 | `SYNC_API_KEY` | Local/dev only; ignored when `JWT_SECRET` is set |
 | `SYNC_REQUIRE_ENCRYPTED` | `true` on staging/production |
 | `PASSWORD_RESET_TOKEN_IN_RESPONSE` | `true` only in dev/staging (no email provider yet) |

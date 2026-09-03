@@ -38,6 +38,25 @@ vi.mock('../services/medicine-catalog-store', () => ({
   medicineRowToCard: vi.fn((row: MedicineCard) => ({ ...row, source: 'catalog' })),
 }));
 
+vi.mock('../services/medicine-overlay-store', () => ({
+  findMedicineOverlay: vi.fn(async () => null),
+  searchMedicineOverlays: vi.fn(async () => []),
+  upsertMedicineOverlay: vi.fn(async (_userId: number, card: MedicineCard) => ({
+    userId: 1,
+    normalizedName: 'нурофен',
+    ...card,
+    aliases: card.aliases ?? [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  })),
+  deleteMedicineOverlay: vi.fn(async () => true),
+  overlayRowToCard: vi.fn((row: MedicineCard) => ({ ...row, source: 'manual' })),
+  mergeCatalogAndOverlayCards: vi.fn((catalog: MedicineCard[], overlays: MedicineCard[]) => [
+    ...catalog,
+    ...overlays,
+  ]),
+}));
+
 vi.mock('../services/llm-dish-vision-provider', async () => {
   const actual = await vi.importActual<typeof import('../services/llm-dish-vision-provider')>(
     '../services/llm-dish-vision-provider',
@@ -50,7 +69,7 @@ vi.mock('../services/llm-dish-vision-provider', async () => {
 });
 
 vi.mock('../lib/jwt', () => ({
-  verifyAuthToken: vi.fn(async () => ({ sub: 'user-1' })),
+  verifyAuthToken: vi.fn(async () => ({ sub: 1, login: 'user@example.com', loginType: 'email' })),
 }));
 
 describe('medicine routes', () => {
@@ -149,19 +168,11 @@ describe('medicine routes', () => {
     expect(response.status).toBe(401);
   });
 
-  it('accepts a catalog write from an authenticated device', async () => {
+  it('writes an authenticated device card to the user overlay, not the public catalog', async () => {
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
     const store = await import('../services/medicine-catalog-store');
-    vi.mocked(store.upsertMedicineCard).mockResolvedValueOnce({
-      id: 'med-1',
-      normalizedName: 'нурофен',
-      ...catalogHit,
-      source: 'manual',
-      recognitions: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-    vi.mocked(store.medicineRowToCard).mockReturnValueOnce({ ...catalogHit, source: 'catalog' });
+    const overlay = await import('../services/medicine-overlay-store');
+    vi.mocked(overlay.overlayRowToCard).mockReturnValueOnce({ ...catalogHit, source: 'manual' });
 
     const app = express();
     app.use(express.json());
@@ -174,7 +185,58 @@ describe('medicine routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.ok).toBe(true);
-    expect(store.upsertMedicineCard).toHaveBeenCalled();
+    expect(overlay.upsertMedicineOverlay).toHaveBeenCalled();
+    expect(store.upsertMedicineCard).not.toHaveBeenCalled();
+  });
+
+  it('merges the caller overlay into authenticated search', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    const overlay = await import('../services/medicine-overlay-store');
+    vi.mocked(store.searchMedicines).mockResolvedValueOnce([]);
+    vi.mocked(overlay.searchMedicineOverlays).mockResolvedValueOnce([
+      {
+        userId: 1,
+        normalizedName: 'нурофен',
+        ...catalogHit,
+        aliases: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+    vi.mocked(overlay.overlayRowToCard).mockReturnValueOnce({ ...catalogHit, source: 'manual' });
+    vi.mocked(overlay.mergeCatalogAndOverlayCards).mockReturnValueOnce([
+      { ...catalogHit, source: 'manual' },
+    ]);
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .get('/api/medicines/search?q=нурофен')
+      .set('authorization', 'Bearer mobile-jwt');
+
+    expect(response.status).toBe(200);
+    expect(overlay.searchMedicineOverlays).toHaveBeenCalledWith(1, 'нурофен');
+    expect(response.body.medicines).toHaveLength(1);
+  });
+
+  it('does not include another user overlay in anonymous search', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    const overlay = await import('../services/medicine-overlay-store');
+    vi.mocked(store.searchMedicines).mockResolvedValueOnce([]);
+    vi.mocked(overlay.searchMedicineOverlays).mockResolvedValueOnce([]);
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app).get('/api/medicines/search?q=нурофен');
+    expect(response.status).toBe(200);
+    expect(overlay.searchMedicineOverlays).not.toHaveBeenCalled();
+    expect(response.body.medicines).toEqual([]);
   });
 
   it('remembers a typed medicine into the catalog', async () => {
@@ -232,6 +294,24 @@ describe('medicine routes', () => {
 
     expect(response.status).toBe(200);
     expect(store.deleteMedicineByNormalizedName).toHaveBeenCalledWith('проверка защиты');
+  });
+
+  it('deletes only the caller overlay when authorized with a JWT', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    const overlay = await import('../services/medicine-overlay-store');
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .delete('/api/medicines/нурофен')
+      .set('authorization', 'Bearer mobile-jwt');
+
+    expect(response.status).toBe(200);
+    expect(overlay.deleteMedicineOverlay).toHaveBeenCalledWith(1, 'нурофен');
+    expect(store.deleteMedicineByNormalizedName).not.toHaveBeenCalled();
   });
 
   it('rejects a delete without the write key', async () => {
@@ -359,6 +439,48 @@ describe('medicine routes', () => {
     expect(response.body.source).toBe('vision');
     expect(response.body.cached).toBe(false);
     expect(response.body.ageUsage.blocked).toBe(true);
-    expect(store.upsertMedicineCard).toHaveBeenCalled();
+    expect(store.upsertMedicineCard).not.toHaveBeenCalled();
+  });
+
+  it('writes a vision miss to the caller overlay when a JWT is present', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    const overlay = await import('../services/medicine-overlay-store');
+    const vision = await import('../services/llm-dish-vision-provider');
+    vi.mocked(vision.medicineVisionConfigured).mockReturnValue(true);
+    vi.mocked(vision.callMedicineVisionLlm).mockResolvedValueOnce(
+      JSON.stringify({
+        name: 'Нурофен',
+        activeSubstance: 'ибупрофен',
+        form: 'таблетки',
+        strength: '200 мг',
+        manufacturer: '',
+        indications: 'боль',
+        ageUsage: [],
+        minAgeYears: 6,
+        ingredients: '',
+        allergenTags: [],
+        confidence: 'medium',
+      }),
+    );
+    vi.mocked(overlay.overlayRowToCard).mockReturnValueOnce({
+      ...catalogHit,
+      source: 'vision',
+      minAgeYears: 6,
+    });
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .post('/api/medicines/recognize')
+      .set('authorization', 'Bearer mobile-jwt')
+      .send({ imageBase64: 'aGVsbG8=', mimeType: 'image/jpeg', ageYears: 4 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.source).toBe('vision');
+    expect(overlay.upsertMedicineOverlay).toHaveBeenCalled();
+    expect(store.upsertMedicineCard).not.toHaveBeenCalled();
   });
 });

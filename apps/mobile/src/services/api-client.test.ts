@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiRequest } from './api-client';
+import { refreshAccessToken } from './token-session';
+
+vi.mock('./token-session', () => ({
+  refreshAccessToken: vi.fn(),
+}));
 
 const originalFetch = global.fetch;
 
@@ -53,5 +58,48 @@ describe('apiRequest', () => {
     const result = await apiRequest('/api/auth/register', { method: 'POST', timeoutMs: 20 });
 
     expect(result).toEqual({ ok: false, error: 'Не удалось подключиться к серверу', status: 0 });
+  });
+
+  it('retries once after a 401 when refresh succeeds', async () => {
+    vi.mocked(refreshAccessToken).mockResolvedValueOnce('new-jwt');
+    global.fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: 'Unauthorized' }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ user: { id: 1 } }),
+      }) as unknown as typeof fetch;
+
+    const result = await apiRequest('/api/profiles', { token: 'old-jwt' });
+
+    expect(result).toEqual({ ok: true, data: { user: { id: 1 } } });
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect((global.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls[1]?.[1]).toEqual(
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: 'Bearer new-jwt' }),
+      }),
+    );
+  });
+
+  it('does not refresh on auth login failures', async () => {
+    vi.mocked(refreshAccessToken).mockClear();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({ error: 'Invalid credentials' }),
+    }) as unknown as typeof fetch;
+
+    const result = await apiRequest('/api/auth/login', {
+      method: 'POST',
+      token: 'stale-jwt',
+      body: { login: 'x' },
+    });
+
+    expect(result.status).toBe(401);
+    expect(refreshAccessToken).not.toHaveBeenCalled();
   });
 });

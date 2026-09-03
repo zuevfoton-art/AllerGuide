@@ -1,38 +1,22 @@
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import type { AuthUser, Profile, ProfileInput } from '@allerguide/core';
 import { apiRequest } from '@/src/services/api-client';
 import { getDb } from '@/src/db/init';
 import { getSetting, setSetting } from '@/src/services/settings-service';
-import {
-  deleteSensitiveSetting,
-  getSensitiveSetting,
-  setSensitiveSettingSync,
-} from '@/src/services/secure-settings-service';
 import { logCaughtError } from '@/src/services/error-reporting';
+import { clearAuthSessionTokens, getAccessToken, setAccessToken } from '@/src/services/token-session';
 
-const AUTH_TOKEN_KEY = 'authToken';
 const AUTH_USER_JSON_KEY = 'authUserJson';
 
 export async function getAuthToken(): Promise<string | null> {
-  if (Platform.OS === 'web') {
-    return getSetting(AUTH_TOKEN_KEY);
-  }
-  const cached = getSensitiveSetting(AUTH_TOKEN_KEY);
-  if (cached) return cached;
-  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  return getAccessToken();
 }
 
 export async function setAuthToken(token: string) {
-  if (Platform.OS === 'web') {
-    setSetting(AUTH_TOKEN_KEY, token);
-    return;
-  }
-  setSensitiveSettingSync(AUTH_TOKEN_KEY, token);
+  setAccessToken(token);
 }
 
 export async function clearAuthToken() {
-  await deleteSensitiveSetting(AUTH_TOKEN_KEY);
+  await clearAuthSessionTokens();
 }
 
 export function cacheAuthUser(user: AuthUser) {
@@ -62,7 +46,7 @@ export async function backendRegister(input: {
   password: string;
   confirmPassword: string;
 }) {
-  return apiRequest<{ user: AuthUser; token: string }>('/api/auth/register', {
+  return apiRequest<{ user: AuthUser; token: string; refreshToken?: string; expiresIn?: number }>('/api/auth/register', {
     method: 'POST',
     body: input,
   });
@@ -73,7 +57,7 @@ export async function backendLogin(input: {
   login: string;
   password: string;
 }) {
-  return apiRequest<{ user: AuthUser; token: string }>('/api/auth/login', {
+  return apiRequest<{ user: AuthUser; token: string; refreshToken?: string; expiresIn?: number }>('/api/auth/login', {
     method: 'POST',
     body: input,
   });
@@ -85,6 +69,14 @@ export async function backendFetchMe(token: string) {
 
 export async function backendDeleteAccount(token: string) {
   return apiRequest<{ ok: true }>('/api/auth/account', { method: 'DELETE', token });
+}
+
+export async function backendLogout(input: { token?: string | null; refreshToken?: string | null }) {
+  return apiRequest<{ ok: true }>('/api/auth/logout', {
+    method: 'POST',
+    token: input.token,
+    body: input.refreshToken ? { refreshToken: input.refreshToken } : {},
+  });
 }
 
 export async function backendForgotPassword(input: { login: string; loginType: 'email' | 'phone' }) {
