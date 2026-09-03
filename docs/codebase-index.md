@@ -79,7 +79,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Строка UI (все 6 локалей) | `apps/mobile/src/i18n/types.ts` + `locales/{ru,en,es,fr,de,it}.ts` |
 | Feature flag | `apps/mobile/src/constants/features.ts` + корневой `.env.example` + `eas.json` |
 | Локальная схема SQLite | `apps/mobile/src/db/init.native.ts` + `migrations.ts` |
-| Web persistence (IndexedDB) | `apps/mobile/src/db/web-store.ts` + `init.ts` |
+| Web persistence (IndexedDB) | `apps/mobile/src/db/web-store.ts` + `web-collections.ts` + `web-sql-router.ts` + `init.ts` |
 | API endpoint | `apps/api/src/routes/*` → регистрация в `app.ts` |
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
@@ -127,7 +127,7 @@ src/install-runtime.ts  # Патчи до старта: CSPRNG + стоимос�
 app/                  # Экраны (file-based routing)
 src/components/       # UI-компоненты (brand/, diary/, onboarding/, profile-setup/, scanner/, map/)
 src/services/         # Оркестрация (единственная точка для DB/API из UI)
-src/db/               # init, init.native, migrations, web-store, types
+src/db/               # init, init.native, migrations, web-store, web-collections, web-sql-router, types
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
@@ -190,7 +190,10 @@ src/modules/marketplace/
 |------|------|
 | `src/db/init.native.ts` | SQLite schema + migrations entry |
 | `src/db/migrations.ts` | `CURRENT_SCHEMA_VERSION = 10` (incremental; v10 — `market_catalog_snapshot`) |
-| `src/db/init.ts` | Web `DbLike` над IndexedDB |
+| `src/db/init.ts` | Web `DbLike`: делегирует `runSync` / `getFirstSync` / `getAllSync` в роутер |
+| `src/db/web-collections.ts` | Typed get/save accessors для JSON-коллекций IndexedDB |
+| `src/db/web-sql-handlers.ts` | Именованные обработчики каждой SQL-ветки WebDb |
+| `src/db/web-sql-router.ts` | `normalizeSql` + dispatch `startsWith` / `includes` (тот же порядок, что у старого `WebDb`) |
 | `src/db/web-store.ts` | IndexedDB + in-memory cache + legacy migration |
 | `src/store/app-store.ts` | Active profile, scenario |
 | `src/store/locale-store.ts` | **`useTranslation()`** — основной i18n |

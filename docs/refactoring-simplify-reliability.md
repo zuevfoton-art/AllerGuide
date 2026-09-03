@@ -72,7 +72,7 @@ flowchart LR
   W1 --> W2 --> W3 --> W4 --> W5
 ```
 
-### Wave 1 — Transport resilience (этот PR)
+### Wave 1 — Transport resilience
 
 Цель: enrichment и LLM никогда не роняют и не вешают core-flow.
 
@@ -90,7 +90,7 @@ flowchart LR
 `pnpm --filter api test` зелёные; LLM/network throw → mock; hung fetch abort ≤ timeout;
 pending alias уходит после успешного POST; unhandled route error → 500 JSON.
 
-### Wave 2 — Screen decomposition (этот PR)
+### Wave 2 — Screen decomposition (в `main`, #324)
 
 - `scanner.tsx` (~1537 → ~264 LOC): `useScannerController` + `ScannerCameraModal` /
   `ScannerResultPanel` / `ScannerLists` / `scanner-styles` / `scanSourceLabelKey`.
@@ -99,12 +99,26 @@ pending alias уходит после успешного POST; unhandled route e
 - Экраны — wiring; I/O остаётся в services.
 - ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
 
-### Wave 3 — Kill WebDb SQL parsing
+### Wave 3 — Kill WebDb SQL parsing (этот PR)
 
-- Typed collection repositories (одна модель native + web), без `startsWith('insert into…')`.
-- Сохранить `DbLike` на переходный период или заменить точечно по доменам
-  (diary → profiles → scans).
-- Регрессия: существующие `init-*.test.ts` + service tests.
+Цель: SQL-string parsing — тонкий роутер, не 687-строчный god-class.
+Сервисы по-прежнему вызывают `getDb().runSync` / `getFirstSync` / `getAllSync`.
+Native SQLite не дублируем (`init.native.ts`).
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 3.1 | Typed get/save accessors + `StoredUser` / `StoredAliasFeedback` / `BarcodeCacheRow` / `StoredDiaryAttachment` | `apps/mobile/src/db/web-collections.ts` |
+| 3.2 | Каждая ветка `runSync` / `getFirstSync` / `getAllSync` — именованная функция; тот же порядок params и ownership | `apps/mobile/src/db/web-sql-handlers.ts` |
+| 3.3 | `normalizeSql` + dispatch в том же порядке `startsWith` / `includes` | `apps/mobile/src/db/web-sql-router.ts` |
+| 3.4 | `WebDb` только делегирует в роутер; `execSync` no-op; `getDb` / `initDb` / `persistDbWrites` без изменений | `apps/mobile/src/db/init.ts` |
+| 3.5 | Unmatched SQL → `console.warn('[WebDb] unmatched SQL', sql)` и `void` / `null` / `[]` (не throw) | router |
+| 3.6 | Регрессия + unmatched / alias DELETE-by-id | `init-*.test.ts`, `web-sql-router.test.ts` |
+
+Полные typed repositories (одна модель native + web без SQL-строк) — follow-up;
+в этом PR `DbLike` сохраняем.
+
+**Критерий готовности:** `init-diary` / `init-profile` / `init-scan` зелёные;
+unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-by-id через `getDb`.
 
 ### Wave 4 — Dedup и вычистка
 
@@ -152,7 +166,6 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Волна | Статус |
 |-------|--------|
 | Wave 1 | ✅ в `main` (#321) |
-| Wave 2 | ✅ этот PR — hooks + подэкраны scanner/map |
-| Wave 3–5 | 📝 запланированы |
-
-После merge Wave 1 отметить ✅ и завести follow-up issues по Wave 2+.
+| Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
+| Wave 3 | ✅ этот PR — typed WebDb collections / handlers / router |
+| Wave 4–5 | 📝 запланированы |
