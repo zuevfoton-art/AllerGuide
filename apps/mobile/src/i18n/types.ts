@@ -744,6 +744,7 @@ export type LocaleMessages = {
     recoveryKeyCopyHint: string;
     recoveryKeyWrong: string;
     recoveryKeyRequired: string;
+    encryptionUnavailable: string;
     localBackupDesc: string;
     localBackupExportSuccess: string;
     localBackupImportSuccess: string;

@@ -17,8 +17,6 @@ async function postAliasFeedbackEntry(entry: AliasFeedbackEntry): Promise<boolea
       term: entry.term,
       suggestedAllergenId: entry.suggestedAllergenId,
       context: entry.context,
-      profileId: entry.profileId,
-      scanInput: entry.scanInput,
     },
   });
   return result.ok;

@@ -48,8 +48,16 @@ const getAuthToken = vi.fn();
 const clearAuthToken = vi.fn();
 const syncProfilesFromBackend = vi.fn().mockResolvedValue({ ok: true });
 
+vi.mock('@/src/services/token-session', () => ({
+  applyAuthSession: vi.fn(),
+  getRefreshToken: vi.fn(() => null),
+  refreshAccessToken: vi.fn(async () => null),
+  usesCookieAuth: () => false,
+}));
+
 vi.mock('@/src/services/backend-api', () => ({
   backendFetchMe: (...args: unknown[]) => backendFetchMe(...args),
+  backendLogout: vi.fn().mockResolvedValue({ ok: true }),
   getAuthToken: () => getAuthToken(),
   clearAuthToken: () => clearAuthToken(),
   cacheAuthUser: (user: { id: number; login: string; loginType: string }) => {

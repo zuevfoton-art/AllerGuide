@@ -145,7 +145,7 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | Стоимость PBKDF2 на native | `PASSWORD_HASH_ITERATIONS_INTERPRETED` (50k) вместо 600k, ставится из `src/install-runtime` | Hermes — интерпретатор без JIT: 600k итераций блокируют JS-поток ~40 c, регистрация и вход «зависают». Web и API остаются на 600k. |
 | Соль для хэша | `setSecureRandomBytes` (expo-crypto) из `src/install-runtime` | `@noble/hashes` кэширует `globalThis.crypto` при импорте, а в release-сборке Hermes его нет. |
 | Точка входа JS | `index.js` (Gradle `entryFile`) **и** `entry.js` (`package.json` `main` для Expo CLI/EAS/web) импортируют `src/install-runtime` | Патч только в `entry.js` не попадает в нативный release-бандл — Gradle его не читает. |
-| Резервное шифрование (AES-GCM) | Web Crypto, с мягкой деградацией | На нативе `crypto.subtle` отсутствует → `isEncryptionAvailable() === false`, облачный бэкап (по умолчанию выключен) просто не шифруется. |
+| Резервное шифрование (AES-GCM) | Web Crypto или `@noble/ciphers` | На нативе без SubtleCrypto используется noble-путь; без ciphertext upload не выполняется. |
 
 **История крашей запуска (для контекста):**
 - 1.0.0 / 1.0.1 — краш из-за `react-native-quick-crypto` `install()` на старте (New Arch). JS-guard в 1.0.1 не помог (нативный abort).

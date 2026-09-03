@@ -93,7 +93,7 @@ describe('downloadBackup recovery key', () => {
     mockListProfiles.mockReturnValue([]);
     mockSetRecoveryKey.mockReturnValue({ ok: true });
     mockDecryptBackup.mockResolvedValue(VALID_PAYLOAD);
-    mockEncryptBackup.mockResolvedValue('enc-envelope');
+    mockEncryptBackup.mockResolvedValue('cipher-envelope');
     mockFetch.mockResolvedValue({
       ok: true,
       text: async () =>
@@ -135,6 +135,18 @@ describe('downloadBackup recovery key', () => {
       error: 'Облачная синхронизация пока недоступна',
       code: 'sync_disabled',
     });
+  });
+
+  it('does not upload plaintext when encryption is unavailable', async () => {
+    mockEncryptBackup.mockResolvedValue(null);
+    const { uploadBackup } = await import('./sync-service');
+    const result = await uploadBackup();
+    expect(result).toEqual({
+      ok: false,
+      error: 'Не удалось зашифровать резервную копию',
+      code: 'encryption_unavailable',
+    });
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('persists recovery key and applies payload on success', async () => {

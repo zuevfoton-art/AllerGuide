@@ -55,6 +55,7 @@ export type SyncErrorCode =
   | 'decrypt_failed'
   | 'wrong_recovery_key'
   | 'recovery_key_required'
+  | 'encryption_unavailable'
   | 'invalid_payload'
   | 'wrong_account'
   | 'encryption_unavailable';

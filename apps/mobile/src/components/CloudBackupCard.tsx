@@ -21,6 +21,8 @@ function syncErrorMessage(code: SyncErrorCode, fallback: string, t: (key: string
       return t('settings.recoveryKeyWrong');
     case 'recovery_key_required':
       return t('settings.recoveryKeyRequired');
+    case 'encryption_unavailable':
+      return t('settings.encryptionUnavailable');
     default:
       return fallback;
   }

@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { parseDishVisionResponse } from '@allerguide/ai';
-import { verifyAuthToken } from '../lib/jwt';
+import { resolveScanIdentity } from '../lib/scan-identity';
 import {
   consumeScanBudget,
   recordBudgetRejection,
@@ -20,20 +20,6 @@ import {
 interface DishVisionRequestBody {
   imageBase64?: string;
   mimeType?: string;
-}
-
-function requireScanAuth(): boolean {
-  return process.env.SCAN_REQUIRE_AUTH === 'true';
-}
-
-async function resolveScanIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (requireScanAuth()) return null;
-  return `ip:${req.ip ?? 'unknown'}`;
 }
 
 /** Option D: multimodal dish photo → name + likely ingredients (no OCR text required). */
