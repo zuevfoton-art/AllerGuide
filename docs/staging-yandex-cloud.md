@@ -314,7 +314,7 @@ NAT_IP=$(yc compute instance get --name aclearo-staging-yc-runner \
 ssh -i "$YC_RUNNER_SSH_KEY" yc-user@"$NAT_IP"
 
 cd /opt/actions-runner
-./config.sh --unattended \
+./config.sh --unattended --replace \
   --url https://github.com/zuevfoton-art/AllerGuide \
   --token <RUNNER_TOKEN> \
   --labels yc-staging-vpc,linux,x64 \
