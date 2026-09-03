@@ -12,7 +12,12 @@ import {
   maybeAlertMapPollenFallback,
 } from '../lib/map-pollen-ops';
 
+const MAX_INGEST_BATCH = 25;
+
 function analyticsEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.ANALYTICS_INGEST_ENABLED === 'true';
+  }
   return process.env.ANALYTICS_INGEST_ENABLED !== 'false';
 }
 
@@ -36,6 +41,10 @@ export function registerAnalyticsRoutes(app: Express) {
     const rawItems = normalizeAnalyticsBody(req.body);
     if (!rawItems.length) {
       res.status(400).json({ ok: false, error: 'No analytics events provided' });
+      return;
+    }
+    if (rawItems.length > MAX_INGEST_BATCH) {
+      res.status(400).json({ ok: false, error: 'Too many analytics events' });
       return;
     }
 

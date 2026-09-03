@@ -85,7 +85,14 @@ describe('alias-feedback-service', () => {
     expect(result).toEqual({ synced: 1, failed: 0 });
     expect(apiRequest).toHaveBeenCalledWith(
       '/api/alias-feedback',
-      expect.objectContaining({ method: 'POST' }),
+      expect.objectContaining({
+        method: 'POST',
+        body: {
+          term: 'молочко',
+          suggestedAllergenId: undefined,
+          context: undefined,
+        },
+      }),
     );
     expect(runSync).toHaveBeenCalledWith('DELETE FROM alias_feedback WHERE id = ?', ['alias-1']);
     expect(persistDbWrites).toHaveBeenCalled();

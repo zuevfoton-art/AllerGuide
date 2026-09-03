@@ -79,7 +79,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Строка UI (все 6 локалей) | `apps/mobile/src/i18n/types.ts` + `locales/{ru,en,es,fr,de,it}.ts` |
 | Feature flag | `apps/mobile/src/constants/features.ts` + корневой `.env.example` + `eas.json` |
 | Локальная схема SQLite | `apps/mobile/src/db/init.native.ts` + `migrations.ts` |
-| Web persistence (IndexedDB) | `apps/mobile/src/db/web-store.ts` + `init.ts` |
+| Web persistence (IndexedDB) | `apps/mobile/src/db/web-store.ts` + `web-collections.ts` + `web-sql-router.ts` + `init.ts` |
 | API endpoint | `apps/api/src/routes/*` → регистрация в `app.ts` |
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
@@ -95,7 +95,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 
 | Фича | Экраны | Services | Domain / API |
 |------|--------|----------|--------------|
-| **Scanner** | `(tabs)/scanner.tsx` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
+| **Scanner** | `(tabs)/scanner.tsx` + `use-scanner-controller` + `components/scanner/*` | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-*`, `ocr-api`, `scan-intent-api`, `search-ingredients-api`, `dish-vision-api`, dish/photo | `@allerguide/ai` (scan, intent, search, dish-vision); API `scan.ts`, `scan-intent.ts`, `scan-dish-vision.ts`, `ocr.ts`, `search-ingredients.ts` |
 | **Home insights** | `(tabs)/home.tsx` | `home-insights-service`, `wellness-service` | core `home-insights`, `wellness*`, `wellness-display` |
 | **Diary** | `(tabs)/diary.tsx` | `diary-*`, attachments, context, `diary-auto-metadata-service`, `diary-dish-recognition-service` | core `diary*`, `diary-wizard-route`, `dish-components` |
 | **Medicine photo / voice / barcode** | `MedicinePhotoStep` + `DiaryBarcodeScanner` + `MedicineNameField` in diary / ASIT / therapy / SOS | `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api`, `voice-dictation-service`, hook `use-medicine-suggestions` | core `medicine-catalog`, `food-drug-allergy`, `list-input`; ai `medicine-vision`, `medicine-label`; API `medicines.ts` |
@@ -103,10 +103,10 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
 | **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service`, `medicine-suggest-service` | core `allergy-passport`, `emergency-contacts`, `list-input` |
-| **Pollen / map** | `(tabs)/map.tsx` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `air-quality-service`, `location-service`, `place-service` | core pollen*, `hourly-series`, `air-quality`, `map-poi`, `pollen-species-heatmap`; API `pollen.ts`, `air-quality.ts`, `places.ts`, `maps.ts`; comps `AirQualityCard`, `PollenIndexCard`, `PlaceSearchBar`, `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
-| **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `secure-settings` | core `auth`/`login-field`/`phone`/`password`; API `mobile-auth.ts` |
-| **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` |
-| **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`; API `catalog.ts` |
+| **Pollen / map** | `(tabs)/map.tsx` + `use-map-live-data` + `components/map/*` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `air-quality-service`, `location-service`, `place-service` | core pollen*, `hourly-series`, `air-quality`, `map-poi`, `pollen-species-heatmap`; API `pollen.ts`, `air-quality.ts`, `places.ts`, `maps.ts`; comps `AirQualityCard`, `PollenIndexCard`, `PlaceSearchBar`, `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
+| **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `token-session`, `secure-settings` | core `auth`/`login-field`/`phone`/`password`; API `mobile-auth.ts` |
+| **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` + `lib/sync-payload.ts` |
+| **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`, `open-food-facts` (normalize/URL, без HTTP); API `catalog.ts` + `open-food-facts` |
 | **Market** | `(tabs)/market.tsx` | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
 | **Clinical** | `asit-course`, `asthma-action-plan`, `insect-action-plan`, `food-drug-registry`, `prescribed-therapy` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
@@ -125,13 +125,13 @@ index.js              # Native-вход (Gradle entryFile) → install-runtime �
 entry.js              # Expo CLI / web / EAS вход (package.json main) → install-runtime
 src/install-runtime.ts  # Патчи до старта: CSPRNG + стоимость PBKDF2
 app/                  # Экраны (file-based routing)
-src/components/       # UI-компоненты (102 файла; brand/, diary/, onboarding/, profile-setup/)
+src/components/       # UI-компоненты (brand/, diary/, onboarding/, profile-setup/, scanner/, map/)
 src/services/         # Оркестрация (единственная точка для DB/API из UI)
-src/db/               # init, init.native, migrations, web-store, types
+src/db/               # init, init.native, migrations, web-store, web-collections, web-sql-router, types
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
@@ -173,8 +173,8 @@ src/modules/marketplace/
 
 | Группа | Файлы |
 |--------|-------|
-| Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors`, `app-lock-service` |
-| Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service`, `owned-profiles` |
+| Auth / API | `auth-service`, `backend-api`, `token-session`, `api-client`, `api-errors`, `app-lock-service` |
+| Profiles | `profile-service`, `profile-outbox-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service`, `owned-profiles` |
 | Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-auto-metadata-service` (фоновое обогащение), `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
 | Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `scanner-dish-lookup-service`, `scanner-dish-query`, `scanner-dish-vision-display`, `scanner-photo-service`, `scanner-photo-geometry`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scan-match-display`, `dish-off-enrichment-service`, `dish-suggest-service`, `dish-resolve-api-service`, `dish-vision-api-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service`, `enrichment-api` |
 | Home | `home-insights-service`, `wellness-service` |
@@ -190,7 +190,10 @@ src/modules/marketplace/
 |------|------|
 | `src/db/init.native.ts` | SQLite schema + migrations entry |
 | `src/db/migrations.ts` | `CURRENT_SCHEMA_VERSION = 10` (incremental; v10 — `market_catalog_snapshot`) |
-| `src/db/init.ts` | Web `DbLike` над IndexedDB |
+| `src/db/init.ts` | Web `DbLike`: делегирует `runSync` / `getFirstSync` / `getAllSync` в роутер |
+| `src/db/web-collections.ts` | Typed get/save accessors для JSON-коллекций IndexedDB |
+| `src/db/web-sql-handlers.ts` | Именованные обработчики каждой SQL-ветки WebDb |
+| `src/db/web-sql-router.ts` | `normalizeSql` + dispatch `startsWith` / `includes` (тот же порядок, что у старого `WebDb`) |
 | `src/db/web-store.ts` | IndexedDB + in-memory cache + legacy migration |
 | `src/store/app-store.ts` | Active profile, scenario |
 | `src/store/locale-store.ts` | **`useTranslation()`** — основной i18n |
@@ -221,9 +224,9 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 
 | Файл | Назначение |
 |------|------------|
-| `mobile-auth.ts` | Register / login / refresh / forgot / reset / export / delete |
+| `mobile-auth.ts` | Register / login / refresh / logout / forgot / reset / export / delete |
 | `profiles.ts` | Profile CRUD (JWT) |
-| `sync.ts` | Encrypted backup (`SYNC_ENABLED`) |
+| `sync.ts` | Encrypted backup (`SYNC_ENABLED`); envelope gate in `lib/sync-payload.ts` |
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
 | `scan-dish-vision.ts` | Multimodal dish photo (`AI_DISH_VISION_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
@@ -232,7 +235,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
 | `dishes.ts` | Dish search + resolve состава (`DISH_LLM_ENABLED` для LLM-ветки) |
-| `medicines.ts` | Medicine recognize + catalog search + remember (VL via `AI_MEDICINE_VISION_ENABLED`; writes need JWT or `MEDICINE_WRITE_KEY`) |
+| `medicines.ts` | Medicine recognize + catalog search + remember (VL via `AI_MEDICINE_VISION_ENABLED`; JWT writes `profile.medicine_overlays`, `MEDICINE_WRITE_KEY` writes `catalog.medicines`) |
 | `market.ts` | Market catalog + Yandex resolve / retired draft-search + `/api/market/health` |
 | `pollen.ts` | Google pollen: heatmap tiles, `/forecast`, `/species-samples` |
 | `air-quality.ts` | Google Air Quality: `/current` + heatmap tiles |
@@ -249,12 +252,12 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 
 | Файл | Schema |
 |------|--------|
-| `db/app-schema.ts` | `profile.*` — `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` |
+| `db/app-schema.ts` | `profile.*` — `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens`, `refresh_tokens`, `medicine_overlays` |
 | `db/catalog-schema.ts` | `catalog.*` — `allergens`, `cross_reactions`, `products`, `dishes`, `medicines`, `alias_feedback`, `market_products`, `market_offers` |
 | `db/auth-schema.ts` | Legacy `public.users` / `public.sessions` — **не используются** кодом |
 | `db/config.ts` + `index.ts` | YC / local Postgres pools; optional `readDb` |
 | `db/seed-*.ts` / `import-*.ts` | Сиды: allergens, dishes, medicines, market, food-allergy dataset |
-| `drizzle/0000`…`0012_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
+| `drizzle/0000`…`0013_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
 
@@ -274,9 +277,9 @@ Barrel: `index.ts`. Pure TS.
 
 | Область | Модули (ориентиры) |
 |---------|-------------------|
-| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `adair-catalog` (`data/adair-registry.json`) |
+| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `open-food-facts` (OFF normalize/URL, без HTTP), `adair-catalog` (`data/adair-registry.json`) |
 | Profiles | `profile-allergens`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `profile-symptom-baseline`, `profile-age`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding`, `list-input` |
-| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
+| Diary / home | `diary` (barrel → `diary-schema` + `diary-format`), `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `scan-history-matches`, `alias-feedback`, `dish-components`, `name-matching` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `prescribed-therapy`, `insect-allergy`, `food-drug-allergy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios`, `beta-metrics`, `medical-disclaimer`, `medical-advisory-board` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report`, `doctor-report-timeline` |

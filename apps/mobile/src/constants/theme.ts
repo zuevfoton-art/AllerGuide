@@ -1,14 +1,9 @@
 import { Platform } from 'react-native';
 
-import {
-  getClaroGradient,
-  getCalmGradient,
-  type ClaroGradient,
-  type CalmGradient,
-} from '@/src/constants/claro-gradient';
+import { getClaroGradient, type ClaroGradient } from '@/src/constants/claro-gradient';
 
-export type { ClaroGradient, CalmGradient };
-export { getClaroGradient, getCalmGradient };
+export type { ClaroGradient };
+export { getClaroGradient };
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -225,9 +220,3 @@ export function createShadows(colors: ThemeColors) {
     danger: makeShadow(colors.danger, 4, 8, 0.25, 4),
   };
 }
-
-/** @deprecated Use useTheme() instead */
-export const colors = lightColors;
-
-/** @deprecated Use useTheme() instead */
-export const shadows = createShadows(lightColors);

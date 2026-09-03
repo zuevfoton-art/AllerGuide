@@ -6,6 +6,7 @@ import { logCaughtError } from '@/src/services/error-reporting';
 /** Keys stored in OS secure enclave on native (never mirrored to SQLite). */
 export const SENSITIVE_SETTING_KEYS = [
   'authToken',
+  'refreshToken',
   'recoveryKey',
   'backupSecret',
   'recoveryKeyConfirmed',

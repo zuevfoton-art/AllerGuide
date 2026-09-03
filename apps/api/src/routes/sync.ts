@@ -1,24 +1,10 @@
 import type { Express, NextFunction, Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
-import { verifyAuthToken } from '../lib/jwt';
+import { readAccessToken, resolveAuthPayload } from '../lib/request-auth';
 import { logCaughtError } from '../lib/log-caught-error';
+import { resolveEncryptedSyncPayload, type SyncBody } from '../lib/sync-payload';
 import { db } from '../db';
 import { syncBackups } from '../db/schema';
-
-interface SyncBody {
-  v?: 1 | 2;
-  userId?: number;
-  exportedAt?: string;
-  encrypted?: boolean;
-  // plaintext payloads carry these; encrypted payloads carry `payload` only
-  payload?: string;
-  profiles?: unknown[];
-  diaryEntries?: unknown[];
-  emergencyContacts?: unknown[];
-  scanHistory?: unknown[];
-  profileSos?: unknown[];
-  appSettings?: Record<string, string>;
-}
 
 function isSyncEnabled(): boolean {
   return process.env.SYNC_ENABLED === 'true';
@@ -74,8 +60,8 @@ async function loadBackup(userId: number): Promise<string | null> {
 }
 
 /**
- * Sync access requires either a valid mobile JWT (preferred — ties data to the
- * authenticated user) or the shared SYNC_API_KEY (legacy/server-to-server).
+ * Sync access requires a valid mobile JWT when `JWT_SECRET` is set (staging/prod).
+ * Legacy `SYNC_API_KEY` is only accepted when JWT is not configured (local/dev).
  */
 async function requireSyncAccess(req: Request, res: Response, next: NextFunction) {
   if (!isSyncEnabled()) {
@@ -83,9 +69,8 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
     return;
   }
 
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+  if (readAccessToken(req)) {
+    const payload = await resolveAuthPayload(req);
     if (!payload) {
       res.status(401).json({ ok: false, error: 'Invalid or expired token' });
       return;
@@ -95,19 +80,14 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
     return;
   }
 
-  const configuredKey = process.env.SYNC_API_KEY;
-  if (configuredKey) {
-    if (req.header('x-sync-api-key') !== configuredKey) {
-      res.status(401).json({ ok: false, error: 'Unauthorized' });
+  // ADR 002: JWT-only on staging/production. A shared key must not skip
+  // per-user ownership when JWT_SECRET is configured.
+  if (!process.env.JWT_SECRET) {
+    const configuredKey = process.env.SYNC_API_KEY;
+    if (configuredKey && req.header('x-sync-api-key') === configuredKey) {
+      next();
       return;
     }
-    next();
-    return;
-  }
-
-  if (process.env.JWT_SECRET) {
-    res.status(401).json({ ok: false, error: 'Authorization required' });
-    return;
   }
 
   res.status(401).json({ ok: false, error: 'Authorization required' });
@@ -126,6 +106,12 @@ export function registerSyncRoutes(app: Express) {
       return;
     }
 
+    const encryptedPayload = resolveEncryptedSyncPayload(body, userId);
+    if (!encryptedPayload.ok) {
+      res.status(400).json({ ok: false, error: encryptedPayload.error });
+      return;
+    }
+
     // When authenticated via JWT, callers may only write their own backup.
     if (tokenUserId && body?.userId && Number(body.userId) !== tokenUserId) {
       res.status(403).json({ ok: false, error: 'User mismatch' });
@@ -136,9 +122,9 @@ export function registerSyncRoutes(app: Express) {
       await persistBackup({
         userId,
         version: body.v,
-        encrypted: body.encrypted === true,
+        encrypted: encryptedPayload.encrypted,
         exportedAt: body.exportedAt,
-        raw: JSON.stringify({ ...body, userId }),
+        raw: encryptedPayload.raw,
       });
       res.json({ ok: true, exportedAt: body.exportedAt });
     } catch (error) {

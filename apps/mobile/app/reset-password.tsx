@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, type TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { validatePassword } from '@allerguide/core';
 import { backendResetPassword } from '@/src/services/backend-api';
 import { Screen } from '@/src/components/Screen';
 import { useTranslation } from '@/src/store/locale-store';
@@ -16,7 +17,7 @@ import {
 import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function ResetPasswordScreen() {
-  const { t } = useTranslation();
+  const { t, tAuthError } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { token } = useLocalSearchParams<{ token?: string }>();
@@ -33,12 +34,9 @@ export default function ResetPasswordScreen() {
       setError(t('auth.resetPassword.invalidToken'));
       return;
     }
-    if (password.length < 6) {
-      setError(t('auth.errors.passwordMin'));
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError(t('auth.errors.passwordMismatch'));
+    const passwordError = validatePassword(password, confirmPassword);
+    if (passwordError) {
+      setError(tAuthError(passwordError));
       return;
     }
 

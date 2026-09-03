@@ -1,17 +1,15 @@
 import type { NextFunction, Request, Response } from 'express';
-import { verifyAuthToken } from '../lib/jwt';
+import { resolveAuthPayload } from '../lib/request-auth';
 
 export async function requireJwt(req: Request, res: Response, next: NextFunction) {
-  const header = req.header('authorization');
-  if (!header?.startsWith('Bearer ')) {
-    res.status(401).json({ ok: false, error: 'Unauthorized' });
-    return;
-  }
-
-  const token = header.slice('Bearer '.length).trim();
-  const payload = await verifyAuthToken(token);
+  const payload = await resolveAuthPayload(req);
   if (!payload) {
-    res.status(401).json({ ok: false, error: 'Invalid or expired token' });
+    res.status(401).json({
+      ok: false,
+      error: req.header('authorization') || req.headers.cookie
+        ? 'Invalid or expired token'
+        : 'Unauthorized',
+    });
     return;
   }
 

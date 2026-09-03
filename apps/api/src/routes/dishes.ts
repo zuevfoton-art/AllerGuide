@@ -6,6 +6,8 @@ import {
   findDishRecipe,
   mergeDishComponents,
 } from '@allerguide/core';
+import { consumeScanBudget, recordBudgetRejection } from '../lib/scan-cache';
+import { resolveScanIdentity } from '../lib/scan-identity';
 import { logCaughtError } from '../lib/log-caught-error';
 import { bundledDishSuggestions, searchDishes } from '../services/dish-catalog-store';
 import { callScanLlm } from '../services/llm-scan-provider';
@@ -53,6 +55,12 @@ export function registerDishRoutes(app: Express) {
       return;
     }
 
+    const identity = await resolveScanIdentity(req);
+    if (!identity) {
+      res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+
     const query = String((req.body as { query?: string })?.query ?? '').trim();
     if (query.length < 2) {
       res.status(400).json({ ok: false, error: 'Query too short' });
@@ -70,6 +78,12 @@ export function registerDishRoutes(app: Express) {
         ingredients: local.components.map((item) => item.nameRu),
         components: local.components,
       });
+      return;
+    }
+
+    if (!consumeScanBudget(identity)) {
+      recordBudgetRejection();
+      res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;
     }
 

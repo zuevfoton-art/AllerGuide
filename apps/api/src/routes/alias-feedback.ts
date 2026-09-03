@@ -17,21 +17,22 @@ export function registerAliasFeedbackRoutes(app: Express) {
       scanInput?: string;
     };
 
-    const term = String(body.term ?? '').trim();
+    const term = String(body.term ?? '').trim().slice(0, 120);
     if (term.length < 2) {
       res.status(400).json({ ok: false, error: 'Term too short' });
       return;
     }
 
+    const suggestedAllergenId = String(body.suggestedAllergenId ?? '').trim().slice(0, 64);
+    const context = String(body.context ?? '').trim().slice(0, 200);
+
     const entry = await persistAliasFeedback({
       term,
-      suggestedAllergenId: body.suggestedAllergenId,
-      context: body.context,
-      profileId: body.profileId,
-      scanInput: body.scanInput,
+      suggestedAllergenId: suggestedAllergenId || undefined,
+      context: context || undefined,
     });
 
-    res.json({ ok: true, entry });
+    res.json({ ok: true, id: entry.id });
   });
 
   app.get('/api/alias-feedback', async (req: Request, res: Response) => {

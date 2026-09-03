@@ -32,7 +32,7 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
 
 async function main() {
   if (!isEncryptionAvailable()) {
-    throw new Error('Web Crypto is not available in this runtime');
+    throw new Error('Backup encryption is not available in this runtime');
   }
 
   console.log(`Staging sync smoke: ${BASE}`);

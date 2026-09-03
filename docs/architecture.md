@@ -236,6 +236,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `scan-history-service.ts` | Локальная история сканов |
 | `profile-service.ts` | CRUD профилей, миграция legacy → userId |
 | `auth-service.ts` | Локальные users **или** backend JWT |
+| `token-session.ts` | Access JWT (web: память; native: SecureStore) + refresh rotation |
 | `backend-api.ts` / `api-client.ts` | Обёртки `/api/auth/*`, `/api/profiles/*` |
 | `secure-settings-service.ts` | SecureStore (native) / settings (web) для token, recovery key |
 | `sync-service.ts` / `sync-restore.ts` | Шифрованный облачный бэкап |
@@ -476,11 +477,11 @@ flowchart LR
 | Режим | Хранение | Когда |
 |-------|----------|-------|
 | **Локальный** | `users` в SQLite/IndexedDB, `authUserId` в settings | `BACKEND_AUTH=false` |
-| **Backend JWT** | Token через `secure-settings-service` → **SecureStore** (native) / `app_settings` (web) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
+| **Backend JWT** | Access: память + httpOnly cookie (web) / SecureStore (native). Refresh: httpOnly cookie (web) / SecureStore (native) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
 
-Чувствительные ключи (`authToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
+Чувствительные ключи (`authToken`, `refreshToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
 
-JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 7 дней (`apps/api/src/lib/jwt.ts`).
+JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, access TTL 30 мин + opaque refresh 30 дней (`apps/api/src/lib/jwt.ts`). Ротация refresh — атомарный `UPDATE … WHERE revoked_at IS NULL`; повторно использованный токен отзывает всю семью. Браузерный `Origin` включает cookie-сессию: `ag_access` / `ag_refresh` (httpOnly, SameSite Lax на localhost и None+Secure на cross-site). JSON больше не отдаёт refresh web-клиенту. Native по-прежнему получает Bearer + refresh в теле.
 
 ### Dual-write policy (Phase 1)
 
@@ -508,7 +509,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 
 | Файл | Эндпоинты |
 |------|-----------|
-| `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
+| `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `refresh`, `logout`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
 | `routes/dishes.ts` | `GET /api/dishes/search`, `POST /api/dishes/resolve` |
@@ -543,19 +544,20 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 
 | Схема | Таблицы | Файл определения |
 |-------|---------|------------------|
-| **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` | `src/db/app-schema.ts` |
+| **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens`, `refresh_tokens`, `medicine_overlays` | `src/db/app-schema.ts` |
 | **`catalog`** | `allergens`, `cross_reactions`, `products`, `dishes`, `medicines`, `alias_feedback`, `market_products`, `market_offers` | `src/db/catalog-schema.ts` |
 | **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
-Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0012_*`).
+Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0013_*`).
 
 ### Каталог лекарств
 
 - **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото. `aliases jsonb` — латинские/альтернативные названия (миграция `0011_medicines_aliases`).
-- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
-- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префикс → contains → `similarity()` (pg_trgm) и `aliases`; дневник, АСИТ, «Терапия» и паспорт SOS подставляют хиты как автодополнение.
+- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу (каталог + overlay вызывающего) → VL fallback (`AI_MEDICINE_VISION_ENABLED`). Общий каталог не пишет; JWT может сохранить карточку в overlay. Каталожный hit увеличивает `recognitions`.
+- **Поиск:** `GET /api/medicines/search?q=` — общий каталог; с JWT дополнительно overlay вызывающего. Без LLM.
 - **allergenTags:** канонические id, как у `catalog.products` (`mapExternalAllergenIds` в сиде).
-- **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные). Запись всегда требует авторизации: mobile JWT (устройство) либо `x-medicine-write-key` = `MEDICINE_WRITE_KEY` (server-to-server, сид). Без этого — 401; чтение и `recognize` остаются открытыми.
+- **Remember:** `POST /api/medicines` — JWT пишет только в `profile.medicine_overlays` (карточка видна лишь этому пользователю в search). `x-medicine-write-key` = `MEDICINE_WRITE_KEY` пишет в общий `catalog.medicines` (сид/куратор). Пустые поля не затирают уже известные. Без auth — 401.
+- **Recognize:** lookup каталог + overlay вызывающего; VL/OCR не пишут в общий каталог (overlay — только при JWT).
 - **Сид каталога:** `pnpm --filter api db:seed-medicines` — датасет `apps/api/data/medicines/` заливается через `POST /api/medicines` (`API_BASE_URL` + `MEDICINE_WRITE_KEY`), идемпотентно.
 - **Curator cleanup:** `DELETE /api/medicines/:name` (та же авторизация) удаляет ошибочную/тестовую карточку по нормализованному имени.
 - **Клиент:** `EXPO_PUBLIC_MEDICINE_DB` включает VL/фото; поиск и remember идут при заданном `EXPO_PUBLIC_API_URL`. При флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance` + ранее сохранённые записи дневника. Demo-карточка только для фото без OCR, не для голоса.
@@ -574,7 +576,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 
 - Кэш результатов (ключ — хэш режима/текста/аллергенов)
 - Дневной бюджет на user/IP; биллится только промах кэша
-- `SCAN_REQUIRE_AUTH` — опциональное требование JWT
+- `SCAN_REQUIRE_AUTH` — JWT для billable AI; в `NODE_ENV=production` при включённых AI-флагах API не стартует без `true`
 - Провайдер: `AI_PROVIDER=yandex|openai` (default `openai`)
   - **yandex:** `YC_AI_API_KEY`, `YC_FOLDER_ID`, опционально `YC_GPT_MODEL` (default `yandexgpt-lite`)
   - **openai:** `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
@@ -616,9 +618,9 @@ Drizzle-объекты схемо-квалифицированы — код за
 ### Облачная синхронизация (`routes/sync.ts`)
 
 - Payload в `sync_backups` (in-memory fallback без БД)
-- Auth: mobile JWT **или** legacy `SYNC_API_KEY`
+- Auth: mobile JWT, когда задан `JWT_SECRET`. Legacy `SYNC_API_KEY` только без JWT (local/dev) и **не** обходит ownership
 - Владение по `userId` из токена
-- Клиент шифрует до загрузки — сервер zero-knowledge
+- Клиент шифрует AES-GCM (Web Crypto или `@noble/ciphers` на native) до загрузки. Сервер принимает ciphertext только если `payload` проходит `isEncryptedEnvelope` (alg/kdf/iter/salt/iv/ct) и в теле нет plaintext-коллекций (`profiles`, дневник, SOS…). Persist — `{ v, userId, encrypted, exportedAt, payload }`, не весь body. Флага `encrypted: true` недостаточно. Staging: `SYNC_REQUIRE_ENCRYPTED=true`
 
 #### Recovery key flow (cross-device restore)
 
@@ -834,9 +836,11 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `DATABASE_URL` / `DIRECT_DATABASE_URL` / `READ_DATABASE_URL` | Postgres connections |
 | `DB_SSL`, `DB_PREPARE`, `DB_POOL_*` | TLS / pooler / pool tuning |
 | `JWT_SECRET` | Mobile JWT signing |
-| `CORS_ORIGINS` | CORS allowlist |
+| `ACCESS_TOKEN_TTL` / `ACCESS_TOKEN_TTL_SECONDS` | Access JWT lifetime (default `30m` / `1800`) |
+| `REFRESH_TOKEN_TTL_MS` | Opaque refresh lifetime (default 30 days) |
+| `CORS_ORIGINS` | CORS allowlist (required in production) |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
-| `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
+| `SYNC_ENABLED`, `SYNC_API_KEY`, `SYNC_REQUIRE_ENCRYPTED` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
 | `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |
