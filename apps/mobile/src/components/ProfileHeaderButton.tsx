@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { listProfiles } from '@/src/services/profile-service';
+import { activateProfile, listProfiles } from '@/src/services/profile-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -30,7 +30,6 @@ export function ProfileHeaderButton({
   const [open, setOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const setActiveProfile = useAppStore((s) => s.setActiveProfile);
 
   useEffect(() => {
     if (!open) return;
@@ -39,7 +38,7 @@ export function ProfileHeaderButton({
 
   const selectProfile = (profile: Profile) => {
     if (activeProfileId !== profile.id) {
-      setActiveProfile(profile);
+      activateProfile(profile);
       trackEvent('profile_switched', { profile_type: profile.type, source: 'header' });
     }
     setOpen(false);

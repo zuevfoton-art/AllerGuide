@@ -15,6 +15,10 @@ import {
   isNetworkUnavailableStatus,
 } from '@/src/services/profile-outbox-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import {
+  getStoredActiveProfileId,
+  setStoredActiveProfileId,
+} from '@/src/services/settings-service';
 import { apiErrorMessage, resolveApiErrorCode, type ApiErrorCode } from '@/src/services/api-errors';
 import {
   dedupeAllergenIds,
@@ -96,24 +100,35 @@ function assertValidProfileInput(input: ProfileInput) {
   if (error) throw new ProfileValidationError(error);
 }
 
+function persistActiveProfile(profile: Profile | null) {
+  useAppStore.getState().setActiveProfile(profile);
+  setStoredActiveProfileId(profile?.id ?? null);
+}
+
 function syncActiveProfileAfterList(profiles: Profile[], options?: { preferSelf?: boolean }) {
-  const { activeProfileId, setActiveProfile } = useAppStore.getState();
+  const { activeProfileId } = useAppStore.getState();
   if (profiles.length === 0) {
-    setActiveProfile(null);
+    persistActiveProfile(null);
     return;
   }
 
   const preferred = resolvePreferredActiveProfile(profiles);
+  const candidateId = activeProfileId ?? getStoredActiveProfileId();
   const keepCurrent =
     !options?.preferSelf &&
-    activeProfileId != null &&
-    profiles.some((profile) => profile.id === activeProfileId);
+    candidateId != null &&
+    profiles.some((profile) => profile.id === candidateId);
 
   const active = keepCurrent
-    ? profiles.find((profile) => profile.id === activeProfileId) ?? preferred
+    ? profiles.find((profile) => profile.id === candidateId) ?? preferred
     : preferred;
 
-  setActiveProfile(active);
+  persistActiveProfile(active);
+}
+
+/** Remember the profile the user picked in the header switcher. */
+export function activateProfile(profile: Profile) {
+  persistActiveProfile(profile);
 }
 
 /**
@@ -134,11 +149,11 @@ export function ensureCurrentProfileLoaded(): Profile | null {
   return ensureActiveProfileLoaded({ preferSelf: false });
 }
 
-/** Recover the persisted profile when transient Zustand state is empty (for example after web HMR). */
+/** Recover the last selected profile when transient Zustand state is empty (web HMR / tab remount). */
 export function getOrLoadActiveProfileId(): number | null {
   const activeProfileId = useAppStore.getState().activeProfileId;
   if (activeProfileId != null) return activeProfileId;
-  return ensureActiveProfileLoaded({ preferSelf: true })?.id ?? null;
+  return ensureCurrentProfileLoaded()?.id ?? null;
 }
 
 function throwOnBackendError(response: { ok: false; error: string; status: number }): never {
@@ -179,7 +194,7 @@ export async function refreshProfilesFromBackend(): Promise<
 
   replaceLocalProfilesForUser(userId, response.data.profiles);
   const profiles = listProfiles();
-  syncActiveProfileAfterList(profiles, { preferSelf: true });
+  syncActiveProfileAfterList(profiles, { preferSelf: false });
   return { ok: true, profiles };
 }
 
@@ -218,7 +233,7 @@ export async function createProfile(input: ProfileInput) {
         response.data.profile.crossReactionAllergies ?? normalized.crossReactionAllergiesJson,
     };
     upsertLocalProfile(localProfile);
-    useAppStore.getState().setActiveProfile(localProfile);
+    persistActiveProfile(localProfile);
     await persistDbWrites();
     trackEvent('profile_created', { type: input.type, source: 'backend' });
     return response.data.profile.id;
@@ -257,7 +272,7 @@ function insertLocalProfileRow(
     'SELECT * FROM profiles WHERE id = ? AND userId = ?',
     [row.id, userId],
   );
-  useAppStore.getState().setActiveProfile(profile || null);
+  persistActiveProfile(profile || null);
   return row.id;
 }
 
@@ -311,8 +326,8 @@ export async function updateProfile(id: number, input: ProfileInput) {
         response.data.profile.crossReactionAllergies ?? normalized.crossReactionAllergiesJson,
     };
     upsertLocalProfile(localProfile);
-    const { activeProfileId, setActiveProfile } = useAppStore.getState();
-    if (activeProfileId === id) setActiveProfile(localProfile);
+    const { activeProfileId } = useAppStore.getState();
+    if (activeProfileId === id) persistActiveProfile(localProfile);
     await persistDbWrites();
     return localProfile;
   }
@@ -347,8 +362,8 @@ function applyLocalProfileUpdate(
     'SELECT * FROM profiles WHERE id = ? AND userId = ?',
     [id, userId],
   );
-  const { activeProfileId, setActiveProfile } = useAppStore.getState();
-  if (activeProfileId === id) setActiveProfile(profile || null);
+  const { activeProfileId } = useAppStore.getState();
+  if (activeProfileId === id) persistActiveProfile(profile || null);
   return profile;
 }
 
