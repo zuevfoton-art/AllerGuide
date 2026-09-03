@@ -1,0 +1,6 @@
+# Fold IME on the scanner without BACK / hideKeyboard.
+# Tap the page title (non-interactive Text), same pattern as auth-hero-title.
+appId: com.aclearo.app
+---
+- tapOn:
+    id: scanner-title

@@ -217,6 +217,28 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(photo, /id: diary-photo-step/);
   });
 
+  it('opens scanner manual input before typing молоко', () => {
+    const flow = read('apps/mobile/.maestro/flows/scanner-smoke.yaml');
+    assert.match(flow, /id: scanner-toggle-manual/);
+    assert.match(flow, /id: scanner-input/);
+    assert.match(flow, /_dismiss-scanner-ime\.yaml/);
+    assert.match(flow, /id: scanner-check/);
+    assert.ok(
+      flow.indexOf('scanner-toggle-manual') < flow.indexOf('scanner-input'),
+      'scanner-smoke must expand manual input before tapping scanner-input',
+    );
+    assert.doesNotMatch(flow, /^\s*-\s+hideKeyboard\b/m);
+
+    const dismiss = read('apps/mobile/.maestro/flows/_dismiss-scanner-ime.yaml');
+    assert.match(dismiss, /id: scanner-title/);
+    assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const screen = read('apps/mobile/app/(tabs)/scanner.tsx');
+    assert.match(screen, /testID="scanner-toggle-manual"/);
+    assert.match(screen, /testID="scanner-title"/);
+    assert.match(screen, /inputTestID="scanner-input"/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));

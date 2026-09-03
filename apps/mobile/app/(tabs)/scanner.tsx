@@ -675,7 +675,9 @@ export default function ScannerScreen() {
       }>
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
+          <Text style={ui.docTitle} testID="scanner-title">
+            {t('scanner.titleShort')}
+          </Text>
         </View>
       </View>
 

@@ -510,7 +510,7 @@
 | Diary | `diary-smoke.yaml` | новая запись → симптомы |
 | Diary dish | `diary-dish-smoke.yaml` | «борщ» → `diary-dish-checklist` → save |
 | Diary photo | `diary-photo-smoke.yaml` | «Кожа» → шаг `diary-photo-step` |
-| Scanner | `scanner-smoke.yaml` | ручной ввод «молоко» → `scanner-result` |
+| Scanner | `scanner-smoke.yaml` | «Ввести вручную» → «молоко» → `scanner-result` |
 | SOS | `sos-smoke.yaml` | `sos-profile-card`, паспорт |
 | Settings | `settings-smoke.yaml` | `/profile`, номер 112 |
 
