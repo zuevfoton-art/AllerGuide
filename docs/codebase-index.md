@@ -32,10 +32,15 @@
 ├── packages/ai/     # Сканер, OCR, scan-intent, search-ingredients, prescription / medicine parse
 ├── packages/ui/     # Тонкие RN-примитивы (Badge, PrimaryButton)
 ├── docs/            # Архитектура, QA, staging, clinical
-├── scripts/         # RC-gate, taxonomy check, YC stage gates
+├── scripts/         # RC-gate, taxonomy check, YC stage gates, Maestro, staging smokes
+├── infra/yandex/    # Terraform staging (YC)
+├── patches/         # pnpm patch (expo-modules-core)
 ├── .cursor/         # skills, rules, mcp.json
-└── .github/         # CI, EAS, YC staging
+├── .github/         # CI, EAS, YC staging, Maestro nightly
+└── Dockerfile       # Прод-образ API (контекст — корень репозитория)
 ```
+
+Масштаб (на 2026-09-01): `app/` — 34 файла маршрутов, `src/services/` — 97, `src/components/` — 102, тесты mobile — 82; `packages/core/src` — 104 модуля + barrel, `packages/ai/src` — 13.
 
 | Пакет | Зависит от |
 |-------|------------|
@@ -64,6 +69,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 |--------|-----|
 | Новый экран / маршрут | `apps/mobile/app/**` (+ `_layout` / tabs при необходимости) |
 | Логика экрана | `apps/mobile/src/services/*` — **не** в `app/` |
+| Патч рантайма до первого экрана (crypto, стоимость KDF) | `src/install-runtime.ts`; его импортируют **оба** входа: `index.js` (Gradle `entryFile`) и `entry.js` (`package.json` `main`) |
+| HTTP-запрос обогащения (pollen, AQI, OFF) | `src/utils/fetch-with-timeout.ts` — без таймаута экран может «зависнуть» |
 | Доменные правила, таксономия, валидация | `packages/core/src/*` |
 | Matching скана / OCR parse / LLM prompt | `packages/ai/src/*` |
 | Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
@@ -113,14 +120,19 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 ### Структура
 
 ```
+index.js              # Native-вход (Gradle entryFile) → install-runtime → ExpoRoot
+entry.js              # Expo CLI / web / EAS вход (package.json main) → install-runtime
+src/install-runtime.ts  # Патчи до старта: CSPRNG + стоимость PBKDF2
 app/                  # Экраны (file-based routing)
-src/components/       # UI-компоненты
+src/components/       # UI-компоненты (102 файла; brand/, diary/, onboarding/, profile-setup/)
 src/services/         # Оркестрация (единственная точка для DB/API из UI)
-src/db/               # init, migrations, web-store
+src/db/               # init, init.native, migrations, web-store, types
 src/store/            # Zustand: app / locale / theme
-src/i18n/             # 6 локалей + types.ts
-src/constants/        # features, theme, brand, typography
-src/hooks/            # theme, fonts, layout, wizard
+src/i18n/             # 6 локалей + content/ + types.ts
+src/constants/        # features, theme, brand, typography, layout
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume
+src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
+src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
 ```
 
@@ -130,6 +142,7 @@ src/modules/marketplace/
 |------|------------|
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
+| `(tabs)/_layout.tsx` | Нижние табы (6 штук) + кастомные кнопки |
 | `(tabs)/home.tsx` | Dashboard / двухслойный wellness / home-insights |
 | `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
@@ -151,28 +164,31 @@ src/modules/marketplace/
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
 | `legal/privacy.tsx` / `legal/terms.tsx` | Legal |
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
+| `+html.tsx` | Web-обёртка Expo Router (не экран) |
+
+Модальных маршрутов нет: sheet-модалки (`DiaryEditorModal`, `ListPickerSheet`, камера сканера) живут внутри экранов.
 
 ### Services (группы)
 
 | Группа | Файлы |
 |--------|-------|
-| Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors` |
-| Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service` |
-| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
-| Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scanner-photo-*`, `scanner-dish-*`, `dish-off-enrichment-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service` |
+| Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors`, `app-lock-service` |
+| Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service`, `owned-profiles` |
+| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-auto-metadata-service` (фоновое обогащение), `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
+| Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `scanner-dish-lookup-service`, `scanner-dish-query`, `scanner-dish-vision-display`, `scanner-photo-service`, `scanner-photo-geometry`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scan-match-display`, `dish-off-enrichment-service`, `dish-suggest-service`, `dish-resolve-api-service`, `dish-vision-api-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service` |
 | Home | `home-insights-service`, `wellness-service` |
 | SOS / reports | `sos-service`, `sos-passport-service`, `doctor-report-service` |
-| Clinical | `asit-*-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy*-service`, `clinical-reminder-service`, `reminder-reconcile-service` |
-| Pollen / map | `pollen-map-service`, `pollen-heatmap-service`, `pollen-reminder-service`, `location-service`, `place-service`, `wellness-service` |
+| Clinical | `asit-course-service`, `asit-reminder-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy-service`, `prescribed-therapy-reminder-service`, `clinical-reminder-service`, `reminder-reconcile-service`, `prescription-ocr-service`, `prescription-photo-service` |
+| Pollen / map | `pollen-map-service`, `pollen-hourly-service`, `pollen-heatmap-service`, `pollen-plume-service`, `pollen-reminder-service`, `air-quality-service`, `wind-service`, `location-service`, `place-service`, `map-basemap`, `google-maps-api-key`, `yandex-interactive-map-url` |
 | Sync / backup | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` |
-| Settings / ops | `settings-service`, `secure-settings-service`, `notification-*-service`, `app-lock-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
+| Settings / ops | `settings-service`, `secure-settings-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
 
 ### DB / store / i18n
 
 | Путь | Роль |
 |------|------|
 | `src/db/init.native.ts` | SQLite schema + migrations entry |
-| `src/db/migrations.ts` | `CURRENT_SCHEMA_VERSION = 9` (incremental) |
+| `src/db/migrations.ts` | `CURRENT_SCHEMA_VERSION = 10` (incremental; v10 — `market_catalog_snapshot`) |
 | `src/db/init.ts` | Web `DbLike` над IndexedDB |
 | `src/db/web-store.ts` | IndexedDB + in-memory cache + legacy migration |
 | `src/store/app-store.ts` | Active profile, scenario |
@@ -214,29 +230,38 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `search-ingredients.ts` | Yandex Search ingredients (`YC_SEARCH_ENABLED`) + cache |
 | `stt.ts` | SpeechKit STT (`YC_STT_ENABLED`) |
 | `catalog.ts` | Allergens + products barcode/search (+ OFF) |
+| `dishes.ts` | Dish search + resolve состава (`DISH_LLM_ENABLED` для LLM-ветки) |
 | `medicines.ts` | Medicine recognize + catalog search + remember (VL via `AI_MEDICINE_VISION_ENABLED`; writes need JWT or `MEDICINE_WRITE_KEY`) |
-| `market.ts` | Market catalog + Yandex resolve / retired draft-search |
-| `pollen.ts` | Google pollen heatmap proxy |
+| `market.ts` | Market catalog + Yandex resolve / retired draft-search + `/api/market/health` |
+| `pollen.ts` | Google pollen: heatmap tiles, `/forecast`, `/species-samples` |
+| `air-quality.ts` | Google Air Quality: `/current` + heatmap tiles |
+| `places.ts` | Places (New): nearby / autocomplete / search / details |
+| `maps.ts` | Yandex JS embed (`/yandex-interactive`, `/yandex-status`) |
 | `alias-feedback.ts` | Crowdsourced aliases |
-| `analytics.ts` | Event ingest |
+| `analytics.ts` | Event ingest + `/api/ops/map-pollen-health` + dashboard |
 | `governance.ts` | Policy metadata |
 | Health | `GET /api/health` в `app.ts` |
+
+Маршруты регистрируются функциями `register*Routes(app)` в `app.ts` — без под-роутеров с префиксами.
 
 ### DB
 
 | Файл | Schema |
 |------|--------|
-| `db/app-schema.ts` | `profile.*` — users, profiles, diary, scan_history, contacts, sos, sync_backups |
-| `db/catalog-schema.ts` | `catalog.*` — allergens, cross_reactions, products, medicines, market_products, market_offers, alias_feedback |
+| `db/app-schema.ts` | `profile.*` — `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` |
+| `db/catalog-schema.ts` | `catalog.*` — `allergens`, `cross_reactions`, `products`, `dishes`, `medicines`, `alias_feedback`, `market_products`, `market_offers` |
+| `db/auth-schema.ts` | Legacy `public.users` / `public.sessions` — **не используются** кодом |
 | `db/config.ts` + `index.ts` | YC / local Postgres pools; optional `readDb` |
-| `drizzle/0000`…`0011_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
+| `db/seed-*.ts` / `import-*.ts` | Сиды: allergens, dishes, medicines, market, food-allergy dataset |
+| `drizzle/0000`…`0012_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
 
 ### Middleware / services
 
 - Middleware: `security.ts` (helmet/CORS/rate limit), `require-jwt.ts`
-- Services: `open-food-facts`, `llm-scan-provider`, `yandex-vision-ocr`, `yandex-speechkit-stt`, `yandex-search-ingredients`, `google-pollen-heatmap`, `yandex-market-affiliate`, `marketplace/*` (YML/pharmacy feed + store), `app-user-service`, `profile-service`, …
+- Services: `open-food-facts`, `llm-scan-provider`, `llm-dish-vision-provider`, `yandex-vision-ocr`, `yandex-speechkit-stt`, `yandex-search-ingredients`, `yandex-maps-embed`, `yandex-market-affiliate`, `google-pollen-forecast`, `google-pollen-heatmap`, `google-pollen-species-samples`, `google-air-quality`, `google-places-*`, `dish-catalog-store`, `medicine-catalog-store`, `alias-feedback-service`, `app-user-service`, `profile-service`, `marketplace/*` (YML/pharmacy feed + store)
+- `src/lib/`: `scan-cache`, `search-ingredients-cache`, `dish-vision-cache`, `rate-limit-store` + `redis-client`, `analytics-store`, `posthog-forward`, `map-pollen-ops`, `product-search-rank`, `jwt`, `health`, `email-service`, `env-flag`, `log-caught-error`, `scan-smoke-expectation`
 
 ---
 
@@ -248,16 +273,18 @@ Barrel: `index.ts`. Pure TS.
 
 | Область | Модули (ориентиры) |
 |---------|-------------------|
-| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` (`data/adair-registry.json`) |
-| Profiles | `profile-*`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding` |
-| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display`, `medicine-catalog`, `profile-age` |
-| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components` |
-| Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `wellness-display`, `diary-wizard-route` |
-| SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
-| Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `marketplace-catalog` |
+| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `adair-catalog` (`data/adair-registry.json`) |
+| Profiles | `profile-allergens`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `profile-symptom-baseline`, `profile-age`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding`, `list-input` |
+| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
+| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `scan-history-matches`, `alias-feedback`, `dish-components`, `name-matching` |
+| Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `prescribed-therapy`, `insect-allergy`, `food-drug-allergy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios`, `beta-metrics`, `medical-disclaimer`, `medical-advisory-board` |
+| SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report`, `doctor-report-timeline` |
+| Pollen / geo / air / market | `pollen-*` (taxonomy, regions, calendar, thresholds, map, upi, plant-detail, google-forecast, google-normalize, species-heatmap, plume, reminder), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog` |
 | Sync / crypto | `sync`, `crypto` |
-| Auth | `auth`, `login-field`, `phone`, `password` |
-| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy` |
+| Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `secure-random` |
+| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
+
+Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,types}.ts` (за `cross-reactions/index.ts`).
 
 ### `@allerguide/ai` — `packages/ai/src/`
 
@@ -267,10 +294,14 @@ Barrel: `index.ts`. Pure TS.
 | `smart-scan.ts` | LLM prompt + normalize + mock |
 | `ocr.ts` | Demo / normalize OCR text |
 | `scan-intent.ts` | Heuristic + normalize OCR intent |
+| `scan-evidence.ts` | Свод VL-фото и OCR-текста в единый evidence |
 | `search-ingredients.ts` | Normalize search-ingredients response |
+| `dish-resolve.ts` | LLM prompt/parse: название блюда → состав |
+| `dish-vision.ts` | VL prompt/parse: фото блюда → название + ингредиенты |
 | `prescription-ocr.ts` | Parse prescription / ASIT text |
 | `medicine-vision.ts` | VL prompt/parse for medicine packages |
 | `medicine-label.ts` | Offline OCR parse of a package label; `parseMedicineVoiceUtterance` for spoken dose logs |
+| `golden-scanner-scenarios.ts` | Golden-сценарии сканера (E.3) — **не** в barrel |
 
 ### `@allerguide/ui` — `packages/ui/src/`
 
@@ -294,14 +325,20 @@ Barrel: `index.ts`. Pure TS.
 | `DISH_LLM` | `features.ts` | `DISH_LLM_ENABLED` + `AI_SCAN_ENABLED` (local/dev **off**; staging **on**) |
 | `PRODUCT_DB` | `features.ts` | catalog DB + OFF |
 | `MEDICINE_DB` | `features.ts` (`EXPO_PUBLIC_MEDICINE_DB`) | `AI_MEDICINE_VISION_ENABLED` + `catalog.medicines` |
+| `YC_STT` / `YC_STT_MIC` | `features.ts` | `YC_STT_ENABLED` (+ облачный микрофон) |
 | `POLLEN_HEATMAP=google` | `features.ts` | `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` |
+| `GOOGLE_MAP_PRIMARY` | `features.ts` → `map-basemap.ts` | Maps key |
+| `MAP_POLLEN_GOOGLE_PRIMARY` | `features.ts` → `pollen-map-service.ts` | `/api/pollen/forecast` |
+| `MAP_POLLEN_PLUME` | `features.ts` → `pollen-plume-service.ts` | — |
+| `YANDEX_MAP_INTERACTIVE` | `features.ts` → `yandex-interactive-map-url.ts` | `YANDEX_MAPS_INTERACTIVE_ENABLED` + `YANDEX_MAPS_JS_API_KEY` |
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
 | `MAP_PLACES` / `LIVE_MAP` (default on) | `features.ts` → `place-service.ts` | `MAP_PLACES_ENABLED` (default on) + Places key |
 | `AIR_QUALITY` (default on) | `features.ts` → `air-quality-service.ts` | `AIR_QUALITY_ENABLED` (default on) + AQ key |
+| `MARKET_LIVE_CATALOG` / `MARKET_MEDICINES` (default on) | `features.ts` → `market-api.ts` | `GET /api/market/catalog` |
 | `SENTRY_DSN` | `error-reporting.ts` | — |
 | `API_URL` | `api-client` и др. | — |
 
-По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places** и **Air Quality** (default on; `false`/`off` выключает).
+По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и **Market** (default on; `false`/`off` выключает). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
 
 ---
 
@@ -332,10 +369,12 @@ Barrel: `index.ts`. Pure TS.
 ```bash
 pnpm install                 # из корня
 pnpm typecheck
-pnpm test
-pnpm --filter mobile lint
+pnpm test                    # core + ai + mobile + api
+pnpm lint                    # mobile + api
 pnpm check:analytics-taxonomy
 pnpm rc-gate                 # typecheck + lint + test + taxonomy + doc/Maestro
+pnpm rc-gate:quick           # то же без pnpm test
+pnpm map-pollen-ops-check    # ops: доля fallback на карте пыления
 ```
 
 Mobile web: `cd apps/mobile && npx expo start --web --port 5000`  

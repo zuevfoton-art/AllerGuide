@@ -13,6 +13,7 @@ Gate before closing **Phase 2** and starting **Phase 3** (store readiness).
 | G4 | Staging API health `200` JSON (`ok: true`) | ✅ when `STAGING_API_URL` set | DevOps | ✅ `https://api.staging.aclearo.com` — checker reports HTTP status + body snippet (YC Gateway HTML/plain text is a fail, not a JSON parse crash) |
 | G5 | Sentry staging crash-free **≥99%** over soak window | Manual — [soak log](./staging-soak-log.md) | Product | ❌ **BLOCKED** — `EXPO_PUBLIC_SENTRY_DSN` not set in EAS `staging`, so no metrics exist |
 | G6 | Security audits **0 critical** open | ✅ parses audit docs when present | Security | ✅ |
+| G6b | Docs quote the live schema version + migration range | ✅ `rc-gate-doc-facts.mjs` | Eng | ✅ schema v10, migrations up to `0012` |
 | G7 | 2-week staging soak completed | Manual — soak log sign-off | Product | ❌ **BLOCKED** — see [staging-soak-log.md](./staging-soak-log.md) |
 
 ## Run locally
