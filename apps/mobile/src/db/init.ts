@@ -439,6 +439,12 @@ class WebDb implements DbLike {
       return;
     }
 
+    if (s.startsWith('delete from alias_feedback where id =')) {
+      const items = this.getAliasFeedback();
+      this.saveAliasFeedback(items.filter((item) => item.id !== params![0]));
+      return;
+    }
+
     if (s === 'delete from alias_feedback' || s.startsWith('delete from alias_feedback;')) {
       this.saveAliasFeedback([]);
       return;

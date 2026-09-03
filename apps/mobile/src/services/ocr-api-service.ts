@@ -1,7 +1,6 @@
 import { YC_OCR_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
-
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { enrichmentPost } from '@/src/services/enrichment-api';
 
 export interface CloudOcrSuccess {
   ok: true;
@@ -35,31 +34,35 @@ export async function recognizeImageViaApi(input: {
   if (!YC_OCR_ENABLED) return null;
 
   const token = await getBackendAuthToken();
-  const response = await fetch(`${API_BASE}/api/ocr`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({
-      imageBase64: stripDataUrlPrefix(input.imageBase64),
-      mimeType: input.mimeType || 'image/jpeg',
-      languageCodes: ['ru', 'en'],
-    }),
-  });
-
-  const payload = (await response.json().catch(() => ({}))) as {
+  const result = await enrichmentPost<{
     ok?: boolean;
     text?: string;
     fullText?: string;
     error?: string;
-  };
+  }>(
+    '/api/ocr',
+    {
+      imageBase64: stripDataUrlPrefix(input.imageBase64),
+      mimeType: input.mimeType || 'image/jpeg',
+      languageCodes: ['ru', 'en'],
+    },
+    { token, context: 'recognizeImageViaApi' },
+  );
 
-  if (!response.ok || !payload.ok || !payload.text?.trim()) {
+  if (!result.ok) {
     return {
       ok: false,
-      error: payload.error || `OCR HTTP ${response.status}`,
-      status: response.status,
+      error: result.error,
+      status: result.status,
+    };
+  }
+
+  const payload = result.data;
+  if (!payload.ok || !payload.text?.trim()) {
+    return {
+      ok: false,
+      error: payload.error || `OCR HTTP ${result.status}`,
+      status: result.status,
     };
   }
 

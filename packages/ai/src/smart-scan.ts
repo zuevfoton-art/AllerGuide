@@ -163,6 +163,9 @@ export function parseLlmScanResponse(
   }
 }
 
+/** LLM enrichment must never hang the scan UI; abort and fall through to keyword scan. */
+export const LLM_SCAN_TIMEOUT_MS = 20_000;
+
 export async function runLlmScan(input: {
   endpoint: string;
   apiKey?: string;
@@ -170,45 +173,59 @@ export async function runLlmScan(input: {
   text: string;
   allergens: string[];
   productName?: string;
+  timeoutMs?: number;
 }): Promise<ScanResult | null> {
   const prompt = buildScanPrompt(input);
+  const timeoutMs = input.timeoutMs ?? LLM_SCAN_TIMEOUT_MS;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  const response = await fetch(input.endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(input.apiKey ? { Authorization: `Bearer ${input.apiKey}` } : {}),
-    },
-    body: JSON.stringify({
-      mode: input.mode,
-      text: input.text,
-      allergens: input.allergens,
-      productName: input.productName,
-      prompt,
-    }),
-  });
+  try {
+    const response = await fetch(input.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(input.apiKey ? { Authorization: `Bearer ${input.apiKey}` } : {}),
+      },
+      body: JSON.stringify({
+        mode: input.mode,
+        text: input.text,
+        allergens: input.allergens,
+        productName: input.productName,
+        prompt,
+      }),
+      signal: controller.signal,
+    });
 
-  if (!response.ok) return null;
+    if (!response.ok) return null;
 
-  const payload = (await response.json()) as {
-    ok?: boolean;
-    result?: LlmScanResponse | ScanResult;
-    content?: string;
-  };
+    const payload = (await response.json().catch(() => null)) as {
+      ok?: boolean;
+      result?: LlmScanResponse | ScanResult;
+      content?: string;
+    } | null;
 
-  if (payload.result && 'verdict' in payload.result) {
-    const result = payload.result;
-    if ('mode' in result && 'crossMatches' in result) {
-      return result as ScanResult;
+    if (!payload) return null;
+
+    if (payload.result && 'verdict' in payload.result) {
+      const result = payload.result;
+      if ('mode' in result && 'crossMatches' in result) {
+        return result as ScanResult;
+      }
+      return parseLlmScanResponse(JSON.stringify(result), input.mode, input.allergens, input.productName);
     }
-    return parseLlmScanResponse(JSON.stringify(result), input.mode, input.allergens, input.productName);
-  }
 
-  if (payload.content) {
-    return parseLlmScanResponse(payload.content, input.mode, input.allergens, input.productName);
-  }
+    if (payload.content) {
+      return parseLlmScanResponse(payload.content, input.mode, input.allergens, input.productName);
+    }
 
-  return null;
+    return null;
+  } catch {
+    // Network / abort / parse — caller falls back to runMockScan.
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function runSmartScan(input: {
@@ -227,15 +244,19 @@ export async function runSmartScan(input: {
     : [];
 
   if (input.llmEndpoint) {
-    const llmResult = await runLlmScan({
-      endpoint: input.llmEndpoint,
-      apiKey: input.llmApiKey,
-      mode: input.mode,
-      text: input.text,
-      allergens,
-      productName: input.productName,
-    });
-    if (llmResult) return llmResult;
+    try {
+      const llmResult = await runLlmScan({
+        endpoint: input.llmEndpoint,
+        apiKey: input.llmApiKey,
+        mode: input.mode,
+        text: input.text,
+        allergens,
+        productName: input.productName,
+      });
+      if (llmResult) return llmResult;
+    } catch {
+      // Defensive: runLlmScan already soft-fails; never block keyword fallback.
+    }
   }
 
   return runMockScan({
