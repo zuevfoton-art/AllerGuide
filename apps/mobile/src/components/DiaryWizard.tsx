@@ -492,9 +492,9 @@ export function DiaryWizard({
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.progressText} testID="diary-wizard-step-label">
-        {section.title}
-      </Text>
+      <View testID="diary-wizard-step-label" collapsable={false}>
+        <Text style={styles.progressText}>{section.title}</Text>
+      </View>
 
       {/* The bar is the only progress indicator; the count stays for screen readers. */}
       <View

@@ -283,9 +283,14 @@ function checkMaestroFlows() {
     failures.push('_dismiss-wizard-ime.yaml missing (fold diary IME without BACK)');
   } else {
     const dismissWizardBody = fs.readFileSync(dismissWizardIme, 'utf8');
-    if (!dismissWizardBody.includes('diary-wizard-step-label')) {
-      failures.push('_dismiss-wizard-ime.yaml must tap diary-wizard-step-label (not hideKeyboard/BACK)');
+    if (!dismissWizardBody.includes('diary-editor-title')) {
+      failures.push('_dismiss-wizard-ime.yaml must tap diary-editor-title (pinned chrome, not the scrolled step title)');
     }
+  }
+
+  const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
+  if (!editorModal.includes('diary-editor-title') || /liftStyle\s*[,}\]]/.test(editorModal)) {
+    failures.push('DiaryEditorModal must expose diary-editor-title and must not apply liftStyle');
   }
 
   const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
