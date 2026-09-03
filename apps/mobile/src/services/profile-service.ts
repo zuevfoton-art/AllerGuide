@@ -10,6 +10,10 @@ import {
   upsertLocalProfile,
   replaceLocalProfilesForUser,
 } from '@/src/services/backend-api';
+import {
+  enqueueProfileOutbox,
+  isNetworkUnavailableStatus,
+} from '@/src/services/profile-outbox-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { apiErrorMessage, resolveApiErrorCode, type ApiErrorCode } from '@/src/services/api-errors';
 import {
@@ -180,14 +184,24 @@ export async function createProfile(input: ProfileInput) {
     const token = await getBackendAuthToken();
     if (!token) throw new ProfileServiceError('session_expired');
 
-    const response = await backendCreateProfile(token, {
+    const queuedInput = {
       ...input,
       name: normalized.name,
       allergies: normalized.allergenIds,
       allergyConfirmations: parseAllergyConfirmations(normalized.allergyConfirmationsJson),
       crossReactionAllergies: parseProfileAllergenIds(normalized.crossReactionAllergiesJson),
-    });
-    if (!response.ok) throwOnBackendError(response);
+    };
+    const response = await backendCreateProfile(token, queuedInput);
+    if (!response.ok) {
+      if (isNetworkUnavailableStatus(response.status)) {
+        const localId = insertLocalProfileRow(userId, input, normalized);
+        enqueueProfileOutbox({ op: 'create', localId: localId ?? undefined, input: queuedInput });
+        await persistDbWrites();
+        trackEvent('profile_created', { type: input.type, source: 'local' });
+        return localId;
+      }
+      throwOnBackendError(response);
+    }
 
     const localProfile = {
       ...response.data.profile,
@@ -202,6 +216,17 @@ export async function createProfile(input: ProfileInput) {
     return response.data.profile.id;
   }
 
+  const localId = insertLocalProfileRow(userId, input, normalized);
+  await persistDbWrites();
+  trackEvent('profile_created', { type: input.type, source: 'local' });
+  return localId;
+}
+
+function insertLocalProfileRow(
+  userId: number,
+  input: ProfileInput,
+  normalized: NormalizedProfilePayload,
+): number | null {
   const db = getDb();
   db.runSync(
     'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations, crossReactionAllergies) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -225,8 +250,6 @@ export async function createProfile(input: ProfileInput) {
     [row.id, userId],
   );
   useAppStore.getState().setActiveProfile(profile || null);
-  await persistDbWrites();
-  trackEvent('profile_created', { type: input.type, source: 'local' });
   return row.id;
 }
 
@@ -255,14 +278,23 @@ export async function updateProfile(id: number, input: ProfileInput) {
     const token = await getBackendAuthToken();
     if (!token) throw new ProfileServiceError('session_expired');
 
-    const response = await backendUpdateProfile(token, id, {
+    const queuedInput = {
       ...input,
       name: normalized.name,
       allergies: normalized.allergenIds,
       allergyConfirmations: parseAllergyConfirmations(normalized.allergyConfirmationsJson),
       crossReactionAllergies: parseProfileAllergenIds(normalized.crossReactionAllergiesJson),
-    });
-    if (!response.ok) throwOnBackendError(response);
+    };
+    const response = await backendUpdateProfile(token, id, queuedInput);
+    if (!response.ok) {
+      if (isNetworkUnavailableStatus(response.status)) {
+        applyLocalProfileUpdate(id, userId, input, normalized);
+        enqueueProfileOutbox({ op: 'update', localId: id, input: queuedInput });
+        await persistDbWrites();
+        return getProfile(id);
+      }
+      throwOnBackendError(response);
+    }
 
     const localProfile = {
       ...response.data.profile,
@@ -277,6 +309,18 @@ export async function updateProfile(id: number, input: ProfileInput) {
     return localProfile;
   }
 
+  const profile = applyLocalProfileUpdate(id, userId, input, normalized);
+  await persistDbWrites();
+  return profile;
+}
+
+function applyLocalProfileUpdate(
+  id: number,
+  userId: number,
+  input: ProfileInput,
+  normalized: NormalizedProfilePayload,
+): Profile | null {
+  const db = getDb();
   db.runSync(
     'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ? AND userId = ?',
     [
@@ -297,7 +341,6 @@ export async function updateProfile(id: number, input: ProfileInput) {
   );
   const { activeProfileId, setActiveProfile } = useAppStore.getState();
   if (activeProfileId === id) setActiveProfile(profile || null);
-  await persistDbWrites();
   return profile;
 }
 

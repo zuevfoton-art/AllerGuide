@@ -120,7 +120,7 @@ Native SQLite не дублируем (`init.native.ts`).
 **Критерий готовности:** `init-diary` / `init-profile` / `init-scan` зелёные;
 unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-by-id через `getDb`.
 
-### Wave 4 — Dedup и вычистка (этот PR)
+### Wave 4 — Dedup и вычистка (в `main`, #326)
 
 Цель: один OFF-парсер без HTTP в core, тонкий `diary.ts`, удаление неиспользуемых `@deprecated` alias.
 
@@ -135,12 +135,14 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 
 **Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
-### Wave 5 — Offline→online reconciliation
+### Wave 5 — Offline→online reconciliation (этот PR)
 
-- Mutation outbox для профилей при `BACKEND_AUTH` (ADR 001 Phase 3+).
-- Sync: retry-once на 502/503; fail-closed если encryption недоступна на stage.
-- Redis-backed scan daily budget (multi-instance).
-- Ops: enrichment fallback rates (по аналогии с `map_pollen_fallback`).
+- Mutation outbox профилей: при `BACKEND_AUTH` + network fail — локальная запись + очередь,
+  `flushProfileOutbox` на старте.
+- Sync: `fetchSyncWithRetry` (502/503 / сеть, один повтор); upload **fail-closed**
+  если `encryptBackup` вернул `null` (`encryption_unavailable`).
+- Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
+- Enrichment fallback rates — follow-up (pollen ops уже есть).
 
 ---
 
@@ -176,5 +178,5 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Wave 1 | ✅ в `main` (#321) |
 | Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
 | Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
-| Wave 4 | ✅ этот PR — OFF core mapping, diary split, unused aliases |
-| Wave 5 | 📝 запланирована |
+| Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
+| Wave 5 | ✅ этот PR — profile outbox, sync fail-closed, Redis scan budget |
