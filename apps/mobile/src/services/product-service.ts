@@ -102,16 +102,3 @@ export function searchRecommendedMarketplaceProducts(
       : recommended.filter((product) => product.category === category);
   return searchMarketplaceProducts(byCategory, query);
 }
-
-/** @deprecated Use searchRecommendedMarketplaceProducts after loadMarketplaceCatalog. */
-export function getRecommendedProducts(profile?: Profile | null): MarketplaceProduct[] {
-  return getRecommendedMarketplaceProducts(getBundledMarketplaceProducts(), profile);
-}
-
-/** @deprecated Use the async catalog loader for live/cache/seed fallback. */
-export function searchRecommendedProducts(
-  profile: Profile | null | undefined,
-  query: string,
-): MarketplaceProduct[] {
-  return searchRecommendedMarketplaceProducts(getBundledMarketplaceProducts(), profile, query);
-}

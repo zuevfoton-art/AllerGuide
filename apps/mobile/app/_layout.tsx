@@ -84,6 +84,16 @@ export default function RootLayout() {
       markStartupPhase('db_ready');
       setDbReady(true);
       void reconcileAllReminders();
+      void import('@/src/services/alias-feedback-service')
+        .then(({ flushPendingAliasFeedback }) => flushPendingAliasFeedback())
+        .catch((error) => {
+          console.warn('[startup] flushPendingAliasFeedback failed:', error);
+        });
+      void import('@/src/services/profile-outbox-service')
+        .then(({ flushProfileOutbox }) => flushProfileOutbox())
+        .catch((error) => {
+          console.warn('[startup] flushProfileOutbox failed:', error);
+        });
 
       const deferBackgroundWarmup = () => {
         safe('warmAllergenCatalogCache', warmAllergenCatalogCache);

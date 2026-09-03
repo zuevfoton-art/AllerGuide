@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { buildScanPrompt, parseLlmScanResponse } from '@allerguide/ai';
-import { verifyAuthToken } from '../lib/jwt';
+import { resolveScanIdentity } from '../lib/scan-identity';
 import {
   consumeScanBudget,
   getCachedScan,
@@ -17,21 +17,6 @@ import { parseScanInput } from './scan-input';
 
 function isScanEnabled(): boolean {
   return process.env.AI_SCAN_ENABLED === 'true';
-}
-
-function requireScanAuth(): boolean {
-  return process.env.SCAN_REQUIRE_AUTH === 'true';
-}
-
-/** Identify the caller for budgeting: prefer authenticated user, fall back to IP. */
-async function resolveScanIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (requireScanAuth()) return null;
-  return `ip:${req.ip ?? 'unknown'}`;
 }
 
 function logScanCacheEvent(hit: boolean): void {
@@ -80,7 +65,7 @@ export function registerScanRoutes(app: Express) {
     recordCacheMiss();
 
     // Only billable (cache-missing) calls consume the daily budget.
-    if (!consumeScanBudget(identity)) {
+    if (!(await consumeScanBudget(identity))) {
       recordBudgetRejection();
       res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;

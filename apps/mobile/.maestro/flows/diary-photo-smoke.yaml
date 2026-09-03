@@ -1,27 +1,38 @@
 # §7.3 — diary: skin photo step is reachable (gallery/camera UI)
 # Does not require actually picking a photo (permission-dependent on CI).
+# Entry types live in the «Что добавить» picker, not home chips.
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - tapOn:
     id: tab-diary
 - tapOn:
-    id: diary-chip-skin
+    id: diary-new-entry
+- scrollUntilVisible:
+    element:
+      id: diary-picker-skin
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: diary-picker-skin
 - extendedWaitUntil:
     visible:
       id: diary-wizard-primary
     timeout: 10000
 # skinArea + appearance + itching share one screen
-- tapOn:
-    id: diary-field-skinArea
-- inputText: лицо
-- tapOn:
-    id: diary-field-appearance
-- inputText: покраснение
+- runFlow:
+    file: _fill-wizard-field.yaml
+    env:
+      FIELD_ID: diary-field-skinArea
+      FIELD_VALUE: лицо
+- runFlow:
+    file: _fill-wizard-field.yaml
+    env:
+      FIELD_ID: diary-field-appearance
+      FIELD_VALUE: покраснение
 - tapOn:
     text: "Слабый"
-- tapOn:
-    id: diary-wizard-primary
+- runFlow: _tap-wizard-primary.yaml
 # photo step
 - extendedWaitUntil:
     visible:
@@ -30,13 +41,11 @@ appId: com.aclearo.app
 - assertVisible:
     id: diary-photo-library
 # Skip photos (optional) and finish notes
-- tapOn:
-    id: diary-wizard-primary
-- tapOn:
-    id: diary-wizard-primary
+- runFlow: _tap-wizard-primary.yaml
+- runFlow: _tap-wizard-primary.yaml
 - extendedWaitUntil:
     notVisible:
       id: diary-wizard-primary
     timeout: 10000
 - assertVisible:
-    id: diary-chip-skin
+    id: diary-new-entry

@@ -21,10 +21,31 @@ describe('security middleware', () => {
     expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
   });
 
-  it('reflects origin when no allowlist is configured', () => {
+  it('reflects origin when no allowlist is configured outside production', () => {
     delete process.env.CORS_ORIGINS;
+    delete process.env.NODE_ENV;
     const options = buildCorsOptions();
     expect(options.origin).toBe(true);
+  });
+
+  it('denies browser origins in production when no allowlist is configured', () => {
+    delete process.env.CORS_ORIGINS;
+    const options = buildCorsOptions({ NODE_ENV: 'production' });
+    const originFn = options.origin as (
+      origin: string | undefined,
+      cb: (err: Error | null, allow?: boolean) => void,
+    ) => void;
+
+    return new Promise<void>((resolve, reject) => {
+      originFn('https://evil.example.com', (err, allow) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        expect(allow).toBe(false);
+        resolve();
+      });
+    });
   });
 
   it('rejects origins outside the allowlist when configured', () => {

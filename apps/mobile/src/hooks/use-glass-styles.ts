@@ -9,9 +9,6 @@ export function useUiStyles() {
   return useMemo(() => createUiStyles(theme), [theme]);
 }
 
-/** @deprecated Use useUiStyles */
-export const useGlassStyles = useUiStyles;
-
 function createUiStyles({ colors, shadows, fonts }: AppTheme) {
   return StyleSheet.create({
     sectionHead: {

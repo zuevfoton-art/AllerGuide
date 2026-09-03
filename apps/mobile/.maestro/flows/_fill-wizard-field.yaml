@@ -1,0 +1,14 @@
+# Type into a diary wizard field, then fold IME via the step title.
+appId: com.aclearo.app
+---
+- runFlow: _dismiss-wizard-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: ${FIELD_ID}
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: ${FIELD_ID}
+- eraseText
+- inputText: ${FIELD_VALUE}
+- runFlow: _dismiss-wizard-ime.yaml

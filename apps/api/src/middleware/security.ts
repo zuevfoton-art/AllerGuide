@@ -16,15 +16,23 @@ function parseNumber(value: string | undefined, fallback: number): number {
 }
 
 /**
- * Strict CORS in production: when CORS_ORIGINS is set (comma-separated allowlist)
- * only those origins are accepted. Requests without an Origin header (mobile apps,
- * curl, server-to-server) are always allowed. When CORS_ORIGINS is unset we fall
- * back to reflecting the request origin, which is convenient for local development.
+ * Strict CORS: when CORS_ORIGINS is set, only those origins are accepted.
+ * Requests without Origin (native apps, curl) are allowed. Production must
+ * set CORS_ORIGINS (see assertCorsPolicy); an empty allowlist there denies
+ * browser origins instead of reflecting them.
  */
-export function buildCorsOptions(): CorsOptions {
-  const allowlist = parseList(process.env.CORS_ORIGINS);
+export function buildCorsOptions(env: NodeJS.ProcessEnv = process.env): CorsOptions {
+  const allowlist = parseList(env.CORS_ORIGINS);
 
   if (allowlist.length === 0) {
+    if (env.NODE_ENV === 'production') {
+      return {
+        credentials: true,
+        origin(_origin, callback) {
+          callback(null, false);
+        },
+      };
+    }
     return { origin: true, credentials: true };
   }
 
@@ -129,6 +137,24 @@ export async function createMapsRateLimiter(): Promise<RateLimitRequestHandler> 
   });
 }
 
+/** Limiter for unauthenticated analytics ingest. */
+export async function createAnalyticsRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('analytics', {
+    windowMs: parseNumber(process.env.ANALYTICS_RATE_LIMIT_WINDOW_MS, 60 * 1000),
+    max: parseNumber(process.env.ANALYTICS_RATE_LIMIT_MAX, 60),
+    message: 'Too many analytics requests',
+  });
+}
+
+/** Limiter for public alias-feedback writes. */
+export async function createAliasFeedbackRateLimiter(): Promise<RateLimitRequestHandler> {
+  return buildLimiter('alias-feedback', {
+    windowMs: parseNumber(process.env.ALIAS_FEEDBACK_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
+    max: parseNumber(process.env.ALIAS_FEEDBACK_RATE_LIMIT_MAX, 20),
+    message: 'Too many alias feedback requests',
+  });
+}
+
 /** Install endpoint rate limiters (Redis-backed when REDIS_URL is set). */
 export async function installRateLimiters(app: Express): Promise<void> {
   app.use(await createGlobalRateLimiter());
@@ -136,6 +162,7 @@ export async function installRateLimiters(app: Express): Promise<void> {
   const scanLimiter = await createScanRateLimiter();
   app.use('/api/scan', scanLimiter);
   app.use('/api/ocr', scanLimiter);
+  app.use('/api/dishes', scanLimiter);
   app.use('/api/medicines', scanLimiter);
   app.use('/api/pollen', await createPollenRateLimiter());
   // Air quality shares the pollen limiter profile (forecast + tile traffic).
@@ -143,4 +170,6 @@ export async function installRateLimiters(app: Express): Promise<void> {
   app.use('/api/places/autocomplete', await createPlacesAutocompleteRateLimiter());
   app.use('/api/places', await createPlacesRateLimiter());
   app.use('/api/maps', await createMapsRateLimiter());
+  app.use('/api/analytics', await createAnalyticsRateLimiter());
+  app.use('/api/alias-feedback', await createAliasFeedbackRateLimiter());
 }

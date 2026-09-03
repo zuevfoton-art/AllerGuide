@@ -13,19 +13,18 @@ appId: com.aclearo.app
       id: diary-wizard-primary
     timeout: 10000
 # Catalog picker and free text share one screen
-- tapOn:
-    id: diary-field-symptoms
-- inputText: зуд
-- tapOn:
-    id: diary-wizard-primary
+- runFlow:
+    file: _fill-wizard-field.yaml
+    env:
+      FIELD_ID: diary-field-symptoms
+      FIELD_VALUE: зуд
+- runFlow: _tap-wizard-primary.yaml
 # severity
 - tapOn:
     text: "1 — лёгкая"
-- tapOn:
-    id: diary-wizard-primary
+- runFlow: _tap-wizard-primary.yaml
 # onset (optional) — save
-- tapOn:
-    id: diary-wizard-primary
+- runFlow: _tap-wizard-primary.yaml
 - extendedWaitUntil:
     notVisible:
       id: diary-wizard-primary

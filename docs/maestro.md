@@ -150,13 +150,17 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |
+| `scanner-input` не найден на «Сканер» | Поле спрятано за «Ввести вручную». Сначала `scanner-toggle-manual`, потом ввод. IME закрывать тапом `scanner-title`, не hideKeyboard |
 | `onboarding-intro-skip` + «Введите корректный номер телефона» | `random-phone.js` даёт 10 национальных цифр без `+`. Android `input text` превращает `+` в пробел; маска LoginField тогда оставляет `(99` |
 | `profile-logout` не виден на «Мои профили» | Кнопка ниже fold (бэкап/пыление). Сначала `profile-screen-title`, потом `scrollUntilVisible` |
 | Форма регистрации заполнена, но онбординг не пришёл | Hermes без JIT: PBKDF2 600k блокирует JS ~40 c. `src/install-runtime` ставит `PASSWORD_HASH_ITERATIONS_INTERPRETED`; ожидание `onboarding-intro-skip` — 60 c |
 | Кнопка «Подождите…» висит до таймаута (staging зелёный, offline красный) | Патч рантайма не попал в APK: Gradle берёт `index.js`, а не `package.json` `main`. Оба entry импортируют `src/install-runtime`. Staging хеширует на API, поэтому не падал |
 | Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |
+| `diary-wizard-primary` не найден после ввода «зуд» | Gboard перекрывает «Далее» (в дампе bounds схлопнуты в ноль). `_dismiss-wizard-ime.yaml` тапает `diary-editor-title`, затем `_tap-wizard-primary.yaml` |
+| `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
+| `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

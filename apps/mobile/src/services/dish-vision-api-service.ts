@@ -1,8 +1,7 @@
 import type { DishVisionResult } from '@allerguide/ai';
 import { AI_DISH_VISION_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
-
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { enrichmentPost } from '@/src/services/enrichment-api';
 
 export interface DishVisionApiSuccess {
   ok: true;
@@ -38,31 +37,35 @@ export async function recognizeDishViaApi(input: {
   if (!AI_DISH_VISION_ENABLED) return null;
 
   const token = await getBackendAuthToken();
-  const response = await fetch(`${API_BASE}/api/scan/dish-vision`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({
-      imageBase64: stripDataUrlPrefix(input.imageBase64),
-      mimeType: input.mimeType || 'image/jpeg',
-    }),
-  });
-
-  const payload = (await response.json().catch(() => ({}))) as {
+  const result = await enrichmentPost<{
     ok?: boolean;
     result?: DishVisionResult;
     cached?: boolean;
     error?: string;
     providerStatus?: number;
-  };
+  }>(
+    '/api/scan/dish-vision',
+    {
+      imageBase64: stripDataUrlPrefix(input.imageBase64),
+      mimeType: input.mimeType || 'image/jpeg',
+    },
+    { token, context: 'recognizeDishViaApi' },
+  );
 
-  if (!response.ok || !payload.ok || !payload.result) {
+  if (!result.ok) {
     return {
       ok: false,
-      error: payload.error || `Dish vision HTTP ${response.status}`,
-      status: response.status,
+      error: result.error,
+      status: result.status,
+    };
+  }
+
+  const payload = result.data;
+  if (!payload.ok || !payload.result) {
+    return {
+      ok: false,
+      error: payload.error || `Dish vision HTTP ${result.status}`,
+      status: result.status,
       ...(typeof payload.providerStatus === 'number'
         ? { providerStatus: payload.providerStatus }
         : {}),

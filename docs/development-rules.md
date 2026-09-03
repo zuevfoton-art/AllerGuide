@@ -283,6 +283,7 @@ ui     → (peer RN only)
 - [ ] Нет unrelated изменений в diff
 - [ ] Астма-логика ссылается на `gina-asthma.ts` (см. §2.5), не дублирует пороги ACT/ПСВ
 - [ ] Новое analytics-событие есть в `ANALYTICS_EVENT_NAMES`, эмиссия в сервисе, `pnpm check:analytics-taxonomy` зелёный
+- [ ] Новый маршрут / сервис / модуль core — добавлен в [`codebase-index.md`](./codebase-index.md); версия схемы и диапазон миграций в документах совпадают с кодом (`pnpm rc-gate` проверяет)
 - [ ] Цвета / радиусы / отступы — из `theme.ts` / `layout.ts`, не литералы в компонентах
 
 ---
@@ -343,6 +344,7 @@ ui     → (peer RN only)
 
 - [`docs/architecture.md`](./architecture.md) — полная архитектура
 - [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md) — фазы и критерии релиза
+- [`docs/refactoring-simplify-reliability.md`](./refactoring-simplify-reliability.md) — упрощение и отказоустойчивость
 - [`docs/functional-requirements.md`](./functional-requirements.md) — FR-требования
 - [`docs/qa-checklist.md`](./qa-checklist.md) — регрессия
 - [`AGENTS.md`](../AGENTS.md) — команды для агентов и разработчиков

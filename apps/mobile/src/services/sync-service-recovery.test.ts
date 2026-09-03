@@ -14,6 +14,7 @@ const {
   mockGetAuthToken,
   mockHasRecoveryKey,
   mockDecryptBackup,
+  mockEncryptBackup,
   mockSetRecoveryKey,
   mockMarkRecoveryKeyConfirmed,
   mockListProfiles,
@@ -24,6 +25,7 @@ const {
   mockGetAuthToken: vi.fn(),
   mockHasRecoveryKey: vi.fn(),
   mockDecryptBackup: vi.fn(),
+  mockEncryptBackup: vi.fn(),
   mockSetRecoveryKey: vi.fn(),
   mockMarkRecoveryKeyConfirmed: vi.fn(),
   mockListProfiles: vi.fn(),
@@ -44,7 +46,7 @@ vi.mock('@/src/services/backup-crypto', () => ({
   decryptBackup: mockDecryptBackup,
   setRecoveryKey: mockSetRecoveryKey,
   markRecoveryKeyConfirmed: mockMarkRecoveryKeyConfirmed,
-  encryptBackup: vi.fn(),
+  encryptBackup: mockEncryptBackup,
 }));
 
 vi.mock('@/src/services/profile-service', () => ({
@@ -91,6 +93,7 @@ describe('downloadBackup recovery key', () => {
     mockListProfiles.mockReturnValue([]);
     mockSetRecoveryKey.mockReturnValue({ ok: true });
     mockDecryptBackup.mockResolvedValue(VALID_PAYLOAD);
+    mockEncryptBackup.mockResolvedValue('cipher-envelope');
     mockFetch.mockResolvedValue({
       ok: true,
       text: async () =>
@@ -132,6 +135,18 @@ describe('downloadBackup recovery key', () => {
       error: 'Облачная синхронизация пока недоступна',
       code: 'sync_disabled',
     });
+  });
+
+  it('does not upload plaintext when encryption is unavailable', async () => {
+    mockEncryptBackup.mockResolvedValue(null);
+    const { uploadBackup } = await import('./sync-service');
+    const result = await uploadBackup();
+    expect(result).toEqual({
+      ok: false,
+      error: 'Не удалось зашифровать резервную копию',
+      code: 'encryption_unavailable',
+    });
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('persists recovery key and applies payload on success', async () => {

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeLogin, validateAuthForm, validateLogin } from './auth';
+import {
+  normalizeLogin,
+  validateAuthForm,
+  validateLogin,
+  validateLoginPassword,
+  validatePassword,
+} from './auth';
 
 describe('normalizeLogin', () => {
   it('lowercases email', () => {
@@ -27,9 +33,22 @@ describe('validateAuthForm', () => {
       validateAuthForm({
         loginType: 'email',
         login: 'user@example.com',
-        password: 'secret1',
-        confirmPassword: 'secret2',
+        password: 'secret12',
+        confirmPassword: 'secret13',
       }),
     ).toBe('Пароли не совпадают.');
+  });
+
+  it('rejects a new password shorter than 8 characters', () => {
+    expect(validatePassword('secret1')).toBe('Пароль должен содержать минимум 8 символов.');
+  });
+
+  it('accepts an 8-character password', () => {
+    expect(validatePassword('secret12')).toBeNull();
+  });
+
+  it('lets an existing shorter password through on login', () => {
+    expect(validateLoginPassword('secret1')).toBeNull();
+    expect(validateLoginPassword('')).toBe('Введите пароль.');
   });
 });

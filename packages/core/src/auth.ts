@@ -27,12 +27,23 @@ export function validateLogin(loginType: LoginType, login: string): string | nul
   return validatePhone(login);
 }
 
+/** Minimum length for a newly chosen password (register / reset). */
+export const MIN_NEW_PASSWORD_LENGTH = 8;
+
+const NEW_PASSWORD_TOO_SHORT = 'Пароль должен содержать минимум 8 символов.';
+
 export function validatePassword(password: string, confirmPassword?: string): string | null {
   if (!password) return 'Введите пароль.';
-  if (password.length < 6) return 'Пароль должен содержать минимум 6 символов.';
+  if (password.length < MIN_NEW_PASSWORD_LENGTH) return NEW_PASSWORD_TOO_SHORT;
   if (confirmPassword != null && password !== confirmPassword) {
     return 'Пароли не совпадают.';
   }
+  return null;
+}
+
+/** Login accepts existing shorter passwords; length is enforced only on new ones. */
+export function validateLoginPassword(password: string): string | null {
+  if (!password) return 'Введите пароль.';
   return null;
 }
 

@@ -36,7 +36,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
       navigationBarTranslucent
       onRequestClose={onClose}>
       <ModalKeyboardAvoid style={styles.root}>
-        {({ liftStyle, keyboardInset }) => (
+        {({ keyboardInset }) => (
           <>
             <Pressable
               style={styles.backdrop}
@@ -45,11 +45,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               accessibilityLabel={t('common.cancel')}
             />
             <View
-              style={[
-                styles.sheet,
-                { paddingBottom: Math.max(insets.bottom, 16) },
-                liftStyle,
-              ]}
+              style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}
               accessibilityViewIsModal>
               <View style={styles.grabberWrap}>
                 <View style={styles.grabber} />
@@ -62,7 +58,11 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   accessibilityLabel={t('common.cancel')}>
                   <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
                 </Pressable>
-                <Text style={styles.headerTitle}>{t('diary.title')}</Text>
+                {/* Pinned chrome. Nightly 33736400731: extra sheet lift + IME
+                    padding hid this header under the status bar. */}
+                <View testID="diary-editor-title" collapsable={false}>
+                  <Text style={styles.headerTitle}>{t('diary.title')}</Text>
+                </View>
                 <View style={styles.headerBtn} />
               </View>
               <ScrollView

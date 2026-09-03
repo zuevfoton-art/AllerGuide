@@ -176,6 +176,69 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(authForm, /<Pressable\s+testID=\{testID\}/);
   });
 
+  it('folds diary IME via pinned editor chrome before tapping Далее', () => {
+    const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
+    assert.match(dismiss, /id: diary-editor-title/);
+    assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
+    assert.match(editorModal, /testID="diary-editor-title"/);
+    assert.match(editorModal, /collapsable=\{false\}/);
+    assert.doesNotMatch(
+      editorModal,
+      /liftStyle\s*[,}\]]/,
+      'DiaryEditorModal must not apply liftStyle to the sheet',
+    );
+
+    const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
+    assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
+    assert.match(tapPrimary, /scrollUntilVisible/);
+    assert.match(tapPrimary, /id: diary-wizard-primary/);
+
+    const fill = read('apps/mobile/.maestro/flows/_fill-wizard-field.yaml');
+    assert.match(fill, /_dismiss-wizard-ime\.yaml/);
+    assert.match(fill, /eraseText/);
+
+    for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
+      const flow = read(`apps/mobile/.maestro/flows/${name}`);
+      assert.ok(flow.includes('_tap-wizard-primary.yaml'), `${name} must tap Далее via _tap-wizard-primary`);
+      assert.ok(flow.includes('_fill-wizard-field.yaml'), `${name} must type via _fill-wizard-field`);
+      assert.ok(flow.includes('diary-new-entry'), `${name} must open the entry picker from diary-new-entry`);
+      assert.doesNotMatch(flow, /diary-chip-/, `${name} must not tap removed home chips`);
+      assert.doesNotMatch(
+        flow,
+        /^\s*-\s+tapOn:\s*\n\s+id: diary-wizard-primary\s*$/m,
+        `${name} must not tap diary-wizard-primary while IME may cover it`,
+      );
+    }
+
+    const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
+    assert.match(photo, /id: diary-picker-skin/);
+    assert.match(photo, /id: diary-photo-step/);
+  });
+
+  it('opens scanner manual input before typing молоко', () => {
+    const flow = read('apps/mobile/.maestro/flows/scanner-smoke.yaml');
+    assert.match(flow, /id: scanner-toggle-manual/);
+    assert.match(flow, /id: scanner-input/);
+    assert.match(flow, /_dismiss-scanner-ime\.yaml/);
+    assert.match(flow, /id: scanner-check/);
+    assert.ok(
+      flow.indexOf('scanner-toggle-manual') < flow.indexOf('scanner-input'),
+      'scanner-smoke must expand manual input before tapping scanner-input',
+    );
+    assert.doesNotMatch(flow, /^\s*-\s+hideKeyboard\b/m);
+
+    const dismiss = read('apps/mobile/.maestro/flows/_dismiss-scanner-ime.yaml');
+    assert.match(dismiss, /id: scanner-title/);
+    assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const screen = read('apps/mobile/app/(tabs)/scanner.tsx');
+    assert.match(screen, /testID="scanner-toggle-manual"/);
+    assert.match(screen, /testID="scanner-title"/);
+    assert.match(screen, /inputTestID="scanner-input"/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));

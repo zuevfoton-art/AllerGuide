@@ -128,6 +128,7 @@ flowchart TB
 ### Слои
 
 ```
+index.js / entry.js   # Два JS-входа (см. ниже) → src/install-runtime
 app/                  # Экраны (Expo Router, file-based routing)
 src/components/       # Переиспользуемые UI-компоненты
 src/services/         # Оркестрация, локальная БД, API-клиенты
@@ -136,11 +137,24 @@ src/store/            # Глобальный UI-state (Zustand)
 src/i18n/             # Локализация (6 языков)
 src/constants/        # Feature flags, тема, типографика, бренд
 src/hooks/            # Тема, шрифты, адаптив, wizard
+src/utils/            # confirm-диалоги, fetch-with-timeout, yield-to-render
+src/stubs/            # Metro-заглушки для web/native
 src/modules/marketplace/  # UI вкладки Market
 metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 ```
 
 Экраны **не** обращаются к БД напрямую — только через `src/services/*`.
+
+### Точка входа и runtime-патчи
+
+Входов **два**, и оба обязаны применить одни и те же патчи:
+
+| Вход | Кто использует | Содержимое |
+|------|----------------|------------|
+| `index.js` | Gradle (`entryFile` в `android/app/build.gradle`) — native release | `install-runtime` → `@expo/metro-runtime` → `ExpoRoot` |
+| `entry.js` | Expo CLI (dev, web, EAS) через `package.json` `main` | `install-runtime` → `expo-router/entry` |
+
+`src/install-runtime.ts` подключает `install-crypto-get-random-values` (CSPRNG из `expo-crypto`; `@noble/hashes` кэширует `globalThis.crypto` на импорте, а в Hermes его нет) и `install-password-hash-cost` (стоимость PBKDF2 для интерпретатора без JIT). Патч, добавленный только в один вход, на другом движке молча не сработает — инвариант закреплён в `scripts/maestro-ci-check.test.mjs`.
 
 ### Роутинг (Expo Router)
 
@@ -222,6 +236,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `scan-history-service.ts` | Локальная история сканов |
 | `profile-service.ts` | CRUD профилей, миграция legacy → userId |
 | `auth-service.ts` | Локальные users **или** backend JWT |
+| `token-session.ts` | Access JWT (web: память; native: SecureStore) + refresh rotation |
 | `backend-api.ts` / `api-client.ts` | Обёртки `/api/auth/*`, `/api/profiles/*` |
 | `secure-settings-service.ts` | SecureStore (native) / settings (web) для token, recovery key |
 | `sync-service.ts` / `sync-restore.ts` | Шифрованный облачный бэкап |
@@ -307,6 +322,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `catalog_allergen_snapshot` / `catalog_products` | Offline snapshot каталога (v5+) |
 | `alias_feedback` | Локальная очередь alias feedback (v6) |
 | `safe_products` | Отмеченные «безопасные» продукты (v7) |
+| `market_catalog_snapshot` | Last-good снапшот каталога Маркета (v10) |
 
 ### Web (IndexedDB)
 
@@ -322,7 +338,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 
 ### Миграции (`migrations.ts`)
 
-- `CURRENT_SCHEMA_VERSION = 9`
+- `CURRENT_SCHEMA_VERSION = 10`
 - v1: `schema_version`
 - v2: `profiles.userId` (multi-user)
 - v3: `barcode_cache`
@@ -332,6 +348,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 - v7: `safe_products`
 - v8: `diary_attachments`
 - v9: `profiles.crossReactionAllergies`
+- v10: `market_catalog_snapshot`
 - **Только native** — на web схема неявная в ключах JSON
 
 ### Облачный бэкап
@@ -460,11 +477,11 @@ flowchart LR
 | Режим | Хранение | Когда |
 |-------|----------|-------|
 | **Локальный** | `users` в SQLite/IndexedDB, `authUserId` в settings | `BACKEND_AUTH=false` |
-| **Backend JWT** | Token через `secure-settings-service` → **SecureStore** (native) / `app_settings` (web) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
+| **Backend JWT** | Access: память + httpOnly cookie (web) / SecureStore (native). Refresh: httpOnly cookie (web) / SecureStore (native) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
 
-Чувствительные ключи (`authToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
+Чувствительные ключи (`authToken`, `refreshToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
 
-JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 7 дней (`apps/api/src/lib/jwt.ts`).
+JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, access TTL 30 мин + opaque refresh 30 дней (`apps/api/src/lib/jwt.ts`). Ротация refresh — атомарный `UPDATE … WHERE revoked_at IS NULL`; повторно использованный токен отзывает всю семью. Браузерный `Origin` включает cookie-сессию: `ag_access` / `ag_refresh` (httpOnly, SameSite Lax на localhost и None+Secure на cross-site). JSON больше не отдаёт refresh web-клиенту. Native по-прежнему получает Bearer + refresh в теле.
 
 ### Dual-write policy (Phase 1)
 
@@ -492,46 +509,55 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, TTL 
 
 | Файл | Эндпоинты |
 |------|-----------|
-| `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
+| `routes/mobile-auth.ts` | `POST /api/auth/register`, `login`, `refresh`, `logout`, `forgot-password`, `reset-password`; `GET verify-reset-token`, `me`, `export`; `DELETE account` |
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
+| `routes/dishes.ts` | `GET /api/dishes/search`, `POST /api/dishes/resolve` |
 | `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=`, `POST /api/medicines`, `DELETE /api/medicines/:name` |
 | `routes/scan.ts` | `POST /api/scan` |
 | `routes/scan-intent.ts` | `POST /api/scan/intent` |
+| `routes/scan-dish-vision.ts` | `POST /api/scan/dish-vision` |
 | `routes/ocr.ts` | `POST /api/ocr` (Yandex Vision) |
 | `routes/search-ingredients.ts` | `POST /api/search/ingredients` |
+| `routes/stt.ts` | `POST /api/stt` (SpeechKit) |
 | `routes/sync.ts` | `POST /api/sync/backup`, `GET /api/sync/backup/:userId` |
-| `routes/market.ts` | `/api/market/catalog`, offers resolve / draft-search |
-| `routes/pollen.ts` | `GET /api/pollen/heatmap/:mapType/:zoom/:x/:y` |
+| `routes/market.ts` | `GET /api/market/health`, `/api/market/catalog`, offers resolve / draft-search |
+| `routes/pollen.ts` | `GET /api/pollen/heatmap/:mapType/:zoom/:x/:y`, `GET /api/pollen/forecast`, `GET /api/pollen/species-samples` |
+| `routes/air-quality.ts` | `GET /api/air-quality/current`, `GET /api/air-quality/heatmap/:mapType/:zoom/:x/:y` |
+| `routes/places.ts` | `GET /api/places/nearby`, `autocomplete`, `search`, `:placeId` |
+| `routes/maps.ts` | `GET /api/maps/yandex-interactive`, `GET /api/maps/yandex-status` |
 | `routes/alias-feedback.ts` | POST/GET/PATCH alias feedback |
-| `routes/analytics.ts` | `POST /api/analytics/events`, dashboard |
+| `routes/analytics.ts` | `POST /api/analytics/events`, `GET /api/ops/map-pollen-health`, dashboard |
 | `routes/governance.ts` | `GET /api/governance` |
 | — | `GET /api/health` |
+
+Все маршруты регистрируются как `register*Routes(app)` прямо на корневом app — под-роутеров с префиксами нет.
 
 ### Middleware
 
 | Файл | Функция |
 |------|---------|
-| `middleware/security.ts` | `helmet`, CORS allowlist (`CORS_ORIGINS`), rate-limit (global + `/api/auth` + `/api/scan` + pollen); `RATE_LIMIT_DISABLED` для тестов |
+| `middleware/security.ts` | `helmet`, CORS allowlist (`CORS_ORIGINS`), rate-limit (global, `/api/auth`, `/api/scan` + `/api/ocr` + `/api/medicines`, `/api/pollen`, `/api/air-quality`, `/api/places` + autocomplete, `/api/maps`; Redis-стор при `REDIS_URL`); `RATE_LIMIT_DISABLED` для тестов |
 | `middleware/require-jwt.ts` | Bearer JWT → `req.authUser` |
 
 ### Разделение БД на схемы (`profile` и `catalog`)
 
 | Схема | Таблицы | Файл определения |
 |-------|---------|------------------|
-| **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens` | `src/db/app-schema.ts` |
-| **`catalog`** | `allergens`, `cross_reactions`, `products`, `medicines`, `alias_feedback` | `src/db/catalog-schema.ts` |
+| **`profile`** | `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens`, `refresh_tokens`, `medicine_overlays` | `src/db/app-schema.ts` |
+| **`catalog`** | `allergens`, `cross_reactions`, `products`, `dishes`, `medicines`, `alias_feedback`, `market_products`, `market_offers` | `src/db/catalog-schema.ts` |
 | **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
-Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0011_*`).
+Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0013_*`).
 
 ### Каталог лекарств
 
 - **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото. `aliases jsonb` — латинские/альтернативные названия (миграция `0011_medicines_aliases`).
-- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу → VL fallback (`AI_MEDICINE_VISION_ENABLED`) → upsert + счётчик `recognitions`.
-- **Поиск:** `GET /api/medicines/search?q=` — только каталог, без LLM. Префикс → contains → `similarity()` (pg_trgm) и `aliases`; дневник, АСИТ, «Терапия» и паспорт SOS подставляют хиты как автодополнение.
+- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу (каталог + overlay вызывающего) → VL fallback (`AI_MEDICINE_VISION_ENABLED`). Общий каталог не пишет; JWT может сохранить карточку в overlay. Каталожный hit увеличивает `recognitions`.
+- **Поиск:** `GET /api/medicines/search?q=` — общий каталог; с JWT дополнительно overlay вызывающего. Без LLM.
 - **allergenTags:** канонические id, как у `catalog.products` (`mapExternalAllergenIds` в сиде).
-- **Remember:** `POST /api/medicines` — write-through найденной/введённой карточки в `catalog.medicines` (пустые поля не затирают уже известные). Запись всегда требует авторизации: mobile JWT (устройство) либо `x-medicine-write-key` = `MEDICINE_WRITE_KEY` (server-to-server, сид). Без этого — 401; чтение и `recognize` остаются открытыми.
+- **Remember:** `POST /api/medicines` — JWT пишет только в `profile.medicine_overlays` (карточка видна лишь этому пользователю в search). `x-medicine-write-key` = `MEDICINE_WRITE_KEY` пишет в общий `catalog.medicines` (сид/куратор). Пустые поля не затирают уже известные. Без auth — 401.
+- **Recognize:** lookup каталог + overlay вызывающего; VL/OCR не пишут в общий каталог (overlay — только при JWT).
 - **Сид каталога:** `pnpm --filter api db:seed-medicines` — датасет `apps/api/data/medicines/` заливается через `POST /api/medicines` (`API_BASE_URL` + `MEDICINE_WRITE_KEY`), идемпотентно.
 - **Curator cleanup:** `DELETE /api/medicines/:name` (та же авторизация) удаляет ошибочную/тестовую карточку по нормализованному имени.
 - **Клиент:** `EXPO_PUBLIC_MEDICINE_DB` включает VL/фото; поиск и remember идут при заданном `EXPO_PUBLIC_API_URL`. При флаге off / ошибке — локальный `parseMedicineLabelText` / `parseMedicineVoiceUtterance` + ранее сохранённые записи дневника. Demo-карточка только для фото без OCR, не для голоса.
@@ -550,7 +576,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 
 - Кэш результатов (ключ — хэш режима/текста/аллергенов)
 - Дневной бюджет на user/IP; биллится только промах кэша
-- `SCAN_REQUIRE_AUTH` — опциональное требование JWT
+- `SCAN_REQUIRE_AUTH` — JWT для billable AI; в `NODE_ENV=production` при включённых AI-флагах API не стартует без `true`
 - Провайдер: `AI_PROVIDER=yandex|openai` (default `openai`)
   - **yandex:** `YC_AI_API_KEY`, `YC_FOLDER_ID`, опционально `YC_GPT_MODEL` (default `yandexgpt-lite`)
   - **openai:** `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
@@ -592,9 +618,9 @@ Drizzle-объекты схемо-квалифицированы — код за
 ### Облачная синхронизация (`routes/sync.ts`)
 
 - Payload в `sync_backups` (in-memory fallback без БД)
-- Auth: mobile JWT **или** legacy `SYNC_API_KEY`
+- Auth: mobile JWT, когда задан `JWT_SECRET`. Legacy `SYNC_API_KEY` только без JWT (local/dev) и **не** обходит ownership
 - Владение по `userId` из токена
-- Клиент шифрует до загрузки — сервер zero-knowledge
+- Клиент шифрует AES-GCM (Web Crypto или `@noble/ciphers` на native) до загрузки. Сервер принимает ciphertext только если `payload` проходит `isEncryptedEnvelope` (alg/kdf/iter/salt/iv/ct) и в теле нет plaintext-коллекций (`profiles`, дневник, SOS…). Persist — `{ v, userId, encrypted, exportedAt, payload }`, не весь body. Флага `encrypted: true` недостаточно. Staging: `SYNC_REQUIRE_ENCRYPTED=true`
 
 #### Recovery key flow (cross-device restore)
 
@@ -640,11 +666,11 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Types / allergens | `types`, `allergens` (обёртка над `allergen-database`), `allergen-aliases`, `regulatory-allergens`, `catalog`, `barcodes`, `adair-catalog` |
 | Profiles | `profile-allergens`, `allergy-confirmations`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `condition-*`, `clinical-phenotypes` |
 | Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness-display` |
-| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `alias-feedback`, `dish-components`, `name-matching`, `inci-allergens` |
-| Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `icd10-reference` |
+| Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `scan-history-matches`, `alias-feedback`, `dish-components`, `name-matching`, `inci-allergens` |
+| Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
-| Pollen / geo / market | `pollen-*`, `google-pollen-heatmap`, `geo`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
-| Auth / sync | `auth`, `password`, `phone`, `sync`, `crypto` |
+| Pollen / geo / air / market | `pollen-*` (в т.ч. `pollen-upi`, `pollen-plume`, `pollen-google-*`), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
+| Auth / sync | `auth`, `password`, `secure-random`, `phone`, `login-field`, `sync`, `crypto` |
 | Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
 
 ### `@allerguide/ai` (`packages/ai/`)
@@ -655,8 +681,12 @@ Drizzle-объекты схемо-квалифицированы — код за
 | `smart-scan.ts` | `runSmartScan`, LLM prompt/parse, fallback на mock |
 | `ocr.ts` | Нормализация OCR-текста, demo capture |
 | `scan-intent.ts` | Heuristic + нормализация intent (label/menu vs visual) |
+| `scan-evidence.ts` | Свод VL-фото и OCR-текста в единый evidence |
 | `search-ingredients.ts` | Нормализация ответа поиска состава |
 | `dish-resolve.ts` | Промпт/парс LLM для названия блюда и типичного состава |
+| `dish-vision.ts` | Промпт/парс VL: фото блюда → название + ингредиенты |
+| `medicine-vision.ts` | Промпт/парс VL для упаковки лекарства |
+| `medicine-label.ts` | Offline-парс этикетки и голосовой дозы |
 | `prescription-ocr.ts` | Парсинг текста рецепта / АСИТ |
 
 ### `@allerguide/ui` (`packages/ui/`)
@@ -694,8 +724,9 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Workflow | Назначение |
 |----------|------------|
 | `ci.yml` | typecheck → lint → test; mobile test gate; API integration |
-| `rc-gate.yml` | Phase 2 RC gate |
-| `deploy-staging.yml` / `deploy-staging-yandex.yml` | Staging deploy |
+| `rc-gate.yml` | Phase 2 RC gate (cron + path-filtered PR) |
+| `deploy-staging.yml` | Staging deploy на Yandex Cloud (push в `staging`) |
+| `seed-staging-catalog.yml` | Сиды каталога на staging Postgres (self-hosted VPC runner) |
 | `eas-staging-android.yml` | EAS staging Android |
 | `staging-apk-gradle.yml` | Gradle APK на GitHub |
 | `release-apk.yml` | Release APK |
@@ -706,9 +737,11 @@ Drizzle-объекты схемо-квалифицированы — код за
 ```bash
 pnpm typecheck   # TypeScript во всех пакетах
 pnpm test        # Vitest: core, ai, mobile, api
-pnpm --filter mobile lint
-pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
+pnpm lint        # ESLint: mobile + api
+pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 ```
+
+Инфраструктура staging описана как код в `infra/yandex/staging/*.tf`; прод-образ API собирается корневым `Dockerfile`.
 
 ### Stage / Yandex Cloud
 
@@ -783,6 +816,11 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `EXPO_PUBLIC_POLLEN_HEATMAP` | `off` | `google` включает Google pollen layer + forecast |
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps SDK / tiles |
 | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | `false` | Google как primary basemap map tab |
+| `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | `false` (staging `true`) | Числа/прогноз карты — Google Pollen |
+| `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` (staging `true`) | Гео-шлейф пыльцы на карте |
+| `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` (staging `true`) | Интерактивный Yandex basemap через API-embed |
+| `EXPO_PUBLIC_MARKET_LIVE_CATALOG` | `true` (default on) | Живой каталог Маркета; `false`/`off` — только seed |
+| `EXPO_PUBLIC_MARKET_MEDICINES` | `true` (default on) | OTC-карточки аптек на Маркете |
 | `EXPO_PUBLIC_MAP_PLACES` | `true` (default on) | Live Places (New) searchNearby via API; `false`/`off` disables |
 | `EXPO_PUBLIC_LIVE_MAP` | alias | Same as `EXPO_PUBLIC_MAP_PLACES` when the primary flag is unset |
 | `EXPO_PUBLIC_AIR_QUALITY` | `google` (default on) | Google Air Quality (wellness + AQ card); `false`/`off` disables |
@@ -798,9 +836,11 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `DATABASE_URL` / `DIRECT_DATABASE_URL` / `READ_DATABASE_URL` | Postgres connections |
 | `DB_SSL`, `DB_PREPARE`, `DB_POOL_*` | TLS / pooler / pool tuning |
 | `JWT_SECRET` | Mobile JWT signing |
-| `CORS_ORIGINS` | CORS allowlist |
+| `ACCESS_TOKEN_TTL` / `ACCESS_TOKEN_TTL_SECONDS` | Access JWT lifetime (default `30m` / `1800`) |
+| `REFRESH_TOKEN_TTL_MS` | Opaque refresh lifetime (default 30 days) |
+| `CORS_ORIGINS` | CORS allowlist (required in production) |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
-| `SYNC_ENABLED`, `SYNC_API_KEY` | Cloud sync endpoints |
+| `SYNC_ENABLED`, `SYNC_API_KEY`, `SYNC_REQUIRE_ENCRYPTED` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
 | `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |
@@ -814,6 +854,14 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `YANDEX_MARKET_*` | Market affiliate |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `PASSWORD_RESET_*` | Password reset email |
 | `ALIAS_FEEDBACK_ADMIN_KEY` | Alias feedback admin |
+| `MEDICINE_WRITE_KEY` | Server-to-server запись в `catalog.medicines` |
+| `REDIS_URL` | Общий стор для rate-limit и кэшей (иначе in-memory) |
+| `ANALYTICS_INGEST_ENABLED`, `ANALYTICS_DASHBOARD_*`, `POSTHOG_*` | Приём событий, дашборд, форвард в PostHog |
+| `MAP_POLLEN_OPS_*`, `OPS_ALERT_WEBHOOK_URL` | Ops-порог fallback карты пыления + алерт |
+| `POLLEN_SPECIES_HEATMAP_ENABLED` | Species heatmap sampling |
+| `YANDEX_MAPS_INTERACTIVE_ENABLED`, `YANDEX_MAPS_JS_API_KEY` | Yandex JS embed (ключ **не** в `EXPO_PUBLIC_*`) |
+| `MARKET_PHARMACY_FEED_*` | Импорт аптечного фида |
+| `OCR_*`, `STT_*`, `SEARCH_*`, `DISH_VISION_CACHE_*` | Лимиты размера, auth и кэши AI-эндпоинтов |
 | `METRO_URL` | Dev proxy to Expo |
 
 **Порты в dev:** mobile web часто на `5000` (`expo start --web --port 5000`); API в коде по умолчанию тоже `5000`, поэтому локально задавайте `API_PORT=3001` (как в `.env.example`).
@@ -835,4 +883,5 @@ pnpm rc-gate     # typecheck + lint + test + doc/Maestro checks
 | `docs/eas-internal-preview.md` / `eas-staging-build.md` | EAS / preview / staging builds |
 | `docs/qa-checklist.md` | QA чеклист |
 | `docs/roadmap-to-prod.md` | Roadmap к production |
+| `docs/refactoring-simplify-reliability.md` | Упрощение + отказоустойчивость (волны) |
 | `docs/adr/` | Architecture Decision Records |

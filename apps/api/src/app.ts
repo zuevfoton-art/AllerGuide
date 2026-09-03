@@ -27,6 +27,7 @@ import {
   buildCorsOptions,
   installRateLimiters,
 } from './middleware/security';
+import { registerErrorHandler } from './middleware/error-handler';
 import { buildHealthPayload } from './lib/health';
 
 export async function createApp(): Promise<Express> {
@@ -82,6 +83,9 @@ export async function createApp(): Promise<Express> {
       res.sendFile(path.join(distDir, 'index.html'));
     });
   }
+
+  // After all routes (including SPA fallback) so missed catches return JSON 500.
+  registerErrorHandler(app);
 
   return app;
 }
