@@ -278,6 +278,28 @@ function checkMaestroFlows() {
     failures.push('_fill-by-id.yaml must eraseText before inputText');
   }
 
+  const scannerSmoke = fs.readFileSync(path.join(flowsDir, 'scanner-smoke.yaml'), 'utf8');
+  if (
+    !scannerSmoke.includes('scanner-toggle-manual') ||
+    scannerSmoke.indexOf('scanner-toggle-manual') > scannerSmoke.indexOf('scanner-input') ||
+    !scannerSmoke.includes('_dismiss-scanner-ime.yaml')
+  ) {
+    failures.push('scanner-smoke.yaml must open scanner-toggle-manual before scanner-input');
+  }
+  const dismissScannerIme = path.join(flowsDir, '_dismiss-scanner-ime.yaml');
+  if (!fs.existsSync(dismissScannerIme)) {
+    failures.push('_dismiss-scanner-ime.yaml missing (fold scanner IME without BACK)');
+  } else {
+    const dismissScannerBody = fs.readFileSync(dismissScannerIme, 'utf8');
+    if (!dismissScannerBody.includes('scanner-title')) {
+      failures.push('_dismiss-scanner-ime.yaml must tap scanner-title (not hideKeyboard/BACK)');
+    }
+  }
+  const scannerScreen = fs.readFileSync(path.join(root, 'apps/mobile/app/(tabs)/scanner.tsx'), 'utf8');
+  if (!scannerScreen.includes('testID="scanner-toggle-manual"') || !scannerScreen.includes('testID="scanner-title"')) {
+    failures.push('scanner.tsx must expose scanner-toggle-manual and scanner-title');
+  }
+
   const dismissWizardIme = path.join(flowsDir, '_dismiss-wizard-ime.yaml');
   if (!fs.existsSync(dismissWizardIme)) {
     failures.push('_dismiss-wizard-ime.yaml missing (fold diary IME without BACK)');
