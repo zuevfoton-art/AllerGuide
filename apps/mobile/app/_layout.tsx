@@ -89,6 +89,11 @@ export default function RootLayout() {
         .catch((error) => {
           console.warn('[startup] flushPendingAliasFeedback failed:', error);
         });
+      void import('@/src/services/profile-outbox-service')
+        .then(({ flushProfileOutbox }) => flushProfileOutbox())
+        .catch((error) => {
+          console.warn('[startup] flushProfileOutbox failed:', error);
+        });
 
       const deferBackgroundWarmup = () => {
         safe('warmAllergenCatalogCache', warmAllergenCatalogCache);

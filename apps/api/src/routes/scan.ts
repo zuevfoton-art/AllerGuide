@@ -80,7 +80,7 @@ export function registerScanRoutes(app: Express) {
     recordCacheMiss();
 
     // Only billable (cache-missing) calls consume the daily budget.
-    if (!consumeScanBudget(identity)) {
+    if (!(await consumeScanBudget(identity))) {
       recordBudgetRejection();
       res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;
