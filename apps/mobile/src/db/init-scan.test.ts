@@ -52,6 +52,31 @@ describe('WebDb scanner persistence', () => {
     ]);
   });
 
+  it('deletes a single alias feedback row by id', async () => {
+    const { getDb } = await import('./init');
+    const db = getDb();
+
+    db.runSync(
+      `INSERT INTO alias_feedback
+        (id, term, suggested_allergen_id, context, profile_id, scan_input, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['alias-keep', 'a', null, null, null, null, 'pending', '2026-08-14T08:00:00.000Z'],
+    );
+    db.runSync(
+      `INSERT INTO alias_feedback
+        (id, term, suggested_allergen_id, context, profile_id, scan_input, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['alias-drop', 'b', null, null, null, null, 'pending', '2026-08-14T08:01:00.000Z'],
+    );
+
+    db.runSync('DELETE FROM alias_feedback WHERE id = ?', ['alias-drop']);
+
+    const pending = db.getAllSync<{ id: string }>(
+      `SELECT id FROM alias_feedback WHERE status = 'pending' ORDER BY created_at DESC`,
+    );
+    expect(pending.map((row) => row.id)).toEqual(['alias-keep']);
+  });
+
   it('stores scan history rows for later structured restore', async () => {
     const { getDb } = await import('./init');
     const db = getDb();
