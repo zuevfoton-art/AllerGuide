@@ -99,7 +99,8 @@ describe('apiRequest', () => {
       body: { login: 'x' },
     });
 
-    expect(result.status).toBe(401);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.status).toBe(401);
     expect(refreshAccessToken).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MedicineCard } from '@allerguide/core';
 
+vi.mock('react-native', () => ({
+  Platform: { OS: 'web' },
+}));
+
+vi.mock('expo-secure-store', () => ({
+  getItemAsync: vi.fn(),
+  setItemAsync: vi.fn(),
+  deleteItemAsync: vi.fn(),
+}));
+
+vi.mock('./token-session', () => ({
+  refreshAccessToken: vi.fn(),
+  getAccessToken: vi.fn(),
+  setAccessToken: vi.fn(),
+  getRefreshToken: vi.fn(),
+  setRefreshToken: vi.fn(),
+  applyAuthSession: vi.fn(),
+  clearAuthSessionTokens: vi.fn(),
+}));
+
 const card: MedicineCard = {
   name: 'Зиртек',
   activeSubstance: 'цетиризин',
