@@ -72,7 +72,7 @@ flowchart LR
   W1 --> W2 --> W3 --> W4 --> W5
 ```
 
-### Wave 1 — Transport resilience (этот PR)
+### Wave 1 — Transport resilience
 
 Цель: enrichment и LLM никогда не роняют и не вешают core-flow.
 
@@ -90,26 +90,50 @@ flowchart LR
 `pnpm --filter api test` зелёные; LLM/network throw → mock; hung fetch abort ≤ timeout;
 pending alias уходит после успешного POST; unhandled route error → 500 JSON.
 
-### Wave 2 — Screen decomposition
+### Wave 2 — Screen decomposition (в `main`, #324)
 
-- Извлечь hooks/subviews из `scanner.tsx` и `map.tsx` (камера, результат, история;
-  pollen/AQI/places/basemap).
-- Экраны только wiring; логика остаётся в services.
-- ASIT / prescribed-therapy: shared course-editor primitives (после scanner/map).
+- `scanner.tsx` (~1537 → ~264 LOC): `useScannerController` + `ScannerCameraModal` /
+  `ScannerResultPanel` / `ScannerLists` / `scanner-styles` / `scanSourceLabelKey`.
+- `map.tsx`: `useMapLiveData` (`refreshMapLiveData` / `searchMapThisArea`) +
+  `MapLayerSwitcher` / `MapPollenStatusCard` / `MapDoctorsSection` / `map-constants`.
+- Экраны — wiring; I/O остаётся в services.
+- ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
 
-### Wave 3 — Kill WebDb SQL parsing
+### Wave 3 — Kill WebDb SQL parsing (в `main`, #325)
 
-- Typed collection repositories (одна модель native + web), без `startsWith('insert into…')`.
-- Сохранить `DbLike` на переходный период или заменить точечно по доменам
-  (diary → profiles → scans).
-- Регрессия: существующие `init-*.test.ts` + service tests.
+Цель: SQL-string parsing — тонкий роутер, не 687-строчный god-class.
+Сервисы по-прежнему вызывают `getDb().runSync` / `getFirstSync` / `getAllSync`.
+Native SQLite не дублируем (`init.native.ts`).
 
-### Wave 4 — Dedup и вычистка
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 3.1 | Typed get/save accessors + `StoredUser` / `StoredAliasFeedback` / `BarcodeCacheRow` / `StoredDiaryAttachment` | `apps/mobile/src/db/web-collections.ts` |
+| 3.2 | Каждая ветка `runSync` / `getFirstSync` / `getAllSync` — именованная функция; тот же порядок params и ownership | `apps/mobile/src/db/web-sql-handlers.ts` |
+| 3.3 | `normalizeSql` + dispatch в том же порядке `startsWith` / `includes` | `apps/mobile/src/db/web-sql-router.ts` |
+| 3.4 | `WebDb` только делегирует в роутер; `execSync` no-op; `getDb` / `initDb` / `persistDbWrites` без изменений | `apps/mobile/src/db/init.ts` |
+| 3.5 | Unmatched SQL → `console.warn('[WebDb] unmatched SQL', sql)` и `void` / `null` / `[]` (не throw) | router |
+| 3.6 | Регрессия + unmatched / alias DELETE-by-id | `init-*.test.ts`, `web-sql-router.test.ts` |
 
-- Shared OFF / catalog client (core или общий модуль для mobile + API).
-- Split `diary.ts` (wizard schema vs formatters) и doctor-report HTML builder.
-- Ownership helper для SOS / reminders / scans (дожать follow-up diary-doc).
-- Sweep `@deprecated` theme/logo/gradient aliases после короткого окна совместимости.
+Полные typed repositories (одна модель native + web без SQL-строк) — follow-up;
+в этом PR `DbLike` сохраняем.
+
+**Критерий готовности:** `init-diary` / `init-profile` / `init-scan` зелёные;
+unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-by-id через `getDb`.
+
+### Wave 4 — Dedup и вычистка (в `main`, #326)
+
+Цель: один OFF-парсер без HTTP в core, тонкий `diary.ts`, удаление неиспользуемых `@deprecated` alias.
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 4.1 | Shared OFF: типы, barcode/product normalize, URL builders, константы (без HTTP) | `packages/core/src/open-food-facts.ts` |
+| 4.2 | Slim-адаптеры: fetch + env + публичные имена | `apps/mobile/.../open-food-facts-service.ts`, `apps/api/.../open-food-facts.ts` |
+| 4.3 | Split `diary.ts`: schema vs format; barrel реэкспортирует оба | `diary-schema.ts`, `diary-format.ts`, `diary.ts` |
+| 4.4 | Удалены неиспользуемые deprecated alias | product-service, `useGlassStyles`, `AppLogo`, `calm-gradient`, theme `colors`/`shadows`, `POLLEN_CALENDAR_MOSCOW`, core `PlumeParticle`, wellness `recentSymptoms`/`recentTriggers`, `ACT_PROMPT_INTERVAL_DAYS` → `GINA_ACT_PROMPT_INTERVAL_DAYS` |
+
+**Не в этом PR (follow-up):** doctor-report HTML builder; ownership helper для SOS / reminders / scans.
+
+**Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
 ### Wave 5 — Offline→online reconciliation (этот PR)
 
@@ -152,7 +176,7 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Волна | Статус |
 |-------|--------|
 | Wave 1 | ✅ в `main` (#321) |
-| Wave 2–4 | отдельные PR |
-| Wave 5 | ✅ этот PR |
-
-После merge Wave 1 отметить ✅ и завести follow-up issues по Wave 2+.
+| Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
+| Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
+| Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
+| Wave 5 | ✅ этот PR — profile outbox, sync fail-closed, Redis scan budget |

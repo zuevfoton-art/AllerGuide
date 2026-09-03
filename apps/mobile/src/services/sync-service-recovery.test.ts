@@ -14,6 +14,7 @@ const {
   mockGetAuthToken,
   mockHasRecoveryKey,
   mockDecryptBackup,
+  mockEncryptBackup,
   mockSetRecoveryKey,
   mockMarkRecoveryKeyConfirmed,
   mockListProfiles,
@@ -24,6 +25,7 @@ const {
   mockGetAuthToken: vi.fn(),
   mockHasRecoveryKey: vi.fn(),
   mockDecryptBackup: vi.fn(),
+  mockEncryptBackup: vi.fn(),
   mockSetRecoveryKey: vi.fn(),
   mockMarkRecoveryKeyConfirmed: vi.fn(),
   mockListProfiles: vi.fn(),
@@ -44,7 +46,7 @@ vi.mock('@/src/services/backup-crypto', () => ({
   decryptBackup: mockDecryptBackup,
   setRecoveryKey: mockSetRecoveryKey,
   markRecoveryKeyConfirmed: mockMarkRecoveryKeyConfirmed,
-  encryptBackup: vi.fn(),
+  encryptBackup: mockEncryptBackup,
 }));
 
 vi.mock('@/src/services/profile-service', () => ({
@@ -91,6 +93,7 @@ describe('downloadBackup recovery key', () => {
     mockListProfiles.mockReturnValue([]);
     mockSetRecoveryKey.mockReturnValue({ ok: true });
     mockDecryptBackup.mockResolvedValue(VALID_PAYLOAD);
+    mockEncryptBackup.mockResolvedValue('enc-envelope');
     mockFetch.mockResolvedValue({
       ok: true,
       text: async () =>

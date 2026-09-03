@@ -1,4 +1,4 @@
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-format';
 
 export type PrescribedTherapyRoute = 'oral' | 'inhaled' | 'nasal' | 'topical' | 'injection' | 'other';
 export type PrescribedDoseStatus = 'on-time' | 'late' | 'missed';

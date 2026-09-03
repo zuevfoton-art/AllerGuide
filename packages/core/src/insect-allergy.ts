@@ -1,7 +1,7 @@
 import { ALLERGENS, findAllergenById, getAllergensByCategory } from './allergen-database';
 import { resolveAllergenId } from './profile-allergens';
 import type { AllergyConditionId } from './allergy-conditions';
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-format';
 
 export interface InsectActionPlan {
   v: 1;
