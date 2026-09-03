@@ -467,7 +467,7 @@ pnpm build:staging:ios
 - [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN` (deploy workflow gate)
 - [ ] Rotation checklist after agent key exposure: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md)
 - [ ] `pnpm yc-stage-phase4` Pass
-- [x] Push в `staging` → `deploy-staging` run `33803793108`: gate/build-push/deploy/migrate/smoke green (EAS mobile jobs optional)
+- [x] Push в `staging` → `deploy-staging` run `33803793108`: gate/build-push/deploy/migrate/smoke green. EAS `mobile-ios` падает на Apple credentials (как 26 Aug); `mobile-android` — Gradle на Expo (`f11ef7d2`), логи только на expo.dev
 - [ ] `./scripts/staging-preflight.sh` → Pass (auth smoke уже Pass отдельно)
 - [ ] `pnpm yc-stage-phase0` Pass без `ALLOW_MISSING_POLLEN_HEATMAP`
 - [ ] EAS staging APK + iOS установлены, smoke S.1–S.4
