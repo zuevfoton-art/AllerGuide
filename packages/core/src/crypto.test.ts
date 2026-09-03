@@ -16,6 +16,7 @@ describe('per-user backup crypto', () => {
     const envelope = await encryptString(plaintext, 'correct horse battery');
 
     expect(isEncryptedEnvelope(envelope)).toBe(true);
+    expect(isEncryptedEnvelope(JSON.stringify({ alg: 'AES-GCM', ct: 'deadbeef' }))).toBe(false);
     expect(envelope).not.toContain('Анна');
 
     const decrypted = await decryptString(envelope, 'correct horse battery');

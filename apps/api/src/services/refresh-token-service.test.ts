@@ -45,4 +45,11 @@ describe('refresh token memory store', () => {
     expect(await rotateRefreshToken(a)).toBeNull();
     expect(await rotateRefreshToken(b)).toBeNull();
   });
+
+  it('lets only one concurrent rotate claim the same unused token', async () => {
+    const raw = await issueRefreshToken(11);
+    const results = await Promise.all([rotateRefreshToken(raw), rotateRefreshToken(raw)]);
+    expect(results.filter(Boolean)).toEqual([{ userId: 11 }]);
+    expect(await rotateRefreshToken(raw)).toBeNull();
+  });
 });

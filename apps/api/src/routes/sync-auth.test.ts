@@ -64,7 +64,14 @@ describe('JWT-authenticated sync', () => {
   it('stores an encrypted backup opaquely', async () => {
     const app = await createApp();
     const auth = await bearer(7);
-    const envelope = JSON.stringify({ alg: 'AES-GCM', ct: 'deadbeef' });
+    const envelope = JSON.stringify({
+      alg: 'AES-GCM',
+      kdf: 'PBKDF2',
+      iter: 100_000,
+      salt: 'c2FsdA',
+      iv: 'aXY',
+      ct: 'Y3Q',
+    });
 
     const upload = await request(app)
       .post('/api/sync/backup')
@@ -76,7 +83,50 @@ describe('JWT-authenticated sync', () => {
     expect(download.status).toBe(200);
     expect(download.body.encrypted).toBe(true);
     expect(download.body.payload).toBe(envelope);
+    expect(download.body.profiles).toBeUndefined();
     expect(JSON.stringify(download.body)).not.toContain('Anna');
+  });
+
+  it('rejects encrypted:true when the payload is not a real envelope', async () => {
+    const app = await createApp();
+    const upload = await request(app)
+      .post('/api/sync/backup')
+      .set('Authorization', await bearer(7))
+      .send({
+        v: 2,
+        userId: 7,
+        encrypted: true,
+        exportedAt: new Date().toISOString(),
+        payload: JSON.stringify({ alg: 'AES-GCM', ct: 'deadbeef' }),
+        profiles: [{ id: 1, name: 'Anna' }],
+      });
+    expect(upload.status).toBe(400);
+    expect(upload.body.error).toBe('Encrypted backup required');
+  });
+
+  it('rejects an encrypted upload that still includes plaintext collections', async () => {
+    const app = await createApp();
+    const envelope = JSON.stringify({
+      alg: 'AES-GCM',
+      kdf: 'PBKDF2',
+      iter: 100_000,
+      salt: 'c2FsdA',
+      iv: 'aXY',
+      ct: 'Y3Q',
+    });
+    const upload = await request(app)
+      .post('/api/sync/backup')
+      .set('Authorization', await bearer(7))
+      .send({
+        v: 2,
+        userId: 7,
+        encrypted: true,
+        exportedAt: new Date().toISOString(),
+        payload: envelope,
+        profiles: [{ id: 1, name: 'Anna' }],
+      });
+    expect(upload.status).toBe(400);
+    expect(upload.body.error).toBe('Encrypted backup required');
   });
 
   it('rejects sync without auth when JWT secret is the only mechanism', async () => {

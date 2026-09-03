@@ -481,7 +481,7 @@ flowchart LR
 
 Чувствительные ключи (`authToken`, `refreshToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
 
-JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, access TTL 30 мин + opaque refresh 30 дней (`apps/api/src/lib/jwt.ts`). Браузерный `Origin` включает cookie-сессию: `ag_access` / `ag_refresh` (httpOnly, SameSite Lax на localhost и None+Secure на cross-site). JSON больше не отдаёт refresh web-клиенту. Native по-прежнему получает Bearer + refresh в теле.
+JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, access TTL 30 мин + opaque refresh 30 дней (`apps/api/src/lib/jwt.ts`). Ротация refresh — атомарный `UPDATE … WHERE revoked_at IS NULL`; повторно использованный токен отзывает всю семью. Браузерный `Origin` включает cookie-сессию: `ag_access` / `ag_refresh` (httpOnly, SameSite Lax на localhost и None+Secure на cross-site). JSON больше не отдаёт refresh web-клиенту. Native по-прежнему получает Bearer + refresh в теле.
 
 ### Dual-write policy (Phase 1)
 
@@ -620,7 +620,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 - Payload в `sync_backups` (in-memory fallback без БД)
 - Auth: mobile JWT, когда задан `JWT_SECRET`. Legacy `SYNC_API_KEY` только без JWT (local/dev) и **не** обходит ownership
 - Владение по `userId` из токена
-- Клиент шифрует AES-GCM (Web Crypto или `@noble/ciphers` на native) до загрузки; без ciphertext upload не уходит. Staging: `SYNC_REQUIRE_ENCRYPTED=true`
+- Клиент шифрует AES-GCM (Web Crypto или `@noble/ciphers` на native) до загрузки. Сервер принимает ciphertext только если `payload` проходит `isEncryptedEnvelope` (alg/kdf/iter/salt/iv/ct) и в теле нет plaintext-коллекций (`profiles`, дневник, SOS…). Persist — `{ v, userId, encrypted, exportedAt, payload }`, не весь body. Флага `encrypted: true` недостаточно. Staging: `SYNC_REQUIRE_ENCRYPTED=true`
 
 #### Recovery key flow (cross-device restore)
 

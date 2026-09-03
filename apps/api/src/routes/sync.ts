@@ -2,23 +2,9 @@ import type { Express, NextFunction, Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { readAccessToken, resolveAuthPayload } from '../lib/request-auth';
 import { logCaughtError } from '../lib/log-caught-error';
+import { resolveEncryptedSyncPayload, type SyncBody } from '../lib/sync-payload';
 import { db } from '../db';
 import { syncBackups } from '../db/schema';
-
-interface SyncBody {
-  v?: 1 | 2;
-  userId?: number;
-  exportedAt?: string;
-  encrypted?: boolean;
-  // plaintext payloads carry these; encrypted payloads carry `payload` only
-  payload?: string;
-  profiles?: unknown[];
-  diaryEntries?: unknown[];
-  emergencyContacts?: unknown[];
-  scanHistory?: unknown[];
-  profileSos?: unknown[];
-  appSettings?: Record<string, string>;
-}
 
 function isSyncEnabled(): boolean {
   return process.env.SYNC_ENABLED === 'true';
@@ -120,8 +106,9 @@ export function registerSyncRoutes(app: Express) {
       return;
     }
 
-    if (process.env.SYNC_REQUIRE_ENCRYPTED === 'true' && body.encrypted !== true) {
-      res.status(400).json({ ok: false, error: 'Encrypted backup required' });
+    const encryptedPayload = resolveEncryptedSyncPayload(body, userId);
+    if (!encryptedPayload.ok) {
+      res.status(400).json({ ok: false, error: encryptedPayload.error });
       return;
     }
 
@@ -135,9 +122,9 @@ export function registerSyncRoutes(app: Express) {
       await persistBackup({
         userId,
         version: body.v,
-        encrypted: body.encrypted === true,
+        encrypted: encryptedPayload.encrypted,
         exportedAt: body.exportedAt,
-        raw: JSON.stringify({ ...body, userId }),
+        raw: encryptedPayload.raw,
       });
       res.json({ ok: true, exportedAt: body.exportedAt });
     } catch (error) {

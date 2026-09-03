@@ -100,7 +100,7 @@ done
 | `REFRESH_TOKEN_TTL_MS` | Opaque refresh lifetime (default 30 days) |
 | `MEDICINE_WRITE_KEY` | Server-to-server public catalog writes |
 | `SYNC_API_KEY` | Local/dev only; ignored when `JWT_SECRET` is set |
-| `SYNC_REQUIRE_ENCRYPTED` | `true` on staging/production |
+| `SYNC_REQUIRE_ENCRYPTED` | `true` on staging/production; server requires a full AES-GCM envelope and drops plaintext collections |
 | `PASSWORD_RESET_TOKEN_IN_RESPONSE` | `true` only in dev/staging (no email provider yet) |
 | `ANALYTICS_DASHBOARD_KEY` | Required header secret for dashboard |
 | `RATE_LIMIT_DISABLED` | `true` only in tests |

@@ -186,7 +186,19 @@ export async function decryptString(
 export function isEncryptedEnvelope(raw: string): boolean {
   try {
     const parsed = JSON.parse(raw) as Partial<EncryptedEnvelope>;
-    return parsed?.alg === 'AES-GCM' && typeof parsed.ct === 'string';
+    return (
+      parsed?.alg === 'AES-GCM' &&
+      parsed.kdf === 'PBKDF2' &&
+      typeof parsed.iter === 'number' &&
+      Number.isFinite(parsed.iter) &&
+      parsed.iter > 0 &&
+      typeof parsed.salt === 'string' &&
+      parsed.salt.length > 0 &&
+      typeof parsed.iv === 'string' &&
+      parsed.iv.length > 0 &&
+      typeof parsed.ct === 'string' &&
+      parsed.ct.length > 0
+    );
   } catch {
     return false;
   }

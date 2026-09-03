@@ -52,43 +52,57 @@ export async function rotateRefreshToken(
   const now = new Date();
 
   if (!databaseConfigured()) {
-    const stored = memoryTokens.get(tokenHash);
-    if (!stored) return null;
-    if (stored.revokedAt || stored.expiresAt <= now) {
-      if (stored.revokedAt) {
-        for (const [hash, row] of memoryTokens) {
-          if (row.userId === stored.userId) {
-            memoryTokens.set(hash, { ...row, revokedAt: now });
-          }
-        }
-      }
-      return null;
-    }
-    memoryTokens.set(tokenHash, { ...stored, revokedAt: now });
-    return { userId: stored.userId };
+    return claimMemoryRefresh(tokenHash, now);
   }
 
-  const [row] = await db
-    .select()
+  // Claim the unused token in one statement so concurrent refreshes cannot
+  // both succeed (SELECT then UPDATE by id is not atomic).
+  const [claimed] = await db
+    .update(refreshTokens)
+    .set({ revokedAt: now })
+    .where(
+      and(
+        eq(refreshTokens.tokenHash, tokenHash),
+        isNull(refreshTokens.revokedAt),
+        gt(refreshTokens.expiresAt, now),
+      ),
+    )
+    .returning({ userId: refreshTokens.userId });
+
+  if (claimed) {
+    return { userId: claimed.userId };
+  }
+
+  const [existing] = await db
+    .select({ userId: refreshTokens.userId, revokedAt: refreshTokens.revokedAt })
     .from(refreshTokens)
     .where(eq(refreshTokens.tokenHash, tokenHash))
     .limit(1);
 
-  if (!row) return null;
+  if (existing?.revokedAt) {
+    await revokeRefreshTokensForUser(existing.userId);
+  }
+  return null;
+}
 
-  if (row.revokedAt || row.expiresAt <= now) {
-    if (row.revokedAt) {
-      await revokeRefreshTokensForUser(row.userId);
-    }
+function claimMemoryRefresh(tokenHash: string, now: Date): { userId: number } | null {
+  const stored = memoryTokens.get(tokenHash);
+  if (!stored) return null;
+  if (stored.expiresAt <= now) return null;
+  if (stored.revokedAt) {
+    revokeMemoryTokensForUser(stored.userId, now);
     return null;
   }
+  stored.revokedAt = now;
+  return { userId: stored.userId };
+}
 
-  await db
-    .update(refreshTokens)
-    .set({ revokedAt: now })
-    .where(eq(refreshTokens.id, row.id));
-
-  return { userId: row.userId };
+function revokeMemoryTokensForUser(userId: number, now: Date): void {
+  for (const row of memoryTokens.values()) {
+    if (row.userId === userId) {
+      row.revokedAt = now;
+    }
+  }
 }
 
 export async function revokeRefreshToken(raw: string): Promise<void> {
@@ -97,7 +111,7 @@ export async function revokeRefreshToken(raw: string): Promise<void> {
 
   if (!databaseConfigured()) {
     const stored = memoryTokens.get(tokenHash);
-    if (stored) memoryTokens.set(tokenHash, { ...stored, revokedAt: now });
+    if (stored) stored.revokedAt = now;
     return;
   }
 
@@ -111,11 +125,7 @@ export async function revokeRefreshTokensForUser(userId: number): Promise<void> 
   const now = new Date();
 
   if (!databaseConfigured()) {
-    for (const [hash, row] of memoryTokens) {
-      if (row.userId === userId) {
-        memoryTokens.set(hash, { ...row, revokedAt: now });
-      }
-    }
+    revokeMemoryTokensForUser(userId, now);
     return;
   }
 
