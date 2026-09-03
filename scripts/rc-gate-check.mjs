@@ -278,6 +278,28 @@ function checkMaestroFlows() {
     failures.push('_fill-by-id.yaml must eraseText before inputText');
   }
 
+  const dismissWizardIme = path.join(flowsDir, '_dismiss-wizard-ime.yaml');
+  if (!fs.existsSync(dismissWizardIme)) {
+    failures.push('_dismiss-wizard-ime.yaml missing (fold diary IME without BACK)');
+  } else {
+    const dismissWizardBody = fs.readFileSync(dismissWizardIme, 'utf8');
+    if (!dismissWizardBody.includes('diary-wizard-step-label')) {
+      failures.push('_dismiss-wizard-ime.yaml must tap diary-wizard-step-label (not hideKeyboard/BACK)');
+    }
+  }
+
+  const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
+  if (!tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') || !tapWizardPrimary.includes('scrollUntilVisible')) {
+    failures.push('_tap-wizard-primary.yaml must dismiss IME then scrollUntilVisible');
+  }
+
+  for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (!flow.includes('_tap-wizard-primary.yaml') || !flow.includes('_fill-wizard-field.yaml')) {
+      failures.push(`${name}: must fill via _fill-wizard-field and advance via _tap-wizard-primary`);
+    }
+  }
+
   const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');
   if (
     !stagingAuth.includes('profile-screen-title') ||

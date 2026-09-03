@@ -1,0 +1,6 @@
+# Fold IME on the diary wizard without BACK / hideKeyboard.
+# Tap the non-interactive step title (same pattern as _dismiss-ime.yaml).
+appId: com.aclearo.app
+---
+- tapOn:
+    id: diary-wizard-step-label
