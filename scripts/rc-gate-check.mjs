@@ -303,6 +303,14 @@ function checkMaestroFlows() {
     if (!flow.includes('_tap-wizard-primary.yaml') || !flow.includes('_fill-wizard-field.yaml')) {
       failures.push(`${name}: must fill via _fill-wizard-field and advance via _tap-wizard-primary`);
     }
+    if (!flow.includes('diary-new-entry') || flow.includes('diary-chip-')) {
+      failures.push(`${name}: must open types via diary-new-entry (home chips were removed)`);
+    }
+  }
+
+  const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
+  if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
+    failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
   }
 
   const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');

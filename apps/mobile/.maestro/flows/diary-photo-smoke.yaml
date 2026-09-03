@@ -1,12 +1,20 @@
 # §7.3 — diary: skin photo step is reachable (gallery/camera UI)
 # Does not require actually picking a photo (permission-dependent on CI).
+# Entry types live in the «Что добавить» picker, not home chips.
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - tapOn:
     id: tab-diary
 - tapOn:
-    id: diary-chip-skin
+    id: diary-new-entry
+- scrollUntilVisible:
+    element:
+      id: diary-picker-skin
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: diary-picker-skin
 - extendedWaitUntil:
     visible:
       id: diary-wizard-primary
@@ -40,4 +48,4 @@ appId: com.aclearo.app
       id: diary-wizard-primary
     timeout: 10000
 - assertVisible:
-    id: diary-chip-skin
+    id: diary-new-entry
