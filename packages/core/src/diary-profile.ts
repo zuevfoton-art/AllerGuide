@@ -268,9 +268,6 @@ export function collectLatestScaleTrends(
   return DIARY_TREND_SCALE_IDS.filter((id) => latest.has(id)).map((id) => latest.get(id)!);
 }
 
-/** @deprecated use GINA_ACT_PROMPT_INTERVAL_DAYS from gina-asthma */
-export const ACT_PROMPT_INTERVAL_DAYS = GINA_ACT_PROMPT_INTERVAL_DAYS;
-
 export function getLastScaleEntryAt(
   entries: { type: string; details: string; createdAt: string }[],
   scaleId: ClinicalScaleId,
@@ -294,7 +291,7 @@ export function isActPromptDue(
   const lastAt = getLastScaleEntryAt(entries, 'act');
   if (!lastAt) return true;
   const daysSince = (Date.now() - new Date(lastAt).getTime()) / 86_400_000;
-  return daysSince >= ACT_PROMPT_INTERVAL_DAYS;
+  return daysSince >= GINA_ACT_PROMPT_INTERVAL_DAYS;
 }
 
 export function daysSinceActEntry(

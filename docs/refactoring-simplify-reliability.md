@@ -99,7 +99,7 @@ pending alias уходит после успешного POST; unhandled route e
 - Экраны — wiring; I/O остаётся в services.
 - ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
 
-### Wave 3 — Kill WebDb SQL parsing (этот PR)
+### Wave 3 — Kill WebDb SQL parsing (в `main`, #325)
 
 Цель: SQL-string parsing — тонкий роутер, не 687-строчный god-class.
 Сервисы по-прежнему вызывают `getDb().runSync` / `getFirstSync` / `getAllSync`.
@@ -120,12 +120,20 @@ Native SQLite не дублируем (`init.native.ts`).
 **Критерий готовности:** `init-diary` / `init-profile` / `init-scan` зелёные;
 unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-by-id через `getDb`.
 
-### Wave 4 — Dedup и вычистка
+### Wave 4 — Dedup и вычистка (этот PR)
 
-- Shared OFF / catalog client (core или общий модуль для mobile + API).
-- Split `diary.ts` (wizard schema vs formatters) и doctor-report HTML builder.
-- Ownership helper для SOS / reminders / scans (дожать follow-up diary-doc).
-- Sweep `@deprecated` theme/logo/gradient aliases после короткого окна совместимости.
+Цель: один OFF-парсер без HTTP в core, тонкий `diary.ts`, удаление неиспользуемых `@deprecated` alias.
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 4.1 | Shared OFF: типы, barcode/product normalize, URL builders, константы (без HTTP) | `packages/core/src/open-food-facts.ts` |
+| 4.2 | Slim-адаптеры: fetch + env + публичные имена | `apps/mobile/.../open-food-facts-service.ts`, `apps/api/.../open-food-facts.ts` |
+| 4.3 | Split `diary.ts`: schema vs format; barrel реэкспортирует оба | `diary-schema.ts`, `diary-format.ts`, `diary.ts` |
+| 4.4 | Удалены неиспользуемые deprecated alias | product-service, `useGlassStyles`, `AppLogo`, `calm-gradient`, theme `colors`/`shadows`, `POLLEN_CALENDAR_MOSCOW`, core `PlumeParticle`, wellness `recentSymptoms`/`recentTriggers`, `ACT_PROMPT_INTERVAL_DAYS` → `GINA_ACT_PROMPT_INTERVAL_DAYS` |
+
+**Не в этом PR (follow-up):** doctor-report HTML builder; ownership helper для SOS / reminders / scans.
+
+**Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
 ### Wave 5 — Offline→online reconciliation
 
@@ -167,5 +175,6 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 |-------|--------|
 | Wave 1 | ✅ в `main` (#321) |
 | Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
-| Wave 3 | ✅ этот PR — typed WebDb collections / handlers / router |
-| Wave 4–5 | 📝 запланированы |
+| Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
+| Wave 4 | ✅ этот PR — OFF core mapping, diary split, unused aliases |
+| Wave 5 | 📝 запланирована |
