@@ -25,7 +25,7 @@ Audit date: 2026-06-20 · OWASP Mobile Top 10 (2024) checklist for `apps/mobile`
 | M6 | Inadequate privacy controls | **Fixed** | Analytics `console.info` gated to `__DEV__`; Sentry `beforeSend` scrubs token/password fields |
 | M7 | Insufficient binary protections | **Deferred** | Standard Expo release builds; no RASP/obfuscation for RC |
 | M8 | Security misconfiguration | **Fixed** | Android `allowBackup=false`; ATS enforced on iOS |
-| M9 | Insecure data storage | **Fixed** | Sensitive keys in SecureStore; SQLite no longer mirrors JWT/recovery key |
+| M9 | Insecure data storage | **Fixed** | Sensitive keys in SecureStore; web refresh is an httpOnly cookie (not IndexedDB) |
 | M10 | Insufficient cryptography | **Partial** | AES-GCM backups when Web Crypto available; local file export remains user-managed JSON (**deferred**) |
 
 ## Findings
@@ -35,7 +35,7 @@ Audit date: 2026-06-20 · OWASP Mobile Top 10 (2024) checklist for `apps/mobile`
 | ID | Finding | Fix |
 |----|---------|-----|
 | MOB-01 | Recovery key / `backupSecret` in plaintext SQLite | `secure-settings-service.ts` + migration in `hydrateSensitiveSettings()` |
-| MOB-02 | JWT duplicated in SQLite `app_settings` | `backend-api.ts` writes SecureStore only on native |
+| MOB-02 | JWT duplicated in SQLite `app_settings` | `backend-api.ts` writes SecureStore only on native; web refresh is httpOnly |
 | MOB-03 | Analytics payloads logged in production builds | `analytics-service.ts` logs only in `__DEV__` |
 | MOB-04 | Sentry `extra` could carry secrets | `error-reporting.ts` scrubs sensitive keys + `beforeSend` |
 | MOB-05 | Android full backup may include SQLite PHI | `allowBackup=false` in `app.json` + `AndroidManifest.xml` |

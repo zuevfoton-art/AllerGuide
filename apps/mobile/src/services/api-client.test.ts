@@ -4,6 +4,7 @@ import { refreshAccessToken } from './token-session';
 
 vi.mock('./token-session', () => ({
   refreshAccessToken: vi.fn(),
+  usesCookieAuth: () => false,
 }));
 
 const originalFetch = global.fetch;

@@ -12,7 +12,7 @@ import {
   type MedicineConfidence,
   type MedicineSource,
 } from '@allerguide/core';
-import { verifyAuthToken } from '../lib/jwt';
+import { resolveAuthPayload } from '../lib/request-auth';
 import { resolveScanIdentity } from '../lib/scan-identity';
 import { consumeScanBudget, recordBudgetRejection } from '../lib/scan-cache';
 import { logCaughtError } from '../lib/log-caught-error';
@@ -81,19 +81,14 @@ async function resolveMedicineWriteAccess(req: Request): Promise<MedicineWriteAc
     return { type: 'key' };
   }
 
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return { type: 'user', userId: payload.sub };
-  }
+  const payload = await resolveAuthPayload(req);
+  if (payload) return { type: 'user', userId: payload.sub };
 
   return null;
 }
 
 async function resolveOptionalUserId(req: Request): Promise<number | null> {
-  const header = req.header('authorization');
-  if (!header?.startsWith('Bearer ')) return null;
-  const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+  const payload = await resolveAuthPayload(req);
   return payload?.sub ?? null;
 }
 

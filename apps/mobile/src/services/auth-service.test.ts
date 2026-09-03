@@ -52,6 +52,7 @@ vi.mock('@/src/services/token-session', () => ({
   applyAuthSession: vi.fn(),
   getRefreshToken: vi.fn(() => null),
   refreshAccessToken: vi.fn(async () => null),
+  usesCookieAuth: () => false,
 }));
 
 vi.mock('@/src/services/backend-api', () => ({

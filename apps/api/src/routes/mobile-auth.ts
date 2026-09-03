@@ -1,6 +1,20 @@
 import type { Express, Request, Response } from 'express';
-import { validateAuthForm, normalizeLogin, type LoginType } from '@allerguide/core';
-import { getAccessTokenTtlSeconds, signAuthToken, verifyAuthToken } from '../lib/jwt';
+import {
+  normalizeLogin,
+  validateAuthForm,
+  validateLogin,
+  validateLoginPassword,
+  validatePassword,
+  type LoginType,
+} from '@allerguide/core';
+import { getAccessTokenTtlSeconds, signAuthToken } from '../lib/jwt';
+import {
+  clearAuthCookies,
+  readRefreshToken,
+  resolveAuthPayload,
+  setAuthCookies,
+  wantsCookieSession,
+} from '../lib/request-auth';
 import { requireJwt } from '../middleware/require-jwt';
 import {
   issueRefreshToken,
@@ -30,13 +44,21 @@ function passwordResetTokenInResponseEnabled(): boolean {
   return process.env.PASSWORD_RESET_TOKEN_IN_RESPONSE === 'true';
 }
 
-async function issueAuthSession(user: { id: number; login: string; loginType: string }) {
+async function issueAuthSession(
+  req: Request,
+  res: Response,
+  user: { id: number; login: string; loginType: string },
+) {
   const token = await signAuthToken({
     sub: user.id,
     login: user.login,
     loginType: user.loginType,
   });
   const refreshToken = await issueRefreshToken(user.id);
+  if (wantsCookieSession(req)) {
+    setAuthCookies(req, res, { access: token, refresh: refreshToken });
+    return { token, expiresIn: getAccessTokenTtlSeconds() };
+  }
   return { token, refreshToken, expiresIn: getAccessTokenTtlSeconds() };
 }
 
@@ -77,7 +99,7 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const session = await issueAuthSession(result.user);
+    const session = await issueAuthSession(req, res, result.user);
     res.status(201).json({ ok: true, user: result.user, ...session });
   });
 
@@ -93,11 +115,8 @@ export function registerMobileAuthRoutes(app: Express) {
       password?: string;
     };
 
-    const validationError = validateAuthForm({
-      loginType: loginType ?? 'email',
-      login: login ?? '',
-      password: password ?? '',
-    });
+    const validationError =
+      validateLogin(loginType ?? 'email', login ?? '') ?? validateLoginPassword(password ?? '');
 
     if (validationError) {
       res.status(400).json({ ok: false, error: validationError });
@@ -115,7 +134,7 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const session = await issueAuthSession(result.user);
+    const session = await issueAuthSession(req, res, result.user);
     res.json({ ok: true, user: result.user, ...session });
   });
 
@@ -141,7 +160,7 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const refreshToken = String((req.body as { refreshToken?: string })?.refreshToken ?? '').trim();
+    const refreshToken = readRefreshToken(req);
     if (!refreshToken) {
       res.status(400).json({ ok: false, error: 'refreshToken is required' });
       return;
@@ -159,21 +178,19 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    const session = await issueAuthSession(toAuthUser(user));
+    const session = await issueAuthSession(req, res, toAuthUser(user));
     res.json({ ok: true, user: toAuthUser(user), ...session });
   });
 
   app.post('/api/auth/logout', async (req: Request, res: Response) => {
-    const refreshToken = String((req.body as { refreshToken?: string })?.refreshToken ?? '').trim();
+    const refreshToken = readRefreshToken(req);
     if (refreshToken) {
       await revokeRefreshToken(refreshToken);
     }
 
-    const header = req.header('authorization');
-    if (header?.startsWith('Bearer ')) {
-      const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-      if (payload) await revokeRefreshTokensForUser(payload.sub);
-    }
+    const payload = await resolveAuthPayload(req);
+    if (payload) await revokeRefreshTokensForUser(payload.sub);
+    clearAuthCookies(req, res);
 
     res.json({ ok: true });
   });
@@ -265,13 +282,9 @@ export function registerMobileAuthRoutes(app: Express) {
       return;
     }
 
-    if (password.length < 6) {
-      res.status(400).json({ ok: false, error: 'Пароль должен содержать минимум 6 символов.' });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      res.status(400).json({ ok: false, error: 'Пароли не совпадают.' });
+    const passwordError = validatePassword(password, confirmPassword);
+    if (passwordError) {
+      res.status(400).json({ ok: false, error: passwordError });
       return;
     }
 

@@ -477,11 +477,11 @@ flowchart LR
 | Режим | Хранение | Когда |
 |-------|----------|-------|
 | **Локальный** | `users` в SQLite/IndexedDB, `authUserId` в settings | `BACKEND_AUTH=false` |
-| **Backend JWT** | Access: память (web) / SecureStore (native). Refresh: IndexedDB (web) / SecureStore (native) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
+| **Backend JWT** | Access: память + httpOnly cookie (web) / SecureStore (native). Refresh: httpOnly cookie (web) / SecureStore (native) | `BACKEND_AUTH=true` + `JWT_SECRET` на API |
 
 Чувствительные ключи (`authToken`, `refreshToken`, `recoveryKey`, `backupSecret`, `recoveryKeyConfirmed`) **не** хранятся в SQLite на native — только SecureStore.
 
-JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, access TTL 30 мин + opaque refresh 30 дней (`apps/api/src/lib/jwt.ts`).
+JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, access TTL 30 мин + opaque refresh 30 дней (`apps/api/src/lib/jwt.ts`). Браузерный `Origin` включает cookie-сессию: `ag_access` / `ag_refresh` (httpOnly, SameSite Lax на localhost и None+Secure на cross-site). JSON больше не отдаёт refresh web-клиенту. Native по-прежнему получает Bearer + refresh в теле.
 
 ### Dual-write policy (Phase 1)
 
@@ -838,7 +838,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `JWT_SECRET` | Mobile JWT signing |
 | `ACCESS_TOKEN_TTL` / `ACCESS_TOKEN_TTL_SECONDS` | Access JWT lifetime (default `30m` / `1800`) |
 | `REFRESH_TOKEN_TTL_MS` | Opaque refresh lifetime (default 30 days) |
-| `CORS_ORIGINS` | CORS allowlist |
+| `CORS_ORIGINS` | CORS allowlist (required in production) |
 | `RATE_LIMIT_*`, `RATE_LIMIT_DISABLED`, `POLLEN_RATE_LIMIT_*` | Rate limiting |
 | `SYNC_ENABLED`, `SYNC_API_KEY`, `SYNC_REQUIRE_ENCRYPTED` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |

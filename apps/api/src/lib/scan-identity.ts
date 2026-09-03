@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { verifyAuthToken } from './jwt';
+import { resolveAuthPayload } from './request-auth';
 
 /** JWT required for billable AI routes when the flag is on. */
 export function isScanAuthRequired(): boolean {
@@ -24,11 +24,8 @@ export async function resolveScanIdentity(
   req: Request,
   options?: { requireAuth?: boolean },
 ): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
+  const payload = await resolveAuthPayload(req);
+  if (payload) return `user:${payload.sub}`;
   const requireAuth = options?.requireAuth ?? isScanAuthRequired();
   if (requireAuth) return null;
   return `ip:${req.ip ?? 'unknown'}`;

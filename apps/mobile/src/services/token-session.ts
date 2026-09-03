@@ -46,6 +46,10 @@ export function getRefreshToken(): string | null {
   return getSensitiveSetting(REFRESH_TOKEN_KEY) ?? getSetting(REFRESH_TOKEN_KEY);
 }
 
+export function usesCookieAuth(): boolean {
+  return Platform.OS === 'web';
+}
+
 export function setRefreshToken(token: string): void {
   if (Platform.OS === 'web') {
     setSetting(REFRESH_TOKEN_KEY, token);
@@ -64,7 +68,13 @@ export async function clearAuthSessionTokens(): Promise<void> {
 
 export function applyAuthSession(session: { token: string; refreshToken?: string }): void {
   setAccessToken(session.token);
-  if (session.refreshToken) setRefreshToken(session.refreshToken);
+  if (session.refreshToken) {
+    setRefreshToken(session.refreshToken);
+    return;
+  }
+  if (Platform.OS === 'web') {
+    setSetting(REFRESH_TOKEN_KEY, '');
+  }
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
@@ -73,13 +83,15 @@ export async function refreshAccessToken(): Promise<string | null> {
   refreshInFlight = (async () => {
     const refreshToken = getRefreshToken();
     const baseUrl = process.env.EXPO_PUBLIC_API_URL ?? '';
-    if (!refreshToken || !baseUrl) return null;
+    const cookieAuth = usesCookieAuth();
+    if (!baseUrl || (!refreshToken && !cookieAuth)) return null;
 
     try {
       const response = await fetch(`${baseUrl}/api/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        credentials: cookieAuth ? 'include' : 'same-origin',
+        body: JSON.stringify(refreshToken ? { refreshToken } : {}),
       });
       const payload = (await response.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -90,6 +102,7 @@ export async function refreshAccessToken(): Promise<string | null> {
         return null;
       }
       applyAuthSession({ token: payload.token, refreshToken: payload.refreshToken });
+      if (cookieAuth) setSetting(REFRESH_TOKEN_KEY, '');
       return payload.token;
     } catch {
       return null;

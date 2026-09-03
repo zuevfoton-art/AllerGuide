@@ -1,6 +1,6 @@
 import type { Express, NextFunction, Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
-import { verifyAuthToken } from '../lib/jwt';
+import { readAccessToken, resolveAuthPayload } from '../lib/request-auth';
 import { logCaughtError } from '../lib/log-caught-error';
 import { db } from '../db';
 import { syncBackups } from '../db/schema';
@@ -83,9 +83,8 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
     return;
   }
 
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
+  if (readAccessToken(req)) {
+    const payload = await resolveAuthPayload(req);
     if (!payload) {
       res.status(401).json({ ok: false, error: 'Invalid or expired token' });
       return;

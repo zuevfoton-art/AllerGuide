@@ -1,5 +1,5 @@
 import { logCaughtError } from '@/src/services/error-reporting';
-import { refreshAccessToken } from '@/src/services/token-session';
+import { refreshAccessToken, usesCookieAuth } from '@/src/services/token-session';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -25,12 +25,14 @@ export async function apiRequest<T>(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const cookieAuth = usesCookieAuth();
     const response = await fetch(`${API_BASE}${path}`, {
       method,
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+      credentials: cookieAuth ? 'include' : 'same-origin',
       body: body != null ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
@@ -44,7 +46,7 @@ export async function apiRequest<T>(
         !path.startsWith('/api/auth/login') &&
         !path.startsWith('/api/auth/register') &&
         !path.startsWith('/api/auth/logout') &&
-        Boolean(token);
+        (Boolean(token) || cookieAuth);
 
       if (canRefresh) {
         const nextToken = await refreshAccessToken();

@@ -44,8 +44,6 @@ export async function saveAliasFeedback(
       term: entry.term,
       suggestedAllergenId: entry.suggestedAllergenId,
       context: entry.context,
-      profileId: entry.profileId,
-      scanInput: entry.scanInput,
     },
   }).catch((error) => {
     logCaughtError('submitAliasFeedback', error, { level: 'warn', extra: { term: entry.term } });

@@ -75,7 +75,29 @@ describe('web token session', () => {
     const { refreshAccessToken, getAccessToken, getRefreshToken } = await import('./token-session');
     expect(await refreshAccessToken()).toBe('access-2');
     expect(await getAccessToken()).toBe('access-2');
-    expect(getRefreshToken()).toBe('refresh-2');
+    expect(getRefreshToken()).toBeNull();
+
+    vi.unstubAllGlobals();
+    delete process.env.EXPO_PUBLIC_API_URL;
+  });
+
+  it('refreshes from the httpOnly cookie when no refresh token is stored', async () => {
+    process.env.EXPO_PUBLIC_API_URL = 'https://api.example.test';
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, token: 'access-cookie' }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { refreshAccessToken, getRefreshToken } = await import('./token-session');
+    expect(await refreshAccessToken()).toBe('access-cookie');
+    expect(getRefreshToken()).toBeNull();
+    expect(fetchMock.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        credentials: 'include',
+        body: '{}',
+      }),
+    );
 
     vi.unstubAllGlobals();
     delete process.env.EXPO_PUBLIC_API_URL;

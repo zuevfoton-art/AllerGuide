@@ -16,7 +16,7 @@ Events are sent with an anonymous `client_id` stored in app settings (not linked
 
 | Variable | Purpose |
 |----------|---------|
-| `ANALYTICS_INGEST_ENABLED` | default on; set `false` to reject ingest |
+| `ANALYTICS_INGEST_ENABLED` | Production: ingest off unless `true`. Dev/test: on unless `false`. Max 25 events / request. |
 | `ANALYTICS_DASHBOARD_ENABLED` | set `true` to expose dashboard |
 | `ANALYTICS_DASHBOARD_KEY` | required secret for `x-analytics-dashboard-key` header |
 | `POSTHOG_API_KEY` | optional forward to PostHog |

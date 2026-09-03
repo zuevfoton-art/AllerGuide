@@ -56,8 +56,8 @@ describe('mobile auth routes', () => {
     const response = await request(app).post('/api/auth/register').send({
       loginType: 'email',
       login: 'user@example.com',
-      password: 'secret1',
-      confirmPassword: 'secret1',
+      password: 'secret12',
+      confirmPassword: 'secret12',
     });
 
     expect(response.status).toBe(201);
@@ -78,7 +78,7 @@ describe('mobile auth routes', () => {
     const response = await request(app).post('/api/auth/login').send({
       loginType: 'phone',
       login: '+79991234567',
-      password: 'secret1',
+      password: 'secret12',
     });
 
     expect(response.status).toBe(200);
@@ -144,6 +144,61 @@ describe('mobile auth routes', () => {
 
     expect(response.status).toBe(200);
     expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+  });
+
+  it('sets httpOnly cookies and omits the refresh token for a browser Origin', async () => {
+    vi.mocked(registerAppUser).mockResolvedValue({
+      ok: true,
+      user: { id: 1, login: 'user@example.com', loginType: 'email' },
+    });
+
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/register')
+      .set('Origin', 'http://localhost:5000')
+      .send({
+        loginType: 'email',
+        login: 'user@example.com',
+        password: 'secret12',
+        confirmPassword: 'secret12',
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.refreshToken).toBeUndefined();
+    expect(response.body.token).toBeTypeOf('string');
+    const rawCookies = response.headers['set-cookie'];
+    const cookies = Array.isArray(rawCookies) ? rawCookies : rawCookies ? [rawCookies] : [];
+    expect(cookies.some((value) => value.includes('ag_refresh=') && /httponly/i.test(value))).toBe(
+      true,
+    );
+    expect(cookies.some((value) => value.includes('ag_access=') && /httponly/i.test(value))).toBe(
+      true,
+    );
+  });
+
+  it('refreshes from an httpOnly cookie when the body has no refresh token', async () => {
+    vi.mocked(rotateRefreshToken).mockResolvedValue({ userId: 3 });
+    vi.mocked(findUserById).mockResolvedValue({
+      id: 3,
+      login: 'user@example.com',
+      loginType: 'email',
+      email: 'user@example.com',
+      phone: null,
+      passwordHash: 'hash',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Origin', 'http://localhost:5000')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(200);
+    expect(rotateRefreshToken).toHaveBeenCalledWith('refresh-old');
+    expect(response.body.refreshToken).toBeUndefined();
   });
 
   it('rejects a missing refresh token', async () => {

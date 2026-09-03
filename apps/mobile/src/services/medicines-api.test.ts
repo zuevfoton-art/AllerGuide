@@ -18,6 +18,7 @@ vi.mock('./token-session', () => ({
   getRefreshToken: vi.fn(),
   setRefreshToken: vi.fn(),
   applyAuthSession: vi.fn(),
+  usesCookieAuth: () => true,
   clearAuthSessionTokens: vi.fn(),
 }));
 

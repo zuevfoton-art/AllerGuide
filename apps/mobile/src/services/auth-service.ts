@@ -4,6 +4,7 @@ import {
   hashPassword,
   normalizeLogin,
   validateLoginField,
+  validateLoginPassword,
   validatePassword,
   verifyPassword,
   type AuthUser,
@@ -26,7 +27,12 @@ import {
   getCachedAuthUser,
   syncProfilesFromBackend,
 } from '@/src/services/backend-api';
-import { applyAuthSession, getRefreshToken, refreshAccessToken } from '@/src/services/token-session';
+import {
+  applyAuthSession,
+  getRefreshToken,
+  refreshAccessToken,
+  usesCookieAuth,
+} from '@/src/services/token-session';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { clearRecoveryKey } from '@/src/services/backup-crypto';
@@ -92,7 +98,7 @@ export async function restoreAuthSession(): Promise<void> {
   if (!BACKEND_AUTH_ENABLED) return;
 
   let token = await getAuthToken();
-  if (!token && getRefreshToken()) {
+  if (!token && (getRefreshToken() || usesCookieAuth())) {
     token = await refreshAccessToken();
   }
   if (!token) {
@@ -204,7 +210,7 @@ export async function loginUser(input: {
   login: string;
   password: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateLoginField(input.login) ?? validatePassword(input.password);
+  const validationError = validateLoginField(input.login) ?? validateLoginPassword(input.password);
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {

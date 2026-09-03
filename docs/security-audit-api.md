@@ -8,8 +8,8 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 |----------|------|-------------------|---------------------|
 | Critical | 0 | 2 | 0 |
 | High | 0 | 2 | 0 |
-| Medium | 0 | 2 | 2 |
-| Low | 0 | 0 | 2 |
+| Medium | 0 | 5 | 1 |
+| Low | 0 | 0 | 1 |
 
 **Gate:** 0 critical open · regression tests in `security-pentest.test.ts`, `security.test.ts`, `sync-auth.test.ts`.
 
@@ -39,15 +39,17 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 | API-03 | **High** | Analytics dashboard public when enabled | Requires `x-analytics-dashboard-key` matching `ANALYTICS_DASHBOARD_KEY` |
 | API-D01 | **High** | `SYNC_API_KEY` grants cross-user access | Key ignored when `JWT_SECRET` is set; JWT-only on staging/prod |
 | API-D04 | **Medium** | `SCAN_REQUIRE_AUTH` optional | Production boot fails if AI flags are on without `SCAN_REQUIRE_AUTH=true` |
+| API-D03 | **Medium** | `GET /api/alias-feedback` unauthenticated | Admin key required; public POST drops `profileId` / `scanInput` |
+| API-D07 | **Medium** | CORS reflects any origin when `CORS_ORIGINS` is unset | Production boot fails without allowlist; empty allowlist denies browser origins |
+| API-D06 | **Medium** | Password min length 6 | New passwords must be 8+; login still accepts existing shorter hashes |
+| API-D08 | **Medium** | Analytics ingest open by default | Production requires `ANALYTICS_INGEST_ENABLED=true`; batch cap 25 + rate limit |
 
 ### Accepted / deferred
 
 | ID | Severity | Finding | Rationale |
 |----|----------|---------|-----------|
-| API-D02 | Medium | Rate limit store in-memory | P2.7b — Redis / Upstash |
-| API-D03 | Medium | `GET /api/alias-feedback` unauthenticated | Internal QA tool; disable or gate in prod deploy |
+| API-D02 | Medium | Rate limit store in-memory | P2.7b — Redis / Upstash (limiters already Redis-backed when `REDIS_URL` is set) |
 | API-D05 | Low | Health exposes feature flags | Acceptable for staging LB probes |
-| API-D06 | Low | Password min length 6 on reset | Align with product policy in Phase 3 |
 
 ## Route auth reference
 
@@ -55,7 +57,7 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 |-------|------|
 | `GET /api/health` | None |
 | `POST /api/auth/register`, `login`, `forgot-password`, `reset-password` | None (rate-limited) |
-| `POST /api/auth/refresh` | Opaque refresh token (rotated) |
+| `POST /api/auth/refresh` | Opaque refresh (body) or `ag_refresh` httpOnly cookie |
 | `POST /api/auth/logout` | Refresh token and/or JWT |
 | `GET /api/auth/me`, `DELETE /api/auth/account` | JWT |
 | `/api/profiles/*` | JWT (userId scoped in service layer) |
@@ -63,7 +65,9 @@ Audit date: 2026-06-20 · Pen-test focus: JWT, IDOR, rate limiting.
 | `POST /api/scan`, `/api/dishes/resolve` | JWT when `SCAN_REQUIRE_AUTH=true` |
 | `POST /api/medicines`, `DELETE /api/medicines/:name` | JWT → per-user overlay; `x-medicine-write-key` → public catalog |
 | `GET /api/medicines/search` | Public catalog; JWT additionally merges caller overlay |
-| `POST /api/analytics/events` | None (PII-sanitized ingest) |
+| `POST /api/analytics/events` | None; production off unless `ANALYTICS_INGEST_ENABLED=true`; rate-limited; max 25 events |
+| `POST /api/alias-feedback` | None (no PII fields); rate-limited |
+| `GET/PATCH /api/alias-feedback` | `x-alias-feedback-admin-key` |
 | `GET /api/analytics/dashboard` | `x-analytics-dashboard-key` when enabled |
 | `/api/allergens`, `/api/products/*`, `/api/governance` | Public by design |
 
