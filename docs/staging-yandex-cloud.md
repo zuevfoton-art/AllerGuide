@@ -463,11 +463,11 @@ pnpm build:staging:ios
 - [x] DNS: certificate challenges + CNAME `api.staging` → API GW
 - [x] `curl https://api.staging.aclearo.com/api/health` → 200
 - [x] Runner VM в VPC: `aclearo-staging-yc-runner` (`10.128.0.24`), runtime Node 20 + pnpm 10.34.4 + Actions runner 2.337.0, PG `:6432` с VM открыт
-- [ ] GitHub runner **зарегистрирован** (`aclearo-staging-yc`, label `yc-staging-vpc`) — нужен repo admin token, см. §5
+- [x] GitHub runner зарегистрирован: `aclearo-staging-yc`, labels `yc-staging-vpc,linux,x64`, systemd `actions.runner.zuevfoton-art-AllerGuide.aclearo-staging-yc` (Idle после job)
 - [ ] GitHub Secrets `YC_*`, `STAGING_*`, `EXPO_TOKEN` (deploy workflow gate)
 - [ ] Rotation checklist after agent key exposure: [`staging-secrets-rotation-checklist.md`](./staging-secrets-rotation-checklist.md)
 - [ ] `pnpm yc-stage-phase4` Pass
-- [ ] Push в `staging` → workflow green
+- [x] Push в `staging` → `deploy-staging` run `33803793108`: gate/build-push/deploy/migrate/smoke green (EAS mobile jobs optional)
 - [ ] `./scripts/staging-preflight.sh` → Pass (auth smoke уже Pass отдельно)
 - [ ] `pnpm yc-stage-phase0` Pass без `ALLOW_MISSING_POLLEN_HEATMAP`
 - [ ] EAS staging APK + iOS установлены, smoke S.1–S.4

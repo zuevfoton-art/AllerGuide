@@ -188,7 +188,7 @@ if [[ -f .runner ]]; then
   cat .runner
   exit 0
 fi
-./config.sh --unattended \\
+./config.sh --unattended --replace \\
   --url "https://github.com/${GH_REPO}" \\
   --token "${token}" \\
   --name "${RUNNER_NAME}" \\
