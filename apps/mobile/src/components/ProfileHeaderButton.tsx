@@ -196,9 +196,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       borderWidth: 1,
       borderColor: colors.accentMid,
-      maxWidth: '58%',
+      maxWidth: 220,
+      flexShrink: 1,
     },
-    chipTextCol: { flex: 1, gap: 1, minWidth: 0 },
+    chipTextCol: { flexShrink: 1, gap: 1, minWidth: 0 },
     chipTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,

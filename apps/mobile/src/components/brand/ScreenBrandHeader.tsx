@@ -70,6 +70,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       minWidth: 0,
     },
     sideRight: {
+      flexShrink: 1,
+      minWidth: 0,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
