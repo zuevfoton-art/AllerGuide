@@ -81,7 +81,7 @@ export function registerDishRoutes(app: Express) {
       return;
     }
 
-    if (!consumeScanBudget(identity)) {
+    if (!(await consumeScanBudget(identity))) {
       recordBudgetRejection();
       res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;
