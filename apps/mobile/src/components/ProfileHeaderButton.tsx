@@ -100,11 +100,14 @@ export function ProfileHeaderButton({
         transparent
         animationType="fade"
         onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
+        <View style={styles.backdrop}>
           <Pressable
-            style={styles.sheet}
-            onPress={(e) => e.stopPropagation()}
-            accessibilityViewIsModal>
+            style={StyleSheet.absoluteFill}
+            onPress={() => setOpen(false)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.cancel')}
+          />
+          <View style={styles.sheet} accessibilityViewIsModal>
             <View style={styles.sheetHead}>
               <Text style={styles.sheetTitle}>{t('profileSwitcher.switchTitle')}</Text>
               <Pressable
@@ -164,8 +167,8 @@ export function ProfileHeaderButton({
               accessibilityLabel={t('profileSwitcher.manage')}>
               <Text style={styles.manageText}>{t('profileSwitcher.manage')}</Text>
             </Pressable>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </>
   );
@@ -220,6 +223,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       maxHeight: '70%',
       overflow: 'hidden',
+      zIndex: 1,
     },
     sheetHead: {
       flexDirection: 'row',

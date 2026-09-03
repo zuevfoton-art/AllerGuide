@@ -142,6 +142,24 @@ describe('ensureActiveProfileLoaded', () => {
     expect(active?.id).toBe(childProfile.id);
   });
 
+  it('default preferSelf snaps a selected child back to parent', async () => {
+    appState.activeProfileId = childProfile.id;
+    appState.activeProfile = childProfile;
+    const { ensureActiveProfileLoaded } = await import('./profile-service');
+    const active = ensureActiveProfileLoaded();
+    expect(active?.id).toBe(selfProfile.id);
+    expect(appState.activeProfileId).toBe(selfProfile.id);
+  });
+
+  it('ensureCurrentProfileLoaded keeps a selected child', async () => {
+    appState.activeProfileId = childProfile.id;
+    appState.activeProfile = childProfile;
+    const { ensureCurrentProfileLoaded } = await import('./profile-service');
+    const active = ensureCurrentProfileLoaded();
+    expect(active?.id).toBe(childProfile.id);
+    expect(appState.activeProfile).toEqual(childProfile);
+  });
+
   it('recovers a persisted profile id when transient app state is empty', async () => {
     const { getOrLoadActiveProfileId } = await import('./profile-service');
 

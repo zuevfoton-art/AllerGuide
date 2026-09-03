@@ -126,6 +126,14 @@ export function ensureActiveProfileLoaded(options?: { preferSelf?: boolean }): P
   return useAppStore.getState().activeProfile;
 }
 
+/**
+ * Keep the profile the user already selected (child or self).
+ * Use on screens with a profile switcher — not bootstrap.
+ */
+export function ensureCurrentProfileLoaded(): Profile | null {
+  return ensureActiveProfileLoaded({ preferSelf: false });
+}
+
 /** Recover the persisted profile when transient Zustand state is empty (for example after web HMR). */
 export function getOrLoadActiveProfileId(): number | null {
   const activeProfileId = useAppStore.getState().activeProfileId;
