@@ -113,23 +113,85 @@ function checkMaestroFlows() {
   if (!runner.includes('pm grant')) {
     failures.push('scripts/maestro-run-emulator.sh must pre-grant runtime permissions');
   }
+  if (!runner.includes('autofill_service null')) {
+    failures.push('scripts/maestro-run-emulator.sh must disable Android Autofill (steals Maestro inputText)');
+  }
+  if (!runner.includes('hide_error_dialogs 1')) {
+    failures.push('scripts/maestro-run-emulator.sh must hide system ANR dialogs (they swallow Maestro taps)');
+  }
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
-  if (!runner.includes('am start') || !runner.includes('dismiss_anr')) {
-    failures.push('scripts/maestro-run-emulator.sh must am start + dismiss ANR');
-  }
-  if (!runner.includes('Application Not Responding') || !runner.includes('ensure_app_foreground')) {
-    failures.push('scripts/maestro-run-emulator.sh must detect Application Not Responding and restore MainActivity');
+  if (!runner.includes('scripts/lib/maestro-device.sh') || !runner.includes('ensure_app_foreground')) {
+    failures.push('scripts/maestro-run-emulator.sh must source scripts/lib/maestro-device.sh helpers');
   }
   if (!runner.includes('during.png')) {
     failures.push('scripts/maestro-run-emulator.sh must capture *-during.png before Maestro exits');
   }
+
+  const samplerLoop = runner.slice(
+    runner.indexOf('while [ -f "$SAMPLER_GUARD" ]'),
+    runner.indexOf('SAMPLER_PID=$!'),
+  );
+  if (!samplerLoop || samplerLoop.includes('ensure_app_foreground')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh sampler must not restart the activity mid-flow (resets expo-router)',
+    );
+  }
+
+  const device = fs.readFileSync(path.join(root, 'scripts/lib/maestro-device.sh'), 'utf8');
+  if (!device.includes('am start') || !device.includes('dismiss_anr')) {
+    failures.push('scripts/lib/maestro-device.sh must am start + dismiss ANR');
+  }
+  if (!device.includes('Application Not Responding')) {
+    failures.push('scripts/lib/maestro-device.sh must detect Application Not Responding');
+  }
+  if (!device.includes('topResumedActivity') || device.includes('launcher_is_focused')) {
+    failures.push(
+      'scripts/lib/maestro-device.sh must read the foreground from the resumed activity, not mCurrentFocus',
+    );
+  }
   if (!workflow.includes('during.png')) {
     failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
   }
-  if (!workflow.includes('maestro-login-visible.png') || !workflow.includes('.maestro/tests')) {
-    failures.push('maestro-nightly.yml must upload maestro-login-visible.png and ~/.maestro/tests');
+  if (!workflow.includes('maestro-login-visible.png')) {
+    failures.push('maestro-nightly.yml must upload maestro-login-visible.png');
+  }
+  if (workflow.includes('~/.maestro/tests')) {
+    failures.push('maestro-nightly.yml must not upload ~/.maestro/tests (upload-artifact never expands ~)');
+  }
+  if (
+    !workflow.includes('maestro-offline-maestro-logs') ||
+    !workflow.includes('maestro-staging-maestro-logs') ||
+    !runner.includes('$HOME/.maestro/tests')
+  ) {
+    failures.push('maestro-nightly.yml must upload the copied per-command Maestro logs');
+  }
+
+  if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {
+    failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
+  }
+
+  const runtimePatches = fs.readFileSync(path.join(root, 'apps/mobile/src/install-runtime.ts'), 'utf8');
+  if (
+    !runtimePatches.includes('install-crypto-get-random-values') ||
+    !runtimePatches.includes('install-password-hash-cost')
+  ) {
+    failures.push('src/install-runtime.ts must install the CSPRNG and the Hermes PBKDF2 cost');
+  }
+  // Gradle pins entryFile to index.js: a patch only in entry.js never ships.
+  for (const entryPath of ['apps/mobile/index.js', 'apps/mobile/entry.js', 'apps/mobile/app/_layout.tsx']) {
+    if (!fs.readFileSync(path.join(root, entryPath), 'utf8').includes('install-runtime')) {
+      failures.push(`${entryPath} must import src/install-runtime`);
+    }
+  }
+  const entry = fs.readFileSync(path.join(root, 'apps/mobile/entry.js'), 'utf8');
+  if (!entry.includes('expo-router/entry')) {
+    failures.push('apps/mobile/entry.js must delegate to expo-router/entry');
+  }
+  const mobilePkg = JSON.parse(fs.readFileSync(path.join(root, 'apps/mobile/package.json'), 'utf8'));
+  if (mobilePkg.main !== './entry.js') {
+    failures.push('apps/mobile package.json main must be ./entry.js (runtime patches before router)');
   }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
@@ -182,11 +244,42 @@ function checkMaestroFlows() {
     if (!tapThenConfirm) {
       failures.push(`${name}: must wait for auth-confirm-password-input after register tap`);
     }
+    if (!flow.includes('_complete-first-run-profile.yaml')) {
+      failures.push(`${name}: must run _complete-first-run-profile.yaml (condition-food before allergen-milk)`);
+    }
+  }
+
+  const firstRunProfile = fs.readFileSync(path.join(flowsDir, '_complete-first-run-profile.yaml'), 'utf8');
+  if (
+    !firstRunProfile.includes('condition-food') ||
+    !firstRunProfile.includes('allergen-milk') ||
+    firstRunProfile.indexOf('condition-food') > firstRunProfile.indexOf('allergen-milk')
+  ) {
+    failures.push('_complete-first-run-profile.yaml must tap condition-food before allergen-milk');
   }
 
   const tapRegister = fs.readFileSync(path.join(flowsDir, '_tap-register.yaml'), 'utf8');
   if (!tapRegister.includes('auth-register-link') || !tapRegister.includes('Зарегистрироваться')) {
     failures.push('_tap-register.yaml must tap auth-register-link then RU register copy');
+  }
+
+  const randomPhone = fs.readFileSync(path.join(root, 'apps/mobile/.maestro/scripts/random-phone.js'), 'utf8');
+  if (randomPhone.includes('+7999') || !randomPhone.includes('999${suffix}')) {
+    failures.push('random-phone.js must emit 10 national digits without a +7 prefix');
+  }
+
+  const fillByIdBody = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
+  if (!fillByIdBody.includes('eraseText')) {
+    failures.push('_fill-by-id.yaml must eraseText before inputText');
+  }
+
+  const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');
+  if (
+    !stagingAuth.includes('profile-screen-title') ||
+    stagingAuth.indexOf('profile-screen-title') > stagingAuth.indexOf('id: profile-logout') ||
+    stagingAuth.indexOf('scrollUntilVisible') > stagingAuth.indexOf('id: profile-logout')
+  ) {
+    failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
   }
 }
 
@@ -283,6 +376,7 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 checkSecurityAuditDocs();

@@ -28,6 +28,7 @@ describe('phone', () => {
 
   it('validates national length', () => {
     expect(validatePhone('+79991234567')).toBeNull();
+    expect(validatePhone('9991234567')).toBeNull();
     expect(validatePhone('+7999')).toMatch(/корректный/);
     expect(validatePhone('')).toMatch(/Введите/);
   });

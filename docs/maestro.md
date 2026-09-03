@@ -144,8 +144,19 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `auth-confirm-password-input` на экране «Вход» | `hideKeyboard` на Android = BACK. На корневом `/login` это выкидывает приложение в лаунчер, тап регистрации молча пропускается (`when:`). Лечится `_dismiss-ime.yaml` (тап `auth-hero-title`) |
 | `auth-hero-title` не виден 120s + ANR Pixel Launcher | `has_anr_dialog` должен ловить `Application Not Responding` из dumpsys (не только `isn't responding`). Wait / Back, затем `ensure_app_foreground` |
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
+| `onboarding-intro-skip` + баннер «непредвиденная ошибка» | Hermes: `@noble/hashes` кэширует `crypto` при импорте. Соль — `getSecureRandomBytes` + `setSecureRandomBytes` из `src/install-runtime` / expo-crypto |
+| `allergen-milk` на шаге «Какая у тебя аллергия?» | Сначала `condition-food`, потом молоко. Общий `_complete-first-run-profile.yaml` |
+| `onboarding-intro-skip` + «Не удалось подключиться к серверу» | Staging release APK блокирует cleartext HTTP на `10.0.2.2`. `maestro-build-apk.sh staging` пишет `network_security_config` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |
+| `onboarding-intro-skip` + «Введите корректный номер телефона» | `random-phone.js` даёт 10 национальных цифр без `+`. Android `input text` превращает `+` в пробел; маска LoginField тогда оставляет `(99` |
+| `profile-logout` не виден на «Мои профили» | Кнопка ниже fold (бэкап/пыление). Сначала `profile-screen-title`, потом `scrollUntilVisible` |
+| Форма регистрации заполнена, но онбординг не пришёл | Hermes без JIT: PBKDF2 600k блокирует JS ~40 c. `src/install-runtime` ставит `PASSWORD_HASH_ITERATIONS_INTERPRETED`; ожидание `onboarding-intro-skip` — 60 c |
+| Кнопка «Подождите…» висит до таймаута (staging зелёный, offline красный) | Патч рантайма не попал в APK: Gradle берёт `index.js`, а не `package.json` `main`. Оба entry импортируют `src/install-runtime`. Staging хеширует на API, поэтому не падал |
+| Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |
+| `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
+| Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
+| Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

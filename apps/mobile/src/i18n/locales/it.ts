@@ -294,7 +294,7 @@ const it: LocaleMessages = {
   medicineScan: {
     title: 'Foto o voce',
     subtitle:
-      'Fotografa la confezione o detta il nome: i campi verranno compilati. Puoi anche scrivere a mano.',
+      'Fotografa la confezione, scansiona il codice a barre o detta il nome: i campi verranno compilati. Puoi anche scrivere a mano.',
     photograph: 'Fotografa la confezione',
     recordVoice: 'Registra con la voce',
     gallery: 'Dalla galleria',
@@ -318,11 +318,13 @@ const it: LocaleMessages = {
     notRecognized: 'Farmaco non riconosciuto. Prova un’altra foto o compila a mano.',
     cropTitle: 'Ritaglia la confezione',
     cropHint: 'Lascia nome, principio attivo e dosaggio',
+    barcodeNotFound:
+      'Codice non trovato nel catalogo. Fotografa la confezione o compila a mano.',
   },
   nutritionScan: {
     title: 'Foto del piatto o inserimento',
     subtitle:
-      'Fotografa il piatto o inserisci il nome: mostriamo gli ingredienti, poi il livello di reazione.',
+      'Fotografa il piatto, scansiona il codice a barre o inserisci il nome: mostriamo gli ingredienti, poi il livello di reazione.',
     photograph: 'Fotografa il piatto',
     gallery: 'Dalla galleria',
     enterManually: 'Inserisci a mano',
@@ -330,6 +332,8 @@ const it: LocaleMessages = {
     notRecognized: 'Piatto non riconosciuto. Inserisci il nome a mano.',
     cropTitle: 'Ritaglia il piatto',
     cropHint: 'Lascia il piatto o l’etichetta nell’inquadratura',
+    barcodeNotFound:
+      'Codice non trovato nel catalogo. Fotografa il piatto o inserisci il nome a mano.',
   },
   voiceNote: {
     title: 'Input vocale',
@@ -384,6 +388,7 @@ const it: LocaleMessages = {
     analyzeMenu: 'Analizza menu',
     analyzeLabel: 'Analizza testo',
     barcodeWebHint: 'La scansione codici è disponibile nell\'app mobile',
+    barcodePlaceholder: 'Codice a barre di 8–14 cifre',
     takePhoto: 'Scatta foto',
     pickFromGallery: 'Scegli dalla galleria',
     cropTitle: 'Ritaglia la foto',
@@ -746,8 +751,6 @@ const it: LocaleMessages = {
     localBackupImportMessage: 'Replace current data?',
     recoveryKeyBannerTitle: 'Save recovery key',
     recoveryKeyBannerDesc: 'Required for cross-device restore.',
-    pollenRegionTitle: 'Pollen region',
-    pollenRegionHint: 'When GPS unavailable',
     locationDefaultHint: 'Default region',
     appLockTitle: 'App lock',
     appLockHint: 'Biometrics for SOS and diary',

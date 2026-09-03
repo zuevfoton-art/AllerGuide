@@ -294,7 +294,7 @@ const fr: LocaleMessages = {
   medicineScan: {
     title: 'Photo ou voix',
     subtitle:
-      'Photographiez la boîte ou dictez le nom — les champs seront préremplis. Vous pouvez aussi saisir à la main.',
+      'Photographiez la boîte, scannez le code-barres ou dictez le nom — les champs seront préremplis. Vous pouvez aussi saisir à la main.',
     photograph: 'Photographier la boîte',
     recordVoice: 'Enregistrer à la voix',
     gallery: 'Depuis la galerie',
@@ -318,11 +318,13 @@ const fr: LocaleMessages = {
     notRecognized: 'Médicament non reconnu. Essayez une autre photo ou remplissez à la main.',
     cropTitle: 'Recadrez la boîte',
     cropHint: 'Gardez le nom, le principe actif et le dosage',
+    barcodeNotFound:
+      'Code-barres introuvable dans le catalogue. Photographiez la boîte ou remplissez à la main.',
   },
   nutritionScan: {
     title: 'Photo du plat ou saisie',
     subtitle:
-      'Photographiez le plat ou saisissez le nom — nous afficherons la composition, puis le niveau de réaction.',
+      'Photographiez le plat, scannez le code-barres ou saisissez le nom — nous afficherons la composition, puis le niveau de réaction.',
     photograph: 'Photographier le plat',
     gallery: 'Depuis la galerie',
     enterManually: 'Saisir manuellement',
@@ -330,6 +332,8 @@ const fr: LocaleMessages = {
     notRecognized: 'Plat non reconnu. Saisissez le nom à la main.',
     cropTitle: 'Recadrez le plat',
     cropHint: 'Gardez l’assiette ou l’étiquette dans le cadre',
+    barcodeNotFound:
+      'Code-barres introuvable dans le catalogue. Photographiez le plat ou saisissez le nom à la main.',
   },
   voiceNote: {
     title: 'Saisie vocale',
@@ -384,6 +388,7 @@ const fr: LocaleMessages = {
     analyzeMenu: 'Analyser le menu',
     analyzeLabel: 'Analyser le texte',
     barcodeWebHint: 'Le scan de codes-barres est disponible dans l\'app mobile',
+    barcodePlaceholder: 'Code-barres de 8–14 chiffres',
     takePhoto: 'Prendre une photo',
     pickFromGallery: 'Choisir dans la galerie',
     cropTitle: 'Recadrer la photo',
@@ -746,8 +751,6 @@ const fr: LocaleMessages = {
     localBackupImportMessage: 'Replace current data?',
     recoveryKeyBannerTitle: 'Save recovery key',
     recoveryKeyBannerDesc: 'Required for cross-device restore.',
-    pollenRegionTitle: 'Pollen region',
-    pollenRegionHint: 'When GPS unavailable',
     locationDefaultHint: 'Default region',
     appLockTitle: 'App lock',
     appLockHint: 'Biometrics for SOS and diary',

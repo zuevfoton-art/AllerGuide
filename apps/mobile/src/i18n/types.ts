@@ -321,6 +321,7 @@ export type LocaleMessages = {
     notRecognized: string;
     cropTitle: string;
     cropHint: string;
+    barcodeNotFound: string;
   };
   nutritionScan: {
     title: string;
@@ -332,6 +333,7 @@ export type LocaleMessages = {
     notRecognized: string;
     cropTitle: string;
     cropHint: string;
+    barcodeNotFound: string;
   };
   voiceNote: {
     title: string;
@@ -390,6 +392,7 @@ export type LocaleMessages = {
     labelPlaceholder: string;
     manualPlaceholder: string;
     barcodeWebHint: string;
+    barcodePlaceholder: string;
     takePhoto: string;
     pickFromGallery: string;
     cropTitle: string;
@@ -748,8 +751,6 @@ export type LocaleMessages = {
     localBackupImportMessage: string;
     recoveryKeyBannerTitle: string;
     recoveryKeyBannerDesc: string;
-    pollenRegionTitle: string;
-    pollenRegionHint: string;
     locationDefaultHint: string;
     appLockTitle: string;
     appLockHint: string;

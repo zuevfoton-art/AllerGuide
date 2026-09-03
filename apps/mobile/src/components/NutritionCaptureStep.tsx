@@ -2,10 +2,14 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import type { DishEnrichmentResult } from '@/src/services/dish-off-enrichment-service';
 import { Button } from '@/src/components/Button';
+import { DiaryBarcodeScanner } from '@/src/components/DiaryBarcodeScanner';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-import { recognizeDiaryDishFromPhoto } from '@/src/services/diary-dish-recognition-service';
+import {
+  recognizeDiaryDishFromBarcode,
+  recognizeDiaryDishFromPhoto,
+} from '@/src/services/diary-dish-recognition-service';
 import {
   captureScanPhotoViaPicker,
   pickScanPhotoFromLibrary,
@@ -62,6 +66,26 @@ export function NutritionCaptureStep({ onEnterManually, onContinue }: Props) {
       setState('result');
     } catch {
       setError(t('nutritionScan.notRecognized'));
+      setState('idle');
+    }
+  };
+
+  const applyBarcode = async (barcode: string) => {
+    setCropped(null);
+    setState('recognizing');
+    setError('');
+    try {
+      const outcome = await recognizeDiaryDishFromBarcode(barcode);
+      if (!outcome) {
+        setError(t('nutritionScan.barcodeNotFound'));
+        setState('idle');
+        return;
+      }
+      setFood(outcome.food);
+      setEnrichment(outcome.enrichment);
+      setState('result');
+    } catch {
+      setError(t('nutritionScan.barcodeNotFound'));
       setState('idle');
     }
   };
@@ -131,6 +155,10 @@ export function NutritionCaptureStep({ onEnterManually, onContinue }: Props) {
         testID="nutrition-photo-camera"
         label={t('nutritionScan.photograph')}
         onPress={() => void startCapture(false)}
+      />
+      <DiaryBarcodeScanner
+        testID="nutrition-photo-barcode"
+        onBarcode={(code) => void applyBarcode(code)}
       />
       <Button
         testID="nutrition-photo-gallery"

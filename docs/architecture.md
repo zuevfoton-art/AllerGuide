@@ -229,7 +229,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `diary-service.ts` (+ section/context/attachment) | Дневник |
 | `home-insights-service.ts` | Инсайты на главной (`@allerguide/core` `home-insights`; без пользовательских ACT/ARIA/GINA) |
 | `wellness-service.ts` | Wellness score + `wellness-display` (словесные категории) |
-| `diary-auto-metadata-service.ts` | Скрытые pollen/scan/meds metadata при save |
+| `diary-auto-metadata-service.ts` | Скрытые pollen/scan/meds metadata при save. Грузятся в фоне: визард дневника открывается сразу, без ожидания сети |
 | `pollen-map-service.ts` / `pollen-heatmap-service.ts` | Open-Meteo + Google pollen tiles |
 | `location-service.ts` / `place-service.ts` | Гео / POI (`EXPO_PUBLIC_MAP_PLACES` / catalog + bundled ADAIR overlay on live and fallback) |
 | `market-api.ts` | Market catalog + Yandex offer resolve |
@@ -454,6 +454,8 @@ flowchart LR
   offline --> App
   backend --> App
 ```
+
+Хэш пароля — PBKDF2-SHA256 (`@allerguide/core` `password.ts`). Стоимость зависит от рантайма: 600k (`PASSWORD_HASH_ITERATIONS_JIT`) в Node/web, 50k (`PASSWORD_HASH_ITERATIONS_INTERPRETED`) на Hermes, где нет JIT и 600k блокируют JS-поток ~40 c. Значение записано в самом хэше, поэтому старые хэши проверяются, а при расхождении `verifyPassword` возвращает `upgradedHash`. Соль — `getSecureRandomBytes`; mobile инжектит expo-crypto из `src/install-runtime`, который импортируют оба JS-entry (`index.js` для Gradle и `entry.js` для Expo CLI/EAS/web).
 
 | Режим | Хранение | Когда |
 |-------|----------|-------|

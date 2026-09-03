@@ -142,6 +142,9 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | New Architecture (SDK 55+) | **всегда on** | `newArchEnabled` убран из `app.json`. Legacy Architecture недоступна. Откат на SDK 54 old-arch только через downgrade. |
 | `react-native-quick-crypto` | **не используется** | Его нативный `install()` аварийно завершал процесс **при запуске** на Android (native/JNI abort, который JS `try/catch` не ловит). Полностью удалён. |
 | Криптография (хэш паролей, PBKDF2/SHA-256) | **чистый JS `@noble/hashes`** в `@allerguide/core` (`src/password.ts`) | Не грузит нативный крипто-модуль на старте; формат хэшей не изменился (старые хэши проверяются). |
+| Стоимость PBKDF2 на native | `PASSWORD_HASH_ITERATIONS_INTERPRETED` (50k) вместо 600k, ставится из `src/install-runtime` | Hermes — интерпретатор без JIT: 600k итераций блокируют JS-поток ~40 c, регистрация и вход «зависают». Web и API остаются на 600k. |
+| Соль для хэша | `setSecureRandomBytes` (expo-crypto) из `src/install-runtime` | `@noble/hashes` кэширует `globalThis.crypto` при импорте, а в release-сборке Hermes его нет. |
+| Точка входа JS | `index.js` (Gradle `entryFile`) **и** `entry.js` (`package.json` `main` для Expo CLI/EAS/web) импортируют `src/install-runtime` | Патч только в `entry.js` не попадает в нативный release-бандл — Gradle его не читает. |
 | Резервное шифрование (AES-GCM) | Web Crypto, с мягкой деградацией | На нативе `crypto.subtle` отсутствует → `isEncryptionAvailable() === false`, облачный бэкап (по умолчанию выключен) просто не шифруется. |
 
 **История крашей запуска (для контекста):**

@@ -43,11 +43,50 @@ esac
 echo "Maestro APK build profile=$PROFILE"
 echo "EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL:-<unset>}"
 
+# Release manifests do not set usesCleartextTraffic (debug overlays do).
+# Staging Maestro talks HTTP to the host API at 10.0.2.2 — Android 9+ blocks
+# that unless we allow cleartext for the emulator loopback domains only.
+enable_emulator_http_cleartext() {
+  local manifest="$ROOT/apps/mobile/android/app/src/main/AndroidManifest.xml"
+  local xml_dir="$ROOT/apps/mobile/android/app/src/main/res/xml"
+  mkdir -p "$xml_dir"
+  cat >"$xml_dir/network_security_config.xml" <<'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>
+EOF
+  python3 - "$manifest" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+attr = 'android:networkSecurityConfig="@xml/network_security_config"'
+if attr in text:
+    print("networkSecurityConfig already set")
+    raise SystemExit(0)
+if "<application" not in text:
+    raise SystemExit(f"no <application> in {path}")
+text = text.replace("<application", f"<application {attr}", 1)
+path.write_text(text)
+print("Patched AndroidManifest networkSecurityConfig for Maestro staging HTTP")
+PY
+}
+
 pnpm install --frozen-lockfile
 
 cd apps/mobile
 pnpm generate-assets || true
 npx expo prebuild --platform android --no-install
+
+if [ "$PROFILE" = "staging" ]; then
+  enable_emulator_http_cleartext
+fi
 
 cd android
 # Metro embeds EXPO_PUBLIC_* only when NODE_ENV=production (same as staging-apk-gradle.yml).

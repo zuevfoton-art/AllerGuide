@@ -24,11 +24,6 @@ import {
   isAppLockEnabled,
   setAppLockEnabled,
 } from '@/src/services/app-lock-service';
-import {
-  getManualPollenRegionId,
-  listPollenRegionOptions,
-  setManualPollenRegionId,
-} from '@/src/services/location-service';
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -148,24 +143,6 @@ export default function ProfileScreen() {
 
       <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
       <CloudBackupCard />
-
-      <Text style={ui.sectionLabel}>{t('settings.pollenRegionTitle')}</Text>
-      <GlassCard>
-        <Text style={styles.cardHint}>{t('settings.pollenRegionHint')}</Text>
-        {listPollenRegionOptions().map((region) => {
-          const selected = getManualPollenRegionId() === region.id;
-          return (
-            <Pressable
-              key={region.id}
-              style={[styles.regionRow, selected && styles.regionRowSelected]}
-              onPress={() => setManualPollenRegionId(selected ? null : region.id)}
-              accessibilityRole="button">
-              <Text style={styles.rowTitle}>{region.name}</Text>
-              {selected ? <Ionicons name="checkmark-circle" size={18} color={theme.colors.accent} /> : null}
-            </Pressable>
-          );
-        })}
-      </GlassCard>
 
       {appLockAvailable ? (
         <>
@@ -359,19 +336,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       fontWeight: '600',
       color: colors.danger,
-    },
-    regionRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    regionRowSelected: {
-      backgroundColor: colors.accentLight,
-      borderRadius: 6,
-      paddingHorizontal: 8,
     },
   });
 }

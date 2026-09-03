@@ -294,7 +294,7 @@ const en: LocaleMessages = {
   medicineScan: {
     title: 'Photo or voice',
     subtitle:
-      'Photograph the package or dictate the name — fields will be filled in. You can also enter them by hand.',
+      'Photograph the package, scan the barcode, or dictate the name — fields will be filled in. You can also enter them by hand.',
     photograph: 'Photograph the package',
     recordVoice: 'Record with voice',
     gallery: 'From gallery',
@@ -317,11 +317,12 @@ const en: LocaleMessages = {
     notRecognized: 'Could not recognize the medicine. Try another photo or fill it in manually.',
     cropTitle: 'Crop the package',
     cropHint: 'Keep the name, active substance, and strength',
+    barcodeNotFound: 'Barcode not found in the catalog. Photograph the package or fill it in by hand.',
   },
   nutritionScan: {
     title: 'Dish photo or type it in',
     subtitle:
-      'Photograph the dish or enter the name — we will show the ingredients, then the reaction level.',
+      'Photograph the dish, scan the barcode, or enter the name — we will show the ingredients, then the reaction level.',
     photograph: 'Photograph the dish',
     gallery: 'From gallery',
     enterManually: 'Enter manually',
@@ -329,6 +330,7 @@ const en: LocaleMessages = {
     notRecognized: 'Could not recognize the dish. Enter the name by hand.',
     cropTitle: 'Crop the dish',
     cropHint: 'Keep the plate or the label in the frame',
+    barcodeNotFound: 'Barcode not found in the catalog. Photograph the dish or enter the name by hand.',
   },
   voiceNote: {
     title: 'Voice input',
@@ -385,6 +387,7 @@ const en: LocaleMessages = {
     analyzeMenu: 'Analyze menu',
     analyzeLabel: 'Analyze text',
     barcodeWebHint: 'Barcode scanning is available in the mobile app',
+    barcodePlaceholder: '8–14 digit barcode',
     takePhoto: 'Take photo',
     pickFromGallery: 'Choose from gallery',
     cropTitle: 'Crop the photo',
@@ -747,8 +750,6 @@ const en: LocaleMessages = {
     localBackupImportMessage: 'Current data will be replaced. Continue?',
     recoveryKeyBannerTitle: 'Save your recovery key',
     recoveryKeyBannerDesc: 'Required to restore cloud backup on another device.',
-    pollenRegionTitle: 'Pollen forecast region',
-    pollenRegionHint: 'Used when GPS is unavailable',
     locationDefaultHint: 'Using default region',
     appLockTitle: 'App lock',
     appLockHint: 'Biometrics or PIN for SOS and diary',

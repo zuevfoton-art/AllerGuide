@@ -11,5 +11,6 @@ appId: com.aclearo.app
     timeout: 20000
 - tapOn:
     id: ${FIELD_ID}
+- eraseText
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-ime.yaml
