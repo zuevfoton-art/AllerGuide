@@ -1,18 +1,13 @@
 import {
   ActivityIndicator,
-  AppState,
   Text,
   View,
   StyleSheet,
   Pressable,
   Linking,
 } from 'react-native';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { useMemo, useState } from 'react';
 import {
-  ADAIR_DOCTORS,
-  ADAIR_SPECIALIZATION_LABELS,
-  DEFAULT_PLACE_FILTERS,
   buildPlacesMapUrl,
   buildPollenRiskMapUrl,
   buildYandexMapWidgetUrl,
@@ -28,11 +23,7 @@ import {
   pollenTaxonToGoogleMapType,
   readingToUpiSnapshot,
   resolvePollenRegion,
-  type AirQualitySnapshot,
-  type MapPlaceFilterId,
-  type PlaceAutocompleteSuggestion,
   type PollenMapTaxonId,
-  type PollenTierLevel,
   type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
@@ -52,6 +43,18 @@ import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal'
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { MapDoctorsSection } from '@/src/components/map/MapDoctorsSection';
+import { MapLayerSwitcher } from '@/src/components/map/MapLayerSwitcher';
+import { MapPollenStatusCard } from '@/src/components/map/MapPollenStatusCard';
+import {
+  ADAIR_PIN_COLOR,
+  LEVEL_LABEL_KEYS,
+  MAP_HERO_HEIGHT,
+  SEARCH_AREA_MIN_DELTA_DEG,
+  WEEKDAY_KEYS,
+  type MapLayerMode,
+} from '@/src/components/map/map-constants';
+import { useMapLiveData } from '@/src/hooks/use-map-live-data';
 import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
@@ -60,36 +63,16 @@ import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useZoneColors, zoneFromPollen } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
-import {
-  autocompleteMapPlaces,
-  createPlacesSessionToken,
-  fetchMapPlaceDetails,
-  searchMapPlaces,
-  type MapPoiWithDistance,
-  type PlacesResultSource,
-} from '@/src/services/place-service';
-import { getCurrentLocation } from '@/src/services/location-service';
-import {
-  fetchPollenMapSnapshot,
-  type PollenMapSnapshot,
-} from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
 import {
   buildAirQualityHeatmapTileUrlTemplate,
-  fetchAirQualitySnapshot,
   isAirQualityHeatmapAvailable,
   isGoogleAirQualityAvailable,
 } from '@/src/services/air-quality-service';
-import { getLocale } from '@/src/services/settings-service';
 import { resolveMapBasemap, resolveRuntimeMapBasemap } from '@/src/services/map-basemap';
 import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
 import { useGoogleBasemapGuard } from '@/src/hooks/use-google-basemap-guard';
-import {
-  fetchPollenHourlySeries,
-  resolveHourlyUpi,
-  type PollenHourlySeries,
-} from '@/src/services/pollen-hourly-service';
-import { fetchWindSnapshot, type WindSnapshot } from '@/src/services/wind-service';
+import { resolveHourlyUpi } from '@/src/services/pollen-hourly-service';
 import { getApiBaseUrl } from '@/src/services/api-client';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
@@ -100,38 +83,6 @@ import {
 } from '@/src/constants/features';
 import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 
-type MapLayerMode = 'pollen' | 'air' | 'places';
-
-const MAP_LAYER_CHIPS = [
-  ['pollen', 'map.layerPollen'],
-  ['air', 'map.layerAir'],
-  ['places', 'map.layerPlaces'],
-] as const;
-
-/** Near-real-time refresh while the Map tab is focused. */
-const MAP_LIVE_REFRESH_MS = 15 * 60 * 1000;
-
-const LEVEL_LABEL_KEYS: Record<PollenTierLevel, string> = {
-  low: 'map.pollenLow',
-  mid: 'map.pollenModerate',
-  high: 'map.pollenHigh',
-};
-
-const ADAIR_PIN_COLOR = '#7C3AED';
-const MAP_HERO_HEIGHT = 380;
-/** How far (degrees) the map center must move before "search this area" shows. */
-const SEARCH_AREA_MIN_DELTA_DEG = 0.01;
-
-const WEEKDAY_KEYS = [
-  'map.weekdaySun',
-  'map.weekdayMon',
-  'map.weekdayTue',
-  'map.weekdayWed',
-  'map.weekdayThu',
-  'map.weekdayFri',
-  'map.weekdaySat',
-] as const;
-
 export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -139,110 +90,40 @@ export default function MapScreen() {
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
 
-  const [coords, setCoords] = useState({ lat: 55.75, lon: 37.62, label: '' });
-  const [pollenSnapshot, setPollenSnapshot] = useState<PollenMapSnapshot | null>(null);
-  const [pois, setPois] = useState<MapPoiWithDistance[]>([]);
   const [selectedTaxonId, setSelectedTaxonId] = useState<PollenMapTaxonId>('birch_pollen');
-  const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
-  const [placeFilters, setPlaceFilters] =
-    useState<MapPlaceFilterId[]>([...DEFAULT_PLACE_FILTERS]);
   const [layerMode, setLayerMode] = useState<MapLayerMode>('pollen');
   const [selectedForecastDay, setSelectedForecastDay] = useState<number | null>(null);
-  const [doctorsOpen, setDoctorsOpen] = useState(false);
   const [allergenPickerOpen, setAllergenPickerOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [wind, setWind] = useState<WindSnapshot | null>(null);
-  const [pollenHourly, setPollenHourly] = useState<PollenHourlySeries | null>(null);
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lon: number } | null>(null);
-  const [poiOrigin, setPoiOrigin] = useState<{ lat: number; lon: number } | null>(null);
-  const [searchingArea, setSearchingArea] = useState(false);
-  const [airQuality, setAirQuality] = useState<AirQualitySnapshot | null>(null);
-  const [airQualityLoading, setAirQualityLoading] = useState(false);
-  const [placeInput, setPlaceInput] = useState('');
-  const [placeQuery, setPlaceQuery] = useState('');
-  const [placeSuggestions, setPlaceSuggestions] = useState<PlaceAutocompleteSuggestion[]>([]);
-  const [placeSearchLoading, setPlaceSearchLoading] = useState(false);
-  const [placeSearchError, setPlaceSearchError] = useState<string | null>(null);
-  const [placesSource, setPlacesSource] = useState<PlacesResultSource>('empty');
-  const [placeSessionToken, setPlaceSessionToken] = useState(createPlacesSessionToken);
 
-  const refresh = useCallback(async (options?: { silent?: boolean }) => {
-    if (!options?.silent) setLoading(true);
-    try {
-      const location = await getCurrentLocation();
-      setCoords({ lat: location.lat, lon: location.lon, label: location.label });
-      const origin = poiOrigin ?? { lat: location.lat, lon: location.lon };
-      setAirQualityLoading(true);
-      const [snapshot, placesResult, windSnapshot, hourlySeries, airSnapshot] = await Promise.all([
-        fetchPollenMapSnapshot(location, profile?.allergies ?? '[]'),
-        searchMapPlaces(
-          profile,
-          { latitude: origin.lat, longitude: origin.lon },
-          placeFilters,
-          placeQuery,
-        ),
-        MAP_POLLEN_PLUME_ENABLED
-          ? fetchWindSnapshot(location.lat, location.lon)
-          : Promise.resolve(null),
-        MAP_POLLEN_PLUME_ENABLED
-          ? fetchPollenHourlySeries(location.lat, location.lon)
-          : Promise.resolve(null),
-        isGoogleAirQualityAvailable()
-          ? fetchAirQualitySnapshot(location.lat, location.lon, getLocale() ?? 'ru')
-          : Promise.resolve(null),
-      ]);
-      setPollenSnapshot(snapshot);
-      setPois(placesResult.pois);
-      setPlacesSource(placesResult.source);
-      setPlaceSearchError(
-        placesResult.liveEmpty ? 'empty' : placesResult.source === 'empty' ? 'empty' : null,
-      );
-      setWind(windSnapshot);
-      setPollenHourly(hourlySeries);
-      setAirQuality(airSnapshot);
-      setAirQualityLoading(false);
-      setSelectedPoiId((current) =>
-        current && placesResult.pois.some((poi) => poi.id === current)
-          ? current
-          : placesResult.pois[0]?.id ?? null,
-      );
-    } finally {
-      if (!options?.silent) setLoading(false);
-    }
-  }, [placeQuery, placeFilters, poiOrigin, profile]);
-
-  const searchThisArea = useCallback(async () => {
-    if (!mapCenter) return;
-    setSearchingArea(true);
-    try {
-      const origin = { lat: mapCenter.lat, lon: mapCenter.lon };
-      setPoiOrigin(origin);
-      const placesResult = await searchMapPlaces(
-        profile,
-        { latitude: origin.lat, longitude: origin.lon },
-        placeFilters,
-        placeQuery,
-      );
-      setPois(placesResult.pois);
-      setPlacesSource(placesResult.source);
-      setPlaceSearchError(placesResult.liveEmpty ? 'empty' : null);
-      setSelectedPoiId(placesResult.pois[0]?.id ?? null);
-    } finally {
-      setSearchingArea(false);
-    }
-  }, [mapCenter, placeQuery, placeFilters, profile]);
-
-  useFocusEffect(
-    useCallback(() => {
-      void refresh();
-      const timer = setInterval(() => {
-        if (AppState.currentState === 'active') {
-          void refresh({ silent: true });
-        }
-      }, MAP_LIVE_REFRESH_MS);
-      return () => clearInterval(timer);
-    }, [refresh]),
-  );
+  const {
+    coords,
+    pollenSnapshot,
+    pois,
+    loading,
+    wind,
+    pollenHourly,
+    airQuality,
+    airQualityLoading,
+    placesSource,
+    placeSearchError,
+    selectedPoiId,
+    setSelectedPoiId,
+    poiOrigin,
+    placeFilters,
+    setPlaceFilters,
+    togglePlaceFilter,
+    placeInput,
+    setPlaceInput,
+    placeSuggestions,
+    placeSearchLoading,
+    mapCenter,
+    searchingArea,
+    searchThisArea,
+    runPlaceSearch,
+    handleSelectSuggestion,
+    handleRegionChange,
+    clearPlaceSearch,
+  } = useMapLiveData({ placesLayerActive: layerMode === 'places' });
 
   const pollenMonth = new Date().getMonth() + 1;
   const pollenRegion = resolvePollenRegion(coords.lat, coords.lon);
@@ -393,83 +274,6 @@ export default function MapScreen() {
     );
   }, [coords.lat, coords.lon, mapCenter, poiOrigin, showPlaceMarkers]);
 
-  const handleRegionChange = useCallback((latitude: number, longitude: number) => {
-    setMapCenter({ lat: latitude, lon: longitude });
-  }, []);
-
-  const autocompleteRequestId = useRef(0);
-  useEffect(() => {
-    if (!showPlaceMarkers) {
-      setPlaceSuggestions([]);
-      return;
-    }
-    const query = placeInput.trim();
-    if (query.length < 2) {
-      setPlaceSuggestions([]);
-      return;
-    }
-    const origin = mapCenter ?? { lat: coords.lat, lon: coords.lon };
-    const requestId = autocompleteRequestId.current + 1;
-    autocompleteRequestId.current = requestId;
-    const timer = setTimeout(() => {
-      void autocompleteMapPlaces(
-        { latitude: origin.lat, longitude: origin.lon },
-        query,
-        placeFilters,
-        placeSessionToken,
-      ).then((suggestions) => {
-        if (autocompleteRequestId.current !== requestId) return;
-        setPlaceSuggestions(suggestions);
-      });
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [coords.lat, coords.lon, mapCenter, placeInput, placeSessionToken, placeFilters, showPlaceMarkers]);
-
-  const runPlaceSearch = useCallback(
-    async (query: string) => {
-      const origin = mapCenter ?? poiOrigin ?? { lat: coords.lat, lon: coords.lon };
-      setPlaceQuery(query);
-      setPlaceSearchLoading(true);
-      setPlaceSuggestions([]);
-      try {
-        const placesResult = await searchMapPlaces(
-          profile,
-          { latitude: origin.lat, longitude: origin.lon },
-          placeFilters,
-          query,
-        );
-        setPois(placesResult.pois);
-        setPlacesSource(placesResult.source);
-        setPlaceSearchError(placesResult.liveEmpty ? 'empty' : null);
-        setSelectedPoiId(placesResult.pois[0]?.id ?? null);
-      } finally {
-        setPlaceSearchLoading(false);
-      }
-    },
-    [coords.lat, coords.lon, mapCenter, placeFilters, poiOrigin, profile],
-  );
-
-  const handleSelectSuggestion = useCallback(
-    async (suggestion: PlaceAutocompleteSuggestion) => {
-      setPlaceInput(suggestion.primaryText);
-      setPlaceSuggestions([]);
-      const details = await fetchMapPlaceDetails(suggestion.placeId, placeSessionToken);
-      setPlaceSessionToken(createPlacesSessionToken());
-      if (details) {
-        setPois((current) => {
-          const next = [details, ...current.filter((poi) => poi.id !== details.id)];
-          return next;
-        });
-        setSelectedPoiId(details.id);
-        setMapCenter({ lat: details.lat, lon: details.lng });
-        setPlacesSource('google-places');
-        return;
-      }
-      await runPlaceSearch(suggestion.primaryText);
-    },
-    [placeSessionToken, runPlaceSearch],
-  );
-
   const yandexPlacesUrl = useMemo(() => {
     if (pois.length === 0) {
       return buildYandexMapWidgetUrl({
@@ -499,16 +303,6 @@ export default function MapScreen() {
       }),
     [coords.lat, coords.lon],
   );
-
-  const togglePlaceFilter = useCallback((filter: MapPlaceFilterId) => {
-    setPlaceFilters((current) => {
-      if (current.includes(filter)) {
-        const next = current.filter((item) => item !== filter);
-        return next.length > 0 ? next : current;
-      }
-      return [...current, filter];
-    });
-  }, []);
 
   const taxonLabel = t(TAXON_LABEL_KEYS[selectedTaxonId] as 'map.pollenBirch');
   const selectedTypeGroup = pollenMapTaxonTypeGroup(selectedTaxonId);
@@ -634,80 +428,32 @@ export default function MapScreen() {
         </View>
       </View>
 
-      <GlassCard testID="map-status" zone={pollenZone} style={styles.statusCard}>
-        <View style={styles.statusTop}>
-          {loading && !pollenSnapshot ? (
-            <ActivityIndicator color={theme.colors.accent} />
-          ) : (
-            <View style={[styles.statusDot, { backgroundColor: levelColor }]} />
-          )}
-          <Text
-            style={[
-              styles.statusHeadline,
-              pollenColors ? { color: pollenColors.fg } : null,
-            ]}>
-            {statusHeadline}
-          </Text>
-        </View>
-        {selectedReading?.profileRelevant && profile?.name ? (
-          <Text style={styles.statusMeta}>
-            {t('map.statusForProfile', { name: profile.name })} · {t('map.pollenYou')}
-          </Text>
-        ) : null}
-        <Text style={styles.statusMeta}>
-          {[coords.label || pollenRegion.name, sourceLabel, updatedLabel]
-            .filter(Boolean)
-            .join(' · ')}
-        </Text>
-        {isCalendarFallback ? (
-          <Text style={styles.statusBadge}>{t('map.pollenCalendarFallback')}</Text>
-        ) : null}
-        {isCacheSource ? (
-          <Text style={styles.statusBadge}>{t('map.pollenSourceCache')}</Text>
-        ) : null}
-      </GlassCard>
+      <MapPollenStatusCard
+        loading={loading}
+        hasSnapshot={Boolean(pollenSnapshot)}
+        zone={pollenZone}
+        headlineColor={pollenColors?.fg}
+        levelColor={levelColor}
+        statusHeadline={statusHeadline}
+        profileName={profile?.name}
+        profileRelevant={Boolean(selectedReading?.profileRelevant)}
+        locationLabel={coords.label || pollenRegion.name}
+        sourceLabel={sourceLabel}
+        updatedLabel={updatedLabel}
+        isCalendarFallback={isCalendarFallback}
+        isCacheSource={isCacheSource}
+      />
 
-      <View style={styles.layerBlock}>
-        <View style={styles.layerRow} testID="map-layers">
-          {MAP_LAYER_CHIPS.map(([key, labelKey]) => {
-            const active = layerMode === key;
-            return (
-              <Pressable
-                key={key}
-                testID={`map-layer-${key}`}
-                style={[styles.layerChip, active && styles.layerChipActive]}
-                hitSlop={8}
-                onPress={() => {
-                  setLayerMode(key);
-                  if (key !== 'pollen') setAllergenPickerOpen(false);
-                }}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}>
-                <Text
-                  style={[styles.layerChipText, active && styles.layerChipTextActive]}
-                  numberOfLines={2}>
-                  {t(labelKey)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {showPollenLayer ? (
-          <Pressable
-            testID="map-allergen-picker"
-            style={styles.allergenPickerBtn}
-            onPress={() => setAllergenPickerOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel={t('map.allergenPickerTitle')}>
-            <View style={[styles.allergenPickerDot, { backgroundColor: levelColor }]} />
-            <Text style={styles.allergenPickerLabel} numberOfLines={1}>
-              {t('map.allergenPickerButton', { taxon: taxonLabel })}
-            </Text>
-            <Ionicons name="chevron-down" size={18} color={theme.colors.accent} />
-          </Pressable>
-        ) : null}
-      </View>
+      <MapLayerSwitcher
+        layerMode={layerMode}
+        onLayerModeChange={(key) => {
+          setLayerMode(key);
+          if (key !== 'pollen') setAllergenPickerOpen(false);
+        }}
+        levelColor={levelColor}
+        taxonLabel={taxonLabel}
+        onAllergenPickerPress={() => setAllergenPickerOpen(true)}
+      />
 
       <MapPollenAllergenModal
         visible={allergenPickerOpen}
@@ -921,13 +667,7 @@ export default function MapScreen() {
             onSelectSuggestion={(suggestion) => {
               void handleSelectSuggestion(suggestion);
             }}
-            onClear={() => {
-              setPlaceInput('');
-              setPlaceQuery('');
-              setPlaceSuggestions([]);
-              setPlaceSessionToken(createPlacesSessionToken());
-              void runPlaceSearch('');
-            }}
+            onClear={clearPlaceSearch}
           />
           <MapPoiSheet
             pois={pois}
@@ -939,62 +679,15 @@ export default function MapScreen() {
         </>
       ) : null}
 
-      <Pressable
-        testID="map-doctors-toggle"
-        style={styles.doctorsToggle}
-        hitSlop={8}
-        onPress={() => setDoctorsOpen((v) => !v)}
-        accessibilityRole="button"
-        accessibilityState={{ expanded: doctorsOpen }}>
-        <Text style={styles.sectionTitle}>
-          {doctorsOpen ? t('map.doctorsHide') : t('map.doctorsShow')}
-        </Text>
-        <Ionicons
-          name={doctorsOpen ? 'chevron-up' : 'chevron-down'}
-          size={18}
-          color={theme.colors.textMuted}
-        />
-      </Pressable>
-      {doctorsOpen
-        ? ADAIR_DOCTORS.map((doctor) => (
-            <Pressable
-              key={doctor.id}
-              onPress={() => {
-                setLayerMode('places');
-                setPlaceFilters((current) =>
-                  current.includes('adair') ? current : [...current, 'adair'],
-                );
-                setSelectedPoiId(`adair:${doctor.clinicId}`);
-              }}
-              accessibilityRole="button">
-              <GlassCard style={styles.card}>
-                <View style={[styles.cardIcon, { backgroundColor: theme.colors.successLight }]}>
-                  <Ionicons name="person" size={22} color={theme.colors.success} />
-                </View>
-                <View style={styles.cardBody}>
-                  <Text style={styles.cardTitle}>{doctor.name}</Text>
-                  {doctor.degree ? <Text style={styles.cardNote}>{doctor.degree}</Text> : null}
-                  <Text style={styles.tags}>
-                    {doctor.specialization
-                      ? ADAIR_SPECIALIZATION_LABELS[doctor.specialization]
-                      : doctor.role}
-                  </Text>
-                  {doctor.isChiefExpert ? (
-                    <Text style={styles.chiefBadge}>{t('map.chiefExpert')}</Text>
-                  ) : null}
-                  {doctor.phone ? (
-                    <Pressable
-                      onPress={() => void Linking.openURL(`tel:${doctor.phone!}`)}
-                      hitSlop={8}
-                      accessibilityRole="link">
-                      <Text style={[styles.tags, styles.phoneLink]}>{doctor.phone}</Text>
-                    </Pressable>
-                  ) : null}
-                </View>
-              </GlassCard>
-            </Pressable>
-          ))
-        : null}
+      <MapDoctorsSection
+        onSelectClinic={(clinicId) => {
+          setLayerMode('places');
+          setPlaceFilters((current) =>
+            current.includes('adair') ? current : [...current, 'adair'],
+          );
+          setSelectedPoiId(`adair:${clinicId}`);
+        }}
+      />
 
       <Disclaimer>
         {showPlacesLayer ? t('map.disclaimerAdair') : t('map.disclaimerUnified')}
