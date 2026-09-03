@@ -1,7 +1,17 @@
-import { mapExternalAllergenIds } from '@allerguide/core';
+import {
+  OFF_DEFAULT_DATASETS,
+  OFF_DEFAULT_USER_AGENT,
+  buildOffProductApiUrl,
+  buildOffSearchUrl,
+  normalizeOffBarcode,
+  normalizeOffProduct,
+  type NormalizedOffProduct,
+  type OffFamilySource,
+  type OffProductPayload,
+} from '@allerguide/core';
 import { logCaughtError } from '@/src/services/error-reporting';
 
-export type OffFamilySource = 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts';
+export type { OffFamilySource };
 
 export interface OpenFoodFactsProduct {
   name: string;
@@ -14,58 +24,22 @@ export interface OpenFoodFactsProduct {
   source: OffFamilySource;
 }
 
-const PRODUCT_FIELDS =
-  'code,product_name,product_name_ru,ingredients_text,ingredients_text_ru,allergens_tags,traces_tags,brands,image_front_small_url';
-
-const OFF_USER_AGENT = 'A-Claro/1.0 (support@aclearo.com)';
 const OFF_SEARCH_TIMEOUT_MS = 4000;
 
-const OFF_FAMILY_DATASETS: { source: OffFamilySource; url: string }[] = [
-  { source: 'openfoodfacts', url: 'https://world.openfoodfacts.org' },
-  { source: 'openbeautyfacts', url: 'https://world.openbeautyfacts.org' },
-  { source: 'openproductsfacts', url: 'https://world.openproductsfacts.org' },
-];
-
 function headers(): Record<string, string> {
-  return { 'User-Agent': OFF_USER_AGENT, Accept: 'application/json' };
+  return { 'User-Agent': OFF_DEFAULT_USER_AGENT, Accept: 'application/json' };
 }
 
-type OffProductPayload = {
-  product_name?: string;
-  product_name_ru?: string;
-  ingredients_text?: string;
-  ingredients_text_ru?: string;
-  code?: string;
-  allergens_tags?: string[];
-  traces_tags?: string[];
-  brands?: string;
-  image_front_small_url?: string;
-};
-
-function normalizeOffProduct(
-  product: OffProductPayload,
-  source: OffFamilySource,
-  fallbackBarcode = '',
-): OpenFoodFactsProduct | null {
-  const ingredients =
-    product.ingredients_text_ru?.trim() || product.ingredients_text?.trim() || '';
-  const name = product.product_name_ru?.trim() || product.product_name?.trim() || '';
-  const barcode = product.code?.trim() || fallbackBarcode;
-
-  if (!barcode || (!name && !ingredients)) return null;
-
-  const brand = product.brands?.split(',')[0]?.trim() || undefined;
-  const imageUrl = product.image_front_small_url?.trim() || undefined;
-
+function toMobileProduct(product: NormalizedOffProduct): OpenFoodFactsProduct {
   return {
-    name: name || `Продукт ${barcode}`,
-    ingredients: ingredients || name,
-    barcode,
-    brand,
-    imageUrl,
-    allergenTags: mapExternalAllergenIds(product.allergens_tags ?? []),
-    traceTags: mapExternalAllergenIds(product.traces_tags ?? []),
-    source,
+    name: product.name,
+    ingredients: product.ingredients || product.name,
+    barcode: product.barcode,
+    brand: product.brand || undefined,
+    imageUrl: product.imageUrl || undefined,
+    allergenTags: product.allergenTags,
+    traceTags: product.traceTags,
+    source: product.source,
   };
 }
 
@@ -81,26 +55,28 @@ async function fetchWithTimeout(url: string): Promise<Response> {
 
 async function fetchFromDataset(
   barcode: string,
-  dataset: (typeof OFF_FAMILY_DATASETS)[number],
+  dataset: (typeof OFF_DEFAULT_DATASETS)[number],
 ): Promise<OpenFoodFactsProduct | null> {
-  const response = await fetchWithTimeout(
-    `${dataset.url}/api/v2/product/${barcode}.json?fields=${PRODUCT_FIELDS}`,
-  );
+  const response = await fetchWithTimeout(buildOffProductApiUrl(dataset.url, barcode));
 
   if (!response.ok) return null;
 
-  const data = (await response.json()) as { status?: number; product?: OffProductPayload };
+  const data = (await response.json()) as {
+    status?: number;
+    product?: OffProductPayload;
+  };
   if (data.status !== 1 || !data.product) return null;
 
-  return normalizeOffProduct(data.product, dataset.source, barcode);
+  const normalized = normalizeOffProduct(data.product, dataset.source, barcode);
+  return normalized ? toMobileProduct(normalized) : null;
 }
 
 export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFactsProduct | null> {
-  const normalized = barcode.replace(/\D/g, '');
+  const normalized = normalizeOffBarcode(barcode);
   if (!normalized) return null;
 
   try {
-    for (const dataset of OFF_FAMILY_DATASETS) {
+    for (const dataset of OFF_DEFAULT_DATASETS) {
       const product = await fetchFromDataset(normalized, dataset);
       if (product) return product;
     }
@@ -113,19 +89,12 @@ export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFa
 
 async function searchDatasetByName(
   query: string,
-  dataset: (typeof OFF_FAMILY_DATASETS)[number],
+  dataset: (typeof OFF_DEFAULT_DATASETS)[number],
   pageSize: number,
 ): Promise<OpenFoodFactsProduct[]> {
-  const params = new URLSearchParams({
-    search_terms: query,
-    search_simple: '1',
-    action: 'process',
-    json: '1',
-    page_size: String(Math.min(Math.max(pageSize, 1), 20)),
-    fields: PRODUCT_FIELDS,
-  });
-
-  const response = await fetchWithTimeout(`${dataset.url}/cgi/search.pl?${params}`);
+  const response = await fetchWithTimeout(
+    buildOffSearchUrl(dataset.url, query, pageSize, { maxPageSize: 20 }),
+  );
   if (!response.ok) return [];
 
   const data = (await response.json()) as { products?: OffProductPayload[] };
@@ -137,7 +106,7 @@ async function searchDatasetByName(
     const normalized = normalizeOffProduct(product, dataset.source);
     if (!normalized || seen.has(normalized.barcode)) continue;
     seen.add(normalized.barcode);
-    results.push(normalized);
+    results.push(toMobileProduct(normalized));
   }
   return results;
 }
@@ -151,9 +120,9 @@ export async function searchProductsByName(
   if (term.length < 2) return [];
 
   try {
-    const perDataset = Math.max(3, Math.ceil(pageSize / OFF_FAMILY_DATASETS.length));
+    const perDataset = Math.max(3, Math.ceil(pageSize / OFF_DEFAULT_DATASETS.length));
     const batches = await Promise.all(
-      OFF_FAMILY_DATASETS.map((dataset) => searchDatasetByName(term, dataset, perDataset)),
+      OFF_DEFAULT_DATASETS.map((dataset) => searchDatasetByName(term, dataset, perDataset)),
     );
     const seen = new Set<string>();
     const results: OpenFoodFactsProduct[] = [];

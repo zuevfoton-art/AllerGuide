@@ -97,9 +97,6 @@ export const POLLEN_CALENDARS: Record<string, PollenSeasonPeak[]> = {
   ekaterinburg: withRegion('ekaterinburg', EKATERINBURG_PEAKS),
 };
 
-/** @deprecated Use `POLLEN_CALENDARS.moscow` */
-export const POLLEN_CALENDAR_MOSCOW = POLLEN_CALENDARS.moscow;
-
 const MONTH_NAMES_RU = [
   'Январь',
   'Февраль',
