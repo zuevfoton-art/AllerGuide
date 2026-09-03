@@ -71,6 +71,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Логика экрана | `apps/mobile/src/services/*` — **не** в `app/` |
 | Патч рантайма до первого экрана (crypto, стоимость KDF) | `src/install-runtime.ts`; его импортируют **оба** входа: `index.js` (Gradle `entryFile`) и `entry.js` (`package.json` `main`) |
 | HTTP-запрос обогащения (pollen, AQI, OFF) | `src/utils/fetch-with-timeout.ts` — без таймаута экран может «зависнуть» |
+| Enrichment POST (OCR, intent, VL, STT, search) | `src/services/enrichment-api.ts` — timeout + soft-fail + `logCaughtError` |
 | Доменные правила, таксономия, валидация | `packages/core/src/*` |
 | Matching скана / OCR parse / LLM prompt | `packages/ai/src/*` |
 | Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
@@ -175,7 +176,7 @@ src/modules/marketplace/
 | Auth / API | `auth-service`, `backend-api`, `api-client`, `api-errors`, `app-lock-service` |
 | Profiles | `profile-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service`, `owned-profiles` |
 | Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-auto-metadata-service` (фоновое обогащение), `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
-| Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `scanner-dish-lookup-service`, `scanner-dish-query`, `scanner-dish-vision-display`, `scanner-photo-service`, `scanner-photo-geometry`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scan-match-display`, `dish-off-enrichment-service`, `dish-suggest-service`, `dish-resolve-api-service`, `dish-vision-api-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service` |
+| Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `scanner-dish-lookup-service`, `scanner-dish-query`, `scanner-dish-vision-display`, `scanner-photo-service`, `scanner-photo-geometry`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scan-match-display`, `dish-off-enrichment-service`, `dish-suggest-service`, `dish-resolve-api-service`, `dish-vision-api-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service`, `enrichment-api` |
 | Home | `home-insights-service`, `wellness-service` |
 | SOS / reports | `sos-service`, `sos-passport-service`, `doctor-report-service` |
 | Clinical | `asit-course-service`, `asit-reminder-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy-service`, `prescribed-therapy-reminder-service`, `clinical-reminder-service`, `reminder-reconcile-service`, `prescription-ocr-service`, `prescription-photo-service` |
@@ -259,7 +260,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 
 ### Middleware / services
 
-- Middleware: `security.ts` (helmet/CORS/rate limit), `require-jwt.ts`
+- Middleware: `security.ts` (helmet/CORS/rate limit), `require-jwt.ts`, `error-handler.ts` (JSON 500 for `next(err)`)
 - Services: `open-food-facts`, `llm-scan-provider`, `llm-dish-vision-provider`, `yandex-vision-ocr`, `yandex-speechkit-stt`, `yandex-search-ingredients`, `yandex-maps-embed`, `yandex-market-affiliate`, `google-pollen-forecast`, `google-pollen-heatmap`, `google-pollen-species-samples`, `google-air-quality`, `google-places-*`, `dish-catalog-store`, `medicine-catalog-store`, `alias-feedback-service`, `app-user-service`, `profile-service`, `marketplace/*` (YML/pharmacy feed + store)
 - `src/lib/`: `scan-cache`, `search-ingredients-cache`, `dish-vision-cache`, `rate-limit-store` + `redis-client`, `analytics-store`, `posthog-forward`, `map-pollen-ops`, `product-search-rank`, `jwt`, `health`, `email-service`, `env-flag`, `log-caught-error`, `scan-smoke-expectation`
 

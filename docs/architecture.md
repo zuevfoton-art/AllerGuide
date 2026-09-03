@@ -879,4 +879,5 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `docs/eas-internal-preview.md` / `eas-staging-build.md` | EAS / preview / staging builds |
 | `docs/qa-checklist.md` | QA чеклист |
 | `docs/roadmap-to-prod.md` | Roadmap к production |
+| `docs/refactoring-simplify-reliability.md` | Упрощение + отказоустойчивость (волны) |
 | `docs/adr/` | Architecture Decision Records |

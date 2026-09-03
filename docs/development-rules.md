@@ -344,6 +344,7 @@ ui     → (peer RN only)
 
 - [`docs/architecture.md`](./architecture.md) — полная архитектура
 - [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md) — фазы и критерии релиза
+- [`docs/refactoring-simplify-reliability.md`](./refactoring-simplify-reliability.md) — упрощение и отказоустойчивость
 - [`docs/functional-requirements.md`](./functional-requirements.md) — FR-требования
 - [`docs/qa-checklist.md`](./qa-checklist.md) — регрессия
 - [`AGENTS.md`](../AGENTS.md) — команды для агентов и разработчиков
