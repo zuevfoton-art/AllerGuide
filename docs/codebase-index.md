@@ -362,6 +362,7 @@ Barrel: `index.ts`. Pure TS.
 | YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
 | Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
+| Freemium / PRO / IAP (план) | [`subscription-monetization-plan.md`](./subscription-monetization-plan.md) |
 
 ---
 
