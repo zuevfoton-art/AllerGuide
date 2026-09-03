@@ -90,12 +90,14 @@ flowchart LR
 `pnpm --filter api test` зелёные; LLM/network throw → mock; hung fetch abort ≤ timeout;
 pending alias уходит после успешного POST; unhandled route error → 500 JSON.
 
-### Wave 2 — Screen decomposition
+### Wave 2 — Screen decomposition (в `main`, #324)
 
-- Извлечь hooks/subviews из `scanner.tsx` и `map.tsx` (камера, результат, история;
-  pollen/AQI/places/basemap).
-- Экраны только wiring; логика остаётся в services.
-- ASIT / prescribed-therapy: shared course-editor primitives (после scanner/map).
+- `scanner.tsx` (~1537 → ~264 LOC): `useScannerController` + `ScannerCameraModal` /
+  `ScannerResultPanel` / `ScannerLists` / `scanner-styles` / `scanSourceLabelKey`.
+- `map.tsx`: `useMapLiveData` (`refreshMapLiveData` / `searchMapThisArea`) +
+  `MapLayerSwitcher` / `MapPollenStatusCard` / `MapDoctorsSection` / `map-constants`.
+- Экраны — wiring; I/O остаётся в services.
+- ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
 
 ### Wave 3 — Kill WebDb SQL parsing (этот PR)
 
@@ -163,7 +165,7 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 
 | Волна | Статус |
 |-------|--------|
-| Wave 1 | ✅ реализована |
-| Wave 2 | 📝 запланирована (отдельный PR) |
-| Wave 3 | ✅ реализована (этот PR) |
+| Wave 1 | ✅ в `main` (#321) |
+| Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
+| Wave 3 | ✅ этот PR — typed WebDb collections / handlers / router |
 | Wave 4–5 | 📝 запланированы |
