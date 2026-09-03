@@ -106,7 +106,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Pollen / map** | `(tabs)/map.tsx` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `air-quality-service`, `location-service`, `place-service` | core pollen*, `hourly-series`, `air-quality`, `map-poi`, `pollen-species-heatmap`; API `pollen.ts`, `air-quality.ts`, `places.ts`, `maps.ts`; comps `AirQualityCard`, `PollenIndexCard`, `PlaceSearchBar`, `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `secure-settings` | core `auth`/`login-field`/`phone`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` |
-| **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`; API `catalog.ts` |
+| **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`, `open-food-facts` (normalize/URL, без HTTP); API `catalog.ts` + `open-food-facts` |
 | **Market** | `(tabs)/market.tsx` | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
 | **Clinical** | `asit-course`, `asthma-action-plan`, `insect-action-plan`, `food-drug-registry`, `prescribed-therapy` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
@@ -274,9 +274,9 @@ Barrel: `index.ts`. Pure TS.
 
 | Область | Модули (ориентиры) |
 |---------|-------------------|
-| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `adair-catalog` (`data/adair-registry.json`) |
+| Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `open-food-facts` (OFF normalize/URL, без HTTP), `adair-catalog` (`data/adair-registry.json`) |
 | Profiles | `profile-allergens`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `profile-symptom-baseline`, `profile-age`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding`, `list-input` |
-| Diary / home | `diary`, `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
+| Diary / home | `diary` (barrel → `diary-schema` + `diary-format`), `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `scan-history-matches`, `alias-feedback`, `dish-components`, `name-matching` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `prescribed-therapy`, `insect-allergy`, `food-drug-allergy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios`, `beta-metrics`, `medical-disclaimer`, `medical-advisory-board` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report`, `doctor-report-timeline` |
