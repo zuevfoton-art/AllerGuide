@@ -69,7 +69,10 @@ flowchart LR
   W3[Wave3_WebDb]
   W4[Wave4_dedup]
   W5[Wave5_outbox]
-  W1 --> W2 --> W3 --> W4 --> W5
+  W6[Wave6_therapy]
+  W7[Wave7_wizard_map]
+  W8[Wave8_repos]
+  W1 --> W2 --> W3 --> W4 --> W5 --> W6 --> W7 --> W8
 ```
 
 ### Wave 1 — Transport resilience
@@ -114,8 +117,7 @@ Native SQLite не дублируем (`init.native.ts`).
 | 3.5 | Unmatched SQL → `console.warn('[WebDb] unmatched SQL', sql)` и `void` / `null` / `[]` (не throw) | router |
 | 3.6 | Регрессия + unmatched / alias DELETE-by-id | `init-*.test.ts`, `web-sql-router.test.ts` |
 
-Полные typed repositories (одна модель native + web без SQL-строк) — follow-up;
-в этом PR `DbLike` сохраняем.
+Полные typed repositories (одна модель native + web без SQL-строк) — Wave 8.
 
 **Критерий готовности:** `init-diary` / `init-profile` / `init-scan` зелёные;
 unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-by-id через `getDb`.
@@ -135,7 +137,7 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 
 **Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
-### Wave 5 — Offline→online reconciliation (этот PR)
+### Wave 5 — Offline→online reconciliation (в `main`, #327)
 
 - Mutation outbox профилей: при `BACKEND_AUTH` + network fail — локальная запись + очередь,
   `flushProfileOutbox` на старте.
@@ -143,6 +145,34 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
   если `encryptBackup` вернул `null` (`encryption_unavailable`).
 - Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
 - Enrichment fallback rates — follow-up (pollen ops уже есть).
+
+### Wave 6 — Shared course editor (отдельный PR)
+
+ASIT + prescribed therapy: общий OCR/камера/PDF и course editor. Не в этом PR.
+
+### Wave 7 — DiaryWizard + map finish (отдельный PR)
+
+Split `DiaryWizard` + доразбор `map.tsx`. Не в этом PR.
+
+### Wave 8 — Typed repositories (этот PR)
+
+Цель: сервисы профилей / дневника / истории скана / settings не содержат SQL-строк.
+Web пишет в `web-collections.ts`, native — parameterized SQL. `DbLike` + SQL-роутер
+остаются для остальных таблиц (auth, contacts, SOS, attachments, alias, barcode…).
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 8.1 | Интерфейсы + web/sqlite реализации + `get*Repository()` (`Platform.OS`) | `apps/mobile/src/db/repositories/` |
+| 8.2 | `profile-service` — list/get/insert/update/deleteOwned/legacy без SQL; каскад в репозитории | `profile-service.ts` |
+| 8.3 | `diary-service` — CRUD через `DiaryRepository` | `diary-service.ts` |
+| 8.4 | `scan-history-service` — insert/list | `scan-history-service.ts` |
+| 8.5 | `settings-service` — get/set | `settings-service.ts` |
+| 8.6 | Регрессия ownership + web collections + sqlite cascade SQL | `repositories.test.ts`, `init-*.test.ts`, service tests |
+
+**Не в этом PR:** SOS / contacts / attachments / alias / barcode / outbox; Postgres repository.
+
+**Критерий готовности:** service + `init-diary` / `init-profile` / `init-scan` + `repositories` зелёные;
+`pnpm --filter mobile typecheck`; web path не матчит SQL-строки для этих четырёх сущностей.
 
 ---
 
@@ -155,6 +185,9 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 | 3 | Высокий | Persistence; только с полной web/native матрицей тестов |
 | 4 | Средний | Дрейф OFF / i18n doctor-report |
 | 5 | Высокий | Dual-write и деньги/бюджет LLM |
+| 6 | Средний | Дубли ASIT / therapy UI |
+| 7 | Средний | Большие экраны дневника и карты |
+| 8 | Высокий | Persistence; web collections vs sqlite SQL |
 
 UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux-improvement-plan.md)
 дополняет Wave 1–2: транспорт soft-fail + UI retry.
@@ -179,4 +212,7 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
 | Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
 | Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
-| Wave 5 | ✅ этот PR — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 5 | ✅ в `main` (#327) — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 6 | отдельный PR — shared course editor / prescription OCR |
+| Wave 7 | отдельный PR — DiaryWizard split + map finish |
+| Wave 8 | ✅ этот PR — typed repositories profile / diary / scan / settings |

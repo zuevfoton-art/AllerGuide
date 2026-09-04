@@ -80,6 +80,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Feature flag | `apps/mobile/src/constants/features.ts` + корневой `.env.example` + `eas.json` |
 | Локальная схема SQLite | `apps/mobile/src/db/init.native.ts` + `migrations.ts` |
 | Web persistence (IndexedDB) | `apps/mobile/src/db/web-store.ts` + `web-collections.ts` + `web-sql-router.ts` + `init.ts` |
+| Typed local repositories | `apps/mobile/src/db/repositories` — profile / diary / scan-history / settings (web collections + sqlite SQL) |
 | API endpoint | `apps/api/src/routes/*` → регистрация в `app.ts` |
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
@@ -127,7 +128,7 @@ src/install-runtime.ts  # Патчи до старта: CSPRNG + стоимос�
 app/                  # Экраны (file-based routing)
 src/components/       # UI-компоненты (brand/, diary/, onboarding/, profile-setup/, scanner/, map/)
 src/services/         # Оркестрация (единственная точка для DB/API из UI)
-src/db/               # init, init.native, migrations, web-store, web-collections, web-sql-router, types
+src/db/               # init, init.native, migrations, web-store, web-collections, web-sql-router, repositories, types
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
@@ -192,7 +193,8 @@ src/modules/marketplace/
 | `src/db/migrations.ts` | `CURRENT_SCHEMA_VERSION = 10` (incremental; v10 — `market_catalog_snapshot`) |
 | `src/db/init.ts` | Web `DbLike`: делегирует `runSync` / `getFirstSync` / `getAllSync` в роутер |
 | `src/db/web-collections.ts` | Typed get/save accessors для JSON-коллекций IndexedDB |
-| `src/db/web-sql-handlers.ts` | Именованные обработчики каждой SQL-ветки WebDb |
+| `src/db/repositories/` | `getProfileRepository` / diary / scan-history / settings — web collections, native SQL |
+| `src/db/web-sql-handlers.ts` | Именованные обработчики каждой SQL-ветки WebDb (сервисы вне Wave 8) |
 | `src/db/web-sql-router.ts` | `normalizeSql` + dispatch `startsWith` / `includes` (тот же порядок, что у старого `WebDb`) |
 | `src/db/web-store.ts` | IndexedDB + in-memory cache + legacy migration |
 | `src/store/app-store.ts` | Active profile, scenario |

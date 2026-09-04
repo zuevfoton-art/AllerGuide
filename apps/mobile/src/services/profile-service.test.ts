@@ -20,6 +20,10 @@ const appState = {
   },
 };
 
+vi.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
 vi.mock('@/src/constants/features', () => ({ BACKEND_AUTH_ENABLED: true }));
 
 vi.mock('@/src/services/auth-service', () => ({
