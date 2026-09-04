@@ -138,7 +138,7 @@ Closed beta: [`closed-beta-p17.md`](closed-beta-p17.md).
 | iOS: `couldn't find any credentials suitable for internal distribution` | Нет Apple certs. Интерактивно `eas credentials --platform ios`, либо оставьте CI skip (нет `EAS_IOS_DEVICE`). Не ставьте `ios.simulator: true` в профиле `staging` — это другой артефакт, не TestFlight. |
 | Android: `Gradle build failed with unknown error` | Логи только на expo.dev → build → **Run gradlew**. Нативный APK при этом собирается через [`android-stage-build.md`](android-stage-build.md) §C. Release Metro `@/` в `import()` — [#331](https://github.com/zuevfoton-art/AllerGuide/pull/331). |
 | Нужен APK без EAS | [`android-stage-build.md`](android-stage-build.md) §C — Gradle on GitHub |
-| Красный `deploy-staging` после зелёного smoke | Не откатывать API. Смотреть `mobile-android` / `mobile-ios` отдельно. |
+| Красный `deploy-staging` после зелёного smoke | Не откатывать API. `mobile-android` теперь только submit (`--no-wait`); ждать APK в **EAS staging Android**. iOS — skip без `EAS_IOS_DEVICE`. |
 
 ---
 
