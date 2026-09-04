@@ -3,7 +3,9 @@ name: Deploy staging (Yandex Cloud)
 # Canonical staging deploy (YC only). Former Neon/Railway workflow removed.
 # Builds API image → YCR → Serverless Container revision.
 # Migrations run on a self-hosted runner inside the VPC (private Postgres, no public IP).
-# After smoke: EAS staging Android (wait). iOS device IPA is opt-in
+# After smoke: submit EAS staging Android (--no-wait). Waiting for the APK
+# lives in eas-staging-android.yml so this workflow does not hold the
+# deploy-staging concurrency group for 30–90 min. iOS device IPA is opt-in
 # (repo variable EAS_IOS_DEVICE=true) — credentials.json is Android-only.
 #
 # Runbook: docs/staging-yandex-cloud.md
@@ -232,16 +234,16 @@ jobs:
         run: |
           # Pin 22.x: eas-cli 16.x fails tarball upload
           # ("Cannot read properties of undefined (reading 'create')").
+          # --no-wait: upload always succeeded; Expo Gradle can take 30–90 min
+          # and would pin concurrency group deploy-staging. Watch/fail on
+          # eas-staging-android.yml or expo.dev. Gradle fallback: staging-apk-gradle.yml.
           npx --yes eas-cli@22.0.0 build \
             --profile staging \
             --platform android \
             --non-interactive \
-          || {
-            echo "::error::EAS Android Gradle failed on Expo cloud. Open the expo.dev build link above → Run gradlew."
-            echo "::error::Working APK without Expo cloud: Actions → Staging Android APK (Gradle). Docs: docs/android-stage-build.md §C"
-            echo "::warning::Do not rollback the staging API — smoke already passed."
-            exit 1
-          }
+            --no-wait
+          echo "::notice::EAS Android submitted (no wait). Track expo.dev / workflow EAS staging Android. Do not rollback API if that build later fails — smoke already passed."
+          echo "::notice::Working APK without Expo cloud: Actions → Staging Android APK (Gradle). Docs: docs/android-stage-build.md §C"
 
   # Device IPA needs Apple certs from interactive `eas credentials --platform ios`.
   # credentials.json is Android-only; non-interactive EAS cannot mint them.
