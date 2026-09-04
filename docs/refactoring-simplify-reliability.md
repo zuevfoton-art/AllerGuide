@@ -70,7 +70,8 @@ flowchart LR
   W4[Wave4_dedup]
   W5[Wave5_outbox]
   W6[Wave6_therapy]
-  W1 --> W2 --> W3 --> W4 --> W5 --> W6
+  W7[Wave7_wizard_map]
+  W1 --> W2 --> W3 --> W4 --> W5 --> W6 --> W7
 ```
 
 ### Wave 1 — Transport resilience
@@ -145,7 +146,7 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 - Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
 - Enrichment fallback rates — follow-up (pollen ops уже есть).
 
-### Wave 6 — Unified therapy + prescription OCR (этот PR)
+### Wave 6 — Unified therapy + prescription OCR (в `main`, #333)
 
 Цель: один OCR/камера/PDF-флоу и общая оболочка шагов `form` → `verify` → `review`
 для АСИТ и базисной терапии. Уникальные поля (аллерген, фаза, клинический диагноз,
@@ -161,6 +162,14 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 
 **Критерий готовности:** тесты `course-editor.test.ts`; `testID` камеры/PDF/OCR/verify/review
 без изменений; offline save курса без API.
+
+### Wave 7 — DiaryWizard + map final split (в `main`, #334)
+
+- `DiaryWizard.tsx` → `useDiaryWizardController` + `components/diary/wizard/*`
+  (`DiaryStepField`, `DiaryPhotoToolbar`, `DiaryDishComponentsField`,
+  `DiaryPefZonePreview`, `DiaryLegacyEditor`, preview helpers).
+- `map.tsx` → `MapCanvas` / `MapLayerLegend` / `MapPollenDetails` / `MapPlacesPanel`.
+- Публичные пропсы, `testID` и i18n без изменений.
 
 ---
 
@@ -198,5 +207,6 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
 | Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
 | Wave 5 | ✅ в `main` (#327) — profile outbox, sync fail-closed, Redis scan budget |
-| Wave 6 | ✅ этот PR — shared course editor + prescription OCR |
-| Wave 7–8 | 📝 запланированы (DiaryWizard / map + typed repositories) |
+| Wave 6 | ✅ в `main` (#333) — shared course editor + prescription OCR |
+| Wave 7 | ✅ в `main` (#334) — DiaryWizard + map canvas/panels |
+| Wave 8 | 📝 запланирована — typed repositories |

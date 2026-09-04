@@ -131,7 +131,7 @@ src/db/               # init, init.native, migrations, web-store, web-collection
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
@@ -205,9 +205,9 @@ src/modules/marketplace/
 
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
-- **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
+- **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
-- **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
+- **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`, `map/MapCanvas`, `MapLayerLegend`, `MapPollenDetails`, `MapPlacesPanel`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
 - **Folders:** `brand/`, `onboarding/`, `profile-setup/`
 
