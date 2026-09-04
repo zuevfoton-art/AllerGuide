@@ -360,7 +360,8 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 | `deploy` | `ubuntu-latest` | `yc serverless container revision deploy` + Lockbox secrets |
 | `migrate` | **`self-hosted, yc-staging-vpc`** | `pnpm --filter api db:migrate` |
 | `smoke` | `ubuntu-latest` | `pnpm install` + `staging-preflight.sh` (sync/scan/yandex-ai через `pnpm exec tsx`) |
-| `mobile-android` / `mobile-ios` | `ubuntu-latest` | `npx eas-cli@22.0.0 build --profile staging` (не `pnpm exec eas` 16.x — ломает upload tarball) |
+| `mobile-android` | `ubuntu-latest` | `npx eas-cli@22.0.0 build --profile staging --platform android` |
+| `mobile-ios` | `ubuntu-latest` | Device IPA **только** при repo variable `EAS_IOS_DEVICE=true` (нужны Apple certs). Иначе job `mobile-ios-notice` |
 
 ### GitHub Secrets
 
@@ -387,15 +388,16 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 
 | Платформа | Результат |
 |-----------|-----------|
-| Android | APK internal → QR на expo.dev |
-| iOS | TestFlight Internal |
+| Android | APK internal → QR на expo.dev. Если Expo Gradle падает — запасной путь [`android-stage-build.md`](android-stage-build.md) §C (`staging-apk-gradle.yml`). Красный `mobile-android` **не** откат API: `smoke` уже прошёл. |
+| iOS | По умолчанию **пропускается**. `credentials.json` — только Android debug keystore; non-interactive EAS не создаёт Apple certs для `distribution: internal`. Device IPA: интерактивно `eas credentials --platform ios`, затем repo variable `EAS_IOS_DEVICE=true`. |
 
 Ручной запуск:
 
 ```bash
 cd apps/mobile
+pnpm exec eas --version   # нужен eas-cli >= 22 (16.x ломает upload tarball)
 pnpm build:staging:android
-pnpm build:staging:ios
+pnpm build:staging:ios    # упадёт без Apple credentials
 ```
 
 Чеклист на устройстве: [`eas-staging-build.md`](./eas-staging-build.md), [`qa-checklist.md`](./qa-checklist.md).
@@ -434,6 +436,8 @@ pnpm build:staging:ios
 | `docker login cr.yandex` fail | `YC_SA_JSON` — полный JSON authorized key deploy SA |
 | OpenAI scan 502 | Прокси / `AI_SCAN_ENABLED=false` / billing |
 | EAS «Сервер недоступен» | DNS `api.staging.aclearo.com`, TLS, URL в `eas.json` |
+| `mobile-ios` / Apple credentials | Ожидаемо без `EAS_IOS_DEVICE`. См. [`eas-staging-build.md`](eas-staging-build.md) |
+| `mobile-android` Gradle unknown error | expo.dev → Run gradlew. Запасной APK: `staging-apk-gradle.yml`. Не откатывать API |
 | Destroy staging | `./scripts/yc-staging-bootstrap.sh destroy` (подтверждение) |
 
 ---

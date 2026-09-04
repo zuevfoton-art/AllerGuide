@@ -37,7 +37,7 @@ Internal-сборка для closed beta: **backend auth, cloud sync и AI scan 
 
 1. Staging API доступен: `curl https://api.staging.aclearo.com/api/health` → 200 ([P1.1c](staging-deploy.md))
 2. `eas login` и реальный `projectId` в [`app.json`](../apps/mobile/app.json) (см. [preview runbook](eas-internal-preview.md))
-3. Apple/Google credentials для internal distribution (те же, что для preview)
+3. Android: committed `credentials.json` + `debug.keystore` (`credentialsSource: local`). iOS device IPA: интерактивно `eas credentials --platform ios` (в `credentials.json` Apple certs нет; CI пропускает iOS, пока нет repo variable `EAS_IOS_DEVICE=true`)
 4. Для pollen heatmap: пошагово создать GCP keys — [`gcp-pollen-maps-keys.md`](gcp-pollen-maps-keys.md); Maps key в **EAS Sensitive** `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (не Secret visibility); API — Lockbox `POLLEN_HEATMAP_ENABLED` + `GOOGLE_POLLEN_API_KEY` (Phase 1). Stage clients: [`yc-stage-gates.md`](yc-stage-gates.md) Phase 2.
 
 ---
@@ -134,8 +134,11 @@ Closed beta: [`closed-beta-p17.md`](closed-beta-p17.md).
 | Sync «недоступна» | API: `SYNC_ENABLED=true`; на клиенте флаг уже `true` в staging |
 | AI scan fallback на mock | API: `AI_SCAN_ENABLED=true`, `OPENAI_API_KEY`, JWT |
 | Пыление остаётся на Яндексе | Нет EAS secret Maps key / пустой `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`; или API pollen выключен |
-| Build fails | Запускайте из `apps/mobile`; см. [preview troubleshooting](eas-internal-preview.md) |
+| Build fails | Запускайте из `apps/mobile`; eas-cli **>= 22** (`pnpm exec eas`). 16.x ломает upload tarball. См. [preview troubleshooting](eas-internal-preview.md) |
+| iOS: `couldn't find any credentials suitable for internal distribution` | Нет Apple certs. Интерактивно `eas credentials --platform ios`, либо оставьте CI skip (нет `EAS_IOS_DEVICE`). Не ставьте `ios.simulator: true` в профиле `staging` — это другой артефакт, не TestFlight. |
+| Android: `Gradle build failed with unknown error` | Логи только на expo.dev → build → **Run gradlew**. Нативный APK при этом собирается через [`android-stage-build.md`](android-stage-build.md) §C. Release Metro `@/` в `import()` — [#331](https://github.com/zuevfoton-art/AllerGuide/pull/331). |
 | Нужен APK без EAS | [`android-stage-build.md`](android-stage-build.md) §C — Gradle on GitHub |
+| Красный `deploy-staging` после зелёного smoke | Не откатывать API. Смотреть `mobile-android` / `mobile-ios` отдельно. |
 
 ---
 

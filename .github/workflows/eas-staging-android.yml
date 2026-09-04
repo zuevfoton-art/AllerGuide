@@ -60,8 +60,8 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.wait }}" = "false" ]; then
             WAIT_FLAG="--no-wait"
           fi
-          # eas-cli 16.x on this runner fails tarball upload:
-          # "Cannot read properties of undefined (reading 'create')".
+          # Pin 22.x: eas-cli 16.x fails tarball upload
+          # ("Cannot read properties of undefined (reading 'create')").
           npx --yes eas-cli@22.0.0 build \
             --profile staging \
             --platform android \
