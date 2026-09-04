@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { transformSync } from '@babel/core';
 import { describe, expect, it } from 'vitest';
 
-const mobileRoot = path.dirname(fileURLToPath(import.meta.url));
+const mobileRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const workspaceRoot = path.resolve(mobileRoot, '../..');
 const layoutFile = path.join(mobileRoot, 'app/_layout.tsx');
 const dynamicImports = [
@@ -35,7 +35,7 @@ describe('mobileAliasPlugin', () => {
   it('still rewrites static import and require aliases', () => {
     const code = transformWith(
       path.join(mobileRoot, 'babel.config.js'),
-      "import x from '@/src/db/init';\nrequire('@/src/services/analytics-service');\n",
+      "export { default } from '@/src/db/init';\nrequire('@/src/services/analytics-service');\n",
     );
     expect(code).not.toMatch('@/src/');
     expect(code).toContain(`${mobileRoot}/src/db/init`);
