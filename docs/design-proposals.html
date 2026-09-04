@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — 3 варианта строгого дизайна</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #eceff1;
+      color: #1a1a1a;
+      padding: 40px 24px 64px;
+      line-height: 1.5;
+    }
+    .intro { max-width: 960px; margin: 0 auto 40px; }
+    .intro h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .intro p { color: #546e7a; font-size: 15px; max-width: 720px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; max-width: 400px; } }
+
+    .variant { display: flex; flex-direction: column; gap: 16px; }
+    .variant-head { padding: 0 4px; }
+    .variant-head h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .variant-head .tag { font-size: 12px; color: #78909c; text-transform: uppercase; letter-spacing: 0.06em; }
+    .variant-head p { font-size: 13px; color: #607d8b; margin-top: 8px; }
+
+    .phone {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .status { height: 44px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; font-size: 12px; font-weight: 600; }
+    .screen { padding: 16px 16px 0; min-height: 620px; display: flex; flex-direction: column; }
+    .tabbar { margin-top: auto; display: flex; border-top: 1px solid; padding: 8px 0 12px; }
+    .tab { flex: 1; text-align: center; font-size: 10px; font-weight: 600; padding-top: 4px; }
+    .tab svg { display: block; margin: 0 auto 4px; width: 20px; height: 20px; }
+
+    /* ─── A: Clinical ─── */
+    .a .status { background: #fff; color: #263238; }
+    .a .screen { background: #fafafa; font-family: 'IBM Plex Sans', sans-serif; }
+    .a .appbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .a .appbar-title { font-size: 13px; font-weight: 600; color: #546e7a; text-transform: uppercase; letter-spacing: 0.04em; }
+    .a .appbar-date { font-size: 22px; font-weight: 700; color: #263238; }
+    .a .profile-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .a .profile-chip { flex: 1; padding: 10px 12px; background: #fff; border: 1px solid #e0e0e0; font-size: 13px; font-weight: 600; color: #37474f; }
+    .a .profile-chip.active { border-color: #1565c0; background: #e3f2fd; color: #0d47a1; }
+    .a .section-label { font-size: 11px; font-weight: 600; color: #78909c; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .a .metric-card { background: #fff; border: 1px solid #e0e0e0; padding: 16px; margin-bottom: 16px; }
+    .a .metric-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .a .metric-title { font-size: 15px; font-weight: 600; color: #263238; }
+    .a .metric-score { font-size: 32px; font-weight: 700; color: #1565c0; font-variant-numeric: tabular-nums; }
+    .a .metric-score span { font-size: 14px; font-weight: 500; color: #78909c; }
+    .a .metric-status { font-size: 13px; color: #546e7a; margin-bottom: 12px; }
+    .a .metric-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-top: 1px solid #f0f0f0; color: #546e7a; }
+    .a .metric-row strong { color: #263238; font-weight: 600; }
+    .a .list { background: #fff; border: 1px solid #e0e0e0; }
+    .a .list-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #f0f0f0; }
+    .a .list-item:last-child { border-bottom: none; }
+    .a .list-icon { width: 36px; height: 36px; background: #eceff1; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .a .list-text { flex: 1; }
+    .a .list-text strong { display: block; font-size: 14px; font-weight: 600; color: #263238; }
+    .a .list-text span { font-size: 12px; color: #78909c; }
+    .a .list-action { font-size: 20px; color: #1565c0; font-weight: 300; }
+    .a .tabbar { background: #fff; border-color: #e0e0e0; }
+    .a .tab { color: #9e9e9e; }
+    .a .tab.on { color: #1565c0; }
+
+    /* ─── B: Swiss ─── */
+    .b .status { background: #fff; color: #000; }
+    .b .screen { background: #fff; font-family: Inter, sans-serif; }
+    .b .hero { border-bottom: 3px solid #000; padding-bottom: 16px; margin-bottom: 20px; }
+    .b .hero-num { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #000; margin-bottom: 4px; }
+    .b .hero-title { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+    .b .hero-sub { font-size: 13px; color: #666; margin-top: 6px; }
+    .b .profile-row { display: flex; gap: 0; margin-bottom: 24px; border: 2px solid #000; }
+    .b .profile-chip { flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; border-right: 2px solid #000; background: #fff; color: #000; }
+    .b .profile-chip:last-child { border-right: none; }
+    .b .profile-chip.active { background: #000; color: #fff; }
+    .b .block { margin-bottom: 20px; }
+    .b .block-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .b .block-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+    .b .block-link { font-size: 11px; font-weight: 600; text-decoration: underline; }
+    .b .index-box { border: 2px solid #000; padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .b .index-val { font-size: 48px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+    .b .index-meta { text-align: right; font-size: 12px; font-weight: 600; line-height: 1.4; }
+    .b .index-bar { grid-column: 1 / -1; height: 4px; background: #eee; margin-top: 8px; }
+    .b .index-bar-fill { height: 100%; width: 72%; background: #000; }
+    .b .rows { border-top: 2px solid #000; }
+    .b .row { display: grid; grid-template-columns: 24px 1fr auto; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid #ddd; font-size: 14px; font-weight: 500; }
+    .b .row-num { font-size: 11px; font-weight: 700; color: #999; }
+    .b .row-btn { width: 28px; height: 28px; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 300; }
+    .b .tabbar { background: #fff; border-color: #000; border-width: 2px 0 0; }
+    .b .tab { color: #999; font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .b .tab.on { color: #000; }
+
+    /* ─── C: Nordic Document ─── */
+    .c .status { background: #f7f8fa; color: #334155; }
+    .c .screen { background: #f7f8fa; font-family: Inter, sans-serif; }
+    .c .doc-header { margin-bottom: 18px; }
+    .c .doc-label { font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 0.06em; text-transform: uppercase; }
+    .c .doc-title { font-family: 'Source Serif 4', Georgia, serif; font-size: 26px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+    .c .doc-meta { font-size: 13px; color: #64748b; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .c .seg { display: flex; background: #e2e8f0; border-radius: 6px; padding: 3px; margin-bottom: 18px; }
+    .c .seg-item { flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; color: #64748b; border-radius: 4px; }
+    .c .seg-item.on { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+    .c .panel { background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 16px; margin-bottom: 14px; }
+    .c .panel-title { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 12px; }
+    .c .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+    .c .stat-val { font-size: 24px; font-weight: 700; color: #1e3a5f; font-variant-numeric: tabular-nums; }
+    .c .stat-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+    .c .stat-note { font-size: 13px; color: #475569; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+    .c .table { width: 100%; font-size: 13px; }
+    .c .table tr { border-bottom: 1px solid #f1f5f9; }
+    .c .table td { padding: 12px 0; vertical-align: middle; }
+    .c .table td:first-child { color: #64748b; width: 28px; font-size: 16px; }
+    .c .table td:nth-child(2) strong { display: block; color: #0f172a; font-weight: 600; }
+    .c .table td:nth-child(2) span { font-size: 12px; color: #94a3b8; }
+    .c .table td:last-child { text-align: right; }
+    .c .btn-sm { display: inline-block; padding: 6px 12px; background: #1e3a5f; color: #fff; font-size: 12px; font-weight: 600; border-radius: 4px; }
+    .c .tabbar { background: #fff; border-color: #e2e8f0; }
+    .c .tab { color: #94a3b8; }
+    .c .tab.on { color: #1e3a5f; }
+
+    .tokens { margin-top: 12px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid #ddd; font-size: 11px; color: #546e7a; }
+    .tokens strong { display: block; color: #263238; margin-bottom: 6px; font-size: 12px; }
+    .swatches { display: flex; gap: 6px; margin-top: 6px; }
+    .sw { width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div class="intro">
+    <h1>AllerGuide — 3 варианта строгого дизайна</h1>
+    <p>
+      Текущий glass UI перегружен: градиенты, скругления 22px, оранжевый + бирюзовый + фиолетовый одновременно, декоративные «облака».
+      Ниже — три направления с чёткой иерархией, одним доминирующим акцентом и предсказуемой сеткой.
+      Откройте файл в браузере для сравнения экранов «Главная».
+    </p>
+  </div>
+
+  <div class="grid">
+    <!-- A: Clinical -->
+    <div class="variant">
+      <div class="variant-head">
+        <div class="tag">Вариант A</div>
+        <h2>Клинический минимализм</h2>
+        <p>Как медицинская карта: белый фон, тонкие границы, один синий акцент. Максимальная читаемость данных.</p>
+      </div>
+      <div class="phone a">
+        <div class="status">9:41</div>
+        <div class="screen">
+          <div class="appbar">
+            <div>
+              <div class="appbar-title">Сегодня</div>
+              <div class="appbar-date">20 июня</div>
+            </div>
+            <div style="width:36px;height:36px;border:1px solid #e0e0e0;background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px">⚕</div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-chip active">Анна</div>
+            <div class="profile-chip">Максим</div>
+            <div class="profile-chip" style="flex:0.5;text-align:center">+</div>
+          </div>
+          <div class="section-label">Самочувствие</div>
+          <div class="metric-card">
+            <div class="metric-top">
+              <div class="metric-title">Индекс среды</div>
+              <div class="metric-score">72 <span>/ 100</span></div>
+            </div>
+            <div class="metric-status">Умеренно · есть факторы внимания</div>
+            <div class="metric-row"><span>Пыльца · Берёза</span><strong>42 grains/m³</strong></div>
+            <div class="metric-row"><span>Воздух · EAQI</span><strong>PM2.5 18</strong></div>
+            <div class="metric-row"><span>Дневник · 48 ч</span><strong>Спокойно</strong></div>
+          </div>
+          <div class="section-label">Быстрые действия</div>
+          <div class="list">
+            <div class="list-item">
+              <div class="list-icon">◉</div>
+              <div class="list-text"><strong>Симптомы</strong><span>Записать самочувствие</span></div>
+              <div class="list-action">+</div>
+            </div>
+            <div class="list-item">
+              <div class="list-icon">◉</div>
+              <div class="list-text"><strong>Питание</strong><span>0 записей сегодня</span></div>
+              <div class="list-action">+</div>
+            </div>
+            <div class="list-item">
+              <div class="list-icon">◉</div>
+              <div class="list-text"><strong>Лекарство</strong><span>Отметить приём</span></div>
+              <div class="list-action">+</div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on">●<br>Главная</div>
+          <div class="tab">○<br>Дневник</div>
+          <div class="tab">○<br>Сканер</div>
+          <div class="tab">○<br>Карта</div>
+          <div class="tab">○<br>SOS</div>
+        </div>
+      </div>
+      <div class="tokens">
+        <strong>Токены</strong>
+        Фон #FAFAFA · Карточка #FFF · Акцент #1565C0 · Текст #263238<br>
+        Шрифт IBM Plex Sans · Радиус 0–4px · Тени нет, только border 1px<br>
+        SOS — красный #C62828 только на экране экстренной помощи
+        <div class="swatches">
+          <div class="sw" style="background:#fafafa"></div>
+          <div class="sw" style="background:#fff"></div>
+          <div class="sw" style="background:#1565c0"></div>
+          <div class="sw" style="background:#263238"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: Swiss -->
+    <div class="variant">
+      <div class="variant-head">
+        <div class="tag">Вариант B</div>
+        <h2>Швейцарская сетка</h2>
+        <p>Чёрно-белая типографика, жёсткая сетка 8px, нумерация блоков. Акцент — только чёрная заливка и underline-ссылки.</p>
+      </div>
+      <div class="phone b">
+        <div class="status">9:41</div>
+        <div class="screen">
+          <div class="hero">
+            <div class="hero-num">01 — ГЛАВНАЯ</div>
+            <div class="hero-title">Сегодня</div>
+            <div class="hero-sub">Профиль · Анна · 20.06.2026</div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-chip active">Анна</div>
+            <div class="profile-chip">Макс</div>
+          </div>
+          <div class="block">
+            <div class="block-head">
+              <span class="block-title">02 — Индекс</span>
+              <span class="block-link">Подробнее</span>
+            </div>
+            <div class="index-box">
+              <div class="index-val">72</div>
+              <div class="index-meta">УМЕРЕННО<br>из 100</div>
+              <div class="index-bar"><div class="index-bar-fill"></div></div>
+            </div>
+          </div>
+          <div class="block">
+            <div class="block-head">
+              <span class="block-title">03 — Дневник</span>
+            </div>
+            <div class="rows">
+              <div class="row"><span class="row-num">1</span><span>Симптомы</span><div class="row-btn">+</div></div>
+              <div class="row"><span class="row-num">2</span><span>Питание</span><div class="row-btn">+</div></div>
+              <div class="row"><span class="row-num">3</span><span>Лекарство</span><div class="row-btn">+</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on">■<br>Home</div>
+          <div class="tab">□<br>Diary</div>
+          <div class="tab">□<br>Scan</div>
+          <div class="tab">□<br>Map</div>
+          <div class="tab">□<br>SOS</div>
+        </div>
+      </div>
+      <div class="tokens">
+        <strong>Токены</strong>
+        Фон #FFFFFF · Текст #000000 · Границы 2px solid #000<br>
+        Шрифт Inter 700 для заголовков · Радиус 0 · Цвет только для SOS (#E53935)<br>
+        Иконки — outline 2px stroke, без заливок
+        <div class="swatches">
+          <div class="sw" style="background:#fff"></div>
+          <div class="sw" style="background:#000"></div>
+          <div class="sw" style="background:#eee"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C: Nordic -->
+    <div class="variant">
+      <div class="variant-head">
+        <div class="tag">Вариант C</div>
+        <h2>Северный документ</h2>
+        <p>Спокойный slate-фон, serif для заголовков, tabular nums для цифр. Ощущение официального отчёта, не «приложения для фитнеса».</p>
+      </div>
+      <div class="phone c">
+        <div class="status">9:41</div>
+        <div class="screen">
+          <div class="doc-header">
+            <div class="doc-label">AllerGuide · Сводка</div>
+            <div class="doc-title">Сегодня</div>
+            <div class="doc-meta">20 июня 2026 · Профиль: Анна</div>
+          </div>
+          <div class="seg">
+            <div class="seg-item on">Анна</div>
+            <div class="seg-item">Максим</div>
+            <div class="seg-item">+</div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">Показатели среды</div>
+            <div class="stat-grid">
+              <div><div class="stat-val">72</div><div class="stat-lbl">Индекс</div></div>
+              <div><div class="stat-val">↑</div><div class="stat-lbl">Пыльца</div></div>
+              <div><div class="stat-val">OK</div><div class="stat-lbl">Воздух</div></div>
+            </div>
+            <div class="stat-note">Умеренно. Есть отдельные факторы внимания — см. рекомендации.</div>
+          </div>
+          <div class="panel" style="padding-bottom:4px">
+            <div class="panel-title">Записи дневника</div>
+            <table class="table">
+              <tr>
+                <td>◉</td>
+                <td><strong>Симптомы</strong><span>Записать самочувствие</span></td>
+                <td><span class="btn-sm">+ Запись</span></td>
+              </tr>
+              <tr>
+                <td>◉</td>
+                <td><strong>Питание</strong><span>0 записей</span></td>
+                <td><span class="btn-sm">+ Запись</span></td>
+              </tr>
+              <tr>
+                <td>◉</td>
+                <td><strong>Лекарство</strong><span>Отметить приём</span></td>
+                <td><span class="btn-sm">+ Запись</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on">●<br>Главная</div>
+          <div class="tab">○<br>Дневник</div>
+          <div class="tab">○<br>Сканер</div>
+          <div class="tab">○<br>Ещё</div>
+        </div>
+      </div>
+      <div class="tokens">
+        <strong>Токены</strong>
+        Фон #F7F8FA · Карточка #FFF · Акцент #1E3A5F (navy) · Текст #0F172A<br>
+        Заголовки Source Serif 4 · UI Inter · Радиус 6–8px · Тень минимальная<br>
+        5 табов → 4 (Market/Map в «Ещё») — меньше шума в навигации
+        <div class="swatches">
+          <div class="sw" style="background:#f7f8fa"></div>
+          <div class="sw" style="background:#1e3a5f"></div>
+          <div class="sw" style="background:#0f172a"></div>
+          <div class="sw" style="background:#e2e8f0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
