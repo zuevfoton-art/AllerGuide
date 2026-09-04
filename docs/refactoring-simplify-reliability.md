@@ -69,7 +69,9 @@ flowchart LR
   W3[Wave3_WebDb]
   W4[Wave4_dedup]
   W5[Wave5_outbox]
-  W1 --> W2 --> W3 --> W4 --> W5
+  W6[Wave6_therapy]
+  W7[Wave7_wizard_map]
+  W1 --> W2 --> W3 --> W4 --> W5 --> W6 --> W7
 ```
 
 ### Wave 1 — Transport resilience
@@ -97,7 +99,7 @@ pending alias уходит после успешного POST; unhandled route e
 - `map.tsx`: `useMapLiveData` (`refreshMapLiveData` / `searchMapThisArea`) +
   `MapLayerSwitcher` / `MapPollenStatusCard` / `MapDoctorsSection` / `map-constants`.
 - Экраны — wiring; I/O остаётся в services.
-- ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
+- ASIT / prescribed-therapy: shared course-editor — Wave 6.
 
 ### Wave 3 — Kill WebDb SQL parsing (в `main`, #325)
 
@@ -135,7 +137,7 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 
 **Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
-### Wave 5 — Offline→online reconciliation (этот PR)
+### Wave 5 — Offline→online reconciliation (в `main`, #327)
 
 - Mutation outbox профилей: при `BACKEND_AUTH` + network fail — локальная запись + очередь,
   `flushProfileOutbox` на старте.
@@ -143,6 +145,18 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
   если `encryptBackup` вернул `null` (`encryption_unavailable`).
 - Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
 - Enrichment fallback rates — follow-up (pollen ops уже есть).
+
+### Wave 6 — Unified therapy + prescription OCR
+
+Shared `usePrescriptionParser` + `components/therapy/*` — отдельный PR.
+
+### Wave 7 — DiaryWizard + map final split (этот PR)
+
+- `DiaryWizard.tsx` → `useDiaryWizardController` + `components/diary/wizard/*`
+  (`DiaryStepField`, `DiaryPhotoToolbar`, `DiaryDishComponentsField`,
+  `DiaryPefZonePreview`, `DiaryLegacyEditor`, preview helpers).
+- `map.tsx` → `MapCanvas` / `MapLayerLegend` / `MapPollenDetails` / `MapPlacesPanel`.
+- Публичные пропсы, `testID` и i18n без изменений.
 
 ---
 
@@ -179,4 +193,7 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
 | Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
 | Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
-| Wave 5 | ✅ этот PR — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 5 | ✅ в `main` (#327) — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 6 | 📝 отдельный PR — shared course editor |
+| Wave 7 | ✅ этот PR — DiaryWizard + map canvas/panels |
+| Wave 8 | 📝 запланирована — typed repositories |

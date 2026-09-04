@@ -1,11 +1,4 @@
-import {
-  ActivityIndicator,
-  Text,
-  View,
-  StyleSheet,
-  Pressable,
-  Linking,
-} from 'react-native';
+import { Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import {
   buildPlacesMapUrl,
@@ -15,7 +8,6 @@ import {
   hasGoogleGroupHeatmap,
   resolveOfficialHeatmapMapType,
   getPollenPeaksForMonth,
-  formatPollenMonth,
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_MAP_SCALE_ZOOM,
   POLLEN_MAP_TAXON_IDS,
@@ -30,44 +22,35 @@ import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
-import { YandexMap } from '@/src/components/YandexMap';
-import { GooglePollenMap } from '@/src/components/GooglePollenMap';
-import { YandexInteractiveMap } from '@/src/components/YandexInteractiveMap';
-import { PollenForecastStrip } from '@/src/components/PollenForecastStrip';
-import { PollenIndexCard } from '@/src/components/PollenIndexCard';
-import { PollenHeatmapLegend } from '@/src/components/PollenHeatmapLegend';
-import { AirQualityCard } from '@/src/components/AirQualityCard';
-import { AirQualityLegend } from '@/src/components/AirQualityLegend';
-import { PlaceSearchBar } from '@/src/components/PlaceSearchBar';
 import { MapPollenAllergenModal } from '@/src/components/MapPollenAllergenModal';
-import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { MapCanvas } from '@/src/components/map/MapCanvas';
 import { MapDoctorsSection } from '@/src/components/map/MapDoctorsSection';
+import { MapLayerLegend } from '@/src/components/map/MapLayerLegend';
 import { MapLayerSwitcher } from '@/src/components/map/MapLayerSwitcher';
+import { MapPlacesPanel } from '@/src/components/map/MapPlacesPanel';
+import { MapPollenDetails } from '@/src/components/map/MapPollenDetails';
 import { MapPollenStatusCard } from '@/src/components/map/MapPollenStatusCard';
 import {
   ADAIR_PIN_COLOR,
   LEVEL_LABEL_KEYS,
-  MAP_HERO_HEIGHT,
   SEARCH_AREA_MIN_DELTA_DEG,
   WEEKDAY_KEYS,
   type MapLayerMode,
 } from '@/src/components/map/map-constants';
+import { createMapScreenStyles } from '@/src/components/map/map-screen-styles';
 import { useMapLiveData } from '@/src/hooks/use-map-live-data';
 import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
-import { radii } from '@/src/constants/layout';
-import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTheme } from '@/src/hooks/use-theme';
 import { useZoneColors, zoneFromPollen } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
 import {
   buildAirQualityHeatmapTileUrlTemplate,
   isAirQualityHeatmapAvailable,
-  isGoogleAirQualityAvailable,
 } from '@/src/services/air-quality-service';
 import { resolveMapBasemap, resolveRuntimeMapBasemap } from '@/src/services/map-basemap';
 import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
@@ -85,7 +68,7 @@ import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 
 export default function MapScreen() {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createMapScreenStyles(theme), [theme]);
   const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
@@ -469,113 +452,44 @@ export default function MapScreen() {
         onClose={() => setAllergenPickerOpen(false)}
       />
 
-      {useYandexInteractive ? (
-        <YandexInteractiveMap
-          latitude={coords.lat}
-          longitude={coords.lon}
-          zoom={POLLEN_MAP_SCALE_ZOOM.city}
-          height={MAP_HERO_HEIGHT}
-          markers={showPlaceMarkers ? markers : []}
-          selectedMarkerId={selectedPoiId}
-          onMarkerPress={setSelectedPoiId}
-          onRegionChange={handleRegionChange}
-          overlay={mapOverlay}
-          unavailableLabel={t('map.basemapUnavailable')}
-        />
-      ) : useGoogleMap ? (
-        <GooglePollenMap
-          latitude={coords.lat}
-          longitude={coords.lon}
-          zoom={POLLEN_MAP_SCALE_ZOOM.city}
-          mapType={googleMapType}
-          tileUrlTemplate={airTileUrlTemplate}
-          height={MAP_HERO_HEIGHT}
-          interactive
-          markers={markers}
-          circles={showPlumeGeo ? plume.circles : []}
-          polylines={showPlumeGeo ? plume.polylines : []}
-          selectedMarkerId={selectedPoiId}
-          onMarkerPress={setSelectedPoiId}
-          onRegionChange={handleRegionChange}
-          onMapLoaded={googleGuard.onMapLoaded}
-          overlay={mapOverlay}
-        />
-      ) : (
-        <YandexMap
-          url={
-            showPlaceMarkers
-              ? yandexPlacesUrl || yandexPollenUrl
-              : yandexPollenUrl || yandexPlacesUrl
-          }
-          height={MAP_HERO_HEIGHT}
-          interactive={false}
-          overlay={mapOverlay}
-        />
-      )}
+      <MapCanvas
+        styles={styles}
+        theme={theme}
+        latitude={coords.lat}
+        longitude={coords.lon}
+        useGoogleMap={useGoogleMap}
+        useYandexInteractive={useYandexInteractive}
+        showPlaceMarkers={showPlaceMarkers}
+        showPlacesLayer={showPlacesLayer}
+        showSearchAreaButton={showSearchAreaButton}
+        searchingArea={searchingArea}
+        yandexUrl={
+          showPlaceMarkers
+            ? yandexPlacesUrl || yandexPollenUrl
+            : yandexPollenUrl || yandexPlacesUrl
+        }
+        googleMapType={googleMapType}
+        airTileUrlTemplate={airTileUrlTemplate}
+        markers={markers}
+        circles={showPlumeGeo ? plume.circles : []}
+        polylines={showPlumeGeo ? plume.polylines : []}
+        selectedPoiId={selectedPoiId}
+        overlay={mapOverlay}
+        mapAttributionKey={mapAttributionKey}
+        yandexPollenUrl={pollenSnapshot?.yandexPollenUrl}
+        onMarkerPress={setSelectedPoiId}
+        onRegionChange={handleRegionChange}
+        onMapLoaded={googleGuard.onMapLoaded}
+        onSearchThisArea={() => void searchThisArea()}
+      />
 
-      {showSearchAreaButton ? (
-        <Pressable
-          testID="map-search-area"
-          style={styles.searchAreaBtn}
-          hitSlop={8}
-          onPress={() => void searchThisArea()}
-          disabled={searchingArea}
-          accessibilityRole="button"
-          accessibilityLabel={t('map.searchThisArea')}>
-          {searchingArea ? (
-            <ActivityIndicator size="small" color={theme.colors.accent} />
-          ) : (
-            <Ionicons name="search" size={16} color={theme.colors.accent} />
-          )}
-          <Text style={styles.searchAreaText}>{t('map.searchThisArea')}</Text>
-        </Pressable>
-      ) : null}
-
-      {mapAttributionKey ? (
-        <Text style={styles.mapAttribution} testID="map-attribution">
-          {t(mapAttributionKey)}
-        </Text>
-      ) : null}
-      {showPlacesLayer ? (
-        <Text style={styles.mapAttribution} testID="map-places-osm-attribution">
-          {t('map.placesOsmAttribution')}
-        </Text>
-      ) : null}
-
-      {!useGoogleMap && !useYandexInteractive ? (
-        <Pressable
-          style={styles.yandexBanner}
-          hitSlop={8}
-          onPress={() => {
-            if (pollenSnapshot) void Linking.openURL(pollenSnapshot.yandexPollenUrl);
-          }}
-          accessibilityRole="link">
-          <Ionicons name="information-circle-outline" size={18} color={theme.colors.warning} />
-          <Text style={styles.yandexBannerText}>{t('map.yandexOverviewBanner')}</Text>
-          <Ionicons name="open-outline" size={16} color={theme.colors.accent} />
-        </Pressable>
-      ) : null}
-
-      {!useGoogleMap && showPlacesPanel ? (
-        <Text style={styles.listFirstHint}>{t('map.listFirstHint')}</Text>
-      ) : null}
-
-      {showPlacesLayer ? (
-        <>
-          <Text style={styles.legendTitle}>{t('map.legendTitlePlaces')}</Text>
-          <View style={styles.legendRow}>
-            <LegendDot color={ADAIR_PIN_COLOR} label={t('map.legendAdair')} />
-            <LegendDot color={theme.colors.success} label={t('map.legendRestaurant')} />
-            <LegendDot color={theme.colors.warningText} label={t('map.legendCafe')} />
-            <LegendDot color={theme.colors.accent} label={t('map.legendMedical')} />
-            <LegendDot color={theme.colors.warning} label={t('map.legendPharmacy')} />
-          </View>
-        </>
-      ) : showAirLayer ? (
-        <AirQualityLegend />
-      ) : (
-        <PollenHeatmapLegend group={pollenMapTaxonTypeGroup(selectedTaxonId)} />
-      )}
+      <MapLayerLegend
+        styles={styles}
+        theme={theme}
+        showPlacesLayer={showPlacesLayer}
+        showAirLayer={showAirLayer}
+        selectedTaxonId={selectedTaxonId}
+      />
 
       {showActionTip ? (
         <GlassCard style={styles.tipCard}>
@@ -594,89 +508,47 @@ export default function MapScreen() {
         </GlassCard>
       ) : null}
 
-      {showPollenLayer ? (
-        <>
-          <PollenIndexCard
-            taxonLabel={taxonLabel}
-            upi={heatmapEmpty && selectedUpi?.source !== 'google' ? null : selectedUpi}
-            grainsPerM3={
-              pollenSnapshot?.source === 'google' || selectedUpi?.source === 'google'
-                ? null
-                : selectedReading?.value ?? null
-            }
-            zone={pollenZone}
-          />
-          {isGoogleAirQualityAvailable() ? (
-            <AirQualityCard snapshot={airQuality} loading={airQualityLoading} />
-          ) : null}
-          <PollenForecastStrip
-            days={pollenSnapshot?.forecastDays ?? []}
-            taxonId={selectedTaxonId}
-            selectedDayIndex={selectedForecastDay}
-            onSelectDay={setSelectedForecastDay}
-          />
-
-          {isCalendarFallback ? (
-            <GlassCard style={styles.calendarCard}>
-              <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
-              <View style={styles.calendarBody}>
-                <Text style={styles.calendarTitle}>{t('map.pollenCalendarFallback')}</Text>
-                {pollenPeaks.length > 0 ? (
-                  pollenPeaks.map((peak) => (
-                    <Text key={peak.taxonId} style={styles.calendarText}>
-                      {peak.label}: {formatPollenMonth(peak.peakMonth)}
-                    </Text>
-                  ))
-                ) : (
-                  <Text style={styles.calendarText}>{t('map.pollenNoSeason')}</Text>
-                )}
-              </View>
-            </GlassCard>
-          ) : null}
-        </>
-      ) : null}
-
-      {showAirLayer && isGoogleAirQualityAvailable() ? (
-        <AirQualityCard snapshot={airQuality} loading={airQualityLoading} />
-      ) : null}
+      <MapPollenDetails
+        styles={styles}
+        theme={theme}
+        showPollenLayer={showPollenLayer}
+        showAirLayer={showAirLayer}
+        taxonLabel={taxonLabel}
+        selectedTaxonId={selectedTaxonId}
+        selectedUpi={selectedUpi}
+        selectedReadingValue={selectedReading?.value ?? null}
+        pollenSnapshot={pollenSnapshot}
+        pollenZone={pollenZone}
+        heatmapEmpty={heatmapEmpty}
+        isCalendarFallback={isCalendarFallback}
+        pollenPeaks={pollenPeaks}
+        selectedForecastDay={selectedForecastDay}
+        onSelectForecastDay={setSelectedForecastDay}
+        airQuality={airQuality}
+        airQualityLoading={airQualityLoading}
+      />
 
       {showPlacesPanel ? (
-        <>
-          <PlaceSearchBar
-            value={placeInput}
-            suggestions={placeSuggestions}
-            loading={placeSearchLoading}
-            error={
-              placeSearchError === 'empty'
-                ? t('map.placeSearchNothingFound')
-                : null
-            }
-            sourceLabel={
-              placesSource === 'catalog'
-                ? t('map.placeSearchOfflineCatalog')
-                : placesSource === 'google-places'
-                  ? t('map.placeSourceGoogle')
-                  : placesSource === 'adair'
-                    ? t('map.placeSourceCatalog')
-                    : null
-            }
-            onChange={setPlaceInput}
-            onSubmit={(value) => {
-              void runPlaceSearch(value);
-            }}
-            onSelectSuggestion={(suggestion) => {
-              void handleSelectSuggestion(suggestion);
-            }}
-            onClear={clearPlaceSearch}
-          />
-          <MapPoiSheet
-            pois={pois}
-            selectedId={selectedPoiId}
-            filters={placeFilters}
-            onSelect={setSelectedPoiId}
-            onToggleFilter={togglePlaceFilter}
-          />
-        </>
+        <MapPlacesPanel
+          placeInput={placeInput}
+          placeSuggestions={placeSuggestions}
+          placeSearchLoading={placeSearchLoading}
+          placeSearchError={placeSearchError}
+          placesSource={placesSource}
+          pois={pois}
+          selectedPoiId={selectedPoiId}
+          placeFilters={placeFilters}
+          onChangeInput={setPlaceInput}
+          onSubmit={(value) => {
+            void runPlaceSearch(value);
+          }}
+          onSelectSuggestion={(suggestion) => {
+            void handleSelectSuggestion(suggestion);
+          }}
+          onClear={clearPlaceSearch}
+          onSelectPoi={setSelectedPoiId}
+          onToggleFilter={togglePlaceFilter}
+        />
       ) : null}
 
       <MapDoctorsSection
@@ -694,291 +566,4 @@ export default function MapScreen() {
       </Disclaimer>
     </Screen>
   );
-}
-
-function LegendDot({ color, label }: { color: string; label: string }) {
-  const theme = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
-      <Text
-        style={{
-          fontFamily: theme.fonts.sans,
-          fontSize: 11,
-          color: theme.colors.textMuted,
-        }}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-function createStyles({ colors, fonts }: AppTheme) {
-  return StyleSheet.create({
-    header: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 12,
-    },
-    headerText: { flex: 1, gap: 2 },
-    statusCard: {
-      gap: 6,
-    },
-    statusTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    statusDot: { width: 12, height: 12, borderRadius: 6 },
-    statusHeadline: {
-      flex: 1,
-      fontFamily: fonts.sansBold,
-      fontSize: 17,
-      fontWeight: '700',
-      color: colors.text,
-    },
-    statusMeta: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textSecondary,
-      lineHeight: 16,
-    },
-    statusBadge: {
-      alignSelf: 'flex-start',
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.warningText,
-      backgroundColor: colors.warningLight,
-      borderRadius: 4,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      overflow: 'hidden',
-    },
-    layerBlock: { gap: 8 },
-    layerRow: { flexDirection: 'row', gap: 8 },
-    layerChip: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 40,
-      paddingHorizontal: 4,
-      paddingVertical: 8,
-      borderRadius: radii.sm,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-    },
-    layerChipActive: {
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
-    },
-    layerChipText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      textAlign: 'center',
-      color: colors.textSecondary,
-    },
-    layerChipTextActive: { color: colors.accent },
-    allergenPickerBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-      minHeight: 44,
-      borderRadius: radii.full,
-      borderWidth: 1,
-      borderColor: colors.accent,
-      backgroundColor: colors.accentLight,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-    },
-    allergenPickerDot: { width: 8, height: 8, borderRadius: 4 },
-    searchAreaBtn: {
-      alignSelf: 'center',
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      minHeight: 40,
-      borderRadius: radii.full,
-      borderWidth: 1,
-      borderColor: colors.accent,
-      backgroundColor: colors.card,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      marginTop: 4,
-    },
-    searchAreaText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.accent,
-    },
-    allergenPickerLabel: {
-      flex: 1,
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.accent,
-    },
-    legendTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textMuted,
-      marginTop: 2,
-    },
-    legendRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 14,
-    },
-    mapAttribution: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      lineHeight: 14,
-    },
-    mapLevelOverlay: {
-      position: 'absolute',
-      top: 8,
-      right: 8,
-      minHeight: 42,
-      maxWidth: 200,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      borderRadius: 8,
-      borderWidth: 1.5,
-      backgroundColor: colors.card,
-      paddingHorizontal: 10,
-      paddingVertical: 8,
-    },
-    mapLevelDot: { width: 10, height: 10, borderRadius: 5 },
-    mapLevelCopy: { flexShrink: 1, gap: 1 },
-    mapLevelTaxon: {
-      fontFamily: fonts.sans,
-      fontSize: 10,
-      color: colors.textMuted,
-    },
-    mapLevelText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      color: colors.text,
-    },
-    heatmapEmptyOverlay: {
-      position: 'absolute',
-      left: 8,
-      right: 8,
-      bottom: 8,
-      borderRadius: 8,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
-      paddingHorizontal: 10,
-      paddingVertical: 8,
-    },
-    heatmapEmptyText: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      lineHeight: 16,
-      color: colors.textSecondary,
-    },
-    yandexBanner: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      borderRadius: radii.full,
-      borderWidth: 1,
-      borderColor: colors.warningBorder,
-      backgroundColor: colors.warningLight,
-      paddingHorizontal: 12,
-      paddingVertical: 10,
-    },
-    yandexBannerText: {
-      flex: 1,
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.warningText,
-      lineHeight: 16,
-    },
-    listFirstHint: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textMuted,
-      lineHeight: 16,
-    },
-    tipCard: { gap: 10 },
-    tipText: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
-    sectionTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      color: colors.head,
-      marginTop: 4,
-    },
-    calendarCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
-    calendarBody: { flex: 1, gap: 4 },
-    calendarTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
-      color: colors.text,
-    },
-    calendarText: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
-    doctorsToggle: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 8,
-    },
-    card: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 14,
-      marginBottom: 0,
-    },
-    cardIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 6,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    cardBody: { flex: 1, gap: 6 },
-    cardTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    cardNote: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-    },
-    tags: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.textMuted,
-    },
-    chiefBadge: {
-      alignSelf: 'flex-start',
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 10,
-      fontWeight: '600',
-      color: colors.accent,
-      backgroundColor: colors.accentLight,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
-      overflow: 'hidden',
-    },
-    phoneLink: {
-      color: colors.accent,
-      textDecorationLine: 'underline',
-    },
-  });
 }
