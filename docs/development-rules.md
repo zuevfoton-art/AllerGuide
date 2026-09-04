@@ -145,9 +145,9 @@ flowchart TD
 
 ### 4.1. Локальное хранилище
 
-- Импорт БД: **только** `@/src/db/init` (платформа выбирается автоматически).
+- Импорт БД: `@/src/db/init` (платформа выбирается автоматически) **или** typed repository из `src/db/repositories` (профили, дневник, scan history, settings). Экраны по-прежнему не импортируют `db`.
 - Новые таблицы/колонки на native: `init.native.ts` + миграция в `migrations.ts` с инкрементом `CURRENT_SCHEMA_VERSION`.
-- Web: те же сущности через JSON-ключи в IndexedDB; не вводить отдельную модель данных без синхронизации с native.
+- Web: те же сущности через JSON-ключи в IndexedDB; не вводить отдельную модель данных без синхронизации с native. Репозитории на web читают `web-collections.ts`, не SQL-роутер.
 - `app_settings` — только KV настройки (onboarding, locale, auth ids), не бизнес-сущности.
 
 ### 4.2. Сканер

@@ -334,7 +334,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 - `KNOWN_KEYS`: `ag_profiles`, `ag_diary`, `ag_scan_history`, `ag_barcode_cache`, `ag_profile_sos`, `ag_settings`, `ag_users`, `ag_emergency_contacts`
 - Дополнительно через `init.ts`: `ag_safe_products`, `ag_diary_attachments`
 
-`WebDb` (`init.ts`) парсит SQL-строки и маршрутизирует к JSON-коллекциям — тот же интерфейс `DbLike`, что и у SQLite.
+`WebDb` (`init.ts`) парсит SQL-строки и маршрутизирует к JSON-коллекциям — тот же интерфейс `DbLike`, что и у SQLite. Профили, дневник, история скана и `app_settings` идут через typed repositories (`src/db/repositories`): web пишет в `web-collections.ts`, native — parameterized SQL в `expo-sqlite`. Остальные сервисы пока вызывают `getDb()`.
 
 ### Миграции (`migrations.ts`)
 

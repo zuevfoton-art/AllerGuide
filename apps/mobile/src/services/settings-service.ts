@@ -1,18 +1,15 @@
-import { getDb } from '@/src/db/init';
+import { getSettingsRepository } from '@/src/db/repositories';
 import type { Scenario } from '@allerguide/core';
 import type { ThemeMode } from '@/src/constants/theme';
 import type { AppLocale } from '@/src/i18n/types';
 import { APP_LOCALES } from '@/src/i18n/types';
 
 export function getSetting(key: string): string | null {
-  const db = getDb();
-  const row = db.getFirstSync<{ value: string }>('SELECT value FROM app_settings WHERE key = ?', [key]);
-  return row?.value ?? null;
+  return getSettingsRepository().get(key);
 }
 
 export function setSetting(key: string, value: string) {
-  const db = getDb();
-  db.runSync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', [key, value]);
+  getSettingsRepository().set(key, value);
 }
 
 export function getStoredScenario(): Scenario | null {

@@ -47,6 +47,10 @@ const getAllSync = vi.fn((sql: string, params: unknown[] = []) => {
   return [];
 });
 
+vi.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}));
+
 vi.mock('@/src/db/init', () => ({
   getDb: () => ({ runSync, getAllSync, getFirstSync: vi.fn() }),
   persistDbWrites: () => persistDbWrites(),

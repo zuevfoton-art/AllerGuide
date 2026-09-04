@@ -1,4 +1,5 @@
-import { getDb, persistDbWrites } from '@/src/db/init';
+import { persistDbWrites } from '@/src/db/init';
+import { getProfileRepository } from '@/src/db/repositories';
 import { useAppStore } from '@/src/store/app-store';
 import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getCurrentUserId, getBackendAuthToken } from '@/src/services/auth-service';
@@ -165,12 +166,7 @@ export function listProfiles(): Profile[] {
   const userId = getCurrentUserId();
   if (!userId) return [];
 
-  const db = getDb();
-  const rows = db.getAllSync<Profile>(
-    'SELECT * FROM profiles WHERE userId = ? ORDER BY id ASC',
-    [userId],
-  );
-  return sortProfilesForDisplay(rows);
+  return sortProfilesForDisplay(getProfileRepository().listByUserId(userId));
 }
 
 /** Pull server profiles into local DB (P1.2d). Best-effort; returns error code without throwing. */
@@ -250,40 +246,23 @@ function insertLocalProfileRow(
   input: ProfileInput,
   normalized: NormalizedProfilePayload,
 ): number | null {
-  const db = getDb();
-  db.runSync(
-    'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations, crossReactionAllergies) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [
-      userId,
-      normalized.name,
-      input.birthYear,
-      input.type,
-      normalized.allergiesJson,
-      normalized.allergyConfirmationsJson,
-      normalized.crossReactionAllergiesJson,
-    ],
-  );
-  const row = db.getFirstSync<{ id: number }>(
-    'SELECT id FROM profiles WHERE userId = ? ORDER BY id DESC LIMIT 1',
-    [userId],
-  );
-  if (!row?.id) return null;
-  const profile = db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [row.id, userId],
-  );
-  persistActiveProfile(profile || null);
-  return row.id;
+  const profile = getProfileRepository().insert({
+    userId,
+    name: normalized.name,
+    birthYear: input.birthYear,
+    type: input.type,
+    allergies: normalized.allergiesJson,
+    allergyConfirmations: normalized.allergyConfirmationsJson,
+    crossReactionAllergies: normalized.crossReactionAllergiesJson,
+  });
+  persistActiveProfile(profile);
+  return profile?.id ?? null;
 }
 
 export async function updateProfile(id: number, input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const db = getDb();
-  const existingProfile = db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
+  const existingProfile = getProfileRepository().getById(id, userId);
   if (!BACKEND_AUTH_ENABLED && !existingProfile) return null;
 
   const inputWithPreservedCrossReactions =
@@ -343,27 +322,17 @@ function applyLocalProfileUpdate(
   input: ProfileInput,
   normalized: NormalizedProfilePayload,
 ): Profile | null {
-  const db = getDb();
-  db.runSync(
-    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ? AND userId = ?',
-    [
-      userId,
-      normalized.name,
-      input.birthYear,
-      input.type,
-      normalized.allergiesJson,
-      normalized.allergyConfirmationsJson,
-      normalized.crossReactionAllergiesJson,
-      id,
-      userId,
-    ],
-  );
-  const profile = db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
+  const profile = getProfileRepository().update(id, userId, {
+    userId,
+    name: normalized.name,
+    birthYear: input.birthYear,
+    type: input.type,
+    allergies: normalized.allergiesJson,
+    allergyConfirmations: normalized.allergyConfirmationsJson,
+    crossReactionAllergies: normalized.crossReactionAllergiesJson,
+  });
   const { activeProfileId } = useAppStore.getState();
-  if (activeProfileId === id) persistActiveProfile(profile || null);
+  if (activeProfileId === id) persistActiveProfile(profile);
   return profile;
 }
 
@@ -378,27 +347,7 @@ export async function deleteProfile(id: number) {
     if (!response.ok) throwOnBackendError(response);
   }
 
-  const db = getDb();
-  const ownedProfile = db.getFirstSync<{ id: number }>(
-    'SELECT id FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
-  if (!ownedProfile) return false;
-
-  const diaryEntries = db.getAllSync<{ id: number }>(
-    'SELECT id FROM diary_entries WHERE profileId = ?',
-    [id],
-  );
-  for (const entry of diaryEntries) {
-    db.runSync('DELETE FROM diary_attachments WHERE entryId = ?', [entry.id]);
-  }
-
-  db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM scan_history WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM safe_products WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM profiles WHERE id = ? AND userId = ?', [id, userId]);
+  if (!getProfileRepository().deleteOwned(id, userId)) return false;
 
   const { activeProfileId } = useAppStore.getState();
   if (activeProfileId === id) {
@@ -412,11 +361,7 @@ export async function getProfile(id: number) {
   const userId = getCurrentUserId();
   if (!userId) return null;
 
-  const db = getDb();
-  return db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
+  return getProfileRepository().getById(id, userId);
 }
 
 export function countProfilesByType(type: ProfileType) {
@@ -424,24 +369,19 @@ export function countProfilesByType(type: ProfileType) {
 }
 
 export function migrateLegacyProfilesToUser(userId: number) {
-  const db = getDb();
-  const all = db.getAllSync<Profile>('SELECT * FROM profiles');
-  for (const profile of all) {
+  const profiles = getProfileRepository();
+  for (const profile of profiles.listAll()) {
     const migratedAllergies = migrateProfileAllergiesJson(profile.allergies);
     const confirmations = profile.allergyConfirmations ?? '{}';
     if (!profile.userId || migratedAllergies !== profile.allergies) {
-      db.runSync(
-        'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ? WHERE id = ?',
-        [
-          profile.userId || userId,
-          profile.name,
-          profile.birthYear,
-          profile.type,
-          migratedAllergies,
-          confirmations,
-          profile.id,
-        ],
-      );
+      profiles.updateLegacy(profile.id, {
+        userId: profile.userId || userId,
+        name: profile.name,
+        birthYear: profile.birthYear,
+        type: profile.type,
+        allergies: migratedAllergies,
+        allergyConfirmations: confirmations,
+      });
     }
   }
 }
