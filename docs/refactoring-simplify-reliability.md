@@ -69,7 +69,8 @@ flowchart LR
   W3[Wave3_WebDb]
   W4[Wave4_dedup]
   W5[Wave5_outbox]
-  W1 --> W2 --> W3 --> W4 --> W5
+  W6[Wave6_therapy]
+  W1 --> W2 --> W3 --> W4 --> W5 --> W6
 ```
 
 ### Wave 1 — Transport resilience
@@ -97,7 +98,7 @@ pending alias уходит после успешного POST; unhandled route e
 - `map.tsx`: `useMapLiveData` (`refreshMapLiveData` / `searchMapThisArea`) +
   `MapLayerSwitcher` / `MapPollenStatusCard` / `MapDoctorsSection` / `map-constants`.
 - Экраны — wiring; I/O остаётся в services.
-- ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
+- ASIT / prescribed-therapy: shared course-editor — Wave 6.
 
 ### Wave 3 — Kill WebDb SQL parsing (в `main`, #325)
 
@@ -135,7 +136,7 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 
 **Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
-### Wave 5 — Offline→online reconciliation (этот PR)
+### Wave 5 — Offline→online reconciliation (в `main`, #327)
 
 - Mutation outbox профилей: при `BACKEND_AUTH` + network fail — локальная запись + очередь,
   `flushProfileOutbox` на старте.
@@ -143,6 +144,23 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
   если `encryptBackup` вернул `null` (`encryption_unavailable`).
 - Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
 - Enrichment fallback rates — follow-up (pollen ops уже есть).
+
+### Wave 6 — Unified therapy + prescription OCR (этот PR)
+
+Цель: один OCR/камера/PDF-флоу и общая оболочка шагов `form` → `verify` → `review`
+для АСИТ и базисной терапии. Уникальные поля (аллерген, фаза, клинический диагноз,
+мульти-напоминания) остаются на экранах.
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 6.1 | Чистые хелперы шагов / расписания / OCR-hint | `components/therapy/course-editor.ts`, `prescription-ocr-copy.ts` |
+| 6.2 | `usePrescriptionParser` — камера, PDF, recognize, paste-sheet | `hooks/use-prescription-parser.ts` |
+| 6.3 | `CourseEditorLayout` + `CourseVerifyStep` + `CourseReviewSummary` | `components/therapy/*` |
+| 6.4 | `PrescriptionImportPanel` + `PrescriptionImportModals` | `components/therapy/*` |
+| 6.5 | Экраны только wiring + ASIT/PT-специфика | `asit-course.tsx`, `prescribed-therapy.tsx` |
+
+**Критерий готовности:** тесты `course-editor.test.ts`; `testID` камеры/PDF/OCR/verify/review
+без изменений; offline save курса без API.
 
 ---
 
@@ -179,4 +197,6 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
 | Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
 | Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
-| Wave 5 | ✅ этот PR — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 5 | ✅ в `main` (#327) — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 6 | ✅ этот PR — shared course editor + prescription OCR |
+| Wave 7–8 | 📝 запланированы (DiaryWizard / map + typed repositories) |

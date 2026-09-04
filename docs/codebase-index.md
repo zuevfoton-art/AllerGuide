@@ -108,7 +108,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` + `lib/sync-payload.ts` |
 | **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`, `open-food-facts` (normalize/URL, без HTTP); API `catalog.ts` + `open-food-facts` |
 | **Market** | `(tabs)/market.tsx` | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
-| **Clinical** | `asit-course`, `asthma-action-plan`, `insect-action-plan`, `food-drug-registry`, `prescribed-therapy` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
+| **Clinical** | `asit-course` / `prescribed-therapy` + `use-prescription-parser` + `components/therapy/*` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
 | **Doctor report** | `doctor-report.tsx` | `doctor-report-service` | core `doctor-report*` |
 
@@ -125,13 +125,13 @@ index.js              # Native-вход (Gradle entryFile) → install-runtime �
 entry.js              # Expo CLI / web / EAS вход (package.json main) → install-runtime
 src/install-runtime.ts  # Патчи до старта: CSPRNG + стоимость PBKDF2
 app/                  # Экраны (file-based routing)
-src/components/       # UI-компоненты (brand/, diary/, onboarding/, profile-setup/, scanner/, map/)
+src/components/       # UI-компоненты (brand/, diary/, onboarding/, profile-setup/, scanner/, map/, therapy/)
 src/services/         # Оркестрация (единственная точка для DB/API из UI)
 src/db/               # init, init.native, migrations, web-store, web-collections, web-sql-router, types
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
@@ -159,7 +159,7 @@ src/modules/marketplace/
 | `sos-edit.tsx` | Редактор SOS (вход из `/profile`) |
 | `notifications.tsx` | Напоминания |
 | `doctor-report.tsx` | PDF для врача |
-| `asit-course.tsx` / `prescribed-therapy.tsx` | ASIT / терапия |
+| `asit-course.tsx` / `prescribed-therapy.tsx` | ASIT / терапия (общий course-editor + OCR) |
 | `asthma-action-plan.tsx` / `insect-action-plan.tsx` | Планы действий |
 | `food-drug-registry.tsx` | Пищево-лекарственный реестр |
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
@@ -206,6 +206,7 @@ src/modules/marketplace/
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
 - **Diary:** `DiaryWizard`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
+- **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
 - **Folders:** `brand/`, `onboarding/`, `profile-setup/`
