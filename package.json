@@ -22,6 +22,7 @@
     "yc-stage-enable-places-air-quality": "bash scripts/yc-stage-enable-places-air-quality.sh",
     "yc-stage-enable-scan-intent-search": "bash scripts/yc-stage-enable-scan-intent-search.sh",
     "yc-stage-enable-dish-vision": "bash scripts/yc-stage-enable-dish-vision.sh",
+    "yc-stage-enable-market-feeds": "bash scripts/yc-stage-enable-market-feeds.sh",
     "yc-stage-phase2": "bash scripts/yc-stage-phase2-gate.sh",
     "yc-stage-phase3": "bash scripts/yc-stage-phase3-gate.sh",
     "yc-stage-phase4": "bash scripts/yc-stage-phase4-gate.sh",

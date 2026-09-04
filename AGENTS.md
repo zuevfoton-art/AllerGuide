@@ -70,6 +70,7 @@ Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgr
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + taxonomy + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage API live on Yandex Cloud; see [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
+- `pnpm yc-stage-enable-market-feeds` — Lockbox Yandex YML + OTC pharmacy feed + container remount (`YANDEX_MARKET_FEED_URL` + `MARKET_PHARMACY_FEED_URL` required)
 - `pnpm yc-stage-phase2` — Stage clients must target YC (`api.staging.aclearo.com`); see same doc §Phase 2
 - `pnpm yc-stage-phase3` — No foreign-host deploy artifacts in repo; see same doc §Phase 3
 - `pnpm yc-stage-phase4` — Secrets/data hygiene (Lockbox/GH/EAS policy); see same doc §Phase 4 · [`docs/staging-secrets-inventory.md`](docs/staging-secrets-inventory.md)

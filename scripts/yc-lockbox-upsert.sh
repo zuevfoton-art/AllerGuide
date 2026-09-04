@@ -6,6 +6,7 @@
 #   GOOGLE_POLLEN_API_KEY=... ./scripts/yc-lockbox-upsert.sh --pollen
 #   YANDEX_MAPS_JS_API_KEY=... ./scripts/yc-lockbox-upsert.sh --yandex-maps
 #   GOOGLE_PLACES_API_KEY=... GOOGLE_AIR_QUALITY_API_KEY=... ./scripts/yc-lockbox-upsert.sh --places-air-quality
+#   YANDEX_MARKET_FEED_URL=... MARKET_PHARMACY_FEED_URL=... ./scripts/yc-lockbox-upsert.sh --market-feeds
 #
 # Env:
 #   YC_LOCKBOX_SECRET_ID  (default: staging id from yc-ai-phase0-smoke)
@@ -92,19 +93,39 @@ while [[ $# -gt 0 ]]; do
       )
       shift
       ;;
+    --market-feeds)
+      : "${YANDEX_MARKET_FEED_URL:?Set YANDEX_MARKET_FEED_URL to the Distribution YML HTTPS URL}"
+      : "${MARKET_PHARMACY_FEED_URL:?Set MARKET_PHARMACY_FEED_URL to the OTC pharmacy feed HTTPS URL}"
+      UPDATES+=(
+        "YANDEX_MARKET_FEED_URL=${YANDEX_MARKET_FEED_URL}"
+        "YANDEX_MARKET_CURATOR_SEARCH=${YANDEX_MARKET_CURATOR_SEARCH:-false}"
+        "MARKET_PHARMACY_FEED_ENABLED=${MARKET_PHARMACY_FEED_ENABLED:-true}"
+        "MARKET_PHARMACY_FEED_URL=${MARKET_PHARMACY_FEED_URL}"
+      )
+      if [[ -n "${YANDEX_MARKET_CLID:-}" ]]; then
+        UPDATES+=("YANDEX_MARKET_CLID=${YANDEX_MARKET_CLID}")
+      fi
+      if [[ -n "${YANDEX_MARKET_OAUTH_TOKEN:-}" ]]; then
+        UPDATES+=("YANDEX_MARKET_OAUTH_TOKEN=${YANDEX_MARKET_OAUTH_TOKEN}")
+      fi
+      if [[ -n "${YANDEX_MARKET_ERID:-}" ]]; then
+        UPDATES+=("YANDEX_MARKET_ERID=${YANDEX_MARKET_ERID}")
+      fi
+      shift
+      ;;
     *=*)
       UPDATES+=("$1")
       shift
       ;;
     *)
-      echo "Expected --pollen | --yandex-maps | --places-air-quality | KEY=VALUE, got: $1" >&2
+      echo "Expected --pollen | --yandex-maps | --places-air-quality | --market-feeds | KEY=VALUE, got: $1" >&2
       exit 2
       ;;
   esac
 done
 
 if [[ "${#UPDATES[@]}" -eq 0 ]]; then
-  echo "Usage: $0 --pollen | --yandex-maps | --places-air-quality | KEY=VALUE ..." >&2
+  echo "Usage: $0 --pollen | --yandex-maps | --places-air-quality | --market-feeds | KEY=VALUE ..." >&2
   exit 2
 fi
 
