@@ -84,6 +84,8 @@ eas credentials --platform ios
 
 EAS может автоматически создать Distribution Certificate и Provisioning Profile. Для TestFlight нужен App Store Connect app record с bundle ID `com.aclearo.app`.
 
+Пока этого шага нет, `deploy-staging` **не** вызывает iOS EAS (`credentials.json` — только Android). После certs: repo variable `EAS_IOS_DEVICE=true`.
+
 ### Android
 
 ```bash
