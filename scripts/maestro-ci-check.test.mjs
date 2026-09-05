@@ -239,6 +239,25 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(screen, /inputTestID="scanner-input"/);
   });
 
+  it('opens profile-edit and scrolls to profile-delete (hub has no delete control)', () => {
+    const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
+    assert.match(flow, /id: profile-list-item-0/);
+    assert.match(flow, /id: profile-edit-title/);
+    assert.match(
+      flow,
+      /scrollUntilVisible:[\s\S]*?id: profile-delete[\s\S]*?-\s+tapOn:\s+id: profile-delete/,
+    );
+    assert.ok(
+      flow.indexOf('profile-list-item-0') < flow.indexOf('profile-delete'),
+      'sos-no-profile must open the list row before tapping delete',
+    );
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /testID=\{`profile-list-item-\$\{index\}`\}/);
+    const edit = read('apps/mobile/app/profile-edit.tsx');
+    assert.match(edit, /titleTestID="profile-edit-title"/);
+    assert.match(edit, /testID="profile-delete"/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));
