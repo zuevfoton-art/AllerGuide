@@ -78,6 +78,7 @@ export default function ProfileScreen() {
             return (
               <Pressable
                 key={profile.id}
+                testID={`profile-row-${index}`}
                 style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}
                 onPress={() => openEdit(profile.id)}
                 accessibilityRole="button"

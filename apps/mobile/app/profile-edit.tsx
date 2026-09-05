@@ -199,6 +199,7 @@ export default function ProfileEditScreen() {
         onBack={() => router.back()}
         title={t('profileEdit.title')}
         subtitle={t('profileEdit.subtitle')}
+        titleTestID="profile-edit-title"
       />
 
       {loading ? (

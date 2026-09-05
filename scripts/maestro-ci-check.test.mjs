@@ -217,6 +217,25 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(photo, /id: diary-photo-step/);
   });
 
+  it('opens profile edit before tapping profile-delete', () => {
+    const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
+    assert.match(flow, /id: profile-screen-title/);
+    assert.match(flow, /id: profile-row-0/);
+    assert.match(flow, /id: profile-edit-title/);
+    assert.match(flow, /scrollUntilVisible:[\s\S]*?id: profile-delete/);
+    assert.ok(
+      flow.indexOf('profile-row-0') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must open a profile row before profile-delete',
+    );
+
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /testID=\{`profile-row-\$\{index\}`\}/);
+
+    const edit = read('apps/mobile/app/profile-edit.tsx');
+    assert.match(edit, /titleTestID="profile-edit-title"/);
+    assert.match(edit, /testID="profile-delete"/);
+  });
+
   it('opens scanner manual input before typing молоко', () => {
     const flow = read('apps/mobile/.maestro/flows/scanner-smoke.yaml');
     assert.match(flow, /id: scanner-toggle-manual/);

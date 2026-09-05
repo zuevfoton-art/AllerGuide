@@ -9,6 +9,17 @@ appId: com.aclearo.app
       id: profile-screen-title
     timeout: 10000
 - tapOn:
+    id: profile-row-0
+- extendedWaitUntil:
+    visible:
+      id: profile-edit-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: profile-delete
+    direction: DOWN
+    timeout: 20000
+- tapOn:
     id: profile-delete
 - tapOn:
     text: Удалить
