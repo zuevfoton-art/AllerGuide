@@ -1,4 +1,5 @@
-# SOS emergency bar remains available after the last profile is removed
+# SOS emergency bar remains available after the last profile is removed.
+# Delete lives on /profile-edit, below the fold of the long edit form — not on the hub.
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
@@ -8,6 +9,17 @@ appId: com.aclearo.app
     visible:
       id: profile-screen-title
     timeout: 10000
+- tapOn:
+    id: profile-list-item-0
+- extendedWaitUntil:
+    visible:
+      id: profile-edit-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: profile-delete
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: profile-delete
 - tapOn:
