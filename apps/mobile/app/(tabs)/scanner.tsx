@@ -239,15 +239,17 @@ export default function ScannerScreen() {
         />
       ) : null}
 
-      <ScanDiaryEntryModal
-        visible={scan.diaryDraft !== null}
-        prefill={scan.diaryDraft?.prefill}
-        initialStepId={scan.diaryDraft?.initialStepId}
-        profileId={scan.activeProfileId}
-        profileAllergiesJson={scan.activeProfile?.allergies ?? '[]'}
-        onClose={scan.closeDiaryEntry}
-        onComplete={(entries) => void scan.saveDiaryEntry(entries)}
-      />
+      {scan.diaryDraft ? (
+        <ScanDiaryEntryModal
+          visible
+          prefill={scan.diaryDraft.prefill}
+          initialStepId={scan.diaryDraft.initialStepId}
+          profileId={scan.activeProfileId}
+          profileAllergiesJson={scan.activeProfile?.allergies ?? '[]'}
+          onClose={scan.closeDiaryEntry}
+          onComplete={(entries) => void scan.saveDiaryEntry(entries)}
+        />
+      ) : null}
 
       <ScannerLists
         listTab={scan.listTab}

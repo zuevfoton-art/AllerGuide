@@ -41,6 +41,9 @@ import {
 } from '@/src/services/medicine-suggest-service';
 import { useTranslation } from '@/src/store/locale-store';
 
+/** Stable identity: an inline default would re-run the suggestion effects on every render. */
+const NO_MEDICINE_CARDS: MedicineCard[] = [];
+
 export interface DiaryWizardResult {
   type: string;
   details: string;
@@ -70,7 +73,7 @@ export function useDiaryWizardController({
   drugIntolerances,
   ageYears = null,
   profileId = null,
-  localMedicineCards = [],
+  localMedicineCards = NO_MEDICINE_CARDS,
   planPersonalBestPef,
   profileAllergiesJson = '[]',
   autoMetadata,
