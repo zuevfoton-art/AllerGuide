@@ -531,8 +531,7 @@ const de: LocaleMessages = {
     pollenLiveTitle: 'Pollen in Ihrer Nähe',
     pollenMapAttribution: 'Karte: Yandex Maps · Werte: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Karte und UPI-Ebene: Google Maps · Werte: Open-Meteo / CAMS',
-    pollenYandexInteractiveAttribution:
-      'Karte: Yandex Maps (interaktiv) · Pollenprognose: Google Pollen / Open-Meteo',
+    pollenYandexInteractiveAttribution: 'Karte: Yandex Maps (interaktiv)',
     pollenHeatmapTreeHint:
       'Untergrund: Baumpollen (Google). Werte für Birke / Erle / Olive sind separat',
     pollenTreeSpeciesLevelsHint:
@@ -591,7 +590,6 @@ const de: LocaleMessages = {
     forecastTitle: 'Mehrtägige Prognose',
     forecastEmpty: 'Prognose noch nicht verfügbar',
     upiTitle: 'Universeller Pollenindex',
-    upiSourceGoogle: 'Index: Google Pollen',
     upiSourceOpenMeteo: 'Index geschätzt aus Open-Meteo / CAMS',
     plantTitle: 'Über dieses Allergen',
     plantEmpty: 'Keine Beschreibung für das gewählte Allergen',
@@ -653,7 +651,6 @@ const de: LocaleMessages = {
     yandexOverviewBanner: 'Übersichtskarte — interaktiv in Yandex öffnen',
     listFirstHint: 'Orte stehen unten; diese Karte ist nicht zoombar.',
     pollenSourceCalendar: 'Saisonkalender',
-    pollenSourceGoogle: 'Google Pollen',
     allergenPickerTitle: 'Pollenallergen',
     allergenPickerBack: 'Zurück',
     allergenPickerButton: '{{taxon}}',

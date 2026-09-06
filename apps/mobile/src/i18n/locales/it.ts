@@ -530,8 +530,7 @@ const it: LocaleMessages = {
     pollenLiveTitle: 'Polline vicino a te',
     pollenMapAttribution: 'Mappa: Yandex Maps · livelli: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Mappa e livello UPI: Google Maps · livelli: Open-Meteo / CAMS',
-    pollenYandexInteractiveAttribution:
-      'Mappa: Yandex Maps (interattiva) · previsione polline: Google Pollen / Open-Meteo',
+    pollenYandexInteractiveAttribution: 'Mappa: Yandex Maps (interattiva)',
     pollenHeatmapTreeHint:
       'Sfondo: polline degli alberi (Google). I livelli di betulla / ontano / olivo sono separati',
     pollenTreeSpeciesLevelsHint:
@@ -590,7 +589,6 @@ const it: LocaleMessages = {
     forecastTitle: 'Previsione plurigiornaliera',
     forecastEmpty: 'Previsione non ancora disponibile',
     upiTitle: 'Indice universale del polline',
-    upiSourceGoogle: 'Indice: Google Pollen',
     upiSourceOpenMeteo: 'Indice stimato da Open-Meteo / CAMS',
     plantTitle: 'Su questo allergene',
     plantEmpty: 'Nessuna descrizione per l’allergene selezionato',
@@ -652,7 +650,6 @@ const it: LocaleMessages = {
     yandexOverviewBanner: 'Mappa di panoramica — apri la versione interattiva in Yandex',
     listFirstHint: 'I luoghi sono elencati sotto; questa mappa non è zoomabile.',
     pollenSourceCalendar: 'calendario stagionale',
-    pollenSourceGoogle: 'Google Pollen',
     allergenPickerTitle: 'Allergene del polline',
     allergenPickerBack: 'Indietro',
     allergenPickerButton: '{{taxon}}',

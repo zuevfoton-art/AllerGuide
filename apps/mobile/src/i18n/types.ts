@@ -593,7 +593,6 @@ export type LocaleMessages = {
     forecastTitle: string;
     forecastEmpty: string;
     upiTitle: string;
-    upiSourceGoogle: string;
     upiSourceOpenMeteo: string;
     plantTitle: string;
     plantEmpty: string;
@@ -654,7 +653,6 @@ export type LocaleMessages = {
     yandexOverviewBanner: string;
     listFirstHint: string;
     pollenSourceCalendar: string;
-    pollenSourceGoogle: string;
     allergenPickerTitle: string;
     allergenPickerBack: string;
     allergenPickerButton: string;

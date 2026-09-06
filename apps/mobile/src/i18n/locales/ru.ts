@@ -531,8 +531,7 @@ const ru: LocaleMessages = {
     pollenLiveTitle: 'Пыльца рядом с вами',
     pollenMapAttribution: 'Карта: Яндекс Карты · уровни: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Карта и слой UPI: Google Maps · уровни: Open-Meteo / CAMS',
-    pollenYandexInteractiveAttribution:
-      'Карта: Яндекс Карты (интерактив) · прогноз пыльцы: Google Pollen / Open-Meteo',
+    pollenYandexInteractiveAttribution: 'Карта: Яндекс Карты (интерактив)',
     pollenHeatmapTreeHint:
       'Подложка: пыльца деревьев (Google). Уровень берёзы/ольхи/оливы — отдельно',
     pollenTreeSpeciesLevelsHint:
@@ -591,7 +590,6 @@ const ru: LocaleMessages = {
     forecastTitle: 'Прогноз на дни',
     forecastEmpty: 'Прогноз пока недоступен',
     upiTitle: 'Универсальный индекс пыльцы',
-    upiSourceGoogle: 'Индекс: Google Pollen',
     upiSourceOpenMeteo: 'Индекс оценён по Open-Meteo / CAMS',
     plantTitle: 'Об аллергене',
     plantEmpty: 'Нет описания для выбранного аллергена',
@@ -653,7 +651,6 @@ const ru: LocaleMessages = {
     yandexOverviewBanner: 'Карта обзорная — откройте интерактивную в Яндексе',
     listFirstHint: 'Список мест ниже; на этой карте нельзя масштабировать.',
     pollenSourceCalendar: 'календарь сезона',
-    pollenSourceGoogle: 'Google Pollen',
     allergenPickerTitle: 'Аллерген пыльцы',
     allergenPickerBack: 'Назад',
     allergenPickerButton: '{{taxon}}',

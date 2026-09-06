@@ -56,6 +56,7 @@ import { resolveMapBasemap, resolveRuntimeMapBasemap } from '@/src/services/map-
 import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
 import { useGoogleBasemapGuard } from '@/src/hooks/use-google-basemap-guard';
 import { resolveHourlyUpi } from '@/src/services/pollen-hourly-service';
+import { resolveMapPollenSourceCaption } from '@/src/services/pollen-map-source-label';
 import { getApiBaseUrl } from '@/src/services/api-client';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
@@ -322,15 +323,15 @@ export default function MapScreen() {
     return t('map.statusToday', { level: levelLabel, taxon: taxonLabel });
   }, [levelLabel, loading, pollenSnapshot, selectedForecastDay, t, taxonLabel]);
 
-  const sourceLabel = useMemo(() => {
-    if (!pollenSnapshot) return '';
-    if (pollenSnapshot.source === 'calendar') return t('map.pollenSourceCalendar');
-    if (pollenSnapshot.source === 'cache') return t('map.pollenSourceCache');
-    if (pollenSnapshot.source === 'google' || selectedUpi?.source === 'google') {
-      return t('map.pollenSourceGoogle');
-    }
-    return t('map.pollenSourceOpenMeteo');
-  }, [pollenSnapshot, selectedUpi?.source, t]);
+  const sourceLabel = useMemo(
+    () =>
+      resolveMapPollenSourceCaption(pollenSnapshot?.source, selectedUpi?.source, {
+        calendar: t('map.pollenSourceCalendar'),
+        cache: t('map.pollenSourceCache'),
+        openMeteo: t('map.pollenSourceOpenMeteo'),
+      }),
+    [pollenSnapshot?.source, selectedUpi?.source, t],
+  );
 
   const plumeGroupHint = useMemo(() => {
     const mapType = pollenTaxonToGoogleMapType(selectedTaxonId);

@@ -530,8 +530,7 @@ const es: LocaleMessages = {
     pollenLiveTitle: 'Polen cerca de ti',
     pollenMapAttribution: 'Mapa: Yandex Maps · niveles: Open-Meteo / CAMS',
     pollenGoogleMapAttribution: 'Mapa y capa UPI: Google Maps · niveles: Open-Meteo / CAMS',
-    pollenYandexInteractiveAttribution:
-      'Mapa: Yandex Maps (interactivo) · previsión de polen: Google Pollen / Open-Meteo',
+    pollenYandexInteractiveAttribution: 'Mapa: Yandex Maps (interactivo)',
     pollenHeatmapTreeHint:
       'Capa: polen de árboles (Google). Los niveles de abedul / aliso / olivo van aparte',
     pollenTreeSpeciesLevelsHint:
@@ -590,7 +589,6 @@ const es: LocaleMessages = {
     forecastTitle: 'Pronóstico de varios días',
     forecastEmpty: 'Pronóstico aún no disponible',
     upiTitle: 'Índice universal de polen',
-    upiSourceGoogle: 'Índice: Google Pollen',
     upiSourceOpenMeteo: 'Índice estimado con Open-Meteo / CAMS',
     plantTitle: 'Sobre este alérgeno',
     plantEmpty: 'No hay descripción para el alérgeno seleccionado',
@@ -652,7 +650,6 @@ const es: LocaleMessages = {
     yandexOverviewBanner: 'Mapa de vista general: ábralo interactivo en Yandex',
     listFirstHint: 'Los lugares están abajo; este mapa no se puede ampliar.',
     pollenSourceCalendar: 'calendario de temporada',
-    pollenSourceGoogle: 'Google Pollen',
     allergenPickerTitle: 'Alérgeno de polen',
     allergenPickerBack: 'Atrás',
     allergenPickerButton: '{{taxon}}',
