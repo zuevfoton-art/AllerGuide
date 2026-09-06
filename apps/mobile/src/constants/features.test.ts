@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { isDefaultOnPublicFlag } from './features';
+import { isDefaultOnPublicFlag, MARKET_ENABLED } from './features';
+
+describe('MARKET_ENABLED', () => {
+  it('is off unless EXPO_PUBLIC_MARKET is exactly true', () => {
+    expect(MARKET_ENABLED).toBe(false);
+  });
+});
 
 describe('isDefaultOnPublicFlag', () => {
   it('is on when the env value is unset or empty', () => {
