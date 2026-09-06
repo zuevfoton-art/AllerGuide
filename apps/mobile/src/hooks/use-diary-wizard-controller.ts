@@ -105,6 +105,16 @@ export function useDiaryWizardController({
   const [error, setError] = useState('');
   const [offEnriching, setOffEnriching] = useState(false);
   const foodComponentsTouchedRef = useRef(false);
+  /**
+   * A dish prefilled from a scan / barcode / photo already carries the composition
+   * that was actually recognized. Re-recognizing it by name would replace the
+   * scanned label with a search guess, so it is only done once the user edits the name.
+   */
+  const prefilledDishRef = useRef(
+    initialAnswersBySection?.['Питание']?.foodComponentsDef
+      ? (initialAnswersBySection['Питание'].food ?? '').trim()
+      : '',
+  );
 
   const section = sections[sectionIndex];
   const screens = screensBySection[sectionIndex] ?? [[]];
@@ -154,7 +164,7 @@ export function useDiaryWizardController({
   useEffect(() => {
     if (section.type !== 'Питание') return;
     const food = nutritionFood;
-    if (food.length < 2) {
+    if (food.length < 2 || (prefilledDishRef.current && food === prefilledDishRef.current)) {
       setOffEnriching(false);
       return;
     }
