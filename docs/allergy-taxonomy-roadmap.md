@@ -6,7 +6,7 @@
 2. **Расширение профиля** — срок появления аллергии + сложные сценарии с сопутствующими заболеваниями (EAACI / РААКИ)  
 3. **Первый инкремент реализации** — маппинг id, SYMPTOM_CATALOG, тип «крапивница» ([PR #124](https://github.com/zuevfoton-art/AllerGuide/pull/124))
 
-**Связано:** [`allergy-taxonomy-issues.md`](./allergy-taxonomy-issues.md) · [`clinical-features-raaci.md`](./clinical-features-raaci.md) · [`clinical-accuracy-roadmap.md`](./clinical-accuracy-roadmap.md) · [`condition-allergen-quick-pick-plan.md`](./condition-allergen-quick-pick-plan.md) · [`architecture.md`](./architecture.md)
+**Связано:** [`allergy-taxonomy-issues.md`](./allergy-taxonomy-issues.md) · [`clinical-features-raaci.md`](./clinical-features-raaci.md) · [`clinical-accuracy-roadmap.md`](./clinical-accuracy-roadmap.md) · [`condition-allergen-quick-pick-plan.md`](./condition-allergen-quick-pick-plan.md) · [`calendar-pollen-allergen-rows-plan.md`](./calendar-pollen-allergen-rows-plan.md) · [`architecture.md`](./architecture.md)
 
 ---
 
@@ -49,7 +49,7 @@
 | Область | Пробел | Приоритет |
 |---------|--------|-----------|
 | Аллергены | Лекарства: 2 id; насекомые: 1 агрегат; животные: только кошка/собака | P1 |
-| Поллиноз | 16 option vs 6 pollen allergen rows в быстром выборе (`condition-allergen-recommendations`). Календарные таксоны без строки каталога (лещина, дуб, клён, ясень, ива, тополь, лебеда) по-прежнему не в чипах — follow-up к [`condition-allergen-quick-pick-plan.md`](./condition-allergen-quick-pick-plan.md) | P2 |
+| Поллиноз | 16 option vs 6 pollen allergen rows в быстром выборе (`condition-allergen-recommendations`). Календарные таксоны без строки каталога (лещина, дуб, клён, ясень, ива, тополь, лебеда) по-прежнему не в чипах — план реализации: [`calendar-pollen-allergen-rows-plan.md`](./calendar-pollen-allergen-rows-plan.md) | P2 |
 | Реакции | Нет модели delayed/T-cell, FPIES, контактный дерматит | P3 |
 | Симптомы | reactionType в еде/укусах не в SNOMED pipeline | P1 |
 | ICD/SNOMED | 24 аллергена без crosswalk | P2 |

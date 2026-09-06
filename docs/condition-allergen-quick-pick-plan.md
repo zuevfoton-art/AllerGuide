@@ -90,7 +90,7 @@ export function getRecommendedAllergenIds(conditionIds: AllergyConditionId[]): P
 
 Все id проверены по `packages/core/src/allergen-database.ts` — инвариант закрепляется тестом.
 
-**Пыльца без строки каталога.** Лещина, дуб, клён, ясень, ива, тополь, лебеда есть в `CONDITION_OPTION_POLLEN_TAXON_MAP` / `CALENDAR_ONLY_POLLEN_OPTION_IDS`, но строки аллергена у них нет — в рекомендации они не попадают. Заводить им строки — отдельная задача (сид `catalog.allergens`, cross-reactions, локали): вынести в [`allergy-taxonomy-roadmap.md`](./allergy-taxonomy-roadmap.md) §2.2, здесь не смешивать. Пять злаковых опций сходятся в один `grass-pollen` — это ожидаемо.
+**Пыльца без строки каталога.** Лещина, дуб, клён, ясень, ива, тополь, лебеда есть в `CONDITION_OPTION_POLLEN_TAXON_MAP` / `CALENDAR_ONLY_POLLEN_OPTION_IDS`, но строки аллергена у них нет — в рекомендации они не попадают. Заводить им строки — отдельная задача (сид `catalog.allergens`, cross-reactions, клинические кодировки): план реализации в [`calendar-pollen-allergen-rows-plan.md`](./calendar-pollen-allergen-rows-plan.md), здесь не смешивать. Пять злаковых опций сходятся в один `grass-pollen` — это ожидаемо.
 
 ### 3.3. Экран (спецификация)
 
@@ -201,4 +201,4 @@ export function getRecommendedAllergenIds(conditionIds: AllergyConditionId[]): P
 | [`codebase-index.md`](./codebase-index.md) | Новый модуль ядра в списке `Profiles` |
 | [`maestro.md`](./maestro.md) | Новый шаг флоу + строка в таблице симптомов |
 | [`qa-test-cases.md`](./qa-test-cases.md) | TC на S1–S6 (рядом с TC-045 / TC-046) |
-| [`allergy-taxonomy-roadmap.md`](./allergy-taxonomy-roadmap.md) | Follow-up: строки каталога для пыльцы «только календарь» |
+| [`allergy-taxonomy-roadmap.md`](./allergy-taxonomy-roadmap.md) | Follow-up: строки каталога для пыльцы «только календарь» → [`calendar-pollen-allergen-rows-plan.md`](./calendar-pollen-allergen-rows-plan.md) |
