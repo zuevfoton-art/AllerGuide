@@ -44,6 +44,8 @@ vi.mock('@/src/services/secure-settings-service', () => ({
 }));
 
 const backendFetchMe = vi.fn();
+const backendRegister = vi.fn();
+const backendDeleteAccount = vi.fn();
 const getAuthToken = vi.fn();
 const clearAuthToken = vi.fn();
 const syncProfilesFromBackend = vi.fn().mockResolvedValue({ ok: true });
@@ -78,9 +80,9 @@ vi.mock('@/src/services/backend-api', () => ({
     settings.delete('authUserJson');
   },
   setAuthToken: vi.fn(),
-  backendRegister: vi.fn(),
+  backendRegister: (...args: unknown[]) => backendRegister(...args),
   backendLogin: vi.fn(),
-  backendDeleteAccount: vi.fn(),
+  backendDeleteAccount: (...args: unknown[]) => backendDeleteAccount(...args),
   syncProfilesFromBackend: (...args: unknown[]) => syncProfilesFromBackend(...args),
 }));
 
@@ -160,5 +162,59 @@ describe('restoreAuthSession', () => {
     await restoreAuthSession();
 
     expect(isAuthenticated()).toBe(false);
+  });
+});
+
+describe('first-run hint eligibility', () => {
+  beforeEach(() => {
+    settings.clear();
+    secureStore.clear();
+    backendRegister.mockReset();
+    backendDeleteAccount.mockReset();
+    getAuthToken.mockReset();
+    syncProfilesFromBackend.mockClear();
+  });
+
+  afterEach(() => {
+    vi.resetModules();
+  });
+
+  it('marks the new user eligible after backend register', async () => {
+    backendRegister.mockResolvedValue({
+      ok: true,
+      data: {
+        user: { id: 15, login: 'new@user.dev', loginType: 'email' },
+        token: 'jwt',
+      },
+    });
+
+    const { registerUser } = await import('./auth-service');
+    const result = await registerUser({
+      loginType: 'email',
+      login: 'new@user.dev',
+      password: 'Secret12!',
+      confirmPassword: 'Secret12!',
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      user: { id: 15, login: 'new@user.dev', loginType: 'email' },
+    });
+    expect(settings.get('hintsEligible:15')).toBe('true');
+  });
+
+  it('clears hint keys on account delete', async () => {
+    settings.set('authUserId', '15');
+    settings.set('hintsEligible:15', 'true');
+    settings.set('hintsSeenTours:15', 'home');
+    getAuthToken.mockResolvedValue('jwt');
+    backendDeleteAccount.mockResolvedValue({ ok: true });
+
+    const { deleteAccount } = await import('./auth-service');
+    const result = await deleteAccount();
+
+    expect(result).toEqual({ ok: true });
+    expect(settings.get('hintsEligible:15')).toBeFalsy();
+    expect(settings.get('hintsSeenTours:15')).toBeFalsy();
   });
 });

@@ -1,13 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  AccessibilityInfo,
-  Animated,
-  StyleSheet,
-  View,
-  type DimensionValue,
-  type ViewStyle,
-} from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View, type DimensionValue, type ViewStyle } from 'react-native';
 import { radii } from '@/src/constants/layout';
+import { useReduceMotion } from '@/src/hooks/use-reduce-motion';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -18,24 +12,6 @@ type SkeletonProps = {
   radius?: number;
   style?: ViewStyle;
 };
-
-function useReduceMotion() {
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (mounted) setReduceMotion(enabled);
-    });
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
-    return () => {
-      mounted = false;
-      subscription.remove();
-    };
-  }, []);
-
-  return reduceMotion;
-}
 
 function useSheenOpacity(reduceMotion: boolean) {
   const opacity = useRef(new Animated.Value(0.35)).current;

@@ -71,6 +71,10 @@ const it: LocaleMessages = {
       phoneInvalid: 'Inserisci un numero valido.',
       passwordRequired: 'Inserisci la password.',
       passwordMin: 'La password deve avere almeno 8 caratteri.',
+      passwordComplexity:
+        'La password deve includere almeno 3 tipi di caratteri su 4: minuscole, maiuscole, numeri e simboli.',
+      passwordCommon: 'Questa password è troppo comune — scegline un’altra.',
+      passwordLikeLogin: 'La password non deve coincidere con il login.',
       passwordMismatch: 'Le password non coincidono.',
       wrongCredentials: 'Login o password errati.',
       emailTaken: 'Esiste già un account con questa email.',
@@ -98,6 +102,21 @@ const it: LocaleMessages = {
       successTitle: 'Password modificata',
       successMessage: 'Accedi con la tua nuova password.',
       invalidToken: 'Il link non è valido o è scaduto. Richiedine uno nuovo.',
+    },
+    passwordStrength: {
+      label: 'Affidabilità della password',
+      weak: 'Debole',
+      fair: 'Accettabile',
+      good: 'Buona',
+      strong: 'Affidabile',
+      minLength: 'Minimo 8 caratteri',
+      lowercase: 'minuscole',
+      uppercase: 'maiuscole',
+      digit: 'numeri',
+      symbol: 'simboli',
+      classesHint: 'Usa almeno 3 tipi di caratteri su 4',
+      common: 'Questa password è troppo comune — scegline un’altra.',
+      likeLogin: 'La password non deve coincidere con il login.',
     },
   },
   profiles: {
@@ -428,6 +447,9 @@ const it: LocaleMessages = {
     safeList: 'Prodotti sicuri',
     saveToSafe: '✓ Salva come sicuro',
     savedToSafe: '✓ Salvato',
+    saveToDiary: 'Salva nel diario',
+    savedToDiary: '✓ Aggiunto al diario',
+    savedToDiaryHint: "La voce è nel diario: lì puoi completarla o modificarla.",
     safeListEmpty: 'Nessun prodotto sicuro ancora',
     removeSafe: 'Rimuovi',
     removeSafeTitle: 'Rimuovere dalla lista sicura?',
@@ -866,6 +888,88 @@ const it: LocaleMessages = {
       },
       map: { title: 'Map & environment', desc: 'Places, pollen calendar and clinics.' },
       sos: { title: 'Emergency SOS', desc: 'Allergy passport and emergency contacts.' },
+    },
+  },
+  hints: {
+    step: 'Passo {{current}} di {{total}}',
+    next: 'Avanti',
+    done: 'Ho capito',
+    skip: 'Salta i suggerimenti',
+    tours: {
+      home: {
+        profile: {
+          title: 'Il suo profilo',
+          body: 'Qui cambia profilo e apre le impostazioni.',
+        },
+        wellness: {
+          title: 'Come si sente oggi',
+          body: 'L’indice unisce polline, aria e diario. Tocchi per i dettagli.',
+        },
+        insights: {
+          title: 'Cosa fare oggi',
+          body: 'Suggerimenti brevi in base al profilo e al diario.',
+        },
+        scanner: {
+          title: 'Scanner',
+          body: 'Controlli etichette e menu prima di mangiare.',
+        },
+        sos: {
+          title: 'SOS',
+          body: 'Passaporto allergie e chiamata di emergenza, sempre a portata.',
+        },
+      },
+      diary: {
+        newEntry: {
+          title: 'Nuova voce',
+          body: 'Annoti sintomi, pasti e farmaci così emergono le regolarità.',
+        },
+        course: {
+          title: 'Corsi di terapia',
+          body: 'Qui imposta la terapia di mantenimento e i corsi.',
+        },
+        report: {
+          title: 'Referto per il medico',
+          body: 'Raccolga le note in un file da portare in visita.',
+        },
+      },
+      scanner: {
+        photo: {
+          title: 'Foto della composizione',
+          body: 'Fotografi un’etichetta o un menu: l’app trova gli allergeni.',
+        },
+        barcode: {
+          title: 'Codice a barre',
+          body: 'Punti la fotocamera sul codice: più veloce del testo piccolo.',
+        },
+        manual: {
+          title: 'Inserire a mano',
+          body: 'Se la foto è sfocata, scriva la composizione.',
+        },
+      },
+      map: {
+        status: {
+          title: 'Polline vicino',
+          body: 'Livello attuale della pianta scelta nella sua zona.',
+        },
+        layers: {
+          title: 'Livelli della mappa',
+          body: 'Passi dal polline ai luoghi e scelga una pianta.',
+        },
+      },
+      sos: {
+        call: {
+          title: 'Chiamata di emergenza',
+          body: 'Un tocco chiama i soccorsi o un contatto vicino.',
+        },
+        passport: {
+          title: 'Passaporto allergie',
+          body: 'Nome, allergeni e dati utili per chi le sta vicino.',
+        },
+        contacts: {
+          title: 'Contatti di emergenza',
+          body: 'Aggiunga persone da chiamare da questa schermata.',
+        },
+      },
     },
   },
   profileSetup: {

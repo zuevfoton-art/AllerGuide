@@ -17,6 +17,14 @@ export type DiaryAutoMetadata = Partial<
   Record<'pollenContext' | 'recentScan' | 'todayMeds' | 'scanRef', string>
 >;
 
+/** Section without auto/duplicate steps: what a single-section wizard shows. */
+export function hideDiaryAutoSteps(section: DiarySection): DiarySection {
+  return {
+    ...section,
+    steps: section.steps.filter((step) => !DIARY_AUTO_STEP_IDS.has(step.id)),
+  };
+}
+
 export function attachDiaryAutoMetadata(
   answers: Record<string, string>,
   metadata: DiaryAutoMetadata,

@@ -128,6 +128,13 @@ export const AIR_QUALITY_GOOGLE_ENABLED = isDefaultOnPublicFlag(
 );
 
 /**
+ * Show the Market tab and allow `/market`. Off by default so the catalog
+ * screen stays in the repo without appearing in the tab bar or deep links.
+ * Enable with `EXPO_PUBLIC_MARKET=true`.
+ */
+export const MARKET_ENABLED = process.env.EXPO_PUBLIC_MARKET === 'true';
+
+/**
  * Fetch the live Market catalog from GET /api/market/catalog when an API URL
  * is configured. Offline last-good snapshot + bundled seed remain the fallback.
  * Explicit `false` / `off` keeps the device on the bundled seed only.

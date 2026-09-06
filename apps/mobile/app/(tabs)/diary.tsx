@@ -2,7 +2,6 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  DIARY_AUTO_STEP_IDS,
   buildCourseSetupOptions,
   buildDiaryEntryPickerOptions,
   formatDiaryDate,
@@ -12,6 +11,7 @@ import {
   getDiarySection,
   getAsthmaPlanPersonalBest,
   getProfileAgeYears,
+  hideDiaryAutoSteps,
   isDiaryHistoryVisible,
   parseAllergies,
   type ClinicalScaleId,
@@ -48,6 +48,8 @@ import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
@@ -110,18 +112,12 @@ type EditorState =
     }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
-function hideAutoSteps(section: DiarySection): DiarySection {
-  return {
-    ...section,
-    steps: section.steps.filter((step) => !DIARY_AUTO_STEP_IDS.has(step.id)),
-  };
-}
-
 export default function DiaryScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
+  useHintTour('diary');
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
@@ -449,7 +445,7 @@ export default function DiaryScreen() {
     if (!baseSection) return null;
     const rawSection =
       editor.mode === 'section' && editor.simplifiedSection ? editor.simplifiedSection : baseSection;
-    const section = hideAutoSteps(rawSection);
+    const section = hideDiaryAutoSteps(rawSection);
 
     const initialAnswers =
       editor.mode === 'edit'
@@ -503,32 +499,39 @@ export default function DiaryScreen() {
         </View>
       </View>
 
-      <Button
-        testID="diary-new-entry"
-        label={t('diary.newEntry')}
-        variant="primary"
-        block
-        onPress={() => setEntryPickerOpen(true)}
-      />
+      <HintAnchor id="diary.newEntry">
+        <Button
+          testID="diary-new-entry"
+          label={t('diary.newEntry')}
+          variant="primary"
+          block
+          onPress={() => setEntryPickerOpen(true)}
+        />
+      </HintAnchor>
       <View style={styles.actionRow}>
         <View style={styles.actionHalf}>
-          <Button
-            testID="diary-setup-course"
-            label={t('diary.courseShort')}
-            variant="secondary"
-            block
-            icon="medical"
-            onPress={() => setCoursePickerOpen(true)}
-          />
+          <HintAnchor id="diary.course">
+            <Button
+              testID="diary-setup-course"
+              label={t('diary.courseShort')}
+              variant="secondary"
+              block
+              icon="medical"
+              onPress={() => setCoursePickerOpen(true)}
+            />
+          </HintAnchor>
         </View>
         <View style={styles.actionHalf}>
-          <Button
-            label={t('diary.reportShort')}
-            variant="secondary"
-            block
-            icon="document"
-            onPress={() => router.push('/doctor-report' as any)}
-          />
+          <HintAnchor id="diary.report">
+            <Button
+              testID="diary-report"
+              label={t('diary.reportShort')}
+              variant="secondary"
+              block
+              icon="document"
+              onPress={() => router.push('/doctor-report' as any)}
+            />
+          </HintAnchor>
         </View>
       </View>
 

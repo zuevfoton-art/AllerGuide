@@ -29,7 +29,7 @@ export function useMedicineSuggestions(
 
   useEffect(() => {
     if (!enabled || query.trim().length < MEDICINE_SUGGESTION_MIN_QUERY) {
-      setSuggestions([]);
+      setSuggestions(EMPTY_CARDS);
       setSearching(false);
       return;
     }

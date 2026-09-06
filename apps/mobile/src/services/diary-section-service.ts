@@ -88,6 +88,8 @@ export async function buildDiarySectionEditorState(input: {
     productBarcode?: string;
     productName?: string;
   };
+  /** Scan the entry is created from; overrides the «last 24 h» history lookup. */
+  scanRef?: FoodDrugScanRef | null;
 }): Promise<DiarySectionEditorStateWithSection> {
   const { sectionType, profileId, profileAllergiesJson, locale } = input;
 
@@ -118,7 +120,7 @@ export async function buildDiarySectionEditorState(input: {
   if (sectionType === 'Питание' && profileId) {
     const allergies = parseAllergies(profileAllergiesJson);
     const registry = getFoodDrugRegistry(profileId);
-    const scanRef = findRecentFoodScanForProfile(profileId);
+    const scanRef = input.scanRef ?? findRecentFoodScanForProfile(profileId);
     let prefill = buildFoodPrefill(allergies, registry, scanRef);
     if (input.recognizedDish?.food.trim()) {
       prefill = applyDishBreakdownToAnswers(

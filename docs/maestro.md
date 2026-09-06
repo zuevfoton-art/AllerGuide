@@ -29,6 +29,8 @@ apps/mobile/.maestro/
     staging-credentials.js
   flows/
     _offline-bootstrap.yaml
+    _offline-bootstrap-until-home.yaml
+    _dismiss-hints.yaml            # wait hint-skip → skip all first-run tours
     _dismiss-ime.yaml              # tap auth-hero-title (не hideKeyboard/BACK)
     _dismiss-profile-ime.yaml      # tap profile-screen-title (не hideKeyboard/BACK)
     _tap-profile-save-number.yaml  # свернуть IME → scroll → «Сохранить номер»
@@ -38,7 +40,8 @@ apps/mobile/.maestro/
     profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы + «Показать ещё» (не в smoke-all)
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
     diary-photo-smoke.yaml         # §7.3 — skin photo step UI
-    smoke-all.yaml                 # P2.1a — все offline
+    market-smoke.yaml              # только при EXPO_PUBLIC_MARKET=true (не в smoke-all)
+    smoke-all.yaml                 # P2.1a — все offline (без Маркета)
     _staging-bootstrap.yaml
     staging-auth-smoke.yaml        # P2.1b — logout → login
     staging-backup-smoke.yaml      # P2.1b — upload + recovery key

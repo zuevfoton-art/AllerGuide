@@ -2,6 +2,8 @@ import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
@@ -43,6 +45,7 @@ export default function SosScreen() {
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
+  useHintTour('sos');
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
@@ -145,6 +148,7 @@ export default function SosScreen() {
       onRefresh={() => handleRefresh()}
       refreshing={refreshing}
       pinnedTop={
+        <HintAnchor id="sos.call">
         <SosEmergencyBar
           emergencyLabel={t('sos.call', { number: emergencyBar.emergencyNumber })}
           contactName={emergencyBar.firstContact?.name}
@@ -168,6 +172,7 @@ export default function SosScreen() {
             contacts.length > 0 ? () => router.push('/sos-edit' as any) : undefined
           }
         />
+        </HintAnchor>
       }>
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
@@ -183,6 +188,7 @@ export default function SosScreen() {
 
       {profile ? (
         <>
+          <HintAnchor id="sos.passport">
           <GlassCard testID="sos-profile-card">
             <View style={ui.kpiRow}>
               <Text style={ui.kpiLabel}>{t('sos.name')}</Text>
@@ -207,6 +213,7 @@ export default function SosScreen() {
               </View>
             ) : null}
           </GlassCard>
+          </HintAnchor>
 
           <Pressable
             testID="sos-passport-toggle"
@@ -366,12 +373,14 @@ export default function SosScreen() {
       {contacts.length > 0 ? null : profile ? (
         <GlassCard style={styles.contactsHintCard}>
           <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
-          <Button
-            testID="sos-edit-contacts"
-            label={t('sos.editContacts')}
-            variant="secondary"
-            onPress={() => router.push('/sos-edit' as any)}
-          />
+          <HintAnchor id="sos.contacts">
+            <Button
+              testID="sos-edit-contacts"
+              label={t('sos.editContacts')}
+              variant="secondary"
+              onPress={() => router.push('/sos-edit' as any)}
+            />
+          </HintAnchor>
         </GlassCard>
       ) : null}
 

@@ -71,6 +71,10 @@ const fr: LocaleMessages = {
       phoneInvalid: 'Entrez un numéro valide.',
       passwordRequired: 'Entrez le mot de passe.',
       passwordMin: 'Le mot de passe doit contenir au moins 8 caractères.',
+      passwordComplexity:
+        'Le mot de passe doit inclure au moins 3 types de caractères sur 4 : minuscules, majuscules, chiffres et symboles.',
+      passwordCommon: 'Ce mot de passe est trop courant — choisissez-en un autre.',
+      passwordLikeLogin: 'Le mot de passe ne doit pas reprendre l’identifiant.',
       passwordMismatch: 'Les mots de passe ne correspondent pas.',
       wrongCredentials: 'Identifiant ou mot de passe incorrect.',
       emailTaken: 'Un compte avec cet email existe déjà.',
@@ -98,6 +102,21 @@ const fr: LocaleMessages = {
       successTitle: 'Mot de passe modifié',
       successMessage: 'Connectez-vous avec votre nouveau mot de passe.',
       invalidToken: 'Le lien est invalide ou expiré. Demandez-en un nouveau.',
+    },
+    passwordStrength: {
+      label: 'Fiabilité du mot de passe',
+      weak: 'Faible',
+      fair: 'Acceptable',
+      good: 'Bon',
+      strong: 'Fiable',
+      minLength: 'Minimum 8 caractères',
+      lowercase: 'minuscules',
+      uppercase: 'majuscules',
+      digit: 'chiffres',
+      symbol: 'symboles',
+      classesHint: 'Utilisez au moins 3 types de caractères sur 4',
+      common: 'Ce mot de passe est trop courant — choisissez-en un autre.',
+      likeLogin: 'Le mot de passe ne doit pas reprendre l’identifiant.',
     },
   },
   profiles: {
@@ -428,6 +447,9 @@ const fr: LocaleMessages = {
     safeList: 'Produits sûrs',
     saveToSafe: '✓ Enregistrer comme sûr',
     savedToSafe: '✓ Enregistré',
+    saveToDiary: 'Enregistrer dans le journal',
+    savedToDiary: '✓ Ajouté au journal',
+    savedToDiaryHint: "L'entrée est dans le journal — vous pouvez la compléter ou la modifier là-bas.",
     safeListEmpty: "Aucun produit sûr pour l'instant",
     removeSafe: 'Retirer',
     removeSafeTitle: 'Retirer de la liste sûre ?',
@@ -866,6 +888,88 @@ const fr: LocaleMessages = {
       },
       map: { title: 'Map & environment', desc: 'Places, pollen calendar and clinics.' },
       sos: { title: 'Emergency SOS', desc: 'Allergy passport and emergency contacts.' },
+    },
+  },
+  hints: {
+    step: 'Étape {{current}} sur {{total}}',
+    next: 'Suivant',
+    done: 'Compris',
+    skip: 'Ignorer les astuces',
+    tours: {
+      home: {
+        profile: {
+          title: 'Votre profil',
+          body: 'Changez de profil et ouvrez les réglages ici.',
+        },
+        wellness: {
+          title: 'Comment vous vous sentez',
+          body: 'L’indice combine pollen, air et journal. Touchez pour voir les détails.',
+        },
+        insights: {
+          title: 'Quoi faire aujourd’hui',
+          body: 'Courtes suggestions selon votre profil et votre journal.',
+        },
+        scanner: {
+          title: 'Scanner',
+          body: 'Vérifiez les étiquettes et les menus avant de manger.',
+        },
+        sos: {
+          title: 'SOS',
+          body: 'Passeport allergie et appel d’urgence, toujours à portée.',
+        },
+      },
+      diary: {
+        newEntry: {
+          title: 'Nouvelle entrée',
+          body: 'Notez symptômes, repas et médicaments pour voir les tendances.',
+        },
+        course: {
+          title: 'Cures',
+          body: 'Réglez ici les traitements d’entretien et les cures.',
+        },
+        report: {
+          title: 'Compte-rendu médecin',
+          body: 'Rassemblez vos notes dans un fichier à emporter en consultation.',
+        },
+      },
+      scanner: {
+        photo: {
+          title: 'Photo de la composition',
+          body: 'Photographiez une étiquette ou un menu — l’app trouve les allergènes.',
+        },
+        barcode: {
+          title: 'Code-barres',
+          body: 'Pointez la caméra vers le code — plus rapide que les petits caractères.',
+        },
+        manual: {
+          title: 'Saisir à la main',
+          body: 'Si la photo est floue, saisissez la composition en texte.',
+        },
+      },
+      map: {
+        status: {
+          title: 'Pollen autour de vous',
+          body: 'Niveau actuel de la plante choisie dans votre zone.',
+        },
+        layers: {
+          title: 'Couches de la carte',
+          body: 'Passez du pollen aux lieux et choisissez une plante.',
+        },
+      },
+      sos: {
+        call: {
+          title: 'Appel d’urgence',
+          body: 'Un tapote appelle les secours ou un proche.',
+        },
+        passport: {
+          title: 'Passeport allergie',
+          body: 'Nom, allergènes et infos utiles pour les personnes autour.',
+        },
+        contacts: {
+          title: 'Contacts d’urgence',
+          body: 'Ajoutez des proches à appeler depuis cet écran.',
+        },
+      },
     },
   },
   profileSetup: {

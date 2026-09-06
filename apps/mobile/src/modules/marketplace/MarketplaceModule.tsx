@@ -15,6 +15,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useAppStore } from '@/src/store/app-store';
+import { MARKET_ENABLED } from '@/src/constants/features';
 import { CATEGORY_LABEL_KEYS } from '@/src/modules/marketplace/category-labels';
 import { MarketplaceProductCard } from '@/src/modules/marketplace/MarketplaceProductCard';
 import { useMarketplaceProducts } from '@/src/modules/marketplace/use-marketplace-products';
@@ -73,7 +74,13 @@ function EmbeddedMarketplace() {
   const profile = useAppStore((s) => s.activeProfile);
   const { items } = useMarketplaceProducts(profile);
   const previewItems = items.slice(0, PREVIEW_LIMIT);
-  const openFullMarket = () => router.push('/(tabs)/market');
+  const openFullMarket = () => {
+    if (!MARKET_ENABLED) {
+      router.replace('/(tabs)/home');
+      return;
+    }
+    router.push('/(tabs)/market');
+  };
 
   return (
     <GlassCard padded={false}>

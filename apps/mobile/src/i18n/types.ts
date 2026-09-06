@@ -78,6 +78,9 @@ export type LocaleMessages = {
       phoneInvalid: string;
       passwordRequired: string;
       passwordMin: string;
+      passwordComplexity: string;
+      passwordCommon: string;
+      passwordLikeLogin: string;
       passwordMismatch: string;
       wrongCredentials: string;
       emailTaken: string;
@@ -105,6 +108,21 @@ export type LocaleMessages = {
       successTitle: string;
       successMessage: string;
       invalidToken: string;
+    };
+    passwordStrength: {
+      label: string;
+      weak: string;
+      fair: string;
+      good: string;
+      strong: string;
+      minLength: string;
+      lowercase: string;
+      uppercase: string;
+      digit: string;
+      symbol: string;
+      classesHint: string;
+      common: string;
+      likeLogin: string;
     };
   };
   profiles: {
@@ -433,6 +451,11 @@ export type LocaleMessages = {
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
+    /** Result action: start a «Питание» diary entry from this scan. */
+    saveToDiary: string;
+    savedToDiary: string;
+    /** Shown after the entry is written: where to find and edit it. */
+    savedToDiaryHint: string;
     safeListEmpty: string;
     removeSafe: string;
     removeSafeTitle: string;
@@ -859,6 +882,19 @@ export type LocaleMessages = {
       care: { title: string; desc: string };
       map: { title: string; desc: string };
       sos: { title: string; desc: string };
+    };
+  };
+  hints: {
+    step: string;
+    next: string;
+    done: string;
+    skip: string;
+    tours: {
+      home: Record<'profile' | 'wellness' | 'insights' | 'scanner' | 'sos', { title: string; body: string }>;
+      diary: Record<'newEntry' | 'course' | 'report', { title: string; body: string }>;
+      scanner: Record<'photo' | 'barcode' | 'manual', { title: string; body: string }>;
+      map: Record<'status' | 'layers', { title: string; body: string }>;
+      sos: Record<'call' | 'passport' | 'contacts', { title: string; body: string }>;
     };
   };
   profileSetup: {
