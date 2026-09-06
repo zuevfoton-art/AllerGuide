@@ -27,6 +27,7 @@ export * from './allergen-aliases';
 export * from './regulatory-allergens';
 export * from './allergy-conditions';
 export * from './condition-allergen-map';
+export * from './condition-allergen-recommendations';
 export * from './condition-option-selections';
 export * from './profile-symptom-baseline';
 
