@@ -38,3 +38,7 @@ appId: com.aclearo.app
     id: allergen-mugwort-pollen
 - assertVisible:
     id: allergen-open-catalog
+- tapOn:
+    id: allergen-show-more-pollinosis
+- assertVisible:
+    id: allergen-poplar-pollen

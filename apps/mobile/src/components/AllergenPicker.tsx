@@ -48,6 +48,7 @@ export function AllergenPicker({
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const [catalog, setCatalog] = useState<AllergenRecord[]>(getAllergenCatalogSnapshot);
 
   useEffect(() => {
@@ -96,14 +97,33 @@ export function AllergenPicker({
         <>
           <Text style={styles.sectionHint}>{t('allergens.recommendedTitle')}</Text>
           <Text style={styles.recommendedHint}>{t('allergens.recommendedHint')}</Text>
-          {model.groups.map((group) => (
-            <View key={group.conditionId} testID={`allergen-recommended-${group.conditionId}`} style={styles.group}>
-              <Text style={styles.sectionHint}>
-                {formatTemplate(t('allergens.recommendedGroup'), { label: group.label })}
-              </Text>
-              <View style={styles.chipGrid}>{group.allergens.map(renderChip)}</View>
-            </View>
-          ))}
+          {model.groups.map((group) => {
+            const isExpanded = expandedGroups.includes(group.conditionId);
+            const chips = isExpanded ? group.allergens : group.visibleAllergens;
+            return (
+              <View key={group.conditionId} testID={`allergen-recommended-${group.conditionId}`} style={styles.group}>
+                <Text style={styles.sectionHint}>
+                  {formatTemplate(t('allergens.recommendedGroup'), { label: group.label })}
+                </Text>
+                <View style={styles.chipGrid}>{chips.map(renderChip)}</View>
+                {!isExpanded && group.hiddenCount > 0 ? (
+                  <Pressable
+                    testID={`allergen-show-more-${group.conditionId}`}
+                    style={styles.showMoreBtn}
+                    onPress={() => setExpandedGroups((prev) => [...prev, group.conditionId])}
+                    accessibilityRole="button"
+                    accessibilityLabel={formatTemplate(t('allergens.showMore'), {
+                      count: String(group.hiddenCount),
+                    })}
+                    hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}>
+                    <Text style={styles.showMoreText}>
+                      {formatTemplate(t('allergens.showMore'), { count: String(group.hiddenCount) })}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            );
+          })}
         </>
       ) : (
         <>
@@ -204,6 +224,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       lineHeight: 18,
     },
     chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+    showMoreBtn: {
+      alignSelf: 'flex-start',
+      minHeight: density.tapMinHeightSm,
+      justifyContent: 'center',
+      paddingVertical: space[2],
+      paddingHorizontal: space[3],
+    },
+    showMoreText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
+    },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',

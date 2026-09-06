@@ -1335,6 +1335,7 @@ const fr: LocaleMessages = {
     recommendedTitle: 'Recommandés pour les types choisis',
     recommendedHint: 'Cochez les vôtres. Les autres sont dans la liste complète.',
     recommendedGroup: '« {{label}} »',
+    showMore: 'Afficher encore {{count}}',
     fromCatalog: 'De la liste complète',
     openCatalog: 'Choisir dans la liste complète',
     crossTitle: 'Réactions croisées possibles',
