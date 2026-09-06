@@ -681,7 +681,6 @@ const it: LocaleMessages = {
     airQualityDominant: 'Inquinante dominante: {{pollutant}}',
     airQualityPm25: 'PM2.5 {{value}}',
     airQualityPm10: 'PM10 {{value}}',
-    airQualitySource: 'Fonte: Google Air Quality',
     airQualityLegend: 'UAQI 0–100',
     airQualityLegendDirection: 'Scarso → Eccellente',
     airQualityExpand: 'Altro',

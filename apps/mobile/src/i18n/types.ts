@@ -684,7 +684,6 @@ export type LocaleMessages = {
     airQualityDominant: string;
     airQualityPm25: string;
     airQualityPm10: string;
-    airQualitySource: string;
     airQualityLegend: string;
     airQualityLegendDirection: string;
     airQualityExpand: string;
