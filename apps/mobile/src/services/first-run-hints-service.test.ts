@@ -60,7 +60,7 @@ describe('first-run-hints-service', () => {
 
   it('dismisses every tour at once', () => {
     markHintsEligible(4);
-    dismissAllHintTours(4, { tourId: 'home', stepIndex: 0 });
+    dismissAllHintTours(4, { tourId: 'home', stepIndex: 0, stepsTotal: 5, stepId: 'profile' });
     expect(isHintTourPending(4, 'home')).toBe(false);
     expect(isHintTourPending(4, 'diary')).toBe(false);
     expect(isHintTourPending(4, 'scanner')).toBe(false);

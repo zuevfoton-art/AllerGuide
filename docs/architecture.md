@@ -202,6 +202,8 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 
 Флаги хранятся в `app_settings`: `onboardingComplete`, `introComplete`, `scenario`.
 
+После регистрации (`registerUser`) ставится `hintsEligible:<userId>`. На главной и при первом заходе на дневник / сканер / карту / SOS `useHintTour` показывает coach marks (`HintSpotlight`). Пропуск пишет все туры в `hintsSeenTours:<userId>`. Существующий пользователь без `hintsEligible` подсказки не видит.
+
 ### Профили
 
 CRUD в `profile-service.ts`: создание, список, редактирование (`/profile-edit`), удаление с каскадом дневника. Хаб — `/profile`. Профили привязаны к `userId` (миграция схемы v2 на native). При `BACKEND_AUTH_ENABLED` — dual-write с `/api/profiles`.
@@ -213,6 +215,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | App | `store/app-store.ts` | `scenario`, `activeProfileId`, `activeProfile` |
 | Locale | `store/locale-store.ts` | `locale`, хук `useTranslation()` → `t()`, `content()` |
 | Theme | `store/theme-store.ts` | `light` / `dark` / `system` |
+| Hints | `store/hints-store.ts` | якоря coach marks и активный тур |
 
 Основные данные (профили, дневник, история сканов) — в SQLite/IndexedDB, не в Zustand.
 
@@ -256,6 +259,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `sos-passport-service.ts`, `emergency-contact-service.ts` | SOS и контакты |
 | `notification-*-service.ts` | Permissions, copy, deep-links, reconcile |
 | `analytics-service.ts` | Opt-in аналитика (`ANALYTICS_EVENT_NAMES`) |
+| `first-run-hints-service.ts` | Coach marks после регистрации: `hintsEligible:<userId>`, `hintsSeenTours:<userId>` |
 | `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN` |
 
 Полный список — [`codebase-index.md`](./codebase-index.md).
@@ -671,7 +675,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
 | Pollen / geo / air / market | `pollen-*` (в т.ч. `pollen-upi`, `pollen-plume`, `pollen-google-*`), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
 | Auth / sync | `auth`, `password`, `secure-random`, `phone`, `login-field`, `sync`, `crypto` |
-| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
+| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
 
 ### `@allerguide/ai` (`packages/ai/`)
 
@@ -763,7 +767,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | Компонент | Файл | Включение |
 |-----------|------|-----------|
 | Аналитика | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED`, опц. `EXPO_PUBLIC_ANALYTICS_ENDPOINT` |
-| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*` |
+| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*`, `hint_tour_*` |
 | Crash reporting | `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN`; иначе console |
 
 ---

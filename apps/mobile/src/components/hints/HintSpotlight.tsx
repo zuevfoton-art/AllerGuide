@@ -59,7 +59,12 @@ export function HintSpotlight() {
         if (mode === 'complete') {
           completeHintTour(userId, tour.tourId, tour.steps.length);
         } else {
-          dismissAllHintTours(userId, { tourId: tour.tourId, stepIndex: tour.stepIndex });
+          dismissAllHintTours(userId, {
+            tourId: tour.tourId,
+            stepIndex: tour.stepIndex,
+            stepId: tour.steps[tour.stepIndex]?.id,
+            stepsTotal: tour.steps.length,
+          });
         }
       }
       closeTour();
