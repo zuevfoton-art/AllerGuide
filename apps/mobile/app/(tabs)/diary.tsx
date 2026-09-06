@@ -2,7 +2,6 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  DIARY_AUTO_STEP_IDS,
   buildCourseSetupOptions,
   buildDiaryEntryPickerOptions,
   formatDiaryDate,
@@ -12,6 +11,7 @@ import {
   getDiarySection,
   getAsthmaPlanPersonalBest,
   getProfileAgeYears,
+  hideDiaryAutoSteps,
   isDiaryHistoryVisible,
   parseAllergies,
   type ClinicalScaleId,
@@ -111,13 +111,6 @@ type EditorState =
       initialStepId?: string;
     }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
-
-function hideAutoSteps(section: DiarySection): DiarySection {
-  return {
-    ...section,
-    steps: section.steps.filter((step) => !DIARY_AUTO_STEP_IDS.has(step.id)),
-  };
-}
 
 export default function DiaryScreen() {
   const theme = useTheme();
@@ -452,7 +445,7 @@ export default function DiaryScreen() {
     if (!baseSection) return null;
     const rawSection =
       editor.mode === 'section' && editor.simplifiedSection ? editor.simplifiedSection : baseSection;
-    const section = hideAutoSteps(rawSection);
+    const section = hideDiaryAutoSteps(rawSection);
 
     const initialAnswers =
       editor.mode === 'edit'

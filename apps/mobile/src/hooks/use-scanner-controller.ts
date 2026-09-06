@@ -17,6 +17,12 @@ import {
 } from '@/src/services/scanner-service';
 import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
 import {
+  buildScanDiaryDraft,
+  saveScanDiaryEntry,
+  SCAN_DIARY_SECTION_TYPE,
+} from '@/src/services/scan-diary-service';
+import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
+import {
   addSafeProduct,
   isSafeProductSaved,
   listSafeProducts,
@@ -47,12 +53,17 @@ const HISTORY_DISPLAY_LIMIT = 5;
 
 export type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
+export type DiaryEntryDraft = {
+  prefill?: Record<string, string>;
+  initialStepId: string;
+};
+
 function resolveScanProfile(): Profile | null {
   return useAppStore.getState().activeProfile ?? ensureCurrentProfileLoaded();
 }
 
 export function useScannerController() {
-  const { t, content } = useTranslation();
+  const { t, content, locale } = useTranslation();
   const localeContent = content();
   const activeProfile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
@@ -79,6 +90,8 @@ export function useScannerController() {
   const [capturing, setCapturing] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<CapturedScanPhoto | null>(null);
   const [resultPhotoUri, setResultPhotoUri] = useState<string | null>(null);
+  const [diaryDraft, setDiaryDraft] = useState<DiaryEntryDraft | null>(null);
+  const [diaryEntrySaved, setDiaryEntrySaved] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const lastScanRef = useRef<(() => void) | null>(null);
   const scanRequestIdRef = useRef(0);
@@ -152,6 +165,11 @@ export function useScannerController() {
     lastHapticResultRef.current = result;
     if (isCautionOrWorse) void hapticDanger();
   }, [result, loading, isCautionOrWorse]);
+
+  useEffect(() => {
+    setDiaryEntrySaved(false);
+    setDiaryDraft(null);
+  }, [result]);
 
   const clearUndo = useCallback(() => {
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
@@ -403,6 +421,50 @@ export function useScannerController() {
     });
   };
 
+  /** Scan verdict → «Питание» diary draft; the user confirms the reaction before saving. */
+  const openDiaryEntry = async () => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
+
+    const draft = buildScanDiaryDraft({ result, scanText: input });
+    const editorState = await buildDiarySectionEditorState({
+      sectionType: SCAN_DIARY_SECTION_TYPE,
+      profileId,
+      profileAllergiesJson: activeProfile?.allergies ?? '[]',
+      locale,
+      profileBirthYear: activeProfile?.birthYear,
+      recognizedDish: draft.dish,
+      scanRef: draft.scanRef,
+    });
+    setDiaryDraft({
+      prefill: editorState.prefill?.[SCAN_DIARY_SECTION_TYPE],
+      initialStepId: draft.initialStepId,
+    });
+  };
+
+  const closeDiaryEntry = () => setDiaryDraft(null);
+
+  const saveDiaryEntry = async (
+    entries: { type: string; details: string; photoUris?: string[] }[],
+  ) => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
+
+    const saved = await saveScanDiaryEntry({
+      profileId,
+      entries,
+      level: result.level,
+      source: result.source,
+    });
+    if (!saved.ok) {
+      logCaughtError('ScannerScreen.saveDiaryEntry', new Error(saved.code));
+      return;
+    }
+    setDiaryDraft(null);
+    setDiaryEntrySaved(true);
+    void hapticSuccess();
+  };
+
   const openHistoryItem = (item: ScanHistoryEntry) => {
     const restored = historyEntryToScanResult(item);
     setInput(item.input);
@@ -487,6 +549,8 @@ export function useScannerController() {
     pendingPhoto,
     setPendingPhoto,
     resultPhotoUri,
+    diaryDraft,
+    diaryEntrySaved,
     isBarcodeEntry,
     supportsPhotoCapture,
     scanTrends,
@@ -518,6 +582,9 @@ export function useScannerController() {
     handleCropRetake,
     closeCamera,
     confirmSaveSafe,
+    openDiaryEntry,
+    closeDiaryEntry,
+    saveDiaryEntry,
     openHistoryItem,
     formatMatchChip,
     reportAlias,

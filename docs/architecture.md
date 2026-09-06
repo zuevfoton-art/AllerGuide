@@ -237,6 +237,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `scanner-dish-lookup-service.ts` | Обогащение состава блюда (OFF + search) |
 | `ocr-api-service.ts` | Cloud Vision OCR через `/api/ocr` |
 | `scan-history-service.ts` | Локальная история сканов |
+| `scan-diary-service.ts` | Результат скана → префилл записи дневника «Питание» + запись (`buildScanDiaryDraft`, `saveScanDiaryEntry`) |
 | `profile-service.ts` | CRUD профилей, миграция legacy → userId |
 | `auth-service.ts` | Локальные users **или** backend JWT |
 | `token-session.ts` | Access JWT (web: память; native: SecureStore) + refresh rotation |
@@ -427,6 +428,16 @@ sequenceDiagram
 6. Если VL недоступен (нет сети / API) — прежний OCR-путь, `evidence: 'ocr'`. История и `scan_completed` / `scan_dish_vision` пишутся один раз на финальном результате
 
 **Ручной ввод:** цифры 8–14 → `scanBarcode`; иначе `scanFromOcr` (нормализация состава, intent, справочник блюд).
+
+### Результат сканирования → дневник (FR-SCAN-13)
+
+Кнопка «Сохранить в дневник» у результата не пишет запись напрямую: `buildScanDiaryDraft`
+(`scan-diary-service`) переводит вердикт в блюдо + чеклист состава (`buildComponentsFromProduct`
+/ `buildDishComponentsFromText`) и `FoodDrugScanRef`, затем `buildDiarySectionEditorState`
+(секция «Питание», явный `scanRef` вместо эвристики «последний скан за 24 ч») собирает префилл,
+а `ScanDiaryEntryModal` открывает тот же `DiaryWizard`, что и вкладка дневника. Запись создаёт
+`saveScanDiaryEntry` → `addDiaryEntries` (+ `diary_entry_saved`, `scan_saved_to_diary`,
+`reconcileAllReminders`). Всё офлайн: сеть не требуется.
 
 ### Анализ текста (`@allerguide/ai`)
 
