@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  NEW_PASSWORD_TOO_SHORT,
+  PASSWORD_LIKE_LOGIN,
+  PASSWORD_TOO_COMMON,
+  PASSWORD_TOO_SIMPLE,
+  PASSWORDS_DO_NOT_MATCH,
   normalizeLogin,
   validateAuthForm,
   validateLogin,
@@ -33,22 +38,47 @@ describe('validateAuthForm', () => {
       validateAuthForm({
         loginType: 'email',
         login: 'user@example.com',
-        password: 'secret12',
-        confirmPassword: 'secret13',
+        password: 'Secret12!',
+        confirmPassword: 'Secret13!',
       }),
-    ).toBe('Пароли не совпадают.');
+    ).toBe(PASSWORDS_DO_NOT_MATCH);
   });
 
   it('rejects a new password shorter than 8 characters', () => {
-    expect(validatePassword('secret1')).toBe('Пароль должен содержать минимум 8 символов.');
+    expect(validatePassword('Secret1')).toBe(NEW_PASSWORD_TOO_SHORT);
   });
 
-  it('accepts an 8-character password', () => {
-    expect(validatePassword('secret12')).toBeNull();
+  it('rejects a password with fewer than 3 character classes', () => {
+    expect(validatePassword('secret12')).toBe(PASSWORD_TOO_SIMPLE);
+  });
+
+  it('rejects a popular password that otherwise meets the class rules', () => {
+    expect(validatePassword('Password1!')).toBe(PASSWORD_TOO_COMMON);
+  });
+
+  it('rejects a password that repeats the login', () => {
+    expect(validatePassword('Marina12!', undefined, { login: 'marina@example.com' })).toBe(
+      PASSWORD_LIKE_LOGIN,
+    );
+  });
+
+  it('accepts a policy-compliant password', () => {
+    expect(validatePassword('Secret12!')).toBeNull();
   });
 
   it('lets an existing shorter password through on login', () => {
     expect(validateLoginPassword('secret1')).toBeNull();
     expect(validateLoginPassword('')).toBe('Введите пароль.');
+  });
+
+  it('passes login into password checks on the registration form', () => {
+    expect(
+      validateAuthForm({
+        loginType: 'email',
+        login: 'marina@example.com',
+        password: 'Marina12!',
+        confirmPassword: 'Marina12!',
+      }),
+    ).toBe(PASSWORD_LIKE_LOGIN);
   });
 });

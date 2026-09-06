@@ -158,7 +158,8 @@ export async function registerUser(input: {
   confirmPassword: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
   const validationError =
-    validateLoginField(input.login) ?? validatePassword(input.password, input.confirmPassword);
+    validateLoginField(input.login) ??
+    validatePassword(input.password, input.confirmPassword, { login: input.login });
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {

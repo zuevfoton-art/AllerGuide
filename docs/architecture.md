@@ -686,7 +686,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `insect-allergy`, `food-drug-allergy`, `prescribed-therapy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
 | Pollen / geo / air / market | `pollen-*` (в т.ч. `pollen-upi`, `pollen-plume`, `pollen-google-*`), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
-| Auth / sync | `auth`, `password`, `secure-random`, `phone`, `login-field`, `sync`, `crypto` |
+| Auth / sync | `auth`, `password`, `password-strength`, `common-passwords`, `secure-random`, `phone`, `login-field`, `sync`, `crypto` |
 | Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
 
 ### `@allerguide/ai` (`packages/ai/`)

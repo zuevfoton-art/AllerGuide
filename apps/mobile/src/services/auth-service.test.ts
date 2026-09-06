@@ -192,8 +192,8 @@ describe('first-run hint eligibility', () => {
     const result = await registerUser({
       loginType: 'email',
       login: 'new@user.dev',
-      password: 'password1',
-      confirmPassword: 'password1',
+      password: 'Secret12!',
+      confirmPassword: 'Secret12!',
     });
 
     expect(result).toEqual({
