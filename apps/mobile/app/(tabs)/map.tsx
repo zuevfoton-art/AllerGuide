@@ -56,7 +56,6 @@ import { resolveMapBasemap, resolveRuntimeMapBasemap } from '@/src/services/map-
 import { isGoogleMapsApiKey } from '@/src/services/google-maps-api-key';
 import { useGoogleBasemapGuard } from '@/src/hooks/use-google-basemap-guard';
 import { resolveHourlyUpi } from '@/src/services/pollen-hourly-service';
-import { resolveMapPollenSourceCaption } from '@/src/services/pollen-map-source-label';
 import { getApiBaseUrl } from '@/src/services/api-client';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
@@ -88,7 +87,6 @@ export default function MapScreen() {
     pollenHourly,
     airQuality,
     airQualityLoading,
-    placesSource,
     placeSearchError,
     selectedPoiId,
     setSelectedPoiId,
@@ -119,7 +117,6 @@ export default function MapScreen() {
     pollenSnapshot?.readings.find((reading) => reading.taxonId === selectedTaxonId) ?? null;
   const selectedUpi = pollenSnapshot?.upiByTaxon[selectedTaxonId] ?? null;
   const isCalendarFallback = pollenSnapshot?.source === 'calendar';
-  const isCacheSource = pollenSnapshot?.source === 'cache';
 
   const forecastReading =
     selectedForecastDay != null
@@ -323,16 +320,6 @@ export default function MapScreen() {
     return t('map.statusToday', { level: levelLabel, taxon: taxonLabel });
   }, [levelLabel, loading, pollenSnapshot, selectedForecastDay, t, taxonLabel]);
 
-  const sourceLabel = useMemo(
-    () =>
-      resolveMapPollenSourceCaption(pollenSnapshot?.source, selectedUpi?.source, {
-        calendar: t('map.pollenSourceCalendar'),
-        cache: t('map.pollenSourceCache'),
-        openMeteo: t('map.pollenSourceOpenMeteo'),
-      }),
-    [pollenSnapshot?.source, selectedUpi?.source, t],
-  );
-
   const plumeGroupHint = useMemo(() => {
     const mapType = pollenTaxonToGoogleMapType(selectedTaxonId);
     if (mapType === 'GRASS_UPI') return t('map.plumeGroupGrass');
@@ -422,10 +409,7 @@ export default function MapScreen() {
         profileName={profile?.name}
         profileRelevant={Boolean(selectedReading?.profileRelevant)}
         locationLabel={coords.label || pollenRegion.name}
-        sourceLabel={sourceLabel}
         updatedLabel={updatedLabel}
-        isCalendarFallback={isCalendarFallback}
-        isCacheSource={isCacheSource}
       />
 
       <MapLayerSwitcher
@@ -535,7 +519,6 @@ export default function MapScreen() {
           placeSuggestions={placeSuggestions}
           placeSearchLoading={placeSearchLoading}
           placeSearchError={placeSearchError}
-          placesSource={placesSource}
           pois={pois}
           selectedPoiId={selectedPoiId}
           placeFilters={placeFilters}

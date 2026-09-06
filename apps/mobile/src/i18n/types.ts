@@ -563,7 +563,6 @@ export type LocaleMessages = {
     pollenTypeTree: string;
     pollenTypeGrass: string;
     pollenTypeWeed: string;
-    pollenGoogleOnlyHint: string;
     pollenYou: string;
     otherPollenAllergens: string;
     pollenScalePlace: string;
@@ -579,9 +578,6 @@ export type LocaleMessages = {
     pollenValue: string;
     pollenUnavailable: string;
     pollenLoading: string;
-    pollenSourceOpenMeteo: string;
-    pollenSourceCache: string;
-    pollenCalendarFallback: string;
     pollenNoSeason: string;
     heatmapGroupEmpty: string;
     openYandexPollen: string;
@@ -593,7 +589,6 @@ export type LocaleMessages = {
     forecastTitle: string;
     forecastEmpty: string;
     upiTitle: string;
-    upiSourceOpenMeteo: string;
     plantTitle: string;
     plantEmpty: string;
     plantFamily: string;
@@ -652,7 +647,6 @@ export type LocaleMessages = {
     actionTipClinicsCta: string;
     yandexOverviewBanner: string;
     listFirstHint: string;
-    pollenSourceCalendar: string;
     allergenPickerTitle: string;
     allergenPickerBack: string;
     allergenPickerButton: string;
@@ -677,7 +671,6 @@ export type LocaleMessages = {
     plantIndexDescription: string;
     groupCount: string;
     dataStatusLive: string;
-    dataStatusGoogleOnly: string;
     dataStatusNone: string;
     airQualityTitle: string;
     airQualityUnavailable: string;
@@ -690,12 +683,9 @@ export type LocaleMessages = {
     airQualityCollapse: string;
     airQualityLocal: string;
     placeSearchPlaceholder: string;
-    placeSearchOfflineCatalog: string;
     placeSearchNothingFound: string;
     placeRating: string;
     placeAllergyUnknown: string;
-    placeSourceGoogle: string;
-    placeSourceCatalog: string;
   };
   settings: {
     title: string;

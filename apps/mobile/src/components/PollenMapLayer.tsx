@@ -181,13 +181,6 @@ export function PollenMapLayer({
             ? 'map.pollenGoogleMapAttribution'
             : 'map.pollenMapAttribution',
         )}
-        {snapshot && !isCalendarFallback
-          ? ` · ${
-              snapshot.source === 'cache'
-                ? t('map.pollenSourceCache')
-                : t('map.pollenSourceOpenMeteo')
-            }`
-          : ''}
       </Text>
       {isGoogleHeatmapEnabled ? (
         <Text style={styles.heatmapHint}>{t(GOOGLE_HEATMAP_HINT_KEYS[googleMapType])}</Text>
@@ -242,7 +235,7 @@ export function PollenMapLayer({
         <GlassCard style={styles.calendarCard}>
           <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
           <View style={styles.readingBody}>
-            <Text style={styles.readingTitle}>{t('map.pollenCalendarFallback')}</Text>
+            <Text style={styles.readingTitle}>{t('map.season')}</Text>
             {calendarPeaks.length > 0 ? (
               calendarPeaks.map((peak) => (
                 <Text key={peak.taxonId} style={styles.valueText}>

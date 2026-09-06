@@ -88,7 +88,7 @@ export function MapPollenDetails({
             <GlassCard style={styles.calendarCard}>
               <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
               <View style={styles.calendarBody}>
-                <Text style={styles.calendarTitle}>{t('map.pollenCalendarFallback')}</Text>
+                <Text style={styles.calendarTitle}>{t('map.season')}</Text>
                 {pollenPeaks.length > 0 ? (
                   pollenPeaks.map((peak) => (
                     <Text key={peak.taxonId} style={styles.calendarText}>
