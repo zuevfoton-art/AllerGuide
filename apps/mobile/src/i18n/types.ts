@@ -866,6 +866,19 @@ export type LocaleMessages = {
       sos: { title: string; desc: string };
     };
   };
+  hints: {
+    step: string;
+    next: string;
+    done: string;
+    skip: string;
+    tours: {
+      home: Record<'profile' | 'wellness' | 'insights' | 'scanner' | 'sos', { title: string; body: string }>;
+      diary: Record<'newEntry' | 'course' | 'report', { title: string; body: string }>;
+      scanner: Record<'photo' | 'barcode' | 'manual', { title: string; body: string }>;
+      map: Record<'status' | 'layers', { title: string; body: string }>;
+      sos: Record<'call' | 'passport' | 'contacts', { title: string; body: string }>;
+    };
+  };
   profileSetup: {
     titleSelf: string;
     titleChild: string;

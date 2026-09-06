@@ -1,4 +1,5 @@
-# P2 — market: two-column catalog with photos
+# P2 — market: two-column catalog with photos.
+# Requires EXPO_PUBLIC_MARKET=true (tab is hidden by default).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml

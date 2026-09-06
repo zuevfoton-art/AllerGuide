@@ -32,6 +32,8 @@ import { MapLayerSwitcher } from '@/src/components/map/MapLayerSwitcher';
 import { MapPlacesPanel } from '@/src/components/map/MapPlacesPanel';
 import { MapPollenDetails } from '@/src/components/map/MapPollenDetails';
 import { MapPollenStatusCard } from '@/src/components/map/MapPollenStatusCard';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import {
   ADAIR_PIN_COLOR,
   LEVEL_LABEL_KEYS,
@@ -105,6 +107,7 @@ export default function MapScreen() {
     handleRegionChange,
     clearPlaceSearch,
   } = useMapLiveData({ placesLayerActive: layerMode === 'places' });
+  useHintTour('map', { ready: !loading });
 
   const pollenMonth = new Date().getMonth() + 1;
   const pollenRegion = resolvePollenRegion(coords.lat, coords.lon);
@@ -390,6 +393,7 @@ export default function MapScreen() {
         </View>
       </View>
 
+      <HintAnchor id="map.status" testID="map-status-card">
       <MapPollenStatusCard
         loading={loading}
         hasSnapshot={Boolean(pollenSnapshot)}
@@ -402,7 +406,9 @@ export default function MapScreen() {
         locationLabel={coords.label || pollenRegion.name}
         updatedLabel={updatedLabel}
       />
+      </HintAnchor>
 
+      <HintAnchor id="map.layers" testID="map-layer-switcher">
       <MapLayerSwitcher
         layerMode={layerMode}
         onLayerModeChange={(key) => {
@@ -413,6 +419,7 @@ export default function MapScreen() {
         taxonLabel={taxonLabel}
         onAllergenPickerPress={() => setAllergenPickerOpen(true)}
       />
+      </HintAnchor>
 
       <MapPollenAllergenModal
         visible={allergenPickerOpen}

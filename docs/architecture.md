@@ -179,14 +179,14 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 | `profile.tsx` | Хаб аккаунта: профили, тема, язык, бэкап, lock, регион пыления |
 | `profiles.tsx`, `settings.tsx` | Legacy — `<Redirect href="/profile" />` |
 
-**Вкладки** (`app/(tabs)/_layout.tsx`) — все видимы:
+**Вкладки** (`app/(tabs)/_layout.tsx`) — пять видимых; Маркет скрыт, пока `EXPO_PUBLIC_MARKET=true`:
 
 | Вкладка | Файл | Функция |
 |---------|------|---------|
 | Главная | `home.tsx` | `ScreenBrandHeader`, двухслойный wellness, plain-language insights, reminder терапии |
 | Дневник | `diary.tsx` | «Новая запись» (picker → секция), «Настроить курс» (терапия/АСИТ), история; карточки астмы/насекомых/лекарств при gating |
 | Сканер | `scanner.tsx` | Штрихкод, OCR, ручной ввод |
-| Маркет | `market.tsx` | Safe-product marketplace (Yandex Market) |
+| Маркет | `market.tsx` | Safe-product marketplace (Yandex Market). Скрыт из таб-бара (`href: null`, без `tabBarButton` — Expo Router их не сочетает); `/market` → Главная, пока `MARKET_ENABLED` выкл. Код экрана остаётся. |
 | Карта | `map.tsx` | Пыление / места (Yandex; опц. Google heatmap) |
 | SOS | `sos.tsx` | Emergency-only: паспорт и контакты только для чтения |
 
@@ -202,6 +202,8 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 
 Флаги хранятся в `app_settings`: `onboardingComplete`, `introComplete`, `scenario`.
 
+После регистрации (`registerUser`) ставится `hintsEligible:<userId>`. На главной и при первом заходе на дневник / сканер / карту / SOS `useHintTour` показывает coach marks (`HintSpotlight`). Пропуск пишет все туры в `hintsSeenTours:<userId>`. Существующий пользователь без `hintsEligible` подсказки не видит.
+
 ### Профили
 
 CRUD в `profile-service.ts`: создание, список, редактирование (`/profile-edit`), удаление с каскадом дневника. Хаб — `/profile`. Профили привязаны к `userId` (миграция схемы v2 на native). При `BACKEND_AUTH_ENABLED` — dual-write с `/api/profiles`.
@@ -213,6 +215,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | App | `store/app-store.ts` | `scenario`, `activeProfileId`, `activeProfile` |
 | Locale | `store/locale-store.ts` | `locale`, хук `useTranslation()` → `t()`, `content()` |
 | Theme | `store/theme-store.ts` | `light` / `dark` / `system` |
+| Hints | `store/hints-store.ts` | якоря coach marks и активный тур |
 
 Основные данные (профили, дневник, история сканов) — в SQLite/IndexedDB, не в Zustand.
 
@@ -257,6 +260,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `sos-passport-service.ts`, `emergency-contact-service.ts` | SOS и контакты |
 | `notification-*-service.ts` | Permissions, copy, deep-links, reconcile |
 | `analytics-service.ts` | Opt-in аналитика (`ANALYTICS_EVENT_NAMES`) |
+| `first-run-hints-service.ts` | Coach marks после регистрации: `hintsEligible:<userId>`, `hintsSeenTours:<userId>` |
 | `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN` |
 
 Полный список — [`codebase-index.md`](./codebase-index.md).
@@ -283,6 +287,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
 | `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` (default **on**; `false`/`off` disables) | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
 | `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY` (default **on**; `false`/`off` disables) | Google Air Quality (UAQI + советы) через API proxy |
+| `MARKET_ENABLED` | `EXPO_PUBLIC_MARKET` (default **off**) | Показать вкладку Маркет; иначе `href: null` и `/market` → Главная |
 | `MARKET_LIVE_CATALOG_ENABLED` | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` (default **on**; `false`/`off` disables) | `GET /api/market/catalog` only when payload is curated `MarketplaceProduct`; legacy `CatalogProduct` / empty → last-good / seed |
 | `MARKET_MEDICINES_ENABLED` | `EXPO_PUBLIC_MARKET_MEDICINES` (default **on**; `false`/`off` disables) | OTC-аптечные карточки на Маркете |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
@@ -682,7 +687,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report*` |
 | Pollen / geo / air / market | `pollen-*` (в т.ч. `pollen-upi`, `pollen-plume`, `pollen-google-*`), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog`, `wellness*` |
 | Auth / sync | `auth`, `password`, `secure-random`, `phone`, `login-field`, `sync`, `crypto` |
-| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
+| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `medical-*`, `beta-metrics` |
 
 ### `@allerguide/ai` (`packages/ai/`)
 
@@ -774,7 +779,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | Компонент | Файл | Включение |
 |-----------|------|-----------|
 | Аналитика | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED`, опц. `EXPO_PUBLIC_ANALYTICS_ENDPOINT` |
-| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*` |
+| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*`, `hint_tour_*` |
 | Crash reporting | `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN`; иначе console |
 
 ---
@@ -830,6 +835,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | `false` (staging `true`) | Числа/прогноз карты — Google Pollen |
 | `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` (staging `true`) | Гео-шлейф пыльцы на карте |
 | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` (staging `true`) | Интерактивный Yandex basemap через API-embed |
+| `EXPO_PUBLIC_MARKET` | `false` | Показать вкладку Маркет; иначе скрыта, `/market` → Главная |
 | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` | `true` (default on) | Живой каталог Маркета; `false`/`off` — только seed |
 | `EXPO_PUBLIC_MARKET_MEDICINES` | `true` (default on) | OTC-карточки аптек на Маркете |
 | `EXPO_PUBLIC_MAP_PLACES` | `true` (default on) | Live Places (New) searchNearby via API; `false`/`off` disables |

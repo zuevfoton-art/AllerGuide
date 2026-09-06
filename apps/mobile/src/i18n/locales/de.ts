@@ -872,6 +872,88 @@ const de: LocaleMessages = {
       sos: { title: 'Emergency SOS', desc: 'Allergy passport and emergency contacts.' },
     },
   },
+  hints: {
+    step: 'Schritt {{current}} von {{total}}',
+    next: 'Weiter',
+    done: 'Verstanden',
+    skip: 'Hinweise überspringen',
+    tours: {
+      home: {
+        profile: {
+          title: 'Ihr Profil',
+          body: 'Hier wechseln Sie Profile und öffnen die Einstellungen.',
+        },
+        wellness: {
+          title: 'Wie geht es Ihnen heute',
+          body: 'Der Index verbindet Pollen, Luft und Tagebuch. Tippen Sie für Details.',
+        },
+        insights: {
+          title: 'Was heute tun',
+          body: 'Kurze Hinweise anhand Ihres Profils und Tagebuchs.',
+        },
+        scanner: {
+          title: 'Scanner',
+          body: 'Prüfen Sie Produktetiketten und Speisekarten vor dem Essen.',
+        },
+        sos: {
+          title: 'SOS',
+          body: 'Allergiepass und Notruf — immer greifbar.',
+        },
+      },
+      diary: {
+        newEntry: {
+          title: 'Neuer Eintrag',
+          body: 'Halten Sie Symptome, Essen und Medikamente fest, damit Muster sichtbar werden.',
+        },
+        course: {
+          title: 'Therapieverläufe',
+          body: 'Hier richten Sie Erhaltungstherapie und Kurse ein.',
+        },
+        report: {
+          title: 'Arztbericht',
+          body: 'Sammeln Sie Einträge in einer Datei für den Termin.',
+        },
+      },
+      scanner: {
+        photo: {
+          title: 'Foto der Zutaten',
+          body: 'Fotografieren Sie ein Etikett oder die Speisekarte — die App findet Allergene.',
+        },
+        barcode: {
+          title: 'Barcode',
+          body: 'Richten Sie die Kamera auf den Code — schneller als Kleingedrucktes.',
+        },
+        manual: {
+          title: 'Manuell eingeben',
+          body: 'Wenn das Foto unscharf ist, tippen Sie die Zutaten ein.',
+        },
+      },
+      map: {
+        status: {
+          title: 'Pollen in der Nähe',
+          body: 'Aktueller Wert der gewählten Pflanze in Ihrer Gegend.',
+        },
+        layers: {
+          title: 'Kartenebenen',
+          body: 'Wechseln Sie zwischen Pollen und Orten und wählen Sie eine Pflanze.',
+        },
+      },
+      sos: {
+        call: {
+          title: 'Notruf',
+          body: 'Ein Tipp ruft den Notdienst oder eine nahestehende Person.',
+        },
+        passport: {
+          title: 'Allergiepass',
+          body: 'Name, Allergene und wichtige Angaben für Menschen in der Nähe.',
+        },
+        contacts: {
+          title: 'Notfallkontakte',
+          body: 'Fügen Sie Personen hinzu, die Sie von diesem Bildschirm anrufen können.',
+        },
+      },
+    },
+  },
   profileSetup: {
     titleSelf: 'Ihr Profil',
     titleChild: 'Kinderprofil',

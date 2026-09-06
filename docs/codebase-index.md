@@ -109,7 +109,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `token-session`, `secure-settings` | core `auth`/`login-field`/`phone`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` + `lib/sync-payload.ts` |
 | **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`, `open-food-facts` (normalize/URL, без HTTP); API `catalog.ts` + `open-food-facts` |
-| **Market** | `(tabs)/market.tsx` | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
+| **Market** | `(tabs)/market.tsx` (скрыт, пока `EXPO_PUBLIC_MARKET=true`) | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
 | **Clinical** | `asit-course` / `prescribed-therapy` + `use-prescription-parser` + `components/therapy/*` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
 | **Doctor report** | `doctor-report.tsx` | `doctor-report-service` | core `doctor-report*` |
@@ -133,7 +133,7 @@ src/db/               # init, init.native, migrations, web-store, web-collection
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`, `use-hint-tour`, `use-reduce-motion`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
@@ -145,13 +145,13 @@ src/modules/marketplace/
 |------|------------|
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
-| `(tabs)/_layout.tsx` | Нижние табы (6 штук) + кастомные кнопки |
+| `(tabs)/_layout.tsx` | Нижние табы (5 видимых; Маркет за `EXPO_PUBLIC_MARKET`) + кастомные кнопки |
 | `(tabs)/home.tsx` | Dashboard / двухслойный wellness / home-insights |
 | `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |
-| `(tabs)/market.tsx` | Safe-product marketplace |
+| `(tabs)/market.tsx` | Safe-product marketplace (скрыт, пока `EXPO_PUBLIC_MARKET=true`) |
 | `(tabs)/sos.tsx` | SOS emergency-only (без редактирования) |
 | `onboarding-intro.tsx` / `onboarding.tsx` | Intro + сценарий |
 | `profile-setup.tsx` | Мастер профиля |
@@ -184,7 +184,7 @@ src/modules/marketplace/
 | Clinical | `asit-course-service`, `asit-reminder-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy-service`, `prescribed-therapy-reminder-service`, `clinical-reminder-service`, `reminder-reconcile-service`, `prescription-ocr-service`, `prescription-photo-service` |
 | Pollen / map | `pollen-map-service`, `pollen-hourly-service`, `pollen-heatmap-service`, `pollen-plume-service`, `pollen-reminder-service`, `air-quality-service`, `wind-service`, `location-service`, `place-service`, `map-basemap`, `google-maps-api-key`, `yandex-interactive-map-url` |
 | Sync / backup | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` |
-| Settings / ops | `settings-service`, `secure-settings-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
+| Settings / ops | `settings-service`, `secure-settings-service`, `first-run-hints-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
 
 ### DB / store / i18n
 
@@ -201,6 +201,7 @@ src/modules/marketplace/
 | `src/store/app-store.ts` | Active profile, scenario |
 | `src/store/locale-store.ts` | **`useTranslation()`** — основной i18n |
 | `src/store/theme-store.ts` | Light/dark/system |
+| `src/store/hints-store.ts` | First-run coach marks: anchors + active tour |
 | `src/i18n/types.ts` | `AppLocale` + `LocaleMessages` |
 | `src/i18n/locales/*.ts` | Каталоги строк (ru/en/es/fr/de/it) |
 
@@ -212,7 +213,7 @@ src/modules/marketplace/
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`, `map/MapCanvas`, `MapLayerLegend`, `MapPollenDetails`, `MapPlacesPanel`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
-- **Folders:** `brand/`, `onboarding/`, `profile-setup/`
+- **Folders:** `brand/`, `onboarding/`, `profile-setup/`, `hints/`
 
 ### Config
 
@@ -291,7 +292,7 @@ Barrel: `index.ts`. Pure TS.
 | Pollen / geo / air / market | `pollen-*` (taxonomy, regions, calendar, thresholds, map, upi, plant-detail, google-forecast, google-normalize, species-heatmap, plume, reminder), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog` |
 | Sync / crypto | `sync`, `crypto` |
 | Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `secure-random` |
-| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
+| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
 
 Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,phase-4,types}.ts` (за `cross-reactions/index.ts`).
 
@@ -343,11 +344,12 @@ Barrel: `index.ts`. Pure TS.
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
 | `MAP_PLACES` / `LIVE_MAP` (default on) | `features.ts` → `place-service.ts` | `MAP_PLACES_ENABLED` (default on) + Places key |
 | `AIR_QUALITY` (default on) | `features.ts` → `air-quality-service.ts` | `AIR_QUALITY_ENABLED` (default on) + AQ key |
+| `MARKET` (default off) | `features.ts` → `(tabs)/_layout.tsx`, `market.tsx` | — |
 | `MARKET_LIVE_CATALOG` / `MARKET_MEDICINES` (default on) | `features.ts` → `market-api.ts` | `GET /api/market/catalog` |
 | `SENTRY_DSN` | `error-reporting.ts` | — |
 | `API_URL` | `api-client` и др. | — |
 
-По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и **Market** (default on; `false`/`off` выключает). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
+По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и живого каталога Маркета (`MARKET_LIVE_CATALOG` / `MARKET_MEDICINES`, default on; `false`/`off` выключает). Вкладка Маркет отдельно за `EXPO_PUBLIC_MARKET` (default off). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
 
 ---
 

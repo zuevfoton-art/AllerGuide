@@ -48,6 +48,8 @@ import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
@@ -115,6 +117,7 @@ export default function DiaryScreen() {
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
+  useHintTour('diary');
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
@@ -496,32 +499,39 @@ export default function DiaryScreen() {
         </View>
       </View>
 
-      <Button
-        testID="diary-new-entry"
-        label={t('diary.newEntry')}
-        variant="primary"
-        block
-        onPress={() => setEntryPickerOpen(true)}
-      />
+      <HintAnchor id="diary.newEntry">
+        <Button
+          testID="diary-new-entry"
+          label={t('diary.newEntry')}
+          variant="primary"
+          block
+          onPress={() => setEntryPickerOpen(true)}
+        />
+      </HintAnchor>
       <View style={styles.actionRow}>
         <View style={styles.actionHalf}>
-          <Button
-            testID="diary-setup-course"
-            label={t('diary.courseShort')}
-            variant="secondary"
-            block
-            icon="medical"
-            onPress={() => setCoursePickerOpen(true)}
-          />
+          <HintAnchor id="diary.course">
+            <Button
+              testID="diary-setup-course"
+              label={t('diary.courseShort')}
+              variant="secondary"
+              block
+              icon="medical"
+              onPress={() => setCoursePickerOpen(true)}
+            />
+          </HintAnchor>
         </View>
         <View style={styles.actionHalf}>
-          <Button
-            label={t('diary.reportShort')}
-            variant="secondary"
-            block
-            icon="document"
-            onPress={() => router.push('/doctor-report' as any)}
-          />
+          <HintAnchor id="diary.report">
+            <Button
+              testID="diary-report"
+              label={t('diary.reportShort')}
+              variant="secondary"
+              block
+              icon="document"
+              onPress={() => router.push('/doctor-report' as any)}
+            />
+          </HintAnchor>
         </View>
       </View>
 

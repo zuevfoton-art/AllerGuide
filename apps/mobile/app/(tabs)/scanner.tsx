@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/src/components/Screen';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { ErrorState } from '@/src/components/ErrorState';
@@ -29,6 +31,7 @@ export default function ScannerScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const scan = useScannerController();
+  useHintTour('scanner');
   const verdictColors = useZoneColors(scan.verdictZone);
 
   if (scan.pendingPhoto) {
@@ -119,35 +122,41 @@ export default function ScannerScreen() {
         </View>
       </View>
 
-      <Button
-        testID="scanner-primary-camera"
-        label={t('scanner.smartScan')}
-        variant="primary"
-        block
-        disabled={scan.loading}
-        onPress={() => void scan.openCamera('scanner')}
-      />
+      <HintAnchor id="scanner.photo">
+        <Button
+          testID="scanner-primary-camera"
+          label={t('scanner.smartScan')}
+          variant="primary"
+          block
+          disabled={scan.loading}
+          onPress={() => void scan.openCamera('scanner')}
+        />
+      </HintAnchor>
 
       <View style={styles.secondaryRow}>
-        <Pressable
-          style={styles.barcodeBtn}
-          onPress={() => void scan.openCamera('barcode')}
-          testID="scanner-barcode"
-          accessibilityRole="button">
-          <Ionicons name="barcode-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
-        </Pressable>
-        <Pressable
-          style={styles.manualToggleBtn}
-          onPress={() => scan.setManualOpen((value) => !value)}
-          testID="scanner-toggle-manual"
-          accessibilityRole="button"
-          accessibilityState={{ expanded: scan.manualOpen }}>
-          <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>
-            {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
-          </Text>
-        </Pressable>
+        <HintAnchor id="scanner.barcode" style={{ flex: 1 }}>
+          <Pressable
+            style={styles.barcodeBtn}
+            onPress={() => void scan.openCamera('barcode')}
+            testID="scanner-barcode"
+            accessibilityRole="button">
+            <Ionicons name="barcode-outline" size={18} color={theme.colors.accent} />
+            <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
+          </Pressable>
+        </HintAnchor>
+        <HintAnchor id="scanner.manual" style={{ flex: 1 }}>
+          <Pressable
+            style={styles.manualToggleBtn}
+            onPress={() => scan.setManualOpen((value) => !value)}
+            testID="scanner-toggle-manual"
+            accessibilityRole="button"
+            accessibilityState={{ expanded: scan.manualOpen }}>
+            <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
+            <Text style={styles.secondaryBtnText}>
+              {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
+            </Text>
+          </Pressable>
+        </HintAnchor>
       </View>
 
       {!scan.displayResult && !scan.loading ? (

@@ -871,6 +871,88 @@ const es: LocaleMessages = {
       sos: { title: 'Emergency SOS', desc: 'Allergy passport and emergency contacts.' },
     },
   },
+  hints: {
+    step: 'Paso {{current}} de {{total}}',
+    next: 'Siguiente',
+    done: 'Entendido',
+    skip: 'Omitir sugerencias',
+    tours: {
+      home: {
+        profile: {
+          title: 'Su perfil',
+          body: 'Aquí cambia de perfil y abre los ajustes.',
+        },
+        wellness: {
+          title: 'Cómo se siente hoy',
+          body: 'El índice junta polen, aire y diario. Toque para ver detalles.',
+        },
+        insights: {
+          title: 'Qué hacer hoy',
+          body: 'Sugerencias breves según su perfil y su diario.',
+        },
+        scanner: {
+          title: 'Escáner',
+          body: 'Revise etiquetas y menús antes de comer.',
+        },
+        sos: {
+          title: 'SOS',
+          body: 'Pasaporte de alergia y llamada de emergencia, siempre a mano.',
+        },
+      },
+      diary: {
+        newEntry: {
+          title: 'Nueva entrada',
+          body: 'Anote síntomas, comidas y medicamentos para ver patrones.',
+        },
+        course: {
+          title: 'Cursos de tratamiento',
+          body: 'Aquí configura la terapia de mantenimiento y los cursos.',
+        },
+        report: {
+          title: 'Informe para el médico',
+          body: 'Reúna las notas en un archivo para llevar a la cita.',
+        },
+      },
+      scanner: {
+        photo: {
+          title: 'Foto de la composición',
+          body: 'Fotografíe una etiqueta o un menú: la app encontrará alérgenos.',
+        },
+        barcode: {
+          title: 'Código de barras',
+          body: 'Apunte la cámara al código: más rápido que la letra pequeña.',
+        },
+        manual: {
+          title: 'Escribir a mano',
+          body: 'Si la foto está borrosa, escriba la composición.',
+        },
+      },
+      map: {
+        status: {
+          title: 'Polen cerca',
+          body: 'Nivel actual de la planta elegida en su zona.',
+        },
+        layers: {
+          title: 'Capas del mapa',
+          body: 'Alterne polen y lugares, y elija una planta.',
+        },
+      },
+      sos: {
+        call: {
+          title: 'Llamada de emergencia',
+          body: 'Un toque llama a emergencias o a un contacto cercano.',
+        },
+        passport: {
+          title: 'Pasaporte de alergia',
+          body: 'Nombre, alérgenos y datos clave para quien esté cerca.',
+        },
+        contacts: {
+          title: 'Contactos de emergencia',
+          body: 'Añada personas a las que pueda llamar desde esta pantalla.',
+        },
+      },
+    },
+  },
   profileSetup: {
     titleSelf: 'Tu perfil',
     titleChild: 'Perfil del niño',
