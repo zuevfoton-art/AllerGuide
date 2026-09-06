@@ -74,7 +74,6 @@ export function AirQualityCard({ snapshot, loading }: AirQualityCardProps) {
           })}
         </Text>
       ) : null}
-      <Text style={styles.meta}>{t('map.airQualitySource')}</Text>
       <Pressable
         onPress={() => setExpanded((value) => !value)}
         accessibilityRole="button"

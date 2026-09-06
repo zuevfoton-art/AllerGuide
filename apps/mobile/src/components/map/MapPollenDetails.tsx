@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import {
   formatPollenMonth,
+  type AirQualitySnapshot,
   type PollenMapTaxonId,
   type PollenUpiSnapshot,
 } from '@allerguide/core';
@@ -13,7 +14,6 @@ import type { MapScreenStyles } from '@/src/components/map/map-screen-styles';
 import type { AppTheme } from '@/src/hooks/use-theme';
 import type { Zone } from '@/src/hooks/use-zone-colors';
 import { isGoogleAirQualityAvailable } from '@/src/services/air-quality-service';
-import type { AirQualitySnapshot } from '@allerguide/core';
 import type { PollenMapSnapshot } from '@/src/services/pollen-map-service';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -88,7 +88,7 @@ export function MapPollenDetails({
             <GlassCard style={styles.calendarCard}>
               <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
               <View style={styles.calendarBody}>
-                <Text style={styles.calendarTitle}>{t('map.pollenCalendarFallback')}</Text>
+                <Text style={styles.calendarTitle}>{t('map.season')}</Text>
                 {pollenPeaks.length > 0 ? (
                   pollenPeaks.map((peak) => (
                     <Text key={peak.taxonId} style={styles.calendarText}>
