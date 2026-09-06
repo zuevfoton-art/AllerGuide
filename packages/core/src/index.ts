@@ -8,6 +8,7 @@ export * from './catalog-cache';
 export * from './types';
 export * from './allergens';
 export * from './onboarding';
+export * from './first-run-hints';
 export * from './auth';
 export * from './phone';
 export * from './login-field';
