@@ -142,9 +142,7 @@ export default function HomeScreen() {
       refreshing={wellnessState.refreshing}
       brandHeaderRight={
         <>
-          <HintAnchor id="home.profile">
-            <ProfileHeaderButton destination="hub" />
-          </HintAnchor>
+          <ProfileHeaderButton destination="hub" hintAnchorId="home.profile" />
           <Pressable
             onPress={() => router.push('/(tabs)/sos')}
             style={styles.sosBtn}
