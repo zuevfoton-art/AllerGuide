@@ -179,14 +179,14 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 | `profile.tsx` | Хаб аккаунта: профили, тема, язык, бэкап, lock, регион пыления |
 | `profiles.tsx`, `settings.tsx` | Legacy — `<Redirect href="/profile" />` |
 
-**Вкладки** (`app/(tabs)/_layout.tsx`) — все видимы:
+**Вкладки** (`app/(tabs)/_layout.tsx`) — пять видимых; Маркет скрыт, пока `EXPO_PUBLIC_MARKET=true`:
 
 | Вкладка | Файл | Функция |
 |---------|------|---------|
 | Главная | `home.tsx` | `ScreenBrandHeader`, двухслойный wellness, plain-language insights, reminder терапии |
 | Дневник | `diary.tsx` | «Новая запись» (picker → секция), «Настроить курс» (терапия/АСИТ), история; карточки астмы/насекомых/лекарств при gating |
 | Сканер | `scanner.tsx` | Штрихкод, OCR, ручной ввод |
-| Маркет | `market.tsx` | Safe-product marketplace (Yandex Market) |
+| Маркет | `market.tsx` | Safe-product marketplace (Yandex Market). Скрыт из таб-бара (`href: null`, без `tabBarButton` — Expo Router их не сочетает); `/market` → Главная, пока `MARKET_ENABLED` выкл. Код экрана остаётся. |
 | Карта | `map.tsx` | Пыление / места (Yandex; опц. Google heatmap) |
 | SOS | `sos.tsx` | Emergency-only: паспорт и контакты только для чтения |
 
@@ -282,6 +282,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `GOOGLE_MAP_PRIMARY_ENABLED` | `EXPO_PUBLIC_GOOGLE_MAP_PRIMARY` | Google как primary basemap единого map UX |
 | `MAP_PLACES_ENABLED` | `EXPO_PUBLIC_MAP_PLACES` / `EXPO_PUBLIC_LIVE_MAP` (default **on**; `false`/`off` disables) | Live Places API (New): Nearby, Autocomplete, Text Search, Details через API |
 | `AIR_QUALITY_GOOGLE_ENABLED` | `EXPO_PUBLIC_AIR_QUALITY` (default **on**; `false`/`off` disables) | Google Air Quality (UAQI + советы) через API proxy |
+| `MARKET_ENABLED` | `EXPO_PUBLIC_MARKET` (default **off**) | Показать вкладку Маркет; иначе `href: null` и `/market` → Главная |
 | `MARKET_LIVE_CATALOG_ENABLED` | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` (default **on**; `false`/`off` disables) | `GET /api/market/catalog` only when payload is curated `MarketplaceProduct`; legacy `CatalogProduct` / empty → last-good / seed |
 | `MARKET_MEDICINES_ENABLED` | `EXPO_PUBLIC_MARKET_MEDICINES` (default **on**; `false`/`off` disables) | OTC-аптечные карточки на Маркете |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
@@ -819,6 +820,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY` | `false` (staging `true`) | Числа/прогноз карты — Google Pollen |
 | `EXPO_PUBLIC_MAP_POLLEN_PLUME` | `false` (staging `true`) | Гео-шлейф пыльцы на карте |
 | `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE` | `false` (staging `true`) | Интерактивный Yandex basemap через API-embed |
+| `EXPO_PUBLIC_MARKET` | `false` | Показать вкладку Маркет; иначе скрыта, `/market` → Главная |
 | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` | `true` (default on) | Живой каталог Маркета; `false`/`off` — только seed |
 | `EXPO_PUBLIC_MARKET_MEDICINES` | `true` (default on) | OTC-карточки аптек на Маркете |
 | `EXPO_PUBLIC_MAP_PLACES` | `true` (default on) | Live Places (New) searchNearby via API; `false`/`off` disables |
