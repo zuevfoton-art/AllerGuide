@@ -89,7 +89,10 @@ export default function ResetPasswordScreen() {
       <AuthField
         label={t('auth.resetPassword.newPassword')}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(value) => {
+          setPassword(value);
+          if (error) setError('');
+        }}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
         returnKeyType="next"
@@ -102,7 +105,10 @@ export default function ResetPasswordScreen() {
         ref={confirmRef}
         label={t('auth.resetPassword.confirmPassword')}
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        onChangeText={(value) => {
+          setConfirmPassword(value);
+          if (error) setError('');
+        }}
         secureTextEntry
         returnKeyType="go"
         submitBehavior="blurAndSubmit"

@@ -74,7 +74,10 @@ export default function RegisterScreen() {
         ref={passwordRef}
         label={t('common.password')}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(value) => {
+          setPassword(value);
+          if (error) setError('');
+        }}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
         testID="auth-password-input"
@@ -88,7 +91,10 @@ export default function RegisterScreen() {
         ref={confirmRef}
         label={t('auth.confirmPassword')}
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        onChangeText={(value) => {
+          setConfirmPassword(value);
+          if (error) setError('');
+        }}
         secureTextEntry
         testID="auth-confirm-password-input"
         returnKeyType="go"
