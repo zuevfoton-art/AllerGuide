@@ -6,7 +6,7 @@
 2. **Расширение профиля** — срок появления аллергии + сложные сценарии с сопутствующими заболеваниями (EAACI / РААКИ)  
 3. **Первый инкремент реализации** — маппинг id, SYMPTOM_CATALOG, тип «крапивница» ([PR #124](https://github.com/zuevfoton-art/AllerGuide/pull/124))
 
-**Связано:** [`allergy-taxonomy-issues.md`](./allergy-taxonomy-issues.md) · [`clinical-features-raaci.md`](./clinical-features-raaci.md) · [`clinical-accuracy-roadmap.md`](./clinical-accuracy-roadmap.md) · [`architecture.md`](./architecture.md)
+**Связано:** [`allergy-taxonomy-issues.md`](./allergy-taxonomy-issues.md) · [`clinical-features-raaci.md`](./clinical-features-raaci.md) · [`clinical-accuracy-roadmap.md`](./clinical-accuracy-roadmap.md) · [`condition-allergen-quick-pick-plan.md`](./condition-allergen-quick-pick-plan.md) · [`architecture.md`](./architecture.md)
 
 ---
 
