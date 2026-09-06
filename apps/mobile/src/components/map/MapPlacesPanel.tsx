@@ -1,7 +1,6 @@
-import type { MapPlaceFilterId } from '@allerguide/core';
+import type { MapPlaceFilterId, PlaceAutocompleteSuggestion } from '@allerguide/core';
 import { PlaceSearchBar } from '@/src/components/PlaceSearchBar';
 import { MapPoiSheet } from '@/src/components/MapPoiSheet';
-import type { PlaceAutocompleteSuggestion } from '@allerguide/core';
 import type { MapPoiWithDistance } from '@/src/services/place-service';
 import { useTranslation } from '@/src/store/locale-store';
 
