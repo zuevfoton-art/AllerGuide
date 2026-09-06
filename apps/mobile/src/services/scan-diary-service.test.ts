@@ -75,13 +75,39 @@ describe('buildScanDiaryDraft', () => {
   });
 
   it('takes the title before the composition marker as the dish name', () => {
+    const scanText = 'Шоколад молочный. Состав: сахар, молоко сухое цельное, лецитин соевый.';
     const draft = buildScanDiaryDraft({
-      result: scanResult({ productName: 'Продукт (OCR)' }),
-      scanText: 'Шоколад молочный. Состав: сахар, молоко сухое цельное, лецитин соевый.',
+      result: scanResult({
+        productName: 'Продукт (OCR)',
+        // Manual / OCR scans keep the title in `text` and strip it from `ingredientsBlock`.
+        ocr: {
+          text: scanText,
+          ingredientsBlock: 'сахар, молоко сухое цельное, лецитин соевый.',
+          source: 'manual',
+          warnings: [],
+        },
+      }),
+      scanText,
     });
 
     expect(draft.dish.food).toBe('Шоколад молочный');
     expect(draft.initialStepId).toBe('reaction');
+    expect(draft.dish.components.some((item) => item.allergenId === 'milk')).toBe(true);
+  });
+
+  it('does not mine a name out of a composition-only OCR block', () => {
+    const ingredientsBlock = 'сахар, молоко сухое цельное, какао-масло, лецитин соевый.';
+    const draft = buildScanDiaryDraft({
+      result: scanResult({
+        productName: 'Продукт (OCR)',
+        source: 'ocr',
+        ocr: { text: ingredientsBlock, ingredientsBlock, source: 'normalized', warnings: [] },
+      }),
+      scanText: '',
+    });
+
+    expect(draft.dish.food).toBe('');
+    expect(draft.initialStepId).toBe('food');
     expect(draft.dish.components.some((item) => item.allergenId === 'milk')).toBe(true);
   });
 

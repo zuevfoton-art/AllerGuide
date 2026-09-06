@@ -62,6 +62,20 @@ function traceAllergenIds(result: ScanResultExtended): string[] {
   return mapExternalAllergenIds(result.traceMatches ?? []);
 }
 
+/**
+ * Text that can still hold the product title. OCR normalization keeps only the
+ * composition block for product/medicine/cosmetics modes, so that block is not
+ * a name source — mining it would yield the first ingredient as a dish name.
+ */
+function resolveTitleText(result: ScanResultExtended, scanText: string): string {
+  const manual = scanText.trim();
+  if (manual && !isManualBarcodeInput(manual)) return manual;
+
+  const ocr = result.ocr;
+  if (!ocr?.text?.trim()) return '';
+  return ocr.ingredientsBlock?.trim() === ocr.text.trim() ? '' : ocr.text.trim();
+}
+
 /** Composition text the verdict was built from, ignoring bare barcode input. */
 function resolveCompositionText(result: ScanResultExtended, scanText: string): string {
   const fromProduct = result.productIngredients?.trim();
@@ -88,7 +102,7 @@ function dishTitleBeforeComposition(text: string): string {
     .trim();
 }
 
-function resolveFoodName(result: ScanResultExtended, compositionText: string): string {
+function resolveFoodName(result: ScanResultExtended, titleText: string): string {
   const fromVision = result.dishVision?.dishName?.trim();
   if (fromVision) return fromVision.slice(0, MAX_FOOD_NAME_CHARS);
 
@@ -97,10 +111,10 @@ function resolveFoodName(result: ScanResultExtended, compositionText: string): s
     return fromProduct.slice(0, MAX_FOOD_NAME_CHARS);
   }
 
-  const title = dishTitleBeforeComposition(compositionText);
+  const title = dishTitleBeforeComposition(titleText);
   if (title) return title.slice(0, MAX_FOOD_NAME_CHARS);
 
-  return extractDishSearchQuery(compositionText).slice(0, MAX_FOOD_NAME_CHARS);
+  return extractDishSearchQuery(titleText).slice(0, MAX_FOOD_NAME_CHARS);
 }
 
 /**
@@ -115,7 +129,7 @@ export function buildScanDiaryDraft(input: {
 }): ScanDiaryDraft {
   const { result } = input;
   const compositionText = resolveCompositionText(result, input.scanText);
-  const food = resolveFoodName(result, compositionText);
+  const food = resolveFoodName(result, resolveTitleText(result, input.scanText));
   const allergenTags = declaredAllergenIds(result);
   const traceTags = traceAllergenIds(result);
   const barcode =
