@@ -34,6 +34,7 @@ import {
   usesCookieAuth,
 } from '@/src/services/token-session';
 import { trackEvent } from '@/src/services/analytics-service';
+import { clearHintsState, markHintsEligible } from '@/src/services/first-run-hints-service';
 import { useAppStore } from '@/src/store/app-store';
 import { clearRecoveryKey } from '@/src/services/backup-crypto';
 import { yieldToRender } from '@/src/utils/yield-to-render';
@@ -168,6 +169,7 @@ export async function registerUser(input: {
 
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
+    markHintsEligible(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
 
     trackEvent('auth_register', { method: input.loginType, source: 'backend' });
@@ -201,6 +203,7 @@ export async function registerUser(input: {
   if (!created) return { ok: false, error: 'Не удалось создать аккаунт.' };
 
   setSessionUserId(created.id);
+  markHintsEligible(created.id);
   trackEvent('auth_register', { method: input.loginType, source: 'local' });
   return { ok: true, user: toAuthUser(created) };
 }
@@ -290,6 +293,7 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
   db.runSync('DELETE FROM alias_feedback');
   db.runSync('DELETE FROM users WHERE id = ?', [userId]);
 
+  clearHintsState(userId);
   clearRecoveryKey();
   clearSessionUserId();
   clearCachedAuthUser();
