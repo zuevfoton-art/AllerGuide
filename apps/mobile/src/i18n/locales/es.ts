@@ -1335,6 +1335,7 @@ const es: LocaleMessages = {
     recommendedTitle: 'Recomendados para los tipos elegidos',
     recommendedHint: 'Marca los tuyos. El resto está en la lista completa.',
     recommendedGroup: '«{{label}}»',
+    showMore: 'Mostrar {{count}} más',
     fromCatalog: 'De la lista completa',
     openCatalog: 'Elegir de la lista completa',
     crossTitle: 'Posibles reacciones cruzadas',

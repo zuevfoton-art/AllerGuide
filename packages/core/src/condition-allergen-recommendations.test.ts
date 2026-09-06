@@ -60,6 +60,13 @@ describe('condition-allergen-recommendations', () => {
       'mugwort-pollen',
       'ragweed-pollen',
       'olive-pollen',
+      'hazel-pollen',
+      'oak-pollen',
+      'ash-pollen',
+      'saltwort-pollen',
+      'maple-pollen',
+      'poplar-pollen',
+      'willow-pollen',
     ]);
     expect(ids).toContain('birch-pollen');
     expect(ids).toContain('mugwort-pollen');

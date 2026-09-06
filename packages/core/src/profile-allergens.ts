@@ -94,7 +94,9 @@ export {
   parseOpenMeteoPollenHourly,
   profileHasPollenAllergen,
   profileMatchesPollenTaxon,
+  resolvePollenTaxonMatch,
   type OpenMeteoPollenTaxonId,
   type PollenReading,
   type PollenTaxonId,
+  type PollenTaxonMatchKind,
 } from './pollen-taxonomy';

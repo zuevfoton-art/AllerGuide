@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  isCalendarOnlyPollenOption,
   normalizeConditionOptionId,
   resolveConditionOptionAllergenId,
   resolveConditionOptionPollenTaxonId,
@@ -54,14 +53,18 @@ describe('condition-allergen-map', () => {
     expect(resolveConditionOptionAllergenId('drug', 'paracetamol')).toBe('paracetamol');
   });
 
-  it('maps alder/olive pollinosis options to dedicated allergen rows', () => {
+  it('maps alder/olive and former calendar-only options to dedicated allergen rows', () => {
     expect(resolveConditionOptionAllergenId('pollinosis', 'alder')).toBe('alder-pollen');
     expect(resolveConditionOptionAllergenId('pollinosis', 'olive-pollen')).toBe('olive-pollen');
     expect(resolveConditionOptionPollenTaxonId('pollinosis', 'alder')).toBe('alder_pollen');
     expect(resolveConditionOptionPollenTaxonId('pollinosis', 'olive-pollen')).toBe('olive_pollen');
-    expect(isCalendarOnlyPollenOption('alder')).toBe(false);
-    expect(isCalendarOnlyPollenOption('oak')).toBe(true);
-    expect(isCalendarOnlyPollenOption('birch-pollen')).toBe(false);
+    expect(resolveConditionOptionAllergenId('pollinosis', 'hazel')).toBe('hazel-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'oak')).toBe('oak-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'maple')).toBe('maple-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'ash')).toBe('ash-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'willow')).toBe('willow-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'poplar')).toBe('poplar-pollen');
+    expect(resolveConditionOptionAllergenId('pollinosis', 'saltwort')).toBe('saltwort-pollen');
     expect(resolveConditionOptionPollenTaxonId('pollinosis', 'hazel')).toBe('hazel_pollen');
     expect(resolveConditionOptionPollenTaxonId('pollinosis', 'maple')).toBe('maple_pollen');
   });

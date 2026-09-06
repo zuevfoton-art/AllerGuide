@@ -18,6 +18,16 @@ describe('diary-profile', () => {
     expect(ids).toContain('rhinitis');
   });
 
+  it('does not infer pollinosis from слива via the ива stem', () => {
+    const ids = inferConditionIdsFromAllergies(['Слива']);
+    expect(ids).not.toContain('pollinosis');
+    expect(ids).not.toContain('rhinitis');
+  });
+
+  it('still infers pollinosis from пыльца ивы', () => {
+    expect(inferConditionIdsFromAllergies(['Пыльца ивы'])).toContain('pollinosis');
+  });
+
   it('recommends scales only for explicit gating conditions', () => {
     expect(getRecommendedScalesForProfile(['Молоко'], ['food'])).toEqual([]);
   });

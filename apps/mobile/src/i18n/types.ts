@@ -1313,6 +1313,7 @@ export type LocaleMessages = {
     recommendedTitle: string;
     recommendedHint: string;
     recommendedGroup: string;
+    showMore: string;
     fromCatalog: string;
     openCatalog: string;
     crossTitle: string;

@@ -253,6 +253,7 @@ describe('Maestro nightly CI invariants', () => {
 
     const picker = read('apps/mobile/src/components/AllergenPicker.tsx');
     assert.match(picker, /allergen-recommended-\$\{group\.conditionId\}/);
+    assert.match(picker, /allergen-show-more-\$\{group\.conditionId\}/);
     assert.match(picker, /testID="allergen-open-catalog"/);
 
     const pollinosis = read('apps/mobile/.maestro/flows/profile-pollinosis-quick-pick.yaml');
@@ -261,8 +262,14 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(pollinosis, /id: allergen-mugwort-pollen/);
     assert.match(pollinosis, /id: allergen-recommended-pollinosis/);
     assert.match(pollinosis, /id: allergen-open-catalog/);
+    assert.match(pollinosis, /id: allergen-show-more-pollinosis/);
+    assert.match(pollinosis, /id: allergen-poplar-pollen/);
     assert.ok(
       pollinosis.indexOf('condition-pollinosis') < pollinosis.indexOf('allergen-birch-pollen'),
+    );
+    assert.ok(
+      pollinosis.indexOf('allergen-show-more-pollinosis') <
+        pollinosis.indexOf('allergen-poplar-pollen'),
     );
 
     const smokeAll = read('apps/mobile/.maestro/flows/smoke-all.yaml');

@@ -1344,6 +1344,7 @@ const en: LocaleMessages = {
     recommendedTitle: 'Recommended for selected types',
     recommendedHint: 'Mark yours. Everything else is in the full list.',
     recommendedGroup: '“{{label}}”',
+    showMore: 'Show {{count}} more',
     fromCatalog: 'From full list',
     openCatalog: 'Choose from full list',
     crossTitle: 'Possible cross-reactions',

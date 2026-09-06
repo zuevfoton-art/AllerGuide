@@ -1,4 +1,5 @@
 import type { AllergyConditionId } from './allergy-conditions';
+import { ALLERGENS } from './allergen-database';
 import { getCrossReactionsFor } from './cross-reactions';
 import type {
   ComorbidityLink,
@@ -134,12 +135,9 @@ const RESPIRATORY_CONDITIONS: AllergyConditionId[] = [
   'household',
 ];
 
-const POLLEN_ALLERGEN_IDS = new Set([
-  'birch-pollen',
-  'grass-pollen',
-  'ragweed-pollen',
-  'mugwort-pollen',
-]);
+const POLLEN_ALLERGEN_IDS = new Set(
+  ALLERGENS.filter((item) => item.id.endsWith('-pollen')).map((item) => item.id),
+);
 
 const FOOD_ALLERGEN_IDS = new Set([
   'milk',

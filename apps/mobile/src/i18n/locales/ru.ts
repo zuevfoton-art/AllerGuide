@@ -1346,6 +1346,7 @@ const ru: LocaleMessages = {
     recommendedTitle: 'Рекомендуем для выбранных типов',
     recommendedHint: 'Отметьте свои. Остальные — в полном списке.',
     recommendedGroup: '«{{label}}»',
+    showMore: 'Показать ещё {{count}}',
     fromCatalog: 'Из полного списка',
     openCatalog: 'Выбрать из полного списка',
     crossTitle: 'Возможные перекрёстные реакции',

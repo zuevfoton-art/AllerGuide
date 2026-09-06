@@ -33,7 +33,7 @@ apps/mobile/.maestro/
     _tap-register.yaml             # Text testID + «Зарегистрироваться»
     onboarding-smoke.yaml … settings-smoke.yaml
     sos-no-profile-smoke.yaml      # SOS call bar after last profile is removed
-    profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы (не в smoke-all)
+    profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы + «Показать ещё» (не в smoke-all)
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
     diary-photo-smoke.yaml         # §7.3 — skin photo step UI
     smoke-all.yaml                 # P2.1a — все offline
@@ -150,7 +150,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
 | `onboarding-intro-skip` + баннер «непредвиденная ошибка» | Hermes: `@noble/hashes` кэширует `crypto` при импорте. Соль — `getSecureRandomBytes` + `setSecureRandomBytes` из `src/install-runtime` / expo-crypto |
 | `allergen-milk` на шаге «Какая у тебя аллергия?» | Сначала `condition-food`, потом молоко. Общий `_complete-first-run-profile.yaml` |
-| Нет пыльцы полыни после «Поллиноз» | Рекомендации зависят от типа: `condition-pollinosis` → `allergen-birch-pollen` / `allergen-mugwort-pollen`. Standalone `profile-pollinosis-quick-pick.yaml` (не в `smoke-all`) |
+| Нет пыльцы полыни после «Поллиноз» | Рекомендации зависят от типа: `condition-pollinosis` → `allergen-birch-pollen` / `allergen-mugwort-pollen`. Тополь — под «Показать ещё». Standalone `profile-pollinosis-quick-pick.yaml` (не в `smoke-all`) |
 | `onboarding-intro-skip` + «Не удалось подключиться к серверу» | Staging release APK блокирует cleartext HTTP на `10.0.2.2`. `maestro-build-apk.sh staging` пишет `network_security_config` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |

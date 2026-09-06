@@ -282,6 +282,7 @@ Barrel: `index.ts`. Pure TS.
 |---------|-------------------|
 | Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `open-food-facts` (OFF normalize/URL, без HTTP), `adair-catalog` (`data/adair-registry.json`) |
 | Profiles | `profile-allergens`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `profile-symptom-baseline`, `profile-age`, `allergy-confirmations`, `condition-*`, `condition-allergen-recommendations`, `clinical-phenotypes`, `clinical-coding`, `list-input` |
+| Pollen match | `pollen-taxonomy` (`resolvePollenTaxonMatch`: exact / related / none) |
 | Diary / home | `diary` (barrel → `diary-schema` + `diary-format`), `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `scan-history-matches`, `alias-feedback`, `dish-components`, `name-matching` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `prescribed-therapy`, `insect-allergy`, `food-drug-allergy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios`, `beta-metrics`, `medical-disclaimer`, `medical-advisory-board` |
@@ -291,7 +292,7 @@ Barrel: `index.ts`. Pure TS.
 | Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `secure-random` |
 | Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
 
-Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,types}.ts` (за `cross-reactions/index.ts`).
+Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,phase-4,types}.ts` (за `cross-reactions/index.ts`).
 
 ### `@allerguide/ai` — `packages/ai/src/`
 

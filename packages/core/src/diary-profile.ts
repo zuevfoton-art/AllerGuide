@@ -39,7 +39,19 @@ const ALWAYS_VISIBLE_SECTIONS = new Set([
 ]);
 
 const POLLEN_PATTERN =
-  /пыльц|берёз|берез|ольх|лещин|амброз|полын|тимоф|злак|клён|клен|ясень|ива|топол|растени/i;
+  /пыльц|берёз|берез|ольх|лещин|амброз|полын|тимоф|злак|клён|клен|ясень|\bивы?\b|ивов|топол|растени/iu;
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Short labels like «Ива» must not match inside «Слива». */
+function textIncludesConditionLabel(text: string, label: string): boolean {
+  const needle = label.toLowerCase().trim();
+  if (!needle) return false;
+  if (needle.length >= 4) return text.includes(needle);
+  return new RegExp(`(?:^|[^\\p{L}])${escapeRegExp(needle)}(?:[^\\p{L}]|$)`, 'iu').test(text);
+}
 const ASTHMA_MARKERS = ['астм', 'бронх'];
 const DERMATITIS_MARKERS = ['дерматит', 'экзем', 'нейродерм', 'атопическ'];
 const RHINITIS_MARKERS = ['ринит', 'насморк', 'поллиноз'];
@@ -79,11 +91,11 @@ export function inferConditionIdsFromAllergies(allergies: string[]): AllergyCond
     if (INSECT_MARKERS.some((marker) => lower.includes(marker))) ids.add('insect');
 
     for (const condition of ALLERGY_CONDITION_TYPES) {
-      if (lower.includes(condition.label.toLowerCase())) {
+      if (textIncludesConditionLabel(lower, condition.label)) {
         ids.add(condition.id);
       }
       for (const option of condition.options ?? []) {
-        if (lower.includes(option.label.toLowerCase())) {
+        if (textIncludesConditionLabel(lower, option.label)) {
           ids.add(condition.id);
         }
       }

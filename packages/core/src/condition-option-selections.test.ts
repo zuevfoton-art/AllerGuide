@@ -16,6 +16,13 @@ describe('condition-option-selections', () => {
     ).toEqual(['milk', 'peanut', 'birch-pollen', 'alder-pollen']);
   });
 
+  it('pre-seeds oak and hazel pollinosis options to dedicated catalog rows', () => {
+    expect(allergenIdsFromConditionOptions({ pollinosis: ['oak', 'hazel'] })).toEqual([
+      'oak-pollen',
+      'hazel-pollen',
+    ]);
+  });
+
   it('merges pre-seed without removing manual picks', () => {
     expect(mergePreSeededAllergens(['milk', 'eggs'], ['milk'], ['milk', 'peanut'])).toEqual([
       'milk',

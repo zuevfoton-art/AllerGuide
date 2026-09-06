@@ -22,6 +22,13 @@ export const CONDITION_RECOMMENDED_ALLERGEN_IDS: Record<AllergyConditionId, Prof
     'mugwort-pollen',
     'ragweed-pollen',
     'olive-pollen',
+    'hazel-pollen',
+    'oak-pollen',
+    'ash-pollen',
+    'saltwort-pollen',
+    'maple-pollen',
+    'poplar-pollen',
+    'willow-pollen',
   ],
   asthma: [
     'dust-mites',
