@@ -37,6 +37,12 @@ describe('clinical coding crosswalk', () => {
     expect(birch?.snomed).toBeTruthy();
     expect(getClinicalCoding('alder-pollen')?.icd11).toBe('CA08.4');
     expect(getClinicalCoding('olive-pollen')?.icd11).toBe('CA08.4');
+    expect(getClinicalCoding('oak-pollen')?.icd11).toBe('CA08.4');
+    expect(getClinicalCoding('hazel-pollen')?.icd11).toBe('CA08.4');
+    expect(getClinicalCoding('mugwort-pollen')?.snomed).toBe('22481000122100');
+    expect(getClinicalCoding('mugwort-pollen')?.snomed).not.toBe(
+      getClinicalCoding('grass-pollen')?.snomed,
+    );
   });
 
   it('builds coded lines with confirmation labels', () => {

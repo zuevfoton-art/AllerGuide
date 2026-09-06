@@ -102,6 +102,29 @@ describe('allergen database', () => {
     expect(CROSS_REACTIONS.length).toBeGreaterThanOrEqual(40);
   });
 
+  it('keeps pollen keyword stems long enough to avoid food false positives', () => {
+    const pollenRows = ALLERGENS.filter(
+      (item) => item.category === 'environmental' && item.id.endsWith('-pollen'),
+    );
+    expect(pollenRows.length).toBeGreaterThanOrEqual(13);
+    for (const row of pollenRows) {
+      expect(row.keywords.length, row.id).toBeGreaterThan(0);
+      for (const keyword of row.keywords) {
+        expect(keyword.length, `${row.id}:${keyword}`).toBeGreaterThanOrEqual(4);
+      }
+    }
+    expect('слива'.includes('ива')).toBe(true);
+    expect(pollenRows.flatMap((row) => row.keywords)).not.toContain('ива');
+    expect(pollenRows.flatMap((row) => row.keywords)).not.toContain('дуб');
+  });
+
+  it('keeps both ends of every cross-reaction pair in the catalog', () => {
+    for (const reaction of CROSS_REACTIONS) {
+      expect(ALLERGENS.some((item) => item.id === reaction.fromId), reaction.fromId).toBe(true);
+      expect(ALLERGENS.some((item) => item.id === reaction.toId), reaction.toId).toBe(true);
+    }
+  });
+
   it('includes phase-2 pollen and food cross reactions', () => {
     const mugwort = findAllergenByName('Пыльца полыни');
     expect(mugwort).toBeDefined();
