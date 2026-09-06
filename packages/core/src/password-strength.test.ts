@@ -58,7 +58,9 @@ describe('evaluatePasswordStrength', () => {
   });
 
   it('rates 3 classes at length 12 with a digit as good', () => {
-    const result = evaluatePasswordStrength('SecretWord1');
+    const password = 'SecretWord12';
+    expect(password).toHaveLength(12);
+    const result = evaluatePasswordStrength(password);
     expect(result.meetsPolicy).toBe(true);
     expect(result.satisfiedClasses).toEqual(['lowercase', 'uppercase', 'digit']);
     expect(result.level).toBe('good');
@@ -71,7 +73,9 @@ describe('evaluatePasswordStrength', () => {
   });
 
   it('rates a long 3-class password as strong', () => {
-    const result = evaluatePasswordStrength('SecretWordLong1');
+    const password = 'SecretWordLong12';
+    expect(password).toHaveLength(16);
+    const result = evaluatePasswordStrength(password);
     expect(result.meetsPolicy).toBe(true);
     expect(result.satisfiedClasses).toEqual(['lowercase', 'uppercase', 'digit']);
     expect(result.level).toBe('strong');
