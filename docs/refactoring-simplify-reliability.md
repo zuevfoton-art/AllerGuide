@@ -69,7 +69,10 @@ flowchart LR
   W3[Wave3_WebDb]
   W4[Wave4_dedup]
   W5[Wave5_outbox]
-  W1 --> W2 --> W3 --> W4 --> W5
+  W6[Wave6_therapy]
+  W7[Wave7_wizard_map]
+  W8[Wave8_repos]
+  W1 --> W2 --> W3 --> W4 --> W5 --> W6 --> W7 --> W8
 ```
 
 ### Wave 1 — Transport resilience
@@ -97,7 +100,7 @@ pending alias уходит после успешного POST; unhandled route e
 - `map.tsx`: `useMapLiveData` (`refreshMapLiveData` / `searchMapThisArea`) +
   `MapLayerSwitcher` / `MapPollenStatusCard` / `MapDoctorsSection` / `map-constants`.
 - Экраны — wiring; I/O остаётся в services.
-- ASIT / prescribed-therapy: shared course-editor — follow-up после merge.
+- ASIT / prescribed-therapy: shared course-editor — Wave 6.
 
 ### Wave 3 — Kill WebDb SQL parsing (в `main`, #325)
 
@@ -114,8 +117,7 @@ Native SQLite не дублируем (`init.native.ts`).
 | 3.5 | Unmatched SQL → `console.warn('[WebDb] unmatched SQL', sql)` и `void` / `null` / `[]` (не throw) | router |
 | 3.6 | Регрессия + unmatched / alias DELETE-by-id | `init-*.test.ts`, `web-sql-router.test.ts` |
 
-Полные typed repositories (одна модель native + web без SQL-строк) — follow-up;
-в этом PR `DbLike` сохраняем.
+Полные typed repositories (одна модель native + web без SQL-строк) — Wave 8.
 
 **Критерий готовности:** `init-diary` / `init-profile` / `init-scan` зелёные;
 unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-by-id через `getDb`.
@@ -135,7 +137,7 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 
 **Критерий готовности:** `pnpm --filter @allerguide/core test` + typecheck core/mobile/api; API `open-food-facts.test.ts` зелёный; импорты `diary.ts` / `@allerguide/core` без изменений.
 
-### Wave 5 — Offline→online reconciliation (этот PR)
+### Wave 5 — Offline→online reconciliation (в `main`, #327)
 
 - Mutation outbox профилей: при `BACKEND_AUTH` + network fail — локальная запись + очередь,
   `flushProfileOutbox` на старте.
@@ -143,6 +145,51 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
   если `encryptBackup` вернул `null` (`encryption_unavailable`).
 - Scan daily budget: Redis `INCR` + TTL при `REDIS_URL`, иначе in-memory.
 - Enrichment fallback rates — follow-up (pollen ops уже есть).
+
+### Wave 6 — Unified therapy + prescription OCR (в `main`, #333)
+
+Цель: один OCR/камера/PDF-флоу и общая оболочка шагов `form` → `verify` → `review`
+для АСИТ и базисной терапии. Уникальные поля (аллерген, фаза, клинический диагноз,
+мульти-напоминания) остаются на экранах.
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 6.1 | Чистые хелперы шагов / расписания / OCR-hint | `components/therapy/course-editor.ts`, `prescription-ocr-copy.ts` |
+| 6.2 | `usePrescriptionParser` — камера, PDF, recognize, paste-sheet | `hooks/use-prescription-parser.ts` |
+| 6.3 | `CourseEditorLayout` + `CourseVerifyStep` + `CourseReviewSummary` | `components/therapy/*` |
+| 6.4 | `PrescriptionImportPanel` + `PrescriptionImportModals` | `components/therapy/*` |
+| 6.5 | Экраны только wiring + ASIT/PT-специфика | `asit-course.tsx`, `prescribed-therapy.tsx` |
+
+**Критерий готовности:** тесты `course-editor.test.ts`; `testID` камеры/PDF/OCR/verify/review
+без изменений; offline save курса без API.
+
+### Wave 7 — DiaryWizard + map final split (в `main`, #334)
+
+- `DiaryWizard.tsx` → `useDiaryWizardController` + `components/diary/wizard/*`
+  (`DiaryStepField`, `DiaryPhotoToolbar`, `DiaryDishComponentsField`,
+  `DiaryPefZonePreview`, `DiaryLegacyEditor`, preview helpers).
+- `map.tsx` → `MapCanvas` / `MapLayerLegend` / `MapPollenDetails` / `MapPlacesPanel`.
+- Публичные пропсы, `testID` и i18n без изменений.
+
+### Wave 8 — Typed repositories (в `main`, #335)
+
+Цель: сервисы профилей / дневника / истории скана / settings не содержат SQL-строк.
+Web пишет в `web-collections.ts`, native — parameterized SQL. `DbLike` + SQL-роутер
+остаются для остальных таблиц (auth, contacts, SOS, attachments, alias, barcode…).
+
+| # | Изменение | Файлы |
+|---|-----------|-------|
+| 8.1 | Интерфейсы + web/sqlite реализации + `get*Repository()` (`Platform.OS`) | `apps/mobile/src/db/repositories/` |
+| 8.2 | `profile-service` — list/get/insert/update/deleteOwned/legacy без SQL; каскад в репозитории | `profile-service.ts` |
+| 8.3 | `diary-service` — CRUD через `DiaryRepository` | `diary-service.ts` |
+| 8.4 | `scan-history-service` — insert/list | `scan-history-service.ts` |
+| 8.5 | `settings-service` — get/set | `settings-service.ts` |
+| 8.6 | Регрессия ownership + web collections + sqlite cascade SQL | `repositories.test.ts`, `init-*.test.ts`, service tests |
+
+**Не в этом PR:** SOS / contacts / attachments / alias / barcode / outbox; Postgres repository.
+
+**Критерий готовности:** service + `init-diary` / `init-profile` / `init-scan` + `repositories` зелёные;
+`pnpm --filter mobile typecheck`; web path не матчит SQL-строки для этих четырёх сущностей.
 
 ---
 
@@ -155,6 +202,9 @@ unmatched SQL варнит и возвращает `[]` / `null`; alias DELETE-b
 | 3 | Высокий | Persistence; только с полной web/native матрицей тестов |
 | 4 | Средний | Дрейф OFF / i18n doctor-report |
 | 5 | Высокий | Dual-write и деньги/бюджет LLM |
+| 6 | Средний | Дубли ASIT / therapy UI |
+| 7 | Средний | Большие экраны дневника и карты |
+| 8 | Высокий | Persistence; web collections vs sqlite SQL |
 
 UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux-improvement-plan.md)
 дополняет Wave 1–2: транспорт soft-fail + UI retry.
@@ -179,4 +229,7 @@ UX Stage B (`useAsyncState` / `ErrorState`) из [`ux-improvement-plan.md`](./ux
 | Wave 2 | ✅ в `main` (#324) — hooks + подэкраны scanner/map |
 | Wave 3 | ✅ в `main` (#325) — typed WebDb collections / handlers / router |
 | Wave 4 | ✅ в `main` (#326) — OFF core mapping, diary split, unused aliases |
-| Wave 5 | ✅ этот PR — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 5 | ✅ в `main` (#327) — profile outbox, sync fail-closed, Redis scan budget |
+| Wave 6 | ✅ в `main` (#333) — shared course editor + prescription OCR |
+| Wave 7 | ✅ в `main` (#334) — DiaryWizard + map canvas/panels |
+| Wave 8 | ✅ в `main` (#335) — typed repositories profile / diary / scan / settings |

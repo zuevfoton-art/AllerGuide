@@ -1,4 +1,5 @@
-import { getDb, persistDbWrites } from '@/src/db/init';
+import { persistDbWrites } from '@/src/db/init';
+import { getProfileRepository } from '@/src/db/repositories';
 import { useAppStore } from '@/src/store/app-store';
 import { BACKEND_AUTH_ENABLED } from '@/src/constants/features';
 import { getCurrentUserId, getBackendAuthToken } from '@/src/services/auth-service';
@@ -15,6 +16,10 @@ import {
   isNetworkUnavailableStatus,
 } from '@/src/services/profile-outbox-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import {
+  getStoredActiveProfileId,
+  setStoredActiveProfileId,
+} from '@/src/services/settings-service';
 import { apiErrorMessage, resolveApiErrorCode, type ApiErrorCode } from '@/src/services/api-errors';
 import {
   dedupeAllergenIds,
@@ -96,24 +101,35 @@ function assertValidProfileInput(input: ProfileInput) {
   if (error) throw new ProfileValidationError(error);
 }
 
+function persistActiveProfile(profile: Profile | null) {
+  useAppStore.getState().setActiveProfile(profile);
+  setStoredActiveProfileId(profile?.id ?? null);
+}
+
 function syncActiveProfileAfterList(profiles: Profile[], options?: { preferSelf?: boolean }) {
-  const { activeProfileId, setActiveProfile } = useAppStore.getState();
+  const { activeProfileId } = useAppStore.getState();
   if (profiles.length === 0) {
-    setActiveProfile(null);
+    persistActiveProfile(null);
     return;
   }
 
   const preferred = resolvePreferredActiveProfile(profiles);
+  const candidateId = activeProfileId ?? getStoredActiveProfileId();
   const keepCurrent =
     !options?.preferSelf &&
-    activeProfileId != null &&
-    profiles.some((profile) => profile.id === activeProfileId);
+    candidateId != null &&
+    profiles.some((profile) => profile.id === candidateId);
 
   const active = keepCurrent
-    ? profiles.find((profile) => profile.id === activeProfileId) ?? preferred
+    ? profiles.find((profile) => profile.id === candidateId) ?? preferred
     : preferred;
 
-  setActiveProfile(active);
+  persistActiveProfile(active);
+}
+
+/** Remember the profile the user picked in the header switcher. */
+export function activateProfile(profile: Profile) {
+  persistActiveProfile(profile);
 }
 
 /**
@@ -126,11 +142,19 @@ export function ensureActiveProfileLoaded(options?: { preferSelf?: boolean }): P
   return useAppStore.getState().activeProfile;
 }
 
-/** Recover the persisted profile when transient Zustand state is empty (for example after web HMR). */
+/**
+ * Keep the profile the user already selected (child or self).
+ * Use on screens with a profile switcher — not bootstrap.
+ */
+export function ensureCurrentProfileLoaded(): Profile | null {
+  return ensureActiveProfileLoaded({ preferSelf: false });
+}
+
+/** Recover the last selected profile when transient Zustand state is empty (web HMR / tab remount). */
 export function getOrLoadActiveProfileId(): number | null {
   const activeProfileId = useAppStore.getState().activeProfileId;
   if (activeProfileId != null) return activeProfileId;
-  return ensureActiveProfileLoaded({ preferSelf: true })?.id ?? null;
+  return ensureCurrentProfileLoaded()?.id ?? null;
 }
 
 function throwOnBackendError(response: { ok: false; error: string; status: number }): never {
@@ -142,12 +166,7 @@ export function listProfiles(): Profile[] {
   const userId = getCurrentUserId();
   if (!userId) return [];
 
-  const db = getDb();
-  const rows = db.getAllSync<Profile>(
-    'SELECT * FROM profiles WHERE userId = ? ORDER BY id ASC',
-    [userId],
-  );
-  return sortProfilesForDisplay(rows);
+  return sortProfilesForDisplay(getProfileRepository().listByUserId(userId));
 }
 
 /** Pull server profiles into local DB (P1.2d). Best-effort; returns error code without throwing. */
@@ -171,7 +190,7 @@ export async function refreshProfilesFromBackend(): Promise<
 
   replaceLocalProfilesForUser(userId, response.data.profiles);
   const profiles = listProfiles();
-  syncActiveProfileAfterList(profiles, { preferSelf: true });
+  syncActiveProfileAfterList(profiles, { preferSelf: false });
   return { ok: true, profiles };
 }
 
@@ -210,7 +229,7 @@ export async function createProfile(input: ProfileInput) {
         response.data.profile.crossReactionAllergies ?? normalized.crossReactionAllergiesJson,
     };
     upsertLocalProfile(localProfile);
-    useAppStore.getState().setActiveProfile(localProfile);
+    persistActiveProfile(localProfile);
     await persistDbWrites();
     trackEvent('profile_created', { type: input.type, source: 'backend' });
     return response.data.profile.id;
@@ -227,40 +246,23 @@ function insertLocalProfileRow(
   input: ProfileInput,
   normalized: NormalizedProfilePayload,
 ): number | null {
-  const db = getDb();
-  db.runSync(
-    'INSERT INTO profiles (userId, name, birthYear, type, allergies, allergyConfirmations, crossReactionAllergies) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [
-      userId,
-      normalized.name,
-      input.birthYear,
-      input.type,
-      normalized.allergiesJson,
-      normalized.allergyConfirmationsJson,
-      normalized.crossReactionAllergiesJson,
-    ],
-  );
-  const row = db.getFirstSync<{ id: number }>(
-    'SELECT id FROM profiles WHERE userId = ? ORDER BY id DESC LIMIT 1',
-    [userId],
-  );
-  if (!row?.id) return null;
-  const profile = db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [row.id, userId],
-  );
-  useAppStore.getState().setActiveProfile(profile || null);
-  return row.id;
+  const profile = getProfileRepository().insert({
+    userId,
+    name: normalized.name,
+    birthYear: input.birthYear,
+    type: input.type,
+    allergies: normalized.allergiesJson,
+    allergyConfirmations: normalized.allergyConfirmationsJson,
+    crossReactionAllergies: normalized.crossReactionAllergiesJson,
+  });
+  persistActiveProfile(profile);
+  return profile?.id ?? null;
 }
 
 export async function updateProfile(id: number, input: ProfileInput) {
   assertValidProfileInput(input);
   const userId = requireUserId();
-  const db = getDb();
-  const existingProfile = db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
+  const existingProfile = getProfileRepository().getById(id, userId);
   if (!BACKEND_AUTH_ENABLED && !existingProfile) return null;
 
   const inputWithPreservedCrossReactions =
@@ -303,8 +305,8 @@ export async function updateProfile(id: number, input: ProfileInput) {
         response.data.profile.crossReactionAllergies ?? normalized.crossReactionAllergiesJson,
     };
     upsertLocalProfile(localProfile);
-    const { activeProfileId, setActiveProfile } = useAppStore.getState();
-    if (activeProfileId === id) setActiveProfile(localProfile);
+    const { activeProfileId } = useAppStore.getState();
+    if (activeProfileId === id) persistActiveProfile(localProfile);
     await persistDbWrites();
     return localProfile;
   }
@@ -320,27 +322,17 @@ function applyLocalProfileUpdate(
   input: ProfileInput,
   normalized: NormalizedProfilePayload,
 ): Profile | null {
-  const db = getDb();
-  db.runSync(
-    'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ?, crossReactionAllergies = ? WHERE id = ? AND userId = ?',
-    [
-      userId,
-      normalized.name,
-      input.birthYear,
-      input.type,
-      normalized.allergiesJson,
-      normalized.allergyConfirmationsJson,
-      normalized.crossReactionAllergiesJson,
-      id,
-      userId,
-    ],
-  );
-  const profile = db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
-  const { activeProfileId, setActiveProfile } = useAppStore.getState();
-  if (activeProfileId === id) setActiveProfile(profile || null);
+  const profile = getProfileRepository().update(id, userId, {
+    userId,
+    name: normalized.name,
+    birthYear: input.birthYear,
+    type: input.type,
+    allergies: normalized.allergiesJson,
+    allergyConfirmations: normalized.allergyConfirmationsJson,
+    crossReactionAllergies: normalized.crossReactionAllergiesJson,
+  });
+  const { activeProfileId } = useAppStore.getState();
+  if (activeProfileId === id) persistActiveProfile(profile);
   return profile;
 }
 
@@ -355,27 +347,7 @@ export async function deleteProfile(id: number) {
     if (!response.ok) throwOnBackendError(response);
   }
 
-  const db = getDb();
-  const ownedProfile = db.getFirstSync<{ id: number }>(
-    'SELECT id FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
-  if (!ownedProfile) return false;
-
-  const diaryEntries = db.getAllSync<{ id: number }>(
-    'SELECT id FROM diary_entries WHERE profileId = ?',
-    [id],
-  );
-  for (const entry of diaryEntries) {
-    db.runSync('DELETE FROM diary_attachments WHERE entryId = ?', [entry.id]);
-  }
-
-  db.runSync('DELETE FROM diary_entries WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM scan_history WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM emergency_contacts WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM profile_sos WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM safe_products WHERE profileId = ?', [id]);
-  db.runSync('DELETE FROM profiles WHERE id = ? AND userId = ?', [id, userId]);
+  if (!getProfileRepository().deleteOwned(id, userId)) return false;
 
   const { activeProfileId } = useAppStore.getState();
   if (activeProfileId === id) {
@@ -389,11 +361,7 @@ export async function getProfile(id: number) {
   const userId = getCurrentUserId();
   if (!userId) return null;
 
-  const db = getDb();
-  return db.getFirstSync<Profile>(
-    'SELECT * FROM profiles WHERE id = ? AND userId = ?',
-    [id, userId],
-  );
+  return getProfileRepository().getById(id, userId);
 }
 
 export function countProfilesByType(type: ProfileType) {
@@ -401,24 +369,19 @@ export function countProfilesByType(type: ProfileType) {
 }
 
 export function migrateLegacyProfilesToUser(userId: number) {
-  const db = getDb();
-  const all = db.getAllSync<Profile>('SELECT * FROM profiles');
-  for (const profile of all) {
+  const profiles = getProfileRepository();
+  for (const profile of profiles.listAll()) {
     const migratedAllergies = migrateProfileAllergiesJson(profile.allergies);
     const confirmations = profile.allergyConfirmations ?? '{}';
     if (!profile.userId || migratedAllergies !== profile.allergies) {
-      db.runSync(
-        'UPDATE profiles SET userId = ?, name = ?, birthYear = ?, type = ?, allergies = ?, allergyConfirmations = ? WHERE id = ?',
-        [
-          profile.userId || userId,
-          profile.name,
-          profile.birthYear,
-          profile.type,
-          migratedAllergies,
-          confirmations,
-          profile.id,
-        ],
-      );
+      profiles.updateLegacy(profile.id, {
+        userId: profile.userId || userId,
+        name: profile.name,
+        birthYear: profile.birthYear,
+        type: profile.type,
+        allergies: migratedAllergies,
+        allergyConfirmations: confirmations,
+      });
     }
   }
 }

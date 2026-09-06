@@ -79,9 +79,6 @@ export function PollenIndexCard({ taxonLabel, upi, grainsPerM3, zone }: PollenIn
           {t('map.pollenValue', { value: grainsPerM3.toFixed(1) })}
         </Text>
       ) : null}
-      <Text style={styles.meta}>
-        {upi.source === 'google' ? t('map.upiSourceGoogle') : t('map.upiSourceOpenMeteo')}
-      </Text>
     </View>
   );
 }

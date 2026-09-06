@@ -1,4 +1,7 @@
-# SOS emergency bar remains available after the last profile is removed
+# SOS emergency bar remains available after the last profile is removed.
+# Delete control is only on the edit form (below the fold), not on the hub.
+# After delete, router.back() returns to the hub (no tab bar) — leave via
+# the header chevron, not Maestro `back` (BACK at /login exits the app).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
@@ -9,9 +12,28 @@ appId: com.aclearo.app
       id: profile-screen-title
     timeout: 10000
 - tapOn:
+    id: profile-list-item-0
+- extendedWaitUntil:
+    visible:
+      id: profile-edit-title
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: profile-delete
+    direction: DOWN
+    timeout: 20000
+- tapOn:
     id: profile-delete
 - tapOn:
-    text: Удалить
+    text: "Удалить"
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- tapOn:
+    id: screen-header-back
 - tapOn:
     id: tab-sos
 - extendedWaitUntil:

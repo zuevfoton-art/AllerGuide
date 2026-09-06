@@ -78,6 +78,7 @@ export default function ProfileScreen() {
             return (
               <Pressable
                 key={profile.id}
+                testID={`profile-list-item-${index}`}
                 style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}
                 onPress={() => openEdit(profile.id)}
                 accessibilityRole="button"
@@ -96,7 +97,13 @@ export default function ProfileScreen() {
           })
         )}
       </GlassCard>
-      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
+      <Button
+        testID="profile-add"
+        label={t('profiles.add')}
+        variant="primary"
+        block
+        onPress={() => router.push('/profile-setup?mode=add')}
+      />
 
       <Text style={ui.sectionLabel}>{t('sos.title')}</Text>
       <GlassCard>

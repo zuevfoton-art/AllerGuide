@@ -1,4 +1,5 @@
-import { getDb, persistDbWrites } from '@/src/db/init';
+import { persistDbWrites } from '@/src/db/init';
+import { getDiaryRepository } from '@/src/db/repositories';
 import {
   getDiaryPhotoUrisFromAnswers,
   getDiaryEntryAnswers,
@@ -35,11 +36,7 @@ type DiaryEntryInput = {
 function getOwnedDiaryEntry(entryId: number): DiaryEntry | null {
   if (!Number.isSafeInteger(entryId) || entryId <= 0) return null;
 
-  const db = getDb();
-  const entry = db.getFirstSync<DiaryEntry>(
-    'SELECT * FROM diary_entries WHERE id = ?',
-    [entryId],
-  );
+  const entry = getDiaryRepository().getById(entryId);
   if (!entry || !isOwnedProfile(entry.profileId)) return null;
   return entry;
 }
@@ -60,15 +57,6 @@ function normalizeDiaryEntryInput(input: DiaryEntryInput): DiaryEntryInput | nul
   return { ...input, type };
 }
 
-function resolveInsertedEntryId(profileId: number, type: string, createdAt: string): number | null {
-  const db = getDb();
-  const row = db.getFirstSync<{ id: number }>(
-    'SELECT id FROM diary_entries WHERE profileId = ? AND type = ? AND createdAt = ? ORDER BY id DESC LIMIT 1',
-    [profileId, type, createdAt],
-  );
-  return row?.id ?? null;
-}
-
 async function syncPhotosFromDetails(entryId: number, details: string, type: string): Promise<void> {
   const answers = getDiaryEntryAnswers(type, details);
   // Photos are stripped from encoded details — callers pass pending URIs separately via answers overlay.
@@ -80,17 +68,12 @@ async function syncPhotosFromDetails(entryId: number, details: string, type: str
 }
 
 async function insertDiaryEntry(input: DiaryEntryInput): Promise<DiaryMutationResult> {
-  const db = getDb();
-  db.runSync('INSERT INTO diary_entries (profileId, type, details, createdAt) VALUES (?, ?, ?, ?)', [
-    input.profileId,
-    input.type,
-    input.details,
-    input.createdAt,
-  ]);
-  const entryId = resolveInsertedEntryId(input.profileId, input.type, input.createdAt);
-  if (entryId == null) {
+  const diary = getDiaryRepository();
+  const inserted = diary.insert(input);
+  if (inserted == null) {
     return { ok: false, code: 'entry_not_found' };
   }
+  const entryId = inserted.id;
 
   try {
     if (input.photoUris?.length) {
@@ -100,10 +83,7 @@ async function insertDiaryEntry(input: DiaryEntryInput): Promise<DiaryMutationRe
     }
   } catch (error) {
     await deleteDiaryAttachmentsForEntry(entryId);
-    db.runSync('DELETE FROM diary_entries WHERE id = ? AND profileId = ?', [
-      entryId,
-      input.profileId,
-    ]);
+    diary.delete(entryId, input.profileId);
     await persistDbWrites();
     throw error;
   }
@@ -161,11 +141,7 @@ export async function addDiaryEntries(
 
 export async function getDiaryEntries(profileId: number) {
   if (!isOwnedProfile(profileId)) return [];
-  const db = getDb();
-  return db.getAllSync<DiaryEntry>(
-    'SELECT * FROM diary_entries WHERE profileId = ? ORDER BY id DESC',
-    [profileId],
-  );
+  return getDiaryRepository().listByProfileId(profileId);
 }
 
 export async function updateDiaryEntry(
@@ -179,13 +155,7 @@ export async function updateDiaryEntry(
     return { ok: false, code: 'invalid_input' };
   }
 
-  const db = getDb();
-  db.runSync('UPDATE diary_entries SET type = ?, details = ? WHERE id = ? AND profileId = ?', [
-    type,
-    input.details,
-    id,
-    existing.profileId,
-  ]);
+  getDiaryRepository().update(id, existing.profileId, { type, details: input.details });
   if (input.photoUris) {
     await replaceDiaryPhotos(id, input.photoUris);
   }
@@ -198,11 +168,7 @@ export async function deleteDiaryEntry(id: number): Promise<DiaryMutationResult>
   if (!existing) return { ok: false, code: 'entry_not_found' };
 
   await deleteDiaryAttachmentsForEntry(id);
-  const db = getDb();
-  db.runSync('DELETE FROM diary_entries WHERE id = ? AND profileId = ?', [
-    id,
-    existing.profileId,
-  ]);
+  getDiaryRepository().delete(id, existing.profileId);
   await persistDbWrites();
   return { ok: true, entryId: id };
 }
@@ -211,9 +177,8 @@ export function listAllDiaryEntries(): DiaryEntry[] {
   const profileIds = new Set(getOwnedProfileIds());
   if (profileIds.size === 0) return [];
 
-  const db = getDb();
-  return db
-    .getAllSync<DiaryEntry>('SELECT * FROM diary_entries ORDER BY id DESC', [])
+  return getDiaryRepository()
+    .listAll()
     .filter((entry) => profileIds.has(entry.profileId));
 }
 

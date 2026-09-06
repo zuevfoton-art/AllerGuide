@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import {
-  OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_TYPE_GROUP_BY_TAXON,
   type PollenPlantDetail,
   type PollenUpiSnapshot,
@@ -29,9 +28,6 @@ export function PollenPlantSheet({ detail, upi }: PollenPlantSheetProps) {
   }
 
   const typeGroup = POLLEN_TYPE_GROUP_BY_TAXON[detail.taxonId];
-  const isGoogleOnlyTaxon = !(OPEN_METEO_POLLEN_MAP_TAXON_IDS as readonly string[]).includes(
-    detail.taxonId,
-  );
   const groupHintKey =
     typeGroup === 'GRASS'
       ? 'map.pollenHeatmapGrassHint'
@@ -73,9 +69,6 @@ export function PollenPlantSheet({ detail, upi }: PollenPlantSheetProps) {
         <Text style={styles.body}>
           {t('map.plantIndexDescription')}: {detail.indexDescription}
         </Text>
-      ) : null}
-      {isGoogleOnlyTaxon ? (
-        <Text style={styles.meta}>{t('map.pollenGoogleOnlyHint')}</Text>
       ) : null}
       <Text style={styles.meta}>{t(groupHintKey)}</Text>
       {detail.family ? (

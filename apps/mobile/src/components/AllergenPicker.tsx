@@ -1,16 +1,22 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   findAllergenById,
   getConditionType,
   getCrossReactionsForSelection,
-  getPopularAllergens,
+  type AllergenRecord,
   type AllergyConditionId,
   type CrossReactionMatch,
 } from '@allerguide/core';
+import { density, radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
+import {
+  getAllergenCatalogSnapshot,
+  resolveAllergenCatalog,
+} from '@/src/services/allergen-catalog-service';
+import { buildAllergenPickerModel } from '@/src/services/allergen-recommendation-display';
 import { useTranslation } from '@/src/store/locale-store';
 import { formatCrossReactionLabel } from '@/src/i18n/cross-reactions';
 import { formatTemplate } from '@/src/i18n/translate';
@@ -26,6 +32,8 @@ interface AllergenPickerProps {
    * kept on for profile-edit by default.
    */
   showCrossReactions?: boolean;
+  /** When set, quick-pick chips follow the selected condition types. */
+  conditionIds?: AllergyConditionId[];
 }
 
 export function AllergenPicker({
@@ -34,14 +42,22 @@ export function AllergenPicker({
   suggestedConditionIds = [],
   onAddSuggestedCondition,
   showCrossReactions = true,
+  conditionIds,
 }: AllergenPickerProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [catalog, setCatalog] = useState<AllergenRecord[]>(getAllergenCatalogSnapshot);
 
-  const popularIds = useMemo(() => new Set(getPopularAllergens().map((item) => item.id)), []);
-  const extraSelected = selected.filter((id) => !popularIds.has(id));
+  useEffect(() => {
+    void resolveAllergenCatalog().then((result) => setCatalog(result.allergens));
+  }, []);
+
+  const model = useMemo(
+    () => buildAllergenPickerModel({ selected, conditionIds, catalog }),
+    [selected, conditionIds, catalog],
+  );
   const crossSuggestions = useMemo(
     () => (showCrossReactions ? getCrossReactionsForSelection(selected) : []),
     [selected, showCrossReactions],
@@ -56,48 +72,64 @@ export function AllergenPicker({
     onChange([...new Set([...selected, ...ids])]);
   };
 
+  const renderChip = (item: { id: string; name: string }) => {
+    const active = selected.includes(item.id);
+    return (
+      <Pressable
+        key={item.id}
+        testID={`allergen-${item.id}`}
+        style={[styles.chip, active && styles.chipActive]}
+        onPress={() => toggle(item.id)}
+        accessibilityRole="button"
+        accessibilityState={{ selected: active }}
+        accessibilityLabel={item.name}
+        hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}>
+        {active ? <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} /> : null}
+        <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.name}</Text>
+      </Pressable>
+    );
+  };
+
   return (
     <View style={styles.wrap}>
-      <Text style={styles.sectionHint}>{t('allergens.popular')}</Text>
-      <View style={styles.chipGrid}>
-        {getPopularAllergens().map((item) => {
-          const active = selected.includes(item.id);
-          return (
-            <Pressable
-              key={item.id}
-              testID={`allergen-${item.id}`}
-              style={[styles.chip, active && styles.chipActive]}
-              onPress={() => toggle(item.id)}>
-              {active ? (
-                <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
-              ) : null}
-              <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.name}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      {model.mode === 'recommended' ? (
+        <>
+          <Text style={styles.sectionHint}>{t('allergens.recommendedTitle')}</Text>
+          <Text style={styles.recommendedHint}>{t('allergens.recommendedHint')}</Text>
+          {model.groups.map((group) => (
+            <View key={group.conditionId} testID={`allergen-recommended-${group.conditionId}`} style={styles.group}>
+              <Text style={styles.sectionHint}>
+                {formatTemplate(t('allergens.recommendedGroup'), { label: group.label })}
+              </Text>
+              <View style={styles.chipGrid}>{group.allergens.map(renderChip)}</View>
+            </View>
+          ))}
+        </>
+      ) : (
+        <>
+          <Text style={styles.sectionHint}>{t('allergens.popular')}</Text>
+          <View style={styles.chipGrid}>{model.popularAllergens.map(renderChip)}</View>
+        </>
+      )}
 
-      {extraSelected.length > 0 ? (
+      {model.extraSelectedIds.length > 0 ? (
         <>
           <Text style={styles.sectionHint}>{t('allergens.fromCatalog')}</Text>
           <View style={styles.chipGrid}>
-            {extraSelected.map((id) => {
+            {model.extraSelectedIds.map((id) => {
               const label = findAllergenById(id)?.name ?? id;
-              return (
-                <Pressable
-                  key={id}
-                  style={[styles.chip, styles.chipActive]}
-                  onPress={() => toggle(id)}>
-                  <Ionicons name="checkmark-circle" size={14} color={theme.colors.accent} />
-                  <Text style={[styles.chipText, styles.chipTextActive]}>{label}</Text>
-                </Pressable>
-              );
+              return renderChip({ id, name: label });
             })}
           </View>
         </>
       ) : null}
 
-      <Pressable style={styles.catalogBtn} onPress={() => setCatalogOpen(true)}>
+      <Pressable
+        testID="allergen-open-catalog"
+        style={styles.catalogBtn}
+        onPress={() => setCatalogOpen(true)}
+        accessibilityRole="button"
+        accessibilityLabel={t('allergens.openCatalog')}>
         <Ionicons name="list" size={18} color={theme.colors.accent} />
         <Text style={styles.catalogBtnText}>{t('allergens.openCatalog')}</Text>
         <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
@@ -155,7 +187,8 @@ export function AllergenPicker({
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    wrap: { gap: 10 },
+    wrap: { gap: space[3] },
+    group: { gap: space[2] },
     sectionHint: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 11,
@@ -164,14 +197,21 @@ function createStyles({ colors, fonts }: AppTheme) {
       textTransform: 'uppercase',
       letterSpacing: 0.6,
     },
-    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    recommendedHint: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      color: colors.textSecondary,
+      lineHeight: 18,
+    },
+    chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 5,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 6,
+      minHeight: density.tapMinHeightSm,
+      paddingVertical: space[2],
+      paddingHorizontal: space[3],
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
@@ -191,8 +231,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
-      padding: 14,
-      borderRadius: 6,
+      minHeight: density.tapMinHeight,
+      padding: density.cardPadding,
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
@@ -206,13 +247,13 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     crossCard: {
       gap: 10,
-      padding: 14,
-      borderRadius: 6,
+      padding: density.cardPadding,
+      borderRadius: radii.sm,
       backgroundColor: colors.tipBg,
       borderWidth: 1,
       borderColor: colors.tipBorder,
     },
-    crossHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    crossHeader: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
     crossTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
@@ -227,9 +268,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     crossBtn: {
       alignSelf: 'flex-start',
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 6,
+      paddingHorizontal: space[3],
+      paddingVertical: space[2],
+      borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.tipBorder,

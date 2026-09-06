@@ -536,9 +536,6 @@ export type LocaleMessages = {
     peakSeason: string;
     season: string;
     pollenLiveTitle: string;
-    pollenMapAttribution: string;
-    pollenGoogleMapAttribution: string;
-    pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenTreeSpeciesLevelsHint: string;
     pollenHeatmapGrassHint: string;
@@ -563,7 +560,6 @@ export type LocaleMessages = {
     pollenTypeTree: string;
     pollenTypeGrass: string;
     pollenTypeWeed: string;
-    pollenGoogleOnlyHint: string;
     pollenYou: string;
     otherPollenAllergens: string;
     pollenScalePlace: string;
@@ -579,9 +575,6 @@ export type LocaleMessages = {
     pollenValue: string;
     pollenUnavailable: string;
     pollenLoading: string;
-    pollenSourceOpenMeteo: string;
-    pollenSourceCache: string;
-    pollenCalendarFallback: string;
     pollenNoSeason: string;
     heatmapGroupEmpty: string;
     openYandexPollen: string;
@@ -593,8 +586,6 @@ export type LocaleMessages = {
     forecastTitle: string;
     forecastEmpty: string;
     upiTitle: string;
-    upiSourceGoogle: string;
-    upiSourceOpenMeteo: string;
     plantTitle: string;
     plantEmpty: string;
     plantFamily: string;
@@ -653,8 +644,6 @@ export type LocaleMessages = {
     actionTipClinicsCta: string;
     yandexOverviewBanner: string;
     listFirstHint: string;
-    pollenSourceCalendar: string;
-    pollenSourceGoogle: string;
     allergenPickerTitle: string;
     allergenPickerBack: string;
     allergenPickerButton: string;
@@ -679,26 +668,21 @@ export type LocaleMessages = {
     plantIndexDescription: string;
     groupCount: string;
     dataStatusLive: string;
-    dataStatusGoogleOnly: string;
     dataStatusNone: string;
     airQualityTitle: string;
     airQualityUnavailable: string;
     airQualityDominant: string;
     airQualityPm25: string;
     airQualityPm10: string;
-    airQualitySource: string;
     airQualityLegend: string;
     airQualityLegendDirection: string;
     airQualityExpand: string;
     airQualityCollapse: string;
     airQualityLocal: string;
     placeSearchPlaceholder: string;
-    placeSearchOfflineCatalog: string;
     placeSearchNothingFound: string;
     placeRating: string;
     placeAllergyUnknown: string;
-    placeSourceGoogle: string;
-    placeSourceCatalog: string;
   };
   settings: {
     title: string;
@@ -1326,6 +1310,9 @@ export type LocaleMessages = {
   };
   allergens: {
     popular: string;
+    recommendedTitle: string;
+    recommendedHint: string;
+    recommendedGroup: string;
     fromCatalog: string;
     openCatalog: string;
     crossTitle: string;

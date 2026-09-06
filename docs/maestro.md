@@ -33,6 +33,7 @@ apps/mobile/.maestro/
     _tap-register.yaml             # Text testID + «Зарегистрироваться»
     onboarding-smoke.yaml … settings-smoke.yaml
     sos-no-profile-smoke.yaml      # SOS call bar after last profile is removed
+    profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы (не в smoke-all)
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
     diary-photo-smoke.yaml         # §7.3 — skin photo step UI
     smoke-all.yaml                 # P2.1a — все offline
@@ -133,6 +134,9 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `cloud-backup-upload` / `cloud-backup-download` | облачный бэкап |
 | `recovery-key-*` | модалка recovery key |
 | `profile-logout` | выход из аккаунта |
+| `profile-list-item-0` | первая строка профиля на хабе «Мои профили» |
+| `profile-edit-title` | заголовок `/profile-edit` |
+| `profile-delete` | удаление на `/profile-edit` (не на хабе) |
 
 ---
 
@@ -146,6 +150,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
 | `onboarding-intro-skip` + баннер «непредвиденная ошибка» | Hermes: `@noble/hashes` кэширует `crypto` при импорте. Соль — `getSecureRandomBytes` + `setSecureRandomBytes` из `src/install-runtime` / expo-crypto |
 | `allergen-milk` на шаге «Какая у тебя аллергия?» | Сначала `condition-food`, потом молоко. Общий `_complete-first-run-profile.yaml` |
+| Нет пыльцы полыни после «Поллиноз» | Рекомендации зависят от типа: `condition-pollinosis` → `allergen-birch-pollen` / `allergen-mugwort-pollen`. Standalone `profile-pollinosis-quick-pick.yaml` (не в `smoke-all`) |
 | `onboarding-intro-skip` + «Не удалось подключиться к серверу» | Staging release APK блокирует cleartext HTTP на `10.0.2.2`. `maestro-build-apk.sh staging` пишет `network_security_config` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
@@ -162,5 +167,6 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
 | `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
+| `profile-delete` не найден на «Мои профили» | Кнопка только в `/profile-edit`, внизу длинной формы. С хаба тап `profile-list-item-0`, ждать `profile-edit-title`, `scrollUntilVisible` → `profile-delete` → «Удалить». После удаления снова хаб без таббара — `screen-header-back`, не Maestro `back` |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

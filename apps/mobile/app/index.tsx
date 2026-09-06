@@ -15,6 +15,7 @@ import {
   refreshProfilesFromBackend,
 } from '@/src/services/profile-service';
 import {
+  getStoredActiveProfileId,
   getStoredScenario,
   isIntroComplete,
   isOnboardingComplete,
@@ -40,8 +41,8 @@ export default function Index() {
 
         // Best-effort cloud refresh (local DB already filled by login/restore when online).
         await refreshProfilesFromBackend();
-        // Parent (`self`) becomes active when several profiles exist; full row in store.
-        ensureActiveProfileLoaded({ preferSelf: true });
+        // Keep the last selected profile; prefer parent only on first session.
+        ensureActiveProfileLoaded({ preferSelf: getStoredActiveProfileId() == null });
 
         const profiles = listProfiles();
         const scenario = getStoredScenario();

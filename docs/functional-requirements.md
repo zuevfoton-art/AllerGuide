@@ -124,6 +124,7 @@ AllerGuide — мобильное приложение-помощник для �
 
   Канонические allergen id выбираются на шаге аллергенов; карта `condition-allergen-map.ts` остаётся справочником соответствий тип↔аллергены (Phase 0/4).
 - **FR-PROF-03.** Конкретные аллергены выбираются на шаге аллергенов (не на шаге типов). Для типа **«Другие виды аллергии»** на шаге типов доступно **текстовое поле** названия (`app_settings` → `otherConditionLabel:{profileId}`).
+- **FR-PROF-03a.** Шаг аллергенов предлагает **быстрый выбор** по выбранным типам состояний (`condition-allergen-recommendations.ts`). Остальные аллергены доступны через полный каталог. Если выбран только тип «Другие виды аллергии» или типов нет — показываются частые аллергены. Снятие типа не удаляет уже выбранные аллергены. См. [`condition-allergen-quick-pick-plan.md`](./condition-allergen-quick-pick-plan.md).
 - **FR-PROF-04.** При создании профиля ребёнка требуется явное согласие родителя/законного представителя.
 
 ### 6.2. Управление профилями
@@ -401,7 +402,7 @@ Baseline также включает **индекс самочувствия 0�
 | Регистрация | `/register` | FR-AUTH-01…03 |
 | Intro | `/onboarding-intro` | FR-ONB-01…02 |
 | Сценарий | `/onboarding` | FR-ONB-03…04 |
-| Создание профиля | `/profile-setup` | FR-PROF-01…05, FR-PROF-09…11 |
+| Создание профиля | `/profile-setup` | FR-PROF-01…05, FR-PROF-03a, FR-PROF-09…11 |
 | Главная | `/(tabs)/home` | FR-HOME-01…10 |
 | Дневник | `/(tabs)/diary` | FR-DIARY-01…07, FR-DIARY-13…16, FR-DIARY-photo, FR-DIARY-medicine-photo, FR-DIARY-dish-breakdown, FR-DIARY-voice |
 | Клинические оценки | `/clinical-scales` | FR-DIARY-14 |
