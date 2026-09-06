@@ -1,11 +1,13 @@
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import { HintSpotlight } from '@/src/components/hints/HintSpotlight';
+import { useHintAnchor } from '@/src/components/hints/HintAnchor';
+import { BrandTabIcon, BrandFeatureIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
-import { BrandTabIcon, BrandFeatureIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
 
 function TabIcon({
   name,
@@ -23,18 +25,30 @@ function TabIcon({
   return <BrandTabIcon name={name} size={size} color={focused ? color : muted} focused={focused} />;
 }
 
+function tabAnchorId(testID: string): string {
+  return testID.replace(/^tab-/, 'tab.');
+}
+
 function TabBarButton({
   testID,
   accessibilityState,
   style,
+  onLayout: tabOnLayout,
   ...props
 }: BottomTabBarButtonProps & { testID: string }) {
   const { colors } = useTheme();
   const focused = accessibilityState?.selected ?? false;
+  const { ref, onLayout } = useHintAnchor(tabAnchorId(testID));
 
   return (
     <Pressable
       {...(props as ComponentProps<typeof Pressable>)}
+      ref={ref}
+      onLayout={(event) => {
+        tabOnLayout?.(event);
+        onLayout();
+      }}
+      collapsable={false}
       testID={testID}
       accessibilityState={accessibilityState}
       style={[
@@ -52,6 +66,7 @@ function TabBarButton({
 }
 
 const tabBarStyles = StyleSheet.create({
+  shell: { flex: 1 },
   button: {
     flex: 1,
     alignItems: 'center',
@@ -69,6 +84,7 @@ export default function TabsLayout() {
   const iconSize = isCompact ? 22 : 24;
 
   return (
+    <View style={tabBarStyles.shell}>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -206,5 +222,7 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    <HintSpotlight />
+    </View>
   );
 }

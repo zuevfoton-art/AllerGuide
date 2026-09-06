@@ -875,6 +875,12 @@ const ru: LocaleMessages = {
       },
     },
   },
+  hints: {
+    step: 'Шаг {{current}} из {{total}}',
+    next: 'Далее',
+    done: 'Понятно',
+    skip: 'Пропустить подсказки',
+  },
   profileSetup: {
     titleSelf: 'Ваш профиль',
     titleChild: 'Профиль ребёнка',

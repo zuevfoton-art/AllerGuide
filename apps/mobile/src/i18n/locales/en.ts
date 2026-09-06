@@ -873,6 +873,12 @@ const en: LocaleMessages = {
       },
     },
   },
+  hints: {
+    step: 'Step {{current}} of {{total}}',
+    next: 'Next',
+    done: 'Got it',
+    skip: 'Skip hints',
+  },
   profileSetup: {
     titleSelf: 'Your profile',
     titleChild: "Child's profile",

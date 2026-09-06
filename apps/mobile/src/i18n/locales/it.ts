@@ -868,6 +868,12 @@ const it: LocaleMessages = {
       sos: { title: 'Emergency SOS', desc: 'Allergy passport and emergency contacts.' },
     },
   },
+  hints: {
+    step: 'Passo {{current}} di {{total}}',
+    next: 'Avanti',
+    done: 'Ho capito',
+    skip: 'Salta i suggerimenti',
+  },
   profileSetup: {
     titleSelf: 'Il tuo profilo',
     titleChild: 'Profilo del bambino',
