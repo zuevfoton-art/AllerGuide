@@ -878,6 +878,82 @@ const en: LocaleMessages = {
     next: 'Next',
     done: 'Got it',
     skip: 'Skip hints',
+    tours: {
+      home: {
+        profile: {
+          title: 'Your profile',
+          body: 'Switch profiles and open settings from here.',
+        },
+        wellness: {
+          title: 'How you feel today',
+          body: 'The index combines pollen, air and diary notes. Tap to see details.',
+        },
+        insights: {
+          title: 'What to do today',
+          body: 'Short suggestions based on your profile and diary.',
+        },
+        scanner: {
+          title: 'Scanner',
+          body: 'Check product labels and menus before you eat.',
+        },
+        sos: {
+          title: 'SOS',
+          body: 'Allergy passport and an emergency call, always at hand.',
+        },
+      },
+      diary: {
+        newEntry: {
+          title: 'New entry',
+          body: 'Log symptoms, meals and medicines so patterns become visible.',
+        },
+        course: {
+          title: 'Treatment courses',
+          body: 'Set up maintenance therapy and courses here.',
+        },
+        report: {
+          title: 'Doctor report',
+          body: 'Collect your notes into a file to take to an appointment.',
+        },
+      },
+      scanner: {
+        photo: {
+          title: 'Photo of the label',
+          body: 'Photograph a label or menu — the app will find allergens.',
+        },
+        barcode: {
+          title: 'Barcode',
+          body: 'Point the camera at the code — faster than reading fine print.',
+        },
+        manual: {
+          title: 'Type it in',
+          body: 'If the photo is blurry, enter the ingredients as text.',
+        },
+      },
+      map: {
+        status: {
+          title: 'Pollen nearby',
+          body: 'Current level of the selected plant in your area.',
+        },
+        layers: {
+          title: 'Map layers',
+          body: 'Switch between pollen and places, and pick a plant.',
+        },
+      },
+      sos: {
+        call: {
+          title: 'Emergency call',
+          body: 'One tap calls emergency services or a close contact.',
+        },
+        passport: {
+          title: 'Allergy passport',
+          body: 'Name, allergens and key facts for people nearby.',
+        },
+        contacts: {
+          title: 'Emergency contacts',
+          body: 'Add people you can call from this screen.',
+        },
+      },
+    },
   },
   profileSetup: {
     titleSelf: 'Your profile',
