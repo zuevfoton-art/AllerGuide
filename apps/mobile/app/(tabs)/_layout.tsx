@@ -6,6 +6,7 @@ import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
 import { BrandTabIcon, BrandFeatureIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
+import { MARKET_ENABLED } from '@/src/constants/features';
 
 function TabIcon({
   name,
@@ -160,17 +161,24 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="market"
-        options={{
-          title: t('tabs.market'),
-          tabBarButton: (props) => <TabBarButton {...props} testID="tab-market" />,
-          tabBarIcon: ({ focused }) => (
-            <BrandFeatureIcon
-              name="market"
-              size={iconSize}
-              color={focused ? colors.accent : colors.textMuted}
-            />
-          ),
-        }}
+        options={
+          MARKET_ENABLED
+            ? {
+                title: t('tabs.market'),
+                tabBarButton: (props) => <TabBarButton {...props} testID="tab-market" />,
+                tabBarIcon: ({ focused }) => (
+                  <BrandFeatureIcon
+                    name="market"
+                    size={iconSize}
+                    color={focused ? colors.accent : colors.textMuted}
+                  />
+                ),
+              }
+            : {
+                href: null,
+                title: t('tabs.market'),
+              }
+        }
       />
       <Tabs.Screen
         name="map"

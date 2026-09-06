@@ -1,4 +1,5 @@
 import { Text, View, StyleSheet } from 'react-native';
+import { Redirect } from 'expo-router';
 import { useMemo, useState } from 'react';
 import type { MarketplaceCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
@@ -9,8 +10,17 @@ import { MarketplaceModule } from '@/src/modules/marketplace';
 import { useMarketplaceProducts } from '@/src/modules/marketplace/use-marketplace-products';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { useAppStore } from '@/src/store/app-store';
+import { MARKET_ENABLED } from '@/src/constants/features';
 
 export default function MarketScreen() {
+  if (!MARKET_ENABLED) {
+    return <Redirect href="/(tabs)/home" />;
+  }
+
+  return <VisibleMarketScreen />;
+}
+
+function VisibleMarketScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const ui = useUiStyles();
