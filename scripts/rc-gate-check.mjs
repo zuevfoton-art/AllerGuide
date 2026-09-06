@@ -343,6 +343,29 @@ function checkMaestroFlows() {
   ) {
     failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
   }
+
+  const sosNoProfile = fs.readFileSync(path.join(flowsDir, 'sos-no-profile-smoke.yaml'), 'utf8');
+  if (
+    !sosNoProfile.includes('profile-list-item-0') ||
+    !sosNoProfile.includes('profile-edit-title') ||
+    !sosNoProfile.includes('profile-delete') ||
+    !sosNoProfile.includes('screen-header-back') ||
+    sosNoProfile.indexOf('id: profile-list-item-0') > sosNoProfile.indexOf('id: profile-delete') ||
+    sosNoProfile.indexOf('id: profile-delete') > sosNoProfile.indexOf('id: screen-header-back') ||
+    sosNoProfile.indexOf('id: screen-header-back') > sosNoProfile.indexOf('id: tab-sos')
+  ) {
+    failures.push(
+      'sos-no-profile-smoke.yaml must open profile-list-item-0, wait for profile-edit-title, scroll to profile-delete, then leave via screen-header-back',
+    );
+  }
+  const profileHub = fs.readFileSync(path.join(root, 'apps/mobile/app/profile.tsx'), 'utf8');
+  const profileEdit = fs.readFileSync(path.join(root, 'apps/mobile/app/profile-edit.tsx'), 'utf8');
+  if (!profileHub.includes('profile-list-item-${index}') || profileHub.includes('testID="profile-delete"')) {
+    failures.push('profile.tsx must expose profile-list-item-${index}; profile-delete lives on profile-edit');
+  }
+  if (!profileEdit.includes('testID="profile-delete"') || !profileEdit.includes('titleTestID="profile-edit-title"')) {
+    failures.push('profile-edit.tsx must expose profile-edit-title and profile-delete');
+  }
 }
 
 const STAGING_HEALTH_ATTEMPTS = 3;

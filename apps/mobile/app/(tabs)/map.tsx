@@ -60,7 +60,6 @@ import { getApiBaseUrl } from '@/src/services/api-client';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
   GOOGLE_POLLEN_HEATMAP_ENABLED,
-  MAP_POLLEN_GOOGLE_PRIMARY,
   MAP_POLLEN_PLUME_ENABLED,
   YANDEX_MAP_INTERACTIVE_ENABLED,
 } from '@/src/constants/features';
@@ -87,7 +86,6 @@ export default function MapScreen() {
     pollenHourly,
     airQuality,
     airQualityLoading,
-    placesSource,
     placeSearchError,
     selectedPoiId,
     setSelectedPoiId,
@@ -118,7 +116,6 @@ export default function MapScreen() {
     pollenSnapshot?.readings.find((reading) => reading.taxonId === selectedTaxonId) ?? null;
   const selectedUpi = pollenSnapshot?.upiByTaxon[selectedTaxonId] ?? null;
   const isCalendarFallback = pollenSnapshot?.source === 'calendar';
-  const isCacheSource = pollenSnapshot?.source === 'cache';
 
   const forecastReading =
     selectedForecastDay != null
@@ -322,16 +319,6 @@ export default function MapScreen() {
     return t('map.statusToday', { level: levelLabel, taxon: taxonLabel });
   }, [levelLabel, loading, pollenSnapshot, selectedForecastDay, t, taxonLabel]);
 
-  const sourceLabel = useMemo(() => {
-    if (!pollenSnapshot) return '';
-    if (pollenSnapshot.source === 'calendar') return t('map.pollenSourceCalendar');
-    if (pollenSnapshot.source === 'cache') return t('map.pollenSourceCache');
-    if (pollenSnapshot.source === 'google' || selectedUpi?.source === 'google') {
-      return t('map.pollenSourceGoogle');
-    }
-    return t('map.pollenSourceOpenMeteo');
-  }, [pollenSnapshot, selectedUpi?.source, t]);
-
   const plumeGroupHint = useMemo(() => {
     const mapType = pollenTaxonToGoogleMapType(selectedTaxonId);
     if (mapType === 'GRASS_UPI') return t('map.plumeGroupGrass');
@@ -391,14 +378,6 @@ export default function MapScreen() {
     </>
   ) : undefined;
 
-  const mapAttributionKey = useYandexInteractive
-    ? 'map.pollenYandexInteractiveAttribution'
-    : useGoogleMap
-      ? pollenSnapshot?.source === 'google' || MAP_POLLEN_GOOGLE_PRIMARY
-        ? null
-        : 'map.pollenGoogleMapAttribution'
-      : 'map.pollenMapAttribution';
-
   const showActionTip =
     showPollenLayer && (displayStatusLevel === 'mid' || displayStatusLevel === 'high');
   const showPlacesPanel = showPlacesLayer;
@@ -421,10 +400,7 @@ export default function MapScreen() {
         profileName={profile?.name}
         profileRelevant={Boolean(selectedReading?.profileRelevant)}
         locationLabel={coords.label || pollenRegion.name}
-        sourceLabel={sourceLabel}
         updatedLabel={updatedLabel}
-        isCalendarFallback={isCalendarFallback}
-        isCacheSource={isCacheSource}
       />
 
       <MapLayerSwitcher
@@ -475,7 +451,6 @@ export default function MapScreen() {
         polylines={showPlumeGeo ? plume.polylines : []}
         selectedPoiId={selectedPoiId}
         overlay={mapOverlay}
-        mapAttributionKey={mapAttributionKey}
         yandexPollenUrl={pollenSnapshot?.yandexPollenUrl}
         onMarkerPress={setSelectedPoiId}
         onRegionChange={handleRegionChange}
@@ -534,7 +509,6 @@ export default function MapScreen() {
           placeSuggestions={placeSuggestions}
           placeSearchLoading={placeSearchLoading}
           placeSearchError={placeSearchError}
-          placesSource={placesSource}
           pois={pois}
           selectedPoiId={selectedPoiId}
           placeFilters={placeFilters}

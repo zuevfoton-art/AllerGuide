@@ -52,6 +52,7 @@ export const GINA_ASTHMA_FEATURE_IDS = [
   'asthma-expert-content',
   'asthma-doctor-report',
   'asthma-diary-section',
+  'asthma-trigger-recommendations',
 ] as const;
 
 export type GinaAsthmaFeatureId = (typeof GINA_ASTHMA_FEATURE_IDS)[number];

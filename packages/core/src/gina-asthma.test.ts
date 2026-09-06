@@ -5,11 +5,13 @@ import {
   GINA_ACT_PARTIAL_MIN,
   GINA_ACT_UNCONTROLLED_MAX,
   GINA_ASTHMA_EXPERT_ARTICLE_IDS,
+  GINA_ASTHMA_FEATURE_IDS,
   GINA_PEF_GREEN_MIN_PERCENT,
   GINA_PEF_YELLOW_MIN_PERCENT,
   classifyActScoreGina,
   isGinaAsthmaExpertArticle,
 } from './gina-asthma';
+import { CONDITION_RECOMMENDED_ALLERGEN_IDS } from './condition-allergen-recommendations';
 import { PEF_ZONE_GREEN_MIN_PERCENT, PEF_ZONE_YELLOW_MIN_PERCENT } from './pef-zones';
 
 describe('GINA asthma governance', () => {
@@ -31,6 +33,13 @@ describe('GINA asthma governance', () => {
   it('keeps PEF zone thresholds aligned with pef-zones module', () => {
     expect(PEF_ZONE_GREEN_MIN_PERCENT).toBe(GINA_PEF_GREEN_MIN_PERCENT);
     expect(PEF_ZONE_YELLOW_MIN_PERCENT).toBe(GINA_PEF_YELLOW_MIN_PERCENT);
+  });
+
+  it('registers asthma trigger quick-pick as a GINA feature, not a threshold', () => {
+    expect(GINA_ASTHMA_FEATURE_IDS).toContain('asthma-trigger-recommendations');
+    expect(CONDITION_RECOMMENDED_ALLERGEN_IDS.asthma).toEqual(
+      expect.arrayContaining(['dust-mites', 'house-dust', 'mold', 'cat-dander']),
+    );
   });
 
   it('registers all asthma expert articles with GINA reference in body or tags', () => {

@@ -239,6 +239,78 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(screen, /inputTestID="scanner-input"/);
   });
 
+  it('keeps first-run food → milk and documents pollinosis quick-pick (S1)', () => {
+    const firstRun = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
+    assert.match(firstRun, /id: condition-food/);
+    assert.match(firstRun, /id: allergen-milk/);
+    assert.ok(
+      firstRun.indexOf('condition-food') < firstRun.indexOf('allergen-milk'),
+      'first-run must pick food before tapping allergen-milk',
+    );
+
+    const core = read('packages/core/src/condition-allergen-recommendations.ts');
+    assert.match(core, /food:\s*\[\s*'milk'/);
+
+    const picker = read('apps/mobile/src/components/AllergenPicker.tsx');
+    assert.match(picker, /allergen-recommended-\$\{group\.conditionId\}/);
+    assert.match(picker, /testID="allergen-open-catalog"/);
+
+    const pollinosis = read('apps/mobile/.maestro/flows/profile-pollinosis-quick-pick.yaml');
+    assert.match(pollinosis, /id: condition-pollinosis/);
+    assert.match(pollinosis, /id: allergen-birch-pollen/);
+    assert.match(pollinosis, /id: allergen-mugwort-pollen/);
+    assert.match(pollinosis, /id: allergen-recommended-pollinosis/);
+    assert.match(pollinosis, /id: allergen-open-catalog/);
+    assert.ok(
+      pollinosis.indexOf('condition-pollinosis') < pollinosis.indexOf('allergen-birch-pollen'),
+    );
+
+    const smokeAll = read('apps/mobile/.maestro/flows/smoke-all.yaml');
+    assert.doesNotMatch(
+      smokeAll,
+      /profile-pollinosis-quick-pick/,
+      'pollinosis quick-pick must stay off smoke-all so scanner keeps the food profile',
+    );
+  });
+
+  it('opens profile-edit before tapping profile-delete, then leaves the hub without BACK', () => {
+    const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
+    assert.match(flow, /id: profile-list-item-0/);
+    assert.match(flow, /id: profile-edit-title/);
+    assert.match(
+      flow,
+      /scrollUntilVisible:[\s\S]*?id: profile-delete[\s\S]*?-\s+tapOn:\s+id: profile-delete/,
+    );
+    assert.match(flow, /text: "Удалить"/);
+    assert.match(flow, /id: screen-header-back/);
+    assert.match(flow, /id: tab-sos/);
+    assert.ok(
+      flow.indexOf('id: profile-list-item-0') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must open the hub row before tapping profile-delete',
+    );
+    assert.ok(
+      flow.indexOf('id: profile-edit-title') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must wait for profile-edit before scrolling to delete',
+    );
+    assert.ok(
+      flow.indexOf('id: profile-delete') < flow.indexOf('id: screen-header-back'),
+      'sos-no-profile-smoke must delete before leaving the hub',
+    );
+    assert.ok(
+      flow.indexOf('id: screen-header-back') < flow.indexOf('id: tab-sos'),
+      'sos-no-profile-smoke must leave the hub via screen-header-back before tab-sos',
+    );
+
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /testID=\{`profile-list-item-\$\{index\}`\}/);
+    assert.doesNotMatch(hub, /testID="profile-delete"/);
+
+    const edit = read('apps/mobile/app/profile-edit.tsx');
+    assert.match(edit, /titleTestID="profile-edit-title"/);
+    assert.match(edit, /testID="profile-delete"/);
+    assert.match(read('apps/mobile/src/components/ScreenHeader.tsx'), /testID="screen-header-back"/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));
