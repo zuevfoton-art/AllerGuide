@@ -318,6 +318,31 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(read('apps/mobile/src/components/ScreenHeader.tsx'), /testID="screen-header-back"/);
   });
 
+  it('folds profile IME via hub title before tapping profile-save-number', () => {
+    const flow = read('apps/mobile/.maestro/flows/settings-smoke.yaml');
+    assert.match(flow, /_tap-profile-save-number\.yaml/);
+    assert.match(flow, /scrollUntilVisible:[\s\S]*?id: profile-emergency-number/);
+    assert.doesNotMatch(
+      flow,
+      /^\s*-\s+tapOn:\s*\n\s+id: profile-save-number\s*$/m,
+      'settings-smoke must not tap profile-save-number while IME may cover it',
+    );
+
+    const tapSave = read('apps/mobile/.maestro/flows/_tap-profile-save-number.yaml');
+    assert.match(tapSave, /_dismiss-profile-ime\.yaml/);
+    assert.match(tapSave, /scrollUntilVisible/);
+    assert.match(tapSave, /id: profile-save-number/);
+
+    const dismiss = read('apps/mobile/.maestro/flows/_dismiss-profile-ime.yaml');
+    assert.match(dismiss, /id: profile-screen-title/);
+    assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /titleTestID="profile-screen-title"/);
+    assert.match(hub, /testID="profile-save-number"/);
+    assert.match(hub, /testID="profile-emergency-number"/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));

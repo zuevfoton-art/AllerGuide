@@ -344,6 +344,38 @@ function checkMaestroFlows() {
     failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
   }
 
+  const settingsSmoke = fs.readFileSync(path.join(flowsDir, 'settings-smoke.yaml'), 'utf8');
+  if (
+    !settingsSmoke.includes('_tap-profile-save-number.yaml') ||
+    !settingsSmoke.includes('profile-emergency-number')
+  ) {
+    failures.push(
+      'settings-smoke.yaml must type the emergency number then save via _tap-profile-save-number.yaml',
+    );
+  }
+  const tapProfileSave = path.join(flowsDir, '_tap-profile-save-number.yaml');
+  if (!fs.existsSync(tapProfileSave)) {
+    failures.push('_tap-profile-save-number.yaml missing (fold IME then tap profile-save-number)');
+  } else {
+    const tapProfileSaveBody = fs.readFileSync(tapProfileSave, 'utf8');
+    if (
+      !tapProfileSaveBody.includes('_dismiss-profile-ime.yaml') ||
+      !tapProfileSaveBody.includes('scrollUntilVisible') ||
+      !tapProfileSaveBody.includes('profile-save-number')
+    ) {
+      failures.push('_tap-profile-save-number.yaml must dismiss IME then scrollUntilVisible profile-save-number');
+    }
+  }
+  const dismissProfileIme = path.join(flowsDir, '_dismiss-profile-ime.yaml');
+  if (!fs.existsSync(dismissProfileIme)) {
+    failures.push('_dismiss-profile-ime.yaml missing (fold profile IME without BACK)');
+  } else {
+    const dismissProfileBody = fs.readFileSync(dismissProfileIme, 'utf8');
+    if (!dismissProfileBody.includes('profile-screen-title')) {
+      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-title (not hideKeyboard/BACK)');
+    }
+  }
+
   const sosNoProfile = fs.readFileSync(path.join(flowsDir, 'sos-no-profile-smoke.yaml'), 'utf8');
   if (
     !sosNoProfile.includes('profile-list-item-0') ||
