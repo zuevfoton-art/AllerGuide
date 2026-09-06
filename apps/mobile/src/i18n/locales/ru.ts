@@ -1343,6 +1343,9 @@ const ru: LocaleMessages = {
   },
   allergens: {
     popular: 'Частые аллергены',
+    recommendedTitle: 'Рекомендуем для выбранных типов',
+    recommendedHint: 'Отметьте свои. Остальные — в полном списке.',
+    recommendedGroup: '«{{label}}»',
     fromCatalog: 'Из полного списка',
     openCatalog: 'Выбрать из полного списка',
     crossTitle: 'Возможные перекрёстные реакции',

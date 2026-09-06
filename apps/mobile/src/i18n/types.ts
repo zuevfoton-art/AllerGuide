@@ -1310,6 +1310,9 @@ export type LocaleMessages = {
   };
   allergens: {
     popular: string;
+    recommendedTitle: string;
+    recommendedHint: string;
+    recommendedGroup: string;
     fromCatalog: string;
     openCatalog: string;
     crossTitle: string;

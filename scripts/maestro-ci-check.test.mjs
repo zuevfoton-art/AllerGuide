@@ -239,6 +239,40 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(screen, /inputTestID="scanner-input"/);
   });
 
+  it('keeps first-run food → milk and documents pollinosis quick-pick (S1)', () => {
+    const firstRun = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
+    assert.match(firstRun, /id: condition-food/);
+    assert.match(firstRun, /id: allergen-milk/);
+    assert.ok(
+      firstRun.indexOf('condition-food') < firstRun.indexOf('allergen-milk'),
+      'first-run must pick food before tapping allergen-milk',
+    );
+
+    const core = read('packages/core/src/condition-allergen-recommendations.ts');
+    assert.match(core, /food:\s*\[\s*'milk'/);
+
+    const picker = read('apps/mobile/src/components/AllergenPicker.tsx');
+    assert.match(picker, /allergen-recommended-\$\{group\.conditionId\}/);
+    assert.match(picker, /testID="allergen-open-catalog"/);
+
+    const pollinosis = read('apps/mobile/.maestro/flows/profile-pollinosis-quick-pick.yaml');
+    assert.match(pollinosis, /id: condition-pollinosis/);
+    assert.match(pollinosis, /id: allergen-birch-pollen/);
+    assert.match(pollinosis, /id: allergen-mugwort-pollen/);
+    assert.match(pollinosis, /id: allergen-recommended-pollinosis/);
+    assert.match(pollinosis, /id: allergen-open-catalog/);
+    assert.ok(
+      pollinosis.indexOf('condition-pollinosis') < pollinosis.indexOf('allergen-birch-pollen'),
+    );
+
+    const smokeAll = read('apps/mobile/.maestro/flows/smoke-all.yaml');
+    assert.doesNotMatch(
+      smokeAll,
+      /profile-pollinosis-quick-pick/,
+      'pollinosis quick-pick must stay off smoke-all so scanner keeps the food profile',
+    );
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));

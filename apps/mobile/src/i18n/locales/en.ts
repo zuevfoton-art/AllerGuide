@@ -1341,6 +1341,9 @@ const en: LocaleMessages = {
   },
   allergens: {
     popular: 'Common allergens',
+    recommendedTitle: 'Recommended for selected types',
+    recommendedHint: 'Mark yours. Everything else is in the full list.',
+    recommendedGroup: '“{{label}}”',
     fromCatalog: 'From full list',
     openCatalog: 'Choose from full list',
     crossTitle: 'Possible cross-reactions',
