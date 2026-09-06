@@ -19,9 +19,16 @@ export const CONDITION_OPTION_ALLERGEN_MAP: Partial<
   pollinosis: {
     'birch-pollen': 'birch-pollen',
     alder: 'alder-pollen',
+    hazel: 'hazel-pollen',
+    oak: 'oak-pollen',
+    maple: 'maple-pollen',
+    ash: 'ash-pollen',
+    willow: 'willow-pollen',
+    poplar: 'poplar-pollen',
     'olive-pollen': 'olive-pollen',
     'ragweed-pollen': 'ragweed-pollen',
     'mugwort-pollen': 'mugwort-pollen',
+    saltwort: 'saltwort-pollen',
     timothy: 'grass-pollen',
     meadow: 'grass-pollen',
     fescue: 'grass-pollen',
@@ -56,7 +63,7 @@ export const CONDITION_OPTION_ALLERGEN_MAP: Partial<
   },
 };
 
-/** Calendar / Open-Meteo pollen taxa without a dedicated allergen catalog row. */
+/** Calendar / Open-Meteo / Google pollen taxa for pollinosis options. */
 export const CONDITION_OPTION_POLLEN_TAXON_MAP: Partial<
   Record<AllergyConditionId, Record<string, PollenTaxonId>>
 > = {
@@ -80,21 +87,6 @@ export const CONDITION_OPTION_POLLEN_TAXON_MAP: Partial<
     'olive-pollen': 'olive_pollen',
   },
 };
-
-/** Pollinosis sub-options with calendar/Open-Meteo taxon but no dedicated allergen row. */
-export const CALENDAR_ONLY_POLLEN_OPTION_IDS = new Set([
-  'hazel',
-  'oak',
-  'maple',
-  'ash',
-  'willow',
-  'poplar',
-  'saltwort',
-]);
-
-export function isCalendarOnlyPollenOption(optionId: string): boolean {
-  return CALENDAR_ONLY_POLLEN_OPTION_IDS.has(normalizeConditionOptionId('pollinosis', optionId));
-}
 
 /** Legacy option ids kept for backward compatibility with stored UI selections. */
 export const LEGACY_CONDITION_OPTION_ALIASES: Partial<

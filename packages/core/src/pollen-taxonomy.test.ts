@@ -3,6 +3,7 @@ import {
   OPEN_METEO_POLLEN_TAXON_IDS,
   parseOpenMeteoPollenHourly,
   profileMatchesPollenTaxon,
+  resolvePollenTaxonMatch,
 } from './pollen-taxonomy';
 
 describe('pollen taxonomy', () => {
@@ -24,6 +25,21 @@ describe('pollen taxonomy', () => {
     expect(profileMatchesPollenTaxon(['milk'], 'oak_pollen')).toBe(false);
     expect(profileMatchesPollenTaxon(['alder-pollen'], 'alder_pollen')).toBe(true);
     expect(profileMatchesPollenTaxon(['olive-pollen'], 'olive_pollen')).toBe(true);
+  });
+
+  it('resolves exact, related, and none matches after dedicated catalog rows', () => {
+    expect(resolvePollenTaxonMatch(['oak-pollen'], 'oak_pollen')).toBe('exact');
+    expect(resolvePollenTaxonMatch(['birch-pollen'], 'oak_pollen')).toBe('related');
+    expect(resolvePollenTaxonMatch(['hazel-pollen'], 'hazel_pollen')).toBe('exact');
+    expect(resolvePollenTaxonMatch(['birch-pollen'], 'hazel_pollen')).toBe('related');
+    expect(resolvePollenTaxonMatch(['hazelnut'], 'hazel_pollen')).toBe('none');
+    expect(resolvePollenTaxonMatch(['olive-pollen'], 'ash_pollen')).toBe('related');
+    expect(resolvePollenTaxonMatch(['birch-pollen'], 'ash_pollen')).toBe('none');
+    expect(resolvePollenTaxonMatch(['birch-pollen'], 'maple_pollen')).toBe('none');
+    expect(resolvePollenTaxonMatch(['birch-pollen'], 'willow_pollen')).toBe('none');
+    expect(resolvePollenTaxonMatch(['birch-pollen'], 'poplar_pollen')).toBe('none');
+    expect(resolvePollenTaxonMatch(['mugwort-pollen'], 'saltwort_pollen')).toBe('none');
+    expect(resolvePollenTaxonMatch(['saltwort-pollen'], 'saltwort_pollen')).toBe('exact');
   });
 
   it('parses Open-Meteo hourly data by taxon id', () => {

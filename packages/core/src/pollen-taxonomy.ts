@@ -40,10 +40,17 @@ export type PollenTaxonId =
   | CalendarPollenTaxonId
   | GooglePlantPollenTaxonId;
 
+export type PollenTaxonMatchKind = 'exact' | 'related' | 'none';
+
 export interface PollenTaxon {
   id: PollenTaxonId;
   /** Canonical allergen id from `allergen-database.ts`, if profile-relevant. */
   allergenId: ProfileAllergenId | null;
+  /**
+   * Botanically justified fallback: a profile with one of these ids is
+   * treated as sensitive to the taxon by kinship, not identity.
+   */
+  relatedAllergenIds?: ProfileAllergenId[];
   labelRu: string;
   /** Present for taxa fetched from Open-Meteo hourly API. */
   openMeteoHourlyKey?: OpenMeteoPollenTaxonId;
@@ -64,32 +71,35 @@ export const POLLEN_TAXA: PollenTaxon[] = [
   },
   {
     id: 'oak_pollen',
-    allergenId: 'birch-pollen',
+    allergenId: 'oak-pollen',
+    relatedAllergenIds: ['birch-pollen'],
     labelRu: 'Дуб',
   },
   {
     id: 'hazel_pollen',
-    allergenId: 'hazelnut',
+    allergenId: 'hazel-pollen',
+    relatedAllergenIds: ['birch-pollen'],
     labelRu: 'Лещина',
   },
   {
     id: 'maple_pollen',
-    allergenId: 'birch-pollen',
+    allergenId: 'maple-pollen',
     labelRu: 'Клён',
   },
   {
     id: 'ash_pollen',
-    allergenId: 'birch-pollen',
+    allergenId: 'ash-pollen',
+    relatedAllergenIds: ['olive-pollen'],
     labelRu: 'Ясень',
   },
   {
     id: 'willow_pollen',
-    allergenId: 'birch-pollen',
+    allergenId: 'willow-pollen',
     labelRu: 'Ива',
   },
   {
     id: 'poplar_pollen',
-    allergenId: 'birch-pollen',
+    allergenId: 'poplar-pollen',
     labelRu: 'Тополь',
   },
   {
@@ -111,7 +121,7 @@ export const POLLEN_TAXA: PollenTaxon[] = [
   },
   {
     id: 'saltwort_pollen',
-    allergenId: 'mugwort-pollen',
+    allergenId: 'saltwort-pollen',
     labelRu: 'Лебеда',
   },
   {
@@ -189,14 +199,23 @@ export function mapOpenMeteoHourlyKeyToAllergenId(
   return taxon?.allergenId ?? undefined;
 }
 
-/** Whether a profile allergen list is sensitive to this pollen taxon (exact id match, not substring). */
+export function resolvePollenTaxonMatch(
+  profileAllergenIds: ProfileAllergenId[],
+  taxonId: PollenTaxonId,
+): PollenTaxonMatchKind {
+  const taxon = getPollenTaxon(taxonId);
+  if (!taxon) return 'none';
+  if (taxon.allergenId && profileAllergenIds.includes(taxon.allergenId)) return 'exact';
+  if (taxon.relatedAllergenIds?.some((id) => profileAllergenIds.includes(id))) return 'related';
+  return 'none';
+}
+
+/** Whether a profile is sensitive to this taxon (exact or related). */
 export function profileMatchesPollenTaxon(
   profileAllergenIds: ProfileAllergenId[],
   taxonId: PollenTaxonId,
 ): boolean {
-  const taxon = getPollenTaxon(taxonId);
-  if (!taxon?.allergenId) return false;
-  return profileAllergenIds.includes(taxon.allergenId);
+  return resolvePollenTaxonMatch(profileAllergenIds, taxonId) !== 'none';
 }
 
 export function profileHasPollenAllergen(

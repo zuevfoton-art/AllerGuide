@@ -72,6 +72,15 @@ describe('clinical-phenotypes', () => {
     expect(result.phenotypeIds).toContain('pollen-food-oas');
   });
 
+  it('P5b: pollen-food-oas — hazel pollen + hazelnut OAS pair', () => {
+    const result = resolveClinicalPhenotypes({
+      conditionIds: ['pollinosis', 'food'],
+      allergenIds: ['hazel-pollen', 'hazelnut'],
+    });
+
+    expect(result.phenotypeIds).toContain('pollen-food-oas');
+  });
+
   it('P6: dustmite-seafood — household + dust-mites + seafood', () => {
     const result = resolveClinicalPhenotypes({
       conditionIds: ['household'],
