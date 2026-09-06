@@ -199,7 +199,7 @@ flowchart LR
   end
 
   subgraph core [Каноническая таксономия]
-    DB[(allergen-database\n46 аллергенов)]
+    DB[(allergen-database\n65 аллергенов)]
     CR[(cross-reactions\n44 пары)]
   end
 
@@ -248,7 +248,7 @@ flowchart LR
 
 ### 4.2. Канонический справочник аллергенов
 
-**Источник истины:** статический модуль `allergen-database.ts` в пакете `@allerguide/core`. Содержит **46 аллергенов**, дублируется в PostgreSQL (`catalog.allergens`) при сидировании для API и каталога продуктов.
+**Источник истины:** статический модуль `allergen-database.ts` в пакете `@allerguide/core`. Содержит **65 аллергенов**, дублируется в PostgreSQL (`catalog.allergens`) при сидировании для API и каталога продуктов.
 
 #### Структура записи
 
@@ -278,9 +278,18 @@ flowchart LR
 | id | Название | Связь с мониторингом среды |
 |----|----------|----------------------------|
 | `birch-pollen` | Пыльца берёзы | Open-Meteo `birch_pollen` |
+| `alder-pollen` | Пыльца ольхи | Open-Meteo `alder_pollen` |
+| `olive-pollen` | Пыльца оливы | Open-Meteo `olive_pollen` |
 | `grass-pollen` | Пыльца злаков | Open-Meteo `grass_pollen` |
 | `ragweed-pollen` | Пыльца амброзии | Open-Meteo `ragweed_pollen` |
 | `mugwort-pollen` | Пыльца полыни | Open-Meteo `mugwort_pollen` |
+| `hazel-pollen` | Пыльца лещины | Google `HAZEL` / календарь |
+| `oak-pollen` | Пыльца дуба | Google `OAK` / календарь |
+| `maple-pollen` | Пыльца клёна | Google `MAPLE` |
+| `ash-pollen` | Пыльца ясеня | Google `ASH` |
+| `willow-pollen` | Пыльца ивы | Календарный таксон |
+| `poplar-pollen` | Пыльца тополя | Google `COTTONWOOD` |
+| `saltwort-pollen` | Пыльца лебеды | Календарный таксон |
 | `dust-mites` | Пылевые клещи | — |
 | `house-dust` | Бытовая пыль | — |
 | `cat-dander`, `dog-dander` | Шерсть кошек / собак | — |
@@ -396,7 +405,7 @@ flowchart LR
 
 #### Происхождение и характер данных
 
-Перекрёстные реакции — **курируемый статический справочник** в `@allerguide/core` (`cross-reactions/phase-1.ts`, `phase-2.ts`). Объединяется в массив `CROSS_REACTIONS` (**44 направленные пары**). Дублируется в PostgreSQL (`catalog.cross_reactions`) при сидировании.
+Перекрёстные реакции — **курируемый статический справочник** в `@allerguide/core` (`cross-reactions/phase-1.ts`, `phase-2.ts`, `phase-3.ts`, `phase-4.ts`). Объединяется в массив `CROSS_REACTIONS` (**54 направленные пары**). Дублируется в PostgreSQL (`catalog.cross_reactions`) при сидировании.
 
 **Источники при формировании (клинико-биологический контекст):**
 
@@ -816,7 +825,7 @@ flowchart TB
 | `packages/core/src/wellness-weights.ts` | Версионированные веса (`beta-1.0`) |
 | `packages/core/src/diary-stats.ts` | Аналитика дневника, корреляции, аномалии |
 | `packages/core/src/diary.ts` | Структура разделов дневника |
-| `packages/core/src/allergen-database.ts` | Каноническая таксономия (46 аллергенов) |
+| `packages/core/src/allergen-database.ts` | Каноническая таксономия (65 аллергенов) |
 | `packages/core/src/allergen-aliases.ts` | Маппинг EU14 / FDA9 / OFF / датасетов |
 | `packages/core/src/regulatory-allergens.ts` | Регуляторные коды аллергенов |
 | `packages/core/src/cross-reactions/` | Справочник перекрёстных реакций (44 пары) |

@@ -77,7 +77,7 @@ export function getRecommendedAllergenIds(conditionIds: AllergyConditionId[]): P
 | Тип | Рекомендованные id | Опора |
 |-----|--------------------|-------|
 | `food` | `milk`, `eggs`, `wheat-gluten`, `tree-nuts`, `peanut`, `fish`, `seafood`, `soy` | EU Reg. 1169/2011 Annex II (уже в `evidence-registry`) |
-| `pollinosis` | `birch-pollen`, `alder-pollen`, `grass-pollen`, `mugwort-pollen`, `ragweed-pollen`, `olive-pollen` | Сезоны из `ALLERGY_CONDITION_TYPES.pollinosis.options` |
+| `pollinosis` | `birch-pollen`, `alder-pollen`, `grass-pollen`, `mugwort-pollen`, `ragweed-pollen`, `olive-pollen`, `hazel-pollen`, `oak-pollen`, `ash-pollen`, `saltwort-pollen`, `maple-pollen`, `poplar-pollen`, `willow-pollen` | Сезоны из `ALLERGY_CONDITION_TYPES.pollinosis.options`; свёртка после 8 чипов |
 | `asthma` | `dust-mites`, `house-dust`, `mold`, `cat-dander`, `dog-dander`, `birch-pollen`, `grass-pollen`, `mugwort-pollen` | GINA — список триггеров, **не** порог |
 | `rhinitis` | `dust-mites`, `house-dust`, `cat-dander`, `dog-dander`, `mold`, `birch-pollen`, `grass-pollen`, `mugwort-pollen` | ARIA |
 | `dermatitis` | `dust-mites`, `milk`, `eggs`, `wheat-gluten`, `cat-dander`, `mold` | РААКИ КР по АтД |
@@ -90,7 +90,7 @@ export function getRecommendedAllergenIds(conditionIds: AllergyConditionId[]): P
 
 Все id проверены по `packages/core/src/allergen-database.ts` — инвариант закрепляется тестом.
 
-**Пыльца без строки каталога.** Лещина, дуб, клён, ясень, ива, тополь, лебеда есть в `CONDITION_OPTION_POLLEN_TAXON_MAP` / `CALENDAR_ONLY_POLLEN_OPTION_IDS`, но строки аллергена у них нет — в рекомендации они не попадают. Заводить им строки — отдельная задача (сид `catalog.allergens`, cross-reactions, локали): вынести в [`allergy-taxonomy-roadmap.md`](./allergy-taxonomy-roadmap.md) §2.2, здесь не смешивать. Пять злаковых опций сходятся в один `grass-pollen` — это ожидаемо.
+**Пыльца с отдельной строкой каталога.** Лещина, дуб, клён, ясень, ива, тополь и лебеда получили строки `*-pollen` (см. [`calendar-pollen-allergen-rows-plan.md`](./calendar-pollen-allergen-rows-plan.md)) и входят в быстрый выбор поллиноза. Пять злаковых опций по-прежнему сходятся в один `grass-pollen`.
 
 ### 3.3. Экран (спецификация)
 
@@ -186,7 +186,7 @@ export function getRecommendedAllergenIds(conditionIds: AllergyConditionId[]): P
 |------|-----------|
 | Ломается offline nightly Maestro | `milk` остаётся в рекомендациях `food`; отдельный инвариант в `maestro-ci-check` |
 | Каталог с бэкенда (`EXPO_PUBLIC_PRODUCT_DB`) не содержит id | Фильтрация по резолвленному каталогу + fallback на популярные |
-| Список на 3+ типах слишком длинный | Группы с заголовками; при необходимости — свёртка группы после N чипов (решение по факту вёрстки, не заранее) |
+| Список на 3+ типах слишком длинный | Группы с заголовками; свёртка группы после 8 чипов (`ALLERGEN_GROUP_VISIBLE_LIMIT`), выбранные всегда видимы |
 | Правило GINA для астмы | Рекомендации — список триггеров, не порог. Если регистрировать как астма-фичу, то id в `GINA_ASTHMA_FEATURE_IDS` + тест в `gina-asthma.test.ts` ([`development-rules.md`](./development-rules.md) §2.5) |
 | Потеря выбранных аллергенов при снятии типа | S5 закреплён тестом хелпера |
 | Рассинхрон с `condition-allergen-map.ts` | Рекомендации на **тип**, маппинг — на **под-опцию**; тест сверяет, что рекомендации не противоречат маппингу там, где он есть |
@@ -201,4 +201,4 @@ export function getRecommendedAllergenIds(conditionIds: AllergyConditionId[]): P
 | [`codebase-index.md`](./codebase-index.md) | Новый модуль ядра в списке `Profiles` |
 | [`maestro.md`](./maestro.md) | Новый шаг флоу + строка в таблице симптомов |
 | [`qa-test-cases.md`](./qa-test-cases.md) | TC на S1–S6 (рядом с TC-045 / TC-046) |
-| [`allergy-taxonomy-roadmap.md`](./allergy-taxonomy-roadmap.md) | Follow-up: строки каталога для пыльцы «только календарь» |
+| [`allergy-taxonomy-roadmap.md`](./allergy-taxonomy-roadmap.md) | Follow-up закрыт: [`calendar-pollen-allergen-rows-plan.md`](./calendar-pollen-allergen-rows-plan.md) |

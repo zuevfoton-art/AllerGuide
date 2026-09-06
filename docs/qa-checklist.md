@@ -38,6 +38,7 @@
 
 - [ ] `pnpm install` из корня репозитория
 - [ ] `pnpm typecheck` — без ошибок
+- [ ] После мержа строк пыльцевого каталога — тег `catalog-seed-*`, в staging `catalog.allergens` = 65 и `catalog.cross_reactions` = 54
 - [ ] `pnpm test` — без падений
 - [ ] Для native preview: установлена сборка из [EAS preview](eas-internal-preview.md)
 - [ ] Для web: `cd apps/mobile && npx expo start --web --port 5000`
