@@ -32,6 +32,8 @@ import {
 } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
@@ -67,6 +69,7 @@ export default function HomeScreen() {
   const wellness = wellnessState.data;
   const loadingWellness = wellnessState.loading;
   const reloadWellness = wellnessState.reload;
+  useHintTour('home', { ready: !loadingWellness });
 
   const reloadHomeData = useCallback(() => {
     void reloadWellness();
@@ -139,7 +142,9 @@ export default function HomeScreen() {
       refreshing={wellnessState.refreshing}
       brandHeaderRight={
         <>
-          <ProfileHeaderButton destination="hub" />
+          <HintAnchor id="home.profile">
+            <ProfileHeaderButton destination="hub" />
+          </HintAnchor>
           <Pressable
             onPress={() => router.push('/(tabs)/sos')}
             style={styles.sosBtn}
@@ -163,10 +168,12 @@ export default function HomeScreen() {
 
         {wellness ? (
           <>
+            <HintAnchor id="home.wellness">
             <Pressable
               onPress={() => setDetailsOpen(true)}
               accessibilityRole="button"
-              accessibilityLabel={t('home.index')}>
+              accessibilityLabel={t('home.index')}
+              testID="home-wellness-kpi">
               <View style={ui.heroKpi}>
                 <View style={styles.heroKpiLeft}>
                   <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
@@ -184,6 +191,7 @@ export default function HomeScreen() {
                 </Text>
               </View>
             </Pressable>
+            </HintAnchor>
 
             <Text style={styles.envHint}>
               {t(`wellness.forecast.${wellness.confidence}`)}
@@ -269,6 +277,7 @@ export default function HomeScreen() {
 
       {loadingWellness && !wellness ? null : (
       <>
+      <HintAnchor id="home.insights" testID="home-insights">
       <GlassCard padded={false}>
         <View style={[styles.listHead, styles.listHeadPad]}>
           <Text style={ui.cardTitle}>{t('home.insightsTitle')}</Text>
@@ -290,6 +299,7 @@ export default function HomeScreen() {
           ))
         )}
       </GlassCard>
+      </HintAnchor>
 
       <GlassCard padded={false}>
         <Pressable

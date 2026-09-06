@@ -24,14 +24,16 @@ export function HintAnchor({
   id,
   children,
   style,
+  testID,
 }: {
   id: string;
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }) {
   const { ref, onLayout } = useHintAnchor(id);
   return (
-    <View ref={ref} onLayout={onLayout} collapsable={false} style={style}>
+    <View ref={ref} onLayout={onLayout} collapsable={false} style={style} testID={testID}>
       {children}
     </View>
   );
