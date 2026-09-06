@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   createEmptySymptomBaseline,
@@ -20,6 +20,7 @@ import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationE
 import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { deleteProfile, getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
 import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
+import { confirmAction } from '@/src/utils/confirm-action';
 import {
   getStoredOtherConditionLabel,
   getStoredProfileConditions,
@@ -137,14 +138,13 @@ export default function ProfileEditScreen() {
   const handleConditionsChange = (next: AllergyConditionId[]) => {
     const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
-      Alert.alert(
-        t('profileSetup.conditionRemoveTitle'),
-        t('profileSetup.conditionRemoveMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          { text: t('common.save'), onPress: () => applyConditionsChange(next) },
-        ],
-      );
+      confirmAction({
+        title: t('profileSetup.conditionRemoveTitle'),
+        message: t('profileSetup.conditionRemoveMessage'),
+        cancelLabel: t('common.cancel'),
+        confirmLabel: t('common.save'),
+        onConfirm: () => applyConditionsChange(next),
+      });
       return;
     }
     applyConditionsChange(next);
