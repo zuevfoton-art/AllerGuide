@@ -13,6 +13,8 @@ export * from './auth';
 export * from './phone';
 export * from './login-field';
 export * from './password';
+export * from './password-strength';
+export * from './common-passwords';
 export * from './secure-random';
 export * from './emergency-contacts';
 export * from './diary';

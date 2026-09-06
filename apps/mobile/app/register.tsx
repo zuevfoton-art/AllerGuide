@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import { applyLoginFieldInput } from '@allerguide/core';
 import { registerUser } from '@/src/services/auth-service';
@@ -15,6 +15,7 @@ import {
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
 import { LoginField } from '@/src/components/LoginField';
+import { PasswordStrengthMeter } from '@/src/components/PasswordStrengthMeter';
 import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function RegisterScreen() {
@@ -26,6 +27,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   const confirmRef = useRef<TextInput>(null);
+  const loginCanonical = useMemo(() => applyLoginFieldInput(login).canonical, [login]);
 
   const handleRegister = async () => {
     setLoading(true);
@@ -81,6 +83,7 @@ export default function RegisterScreen() {
         onSubmitEditing={() => confirmRef.current?.focus()}
         {...authPasswordInputProps('new')}
       />
+      <PasswordStrengthMeter password={password} login={loginCanonical} />
       <AuthField
         ref={confirmRef}
         label={t('auth.confirmPassword')}

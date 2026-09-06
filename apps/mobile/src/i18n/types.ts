@@ -78,6 +78,9 @@ export type LocaleMessages = {
       phoneInvalid: string;
       passwordRequired: string;
       passwordMin: string;
+      passwordComplexity: string;
+      passwordCommon: string;
+      passwordLikeLogin: string;
       passwordMismatch: string;
       wrongCredentials: string;
       emailTaken: string;
@@ -105,6 +108,21 @@ export type LocaleMessages = {
       successTitle: string;
       successMessage: string;
       invalidToken: string;
+    };
+    passwordStrength: {
+      label: string;
+      weak: string;
+      fair: string;
+      good: string;
+      strong: string;
+      minLength: string;
+      lowercase: string;
+      uppercase: string;
+      digit: string;
+      symbol: string;
+      classesHint: string;
+      common: string;
+      likeLogin: string;
     };
   };
   profiles: {

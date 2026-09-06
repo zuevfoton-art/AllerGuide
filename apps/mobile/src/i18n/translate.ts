@@ -51,6 +51,10 @@ const AUTH_ERROR_KEY_MAP: Record<string, keyof LocaleMessages['auth']['errors']>
   'Введите пароль.': 'passwordRequired',
   'Пароль должен содержать минимум 6 символов.': 'passwordMin',
   'Пароль должен содержать минимум 8 символов.': 'passwordMin',
+  'Пароль должен содержать минимум 3 типа символов из 4: строчные и заглавные буквы, цифры, спецсимволы.':
+    'passwordComplexity',
+  'Этот пароль слишком простой — придумайте другой.': 'passwordCommon',
+  'Пароль не должен повторять логин.': 'passwordLikeLogin',
   'Пароли не совпадают.': 'passwordMismatch',
   'Неверный логин или пароль.': 'wrongCredentials',
   'Пользователь с таким email уже зарегистрирован.': 'emailTaken',

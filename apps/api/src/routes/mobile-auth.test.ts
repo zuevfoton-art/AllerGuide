@@ -56,8 +56,8 @@ describe('mobile auth routes', () => {
     const response = await request(app).post('/api/auth/register').send({
       loginType: 'email',
       login: 'user@example.com',
-      password: 'secret12',
-      confirmPassword: 'secret12',
+      password: 'Secret12!',
+      confirmPassword: 'Secret12!',
     });
 
     expect(response.status).toBe(201);
@@ -66,6 +66,23 @@ describe('mobile auth routes', () => {
     expect(response.body.refreshToken).toBe('refresh-test');
     expect(response.body.expiresIn).toBeGreaterThan(0);
     expect(response.body.user.id).toBe(1);
+  });
+
+  it('rejects a weak password on register', async () => {
+    const app = await createApp();
+    const response = await request(app).post('/api/auth/register').send({
+      loginType: 'email',
+      login: 'user@example.com',
+      password: 'secret12',
+      confirmPassword: 'secret12',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.ok).toBe(false);
+    expect(response.body.error).toBe(
+      'Пароль должен содержать минимум 3 типа символов из 4: строчные и заглавные буквы, цифры, спецсимволы.',
+    );
+    expect(registerAppUser).not.toHaveBeenCalled();
   });
 
   it('logs in user and returns token', async () => {
@@ -159,8 +176,8 @@ describe('mobile auth routes', () => {
       .send({
         loginType: 'email',
         login: 'user@example.com',
-        password: 'secret12',
-        confirmPassword: 'secret12',
+        password: 'Secret12!',
+        confirmPassword: 'Secret12!',
       });
 
     expect(response.status).toBe(201);

@@ -14,6 +14,7 @@ import {
   AuthLink,
   AuthError,
 } from '@/src/components/AuthForm';
+import { PasswordStrengthMeter } from '@/src/components/PasswordStrengthMeter';
 import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function ResetPasswordScreen() {
@@ -96,6 +97,7 @@ export default function ResetPasswordScreen() {
         onSubmitEditing={() => confirmRef.current?.focus()}
         {...authPasswordInputProps('new')}
       />
+      <PasswordStrengthMeter password={password} />
       <AuthField
         ref={confirmRef}
         label={t('auth.resetPassword.confirmPassword')}
