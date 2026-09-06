@@ -39,7 +39,9 @@ describe('buildScanDiaryDraft', () => {
       result: scanResult({
         productName: 'Йогурт Activia',
         productIngredients: 'молоко, сахар, закваска',
-        structuredMatches: [{ kind: 'direct', allergenId: 'milk', label: 'Молоко' }],
+        structuredMatches: [
+          { kind: 'direct', allergenId: 'milk', label: 'Молоко', confidence: 'high' },
+        ],
       }),
       scanText: '4601234567890',
     });
@@ -70,6 +72,17 @@ describe('buildScanDiaryDraft', () => {
     expect(draft.dish.food).toBe('Оливье');
     expect(draft.dish.components.length).toBeGreaterThan(0);
     expect(draft.initialStepId).toBe('reaction');
+  });
+
+  it('takes the title before the composition marker as the dish name', () => {
+    const draft = buildScanDiaryDraft({
+      result: scanResult({ productName: 'Продукт (OCR)' }),
+      scanText: 'Шоколад молочный. Состав: сахар, молоко сухое цельное, лецитин соевый.',
+    });
+
+    expect(draft.dish.food).toBe('Шоколад молочный');
+    expect(draft.initialStepId).toBe('reaction');
+    expect(draft.dish.components.some((item) => item.allergenId === 'milk')).toBe(true);
   });
 
   it('asks for the dish name when the scan only produced a composition list', () => {

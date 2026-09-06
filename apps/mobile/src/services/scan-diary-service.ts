@@ -17,6 +17,7 @@ import type { ScanResultExtended } from '@/src/services/scan-analysis';
 export const SCAN_DIARY_SECTION_TYPE = 'Питание';
 
 const MAX_FOOD_NAME_CHARS = 80;
+const COMPOSITION_MARKER = /(состав|ингредиенты|ingredients|composition)\s*[:：]/i;
 const SCAN_MODES: ScanMode[] = ['product', 'menu', 'medicine', 'cosmetics'];
 /** OCR scans without a recognized dish carry a placeholder name — not a food name. */
 const OCR_PLACEHOLDER_NAMES = new Set(SCAN_MODES.map(buildOcrScanProductName));
@@ -76,6 +77,17 @@ function resolveCompositionText(result: ScanResultExtended, scanText: string): s
   return isManualBarcodeInput(manual) ? '' : manual;
 }
 
+/** «Шоколад молочный. Состав: сахар, …» → «Шоколад молочный». */
+function dishTitleBeforeComposition(text: string): string {
+  const firstLine = text.split('\n')[0] ?? '';
+  const markerIndex = firstLine.search(COMPOSITION_MARKER);
+  if (markerIndex <= 0) return '';
+  return firstLine
+    .slice(0, markerIndex)
+    .replace(/[\s.,;:·—-]+$/, '')
+    .trim();
+}
+
 function resolveFoodName(result: ScanResultExtended, compositionText: string): string {
   const fromVision = result.dishVision?.dishName?.trim();
   if (fromVision) return fromVision.slice(0, MAX_FOOD_NAME_CHARS);
@@ -84,6 +96,9 @@ function resolveFoodName(result: ScanResultExtended, compositionText: string): s
   if (fromProduct && !OCR_PLACEHOLDER_NAMES.has(fromProduct)) {
     return fromProduct.slice(0, MAX_FOOD_NAME_CHARS);
   }
+
+  const title = dishTitleBeforeComposition(compositionText);
+  if (title) return title.slice(0, MAX_FOOD_NAME_CHARS);
 
   return extractDishSearchQuery(compositionText).slice(0, MAX_FOOD_NAME_CHARS);
 }
