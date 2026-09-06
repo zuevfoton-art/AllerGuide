@@ -861,6 +861,12 @@ export type LocaleMessages = {
       sos: { title: string; desc: string };
     };
   };
+  hints: {
+    step: string;
+    next: string;
+    done: string;
+    skip: string;
+  };
   profileSetup: {
     titleSelf: string;
     titleChild: string;
