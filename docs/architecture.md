@@ -186,7 +186,7 @@ metro.config.js       # Monorepo resolution, web-stubs (i18next, crypto)
 | Главная | `home.tsx` | `ScreenBrandHeader`, двухслойный wellness, plain-language insights, reminder терапии |
 | Дневник | `diary.tsx` | «Новая запись» (picker → секция), «Настроить курс» (терапия/АСИТ), история; карточки астмы/насекомых/лекарств при gating |
 | Сканер | `scanner.tsx` | Штрихкод, OCR, ручной ввод |
-| Маркет | `market.tsx` | Safe-product marketplace (Yandex Market). Скрыт из таб-бара (`href: null`); `/market` → Главная, пока `MARKET_ENABLED` выкл. Код экрана остаётся. |
+| Маркет | `market.tsx` | Safe-product marketplace (Yandex Market). Скрыт из таб-бара (`href: null`, без `tabBarButton` — Expo Router их не сочетает); `/market` → Главная, пока `MARKET_ENABLED` выкл. Код экрана остаётся. |
 | Карта | `map.tsx` | Пыление / места (Yandex; опц. Google heatmap) |
 | SOS | `sos.tsx` | Emergency-only: паспорт и контакты только для чтения |
 

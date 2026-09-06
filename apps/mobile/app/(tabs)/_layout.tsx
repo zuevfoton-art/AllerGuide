@@ -161,17 +161,24 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="market"
-        options={{
-          title: t('tabs.market'),
-          tabBarButton: MARKET_ENABLED ? (props) => <TabBarButton {...props} testID="tab-market" /> : () => null,
-          tabBarIcon: ({ focused }) => (
-            <BrandFeatureIcon
-              name="market"
-              size={iconSize}
-              color={focused ? colors.accent : colors.textMuted}
-            />
-          ),
-        }}
+        options={
+          MARKET_ENABLED
+            ? {
+                title: t('tabs.market'),
+                tabBarButton: (props) => <TabBarButton {...props} testID="tab-market" />,
+                tabBarIcon: ({ focused }) => (
+                  <BrandFeatureIcon
+                    name="market"
+                    size={iconSize}
+                    color={focused ? colors.accent : colors.textMuted}
+                  />
+                ),
+              }
+            : {
+                href: null,
+                title: t('tabs.market'),
+              }
+        }
       />
       <Tabs.Screen
         name="map"
