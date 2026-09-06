@@ -12,6 +12,12 @@ appId: com.aclearo.app
     id: profile-emergency-number
 - eraseText
 - inputText: "112"
+- runFlow: _dismiss-profile-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: profile-save-number
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: profile-save-number
 - tapOn:

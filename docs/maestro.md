@@ -98,7 +98,7 @@ maestro test .maestro/flows/staging-smoke-all.yaml
 | `diary-smoke` | новая запись → симптомы |
 | `scanner-smoke` | «молоко» → вердикт |
 | `sos-smoke` | карточка + паспорт |
-| `settings-smoke` | номер экстренной службы |
+| `settings-smoke` | номер SOS: ввод → `_dismiss-profile-ime` → `profile-save-number` |
 
 ### P2.1b (staging)
 
@@ -158,6 +158,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `scanner-input` не найден на «Сканер» | Поле спрятано за «Ввести вручную». Сначала `scanner-toggle-manual`, потом ввод. IME закрывать тапом `scanner-title`, не hideKeyboard |
 | `onboarding-intro-skip` + «Введите корректный номер телефона» | `random-phone.js` даёт 10 национальных цифр без `+`. Android `input text` превращает `+` в пробел; маска LoginField тогда оставляет `(99` |
 | `profile-logout` не виден на «Мои профили» | Кнопка ниже fold (бэкап/пыление). Сначала `profile-screen-title`, потом `scrollUntilVisible` |
+| `profile-save-number` не найден после ввода 112 | Numeric keypad перекрывает «Сохранить номер». `_dismiss-profile-ime.yaml` (тап `profile-screen-title`), затем `scrollUntilVisible` (nightly 34052584781) |
 | Форма регистрации заполнена, но онбординг не пришёл | Hermes без JIT: PBKDF2 600k блокирует JS ~40 c. `src/install-runtime` ставит `PASSWORD_HASH_ITERATIONS_INTERPRETED`; ожидание `onboarding-intro-skip` — 60 c |
 | Кнопка «Подождите…» висит до таймаута (staging зелёный, offline красный) | Патч рантайма не попал в APK: Gradle берёт `index.js`, а не `package.json` `main`. Оба entry импортируют `src/install-runtime`. Staging хеширует на API, поэтому не падал |
 | Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |

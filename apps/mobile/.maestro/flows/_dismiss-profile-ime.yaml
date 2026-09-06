@@ -1,0 +1,6 @@
+# Fold IME on /profile without BACK / hideKeyboard.
+# Tap the hub title (non-interactive Text), same pattern as auth-hero-title.
+appId: com.aclearo.app
+---
+- tapOn:
+    id: profile-screen-title
