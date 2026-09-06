@@ -14,6 +14,7 @@ import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { ScannerCameraModal } from '@/src/components/scanner/ScannerCameraModal';
 import { ScannerLists } from '@/src/components/scanner/ScannerLists';
 import { ScannerResultPanel } from '@/src/components/scanner/ScannerResultPanel';
+import { ScanDiaryEntryModal } from '@/src/components/scanner/ScanDiaryEntryModal';
 import { createStyles } from '@/src/components/scanner/scanner-styles';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme } from '@/src/hooks/use-theme';
@@ -224,6 +225,7 @@ export default function ScannerScreen() {
           isVisionOnly={scan.isVisionOnly}
           hasVisionEvidence={scan.hasVisionEvidence}
           isCurrentInputSaved={scan.isCurrentInputSaved}
+          diaryEntrySaved={scan.diaryEntrySaved}
           activeProfileId={scan.activeProfileId}
           matchIdByLabel={scan.matchIdByLabel}
           formatMatchChip={scan.formatMatchChip}
@@ -231,10 +233,21 @@ export default function ScannerScreen() {
           onOpenCamera={() => void scan.openCamera('scanner')}
           onOpenManual={() => scan.setManualOpen(true)}
           onSaveSafe={scan.confirmSaveSafe}
+          onSaveDiary={() => void scan.openDiaryEntry()}
           onReportAlias={scan.reportAlias}
           onScanAgain={scan.scanAgain}
         />
       ) : null}
+
+      <ScanDiaryEntryModal
+        visible={scan.diaryDraft !== null}
+        prefill={scan.diaryDraft?.prefill}
+        initialStepId={scan.diaryDraft?.initialStepId}
+        profileId={scan.activeProfileId}
+        profileAllergiesJson={scan.activeProfile?.allergies ?? '[]'}
+        onClose={scan.closeDiaryEntry}
+        onComplete={(entries) => void scan.saveDiaryEntry(entries)}
+      />
 
       <ScannerLists
         listTab={scan.listTab}

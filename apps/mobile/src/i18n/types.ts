@@ -433,6 +433,11 @@ export type LocaleMessages = {
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
+    /** Result action: start a «Питание» diary entry from this scan. */
+    saveToDiary: string;
+    savedToDiary: string;
+    /** Shown after the entry is written: where to find and edit it. */
+    savedToDiaryHint: string;
     safeListEmpty: string;
     removeSafe: string;
     removeSafeTitle: string;

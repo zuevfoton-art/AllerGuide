@@ -257,6 +257,13 @@ export function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     actionCol: { gap: 8 },
+    diaryHint: {
+      fontFamily: fonts.sans,
+      fontSize: 12,
+      color: colors.textMuted,
+      lineHeight: 16,
+      textAlign: 'center',
+    },
     ocrHint: {
       fontFamily: fonts.sans,
       fontSize: 12,
