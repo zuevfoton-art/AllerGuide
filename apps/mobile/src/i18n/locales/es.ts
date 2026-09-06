@@ -528,9 +528,6 @@ const es: LocaleMessages = {
     peakSeason: 'Pico de temporada: {{month}} · {{region}}',
     season: 'Temporada',
     pollenLiveTitle: 'Polen cerca de ti',
-    pollenMapAttribution: 'Mapa: Yandex Maps',
-    pollenGoogleMapAttribution: 'Mapa: Google Maps',
-    pollenYandexInteractiveAttribution: 'Mapa: Yandex Maps (interactivo)',
     pollenHeatmapTreeHint:
       'Capa: polen de árboles. Los niveles de abedul, aliso y olivo van aparte',
     pollenTreeSpeciesLevelsHint:

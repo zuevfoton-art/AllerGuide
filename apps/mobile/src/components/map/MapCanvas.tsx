@@ -30,7 +30,6 @@ type Props = {
   polylines: GoogleMapPolyline[];
   selectedPoiId: string | null;
   overlay?: ReactNode;
-  mapAttributionKey: string | null;
   yandexPollenUrl?: string;
   onMarkerPress: (id: string) => void;
   onRegionChange: (lat: number, lon: number) => void;
@@ -57,7 +56,6 @@ export function MapCanvas({
   polylines,
   selectedPoiId,
   overlay,
-  mapAttributionKey,
   yandexPollenUrl,
   onMarkerPress,
   onRegionChange,
@@ -121,11 +119,6 @@ export function MapCanvas({
         </Pressable>
       ) : null}
 
-      {mapAttributionKey ? (
-        <Text style={styles.mapAttribution} testID="map-attribution">
-          {t(mapAttributionKey)}
-        </Text>
-      ) : null}
       {showPlacesLayer ? (
         <Text style={styles.mapAttribution} testID="map-places-osm-attribution">
           {t('map.placesOsmAttribution')}

@@ -175,13 +175,6 @@ export function PollenMapLayer({
           overlay={levelBadge}
         />
       )}
-      <Text style={styles.attribution}>
-        {t(
-          isGoogleHeatmapEnabled
-            ? 'map.pollenGoogleMapAttribution'
-            : 'map.pollenMapAttribution',
-        )}
-      </Text>
       {isGoogleHeatmapEnabled ? (
         <Text style={styles.heatmapHint}>{t(GOOGLE_HEATMAP_HINT_KEYS[googleMapType])}</Text>
       ) : null}
@@ -293,12 +286,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.head,
     },
     subtitle: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
-    attribution: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      marginTop: -8,
-    },
     scaleHint: {
       fontFamily: fonts.sans,
       fontSize: 11,

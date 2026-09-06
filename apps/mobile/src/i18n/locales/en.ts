@@ -527,9 +527,6 @@ const en: LocaleMessages = {
     peakSeason: 'Peak season: {{month}} · {{region}}',
     season: 'Season',
     pollenLiveTitle: 'Pollen near you',
-    pollenMapAttribution: 'Map: Yandex Maps',
-    pollenGoogleMapAttribution: 'Map: Google Maps',
-    pollenYandexInteractiveAttribution: 'Map: Yandex Maps (interactive)',
     pollenHeatmapTreeHint:
       'Basemap: tree pollen. Birch, alder and olive levels are shown separately',
     pollenTreeSpeciesLevelsHint:

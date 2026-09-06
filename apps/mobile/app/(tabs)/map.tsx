@@ -60,7 +60,6 @@ import { getApiBaseUrl } from '@/src/services/api-client';
 import {
   GOOGLE_MAP_PRIMARY_ENABLED,
   GOOGLE_POLLEN_HEATMAP_ENABLED,
-  MAP_POLLEN_GOOGLE_PRIMARY,
   MAP_POLLEN_PLUME_ENABLED,
   YANDEX_MAP_INTERACTIVE_ENABLED,
 } from '@/src/constants/features';
@@ -379,14 +378,6 @@ export default function MapScreen() {
     </>
   ) : undefined;
 
-  const mapAttributionKey = useYandexInteractive
-    ? 'map.pollenYandexInteractiveAttribution'
-    : useGoogleMap
-      ? pollenSnapshot?.source === 'google' || MAP_POLLEN_GOOGLE_PRIMARY
-        ? null
-        : 'map.pollenGoogleMapAttribution'
-      : 'map.pollenMapAttribution';
-
   const showActionTip =
     showPollenLayer && (displayStatusLevel === 'mid' || displayStatusLevel === 'high');
   const showPlacesPanel = showPlacesLayer;
@@ -460,7 +451,6 @@ export default function MapScreen() {
         polylines={showPlumeGeo ? plume.polylines : []}
         selectedPoiId={selectedPoiId}
         overlay={mapOverlay}
-        mapAttributionKey={mapAttributionKey}
         yandexPollenUrl={pollenSnapshot?.yandexPollenUrl}
         onMarkerPress={setSelectedPoiId}
         onRegionChange={handleRegionChange}

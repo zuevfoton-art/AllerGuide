@@ -529,9 +529,6 @@ const ru: LocaleMessages = {
     peakSeason: 'Пик сезона: {{month}} · {{region}}',
     season: 'Сезон',
     pollenLiveTitle: 'Пыльца рядом с вами',
-    pollenMapAttribution: 'Карта: Яндекс Карты',
-    pollenGoogleMapAttribution: 'Карта: Google Maps',
-    pollenYandexInteractiveAttribution: 'Карта: Яндекс Карты (интерактив)',
     pollenHeatmapTreeHint:
       'Подложка: пыльца деревьев. Уровень берёзы, ольхи и оливы — отдельно',
     pollenTreeSpeciesLevelsHint:

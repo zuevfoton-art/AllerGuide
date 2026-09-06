@@ -528,9 +528,6 @@ const fr: LocaleMessages = {
     peakSeason: 'Pic de saison : {{month}} · {{region}}',
     season: 'Saison',
     pollenLiveTitle: 'Pollen près de vous',
-    pollenMapAttribution: 'Carte : Yandex Maps',
-    pollenGoogleMapAttribution: 'Carte : Google Maps',
-    pollenYandexInteractiveAttribution: 'Carte : Yandex Maps (interactive)',
     pollenHeatmapTreeHint:
       'Fond : pollen d’arbres. Les niveaux bouleau, aulne et olivier sont séparés',
     pollenTreeSpeciesLevelsHint:

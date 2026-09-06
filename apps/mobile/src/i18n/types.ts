@@ -536,9 +536,6 @@ export type LocaleMessages = {
     peakSeason: string;
     season: string;
     pollenLiveTitle: string;
-    pollenMapAttribution: string;
-    pollenGoogleMapAttribution: string;
-    pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenTreeSpeciesLevelsHint: string;
     pollenHeatmapGrassHint: string;

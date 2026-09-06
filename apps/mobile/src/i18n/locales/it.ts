@@ -528,9 +528,6 @@ const it: LocaleMessages = {
     peakSeason: 'Picco stagionale: {{month}} · {{region}}',
     season: 'Stagione',
     pollenLiveTitle: 'Polline vicino a te',
-    pollenMapAttribution: 'Mappa: Yandex Maps',
-    pollenGoogleMapAttribution: 'Mappa: Google Maps',
-    pollenYandexInteractiveAttribution: 'Mappa: Yandex Maps (interattiva)',
     pollenHeatmapTreeHint:
       'Sfondo: polline degli alberi. I livelli di betulla, ontano e olivo sono separati',
     pollenTreeSpeciesLevelsHint:
