@@ -273,6 +273,44 @@ describe('Maestro nightly CI invariants', () => {
     );
   });
 
+  it('opens profile-edit before tapping profile-delete, then leaves the hub without BACK', () => {
+    const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
+    assert.match(flow, /id: profile-list-item-0/);
+    assert.match(flow, /id: profile-edit-title/);
+    assert.match(
+      flow,
+      /scrollUntilVisible:[\s\S]*?id: profile-delete[\s\S]*?-\s+tapOn:\s+id: profile-delete/,
+    );
+    assert.match(flow, /text: "Удалить"/);
+    assert.match(flow, /id: screen-header-back/);
+    assert.match(flow, /id: tab-sos/);
+    assert.ok(
+      flow.indexOf('id: profile-list-item-0') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must open the hub row before tapping profile-delete',
+    );
+    assert.ok(
+      flow.indexOf('id: profile-edit-title') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must wait for profile-edit before scrolling to delete',
+    );
+    assert.ok(
+      flow.indexOf('id: profile-delete') < flow.indexOf('id: screen-header-back'),
+      'sos-no-profile-smoke must delete before leaving the hub',
+    );
+    assert.ok(
+      flow.indexOf('id: screen-header-back') < flow.indexOf('id: tab-sos'),
+      'sos-no-profile-smoke must leave the hub via screen-header-back before tab-sos',
+    );
+
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /testID=\{`profile-list-item-\$\{index\}`\}/);
+    assert.doesNotMatch(hub, /testID="profile-delete"/);
+
+    const edit = read('apps/mobile/app/profile-edit.tsx');
+    assert.match(edit, /titleTestID="profile-edit-title"/);
+    assert.match(edit, /testID="profile-delete"/);
+    assert.match(read('apps/mobile/src/components/ScreenHeader.tsx'), /testID="screen-header-back"/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));
