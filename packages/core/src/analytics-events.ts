@@ -13,6 +13,7 @@ export const ANALYTICS_EVENT_NAMES = [
   'diary_report_exported',
   'scan_completed',
   'scan_barcode',
+  'scan_saved_to_diary',
   'sync_upload',
   'sync_download',
   'backup_exported',
