@@ -1,0 +1,13 @@
+# Fold IME, bring «Сохранить номер» on-screen, tap it.
+# Pixel 6 phone-pad removes profile-save-number from the UiAutomator tree
+# (nightly 34052584781).
+appId: com.aclearo.app
+---
+- runFlow: _dismiss-profile-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: profile-save-number
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: profile-save-number
