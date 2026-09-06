@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { BackHandler, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Button } from '@/src/components/Button';
 import { CardTitle } from '@/src/components/CardTitle';
 import {
@@ -114,7 +114,7 @@ export function HintSpotlight() {
   }, [activeTour, anchors, closeTour]);
 
   useEffect(() => {
-    if (!activeTour) return;
+    if (!activeTour || Platform.OS === 'web') return;
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       finishTour('dismiss');
       return true;
