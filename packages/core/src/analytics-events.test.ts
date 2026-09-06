@@ -12,6 +12,9 @@ describe('analytics-events', () => {
     expect(ANALYTICS_EVENT_NAMES).toContain('screen_view');
     expect(ANALYTICS_EVENT_NAMES).toContain('scan_dish_vision');
     expect(ANALYTICS_EVENT_NAMES).toContain('pollen_alert_sent');
+    expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_started');
+    expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_completed');
+    expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_skipped');
     expect(ANALYTICS_EVENT_NAMES.length).toBeGreaterThanOrEqual(10);
   });
 

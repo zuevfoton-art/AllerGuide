@@ -106,7 +106,7 @@ describe('Maestro nightly CI invariants', () => {
       /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
     );
 
-    for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_wait-login\.yaml/);
       assert.match(flow, /_tap-register\.yaml/);
@@ -121,6 +121,20 @@ describe('Maestro nightly CI invariants', () => {
         `${name} must wait for confirm field after register tap`,
       );
     }
+
+    for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+      const flow = read(`apps/mobile/.maestro/flows/${name}`);
+      assert.match(flow, /_dismiss-hints\.yaml/);
+    }
+
+    const dismissHints = read('apps/mobile/.maestro/flows/_dismiss-hints.yaml');
+    assert.match(dismissHints, /id: hint-skip/);
+    assert.match(dismissHints, /id: hint-overlay/);
+
+    const onboardingSmoke = read('apps/mobile/.maestro/flows/onboarding-smoke.yaml');
+    assert.match(onboardingSmoke, /_offline-bootstrap-until-home\.yaml/);
+    assert.match(onboardingSmoke, /id: hint-overlay/);
+    assert.match(onboardingSmoke, /_dismiss-hints\.yaml/);
   });
 
   it('applies the CSPRNG and PBKDF2 cost patches on both JS entries', () => {
@@ -346,6 +360,7 @@ describe('Maestro nightly CI invariants', () => {
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));
+    assert.ok(names.includes('_dismiss-hints.yaml'));
     for (const name of names) {
       const body = fs.readFileSync(path.join(flowsDir, name), 'utf8');
       assert.doesNotMatch(body, /^\s*-\s+hideKeyboard\b/m, `${name} must not use hideKeyboard`);

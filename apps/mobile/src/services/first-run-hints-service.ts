@@ -5,6 +5,7 @@ import {
   withSeenHintTour,
   type HintTourId,
 } from '@allerguide/core';
+import { trackEvent } from '@/src/services/analytics-service';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 
 const ELIGIBLE_PREFIX = 'hintsEligible:';
@@ -35,14 +36,12 @@ export function isHintTourPending(userId: number, tourId: HintTourId): boolean {
   });
 }
 
-/** Reserved for analytics (P5). Keeps the start call site stable. */
-export function startHintTour(
-  _userId: number,
-  _tourId: HintTourId,
-  _stepsTotal: number,
-): void {}
+export function startHintTour(userId: number, tourId: HintTourId, stepsTotal: number): void {
+  if (!isPersistedUserId(userId)) return;
+  trackEvent('hint_tour_started', { tour_id: tourId, steps_total: stepsTotal });
+}
 
-export function completeHintTour(userId: number, tourId: HintTourId, _stepsTotal: number): void {
+export function completeHintTour(userId: number, tourId: HintTourId, stepsTotal: number): void {
   if (!isPersistedUserId(userId)) return;
 
   const nextSeen = withSeenHintTour(getSetting(hintsSeenToursKey(userId)), tourId);
@@ -51,15 +50,23 @@ export function completeHintTour(userId: number, tourId: HintTourId, _stepsTotal
   if (areAllHintToursSeen(nextSeen)) {
     setSetting(hintsEligibleKey(userId), '');
   }
+
+  trackEvent('hint_tour_completed', { tour_id: tourId, steps_total: stepsTotal });
 }
 
 export function dismissAllHintTours(
   userId: number,
-  _from: { tourId: HintTourId; stepIndex: number },
+  from: { tourId: HintTourId; stepIndex: number; stepId?: string; stepsTotal: number },
 ): void {
   if (!isPersistedUserId(userId)) return;
   setSetting(hintsSeenToursKey(userId), withAllHintToursSeen());
   setSetting(hintsEligibleKey(userId), '');
+  trackEvent('hint_tour_skipped', {
+    tour_id: from.tourId,
+    step_index: from.stepIndex,
+    steps_total: from.stepsTotal,
+    ...(from.stepId ? { step_id: from.stepId } : {}),
+  });
 }
 
 export function clearHintsState(userId: number): void {

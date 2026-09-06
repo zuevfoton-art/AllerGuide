@@ -1,0 +1,13 @@
+# First-run coach marks block tab taps. Wait for the overlay, then skip all tours.
+appId: com.aclearo.app
+---
+- extendedWaitUntil:
+    visible:
+      id: hint-skip
+    timeout: 20000
+- tapOn:
+    id: hint-skip
+- extendedWaitUntil:
+    notVisible:
+      id: hint-overlay
+    timeout: 8000

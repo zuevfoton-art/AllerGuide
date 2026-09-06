@@ -132,7 +132,7 @@ src/db/               # init, init.native, migrations, web-store, web-collection
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`, `use-hint-tour`, `use-reduce-motion`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
@@ -183,7 +183,7 @@ src/modules/marketplace/
 | Clinical | `asit-course-service`, `asit-reminder-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy-service`, `prescribed-therapy-reminder-service`, `clinical-reminder-service`, `reminder-reconcile-service`, `prescription-ocr-service`, `prescription-photo-service` |
 | Pollen / map | `pollen-map-service`, `pollen-hourly-service`, `pollen-heatmap-service`, `pollen-plume-service`, `pollen-reminder-service`, `air-quality-service`, `wind-service`, `location-service`, `place-service`, `map-basemap`, `google-maps-api-key`, `yandex-interactive-map-url` |
 | Sync / backup | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` |
-| Settings / ops | `settings-service`, `secure-settings-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
+| Settings / ops | `settings-service`, `secure-settings-service`, `first-run-hints-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
 
 ### DB / store / i18n
 
@@ -200,6 +200,7 @@ src/modules/marketplace/
 | `src/store/app-store.ts` | Active profile, scenario |
 | `src/store/locale-store.ts` | **`useTranslation()`** — основной i18n |
 | `src/store/theme-store.ts` | Light/dark/system |
+| `src/store/hints-store.ts` | First-run coach marks: anchors + active tour |
 | `src/i18n/types.ts` | `AppLocale` + `LocaleMessages` |
 | `src/i18n/locales/*.ts` | Каталоги строк (ru/en/es/fr/de/it) |
 
@@ -211,7 +212,7 @@ src/modules/marketplace/
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`, `map/MapCanvas`, `MapLayerLegend`, `MapPollenDetails`, `MapPlacesPanel`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
-- **Folders:** `brand/`, `onboarding/`, `profile-setup/`
+- **Folders:** `brand/`, `onboarding/`, `profile-setup/`, `hints/`
 
 ### Config
 
@@ -290,7 +291,7 @@ Barrel: `index.ts`. Pure TS.
 | Pollen / geo / air / market | `pollen-*` (taxonomy, regions, calendar, thresholds, map, upi, plant-detail, google-forecast, google-normalize, species-heatmap, plume, reminder), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog` |
 | Sync / crypto | `sync`, `crypto` |
 | Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `secure-random` |
-| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
+| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
 
 Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,phase-4,types}.ts` (за `cross-reactions/index.ts`).
 

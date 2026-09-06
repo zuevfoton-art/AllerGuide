@@ -29,6 +29,8 @@ apps/mobile/.maestro/
     staging-credentials.js
   flows/
     _offline-bootstrap.yaml
+    _offline-bootstrap-until-home.yaml
+    _dismiss-hints.yaml            # wait hint-skip → skip all first-run tours
     _dismiss-ime.yaml              # tap auth-hero-title (не hideKeyboard/BACK)
     _dismiss-profile-ime.yaml      # tap profile-screen-title (не hideKeyboard/BACK)
     _tap-profile-save-number.yaml  # свернуть IME → scroll → «Сохранить номер»
