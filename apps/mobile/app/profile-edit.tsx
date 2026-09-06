@@ -291,6 +291,7 @@ export default function ProfileEditScreen() {
             <AllergenPicker
               selected={selected}
               showCrossReactions={false}
+              conditionIds={conditions}
               suggestedConditionIds={suggestedConditions}
               onAddSuggestedCondition={(conditionId) =>
                 setConditions((prev) => (prev.includes(conditionId) ? prev : [...prev, conditionId]))

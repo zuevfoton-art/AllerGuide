@@ -40,6 +40,7 @@ import {
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { trackProfileSetupAllergenStepComplete } from '@/src/services/profile-setup-analytics';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { Button } from '@/src/components/Button';
@@ -350,6 +351,11 @@ export default function ProfileSetupScreen() {
       } else {
         trackEvent('profile_setup_step_complete', { step: 'symptomBaseline' });
       }
+    } else if (currentStep === 'allergens') {
+      trackProfileSetupAllergenStepComplete({
+        selectedAllergenIds: selected,
+        conditionIds: conditions,
+      });
     } else {
       trackEvent('profile_setup_step_complete', { step: currentStep });
     }
@@ -445,6 +451,7 @@ export default function ProfileSetupScreen() {
           }}
           confirmations={confirmations}
           onConfirmationsChange={setConfirmations}
+          conditionIds={conditions}
           suggestedConditionIds={suggestedConditions}
           onAddSuggestedCondition={(conditionId) =>
             applyConditionsChange(

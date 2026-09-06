@@ -96,7 +96,13 @@ export default function ProfileScreen() {
           })
         )}
       </GlassCard>
-      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
+      <Button
+        testID="profile-add"
+        label={t('profiles.add')}
+        variant="primary"
+        block
+        onPress={() => router.push('/profile-setup?mode=add')}
+      />
 
       <Text style={ui.sectionLabel}>{t('sos.title')}</Text>
       <GlassCard>
