@@ -20,12 +20,12 @@ appId: com.aclearo.app
     file: _fill-by-id.yaml
     env:
       FIELD_ID: auth-password-input
-      FIELD_VALUE: maestro1
+      FIELD_VALUE: Maestro1
 - runFlow:
     file: _fill-by-id.yaml
     env:
       FIELD_ID: auth-confirm-password-input
-      FIELD_VALUE: maestro1
+      FIELD_VALUE: Maestro1
 - runFlow:
     file: _tap-by-id.yaml
     env:
