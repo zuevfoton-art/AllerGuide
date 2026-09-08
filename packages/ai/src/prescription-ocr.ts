@@ -309,7 +309,8 @@ function resolveEndDate(input: {
     if (computed) return computed;
   }
   if (input.stageToDates.length > 0) {
-    return [...input.stageToDates].sort(compareIsoDates).at(-1)!;
+    const sortedToDates = [...input.stageToDates].sort(compareIsoDates);
+    return sortedToDates[sortedToDates.length - 1]!;
   }
   return '';
 }

@@ -178,6 +178,8 @@ describe('prescription-ocr', () => {
           | Array<{ from: string; to: string; dose: string }>
           | undefined,
         clinicalDiagnosis: createEmptyAsitClinicalDiagnosis(),
+        allergen: '',
+        allergenId: '',
       },
       getDemoPrescriptionParse(),
     );
