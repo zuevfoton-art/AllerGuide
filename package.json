@@ -52,7 +52,7 @@
       "decode-uri-component": "0.5.0",
       "tar": "7.5.22",
       "node-forge": "1.4.0",
-      "ajv": "8.20.0",
+      "eas-cli>ajv": "8.20.0",
       "joi": "17.13.7",
       "ts-deepmerge": "8.0.0",
       "yaml": "2.9.0",

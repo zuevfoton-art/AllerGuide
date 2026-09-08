@@ -16,7 +16,7 @@ const profile: Profile = {
   id: 1,
   name: PAYLOAD,
   birthYear: 1990,
-  type: 'adult',
+  type: 'self',
   allergies: '[]',
   allergyConfirmations: '{}',
   crossReactionAllergies: '[]',
