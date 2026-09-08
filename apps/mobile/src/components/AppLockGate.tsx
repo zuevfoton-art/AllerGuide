@@ -21,6 +21,7 @@ export function AppLockGate({ children }: Props) {
   const lockReason = t('settings.appLockTitle');
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? parseAllergies(profile.allergies) : [];
+  const crossReactions = profile ? parseAllergies(profile.crossReactionAllergies ?? '[]') : [];
   const emergencyNumber = getEmergencyNumber();
   const firstContact = profile ? listEmergencyContacts(profile.id)[0] : null;
 
@@ -63,6 +64,11 @@ export function AppLockGate({ children }: Props) {
             <Text style={styles.hint}>{t('settings.appLockEmergencyHint')}</Text>
             {profile ? <Text style={styles.meta}>{profile.name}</Text> : null}
             {allergies.length ? <Text style={styles.meta}>{allergies.join(', ')}</Text> : null}
+            {crossReactions.length ? (
+              <Text style={styles.meta}>
+                {t('sos.crossReactions')}: {crossReactions.join(', ')}
+              </Text>
+            ) : null}
             <Pressable
               style={styles.button}
               onPress={() => void Linking.openURL(`tel:${emergencyNumber}`)}

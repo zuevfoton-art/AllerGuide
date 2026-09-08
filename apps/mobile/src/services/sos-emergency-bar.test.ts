@@ -22,13 +22,13 @@ describe('resolveSosEmergencyBar', () => {
     expect(bar.firstContact).toBeNull();
   });
 
-  it('falls back to 103 when the stored number is empty', () => {
+  it('falls back to 112 when the stored number is empty', () => {
     const bar = resolveSosEmergencyBar({
       profileId: null,
       emergencyNumber: '   ',
     });
 
-    expect(bar.emergencyNumber).toBe('103');
+    expect(bar.emergencyNumber).toBe('112');
     expect(bar.firstContact).toBeNull();
   });
 

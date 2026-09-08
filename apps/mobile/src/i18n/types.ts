@@ -68,6 +68,8 @@ export type LocaleMessages = {
     hasAccount: string;
     loginLink: string;
     forgotLink: string;
+    showPassword: string;
+    hidePassword: string;
     countryCode: string;
     countryCodeTitle: string;
     errors: {
@@ -923,6 +925,8 @@ export type LocaleMessages = {
       title: string;
       hint: string;
       addNext: string;
+      addAll: string;
+      clearAll: string;
       disclaimer: string;
     };
     symptoms: {
@@ -1263,6 +1267,7 @@ export type LocaleMessages = {
     name: string;
     age: string;
     allergies: string;
+    crossReactions: string;
     medicalNotes: string;
     actionPlan: string;
     emptyProfile: string;

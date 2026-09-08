@@ -48,6 +48,17 @@ describe('allergy passport', () => {
     expect(text).toContain('103');
   });
 
+  it('includes cross-reactions as a separate passport line', () => {
+    const text = formatPassportText({
+      profileName: 'Анна',
+      allergies: ['Молоко'],
+      crossReactions: ['Козье молоко', 'Говядина'],
+      passport: createDefaultPassport(),
+    });
+    expect(text).toContain('Молоко');
+    expect(text).toContain('Перекрёстные реакции: Козье молоко, Говядина');
+  });
+
   it('defines three anaphylaxis grades', () => {
     expect(ANAPHYLAXIS_GRADES).toHaveLength(3);
     expect(ANAPHYLAXIS_GRADES.map((g) => g.grade)).toEqual([1, 2, 3]);

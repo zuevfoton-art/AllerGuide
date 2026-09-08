@@ -7,9 +7,10 @@ import {
   StyleSheet,
   type TextInputProps,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/src/components/Button';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { density, radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { fontSizes } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -53,33 +54,55 @@ export const AuthField = forwardRef<TextInput, AuthFieldProps>(function AuthFiel
   ref,
 ) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [focused, setFocused] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const isPasswordField = Boolean(secureTextEntry);
+  const hidePassword = isPasswordField && !passwordVisible;
+  const toggleLabel = passwordVisible ? t('auth.hidePassword') : t('auth.showPassword');
 
   return (
     <View style={styles.fieldWrap}>
       <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
-      <TextInput
-        ref={ref}
-        testID={testID}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={theme.colors.textMuted}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize}
-        returnKeyType={returnKeyType}
-        onSubmitEditing={onSubmitEditing}
-        submitBehavior={submitBehavior}
-        textContentType={textContentType}
-        autoComplete={autoComplete}
-        autoCorrect={autoCorrect}
-        accessibilityLabel={accessibilityLabel ?? label}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        style={[styles.input, focused && styles.inputFocused]}
-      />
+      <View style={[styles.inputRow, focused && styles.inputRowFocused]}>
+        <TextInput
+          ref={ref}
+          testID={testID}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={theme.colors.textMuted}
+          secureTextEntry={hidePassword}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
+          submitBehavior={submitBehavior}
+          textContentType={textContentType}
+          autoComplete={autoComplete}
+          autoCorrect={autoCorrect}
+          accessibilityLabel={accessibilityLabel ?? label}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={styles.input}
+        />
+        {isPasswordField ? (
+          <Pressable
+            testID={testID ? `${testID}-toggle` : undefined}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={styles.visibilityToggle}
+            accessibilityRole="button"
+            accessibilityLabel={toggleLabel}
+            hitSlop={8}>
+            <Ionicons
+              name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={theme.colors.textSecondary}
+            />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 });
@@ -209,20 +232,33 @@ function createStyles({ colors, fonts }: AppTheme) {
     labelFocused: {
       color: colors.accent,
     },
-    input: {
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: colors.card,
-      padding: 14,
-      minHeight: 44,
       borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+      minHeight: density.tapMinHeight,
+      overflow: 'hidden',
+    },
+    inputRowFocused: {
+      borderColor: colors.accent,
+      borderWidth: 1.5,
+    },
+    input: {
+      flex: 1,
+      padding: 14,
+      minHeight: density.tapMinHeight,
       fontSize: WEB_INPUT_FONT_SIZE,
       fontFamily: fonts.sans,
       color: colors.text,
-      borderWidth: 1,
-      borderColor: colors.borderInput,
     },
-    inputFocused: {
-      borderColor: colors.accent,
-      borderWidth: 1.5,
+    visibilityToggle: {
+      width: density.tapMinHeight,
+      minHeight: density.tapMinHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
     linkText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm + 1, color: colors.textSecondary },

@@ -294,6 +294,21 @@ describe('Maestro nightly CI invariants', () => {
     );
   });
 
+  it('keeps cross-reactions add-all off smoke-all and checks SOS chips', () => {
+    const flow = read('apps/mobile/.maestro/flows/profile-cross-reactions-add-all.yaml');
+    assert.match(flow, /id: cross-reactions-add-all/);
+    assert.match(flow, /id: allergen-milk/);
+    assert.match(flow, /id: profile-save/);
+    assert.match(flow, /id: sos-cross-chip-goat-milk/);
+    assert.match(flow, /id: sos-cross-reactions-row/);
+    const smokeAll = read('apps/mobile/.maestro/flows/smoke-all.yaml');
+    assert.doesNotMatch(
+      smokeAll,
+      /profile-cross-reactions-add-all/,
+      'cross-reactions add-all must stay off smoke-all so scanner keeps the food profile',
+    );
+  });
+
   it('opens profile-edit before tapping profile-delete, then leaves the hub without BACK', () => {
     const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
     assert.match(flow, /id: profile-list-item-0/);

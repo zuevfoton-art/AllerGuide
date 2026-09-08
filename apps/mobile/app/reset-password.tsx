@@ -95,6 +95,7 @@ export default function ResetPasswordScreen() {
         }}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
+        testID="auth-reset-password-input"
         returnKeyType="next"
         submitBehavior="submit"
         onSubmitEditing={() => confirmRef.current?.focus()}
@@ -108,8 +109,9 @@ export default function ResetPasswordScreen() {
         onChangeText={(value) => {
           setConfirmPassword(value);
           if (error) setError('');
-        }}
+        }        }
         secureTextEntry
+        testID="auth-reset-confirm-input"
         returnKeyType="go"
         submitBehavior="blurAndSubmit"
         onSubmitEditing={() => void handleSubmit()}

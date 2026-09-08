@@ -16,10 +16,11 @@ import {
   BIPHASIC_WARNING,
   formatEpinephrineEligibilityHint,
   getProfileAgeYears,
-  parseAllergies,
+  listProfileAllergenChips,
   pluralRu,
   type EmergencyContact,
 } from '@allerguide/core';
+import { radii } from '@/src/constants/layout';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -32,6 +33,7 @@ import {
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { isProfileEpinephrineEligible } from '@/src/services/clinical-phenotype-service';
 import {
+  DEFAULT_EMERGENCY_NUMBER,
   getEmergencyNumber,
   getSosActionPlan,
   getSosNotes,
@@ -48,8 +50,9 @@ export default function SosScreen() {
   useHintTour('sos');
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
-  const allergies = profile ? parseAllergies(profile.allergies) : [];
-  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const allergies = profile ? listProfileAllergenChips(profile.allergies) : [];
+  const crossReactions = profile ? listProfileAllergenChips(profile.crossReactionAllergies) : [];
+  const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [notes, setNotes] = useState('');
   const [actionPlan, setActionPlan] = useState('');
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
@@ -205,8 +208,28 @@ export default function SosScreen() {
                 <Text style={ui.kpiLabel}>{t('sos.allergies')}</Text>
                 <View style={styles.allergyChips}>
                   {allergies.map((allergen) => (
-                    <View key={allergen} style={styles.allergyChip}>
-                      <Text style={styles.allergyText}>{allergen}</Text>
+                    <View
+                      key={allergen.id}
+                      testID={`sos-allergy-chip-${allergen.id}`}
+                      style={styles.allergyChip}>
+                      <Text style={styles.allergyText}>{allergen.name}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+            {crossReactions.length > 0 ? (
+              <View
+                style={[ui.kpiRow, styles.allergyRow]}
+                testID="sos-cross-reactions-row">
+                <Text style={ui.kpiLabel}>{t('sos.crossReactions')}</Text>
+                <View style={styles.allergyChips}>
+                  {crossReactions.map((allergen) => (
+                    <View
+                      key={allergen.id}
+                      testID={`sos-cross-chip-${allergen.id}`}
+                      style={styles.allergyChip}>
+                      <Text style={styles.allergyText}>{allergen.name}</Text>
                     </View>
                   ))}
                 </View>
@@ -444,7 +467,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.dangerLight,
       paddingVertical: 4,
       paddingHorizontal: 10,
-      borderRadius: 4,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },

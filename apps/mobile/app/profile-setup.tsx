@@ -64,6 +64,7 @@ import {
   buildProfileSetupWizardNavOptions,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
+  resolveCrossReactionAllergenIdsForSave,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardStep,
@@ -233,7 +234,7 @@ export default function ProfileSetupScreen() {
     setError('');
   };
 
-  const save = async () => {
+  const save = async (crossReactionIds: string[] = crossReactionAllergenIds) => {
     const validationError = validateProfileSetupWizardDraft(draft, { scenario });
     if (validationError) {
       setError(tProfileError(validationError));
@@ -250,7 +251,7 @@ export default function ProfileSetupScreen() {
         type: effectiveType,
         allergies: selected,
         allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
-        crossReactionAllergies: crossReactionAllergenIds,
+        crossReactionAllergies: crossReactionIds,
         childConsent,
         scenario: scenario ?? undefined,
       });
@@ -372,7 +373,13 @@ export default function ProfileSetupScreen() {
       return;
     }
 
-    void save();
+    void save(
+      resolveCrossReactionAllergenIdsForSave(
+        currentStep,
+        crossPendingIds,
+        crossReactionAllergenIds,
+      ),
+    );
   };
 
   const goBack = () => {

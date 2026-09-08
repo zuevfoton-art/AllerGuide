@@ -126,6 +126,7 @@ export interface PassportExportInput {
   profileName: string;
   profileAge?: string;
   allergies: string[];
+  crossReactions?: string[];
   passport: AllergyPassport;
   emergencyNumber?: string;
 }
@@ -139,6 +140,9 @@ export function formatPassportText(input: PassportExportInput): string {
 
   if (input.profileAge) lines.push(`Возраст: ${input.profileAge}`);
   if (input.allergies.length) lines.push(`Аллергены: ${input.allergies.join(', ')}`);
+  if (input.crossReactions?.length) {
+    lines.push(`Перекрёстные реакции: ${input.crossReactions.join(', ')}`);
+  }
   if (p.drugIntolerances.length) lines.push(`Непереносимые ЛС: ${p.drugIntolerances.join(', ')}`);
   if (p.triggers.length) lines.push(`Триггеры: ${p.triggers.join(', ')}`);
 
