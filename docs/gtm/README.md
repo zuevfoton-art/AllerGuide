@@ -6,6 +6,7 @@ Go-to-market для **A-Claro** (master brand **Aclearo**).
 |----------|------------|
 | [`strategy.md`](./strategy.md) | Полная GTM-стратегия (позиционирование, фазы, каналы) |
 | [`okr.md`](./okr.md) | **OKR** O1–O6 и KR |
+| [`playbook.md`](./playbook.md) | **Рамки решений:** ICP, оффер, PMF, стоп-лист до масштабирования, первые системные продажи, метрики, партнёрский канал, CAC |
 | [`adair-co-marketing-agreement-draft.md`](./adair-co-marketing-agreement-draft.md) | Черновик co-marketing с АДАИР |
 | [`patient-one-pager.html`](./patient-one-pager.html) | Листовка A4 для пациентов |
 | [`doctor-brief.html`](./doctor-brief.html) | Бриф для врачей |
@@ -23,9 +24,11 @@ Go-to-market для **A-Claro** (master brand **Aclearo**).
 
 ## Снимок продукта
 
-6 вкладок (Главная, Дневник, Сканер, Маркет, Карта, SOS) · UPI/UAQI карта · Яндекс Маркет affiliate · offline-first · flags OFF по умолчанию.
+**5 видимых вкладок** (Главная, Дневник, Сканер, Карта, SOS) · UPI/UAQI карта · туры подсказок при первом запуске · offline-first · flags OFF по умолчанию.
 
-Не заявлять: полный OCR везде, telemedicine, cloud sync из коробки, in-app checkout.
+**Маркет** (и Яндекс Маркет affiliate) скрыт за `EXPO_PUBLIC_MARKET`, по умолчанию `false` — не подавать как доступную функцию, пока флаг выключен.
+
+Не заявлять: полный OCR везде, telemedicine, cloud sync из коробки, in-app checkout, действующую подписку (IAP — фаза P5.7).
 
 ## Экспорт HTML → PDF
 

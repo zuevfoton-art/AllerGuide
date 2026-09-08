@@ -29,14 +29,17 @@ Local default в `.env.example` остаётся `false` (offline-first / privac
 | `profile_setup_step_*` | шаги wizard | O2.2 drop-off |
 | `profile_created` | createProfile | O2.2, O4 |
 | `onboarding_completed` | markOnboardingComplete | **O2.2 primary** |
+| `hint_tour_started` / `hint_tour_completed` / `hint_tour_skipped` | туры подсказок (home/diary/scanner/map/sos) | **O4 активация** |
 | `diary_entry_saved` | diary-service | O4.3 |
 | `scan_completed` / `scan_barcode` / `scan_dish_vision` | scanner | O4.2 |
+| `scan_saved_to_diary` | результат скана сохранён в дневник | O4 глубина петли |
 | `diary_report_exported` | doctor PDF | O1, O4.5 |
 | `sos_opened` | SOS tab | O4.4 |
-| `market_click` | marketplace card | O5.3 |
+| `market_impression` / `market_click` / `market_catalog_refresh` | marketplace — **только при `EXPO_PUBLIC_MARKET=true`** | O5.3 |
 | `map_pollen_*` | карта пыльцы | O4.6 |
 | `wellness_refreshed` | home | O4 |
 | `pollen_alert_sent` | push пыльцы | O4 |
+| `waitlist_joined` | лендинг waitlist | O3.6 |
 
 **PII:** запрещены email/phone/name/allergies в props (`ANALYTICS_FORBIDDEN_KEYS`). UTM: передавать как `utm_source`, `utm_campaign`, `utm_content` (snake_case).
 
@@ -52,9 +55,23 @@ auth_register OR first open
 
 **Formula:** `onboarding_completed` / `onboarding_scenario_selected` за cohort window (≥200 users).
 
+Экран `onboarding-intro.tsx` (карусель до выбора сценария) событий не шлёт — первый шаг воронки невидим. Backlog: [`playbook.md` §9](./playbook.md#9-backlog-инструментовки).
+
+## Funnel: активация (после онбординга)
+
+```
+onboarding_completed
+  → hint_tour_started (home)
+  → hint_tour_completed
+  → первое ценное действие: diary_entry_saved OR scan_completed
+```
+
+Считать **отдельно по `scenario`** (`child` / `self`): усреднение по смешанной когорте скрывает разницу между ICP-1 и ICP-2 ([`playbook.md` §1](./playbook.md#1-как-определить-icp)).
+
 ## Retention proxies (KR4.1)
 
 - D1 / D7: return `screen_view` или любой write-event после first `onboarding_completed`
+- D30: строить **кривую**, а не точку — сигнал PMF в выполаживании ([`playbook.md` §3](./playbook.md#3-как-найти-product-market-fit))
 - WEAC: diary OR scan AND (sos OR diary_report) in 30d
 
 ## Verify before beta invite
@@ -69,3 +86,5 @@ auth_register OR first open
 
 Landing / QR: `https://aclearo.com/r/clinic?utm_source=clinic&utm_campaign=adair&utm_content={clinic_id}`  
 Документировать в TestFlight notes до deep-link attribution infra.
+
+**Ограничение:** в мобильном приложении атрибуции источника установки нет — UTM живёт только на лендинге. Пока считаем по связке «лендинг + ручной учёт розданных QR по клиникам». Это блокер для расчёта CAC по каналам и, следовательно, для платного трафика ([`playbook.md` §4](./playbook.md#4-что-критично-сделать-до-масштабирования), §9).

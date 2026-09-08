@@ -2,7 +2,7 @@
 
 **Продукт:** A-Claro (master brand **Aclearo**)  
 **Версия:** 1.0.4 · Слоган: «Aclearo — когда важна ясность»  
-**OKR:** [`okr.md`](./okr.md) · Collateral index: [`README.md`](./README.md)
+**OKR:** [`okr.md`](./okr.md) · Рамки решений: [`playbook.md`](./playbook.md) · Collateral index: [`README.md`](./README.md)
 
 Адаптировано из GTM-плана AllerGuide под текущий бренд и код. **Не редактировать** исходный plan-файл агента.
 
@@ -11,7 +11,7 @@
 ## 1. Допущения
 
 - Первичный рынок: **Россия → СНГ → EU**
-- Монетизация: **бесплатное ядро + freemium + affiliate (Яндекс Маркет) + B2B2C через клиники**
+- Монетизация: **бесплатное ядро + PRO за облачный ИИ (Store IAP) + B2B2C через клиники**; affiliate (Яндекс Маркет) — опционально, за флагом `EXPO_PUBLIC_MARKET`
 
 ## 2. Positioning
 
@@ -29,9 +29,13 @@
 
 ### Сегменты
 
-1. **Primary:** родители детей с пищевой аллергией; взрослые с поллинозом/астмой  
-2. **Secondary:** АСИТ; врачи-рефереры  
-3. **Tertiary:** СНГ/EU; pharma/B2B2C
+1. **ICP-1:** родитель ребёнка (до 12) с подтверждённой пищевой аллергией, ведёт элиминационную диету  
+2. **ICP-2:** взрослый с поллинозом/астмой, на АСИТ или готовится к ней (сезонный)  
+3. **Канал, не ICP:** врачи-аллергологи — рекомендатели, не платящие пользователи  
+4. **Tertiary:** СНГ/EU; pharma/B2B2C  
+5. **Anti-ICP (не таргетировать):** ЗОЖ-аудитория, которой нужен generic-сканер Е-добавок
+
+Критерии отбора по пяти осям и обоснование anti-ICP — [`playbook.md` §1](./playbook.md#1-как-определить-icp).
 
 ### Дифференциаторы
 
@@ -58,13 +62,17 @@
 
 ## 5. Монетизация
 
+Модель зафиксирована в [`subscription-monetization-plan.md`](../subscription-monetization-plan.md) (код — фаза P5.7, пока не реализован).
+
 | Tier | Содержание |
 |------|------------|
-| Free | Профили, дневник, SOS, базовый сканер, PDF, карта (базовая) |
-| Premium (~299–499 ₽/мес) | AI-скан, cloud sync, advanced pollen insights/push |
-| Affiliate | Яндекс Маркет deep-links (`market_click`) |
+| Trial (7 дней) | Всё, включая облачный ИИ |
+| Free (бессрочно) | Профили, дневник **без лимита записей**, SOS, карта, локальный keyword-скан, PDF |
+| PRO (~299–499 ₽/мес, Store IAP) | Облачный ИИ: LLM-вердикт, dish vision, OCR, medicine recognize, cloud STT |
+| Affiliate (опционально) | Яндекс Маркет deep-links (`market_click`) — при `EXPO_PUBLIC_MARKET=true` |
 | B2B (later) | White-label клиник / школы |
 
+Рамка оффера: «безопасность бесплатна навсегда, платите за облачный ИИ» — [`playbook.md` §2](./playbook.md#2-как-сформулировать-оффер).  
 Валидация цены: [`pricing-discovery.md`](./pricing-discovery.md)
 
 ## 6. Deliverables map (plan todos)
@@ -80,10 +88,13 @@
 | Beta cohort | [`beta-cohort.md`](./beta-cohort.md) |
 | Launch week | [`launch-playbook.md`](./launch-playbook.md) |
 | OKR scorecard | [`okr.md`](./okr.md) |
+| ICP / оффер / PMF / CAC | [`playbook.md`](./playbook.md) |
 
 ## 7. Метрики
 
 См. OKR O2–O5. North Star: **WEAC**. Targets: onboarding ≥70%, D7 ≥25% (beta), crash-free ≥99.5%, store ≥4.5.
+
+Дерево метрик, разделение vanity и решающих, одна главная метрика на фазу — [`playbook.md` §6](./playbook.md#6-какие-метрики-действительно-важны). Критерии PMF — [`playbook.md` §3](./playbook.md#3-как-найти-product-market-fit).
 
 ## 8. Риски
 

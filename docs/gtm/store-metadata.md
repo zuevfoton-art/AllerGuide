@@ -2,7 +2,7 @@
 
 **Продукт:** A-Claro · Developer: Aclearo  
 **Источник copy:** [`apps/mobile/store.config.json`](../../apps/mobile/store.config.json)  
-**Legal in-app:** [`apps/mobile/src/constants/legal.ts`](../../apps/mobile/src/constants/legal.ts), [`legal-docs.ts`](../../apps/mobile/src/i18n/legal-docs.ts)
+**Legal in-app:** [`packages/core/src/medical-disclaimer.ts`](../../packages/core/src/medical-disclaimer.ts), [`Disclaimer.tsx`](../../apps/mobile/src/components/Disclaimer.tsx), [`legal-docs.ts`](../../apps/mobile/src/i18n/legal-docs.ts)
 
 ## Локали (6)
 
@@ -25,7 +25,7 @@
 
 ## Push checklist before soft launch
 
-- [ ] Screenshots 6.7" / 6.5" / Android phone — 6 tabs + SOS + scanner verdict  
+- [ ] Screenshots 6.7" / 6.5" / Android phone — 5 видимых вкладок + SOS + scanner verdict (без вкладки «Маркет»: отключена флагом)  
 - [ ] Privacy Policy live: `https://aclearo.com/legal`  
 - [ ] Support URL live  
 - [ ] `eas metadata:push` after ASC/Play credentials (brand-rollout Phase 1)  
