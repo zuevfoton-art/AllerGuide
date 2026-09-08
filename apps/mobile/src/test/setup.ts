@@ -1,5 +1,8 @@
 import { vi } from 'vitest';
 
+// expo-modules-core reads this RN global; Vitest node env does not define it.
+(globalThis as { __DEV__?: boolean }).__DEV__ = false;
+
 // token-session / api-client import Platform. The real RN entry is Flow and
 // cannot be parsed by Vite. Tests that need a specific OS still override this.
 vi.mock('react-native', () => ({

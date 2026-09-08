@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii } from '@/src/constants/layout';
+import { density, radii } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
 export function createStyles({ colors, fonts }: AppTheme) {
@@ -407,5 +407,36 @@ export function createStyles({ colors, fonts }: AppTheme) {
       borderRadius: 28,
       backgroundColor: colors.onAccent,
     },
+    diarySectionPicker: { gap: 8, marginBottom: 4 },
+    diarySectionLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.4,
+    },
+    diarySectionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    diarySectionChip: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      minHeight: density.tapMinHeightSm,
+      borderRadius: radii.sm,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+      justifyContent: 'center',
+    },
+    diarySectionChipActive: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accentLight,
+    },
+    diarySectionChipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    diarySectionChipTextActive: { color: colors.accent },
   });
 }

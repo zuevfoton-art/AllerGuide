@@ -155,7 +155,11 @@ export function ScannerResultPanel({
         </View>
       ) : null}
 
-      {displayResult.reason ? <Text style={styles.reason}>{displayResult.reason}</Text> : null}
+      {result.barcodeScanStatus === 'not_found' || result.lookupFailed ? (
+        <Text style={styles.reason}>{t('scanner.barcodeNotFoundHint')}</Text>
+      ) : displayResult.reason ? (
+        <Text style={styles.reason}>{displayResult.reason}</Text>
+      ) : null}
 
       {displayResult.matches?.length > 0 ? (
         <View style={styles.chipWrap}>

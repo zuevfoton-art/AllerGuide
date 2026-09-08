@@ -431,13 +431,13 @@ sequenceDiagram
 
 ### Результат сканирования → дневник (FR-SCAN-13)
 
-Кнопка «Сохранить в дневник» у результата не пишет запись напрямую: `buildScanDiaryDraft`
-(`scan-diary-service`) переводит вердикт в блюдо + чеклист состава (`buildComponentsFromProduct`
-/ `buildDishComponentsFromText`) и `FoodDrugScanRef`, затем `buildDiarySectionEditorState`
-(секция «Питание», явный `scanRef` вместо эвристики «последний скан за 24 ч») собирает префилл,
-а `ScanDiaryEntryModal` открывает тот же `DiaryWizard`, что и вкладка дневника. Запись создаёт
-`saveScanDiaryEntry` → `addDiaryEntries` (+ `diary_entry_saved`, `scan_saved_to_diary`,
-`reconcileAllReminders`). Всё офлайн: сеть не требуется.
+Кнопка «Сохранить в дневник» у результата не пишет запись напрямую: `resolveScanDiarySection`
+выбирает раздел (лекарство → «Лекарство», косметика/химия → «Триггер», иначе «Питание»;
+«Терапия» не используется). `buildScanDiaryDraft` переводит вердикт в блюдо + чеклист состава
+и `FoodDrugScanRef`, затем `buildDiarySectionEditorState` (явный `scanRef` вместо эвристики
+«последний скан за 24 ч») собирает префилл. `ScanDiaryEntryModal` даёт сменить раздел чипами
+и открывает тот же `DiaryWizard`. Запись создаёт `saveScanDiaryEntry` → `addDiaryEntries`
+(+ `diary_entry_saved`, `scan_saved_to_diary`, `reconcileAllReminders`). Всё офлайн.
 
 ### Анализ текста (`@allerguide/ai`)
 

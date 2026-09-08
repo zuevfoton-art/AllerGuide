@@ -459,6 +459,8 @@ const en: LocaleMessages = {
     repeatUnsafeWarning: 'You scanned this product before as high risk.',
     scanWithCamera: 'Scan with camera',
     statusNotFound: 'Product not found',
+    barcodeNotFoundHint:
+      'Not in the catalog or Open Food Facts. Photograph the label or type the ingredients — barcode digits are not analysed as text.',
     statusInsufficientComposition: 'Composition not fully recognised',
     statusNoAllergens: 'No allergens detected',
     menuStatusMatch: 'Match found in menu text',
@@ -497,6 +499,7 @@ const en: LocaleMessages = {
     trendsHide: 'Hide stats',
     failForwardPhoto: 'Photograph ingredients',
     failForwardManual: 'Enter barcode or ingredients',
+    diarySectionLabel: 'Diary section',
     barcodeWebFailForward: 'Barcode scan is unavailable on web — photograph ingredients or type them in.',
     matchAlias: '{{keyword}} → {{allergen}}',
     verifyPackageHint: 'Always verify the package in your hand',

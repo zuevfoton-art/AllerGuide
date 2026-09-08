@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { CameraView } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { SCAN_BARCODE_SYMBOLOGIES } from '@allerguide/core';
 import {
   resolveCameraChromePaddingBottom,
   resolveCameraChromePaddingTop,
@@ -83,7 +84,7 @@ export function ScannerCameraModal({
           enableTorch={torchOn}
           barcodeScannerSettings={
             isBarcodeEntry
-              ? { barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] }
+              ? { barcodeTypes: [...SCAN_BARCODE_SYMBOLOGIES] }
               : undefined
           }
           onBarcodeScanned={isBarcodeEntry ? onBarcode : undefined}

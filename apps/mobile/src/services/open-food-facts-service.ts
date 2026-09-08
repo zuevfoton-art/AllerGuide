@@ -22,6 +22,7 @@ export interface OpenFoodFactsProduct {
   allergenTags: string[];
   traceTags: string[];
   source: OffFamilySource;
+  category: NormalizedOffProduct['category'];
 }
 
 const OFF_SEARCH_TIMEOUT_MS = 4000;
@@ -40,6 +41,7 @@ function toMobileProduct(product: NormalizedOffProduct): OpenFoodFactsProduct {
     allergenTags: product.allergenTags,
     traceTags: product.traceTags,
     source: product.source,
+    category: product.category,
   };
 }
 

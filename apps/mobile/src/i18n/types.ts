@@ -451,7 +451,7 @@ export type LocaleMessages = {
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
-    /** Result action: start a «Питание» diary entry from this scan. */
+    /** Result action: start a diary entry from this scan. */
     saveToDiary: string;
     savedToDiary: string;
     /** Shown after the entry is written: where to find and edit it. */
@@ -468,6 +468,7 @@ export type LocaleMessages = {
     scanWithCamera: string;
     /** Barcode lookup outcome labels */
     statusNotFound: string;
+    barcodeNotFoundHint: string;
     statusInsufficientComposition: string;
     statusNoAllergens: string;
     /** Menu scan outcome labels */
@@ -509,6 +510,7 @@ export type LocaleMessages = {
     trendsHide: string;
     failForwardPhoto: string;
     failForwardManual: string;
+    diarySectionLabel: string;
     barcodeWebFailForward: string;
     matchAlias: string;
     verifyPackageHint: string;
