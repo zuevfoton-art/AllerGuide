@@ -463,6 +463,8 @@ const ru: LocaleMessages = {
     repeatUnsafeWarning: 'Вы уже сканировали этот продукт как высокий риск.',
     scanWithCamera: 'Сканировать камерой',
     statusNotFound: 'Продукт не найден',
+    barcodeNotFoundHint:
+      'Нет в каталоге и Open Food Facts. Сфотографируйте этикетку или введите состав — цифры штрихкода сами по себе не анализируются.',
     statusInsufficientComposition: 'Состав не распознан полностью',
     statusNoAllergens: 'Аллергенов не обнаружено',
     menuStatusMatch: 'Найдено совпадение в тексте меню',
@@ -501,6 +503,7 @@ const ru: LocaleMessages = {
     trendsHide: 'Скрыть статистику',
     failForwardPhoto: 'Сфотографировать состав',
     failForwardManual: 'Ввести штрихкод или состав',
+    diarySectionLabel: 'Раздел дневника',
     barcodeWebFailForward: 'На вебе штрихкод недоступен — сфотографируйте состав или введите вручную.',
     matchAlias: '{{keyword}} → {{allergen}}',
     verifyPackageHint: 'Всегда сверяйте упаковку в руках',

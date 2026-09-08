@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ScanResultExtended } from '@/src/services/scan-analysis';
 import {
   buildScanDiaryDraft,
+  resolveScanDiarySection,
   saveScanDiaryEntry,
+  scanModeFromProductCategory,
   SCAN_DIARY_SECTION_TYPE,
 } from '@/src/services/scan-diary-service';
 import { addDiaryEntries } from '@/src/services/diary-service';
@@ -138,6 +140,32 @@ describe('buildScanDiaryDraft', () => {
       .filter((id): id is string => Boolean(id));
     expect(allergenIds).toContain('milk');
     expect(allergenIds).toContain('tree-nuts');
+  });
+});
+
+describe('resolveScanDiarySection', () => {
+  it('routes medicine scans to the medicine diary section', () => {
+    expect(resolveScanDiarySection({ mode: 'medicine' })).toBe('Лекарство');
+    expect(resolveScanDiarySection({ productCategory: 'medicine' })).toBe('Лекарство');
+  });
+
+  it('routes cosmetics and household products to the trigger section', () => {
+    expect(resolveScanDiarySection({ productCategory: 'beauty' })).toBe('Триггер');
+    expect(resolveScanDiarySection({ productCategory: 'household' })).toBe('Триггер');
+    expect(resolveScanDiarySection({ mode: 'cosmetics' })).toBe('Триггер');
+    expect(resolveScanDiarySection({ source: 'openbeautyfacts' })).toBe('Триггер');
+  });
+
+  it('keeps food and unknown scans in nutrition', () => {
+    expect(resolveScanDiarySection({ productCategory: 'food' })).toBe('Питание');
+    expect(resolveScanDiarySection({})).toBe(SCAN_DIARY_SECTION_TYPE);
+  });
+
+  it('maps OFF categories onto analysis modes', () => {
+    expect(scanModeFromProductCategory('food')).toBe('product');
+    expect(scanModeFromProductCategory('beauty')).toBe('cosmetics');
+    expect(scanModeFromProductCategory('household')).toBe('cosmetics');
+    expect(scanModeFromProductCategory('medicine')).toBe('medicine');
   });
 });
 

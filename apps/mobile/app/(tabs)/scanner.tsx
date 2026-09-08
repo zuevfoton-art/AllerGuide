@@ -251,11 +251,13 @@ export default function ScannerScreen() {
       {scan.diaryDraft ? (
         <ScanDiaryEntryModal
           visible
+          sectionType={scan.diaryDraft.sectionType}
           prefill={scan.diaryDraft.prefill}
           initialStepId={scan.diaryDraft.initialStepId}
           profileId={scan.activeProfileId}
           profileAllergiesJson={scan.activeProfile?.allergies ?? '[]'}
           onClose={scan.closeDiaryEntry}
+          onSectionChange={(sectionType) => void scan.changeDiarySection(sectionType)}
           onComplete={(entries) => void scan.saveDiaryEntry(entries)}
         />
       ) : null}

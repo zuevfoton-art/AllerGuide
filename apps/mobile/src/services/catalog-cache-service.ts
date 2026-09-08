@@ -157,6 +157,7 @@ export function saveCachedCatalogProduct(
     allergenTags: product.allergenTags,
     traceTags: product.traceTags,
     source,
+    category: product.category,
   });
 
   if (isWebStorageBackend()) {
@@ -199,5 +200,6 @@ export function cachedCatalogProductToDto(product: CachedCatalogProduct): Catalo
     ingredients: product.ingredients,
     allergenTags: product.allergenTags,
     traceTags: product.traceTags,
+    category: product.category,
   };
 }

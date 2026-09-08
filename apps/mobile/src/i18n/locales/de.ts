@@ -463,6 +463,8 @@ const de: LocaleMessages = {
     repeatUnsafeWarning: 'Previously scanned as high risk.',
     scanWithCamera: 'Mit Kamera scannen',
     statusNotFound: 'Produkt nicht gefunden',
+    barcodeNotFoundHint:
+      'Nicht im Katalog oder bei Open Food Facts. Etikett fotografieren oder Zutaten eingeben — die Ziffern werden nicht als Text geprüft.',
     statusInsufficientComposition: 'Zusammensetzung nicht vollständig erkannt',
     statusNoAllergens: 'Keine Allergene gefunden',
     menuStatusMatch: 'Übereinstimmung im Menütext gefunden',
@@ -501,6 +503,7 @@ const de: LocaleMessages = {
     trendsHide: 'Statistik ausblenden',
     failForwardPhoto: 'Zutaten fotografieren',
     failForwardManual: 'Barcode oder Zutaten eingeben',
+    diarySectionLabel: 'Tagebuch-Bereich',
     barcodeWebFailForward: 'Barcode-Scan im Web nicht verfügbar — Zutaten fotografieren oder eingeben.',
     matchAlias: '{{keyword}} → {{allergen}}',
     verifyPackageHint: 'Verpackung immer selbst prüfen',

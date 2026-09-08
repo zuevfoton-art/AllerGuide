@@ -3,13 +3,12 @@ import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+import { extractGtinFromScan, SCAN_BARCODE_SYMBOLOGIES } from '@allerguide/core';
 import {
   resolveCameraChromePaddingTop,
 } from '@/src/hooks/camera-chrome-metrics';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-
-const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] as const;
 
 type Props = {
   visible: boolean;
@@ -55,7 +54,7 @@ export function BarcodeScanCamera({ visible, onCancel, onScan }: Props) {
     scannedRef.current = true;
     setScanned(true);
     setTorchOn(false);
-    onScan(data);
+    onScan(extractGtinFromScan(data) || data);
   };
 
   const topPad = resolveCameraChromePaddingTop(insets.top);
@@ -74,7 +73,7 @@ export function BarcodeScanCamera({ visible, onCancel, onScan }: Props) {
             style={StyleSheet.absoluteFillObject}
             facing="back"
             enableTorch={torchOn}
-            barcodeScannerSettings={{ barcodeTypes: [...BARCODE_TYPES] }}
+            barcodeScannerSettings={{ barcodeTypes: [...SCAN_BARCODE_SYMBOLOGIES] }}
             onBarcodeScanned={handleBarcode}
           />
         ) : (

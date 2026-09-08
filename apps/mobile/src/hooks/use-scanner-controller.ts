@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
-import { computeScanTrends, type Profile, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
+import { computeScanTrends, extractGtinFromScan, type Profile, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
@@ -18,8 +18,8 @@ import {
 import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
 import {
   buildScanDiaryDraft,
+  resolveScanDiarySection,
   saveScanDiaryEntry,
-  SCAN_DIARY_SECTION_TYPE,
 } from '@/src/services/scan-diary-service';
 import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import {
@@ -54,8 +54,9 @@ const HISTORY_DISPLAY_LIMIT = 5;
 export type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
 export type DiaryEntryDraft = {
+  sectionType: string;
   prefill?: Record<string, string>;
-  initialStepId: string;
+  initialStepId?: string;
 };
 
 function resolveScanProfile(): Profile | null {
@@ -234,8 +235,9 @@ export function useScannerController() {
     setIngredientsOpen(false);
     setResultPhotoUri(null);
     try {
+      const barcodeLookup = extractGtinFromScan(text);
       const scanResult =
-        barcodeMode || isManualBarcodeInput(text)
+        barcodeMode || isManualBarcodeInput(text) || Boolean(barcodeLookup)
           ? await scanBarcode({ barcode: text, profile: scanProfile })
           : await scanFromOcr({
               mode: SMART_SCAN_MODE,
@@ -364,8 +366,9 @@ export function useScannerController() {
     setScanned(true);
     setTorchOn(false);
     setCameraOpen(false);
-    setInput(data);
-    void runCheck(data, true);
+    const lookup = extractGtinFromScan(data) || data;
+    setInput(lookup);
+    void runCheck(lookup, true);
   };
 
   const handleCropConfirm = async (cropped: CroppedScanPhoto) => {
@@ -427,8 +430,9 @@ export function useScannerController() {
     if (!profileId || !result) return;
 
     const draft = buildScanDiaryDraft({ result, scanText: input });
+    const sectionType = resolveScanDiarySection(result);
     const editorState = await buildDiarySectionEditorState({
-      sectionType: SCAN_DIARY_SECTION_TYPE,
+      sectionType,
       profileId,
       profileAllergiesJson: activeProfile?.allergies ?? '[]',
       locale,
@@ -437,8 +441,29 @@ export function useScannerController() {
       scanRef: draft.scanRef,
     });
     setDiaryDraft({
-      prefill: editorState.prefill?.[SCAN_DIARY_SECTION_TYPE],
-      initialStepId: draft.initialStepId,
+      sectionType,
+      prefill: editorState.prefill?.[sectionType],
+      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+    });
+  };
+
+  const changeDiarySection = async (sectionType: string) => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
+    const draft = buildScanDiaryDraft({ result, scanText: input });
+    const editorState = await buildDiarySectionEditorState({
+      sectionType,
+      profileId,
+      profileAllergiesJson: activeProfile?.allergies ?? '[]',
+      locale,
+      profileBirthYear: activeProfile?.birthYear,
+      recognizedDish: draft.dish,
+      scanRef: draft.scanRef,
+    });
+    setDiaryDraft({
+      sectionType,
+      prefill: editorState.prefill?.[sectionType],
+      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
     });
   };
 
@@ -583,6 +608,7 @@ export function useScannerController() {
     closeCamera,
     confirmSaveSafe,
     openDiaryEntry,
+    changeDiarySection,
     closeDiaryEntry,
     saveDiaryEntry,
     openHistoryItem,

@@ -18,6 +18,7 @@ export interface CachedCatalogProduct {
   traceTags: string[];
   source: string;
   fetchedAt: string;
+  category?: string;
 }
 
 export function isCatalogCacheFresh(fetchedAt: string, ttlMs = CATALOG_CACHE_TTL_MS): boolean {
