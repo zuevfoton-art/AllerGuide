@@ -103,3 +103,4 @@ export * from './scan-history-matches';
 export * from './scan-trends';
 export * from './icd10-reference';
 export * from './prescribed-therapy';
+export * from './html-escape';
