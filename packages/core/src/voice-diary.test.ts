@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   appendTranscript,
   applyVoiceParseToAnswers,
+  isDiaryVoiceStep,
   parseVoiceDiaryUtterance,
   resolveSpeechLocale,
 } from './voice-diary';
@@ -54,6 +55,14 @@ describe('voice-diary', () => {
     expect(next.severity0_3).toBe('2 — умеренная');
     expect(next.symptomCode).toBeTruthy();
     expect(next.onset).toBeTruthy();
+  });
+
+  it('limits the mic button to symptoms and onset in the symptoms section', () => {
+    expect(isDiaryVoiceStep('Симптомы', 'symptoms')).toBe(true);
+    expect(isDiaryVoiceStep('Симптомы', 'onset')).toBe(true);
+    expect(isDiaryVoiceStep('Симптомы', 'severity0_3')).toBe(false);
+    expect(isDiaryVoiceStep('Питание', 'food')).toBe(false);
+    expect(isDiaryVoiceStep('Заметка', 'text')).toBe(false);
   });
 
   it('does not overwrite existing structured fields', () => {

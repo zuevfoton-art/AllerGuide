@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   applyDishBreakdownToAnswers,
   applyMedicineCardToSectionAnswers,
+  applyVoiceParseToAnswers,
   attachDiaryAutoMetadata,
   buildIntoleranceAlert,
   buildMedicineCardFromDiaryAnswers,
@@ -15,6 +16,7 @@ import {
   hasSectionAnswers,
   mergeMedicinePrefillFromCard,
   parseSelectedComponentIds,
+  parseVoiceDiaryUtterance,
   pickMedicineSuggestionForTypedName,
   resolveSelectedIdsForEnrichment,
   serializeSelectedComponentIds,
@@ -223,6 +225,17 @@ export function useDiaryWizardController({
 
   const scalePreview = diaryScalePreview(section.type, isLastStep, sectionAnswers);
   const pefZonePreview = diaryPefZonePreview(section.type, sectionAnswers, planPersonalBestPef);
+
+  const applyVoiceTranscript = (targetStepId: string, transcript: string) => {
+    const parsed = parseVoiceDiaryUtterance(transcript);
+    setAnswersBySection((prev) => ({
+      ...prev,
+      [section.type]: applyVoiceParseToAnswers(prev[section.type] ?? {}, parsed, {
+        targetStepId,
+        sectionType: section.type,
+      }),
+    }));
+  };
 
   const setAnswer = (stepId: string, value: string) => {
     setAnswersBySection((prev) => {
@@ -455,6 +468,7 @@ export function useDiaryWizardController({
       setFoodComponentSelection,
       selectMedicineSuggestion,
       selectDishSuggestion,
+      applyVoiceTranscript,
     },
     goNext,
     goBack,
