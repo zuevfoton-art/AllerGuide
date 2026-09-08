@@ -1059,6 +1059,7 @@ export type LocaleMessages = {
     ocrEmptyMedia: string;
     ocrDemoHint: string;
     ocrFieldsIncomplete: string;
+    ocrAllergenUncertain: string;
     ocrParseError: string;
     verifyTitle: string;
     verifySubtitle: string;
@@ -1141,6 +1142,7 @@ export type LocaleMessages = {
     ocrEmptyMedia: string;
     ocrDemoHint: string;
     ocrFieldsIncomplete: string;
+    ocrAllergenUncertain: string;
     ocrParseError: string;
     verifyTitle: string;
     verifyConfirm: string;

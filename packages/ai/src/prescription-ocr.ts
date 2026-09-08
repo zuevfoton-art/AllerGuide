@@ -1,5 +1,9 @@
 import {
+  ALLERGENS,
   PRESCRIBED_THERAPY_ROUTE_LABELS,
+  findAllergenById,
+  findAllergenByName,
+  resolveAllergenId,
   type AsitClinicalDiagnosis,
   type AsitRoute,
   type AsitScheduleStage,
@@ -16,6 +20,10 @@ export interface PrescriptionParseResult {
   route: PrescribedTherapyRoute | '';
   /** Empty when not detected — caller keeps existing ASIT SLIT/SCIT route. */
   asitRoute: AsitRoute | '';
+  /** Display name of the course allergen when uniquely resolved. */
+  allergen: string;
+  /** Canonical catalog id when uniquely resolved. */
+  allergenId: string;
   scheduleStages: AsitScheduleStage[];
   /** One UI row per schedule line (from stages and/or free-text schema). */
   scheduleLines: string[];
@@ -123,6 +131,13 @@ const ALL_SECTION_STOP_LABELS = [
   'Route',
   'Дата начала',
   'Дата окончания',
+  'Дата приёма',
+  'Дата приема',
+  'Дата назначения',
+  'Дата выписки',
+  'Аллерген',
+  'Аллерген курса',
+  'Allergen',
   'Схема приёма',
   'Схема приема',
   'Схема',
@@ -141,6 +156,22 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const RU_MONTHS: Record<string, string> = {
+  январ: '01',
+  феврал: '02',
+  март: '03',
+  апрел: '04',
+  мая: '05',
+  май: '05',
+  июн: '06',
+  июл: '07',
+  август: '08',
+  сентябр: '09',
+  октябр: '10',
+  ноябр: '11',
+  декабр: '12',
+};
+
 function extractDateFromSnippet(text: string): string {
   const iso = text.match(/(\d{4}-\d{2}-\d{2})/);
   if (iso) return iso[1]!;
@@ -151,6 +182,18 @@ function extractDateFromSnippet(text: string): string {
     const month = dotted[2]!.padStart(2, '0');
     const year = dotted[3]!;
     return `${year}-${month}-${day}`;
+  }
+
+  const monthMatch = text.match(
+    /(\d{1,2})\s+(январ[яь]|феврал[яь]|марта?|апрел[яь]|ма[йя]|июн[яь]|июл[яь]|августа?|сентябр[яь]|октябр[яь]|ноябр[яь]|декабр[яь])\s+(\d{4})(?:\s*г\.?)?/i,
+  );
+  if (monthMatch) {
+    const day = monthMatch[1]!.padStart(2, '0');
+    const monthToken = monthMatch[2]!.toLowerCase();
+    const monthKey = Object.keys(RU_MONTHS).find((key) => monthToken.startsWith(key));
+    const month = monthKey ? RU_MONTHS[monthKey] : '';
+    const year = monthMatch[3]!;
+    if (month) return `${year}-${month}-${day}`;
   }
 
   return '';
@@ -193,6 +236,151 @@ function extractLabeledDate(text: string, labels: string[]): string {
   const value = extractField(text, labels);
   if (!value) return '';
   return extractDateFromSnippet(value);
+}
+
+function extractBareDateLabel(text: string): string {
+  const match = text.match(/(?:^|\n)\s*Дата\s*:\s*(.+)/i);
+  if (!match?.[1]) return '';
+  return extractDateFromSnippet(match[1]);
+}
+
+function compareIsoDates(left: string, right: string): number {
+  return left.localeCompare(right);
+}
+
+function addDaysToIsoDate(startDate: string, days: number): string {
+  const match = startDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match || days <= 0) return '';
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function durationUnitToDays(amount: number, unit: string): number {
+  const normalized = unit.toLowerCase();
+  if (/^дн|день|дня|days?/.test(normalized)) return amount;
+  if (/^недел|week/.test(normalized)) return amount * 7;
+  if (/^мес|month/.test(normalized)) return amount * 30;
+  return 0;
+}
+
+function parseDurationDays(text: string): number | null {
+  const labeled =
+    /(?:курс|на|в течение|сроком)\s+(\d+)\s*(дн(?:ей|я|ь)?|день|недел(?:я|и|ь|ю)|мес(?:яц(?:ев|а)?|\.?)|days?|weeks?|months?)/i.exec(
+      text,
+    );
+  const match =
+    labeled ??
+    /(\d+)\s*(дн(?:ей|я|ь)|день|недел(?:я|и|ь|ю)|мес(?:яц(?:ев|а)?|\.?)|days?|weeks?|months?)\b/i.exec(
+      text,
+    );
+  if (!match) return null;
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  const days = durationUnitToDays(amount, match[2]!);
+  return days > 0 ? days : null;
+}
+
+function resolveStartDate(input: {
+  labeledStart: string;
+  appointmentDate: string;
+  headerDate: string;
+  stageFromDates: string[];
+  fallbackText: string;
+}): string {
+  if (input.labeledStart) return input.labeledStart;
+  if (input.appointmentDate) return input.appointmentDate;
+  if (input.headerDate) return input.headerDate;
+  if (input.stageFromDates.length > 0) {
+    return [...input.stageFromDates].sort(compareIsoDates)[0]!;
+  }
+  return extractDateFromSnippet(input.fallbackText);
+}
+
+function resolveEndDate(input: {
+  labeledEnd: string;
+  startDate: string;
+  durationDays: number | null;
+  stageToDates: string[];
+}): string {
+  if (input.labeledEnd) return input.labeledEnd;
+  if (input.startDate && input.durationDays) {
+    const computed = addDaysToIsoDate(input.startDate, input.durationDays);
+    if (computed) return computed;
+  }
+  if (input.stageToDates.length > 0) {
+    return [...input.stageToDates].sort(compareIsoDates).at(-1)!;
+  }
+  return '';
+}
+
+function collectAllergenHits(text: string): Array<{ id: string; name: string; score: number }> {
+  const haystack = text.toLowerCase();
+  const hits: Array<{ id: string; name: string; score: number }> = [];
+
+  for (const allergen of ALLERGENS) {
+    const needles = [
+      allergen.name,
+      allergen.id.replace(/-/g, ' '),
+      ...allergen.keywords,
+    ].filter((item) => item.trim().length >= 3);
+
+    let score = 0;
+    for (const needle of needles) {
+      if (haystack.includes(needle.toLowerCase())) {
+        score = Math.max(score, needle.length);
+      }
+    }
+    if (score > 0) hits.push({ id: allergen.id, name: allergen.name, score });
+  }
+
+  return hits.sort((left, right) => right.score - left.score || left.name.localeCompare(right.name));
+}
+
+function resolveAllergenFromSnippet(snippet: string): { allergen: string; allergenId: string } | null {
+  const trimmed = snippet.trim();
+  if (!trimmed) return null;
+
+  const byId = resolveAllergenId(trimmed);
+  if (byId) {
+    const record = findAllergenById(byId);
+    return { allergen: record?.name ?? trimmed, allergenId: byId };
+  }
+
+  const byName = findAllergenByName(trimmed);
+  if (byName) return { allergen: byName.name, allergenId: byName.id };
+
+  const hits = collectAllergenHits(trimmed);
+  if (hits.length === 0) return null;
+  const top = hits[0]!;
+  const tied = hits.filter((hit) => hit.score === top.score);
+  if (tied.length !== 1) return null;
+  return { allergen: top.name, allergenId: top.id };
+}
+
+function extractPrescriptionAllergen(input: {
+  text: string;
+  drug: string;
+  primaryDisease: string;
+}): { allergen: string; allergenId: string; warning?: string } {
+  const labeled = extractField(input.text, [
+    'Аллерген курса',
+    'Аллерген',
+    'Allergen of the course',
+    'Allergen',
+  ]);
+  const sources = [labeled, input.drug, input.primaryDisease, input.text];
+
+  for (const source of sources) {
+    const resolved = resolveAllergenFromSnippet(source);
+    if (resolved) return resolved;
+  }
+
+  return {
+    allergen: '',
+    allergenId: '',
+    warning: 'Аллерген курса не распознан однозначно — выберите из каталога.',
+  };
 }
 
 function stopLabelPattern(): string {
@@ -434,16 +622,38 @@ export function parsePrescriptionText(text: string): PrescriptionParseResult {
 
   const route = parseRoute(normalized);
   const asitRoute = parseAsitRoute(normalized);
-  const startDate =
-    extractLabeledDate(normalized, ['Дата начала', 'Начало', 'Start date', 'Start']) ||
-    extractDateFromSnippet(normalized);
-  const endDate = extractLabeledDate(normalized, [
-    'Дата окончания',
-    'Окончание',
-    'Конец',
-    'End date',
-    'End',
-  ]);
+  const scheduleStages = parseScheduleStages(normalized);
+  const startDate = resolveStartDate({
+    labeledStart: extractLabeledDate(normalized, [
+      'Дата начала',
+      'Начало',
+      'Start date',
+      'Start',
+    ]),
+    appointmentDate: extractLabeledDate(normalized, [
+      'Дата приёма',
+      'Дата приема',
+      'Дата назначения',
+      'Дата выписки',
+      'Appointment date',
+      'Issued',
+    ]),
+    headerDate: extractBareDateLabel(normalized),
+    stageFromDates: scheduleStages.map((stage) => stage.from).filter(Boolean),
+    fallbackText: normalized,
+  });
+  const endDate = resolveEndDate({
+    labeledEnd: extractLabeledDate(normalized, [
+      'Дата окончания',
+      'Окончание',
+      'Конец',
+      'End date',
+      'End',
+    ]),
+    startDate,
+    durationDays: parseDurationDays(normalized),
+    stageToDates: scheduleStages.map((stage) => stage.to).filter(Boolean),
+  });
   const scheduleNotesLine = extractField(normalized, [
     'Схема приёма',
     'Схема приема',
@@ -453,7 +663,6 @@ export function parsePrescriptionText(text: string): PrescriptionParseResult {
     'Schedule',
     'Regimen',
   ]);
-  const scheduleStages = parseScheduleStages(normalized);
   let bulletLines = extractScheduleBulletLines(normalized);
   if (bulletLines.length === 0) {
     bulletLines = inferScheduleLinesFromUnlabeledText(normalized);
@@ -462,12 +671,18 @@ export function parsePrescriptionText(text: string): PrescriptionParseResult {
   const scheduleNotes = scheduleLinesToNotes(scheduleLines) || scheduleNotesLine;
   const notes = extractField(normalized, ['Заметки', 'Notes', 'Примечание', 'Комментарий']);
   const clinicalDiagnosis = parseClinicalDiagnosis(normalized);
+  const allergenResult = extractPrescriptionAllergen({
+    text: normalized,
+    drug,
+    primaryDisease: clinicalDiagnosis.primaryDisease,
+  });
 
   if (!drug) warnings.push('Препарат не распознан — укажите вручную.');
   if (!dosage) warnings.push('Дозировка не распознана — укажите вручную.');
   if (!route && !asitRoute) warnings.push('Путь введения не распознан — выберите вручную.');
   if (!startDate) warnings.push('Дата начала не распознана — выберите вручную.');
   if (!endDate) warnings.push('Дата окончания не распознана — выберите вручную.');
+  if (allergenResult.warning) warnings.push(allergenResult.warning);
   if (scheduleLines.every((line) => !line.trim()) && scheduleStages.length === 0) {
     warnings.push('Схема приёма не найдена — проверьте текст назначения.');
   }
@@ -477,6 +692,8 @@ export function parsePrescriptionText(text: string): PrescriptionParseResult {
     dosage,
     route,
     asitRoute,
+    allergen: allergenResult.allergen,
+    allergenId: allergenResult.allergenId,
     scheduleStages,
     scheduleLines,
     startDate,
@@ -555,6 +772,8 @@ export function applyPrescriptionParseToCourse<T extends {
 export function applyPrescriptionParseToAsitCourse<T extends {
   drug: string;
   dosage?: string;
+  allergen?: string;
+  allergenId?: string;
   route: AsitRoute;
   startDate: string;
   endDate?: string;
@@ -567,6 +786,8 @@ export function applyPrescriptionParseToAsitCourse<T extends {
 
   if (parsed.drug) next.drug = parsed.drug;
   if (parsed.dosage) next.dosage = parsed.dosage;
+  if (parsed.allergen) next.allergen = parsed.allergen;
+  if (parsed.allergenId) next.allergenId = parsed.allergenId;
   if (parsed.asitRoute) next.route = parsed.asitRoute;
   if (parsed.startDate) next.startDate = parsed.startDate;
   if (parsed.endDate) next.endDate = parsed.endDate;
