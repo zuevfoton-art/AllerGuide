@@ -155,6 +155,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `auth-hero-title` не виден 120s + ANR Pixel Launcher | `has_anr_dialog` должен ловить `Application Not Responding` из dumpsys (не только `isn't responding`). Wait / Back, затем `ensure_app_foreground` |
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
 | `onboarding-intro-skip` + баннер «непредвиденная ошибка» | Hermes: `@noble/hashes` кэширует `crypto` при импорте. Соль — `getSecureRandomBytes` + `setSecureRandomBytes` из `src/install-runtime` / expo-crypto |
+| `onboarding-intro-skip` не виден, экран «Регистрация», «Слабый» пароль | `maestro1` не проходит 3 из 4 классов (#354). Offline bootstrap — `Maestro1` (nightly 34097074712) |
 | `allergen-milk` на шаге «Какая у тебя аллергия?» | Сначала `condition-food`, потом молоко. Общий `_complete-first-run-profile.yaml` |
 | Нет пыльцы полыни после «Поллиноз» | Рекомендации зависят от типа: `condition-pollinosis` → `allergen-birch-pollen` / `allergen-mugwort-pollen`. Тополь — под «Показать ещё». Standalone `profile-pollinosis-quick-pick.yaml` (не в `smoke-all`) |
 | Перекрёсты не видны в паспорте после шага 5 | Первый проход заканчивается на `crossReactions`; save должен брать `pendingIds` синхронно. Standalone `profile-cross-reactions-add-all.yaml` (не в `smoke-all`) |

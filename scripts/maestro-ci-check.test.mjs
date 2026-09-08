@@ -122,6 +122,14 @@ describe('Maestro nightly CI invariants', () => {
       );
     }
 
+    const offlineUntilHome = read('apps/mobile/.maestro/flows/_offline-bootstrap-until-home.yaml');
+    assert.doesNotMatch(
+      offlineUntilHome,
+      /FIELD_VALUE: maestro1\b/,
+      'offline register password must meet 3-of-4 character classes (nightly 34097074712)',
+    );
+    assert.match(offlineUntilHome, /FIELD_VALUE: Maestro1/);
+
     for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_dismiss-hints\.yaml/);
