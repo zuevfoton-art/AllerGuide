@@ -5,7 +5,7 @@ import {
   type DishComponentDef,
   type FoodDrugScanRef,
 } from '@allerguide/core';
-import { buildOcrScanProductName } from '@allerguide/ai';
+import { buildOcrScanProductName, type ScanMode } from '@allerguide/ai';
 import { addDiaryEntries, type DiaryMutationResult } from '@/src/services/diary-service';
 import { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
 import { isManualBarcodeInput } from '@/src/constants/scanner-mode';
