@@ -59,6 +59,21 @@ describe('recovery key format', () => {
     expect(validateRecoveryKey(key)).toBe(true);
   });
 
+  it('generates distinct keys rather than a low-entropy sequence', () => {
+    const keys = new Set(Array.from({ length: 25 }, () => generateRecoveryKey()));
+    expect(keys.size).toBe(25);
+  });
+
+  it('throws instead of falling back to Math.random when no CSPRNG exists', () => {
+    const original = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+    Object.defineProperty(globalThis, 'crypto', { configurable: true, value: undefined });
+    try {
+      expect(() => generateRecoveryKey()).toThrow(/getRandomValues/);
+    } finally {
+      if (original) Object.defineProperty(globalThis, 'crypto', original);
+    }
+  });
+
   it('normalizes dashed/spaced input', () => {
     const dashed = formatRecoveryKeyForDisplay(SAMPLE_KEY);
     expect(normalizeRecoveryKey(dashed)).toBe(SAMPLE_KEY);
