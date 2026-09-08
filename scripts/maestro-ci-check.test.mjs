@@ -124,8 +124,18 @@ describe('Maestro nightly CI invariants', () => {
 
     for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
+      const untilHome = name.replace('.yaml', '-until-home.yaml');
+      assert.match(flow, new RegExp(untilHome.replace('.', '\\.')));
       assert.match(flow, /_dismiss-hints\.yaml/);
     }
+
+    const offlineUntilHome = read('apps/mobile/.maestro/flows/_offline-bootstrap-until-home.yaml');
+    assert.match(offlineUntilHome, /FIELD_VALUE: Maestro1!/);
+    assert.doesNotMatch(offlineUntilHome, /FIELD_VALUE: maestro1\b/);
+
+    const gate = read('scripts/rc-gate-check.mjs');
+    assert.match(gate, /_offline-bootstrap-until-home\.yaml/);
+    assert.match(gate, /_staging-bootstrap-until-home\.yaml/);
 
     const dismissHints = read('apps/mobile/.maestro/flows/_dismiss-hints.yaml');
     assert.match(dismissHints, /id: hint-skip/);
