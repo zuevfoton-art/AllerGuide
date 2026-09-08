@@ -237,7 +237,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `scanner-dish-lookup-service.ts` | Обогащение состава блюда (OFF + search) |
 | `ocr-api-service.ts` | Cloud Vision OCR через `/api/ocr` |
 | `scan-history-service.ts` | Локальная история сканов |
-| `scan-diary-service.ts` | Результат скана → префилл записи дневника «Питание» + запись (`buildScanDiaryDraft`, `saveScanDiaryEntry`) |
+| `scan-diary-service.ts` | Результат скана → раздел (`resolveScanDiarySection`) + префилл + запись (`buildScanDiaryDraft`, `saveScanDiaryEntry`); UI выбора — `ScanDiaryEntryModal` |
 | `profile-service.ts` | CRUD профилей, миграция legacy → userId |
 | `auth-service.ts` | Локальные users **или** backend JWT |
 | `token-session.ts` | Access JWT (web: память; native: SecureStore) + refresh rotation |
