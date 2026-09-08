@@ -308,3 +308,18 @@ export function mergeCrossReactionAllergenIds(
 ): string[] {
   return [...new Set([...selectedAllergenIds, ...acceptedRelatedIds])];
 }
+
+/**
+ * Ids to persist when leaving the wizard. Pending checks on the last step
+ * must not wait for a React re-render.
+ */
+export function resolveCrossReactionAllergenIdsForSave(
+  currentStep: ProfileSetupWizardStep,
+  pendingIds: string[],
+  committedIds: string[],
+): string[] {
+  if (currentStep === 'crossReactions') {
+    return [...new Set(pendingIds)];
+  }
+  return [...new Set(committedIds)];
+}

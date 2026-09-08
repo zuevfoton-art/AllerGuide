@@ -13,6 +13,7 @@ export {
   getVisibleProfileSetupStepProgress,
   getVisibleProfileSetupSteps,
   mergeCrossReactionAllergenIds,
+  resolveCrossReactionAllergenIdsForSave,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
   shouldSkipAllergenConfirmationsStep,

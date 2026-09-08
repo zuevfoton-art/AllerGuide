@@ -126,7 +126,7 @@ eas build --profile preview --platform all
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` |
-| `EXPO_PUBLIC_PRODUCT_DB` | `false` |
+| `EXPO_PUBLIC_PRODUCT_DB` | `true` |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` |
 
 Sentry и analytics остаются выключенными (DSN пустой).

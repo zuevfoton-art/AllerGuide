@@ -9,6 +9,7 @@ import {
   getVisibleProfileSetupStepProgress,
   getVisibleProfileSetupSteps,
   mergeCrossReactionAllergenIds,
+  resolveCrossReactionAllergenIdsForSave,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
@@ -156,5 +157,11 @@ describe('profile setup wizard', () => {
       'milk',
       'goat-milk',
     ]);
+    expect(
+      resolveCrossReactionAllergenIdsForSave('crossReactions', ['goat-milk', 'beef'], []),
+    ).toEqual(['goat-milk', 'beef']);
+    expect(
+      resolveCrossReactionAllergenIdsForSave('allergenConfirmations', ['pending'], ['goat-milk']),
+    ).toEqual(['goat-milk']);
   });
 });

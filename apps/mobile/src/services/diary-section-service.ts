@@ -150,6 +150,9 @@ export async function buildDiarySectionEditorState(input: {
     if (input.photoUri) {
       prefill.medicinePhotos = serializeDiaryPhotoUris([input.photoUri]);
     }
+    if (!input.recognizedCard && input.recognizedDish?.food.trim()) {
+      prefill.medicine = input.recognizedDish.food.trim();
+    }
     return { mode: 'section', sectionType, prefill: { Лекарство: prefill } };
   }
 
@@ -189,8 +192,19 @@ export async function buildDiarySectionEditorState(input: {
       },
     );
     const context = await loadDiaryTriggerContext(profileId, wellness?.factors);
-    const prefill = { Триггер: buildTriggerPrefill(context) };
-    return { mode: 'section', sectionType, prefill };
+    const answers = buildTriggerPrefill(context);
+    if (input.recognizedDish?.food.trim()) {
+      answers.trigger = input.recognizedDish.food.trim();
+    }
+    return { mode: 'section', sectionType, prefill: { Триггер: answers } };
+  }
+
+  if (sectionType === 'Заметка' && input.recognizedDish?.food.trim()) {
+    return {
+      mode: 'section',
+      sectionType,
+      prefill: { Заметка: { noteTitle: input.recognizedDish.food.trim() } },
+    };
   }
 
   return { mode: 'section', sectionType };

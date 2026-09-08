@@ -7,6 +7,7 @@ import {
 import {
   isValidBarcode,
   normalizeBarcode,
+  extractGtinFromScan,
   resolveMedicineAgeUsage,
   toMedicineCard,
   type MedicineAgeResolution,
@@ -131,7 +132,7 @@ export async function recognizeMedicineFromBarcode(input: {
   barcode: string;
   ageYears?: number | null;
 }): Promise<MedicineRecognitionOutcome> {
-  const barcode = normalizeBarcode(input.barcode);
+  const barcode = extractGtinFromScan(input.barcode) || normalizeBarcode(input.barcode);
   const ageYears = input.ageYears ?? null;
   if (!isValidBarcode(barcode)) {
     return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };

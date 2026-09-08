@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type RefObject } from 'react';
 import {
+  findNodeHandle,
+  Keyboard,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  UIManager,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
-import { radii } from '@/src/constants/layout';
+import { radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -20,12 +23,76 @@ interface DiaryEditorModalProps {
   children: React.ReactNode;
 }
 
+type DiaryEditorScrollApi = {
+  scrollFieldIntoView: (node: unknown) => void;
+};
+
+const DiaryEditorScrollContext = createContext<DiaryEditorScrollApi | null>(null);
+
+export function useDiaryEditorScroll(): DiaryEditorScrollApi | null {
+  return useContext(DiaryEditorScrollContext);
+}
+
+function measureAndScroll(scrollRef: RefObject<ScrollView | null>, node: unknown) {
+  const scroll = scrollRef.current;
+  if (!scroll || node == null) return;
+  const target = findNodeHandle(node as Parameters<typeof findNodeHandle>[0]);
+  const scrollNode = findNodeHandle(scroll);
+  if (target == null || scrollNode == null) return;
+
+  UIManager.measureLayout(
+    target,
+    scrollNode,
+    () => undefined,
+    (_x, y) => {
+      scroll.scrollTo({ y: Math.max(0, y - space[3]), animated: true });
+    },
+  );
+}
+
 /** Bottom-sheet diary editor matching `docs/design-mockup.html` (#screen-diary-editor). */
 export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModalProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const scrollRef = useRef<ScrollView>(null);
+  const pendingFocusNode = useRef<unknown>(null);
+
+  const scrollFieldIntoView = useCallback((node: unknown) => {
+    pendingFocusNode.current = node;
+    if (Platform.OS === 'web') {
+      const maybeEl = node as { scrollIntoView?: (opts: ScrollIntoViewOptions) => void } | null;
+      requestAnimationFrame(() => {
+        maybeEl?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+      });
+      return;
+    }
+
+    // Keyboard inset is applied as padding after layout; wait one frame so
+    // the focused field lands above the IME instead of under it.
+    requestAnimationFrame(() => {
+      setTimeout(() => measureAndScroll(scrollRef, node), 80);
+    });
+  }, []);
+
+  useEffect(() => {
+    const event = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const shown = Keyboard.addListener(event, () => {
+      if (pendingFocusNode.current) {
+        measureAndScroll(scrollRef, pendingFocusNode.current);
+      }
+    });
+    const hidden = Keyboard.addListener('keyboardDidHide', () => {
+      pendingFocusNode.current = null;
+    });
+    return () => {
+      shown.remove();
+      hidden.remove();
+    };
+  }, []);
+
+  const scrollApi = useMemo(() => ({ scrollFieldIntoView }), [scrollFieldIntoView]);
 
   return (
     <Modal
@@ -65,18 +132,21 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                 </View>
                 <View style={styles.headerBtn} />
               </View>
-              <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={[
-                  styles.scrollContent,
-                  { paddingBottom: 8 + keyboardInset },
-                ]}
-                keyboardShouldPersistTaps="handled"
-                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-                automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-                bounces={false}>
-                {children}
-              </ScrollView>
+              <DiaryEditorScrollContext.Provider value={scrollApi}>
+                <ScrollView
+                  ref={scrollRef}
+                  style={styles.scroll}
+                  contentContainerStyle={[
+                    styles.scrollContent,
+                    { paddingBottom: 8 + keyboardInset },
+                  ]}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                  automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+                  bounces={false}>
+                  {children}
+                </ScrollView>
+              </DiaryEditorScrollContext.Provider>
             </View>
           </>
         )}

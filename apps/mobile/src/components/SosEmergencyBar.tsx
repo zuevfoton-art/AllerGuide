@@ -17,7 +17,7 @@ type SosEmergencyBarProps = {
   onAllContacts?: () => void;
 };
 
-/** Pinned emergency actions — 103 + optional first contact, always visible while scrolling. */
+/** Pinned emergency actions — 112 + optional first contact, always visible while scrolling. */
 export function SosEmergencyBar({
   emergencyLabel,
   contactName,

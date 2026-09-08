@@ -146,10 +146,12 @@ function renderPefTrend(entries: DiaryEntry[], planPersonalBest?: string | null)
 function renderPassportSummary(profile: Profile): string {
   const passport = getAllergyPassport(profile.id);
   const allergies = parseAllergies(profile.allergies);
+  const crossReactions = parseAllergies(profile.crossReactionAllergies ?? '[]');
   const text = formatPassportText({
     profileName: profile.name,
     profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
     allergies,
+    crossReactions,
     passport,
     emergencyNumber: getEmergencyNumber(),
   });
@@ -375,10 +377,12 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
 export async function exportPassportPdf(profile: Profile) {
   const passport = getAllergyPassport(profile.id);
   const allergies = parseAllergies(profile.allergies);
+  const crossReactions = parseAllergies(profile.crossReactionAllergies ?? '[]');
   const html = formatPassportHtml({
     profileName: profile.name,
     profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
     allergies,
+    crossReactions,
     passport,
     emergencyNumber: getEmergencyNumber(),
   });
@@ -402,10 +406,12 @@ export async function exportPassportPdf(profile: Profile) {
 export async function sharePassportText(profile: Profile) {
   const passport = getAllergyPassport(profile.id);
   const allergies = parseAllergies(profile.allergies);
+  const crossReactions = parseAllergies(profile.crossReactionAllergies ?? '[]');
   const text = formatPassportText({
     profileName: profile.name,
     profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
     allergies,
+    crossReactions,
     passport,
     emergencyNumber: getEmergencyNumber(),
   });

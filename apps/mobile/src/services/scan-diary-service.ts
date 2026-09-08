@@ -13,8 +13,41 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { trackEvent } from '@/src/services/analytics-service';
 import type { ScanResultExtended } from '@/src/services/scan-analysis';
 
-/** Food, label and dish scans all belong to the «Питание» diary section. */
+/** Food, label and dish scans belong to «Питание» unless category routing says otherwise. */
 export const SCAN_DIARY_SECTION_TYPE = 'Питание';
+
+export const SCAN_DIARY_SECTION_OPTIONS = [
+  'Питание',
+  'Лекарство',
+  'Триггер',
+  'Кожа',
+  'Заметка',
+] as const;
+
+export type ScanDiarySectionType = (typeof SCAN_DIARY_SECTION_OPTIONS)[number];
+
+export { scanModeFromProductCategory } from '@/src/services/scan-product-category';
+
+export function resolveScanDiarySection(input: {
+  mode?: string | null;
+  productCategory?: string | null;
+  source?: string | null;
+}): ScanDiarySectionType {
+  const category = input.productCategory ?? '';
+  const mode = input.mode ?? '';
+  const source = input.source ?? '';
+  if (mode === 'medicine' || category === 'medicine') return 'Лекарство';
+  if (
+    mode === 'cosmetics' ||
+    category === 'beauty' ||
+    category === 'household' ||
+    source === 'openbeautyfacts' ||
+    source === 'openproductsfacts'
+  ) {
+    return 'Триггер';
+  }
+  return SCAN_DIARY_SECTION_TYPE;
+}
 
 const MAX_FOOD_NAME_CHARS = 80;
 const COMPOSITION_MARKER = /(состав|ингредиенты|ingredients|composition)\s*[:：]/i;

@@ -12,6 +12,7 @@ type Props = {
   title: string;
   subtitle?: string;
   emptyHint?: string;
+  hint?: string;
   confirmLabel: string;
   stages: AsitScheduleStage[];
   doseLabel: string;
@@ -32,6 +33,7 @@ export function CourseVerifyStep({
   title,
   subtitle,
   emptyHint,
+  hint,
   confirmLabel,
   stages,
   doseLabel,
@@ -53,6 +55,7 @@ export function CourseVerifyStep({
       subtitle={subtitle}
       onBack={onBack}>
       <GlassCard style={styles.section}>
+        {hint ? <Text style={styles.hint}>{hint}</Text> : null}
         {emptyHint && stages.length === 0 ? <Text style={styles.hint}>{emptyHint}</Text> : null}
         <ScheduleStagesEditor
           stages={stages}

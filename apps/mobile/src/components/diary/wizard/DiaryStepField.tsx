@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { parseMultiChoiceValue, toggleMultiChoiceValue, type DiaryStep } from '@allerguide/core';
 import { DateTimeField } from '@/src/components/DateTimeField';
+import { useDiaryEditorScroll } from '@/src/components/DiaryEditorModal';
 import { DiaryPhotoToolbar } from '@/src/components/diary/wizard/DiaryPhotoToolbar';
 import { createFieldStyles } from '@/src/components/diary/wizard/diary-wizard-styles';
 import { useTheme } from '@/src/hooks/use-theme';
@@ -17,6 +18,12 @@ export function DiaryStepField({
 }) {
   const theme = useTheme();
   const styles = useMemo(() => createFieldStyles(theme), [theme]);
+  const inputRef = useRef<TextInput>(null);
+  const editorScroll = useDiaryEditorScroll();
+
+  const handleFocus = () => {
+    editorScroll?.scrollFieldIntoView(inputRef.current);
+  };
 
   if (step.field === 'photo') {
     return <DiaryPhotoToolbar value={value} onChange={onChange} />;
@@ -63,10 +70,12 @@ export function DiaryStepField({
 
   return (
     <TextInput
+      ref={inputRef}
       testID={`diary-field-${step.id}`}
       style={[styles.input, step.multiline && styles.inputMultiline]}
       value={value}
       onChangeText={onChange}
+      onFocus={handleFocus}
       placeholder={step.placeholder}
       placeholderTextColor={theme.colors.textMuted}
       accessibilityLabel={step.label}

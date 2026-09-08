@@ -59,6 +59,16 @@ export function parseAllergies(allergiesJson: string): string[] {
   return parseProfileAllergenIds(allergiesJson).map((id) => findAllergenById(id)?.name ?? id);
 }
 
+/** Canonical id + display name pairs for SOS chips and passport export. */
+export function listProfileAllergenChips(
+  allergiesJson: string | null | undefined,
+): Array<{ id: ProfileAllergenId; name: string }> {
+  return parseProfileAllergenIds(allergiesJson ?? '[]').map((id) => ({
+    id,
+    name: findAllergenById(id)?.name ?? id,
+  }));
+}
+
 /** Serialize validated allergen ids for `profiles.allergies`. */
 export function serializeProfileAllergenIds(ids: string[]): string {
   const unique = [...new Set(ids.map(resolveAllergenId).filter((id): id is string => Boolean(id)))];

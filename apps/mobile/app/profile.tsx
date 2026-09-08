@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
+import { getEmergencyNumber, setEmergencyNumber, DEFAULT_EMERGENCY_NUMBER } from '@/src/services/sos-service';
 import { CloudBackupCard } from '@/src/components/CloudBackupCard';
 import { LocalBackupCard } from '@/src/components/LocalBackupCard';
 import { RecoveryKeyBanner } from '@/src/components/RecoveryKeyBanner';
@@ -31,7 +31,7 @@ export default function ProfileScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [appLockAvailable, setAppLockAvailable] = useState(false);
 
   const refresh = useCallback(() => {
@@ -51,7 +51,7 @@ export default function ProfileScreen() {
   };
 
   const saveEmergencyNumber = () => {
-    const normalized = emergencyNumber.replace(/[^\d+]/g, '') || '103';
+    const normalized = emergencyNumber.replace(/[^\d+]/g, '') || DEFAULT_EMERGENCY_NUMBER;
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
     Alert.alert(t('settings.saved'), t('settings.savedNumberMessage', { number: normalized }));
@@ -130,7 +130,7 @@ export default function ProfileScreen() {
           style={styles.input}
           value={emergencyNumber}
           onChangeText={setEmergencyNumberState}
-          placeholder="103"
+          placeholder={DEFAULT_EMERGENCY_NUMBER}
           placeholderTextColor={theme.colors.textMuted}
           accessibilityLabel={t('settings.emergencyNumber')}
           keyboardType="phone-pad"

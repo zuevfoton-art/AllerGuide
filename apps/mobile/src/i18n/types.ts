@@ -68,6 +68,8 @@ export type LocaleMessages = {
     hasAccount: string;
     loginLink: string;
     forgotLink: string;
+    showPassword: string;
+    hidePassword: string;
     countryCode: string;
     countryCodeTitle: string;
     errors: {
@@ -451,7 +453,7 @@ export type LocaleMessages = {
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
-    /** Result action: start a «Питание» diary entry from this scan. */
+    /** Result action: start a diary entry from this scan. */
     saveToDiary: string;
     savedToDiary: string;
     /** Shown after the entry is written: where to find and edit it. */
@@ -468,6 +470,7 @@ export type LocaleMessages = {
     scanWithCamera: string;
     /** Barcode lookup outcome labels */
     statusNotFound: string;
+    barcodeNotFoundHint: string;
     statusInsufficientComposition: string;
     statusNoAllergens: string;
     /** Menu scan outcome labels */
@@ -509,6 +512,7 @@ export type LocaleMessages = {
     trendsHide: string;
     failForwardPhoto: string;
     failForwardManual: string;
+    diarySectionLabel: string;
     barcodeWebFailForward: string;
     matchAlias: string;
     verifyPackageHint: string;
@@ -923,6 +927,8 @@ export type LocaleMessages = {
       title: string;
       hint: string;
       addNext: string;
+      addAll: string;
+      clearAll: string;
       disclaimer: string;
     };
     symptoms: {
@@ -1059,6 +1065,7 @@ export type LocaleMessages = {
     ocrEmptyMedia: string;
     ocrDemoHint: string;
     ocrFieldsIncomplete: string;
+    ocrAllergenUncertain: string;
     ocrParseError: string;
     verifyTitle: string;
     verifySubtitle: string;
@@ -1141,6 +1148,7 @@ export type LocaleMessages = {
     ocrEmptyMedia: string;
     ocrDemoHint: string;
     ocrFieldsIncomplete: string;
+    ocrAllergenUncertain: string;
     ocrParseError: string;
     verifyTitle: string;
     verifyConfirm: string;
@@ -1263,6 +1271,7 @@ export type LocaleMessages = {
     name: string;
     age: string;
     allergies: string;
+    crossReactions: string;
     medicalNotes: string;
     actionPlan: string;
     emptyProfile: string;

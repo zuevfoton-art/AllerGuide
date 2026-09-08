@@ -3,6 +3,7 @@ import {
   migrateProfileAllergiesJson,
   parseAllergies,
   parseProfileAllergenIds,
+  listProfileAllergenChips,
   profileHasPollenAllergen,
   resolveAllergenId,
   serializeProfileAllergenIds,
@@ -41,6 +42,18 @@ describe('parseProfileAllergenIds', () => {
 describe('parseAllergies', () => {
   it('returns display names from ids', () => {
     expect(parseAllergies('["milk","peanut"]')).toEqual(['Молоко', 'Арахис']);
+  });
+});
+
+describe('listProfileAllergenChips', () => {
+  it('pairs canonical ids with display names', () => {
+    expect(listProfileAllergenChips('["goat-milk"]')).toEqual([
+      { id: 'goat-milk', name: 'Козье молоко' },
+    ]);
+  });
+
+  it('treats missing json as empty', () => {
+    expect(listProfileAllergenChips(undefined)).toEqual([]);
   });
 });
 

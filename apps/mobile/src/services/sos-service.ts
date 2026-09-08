@@ -7,7 +7,7 @@ import {
 } from '@/src/services/emergency-contact-service';
 import { getProfileAgeYears, pluralRu, type EmergencyContact } from '@allerguide/core';
 
-export const DEFAULT_EMERGENCY_NUMBER = '103';
+export const DEFAULT_EMERGENCY_NUMBER = '112';
 
 export type SosEmergencyBarModel = {
   emergencyNumber: string;

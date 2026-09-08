@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  isDiaryVoiceStep,
   parseDishComponentDefs,
   type DiaryAutoMetadata,
   type DiarySection,
@@ -14,6 +15,7 @@ import { DiaryStepField } from '@/src/components/diary/wizard/DiaryStepField';
 import { createStyles } from '@/src/components/diary/wizard/diary-wizard-styles';
 import { DishNameField } from '@/src/components/DishNameField';
 import { MedicineNameField } from '@/src/components/MedicineNameField';
+import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 import {
   useDiaryWizardController,
   type DiaryWizardResult,
@@ -77,7 +79,13 @@ export function DiaryWizard({
     answers,
     previews: { scalePreview, pefZonePreview },
     suggestions: { medicineSuggestions, medicineSearching, dishSuggestions, dishSearching },
-    setters: { setAnswer, setFoodComponentSelection, selectMedicineSuggestion, selectDishSuggestion },
+    setters: {
+      setAnswer,
+      setFoodComponentSelection,
+      selectMedicineSuggestion,
+      selectDishSuggestion,
+      applyVoiceTranscript,
+    },
     goNext,
     goBack,
     skipSection,
@@ -194,6 +202,12 @@ export function DiaryWizard({
               onChange={(value) => setAnswer(current.id, value)}
             />
           )}
+          {isDiaryVoiceStep(section.type, current.id) ? (
+            <VoiceNoteButton
+              testID="diary-wizard-voice"
+              onTranscript={(transcript) => applyVoiceTranscript(current.id, transcript)}
+            />
+          ) : null}
         </View>
       ))}
 
