@@ -11,6 +11,8 @@ appId: com.aclearo.app
       id: auth-confirm-password-input
     timeout: 15000
 - runScript: ../scripts/random-phone.js
+# Register password must satisfy MIN_NEW_PASSWORD_LENGTH + 3 character classes
+# (legacy 8-char lowercase+digit value is rejected). Staging uses SmokeTest1!.
 - runFlow:
     file: _fill-by-id.yaml
     env:
@@ -20,12 +22,12 @@ appId: com.aclearo.app
     file: _fill-by-id.yaml
     env:
       FIELD_ID: auth-password-input
-      FIELD_VALUE: maestro1
+      FIELD_VALUE: Maestro1!
 - runFlow:
     file: _fill-by-id.yaml
     env:
       FIELD_ID: auth-confirm-password-input
-      FIELD_VALUE: maestro1
+      FIELD_VALUE: Maestro1!
 - runFlow:
     file: _tap-by-id.yaml
     env:
