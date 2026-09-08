@@ -49,6 +49,31 @@ describe('per-user backup crypto', () => {
     }
   });
 
+  it('refuses an envelope whose PBKDF2 iteration count is inflated', async () => {
+    const envelope = JSON.parse(await encryptString('payload', 'passphrase')) as {
+      iter: number;
+    };
+    const hostile = JSON.stringify({ ...envelope, iter: 500_000_000 });
+
+    expect(isEncryptedEnvelope(hostile)).toBe(false);
+
+    const start = Date.now();
+    expect(await decryptString(hostile, 'passphrase')).toBeNull();
+    // Rejected up front rather than after deriving a 500M-iteration key.
+    expect(Date.now() - start).toBeLessThan(1_000);
+  });
+
+  it('refuses an envelope with a non-positive or fractional iteration count', async () => {
+    const envelope = JSON.parse(await encryptString('payload', 'passphrase')) as {
+      iter: number;
+    };
+    for (const iter of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+      const raw = JSON.stringify({ ...envelope, iter });
+      expect(isEncryptedEnvelope(raw)).toBe(false);
+      expect(await decryptString(raw, 'passphrase')).toBeNull();
+    }
+  });
+
   it('decrypts a Web Crypto envelope after SubtleCrypto is removed', async () => {
     const envelope = await encryptString('cross-runtime', 'shared-key');
     const cryptoObj = globalThis.crypto as Crypto;
