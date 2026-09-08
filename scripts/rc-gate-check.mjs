@@ -229,7 +229,9 @@ function checkMaestroFlows() {
     }
   }
 
-  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+  // Register / profile steps live in *-until-home.yaml. The wrappers only add
+  // _dismiss-hints.yaml so onboarding-smoke can assert hint-overlay first.
+  for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
     const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
     if (!flow.includes('_wait-login.yaml')) {
       failures.push(`${name}: must run _wait-login.yaml`);
@@ -251,6 +253,33 @@ function checkMaestroFlows() {
     }
     if (!flow.includes('_complete-first-run-profile.yaml')) {
       failures.push(`${name}: must run _complete-first-run-profile.yaml (condition-food before allergen-milk)`);
+    }
+  }
+
+  const offlineUntilHome = fs.readFileSync(
+    path.join(flowsDir, '_offline-bootstrap-until-home.yaml'),
+    'utf8',
+  );
+  if (
+    /FIELD_VALUE:\s*maestro1\b/.test(offlineUntilHome) ||
+    !/FIELD_VALUE:\s*Maestro1!/.test(offlineUntilHome)
+  ) {
+    failures.push(
+      '_offline-bootstrap-until-home.yaml: register password must meet MIN_NEW_PASSWORD_LENGTH + 3 character classes (use Maestro1!, not the legacy lowercase+digit value)',
+    );
+  }
+
+  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    const untilHome = name.replace('.yaml', '-until-home.yaml');
+    if (!flow.includes(untilHome)) {
+      failures.push(`${name}: must runFlow ${untilHome}`);
+    }
+    if (!flow.includes('_dismiss-hints.yaml')) {
+      failures.push(`${name}: must run _dismiss-hints.yaml`);
+    }
+    if (flow.includes('stopApp: false')) {
+      failures.push(`${name}: must not re-launchApp after clearState (masked hideKeyboard BACK)`);
     }
   }
 
