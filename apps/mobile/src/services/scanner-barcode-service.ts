@@ -18,7 +18,7 @@ import {
   INSUFFICIENT_INGREDIENTS_LENGTH,
   type ScanResultExtended,
 } from '@/src/services/scan-analysis';
-import { scanModeFromProductCategory } from '@/src/services/scan-diary-service';
+import { scanModeFromProductCategory } from '@/src/services/scan-product-category';
 
 function barcodeNotFoundResult(source: ScanResult['source'] = 'barcode'): ScanResultExtended {
   return {

@@ -30,14 +30,6 @@ vi.mock('@/src/services/scan-analysis', () => ({
   analyzeText: vi.fn(),
 }));
 
-vi.mock('@/src/services/scan-diary-service', () => ({
-  scanModeFromProductCategory: (category?: string | null) => {
-    if (category === 'beauty' || category === 'household') return 'cosmetics';
-    if (category === 'medicine') return 'medicine';
-    return 'product';
-  },
-}));
-
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
 import { searchMedicinesFromCatalog } from '@/src/services/medicines-api';
 import { analyzeText } from '@/src/services/scan-analysis';

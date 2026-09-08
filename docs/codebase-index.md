@@ -74,7 +74,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Enrichment POST (OCR, intent, VL, STT, search) | `src/services/enrichment-api.ts` — timeout + soft-fail + `logCaughtError` |
 | Доменные правила, таксономия, валидация | `packages/core/src/*` |
 | Matching скана / OCR parse / LLM prompt | `packages/ai/src/*` |
-| Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
+| Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scan-product-category`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
 | Дневник «Питание»: фото / штрихкод / вручную → состав | `NutritionCaptureStep` + `DiaryBarcodeScanner` + `diary-dish-recognition-service` (тот же lookup, что сканер) |
 | Результат сканера → запись дневника | `scan-diary-service` (`resolveScanDiarySection` + префилл) + `components/scanner/ScanDiaryEntryModal` (выбор раздела) |
 | Строка UI (все 6 локалей) | `apps/mobile/src/i18n/types.ts` + `locales/{ru,en,es,fr,de,it}.ts` |

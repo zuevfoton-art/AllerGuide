@@ -5,7 +5,7 @@ import {
   type DishComponentDef,
   type FoodDrugScanRef,
 } from '@allerguide/core';
-import { buildOcrScanProductName, type ScanMode } from '@allerguide/ai';
+import { buildOcrScanProductName } from '@allerguide/ai';
 import { addDiaryEntries, type DiaryMutationResult } from '@/src/services/diary-service';
 import { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
 import { isManualBarcodeInput } from '@/src/constants/scanner-mode';
@@ -26,11 +26,7 @@ export const SCAN_DIARY_SECTION_OPTIONS = [
 
 export type ScanDiarySectionType = (typeof SCAN_DIARY_SECTION_OPTIONS)[number];
 
-export function scanModeFromProductCategory(category?: string | null): ScanMode {
-  if (category === 'beauty' || category === 'household') return 'cosmetics';
-  if (category === 'medicine') return 'medicine';
-  return 'product';
-}
+export { scanModeFromProductCategory } from '@/src/services/scan-product-category';
 
 export function resolveScanDiarySection(input: {
   mode?: string | null;
