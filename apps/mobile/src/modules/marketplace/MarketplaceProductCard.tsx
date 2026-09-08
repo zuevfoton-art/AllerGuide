@@ -75,7 +75,7 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
   };
 
   const addToCart = () => {
-    addProduct(item.id);
+    addProduct(item.id, item.priceRub != null ? Math.round(item.priceRub * 100) : undefined);
     trackEvent('market_add_to_cart', { productId: item.id });
   };
 

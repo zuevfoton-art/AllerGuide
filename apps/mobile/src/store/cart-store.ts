@@ -29,7 +29,7 @@ interface CartState {
   items: CheckoutLineItem[];
   appliedDiscount: Extract<DiscountValidationResult, { ok: true }> | null;
   hydrate: () => void;
-  addProduct: (productId: string) => void;
+  addProduct: (productId: string, unitPriceMinor?: number) => void;
   removeProduct: (productId: string) => void;
   clear: () => void;
   setDiscountResult: (result: DiscountValidationResult) => void;
@@ -44,9 +44,9 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   hydrate: () => set({ items: readCart() }),
 
-  addProduct: (productId) => {
-    const price = getCatalogProductPriceMinor(productId);
-    if (price === null) return;
+  addProduct: (productId, unitPriceMinor) => {
+    const price = unitPriceMinor ?? getCatalogProductPriceMinor(productId);
+    if (price == null) return;
     const items = [...get().items];
     const existing = items.find((item) => item.productId === productId);
     if (existing) {

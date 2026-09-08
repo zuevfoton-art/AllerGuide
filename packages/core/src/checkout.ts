@@ -2,13 +2,15 @@ import type { DiscountValidationResult } from './discount';
 
 /** Reference prices for bundled marketplace SKUs (minor units / kopecks). */
 export const CATALOG_PRODUCT_PRICES_MINOR: Record<string, number> = {
-  'air-purifier': 12_999_00,
+  'air-purifier': 12_990_00,
   'hypo-cream': 890_00,
-  'bed-covers': 3_490_00,
+  'bed-covers': 2_490_00,
   'oat-milk': 189_00,
-  'sunflower-spread': 650_00,
-  'epipen-case': 1_290_00,
-  'nasal-rinse': 650_00,
+  'sunflower-spread': 259_00,
+  'epipen-case': 1_490_00,
+  'nasal-rinse': 2_190_00,
+  humidifier: 3_990_00,
+  'hypo-detergent': 649_00,
 };
 
 export interface CheckoutLineItem {
