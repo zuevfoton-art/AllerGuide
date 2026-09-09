@@ -24,7 +24,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
-import { radii, space } from '@/src/constants/layout';
+import { radii, space, WEB_TAB_BAR_HEIGHT } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -152,7 +152,14 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               accessibilityLabel={t('common.cancel')}
             />
             <View
-              style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}
+              style={[
+                styles.sheet,
+                {
+                  paddingBottom:
+                    Math.max(insets.bottom, space[4]) +
+                    (Platform.OS === 'web' ? WEB_TAB_BAR_HEIGHT : 0),
+                },
+              ]}
               accessibilityViewIsModal>
               <View style={styles.grabberWrap}>
                 <View style={styles.grabber} />
