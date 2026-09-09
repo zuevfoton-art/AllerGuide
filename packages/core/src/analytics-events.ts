@@ -30,6 +30,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'map_pollen_fallback',
   'scan_dish_vision',
   'pollen_alert_sent',
+  'reengagement_shown',
+  'reengagement_action',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

@@ -116,7 +116,7 @@ export const DIARY_SECTIONS: DiarySection[] = [
         placeholder: 'Например: зуд, отёк губ, кашель',
         field: 'text',
         multiline: true,
-        required: true,
+        required: false,
       },
       {
         id: 'severity0_3',

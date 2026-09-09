@@ -1,4 +1,5 @@
 import type { AllergyConditionId } from './allergy-conditions';
+import type { ReturnStage } from './reengagement';
 import {
   hasDiaryEntryOnDate,
   shouldScheduleActReminder,
@@ -10,6 +11,10 @@ export const HOME_INSIGHTS_MAX_ITEMS = 5;
 export type PlannedHomeInsightKind =
   | 'select-profile'
   | 'diary-missing-today'
+  | 'return-quick-checkin'
+  | 'return-value'
+  | 'return-reframe'
+  | 'return-restart'
   | 'act-due'
   | 'therapy-reminder'
   | 'wellness'
@@ -34,6 +39,7 @@ export type PlanHomeInsightsInput = {
   hasTherapyReminder?: boolean;
   now?: Date;
   maxItems?: number;
+  returnStage?: ReturnStage | null;
 };
 
 /**
@@ -50,7 +56,13 @@ export function planHomeInsights(input: PlanHomeInsightsInput): PlannedHomeInsig
     return planned.slice(0, maxItems);
   }
 
-  if (!hasDiaryEntryOnDate(input.diaryEntries, now, now)) {
+  if (input.returnStage) {
+    planned.push({
+      id: `return-${input.returnStage}`,
+      kind: `return-${input.returnStage}`,
+      priority: 1,
+    });
+  } else if (!hasDiaryEntryOnDate(input.diaryEntries, now, now)) {
     planned.push({
       id: 'diary-missing-today',
       kind: 'diary-missing-today',

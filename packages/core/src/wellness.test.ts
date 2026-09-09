@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { computeDiaryInsights } from './diary-stats';
+import { encodeDiaryDetails } from './diary';
 import {
   buildClinicalScalesFromTrends,
   buildDiarySeriesFromInsights,
+  computeDiaryPenalty,
   computeWellnessConfidence,
   buildWellnessRecommendations,
   computeWellnessScore,
@@ -120,5 +122,23 @@ describe('wellness v2 (B.4–B.9)', () => {
     });
     expect(without).toBeGreaterThan(withMultimorbid);
     expect(without - withMultimorbid).toBe(WELLNESS_WEIGHTS.multimorbidAriaAsthma);
+  });
+
+  it('does not worsen the index for a series of zero check-ins', () => {
+    const empty = computeDiaryPenalty(baseInput.diary);
+    const zeroDetails = encodeDiaryDetails({ severity0_3: '0 — нет' }, 'Симптомы');
+    const today = new Date();
+    const entries = [0, 1, 2].map((offset) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - offset);
+      return makeEntry('Симптомы', d.toISOString().slice(0, 10), zeroDetails);
+    });
+    const series = buildDiarySeriesFromInsights(computeDiaryInsights(entries));
+    expect(series.symptomDays).toBe(0);
+    expect(series.streak).toBeGreaterThanOrEqual(3);
+    expect(computeDiaryPenalty(series)).toBe(empty);
+    const before = computeWellnessScore(baseInput);
+    const after = computeWellnessScore({ ...baseInput, diary: series });
+    expect(after).toBeGreaterThanOrEqual(before);
   });
 });

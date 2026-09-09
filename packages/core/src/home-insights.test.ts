@@ -75,4 +75,18 @@ describe('planHomeInsights', () => {
     });
     expect(planned).toHaveLength(3);
   });
+
+  it('replaces diary-missing-today with a return stage', () => {
+    const planned = planHomeInsights({
+      hasProfile: true,
+      diaryEntries: [],
+      conditions: [],
+      enableActReminder: false,
+      wellnessCount: 0,
+      phenotypeCount: 0,
+      now: noon,
+      returnStage: 'quick-checkin',
+    });
+    expect(planned.map((item) => item.kind)).toEqual(['return-quick-checkin']);
+  });
 });
