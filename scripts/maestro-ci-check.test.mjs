@@ -430,11 +430,13 @@ describe('Maestro nightly CI invariants', () => {
     const hub = read('apps/mobile/app/profile.tsx');
     assert.match(hub, /titleTestID="profile-screen-title"/);
     assert.match(hub, /subtitleTestID="profile-screen-subtitle"/);
+    assert.match(hub, /pinnedTop=\{/);
+    assert.match(hub, /testID="profile-save-number"/);
+    assert.match(hub, /testID="profile-emergency-number"/);
 
     const header = read('apps/mobile/src/components/ScreenHeader.tsx');
     assert.match(header, /subtitleTestID/);
-    assert.match(hub, /testID="profile-save-number"/);
-    assert.match(hub, /testID="profile-emergency-number"/);
+    assert.match(header, /collapsable=\{false\}/);
   });
 
   it('bans hideKeyboard and the back command in every Maestro flow', () => {

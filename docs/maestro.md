@@ -180,6 +180,6 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
 | `profile-delete` не найден на «Мои профили» | Кнопка только в `/profile-edit`, внизу длинной формы. С хаба тап `profile-list-item-0`, ждать `profile-edit-title`, `scrollUntilVisible` → `profile-delete` → «Удалить». После удаления снова хаб без таббара — `screen-header-back`, не Maestro `back` |
 | `profile-save-number` не найден после ввода 112 | Phone-pad на Pixel 6 выкидывает кнопку из UiAutomator (nightly 34052584781). `_dismiss-profile-ime.yaml` тапает `profile-screen-subtitle` (title сминается, nightly 34340207243), затем `scrollUntilVisible` → `profile-save-number` |
-| `profile-screen-title` не найден после ввода 112 | Тот же phone-pad сминает «Мои профили» в inverted bounds. Тапать `profile-screen-subtitle` («Редактирование и удаление»), не `screen-brand-home` |
+| `profile-screen-title` не найден при открытой IME | Заголовок хаба жил в ScrollView и схлопывался под brand header (nightly 34340207243: bounds `[190,380][892,357]`). `ScreenHeader` в `pinnedTop` рядом с `screen-brand-header`. IME-dismiss всё равно тапает `profile-screen-subtitle`, не `screen-brand-home` |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).
