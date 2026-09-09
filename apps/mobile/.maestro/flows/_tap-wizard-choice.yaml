@@ -1,6 +1,6 @@
 # Fold IME, bring a wizard choice chip on-screen, tap it.
-# Nightly 34336499730: after typing «покраснение», Gboard + pinned footer
-# crushed «Слабый» to inverted bounds [266,1617][394,1396].
+# Nightly 34336499730: after pinning diary-editor-footer, itching chips
+# ("Слабый") sit under Gboard with inverted bounds and tapOn text fails.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml

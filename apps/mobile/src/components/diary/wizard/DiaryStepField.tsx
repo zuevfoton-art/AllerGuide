@@ -45,7 +45,10 @@ export function DiaryStepField({
   if (step.field === 'choice' && step.choices) {
     const selected = step.multiSelect ? parseMultiChoiceValue(value) : [];
     return (
-      <View style={styles.choiceGrid} testID={step.multiSelect ? 'diary-multi-choice' : undefined}>
+      <View
+        style={styles.choiceGrid}
+        testID={step.multiSelect ? 'diary-multi-choice' : `diary-choice-${step.id}`}
+        collapsable={false}>
         {step.choices.map((choice) => {
           const active = step.multiSelect ? selected.includes(choice) : value === choice;
           return (

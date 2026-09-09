@@ -244,6 +244,7 @@ describe('Maestro nightly CI invariants', () => {
 
     const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
     assert.match(stepField, /diary-choice-\$\{choice\}/);
+    assert.match(stepField, /diary-choice-\$\{step\.id\}/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
@@ -263,7 +264,12 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(photo, /id: diary-picker-skin/);
     assert.match(photo, /id: diary-photo-step/);
     assert.match(photo, /_tap-wizard-choice.yaml/);
-    assert.doesNotMatch(photo, /text: "Слабый"/);
+    assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
+    assert.doesNotMatch(
+      photo,
+      /text: "Слабый"/,
+      'diary-photo-smoke must not tap itching copy while IME may cover it',
+    );
 
     const symptoms = read('apps/mobile/.maestro/flows/diary-smoke.yaml');
     assert.match(symptoms, /_tap-wizard-choice.yaml/);
