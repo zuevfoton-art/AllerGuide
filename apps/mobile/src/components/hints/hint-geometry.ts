@@ -127,14 +127,19 @@ export function resolveHintFollowScroll(args: {
   bubbleHeight: number;
   gap?: number;
   margin?: number;
+  /** Tab bar (or other chrome) to keep content holes above. Ignored for tab-bar targets. */
+  bottomInset?: number;
+  tabBandHeight?: number;
 }): { deltaY: number } {
   const gap = args.gap ?? space[3];
   const margin = args.margin ?? HINT_FOLLOW_MARGIN_PX;
-  const minY = margin;
-  const maxY = args.viewportHeight - margin;
-  if (maxY <= minY) return { deltaY: 0 };
-
+  const tabBand = args.tabBandHeight ?? 0;
   const holeTop = args.hole.y;
+  const inTabBand = tabBand > 0 && holeTop >= args.viewportHeight - tabBand;
+  const bottomInset = inTabBand ? 0 : Math.max(0, args.bottomInset ?? 0);
+  const minY = margin;
+  const maxY = args.viewportHeight - margin - bottomInset;
+  if (maxY <= minY) return { deltaY: 0 };
   const holeBottom = args.hole.y + args.hole.height;
   const bubbleBlock = args.bubbleHeight + gap;
   const spaceBelow = maxY - holeBottom;

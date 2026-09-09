@@ -151,11 +151,13 @@ export function HintSpotlight() {
     const overlayHeight = viewport.width > 0 ? viewport.height : windowSize.height;
     if (overlayHeight <= 0) return;
 
-    const followKey = `${activeTour.tourId}:${activeTour.stepIndex}:${Math.round(bubbleHeight)}`;
+    const followKey = `${activeTour.tourId}:${activeTour.stepIndex}:${Math.round(bubbleHeight)}:${layout.tabBarHeight}`;
     const { deltaY } = resolveHintFollowScroll({
       hole,
       viewportHeight: overlayHeight,
       bubbleHeight,
+      bottomInset: layout.tabBarHeight,
+      tabBandHeight: layout.tabBarHeight + space[4],
     });
     if (deltaY === 0) {
       followedStepRef.current = followKey;
@@ -180,6 +182,7 @@ export function HintSpotlight() {
     viewport.height,
     windowSize.height,
     bubbleHeight,
+    layout.tabBarHeight,
     reduceMotion,
   ]);
 

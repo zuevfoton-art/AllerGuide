@@ -94,12 +94,27 @@ describe('resolveHintFollowScroll', () => {
     expect(newTop - 12 - 180).toBeGreaterThanOrEqual(16);
   });
 
+  it('keeps a content hole above the tab bar when bottomInset is set', () => {
+    const result = resolveHintFollowScroll({
+      hole: { x: 16, y: 500, width: 320, height: 360 },
+      viewportHeight: 844,
+      bubbleHeight: 180,
+      bottomInset: 68,
+      tabBandHeight: 76,
+    });
+    expect(result.deltaY).toBeGreaterThan(0);
+    const newBottom = 500 + 360 - result.deltaY;
+    expect(newBottom).toBeLessThanOrEqual(844 - 16 - 68);
+  });
+
   it('does not scroll a tab-bar hole that already has room for the bubble above', () => {
     expect(
       resolveHintFollowScroll({
         hole: { x: 160, y: 760, width: 64, height: 56 },
         viewportHeight: 844,
         bubbleHeight: 180,
+        bottomInset: 68,
+        tabBandHeight: 84,
       }).deltaY,
     ).toBe(0);
   });
