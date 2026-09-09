@@ -1,4 +1,5 @@
 import { decodeDiaryDetails } from './diary';
+import { normalizeSeverity } from './diary-severity';
 import type { DiaryEntry } from './types';
 
 export interface DiaryStats {
@@ -176,6 +177,14 @@ export function computeDiaryStats(entries: DiaryEntry[]): DiaryStats {
   };
 }
 
+/** A 0 — нет check-in is still a diary day, but not a symptom day. */
+function isZeroSeverityCheckIn(entry: { type: string; details: string }): boolean {
+  if (entry.type !== 'Симптомы') return false;
+  const payload = decodeDiaryDetails(entry.details);
+  if (!payload) return false;
+  return normalizeSeverity(payload.answers, 'Симптомы') === 0;
+}
+
 export function computeDiaryInsights(entries: DiaryEntry[]): DiaryInsights {
   const today = new Date();
 
@@ -206,7 +215,7 @@ export function computeDiaryInsights(entries: DiaryEntry[]): DiaryInsights {
     const bucket = bucketMap[iso];
     if (bucket) {
       bucket.count++;
-      if (entry.type === 'Симптомы') bucket.hasSymptoms = true;
+      if (entry.type === 'Симптомы' && !isZeroSeverityCheckIn(entry)) bucket.hasSymptoms = true;
       if (entry.type === 'Лекарство') bucket.hasMeds = true;
       if (entry.type === 'Питание') bucket.hasFood = true;
       if (entry.type === 'Триггер') bucket.hasTrigger = true;

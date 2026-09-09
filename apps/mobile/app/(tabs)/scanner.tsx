@@ -23,6 +23,7 @@ import { useTheme } from '@/src/hooks/use-theme';
 import { useZoneColors } from '@/src/hooks/use-zone-colors';
 import { useScannerController } from '@/src/hooks/use-scanner-controller';
 import { useTranslation } from '@/src/store/locale-store';
+import { AI_CHAT_ENABLED } from '@/src/constants/features';
 import { isManualBarcodeInput, shouldShowScannerPageTrustLine } from '@/src/constants/scanner-mode';
 
 export default function ScannerScreen() {
@@ -245,6 +246,16 @@ export default function ScannerScreen() {
           onSaveDiary={() => void scan.openDiaryEntry()}
           onReportAlias={scan.reportAlias}
           onScanAgain={scan.scanAgain}
+        />
+      ) : null}
+
+      {AI_CHAT_ENABLED && scan.displayResult ? (
+        <Button
+          testID="scanner-ask"
+          label={t('today.ask')}
+          variant="ghost"
+          block
+          onPress={() => router.push('/ask')}
         />
       ) : null}
 

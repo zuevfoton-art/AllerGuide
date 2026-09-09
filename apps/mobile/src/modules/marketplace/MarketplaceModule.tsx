@@ -7,15 +7,15 @@ import {
   type MarketplaceCategory,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
-import { Disclaimer } from '@/src/components/Disclaimer';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
+import { Disclaimer } from '@/src/components/Disclaimer';
 import { radii } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useAppStore } from '@/src/store/app-store';
-import { MARKET_ENABLED } from '@/src/constants/features';
 import { CATEGORY_LABEL_KEYS } from '@/src/modules/marketplace/category-labels';
 import { MarketplaceProductCard } from '@/src/modules/marketplace/MarketplaceProductCard';
 import { useMarketplaceProducts } from '@/src/modules/marketplace/use-marketplace-products';
@@ -74,13 +74,7 @@ function EmbeddedMarketplace() {
   const profile = useAppStore((s) => s.activeProfile);
   const { items } = useMarketplaceProducts(profile);
   const previewItems = items.slice(0, PREVIEW_LIMIT);
-  const openFullMarket = () => {
-    if (!MARKET_ENABLED) {
-      router.replace('/(tabs)/home');
-      return;
-    }
-    router.push('/(tabs)/market');
-  };
+  const openFullMarket = () => router.push('/market');
 
   return (
     <GlassCard padded={false}>
@@ -90,7 +84,7 @@ function EmbeddedMarketplace() {
             <BrandFeatureIcon name="market" size={18} color={theme.colors.accent} />
           </View>
           <View style={styles.moduleTitles}>
-            <Text style={ui.cardTitle}>{t('home.marketplaceTitle')}</Text>
+            <CardTitle>{t('home.marketplaceTitle')}</CardTitle>
             <Text style={styles.moduleSub}>{t('home.marketplaceSub')}</Text>
           </View>
         </View>
@@ -242,7 +236,7 @@ function FullMarketplace({
 
       <Disclaimer>{t('market.disclaimer')}</Disclaimer>
       {items.some((item) => item.kind === 'medicine') ? (
-        <Disclaimer>{t('market.medicineDisclaimer')}</Disclaimer>
+        <Disclaimer collapsible>{t('market.medicineDisclaimer')}</Disclaimer>
       ) : null}
     </>
   );

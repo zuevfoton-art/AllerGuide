@@ -38,6 +38,7 @@ import {
   buildDiarySectionEditorState,
 } from '@/src/services/diary-section-service';
 import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
+import { WeekRingCard } from '@/src/components/WeekRingCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
 import { AsthmaCard } from '@/src/components/AsthmaCard';
@@ -575,6 +576,7 @@ export default function DiaryScreen() {
       </DiaryEditorModal>
 
       <DiaryInsightsCard entries={list} />
+      {activeProfileId ? <WeekRingCard entries={list} surface="journal" /> : null}
 
       {list.filter((item) => isDiaryHistoryVisible(item.type)).length === 0 ? (
         <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />

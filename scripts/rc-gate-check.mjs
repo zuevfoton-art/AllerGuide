@@ -553,6 +553,7 @@ runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.tes
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
+runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
 checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();

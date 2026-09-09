@@ -105,7 +105,8 @@ export function ClinicalPhenotypeCard({
         </View>
       ) : null}
 
-      <Disclaimer>{t('profileSetup.phenotype.disclaimer')}</Disclaimer>
+      <Text style={styles.icd10DisclaimerText}>{t('profileSetup.phenotype.icd10Disclaimer')}</Text>
+      <Disclaimer collapsible>{t('profileSetup.phenotype.disclaimer')}</Disclaimer>
     </GlassCard>
   );
 }
@@ -152,6 +153,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       marginTop: 2,
+    },
+    icd10DisclaimerText: {
+      fontFamily: fonts.sans,
+      fontSize: 11,
+      color: colors.textMuted,
+      lineHeight: 15,
+      fontStyle: 'italic',
     },
     hints: { gap: 6 },
     hintItem: {

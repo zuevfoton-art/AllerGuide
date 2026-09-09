@@ -39,6 +39,9 @@ export type LocaleMessages = {
     years: string;
     daysShort: string;
     skipToContent: string;
+    moreDetails: string;
+    hideDetails: string;
+    saved: string;
   };
   brand: {
     productName: string;
@@ -159,10 +162,19 @@ export type LocaleMessages = {
     dark: string;
     system: string;
   };
+  appearance: {
+    title: string;
+    textSize: string;
+    textRegular: string;
+    textLarge: string;
+    textMax: string;
+    calmMotion: string;
+    calmMotionHint: string;
+  };
   tabs: {
-    home: string;
-    diary: string;
-    scanner: string;
+    today: string;
+    journal: string;
+    scan: string;
     market: string;
     map: string;
     more: string;
@@ -176,7 +188,70 @@ export type LocaleMessages = {
     expertDesc: string;
     settingsDesc: string;
   };
+  today: {
+    readingTitle: string;
+    lead: {
+      noProfile: string;
+      noData: string;
+      pollenHigh: string;
+      pollenModerate: string;
+      airHigh: string;
+      airModerate: string;
+      diaryHigh: string;
+      calm: string;
+    };
+    leadAllergen: string;
+    advice: {
+      noProfile: string;
+      noData: string;
+      calm: string;
+      watch: string;
+      careful: string;
+    };
+    action: {
+      createProfile: string;
+      openMap: string;
+      openJournal: string;
+      openScanner: string;
+    };
+    checkedIn: string;
+    checkedInChange: string;
+    ask: string;
+  };
+  game: {
+    weekTitle: string;
+    weekCount: string;
+    weekEmpty: string;
+    weekNudge: string;
+    weekOff: string;
+    weekOffHint: string;
+  };
+  ask: {
+    title: string;
+    eyebrow: string;
+    disclaimer: string;
+    disclaimerShow: string;
+    disclaimerHide: string;
+    inputPlaceholder: string;
+    send: string;
+    intro: string;
+    offlineTitle: string;
+    offlineHint: string;
+    offlineExpert: string;
+    handoffTitle: string;
+    handoffBody: string;
+    handoffAction: string;
+    disabledTitle: string;
+    disabledHint: string;
+    suggestions: {
+      air: string;
+      traces: string;
+      pollen: string;
+    };
+    answerFallback: string;
+  };
   home: {
+    eyebrow: string;
     today: string;
     summary: string;
     profilePrefix: string;
@@ -215,6 +290,9 @@ export type LocaleMessages = {
     insightsDiaryTitle: string;
     insightsDiaryText: string;
     insightsOpenDiary: string;
+    insightsCompleteProfileTitle: string;
+    insightsCompleteProfileText: string;
+    insightsCompleteProfileAction: string;
     insightsActTitle: string;
     insightsActText: string;
     insightsOpenAct: string;
@@ -858,6 +936,28 @@ export type LocaleMessages = {
     pollenPushBodyHigh: string;
     pollenPushBodyModerate: string;
     pollenCacheHint: string;
+    returnQuickTitle: string;
+    returnQuickBody: string;
+    returnValueTitle: string;
+    returnValueBody: string;
+    returnReframeTitle: string;
+    returnReframeBody: string;
+  };
+  reengagement: {
+    checkInTitle: string;
+    checkInHint: string;
+    valueTitle: string;
+    valueHint: string;
+    valueScale: string;
+    valueArticle: string;
+    reframeTitle: string;
+    reframeHint: string;
+    reframeMap: string;
+    reframeSos: string;
+    restartTitle: string;
+    restartHint: string;
+    restartAction: string;
+    checkInSaved: string;
   };
   profileSwitcher: {
     add: string;
@@ -1007,6 +1107,7 @@ export type LocaleMessages = {
     contactsLabel: string;
     next: string;
     back: string;
+    finishEarly: string;
     saveProfile: string;
     nextChild: string;
     disclaimer: string;
@@ -1271,6 +1372,16 @@ export type LocaleMessages = {
     name: string;
     age: string;
     allergies: string;
+    crisisTitle: string;
+    crisisPlanTitle: string;
+    crisisPlanPersonal: string;
+    crisisStep: {
+      epinephrine: string;
+      callEmergency: string;
+      stay: string;
+      secondDose: string;
+    };
+    crisisPlanNoProfile: string;
     crossReactions: string;
     medicalNotes: string;
     actionPlan: string;

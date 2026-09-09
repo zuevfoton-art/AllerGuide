@@ -23,6 +23,7 @@ export function EmptyState({ icon = 'sparkles-outline', title, description, acti
     <GlassCard>
       <View style={styles.wrap}>
         <View style={styles.iconWrap}>
+          <View pointerEvents="none" style={styles.iconWash} />
           <Ionicons name={icon} size={24} color={theme.colors.accent} />
         </View>
         <Text style={styles.title}>{title}</Text>
@@ -46,6 +47,18 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 2,
+      overflow: 'hidden',
+    },
+    /** Atmosphere wash (N10) — decorative, not a text/CTA color. */
+    iconWash: {
+      position: 'absolute',
+      top: -8,
+      left: -10,
+      width: 36,
+      height: 36,
+      borderRadius: radii.md,
+      backgroundColor: '#DCEEE4',
+      opacity: 0.7,
     },
     title: {
       fontFamily: fonts.sansSemiBold,

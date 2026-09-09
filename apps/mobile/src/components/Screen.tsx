@@ -16,6 +16,7 @@ import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
 import { SkipLink } from '@/src/components/FocusRing';
+import { StatusBannerHost } from '@/src/components/StatusBanner';
 
 type ScreenProps = {
   scroll?: boolean;
@@ -24,6 +25,8 @@ type ScreenProps = {
   refreshing?: boolean;
   /** Content pinned above the scroll area (stays visible while scrolling). */
   pinnedTop?: React.ReactNode;
+  /** Sticky footer (e.g. a single Save action). */
+  pinnedBottom?: React.ReactNode;
   /** Override auto brand header (hidden on login/register). */
   showBrandHeader?: boolean;
   brandHeaderLeft?: ReactNode;
@@ -36,6 +39,7 @@ export function Screen({
   onRefresh,
   refreshing = false,
   pinnedTop,
+  pinnedBottom,
   showBrandHeader,
   brandHeaderLeft,
   brandHeaderRight,
@@ -72,6 +76,14 @@ export function Screen({
           paddingHorizontal: layout.horizontalPadding,
           paddingBottom: 8,
           gap: 8,
+        },
+        pinnedBottom: {
+          width: '100%',
+          maxWidth: layout.contentMaxWidth,
+          alignSelf: 'center',
+          paddingHorizontal: layout.horizontalPadding,
+          paddingBottom: layout.bottomPadding,
+          paddingTop: 8,
         },
         scrollOuter: { flex: 1, backgroundColor: colors.bg },
         scroll: {
@@ -151,6 +163,8 @@ export function Screen({
           }>
           {body}
         </ScrollView>
+        {pinnedBottom ? <View style={styles.pinnedBottom}>{pinnedBottom}</View> : null}
+        <StatusBannerHost />
       </KeyboardAvoidingView>
     );
   }
@@ -162,6 +176,7 @@ export function Screen({
         {brandHeader ? <View style={styles.nonScrollBrand}>{brandHeader}</View> : null}
         <View style={[styles.content, styles.contentFill]}>{children}</View>
       </SafeAreaView>
+      <StatusBannerHost />
     </KeyboardAvoidingView>
   );
 }

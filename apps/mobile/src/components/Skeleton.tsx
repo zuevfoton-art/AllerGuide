@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, type DimensionValue, type ViewStyle } from 'react-native';
+import {
+  Animated,
+  StyleSheet,
+  View,
+  type DimensionValue,
+  type ViewStyle,
+} from 'react-native';
 import { radii } from '@/src/constants/layout';
-import { useReduceMotion } from '@/src/hooks/use-reduce-motion';
+import { SKELETON_CYCLE_MS } from '@/src/constants/motion';
 import { useTheme } from '@/src/hooks/use-theme';
+import { useReducedMotion } from '@/src/hooks/use-reduced-motion';
 import { useTranslation } from '@/src/store/locale-store';
 import { GlassCard } from '@/src/components/GlassCard';
 
@@ -23,8 +30,8 @@ function useSheenOpacity(reduceMotion: boolean) {
     }
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.85, duration: 650, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.2, duration: 650, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.85, duration: SKELETON_CYCLE_MS, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.2, duration: SKELETON_CYCLE_MS, useNativeDriver: true }),
       ]),
     );
     loop.start();
@@ -41,7 +48,7 @@ function SkeletonFill({
   style,
 }: SkeletonProps) {
   const { colors } = useTheme();
-  const reduceMotion = useReduceMotion();
+  const reduceMotion = useReducedMotion();
   const sheenOpacity = useSheenOpacity(reduceMotion);
 
   return (

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import {
   applyDisplayCropDrag,
   computeContainLayout,
@@ -247,7 +248,7 @@ export function ImageCropEditor({
     <Modal
       visible
       transparent
-      animationType="fade"
+      animationType={useModalAnimation('fade')}
       statusBarTranslucent
       onRequestClose={onCancel}>
     <View style={styles.root} testID="scanner-crop-editor">

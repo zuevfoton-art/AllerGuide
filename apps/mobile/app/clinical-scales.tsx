@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CLINICAL_SCALES,
   collectLatestScaleTrends,
+  collectScaleHistory,
   formatDiaryDate,
   type ClinicalScaleId,
 } from '@allerguide/core';
@@ -15,10 +16,12 @@ import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
-import { DiaryWizard } from '@/src/components/DiaryWizard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
+import { DiaryWizard } from '@/src/components/DiaryWizard';
+import { DiaryTrendChart } from '@/src/components/diary/DiaryTrendChart';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
+import { badgeStyle, useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { getOrLoadActiveProfileId } from '@/src/services/profile-service';
@@ -90,11 +93,11 @@ export default function ClinicalScalesScreen() {
       />
 
       <GlassCard>
-        <Text style={ui.cardTitle}>{t('diary.scalePick')}</Text>
+        <CardTitle>{t('diary.scalePick')}</CardTitle>
         <Text style={styles.hint}>{t('diary.scaleRaaciHint')}</Text>
         {recommendedScales.length > 0 ? (
           <>
-            <Text style={styles.groupLabel}>{t('diary.scaleSuggested')}</Text>
+            <Text style={ui.sectionLabel}>{t('diary.scaleSuggested')}</Text>
             <View style={styles.chipRow}>
               {recommendedScales.map((scale) => (
                 <Pressable
@@ -127,16 +130,33 @@ export default function ClinicalScalesScreen() {
 
       {scaleTrends.length > 0 ? (
         <GlassCard>
-          <Text style={ui.cardTitle}>{t('diary.scaleTrends')}</Text>
-          {scaleTrends.map((trend, index) => (
-            <View key={trend.scaleId} style={[styles.trendRow, index === 0 && styles.trendRowFirst]}>
-              <Text style={styles.trendLabel}>{trend.label}</Text>
-              <Text style={styles.trendValue}>
-                {trend.total} · {trend.interpretation}
-              </Text>
-              <Text style={styles.trendMeta}>{formatDiaryDate(trend.at)}</Text>
-            </View>
-          ))}
+          <CardTitle>{t('diary.scaleTrends')}</CardTitle>
+          {scaleTrends.map((trend, index) => {
+            const history = collectScaleHistory(list, trend.scaleId, 90);
+            const last = history[history.length - 1];
+            const zone =
+              last && last.severity >= 3 ? 'alarm' : last && last.severity >= 2 ? 'attention' : 'calm';
+            const badge = badgeStyle(
+              last && last.severity >= 3 ? 'danger' : last && last.severity >= 2 ? 'warn' : 'ok',
+              theme,
+            );
+            return (
+              <View key={trend.scaleId} style={[styles.trendRow, index === 0 && styles.trendRowFirst]}>
+                <GlassCard zone={zone} padded={false} style={styles.trendCard}>
+                  <View style={styles.trendHead}>
+                    <Text style={styles.trendLabel}>{trend.label}</Text>
+                    <View style={[ui.badge, badge.container]}>
+                      <Text style={[ui.badgeText, badge.text]}>
+                        {trend.total} · {trend.interpretation}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.trendMeta}>{formatDiaryDate(trend.at)}</Text>
+                  {history.length > 1 ? <DiaryTrendChart points={history} height={72} /> : null}
+                </GlassCard>
+              </View>
+            );
+          })}
         </GlassCard>
       ) : (
         <GlassCard>
@@ -157,7 +177,7 @@ export default function ClinicalScalesScreen() {
         ) : null}
       </DiaryEditorModal>
 
-      <Disclaimer>{t('diary.disclaimer')}</Disclaimer>
+      <Disclaimer collapsible>{t('diary.disclaimer')}</Disclaimer>
     </Screen>
   );
 }
@@ -169,15 +189,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textSecondary,
       lineHeight: 17,
-    },
-    groupLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.6,
-      marginTop: 8,
     },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
     chip: {
@@ -205,6 +216,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 2,
     },
     trendRowFirst: { borderTopWidth: 0, paddingTop: 0 },
+    trendCard: { padding: 12, gap: 6 },
+    trendHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
     trendLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,

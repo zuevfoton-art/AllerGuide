@@ -2,6 +2,7 @@ import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
+import { TabScreenHeader } from '@/src/components/TabScreenHeader';
 import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -14,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   ANAPHYLAXIS_GRADES,
   BIPHASIC_WARNING,
+  buildCrisisPlan,
   formatEpinephrineEligibilityHint,
   getProfileAgeYears,
   listProfileAllergenChips,
@@ -21,6 +23,7 @@ import {
   type EmergencyContact,
 } from '@allerguide/core';
 import { radii } from '@/src/constants/layout';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -104,6 +107,7 @@ export default function SosScreen() {
         .filter(Boolean),
     [actionPlan],
   );
+  const crisisPlan = useMemo(() => buildCrisisPlan(actionPlan), [actionPlan]);
 
   const kitChecked = passport.shockKit.filter((item) => item.checked);
   const epinephrineEligible = profile ? isProfileEpinephrineEligible(profile) : false;
@@ -177,11 +181,27 @@ export default function SosScreen() {
         />
         </HintAnchor>
       }>
-      <View style={styles.headerRow}>
-        <View style={styles.headerText}>
-          <Text style={ui.docTitle}>{t('sos.title')}</Text>
-        </View>
-      </View>
+      <TabScreenHeader eyebrow={t('sos.title')} title={t('sos.crisisTitle')} />
+
+      <GlassCard testID="sos-crisis-plan">
+        <CardTitle>
+          {crisisPlan.source === 'personal' ? t('sos.crisisPlanPersonal') : t('sos.crisisPlanTitle')}
+        </CardTitle>
+        {crisisPlan.steps.map((step, index) => (
+          <View
+            key={step.source === 'personal' ? `${index}-${step.text}` : step.id}
+            testID={`sos-crisis-step-${index + 1}`}
+            style={styles.crisisStep}>
+            <Text style={styles.crisisNum}>{index + 1}</Text>
+            <Text style={styles.crisisText}>
+              {step.source === 'personal'
+                ? step.text
+                : t(`sos.crisisStep.${step.id}`, { number: emergencyBar.emergencyNumber })}
+            </Text>
+          </View>
+        ))}
+        {profile ? null : <Text style={styles.hintText}>{t('sos.crisisPlanNoProfile')}</Text>}
+      </GlassCard>
 
       {epinephrineHint ? (
         <GlassCard style={styles.epiHintCard}>
@@ -552,6 +572,27 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       color: colors.textSecondary,
       lineHeight: 20,
+    },
+    crisisStep: {
+      flexDirection: 'row',
+      gap: 12,
+      alignItems: 'flex-start',
+      paddingVertical: 6,
+    },
+    crisisNum: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h3,
+      lineHeight: lineHeights.h3,
+      fontWeight: '700',
+      color: colors.danger,
+      width: 24,
+    },
+    crisisText: {
+      fontFamily: fonts.sans,
+      flex: 1,
+      fontSize: fontSizes.body,
+      color: colors.text,
+      lineHeight: lineHeights.body,
     },
     planStep: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
     planNum: {

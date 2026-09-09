@@ -4,11 +4,14 @@ import {
   isPrescribedCourseConfigured,
   planHomeInsights,
   type DiaryEntry,
+  type PlannedHomeInsightKind,
   type PrescribedCourse,
   type Profile,
+  type ReturnStage,
 } from '@allerguide/core';
 import { getStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { listEmergencyContacts } from '@/src/services/sos-service';
 import type { WellnessSnapshot } from '@/src/services/wellness-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 
@@ -19,10 +22,12 @@ export type HomeInsightAction = {
 
 export type HomeInsightItem = {
   id: string;
+  kind: PlannedHomeInsightKind;
   icon: string;
   title: string;
   text: string;
   action?: HomeInsightAction;
+  extraAction?: HomeInsightAction;
 };
 
 type Translate = (key: string, params?: Record<string, string | number>) => string;
@@ -42,6 +47,8 @@ export function buildHomeInsightItems(input: {
   wellness: WellnessSnapshot | null;
   phenotypeHints: string[];
   prescribedCourse?: PrescribedCourse | null;
+  returnStage?: ReturnStage | null;
+  hasStandaloneCheckIn?: boolean;
   t: Translate;
 }): HomeInsightItem[] {
   const capabilities = input.profile ? getProfileCapabilities(input.profile) : null;
@@ -66,6 +73,11 @@ export function buildHomeInsightItems(input: {
     hasTherapyReminder: Boolean(
       input.prescribedCourse && isPrescribedCourseConfigured(input.prescribedCourse),
     ),
+    returnStage: input.returnStage,
+    hasStandaloneCheckIn: input.hasStandaloneCheckIn,
+    hasEmergencyContacts: input.profile
+      ? listEmergencyContacts(input.profile.id).length > 0
+      : undefined,
   });
 
   const items: HomeInsightItem[] = [];
@@ -74,6 +86,7 @@ export function buildHomeInsightItems(input: {
     if (item.kind === 'select-profile') {
       items.push({
         id: item.id,
+        kind: item.kind,
         icon: 'person-outline',
         title: input.t('home.insightsSelectProfileTitle'),
         text: input.t('home.insightsSelectProfileText'),
@@ -88,6 +101,7 @@ export function buildHomeInsightItems(input: {
     if (item.kind === 'diary-missing-today') {
       items.push({
         id: item.id,
+        kind: item.kind,
         icon: 'create-outline',
         title: input.t('home.insightsDiaryTitle'),
         text: input.t('home.insightsDiaryText'),
@@ -99,9 +113,89 @@ export function buildHomeInsightItems(input: {
       continue;
     }
 
+    if (item.kind === 'return-quick-checkin') {
+      items.push({
+        id: item.id,
+        kind: item.kind,
+        icon: 'heart-outline',
+        title: input.t('reengagement.checkInTitle'),
+        text: input.t('reengagement.checkInHint'),
+      });
+      continue;
+    }
+
+    if (item.kind === 'return-value') {
+      items.push({
+        id: item.id,
+        kind: item.kind,
+        icon: 'book-outline',
+        title: input.t('reengagement.valueTitle'),
+        text: input.t('reengagement.valueHint'),
+        action: {
+          label: input.t('reengagement.valueScale'),
+          href: '/clinical-scales?openScale=uas7',
+        },
+        extraAction: {
+          label: input.t('reengagement.valueArticle'),
+          href: '/expert?article=pollinosis-basics',
+        },
+      });
+      continue;
+    }
+
+    if (item.kind === 'return-reframe') {
+      items.push({
+        id: item.id,
+        kind: item.kind,
+        icon: 'map-outline',
+        title: input.t('reengagement.reframeTitle'),
+        text: input.t('reengagement.reframeHint'),
+        action: {
+          label: input.t('reengagement.reframeMap'),
+          href: '/(tabs)/map',
+        },
+        extraAction: {
+          label: input.t('reengagement.reframeSos'),
+          href: '/(tabs)/sos',
+        },
+      });
+      continue;
+    }
+
+    if (item.kind === 'return-restart') {
+      items.push({
+        id: item.id,
+        kind: item.kind,
+        icon: 'refresh-outline',
+        title: input.t('reengagement.restartTitle'),
+        text: input.t('reengagement.restartHint'),
+        action: {
+          label: input.t('reengagement.restartAction'),
+          href: '/notifications',
+        },
+      });
+      continue;
+    }
+
+    if (item.kind === 'profile-incomplete') {
+      items.push({
+        id: item.id,
+        kind: item.kind,
+        icon: 'shield-checkmark-outline',
+        title: input.t('home.insightsCompleteProfileTitle'),
+        text: input.t('home.insightsCompleteProfileText'),
+        action: {
+          label: input.t('home.insightsCompleteProfileAction'),
+          href: '/sos-edit',
+        },
+      });
+      continue;
+    }
+
     if (item.kind === 'act-due') {
       items.push({
         id: item.id,
+        kind: item.kind,
         icon: 'pulse-outline',
         title: input.t('home.insightsActTitle'),
         text: input.t('home.insightsActText'),
@@ -116,6 +210,7 @@ export function buildHomeInsightItems(input: {
     if (item.kind === 'therapy-reminder' && input.prescribedCourse) {
       items.push({
         id: item.id,
+        kind: item.kind,
         icon: 'alarm-outline',
         title: input.t('home.insightsTherapyTitle'),
         text: nextIntake
@@ -139,6 +234,7 @@ export function buildHomeInsightItems(input: {
       if (!rec) continue;
       items.push({
         id: item.id,
+        kind: item.kind,
         icon: 'leaf-outline',
         title: rec.title,
         text: rec.text,
@@ -150,6 +246,7 @@ export function buildHomeInsightItems(input: {
     if (!hint) continue;
     items.push({
       id: item.id,
+      kind: item.kind,
       icon: 'alert-circle-outline',
       title: input.t('home.phenotypeHintsTitle'),
       text: hint,

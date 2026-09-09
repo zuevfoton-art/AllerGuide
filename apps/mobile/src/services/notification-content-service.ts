@@ -3,6 +3,7 @@ import { LOCALE_MESSAGES } from '@/src/i18n/locales';
 import { formatMessage, translate } from '@/src/i18n/translate';
 import type { AsitCourse, PrescribedCourse } from '@allerguide/core';
 import { getLocale } from '@/src/services/settings-service';
+import { resolveActiveReturnStage } from '@/src/services/reengagement-service';
 
 function resolveLocale() {
   return getLocale() ?? DEFAULT_LOCALE;
@@ -10,9 +11,30 @@ function resolveLocale() {
 
 export function getDiaryReminderNotificationContent(): { title: string; body: string } {
   const messages = LOCALE_MESSAGES[resolveLocale()];
+  const stage = resolveActiveReturnStage();
+  if (stage === 'quick-checkin') {
+    return {
+      title: translate(messages, 'notifications.returnQuickTitle'),
+      body: translate(messages, 'notifications.returnQuickBody'),
+    };
+  }
   return {
     title: translate(messages, 'notifications.diaryPushTitle'),
     body: translate(messages, 'notifications.diaryPushBody'),
+  };
+}
+
+export function getReturnReminderNotificationContent(stage: 'value' | 'reframe'): { title: string; body: string } {
+  const messages = LOCALE_MESSAGES[resolveLocale()];
+  if (stage === 'value') {
+    return {
+      title: translate(messages, 'notifications.returnValueTitle'),
+      body: translate(messages, 'notifications.returnValueBody'),
+    };
+  }
+  return {
+    title: translate(messages, 'notifications.returnReframeTitle'),
+    body: translate(messages, 'notifications.returnReframeBody'),
   };
 }
 

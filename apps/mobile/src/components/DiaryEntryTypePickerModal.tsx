@@ -18,6 +18,7 @@ import {
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 
 const TYPE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -103,7 +104,7 @@ export function DiaryEntryTypePickerModal({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType={useModalAnimation('slide')}
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={handleLeftPress}>

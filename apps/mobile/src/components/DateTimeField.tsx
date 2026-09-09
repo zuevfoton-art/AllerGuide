@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 
 type PickerMode = 'date' | 'time' | 'datetime';
@@ -106,6 +107,7 @@ export function DateTimeField({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { locale } = useTranslation();
+  const modalAnimation = useModalAnimation('slide');
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(() => parseParts(value));
 
@@ -153,7 +155,7 @@ export function DateTimeField({
         />
       </Pressable>
 
-      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+      <Modal visible={open} transparent animationType={modalAnimation} onRequestClose={() => setOpen(false)}>
         <View style={styles.backdrop}>
           <View style={styles.sheet}>
             <View style={styles.sheetHeader}>

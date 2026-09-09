@@ -42,5 +42,12 @@ appId: com.aclearo.app
     timeout: 10000
 - assertVisible:
     id: sos-emergency-bar
+# North-star N3: calling 103 and the numbered plan work without a profile.
+- assertVisible:
+    id: sos-crisis-call
+- assertVisible:
+    id: sos-crisis-plan
+- assertVisible:
+    id: sos-crisis-step-1
 - assertVisible:
     text: Выберите профиль, чтобы увидеть медицинскую информацию

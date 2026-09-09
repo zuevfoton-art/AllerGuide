@@ -86,7 +86,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
 | Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
-| UI / токены / a11y | `constants/{theme,layout,typography}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md` |
+| UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
 | CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
@@ -109,7 +109,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `token-session`, `secure-settings` | core `auth`/`login-field`/`phone`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` + `lib/sync-payload.ts` |
 | **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`, `open-food-facts` (normalize/URL, без HTTP); API `catalog.ts` + `open-food-facts` |
-| **Market** | `(tabs)/market.tsx` (скрыт, пока `EXPO_PUBLIC_MARKET=true`) | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
+| **Market** | `market.tsx` (hub route, not a tab) | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
 | **Clinical** | `asit-course` / `prescribed-therapy` + `use-prescription-parser` + `components/therapy/*` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
 | **Doctor report** | `doctor-report.tsx` | `doctor-report-service` | core `doctor-report*` |
@@ -145,13 +145,13 @@ src/modules/marketplace/
 |------|------------|
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
-| `(tabs)/_layout.tsx` | Нижние табы (5 видимых; Маркет за `EXPO_PUBLIC_MARKET`) + кастомные кнопки |
-| `(tabs)/home.tsx` | Dashboard / двухслойный wellness / home-insights |
-| `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
+| `(tabs)/_layout.tsx` | 4 вкладки (Сегодня, Журнал, Скан, Карта) + SOS control; маркет не вкладка |
+| `(tabs)/home.tsx` | Сегодня: daily reading, чек-ин 0–3, кольцо недели, home-insights |
+| `(tabs)/diary.tsx` | Журнал: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |
-| `(tabs)/market.tsx` | Safe-product marketplace (скрыт, пока `EXPO_PUBLIC_MARKET=true`) |
+| `market.tsx` | Safe-product marketplace (from profile hub, not a tab) |
 | `(tabs)/sos.tsx` | SOS emergency-only (без редактирования) |
 | `onboarding-intro.tsx` / `onboarding.tsx` | Intro + сценарий |
 | `profile-setup.tsx` | Мастер профиля |
@@ -165,6 +165,7 @@ src/modules/marketplace/
 | `asthma-action-plan.tsx` / `insect-action-plan.tsx` | Планы действий |
 | `food-drug-registry.tsx` | Пищево-лекарственный реестр |
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
+| `ask.tsx` | AI-чат «Спросить» (`EXPO_PUBLIC_AI_CHAT`, default off; SOS-handoff) |
 | `legal/privacy.tsx` / `legal/terms.tsx` | Legal |
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
 | `+html.tsx` | Web-обёртка Expo Router (не экран) |
@@ -233,6 +234,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `profiles.ts` | Profile CRUD (JWT) |
 | `sync.ts` | Encrypted backup (`SYNC_ENABLED`); envelope gate in `lib/sync-payload.ts` |
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
+| `ask.ts` | Explainer chat (`AI_CHAT_ENABLED` + `AI_SCAN_ENABLED`; distress → SOS) |
 | `scan-dish-vision.ts` | Multimodal dish photo (`AI_DISH_VISION_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
 | `ocr.ts` | Yandex Vision OCR (`YC_OCR_ENABLED`) |
@@ -328,6 +330,7 @@ Barrel: `index.ts`. Pure TS.
 | `BACKEND_AUTH` | `features.ts` | `JWT_SECRET` + `DATABASE_URL` |
 | `CLOUD_SYNC` | `features.ts` | `SYNC_ENABLED` |
 | `AI_SCAN_ENABLED` | `features.ts` | `AI_SCAN_ENABLED` + LLM keys |
+| `AI_CHAT` | `features.ts` | `AI_CHAT_ENABLED` + `AI_SCAN_ENABLED` (default **off**) |
 | `AI_DISH_VISION_ENABLED` | `features.ts` (`EXPO_PUBLIC_AI_DISH_VISION`) | `AI_DISH_VISION_ENABLED` + VL model |
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
@@ -371,6 +374,8 @@ Barrel: `index.ts`. Pure TS.
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
 | YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
+| Wellness-дизайн (типографика, плотность, возвращение) | [`wellness-design-plan.md`](./wellness-design-plan.md) · [`ux-audit-2026-08.md`](./ux-audit-2026-08.md) · [`ux-improvement-plan.md`](./ux-improvement-plan.md) |
+| Wellness UX north-star (IA 4 таба + SOS, фазы N0–N10) | [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · макет [`wellness-ux-north-star.html`](./wellness-ux-north-star.html) |
 | Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 | Freemium / PRO / IAP (план) | [`subscription-monetization-plan.md`](./subscription-monetization-plan.md) |
 
@@ -384,7 +389,8 @@ pnpm typecheck
 pnpm test                    # core + ai + mobile + api
 pnpm lint                    # mobile + api
 pnpm check:analytics-taxonomy
-pnpm rc-gate                 # typecheck + lint + test + taxonomy + doc/Maestro
+pnpm check:design-tokens
+pnpm rc-gate                 # typecheck + lint + test + taxonomy + tokens + doc/Maestro
 pnpm rc-gate:quick           # то же без pnpm test
 pnpm map-pollen-ops-check    # ops: доля fallback на карте пыления
 ```

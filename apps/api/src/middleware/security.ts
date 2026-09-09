@@ -1,14 +1,8 @@
 import type { Express, NextFunction, Request, Response } from 'express';
 import type { CorsOptions } from 'cors';
 import rateLimit, { type RateLimitRequestHandler } from 'express-rate-limit';
+import { isAllowedCorsOrigin, parseCorsOrigins } from '../lib/cors-policy';
 import { createRedisRateLimitStore } from '../lib/rate-limit-store';
-
-function parseList(value: string | undefined): string[] {
-  return (value ?? '')
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-}
 
 function parseNumber(value: string | undefined, fallback: number): number {
   const parsed = Number(value);
@@ -22,29 +16,17 @@ function parseNumber(value: string | undefined, fallback: number): number {
  * browser origins instead of reflecting them.
  */
 export function buildCorsOptions(env: NodeJS.ProcessEnv = process.env): CorsOptions {
-  const allowlist = parseList(env.CORS_ORIGINS);
+  const allowlist = parseCorsOrigins(env);
 
-  if (allowlist.length === 0) {
-    if (env.NODE_ENV === 'production') {
-      return {
-        credentials: true,
-        origin(_origin, callback) {
-          callback(null, false);
-        },
-      };
-    }
+  if (allowlist.length === 0 && env.NODE_ENV !== 'production') {
     return { origin: true, credentials: true };
   }
 
   return {
     credentials: true,
     origin(origin, callback) {
-      if (!origin || allowlist.includes(origin)) {
-        callback(null, true);
-        return;
-      }
       // Deny without throwing — cors package turns Error into HTTP 500.
-      callback(null, false);
+      callback(null, isAllowedCorsOrigin(origin, env));
     },
   };
 }
@@ -167,6 +149,7 @@ export async function installRateLimiters(app: Express): Promise<void> {
   app.use('/api/search', scanLimiter);
   app.use('/api/dishes', scanLimiter);
   app.use('/api/medicines', scanLimiter);
+  app.use('/api/ask', scanLimiter);
   app.use('/api/pollen', await createPollenRateLimiter());
   // Air quality shares the pollen limiter profile (forecast + tile traffic).
   app.use('/api/air-quality', await createPollenRateLimiter());

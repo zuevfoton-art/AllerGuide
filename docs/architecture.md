@@ -274,6 +274,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `BACKEND_AUTH_ENABLED` | `EXPO_PUBLIC_BACKEND_AUTH` | JWT + серверные профили |
 | `PRODUCT_DB_ENABLED` | `EXPO_PUBLIC_PRODUCT_DB` | Каталог на backend до OFF |
 | `AI_SCAN_ENABLED` | `EXPO_PUBLIC_AI_SCAN_ENABLED` | LLM через `/api/scan` |
+| `AI_CHAT_ENABLED` | `EXPO_PUBLIC_AI_CHAT` | Explainer-чат `/ask` → `/api/ask` (default **off**; distress → SOS) |
 | `AI_DISH_VISION_ENABLED` | `EXPO_PUBLIC_AI_DISH_VISION` | Multimodal фото блюда → `/api/scan/dish-vision` |
 | `MEDICINE_DB_ENABLED` | `EXPO_PUBLIC_MEDICINE_DB` | Фото упаковки / голос → `/api/medicines/recognize` |
 | `YC_OCR_ENABLED` | `EXPO_PUBLIC_YC_OCR` | Vision OCR через `/api/ocr` |
@@ -821,6 +822,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `EXPO_PUBLIC_PRODUCT_DB` | `false` | Backend catalog lookup |
 | `EXPO_PUBLIC_MEDICINE_DB` | `false` | Medicine package recognize + catalog |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` | LLM scan via API |
+| `EXPO_PUBLIC_AI_CHAT` | `false` | Ask chat via `/api/ask` (distress → SOS) |
 | `EXPO_PUBLIC_AI_DISH_VISION` | `true` | Smart-scanner VL (деградирует в OCR без сети) |
 | `EXPO_PUBLIC_YC_OCR` | `false` | Vision OCR via `/api/ocr` |
 | `EXPO_PUBLIC_YC_SCAN_INTENT_LLM` | `false` | OCR intent via `/api/scan/intent` |
@@ -860,6 +862,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `SYNC_ENABLED`, `SYNC_API_KEY`, `SYNC_REQUIRE_ENCRYPTED` | Cloud sync endpoints |
 | `PRODUCT_OFF_FALLBACK`, `OPENFOODFACTS_*` | OFF write-through / UA |
 | `AI_SCAN_ENABLED`, `AI_PROVIDER`, `YC_AI_*` / `OPENAI_*` | LLM scan |
+| `AI_CHAT_ENABLED` | Ask explainer chat (`/api/ask`; needs `AI_SCAN_ENABLED`) |
 | `AI_DISH_VISION_ENABLED`, `YC_VISION_MODEL` / `OPENAI_VISION_MODEL` | Dish photo vision |
 | `AI_MEDICINE_VISION_ENABLED` | Medicine package vision (`/api/medicines/recognize`) |
 | `YC_OCR_ENABLED` | Vision OCR |

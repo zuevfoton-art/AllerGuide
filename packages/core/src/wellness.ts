@@ -156,7 +156,9 @@ export function buildClinicalScalesFromTrends(trends: ScaleTrendEntry[]): Wellne
 export function computeDiaryPenalty(diary: WellnessDiarySeries): number {
   let penalty = diary.symptomDays * WELLNESS_WEIGHTS.diarySymptomDay;
   penalty += diary.triggerDays * WELLNESS_WEIGHTS.diaryTriggerDay;
-  if (diary.streak >= 3) penalty += WELLNESS_WEIGHTS.diaryStreakBonus;
+  if (diary.streak >= 3 && diary.symptomDays > 0) {
+    penalty += WELLNESS_WEIGHTS.diaryStreakBonus;
+  }
 
   const temporalKind = diary.temporalCorrelationKind ?? diary.correlationKind;
   if (temporalKind === 'symptom-trigger' || temporalKind === 'symptom-food') {

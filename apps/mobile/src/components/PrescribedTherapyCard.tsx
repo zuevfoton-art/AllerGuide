@@ -14,9 +14,9 @@ import {
   type PrescribedCourse,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import type { DiaryEntry } from '@/src/types';
 
@@ -28,7 +28,6 @@ interface PrescribedTherapyCardProps {
 
 export function PrescribedTherapyCard({ course, entries, onLogDose }: PrescribedTherapyCardProps) {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const compliance = useMemo(() => computePrescribedCompliance(entries, 30), [entries]);
@@ -39,7 +38,7 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
       <GlassCard style={styles.card}>
         <View style={styles.headerRow}>
           <Ionicons name="medical" size={18} color={theme.colors.accent} />
-          <Text style={ui.cardTitle}>{t('prescribedTherapy.title')}</Text>
+          <CardTitle>{t('prescribedTherapy.title')}</CardTitle>
         </View>
         <Text style={styles.hint}>{t('prescribedTherapy.emptyCourse')}</Text>
         <Button
@@ -56,7 +55,7 @@ export function PrescribedTherapyCard({ course, entries, onLogDose }: Prescribed
     <GlassCard style={styles.card}>
       <View style={styles.headerRow}>
         <Ionicons name="medical" size={18} color={theme.colors.accent} />
-        <Text style={ui.cardTitle}>{t('prescribedTherapy.title')}</Text>
+        <CardTitle>{t('prescribedTherapy.title')}</CardTitle>
         <Pressable style={styles.editBtn} onPress={() => router.push('/prescribed-therapy' as any)}>
           <Text style={styles.editText}>{t('prescribedTherapy.editCourse')}</Text>
         </Pressable>

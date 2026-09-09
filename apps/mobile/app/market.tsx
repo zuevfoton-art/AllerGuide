@@ -1,29 +1,15 @@
-import { Text, View, StyleSheet } from 'react-native';
-import { Redirect } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { router } from 'expo-router';
 import type { MarketplaceCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { useTranslation } from '@/src/store/locale-store';
 import { MarketplaceModule } from '@/src/modules/marketplace';
 import { useMarketplaceProducts } from '@/src/modules/marketplace/use-marketplace-products';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { useAppStore } from '@/src/store/app-store';
-import { MARKET_ENABLED } from '@/src/constants/features';
 
 export default function MarketScreen() {
-  if (!MARKET_ENABLED) {
-    return <Redirect href="/(tabs)/home" />;
-  }
-
-  return <VisibleMarketScreen />;
-}
-
-function VisibleMarketScreen() {
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
   const [query, setQuery] = useState('');
@@ -36,11 +22,12 @@ function VisibleMarketScreen() {
       refreshing={catalog.refreshing}
       onRefresh={catalog.refresh}
     >
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={ui.docTitle}>{t('market.title')}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        onBack={() => router.back()}
+        eyebrow={t('market.eyebrow')}
+        title={t('market.title')}
+        subtitle={t('market.subtitle')}
+      />
 
       <MarketplaceModule
         variant="full"
@@ -52,16 +39,4 @@ function VisibleMarketScreen() {
       />
     </Screen>
   );
-}
-
-function createStyles(_theme: AppTheme) {
-  return StyleSheet.create({
-    header: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 12,
-    },
-    headerText: { flex: 1, gap: 2 },
-  });
 }

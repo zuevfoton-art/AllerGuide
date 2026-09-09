@@ -7,6 +7,7 @@ import {
   type PollenUpiIndex,
   type PollenUpiSnapshot,
 } from '@allerguide/core';
+import { TierScale } from '@/src/components/TierScale';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useZoneColors, type Zone } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
@@ -59,20 +60,11 @@ export function PollenIndexCard({ taxonLabel, upi, grainsPerM3, zone }: PollenIn
       <Text style={[styles.subtitle, { color: zoneColors?.fg ?? display.color }]}>
         {taxonLabel} · {categoryLabel}
       </Text>
-      <View style={styles.scale} accessibilityRole="adjustable">
-        {UPI_SEGMENTS.map((index) => (
-          <View
-            key={index}
-            style={[
-              styles.segment,
-              {
-                backgroundColor: POLLEN_UPI_FALLBACK_COLORS[index],
-                opacity: index === display.index ? 1 : 0.35,
-              },
-            ]}
-          />
-        ))}
-      </View>
+      <TierScale
+        activeIndex={display.index}
+        segmentColors={UPI_SEGMENTS.map((index) => POLLEN_UPI_FALLBACK_COLORS[index])}
+        style={styles.scale}
+      />
       <Text style={styles.meta}>{t('map.upiLevelDescription', { category: categoryLabel })}</Text>
       {typeof grainsPerM3 === 'number' && upi.source !== 'google' ? (
         <Text style={styles.meta}>
@@ -112,8 +104,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
     },
-    scale: { flexDirection: 'row', gap: 3, height: 8 },
-    segment: { flex: 1, borderRadius: 4 },
+    scale: { width: '100%', height: 8 },
     meta: {
       fontFamily: fonts.sans,
       fontSize: 11,

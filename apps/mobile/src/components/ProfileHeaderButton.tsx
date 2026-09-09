@@ -7,6 +7,7 @@ import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
 import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
@@ -110,7 +111,7 @@ export function ProfileHeaderButton({
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={useModalAnimation('fade')}
         onRequestClose={() => setOpen(false)}>
         <View style={styles.backdrop}>
           <Pressable
@@ -170,6 +171,7 @@ export function ProfileHeaderButton({
               </ScrollView>
             )}
             <Pressable
+              testID="profile-switcher-manage"
               style={styles.manageRow}
               onPress={() => {
                 setOpen(false);

@@ -280,6 +280,42 @@ export function collectLatestScaleTrends(
   return DIARY_TREND_SCALE_IDS.filter((id) => latest.has(id)).map((id) => latest.get(id)!);
 }
 
+function scaleLevelToChartSeverity(level: 'good' | 'moderate' | 'severe' | 'uncontrolled'): number {
+  if (level === 'good') return 1;
+  if (level === 'moderate') return 2;
+  return 3;
+}
+
+export function collectScaleHistory(
+  entries: { type: string; details: string; createdAt: string }[],
+  scaleId: ClinicalScaleId,
+  days: number,
+): { date: string; severity: number }[] {
+  const cutoff = Date.now() - days * 86_400_000;
+  const points: { date: string; severity: number }[] = [];
+
+  for (const entry of [...entries].reverse()) {
+    if (entry.type !== 'Шкала') continue;
+    const at = Date.parse(entry.createdAt);
+    if (!Number.isFinite(at) || at < cutoff) continue;
+    const payload = decodeDiaryDetails(entry.details);
+    if (!payload) continue;
+    if (getScaleIdFromAnswers(payload.answers) !== scaleId) continue;
+    const score = computeScaleScore(scaleId, payload.answers);
+    if (!score) continue;
+    points.push({
+      date: entry.createdAt.slice(0, 10),
+      severity: scaleLevelToChartSeverity(score.level),
+    });
+  }
+
+  return points;
+}
+
+/** @deprecated use GINA_ACT_PROMPT_INTERVAL_DAYS from gina-asthma */
+export const ACT_PROMPT_INTERVAL_DAYS = GINA_ACT_PROMPT_INTERVAL_DAYS;
+
+
 export function getLastScaleEntryAt(
   entries: { type: string; details: string; createdAt: string }[],
   scaleId: ClinicalScaleId,

@@ -4,10 +4,10 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
 import { HintSpotlight } from '@/src/components/hints/HintSpotlight';
 import { useHintAnchor } from '@/src/components/hints/HintAnchor';
-import { BrandTabIcon, BrandFeatureIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
+import { BrandTabIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
+import { density } from '@/src/constants/layout';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
-import { MARKET_ENABLED } from '@/src/constants/features';
 import { useTranslation } from '@/src/store/locale-store';
 
 function TabIcon({
@@ -66,6 +66,29 @@ function TabBarButton({
   );
 }
 
+/**
+ * SOS is not a peer of the four navigation tabs: it is an emergency control that
+ * keeps a permanent danger tint so it reads as a call button, not as a section.
+ */
+function SosTabBarButton({ accessibilityState, style, ...props }: BottomTabBarButtonProps) {
+  const { colors } = useTheme();
+
+  return (
+    <Pressable
+      {...(props as ComponentProps<typeof Pressable>)}
+      testID="tab-sos"
+      accessibilityState={accessibilityState}
+      style={[
+        tabBarStyles.button,
+        tabBarStyles.emergencyButton,
+        { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+        style,
+      ]}>
+      {props.children}
+    </Pressable>
+  );
+}
+
 const tabBarStyles = StyleSheet.create({
   shell: { flex: 1 },
   button: {
@@ -74,7 +97,11 @@ const tabBarStyles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 20,
     marginHorizontal: 2,
-    minHeight: 44,
+    minHeight: density.tapMinHeight,
+  },
+  emergencyButton: {
+    borderWidth: 1,
+    minWidth: density.tapMinHeight,
   },
 });
 
@@ -83,6 +110,7 @@ export default function TabsLayout() {
   const { isCompact, showTabLabels, tabBarHeight, tabBarPaddingBottom } = useResponsiveLayout();
   const { t } = useTranslation();
   const iconSize = isCompact ? 22 : 24;
+  const sosSlotWidth = isCompact ? 60 : 68;
 
   return (
     <View style={tabBarStyles.shell}>
@@ -130,7 +158,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: t('tabs.home'),
+          title: t('tabs.today'),
           tabBarButton: (props) => <TabBarButton {...props} testID="tab-home" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -146,7 +174,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="diary"
         options={{
-          title: t('tabs.diary'),
+          title: t('tabs.journal'),
           tabBarButton: (props) => <TabBarButton {...props} testID="tab-diary" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -162,7 +190,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
-          title: t('tabs.scanner'),
+          title: t('tabs.scan'),
           tabBarButton: (props) => <TabBarButton {...props} testID="tab-scanner" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -174,27 +202,6 @@ export default function TabsLayout() {
             />
           ),
         }}
-      />
-      <Tabs.Screen
-        name="market"
-        options={
-          MARKET_ENABLED
-            ? {
-                title: t('tabs.market'),
-                tabBarButton: (props) => <TabBarButton {...props} testID="tab-market" />,
-                tabBarIcon: ({ focused }) => (
-                  <BrandFeatureIcon
-                    name="market"
-                    size={iconSize}
-                    color={focused ? colors.accent : colors.textMuted}
-                  />
-                ),
-              }
-            : {
-                href: null,
-                title: t('tabs.market'),
-              }
-        }
       />
       <Tabs.Screen
         name="map"
@@ -216,17 +223,13 @@ export default function TabsLayout() {
         name="sos"
         options={{
           title: t('tabs.sos'),
-          tabBarButton: (props) => <TabBarButton {...props} testID="tab-sos" />,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon
-              name="sos"
-              focused={focused}
-              color={colors.danger}
-              muted={colors.textMuted}
-              size={iconSize}
-            />
+          tabBarButton: (props) => <SosTabBarButton {...props} />,
+          tabBarIcon: () => (
+            <BrandTabIcon name="sos" size={iconSize} color={colors.danger} focused />
           ),
           tabBarActiveTintColor: colors.danger,
+          tabBarInactiveTintColor: colors.danger,
+          tabBarItemStyle: { flex: 0, paddingHorizontal: 0, width: sosSlotWidth },
         }}
       />
     </Tabs>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, Text } from 'react-native';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { pickAndImportLocalBackup, shareLocalBackupFile } from '@/src/services/backup-file-service';
@@ -17,10 +18,10 @@ export function LocalBackupCard() {
     setLoading(true);
     try {
       const result = await shareLocalBackupFile();
-      Alert.alert(
-        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
-        result.ok ? t('settings.localBackupExportSuccess') : result.error,
-      );
+      showStatusBanner({
+        tone: result.ok ? 'success' : 'error',
+        message: result.ok ? t('settings.localBackupExportSuccess') : result.error,
+      });
     } finally {
       setLoading(false);
     }
@@ -37,10 +38,10 @@ export function LocalBackupCard() {
             setLoading(true);
             try {
               const result = await pickAndImportLocalBackup();
-              Alert.alert(
-                result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
-                result.ok ? t('settings.localBackupImportSuccess') : result.error,
-              );
+              showStatusBanner({
+                tone: result.ok ? 'success' : 'error',
+                message: result.ok ? t('settings.localBackupImportSuccess') : result.error,
+              });
             } finally {
               setLoading(false);
             }

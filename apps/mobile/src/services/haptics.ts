@@ -1,10 +1,21 @@
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 import { logCaughtError } from '@/src/services/error-reporting';
+import { useAppearanceStore } from '@/src/store/appearance-store';
+
+async function shouldSkipHaptics(): Promise<boolean> {
+  if (useAppearanceStore.getState().preferCalmMotion) return true;
+  try {
+    return await AccessibilityInfo.isReduceMotionEnabled();
+  } catch {
+    return false;
+  }
+}
 
 /** No-op on web — haptics require native hardware. */
 async function run(fn: () => Promise<void>): Promise<void> {
   if (Platform.OS === 'web') return;
+  if (await shouldSkipHaptics()) return;
   try {
     await fn();
   } catch (error) {

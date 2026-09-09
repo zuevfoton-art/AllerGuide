@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { density, radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 
 export type ListPickerItem = {
@@ -73,9 +74,10 @@ export function ListPickerSheet({
   onAccessory,
 }: ListPickerSheetProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t } = useTranslation();
+  const modalAnimation = useModalAnimation('slide');
   const [query, setQuery] = useState('');
   const close = onRequestClose ?? onDone;
 
@@ -238,7 +240,7 @@ export function ListPickerSheet({
     <Modal
       visible={visible}
       transparent={!fullHeight}
-      animationType="slide"
+      animationType={modalAnimation}
       presentationStyle={fullHeight ? 'pageSheet' : undefined}
       statusBarTranslucent={!fullHeight}
       navigationBarTranslucent={!fullHeight}

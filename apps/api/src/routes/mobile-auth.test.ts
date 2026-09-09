@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app';
 
@@ -35,7 +35,11 @@ import {
   loginAppUser,
   findUserById,
 } from '../services/app-user-service';
-import { rotateRefreshToken } from '../services/refresh-token-service';
+import {
+  rotateRefreshToken,
+  revokeRefreshToken,
+  revokeRefreshTokensForUser,
+} from '../services/refresh-token-service';
 import { listProfilesForUser, createProfileForUser } from '../services/profile-service';
 import { signAuthToken } from '../lib/jwt';
 
@@ -44,6 +48,10 @@ describe('mobile auth routes', () => {
     process.env.DATABASE_URL = 'postgres://test';
     process.env.JWT_SECRET = 'test-secret-key-with-enough-length';
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    delete process.env.CORS_ORIGINS;
   });
 
   it('registers user and returns token', async () => {
@@ -152,8 +160,6 @@ describe('mobile auth routes', () => {
   });
 
   it('revokes the presented refresh token on logout', async () => {
-    const { revokeRefreshToken } = await import('../services/refresh-token-service');
-
     const app = await createApp();
     const response = await request(app)
       .post('/api/auth/logout')
@@ -161,6 +167,64 @@ describe('mobile auth routes', () => {
 
     expect(response.status).toBe(200);
     expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
+  it('revokes every refresh token when logout uses a Bearer access token', async () => {
+    const token = await signAuthToken({ sub: 9, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ refreshToken: 'refresh-test' });
+
+    expect(response.status).toBe(200);
+    expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+    expect(revokeRefreshTokensForUser).toHaveBeenCalledWith(9);
+  });
+
+  it('rejects cookie logout from an origin outside the CORS allowlist', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const token = await signAuthToken({ sub: 4, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Origin', 'https://evil.example')
+      .set('Cookie', `ag_access=${token}; ag_refresh=refresh-test`)
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(revokeRefreshToken).not.toHaveBeenCalled();
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
+  it('rejects cookie logout without an Origin header', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const token = await signAuthToken({ sub: 4, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', `ag_access=${token}; ag_refresh=refresh-test`)
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(revokeRefreshToken).not.toHaveBeenCalled();
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
+  it('clears the presented cookie session without revoking native tokens', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const token = await signAuthToken({ sub: 4, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Origin', 'https://app.example')
+      .set('Cookie', `ag_access=${token}; ag_refresh=refresh-test`)
+      .send({});
+
+    expect(response.status).toBe(200);
+    expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
   });
 
   it('sets httpOnly cookies and omits the refresh token for a browser Origin', async () => {

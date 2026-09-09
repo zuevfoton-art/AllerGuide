@@ -10,6 +10,7 @@ import {
 } from '@/src/services/prescribed-therapy-reminder-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { listAllDiaryEntries } from '@/src/services/diary-service';
+import { markAppOpened } from '@/src/services/reengagement-service';
 import {
   getAsitReminderNotificationContent,
   getDiaryReminderNotificationContent,
@@ -20,7 +21,12 @@ import { listProfiles } from '@/src/services/profile-service';
 import { Platform } from 'react-native';
 
 export async function reconcileAllReminders(): Promise<void> {
-  if (Platform.OS === 'web') return;
+  if (Platform.OS === 'web') {
+    markAppOpened();
+    return;
+  }
+
+  markAppOpened();
 
   const entries = listAllDiaryEntries();
   const diaryContent = getDiaryReminderNotificationContent();

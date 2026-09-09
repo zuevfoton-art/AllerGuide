@@ -9,12 +9,16 @@ import {
 } from '@allerguide/core';
 import { getAccessTokenTtlSeconds, signAuthToken } from '../lib/jwt';
 import {
+  ACCESS_COOKIE,
+  REFRESH_COOKIE,
   clearAuthCookies,
+  parseCookies,
   readRefreshToken,
   resolveAuthPayload,
   setAuthCookies,
   wantsCookieSession,
 } from '../lib/request-auth';
+import { isAllowedCorsOrigin } from '../lib/cors-policy';
 import { requireJwt } from '../middleware/require-jwt';
 import {
   issueRefreshToken,
@@ -38,6 +42,31 @@ import { listProfilesForUser } from '../services/profile-service';
 
 function isDatabaseConfigured() {
   return Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET);
+}
+
+function hasBearerAuthorization(req: Request): boolean {
+  const header = req.header('authorization');
+  return Boolean(header?.startsWith('Bearer ') && header.slice('Bearer '.length).trim());
+}
+
+function hasAuthCookies(req: Request): boolean {
+  const cookies = parseCookies(req);
+  return Boolean(cookies[ACCESS_COOKIE] || cookies[REFRESH_COOKIE]);
+}
+
+/**
+ * Cookie sessions may be SameSite=None across API/web hosts. A cross-site form
+ * POST then sends those cookies without a CORS preflight, so mutating cookie
+ * auth must check Origin against the CORS allowlist itself.
+ */
+function rejectUntrustedCookieMutation(req: Request, res: Response): boolean {
+  if (!hasAuthCookies(req) || hasBearerAuthorization(req)) return false;
+  const origin = req.get('origin');
+  if (!origin || !isAllowedCorsOrigin(origin)) {
+    res.status(403).json({ ok: false, error: 'Forbidden origin' });
+    return true;
+  }
+  return false;
 }
 
 function passwordResetTokenInResponseEnabled(): boolean {
@@ -183,13 +212,19 @@ export function registerMobileAuthRoutes(app: Express) {
   });
 
   app.post('/api/auth/logout', async (req: Request, res: Response) => {
+    if (rejectUntrustedCookieMutation(req, res)) return;
+
     const refreshToken = readRefreshToken(req);
     if (refreshToken) {
       await revokeRefreshToken(refreshToken);
     }
 
+    // Cookie logout only drops the presented session. A CSRF POST must not
+    // revoke native refresh tokens for the same account.
     const payload = await resolveAuthPayload(req);
-    if (payload) await revokeRefreshTokensForUser(payload.sub);
+    if (payload && hasBearerAuthorization(req)) {
+      await revokeRefreshTokensForUser(payload.sub);
+    }
     clearAuthCookies(req, res);
 
     res.json({ ok: true });

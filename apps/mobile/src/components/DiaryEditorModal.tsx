@@ -28,6 +28,7 @@ import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { diaryEditorScrollMaxHeight } from '@/src/components/diary/wizard/diary-editor-layout';
 import { radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 
 interface DiaryEditorModalProps {
@@ -105,6 +106,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const { height: windowHeight } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const modalAnimation = useModalAnimation('slide');
   const scrollRef = useRef<ScrollView>(null);
   const pendingFocusNode = useRef<unknown>(null);
   const footerRenderRef = useRef<FooterRenderer | null>(null);
@@ -171,7 +173,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType={modalAnimation}
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={onClose}>

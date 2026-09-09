@@ -9,3 +9,4 @@ export * from './dish-vision';
 export * from './scan-evidence';
 export * from './medicine-vision';
 export * from './medicine-label';
+export * from './ask-chat';
