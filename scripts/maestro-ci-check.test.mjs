@@ -212,11 +212,13 @@ describe('Maestro nightly CI invariants', () => {
   it('folds diary IME via pinned editor chrome before tapping Далее', () => {
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
     assert.match(dismiss, /id: diary-editor-title/);
+    assert.match(dismiss, /waitForAnimationToEnd/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
 
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
+    assert.match(editorModal, /onPress=\{Keyboard\.dismiss\}/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(
@@ -237,6 +239,8 @@ describe('Maestro nightly CI invariants', () => {
     const fill = read('apps/mobile/.maestro/flows/_fill-wizard-field.yaml');
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
+    assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(tapPrimary, /enabled: true/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);

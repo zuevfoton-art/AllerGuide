@@ -214,10 +214,18 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                     <Text style={styles.headerBtnText}>{t('common.cancel')}</Text>
                   </Pressable>
                   {/* Pinned chrome. Nightly 33736400731: extra sheet lift + IME
-                      padding hid this header under the status bar. */}
-                  <View testID="diary-editor-title" collapsable={false}>
+                      padding hid this header under the status bar.
+                      Nightly 34349155324: a non-Pressable View does not blur
+                      the focused TextInput, so Gboard stayed up and the next
+                      field fill typed into skinArea (`лицоyпокраснение`). */}
+                  <Pressable
+                    testID="diary-editor-title"
+                    collapsable={false}
+                    onPress={Keyboard.dismiss}
+                    accessibilityRole="header"
+                    accessibilityLabel={t('diary.title')}>
                     <Text style={styles.headerTitle}>{t('diary.title')}</Text>
-                  </View>
+                  </Pressable>
                   <View style={styles.headerBtn} />
                 </View>
               </View>
@@ -227,7 +235,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                     ref={scrollRef}
                     style={[styles.scroll, { maxHeight: scrollMaxHeight }]}
                     contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
+                    keyboardShouldPersistTaps="always"
                     keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
                     automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
                     bounces={false}>
