@@ -76,7 +76,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
 | Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
-| UI / токены / a11y | `constants/{theme,layout,typography}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md` |
+| UI / токены / a11y | `constants/{theme,layout,typography}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; north-star [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
 | CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
@@ -322,6 +322,7 @@ Barrel: `index.ts`. Pure TS.
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
 | YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
+| Wellness UX north-star (практики, IA 4 таба + SOS, фазы N0–N6) | [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · макет [`wellness-ux-north-star.html`](./wellness-ux-north-star.html) · [`ux-audit-2026-08.md`](./ux-audit-2026-08.md) · [`ux-improvement-plan.md`](./ux-improvement-plan.md) |
 | Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 
 ---

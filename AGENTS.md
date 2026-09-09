@@ -14,7 +14,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist, Code Complete §10
 3. [`docs/codebase-index.md`](docs/codebase-index.md) — file map: routes, services, packages, «where to change X»
 
-Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
+Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase) · [`docs/wellness-ux-north-star.md`](docs/wellness-ux-north-star.md) (wellness UX north-star: практики, IA, фазы N0–N6).
 
 ### Non-negotiable rules (summary)
 
@@ -38,7 +38,7 @@ Procedure lives in a **skill** (loaded by `description`). Invariants live in a *
 | Kind | Path | When |
 |------|------|------|
 | Skill | `.cursor/skills/product-analyst/SKILL.md` | Metrics, KPI, funnels, analytics events, `FR-*` |
-| Skill | `.cursor/skills/product-designer/SKILL.md` | Screens, tokens, a11y, empty states, i18n copy |
+| Skill | `.cursor/skills/product-designer/SKILL.md` | Screens, tokens, a11y, empty states, i18n copy · north-star [`docs/wellness-ux-north-star.md`](docs/wellness-ux-north-star.md) |
 | Skill | `.cursor/skills/code-complete/SKILL.md` | Code construction / review quality |
 | Skill | `.cursor/skills/rework-commits/SKILL.md` | History rewrite on a feature branch |
 | Rule | `.cursor/rules/analytics-events.mdc` | `trackEvent` / taxonomy / PII |
