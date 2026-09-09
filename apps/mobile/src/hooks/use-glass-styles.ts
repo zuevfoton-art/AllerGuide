@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { density, radii, space } from '@/src/constants/layout';
-import { fontSizes } from '@/src/constants/typography';
+import { fontSizes, lineHeights, textStyles, tracking } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
 export function useUiStyles() {
@@ -20,14 +20,14 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       alignItems: 'center',
     },
     sectionTitle: {
-      fontFamily: fonts.serif,
-      fontSize: fontSizes.h3,
+      ...textStyles.h3,
       fontWeight: '600',
       color: colors.head,
     },
     sectionLink: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       fontWeight: '600',
       color: colors.accent,
     },
@@ -45,6 +45,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     pillText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       fontWeight: '600',
       color: colors.text,
     },
@@ -69,13 +70,15 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     feedBody: { flex: 1, gap: 2 },
     feedTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm + 1,
+      fontSize: fontSizes.bodyMd,
+      lineHeight: lineHeights.bodyMd,
       fontWeight: '600',
       color: colors.text,
     },
     feedSub: {
+      ...textStyles.label,
       fontFamily: fonts.sans,
-      fontSize: fontSizes.label,
+      letterSpacing: tracking.normal,
       color: colors.textMuted,
     },
     addBtn: {
@@ -101,6 +104,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       color: colors.onAccent,
       fontWeight: '600',
       fontSize: fontSizes.body,
+      lineHeight: lineHeights.body,
     },
     toggleRow: {
       flexDirection: 'row',
@@ -125,24 +129,24 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     toggleText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       fontWeight: '600',
       color: colors.textMuted,
     },
     toggleTextActive: { color: colors.onAccent, fontWeight: '600' },
     disclaimer: {
-      fontFamily: fonts.sans,
-      fontSize: fontSizes.caption,
+      ...textStyles.caption,
       color: colors.textMuted,
       textAlign: 'center',
-      lineHeight: 16,
     },
     sectionLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
-      letterSpacing: 0.12,
+      letterSpacing: tracking.label,
     },
     secondaryBtn: {
       flex: 1,
@@ -162,7 +166,8 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.text,
       fontWeight: '600',
-      fontSize: fontSizes.bodySm + 1,
+      fontSize: fontSizes.bodyMd,
+      lineHeight: lineHeights.bodyMd,
     },
     cardHead: {
       flexDirection: 'row',
@@ -170,30 +175,37 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       alignItems: 'center',
       marginBottom: 12,
     },
+    /** @deprecated Use microLabel — cardTitle is a 12px caption, not a card H2. */
     cardTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.label,
+      lineHeight: lineHeights.label,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    microLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.label,
+      lineHeight: lineHeights.label,
       fontWeight: '600',
       color: colors.textSecondary,
     },
     docLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
-      letterSpacing: 0.08,
+      letterSpacing: tracking.label,
     },
     docTitle: {
-      fontFamily: fonts.serifBold,
-      fontSize: fontSizes.h1,
+      ...textStyles.h1,
       fontWeight: '700',
       color: colors.head,
-      letterSpacing: -0.3,
     },
     docMeta: {
-      fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      ...textStyles.bodySm,
       color: colors.textSecondary,
     },
     kpiRow: {
@@ -205,14 +217,14 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       borderTopColor: colors.border,
     },
     kpiLabel: {
-      fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      ...textStyles.bodySm,
       color: colors.textSecondary,
       flex: 1,
     },
     kpiValue: {
       fontFamily: fonts.sansBold,
       fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       fontWeight: '700',
       color: colors.head,
       fontVariant: ['tabular-nums'],
@@ -227,16 +239,14 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       borderBottomColor: colors.border,
     },
     heroKpiNum: {
-      fontFamily: fonts.sansBold,
-      fontSize: fontSizes.kpi,
+      ...textStyles.kpi,
       fontWeight: '700',
       color: colors.head,
       fontVariant: ['tabular-nums'],
-      lineHeight: 40,
     },
     heroKpiSub: {
+      ...textStyles.bodyMd,
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm + 1,
       color: colors.textMuted,
     },
     badge: {
@@ -249,6 +259,7 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     badgeText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
       fontWeight: '600',
     },
   });

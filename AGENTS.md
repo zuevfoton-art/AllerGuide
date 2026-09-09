@@ -65,6 +65,7 @@ Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgr
 - `pnpm test` — Vitest in `packages/core`, `packages/ai`, `apps/mobile`, and `apps/api`
 - `pnpm --filter mobile lint` — ESLint for the mobile app
 - `pnpm check:analytics-taxonomy` — `trackEvent` names must match `ANALYTICS_EVENT_NAMES`; also part of `pnpm rc-gate`
+- `pnpm check:design-tokens` — literal `fontSize`/`lineHeight` and ad-hoc title keys must stay on the allowlist; also part of `pnpm rc-gate`
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + taxonomy + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage API live on Yandex Cloud; see [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1

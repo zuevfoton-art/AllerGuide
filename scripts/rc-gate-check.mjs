@@ -248,6 +248,7 @@ checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
+runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 

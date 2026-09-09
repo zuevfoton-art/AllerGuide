@@ -100,6 +100,7 @@ import {
   YANDEX_MAP_INTERACTIVE_ENABLED,
 } from '@/src/constants/features';
 import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 
 type MapLayerMode = 'pollen' | 'air' | 'places';
 
@@ -1013,7 +1014,7 @@ function LegendDot({ color, label }: { color: string; label: string }) {
       <Text
         style={{
           fontFamily: theme.fonts.sans,
-          fontSize: 11,
+          fontSize: fontSizes.caption,
           color: theme.colors.textMuted,
         }}>
         {label}
@@ -1039,20 +1040,20 @@ function createStyles({ colors, fonts }: AppTheme) {
     statusHeadline: {
       flex: 1,
       fontFamily: fonts.sansBold,
-      fontSize: 17,
+      fontSize: fontSizes.h3,
       fontWeight: '700',
       color: colors.text,
     },
     statusMeta: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textSecondary,
-      lineHeight: 16,
+      lineHeight: lineHeights.caption,
     },
     statusBadge: {
       alignSelf: 'flex-start',
       fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.warningText,
       backgroundColor: colors.warningLight,
@@ -1081,7 +1082,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     layerChipText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       textAlign: 'center',
       color: colors.textSecondary,
@@ -1116,20 +1117,20 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     searchAreaText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.accent,
     },
     allergenPickerLabel: {
       flex: 1,
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
       color: colors.accent,
     },
     legendTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.textMuted,
       marginTop: 2,
@@ -1141,9 +1142,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     mapAttribution: {
       fontFamily: fonts.sans,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       color: colors.textMuted,
-      lineHeight: 14,
+      lineHeight: lineHeights.caption,
     },
     mapLevelOverlay: {
       position: 'absolute',
@@ -1164,12 +1165,12 @@ function createStyles({ colors, fonts }: AppTheme) {
     mapLevelCopy: { flexShrink: 1, gap: 1 },
     mapLevelTaxon: {
       fontFamily: fonts.sans,
-      fontSize: 10,
+      fontSize: fontSizes.caption,
       color: colors.textMuted,
     },
     mapLevelText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.text,
     },
     heatmapEmptyOverlay: {
@@ -1186,8 +1187,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     heatmapEmptyText: {
       fontFamily: fonts.sans,
-      fontSize: 12,
-      lineHeight: 16,
+      fontSize: fontSizes.label,
+      lineHeight: lineHeights.caption,
       color: colors.textSecondary,
     },
     yandexBanner: {
@@ -1204,26 +1205,26 @@ function createStyles({ colors, fonts }: AppTheme) {
     yandexBannerText: {
       flex: 1,
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.warningText,
-      lineHeight: 16,
+      lineHeight: lineHeights.caption,
     },
     listFirstHint: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textMuted,
-      lineHeight: 16,
+      lineHeight: lineHeights.caption,
     },
     tipCard: { gap: 10 },
     tipText: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     sectionTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       color: colors.head,
       marginTop: 4,
     },
@@ -1231,10 +1232,10 @@ function createStyles({ colors, fonts }: AppTheme) {
     calendarBody: { flex: 1, gap: 4 },
     calendarTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
+      fontSize: fontSizes.body,
       color: colors.text,
     },
-    calendarText: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
+    calendarText: { fontFamily: fonts.sans, fontSize: fontSizes.label, color: colors.textSecondary },
     doctorsToggle: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -1257,26 +1258,26 @@ function createStyles({ colors, fonts }: AppTheme) {
     cardBody: { flex: 1, gap: 6 },
     cardTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
+      fontSize: fontSizes.body,
       fontWeight: '600',
       color: colors.text,
     },
     cardNote: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     tags: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.textMuted,
     },
     chiefBadge: {
       alignSelf: 'flex-start',
       fontFamily: fonts.sansSemiBold,
-      fontSize: 10,
+      fontSize: fontSizes.caption,
       fontWeight: '600',
       color: colors.accent,
       backgroundColor: colors.accentLight,

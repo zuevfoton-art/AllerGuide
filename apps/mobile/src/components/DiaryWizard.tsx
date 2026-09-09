@@ -64,6 +64,7 @@ import {
   rememberMedicineCard,
 } from '@/src/services/medicine-suggest-service';
 import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 
 export interface DiaryWizardResult {
   type: string;
@@ -695,14 +696,14 @@ function createPefZoneStyles({ colors, fonts }: AppTheme) {
     },
     title: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
     },
     hint: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textSecondary,
-      lineHeight: 17,
+      lineHeight: lineHeights.label,
     },
   });
 }
@@ -976,13 +977,13 @@ function createLegacyStyles({ colors, fonts }: AppTheme) {
     topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     title: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 16,
+      fontSize: fontSizes.h4,
       fontWeight: '600',
       color: colors.text,
     },
     cancelText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.accent,
     },
@@ -997,12 +998,12 @@ function createLegacyStyles({ colors, fonts }: AppTheme) {
       fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
       fontFamily: fonts.sans,
       color: colors.text,
-      lineHeight: 22,
+      lineHeight: lineHeights.body,
     },
     error: {
       fontFamily: fonts.sansSemiBold,
       color: colors.danger,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
     },
     primaryBtn: {
@@ -1017,7 +1018,7 @@ function createLegacyStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.onAccent,
       fontWeight: '600',
-      fontSize: 15,
+      fontSize: fontSizes.body,
     },
     deleteBtn: {
       flexDirection: 'row',
@@ -1028,7 +1029,7 @@ function createLegacyStyles({ colors, fonts }: AppTheme) {
     },
     deleteText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.danger,
     },
@@ -1048,7 +1049,7 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       color: colors.text,
     },
-    inputMultiline: { minHeight: 120, lineHeight: 22 },
+    inputMultiline: { minHeight: 120, lineHeight: lineHeights.body },
     choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     choiceChip: {
       paddingVertical: 9,
@@ -1061,7 +1062,7 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
     choiceChipActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
     choiceText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -1069,9 +1070,9 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
     photoWrap: { gap: 10 },
     photoHint: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     photoActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     photoBtn: {
@@ -1087,7 +1088,7 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
     },
     photoBtnText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.accent,
     },
@@ -1097,28 +1098,28 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
     photoRemove: { position: 'absolute', top: 2, right: 2 },
     photoEmpty: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textMuted,
     },
     btnDisabled: { opacity: 0.45 },
     checklistWrap: { gap: 10 },
     checklistDish: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
       color: colors.head,
     },
     checklistHint: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     offSource: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.accent,
-      lineHeight: 16,
+      lineHeight: lineHeights.caption,
     },
     offLoadingRow: {
       flexDirection: 'row',
@@ -1141,9 +1142,9 @@ function createFieldStyles({ colors, fonts }: AppTheme) {
     },
     conflictBanner: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.danger,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
       marginTop: 4,
     },
   });
@@ -1161,7 +1162,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     progressText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.textSecondary,
       textTransform: 'uppercase',
@@ -1177,23 +1178,23 @@ function createStyles({ colors, fonts }: AppTheme) {
     notice: { marginBottom: 4 },
     stepLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 17,
+      fontSize: fontSizes.h3,
       fontWeight: '600',
       color: colors.head,
-      lineHeight: 24,
+      lineHeight: lineHeights.h3,
     },
     stepHint: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
       marginBottom: 4,
     },
     scalePreview: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.accent,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
       backgroundColor: colors.accentLight,
       borderRadius: 6,
       padding: 10,
@@ -1203,7 +1204,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     error: {
       fontFamily: fonts.sansSemiBold,
       color: colors.danger,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
     },
     actions: { flexDirection: 'row', gap: 8 },
@@ -1222,7 +1223,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.text,
       fontWeight: '600',
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
     },
     primaryBtn: {
       flex: 1,
@@ -1237,13 +1238,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.onAccent,
       fontWeight: '600',
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
     },
     btnDisabled: { opacity: 0.45 },
     skipBtn: { alignItems: 'center', paddingVertical: 4 },
     skipText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -1256,7 +1257,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     deleteText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.danger,
     },
@@ -1267,9 +1268,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     hint: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
   });
 }

@@ -43,6 +43,7 @@ import {
   recognizePrescription,
   type PrescriptionOcrHintCode,
 } from '@/src/services/prescription-ocr-service';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 
 const ROUTES = Object.keys(PRESCRIBED_THERAPY_ROUTE_LABELS) as PrescribedTherapyRoute[];
 
@@ -625,9 +626,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     fieldGap: { marginTop: 12 },
     input: {
       backgroundColor: colors.card, borderRadius: 6, borderWidth: 1, borderColor: colors.borderInput,
-      paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, fontFamily: fonts.sans, color: colors.text,
+      paddingHorizontal: 14, paddingVertical: 12, fontSize: fontSizes.body, fontFamily: fonts.sans, color: colors.text,
     },
-    inputMultiline: { minHeight: 80, lineHeight: 22 },
+    inputMultiline: { minHeight: 80, lineHeight: lineHeights.body },
     uploadRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     uploadChip: {
       flexDirection: 'row',
@@ -646,7 +647,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     uploadChipText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -666,7 +667,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     routeBubbleText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -688,29 +689,29 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     ocrBtnText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
       color: colors.accent,
     },
     ocrHint: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textSecondary,
-      lineHeight: 17,
+      lineHeight: lineHeights.label,
       marginTop: 8,
     },
     stageCard: { gap: 8, marginBottom: 8 },
-    stageLabel: { fontFamily: fonts.sansSemiBold, fontSize: 13, fontWeight: '600', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+    stageLabel: { fontFamily: fonts.sansSemiBold, fontSize: fontSizes.bodySm, fontWeight: '600', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
     stageDateRow: { flexDirection: 'row', gap: 8 },
-    stageRow: { fontFamily: fonts.sans, fontSize: 13, color: colors.textSecondary, lineHeight: 19 },
-    reviewValue: { fontFamily: fonts.sansSemiBold, fontSize: 15, fontWeight: '600', color: colors.text },
+    stageRow: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm, color: colors.textSecondary, lineHeight: lineHeights.bodySm },
+    reviewValue: { fontFamily: fonts.sansSemiBold, fontSize: fontSizes.body, fontWeight: '600', color: colors.text },
     reminderList: { gap: 8, marginTop: 8 },
     reminderRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
     reminderField: { flex: 1, gap: 4 },
-    reminderFieldLabel: { fontFamily: fonts.sans, fontSize: 12, color: colors.textMuted },
+    reminderFieldLabel: { fontFamily: fonts.sans, fontSize: fontSizes.label, color: colors.textMuted },
     reminderPreview: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 16,
+      fontSize: fontSizes.h4,
       fontWeight: '600',
       color: colors.accent,
       paddingBottom: 12,
@@ -739,19 +740,19 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     addReminderText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
       color: colors.accent,
     },
-    empty: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary, textAlign: 'center', paddingVertical: 24 },
-    hint: { fontFamily: fonts.sans, fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+    empty: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.textSecondary, textAlign: 'center', paddingVertical: 24 },
+    hint: { fontFamily: fonts.sans, fontSize: fontSizes.bodyMd, color: colors.textSecondary, lineHeight: lineHeights.bodySm },
     modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
     modalSheet: { backgroundColor: colors.card, borderTopLeftRadius: radii.xl, borderTopRightRadius: radii.xl, paddingBottom: 24, maxHeight: '70%' },
     modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-    modalTitle: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.text },
-    modalCancel: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary },
-    modalDone: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.accent },
+    modalTitle: { fontFamily: fonts.sans, fontSize: fontSizes.body, fontWeight: '700', color: colors.text },
+    modalCancel: { fontFamily: fonts.sans, fontSize: fontSizes.body, color: colors.textSecondary },
+    modalDone: { fontFamily: fonts.sans, fontSize: fontSizes.body, fontWeight: '700', color: colors.accent },
     modalDoneDisabled: { opacity: 0.4 },
-    parseInput: { flex: 1, margin: 16, backgroundColor: colors.card, borderRadius: 8, borderWidth: 1, borderColor: colors.borderInput, padding: 12, fontSize: 14, fontFamily: fonts.sans, color: colors.text, minHeight: 120 },
+    parseInput: { flex: 1, margin: 16, backgroundColor: colors.card, borderRadius: 8, borderWidth: 1, borderColor: colors.borderInput, padding: 12, fontSize: fontSizes.bodyMd, fontFamily: fonts.sans, color: colors.text, minHeight: 120 },
   });
 }

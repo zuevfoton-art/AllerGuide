@@ -38,6 +38,7 @@ import {
   resolveSosEmergencyBar,
 } from '@/src/services/sos-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 
 export default function SosScreen() {
   const theme = useTheme();
@@ -426,7 +427,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     collapseTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.textSecondary,
       textTransform: 'uppercase',
@@ -444,26 +445,26 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     allergyText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.danger,
       fontWeight: '600',
     },
     passportRow: { gap: 4, marginBottom: 8 },
     passportLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.textSecondary,
     },
     passportValue: {
       fontFamily: fonts.sans,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       color: colors.text,
-      lineHeight: 20,
+      lineHeight: lineHeights.bodySm,
     },
     warnText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.danger,
       fontWeight: '600',
       marginBottom: 8,
@@ -473,21 +474,21 @@ function createStyles({ colors, fonts }: AppTheme) {
     gradeBlock: { gap: 4 },
     gradeTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
       color: colors.head,
     },
     gradeSigns: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     gradeAction: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.text,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
       paddingLeft: 4,
     },
     biphasicTip: {
@@ -500,10 +501,10 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     biphasicText: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textSecondary,
       flex: 1,
-      lineHeight: 17,
+      lineHeight: lineHeights.label,
     },
     notesBlock: {
       marginTop: 10,
@@ -514,20 +515,20 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     notesLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.textSecondary,
     },
     notesText: {
       fontFamily: fonts.sans,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       color: colors.textSecondary,
-      lineHeight: 20,
+      lineHeight: lineHeights.bodySm,
     },
     planStep: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
     planNum: {
       fontFamily: fonts.sansBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '700',
       color: colors.head,
       width: 20,
@@ -535,9 +536,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     planText: {
       fontFamily: fonts.sans,
       flex: 1,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       color: colors.text,
-      lineHeight: 20,
+      lineHeight: lineHeights.bodySm,
     },
     contactsHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     contactRow: {
@@ -551,28 +552,28 @@ function createStyles({ colors, fonts }: AppTheme) {
     contactBody: { flex: 1, gap: 2, minWidth: 0 },
     contactName: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodyMd,
       fontWeight: '600',
       color: colors.text,
     },
     contactMeta: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.label,
       color: colors.textMuted,
     },
     hintText: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     contactsHintCard: { gap: 10 },
     epiHintCard: { gap: 10, borderColor: colors.dangerBorder, backgroundColor: colors.dangerLight },
     epiHintText: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.text,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
     },
     tipCard: {
       flexDirection: 'row',
@@ -586,9 +587,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     tipText: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
       color: colors.tipText,
-      lineHeight: 18,
+      lineHeight: lineHeights.label,
       flex: 1,
     },
   });
