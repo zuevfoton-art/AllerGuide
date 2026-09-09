@@ -15,6 +15,12 @@ export function useHintAnchor(anchorId: string) {
     });
   }, [anchorId, registerAnchor]);
 
+  const anchorNudge = useHintsStore((state) => state.anchorNudge);
+  useEffect(() => {
+    if (anchorNudge === 0) return;
+    measure();
+  }, [anchorNudge, measure]);
+
   useEffect(() => () => unregisterAnchor(anchorId), [anchorId, unregisterAnchor]);
 
   return { ref, onLayout: measure };

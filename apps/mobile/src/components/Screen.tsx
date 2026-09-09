@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo, type ReactNode } from 'react';
+import { PropsWithChildren, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -19,6 +19,8 @@ import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
 import { resolveScreenKeyboardPadding } from '@/src/hooks/screen-keyboard-metrics';
 import { SkipLink } from '@/src/components/FocusRing';
 import { StatusBannerHost } from '@/src/components/StatusBanner';
+import { HINT_FOLLOW_EPSILON_PX } from '@/src/components/hints/hint-geometry';
+import { useHintsStore } from '@/src/store/hints-store';
 
 type ScreenProps = {
   scroll?: boolean;
@@ -56,6 +58,25 @@ export function Screen({
     layoutBottomPadding: layout.bottomPadding,
     safeBottom: insets.bottom,
   });
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollOffsetYRef = useRef(0);
+
+  useEffect(() => {
+    if (!scroll) return undefined;
+    const scrollBy = (deltaY: number, animated: boolean) => {
+      if (Math.abs(deltaY) < HINT_FOLLOW_EPSILON_PX) return;
+      scrollRef.current?.scrollTo({
+        y: Math.max(0, scrollOffsetYRef.current + deltaY),
+        animated,
+      });
+    };
+    useHintsStore.getState().setScrollScreenBy(scrollBy);
+    return () => {
+      if (useHintsStore.getState().scrollScreenBy === scrollBy) {
+        useHintsStore.getState().setScrollScreenBy(null);
+      }
+    };
+  }, [scroll]);
   const pathname = usePathname();
   const brandVisible = showBrandHeader ?? shouldShowScreenBrandHeader(pathname);
   const brandHeader = brandVisible ? (
@@ -163,12 +184,17 @@ export function Screen({
           <SkipLink />
           {pinnedContent ? <View style={styles.pinned}>{pinnedContent}</View> : null}
           <ScrollView
+            ref={scrollRef}
             style={styles.scrollOuter}
             contentContainerStyle={styles.scroll}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
             automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+            scrollEventThrottle={16}
+            onScroll={(event) => {
+              scrollOffsetYRef.current = event.nativeEvent.contentOffset.y;
+            }}
             refreshControl={
               onRefresh ? (
                 <RefreshControl

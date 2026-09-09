@@ -8,7 +8,12 @@ const homeSteps: HintStepView[] = [
 
 describe('hints-store', () => {
   beforeEach(() => {
-    useHintsStore.setState({ anchors: {}, activeTour: null });
+    useHintsStore.setState({
+      anchors: {},
+      activeTour: null,
+      anchorNudge: 0,
+      scrollScreenBy: null,
+    });
   });
 
   it('registers and unregisters an anchor rect', () => {
@@ -45,5 +50,14 @@ describe('hints-store', () => {
     expect(useHintsStore.getState().activeTour?.stepIndex).toBe(1);
     useHintsStore.getState().closeTour();
     expect(useHintsStore.getState().activeTour).toBeNull();
+  });
+
+  it('nudges anchors and stores a screen scroller', () => {
+    useHintsStore.getState().setScrollScreenBy(() => undefined);
+    useHintsStore.getState().nudgeAnchors();
+    expect(useHintsStore.getState().anchorNudge).toBe(1);
+    expect(useHintsStore.getState().scrollScreenBy).not.toBeNull();
+    useHintsStore.getState().setScrollScreenBy(null);
+    expect(useHintsStore.getState().scrollScreenBy).toBeNull();
   });
 });

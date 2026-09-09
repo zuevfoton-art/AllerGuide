@@ -4,12 +4,14 @@ import { Button } from '@/src/components/Button';
 import { CardTitle } from '@/src/components/CardTitle';
 import {
   HINT_ANCHOR_WAIT_MS,
+  HINT_FOLLOW_REMEASURE_MS,
   HINT_HOLE_PADDING,
   HINT_SCRIM_OPACITY,
   expandRect,
   firstResolvedHintStepIndex,
   isUsableAnchorRect,
   placeHintBubble,
+  resolveHintFollowScroll,
   scrimRectsAroundHole,
   toLocalRect,
 } from '@/src/components/hints/hint-geometry';
@@ -137,6 +139,49 @@ export function HintSpotlight() {
     rememberedTourIdRef.current = activeTour.tourId;
     rememberHintTour(userId, activeTour.tourId);
   }, [activeTour, hole]);
+
+  const followedStepRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!activeTour) {
+      followedStepRef.current = null;
+      return;
+    }
+    if (!hole) return;
+    const overlayHeight = viewport.width > 0 ? viewport.height : windowSize.height;
+    if (overlayHeight <= 0) return;
+
+    const followKey = `${activeTour.tourId}:${activeTour.stepIndex}:${Math.round(bubbleHeight)}`;
+    const { deltaY } = resolveHintFollowScroll({
+      hole,
+      viewportHeight: overlayHeight,
+      bubbleHeight,
+    });
+    if (deltaY === 0) {
+      followedStepRef.current = followKey;
+      return;
+    }
+    if (followedStepRef.current === followKey) return;
+    followedStepRef.current = followKey;
+
+    useHintsStore.getState().scrollScreenBy?.(deltaY, !reduceMotion);
+    const waitMs = reduceMotion ? 0 : HINT_FOLLOW_REMEASURE_MS;
+    const timeout = setTimeout(() => {
+      useHintsStore.getState().nudgeAnchors();
+    }, waitMs);
+    return () => clearTimeout(timeout);
+  }, [
+    activeTour,
+    hole?.x,
+    hole?.y,
+    hole?.width,
+    hole?.height,
+    viewport.width,
+    viewport.height,
+    windowSize.height,
+    bubbleHeight,
+    reduceMotion,
+  ]);
 
   useEffect(() => {
     if (!activeTour || Platform.OS === 'web') return;
