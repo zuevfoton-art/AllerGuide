@@ -20,6 +20,15 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /NODE_ENV=production/);
     assert.match(script, /unzip -l "\$APK"/);
     assert.match(script, /missing the embedded JS bundle/);
+    // Under `pipefail`, `grep -q` closing the pipe early kills unzip with
+    // SIGPIPE once the listing outgrows the 64K buffer, so the guard reports a
+    // missing bundle on a good APK. Match a captured listing instead.
+    assert.match(script, /APK_LISTING="\$\(unzip -l "\$APK"\)"/);
+    assert.doesNotMatch(
+      script,
+      /unzip -l "\$APK"\s*\|\s*grep/,
+      'do not pipe the APK listing into grep — SIGPIPE + pipefail fails the guard',
+    );
     assert.match(script, /enable_emulator_http_cleartext/);
     assert.match(script, /network_security_config/);
     assert.match(script, /10\.0\.2\.2/);
@@ -234,7 +243,28 @@ describe('Maestro nightly CI invariants', () => {
         /^\s*-\s+tapOn:\s*\n\s+id: diary-wizard-primary\s*$/m,
         `${name} must not tap diary-wizard-primary while IME may cover it`,
       );
+      // «Далее» is the last child of the wizard's ScrollView and stays disabled
+      // until the step is filled, so it lays out below the fold on the Pixel 6
+      // AVD (nightly 34325395361: bounds [87,2373][993,2358], enabled=false).
+      // Only _tap-wizard-primary.yaml may reference it, and only to scroll+tap.
+      assert.doesNotMatch(
+        flow,
+        /(visible|notVisible):\s*\n\s+id: diary-wizard-primary\s*$/m,
+        `${name} must not wait on diary-wizard-primary visibility — use diary-wizard-step-label`,
+      );
+      assert.ok(
+        flow.includes('id: diary-wizard-step-label'),
+        `${name} must gate the wizard on diary-wizard-step-label`,
+      );
     }
+
+    const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
+    assert.match(wizard, /testID="diary-wizard-step-label"/);
+    assert.match(
+      wizard,
+      /testID="diary-wizard-step-label" collapsable=\{false\}/,
+      'the wizard mount anchor must stay in the native hierarchy',
+    );
 
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
