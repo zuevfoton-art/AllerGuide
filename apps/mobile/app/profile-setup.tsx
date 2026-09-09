@@ -57,6 +57,7 @@ import { ProfileSetupSymptomsStep } from '@/src/components/profile-setup/Profile
 import { ProfileSetupConditionHistoryStep } from '@/src/components/profile-setup/ProfileSetupConditionHistoryStep';
 import type { ConditionHistoryDrafts } from '@/src/components/ConditionHistoryEditor';
 import {
+  canFinishProfileSetupEarly,
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
@@ -392,6 +393,8 @@ export default function ProfileSetupScreen() {
 
   const isLastStep = currentStep === 'contacts';
   const showBack = stepProgressMeta.current > 1;
+  const canFinishEarly =
+    !isLastStep && canFinishProfileSetupEarly(currentStep, draft, { scenario });
 
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
@@ -517,6 +520,19 @@ export default function ProfileSetupScreen() {
       ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      {canFinishEarly ? (
+        <Button
+          testID="profile-finish-early"
+          label={t('profileSetup.finishEarly')}
+          variant="ghost"
+          block
+          onPress={() => {
+            trackEvent('profile_setup_step_skip', { step: 'optional_tail', from: currentStep });
+            void save();
+          }}
+        />
+      ) : null}
 
       <View style={styles.actions}>
         {showBack ? (

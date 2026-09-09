@@ -34,6 +34,24 @@ export type ProfileSetupWizardStep = (typeof PROFILE_SETUP_WIZARD_STEPS)[number]
 
 export const PROFILE_SETUP_WIZARD_STEP_COUNT = PROFILE_SETUP_WIZARD_STEPS.length;
 
+/**
+ * The shortest path to a useful app: name, age, condition types and allergens.
+ * Everything after that is progressive profiling and must not block the first
+ * value (north-star §4.6, FR-ONB-VALUE).
+ */
+export const PROFILE_SETUP_REQUIRED_STEPS = [
+  'name',
+  'birthYear',
+  'conditions',
+  'allergens',
+] as const;
+
+export type ProfileSetupRequiredStep = (typeof PROFILE_SETUP_REQUIRED_STEPS)[number];
+
+export function isProfileSetupWizardStepOptional(step: ProfileSetupWizardStep): boolean {
+  return !(PROFILE_SETUP_REQUIRED_STEPS as readonly string[]).includes(step);
+}
+
 export type ProfileSetupWizardErrorCode =
   | 'name_required'
   | 'birth_year_invalid'
@@ -224,6 +242,24 @@ export function validateProfileSetupWizardDraft(
 
 export function getProfileSetupWizardStepIndex(step: ProfileSetupWizardStep): number {
   return PROFILE_SETUP_WIZARD_STEPS.indexOf(step);
+}
+
+/**
+ * True once every required step is filled, so the wizard can offer «done» on the
+ * allergens step instead of eleven screens before the first forecast.
+ */
+export function canFinishProfileSetupEarly(
+  step: ProfileSetupWizardStep,
+  draft: ProfileSetupWizardDraft,
+  options: { scenario?: Scenario | null },
+): boolean {
+  const lastRequired = PROFILE_SETUP_REQUIRED_STEPS[PROFILE_SETUP_REQUIRED_STEPS.length - 1];
+  if (getProfileSetupWizardStepIndex(step) < getProfileSetupWizardStepIndex(lastRequired)) {
+    return false;
+  }
+  return PROFILE_SETUP_REQUIRED_STEPS.every(
+    (required) => validateProfileSetupWizardStep(required, draft, options) === null,
+  );
 }
 
 export function getNextProfileSetupWizardStep(

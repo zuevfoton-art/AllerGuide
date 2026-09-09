@@ -245,6 +245,9 @@ export type LocaleMessages = {
     insightsDiaryTitle: string;
     insightsDiaryText: string;
     insightsOpenDiary: string;
+    insightsCompleteProfileTitle: string;
+    insightsCompleteProfileText: string;
+    insightsCompleteProfileAction: string;
     insightsActTitle: string;
     insightsActText: string;
     insightsOpenAct: string;
@@ -1070,6 +1073,7 @@ export type LocaleMessages = {
     contactsLabel: string;
     next: string;
     back: string;
+    finishEarly: string;
     saveProfile: string;
     nextChild: string;
     disclaimer: string;

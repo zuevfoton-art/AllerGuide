@@ -17,6 +17,7 @@ export type PlannedHomeInsightKind =
   | 'return-restart'
   | 'act-due'
   | 'therapy-reminder'
+  | 'profile-incomplete'
   | 'wellness'
   | 'phenotype';
 
@@ -37,6 +38,11 @@ export type PlanHomeInsightsInput = {
   wellnessCount: number;
   phenotypeCount: number;
   hasTherapyReminder?: boolean;
+  /**
+   * Progressive profiling after an early wizard finish (N5): a soft row, never a
+   * blocker and never framed as the user's failure.
+   */
+  hasEmergencyContacts?: boolean;
   now?: Date;
   maxItems?: number;
   returnStage?: ReturnStage | null;
@@ -88,6 +94,10 @@ export function planHomeInsights(input: PlanHomeInsightsInput): PlannedHomeInsig
 
   if (input.hasTherapyReminder) {
     planned.push({ id: 'therapy-reminder', kind: 'therapy-reminder', priority: 3 });
+  }
+
+  if (input.hasEmergencyContacts === false) {
+    planned.push({ id: 'profile-incomplete', kind: 'profile-incomplete', priority: 4 });
   }
 
   for (let index = 0; index < input.wellnessCount; index += 1) {

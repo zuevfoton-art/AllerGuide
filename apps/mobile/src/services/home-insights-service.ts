@@ -11,6 +11,7 @@ import {
 } from '@allerguide/core';
 import { getStoredProfileConditions } from '@/src/services/profile-conditions-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
+import { listEmergencyContacts } from '@/src/services/sos-service';
 import type { WellnessSnapshot } from '@/src/services/wellness-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 
@@ -74,6 +75,9 @@ export function buildHomeInsightItems(input: {
     ),
     returnStage: input.returnStage,
     hasStandaloneCheckIn: input.hasStandaloneCheckIn,
+    hasEmergencyContacts: input.profile
+      ? listEmergencyContacts(input.profile.id).length > 0
+      : undefined,
   });
 
   const items: HomeInsightItem[] = [];
@@ -168,6 +172,21 @@ export function buildHomeInsightItems(input: {
         action: {
           label: input.t('reengagement.restartAction'),
           href: '/notifications',
+        },
+      });
+      continue;
+    }
+
+    if (item.kind === 'profile-incomplete') {
+      items.push({
+        id: item.id,
+        kind: item.kind,
+        icon: 'shield-checkmark-outline',
+        title: input.t('home.insightsCompleteProfileTitle'),
+        text: input.t('home.insightsCompleteProfileText'),
+        action: {
+          label: input.t('home.insightsCompleteProfileAction'),
+          href: '/sos-edit',
         },
       });
       continue;
