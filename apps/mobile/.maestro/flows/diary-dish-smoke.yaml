@@ -16,10 +16,9 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: nutrition-enter-manual
-# Wizard mount signal — see diary-smoke.yaml for why «Далее» cannot be used.
 - extendedWaitUntil:
     visible:
-      id: diary-wizard-step-label
+      id: diary-wizard-primary
     timeout: 10000
 # food text
 - runFlow:
@@ -42,7 +41,7 @@ appId: com.aclearo.app
 - runFlow: _tap-wizard-primary.yaml
 - extendedWaitUntil:
     notVisible:
-      id: diary-wizard-step-label
+      id: diary-wizard-primary
     timeout: 10000
 - assertVisible:
     id: diary-new-entry

@@ -217,11 +217,17 @@ describe('Maestro nightly CI invariants', () => {
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
+    assert.match(editorModal, /testID="diary-editor-footer"/);
+    assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
+
+    const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
+    assert.match(wizard, /DiaryEditorFooter/);
+    assert.match(wizard, /testID="diary-wizard-primary"/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
@@ -243,28 +249,7 @@ describe('Maestro nightly CI invariants', () => {
         /^\s*-\s+tapOn:\s*\n\s+id: diary-wizard-primary\s*$/m,
         `${name} must not tap diary-wizard-primary while IME may cover it`,
       );
-      // «Далее» is the last child of the wizard's ScrollView and stays disabled
-      // until the step is filled, so it lays out below the fold on the Pixel 6
-      // AVD (nightly 34325395361: bounds [87,2373][993,2358], enabled=false).
-      // Only _tap-wizard-primary.yaml may reference it, and only to scroll+tap.
-      assert.doesNotMatch(
-        flow,
-        /(visible|notVisible):\s*\n\s+id: diary-wizard-primary\s*$/m,
-        `${name} must not wait on diary-wizard-primary visibility — use diary-wizard-step-label`,
-      );
-      assert.ok(
-        flow.includes('id: diary-wizard-step-label'),
-        `${name} must gate the wizard on diary-wizard-step-label`,
-      );
     }
-
-    const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
-    assert.match(wizard, /testID="diary-wizard-step-label"/);
-    assert.match(
-      wizard,
-      /testID="diary-wizard-step-label" collapsable=\{false\}/,
-      'the wizard mount anchor must stay in the native hierarchy',
-    );
 
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
