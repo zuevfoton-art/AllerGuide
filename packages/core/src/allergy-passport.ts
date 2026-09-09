@@ -1,5 +1,6 @@
 import type { AllergyConditionId } from './allergy-conditions';
 import type { ClinicalPhenotypeId } from './clinical-phenotypes';
+import { escapeHtmlMultiline } from './html-escape';
 
 export interface ShockKitItem {
   id: string;
@@ -171,7 +172,7 @@ export function formatPassportText(input: PassportExportInput): string {
 }
 
 export function formatPassportHtml(input: PassportExportInput): string {
-  const text = formatPassportText(input).replace(/\n/g, '<br/>');
+  const text = escapeHtmlMultiline(formatPassportText(input));
   return `
     <html><body style="font-family:Helvetica,Arial,sans-serif;padding:24px;color:#20322a;">
       <h1 style="color:#FF6B00;">Паспорт аллергика</h1>

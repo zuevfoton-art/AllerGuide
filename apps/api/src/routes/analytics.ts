@@ -7,6 +7,7 @@ import {
 } from '../lib/analytics-store';
 import { forwardAnalyticsToPostHog } from '../lib/posthog-forward';
 import { logCaughtError } from '../lib/log-caught-error';
+import { secretsMatch } from '../lib/secret-compare';
 import {
   buildMapPollenOpsHealth,
   maybeAlertMapPollenFallback,
@@ -28,7 +29,7 @@ function dashboardEnabled(): boolean {
 function dashboardAuthorized(req: Request): boolean {
   const configuredKey = process.env.ANALYTICS_DASHBOARD_KEY?.trim();
   if (!configuredKey) return false;
-  return req.header('x-analytics-dashboard-key') === configuredKey;
+  return secretsMatch(req.header('x-analytics-dashboard-key'), configuredKey);
 }
 
 export function registerAnalyticsRoutes(app: Express) {

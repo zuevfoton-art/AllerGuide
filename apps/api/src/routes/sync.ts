@@ -2,6 +2,7 @@ import type { Express, NextFunction, Request, Response } from 'express';
 import { eq } from 'drizzle-orm';
 import { readAccessToken, resolveAuthPayload } from '../lib/request-auth';
 import { logCaughtError } from '../lib/log-caught-error';
+import { secretsMatch } from '../lib/secret-compare';
 import { resolveEncryptedSyncPayload, type SyncBody } from '../lib/sync-payload';
 import { db } from '../db';
 import { syncBackups } from '../db/schema';
@@ -84,7 +85,7 @@ async function requireSyncAccess(req: Request, res: Response, next: NextFunction
   // per-user ownership when JWT_SECRET is configured.
   if (!process.env.JWT_SECRET) {
     const configuredKey = process.env.SYNC_API_KEY;
-    if (configuredKey && req.header('x-sync-api-key') === configuredKey) {
+    if (secretsMatch(req.header('x-sync-api-key'), configuredKey)) {
       next();
       return;
     }

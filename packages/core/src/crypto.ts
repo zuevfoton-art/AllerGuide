@@ -18,6 +18,14 @@ const GCM_IV_BYTES = 12;
 const PBKDF2_ITERATIONS = 100_000;
 const SALT_BYTES = 16;
 
+/**
+ * Upper bound for the iteration count read out of an envelope. The envelope is
+ * untrusted input (a restored cloud backup or a pasted file), and PBKDF2 runs on
+ * the JS thread — pure-JS on Hermes — so an inflated `iter` would freeze the app
+ * for minutes. Ten times the value we write leaves room to raise the cost later.
+ */
+const PBKDF2_MAX_ITERATIONS = PBKDF2_ITERATIONS * 10;
+
 export interface EncryptedEnvelope {
   alg: 'AES-GCM';
   kdf: 'PBKDF2';
@@ -25,6 +33,10 @@ export interface EncryptedEnvelope {
   salt: string;
   iv: string;
   ct: string;
+}
+
+function isAcceptableIterationCount(iter: unknown): iter is number {
+  return typeof iter === 'number' && Number.isInteger(iter) && iter > 0 && iter <= PBKDF2_MAX_ITERATIONS;
 }
 
 function hasSubtleCrypto(): boolean {
@@ -172,6 +184,7 @@ export async function decryptString(
   try {
     const envelope = JSON.parse(envelopeRaw) as EncryptedEnvelope;
     if (envelope.alg !== 'AES-GCM') return null;
+    if (!isAcceptableIterationCount(envelope.iter)) return null;
 
     if (hasSubtleCrypto()) {
       const fromSubtle = await decryptWithSubtle(envelope, passphrase);
@@ -189,9 +202,7 @@ export function isEncryptedEnvelope(raw: string): boolean {
     return (
       parsed?.alg === 'AES-GCM' &&
       parsed.kdf === 'PBKDF2' &&
-      typeof parsed.iter === 'number' &&
-      Number.isFinite(parsed.iter) &&
-      parsed.iter > 0 &&
+      isAcceptableIterationCount(parsed.iter) &&
       typeof parsed.salt === 'string' &&
       parsed.salt.length > 0 &&
       typeof parsed.iv === 'string' &&

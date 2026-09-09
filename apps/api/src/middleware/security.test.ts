@@ -90,6 +90,26 @@ describe('security middleware', () => {
     expect(blocked.status).toBe(429);
     expect(blocked.body.error).toBe('Too many authentication attempts');
   });
+
+  // /api/stt and /api/search/ingredients bill per call (SpeechKit, Yandex Search),
+  // so they must sit behind the scan limiter rather than the coarse global one.
+  it.each(['/api/stt', '/api/search/ingredients'])(
+    'returns 429 after exceeding the scan rate limit on %s',
+    async (path) => {
+      process.env.SCAN_RATE_LIMIT_MAX = '2';
+      process.env.SCAN_RATE_LIMIT_WINDOW_MS = '60000';
+      delete process.env.RATE_LIMIT_DISABLED;
+
+      const app = await createApp();
+
+      await request(app).post(path).send({});
+      await request(app).post(path).send({});
+      const blocked = await request(app).post(path).send({});
+
+      expect(blocked.status).toBe(429);
+      expect(blocked.body.error).toBe('Too many scan requests');
+    },
+  );
 });
 
 describe('health endpoint', () => {

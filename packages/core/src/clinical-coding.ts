@@ -3,6 +3,7 @@ import {
   ALLERGY_CONFIRMATION_LABELS,
   type AllergyConfirmationSource,
 } from './allergy-confirmations';
+import { escapeHtml } from './html-escape';
 
 export interface ClinicalCoding {
   allergenId: string;
@@ -536,12 +537,12 @@ export function formatCodedAllergiesReportHtml(lines: CodedAllergyLine[]): strin
   return `<ul>${lines
     .map(
       (line) =>
-        `<li><strong>${line.name}</strong><br/>` +
-        `ICD-11: ${line.icd11} — ${line.icd11Label}<br/>` +
+        `<li><strong>${escapeHtml(line.name)}</strong><br/>` +
+        `ICD-11: ${escapeHtml(line.icd11)} — ${escapeHtml(line.icd11Label)}<br/>` +
         (line.snomed
-          ? `SNOMED CT: ${line.snomed} (${line.snomedLabel})<br/>`
-          : `${line.snomedLabel}<br/>`) +
-        `Подтверждение: ${line.confirmedByLabel}</li>`,
+          ? `SNOMED CT: ${escapeHtml(line.snomed)} (${escapeHtml(line.snomedLabel)})<br/>`
+          : `${escapeHtml(line.snomedLabel)}<br/>`) +
+        `Подтверждение: ${escapeHtml(line.confirmedByLabel)}</li>`,
     )
     .join('')}</ul>`;
 }
