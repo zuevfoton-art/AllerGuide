@@ -234,7 +234,6 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                 </DiaryEditorScrollContext.Provider>
                 {hasFooter ? (
                   <View
-                    key={footerEpoch}
                     testID="diary-editor-footer"
                     collapsable={false}
                     style={styles.footer}
@@ -242,7 +241,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                       const next = Math.ceil(event.nativeEvent.layout.height);
                       setFooterHeight((prev) => (prev === next ? prev : next));
                     }}>
-                    {footerRenderRef.current?.()}
+                    {footerEpoch >= 0 ? footerRenderRef.current?.() : null}
                   </View>
                 ) : null}
               </DiaryEditorFooterContext.Provider>
