@@ -15,9 +15,10 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: diary-picker-skin
+# Wizard mount signal — see diary-smoke.yaml for why «Далее» cannot be used.
 - extendedWaitUntil:
     visible:
-      id: diary-wizard-primary
+      id: diary-wizard-step-label
     timeout: 10000
 # skinArea + appearance + itching share one screen
 - runFlow:
@@ -45,7 +46,7 @@ appId: com.aclearo.app
 - runFlow: _tap-wizard-primary.yaml
 - extendedWaitUntil:
     notVisible:
-      id: diary-wizard-primary
+      id: diary-wizard-step-label
     timeout: 10000
 - assertVisible:
     id: diary-new-entry

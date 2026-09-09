@@ -8,9 +8,13 @@ appId: com.aclearo.app
     id: diary-new-entry
 - tapOn:
     id: diary-picker-symptoms
+# «Далее» is the last child of the scrolling wizard, so on Pixel 6 it mounts
+# below the fold and stays disabled until the step is filled — it never turns
+# visible here (nightly 34325395361: bounds [87,2373][993,2358], enabled=false).
+# The step label sits at the top of the wizard, so it is the mount signal.
 - extendedWaitUntil:
     visible:
-      id: diary-wizard-primary
+      id: diary-wizard-step-label
     timeout: 10000
 # Catalog picker and free text share one screen
 - runFlow:
@@ -27,7 +31,7 @@ appId: com.aclearo.app
 - runFlow: _tap-wizard-primary.yaml
 - extendedWaitUntil:
     notVisible:
-      id: diary-wizard-primary
+      id: diary-wizard-step-label
     timeout: 10000
 - assertVisible:
     id: diary-new-entry
