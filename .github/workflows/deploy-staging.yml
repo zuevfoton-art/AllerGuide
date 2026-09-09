@@ -30,7 +30,8 @@ concurrency:
 env:
   IMAGE_NAME: aclearo-api
   NODE_VERSION: "20"
-  PNPM_VERSION: "10.34.4"
+  # pnpm version: root package.json `packageManager` (do not pass
+  # pnpm/action-setup `version` — it errors if it disagrees with package.json).
 
 jobs:
   gate:
@@ -162,8 +163,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -189,8 +188,6 @@ jobs:
 
       # Preflight shells after auth use `pnpm --filter api exec tsx` (sync/scan/yandex-ai).
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -219,8 +216,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           # Match eas-staging-android.yml; eas-cli 22 expects current Node.
@@ -256,8 +251,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22

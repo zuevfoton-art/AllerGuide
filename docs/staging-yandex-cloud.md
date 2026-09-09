@@ -428,6 +428,7 @@ pnpm build:staging:ios    # упадёт без Apple credentials
 | Симптом | Решение |
 |---------|---------|
 | `migrate` job pending forever | Runner не зарегистрирован или нет label `yc-staging-vpc` |
+| `migrate`: Multiple versions of pnpm specified | `pnpm/action-setup` `version` расходится с `package.json` `packageManager`. Не пинить version в workflow — как в `ci.yml` |
 | `connection refused` к Postgres с runner | VM в той же subnet; проверьте SG (`6432` из VPC CIDR) |
 | Health 503, `database.ok: false` | Lockbox `DATABASE_URL`; container имеет VPC connectivity |
 | Health 403 `API Gateway is stopped` | `yc serverless api-gateway resume --id <gw>` (`aclearo-staging-api-gw`) |
