@@ -148,7 +148,14 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               accessibilityLabel={t('common.cancel')}
             />
             <View
-              style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}
+              style={[
+                styles.sheet,
+                { paddingBottom: Math.max(insets.bottom, space[4]) },
+                // Bound the sheet when actions are pinned so the footer stays
+                // inside the viewport (web + Pixel 6). Content-sized sheets
+                // still grow past 88% if maxHeight is the only cap.
+                footer ? { height: '88%' } : null,
+              ]}
               accessibilityViewIsModal>
               <View style={styles.grabberWrap}>
                 <View style={styles.grabber} />

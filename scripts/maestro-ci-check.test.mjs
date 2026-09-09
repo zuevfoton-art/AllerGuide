@@ -210,6 +210,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /collapsable=\{false\}/);
     assert.match(editorModal, /export function DiaryEditorFooter/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
+    assert.match(editorModal, /height: '88%'/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
