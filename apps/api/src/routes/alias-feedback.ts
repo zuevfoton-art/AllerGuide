@@ -1,10 +1,11 @@
 import type { Express, Request, Response } from 'express';
 import { persistAliasFeedback, listPendingAliasFeedbackDb, updateAliasFeedbackStatus } from '../services/alias-feedback-service';
+import { secretsMatch } from '../lib/secret-compare';
 
 function adminKeyValid(req: Request): boolean {
   const expected = process.env.ALIAS_FEEDBACK_ADMIN_KEY?.trim();
   if (!expected) return false;
-  return req.header('x-alias-feedback-admin-key') === expected;
+  return secretsMatch(req.header('x-alias-feedback-admin-key'), expected);
 }
 
 export function registerAliasFeedbackRoutes(app: Express) {

@@ -1,4 +1,9 @@
-import { decryptString, encryptString, isEncryptionAvailable } from '@allerguide/core';
+import {
+  decryptString,
+  encryptString,
+  getSecureRandomBytes,
+  isEncryptionAvailable,
+} from '@allerguide/core';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { getSetting } from '@/src/services/settings-service';
 import { getSensitiveSetting, setSensitiveSettingSync } from '@/src/services/secure-settings-service';
@@ -16,15 +21,13 @@ const RECOVERY_KEY_BYTE_LENGTH = 32;
 const RECOVERY_KEY_HEX_LENGTH = RECOVERY_KEY_BYTE_LENGTH * 2;
 const DISPLAY_GROUP_LENGTH = 8;
 
+/**
+ * Recovery keys are the only secret protecting cloud backups, so this must fail
+ * loudly rather than degrade: `getSecureRandomBytes` throws when no CSPRNG is
+ * reachable, matching the policy the core crypto helpers already enforce.
+ */
 function randomHex(byteLength: number): string {
-  const bytes = new Uint8Array(byteLength);
-  const webCrypto = (globalThis as { crypto?: Crypto }).crypto;
-  if (webCrypto?.getRandomValues) {
-    webCrypto.getRandomValues(bytes);
-  } else {
-    for (let i = 0; i < byteLength; i += 1) bytes[i] = Math.floor(Math.random() * 256);
-  }
-  return Array.from(bytes)
+  return Array.from(getSecureRandomBytes(byteLength))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 }

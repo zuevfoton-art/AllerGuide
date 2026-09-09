@@ -162,6 +162,9 @@ export async function installRateLimiters(app: Express): Promise<void> {
   const scanLimiter = await createScanRateLimiter();
   app.use('/api/scan', scanLimiter);
   app.use('/api/ocr', scanLimiter);
+  // SpeechKit STT and Yandex ingredient search are billable per call, like scan/OCR.
+  app.use('/api/stt', scanLimiter);
+  app.use('/api/search', scanLimiter);
   app.use('/api/dishes', scanLimiter);
   app.use('/api/medicines', scanLimiter);
   app.use('/api/pollen', await createPollenRateLimiter());

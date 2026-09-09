@@ -78,6 +78,17 @@ describe('allergy passport', () => {
     expect(html).toContain('Анна');
   });
 
+  it('escapes markup in passport HTML export', () => {
+    const html = formatPassportHtml({
+      profileName: '<img src=x onerror="alert(1)">',
+      allergies: ['</p><script>alert(2)</script>'],
+      passport: createDefaultPassport(),
+    });
+    expect(html).not.toContain('<img src=x');
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
+  });
+
   it('detects epinephrine eligibility from phenotypes (Phase 3)', () => {
     expect(
       isEpinephrineEligible({
