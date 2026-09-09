@@ -9,6 +9,7 @@ import {
   categoryFromOffSource,
   normalizeOffBarcode,
   normalizeOffProduct,
+  offBarcodeLookupCandidates,
 } from './open-food-facts';
 
 describe('open-food-facts', () => {
@@ -21,6 +22,13 @@ describe('open-food-facts', () => {
   it('keeps only barcode digits', () => {
     expect(normalizeOffBarcode('301 7620-422003')).toBe('3017620422003');
     expect(normalizeOffBarcode('abc')).toBe('');
+  });
+
+  it('adds a UPC leading-zero pair for catalog lookup', () => {
+    expect(offBarcodeLookupCandidates('737052002195')).toEqual(['737052002195', '0737052002195']);
+    expect(offBarcodeLookupCandidates('0737052002195')).toEqual(['0737052002195', '737052002195']);
+    expect(offBarcodeLookupCandidates('4005808890590')).toEqual(['4005808890590']);
+    expect(offBarcodeLookupCandidates('abc')).toEqual([]);
   });
 
   it('normalizes a product, prefers RU text, and maps allergens + traces', () => {

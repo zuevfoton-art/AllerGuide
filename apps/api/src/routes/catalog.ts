@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from 'express';
 import { and, eq, ilike, ne, sql } from 'drizzle-orm';
-import { getAllAllergens } from '@allerguide/core';
+import { getAllAllergens, offBarcodeLookupCandidates } from '@allerguide/core';
 import { db, readDb } from '../db';
 import { allergens, products, type ProductRow } from '../db/catalog-schema';
 import {
@@ -17,10 +17,6 @@ function databaseConfigured(): boolean {
 
 function offFallbackEnabled(): boolean {
   return process.env.PRODUCT_OFF_FALLBACK !== 'false';
-}
-
-function normalizeBarcode(raw: string): string {
-  return raw.replace(/\s+/g, '').trim();
 }
 
 /** Upsert an Open Food Facts product into the catalog cache. */
@@ -136,17 +132,20 @@ export function registerCatalogRoutes(app: Express) {
       return;
     }
 
-    const barcode = normalizeBarcode(String(req.params.barcode ?? ''));
-    if (!barcode) {
+    const candidates = offBarcodeLookupCandidates(String(req.params.barcode ?? ''));
+    if (candidates.length === 0) {
       res.status(400).json({ ok: false, error: 'Missing barcode' });
       return;
     }
+    const barcode = candidates[0];
 
     try {
-      const [row] = await readDb.select().from(products).where(eq(products.barcode, barcode));
-      if (row) {
-        res.json({ ok: true, product: row, source: 'cache' });
-        return;
+      for (const code of candidates) {
+        const [row] = await readDb.select().from(products).where(eq(products.barcode, code));
+        if (row) {
+          res.json({ ok: true, product: row, source: 'cache' });
+          return;
+        }
       }
 
       // Write-through cache: on a miss, look up Open Food Facts, persist, return.

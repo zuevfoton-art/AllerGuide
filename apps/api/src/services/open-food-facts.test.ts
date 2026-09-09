@@ -3,6 +3,7 @@ import { fetchOpenFoodFactsProduct, searchOpenFoodFacts } from './open-food-fact
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 function mockJson(body: unknown, ok = true) {
@@ -40,6 +41,63 @@ describe('open food facts service', () => {
     expect(product!.allergenTags).toEqual(['milk', 'tree-nuts']);
     expect(product!.traceTags).toEqual(['soy']);
     expect(product!.source).toBe('openfoodfacts');
+  });
+
+  it('continues to Open Beauty Facts when the food dataset throws', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (String(url).includes('openfoodfacts.org') && !String(url).includes('openbeauty') && !String(url).includes('openproducts')) {
+        throw new Error('OFF down');
+      }
+      if (String(url).includes('openbeautyfacts.org')) {
+        return new Response(
+          JSON.stringify({
+            status: 1,
+            product: {
+              code: '4005808890590',
+              product_name: 'Nivea crème',
+              ingredients_text: 'Aqua, Glycerin',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      return new Response(JSON.stringify({ status: 0 }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const product = await fetchOpenFoodFactsProduct('4005808890590');
+    expect(product?.name).toBe('Nivea crème');
+    expect(product?.source).toBe('openbeautyfacts');
+  });
+
+  it('retries a 12-digit UPC with a leading zero on Open Beauty Facts', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (String(url).includes('/0737052002195.json') && String(url).includes('openbeautyfacts.org')) {
+        return new Response(
+          JSON.stringify({
+            status: 1,
+            product: {
+              code: '0737052002195',
+              product_name: 'Lip balm',
+              ingredients_text: 'Beeswax',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      return new Response(JSON.stringify({ status: 0 }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const product = await fetchOpenFoodFactsProduct('737052002195');
+    expect(product?.name).toBe('Lip balm');
+    expect(product?.source).toBe('openbeautyfacts');
   });
 
   it('falls through to Open Beauty Facts when OFF misses', async () => {
