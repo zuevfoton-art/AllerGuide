@@ -1,4 +1,7 @@
 # Type into a diary wizard field, then fold IME via the step title.
+# Nightly 34349155324: a second TextInput on the same screen (appearance)
+# must be tapped again after IME layout, otherwise inputText appends to
+# the previous field (`лицоyпокраснение`) and Далее stays disabled.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -9,6 +12,10 @@ appId: com.aclearo.app
     timeout: 20000
 - tapOn:
     id: ${FIELD_ID}
-- eraseText
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn:
+    id: ${FIELD_ID}
+- eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml

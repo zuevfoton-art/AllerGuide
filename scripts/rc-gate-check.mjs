@@ -340,13 +340,28 @@ function checkMaestroFlows() {
   }
 
   const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
-  if (!editorModal.includes('diary-editor-title') || /liftStyle\s*[,}\]]/.test(editorModal)) {
-    failures.push('DiaryEditorModal must expose diary-editor-title and must not apply liftStyle');
+  if (
+    !editorModal.includes('diary-editor-title') ||
+    !editorModal.includes('Keyboard.dismiss') ||
+    /liftStyle\s*[,}\]]/.test(editorModal)
+  ) {
+    failures.push(
+      'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
+    );
   }
 
   const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
-  if (!tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') || !tapWizardPrimary.includes('scrollUntilVisible')) {
-    failures.push('_tap-wizard-primary.yaml must dismiss IME then scrollUntilVisible');
+  if (
+    !tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') ||
+    !tapWizardPrimary.includes('scrollUntilVisible') ||
+    !tapWizardPrimary.includes('enabled: true')
+  ) {
+    failures.push('_tap-wizard-primary.yaml must dismiss IME then tap an enabled diary-wizard-primary');
+  }
+
+  const fillWizardField = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
+  if (!fillWizardField.includes('waitForAnimationToEnd') || !fillWizardField.includes('eraseText')) {
+    failures.push('_fill-wizard-field.yaml must retap the field after layout before typing');
   }
 
   for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {

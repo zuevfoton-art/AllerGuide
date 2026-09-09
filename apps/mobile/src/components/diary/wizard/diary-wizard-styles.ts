@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
-import { WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { WEB_INPUT_FONT_SIZE, density } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
 export function createStyles({ colors, fonts }: AppTheme) {
@@ -11,6 +11,9 @@ export function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
+      // Nightly 34349155324: Yoga shrinks this card into a short scroll
+      // viewport and inverts `diary-field-skinArea` bounds (h=-12).
+      flexShrink: 0,
     },
     progressText: {
       fontFamily: fonts.sansSemiBold,
@@ -28,7 +31,7 @@ export function createStyles({ colors, fonts }: AppTheme) {
     },
     progressFill: { height: '100%', backgroundColor: colors.accent, borderRadius: 999 },
     notice: { marginBottom: 4 },
-    fieldBlock: { gap: 8 },
+    fieldBlock: { gap: 8, flexShrink: 0 },
     stepLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 17,
@@ -140,6 +143,8 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
       fontSize: Platform.OS === 'web' ? WEB_INPUT_FONT_SIZE : 15,
       fontFamily: fonts.sans,
       color: colors.text,
+      minHeight: density.tapMinHeight,
+      flexShrink: 0,
     },
     inputMultiline: { minHeight: 120, lineHeight: 22 },
     choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
