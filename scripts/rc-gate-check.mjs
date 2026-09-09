@@ -340,8 +340,14 @@ function checkMaestroFlows() {
   }
 
   const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
-  if (!editorModal.includes('diary-editor-title') || /liftStyle\s*[,}\]]/.test(editorModal)) {
-    failures.push('DiaryEditorModal must expose diary-editor-title and must not apply liftStyle');
+  if (
+    !editorModal.includes('diary-editor-title') ||
+    !editorModal.includes('Keyboard.dismiss') ||
+    /liftStyle\s*[,}\]]/.test(editorModal)
+  ) {
+    failures.push(
+      'DiaryEditorModal must expose diary-editor-title, dismiss IME on tap, and must not apply liftStyle',
+    );
   }
 
   const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
@@ -362,6 +368,21 @@ function checkMaestroFlows() {
   const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
   if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
     failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
+  }
+  if (
+    !photoSmoke.includes('FIELD_VALUE: предплечье') ||
+    !photoSmoke.includes('FIELD_VALUE: шелушение') ||
+    /\bFIELD_VALUE: лицо\b/.test(photoSmoke) ||
+    photoSmoke.includes('FIELD_VALUE: покраснение')
+  ) {
+    failures.push(
+      'diary-photo-smoke.yaml must type values that are not placeholder substrings (лицо / покраснение)',
+    );
+  }
+
+  const fillWizard = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
+  if (!fillWizard.includes('assertVisible') || !fillWizard.includes('${FIELD_VALUE}')) {
+    failures.push('_fill-wizard-field.yaml must assertVisible the typed FIELD_VALUE on FIELD_ID');
   }
 
   const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');
@@ -400,8 +421,11 @@ function checkMaestroFlows() {
     failures.push('_dismiss-profile-ime.yaml missing (fold profile IME without BACK)');
   } else {
     const dismissProfileBody = fs.readFileSync(dismissProfileIme, 'utf8');
-    if (!dismissProfileBody.includes('profile-screen-title')) {
-      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-title (not hideKeyboard/BACK)');
+    if (!dismissProfileBody.includes('profile-screen-subtitle')) {
+      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-subtitle (title crushes under IME)');
+    }
+    if (dismissProfileBody.includes('profile-screen-title')) {
+      failures.push('_dismiss-profile-ime.yaml must not tap crushed profile-screen-title');
     }
   }
 

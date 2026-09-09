@@ -32,7 +32,7 @@ apps/mobile/.maestro/
     _offline-bootstrap-until-home.yaml
     _dismiss-hints.yaml            # wait hint-skip → skip all first-run tours
     _dismiss-ime.yaml              # tap auth-hero-title (не hideKeyboard/BACK)
-    _dismiss-profile-ime.yaml      # tap profile-screen-title (не hideKeyboard/BACK)
+    _dismiss-profile-ime.yaml      # tap profile-screen-subtitle (не hideKeyboard/BACK; title сминается)
     _tap-profile-save-number.yaml  # свернуть IME → scroll → «Сохранить номер»
     _tap-register.yaml             # Text testID + «Зарегистрироваться»
     onboarding-smoke.yaml … settings-smoke.yaml
@@ -170,8 +170,9 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Кнопка «Подождите…» висит до таймаута (staging зелёный, offline красный) | Патч рантайма не попал в APK: Gradle берёт `index.js`, а не `package.json` `main`. Оба entry импортируют `src/install-runtime`. Staging хеширует на API, поэтому не падал |
 | Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |
 | `diary-wizard-primary` не найден после ввода «зуд» | Gboard перекрывает «Далее» (в дампе bounds схлопнуты в ноль). `_dismiss-wizard-ime.yaml` тапает `diary-editor-title`, затем `_tap-wizard-primary.yaml` |
-| `diary-wizard-primary` не виден на шаге симптомов (IME закрыта) | Чипы + поле + голос выше fold; sheet `maxHeight: 88%` + `flexGrow: 0` обрезает кнопку (nightly 34325395361: `[87,2373][993,2358]`). Кнопки мастера в `diary-editor-footer` вне ScrollView; скролл ограничен `diaryEditorScrollMaxHeight` |
-| `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-Слабый` |
+| `diary-wizard-primary` не виден на шаге симптомов (IME закрыта) | Чипы + поле + голос выше fold; sheet `maxHeight: 88%` + `flexGrow: 0` обрезает кнопку (nightly 34325395361: `[87,2373][993,2358]`). Кнопки мастера в `diary-editor-footer` вне ScrollView; скролл ограничен `diaryEditorScrollMaxHeight`. `_wait-wizard-primary.yaml` ждёт `diary-wizard-step-label` и `scrollUntilVisible` |
+| `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-*` |
+| `diary-photo-step` не найден после «Далее» на коже | Второй `_fill-wizard-field` ушёл в ещё сфокусированный `skinArea` (`лицоyпокраснение`, nightly 34349155324). `appearance` пустой → required блокирует «Далее». Тап `diary-editor-title` вызывает `Keyboard.dismiss()`; fill ждёт анимацию и `assertVisible` значение. Не брать подстроки плейсхолдера (`лицо`, `покраснение`) |
 | `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, поле прокручивается к фокусу; тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
 | Сборка падает на `APK is missing the embedded JS bundle`, хотя бандл в APK есть | `maestro-build-apk.sh` работает под `pipefail`, а `grep -q` закрывал пайп: как только листинг перерос 64K буфер, `unzip` умирает с SIGPIPE (141). Листинг читается в `APK_LISTING`, сверка — here-string |
@@ -179,7 +180,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
 | `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
 | `profile-delete` не найден на «Мои профили» | Кнопка только в `/profile-edit`, внизу длинной формы. С хаба тап `profile-list-item-0`, ждать `profile-edit-title`, `scrollUntilVisible` → `profile-delete` → «Удалить». После удаления снова хаб без таббара — `screen-header-back`, не Maestro `back` |
-| `profile-save-number` не найден после ввода 112 | Phone-pad на Pixel 6 выкидывает кнопку из UiAutomator (nightly 34052584781). `_dismiss-profile-ime.yaml` тапает `profile-screen-title`, затем `scrollUntilVisible` → `profile-save-number` |
-| `profile-screen-title` не найден при открытой IME | Заголовок хаба жил в ScrollView и схлопывался под brand header (nightly 34340207243: bounds `[190,380][892,357]`). `ScreenHeader` в `pinnedTop` рядом с `screen-brand-header` |
+| `profile-save-number` не найден после ввода 112 | Phone-pad на Pixel 6 выкидывает кнопку из UiAutomator (nightly 34052584781). `_dismiss-profile-ime.yaml` тапает `profile-screen-subtitle` (title сминается, nightly 34340207243), затем `scrollUntilVisible` → `profile-save-number` |
+| `profile-screen-title` не найден при открытой IME | Заголовок хаба жил в ScrollView и схлопывался под brand header (nightly 34340207243: bounds `[190,380][892,357]`). `ScreenHeader` в `pinnedTop` рядом с `screen-brand-header`. IME-dismiss всё равно тапает `profile-screen-subtitle`, не `screen-brand-home` |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

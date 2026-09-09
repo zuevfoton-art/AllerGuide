@@ -1,8 +1,12 @@
 # Fold IME on /profile without BACK / hideKeyboard.
 # Pixel 6 phone-pad removes profile-save-number from the UiAutomator tree
 # (nightly 34052584781: dump has profile-emergency-number=112, no save button).
-# Tap the hub title (non-interactive Text), same pattern as scanner-title.
+# Nightly 34340207243: the hub title (Мои профили) crushes to inverted
+# bounds [190,380][892,357] under the phone-pad; the subtitle stays
+# visible (h=35). Tap that, not screen-brand-home (navigates Home).
 appId: com.aclearo.app
 ---
 - tapOn:
-    id: profile-screen-title
+    id: profile-screen-subtitle
+- waitForAnimationToEnd:
+    timeout: 3000
