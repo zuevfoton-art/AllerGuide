@@ -225,9 +225,19 @@ export function DiaryWizard({
         <DiaryPefZonePreview zone={pefZonePreview.zone} percent={pefZonePreview.percent} />
       ) : null}
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <DiaryEditorFooter
+        deps={[
+          canAdvanceCurrentStep,
+          isLastStep,
+          sectionIndex,
+          stepIndex,
+          error,
+          canSkipSection,
+          Boolean(onDelete),
+          submitLabel ?? '',
+        ]}>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <DiaryEditorFooter>
         <View style={styles.actions} collapsable={false}>
           {sectionIndex === 0 && stepIndex === 0 ? null : (
             <Pressable style={styles.secondaryBtn} onPress={goBack}>
@@ -238,8 +248,8 @@ export function DiaryWizard({
             style={[styles.primaryBtn, !canAdvanceCurrentStep && styles.btnDisabled]}
             disabled={!canAdvanceCurrentStep}
             onPress={goNext}
-            collapsable={false}
-            testID="diary-wizard-primary">
+            testID="diary-wizard-primary"
+            collapsable={false}>
             <Text style={styles.primaryText}>
               {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
             </Text>

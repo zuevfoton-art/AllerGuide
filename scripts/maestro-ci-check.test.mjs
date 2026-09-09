@@ -208,10 +208,8 @@ describe('Maestro nightly CI invariants', () => {
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
-    assert.match(editorModal, /export function DiaryEditorFooter/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
-    assert.match(editorModal, /height: '88%'/);
-    assert.match(editorModal, /WEB_TAB_BAR_HEIGHT/);
+    assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
