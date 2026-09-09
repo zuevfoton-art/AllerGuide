@@ -58,15 +58,16 @@ export default function ProfileScreen() {
   };
 
   return (
-    <Screen>
-      <ScreenHeader
-        onBack={() => router.back()}
-        title={t('profiles.title')}
-        subtitle={t('profiles.subtitle')}
-        right={<LanguagePicker header />}
-        titleTestID="profile-screen-title"
-      />
-
+    <Screen
+      pinnedTop={
+        <ScreenHeader
+          onBack={() => router.back()}
+          title={t('profiles.title')}
+          subtitle={t('profiles.subtitle')}
+          right={<LanguagePicker header />}
+          titleTestID="profile-screen-title"
+        />
+      }>
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>
       <GlassCard padded={false}>
         {profiles.length === 0 ? (
