@@ -33,5 +33,6 @@ describe('diaryEditorScrollMaxHeight', () => {
         sheetPaddingBottom: 40,
       }),
     ).toBe(DIARY_EDITOR_SCROLL_MIN_HEIGHT);
+    expect(DIARY_EDITOR_SCROLL_MIN_HEIGHT).toBeGreaterThanOrEqual(240);
   });
 });

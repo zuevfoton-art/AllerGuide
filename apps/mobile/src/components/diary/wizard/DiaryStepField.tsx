@@ -78,6 +78,7 @@ export function DiaryStepField({
     <TextInput
       ref={inputRef}
       testID={`diary-field-${step.id}`}
+      collapsable={false}
       style={[styles.input, step.multiline && styles.inputMultiline]}
       value={value}
       onChangeText={onChange}

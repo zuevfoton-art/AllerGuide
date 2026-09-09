@@ -1,7 +1,8 @@
 /** Bottom-sheet diary editor: keep the scroll viewport inside the 88% sheet. */
 
 export const DIARY_EDITOR_SHEET_MAX_RATIO = 0.88;
-export const DIARY_EDITOR_SCROLL_MIN_HEIGHT = 120;
+/** One step label + text field must keep a positive height when Gboard is open. */
+export const DIARY_EDITOR_SCROLL_MIN_HEIGHT = 240;
 
 export function diaryEditorSheetMaxHeight(windowHeight: number): number {
   return Math.round(windowHeight * DIARY_EDITOR_SHEET_MAX_RATIO);
