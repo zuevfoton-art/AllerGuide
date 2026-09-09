@@ -1,7 +1,8 @@
 import type { Express, Request, Response } from 'express';
 import { buildAskChatPrompt, parseAskChatAnswer } from '@allerguide/ai';
 import { ASK_MAX_QUESTION_LENGTH, detectAskDistress } from '@allerguide/core';
-import { verifyAuthToken } from '../lib/jwt';
+import { consumeScanBudget, recordBudgetRejection } from '../lib/scan-cache';
+import { resolveScanIdentity } from '../lib/scan-identity';
 import { logCaughtError } from '../lib/log-caught-error';
 import { callScanLlm } from '../services/llm-scan-provider';
 
@@ -73,16 +74,6 @@ function askEnabled(): boolean {
   return process.env.AI_CHAT_ENABLED === 'true' && process.env.AI_SCAN_ENABLED === 'true';
 }
 
-async function resolveIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (process.env.SCAN_REQUIRE_AUTH === 'true') return null;
-  return `ip:${req.ip ?? 'unknown'}`;
-}
-
 /**
  * «Ask» explainer chat (north-star §4.9). Distress wording is answered with a
  * crisis handoff and the model is never called — the client runs the same guard,
@@ -106,9 +97,15 @@ export function registerAskRoutes(app: Express) {
       return;
     }
 
-    const identity = await resolveIdentity(req);
+    const identity = await resolveScanIdentity(req);
     if (!identity) {
       res.status(401).json({ ok: false, error: 'Unauthorized' });
+      return;
+    }
+
+    if (!(await consumeScanBudget(identity))) {
+      recordBudgetRejection();
+      res.status(429).json({ ok: false, error: 'Daily scan budget exceeded' });
       return;
     }
 

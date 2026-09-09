@@ -3,6 +3,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { callScanLlm } from '../services/llm-scan-provider';
 import { parseAskInput, registerAskRoutes } from './ask';
+import { resetScanState } from '../lib/scan-cache';
 
 vi.mock('../services/llm-scan-provider', () => ({
   callScanLlm: vi.fn(async () => '{"answer":"Пыльца высокая, прогулку лучше сократить."}'),
@@ -47,6 +48,8 @@ describe('POST /api/ask', () => {
     process.env.AI_CHAT_ENABLED = 'true';
     process.env.AI_SCAN_ENABLED = 'true';
     process.env.SCAN_REQUIRE_AUTH = 'false';
+    process.env.SCAN_DAILY_BUDGET = '100';
+    resetScanState();
     vi.mocked(callScanLlm).mockClear();
   });
 
@@ -54,6 +57,7 @@ describe('POST /api/ask', () => {
     delete process.env.AI_CHAT_ENABLED;
     delete process.env.AI_SCAN_ENABLED;
     delete process.env.SCAN_REQUIRE_AUTH;
+    delete process.env.SCAN_DAILY_BUDGET;
   });
 
   it('returns 503 when the chat flag is off', async () => {
@@ -99,5 +103,30 @@ describe('POST /api/ask', () => {
 
     expect(response.status).toBe(502);
     expect(response.body.ok).toBe(false);
+  });
+
+  it('does not consume the daily budget for a distress handoff', async () => {
+    process.env.SCAN_DAILY_BUDGET = '1';
+    const app = buildApp();
+
+    const distress = await request(app).post('/api/ask').send({ question: 'Я задыхаюсь, что делать' });
+    expect(distress.status).toBe(200);
+    expect(callScanLlm).not.toHaveBeenCalled();
+
+    const ordinary = await request(app).post('/api/ask').send({ question: 'Можно гулять?' });
+    expect(ordinary.status).toBe(200);
+    expect(callScanLlm).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 429 when the shared daily LLM budget is exhausted', async () => {
+    process.env.SCAN_DAILY_BUDGET = '1';
+    const app = buildApp();
+
+    await request(app).post('/api/ask').send({ question: 'Можно гулять?' });
+    const blocked = await request(app).post('/api/ask').send({ question: 'А вечером?' });
+
+    expect(blocked.status).toBe(429);
+    expect(blocked.body.error).toBe('Daily scan budget exceeded');
+    expect(callScanLlm).toHaveBeenCalledTimes(1);
   });
 });

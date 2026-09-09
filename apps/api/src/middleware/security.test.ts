@@ -91,9 +91,9 @@ describe('security middleware', () => {
     expect(blocked.body.error).toBe('Too many authentication attempts');
   });
 
-  // /api/stt and /api/search/ingredients bill per call (SpeechKit, Yandex Search),
+  // /api/stt, /api/search/ingredients and /api/ask bill per LLM/STT/search call,
   // so they must sit behind the scan limiter rather than the coarse global one.
-  it.each(['/api/stt', '/api/search/ingredients'])(
+  it.each(['/api/stt', '/api/search/ingredients', '/api/ask'])(
     'returns 429 after exceeding the scan rate limit on %s',
     async (path) => {
       process.env.SCAN_RATE_LIMIT_MAX = '2';
