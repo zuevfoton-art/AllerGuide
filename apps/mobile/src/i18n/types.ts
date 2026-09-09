@@ -1338,6 +1338,16 @@ export type LocaleMessages = {
     name: string;
     age: string;
     allergies: string;
+    crisisTitle: string;
+    crisisPlanTitle: string;
+    crisisPlanPersonal: string;
+    crisisStep: {
+      epinephrine: string;
+      callEmergency: string;
+      stay: string;
+      secondDose: string;
+    };
+    crisisPlanNoProfile: string;
     medicalNotes: string;
     actionPlan: string;
     emptyProfile: string;

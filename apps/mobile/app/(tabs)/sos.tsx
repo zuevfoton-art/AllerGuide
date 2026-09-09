@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   ANAPHYLAXIS_GRADES,
   BIPHASIC_WARNING,
+  buildCrisisPlan,
   formatEpinephrineEligibilityHint,
   getProfileAgeYears,
   parseAllergies,
@@ -92,14 +93,7 @@ export default function SosScreen() {
     void Linking.openURL(`tel:${phone.replace(/\s/g, '')}`);
   };
 
-  const planSteps = useMemo(
-    () =>
-      actionPlan
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean),
-    [actionPlan],
-  );
+  const crisisPlan = useMemo(() => buildCrisisPlan(actionPlan), [actionPlan]);
 
   const kitChecked = passport.shockKit.filter((item) => item.checked);
   const epinephrineEligible = profile ? isProfileEpinephrineEligible(profile) : false;
@@ -171,11 +165,27 @@ export default function SosScreen() {
           }
         />
       }>
-      <TabScreenHeader
-        eyebrow={t('sos.eyebrow')}
-        title={t('sos.title')}
-        meta={t('sos.subtitle')}
-      />
+      <TabScreenHeader eyebrow={t('sos.eyebrow')} title={t('sos.crisisTitle')} />
+
+      <GlassCard testID="sos-crisis-plan">
+        <CardTitle>
+          {crisisPlan.source === 'personal' ? t('sos.crisisPlanPersonal') : t('sos.crisisPlanTitle')}
+        </CardTitle>
+        {crisisPlan.steps.map((step, index) => (
+          <View
+            key={step.source === 'personal' ? `${index}-${step.text}` : step.id}
+            testID={`sos-crisis-step-${index + 1}`}
+            style={styles.crisisStep}>
+            <Text style={styles.crisisNum}>{index + 1}</Text>
+            <Text style={styles.crisisText}>
+              {step.source === 'personal'
+                ? step.text
+                : t(`sos.crisisStep.${step.id}`, { number: emergencyBar.emergencyNumber })}
+            </Text>
+          </View>
+        ))}
+        {profile ? null : <Text style={styles.hintText}>{t('sos.crisisPlanNoProfile')}</Text>}
+      </GlassCard>
 
       {epinephrineHint ? (
         <GlassCard style={styles.epiHintCard}>
@@ -346,27 +356,14 @@ export default function SosScreen() {
             </GlassCard>
           ) : null}
 
-          {(notes || planSteps.length > 0) && (
+          {notes ? (
             <GlassCard>
-              {notes ? (
-                <View style={styles.notesBlock}>
-                  <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
-                  <Text style={styles.notesText}>{notes}</Text>
-                </View>
-              ) : null}
-              {planSteps.length > 0 ? (
-                <View style={styles.notesBlock}>
-                  <Text style={styles.notesLabel}>{t('sos.actionPlan')}</Text>
-                  {planSteps.map((step, index) => (
-                    <View key={`${index}-${step}`} style={styles.planStep}>
-                      <Text style={styles.planNum}>{index + 1}</Text>
-                      <Text style={styles.planText}>{step}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
+              <View style={styles.notesBlock}>
+                <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
+                <Text style={styles.notesText}>{notes}</Text>
+              </View>
             </GlassCard>
-          )}
+          ) : null}
         </>
       ) : (
         <EmptyState
@@ -535,6 +532,27 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: fontSizes.bodyMd,
       color: colors.textSecondary,
       lineHeight: lineHeights.bodySm,
+    },
+    crisisStep: {
+      flexDirection: 'row',
+      gap: 12,
+      alignItems: 'flex-start',
+      paddingVertical: 6,
+    },
+    crisisNum: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h3,
+      lineHeight: lineHeights.h3,
+      fontWeight: '700',
+      color: colors.danger,
+      width: 24,
+    },
+    crisisText: {
+      fontFamily: fonts.sans,
+      flex: 1,
+      fontSize: fontSizes.body,
+      color: colors.text,
+      lineHeight: lineHeights.body,
     },
     planStep: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
     planNum: {

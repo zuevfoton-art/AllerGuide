@@ -43,6 +43,8 @@ export const density = {
   pickerRowGap: 6,
   tapMinHeight: 44,
   tapMinHeightSm: 36,
+  /** Crisis CTA: reachable with shaking hands, north-star §3.3. */
+  tapMinHeightCrisis: 56,
 } as const;
 
 /** Brand hex for static HTML/PDF exports (mirrors light theme) */

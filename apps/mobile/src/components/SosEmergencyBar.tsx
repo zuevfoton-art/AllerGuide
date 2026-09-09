@@ -39,7 +39,14 @@ export function SosEmergencyBar({
       style={styles.wrap}
       accessibilityRole="toolbar"
       accessibilityLabel={emergencyLabel}>
-      <Button label={emergencyLabel} variant="danger" block onPress={onCallEmergency} />
+      <Button
+        testID="sos-crisis-call"
+        label={emergencyLabel}
+        variant="danger"
+        size="lg"
+        block
+        onPress={onCallEmergency}
+      />
       {hasContact ? (
         <View style={styles.contactRow}>
           <View style={styles.contactBody}>
