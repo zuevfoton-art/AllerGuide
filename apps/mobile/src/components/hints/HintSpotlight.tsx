@@ -20,7 +20,11 @@ import { useReduceMotion } from '@/src/hooks/use-reduce-motion';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTheme } from '@/src/hooks/use-theme';
 import { getCurrentUserId } from '@/src/services/auth-service';
-import { completeHintTour, dismissAllHintTours } from '@/src/services/first-run-hints-service';
+import {
+  completeHintTour,
+  dismissAllHintTours,
+  rememberHintTour,
+} from '@/src/services/first-run-hints-service';
 import { useTranslation } from '@/src/store/locale-store';
 import { useHintsStore } from '@/src/store/hints-store';
 
@@ -40,6 +44,8 @@ export function HintSpotlight() {
 
   const windowSize = useWindowDimensions();
   const overlayRef = useRef<View>(null);
+  const displayedHoleRef = useRef(false);
+  const rememberedTourIdRef = useRef<string | null>(null);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [bubbleHeight, setBubbleHeight] = useState(180);
@@ -102,7 +108,11 @@ export function HintSpotlight() {
         useHintsStore.getState().anchors,
       );
       if (nextIndex == null) {
-        closeTour();
+        if (displayedHoleRef.current) {
+          finishTour('complete');
+        } else {
+          closeTour();
+        }
         return;
       }
       if (nextIndex !== latest.stepIndex) {
@@ -111,7 +121,22 @@ export function HintSpotlight() {
     }, waitMs);
 
     return () => clearTimeout(timeout);
-  }, [activeTour, anchors, closeTour]);
+  }, [activeTour, anchors, closeTour, finishTour]);
+
+  useEffect(() => {
+    if (!activeTour) {
+      displayedHoleRef.current = false;
+      rememberedTourIdRef.current = null;
+      return;
+    }
+    if (!hole) return;
+
+    displayedHoleRef.current = true;
+    const userId = getCurrentUserId();
+    if (!userId || rememberedTourIdRef.current === activeTour.tourId) return;
+    rememberedTourIdRef.current = activeTour.tourId;
+    rememberHintTour(userId, activeTour.tourId);
+  }, [activeTour, hole]);
 
   useEffect(() => {
     if (!activeTour || Platform.OS === 'web') return;

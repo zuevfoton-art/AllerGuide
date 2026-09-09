@@ -70,12 +70,24 @@ function TabBarButton({
  * SOS is not a peer of the four navigation tabs: it is an emergency control that
  * keeps a permanent danger tint so it reads as a call button, not as a section.
  */
-function SosTabBarButton({ accessibilityState, style, ...props }: BottomTabBarButtonProps) {
+function SosTabBarButton({
+  accessibilityState,
+  style,
+  onLayout: tabOnLayout,
+  ...props
+}: BottomTabBarButtonProps) {
   const { colors } = useTheme();
+  const { ref, onLayout } = useHintAnchor('tab.sos');
 
   return (
     <Pressable
       {...(props as ComponentProps<typeof Pressable>)}
+      ref={ref}
+      onLayout={(event) => {
+        tabOnLayout?.(event);
+        onLayout();
+      }}
+      collapsable={false}
       testID="tab-sos"
       accessibilityState={accessibilityState}
       style={[

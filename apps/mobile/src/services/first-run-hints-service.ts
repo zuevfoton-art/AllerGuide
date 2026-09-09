@@ -36,6 +36,16 @@ export function isHintTourPending(userId: number, tourId: HintTourId): boolean {
   });
 }
 
+/** Persist that this tour was shown so leaving the tab does not replay it. */
+export function rememberHintTour(userId: number, tourId: HintTourId): void {
+  if (!isPersistedUserId(userId)) return;
+  const nextSeen = withSeenHintTour(getSetting(hintsSeenToursKey(userId)), tourId);
+  setSetting(hintsSeenToursKey(userId), nextSeen);
+  if (areAllHintToursSeen(nextSeen)) {
+    setSetting(hintsEligibleKey(userId), '');
+  }
+}
+
 export function startHintTour(userId: number, tourId: HintTourId, stepsTotal: number): void {
   if (!isPersistedUserId(userId)) return;
   trackEvent('hint_tour_started', { tour_id: tourId, steps_total: stepsTotal });
@@ -43,14 +53,7 @@ export function startHintTour(userId: number, tourId: HintTourId, stepsTotal: nu
 
 export function completeHintTour(userId: number, tourId: HintTourId, stepsTotal: number): void {
   if (!isPersistedUserId(userId)) return;
-
-  const nextSeen = withSeenHintTour(getSetting(hintsSeenToursKey(userId)), tourId);
-  setSetting(hintsSeenToursKey(userId), nextSeen);
-
-  if (areAllHintToursSeen(nextSeen)) {
-    setSetting(hintsEligibleKey(userId), '');
-  }
-
+  rememberHintTour(userId, tourId);
   trackEvent('hint_tour_completed', { tour_id: tourId, steps_total: stepsTotal });
 }
 
