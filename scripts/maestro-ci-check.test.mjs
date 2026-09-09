@@ -11,6 +11,20 @@ function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
 }
 
+// `Screen` renders `pinnedTop` above its ScrollView and everything passed as
+// children inside it, so only the pinned block survives a scroll. Return the
+// prop body to tell the two apart.
+function pinnedTop(source) {
+  const start = source.indexOf('pinnedTop={');
+  if (start === -1) return '';
+  let depth = 0;
+  for (let i = source.indexOf('{', start); i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1;
+    else if (source[i] === '}' && (depth -= 1) === 0) return source.slice(start, i + 1);
+  }
+  return '';
+}
+
 describe('Maestro nightly CI invariants', () => {
   it('builds a release APK with an embedded JS bundle check', () => {
     const script = read('scripts/maestro-build-apk.sh');
@@ -409,7 +423,16 @@ describe('Maestro nightly CI invariants', () => {
 
     const hub = read('apps/mobile/app/profile.tsx');
     assert.match(hub, /titleTestID="profile-screen-title"/);
-    assert.match(hub, /pinnedTop=\{/);
+    // Focusing the number field makes Android scroll the hub to keep it above
+    // the phone-pad (measured 220dp on a 533dp window). A header inside the
+    // ScrollView leaves the viewport, and UiAutomator then reports it with the
+    // top clamped to the scroll edge and the bottom above it — nightly
+    // 34340207243 dumped `[190,380][892,357]` and the tap found no element.
+    assert.match(
+      pinnedTop(hub),
+      /titleTestID="profile-screen-title"/,
+      'the anchor _dismiss-profile-ime taps must be pinned, not inside the scrolled body',
+    );
     assert.match(hub, /testID="profile-save-number"/);
     assert.match(hub, /testID="profile-emergency-number"/);
 
