@@ -234,6 +234,17 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
 
+    const dismissIme = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
+    assert.match(dismissIme, /waitForAnimationToEnd/);
+
+    const tapChoice = read('apps/mobile/.maestro/flows/_tap-wizard-choice.yaml');
+    assert.match(tapChoice, /_dismiss-wizard-ime\.yaml/);
+    assert.match(tapChoice, /scrollUntilVisible/);
+    assert.match(tapChoice, /\$\{CHOICE_ID\}/);
+
+    const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
+    assert.match(stepField, /diary-choice-\$\{choice\}/);
+
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.ok(flow.includes('_tap-wizard-primary.yaml'), `${name} must tap Далее via _tap-wizard-primary`);
@@ -251,6 +262,16 @@ describe('Maestro nightly CI invariants', () => {
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
     assert.match(photo, /id: diary-photo-step/);
+    assert.match(photo, /_tap-wizard-choice.yaml/);
+    assert.doesNotMatch(photo, /text: "Слабый"/);
+
+    const symptoms = read('apps/mobile/.maestro/flows/diary-smoke.yaml');
+    assert.match(symptoms, /_tap-wizard-choice.yaml/);
+    assert.doesNotMatch(symptoms, /text: "1 — лёгкая"/);
+
+    const dish = read('apps/mobile/.maestro/flows/diary-dish-smoke.yaml');
+    assert.match(dish, /_tap-wizard-choice.yaml/);
+    assert.doesNotMatch(dish, /text: "Нет реакции"/);
   });
 
   it('opens scanner manual input before typing молоко', () => {

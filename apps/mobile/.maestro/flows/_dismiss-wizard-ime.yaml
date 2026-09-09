@@ -6,3 +6,5 @@ appId: com.aclearo.app
 ---
 - tapOn:
     id: diary-editor-title
+- waitForAnimationToEnd:
+    timeout: 3000

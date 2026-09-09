@@ -1,0 +1,13 @@
+# Fold IME, bring a wizard choice chip on-screen, tap it.
+# Nightly 34336499730: after typing «покраснение», Gboard + pinned footer
+# crushed «Слабый» to inverted bounds [266,1617][394,1396].
+appId: com.aclearo.app
+---
+- runFlow: _dismiss-wizard-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: ${CHOICE_ID}
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: ${CHOICE_ID}

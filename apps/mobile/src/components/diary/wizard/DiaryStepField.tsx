@@ -51,7 +51,10 @@ export function DiaryStepField({
           return (
             <Pressable
               key={choice}
-              testID={step.multiSelect ? `diary-multi-choice-${choice}` : undefined}
+              testID={
+                step.multiSelect ? `diary-multi-choice-${choice}` : `diary-choice-${choice}`
+              }
+              collapsable={false}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
               hitSlop={8}
               onPress={() =>

@@ -17,8 +17,10 @@ appId: com.aclearo.app
       FIELD_VALUE: зуд
 - runFlow: _tap-wizard-primary.yaml
 # severity
-- tapOn:
-    text: "1 — лёгкая"
+- runFlow:
+    file: _tap-wizard-choice.yaml
+    env:
+      CHOICE_ID: "diary-choice-1 — лёгкая"
 - runFlow: _tap-wizard-primary.yaml
 # onset (optional) — save
 - runFlow: _tap-wizard-primary.yaml

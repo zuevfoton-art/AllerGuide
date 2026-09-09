@@ -33,8 +33,10 @@ appId: com.aclearo.app
     id: diary-dish-component-beet
 - runFlow: _tap-wizard-primary.yaml
 # reaction level and type share the last screen
-- tapOn:
-    text: "Нет реакции"
+- runFlow:
+    file: _tap-wizard-choice.yaml
+    env:
+      CHOICE_ID: diary-choice-Нет реакции
 - runFlow: _tap-wizard-primary.yaml
 - extendedWaitUntil:
     notVisible:
