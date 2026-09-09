@@ -96,4 +96,4 @@ testID для Maestro:
 Что уходит в docs/ux-improvement-plan.md, если это долг:
 ```
 
-Макеты в репозитории: [`docs/design-mockup.html`](../../docs/design-mockup.html), [`docs/onboarding-mockup.html`](../../docs/onboarding-mockup.html). UX-долг: [`docs/ux-audit-2026-08.md`](../../docs/ux-audit-2026-08.md), [`docs/ux-improvement-plan.md`](../../docs/ux-improvement-plan.md).
+Макеты в репозитории: [`docs/design-mockup.html`](../../docs/design-mockup.html), [`docs/onboarding-mockup.html`](../../docs/onboarding-mockup.html). North-star IA (4 таба + SOS-control, daily reading): [`docs/wellness-ux-north-star.md`](../../docs/wellness-ux-north-star.md), макет [`docs/wellness-ux-north-star.html`](../../docs/wellness-ux-north-star.html). UX-долг текущего каркаса: [`docs/ux-audit-2026-08.md`](../../docs/ux-audit-2026-08.md), [`docs/ux-improvement-plan.md`](../../docs/ux-improvement-plan.md).
