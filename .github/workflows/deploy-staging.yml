@@ -223,6 +223,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: EAS Build staging (Android)
+        id: eas_android
+        continue-on-error: true
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -237,8 +239,16 @@ jobs:
             --platform android \
             --non-interactive \
             --no-wait
-          echo "::notice::EAS Android submitted (no wait). Track expo.dev / workflow EAS staging Android. Do not rollback API if that build later fails — smoke already passed."
-          echo "::notice::Working APK without Expo cloud: Actions → Staging Android APK (Gradle). Docs: docs/android-stage-build.md §C"
+      - name: EAS Android submit outcome
+        if: always() && needs.smoke.result == 'success'
+        run: |
+          if [ "${{ steps.eas_android.outcome }}" = "success" ]; then
+            echo "::notice::EAS Android submitted (no wait). Track expo.dev / workflow EAS staging Android. Do not rollback API if that build later fails — smoke already passed."
+            echo "::notice::Working APK without Expo cloud: Actions → Staging Android APK (Gradle). Docs: docs/android-stage-build.md §C"
+          else
+            echo "::warning::EAS Android submit failed (often Expo Free-plan monthly quota after a successful upload). Smoke already passed — do not rollback the API."
+            echo "::warning::APK without Expo cloud: Actions → Staging Android APK (Gradle) · docs/android-stage-build.md §C. Retry EAS after quota reset or a paid plan."
+          fi
 
   # Device IPA needs Apple certs from interactive `eas credentials --platform ios`.
   # credentials.json is Android-only; non-interactive EAS cannot mint them.

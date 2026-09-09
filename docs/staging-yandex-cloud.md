@@ -439,6 +439,7 @@ pnpm build:staging:ios    # упадёт без Apple credentials
 | EAS «Сервер недоступен» | DNS `api.staging.aclearo.com`, TLS, URL в `eas.json` |
 | `mobile-ios` / Apple credentials | Ожидаемо без `EAS_IOS_DEVICE`. См. [`eas-staging-build.md`](eas-staging-build.md) |
 | `mobile-android` Gradle unknown error | expo.dev → Run gradlew. Запасной APK: `staging-apk-gradle.yml`. Не откатывать API |
+| `mobile-android` / Free plan this month | EAS quota. Upload мог пройти, build — нет. Не откатывать API (`smoke` уже зелёный). APK: `staging-apk-gradle.yml`. После 1-го числа / paid plan — снова EAS |
 | Destroy staging | `./scripts/yc-staging-bootstrap.sh destroy` (подтверждение) |
 
 ---
