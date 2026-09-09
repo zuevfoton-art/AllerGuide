@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_FONT_SIZE_MULTIPLIER,
   TEXT_SCALE_PRESETS,
+  fonts,
   fontSizes,
   lineHeights,
   scaledTextProps,
@@ -43,6 +44,24 @@ describe('typography policy', () => {
     expect(textStyles.body.lineHeight).toBe(lineHeights.body);
     expect(textStyles.h1.letterSpacing).toBe(tracking.tight);
     expect(textStyles.label.letterSpacing).toBe(tracking.label);
+  });
+
+  it('gives the display face to H1 and the reading paragraph only', () => {
+    expect(textStyles.h1.fontFamily).toBe(fonts.displayBold);
+    expect(textStyles.reading.fontFamily).toBe(fonts.display);
+    expect(textStyles.body.fontFamily).toBe(fonts.sans);
+    expect(textStyles.h4.fontFamily).toBe(fonts.sansSemiBold);
+    expect(textStyles.kpi.fontFamily).toBe(fonts.sansBold);
+  });
+
+  it('keeps the reading paragraph at ≥1.4 leading', () => {
+    expect(textStyles.reading.lineHeight / textStyles.reading.fontSize).toBeGreaterThanOrEqual(1.4);
+  });
+
+  it('carries a weight on every token so one web font file is enough', () => {
+    for (const [name, style] of Object.entries(textStyles)) {
+      expect(style.fontWeight, name).toMatch(/^[4-7]00$/);
+    }
   });
 
   it('keeps text-scale presets under the Dynamic Type cap', () => {

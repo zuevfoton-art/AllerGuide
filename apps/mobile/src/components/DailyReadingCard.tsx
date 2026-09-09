@@ -57,8 +57,7 @@ function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     body: { gap: 6, marginBottom: 12 },
     lead: {
-      ...textStyles.h3,
-      fontFamily: fonts.serif,
+      ...textStyles.reading,
       color: colors.head,
     },
     advice: {

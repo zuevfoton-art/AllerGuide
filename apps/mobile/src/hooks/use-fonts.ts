@@ -9,6 +9,7 @@ import { Platform } from 'react-native';
  */
 export function useAppFonts(): boolean {
   if (Platform.OS === 'web') return true;
-  // TODO: wire up expo-font useFonts for native builds when .ttf assets are bundled.
+  // TODO: wire up expo-font useFonts for native builds when the .ttf assets are
+  // bundled — Inter, Source Serif 4 and Fraunces (see `constants/typography.ts`).
   return true;
 }
