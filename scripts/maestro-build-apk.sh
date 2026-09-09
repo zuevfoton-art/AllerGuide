@@ -99,9 +99,14 @@ if [ ! -f "$APK" ]; then
   exit 1
 fi
 
-if ! unzip -l "$APK" | grep -Eq 'index\.android\.bundle|index\.bundle'; then
+# Hold the listing in a variable: piping it into `grep -q` makes grep exit on
+# the first match, and once the listing outgrows the 64K pipe buffer `unzip`
+# dies of SIGPIPE — which `pipefail` reports as a missing bundle even though
+# the APK is fine.
+APK_LISTING="$(unzip -l "$APK")"
+if ! grep -Eq 'index\.android\.bundle|index\.bundle' <<<"$APK_LISTING"; then
   echo "ERROR: APK is missing the embedded JS bundle. Maestro cannot run without Metro." >&2
-  unzip -l "$APK" | grep -Ei 'index|bundle|assets/' | head -40 >&2
+  grep -Ei 'index|bundle|assets/' <<<"$APK_LISTING" | head -40 >&2
   exit 1
 fi
 

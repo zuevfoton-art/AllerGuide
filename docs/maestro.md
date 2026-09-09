@@ -174,10 +174,12 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-Слабый` |
 | `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, поле прокручивается к фокусу; тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
+| Сборка падает на `APK is missing the embedded JS bundle`, хотя бандл в APK есть | `maestro-build-apk.sh` работает под `pipefail`, а `grep -q` закрывал пайп: как только листинг перерос 64K буфер, `unzip` умирает с SIGPIPE (141). Листинг читается в `APK_LISTING`, сверка — here-string |
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
 | `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
 | `profile-delete` не найден на «Мои профили» | Кнопка только в `/profile-edit`, внизу длинной формы. С хаба тап `profile-list-item-0`, ждать `profile-edit-title`, `scrollUntilVisible` → `profile-delete` → «Удалить». После удаления снова хаб без таббара — `screen-header-back`, не Maestro `back` |
 | `profile-save-number` не найден после ввода 112 | Phone-pad на Pixel 6 выкидывает кнопку из UiAutomator (nightly 34052584781). `_dismiss-profile-ime.yaml` тапает `profile-screen-title`, затем `scrollUntilVisible` → `profile-save-number` |
+| `profile-screen-title` не найден при открытой IME | Заголовок хаба жил в ScrollView и схлопывался под brand header (nightly 34340207243: bounds `[190,380][892,357]`). `ScreenHeader` в `pinnedTop` рядом с `screen-brand-header` |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).
