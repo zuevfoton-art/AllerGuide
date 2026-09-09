@@ -4,12 +4,14 @@ import { Button } from '@/src/components/Button';
 import { CardTitle } from '@/src/components/CardTitle';
 import {
   HINT_ANCHOR_WAIT_MS,
+  HINT_FOLLOW_REMEASURE_MS,
   HINT_HOLE_PADDING,
   HINT_SCRIM_OPACITY,
   expandRect,
   firstResolvedHintStepIndex,
   isUsableAnchorRect,
   placeHintBubble,
+  resolveHintFollowScroll,
   scrimRectsAroundHole,
   toLocalRect,
 } from '@/src/components/hints/hint-geometry';
@@ -20,7 +22,11 @@ import { useReduceMotion } from '@/src/hooks/use-reduce-motion';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTheme } from '@/src/hooks/use-theme';
 import { getCurrentUserId } from '@/src/services/auth-service';
-import { completeHintTour, dismissAllHintTours } from '@/src/services/first-run-hints-service';
+import {
+  completeHintTour,
+  dismissAllHintTours,
+  rememberHintTour,
+} from '@/src/services/first-run-hints-service';
 import { useTranslation } from '@/src/store/locale-store';
 import { useHintsStore } from '@/src/store/hints-store';
 
@@ -40,6 +46,8 @@ export function HintSpotlight() {
 
   const windowSize = useWindowDimensions();
   const overlayRef = useRef<View>(null);
+  const displayedHoleRef = useRef(false);
+  const rememberedTourIdRef = useRef<string | null>(null);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [bubbleHeight, setBubbleHeight] = useState(180);
@@ -102,7 +110,11 @@ export function HintSpotlight() {
         useHintsStore.getState().anchors,
       );
       if (nextIndex == null) {
-        closeTour();
+        if (displayedHoleRef.current) {
+          finishTour('complete');
+        } else {
+          closeTour();
+        }
         return;
       }
       if (nextIndex !== latest.stepIndex) {
@@ -111,7 +123,68 @@ export function HintSpotlight() {
     }, waitMs);
 
     return () => clearTimeout(timeout);
-  }, [activeTour, anchors, closeTour]);
+  }, [activeTour, anchors, closeTour, finishTour]);
+
+  useEffect(() => {
+    if (!activeTour) {
+      displayedHoleRef.current = false;
+      rememberedTourIdRef.current = null;
+      return;
+    }
+    if (!hole) return;
+
+    displayedHoleRef.current = true;
+    const userId = getCurrentUserId();
+    if (!userId || rememberedTourIdRef.current === activeTour.tourId) return;
+    rememberedTourIdRef.current = activeTour.tourId;
+    rememberHintTour(userId, activeTour.tourId);
+  }, [activeTour, hole]);
+
+  const followedStepRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!activeTour) {
+      followedStepRef.current = null;
+      return;
+    }
+    if (!hole) return;
+    const overlayHeight = viewport.width > 0 ? viewport.height : windowSize.height;
+    if (overlayHeight <= 0) return;
+
+    const followKey = `${activeTour.tourId}:${activeTour.stepIndex}:${Math.round(bubbleHeight)}:${layout.tabBarHeight}`;
+    const { deltaY } = resolveHintFollowScroll({
+      hole,
+      viewportHeight: overlayHeight,
+      bubbleHeight,
+      bottomInset: layout.tabBarHeight,
+      tabBandHeight: layout.tabBarHeight + space[4],
+    });
+    if (deltaY === 0) {
+      followedStepRef.current = followKey;
+      return;
+    }
+    if (followedStepRef.current === followKey) return;
+    followedStepRef.current = followKey;
+
+    useHintsStore.getState().scrollScreenBy?.(deltaY, !reduceMotion);
+    const waitMs = reduceMotion ? 0 : HINT_FOLLOW_REMEASURE_MS;
+    const timeout = setTimeout(() => {
+      useHintsStore.getState().nudgeAnchors();
+    }, waitMs);
+    return () => clearTimeout(timeout);
+  }, [
+    activeTour,
+    hole?.x,
+    hole?.y,
+    hole?.width,
+    hole?.height,
+    viewport.width,
+    viewport.height,
+    windowSize.height,
+    bubbleHeight,
+    layout.tabBarHeight,
+    reduceMotion,
+  ]);
 
   useEffect(() => {
     if (!activeTour || Platform.OS === 'web') return;

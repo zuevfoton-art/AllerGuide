@@ -65,6 +65,20 @@ export function normalizeOffBarcode(barcode: string): string {
   return barcode.replace(/\D/g, '');
 }
 
+/**
+ * Camera payloads sometimes drop or keep a UPC leading zero. Try both so a
+ * cosmetics EAN-13 stored in Open Beauty Facts still matches a 12-digit scan.
+ */
+export function offBarcodeLookupCandidates(barcode: string): string[] {
+  const digits = normalizeOffBarcode(barcode);
+  if (!digits) return [];
+
+  const candidates = [digits];
+  if (digits.length === 12) candidates.push(`0${digits}`);
+  if (digits.length === 13 && digits.startsWith('0')) candidates.push(digits.slice(1));
+  return [...new Set(candidates)];
+}
+
 export function normalizeOffProduct(
   product: OffProductPayload,
   source: OffFamilySource,

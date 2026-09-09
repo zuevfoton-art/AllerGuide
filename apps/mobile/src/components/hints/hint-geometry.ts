@@ -4,6 +4,9 @@ export const HINT_HOLE_PADDING = 6;
 export const HINT_BUBBLE_MIN_SPACE = 160;
 export const HINT_ANCHOR_WAIT_MS = 600;
 export const HINT_SCRIM_OPACITY = 0.6;
+export const HINT_FOLLOW_MARGIN_PX = space[4];
+export const HINT_FOLLOW_EPSILON_PX = 2;
+export const HINT_FOLLOW_REMEASURE_MS = 360;
 
 export type HintRect = {
   x: number;
@@ -84,19 +87,81 @@ export function placeHintBubble(args: {
   const maxLeft = args.viewport.width - args.horizontalPadding - width;
   const left = Math.max(args.horizontalPadding, Math.min(centeredLeft, maxLeft));
 
-  const spaceBelow = args.viewport.height - (args.hole.y + args.hole.height);
-  const placedBelow = spaceBelow >= minSpace;
   const gap = space[3];
-  const rawTop = placedBelow
-    ? args.hole.y + args.hole.height + gap
-    : args.hole.y - args.bubbleHeight - gap;
+  const minTop = args.horizontalPadding;
+  const maxTop = Math.max(minTop, args.viewport.height - args.bubbleHeight - args.horizontalPadding);
+  const belowTop = args.hole.y + args.hole.height + gap;
+  const aboveTop = args.hole.y - args.bubbleHeight - gap;
+  const belowFits = belowTop <= maxTop;
+  const aboveFits = aboveTop >= minTop;
+  const spaceBelow = args.viewport.height - (args.hole.y + args.hole.height);
+  const spaceAbove = args.hole.y;
 
+  let placedBelow: boolean;
+  if (belowFits && !aboveFits) {
+    placedBelow = true;
+  } else if (aboveFits && !belowFits) {
+    placedBelow = false;
+  } else if (belowFits && aboveFits) {
+    placedBelow = spaceBelow >= minSpace;
+  } else {
+    placedBelow = spaceBelow >= spaceAbove;
+  }
+
+  const rawTop = placedBelow ? belowTop : aboveTop;
   return {
-    top: Math.max(args.horizontalPadding, rawTop),
+    top: Math.min(maxTop, Math.max(minTop, rawTop)),
     left,
     width,
     placedBelow,
   };
+}
+
+/**
+ * How far to scroll so the hole and its bubble both sit inside the viewport.
+ * Positive `deltaY` moves content up (reveals targets below the fold).
+ */
+export function resolveHintFollowScroll(args: {
+  hole: HintRect;
+  viewportHeight: number;
+  bubbleHeight: number;
+  gap?: number;
+  margin?: number;
+  /** Tab bar (or other chrome) to keep content holes above. Ignored for tab-bar targets. */
+  bottomInset?: number;
+  tabBandHeight?: number;
+}): { deltaY: number } {
+  const gap = args.gap ?? space[3];
+  const margin = args.margin ?? HINT_FOLLOW_MARGIN_PX;
+  const tabBand = args.tabBandHeight ?? 0;
+  const holeTop = args.hole.y;
+  const inTabBand = tabBand > 0 && holeTop >= args.viewportHeight - tabBand;
+  const bottomInset = inTabBand ? 0 : Math.max(0, args.bottomInset ?? 0);
+  const minY = margin;
+  const maxY = args.viewportHeight - margin - bottomInset;
+  if (maxY <= minY) return { deltaY: 0 };
+  const holeBottom = args.hole.y + args.hole.height;
+  const bubbleBlock = args.bubbleHeight + gap;
+  const spaceBelow = maxY - holeBottom;
+  const spaceAbove = holeTop - minY;
+  const placeBelow = spaceBelow >= bubbleBlock || (spaceBelow >= spaceAbove && spaceAbove < bubbleBlock);
+
+  let targetTop = holeTop;
+  if (placeBelow) {
+    const overflowBottom = holeBottom + bubbleBlock - maxY;
+    if (overflowBottom > 0) targetTop = holeTop - overflowBottom;
+    if (targetTop < minY) targetTop = minY;
+  } else {
+    const overflowTop = minY - (holeTop - bubbleBlock);
+    if (overflowTop > 0) targetTop = holeTop + overflowTop;
+    if (targetTop + args.hole.height > maxY) {
+      targetTop = maxY - args.hole.height;
+    }
+  }
+
+  const deltaY = holeTop - targetTop;
+  if (Math.abs(deltaY) < HINT_FOLLOW_EPSILON_PX) return { deltaY: 0 };
+  return { deltaY };
 }
 
 export function firstResolvedHintStepIndex(

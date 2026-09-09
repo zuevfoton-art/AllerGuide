@@ -91,6 +91,35 @@ describe('scanBarcode', () => {
     expect(result.productCategory).toBe('beauty');
   });
 
+  it('uses cosmetics analysis for household Open Products Facts hits', async () => {
+    vi.mocked(resolveProductByBarcode).mockResolvedValue({
+      barcode: '8717644231180',
+      name: 'Domestos WC gel',
+      ingredients: 'Sodium hypochlorite 4.5%',
+      source: 'openproductsfacts',
+      declaredAllergenIds: [],
+      traceAllergenIds: [],
+      category: 'household',
+    });
+    vi.mocked(analyzeText).mockResolvedValue({
+      verdict: 'Низкий риск',
+      reason: 'ok',
+      matches: [],
+      crossMatches: [],
+      mode: 'cosmetics',
+      level: 'low',
+      source: 'openproductsfacts',
+    });
+
+    const result = await scanBarcode({ barcode: '8717644231180' });
+
+    expect(analyzeText).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: 'cosmetics', productName: 'Domestos WC gel' }),
+    );
+    expect(result.productCategory).toBe('household');
+    expect(result.source).toBe('openproductsfacts');
+  });
+
   it('searches the medicine catalog by leftover name after an OFF miss', async () => {
     featureState.MEDICINE_DB_ENABLED = true;
     vi.mocked(resolveProductByBarcode).mockResolvedValue(null);

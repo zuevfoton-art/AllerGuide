@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const settings = new Map<string, string>();
 
+vi.mock('@/src/services/analytics-service', () => ({
+  trackEvent: vi.fn(),
+}));
+
 vi.mock('@/src/services/settings-service', () => ({
   getSetting: (key: string) => settings.get(key) ?? null,
   setSetting: (key: string, value: string) => {
@@ -18,6 +22,7 @@ import {
   hintsSeenToursKey,
   isHintTourPending,
   markHintsEligible,
+  rememberHintTour,
 } from './first-run-hints-service';
 
 describe('first-run-hints-service', () => {
@@ -38,6 +43,14 @@ describe('first-run-hints-service', () => {
     markHintsEligible(1.5);
     expect(settings.size).toBe(0);
     expect(isHintTourPending(0, 'home')).toBe(false);
+  });
+
+  it('marks a shown tour as seen without completing the rest', () => {
+    markHintsEligible(3);
+    rememberHintTour(3, 'home');
+    expect(isHintTourPending(3, 'home')).toBe(false);
+    expect(isHintTourPending(3, 'diary')).toBe(true);
+    expect(settings.has(hintsEligibleKey(3))).toBe(true);
   });
 
   it('hides a completed tour and keeps the next one pending', () => {

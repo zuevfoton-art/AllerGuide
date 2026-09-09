@@ -5,8 +5,8 @@ import {
   buildOffProductApiUrl,
   buildOffSearchUrl,
   categoryFromOffSource,
-  normalizeOffBarcode,
   normalizeOffProduct,
+  offBarcodeLookupCandidates,
   type NormalizedOffProduct,
   type OffFamilySource,
   type OffProductCategory,
@@ -68,12 +68,14 @@ async function fetchFromDataset(
 export async function fetchOpenFoodFactsProduct(
   barcode: string,
 ): Promise<NormalizedProduct | null> {
-  const normalized = normalizeOffBarcode(barcode);
-  if (!normalized) return null;
+  const candidates = offBarcodeLookupCandidates(barcode);
+  if (candidates.length === 0) return null;
 
-  for (const source of OFF_FAMILY_SOURCES) {
-    const product = await fetchFromDataset(normalized, source);
-    if (product) return product;
+  for (const code of candidates) {
+    for (const source of OFF_FAMILY_SOURCES) {
+      const product = await fetchFromDataset(code, source);
+      if (product) return product;
+    }
   }
   return null;
 }

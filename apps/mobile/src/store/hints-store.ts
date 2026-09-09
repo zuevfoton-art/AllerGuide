@@ -24,8 +24,12 @@ export type ActiveHintTour = {
 interface HintsState {
   anchors: Record<string, HintAnchorRect>;
   activeTour: ActiveHintTour | null;
+  anchorNudge: number;
+  scrollScreenBy: ((deltaY: number, animated: boolean) => void) | null;
   registerAnchor: (anchorId: string, rect: HintAnchorRect) => void;
   unregisterAnchor: (anchorId: string) => void;
+  nudgeAnchors: () => void;
+  setScrollScreenBy: (scrollBy: ((deltaY: number, animated: boolean) => void) | null) => void;
   startTour: (tourId: HintTourId, steps: HintStepView[]) => void;
   goToNextStep: () => void;
   closeTour: () => void;
@@ -34,6 +38,8 @@ interface HintsState {
 export const useHintsStore = create<HintsState>((set, get) => ({
   anchors: {},
   activeTour: null,
+  anchorNudge: 0,
+  scrollScreenBy: null,
   registerAnchor: (anchorId, rect) =>
     set((state) => ({
       anchors: { ...state.anchors, [anchorId]: rect },
@@ -44,6 +50,8 @@ export const useHintsStore = create<HintsState>((set, get) => ({
       const { [anchorId]: _removed, ...rest } = state.anchors;
       return { anchors: rest };
     }),
+  nudgeAnchors: () => set((state) => ({ anchorNudge: state.anchorNudge + 1 })),
+  setScrollScreenBy: (scrollBy) => set({ scrollScreenBy: scrollBy }),
   startTour: (tourId, steps) => {
     if (get().activeTour) return;
     if (steps.length === 0) return;

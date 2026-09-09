@@ -6,6 +6,14 @@ export const REFRESH_COOKIE = 'ag_refresh';
 
 const DEFAULT_REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
+function decodeCookieValue(value: string): string | null {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return null;
+  }
+}
+
 export function parseCookies(req: Request): Record<string, string> {
   const header = req.headers.cookie;
   if (!header) return {};
@@ -16,7 +24,9 @@ export function parseCookies(req: Request): Record<string, string> {
     if (separator < 0) continue;
     const name = part.slice(0, separator).trim();
     if (!name) continue;
-    cookies[name] = decodeURIComponent(part.slice(separator + 1).trim());
+    const decoded = decodeCookieValue(part.slice(separator + 1).trim());
+    if (decoded === null) continue;
+    cookies[name] = decoded;
   }
   return cookies;
 }

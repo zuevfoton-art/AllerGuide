@@ -57,7 +57,7 @@ function hasAuthCookies(req: Request): boolean {
 /**
  * Cookie sessions may be SameSite=None across API/web hosts. A cross-site form
  * POST then sends those cookies without a CORS preflight, so mutating cookie
- * auth must check Origin against the CORS allowlist itself.
+ * auth (logout, refresh) must check Origin against the CORS allowlist itself.
  */
 function rejectUntrustedCookieMutation(req: Request, res: Response): boolean {
   if (!hasAuthCookies(req) || hasBearerAuthorization(req)) return false;
@@ -188,6 +188,9 @@ export function registerMobileAuthRoutes(app: Express) {
       res.status(503).json({ ok: false, error: 'Auth database is not configured' });
       return;
     }
+
+    // Cookie refresh must not rotate (or trip reuse detection) from a CSRF POST.
+    if (rejectUntrustedCookieMutation(req, res)) return;
 
     const refreshToken = readRefreshToken(req);
     if (!refreshToken) {

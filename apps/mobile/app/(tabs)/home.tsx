@@ -203,7 +203,9 @@ export default function HomeScreen() {
           <SkeletonCard lines={2} />
         </>
       ) : (
-        <DailyReadingCard reading={reading} />
+        <HintAnchor id="home.wellness" testID="home-wellness-kpi">
+          <DailyReadingCard reading={reading} />
+        </HintAnchor>
       )}
 
       {activeProfileId && !(loadingWellness && !wellness) ? (
