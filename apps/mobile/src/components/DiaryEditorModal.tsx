@@ -315,7 +315,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     scrollContent: {
       paddingHorizontal: space[4],
       paddingTop: space[3],
-      paddingBottom: space[2],
+      paddingBottom: space[8],
       gap: space[4],
     },
     footer: {
