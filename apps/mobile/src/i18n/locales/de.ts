@@ -543,7 +543,7 @@ const de: LocaleMessages = {
     scanWithCamera: 'Mit Kamera scannen',
     statusNotFound: 'Produkt nicht gefunden',
     barcodeNotFoundHint:
-      'Nicht im Katalog, bei Open Food Facts oder Open Beauty Facts. Etikett fotografieren oder Zutaten eingeben — die Ziffern werden nicht als Text geprüft.',
+      'Nicht im Katalog, bei Open Food Facts, Open Beauty Facts oder Open Products Facts. Etikett fotografieren oder Zutaten eingeben — die Ziffern werden nicht als Text geprüft.',
     statusInsufficientComposition: 'Zusammensetzung nicht vollständig erkannt',
     statusNoAllergens: 'Keine Allergene gefunden',
     menuStatusMatch: 'Übereinstimmung im Menütext gefunden',

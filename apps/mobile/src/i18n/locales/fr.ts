@@ -542,7 +542,7 @@ const fr: LocaleMessages = {
     scanWithCamera: 'Scanner avec la caméra',
     statusNotFound: 'Produit introuvable',
     barcodeNotFoundHint:
-      'Absent du catalogue, d’Open Food Facts et d’Open Beauty Facts. Photographiez l’étiquette ou saisissez la composition — les chiffres du code-barres ne sont pas analysés comme du texte.',
+      'Absent du catalogue, d’Open Food Facts, d’Open Beauty Facts et d’Open Products Facts. Photographiez l’étiquette ou saisissez la composition — les chiffres du code-barres ne sont pas analysés comme du texte.',
     statusInsufficientComposition: 'Composition non entièrement reconnue',
     statusNoAllergens: 'Aucun allergène détecté',
     menuStatusMatch: 'Correspondance trouvée dans le menu',

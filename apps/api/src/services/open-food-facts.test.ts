@@ -100,6 +100,38 @@ describe('open food facts service', () => {
     expect(product?.source).toBe('openbeautyfacts');
   });
 
+  it('falls through to Open Products Facts when food and beauty miss', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (String(url).includes('openproductsfacts.org')) {
+        return new Response(
+          JSON.stringify({
+            status: 1,
+            product: {
+              code: '8717644231180',
+              product_name: 'Domestos WC gel',
+              brands: 'Domestos',
+              ingredients_text: 'Sodium hypochlorite 4.5%',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      if (String(url).includes('openbeautyfacts.org')) {
+        throw new Error('OBF down');
+      }
+      return new Response(JSON.stringify({ status: 0 }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const product = await fetchOpenFoodFactsProduct('8717644231180');
+    expect(product?.name).toBe('Domestos WC gel');
+    expect(product?.source).toBe('openproductsfacts');
+    expect(product?.category).toBe('household');
+  });
+
   it('falls through to Open Beauty Facts when OFF misses', async () => {
     const fetchMock = vi.fn(async (url: string) => {
       if (String(url).includes('openfoodfacts.org')) {
