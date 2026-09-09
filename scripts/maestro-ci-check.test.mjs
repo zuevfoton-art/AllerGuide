@@ -216,6 +216,7 @@ describe('Maestro nightly CI invariants', () => {
 
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
+    assert.match(editorModal, /Keyboard\.dismiss/);
     assert.match(editorModal, /collapsable=\{false\}/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
@@ -242,6 +243,8 @@ describe('Maestro nightly CI invariants', () => {
     const fill = read('apps/mobile/.maestro/flows/_fill-wizard-field.yaml');
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
+    assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
 
     const dismissIme = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
     assert.match(dismissIme, /waitForAnimationToEnd/);
@@ -274,6 +277,10 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(photo, /id: diary-photo-step/);
     assert.match(photo, /_tap-wizard-choice.yaml/);
     assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
+    assert.match(photo, /FIELD_VALUE: предплечье/);
+    assert.match(photo, /FIELD_VALUE: шелушение/);
+    assert.doesNotMatch(photo, /FIELD_VALUE: лицо\b/);
+    assert.doesNotMatch(photo, /FIELD_VALUE: покраснение/);
     assert.doesNotMatch(
       photo,
       /text: "Слабый"/,

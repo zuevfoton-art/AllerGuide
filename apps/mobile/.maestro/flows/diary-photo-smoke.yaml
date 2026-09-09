@@ -21,12 +21,12 @@ appId: com.aclearo.app
     file: _fill-wizard-field.yaml
     env:
       FIELD_ID: diary-field-skinArea
-      FIELD_VALUE: лицо
+      FIELD_VALUE: предплечье
 - runFlow:
     file: _fill-wizard-field.yaml
     env:
       FIELD_ID: diary-field-appearance
-      FIELD_VALUE: покраснение
+      FIELD_VALUE: шелушение
 - runFlow:
     file: _tap-wizard-choice.yaml
     env:

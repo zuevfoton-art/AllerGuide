@@ -213,9 +213,17 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   </Pressable>
                   {/* Pinned chrome. Nightly 33736400731: extra sheet lift + IME
                       padding hid this header under the status bar. */}
-                  <View testID="diary-editor-title" collapsable={false}>
+                  {/* Title sits outside the ScrollView, so a plain View tap does
+                      not blur the focused field. Nightly 34349155324: IME stayed
+                      up, the next _fill-wizard-field typed into skinArea
+                      (`лицоyпокраснение`), appearance stayed empty, Далее no-op. */}
+                  <Pressable
+                    testID="diary-editor-title"
+                    collapsable={false}
+                    onPress={() => Keyboard.dismiss()}
+                    accessibilityRole="header">
                     <Text style={styles.headerTitle}>{t('diary.title')}</Text>
-                  </View>
+                  </Pressable>
                   <View style={styles.headerBtn} />
                 </View>
               </View>

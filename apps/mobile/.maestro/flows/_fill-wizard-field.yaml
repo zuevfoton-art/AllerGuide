@@ -1,4 +1,9 @@
 # Type into a diary wizard field, then fold IME via the step title.
+# Nightly 34349155324: the second fill on the skin screen typed into the
+# still-focused skinArea (`лицоyпокраснение`). appearance stayed on its
+# placeholder, required validation blocked Далее, diary-photo-step never
+# appeared. Dismiss IME (Keyboard.dismiss on the title), wait, then assert
+# the value landed on THIS field — not a placeholder substring.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -9,6 +14,11 @@ appId: com.aclearo.app
     timeout: 20000
 - tapOn:
     id: ${FIELD_ID}
+- waitForAnimationToEnd:
+    timeout: 3000
 - eraseText
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml
+- assertVisible:
+    id: ${FIELD_ID}
+    text: ${FIELD_VALUE}
