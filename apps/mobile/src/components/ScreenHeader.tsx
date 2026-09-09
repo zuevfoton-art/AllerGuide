@@ -15,6 +15,7 @@ type ScreenHeaderProps = {
   onLinkPress?: () => void;
   right?: ReactNode;
   titleTestID?: string;
+  subtitleTestID?: string;
   style?: ViewStyle;
 };
 
@@ -28,6 +29,7 @@ export function ScreenHeader({
   onLinkPress,
   right,
   titleTestID,
+  subtitleTestID,
   style,
 }: ScreenHeaderProps) {
   const theme = useTheme();
@@ -50,7 +52,11 @@ export function ScreenHeader({
       <View style={styles.textWrap} accessibilityRole="header">
         {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
         <Text testID={titleTestID} style={styles.title}>{title}</Text>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        {subtitle ? (
+          <View testID={subtitleTestID} collapsable={false}>
+            <Text style={styles.subtitle}>{subtitle}</Text>
+          </View>
+        ) : null}
       </View>
       {linkLabel && onLinkPress ? (
         <Pressable onPress={onLinkPress} hitSlop={8}>

@@ -400,8 +400,11 @@ function checkMaestroFlows() {
     failures.push('_dismiss-profile-ime.yaml missing (fold profile IME without BACK)');
   } else {
     const dismissProfileBody = fs.readFileSync(dismissProfileIme, 'utf8');
-    if (!dismissProfileBody.includes('profile-screen-title')) {
-      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-title (not hideKeyboard/BACK)');
+    if (!dismissProfileBody.includes('profile-screen-subtitle')) {
+      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-subtitle (title crushes under IME)');
+    }
+    if (dismissProfileBody.includes('profile-screen-title')) {
+      failures.push('_dismiss-profile-ime.yaml must not tap crushed profile-screen-title');
     }
   }
 

@@ -421,11 +421,18 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(tapSave, /id: profile-save-number/);
 
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-profile-ime.yaml');
-    assert.match(dismiss, /id: profile-screen-title/);
+    assert.match(dismiss, /id: profile-screen-subtitle/);
+    assert.doesNotMatch(dismiss, /id: profile-screen-title/);
+    assert.doesNotMatch(dismiss, /id: screen-brand-home/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+    assert.match(dismiss, /waitForAnimationToEnd/);
 
     const hub = read('apps/mobile/app/profile.tsx');
     assert.match(hub, /titleTestID="profile-screen-title"/);
+    assert.match(hub, /subtitleTestID="profile-screen-subtitle"/);
+
+    const header = read('apps/mobile/src/components/ScreenHeader.tsx');
+    assert.match(header, /subtitleTestID/);
     assert.match(hub, /testID="profile-save-number"/);
     assert.match(hub, /testID="profile-emergency-number"/);
   });

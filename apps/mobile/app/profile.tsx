@@ -65,6 +65,7 @@ export default function ProfileScreen() {
         subtitle={t('profiles.subtitle')}
         right={<LanguagePicker header />}
         titleTestID="profile-screen-title"
+        subtitleTestID="profile-screen-subtitle"
       />
 
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>
