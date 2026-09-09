@@ -1,4 +1,4 @@
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-format';
 
 export type AsitRoute = 'slit' | 'scit';
 export type AsitPhase = 'buildup' | 'maintenance';
@@ -83,9 +83,6 @@ export const ASIT_SYSTEMIC_REACTION_CHOICES = [
   'Умеренная',
   'Сильная',
 ] as const;
-
-export const ASIT_DISCLAIMER =
-  'АСИТ назначается только врачом. Приложение фиксирует приёмы и реакции, но не корректирует дозировки и схему.';
 
 export const DEFAULT_ASIT_REMINDER_HOUR = 8;
 export const DEFAULT_ASIT_REMINDER_MINUTE = 0;

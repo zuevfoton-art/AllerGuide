@@ -1,9 +1,11 @@
+import type { MedicineAgeUsage } from '@allerguide/core';
 import {
   boolean,
   index,
   integer,
   jsonb,
   pgSchema,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -126,6 +128,57 @@ export const syncBackups = profileSchema.table('sync_backups', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const refreshTokens = profileSchema.table(
+  'refresh_tokens',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => appUsers.id, { onDelete: 'cascade' }),
+    tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('refresh_tokens_user_idx').on(table.userId),
+    index('refresh_tokens_expires_idx').on(table.expiresAt),
+  ],
+);
+
+/**
+ * Per-user medicine cards from diary remember / recognize.
+ * Never returned by public catalog search.
+ */
+export const medicineOverlays = profileSchema.table(
+  'medicine_overlays',
+  {
+    userId: integer('user_id')
+      .notNull()
+      .references(() => appUsers.id, { onDelete: 'cascade' }),
+    normalizedName: varchar('normalized_name', { length: 255 }).notNull(),
+    name: text('name').notNull(),
+    activeSubstance: text('active_substance').notNull().default(''),
+    form: varchar('form', { length: 128 }).notNull().default(''),
+    strength: varchar('strength', { length: 128 }).notNull().default(''),
+    manufacturer: varchar('manufacturer', { length: 255 }).notNull().default(''),
+    indications: text('indications').notNull().default(''),
+    ageUsage: jsonb('age_usage').$type<MedicineAgeUsage[]>().notNull().default([]),
+    minAgeYears: integer('min_age_years'),
+    ingredients: text('ingredients').notNull().default(''),
+    allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
+    aliases: jsonb('aliases').$type<string[]>().notNull().default([]),
+    source: varchar('source', { length: 32 }).notNull().default('manual'),
+    confidence: varchar('confidence', { length: 16 }).notNull().default('low'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.normalizedName] }),
+    index('medicine_overlays_user_idx').on(table.userId),
+  ],
+);
+
 export const passwordResetTokens = profileSchema.table('password_reset_tokens', {
   id: serial('id').primaryKey(),
   userId: integer('user_id')
@@ -150,3 +203,6 @@ export type NewEmergencyContactRow = typeof emergencyContacts.$inferInsert;
 export type ProfileSosRow = typeof profileSos.$inferSelect;
 export type SyncBackupRow = typeof syncBackups.$inferSelect;
 export type NewSyncBackupRow = typeof syncBackups.$inferInsert;
+export type RefreshTokenRow = typeof refreshTokens.$inferSelect;
+export type MedicineOverlayRow = typeof medicineOverlays.$inferSelect;
+export type NewMedicineOverlayRow = typeof medicineOverlays.$inferInsert;

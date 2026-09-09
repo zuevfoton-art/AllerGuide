@@ -178,6 +178,8 @@ describe('prescription-ocr', () => {
           | Array<{ from: string; to: string; dose: string }>
           | undefined,
         clinicalDiagnosis: createEmptyAsitClinicalDiagnosis(),
+        allergen: '',
+        allergenId: '',
       },
       getDemoPrescriptionParse(),
     );
@@ -191,5 +193,61 @@ describe('prescription-ocr', () => {
     expect(applied.scheduleStages?.length).toBe(2);
     expect(applied.clinicalDiagnosis?.primaryDisease).toMatch(/ринит/i);
     expect(applied.clinicalDiagnosis?.diet).toBeTruthy();
+    expect(applied.allergenId).toBe('birch-pollen');
+    expect(applied.allergen).toMatch(/берёз/i);
+  });
+
+  it('extracts the course allergen from the drug name', () => {
+    const parsed = parsePrescriptionText('Препарат: Сталораль Берёза\nДозировка: 2 нажатия');
+    expect(parsed.allergenId).toBe('birch-pollen');
+    expect(parsed.allergen).toMatch(/берёз/i);
+  });
+
+  it('extracts the allergen from the clinical diagnosis when the drug has no taxon', () => {
+    const parsed = parsePrescriptionText(
+      [
+        'Основное заболевание: сенсибилизация к пыльце берёзы',
+        'Препарат: Сталораль',
+      ].join('\n'),
+    );
+    expect(parsed.allergenId).toBe('birch-pollen');
+  });
+
+  it('leaves allergen empty and warns when several catalog hits are tied', () => {
+    const parsed = parsePrescriptionText('Аллерген: Молоко и Арахис');
+    expect(parsed.allergenId).toBe('');
+    expect(parsed.warnings.some((warning) => /аллерген/i.test(warning))).toBe(true);
+  });
+
+  it('prefers the appointment date over earlier stage dates', () => {
+    const parsed = parsePrescriptionText(
+      [
+        'Дата приёма: 12.05.2026',
+        'Этап 1 (2026-03-01 – 2026-03-31): наращивание',
+        'Этап 2 (2026-04-01 – 2026-08-31): поддержка',
+      ].join('\n'),
+    );
+    expect(parsed.startDate).toBe('2026-05-12');
+    expect(parsed.endDate).toBe('2026-08-31');
+  });
+
+  it('parses Russian month names for the start date', () => {
+    const parsed = parsePrescriptionText('Дата начала: 12 мая 2026 г.');
+    expect(parsed.startDate).toBe('2026-05-12');
+  });
+
+  it('computes the end date from a 30-day course duration', () => {
+    const parsed = parsePrescriptionText(
+      ['Дата начала: 2026-03-01', 'курс 30 дней'].join('\n'),
+    );
+    expect(parsed.startDate).toBe('2026-03-01');
+    expect(parsed.endDate).toBe('2026-03-31');
+  });
+
+  it('computes the end date from a duration in weeks', () => {
+    const parsed = parsePrescriptionText(
+      ['Дата начала: 01.04.2026', 'на 3 недели'].join('\n'),
+    );
+    expect(parsed.endDate).toBe('2026-04-22');
   });
 });

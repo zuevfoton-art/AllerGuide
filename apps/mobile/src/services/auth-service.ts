@@ -3,7 +3,9 @@ import * as SecureStore from 'expo-secure-store';
 import {
   hashPassword,
   normalizeLogin,
-  validateAuthForm,
+  validateLoginField,
+  validateLoginPassword,
+  validatePassword,
   verifyPassword,
   type AuthUser,
   type LoginType,
@@ -17,17 +19,25 @@ import {
   backendLogin,
   backendRegister,
   backendFetchMe,
+  backendLogout,
   cacheAuthUser,
   clearAuthToken,
   clearCachedAuthUser,
   getAuthToken,
   getCachedAuthUser,
-  setAuthToken,
   syncProfilesFromBackend,
 } from '@/src/services/backend-api';
+import {
+  applyAuthSession,
+  getRefreshToken,
+  refreshAccessToken,
+  usesCookieAuth,
+} from '@/src/services/token-session';
 import { trackEvent } from '@/src/services/analytics-service';
+import { clearHintsState, markHintsEligible } from '@/src/services/first-run-hints-service';
 import { useAppStore } from '@/src/store/app-store';
 import { clearRecoveryKey } from '@/src/services/backup-crypto';
+import { yieldToRender } from '@/src/utils/yield-to-render';
 
 interface StoredUser extends AuthUser {
   passwordHash: string;
@@ -88,7 +98,10 @@ export async function restoreAuthSession(): Promise<void> {
 
   if (!BACKEND_AUTH_ENABLED) return;
 
-  const token = await getAuthToken();
+  let token = await getAuthToken();
+  if (!token && (getRefreshToken() || usesCookieAuth())) {
+    token = await refreshAccessToken();
+  }
   if (!token) {
     if (getSessionUserId() || getCachedAuthUser()) {
       logoutUser();
@@ -144,17 +157,20 @@ export async function registerUser(input: {
   password: string;
   confirmPassword: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateAuthForm(input);
+  const validationError =
+    validateLoginField(input.login) ??
+    validatePassword(input.password, input.confirmPassword, { login: input.login });
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {
     const response = await backendRegister(input);
     if (!response.ok) return { ok: false, error: response.error };
 
-    await setAuthToken(response.data.token);
+    applyAuthSession(response.data);
 
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
+    markHintsEligible(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
 
     trackEvent('auth_register', { method: input.loginType, source: 'backend' });
@@ -175,6 +191,7 @@ export async function registerUser(input: {
     };
   }
 
+  await yieldToRender();
   const passwordHash = await hashPassword(input.password);
   db.runSync('INSERT INTO users (login, loginType, passwordHash, createdAt) VALUES (?, ?, ?, ?)', [
     normalizedLogin,
@@ -187,6 +204,7 @@ export async function registerUser(input: {
   if (!created) return { ok: false, error: 'Не удалось создать аккаунт.' };
 
   setSessionUserId(created.id);
+  markHintsEligible(created.id);
   trackEvent('auth_register', { method: input.loginType, source: 'local' });
   return { ok: true, user: toAuthUser(created) };
 }
@@ -196,14 +214,14 @@ export async function loginUser(input: {
   login: string;
   password: string;
 }): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
-  const validationError = validateAuthForm(input);
+  const validationError = validateLoginField(input.login) ?? validateLoginPassword(input.password);
   if (validationError) return { ok: false, error: validationError };
 
   if (BACKEND_AUTH_ENABLED) {
     const response = await backendLogin(input);
     if (!response.ok) return { ok: false, error: response.error };
 
-    await setAuthToken(response.data.token);
+    applyAuthSession(response.data);
     cacheAuthUser(response.data.user);
     setSessionUserId(response.data.user.id);
     await syncProfilesFromBackend(response.data.user.id, response.data.token);
@@ -219,6 +237,7 @@ export async function loginUser(input: {
     return { ok: false, error: 'Неверный логин или пароль.' };
   }
 
+  await yieldToRender();
   const verification = await verifyPassword(input.password, row.passwordHash);
   if (!verification.valid) {
     return { ok: false, error: 'Неверный логин или пароль.' };
@@ -235,9 +254,16 @@ export async function loginUser(input: {
 
 export function logoutUser() {
   trackEvent('auth_logout');
+  const refreshToken = getRefreshToken();
+  void (async () => {
+    const token = await getAuthToken();
+    if (token || refreshToken) {
+      await backendLogout({ token, refreshToken });
+    }
+    await clearAuthToken();
+  })();
   clearSessionUserId();
   clearCachedAuthUser();
-  void clearAuthToken();
   useAppStore.getState().resetAppState();
 }
 
@@ -268,6 +294,7 @@ export async function deleteAccount(): Promise<{ ok: true } | { ok: false; error
   db.runSync('DELETE FROM alias_feedback');
   db.runSync('DELETE FROM users WHERE id = ?', [userId]);
 
+  clearHintsState(userId);
   clearRecoveryKey();
   clearSessionUserId();
   clearCachedAuthUser();

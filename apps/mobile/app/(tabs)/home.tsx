@@ -44,6 +44,8 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
@@ -79,6 +81,7 @@ export default function HomeScreen() {
   const wellness = wellnessState.data;
   const loadingWellness = wellnessState.loading;
   const reloadWellness = wellnessState.reload;
+  useHintTour('home', { ready: !loadingWellness });
 
   const reloadHomeData = useCallback(() => {
     void reloadWellness();
@@ -179,7 +182,7 @@ export default function HomeScreen() {
       refreshing={wellnessState.refreshing}
       brandHeaderRight={
         <>
-          <ProfileHeaderButton destination="hub" />
+          <ProfileHeaderButton destination="hub" hintAnchorId="home.profile" />
           <Pressable
             onPress={() => router.push('/(tabs)/sos')}
             style={styles.sosBtn}
@@ -312,6 +315,7 @@ export default function HomeScreen() {
 
       {loadingWellness && !wellness ? null : (
       <>
+      <HintAnchor id="home.insights" testID="home-insights">
       <GlassCard padded={false}>
         <View style={[styles.listHead, styles.listHeadPad]}>
           <CardTitle>{t('home.insightsTitle')}</CardTitle>
@@ -333,6 +337,7 @@ export default function HomeScreen() {
           ))
         )}
       </GlassCard>
+      </HintAnchor>
 
       <GlassCard padded={false}>
         <Pressable

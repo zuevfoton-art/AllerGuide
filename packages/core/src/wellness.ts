@@ -73,10 +73,6 @@ export interface WellnessInput {
   asit?: WellnessAsitSummary | null;
   /** ARIA multimorbid AR + asthma penalty input (Phase 3). */
   multimorbidAriaAsthma?: boolean;
-  /** @deprecated Use `diary.symptomDays > 0` — kept for transitional callers */
-  recentSymptoms?: boolean;
-  /** @deprecated Use `diary.triggerDays > 0` */
-  recentTriggers?: boolean;
 }
 
 export interface WellnessScoreBreakdown {

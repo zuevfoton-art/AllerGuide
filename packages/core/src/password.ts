@@ -1,11 +1,35 @@
 import { pbkdf2 } from '@noble/hashes/pbkdf2';
 import { sha256 } from '@noble/hashes/sha2';
-import { randomBytes } from '@noble/hashes/utils';
+import { getSecureRandomBytes } from './secure-random';
 
 const PREFIX = 'pbkdf2-sha256';
-const ITERATIONS = 600_000;
 const LEGACY_SALT = 'allerguide:';
 const textEncoder = new TextEncoder();
+
+/** OWASP PBKDF2-SHA256 target for runtimes with a JIT (Node, browsers, Expo web). */
+export const PASSWORD_HASH_ITERATIONS_JIT = 600_000;
+
+/**
+ * Cost for bytecode interpreters without a JIT (Hermes on React Native), where
+ * pure-JS PBKDF2 runs ~60× slower: 600k iterations block the JS thread for
+ * ~40s, so register/login freeze the app. Measured with `node --jitless`:
+ * 600k ≈ 39s, 50k ≈ 3s. On device the local hash guards a database that the
+ * password does not encrypt, so the lower cost stays proportionate.
+ */
+export const PASSWORD_HASH_ITERATIONS_INTERPRETED = 50_000;
+
+let configuredIterations = PASSWORD_HASH_ITERATIONS_JIT;
+
+export function setPasswordHashIterations(iterations: number): void {
+  if (!Number.isInteger(iterations) || iterations < 1) {
+    throw new Error(`setPasswordHashIterations: expected a positive integer, got ${iterations}`);
+  }
+  configuredIterations = iterations;
+}
+
+export function getPasswordHashIterations(): number {
+  return configuredIterations;
+}
 
 function toBase64(bytes: Uint8Array): string {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -70,9 +94,10 @@ function derivePbkdf2(password: string, salt: Uint8Array, iterations: number): U
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
-  const hash = derivePbkdf2(password, salt, ITERATIONS);
-  return `${PREFIX}:${ITERATIONS}:${toBase64(salt)}:${toBase64(hash)}`;
+  const iterations = getPasswordHashIterations();
+  const salt = getSecureRandomBytes(16);
+  const hash = derivePbkdf2(password, salt, iterations);
+  return `${PREFIX}:${iterations}:${toBase64(salt)}:${toBase64(hash)}`;
 }
 
 export async function verifyPassword(
@@ -92,7 +117,9 @@ export async function verifyPassword(
     let diff = 0;
     for (let i = 0; i < actual.length; i += 1) diff |= actual[i] ^ expected[i];
     if (diff !== 0) return { valid: false };
-    if (iterations !== ITERATIONS) {
+    // Re-hash at the cost configured for this runtime, so a hash written by a
+    // faster engine does not make every later login pay its cost.
+    if (iterations !== getPasswordHashIterations()) {
       const upgradedHash = await hashPassword(password);
       return { valid: true, upgradedHash };
     }

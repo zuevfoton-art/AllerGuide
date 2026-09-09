@@ -98,6 +98,8 @@ export const dishes = catalogSchema.table(
 /**
  * Shared medicine cards recognized from package photos.
  * Deduped by `normalized_name`. No user id and no photo payload.
+ * Follow-up: add a GTIN column (unique) so barcode scans can hit this table
+ * after an Open Food Facts miss — today lookup is by name only.
  */
 export const medicines = catalogSchema.table(
   'medicines',

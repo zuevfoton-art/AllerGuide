@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { listProfiles } from '@/src/services/profile-service';
+import { activateProfile, listProfiles } from '@/src/services/profile-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
@@ -17,6 +18,8 @@ type ProfileHeaderButtonProps = {
   chipDetail?: string;
   /** `hub` opens profile management; `switcher` keeps the quick switch sheet. */
   destination?: 'switcher' | 'hub';
+  /** Measure only the trigger — the switcher Modal must stay outside the rect. */
+  hintAnchorId?: string;
 };
 
 export function ProfileHeaderButton({
@@ -24,6 +27,7 @@ export function ProfileHeaderButton({
   chipTitle,
   chipDetail,
   destination = 'switcher',
+  hintAnchorId,
 }: ProfileHeaderButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -31,7 +35,6 @@ export function ProfileHeaderButton({
   const [open, setOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
-  const setActiveProfile = useAppStore((s) => s.setActiveProfile);
 
   useEffect(() => {
     if (!open) return;
@@ -40,7 +43,7 @@ export function ProfileHeaderButton({
 
   const selectProfile = (profile: Profile) => {
     if (activeProfileId !== profile.id) {
-      setActiveProfile(profile);
+      activateProfile(profile);
       trackEvent('profile_switched', { profile_type: profile.type, source: 'header' });
     }
     setOpen(false);
@@ -59,41 +62,50 @@ export function ProfileHeaderButton({
     setOpen(true);
   };
 
+  const trigger =
+    variant === 'chip' && chipTitle ? (
+      <Pressable
+        testID="profile-header-chip"
+        style={styles.chip}
+        onPress={openTrigger}
+        accessibilityRole="button"
+        accessibilityLabel={t('profileSwitcher.switchTitle')}
+        hitSlop={8}>
+        <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
+        <View style={styles.chipTextCol}>
+          <Text style={styles.chipTitle} numberOfLines={1}>
+            {chipTitle}
+          </Text>
+          {chipDetail ? (
+            <Text style={styles.chipDetail} numberOfLines={1}>
+              {chipDetail}
+            </Text>
+          ) : null}
+        </View>
+        <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
+      </Pressable>
+    ) : (
+      <Pressable
+        testID="profile-header-button"
+        style={styles.button}
+        onPress={openTrigger}
+        accessibilityRole="button"
+        accessibilityLabel={
+          destination === 'hub' ? t('profiles.title') : t('profileSwitcher.switchTitle')
+        }
+        hitSlop={8}>
+        <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
+      </Pressable>
+    );
+
   return (
     <>
-      {variant === 'chip' && chipTitle ? (
-        <Pressable
-          testID="profile-header-chip"
-          style={styles.chip}
-          onPress={openTrigger}
-          accessibilityRole="button"
-          accessibilityLabel={t('profileSwitcher.switchTitle')}
-          hitSlop={8}>
-          <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
-          <View style={styles.chipTextCol}>
-            <Text style={styles.chipTitle} numberOfLines={1}>
-              {chipTitle}
-            </Text>
-            {chipDetail ? (
-              <Text style={styles.chipDetail} numberOfLines={1}>
-                {chipDetail}
-              </Text>
-            ) : null}
-          </View>
-          <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
-        </Pressable>
+      {hintAnchorId ? (
+        <HintAnchor id={hintAnchorId} style={styles.hintAnchor}>
+          {trigger}
+        </HintAnchor>
       ) : (
-        <Pressable
-          testID="profile-header-button"
-          style={styles.button}
-          onPress={openTrigger}
-          accessibilityRole="button"
-          accessibilityLabel={
-            destination === 'hub' ? t('profiles.title') : t('profileSwitcher.switchTitle')
-          }
-          hitSlop={8}>
-          <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
-        </Pressable>
+        trigger
       )}
 
       <Modal
@@ -101,11 +113,14 @@ export function ProfileHeaderButton({
         transparent
         animationType={useModalAnimation('fade')}
         onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
+        <View style={styles.backdrop}>
           <Pressable
-            style={styles.sheet}
-            onPress={(e) => e.stopPropagation()}
-            accessibilityViewIsModal>
+            style={StyleSheet.absoluteFill}
+            onPress={() => setOpen(false)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.cancel')}
+          />
+          <View style={styles.sheet} accessibilityViewIsModal>
             <View style={styles.sheetHead}>
               <Text style={styles.sheetTitle}>{t('profileSwitcher.switchTitle')}</Text>
               <Pressable
@@ -166,8 +181,8 @@ export function ProfileHeaderButton({
               accessibilityLabel={t('profileSwitcher.manage')}>
               <Text style={styles.manageText}>{t('profileSwitcher.manage')}</Text>
             </Pressable>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </>
   );
@@ -175,6 +190,9 @@ export function ProfileHeaderButton({
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    hintAnchor: {
+      alignSelf: 'flex-start',
+    },
     button: {
       width: 40,
       height: 40,
@@ -195,9 +213,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       borderWidth: 1,
       borderColor: colors.accentMid,
-      maxWidth: '58%',
+      maxWidth: 220,
+      flexShrink: 1,
     },
-    chipTextCol: { flex: 1, gap: 1, minWidth: 0 },
+    chipTextCol: { flexShrink: 1, gap: 1, minWidth: 0 },
     chipTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
@@ -222,6 +241,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       maxHeight: '70%',
       overflow: 'hidden',
+      zIndex: 1,
     },
     sheetHead: {
       flexDirection: 'row',

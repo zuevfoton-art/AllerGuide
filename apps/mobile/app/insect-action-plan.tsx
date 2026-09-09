@@ -167,7 +167,7 @@ export default function InsectActionPlanScreen() {
       </GlassCard>
 
       <Button label={t('insect.savePlan')} variant="primary" block onPress={save} />
-      <Disclaimer>{t('insect.disclaimer')}</Disclaimer>
+      <Disclaimer>{t('disclaimer.actionPlan')}</Disclaimer>
     </Screen>
   );
 }

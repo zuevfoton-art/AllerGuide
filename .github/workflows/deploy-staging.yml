@@ -3,7 +3,10 @@ name: Deploy staging (Yandex Cloud)
 # Canonical staging deploy (YC only). Former Neon/Railway workflow removed.
 # Builds API image → YCR → Serverless Container revision.
 # Migrations run on a self-hosted runner inside the VPC (private Postgres, no public IP).
-# After smoke: EAS staging builds for Android + iOS.
+# After smoke: submit EAS staging Android (--no-wait). Waiting for the APK
+# lives in eas-staging-android.yml so this workflow does not hold the
+# deploy-staging concurrency group for 30–90 min. iOS device IPA is opt-in
+# (repo variable EAS_IOS_DEVICE=true) — credentials.json is Android-only.
 #
 # Runbook: docs/staging-yandex-cloud.md
 #
@@ -27,7 +30,8 @@ concurrency:
 env:
   IMAGE_NAME: aclearo-api
   NODE_VERSION: "20"
-  PNPM_VERSION: "10.34.4"
+  # pnpm version: root package.json `packageManager` (do not pass
+  # pnpm/action-setup `version` — it errors if it disagrees with package.json).
 
 jobs:
   gate:
@@ -159,8 +163,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -186,8 +188,6 @@ jobs:
 
       # Preflight shells after auth use `pnpm --filter api exec tsx` (sync/scan/yandex-ai).
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
@@ -216,8 +216,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           # Match eas-staging-android.yml; eas-cli 22 expects current Node.
@@ -225,27 +223,44 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: EAS Build staging (Android)
+        id: eas_android
+        continue-on-error: true
         working-directory: apps/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          # pnpm exec eas resolves apps/mobile eas-cli ^16.32.0, which fails
-          # tarball upload: "Cannot read properties of undefined (reading 'create')".
+          # Pin 22.x: eas-cli 16.x fails tarball upload
+          # ("Cannot read properties of undefined (reading 'create')").
+          # --no-wait: upload always succeeded; Expo Gradle can take 30–90 min
+          # and would pin concurrency group deploy-staging. Watch/fail on
+          # eas-staging-android.yml or expo.dev. Gradle fallback: staging-apk-gradle.yml.
           npx --yes eas-cli@22.0.0 build \
             --profile staging \
             --platform android \
-            --non-interactive
+            --non-interactive \
+            --no-wait
+      - name: EAS Android submit outcome
+        if: always() && needs.smoke.result == 'success'
+        run: |
+          if [ "${{ steps.eas_android.outcome }}" = "success" ]; then
+            echo "::notice::EAS Android submitted (no wait). Track expo.dev / workflow EAS staging Android. Do not rollback API if that build later fails — smoke already passed."
+            echo "::notice::Working APK without Expo cloud: Actions → Staging Android APK (Gradle). Docs: docs/android-stage-build.md §C"
+          else
+            echo "::warning::EAS Android submit failed (often Expo Free-plan monthly quota after a successful upload). Smoke already passed — do not rollback the API."
+            echo "::warning::APK without Expo cloud: Actions → Staging Android APK (Gradle) · docs/android-stage-build.md §C. Retry EAS after quota reset or a paid plan."
+          fi
 
+  # Device IPA needs Apple certs from interactive `eas credentials --platform ios`.
+  # credentials.json is Android-only; non-interactive EAS cannot mint them.
+  # Enable: repo Settings → Variables → EAS_IOS_DEVICE=true
   mobile-ios:
     needs: [gate, smoke]
-    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true'
+    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true' && vars.EAS_IOS_DEVICE == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -260,3 +275,14 @@ jobs:
             --profile staging \
             --platform ios \
             --non-interactive
+
+  mobile-ios-notice:
+    needs: [gate, smoke]
+    if: needs.smoke.result == 'success' && needs.gate.outputs.mobile == 'true' && vars.EAS_IOS_DEVICE != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: iOS EAS skipped (no Apple credentials)
+        run: |
+          echo "::notice::Skipping staging iOS EAS. credentials.json has Android only; non-interactive eas cannot create Apple internal-distribution certs."
+          echo "Enable later: interactive 'cd apps/mobile && eas credentials --platform ios', then set repo variable EAS_IOS_DEVICE=true."
+          echo "Docs: docs/eas-staging-build.md · docs/eas-internal-preview.md"

@@ -25,11 +25,6 @@ export function getClaroGradient(isDark: boolean): ClaroGradient {
   };
 }
 
-/** @deprecated Use getClaroGradient */
-export const getCalmGradient = getClaroGradient;
-/** @deprecated Use ClaroGradient */
-export type CalmGradient = ClaroGradient;
-
 /** Light-mode Claro tokens (mirror theme.ts) — no medical blue, no calm.* keys */
 export const LIGHT_CLARO_TOKENS = {
   tipText: '#1F6B62',
@@ -53,8 +48,3 @@ export const DARK_CLARO_TOKENS = {
   accentLight: '#134E48',
   accentMid: '#2A9D8F',
 } as const;
-
-/** @deprecated Use LIGHT_CLARO_TOKENS */
-export const LIGHT_CALM_TOKENS = LIGHT_CLARO_TOKENS;
-/** @deprecated Use DARK_CLARO_TOKENS */
-export const DARK_CALM_TOKENS = DARK_CLARO_TOKENS;

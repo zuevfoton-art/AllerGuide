@@ -1,0 +1,50 @@
+# Cross-reactions: «Добавить все» persists to the SOS allergy passport.
+# Standalone — do not add to smoke-all.yaml: saving would switch the active
+# profile away from the food/milk first-run profile that scanner-smoke needs.
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: profile-header-button
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- tapOn:
+    id: profile-add
+- tapOn:
+    id: profile-name
+- inputText: "Перекрёсты"
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: profile-birth-year
+- inputText: "1990"
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: condition-food
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: allergen-milk
+- tapOn:
+    id: profile-wizard-next
+- extendedWaitUntil:
+    visible:
+      id: cross-reactions-add-all
+    timeout: 10000
+- tapOn:
+    id: cross-reactions-add-all
+- tapOn:
+    id: profile-save
+- tapOn:
+    id: tab-sos
+- extendedWaitUntil:
+    visible:
+      id: sos-profile-card
+    timeout: 10000
+- assertVisible:
+    id: sos-cross-reactions-row
+- assertVisible:
+    id: sos-cross-chip-goat-milk

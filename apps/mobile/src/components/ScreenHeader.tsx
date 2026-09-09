@@ -36,7 +36,7 @@ export function ScreenHeader({
   const { t } = useTranslation();
 
   return (
-    <View style={[styles.wrap, style]}>
+    <View style={[styles.wrap, style]} collapsable={false}>
       {onBack ? (
         <Pressable
           testID="screen-header-back"
@@ -50,7 +50,9 @@ export function ScreenHeader({
       ) : null}
       <View style={styles.textWrap} accessibilityRole="header">
         {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <Text testID={titleTestID} style={styles.title}>{title}</Text>
+        <View testID={titleTestID} collapsable={false}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
       {linkLabel && onLinkPress ? (
@@ -70,6 +72,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'flex-start',
       justifyContent: 'space-between',
       gap: 12,
+      flexShrink: 0,
     },
     backBtn: {
       width: 40,

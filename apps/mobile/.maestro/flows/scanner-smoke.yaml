@@ -1,12 +1,29 @@
 # P2.1a — scanner: manual text check (offline ingredient match)
+# The input is behind «Ввести вручную» (scanner-toggle-manual).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - tapOn:
     id: tab-scanner
+- extendedWaitUntil:
+    visible:
+      id: scanner-toggle-manual
+    timeout: 15000
+- tapOn:
+    id: scanner-toggle-manual
+- extendedWaitUntil:
+    visible:
+      id: scanner-input
+    timeout: 10000
 - tapOn:
     id: scanner-input
 - inputText: молоко
+- runFlow: _dismiss-scanner-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: scanner-check
+    direction: DOWN
+    timeout: 15000
 - tapOn:
     id: scanner-check
 - extendedWaitUntil:

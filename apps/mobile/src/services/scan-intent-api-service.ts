@@ -1,8 +1,7 @@
 import type { ScanImageIntent, ScanMode } from '@allerguide/ai';
 import { YC_SCAN_INTENT_LLM_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
-
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+import { enrichmentPost } from '@/src/services/enrichment-api';
 
 export type CloudScanIntentResult = {
   intent: ScanImageIntent;
@@ -21,35 +20,28 @@ export async function classifyScanIntentViaApi(input: {
   if (!YC_SCAN_INTENT_LLM_ENABLED) return null;
   if (!input.text.trim()) return null;
 
-  try {
-    const token = await getBackendAuthToken();
-    const response = await fetch(`${API_BASE}/api/scan/intent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({
-        text: input.text.trim().slice(0, 1200),
-        fallbackMode: input.fallbackMode ?? 'product',
-      }),
-    });
+  const token = await getBackendAuthToken();
+  const result = await enrichmentPost<{
+    ok?: boolean;
+    intent?: ScanImageIntent;
+    mode?: ScanMode;
+    source?: 'llm' | 'heuristic';
+  }>(
+    '/api/scan/intent',
+    {
+      text: input.text.trim().slice(0, 1200),
+      fallbackMode: input.fallbackMode ?? 'product',
+    },
+    { token, context: 'classifyScanIntentViaApi' },
+  );
 
-    const payload = (await response.json().catch(() => ({}))) as {
-      ok?: boolean;
-      intent?: ScanImageIntent;
-      mode?: ScanMode;
-      source?: 'llm' | 'heuristic';
-    };
-
-    if (!response.ok || !payload.ok || !payload.intent || !payload.mode) return null;
-
-    return {
-      intent: payload.intent,
-      mode: payload.mode,
-      source: payload.source ?? 'llm',
-    };
-  } catch {
+  if (!result.ok || !result.data.ok || !result.data.intent || !result.data.mode) {
     return null;
   }
+
+  return {
+    intent: result.data.intent,
+    mode: result.data.mode,
+    source: result.data.source ?? 'llm',
+  };
 }

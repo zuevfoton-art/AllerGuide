@@ -4,7 +4,8 @@ import {
   type ScanHistoryEntry,
 } from '@allerguide/core';
 import type { ScanResult } from '@allerguide/ai';
-import { getDb, persistDbWrites } from '@/src/db/init';
+import { persistDbWrites } from '@/src/db/init';
+import { getScanHistoryRepository } from '@/src/db/repositories';
 import { isOwnedProfile } from '@/src/services/owned-profiles';
 
 /** 2-minute window for menu/OCR scan deduplication. */
@@ -117,34 +118,27 @@ export async function saveScanHistory(
     return { ok: true };
   }
 
-  getDb().runSync(
-    'INSERT INTO scan_history (profileId, mode, input, verdict, matches, level, productName, source, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [
-      profileId,
-      mode,
-      trimmedInput,
-      result.verdict,
-      serializeScanHistoryMatches({
-        matches: result.matches,
-        crossMatches: result.crossMatches,
-        traceMatches: result.traceMatches,
-        composition: extras?.composition,
-      }),
-      result.level,
-      productName ?? result.productName ?? null,
-      result.source ?? 'manual',
-      new Date().toISOString(),
-    ],
-  );
+  getScanHistoryRepository().insert({
+    profileId,
+    mode,
+    input: trimmedInput,
+    verdict: result.verdict,
+    matches: serializeScanHistoryMatches({
+      matches: result.matches,
+      crossMatches: result.crossMatches,
+      traceMatches: result.traceMatches,
+      composition: extras?.composition,
+    }),
+    level: result.level,
+    productName: productName ?? result.productName ?? null,
+    source: result.source ?? 'manual',
+    createdAt: new Date().toISOString(),
+  });
   await persistDbWrites();
   return { ok: true };
 }
 
 export function listScanHistory(profileId: number): ScanHistoryEntry[] {
   if (!isOwnedProfile(profileId)) return [];
-
-  return getDb().getAllSync<ScanHistoryEntry>(
-    'SELECT * FROM scan_history WHERE profileId = ? ORDER BY id DESC',
-    [profileId],
-  );
+  return getScanHistoryRepository().listByProfileId(profileId);
 }

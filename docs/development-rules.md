@@ -145,9 +145,9 @@ flowchart TD
 
 ### 4.1. Локальное хранилище
 
-- Импорт БД: **только** `@/src/db/init` (платформа выбирается автоматически).
+- Импорт БД: `@/src/db/init` (платформа выбирается автоматически) **или** typed repository из `src/db/repositories` (профили, дневник, scan history, settings). Экраны по-прежнему не импортируют `db`.
 - Новые таблицы/колонки на native: `init.native.ts` + миграция в `migrations.ts` с инкрементом `CURRENT_SCHEMA_VERSION`.
-- Web: те же сущности через JSON-ключи в IndexedDB; не вводить отдельную модель данных без синхронизации с native.
+- Web: те же сущности через JSON-ключи в IndexedDB; не вводить отдельную модель данных без синхронизации с native. Репозитории на web читают `web-collections.ts`, не SQL-роутер.
 - `app_settings` — только KV настройки (onboarding, locale, auth ids), не бизнес-сущности.
 
 ### 4.2. Сканер
@@ -283,6 +283,7 @@ ui     → (peer RN only)
 - [ ] Нет unrelated изменений в diff
 - [ ] Астма-логика ссылается на `gina-asthma.ts` (см. §2.5), не дублирует пороги ACT/ПСВ
 - [ ] Новое analytics-событие есть в `ANALYTICS_EVENT_NAMES`, эмиссия в сервисе, `pnpm check:analytics-taxonomy` зелёный
+- [ ] Новый маршрут / сервис / модуль core — добавлен в [`codebase-index.md`](./codebase-index.md); версия схемы и диапазон миграций в документах совпадают с кодом (`pnpm rc-gate` проверяет)
 - [ ] Цвета / радиусы / отступы — из `theme.ts` / `layout.ts`, не литералы в компонентах
 
 ---
@@ -343,6 +344,7 @@ ui     → (peer RN only)
 
 - [`docs/architecture.md`](./architecture.md) — полная архитектура
 - [`docs/roadmap-to-prod.md`](./roadmap-to-prod.md) — фазы и критерии релиза
+- [`docs/refactoring-simplify-reliability.md`](./refactoring-simplify-reliability.md) — упрощение и отказоустойчивость
 - [`docs/functional-requirements.md`](./functional-requirements.md) — FR-требования
 - [`docs/qa-checklist.md`](./qa-checklist.md) — регрессия
 - [`AGENTS.md`](../AGENTS.md) — команды для агентов и разработчиков

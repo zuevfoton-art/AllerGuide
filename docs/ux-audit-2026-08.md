@@ -96,11 +96,11 @@
 
 ## 4. Экран логина
 
-Файлы: [`app/login.tsx`](../apps/mobile/app/login.tsx), [`AuthForm.tsx`](../apps/mobile/src/components/AuthForm.tsx), [`PhoneInput.tsx`](../apps/mobile/src/components/PhoneInput.tsx). PR #238 файл не меняет.
+Файлы: [`app/login.tsx`](../apps/mobile/app/login.tsx), [`AuthForm.tsx`](../apps/mobile/src/components/AuthForm.tsx), [`LoginField.tsx`](../apps/mobile/src/components/LoginField.tsx).
 
 ### Иерархия
 
-Порядок: `LanguagePicker` → `AuthHero` → `AuthModeToggle` → поле логина → пароль → «Забыли пароль» → ошибка → кнопка входа → ссылка на регистрацию → (web) Replit.
+Порядок: `LanguagePicker` → `AuthHero` → `LoginField` («Телефон или почта») → пароль → «Забыли пароль» → ошибка → кнопка входа → ссылка на регистрацию.
 
 `AuthHero` занимает около **190 pt** (~27 % первого экрана на 667 pt): `BrandLogo` 56 с эндорсером, теглайн 14 px `accent`, заголовок 22 px serif, подзаголовок 14 px. Форма начинается примерно на **310 pt**. Кнопка входа при закрытой клавиатуре помещается в 700 pt с запасом ~80 pt; при показе `AuthError` запас почти исчезает.
 
@@ -124,9 +124,8 @@
 |---------|---------------|----------|
 | `AuthForgotLink` | 13 px текст, `marginTop: -4`, без вертикального паддинга → **17–20 pt** | нет |
 | `AuthLink` (регистрация) | 14 px + `paddingVertical: 4` → **~26 pt** | нет |
-| `AuthModeToggle` | `padding: 12` → **~42 pt** | почти |
 | `AuthPrimaryButton` | `minHeight: 48` | да |
-| Сегмент страны в `PhoneInput` | есть `accessibilityLabel="Country code"` | ок, заголовок модалки захардкожен |
+| Сегмент страны в `LoginField` | появляется только когда ввод похож на телефон | ок |
 
 ### Плотность
 

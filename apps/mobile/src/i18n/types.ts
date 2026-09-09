@@ -28,7 +28,6 @@ export type LocaleMessages = {
     loadFailed: string;
     createProfile: string;
     undo: string;
-    email: string;
     phone: string;
     password: string;
     next: string;
@@ -60,15 +59,11 @@ export type LocaleMessages = {
   };
   auth: {
     loginTitle: string;
-    loginSubtitle: string;
     registerTitle: string;
-    registerSubtitle: string;
-    phoneLabel: string;
+    loginLabel: string;
     phonePlaceholder: string;
-    passwordPlaceholder: string;
     passwordMinPlaceholder: string;
     confirmPassword: string;
-    confirmPasswordPlaceholder: string;
     loginButton: string;
     registerButton: string;
     noAccount: string;
@@ -76,15 +71,21 @@ export type LocaleMessages = {
     hasAccount: string;
     loginLink: string;
     forgotLink: string;
+    showPassword: string;
+    hidePassword: string;
     countryCode: string;
     countryCodeTitle: string;
     errors: {
+      loginRequired: string;
       emailRequired: string;
       phoneRequired: string;
       emailInvalid: string;
       phoneInvalid: string;
       passwordRequired: string;
       passwordMin: string;
+      passwordComplexity: string;
+      passwordCommon: string;
+      passwordLikeLogin: string;
       passwordMismatch: string;
       wrongCredentials: string;
       emailTaken: string;
@@ -106,7 +107,6 @@ export type LocaleMessages = {
     };
     resetPassword: {
       title: string;
-      subtitle: string;
       newPassword: string;
       confirmPassword: string;
       submitButton: string;
@@ -114,11 +114,25 @@ export type LocaleMessages = {
       successMessage: string;
       invalidToken: string;
     };
+    passwordStrength: {
+      label: string;
+      weak: string;
+      fair: string;
+      good: string;
+      strong: string;
+      minLength: string;
+      lowercase: string;
+      uppercase: string;
+      digit: string;
+      symbol: string;
+      classesHint: string;
+      common: string;
+      likeLogin: string;
+    };
   };
   profiles: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     listTitle: string;
     empty: string;
     self: string;
@@ -167,7 +181,6 @@ export type LocaleMessages = {
     sos: string;
   };
   more: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     marketDesc: string;
@@ -267,7 +280,6 @@ export type LocaleMessages = {
     marketplaceSub: string;
     marketplaceEmpty: string;
     marketplaceOpen: string;
-    disclaimer: string;
     disclaimerShort: string;
     phenotypeHintsTitle: string;
     insightsTitle: string;
@@ -295,7 +307,6 @@ export type LocaleMessages = {
   };
   diary: {
     title: string;
-    subtitle: string;
     eyebrow: string;
     newEntry: string;
     quickEntry: string;
@@ -355,11 +366,9 @@ export type LocaleMessages = {
   clinicalScales: {
     title: string;
     subtitle: string;
-    eyebrow: string;
   };
   diaryWizard: {
     stepOf: string;
-    stepOfSection: string;
     skipSection: string;
     deleteEntry: string;
     fillOneSection: string;
@@ -410,6 +419,7 @@ export type LocaleMessages = {
     notRecognized: string;
     cropTitle: string;
     cropHint: string;
+    barcodeNotFound: string;
   };
   nutritionScan: {
     title: string;
@@ -421,6 +431,7 @@ export type LocaleMessages = {
     notRecognized: string;
     cropTitle: string;
     cropHint: string;
+    barcodeNotFound: string;
   };
   voiceNote: {
     title: string;
@@ -436,7 +447,6 @@ export type LocaleMessages = {
   scanner: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     openAction: string;
     product: string;
     menu: string;
@@ -480,6 +490,7 @@ export type LocaleMessages = {
     labelPlaceholder: string;
     manualPlaceholder: string;
     barcodeWebHint: string;
+    barcodePlaceholder: string;
     takePhoto: string;
     pickFromGallery: string;
     cropTitle: string;
@@ -520,6 +531,11 @@ export type LocaleMessages = {
     safeList: string;
     saveToSafe: string;
     savedToSafe: string;
+    /** Result action: start a diary entry from this scan. */
+    saveToDiary: string;
+    savedToDiary: string;
+    /** Shown after the entry is written: where to find and edit it. */
+    savedToDiaryHint: string;
     safeListEmpty: string;
     removeSafe: string;
     removeSafeTitle: string;
@@ -532,6 +548,7 @@ export type LocaleMessages = {
     scanWithCamera: string;
     /** Barcode lookup outcome labels */
     statusNotFound: string;
+    barcodeNotFoundHint: string;
     statusInsufficientComposition: string;
     statusNoAllergens: string;
     /** Menu scan outcome labels */
@@ -573,6 +590,7 @@ export type LocaleMessages = {
     trendsHide: string;
     failForwardPhoto: string;
     failForwardManual: string;
+    diarySectionLabel: string;
     barcodeWebFailForward: string;
     matchAlias: string;
     verifyPackageHint: string;
@@ -582,8 +600,6 @@ export type LocaleMessages = {
   };
   market: {
     title: string;
-    subtitle: string;
-    eyebrow: string;
     searchPlaceholder: string;
     banner: string;
     empty: string;
@@ -609,7 +625,6 @@ export type LocaleMessages = {
   map: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     places: string;
     pollen: string;
     adair: string;
@@ -619,7 +634,6 @@ export type LocaleMessages = {
     yandexAttribution: string;
     basemapUnavailable: string;
     emptyPlaces: string;
-    disclaimerPlaces: string;
     disclaimerPollen: string;
     disclaimerAdair: string;
     pollenMapTitle: string;
@@ -627,9 +641,6 @@ export type LocaleMessages = {
     peakSeason: string;
     season: string;
     pollenLiveTitle: string;
-    pollenMapAttribution: string;
-    pollenGoogleMapAttribution: string;
-    pollenYandexInteractiveAttribution: string;
     pollenHeatmapTreeHint: string;
     pollenTreeSpeciesLevelsHint: string;
     pollenHeatmapGrassHint: string;
@@ -654,7 +665,6 @@ export type LocaleMessages = {
     pollenTypeTree: string;
     pollenTypeGrass: string;
     pollenTypeWeed: string;
-    pollenGoogleOnlyHint: string;
     pollenYou: string;
     otherPollenAllergens: string;
     pollenScalePlace: string;
@@ -670,9 +680,6 @@ export type LocaleMessages = {
     pollenValue: string;
     pollenUnavailable: string;
     pollenLoading: string;
-    pollenSourceOpenMeteo: string;
-    pollenSourceCache: string;
-    pollenCalendarFallback: string;
     pollenNoSeason: string;
     heatmapGroupEmpty: string;
     openYandexPollen: string;
@@ -684,8 +691,6 @@ export type LocaleMessages = {
     forecastTitle: string;
     forecastEmpty: string;
     upiTitle: string;
-    upiSourceGoogle: string;
-    upiSourceOpenMeteo: string;
     plantTitle: string;
     plantEmpty: string;
     plantFamily: string;
@@ -744,8 +749,6 @@ export type LocaleMessages = {
     actionTipClinicsCta: string;
     yandexOverviewBanner: string;
     listFirstHint: string;
-    pollenSourceCalendar: string;
-    pollenSourceGoogle: string;
     allergenPickerTitle: string;
     allergenPickerBack: string;
     allergenPickerButton: string;
@@ -770,31 +773,25 @@ export type LocaleMessages = {
     plantIndexDescription: string;
     groupCount: string;
     dataStatusLive: string;
-    dataStatusGoogleOnly: string;
     dataStatusNone: string;
     airQualityTitle: string;
     airQualityUnavailable: string;
     airQualityDominant: string;
     airQualityPm25: string;
     airQualityPm10: string;
-    airQualitySource: string;
     airQualityLegend: string;
     airQualityLegendDirection: string;
     airQualityExpand: string;
     airQualityCollapse: string;
     airQualityLocal: string;
     placeSearchPlaceholder: string;
-    placeSearchOfflineCatalog: string;
     placeSearchNothingFound: string;
     placeRating: string;
     placeAllergyUnknown: string;
-    placeSourceGoogle: string;
-    placeSourceCatalog: string;
   };
   settings: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     emergencyNumber: string;
     emergencyHint: string;
     saveNumber: string;
@@ -836,6 +833,7 @@ export type LocaleMessages = {
     recoveryKeyCopyHint: string;
     recoveryKeyWrong: string;
     recoveryKeyRequired: string;
+    encryptionUnavailable: string;
     localBackupDesc: string;
     localBackupExportSuccess: string;
     localBackupImportSuccess: string;
@@ -843,8 +841,6 @@ export type LocaleMessages = {
     localBackupImportMessage: string;
     recoveryKeyBannerTitle: string;
     recoveryKeyBannerDesc: string;
-    pollenRegionTitle: string;
-    pollenRegionHint: string;
     locationDefaultHint: string;
     appLockTitle: string;
     appLockHint: string;
@@ -856,7 +852,6 @@ export type LocaleMessages = {
     aboutHint: string;
   };
   about: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     version: string;
@@ -876,9 +871,12 @@ export type LocaleMessages = {
   };
   disclaimer: {
     details: string;
+    /** Shared wording for every action-plan screen (asthma, insect). */
+    actionPlan: string;
+    /** MDR classification footnote, prefixed with the disclaimer version. */
+    mdrFootnote: string;
   };
   notifications: {
-    eyebrow: string;
     title: string;
     subtitle: string;
     hubTitle: string;
@@ -976,7 +974,6 @@ export type LocaleMessages = {
     childDesc: string;
     both: string;
     bothDesc: string;
-    disclaimer: string;
   };
   onboardingIntro: {
     next: string;
@@ -991,24 +988,30 @@ export type LocaleMessages = {
       sos: { title: string; desc: string };
     };
   };
+  hints: {
+    step: string;
+    next: string;
+    done: string;
+    skip: string;
+    tours: {
+      home: Record<'profile' | 'wellness' | 'insights' | 'scanner' | 'sos', { title: string; body: string }>;
+      diary: Record<'newEntry' | 'course' | 'report', { title: string; body: string }>;
+      scanner: Record<'photo' | 'barcode' | 'manual', { title: string; body: string }>;
+      map: Record<'status' | 'layers', { title: string; body: string }>;
+      sos: Record<'call' | 'passport' | 'contacts', { title: string; body: string }>;
+    };
+  };
   profileSetup: {
-    eyebrow: string;
     titleSelf: string;
     titleChild: string;
     titleCreate: string;
-    subtitleSelfStep: string;
-    subtitleChildStep: string;
-    subtitleDefault: string;
     stepProgress: string;
     nameLabel: string;
-    namePlaceholder: string;
     birthYearLabel: string;
     birthYearPlaceholder: string;
     profileLabel: string;
     profileSelf: string;
     profileChild: string;
-    profileSelfLocked: string;
-    profileChildLocked: string;
     allergensLabel: string;
     allergensHint: string;
     conditionsLabel: string;
@@ -1023,8 +1026,9 @@ export type LocaleMessages = {
     crossReactions: {
       title: string;
       hint: string;
-      skipHint: string;
       addNext: string;
+      addAll: string;
+      clearAll: string;
       disclaimer: string;
     };
     symptoms: {
@@ -1033,7 +1037,6 @@ export type LocaleMessages = {
       zonesLabel: string;
       severityLabel: string;
       typicalLabel: string;
-      skipHint: string;
       disclaimer: string;
       zones: {
         nose: string;
@@ -1085,12 +1088,10 @@ export type LocaleMessages = {
       empty: string;
       disclaimer: string;
       icd10Ref: string;
-      icd10Disclaimer: string;
     };
     allergenConfirmations: {
       title: string;
       hint: string;
-      skipHint: string;
     };
     conditionsOther: string;
     conditionHintTitle: string;
@@ -1165,6 +1166,7 @@ export type LocaleMessages = {
     ocrEmptyMedia: string;
     ocrDemoHint: string;
     ocrFieldsIncomplete: string;
+    ocrAllergenUncertain: string;
     ocrParseError: string;
     verifyTitle: string;
     verifySubtitle: string;
@@ -1247,11 +1249,11 @@ export type LocaleMessages = {
     ocrEmptyMedia: string;
     ocrDemoHint: string;
     ocrFieldsIncomplete: string;
+    ocrAllergenUncertain: string;
     ocrParseError: string;
     verifyTitle: string;
     verifyConfirm: string;
     saveCourse: string;
-    disclaimer: string;
     disclaimerShort: string;
     noProfile: string;
     reminderLabel: string;
@@ -1294,13 +1296,11 @@ export type LocaleMessages = {
     clinicalNotesPlaceholder: string;
     consolidated: string;
     savePlan: string;
-    disclaimer: string;
     noProfile: string;
     notEligible: string;
   };
   asthma: {
     title: string;
-    eyebrow: string;
     planTitle: string;
     planSubtitle: string;
     editPlan: string;
@@ -1320,8 +1320,6 @@ export type LocaleMessages = {
     clinicalNotes: string;
     clinicalNotesPlaceholder: string;
     savePlan: string;
-    disclaimer: string;
-    cardDisclaimer: string;
     noProfile: string;
     notEligible: string;
     ginaLink: string;
@@ -1371,7 +1369,6 @@ export type LocaleMessages = {
   sos: {
     title: string;
     subtitle: string;
-    eyebrow: string;
     name: string;
     age: string;
     allergies: string;
@@ -1385,6 +1382,7 @@ export type LocaleMessages = {
       secondDose: string;
     };
     crisisPlanNoProfile: string;
+    crossReactions: string;
     medicalNotes: string;
     actionPlan: string;
     emptyProfile: string;
@@ -1396,7 +1394,6 @@ export type LocaleMessages = {
     callContact: string;
     call: string;
     tip: string;
-    disclaimer: string;
     disclaimerShort: string;
     passportTitle: string;
     passportEmpty: string;
@@ -1418,7 +1415,6 @@ export type LocaleMessages = {
   };
   sosEdit: {
     title: string;
-    eyebrow: string;
     noProfile: string;
     notesLabel: string;
     notesPlaceholder: string;
@@ -1451,7 +1447,6 @@ export type LocaleMessages = {
     back: string;
     title: string;
     subtitle: string;
-    eyebrow: string;
     period: string;
     customRange: string;
     fromDate: string;
@@ -1459,7 +1454,6 @@ export type LocaleMessages = {
     blocks: string;
     generating: string;
     generate: string;
-    disclaimer: string;
     disclaimerShort: string;
   };
   expert: {
@@ -1472,6 +1466,10 @@ export type LocaleMessages = {
   };
   allergens: {
     popular: string;
+    recommendedTitle: string;
+    recommendedHint: string;
+    recommendedGroup: string;
+    showMore: string;
     fromCatalog: string;
     openCatalog: string;
     crossTitle: string;

@@ -4,6 +4,7 @@ import {
   createEmptyProfileSetupWizardDraft,
   getNextProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
+  getVisibleProfileSetupSteps,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   shouldSkipCrossReactionsStep,
   validateProfileSetupWizardDraft,
@@ -32,6 +33,12 @@ describe('profile setup wizard (mobile re-export)', () => {
         selectedAllergenIds: ['unknown-allergen-xyz'],
       }),
     ).toEqual({ current: 4, total: 7 });
+  });
+
+  it('keeps the first run to name, birth year, conditions, allergens and cross-reactions', () => {
+    expect(
+      getVisibleProfileSetupSteps(baseDraft(), { deferOptionalSteps: true }),
+    ).toEqual(['name', 'birthYear', 'conditions', 'allergens', 'crossReactions']);
   });
 
   it('validates full draft', () => {

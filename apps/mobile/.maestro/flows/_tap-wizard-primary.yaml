@@ -1,0 +1,13 @@
+# Fold IME, bring «Далее / Сохранить» on-screen, tap it.
+# Pixel 6 + Gboard crush diary-wizard-primary to zero height
+# (nightly 33728952919: bounds [87,1575][993,1538]).
+appId: com.aclearo.app
+---
+- runFlow: _dismiss-wizard-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: diary-wizard-primary
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: diary-wizard-primary

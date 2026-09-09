@@ -8,6 +8,58 @@ export type AliasFeedbackMutationResult =
   | { ok: true; entry: AliasFeedbackEntry }
   | { ok: false; code: 'invalid_input' | 'profile_not_found' };
 
+export type AliasFeedbackFlushResult = { synced: number; failed: number };
+
+async function postAliasFeedbackEntry(entry: AliasFeedbackEntry): Promise<boolean> {
+  const result = await apiRequest('/api/alias-feedback', {
+    method: 'POST',
+    body: {
+      term: entry.term,
+      suggestedAllergenId: entry.suggestedAllergenId,
+      context: entry.context,
+    },
+  });
+  return result.ok;
+}
+
+function deleteAliasFeedbackById(id: string): void {
+  getDb().runSync('DELETE FROM alias_feedback WHERE id = ?', [id]);
+}
+
+/**
+ * Drain local pending alias feedback to the API.
+ * Successful posts remove the local row (server owns the queue after handoff).
+ */
+export async function flushPendingAliasFeedback(): Promise<AliasFeedbackFlushResult> {
+  const pending = listPendingAliasFeedback();
+  let synced = 0;
+  let failed = 0;
+
+  for (const entry of pending) {
+    try {
+      const ok = await postAliasFeedbackEntry(entry);
+      if (!ok) {
+        failed += 1;
+        continue;
+      }
+      deleteAliasFeedbackById(entry.id);
+      synced += 1;
+    } catch (error) {
+      failed += 1;
+      logCaughtError('flushPendingAliasFeedback', error, {
+        level: 'warn',
+        extra: { term: entry.term },
+      });
+    }
+  }
+
+  if (synced > 0) {
+    await persistDbWrites();
+  }
+
+  return { synced, failed };
+}
+
 export async function saveAliasFeedback(
   input: AliasFeedbackInput,
 ): Promise<AliasFeedbackMutationResult> {
@@ -38,17 +90,9 @@ export async function saveAliasFeedback(
   );
   await persistDbWrites();
 
-  void apiRequest('/api/alias-feedback', {
-    method: 'POST',
-    body: {
-      term: entry.term,
-      suggestedAllergenId: entry.suggestedAllergenId,
-      context: entry.context,
-      profileId: entry.profileId,
-      scanInput: entry.scanInput,
-    },
-  }).catch((error) => {
-    logCaughtError('submitAliasFeedback', error, { level: 'warn', extra: { term: entry.term } });
+  // Best-effort drain (includes this entry). Failures stay pending for next flush.
+  void flushPendingAliasFeedback().catch((error) => {
+    logCaughtError('saveAliasFeedback.flush', error, { level: 'warn', extra: { term: entry.term } });
   });
 
   return { ok: true, entry };

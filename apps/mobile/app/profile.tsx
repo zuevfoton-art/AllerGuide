@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
+import { getEmergencyNumber, setEmergencyNumber, DEFAULT_EMERGENCY_NUMBER } from '@/src/services/sos-service';
 import { CloudBackupCard } from '@/src/components/CloudBackupCard';
 import { LocalBackupCard } from '@/src/components/LocalBackupCard';
 import { RecoveryKeyBanner } from '@/src/components/RecoveryKeyBanner';
@@ -26,11 +26,6 @@ import {
   isAppLockEnabled,
   setAppLockEnabled,
 } from '@/src/services/app-lock-service';
-import {
-  getManualPollenRegionId,
-  listPollenRegionOptions,
-  setManualPollenRegionId,
-} from '@/src/services/location-service';
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -38,7 +33,7 @@ export default function ProfileScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [appLockAvailable, setAppLockAvailable] = useState(false);
 
   const refresh = useCallback(() => {
@@ -58,23 +53,23 @@ export default function ProfileScreen() {
   };
 
   const saveEmergencyNumber = () => {
-    const normalized = emergencyNumber.replace(/[^\d+]/g, '') || '103';
+    const normalized = emergencyNumber.replace(/[^\d+]/g, '') || DEFAULT_EMERGENCY_NUMBER;
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
     showStatusBanner({ tone: 'success', message: t('settings.savedNumberMessage', { number: normalized }) });
   };
 
   return (
-    <Screen>
-      <ScreenHeader
-        onBack={() => router.back()}
-        eyebrow={t('profiles.eyebrow')}
-        title={t('profiles.title')}
-        subtitle={t('profiles.subtitle')}
-        right={<LanguagePicker header />}
-        titleTestID="profile-screen-title"
-      />
-
+    <Screen
+      pinnedTop={
+        <ScreenHeader
+          onBack={() => router.back()}
+          title={t('profiles.title')}
+          subtitle={t('profiles.subtitle')}
+          right={<LanguagePicker header />}
+          titleTestID="profile-screen-title"
+        />
+      }>
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>
       <GlassCard padded={false}>
         {profiles.length === 0 ? (
@@ -86,6 +81,7 @@ export default function ProfileScreen() {
             return (
               <Pressable
                 key={profile.id}
+                testID={`profile-list-item-${index}`}
                 style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}
                 onPress={() => openEdit(profile.id)}
                 accessibilityRole="button"
@@ -104,7 +100,13 @@ export default function ProfileScreen() {
           })
         )}
       </GlassCard>
-      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
+      <Button
+        testID="profile-add"
+        label={t('profiles.add')}
+        variant="primary"
+        block
+        onPress={() => router.push('/profile-setup?mode=add')}
+      />
 
       <Text style={ui.sectionLabel}>{t('profiles.sosPassport')}</Text>
       <GlassCard>
@@ -132,7 +134,7 @@ export default function ProfileScreen() {
           style={styles.input}
           value={emergencyNumber}
           onChangeText={setEmergencyNumberState}
-          placeholder="103"
+          placeholder={DEFAULT_EMERGENCY_NUMBER}
           placeholderTextColor={theme.colors.textMuted}
           accessibilityLabel={t('settings.emergencyNumber')}
           keyboardType="phone-pad"
@@ -152,24 +154,6 @@ export default function ProfileScreen() {
 
       <Text style={ui.sectionLabel}>{t('settings.cloudBackup')}</Text>
       <CloudBackupCard />
-
-      <Text style={ui.sectionLabel}>{t('settings.pollenRegionTitle')}</Text>
-      <GlassCard>
-        <Text style={styles.cardHint}>{t('settings.pollenRegionHint')}</Text>
-        {listPollenRegionOptions().map((region) => {
-          const selected = getManualPollenRegionId() === region.id;
-          return (
-            <Pressable
-              key={region.id}
-              style={[styles.regionRow, selected && styles.regionRowSelected]}
-              onPress={() => setManualPollenRegionId(selected ? null : region.id)}
-              accessibilityRole="button">
-              <Text style={styles.rowTitle}>{region.name}</Text>
-              {selected ? <Ionicons name="checkmark-circle" size={18} color={theme.colors.accent} /> : null}
-            </Pressable>
-          );
-        })}
-      </GlassCard>
 
       {appLockAvailable ? (
         <>
@@ -397,19 +381,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 14,
       fontWeight: '600',
       color: colors.danger,
-    },
-    regionRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    regionRowSelected: {
-      backgroundColor: colors.accentLight,
-      borderRadius: 6,
-      paddingHorizontal: 8,
     },
   });
 }

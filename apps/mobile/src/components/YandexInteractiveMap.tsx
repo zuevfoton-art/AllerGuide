@@ -63,7 +63,12 @@ export function YandexInteractiveMap({
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return undefined;
+    // Only the embed iframe may drive the map. Without this check any script or
+    // nested frame on the page can forge a bridge message and move the map or
+    // fire marker callbacks, since the payload only self-identifies by name.
+    const expectedOrigin = embedOrigin(src);
     const onMessage = (event: MessageEvent) => {
+      if (!expectedOrigin || event.origin !== expectedOrigin) return;
       handleBridgeMessage(
         String(event.data ?? ''),
         onMarkerPressRef.current,
@@ -72,7 +77,7 @@ export function YandexInteractiveMap({
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, []);
+  }, [src]);
 
   if (!src || loadFailed) {
     return (
@@ -109,7 +114,7 @@ export function YandexInteractiveMap({
       <WebView
         source={{ uri: src }}
         style={styles.webview}
-        originWhitelist={['https://*', 'http://*']}
+        originWhitelist={WEBVIEW_ORIGIN_WHITELIST}
         javaScriptEnabled
         domStorageEnabled
         onError={() => setLoadFailed(true)}
@@ -129,6 +134,22 @@ export function YandexInteractiveMap({
       ) : null}
     </View>
   );
+}
+
+/**
+ * Release builds refuse plaintext origins so a downgraded or MITM'd embed cannot
+ * run active content in the WebView. Dev builds keep `http` for a local API.
+ */
+const WEBVIEW_ORIGIN_WHITELIST = __DEV__ ? ['https://*', 'http://*'] : ['https://*'];
+
+/** Origin of the API-hosted embed, used to reject forged `postMessage` senders. */
+function embedOrigin(src: string | null): string | null {
+  if (!src) return null;
+  try {
+    return new URL(src, typeof window === 'undefined' ? undefined : window.location.href).origin;
+  } catch {
+    return null;
+  }
 }
 
 function handleBridgeMessage(

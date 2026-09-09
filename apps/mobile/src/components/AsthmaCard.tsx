@@ -85,7 +85,6 @@ export function AsthmaCard({ plan, entries, onLogPef }: AsthmaCardProps) {
       ) : null}
 
       <Button label={t('asthma.logPef')} variant="primary" size="sm" onPress={onLogPef} />
-      <Text style={styles.disclaimer}>{t('asthma.cardDisclaimer')}</Text>
     </GlassCard>
   );
 }
@@ -115,12 +114,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textSecondary,
       lineHeight: 17,
-    },
-    disclaimer: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      lineHeight: 15,
     },
   });
 }

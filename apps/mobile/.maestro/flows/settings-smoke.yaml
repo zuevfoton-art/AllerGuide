@@ -1,4 +1,5 @@
 # P2.1a — settings (/profile): emergency number
+# After typing, the phone-pad IME hides profile-save-number (nightly 34052584781).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
@@ -8,12 +9,16 @@ appId: com.aclearo.app
     visible:
       id: profile-screen-title
     timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: profile-emergency-number
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: profile-emergency-number
 - eraseText
 - inputText: "112"
-- tapOn:
-    id: profile-save-number
+- runFlow: _tap-profile-save-number.yaml
 - tapOn:
     text: OK
 - assertVisible:

@@ -3,10 +3,12 @@ import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { showStatusBanner } from '@/src/store/banner-store';
 import type { MedicineAgeResolution, MedicineCard } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
+import { DiaryBarcodeScanner } from '@/src/components/DiaryBarcodeScanner';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import {
+  recognizeMedicineFromBarcode,
   recognizeMedicineFromVoice,
   recognizeMedicinePackage,
 } from '@/src/services/medicine-recognition-service';
@@ -146,6 +148,32 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
     }
   };
 
+  const applyBarcode = async (barcode: string) => {
+    void cancelVoiceDictation();
+    setVoiceState('idle');
+    setTranscript('');
+    setCropped(null);
+    setState('recognizing');
+    setError('');
+    try {
+      const outcome = await recognizeMedicineFromBarcode({
+        barcode,
+        ageYears,
+      });
+      if (!outcome.card) {
+        setError(t('medicineScan.barcodeNotFound'));
+        setState('idle');
+        return;
+      }
+      setCard(outcome.card);
+      setAgeUsage(outcome.ageUsage);
+      setState('result');
+    } catch {
+      setError(t('medicineScan.barcodeNotFound'));
+      setState('idle');
+    }
+  };
+
   const applyVoiceTranscript = useCallback(
     async (spoken: string) => {
       setTranscript(spoken);
@@ -245,7 +273,7 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
     );
   }
 
-  if (state === 'result' && card && (cropped || transcript)) {
+  if (state === 'result' && card) {
     return (
       <View style={styles.wrap} testID="medicine-photo-result">
         {cropped ? <Image source={{ uri: cropped.uri }} style={styles.preview} /> : null}
@@ -291,6 +319,7 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
           void startCapture(false);
         }}
       />
+      <DiaryBarcodeScanner testID="medicine-photo-barcode" onBarcode={(code) => void applyBarcode(code)} />
       {voiceSupported ? (
         <Button
           testID="medicine-photo-voice"

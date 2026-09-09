@@ -1,7 +1,8 @@
-# Scroll a control on-screen, then tap. Use after hideKeyboard so IME is gone.
+# Scroll a control on-screen, then tap. Fold IME first so the target is
+# not covered. Do not use hideKeyboard (BACK at /login exits the app).
 appId: com.aclearo.app
 ---
-- hideKeyboard
+- runFlow: _dismiss-ime.yaml
 - scrollUntilVisible:
     element:
       id: ${FIELD_ID}

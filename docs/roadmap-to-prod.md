@@ -245,6 +245,7 @@ flowchart TB
 | P2 | P5.4b | Карта пыления (Google + Yandex + гео) | ✅ [`yandex-pollen-map-integration.md`](./yandex-pollen-map-integration.md), [`interactive-pollen-map-plan.md`](./interactive-pollen-map-plan.md) |
 | P2 | P5.5 | Маркетплейс (affiliate) | ✅ [`yandex-market-affiliate.md`](./yandex-market-affiliate.md) |
 | P2 | P5.6 | Масштабирование | 🔶 Redis rate-limit + read-replica есть; распределённый scan-cache и PgBouncer в prod — нет |
+| P2 | P5.7 | Freemium → PRO (IAP) | 📝 план [`subscription-monetization-plan.md`](./subscription-monetization-plan.md) — trial 7 дн., gate облачного ИИ, управление в Профиле; ЮKassa только как web follow-up |
 
 Досрочно закрытые P5-пункты не заменяют Phase 2/3: они увеличили площадь, которую нужно покрыть soak-ом и store-комплаенсом.
 

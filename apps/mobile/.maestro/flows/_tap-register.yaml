@@ -2,9 +2,10 @@
 # (same class as auth-mode-phone). Prefer the accent Text testID, then
 # the RU link copy. Do not tap "Зарегистрироваться" after navigation —
 # the register submit button uses the same string.
+# Do not hideKeyboard here: BACK at /login exits to Pixel Launcher.
 appId: com.aclearo.app
 ---
-- hideKeyboard
+- runFlow: _dismiss-ime.yaml
 - runFlow:
     when:
       visible:

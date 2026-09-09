@@ -360,7 +360,8 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 | `deploy` | `ubuntu-latest` | `yc serverless container revision deploy` + Lockbox secrets |
 | `migrate` | **`self-hosted, yc-staging-vpc`** | `pnpm --filter api db:migrate` |
 | `smoke` | `ubuntu-latest` | `pnpm install` + `staging-preflight.sh` (sync/scan/yandex-ai через `pnpm exec tsx`) |
-| `mobile-android` / `mobile-ios` | `ubuntu-latest` | `npx eas-cli@22.0.0 build --profile staging` (не `pnpm exec eas` 16.x — ломает upload tarball) |
+| `mobile-android` | `ubuntu-latest` | `eas build --profile staging --platform android --no-wait` (ожидание APK — `eas-staging-android.yml`) |
+| `mobile-ios` | `ubuntu-latest` | Device IPA **только** при repo variable `EAS_IOS_DEVICE=true` (нужны Apple certs). Иначе job `mobile-ios-notice` |
 
 ### GitHub Secrets
 
@@ -387,15 +388,16 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 
 | Платформа | Результат |
 |-----------|-----------|
-| Android | APK internal → QR на expo.dev |
-| iOS | TestFlight Internal |
+| Android | `deploy-staging` только **отправляет** EAS (`--no-wait`), чтобы не держать concurrency 30–90 мин. Дождаться APK: Actions → **EAS staging Android** или expo.dev. Если Expo Gradle падает — [`android-stage-build.md`](android-stage-build.md) §C (`staging-apk-gradle.yml`). Поздний fail EAS **не** откат API: `smoke` уже прошёл. |
+| iOS | По умолчанию **пропускается**. `credentials.json` — только Android debug keystore; non-interactive EAS не создаёт Apple certs для `distribution: internal`. Device IPA: интерактивно `eas credentials --platform ios`, затем repo variable `EAS_IOS_DEVICE=true`. |
 
 Ручной запуск:
 
 ```bash
 cd apps/mobile
+pnpm exec eas --version   # нужен eas-cli >= 22 (16.x ломает upload tarball)
 pnpm build:staging:android
-pnpm build:staging:ios
+pnpm build:staging:ios    # упадёт без Apple credentials
 ```
 
 Чеклист на устройстве: [`eas-staging-build.md`](./eas-staging-build.md), [`qa-checklist.md`](./qa-checklist.md).
@@ -426,6 +428,7 @@ pnpm build:staging:ios
 | Симптом | Решение |
 |---------|---------|
 | `migrate` job pending forever | Runner не зарегистрирован или нет label `yc-staging-vpc` |
+| `migrate`: Multiple versions of pnpm specified | `pnpm/action-setup` `version` расходится с `package.json` `packageManager`. Не пинить version в workflow — как в `ci.yml` |
 | `connection refused` к Postgres с runner | VM в той же subnet; проверьте SG (`6432` из VPC CIDR) |
 | Health 503, `database.ok: false` | Lockbox `DATABASE_URL`; container имеет VPC connectivity |
 | Health 403 `API Gateway is stopped` | `yc serverless api-gateway resume --id <gw>` (`aclearo-staging-api-gw`) |
@@ -434,6 +437,9 @@ pnpm build:staging:ios
 | `docker login cr.yandex` fail | `YC_SA_JSON` — полный JSON authorized key deploy SA |
 | OpenAI scan 502 | Прокси / `AI_SCAN_ENABLED=false` / billing |
 | EAS «Сервер недоступен» | DNS `api.staging.aclearo.com`, TLS, URL в `eas.json` |
+| `mobile-ios` / Apple credentials | Ожидаемо без `EAS_IOS_DEVICE`. См. [`eas-staging-build.md`](eas-staging-build.md) |
+| `mobile-android` Gradle unknown error | expo.dev → Run gradlew. Запасной APK: `staging-apk-gradle.yml`. Не откатывать API |
+| `mobile-android` / Free plan this month | EAS quota. Upload мог пройти, build — нет. Не откатывать API (`smoke` уже зелёный). APK: `staging-apk-gradle.yml`. После 1-го числа / paid plan — снова EAS |
 | Destroy staging | `./scripts/yc-staging-bootstrap.sh destroy` (подтверждение) |
 
 ---

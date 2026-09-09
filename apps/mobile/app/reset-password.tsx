@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, type TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { validatePassword } from '@allerguide/core';
 import { backendResetPassword } from '@/src/services/backend-api';
 import { Screen } from '@/src/components/Screen';
 import { useTranslation } from '@/src/store/locale-store';
@@ -13,10 +14,11 @@ import {
   AuthLink,
   AuthError,
 } from '@/src/components/AuthForm';
+import { PasswordStrengthMeter } from '@/src/components/PasswordStrengthMeter';
 import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function ResetPasswordScreen() {
-  const { t } = useTranslation();
+  const { t, tAuthError } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { token } = useLocalSearchParams<{ token?: string }>();
@@ -33,12 +35,9 @@ export default function ResetPasswordScreen() {
       setError(t('auth.resetPassword.invalidToken'));
       return;
     }
-    if (password.length < 6) {
-      setError(t('auth.errors.passwordMin'));
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError(t('auth.errors.passwordMismatch'));
+    const passwordError = validatePassword(password, confirmPassword);
+    if (passwordError) {
+      setError(tAuthError(passwordError));
       return;
     }
 
@@ -81,7 +80,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <Screen>
-      <AuthHero title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle')} />
+      <AuthHero title={t('auth.resetPassword.title')} />
       {!token && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{t('auth.resetPassword.invalidToken')}</Text>
@@ -90,21 +89,29 @@ export default function ResetPasswordScreen() {
       <AuthField
         label={t('auth.resetPassword.newPassword')}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(value) => {
+          setPassword(value);
+          if (error) setError('');
+        }}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
+        testID="auth-reset-password-input"
         returnKeyType="next"
         submitBehavior="submit"
         onSubmitEditing={() => confirmRef.current?.focus()}
         {...authPasswordInputProps('new')}
       />
+      <PasswordStrengthMeter password={password} />
       <AuthField
         ref={confirmRef}
         label={t('auth.resetPassword.confirmPassword')}
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        placeholder={t('auth.confirmPasswordPlaceholder')}
+        onChangeText={(value) => {
+          setConfirmPassword(value);
+          if (error) setError('');
+        }        }
         secureTextEntry
+        testID="auth-reset-confirm-input"
         returnKeyType="go"
         submitBehavior="blurAndSubmit"
         onSubmitEditing={() => void handleSubmit()}

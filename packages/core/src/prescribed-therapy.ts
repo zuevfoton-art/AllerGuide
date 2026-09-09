@@ -1,4 +1,4 @@
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-format';
 
 export type PrescribedTherapyRoute = 'oral' | 'inhaled' | 'nasal' | 'topical' | 'injection' | 'other';
 export type PrescribedDoseStatus = 'on-time' | 'late' | 'missed';
@@ -64,9 +64,6 @@ export const PRESCRIBED_THERAPY_DOSE_STATUS_LABELS: Record<PrescribedDoseStatus,
   late: 'С опозданием',
   missed: 'Пропущена',
 };
-
-export const PRESCRIBED_THERAPY_DISCLAIMER =
-  'Терапия назначается только врачом. Приложение фиксирует приёмы, но не корректирует дозировки и схему.';
 
 export function createDefaultPrescribedCourse(): PrescribedCourse {
   return {

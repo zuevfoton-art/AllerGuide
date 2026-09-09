@@ -28,7 +28,6 @@ export function ProfileSetupAllergenConfirmationsStep({
         confirmations={confirmations}
         onChange={onConfirmationsChange}
       />
-      <Text style={ui.docMeta}>{t('profileSetup.allergenConfirmations.skipHint')}</Text>
     </GlassCard>
   );
 }

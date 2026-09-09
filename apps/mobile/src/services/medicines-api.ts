@@ -98,9 +98,13 @@ export async function searchMedicinesFromCatalog(query: string): Promise<Medicin
   const timeout = setTimeout(() => controller.abort(), CATALOG_SEARCH_TIMEOUT_MS);
 
   try {
+    const token = await getBackendAuthToken();
     const response = await fetch(
       `${baseUrl}/api/medicines/search?q=${encodeURIComponent(term)}`,
-      { signal: controller.signal },
+      {
+        signal: controller.signal,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      },
     );
     if (!response.ok) return [];
     const data = (await response.json()) as { ok?: boolean; medicines?: MedicineCard[] };
@@ -117,9 +121,8 @@ export async function searchMedicinesFromCatalog(query: string): Promise<Medicin
 }
 
 /**
- * Write-through a found/typed card into the YC catalog. Catalog writes require a
- * signed-in device, so without a backend token we keep the card local instead of
- * collecting 401s on every save.
+ * Persist a found/typed card as the signed-in user's overlay. Without a backend
+ * token the card stays local instead of collecting 401s on every save.
  */
 export async function rememberMedicineViaApi(card: MedicineCard): Promise<MedicineCard | null> {
   const baseUrl = getApiBaseUrl();

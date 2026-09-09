@@ -84,6 +84,8 @@ eas credentials --platform ios
 
 EAS может автоматически создать Distribution Certificate и Provisioning Profile. Для TestFlight нужен App Store Connect app record с bundle ID `com.aclearo.app`.
 
+Пока этого шага нет, `deploy-staging` **не** вызывает iOS EAS (`credentials.json` — только Android). После certs: repo variable `EAS_IOS_DEVICE=true`.
+
 ### Android
 
 ```bash
@@ -126,7 +128,7 @@ eas build --profile preview --platform all
 | `EXPO_PUBLIC_BACKEND_AUTH` | `false` |
 | `EXPO_PUBLIC_CLOUD_SYNC` | `false` |
 | `EXPO_PUBLIC_AI_SCAN_ENABLED` | `false` |
-| `EXPO_PUBLIC_PRODUCT_DB` | `false` |
+| `EXPO_PUBLIC_PRODUCT_DB` | `true` |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` |
 
 Sentry и analytics остаются выключенными (DSN пустой).
@@ -142,7 +144,10 @@ Sentry и analytics остаются выключенными (DSN пустой)
 | New Architecture (SDK 55+) | **всегда on** | `newArchEnabled` убран из `app.json`. Legacy Architecture недоступна. Откат на SDK 54 old-arch только через downgrade. |
 | `react-native-quick-crypto` | **не используется** | Его нативный `install()` аварийно завершал процесс **при запуске** на Android (native/JNI abort, который JS `try/catch` не ловит). Полностью удалён. |
 | Криптография (хэш паролей, PBKDF2/SHA-256) | **чистый JS `@noble/hashes`** в `@allerguide/core` (`src/password.ts`) | Не грузит нативный крипто-модуль на старте; формат хэшей не изменился (старые хэши проверяются). |
-| Резервное шифрование (AES-GCM) | Web Crypto, с мягкой деградацией | На нативе `crypto.subtle` отсутствует → `isEncryptionAvailable() === false`, облачный бэкап (по умолчанию выключен) просто не шифруется. |
+| Стоимость PBKDF2 на native | `PASSWORD_HASH_ITERATIONS_INTERPRETED` (50k) вместо 600k, ставится из `src/install-runtime` | Hermes — интерпретатор без JIT: 600k итераций блокируют JS-поток ~40 c, регистрация и вход «зависают». Web и API остаются на 600k. |
+| Соль для хэша | `setSecureRandomBytes` (expo-crypto) из `src/install-runtime` | `@noble/hashes` кэширует `globalThis.crypto` при импорте, а в release-сборке Hermes его нет. |
+| Точка входа JS | `index.js` (Gradle `entryFile`) **и** `entry.js` (`package.json` `main` для Expo CLI/EAS/web) импортируют `src/install-runtime` | Патч только в `entry.js` не попадает в нативный release-бандл — Gradle его не читает. |
+| Резервное шифрование (AES-GCM) | Web Crypto или `@noble/ciphers` | На нативе без SubtleCrypto используется noble-путь; без ciphertext upload не выполняется. |
 
 **История крашей запуска (для контекста):**
 - 1.0.0 / 1.0.1 — краш из-за `react-native-quick-crypto` `install()` на старте (New Arch). JS-guard в 1.0.1 не помог (нативный abort).

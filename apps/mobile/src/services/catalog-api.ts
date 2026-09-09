@@ -14,6 +14,7 @@ export interface CatalogProduct {
   ingredients: string;
   allergenTags: string[];
   traceTags: string[];
+  category?: string;
 }
 
 interface ProductDto {
@@ -25,6 +26,7 @@ interface ProductDto {
   allergenTags?: string[];
   traceTags?: string[];
   source?: string;
+  category?: string;
 }
 
 function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct | null {
@@ -38,6 +40,7 @@ function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct
     ingredients: dto.ingredients ?? '',
     allergenTags: Array.isArray(dto.allergenTags) ? dto.allergenTags : [],
     traceTags: Array.isArray(dto.traceTags) ? dto.traceTags : [],
+    category: dto.category,
   };
 }
 

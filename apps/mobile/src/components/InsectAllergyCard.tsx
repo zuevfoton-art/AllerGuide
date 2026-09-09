@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import {
-  INSECT_DISCLAIMER,
   computeInsectStingSummary,
   getConsolidatedInsectList,
   type InsectActionPlan,
@@ -73,7 +72,6 @@ export function InsectAllergyCard({
       </View>
 
       <Button label={t('insect.logSting')} variant="primary" size="sm" onPress={onLogSting} />
-      <Text style={styles.disclaimer}>{INSECT_DISCLAIMER}</Text>
     </GlassCard>
   );
 }
@@ -98,12 +96,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 17,
-    },
-    disclaimer: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      lineHeight: 15,
     },
   });
 }

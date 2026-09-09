@@ -32,12 +32,12 @@ export function authPasswordInputProps(mode: 'current' | 'new'): AuthInputProps 
   };
 }
 
-export function authPhoneInputProps(): AuthInputProps {
+export function authLoginInputProps(kind: 'phone' | 'email' | 'unknown'): AuthInputProps {
   return {
-    keyboardType: 'phone-pad',
+    keyboardType: kind === 'phone' ? 'phone-pad' : 'email-address',
     autoCapitalize: 'none',
     autoCorrect: false,
-    textContentType: 'telephoneNumber',
-    autoComplete: 'tel',
+    textContentType: 'username',
+    autoComplete: 'username',
   };
 }

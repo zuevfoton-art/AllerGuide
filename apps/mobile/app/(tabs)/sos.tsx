@@ -3,6 +3,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
 import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
@@ -16,10 +18,12 @@ import {
   buildCrisisPlan,
   formatEpinephrineEligibilityHint,
   getProfileAgeYears,
-  parseAllergies,
+  listProfileAllergenChips,
   pluralRu,
   type EmergencyContact,
 } from '@allerguide/core';
+import { radii } from '@/src/constants/layout';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useAppStore } from '@/src/store/app-store';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -32,6 +36,7 @@ import {
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { isProfileEpinephrineEligible } from '@/src/services/clinical-phenotype-service';
 import {
+  DEFAULT_EMERGENCY_NUMBER,
   getEmergencyNumber,
   getSosActionPlan,
   getSosNotes,
@@ -39,17 +44,18 @@ import {
   resolveSosEmergencyBar,
 } from '@/src/services/sos-service';
 import { trackEvent } from '@/src/services/analytics-service';
-import { fontSizes, lineHeights } from '@/src/constants/typography';
 
 export default function SosScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
+  useHintTour('sos');
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
-  const allergies = profile ? parseAllergies(profile.allergies) : [];
-  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const allergies = profile ? listProfileAllergenChips(profile.allergies) : [];
+  const crossReactions = profile ? listProfileAllergenChips(profile.crossReactionAllergies) : [];
+  const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [notes, setNotes] = useState('');
   const [actionPlan, setActionPlan] = useState('');
   const [contacts, setContacts] = useState<EmergencyContact[]>([]);
@@ -93,6 +99,14 @@ export default function SosScreen() {
     void Linking.openURL(`tel:${phone.replace(/\s/g, '')}`);
   };
 
+  const planSteps = useMemo(
+    () =>
+      actionPlan
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean),
+    [actionPlan],
+  );
   const crisisPlan = useMemo(() => buildCrisisPlan(actionPlan), [actionPlan]);
 
   const kitChecked = passport.shockKit.filter((item) => item.checked);
@@ -141,6 +155,7 @@ export default function SosScreen() {
       onRefresh={() => handleRefresh()}
       refreshing={refreshing}
       pinnedTop={
+        <HintAnchor id="sos.call">
         <SosEmergencyBar
           emergencyLabel={t('sos.call', { number: emergencyBar.emergencyNumber })}
           contactName={emergencyBar.firstContact?.name}
@@ -164,8 +179,9 @@ export default function SosScreen() {
             contacts.length > 0 ? () => router.push('/sos-edit' as any) : undefined
           }
         />
+        </HintAnchor>
       }>
-      <TabScreenHeader eyebrow={t('sos.eyebrow')} title={t('sos.crisisTitle')} />
+      <TabScreenHeader eyebrow={t('sos.title')} title={t('sos.crisisTitle')} />
 
       <GlassCard testID="sos-crisis-plan">
         <CardTitle>
@@ -195,6 +211,7 @@ export default function SosScreen() {
 
       {profile ? (
         <>
+          <HintAnchor id="sos.passport">
           <GlassCard testID="sos-profile-card">
             <View style={ui.kpiRow}>
               <Text style={ui.kpiLabel}>{t('sos.name')}</Text>
@@ -211,14 +228,35 @@ export default function SosScreen() {
                 <Text style={ui.kpiLabel}>{t('sos.allergies')}</Text>
                 <View style={styles.allergyChips}>
                   {allergies.map((allergen) => (
-                    <View key={allergen} style={styles.allergyChip}>
-                      <Text style={styles.allergyText}>{allergen}</Text>
+                    <View
+                      key={allergen.id}
+                      testID={`sos-allergy-chip-${allergen.id}`}
+                      style={styles.allergyChip}>
+                      <Text style={styles.allergyText}>{allergen.name}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+            {crossReactions.length > 0 ? (
+              <View
+                style={[ui.kpiRow, styles.allergyRow]}
+                testID="sos-cross-reactions-row">
+                <Text style={ui.kpiLabel}>{t('sos.crossReactions')}</Text>
+                <View style={styles.allergyChips}>
+                  {crossReactions.map((allergen) => (
+                    <View
+                      key={allergen.id}
+                      testID={`sos-cross-chip-${allergen.id}`}
+                      style={styles.allergyChip}>
+                      <Text style={styles.allergyText}>{allergen.name}</Text>
                     </View>
                   ))}
                 </View>
               </View>
             ) : null}
           </GlassCard>
+          </HintAnchor>
 
           <Pressable
             testID="sos-passport-toggle"
@@ -243,25 +281,13 @@ export default function SosScreen() {
                   {passport.drugIntolerances.length > 0 ? (
                     <View style={styles.passportRow}>
                       <Text style={styles.passportLabel}>{t('sos.drugIntolerances')}</Text>
-                      <View style={styles.allergyChips}>
-                        {passport.drugIntolerances.map((item) => (
-                          <View key={item} style={styles.allergyChip}>
-                            <Text style={styles.allergyText}>{item}</Text>
-                          </View>
-                        ))}
-                      </View>
+                      <Text style={styles.passportValue}>{passport.drugIntolerances.join(', ')}</Text>
                     </View>
                   ) : null}
                   {passport.triggers.length > 0 ? (
                     <View style={styles.passportRow}>
                       <Text style={styles.passportLabel}>{t('sos.triggers')}</Text>
-                      <View style={styles.allergyChips}>
-                        {passport.triggers.map((item) => (
-                          <View key={item} style={styles.allergyChip}>
-                            <Text style={styles.allergyText}>{item}</Text>
-                          </View>
-                        ))}
-                      </View>
+                      <Text style={styles.passportValue}>{passport.triggers.join(', ')}</Text>
                     </View>
                   ) : null}
                   {passport.epinephrine?.brand ? (
@@ -341,11 +367,10 @@ export default function SosScreen() {
                 <View key={grade.grade} style={styles.gradeBlock}>
                   <Text style={styles.gradeTitle}>{grade.title}</Text>
                   <Text style={styles.gradeSigns}>{grade.signs}</Text>
-                  {grade.actions.map((action, index) => (
-                    <View key={action} style={styles.planStep}>
-                      <Text style={styles.planNum}>{index + 1}</Text>
-                      <Text style={styles.planText}>{action}</Text>
-                    </View>
+                  {grade.actions.map((action) => (
+                    <Text key={action} style={styles.gradeAction}>
+                      · {action}
+                    </Text>
                   ))}
                 </View>
               ))}
@@ -356,14 +381,27 @@ export default function SosScreen() {
             </GlassCard>
           ) : null}
 
-          {notes ? (
+          {(notes || planSteps.length > 0) && (
             <GlassCard>
-              <View style={styles.notesBlock}>
-                <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
-                <Text style={styles.notesText}>{notes}</Text>
-              </View>
+              {notes ? (
+                <View style={styles.notesBlock}>
+                  <Text style={styles.notesLabel}>{t('sos.medicalNotes')}</Text>
+                  <Text style={styles.notesText}>{notes}</Text>
+                </View>
+              ) : null}
+              {planSteps.length > 0 ? (
+                <View style={styles.notesBlock}>
+                  <Text style={styles.notesLabel}>{t('sos.actionPlan')}</Text>
+                  {planSteps.map((step, index) => (
+                    <View key={`${index}-${step}`} style={styles.planStep}>
+                      <Text style={styles.planNum}>{index + 1}</Text>
+                      <Text style={styles.planText}>{step}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
             </GlassCard>
-          ) : null}
+          )}
         </>
       ) : (
         <EmptyState
@@ -378,12 +416,14 @@ export default function SosScreen() {
       {contacts.length > 0 ? null : profile ? (
         <GlassCard style={styles.contactsHintCard}>
           <Text style={styles.hintText}>{t('sos.contactsHint')}</Text>
-          <Button
-            testID="sos-edit-contacts"
-            label={t('sos.editContacts')}
-            variant="secondary"
-            onPress={() => router.push('/sos-edit' as any)}
-          />
+          <HintAnchor id="sos.contacts">
+            <Button
+              testID="sos-edit-contacts"
+              label={t('sos.editContacts')}
+              variant="secondary"
+              onPress={() => router.push('/sos-edit' as any)}
+            />
+          </HintAnchor>
         </GlassCard>
       ) : null}
 
@@ -435,7 +475,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     collapseTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       fontWeight: '600',
       color: colors.textSecondary,
       textTransform: 'uppercase',
@@ -447,32 +487,32 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.dangerLight,
       paddingVertical: 4,
       paddingHorizontal: 10,
-      borderRadius: 4,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.dangerBorder,
     },
     allergyText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.label,
+      fontSize: 12,
       color: colors.danger,
       fontWeight: '600',
     },
     passportRow: { gap: 4, marginBottom: 8 },
     passportLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.label,
+      fontSize: 12,
       fontWeight: '600',
       color: colors.textSecondary,
     },
     passportValue: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodyMd,
+      fontSize: 14,
       color: colors.text,
-      lineHeight: lineHeights.bodySm,
+      lineHeight: 20,
     },
     warnText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       color: colors.danger,
       fontWeight: '600',
       marginBottom: 8,
@@ -482,21 +522,21 @@ function createStyles({ colors, fonts }: AppTheme) {
     gradeBlock: { gap: 4 },
     gradeTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodyMd,
+      fontSize: 14,
       fontWeight: '600',
       color: colors.head,
     },
     gradeSigns: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       color: colors.textSecondary,
-      lineHeight: lineHeights.label,
+      lineHeight: 18,
     },
     gradeAction: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       color: colors.text,
-      lineHeight: lineHeights.label,
+      lineHeight: 18,
       paddingLeft: 4,
     },
     biphasicTip: {
@@ -509,10 +549,10 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     biphasicText: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.label,
+      fontSize: 12,
       color: colors.textSecondary,
       flex: 1,
-      lineHeight: lineHeights.label,
+      lineHeight: 17,
     },
     notesBlock: {
       marginTop: 10,
@@ -523,15 +563,15 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     notesLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.label,
+      fontSize: 12,
       fontWeight: '600',
       color: colors.textSecondary,
     },
     notesText: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodyMd,
+      fontSize: 14,
       color: colors.textSecondary,
-      lineHeight: lineHeights.bodySm,
+      lineHeight: 20,
     },
     crisisStep: {
       flexDirection: 'row',
@@ -557,7 +597,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     planStep: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
     planNum: {
       fontFamily: fonts.sansBold,
-      fontSize: fontSizes.bodyMd,
+      fontSize: 14,
       fontWeight: '700',
       color: colors.head,
       width: 20,
@@ -565,9 +605,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     planText: {
       fontFamily: fonts.sans,
       flex: 1,
-      fontSize: fontSizes.bodyMd,
+      fontSize: 14,
       color: colors.text,
-      lineHeight: lineHeights.bodySm,
+      lineHeight: 20,
     },
     contactsHead: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
     contactRow: {
@@ -581,28 +621,28 @@ function createStyles({ colors, fonts }: AppTheme) {
     contactBody: { flex: 1, gap: 2, minWidth: 0 },
     contactName: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodyMd,
+      fontSize: 14,
       fontWeight: '600',
       color: colors.text,
     },
     contactMeta: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.label,
+      fontSize: 12,
       color: colors.textMuted,
     },
     hintText: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       color: colors.textSecondary,
-      lineHeight: lineHeights.label,
+      lineHeight: 18,
     },
     contactsHintCard: { gap: 10 },
     epiHintCard: { gap: 10, borderColor: colors.dangerBorder, backgroundColor: colors.dangerLight },
     epiHintText: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       color: colors.text,
-      lineHeight: lineHeights.label,
+      lineHeight: 18,
     },
     tipCard: {
       flexDirection: 'row',
@@ -616,9 +656,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     tipText: {
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm,
+      fontSize: 13,
       color: colors.tipText,
-      lineHeight: lineHeights.label,
+      lineHeight: 18,
       flex: 1,
     },
   });

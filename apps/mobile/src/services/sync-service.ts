@@ -24,8 +24,28 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { trackEvent } from '@/src/services/analytics-service';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { CLOUD_SYNC_ENABLED } from '@/src/constants/features';
+import { fetchWithTimeout } from '@/src/utils/fetch-with-timeout';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
+/** Backup upload/download must not hang settings on a dead network. */
+const SYNC_TIMEOUT_MS = 15_000;
+const SYNC_RETRY_DELAY_MS = 400;
+
+function isRetryableSyncStatus(status: number): boolean {
+  return status === 502 || status === 503;
+}
+
+async function fetchSyncWithRetry(url: string, init: RequestInit & { timeoutMs?: number }): Promise<Response> {
+  try {
+    const response = await fetchWithTimeout(url, init);
+    if (!isRetryableSyncStatus(response.status)) return response;
+    await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS));
+    return fetchWithTimeout(url, init);
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS));
+    return fetchWithTimeout(url, init);
+  }
+}
 
 export type SyncErrorCode =
   | 'sync_disabled'
@@ -35,8 +55,10 @@ export type SyncErrorCode =
   | 'decrypt_failed'
   | 'wrong_recovery_key'
   | 'recovery_key_required'
+  | 'encryption_unavailable'
   | 'invalid_payload'
-  | 'wrong_account';
+  | 'wrong_account'
+  | 'encryption_unavailable';
 
 export type SyncResult = { ok: true } | { ok: false; error: string; code: SyncErrorCode };
 
@@ -118,18 +140,30 @@ export async function uploadBackup(): Promise<SyncResult> {
     const payload = collectUserData(userId);
     const token = await getAuthToken();
     const envelope = await encryptBackup(JSON.stringify(payload));
+    if (!envelope) {
+      return {
+        ok: false,
+        error: 'Не удалось зашифровать резервную копию',
+        code: 'encryption_unavailable',
+      };
+    }
 
-    const body = envelope
-      ? { v: 2 as const, userId, exportedAt: payload.exportedAt, encrypted: true, payload: envelope }
-      : payload;
+    const body = {
+      v: 2 as const,
+      userId,
+      exportedAt: payload.exportedAt,
+      encrypted: true,
+      payload: envelope,
+    };
 
-    const response = await fetch(`${API_BASE}/api/sync/backup`, {
+    const response = await fetchSyncWithRetry(`${API_BASE}/api/sync/backup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify(body),
+      timeoutMs: SYNC_TIMEOUT_MS,
     });
 
     if (!response.ok) {
@@ -168,8 +202,9 @@ export async function downloadBackup(options?: {
 
   try {
     const token = await getAuthToken();
-    const response = await fetch(`${API_BASE}/api/sync/backup/${userId}`, {
+    const response = await fetchSyncWithRetry(`${API_BASE}/api/sync/backup/${userId}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
+      timeoutMs: SYNC_TIMEOUT_MS,
     });
     if (!response.ok) {
       if (response.status === 503) {

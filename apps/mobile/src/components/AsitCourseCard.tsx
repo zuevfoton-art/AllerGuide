@@ -92,7 +92,6 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
       <View style={styles.actions}>
         <Button label={t('asit.logDose')} variant="primary" size="sm" onPress={onLogDose} />
       </View>
-
       <Disclaimer collapsible>{t('asit.disclaimer')}</Disclaimer>
     </GlassCard>
   );

@@ -16,7 +16,7 @@ Events are sent with an anonymous `client_id` stored in app settings (not linked
 
 | Variable | Purpose |
 |----------|---------|
-| `ANALYTICS_INGEST_ENABLED` | default on; set `false` to reject ingest |
+| `ANALYTICS_INGEST_ENABLED` | Production: ingest off unless `true`. Dev/test: on unless `false`. Max 25 events / request. |
 | `ANALYTICS_DASHBOARD_ENABLED` | set `true` to expose dashboard |
 | `ANALYTICS_DASHBOARD_KEY` | required secret for `x-analytics-dashboard-key` header |
 | `POSTHOG_API_KEY` | optional forward to PostHog |
@@ -36,6 +36,6 @@ curl -H "x-analytics-dashboard-key: $ANALYTICS_DASHBOARD_KEY" \
 
 ### Wired events
 
-`screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*` (включая `scan_dish_vision`), `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `map_pollen_*`, `pollen_alert_sent`
+`screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*` (включая `scan_dish_vision` и `scan_saved_to_diary`), `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `map_pollen_*`, `pollen_alert_sent`, `hint_tour_started`, `hint_tour_completed`, `hint_tour_skipped`
 
 See `apps/mobile/src/services/analytics-service.ts` and key flow call sites.

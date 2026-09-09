@@ -2,7 +2,7 @@ import { ALLERGENS, findAllergenById, getAllergensByCategory } from './allergen-
 import { resolveAllergenId } from './profile-allergens';
 import { getCrossReactionsForSelection } from './cross-reactions';
 import type { AllergyConditionId } from './allergy-conditions';
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-format';
 
 export interface FoodDrugRegistry {
   v: 1;
@@ -44,9 +44,6 @@ export const DRUG_REACTION_TYPE_CHOICES = [
 ] as const;
 
 export type DrugReactionTypeChoice = (typeof DRUG_REACTION_TYPE_CHOICES)[number];
-
-export const FOOD_DRUG_DISCLAIMER =
-  'Учёт пищевых и лекарственных реакций носит информационный характер. Назначения и исключения определяет врач.';
 
 const FOOD_ALLERGEN_NAMES = new Set(getAllergensByCategory('food').map((item) => item.name.toLowerCase()));
 const MEDICATION_KEYWORDS = getAllergensByCategory('medication').flatMap((item) => [

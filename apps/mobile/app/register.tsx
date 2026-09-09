@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
-import type { LoginType } from '@allerguide/core';
+import { applyLoginFieldInput } from '@allerguide/core';
 import { registerUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
@@ -12,19 +12,14 @@ import {
   AuthField,
   AuthHero,
   AuthLink,
-  AuthModeToggle,
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
-import { PhoneInput } from '@/src/components/PhoneInput';
-import {
-  authEmailInputProps,
-  authPasswordInputProps,
-  authPhoneInputProps,
-} from '@/src/constants/auth-input-props';
+import { LoginField } from '@/src/components/LoginField';
+import { PasswordStrengthMeter } from '@/src/components/PasswordStrengthMeter';
+import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function RegisterScreen() {
   const { t, tAuthError } = useTranslation();
-  const [loginType, setLoginType] = useState<LoginType>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,12 +27,19 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   const confirmRef = useRef<TextInput>(null);
+  const loginCanonical = useMemo(() => applyLoginFieldInput(login).canonical, [login]);
 
   const handleRegister = async () => {
     setLoading(true);
     setError('');
+    const resolved = applyLoginFieldInput(login);
     try {
-      const result = await registerUser({ loginType, login, password, confirmPassword });
+      const result = await registerUser({
+        loginType: resolved.loginType,
+        login: resolved.canonical,
+        password,
+        confirmPassword,
+      });
 
       if (!result.ok) {
         setError(tAuthError(result.error));
@@ -47,7 +49,7 @@ export default function RegisterScreen() {
       router.replace('/');
     } catch (error) {
       logCaughtError('RegisterScreen.handleRegister', error, {
-        extra: { loginType },
+        extra: { loginType: resolved.loginType },
       });
       setError(t('auth.errors.unexpected'));
     } finally {
@@ -58,37 +60,24 @@ export default function RegisterScreen() {
   return (
     <Screen>
       <LanguagePicker compact />
-      <AuthHero title={t('auth.registerTitle')} subtitle={t('auth.registerSubtitle')} />
-      <AuthModeToggle loginType={loginType} onChange={setLoginType} />
-      {loginType === 'phone' ? (
-        <PhoneInput
-          label={t('auth.phoneLabel')}
-          value={login}
-          onChangeText={setLogin}
-          testID="auth-login-input"
-          returnKeyType="next"
-          submitBehavior="submit"
-          onSubmitEditing={() => passwordRef.current?.focus()}
-          {...authPhoneInputProps()}
-        />
-      ) : (
-        <AuthField
-          label={t('common.email')}
-          value={login}
-          onChangeText={setLogin}
-          placeholder={t('auth.forgot.emailPlaceholder')}
-          testID="auth-login-input"
-          returnKeyType="next"
-          submitBehavior="submit"
-          onSubmitEditing={() => passwordRef.current?.focus()}
-          {...authEmailInputProps()}
-        />
-      )}
+      <AuthHero title={t('auth.registerTitle')} />
+      <LoginField
+        label={t('auth.loginLabel')}
+        value={login}
+        onChangeText={setLogin}
+        testID="auth-login-input"
+        returnKeyType="next"
+        submitBehavior="submit"
+        onSubmitEditing={() => passwordRef.current?.focus()}
+      />
       <AuthField
         ref={passwordRef}
         label={t('common.password')}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(value) => {
+          setPassword(value);
+          if (error) setError('');
+        }}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
         testID="auth-password-input"
@@ -97,12 +86,15 @@ export default function RegisterScreen() {
         onSubmitEditing={() => confirmRef.current?.focus()}
         {...authPasswordInputProps('new')}
       />
+      <PasswordStrengthMeter password={password} login={loginCanonical} />
       <AuthField
         ref={confirmRef}
         label={t('auth.confirmPassword')}
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        placeholder={t('auth.confirmPasswordPlaceholder')}
+        onChangeText={(value) => {
+          setConfirmPassword(value);
+          if (error) setError('');
+        }}
         secureTextEntry
         testID="auth-confirm-password-input"
         returnKeyType="go"

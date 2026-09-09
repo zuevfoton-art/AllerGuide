@@ -21,10 +21,31 @@ describe('security middleware', () => {
     expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
   });
 
-  it('reflects origin when no allowlist is configured', () => {
+  it('reflects origin when no allowlist is configured outside production', () => {
     delete process.env.CORS_ORIGINS;
+    delete process.env.NODE_ENV;
     const options = buildCorsOptions();
     expect(options.origin).toBe(true);
+  });
+
+  it('denies browser origins in production when no allowlist is configured', () => {
+    delete process.env.CORS_ORIGINS;
+    const options = buildCorsOptions({ NODE_ENV: 'production' });
+    const originFn = options.origin as (
+      origin: string | undefined,
+      cb: (err: Error | null, allow?: boolean) => void,
+    ) => void;
+
+    return new Promise<void>((resolve, reject) => {
+      originFn('https://evil.example.com', (err, allow) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        expect(allow).toBe(false);
+        resolve();
+      });
+    });
   });
 
   it('rejects origins outside the allowlist when configured', () => {
@@ -69,6 +90,26 @@ describe('security middleware', () => {
     expect(blocked.status).toBe(429);
     expect(blocked.body.error).toBe('Too many authentication attempts');
   });
+
+  // /api/stt and /api/search/ingredients bill per call (SpeechKit, Yandex Search),
+  // so they must sit behind the scan limiter rather than the coarse global one.
+  it.each(['/api/stt', '/api/search/ingredients'])(
+    'returns 429 after exceeding the scan rate limit on %s',
+    async (path) => {
+      process.env.SCAN_RATE_LIMIT_MAX = '2';
+      process.env.SCAN_RATE_LIMIT_WINDOW_MS = '60000';
+      delete process.env.RATE_LIMIT_DISABLED;
+
+      const app = await createApp();
+
+      await request(app).post(path).send({});
+      await request(app).post(path).send({});
+      const blocked = await request(app).post(path).send({});
+
+      expect(blocked.status).toBe(429);
+      expect(blocked.body.error).toBe('Too many scan requests');
+    },
+  );
 });
 
 describe('health endpoint', () => {

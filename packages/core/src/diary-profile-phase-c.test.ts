@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { isActPromptDue, getLastScaleEntryAt, ACT_PROMPT_INTERVAL_DAYS } from './diary-profile';
+import { isActPromptDue, getLastScaleEntryAt } from './diary-profile';
 import { encodeDiaryDetails } from './diary';
+import { GINA_ACT_PROMPT_INTERVAL_DAYS } from './gina-asthma';
 
 describe('diary-profile ACT prompt (C.4)', () => {
   it('prompts when asthma and no ACT entry', () => {
@@ -9,7 +10,7 @@ describe('diary-profile ACT prompt (C.4)', () => {
   });
 
   it('prompts when last ACT is older than interval', () => {
-    const old = new Date(Date.now() - (ACT_PROMPT_INTERVAL_DAYS + 1) * 86_400_000).toISOString();
+    const old = new Date(Date.now() - (GINA_ACT_PROMPT_INTERVAL_DAYS + 1) * 86_400_000).toISOString();
     const entries = [
       {
         type: 'Шкала',

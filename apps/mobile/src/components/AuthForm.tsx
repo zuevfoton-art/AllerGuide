@@ -8,63 +8,18 @@ import {
   type TextInputProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { LoginType } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
-import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { density, radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { fontSizes, textStyles } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
-
-interface AuthModeToggleProps {
-  loginType: LoginType;
-  onChange: (type: LoginType) => void;
-}
-
-export function AuthModeToggle({ loginType, onChange }: AuthModeToggleProps) {
-  const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t } = useTranslation();
-
-  return (
-    <View style={styles.toggleRow}>
-      <Pressable
-        testID="auth-mode-phone"
-        accessible
-        accessibilityRole="button"
-        accessibilityLabel={t('common.phone')}
-        style={[styles.toggleBtn, loginType === 'phone' && styles.toggleActive]}
-        onPress={() => onChange('phone')}>
-        <Ionicons
-          name="call"
-          size={16}
-          color={loginType === 'phone' ? theme.colors.onAccent : theme.colors.textSecondary}
-        />
-        <Text style={[styles.toggleText, loginType === 'phone' && styles.toggleTextActive]}>{t('common.phone')}</Text>
-      </Pressable>
-      <Pressable
-        testID="auth-mode-email"
-        accessible
-        accessibilityRole="button"
-        accessibilityLabel={t('common.email')}
-        style={[styles.toggleBtn, styles.toggleBtnLast, loginType === 'email' && styles.toggleActive]}
-        onPress={() => onChange('email')}>
-        <Ionicons
-          name="mail"
-          size={16}
-          color={loginType === 'email' ? theme.colors.onAccent : theme.colors.textSecondary}
-        />
-        <Text style={[styles.toggleText, loginType === 'email' && styles.toggleTextActive]}>{t('common.email')}</Text>
-      </Pressable>
-    </View>
-  );
-}
 
 export interface AuthFieldProps {
   label: string;
   value: string;
   onChangeText: (value: string) => void;
-  placeholder: string;
+  placeholder?: string;
   secureTextEntry?: boolean;
   keyboardType?: TextInputProps['keyboardType'];
   autoCapitalize?: TextInputProps['autoCapitalize'];
@@ -99,33 +54,55 @@ export const AuthField = forwardRef<TextInput, AuthFieldProps>(function AuthFiel
   ref,
 ) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [focused, setFocused] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const isPasswordField = Boolean(secureTextEntry);
+  const hidePassword = isPasswordField && !passwordVisible;
+  const toggleLabel = passwordVisible ? t('auth.hidePassword') : t('auth.showPassword');
 
   return (
     <View style={styles.fieldWrap}>
       <Text style={[styles.label, focused && styles.labelFocused]}>{label}</Text>
-      <TextInput
-        ref={ref}
-        testID={testID}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={theme.colors.textMuted}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        autoCapitalize={autoCapitalize}
-        returnKeyType={returnKeyType}
-        onSubmitEditing={onSubmitEditing}
-        submitBehavior={submitBehavior}
-        textContentType={textContentType}
-        autoComplete={autoComplete}
-        autoCorrect={autoCorrect}
-        accessibilityLabel={accessibilityLabel ?? label}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        style={[styles.input, focused && styles.inputFocused]}
-      />
+      <View style={[styles.inputRow, focused && styles.inputRowFocused]}>
+        <TextInput
+          ref={ref}
+          testID={testID}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={theme.colors.textMuted}
+          secureTextEntry={hidePassword}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
+          submitBehavior={submitBehavior}
+          textContentType={textContentType}
+          autoComplete={autoComplete}
+          autoCorrect={autoCorrect}
+          accessibilityLabel={accessibilityLabel ?? label}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          style={styles.input}
+        />
+        {isPasswordField ? (
+          <Pressable
+            testID={testID ? `${testID}-toggle` : undefined}
+            onPress={() => setPasswordVisible((visible) => !visible)}
+            style={styles.visibilityToggle}
+            accessibilityRole="button"
+            accessibilityLabel={toggleLabel}
+            hitSlop={8}>
+            <Ionicons
+              name={passwordVisible ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={theme.colors.textSecondary}
+            />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 });
@@ -198,19 +175,17 @@ export function AuthForgotLink({ text, onPress }: { text: string; onPress: () =>
   );
 }
 
-export function AuthHero({ title, subtitle }: { title: string; subtitle: string }) {
+export function AuthHero({ title, subtitle }: { title: string; subtitle?: string }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t } = useTranslation();
 
   return (
     <View style={styles.hero} testID="auth-hero">
-      <BrandLogo size={56} showWordmark showEndorser />
-      <Text style={styles.heroTagline}>{t('brand.slogan')}</Text>
+      <BrandLogo size={56} showWordmark />
       <Text style={styles.heroTitle} testID="auth-hero-title">
         {title}
       </Text>
-      <Text style={styles.heroSubtitle}>{subtitle}</Text>
+      {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -229,14 +204,6 @@ export function AuthError({ message }: { message: string }) {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
-    heroTagline: {
-      fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm + 1,
-      fontWeight: '600',
-      color: colors.accent,
-      letterSpacing: 0.2,
-      marginBottom: 4,
-    },
     heroTitle: {
       ...textStyles.h1,
       fontWeight: '700',
@@ -250,36 +217,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       textAlign: 'center',
       marginTop: 4,
     },
-    toggleRow: {
-      flexDirection: 'row',
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: radii.md,
-      overflow: 'hidden',
-    },
-    toggleBtn: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 6,
-      backgroundColor: colors.card,
-      padding: 12,
-      minHeight: 44,
-      borderRightWidth: 1,
-      borderRightColor: colors.border,
-    },
-    toggleBtnLast: {
-      borderRightWidth: 0,
-    },
-    toggleActive: { backgroundColor: colors.accent },
-    toggleText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm + 1,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    toggleTextActive: { color: colors.onAccent, fontWeight: '600' },
     fieldWrap: { gap: 6 },
     label: {
       fontFamily: fonts.sansSemiBold,
@@ -292,20 +229,33 @@ function createStyles({ colors, fonts }: AppTheme) {
     labelFocused: {
       color: colors.accent,
     },
-    input: {
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: colors.card,
-      padding: 14,
-      minHeight: 44,
       borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+      minHeight: density.tapMinHeight,
+      overflow: 'hidden',
+    },
+    inputRowFocused: {
+      borderColor: colors.accent,
+      borderWidth: 1.5,
+    },
+    input: {
+      flex: 1,
+      padding: 14,
+      minHeight: density.tapMinHeight,
       fontSize: WEB_INPUT_FONT_SIZE,
       fontFamily: fonts.sans,
       color: colors.text,
-      borderWidth: 1,
-      borderColor: colors.borderInput,
     },
-    inputFocused: {
-      borderColor: colors.accent,
-      borderWidth: 1.5,
+    visibilityToggle: {
+      width: density.tapMinHeight,
+      minHeight: density.tapMinHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
     linkText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm + 1, color: colors.textSecondary },

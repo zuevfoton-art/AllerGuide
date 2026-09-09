@@ -1,31 +1,21 @@
-import { extractComponentsFromIngredientsText, type DishComponentDef } from '@allerguide/core';
+import {
+  buildComponentsFromProduct,
+  buildDishComponentsFromText,
+  isValidBarcode,
+  normalizeBarcode,
+} from '@allerguide/core';
 import {
   enrichDishFromOpenFoods,
   type DishEnrichmentResult,
+  type DishEnrichmentSource,
 } from '@/src/services/dish-off-enrichment-service';
+import {
+  resolveProductByBarcode,
+  type BarcodeLookupSource,
+} from '@/src/services/barcode-lookup-service';
 import { extractDishSearchQuery } from '@/src/services/scanner-dish-query';
 import { lookupDishIngredientsForScan } from '@/src/services/scanner-dish-lookup-service';
 import { scanFromOcr } from '@/src/services/scanner-ocr-service';
-
-const MAX_FALLBACK_INGREDIENTS = 20;
-
-function fallbackComponentsFromText(text: string): DishComponentDef[] {
-  const known = extractComponentsFromIngredientsText(text);
-  if (known.length) return known;
-
-  const seen = new Set<string>();
-  const items: DishComponentDef[] = [];
-  for (const part of text.split(/[,;]/)) {
-    const nameRu = part.trim().replace(/\s+/g, ' ');
-    if (nameRu.length < 2) continue;
-    const id = `ing:${nameRu.toLowerCase().replace(/ё/g, 'е')}`;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    items.push({ id, nameRu });
-    if (items.length >= MAX_FALLBACK_INGREDIENTS) break;
-  }
-  return items;
-}
 
 /**
  * Diary «Ввести вручную» uses the same dish lookup as the scanner:
@@ -41,7 +31,7 @@ export async function recognizeDiaryDish(foodText: string): Promise<DishEnrichme
   }
 
   if (lookup?.ingredients.trim()) {
-    const components = fallbackComponentsFromText(lookup.ingredients);
+    const components = buildDishComponentsFromText(lookup.ingredients);
     if (components.length) {
       return {
         components,
@@ -66,6 +56,57 @@ export type RecognizedDiaryDish = {
   enrichment: DishEnrichmentResult;
 };
 
+function enrichmentSourceFromLookup(source: BarcodeLookupSource): DishEnrichmentSource {
+  if (
+    source === 'openfoodfacts' ||
+    source === 'openbeautyfacts' ||
+    source === 'openproductsfacts'
+  ) {
+    return 'openfoodfacts';
+  }
+  return 'catalog';
+}
+
+/**
+ * Packaged product via the same catalog → cache → OFF chain as Scanner barcode.
+ */
+export async function recognizeDiaryDishFromBarcode(
+  rawBarcode: string,
+): Promise<RecognizedDiaryDish | null> {
+  const barcode = normalizeBarcode(rawBarcode);
+  if (!isValidBarcode(barcode)) return null;
+
+  const product = await resolveProductByBarcode(barcode);
+  if (!product) return null;
+
+  const fromProduct = buildComponentsFromProduct({
+    name: product.name,
+    ingredients: product.ingredients,
+    allergenTags: product.declaredAllergenIds,
+    traceTags: product.traceAllergenIds,
+    barcode: product.barcode,
+  });
+  const components =
+    fromProduct.length > 0
+      ? fromProduct
+      : buildDishComponentsFromText(product.ingredients || product.name);
+
+  return {
+    food: product.name,
+    enrichment: {
+      components: components.length ? components : [{ id: 'dish', nameRu: product.name }],
+      dishId: `barcode:${product.barcode}`,
+      dishName: product.name,
+      source: enrichmentSourceFromLookup(product.source),
+      productBarcode: product.barcode,
+      productName: product.name,
+      ingredients: product.ingredients,
+      allergenTags: product.declaredAllergenIds,
+      traceTags: product.traceAllergenIds,
+    },
+  };
+}
+
 /**
  * Photo path: same VL/OCR pipeline as the scanner, then the manual dish lookup.
  */
@@ -86,7 +127,7 @@ export async function recognizeDiaryDishFromPhoto(input: {
     return { food: enrichment.dishName || food, enrichment };
   }
 
-  const fromOcr = fallbackComponentsFromText(scan.ocr?.text ?? food);
+  const fromOcr = buildDishComponentsFromText(scan.ocr?.text ?? food);
   if (!fromOcr.length) {
     return {
       food,

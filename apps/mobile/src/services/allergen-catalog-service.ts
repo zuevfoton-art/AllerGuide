@@ -1,4 +1,4 @@
-import { getAllAllergens, type AllergenRecord } from '@allerguide/core';
+import { getAllAllergens, mergeAllergenCatalogWithStatic, type AllergenRecord } from '@allerguide/core';
 import { getApiBaseUrl } from '@/src/services/api-client';
 import { logCaughtError } from '@/src/services/error-reporting';
 import {
@@ -20,7 +20,7 @@ export async function resolveAllergenCatalog(): Promise<{
 }> {
   const cached = getCachedAllergenCatalog();
   if (cached) {
-    return { allergens: cached.allergens, source: 'cache' };
+    return { allergens: mergeAllergenCatalogWithStatic(cached.allergens), source: 'cache' };
   }
 
   try {
@@ -29,8 +29,9 @@ export async function resolveAllergenCatalog(): Promise<{
       const data = (await response.json()) as AllergenApiResponse;
       if (data.ok && Array.isArray(data.allergens) && data.allergens.length > 0) {
         const source = data.source === 'db' ? 'db' : 'static';
-        saveCachedAllergenCatalog(data.allergens, source);
-        return { allergens: data.allergens, source: 'api' };
+        const allergens = mergeAllergenCatalogWithStatic(data.allergens);
+        saveCachedAllergenCatalog(allergens, source);
+        return { allergens, source: 'api' };
       }
     }
   } catch (error) {

@@ -2,7 +2,6 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  DIARY_AUTO_STEP_IDS,
   buildCourseSetupOptions,
   buildDiaryEntryPickerOptions,
   formatDiaryDate,
@@ -12,6 +11,7 @@ import {
   getDiarySection,
   getAsthmaPlanPersonalBest,
   getProfileAgeYears,
+  hideDiaryAutoSteps,
   isDiaryHistoryVisible,
   parseAllergies,
   type ClinicalScaleId,
@@ -42,18 +42,16 @@ import { WeekRingCard } from '@/src/components/WeekRingCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
 import { AsthmaCard } from '@/src/components/AsthmaCard';
-import { AsitCourseCard } from '@/src/components/AsitCourseCard';
-import { PrescribedTherapyCard } from '@/src/components/PrescribedTherapyCard';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
-import { getAsitCourse } from '@/src/services/asit-course-service';
-import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
+import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
@@ -115,18 +113,12 @@ type EditorState =
     }
   | { mode: 'edit'; entry: DiaryEntry; legacy?: boolean };
 
-function hideAutoSteps(section: DiarySection): DiarySection {
-  return {
-    ...section,
-    steps: section.steps.filter((step) => !DIARY_AUTO_STEP_IDS.has(step.id)),
-  };
-}
-
 export default function DiaryScreen() {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
+  useHintTour('diary');
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
@@ -189,16 +181,6 @@ export default function DiaryScreen() {
     () => (activeProfileId ? getAsthmaActionPlan(activeProfileId) : null),
     [activeProfileId],
   );
-  const asitCourse = useMemo(
-    () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick re-reads ASIT/therapy after profile/settings focus
-    [activeProfileId, capabilitiesTick],
-  );
-  const prescribedCourse = useMemo(
-    () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick re-reads ASIT/therapy after profile/settings focus
-    [activeProfileId, capabilitiesTick],
-  );
   const planPersonalBestPef = useMemo(
     () => getAsthmaPlanPersonalBest(asthmaActionPlan),
     [asthmaActionPlan],
@@ -241,7 +223,6 @@ export default function DiaryScreen() {
       photoUri: extras?.photoUri,
       recognizedDish: extras?.recognizedDish,
     });
-    await loadAutoMetadata();
     setEntryPickerOpen(false);
     setEditor({
       mode: 'section',
@@ -251,6 +232,9 @@ export default function DiaryScreen() {
       notice: extras?.notice,
       initialStepId: extras?.initialStepId,
     });
+    // Pollen/scan/meds metadata is hidden enrichment merged on save: fetching it
+    // must not delay the wizard, which has to open offline too.
+    void loadAutoMetadata();
   };
 
   const openMedicinePhoto = () => {
@@ -462,7 +446,7 @@ export default function DiaryScreen() {
     if (!baseSection) return null;
     const rawSection =
       editor.mode === 'section' && editor.simplifiedSection ? editor.simplifiedSection : baseSection;
-    const section = hideAutoSteps(rawSection);
+    const section = hideDiaryAutoSteps(rawSection);
 
     const initialAnswers =
       editor.mode === 'edit'
@@ -509,38 +493,46 @@ export default function DiaryScreen() {
       onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
       refreshing={refreshing}
       brandHeaderRight={<ProfileHeaderButton />}>
-      <TabScreenHeader
-        eyebrow={t('diary.eyebrow')}
-        title={t('diary.title')}
-        meta={t('diary.subtitle')}
-      />
+      <View style={styles.header}>
+        <View style={styles.headerText}>
+          <ScreenEyebrow section={t('diary.eyebrow')} />
+          <Text style={ui.docTitle}>{t('diary.title')}</Text>
+        </View>
+      </View>
 
-      <Button
-        testID="diary-new-entry"
-        label={t('diary.newEntry')}
-        variant="primary"
-        block
-        onPress={() => setEntryPickerOpen(true)}
-      />
+      <HintAnchor id="diary.newEntry">
+        <Button
+          testID="diary-new-entry"
+          label={t('diary.newEntry')}
+          variant="primary"
+          block
+          onPress={() => setEntryPickerOpen(true)}
+        />
+      </HintAnchor>
       <View style={styles.actionRow}>
         <View style={styles.actionHalf}>
-          <Button
-            testID="diary-setup-course"
-            label={t('diary.courseShort')}
-            variant="secondary"
-            block
-            icon="medical"
-            onPress={() => setCoursePickerOpen(true)}
-          />
+          <HintAnchor id="diary.course">
+            <Button
+              testID="diary-setup-course"
+              label={t('diary.courseShort')}
+              variant="secondary"
+              block
+              icon="medical"
+              onPress={() => setCoursePickerOpen(true)}
+            />
+          </HintAnchor>
         </View>
         <View style={styles.actionHalf}>
-          <Button
-            label={t('diary.reportShort')}
-            variant="secondary"
-            block
-            icon="document"
-            onPress={() => router.push('/doctor-report' as any)}
-          />
+          <HintAnchor id="diary.report">
+            <Button
+              testID="diary-report"
+              label={t('diary.reportShort')}
+              variant="secondary"
+              block
+              icon="document"
+              onPress={() => router.push('/doctor-report' as any)}
+            />
+          </HintAnchor>
         </View>
       </View>
 
@@ -583,9 +575,8 @@ export default function DiaryScreen() {
         {renderEditor()}
       </DiaryEditorModal>
 
-      {activeProfileId ? <WeekRingCard entries={list} surface="journal" /> : null}
-
       <DiaryInsightsCard entries={list} />
+      {activeProfileId ? <WeekRingCard entries={list} surface="journal" /> : null}
 
       {list.filter((item) => isDiaryHistoryVisible(item.type)).length === 0 ? (
         <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
@@ -669,20 +660,6 @@ export default function DiaryScreen() {
           onLogPef={() => void openSection('Пикфлоуметрия')}
         />
       ) : null}
-
-      {asitEnabled ? (
-        <AsitCourseCard
-          course={asitCourse}
-          entries={list}
-          onLogDose={() => void openSection('АСИТ')}
-        />
-      ) : null}
-
-      <PrescribedTherapyCard
-        course={prescribedCourse}
-        entries={list}
-        onLogDose={() => void openSection('Терапия')}
-      />
 
       <Disclaimer compact>{t('diary.disclaimerShort')}</Disclaimer>
     </Screen>

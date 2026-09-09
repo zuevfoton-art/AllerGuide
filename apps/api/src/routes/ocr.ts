@@ -1,5 +1,5 @@
 import type { Express, Request, Response } from 'express';
-import { verifyAuthToken } from '../lib/jwt';
+import { isOverrideAuthRequired, resolveScanIdentity } from '../lib/scan-identity';
 import { logCaughtError } from '../lib/log-caught-error';
 import {
   recognizeTextWithYandexVision,
@@ -12,22 +12,6 @@ interface OcrRequestBody {
   languageCodes?: string[];
 }
 
-function requireOcrAuth(): boolean {
-  if (process.env.OCR_REQUIRE_AUTH === 'true') return true;
-  if (process.env.OCR_REQUIRE_AUTH === 'false') return false;
-  return process.env.SCAN_REQUIRE_AUTH === 'true';
-}
-
-async function resolveOcrIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (requireOcrAuth()) return null;
-  return `ip:${req.ip ?? 'unknown'}`;
-}
-
 export function registerOcrRoutes(app: Express) {
   app.post('/api/ocr', async (req: Request, res: Response) => {
     if (!yandexVisionOcrConfigured()) {
@@ -35,7 +19,9 @@ export function registerOcrRoutes(app: Express) {
       return;
     }
 
-    const identity = await resolveOcrIdentity(req);
+    const identity = await resolveScanIdentity(req, {
+      requireAuth: isOverrideAuthRequired(process.env.OCR_REQUIRE_AUTH),
+    });
     if (!identity) {
       res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;

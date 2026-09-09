@@ -9,7 +9,12 @@ function mobileAliasPlugin() {
       CallExpression(nodePath) {
         const callee = nodePath.node.callee;
         const args = nodePath.node.arguments;
-        if (callee.type === 'Identifier' && callee.name === 'require') {
+        // `import()` is a CallExpression whose callee is Import — not `require`.
+        // Release Metro (EAS / Gradle export:embed) does not run metro.config
+        // resolveRequest on those specifiers, so `@/` must be rewritten here.
+        const isRequire = callee.type === 'Identifier' && callee.name === 'require';
+        const isDynamicImport = callee.type === 'Import';
+        if (isRequire || isDynamicImport) {
           rewriteSource(args[0]);
         }
       },

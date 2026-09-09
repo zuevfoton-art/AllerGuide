@@ -62,6 +62,36 @@ describe('analytics routes', () => {
     expect(response.status).toBe(401);
   });
 
+  it('rejects a batch larger than 25 events', async () => {
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/analytics/events')
+      .send({
+        events: Array.from({ length: 26 }, (_, index) => ({
+          event: 'screen_view',
+          screen: `/home-${index}`,
+          client_id: 'c1',
+          platform: 'ios',
+        })),
+      });
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Too many analytics events');
+  });
+
+  it('disables ingest in production unless explicitly enabled', async () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.ANALYTICS_INGEST_ENABLED;
+    const app = await createApp();
+    const response = await request(app).post('/api/analytics/events').send({
+      event: 'screen_view',
+      screen: '/home',
+      client_id: 'c1',
+      platform: 'web',
+    });
+    expect(response.status).toBe(503);
+    delete process.env.NODE_ENV;
+  });
+
   it('hides dashboard when disabled', async () => {
     process.env.ANALYTICS_DASHBOARD_ENABLED = 'false';
     const app = await createApp();

@@ -11,6 +11,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { interpretStagingHealthResponse } from './rc-gate-health.mjs';
+import {
+  findDocFactDrift,
+  parseLatestMigrationNumber,
+  parseMobileSchemaVersion,
+} from './rc-gate-doc-facts.mjs';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const quick = process.argv.includes('--quick');
@@ -113,20 +118,85 @@ function checkMaestroFlows() {
   if (!runner.includes('pm grant')) {
     failures.push('scripts/maestro-run-emulator.sh must pre-grant runtime permissions');
   }
+  if (!runner.includes('autofill_service null')) {
+    failures.push('scripts/maestro-run-emulator.sh must disable Android Autofill (steals Maestro inputText)');
+  }
+  if (!runner.includes('hide_error_dialogs 1')) {
+    failures.push('scripts/maestro-run-emulator.sh must hide system ANR dialogs (they swallow Maestro taps)');
+  }
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
-  if (!runner.includes('am start') || !runner.includes('dismiss_anr')) {
-    failures.push('scripts/maestro-run-emulator.sh must am start + dismiss ANR');
-  }
-  if (!runner.includes('Application Not Responding') || !runner.includes('ensure_app_foreground')) {
-    failures.push('scripts/maestro-run-emulator.sh must detect Application Not Responding and restore MainActivity');
+  if (!runner.includes('scripts/lib/maestro-device.sh') || !runner.includes('ensure_app_foreground')) {
+    failures.push('scripts/maestro-run-emulator.sh must source scripts/lib/maestro-device.sh helpers');
   }
   if (!runner.includes('during.png')) {
     failures.push('scripts/maestro-run-emulator.sh must capture *-during.png before Maestro exits');
   }
+
+  const samplerLoop = runner.slice(
+    runner.indexOf('while [ -f "$SAMPLER_GUARD" ]'),
+    runner.indexOf('SAMPLER_PID=$!'),
+  );
+  if (!samplerLoop || samplerLoop.includes('ensure_app_foreground')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh sampler must not restart the activity mid-flow (resets expo-router)',
+    );
+  }
+
+  const device = fs.readFileSync(path.join(root, 'scripts/lib/maestro-device.sh'), 'utf8');
+  if (!device.includes('am start') || !device.includes('dismiss_anr')) {
+    failures.push('scripts/lib/maestro-device.sh must am start + dismiss ANR');
+  }
+  if (!device.includes('Application Not Responding')) {
+    failures.push('scripts/lib/maestro-device.sh must detect Application Not Responding');
+  }
+  if (!device.includes('topResumedActivity') || device.includes('launcher_is_focused')) {
+    failures.push(
+      'scripts/lib/maestro-device.sh must read the foreground from the resumed activity, not mCurrentFocus',
+    );
+  }
   if (!workflow.includes('during.png')) {
     failures.push('maestro-nightly.yml must upload *-during.png in-flow screenshots');
+  }
+  if (!workflow.includes('maestro-login-visible.png')) {
+    failures.push('maestro-nightly.yml must upload maestro-login-visible.png');
+  }
+  if (workflow.includes('~/.maestro/tests')) {
+    failures.push('maestro-nightly.yml must not upload ~/.maestro/tests (upload-artifact never expands ~)');
+  }
+  if (
+    !workflow.includes('maestro-offline-maestro-logs') ||
+    !workflow.includes('maestro-staging-maestro-logs') ||
+    !runner.includes('$HOME/.maestro/tests')
+  ) {
+    failures.push('maestro-nightly.yml must upload the copied per-command Maestro logs');
+  }
+
+  if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {
+    failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
+  }
+
+  const runtimePatches = fs.readFileSync(path.join(root, 'apps/mobile/src/install-runtime.ts'), 'utf8');
+  if (
+    !runtimePatches.includes('install-crypto-get-random-values') ||
+    !runtimePatches.includes('install-password-hash-cost')
+  ) {
+    failures.push('src/install-runtime.ts must install the CSPRNG and the Hermes PBKDF2 cost');
+  }
+  // Gradle pins entryFile to index.js: a patch only in entry.js never ships.
+  for (const entryPath of ['apps/mobile/index.js', 'apps/mobile/entry.js', 'apps/mobile/app/_layout.tsx']) {
+    if (!fs.readFileSync(path.join(root, entryPath), 'utf8').includes('install-runtime')) {
+      failures.push(`${entryPath} must import src/install-runtime`);
+    }
+  }
+  const entry = fs.readFileSync(path.join(root, 'apps/mobile/entry.js'), 'utf8');
+  if (!entry.includes('expo-router/entry')) {
+    failures.push('apps/mobile/entry.js must delegate to expo-router/entry');
+  }
+  const mobilePkg = JSON.parse(fs.readFileSync(path.join(root, 'apps/mobile/package.json'), 'utf8'));
+  if (mobilePkg.main !== './entry.js') {
+    failures.push('apps/mobile package.json main must be ./entry.js (runtime patches before router)');
   }
 
   const waitLogin = fs.readFileSync(path.join(flowsDir, '_wait-login.yaml'), 'utf8');
@@ -134,12 +204,34 @@ function checkMaestroFlows() {
     failures.push('_wait-login.yaml must wait for auth-hero-title (above the fold)');
   }
 
-  const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
-  if (!fillById.includes('hideKeyboard') || !fillById.includes('scrollUntilVisible')) {
-    failures.push('_fill-by-id.yaml must hideKeyboard + scrollUntilVisible');
+  const dismissIme = path.join(flowsDir, '_dismiss-ime.yaml');
+  if (!fs.existsSync(dismissIme)) {
+    failures.push('_dismiss-ime.yaml missing (fold IME without BACK)');
+  } else {
+    const dismissBody = fs.readFileSync(dismissIme, 'utf8');
+    if (!dismissBody.includes('auth-hero-title')) {
+      failures.push('_dismiss-ime.yaml must tap auth-hero-title (not hideKeyboard/BACK)');
+    }
   }
 
-  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+  const fillById = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
+  if (!fillById.includes('_dismiss-ime.yaml') || !fillById.includes('scrollUntilVisible')) {
+    failures.push('_fill-by-id.yaml must _dismiss-ime.yaml + scrollUntilVisible');
+  }
+
+  for (const name of fs.readdirSync(flowsDir).filter((file) => file.endsWith('.yaml'))) {
+    const body = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (/^\s*-\s+hideKeyboard\b/m.test(body)) {
+      failures.push(`${name}: hideKeyboard sends BACK and pops /login — use _dismiss-ime.yaml`);
+    }
+    if (/^\s*-\s+back\b/m.test(body)) {
+      failures.push(`${name}: Maestro back command is banned (same as hideKeyboard on Android)`);
+    }
+  }
+
+  // Register / profile steps live in *-until-home.yaml. The wrappers only add
+  // _dismiss-hints.yaml so onboarding-smoke can assert hint-overlay first.
+  for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
     const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
     if (!flow.includes('_wait-login.yaml')) {
       failures.push(`${name}: must run _wait-login.yaml`);
@@ -147,20 +239,193 @@ function checkMaestroFlows() {
     if (!flow.includes('_tap-register.yaml')) {
       failures.push(`${name}: must tap register via _tap-register.yaml`);
     }
-    if (!flow.includes('stopApp: false')) {
-      failures.push(`${name}: must re-launchApp without stopping after clearState`);
+    if (flow.includes('stopApp: false')) {
+      failures.push(`${name}: must not re-launchApp after clearState (masked hideKeyboard BACK)`);
     }
     if (!flow.includes('_fill-by-id.yaml')) {
       failures.push(`${name}: must fill auth fields via _fill-by-id.yaml`);
     }
-    if (!flow.includes('auth-confirm-password-input')) {
-      failures.push(`${name}: must fill auth-confirm-password-input`);
+    const tapThenConfirm =
+      flow.includes('_tap-register.yaml') &&
+      flow.indexOf('_tap-register.yaml') < flow.indexOf('id: auth-confirm-password-input');
+    if (!tapThenConfirm) {
+      failures.push(`${name}: must wait for auth-confirm-password-input after register tap`);
     }
+    if (!flow.includes('_complete-first-run-profile.yaml')) {
+      failures.push(`${name}: must run _complete-first-run-profile.yaml (condition-food before allergen-milk)`);
+    }
+  }
+
+  const offlineUntilHome = fs.readFileSync(
+    path.join(flowsDir, '_offline-bootstrap-until-home.yaml'),
+    'utf8',
+  );
+  if (
+    /FIELD_VALUE:\s*maestro1\b/.test(offlineUntilHome) ||
+    !/FIELD_VALUE:\s*Maestro1!/.test(offlineUntilHome)
+  ) {
+    failures.push(
+      '_offline-bootstrap-until-home.yaml: register password must meet MIN_NEW_PASSWORD_LENGTH + 3 character classes (use Maestro1!, not the legacy lowercase+digit value)',
+    );
+  }
+
+  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    const untilHome = name.replace('.yaml', '-until-home.yaml');
+    if (!flow.includes(untilHome)) {
+      failures.push(`${name}: must runFlow ${untilHome}`);
+    }
+    if (!flow.includes('_dismiss-hints.yaml')) {
+      failures.push(`${name}: must run _dismiss-hints.yaml`);
+    }
+    if (flow.includes('stopApp: false')) {
+      failures.push(`${name}: must not re-launchApp after clearState (masked hideKeyboard BACK)`);
+    }
+  }
+
+  const firstRunProfile = fs.readFileSync(path.join(flowsDir, '_complete-first-run-profile.yaml'), 'utf8');
+  if (
+    !firstRunProfile.includes('condition-food') ||
+    !firstRunProfile.includes('allergen-milk') ||
+    firstRunProfile.indexOf('condition-food') > firstRunProfile.indexOf('allergen-milk')
+  ) {
+    failures.push('_complete-first-run-profile.yaml must tap condition-food before allergen-milk');
   }
 
   const tapRegister = fs.readFileSync(path.join(flowsDir, '_tap-register.yaml'), 'utf8');
   if (!tapRegister.includes('auth-register-link') || !tapRegister.includes('Зарегистрироваться')) {
     failures.push('_tap-register.yaml must tap auth-register-link then RU register copy');
+  }
+
+  const randomPhone = fs.readFileSync(path.join(root, 'apps/mobile/.maestro/scripts/random-phone.js'), 'utf8');
+  if (randomPhone.includes('+7999') || !randomPhone.includes('999${suffix}')) {
+    failures.push('random-phone.js must emit 10 national digits without a +7 prefix');
+  }
+
+  const fillByIdBody = fs.readFileSync(path.join(flowsDir, '_fill-by-id.yaml'), 'utf8');
+  if (!fillByIdBody.includes('eraseText')) {
+    failures.push('_fill-by-id.yaml must eraseText before inputText');
+  }
+
+  const scannerSmoke = fs.readFileSync(path.join(flowsDir, 'scanner-smoke.yaml'), 'utf8');
+  if (
+    !scannerSmoke.includes('scanner-toggle-manual') ||
+    scannerSmoke.indexOf('scanner-toggle-manual') > scannerSmoke.indexOf('scanner-input') ||
+    !scannerSmoke.includes('_dismiss-scanner-ime.yaml')
+  ) {
+    failures.push('scanner-smoke.yaml must open scanner-toggle-manual before scanner-input');
+  }
+  const dismissScannerIme = path.join(flowsDir, '_dismiss-scanner-ime.yaml');
+  if (!fs.existsSync(dismissScannerIme)) {
+    failures.push('_dismiss-scanner-ime.yaml missing (fold scanner IME without BACK)');
+  } else {
+    const dismissScannerBody = fs.readFileSync(dismissScannerIme, 'utf8');
+    if (!dismissScannerBody.includes('scanner-title')) {
+      failures.push('_dismiss-scanner-ime.yaml must tap scanner-title (not hideKeyboard/BACK)');
+    }
+  }
+  const scannerScreen = fs.readFileSync(path.join(root, 'apps/mobile/app/(tabs)/scanner.tsx'), 'utf8');
+  if (!scannerScreen.includes('testID="scanner-toggle-manual"') || !scannerScreen.includes('testID="scanner-title"')) {
+    failures.push('scanner.tsx must expose scanner-toggle-manual and scanner-title');
+  }
+
+  const dismissWizardIme = path.join(flowsDir, '_dismiss-wizard-ime.yaml');
+  if (!fs.existsSync(dismissWizardIme)) {
+    failures.push('_dismiss-wizard-ime.yaml missing (fold diary IME without BACK)');
+  } else {
+    const dismissWizardBody = fs.readFileSync(dismissWizardIme, 'utf8');
+    if (!dismissWizardBody.includes('diary-editor-title')) {
+      failures.push('_dismiss-wizard-ime.yaml must tap diary-editor-title (pinned chrome, not the scrolled step title)');
+    }
+  }
+
+  const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
+  if (!editorModal.includes('diary-editor-title') || /liftStyle\s*[,}\]]/.test(editorModal)) {
+    failures.push('DiaryEditorModal must expose diary-editor-title and must not apply liftStyle');
+  }
+
+  const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
+  if (!tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') || !tapWizardPrimary.includes('scrollUntilVisible')) {
+    failures.push('_tap-wizard-primary.yaml must dismiss IME then scrollUntilVisible');
+  }
+
+  for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    if (!flow.includes('_tap-wizard-primary.yaml') || !flow.includes('_fill-wizard-field.yaml')) {
+      failures.push(`${name}: must fill via _fill-wizard-field and advance via _tap-wizard-primary`);
+    }
+    if (!flow.includes('diary-new-entry') || flow.includes('diary-chip-')) {
+      failures.push(`${name}: must open types via diary-new-entry (home chips were removed)`);
+    }
+  }
+
+  const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
+  if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
+    failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
+  }
+
+  const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');
+  if (
+    !stagingAuth.includes('profile-screen-title') ||
+    stagingAuth.indexOf('profile-screen-title') > stagingAuth.indexOf('id: profile-logout') ||
+    stagingAuth.indexOf('scrollUntilVisible') > stagingAuth.indexOf('id: profile-logout')
+  ) {
+    failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
+  }
+
+  const settingsSmoke = fs.readFileSync(path.join(flowsDir, 'settings-smoke.yaml'), 'utf8');
+  if (
+    !settingsSmoke.includes('_tap-profile-save-number.yaml') ||
+    !settingsSmoke.includes('profile-emergency-number')
+  ) {
+    failures.push(
+      'settings-smoke.yaml must type the emergency number then save via _tap-profile-save-number.yaml',
+    );
+  }
+  const tapProfileSave = path.join(flowsDir, '_tap-profile-save-number.yaml');
+  if (!fs.existsSync(tapProfileSave)) {
+    failures.push('_tap-profile-save-number.yaml missing (fold IME then tap profile-save-number)');
+  } else {
+    const tapProfileSaveBody = fs.readFileSync(tapProfileSave, 'utf8');
+    if (
+      !tapProfileSaveBody.includes('_dismiss-profile-ime.yaml') ||
+      !tapProfileSaveBody.includes('scrollUntilVisible') ||
+      !tapProfileSaveBody.includes('profile-save-number')
+    ) {
+      failures.push('_tap-profile-save-number.yaml must dismiss IME then scrollUntilVisible profile-save-number');
+    }
+  }
+  const dismissProfileIme = path.join(flowsDir, '_dismiss-profile-ime.yaml');
+  if (!fs.existsSync(dismissProfileIme)) {
+    failures.push('_dismiss-profile-ime.yaml missing (fold profile IME without BACK)');
+  } else {
+    const dismissProfileBody = fs.readFileSync(dismissProfileIme, 'utf8');
+    if (!dismissProfileBody.includes('profile-screen-title')) {
+      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-title (not hideKeyboard/BACK)');
+    }
+  }
+
+  const sosNoProfile = fs.readFileSync(path.join(flowsDir, 'sos-no-profile-smoke.yaml'), 'utf8');
+  if (
+    !sosNoProfile.includes('profile-list-item-0') ||
+    !sosNoProfile.includes('profile-edit-title') ||
+    !sosNoProfile.includes('profile-delete') ||
+    !sosNoProfile.includes('screen-header-back') ||
+    sosNoProfile.indexOf('id: profile-list-item-0') > sosNoProfile.indexOf('id: profile-delete') ||
+    sosNoProfile.indexOf('id: profile-delete') > sosNoProfile.indexOf('id: screen-header-back') ||
+    sosNoProfile.indexOf('id: screen-header-back') > sosNoProfile.indexOf('id: tab-sos')
+  ) {
+    failures.push(
+      'sos-no-profile-smoke.yaml must open profile-list-item-0, wait for profile-edit-title, scroll to profile-delete, then leave via screen-header-back',
+    );
+  }
+  const profileHub = fs.readFileSync(path.join(root, 'apps/mobile/app/profile.tsx'), 'utf8');
+  const profileEdit = fs.readFileSync(path.join(root, 'apps/mobile/app/profile-edit.tsx'), 'utf8');
+  if (!profileHub.includes('profile-list-item-${index}') || profileHub.includes('testID="profile-delete"')) {
+    failures.push('profile.tsx must expose profile-list-item-${index}; profile-delete lives on profile-edit');
+  }
+  if (!profileEdit.includes('testID="profile-delete"') || !profileEdit.includes('titleTestID="profile-edit-title"')) {
+    failures.push('profile-edit.tsx must expose profile-edit-title and profile-delete');
   }
 }
 
@@ -169,6 +434,17 @@ const STAGING_HEALTH_RETRY_MS = 1500;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function reportStagingHealthIssue(message) {
+  // Path-triggered PRs re-run this script for Maestro/docs invariants.
+  // A stopped YC API Gateway must not block those. schedule + push to main
+  // still hard-fail G4.
+  if (process.env.GITHUB_EVENT_NAME === 'pull_request') {
+    warnings.push(`${message} (G4 warning on PRs; hard-fail on main/schedule)`);
+    return;
+  }
+  failures.push(message);
 }
 
 async function checkStagingHealth() {
@@ -205,7 +481,34 @@ async function checkStagingHealth() {
     }
   }
 
-  failures.push(lastFailure);
+  reportStagingHealthIssue(lastFailure);
+}
+
+/** Docs must quote the live mobile schema version and migration range. */
+function checkDocFacts() {
+  const schemaVersion = parseMobileSchemaVersion(
+    fs.readFileSync(path.join(root, 'apps/mobile/src/db/migrations.ts'), 'utf8'),
+  );
+  const latestMigration = parseLatestMigrationNumber(
+    fs.readdirSync(path.join(root, 'apps/api/drizzle')).filter((name) => name.endsWith('.sql')),
+  );
+
+  if (schemaVersion == null || latestMigration == null) {
+    failures.push('Could not read CURRENT_SCHEMA_VERSION or the newest drizzle migration');
+    return;
+  }
+
+  const docPaths = ['docs/architecture.md', 'docs/codebase-index.md'];
+  const docs = Object.fromEntries(
+    docPaths.map((docPath) => [docPath, fs.readFileSync(path.join(root, docPath), 'utf8')]),
+  );
+
+  const drift = findDocFactDrift({ schemaVersion, latestMigration, docs });
+  if (drift.length) {
+    failures.push(...drift);
+    return;
+  }
+  log(`docs match code: schema v${schemaVersion}, migrations up to ${String(latestMigration).padStart(4, '0')}`);
 }
 
 function checkSoakLogStarted() {
@@ -246,9 +549,12 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
+runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
+checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();
 

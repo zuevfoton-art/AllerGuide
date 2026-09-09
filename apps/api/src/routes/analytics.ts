@@ -7,12 +7,18 @@ import {
 } from '../lib/analytics-store';
 import { forwardAnalyticsToPostHog } from '../lib/posthog-forward';
 import { logCaughtError } from '../lib/log-caught-error';
+import { secretsMatch } from '../lib/secret-compare';
 import {
   buildMapPollenOpsHealth,
   maybeAlertMapPollenFallback,
 } from '../lib/map-pollen-ops';
 
+const MAX_INGEST_BATCH = 25;
+
 function analyticsEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.ANALYTICS_INGEST_ENABLED === 'true';
+  }
   return process.env.ANALYTICS_INGEST_ENABLED !== 'false';
 }
 
@@ -23,7 +29,7 @@ function dashboardEnabled(): boolean {
 function dashboardAuthorized(req: Request): boolean {
   const configuredKey = process.env.ANALYTICS_DASHBOARD_KEY?.trim();
   if (!configuredKey) return false;
-  return req.header('x-analytics-dashboard-key') === configuredKey;
+  return secretsMatch(req.header('x-analytics-dashboard-key'), configuredKey);
 }
 
 export function registerAnalyticsRoutes(app: Express) {
@@ -36,6 +42,10 @@ export function registerAnalyticsRoutes(app: Express) {
     const rawItems = normalizeAnalyticsBody(req.body);
     if (!rawItems.length) {
       res.status(400).json({ ok: false, error: 'No analytics events provided' });
+      return;
+    }
+    if (rawItems.length > MAX_INGEST_BATCH) {
+      res.status(400).json({ ok: false, error: 'Too many analytics events' });
       return;
     }
 

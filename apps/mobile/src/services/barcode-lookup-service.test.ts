@@ -58,7 +58,8 @@ vi.mock('@/src/services/open-food-facts-service', () => ({
         ingredients: 'water, sugar',
         allergenTags: ['soy'],
         traceTags: [],
-        source: 'openfoodfacts',
+        source: 'openbeautyfacts',
+        category: 'beauty',
       };
     }
     return null;
@@ -98,8 +99,9 @@ describe('barcode-lookup-service', () => {
 
   it('fetches online and saves to cache when catalog misses', async () => {
     const product = await resolveProductByBarcode('9999999999999');
-    expect(product?.source).toBe('openfoodfacts');
+    expect(product?.source).toBe('openbeautyfacts');
     expect(product?.name).toBe('Remote Product');
+    expect(product?.category).toBe('beauty');
     expect(cache.has('9999999999999')).toBe(true);
   });
 

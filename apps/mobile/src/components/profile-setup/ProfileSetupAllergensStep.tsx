@@ -16,6 +16,7 @@ interface ProfileSetupAllergensStepProps {
   onConfirmationsChange: (value: Record<string, AllergyConfirmationSource>) => void;
   suggestedConditionIds?: AllergyConditionId[];
   onAddSuggestedCondition?: (id: AllergyConditionId) => void;
+  conditionIds?: AllergyConditionId[];
 }
 
 /**
@@ -29,6 +30,7 @@ export function ProfileSetupAllergensStep({
   onConfirmationsChange,
   suggestedConditionIds = [],
   onAddSuggestedCondition,
+  conditionIds,
 }: ProfileSetupAllergensStepProps) {
   const ui = useUiStyles();
   const { t } = useTranslation();
@@ -40,6 +42,7 @@ export function ProfileSetupAllergensStep({
       <AllergenPicker
         selected={selected}
         showCrossReactions={false}
+        conditionIds={conditionIds}
         suggestedConditionIds={suggestedConditionIds}
         onAddSuggestedCondition={onAddSuggestedCondition}
         onChange={(ids) => {

@@ -3,7 +3,7 @@ import {
   buildScanIntentPrompt,
   resolveScanIntentClassification,
 } from '@allerguide/ai';
-import { verifyAuthToken } from '../lib/jwt';
+import { resolveScanIdentity } from '../lib/scan-identity';
 import { logCaughtError } from '../lib/log-caught-error';
 import { callScanLlm } from '../services/llm-scan-provider';
 import { parseScanIntentInput } from './scan-input';
@@ -14,16 +14,6 @@ function intentLlmEnabled(): boolean {
   );
 }
 
-async function resolveIdentity(req: Request): Promise<string | null> {
-  const header = req.header('authorization');
-  if (header?.startsWith('Bearer ')) {
-    const payload = await verifyAuthToken(header.slice('Bearer '.length).trim());
-    if (payload) return `user:${payload.sub}`;
-  }
-  if (process.env.SCAN_REQUIRE_AUTH === 'true') return null;
-  return `ip:${req.ip ?? 'unknown'}`;
-}
-
 /** Option B: YandexGPT/OpenAI classifies OCR text → label_or_menu | visual_product. */
 export function registerScanIntentRoutes(app: Express) {
   app.post('/api/scan/intent', async (req: Request, res: Response) => {
@@ -32,7 +22,7 @@ export function registerScanIntentRoutes(app: Express) {
       return;
     }
 
-    const identity = await resolveIdentity(req);
+    const identity = await resolveScanIdentity(req);
     if (!identity) {
       res.status(401).json({ ok: false, error: 'Unauthorized' });
       return;

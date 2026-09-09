@@ -1,0 +1,24 @@
+# First-run profile wizard after onboarding scenario (5 visible steps).
+# conditions → allergens → cross-reactions (last) → save.
+appId: com.aclearo.app
+---
+- tapOn:
+    id: profile-name
+- inputText: ${PROFILE_NAME}
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: profile-birth-year
+- inputText: "1990"
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: condition-food
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: allergen-milk
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: profile-save

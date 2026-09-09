@@ -9,6 +9,7 @@ import {
 } from '@allerguide/core';
 import { db } from '../db';
 import { appUsers, passwordResetTokens, syncBackups } from '../db/app-schema';
+import { revokeRefreshTokensForUser } from './refresh-token-service';
 
 export function toAuthUser(row: typeof appUsers.$inferSelect): AuthUser {
   return {
@@ -136,5 +137,6 @@ export async function consumeResetToken(token: string, newPassword: string): Pro
     .set({ usedAt: new Date() })
     .where(eq(passwordResetTokens.id, row.id));
 
+  await revokeRefreshTokensForUser(row.userId);
   return true;
 }

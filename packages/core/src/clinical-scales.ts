@@ -48,12 +48,15 @@ const ACT_CHOICES = ['1', '2', '3', '4', '5'];
 const UAS_WHEALS = ['0', '1–6', '7–12', '>12'];
 const UAS_ITCH = ['0 — нет', '1 — слабый', '2 — умеренный', '3 — сильный'];
 
+/** Every scale item shares one group so a scale is answered on a single screen. */
+const SCALE_GROUP = 'scale';
+
 function choiceStep(id: string, label: string, choices: string[]): DiaryStep {
-  return { id, label, field: 'choice', choices, required: true };
+  return { id, label, field: 'choice', choices, required: true, group: SCALE_GROUP };
 }
 
 function textStep(id: string, label: string, placeholder: string, required = true): DiaryStep {
-  return { id, label, field: 'text', placeholder, required };
+  return { id, label, field: 'text', placeholder, required, group: SCALE_GROUP };
 }
 
 export function getClinicalScaleSection(scaleId: ClinicalScaleId): DiarySection {

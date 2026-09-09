@@ -158,7 +158,10 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function consumeScanBudget(identity: string): boolean {
+const SCAN_BUDGET_PREFIX = 'scan:budget:';
+const SCAN_BUDGET_TTL_SECONDS = 48 * 60 * 60;
+
+function consumeMemoryScanBudget(identity: string): boolean {
   const max = envNumber('SCAN_DAILY_BUDGET', 100);
   const day = today();
   const entry = budget.get(identity);
@@ -174,6 +177,32 @@ export function consumeScanBudget(identity: string): boolean {
 
   entry.count += 1;
   return true;
+}
+
+async function consumeRedisScanBudget(identity: string): Promise<boolean | null> {
+  const redis = await getRedisClient();
+  if (!redis) return null;
+
+  const day = today();
+  const key = `${SCAN_BUDGET_PREFIX}${identity}:${day}`;
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.expire(key, SCAN_BUDGET_TTL_SECONDS);
+  }
+  return count <= envNumber('SCAN_DAILY_BUDGET', 100);
+}
+
+/** Shared across API instances when Redis is configured; otherwise in-process memory. */
+export async function consumeScanBudget(identity: string): Promise<boolean> {
+  if (isRedisConfigured()) {
+    try {
+      const redisResult = await consumeRedisScanBudget(identity);
+      if (redisResult != null) return redisResult;
+    } catch (error) {
+      logCaughtError('consumeScanBudget.redis', error, { identity });
+    }
+  }
+  return consumeMemoryScanBudget(identity);
 }
 
 export function resetScanBudget(): void {

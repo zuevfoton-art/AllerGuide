@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  createEmptySymptomBaseline,
   getMissingConditionsForAllergens,
   getGatedConditionRemovals,
+  isSymptomBaselineEmpty,
   normalizeAllergyConfirmations,
   parseAllergyConfirmations,
   parseProfileAllergenIds,
   type AllergyConditionId,
   type AllergyConfirmationSource,
   type ComorbidityLink,
+  type ProfileSymptomBaseline,
   type ProfileType,
 } from '@allerguide/core';
 import { AllergenPicker } from '@/src/components/AllergenPicker';
@@ -17,6 +20,7 @@ import { AllergyConfirmationEditor } from '@/src/components/AllergyConfirmationE
 import { ConditionPicker } from '@/src/components/ConditionPicker';
 import { deleteProfile, getProfile, ProfileValidationError, updateProfile } from '@/src/services/profile-service';
 import { confirmDeleteProfile } from '@/src/utils/confirm-delete-profile';
+import { confirmAction } from '@/src/utils/confirm-action';
 import {
   getStoredOtherConditionLabel,
   getStoredProfileConditions,
@@ -40,6 +44,12 @@ import {
   type EmergencyContactDraft,
 } from '@/src/services/emergency-contact-service';
 import { EmergencyContactsEditor } from '@/src/components/EmergencyContactsEditor';
+import { ProfileSetupSymptomsStep } from '@/src/components/profile-setup/ProfileSetupSymptomsStep';
+import { ProfileSetupPhenotypeStep } from '@/src/components/profile-setup/ProfileSetupPhenotypeStep';
+import {
+  getStoredSymptomBaseline,
+  setStoredSymptomBaseline,
+} from '@/src/services/profile-symptom-baseline-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
@@ -69,6 +79,9 @@ export default function ProfileEditScreen() {
   const [conditionHistoryDrafts, setConditionHistoryDrafts] = useState<ConditionHistoryDrafts>({});
   const [comorbidityLinks, setComorbidityLinks] = useState<ComorbidityLink[]>([]);
   const [contacts, setContacts] = useState<EmergencyContactDraft[]>([]);
+  const [symptomBaseline, setSymptomBaseline] = useState<ProfileSymptomBaseline>(() =>
+    createEmptySymptomBaseline(),
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -105,6 +118,7 @@ export default function ProfileEditScreen() {
       );
       setConditionHistoryDrafts(getConditionHistoryDrafts(profileId));
       setComorbidityLinks(getStoredConditionHistory(profileId)?.comorbidityLinks ?? []);
+      setSymptomBaseline(getStoredSymptomBaseline(profileId) ?? createEmptySymptomBaseline());
       setLoading(false);
     });
   }, [profileId]);
@@ -124,14 +138,13 @@ export default function ProfileEditScreen() {
   const handleConditionsChange = (next: AllergyConditionId[]) => {
     const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
-      Alert.alert(
-        t('profileSetup.conditionRemoveTitle'),
-        t('profileSetup.conditionRemoveMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          { text: t('common.save'), onPress: () => applyConditionsChange(next) },
-        ],
-      );
+      confirmAction({
+        title: t('profileSetup.conditionRemoveTitle'),
+        message: t('profileSetup.conditionRemoveMessage'),
+        cancelLabel: t('common.cancel'),
+        confirmLabel: t('common.save'),
+        onConfirm: () => applyConditionsChange(next),
+      });
       return;
     }
     applyConditionsChange(next);
@@ -171,6 +184,10 @@ export default function ProfileEditScreen() {
       conditions.includes('other') ? otherConditionLabel : '',
     );
     saveConditionHistoryFromOnboarding(profileId, conditions, conditionHistoryDrafts, comorbidityLinks);
+    setStoredSymptomBaseline(
+      profileId,
+      isSymptomBaselineEmpty(symptomBaseline) ? null : symptomBaseline,
+    );
     syncEmergencyContacts(profileId, normalizeEmergencyContactDrafts(contacts));
     void reconcileAllReminders();
     router.back();
@@ -180,9 +197,9 @@ export default function ProfileEditScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('profiles.eyebrow')}
         title={t('profileEdit.title')}
         subtitle={t('profileEdit.subtitle')}
+        titleTestID="profile-edit-title"
       />
 
       {loading ? (
@@ -275,6 +292,7 @@ export default function ProfileEditScreen() {
             <AllergenPicker
               selected={selected}
               showCrossReactions={false}
+              conditionIds={conditions}
               suggestedConditionIds={suggestedConditions}
               onAddSuggestedCondition={(conditionId) =>
                 setConditions((prev) => (prev.includes(conditionId) ? prev : [...prev, conditionId]))
@@ -300,6 +318,23 @@ export default function ProfileEditScreen() {
               />
               <Text style={styles.consentText}>{t('profileSetup.consent')}</Text>
             </Pressable>
+          ) : null}
+
+          <ProfileSetupSymptomsStep
+            conditions={conditions}
+            baseline={symptomBaseline}
+            onChange={setSymptomBaseline}
+          />
+
+          {conditions.length > 0 ? (
+            <ProfileSetupPhenotypeStep
+              conditions={conditions}
+              conditionHistoryDrafts={conditionHistoryDrafts}
+              comorbidityLinks={comorbidityLinks}
+              allergenIds={selected}
+              profileType={type}
+              birthYear={birthYear}
+            />
           ) : null}
 
           <GlassCard style={styles.section}>

@@ -94,3 +94,38 @@ CREATE TABLE IF NOT EXISTS profile.sync_backups (
     exported_at varchar(64),
     updated_at  timestamptz NOT NULL DEFAULT now()
 );
+
+-- Refresh tokens (opaque, hashed) ------------------------------------
+CREATE TABLE IF NOT EXISTS profile.refresh_tokens (
+    id         serial PRIMARY KEY,
+    user_id    integer NOT NULL REFERENCES profile.app_users(id) ON DELETE CASCADE,
+    token_hash varchar(64) NOT NULL UNIQUE,
+    expires_at timestamptz NOT NULL,
+    revoked_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS refresh_tokens_user_idx ON profile.refresh_tokens (user_id);
+CREATE INDEX IF NOT EXISTS refresh_tokens_expires_idx ON profile.refresh_tokens (expires_at);
+
+-- Per-user medicine cards (not visible in public catalog search) ------
+CREATE TABLE IF NOT EXISTS profile.medicine_overlays (
+    user_id           integer NOT NULL REFERENCES profile.app_users(id) ON DELETE CASCADE,
+    normalized_name   varchar(255) NOT NULL,
+    name              text NOT NULL,
+    active_substance  text NOT NULL DEFAULT '',
+    form              varchar(128) NOT NULL DEFAULT '',
+    strength          varchar(128) NOT NULL DEFAULT '',
+    manufacturer      varchar(255) NOT NULL DEFAULT '',
+    indications       text NOT NULL DEFAULT '',
+    age_usage         jsonb NOT NULL DEFAULT '[]'::jsonb,
+    min_age_years     integer,
+    ingredients       text NOT NULL DEFAULT '',
+    allergen_tags     jsonb NOT NULL DEFAULT '[]'::jsonb,
+    aliases           jsonb NOT NULL DEFAULT '[]'::jsonb,
+    source            varchar(32) NOT NULL DEFAULT 'manual',
+    confidence        varchar(16) NOT NULL DEFAULT 'low',
+    created_at        timestamptz NOT NULL DEFAULT now(),
+    updated_at        timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, normalized_name)
+);
+CREATE INDEX IF NOT EXISTS medicine_overlays_user_idx ON profile.medicine_overlays (user_id);

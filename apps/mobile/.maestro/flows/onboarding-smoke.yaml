@@ -1,7 +1,16 @@
-# P2.1a — onboarding: register → intro skip → profile → home
+# P2.1a — onboarding: register → intro skip → profile → home → first-run hints
 appId: com.aclearo.app
 ---
-- runFlow: _offline-bootstrap.yaml
+- runFlow: _offline-bootstrap-until-home.yaml
+- extendedWaitUntil:
+    visible:
+      id: hint-overlay
+    timeout: 20000
+- assertVisible:
+    id: hint-skip
+- runFlow: _dismiss-hints.yaml
+- assertNotVisible:
+    id: hint-overlay
 - assertVisible:
     id: tab-home
 - assertVisible:

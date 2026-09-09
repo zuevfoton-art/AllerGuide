@@ -16,6 +16,14 @@ describe('clinical scales', () => {
     expect(aria.steps.length).toBe(4);
   });
 
+  it('puts every scale item in one group so the scale is one screen', () => {
+    for (const scaleId of ['aria-lite', 'act', 'scorad-lite', 'uas7'] as const) {
+      const section = getClinicalScaleSection(scaleId);
+      const groups = new Set(section.steps.map((step) => step.group));
+      expect(groups).toEqual(new Set(['scale']));
+    }
+  });
+
   it('builds a diary editor state for the selected scale', () => {
     const state = buildClinicalScaleEditorState('act');
     expect(state.sectionType).toBe('Шкала');

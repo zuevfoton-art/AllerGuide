@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   ALLERGY_CONDITION_TYPES,
@@ -40,9 +40,10 @@ import {
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { trackProfileSetupAllergenStepComplete } from '@/src/services/profile-setup-analytics';
+import { confirmAction } from '@/src/utils/confirm-action';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -64,6 +65,7 @@ import {
   buildProfileSetupWizardNavOptions,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
+  resolveCrossReactionAllergenIdsForSave,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardStep,
@@ -154,21 +156,18 @@ export default function ProfileSetupScreen() {
     ],
   );
 
-  const wizardNav = buildProfileSetupWizardNavOptions(draft);
-  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft);
+  // First run collects only what a usable profile needs; the rest lives in
+  // profile editing, SOS and the home screen.
+  const navOptions = { deferOptionalSteps: true };
+  const wizardNav = buildProfileSetupWizardNavOptions(draft, navOptions);
+  const stepProgressMeta = getVisibleProfileSetupStepProgress(currentStep, draft, navOptions);
   const stepProgress = t('profileSetup.stepProgress', {
     current: stepProgressMeta.current,
     total: stepProgressMeta.total,
   });
 
-  const subtitle =
-    scenario === 'both' && wizardStep === 'child'
-      ? t('profileSetup.subtitleChildStep', { step: stepProgress })
-      : scenario === 'both'
-        ? t('profileSetup.subtitleSelfStep', { step: stepProgress })
-        : currentStep === 'phenotypeSummary'
-          ? stepProgress
-          : t('profileSetup.subtitleDefault', { step: stepProgress });
+  // The title already says whose profile this is, so the subtitle is the counter only.
+  const subtitle = stepProgress;
 
   const suggestedConditions = useMemo(
     () => getMissingConditionsForAllergens(selected, conditions),
@@ -203,14 +202,13 @@ export default function ProfileSetupScreen() {
   const handleConditionsChange = (next: AllergyConditionId[]) => {
     const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
-      Alert.alert(
-        t('profileSetup.conditionRemoveTitle'),
-        t('profileSetup.conditionRemoveMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          { text: t('common.save'), onPress: () => applyConditionsChange(next) },
-        ],
-      );
+      confirmAction({
+        title: t('profileSetup.conditionRemoveTitle'),
+        message: t('profileSetup.conditionRemoveMessage'),
+        cancelLabel: t('common.cancel'),
+        confirmLabel: t('common.save'),
+        onConfirm: () => applyConditionsChange(next),
+      });
       return;
     }
     applyConditionsChange(next);
@@ -237,7 +235,7 @@ export default function ProfileSetupScreen() {
     setError('');
   };
 
-  const save = async () => {
+  const save = async (crossReactionIds: string[] = crossReactionAllergenIds) => {
     const validationError = validateProfileSetupWizardDraft(draft, { scenario });
     if (validationError) {
       setError(tProfileError(validationError));
@@ -254,7 +252,7 @@ export default function ProfileSetupScreen() {
         type: effectiveType,
         allergies: selected,
         allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
-        crossReactionAllergies: crossReactionAllergenIds,
+        crossReactionAllergies: crossReactionIds,
         childConsent,
         scenario: scenario ?? undefined,
       });
@@ -355,14 +353,19 @@ export default function ProfileSetupScreen() {
       } else {
         trackEvent('profile_setup_step_complete', { step: 'symptomBaseline' });
       }
+    } else if (currentStep === 'allergens') {
+      trackProfileSetupAllergenStepComplete({
+        selectedAllergenIds: selected,
+        conditionIds: conditions,
+      });
     } else {
       trackEvent('profile_setup_step_complete', { step: currentStep });
     }
 
-    const nextNav = buildProfileSetupWizardNavOptions({
-      conditions,
-      selectedAllergenIds: nextSelected,
-    });
+    const nextNav = buildProfileSetupWizardNavOptions(
+      { conditions, selectedAllergenIds: nextSelected },
+      navOptions,
+    );
     const next = getNextProfileSetupWizardStep(currentStep, nextNav);
     if (next) {
       if (next === 'crossReactions') setCrossPendingIds([]);
@@ -371,7 +374,13 @@ export default function ProfileSetupScreen() {
       return;
     }
 
-    void save();
+    void save(
+      resolveCrossReactionAllergenIdsForSave(
+        currentStep,
+        crossPendingIds,
+        crossReactionAllergenIds,
+      ),
+    );
   };
 
   const goBack = () => {
@@ -391,11 +400,13 @@ export default function ProfileSetupScreen() {
     }
   };
 
-  const isLastStep = currentStep === 'contacts';
+  const isLastStep = getNextProfileSetupWizardStep(currentStep, wizardNav) === null;
   const showBack = stepProgressMeta.current > 1;
   const canFinishEarly =
     !isLastStep && canFinishProfileSetupEarly(currentStep, draft, { scenario });
 
+  // The primary button always states what it does, which is why the optional
+  // steps no longer carry a separate «press Next to skip» hint.
   const primaryLabel = isLastStep
     ? scenario === 'both' && wizardStep === 'self'
       ? t('profileSetup.nextChild')
@@ -407,7 +418,6 @@ export default function ProfileSetupScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <ScreenEyebrow section={t('profileSetup.eyebrow')} />
         <Text style={ui.docTitle}>{title}</Text>
         <Text style={ui.docMeta}>{subtitle}</Text>
       </View>
@@ -419,7 +429,6 @@ export default function ProfileSetupScreen() {
           profileType={type}
           onProfileTypeChange={setType}
           canToggleType={canToggleType}
-          lockedType={lockedType}
         />
       ) : null}
 
@@ -452,6 +461,7 @@ export default function ProfileSetupScreen() {
           }}
           confirmations={confirmations}
           onConfirmationsChange={setConfirmations}
+          conditionIds={conditions}
           suggestedConditionIds={suggestedConditions}
           onAddSuggestedCondition={(conditionId) =>
             applyConditionsChange(

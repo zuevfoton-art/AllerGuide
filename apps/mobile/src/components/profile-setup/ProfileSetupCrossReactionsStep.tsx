@@ -7,6 +7,7 @@ import {
 } from '@allerguide/core';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { GlassCard } from '@/src/components/GlassCard';
+import { density, radii, space } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import {
@@ -36,6 +37,9 @@ export function ProfileSetupCrossReactionsStep({
     () => getCrossReactionsForSelection(selectedAllergenIds),
     [selectedAllergenIds],
   );
+  const allMatchIds = useMemo(() => matches.map((match) => match.allergen.id), [matches]);
+  const allSelected =
+    allMatchIds.length > 0 && allMatchIds.every((id) => pendingIds.includes(id));
 
   const toggle = (match: CrossReactionMatch) => {
     const id = match.allergen.id;
@@ -46,10 +50,37 @@ export function ProfileSetupCrossReactionsStep({
     onPendingChange([...pendingIds, id]);
   };
 
+  const toggleAll = () => {
+    if (allSelected) {
+      onPendingChange([]);
+      return;
+    }
+    onPendingChange([...new Set([...pendingIds, ...allMatchIds])]);
+  };
+
   return (
     <GlassCard style={styles.section}>
       <Text style={ui.sectionLabel}>{t('profileSetup.crossReactions.title')}</Text>
       <Text style={styles.hint}>{t('profileSetup.crossReactions.hint')}</Text>
+
+      {matches.length > 1 ? (
+        <Pressable
+          testID="cross-reactions-add-all"
+          style={styles.addAllBtn}
+          onPress={toggleAll}
+          accessibilityRole="button"
+          accessibilityLabel={
+            allSelected
+              ? t('profileSetup.crossReactions.clearAll')
+              : t('profileSetup.crossReactions.addAll')
+          }>
+          <Text style={styles.addAllText}>
+            {allSelected
+              ? t('profileSetup.crossReactions.clearAll')
+              : t('profileSetup.crossReactions.addAll')}
+          </Text>
+        </Pressable>
+      ) : null}
 
       <View style={styles.list}>
         {matches.map((match) => {
@@ -89,7 +120,6 @@ export function ProfileSetupCrossReactionsStep({
         })}
       </View>
 
-      <Text style={styles.skipHint}>{t('profileSetup.crossReactions.skipHint')}</Text>
       <Disclaimer>{t('profileSetup.crossReactions.disclaimer')}</Disclaimer>
     </GlassCard>
   );
@@ -103,6 +133,23 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
+    },
+    addAllBtn: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: space[3],
+      paddingVertical: space[2],
+      minHeight: density.tapMinHeightSm,
+      justifyContent: 'center',
+      borderRadius: radii.sm,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.tipBorder,
+    },
+    addAllText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.accent,
     },
     list: { gap: 8 },
     row: {
@@ -136,12 +183,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
       fontWeight: '600',
-    },
-    skipHint: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textMuted,
-      lineHeight: 16,
     },
   });
 }

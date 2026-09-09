@@ -32,7 +32,6 @@ export default function AboutScreen() {
     <Screen>
       <ScreenHeader
         onBack={() => router.back()}
-        eyebrow={t('about.eyebrow')}
         title={t('about.title')}
         subtitle={t('about.subtitle')}
       />

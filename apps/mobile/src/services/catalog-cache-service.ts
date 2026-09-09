@@ -4,6 +4,7 @@ import {
   buildCachedProductPayload,
   getAllAllergens,
   isCatalogCacheFresh,
+  mergeAllergenCatalogWithStatic,
   type AllergenRecord,
   type CachedCatalogAllergens,
   type CachedCatalogProduct,
@@ -156,6 +157,7 @@ export function saveCachedCatalogProduct(
     allergenTags: product.allergenTags,
     traceTags: product.traceTags,
     source,
+    category: product.category,
   });
 
   if (isWebStorageBackend()) {
@@ -186,7 +188,7 @@ export function saveCachedCatalogProduct(
 }
 
 export function getResolvedAllergenCatalog(): AllergenRecord[] {
-  return getCachedAllergenCatalog()?.allergens ?? getAllAllergens();
+  return mergeAllergenCatalogWithStatic(getCachedAllergenCatalog()?.allergens);
 }
 
 export function cachedCatalogProductToDto(product: CachedCatalogProduct): CatalogProduct {
@@ -198,5 +200,6 @@ export function cachedCatalogProductToDto(product: CachedCatalogProduct): Catalo
     ingredients: product.ingredients,
     allergenTags: product.allergenTags,
     traceTags: product.traceTags,
+    category: product.category,
   };
 }

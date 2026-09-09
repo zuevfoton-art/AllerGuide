@@ -5,6 +5,7 @@ import {
   applyDishBreakdownToAnswers,
   buildComponentsFromProduct,
   buildDishBreakdown,
+  buildDishComponentsFromText,
   enrichLocalComponentsWithProduct,
   findDishMatches,
   findDishRecipe,
@@ -153,6 +154,18 @@ describe('dish-components', () => {
       ],
     );
     expect(next).toEqual(['beet', 'cabbage', 'celery']);
+  });
+
+  it('builds components from free-text composition, catalog names first', () => {
+    const known = buildDishComponentsFromText('Состав: молоко, сахар, лецитин соевый');
+    expect(known.some((item) => item.allergenId === 'milk')).toBe(true);
+
+    const unknown = buildDishComponentsFromText('крем-база альфа; экстракт бета, экстракт бета');
+    expect(unknown.map((item) => item.nameRu)).toEqual([
+      'крем-база альфа',
+      'экстракт бета',
+    ]);
+    expect(buildDishComponentsFromText('   ')).toEqual([]);
   });
 
   it('applies stored component defs so OFF-only dishes survive re-apply', () => {

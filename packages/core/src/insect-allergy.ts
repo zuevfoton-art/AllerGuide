@@ -1,7 +1,7 @@
 import { ALLERGENS, findAllergenById, getAllergensByCategory } from './allergen-database';
 import { resolveAllergenId } from './profile-allergens';
 import type { AllergyConditionId } from './allergy-conditions';
-import { decodeDiaryDetails } from './diary';
+import { decodeDiaryDetails } from './diary-format';
 
 export interface InsectActionPlan {
   v: 1;
@@ -29,9 +29,6 @@ export const STING_SYSTEMIC_SYMPTOM_CHOICES = [
   'Тошнота',
   'Падение давления',
 ] as const;
-
-export const INSECT_DISCLAIMER =
-  'Учёт укусов насекомых носит информационный характер. План действий и лечение определяет врач.';
 
 const INSECT_ALLERGEN_NAMES = new Set(getAllergensByCategory('insect').map((item) => item.name.toLowerCase()));
 const INSECT_KEYWORDS = getAllergensByCategory('insect').flatMap((item) => [

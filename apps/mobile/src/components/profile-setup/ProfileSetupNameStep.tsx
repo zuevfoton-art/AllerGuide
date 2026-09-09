@@ -13,7 +13,6 @@ interface ProfileSetupNameStepProps {
   profileType: ProfileType;
   onProfileTypeChange: (value: ProfileType) => void;
   canToggleType: boolean;
-  lockedType: ProfileType;
 }
 
 export function ProfileSetupNameStep({
@@ -22,26 +21,23 @@ export function ProfileSetupNameStep({
   profileType,
   onProfileTypeChange,
   canToggleType,
-  lockedType,
 }: ProfileSetupNameStepProps) {
   const theme = useTheme();
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
-  const effectiveType = canToggleType ? profileType : lockedType;
 
   return (
     <GlassCard style={styles.section}>
       <Text style={ui.sectionLabel}>{t('profileSetup.nameLabel')}</Text>
       <TextInput
         testID="profile-name"
-        placeholder={t('profileSetup.namePlaceholder')}
-        placeholderTextColor={theme.colors.textMuted}
         value={name}
         onChangeText={onNameChange}
         style={styles.input}
       />
 
+      {/* Locked profile type needs no badge: the screen title already names it. */}
       {canToggleType ? (
         <>
           <Text style={[ui.sectionLabel, styles.fieldGap]}>{t('profileSetup.profileLabel')}</Text>
@@ -72,20 +68,7 @@ export function ProfileSetupNameStep({
             </Pressable>
           </View>
         </>
-      ) : (
-        <View style={styles.lockedType}>
-          <Ionicons
-            name={effectiveType === 'self' ? 'person' : 'happy'}
-            size={16}
-            color={theme.colors.accent}
-          />
-          <Text style={styles.lockedTypeText}>
-            {effectiveType === 'self'
-              ? t('profileSetup.profileSelfLocked')
-              : t('profileSetup.profileChildLocked')}
-          </Text>
-        </View>
-      )}
+      ) : null}
     </GlassCard>
   );
 }
@@ -103,23 +86,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.borderInput,
-    },
-    lockedType: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      backgroundColor: colors.accentLight,
-      padding: 14,
-      borderRadius: 6,
-      borderWidth: 1,
-      borderColor: colors.accentMid,
-      marginTop: 12,
-    },
-    lockedTypeText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.accent,
     },
   });
 }

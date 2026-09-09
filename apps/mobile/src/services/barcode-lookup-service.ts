@@ -1,4 +1,4 @@
-import { expandAllergenTagsForScan } from '@allerguide/core';
+import { categoryFromOffSource, expandAllergenTagsForScan, type OffFamilySource } from '@allerguide/core';
 import { PRODUCT_DB_ENABLED } from '@/src/constants/features';
 import { fetchProductFromCatalog } from '@/src/services/catalog-api';
 import { fetchProductByBarcode } from '@/src/services/open-food-facts-service';
@@ -51,9 +51,18 @@ export type ResolvedBarcodeProduct = {
   source: BarcodeLookupSource;
   declaredAllergenIds: string[];
   traceAllergenIds: string[];
+  category?: string;
 };
 
 const OFF_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function categoryForSource(source: string, explicit?: string): string | undefined {
+  if (explicit) return explicit;
+  if (OFF_FAMILY_SOURCES.has(source)) {
+    return categoryFromOffSource(source as OffFamilySource);
+  }
+  return undefined;
+}
 
 function isStaleOffCache(entry: BarcodeCacheEntry): boolean {
   if (!OFF_FAMILY_SOURCES.has(entry.originSource)) return false;
@@ -103,6 +112,7 @@ export async function resolveProductByBarcode(
         source: 'catalog_api',
         declaredAllergenIds: declared,
         traceAllergenIds: traces,
+        category: catalogProduct.category,
       };
     }
   }
@@ -140,6 +150,7 @@ export async function resolveProductByBarcode(
     source: remote.source,
     declaredAllergenIds: remote.allergenTags,
     traceAllergenIds: remote.traceTags,
+    category: remote.category ?? categoryForSource(remote.source),
   };
 }
 
@@ -155,5 +166,6 @@ function toResolvedProduct(
     source,
     declaredAllergenIds: product.declaredAllergenIds ?? [],
     traceAllergenIds: product.traceAllergenIds ?? [],
+    category: categoryForSource(product.originSource, product.category),
   };
 }

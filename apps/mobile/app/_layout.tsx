@@ -1,3 +1,4 @@
+import '@/src/install-runtime';
 import { Stack, usePathname } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { InteractionManager, Platform, StyleSheet, View, AppState } from 'react-native';
@@ -24,9 +25,8 @@ import {
 
 // NOTE: react-native-quick-crypto was removed. Its native install() crashed the
 // Android app at launch (a native/JNI abort that a JS try/catch cannot catch,
-// independent of the New Architecture flag). Password hashing now uses the
-// pure-JS `@noble/hashes` in @allerguide/core, so no native crypto module is
-// loaded at startup.
+// independent of the New Architecture flag). Password hashing uses pure-JS
+// `@noble/hashes`, configured in `src/install-runtime`.
 
 function WebShell({ children }: { children: ReactNode }) {
   const { colors } = useTheme();
@@ -87,6 +87,16 @@ export default function RootLayout() {
       markStartupPhase('db_ready');
       setDbReady(true);
       void reconcileAllReminders();
+      void import('@/src/services/alias-feedback-service')
+        .then(({ flushPendingAliasFeedback }) => flushPendingAliasFeedback())
+        .catch((error) => {
+          console.warn('[startup] flushPendingAliasFeedback failed:', error);
+        });
+      void import('@/src/services/profile-outbox-service')
+        .then(({ flushProfileOutbox }) => flushProfileOutbox())
+        .catch((error) => {
+          console.warn('[startup] flushProfileOutbox failed:', error);
+        });
 
       const deferBackgroundWarmup = () => {
         safe('warmAllergenCatalogCache', warmAllergenCatalogCache);
