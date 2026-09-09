@@ -171,6 +171,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |
 | `diary-wizard-primary` не найден после ввода «зуд» | Gboard перекрывает «Далее» (в дампе bounds схлопнуты в ноль). `_dismiss-wizard-ime.yaml` тапает `diary-editor-title`, затем `_tap-wizard-primary.yaml` |
 | `diary-wizard-primary` не виден на шаге симптомов (IME закрыта) | Чипы + поле + голос выше fold; sheet `maxHeight: 88%` + `flexGrow: 0` обрезает кнопку (nightly 34325395361: `[87,2373][993,2358]`). Кнопки мастера в `diary-editor-footer` вне ScrollView; скролл ограничен `diaryEditorScrollMaxHeight` |
+| `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-Слабый` |
 | `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, поле прокручивается к фокусу; тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |

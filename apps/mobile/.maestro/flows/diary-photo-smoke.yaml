@@ -30,8 +30,10 @@ appId: com.aclearo.app
     env:
       FIELD_ID: diary-field-appearance
       FIELD_VALUE: покраснение
-- tapOn:
-    text: "Слабый"
+- runFlow:
+    file: _tap-wizard-choice.yaml
+    env:
+      CHOICE_ID: diary-choice-Слабый
 - runFlow: _tap-wizard-primary.yaml
 # photo step
 - extendedWaitUntil:
