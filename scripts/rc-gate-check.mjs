@@ -111,6 +111,20 @@ function checkMaestroFlows() {
     failures.push('maestro-nightly.yml still installs app-debug.apk');
   }
 
+  const easStagingAndroid = fs.readFileSync(
+    path.join(root, '.github/workflows/eas-staging-android.yml'),
+    'utf8',
+  );
+  if (
+    !easStagingAndroid.includes('Free plan this month') ||
+    !easStagingAndroid.includes('staging-apk-gradle') ||
+    !easStagingAndroid.includes('PIPESTATUS')
+  ) {
+    failures.push(
+      'eas-staging-android.yml must warn (exit 0) on Expo Free-plan quota and point to staging-apk-gradle.yml',
+    );
+  }
+
   const runner = fs.readFileSync(path.join(root, 'scripts/maestro-run-emulator.sh'), 'utf8');
   if (!runner.includes('app-release.apk')) {
     failures.push('scripts/maestro-run-emulator.sh must install app-release.apk');
