@@ -6,7 +6,7 @@
   <title>Aclearo — north-star UX (Сегодня, SOS, Скан)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #f3f6f4;
@@ -27,6 +27,9 @@
       --warning: #b45309;
       --sans: Inter, system-ui, sans-serif;
       --serif: "Source Serif 4", Georgia, serif;
+      --display: Fraunces, "Source Serif 4", Georgia, serif;
+      --wash-a: #dceee4;
+      --wash-b: #f7f1e6;
     }
     * { box-sizing: border-box; }
     body {
@@ -110,17 +113,20 @@
       text-transform: uppercase; color: var(--muted); margin: 4px 0 0;
     }
     h2.screen {
-      font-family: var(--serif); font-size: 26px; line-height: 1.2;
+      font-family: var(--display); font-size: 28px; line-height: 1.15;
       margin: 2px 0 12px; color: var(--head); font-weight: 700;
     }
     .reading {
-      background: var(--soft);
-      border: 1px solid var(--soft-border);
+      background: linear-gradient(160deg, #dceee4 0%, #e6f6f4 48%, #f7f1e6 100%);
+      border: 1px solid #b7d8cc;
       border-radius: 16px;
       padding: 14px;
       margin-bottom: 12px;
     }
-    .reading p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--accent-deep); }
+    .reading p {
+      margin: 0; font-family: var(--display); font-size: 16px; font-weight: 500;
+      font-optical-sizing: auto; line-height: 1.4; color: #1a4a40;
+    }
     .reading .kpi {
       margin-top: 8px; font-size: 12px; color: var(--secondary);
     }
@@ -197,7 +203,7 @@
       text-transform: uppercase; color: var(--success); margin: 0 0 6px;
     }
     .verdict.caution .flag { color: var(--warning); }
-    .verdict h3 { margin: 0 0 6px; font-family: var(--serif); font-size: 22px; color: var(--head); }
+    .verdict h3 { margin: 0 0 6px; font-family: var(--display); font-size: 22px; color: var(--head); }
     .verdict p { margin: 0; font-size: 14px; color: var(--secondary); line-height: 1.4; }
     .more {
       font-size: 14px; font-weight: 600; color: var(--accent);
@@ -209,6 +215,20 @@
       display: grid; place-items: center; color: var(--accent-deep);
       font-size: 13px; margin-bottom: 12px; border: 1px dashed var(--accent-mid, #9fd9d1);
     }
+    .week {
+      display: flex; gap: 6px; margin: 10px 0 4px;
+    }
+    .week i {
+      flex: 1; height: 8px; border-radius: 99px; background: #d5ddd8;
+    }
+    .week i.on { background: #2a9d8f; }
+    .week-label { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+    .ask {
+      display: block; width: 100%; margin-top: 8px;
+      background: transparent; color: #1f6b62;
+      border: 1px solid #9fd9d1; border-radius: 8px;
+      min-height: 44px; font-weight: 600; font-size: 14px;
+    }
     .legend { max-width: 1180px; margin: 0 auto 48px; padding: 0 24px; color: var(--secondary); font-size: 14px; line-height: 1.55; }
     .legend h2 { font-family: var(--serif); color: var(--head); font-size: 20px; }
   </style>
@@ -218,8 +238,8 @@
     <h1>North-star Aclearo — три поверхности</h1>
     <p>
       Не шесть равных табов, а ежедневный ритуал: Сегодня (чтение дня + чек-ин),
-      Скан (вердикт у полки) и SOS как аварийная кнопка, а не энциклопедия.
-      Макет к документу <code>docs/wellness-ux-north-star.md</code>.
+      Скан (вердикт у полки) и SOS как аварийная кнопка. Ниже уже заложены
+      display-шрифт, кольцо недели, вход в AI-чат и декоративный hex-wash.
     </p>
   </header>
 
@@ -246,6 +266,10 @@
               <div class="chip"><b>2</b>средне</div>
               <div class="chip"><b>3</b>сильно</div>
             </div>
+            <div class="week" aria-label="Неделя">
+              <i class="on"></i><i class="on"></i><i></i><i class="on"></i><i class="on"></i><i></i><i></i>
+            </div>
+            <p class="week-label">На этой неделе отмечено 4 дня</p>
           </div>
           <div class="factors" style="margin-top:14px">
             <h3>Сейчас</h3>
@@ -260,6 +284,7 @@
             <h3>Одно действие</h3>
             <p>На карте сейчас спокойнее к северу от Садового.</p>
             <button class="btn" type="button">Открыть карту</button>
+            <button class="ask" type="button">Спросить, что это значит</button>
           </div>
         </div>
         <nav class="tabbar">
@@ -333,8 +358,10 @@
   <section class="legend">
     <h2>Как читать макет</h2>
     <p>
-      Четыре таба плюс красный SOS-слот. Маркет и эксперт уходят в хаб профиля.
-      На Сегодня одна primary-кнопка. Чек-ин — чипы 0–3, не мастер.
+      Четыре таба плюс красный SOS-слот. Display-шрифт Fraunces на H1 и reading.
+      Кольцо недели без «сгоревшей серии». Ghost «Спросить» — вход в AI-чат, не дом экрана.
+      Wash reading-карточки — сырые hex `#dceee4` → `#f7f1e6` в JSX/CSS атмосферы.
+      Маркет и эксперт уходят в хаб профиля. На Сегодня одна primary-кнопка.
       Кризисный SOS не требует профиля для вызова 103. Скан никогда не показывает ложный «можно» при дырах в данных.
     </p>
   </section>
