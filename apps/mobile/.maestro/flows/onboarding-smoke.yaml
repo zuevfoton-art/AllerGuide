@@ -9,4 +9,9 @@ appId: com.aclearo.app
 - assertVisible:
     id: tab-scanner
 - assertVisible:
+    id: tab-map
+- assertVisible:
     id: tab-sos
+# North-star N1: four navigation tabs + SOS control, market moved to the profile hub.
+- assertNotVisible:
+    id: tab-market

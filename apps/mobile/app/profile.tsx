@@ -186,6 +186,40 @@ export default function ProfileScreen() {
         </>
       ) : null}
 
+      <Text style={ui.sectionLabel}>{t('more.eyebrow')}</Text>
+      <GlassCard padded={false}>
+        <Pressable
+          testID="hub-market"
+          style={[styles.hubRow, styles.hubRowBorder]}
+          onPress={() => router.push('/market' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('market.title')}>
+          <View style={styles.hubIcon}>
+            <Ionicons name="bag-handle-outline" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.hubBody}>
+            <Text style={styles.hubTitle}>{t('market.title')}</Text>
+            <Text style={styles.hubHint}>{t('more.marketDesc')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+        <Pressable
+          testID="hub-expert"
+          style={styles.hubRow}
+          onPress={() => router.push('/expert' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('expert.title')}>
+          <View style={styles.hubIcon}>
+            <Ionicons name="school-outline" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.hubBody}>
+            <Text style={styles.hubTitle}>{t('expert.title')}</Text>
+            <Text style={styles.hubHint}>{t('more.expertDesc')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+      </GlassCard>
+
       <Text style={ui.sectionLabel}>{t('notifications.hubTitle')}</Text>
       <GlassCard padded={false}>
         <Pressable
@@ -300,6 +334,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 16,
       paddingVertical: 14,
     },
+    hubRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
     hubIcon: {
       width: 40,
       height: 40,

@@ -152,9 +152,9 @@ const it: LocaleMessages = {
     calmMotionHint: 'Riduci il movimento dell’interfaccia se disturba.',
   },
   tabs: {
-    home: 'Home',
-    diary: 'Diario',
-    scanner: 'Scanner',
+    today: 'Oggi',
+    journal: 'Diario',
+    scan: 'Scan',
     market: 'Mercato',
     map: 'Mappa',
     more: 'Altro',

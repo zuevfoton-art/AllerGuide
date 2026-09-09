@@ -153,9 +153,9 @@ const de: LocaleMessages = {
     calmMotionHint: 'Bewegung in der Oberfläche reduzieren, wenn sie stört.',
   },
   tabs: {
-    home: 'Start',
-    diary: 'Tagebuch',
-    scanner: 'Scanner',
+    today: 'Heute',
+    journal: 'Journal',
+    scan: 'Scan',
     market: 'Markt',
     map: 'Karte',
     more: 'Mehr',

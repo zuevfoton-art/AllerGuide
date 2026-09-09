@@ -158,9 +158,9 @@ export type LocaleMessages = {
     calmMotionHint: string;
   };
   tabs: {
-    home: string;
-    diary: string;
-    scanner: string;
+    today: string;
+    journal: string;
+    scan: string;
     market: string;
     map: string;
     more: string;

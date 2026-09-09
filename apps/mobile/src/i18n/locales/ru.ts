@@ -153,9 +153,9 @@ const ru: LocaleMessages = {
     calmMotionHint: 'Убрать движение интерфейса, если оно мешает.',
   },
   tabs: {
-    home: 'Главная',
-    diary: 'Дневник',
-    scanner: 'Сканер',
+    today: 'Сегодня',
+    journal: 'Журнал',
+    scan: 'Скан',
     market: 'Маркет',
     map: 'Карта',
     more: 'Ещё',

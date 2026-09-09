@@ -156,6 +156,7 @@ export function ProfileHeaderButton({
               </ScrollView>
             )}
             <Pressable
+              testID="profile-switcher-manage"
               style={styles.manageRow}
               onPress={() => {
                 setOpen(false);

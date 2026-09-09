@@ -173,7 +173,7 @@ export default function HomeScreen() {
         </>
       }>
 
-      <TabScreenHeader eyebrow={t('home.eyebrow')} title={t('tabs.home')} />
+      <TabScreenHeader eyebrow={t('home.eyebrow')} title={t('tabs.today')} />
 
       {loadingWellness && !wellness ? (
         <>

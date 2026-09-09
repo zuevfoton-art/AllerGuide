@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
 import type { MarketplaceCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { useTranslation } from '@/src/store/locale-store';
 import { MarketplaceModule } from '@/src/modules/marketplace';
 import { useMarketplaceProducts } from '@/src/modules/marketplace/use-marketplace-products';
@@ -21,10 +22,11 @@ export default function MarketScreen() {
       refreshing={catalog.refreshing}
       onRefresh={catalog.refresh}
     >
-      <TabScreenHeader
+      <ScreenHeader
+        onBack={() => router.back()}
         eyebrow={t('market.eyebrow')}
         title={t('market.title')}
-        meta={t('market.subtitle')}
+        subtitle={t('market.subtitle')}
       />
 
       <MarketplaceModule

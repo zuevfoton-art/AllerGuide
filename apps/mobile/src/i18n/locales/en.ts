@@ -152,9 +152,9 @@ const en: LocaleMessages = {
     calmMotionHint: 'Reduce motion in the interface if it is distracting.',
   },
   tabs: {
-    home: 'Home',
-    diary: 'Diary',
-    scanner: 'Scanner',
+    today: 'Today',
+    journal: 'Journal',
+    scan: 'Scan',
     market: 'Market',
     map: 'Map',
     more: 'More',

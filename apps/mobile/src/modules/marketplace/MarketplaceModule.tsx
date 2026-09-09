@@ -74,7 +74,7 @@ function EmbeddedMarketplace() {
   const profile = useAppStore((s) => s.activeProfile);
   const { items } = useMarketplaceProducts(profile);
   const previewItems = items.slice(0, PREVIEW_LIMIT);
-  const openFullMarket = () => router.push('/(tabs)/market');
+  const openFullMarket = () => router.push('/market');
 
   return (
     <GlassCard padded={false}>
