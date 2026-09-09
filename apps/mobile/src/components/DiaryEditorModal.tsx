@@ -57,8 +57,12 @@ export function DiaryEditorFooter({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     if (!setFooter) return undefined;
     setFooter(children);
-    return () => setFooter(null);
   }, [setFooter, children]);
+
+  useLayoutEffect(() => {
+    if (!setFooter) return undefined;
+    return () => setFooter(null);
+  }, [setFooter]);
 
   if (!setFooter) return children;
   return null;
@@ -148,14 +152,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               accessibilityLabel={t('common.cancel')}
             />
             <View
-              style={[
-                styles.sheet,
-                { paddingBottom: Math.max(insets.bottom, space[4]) },
-                // Bound the sheet when actions are pinned so the footer stays
-                // inside the viewport (web + Pixel 6). Content-sized sheets
-                // still grow past 88% if maxHeight is the only cap.
-                footer ? { height: '88%' } : null,
-              ]}
+              style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}
               accessibilityViewIsModal>
               <View style={styles.grabberWrap}>
                 <View style={styles.grabber} />
@@ -222,6 +219,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: 'rgba(15, 23, 42, 0.45)',
     },
     sheet: {
+      // Fixed height, not only maxHeight: a content-sized sheet overflowed
+      // and crushed diary-wizard-primary (nightly 34325395361).
+      height: '88%',
       maxHeight: '88%',
       backgroundColor: colors.bg,
       borderTopLeftRadius: radii.xl,
