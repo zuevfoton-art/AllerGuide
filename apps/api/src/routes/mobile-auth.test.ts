@@ -282,6 +282,57 @@ describe('mobile auth routes', () => {
     expect(response.body.refreshToken).toBeUndefined();
   });
 
+  it('rejects cookie refresh from an origin outside the CORS allowlist', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Origin', 'https://evil.example')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(rotateRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('rejects cookie refresh without an Origin header', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(rotateRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('rotates a cookie session from an allowed Origin without touching native tokens', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    vi.mocked(rotateRefreshToken).mockResolvedValue({ userId: 3 });
+    vi.mocked(findUserById).mockResolvedValue({
+      id: 3,
+      login: 'user@example.com',
+      loginType: 'email',
+      email: 'user@example.com',
+      phone: null,
+      passwordHash: 'hash',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Origin', 'https://app.example')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(200);
+    expect(rotateRefreshToken).toHaveBeenCalledWith('refresh-old');
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
   it('rejects a missing refresh token', async () => {
     const app = await createApp();
     const response = await request(app).post('/api/auth/refresh').send({});
