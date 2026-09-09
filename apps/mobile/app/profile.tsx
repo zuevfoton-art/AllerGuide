@@ -124,7 +124,9 @@ export default function ProfileScreen() {
 
       <Text style={ui.sectionLabel}>{t('settings.emergencyNumber')}</Text>
       <GlassCard>
-        <Text style={styles.cardHint}>{t('settings.emergencyHint')}</Text>
+        <Text testID="profile-emergency-hint" style={styles.cardHint}>
+          {t('settings.emergencyHint')}
+        </Text>
         <TextInput
           testID="profile-emergency-number"
           style={styles.input}

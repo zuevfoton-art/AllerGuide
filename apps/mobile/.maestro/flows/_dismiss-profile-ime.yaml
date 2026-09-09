@@ -1,8 +1,13 @@
 # Fold IME on /profile without BACK / hideKeyboard.
 # Pixel 6 phone-pad removes profile-save-number from the UiAutomator tree
 # (nightly 34052584781: dump has profile-emergency-number=112, no save button).
-# Tap the hub title (non-interactive Text), same pattern as scanner-title.
+# Tap an inert Text: keyboardShouldPersistTaps=handled folds the IME on any tap
+# a child does not handle.
+# The anchor must sit next to the field, not in the screen header: focusing the
+# field scrolls the header out of the ScrollView viewport, so UiAutomator clips
+# profile-screen-title to a negative height and it can never be tapped
+# (nightly 34340207243: title bounds [190,380][892,357], hint [92,1459][990,1507]).
 appId: com.aclearo.app
 ---
 - tapOn:
-    id: profile-screen-title
+    id: profile-emergency-hint

@@ -388,7 +388,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(read('apps/mobile/src/components/ScreenHeader.tsx'), /testID="screen-header-back"/);
   });
 
-  it('folds profile IME via hub title before tapping profile-save-number', () => {
+  it('folds profile IME via the field hint before tapping profile-save-number', () => {
     const flow = read('apps/mobile/.maestro/flows/settings-smoke.yaml');
     assert.match(flow, /_tap-profile-save-number\.yaml/);
     assert.match(flow, /scrollUntilVisible:[\s\S]*?id: profile-emergency-number/);
@@ -404,13 +404,22 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(tapSave, /id: profile-save-number/);
 
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-profile-ime.yaml');
-    assert.match(dismiss, /id: profile-screen-title/);
+    assert.match(dismiss, /id: profile-emergency-hint/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+    // Focusing the field scrolls the hub header out of the ScrollView, so
+    // UiAutomator clips profile-screen-title to a negative height and the tap
+    // can never land (nightly 34340207243).
+    assert.doesNotMatch(
+      dismiss,
+      /id: profile-screen-title/,
+      'the IME anchor must sit next to the field, not in the scrolled-away header',
+    );
 
     const hub = read('apps/mobile/app/profile.tsx');
     assert.match(hub, /titleTestID="profile-screen-title"/);
     assert.match(hub, /testID="profile-save-number"/);
     assert.match(hub, /testID="profile-emergency-number"/);
+    assert.match(hub, /testID="profile-emergency-hint"/);
   });
 
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
