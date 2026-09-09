@@ -28,9 +28,12 @@ import {
 } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
+import { CardTitle } from '@/src/components/CardTitle';
+import { Skeleton } from '@/src/components/Skeleton';
 import { ErrorState } from '@/src/components/ErrorState';
 import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -42,6 +45,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useZoneColors, zoneFromScanRisk } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
@@ -104,12 +108,14 @@ export default function ScannerScreen() {
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, content } = useTranslation();
+  const modalAnimation = useModalAnimation('fade');
   const localeContent = content();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const [input, setInput] = useState('');
   const [entryMode, setEntryMode] = useState<CameraEntryMode>('scanner');
   const [manualOpen, setManualOpen] = useState(false);
-  const [ingredientsOpen, setIngredientsOpen] = useState(true);
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
+  const [resultDetailsOpen, setResultDetailsOpen] = useState(false);
   const [trendsOpen, setTrendsOpen] = useState(false);
   const [listTab, setListTab] = useState<ListTab>('recent');
   const [result, setResult] = useState<ScanResultExtended | null>(null);
@@ -536,7 +542,7 @@ export default function ScannerScreen() {
     return (
       <Modal
         visible
-        animationType="fade"
+        animationType={modalAnimation}
         presentationStyle="fullScreen"
         statusBarTranslucent
         navigationBarTranslucent
@@ -633,10 +639,9 @@ export default function ScannerScreen() {
   if (!activeProfileId) {
     return (
       <Screen>
-        <ScreenEyebrow section={t('scanner.eyebrow')} />
-        <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
+        <TabScreenHeader eyebrow={t('scanner.eyebrow')} title={t('scanner.titleShort')} />
         <GlassCard>
-          <Text style={ui.cardTitle}>{t('scanner.noProfileTitle')}</Text>
+          <CardTitle>{t('scanner.noProfileTitle')}</CardTitle>
           <Text style={styles.emptyBody}>{t('scanner.noProfileText')}</Text>
           <Button
             label={t('scanner.noProfileCta')}
@@ -676,12 +681,7 @@ export default function ScannerScreen() {
           </GlassCard>
         ) : undefined
       }>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('scanner.eyebrow')} />
-          <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
-        </View>
-      </View>
+      <TabScreenHeader eyebrow={t('scanner.eyebrow')} title={t('scanner.titleShort')} />
 
       <Button
         testID="scanner-primary-camera"
@@ -742,7 +742,7 @@ export default function ScannerScreen() {
           <Button
             testID="scanner-check"
             label={t('scanner.check')}
-            variant="primary"
+            variant="secondary"
             block
             disabled={loading || !input.trim()}
             onPress={() => {
@@ -752,7 +752,7 @@ export default function ScannerScreen() {
         </View>
       ) : null}
 
-      {loading ? <ActivityIndicator color={theme.colors.accent} style={{ marginTop: -8 }} /> : null}
+      {loading ? <Skeleton height={16} style={{ marginTop: -8 }} /> : null}
       {ocrHint ? <Text style={styles.ocrHint}>{ocrHint}</Text> : null}
 
       {scanError && !loading ? (
@@ -798,8 +798,6 @@ export default function ScannerScreen() {
             />
           ) : null}
 
-          <Text style={styles.resultTrust}>{t('scanner.resultTrustStrip')}</Text>
-
           {!isVisionOnly &&
           (result?.productBrand ||
             result?.productImageUrl ||
@@ -828,26 +826,6 @@ export default function ScannerScreen() {
                 ) : null}
               </View>
             </View>
-          ) : null}
-
-          {result?.barcodeScanStatus && result.barcodeScanStatus !== 'found_match' ? (
-            <Text style={styles.statusBadge}>
-              {result.barcodeScanStatus === 'not_found'
-                ? t('scanner.statusNotFound')
-                : result.barcodeScanStatus === 'found_insufficient_composition'
-                  ? t('scanner.statusInsufficientComposition')
-                  : t('scanner.statusNoAllergens')}
-            </Text>
-          ) : null}
-
-          {result?.menuScanStatus ? (
-            <Text style={styles.statusBadge}>
-              {result.menuScanStatus === 'text_match'
-                ? t('scanner.menuStatusMatch')
-                : result.menuScanStatus === 'incomplete_composition'
-                  ? t('scanner.menuStatusIncomplete')
-                  : t('scanner.menuStatusNoMatch')}
-            </Text>
           ) : null}
 
           {result?.barcodeScanStatus === 'not_found' || result?.lookupFailed ? (
@@ -880,6 +858,42 @@ export default function ScannerScreen() {
               ))}
             </View>
           ) : null}
+
+          <Pressable
+            onPress={() => setResultDetailsOpen((open) => !open)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: resultDetailsOpen }}
+            hitSlop={8}
+            testID="scanner-result-more">
+            <Text style={styles.ingredientsToggleText}>
+              {resultDetailsOpen ? t('common.hideDetails') : t('common.moreDetails')}
+            </Text>
+          </Pressable>
+
+          {resultDetailsOpen ? (
+            <>
+          <Text style={styles.resultTrust}>{t('scanner.resultTrustStrip')}</Text>
+
+          {result?.barcodeScanStatus && result.barcodeScanStatus !== 'found_match' ? (
+            <Text style={styles.statusBadge}>
+              {result.barcodeScanStatus === 'not_found'
+                ? t('scanner.statusNotFound')
+                : result.barcodeScanStatus === 'found_insufficient_composition'
+                  ? t('scanner.statusInsufficientComposition')
+                  : t('scanner.statusNoAllergens')}
+            </Text>
+          ) : null}
+
+          {result?.menuScanStatus ? (
+            <Text style={styles.statusBadge}>
+              {result.menuScanStatus === 'text_match'
+                ? t('scanner.menuStatusMatch')
+                : result.menuScanStatus === 'incomplete_composition'
+                  ? t('scanner.menuStatusIncomplete')
+                  : t('scanner.menuStatusNoMatch')}
+            </Text>
+          ) : null}
+
           {(displayResult.crossMatches?.length ?? 0) > 0 ? (
             <View style={styles.chipWrap}>
               <Text style={styles.chipSectionLabel}>{t('scanner.crossMatches')}</Text>
@@ -940,6 +954,8 @@ export default function ScannerScreen() {
           ) : null}
 
           <Text style={styles.verifyHint}>{t('scanner.verifyPackageHint')}</Text>
+            </>
+          ) : null}
 
           <View style={styles.actionCol}>
             {isLow && activeProfileId ? (
@@ -973,7 +989,7 @@ export default function ScannerScreen() {
                       logCaughtError('ScannerScreen.reportAlias', new Error(saved.code));
                       return;
                     }
-                    Alert.alert(t('scanner.reportIncorrect'), t('scanner.reportThanks'));
+                    showStatusBanner({ tone: 'success', message: t('scanner.reportThanks') });
                     void hapticLight();
                   });
                 }}
@@ -1002,9 +1018,9 @@ export default function ScannerScreen() {
             style={styles.trendsToggle}
             accessibilityRole="button"
             hitSlop={8}>
-            <Text style={ui.cardTitle}>
+            <CardTitle>
               {trendsOpen ? t('scanner.trendsHide') : t('scanner.trendsShow')}
-            </Text>
+            </CardTitle>
             <Ionicons
               name={trendsOpen ? 'chevron-up' : 'chevron-down'}
               size={18}
@@ -1019,11 +1035,25 @@ export default function ScannerScreen() {
                   highRisk: String(scanTrends.highRiskCount),
                 })}
               </Text>
-              {scanTrends.topAllergens.map((item) => (
-                <Text key={item.allergenId} style={styles.trendRow}>
-                  {item.label}: {item.count}
-                </Text>
-              ))}
+              {scanTrends.topAllergens.map((item) => {
+                const maxCount = Math.max(...scanTrends.topAllergens.map((row) => row.count), 1);
+                return (
+                  <View key={item.allergenId} style={styles.trendBarRow}>
+                    <Text style={styles.trendBarLabel} numberOfLines={1}>
+                      {item.label}
+                    </Text>
+                    <View style={styles.trendTrack}>
+                      <View
+                        style={[
+                          styles.trendFill,
+                          { width: `${Math.round((item.count / maxCount) * 100)}%` },
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.trendBarCount}>{item.count}</Text>
+                  </View>
+                );
+              })}
             </>
           ) : null}
         </GlassCard>
@@ -1128,7 +1158,7 @@ export default function ScannerScreen() {
         />
       ) : null}
 
-      <Disclaimer>
+      <Disclaimer collapsible={isDishVisionResult}>
         {isDishVisionResult ? t('scanner.dishVisionDisclaimer') : t('scanner.disclaimer')}
       </Disclaimer>
     </Screen>
@@ -1284,11 +1314,36 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textMuted,
       marginBottom: 6,
     },
-    trendRow: {
+    trendBarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 6,
+    },
+    trendBarLabel: {
       fontFamily: fonts.sans,
       fontSize: fontSizes.bodySm,
       color: colors.textSecondary,
-      marginBottom: 2,
+      width: 88,
+    },
+    trendTrack: {
+      flex: 1,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.surfaceMuted,
+      overflow: 'hidden',
+    },
+    trendFill: {
+      height: '100%',
+      borderRadius: 4,
+      backgroundColor: colors.accent,
+    },
+    trendBarCount: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.caption,
+      color: colors.textMuted,
+      width: 24,
+      textAlign: 'right',
     },
     trendsToggle: {
       flexDirection: 'row',

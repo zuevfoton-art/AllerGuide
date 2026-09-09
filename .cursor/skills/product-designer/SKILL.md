@@ -35,11 +35,24 @@ description: Senior product designer for AllerGuide — проектирует �
 
 ## 4. Иерархия заголовков (не смешивать)
 
-| Уровень | Компонент | Типографика |
-|---------|-----------|-------------|
-| Экран | `ScreenHeader` / `ui.docTitle` | 26 / 700 |
+Три семьи экранных заголовков — выбирай осознанно, не изобретай четвёртую:
+
+| Семья | Когда | Компонент |
+|-------|--------|-----------|
+| **Стек** | Вложенный экран с «назад» | `ScreenHeader` (`eyebrow` + H1 + optional subtitle) |
+| **Таб** | Корневой экран нижней навигации | `TabScreenHeader` (бренд-лок + `ScreenEyebrow` + `ui.docTitle` + optional `ui.docMeta`) |
+| **Юридический** | Политика / оферта / согласие | `ScreenBackBrandHeader` (бренд + «назад» 40×40 с `hitSlop={8}`) |
+
+Авторизация: `AuthHero` на `textStyles.h1` / `fontSizes.h1`. Онбординг и сплэш — исключения, не копировать в продуктовые экраны.
+
+| Уровень внутри экрана | Компонент | Типографика |
+|-----------------------|-----------|-------------|
+| Экран | `ScreenHeader` / `TabScreenHeader` / `ui.docTitle` | 26 / 700 |
 | Карточка | `CardTitle` / `ui.sectionTitle` | 18 / 600 serif |
+| Строка списка | `ui.feedTitle` | 14 / 600 |
 | Группа | `ui.sectionLabel` | 11 uppercase — **не** заголовок карточки |
+
+`ui.microLabel` (`ui.cardTitle` — deprecated alias) — 12 px подпись, не H2 карточки. Одна visible `Button variant="primary"` на поверхность; остальные `secondary` / `ghost`.
 
 ## 5. Что переиспользовать
 

@@ -16,6 +16,7 @@ import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service
 import { registerNotificationNavigation } from '@/src/services/notification-navigation-service';
 import { useThemeStore } from '@/src/store/theme-store';
 import { useLocaleStore } from '@/src/store/locale-store';
+import { useAppearanceStore } from '@/src/store/appearance-store';
 import {
   logStartupMetrics,
   markStartupPhase,
@@ -45,6 +46,7 @@ function WebShell({ children }: { children: ReactNode }) {
 export default function RootLayout() {
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const hydrateLocale = useLocaleStore((s) => s.hydrate);
+  const hydrateAppearance = useAppearanceStore((s) => s.hydrate);
   const { colors, isDark } = useTheme();
   const pathname = usePathname();
   const fontsLoaded = useAppFonts();
@@ -81,6 +83,7 @@ export default function RootLayout() {
       if (!mounted) return;
       safe('hydrateTheme', hydrateTheme);
       safe('hydrateLocale', hydrateLocale);
+      safe('hydrateAppearance', hydrateAppearance);
       markStartupPhase('db_ready');
       setDbReady(true);
       void reconcileAllReminders();
@@ -99,7 +102,7 @@ export default function RootLayout() {
     return () => {
       mounted = false;
     };
-  }, [hydrateTheme, hydrateLocale]);
+  }, [hydrateTheme, hydrateLocale, hydrateAppearance]);
 
   useEffect(() => {
     if (!appReady) return;

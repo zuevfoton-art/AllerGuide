@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies, type Profile } from '@allerguide/core';
@@ -8,9 +8,11 @@ import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
-import { ThemeToggle } from '@/src/components/ThemeToggle';
+import { AppearanceSettings } from '@/src/components/AppearanceSettings';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
@@ -59,7 +61,7 @@ export default function ProfileScreen() {
     const normalized = emergencyNumber.replace(/[^\d+]/g, '') || '103';
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
-    Alert.alert(t('settings.saved'), t('settings.savedNumberMessage', { number: normalized }));
+    showStatusBanner({ tone: 'success', message: t('settings.savedNumberMessage', { number: normalized }) });
   };
 
   return (
@@ -104,8 +106,9 @@ export default function ProfileScreen() {
       </GlassCard>
       <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
 
-      <Text style={ui.sectionLabel}>{t('sos.title')}</Text>
+      <Text style={ui.sectionLabel}>{t('profiles.sosPassport')}</Text>
       <GlassCard>
+        <CardTitle>{t('sos.title')}</CardTitle>
         <Text style={styles.cardHint}>{t('sos.subtitle')}</Text>
         <Button
           label={t('profiles.sosPassport')}
@@ -137,7 +140,7 @@ export default function ProfileScreen() {
         <Button
           testID="profile-save-number"
           label={t('settings.saveNumber')}
-          variant="primary"
+          variant="secondary"
           block
           onPress={saveEmergencyNumber}
         />
@@ -201,8 +204,7 @@ export default function ProfileScreen() {
         </Pressable>
       </GlassCard>
 
-      <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
-      <ThemeToggle />
+      <AppearanceSettings />
 
       <Text style={ui.sectionLabel}>{t('settings.aboutTitle')}</Text>
       <GlassCard padded={false}>

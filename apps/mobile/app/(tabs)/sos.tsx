@@ -2,7 +2,7 @@ import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { TabScreenHeader } from '@/src/components/TabScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
@@ -171,13 +171,11 @@ export default function SosScreen() {
           }
         />
       }>
-      <View style={styles.headerRow}>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('sos.eyebrow')} />
-          <Text style={ui.docTitle}>{t('sos.title')}</Text>
-          <Text style={ui.docMeta}>{t('sos.subtitle')}</Text>
-        </View>
-      </View>
+      <TabScreenHeader
+        eyebrow={t('sos.eyebrow')}
+        title={t('sos.title')}
+        meta={t('sos.subtitle')}
+      />
 
       {epinephrineHint ? (
         <GlassCard style={styles.epiHintCard}>
@@ -235,13 +233,25 @@ export default function SosScreen() {
                   {passport.drugIntolerances.length > 0 ? (
                     <View style={styles.passportRow}>
                       <Text style={styles.passportLabel}>{t('sos.drugIntolerances')}</Text>
-                      <Text style={styles.passportValue}>{passport.drugIntolerances.join(', ')}</Text>
+                      <View style={styles.allergyChips}>
+                        {passport.drugIntolerances.map((item) => (
+                          <View key={item} style={styles.allergyChip}>
+                            <Text style={styles.allergyText}>{item}</Text>
+                          </View>
+                        ))}
+                      </View>
                     </View>
                   ) : null}
                   {passport.triggers.length > 0 ? (
                     <View style={styles.passportRow}>
                       <Text style={styles.passportLabel}>{t('sos.triggers')}</Text>
-                      <Text style={styles.passportValue}>{passport.triggers.join(', ')}</Text>
+                      <View style={styles.allergyChips}>
+                        {passport.triggers.map((item) => (
+                          <View key={item} style={styles.allergyChip}>
+                            <Text style={styles.allergyText}>{item}</Text>
+                          </View>
+                        ))}
+                      </View>
                     </View>
                   ) : null}
                   {passport.epinephrine?.brand ? (
@@ -321,10 +331,11 @@ export default function SosScreen() {
                 <View key={grade.grade} style={styles.gradeBlock}>
                   <Text style={styles.gradeTitle}>{grade.title}</Text>
                   <Text style={styles.gradeSigns}>{grade.signs}</Text>
-                  {grade.actions.map((action) => (
-                    <Text key={action} style={styles.gradeAction}>
-                      · {action}
-                    </Text>
+                  {grade.actions.map((action, index) => (
+                    <View key={action} style={styles.planStep}>
+                      <Text style={styles.planNum}>{index + 1}</Text>
+                      <Text style={styles.planText}>{action}</Text>
+                    </View>
                   ))}
                 </View>
               ))}

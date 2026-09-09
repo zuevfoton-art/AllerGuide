@@ -34,6 +34,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { radii } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -61,6 +62,7 @@ export default function AsitCourseScreen() {
   const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const modalAnimation = useModalAnimation('slide');
   const profile = useAppStore((s) => s.activeProfile);
   const profileId = profile?.id;
   const [course, setCourse] = useState<AsitCourse>(() => createEmptyAsitCourse());
@@ -515,7 +517,7 @@ export default function AsitCourseScreen() {
         onPress={goToNextFromForm}
       />
 
-      <Disclaimer>{t('asit.disclaimer')}</Disclaimer>
+      <Disclaimer collapsible>{t('asit.disclaimer')}</Disclaimer>
 
       {/* Allergen catalog modal */}
       <AllergenCatalogModal
@@ -526,7 +528,7 @@ export default function AsitCourseScreen() {
       />
 
       {/* OCR text input modal */}
-      <Modal visible={parseTextOpen} transparent animationType="slide" onRequestClose={() => setParseTextOpen(false)}>
+      <Modal visible={parseTextOpen} transparent animationType={modalAnimation} onRequestClose={() => setParseTextOpen(false)}>
         <ModalKeyboardAvoid style={styles.modalBackdrop}>
           {({ liftStyle, keyboardInset }) => (
             <View style={[styles.modalSheet, liftStyle]}>
@@ -734,7 +736,7 @@ function ReviewStep({ ui, styles, course, setCourse, onBack, onSave, reminderEna
       </GlassCard>
 
       <Button label={t('asit.reviewConfirm')} variant="primary" block onPress={() => void onSave()} />
-      <Disclaimer>{t('asit.disclaimer')}</Disclaimer>
+      <Disclaimer collapsible>{t('asit.disclaimer')}</Disclaimer>
     </Screen>
   );
 }

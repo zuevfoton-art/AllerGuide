@@ -41,14 +41,18 @@ import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
 import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
 import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
 import { AsthmaCard } from '@/src/components/AsthmaCard';
+import { AsitCourseCard } from '@/src/components/AsitCourseCard';
+import { PrescribedTherapyCard } from '@/src/components/PrescribedTherapyCard';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
+import { getAsitCourse } from '@/src/services/asit-course-service';
+import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
 import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { TabScreenHeader } from '@/src/components/TabScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
@@ -183,6 +187,14 @@ export default function DiaryScreen() {
   const asthmaActionPlan = useMemo(
     () => (activeProfileId ? getAsthmaActionPlan(activeProfileId) : null),
     [activeProfileId],
+  );
+  const asitCourse = useMemo(
+    () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
+    [activeProfileId, capabilitiesTick],
+  );
+  const prescribedCourse = useMemo(
+    () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
+    [activeProfileId, capabilitiesTick],
   );
   const planPersonalBestPef = useMemo(
     () => getAsthmaPlanPersonalBest(asthmaActionPlan),
@@ -494,13 +506,11 @@ export default function DiaryScreen() {
       onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
       refreshing={refreshing}
       brandHeaderRight={<ProfileHeaderButton />}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('diary.eyebrow')} />
-          <Text style={ui.docTitle}>{t('diary.title')}</Text>
-          <Text style={ui.docMeta}>{t('diary.subtitle')}</Text>
-        </View>
-      </View>
+      <TabScreenHeader
+        eyebrow={t('diary.eyebrow')}
+        title={t('diary.title')}
+        meta={t('diary.subtitle')}
+      />
 
       <Button
         testID="diary-new-entry"
@@ -654,6 +664,20 @@ export default function DiaryScreen() {
           onLogPef={() => void openSection('Пикфлоуметрия')}
         />
       ) : null}
+
+      {asitEnabled ? (
+        <AsitCourseCard
+          course={asitCourse}
+          entries={list}
+          onLogDose={() => void openSection('АСИТ')}
+        />
+      ) : null}
+
+      <PrescribedTherapyCard
+        course={prescribedCourse}
+        entries={list}
+        onLogDose={() => void openSection('Терапия')}
+      />
 
       <Disclaimer compact>{t('diary.disclaimerShort')}</Disclaimer>
     </Screen>

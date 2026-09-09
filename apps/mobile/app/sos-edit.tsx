@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Screen } from '@/src/components/Screen';
@@ -39,6 +39,7 @@ import {
   getAllergyPassport,
   saveAllergyPassport,
 } from '@/src/services/sos-passport-service';
+import { showStatusBanner } from '@/src/store/banner-store';
 
 function parseListInput(value: string): string[] {
   return splitListInput(value);
@@ -103,23 +104,25 @@ export default function SosEditScreen() {
   );
 
   const saveNotes = () => {
-    if (!profile) {
-      setError(t('errors.selectProfile'));
-      return;
-    }
+    if (!profile) return;
     saveSosNotes(profile.id, notes);
-    setError('');
-    Alert.alert(t('settings.saved'), t('sosEdit.savedNotes'));
   };
 
   const savePlan = () => {
+    if (!profile) return;
+    saveSosActionPlan(profile.id, plan);
+  };
+
+  const saveAll = () => {
     if (!profile) {
       setError(t('errors.selectProfile'));
       return;
     }
-    saveSosActionPlan(profile.id, plan);
+    saveNotes();
+    savePlan();
+    savePassport();
     setError('');
-    Alert.alert(t('settings.saved'), t('sosEdit.savedPlan'));
+    showStatusBanner({ tone: 'success', message: t('common.saved') });
   };
 
   const savePassport = () => {
@@ -143,7 +146,6 @@ export default function SosEditScreen() {
     saveAllergyPassport(profile.id, next);
     setPassport(next);
     setError('');
-    Alert.alert(t('settings.saved'), t('sosEdit.savedPassport'));
   };
 
   const toggleKitItem = (id: string) => {
@@ -198,7 +200,10 @@ export default function SosEditScreen() {
   };
 
   return (
-    <Screen>
+    <Screen
+      pinnedBottom={
+        <Button label={t('common.save')} variant="primary" block onPress={saveAll} />
+      }>
       <ScreenHeader
         onBack={() => router.back()}
         eyebrow={t('sosEdit.eyebrow')}
@@ -283,7 +288,6 @@ export default function SosEditScreen() {
               <Text style={styles.checkLabel}>{item.label}</Text>
             </Pressable>
           ))}
-          <Button label={t('sosEdit.savePassport')} variant="primary" block onPress={savePassport} />
         </GlassCard>
       ) : null}
 
@@ -297,7 +301,6 @@ export default function SosEditScreen() {
           placeholderTextColor={theme.colors.textMuted}
           multiline
         />
-        <Button label={t('sosEdit.saveNotes')} variant="primary" block onPress={saveNotes} />
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('sosEdit.planLabel')}</Text>
@@ -310,7 +313,6 @@ export default function SosEditScreen() {
           placeholderTextColor={theme.colors.textMuted}
           multiline
         />
-        <Button label={t('sosEdit.savePlan')} variant="primary" block onPress={savePlan} />
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('sosEdit.contactsLabel')}</Text>

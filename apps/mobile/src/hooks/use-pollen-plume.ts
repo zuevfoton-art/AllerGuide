@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  AccessibilityInfo,
-  AppState,
-  type AppStateStatus,
-} from 'react-native';
+import { AppState, type AppStateStatus } from 'react-native';
+import { POLLEN_PLUME_FRAME_MS } from '@/src/constants/motion';
+import { useReducedMotion } from '@/src/hooks/use-reduced-motion';
 import { clampPollenUpiIndex, type PollenUpiIndex, type PollenUpiSnapshot } from '@allerguide/core';
 import type { GoogleMapCircle, GoogleMapPolyline } from '@/src/components/google-pollen-map.types';
 import {
@@ -13,8 +11,6 @@ import {
   type PlumeParticle,
 } from '@/src/services/pollen-plume-service';
 import type { WindSnapshot } from '@/src/services/wind-service';
-
-const FRAME_MS = 80;
 
 type UsePollenPlumeParams = {
   enabled: boolean;
@@ -48,22 +44,10 @@ export function usePollenPlume({
     return interpolateMapUpi(todayUpi, tomorrowUpi);
   }, [hourlyUpi, todayUpi, tomorrowUpi]);
   const [particles, setParticles] = useState<PlumeParticle[]>([]);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(AppState.currentState === 'active');
   const nextIdRef = useRef(1);
   const particlesRef = useRef<PlumeParticle[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (mounted) setReduceMotion(value);
-    });
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
-    return () => {
-      mounted = false;
-      sub.remove();
-    };
-  }, []);
 
   useEffect(() => {
     const onChange = (state: AppStateStatus) => setActive(state === 'active');
@@ -100,7 +84,7 @@ export function usePollenPlume({
       particlesRef.current = tick.particles;
       nextIdRef.current = tick.nextId;
       setParticles(tick.particles);
-    }, FRAME_MS);
+    }, POLLEN_PLUME_FRAME_MS);
 
     return () => clearInterval(timer);
   }, [

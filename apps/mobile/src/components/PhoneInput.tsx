@@ -21,6 +21,7 @@ import {
   type PhoneCountry,
 } from '@allerguide/core';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
 import { fontSizes } from '@/src/constants/typography';
@@ -122,7 +123,7 @@ export const PhoneInput = forwardRef<TextInput, PhoneInputProps>(function PhoneI
         <Text style={styles.hint}>{displayValue}</Text>
       ) : null}
 
-      <Modal visible={pickerOpen} transparent animationType="fade" onRequestClose={() => setPickerOpen(false)}>
+      <Modal visible={pickerOpen} transparent animationType={useModalAnimation('fade')} onRequestClose={() => setPickerOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setPickerOpen(false)}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{t('auth.countryCodeTitle')}</Text>

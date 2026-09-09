@@ -12,7 +12,7 @@ import type { LoginType } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
-import { fontSizes } from '@/src/constants/typography';
+import { fontSizes, lineHeights, textStyles } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -238,19 +238,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       marginBottom: 4,
     },
     heroTitle: {
-      fontFamily: fonts.serifBold,
-      fontSize: fontSizes.h2,
+      ...textStyles.h1,
       fontWeight: '700',
       color: colors.head,
-      letterSpacing: -0.3,
       textAlign: 'center',
     },
     heroSubtitle: {
+      ...textStyles.bodyMd,
       fontFamily: fonts.sans,
-      fontSize: fontSizes.bodySm + 1,
       color: colors.textSecondary,
       textAlign: 'center',
-      lineHeight: 20,
       marginTop: 4,
     },
     toggleRow: {

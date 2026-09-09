@@ -10,6 +10,8 @@ type GlassCardProps = PropsWithChildren<{
   testID?: string;
   /** Clinical information fill. Omit when the card is not a state surface. */
   zone?: Zone | null;
+  /** Soft wellness surface — accentLight fill, accentMid border. */
+  variant?: 'default' | 'soft';
 }>;
 
 /** Clinical card surface. */
@@ -19,6 +21,7 @@ export function GlassCard({
   padded = true,
   testID,
   zone,
+  variant = 'default',
 }: GlassCardProps) {
   const theme = useTheme();
   const zoneColors = useZoneColors(zone);
@@ -29,6 +32,7 @@ export function GlassCard({
       testID={testID}
       style={[
         styles.card,
+        variant === 'soft' ? styles.soft : null,
         zoneColors
           ? { backgroundColor: zoneColors.bg, borderColor: zoneColors.border }
           : null,
@@ -53,6 +57,10 @@ function createStyles({ colors, shadows }: AppTheme) {
     },
     padded: {
       padding: density.cardPadding,
+    },
+    soft: {
+      backgroundColor: colors.accentLight,
+      borderColor: colors.accentMid,
     },
   });
 }

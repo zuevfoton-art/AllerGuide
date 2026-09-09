@@ -20,6 +20,7 @@ import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
 import { YandexMap } from '@/src/components/YandexMap';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import type { PollenMapSnapshot } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
@@ -72,6 +73,7 @@ export function PollenMapLayer({
   formatMonth,
 }: PollenMapLayerProps) {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [selectedTaxonId, setSelectedTaxonId] = useState<PollenMapTaxonId>('birch_pollen');
@@ -215,7 +217,7 @@ export function PollenMapLayer({
         })}
       </View>
 
-      <Text style={styles.sectionLabel}>{t('map.otherPollenAllergens')}</Text>
+      <Text style={ui.sectionLabel}>{t('map.otherPollenAllergens')}</Text>
       <View style={styles.secondaryTaxonRow}>
         {SECONDARY_POLLEN_MAP_TAXON_IDS.map((taxonId) => {
           const isSelected = selectedTaxonId === taxonId;
@@ -394,12 +396,6 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     taxonTextSelected: { color: colors.accent },
     profileDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
-    sectionLabel: {
-      marginTop: 2,
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      color: colors.textSecondary,
-    },
     secondaryTaxonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     secondaryTaxonButton: {
       minHeight: 34,

@@ -3,16 +3,26 @@ import { StyleSheet } from 'react-native';
 import { density, radii, space } from '@/src/constants/layout';
 import { fontSizes, lineHeights, textStyles, tracking } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTextScaleMultiplier } from '@/src/store/appearance-store';
 
 export function useUiStyles() {
   const theme = useTheme();
-  return useMemo(() => createUiStyles(theme), [theme]);
+  const scale = useTextScaleMultiplier();
+  return useMemo(() => createUiStyles(theme, scale), [theme, scale]);
 }
 
 /** @deprecated Use useUiStyles */
 export const useGlassStyles = useUiStyles;
 
-function createUiStyles({ colors, shadows, fonts }: AppTheme) {
+function createUiStyles({ colors, shadows, fonts }: AppTheme, scale: number) {
+  const fs = (key: keyof typeof fontSizes) => Math.round(fontSizes[key] * scale);
+  const lh = (key: keyof typeof lineHeights) => Math.round(lineHeights[key] * scale);
+  const ts = (key: keyof typeof textStyles) => ({
+    ...textStyles[key],
+    fontSize: Math.round(textStyles[key].fontSize * scale),
+    lineHeight: Math.round(textStyles[key].lineHeight * scale),
+  });
+
   return StyleSheet.create({
     sectionHead: {
       flexDirection: 'row',
@@ -20,14 +30,14 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       alignItems: 'center',
     },
     sectionTitle: {
-      ...textStyles.h3,
+      ...ts('h3'),
       fontWeight: '600',
       color: colors.head,
     },
     sectionLink: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm,
-      lineHeight: lineHeights.bodySm,
+      fontSize: fs('bodySm'),
+      lineHeight: lh('bodySm'),
       fontWeight: '600',
       color: colors.accent,
     },
@@ -44,8 +54,8 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     },
     pillText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm,
-      lineHeight: lineHeights.bodySm,
+      fontSize: fs('bodySm'),
+      lineHeight: lh('bodySm'),
       fontWeight: '600',
       color: colors.text,
     },
@@ -70,13 +80,13 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     feedBody: { flex: 1, gap: 2 },
     feedTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodyMd,
-      lineHeight: lineHeights.bodyMd,
+      fontSize: fs('bodyMd'),
+      lineHeight: lh('bodyMd'),
       fontWeight: '600',
       color: colors.text,
     },
     feedSub: {
-      ...textStyles.label,
+      ...ts('label'),
       fontFamily: fonts.sans,
       letterSpacing: tracking.normal,
       color: colors.textMuted,
@@ -103,8 +113,8 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.onAccent,
       fontWeight: '600',
-      fontSize: fontSizes.body,
-      lineHeight: lineHeights.body,
+      fontSize: fs('body'),
+      lineHeight: lh('body'),
     },
     toggleRow: {
       flexDirection: 'row',
@@ -128,21 +138,21 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     toggleActive: { backgroundColor: colors.accent },
     toggleText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.bodySm,
-      lineHeight: lineHeights.bodySm,
+      fontSize: fs('bodySm'),
+      lineHeight: lh('bodySm'),
       fontWeight: '600',
       color: colors.textMuted,
     },
     toggleTextActive: { color: colors.onAccent, fontWeight: '600' },
     disclaimer: {
-      ...textStyles.caption,
+      ...ts('caption'),
       color: colors.textMuted,
       textAlign: 'center',
     },
     sectionLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.caption,
-      lineHeight: lineHeights.caption,
+      fontSize: fs('caption'),
+      lineHeight: lh('caption'),
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
@@ -166,8 +176,8 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       color: colors.text,
       fontWeight: '600',
-      fontSize: fontSizes.bodyMd,
-      lineHeight: lineHeights.bodyMd,
+      fontSize: fs('bodyMd'),
+      lineHeight: lh('bodyMd'),
     },
     cardHead: {
       flexDirection: 'row',
@@ -178,34 +188,34 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     /** @deprecated Use microLabel — cardTitle is a 12px caption, not a card H2. */
     cardTitle: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.label,
-      lineHeight: lineHeights.label,
+      fontSize: fs('label'),
+      lineHeight: lh('label'),
       fontWeight: '600',
       color: colors.textSecondary,
     },
     microLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.label,
-      lineHeight: lineHeights.label,
+      fontSize: fs('label'),
+      lineHeight: lh('label'),
       fontWeight: '600',
       color: colors.textSecondary,
     },
     docLabel: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.caption,
-      lineHeight: lineHeights.caption,
+      fontSize: fs('caption'),
+      lineHeight: lh('caption'),
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
       letterSpacing: tracking.label,
     },
     docTitle: {
-      ...textStyles.h1,
+      ...ts('h1'),
       fontWeight: '700',
       color: colors.head,
     },
     docMeta: {
-      ...textStyles.bodySm,
+      ...ts('bodySm'),
       color: colors.textSecondary,
     },
     kpiRow: {
@@ -217,14 +227,14 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       borderTopColor: colors.border,
     },
     kpiLabel: {
-      ...textStyles.bodySm,
+      ...ts('bodySm'),
       color: colors.textSecondary,
       flex: 1,
     },
     kpiValue: {
       fontFamily: fonts.sansBold,
-      fontSize: fontSizes.bodySm,
-      lineHeight: lineHeights.bodySm,
+      fontSize: fs('bodySm'),
+      lineHeight: lh('bodySm'),
       fontWeight: '700',
       color: colors.head,
       fontVariant: ['tabular-nums'],
@@ -239,13 +249,13 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
       borderBottomColor: colors.border,
     },
     heroKpiNum: {
-      ...textStyles.kpi,
+      ...ts('kpi'),
       fontWeight: '700',
       color: colors.head,
       fontVariant: ['tabular-nums'],
     },
     heroKpiSub: {
-      ...textStyles.bodyMd,
+      ...ts('bodyMd'),
       fontFamily: fonts.sans,
       color: colors.textMuted,
     },
@@ -258,8 +268,8 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme) {
     },
     badgeText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.caption,
-      lineHeight: lineHeights.caption,
+      fontSize: fs('caption'),
+      lineHeight: lh('caption'),
       fontWeight: '600',
     },
   });

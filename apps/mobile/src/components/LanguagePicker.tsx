@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { APP_LOCALES, type AppLocale } from '@/src/i18n/types';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 
 export const LOCALE_FLAGS: Record<AppLocale, string> = {
   ru: '🇷🇺',
@@ -39,6 +40,7 @@ export function LanguagePicker({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme, { compact, header }), [theme, compact, header]);
   const { locale, setLocale, t } = useTranslation();
+  const modalAnimation = useModalAnimation('fade');
   const [open, setOpen] = useState(false);
 
   const select = (code: AppLocale) => {
@@ -81,7 +83,7 @@ export function LanguagePicker({
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={modalAnimation}
         onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>

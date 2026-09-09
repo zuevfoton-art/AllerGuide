@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  ActivityIndicator,
   Platform,
   Pressable,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
 import type { MedicineCard } from '@allerguide/core';
 import { formatMedicineSuggestionMeta } from '@allerguide/core';
 import { density, radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
+import { Skeleton } from '@/src/components/Skeleton';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -54,7 +54,7 @@ export function MedicineNameField({
       />
       {loading ? (
         <View style={styles.loadingRow} testID="diary-medicine-searching">
-          <ActivityIndicator size="small" color={theme.colors.accent} />
+          <Skeleton width={16} height={16} />
           <Text style={styles.loadingText}>{t('diaryWizard.medicineSearching')}</Text>
         </View>
       ) : null}

@@ -10,6 +10,7 @@ import { OnboardingWaveBackground } from '@/src/components/onboarding/Onboarding
 import { OnboardingSlideImage } from '@/src/components/onboarding/OnboardingSlideImage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
@@ -23,6 +24,7 @@ const CARD_PADDING_H = 20;
 
 export default function OnboardingScreen() {
   const theme = useTheme();
+  const ui = useUiStyles();
   const layout = useResponsiveLayout();
   const styles = useMemo(
     () => createStyles(theme, layout.horizontalPadding, layout.isCompact),
@@ -53,7 +55,7 @@ export default function OnboardingScreen() {
             <Text style={styles.tagline}>{t('brand.slogan')}</Text>
           </View>
 
-          <Text style={styles.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
+          <Text style={ui.sectionLabel}>{t('onboarding.sectionLabel')}</Text>
 
           {SCENARIO_KEYS.map((item) => (
             <Pressable
@@ -69,7 +71,7 @@ export default function OnboardingScreen() {
                   <Ionicons name={item.icon as 'person'} size={20} color={theme.colors.accent} />
                 </View>
                 <View style={styles.cardText}>
-                  <Text style={styles.cardTitle}>{t(item.labelKey)}</Text>
+                  <Text style={ui.feedTitle}>{t(item.labelKey)}</Text>
                   <Text style={styles.cardDesc}>{t(item.descKey)}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
@@ -126,14 +128,6 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
       width: '100%',
       flexShrink: 1,
     },
-    sectionLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.6,
-    },
     scenarioCard: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -155,13 +149,6 @@ function createStyles({ colors, fonts, shadows }: AppTheme, horizontalPadding: n
       justifyContent: 'center',
     },
     cardText: { flex: 1, gap: 3, minWidth: 0, flexShrink: 1 },
-    cardTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: isCompact ? 15 : 16,
-      fontWeight: '600',
-      color: colors.text,
-      flexShrink: 1,
-    },
     cardDesc: {
       fontFamily: fonts.sans,
       fontSize: isCompact ? 12 : 13,

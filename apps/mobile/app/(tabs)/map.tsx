@@ -36,7 +36,8 @@ import {
   type PollenUpiSnapshot,
 } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
+import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { Skeleton } from '@/src/components/Skeleton';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { Button } from '@/src/components/Button';
@@ -630,17 +631,12 @@ export default function MapScreen() {
 
   return (
     <Screen brandHeaderRight={<ProfileHeaderButton />}>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('map.eyebrow')} />
-          <Text style={ui.docTitle}>{t('map.titleShort')}</Text>
-        </View>
-      </View>
+      <TabScreenHeader eyebrow={t('map.eyebrow')} title={t('map.titleShort')} />
 
-      <GlassCard testID="map-status" zone={pollenZone} style={styles.statusCard}>
-        <View style={styles.statusTop}>
+      <View style={styles.chromeRow} testID="map-status">
+        <View style={styles.chromeStatus}>
           {loading && !pollenSnapshot ? (
-            <ActivityIndicator color={theme.colors.accent} />
+            <Skeleton width={12} height={12} radius={6} />
           ) : (
             <View style={[styles.statusDot, { backgroundColor: levelColor }]} />
           )}
@@ -648,29 +644,11 @@ export default function MapScreen() {
             style={[
               styles.statusHeadline,
               pollenColors ? { color: pollenColors.fg } : null,
-            ]}>
+            ]}
+            numberOfLines={1}>
             {statusHeadline}
           </Text>
         </View>
-        {selectedReading?.profileRelevant && profile?.name ? (
-          <Text style={styles.statusMeta}>
-            {t('map.statusForProfile', { name: profile.name })} · {t('map.pollenYou')}
-          </Text>
-        ) : null}
-        <Text style={styles.statusMeta}>
-          {[coords.label || pollenRegion.name, sourceLabel, updatedLabel]
-            .filter(Boolean)
-            .join(' · ')}
-        </Text>
-        {isCalendarFallback ? (
-          <Text style={styles.statusBadge}>{t('map.pollenCalendarFallback')}</Text>
-        ) : null}
-        {isCacheSource ? (
-          <Text style={styles.statusBadge}>{t('map.pollenSourceCache')}</Text>
-        ) : null}
-      </GlassCard>
-
-      <View style={styles.layerBlock}>
         <View style={styles.layerRow} testID="map-layers">
           {MAP_LAYER_CHIPS.map(([key, labelKey]) => {
             const active = layerMode === key;
@@ -695,6 +673,7 @@ export default function MapScreen() {
             );
           })}
         </View>
+      </View>
 
         {showPollenLayer ? (
           <Pressable
@@ -710,7 +689,6 @@ export default function MapScreen() {
             <Ionicons name="chevron-down" size={18} color={theme.colors.accent} />
           </Pressable>
         ) : null}
-      </View>
 
       <MapPollenAllergenModal
         visible={allergenPickerOpen}
@@ -1032,6 +1010,20 @@ function createStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    chromeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      flexWrap: 'wrap',
+    },
+    chromeStatus: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flexGrow: 1,
+      flexShrink: 1,
+      minWidth: 140,
+    },
     statusCard: {
       gap: 6,
     },
@@ -1040,7 +1032,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     statusHeadline: {
       flex: 1,
       fontFamily: fonts.sansBold,
-      fontSize: fontSizes.h3,
+      fontSize: fontSizes.body,
       fontWeight: '700',
       color: colors.text,
     },

@@ -1,10 +1,11 @@
 import { ScrollView, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { EXPERT_CATEGORIES, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useMemo } from 'react';
+import { EXPERT_CATEGORIES, getExpertArticle, getExpertArticlesByCategory, MEDICAL_ADVISORY_BOARD, type ExpertArticleCategory } from '@allerguide/core';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandMark } from '@/src/components/brand/BrandMark';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -12,27 +13,72 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
+const COLON_SPLIT_IDS = new Set(['pollen-calendar-moscow', 'symptom-scale-rhinitis']);
+
+const CATEGORY_IONICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  book: 'book-outline',
+  calendar: 'calendar-outline',
+  list: 'list-outline',
+  medical: 'medkit-outline',
+  alert: 'alert-circle-outline',
+  stats: 'stats-chart-outline',
+};
+
+function splitColonLines(body: string): string[] | null {
+  const chunks = body.split(/(?<=[.!?])\s+/).map((part) => part.trim()).filter(Boolean);
+  if (chunks.length < 2) return null;
+  if (!chunks.some((part) => part.includes(':'))) return null;
+  return chunks;
+}
+
 export default function ExpertScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const ui = useUiStyles();
   const { t, content } = useTranslation();
   const localeContent = content();
-  const [category, setCategory] = useState<ExpertArticleCategory>('recommendations');
-  const [articleId, setArticleId] = useState<string | null>(null);
+  const params = useLocalSearchParams<{ article?: string; category?: string }>();
+  const articleId = typeof params.article === 'string' ? params.article : null;
+  const category: ExpertArticleCategory =
+    typeof params.category === 'string' &&
+    EXPERT_CATEGORIES.some((item) => item.id === params.category)
+      ? (params.category as ExpertArticleCategory)
+      : 'recommendations';
 
   const articles = getExpertArticlesByCategory(category);
   const article = articleId ? localeContent.expertArticles[articleId] : null;
+  const catalogArticle = articleId ? getExpertArticle(articleId) : undefined;
 
   if (article) {
+    const lines =
+      articleId && COLON_SPLIT_IDS.has(articleId) ? splitColonLines(article.body) : null;
     return (
       <Screen>
         <ScreenHeader
-          onBack={() => setArticleId(null)}
+          onBack={() => router.back()}
           eyebrow={t('expert.eyebrow')}
           title={article.title}
         />
-        <Text style={styles.articleBody}>{article.body}</Text>
+        {lines ? (
+          <View style={styles.articleLines}>
+            {lines.map((line) => (
+              <Text key={line} style={styles.articleBody}>
+                {line}
+              </Text>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.articleBody}>{article.body}</Text>
+        )}
+        {catalogArticle?.tags?.length ? (
+          <View style={ui.pillRow}>
+            {catalogArticle.tags.map((tag) => (
+              <View key={tag} style={ui.pill}>
+                <Text style={ui.pillText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
         <Disclaimer showMdrFootnote>{localeContent.expertDisclaimer}</Disclaimer>
       </Screen>
     );
@@ -78,7 +124,12 @@ export default function ExpertScreen() {
                 backgroundColor: theme.colors.accentLight,
               },
             ]}
-            onPress={() => setCategory(cat.id)}>
+            onPress={() => router.setParams({ category: cat.id })}>
+            <Ionicons
+              name={CATEGORY_IONICONS[cat.icon] ?? 'book-outline'}
+              size={14}
+              color={category === cat.id ? theme.colors.accent : theme.colors.textSecondary}
+            />
             <Text
               style={[
                 ui.pillText,
@@ -93,11 +144,20 @@ export default function ExpertScreen() {
       {articles.map((item) => {
         const localized = localeContent.expertArticles[item.id] ?? item;
         return (
-          <Pressable key={item.id} onPress={() => setArticleId(item.id)}>
+          <Pressable key={item.id} onPress={() => router.push(`/expert?article=${item.id}`)}>
             <GlassCard style={styles.card}>
               <View style={styles.cardBody}>
-                <Text style={styles.cardTitle}>{localized.title}</Text>
+                <CardTitle>{localized.title}</CardTitle>
                 <Text style={styles.cardSummary}>{localized.summary}</Text>
+                {item.tags.length > 0 ? (
+                  <View style={ui.pillRow}>
+                    {item.tags.map((tag) => (
+                      <View key={tag} style={ui.pill}>
+                        <Text style={ui.pillText}>{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
               </View>
               <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
             </GlassCard>
@@ -160,18 +220,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       marginBottom: 0,
     },
     cardBody: { flex: 1, gap: 4 },
-    cardTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.text,
-    },
     cardSummary: {
       fontFamily: fonts.sans,
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
     },
+    articleLines: { gap: 10 },
     articleBody: {
       fontFamily: fonts.sans,
       fontSize: 15,

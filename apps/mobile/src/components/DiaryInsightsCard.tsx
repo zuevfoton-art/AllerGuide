@@ -7,6 +7,7 @@ import { GlassCard } from './GlassCard';
 import { DiaryTrendChart, type DiaryTrendPoint } from './diary/DiaryTrendChart';
 import { DiaryCalendarHeatmap, type DiaryHeatmapDay } from './diary/DiaryCalendarHeatmap';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiaryType } from '@/src/i18n/content';
 import { fontSizes } from '@/src/constants/typography';
@@ -44,6 +45,7 @@ function buildHeatmapDays(insights: DiaryInsights): DiaryHeatmapDay[] {
 
 export function DiaryInsightsCard({ entries }: Props) {
   const theme = useTheme();
+  const ui = useUiStyles();
   const { colors } = theme;
   const { t, locale, content } = useTranslation();
   const localeContent = content();
@@ -159,12 +161,12 @@ export function DiaryInsightsCard({ entries }: Props) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('diary.trendsTitle')}</Text>
+        <Text style={ui.sectionLabel}>{t('diary.trendsTitle')}</Text>
         <DiaryTrendChart points={trendPoints} />
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('diary.insightsCalendar')}</Text>
+        <Text style={ui.sectionLabel}>{t('diary.insightsCalendar')}</Text>
         <DiaryCalendarHeatmap days={heatmapDays} />
       </View>
 
@@ -244,14 +246,6 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     section: {
       gap: space[2],
-    },
-    sectionTitle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.caption,
-      fontWeight: '600',
-      color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.3,
     },
     legend: {
       flexDirection: 'row',

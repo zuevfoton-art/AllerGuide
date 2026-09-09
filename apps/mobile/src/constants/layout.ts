@@ -50,8 +50,8 @@ export const brandReportColors = {
   text: '#0F172A',
   head: '#1E3A5F',
   muted: '#64748B',
-  bg: '#F4F6F9',
-  border: '#E2E8F0',
+  bg: '#F3F6F4',
+  border: '#E3E9E5',
   accent: '#2A9D8F',
   danger: '#B91C1C',
 } as const;

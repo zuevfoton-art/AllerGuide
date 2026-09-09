@@ -10,6 +10,7 @@ import {
 import { Button } from '@/src/components/Button';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { fontSizes } from '@/src/constants/typography';
 import { radii } from '@/src/constants/layout';
 import { useTranslation } from '@/src/store/locale-store';
@@ -34,6 +35,7 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const modalAnimation = useModalAnimation('fade');
   const [generatedKey] = useState(() => getMaestroFixtureRecoveryKey() ?? generateRecoveryKey());
   const [enteredKey, setEnteredKey] = useState('');
   const [savedAck, setSavedAck] = useState(false);
@@ -71,7 +73,7 @@ export function RecoveryKeyModal({ visible, mode, onClose, onConfirmed }: Recove
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType={modalAnimation} onRequestClose={onClose}>
       <ModalKeyboardAvoid style={styles.backdrop}>
         {({ liftStyle }) => (
           <View style={[styles.card, liftStyle]}>

@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, type PressableProps, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { density, radii } from '@/src/constants/layout';
+import { disabledOpacity, pressedOpacity } from '@/src/constants/motion';
 import { fontSizes, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useTextScaleMultiplier } from '@/src/store/appearance-store';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'md' | 'sm';
@@ -34,7 +36,8 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const theme = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const textScale = useTextScaleMultiplier();
+  const styles = useMemo(() => createStyles(theme, textScale), [theme, textScale]);
   const textColor = theme.colors[TEXT_COLORS[variant]];
 
   return (
@@ -66,7 +69,7 @@ export function Button({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts }: AppTheme, scale: number) {
   return StyleSheet.create({
     base: {
       flexDirection: 'row',
@@ -94,14 +97,14 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     ghost: { backgroundColor: 'transparent', minHeight: 36, paddingHorizontal: 0 },
     danger: { backgroundColor: colors.danger },
-    disabled: { opacity: 0.55 },
-    pressed: { opacity: 0.88 },
+    disabled: { opacity: disabledOpacity },
+    pressed: { opacity: pressedOpacity },
     text: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.body,
+      fontSize: Math.round(fontSizes.body * scale),
       fontWeight: '600',
       flexShrink: 1,
     },
-    textSm: { fontSize: fontSizes.label },
+    textSm: { fontSize: Math.round(fontSizes.label * scale) },
   });
 }

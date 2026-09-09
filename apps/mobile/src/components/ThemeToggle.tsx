@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import type { ThemeMode } from '@/src/constants/theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -38,7 +39,10 @@ export function ThemeToggle({ embedded = false }: ThemeToggleProps) {
                 index < MODES.length - 1 && styles.segBorder,
                 active && styles.segActive,
               ]}
-              onPress={() => theme.setMode(item.key)}>
+              onPress={() => theme.setMode(item.key)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={t(item.labelKey)}>
               <Ionicons
                 name={item.icon}
                 size={15}
@@ -69,7 +73,8 @@ function createStyles({ colors, fonts }: AppTheme, embedded: boolean) {
     },
     title: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
+      lineHeight: lineHeights.label,
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -94,7 +99,8 @@ function createStyles({ colors, fonts }: AppTheme, embedded: boolean) {
     segActive: { backgroundColor: colors.accent },
     segText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
+      fontSize: fontSizes.label,
+      lineHeight: lineHeights.label,
       fontWeight: '600',
       color: colors.textMuted,
     },

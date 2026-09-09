@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import {
-  AccessibilityInfo,
   Animated,
   StyleSheet,
   View,
@@ -8,7 +7,9 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { radii } from '@/src/constants/layout';
+import { SKELETON_CYCLE_MS } from '@/src/constants/motion';
 import { useTheme } from '@/src/hooks/use-theme';
+import { useReducedMotion } from '@/src/hooks/use-reduced-motion';
 import { useTranslation } from '@/src/store/locale-store';
 import { GlassCard } from '@/src/components/GlassCard';
 
@@ -18,24 +19,6 @@ type SkeletonProps = {
   radius?: number;
   style?: ViewStyle;
 };
-
-function useReduceMotion() {
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (mounted) setReduceMotion(enabled);
-    });
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
-    return () => {
-      mounted = false;
-      subscription.remove();
-    };
-  }, []);
-
-  return reduceMotion;
-}
 
 function useSheenOpacity(reduceMotion: boolean) {
   const opacity = useRef(new Animated.Value(0.35)).current;
@@ -47,8 +30,8 @@ function useSheenOpacity(reduceMotion: boolean) {
     }
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.85, duration: 650, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.2, duration: 650, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.85, duration: SKELETON_CYCLE_MS, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.2, duration: SKELETON_CYCLE_MS, useNativeDriver: true }),
       ]),
     );
     loop.start();
@@ -65,7 +48,7 @@ function SkeletonFill({
   style,
 }: SkeletonProps) {
   const { colors } = useTheme();
-  const reduceMotion = useReduceMotion();
+  const reduceMotion = useReducedMotion();
   const sheenOpacity = useSheenOpacity(reduceMotion);
 
   return (

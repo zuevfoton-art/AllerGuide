@@ -1,6 +1,7 @@
 import { getDb } from '@/src/db/init';
 import type { Scenario } from '@allerguide/core';
 import type { ThemeMode } from '@/src/constants/theme';
+import type { TextScalePreset } from '@/src/constants/typography';
 import type { AppLocale } from '@/src/i18n/types';
 import { APP_LOCALES } from '@/src/i18n/types';
 
@@ -49,6 +50,24 @@ export function getThemeMode(): ThemeMode | null {
 
 export function setThemeMode(mode: ThemeMode) {
   setSetting('themeMode', mode);
+}
+
+export function getTextScalePreset(): TextScalePreset | null {
+  const value = getSetting('textScale');
+  if (value === 'regular' || value === 'large' || value === 'max') return value;
+  return null;
+}
+
+export function setTextScalePreset(preset: TextScalePreset) {
+  setSetting('textScale', preset);
+}
+
+export function getPreferCalmMotion(): boolean {
+  return getSetting('preferCalmMotion') === 'true';
+}
+
+export function setPreferCalmMotion(enabled: boolean) {
+  setSetting('preferCalmMotion', enabled ? 'true' : 'false');
 }
 
 export function getLocale(): AppLocale | null {

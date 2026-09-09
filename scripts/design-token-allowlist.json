@@ -23,7 +23,6 @@
     "apps/mobile/src/components/AllergyConfirmationEditor.tsx",
     "apps/mobile/src/components/AsitCourseCard.tsx",
     "apps/mobile/src/components/AsthmaCard.tsx",
-    "apps/mobile/src/components/AuthForm.tsx",
     "apps/mobile/src/components/ClinicalPhenotypeCard.tsx",
     "apps/mobile/src/components/CloudBackupCard.tsx",
     "apps/mobile/src/components/ComorbidityEditor.tsx",
@@ -34,7 +33,6 @@
     "apps/mobile/src/components/DiaryEditorModal.tsx",
     "apps/mobile/src/components/DiaryEntryTypePickerModal.tsx",
     "apps/mobile/src/components/DiaryInsightsCard.tsx",
-    "apps/mobile/src/components/Disclaimer.tsx",
     "apps/mobile/src/components/DishNameField.tsx",
     "apps/mobile/src/components/EmergencyContactsEditor.tsx",
     "apps/mobile/src/components/EmptyState.tsx",
@@ -69,8 +67,6 @@
     "apps/mobile/src/components/ScheduleLinesEditor.tsx",
     "apps/mobile/src/components/ScheduleStagesEditor.tsx",
     "apps/mobile/src/components/SosEmergencyBar.tsx",
-    "apps/mobile/src/components/ThemeToggle.tsx",
-    "apps/mobile/src/components/UndoBanner.tsx",
     "apps/mobile/src/components/VoiceNoteButton.tsx",
     "apps/mobile/src/components/brand/ScreenBrandHeader.tsx",
     "apps/mobile/src/components/onboarding/OnboardingSlideChrome.tsx",
@@ -84,9 +80,7 @@
   ],
   "titleKeys": [
     "apps/mobile/app/(tabs)/map.tsx",
-    "apps/mobile/app/expert.tsx",
     "apps/mobile/app/onboarding-intro.tsx",
-    "apps/mobile/app/onboarding.tsx",
     "apps/mobile/src/components/AirQualityCard.tsx",
     "apps/mobile/src/components/AirQualityLegend.tsx",
     "apps/mobile/src/components/AppLockGate.tsx",
@@ -113,11 +107,5 @@
     "apps/mobile/src/components/ScreenHeader.tsx",
     "apps/mobile/src/components/ThemeToggle.tsx"
   ],
-  "cardTitleUsage": [
-    "apps/mobile/app/(tabs)/home.tsx",
-    "apps/mobile/app/(tabs)/scanner.tsx",
-    "apps/mobile/app/clinical-scales.tsx",
-    "apps/mobile/src/components/AsitCourseCard.tsx",
-    "apps/mobile/src/components/PrescribedTherapyCard.tsx"
-  ]
+  "cardTitleUsage": []
 }

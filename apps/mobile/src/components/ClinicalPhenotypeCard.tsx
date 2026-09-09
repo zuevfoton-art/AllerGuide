@@ -106,7 +106,7 @@ export function ClinicalPhenotypeCard({
       ) : null}
 
       <Text style={styles.icd10DisclaimerText}>{t('profileSetup.phenotype.icd10Disclaimer')}</Text>
-      <Disclaimer>{t('profileSetup.phenotype.disclaimer')}</Disclaimer>
+      <Disclaimer collapsible>{t('profileSetup.phenotype.disclaimer')}</Disclaimer>
     </GlassCard>
   );
 }

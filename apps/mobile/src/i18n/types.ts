@@ -40,6 +40,9 @@ export type LocaleMessages = {
     years: string;
     daysShort: string;
     skipToContent: string;
+    moreDetails: string;
+    hideDetails: string;
+    saved: string;
   };
   brand: {
     productName: string;
@@ -145,6 +148,15 @@ export type LocaleMessages = {
     dark: string;
     system: string;
   };
+  appearance: {
+    title: string;
+    textSize: string;
+    textRegular: string;
+    textLarge: string;
+    textMax: string;
+    calmMotion: string;
+    calmMotionHint: string;
+  };
   tabs: {
     home: string;
     diary: string;
@@ -164,6 +176,7 @@ export type LocaleMessages = {
     settingsDesc: string;
   };
   home: {
+    eyebrow: string;
     today: string;
     summary: string;
     profilePrefix: string;
@@ -860,6 +873,28 @@ export type LocaleMessages = {
     pollenPushBodyHigh: string;
     pollenPushBodyModerate: string;
     pollenCacheHint: string;
+    returnQuickTitle: string;
+    returnQuickBody: string;
+    returnValueTitle: string;
+    returnValueBody: string;
+    returnReframeTitle: string;
+    returnReframeBody: string;
+  };
+  reengagement: {
+    checkInTitle: string;
+    checkInHint: string;
+    valueTitle: string;
+    valueHint: string;
+    valueScale: string;
+    valueArticle: string;
+    reframeTitle: string;
+    reframeHint: string;
+    reframeMap: string;
+    reframeSos: string;
+    restartTitle: string;
+    restartHint: string;
+    restartAction: string;
+    checkInSaved: string;
   };
   profileSwitcher: {
     add: string;

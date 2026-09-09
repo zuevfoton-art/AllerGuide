@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { PlaceAutocompleteSuggestion } from '@allerguide/core';
+import { Skeleton } from '@/src/components/Skeleton';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -56,7 +56,7 @@ export function PlaceSearchBar({
           accessibilityLabel={t('map.placeSearchPlaceholder')}
           testID="place-search-input"
         />
-        {loading ? <ActivityIndicator size="small" color={theme.colors.accent} /> : null}
+        {loading ? <Skeleton width={16} height={16} /> : null}
         {value ? (
           <Pressable
             onPress={onClear}
