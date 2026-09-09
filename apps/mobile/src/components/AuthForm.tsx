@@ -12,7 +12,7 @@ import type { LoginType } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
-import { fontSizes, lineHeights, textStyles } from '@/src/constants/typography';
+import { fontSizes, textStyles } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 

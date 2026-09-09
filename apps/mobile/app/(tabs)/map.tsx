@@ -55,7 +55,6 @@ import { MapPoiSheet } from '@/src/components/MapPoiSheet';
 import { PollenPlumeOverlay } from '@/src/components/PollenPlumeOverlay';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { usePollenPlume } from '@/src/hooks/use-pollen-plume';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '@/src/store/app-store';
 import { radii } from '@/src/constants/layout';
@@ -138,7 +137,6 @@ const WEEKDAY_KEYS = [
 export default function MapScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
 
@@ -257,7 +255,6 @@ export default function MapScreen() {
     pollenSnapshot?.readings.find((reading) => reading.taxonId === selectedTaxonId) ?? null;
   const selectedUpi = pollenSnapshot?.upiByTaxon[selectedTaxonId] ?? null;
   const isCalendarFallback = pollenSnapshot?.source === 'calendar';
-  const isCacheSource = pollenSnapshot?.source === 'cache';
 
   const forecastReading =
     selectedForecastDay != null
@@ -548,30 +545,12 @@ export default function MapScreen() {
     return t('map.statusToday', { level: levelLabel, taxon: taxonLabel });
   }, [levelLabel, loading, pollenSnapshot, selectedForecastDay, t, taxonLabel]);
 
-  const sourceLabel = useMemo(() => {
-    if (!pollenSnapshot) return '';
-    if (pollenSnapshot.source === 'calendar') return t('map.pollenSourceCalendar');
-    if (pollenSnapshot.source === 'cache') return t('map.pollenSourceCache');
-    if (pollenSnapshot.source === 'google' || selectedUpi?.source === 'google') {
-      return t('map.pollenSourceGoogle');
-    }
-    return t('map.pollenSourceOpenMeteo');
-  }, [pollenSnapshot, selectedUpi?.source, t]);
-
   const plumeGroupHint = useMemo(() => {
     const mapType = pollenTaxonToGoogleMapType(selectedTaxonId);
     if (mapType === 'GRASS_UPI') return t('map.plumeGroupGrass');
     if (mapType === 'WEED_UPI') return t('map.plumeGroupWeed');
     return t('map.plumeGroupTree');
   }, [selectedTaxonId, t]);
-
-  const updatedLabel = useMemo(() => {
-    if (!pollenSnapshot?.updatedAt) return null;
-    const parsed = new Date(pollenSnapshot.updatedAt);
-    if (Number.isNaN(parsed.getTime())) return null;
-    const time = parsed.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    return t('map.statusUpdated', { time });
-  }, [pollenSnapshot?.updatedAt, t]);
 
   const levelColor = displayStatusLevel
     ? displayStatusLevel === 'high'

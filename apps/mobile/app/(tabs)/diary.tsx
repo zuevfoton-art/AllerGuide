@@ -190,10 +190,12 @@ export default function DiaryScreen() {
   );
   const asitCourse = useMemo(
     () => (activeProfileId ? getAsitCourse(activeProfileId) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick re-reads ASIT/therapy after profile/settings focus
     [activeProfileId, capabilitiesTick],
   );
   const prescribedCourse = useMemo(
     () => (activeProfileId ? getPrescribedCourse(activeProfileId) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick re-reads ASIT/therapy after profile/settings focus
     [activeProfileId, capabilitiesTick],
   );
   const planPersonalBestPef = useMemo(

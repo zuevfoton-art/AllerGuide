@@ -4,14 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   latestDiaryTimestamp,
   calendarDaysBetween,
+  resolveReturnStage,
   type DiaryEntry,
 } from '@allerguide/core';
 import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
-import {
-  resolveActiveReturnStage,
-  trackReturnAction,
-  trackReturnShown,
-} from '@/src/services/reengagement-service';
+import { trackReturnAction, trackReturnShown } from '@/src/services/reengagement-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
@@ -126,7 +123,7 @@ export default function HomeScreen() {
   );
 
   const returnStage = useMemo(
-    () => resolveActiveReturnStage(),
+    () => resolveReturnStage({ lastDiaryAt: latestDiaryTimestamp(diaryEntries) }),
     [diaryEntries],
   );
 
