@@ -6,6 +6,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import { registerSyncRoutes } from './routes/sync';
 import { registerScanRoutes } from './routes/scan';
 import { registerScanIntentRoutes } from './routes/scan-intent';
+import { registerAskRoutes } from './routes/ask';
 import { registerScanDishVisionRoutes } from './routes/scan-dish-vision';
 import { registerOcrRoutes } from './routes/ocr';
 import { registerSearchIngredientsRoutes } from './routes/search-ingredients';
@@ -46,6 +47,7 @@ export async function createApp(): Promise<Express> {
   registerSyncRoutes(app);
   registerScanRoutes(app);
   registerScanIntentRoutes(app);
+  registerAskRoutes(app);
   registerScanDishVisionRoutes(app);
   registerOcrRoutes(app);
   registerSearchIngredientsRoutes(app);

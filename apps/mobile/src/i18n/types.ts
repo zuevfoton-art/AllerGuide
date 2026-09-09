@@ -203,6 +203,39 @@ export type LocaleMessages = {
     };
     checkedIn: string;
     checkedInChange: string;
+    ask: string;
+  };
+  game: {
+    weekTitle: string;
+    weekCount: string;
+    weekEmpty: string;
+    weekNudge: string;
+    weekOff: string;
+    weekOffHint: string;
+  };
+  ask: {
+    title: string;
+    eyebrow: string;
+    disclaimer: string;
+    disclaimerShow: string;
+    disclaimerHide: string;
+    inputPlaceholder: string;
+    send: string;
+    intro: string;
+    offlineTitle: string;
+    offlineHint: string;
+    offlineExpert: string;
+    handoffTitle: string;
+    handoffBody: string;
+    handoffAction: string;
+    disabledTitle: string;
+    disabledHint: string;
+    suggestions: {
+      air: string;
+      traces: string;
+      pollen: string;
+    };
+    answerFallback: string;
   };
   home: {
     eyebrow: string;

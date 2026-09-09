@@ -70,6 +70,15 @@ export function setPreferCalmMotion(enabled: boolean) {
   setSetting('preferCalmMotion', enabled ? 'true' : 'false');
 }
 
+/** Week ring is opt-out: absent setting means «show it» (north-star §4.8). */
+export function getShowWeekRing(): boolean {
+  return getSetting('showWeekRing') !== 'false';
+}
+
+export function setShowWeekRing(enabled: boolean) {
+  setSetting('showWeekRing', enabled ? 'true' : 'false');
+}
+
 export function getLocale(): AppLocale | null {
   const value = getSetting('locale');
   if (value && (APP_LOCALES as readonly string[]).includes(value)) {

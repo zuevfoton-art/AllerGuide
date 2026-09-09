@@ -5,8 +5,10 @@ import {
 } from '@/src/constants/typography';
 import {
   getPreferCalmMotion,
+  getShowWeekRing,
   getTextScalePreset,
   setPreferCalmMotion as persistCalmMotion,
+  setShowWeekRing as persistShowWeekRing,
   setTextScalePreset as persistTextScale,
 } from '@/src/services/settings-service';
 import { trackEvent } from '@/src/services/analytics-service';
@@ -14,20 +16,24 @@ import { trackEvent } from '@/src/services/analytics-service';
 interface AppearanceState {
   textScale: TextScalePreset;
   preferCalmMotion: boolean;
+  showWeekRing: boolean;
   hydrated: boolean;
   hydrate: () => void;
   setTextScale: (preset: TextScalePreset) => void;
   setPreferCalmMotion: (enabled: boolean) => void;
+  setShowWeekRing: (enabled: boolean) => void;
 }
 
 export const useAppearanceStore = create<AppearanceState>((set) => ({
   textScale: 'regular',
   preferCalmMotion: false,
+  showWeekRing: true,
   hydrated: false,
   hydrate: () => {
     set({
       textScale: getTextScalePreset() ?? 'regular',
       preferCalmMotion: getPreferCalmMotion(),
+      showWeekRing: getShowWeekRing(),
       hydrated: true,
     });
   },
@@ -40,6 +46,11 @@ export const useAppearanceStore = create<AppearanceState>((set) => ({
     persistCalmMotion(enabled);
     set({ preferCalmMotion: enabled });
     trackEvent('settings_changed', { setting: 'calm_motion', value: enabled ? 'on' : 'off' });
+  },
+  setShowWeekRing: (enabled) => {
+    persistShowWeekRing(enabled);
+    set({ showWeekRing: enabled });
+    trackEvent('settings_changed', { setting: 'week_ring', value: enabled ? 'on' : 'off' });
   },
 }));
 

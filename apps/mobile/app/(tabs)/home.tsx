@@ -9,6 +9,7 @@ import {
 } from '@allerguide/core';
 import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
 import { DailyReadingCard } from '@/src/components/DailyReadingCard';
+import { WeekRingCard } from '@/src/components/WeekRingCard';
 import {
   buildTodayReading,
   formatTodayDate,
@@ -38,6 +39,7 @@ import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabI
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
+import { AI_CHAT_ENABLED } from '@/src/constants/features';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
@@ -202,11 +204,23 @@ export default function HomeScreen() {
       )}
 
       {activeProfileId && !(loadingWellness && !wellness) ? (
-        <QuickCheckInCard
-          profileId={activeProfileId}
-          checkedInToday={checkedInToday}
-          onSaved={reloadHomeData}
-        />
+        <>
+          <QuickCheckInCard
+            profileId={activeProfileId}
+            checkedInToday={checkedInToday}
+            onSaved={reloadHomeData}
+          />
+          <WeekRingCard entries={diaryEntries} surface="today" />
+          {AI_CHAT_ENABLED ? (
+            <Button
+              testID="today-ask"
+              label={t('today.ask')}
+              variant="ghost"
+              block
+              onPress={() => router.push('/ask')}
+            />
+          ) : null}
+        </>
       ) : null}
 
       {wellness ? (

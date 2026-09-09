@@ -130,8 +130,8 @@ src/modules/marketplace/
 |------|------------|
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
-| `(tabs)/home.tsx` | Dashboard / двухслойный wellness / home-insights |
-| `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
+| `(tabs)/home.tsx` | Сегодня: daily reading, чек-ин 0–3, кольцо недели |
+| `(tabs)/diary.tsx` | Журнал: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |
@@ -149,6 +149,7 @@ src/modules/marketplace/
 | `asthma-action-plan.tsx` / `insect-action-plan.tsx` | Планы действий |
 | `food-drug-registry.tsx` | Пищево-лекарственный реестр |
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
+| `ask.tsx` | AI-чат «Спросить» (`EXPO_PUBLIC_AI_CHAT`, default off; SOS-handoff) |
 | `legal/privacy.tsx` / `legal/terms.tsx` | Legal |
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
 
@@ -208,6 +209,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `profiles.ts` | Profile CRUD (JWT) |
 | `sync.ts` | Encrypted backup (`SYNC_ENABLED`) |
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
+| `ask.ts` | Explainer chat (`AI_CHAT_ENABLED` + `AI_SCAN_ENABLED`; distress → SOS) |
 | `scan-dish-vision.ts` | Multimodal dish photo (`AI_DISH_VISION_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
 | `ocr.ts` | Yandex Vision OCR (`YC_OCR_ENABLED`) |
@@ -286,6 +288,7 @@ Barrel: `index.ts`. Pure TS.
 | `BACKEND_AUTH` | `features.ts` | `JWT_SECRET` + `DATABASE_URL` |
 | `CLOUD_SYNC` | `features.ts` | `SYNC_ENABLED` |
 | `AI_SCAN_ENABLED` | `features.ts` | `AI_SCAN_ENABLED` + LLM keys |
+| `AI_CHAT` | `features.ts` | `AI_CHAT_ENABLED` + `AI_SCAN_ENABLED` (default **off**) |
 | `AI_DISH_VISION_ENABLED` | `features.ts` (`EXPO_PUBLIC_AI_DISH_VISION`) | `AI_DISH_VISION_ENABLED` + VL model |
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |

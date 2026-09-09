@@ -32,6 +32,9 @@ export const ANALYTICS_EVENT_NAMES = [
   'pollen_alert_sent',
   'reengagement_shown',
   'reengagement_action',
+  'week_ring_shown',
+  'ai_chat_opened',
+  'ai_chat_handoff_sos',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];

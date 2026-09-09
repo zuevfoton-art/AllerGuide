@@ -44,6 +44,7 @@ import { useDishSuggestions } from '@/src/hooks/use-dish-suggestions';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
+import { AI_CHAT_ENABLED } from '@/src/constants/features';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useZoneColors, zoneFromScanRisk } from '@/src/hooks/use-zone-colors';
@@ -786,6 +787,15 @@ export default function ScannerScreen() {
           <Text style={styles.verdictClaro}>
             {t('scanner.claroVerdict', { verdict: displayResult.verdict })}
           </Text>
+          {AI_CHAT_ENABLED ? (
+            <Button
+              testID="scanner-ask"
+              label={t('today.ask')}
+              variant="ghost"
+              block
+              onPress={() => router.push('/ask')}
+            />
+          ) : null}
 
           {hasVisionEvidence ? (
             <ScannerDishVisionCard

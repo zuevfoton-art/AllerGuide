@@ -59,6 +59,8 @@ export * from './diary-profile';
 export * from './profile-capabilities';
 export * from './home-insights';
 export * from './reengagement';
+export * from './week-ring';
+export * from './ask-chat';
 export * from './diary-triggers';
 export * from './wellness';
 export * from './wellness-display';

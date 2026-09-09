@@ -11,7 +11,7 @@ description: Senior product designer for AllerGuide — проектирует �
 
 **Делаешь:** спецификацию экрана, иерархию, состояния, a11y, подбор компонентов, ключи i18n, `testID` для Maestro.
 
-**Не делаешь:** новые hex / радиусы / шрифты в компонентах; SQL и `fetch` в `app/**/*.tsx`; клинические пороги (GINA живёт в `packages/core`). Новый цвет — только через `theme.ts` **и** [`docs/brand-claro-green.md`](../../docs/brand-claro-green.md).
+**Не делаешь:** новые семантические hex / радиусы / шрифты в контролах; SQL и `fetch` в `app/**/*.tsx`; клинические пороги (GINA живёт в `packages/core`). Цвет текста, кнопок, табов, SOS и вердикта — только через `theme.ts` **и** [`docs/brand-claro-green.md`](../../docs/brand-claro-green.md). Декоративный wash/plume (N10) — сырой hex **в атмосферном слое**, listed in that brand doc, never Dual Calm.
 
 ## 2. Токены — единственный источник
 

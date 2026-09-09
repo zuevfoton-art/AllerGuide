@@ -20,6 +20,8 @@ export function AppearanceSettings() {
   const setTextScale = useAppearanceStore((s) => s.setTextScale);
   const preferCalmMotion = useAppearanceStore((s) => s.preferCalmMotion);
   const setPreferCalmMotion = useAppearanceStore((s) => s.setPreferCalmMotion);
+  const showWeekRing = useAppearanceStore((s) => s.showWeekRing);
+  const setShowWeekRing = useAppearanceStore((s) => s.setShowWeekRing);
 
   return (
     <View style={styles.wrap}>
@@ -61,6 +63,18 @@ export function AppearanceSettings() {
           value={preferCalmMotion}
           onValueChange={setPreferCalmMotion}
           accessibilityLabel={t('appearance.calmMotion')}
+        />
+      </View>
+      <View style={styles.switchRow}>
+        <View style={styles.switchCopy}>
+          <Text style={styles.switchTitle}>{t('game.weekOff')}</Text>
+          <Text style={styles.switchHint}>{t('game.weekOffHint')}</Text>
+        </View>
+        <Switch
+          testID="appearance-week-ring"
+          value={showWeekRing}
+          onValueChange={setShowWeekRing}
+          accessibilityLabel={t('game.weekOff')}
         />
       </View>
     </View>
