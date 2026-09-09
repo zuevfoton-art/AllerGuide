@@ -175,6 +175,35 @@ export type LocaleMessages = {
     expertDesc: string;
     settingsDesc: string;
   };
+  today: {
+    readingTitle: string;
+    lead: {
+      noProfile: string;
+      noData: string;
+      pollenHigh: string;
+      pollenModerate: string;
+      airHigh: string;
+      airModerate: string;
+      diaryHigh: string;
+      calm: string;
+    };
+    leadAllergen: string;
+    advice: {
+      noProfile: string;
+      noData: string;
+      calm: string;
+      watch: string;
+      careful: string;
+    };
+    action: {
+      createProfile: string;
+      openMap: string;
+      openJournal: string;
+      openScanner: string;
+    };
+    checkedIn: string;
+    checkedInChange: string;
+  };
   home: {
     eyebrow: string;
     today: string;

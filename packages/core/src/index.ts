@@ -62,6 +62,7 @@ export * from './reengagement';
 export * from './diary-triggers';
 export * from './wellness';
 export * from './wellness-display';
+export * from './daily-reading';
 export * from './wellness-weights';
 export * from './pollen-thresholds';
 export * from './pollen-map';

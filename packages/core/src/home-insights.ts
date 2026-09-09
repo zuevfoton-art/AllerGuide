@@ -40,6 +40,11 @@ export type PlanHomeInsightsInput = {
   now?: Date;
   maxItems?: number;
   returnStage?: ReturnStage | null;
+  /**
+   * Today owns a permanent 0–3 check-in block (north-star N2), so the rows that
+   * only ask for a check-in would repeat it.
+   */
+  hasStandaloneCheckIn?: boolean;
 };
 
 /**
@@ -56,13 +61,20 @@ export function planHomeInsights(input: PlanHomeInsightsInput): PlannedHomeInsig
     return planned.slice(0, maxItems);
   }
 
+  const checkInRowWouldRepeatToday = input.hasStandaloneCheckIn === true;
+
   if (input.returnStage) {
-    planned.push({
-      id: `return-${input.returnStage}`,
-      kind: `return-${input.returnStage}`,
-      priority: 1,
-    });
-  } else if (!hasDiaryEntryOnDate(input.diaryEntries, now, now)) {
+    if (!(input.returnStage === 'quick-checkin' && checkInRowWouldRepeatToday)) {
+      planned.push({
+        id: `return-${input.returnStage}`,
+        kind: `return-${input.returnStage}`,
+        priority: 1,
+      });
+    }
+  } else if (
+    !checkInRowWouldRepeatToday &&
+    !hasDiaryEntryOnDate(input.diaryEntries, now, now)
+  ) {
     planned.push({
       id: 'diary-missing-today',
       kind: 'diary-missing-today',

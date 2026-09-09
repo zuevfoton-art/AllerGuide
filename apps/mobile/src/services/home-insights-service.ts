@@ -47,6 +47,7 @@ export function buildHomeInsightItems(input: {
   phenotypeHints: string[];
   prescribedCourse?: PrescribedCourse | null;
   returnStage?: ReturnStage | null;
+  hasStandaloneCheckIn?: boolean;
   t: Translate;
 }): HomeInsightItem[] {
   const capabilities = input.profile ? getProfileCapabilities(input.profile) : null;
@@ -72,6 +73,7 @@ export function buildHomeInsightItems(input: {
       input.prescribedCourse && isPrescribedCourseConfigured(input.prescribedCourse),
     ),
     returnStage: input.returnStage,
+    hasStandaloneCheckIn: input.hasStandaloneCheckIn,
   });
 
   const items: HomeInsightItem[] = [];

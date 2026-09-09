@@ -8,6 +8,12 @@ import {
   type DiaryEntry,
 } from '@allerguide/core';
 import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
+import { DailyReadingCard } from '@/src/components/DailyReadingCard';
+import {
+  buildTodayReading,
+  formatTodayDate,
+  hasCheckedInToday,
+} from '@/src/services/today-reading-service';
 import { trackReturnAction, trackReturnShown } from '@/src/services/reengagement-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { getCurrentLocation } from '@/src/services/location-service';
@@ -33,12 +39,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import {
-  resolveZoneColors,
-  useZoneColors,
-  zoneFromWellnessLevel,
-  zoneFromWellnessVerbalTier,
-} from '@/src/hooks/use-zone-colors';
+import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
@@ -108,8 +109,6 @@ export default function HomeScreen() {
     );
   }, [wellness, activeProfileId, profile, profileCapabilities]);
 
-  const indexZone = wellness ? zoneFromWellnessLevel(wellness.level) : null;
-  const indexColors = useZoneColors(indexZone);
   const pollenColors = wellness
     ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.pollenTier), theme.colors)
     : null;
@@ -127,6 +126,13 @@ export default function HomeScreen() {
     [diaryEntries],
   );
 
+  const checkedInToday = useMemo(() => hasCheckedInToday(diaryEntries), [diaryEntries]);
+  const dateLabel = useMemo(() => formatTodayDate(locale), [locale]);
+  const reading = useMemo(
+    () => buildTodayReading({ profile, wellness, t }),
+    [profile, wellness, t],
+  );
+
   const insightItems = useMemo(
     () =>
       buildHomeInsightItems({
@@ -136,9 +142,19 @@ export default function HomeScreen() {
         phenotypeHints,
         prescribedCourse,
         returnStage,
+        hasStandaloneCheckIn: Boolean(activeProfileId),
         t,
       }),
-    [profile, diaryEntries, wellness, phenotypeHints, prescribedCourse, returnStage, t],
+    [
+      profile,
+      diaryEntries,
+      wellness,
+      phenotypeHints,
+      prescribedCourse,
+      returnStage,
+      activeProfileId,
+      t,
+    ],
   );
 
   useEffect(() => {
@@ -173,7 +189,7 @@ export default function HomeScreen() {
         </>
       }>
 
-      <TabScreenHeader eyebrow={t('home.eyebrow')} title={t('tabs.today')} />
+      <TabScreenHeader eyebrow={dateLabel} title={profile?.name ?? t('tabs.today')} />
 
       {loadingWellness && !wellness ? (
         <>
@@ -182,45 +198,16 @@ export default function HomeScreen() {
           <SkeletonCard lines={2} />
         </>
       ) : (
-      <GlassCard zone={indexZone} variant="soft">
-        <CardTitle>{t('home.stateToday')}</CardTitle>
-
-        {wellness ? (
-          <>
-            <Pressable
-              onPress={() => setDetailsOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('home.index')}>
-              <View style={ui.heroKpi}>
-                <View style={styles.heroKpiLeft}>
-                  <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
-                  <Text
-                    style={[
-                      styles.statusPhrase,
-                      indexColors ? { color: indexColors.fg } : null,
-                    ]}>
-                    {t(`wellness.statusPhrase.${wellness.level}`)}
-                  </Text>
-                </View>
-                <Text style={[ui.heroKpiNum, indexColors ? { color: indexColors.fg } : null]}>
-                  {wellness.score}
-                  <Text style={ui.heroKpiSub}> / 100</Text>
-                </Text>
-              </View>
-            </Pressable>
-
-            <Text style={styles.envHint}>
-              {t(`wellness.forecast.${wellness.confidence}`)}
-            </Text>
-            <Text style={styles.interpret}>
-              {t(`wellness.primaryFactorSentence.${wellness.display.primaryFactorId}`)}
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.interpret}>{t('home.selectProfile')}</Text>
-        )}
-      </GlassCard>
+        <DailyReadingCard reading={reading} />
       )}
+
+      {activeProfileId && !(loadingWellness && !wellness) ? (
+        <QuickCheckInCard
+          profileId={activeProfileId}
+          checkedInToday={checkedInToday}
+          onSaved={reloadHomeData}
+        />
+      ) : null}
 
       {wellness ? (
       <GlassCard variant="soft">
@@ -320,24 +307,16 @@ export default function HomeScreen() {
             <Text style={styles.emptyInsightsText}>{t('home.insightsEmpty')}</Text>
           </View>
         ) : (
-          insightItems.map((item, index) =>
-            item.kind === 'return-quick-checkin' && activeProfileId ? (
-              <QuickCheckInCard
-                key={item.id}
-                profileId={activeProfileId}
-                onSaved={reloadHomeData}
-              />
-            ) : (
-              <InsightRow
-                key={item.id}
-                item={item}
-                bordered={index < insightItems.length - 1}
-                styles={styles}
-                ui={ui}
-                theme={theme}
-              />
-            ),
-          )
+          insightItems.map((item, index) => (
+            <InsightRow
+              key={item.id}
+              item={item}
+              bordered={index < insightItems.length - 1}
+              styles={styles}
+              ui={ui}
+              theme={theme}
+            />
+          ))
         )}
       </GlassCard>
 
