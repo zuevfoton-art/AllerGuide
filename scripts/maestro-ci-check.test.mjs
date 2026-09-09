@@ -208,11 +208,22 @@ describe('Maestro nightly CI invariants', () => {
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
+    assert.match(editorModal, /export function DiaryEditorFooter/);
+    assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
+
+    const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
+    assert.match(wizard, /DiaryEditorFooter/);
+    assert.match(wizard, /testID="diary-wizard-primary"/);
+
+    const waitPrimary = read('apps/mobile/.maestro/flows/_wait-wizard-primary.yaml');
+    assert.match(waitPrimary, /id: diary-wizard-step-label/);
+    assert.match(waitPrimary, /scrollUntilVisible/);
+    assert.match(waitPrimary, /id: diary-wizard-primary/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
@@ -226,6 +237,7 @@ describe('Maestro nightly CI invariants', () => {
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.ok(flow.includes('_tap-wizard-primary.yaml'), `${name} must tap Далее via _tap-wizard-primary`);
+      assert.ok(flow.includes('_wait-wizard-primary.yaml'), `${name} must wait for pinned Далее via _wait-wizard-primary`);
       assert.ok(flow.includes('_fill-wizard-field.yaml'), `${name} must type via _fill-wizard-field`);
       assert.ok(flow.includes('diary-new-entry'), `${name} must open the entry picker from diary-new-entry`);
       assert.doesNotMatch(flow, /diary-chip-/, `${name} must not tap removed home chips`);

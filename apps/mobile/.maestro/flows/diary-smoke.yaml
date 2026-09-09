@@ -8,10 +8,7 @@ appId: com.aclearo.app
     id: diary-new-entry
 - tapOn:
     id: diary-picker-symptoms
-- extendedWaitUntil:
-    visible:
-      id: diary-wizard-primary
-    timeout: 10000
+- runFlow: _wait-wizard-primary.yaml
 # Catalog picker and free text share one screen
 - runFlow:
     file: _fill-wizard-field.yaml

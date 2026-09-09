@@ -1,0 +1,15 @@
+# Confirm the wizard opened, then bring «Далее» on-screen.
+# Nightly 34325395361: catalog chips + voice crushed diary-wizard-primary
+# to inverted bounds [87,2373][993,2358] just after picking Симптомы.
+# Actions are pinned in DiaryEditorFooter; scroll is a no-op when already visible.
+appId: com.aclearo.app
+---
+- extendedWaitUntil:
+    visible:
+      id: diary-wizard-step-label
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: diary-wizard-primary
+    direction: DOWN
+    timeout: 20000

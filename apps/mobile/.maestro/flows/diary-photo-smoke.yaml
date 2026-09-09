@@ -15,10 +15,7 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: diary-picker-skin
-- extendedWaitUntil:
-    visible:
-      id: diary-wizard-primary
-    timeout: 10000
+- runFlow: _wait-wizard-primary.yaml
 # skinArea + appearance + itching share one screen
 - runFlow:
     file: _fill-wizard-field.yaml

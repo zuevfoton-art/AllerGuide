@@ -16,10 +16,7 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: nutrition-enter-manual
-- extendedWaitUntil:
-    visible:
-      id: diary-wizard-primary
-    timeout: 10000
+- runFlow: _wait-wizard-primary.yaml
 # food text
 - runFlow:
     file: _fill-wizard-field.yaml

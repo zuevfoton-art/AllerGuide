@@ -1,4 +1,15 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type RefObject } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import {
   findNodeHandle,
   Keyboard,
@@ -20,7 +31,7 @@ import { useTranslation } from '@/src/store/locale-store';
 interface DiaryEditorModalProps {
   visible: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 type DiaryEditorScrollApi = {
@@ -28,9 +39,29 @@ type DiaryEditorScrollApi = {
 };
 
 const DiaryEditorScrollContext = createContext<DiaryEditorScrollApi | null>(null);
+const DiaryEditorFooterContext = createContext<((node: ReactNode | null) => void) | null>(null);
 
 export function useDiaryEditorScroll(): DiaryEditorScrollApi | null {
   return useContext(DiaryEditorScrollContext);
+}
+
+/**
+ * Renders children in the pinned sheet footer (outside the ScrollView).
+ * Symptom chips + voice used to crush `diary-wizard-primary` below maxHeight
+ * (nightly 34325395361: bounds [87,2373][993,2358]).
+ * Outside a modal the children stay inline.
+ */
+export function DiaryEditorFooter({ children }: { children: ReactNode }) {
+  const setFooter = useContext(DiaryEditorFooterContext);
+
+  useLayoutEffect(() => {
+    if (!setFooter) return undefined;
+    setFooter(children);
+    return () => setFooter(null);
+  }, [setFooter, children]);
+
+  if (!setFooter) return children;
+  return null;
 }
 
 function measureAndScroll(scrollRef: RefObject<ScrollView | null>, node: unknown) {
@@ -58,6 +89,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const { t } = useTranslation();
   const scrollRef = useRef<ScrollView>(null);
   const pendingFocusNode = useRef<unknown>(null);
+  const [footer, setFooter] = useState<ReactNode>(null);
 
   const scrollFieldIntoView = useCallback((node: unknown) => {
     pendingFocusNode.current = node;
@@ -94,6 +126,10 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
 
   const scrollApi = useMemo(() => ({ scrollFieldIntoView }), [scrollFieldIntoView]);
 
+  useEffect(() => {
+    if (!visible) setFooter(null);
+  }, [visible]);
+
   return (
     <Modal
       visible={visible}
@@ -112,7 +148,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               accessibilityLabel={t('common.cancel')}
             />
             <View
-              style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}
+              style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, space[4]) }]}
               accessibilityViewIsModal>
               <View style={styles.grabberWrap}>
                 <View style={styles.grabber} />
@@ -132,21 +168,34 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                 </View>
                 <View style={styles.headerBtn} />
               </View>
-              <DiaryEditorScrollContext.Provider value={scrollApi}>
-                <ScrollView
-                  ref={scrollRef}
-                  style={styles.scroll}
-                  contentContainerStyle={[
-                    styles.scrollContent,
-                    { paddingBottom: 8 + keyboardInset },
-                  ]}
-                  keyboardShouldPersistTaps="handled"
-                  keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-                  automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-                  bounces={false}>
-                  {children}
-                </ScrollView>
-              </DiaryEditorScrollContext.Provider>
+              <DiaryEditorFooterContext.Provider value={setFooter}>
+                <DiaryEditorScrollContext.Provider value={scrollApi}>
+                  <ScrollView
+                    ref={scrollRef}
+                    style={styles.scroll}
+                    contentContainerStyle={[
+                      styles.scrollContent,
+                      !footer ? { paddingBottom: space[2] + keyboardInset } : null,
+                    ]}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                    automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+                    bounces={false}>
+                    {children}
+                  </ScrollView>
+                  {footer ? (
+                    <View
+                      style={[
+                        styles.footer,
+                        keyboardInset > 0 ? { paddingBottom: keyboardInset } : null,
+                      ]}
+                      testID="diary-editor-footer"
+                      collapsable={false}>
+                      {footer}
+                    </View>
+                  ) : null}
+                </DiaryEditorScrollContext.Provider>
+              </DiaryEditorFooterContext.Provider>
             </View>
           </>
         )}
@@ -212,12 +261,24 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
     },
-    scroll: { flexGrow: 0 },
+    scroll: {
+      flexGrow: 1,
+      flexShrink: 1,
+      minHeight: 0,
+    },
     scrollContent: {
-      paddingHorizontal: 16,
-      paddingTop: 12,
-      paddingBottom: 8,
-      gap: 16,
+      paddingHorizontal: space[4],
+      paddingTop: space[3],
+      paddingBottom: space[2],
+      gap: space[4],
+    },
+    footer: {
+      paddingHorizontal: space[4],
+      paddingTop: space[3],
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.border,
+      backgroundColor: colors.bg,
+      gap: space[2],
     },
   });
 }

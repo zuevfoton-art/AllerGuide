@@ -209,7 +209,7 @@ src/modules/marketplace/
 
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
-- **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal` (scroll-to-focus, no `liftStyle`), `VoiceNoteButton` (только `symptoms`/`onset`), `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
+- **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal` (scroll-to-focus, `DiaryEditorFooter` pins «Далее», no `liftStyle`), `VoiceNoteButton` (только `symptoms`/`onset`), `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`, `map/MapCanvas`, `MapLayerLegend`, `MapPollenDetails`, `MapPlacesPanel`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
