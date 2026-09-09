@@ -208,11 +208,17 @@ describe('Maestro nightly CI invariants', () => {
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
+    assert.match(editorModal, /testID="diary-editor-footer"/);
+    assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
+
+    const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
+    assert.match(wizard, /DiaryEditorFooter/);
+    assert.match(wizard, /testID="diary-wizard-primary"/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
