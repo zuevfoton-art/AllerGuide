@@ -155,7 +155,8 @@ describe('diary schema', () => {
     const symptomsIndex = section.steps.findIndex((step) => step.id === 'symptoms');
     expect(validateDiarySectionStep(section, severityIndex, {})).toMatch(/Заполните поле/);
     expect(validateDiarySectionStep(section, severityIndex, { severity0_3: '0 — нет' })).toBeNull();
-    expect(validateDiarySectionStep(section, symptomsIndex, {})).toBeNull();
+    expect(validateDiarySectionStep(section, symptomsIndex, {})).toMatch(/Заполните поле/);
+    expect(validateDiarySectionStep(section, symptomsIndex, { symptoms: 'зуд' })).toBeNull();
   });
 
   it('detects when a section has answers', () => {

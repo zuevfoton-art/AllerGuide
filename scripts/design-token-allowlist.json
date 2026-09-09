@@ -2,6 +2,7 @@
   "literals": [
     "apps/mobile/app/(tabs)/diary.tsx",
     "apps/mobile/app/(tabs)/home.tsx",
+    "apps/mobile/app/(tabs)/sos.tsx",
     "apps/mobile/app/about.tsx",
     "apps/mobile/app/asthma-action-plan.tsx",
     "apps/mobile/app/clinical-scales.tsx",
@@ -23,6 +24,7 @@
     "apps/mobile/src/components/AllergyConfirmationEditor.tsx",
     "apps/mobile/src/components/AsitCourseCard.tsx",
     "apps/mobile/src/components/AsthmaCard.tsx",
+    "apps/mobile/src/components/BarcodeScanCamera.tsx",
     "apps/mobile/src/components/ClinicalPhenotypeCard.tsx",
     "apps/mobile/src/components/CloudBackupCard.tsx",
     "apps/mobile/src/components/ComorbidityEditor.tsx",
@@ -30,6 +32,7 @@
     "apps/mobile/src/components/ConditionPicker.tsx",
     "apps/mobile/src/components/CourseSetupModal.tsx",
     "apps/mobile/src/components/DateTimeField.tsx",
+    "apps/mobile/src/components/DiaryBarcodeScanner.tsx",
     "apps/mobile/src/components/DiaryEditorModal.tsx",
     "apps/mobile/src/components/DiaryEntryTypePickerModal.tsx",
     "apps/mobile/src/components/DiaryInsightsCard.tsx",
@@ -69,6 +72,12 @@
     "apps/mobile/src/components/SosEmergencyBar.tsx",
     "apps/mobile/src/components/VoiceNoteButton.tsx",
     "apps/mobile/src/components/brand/ScreenBrandHeader.tsx",
+    "apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts",
+    "apps/mobile/src/components/map/MapDoctorsSection.tsx",
+    "apps/mobile/src/components/map/MapLayerSwitcher.tsx",
+    "apps/mobile/src/components/map/MapLegendDots.tsx",
+    "apps/mobile/src/components/map/MapPollenStatusCard.tsx",
+    "apps/mobile/src/components/map/map-screen-styles.ts",
     "apps/mobile/src/components/onboarding/OnboardingSlideChrome.tsx",
     "apps/mobile/src/components/profile-setup/ProfileSetupBirthYearStep.tsx",
     "apps/mobile/src/components/profile-setup/ProfileSetupComorbidityStep.tsx",
@@ -76,7 +85,9 @@
     "apps/mobile/src/components/profile-setup/ProfileSetupConditionsStep.tsx",
     "apps/mobile/src/components/profile-setup/ProfileSetupCrossReactionsStep.tsx",
     "apps/mobile/src/components/profile-setup/ProfileSetupNameStep.tsx",
-    "apps/mobile/src/components/profile-setup/ProfileSetupSymptomsStep.tsx"
+    "apps/mobile/src/components/profile-setup/ProfileSetupSymptomsStep.tsx",
+    "apps/mobile/src/components/scanner/scanner-styles.ts",
+    "apps/mobile/src/components/therapy/course-editor-styles.ts"
   ],
   "titleKeys": [
     "apps/mobile/app/(tabs)/map.tsx",
@@ -105,9 +116,14 @@
     "apps/mobile/src/components/RecoveryKeyBanner.tsx",
     "apps/mobile/src/components/RecoveryKeyModal.tsx",
     "apps/mobile/src/components/ScreenHeader.tsx",
-    "apps/mobile/src/components/ThemeToggle.tsx"
+    "apps/mobile/src/components/ThemeToggle.tsx",
+    "apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts",
+    "apps/mobile/src/components/map/MapDoctorsSection.tsx"
   ],
-  "cardTitleUsage": [],
+  "cardTitleUsage": [
+    "apps/mobile/app/(tabs)/scanner.tsx",
+    "apps/mobile/src/components/scanner/ScannerLists.tsx"
+  ],
   "atmosphereHex": [
     "apps/mobile/src/components/DailyReadingCard.tsx",
     "apps/mobile/src/components/EmptyState.tsx",
@@ -121,6 +137,7 @@
     "apps/mobile/app/prescribed-therapy.tsx",
     "apps/mobile/src/components/AirQualityLegend.tsx",
     "apps/mobile/src/components/AppLockGate.tsx",
+    "apps/mobile/src/components/BarcodeScanCamera.tsx",
     "apps/mobile/src/components/CourseSetupModal.tsx",
     "apps/mobile/src/components/DateTimeField.tsx",
     "apps/mobile/src/components/DiaryEditorModal.tsx",
@@ -129,11 +146,15 @@
     "apps/mobile/src/components/ImageCropEditor.tsx",
     "apps/mobile/src/components/LanguagePicker.tsx",
     "apps/mobile/src/components/MapPoiSheet.tsx",
+    "apps/mobile/src/components/PhoneCountryPicker.tsx",
     "apps/mobile/src/components/PhoneInput.tsx",
     "apps/mobile/src/components/PrescriptionCameraCapture.tsx",
     "apps/mobile/src/components/ProfileHeaderButton.tsx",
     "apps/mobile/src/components/RecoveryKeyModal.tsx",
     "apps/mobile/src/components/brand/BrandMark.tsx",
-    "apps/mobile/src/components/diary/DiaryCalendarHeatmap.tsx"
+    "apps/mobile/src/components/diary/DiaryCalendarHeatmap.tsx",
+    "apps/mobile/src/components/map/map-constants.ts",
+    "apps/mobile/src/components/scanner/scanner-styles.ts",
+    "apps/mobile/src/components/therapy/course-editor-styles.ts"
   ]
 }
