@@ -1,0 +1,13 @@
+# Fold IME, bring a wizard choice chip on-screen, tap it.
+# Nightly 34336499730: after pinning diary-editor-footer, itching chips
+# ("Слабый") sit under Gboard with inverted bounds and tapOn text fails.
+appId: com.aclearo.app
+---
+- runFlow: _dismiss-wizard-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: ${CHOICE_ID}
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: ${CHOICE_ID}

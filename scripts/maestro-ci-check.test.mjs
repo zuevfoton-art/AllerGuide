@@ -254,6 +254,22 @@ describe('Maestro nightly CI invariants', () => {
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
     assert.match(photo, /id: diary-photo-step/);
+    assert.match(photo, /_tap-wizard-choice.yaml/);
+    assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
+    assert.doesNotMatch(
+      photo,
+      /text: "Слабый"/,
+      'diary-photo-smoke must not tap itching copy while IME may cover it',
+    );
+
+    const tapChoice = read('apps/mobile/.maestro/flows/_tap-wizard-choice.yaml');
+    assert.match(tapChoice, /_dismiss-wizard-ime.yaml/);
+    assert.match(tapChoice, /scrollUntilVisible/);
+    assert.match(tapChoice, /id: \$\{CHOICE_ID\}/);
+
+    const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
+    assert.match(stepField, /diary-choice-\$\{choice\}/);
+    assert.match(stepField, /diary-choice-\$\{step\.id\}/);
   });
 
   it('opens scanner manual input before typing молоко', () => {
