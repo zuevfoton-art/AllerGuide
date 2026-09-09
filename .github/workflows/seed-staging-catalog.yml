@@ -12,7 +12,8 @@ on:
 
 env:
   NODE_VERSION: "20"
-  PNPM_VERSION: "10.34.4"
+  # pnpm version: root package.json `packageManager` (do not pin
+  # pnpm/action-setup `version` — it must match package.json).
 
 jobs:
   seed:
@@ -21,8 +22,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
