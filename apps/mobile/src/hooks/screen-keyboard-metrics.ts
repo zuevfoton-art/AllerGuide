@@ -6,6 +6,9 @@ export type ScreenKeyboardPadding = {
   pinnedPaddingBottom: number;
 };
 
+/** Air between a sticky CTA and the IME (matches `space[2]`). */
+export const KEYBOARD_CLEARANCE_PX = 8;
+
 /**
  * Bottom padding for `Screen` while the software keyboard is open.
  *
@@ -31,11 +34,12 @@ export function resolveScreenKeyboardPadding(input: {
 
   const aboveImePad = Math.max(input.safeBottom, extraKeyboardPad);
   if (input.platform === 'web') {
+    const clearance = Math.max(input.safeBottom, KEYBOARD_CLEARANCE_PX);
     return {
       extraKeyboardPad,
       rootPaddingBottom: extraKeyboardPad,
-      scrollPaddingBottom: input.safeBottom,
-      pinnedPaddingBottom: input.safeBottom,
+      scrollPaddingBottom: clearance,
+      pinnedPaddingBottom: clearance,
     };
   }
 

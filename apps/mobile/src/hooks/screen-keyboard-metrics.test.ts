@@ -45,9 +45,20 @@ describe('resolveScreenKeyboardPadding', () => {
     ).toEqual({
       extraKeyboardPad: 280,
       rootPaddingBottom: 280,
-      scrollPaddingBottom: 0,
-      pinnedPaddingBottom: 0,
+      scrollPaddingBottom: 8,
+      pinnedPaddingBottom: 8,
     });
+  });
+
+  it('keeps the web safe-area when it already clears the IME', () => {
+    expect(
+      resolveScreenKeyboardPadding({
+        platform: 'web',
+        keyboardInset: 280,
+        layoutBottomPadding: 92,
+        safeBottom: 20,
+      }).pinnedPaddingBottom,
+    ).toBe(20);
   });
 
   it('keeps layout padding when the keyboard is hidden', () => {
