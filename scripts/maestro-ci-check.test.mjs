@@ -32,6 +32,11 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /enable_emulator_http_cleartext/);
     assert.match(script, /network_security_config/);
     assert.match(script, /10\.0\.2\.2/);
+    // Nightly 34474685308: mergeDexRelease OOM at -Xmx2048m. Pin ≥4g after prebuild.
+    assert.match(script, /pin_gradle_heap/);
+    assert.match(script, /Xmx4096m/);
+    assert.match(script, /--no-parallel/);
+    assert.match(script, /-Dorg\.gradle\.jvmargs=/);
   });
 
   it('runs emulator flows via the helper that installs the release APK', () => {
