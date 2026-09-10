@@ -115,6 +115,15 @@ describe('Maestro nightly CI invariants', () => {
       /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
     );
 
+    const stagingBackup = read('apps/mobile/.maestro/flows/staging-backup-smoke.yaml');
+    assert.match(stagingBackup, /id: status-banner/);
+    assert.match(stagingBackup, /Резервная копия отправлена на сервер/);
+    assert.doesNotMatch(stagingBackup, /text: "Готово"/);
+
+    const banner = read('apps/mobile/src/components/StatusBanner.tsx');
+    assert.match(banner, /testID="status-banner"/);
+    assert.match(banner, /testID="status-banner-dismiss"/);
+
     for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_wait-login\.yaml/);
@@ -218,7 +227,9 @@ describe('Maestro nightly CI invariants', () => {
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
-    assert.match(editorModal, /onPress=\{Keyboard\.dismiss\}/);
+    const dismissHelper = read('apps/mobile/src/components/diary/wizard/dismiss-diary-keyboard.ts');
+    assert.match(dismissHelper, /blurTextInput/);
+    assert.match(dismissHelper, /Keyboard\.dismiss/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(

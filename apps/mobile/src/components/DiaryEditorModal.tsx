@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
+import { dismissDiaryKeyboard } from '@/src/components/diary/wizard/dismiss-diary-keyboard';
 import { diaryEditorScrollMaxHeight } from '@/src/components/diary/wizard/diary-editor-layout';
 import { radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -221,7 +222,8 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   <Pressable
                     testID="diary-editor-title"
                     collapsable={false}
-                    onPress={Keyboard.dismiss}
+                    focusable
+                    onPress={dismissDiaryKeyboard}
                     accessibilityRole="header"
                     accessibilityLabel={t('diary.title')}>
                     <Text style={styles.headerTitle}>{t('diary.title')}</Text>

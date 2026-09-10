@@ -133,6 +133,14 @@ export function createStyles({ colors, fonts }: AppTheme) {
 
 export function createFieldStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    inputWrap: {
+      height: density.tapMinHeight,
+      flexShrink: 0,
+    },
+    inputMultilineWrap: {
+      minHeight: 120,
+      flexShrink: 0,
+    },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,

@@ -340,13 +340,18 @@ function checkMaestroFlows() {
   }
 
   const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
+  const dismissDiaryKeyboard = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/dismiss-diary-keyboard.ts'),
+    'utf8',
+  );
   if (
     !editorModal.includes('diary-editor-title') ||
-    !editorModal.includes('Keyboard.dismiss') ||
+    !editorModal.includes('dismissDiaryKeyboard') ||
+    !dismissDiaryKeyboard.includes('blurTextInput') ||
     /liftStyle\s*[,}\]]/.test(editorModal)
   ) {
     failures.push(
-      'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
+      'DiaryEditorModal must blur the focused field on title press and must not apply liftStyle',
     );
   }
 
@@ -395,6 +400,17 @@ function checkMaestroFlows() {
   ) {
     failures.push(
       'settings-smoke.yaml must type the emergency number then save via _tap-profile-save-number.yaml',
+    );
+  }
+
+  const stagingBackup = fs.readFileSync(path.join(flowsDir, 'staging-backup-smoke.yaml'), 'utf8');
+  if (
+    !stagingBackup.includes('status-banner') ||
+    stagingBackup.includes('text: "Готово"') ||
+    !stagingBackup.includes('Резервная копия отправлена на сервер')
+  ) {
+    failures.push(
+      'staging-backup-smoke.yaml must wait for the upload status banner, not Alert «Готово»',
     );
   }
   const tapProfileSave = path.join(flowsDir, '_tap-profile-save-number.yaml');

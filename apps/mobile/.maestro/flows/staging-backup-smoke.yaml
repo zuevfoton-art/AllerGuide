@@ -19,13 +19,19 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: recovery-key-saved-ack
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn:
     id: recovery-key-confirm
+    enabled: true
+# CloudBackupCard posts a status banner (not Alert «Готово»).
 - extendedWaitUntil:
     visible:
-      text: "Готово"
+      id: status-banner
     timeout: 60000
+- assertVisible:
+    text: "Резервная копия отправлена на сервер."
 - tapOn:
-    text: OK
+    id: status-banner-dismiss
 - assertVisible:
     id: cloud-backup-upload
