@@ -296,6 +296,10 @@ describe('Maestro nightly CI invariants', () => {
     const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
     assert.match(stepField, /diary-choice-\$\{choice\}/);
     assert.match(stepField, /diary-choice-\$\{step\.id\}/);
+    assert.match(stepField, /styles\.inputWrap/);
+    const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
+    assert.match(fieldStyles, /inputWrap:/);
+    assert.match(fieldStyles, /height: density\.tapMinHeight/);
   });
 
   it('opens scanner manual input before typing молоко', () => {
