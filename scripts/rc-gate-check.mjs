@@ -176,6 +176,15 @@ function checkMaestroFlows() {
   if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {
     failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
   }
+  if (
+    !buildScript.includes('pin_gradle_heap') ||
+    !buildScript.includes('Xmx4096m') ||
+    !buildScript.includes('--no-parallel')
+  ) {
+    failures.push(
+      'scripts/maestro-build-apk.sh must pin Gradle to -Xmx4096m after prebuild (nightly 34474685308 mergeDex OOM)',
+    );
+  }
 
   const runtimePatches = fs.readFileSync(path.join(root, 'apps/mobile/src/install-runtime.ts'), 'utf8');
   if (
