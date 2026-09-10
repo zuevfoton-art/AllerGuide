@@ -389,12 +389,19 @@ function checkMaestroFlows() {
   }
 
   const fillWizardField = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
+  const fillScrolls = fillWizardField.match(/scrollUntilVisible:/g) ?? [];
   if (
     !fillWizardField.includes('waitForAnimationToEnd') ||
     !fillWizardField.includes('eraseText') ||
-    !fillWizardField.includes('assertVisible')
+    !fillWizardField.includes('assertVisible') ||
+    fillScrolls.length < 2 ||
+    !/inputText: \$\{FIELD_VALUE\}[\s\S]*_dismiss-wizard-ime\.yaml[\s\S]*scrollUntilVisible:[\s\S]*assertVisible/.test(
+      fillWizardField,
+    )
   ) {
-    failures.push('_fill-wizard-field.yaml must retap the field after layout and assertVisible FIELD_VALUE');
+    failures.push(
+      '_fill-wizard-field.yaml must scroll after IME dismiss before assertVisible FIELD_VALUE (nightly 34477934128)',
+    );
   }
 
   const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
