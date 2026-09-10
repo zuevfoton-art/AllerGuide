@@ -221,6 +221,7 @@ export default function AsitCourseScreen() {
         title={t('asit.verifyTitle')}
         subtitle={t('asit.verifySubtitle')}
         emptyHint={t('asit.verifyStagesEmpty')}
+        hint={!course.allergenId ? t('asit.ocrAllergenUncertain') : undefined}
         confirmLabel={t('asit.verifyConfirm')}
         stages={course.scheduleStages ?? []}
         doseLabel={t('asit.stageDose')}

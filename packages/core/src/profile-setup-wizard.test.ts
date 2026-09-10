@@ -3,12 +3,15 @@ import type { AllergyConditionId } from './allergy-conditions';
 import { createEmptySymptomBaseline } from './profile-symptom-baseline';
 import {
   buildProfileSetupWizardNavOptions,
+  canFinishProfileSetupEarly,
   createEmptyProfileSetupWizardDraft,
+  isProfileSetupWizardStepOptional,
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
   getVisibleProfileSetupSteps,
   mergeCrossReactionAllergenIds,
+  resolveCrossReactionAllergenIdsForSave,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
@@ -156,5 +159,31 @@ describe('profile setup wizard', () => {
       'milk',
       'goat-milk',
     ]);
+    expect(
+      resolveCrossReactionAllergenIdsForSave('crossReactions', ['goat-milk', 'beef'], []),
+    ).toEqual(['goat-milk', 'beef']);
+    expect(
+      resolveCrossReactionAllergenIdsForSave('allergenConfirmations', ['pending'], ['goat-milk']),
+    ).toEqual(['goat-milk']);
+  });
+
+  it('marks everything after allergens as optional', () => {
+    expect(isProfileSetupWizardStepOptional('name')).toBe(false);
+    expect(isProfileSetupWizardStepOptional('allergens')).toBe(false);
+    expect(isProfileSetupWizardStepOptional('crossReactions')).toBe(true);
+    expect(isProfileSetupWizardStepOptional('contacts')).toBe(true);
+  });
+
+  it('allows finishing from the allergens step onward', () => {
+    expect(canFinishProfileSetupEarly('conditions', baseDraft(), {})).toBe(false);
+    expect(canFinishProfileSetupEarly('allergens', baseDraft(), {})).toBe(true);
+    expect(canFinishProfileSetupEarly('symptomBaseline', baseDraft(), {})).toBe(true);
+  });
+
+  it('does not allow finishing while a required step is empty', () => {
+    expect(
+      canFinishProfileSetupEarly('allergens', { ...baseDraft(), selectedAllergenIds: [] }, {}),
+    ).toBe(false);
+    expect(canFinishProfileSetupEarly('allergens', { ...baseDraft(), name: ' ' }, {})).toBe(false);
   });
 });

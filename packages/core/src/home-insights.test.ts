@@ -75,4 +75,60 @@ describe('planHomeInsights', () => {
     });
     expect(planned).toHaveLength(3);
   });
+
+  it('replaces diary-missing-today with a return stage', () => {
+    const planned = planHomeInsights({
+      hasProfile: true,
+      diaryEntries: [],
+      conditions: [],
+      enableActReminder: false,
+      wellnessCount: 0,
+      phenotypeCount: 0,
+      now: noon,
+      returnStage: 'quick-checkin',
+    });
+    expect(planned.map((item) => item.kind)).toEqual(['return-quick-checkin']);
+  });
+
+  it('drops check-in rows when Today already shows a standalone check-in', () => {
+    const withoutStage = planHomeInsights({
+      hasProfile: true,
+      diaryEntries: [],
+      conditions: [],
+      enableActReminder: false,
+      wellnessCount: 0,
+      phenotypeCount: 0,
+      now: noon,
+      hasStandaloneCheckIn: true,
+    });
+    expect(withoutStage).toEqual([]);
+
+    const withStage = planHomeInsights({
+      hasProfile: true,
+      diaryEntries: [],
+      conditions: [],
+      enableActReminder: false,
+      wellnessCount: 0,
+      phenotypeCount: 0,
+      now: noon,
+      returnStage: 'quick-checkin',
+      hasStandaloneCheckIn: true,
+    });
+    expect(withStage).toEqual([]);
+  });
+
+  it('keeps later return stages even with a standalone check-in', () => {
+    const planned = planHomeInsights({
+      hasProfile: true,
+      diaryEntries: [],
+      conditions: [],
+      enableActReminder: false,
+      wellnessCount: 0,
+      phenotypeCount: 0,
+      now: noon,
+      returnStage: 'reframe',
+      hasStandaloneCheckIn: true,
+    });
+    expect(planned.map((item) => item.kind)).toEqual(['return-reframe']);
+  });
 });

@@ -316,4 +316,30 @@ describe('pollen-map-service', () => {
       forecastDays: [],
     });
   });
+
+  it('marks oak as related and maple as none for a birch-only profile', async () => {
+    const { applyProfileRelevance } = await import('./pollen-map-service');
+    const readings = applyProfileRelevance(
+      [
+        {
+          taxonId: 'oak_pollen',
+          allergenId: 'oak-pollen',
+          value: 20,
+          level: 'mid',
+          profileRelevant: false,
+        },
+        {
+          taxonId: 'maple_pollen',
+          allergenId: 'maple-pollen',
+          value: 20,
+          level: 'mid',
+          profileRelevant: false,
+        },
+      ],
+      ['birch-pollen'],
+    );
+
+    expect(readings.find((item) => item.taxonId === 'oak_pollen')?.profileRelevant).toBe(true);
+    expect(readings.find((item) => item.taxonId === 'maple_pollen')?.profileRelevant).toBe(false);
+  });
 });

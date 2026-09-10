@@ -1,6 +1,7 @@
 # Fold IME, bring «Далее / Сохранить» on-screen, tap it.
 # Pixel 6 + Gboard crush diary-wizard-primary to zero height
 # (nightly 33728952919: bounds [87,1575][993,1538]).
+# Nightly 34349155324: skip a disabled Далее (empty required field).
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -11,3 +12,4 @@ appId: com.aclearo.app
     timeout: 20000
 - tapOn:
     id: diary-wizard-primary
+    enabled: true

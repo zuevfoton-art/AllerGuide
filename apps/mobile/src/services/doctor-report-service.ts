@@ -8,6 +8,8 @@ import {
   computeAsitCompliance,
   computeFoodDrugSummary,
   computeInsectStingSummary,
+  escapeHtml,
+  escapeHtmlAttributeUrl,
   computePefTrend,
   computePrescribedCompliance,
   formatAsitReportSummary,
@@ -107,9 +109,11 @@ function renderTimeline(entries: DiaryEntry[]): string {
   if (!items.length) return `<p style="color:${c.muted};">Нет записей за период.</p>`;
   return items
     .map((item) => {
-      const severity = item.severityLabel ? ` · тяжесть: ${item.severityLabel}` : '';
-      const coded = item.codedSymptoms ? `<br/><small>Коды: ${item.codedSymptoms}</small>` : '';
-      return `<div style="margin-bottom:10px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${item.type}</strong> <small>(${formatDiaryDate(item.createdAt)})</small><p>${item.summary}${severity}</p>${coded}</div>`;
+      const severity = item.severityLabel ? ` · тяжесть: ${escapeHtml(item.severityLabel)}` : '';
+      const coded = item.codedSymptoms
+        ? `<br/><small>Коды: ${escapeHtml(item.codedSymptoms)}</small>`
+        : '';
+      return `<div style="margin-bottom:10px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${escapeHtml(item.type)}</strong> <small>(${escapeHtml(formatDiaryDate(item.createdAt))})</small><p>${escapeHtml(item.summary)}${severity}</p>${coded}</div>`;
     })
     .join('');
 }
@@ -132,7 +136,7 @@ function renderScaleTrend(entries: DiaryEntry[]): string {
   return [...byType.values()]
     .map((e) => {
       const summary = formatDiaryEntrySummary(e.type, e.details || '');
-      return `<li>${summary} <small>(${formatDiaryDate(e.createdAt)})</small></li>`;
+      return `<li>${escapeHtml(summary)} <small>(${escapeHtml(formatDiaryDate(e.createdAt))})</small></li>`;
     })
     .join('');
 }
@@ -140,20 +144,22 @@ function renderScaleTrend(entries: DiaryEntry[]): string {
 function renderPefTrend(entries: DiaryEntry[], planPersonalBest?: string | null): string {
   const trend = computePefTrend(entries, { planPersonalBest });
   if (!trend.count) return `<p style="color:${c.muted};">Нет измерений ПСВ за период.</p>`;
-  return `<p>${formatPefTrendSummary(trend).replace(/</g, '&lt;')}</p>`;
+  return `<p>${escapeHtml(formatPefTrendSummary(trend))}</p>`;
 }
 
 function renderPassportSummary(profile: Profile): string {
   const passport = getAllergyPassport(profile.id);
   const allergies = parseAllergies(profile.allergies);
+  const crossReactions = parseAllergies(profile.crossReactionAllergies ?? '[]');
   const text = formatPassportText({
     profileName: profile.name,
     profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
     allergies,
+    crossReactions,
     passport,
     emergencyNumber: getEmergencyNumber(),
   });
-  return `<pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${text.replace(/</g, '&lt;')}</pre>`;
+  return `<pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${escapeHtml(text)}</pre>`;
 }
 
 export async function generateDoctorReportPdf(options: DoctorReportOptions) {
@@ -190,12 +196,12 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
                   photosHtml = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">${dataUris
                     .map(
                       (uri) =>
-                        `<img src="${uri}" alt="skin" style="max-width:180px;max-height:180px;border-radius:8px;border:1px solid ${c.border};object-fit:cover;" />`,
+                        `<img src="${escapeHtmlAttributeUrl(uri)}" alt="skin" style="max-width:180px;max-height:180px;border-radius:8px;border:1px solid ${c.border};object-fit:cover;" />`,
                     )
                     .join('')}</div>`;
                 }
               }
-              return `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${e.type}</strong><p>${summary}</p>${photosHtml}<small>${formatDiaryDate(e.createdAt)}</small></div>`;
+              return `<div style="margin-bottom:12px;border-left:3px solid ${c.accent};padding-left:10px;"><strong>${escapeHtml(e.type)}</strong><p>${escapeHtml(summary)}</p>${photosHtml}<small>${escapeHtml(formatDiaryDate(e.createdAt))}</small></div>`;
             }),
           )
         ).join('');
@@ -215,7 +221,7 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
           const phenotypes = resolveProfileClinicalPhenotypes(profile);
           const historyText = formatConditionHistoryReportText(history);
           const phenotypeText = formatClinicalPhenotypesReportText(phenotypes);
-          const body = `${historyText}\n\n---\n\n${phenotypeText}`.replace(/</g, '&lt;');
+          const body = escapeHtml(`${historyText}\n\n---\n\n${phenotypeText}`);
           return `<section><h2>Хронология и фенотипы профиля</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${body}</pre></section>`;
         })()
       : '';
@@ -225,17 +231,18 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     : '';
 
   const asitHtml = options.blockIds.includes('asit')
-    ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatAsitReportSummary(
-        computeAsitCompliance(periodEntries, periodDays),
-        getAsitCourse(options.profileId),
-        periodDays,
-      ).replace(/</g, '&lt;')}</pre></section>`
+    ? `<section><h2>Сводка АСИТ</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${escapeHtml(
+        formatAsitReportSummary(
+          computeAsitCompliance(periodEntries, periodDays),
+          getAsitCourse(options.profileId),
+          periodDays,
+        ),
+      )}</pre></section>`
     : '';
 
   const foodDrugHtml = options.blockIds.includes('foodDrug') && profile
-    ? `<section><h2>Пищевая и лекарственная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatFoodDrugReportSummary(
-        computeFoodDrugSummary(periodEntries, periodDays),
-        {
+    ? `<section><h2>Пищевая и лекарственная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${escapeHtml(
+        formatFoodDrugReportSummary(computeFoodDrugSummary(periodEntries, periodDays), {
           avoidFoods: getConsolidatedFoodAvoidList(
             parseAllergies(profile.allergies),
             getFoodDrugRegistry(options.profileId),
@@ -243,42 +250,45 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
           drugIntolerances: getAllergyPassport(options.profileId).drugIntolerances,
           clinicalNotes: getFoodDrugRegistry(options.profileId)?.clinicalNotes,
           periodDays: periodDays,
-        },
-      ).replace(/</g, '&lt;')}</pre></section>`
+        }),
+      )}</pre></section>`
     : '';
 
   const insectPlan = getInsectActionPlan(options.profileId);
   const insectHtml =
     options.blockIds.includes('insect') && profile
-      ? `<section><h2>Инсектная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatInsectReportSummary(
-          computeInsectStingSummary(periodEntries, periodDays),
-          {
+      ? `<section><h2>Инсектная аллергия</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${escapeHtml(
+          formatInsectReportSummary(computeInsectStingSummary(periodEntries, periodDays), {
             knownInsects: getConsolidatedInsectList(parseAllergies(profile.allergies), insectPlan),
             adrenalineLocation: insectPlan?.adrenalineLocation,
             emergencySteps: insectPlan?.emergencySteps,
             clinicalNotes: insectPlan?.clinicalNotes,
             periodDays: periodDays,
-          },
-        ).replace(/</g, '&lt;')}</pre></section>`
+          }),
+        )}</pre></section>`
       : '';
 
   const asthmaPlan = getAsthmaActionPlan(options.profileId);
   const pefTrend = computePefTrend(periodEntries, { planPersonalBest: asthmaPlan?.personalBestPef });
   const asthmaHtml =
     options.blockIds.includes('asthma') && profile
-      ? `<section><h2>Бронхиальная астма</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${formatAsthmaReportSummary(
-          {
-            count: pefTrend.count,
-            latest: pefTrend.latest,
-            personalBest: pefTrend.personalBest,
-            latestZone: pefTrend.latestZone
-              ? { green: 'Зелёная зона', yellow: 'Жёлтая зона', red: 'Красная зона' }[pefTrend.latestZone]
-              : null,
-            latestPercentOfBest: pefTrend.latestPercentOfBest,
-          },
-          asthmaPlan,
-          { periodDays: periodDays },
-        ).replace(/</g, '&lt;')}</pre></section>`
+      ? `<section><h2>Бронхиальная астма</h2><pre style="font-size:12px;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">${escapeHtml(
+          formatAsthmaReportSummary(
+            {
+              count: pefTrend.count,
+              latest: pefTrend.latest,
+              personalBest: pefTrend.personalBest,
+              latestZone: pefTrend.latestZone
+                ? { green: 'Зелёная зона', yellow: 'Жёлтая зона', red: 'Красная зона' }[
+                    pefTrend.latestZone
+                  ]
+                : null,
+              latestPercentOfBest: pefTrend.latestPercentOfBest,
+            },
+            asthmaPlan,
+            { periodDays: periodDays },
+          ),
+        )}</pre></section>`
       : '';
 
   const therapyCourse = getPrescribedCourse(options.profileId);
@@ -302,13 +312,13 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
             if (therapyCompliance.missed) lines.push(`Пропущено: ${therapyCompliance.missed}`);
             if (therapyCompliance.reactions) lines.push(`Реакций: ${therapyCompliance.reactions}`);
           }
-          const body = lines.join('\n').replace(/</g, '&lt;');
+          const body = escapeHtml(lines.join('\n'));
           return `<section><h2>Терапия</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${body || 'Данные о терапии не введены.'}</pre></section>`;
         })()
       : '';
 
   const triggerContextHtml = options.blockIds.includes('triggerContext')
-    ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${formatTriggerContextReport(periodEntries).replace(/</g, '&lt;')}</pre></section>`
+    ? `<section><h2>Контекст триггеров</h2><pre style="font-size:12px;white-space:pre-wrap;background:${c.bg};padding:12px;border-radius:8px;border:1px solid ${c.border};">${escapeHtml(formatTriggerContextReport(periodEntries))}</pre></section>`
     : '';
 
   const pefHtml = options.blockIds.includes('peakflow')
@@ -332,9 +342,9 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
     <html><body style="font-family: Inter, Helvetica, Arial, sans-serif; padding: 24px; color:${c.text};">
       <h1 style="color:${c.head};font-family: 'Source Serif 4', Georgia, serif;">${doctorReportTitleRu()}</h1>
       <p style="font-size:13px;color:${c.head};font-weight:700;">${DOCTOR_REPORT_TITLE}</p>
-      <p><strong>Профиль:</strong> ${profile?.name || 'Профиль'}</p>
-      <p><strong>Год рождения:</strong> ${profile?.birthYear || ''}</p>
-      <p><strong>Период:</strong> ${formatPeriodLabel(options)}</p>
+      <p><strong>Профиль:</strong> ${escapeHtml(profile?.name || 'Профиль')}</p>
+      <p><strong>Год рождения:</strong> ${escapeHtml(profile?.birthYear || '')}</p>
+      <p><strong>Период:</strong> ${escapeHtml(formatPeriodLabel(options))}</p>
       <p style="font-size:12px;color:${c.muted};">${DOCTOR_REPORT_DISCLAIMER}</p>
       <hr style="border:none;border-top:1px solid ${c.border};" />
       ${pefHtml}
@@ -375,10 +385,12 @@ export async function generateDoctorReportPdf(options: DoctorReportOptions) {
 export async function exportPassportPdf(profile: Profile) {
   const passport = getAllergyPassport(profile.id);
   const allergies = parseAllergies(profile.allergies);
+  const crossReactions = parseAllergies(profile.crossReactionAllergies ?? '[]');
   const html = formatPassportHtml({
     profileName: profile.name,
     profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
     allergies,
+    crossReactions,
     passport,
     emergencyNumber: getEmergencyNumber(),
   });
@@ -402,10 +414,12 @@ export async function exportPassportPdf(profile: Profile) {
 export async function sharePassportText(profile: Profile) {
   const passport = getAllergyPassport(profile.id);
   const allergies = parseAllergies(profile.allergies);
+  const crossReactions = parseAllergies(profile.crossReactionAllergies ?? '[]');
   const text = formatPassportText({
     profileName: profile.name,
     profileAge: profile.birthYear ? getProfileAge(profile.birthYear) : undefined,
     allergies,
+    crossReactions,
     passport,
     emergencyNumber: getEmergencyNumber(),
   });

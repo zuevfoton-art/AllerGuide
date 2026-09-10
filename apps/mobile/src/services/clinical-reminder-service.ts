@@ -11,15 +11,23 @@ import {
   getActReminderNotificationContent,
   getDoctorVisitReminderNotificationContent,
   getEpinephrineExpiryNotificationContent,
+  getReturnReminderNotificationContent,
 } from '@/src/services/notification-content-service';
 import {
   appendClinicalReminderIds,
   cancelAllClinicalReminders,
+  getDiaryReminderHour,
+  getDiaryReminderMinute,
   isActReminderEnabled,
   isEpinephrineReminderEnabled,
   isVisitReminderEnabled,
   scheduleDateNotification,
 } from '@/src/services/notification-service';
+import {
+  planActiveReturnReminder,
+  recordReturnPushScheduled,
+  resolveActiveReturnStage,
+} from '@/src/services/reengagement-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
 import { listProfiles } from '@/src/services/profile-service';
 import { Platform } from 'react-native';
@@ -30,6 +38,10 @@ function contentForTrigger(trigger: ScheduledReminderTrigger) {
   if (trigger.kind === 'act') return getActReminderNotificationContent();
   if (trigger.kind === 'doctor-visit') {
     return getDoctorVisitReminderNotificationContent(trigger.visitLabel ?? 'Визит к врачу');
+  }
+  if (trigger.kind === 'diary-return') {
+    const stage = resolveActiveReturnStage();
+    return getReturnReminderNotificationContent(stage === 'reframe' ? 'reframe' : 'value');
   }
   return getEpinephrineExpiryNotificationContent();
 }
@@ -88,12 +100,23 @@ export async function reconcileClinicalReminders(): Promise<void> {
     }
   }
 
+  const returnReminder = planActiveReturnReminder({
+    reminderHour: getDiaryReminderHour(),
+    reminderMinute: getDiaryReminderMinute(),
+    now,
+  });
+  if (returnReminder) triggers.push(returnReminder);
+
   const limited = limitRemindersPerDay(triggers, MAX_CLINICAL_REMINDERS_PER_DAY);
   const scheduledIds: string[] = [];
 
   for (const trigger of limited) {
     const id = await scheduleDateNotification(atFromTrigger(trigger), contentForTrigger(trigger), payloadForTrigger(trigger));
     if (id) scheduledIds.push(id);
+    if (id && trigger.kind === 'diary-return') {
+      const stage = resolveActiveReturnStage() ?? 'value';
+      recordReturnPushScheduled(stage === 'reframe' ? 'reframe' : 'value', trigger.at);
+    }
   }
 
   await appendClinicalReminderIds(scheduledIds);

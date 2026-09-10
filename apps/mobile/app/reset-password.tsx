@@ -14,6 +14,7 @@ import {
   AuthLink,
   AuthError,
 } from '@/src/components/AuthForm';
+import { PasswordStrengthMeter } from '@/src/components/PasswordStrengthMeter';
 import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function ResetPasswordScreen() {
@@ -88,20 +89,29 @@ export default function ResetPasswordScreen() {
       <AuthField
         label={t('auth.resetPassword.newPassword')}
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(value) => {
+          setPassword(value);
+          if (error) setError('');
+        }}
         placeholder={t('auth.passwordMinPlaceholder')}
         secureTextEntry
+        testID="auth-reset-password-input"
         returnKeyType="next"
         submitBehavior="submit"
         onSubmitEditing={() => confirmRef.current?.focus()}
         {...authPasswordInputProps('new')}
       />
+      <PasswordStrengthMeter password={password} />
       <AuthField
         ref={confirmRef}
         label={t('auth.resetPassword.confirmPassword')}
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        onChangeText={(value) => {
+          setConfirmPassword(value);
+          if (error) setError('');
+        }        }
         secureTextEntry
+        testID="auth-reset-confirm-input"
         returnKeyType="go"
         submitBehavior="blurAndSubmit"
         onSubmitEditing={() => void handleSubmit()}

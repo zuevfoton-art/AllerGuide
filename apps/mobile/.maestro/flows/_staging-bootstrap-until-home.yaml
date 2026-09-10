@@ -1,0 +1,52 @@
+# Shared subflow: staging register (email + API) → onboarding → home.
+# Does not dismiss first-run hints — callers that need a clear UI run `_dismiss-hints.yaml`.
+appId: com.aclearo.app
+---
+- launchApp:
+    clearState: true
+- runFlow: _wait-login.yaml
+- runFlow: _tap-register.yaml
+- extendedWaitUntil:
+    visible:
+      id: auth-confirm-password-input
+    timeout: 15000
+- runScript: ../scripts/staging-credentials.js
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-login-input
+      FIELD_VALUE: ${output.email}
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-password-input
+      FIELD_VALUE: ${output.password}
+- runFlow:
+    file: _fill-by-id.yaml
+    env:
+      FIELD_ID: auth-confirm-password-input
+      FIELD_VALUE: ${output.password}
+- runFlow:
+    file: _tap-by-id.yaml
+    env:
+      FIELD_ID: auth-submit
+- extendedWaitUntil:
+    visible:
+      id: onboarding-intro-skip
+    timeout: 60000
+- tapOn:
+    id: onboarding-intro-skip
+- extendedWaitUntil:
+    visible:
+      id: onboarding-scenario-self
+    timeout: 10000
+- tapOn:
+    id: onboarding-scenario-self
+- runFlow:
+    file: _complete-first-run-profile.yaml
+    env:
+      PROFILE_NAME: Maestro Staging
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 30000

@@ -29,13 +29,20 @@ apps/mobile/.maestro/
     staging-credentials.js
   flows/
     _offline-bootstrap.yaml
+    _offline-bootstrap-until-home.yaml
+    _dismiss-hints.yaml            # wait hint-skip → skip all first-run tours
     _dismiss-ime.yaml              # tap auth-hero-title (не hideKeyboard/BACK)
+    _dismiss-profile-ime.yaml      # tap profile-screen-title (не hideKeyboard/BACK)
+    _tap-profile-save-number.yaml  # свернуть IME → scroll → «Сохранить номер»
     _tap-register.yaml             # Text testID + «Зарегистрироваться»
     onboarding-smoke.yaml … settings-smoke.yaml
     sos-no-profile-smoke.yaml      # SOS call bar after last profile is removed
+    profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы + «Показать ещё» (не в smoke-all)
+    profile-cross-reactions-add-all.yaml  # шаг 5 «Добавить все» → чипы на SOS (не в smoke-all)
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
     diary-photo-smoke.yaml         # §7.3 — skin photo step UI
-    smoke-all.yaml                 # P2.1a — все offline
+    market-smoke.yaml              # только при EXPO_PUBLIC_MARKET=true (не в smoke-all)
+    smoke-all.yaml                 # P2.1a — все offline (без Маркета)
     _staging-bootstrap.yaml
     staging-auth-smoke.yaml        # P2.1b — logout → login
     staging-backup-smoke.yaml      # P2.1b — upload + recovery key
@@ -97,7 +104,7 @@ maestro test .maestro/flows/staging-smoke-all.yaml
 | `diary-smoke` | новая запись → симптомы |
 | `scanner-smoke` | «молоко» → вердикт |
 | `sos-smoke` | карточка + паспорт |
-| `sos-no-profile-smoke` | список профилей → `profile-row-0` → edit → `profile-delete` → SOS без профиля |
+| `sos-no-profile-smoke` | список профилей → `profile-list-item-0` → edit → `profile-delete` → SOS без профиля |
 | `settings-smoke` | номер экстренной службы |
 
 ### P2.1b (staging)
@@ -134,6 +141,9 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `cloud-backup-upload` / `cloud-backup-download` | облачный бэкап |
 | `recovery-key-*` | модалка recovery key |
 | `profile-logout` | выход из аккаунта |
+| `profile-list-item-0` | первая строка профиля на хабе «Мои профили» |
+| `profile-edit-title` | заголовок `/profile-edit` |
+| `profile-delete` | удаление на `/profile-edit` (не на хабе) |
 
 ---
 
@@ -147,6 +157,8 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Post-fail скрин — app drawer | Maestro уже вышел. Смотреть `*-during.png` / `*-during-focus.txt` (кадр до выхода) |
 | `onboarding-intro-skip` + баннер «непредвиденная ошибка» | Hermes: `@noble/hashes` кэширует `crypto` при импорте. Соль — `getSecureRandomBytes` + `setSecureRandomBytes` из `src/install-runtime` / expo-crypto |
 | `allergen-milk` на шаге «Какая у тебя аллергия?» | Сначала `condition-food`, потом молоко. Общий `_complete-first-run-profile.yaml` |
+| Нет пыльцы полыни после «Поллиноз» | Рекомендации зависят от типа: `condition-pollinosis` → `allergen-birch-pollen` / `allergen-mugwort-pollen`. Тополь — под «Показать ещё». Standalone `profile-pollinosis-quick-pick.yaml` (не в `smoke-all`) |
+| Перекрёсты не видны в паспорте после шага 5 | Первый проход заканчивается на `crossReactions`; save должен брать `pendingIds` синхронно. Standalone `profile-cross-reactions-add-all.yaml` (не в `smoke-all`) |
 | `onboarding-intro-skip` + «Не удалось подключиться к серверу» | Staging release APK блокирует cleartext HTTP на `10.0.2.2`. `maestro-build-apk.sh staging` пишет `network_security_config` |
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
@@ -154,15 +166,22 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `scanner-input` не найден на «Сканер» | Поле спрятано за «Ввести вручную». Сначала `scanner-toggle-manual`, потом ввод. IME закрывать тапом `scanner-title`, не hideKeyboard |
 | `onboarding-intro-skip` + «Введите корректный номер телефона» | `random-phone.js` даёт 10 национальных цифр без `+`. Android `input text` превращает `+` в пробел; маска LoginField тогда оставляет `(99` |
 | `profile-logout` не виден на «Мои профили» | Кнопка ниже fold (бэкап/пыление). Сначала `profile-screen-title`, потом `scrollUntilVisible` |
-| `profile-delete` не найден на «Мои профили» | Удаление на `/profile-edit`, не на хабе. Тап `profile-row-0`, ждать `profile-edit-title`, `scrollUntilVisible` `profile-delete` (nightly 33952102610) |
 | Форма регистрации заполнена, но онбординг не пришёл | Hermes без JIT: PBKDF2 600k блокирует JS ~40 c. `src/install-runtime` ставит `PASSWORD_HASH_ITERATIONS_INTERPRETED`; ожидание `onboarding-intro-skip` — 60 c |
+| Офлайн-регистрация отклоняет пароль | `_offline-bootstrap-until-home.yaml` должен использовать `Maestro1!` (≥8, 3 класса). Старый 8-символьный lowercase+digit пароль не проходит `evaluatePasswordStrength`. Staging: `SmokeTest1!` в `staging-credentials.js` |
 | Кнопка «Подождите…» висит до таймаута (staging зелёный, offline красный) | Патч рантайма не попал в APK: Gradle берёт `index.js`, а не `package.json` `main`. Оба entry импортируют `src/install-runtime`. Staging хеширует на API, поэтому не падал |
 | Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |
 | `diary-wizard-primary` не найден после ввода «зуд» | Gboard перекрывает «Далее» (в дампе bounds схлопнуты в ноль). `_dismiss-wizard-ime.yaml` тапает `diary-editor-title`, затем `_tap-wizard-primary.yaml` |
-| `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, тапаем `diary-editor-title` |
+| `diary-wizard-primary` не виден на шаге симптомов (IME закрыта) | Чипы + поле + голос выше fold; sheet `maxHeight: 88%` + `flexGrow: 0` обрезает кнопку (nightly 34325395361: `[87,2373][993,2358]`). Кнопки мастера в `diary-editor-footer` вне ScrollView; скролл ограничен `diaryEditorScrollMaxHeight` |
+| `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-Слабый` |
+| `diary-photo-step` не появился после «Слабый» | Gboard не закрылся (title был View, не Pressable), второе поле не взяло фокус: `skinArea=лицоyпокраснение`, appearance пустое, Далее disabled (nightly 34349155324). Шапка вызывает `Keyboard.dismiss`; `_fill-wizard-field` тапает поле повторно после layout; `_tap-wizard-primary` требует `enabled: true` |
+| `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, поле прокручивается к фокусу; тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
+| Сборка падает на `APK is missing the embedded JS bundle`, хотя бандл в APK есть | `maestro-build-apk.sh` работает под `pipefail`, а `grep -q` закрывал пайп: как только листинг перерос 64K буфер, `unzip` умирает с SIGPIPE (141). Листинг читается в `APK_LISTING`, сверка — here-string |
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
 | `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |
+| `profile-delete` не найден на «Мои профили» | Кнопка только в `/profile-edit`, внизу длинной формы. С хаба тап `profile-list-item-0`, ждать `profile-edit-title`, `scrollUntilVisible` → `profile-delete` → «Удалить». После удаления снова хаб без таббара — `screen-header-back`, не Maestro `back` |
+| `profile-save-number` не найден после ввода 112 | Phone-pad на Pixel 6 выкидывает кнопку из UiAutomator (nightly 34052584781). `_dismiss-profile-ime.yaml` тапает `profile-screen-title`, затем `scrollUntilVisible` → `profile-save-number` |
+| `profile-screen-title` не найден при открытой IME | Заголовок хаба жил в ScrollView и схлопывался под brand header (nightly 34340207243: bounds `[190,380][892,357]`). `ScreenHeader` в `pinnedTop` рядом с `screen-brand-header` |
 
 См. [QA checklist § P2.1](./qa-checklist.md), [phase-2-run](./phase-2-run.md).

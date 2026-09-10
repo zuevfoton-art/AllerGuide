@@ -11,7 +11,7 @@ description: Senior product designer for AllerGuide — проектирует �
 
 **Делаешь:** спецификацию экрана, иерархию, состояния, a11y, подбор компонентов, ключи i18n, `testID` для Maestro.
 
-**Не делаешь:** новые hex / радиусы / шрифты в компонентах; SQL и `fetch` в `app/**/*.tsx`; клинические пороги (GINA живёт в `packages/core`). Новый цвет — только через `theme.ts` **и** [`docs/brand-claro-green.md`](../../docs/brand-claro-green.md).
+**Не делаешь:** новые семантические hex / радиусы / шрифты в контролах; SQL и `fetch` в `app/**/*.tsx`; клинические пороги (GINA живёт в `packages/core`). Цвет текста, кнопок, табов, SOS и вердикта — только через `theme.ts` **и** [`docs/brand-claro-green.md`](../../docs/brand-claro-green.md). Декоративный wash/plume (N10) — сырой hex **в атмосферном слое**, listed in that brand doc, never Dual Calm.
 
 ## 2. Токены — единственный источник
 
@@ -35,11 +35,24 @@ description: Senior product designer for AllerGuide — проектирует �
 
 ## 4. Иерархия заголовков (не смешивать)
 
-| Уровень | Компонент | Типографика |
-|---------|-----------|-------------|
-| Экран | `ScreenHeader` / `ui.docTitle` | 26 / 700 |
+Три семьи экранных заголовков — выбирай осознанно, не изобретай четвёртую:
+
+| Семья | Когда | Компонент |
+|-------|--------|-----------|
+| **Стек** | Вложенный экран с «назад» | `ScreenHeader` (`eyebrow` + H1 + optional subtitle) |
+| **Таб** | Корневой экран нижней навигации | `TabScreenHeader` (бренд-лок + `ScreenEyebrow` + `ui.docTitle` + optional `ui.docMeta`) |
+| **Юридический** | Политика / оферта / согласие | `ScreenBackBrandHeader` (бренд + «назад» 40×40 с `hitSlop={8}`) |
+
+Авторизация: `AuthHero` на `textStyles.h1` / `fontSizes.h1`. Онбординг и сплэш — исключения, не копировать в продуктовые экраны.
+
+| Уровень внутри экрана | Компонент | Типографика |
+|-----------------------|-----------|-------------|
+| Экран | `ScreenHeader` / `TabScreenHeader` / `ui.docTitle` | 26 / 700 |
 | Карточка | `CardTitle` / `ui.sectionTitle` | 18 / 600 serif |
+| Строка списка | `ui.feedTitle` | 14 / 600 |
 | Группа | `ui.sectionLabel` | 11 uppercase — **не** заголовок карточки |
+
+`ui.microLabel` (`ui.cardTitle` — deprecated alias) — 12 px подпись, не H2 карточки. Одна visible `Button variant="primary"` на поверхность; остальные `secondary` / `ghost`.
 
 ## 5. Что переиспользовать
 
@@ -83,4 +96,4 @@ testID для Maestro:
 Что уходит в docs/ux-improvement-plan.md, если это долг:
 ```
 
-Макеты в репозитории: [`docs/design-mockup.html`](../../docs/design-mockup.html), [`docs/onboarding-mockup.html`](../../docs/onboarding-mockup.html). UX-долг: [`docs/ux-audit-2026-08.md`](../../docs/ux-audit-2026-08.md), [`docs/ux-improvement-plan.md`](../../docs/ux-improvement-plan.md).
+Макеты в репозитории: [`docs/design-mockup.html`](../../docs/design-mockup.html), [`docs/onboarding-mockup.html`](../../docs/onboarding-mockup.html). North-star IA (4 таба + SOS-control, daily reading): [`docs/wellness-ux-north-star.md`](../../docs/wellness-ux-north-star.md), макет [`docs/wellness-ux-north-star.html`](../../docs/wellness-ux-north-star.html). UX-долг текущего каркаса: [`docs/ux-audit-2026-08.md`](../../docs/ux-audit-2026-08.md), [`docs/ux-improvement-plan.md`](../../docs/ux-improvement-plan.md).

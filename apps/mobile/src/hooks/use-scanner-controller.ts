@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
-import { computeScanTrends, type Profile, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
+import { computeScanTrends, extractGtinFromScan, type Profile, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
 import { useAppStore } from '@/src/store/app-store';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
@@ -16,6 +16,12 @@ import {
   type ScanResultExtended,
 } from '@/src/services/scanner-service';
 import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
+import {
+  buildScanDiaryDraft,
+  resolveScanDiarySection,
+  saveScanDiaryEntry,
+} from '@/src/services/scan-diary-service';
+import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import {
   addSafeProduct,
   isSafeProductSaved,
@@ -47,12 +53,18 @@ const HISTORY_DISPLAY_LIMIT = 5;
 
 export type UndoSnapshot = Pick<SafeProduct, 'name' | 'mode' | 'input' | 'savedAt'>;
 
+export type DiaryEntryDraft = {
+  sectionType: string;
+  prefill?: Record<string, string>;
+  initialStepId?: string;
+};
+
 function resolveScanProfile(): Profile | null {
   return useAppStore.getState().activeProfile ?? ensureCurrentProfileLoaded();
 }
 
 export function useScannerController() {
-  const { t, content } = useTranslation();
+  const { t, content, locale } = useTranslation();
   const localeContent = content();
   const activeProfile = useAppStore((s) => s.activeProfile);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
@@ -79,6 +91,8 @@ export function useScannerController() {
   const [capturing, setCapturing] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<CapturedScanPhoto | null>(null);
   const [resultPhotoUri, setResultPhotoUri] = useState<string | null>(null);
+  const [diaryDraft, setDiaryDraft] = useState<DiaryEntryDraft | null>(null);
+  const [diaryEntrySaved, setDiaryEntrySaved] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const lastScanRef = useRef<(() => void) | null>(null);
   const scanRequestIdRef = useRef(0);
@@ -153,6 +167,11 @@ export function useScannerController() {
     if (isCautionOrWorse) void hapticDanger();
   }, [result, loading, isCautionOrWorse]);
 
+  useEffect(() => {
+    setDiaryEntrySaved(false);
+    setDiaryDraft(null);
+  }, [result]);
+
   const clearUndo = useCallback(() => {
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
     undoTimerRef.current = null;
@@ -216,8 +235,9 @@ export function useScannerController() {
     setIngredientsOpen(false);
     setResultPhotoUri(null);
     try {
+      const barcodeLookup = extractGtinFromScan(text);
       const scanResult =
-        barcodeMode || isManualBarcodeInput(text)
+        barcodeMode || isManualBarcodeInput(text) || Boolean(barcodeLookup)
           ? await scanBarcode({ barcode: text, profile: scanProfile })
           : await scanFromOcr({
               mode: SMART_SCAN_MODE,
@@ -346,8 +366,9 @@ export function useScannerController() {
     setScanned(true);
     setTorchOn(false);
     setCameraOpen(false);
-    setInput(data);
-    void runCheck(data, true);
+    const lookup = extractGtinFromScan(data) || data;
+    setInput(lookup);
+    void runCheck(lookup, true);
   };
 
   const handleCropConfirm = async (cropped: CroppedScanPhoto) => {
@@ -401,6 +422,72 @@ export function useScannerController() {
       },
       onError: (error) => logCaughtError('ScannerScreen.confirmSaveSafe', error),
     });
+  };
+
+  /** Scan verdict → «Питание» diary draft; the user confirms the reaction before saving. */
+  const openDiaryEntry = async () => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
+
+    const draft = buildScanDiaryDraft({ result, scanText: input });
+    const sectionType = resolveScanDiarySection(result);
+    const editorState = await buildDiarySectionEditorState({
+      sectionType,
+      profileId,
+      profileAllergiesJson: activeProfile?.allergies ?? '[]',
+      locale,
+      profileBirthYear: activeProfile?.birthYear,
+      recognizedDish: draft.dish,
+      scanRef: draft.scanRef,
+    });
+    setDiaryDraft({
+      sectionType,
+      prefill: editorState.prefill?.[sectionType],
+      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+    });
+  };
+
+  const changeDiarySection = async (sectionType: string) => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
+    const draft = buildScanDiaryDraft({ result, scanText: input });
+    const editorState = await buildDiarySectionEditorState({
+      sectionType,
+      profileId,
+      profileAllergiesJson: activeProfile?.allergies ?? '[]',
+      locale,
+      profileBirthYear: activeProfile?.birthYear,
+      recognizedDish: draft.dish,
+      scanRef: draft.scanRef,
+    });
+    setDiaryDraft({
+      sectionType,
+      prefill: editorState.prefill?.[sectionType],
+      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+    });
+  };
+
+  const closeDiaryEntry = () => setDiaryDraft(null);
+
+  const saveDiaryEntry = async (
+    entries: { type: string; details: string; photoUris?: string[] }[],
+  ) => {
+    const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
+    if (!profileId || !result) return;
+
+    const saved = await saveScanDiaryEntry({
+      profileId,
+      entries,
+      level: result.level,
+      source: result.source,
+    });
+    if (!saved.ok) {
+      logCaughtError('ScannerScreen.saveDiaryEntry', new Error(saved.code));
+      return;
+    }
+    setDiaryDraft(null);
+    setDiaryEntrySaved(true);
+    void hapticSuccess();
   };
 
   const openHistoryItem = (item: ScanHistoryEntry) => {
@@ -487,6 +574,8 @@ export function useScannerController() {
     pendingPhoto,
     setPendingPhoto,
     resultPhotoUri,
+    diaryDraft,
+    diaryEntrySaved,
     isBarcodeEntry,
     supportsPhotoCapture,
     scanTrends,
@@ -518,6 +607,10 @@ export function useScannerController() {
     handleCropRetake,
     closeCamera,
     confirmSaveSafe,
+    openDiaryEntry,
+    changeDiarySection,
+    closeDiaryEntry,
+    saveDiaryEntry,
     openHistoryItem,
     formatMatchChip,
     reportAlias,

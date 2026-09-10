@@ -1,3 +1,4 @@
+import { offBarcodeLookupCandidates } from '@allerguide/core';
 import { getApiBaseUrl } from '@/src/services/api-client';
 import { logCaughtError } from '@/src/services/error-reporting';
 import {
@@ -14,6 +15,7 @@ export interface CatalogProduct {
   ingredients: string;
   allergenTags: string[];
   traceTags: string[];
+  category?: string;
 }
 
 interface ProductDto {
@@ -25,6 +27,7 @@ interface ProductDto {
   allergenTags?: string[];
   traceTags?: string[];
   source?: string;
+  category?: string;
 }
 
 function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct | null {
@@ -38,6 +41,7 @@ function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct
     ingredients: dto.ingredients ?? '',
     allergenTags: Array.isArray(dto.allergenTags) ? dto.allergenTags : [],
     traceTags: Array.isArray(dto.traceTags) ? dto.traceTags : [],
+    category: dto.category,
   };
 }
 
@@ -46,32 +50,36 @@ function toCatalogProduct(dto: ProductDto, fallbackBarcode = ''): CatalogProduct
  * source of truth with OFF write-through). Successful API hits are cached locally.
  */
 export async function fetchProductFromCatalog(barcode: string): Promise<CatalogProduct | null> {
-  const normalized = barcode.replace(/\s+/g, '').trim();
-  if (!normalized) return null;
+  const candidates = offBarcodeLookupCandidates(barcode);
+  if (candidates.length === 0) return null;
 
-  const cached = getCachedCatalogProduct(normalized);
-  if (cached) return cachedCatalogProductToDto(cached);
-
-  try {
-    const response = await fetch(`${getApiBaseUrl()}/api/products/${encodeURIComponent(normalized)}`);
-    if (!response.ok) return null;
-
-    const data = (await response.json()) as {
-      ok?: boolean;
-      product?: ProductDto;
-      source?: string;
-    };
-    if (!data.ok || !data.product) return null;
-
-    const product = toCatalogProduct(data.product, normalized);
-    if (!product) return null;
-
-    saveCachedCatalogProduct(product, data.source ?? 'api');
-    return product;
-  } catch (error) {
-    logCaughtError('fetchProductFromCatalog', error, { extra: { barcode: normalized } });
-    return null;
+  for (const code of candidates) {
+    const cached = getCachedCatalogProduct(code);
+    if (cached) return cachedCatalogProductToDto(cached);
   }
+
+  for (const code of candidates) {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/products/${encodeURIComponent(code)}`);
+      if (!response.ok) continue;
+
+      const data = (await response.json()) as {
+        ok?: boolean;
+        product?: ProductDto;
+        source?: string;
+      };
+      if (!data.ok || !data.product) continue;
+
+      const product = toCatalogProduct(data.product, code);
+      if (!product) continue;
+
+      saveCachedCatalogProduct(product, data.source ?? 'api');
+      return product;
+    } catch (error) {
+      logCaughtError('fetchProductFromCatalog', error, { extra: { barcode: code } });
+    }
+  }
+  return null;
 }
 
 /**

@@ -48,6 +48,17 @@ describe('allergy passport', () => {
     expect(text).toContain('103');
   });
 
+  it('includes cross-reactions as a separate passport line', () => {
+    const text = formatPassportText({
+      profileName: 'Анна',
+      allergies: ['Молоко'],
+      crossReactions: ['Козье молоко', 'Говядина'],
+      passport: createDefaultPassport(),
+    });
+    expect(text).toContain('Молоко');
+    expect(text).toContain('Перекрёстные реакции: Козье молоко, Говядина');
+  });
+
   it('defines three anaphylaxis grades', () => {
     expect(ANAPHYLAXIS_GRADES).toHaveLength(3);
     expect(ANAPHYLAXIS_GRADES.map((g) => g.grade)).toEqual([1, 2, 3]);
@@ -65,6 +76,17 @@ describe('allergy passport', () => {
     });
     expect(html).toContain('Паспорт аллергика');
     expect(html).toContain('Анна');
+  });
+
+  it('escapes markup in passport HTML export', () => {
+    const html = formatPassportHtml({
+      profileName: '<img src=x onerror="alert(1)">',
+      allergies: ['</p><script>alert(2)</script>'],
+      passport: createDefaultPassport(),
+    });
+    expect(html).not.toContain('<img src=x');
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
   });
 
   it('detects epinephrine eligibility from phenotypes (Phase 3)', () => {

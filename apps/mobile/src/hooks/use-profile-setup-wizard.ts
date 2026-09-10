@@ -5,7 +5,10 @@ import type { EmergencyContactDraft } from '@/src/services/emergency-contact-ser
 export {
   PROFILE_SETUP_WIZARD_STEPS,
   PROFILE_SETUP_WIZARD_STEP_COUNT,
+  PROFILE_SETUP_REQUIRED_STEPS,
   buildProfileSetupWizardNavOptions,
+  canFinishProfileSetupEarly,
+  isProfileSetupWizardStepOptional,
   createEmptyProfileSetupWizardDraft,
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
@@ -13,6 +16,7 @@ export {
   getVisibleProfileSetupStepProgress,
   getVisibleProfileSetupSteps,
   mergeCrossReactionAllergenIds,
+  resolveCrossReactionAllergenIdsForSave,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
   shouldSkipAllergenConfirmationsStep,

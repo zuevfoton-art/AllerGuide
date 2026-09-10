@@ -3,6 +3,7 @@ import {
   ALLERGY_CONFIRMATION_LABELS,
   type AllergyConfirmationSource,
 } from './allergy-confirmations';
+import { escapeHtml } from './html-escape';
 
 export interface ClinicalCoding {
   allergenId: string;
@@ -340,8 +341,57 @@ export const ALLERGEN_CLINICAL_CODES: Record<string, ClinicalCoding> = {
     allergenId: 'mugwort-pollen',
     icd11: 'CA08.4',
     icd11Label: 'Allergic rhinitis — mugwort pollen',
-    snomed: '418689008',
-    snomedLabel: 'Mugwort pollen allergy',
+    snomed: '22481000122100',
+    snomedLabel: 'Allergy to mugwort pollen',
+  },
+  'hazel-pollen': {
+    allergenId: 'hazel-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — hazel pollen',
+    snomed: '419263009',
+    snomedLabel: 'Allergy to tree pollen (parent — no verified species-specific finding)',
+  },
+  'oak-pollen': {
+    allergenId: 'oak-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — oak pollen',
+    snomed: '419263009',
+    snomedLabel: 'Allergy to tree pollen (parent — no verified species-specific finding)',
+  },
+  'maple-pollen': {
+    allergenId: 'maple-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — maple pollen',
+    snomed: '419263009',
+    snomedLabel: 'Allergy to tree pollen (parent — no verified species-specific finding)',
+  },
+  'ash-pollen': {
+    allergenId: 'ash-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — ash pollen',
+    snomed: '419263009',
+    snomedLabel: 'Allergy to tree pollen (parent — no verified species-specific finding)',
+  },
+  'willow-pollen': {
+    allergenId: 'willow-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — willow pollen',
+    snomed: '419263009',
+    snomedLabel: 'Allergy to tree pollen (parent — no verified species-specific finding)',
+  },
+  'poplar-pollen': {
+    allergenId: 'poplar-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — poplar pollen',
+    snomed: '419263009',
+    snomedLabel: 'Allergy to tree pollen (parent — no verified species-specific finding)',
+  },
+  'saltwort-pollen': {
+    allergenId: 'saltwort-pollen',
+    icd11: 'CA08.4',
+    icd11Label: 'Allergic rhinitis — saltwort pollen',
+    snomed: '300910009',
+    snomedLabel: 'Allergy to pollen (parent — no verified species-specific finding)',
   },
   'house-dust': {
     allergenId: 'house-dust',
@@ -487,12 +537,12 @@ export function formatCodedAllergiesReportHtml(lines: CodedAllergyLine[]): strin
   return `<ul>${lines
     .map(
       (line) =>
-        `<li><strong>${line.name}</strong><br/>` +
-        `ICD-11: ${line.icd11} — ${line.icd11Label}<br/>` +
+        `<li><strong>${escapeHtml(line.name)}</strong><br/>` +
+        `ICD-11: ${escapeHtml(line.icd11)} — ${escapeHtml(line.icd11Label)}<br/>` +
         (line.snomed
-          ? `SNOMED CT: ${line.snomed} (${line.snomedLabel})<br/>`
-          : `${line.snomedLabel}<br/>`) +
-        `Подтверждение: ${line.confirmedByLabel}</li>`,
+          ? `SNOMED CT: ${escapeHtml(line.snomed)} (${escapeHtml(line.snomedLabel)})<br/>`
+          : `${escapeHtml(line.snomedLabel)}<br/>`) +
+        `Подтверждение: ${escapeHtml(line.confirmedByLabel)}</li>`,
     )
     .join('')}</ul>`;
 }

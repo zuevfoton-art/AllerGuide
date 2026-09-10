@@ -285,6 +285,34 @@ export function extractComponentsFromIngredientsText(ingredientsText: string): D
   return matched;
 }
 
+export const DISH_TEXT_COMPONENTS_LIMIT = 20;
+
+/**
+ * Free-text composition → checklist components. Known catalog components win;
+ * otherwise the text is split by separators so scanner/OFF compositions that are
+ * not in the catalog still produce a checklist the user can correct.
+ */
+export function buildDishComponentsFromText(
+  ingredientsText: string,
+  limit = DISH_TEXT_COMPONENTS_LIMIT,
+): DishComponentDef[] {
+  const known = extractComponentsFromIngredientsText(ingredientsText);
+  if (known.length) return known;
+
+  const seen = new Set<string>();
+  const items: DishComponentDef[] = [];
+  for (const part of ingredientsText.split(/[,;]/)) {
+    const nameRu = part.trim().replace(/\s+/g, ' ');
+    if (nameRu.length < 2) continue;
+    const id = `ing:${nameRu.toLowerCase().replace(/ё/g, 'е')}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    items.push({ id, nameRu });
+    if (items.length >= limit) break;
+  }
+  return items;
+}
+
 export type ProductDishInput = {
   name?: string;
   ingredients?: string;

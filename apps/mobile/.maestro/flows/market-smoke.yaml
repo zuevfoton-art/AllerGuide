@@ -1,9 +1,15 @@
-# P2 — market: two-column catalog with photos
+# P2 — market: two-column catalog with photos.
+# Requires EXPO_PUBLIC_MARKET=true (tab is hidden by default).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
+# Market is no longer a tab: it lives in the profile hub (north-star N1).
 - tapOn:
-    id: tab-market
+    id: profile-header-button
+- tapOn:
+    id: profile-switcher-manage
+- tapOn:
+    id: hub-market
 - extendedWaitUntil:
     visible:
       id: market-grid

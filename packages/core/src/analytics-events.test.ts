@@ -11,7 +11,16 @@ describe('analytics-events', () => {
   it('defines a closed set of event names', () => {
     expect(ANALYTICS_EVENT_NAMES).toContain('screen_view');
     expect(ANALYTICS_EVENT_NAMES).toContain('scan_dish_vision');
+    expect(ANALYTICS_EVENT_NAMES).toContain('scan_saved_to_diary');
     expect(ANALYTICS_EVENT_NAMES).toContain('pollen_alert_sent');
+    expect(ANALYTICS_EVENT_NAMES).toContain('reengagement_shown');
+    expect(ANALYTICS_EVENT_NAMES).toContain('reengagement_action');
+    expect(ANALYTICS_EVENT_NAMES).toContain('week_ring_shown');
+    expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_opened');
+    expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_handoff_sos');
+    expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_started');
+    expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_completed');
+    expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_skipped');
     expect(ANALYTICS_EVENT_NAMES.length).toBeGreaterThanOrEqual(10);
   });
 

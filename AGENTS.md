@@ -14,7 +14,7 @@ See `README.md` for the basic stack/run summary and root `package.json` / per-pa
 2. [`docs/development-rules.md`](docs/development-rules.md) — where to put code, anti-patterns, PR checklist, Code Complete §10
 3. [`docs/codebase-index.md`](docs/codebase-index.md) — file map: routes, services, packages, «where to change X»
 
-Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase).
+Task context: [`docs/functional-requirements.md`](docs/functional-requirements.md) (what) · [`docs/roadmap-to-prod.md`](docs/roadmap-to-prod.md) (when/phase) · [`docs/wellness-design-plan.md`](docs/wellness-design-plan.md) (wellness UX phases W0–W9) · [`docs/wellness-ux-north-star.md`](docs/wellness-ux-north-star.md) (north-star IA and phases N0–N10).
 
 ### Non-negotiable rules (summary)
 
@@ -38,7 +38,7 @@ Procedure lives in a **skill** (loaded by `description`). Invariants live in a *
 | Kind | Path | When |
 |------|------|------|
 | Skill | `.cursor/skills/product-analyst/SKILL.md` | Metrics, KPI, funnels, analytics events, `FR-*` |
-| Skill | `.cursor/skills/product-designer/SKILL.md` | Screens, tokens, a11y, empty states, i18n copy |
+| Skill | `.cursor/skills/product-designer/SKILL.md` | Screens, tokens, a11y, empty states, i18n copy · phases [`docs/wellness-design-plan.md`](docs/wellness-design-plan.md) · north-star [`docs/wellness-ux-north-star.md`](docs/wellness-ux-north-star.md) |
 | Skill | `.cursor/skills/code-complete/SKILL.md` | Code construction / review quality |
 | Skill | `.cursor/skills/rework-commits/SKILL.md` | History rewrite on a feature branch |
 | Rule | `.cursor/rules/analytics-events.mdc` | `trackEvent` / taxonomy / PII |
@@ -67,6 +67,7 @@ Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgr
 - `pnpm lint` — ESLint for the mobile app and the API (`pnpm --filter mobile lint` for mobile only)
 - `pnpm map-pollen-ops-check` — ops check: map pollen fallback rate against the analytics dashboard
 - `pnpm check:analytics-taxonomy` — `trackEvent` names must match `ANALYTICS_EVENT_NAMES`; also part of `pnpm rc-gate`
+- `pnpm check:design-tokens` — literal `fontSize`/`lineHeight` and ad-hoc title keys must stay on the allowlist; also part of `pnpm rc-gate`
 - `pnpm rc-gate` — Phase 2 RC gate (typecheck + lint + test + taxonomy + doc/Maestro checks); see [`docs/rc-gate.md`](docs/rc-gate.md)
 - `pnpm yc-stage-phase0` — Stage API live on Yandex Cloud; see [`docs/yc-stage-gates.md`](docs/yc-stage-gates.md)
 - `pnpm yc-stage-phase1` — Lockbox pollen + YC container redeploy (`GOOGLE_POLLEN_API_KEY` + `YC_CONTAINER_ID` required); see same doc §Phase 1
@@ -86,6 +87,7 @@ Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgr
 - DB layout: data is split into two Postgres schemas — `profile` (per-user: `app_users`, `profiles`, `diary_entries`, `scan_history`, `emergency_contacts`, `profile_sos`, `sync_backups`, `password_reset_tokens`) and `catalog` (global: `allergens`, `cross_reactions`, `products`, `dishes`, `medicines`, `alias_feedback`, `market_products`, `market_offers`). Drizzle table objects are schema-qualified (`profileSchema`/`catalogSchema` in `db/app-schema.ts` / `db/catalog-schema.ts`), so query code is unchanged. `db/auth-schema.ts` still declares legacy `public.users` / `public.sessions` — nothing imports them. Human-readable standalone definitions live in `apps/api/sql/{profile,catalog}.sql` (reference artifacts; the live DB is managed by migrations).
 - Production hardening lives in `app.ts` + `src/middleware/security.ts`: helmet, strict CORS (`CORS_ORIGINS` allowlist), and per-IP rate limits. Set `RATE_LIMIT_DISABLED=true` to turn limits off (tests already do this where needed).
 - AI scan (`src/routes/scan.ts` + `src/lib/scan-cache.ts`): in-memory result cache + per-identity daily budget + optional `SCAN_REQUIRE_AUTH`. Enable with `AI_SCAN_ENABLED=true` + `OPENAI_API_KEY`; mobile flag `EXPO_PUBLIC_AI_SCAN_ENABLED=true`.
+- Ask chat (`src/routes/ask.ts`): explainer via `/api/ask`. Enable with `AI_CHAT_ENABLED=true` + `AI_SCAN_ENABLED`; mobile `EXPO_PUBLIC_AI_CHAT=true` (default off). Distress wording returns `{ handoff: 'sos' }` without calling the model.
 - Cloud sync (`src/routes/sync.ts`): disabled by default (`SYNC_ENABLED=false`). When enabled it persists to the `sync_backups` table (in-memory fallback when no DB) and authenticates via mobile JWT. Legacy `SYNC_API_KEY` is ignored whenever `JWT_SECRET` is set. The mobile client encrypts backups client-side (`@allerguide/core` `encryptString`, AES-GCM via Web Crypto or `@noble/ciphers`) before upload — the server is zero-knowledge. Enable on mobile with `EXPO_PUBLIC_CLOUD_SYNC=true`. NOTE: the backup key is currently device-held, so cross-device restore needs key escrow / a password-derived key (follow-up).
 - Mobile backend auth: set `JWT_SECRET` + `DATABASE_URL` on API, migrate, then enable `EXPO_PUBLIC_BACKEND_AUTH=true` on mobile.
 - Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`) to console/HTTP; `EXPO_PUBLIC_SENTRY_DSN` enables crash reporting. Both off by default.

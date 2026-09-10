@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { RecoveryKeyModal, type RecoveryKeyModalMode } from '@/src/components/RecoveryKeyModal';
@@ -49,10 +50,10 @@ export function CloudBackupCard() {
     setLoading(true);
     try {
       const result = await uploadBackup();
-      Alert.alert(
-        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
-        result.ok ? t('settings.uploadSuccess') : syncErrorMessage(result.code, result.error, t),
-      );
+      showStatusBanner({
+        tone: result.ok ? 'success' : 'error',
+        message: result.ok ? t('settings.uploadSuccess') : syncErrorMessage(result.code, result.error, t),
+      });
     } finally {
       setLoading(false);
     }
@@ -62,10 +63,10 @@ export function CloudBackupCard() {
     setLoading(true);
     try {
       const result = await downloadBackup(recoveryKey ? { recoveryKey } : undefined);
-      Alert.alert(
-        result.ok ? t('settings.syncSuccess') : t('settings.syncError'),
-        result.ok ? t('settings.downloadSuccess') : syncErrorMessage(result.code, result.error, t),
-      );
+      showStatusBanner({
+        tone: result.ok ? 'success' : 'error',
+        message: result.ok ? t('settings.downloadSuccess') : syncErrorMessage(result.code, result.error, t),
+      });
     } finally {
       setLoading(false);
     }

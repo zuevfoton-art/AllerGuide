@@ -2,11 +2,13 @@ import { useMemo, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
+  isDiaryVoiceStep,
   parseDishComponentDefs,
   type DiaryAutoMetadata,
   type DiarySection,
   type MedicineCard,
 } from '@allerguide/core';
+import { DiaryEditorFooter } from '@/src/components/DiaryEditorModal';
 import { DiaryDishComponentsField } from '@/src/components/diary/wizard/DiaryDishComponentsField';
 import { DiaryLegacyEditor } from '@/src/components/diary/wizard/DiaryLegacyEditor';
 import { DiaryPefZonePreview } from '@/src/components/diary/wizard/DiaryPefZonePreview';
@@ -14,6 +16,7 @@ import { DiaryStepField } from '@/src/components/diary/wizard/DiaryStepField';
 import { createStyles } from '@/src/components/diary/wizard/diary-wizard-styles';
 import { DishNameField } from '@/src/components/DishNameField';
 import { MedicineNameField } from '@/src/components/MedicineNameField';
+import { VoiceNoteButton } from '@/src/components/VoiceNoteButton';
 import {
   useDiaryWizardController,
   type DiaryWizardResult,
@@ -77,7 +80,13 @@ export function DiaryWizard({
     answers,
     previews: { scalePreview, pefZonePreview },
     suggestions: { medicineSuggestions, medicineSearching, dishSuggestions, dishSearching },
-    setters: { setAnswer, setFoodComponentSelection, selectMedicineSuggestion, selectDishSuggestion },
+    setters: {
+      setAnswer,
+      setFoodComponentSelection,
+      selectMedicineSuggestion,
+      selectDishSuggestion,
+      applyVoiceTranscript,
+    },
     goNext,
     goBack,
     skipSection,
@@ -194,6 +203,12 @@ export function DiaryWizard({
               onChange={(value) => setAnswer(current.id, value)}
             />
           )}
+          {isDiaryVoiceStep(section.type, current.id) ? (
+            <VoiceNoteButton
+              testID="diary-wizard-voice"
+              onTranscript={(transcript) => applyVoiceTranscript(current.id, transcript)}
+            />
+          ) : null}
         </View>
       ))}
 
@@ -210,37 +225,50 @@ export function DiaryWizard({
         <DiaryPefZonePreview zone={pefZonePreview.zone} percent={pefZonePreview.percent} />
       ) : null}
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <DiaryEditorFooter
+        deps={[
+          canAdvanceCurrentStep,
+          isLastStep,
+          sectionIndex,
+          stepIndex,
+          error,
+          canSkipSection,
+          Boolean(onDelete),
+          submitLabel ?? '',
+        ]}>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <View style={styles.actions}>
-        {sectionIndex === 0 && stepIndex === 0 ? null : (
-          <Pressable style={styles.secondaryBtn} onPress={goBack}>
-            <Text style={styles.secondaryText}>{t('common.back')}</Text>
+        <View style={styles.actions} collapsable={false}>
+          {sectionIndex === 0 && stepIndex === 0 ? null : (
+            <Pressable style={styles.secondaryBtn} onPress={goBack}>
+              <Text style={styles.secondaryText}>{t('common.back')}</Text>
+            </Pressable>
+          )}
+          <Pressable
+            style={[styles.primaryBtn, !canAdvanceCurrentStep && styles.btnDisabled]}
+            disabled={!canAdvanceCurrentStep}
+            onPress={goNext}
+            testID="diary-wizard-primary"
+            collapsable={false}>
+            <Text style={styles.primaryText}>
+              {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
+            </Text>
           </Pressable>
-        )}
-        <Pressable
-          style={[styles.primaryBtn, !canAdvanceCurrentStep && styles.btnDisabled]}
-          disabled={!canAdvanceCurrentStep}
-          onPress={goNext}
-          testID="diary-wizard-primary">
-          <Text style={styles.primaryText}>
-            {isLastStep ? (submitLabel ?? t('common.save')) : t('common.next')}
-          </Text>
-        </Pressable>
-      </View>
+        </View>
 
-      {canSkipSection ? (
-        <Pressable style={styles.skipBtn} onPress={skipSection}>
-          <Text style={styles.skipText}>{t('diaryWizard.skipSection')}</Text>
-        </Pressable>
-      ) : null}
+        {canSkipSection ? (
+          <Pressable style={styles.skipBtn} onPress={skipSection}>
+            <Text style={styles.skipText}>{t('diaryWizard.skipSection')}</Text>
+          </Pressable>
+        ) : null}
 
-      {onDelete ? (
-        <Pressable style={styles.deleteBtn} onPress={onDelete}>
-          <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
-          <Text style={styles.deleteText}>{t('diaryWizard.deleteEntry')}</Text>
-        </Pressable>
-      ) : null}
+        {onDelete ? (
+          <Pressable style={styles.deleteBtn} onPress={onDelete}>
+            <Ionicons name="trash-outline" size={16} color={theme.colors.danger} />
+            <Text style={styles.deleteText}>{t('diaryWizard.deleteEntry')}</Text>
+          </Pressable>
+        ) : null}
+      </DiaryEditorFooter>
     </View>
   );
 }

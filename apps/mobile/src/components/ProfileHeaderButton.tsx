@@ -5,7 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { activateProfile, listProfiles } from '@/src/services/profile-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { useAppStore } from '@/src/store/app-store';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
@@ -16,6 +18,8 @@ type ProfileHeaderButtonProps = {
   chipDetail?: string;
   /** `hub` opens profile management; `switcher` keeps the quick switch sheet. */
   destination?: 'switcher' | 'hub';
+  /** Measure only the trigger — the switcher Modal must stay outside the rect. */
+  hintAnchorId?: string;
 };
 
 export function ProfileHeaderButton({
@@ -23,6 +27,7 @@ export function ProfileHeaderButton({
   chipTitle,
   chipDetail,
   destination = 'switcher',
+  hintAnchorId,
 }: ProfileHeaderButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -57,47 +62,56 @@ export function ProfileHeaderButton({
     setOpen(true);
   };
 
+  const trigger =
+    variant === 'chip' && chipTitle ? (
+      <Pressable
+        testID="profile-header-chip"
+        style={styles.chip}
+        onPress={openTrigger}
+        accessibilityRole="button"
+        accessibilityLabel={t('profileSwitcher.switchTitle')}
+        hitSlop={8}>
+        <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
+        <View style={styles.chipTextCol}>
+          <Text style={styles.chipTitle} numberOfLines={1}>
+            {chipTitle}
+          </Text>
+          {chipDetail ? (
+            <Text style={styles.chipDetail} numberOfLines={1}>
+              {chipDetail}
+            </Text>
+          ) : null}
+        </View>
+        <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
+      </Pressable>
+    ) : (
+      <Pressable
+        testID="profile-header-button"
+        style={styles.button}
+        onPress={openTrigger}
+        accessibilityRole="button"
+        accessibilityLabel={
+          destination === 'hub' ? t('profiles.title') : t('profileSwitcher.switchTitle')
+        }
+        hitSlop={8}>
+        <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
+      </Pressable>
+    );
+
   return (
     <>
-      {variant === 'chip' && chipTitle ? (
-        <Pressable
-          testID="profile-header-chip"
-          style={styles.chip}
-          onPress={openTrigger}
-          accessibilityRole="button"
-          accessibilityLabel={t('profileSwitcher.switchTitle')}
-          hitSlop={8}>
-          <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
-          <View style={styles.chipTextCol}>
-            <Text style={styles.chipTitle} numberOfLines={1}>
-              {chipTitle}
-            </Text>
-            {chipDetail ? (
-              <Text style={styles.chipDetail} numberOfLines={1}>
-                {chipDetail}
-              </Text>
-            ) : null}
-          </View>
-          <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
-        </Pressable>
+      {hintAnchorId ? (
+        <HintAnchor id={hintAnchorId} style={styles.hintAnchor}>
+          {trigger}
+        </HintAnchor>
       ) : (
-        <Pressable
-          testID="profile-header-button"
-          style={styles.button}
-          onPress={openTrigger}
-          accessibilityRole="button"
-          accessibilityLabel={
-            destination === 'hub' ? t('profiles.title') : t('profileSwitcher.switchTitle')
-          }
-          hitSlop={8}>
-          <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
-        </Pressable>
+        trigger
       )}
 
       <Modal
         visible={open}
         transparent
-        animationType="fade"
+        animationType={useModalAnimation('fade')}
         onRequestClose={() => setOpen(false)}>
         <View style={styles.backdrop}>
           <Pressable
@@ -157,6 +171,7 @@ export function ProfileHeaderButton({
               </ScrollView>
             )}
             <Pressable
+              testID="profile-switcher-manage"
               style={styles.manageRow}
               onPress={() => {
                 setOpen(false);
@@ -175,6 +190,9 @@ export function ProfileHeaderButton({
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    hintAnchor: {
+      alignSelf: 'flex-start',
+    },
     button: {
       width: 40,
       height: 40,

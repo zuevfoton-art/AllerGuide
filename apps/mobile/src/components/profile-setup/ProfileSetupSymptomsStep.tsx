@@ -77,7 +77,7 @@ export function ProfileSetupSymptomsStep({
       <Text style={ui.sectionLabel}>{t('profileSetup.symptoms.title')}</Text>
       <Text style={styles.hint}>{t('profileSetup.symptoms.hint')}</Text>
 
-      <Text style={styles.groupLabel}>{t('profileSetup.symptoms.zonesLabel')}</Text>
+      <Text style={ui.sectionLabel}>{t('profileSetup.symptoms.zonesLabel')}</Text>
       <View style={styles.chipGrid}>
         {SYMPTOM_ZONE_IDS.map((zoneId) => {
           const active = baseline.zoneIds.includes(zoneId);
@@ -98,7 +98,7 @@ export function ProfileSetupSymptomsStep({
         })}
       </View>
 
-      <Text style={styles.groupLabel}>{t('profileSetup.symptoms.severityLabel')}</Text>
+      <Text style={ui.sectionLabel}>{t('profileSetup.symptoms.severityLabel')}</Text>
       <View style={styles.chipGrid}>
         {SYMPTOM_USUAL_SEVERITIES.map((severity) => {
           const active = baseline.usualSeverity === severity;
@@ -116,7 +116,7 @@ export function ProfileSetupSymptomsStep({
         })}
       </View>
 
-      <Text style={styles.groupLabel}>{t('profileSetup.symptoms.typicalLabel')}</Text>
+      <Text style={ui.sectionLabel}>{t('profileSetup.symptoms.typicalLabel')}</Text>
       <View style={styles.chipGrid}>
         {suggestions.map((item) => {
           const active = baseline.typicalSymptomIds.includes(item.id);
@@ -148,15 +148,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
-    },
-    groupLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      marginTop: 4,
     },
     chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: {

@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { parseAllergies, type Profile } from '@allerguide/core';
@@ -8,14 +8,16 @@ import { confirmLogout } from '@/src/utils/confirm-logout';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
-import { ThemeToggle } from '@/src/components/ThemeToggle';
+import { AppearanceSettings } from '@/src/components/AppearanceSettings';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { getEmergencyNumber, setEmergencyNumber } from '@/src/services/sos-service';
+import { getEmergencyNumber, setEmergencyNumber, DEFAULT_EMERGENCY_NUMBER } from '@/src/services/sos-service';
 import { CloudBackupCard } from '@/src/components/CloudBackupCard';
 import { LocalBackupCard } from '@/src/components/LocalBackupCard';
 import { RecoveryKeyBanner } from '@/src/components/RecoveryKeyBanner';
@@ -31,7 +33,7 @@ export default function ProfileScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [emergencyNumber, setEmergencyNumberState] = useState('103');
+  const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [appLockAvailable, setAppLockAvailable] = useState(false);
 
   const refresh = useCallback(() => {
@@ -51,22 +53,23 @@ export default function ProfileScreen() {
   };
 
   const saveEmergencyNumber = () => {
-    const normalized = emergencyNumber.replace(/[^\d+]/g, '') || '103';
+    const normalized = emergencyNumber.replace(/[^\d+]/g, '') || DEFAULT_EMERGENCY_NUMBER;
     setEmergencyNumber(normalized);
     setEmergencyNumberState(normalized);
-    Alert.alert(t('settings.saved'), t('settings.savedNumberMessage', { number: normalized }));
+    showStatusBanner({ tone: 'success', message: t('settings.savedNumberMessage', { number: normalized }) });
   };
 
   return (
-    <Screen>
-      <ScreenHeader
-        onBack={() => router.back()}
-        title={t('profiles.title')}
-        subtitle={t('profiles.subtitle')}
-        right={<LanguagePicker header />}
-        titleTestID="profile-screen-title"
-      />
-
+    <Screen
+      pinnedTop={
+        <ScreenHeader
+          onBack={() => router.back()}
+          title={t('profiles.title')}
+          subtitle={t('profiles.subtitle')}
+          right={<LanguagePicker header />}
+          titleTestID="profile-screen-title"
+        />
+      }>
       <Text style={ui.sectionLabel}>{t('profiles.listTitle')}</Text>
       <GlassCard padded={false}>
         {profiles.length === 0 ? (
@@ -78,7 +81,7 @@ export default function ProfileScreen() {
             return (
               <Pressable
                 key={profile.id}
-                testID={`profile-row-${index}`}
+                testID={`profile-list-item-${index}`}
                 style={[styles.row, index < profiles.length - 1 && styles.rowBorder]}
                 onPress={() => openEdit(profile.id)}
                 accessibilityRole="button"
@@ -97,10 +100,17 @@ export default function ProfileScreen() {
           })
         )}
       </GlassCard>
-      <Button label={t('profiles.add')} variant="primary" block onPress={() => router.push('/profile-setup?mode=add')} />
+      <Button
+        testID="profile-add"
+        label={t('profiles.add')}
+        variant="primary"
+        block
+        onPress={() => router.push('/profile-setup?mode=add')}
+      />
 
-      <Text style={ui.sectionLabel}>{t('sos.title')}</Text>
+      <Text style={ui.sectionLabel}>{t('profiles.sosPassport')}</Text>
       <GlassCard>
+        <CardTitle>{t('sos.title')}</CardTitle>
         <Text style={styles.cardHint}>{t('sos.subtitle')}</Text>
         <Button
           label={t('profiles.sosPassport')}
@@ -124,7 +134,7 @@ export default function ProfileScreen() {
           style={styles.input}
           value={emergencyNumber}
           onChangeText={setEmergencyNumberState}
-          placeholder="103"
+          placeholder={DEFAULT_EMERGENCY_NUMBER}
           placeholderTextColor={theme.colors.textMuted}
           accessibilityLabel={t('settings.emergencyNumber')}
           keyboardType="phone-pad"
@@ -132,7 +142,7 @@ export default function ProfileScreen() {
         <Button
           testID="profile-save-number"
           label={t('settings.saveNumber')}
-          variant="primary"
+          variant="secondary"
           block
           onPress={saveEmergencyNumber}
         />
@@ -160,6 +170,40 @@ export default function ProfileScreen() {
         </>
       ) : null}
 
+      <Text style={ui.sectionLabel}>{t('more.eyebrow')}</Text>
+      <GlassCard padded={false}>
+        <Pressable
+          testID="hub-market"
+          style={[styles.hubRow, styles.hubRowBorder]}
+          onPress={() => router.push('/market' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('market.title')}>
+          <View style={styles.hubIcon}>
+            <Ionicons name="bag-handle-outline" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.hubBody}>
+            <Text style={styles.hubTitle}>{t('market.title')}</Text>
+            <Text style={styles.hubHint}>{t('more.marketDesc')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+        <Pressable
+          testID="hub-expert"
+          style={styles.hubRow}
+          onPress={() => router.push('/expert' as any)}
+          accessibilityRole="button"
+          accessibilityLabel={t('expert.title')}>
+          <View style={styles.hubIcon}>
+            <Ionicons name="school-outline" size={20} color={theme.colors.accent} />
+          </View>
+          <View style={styles.hubBody}>
+            <Text style={styles.hubTitle}>{t('expert.title')}</Text>
+            <Text style={styles.hubHint}>{t('more.expertDesc')}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
+        </Pressable>
+      </GlassCard>
+
       <Text style={ui.sectionLabel}>{t('notifications.hubTitle')}</Text>
       <GlassCard padded={false}>
         <Pressable
@@ -178,8 +222,7 @@ export default function ProfileScreen() {
         </Pressable>
       </GlassCard>
 
-      <Text style={ui.sectionLabel}>{t('theme.title')}</Text>
-      <ThemeToggle />
+      <AppearanceSettings />
 
       <Text style={ui.sectionLabel}>{t('settings.aboutTitle')}</Text>
       <GlassCard padded={false}>
@@ -275,6 +318,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingHorizontal: 16,
       paddingVertical: 14,
     },
+    hubRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
     hubIcon: {
       width: 40,
       height: 40,

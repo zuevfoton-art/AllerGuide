@@ -8,6 +8,7 @@ import {
   parseCurrentPollenMapReadings,
   parseDailyPollenForecast,
   parseProfileAllergenIds,
+  resolvePollenTaxonMatch,
   OPEN_METEO_POLLEN_MAP_TAXON_IDS,
   POLLEN_MAP_TAXON_IDS,
   POLLEN_OPEN_METEO_FORECAST_DAYS,
@@ -418,14 +419,12 @@ function writeCache(cacheKey: string, snapshot: CachedPollenMapSnapshot): void {
   setSetting(cacheKey, JSON.stringify(snapshot));
 }
 
-function applyProfileRelevance(
+export function applyProfileRelevance(
   readings: PollenMapReading[],
   profileAllergenIds: string[],
 ): PollenMapReading[] {
   return readings.map((reading) => ({
     ...reading,
-    profileRelevant: Boolean(
-      reading.allergenId && profileAllergenIds.includes(reading.allergenId),
-    ),
+    profileRelevant: resolvePollenTaxonMatch(profileAllergenIds, reading.taxonId) !== 'none',
   }));
 }

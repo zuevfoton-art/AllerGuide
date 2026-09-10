@@ -1,0 +1,44 @@
+# S1: pollinosis → recommended pollen chips (birch, mugwort).
+# Standalone — do not add to smoke-all.yaml: saving would switch the active
+# profile away from the food/milk first-run profile that scanner-smoke needs.
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- tapOn:
+    id: profile-header-button
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- tapOn:
+    id: profile-add
+- tapOn:
+    id: profile-name
+- inputText: "Поллиноз"
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: profile-birth-year
+- inputText: "1990"
+- tapOn:
+    id: profile-wizard-next
+- tapOn:
+    id: condition-pollinosis
+- tapOn:
+    id: profile-wizard-next
+- extendedWaitUntil:
+    visible:
+      id: allergen-birch-pollen
+    timeout: 10000
+- assertVisible:
+    id: allergen-recommended-pollinosis
+- assertVisible:
+    id: allergen-birch-pollen
+- assertVisible:
+    id: allergen-mugwort-pollen
+- assertVisible:
+    id: allergen-open-catalog
+- tapOn:
+    id: allergen-show-more-pollinosis
+- assertVisible:
+    id: allergen-poplar-pollen

@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Screen } from '@/src/components/Screen';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { ErrorState } from '@/src/components/ErrorState';
@@ -14,12 +16,14 @@ import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { ScannerCameraModal } from '@/src/components/scanner/ScannerCameraModal';
 import { ScannerLists } from '@/src/components/scanner/ScannerLists';
 import { ScannerResultPanel } from '@/src/components/scanner/ScannerResultPanel';
+import { ScanDiaryEntryModal } from '@/src/components/scanner/ScanDiaryEntryModal';
 import { createStyles } from '@/src/components/scanner/scanner-styles';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useZoneColors } from '@/src/hooks/use-zone-colors';
 import { useScannerController } from '@/src/hooks/use-scanner-controller';
 import { useTranslation } from '@/src/store/locale-store';
+import { AI_CHAT_ENABLED } from '@/src/constants/features';
 import { isManualBarcodeInput, shouldShowScannerPageTrustLine } from '@/src/constants/scanner-mode';
 
 export default function ScannerScreen() {
@@ -28,6 +32,7 @@ export default function ScannerScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const scan = useScannerController();
+  useHintTour('scanner');
   const verdictColors = useZoneColors(scan.verdictZone);
 
   if (scan.pendingPhoto) {
@@ -118,35 +123,41 @@ export default function ScannerScreen() {
         </View>
       </View>
 
-      <Button
-        testID="scanner-primary-camera"
-        label={t('scanner.smartScan')}
-        variant="primary"
-        block
-        disabled={scan.loading}
-        onPress={() => void scan.openCamera('scanner')}
-      />
+      <HintAnchor id="scanner.photo">
+        <Button
+          testID="scanner-primary-camera"
+          label={t('scanner.smartScan')}
+          variant="primary"
+          block
+          disabled={scan.loading}
+          onPress={() => void scan.openCamera('scanner')}
+        />
+      </HintAnchor>
 
       <View style={styles.secondaryRow}>
-        <Pressable
-          style={styles.barcodeBtn}
-          onPress={() => void scan.openCamera('barcode')}
-          testID="scanner-barcode"
-          accessibilityRole="button">
-          <Ionicons name="barcode-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
-        </Pressable>
-        <Pressable
-          style={styles.manualToggleBtn}
-          onPress={() => scan.setManualOpen((value) => !value)}
-          testID="scanner-toggle-manual"
-          accessibilityRole="button"
-          accessibilityState={{ expanded: scan.manualOpen }}>
-          <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
-          <Text style={styles.secondaryBtnText}>
-            {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
-          </Text>
-        </Pressable>
+        <HintAnchor id="scanner.barcode" style={{ flex: 1 }}>
+          <Pressable
+            style={styles.barcodeBtn}
+            onPress={() => void scan.openCamera('barcode')}
+            testID="scanner-barcode"
+            accessibilityRole="button">
+            <Ionicons name="barcode-outline" size={18} color={theme.colors.accent} />
+            <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
+          </Pressable>
+        </HintAnchor>
+        <HintAnchor id="scanner.manual" style={{ flex: 1 }}>
+          <Pressable
+            style={styles.manualToggleBtn}
+            onPress={() => scan.setManualOpen((value) => !value)}
+            testID="scanner-toggle-manual"
+            accessibilityRole="button"
+            accessibilityState={{ expanded: scan.manualOpen }}>
+            <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
+            <Text style={styles.secondaryBtnText}>
+              {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
+            </Text>
+          </Pressable>
+        </HintAnchor>
       </View>
 
       {!scan.displayResult && !scan.loading ? (
@@ -224,6 +235,7 @@ export default function ScannerScreen() {
           isVisionOnly={scan.isVisionOnly}
           hasVisionEvidence={scan.hasVisionEvidence}
           isCurrentInputSaved={scan.isCurrentInputSaved}
+          diaryEntrySaved={scan.diaryEntrySaved}
           activeProfileId={scan.activeProfileId}
           matchIdByLabel={scan.matchIdByLabel}
           formatMatchChip={scan.formatMatchChip}
@@ -231,8 +243,33 @@ export default function ScannerScreen() {
           onOpenCamera={() => void scan.openCamera('scanner')}
           onOpenManual={() => scan.setManualOpen(true)}
           onSaveSafe={scan.confirmSaveSafe}
+          onSaveDiary={() => void scan.openDiaryEntry()}
           onReportAlias={scan.reportAlias}
           onScanAgain={scan.scanAgain}
+        />
+      ) : null}
+
+      {AI_CHAT_ENABLED && scan.displayResult ? (
+        <Button
+          testID="scanner-ask"
+          label={t('today.ask')}
+          variant="ghost"
+          block
+          onPress={() => router.push('/ask')}
+        />
+      ) : null}
+
+      {scan.diaryDraft ? (
+        <ScanDiaryEntryModal
+          visible
+          sectionType={scan.diaryDraft.sectionType}
+          prefill={scan.diaryDraft.prefill}
+          initialStepId={scan.diaryDraft.initialStepId}
+          profileId={scan.activeProfileId}
+          profileAllergiesJson={scan.activeProfile?.allergies ?? '[]'}
+          onClose={scan.closeDiaryEntry}
+          onSectionChange={(sectionType) => void scan.changeDiarySection(sectionType)}
+          onComplete={(entries) => void scan.saveDiaryEntry(entries)}
         />
       ) : null}
 

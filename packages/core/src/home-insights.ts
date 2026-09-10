@@ -1,4 +1,5 @@
 import type { AllergyConditionId } from './allergy-conditions';
+import type { ReturnStage } from './reengagement';
 import {
   hasDiaryEntryOnDate,
   shouldScheduleActReminder,
@@ -10,8 +11,13 @@ export const HOME_INSIGHTS_MAX_ITEMS = 5;
 export type PlannedHomeInsightKind =
   | 'select-profile'
   | 'diary-missing-today'
+  | 'return-quick-checkin'
+  | 'return-value'
+  | 'return-reframe'
+  | 'return-restart'
   | 'act-due'
   | 'therapy-reminder'
+  | 'profile-incomplete'
   | 'wellness'
   | 'phenotype';
 
@@ -32,8 +38,19 @@ export type PlanHomeInsightsInput = {
   wellnessCount: number;
   phenotypeCount: number;
   hasTherapyReminder?: boolean;
+  /**
+   * Progressive profiling after an early wizard finish (N5): a soft row, never a
+   * blocker and never framed as the user's failure.
+   */
+  hasEmergencyContacts?: boolean;
   now?: Date;
   maxItems?: number;
+  returnStage?: ReturnStage | null;
+  /**
+   * Today owns a permanent 0–3 check-in block (north-star N2), so the rows that
+   * only ask for a check-in would repeat it.
+   */
+  hasStandaloneCheckIn?: boolean;
 };
 
 /**
@@ -50,7 +67,20 @@ export function planHomeInsights(input: PlanHomeInsightsInput): PlannedHomeInsig
     return planned.slice(0, maxItems);
   }
 
-  if (!hasDiaryEntryOnDate(input.diaryEntries, now, now)) {
+  const checkInRowWouldRepeatToday = input.hasStandaloneCheckIn === true;
+
+  if (input.returnStage) {
+    if (!(input.returnStage === 'quick-checkin' && checkInRowWouldRepeatToday)) {
+      planned.push({
+        id: `return-${input.returnStage}`,
+        kind: `return-${input.returnStage}`,
+        priority: 1,
+      });
+    }
+  } else if (
+    !checkInRowWouldRepeatToday &&
+    !hasDiaryEntryOnDate(input.diaryEntries, now, now)
+  ) {
     planned.push({
       id: 'diary-missing-today',
       kind: 'diary-missing-today',
@@ -64,6 +94,10 @@ export function planHomeInsights(input: PlanHomeInsightsInput): PlannedHomeInsig
 
   if (input.hasTherapyReminder) {
     planned.push({ id: 'therapy-reminder', kind: 'therapy-reminder', priority: 3 });
+  }
+
+  if (input.hasEmergencyContacts === false) {
+    planned.push({ id: 'profile-incomplete', kind: 'profile-incomplete', priority: 4 });
   }
 
   for (let index = 0; index < input.wellnessCount; index += 1) {

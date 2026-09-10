@@ -12,9 +12,10 @@ import {
   type AsitCourse,
 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
+import { CardTitle } from '@/src/components/CardTitle';
 import { Button } from '@/src/components/Button';
+import { Disclaimer } from '@/src/components/Disclaimer';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import type { DiaryEntry } from '@/src/types';
 
@@ -26,7 +27,6 @@ interface AsitCourseCardProps {
 
 export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardProps) {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const compliance = useMemo(() => computeAsitCompliance(entries, 30), [entries]);
@@ -36,7 +36,7 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
       <GlassCard style={styles.card}>
         <View style={styles.headerRow}>
           <Ionicons name="fitness" size={18} color={theme.colors.accent} />
-          <Text style={ui.cardTitle}>{t('asit.title')}</Text>
+          <CardTitle>{t('asit.title')}</CardTitle>
         </View>
         <Text style={styles.hint}>{t('asit.emptyCourse')}</Text>
         <Button
@@ -53,7 +53,7 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
     <GlassCard style={styles.card}>
       <View style={styles.headerRow}>
         <Ionicons name="fitness" size={18} color={theme.colors.accent} />
-        <Text style={ui.cardTitle}>{t('asit.title')}</Text>
+        <CardTitle>{t('asit.title')}</CardTitle>
         <Pressable style={styles.editBtn} onPress={() => router.push('/asit-course' as any)}>
           <Text style={styles.editText}>{t('asit.editCourse')}</Text>
         </Pressable>
@@ -92,6 +92,7 @@ export function AsitCourseCard({ course, entries, onLogDose }: AsitCourseCardPro
       <View style={styles.actions}>
         <Button label={t('asit.logDose')} variant="primary" size="sm" onPress={onLogDose} />
       </View>
+      <Disclaimer collapsible>{t('asit.disclaimer')}</Disclaimer>
     </GlassCard>
   );
 }

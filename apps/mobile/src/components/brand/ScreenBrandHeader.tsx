@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { HOME_TAB_HREF } from '@/src/components/brand/brand-header-nav';
@@ -12,7 +12,11 @@ type ScreenBrandHeaderProps = {
   right?: ReactNode;
 };
 
-/** Left-aligned mark + slogan. After login, the lockup opens Home. */
+/**
+ * Left-aligned brand mark. After login, the lockup opens Today.
+ * The slogan lives on the auth hero, onboarding and «About» only — repeating it on
+ * every tab cost ~180 pt of chrome before the content (north-star §3.3).
+ */
 export function ScreenBrandHeader({ left, right }: ScreenBrandHeaderProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -36,9 +40,6 @@ export function ScreenBrandHeader({ left, right }: ScreenBrandHeaderProps) {
           accessibilityLabel={t('brand.goHome')}>
           <View style={styles.lockup}>
             <BrandLogo size={32} />
-            <Text style={styles.slogan} numberOfLines={1}>
-              {t('brand.slogan')}
-            </Text>
           </View>
         </Pressable>
         {left}
@@ -76,15 +77,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'flex-end',
       gap: 8,
-    },
-    slogan: {
-      flexShrink: 1,
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textMuted,
-      textAlign: 'left',
-      letterSpacing: 0.2,
     },
   });
 }

@@ -1,11 +1,14 @@
 import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs';
+import { HintSpotlight } from '@/src/components/hints/HintSpotlight';
+import { useHintAnchor } from '@/src/components/hints/HintAnchor';
+import { BrandTabIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
+import { density } from '@/src/constants/layout';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
-import { BrandTabIcon, BrandFeatureIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
 
 function TabIcon({
   name,
@@ -23,18 +26,30 @@ function TabIcon({
   return <BrandTabIcon name={name} size={size} color={focused ? color : muted} focused={focused} />;
 }
 
+function tabAnchorId(testID: string): string {
+  return testID.replace(/^tab-/, 'tab.');
+}
+
 function TabBarButton({
   testID,
   accessibilityState,
   style,
+  onLayout: tabOnLayout,
   ...props
 }: BottomTabBarButtonProps & { testID: string }) {
   const { colors } = useTheme();
   const focused = accessibilityState?.selected ?? false;
+  const { ref, onLayout } = useHintAnchor(tabAnchorId(testID));
 
   return (
     <Pressable
       {...(props as ComponentProps<typeof Pressable>)}
+      ref={ref}
+      onLayout={(event) => {
+        tabOnLayout?.(event);
+        onLayout();
+      }}
+      collapsable={false}
       testID={testID}
       accessibilityState={accessibilityState}
       style={[
@@ -51,14 +66,54 @@ function TabBarButton({
   );
 }
 
+/**
+ * SOS is not a peer of the four navigation tabs: it is an emergency control that
+ * keeps a permanent danger tint so it reads as a call button, not as a section.
+ */
+function SosTabBarButton({
+  accessibilityState,
+  style,
+  onLayout: tabOnLayout,
+  ...props
+}: BottomTabBarButtonProps) {
+  const { colors } = useTheme();
+  const { ref, onLayout } = useHintAnchor('tab.sos');
+
+  return (
+    <Pressable
+      {...(props as ComponentProps<typeof Pressable>)}
+      ref={ref}
+      onLayout={(event) => {
+        tabOnLayout?.(event);
+        onLayout();
+      }}
+      collapsable={false}
+      testID="tab-sos"
+      accessibilityState={accessibilityState}
+      style={[
+        tabBarStyles.button,
+        tabBarStyles.emergencyButton,
+        { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
+        style,
+      ]}>
+      {props.children}
+    </Pressable>
+  );
+}
+
 const tabBarStyles = StyleSheet.create({
+  shell: { flex: 1 },
   button: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 20,
     marginHorizontal: 2,
-    minHeight: 44,
+    minHeight: density.tapMinHeight,
+  },
+  emergencyButton: {
+    borderWidth: 1,
+    minWidth: density.tapMinHeight,
   },
 });
 
@@ -67,8 +122,10 @@ export default function TabsLayout() {
   const { isCompact, showTabLabels, tabBarHeight, tabBarPaddingBottom } = useResponsiveLayout();
   const { t } = useTranslation();
   const iconSize = isCompact ? 22 : 24;
+  const sosSlotWidth = isCompact ? 60 : 68;
 
   return (
+    <View style={tabBarStyles.shell}>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -113,7 +170,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: t('tabs.home'),
+          title: t('tabs.today'),
           tabBarButton: (props) => <TabBarButton {...props} testID="tab-home" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -129,7 +186,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="diary"
         options={{
-          title: t('tabs.diary'),
+          title: t('tabs.journal'),
           tabBarButton: (props) => <TabBarButton {...props} testID="tab-diary" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -145,7 +202,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="scanner"
         options={{
-          title: t('tabs.scanner'),
+          title: t('tabs.scan'),
           tabBarButton: (props) => <TabBarButton {...props} testID="tab-scanner" />,
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -154,20 +211,6 @@ export default function TabsLayout() {
               color={colors.accent}
               muted={colors.textMuted}
               size={iconSize}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="market"
-        options={{
-          title: t('tabs.market'),
-          tabBarButton: (props) => <TabBarButton {...props} testID="tab-market" />,
-          tabBarIcon: ({ focused }) => (
-            <BrandFeatureIcon
-              name="market"
-              size={iconSize}
-              color={focused ? colors.accent : colors.textMuted}
             />
           ),
         }}
@@ -192,19 +235,17 @@ export default function TabsLayout() {
         name="sos"
         options={{
           title: t('tabs.sos'),
-          tabBarButton: (props) => <TabBarButton {...props} testID="tab-sos" />,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon
-              name="sos"
-              focused={focused}
-              color={colors.danger}
-              muted={colors.textMuted}
-              size={iconSize}
-            />
+          tabBarButton: (props) => <SosTabBarButton {...props} />,
+          tabBarIcon: () => (
+            <BrandTabIcon name="sos" size={iconSize} color={colors.danger} focused />
           ),
           tabBarActiveTintColor: colors.danger,
+          tabBarInactiveTintColor: colors.danger,
+          tabBarItemStyle: { flex: 0, paddingHorizontal: 0, width: sosSlotWidth },
         }}
       />
     </Tabs>
+    <HintSpotlight />
+    </View>
   );
 }

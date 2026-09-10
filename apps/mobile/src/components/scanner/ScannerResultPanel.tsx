@@ -21,6 +21,7 @@ type Props = {
   isVisionOnly: boolean;
   hasVisionEvidence: boolean;
   isCurrentInputSaved: boolean;
+  diaryEntrySaved: boolean;
   activeProfileId: number | null;
   matchIdByLabel: Map<string, string>;
   formatMatchChip: (label: string, allergenId?: string) => string;
@@ -28,6 +29,7 @@ type Props = {
   onOpenCamera: () => void;
   onOpenManual: () => void;
   onSaveSafe: () => void;
+  onSaveDiary: () => void;
   onReportAlias: () => void;
   onScanAgain: () => void;
 };
@@ -44,6 +46,7 @@ export function ScannerResultPanel({
   isVisionOnly,
   hasVisionEvidence,
   isCurrentInputSaved,
+  diaryEntrySaved,
   activeProfileId,
   matchIdByLabel,
   formatMatchChip,
@@ -51,6 +54,7 @@ export function ScannerResultPanel({
   onOpenCamera,
   onOpenManual,
   onSaveSafe,
+  onSaveDiary,
   onReportAlias,
   onScanAgain,
 }: Props) {
@@ -151,7 +155,11 @@ export function ScannerResultPanel({
         </View>
       ) : null}
 
-      {displayResult.reason ? <Text style={styles.reason}>{displayResult.reason}</Text> : null}
+      {result.barcodeScanStatus === 'not_found' || result.lookupFailed ? (
+        <Text style={styles.reason}>{t('scanner.barcodeNotFoundHint')}</Text>
+      ) : displayResult.reason ? (
+        <Text style={styles.reason}>{displayResult.reason}</Text>
+      ) : null}
 
       {displayResult.matches?.length > 0 ? (
         <View style={styles.chipWrap}>
@@ -226,6 +234,28 @@ export function ScannerResultPanel({
       <Text style={styles.verifyHint}>{t('scanner.verifyPackageHint')}</Text>
 
       <View style={styles.actionCol}>
+        {activeProfileId ? (
+          diaryEntrySaved ? (
+            <>
+              <Button
+                testID="scanner-saved-diary"
+                label={t('scanner.savedToDiary')}
+                variant="secondary"
+                block
+                disabled
+              />
+              <Text style={styles.diaryHint}>{t('scanner.savedToDiaryHint')}</Text>
+            </>
+          ) : (
+            <Button
+              testID="scanner-save-diary"
+              label={t('scanner.saveToDiary')}
+              icon="book-outline"
+              block
+              onPress={onSaveDiary}
+            />
+          )
+        ) : null}
         {isLow && activeProfileId ? (
           isCurrentInputSaved ? (
             <Button label={t('scanner.savedToSafe')} variant="secondary" block disabled />

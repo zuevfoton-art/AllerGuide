@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   ALLERGY_CONDITION_TYPES,
@@ -40,6 +40,8 @@ import {
 import { getStoredScenario, markOnboardingComplete } from '@/src/services/settings-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { trackEvent } from '@/src/services/analytics-service';
+import { trackProfileSetupAllergenStepComplete } from '@/src/services/profile-setup-analytics';
+import { confirmAction } from '@/src/utils/confirm-action';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { Button } from '@/src/components/Button';
@@ -56,12 +58,14 @@ import { ProfileSetupSymptomsStep } from '@/src/components/profile-setup/Profile
 import { ProfileSetupConditionHistoryStep } from '@/src/components/profile-setup/ProfileSetupConditionHistoryStep';
 import type { ConditionHistoryDrafts } from '@/src/components/ConditionHistoryEditor';
 import {
+  canFinishProfileSetupEarly,
   getNextProfileSetupWizardStep,
   getPreviousProfileSetupWizardStep,
   getVisibleProfileSetupStepProgress,
   buildProfileSetupWizardNavOptions,
   reconcileComorbidityLinks,
   reconcileConditionHistoryDrafts,
+  resolveCrossReactionAllergenIdsForSave,
   validateProfileSetupWizardDraft,
   validateProfileSetupWizardStep,
   type ProfileSetupWizardStep,
@@ -198,14 +202,13 @@ export default function ProfileSetupScreen() {
   const handleConditionsChange = (next: AllergyConditionId[]) => {
     const gatedRemoved = getGatedConditionRemovals(conditions, next);
     if (gatedRemoved.length > 0) {
-      Alert.alert(
-        t('profileSetup.conditionRemoveTitle'),
-        t('profileSetup.conditionRemoveMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          { text: t('common.save'), onPress: () => applyConditionsChange(next) },
-        ],
-      );
+      confirmAction({
+        title: t('profileSetup.conditionRemoveTitle'),
+        message: t('profileSetup.conditionRemoveMessage'),
+        cancelLabel: t('common.cancel'),
+        confirmLabel: t('common.save'),
+        onConfirm: () => applyConditionsChange(next),
+      });
       return;
     }
     applyConditionsChange(next);
@@ -232,7 +235,7 @@ export default function ProfileSetupScreen() {
     setError('');
   };
 
-  const save = async () => {
+  const save = async (crossReactionIds: string[] = crossReactionAllergenIds) => {
     const validationError = validateProfileSetupWizardDraft(draft, { scenario });
     if (validationError) {
       setError(tProfileError(validationError));
@@ -249,7 +252,7 @@ export default function ProfileSetupScreen() {
         type: effectiveType,
         allergies: selected,
         allergyConfirmations: normalizeAllergyConfirmations(selected, confirmations),
-        crossReactionAllergies: crossReactionAllergenIds,
+        crossReactionAllergies: crossReactionIds,
         childConsent,
         scenario: scenario ?? undefined,
       });
@@ -350,6 +353,11 @@ export default function ProfileSetupScreen() {
       } else {
         trackEvent('profile_setup_step_complete', { step: 'symptomBaseline' });
       }
+    } else if (currentStep === 'allergens') {
+      trackProfileSetupAllergenStepComplete({
+        selectedAllergenIds: selected,
+        conditionIds: conditions,
+      });
     } else {
       trackEvent('profile_setup_step_complete', { step: currentStep });
     }
@@ -366,7 +374,13 @@ export default function ProfileSetupScreen() {
       return;
     }
 
-    void save();
+    void save(
+      resolveCrossReactionAllergenIdsForSave(
+        currentStep,
+        crossPendingIds,
+        crossReactionAllergenIds,
+      ),
+    );
   };
 
   const goBack = () => {
@@ -388,6 +402,8 @@ export default function ProfileSetupScreen() {
 
   const isLastStep = getNextProfileSetupWizardStep(currentStep, wizardNav) === null;
   const showBack = stepProgressMeta.current > 1;
+  const canFinishEarly =
+    !isLastStep && canFinishProfileSetupEarly(currentStep, draft, { scenario });
 
   // The primary button always states what it does, which is why the optional
   // steps no longer carry a separate «press Next to skip» hint.
@@ -445,6 +461,7 @@ export default function ProfileSetupScreen() {
           }}
           confirmations={confirmations}
           onConfirmationsChange={setConfirmations}
+          conditionIds={conditions}
           suggestedConditionIds={suggestedConditions}
           onAddSuggestedCondition={(conditionId) =>
             applyConditionsChange(
@@ -513,6 +530,19 @@ export default function ProfileSetupScreen() {
       ) : null}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      {canFinishEarly ? (
+        <Button
+          testID="profile-finish-early"
+          label={t('profileSetup.finishEarly')}
+          variant="ghost"
+          block
+          onPress={() => {
+            trackEvent('profile_setup_step_skip', { step: 'optional_tail', from: currentStep });
+            void save();
+          }}
+        />
+      ) : null}
 
       <View style={styles.actions}>
         {showBack ? (

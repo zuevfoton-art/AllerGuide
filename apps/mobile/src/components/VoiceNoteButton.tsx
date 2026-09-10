@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -33,7 +34,7 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
           : code === 'VOICE_NOT_SUPPORTED'
             ? t('voiceNote.notSupported')
             : t('voiceNote.failed');
-      Alert.alert(t('voiceNote.title'), message);
+      showStatusBanner({ tone: 'error', message });
       setState('idle');
     },
     [t],

@@ -1,7 +1,21 @@
 import { Text, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { DiaryEntry } from '@allerguide/core';
+import {
+  latestDiaryTimestamp,
+  calendarDaysBetween,
+  resolveReturnStage,
+  type DiaryEntry,
+} from '@allerguide/core';
+import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
+import { DailyReadingCard } from '@/src/components/DailyReadingCard';
+import { WeekRingCard } from '@/src/components/WeekRingCard';
+import {
+  buildTodayReading,
+  formatTodayDate,
+  hasCheckedInToday,
+} from '@/src/services/today-reading-service';
+import { trackReturnAction, trackReturnShown } from '@/src/services/reengagement-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
@@ -15,6 +29,8 @@ import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
+import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { TierScale } from '@/src/components/TierScale';
 import { CardTitle } from '@/src/components/CardTitle';
 import { SkeletonCard } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
@@ -23,15 +39,13 @@ import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabI
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
+import { AI_CHAT_ENABLED } from '@/src/constants/features';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import {
-  resolveZoneColors,
-  useZoneColors,
-  zoneFromWellnessLevel,
-  zoneFromWellnessVerbalTier,
-} from '@/src/hooks/use-zone-colors';
+import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
+import { HintAnchor } from '@/src/components/hints/HintAnchor';
+import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
@@ -67,6 +81,7 @@ export default function HomeScreen() {
   const wellness = wellnessState.data;
   const loadingWellness = wellnessState.loading;
   const reloadWellness = wellnessState.reload;
+  useHintTour('home', { ready: !loadingWellness });
 
   const reloadHomeData = useCallback(() => {
     void reloadWellness();
@@ -99,8 +114,6 @@ export default function HomeScreen() {
     );
   }, [wellness, activeProfileId, profile, profileCapabilities]);
 
-  const indexZone = wellness ? zoneFromWellnessLevel(wellness.level) : null;
-  const indexColors = useZoneColors(indexZone);
   const pollenColors = wellness
     ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.pollenTier), theme.colors)
     : null;
@@ -113,6 +126,18 @@ export default function HomeScreen() {
     [profile],
   );
 
+  const returnStage = useMemo(
+    () => resolveReturnStage({ lastDiaryAt: latestDiaryTimestamp(diaryEntries) }),
+    [diaryEntries],
+  );
+
+  const checkedInToday = useMemo(() => hasCheckedInToday(diaryEntries), [diaryEntries]);
+  const dateLabel = useMemo(() => formatTodayDate(locale), [locale]);
+  const reading = useMemo(
+    () => buildTodayReading({ profile, wellness, t }),
+    [profile, wellness, t],
+  );
+
   const insightItems = useMemo(
     () =>
       buildHomeInsightItems({
@@ -121,10 +146,28 @@ export default function HomeScreen() {
         wellness,
         phenotypeHints,
         prescribedCourse,
+        returnStage,
+        hasStandaloneCheckIn: Boolean(activeProfileId),
         t,
       }),
-    [profile, diaryEntries, wellness, phenotypeHints, prescribedCourse, t],
+    [
+      profile,
+      diaryEntries,
+      wellness,
+      phenotypeHints,
+      prescribedCourse,
+      returnStage,
+      activeProfileId,
+      t,
+    ],
   );
+
+  useEffect(() => {
+    if (!returnStage) return;
+    const last = latestDiaryTimestamp(diaryEntries);
+    const gap = last ? calendarDaysBetween(new Date(last), new Date()) : 0;
+    trackReturnShown(returnStage, gap, 'home');
+  }, [returnStage, diaryEntries]);
 
   return (
     <Screen
@@ -139,7 +182,7 @@ export default function HomeScreen() {
       refreshing={wellnessState.refreshing}
       brandHeaderRight={
         <>
-          <ProfileHeaderButton destination="hub" />
+          <ProfileHeaderButton destination="hub" hintAnchorId="home.profile" />
           <Pressable
             onPress={() => router.push('/(tabs)/sos')}
             style={styles.sosBtn}
@@ -151,6 +194,8 @@ export default function HomeScreen() {
         </>
       }>
 
+      <TabScreenHeader eyebrow={dateLabel} title={profile?.name ?? t('tabs.today')} />
+
       {loadingWellness && !wellness ? (
         <>
           <SkeletonCard hero lines={3} />
@@ -158,73 +203,76 @@ export default function HomeScreen() {
           <SkeletonCard lines={2} />
         </>
       ) : (
-      <GlassCard zone={indexZone}>
-        <CardTitle>{t('home.stateToday')}</CardTitle>
-
-        {wellness ? (
-          <>
-            <Pressable
-              onPress={() => setDetailsOpen(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('home.index')}>
-              <View style={ui.heroKpi}>
-                <View style={styles.heroKpiLeft}>
-                  <Text style={styles.heroKpiLabel}>{t('home.index')}</Text>
-                  <Text
-                    style={[
-                      styles.statusPhrase,
-                      indexColors ? { color: indexColors.fg } : null,
-                    ]}>
-                    {t(`wellness.statusPhrase.${wellness.level}`)}
-                  </Text>
-                </View>
-                <Text style={[ui.heroKpiNum, indexColors ? { color: indexColors.fg } : null]}>
-                  {wellness.score}
-                  <Text style={ui.heroKpiSub}> / 100</Text>
-                </Text>
-              </View>
-            </Pressable>
-
-            <Text style={styles.envHint}>
-              {t(`wellness.forecast.${wellness.confidence}`)}
-            </Text>
-            <Text style={styles.interpret}>
-              {t(`wellness.primaryFactorSentence.${wellness.display.primaryFactorId}`)}
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.interpret}>{t('home.selectProfile')}</Text>
-        )}
-      </GlassCard>
+        <HintAnchor id="home.wellness" testID="home-wellness-kpi">
+          <DailyReadingCard reading={reading} />
+        </HintAnchor>
       )}
 
+      {activeProfileId && !(loadingWellness && !wellness) ? (
+        <>
+          <QuickCheckInCard
+            profileId={activeProfileId}
+            checkedInToday={checkedInToday}
+            onSaved={reloadHomeData}
+          />
+          <WeekRingCard entries={diaryEntries} surface="today" />
+          {AI_CHAT_ENABLED ? (
+            <Button
+              testID="today-ask"
+              label={t('today.ask')}
+              variant="ghost"
+              block
+              onPress={() => router.push('/ask')}
+            />
+          ) : null}
+        </>
+      ) : null}
+
       {wellness ? (
-      <GlassCard>
+      <GlassCard variant="soft">
         <CardTitle>{t('home.factors')}</CardTitle>
         <Pressable
           onPress={() => setDetailsOpen(true)}
           accessibilityRole="button"
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
-          <Text style={[ui.kpiValue, pollenColors ? { color: pollenColors.fg } : null]}>
-            {t(`wellness.pollen.${wellness.display.pollenTier}`)}
-          </Text>
+          <View style={styles.factorValue}>
+            <TierScale
+              activeIndex={verbalTierIndex(wellness.display.pollenTier)}
+              zone={zoneFromWellnessVerbalTier(wellness.display.pollenTier)}
+            />
+            <Text style={[ui.kpiValue, pollenColors ? { color: pollenColors.fg } : null]}>
+              {t(`wellness.pollen.${wellness.display.pollenTier}`)}
+            </Text>
+          </View>
         </Pressable>
         <Pressable
           onPress={() => setDetailsOpen(true)}
           accessibilityRole="button"
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.air')}</Text>
-          <Text style={[ui.kpiValue, airColors ? { color: airColors.fg } : null]}>
-            {t(`wellness.air.${wellness.display.airTier}`)}
-          </Text>
+          <View style={styles.factorValue}>
+            <TierScale
+              activeIndex={verbalTierIndex(wellness.display.airTier)}
+              zone={zoneFromWellnessVerbalTier(wellness.display.airTier)}
+            />
+            <Text style={[ui.kpiValue, airColors ? { color: airColors.fg } : null]}>
+              {t(`wellness.air.${wellness.display.airTier}`)}
+            </Text>
+          </View>
         </Pressable>
         <Pressable
           onPress={() => setDetailsOpen(true)}
           accessibilityRole="button"
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
-          <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
+          <View style={styles.factorValue}>
+            <TierScale
+              activeIndex={verbalTierIndex(wellness.display.diaryTier)}
+              zone={zoneFromWellnessVerbalTier(wellness.display.diaryTier)}
+            />
+            <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
+          </View>
         </Pressable>
 
         <Pressable
@@ -269,9 +317,10 @@ export default function HomeScreen() {
 
       {loadingWellness && !wellness ? null : (
       <>
+      <HintAnchor id="home.insights" testID="home-insights">
       <GlassCard padded={false}>
         <View style={[styles.listHead, styles.listHeadPad]}>
-          <Text style={ui.cardTitle}>{t('home.insightsTitle')}</Text>
+          <CardTitle>{t('home.insightsTitle')}</CardTitle>
         </View>
         {insightItems.length === 0 ? (
           <View style={styles.emptyInsights}>
@@ -290,6 +339,7 @@ export default function HomeScreen() {
           ))
         )}
       </GlassCard>
+      </HintAnchor>
 
       <GlassCard padded={false}>
         <Pressable
@@ -337,13 +387,35 @@ function InsightRow({
         <Text style={ui.feedTitle}>{item.title}</Text>
         <Text style={ui.feedSub}>{item.text}</Text>
       </View>
-      {item.action ? (
-        <Button
-          label={item.action.label}
-          variant="primary"
-          size="sm"
-          onPress={() => router.push(item.action!.href as never)}
-        />
+      {item.action || item.extraAction ? (
+        <View style={styles.insightActions}>
+          {item.action ? (
+            <Button
+              label={item.action.label}
+              variant="ghost"
+              size="sm"
+              onPress={() => {
+                if (item.kind.startsWith('return-')) {
+                  trackReturnAction(item.kind.replace('return-', '') as never, 'cta');
+                }
+                router.push(item.action!.href as never);
+              }}
+            />
+          ) : null}
+          {item.extraAction ? (
+            <Button
+              label={item.extraAction.label}
+              variant="ghost"
+              size="sm"
+              onPress={() => {
+                if (item.kind.startsWith('return-')) {
+                  trackReturnAction(item.kind.replace('return-', '') as never, 'extra');
+                }
+                router.push(item.extraAction!.href as never);
+              }}
+            />
+          ) : null}
+        </View>
       ) : null}
     </View>
   );
@@ -419,6 +491,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 12,
     },
     listRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    insightActions: { gap: 4, alignItems: 'flex-end' },
     emptyInsights: {
       paddingHorizontal: 16,
       paddingVertical: 16,
@@ -445,5 +518,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'center',
     },
     expertBody: { flex: 1, gap: 2 },
+    factorValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   });
+}
+
+function verbalTierIndex(tier: string): number {
+  if (tier === 'none') return 0;
+  if (tier === 'low') return 1;
+  if (tier === 'moderate') return 2;
+  if (tier === 'high') return 3;
+  return 0;
 }

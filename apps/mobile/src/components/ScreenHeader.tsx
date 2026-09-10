@@ -2,6 +2,7 @@ import { useMemo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { radii } from '@/src/constants/layout';
+import { fontSizes, lineHeights, textStyles, tracking } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -35,7 +36,7 @@ export function ScreenHeader({
   const { t } = useTranslation();
 
   return (
-    <View style={[styles.wrap, style]}>
+    <View style={[styles.wrap, style]} collapsable={false}>
       {onBack ? (
         <Pressable
           testID="screen-header-back"
@@ -49,7 +50,9 @@ export function ScreenHeader({
       ) : null}
       <View style={styles.textWrap} accessibilityRole="header">
         {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <Text testID={titleTestID} style={styles.title}>{title}</Text>
+        <View testID={titleTestID} collapsable={false}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
       {linkLabel && onLinkPress ? (
@@ -69,6 +72,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'flex-start',
       justifyContent: 'space-between',
       gap: 12,
+      flexShrink: 0,
     },
     backBtn: {
       width: 40,
@@ -83,28 +87,26 @@ function createStyles({ colors, fonts }: AppTheme) {
     textWrap: { flex: 1, gap: 4 },
     eyebrow: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
+      fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
-      letterSpacing: 0.6,
+      letterSpacing: tracking.label,
     },
     title: {
-      fontFamily: fonts.serifBold,
-      fontSize: 26,
+      ...textStyles.h1,
       fontWeight: '700',
       color: colors.head,
-      letterSpacing: -0.3,
     },
     subtitle: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
+      ...textStyles.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
     },
     link: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       fontWeight: '600',
       color: colors.accent,
       marginTop: 8,

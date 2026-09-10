@@ -20,6 +20,15 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /NODE_ENV=production/);
     assert.match(script, /unzip -l "\$APK"/);
     assert.match(script, /missing the embedded JS bundle/);
+    // Under `pipefail`, `grep -q` closing the pipe early kills unzip with
+    // SIGPIPE once the listing outgrows the 64K buffer, so the guard reports a
+    // missing bundle on a good APK. Match a captured listing instead.
+    assert.match(script, /APK_LISTING="\$\(unzip -l "\$APK"\)"/);
+    assert.doesNotMatch(
+      script,
+      /unzip -l "\$APK"\s*\|\s*grep/,
+      'do not pipe the APK listing into grep — SIGPIPE + pipefail fails the guard',
+    );
     assert.match(script, /enable_emulator_http_cleartext/);
     assert.match(script, /network_security_config/);
     assert.match(script, /10\.0\.2\.2/);
@@ -106,7 +115,7 @@ describe('Maestro nightly CI invariants', () => {
       /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
     );
 
-    for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_wait-login\.yaml/);
       assert.match(flow, /_tap-register\.yaml/);
@@ -121,6 +130,30 @@ describe('Maestro nightly CI invariants', () => {
         `${name} must wait for confirm field after register tap`,
       );
     }
+
+    for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+      const flow = read(`apps/mobile/.maestro/flows/${name}`);
+      const untilHome = name.replace('.yaml', '-until-home.yaml');
+      assert.match(flow, new RegExp(untilHome.replace('.', '\\.')));
+      assert.match(flow, /_dismiss-hints\.yaml/);
+    }
+
+    const offlineUntilHome = read('apps/mobile/.maestro/flows/_offline-bootstrap-until-home.yaml');
+    assert.match(offlineUntilHome, /FIELD_VALUE: Maestro1!/);
+    assert.doesNotMatch(offlineUntilHome, /FIELD_VALUE: maestro1\b/);
+
+    const gate = read('scripts/rc-gate-check.mjs');
+    assert.match(gate, /_offline-bootstrap-until-home\.yaml/);
+    assert.match(gate, /_staging-bootstrap-until-home\.yaml/);
+
+    const dismissHints = read('apps/mobile/.maestro/flows/_dismiss-hints.yaml');
+    assert.match(dismissHints, /id: hint-skip/);
+    assert.match(dismissHints, /id: hint-overlay/);
+
+    const onboardingSmoke = read('apps/mobile/.maestro/flows/onboarding-smoke.yaml');
+    assert.match(onboardingSmoke, /_offline-bootstrap-until-home\.yaml/);
+    assert.match(onboardingSmoke, /id: hint-overlay/);
+    assert.match(onboardingSmoke, /_dismiss-hints\.yaml/);
   });
 
   it('applies the CSPRNG and PBKDF2 cost patches on both JS entries', () => {
@@ -179,16 +212,24 @@ describe('Maestro nightly CI invariants', () => {
   it('folds diary IME via pinned editor chrome before tapping Далее', () => {
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
     assert.match(dismiss, /id: diary-editor-title/);
+    assert.match(dismiss, /waitForAnimationToEnd/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
 
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
+    assert.match(editorModal, /onPress=\{Keyboard\.dismiss\}/);
+    assert.match(editorModal, /testID="diary-editor-footer"/);
+    assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
+
+    const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
+    assert.match(wizard, /DiaryEditorFooter/);
+    assert.match(wizard, /testID="diary-wizard-primary"/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
@@ -198,6 +239,8 @@ describe('Maestro nightly CI invariants', () => {
     const fill = read('apps/mobile/.maestro/flows/_fill-wizard-field.yaml');
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
+    assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(tapPrimary, /enabled: true/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
@@ -215,25 +258,22 @@ describe('Maestro nightly CI invariants', () => {
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
     assert.match(photo, /id: diary-photo-step/);
-  });
-
-  it('opens profile edit before tapping profile-delete', () => {
-    const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
-    assert.match(flow, /id: profile-screen-title/);
-    assert.match(flow, /id: profile-row-0/);
-    assert.match(flow, /id: profile-edit-title/);
-    assert.match(flow, /scrollUntilVisible:[\s\S]*?id: profile-delete/);
-    assert.ok(
-      flow.indexOf('profile-row-0') < flow.indexOf('id: profile-delete'),
-      'sos-no-profile-smoke must open a profile row before profile-delete',
+    assert.match(photo, /_tap-wizard-choice.yaml/);
+    assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
+    assert.doesNotMatch(
+      photo,
+      /text: "Слабый"/,
+      'diary-photo-smoke must not tap itching copy while IME may cover it',
     );
 
-    const hub = read('apps/mobile/app/profile.tsx');
-    assert.match(hub, /testID=\{`profile-row-\$\{index\}`\}/);
+    const tapChoice = read('apps/mobile/.maestro/flows/_tap-wizard-choice.yaml');
+    assert.match(tapChoice, /_dismiss-wizard-ime.yaml/);
+    assert.match(tapChoice, /scrollUntilVisible/);
+    assert.match(tapChoice, /id: \$\{CHOICE_ID\}/);
 
-    const edit = read('apps/mobile/app/profile-edit.tsx');
-    assert.match(edit, /titleTestID="profile-edit-title"/);
-    assert.match(edit, /testID="profile-delete"/);
+    const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
+    assert.match(stepField, /diary-choice-\$\{choice\}/);
+    assert.match(stepField, /diary-choice-\$\{step\.id\}/);
   });
 
   it('opens scanner manual input before typing молоко', () => {
@@ -258,9 +298,133 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(screen, /inputTestID="scanner-input"/);
   });
 
+  it('keeps first-run food → milk and documents pollinosis quick-pick (S1)', () => {
+    const firstRun = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
+    assert.match(firstRun, /id: condition-food/);
+    assert.match(firstRun, /id: allergen-milk/);
+    assert.ok(
+      firstRun.indexOf('condition-food') < firstRun.indexOf('allergen-milk'),
+      'first-run must pick food before tapping allergen-milk',
+    );
+
+    const core = read('packages/core/src/condition-allergen-recommendations.ts');
+    assert.match(core, /food:\s*\[\s*'milk'/);
+
+    const picker = read('apps/mobile/src/components/AllergenPicker.tsx');
+    assert.match(picker, /allergen-recommended-\$\{group\.conditionId\}/);
+    assert.match(picker, /allergen-show-more-\$\{group\.conditionId\}/);
+    assert.match(picker, /testID="allergen-open-catalog"/);
+
+    const pollinosis = read('apps/mobile/.maestro/flows/profile-pollinosis-quick-pick.yaml');
+    assert.match(pollinosis, /id: condition-pollinosis/);
+    assert.match(pollinosis, /id: allergen-birch-pollen/);
+    assert.match(pollinosis, /id: allergen-mugwort-pollen/);
+    assert.match(pollinosis, /id: allergen-recommended-pollinosis/);
+    assert.match(pollinosis, /id: allergen-open-catalog/);
+    assert.match(pollinosis, /id: allergen-show-more-pollinosis/);
+    assert.match(pollinosis, /id: allergen-poplar-pollen/);
+    assert.ok(
+      pollinosis.indexOf('condition-pollinosis') < pollinosis.indexOf('allergen-birch-pollen'),
+    );
+    assert.ok(
+      pollinosis.indexOf('allergen-show-more-pollinosis') <
+        pollinosis.indexOf('allergen-poplar-pollen'),
+    );
+
+    const smokeAll = read('apps/mobile/.maestro/flows/smoke-all.yaml');
+    assert.doesNotMatch(
+      smokeAll,
+      /profile-pollinosis-quick-pick/,
+      'pollinosis quick-pick must stay off smoke-all so scanner keeps the food profile',
+    );
+  });
+
+  it('keeps cross-reactions add-all off smoke-all and checks SOS chips', () => {
+    const flow = read('apps/mobile/.maestro/flows/profile-cross-reactions-add-all.yaml');
+    assert.match(flow, /id: cross-reactions-add-all/);
+    assert.match(flow, /id: allergen-milk/);
+    assert.match(flow, /id: profile-save/);
+    assert.match(flow, /id: sos-cross-chip-goat-milk/);
+    assert.match(flow, /id: sos-cross-reactions-row/);
+    const smokeAll = read('apps/mobile/.maestro/flows/smoke-all.yaml');
+    assert.doesNotMatch(
+      smokeAll,
+      /profile-cross-reactions-add-all/,
+      'cross-reactions add-all must stay off smoke-all so scanner keeps the food profile',
+    );
+  });
+
+  it('opens profile-edit before tapping profile-delete, then leaves the hub without BACK', () => {
+    const flow = read('apps/mobile/.maestro/flows/sos-no-profile-smoke.yaml');
+    assert.match(flow, /id: profile-list-item-0/);
+    assert.match(flow, /id: profile-edit-title/);
+    assert.match(
+      flow,
+      /scrollUntilVisible:[\s\S]*?id: profile-delete[\s\S]*?-\s+tapOn:\s+id: profile-delete/,
+    );
+    assert.match(flow, /text: "Удалить"/);
+    assert.match(flow, /id: screen-header-back/);
+    assert.match(flow, /id: tab-sos/);
+    assert.ok(
+      flow.indexOf('id: profile-list-item-0') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must open the hub row before tapping profile-delete',
+    );
+    assert.ok(
+      flow.indexOf('id: profile-edit-title') < flow.indexOf('id: profile-delete'),
+      'sos-no-profile-smoke must wait for profile-edit before scrolling to delete',
+    );
+    assert.ok(
+      flow.indexOf('id: profile-delete') < flow.indexOf('id: screen-header-back'),
+      'sos-no-profile-smoke must delete before leaving the hub',
+    );
+    assert.ok(
+      flow.indexOf('id: screen-header-back') < flow.indexOf('id: tab-sos'),
+      'sos-no-profile-smoke must leave the hub via screen-header-back before tab-sos',
+    );
+
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /testID=\{`profile-list-item-\$\{index\}`\}/);
+    assert.doesNotMatch(hub, /testID="profile-delete"/);
+
+    const edit = read('apps/mobile/app/profile-edit.tsx');
+    assert.match(edit, /titleTestID="profile-edit-title"/);
+    assert.match(edit, /testID="profile-delete"/);
+    assert.match(read('apps/mobile/src/components/ScreenHeader.tsx'), /testID="screen-header-back"/);
+  });
+
+  it('folds profile IME via hub title before tapping profile-save-number', () => {
+    const flow = read('apps/mobile/.maestro/flows/settings-smoke.yaml');
+    assert.match(flow, /_tap-profile-save-number\.yaml/);
+    assert.match(flow, /scrollUntilVisible:[\s\S]*?id: profile-emergency-number/);
+    assert.doesNotMatch(
+      flow,
+      /^\s*-\s+tapOn:\s*\n\s+id: profile-save-number\s*$/m,
+      'settings-smoke must not tap profile-save-number while IME may cover it',
+    );
+
+    const tapSave = read('apps/mobile/.maestro/flows/_tap-profile-save-number.yaml');
+    assert.match(tapSave, /_dismiss-profile-ime\.yaml/);
+    assert.match(tapSave, /scrollUntilVisible/);
+    assert.match(tapSave, /id: profile-save-number/);
+
+    const dismiss = read('apps/mobile/.maestro/flows/_dismiss-profile-ime.yaml');
+    assert.match(dismiss, /id: profile-screen-title/);
+    assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
+
+    const hub = read('apps/mobile/app/profile.tsx');
+    assert.match(hub, /titleTestID="profile-screen-title"/);
+    assert.match(hub, /pinnedTop=\{/);
+    assert.match(hub, /testID="profile-save-number"/);
+    assert.match(hub, /testID="profile-emergency-number"/);
+
+    const header = read('apps/mobile/src/components/ScreenHeader.tsx');
+    assert.match(header, /collapsable=\{false\}/);
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));
+    assert.ok(names.includes('_dismiss-hints.yaml'));
     for (const name of names) {
       const body = fs.readFileSync(path.join(flowsDir, name), 'utf8');
       assert.doesNotMatch(body, /^\s*-\s+hideKeyboard\b/m, `${name} must not use hideKeyboard`);

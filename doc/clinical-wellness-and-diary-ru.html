@@ -455,7 +455,7 @@
   end
 
   subgraph core [Каноническая таксономия]
-    DB[(allergen-database\n46 аллергенов)]
+    DB[(allergen-database\n65 аллергенов)]
     CR[(cross-reactions\n44 пары)]
   end
 
@@ -537,7 +537,7 @@
 </tr>
 </tbody></table>
 <h3>4.2. Канонический справочник аллергенов</h3>
-<p><strong>Источник истины:</strong> статический модуль <code>allergen-database.ts</code> в пакете <code>@allerguide/core</code>. Содержит <strong>46 аллергенов</strong>, дублируется в PostgreSQL (<code>catalog.allergens</code>) при сидировании для API и каталога продуктов.</p>
+<p><strong>Источник истины:</strong> статический модуль <code>allergen-database.ts</code> в пакете <code>@allerguide/core</code>. Содержит <strong>65 аллергенов</strong>, дублируется в PostgreSQL (<code>catalog.allergens</code>) при сидировании для API и каталога продуктов.</p>
 <h4>Структура записи</h4>
 <table>
 <thead>
@@ -897,7 +897,7 @@
 <p><strong>Релевантность для индекса:</strong> штраф за пыльцу начисляется только если <code>profileRelevant = true</code>, т.е. соответствующий id есть в <code>profiles.allergies</code>.</p>
 <h3>4.7. Справочник перекрёстных реакций</h3>
 <h4>Происхождение и характер данных</h4>
-<p>Перекрёстные реакции — <strong>курируемый статический справочник</strong> в <code>@allerguide/core</code> (<code>cross-reactions/phase-1.ts</code>, <code>phase-2.ts</code>). Объединяется в массив <code>CROSS_REACTIONS</code> (<strong>44 направленные пары</strong>). Дублируется в PostgreSQL (<code>catalog.cross_reactions</code>) при сидировании.</p>
+<p>Перекрёстные реакции — <strong>курируемый статический справочник</strong> в <code>@allerguide/core</code> (<code>cross-reactions/phase-1.ts</code>, <code>phase-2.ts</code>, <code>phase-3.ts</code>, <code>phase-4.ts</code>). Объединяется в массив <code>CROSS_REACTIONS</code> (<strong>54 направленные пары</strong>). Дублируется в PostgreSQL (<code>catalog.cross_reactions</code>) при сидировании.</p>
 <p><strong>Источники при формировании (клинико-биологический контекст):</strong></p>
 <ul>
 <li>литература по <strong>оральному аллергическому синдрому (OAS)</strong> и pollen-food syndrome;</li>
@@ -1966,7 +1966,7 @@
 </tr>
 <tr>
 <td><code>packages/core/src/allergen-database.ts</code></td>
-<td>Каноническая таксономия (46 аллергенов)</td>
+<td>Каноническая таксономия (65 аллергенов)</td>
 </tr>
 <tr>
 <td><code>packages/core/src/allergen-aliases.ts</code></td>

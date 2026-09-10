@@ -1,4 +1,7 @@
-# SOS emergency bar remains available after the last profile is removed
+# SOS emergency bar remains available after the last profile is removed.
+# Delete control is only on the edit form (below the fold), not on the hub.
+# After delete, router.back() returns to the hub (no tab bar) — leave via
+# the header chevron, not Maestro `back` (BACK at /login exits the app).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
@@ -9,7 +12,7 @@ appId: com.aclearo.app
       id: profile-screen-title
     timeout: 10000
 - tapOn:
-    id: profile-row-0
+    id: profile-list-item-0
 - extendedWaitUntil:
     visible:
       id: profile-edit-title
@@ -22,7 +25,15 @@ appId: com.aclearo.app
 - tapOn:
     id: profile-delete
 - tapOn:
-    text: Удалить
+    text: "Удалить"
+- waitForAnimationToEnd:
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: profile-screen-title
+    timeout: 10000
+- tapOn:
+    id: screen-header-back
 - tapOn:
     id: tab-sos
 - extendedWaitUntil:
@@ -31,5 +42,12 @@ appId: com.aclearo.app
     timeout: 10000
 - assertVisible:
     id: sos-emergency-bar
+# North-star N3: calling 103 and the numbered plan work without a profile.
+- assertVisible:
+    id: sos-crisis-call
+- assertVisible:
+    id: sos-crisis-plan
+- assertVisible:
+    id: sos-crisis-step-1
 - assertVisible:
     text: Выберите профиль, чтобы увидеть медицинскую информацию

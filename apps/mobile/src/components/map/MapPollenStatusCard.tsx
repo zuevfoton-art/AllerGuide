@@ -15,10 +15,7 @@ interface MapPollenStatusCardProps {
   profileName?: string;
   profileRelevant: boolean;
   locationLabel: string;
-  sourceLabel: string;
   updatedLabel: string | null;
-  isCalendarFallback: boolean;
-  isCacheSource: boolean;
 }
 
 export function MapPollenStatusCard({
@@ -31,10 +28,7 @@ export function MapPollenStatusCard({
   profileName,
   profileRelevant,
   locationLabel,
-  sourceLabel,
   updatedLabel,
-  isCalendarFallback,
-  isCacheSource,
 }: MapPollenStatusCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -62,14 +56,8 @@ export function MapPollenStatusCard({
         </Text>
       ) : null}
       <Text style={styles.statusMeta}>
-        {[locationLabel, sourceLabel, updatedLabel].filter(Boolean).join(' · ')}
+        {[locationLabel, updatedLabel].filter(Boolean).join(' · ')}
       </Text>
-      {isCalendarFallback ? (
-        <Text style={styles.statusBadge}>{t('map.pollenCalendarFallback')}</Text>
-      ) : null}
-      {isCacheSource ? (
-        <Text style={styles.statusBadge}>{t('map.pollenSourceCache')}</Text>
-      ) : null}
     </GlassCard>
   );
 }
@@ -93,18 +81,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textSecondary,
       lineHeight: 16,
-    },
-    statusBadge: {
-      alignSelf: 'flex-start',
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 11,
-      fontWeight: '600',
-      color: colors.warningText,
-      backgroundColor: colors.warningLight,
-      borderRadius: 4,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      overflow: 'hidden',
     },
   });
 }

@@ -229,7 +229,9 @@ function checkMaestroFlows() {
     }
   }
 
-  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+  // Register / profile steps live in *-until-home.yaml. The wrappers only add
+  // _dismiss-hints.yaml so onboarding-smoke can assert hint-overlay first.
+  for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
     const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
     if (!flow.includes('_wait-login.yaml')) {
       failures.push(`${name}: must run _wait-login.yaml`);
@@ -251,6 +253,33 @@ function checkMaestroFlows() {
     }
     if (!flow.includes('_complete-first-run-profile.yaml')) {
       failures.push(`${name}: must run _complete-first-run-profile.yaml (condition-food before allergen-milk)`);
+    }
+  }
+
+  const offlineUntilHome = fs.readFileSync(
+    path.join(flowsDir, '_offline-bootstrap-until-home.yaml'),
+    'utf8',
+  );
+  if (
+    /FIELD_VALUE:\s*maestro1\b/.test(offlineUntilHome) ||
+    !/FIELD_VALUE:\s*Maestro1!/.test(offlineUntilHome)
+  ) {
+    failures.push(
+      '_offline-bootstrap-until-home.yaml: register password must meet MIN_NEW_PASSWORD_LENGTH + 3 character classes (use Maestro1!, not the legacy lowercase+digit value)',
+    );
+  }
+
+  for (const name of ['_offline-bootstrap.yaml', '_staging-bootstrap.yaml']) {
+    const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+    const untilHome = name.replace('.yaml', '-until-home.yaml');
+    if (!flow.includes(untilHome)) {
+      failures.push(`${name}: must runFlow ${untilHome}`);
+    }
+    if (!flow.includes('_dismiss-hints.yaml')) {
+      failures.push(`${name}: must run _dismiss-hints.yaml`);
+    }
+    if (flow.includes('stopApp: false')) {
+      failures.push(`${name}: must not re-launchApp after clearState (masked hideKeyboard BACK)`);
     }
   }
 
@@ -311,13 +340,28 @@ function checkMaestroFlows() {
   }
 
   const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
-  if (!editorModal.includes('diary-editor-title') || /liftStyle\s*[,}\]]/.test(editorModal)) {
-    failures.push('DiaryEditorModal must expose diary-editor-title and must not apply liftStyle');
+  if (
+    !editorModal.includes('diary-editor-title') ||
+    !editorModal.includes('Keyboard.dismiss') ||
+    /liftStyle\s*[,}\]]/.test(editorModal)
+  ) {
+    failures.push(
+      'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
+    );
   }
 
   const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
-  if (!tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') || !tapWizardPrimary.includes('scrollUntilVisible')) {
-    failures.push('_tap-wizard-primary.yaml must dismiss IME then scrollUntilVisible');
+  if (
+    !tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') ||
+    !tapWizardPrimary.includes('scrollUntilVisible') ||
+    !tapWizardPrimary.includes('enabled: true')
+  ) {
+    failures.push('_tap-wizard-primary.yaml must dismiss IME then tap an enabled diary-wizard-primary');
+  }
+
+  const fillWizardField = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
+  if (!fillWizardField.includes('waitForAnimationToEnd') || !fillWizardField.includes('eraseText')) {
+    failures.push('_fill-wizard-field.yaml must retap the field after layout before typing');
   }
 
   for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
@@ -342,6 +386,61 @@ function checkMaestroFlows() {
     stagingAuth.indexOf('scrollUntilVisible') > stagingAuth.indexOf('id: profile-logout')
   ) {
     failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
+  }
+
+  const settingsSmoke = fs.readFileSync(path.join(flowsDir, 'settings-smoke.yaml'), 'utf8');
+  if (
+    !settingsSmoke.includes('_tap-profile-save-number.yaml') ||
+    !settingsSmoke.includes('profile-emergency-number')
+  ) {
+    failures.push(
+      'settings-smoke.yaml must type the emergency number then save via _tap-profile-save-number.yaml',
+    );
+  }
+  const tapProfileSave = path.join(flowsDir, '_tap-profile-save-number.yaml');
+  if (!fs.existsSync(tapProfileSave)) {
+    failures.push('_tap-profile-save-number.yaml missing (fold IME then tap profile-save-number)');
+  } else {
+    const tapProfileSaveBody = fs.readFileSync(tapProfileSave, 'utf8');
+    if (
+      !tapProfileSaveBody.includes('_dismiss-profile-ime.yaml') ||
+      !tapProfileSaveBody.includes('scrollUntilVisible') ||
+      !tapProfileSaveBody.includes('profile-save-number')
+    ) {
+      failures.push('_tap-profile-save-number.yaml must dismiss IME then scrollUntilVisible profile-save-number');
+    }
+  }
+  const dismissProfileIme = path.join(flowsDir, '_dismiss-profile-ime.yaml');
+  if (!fs.existsSync(dismissProfileIme)) {
+    failures.push('_dismiss-profile-ime.yaml missing (fold profile IME without BACK)');
+  } else {
+    const dismissProfileBody = fs.readFileSync(dismissProfileIme, 'utf8');
+    if (!dismissProfileBody.includes('profile-screen-title')) {
+      failures.push('_dismiss-profile-ime.yaml must tap profile-screen-title (not hideKeyboard/BACK)');
+    }
+  }
+
+  const sosNoProfile = fs.readFileSync(path.join(flowsDir, 'sos-no-profile-smoke.yaml'), 'utf8');
+  if (
+    !sosNoProfile.includes('profile-list-item-0') ||
+    !sosNoProfile.includes('profile-edit-title') ||
+    !sosNoProfile.includes('profile-delete') ||
+    !sosNoProfile.includes('screen-header-back') ||
+    sosNoProfile.indexOf('id: profile-list-item-0') > sosNoProfile.indexOf('id: profile-delete') ||
+    sosNoProfile.indexOf('id: profile-delete') > sosNoProfile.indexOf('id: screen-header-back') ||
+    sosNoProfile.indexOf('id: screen-header-back') > sosNoProfile.indexOf('id: tab-sos')
+  ) {
+    failures.push(
+      'sos-no-profile-smoke.yaml must open profile-list-item-0, wait for profile-edit-title, scroll to profile-delete, then leave via screen-header-back',
+    );
+  }
+  const profileHub = fs.readFileSync(path.join(root, 'apps/mobile/app/profile.tsx'), 'utf8');
+  const profileEdit = fs.readFileSync(path.join(root, 'apps/mobile/app/profile-edit.tsx'), 'utf8');
+  if (!profileHub.includes('profile-list-item-${index}') || profileHub.includes('testID="profile-delete"')) {
+    failures.push('profile.tsx must expose profile-list-item-${index}; profile-delete lives on profile-edit');
+  }
+  if (!profileEdit.includes('testID="profile-delete"') || !profileEdit.includes('titleTestID="profile-edit-title"')) {
+    failures.push('profile-edit.tsx must expose profile-edit-title and profile-delete');
   }
 }
 
@@ -469,6 +568,7 @@ runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.tes
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
+runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
 checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();

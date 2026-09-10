@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { PlaceAutocompleteSuggestion } from '@allerguide/core';
+import { Skeleton } from '@/src/components/Skeleton';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -17,7 +17,6 @@ interface PlaceSearchBarProps {
   suggestions: PlaceAutocompleteSuggestion[];
   loading?: boolean;
   error?: string | null;
-  sourceLabel?: string | null;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
   onSelectSuggestion: (suggestion: PlaceAutocompleteSuggestion) => void;
@@ -29,7 +28,6 @@ export function PlaceSearchBar({
   suggestions,
   loading,
   error,
-  sourceLabel,
   onChange,
   onSubmit,
   onSelectSuggestion,
@@ -56,7 +54,7 @@ export function PlaceSearchBar({
           accessibilityLabel={t('map.placeSearchPlaceholder')}
           testID="place-search-input"
         />
-        {loading ? <ActivityIndicator size="small" color={theme.colors.accent} /> : null}
+        {loading ? <Skeleton width={16} height={16} /> : null}
         {value ? (
           <Pressable
             onPress={onClear}
@@ -69,7 +67,6 @@ export function PlaceSearchBar({
         ) : null}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      {sourceLabel ? <Text style={styles.source}>{sourceLabel}</Text> : null}
       {suggestions.length > 0 ? (
         <View style={styles.suggestions}>
           {suggestions.map((suggestion) => (
@@ -117,11 +114,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       fontSize: 12,
       color: colors.danger,
-    },
-    source: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
     },
     suggestions: {
       borderRadius: 8,

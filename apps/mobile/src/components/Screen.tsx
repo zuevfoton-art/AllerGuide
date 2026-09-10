@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo, type ReactNode } from 'react';
+import { PropsWithChildren, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,13 +9,18 @@ import {
   View,
 } from 'react-native';
 import { usePathname } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenBrandHeader } from '@/src/components/brand/ScreenBrandHeader';
 import { shouldShowScreenBrandHeader } from '@/src/components/brand/brand-header-nav';
 import { density } from '@/src/constants/layout';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useKeyboardBottomInset } from '@/src/hooks/use-keyboard-bottom-inset';
+import { resolveScreenKeyboardPadding } from '@/src/hooks/screen-keyboard-metrics';
 import { SkipLink } from '@/src/components/FocusRing';
+import { StatusBannerHost } from '@/src/components/StatusBanner';
+import { HINT_FOLLOW_EPSILON_PX } from '@/src/components/hints/hint-geometry';
+import { useHintsStore } from '@/src/store/hints-store';
 
 type ScreenProps = {
   scroll?: boolean;
@@ -24,6 +29,8 @@ type ScreenProps = {
   refreshing?: boolean;
   /** Content pinned above the scroll area (stays visible while scrolling). */
   pinnedTop?: React.ReactNode;
+  /** Sticky footer (e.g. a single Save action). */
+  pinnedBottom?: React.ReactNode;
   /** Override auto brand header (hidden on login/register). */
   showBrandHeader?: boolean;
   brandHeaderLeft?: ReactNode;
@@ -36,13 +43,40 @@ export function Screen({
   onRefresh,
   refreshing = false,
   pinnedTop,
+  pinnedBottom,
   showBrandHeader,
   brandHeaderLeft,
   brandHeaderRight,
 }: PropsWithChildren<ScreenProps>) {
   const { colors } = useTheme();
   const layout = useResponsiveLayout();
+  const insets = useSafeAreaInsets();
   const keyboardInset = useKeyboardBottomInset();
+  const keyboardPad = resolveScreenKeyboardPadding({
+    platform: Platform.OS,
+    keyboardInset,
+    layoutBottomPadding: layout.bottomPadding,
+    safeBottom: insets.bottom,
+  });
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollOffsetYRef = useRef(0);
+
+  useEffect(() => {
+    if (!scroll) return undefined;
+    const scrollBy = (deltaY: number, animated: boolean) => {
+      if (Math.abs(deltaY) < HINT_FOLLOW_EPSILON_PX) return;
+      scrollRef.current?.scrollTo({
+        y: Math.max(0, scrollOffsetYRef.current + deltaY),
+        animated,
+      });
+    };
+    useHintsStore.getState().setScrollScreenBy(scrollBy);
+    return () => {
+      if (useHintsStore.getState().scrollScreenBy === scrollBy) {
+        useHintsStore.getState().setScrollScreenBy(null);
+      }
+    };
+  }, [scroll]);
   const pathname = usePathname();
   const brandVisible = showBrandHeader ?? shouldShowScreenBrandHeader(pathname);
   const brandHeader = brandVisible ? (
@@ -58,12 +92,17 @@ export function Screen({
   // Android API 35+: `adjustResize` often no longer shrinks the window. Extra
   // bottom content inset lets ScrollView bring focused fields (e.g. password)
   // above the IME. iOS keeps using KeyboardAvoidingView padding instead.
-  const extraKeyboardPad = Platform.OS === 'ios' ? 0 : keyboardInset;
-  const scrollBottomPad = layout.bottomPadding + extraKeyboardPad;
+  // Web lifts the whole screen (`rootPaddingBottom`) so sticky footers and
+  // in-scroll CTAs are not painted under the overlay keyboard.
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        root: { flex: 1, backgroundColor: colors.bg },
+        kav: { flex: 1, backgroundColor: colors.bg },
+        root: {
+          flex: 1,
+          backgroundColor: colors.bg,
+          paddingBottom: keyboardPad.rootPaddingBottom,
+        },
         pinned: {
           width: '100%',
           maxWidth: layout.contentMaxWidth,
@@ -73,12 +112,20 @@ export function Screen({
           paddingBottom: 8,
           gap: 8,
         },
+        pinnedBottom: {
+          width: '100%',
+          maxWidth: layout.contentMaxWidth,
+          alignSelf: 'center',
+          paddingHorizontal: layout.horizontalPadding,
+          paddingBottom: keyboardPad.pinnedPaddingBottom,
+          paddingTop: 8,
+        },
         scrollOuter: { flex: 1, backgroundColor: colors.bg },
         scroll: {
           flexGrow: 1,
           backgroundColor: colors.bg,
           paddingTop: hasPinned ? 0 : layout.topPadding,
-          paddingBottom: scrollBottomPad,
+          paddingBottom: keyboardPad.scrollPaddingBottom,
           gap: density.screenGap,
         },
         content: {
@@ -96,21 +143,21 @@ export function Screen({
           backgroundColor: colors.bg,
           paddingHorizontal: layout.horizontalPadding,
           paddingTop: layout.topPadding,
-          paddingBottom: layout.bottomPadding + extraKeyboardPad,
+          paddingBottom: keyboardPad.scrollPaddingBottom,
         },
         nonScrollBrand: {
           paddingBottom: 8,
         },
       }),
     [
-      extraKeyboardPad,
       colors.bg,
       hasPinned,
-      layout.bottomPadding,
+      keyboardPad.pinnedPaddingBottom,
+      keyboardPad.rootPaddingBottom,
+      keyboardPad.scrollPaddingBottom,
       layout.contentMaxWidth,
       layout.horizontalPadding,
       layout.topPadding,
-      scrollBottomPad,
     ],
   );
 
@@ -129,39 +176,54 @@ export function Screen({
 
   if (scroll) {
     return (
-      <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior} keyboardVerticalOffset={0}>
-        <SkipLink />
-        {pinnedContent ? <View style={styles.pinned}>{pinnedContent}</View> : null}
-        <ScrollView
-          style={styles.scrollOuter}
-          contentContainerStyle={styles.scroll}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-          automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
-          refreshControl={
-            onRefresh ? (
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={colors.accent}
-                colors={[colors.accent]}
-              />
-            ) : undefined
-          }>
-          {body}
-        </ScrollView>
+      <KeyboardAvoidingView
+        style={styles.kav}
+        behavior={keyboardBehavior}
+        keyboardVerticalOffset={0}>
+        <View testID="app-screen" style={styles.root}>
+          <SkipLink />
+          {pinnedContent ? <View style={styles.pinned}>{pinnedContent}</View> : null}
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scrollOuter}
+            contentContainerStyle={styles.scroll}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+            scrollEventThrottle={16}
+            onScroll={(event) => {
+              scrollOffsetYRef.current = event.nativeEvent.contentOffset.y;
+            }}
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={colors.accent}
+                  colors={[colors.accent]}
+                />
+              ) : undefined
+            }>
+            {body}
+          </ScrollView>
+          {pinnedBottom ? <View style={styles.pinnedBottom}>{pinnedBottom}</View> : null}
+          <StatusBannerHost />
+        </View>
       </KeyboardAvoidingView>
     );
   }
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={keyboardBehavior}>
-      <SkipLink />
-      <SafeAreaView style={styles.safe}>
-        {brandHeader ? <View style={styles.nonScrollBrand}>{brandHeader}</View> : null}
-        <View style={[styles.content, styles.contentFill]}>{children}</View>
-      </SafeAreaView>
+    <KeyboardAvoidingView style={styles.kav} behavior={keyboardBehavior}>
+      <View testID="app-screen" style={styles.root}>
+        <SkipLink />
+        <SafeAreaView style={styles.safe}>
+          {brandHeader ? <View style={styles.nonScrollBrand}>{brandHeader}</View> : null}
+          <View style={[styles.content, styles.contentFill]}>{children}</View>
+        </SafeAreaView>
+        <StatusBannerHost />
+      </View>
     </KeyboardAvoidingView>
   );
 }

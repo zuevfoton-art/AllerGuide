@@ -42,7 +42,9 @@ describe('regional pollen calendars', () => {
   it('filters profile alerts by allergen id via taxon id', () => {
     const alerts = getCurrentPollenAlerts(5, ['birch-pollen'], 'moscow');
     expect(alerts.map((a) => a.taxonId)).toContain('birch_pollen');
-    expect(alerts.every((a) => a.allergenId === 'birch-pollen')).toBe(true);
+    expect(alerts.map((a) => a.taxonId)).toContain('oak_pollen');
+    expect(alerts.find((a) => a.taxonId === 'birch_pollen')?.allergenId).toBe('birch-pollen');
+    expect(alerts.find((a) => a.taxonId === 'oak_pollen')?.allergenId).toBe('oak-pollen');
   });
 
   it('marks alder and olive calendar peaks as profile-relevant', () => {

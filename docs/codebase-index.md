@@ -74,8 +74,9 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Enrichment POST (OCR, intent, VL, STT, search) | `src/services/enrichment-api.ts` — timeout + soft-fail + `logCaughtError` |
 | Доменные правила, таксономия, валидация | `packages/core/src/*` |
 | Matching скана / OCR parse / LLM prompt | `packages/ai/src/*` |
-| Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
+| Оркестрация сканера (barcode / OCR / VL) | `scan-analysis`, `scanner-barcode-service`, `scan-product-category`, `scanner-ocr-service`, `scanner-dish-vision-service`; публичный импорт — `scanner-service` |
 | Дневник «Питание»: фото / штрихкод / вручную → состав | `NutritionCaptureStep` + `DiaryBarcodeScanner` + `diary-dish-recognition-service` (тот же lookup, что сканер) |
+| Результат сканера → запись дневника | `scan-diary-service` (`resolveScanDiarySection` + префилл) + `components/scanner/ScanDiaryEntryModal` (выбор раздела) |
 | Строка UI (все 6 локалей) | `apps/mobile/src/i18n/types.ts` + `locales/{ru,en,es,fr,de,it}.ts` |
 | Feature flag | `apps/mobile/src/constants/features.ts` + корневой `.env.example` + `eas.json` |
 | Локальная схема SQLite | `apps/mobile/src/db/init.native.ts` + `migrations.ts` |
@@ -85,7 +86,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
 | Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
-| UI / токены / a11y | `constants/{theme,layout,typography}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md` |
+| UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
 | CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
@@ -103,12 +104,12 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Nutrition photo / barcode / manual** | `NutritionCaptureStep` + `DiaryBarcodeScanner` + `DishNameField` in diary / scanner | `diary-dish-recognition-service`, `dish-suggest-service`, `scanner-dish-lookup-service`, `barcode-lookup-service` | core `dish-components`, `name-matching`, `data/dishes.json`; API `dishes.ts` |
 | **Clinical scales** | `clinical-scales.tsx` | diary-service | core `clinical-scales` |
 | **Profiles** | `profile-setup`, `profile`, `profile-edit` | `profile-*`, conditions, phenotype, contacts | core profile*; API `profiles.ts` |
-| **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service`, `medicine-suggest-service` | core `allergy-passport`, `emergency-contacts`, `list-input` |
+| **SOS** | `(tabs)/sos.tsx` (read-only); `sos-edit.tsx` из `/profile` | `sos-service`, `sos-passport-service`, `emergency-contact-service`, `medicine-suggest-service` | core `allergy-passport`, `emergency-contacts`, `list-input`, `listProfileAllergenChips` |
 | **Pollen / map** | `(tabs)/map.tsx` + `use-map-live-data` + `components/map/*` | `pollen-map-service`, `pollen-hourly-service`, `wind-service`, `pollen-heatmap-service`, `air-quality-service`, `location-service`, `place-service` | core pollen*, `hourly-series`, `air-quality`, `map-poi`, `pollen-species-heatmap`; API `pollen.ts`, `air-quality.ts`, `places.ts`, `maps.ts`; comps `AirQualityCard`, `PollenIndexCard`, `PlaceSearchBar`, `YandexMap`, `YandexInteractiveMap`, `GooglePollenMap*` |
 | **Auth** | `login`, `register`, forgot/reset | `auth-service`, `backend-api`, `token-session`, `secure-settings` | core `auth`/`login-field`/`phone`/`password`; API `mobile-auth.ts` |
 | **Sync / backup** | cards на profile | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` | core `sync`/`crypto`; API `sync.ts` + `lib/sync-payload.ts` |
 | **Product catalog** | scanner (+ market) | `catalog-api`, `barcode-*`, `open-food-facts-service`, `product-service` | core `catalog`, `open-food-facts` (normalize/URL, без HTTP); API `catalog.ts` + `open-food-facts` |
-| **Market** | `(tabs)/market.tsx` | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
+| **Market** | `market.tsx` (hub route, not a tab) | `market-api`, `market-catalog-cache-service`, `product-service`, `modules/marketplace` | core `marketplace-catalog`, `market-offers`; API `market.ts` + `services/marketplace/*` |
 | **Clinical** | `asit-course` / `prescribed-therapy` + `use-prescription-parser` + `components/therapy/*` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
 | **Doctor report** | `doctor-report.tsx` | `doctor-report-service` | core `doctor-report*` |
@@ -132,7 +133,7 @@ src/db/               # init, init.native, migrations, web-store, web-collection
 src/store/            # Zustand: app / locale / theme
 src/i18n/             # 6 локалей + content/ + types.ts
 src/constants/        # features, theme, brand, typography, layout
-src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`
+src/hooks/            # theme, fonts, layout, wizard, suggestions, plume, `use-scanner-controller`, `use-map-live-data`, `use-prescription-parser`, `use-diary-wizard-controller`, `use-hint-tour`, `use-reduce-motion`
 src/utils/            # confirm-*, fetch-with-timeout, yield-to-render
 src/stubs/            # Metro-заглушки (i18next, react-i18next, expo-location web)
 src/modules/marketplace/
@@ -144,13 +145,13 @@ src/modules/marketplace/
 |------|------------|
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
-| `(tabs)/_layout.tsx` | Нижние табы (6 штук) + кастомные кнопки |
-| `(tabs)/home.tsx` | Dashboard / двухслойный wellness / home-insights |
-| `(tabs)/diary.tsx` | Дневник: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
+| `(tabs)/_layout.tsx` | 4 вкладки (Сегодня, Журнал, Скан, Карта) + SOS control; маркет не вкладка |
+| `(tabs)/home.tsx` | Сегодня: daily reading, чек-ин 0–3, кольцо недели, home-insights |
+| `(tabs)/diary.tsx` | Журнал: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
 | `(tabs)/map.tsx` | Пыление / места |
-| `(tabs)/market.tsx` | Safe-product marketplace |
+| `market.tsx` | Safe-product marketplace (from profile hub, not a tab) |
 | `(tabs)/sos.tsx` | SOS emergency-only (без редактирования) |
 | `onboarding-intro.tsx` / `onboarding.tsx` | Intro + сценарий |
 | `profile-setup.tsx` | Мастер профиля |
@@ -164,6 +165,7 @@ src/modules/marketplace/
 | `asthma-action-plan.tsx` / `insect-action-plan.tsx` | Планы действий |
 | `food-drug-registry.tsx` | Пищево-лекарственный реестр |
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
+| `ask.tsx` | AI-чат «Спросить» (`EXPO_PUBLIC_AI_CHAT`, default off; SOS-handoff) |
 | `legal/privacy.tsx` / `legal/terms.tsx` | Legal |
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
 | `+html.tsx` | Web-обёртка Expo Router (не экран) |
@@ -175,15 +177,15 @@ src/modules/marketplace/
 | Группа | Файлы |
 |--------|-------|
 | Auth / API | `auth-service`, `backend-api`, `token-session`, `api-client`, `api-errors`, `app-lock-service` |
-| Profiles | `profile-service`, `profile-outbox-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service`, `owned-profiles` |
-| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-auto-metadata-service` (фоновое обогащение), `diary-photo-picker`, `diary-dish-recognition-service`, `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
-| Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service`, `scanner-ocr-service`, `scanner-dish-vision-service`, `scanner-dish-lookup-service`, `scanner-dish-query`, `scanner-dish-vision-display`, `scanner-photo-service`, `scanner-photo-geometry`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scan-match-display`, `dish-off-enrichment-service`, `dish-suggest-service`, `dish-resolve-api-service`, `dish-vision-api-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service`, `enrichment-api` |
+| Profiles | `profile-service`, `profile-outbox-service`, `profile-conditions-service`, `profile-capabilities-service`, `profile-symptom-baseline-service`, `condition-history-service`, `clinical-phenotype-service`, `emergency-contact-service`, `owned-profiles`, `allergen-recommendation-display`, `profile-setup-analytics` |
+| Diary | `diary-service`, `diary-section-service`, `diary-context-service`, `diary-attachment-service`, `diary-auto-metadata-service` (фоновое обогащение), `diary-photo-picker`, `diary-dish-recognition-service`, `scan-diary-service` (`resolveScanDiarySection` + префилл), `medicine-recognition-service`, `medicine-suggest-service`, `medicines-api` |
+| Scanner / catalog | `scanner-service` (баррель), `scan-analysis`, `scanner-barcode-service` (`extractGtinFromScan`, категория OFF), `scanner-ocr-service`, `scanner-dish-vision-service`, `scanner-dish-lookup-service`, `scanner-dish-query`, `scanner-dish-vision-display`, `scanner-photo-service`, `scanner-photo-geometry`, `barcode-lookup-service`, `barcode-cache-service`, `catalog-api`, `catalog-cache-service`, `allergen-catalog-service`, `open-food-facts-service`, `product-service`, `safe-products-service`, `scan-history-service`, `scan-match-display`, `dish-off-enrichment-service`, `dish-suggest-service`, `dish-resolve-api-service`, `dish-vision-api-service`, `ocr-api-service`, `scan-intent-api-service`, `search-ingredients-api-service`, `stt-api-service`, `alias-feedback-service`, `enrichment-api` |
 | Home | `home-insights-service`, `wellness-service` |
 | SOS / reports | `sos-service`, `sos-passport-service`, `doctor-report-service` |
 | Clinical | `asit-course-service`, `asit-reminder-service`, `asthma-action-plan-service`, `insect-action-plan-service`, `food-drug-registry-service`, `prescribed-therapy-service`, `prescribed-therapy-reminder-service`, `clinical-reminder-service`, `reminder-reconcile-service`, `prescription-ocr-service`, `prescription-photo-service` |
 | Pollen / map | `pollen-map-service`, `pollen-hourly-service`, `pollen-heatmap-service`, `pollen-plume-service`, `pollen-reminder-service`, `air-quality-service`, `wind-service`, `location-service`, `place-service`, `map-basemap`, `google-maps-api-key`, `yandex-interactive-map-url` |
 | Sync / backup | `sync-service`, `sync-restore`, `backup-crypto`, `backup-file-service` |
-| Settings / ops | `settings-service`, `secure-settings-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
+| Settings / ops | `settings-service`, `secure-settings-service`, `first-run-hints-service`, `notification-service`, `notification-content-service`, `notification-navigation-service`, `analytics-service`, `error-reporting`, `startup-metrics`, `haptics`, `voice-dictation-service`, `voice-mic-recording-service`, `market-api`, `market-catalog-cache-service` |
 
 ### DB / store / i18n
 
@@ -200,6 +202,7 @@ src/modules/marketplace/
 | `src/store/app-store.ts` | Active profile, scenario |
 | `src/store/locale-store.ts` | **`useTranslation()`** — основной i18n |
 | `src/store/theme-store.ts` | Light/dark/system |
+| `src/store/hints-store.ts` | First-run coach marks: anchors + active tour |
 | `src/i18n/types.ts` | `AppLocale` + `LocaleMessages` |
 | `src/i18n/locales/*.ts` | Каталоги строк (ru/en/es/fr/de/it) |
 
@@ -207,11 +210,11 @@ src/modules/marketplace/
 
 - **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
-- **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal`, `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
+- **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal` (pinned `diary-editor-footer`, bounded scroll, scroll-to-focus, no `liftStyle`), `VoiceNoteButton` (только `symptoms`/`onset`), `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
 - **Maps:** `YandexMap`, `YandexInteractiveMap`, `PollenMapLayer`, `GooglePollenMap(.web)`, `map/MapCanvas`, `MapLayerLegend`, `MapPollenDetails`, `MapPlacesPanel`
 - **Backup:** `CloudBackupCard`, `LocalBackupCard`, `RecoveryKey*`
-- **Folders:** `brand/`, `onboarding/`, `profile-setup/`
+- **Folders:** `brand/`, `onboarding/`, `profile-setup/`, `hints/`
 
 ### Config
 
@@ -231,6 +234,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `profiles.ts` | Profile CRUD (JWT) |
 | `sync.ts` | Encrypted backup (`SYNC_ENABLED`); envelope gate in `lib/sync-payload.ts` |
 | `scan.ts` | LLM smart scan (`AI_SCAN_ENABLED`) |
+| `ask.ts` | Explainer chat (`AI_CHAT_ENABLED` + `AI_SCAN_ENABLED`; distress → SOS) |
 | `scan-dish-vision.ts` | Multimodal dish photo (`AI_DISH_VISION_ENABLED`) |
 | `scan-intent.ts` | OCR intent classify (`YC_SCAN_INTENT_LLM`) |
 | `ocr.ts` | Yandex Vision OCR (`YC_OCR_ENABLED`) |
@@ -281,17 +285,18 @@ Barrel: `index.ts`. Pure TS.
 | Область | Модули (ориентиры) |
 |---------|-------------------|
 | Types / allergens | `types`, `allergens`, `allergen-aliases`, `regulatory-allergens`, `inci-allergens`, `catalog`, `catalog-cache`, `barcodes`, `open-food-facts` (OFF normalize/URL, без HTTP), `adair-catalog` (`data/adair-registry.json`) |
-| Profiles | `profile-allergens`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `profile-symptom-baseline`, `profile-age`, `allergy-confirmations`, `condition-*`, `clinical-phenotypes`, `clinical-coding`, `list-input` |
+| Profiles | `profile-allergens`, `profile-validation`, `profile-setup-wizard`, `profile-condition-gating`, `profile-capabilities`, `profile-symptom-baseline`, `profile-age`, `allergy-confirmations`, `condition-*`, `condition-allergen-recommendations`, `clinical-phenotypes`, `clinical-coding`, `list-input` |
+| Pollen match | `pollen-taxonomy` (`resolvePollenTaxonMatch`: exact / related / none) |
 | Diary / home | `diary` (barrel → `diary-schema` + `diary-format`), `diary-stats`, `diary-severity`, `diary-triggers`, `diary-profile`, `diary-reminder`, `diary-wizard-route`, `voice-diary`, `home-insights`, `wellness`, `wellness-display`, `wellness-weights`, `wellness-cross-reactions`, `medicine-catalog` |
 | Scan risk | `scan-risk`, `may-contain-parser`, `scan-trends`, `scan-history-matches`, `alias-feedback`, `dish-components`, `name-matching` |
 | Clinical | `gina-asthma`, `pef-zones`, `asthma-action-plan`, `asit-therapy`, `therapy-schedule`, `prescribed-therapy`, `insect-allergy`, `food-drug-allergy`, `clinical-scales`, `symptom-coding`, `icd10-reference`, `golden-clinical-scenarios`, `beta-metrics`, `medical-disclaimer`, `medical-advisory-board` |
 | SOS / reports | `emergency-contacts`, `allergy-passport`, `doctor-report`, `doctor-report-timeline` |
 | Pollen / geo / air / market | `pollen-*` (taxonomy, regions, calendar, thresholds, map, upi, plant-detail, google-forecast, google-normalize, species-heatmap, plume, reminder), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog` |
 | Sync / crypto | `sync`, `crypto` |
-| Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `secure-random` |
-| Ops / content | `onboarding`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
+| Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `password-strength` (политика сложности + индикатор), `common-passwords`, `secure-random` |
+| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
 
-Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,types}.ts` (за `cross-reactions/index.ts`).
+Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,phase-4,types}.ts` (за `cross-reactions/index.ts`).
 
 ### `@allerguide/ai` — `packages/ai/src/`
 
@@ -325,6 +330,7 @@ Barrel: `index.ts`. Pure TS.
 | `BACKEND_AUTH` | `features.ts` | `JWT_SECRET` + `DATABASE_URL` |
 | `CLOUD_SYNC` | `features.ts` | `SYNC_ENABLED` |
 | `AI_SCAN_ENABLED` | `features.ts` | `AI_SCAN_ENABLED` + LLM keys |
+| `AI_CHAT` | `features.ts` | `AI_CHAT_ENABLED` + `AI_SCAN_ENABLED` (default **off**) |
 | `AI_DISH_VISION_ENABLED` | `features.ts` (`EXPO_PUBLIC_AI_DISH_VISION`) | `AI_DISH_VISION_ENABLED` + VL model |
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |
@@ -341,11 +347,12 @@ Barrel: `index.ts`. Pure TS.
 | `ANALYTICS_ENABLED` | `analytics-service.ts` | `/api/analytics` |
 | `MAP_PLACES` / `LIVE_MAP` (default on) | `features.ts` → `place-service.ts` | `MAP_PLACES_ENABLED` (default on) + Places key |
 | `AIR_QUALITY` (default on) | `features.ts` → `air-quality-service.ts` | `AIR_QUALITY_ENABLED` (default on) + AQ key |
+| `MARKET` (default off) | `features.ts` → `(tabs)/_layout.tsx`, `market.tsx` | — |
 | `MARKET_LIVE_CATALOG` / `MARKET_MEDICINES` (default on) | `features.ts` → `market-api.ts` | `GET /api/market/catalog` |
 | `SENTRY_DSN` | `error-reporting.ts` | — |
 | `API_URL` | `api-client` и др. | — |
 
-По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и **Market** (default on; `false`/`off` выключает). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
+По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и живого каталога Маркета (`MARKET_LIVE_CATALOG` / `MARKET_MEDICINES`, default on; `false`/`off` выключает). Вкладка Маркет отдельно за `EXPO_PUBLIC_MARKET` (default off). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
 
 ---
 
@@ -367,6 +374,8 @@ Barrel: `index.ts`. Pure TS.
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
 | YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
 | ADR | [`adr/`](./adr/) |
+| Wellness-дизайн (типографика, плотность, возвращение) | [`wellness-design-plan.md`](./wellness-design-plan.md) · [`ux-audit-2026-08.md`](./ux-audit-2026-08.md) · [`ux-improvement-plan.md`](./ux-improvement-plan.md) |
+| Wellness UX north-star (IA 4 таба + SOS, фазы N0–N10) | [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · макет [`wellness-ux-north-star.html`](./wellness-ux-north-star.html) |
 | Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 | Freemium / PRO / IAP (план) | [`subscription-monetization-plan.md`](./subscription-monetization-plan.md) |
 
@@ -380,7 +389,8 @@ pnpm typecheck
 pnpm test                    # core + ai + mobile + api
 pnpm lint                    # mobile + api
 pnpm check:analytics-taxonomy
-pnpm rc-gate                 # typecheck + lint + test + taxonomy + doc/Maestro
+pnpm check:design-tokens
+pnpm rc-gate                 # typecheck + lint + test + taxonomy + tokens + doc/Maestro
 pnpm rc-gate:quick           # то же без pnpm test
 pnpm map-pollen-ops-check    # ops: доля fallback на карте пыления
 ```

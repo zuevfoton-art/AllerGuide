@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Image, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import { showStatusBanner } from '@/src/store/banner-store';
 import type { MedicineAgeResolution, MedicineCard } from '@allerguide/core';
 import { Button } from '@/src/components/Button';
 import { DiaryBarcodeScanner } from '@/src/components/DiaryBarcodeScanner';
@@ -208,7 +209,7 @@ export function MedicinePhotoStep({ ageYears, onSkip, onContinue }: Props) {
           : code === 'VOICE_NOT_SUPPORTED'
             ? t('voiceNote.notSupported')
             : t('voiceNote.failed');
-      Alert.alert(t('voiceNote.title'), message);
+      showStatusBanner({ tone: 'error', message });
       setVoiceState('idle');
     },
     [t],

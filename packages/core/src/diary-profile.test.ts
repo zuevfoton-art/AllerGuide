@@ -3,6 +3,7 @@ import {
   buildCourseSetupOptions,
   buildDiaryEntryPickerOptions,
   collectLatestScaleTrends,
+  collectScaleHistory,
   filterDiarySections,
   getRecommendedScalesForProfile,
   inferConditionIdsFromAllergies,
@@ -16,6 +17,16 @@ describe('diary-profile', () => {
     const ids = inferConditionIdsFromAllergies(['Пыльца берёзы']);
     expect(ids).toContain('pollinosis');
     expect(ids).toContain('rhinitis');
+  });
+
+  it('does not infer pollinosis from слива via the ива stem', () => {
+    const ids = inferConditionIdsFromAllergies(['Слива']);
+    expect(ids).not.toContain('pollinosis');
+    expect(ids).not.toContain('rhinitis');
+  });
+
+  it('still infers pollinosis from пыльца ивы', () => {
+    expect(inferConditionIdsFromAllergies(['Пыльца ивы'])).toContain('pollinosis');
   });
 
   it('recommends scales only for explicit gating conditions', () => {
@@ -133,5 +144,29 @@ describe('diary-profile', () => {
     expect(trends).toHaveLength(1);
     expect(trends[0]?.scaleId).toBe('act');
     expect(trends[0]?.total).toBe(24);
+  });
+
+  it('collects scale history points for the trend chart', () => {
+    const actAnswers = enrichScaleAnswers({
+      ...buildScaleInitialAnswers('act'),
+      actActivity: '5',
+      actBreath: '5',
+      actNight: '4',
+      actReliever: '5',
+      actControl: '5',
+    });
+    const points = collectScaleHistory(
+      [
+        {
+          type: 'Шкала',
+          details: encodeDiaryDetails(actAnswers),
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      'act',
+      30,
+    );
+    expect(points).toHaveLength(1);
+    expect(points[0]?.severity).toBeGreaterThanOrEqual(1);
   });
 });

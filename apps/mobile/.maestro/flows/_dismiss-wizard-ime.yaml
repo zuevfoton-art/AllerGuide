@@ -2,7 +2,11 @@
 # Tap pinned modal chrome (outside the ScrollView). The wizard step title
 # slides under the status bar when Gboard is open, so its testID vanishes
 # from UiAutomator (Nightly 33736400731).
+# Nightly 34349155324: wait for Keyboard.dismiss() + layout to settle so the
+# next tapOn hits the intended field, not the still-focused previous one.
 appId: com.aclearo.app
 ---
 - tapOn:
     id: diary-editor-title
+- waitForAnimationToEnd:
+    timeout: 3000

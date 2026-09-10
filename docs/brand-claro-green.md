@@ -84,6 +84,21 @@
 
 ---
 
+## Atmosphere hex (N10)
+
+Декоративный wash / plume **рядом с компонентом**, не в `theme.ts`. Текст, кнопки, табы, SOS, вердикт — только `ThemeColors`.
+
+| Hex / rgba | Где | Роль |
+|------------|-----|------|
+| `#DCEEE4` | reading wash (light), EmptyState glow | foam green, mockup `--wash-a` |
+| `#F7F1E6` | reading wash warm (light) | paper warm, mockup `--wash-b` |
+| `#1A3A32` | reading wash (dark) | teal foam on dark bg |
+| `rgba(0,0,0,0.45)` | pollen plume caption | map overlay, not a CTA |
+
+`check:design-tokens` allowlist: `atmosphereHex` на этих файлах. Dual Calm banlist жив.
+
+---
+
 ## Roadmap
 
 | Фаза | Содержание | Статус |

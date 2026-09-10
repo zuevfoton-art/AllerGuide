@@ -3,8 +3,8 @@ import {
   OFF_DEFAULT_USER_AGENT,
   buildOffProductApiUrl,
   buildOffSearchUrl,
-  normalizeOffBarcode,
   normalizeOffProduct,
+  offBarcodeLookupCandidates,
   type NormalizedOffProduct,
   type OffFamilySource,
   type OffProductPayload,
@@ -22,6 +22,7 @@ export interface OpenFoodFactsProduct {
   allergenTags: string[];
   traceTags: string[];
   source: OffFamilySource;
+  category: NormalizedOffProduct['category'];
 }
 
 const OFF_SEARCH_TIMEOUT_MS = 4000;
@@ -40,6 +41,7 @@ function toMobileProduct(product: NormalizedOffProduct): OpenFoodFactsProduct {
     allergenTags: product.allergenTags,
     traceTags: product.traceTags,
     source: product.source,
+    category: product.category,
   };
 }
 
@@ -57,34 +59,40 @@ async function fetchFromDataset(
   barcode: string,
   dataset: (typeof OFF_DEFAULT_DATASETS)[number],
 ): Promise<OpenFoodFactsProduct | null> {
-  const response = await fetchWithTimeout(buildOffProductApiUrl(dataset.url, barcode));
+  try {
+    const response = await fetchWithTimeout(buildOffProductApiUrl(dataset.url, barcode));
 
-  if (!response.ok) return null;
+    if (!response.ok) return null;
 
-  const data = (await response.json()) as {
-    status?: number;
-    product?: OffProductPayload;
-  };
-  if (data.status !== 1 || !data.product) return null;
+    const data = (await response.json()) as {
+      status?: number;
+      product?: OffProductPayload;
+    };
+    if (data.status !== 1 || !data.product) return null;
 
-  const normalized = normalizeOffProduct(data.product, dataset.source, barcode);
-  return normalized ? toMobileProduct(normalized) : null;
+    const normalized = normalizeOffProduct(data.product, dataset.source, barcode);
+    return normalized ? toMobileProduct(normalized) : null;
+  } catch (error) {
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      logCaughtError('fetchProductByBarcode.dataset', error, {
+        extra: { barcode, source: dataset.source },
+      });
+    }
+    return null;
+  }
 }
 
 export async function fetchProductByBarcode(barcode: string): Promise<OpenFoodFactsProduct | null> {
-  const normalized = normalizeOffBarcode(barcode);
-  if (!normalized) return null;
+  const candidates = offBarcodeLookupCandidates(barcode);
+  if (candidates.length === 0) return null;
 
-  try {
+  for (const code of candidates) {
     for (const dataset of OFF_DEFAULT_DATASETS) {
-      const product = await fetchFromDataset(normalized, dataset);
+      const product = await fetchFromDataset(code, dataset);
       if (product) return product;
     }
-    return null;
-  } catch (error) {
-    logCaughtError('fetchProductByBarcode', error, { extra: { barcode: normalized } });
-    return null;
   }
+  return null;
 }
 
 async function searchDatasetByName(

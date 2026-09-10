@@ -3,6 +3,7 @@ import { resolveAllergenId } from '../profile-allergens';
 import { CROSS_REACTIONS_PHASE_1 } from './phase-1';
 import { CROSS_REACTIONS_PHASE_2 } from './phase-2';
 import { CROSS_REACTIONS_PHASE_3 } from './phase-3';
+import { CROSS_REACTIONS_PHASE_4 } from './phase-4';
 import {
   compareCrossReactionRisk,
   type CrossReaction,
@@ -23,6 +24,7 @@ export const CROSS_REACTIONS: CrossReaction[] = [
   ...CROSS_REACTIONS_PHASE_1,
   ...CROSS_REACTIONS_PHASE_2,
   ...CROSS_REACTIONS_PHASE_3,
+  ...CROSS_REACTIONS_PHASE_4,
 ];
 
 function toMatch(reaction: CrossReaction, allergenId: string): CrossReactionMatch | null {

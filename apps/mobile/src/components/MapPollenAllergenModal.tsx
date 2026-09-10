@@ -59,9 +59,7 @@ export function MapPollenAllergenModal({
             status:
               item.dataStatus === 'live'
                 ? t('map.dataStatusLive')
-                : item.dataStatus === 'google-only'
-                  ? t('map.dataStatusGoogleOnly')
-                  : t('map.dataStatusNone'),
+                : t('map.dataStatusNone'),
             dot: levelColor(item.level, theme.colors),
             testID: `map-allergen-option-${item.taxonId}`,
             accessoryA11y: t('map.allergenInfoA11y', {

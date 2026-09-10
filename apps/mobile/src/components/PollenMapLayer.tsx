@@ -20,6 +20,7 @@ import { TAXON_LABEL_KEYS } from '@/src/constants/pollen-taxon-labels';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
 import { YandexMap } from '@/src/components/YandexMap';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import type { PollenMapSnapshot } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
@@ -72,6 +73,7 @@ export function PollenMapLayer({
   formatMonth,
 }: PollenMapLayerProps) {
   const theme = useTheme();
+  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const [selectedTaxonId, setSelectedTaxonId] = useState<PollenMapTaxonId>('birch_pollen');
@@ -175,20 +177,6 @@ export function PollenMapLayer({
           overlay={levelBadge}
         />
       )}
-      <Text style={styles.attribution}>
-        {t(
-          isGoogleHeatmapEnabled
-            ? 'map.pollenGoogleMapAttribution'
-            : 'map.pollenMapAttribution',
-        )}
-        {snapshot && !isCalendarFallback
-          ? ` · ${
-              snapshot.source === 'cache'
-                ? t('map.pollenSourceCache')
-                : t('map.pollenSourceOpenMeteo')
-            }`
-          : ''}
-      </Text>
       {isGoogleHeatmapEnabled ? (
         <Text style={styles.heatmapHint}>{t(GOOGLE_HEATMAP_HINT_KEYS[googleMapType])}</Text>
       ) : null}
@@ -215,7 +203,7 @@ export function PollenMapLayer({
         })}
       </View>
 
-      <Text style={styles.sectionLabel}>{t('map.otherPollenAllergens')}</Text>
+      <Text style={ui.sectionLabel}>{t('map.otherPollenAllergens')}</Text>
       <View style={styles.secondaryTaxonRow}>
         {SECONDARY_POLLEN_MAP_TAXON_IDS.map((taxonId) => {
           const isSelected = selectedTaxonId === taxonId;
@@ -242,7 +230,7 @@ export function PollenMapLayer({
         <GlassCard style={styles.calendarCard}>
           <Ionicons name="calendar-outline" size={22} color={theme.colors.warning} />
           <View style={styles.readingBody}>
-            <Text style={styles.readingTitle}>{t('map.pollenCalendarFallback')}</Text>
+            <Text style={styles.readingTitle}>{t('map.season')}</Text>
             {calendarPeaks.length > 0 ? (
               calendarPeaks.map((peak) => (
                 <Text key={peak.taxonId} style={styles.valueText}>
@@ -300,12 +288,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.head,
     },
     subtitle: { fontFamily: fonts.sans, fontSize: 12, color: colors.textSecondary },
-    attribution: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      marginTop: -8,
-    },
     scaleHint: {
       fontFamily: fonts.sans,
       fontSize: 11,
@@ -394,12 +376,6 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     taxonTextSelected: { color: colors.accent },
     profileDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
-    sectionLabel: {
-      marginTop: 2,
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      color: colors.textSecondary,
-    },
     secondaryTaxonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     secondaryTaxonButton: {
       minHeight: 34,

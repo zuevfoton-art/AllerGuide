@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app';
 
@@ -35,7 +35,11 @@ import {
   loginAppUser,
   findUserById,
 } from '../services/app-user-service';
-import { rotateRefreshToken } from '../services/refresh-token-service';
+import {
+  rotateRefreshToken,
+  revokeRefreshToken,
+  revokeRefreshTokensForUser,
+} from '../services/refresh-token-service';
 import { listProfilesForUser, createProfileForUser } from '../services/profile-service';
 import { signAuthToken } from '../lib/jwt';
 
@@ -44,6 +48,10 @@ describe('mobile auth routes', () => {
     process.env.DATABASE_URL = 'postgres://test';
     process.env.JWT_SECRET = 'test-secret-key-with-enough-length';
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    delete process.env.CORS_ORIGINS;
   });
 
   it('registers user and returns token', async () => {
@@ -56,8 +64,8 @@ describe('mobile auth routes', () => {
     const response = await request(app).post('/api/auth/register').send({
       loginType: 'email',
       login: 'user@example.com',
-      password: 'secret12',
-      confirmPassword: 'secret12',
+      password: 'Secret12!',
+      confirmPassword: 'Secret12!',
     });
 
     expect(response.status).toBe(201);
@@ -66,6 +74,23 @@ describe('mobile auth routes', () => {
     expect(response.body.refreshToken).toBe('refresh-test');
     expect(response.body.expiresIn).toBeGreaterThan(0);
     expect(response.body.user.id).toBe(1);
+  });
+
+  it('rejects a weak password on register', async () => {
+    const app = await createApp();
+    const response = await request(app).post('/api/auth/register').send({
+      loginType: 'email',
+      login: 'user@example.com',
+      password: 'secret12',
+      confirmPassword: 'secret12',
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.ok).toBe(false);
+    expect(response.body.error).toBe(
+      'Пароль должен содержать минимум 3 типа символов из 4: строчные и заглавные буквы, цифры, спецсимволы.',
+    );
+    expect(registerAppUser).not.toHaveBeenCalled();
   });
 
   it('logs in user and returns token', async () => {
@@ -135,8 +160,6 @@ describe('mobile auth routes', () => {
   });
 
   it('revokes the presented refresh token on logout', async () => {
-    const { revokeRefreshToken } = await import('../services/refresh-token-service');
-
     const app = await createApp();
     const response = await request(app)
       .post('/api/auth/logout')
@@ -144,6 +167,64 @@ describe('mobile auth routes', () => {
 
     expect(response.status).toBe(200);
     expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
+  it('revokes every refresh token when logout uses a Bearer access token', async () => {
+    const token = await signAuthToken({ sub: 9, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ refreshToken: 'refresh-test' });
+
+    expect(response.status).toBe(200);
+    expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+    expect(revokeRefreshTokensForUser).toHaveBeenCalledWith(9);
+  });
+
+  it('rejects cookie logout from an origin outside the CORS allowlist', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const token = await signAuthToken({ sub: 4, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Origin', 'https://evil.example')
+      .set('Cookie', `ag_access=${token}; ag_refresh=refresh-test`)
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(revokeRefreshToken).not.toHaveBeenCalled();
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
+  it('rejects cookie logout without an Origin header', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const token = await signAuthToken({ sub: 4, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', `ag_access=${token}; ag_refresh=refresh-test`)
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(revokeRefreshToken).not.toHaveBeenCalled();
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
+  });
+
+  it('clears the presented cookie session without revoking native tokens', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const token = await signAuthToken({ sub: 4, login: 'user@example.com', loginType: 'email' });
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Origin', 'https://app.example')
+      .set('Cookie', `ag_access=${token}; ag_refresh=refresh-test`)
+      .send({});
+
+    expect(response.status).toBe(200);
+    expect(revokeRefreshToken).toHaveBeenCalledWith('refresh-test');
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
   });
 
   it('sets httpOnly cookies and omits the refresh token for a browser Origin', async () => {
@@ -159,8 +240,8 @@ describe('mobile auth routes', () => {
       .send({
         loginType: 'email',
         login: 'user@example.com',
-        password: 'secret12',
-        confirmPassword: 'secret12',
+        password: 'Secret12!',
+        confirmPassword: 'Secret12!',
       });
 
     expect(response.status).toBe(201);
@@ -199,6 +280,57 @@ describe('mobile auth routes', () => {
     expect(response.status).toBe(200);
     expect(rotateRefreshToken).toHaveBeenCalledWith('refresh-old');
     expect(response.body.refreshToken).toBeUndefined();
+  });
+
+  it('rejects cookie refresh from an origin outside the CORS allowlist', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Origin', 'https://evil.example')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(rotateRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('rejects cookie refresh without an Origin header', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(403);
+    expect(rotateRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it('rotates a cookie session from an allowed Origin without touching native tokens', async () => {
+    process.env.CORS_ORIGINS = 'https://app.example';
+    vi.mocked(rotateRefreshToken).mockResolvedValue({ userId: 3 });
+    vi.mocked(findUserById).mockResolvedValue({
+      id: 3,
+      login: 'user@example.com',
+      loginType: 'email',
+      email: 'user@example.com',
+      phone: null,
+      passwordHash: 'hash',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const app = await createApp();
+    const response = await request(app)
+      .post('/api/auth/refresh')
+      .set('Origin', 'https://app.example')
+      .set('Cookie', 'ag_refresh=refresh-old')
+      .send({});
+
+    expect(response.status).toBe(200);
+    expect(rotateRefreshToken).toHaveBeenCalledWith('refresh-old');
+    expect(revokeRefreshTokensForUser).not.toHaveBeenCalled();
   });
 
   it('rejects a missing refresh token', async () => {

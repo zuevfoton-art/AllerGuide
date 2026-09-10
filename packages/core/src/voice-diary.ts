@@ -136,6 +136,16 @@ function detectArea(lower: string): string | undefined {
   return undefined;
 }
 
+/** Free-text steps in the «Симптомы» section that show the mic button. */
+export const DIARY_VOICE_STEP_IDS = ['symptoms', 'onset'] as const;
+
+export function isDiaryVoiceStep(sectionType: string, stepId: string): boolean {
+  return (
+    sectionType === 'Симптомы' &&
+    (DIARY_VOICE_STEP_IDS as readonly string[]).includes(stepId)
+  );
+}
+
 /**
  * Light parser for diary voice utterances (Phase C v2).
  * Preferentially fills symptoms / severity / onset / area from free text.

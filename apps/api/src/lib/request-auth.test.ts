@@ -46,4 +46,10 @@ describe('request-auth helpers', () => {
     expect(wantsCookieSession(fakeReq({ origin: 'http://localhost:5000' }))).toBe(true);
     expect(wantsCookieSession(fakeReq({}))).toBe(false);
   });
+
+  it('skips percent-invalid cookie values instead of throwing', () => {
+    const req = fakeReq({ cookie: 'a=%; ag_refresh=ok%2Dtoken; b=%E0%A4%A' });
+    expect(() => parseCookies(req)).not.toThrow();
+    expect(parseCookies(req)).toEqual({ ag_refresh: 'ok-token' });
+  });
 });

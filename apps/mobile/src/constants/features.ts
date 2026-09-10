@@ -8,6 +8,13 @@ export const CLOUD_SYNC_ENABLED = process.env.EXPO_PUBLIC_CLOUD_SYNC === 'true';
 export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true';
 
 /**
+ * «Ask» explainer chat via POST /api/ask (north-star N9). Default off.
+ * Requires AI_CHAT_ENABLED + AI_SCAN_ENABLED on the API. Offline falls back to
+ * bundled expert cards; distress wording opens SOS without calling the model.
+ */
+export const AI_CHAT_ENABLED = process.env.EXPO_PUBLIC_AI_CHAT === 'true';
+
+/**
  * Option D: multimodal dish photo → name + likely ingredients via
  * POST /api/scan/dish-vision. Used when OCR finds little/no text (plate-only photo).
  * On by default (core smart scanner). Requires AI_DISH_VISION_ENABLED + AI_SCAN_ENABLED on the API.
@@ -126,6 +133,13 @@ export const MAP_PLACES_ENABLED = isDefaultOnPublicFlag(
 export const AIR_QUALITY_GOOGLE_ENABLED = isDefaultOnPublicFlag(
   process.env.EXPO_PUBLIC_AIR_QUALITY,
 );
+
+/**
+ * Show the Market tab and allow `/market`. Off by default so the catalog
+ * screen stays in the repo without appearing in the tab bar or deep links.
+ * Enable with `EXPO_PUBLIC_MARKET=true`.
+ */
+export const MARKET_ENABLED = process.env.EXPO_PUBLIC_MARKET === 'true';
 
 /**
  * Fetch the live Market catalog from GET /api/market/catalog when an API URL

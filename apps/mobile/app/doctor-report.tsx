@@ -1,10 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { DOCTOR_REPORT_BLOCKS } from '@allerguide/core';
+import { DOCTOR_REPORT_BLOCKS, getDiaryEntryAnswers, normalizeSeverity } from '@allerguide/core';
 import { generateDoctorReportPdf } from '@/src/services/doctor-report-service';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
+import { getDiaryEntries } from '@/src/services/diary-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { ScreenHeader } from '@/src/components/ScreenHeader';
@@ -13,6 +14,7 @@ import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { DateTimeField } from '@/src/components/DateTimeField';
+import { DiaryTrendChart, type DiaryTrendPoint } from '@/src/components/diary/DiaryTrendChart';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
@@ -74,6 +76,28 @@ export default function DoctorReportScreen() {
   const [fromDate, setFromDate] = useState(isoDaysAgo(30));
   const [toDate, setToDate] = useState(isoToday());
   const [blockIds, setBlockIds] = useState<string[]>([]);
+  const [timelinePreview, setTimelinePreview] = useState<DiaryTrendPoint[]>([]);
+
+  useEffect(() => {
+    if (!activeProfileId) {
+      setTimelinePreview([]);
+      return;
+    }
+    void getDiaryEntries(activeProfileId).then((entries) => {
+      const points = entries
+        .filter((entry) => {
+          const day = entry.createdAt.slice(0, 10);
+          return day >= fromDate && day <= toDate;
+        })
+        .map((entry) => ({
+          date: entry.createdAt.slice(0, 10),
+          severity: normalizeSeverity(getDiaryEntryAnswers(entry.type, entry.details) ?? {}, entry.type) ?? 0,
+        }))
+        .filter((point) => point.severity > 0)
+        .slice(0, 30);
+      setTimelinePreview(points);
+    });
+  }, [activeProfileId, fromDate, toDate]);
 
   useEffect(() => {
     if (!profileCapabilities) {
@@ -192,6 +216,13 @@ export default function DoctorReportScreen() {
           </Pressable>
         ))}
       </GlassCard>
+
+      {blockIds.includes('timeline') && timelinePreview.length > 0 ? (
+        <GlassCard>
+          <Text style={ui.sectionLabel}>{localizeReportBlockLabel('timeline', localeContent)}</Text>
+          <DiaryTrendChart points={timelinePreview} height={72} />
+        </GlassCard>
+      ) : null}
 
       <Button
         label={loading ? t('doctorReport.generating') : t('doctorReport.generate')}

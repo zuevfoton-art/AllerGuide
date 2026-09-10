@@ -5,7 +5,9 @@ import {
   FULL_WIZARD_HIDDEN_STEP_IDS,
   attachDiaryAutoMetadata,
   buildAdaptiveDiaryWizardSections,
+  hideDiaryAutoSteps,
 } from './diary-wizard-route';
+import { getDiarySection } from './diary-schema';
 
 describe('diary-wizard-route', () => {
   it('drops dedicated modules and hidden auto/duplicate steps from the full wizard', () => {
@@ -32,6 +34,13 @@ describe('diary-wizard-route', () => {
       'reactionType',
     ]);
     expect(FULL_WIZARD_EXCLUDED_SECTION_TYPES.size).toBe(4);
+  });
+
+  it('hides auto steps of a single section wizard', () => {
+    const nutrition = getDiarySection('Питание');
+    expect(nutrition).toBeTruthy();
+    const stepIds = hideDiaryAutoSteps(nutrition!).steps.map((step) => step.id);
+    expect(stepIds).toEqual(['food', 'foodComponents', 'reaction', 'reactionType']);
   });
 
   it('fills missing auto metadata without overwriting user answers', () => {

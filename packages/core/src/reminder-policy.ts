@@ -20,7 +20,7 @@ export type DiaryEntryLike = {
 
 export type ScheduledReminderTrigger = {
   at: Date;
-  kind: 'diary' | 'act' | 'doctor-visit' | 'epinephrine-expiry' | 'pollen';
+  kind: 'diary' | 'act' | 'doctor-visit' | 'epinephrine-expiry' | 'pollen' | 'diary-return';
   profileId?: number;
   entryId?: number;
   scaleId?: string;
@@ -258,6 +258,7 @@ export function limitRemindersPerDay(
     'doctor-visit': 2,
     pollen: 3,
     diary: 4,
+    'diary-return': 5,
   };
 
   const sorted = [...reminders].sort((a, b) => {

@@ -13,6 +13,7 @@ import { useTranslation } from '@/src/store/locale-store';
 import { useAppStore } from '@/src/store/app-store';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getDiaryReminderNotificationContent } from '@/src/services/notification-content-service';
+import { showStatusBanner } from '@/src/store/banner-store';
 import { listAllDiaryEntries } from '@/src/services/diary-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import {
@@ -239,7 +240,7 @@ export default function NotificationsScreen() {
         setPermissionStatus(await getNotificationPermissionStatus());
         return;
       }
-      Alert.alert(t('settings.saved'), t('notifications.previewSent'));
+      showStatusBanner({ tone: 'success', message: t('notifications.previewSent') });
       setPermissionStatus(await getNotificationPermissionStatus());
     } finally {
       setLoading(false);

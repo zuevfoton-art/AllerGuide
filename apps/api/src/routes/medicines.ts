@@ -16,6 +16,7 @@ import { resolveAuthPayload } from '../lib/request-auth';
 import { resolveScanIdentity } from '../lib/scan-identity';
 import { consumeScanBudget, recordBudgetRejection } from '../lib/scan-cache';
 import { logCaughtError } from '../lib/log-caught-error';
+import { secretsMatch } from '../lib/secret-compare';
 import {
   callMedicineVisionLlm,
   medicineVisionConfigured,
@@ -77,7 +78,7 @@ type MedicineWriteAccess = { type: 'key' } | { type: 'user'; userId: number };
  */
 async function resolveMedicineWriteAccess(req: Request): Promise<MedicineWriteAccess | null> {
   const configuredKey = process.env.MEDICINE_WRITE_KEY?.trim();
-  if (configuredKey && req.header('x-medicine-write-key') === configuredKey) {
+  if (secretsMatch(req.header('x-medicine-write-key'), configuredKey)) {
     return { type: 'key' };
   }
 
