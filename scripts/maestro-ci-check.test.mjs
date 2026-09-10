@@ -262,6 +262,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
+    const afterInput = fill.split('inputText')[1] ?? '';
+    assert.match(afterInput, /scrollUntilVisible/);
     assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
     assert.match(tapPrimary, /enabled: true/);
 

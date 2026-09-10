@@ -46,10 +46,18 @@ describe('diary schema', () => {
         screen.map((step) => step.id),
       );
 
-    expect(screenIds('Симптомы')[0]).toEqual(['symptomCode', 'symptoms']);
+    expect(screenIds('Симптомы')[0]).toEqual(['symptoms', 'symptomCode']);
     expect(screenIds('Кожа')[0]).toEqual(['skinArea', 'appearance', 'itching']);
     expect(screenIds('Пикфлоуметрия')[0]).toEqual(['pefTime', 'pefValue']);
     expect(screenIds('Лекарство')[0]).toEqual(['medicine', 'dosage', 'takenAt']);
+  });
+
+  it('keeps the required symptoms text field above the catalog chips', () => {
+    const [text, catalog] = groupDiaryStepsIntoScreens(
+      getDiarySection('Симптомы')?.steps ?? [],
+    )[0];
+    expect(text).toMatchObject({ id: 'symptoms', required: true, field: 'text' });
+    expect(catalog).toMatchObject({ id: 'symptomCode', required: false, field: 'choice' });
   });
 
   it('includes trigger context fields for diary-trigger linking', () => {
