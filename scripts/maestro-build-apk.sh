@@ -43,30 +43,33 @@ esac
 echo "Maestro APK build profile=$PROFILE"
 echo "EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL:-<unset>}"
 
-# Nightly 34474685308: :app:mergeDexRelease died with "Java heap space"
-# while gradle.properties was -Xmx2048m. `expo prebuild` can rewrite that
-# file, so pin heap after prebuild before assembleRelease.
+# Release manifests do not set usesCleartextTraffic (debug overlays do).
+# Staging Maestro talks HTTP to the host API at 10.0.2.2 — Android 9+ blocks
+# that unless we allow cleartext for the emulator loopback domains only.
+# Nightly 34474685308: `:app:mergeDexRelease` died with "Java heap space" at
+# -Xmx2048m. `expo prebuild` can rewrite gradle.properties, so pin heap after it
+# and pass the same jvmargs on the Gradle CLI (CLI wins over the properties file).
+MAESTRO_GRADLE_JVMARGS='-Xmx4096m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError'
+
 pin_gradle_heap() {
   local props="$ROOT/apps/mobile/android/gradle.properties"
-  python3 - "$props" <<'PY'
+  python3 - "$props" "$MAESTRO_GRADLE_JVMARGS" <<'PY'
 from pathlib import Path
 import re
 import sys
 
 path = Path(sys.argv[1])
-text = path.read_text()
-wanted = "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
-updated, n = re.subn(r"^org\.gradle\.jvmargs=.*$", wanted, text, count=1, flags=re.M)
+jvmargs = sys.argv[2]
+target = f"org.gradle.jvmargs={jvmargs}"
+text = path.read_text() if path.exists() else ""
+new, n = re.subn(r"^org\.gradle\.jvmargs=.*$", target, text, count=1, flags=re.M)
 if n == 0:
-    updated = text.rstrip() + "\n" + wanted + "\n"
-path.write_text(updated)
-print(f"Pinned Gradle heap: {wanted}")
+    new = text.rstrip() + ("\n" if text else "") + target + "\n"
+path.write_text(new)
+print(f"Pinned Gradle heap: {target}")
 PY
 }
 
-# Release manifests do not set usesCleartextTraffic (debug overlays do).
-# Staging Maestro talks HTTP to the host API at 10.0.2.2 — Android 9+ blocks
-# that unless we allow cleartext for the emulator loopback domains only.
 enable_emulator_http_cleartext() {
   local manifest="$ROOT/apps/mobile/android/app/src/main/AndroidManifest.xml"
   local xml_dir="$ROOT/apps/mobile/android/app/src/main/res/xml"
@@ -104,16 +107,20 @@ pnpm install --frozen-lockfile
 cd apps/mobile
 pnpm generate-assets || true
 npx expo prebuild --platform android --no-install
-pin_gradle_heap
 
 if [ "$PROFILE" = "staging" ]; then
   enable_emulator_http_cleartext
 fi
 
+pin_gradle_heap
+
 cd android
 # Metro embeds EXPO_PUBLIC_* only when NODE_ENV=production (same as staging-apk-gradle.yml).
 # Emulator in nightly is x86_64 — skip unused ABIs.
-NODE_ENV=production ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=x86_64
+# --no-parallel keeps D8 mergeDex off competing workers on the 4g heap.
+NODE_ENV=production ./gradlew assembleRelease --no-daemon --no-parallel \
+  -Dorg.gradle.jvmargs="$MAESTRO_GRADLE_JVMARGS" \
+  -PreactNativeArchitectures=x86_64
 
 APK="$PWD/app/build/outputs/apk/release/app-release.apk"
 if [ ! -f "$APK" ]; then
