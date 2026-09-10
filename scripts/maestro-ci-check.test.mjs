@@ -35,6 +35,7 @@ describe('Maestro nightly CI invariants', () => {
     // Nightly 34474685308: mergeDexRelease OOM at -Xmx2048m. Pin ≥4g after prebuild.
     assert.match(script, /pin_gradle_heap/);
     assert.match(script, /Xmx4096m/);
+    assert.match(script, /MaxMetaspaceSize=1024m/);
     assert.match(script, /--no-parallel/);
     assert.match(script, /-Dorg\.gradle\.jvmargs=/);
   });

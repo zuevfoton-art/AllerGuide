@@ -179,10 +179,11 @@ function checkMaestroFlows() {
   if (
     !buildScript.includes('pin_gradle_heap') ||
     !buildScript.includes('Xmx4096m') ||
+    !buildScript.includes('MaxMetaspaceSize=1024m') ||
     !buildScript.includes('--no-parallel')
   ) {
     failures.push(
-      'scripts/maestro-build-apk.sh must pin Gradle to -Xmx4096m after prebuild (nightly 34474685308 mergeDex OOM)',
+      'scripts/maestro-build-apk.sh must pin Gradle to -Xmx4096m / 1024m metaspace after prebuild (nightly 34474685308 mergeDex OOM)',
     );
   }
 
