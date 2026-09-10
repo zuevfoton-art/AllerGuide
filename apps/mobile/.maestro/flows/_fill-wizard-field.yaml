@@ -3,6 +3,10 @@
 # (appearance) must be tapped after IME layout, then assertVisible the value
 # — otherwise inputText appends to skinArea (`лицоyyпокраснение`) and Далее
 # stays disabled.
+# Nightly 34477934128: symptoms fill wrote `зуд` but assertVisible failed —
+# chips + multiline + voice sit below the fold, Yoga inverted
+# diary-field-symptoms to `[87,1807][993,1395]`. Scroll after IME dismiss
+# before asserting the value (same pattern as `_tap-wizard-primary`).
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -20,6 +24,11 @@ appId: com.aclearo.app
 - eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml
+- scrollUntilVisible:
+    element:
+      id: ${FIELD_ID}
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: ${FIELD_ID}
     text: ${FIELD_VALUE}

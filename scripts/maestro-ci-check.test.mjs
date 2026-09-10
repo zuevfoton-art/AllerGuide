@@ -262,7 +262,15 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
-    assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
+    assert.equal(
+      (fill.match(/scrollUntilVisible:/g) ?? []).length,
+      2,
+      'scroll the field into view before typing and again after IME dismiss (nightly 34477934128 inverted symptoms bounds)',
+    );
+    assert.match(
+      fill,
+      /inputText: \$\{FIELD_VALUE\}[\s\S]*_dismiss-wizard-ime\.yaml[\s\S]*scrollUntilVisible:[\s\S]*assertVisible:[\s\S]*id: \$\{FIELD_ID\}[\s\S]*text: \$\{FIELD_VALUE\}/,
+    );
     assert.match(tapPrimary, /enabled: true/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
