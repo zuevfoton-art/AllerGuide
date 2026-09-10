@@ -8,7 +8,7 @@ import {
   type DiarySection,
   type MedicineCard,
 } from '@allerguide/core';
-import { DiaryEditorFooter } from '@/src/components/DiaryEditorModal';
+import { DiaryEditorFooter, DiaryEditorPinnedTop } from '@/src/components/DiaryEditorModal';
 import { DiaryDishComponentsField } from '@/src/components/diary/wizard/DiaryDishComponentsField';
 import { DiaryLegacyEditor } from '@/src/components/diary/wizard/DiaryLegacyEditor';
 import { DiaryPefZonePreview } from '@/src/components/diary/wizard/DiaryPefZonePreview';
@@ -120,22 +120,24 @@ export function DiaryWizard({
 
   return (
     <View style={styles.wrap}>
-      <View testID="diary-wizard-step-label" collapsable={false}>
-        <Text style={styles.progressText}>{section.title}</Text>
-      </View>
+      <DiaryEditorPinnedTop deps={[section.title, overallStepNumber, overallStepsTotal]}>
+        <View testID="diary-wizard-step-label" collapsable={false}>
+          <Text style={styles.progressText}>{section.title}</Text>
+        </View>
 
-      {/* The bar is the only progress indicator; the count stays for screen readers. */}
-      <View
-        style={styles.progressTrack}
-        accessibilityRole="progressbar"
-        accessibilityLabel={t('diaryWizard.stepOf', {
-          current: overallStepNumber,
-          total: overallStepsTotal,
-        })}>
+        {/* The bar is the only progress indicator; the count stays for screen readers. */}
         <View
-          style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
-        />
-      </View>
+          style={styles.progressTrack}
+          accessibilityRole="progressbar"
+          accessibilityLabel={t('diaryWizard.stepOf', {
+            current: overallStepNumber,
+            total: overallStepsTotal,
+          })}>
+          <View
+            style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
+          />
+        </View>
+      </DiaryEditorPinnedTop>
 
       {notice ? <View style={styles.notice}>{notice}</View> : null}
 

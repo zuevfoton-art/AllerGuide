@@ -540,7 +540,7 @@
 | Flow | Файл | Проверка |
 |------|------|----------|
 | Auth | `staging-auth-smoke.yaml` | register (API) → logout → login |
-| Backup | `staging-backup-smoke.yaml` | fixture recovery key → upload → «Готово» |
+| Backup | `staging-backup-smoke.yaml` | fixture recovery key → upload → `status-banner` |
 
 **Запуск:** `pnpm --filter mobile maestro:staging`
 

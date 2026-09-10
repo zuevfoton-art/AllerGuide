@@ -19,6 +19,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   UIManager,
   useWindowDimensions,
   View,
@@ -51,19 +52,23 @@ type FooterRenderer = () => ReactNode;
 type FooterRegistry = (render: FooterRenderer | null) => void;
 
 const DiaryEditorFooterContext = createContext<FooterRegistry | null>(null);
+const DiaryEditorPinnedTopContext = createContext<FooterRegistry | null>(null);
 
-/**
- * Renders children in the pinned sheet footer (sibling of ScrollView).
- * Without a host, children stay in place — used by unit tests / web previews.
- */
-export function DiaryEditorFooter({
+function dismissDiaryIme() {
+  Keyboard.dismiss();
+  const focused = TextInput.State.currentlyFocusedInput();
+  if (focused) TextInput.State.blurTextInput(focused);
+}
+
+function DiaryEditorPinnedSlot({
+  register,
   children,
   deps,
 }: {
+  register: FooterRegistry | null;
   children: ReactNode;
   deps: readonly (string | number | boolean | null | undefined)[];
 }) {
-  const register = useContext(DiaryEditorFooterContext);
   const childrenRef = useRef(children);
   childrenRef.current = children;
   const depKey = deps.join('\u0001');
@@ -80,6 +85,46 @@ export function DiaryEditorFooter({
 
   if (!register) return <>{children}</>;
   return null;
+}
+
+/**
+ * Renders children above the editor ScrollView (sibling, not clipped).
+ * Nightly 34451477109: the in-scroll step label crushed to inverted bounds
+ * `[87,625][993,322]` and overlaid `diary-editor-title`, so IME dismiss
+ * never fired and the next fill typed into skinArea (`лицоyyпокраснение`).
+ */
+export function DiaryEditorPinnedTop({
+  children,
+  deps,
+}: {
+  children: ReactNode;
+  deps: readonly (string | number | boolean | null | undefined)[];
+}) {
+  const register = useContext(DiaryEditorPinnedTopContext);
+  return (
+    <DiaryEditorPinnedSlot register={register} deps={deps}>
+      {children}
+    </DiaryEditorPinnedSlot>
+  );
+}
+
+/**
+ * Renders children in the pinned sheet footer (sibling of ScrollView).
+ * Without a host, children stay in place — used by unit tests / web previews.
+ */
+export function DiaryEditorFooter({
+  children,
+  deps,
+}: {
+  children: ReactNode;
+  deps: readonly (string | number | boolean | null | undefined)[];
+}) {
+  const register = useContext(DiaryEditorFooterContext);
+  return (
+    <DiaryEditorPinnedSlot register={register} deps={deps}>
+      {children}
+    </DiaryEditorPinnedSlot>
+  );
 }
 
 function measureAndScroll(scrollRef: RefObject<ScrollView | null>, node: unknown) {
@@ -110,11 +155,15 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const scrollRef = useRef<ScrollView>(null);
   const pendingFocusNode = useRef<unknown>(null);
   const footerRenderRef = useRef<FooterRenderer | null>(null);
+  const topRenderRef = useRef<FooterRenderer | null>(null);
   const [hasFooter, setHasFooter] = useState(false);
+  const [hasTop, setHasTop] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(64);
+  const [topHeight, setTopHeight] = useState(0);
   const [footerHeight, setFooterHeight] = useState(0);
 
   const [footerEpoch, setFooterEpoch] = useState(0);
+  const [topEpoch, setTopEpoch] = useState(0);
 
   const registerFooter = useCallback<FooterRegistry>((render) => {
     footerRenderRef.current = render;
@@ -125,6 +174,17 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
     }
     setHasFooter(true);
     setFooterEpoch((epoch) => epoch + 1);
+  }, []);
+
+  const registerTop = useCallback<FooterRegistry>((render) => {
+    topRenderRef.current = render;
+    if (!render) {
+      setHasTop(false);
+      setTopHeight(0);
+      return;
+    }
+    setHasTop(true);
+    setTopEpoch((epoch) => epoch + 1);
   }, []);
 
   const scrollFieldIntoView = useCallback((node: unknown) => {
@@ -165,8 +225,11 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   useEffect(() => {
     if (visible) return;
     footerRenderRef.current = null;
+    topRenderRef.current = null;
     setHasFooter(false);
+    setHasTop(false);
     setFooterHeight(0);
+    setTopHeight(0);
   }, [visible]);
 
   return (
@@ -182,7 +245,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
           const sheetPaddingBottom = Math.max(insets.bottom, space[4]) + keyboardInset;
           const scrollMaxHeight = diaryEditorScrollMaxHeight({
             windowHeight,
-            headerHeight,
+            headerHeight: headerHeight + topHeight,
             footerHeight,
             sheetPaddingBottom,
           });
@@ -221,7 +284,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   <Pressable
                     testID="diary-editor-title"
                     collapsable={false}
-                    onPress={Keyboard.dismiss}
+                    onPress={dismissDiaryIme}
                     accessibilityRole="header"
                     accessibilityLabel={t('diary.title')}>
                     <Text style={styles.headerTitle}>{t('diary.title')}</Text>
@@ -229,8 +292,21 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   <View style={styles.headerBtn} />
                 </View>
               </View>
+              <DiaryEditorPinnedTopContext.Provider value={registerTop}>
               <DiaryEditorFooterContext.Provider value={registerFooter}>
                 <DiaryEditorScrollContext.Provider value={scrollApi}>
+                  {hasTop ? (
+                    <View
+                      testID="diary-editor-pinned-top"
+                      collapsable={false}
+                      style={styles.pinnedTop}
+                      onLayout={(event) => {
+                        const next = Math.ceil(event.nativeEvent.layout.height);
+                        setTopHeight((prev) => (prev === next ? prev : next));
+                      }}>
+                      {topEpoch >= 0 ? topRenderRef.current?.() : null}
+                    </View>
+                  ) : null}
                   <ScrollView
                     ref={scrollRef}
                     style={[styles.scroll, { maxHeight: scrollMaxHeight }]}
@@ -255,6 +331,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   </View>
                 ) : null}
               </DiaryEditorFooterContext.Provider>
+              </DiaryEditorPinnedTopContext.Provider>
             </View>
           </>
           );
@@ -320,6 +397,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 16,
       fontWeight: '600',
       color: colors.head,
+    },
+    pinnedTop: {
+      paddingHorizontal: space[4],
+      paddingTop: space[3],
+      paddingBottom: space[2],
+      gap: space[2],
+      backgroundColor: colors.bg,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
     scroll: { flexGrow: 0 },
     scrollContent: {

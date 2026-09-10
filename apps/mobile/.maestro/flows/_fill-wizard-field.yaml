@@ -1,7 +1,8 @@
 # Type into a diary wizard field, then fold IME via the step title.
-# Nightly 34349155324: a second TextInput on the same screen (appearance)
-# must be tapped again after IME layout, otherwise inputText appends to
-# the previous field (`лицоyпокраснение`) and Далее stays disabled.
+# Nightly 34349155324 / 34451477109: a second TextInput on the same screen
+# (appearance) must be tapped after IME layout, then assertVisible the value
+# — otherwise inputText appends to skinArea (`лицоyyпокраснение`) and Далее
+# stays disabled.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -19,3 +20,6 @@ appId: com.aclearo.app
 - eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml
+- assertVisible:
+    id: ${FIELD_ID}
+    text: ${FIELD_VALUE}
