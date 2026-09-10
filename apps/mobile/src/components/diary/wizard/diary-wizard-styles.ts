@@ -133,6 +133,17 @@ export function createStyles({ colors, fonts }: AppTheme) {
 
 export function createFieldStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    // Nightly 34451477109: minHeight on the TextInput still inverted
+    // diary-field-skinArea to `[87,625][995,613]` (h=-12). A wrap with a
+    // definite height keeps the UiAutomator hit box usable.
+    inputWrap: {
+      height: density.tapMinHeight,
+      flexShrink: 0,
+    },
+    inputMultilineWrap: {
+      minHeight: 120,
+      flexShrink: 0,
+    },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,

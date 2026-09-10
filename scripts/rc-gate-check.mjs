@@ -343,10 +343,30 @@ function checkMaestroFlows() {
   if (
     !editorModal.includes('diary-editor-title') ||
     !editorModal.includes('Keyboard.dismiss') ||
+    !editorModal.includes('blurTextInput') ||
+    !editorModal.includes('diary-editor-pinned-top') ||
     /liftStyle\s*[,}\]]/.test(editorModal)
   ) {
     failures.push(
       'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
+    );
+  }
+
+  const stepField = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/DiaryStepField.tsx'),
+    'utf8',
+  );
+  const fieldStyles = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts'),
+    'utf8',
+  );
+  if (
+    !stepField.includes('styles.inputWrap') ||
+    !fieldStyles.includes('inputWrap:') ||
+    !fieldStyles.includes('height: density.tapMinHeight')
+  ) {
+    failures.push(
+      'DiaryStepField inputs must sit in a wrap with definite height (nightly 34451477109 inverted skinArea bounds)',
     );
   }
 
@@ -360,8 +380,43 @@ function checkMaestroFlows() {
   }
 
   const fillWizardField = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
-  if (!fillWizardField.includes('waitForAnimationToEnd') || !fillWizardField.includes('eraseText')) {
-    failures.push('_fill-wizard-field.yaml must retap the field after layout before typing');
+  if (
+    !fillWizardField.includes('waitForAnimationToEnd') ||
+    !fillWizardField.includes('eraseText') ||
+    !fillWizardField.includes('assertVisible')
+  ) {
+    failures.push('_fill-wizard-field.yaml must retap the field after layout and assertVisible FIELD_VALUE');
+  }
+
+  const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
+  if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
+    failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
+  }
+  if (
+    !photoSmoke.includes('FIELD_VALUE: предплечье') ||
+    !photoSmoke.includes('FIELD_VALUE: шелушение') ||
+    /\bFIELD_VALUE: лицо\b/.test(photoSmoke) ||
+    photoSmoke.includes('FIELD_VALUE: покраснение')
+  ) {
+    failures.push(
+      'diary-photo-smoke.yaml must type values that are not placeholder substrings (лицо / покраснение)',
+    );
+  }
+
+  const stagingBackup = fs.readFileSync(path.join(flowsDir, 'staging-backup-smoke.yaml'), 'utf8');
+  if (
+    /text:\s*"Готово"/.test(stagingBackup) ||
+    !stagingBackup.includes('status-banner-message') ||
+    !stagingBackup.includes('Резервная копия отправлена на сервер')
+  ) {
+    failures.push(
+      'staging-backup-smoke.yaml must wait for uploadSuccess copy (Alert title «Готово» was removed)',
+    );
+  }
+
+  const bannerStore = fs.readFileSync(path.join(root, 'apps/mobile/src/store/banner-store.ts'), 'utf8');
+  if (!bannerStore.includes('BANNER_AUTO_HIDE_MS = 10_000')) {
+    failures.push('banner-store must keep StatusBanner visible for at least 10s (Maestro nightly)');
   }
 
   for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
@@ -372,11 +427,6 @@ function checkMaestroFlows() {
     if (!flow.includes('diary-new-entry') || flow.includes('diary-chip-')) {
       failures.push(`${name}: must open types via diary-new-entry (home chips were removed)`);
     }
-  }
-
-  const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
-  if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
-    failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
   }
 
   const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');

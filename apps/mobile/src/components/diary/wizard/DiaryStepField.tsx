@@ -75,19 +75,21 @@ export function DiaryStepField({
   }
 
   return (
-    <TextInput
-      ref={inputRef}
-      testID={`diary-field-${step.id}`}
-      collapsable={false}
-      style={[styles.input, step.multiline && styles.inputMultiline]}
-      value={value}
-      onChangeText={onChange}
-      onFocus={handleFocus}
-      placeholder={step.placeholder}
-      placeholderTextColor={theme.colors.textMuted}
-      accessibilityLabel={step.label}
-      multiline={step.multiline}
-      textAlignVertical={step.multiline ? 'top' : 'center'}
-    />
+    <View style={step.multiline ? styles.inputMultilineWrap : styles.inputWrap} collapsable={false}>
+      <TextInput
+        ref={inputRef}
+        testID={`diary-field-${step.id}`}
+        collapsable={false}
+        style={[styles.input, step.multiline && styles.inputMultiline]}
+        value={value}
+        onChangeText={onChange}
+        onFocus={handleFocus}
+        placeholder={step.placeholder}
+        placeholderTextColor={theme.colors.textMuted}
+        accessibilityLabel={step.label}
+        multiline={step.multiline}
+        textAlignVertical={step.multiline ? 'top' : 'center'}
+      />
+    </View>
   );
 }
