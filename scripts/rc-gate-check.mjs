@@ -352,6 +352,24 @@ function checkMaestroFlows() {
     );
   }
 
+  const stepField = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/DiaryStepField.tsx'),
+    'utf8',
+  );
+  const fieldStyles = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts'),
+    'utf8',
+  );
+  if (
+    !stepField.includes('styles.inputWrap') ||
+    !fieldStyles.includes('inputWrap:') ||
+    !fieldStyles.includes('height: density.tapMinHeight')
+  ) {
+    failures.push(
+      'DiaryStepField inputs must sit in a wrap with definite height (nightly 34451477109 inverted skinArea bounds)',
+    );
+  }
+
   const tapWizardPrimary = fs.readFileSync(path.join(flowsDir, '_tap-wizard-primary.yaml'), 'utf8');
   if (
     !tapWizardPrimary.includes('_dismiss-wizard-ime.yaml') ||
