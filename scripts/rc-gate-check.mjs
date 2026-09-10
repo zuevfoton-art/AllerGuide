@@ -386,8 +386,19 @@ function checkMaestroFlows() {
   }
 
   const stagingBackup = fs.readFileSync(path.join(flowsDir, 'staging-backup-smoke.yaml'), 'utf8');
-  if (/text:\s*"Готово"/.test(stagingBackup) || !stagingBackup.includes('status-banner')) {
-    failures.push('staging-backup-smoke.yaml must wait for status-banner (Alert title «Готово» was removed)');
+  if (
+    /text:\s*"Готово"/.test(stagingBackup) ||
+    !stagingBackup.includes('status-banner-message') ||
+    !stagingBackup.includes('Резервная копия отправлена на сервер')
+  ) {
+    failures.push(
+      'staging-backup-smoke.yaml must wait for uploadSuccess copy (Alert title «Готово» was removed)',
+    );
+  }
+
+  const bannerStore = fs.readFileSync(path.join(root, 'apps/mobile/src/store/banner-store.ts'), 'utf8');
+  if (!bannerStore.includes('BANNER_AUTO_HIDE_MS = 10_000')) {
+    failures.push('banner-store must keep StatusBanner visible for at least 10s (Maestro nightly)');
   }
 
   for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {

@@ -116,9 +116,17 @@ describe('Maestro nightly CI invariants', () => {
     );
 
     const stagingBackup = read('apps/mobile/.maestro/flows/staging-backup-smoke.yaml');
-    assert.match(stagingBackup, /id: status-banner/);
+    assert.match(stagingBackup, /id: status-banner-message/);
+    assert.match(stagingBackup, /Резервная копия отправлена на сервер/);
     assert.match(stagingBackup, /id: status-banner-dismiss/);
     assert.doesNotMatch(stagingBackup, /text:\s*"Готово"/);
+
+    const bannerStore = read('apps/mobile/src/store/banner-store.ts');
+    assert.match(bannerStore, /export const BANNER_AUTO_HIDE_MS = 10_000/);
+
+    const statusBanner = read('apps/mobile/src/components/StatusBanner.tsx');
+    assert.match(statusBanner, /testID="status-banner-message"/);
+    assert.match(statusBanner, /collapsable=\{false\}/);
 
     for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
