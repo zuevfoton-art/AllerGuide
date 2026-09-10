@@ -111,7 +111,7 @@ maestro test .maestro/flows/staging-smoke-all.yaml
 | Flow | Сценарий |
 |------|----------|
 | `staging-auth-smoke` | email register (API) → logout → login |
-| `staging-backup-smoke` | recovery key fixture → upload backup → alert «Готово» |
+| `staging-backup-smoke` | recovery key fixture → upload backup → `status-banner-message` |
 
 ---
 
@@ -172,7 +172,8 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `diary-wizard-primary` не найден после ввода «зуд» | Gboard перекрывает «Далее» (в дампе bounds схлопнуты в ноль). `_dismiss-wizard-ime.yaml` тапает `diary-editor-title`, затем `_tap-wizard-primary.yaml` |
 | `diary-wizard-primary` не виден на шаге симптомов (IME закрыта) | Чипы + поле + голос выше fold; sheet `maxHeight: 88%` + `flexGrow: 0` обрезает кнопку (nightly 34325395361: `[87,2373][993,2358]`). Кнопки мастера в `diary-editor-footer` вне ScrollView; скролл ограничен `diaryEditorScrollMaxHeight` |
 | `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-Слабый` |
-| `diary-photo-step` не появился после «Слабый» | Gboard не закрылся (title был View, не Pressable), второе поле не взяло фокус: `skinArea=лицоyпокраснение`, appearance пустое, Далее disabled (nightly 34349155324). Шапка вызывает `Keyboard.dismiss`; `_fill-wizard-field` тапает поле повторно после layout; `_tap-wizard-primary` требует `enabled: true` |
+| `diary-photo-step` не появился / `diary-wizard-primary` не Enabled на коже | Второе поле не взяло фокус: `skinArea=лицоyyпокраснение`, appearance пустой, Далее disabled (nightly 34451477109). Смятый `diary-wizard-step-label` (`[87,625][993,322]`) перекрывал title. Лейбл+прогресс в `DiaryEditorPinnedTop`; title зовёт `dismissDiaryIme` (Keyboard.dismiss + blur); fill `assertVisible` значение; smoke не использует подстроки плейсхолдера |
+| `Готово` не видно после upload бэкапа | Alert заменили на `StatusBanner` (`uploadSuccess`, не title «Готово»). Nightly 34451477109 ждал текст «Готово» 60 с, баннер автоскрывался за ~4 с. `staging-backup-smoke` ждёт `status-banner-message` с copy «Резервная копия отправлена на сервер.»; `BANNER_AUTO_HIDE_MS` = 10 с |
 | `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, поле прокручивается к фокусу; тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
 | Сборка падает на `APK is missing the embedded JS bundle`, хотя бандл в APK есть | `maestro-build-apk.sh` работает под `pipefail`, а `grep -q` закрывал пайп: как только листинг перерос 64K буфер, `unzip` умирает с SIGPIPE (141). Листинг читается в `APK_LISTING`, сверка — here-string |

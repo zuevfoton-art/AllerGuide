@@ -24,6 +24,24 @@ describe('diaryEditorScrollMaxHeight', () => {
     expect(headerHeight + footerHeight + sheetPaddingBottom + scrollMax).toBe(2112);
   });
 
+  it('still leaves room after pinning the step label above the ScrollView', () => {
+    const windowHeight = 2400;
+    const headerHeight = 64 + 72;
+    const footerHeight = 143;
+    const sheetPaddingBottom = 16;
+    const scrollMax = diaryEditorScrollMaxHeight({
+      windowHeight,
+      headerHeight,
+      footerHeight,
+      sheetPaddingBottom,
+    });
+
+    expect(scrollMax).toBeGreaterThan(DIARY_EDITOR_SCROLL_MIN_HEIGHT);
+    expect(headerHeight + footerHeight + sheetPaddingBottom + scrollMax).toBe(
+      diaryEditorSheetMaxHeight(windowHeight),
+    );
+  });
+
   it('does not shrink the scroll viewport below the minimum', () => {
     expect(
       diaryEditorScrollMaxHeight({

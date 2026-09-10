@@ -115,6 +115,19 @@ describe('Maestro nightly CI invariants', () => {
       /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
     );
 
+    const stagingBackup = read('apps/mobile/.maestro/flows/staging-backup-smoke.yaml');
+    assert.match(stagingBackup, /id: status-banner-message/);
+    assert.match(stagingBackup, /Резервная копия отправлена на сервер/);
+    assert.match(stagingBackup, /id: status-banner-dismiss/);
+    assert.doesNotMatch(stagingBackup, /text:\s*"Готово"/);
+
+    const bannerStore = read('apps/mobile/src/store/banner-store.ts');
+    assert.match(bannerStore, /export const BANNER_AUTO_HIDE_MS = 10_000/);
+
+    const statusBanner = read('apps/mobile/src/components/StatusBanner.tsx');
+    assert.match(statusBanner, /testID="status-banner-message"/);
+    assert.match(statusBanner, /collapsable=\{false\}/);
+
     for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
       assert.match(flow, /_wait-login\.yaml/);
@@ -218,8 +231,11 @@ describe('Maestro nightly CI invariants', () => {
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
-    assert.match(editorModal, /onPress=\{Keyboard\.dismiss\}/);
+    assert.match(editorModal, /dismissDiaryIme/);
+    assert.match(editorModal, /Keyboard\.dismiss/);
+    assert.match(editorModal, /blurTextInput/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
+    assert.match(editorModal, /testID="diary-editor-pinned-top"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
     assert.doesNotMatch(
       editorModal,
@@ -229,6 +245,7 @@ describe('Maestro nightly CI invariants', () => {
 
     const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
     assert.match(wizard, /DiaryEditorFooter/);
+    assert.match(wizard, /DiaryEditorPinnedTop/);
     assert.match(wizard, /testID="diary-wizard-primary"/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
@@ -240,6 +257,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
     assert.match(tapPrimary, /enabled: true/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
@@ -260,6 +278,10 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(photo, /id: diary-photo-step/);
     assert.match(photo, /_tap-wizard-choice.yaml/);
     assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
+    assert.match(photo, /FIELD_VALUE: предплечье/);
+    assert.match(photo, /FIELD_VALUE: шелушение/);
+    assert.doesNotMatch(photo, /FIELD_VALUE: лицо\b/);
+    assert.doesNotMatch(photo, /FIELD_VALUE: покраснение/);
     assert.doesNotMatch(
       photo,
       /text: "Слабый"/,
