@@ -43,6 +43,27 @@ esac
 echo "Maestro APK build profile=$PROFILE"
 echo "EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL:-<unset>}"
 
+# Nightly 34474685308: :app:mergeDexRelease died with "Java heap space"
+# while gradle.properties was -Xmx2048m. `expo prebuild` can rewrite that
+# file, so pin heap after prebuild before assembleRelease.
+pin_gradle_heap() {
+  local props="$ROOT/apps/mobile/android/gradle.properties"
+  python3 - "$props" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+wanted = "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m"
+updated, n = re.subn(r"^org\.gradle\.jvmargs=.*$", wanted, text, count=1, flags=re.M)
+if n == 0:
+    updated = text.rstrip() + "\n" + wanted + "\n"
+path.write_text(updated)
+print(f"Pinned Gradle heap: {wanted}")
+PY
+}
+
 # Release manifests do not set usesCleartextTraffic (debug overlays do).
 # Staging Maestro talks HTTP to the host API at 10.0.2.2 — Android 9+ blocks
 # that unless we allow cleartext for the emulator loopback domains only.
@@ -83,6 +104,7 @@ pnpm install --frozen-lockfile
 cd apps/mobile
 pnpm generate-assets || true
 npx expo prebuild --platform android --no-install
+pin_gradle_heap
 
 if [ "$PROFILE" = "staging" ]; then
   enable_emulator_http_cleartext

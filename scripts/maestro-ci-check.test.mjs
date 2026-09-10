@@ -32,6 +32,17 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /enable_emulator_http_cleartext/);
     assert.match(script, /network_security_config/);
     assert.match(script, /10\.0\.2\.2/);
+    assert.match(script, /pin_gradle_heap/);
+    assert.match(script, /Xmx4096m/);
+    assert.match(
+      script,
+      /npx expo prebuild[\s\S]*pin_gradle_heap/,
+      'pin Gradle heap after expo prebuild so a regenerated gradle.properties cannot drop back to 2g',
+    );
+    assert.match(
+      read('apps/mobile/android/gradle.properties'),
+      /org\.gradle\.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m/,
+    );
   });
 
   it('runs emulator flows via the helper that installs the release APK', () => {
