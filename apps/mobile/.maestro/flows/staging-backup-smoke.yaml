@@ -1,4 +1,6 @@
 # P2.1b — staging: recovery key setup + encrypted backup upload
+# Nightly 34451477109: Alert «Готово» is gone — success is StatusBanner
+# (`settings.uploadSuccess`). Wait for that copy, not any banner and not «Готово».
 appId: com.aclearo.app
 ---
 - runFlow: _staging-bootstrap.yaml
@@ -19,18 +21,13 @@ appId: com.aclearo.app
     timeout: 10000
 - tapOn:
     id: recovery-key-saved-ack
-- waitForAnimationToEnd:
-    timeout: 3000
 - tapOn:
     id: recovery-key-confirm
-    enabled: true
-# CloudBackupCard posts a status banner (not Alert «Готово»).
 - extendedWaitUntil:
     visible:
-      id: status-banner
+      id: status-banner-message
+      text: "Резервная копия отправлена на сервер."
     timeout: 60000
-- assertVisible:
-    text: "Резервная копия отправлена на сервер."
 - tapOn:
     id: status-banner-dismiss
 - assertVisible:
