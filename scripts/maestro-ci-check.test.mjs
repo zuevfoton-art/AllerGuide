@@ -265,6 +265,17 @@ describe('Maestro nightly CI invariants', () => {
     const afterInput = fill.split('inputText')[1] ?? '';
     assert.match(afterInput, /scrollUntilVisible/);
     assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
+
+    // Nightly 34477934128 / 34575409044: 18 catalog chips above the required
+    // field invert `diary-field-symptoms` (`[87,1696][993,1395]`, text «зуд»).
+    const symptomsSection =
+      read('packages/core/src/diary-schema.ts').split("type: 'Симптомы'")[1]?.split("type:")[0] ?? '';
+    const textIdx = symptomsSection.indexOf("id: 'symptoms'");
+    const catalogIdx = symptomsSection.indexOf("id: 'symptomCode'");
+    assert.ok(
+      textIdx >= 0 && catalogIdx > textIdx,
+      'required symptoms text must sit above catalog chips on the grouped screen',
+    );
     assert.match(tapPrimary, /enabled: true/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {

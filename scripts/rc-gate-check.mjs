@@ -401,6 +401,16 @@ function checkMaestroFlows() {
     );
   }
 
+  const diarySchema = fs.readFileSync(path.join(root, 'packages/core/src/diary-schema.ts'), 'utf8');
+  const symptomsSection = diarySchema.split("type: 'Симптомы'")[1]?.split('type:')[0] ?? '';
+  const symptomsTextIdx = symptomsSection.indexOf("id: 'symptoms'");
+  const symptomsCatalogIdx = symptomsSection.indexOf("id: 'symptomCode'");
+  if (!(symptomsTextIdx >= 0 && symptomsCatalogIdx > symptomsTextIdx)) {
+    failures.push(
+      'Симптомы grouped screen must ask the required text field above catalog chips (nightly 34575409044 inverted diary-field-symptoms)',
+    );
+  }
+
   const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
   if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
     failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');

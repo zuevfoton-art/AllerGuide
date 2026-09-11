@@ -123,7 +123,8 @@ export const DIARY_SECTIONS: DiarySection[] = [
     icon: 'pulse',
     steps: [
       // Required free text first: 18 catalog chips before this field invert
-      // `diary-field-symptoms` below the editor fold (nightly 34477934128).
+      // `diary-field-symptoms` below the editor fold (nightly 34477934128 /
+      // 34575409044: `[87,1696][993,1395]`, text already «зуд»).
       {
         id: 'symptoms',
         label: 'Какие симптомы наблюдаются?',
