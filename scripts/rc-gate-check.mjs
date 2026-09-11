@@ -389,12 +389,26 @@ function checkMaestroFlows() {
   }
 
   const fillWizardField = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
+  const fillAfterInput = fillWizardField.split('inputText')[1] ?? '';
   if (
     !fillWizardField.includes('waitForAnimationToEnd') ||
     !fillWizardField.includes('eraseText') ||
-    !fillWizardField.includes('assertVisible')
+    !fillWizardField.includes('assertVisible') ||
+    !fillAfterInput.includes('scrollUntilVisible')
   ) {
-    failures.push('_fill-wizard-field.yaml must retap the field after layout and assertVisible FIELD_VALUE');
+    failures.push(
+      '_fill-wizard-field.yaml must retap the field after layout, scroll it back into view, and assertVisible FIELD_VALUE',
+    );
+  }
+
+  const diarySchema = fs.readFileSync(path.join(root, 'packages/core/src/diary-schema.ts'), 'utf8');
+  const symptomsSection = diarySchema.split("type: 'Симптомы'")[1]?.split('type:')[0] ?? '';
+  const symptomsTextIdx = symptomsSection.indexOf("id: 'symptoms'");
+  const symptomsCatalogIdx = symptomsSection.indexOf("id: 'symptomCode'");
+  if (!(symptomsTextIdx >= 0 && symptomsCatalogIdx > symptomsTextIdx)) {
+    failures.push(
+      'Симптомы grouped screen must ask the required text field above catalog chips (nightly 34575409044 inverted diary-field-symptoms)',
+    );
   }
 
   const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');

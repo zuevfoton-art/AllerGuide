@@ -20,6 +20,13 @@ appId: com.aclearo.app
 - eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml
+# Nightly 34477934128 / 34575409044: after IME the field can sit below catalog
+# chips with inverted UiAutomator bounds (`[87,1696][993,1395]`, text «зуд»).
+- scrollUntilVisible:
+    element:
+      id: ${FIELD_ID}
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: ${FIELD_ID}
     text: ${FIELD_VALUE}
