@@ -27,6 +27,12 @@ const ANR_OVER_APP = `=== window ===
 === activities ===
     topResumedActivity=ActivityRecord{5fa76ec u0 com.aclearo.app/.MainActivity t13}`;
 
+const IMMERSIVE_OVER_APP = `=== window ===
+  mCurrentFocus=Window{1c21af u0 ImmersiveModeConfirmation}
+  mCurrentFocus=Window{87ff88d u0 com.aclearo.app/com.aclearo.app.MainActivity}
+=== activities ===
+    topResumedActivity=ActivityRecord{f3654a8 u0 com.aclearo.app/.MainActivity t11}`;
+
 /**
  * Run one helper against a fake `adb` that replays a canned dumpsys state and
  * logs every invocation, so assertions can check which commands were issued.
@@ -103,6 +109,27 @@ describe('maestro device helpers', () => {
     assert.ok(
       calls.some((call) => call.includes('input tap 540 1359')),
       'ANR dialog must be dismissed with Wait',
+    );
+  });
+
+  it('dismisses ImmersiveModeConfirmation with BACK so IME dismiss taps land', () => {
+    const { calls } = runHelper('dismiss_immersive_confirm', IMMERSIVE_OVER_APP);
+    assert.ok(
+      calls.some((call) => call.includes('input keyevent KEYCODE_BACK')),
+      'ImmersiveModeConfirmation must be dismissed (nightly 34681029886)',
+    );
+  });
+
+  it('warmup dismisses the immersive overlay without restarting a resumed app', () => {
+    const { calls } = runHelper('ensure_app_foreground', IMMERSIVE_OVER_APP);
+    assert.equal(
+      startedActivity(calls),
+      false,
+      'am start after immersive BACK would reset expo-router',
+    );
+    assert.ok(
+      calls.some((call) => call.includes('input keyevent KEYCODE_BACK')),
+      'warmup must clear ImmersiveModeConfirmation before Maestro taps the diary title',
     );
   });
 });
