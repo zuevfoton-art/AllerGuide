@@ -124,6 +124,11 @@ function checkMaestroFlows() {
   if (!runner.includes('hide_error_dialogs 1')) {
     failures.push('scripts/maestro-run-emulator.sh must hide system ANR dialogs (they swallow Maestro taps)');
   }
+  if (!runner.includes('immersive_mode_confirmations confirmed')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh must confirm immersive-mode overlay (nightly 34681029886 swallowed IME dismiss)',
+    );
+  }
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
@@ -143,10 +148,20 @@ function checkMaestroFlows() {
       'scripts/maestro-run-emulator.sh sampler must not restart the activity mid-flow (resets expo-router)',
     );
   }
+  if (samplerLoop.includes('dismiss_immersive_confirm')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh sampler must not KEYCODE_BACK mid-flow to dismiss immersive overlay',
+    );
+  }
 
   const device = fs.readFileSync(path.join(root, 'scripts/lib/maestro-device.sh'), 'utf8');
   if (!device.includes('am start') || !device.includes('dismiss_anr')) {
     failures.push('scripts/lib/maestro-device.sh must am start + dismiss ANR');
+  }
+  if (!device.includes('ImmersiveModeConfirmation') || !device.includes('dismiss_immersive_confirm')) {
+    failures.push(
+      'scripts/lib/maestro-device.sh must dismiss ImmersiveModeConfirmation (nightly 34681029886)',
+    );
   }
   if (!device.includes('Application Not Responding')) {
     failures.push('scripts/lib/maestro-device.sh must detect Application Not Responding');

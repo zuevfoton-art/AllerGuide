@@ -58,6 +58,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(runner, /pm grant/);
     assert.match(runner, /autofill_service null/);
     assert.match(runner, /hide_error_dialogs 1/);
+    assert.match(runner, /immersive_mode_confirmations confirmed/);
     assert.match(runner, /adb logcat/);
     assert.match(runner, /scripts\/lib\/maestro-device\.sh/);
     assert.doesNotMatch(runner, /adb shell monkey/);
@@ -74,6 +75,11 @@ describe('Maestro nightly CI invariants', () => {
     );
     assert.ok(samplerLoop.length > 0, 'sampler loop must exist');
     assert.doesNotMatch(samplerLoop, /ensure_app_foreground/);
+    assert.doesNotMatch(
+      samplerLoop,
+      /dismiss_immersive_confirm/,
+      'in-flow sampler must not KEYCODE_BACK (nightly 33414517311 expo-router pop)',
+    );
     assert.match(samplerLoop, /capture_screen/);
 
     const device = read('scripts/lib/maestro-device.sh');
@@ -84,6 +90,8 @@ describe('Maestro nightly CI invariants', () => {
     // stale launcher line per display (nightly 33414517311).
     assert.match(device, /topResumedActivity/);
     assert.doesNotMatch(device, /launcher_is_focused/);
+    assert.match(device, /ImmersiveModeConfirmation/);
+    assert.match(device, /dismiss_immersive_confirm/);
   });
 
   it('waits for the auth hero title, then scrolls and folds IME without BACK', () => {
