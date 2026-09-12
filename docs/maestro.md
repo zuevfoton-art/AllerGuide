@@ -104,6 +104,7 @@ maestro test .maestro/flows/staging-smoke-all.yaml
 | `diary-smoke` | новая запись → симптомы |
 | `scanner-smoke` | «молоко» → вердикт |
 | `sos-smoke` | карточка + паспорт |
+| `sos-no-profile-smoke` | список профилей → `profile-list-item-0` → edit → `profile-delete` → SOS без профиля |
 | `settings-smoke` | номер экстренной службы |
 
 ### P2.1b (staging)
