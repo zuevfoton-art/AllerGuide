@@ -1,4 +1,4 @@
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   getMarketplacePrimaryOffer,
@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { CATEGORY_LABEL_KEYS } from '@/src/modules/marketplace/category-labels';
 import { getProductColor } from '@/src/modules/marketplace/product-theme';
 import { trackEvent } from '@/src/services/analytics-service';
+import { openExternalUrl } from '@/src/services/external-link';
 import { resolveYandexMarketOffer } from '@/src/services/market-api';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -64,7 +65,7 @@ export function MarketplaceProductCard({ item, compact = false }: MarketplacePro
         product_kind: item.kind,
         provider: item.provider,
       });
-      await Linking.openURL(url);
+      await openExternalUrl(url);
     } finally {
       setOpening(false);
     }

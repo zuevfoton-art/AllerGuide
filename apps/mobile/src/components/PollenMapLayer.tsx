@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   buildPollenRiskMapUrl,
@@ -24,6 +24,7 @@ import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import type { PollenMapSnapshot } from '@/src/services/pollen-map-service';
 import { isGooglePollenHeatmapAvailable } from '@/src/services/pollen-heatmap-service';
+import { openExternalUrl } from '@/src/services/external-link';
 
 interface CalendarPeak {
   taxonId: string;
@@ -248,7 +249,7 @@ export function PollenMapLayer({
         accessibilityRole="link"
         style={({ pressed }) => [styles.yandexButton, pressed && styles.pressed]}
         onPress={() => {
-          if (snapshot) void Linking.openURL(snapshot.yandexPollenUrl);
+          if (snapshot) void openExternalUrl(snapshot.yandexPollenUrl);
         }}
         disabled={!snapshot}>
         <View style={styles.yandexButtonText}>

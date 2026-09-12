@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Linking, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { POLLEN_MAP_SCALE_ZOOM, type GooglePollenMapType } from '@allerguide/core';
 import { GooglePollenMap } from '@/src/components/GooglePollenMap';
@@ -9,6 +9,7 @@ import { MAP_HERO_HEIGHT } from '@/src/components/map/map-constants';
 import type { MapScreenStyles } from '@/src/components/map/map-screen-styles';
 import type { GoogleMapCircle, GoogleMapMarker, GoogleMapPolyline } from '@/src/components/google-pollen-map.types';
 import type { AppTheme } from '@/src/hooks/use-theme';
+import { openExternalUrl } from '@/src/services/external-link';
 import { useTranslation } from '@/src/store/locale-store';
 
 type Props = {
@@ -130,7 +131,7 @@ export function MapCanvas({
           style={styles.yandexBanner}
           hitSlop={8}
           onPress={() => {
-            if (yandexPollenUrl) void Linking.openURL(yandexPollenUrl);
+            if (yandexPollenUrl) void openExternalUrl(yandexPollenUrl);
           }}
           accessibilityRole="link">
           <Ionicons name="information-circle-outline" size={18} color={theme.colors.warning} />
