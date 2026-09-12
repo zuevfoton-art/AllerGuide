@@ -25,6 +25,18 @@ dismiss_anr() {
   fi
 }
 
+# Nightly 34681029886: API 34 ImmersiveModeConfirmation sat in mCurrentFocus
+# and swallowed the diary-editor-title tap that folds Gboard.
+has_immersive_confirm() {
+  adb shell dumpsys window 2>/dev/null | grep -q 'ImmersiveModeConfirmation'
+}
+
+dismiss_immersive_confirm() {
+  has_immersive_confirm || return 0
+  echo "ImmersiveModeConfirmation — BACK" >&2
+  adb shell input keyevent KEYCODE_BACK || true
+}
+
 resumed_activity() {
   adb shell dumpsys activity activities 2>/dev/null |
     grep -E 'mResumedActivity|topResumedActivity' || true
@@ -45,6 +57,7 @@ app_is_foreground() {
 # mid-suite in nightly 33414517311.
 ensure_app_foreground() {
   dismiss_anr
+  dismiss_immersive_confirm
   if app_is_foreground; then
     return 0
   fi
@@ -65,7 +78,7 @@ capture_focus() {
   {
     echo "=== mCurrentFocus ==="
     adb shell dumpsys window 2>/dev/null |
-      grep -E 'mCurrentFocus|Application Not Responding|Application Error' || true
+      grep -E 'mCurrentFocus|Application Not Responding|Application Error|ImmersiveModeConfirmation' || true
     echo "=== mResumedActivity ==="
     resumed_activity
   } > "$1" || true
