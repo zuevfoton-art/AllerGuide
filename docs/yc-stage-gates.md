@@ -8,6 +8,7 @@ EAS: [`eas-staging-build.md`](./eas-staging-build.md) · профиль `staging
 ```bash
 pnpm yc-stage-phase0   # live YC health + EAS staging URL
 pnpm yc-stage-phase1   # Lockbox pollen + container redeploy
+pnpm yc-stage-enable-market-feeds  # Lockbox Yandex YML + pharmacy feed + remount
 pnpm yc-stage-phase2   # clients → api.staging.aclearo.com
 pnpm yc-stage-phase3   # no foreign-host deploy artifacts in repo
 pnpm yc-stage-phase4   # secrets hygiene (Lockbox / GH / EAS)
