@@ -59,6 +59,8 @@ After import, `terraform plan` should show no destroy of the API/runner/MDB.
 
 Secret name: `aclearo-staging-glitchtip`. Live id: `e6qrn93qngpnhviaog11`.
 
+Payload **already exists**. Re-running `yc-glitchtip-lockbox-init.sh` without `SECRET_KEY` / `POSTGRES_PASSWORD` generates **new** hex values and will desync the VM volume until bootstrap is restarted.
+
 **Never** `./scripts/yc-lockbox-upsert.sh` — that defaults to the API secret.
 
 ```bash
