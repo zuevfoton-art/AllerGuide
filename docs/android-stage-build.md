@@ -126,7 +126,7 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 
 | | EAS (A/B) | Gradle on GitHub (C) |
 |--|-----------|----------------------|
-| Android SDK | у Expo | ставит `android-actions/setup-android` |
+| Android SDK | у Expo | ставит `android-actions/setup-android` (`packages: platform-tools`; пакет `tools` Google снял) |
 | Google Maps key | EAS secret / `app.config.js` | GH secret → env → `app.config.js` / manifest |
 | Signing | EAS credentials | debug/release keystore в CI (сейчас debug-подобный preview) |
 | Время | обычно стабильнее | 10–25+ мин на cold SDK |
