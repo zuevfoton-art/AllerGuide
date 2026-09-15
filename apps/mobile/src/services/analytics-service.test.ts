@@ -36,7 +36,7 @@ describe('analytics-events', () => {
       token: 'jwt',
     });
 
-    expect(sanitized).toEqual({ screen: 'home', profile_id: 3 });
+    expect(sanitized).toEqual({ screen: 'home' });
   });
 
   it('builds payload with event name and timestamp', () => {
@@ -78,11 +78,12 @@ describe('trackEvent integration', () => {
     trackEvent('screen_view', { screen: 'diary', email: 'hidden@x.com' });
 
     expect(info).toHaveBeenCalled();
-    const payload = info.mock.calls[0]?.[1] as Record<string, unknown>;
-    expect(payload?.event).toBe('screen_view');
-    expect(payload?.screen).toBe('diary');
-    expect(payload?.email).toBeUndefined();
-    expect(payload?.client_id).toBeTruthy();
+    const payloads = info.mock.calls.map((call) => call[1] as Record<string, unknown>);
+    expect(payloads.some((payload) => payload?.event === 'session_started')).toBe(true);
+    const screenView = payloads.find((payload) => payload?.event === 'screen_view');
+    expect(screenView?.screen).toBe('diary');
+    expect(screenView?.email).toBeUndefined();
+    expect(screenView?.client_id).toBeTruthy();
     info.mockRestore();
   });
 
@@ -100,5 +101,23 @@ describe('trackEvent integration', () => {
       'https://api.staging.aclearo.com/api/analytics/events',
       expect.objectContaining({ method: 'POST' }),
     );
+    const bodies = fetchMock.mock.calls.map((call) => JSON.parse(String(call[1]?.body)));
+    expect(bodies.some((body: { event?: string }) => body.event === 'session_started')).toBe(true);
+    expect(bodies.some((body: { event?: string }) => body.event === 'auth_login')).toBe(true);
+  });
+
+  it('forwards fatal crashes from error-reporting as app_crashed', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const { initAnalytics } = await import('./analytics-service');
+    const { captureError } = await import('./error-reporting');
+
+    initAnalytics();
+    captureError(new Error('boundary'), { screen: 'root' }, { fatal: true });
+
+    const payloads = info.mock.calls.map((call) => call[1] as Record<string, unknown>);
+    expect(payloads.some((payload) => payload?.event === 'app_crashed' && payload?.fatal === true)).toBe(
+      true,
+    );
+    info.mockRestore();
   });
 });
