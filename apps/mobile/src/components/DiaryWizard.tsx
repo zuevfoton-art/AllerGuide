@@ -8,7 +8,11 @@ import {
   type DiarySection,
   type MedicineCard,
 } from '@allerguide/core';
-import { DiaryEditorFooter, DiaryEditorPinnedTop } from '@/src/components/DiaryEditorModal';
+import {
+  DiaryEditorFooter,
+  DiaryEditorPinnedTop,
+  useDiaryEditorScroll,
+} from '@/src/components/DiaryEditorModal';
 import { DiaryDishComponentsField } from '@/src/components/diary/wizard/DiaryDishComponentsField';
 import { DiaryLegacyEditor } from '@/src/components/diary/wizard/DiaryLegacyEditor';
 import { DiaryPefZonePreview } from '@/src/components/diary/wizard/DiaryPefZonePreview';
@@ -74,6 +78,7 @@ export function DiaryWizard({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
+  const editorScroll = useDiaryEditorScroll();
   const {
     section,
     screens,
@@ -121,9 +126,14 @@ export function DiaryWizard({
   return (
     <View style={styles.wrap}>
       <DiaryEditorPinnedTop deps={[section.title, overallStepNumber, overallStepsTotal]}>
-        <View testID="diary-wizard-step-label" collapsable={false}>
+        <Pressable
+          testID="diary-wizard-step-label"
+          collapsable={false}
+          onPressIn={() => editorScroll?.dismissIme()}
+          onPress={() => editorScroll?.dismissIme()}
+          accessibilityRole="header">
           <Text style={styles.progressText}>{section.title}</Text>
-        </View>
+        </Pressable>
 
         {/* The bar is the only progress indicator; the count stays for screen readers. */}
         <View

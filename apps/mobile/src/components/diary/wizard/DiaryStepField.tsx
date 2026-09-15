@@ -22,6 +22,7 @@ export function DiaryStepField({
   const editorScroll = useDiaryEditorScroll();
 
   const handleFocus = () => {
+    editorScroll?.registerFocusedInput(inputRef.current);
     editorScroll?.scrollFieldIntoView(inputRef.current);
   };
 
