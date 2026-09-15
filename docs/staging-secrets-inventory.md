@@ -78,9 +78,10 @@ Do **not** put `GOOGLE_POLLEN_API_KEY` in GitHub unless a dedicated upsert workf
 | Name | Visibility | Value |
 |------|------------|--------|
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | **Sensitive** (not Secret) | Maps Android (or JS) restricted key |
+| `EXPO_PUBLIC_ERROR_DSN` | **Sensitive** (not Secret) | GlitchTip envelope DSN (public in the APK by design). Alias `EXPO_PUBLIC_SENTRY_DSN`. Never `sentry.io`. See [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | Profile `staging` env | in `eas.json` | API URL = YC; `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE=true`; `EXPO_PUBLIC_MAP_PLACES=true`; `EXPO_PUBLIC_AIR_QUALITY=google`; no server maps/pollen/places/AQ keys |
 
-Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_AIR_QUALITY_API_KEY`, `YANDEX_MAPS_JS_API_KEY`, `JWT_SECRET`, `DATABASE_URL`, YC AI keys.
+Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_AIR_QUALITY_API_KEY`, `YANDEX_MAPS_JS_API_KEY`, `JWT_SECRET`, `DATABASE_URL`, YC AI keys. `SENTRY_AUTH_TOKEN` for sentry.io is not used.
 
 ---
 

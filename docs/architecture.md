@@ -261,7 +261,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `notification-*-service.ts` | Permissions, copy, deep-links, reconcile |
 | `analytics-service.ts` | Opt-in аналитика (`ANALYTICS_EVENT_NAMES`) |
 | `first-run-hints-service.ts` | Coach marks после регистрации: `hintsEligible:<userId>`, `hintsSeenTours:<userId>` |
-| `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN` |
+| `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_ERROR_DSN` / `EXPO_PUBLIC_SENTRY_DSN` (GlitchTip; `sentry.io` отказан) |
 
 Полный список — [`codebase-index.md`](./codebase-index.md).
 
@@ -292,7 +292,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `MARKET_LIVE_CATALOG_ENABLED` | `EXPO_PUBLIC_MARKET_LIVE_CATALOG` (default **on**; `false`/`off` disables) | `GET /api/market/catalog` only when payload is curated `MarketplaceProduct`; legacy `CatalogProduct` / empty → last-good / seed |
 | `MARKET_MEDICINES_ENABLED` | `EXPO_PUBLIC_MARKET_MEDICINES` (default **on**; `false`/`off` disables) | OTC-аптечные карточки на Маркете |
 | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED` | Product analytics |
-| `error-reporting.ts` | `EXPO_PUBLIC_SENTRY_DSN` | Crash reporting |
+| `error-reporting.ts` | `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) | Crash reporting → self-hosted GlitchTip |
 
 По умолчанию флаги **false** / `off` (см. `.env.example`), кроме **Places** и **Air Quality** — они включены, пока явно не выключены (`false` / `off`). На API те же два флага default-on; без ключей health остаётся `false`.
 
@@ -780,8 +780,8 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | Компонент | Файл | Включение |
 |-----------|------|-----------|
 | Аналитика | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED`, опц. `EXPO_PUBLIC_ANALYTICS_ENDPOINT` |
-| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*`, `hint_tour_*` |
-| Crash reporting | `error-reporting.ts` | `@sentry/react-native` при `EXPO_PUBLIC_SENTRY_DSN`; иначе console |
+| События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*`, `hint_tour_*`, `session_started`, `app_crashed` |
+| Crash reporting | `error-reporting.ts` | `@sentry/react-native` envelope в GlitchTip при `EXPO_PUBLIC_ERROR_DSN` / alias `EXPO_PUBLIC_SENTRY_DSN`; `sentry.io` отказан; иначе console. Sessions off. G5 crash-free — `crashFree` на `/api/analytics/dashboard` |
 
 ---
 
@@ -845,7 +845,8 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `EXPO_PUBLIC_AIR_QUALITY` | `google` (default on) | Google Air Quality (wellness + AQ card); `false`/`off` disables |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_ANALYTICS_ENDPOINT` | — | Optional analytics HTTP sink |
-| `EXPO_PUBLIC_SENTRY_DSN` | — | Crash reporting |
+| `EXPO_PUBLIC_ERROR_DSN` | — | GlitchTip DSN (preferred; Sentry-protocol, not sentry.io) |
+| `EXPO_PUBLIC_SENTRY_DSN` | — | Legacy alias for the same GlitchTip DSN |
 
 ### API
 
