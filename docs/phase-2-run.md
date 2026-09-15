@@ -42,7 +42,7 @@
 ## GlitchTip (P2.3)
 
 1. Provision the YC VM per [`staging-glitchtip.md`](./staging-glitchtip.md). Do **not** use sentry.io or the app Managed Postgres.
-2. EAS Sensitive: `EXPO_PUBLIC_ERROR_DSN` (optional alias `EXPO_PUBLIC_SENTRY_DSN`). Do not set `SENTRY_AUTH_TOKEN` for sentry.io.
+2. EAS preview Sensitive **and** GitHub secret `EXPO_PUBLIC_ERROR_DSN` (Gradle staging APK; optional alias `EXPO_PUBLIC_SENTRY_DSN`). Do not set `SENTRY_AUTH_TOKEN` for sentry.io.
 3. Optional maps upload: `SENTRY_URL` + `SENTRY_ORG` + `SENTRY_PROJECT` only when `SENTRY_URL` is the GlitchTip origin.
 4. Проверка: тестовый crash через `captureError` виден в GlitchTip; cold start → `session_started` на analytics dashboard.
 

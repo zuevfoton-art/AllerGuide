@@ -45,7 +45,7 @@ Optional SSH later: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (ne
 | Live VM + Lockbox payload (this folder) | **Done** (`yc`, bootstrap SA) |
 | DNS A at **reg.ru** (`ns1.reg.ru` / `ns2.reg.ru`) | **Owner** — not in this YC folder |
 | First GlitchTip admin via `createsuperuser` on the VM, DSN | **Owner** |
-| EAS `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
+| EAS + GitHub `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN` + GH secret for Gradle) |
 | `terraform import` into owner state | **Owner** (before the next apply) |
 | 14-day soak | Product, after smoke below |
 
@@ -118,16 +118,28 @@ ENABLE_USER_REGISTRATION=false YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6qrn93qngpnhviaog
 sudo systemctl restart glitchtip-bootstrap.service
 ```
 
-## 5. EAS DSN + staging APK
+## 5. EAS + GitHub DSN + staging APK
 
-DSN is public in the APK by design (Sensitive, not Secret).
+DSN is public in the APK by design (Sensitive, not Secret). Set it in **both** stores: EAS (cloud / `eas-staging-android.yml`) and GitHub (Gradle / `staging-apk-gradle.yml`). The Gradle job prefers the GH secret, then `eas env:get` (`preview` first — profile `staging` uses `"environment": "preview"` in [`eas.json`](../apps/mobile/eas.json)).
 
 ```bash
 cd apps/mobile
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+# EAS profile staging reads environment "preview"
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 # optional alias:
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 pnpm --filter mobile build:staging:android
+```
+
+GitHub repo secret (Actions → **Staging Android APK (Gradle on GitHub)**):
+
+| Secret | Notes |
+|--------|--------|
+| `EXPO_PUBLIC_ERROR_DSN` | Same DSN as EAS. Alias `EXPO_PUBLIC_SENTRY_DSN` also accepted. CI refuses `sentry.io`. |
+
+```bash
+gh secret set EXPO_PUBLIC_ERROR_DSN --body "$GLITCHTIP_DSN"
+# then Actions → Staging Android APK (Gradle on GitHub) → Run workflow
 ```
 
 Do **not** set `SENTRY_AUTH_TOKEN` for sentry.io. Maps upload only if `SENTRY_URL` is this origin ([`error-tracker-url.js`](../apps/mobile/error-tracker-url.js)).

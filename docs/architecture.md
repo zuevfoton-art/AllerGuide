@@ -745,7 +745,7 @@ Drizzle-объекты схемо-квалифицированы — код за
 | `deploy-staging.yml` | Staging deploy на Yandex Cloud (push в `staging`) |
 | `seed-staging-catalog.yml` | Сиды каталога на staging Postgres (self-hosted VPC runner) |
 | `eas-staging-android.yml` | EAS staging Android |
-| `staging-apk-gradle.yml` | Gradle APK на GitHub |
+| `staging-apk-gradle.yml` | Gradle APK на GitHub (Maps key + GlitchTip `EXPO_PUBLIC_ERROR_DSN`) |
 | `release-apk.yml` | Release APK |
 | `maestro-nightly.yml` | Maestro E2E nightly |
 
@@ -781,7 +781,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 |-----------|------|-----------|
 | Аналитика | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED`, опц. `EXPO_PUBLIC_ANALYTICS_ENDPOINT` |
 | События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*`, `hint_tour_*`, `session_started`, `app_crashed` |
-| Crash reporting | `error-reporting.ts` | `@sentry/react-native` envelope в GlitchTip при `EXPO_PUBLIC_ERROR_DSN` / alias `EXPO_PUBLIC_SENTRY_DSN`; `sentry.io` отказан; иначе console. Sessions off. Staging ingest: VM + Caddy (`infra/yandex/staging/glitchtip.tf`, `https://errors.staging.aclearo.com`). G5 crash-free — `crashFree` на `/api/analytics/dashboard` |
+| Crash reporting | `error-reporting.ts` | `@sentry/react-native` envelope в GlitchTip при `EXPO_PUBLIC_ERROR_DSN` / alias `EXPO_PUBLIC_SENTRY_DSN`; `sentry.io` отказан; иначе console. Sessions off. Staging ingest: VM + Caddy (`infra/yandex/staging/glitchtip.tf`, `https://errors.staging.aclearo.com`). Staging APK: EAS preview Sensitive **and** GH secret for `staging-apk-gradle.yml`. G5 crash-free — `crashFree` на `/api/analytics/dashboard` |
 
 ---
 
@@ -845,7 +845,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 | `EXPO_PUBLIC_AIR_QUALITY` | `google` (default on) | Google Air Quality (wellness + AQ card); `false`/`off` disables |
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `false` | Product analytics |
 | `EXPO_PUBLIC_ANALYTICS_ENDPOINT` | — | Optional analytics HTTP sink |
-| `EXPO_PUBLIC_ERROR_DSN` | — | GlitchTip DSN (preferred; Sentry-protocol, not sentry.io) |
+| `EXPO_PUBLIC_ERROR_DSN` | — | GlitchTip DSN (preferred; Sentry-protocol, not sentry.io). Staging Gradle: GH secret or EAS preview |
 | `EXPO_PUBLIC_SENTRY_DSN` | — | Legacy alias for the same GlitchTip DSN |
 
 ### API

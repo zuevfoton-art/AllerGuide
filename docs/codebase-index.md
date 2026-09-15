@@ -86,7 +86,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
 | Analytics event | `packages/core` `analytics-events.ts` + `crash-free.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
-| Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + [`glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) + compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
+| Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + [`glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) + compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · Gradle [`staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) / [`resolve-staging-error-dsn.sh`](../scripts/resolve-staging-error-dsn.sh) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
@@ -351,7 +351,7 @@ Barrel: `index.ts`. Pure TS.
 | `AIR_QUALITY` (default on) | `features.ts` → `air-quality-service.ts` | `AIR_QUALITY_ENABLED` (default on) + AQ key |
 | `MARKET` (default off) | `features.ts` → `(tabs)/_layout.tsx`, `market.tsx` | — |
 | `MARKET_LIVE_CATALOG` / `MARKET_MEDICINES` (default on) | `features.ts` → `market-api.ts` | `GET /api/market/catalog` |
-| `ERROR_DSN` (alias `SENTRY_DSN`) | `error-reporting.ts` | GlitchTip envelope DSN; `sentry.io` refused |
+| `ERROR_DSN` (alias `SENTRY_DSN`) | `error-reporting.ts` | GlitchTip envelope DSN; `sentry.io` refused. Staging APK: EAS preview Sensitive **and** GH secret for [`staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) |
 | `API_URL` | `api-client` и др. | — |
 
 По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и живого каталога Маркета (`MARKET_LIVE_CATALOG` / `MARKET_MEDICINES`, default on; `false`/`off` выключает). Вкладка Маркет отдельно за `EXPO_PUBLIC_MARKET` (default off). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
