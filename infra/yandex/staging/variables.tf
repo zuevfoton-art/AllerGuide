@@ -116,3 +116,51 @@ variable "runtime_service_account_id" {
   type        = string
   default     = ""
 }
+
+variable "glitchtip_name" {
+  description = "Compute VM name for self-hosted GlitchTip (crash ingest). Not the GitHub runner."
+  type        = string
+  default     = "aclearo-staging-glitchtip"
+}
+
+variable "glitchtip_fqdn" {
+  description = "Public FQDN for GlitchTip ingest + UI (Caddy + Let's Encrypt)"
+  type        = string
+  default     = "errors.staging.aclearo.com"
+}
+
+variable "glitchtip_fqdn_ru" {
+  description = "Optional extra hostname on the same Caddy site (empty = skip). Set only after DNS exists, or ACME can fail the whole site."
+  type        = string
+  default     = ""
+}
+
+variable "glitchtip_cores" {
+  description = "vCPU count for the GlitchTip VM"
+  type        = number
+  default     = 2
+}
+
+variable "glitchtip_memory_gb" {
+  description = "RAM (GB) for the GlitchTip VM"
+  type        = number
+  default     = 4
+}
+
+variable "glitchtip_disk_gb" {
+  description = "Boot disk size (GB) for the GlitchTip VM"
+  type        = number
+  default     = 30
+}
+
+variable "glitchtip_ssh_public_key" {
+  description = "SSH public key for the GlitchTip VM (required if glitchtip_ssh_cidrs is set)"
+  type        = string
+  default     = ""
+}
+
+variable "glitchtip_ssh_cidrs" {
+  description = "CIDRs allowed to SSH to GlitchTip. Empty = no port 22 (serial console only)."
+  type        = list(string)
+  default     = []
+}

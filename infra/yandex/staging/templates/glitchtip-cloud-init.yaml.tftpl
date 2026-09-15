@@ -1,0 +1,59 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+  - caddy
+  - jq
+  - curl
+  - ca-certificates
+
+%{ if ssh_public_key != "" ~}
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+%{ endif ~}
+
+write_files:
+  - path: /opt/glitchtip/docker-compose.yml
+    permissions: "0644"
+    encoding: b64
+    content: ${compose_b64}
+  - path: /opt/glitchtip/bootstrap.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${bootstrap_b64}
+  - path: /opt/glitchtip/Caddyfile
+    permissions: "0644"
+    encoding: b64
+    content: ${caddyfile_b64}
+  - path: /etc/systemd/system/glitchtip-bootstrap.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Start GlitchTip from Lockbox secrets
+      After=docker.service network-online.target
+      Wants=network-online.target
+      Requires=docker.service
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      Restart=on-failure
+      RestartSec=30
+      ExecStart=/opt/glitchtip/bootstrap.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - cp /opt/glitchtip/Caddyfile /etc/caddy/Caddyfile
+  - systemctl enable --now docker
+  - mkdir -p /usr/local/lib/docker/cli-plugins
+  - curl -fsSL https://github.com/docker/compose/releases/download/v2.35.1/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+  - chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+  - systemctl daemon-reload
+  - systemctl enable --now glitchtip-bootstrap.service
+  - systemctl enable caddy

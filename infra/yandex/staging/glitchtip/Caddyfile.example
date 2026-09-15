@@ -1,0 +1,7 @@
+# Example Caddy site for a local VM. Terraform writes the live file from
+# templates/glitchtip-caddyfile.tftpl using glitchtip_fqdn.
+
+errors.staging.aclearo.com {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}
