@@ -42,4 +42,23 @@ describe('blurDiaryEditorIme', () => {
     expect(blurTextInput.mock.calls).toEqual([[registered], [focused]]);
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
+
+  it('uses currentlyFocusedField on web when currentlyFocusedInput is missing', async () => {
+    const blurTextInput = vi.fn();
+    const focused = { id: 'web-field' };
+    const currentlyFocusedField = vi.fn(() => focused);
+    const dismiss = vi.fn();
+    vi.doMock('react-native', () => ({
+      Platform: { OS: 'web' },
+      Keyboard: { dismiss },
+      TextInput: { State: { blurTextInput, currentlyFocusedField } },
+    }));
+
+    const { blurDiaryEditorIme } = await import('./diary-editor-ime');
+    blurDiaryEditorIme(null);
+
+    expect(currentlyFocusedField).toHaveBeenCalledTimes(1);
+    expect(blurTextInput).toHaveBeenCalledWith(focused);
+    expect(dismiss).toHaveBeenCalledTimes(1);
+  });
 });
