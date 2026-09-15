@@ -23,13 +23,18 @@ function readFocusedInput(): InputHandle | null | undefined {
  * Fold Gboard from a React Native Modal.
  * Nightly 34946086211: `Keyboard.dismiss()` alone left IME up (Modal window
  * token), so `diary-choice-Слабый` stayed in the tree under Gboard.
- * Blur the editor's last focused input first, then RN's focused input.
+ * Nightly 34956812041: Maestro `inputText` never fires RN `onFocus`, so a
+ * single "last focused" ref was null. Blur every mounted editor input.
  * Web: `TextInput.State.currentlyFocusedInput` is missing — do not call it.
  */
-export function blurDiaryEditorIme(registered: InputHandle | null | undefined) {
-  if (registered) TextInput.State.blurTextInput(registered);
+export function blurDiaryEditorIme(
+  registered: ReadonlyArray<InputHandle | null | undefined> = [],
+) {
+  for (const node of registered) {
+    if (node) TextInput.State.blurTextInput(node);
+  }
   const focused = readFocusedInput();
-  if (focused && focused !== registered) TextInput.State.blurTextInput(focused);
+  if (focused && !registered.includes(focused)) TextInput.State.blurTextInput(focused);
   if (Platform.OS === 'web' && typeof document !== 'undefined') {
     const active = document.activeElement;
     if (active instanceof HTMLElement) active.blur();

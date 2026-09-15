@@ -389,6 +389,7 @@ function checkMaestroFlows() {
     !editorModal.includes('onPressIn={dismissDiaryIme}') ||
     !editorModal.includes('diary-editor-pinned-top') ||
     !editorModal.includes('diaryEditorSheetPaddingBottom') ||
+    !editorModal.includes('registerInput') ||
     /liftStyle\s*[,}\]]/.test(editorModal)
   ) {
     failures.push(
@@ -416,11 +417,23 @@ function checkMaestroFlows() {
   );
   if (
     !stepField.includes('styles.inputWrap') ||
+    !stepField.includes('registerInput') ||
     !fieldStyles.includes('inputWrap:') ||
     !fieldStyles.includes('height: density.tapMinHeight')
   ) {
     failures.push(
       'DiaryStepField inputs must sit in a wrap with definite height (nightly 34451477109 inverted skinArea bounds)',
+    );
+  }
+
+  const tapWizardChoice = fs.readFileSync(path.join(flowsDir, '_tap-wizard-choice.yaml'), 'utf8');
+  if (
+    tapWizardChoice.indexOf('scrollUntilVisible') < 0 ||
+    tapWizardChoice.indexOf('extendedWaitUntil') < 0 ||
+    tapWizardChoice.indexOf('scrollUntilVisible') > tapWizardChoice.indexOf('extendedWaitUntil')
+  ) {
+    failures.push(
+      '_tap-wizard-choice.yaml must scrollUntilVisible before waiting for visible (nightly 34956812041)',
     );
   }
 

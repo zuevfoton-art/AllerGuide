@@ -46,7 +46,8 @@ type DiaryEditorInputHandle = Parameters<typeof TextInput.State.blurTextInput>[0
 
 type DiaryEditorScrollApi = {
   scrollFieldIntoView: (node: unknown) => void;
-  registerFocusedInput: (node: DiaryEditorInputHandle | null) => void;
+  registerInput: (node: DiaryEditorInputHandle | null) => void;
+  unregisterInput: (node: DiaryEditorInputHandle | null) => void;
   dismissIme: () => void;
 };
 
@@ -156,7 +157,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const modalAnimation = useModalAnimation('slide');
   const scrollRef = useRef<ScrollView>(null);
   const pendingFocusNode = useRef<unknown>(null);
-  const focusedInputRef = useRef<DiaryEditorInputHandle | null>(null);
+  const inputRefs = useRef(new Set<DiaryEditorInputHandle>());
   const footerRenderRef = useRef<FooterRenderer | null>(null);
   const topRenderRef = useRef<FooterRenderer | null>(null);
   const [hasFooter, setHasFooter] = useState(false);
@@ -191,13 +192,15 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   }, []);
 
   const dismissDiaryIme = useCallback(() => {
-    const registered = focusedInputRef.current;
-    blurDiaryEditorIme(registered);
-    focusedInputRef.current = null;
+    blurDiaryEditorIme([...inputRefs.current]);
   }, []);
 
-  const registerFocusedInput = useCallback((node: DiaryEditorInputHandle | null) => {
-    focusedInputRef.current = node;
+  const registerInput = useCallback((node: DiaryEditorInputHandle | null) => {
+    if (node) inputRefs.current.add(node);
+  }, []);
+
+  const unregisterInput = useCallback((node: DiaryEditorInputHandle | null) => {
+    if (node) inputRefs.current.delete(node);
   }, []);
 
   const scrollFieldIntoView = useCallback((node: unknown) => {
@@ -234,12 +237,13 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   }, []);
 
   const scrollApi = useMemo(
-    () => ({ scrollFieldIntoView, registerFocusedInput, dismissIme: dismissDiaryIme }),
-    [scrollFieldIntoView, registerFocusedInput, dismissDiaryIme],
+    () => ({ scrollFieldIntoView, registerInput, unregisterInput, dismissIme: dismissDiaryIme }),
+    [scrollFieldIntoView, registerInput, unregisterInput, dismissDiaryIme],
   );
 
   useEffect(() => {
     if (visible) return;
+    inputRefs.current.clear();
     footerRenderRef.current = null;
     topRenderRef.current = null;
     setHasFooter(false);

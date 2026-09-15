@@ -279,7 +279,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /collapsable=\{false\}/);
     assert.match(editorModal, /dismissDiaryIme/);
     assert.match(editorModal, /onPressIn=\{dismissDiaryIme\}/);
-    assert.match(editorModal, /registerFocusedInput/);
+    assert.match(editorModal, /registerInput/);
+    assert.match(editorModal, /unregisterInput/);
     assert.match(editorModal, /blurDiaryEditorIme/);
     const imeHelper = read('apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
     assert.match(imeHelper, /Keyboard\.dismiss/);
@@ -364,13 +365,18 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(tapChoice, /_dismiss-wizard-ime.yaml/);
     assert.match(tapChoice, /extendedWaitUntil/);
     assert.match(tapChoice, /scrollUntilVisible/);
+    assert.ok(
+      tapChoice.indexOf('scrollUntilVisible') < tapChoice.indexOf('extendedWaitUntil'),
+      'scroll the chip into view before waiting for visible (nightly 34956812041)',
+    );
     assert.match(tapChoice, /id: \$\{CHOICE_ID\}/);
 
     const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
     assert.match(stepField, /diary-choice-\$\{choice\}/);
     assert.match(stepField, /diary-choice-\$\{step\.id\}/);
     assert.match(stepField, /styles\.inputWrap/);
-    assert.match(stepField, /registerFocusedInput/);
+    assert.match(stepField, /registerInput/);
+    assert.match(stepField, /unregisterInput/);
     const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
     assert.match(fieldStyles, /inputWrap:/);
     assert.match(fieldStyles, /height: density\.tapMinHeight/);

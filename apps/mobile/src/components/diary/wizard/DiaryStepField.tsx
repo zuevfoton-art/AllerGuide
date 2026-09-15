@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { parseMultiChoiceValue, toggleMultiChoiceValue, type DiaryStep } from '@allerguide/core';
 import { DateTimeField } from '@/src/components/DateTimeField';
@@ -21,8 +21,17 @@ export function DiaryStepField({
   const inputRef = useRef<TextInput>(null);
   const editorScroll = useDiaryEditorScroll();
 
+  useLayoutEffect(() => {
+    const node = inputRef.current;
+    if (!node) return undefined;
+    // Maestro inputText focuses the native EditText without RN onFocus
+    // (nightly 34956812041), so register on mount, not only on focus.
+    editorScroll?.registerInput(node);
+    return () => editorScroll?.unregisterInput(node);
+  }, [editorScroll]);
+
   const handleFocus = () => {
-    editorScroll?.registerFocusedInput(inputRef.current);
+    editorScroll?.registerInput(inputRef.current);
     editorScroll?.scrollFieldIntoView(inputRef.current);
   };
 
