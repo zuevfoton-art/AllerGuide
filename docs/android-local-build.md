@@ -332,7 +332,7 @@ curl -s https://api.staging.aclearo.com/api/health | jq '{ok, features}'
 ## Связанные файлы и документы
 
 - [`apps/mobile/android/app/build.gradle`](../apps/mobile/android/app/build.gradle) — конфигурация Android-приложения (applicationId, signing, варианты)
-- [`apps/mobile/android/gradle.properties`](../apps/mobile/android/gradle.properties) — Hermes, архитектуры ABI, память Gradle
+- [`apps/mobile/android/gradle.properties`](../apps/mobile/android/gradle.properties) — Hermes, архитектуры ABI, память Gradle (`-Xmx4096m`; nightly 34474685308 OOM’d `mergeDexRelease` at 2g)
 - [`apps/mobile/app.json`](../apps/mobile/app.json) — package, версии, permissions, иконки
 - [`docs/eas-internal-preview.md`](eas-internal-preview.md) — облачная сборка через EAS
 - [`docs/android-stage-build.md`](android-stage-build.md) — stage APK: EAS (preferred) vs GitHub Actions
