@@ -64,9 +64,12 @@ cd "$INSTALL_DIR"
 docker compose --env-file "$ENV_FILE" up -d
 
 if [[ -f /opt/glitchtip/Caddyfile ]]; then
+  mkdir -p /etc/caddy
   cp /opt/glitchtip/Caddyfile /etc/caddy/Caddyfile
-  systemctl enable --now caddy
-  systemctl reload caddy || systemctl restart caddy
+  if [[ -f /etc/systemd/system/caddy.service ]] || systemctl cat caddy.service >/dev/null 2>&1; then
+    systemctl enable --now caddy
+    systemctl reload caddy || systemctl restart caddy
+  fi
 fi
 
 echo "glitchtip-bootstrap: compose is up (Caddy terminates TLS on :443; lockbox $LOCKBOX_SECRET_ID)"

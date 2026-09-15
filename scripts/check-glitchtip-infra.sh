@@ -12,6 +12,12 @@ if grep -E "['\"]8000:8000['\"]|[[:space:]]- 8000:8000" "$COMPOSE"; then
   exit 1
 fi
 grep -q 'aclearo-staging-glitchtip' "$TF"
+grep -q 'glitchtip-setup.sh' "$TF"
+if grep -E '^[[:space:]]+- caddy$' "$ROOT/infra/yandex/staging/templates/glitchtip-cloud-init.yaml.tftpl"; then
+  echo "Ubuntu 22.04 has no apt package named caddy; install the GitHub binary in setup.sh" >&2
+  exit 1
+fi
+grep -q 'caddy_2.10.0_linux_amd64' "$ROOT/infra/yandex/staging/templates/glitchtip-setup.sh"
 grep -q 'yandex_lockbox_secret" "glitchtip"' "$TF"
 grep -q 'postgresql.tf' "$TF" && { echo "glitchtip.tf must not reference app postgresql.tf"; exit 1; } || true
 if grep -n 'yandex_mdb_postgresql' "$TF"; then

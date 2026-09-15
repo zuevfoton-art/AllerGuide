@@ -69,6 +69,7 @@ locals {
     compose_b64    = base64encode(file("${path.module}/glitchtip/docker-compose.yml"))
     bootstrap_b64  = base64encode(local.glitchtip_bootstrap_sh)
     caddyfile_b64  = base64encode(local.glitchtip_caddyfile)
+    setup_b64      = base64encode(file("${path.module}/templates/glitchtip-setup.sh"))
     ssh_public_key = var.glitchtip_ssh_public_key
   })
 }

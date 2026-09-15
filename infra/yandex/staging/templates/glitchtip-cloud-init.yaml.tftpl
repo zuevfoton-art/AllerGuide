@@ -2,7 +2,7 @@
 package_update: true
 packages:
   - docker.io
-  - caddy
+  - docker-compose-v2
   - jq
   - curl
   - ca-certificates
@@ -29,6 +29,10 @@ write_files:
     permissions: "0644"
     encoding: b64
     content: ${caddyfile_b64}
+  - path: /opt/glitchtip/setup.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${setup_b64}
   - path: /etc/systemd/system/glitchtip-bootstrap.service
     permissions: "0644"
     content: |
@@ -43,17 +47,11 @@ write_files:
       RemainAfterExit=yes
       Restart=on-failure
       RestartSec=30
+      TimeoutStartSec=600
       ExecStart=/opt/glitchtip/bootstrap.sh
 
       [Install]
       WantedBy=multi-user.target
 
 runcmd:
-  - cp /opt/glitchtip/Caddyfile /etc/caddy/Caddyfile
-  - systemctl enable --now docker
-  - mkdir -p /usr/local/lib/docker/cli-plugins
-  - curl -fsSL https://github.com/docker/compose/releases/download/v2.35.1/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-  - chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-  - systemctl daemon-reload
-  - systemctl enable --now glitchtip-bootstrap.service
-  - systemctl enable caddy
+  - /opt/glitchtip/setup.sh
