@@ -52,6 +52,14 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(workflow, /~\/\.maestro\/tests/);
     assert.match(workflow, /maestro-offline-maestro-logs/);
     assert.match(workflow, /maestro-staging-maestro-logs/);
+    // Nightly 34939781509: cmdline-tools 16.0 cannot install obsolete SDK `tools`.
+    const setupAndroidUses = (workflow.match(/android-actions\/setup-android/g) || []).length;
+    const platformToolsPackages = (workflow.match(/packages:\s*platform-tools/g) || []).length;
+    assert.equal(
+      setupAndroidUses,
+      platformToolsPackages,
+      "setup-android must override packages: platform-tools (do not install obsolete 'tools')",
+    );
 
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);

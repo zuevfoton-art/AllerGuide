@@ -71,7 +71,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # Default packages include obsolete `tools` (nightly 34939781509).
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
       - name: Install Android SDK packages
         run: |

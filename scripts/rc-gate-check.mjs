@@ -110,6 +110,25 @@ function checkMaestroFlows() {
   if (workflow.includes('app-debug.apk')) {
     failures.push('maestro-nightly.yml still installs app-debug.apk');
   }
+  const setupAndroidUses = (workflow.match(/android-actions\/setup-android/g) || []).length;
+  const platformToolsPackages = (workflow.match(/packages:\s*platform-tools/g) || []).length;
+  if (setupAndroidUses === 0 || setupAndroidUses !== platformToolsPackages) {
+    failures.push(
+      "maestro-nightly.yml must set setup-android packages: platform-tools (obsolete SDK 'tools' removed; nightly 34939781509)",
+    );
+  }
+  const workflowDir = path.join(root, '.github/workflows');
+  for (const name of fs.readdirSync(workflowDir).filter((file) => file.endsWith('.yml'))) {
+    const yml = fs.readFileSync(path.join(workflowDir, name), 'utf8');
+    if (!yml.includes('android-actions/setup-android')) continue;
+    const uses = (yml.match(/android-actions\/setup-android/g) || []).length;
+    const packages = (yml.match(/packages:\s*platform-tools/g) || []).length;
+    if (uses !== packages) {
+      failures.push(
+        `${name} must override setup-android packages: platform-tools (obsolete SDK 'tools'; nightly 34939781509)`,
+      );
+    }
+  }
 
   const runner = fs.readFileSync(path.join(root, 'scripts/maestro-run-emulator.sh'), 'utf8');
   if (!runner.includes('app-release.apk')) {
