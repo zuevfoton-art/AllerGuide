@@ -55,7 +55,7 @@ yc lockbox secret get --id e6qs399v1b3unstfh5rj --format json \
 
 ## 1b. Lockbox `aclearo-staging-glitchtip`
 
-Crash-ingest VM only. Id: `terraform output -raw glitchtip_lockbox_secret_id`. **Not** mounted into Serverless. Do **not** use `./scripts/yc-lockbox-upsert.sh` (that script defaults to the API secret).
+Crash-ingest VM only. Live id: `e6qrn93qngpnhviaog11` (`terraform output -raw glitchtip_lockbox_secret_id` after import). **Not** mounted into Serverless. Do **not** use `./scripts/yc-lockbox-upsert.sh` (that script defaults to the API secret).
 
 ```bash
 YC_GLITCHTIP_LOCKBOX_SECRET_ID="$(cd infra/yandex/staging && terraform output -raw glitchtip_lockbox_secret_id)"

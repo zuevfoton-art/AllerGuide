@@ -1,6 +1,6 @@
 # Self-hosted GlitchTip for staging crash ingest.
 # Compose Postgres lives on this VM — never the app Managed Postgres cluster.
-# Owner: terraform apply + DNS A + Lockbox payload + EAS DSN (docs/staging-glitchtip.md).
+# Live VM is in folder b1glkbb9i8ufp6bsdn4u (docs/staging-glitchtip.md). Import before apply.
 
 resource "yandex_iam_service_account" "glitchtip" {
   name        = "aclearo-staging-glitchtip"

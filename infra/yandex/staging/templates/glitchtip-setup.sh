@@ -60,6 +60,9 @@ WantedBy=multi-user.target
 UNIT
 
 systemctl daemon-reload
-systemctl enable --now glitchtip-bootstrap.service
+systemctl enable glitchtip-bootstrap.service
+if ! systemctl start glitchtip-bootstrap.service; then
+  echo "glitchtip-setup: first bootstrap start failed; systemd Restart=on-failure will retry" >&2
+fi
 systemctl enable --now caddy.service
 echo "glitchtip-setup: done $(date -u +%FT%TZ)"

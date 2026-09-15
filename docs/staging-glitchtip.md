@@ -1,6 +1,6 @@
 # GlitchTip on staging — self-hosted crash ingest (P2.3 / G5)
 
-Terraform in [`infra/yandex/staging/glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) defines the VM, dedicated security group, instance SA, and Lockbox **placeholder**. This document is the **owner apply checklist**. Cloud agents do **not** run `terraform apply` or `yc` write against the live folder.
+Terraform in [`infra/yandex/staging/glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) matches the live folder. There is **no remote Terraform state** in this repo (S3 backend is commented out in [`versions.tf`](../infra/yandex/staging/versions.tf)), so the staging VM was created with `yc` against folder `b1glkbb9i8ufp6bsdn4u` instead of a full `terraform apply` (that would try to recreate VPC/MDB/API). Import the resources below into the owner state before the next apply.
 
 Do **not** point ingest at sentry.io. Do **not** put GlitchTip on the AllerGuide Managed Postgres cluster ([`postgresql.tf`](../infra/yandex/staging/postgresql.tf)). Do **not** mount this Lockbox into the API Serverless Container.
 
@@ -10,33 +10,54 @@ Do **not** point ingest at sentry.io. Do **not** put GlitchTip on the AllerGuide
 
 Public hostname: `https://errors.staging.aclearo.com`
 
+## Live staging (folder `b1glkbb9i8ufp6bsdn4u`)
+
+| Resource | Id / value |
+|----------|------------|
+| VM `aclearo-staging-glitchtip` | `fhmpenjqltp5ee82ek9r` RUNNING, Ubuntu 22.04, 2/4/30, `ru-central1-a` |
+| NAT IPv4 | `158.160.58.56` (private `10.128.0.34`, subnet `default-ru-central1-a`) |
+| Instance SA | `ajeh5pcrgsuq6fe1hq81` (`aclearo-staging-glitchtip`) |
+| Lockbox | `e6qrn93qngpnhviaog11` (`aclearo-staging-glitchtip`, `deletion_protection`) |
+| Security group | `enpt4cblcdr873501otf` (`aclearo-staging-glitchtip-sg`) — :80/:443 in, no :22 |
+| Compose | `glitchtip/glitchtip:6.2.6` + `postgres:16` + `valkey:8` on a VM volume |
+
+Lockbox already has `SECRET_KEY`, `POSTGRES_PASSWORD`, `ENABLE_USER_REGISTRATION=true`. On the VM, `glitchtip-bootstrap.service` and Caddy are active; GlitchTip answers `200` on `127.0.0.1:8000`. Port **8000** is not published on the NAT IP.
+
+Import into the owner Terraform state (same root as the API):
+
+```bash
+cd infra/yandex/staging
+terraform import yandex_iam_service_account.glitchtip ajeh5pcrgsuq6fe1hq81
+terraform import yandex_lockbox_secret.glitchtip e6qrn93qngpnhviaog11
+terraform import 'yandex_lockbox_secret_iam_member.glitchtip_payload' \
+  'e6qrn93qngpnhviaog11,lockbox.payloadViewer,serviceAccount:ajeh5pcrgsuq6fe1hq81'
+terraform import yandex_vpc_security_group.glitchtip enpt4cblcdr873501otf
+terraform import yandex_compute_instance.glitchtip fhmpenjqltp5ee82ek9r
+```
+
+Optional SSH later: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (never `0.0.0.0/0`) in `terraform.tfvars` and apply **only after import**. Default is **no port 22**.
+
 ## Who does what
 
 | Step | Who |
 |------|-----|
 | Terraform + cloud-init + Caddy + compose bind + this runbook | git / PR |
-| `terraform apply`, DNS A, Lockbox payload | **Owner** (folder `admin`) |
+| Live VM + Lockbox payload (this folder) | **Done** (`yc`, bootstrap SA) |
+| DNS A at **reg.ru** (`ns1.reg.ru` / `ns2.reg.ru`) | **Owner** — not in this YC folder |
 | First GlitchTip admin, disable registration, copy DSN | **Owner** |
 | EAS `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
+| `terraform import` into owner state | **Owner** (before the next apply) |
 | 14-day soak | Product, after smoke below |
 
-## 1. Terraform apply
+## 1. Terraform apply (only after import)
 
-Same root as the API ([`infra/yandex/staging/`](../infra/yandex/staging/)):
+Do **not** run `./scripts/yc-staging-bootstrap.sh apply` against an empty local state — it would try to create a second VPC/MDB/API stack.
 
-```bash
-./scripts/yc-staging-bootstrap.sh plan    # expect compute instance aclearo-staging-glitchtip
-./scripts/yc-staging-bootstrap.sh apply   # owner only
-cd infra/yandex/staging
-terraform output -raw glitchtip_public_ip
-terraform output -raw glitchtip_lockbox_secret_id
-```
-
-Optional SSH: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (never `0.0.0.0/0`) in `terraform.tfvars`. Default is **no port 22**.
+After import, `terraform plan` should show no destroy of the API/runner/MDB.
 
 ## 2. Lockbox payload (separate secret)
 
-Secret name: `aclearo-staging-glitchtip`. Id: `terraform output -raw glitchtip_lockbox_secret_id`.
+Secret name: `aclearo-staging-glitchtip`. Live id: `e6qrn93qngpnhviaog11`.
 
 **Never** `./scripts/yc-lockbox-upsert.sh` — that defaults to the API secret.
 
@@ -61,10 +82,10 @@ The VM systemd unit `glitchtip-bootstrap.service` retries Lockbox until those ke
 
 TLS is **Caddy + Let's Encrypt HTTP-01** on the VM (not Certificate Manager — CM certs are awkward on Compute).
 
-In Yandex Cloud DNS (`aclearo.com`):
+`aclearo.com` NS is **reg.ru** (`ns1.reg.ru` / `ns2.reg.ru`), not a public zone in this YC folder.
 
 ```
-A  errors.staging.aclearo.com  →  (glitchtip_public_ip)
+A  errors.staging.aclearo.com  →  158.160.58.56
 ```
 
 Optional later: CNAME `errors.staging.aclearo.ru` and `glitchtip_fqdn_ru` in tfvars — only after the name exists, or ACME can fail the whole Caddy site.
@@ -114,7 +135,7 @@ Native crashes that kill JS may miss `app_crashed`. Count GlitchTip issues in th
 
 1. `postgres:16` — named volume on the VM. **Not** app MDB.
 2. `valkey` — queue/cache
-3. `glitchtip/glitchtip:v6.0.10` all-in-one, `127.0.0.1:8000`
+3. `glitchtip/glitchtip:6.2.6` all-in-one, `127.0.0.1:8000`
 
 Retention: `GLITCHTIP_MAX_EVENT_LIFE_DAYS=90`.
 
