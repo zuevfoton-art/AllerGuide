@@ -375,19 +375,34 @@ function checkMaestroFlows() {
     if (!dismissWizardBody.includes('diary-editor-title')) {
       failures.push('_dismiss-wizard-ime.yaml must tap diary-editor-title (pinned chrome, not the scrolled step title)');
     }
+    if (!dismissWizardBody.includes('diary-wizard-step-label')) {
+      failures.push(
+        '_dismiss-wizard-ime.yaml must also tap diary-wizard-step-label (nightly 34946086211: title tap left Gboard up)',
+      );
+    }
   }
 
   const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
   if (
     !editorModal.includes('diary-editor-title') ||
-    !editorModal.includes('Keyboard.dismiss') ||
-    !editorModal.includes('blurTextInput') ||
+    !editorModal.includes('blurDiaryEditorIme') ||
+    !editorModal.includes('onPressIn={dismissDiaryIme}') ||
     !editorModal.includes('diary-editor-pinned-top') ||
     /liftStyle\s*[,}\]]/.test(editorModal)
   ) {
     failures.push(
       'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
     );
+  }
+
+  const diaryImeHelper = path.join(root, 'apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
+  if (!fs.existsSync(diaryImeHelper)) {
+    failures.push('diary-editor-ime.ts missing (blur registered Modal input before Keyboard.dismiss)');
+  } else {
+    const imeBody = fs.readFileSync(diaryImeHelper, 'utf8');
+    if (!imeBody.includes('Keyboard.dismiss') || !imeBody.includes('blurTextInput')) {
+      failures.push('blurDiaryEditorIme must blur the focused input then Keyboard.dismiss');
+    }
   }
 
   const stepField = fs.readFileSync(
