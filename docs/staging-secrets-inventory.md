@@ -66,7 +66,7 @@ YC_GLITCHTIP_LOCKBOX_SECRET_ID="$(cd infra/yandex/staging && terraform output -r
 |-----|---------|
 | `SECRET_KEY` | Django signing key (`openssl rand -hex 32`) |
 | `POSTGRES_PASSWORD` | Compose Postgres on the GlitchTip VM (hex; not app MDB) |
-| `ENABLE_USER_REGISTRATION` | `true` until first admin, then `false` |
+| `ENABLE_USER_REGISTRATION` | Must stay `false`. First admin via `createsuperuser` on the VM, not public signup |
 | `EMAIL_URL` | Optional SMTP; default `consolemail://` |
 | `DEFAULT_FROM_EMAIL` | Optional; default `support@aclearo.com` |
 

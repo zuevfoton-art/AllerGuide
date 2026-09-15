@@ -48,7 +48,7 @@ services:
       GLITCHTIP_DOMAIN: ${GLITCHTIP_DOMAIN:-https://errors.staging.aclearo.com}
       VALKEY_URL: redis://valkey:6379/0
       GLITCHTIP_MAX_EVENT_LIFE_DAYS: ${GLITCHTIP_MAX_EVENT_LIFE_DAYS:-90}
-      ENABLE_USER_REGISTRATION: ${ENABLE_USER_REGISTRATION:-true}
+      ENABLE_USER_REGISTRATION: ${ENABLE_USER_REGISTRATION:-false}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-support@aclearo.com}
       EMAIL_URL: ${EMAIL_URL:-consolemail://}
     volumes:

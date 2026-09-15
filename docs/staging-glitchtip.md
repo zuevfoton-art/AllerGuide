@@ -21,7 +21,7 @@ Public hostname: `https://errors.staging.aclearo.com`
 | Security group | `enpt4cblcdr873501otf` (`aclearo-staging-glitchtip-sg`) — :80/:443 in, no :22 |
 | Compose | `glitchtip/glitchtip:6.2.6` + `postgres:16` + `valkey:8` on a VM volume |
 
-Lockbox already has `SECRET_KEY`, `POSTGRES_PASSWORD`, `ENABLE_USER_REGISTRATION=true`. On the VM, `glitchtip-bootstrap.service` and Caddy are active; GlitchTip answers `200` on `127.0.0.1:8000`. Port **8000** is not published on the NAT IP.
+Lockbox already has `SECRET_KEY` / `POSTGRES_PASSWORD`. `ENABLE_USER_REGISTRATION` must stay **`false`**. First admin is `createsuperuser` on the VM, not the public signup form.
 
 Import into the owner Terraform state (same root as the API):
 
@@ -44,7 +44,7 @@ Optional SSH later: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (ne
 | Terraform + cloud-init + Caddy + compose bind + this runbook | git / PR |
 | Live VM + Lockbox payload (this folder) | **Done** (`yc`, bootstrap SA) |
 | DNS A at **reg.ru** (`ns1.reg.ru` / `ns2.reg.ru`) | **Owner** — not in this YC folder |
-| First GlitchTip admin, disable registration, copy DSN | **Owner** |
+| First GlitchTip admin via `createsuperuser` on the VM, DSN | **Owner** |
 | EAS `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
 | `terraform import` into owner state | **Owner** (before the next apply) |
 | 14-day soak | Product, after smoke below |
@@ -59,7 +59,7 @@ After import, `terraform plan` should show no destroy of the API/runner/MDB.
 
 Secret name: `aclearo-staging-glitchtip`. Live id: `e6qrn93qngpnhviaog11`.
 
-Payload **already exists**. Re-running `yc-glitchtip-lockbox-init.sh` without `SECRET_KEY` / `POSTGRES_PASSWORD` generates **new** hex values and will desync the VM volume until bootstrap is restarted.
+Payload **already exists**. `yc-glitchtip-lockbox-init.sh` keeps `SECRET_KEY` / `POSTGRES_PASSWORD` unless you override them in the environment.
 
 **Never** `./scripts/yc-lockbox-upsert.sh` — that defaults to the API secret.
 
@@ -96,15 +96,25 @@ Wait until `curl -sI https://errors.staging.aclearo.com` is 200/302. Host must n
 
 Port **8000** from the NAT IP must not answer (compose is loopback-only).
 
-## 4. First admin
+## 4. First admin (not public signup)
 
-1. Open `https://errors.staging.aclearo.com` and create the **single** admin.
-2. Create organization + React Native project. Copy the DSN (`https://<key>@errors.staging.aclearo.com/<id>`). Confirm the host is **not** `sentry.io`.
-3. Disable public signup:
+Public registration defaults to **off**. Do not open the UI to create the first user — GlitchTip can still allow a first-registrant takeover if the user table is empty.
+
+On the VM (SSH from a tight CIDR, or serial console):
 
 ```bash
-ENABLE_USER_REGISTRATION=false YC_GLITCHTIP_LOCKBOX_SECRET_ID=... ./scripts/yc-glitchtip-lockbox-init.sh
-# on the VM (SSH or serial console):
+cd /opt/glitchtip
+sudo docker compose exec -T glitchtip \
+  python3 manage.py createsuperuser --noinput --email support@aclearo.com
+# set DJANGO_SUPERUSER_PASSWORD in the environment for --noinput
+```
+
+Then log in, create organization + React Native project. Copy the DSN (`https://<key>@errors.staging.aclearo.com/<id>`). Confirm the host is **not** `sentry.io`.
+
+To flip the flag later without rotating DB secrets:
+
+```bash
+ENABLE_USER_REGISTRATION=false YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6qrn93qngpnhviaog11 ./scripts/yc-glitchtip-lockbox-init.sh
 sudo systemctl restart glitchtip-bootstrap.service
 ```
 
