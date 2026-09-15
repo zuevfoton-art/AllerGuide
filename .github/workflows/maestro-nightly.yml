@@ -48,6 +48,10 @@ jobs:
           java-version: 21
 
       - uses: android-actions/setup-android@v3
+        with:
+          # Nightly 34939781509: Google dropped the obsolete `tools` package.
+          # The action default (`tools platform-tools`) fails sdkmanager.
+          packages: platform-tools
 
       - name: Install Android SDK packages
         run: |
@@ -134,6 +138,10 @@ jobs:
           java-version: 21
 
       - uses: android-actions/setup-android@v3
+        with:
+          # Nightly 34939781509: Google dropped the obsolete `tools` package.
+          # The action default (`tools platform-tools`) fails sdkmanager.
+          packages: platform-tools
 
       - name: Install Android SDK packages
         run: |

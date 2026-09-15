@@ -188,6 +188,20 @@ function checkMaestroFlows() {
     failures.push('maestro-nightly.yml must upload the copied per-command Maestro logs');
   }
 
+  const setupAndroidBlocks = workflow.match(
+    /uses:\s*android-actions\/setup-android@v\d+[\s\S]{0,280}/g,
+  );
+  if (
+    !setupAndroidBlocks?.length ||
+    setupAndroidBlocks.some(
+      (block) => !/packages:\s*platform-tools\b/.test(block) || /packages:\s*['"]?tools\b/.test(block),
+    )
+  ) {
+    failures.push(
+      'maestro-nightly.yml must pass setup-android packages: platform-tools (Google removed the tools package, nightly 34939781509)',
+    );
+  }
+
   if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {
     failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
   }

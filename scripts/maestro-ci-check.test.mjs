@@ -52,6 +52,34 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(workflow, /~\/\.maestro\/tests/);
     assert.match(workflow, /maestro-offline-maestro-logs/);
     assert.match(workflow, /maestro-staging-maestro-logs/);
+    // Nightly 34939781509: setup-android@v3 default still installs obsolete `tools`.
+    const setupAndroidBlocks = workflow.match(
+      /uses:\s*android-actions\/setup-android@v\d+[\s\S]{0,280}/g,
+    );
+    assert.ok(setupAndroidBlocks && setupAndroidBlocks.length >= 2, 'nightly must set up Android SDK twice');
+    for (const block of setupAndroidBlocks) {
+      assert.match(
+        block,
+        /packages:\s*platform-tools\b/,
+        'setup-android must install platform-tools, not the removed tools package',
+      );
+      assert.doesNotMatch(block, /packages:\s*['"]?tools\b/);
+    }
+
+    for (const relative of [
+      '.github/workflows/staging-apk-gradle.yml',
+      '.github/workflows/release-apk.yml',
+    ]) {
+      const apkWorkflow = read(relative);
+      const apkBlocks = apkWorkflow.match(
+        /uses:\s*android-actions\/setup-android@v\d+[\s\S]{0,280}/g,
+      );
+      assert.ok(apkBlocks?.length, `${relative} must use setup-android`);
+      for (const block of apkBlocks) {
+        assert.match(block, /packages:\s*platform-tools\b/, `${relative} must skip obsolete SDK tools`);
+        assert.doesNotMatch(block, /packages:\s*['"]?tools\b/);
+      }
+    }
 
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
