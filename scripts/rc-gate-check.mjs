@@ -383,10 +383,11 @@ function checkMaestroFlows() {
     !editorModal.includes('Keyboard.dismiss') ||
     !editorModal.includes('blurTextInput') ||
     !editorModal.includes('diary-editor-pinned-top') ||
+    !editorModal.includes('diaryEditorSheetPaddingBottom') ||
     /liftStyle\s*[,}\]]/.test(editorModal)
   ) {
     failures.push(
-      'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
+      'DiaryEditorModal must expose diary-editor-title, cap IME padding, dismiss IME on title press, and must not apply liftStyle',
     );
   }
 

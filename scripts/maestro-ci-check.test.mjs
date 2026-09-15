@@ -278,11 +278,18 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /testID="diary-editor-pinned-top"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
+    assert.match(editorModal, /diaryEditorSheetPaddingBottom/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
+
+    const editorLayout = read(
+      'apps/mobile/src/components/diary/wizard/diary-editor-layout.ts',
+    );
+    assert.match(editorLayout, /diaryEditorSheetPaddingBottom/);
+    assert.match(editorLayout, /DIARY_EDITOR_HEADER_MIN_HEIGHT/);
 
     const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
     assert.match(wizard, /DiaryEditorFooter/);

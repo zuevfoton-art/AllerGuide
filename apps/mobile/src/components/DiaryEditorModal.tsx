@@ -26,8 +26,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
-import { diaryEditorScrollMaxHeight } from '@/src/components/diary/wizard/diary-editor-layout';
-import { radii, space } from '@/src/constants/layout';
+import {
+  diaryEditorScrollMaxHeight,
+  diaryEditorSheetPaddingBottom,
+} from '@/src/components/diary/wizard/diary-editor-layout';
+import { density, radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
@@ -242,7 +245,13 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
       onRequestClose={onClose}>
       <ModalKeyboardAvoid style={styles.root}>
         {({ keyboardInset }) => {
-          const sheetPaddingBottom = Math.max(insets.bottom, space[4]) + keyboardInset;
+          const sheetPaddingBottom = diaryEditorSheetPaddingBottom({
+            windowHeight,
+            headerHeight: headerHeight + topHeight,
+            footerHeight,
+            keyboardInset,
+            safeBottom: insets.bottom,
+          });
           const scrollMaxHeight = diaryEditorScrollMaxHeight({
             windowHeight,
             headerHeight: headerHeight + topHeight,
@@ -261,6 +270,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               style={[styles.sheet, { paddingBottom: sheetPaddingBottom }]}
               accessibilityViewIsModal>
               <View
+                style={styles.headerChrome}
                 onLayout={(event) => {
                   const next = Math.ceil(event.nativeEvent.layout.height);
                   setHeaderHeight((prev) => (prev === next ? prev : next));
@@ -284,6 +294,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                   <Pressable
                     testID="diary-editor-title"
                     collapsable={false}
+                    style={styles.headerTitleHit}
                     onPress={dismissDiaryIme}
                     accessibilityRole="header"
                     accessibilityLabel={t('diary.title')}>
@@ -360,6 +371,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       overflow: 'hidden',
     },
+    headerChrome: {
+      flexShrink: 0,
+    },
     grabberWrap: {
       alignItems: 'center',
       paddingTop: 8,
@@ -377,9 +391,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       paddingHorizontal: 8,
       paddingVertical: 8,
+      minHeight: density.tapMinHeight,
+      flexShrink: 0,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       backgroundColor: colors.bg,
+    },
+    headerTitleHit: {
+      flexShrink: 0,
+      minHeight: density.tapMinHeight,
+      justifyContent: 'center',
     },
     headerBtn: {
       minWidth: 72,
@@ -403,6 +424,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingTop: space[3],
       paddingBottom: space[2],
       gap: space[2],
+      flexShrink: 0,
       backgroundColor: colors.bg,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
@@ -417,6 +439,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     footer: {
       paddingHorizontal: space[4],
       paddingTop: space[2],
+      flexShrink: 0,
+      minHeight: density.tapMinHeight,
       borderTopWidth: 1,
       borderTopColor: colors.border,
       backgroundColor: colors.bg,
