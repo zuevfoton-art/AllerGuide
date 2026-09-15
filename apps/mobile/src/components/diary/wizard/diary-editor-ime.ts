@@ -8,7 +8,7 @@ type TextInputStateApi = {
 };
 
 function readFocusedInput(): InputHandle | null | undefined {
-  const state = TextInput.State as TextInputStateApi;
+  const state = TextInput.State as unknown as TextInputStateApi;
   if (typeof state.currentlyFocusedInput === 'function') {
     return state.currentlyFocusedInput();
   }
