@@ -55,6 +55,53 @@ describe('analytics routes', () => {
     expect(dashboard.body.dashboard.topEvents.length).toBeGreaterThan(0);
   });
 
+  it('computes first-party crash-free from session_started and fatal app_crashed', async () => {
+    process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
+    const app = await createApp();
+
+    await request(app).post('/api/analytics/events').send({
+      events: [
+        { event: 'session_started', client_id: 'c1', platform: 'android', app_version: '1.0.0' },
+        { event: 'session_started', client_id: 'c2', platform: 'android', app_version: '1.0.0' },
+        { event: 'app_crashed', client_id: 'c1', fatal: true, platform: 'android' },
+      ],
+    });
+
+    const dashboard = await request(app)
+      .get('/api/analytics/dashboard?days=7')
+      .set('x-analytics-dashboard-key', 'dashboard-secret');
+    expect(dashboard.status).toBe(200);
+    expect(dashboard.body.dashboard.crashFree).toMatchObject({
+      sessionClients: 2,
+      crashedClients: 1,
+      rate: 0.5,
+      target: 0.99,
+      meetsTarget: false,
+    });
+  });
+
+  it('ignores non-fatal app_crashed when computing crash-free', async () => {
+    process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
+    const app = await createApp();
+
+    await request(app).post('/api/analytics/events').send({
+      events: [
+        { event: 'session_started', client_id: 'c1', platform: 'android' },
+        { event: 'app_crashed', client_id: 'c1', fatal: false, platform: 'android' },
+      ],
+    });
+
+    const dashboard = await request(app)
+      .get('/api/analytics/dashboard?days=7')
+      .set('x-analytics-dashboard-key', 'dashboard-secret');
+    expect(dashboard.body.dashboard.crashFree).toMatchObject({
+      sessionClients: 1,
+      crashedClients: 0,
+      rate: 1,
+      meetsTarget: true,
+    });
+  });
+
   it('rejects dashboard without key when enabled', async () => {
     process.env.ANALYTICS_DASHBOARD_KEY = 'dashboard-secret';
     const app = await createApp();

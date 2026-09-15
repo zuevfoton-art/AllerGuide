@@ -85,7 +85,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | API endpoint | `apps/api/src/routes/*` → регистрация в `app.ts` |
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
-| Analytics event | `packages/core` `analytics-events.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
+| Analytics event | `packages/core` `analytics-events.ts` + `crash-free.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
+| Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + [`glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) + compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
@@ -113,6 +114,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | **Clinical** | `asit-course` / `prescribed-therapy` + `use-prescription-parser` + `components/therapy/*` | соответствующие `*-service` | core `asit-therapy`, `gina-asthma`, `insect-allergy`, … |
 | **i18n** | любой экран через `useTranslation()` | `settings-service` (locale) | `src/i18n/*`, `locale-store.ts` |
 | **Doctor report** | `doctor-report.tsx` | `doctor-report-service` | core `doctor-report*` |
+| **Crash reporting** | `ErrorBoundary` | `error-reporting` → GlitchTip; `analytics-service` emits `session_started` / `app_crashed` | core `crash-free`; API `analytics-store` `crashFree` |
 
 ---
 
@@ -294,7 +296,7 @@ Barrel: `index.ts`. Pure TS.
 | Pollen / geo / air / market | `pollen-*` (taxonomy, regions, calendar, thresholds, map, upi, plant-detail, google-forecast, google-normalize, species-heatmap, plume, reminder), `google-pollen-heatmap`, `hourly-series`, `air-quality`, `geo`, `map-poi`, `yandex-map`, `market-offers`, `marketplace-catalog` |
 | Sync / crypto | `sync`, `crypto` |
 | Auth | `auth`, `login-field`, `phone`, `password` (стоимость PBKDF2 настраивается), `password-strength` (политика сложности + индикатор), `common-passwords`, `secure-random` |
-| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `reminder-policy`, `plural-ru` |
+| Ops / content | `onboarding`, `first-run-hints`, `expert-content`, `evidence-registry`, `analytics-events`, `crash-free`, `reminder-policy`, `plural-ru` |
 
 Не в barrel (внутренние): `allergen-database.ts` (за фасадом `allergens`) и `cross-reactions/{phase-1,phase-2,phase-3,phase-4,types}.ts` (за `cross-reactions/index.ts`).
 
@@ -349,7 +351,7 @@ Barrel: `index.ts`. Pure TS.
 | `AIR_QUALITY` (default on) | `features.ts` → `air-quality-service.ts` | `AIR_QUALITY_ENABLED` (default on) + AQ key |
 | `MARKET` (default off) | `features.ts` → `(tabs)/_layout.tsx`, `market.tsx` | — |
 | `MARKET_LIVE_CATALOG` / `MARKET_MEDICINES` (default on) | `features.ts` → `market-api.ts` | `GET /api/market/catalog` |
-| `SENTRY_DSN` | `error-reporting.ts` | — |
+| `ERROR_DSN` (alias `SENTRY_DSN`) | `error-reporting.ts` | GlitchTip envelope DSN; `sentry.io` refused |
 | `API_URL` | `api-client` и др. | — |
 
 По умолчанию флаги **выключены** (см. `.env.example`), кроме **Places**, **Air Quality** и живого каталога Маркета (`MARKET_LIVE_CATALOG` / `MARKET_MEDICINES`, default on; `false`/`off` выключает). Вкладка Маркет отдельно за `EXPO_PUBLIC_MARKET` (default off). Полная таблица с эффектами — [`architecture.md` §Feature flags](./architecture.md#feature-flags-mobile).
@@ -372,7 +374,7 @@ Barrel: `index.ts`. Pure TS.
 | QA | [`qa-checklist.md`](./qa-checklist.md) |
 | CJM + сценарии (профиль, дневник, capabilities) | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
 | Clinical | [`clinical-features-raaci.md`](./clinical-features-raaci.md) |
-| YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) |
+| YC stage | [`yc-stage-gates.md`](./yc-stage-gates.md) · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | ADR | [`adr/`](./adr/) |
 | Wellness-дизайн (типографика, плотность, возвращение) | [`wellness-design-plan.md`](./wellness-design-plan.md) · [`ux-audit-2026-08.md`](./ux-audit-2026-08.md) · [`ux-improvement-plan.md`](./ux-improvement-plan.md) |
 | Wellness UX north-star (IA 4 таба + SOS, фазы N0–N10) | [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · макет [`wellness-ux-north-star.html`](./wellness-ux-north-star.html) |

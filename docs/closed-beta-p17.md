@@ -4,7 +4,7 @@
 **Сборка:** EAS profile `staging` ([eas-staging-build.md](eas-staging-build.md))  
 **API:** [staging-deploy.md](staging-deploy.md) · [staging-infrastructure-plan.md](staging-infrastructure-plan.md)
 
-Закрытая бета на **10–20 тестеров** с backend-интеграцией (auth, sync, AI scan). Цель — подтвердить готовность Phase 1 перед Phase 2 (Maestro E2E, Sentry).
+Закрытая бета на **10–20 тестеров** с backend-интеграцией (auth, sync, AI scan). Цель — подтвердить готовность Phase 1 перед Phase 2 (Maestro E2E, GlitchTip crash ingest).
 
 ---
 
@@ -19,7 +19,7 @@
 | G.3 | EAS staging build свежий | Коммит ≤ 7 дней; channel `staging` |
 | G.4 | Internal QA | [qa-checklist.md](qa-checklist.md): S.1–S.4, O.1–O.3, B.1–B.6, C.1 |
 | G.5 | Recovery key policy | Тестеры проинструктированы сохранять ключ вне приложения |
-| G.6 | Crash reporting (опц.) | `EXPO_PUBLIC_SENTRY_DSN` на staging — рекомендуется |
+| G.6 | Crash reporting (опц.) | `EXPO_PUBLIC_ERROR_DSN` на staging (GlitchTip) — рекомендуется |
 
 ```bash
 ./scripts/staging-preflight.sh
@@ -79,7 +79,7 @@ TestFlight internal group «Closed Beta». Требуется Apple Developer.
 | O.2 | Auth S.1–S.3 без P0 | 0 блокеров auth |
 | O.3 | Cross-device backup B.1–B.6 | ≥ 1 успешная пара устройств |
 | O.4 | AI scan C.1 | ≥ 70% тестеров видят «ИИ-анализ» |
-| O.5 | Crash-free sessions | ≥ 95% (если Sentry включён) |
+| O.5 | Crash-free clients | ≥ 95% (`crashFree` on analytics dashboard, если ingest включён) |
 | O.6 | Критические баги | 0 открытых P0; P1 ≤ 3 с workaround |
 
 **Sign-off:** Product + QA → закрыть milestone Phase 1 → старт P2.1a.

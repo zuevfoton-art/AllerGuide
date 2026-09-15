@@ -1,4 +1,5 @@
 const base = require('./app.json');
+const { isSelfHostedCrashTrackerUrl } = require('./error-tracker-url');
 
 /** @type {import('expo/config').ExpoConfig} */
 module.exports = ({ config }) => {
@@ -10,13 +11,18 @@ module.exports = ({ config }) => {
   const rawMapsKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ?? '';
   const googleMapsApiKey = /^AIza[0-9A-Za-z_-]{20,}$/.test(rawMapsKey) ? rawMapsKey : '';
 
-  if (process.env.SENTRY_ORG && process.env.SENTRY_PROJECT) {
+  const sentryUrl = process.env.SENTRY_URL?.trim();
+  if (
+    process.env.SENTRY_ORG &&
+    process.env.SENTRY_PROJECT &&
+    isSelfHostedCrashTrackerUrl(sentryUrl)
+  ) {
     plugins.push([
       '@sentry/react-native/expo',
       {
         organization: process.env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT,
-        url: process.env.SENTRY_URL || 'https://sentry.io/',
+        url: sentryUrl,
       },
     ]);
   }

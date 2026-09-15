@@ -6,11 +6,12 @@ import {
   type AnalyticsEventProps,
 } from '@allerguide/core';
 import { getSetting, setSetting } from '@/src/services/settings-service';
-import { logCaughtError } from '@/src/services/error-reporting';
+import { logCaughtError, setCrashAnalyticsSink } from '@/src/services/error-reporting';
 
 const CLIENT_ID_KEY = 'analyticsClientId';
 let analyticsEnabled = false;
 let clientId: string | null = null;
+let sessionStarted = false;
 
 function shouldLogAnalyticsPayload(): boolean {
   if (typeof __DEV__ !== 'undefined') return __DEV__;
@@ -51,8 +52,18 @@ function transportMeta() {
 
 export function initAnalytics() {
   analyticsEnabled = process.env.EXPO_PUBLIC_ANALYTICS_ENABLED === 'true';
-  if (analyticsEnabled) {
-    getOrCreateClientId();
+  if (!analyticsEnabled) {
+    setCrashAnalyticsSink(null);
+    return;
+  }
+
+  getOrCreateClientId();
+  setCrashAnalyticsSink((fatal) => {
+    trackEvent('app_crashed', { fatal });
+  });
+  if (!sessionStarted) {
+    sessionStarted = true;
+    trackEvent('session_started');
   }
 }
 
@@ -96,4 +107,6 @@ export function trackScreen(screen: string) {
 export function __resetAnalyticsForTests() {
   analyticsEnabled = false;
   clientId = null;
+  sessionStarted = false;
+  setCrashAnalyticsSink(null);
 }

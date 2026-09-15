@@ -11,3 +11,14 @@ runner_ssh_public_key = "ssh-ed25519 AAAAC3... ops@aclearo"
 
 api_staging_fqdn    = "api.staging.aclearo.com"
 api_staging_fqdn_ru = "api.staging.aclearo.ru"
+
+# GlitchTip (crash ingest). Leave SSH closed unless you need first-admin access.
+glitchtip_fqdn           = "errors.staging.aclearo.com"
+# Only set after a CNAME exists, otherwise Let's Encrypt can fail the whole Caddy site:
+glitchtip_fqdn_ru        = ""
+# glitchtip_fqdn_ru      = "errors.staging.aclearo.ru"
+glitchtip_ssh_public_key = ""
+glitchtip_ssh_cidrs      = []
+# Example to allow SSH from one office IP:
+# glitchtip_ssh_public_key = "ssh-ed25519 AAAAC3... ops@aclearo"
+# glitchtip_ssh_cidrs      = ["203.0.113.10/32"]

@@ -55,7 +55,7 @@ description: Senior product analyst for AllerGuide — определяет ме
 Срок жизни / владелец:
 ```
 
-Не вводить метрику, для которой нет события. Не подменять продуктовую метрику технической (crash-free — Sentry, не `screen_view`).
+Не вводить метрику, для которой нет события. Не подменять продуктовую метрику технической (crash-free G5 — unique `session_started` / `app_crashed`, не `screen_view`; GlitchTip — native backstop, не sentry.io Release Health).
 
 ## 6. Шаблон воронки
 

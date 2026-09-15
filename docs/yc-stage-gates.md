@@ -27,6 +27,8 @@ pnpm yc-stage-phase5   # final YC acceptance (re-runs 0/2/3/4 + pollen smoke)
 | **P0.5** | EAS `staging` | `EXPO_PUBLIC_API_URL=https://api.staging.aclearo.com` |
 | **P0.6** | Stage scripts / workflows | defaults на `api.staging.aclearo.com` |
 
+GlitchTip (`https://errors.staging.aclearo.com`) is **not** part of phase 0. Owner apply + smoke: [`staging-glitchtip.md`](./staging-glitchtip.md).
+
 ```bash
 ./scripts/yc-stage-phase0-gate.sh
 STAGING_RUN_SMOKES=1 ./scripts/yc-stage-phase0-gate.sh

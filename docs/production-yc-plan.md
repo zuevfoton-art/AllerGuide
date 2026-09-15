@@ -25,7 +25,7 @@ Staging scripts hard-code staging IDs as defaults. Pointing them at prod without
 4. **Serverless Container** — image `aclearo-api:production` (not `:staging`).
 5. **Domain** — `api.aclearo.com` (+ optional `.ru`). TLS at the API gateway / certificate manager.
 6. **EAS production** — already has `EXPO_PUBLIC_API_URL=https://api.aclearo.com`. Fill real `ascAppId` / `appleTeamId` (still placeholders).
-7. **Monitoring** — YC logging + alerting on `/api/health` (`ok`, `database.ok`, `features.*`). Sentry DSN for production (separate project from staging).
+7. **Monitoring** — YC logging + alerting on `/api/health` (`ok`, `database.ok`, `features.*`). Separate prod GlitchTip (`errors.aclearo.com`) + DSN; do not reuse staging DB/`SECRET_KEY`. Crash-free stays first-party analytics.
 8. **Backups** — Managed PG automated backups + a documented restore drill. Backup retention must match the privacy deletion SLA.
 
 ## Parameterization sketch (do this before first prod deploy)

@@ -12,7 +12,7 @@
 |------|--------|--------------|
 | Phase 0 — Stabilization MVP | ✅ кроме P0.5 review | Legal drafts `de`/`es`/`fr`/`it` in [#260](https://github.com/zuevfoton-art/AllerGuide/pull/260); lawyer review still required (P3.3) |
 | Phase 1 — Backend integration | ✅ | — (см. [`phase-1-run.md`](./phase-1-run.md)) |
-| Phase 2 — Quality & Security | ⚠️ P2.1–P2.7 ✅, **P2.8 BLOCKED** | Maestro workflow fix [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) (enable + dispatch); Sentry EAS vars; soak testers |
+| Phase 2 — Quality & Security | ⚠️ P2.1–P2.7 ✅, **P2.8 BLOCKED** | Maestro workflow fix [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) (enable + dispatch); GlitchTip VM + `EXPO_PUBLIC_ERROR_DSN`; soak testers |
 | Phase 3 — Compliance & Store | 📝 prep docs | Privacy audit, prod YC plan, store permission drafts — still gated by P2.8 |
 | Phase 4 — v1.0 Launch | ⛔ не начата | — |
 | Phase 5 — Post-launch | 🔶 частично сделана досрочно | Осталось масштабирование (P5.6) |
@@ -57,7 +57,7 @@ chmod +x scripts/create-roadmap-issues.sh
 | Приватность | `DELETE /api/auth/account` + `GET /api/auth/export`; профили/дневник/история удаляются каскадом от `app_users` |
 | Тесты | core 458, ai 52, mobile 189, api 160; 10 Maestro smoke-флоу (метрика `rc-gate`); CI `typecheck` + `lint` + `test` + `api-integration` |
 | Staging | YC Serverless Container + Managed PG + Lockbox; `Dockerfile`, `deploy-staging.yml`, EAS `staging`, Gradle APK workflow |
-| Observability | `error-reporting.ts` (Sentry) + `analytics-service` + `/api/analytics` (код готов, DSN на stage не задан) |
+| Observability | `error-reporting.ts` (`@sentry/react-native` → GlitchTip) + `analytics-service` (`session_started` / `app_crashed`) + `/api/analytics` `crashFree` (код готов; YC GlitchTip / DSN на stage ещё не подняты) |
 
 ### Частично / за feature flags
 
@@ -68,14 +68,14 @@ chmod +x scripts/create-roadmap-issues.sh
 | AI-сканер / OCR / VL | `EXPO_PUBLIC_AI_SCAN_ENABLED`, `EXPO_PUBLIC_YC_OCR`, `EXPO_PUBLIC_AI_DISH_VISION` | Провайдер на stage — Yandex AI (`AI_PROVIDER=yandex`), не OpenAI; нужны YC-ключи + бюджет |
 | Places / Air Quality | `EXPO_PUBLIC_MAP_PLACES`, `EXPO_PUBLIC_AIR_QUALITY=google` | Отдельные server-ключи в Lockbox; Pollen-only ключ не подходит |
 | STT | `EXPO_PUBLIC_YC_STT` (+ `_MIC`) | Cloud-микрофон только как fallback к OS speech |
-| Sentry / analytics | `EXPO_PUBLIC_SENTRY_DSN`, `EXPO_PUBLIC_ANALYTICS_ENABLED` | Analytics на stage включена; Sentry DSN в EAS `staging` **не** задан |
+| Crash ingest / analytics | `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`), `EXPO_PUBLIC_ANALYTICS_ENABLED` | Analytics на stage включена; GlitchTip DSN в EAS `staging` **не** задан; `sentry.io` отказан в runtime |
 
 ### Пробелы (проверено)
 
 | Пробел | Факт |
 |--------|------|
 | Maestro nightly красный | 10 подряд `failure` до 2026-08-11, после — прогонов нет. Две разные причины: offline-джоб — `Timeout waiting for emulator to boot` (`macos-latest` теперь arm64, а в workflow `arch: x86_64`); staging-джоб — `Maestro Android driver did not start up in time` на ubuntu |
-| Crash-free метрики | `EXPO_PUBLIC_SENTRY_DSN` не задан в EAS `staging` → G5 нечем закрыть |
+| Crash-free метрики | GlitchTip на YC не провижен; EAS DSN пуст → G5 нечем закрыть (формула first-party, не sentry.io Release Health) |
 | Soak-тестеры | 0 enrolled ([`staging-soak-log.md`](./staging-soak-log.md)) |
 | Legal локализация | Тексты только `ru` + `en` ([`apps/mobile/src/i18n/legal-docs.ts`](../apps/mobile/src/i18n/legal-docs.ts)); `de`/`es`/`fr`/`it` падают на fallback |
 | Store credentials | `eas.json`: `ascAppId: 0000000000`, `appleTeamId: XXXXXXXXXX` (EAS `projectId` — уже реальный) |
@@ -112,8 +112,8 @@ flowchart TB
   end
 
   subgraph obs [Observability]
-    Sentry[Sentry]
-    Analytics[Analytics]
+    GlitchTip[GlitchTip YC]
+    Analytics[Analytics crashFree]
     Logs[Structured logs]
   end
 
@@ -124,7 +124,7 @@ flowchart TB
   API1 --> PGB --> PG
   API1 --> Redis
   API1 --> Replica
-  clients --> Sentry
+  clients --> GlitchTip
   clients --> Analytics
 ```
 
@@ -189,7 +189,7 @@ flowchart TB
 |----|--------|--------|------|
 | P2.1 | E2E mobile (Maestro) | ✅ код / ⛔ CI | Флоу + nightly workflow есть; nightly падает на старте эмулятора / драйвера |
 | P2.2 | Mobile unit tests | ✅ | 189 тестов (цель была ≥30), гейт `mobile-test-gate.mjs` |
-| P2.3 | Sentry | ✅ код / ⛔ stage | `error-reporting.ts` + EAS hook; DSN на stage не задан |
+| P2.3 | GlitchTip crash ingest | ✅ код / ⛔ stage | SDK Sentry-protocol → self-hosted GlitchTip; sessions off; DSN на stage не задан |
 | P2.4 | Analytics | ✅ | `analytics-service` + `/api/analytics` ([`analytics-staging.md`](./analytics-staging.md)) |
 | P2.5 | Security audit mobile | ✅ | [`security-audit-mobile.md`](./security-audit-mobile.md) |
 | P2.6 | Pen-test API | ✅ | [`security-audit-api.md`](./security-audit-api.md), 0 critical |
@@ -218,7 +218,7 @@ flowchart TB
 
 | ID | Задача | Критерий готовности |
 |----|--------|---------------------|
-| P4.1 | Production feature flags | Auth, sync, AI scan, Sentry, analytics ON |
+| P4.1 | Production feature flags | Auth, sync, AI scan, GlitchTip DSN, analytics ON |
 | P4.2 | Go/No-Go checklist | 0 P0, E2E green, legal signed, rollback plan, PR backlog разобран |
 | P4.3 | Public store release | App Store + Google Play live |
 
@@ -270,7 +270,7 @@ flowchart TB
 flowchart LR
   P2_8[P2.8 RC gate + soak BLOCKED] --> P3[Phase 3 Compliance]
   M[Maestro nightly green] --> P2_8
-  S[Sentry DSN on stage] --> P2_8
+  S[GlitchTip DSN + crashFree on stage] --> P2_8
   T[Soak testers] --> P2_8
   P3 --> P37[P3.7 Production API]
   P3 --> P31[P3.1 Store credentials]
@@ -282,7 +282,7 @@ flowchart LR
 **Топ-5 блокеров прода (актуально):**
 
 1. Maestro nightly не зелёный — без него нет G3 и нет E2E-гейта перед релизом
-2. `EXPO_PUBLIC_SENTRY_DSN` не задан на stage — нет crash-free метрики для G5
+2. GlitchTip / `EXPO_PUBLIC_ERROR_DSN` не заданы на stage — нет crash-free метрики для G5
 3. Нет soak-тестеров — G7 не закрывается даже при зелёном CI
 4. Store credentials (`ascAppId`, `appleTeamId`) — плейсхолдеры
 5. Production-контур API не поднят (домен, monitoring, backups)
@@ -301,9 +301,18 @@ flowchart LR
 
 Расписание молчало после 2026-08-11, потому что workflow в состоянии **`disabled_manually`**. После merge: `gh workflow enable maestro-nightly.yml`, затем `workflow_dispatch`. Критерий выхода: оба джоба зелёные вручную, затем ≥7 зелёных ночей.
 
-### Шаг 2 — включить Sentry на stage (разблокирует G5)
+### Шаг 2 — поднять GlitchTip на YC и включить first-party crash-free (разблокирует G5)
 
-Чеклист переменных: [rc-gate.md § Pre-soak](./rc-gate.md#pre-soak-sentry-eas-variables-g5). Нужен `EXPO_TOKEN` у владельца. Метрика гейта — crash-free sessions ≥99% на окне soak.
+Чеклист: [staging-glitchtip.md](./staging-glitchtip.md) (VM, DNS, Lockbox, compose) и [rc-gate.md § Pre-soak](./rc-gate.md#pre-soak-glitchtip--first-party-crash-free-g5). Нужен `EXPO_TOKEN` у владельца для EAS `EXPO_PUBLIC_ERROR_DSN`.
+
+GlitchTip **не** считает session health. Метрика гейта на окне soak:
+
+```
+crash_free = 1 - unique clients with app_crashed(fatal=true) / unique clients with session_started
+target ≥ 0.99
+```
+
+Источник: `GET /api/analytics/dashboard` → `crashFree`. Native-крэши, убившие JS до аналитики, смотреть в UI GlitchTip (колонка soak-лога). Не sentry.io.
 
 ### Шаг 3 — набрать soak-когорту (разблокирует G7)
 
