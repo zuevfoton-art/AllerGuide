@@ -133,8 +133,9 @@ yc config set folder-id <FOLDER_ID>
 | Serverless Container | `aclearo-staging-api` + VPC connectivity |
 | API Gateway | публичный HTTPS → container |
 | Certificate Manager | TLS для `api.staging.aclearo.com` (+ `.ru`) |
-| Lockbox secret | placeholder для env API |
+| Lockbox secret | placeholder для env API (`aclearo-staging-api-env`) |
 | Compute VM | GitHub runner для миграций |
+| Compute VM + Lockbox | GlitchTip crash ingest (`aclearo-staging-glitchtip`, `errors.staging.aclearo.com`) — [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | IAM | SA для API и deploy |
 
 ### Запуск

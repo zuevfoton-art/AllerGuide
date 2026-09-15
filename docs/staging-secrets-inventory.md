@@ -1,6 +1,6 @@
 # Staging secrets inventory (Yandex Cloud)
 
-**Canonical stores:** Yandex Lockbox (`aclearo-staging-api-env`) + GitHub Actions secrets + EAS Sensitive env.  
+**Canonical stores:** Yandex Lockbox (`aclearo-staging-api-env` + `aclearo-staging-glitchtip`) + GitHub Actions secrets + EAS Sensitive env.  
 **Never:** git, `EXPO_PUBLIC_*` for server keys, chat uploads. Never store stage secrets outside YC Lockbox.
 
 Related: [`yc-stage-gates.md`](./yc-stage-gates.md) Phase 4 · [`staging-yandex-cloud.md`](./staging-yandex-cloud.md) §3 · [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys)
@@ -53,6 +53,27 @@ yc lockbox secret get --id e6qs399v1b3unstfh5rj --format json \
 
 ---
 
+## 1b. Lockbox `aclearo-staging-glitchtip`
+
+Crash-ingest VM only. Id: `terraform output -raw glitchtip_lockbox_secret_id`. **Not** mounted into Serverless. Do **not** use `./scripts/yc-lockbox-upsert.sh` (that script defaults to the API secret).
+
+```bash
+YC_GLITCHTIP_LOCKBOX_SECRET_ID="$(cd infra/yandex/staging && terraform output -raw glitchtip_lockbox_secret_id)"
+./scripts/yc-glitchtip-lockbox-init.sh
+```
+
+| Key | Purpose |
+|-----|---------|
+| `SECRET_KEY` | Django signing key (`openssl rand -hex 32`) |
+| `POSTGRES_PASSWORD` | Compose Postgres on the GlitchTip VM (hex; not app MDB) |
+| `ENABLE_USER_REGISTRATION` | `true` until first admin, then `false` |
+| `EMAIL_URL` | Optional SMTP; default `consolemail://` |
+| `DEFAULT_FROM_EMAIL` | Optional; default `support@aclearo.com` |
+
+Runbook: [`staging-glitchtip.md`](./staging-glitchtip.md).
+
+---
+
 ## 2. GitHub Actions (repo secrets)
 
 Required for [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml):
@@ -89,7 +110,8 @@ Forbidden in EAS: `GOOGLE_POLLEN_API_KEY`, `GOOGLE_PLACES_API_KEY`, `GOOGLE_AIR_
 
 | Store | Role |
 |-------|------|
-| YC Managed PostgreSQL (private IP) | **Source of truth** for staging |
+| YC Managed PostgreSQL (private IP) | **Source of truth** for staging app/catalog |
+| GlitchTip compose Postgres (VM volume) | Crash events only — not this cluster |
 
 Optional one-time ops (from VPC runner):
 

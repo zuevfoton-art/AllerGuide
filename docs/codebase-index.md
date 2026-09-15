@@ -86,7 +86,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Таблица Postgres | `db/app-schema.ts` или `catalog-schema.ts` → `db:generate` → commit SQL |
 | Тема / бренд | `constants/theme.ts`, `brand.ts`, `components/brand/` |
 | Analytics event | `packages/core` `analytics-events.ts` + `crash-free.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
-| Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + GlitchTip compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
+| Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + [`glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) + compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |

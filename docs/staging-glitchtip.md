@@ -1,97 +1,130 @@
 # GlitchTip on staging — self-hosted crash ingest (P2.3 / G5)
 
-Plan only for **owner provisioning**. This document does **not** create a VM, DNS, or Lockbox entries. Do not point ingest at sentry.io. Do not put GlitchTip on the AllerGuide Managed Postgres cluster ([`postgresql.tf`](../infra/yandex/staging/postgresql.tf)) — that database holds profiles and diary data.
+Terraform in [`infra/yandex/staging/glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) defines the VM, dedicated security group, instance SA, and Lockbox **placeholder**. This document is the **owner apply checklist**. Cloud agents do **not** run `terraform apply` or `yc` write against the live folder.
 
-**Compose:** [`infra/yandex/staging/glitchtip/docker-compose.yml`](../infra/yandex/staging/glitchtip/docker-compose.yml)
+Do **not** point ingest at sentry.io. Do **not** put GlitchTip on the AllerGuide Managed Postgres cluster ([`postgresql.tf`](../infra/yandex/staging/postgresql.tf)). Do **not** mount this Lockbox into the API Serverless Container.
 
-**Client:** `@sentry/react-native` in [`apps/mobile/src/services/error-reporting.ts`](../apps/mobile/src/services/error-reporting.ts) (Sentry envelope protocol). Session health is **off**; G5 crash-free is first-party analytics (`session_started` / `app_crashed`). See [`analytics-staging.md`](./analytics-staging.md) and [`rc-gate.md`](./rc-gate.md).
+**Compose:** [`infra/yandex/staging/glitchtip/docker-compose.yml`](../infra/yandex/staging/glitchtip/docker-compose.yml) — publishes `127.0.0.1:8000` only. Caddy on the VM terminates TLS on :443.
 
-## Why a separate VM
+**Client:** `@sentry/react-native` in [`apps/mobile/src/services/error-reporting.ts`](../apps/mobile/src/services/error-reporting.ts). Session health is **off**; G5 crash-free is first-party analytics (`session_started` / `app_crashed`). See [`analytics-staging.md`](./analytics-staging.md) and [`rc-gate.md`](./rc-gate.md).
 
-| Constraint | Reason |
-|------------|--------|
-| Public HTTPS | The mobile SDK posts envelopes from devices; ingest cannot stay private-only |
-| Own Postgres volume | Crash payloads (stacks, breadcrumbs) must not sit next to `profile.*` |
-| Not the API Serverless Container | GlitchTip is stateful (uploads, worker); API stays stateless |
+Public hostname: `https://errors.staging.aclearo.com`
 
-Suggested hostname: `https://errors.staging.aclearo.com` (+ optional `.ru` CNAME).
+## Who does what
 
-## Minimum VM
+| Step | Who |
+|------|-----|
+| Terraform + cloud-init + Caddy + compose bind + this runbook | git / PR |
+| `terraform apply`, DNS A, Lockbox payload | **Owner** (folder `admin`) |
+| First GlitchTip admin, disable registration, copy DSN | **Owner** |
+| EAS `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
+| 14-day soak | Product, after smoke below |
 
-- Yandex Compute, Container Optimized Image or Ubuntu, **2 vCPU / 4 GB**, staging VPC
-- Security group: 443 from the internet (ingest + UI); SSH/22 only from admin CIDR
-- Disk: 30 GB+ (events + uploads). Retention: `GLITCHTIP_MAX_EVENT_LIFE_DAYS=90`
-- TLS: Certificate Manager + HTTPS reverse proxy (Caddy/nginx) in front of container port 8000
+## 1. Terraform apply
 
-## Compose layout
-
-Services in the bundled file:
-
-1. `postgres:16` — GlitchTip-only database (named volume). **Not** the app MDB cluster.
-2. `valkey` — queue/cache (optional to drop; then set `VALKEY_URL=` empty so GlitchTip uses Postgres)
-3. `glitchtip` — `glitchtip/glitchtip:v6.0.10` all-in-one (`./bin/run-all-in-one.sh`)
-
-Copy env, then start:
+Same root as the API ([`infra/yandex/staging/`](../infra/yandex/staging/)):
 
 ```bash
-cd infra/yandex/staging/glitchtip
-cp .env.example .env
-# set SECRET_KEY, POSTGRES_PASSWORD, GLITCHTIP_DOMAIN
-docker compose up -d
+./scripts/yc-staging-bootstrap.sh plan    # expect compute instance aclearo-staging-glitchtip
+./scripts/yc-staging-bootstrap.sh apply   # owner only
+cd infra/yandex/staging
+terraform output -raw glitchtip_public_ip
+terraform output -raw glitchtip_lockbox_secret_id
 ```
 
-First boot:
+Optional SSH: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (never `0.0.0.0/0`) in `terraform.tfvars`. Default is **no port 22**.
 
-1. Open `https://errors.staging.aclearo.com` and create the **single** admin user.
-2. Set `ENABLE_USER_REGISTRATION=false` in `.env` and recreate the GlitchTip container.
-3. Create organization + React Native project. Copy the DSN (`https://<key>@errors.staging.aclearo.com/<id>`).
-4. Confirm the DSN host is **not** `sentry.io`.
+## 2. Lockbox payload (separate secret)
 
-## Secrets (do not reuse API Lockbox)
+Secret name: `aclearo-staging-glitchtip`. Id: `terraform output -raw glitchtip_lockbox_secret_id`.
 
-Keep GlitchTip secrets on the VM (or a **separate** Lockbox secret, e.g. `aclearo-staging-glitchtip`). Never mount them into `apps/api`. Never put GlitchTip on the AllerGuide Managed Postgres cluster.
+**Never** `./scripts/yc-lockbox-upsert.sh` — that defaults to the API secret.
 
-Optional: a dedicated MDB database named `glitchtip` with its own user, instead of compose Postgres — still a separate cluster/database from `profile` / `catalog`.
+```bash
+YC_GLITCHTIP_LOCKBOX_SECRET_ID="$(cd infra/yandex/staging && terraform output -raw glitchtip_lockbox_secret_id)"
+./scripts/yc-glitchtip-lockbox-init.sh
+```
 
-| Name | Where |
-|------|--------|
-| `SECRET_KEY` (`GLITCHTIP_SECRET_KEY` in Lockbox) | Django signing key (`openssl rand -hex 32`) |
-| `POSTGRES_PASSWORD` / DB URL | Compose Postgres only, or the dedicated `glitchtip` MDB user |
-| SMTP (`EMAIL_URL`) | Optional alerts; console mail is fine for soak |
+Keys (hex only for `POSTGRES_PASSWORD` so `DATABASE_URL` stays valid):
 
-EAS (client DSN is public-by-design in the APK):
+| Key | Purpose |
+|-----|---------|
+| `SECRET_KEY` | Django signing key |
+| `POSTGRES_PASSWORD` | Compose Postgres on the VM disk |
+| `ENABLE_USER_REGISTRATION` | `true` until the first admin exists, then `false` |
+| `EMAIL_URL` | Optional; default `consolemail://` |
+| `DEFAULT_FROM_EMAIL` | Optional; default `support@aclearo.com` |
+
+The VM systemd unit `glitchtip-bootstrap.service` retries Lockbox until those keys exist, then `docker compose up -d`.
+
+## 3. DNS + TLS
+
+TLS is **Caddy + Let's Encrypt HTTP-01** on the VM (not Certificate Manager — CM certs are awkward on Compute).
+
+In Yandex Cloud DNS (`aclearo.com`):
+
+```
+A  errors.staging.aclearo.com  →  (glitchtip_public_ip)
+```
+
+Optional later: CNAME `errors.staging.aclearo.ru` and `glitchtip_fqdn_ru` in tfvars — only after the name exists, or ACME can fail the whole Caddy site.
+
+Wait until `curl -sI https://errors.staging.aclearo.com` is 200/302. Host must not be `sentry.io`.
+
+Port **8000** from the NAT IP must not answer (compose is loopback-only).
+
+## 4. First admin
+
+1. Open `https://errors.staging.aclearo.com` and create the **single** admin.
+2. Create organization + React Native project. Copy the DSN (`https://<key>@errors.staging.aclearo.com/<id>`). Confirm the host is **not** `sentry.io`.
+3. Disable public signup:
+
+```bash
+ENABLE_USER_REGISTRATION=false YC_GLITCHTIP_LOCKBOX_SECRET_ID=... ./scripts/yc-glitchtip-lockbox-init.sh
+# on the VM (SSH or serial console):
+sudo systemctl restart glitchtip-bootstrap.service
+```
+
+## 5. EAS DSN + staging APK
+
+DSN is public in the APK by design (Sensitive, not Secret).
 
 ```bash
 cd apps/mobile
 pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
-# optional alias if something still reads the old name:
+# optional alias:
 pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
-```
-
-Do **not** set `SENTRY_AUTH_TOKEN` for sentry.io. Native/JS source maps: Expo's artifact-bundle upload talks to Sentry Cloud APIs that GlitchTip does not implement. For soak, JS stacks without maps are acceptable; native symbols via `glitchtip-cli debug-files upload` if needed later. `SENTRY_URL` + `SENTRY_ORG` + `SENTRY_PROJECT` enable the Expo plugin **only** when `SENTRY_URL` is this GlitchTip origin (sentry.io is rejected in [`error-tracker-url.js`](../apps/mobile/error-tracker-url.js)).
-
-Then rebuild:
-
-```bash
 pnpm --filter mobile build:staging:android
 ```
 
-## Verify before soak
+Do **not** set `SENTRY_AUTH_TOKEN` for sentry.io. Maps upload only if `SENTRY_URL` is this origin ([`error-tracker-url.js`](../apps/mobile/error-tracker-url.js)).
 
-1. Staging APK with `EXPO_PUBLIC_ERROR_DSN` set and `EXPO_PUBLIC_ANALYTICS_ENABLED=true` (already on the EAS `staging` profile).
-2. Force `captureMessage` / a debug crash → issue appears in GlitchTip (native backstop).
+## 6. Smoke before soak
+
+1. Staging APK with `EXPO_PUBLIC_ERROR_DSN` and `EXPO_PUBLIC_ANALYTICS_ENABLED=true`.
+2. `captureMessage` / debug crash → issue in GlitchTip UI.
 3. Cold start → `session_started` on `GET /api/analytics/dashboard` (`crashFree.sessionClients ≥ 1`).
-4. ErrorBoundary crash → `app_crashed` with `fatal: true`; `crashFree.rate` updates.
+4. ErrorBoundary → `app_crashed` with `fatal: true`.
 
-Native crashes after JS is dead may miss `app_crashed`. Count GlitchTip issues in the same 14-day window as a backstop in the [soak log](./staging-soak-log.md).
+Native crashes that kill JS may miss `app_crashed`. Count GlitchTip issues in the [soak log](./staging-soak-log.md).
+
+`pnpm yc-stage-phase0` does **not** hard-fail if GlitchTip is down (API health stays the gate).
+
+## Compose layout
+
+1. `postgres:16` — named volume on the VM. **Not** app MDB.
+2. `valkey` — queue/cache
+3. `glitchtip/glitchtip:v6.0.10` all-in-one, `127.0.0.1:8000`
+
+Retention: `GLITCHTIP_MAX_EVENT_LIFE_DAYS=90`.
 
 ## Privacy
 
-- No session replay (GlitchTip does not record the screen).
-- `error-reporting.ts` scrubs tokens, passwords, user/profile ids from extras.
-- Analytics `app_crashed` sends **only** `fatal` (plus transport `client_id` / `platform` / `app_version`) — no message, no stack.
-- 90-day event retention; state the period in the privacy policy (P3.3 / P3.4).
+- No session replay.
+- `error-reporting.ts` scrubs tokens, passwords, user/profile ids.
+- Analytics `app_crashed` sends **only** `fatal` plus transport meta.
+- 90-day event retention — state in the privacy policy (P3.3 / P3.4).
 
 ## Production
 
-Duplicate in a **prod** folder/VM (`errors.aclearo.com`), new secret, new DSN. Do not reuse the staging database or `SECRET_KEY`. See [`production-yc-plan.md`](./production-yc-plan.md).
+Out of this checklist. Duplicate in a **prod** folder/VM (`errors.aclearo.com`), new Lockbox, new DSN. See [`production-yc-plan.md`](./production-yc-plan.md).

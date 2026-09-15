@@ -781,7 +781,7 @@ pnpm rc-gate     # typecheck + lint + test + taxonomy + doc/Maestro checks
 |-----------|------|-----------|
 | Аналитика | `analytics-service.ts` | `EXPO_PUBLIC_ANALYTICS_ENABLED`, опц. `EXPO_PUBLIC_ANALYTICS_ENDPOINT` |
 | События | `packages/core` `analytics-events.ts` | `screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*`, `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `market_click`, `market_impression`, `market_catalog_refresh`, `profile_setup_step_*`, `hint_tour_*`, `session_started`, `app_crashed` |
-| Crash reporting | `error-reporting.ts` | `@sentry/react-native` envelope в GlitchTip при `EXPO_PUBLIC_ERROR_DSN` / alias `EXPO_PUBLIC_SENTRY_DSN`; `sentry.io` отказан; иначе console. Sessions off. G5 crash-free — `crashFree` на `/api/analytics/dashboard` |
+| Crash reporting | `error-reporting.ts` | `@sentry/react-native` envelope в GlitchTip при `EXPO_PUBLIC_ERROR_DSN` / alias `EXPO_PUBLIC_SENTRY_DSN`; `sentry.io` отказан; иначе console. Sessions off. Staging ingest: VM + Caddy (`infra/yandex/staging/glitchtip.tf`, `https://errors.staging.aclearo.com`). G5 crash-free — `crashFree` на `/api/analytics/dashboard` |
 
 ---
 

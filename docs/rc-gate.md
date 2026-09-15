@@ -53,7 +53,7 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 
 ## Pre-soak: GlitchTip + first-party crash-free (G5)
 
-Crash **grouping** uses self-hosted GlitchTip ([staging-glitchtip.md](./staging-glitchtip.md)). Runtime reads `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) in [`error-reporting.ts`](../apps/mobile/src/services/error-reporting.ts). Hosts `sentry.io` / `*.sentry.io` are **refused**. Session tracking in the SDK is off — GlitchTip has no Release Health.
+Crash **grouping** uses self-hosted GlitchTip at `https://errors.staging.aclearo.com` after owner apply ([staging-glitchtip.md](./staging-glitchtip.md)). Runtime reads `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) in [`error-reporting.ts`](../apps/mobile/src/services/error-reporting.ts). Hosts `sentry.io` / `*.sentry.io` are **refused**. Session tracking in the SDK is off — GlitchTip has no Release Health.
 
 Crash-free for the gate:
 
