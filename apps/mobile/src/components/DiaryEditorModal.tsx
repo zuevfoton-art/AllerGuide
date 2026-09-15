@@ -26,6 +26,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
+import { blurDiaryEditorIme } from '@/src/components/diary/wizard/diary-editor-ime';
 import {
   diaryEditorScrollMaxHeight,
   diaryEditorSheetPaddingBottom,
@@ -41,8 +42,12 @@ interface DiaryEditorModalProps {
   children: ReactNode;
 }
 
+type DiaryEditorInputHandle = Parameters<typeof TextInput.State.blurTextInput>[0];
+
 type DiaryEditorScrollApi = {
   scrollFieldIntoView: (node: unknown) => void;
+  registerFocusedInput: (node: DiaryEditorInputHandle | null) => void;
+  dismissIme: () => void;
 };
 
 const DiaryEditorScrollContext = createContext<DiaryEditorScrollApi | null>(null);
@@ -56,12 +61,6 @@ type FooterRegistry = (render: FooterRenderer | null) => void;
 
 const DiaryEditorFooterContext = createContext<FooterRegistry | null>(null);
 const DiaryEditorPinnedTopContext = createContext<FooterRegistry | null>(null);
-
-function dismissDiaryIme() {
-  Keyboard.dismiss();
-  const focused = TextInput.State.currentlyFocusedInput();
-  if (focused) TextInput.State.blurTextInput(focused);
-}
 
 function DiaryEditorPinnedSlot({
   register,
@@ -157,6 +156,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const modalAnimation = useModalAnimation('slide');
   const scrollRef = useRef<ScrollView>(null);
   const pendingFocusNode = useRef<unknown>(null);
+  const focusedInputRef = useRef<DiaryEditorInputHandle | null>(null);
   const footerRenderRef = useRef<FooterRenderer | null>(null);
   const topRenderRef = useRef<FooterRenderer | null>(null);
   const [hasFooter, setHasFooter] = useState(false);
@@ -188,6 +188,16 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
     }
     setHasTop(true);
     setTopEpoch((epoch) => epoch + 1);
+  }, []);
+
+  const dismissDiaryIme = useCallback(() => {
+    const registered = focusedInputRef.current;
+    blurDiaryEditorIme(registered);
+    focusedInputRef.current = null;
+  }, []);
+
+  const registerFocusedInput = useCallback((node: DiaryEditorInputHandle | null) => {
+    focusedInputRef.current = node;
   }, []);
 
   const scrollFieldIntoView = useCallback((node: unknown) => {
@@ -223,7 +233,10 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
     };
   }, []);
 
-  const scrollApi = useMemo(() => ({ scrollFieldIntoView }), [scrollFieldIntoView]);
+  const scrollApi = useMemo(
+    () => ({ scrollFieldIntoView, registerFocusedInput, dismissIme: dismissDiaryIme }),
+    [scrollFieldIntoView, registerFocusedInput, dismissDiaryIme],
+  );
 
   useEffect(() => {
     if (visible) return;
@@ -263,8 +276,8 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
             <Pressable
               style={styles.backdrop}
               onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel={t('common.cancel')}
+              importantForAccessibility="no"
+              accessibilityElementsHidden
             />
             <View
               style={[styles.sheet, { paddingBottom: sheetPaddingBottom }]}
@@ -295,6 +308,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
                     testID="diary-editor-title"
                     collapsable={false}
                     style={styles.headerTitleHit}
+                    onPressIn={dismissDiaryIme}
                     onPress={dismissDiaryIme}
                     accessibilityRole="header"
                     accessibilityLabel={t('diary.title')}>
@@ -398,9 +412,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.bg,
     },
     headerTitleHit: {
+      flex: 1,
       flexShrink: 0,
       minHeight: density.tapMinHeight,
+      alignItems: 'center',
       justifyContent: 'center',
+      paddingVertical: 6,
     },
     headerBtn: {
       minWidth: 72,

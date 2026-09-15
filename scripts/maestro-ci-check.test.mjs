@@ -266,6 +266,11 @@ describe('Maestro nightly CI invariants', () => {
   it('folds diary IME via pinned editor chrome before tapping Далее', () => {
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
     assert.match(dismiss, /id: diary-editor-title/);
+    assert.match(dismiss, /id: diary-wizard-step-label/);
+    assert.ok(
+      dismiss.indexOf('diary-editor-title') < dismiss.indexOf('diary-wizard-step-label'),
+      'dismiss must tap the title, then the wider step label (nightly 34946086211)',
+    );
     assert.match(dismiss, /waitForAnimationToEnd/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
 
@@ -273,8 +278,12 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
     assert.match(editorModal, /dismissDiaryIme/);
-    assert.match(editorModal, /Keyboard\.dismiss/);
-    assert.match(editorModal, /blurTextInput/);
+    assert.match(editorModal, /onPressIn=\{dismissDiaryIme\}/);
+    assert.match(editorModal, /registerFocusedInput/);
+    assert.match(editorModal, /blurDiaryEditorIme/);
+    const imeHelper = read('apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
+    assert.match(imeHelper, /Keyboard\.dismiss/);
+    assert.match(imeHelper, /blurTextInput/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /testID="diary-editor-pinned-top"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
@@ -295,6 +304,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(wizard, /DiaryEditorFooter/);
     assert.match(wizard, /DiaryEditorPinnedTop/);
     assert.match(wizard, /testID="diary-wizard-primary"/);
+    assert.match(wizard, /testID="diary-wizard-step-label"/);
+    assert.match(wizard, /onPressIn=\{\(\) => editorScroll\?\.dismissIme\(\)\}/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
@@ -351,6 +362,7 @@ describe('Maestro nightly CI invariants', () => {
 
     const tapChoice = read('apps/mobile/.maestro/flows/_tap-wizard-choice.yaml');
     assert.match(tapChoice, /_dismiss-wizard-ime.yaml/);
+    assert.match(tapChoice, /extendedWaitUntil/);
     assert.match(tapChoice, /scrollUntilVisible/);
     assert.match(tapChoice, /id: \$\{CHOICE_ID\}/);
 
@@ -358,6 +370,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(stepField, /diary-choice-\$\{choice\}/);
     assert.match(stepField, /diary-choice-\$\{step\.id\}/);
     assert.match(stepField, /styles\.inputWrap/);
+    assert.match(stepField, /registerFocusedInput/);
     const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
     assert.match(fieldStyles, /inputWrap:/);
     assert.match(fieldStyles, /height: density\.tapMinHeight/);
