@@ -348,6 +348,11 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
     assert.match(fill, /extendedWaitUntil/);
+    assert.match(
+      fill,
+      /tapOn:\s*\n\s+id: \$\{FIELD_ID\}\s*\n\s+optional: true/,
+      'second FIELD_ID tap must be optional once Gboard covers a tall multiline (nightly 35094037122)',
+    );
     const afterInput = fill.split('inputText')[1] ?? '';
     assert.match(afterInput, /scrollUntilVisible/);
     assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);

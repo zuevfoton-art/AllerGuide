@@ -8,6 +8,10 @@
 # Nightly 35081306254: pinning appearance into diary-editor-pinned-top left
 # it under Gboard with no scroll. Text fields stay in the ScrollView so
 # scrollUntilVisible can lift appearance into the gap above the keyboard.
+# Nightly 35094037122: first tapOn focused appearance, Gboard covered the
+# multiline at `[42,1558][1038,1873]`, second tapOn failed with
+# "Element not found: diary-field-appearance". After the first tap, type
+# into the focused EditText even if the second tap is covered.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -24,8 +28,10 @@ appId: com.aclearo.app
     id: ${FIELD_ID}
 - waitForAnimationToEnd:
     timeout: 3000
+# Optional: Gboard may now cover a tall multiline; native focus is enough.
 - tapOn:
     id: ${FIELD_ID}
+    optional: true
 - eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml
