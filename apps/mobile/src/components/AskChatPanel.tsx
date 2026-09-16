@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ASK_SUGGESTION_IDS, type AskMessage, type AskSuggestionId } from '@allerguide/core';
 import { ActionChip } from '@/src/components/ActionChip';
 import { GlassCard } from '@/src/components/GlassCard';
@@ -133,9 +134,14 @@ export function useAskChat({
           />
         ))}
       </View>
-      <View style={styles.inputRow}>
+      <View style={styles.ovalRow}>
         {voiceSupported ? (
-          <VoiceNoteButton testID="ask-voice" disabled={busy} onTranscript={onVoiceTranscript} />
+          <VoiceNoteButton
+            testID="ask-voice"
+            variant="icon"
+            disabled={busy}
+            onTranscript={onVoiceTranscript}
+          />
         ) : null}
         <TextInput
           testID="ask-input"
@@ -143,20 +149,30 @@ export function useAskChat({
           onChangeText={setDraft}
           placeholder={t('ask.inputPlaceholder')}
           placeholderTextColor={theme.colors.textMuted}
-          style={styles.input}
+          style={styles.ovalInput}
           editable={!busy}
           multiline
           maxLength={500}
           accessibilityLabel={t('ask.inputPlaceholder')}
         />
-        <Button
+        <Pressable
           testID="ask-send"
-          label={t('ask.send')}
-          variant="primary"
-          size="sm"
+          accessibilityRole="button"
+          accessibilityLabel={t('ask.send')}
           disabled={busy || !draft.trim()}
           onPress={() => void send(draft)}
-        />
+          style={[
+            styles.sendBtn,
+            (busy || !draft.trim()) && styles.sendBtnDisabled,
+          ]}>
+          <Ionicons
+            name="send"
+            size={18}
+            color={
+              busy || !draft.trim() ? theme.colors.textMuted : theme.colors.onAccent
+            }
+          />
+        </Pressable>
       </View>
       {!AI_CHAT_ENABLED ? (
         <Text style={styles.flagHint} testID="ask-offline-mode-hint">
@@ -303,24 +319,42 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     composer: { gap: 8 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    inputRow: {
+    ovalRow: {
       flexDirection: 'row',
       alignItems: 'flex-end',
-      gap: 8,
-    },
-    input: {
-      flex: 1,
-      minHeight: density.tapMinHeight,
-      maxHeight: 96,
-      borderRadius: radii.sm,
+      gap: 6,
+      minHeight: density.tapMinHeight + 4,
+      maxHeight: 104,
+      borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
-      backgroundColor: colors.card,
-      paddingHorizontal: 12,
+      backgroundColor: colors.surfaceMuted,
+      paddingLeft: 6,
+      paddingRight: 6,
+      paddingVertical: 4,
+      width: '100%',
+    },
+    ovalInput: {
+      flex: 1,
+      minHeight: density.tapMinHeight - 4,
+      maxHeight: 88,
+      paddingHorizontal: 8,
       paddingVertical: 10,
       fontFamily: fonts.sans,
       fontSize: WEB_INPUT_FONT_SIZE,
       color: colors.text,
+    },
+    sendBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      marginBottom: 2,
+    },
+    sendBtnDisabled: {
+      backgroundColor: colors.border,
     },
     flagHint: {
       fontFamily: fonts.sans,
