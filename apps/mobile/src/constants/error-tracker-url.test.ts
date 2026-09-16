@@ -2,8 +2,14 @@ import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
-const { isSelfHostedCrashTrackerUrl } = require('../../error-tracker-url.js') as {
+const {
+  isSelfHostedCrashTrackerUrl,
+  isValidCrashIngestDsn,
+  crashIngestHostname,
+} = require('../../error-tracker-url.js') as {
   isSelfHostedCrashTrackerUrl: (raw: unknown) => boolean;
+  isValidCrashIngestDsn: (raw: unknown) => boolean;
+  crashIngestHostname: (raw: unknown) => string;
 };
 
 describe('isSelfHostedCrashTrackerUrl', () => {
@@ -17,5 +23,24 @@ describe('isSelfHostedCrashTrackerUrl', () => {
 
   it('accepts the staging GlitchTip host', () => {
     expect(isSelfHostedCrashTrackerUrl('https://errors.staging.aclearo.com')).toBe(true);
+  });
+});
+
+describe('isValidCrashIngestDsn', () => {
+  it('requires https, a public key, a project path, and a non-sentry host', () => {
+    expect(isValidCrashIngestDsn('https://key@errors.staging.aclearo.com/1')).toBe(true);
+    expect(isValidCrashIngestDsn('https://errors.staging.aclearo.com/1')).toBe(false);
+    expect(isValidCrashIngestDsn('http://key@errors.staging.aclearo.com/1')).toBe(false);
+    expect(isValidCrashIngestDsn('https://key@errors.staging.aclearo.com/')).toBe(false);
+    expect(isValidCrashIngestDsn('https://key@sentry.io/1')).toBe(false);
+  });
+});
+
+describe('crashIngestHostname', () => {
+  it('returns the lowercased host or empty', () => {
+    expect(crashIngestHostname('https://key@errors.staging.aclearo.com/1')).toBe(
+      'errors.staging.aclearo.com',
+    );
+    expect(crashIngestHostname('not-a-url')).toBe('');
   });
 });

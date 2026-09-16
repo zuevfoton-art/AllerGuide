@@ -41,4 +41,9 @@ if YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6qs399v1b3unstfh5rj "$INIT" 2>/dev/null; then
   exit 1
 fi
 
+GRADLE_WF="$ROOT/.github/workflows/staging-apk-gradle.yml"
+grep -q 'scripts/resolve-staging-error-dsn.sh' "$GRADLE_WF"
+grep -q 'EXPO_PUBLIC_ERROR_DSN' "$GRADLE_WF"
+grep -q 'isValidCrashIngestDsn' "$ROOT/apps/mobile/error-tracker-url.js"
+
 echo "glitchtip infra checks OK"

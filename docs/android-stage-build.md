@@ -128,6 +128,7 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 |--|-----------|----------------------|
 | Android SDK | у Expo | ставит `android-actions/setup-android` (`packages: platform-tools`; пакет `tools` Google снял) |
 | Google Maps key | EAS secret / `app.config.js` | GH secret → env → `app.config.js` / manifest |
+| Crash DSN | EAS preview Sensitive `EXPO_PUBLIC_ERROR_DSN` | GH secret `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) or the same EAS var via `EXPO_TOKEN`; [`resolve-staging-error-dsn.sh`](../scripts/resolve-staging-error-dsn.sh) refuses `sentry.io` |
 | Signing | EAS credentials | debug/release keystore в CI (сейчас debug-подобный preview) |
 | Время | обычно стабильнее | 10–25+ мин на cold SDK |
 | iOS | тот же EAS профиль | **не** покрывает iOS |
@@ -137,7 +138,8 @@ Env job’а держится в sync с `eas.json` → `staging` (auth/sync/AI/
 | Secret | Назначение |
 |--------|------------|
 | `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps Android key (`AIza…`, package + SHA-1). Without a **valid** key the job still builds, but the APK uses **Yandex interactive** basemap (Google pollen numbers via API remain). |
-| `EXPO_TOKEN` | Fallback: pull the same Maps key from EAS Sensitive when the GH secret is empty (token must be valid — error text must not be baked into the APK) |
+| `EXPO_PUBLIC_ERROR_DSN` | GlitchTip DSN (`https://<key>@errors.staging.aclearo.com/<id>`). Alias `EXPO_PUBLIC_SENTRY_DSN`. Public in the APK. Without a valid self-hosted DSN the job still builds; crash envelopes stay off. Never `sentry.io`. |
+| `EXPO_TOKEN` | Fallback: pull Maps key **and** crash DSN from EAS Sensitive (`preview` first) when the GH secret is empty (token must be valid — error text must not be baked into the APK) |
 | *(опционально)* `GOOGLE_POLLEN` уже на API | клиент бьёт в `api.staging.aclearo.com` |
 
 Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_GOOGLE_PRIMARY`, `EXPO_PUBLIC_MAP_POLLEN_PLUME`, `EXPO_PUBLIC_YANDEX_MAP_INTERACTIVE`, `EXPO_PUBLIC_MAP_PLACES`, `EXPO_PUBLIC_AIR_QUALITY`). Google basemap wins only when a valid `AIza…` key is present; otherwise Yandex interactive.
@@ -165,8 +167,10 @@ Job env must stay in sync with `eas.json` → `staging` (`EXPO_PUBLIC_GOOGLE_MAP
 - [ ] Restricted Maps key(s) + server Pollen key
 - [ ] API staging: `POLLEN_HEATMAP_ENABLED=true`, health `features.pollenHeatmap: true`
 - [ ] EAS secret `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`
-- [ ] GitHub secret `EXPO_TOKEN` (для пути B; также fallback Maps key для пути C)
+- [ ] EAS preview Sensitive `EXPO_PUBLIC_ERROR_DSN` (GlitchTip; not sentry.io)
+- [ ] GitHub secret `EXPO_TOKEN` (для пути B; также fallback Maps key **and** crash DSN для пути C)
 - [ ] GitHub secret `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (путь C; или EAS pull через `EXPO_TOKEN`)
+- [ ] GitHub secret `EXPO_PUBLIC_ERROR_DSN` (путь C; или EAS pull через `EXPO_TOKEN`)
 - [ ] `eas build` или Actions → **EAS staging Android**
 - [ ] Device smoke: Google map + UPI + OM badge
 

@@ -702,6 +702,7 @@ requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('staging Gradle crash DSN', 'node', ['--test', 'scripts/resolve-staging-error-dsn.test.mjs']);
 runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
