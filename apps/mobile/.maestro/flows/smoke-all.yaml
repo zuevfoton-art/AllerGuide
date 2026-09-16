@@ -9,3 +9,4 @@ appId: com.aclearo.app
 - runFlow: sos-smoke.yaml
 - runFlow: sos-no-profile-smoke.yaml
 - runFlow: settings-smoke.yaml
+- runFlow: ask-smoke.yaml

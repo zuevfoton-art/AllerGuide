@@ -170,7 +170,7 @@ src/modules/marketplace/
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
 | `+html.tsx` | Web-обёртка Expo Router (не экран) |
 
-Модальных маршрутов нет: sheet-модалки (`DiaryEditorModal`, `ListPickerSheet`, камера сканера) живут внутри экранов.
+Модальных маршрутов нет: sheet-модалки (`DiaryEditorModal`, `ListPickerSheet`, `AskChatSheet` / `BottomSheet`, камера сканера) живут внутри экранов.
 
 ### Services (группы)
 
@@ -208,7 +208,7 @@ src/modules/marketplace/
 
 ### Components (по смыслу)
 
-- **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
+- **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `ActionChip`, `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
 - **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal` (pinned `diary-editor-footer`, bounded scroll, scroll-to-focus, no `liftStyle`), `VoiceNoteButton` (только `symptoms`/`onset`), `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)

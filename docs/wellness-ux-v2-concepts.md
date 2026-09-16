@@ -189,14 +189,14 @@ Plum & Sage снят: не подходит как production-направлен
 
 ## 5. Связь с реализацией (после выбора)
 
-Чеклист следующего этапа (частично начат после выбора B):
+Чеклист следующего этапа (после выбора B):
 
-1. Канон в north-star / FR / brand doc → B Nordic Air.
-2. `criticality` + resolver видимой/свёрнутой групп в `packages/core` `home-insights.ts`.
-3. Semantic tokens → `theme.ts` / `layout.ts` / `claro-gradient.ts`; далее primitives `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
-4. Мигрировать все `ProfileHeaderButton` на chip + имя (кроме `/profile` и setup).
-5. Voice-to-draft на существующих `VoiceNoteButton` + `voice-dictation-service`.
-6. Analytics без PII; тесты комбинаций criticality; Maestro; `pnpm rc-gate`.
+1. [x] Канон в north-star / FR / brand doc → B Nordic Air.
+2. [x] `criticality` + resolver видимой/свёрнутой групп в `packages/core` `home-insights.ts`.
+3. [x] Semantic tokens → `theme.ts` / `layout.ts` / `claro-gradient.ts`; primitives `SelectChip`, `ActionChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
+4. [x] Мигрировать все `ProfileHeaderButton` на chip + имя (кроме `/profile` и setup).
+5. [x] Voice-to-draft на существующих `VoiceNoteButton` + `voice-dictation-service`.
+6. [x] Analytics без PII (`ai_chat_voice_*`); Maestro `ask-smoke.yaml`; `pnpm check:analytics-taxonomy`.
 
 ---
 
