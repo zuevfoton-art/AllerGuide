@@ -280,6 +280,8 @@ const en: LocaleMessages = {
     phenotypeHintsTitle: 'Profile recommendations',
     insightsTitle: 'Recommendations and reminders',
     insightsEmpty: 'No urgent recommendations right now. Keep logging in the diary — tips will appear from your data.',
+    insightsMore: '{{count}} more recommendations',
+    insightsCollapse: 'Show less',
     insightsSelectProfileTitle: 'Select a profile',
     insightsSelectProfileText: 'Recommendations and reminders are based on the active profile and diary entries.',
     insightsOpenProfiles: 'Profiles',

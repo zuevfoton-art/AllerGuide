@@ -281,6 +281,8 @@ const de: LocaleMessages = {
     phenotypeHintsTitle: 'Profil-Empfehlungen',
     insightsTitle: 'Empfehlungen und Erinnerungen',
     insightsEmpty: 'Derzeit keine dringenden Empfehlungen. Führen Sie das Tagebuch weiter — Hinweise erscheinen aus Ihren Daten.',
+    insightsMore: 'Noch {{count}} Empfehlungen',
+    insightsCollapse: 'Weniger anzeigen',
     insightsSelectProfileTitle: 'Profil wählen',
     insightsSelectProfileText: 'Empfehlungen und Erinnerungen basieren auf dem aktiven Profil und Tagebucheinträgen.',
     insightsOpenProfiles: 'Profile',

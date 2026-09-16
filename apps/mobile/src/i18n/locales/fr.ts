@@ -280,6 +280,8 @@ const fr: LocaleMessages = {
     phenotypeHintsTitle: 'Recommandations du profil',
     insightsTitle: 'Recommandations et rappels',
     insightsEmpty: 'Aucune recommandation urgente pour le moment. Continuez le journal — des conseils apparaîtront selon vos données.',
+    insightsMore: 'Encore {{count}} recommandations',
+    insightsCollapse: 'Réduire',
     insightsSelectProfileTitle: 'Choisir un profil',
     insightsSelectProfileText: 'Les recommandations et rappels s’appuient sur le profil actif et le journal.',
     insightsOpenProfiles: 'Profils',

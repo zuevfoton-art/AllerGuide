@@ -138,7 +138,7 @@ export default function HomeScreen() {
     [profile, wellness, t],
   );
 
-  const insightItems = useMemo(
+  const insights = useMemo(
     () =>
       buildHomeInsightItems({
         profile,
@@ -161,6 +161,10 @@ export default function HomeScreen() {
       t,
     ],
   );
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
+  const displayedInsights = insightsExpanded
+    ? [...insights.items, ...insights.collapsedItems]
+    : insights.items;
 
   useEffect(() => {
     if (!returnStage) return;
@@ -194,7 +198,7 @@ export default function HomeScreen() {
         </>
       }>
 
-      <TabScreenHeader eyebrow={dateLabel} title={profile?.name ?? t('tabs.today')} />
+      <TabScreenHeader eyebrow={dateLabel} title={t('tabs.today')} />
 
       {loadingWellness && !wellness ? (
         <>
@@ -322,21 +326,40 @@ export default function HomeScreen() {
         <View style={[styles.listHead, styles.listHeadPad]}>
           <CardTitle>{t('home.insightsTitle')}</CardTitle>
         </View>
-        {insightItems.length === 0 ? (
+        {displayedInsights.length === 0 ? (
           <View style={styles.emptyInsights}>
             <Text style={styles.emptyInsightsText}>{t('home.insightsEmpty')}</Text>
           </View>
         ) : (
-          insightItems.map((item, index) => (
-            <InsightRow
-              key={item.id}
-              item={item}
-              bordered={index < insightItems.length - 1}
-              styles={styles}
-              ui={ui}
-              theme={theme}
-            />
-          ))
+          <>
+            {displayedInsights.map((item, index) => (
+              <InsightRow
+                key={item.id}
+                item={item}
+                bordered={
+                  index < displayedInsights.length - 1 ||
+                  (!insightsExpanded && insights.collapsedCount > 0)
+                }
+                styles={styles}
+                ui={ui}
+                theme={theme}
+              />
+            ))}
+            {insights.collapsedCount > 0 ? (
+              <Pressable
+                testID="home-insights-more"
+                style={styles.moreInsights}
+                onPress={() => setInsightsExpanded((open) => !open)}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.insightsMore', { count: insights.collapsedCount })}>
+                <Text style={styles.moreInsightsText}>
+                  {insightsExpanded
+                    ? t('home.insightsCollapse')
+                    : t('home.insightsMore', { count: insights.collapsedCount })}
+                </Text>
+              </Pressable>
+            ) : null}
+          </>
         )}
       </GlassCard>
       </HintAnchor>
@@ -501,6 +524,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
+    },
+    moreInsights: {
+      minHeight: 44,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moreInsightsText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
     },
     expertRow: {
       flexDirection: 'row',

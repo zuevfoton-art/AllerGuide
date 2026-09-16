@@ -284,6 +284,8 @@ export type LocaleMessages = {
     phenotypeHintsTitle: string;
     insightsTitle: string;
     insightsEmpty: string;
+    insightsMore: string;
+    insightsCollapse: string;
     insightsSelectProfileTitle: string;
     insightsSelectProfileText: string;
     insightsOpenProfiles: string;
