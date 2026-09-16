@@ -10,6 +10,8 @@ import {
   diaryEditorSheetMaxHeight,
   diaryEditorSheetPaddingBottom,
   isDiaryTextInputStep,
+  isCompactDiaryTextIme,
+  pinnedStepsVisibleForIme,
   splitDiaryScreenForIme,
 } from './diary-editor-layout';
 
@@ -154,6 +156,25 @@ describe('splitDiaryScreenForIme', () => {
       'skinArea',
       'appearance',
     ]);
+  });
+
+  it('keeps only the focused pinned text field while IME is open', () => {
+    const pinned = [skinArea, appearance, itching];
+    expect(pinnedStepsVisibleForIme(pinned, null).map((step) => step.id)).toEqual([
+      'skinArea',
+      'appearance',
+      'itching',
+    ]);
+    expect(pinnedStepsVisibleForIme(pinned, 'appearance').map((step) => step.id)).toEqual([
+      'appearance',
+    ]);
+    expect(isCompactDiaryTextIme(pinnedStepsVisibleForIme(pinned, 'appearance'))).toBe(true);
+    expect(pinnedStepsVisibleForIme(pinned, 'itching').map((step) => step.id)).toEqual([
+      'skinArea',
+      'appearance',
+      'itching',
+    ]);
+    expect(isCompactDiaryTextIme(pinned)).toBe(false);
   });
 
   it('pins two medicine text fields and leaves the time picker in the scroll', () => {

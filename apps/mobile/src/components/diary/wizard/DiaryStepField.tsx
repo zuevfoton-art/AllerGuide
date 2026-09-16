@@ -10,10 +10,12 @@ import { useTheme } from '@/src/hooks/use-theme';
 export function DiaryStepField({
   step,
   value,
+  compactIme = false,
   onChange,
 }: {
   step: DiaryStep;
   value: string;
+  compactIme?: boolean;
   onChange: (value: string) => void;
 }) {
   const theme = useTheme();
@@ -32,12 +34,14 @@ export function DiaryStepField({
 
   const handleFocus = () => {
     editorScroll?.registerInput(inputRef.current);
+    editorScroll?.setFocusedStepId(step.id);
     editorScroll?.scrollFieldIntoView(inputRef.current);
   };
 
   const handleChangeText = (text: string) => {
     // Maestro inputText may skip RN onFocus (nightly 35067465304).
     editorScroll?.registerInput(inputRef.current);
+    editorScroll?.setFocusedStepId(step.id);
     onChange(text);
   };
 
@@ -91,13 +95,15 @@ export function DiaryStepField({
     );
   }
 
+  const useMultilineLayout = Boolean(step.multiline) && !compactIme;
+
   return (
-    <View style={step.multiline ? styles.inputMultilineWrap : styles.inputWrap} collapsable={false}>
+    <View style={useMultilineLayout ? styles.inputMultilineWrap : styles.inputWrap} collapsable={false}>
       <TextInput
         ref={inputRef}
         testID={`diary-field-${step.id}`}
         collapsable={false}
-        style={[styles.input, step.multiline && styles.inputMultiline]}
+        style={[styles.input, useMultilineLayout && styles.inputMultiline]}
         value={value}
         onChangeText={handleChangeText}
         onFocus={handleFocus}

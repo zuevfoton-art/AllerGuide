@@ -301,6 +301,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /onPressIn=\{dismissDiaryIme\}/);
     assert.match(editorModal, /registerInput/);
     assert.match(editorModal, /unregisterInput/);
+    assert.match(editorModal, /setFocusedStepId/);
+    assert.match(editorModal, /focusedStepId/);
     assert.match(editorModal, /blurDiaryEditorIme/);
     assert.doesNotMatch(
       editorModal,
@@ -332,7 +334,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(wizard, /DiaryEditorFooter/);
     assert.match(wizard, /DiaryEditorPinnedTop/);
     assert.match(wizard, /splitDiaryScreenForIme/);
-    assert.match(wizard, /pinnedSteps\.map/);
+    assert.match(wizard, /pinnedStepsVisibleForIme/);
+    assert.match(wizard, /visiblePinnedSteps\.map/);
     assert.match(wizard, /scrolledSteps\.map/);
     assert.match(wizard, /testID="diary-wizard-primary"/);
     assert.match(wizard, /testID="diary-wizard-step-label"/);
@@ -348,6 +351,11 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
     assert.match(fill, /extendedWaitUntil/);
+    assert.match(
+      fill,
+      /tapOn:\s*\n\s+id: \$\{FIELD_ID\}\s*\n\s+optional: true/,
+      'second FIELD_ID tap must be optional once Gboard covers a tall multiline (nightly 35094037122)',
+    );
     const afterInput = fill.split('inputText')[1] ?? '';
     assert.match(afterInput, /scrollUntilVisible/);
     assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
@@ -413,6 +421,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(stepField, /registerInput/);
     assert.match(stepField, /unregisterInput/);
     assert.match(stepField, /handleChangeText/);
+    assert.match(stepField, /setFocusedStepId/);
+    assert.match(stepField, /compactIme/);
     assert.match(stepField, /editorScroll\?\.dismissIme\(\)/);
     const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
     assert.match(fieldStyles, /inputWrap:/);
@@ -421,6 +431,8 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fieldStyles, /maxHeight: 160/);
     const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
     assert.match(layout, /splitDiaryScreenForIme/);
+    assert.match(layout, /pinnedStepsVisibleForIme/);
+    assert.match(layout, /isCompactDiaryTextIme/);
     assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
     assert.match(layout, /isDiaryTextInputStep/);
     assert.match(layout, /textInputCount >= 2/);

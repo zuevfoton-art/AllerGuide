@@ -390,6 +390,7 @@ function checkMaestroFlows() {
     !editorModal.includes('diary-editor-pinned-top') ||
     !editorModal.includes('diaryEditorSheetPaddingBottom') ||
     !editorModal.includes('registerInput') ||
+    !editorModal.includes('setFocusedStepId') ||
     /liftStyle\s*[,}\]]/.test(editorModal) ||
     /focusedInputRef\.current = null/.test(editorModal)
   ) {
@@ -436,6 +437,11 @@ function checkMaestroFlows() {
       'DiaryStepField must dismiss IME on choice press and re-register the input on change (nightly 35067465304)',
     );
   }
+  if (!stepField.includes('setFocusedStepId') || !stepField.includes('compactIme')) {
+    failures.push(
+      'DiaryStepField must report the focused step and compact multiline height while IME is open (nightly 35094037122)',
+    );
+  }
 
   const diaryWizard = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryWizard.tsx'), 'utf8');
   const diaryLayout = fs.readFileSync(
@@ -444,9 +450,11 @@ function checkMaestroFlows() {
   );
   if (
     !diaryWizard.includes('splitDiaryScreenForIme') ||
-    !diaryWizard.includes('pinnedSteps.map') ||
+    !diaryWizard.includes('pinnedStepsVisibleForIme') ||
+    !diaryWizard.includes('visiblePinnedSteps.map') ||
     !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS') ||
-    !diaryLayout.includes('isDiaryTextInputStep')
+    !diaryLayout.includes('isDiaryTextInputStep') ||
+    !diaryLayout.includes('pinnedStepsVisibleForIme')
   ) {
     failures.push(
       'DiaryWizard must pin text fields and compact chips above the editor scroll (nightly 35072335460)',
@@ -480,10 +488,11 @@ function checkMaestroFlows() {
     !fillWizardField.includes('eraseText') ||
     !fillWizardField.includes('assertVisible') ||
     !fillWizardField.includes('extendedWaitUntil') ||
+    !fillWizardField.includes('optional: true') ||
     !fillAfterInput.includes('scrollUntilVisible')
   ) {
     failures.push(
-      '_fill-wizard-field.yaml must wait for FIELD_ID, retap after layout, scroll it back into view, and assertVisible FIELD_VALUE',
+      '_fill-wizard-field.yaml must wait for FIELD_ID, type after the first tap, scroll it back into view, and assertVisible FIELD_VALUE',
     );
   }
 

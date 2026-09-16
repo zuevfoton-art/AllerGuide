@@ -16,6 +16,7 @@ export const DIARY_EDITOR_SAFE_BOTTOM_MIN = 16;
 export const COMPACT_DIARY_CHOICE_MAX_OPTIONS = 8;
 
 type DiaryScreenStep = {
+  id?: string;
   field: string;
   multiSelect?: boolean;
   choices?: readonly string[];
@@ -71,6 +72,32 @@ export function splitDiaryScreenForIme<T extends DiaryScreenStep>(
     }
   }
   return { pinnedSteps, scrolledSteps };
+}
+
+/**
+ * Nightly 35094037122: pinning skinArea + multiline appearance + itching
+ * still left `diary-field-appearance` at `[42,1558][1038,1873]` under Gboard
+ * after the first tap. Maestro's second tapOn then failed with
+ * "Element not found: diary-field-appearance" while the field stayed focused
+ * on the placeholder. While a pinned text field is focused, keep only that
+ * step in chrome so it sits where skinArea already fits above Gboard.
+ * `dismissIme` clears the focused id and shows every pinned step again.
+ */
+export function pinnedStepsVisibleForIme<T extends DiaryScreenStep & { id: string }>(
+  pinnedSteps: readonly T[],
+  focusedStepId: string | null,
+): T[] {
+  if (!focusedStepId) return [...pinnedSteps];
+  const focused = pinnedSteps.find((step) => step.id === focusedStepId);
+  if (!focused || !isDiaryTextInputStep(focused)) return [...pinnedSteps];
+  return [focused];
+}
+
+/** Single pinned text field: use tap-min height so Gboard cannot cover it. */
+export function isCompactDiaryTextIme<T extends DiaryScreenStep>(
+  visiblePinnedSteps: readonly T[],
+): boolean {
+  return visiblePinnedSteps.length === 1 && isDiaryTextInputStep(visiblePinnedSteps[0]);
 }
 
 export function diaryEditorSheetMaxHeight(windowHeight: number): number {

@@ -6,6 +6,11 @@
 # Nightly 35072335460: the same append (`предплечьеyyшелушение`) when Gboard
 # still covered appearance in the scroll. Skin text fields now live in
 # diary-editor-pinned-top; wait until FIELD_ID is visible before typing.
+# Nightly 35094037122: first tapOn focused appearance, Gboard covered the
+# 315px multiline at `[42,1558][1038,1873]`, second tapOn failed with
+# "Element not found: diary-field-appearance". After the first tap, type
+# into the focused EditText even if the second tap is covered. The editor
+# also keeps only the focused pinned field above Gboard.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -22,8 +27,10 @@ appId: com.aclearo.app
     id: ${FIELD_ID}
 - waitForAnimationToEnd:
     timeout: 3000
+# Optional: Gboard may now cover a tall multiline; native focus is enough.
 - tapOn:
     id: ${FIELD_ID}
+    optional: true
 - eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml

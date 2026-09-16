@@ -18,7 +18,11 @@ import { DiaryDishComponentsField } from '@/src/components/diary/wizard/DiaryDis
 import { DiaryLegacyEditor } from '@/src/components/diary/wizard/DiaryLegacyEditor';
 import { DiaryPefZonePreview } from '@/src/components/diary/wizard/DiaryPefZonePreview';
 import { DiaryStepField } from '@/src/components/diary/wizard/DiaryStepField';
-import { splitDiaryScreenForIme } from '@/src/components/diary/wizard/diary-editor-layout';
+import {
+  isCompactDiaryTextIme,
+  pinnedStepsVisibleForIme,
+  splitDiaryScreenForIme,
+} from '@/src/components/diary/wizard/diary-editor-layout';
 import { createStyles } from '@/src/components/diary/wizard/diary-wizard-styles';
 import { DishNameField } from '@/src/components/DishNameField';
 import { MedicineNameField } from '@/src/components/MedicineNameField';
@@ -126,7 +130,12 @@ export function DiaryWizard({
   });
 
   const { pinnedSteps, scrolledSteps } = splitDiaryScreenForIme(screens);
-  const pinnedAnswerKey = pinnedSteps
+  const visiblePinnedSteps = pinnedStepsVisibleForIme(
+    pinnedSteps,
+    editorScroll?.focusedStepId ?? null,
+  );
+  const compactPinnedTextIme = isCompactDiaryTextIme(visiblePinnedSteps);
+  const pinnedAnswerKey = visiblePinnedSteps
     .map((step) => `${step.id}:${answers[step.id] ?? ''}`)
     .join('|');
   const hasScrolledBody =
@@ -135,7 +144,7 @@ export function DiaryWizard({
     Boolean(scalePreview) ||
     Boolean(pefZonePreview);
 
-  const renderStep = (current: DiaryStep) => (
+  const renderStep = (current: DiaryStep, compactIme = false) => (
     <View key={current.id} style={styles.fieldBlock}>
       <Text style={styles.stepLabel}>{current.label}</Text>
       {current.hint ? <Text style={styles.stepHint}>{current.hint}</Text> : null}
@@ -196,6 +205,7 @@ export function DiaryWizard({
         <DiaryStepField
           step={current}
           value={answers[current.id] ?? ''}
+          compactIme={compactIme}
           onChange={(value) => setAnswer(current.id, value)}
         />
       )}
@@ -211,7 +221,14 @@ export function DiaryWizard({
   return (
     <View style={hasScrolledBody ? styles.wrap : undefined}>
       <DiaryEditorPinnedTop
-        deps={[section.title, overallStepNumber, overallStepsTotal, pinnedAnswerKey]}>
+        deps={[
+          section.title,
+          overallStepNumber,
+          overallStepsTotal,
+          pinnedAnswerKey,
+          editorScroll?.focusedStepId ?? '',
+          compactPinnedTextIme,
+        ]}>
         <Pressable
           testID="diary-wizard-step-label"
           collapsable={false}
@@ -233,13 +250,13 @@ export function DiaryWizard({
             style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
           />
         </View>
-        {pinnedSteps.map(renderStep)}
+        {visiblePinnedSteps.map((step) => renderStep(step, compactPinnedTextIme))}
       </DiaryEditorPinnedTop>
 
       {hasScrolledBody ? (
         <>
           {notice ? <View style={styles.notice}>{notice}</View> : null}
-          {scrolledSteps.map(renderStep)}
+          {scrolledSteps.map((step) => renderStep(step))}
         </>
       ) : null}
 
