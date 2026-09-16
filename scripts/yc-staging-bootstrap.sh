@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Bootstrap Aclearo staging on Yandex Cloud (VPC, private Postgres, API GW, GH runner).
+# Bootstrap Aclearo staging on Yandex Cloud (VPC, private Postgres, API GW, GH runner, GlitchTip VM).
+#
+# Cloud Agent / CI must not run `apply` against this live folder from empty state.
+# GlitchTip import: docs/staging-glitchtip.md
 #
 # Prerequisites:
 #   - yc CLI authenticated (service-account-key or yc init)
@@ -69,6 +72,9 @@ case "$ACTION" in
     terraform plan -input=false
     ;;
   apply)
+    echo "WARNING: apply from empty local state recreates VPC/MDB/API/GlitchTip."
+    echo "If folder ${YC_FOLDER_ID} already has staging, import first (docs/staging-glitchtip.md)."
+    echo "Cloud agents must not apply. Owner only."
     terraform apply -input=false -auto-approve
     echo ""
     echo "=== Outputs ==="
@@ -77,6 +83,8 @@ case "$ACTION" in
     echo "Sensitive outputs (store securely):"
     echo "  terraform output -raw database_url"
     echo "  terraform output -raw deploy_service_account_key > /tmp/yc-deploy-sa-key.json"
+    echo "  terraform output -raw glitchtip_public_ip"
+    echo "  terraform output -raw glitchtip_lockbox_secret_id"
     echo ""
     terraform output -raw next_steps
     echo ""

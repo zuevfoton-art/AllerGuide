@@ -12,7 +12,7 @@ Gate before closing **Phase 2** and starting **Phase 3** (store readiness).
 | G2 | Mobile unit tests ≥30 | ✅ `mobile-test-gate.mjs` | CI | ✅ 189 tests |
 | G3 | Maestro nightly green (offline + staging) | Manual — [Maestro Nightly](../.github/workflows/maestro-nightly.yml) | QA | ❌ **BLOCKED** — workflow is `disabled_manually` (no runs after 2026-08-11). Fix: [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) (Ubuntu + KVM). After merge: `gh workflow enable maestro-nightly.yml` + `workflow_dispatch` |
 | G4 | Staging API health `200` JSON (`ok: true`) | ✅ when `STAGING_API_URL` set | DevOps | ✅ `https://api.staging.aclearo.com` — checker reports HTTP status + body snippet (YC Gateway HTML/plain text is a fail, not a JSON parse crash) |
-| G5 | First-party crash-free **≥99%** over soak window (GlitchTip ingest + analytics `session_started` / `app_crashed`) | Manual — [soak log](./staging-soak-log.md) | Product | ❌ **BLOCKED** — GlitchTip VM/DSN not provisioned yet; formula is in the API dashboard (`crashFree`) |
+| G5 | First-party crash-free **≥99%** over soak window (GlitchTip ingest + analytics `session_started` / `app_crashed`) | Manual — [soak log](./staging-soak-log.md) | Product | ❌ **BLOCKED** — VM live at `https://errors.staging.aclearo.com`; owner DNS A + DSN + EAS preview still required ([staging-glitchtip.md](./staging-glitchtip.md)); formula is `crashFree` on the API dashboard |
 | G6 | Security audits **0 critical** open | ✅ parses audit docs when present | Security | ✅ |
 | G6b | Docs quote the live schema version + migration range | ✅ `rc-gate-doc-facts.mjs` | Eng | ✅ schema v10, migrations up to `0012` |
 | G7 | 2-week staging soak completed | Manual — soak log sign-off | Product | ❌ **BLOCKED** — see [staging-soak-log.md](./staging-soak-log.md) |
@@ -53,7 +53,7 @@ STAGING_API_URL=https://api.staging.aclearo.com node scripts/rc-gate-check.mjs
 
 ## Pre-soak: GlitchTip + first-party crash-free (G5)
 
-Crash **grouping** uses self-hosted GlitchTip at `https://errors.staging.aclearo.com` after owner apply ([staging-glitchtip.md](./staging-glitchtip.md)). Runtime reads `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) in [`error-reporting.ts`](../apps/mobile/src/services/error-reporting.ts). Hosts `sentry.io` / `*.sentry.io` are **refused**. Session tracking in the SDK is off — GlitchTip has no Release Health.
+Crash **grouping** uses self-hosted GlitchTip at `https://errors.staging.aclearo.com` after owner DNS A + TLS ([staging-glitchtip.md](./staging-glitchtip.md)). Runtime reads `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) in [`error-reporting.ts`](../apps/mobile/src/services/error-reporting.ts). Hosts `sentry.io` / `*.sentry.io` are **refused**. Session tracking in the SDK is off — GlitchTip has no Release Health.
 
 Crash-free for the gate:
 
@@ -67,7 +67,8 @@ Exposed as `dashboard.crashFree` on `GET /api/analytics/dashboard`. Native crash
 ```bash
 cd apps/mobile
 # DSN is public-by-design in the client bundle (Sensitive, not Secret)
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+# Profile staging reads EAS environment "preview"
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 pnpm --filter mobile build:staging:android
 ```
 

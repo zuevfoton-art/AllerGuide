@@ -81,6 +81,26 @@ describe('Maestro nightly CI invariants', () => {
       }
     }
 
+    const stagingGradle = read('.github/workflows/staging-apk-gradle.yml');
+    assert.match(
+      stagingGradle,
+      /scripts\/resolve-staging-error-dsn\.sh/,
+      'Gradle staging APK must bake EXPO_PUBLIC_ERROR_DSN the same way as EAS',
+    );
+    const easAndroid = read('.github/workflows/eas-staging-android.yml');
+    assert.match(
+      easAndroid,
+      /eas-android-quota\.sh" apply/,
+      'EAS staging Android must skip Expo Free-plan quota (Gradle is the APK fallback)',
+    );
+    assert.match(stagingGradle, /secrets\.EXPO_PUBLIC_ERROR_DSN/);
+    assert.match(stagingGradle, /secrets\.EXPO_PUBLIC_SENTRY_DSN/);
+    assert.doesNotMatch(
+      stagingGradle,
+      /sentry\.io\/[0-9]/,
+      'do not hard-code a sentry.io DSN in the Gradle workflow',
+    );
+
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
     assert.match(runner, /pm grant/);

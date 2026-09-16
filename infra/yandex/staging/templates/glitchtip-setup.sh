@@ -61,8 +61,13 @@ UNIT
 
 systemctl daemon-reload
 systemctl enable glitchtip-bootstrap.service
+systemctl enable glitchtip-bootstrap-admin.service
 if ! systemctl start glitchtip-bootstrap.service; then
   echo "glitchtip-setup: first bootstrap start failed; systemd Restart=on-failure will retry" >&2
 fi
+if ! systemctl start glitchtip-bootstrap-admin.service; then
+  echo "glitchtip-setup: admin/DSN bootstrap will retry (needs GLITCHTIP_ADMIN_PASSWORD + healthy compose)" >&2
+fi
 systemctl enable --now caddy.service
+systemctl enable --now glitchtip-acme-retry.timer
 echo "glitchtip-setup: done $(date -u +%FT%TZ)"

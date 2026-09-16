@@ -65,6 +65,8 @@
         "EXPO_PUBLIC_AIR_QUALITY": "google",
         "EXPO_PUBLIC_ANALYTICS_ENABLED": "true",
         "EXPO_PUBLIC_APP_ENV": "staging",
+        "EXPO_PUBLIC_ERROR_DSN": "https://a37ae124be5045d2bf545057c16890a2@errors.staging.aclearo.com/1",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://a37ae124be5045d2bf545057c16890a2@errors.staging.aclearo.com/1",
         "EXPO_PUBLIC_MAESTRO_TEST_RECOVERY_KEY": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "NODE_OPTIONS": "--max-old-space-size=8192"
       },
