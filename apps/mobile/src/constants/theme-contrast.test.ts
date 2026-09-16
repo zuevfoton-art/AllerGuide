@@ -7,12 +7,11 @@ vi.mock('react-native', () => ({
 }));
 
 /**
- * Documented exception: white on brand accent fails AA 4.5:1
- * (light ≈ 3.32, dark ≈ 2.44). See docs/ux-audit-2026-08.md §13.
- * Do not treat this pair as a gate until product picks a fill shade.
+ * Brand primary is recognition green with petrol ink (`#004F70` on `#7DCD72`).
+ * White-on-green fails AA; brandbook uses navy-on-green.
  */
-const BRAND_BUTTON_EXCEPTION = {
-  reason: 'ux-audit-2026-08 §13 — onAccent on accent is a brand exception',
+const BRAND_BUTTON_NOTE = {
+  reason: 'ux-audit-2026-08 §13 — superseded by petrol-on-green AA in brandbook 50/35/15',
 };
 
 const AA = 4.5;
@@ -41,11 +40,9 @@ describe('theme contrast', () => {
     }
   });
 
-  it('records light primary-button pair as a documented exception; dark sky accent meets AA', () => {
-    const light = contrastRatio(lightColors.onAccent, lightColors.accent);
-    const dark = contrastRatio(darkColors.onAccent, darkColors.accent);
-    expect(light).toBeLessThan(AA);
-    expect(dark).toBeGreaterThanOrEqual(AA);
-    expect(BRAND_BUTTON_EXCEPTION.reason).toContain('§13');
+  it('keeps petrol-on-green primary and dark onAccent/accent at AA', () => {
+    expectReadable(lightColors.onAccent, lightColors.accent, 'light onAccent/accent');
+    expectReadable(darkColors.onAccent, darkColors.accent, 'dark onAccent/accent');
+    expect(BRAND_BUTTON_NOTE.reason).toContain('§13');
   });
 });

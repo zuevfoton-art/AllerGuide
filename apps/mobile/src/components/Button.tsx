@@ -8,7 +8,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTextScaleMultiplier } from '@/src/store/appearance-store';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-/** `lg` is reserved for crisis actions (≥56 pt). */
+/** `lg` is reserved for crisis actions (≥60 pt). */
 type ButtonSize = 'lg' | 'md' | 'sm';
 
 type ButtonProps = PressableProps & {
@@ -22,7 +22,7 @@ type ButtonProps = PressableProps & {
 const TEXT_COLORS: Record<ButtonVariant, keyof AppTheme['colors']> = {
   primary: 'onAccent',
   secondary: 'text',
-  ghost: 'accent',
+  ghost: 'info',
   danger: 'onDanger',
 };
 
@@ -80,7 +80,7 @@ function createStyles({ colors, fonts }: AppTheme, scale: number) {
       justifyContent: 'center',
       gap: 6,
       borderRadius: radii.full,
-      minHeight: density.tapMinHeight,
+      minHeight: density.tapMinHeightPrimary,
       minWidth: 0,
       paddingHorizontal: 20,
       paddingVertical: 10,
@@ -102,6 +102,7 @@ function createStyles({ colors, fonts }: AppTheme, scale: number) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
+      minHeight: density.tapMinHeightSecondary,
     },
     ghost: { backgroundColor: 'transparent', minHeight: 36, paddingHorizontal: 0 },
     danger: { backgroundColor: colors.danger },

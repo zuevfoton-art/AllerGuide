@@ -8,18 +8,21 @@ export { getClaroGradient };
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * Nordic Air (warm sky) design tokens — UX/UI v2 production palette B.
- * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
+ * Brandbook 50 / 35 / 15 — UX/UI v2 Variant A layout + institutional palette.
+ * Recognition green `#7DCD72` (50%); composition petrol `#006F83` (35%);
+ * mix `#004F70` + white (15%); neutral canvas `#F4F8F5`.
+ * CTA ink is petrol on green (white-on-green fails AA).
+ * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS.
  * Policy: docs/brand-claro-green.md
  */
 export type ThemeColors = {
   bg: string;
   card: string;
-  /** Primary interactive — actions, links, active tabs (Claro teal) */
+  /** Primary interactive — actions, links, active tabs (recognition green) */
   accent: string;
   accentLight: string;
   accentMid: string;
-  /** Dark text / KPI — navy for contrast (not ambient fill) */
+  /** Dark text / KPI — petrol ink for contrast (not ambient fill) */
   head: string;
   text: string;
   textSecondary: string;
@@ -75,17 +78,17 @@ export type ThemeColors = {
 };
 
 export const lightColors: ThemeColors = {
-  bg: '#F5F3EE',
-  card: '#FFFCF8',
-  accent: '#4F8FB8',
-  accentLight: '#D9EAF5',
-  accentMid: '#A8C9DC',
-  head: '#1A3038',
-  text: '#1C2624',
-  textSecondary: '#5A6B72',
-  textMuted: '#5A6B72',
-  border: '#E2DDD4',
-  borderInput: '#C9C4BA',
+  bg: '#F4F8F5',
+  card: '#FFFFFF',
+  accent: '#7DCD72',
+  accentLight: '#E5F6E2',
+  accentMid: '#7DCD72',
+  head: '#004F70',
+  text: '#0E3A48',
+  textSecondary: '#3A6670',
+  textMuted: '#3A6670',
+  border: '#C9DDD6',
+  borderInput: '#A8C4BC',
   success: '#15803D',
   successLight: '#F0FDF4',
   successBorder: '#BBF7D0',
@@ -96,49 +99,49 @@ export const lightColors: ThemeColors = {
   warningLight: '#FFFBEB',
   warningBorder: '#FDE68A',
   warningText: '#92400E',
-  forest: '#1A3038',
+  forest: '#004F70',
   green: '#15803D',
-  mint: '#EDE9E2',
-  foam: '#F3EDE4',
-  cream: '#F5F3EE',
-  onAccent: '#FFFFFF',
+  mint: '#D7E8E2',
+  foam: '#E8F3F0',
+  cream: '#F4F8F5',
+  onAccent: '#004F70',
   onDanger: '#FFFFFF',
   purple: '#6366F1',
   pink: '#E11D48',
-  tipBg: '#D9EAF5',
-  tipBorder: '#A8C9DC',
-  tipText: '#3A6F92',
-  iconOnCard: '#FFFFFF',
+  tipBg: '#E5F6E2',
+  tipBorder: '#7DCD72',
+  tipText: '#004F70',
+  iconOnCard: '#004F70',
   scannerSafeBorder: '#BBF7D0',
   scannerDangerBorder: '#FECACA',
   scannerSafeIconBg: '#F0FDF4',
   scannerDangerIconBg: '#FEF2F2',
   scannerSafeText: '#15803D',
-  overlay: '#1C2624',
-  teal: '#4F8FB8',
-  tealLight: '#D9EAF5',
-  surfaceMuted: '#F3EDE4',
-  info: '#4F8FB8',
-  infoLight: '#D9EAF5',
-  focusRing: 'rgba(79,143,184,0.35)',
-  skeletonBase: '#E8E2D8',
-  skeletonSheen: '#F7F3EC',
-  mapLand: '#E8E2D8',
-  mapRoad: '#D0C9BE',
+  overlay: '#0E3A48',
+  teal: '#7DCD72',
+  tealLight: '#E5F6E2',
+  surfaceMuted: '#E8F3F0',
+  info: '#006F83',
+  infoLight: '#D5EEF2',
+  focusRing: 'rgba(125,205,114,0.35)',
+  skeletonBase: '#DCEBE4',
+  skeletonSheen: '#F4F8F5',
+  mapLand: '#DCEBE4',
+  mapRoad: '#C9DDD6',
 };
 
 export const darkColors: ThemeColors = {
-  bg: '#121614',
-  card: '#1A2220',
-  accent: '#7EB7D6',
-  accentLight: '#243846',
-  accentMid: '#4F8FB8',
-  head: '#E8F0ED',
-  text: '#E8F0ED',
-  textSecondary: '#9BB0A8',
-  textMuted: '#9BB0A8',
-  border: '#2A3531',
-  borderInput: '#3A4842',
+  bg: '#0A2F3C',
+  card: '#0E3A48',
+  accent: '#7DCD72',
+  accentLight: '#143844',
+  accentMid: '#4FA86A',
+  head: '#E8F7F4',
+  text: '#E8F7F4',
+  textSecondary: '#9EC4CC',
+  textMuted: '#9EC4CC',
+  border: '#1A4A56',
+  borderInput: '#2A5A66',
   success: '#4ADE80',
   successLight: '#14532D',
   successBorder: '#166534',
@@ -149,35 +152,35 @@ export const darkColors: ThemeColors = {
   warningLight: '#451A03',
   warningBorder: '#92400E',
   warningText: '#FDE68A',
-  forest: '#E8F0ED',
+  forest: '#E8F7F4',
   green: '#4ADE80',
-  mint: '#1A2420',
-  foam: '#1A2420',
-  cream: '#121614',
-  onAccent: '#0A1214',
+  mint: '#143844',
+  foam: '#143844',
+  cream: '#0A2F3C',
+  onAccent: '#0A2F3C',
   onDanger: '#FFFFFF',
   purple: '#818CF8',
   pink: '#FB7185',
-  tipBg: '#243846',
-  tipBorder: '#4F8FB8',
-  tipText: '#A8C9DC',
-  iconOnCard: '#0A1214',
+  tipBg: '#143844',
+  tipBorder: '#7DCD72',
+  tipText: '#C5E8C0',
+  iconOnCard: '#0A2F3C',
   scannerSafeBorder: '#166534',
   scannerDangerBorder: '#991B1B',
   scannerSafeIconBg: '#14532D',
   scannerDangerIconBg: '#450A0A',
   scannerSafeText: '#4ADE80',
   overlay: '#000000',
-  teal: '#7EB7D6',
-  tealLight: '#243846',
-  surfaceMuted: '#1A2420',
-  info: '#7EB7D6',
-  infoLight: '#243846',
-  focusRing: 'rgba(126,183,214,0.45)',
-  skeletonBase: '#1A2420',
-  skeletonSheen: '#24302B',
-  mapLand: '#1A2420',
-  mapRoad: '#2A3531',
+  teal: '#7DCD72',
+  tealLight: '#143844',
+  surfaceMuted: '#143844',
+  info: '#7EBFD0',
+  infoLight: '#143844',
+  focusRing: 'rgba(125,205,114,0.45)',
+  skeletonBase: '#143844',
+  skeletonSheen: '#1A4A56',
+  mapLand: '#143844',
+  mapRoad: '#1A4A56',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {
@@ -200,8 +203,8 @@ function makeShadow(
   return {
     shadowColor: hexColor,
     shadowOffset: { width: 0, height: y },
-    shadowOpacity: opacity,
     shadowRadius: blur,
+    shadowOpacity: opacity,
     elevation,
   };
 }

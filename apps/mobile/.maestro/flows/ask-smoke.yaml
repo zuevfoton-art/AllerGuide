@@ -1,13 +1,13 @@
-# Ask sheet from Today — open, suggest chip, composer visible (offline-capable)
+# Ask sheet from global FAB — open, suggest chip, composer visible (offline-capable)
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
 - extendedWaitUntil:
     visible:
-      id: today-ask
+      id: ask-fab
     timeout: 15000
 - tapOn:
-    id: today-ask
+    id: ask-fab
 - extendedWaitUntil:
     visible:
       id: ask-chat-sheet
@@ -33,4 +33,4 @@ appId: com.aclearo.app
       id: ask-chat-sheet
     timeout: 10000
 - assertVisible:
-    id: today-ask
+    id: ask-fab

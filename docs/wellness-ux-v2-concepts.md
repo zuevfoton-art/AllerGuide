@@ -34,7 +34,7 @@
 |----------|------------------|---------|
 | Чек-ин «как сегодня» | Часто через карточку-напоминание или полный дневник | Постоянный блок 0–3 на «Сегодня», 1 тап |
 | Рекомендации | До 5 равных строк / CTA | Critical → important → одна recommended; остальное под «Ещё N» |
-| Ask / чат | Отдельный маршрут `/ask` | Полноразмерный bottom sheet с контекстом рекомендации; `/ask` — deep-link fallback |
+| Ask / чат | Отдельный маршрут `/ask` + FAB | Global FAB → full-height sheet; `/ask` — deep-link fallback |
 | Голос в Ask | Отдельный путь / неясный send | Voice → расшифровка → **редактируемый draft** → send отдельным тапом |
 | Скан | Возможны шаги до камеры | Camera-first |
 | Карта | Возможны шаги до холста | Canvas-first + чипы/sheet фильтров |
@@ -49,8 +49,8 @@
 ```text
 Постоянная оболочка
 ├── Chrome профиля — chip: иконка + имя активного профиля (везде, кроме /profile)
-├── Сегодня — ответ дня + чек-ин 0–3 + рекомендации по criticality + «Спросить»
-│   └── AskChatSheet — быстрые вопросы · история · voice-to-draft · keyboard-safe composer
+├── Сегодня — ответ дня + чек-ин 0–3 + рекомендации по criticality
+│   └── Ask — global FAB → AskChatSheet (voice-to-draft · keyboard-safe composer)
 ├── Журнал — история + sheet выбора типа полной записи
 ├── Скан — камера сразу → вердикт → sheet подробностей
 ├── Карта — холст сразу → чипы + sheet фильтров
@@ -66,7 +66,7 @@ Chip профиля → switcher / хаб: профиль / настройки /
 1. Daily reading (одно предложение + мягкие KPI).
 2. Чек-ин 0–3 (`SelectChip`).
 3. Секция рекомендаций с явной критичностью.
-4. Быстрые действия: минимум «Спросить» (`ActionChip` / ghost); без второго dashboard.
+4. Быстрые действия: без отдельного chip «Спросить» — Ask открывается **global FAB** поверх оболочки.
 
 ### 2.2. Уровни критичности рекомендаций
 
@@ -87,14 +87,15 @@ Chip профиля → switcher / хаб: профиль / настройки /
 
 **Primary CTA:** даже при нескольких видимых строках — только **одна** filled-primary у самого приоритетного действия; остальные — compact action rows / ghost. Уровень — текст + иконка, не только цвет. `danger` — только для реально срочных safety-сценариев.
 
-### 2.3. Ask как contextual sheet
+### 2.3. Ask как global FAB + contextual sheet
 
-- 1 тап «Спросить» открывает полноразмерный chat bottom sheet поверх текущего экрана (контекст рекомендации + позиция пользователя сохраняются).
+- 1 тап FAB открывает полноразмерный chat bottom sheet поверх текущего экрана.
+- FAB на Today / Journal / Scan / Map и stack-экранах вроде профиля; **нет** на SOS, auth, onboarding, `/ask`.
 - В sheet: 3–4 контекстных `ActionChip`, история, collapsible disclaimer, keyboard-safe composer.
 - Голос: OS speech → YC STT fallback → draft; send всегда отдельным тапом; аудио не хранить.
 - Дистресс-фразы → handoff в полноэкранный SOS без вызова модели.
 - Online AI за `EXPO_PUBLIC_AI_CHAT`; offline — локальные быстрые ответы / экспертные карточки.
-- Маршрут `/ask` сохраняется как deep-link / full-screen fallback.
+- Маршрут `/ask` сохраняется как deep-link / full-screen fallback (без tab-bar bottom padding).
 
 ### 2.4. Профиль в chrome: значок + имя
 
@@ -162,21 +163,24 @@ Chip профиля → switcher / хаб: профиль / настройки /
 
 | ID | Название | Фон / surface / action / soft / ink | Характер |
 |----|----------|-------------------------------------|----------|
-| **A** | Forest & Linen / Claro Refuge (**рекомендованный**) | `#F6F2EA` / `#FFFCF6` / `#176C62` / `#DCEFEA` / `#17201E` | Тёплое прибежище, ближе к Claro |
-| **B** | Nordic Air (тёплый небо) — **выбран** | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Production: тёплый воздух + голубые градации; не medical calm |
-| **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Бежевый · мягкий серый · пыльный синий |
+| **A** | Forest & Linen / Brandbook 50/35/15 (**production**) | `#F4F8F5` / `#FFFFFF` / `#7DCD72` (green CTA, petrol ink) / petrol `#006F83` / mix `#004F70` / ink `#0E3A48` | Institutional green+petrol; `BrandField` / extended FAB |
+| **B** | Nordic Air (тёплый небо) — **архив** | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Снят с production; остаётся в HTML для сравнения |
+| **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Concept only |
 
-**B wash:** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`. Dark B: тёплый уголь-фон, action `#7EB7D6`, soft `#243846`.
+**A wash:** green `#E5F6E2` → mist `#E8F3F0` → canvas `#F4F8F5`. Dark A: `#0A2F3C` / `#0E3A48` / action `#7DCD72` / soft `#143844`.
+
+**B wash (архив):** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 
 **C wash:** беж → серый → пыльный синий ambient. Dark C: `#161512` / `#1E1D1A` / action `#9AADB8` / soft `#2C333A`.
 
 Plum & Sage снят: не подходит как production-направление.
 
-Во всех вариантах `danger` / `caution` / `success` — отдельная семантика с иконкой и текстом. Это стартовые направления: финальные пары проходят contrast-test после выбора.
+Во всех вариантах `danger` / `caution` / `success` — отдельная семантика с иконкой и текстом. Финальные пары — contrast-test.
 
-**Правило внедрения:** выбрана production-схема **B — Nordic Air (тёплый небо)**. A и C остаются в HTML для сравнения; в код уходит только B.
+**Правило внедрения:** production-схема **A — Forest Refuge · Brandbook 50/35/15** (layout A + recognition green, petrol composition, white canvas). B и C остаются в HTML для сравнения.
 
 ### 4.1. Что покрывает HTML-прототип
+
 
 - Переключатель A / B / C, light / dark, viewport 360×667 и 390×844.
 - Chrome: profile chip «иконка · имя · ▾» на Today / Scan / Map / Journal / Ask overlay.
@@ -189,19 +193,20 @@ Plum & Sage снят: не подходит как production-направлен
 
 ## 5. Связь с реализацией (после выбора)
 
-Чеклист следующего этапа (после выбора B):
+Чеклист:
 
-1. [x] Канон в north-star / FR / brand doc → B Nordic Air.
-2. [x] `criticality` + resolver видимой/свёрнутой групп в `packages/core` `home-insights.ts`.
+1. [x] Канон в north-star / FR / brand doc → **A Brandbook 50/35/15** (green / petrol / white).
+2. [x] `criticality` + resolver в `packages/core` `home-insights.ts`.
 3. [x] Semantic tokens → `theme.ts` / `layout.ts` / `claro-gradient.ts`; primitives `SelectChip`, `ActionChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
-4. [x] Мигрировать все `ProfileHeaderButton` на chip + имя (кроме `/profile` и setup).
-5. [x] Voice-to-draft на существующих `VoiceNoteButton` + `voice-dictation-service`.
+4. [x] `ProfileHeaderButton` chip + имя (кроме `/profile` и setup).
+5. [x] Voice-to-draft на `VoiceNoteButton` + `voice-dictation-service`.
 6. [x] Analytics без PII (`ai_chat_voice_*`); Maestro `ask-smoke.yaml`; `pnpm check:analytics-taxonomy`.
+7. [x] Extended Ask FAB на tab roots; icon-only на allow-list стеке; `/ask` без tab-bar padding; `BrandField` / `BrandPair`.
 
 ---
 
-## 6. Acceptance этого этапа (§§1–4)
+## 6. Acceptance
 
-- [x] Зафиксированы tap-depth, IA, criticality, семантика контролов, канон profile chip.
-- [x] HTML сравнивает A / тёплый B / Dusty Beige Sky C на ключевых экранах и состояниях.
-- [x] Пользователь выбрал production-палитру **B — Nordic Air (тёплый небо)**.
+- [x] Tap-depth, IA, criticality, семантика контролов, profile chip.
+- [x] HTML сравнивает A / B / C.
+- [x] Production-палитра **A — Forest Refuge · Brandbook 50/35/15**.

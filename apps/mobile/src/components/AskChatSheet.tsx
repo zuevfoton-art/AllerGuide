@@ -11,7 +11,7 @@ export type AskChatSheetProps = {
 };
 
 /**
- * Full-height Ask bottom sheet for Today (and other surfaces).
+ * Full-height Ask bottom sheet from the global FAB (and other overlays).
  * Keeps `/ask` as deep-link / fullscreen fallback.
  */
 export function AskChatSheet({ visible, onClose, context, quickQuestions }: AskChatSheetProps) {
@@ -32,7 +32,7 @@ export function AskChatSheet({ visible, onClose, context, quickQuestions }: AskC
       testID="ask-chat-sheet"
       accessibilityLabel={t('ask.title')}>
       <AskChatPanel
-        openSource="today"
+        openSource="sheet"
         context={context}
         quickQuestions={questions}
         onHandoffSos={onClose}

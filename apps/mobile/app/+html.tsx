@@ -45,9 +45,9 @@ select {
 }
 
 :focus-visible {
-  outline: 2px solid #2A9D8F;
+  outline: 2px solid #7DCD72;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(42,157,143,0.35);
+  box-shadow: 0 0 0 4px rgba(125,205,114,0.35);
   border-radius: 6px;
 }
 
@@ -65,8 +65,8 @@ a[href="#content"] {
   padding: 10px 14px;
   border-radius: 999px;
   background: #FFFFFF;
-  border: 1px solid #2A9D8F;
-  color: #2A9D8F;
+  border: 1px solid #006F83;
+  color: #004F70;
   font: 600 14px/1.2 Inter, system-ui, sans-serif;
   text-decoration: none;
 }

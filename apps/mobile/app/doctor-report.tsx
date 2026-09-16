@@ -150,7 +150,7 @@ export default function DoctorReportScreen() {
         onBack={() => router.back()}
         title={t('doctorReport.title')}
         subtitle={t('doctorReport.subtitle')}
-        right={<ProfileHeaderButton />}
+        right={<ProfileHeaderButton variant="chip" chipTitle={activeProfile?.name} />}
       />
 
       <Text style={ui.sectionLabel}>{t('doctorReport.period')}</Text>

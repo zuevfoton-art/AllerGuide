@@ -3,7 +3,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   View,
@@ -35,6 +34,11 @@ type ScreenProps = {
   showBrandHeader?: boolean;
   brandHeaderLeft?: ReactNode;
   brandHeaderRight?: ReactNode;
+  /**
+   * Bottom clearance: `tabs` clears the absolute tab bar (default);
+   * `safe` uses only the home-indicator inset — for stack routes like `/ask`.
+   */
+  bottomClearance?: 'tabs' | 'safe';
 };
 
 export function Screen({
@@ -47,15 +51,20 @@ export function Screen({
   showBrandHeader,
   brandHeaderLeft,
   brandHeaderRight,
+  bottomClearance = 'tabs',
 }: PropsWithChildren<ScreenProps>) {
   const { colors } = useTheme();
   const layout = useResponsiveLayout();
   const insets = useSafeAreaInsets();
   const keyboardInset = useKeyboardBottomInset();
+  const layoutBottomPadding =
+    bottomClearance === 'safe'
+      ? Math.max(insets.bottom, 16)
+      : layout.bottomPadding;
   const keyboardPad = resolveScreenKeyboardPadding({
     platform: Platform.OS,
     keyboardInset,
-    layoutBottomPadding: layout.bottomPadding,
+    layoutBottomPadding,
     safeBottom: insets.bottom,
   });
   const scrollRef = useRef<ScrollView>(null);
@@ -138,16 +147,6 @@ export function Screen({
         contentFill: {
           flex: 1,
         },
-        safe: {
-          flex: 1,
-          backgroundColor: colors.bg,
-          paddingHorizontal: layout.horizontalPadding,
-          paddingTop: layout.topPadding,
-          paddingBottom: keyboardPad.scrollPaddingBottom,
-        },
-        nonScrollBrand: {
-          paddingBottom: 8,
-        },
       }),
     [
       colors.bg,
@@ -218,10 +217,19 @@ export function Screen({
     <KeyboardAvoidingView style={styles.kav} behavior={keyboardBehavior}>
       <View testID="app-screen" style={styles.root}>
         <SkipLink />
-        <SafeAreaView style={styles.safe}>
-          {brandHeader ? <View style={styles.nonScrollBrand}>{brandHeader}</View> : null}
-          <View style={[styles.content, styles.contentFill]}>{children}</View>
-        </SafeAreaView>
+        {pinnedContent ? <View style={styles.pinned}>{pinnedContent}</View> : null}
+        <View
+          nativeID="content"
+          style={[
+            styles.content,
+            styles.contentFill,
+            !hasPinned ? { paddingTop: layout.topPadding } : null,
+            { paddingBottom: keyboardPad.scrollPaddingBottom },
+          ]}
+          {...(Platform.OS === 'web' ? ({ tabIndex: -1 } as object) : null)}>
+          {children}
+        </View>
+        {pinnedBottom ? <View style={styles.pinnedBottom}>{pinnedBottom}</View> : null}
         <StatusBannerHost />
       </View>
     </KeyboardAvoidingView>

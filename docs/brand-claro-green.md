@@ -1,34 +1,38 @@
-# Nordic Air — политика цвета (UX/UI v2)
+# Brandbook 50 / 35 / 15 — политика цвета (UX/UI v2)
 
-**Статус:** канон production · supersedes Claro Green teal as product accent  
-**Выбор:** UX/UI v2 вариант **B — Nordic Air (тёплый небо)** — [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md)  
+**Статус:** канон production · supersedes Earth Wellness olive / Nordic Air  
+**Выбор:** UX/UI v2 **вариант A (Forest & Linen layout)** + палитра **брендбук 50/35/15** — [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md)  
 **Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts) · [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts)
 
-> Исторический документ Claro teal (`#2A9D8F`) остаётся в git history и в сравнениях A/C макета. Production accent — тёплый голубой Nordic Air. Dual Calm medical blues по-прежнему запрещены.
+> Nordic Air (`#4F8FB8`), Claro teal (`#2A9D8F`) и Earth Wellness olive остаются в git history. Production — **recognition green 50%** + **petrol 35%** + **микс 15%** на нейтральном белом холсте. Dual Calm medical blues по-прежнему запрещены.
 
 ---
 
 ## Решение
 
-Уходим от **Claro teal** и от **medical calm / Dual Calm slate-blue**. Product + ambient + info — **одна семья тёплого неба (sky blue)** на тёплом льняном фоне. Имена `calm.*` в коде сняты; в UI — `accent*` / `tip*` / `GlassCard variant="soft"`.
+Вариант **A** задаёт характер экрана. Хроматический бюджет с брендбука:
+
+| Доля | Swatch | Hex | Роль в UI |
+|------|--------|-----|-----------|
+| **50%** | Recognition green | `#7DCD72` | CTA / FAB / BrandMark / `BrandField` recognition / active tab |
+| **35%** | Composition petrol | `#006F83` | `info`, заголовки-компаньоны, `BrandField` composition |
+| **15%** | Mix | `#004F70` + `#FFFFFF` + green | Ink на green, `BrandPair`, иконки |
+| Neutral | Canvas | `#F4F8F5` / `#FFFFFF` | `bg` / `card` |
+
+CTA: **petrol ink на green** (`onAccent` `#004F70`). Белый на `#7DCD72` ≈ 1.8:1 — нельзя для обычного текста.
 
 ---
 
 ## Запрещённые fills (inventory)
 
-Не использовать в `apps/mobile` UI fills, mockups и brand kit (кроме цитат в тестах-banlist):
+Не использовать в `apps/mobile` UI fills (кроме banlist-тестов):
 
-| Hex | Бывшая роль Dual Calm |
-|-----|------------------------|
-| `#2563EB` | calmMid / info |
-| `#1D4ED8` | dark calmMid |
-| `#3B82F6` | calmLight / dark info |
-| `#EFF4FF` | calmWash / infoLight |
-| `#DBEAFE` | calmMist |
-| `#0C4A6E` | dark infoLight |
-| `#BFDBFE` / `#93C5FD` / `#1E40AF` | legacy tip blues |
+| Hex | Бывшая роль |
+|-----|-------------|
+| `#2563EB` / `#1D4ED8` / `#3B82F6` / `#EFF4FF` / `#DBEAFE` / `#0C4A6E` | Dual Calm medical blues |
+| `#4F8FB8` / `#D9EAF5` / `#A8C9DC` / `#3A6F92` / `#7EB7D6` | Retired Nordic Air sky |
 
-Проверка: `rg '#2563EB|#1D4ED8|#3B82F6|#EFF4FF|#DBEAFE|#0C4A6E' apps/mobile docs --glob '!**/claro-gradient.test.ts'` → пусто.
+Institutional Petrol `#006F83` / `#004F70` **разрешён** — это не Dual Calm.
 
 ---
 
@@ -36,43 +40,45 @@
 
 | Исключение | Почему |
 |------------|--------|
-| `danger` / SOS `#B91C1C` | Экстренный акцент (не sky) |
-| `success` / `warning` traffic-light | Клинические зоны, не бренд-ambient |
-| `head` тёплый уголь / deep sky | Типографика / KPI, не fill atmosphere |
-| Внешние тайлы карт (Google / Yandex) | Не бренд-токены |
+| `danger` / SOS `#B91C1C` | Экстренный акцент |
+| `success` / `warning` traffic-light | Клинические зоны |
+| `head` petrol ink | Типографика / KPI |
+| Внешние тайлы карт | Не бренд-токены |
 
 ---
 
-## Канонические токены (Nordic Air B)
+## Канонические токены (50 / 35 / 15)
 
 | Token | Light | Dark | Роль |
 |-------|-------|------|------|
-| `bg` / `cream` | `#F5F3EE` | `#121614` | Экран |
-| `card` | `#FFFCF8` | `#1A2220` | Surface |
-| `accent` | `#4F8FB8` | `#7EB7D6` | CTA, табы, ссылки, info icon |
-| `accentLight` | `#D9EAF5` | `#243846` | Soft surfaces, tip bg |
-| `accentMid` | `#A8C9DC` | `#4F8FB8` | Soft borders |
-| `tipText` | `#3A6F92` | `#A8C9DC` | Tip copy / gradient deep (light) |
-| `ink` / `text` | `#1C2624` | `#E8F0ED` | Основной текст |
-| `info` / `infoLight` | = accent / accentLight | | Семантика «подсказка» |
-| `tipBg` / `tipBorder` | = accentLight / accentMid | | Tip cards |
+| `bg` / `cream` | `#F4F8F5` | `#0A2F3C` | Экран |
+| `card` | `#FFFFFF` | `#0E3A48` | Surface |
+| `accent` | `#7DCD72` | `#7DCD72` | CTA, табы, FAB (green) |
+| `onAccent` | `#004F70` | `#0A2F3C` | Ink на green |
+| `accentLight` | `#E5F6E2` | `#143844` | Soft green wash |
+| `accentMid` | `#7DCD72` | `#4FA86A` | Borders / selected |
+| `info` / `infoLight` | `#006F83` / `#D5EEF2` | `#7EBFD0` / `#143844` | Petrol composition |
+| `tipBg` / `tipBorder` / `tipText` | green wash / green / petrol | petrol family | Tip cards |
+| `surfaceMuted` / `foam` | `#E8F3F0` | `#143844` | Cool mist |
+| `ink` / `text` | `#0E3A48` | `#E8F7F4` | Основной текст |
 
-Градиент `getClaroGradient(isDark)` (имя файла историческое):
+Градиент `getClaroGradient(isDark)`:
 
-- Light: `#3A6F92` → `#4F8FB8` → `#D9EAF5`
-- Dark: `#0E1618` → `#243846` → `#4F8FB8`
-
-Wash reading: `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
+- Light: `#004F70` → `#006F83` → `#7DCD72`
+- Dark: `#0A2F3C` → `#006F83` → `#7DCD72`
 
 ---
 
 ## Правила (non-negotiable)
 
-1. Нет второго «медицинского» hue рядом с accent; нет возврата Dual Calm blues.
-2. Soft wellness surfaces — `accentLight` / `accentMid` или `GlassCard variant="soft"`.
-3. SOS — только `danger`.
-4. Запрещённые написания бренда — [`brand-rollout.md`](./brand-rollout.md).
-5. Profile chrome вне `/profile` — chip иконка + имя ([`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) §2.4).
+1. Нет medical Dual Calm рядом с petrol; нет возврата Nordic Air sky.
+2. ~50% brand-green: онбординг-волны / `BrandField` recognition / FAB / primary fill / BrandMark.
+3. ~35% petrol: `head` / `info` / текст на green / composition field.
+4. ~15% микс: `BrandPair`, чипы, иконки.
+5. SOS — только `danger`.
+6. Ask — **extended FAB** на tab roots; icon-only на allow-list стеке; скрыт на SOS / auth / onboarding / `/ask` / setup / lock / legal.
+7. Profile chrome вне `/profile` — chip иконка + имя.
+8. ACTION `radii.full`; STATE `sm`/`md`; institutional fields `radii.field`.
 
 ---
 
@@ -81,12 +87,14 @@ Wash reading: `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 | Элемент | Токен |
 |---------|--------|
 | Screen background | `bg` |
-| Soft card / wellness | `GlassCard variant="soft"` → accentLight/Mid |
-| Tab pill | `accentLight` / `accentMid` |
-| Onboarding waves | `accentLight` + `accent` |
-| H1, KPI | `head` |
-| Primary CTA / links | `accent` |
-| Profile switcher chip | `accentLight` / `accentMid` + имя |
+| Soft card / wellness | `GlassCard variant="soft"` → green wash |
+| Brand hero | `BrandField` recognition / composition |
+| 15% mark | `BrandPair` |
+| Tab pill (floating) | `card` + `border`; active slot `accentLight` |
+| Onboarding waves | accentLight + accent + info |
+| H1, KPI | `head` / display type |
+| Primary CTA / FAB | `accent` (green) + `onAccent` (petrol) |
+| Info / cool hint | `info` / `infoLight` |
 
 ---
 
@@ -94,7 +102,8 @@ Wash reading: `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 
 | # | Содержание | Статус |
 |---|------------|--------|
-| **v2-B** | Выбор Nordic Air + токены `theme.ts` / gradient | ✅ |
-| Далее | SelectChip / BottomSheet / AskChatSheet / Today criticality UI | pending |
+| **v2-B** | Nordic Air (superseded) | ↩️ |
+| **v2-A-earth olive** | Olive primary | ↩️ |
+| **v2-A brandbook 50/35/15** | Green + petrol + white | ✅ |
 
-Спека сравнения A/B/C: [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html).
+Спека: [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · HTML [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html).

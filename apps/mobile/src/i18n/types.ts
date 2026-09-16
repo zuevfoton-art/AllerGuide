@@ -249,6 +249,7 @@ export type LocaleMessages = {
       pollen: string;
     };
     answerFallback: string;
+    fabLabel: string;
     quickWhy: string;
     quickToday: string;
   };

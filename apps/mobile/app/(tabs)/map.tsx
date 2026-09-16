@@ -386,7 +386,7 @@ export default function MapScreen() {
   const showPlacesPanel = showPlacesLayer;
 
   return (
-    <Screen brandHeaderRight={<ProfileHeaderButton />}>
+    <Screen brandHeaderRight={<ProfileHeaderButton variant="chip" chipTitle={profile?.name} />}>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={ui.docTitle}>{t('map.titleShort')}</Text>
