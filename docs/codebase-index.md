@@ -168,12 +168,12 @@ src/modules/marketplace/
 | `asthma-action-plan.tsx` / `insect-action-plan.tsx` | Планы действий |
 | `food-drug-registry.tsx` | Пищево-лекарственный реестр |
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
-| `ask.tsx` | AI-чат «Спросить» (`EXPO_PUBLIC_AI_CHAT`, default off; SOS-handoff) |
+| `ask.tsx` | AI-чат deep-link (`EXPO_PUBLIC_AI_CHAT`, default off; SOS-handoff); primary entry — `AskFabHost` |
 | `legal/privacy.tsx` / `legal/terms.tsx` | Legal |
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
 | `+html.tsx` | Web-обёртка Expo Router (не экран) |
 
-Модальных маршрутов нет: sheet-модалки (`DiaryEditorModal`, `ListPickerSheet`, `AskChatSheet` / `BottomSheet`, камера сканера) живут внутри экранов.
+Модальных маршрутов нет: sheet-модалки (`DiaryEditorModal`, `ListPickerSheet`, `AskChatSheet` / `BottomSheet` через global `AskFabHost`, камера сканера) живут поверх экранов.
 
 ### Services (группы)
 
@@ -211,7 +211,7 @@ src/modules/marketplace/
 
 ### Components (по смыслу)
 
-- **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `ActionChip`, `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
+- **Shell:** `Screen`, `ScreenHeader`, `GlassCard`, `CardTitle`, `Button`, `ActionChip`, `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskFabHost` / `AskChatPanel` / `AskChatSheet`, `Disclaimer`, `Skeleton` (`SkeletonLine` / `SkeletonCard` / `SkeletonBlock`), `EmptyState`, `ErrorBoundary`, `AppLockGate`, `FocusRing`/`SkipLink`, `ListPickerSheet`, …
 - **Profile/clinical editors:** `AllergenPicker`, `ConditionPicker`, `*Card`, `EmergencyContactsEditor`, …
 - **Diary:** `DiaryWizard` + `use-diary-wizard-controller` + `diary/wizard/*`, `DiaryEditorModal` (pinned compact choice chips + `diary-editor-footer`, bounded scroll for text fields, scroll-to-focus, no `liftStyle`), `VoiceNoteButton` (только `symptoms`/`onset`), `MedicinePhotoStep`, `MedicineNameField`, `NutritionCaptureStep`, `DiaryBarcodeScanner`, `BarcodeScanCamera`, `diary/*`
 - **Therapy:** `components/therapy/*` (`CourseEditorLayout`, `CourseVerifyStep`, `CourseReviewSummary`, `PrescriptionImportPanel` / `PrescriptionImportModals`)
