@@ -297,7 +297,7 @@ flowchart TB
 | D-CRT-02 | wizard Симптомы | заполнить symptoms, **не** severity → завершить | ошибка «Укажите выраженность симптомов (0–3).»; INSERT нет |
 | D-CRT-03 | chip Лекарство | `medicine="цетиризин"`, `dosage="10 мг"` → Save | INSERT `type=Лекарство` |
 | D-CRT-04 | Новая запись → Питание | «Ввести вручную» → `food="борщ"`; чеклист состава → уровень реакции → Save | INSERT `Питание`; answers содержат `food` + `foodComponents`; шаг `foodSource` скрыт |
-| D-CRT-05 | chip Кожа | area/appearance/itching + N∈[1..5] фото → Save | INSERT + `diary_attachments`; N&gt;5 отклонено хелпером |
+| D-CRT-05 | chip Кожа | area/appearance + фото на том же экране + itching, N∈[1..5] → Save | INSERT + `diary_attachments`; N&gt;5 отклонено хелпером |
 | D-CRT-06 | full wizard | Save без answers ни в одной секции | сообщение `diaryWizard.fillOneSection`; INSERT нет |
 | D-EDT-01 | structured запись | tap row → изменить поле → Save | `updateDiaryEntry`; список показывает новое summary |
 | D-EDT-02 | legacy plain `details` | tap row | `DiaryLegacyEditor`; save обновляет текст того же type |

@@ -373,7 +373,7 @@ const es: LocaleMessages = {
     enterEntryText: 'Introduce el texto de la entrada.',
     scalePreview: 'Puntuación preliminar: {{score}} — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % del mejor PEF',
-    photoHint: 'Añade hasta 5 fotos de erupción, hinchazón u otros signos. Las fotos quedan en el dispositivo y aparecen en el PDF.',
+    photoHint: 'Fotografía aquí la erupción o hinchazón — hasta 5 fotos. Quedan en el dispositivo y aparecen en el PDF del médico.',
     photoCamera: 'Cámara',
     photoLibrary: 'Galería',
     photoRemove: 'Eliminar foto',

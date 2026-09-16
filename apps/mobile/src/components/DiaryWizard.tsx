@@ -137,7 +137,9 @@ export function DiaryWizard({
 
   const renderStep = (current: DiaryStep) => (
     <View key={current.id} style={styles.fieldBlock}>
-      <Text style={styles.stepLabel}>{current.label}</Text>
+      {current.field === 'photo' ? null : (
+        <Text style={styles.stepLabel}>{current.label}</Text>
+      )}
       {current.hint ? <Text style={styles.stepHint}>{current.hint}</Text> : null}
 
       {current.field === 'checklist' && current.id === 'foodComponents' ? (

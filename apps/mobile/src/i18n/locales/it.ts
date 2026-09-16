@@ -373,7 +373,7 @@ const it: LocaleMessages = {
     enterEntryText: 'Inserisci il testo della voce.',
     scalePreview: 'Punteggio preliminare: {{score}} — {{interpretation}}',
     pefZone: '{{zone}} — {{percent}} % del miglior PEF',
-    photoHint: 'Aggiungi fino a 5 foto di eruzione, gonfiore o altri segni. Le foto restano sul dispositivo e compaiono nel PDF.',
+    photoHint: 'Fotografa qui eruzione o gonfiore — fino a 5 foto. Restano sul dispositivo e compaiono nel PDF del medico.',
     photoCamera: 'Fotocamera',
     photoLibrary: 'Galleria',
     photoRemove: 'Rimuovi foto',

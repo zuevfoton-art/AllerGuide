@@ -412,18 +412,19 @@ export const DIARY_SECTIONS: DiarySection[] = [
         group: 'skin',
       },
       {
+        id: 'skinPhotos',
+        label: 'Фото проявлений',
+        field: 'photo',
+        required: false,
+        group: 'skin',
+      },
+      {
         id: 'itching',
         label: 'Интенсивность зуда',
         field: 'choice',
         choices: ['Нет', 'Слабый', 'Умеренный', 'Сильный'],
         required: true,
         group: 'skin',
-      },
-      {
-        id: 'skinPhotos',
-        label: 'Фото проявлений',
-        field: 'photo',
-        required: false,
       },
       {
         id: 'skinNotes',

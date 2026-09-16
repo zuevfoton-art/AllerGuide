@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Image, Platform, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { parseDiaryPhotoUris } from '@allerguide/core';
 import { useTheme } from '@/src/hooks/use-theme';
@@ -39,20 +39,22 @@ export function DiaryPhotoToolbar({
     <View style={styles.photoWrap} testID="diary-photo-step">
       <Text style={styles.photoHint}>{t('diaryWizard.photoHint')}</Text>
       <View style={styles.photoActions}>
-        {Platform.OS !== 'web' ? (
-          <Pressable
-            style={[styles.photoBtn, !canAdd && styles.btnDisabled]}
-            disabled={!canAdd}
-            onPress={() => void addFromCamera()}
-            testID="diary-photo-camera">
-            <Ionicons name="camera-outline" size={18} color={theme.colors.accent} />
-            <Text style={styles.photoBtnText}>{t('diaryWizard.photoCamera')}</Text>
-          </Pressable>
-        ) : null}
+        <Pressable
+          style={[styles.photoBtn, !canAdd && styles.btnDisabled]}
+          disabled={!canAdd}
+          onPress={() => void addFromCamera()}
+          accessibilityRole="button"
+          accessibilityLabel={t('diaryWizard.photoCamera')}
+          testID="diary-photo-camera">
+          <Ionicons name="camera-outline" size={18} color={theme.colors.accent} />
+          <Text style={styles.photoBtnText}>{t('diaryWizard.photoCamera')}</Text>
+        </Pressable>
         <Pressable
           style={[styles.photoBtn, !canAdd && styles.btnDisabled]}
           disabled={!canAdd}
           onPress={() => void addFromLibrary()}
+          accessibilityRole="button"
+          accessibilityLabel={t('diaryWizard.photoLibrary')}
           testID="diary-photo-library">
           <Ionicons name="images-outline" size={18} color={theme.colors.accent} />
           <Text style={styles.photoBtnText}>{t('diaryWizard.photoLibrary')}</Text>

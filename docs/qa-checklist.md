@@ -140,7 +140,7 @@
 | 5.7 | Экран `/clinical-scales`: рекомендуемые и прочие шкалы | ☐ | ☐ | ☐ | |
 | 5.8 | Auto пыльца/скан/ЛС не показываются шагами, пишутся в metadata | ☐ | ☐ | ☐ | нужен интернет для пыльцы |
 | 5.9 | Компактный disclaimer дневника + «Подробнее» | ☐ | ☐ | ☐ | |
-| 5.10 | **§7.3 photo:** секция «Кожа» → шаг фото → камера/галерея, превью, удаление | ☐ | ☐ | ☐ | FR-DIARY-photo; web: gallery |
+| 5.10 | **§7.3 photo:** секция «Кожа» → под «Как выглядит кожа» камера/галерея, превью, удаление | ☐ | ☐ | ☐ | FR-DIARY-photo; web: camera CTA → gallery |
 | 5.10b | **§7.3 medicine photo:** «Лекарство» → фото / голос / вручную → предзаполнение → сохранить | ☐ | ☐ | ☐ | FR-DIARY-medicine-photo |
 | 5.11 | **§7.3 photo:** фото видно в ленте и в PDF отчёта | ☐ | ☐ | ☐ | лимит ≤5, JPEG |
 | 5.12 | **§7.3 dish:** Питание → «Ввести вручную» → «борщ» → чеклист состава → уровень реакции | ☐ | ☐ | ☐ | FR-DIARY-dish-breakdown |
@@ -520,7 +520,7 @@
 | Onboarding | `onboarding-smoke.yaml` | register → profile → `tab-home` |
 | Diary | `diary-smoke.yaml` | новая запись → симптомы |
 | Diary dish | `diary-dish-smoke.yaml` | «борщ» → `diary-dish-checklist` → save |
-| Diary photo | `diary-photo-smoke.yaml` | «Кожа» → шаг `diary-photo-step` |
+| Diary photo | `diary-photo-smoke.yaml` | «Кожа» → `diary-photo-step` на экране вида |
 | Scanner | `scanner-smoke.yaml` | «Ввести вручную» → «молоко» → `scanner-result` |
 | SOS | `sos-smoke.yaml` | `sos-profile-card`, паспорт |
 | Settings | `settings-smoke.yaml` | `/profile`, номер 112 |

@@ -389,6 +389,11 @@ describe('Maestro nightly CI invariants', () => {
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
     assert.match(photo, /id: diary-photo-step/);
+    assert.match(photo, /id: diary-photo-camera/);
+    assert.ok(
+      photo.indexOf('id: diary-photo-step') < photo.indexOf('_tap-wizard-primary.yaml'),
+      'photo CTA must sit on the appearance screen before the first Далее',
+    );
     assert.match(photo, /_tap-wizard-choice.yaml/);
     assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
     assert.match(photo, /FIELD_VALUE: предплечье/);
