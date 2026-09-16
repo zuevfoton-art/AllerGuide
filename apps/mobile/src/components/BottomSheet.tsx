@@ -3,11 +3,13 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
-import { density, radii } from '@/src/constants/layout';
-import { fontSizes, lineHeights } from '@/src/constants/typography';
+import { density, radii, space } from '@/src/constants/layout';
+import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
+
+const SHEET_BACKDROP_OPACITY = 0.42;
 
 export type BottomSheetProps = {
   visible: boolean;
@@ -37,6 +39,7 @@ export function BottomSheet({
   accessibilityLabel,
 }: BottomSheetProps) {
   const theme = useTheme();
+  const ui = useUiStyles();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -62,7 +65,7 @@ export function BottomSheet({
               style={[
                 fullHeight ? styles.fullSheet : styles.sheet,
                 liftStyle,
-                { paddingBottom: Math.max(insets.bottom, 12) },
+                { paddingBottom: Math.max(insets.bottom, space[3]) },
               ]}
               accessibilityViewIsModal
               accessibilityLabel={accessibilityLabel ?? title}
@@ -71,7 +74,7 @@ export function BottomSheet({
                 <View style={styles.grabber} />
               </View>
               <View style={styles.header}>
-                <Text style={styles.title} numberOfLines={1}>
+                <Text style={[ui.sectionTitle, styles.headerLabel]} numberOfLines={1}>
                   {title}
                 </Text>
                 <Pressable
@@ -94,12 +97,13 @@ export function BottomSheet({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors }: AppTheme) {
   return StyleSheet.create({
     root: { flex: 1, justifyContent: 'flex-end' },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(28, 38, 36, 0.42)',
+      backgroundColor: colors.overlay,
+      opacity: SHEET_BACKDROP_OPACITY,
     },
     sheet: {
       maxHeight: '72%',
@@ -137,13 +141,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingBottom: 10,
       gap: 12,
     },
-    title: {
+    headerLabel: {
       flex: 1,
-      fontFamily: fonts.serifBold,
-      fontSize: fontSizes.h3,
-      lineHeight: lineHeights.h3,
-      fontWeight: '700',
-      color: colors.head,
     },
     closeBtn: {
       width: density.tapMinHeight,
