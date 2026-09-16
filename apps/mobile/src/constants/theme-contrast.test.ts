@@ -7,11 +7,11 @@ vi.mock('react-native', () => ({
 }));
 
 /**
- * Brand primary now uses AA-safe Moss (`#6E6E58`). Historical ux-audit §13
- * applied to lighter Claro/Nordic accents; keep the note for doc cross-links.
+ * Brand primary uses AA-safe Slate (`#5F7076`; photo-3 swatch `#829399`).
+ * Historical ux-audit §13 applied to lighter Claro/Nordic accents.
  */
 const BRAND_BUTTON_NOTE = {
-  reason: 'ux-audit-2026-08 §13 — superseded by Moss AA primary in Earth Wellness',
+  reason: 'ux-audit-2026-08 §13 — superseded by Slate AA primary in Earth Wellness 2B',
 };
 
 const AA = 4.5;
@@ -40,10 +40,9 @@ describe('theme contrast', () => {
     }
   });
 
-  it('keeps white-on-Moss primary and dark onAccent/accent at AA', () => {
+  it('keeps white-on-Slate primary and dark onAccent/accent at AA', () => {
     expectReadable(lightColors.onAccent, lightColors.accent, 'light onAccent/accent');
     expectReadable(darkColors.onAccent, darkColors.accent, 'dark onAccent/accent');
-    // Retained so callers that still reference the audit note do not break.
     expect(BRAND_BUTTON_NOTE.reason).toContain('§13');
   });
 });

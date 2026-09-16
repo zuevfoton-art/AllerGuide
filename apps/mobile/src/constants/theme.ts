@@ -8,15 +8,15 @@ export { getClaroGradient };
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * Forest Refuge · Earth Wellness — UX/UI v2 Variant A layout + photo-3 palette.
- * Primary CTA = deepened Moss; soft wash = Sage; info = Slate; secondary soft = Dusty Rose.
+ * Forest Refuge · Earth Wellness — UX/UI v2 Variant A layout + photo-3 palette (2B).
+ * Primary CTA = deepened Slate; soft wash = Sage; secondary = Moss + Dusty Rose.
  * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
  * Policy: docs/brand-claro-green.md
  */
 export type ThemeColors = {
   bg: string;
   card: string;
-  /** Primary interactive — actions, links, active tabs (Moss) */
+  /** Primary interactive — actions, links, active tabs (Slate) */
   accent: string;
   accentLight: string;
   accentMid: string;
@@ -78,7 +78,7 @@ export type ThemeColors = {
 export const lightColors: ThemeColors = {
   bg: '#F7ECE1',
   card: '#FFFCF8',
-  accent: '#6E6E58',
+  accent: '#5F7076',
   accentLight: '#E4E5D4',
   accentMid: '#A3A380',
   head: '#1C1B18',
@@ -116,12 +116,12 @@ export const lightColors: ThemeColors = {
   scannerDangerIconBg: '#FEF2F2',
   scannerSafeText: '#15803D',
   overlay: '#1C2624',
-  teal: '#6E6E58',
+  teal: '#5F7076',
   tealLight: '#E4E5D4',
   surfaceMuted: '#F3E9E2',
-  info: '#829399',
+  info: '#5F7076',
   infoLight: '#E0E5E7',
-  focusRing: 'rgba(110,110,88,0.35)',
+  focusRing: 'rgba(95,112,118,0.35)',
   skeletonBase: '#E8DFD6',
   skeletonSheen: '#F7ECE1',
   mapLand: '#E8DFD6',
@@ -131,7 +131,7 @@ export const lightColors: ThemeColors = {
 export const darkColors: ThemeColors = {
   bg: '#14140F',
   card: '#1E1D1A',
-  accent: '#A3A380',
+  accent: '#9AADB8',
   accentLight: '#2A2A22',
   accentMid: '#7F7F67',
   head: '#F3EDE4',
@@ -169,12 +169,12 @@ export const darkColors: ThemeColors = {
   scannerDangerIconBg: '#450A0A',
   scannerSafeText: '#4ADE80',
   overlay: '#000000',
-  teal: '#A3A380',
+  teal: '#9AADB8',
   tealLight: '#2A2A22',
   surfaceMuted: '#24221E',
   info: '#9AADB8',
   infoLight: '#2C333A',
-  focusRing: 'rgba(163,163,128,0.45)',
+  focusRing: 'rgba(154,173,184,0.45)',
   skeletonBase: '#24221E',
   skeletonSheen: '#2E2C28',
   mapLand: '#24221E',

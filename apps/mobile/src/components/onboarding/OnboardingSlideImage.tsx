@@ -16,7 +16,7 @@ type OnboardingSlideImageProps = {
   height?: number;
 };
 
-/** Raster onboarding art — Earth Wellness Moss/Sage accents per slide. */
+/** Raster onboarding art — Earth Wellness Slate primary + Sage soft accents per slide. */
 export function OnboardingSlideImage({ slide, width = 280, height = 220 }: OnboardingSlideImageProps) {
   return (
     <View style={[styles.frame, { width, height }]}>

@@ -11,14 +11,14 @@ export type ClaroGradient = {
 export function getClaroGradient(isDark: boolean): ClaroGradient {
   if (isDark) {
     return {
-      colors: ['#14140F', '#2A2A22', '#A3A380'],
+      colors: ['#14140F', '#2C333A', '#9AADB8'],
       locations: [0, 0.55, 1],
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     };
   }
   return {
-    colors: ['#5F5F4A', '#6E6E58', '#E4E5D4'],
+    colors: ['#3F4F55', '#5F7076', '#E0E5E7'],
     locations: [0, 0.6, 1],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
@@ -26,29 +26,29 @@ export function getClaroGradient(isDark: boolean): ClaroGradient {
 }
 
 /**
- * Light-mode Earth Wellness tokens (mirror theme.ts).
- * Moss deepened to `#6E6E58` for white-on-accent AA; photo swatch `#7F7F67` is the brand hue.
- * Sage soft = wash; slate = info; dusty rose lives on surfaceMuted/foam in theme.ts.
+ * Light-mode Earth Wellness tokens (mirror theme.ts) — choice 2B.
+ * Primary CTA = deepened Photo-3 Slate (`#5F7076`; brand swatch `#829399`).
+ * Sage/Moss = soft surfaces; dusty rose lives on surfaceMuted/foam in theme.ts.
  */
 export const LIGHT_CLARO_TOKENS = {
   tipText: '#5F5F4A',
-  info: '#829399',
+  info: '#5F7076',
   infoLight: '#E0E5E7',
   tipBg: '#E4E5D4',
   tipBorder: '#A3A380',
-  accent: '#6E6E58',
+  accent: '#5F7076',
   accentLight: '#E4E5D4',
   accentMid: '#A3A380',
 } as const;
 
-/** Dark-mode Earth Wellness tokens (mirror theme.ts) */
+/** Dark-mode Earth Wellness tokens (mirror theme.ts) — Slate primary */
 export const DARK_CLARO_TOKENS = {
   tipText: '#C5C5A8',
   info: '#9AADB8',
   infoLight: '#2C333A',
   tipBg: '#2A2A22',
   tipBorder: '#A3A380',
-  accent: '#A3A380',
+  accent: '#9AADB8',
   accentLight: '#2A2A22',
   accentMid: '#7F7F67',
 } as const;
