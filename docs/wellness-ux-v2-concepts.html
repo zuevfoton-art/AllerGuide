@@ -23,35 +23,35 @@
       --danger: #F87171; --danger-soft: #3A1515; --caution: #FBBF24; --caution-soft: #3A2A10;
       --success: #4ADE80; --success-soft: #14301F; --page: #0B0F0E;
     }
-    /* —— Variant B: Nordic Air —— */
+    /* —— Variant B: Nordic Air (warm sky, not medical calm) —— */
     html[data-theme="B"][data-mode="light"] {
-      --bg: #F2F6F8; --surface: #FFFFFF; --action: #315F78; --action-ink: #fff;
-      --soft: #DCEBF2; --ink: #13232C; --muted: #5A7080; --border: #D5E0E6;
-      --head: #0F2A38; --wash-a: #DCEBF2; --wash-b: #E8EEF2;
+      --bg: #F5F3EE; --surface: #FFFCF8; --action: #4F8FB8; --action-ink: #fff;
+      --soft: #D9EAF5; --ink: #1C2624; --muted: #5A6B72; --border: #E2DDD4;
+      --head: #1A3038; --wash-a: #D9EAF5; --wash-b: #F3EDE4;
       --danger: #B91C1C; --danger-soft: #FEF2F2; --caution: #B45309; --caution-soft: #FFFBEB;
-      --success: #15803D; --success-soft: #F0FDF4; --page: #DCE4EA;
+      --success: #15803D; --success-soft: #F0FDF4; --page: #E6E1D8;
     }
     html[data-theme="B"][data-mode="dark"] {
-      --bg: #0E161B; --surface: #172228; --action: #6BA3BF; --action-ink: #0A1218;
-      --soft: #1C3340; --ink: #E6EEF2; --muted: #8FA6B4; --border: #24333C;
-      --head: #E6EEF2; --wash-a: #162830; --wash-b: #1A2228;
+      --bg: #121614; --surface: #1A2220; --action: #7EB7D6; --action-ink: #0A1214;
+      --soft: #243846; --ink: #E8F0ED; --muted: #9BB0A8; --border: #2A3531;
+      --head: #E8F0ED; --wash-a: #243846; --wash-b: #2A241C;
       --danger: #F87171; --danger-soft: #3A1515; --caution: #FBBF24; --caution-soft: #3A2A10;
-      --success: #4ADE80; --success-soft: #14301F; --page: #080C10;
+      --success: #4ADE80; --success-soft: #14301F; --page: #0B0F0E;
     }
-    /* —— Variant C: Plum & Sage —— */
+    /* —— Variant C: Dusty Beige Sky —— */
     html[data-theme="C"][data-mode="light"] {
-      --bg: #F8F3EE; --surface: #FFFDFC; --action: #66507B; --action-ink: #fff;
-      --soft: #ECE3F3; --ink: #221C24; --muted: #6B6270; --border: #E6DDD6;
-      --head: #3A2F45; --wash-a: #E5EDE6; --wash-b: #ECE3F3; --sage: #6B8F71;
+      --bg: #F3EEE6; --surface: #F7F5F2; --action: #6E8399; --action-ink: #fff;
+      --soft: #E5E2DC; --ink: #2A2926; --muted: #6B6862; --border: #E0DBD3;
+      --head: #2A2926; --wash-a: #E2E7ED; --wash-b: #E5E2DC;
       --danger: #B91C1C; --danger-soft: #FEF2F2; --caution: #B45309; --caution-soft: #FFFBEB;
-      --success: #15803D; --success-soft: #F0FDF4; --page: #E8E0D8;
+      --success: #15803D; --success-soft: #F0FDF4; --page: #E4DFD6;
     }
     html[data-theme="C"][data-mode="dark"] {
-      --bg: #141018; --surface: #1E1A22; --action: #B8A0CC; --action-ink: #1A1220;
-      --soft: #2E2438; --ink: #F0EAF2; --muted: #A89BB0; --border: #322A38;
-      --head: #F0EAF2; --wash-a: #1E2A22; --wash-b: #2A2230; --sage: #8FB896;
+      --bg: #161512; --surface: #1E1D1A; --action: #9AADB8; --action-ink: #121418;
+      --soft: #2C333A; --ink: #F0EEEA; --muted: #A8A49C; --border: #2E2C28;
+      --head: #F0EEEA; --wash-a: #2C333A; --wash-b: #2A2620;
       --danger: #F87171; --danger-soft: #3A1515; --caution: #FBBF24; --caution-soft: #3A2A10;
-      --success: #4ADE80; --success-soft: #14301F; --page: #0C0A0E;
+      --success: #4ADE80; --success-soft: #14301F; --page: #0C0B0A;
     }
 
     * { box-sizing: border-box; }
@@ -189,6 +189,24 @@
       display: grid; place-items: center; color: var(--muted); font-size: 16px;
       cursor: pointer;
     }
+    .profile-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 40px; max-width: 160px;
+      padding: 6px 10px 6px 8px; border-radius: 10px;
+      border: 1px solid color-mix(in srgb, var(--action) 28%, var(--border));
+      background: var(--soft); color: var(--head);
+      font: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; flex-shrink: 1;
+    }
+    .profile-chip .pc-ico {
+      width: 22px; height: 22px; border-radius: 99px;
+      background: var(--surface); color: var(--action);
+      display: grid; place-items: center; font-size: 12px; flex-shrink: 0;
+    }
+    .profile-chip .pc-name {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+    }
+    .profile-chip .pc-chev { color: var(--muted); font-size: 11px; flex-shrink: 0; }
 
     .scroll {
       flex: 1; overflow-y: auto; padding: 0 16px 14px;
@@ -512,6 +530,9 @@
       Спецификация: <a href="wellness-ux-v2-concepts.md">wellness-ux-v2-concepts.md</a>.
       North-star IA: <a href="wellness-ux-north-star.md">wellness-ux-north-star.md</a>.
       Рекомендованный старт — вариант <strong>A · Forest &amp; Linen</strong>.
+      B — тёплый Nordic Air (голубые градации, не medical calm).
+      C — <strong>Dusty Beige Sky</strong> (беж · мягкий серый · пыльный синий).
+      Chrome профиля: chip «иконка + имя» (эталон Скан), кроме хаба профиля.
     </p>
     <div class="swatches" id="swatches"></div>
   </header>
@@ -523,7 +544,7 @@
         <div class="seg" role="group" aria-label="Вариант цвета">
           <button type="button" data-theme="A" aria-pressed="true">A Forest</button>
           <button type="button" data-theme="B" aria-pressed="false">B Nordic</button>
-          <button type="button" data-theme="C" aria-pressed="false">C Plum</button>
+          <button type="button" data-theme="C" aria-pressed="false">C Dusty</button>
         </div>
       </div>
       <div class="group">
@@ -567,7 +588,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Aclearo</div>
-            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">Сегодня · среда</p>
@@ -611,7 +636,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Aclearo</div>
-            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">Сегодня · среда</p>
@@ -658,7 +687,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Aclearo</div>
-            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">Сегодня · среда</p>
@@ -701,7 +734,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Aclearo</div>
-            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">Сегодня · раскрытие</p>
@@ -740,7 +777,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Aclearo</div>
-            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">Сегодня · контекст сохранён</p>
@@ -799,7 +840,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Скан</div>
-            <button type="button" class="icon-btn" aria-label="История">◷</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <div class="camera" aria-label="Камера сразу"><div class="frame"></div></div>
@@ -825,7 +870,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Карта</div>
-            <button type="button" class="icon-btn" aria-label="Фильтры">☰</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <div class="map-filters">
@@ -874,7 +923,11 @@
           <div class="status"><span>9:41</span><span>●●●</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Журнал</div>
-            <button type="button" class="icon-btn" aria-label="Поиск">⌕</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">История</p>
@@ -924,7 +977,11 @@
           <div class="status"><span>9:41</span><span>offline</span></div>
           <div class="topbar">
             <div class="brand"><span class="mark">A</span> Aclearo</div>
-            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+            <button type="button" class="profile-chip" aria-label="Профиль Анна">
+              <span class="pc-ico" aria-hidden="true">☺</span>
+              <span class="pc-name">Анна</span>
+              <span class="pc-chev" aria-hidden="true">▾</span>
+            </button>
           </div>
           <div class="scroll">
             <p class="eyebrow">Состояния</p>
@@ -957,8 +1014,8 @@
   <script>
     const THEMES = {
       A: { name: 'Forest & Linen', colors: [['bg','#F6F2EA'],['surface','#FFFCF6'],['action','#176C62'],['soft','#DCEFEA'],['ink','#17201E']] },
-      B: { name: 'Nordic Air', colors: [['bg','#F2F6F8'],['surface','#FFFFFF'],['action','#315F78'],['soft','#DCEBF2'],['ink','#13232C']] },
-      C: { name: 'Plum & Sage', colors: [['bg','#F8F3EE'],['surface','#FFFDFC'],['action','#66507B'],['soft','#ECE3F3'],['ink','#221C24']] },
+      B: { name: 'Nordic Air (warm sky)', colors: [['bg','#F5F3EE'],['surface','#FFFCF8'],['action','#4F8FB8'],['soft','#D9EAF5'],['ink','#1C2624']] },
+      C: { name: 'Dusty Beige Sky', colors: [['bg','#F3EEE6'],['surface','#F7F5F2'],['action','#6E8399'],['soft','#E5E2DC'],['ink','#2A2926']] },
     };
 
     const root = document.documentElement;

@@ -40,7 +40,7 @@
 | Карта | Возможны шаги до холста | Canvas-first + чипы/sheet фильтров |
 | SOS | Риск энциклопедии на первом экране | Crisis mode; паспорт вторым слоем |
 | Журнал | Много точек входа в типы записи | Один contextual sheet выбора типа |
-| Профиль / маркет / эксперт | Разрозненный chrome | Хаб с аватара |
+| Профиль / маркет / эксперт | Разрозненный chrome; на большинстве экранов icon-only | Хаб с `/profile`; в оболочке — chip «значок + имя» (эталон Скан) |
 
 ---
 
@@ -48,6 +48,7 @@
 
 ```text
 Постоянная оболочка
+├── Chrome профиля — chip: иконка + имя активного профиля (везде, кроме /profile)
 ├── Сегодня — ответ дня + чек-ин 0–3 + рекомендации по criticality + «Спросить»
 │   └── AskChatSheet — быстрые вопросы · история · voice-to-draft · keyboard-safe composer
 ├── Журнал — история + sheet выбора типа полной записи
@@ -55,7 +56,7 @@
 ├── Карта — холст сразу → чипы + sheet фильтров
 └── SOS (отдельный control) — кризисный экран → паспорт вторым слоем
 
-Аватар → хаб: профиль / настройки / маркет / эксперт
+Chip профиля → switcher / хаб: профиль / настройки / маркет / эксперт
 ```
 
 ### 2.1. «Сегодня» — reading, чек-ин, приоритетные рекомендации
@@ -95,7 +96,21 @@
 - Online AI за `EXPO_PUBLIC_AI_CHAT`; offline — локальные быстрые ответы / экспертные карточки.
 - Маршрут `/ask` сохраняется как deep-link / full-screen fallback.
 
-### 2.4. Остальные поверхности
+### 2.4. Профиль в chrome: значок + имя
+
+Эталон в коде: [`ProfileHeaderButton`](../apps/mobile/src/components/ProfileHeaderButton.tsx) `variant="chip"` + `chipTitle={activeProfile.name}` на Сканере ([`scanner.tsx`](../apps/mobile/app/(tabs)/scanner.tsx) `brandHeaderRight`).
+
+| Правило | Деталь |
+|---------|--------|
+| **Где** | Везде в оболочке, где есть кнопка или выбор активного профиля (Today, Journal, Scan, Map, Market, doctor-report и аналоги) |
+| **Как** | Chip: иконка профиля + имя + chevron; не icon-only |
+| **Исключение** | Сам экран/хаб `/profile` и связанные setup — имя уже в контенте, chrome-chip не дублировать |
+| **No profile** | Без пустого chip; CTA создания профиля |
+| **SOS / onboarding** | Crisis и intro не обязаны показывать chip; приоритет — safety / линейный вход |
+
+Сейчас chip только на Сканере; `home` / `diary` / `map` / `market` / `doctor-report` — icon-only. Миграция — в §5 после выбора палитры.
+
+### 2.5. Остальные поверхности
 
 | Поверхность | Правило |
 |-------------|---------|
@@ -126,6 +141,7 @@
 |-----------|------|--------|
 | `SelectChip` | Выбор / фильтр / состояние (симптом 0–3, аллерген, слой карты, период) | STATE `sm`/`md` |
 | `ActionChip` | Явная быстрая команда («Спросить», готовый вопрос) | ACTION `full` или явный action treatment |
+| `ProfileHeaderButton` chip | Активный профиль в chrome: иконка + имя (эталон Скан) | STATE `sm`/`md`; не icon-only вне `/profile` |
 | `SegmentedControl` | Взаимоисключающие настройки | Группа ACTION; сегменты STATE |
 | `BottomSheet` | Контекстный выбор и Ask chat | Не для длинных клинических форм и не для SOS |
 
@@ -146,9 +162,15 @@
 
 | ID | Название | Фон / surface / action / soft / ink | Характер |
 |----|----------|-------------------------------------|----------|
-| **A** | Forest & Linen / Claro Refuge (**рекомендованный**) | `#F6F2EA` / `#FFFCF6` / `#176C62` / `#DCEFEA` / `#17201E` | Тёплое прибежище, ближе к Claro / Clinical Calm |
-| **B** | Nordic Air | `#F2F6F8` / `#FFFFFF` / `#315F78` / `#DCEBF2` / `#13232C` | Минеральный, клинический, структурный |
-| **C** | Plum & Sage | `#F8F3EE` / `#FFFDFC` / `#66507B` / `#ECE3F3` / `#221C24` (+ sage ambient) | Наиболее отличимый от типовых health-app |
+| **A** | Forest & Linen / Claro Refuge (**рекомендованный**) | `#F6F2EA` / `#FFFCF6` / `#176C62` / `#DCEFEA` / `#17201E` | Тёплое прибежище, ближе к Claro |
+| **B** | Nordic Air (тёплый небо) | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Тёплый воздух + голубые градации; **не** medical calm / slate |
+| **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Бежевый · мягкий серый · пыльный синий |
+
+**B wash:** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`. Dark B: тёплый уголь-фон, action `#7EB7D6`, soft `#243846`.
+
+**C wash:** беж → серый → пыльный синий ambient. Dark C: `#161512` / `#1E1D1A` / action `#9AADB8` / soft `#2C333A`.
+
+Plum & Sage снят: не подходит как production-направление.
 
 Во всех вариантах `danger` / `caution` / `success` — отдельная семантика с иконкой и текстом. Это стартовые направления: финальные пары проходят contrast-test после выбора.
 
@@ -157,6 +179,7 @@
 ### 4.1. Что покрывает HTML-прототип
 
 - Переключатель A / B / C, light / dark, viewport 360×667 и 390×844.
+- Chrome: profile chip «иконка · имя · ▾» на Today / Scan / Map / Journal / Ask overlay.
 - Today: состояния `critical`, только `important`, только `recommended`, раскрытый «Ещё N».
 - Ask sheet: быстрые вопросы, listening, processing, editable draft.
 - Scan verdict, SOS crisis, Journal entry sheet, Map canvas-first, короткий onboarding.
@@ -171,13 +194,14 @@
 1. Канон в north-star / FR / brand doc.
 2. `criticality` + resolver видимой/свёрнутой групп в `packages/core` `home-insights.ts`.
 3. Semantic tokens → `theme.ts` / `layout.ts`; primitives `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
-4. Voice-to-draft на существующих `VoiceNoteButton` + `voice-dictation-service`.
-5. Analytics без PII; тесты комбинаций criticality; Maestro; `pnpm rc-gate`.
+4. Мигрировать все `ProfileHeaderButton` на `variant="chip"` + имя активного профиля (кроме `/profile` и setup).
+5. Voice-to-draft на существующих `VoiceNoteButton` + `voice-dictation-service`.
+6. Analytics без PII; тесты комбинаций criticality; Maestro; `pnpm rc-gate`.
 
 ---
 
 ## 6. Acceptance этого этапа (§§1–4)
 
-- [x] Зафиксированы tap-depth, IA, criticality, семантика контролов.
-- [x] HTML сравнивает A / B / C на ключевых экранах и состояниях.
+- [x] Зафиксированы tap-depth, IA, criticality, семантика контролов, канон profile chip.
+- [x] HTML сравнивает A / тёплый B / Dusty Beige Sky C на ключевых экранах и состояниях.
 - [ ] Пользователь выбрал одну production-палитру (блокер для §5).
