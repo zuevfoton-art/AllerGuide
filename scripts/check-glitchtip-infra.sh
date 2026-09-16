@@ -33,6 +33,14 @@ if grep -E 'yandex_lockbox_secret\.api_env|lockbox_secret_id \(API\)' "$TF"; the
   echo "glitchtip.tf must not reference the API Lockbox resource" >&2
   exit 1
 fi
+if grep -E 'glitchtip' "$ROOT/infra/yandex/staging/iam.tf"; then
+  echo "GlitchTip instance SA must not get folder-wide IAM in iam.tf (payloadViewer is secret-scoped in glitchtip.tf)" >&2
+  exit 1
+fi
+if grep -E 'glitchtip' "$ROOT/infra/yandex/staging/postgresql.tf" "$ROOT/infra/yandex/staging/runner.tf"; then
+  echo "GlitchTip must stay off app MDB and the GitHub runner VM" >&2
+  exit 1
+fi
 grep -q 'postgresql.tf' "$TF" && { echo "glitchtip.tf must not reference app postgresql.tf"; exit 1; } || true
 if grep -n 'yandex_mdb_postgresql' "$TF"; then
   echo "GlitchTip must not use Managed Postgres" >&2
