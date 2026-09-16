@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="A" data-mode="light" data-size="390">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aclearo — UX/UI v2 concepts (A / B / C)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <style>
+    /* —— Variant A: Forest & Linen / Claro Refuge —— */
+    html[data-theme="A"][data-mode="light"] {
+      --bg: #F6F2EA; --surface: #FFFCF6; --action: #176C62; --action-ink: #fff;
+      --soft: #DCEFEA; --ink: #17201E; --muted: #5A6B66; --border: #E4DDD2;
+      --head: #14352F; --wash-a: #DCEFEA; --wash-b: #F3E8D8;
+      --danger: #B91C1C; --danger-soft: #FEF2F2; --caution: #B45309; --caution-soft: #FFFBEB;
+      --success: #15803D; --success-soft: #F0FDF4; --page: #E8E2D6;
+    }
+    html[data-theme="A"][data-mode="dark"] {
+      --bg: #121816; --surface: #1C2421; --action: #3DB8A8; --action-ink: #0A1614;
+      --soft: #1F3A35; --ink: #E8F0ED; --muted: #9BB0A8; --border: #2A3531;
+      --head: #E8F0ED; --wash-a: #1A2E2A; --wash-b: #2A241C;
+      --danger: #F87171; --danger-soft: #3A1515; --caution: #FBBF24; --caution-soft: #3A2A10;
+      --success: #4ADE80; --success-soft: #14301F; --page: #0B0F0E;
+    }
+    /* —— Variant B: Nordic Air —— */
+    html[data-theme="B"][data-mode="light"] {
+      --bg: #F2F6F8; --surface: #FFFFFF; --action: #315F78; --action-ink: #fff;
+      --soft: #DCEBF2; --ink: #13232C; --muted: #5A7080; --border: #D5E0E6;
+      --head: #0F2A38; --wash-a: #DCEBF2; --wash-b: #E8EEF2;
+      --danger: #B91C1C; --danger-soft: #FEF2F2; --caution: #B45309; --caution-soft: #FFFBEB;
+      --success: #15803D; --success-soft: #F0FDF4; --page: #DCE4EA;
+    }
+    html[data-theme="B"][data-mode="dark"] {
+      --bg: #0E161B; --surface: #172228; --action: #6BA3BF; --action-ink: #0A1218;
+      --soft: #1C3340; --ink: #E6EEF2; --muted: #8FA6B4; --border: #24333C;
+      --head: #E6EEF2; --wash-a: #162830; --wash-b: #1A2228;
+      --danger: #F87171; --danger-soft: #3A1515; --caution: #FBBF24; --caution-soft: #3A2A10;
+      --success: #4ADE80; --success-soft: #14301F; --page: #080C10;
+    }
+    /* —— Variant C: Plum & Sage —— */
+    html[data-theme="C"][data-mode="light"] {
+      --bg: #F8F3EE; --surface: #FFFDFC; --action: #66507B; --action-ink: #fff;
+      --soft: #ECE3F3; --ink: #221C24; --muted: #6B6270; --border: #E6DDD6;
+      --head: #3A2F45; --wash-a: #E5EDE6; --wash-b: #ECE3F3; --sage: #6B8F71;
+      --danger: #B91C1C; --danger-soft: #FEF2F2; --caution: #B45309; --caution-soft: #FFFBEB;
+      --success: #15803D; --success-soft: #F0FDF4; --page: #E8E0D8;
+    }
+    html[data-theme="C"][data-mode="dark"] {
+      --bg: #141018; --surface: #1E1A22; --action: #B8A0CC; --action-ink: #1A1220;
+      --soft: #2E2438; --ink: #F0EAF2; --muted: #A89BB0; --border: #322A38;
+      --head: #F0EAF2; --wash-a: #1E2A22; --wash-b: #2A2230; --sage: #8FB896;
+      --danger: #F87171; --danger-soft: #3A1515; --caution: #FBBF24; --caution-soft: #3A2A10;
+      --success: #4ADE80; --success-soft: #14301F; --page: #0C0A0E;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Source Sans 3", system-ui, sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      transition: background .25s ease, color .25s ease;
+    }
+    a { color: var(--action); }
+
+    .doc {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 20px 12px;
+    }
+    .doc h1 {
+      font-family: "Source Serif 4", Georgia, serif;
+      font-size: 28px;
+      margin: 0 0 8px;
+      color: var(--head);
+    }
+    .doc .lede {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 78ch;
+    }
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 0;
+    }
+    .swatch {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 12px; color: var(--muted);
+    }
+    .swatch i {
+      width: 16px; height: 16px; border-radius: 4px;
+      border: 1px solid rgba(0,0,0,.08);
+    }
+
+    .toolbar {
+      position: sticky; top: 0; z-index: 40;
+      background: color-mix(in srgb, var(--page) 92%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+    }
+    .toolbar-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    }
+    .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .group label {
+      font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--muted); margin-right: 4px;
+    }
+    .seg {
+      display: inline-flex; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 999px; padding: 3px;
+    }
+    .seg button {
+      border: 0; background: transparent; color: var(--muted);
+      font: inherit; font-size: 13px; font-weight: 600;
+      min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+    }
+    .seg button[aria-pressed="true"] {
+      background: var(--action); color: var(--action-ink);
+    }
+    .nav-screens {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .nav-screens button {
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--ink); font: inherit; font-size: 13px; font-weight: 600;
+      min-height: 36px; padding: 0 12px; border-radius: 999px; cursor: pointer;
+    }
+    .nav-screens button[aria-current="true"] {
+      border-color: var(--action); background: var(--soft); color: var(--head);
+    }
+
+    .stage {
+      display: flex; flex-wrap: wrap; gap: 28px;
+      justify-content: center; padding: 28px 16px 80px;
+    }
+    .device-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .caption {
+      font-size: 12px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--muted); text-align: center;
+    }
+
+    .phone {
+      --pw: 390px; --ph: 844px;
+      width: var(--pw); height: var(--ph);
+      background: var(--bg);
+      border: 1px solid color-mix(in srgb, var(--border) 80%, #888);
+      border-radius: 36px;
+      box-shadow: 0 22px 48px rgba(15, 23, 42, 0.14);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      position: relative;
+      transition: width .2s ease, height .2s ease, background .25s ease;
+    }
+    html[data-size="360"] .phone { --pw: 360px; --ph: 667px; border-radius: 28px; }
+    .phone.crisis { background: #1a0b0b; }
+
+    .status {
+      height: 44px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; font-size: 12px; font-weight: 700; color: var(--head);
+    }
+    .crisis .status { color: #fecaca; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px 8px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 8px;
+      font-family: Fraunces, "Source Serif 4", Georgia, serif;
+      font-weight: 700; font-size: 18px; color: var(--head);
+    }
+    .mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--action); color: var(--action-ink);
+      display: grid; place-items: center; font-weight: 700; font-size: 14px;
+      font-family: "Source Sans 3", sans-serif;
+    }
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      display: grid; place-items: center; color: var(--muted); font-size: 16px;
+      cursor: pointer;
+    }
+
+    .scroll {
+      flex: 1; overflow-y: auto; padding: 0 16px 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted); margin: 2px 0 0;
+    }
+    h2.screen {
+      font-family: Fraunces, "Source Serif 4", Georgia, serif;
+      font-size: 28px; line-height: 1.15; margin: 2px 0 12px;
+      color: var(--head); font-weight: 700;
+    }
+    html[data-size="360"] h2.screen { font-size: 24px; }
+
+    .reading {
+      background: linear-gradient(160deg, var(--wash-a) 0%, var(--soft) 45%, var(--wash-b) 100%);
+      border: 1px solid color-mix(in srgb, var(--action) 28%, var(--border));
+      border-radius: 16px; padding: 14px; margin-bottom: 14px;
+    }
+    .reading p {
+      margin: 0; font-family: Fraunces, Georgia, serif;
+      font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--head);
+    }
+    .reading .kpi { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+    .section-title {
+      margin: 0 0 8px; font-family: "Source Serif 4", Georgia, serif;
+      font-size: 16px; color: var(--head);
+    }
+
+    .chips { display: flex; gap: 8px; margin-bottom: 14px; }
+    .chip {
+      flex: 1; min-height: 48px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--muted); cursor: pointer;
+      font-family: inherit;
+    }
+    .chip b { font-size: 16px; color: var(--head); }
+    .chip.on {
+      border-color: var(--action); background: var(--soft); color: var(--head);
+    }
+
+    .quick-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .action-chip {
+      min-height: 40px; padding: 0 14px; border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--action) 40%, var(--border));
+      background: var(--surface); color: var(--action);
+      font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .action-chip.primary-soft {
+      background: var(--soft); border-color: transparent; color: var(--head);
+    }
+
+    .rec-block { margin-top: 4px; }
+    .level-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: .04em;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .level-badge.critical { color: var(--danger); }
+    .level-badge.important { color: var(--caution); }
+    .level-badge.recommended { color: var(--action); }
+
+    .rec-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 12px; margin-bottom: 10px;
+    }
+    .rec-card.critical {
+      border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+      background: color-mix(in srgb, var(--danger-soft) 70%, var(--surface));
+    }
+    .rec-card h3 {
+      margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--head);
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .rec-card p { margin: 0 0 10px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+    .rec-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 10px 0; border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--ink);
+    }
+    .rec-row:first-of-type { border-top: 0; padding-top: 0; }
+    .ghost-link {
+      background: none; border: 0; color: var(--action);
+      font: inherit; font-weight: 600; cursor: pointer; padding: 8px 0;
+      min-height: 44px;
+    }
+    .more-toggle {
+      width: 100%; min-height: 44px; margin-top: 4px;
+      border: 1px dashed var(--border); border-radius: 12px;
+      background: transparent; color: var(--muted);
+      font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    .btn {
+      display: block; width: 100%; text-align: center;
+      background: var(--action); color: var(--action-ink); border: 0;
+      border-radius: 999px; min-height: 52px; font-weight: 700; font-size: 15px;
+      padding: 12px; cursor: pointer; font-family: inherit;
+    }
+    .btn.secondary {
+      background: var(--surface); color: var(--head);
+      border: 1px solid var(--border); min-height: 48px;
+    }
+    .btn.ghost {
+      background: transparent; color: var(--action);
+      border: 1px solid color-mix(in srgb, var(--action) 45%, var(--border));
+      min-height: 48px;
+    }
+    .btn.danger {
+      background: var(--danger); color: #fff; min-height: 60px; font-size: 17px;
+    }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .tabbar {
+      height: 72px; background: var(--surface); border-top: 1px solid var(--border);
+      display: flex; align-items: stretch; padding: 6px 6px 10px; gap: 4px;
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 2px; font-size: 10px; font-weight: 700;
+      color: var(--muted); border-radius: 20px; border: 0; background: transparent;
+      cursor: pointer; font-family: inherit;
+    }
+    .tab.active { color: var(--action); background: var(--soft); }
+    .tab.sos {
+      flex: 0 0 56px; background: var(--danger-soft); color: var(--danger);
+      border-radius: 20px;
+    }
+    .tab .ico { font-size: 16px; line-height: 1; }
+
+    /* Sheet overlay */
+    .sheet-backdrop {
+      position: absolute; inset: 0; background: rgba(15, 20, 18, .42);
+      display: none; z-index: 20;
+    }
+    .sheet-backdrop.open { display: block; }
+    .sheet {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 88%; max-height: 92%;
+      background: var(--bg); border-radius: 20px 20px 0 0;
+      box-shadow: 0 -12px 40px rgba(0,0,0,.2);
+      display: none; flex-direction: column; z-index: 21;
+      transform: translateY(12px); opacity: 0;
+      transition: transform .22s ease, opacity .22s ease;
+    }
+    .sheet.open { display: flex; transform: translateY(0); opacity: 1; }
+    .sheet-handle {
+      width: 40px; height: 4px; border-radius: 99px; background: var(--border);
+      margin: 10px auto 6px;
+    }
+    .sheet-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 16px 10px;
+    }
+    .sheet-head h3 {
+      margin: 0; font-family: "Source Serif 4", Georgia, serif;
+      font-size: 18px; color: var(--head);
+    }
+    .sheet-body { flex: 1; overflow-y: auto; padding: 0 16px 12px; }
+    .sheet-composer {
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .composer-row { display: flex; gap: 8px; align-items: flex-end; }
+    .composer-input {
+      flex: 1; min-height: 48px; max-height: 96px; resize: none;
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 12px; font: inherit; font-size: 14px;
+      background: var(--bg); color: var(--ink);
+    }
+    .mic-btn, .send-btn {
+      width: 48px; height: 48px; border-radius: 999px; border: 0;
+      display: grid; place-items: center; cursor: pointer; font-size: 18px;
+      flex-shrink: 0;
+    }
+    .mic-btn { background: var(--soft); color: var(--head); }
+    .mic-btn.listening {
+      background: var(--danger-soft); color: var(--danger);
+      animation: pulse 1.2s ease infinite;
+    }
+    .send-btn { background: var(--action); color: var(--action-ink); }
+    .send-btn:disabled { opacity: .4; cursor: not-allowed; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    .bubble {
+      max-width: 88%; padding: 10px 12px; border-radius: 14px;
+      font-size: 14px; line-height: 1.4; margin: 8px 0;
+    }
+    .bubble.bot {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px 14px 14px 4px; color: var(--ink);
+    }
+    .bubble.user {
+      margin-left: auto; background: var(--action); color: var(--action-ink);
+      border-radius: 14px 14px 4px 14px;
+    }
+    .voice-status {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      display: flex; align-items: center; gap: 8px; min-height: 24px;
+    }
+    .voice-status.listening { color: var(--danger); }
+    .voice-status.processing { color: var(--caution); }
+    .disclaimer {
+      font-size: 11px; color: var(--muted); line-height: 1.35;
+      padding: 8px 10px; background: var(--surface); border-radius: 10px;
+      border: 1px solid var(--border); margin-bottom: 8px;
+    }
+
+    /* Scan / Map / SOS / Journal / Onboarding */
+    .camera {
+      height: 210px; border-radius: 16px; margin-bottom: 12px;
+      background:
+        linear-gradient(135deg, rgba(0,0,0,.15), transparent),
+        repeating-linear-gradient(45deg, #2a3330 0 10px, #323c38 10px 20px);
+      display: grid; place-items: center; color: #fff; font-weight: 700;
+      position: relative; overflow: hidden;
+    }
+    .camera .frame {
+      width: 70%; height: 55%; border: 2px solid rgba(255,255,255,.75);
+      border-radius: 12px;
+    }
+    .verdict {
+      border-radius: 16px; padding: 14px; margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .verdict.ok { background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 35%, var(--border)); }
+    .verdict.caution { background: var(--caution-soft); border-color: color-mix(in srgb, var(--caution) 35%, var(--border)); }
+    .verdict .tag {
+      font-size: 11px; font-weight: 800; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .verdict.ok .tag { color: var(--success); }
+    .verdict.caution .tag { color: var(--caution); }
+    .verdict h3 { margin: 0 0 6px; font-size: 18px; color: var(--head); }
+    .verdict p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+    .map-canvas {
+      height: 320px; border-radius: 16px; margin-bottom: 10px;
+      background:
+        radial-gradient(circle at 40% 45%, color-mix(in srgb, var(--action) 25%, transparent), transparent 40%),
+        linear-gradient(160deg, var(--wash-a), var(--wash-b));
+      border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .map-pin {
+      position: absolute; left: 42%; top: 48%;
+      width: 14px; height: 14px; border-radius: 99px;
+      background: var(--action); border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    .map-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+    .crisis-body { color: #fee2e2; padding: 0 16px 12px; flex: 1; overflow-y: auto; }
+    .crisis h2.screen { color: #fff; }
+    .crisis .eyebrow { color: #fca5a5; }
+    .steps ol { margin: 8px 0 14px; padding-left: 22px; }
+    .steps li { margin: 10px 0; font-size: 15px; line-height: 1.35; }
+    .contact {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #2a1212; border-radius: 12px; padding: 12px;
+      color: #fecaca; margin-bottom: 8px; font-size: 14px;
+    }
+
+    .entry-option {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px; border: 1px solid var(--border); border-radius: 14px;
+      background: var(--surface); margin-bottom: 8px; cursor: pointer;
+      text-align: left; width: 100%; font: inherit; color: var(--ink);
+    }
+    .entry-option strong { display: block; font-size: 15px; color: var(--head); }
+    .entry-option span { font-size: 12px; color: var(--muted); }
+
+    .onb-slide {
+      display: flex; flex-direction: column; justify-content: flex-end;
+      min-height: 420px; padding: 16px; border-radius: 16px;
+      background: linear-gradient(180deg, transparent 20%, var(--bg) 70%),
+        linear-gradient(160deg, var(--wash-a), var(--wash-b));
+      margin-bottom: 12px;
+    }
+    .onb-slide h2 {
+      font-family: Fraunces, Georgia, serif; font-size: 26px;
+      margin: 0 0 8px; color: var(--head);
+    }
+    .onb-slide p { margin: 0 0 16px; color: var(--muted); line-height: 1.45; }
+
+    .state-banner {
+      border-radius: 12px; padding: 12px; margin-bottom: 12px;
+      font-size: 13px; line-height: 1.4; border: 1px solid var(--border);
+    }
+    .state-banner.offline { background: var(--surface); color: var(--muted); }
+    .state-banner.error { background: var(--danger-soft); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, var(--border)); }
+    .state-banner.empty { background: var(--soft); color: var(--head); }
+
+    .screen-panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+    .screen-panel.active { display: flex; }
+
+    .legend {
+      max-width: 1280px; margin: 0 auto 40px; padding: 0 20px;
+      color: var(--muted); font-size: 13px; line-height: 1.5;
+    }
+    .legend code {
+      font-size: 12px; background: var(--surface); padding: 1px 6px;
+      border-radius: 4px; border: 1px solid var(--border);
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="doc">
+    <h1>UX/UI v2 — три визуальных концепта</h1>
+    <p class="lede">
+      Интерактивное сравнение палитр до смены production-токенов.
+      Спецификация: <a href="wellness-ux-v2-concepts.md">wellness-ux-v2-concepts.md</a>.
+      North-star IA: <a href="wellness-ux-north-star.md">wellness-ux-north-star.md</a>.
+      Рекомендованный старт — вариант <strong>A · Forest &amp; Linen</strong>.
+    </p>
+    <div class="swatches" id="swatches"></div>
+  </header>
+
+  <div class="toolbar" role="toolbar" aria-label="Переключатели концепта">
+    <div class="toolbar-inner">
+      <div class="group">
+        <label>Палитра</label>
+        <div class="seg" role="group" aria-label="Вариант цвета">
+          <button type="button" data-theme="A" aria-pressed="true">A Forest</button>
+          <button type="button" data-theme="B" aria-pressed="false">B Nordic</button>
+          <button type="button" data-theme="C" aria-pressed="false">C Plum</button>
+        </div>
+      </div>
+      <div class="group">
+        <label>Тема</label>
+        <div class="seg" role="group" aria-label="Светлая или тёмная">
+          <button type="button" data-mode="light" aria-pressed="true">Light</button>
+          <button type="button" data-mode="dark" aria-pressed="false">Dark</button>
+        </div>
+      </div>
+      <div class="group">
+        <label>Viewport</label>
+        <div class="seg" role="group" aria-label="Размер устройства">
+          <button type="button" data-size="390" aria-pressed="true">390×844</button>
+          <button type="button" data-size="360" aria-pressed="false">360×667</button>
+        </div>
+      </div>
+      <div class="group">
+        <label>Экран</label>
+        <div class="nav-screens" id="screen-nav">
+          <button type="button" data-screen="today-critical" aria-current="true">Today · critical</button>
+          <button type="button" data-screen="today-important">Today · important</button>
+          <button type="button" data-screen="today-recommended">Today · recommended</button>
+          <button type="button" data-screen="today-expanded">Today · ещё N</button>
+          <button type="button" data-screen="ask">Ask sheet</button>
+          <button type="button" data-screen="scan">Scan</button>
+          <button type="button" data-screen="map">Map</button>
+          <button type="button" data-screen="sos">SOS</button>
+          <button type="button" data-screen="journal">Journal sheet</button>
+          <button type="button" data-screen="onboarding">Onboarding</button>
+          <button type="button" data-screen="states">Empty / offline</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="device-wrap">
+      <div class="phone" id="phone">
+        <!-- TODAY CRITICAL -->
+        <section class="screen-panel active" data-panel="today-critical" aria-label="Сегодня critical">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Aclearo</div>
+            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">Сегодня · среда</p>
+            <h2 class="screen">Ясный день</h2>
+            <div class="reading">
+              <p>Берёза почти нет, воздух ниже комфорта — короче прогулка, сканер с собой.</p>
+              <div class="kpi">Пыльца низкая · PM2.5 умеренный</div>
+            </div>
+            <h3 class="section-title">Как вы сегодня?</h3>
+            <div class="chips" role="group" aria-label="Чек-ин 0–3">
+              <button type="button" class="chip on"><b>0</b>Нет</button>
+              <button type="button" class="chip"><b>1</b>Слабо</button>
+              <button type="button" class="chip"><b>2</b>Средне</button>
+              <button type="button" class="chip"><b>3</b>Сильно</button>
+            </div>
+            <div class="quick-row">
+              <button type="button" class="action-chip primary-soft" data-open-ask>Спросить</button>
+              <button type="button" class="action-chip">Открыть карту</button>
+            </div>
+            <div class="rec-block">
+              <div class="level-badge critical" aria-label="Уровень критичный">⚠ Критично</div>
+              <div class="rec-card critical">
+                <h3><span aria-hidden="true">💊</span> Приём антигистамина</h3>
+                <p>Окно приёма заканчивается через 40 минут. Отметьте, когда примете.</p>
+                <button type="button" class="btn">Отметить приём</button>
+              </div>
+              <button type="button" class="more-toggle">Ещё 3 рекомендации</button>
+            </div>
+          </div>
+          <nav class="tabbar" aria-label="Нижняя навигация">
+            <button type="button" class="tab active"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+
+        <!-- TODAY IMPORTANT -->
+        <section class="screen-panel" data-panel="today-important" aria-label="Сегодня important">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Aclearo</div>
+            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">Сегодня · среда</p>
+            <h2 class="screen">Спокойный фон</h2>
+            <div class="reading">
+              <p>Симптомы стабильны. Сегодня удобно обновить ACT — займёт пару минут.</p>
+              <div class="kpi">Чек-ин сохранён · пыльца низкая</div>
+            </div>
+            <h3 class="section-title">Как вы сегодня?</h3>
+            <div class="chips">
+              <button type="button" class="chip"><b>0</b>Нет</button>
+              <button type="button" class="chip on"><b>1</b>Слабо</button>
+              <button type="button" class="chip"><b>2</b>Средне</button>
+              <button type="button" class="chip"><b>3</b>Сильно</button>
+            </div>
+            <div class="quick-row">
+              <button type="button" class="action-chip primary-soft" data-open-ask>Спросить</button>
+            </div>
+            <div class="rec-block">
+              <div class="level-badge important">◆ Важно сегодня</div>
+              <div class="rec-card">
+                <h3><span aria-hidden="true">📋</span> Пора пройти ACT</h3>
+                <p>Оценка контроля астмы за период. Не срочно по безопасности, но актуально сегодня.</p>
+                <button type="button" class="btn">Начать ACT</button>
+                <div class="rec-row">
+                  <span>Добавить контакты SOS</span>
+                  <button type="button" class="ghost-link">Открыть</button>
+                </div>
+              </div>
+              <button type="button" class="more-toggle">Ещё 2 рекомендации</button>
+            </div>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab active"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+
+        <!-- TODAY RECOMMENDED -->
+        <section class="screen-panel" data-panel="today-recommended" aria-label="Сегодня recommended">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Aclearo</div>
+            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">Сегодня · среда</p>
+            <h2 class="screen">Всё под контролем</h2>
+            <div class="reading">
+              <p>Нет срочных задач. Можно узнать, почему сегодня комфортнее на улице.</p>
+              <div class="kpi">Нет критичных · нет важных</div>
+            </div>
+            <h3 class="section-title">Как вы сегодня?</h3>
+            <div class="chips">
+              <button type="button" class="chip on"><b>0</b>Нет</button>
+              <button type="button" class="chip"><b>1</b>Слабо</button>
+              <button type="button" class="chip"><b>2</b>Средне</button>
+              <button type="button" class="chip"><b>3</b>Сильно</button>
+            </div>
+            <div class="quick-row">
+              <button type="button" class="action-chip primary-soft" data-open-ask>Спросить</button>
+            </div>
+            <div class="rec-block">
+              <div class="level-badge recommended">○ Рекомендуем</div>
+              <div class="rec-card">
+                <h3><span aria-hidden="true">🌿</span> Короткий совет по воздуху</h3>
+                <p>Одна наиболее релевантная recommended. Остальные — под раскрытием.</p>
+                <button type="button" class="btn">Посмотреть совет</button>
+              </div>
+              <button type="button" class="more-toggle">Ещё 4 рекомендации</button>
+            </div>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab active"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+
+        <!-- TODAY EXPANDED -->
+        <section class="screen-panel" data-panel="today-expanded" aria-label="Сегодня раскрыто">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Aclearo</div>
+            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">Сегодня · раскрытие</p>
+            <h2 class="screen">Ещё рекомендации</h2>
+            <div class="rec-block">
+              <div class="level-badge critical">⚠ Критично</div>
+              <div class="rec-card critical">
+                <h3>Приём антигистамина</h3>
+                <p>Единственный filled-primary на поверхности.</p>
+                <button type="button" class="btn">Отметить приём</button>
+              </div>
+              <div class="level-badge important" style="margin-top:12px">◆ Важно</div>
+              <div class="rec-card">
+                <div class="rec-row"><span>Пройти ACT</span><button type="button" class="ghost-link">Открыть</button></div>
+                <div class="rec-row"><span>Контакты SOS</span><button type="button" class="ghost-link">Дополнить</button></div>
+              </div>
+              <div class="level-badge recommended" style="margin-top:12px">○ Рекомендуем</div>
+              <div class="rec-card">
+                <div class="rec-row"><span>Совет по пыльце</span><button type="button" class="ghost-link">Читать</button></div>
+                <div class="rec-row"><span>Фенотип: уточнить</span><button type="button" class="ghost-link">Открыть</button></div>
+              </div>
+              <button type="button" class="more-toggle">Свернуть</button>
+            </div>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab active"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+
+        <!-- ASK (opens sheet over today) -->
+        <section class="screen-panel" data-panel="ask" aria-label="Ask sheet">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Aclearo</div>
+            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">Сегодня · контекст сохранён</p>
+            <h2 class="screen">Ясный день</h2>
+            <div class="reading">
+              <p>Sheet открыт поверх — позиция и reading остаются.</p>
+            </div>
+            <div class="rec-card critical">
+              <h3>Приём антигистамина</h3>
+              <button type="button" class="btn">Отметить приём</button>
+            </div>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab active"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+
+          <div class="sheet-backdrop open" data-close-ask></div>
+          <div class="sheet open" role="dialog" aria-modal="true" aria-label="Спросить">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head">
+              <h3>Спросить</h3>
+              <button type="button" class="icon-btn" data-close-ask aria-label="Закрыть">✕</button>
+            </div>
+            <div class="sheet-body">
+              <div class="disclaimer">Не заменяет врача. При угрозе жизни — SOS или 103.</div>
+              <div class="quick-row" id="ask-chips">
+                <button type="button" class="action-chip" data-ask-q="Почему это важно сейчас?">Почему это важно?</button>
+                <button type="button" class="action-chip" data-ask-q="Что сделать сегодня?">Что сделать сегодня?</button>
+                <button type="button" class="action-chip" data-ask-q="Как связан воздух и симптомы?">Про воздух</button>
+              </div>
+              <div id="ask-thread">
+                <div class="bubble bot">Могу объяснить рекомендацию про приём или подсказать безопасный следующий шаг. Выберите вопрос или продиктуйте.</div>
+              </div>
+            </div>
+            <div class="sheet-composer">
+              <div class="voice-status" id="voice-status" aria-live="polite">Голос: idle — нажмите микрофон</div>
+              <div class="composer-row">
+                <button type="button" class="mic-btn" id="mic-btn" aria-label="Голосовой ввод" title="Голос → draft">🎤</button>
+                <textarea class="composer-input" id="ask-draft" rows="2" placeholder="Сообщение…" aria-label="Черновик сообщения"></textarea>
+                <button type="button" class="send-btn" id="send-btn" disabled aria-label="Отправить">➤</button>
+              </div>
+              <div class="quick-row">
+                <button type="button" class="action-chip" id="voice-stop" disabled>Остановить</button>
+                <button type="button" class="action-chip" id="voice-cancel" disabled>Отмена голоса</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SCAN -->
+        <section class="screen-panel" data-panel="scan" aria-label="Скан">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Скан</div>
+            <button type="button" class="icon-btn" aria-label="История">◷</button>
+          </div>
+          <div class="scroll">
+            <div class="camera" aria-label="Камера сразу"><div class="frame"></div></div>
+            <div class="verdict caution">
+              <div class="tag">⚠ Осторожно</div>
+              <h3>Может содержать следы молока</h3>
+              <p>Вердикт на первом экране. Состав и источник — в sheet «Подробнее».</p>
+            </div>
+            <button type="button" class="btn secondary">Подробнее</button>
+            <button type="button" class="btn ghost" style="margin-top:8px" data-open-ask>Спросить про состав</button>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab" data-goto="today-critical"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab active"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+
+        <!-- MAP -->
+        <section class="screen-panel" data-panel="map" aria-label="Карта">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Карта</div>
+            <button type="button" class="icon-btn" aria-label="Фильтры">☰</button>
+          </div>
+          <div class="scroll">
+            <div class="map-filters">
+              <button type="button" class="action-chip primary-soft">Пыльца</button>
+              <button type="button" class="action-chip">Воздух</button>
+              <button type="button" class="action-chip">Безопасные места</button>
+            </div>
+            <div class="map-canvas" aria-label="Холст карты сразу"><span class="map-pin"></span></div>
+            <p style="margin:0;font-size:13px;color:var(--muted)">Canvas-first: фильтры — чипы и sheet, без промежуточного списка.</p>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab" data-goto="today-critical"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab active"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+
+        <!-- SOS -->
+        <section class="screen-panel crisis" data-panel="sos" aria-label="SOS">
+          <div class="status"><span>9:41</span><span>кризис</span></div>
+          <div class="topbar">
+            <div class="brand" style="color:#fff"><span class="mark" style="background:#b91c1c;color:#fff">!</span> SOS</div>
+            <button type="button" class="icon-btn" data-goto="today-critical" aria-label="Закрыть" style="background:#2a1212;border-color:#5b2121;color:#fecaca">✕</button>
+          </div>
+          <div class="crisis-body steps">
+            <p class="eyebrow">План действий</p>
+            <h2 class="screen">Сначала безопасность</h2>
+            <ol>
+              <li>Используйте назначенный препарат / автоинъектор</li>
+              <li>Позовите помощь рядом</li>
+              <li>Позвоните 103</li>
+              <li>Оставайтесь с человеком до помощи</li>
+            </ol>
+            <button type="button" class="btn danger">Позвонить 103</button>
+            <div style="height:10px"></div>
+            <div class="contact"><span>Мама</span><strong>Вызов</strong></div>
+            <div class="contact"><span>Напарник</span><strong>Вызов</strong></div>
+            <button type="button" class="btn ghost" style="color:#fecaca;border-color:#7f1d1d;margin-top:8px">Паспорт аллергии →</button>
+          </div>
+        </section>
+
+        <!-- JOURNAL -->
+        <section class="screen-panel" data-panel="journal" aria-label="Журнал">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Журнал</div>
+            <button type="button" class="icon-btn" aria-label="Поиск">⌕</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">История</p>
+            <h2 class="screen">Записи</h2>
+            <div class="state-banner empty">Сегодня чек-ин уже есть. Для клинической глубины — тип записи в одном sheet.</div>
+            <button type="button" class="btn" id="open-entry-sheet">Новая запись</button>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab" data-goto="today-critical"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab active"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+          <div class="sheet-backdrop" id="entry-backdrop"></div>
+          <div class="sheet" id="entry-sheet" role="dialog" aria-label="Тип записи">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head">
+              <h3>Тип записи</h3>
+              <button type="button" class="icon-btn" id="close-entry" aria-label="Закрыть">✕</button>
+            </div>
+            <div class="sheet-body">
+              <button type="button" class="entry-option"><div><strong>Симптомы</strong><span>Быстрый клинический блок</span></div></button>
+              <button type="button" class="entry-option"><div><strong>Еда / триггер</strong><span>Что ели и реакция</span></div></button>
+              <button type="button" class="entry-option"><div><strong>Лекарства</strong><span>Доза и эффект</span></div></button>
+              <button type="button" class="entry-option"><div><strong>Заметка врачу</strong><span>Свободный текст</span></div></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ONBOARDING -->
+        <section class="screen-panel" data-panel="onboarding" aria-label="Онбординг">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="scroll" style="padding-top:12px">
+            <div class="onb-slide">
+              <p class="eyebrow">Шаг 1 из 2 · intro</p>
+              <h2>Ясность при аллергии</h2>
+              <p>Два intro-слайда, затем минимум: сценарий → имя/год → аллергены. Остальное — progressive profiling.</p>
+              <button type="button" class="btn">Дальше</button>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin:0">Юридические согласия не сокращаем искусственно.</p>
+          </div>
+        </section>
+
+        <!-- STATES -->
+        <section class="screen-panel" data-panel="states" aria-label="Состояния">
+          <div class="status"><span>9:41</span><span>offline</span></div>
+          <div class="topbar">
+            <div class="brand"><span class="mark">A</span> Aclearo</div>
+            <button type="button" class="icon-btn" aria-label="Профиль">☺</button>
+          </div>
+          <div class="scroll">
+            <p class="eyebrow">Состояния</p>
+            <h2 class="screen">Empty · offline · error</h2>
+            <div class="state-banner offline">Offline: ядро (профиль, дневник, SOS) доступно. Сеть — обогащение, не блокер.</div>
+            <div class="state-banner empty">Пусто: нет профиля — мягкий CTA «Создать профиль», без стыда.</div>
+            <div class="state-banner error">Ошибка AI Ask: sheet остаётся; локальные быстрые ответы и expert cards работают.</div>
+            <button type="button" class="btn">Создать профиль</button>
+            <button type="button" class="btn ghost" style="margin-top:8px" data-goto="sos">Открыть SOS без сети</button>
+          </div>
+          <nav class="tabbar">
+            <button type="button" class="tab active"><span class="ico">⌂</span>Сегодня</button>
+            <button type="button" class="tab"><span class="ico">☰</span>Журнал</button>
+            <button type="button" class="tab"><span class="ico">▣</span>Скан</button>
+            <button type="button" class="tab"><span class="ico">◎</span>Карта</button>
+            <button type="button" class="tab sos" data-goto="sos"><span class="ico">SOS</span></button>
+          </nav>
+        </section>
+      </div>
+      <div class="caption" id="device-caption">A · Forest &amp; Linen · light · 390×844</div>
+    </div>
+  </div>
+
+  <p class="legend">
+    Danger / caution / success во всех вариантах — отдельные семантики с иконкой и текстом.
+    Спека: <code>docs/wellness-ux-v2-concepts.md</code>.
+    После выбора одной палитры — §5 плана (tokens, primitives, AskChatSheet, criticality в core).
+  </p>
+
+  <script>
+    const THEMES = {
+      A: { name: 'Forest & Linen', colors: [['bg','#F6F2EA'],['surface','#FFFCF6'],['action','#176C62'],['soft','#DCEFEA'],['ink','#17201E']] },
+      B: { name: 'Nordic Air', colors: [['bg','#F2F6F8'],['surface','#FFFFFF'],['action','#315F78'],['soft','#DCEBF2'],['ink','#13232C']] },
+      C: { name: 'Plum & Sage', colors: [['bg','#F8F3EE'],['surface','#FFFDFC'],['action','#66507B'],['soft','#ECE3F3'],['ink','#221C24']] },
+    };
+
+    const root = document.documentElement;
+    const caption = document.getElementById('device-caption');
+    const swatches = document.getElementById('swatches');
+
+    function updateCaption() {
+      const t = root.getAttribute('data-theme');
+      const m = root.getAttribute('data-mode');
+      const s = root.getAttribute('data-size');
+      const sizeLabel = s === '360' ? '360×667' : '390×844';
+      caption.textContent = t + ' · ' + THEMES[t].name + ' · ' + m + ' · ' + sizeLabel;
+      document.querySelectorAll('.mark').forEach((el) => {
+        if (!el.closest('.crisis')) el.textContent = t;
+      });
+      renderSwatches();
+    }
+
+    function renderSwatches() {
+      const t = root.getAttribute('data-theme');
+      swatches.innerHTML = THEMES[t].colors.map(([k, hex]) =>
+        '<span class="swatch"><i style="background:' + hex + '"></i>' + k + ' ' + hex + '</span>'
+      ).join('');
+    }
+
+    function setPressed(selector, attr, value) {
+      document.querySelectorAll(selector).forEach((btn) => {
+        btn.setAttribute('aria-pressed', String(btn.getAttribute(attr) === value));
+      });
+    }
+
+    document.querySelectorAll('[data-theme]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        root.setAttribute('data-theme', btn.getAttribute('data-theme'));
+        setPressed('.seg [data-theme]', 'data-theme', btn.getAttribute('data-theme'));
+        updateCaption();
+      });
+    });
+    document.querySelectorAll('[data-mode]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        root.setAttribute('data-mode', btn.getAttribute('data-mode'));
+        setPressed('.seg [data-mode]', 'data-mode', btn.getAttribute('data-mode'));
+        updateCaption();
+      });
+    });
+    document.querySelectorAll('[data-size]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        root.setAttribute('data-size', btn.getAttribute('data-size'));
+        setPressed('.seg [data-size]', 'data-size', btn.getAttribute('data-size'));
+        updateCaption();
+      });
+    });
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen-panel').forEach((p) => {
+        p.classList.toggle('active', p.getAttribute('data-panel') === id);
+      });
+      document.querySelectorAll('#screen-nav button').forEach((b) => {
+        b.setAttribute('aria-current', String(b.getAttribute('data-screen') === id));
+      });
+      if (id === 'ask') resetAskDemo(true);
+    }
+
+    document.querySelectorAll('#screen-nav button').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen(btn.getAttribute('data-screen')));
+    });
+    document.querySelectorAll('[data-goto]').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen(btn.getAttribute('data-goto')));
+    });
+    document.querySelectorAll('[data-open-ask]').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen('ask'));
+    });
+    document.querySelectorAll('[data-close-ask]').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen('today-critical'));
+    });
+
+    // Check-in chips
+    document.querySelectorAll('.chips').forEach((group) => {
+      group.querySelectorAll('.chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          group.querySelectorAll('.chip').forEach((c) => c.classList.remove('on'));
+          chip.classList.add('on');
+        });
+      });
+    });
+
+    // Journal entry sheet
+    const entrySheet = document.getElementById('entry-sheet');
+    const entryBackdrop = document.getElementById('entry-backdrop');
+    function setEntryOpen(open) {
+      entrySheet.classList.toggle('open', open);
+      entryBackdrop.classList.toggle('open', open);
+    }
+    document.getElementById('open-entry-sheet').addEventListener('click', () => setEntryOpen(true));
+    document.getElementById('close-entry').addEventListener('click', () => setEntryOpen(false));
+    entryBackdrop.addEventListener('click', () => setEntryOpen(false));
+
+    // Ask voice-to-draft demo
+    const draft = document.getElementById('ask-draft');
+    const sendBtn = document.getElementById('send-btn');
+    const micBtn = document.getElementById('mic-btn');
+    const voiceStatus = document.getElementById('voice-status');
+    const voiceStop = document.getElementById('voice-stop');
+    const voiceCancel = document.getElementById('voice-cancel');
+    const askThread = document.getElementById('ask-thread');
+    let voiceTimer = null;
+    let voicePhase = 'idle';
+    let savedDraft = '';
+
+    function setSendEnabled() {
+      sendBtn.disabled = !draft.value.trim() || voicePhase === 'listening' || voicePhase === 'processing';
+    }
+    draft.addEventListener('input', setSendEnabled);
+
+    function setVoicePhase(phase, message) {
+      voicePhase = phase;
+      voiceStatus.textContent = message;
+      voiceStatus.className = 'voice-status' + (phase === 'listening' || phase === 'processing' ? ' ' + phase : '');
+      micBtn.classList.toggle('listening', phase === 'listening');
+      voiceStop.disabled = phase !== 'listening';
+      voiceCancel.disabled = phase === 'idle';
+      setSendEnabled();
+    }
+
+    function resetAskDemo(openFresh) {
+      clearTimeout(voiceTimer);
+      draft.value = '';
+      savedDraft = '';
+      setVoicePhase('idle', 'Голос: idle — нажмите микрофон');
+      if (openFresh) {
+        askThread.innerHTML = '<div class="bubble bot">Могу объяснить рекомендацию про приём или подсказать безопасный следующий шаг. Выберите вопрос или продиктуйте.</div>';
+      }
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (voicePhase === 'listening' || voicePhase === 'processing') return;
+      savedDraft = draft.value;
+      setVoicePhase('listening', 'Слушаю… нажмите «Остановить»');
+    });
+    voiceStop.addEventListener('click', () => {
+      if (voicePhase !== 'listening') return;
+      setVoicePhase('processing', 'Расшифровка…');
+      voiceTimer = setTimeout(() => {
+        draft.value = (savedDraft ? savedDraft + ' ' : '') + 'Почему важно принять антигистамин до прогулки?';
+        setVoicePhase('idle', 'Draft готов — отредактируйте и отправьте отдельно');
+        setSendEnabled();
+      }, 900);
+    });
+    voiceCancel.addEventListener('click', () => {
+      clearTimeout(voiceTimer);
+      draft.value = savedDraft;
+      setVoicePhase('idle', 'Голос отменён — текст черновика сохранён');
+    });
+
+    document.querySelectorAll('[data-ask-q]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const q = btn.getAttribute('data-ask-q');
+        askThread.insertAdjacentHTML('beforeend', '<div class="bubble user"></div>');
+        askThread.lastChild.textContent = q;
+        askThread.insertAdjacentHTML('beforeend', '<div class="bubble bot">Краткий локальный ответ по контексту рекомендации. Online AI — за флагом; offline не ломает sheet.</div>');
+        askThread.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+
+    sendBtn.addEventListener('click', () => {
+      const text = draft.value.trim();
+      if (!text) return;
+      const distress = /не могу дышать|скорую|умираю/i.test(text);
+      askThread.insertAdjacentHTML('beforeend', '<div class="bubble user"></div>');
+      askThread.lastChild.textContent = text;
+      draft.value = '';
+      setSendEnabled();
+      if (distress) {
+        askThread.insertAdjacentHTML('beforeend', '<div class="bubble bot">Похоже на острое состояние — открываю SOS без вызова модели.</div>');
+        setTimeout(() => showScreen('sos'), 600);
+        return;
+      }
+      askThread.insertAdjacentHTML('beforeend', '<div class="bubble bot">Ответ отправлен отдельным тапом после правки draft. Аудио не сохраняется.</div>');
+    });
+
+    updateCaption();
+  </script>
+</body>
+</html>
