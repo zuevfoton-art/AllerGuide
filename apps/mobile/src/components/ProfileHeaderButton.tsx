@@ -12,7 +12,10 @@ import { useTranslation } from '@/src/store/locale-store';
 import type { Profile } from '@/src/types';
 
 type ProfileHeaderButtonProps = {
-  /** Chip trigger with name + detail (scanner/map chrome); default is icon-only. */
+  /**
+   * Chip = icon + name (UX v2 canon for shell chrome). Default `chip`.
+   * Falls back to icon when no active profile name. Do not place on `/profile` hub content.
+   */
   variant?: 'icon' | 'chip';
   chipTitle?: string;
   chipDetail?: string;
@@ -23,7 +26,7 @@ type ProfileHeaderButtonProps = {
 };
 
 export function ProfileHeaderButton({
-  variant = 'icon',
+  variant = 'chip',
   chipTitle,
   chipDetail,
   destination = 'switcher',
@@ -35,6 +38,9 @@ export function ProfileHeaderButton({
   const [open, setOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const activeProfileId = useAppStore((s) => s.activeProfileId);
+  const activeProfile = useAppStore((s) => s.activeProfile);
+  const resolvedTitle = chipTitle ?? activeProfile?.name ?? undefined;
+  const showChip = variant === 'chip' && Boolean(resolvedTitle);
 
   useEffect(() => {
     if (!open) return;
@@ -63,7 +69,7 @@ export function ProfileHeaderButton({
   };
 
   const trigger =
-    variant === 'chip' && chipTitle ? (
+    showChip && resolvedTitle ? (
       <Pressable
         testID="profile-header-chip"
         style={styles.chip}
@@ -74,7 +80,7 @@ export function ProfileHeaderButton({
         <Ionicons name="person-circle-outline" size={20} color={theme.colors.textSecondary} />
         <View style={styles.chipTextCol}>
           <Text style={styles.chipTitle} numberOfLines={1}>
-            {chipTitle}
+            {resolvedTitle}
           </Text>
           {chipDetail ? (
             <Text style={styles.chipDetail} numberOfLines={1}>

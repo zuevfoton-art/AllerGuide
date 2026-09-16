@@ -1,0 +1,36 @@
+# Ask sheet from Today — open, suggest chip, composer visible (offline-capable)
+appId: com.aclearo.app
+---
+- runFlow: _offline-bootstrap.yaml
+- extendedWaitUntil:
+    visible:
+      id: today-ask
+    timeout: 15000
+- tapOn:
+    id: today-ask
+- extendedWaitUntil:
+    visible:
+      id: ask-chat-sheet
+    timeout: 10000
+- assertVisible:
+    id: ask-panel
+- assertVisible:
+    id: ask-input
+- assertVisible:
+    id: ask-send
+- tapOn:
+    id: ask-suggest-air
+- extendedWaitUntil:
+    visible:
+      id: ask-message-user
+    timeout: 10000
+- assertVisible:
+    id: ask-message-assistant
+- tapOn:
+    id: ask-chat-sheet-close
+- extendedWaitUntil:
+    notVisible:
+      id: ask-chat-sheet
+    timeout: 10000
+- assertVisible:
+    id: today-ask

@@ -246,6 +246,8 @@ const ru: LocaleMessages = {
       pollen: 'Что с пыльцой',
     },
     answerFallback: 'Не получилось ответить. Откройте экспертные материалы или журнал.',
+    quickWhy: 'Почему это важно?',
+    quickToday: 'Что сделать сегодня?',
   },
   home: {
     eyebrow: 'Сегодня',
@@ -281,6 +283,8 @@ const ru: LocaleMessages = {
     phenotypeHintsTitle: 'Рекомендации по профилю',
     insightsTitle: 'Рекомендации и напоминания',
     insightsEmpty: 'Сейчас нет срочных рекомендаций. Продолжайте вести дневник — подсказки появятся по вашим данным.',
+    insightsMore: 'Ещё {{count}} рекомендаций',
+    insightsCollapse: 'Свернуть',
     insightsSelectProfileTitle: 'Выберите профиль',
     insightsSelectProfileText: 'Рекомендации и напоминания строятся по активному профилю и записям дневника.',
     insightsOpenProfiles: 'Профили',

@@ -245,6 +245,8 @@ const it: LocaleMessages = {
       pollen: 'Che succede al polline',
     },
     answerFallback: 'Nessuna risposta. Apri le schede esperto o il diario.',
+    quickWhy: 'Perché è importante?',
+    quickToday: 'Cosa fare oggi?',
   },
   home: {
     eyebrow: 'Oggi',
@@ -280,6 +282,8 @@ const it: LocaleMessages = {
     phenotypeHintsTitle: 'Raccomandazioni del profilo',
     insightsTitle: 'Raccomandazioni e promemoria',
     insightsEmpty: 'Nessuna raccomandazione urgente ora. Continua il diario: i suggerimenti arriveranno dai tuoi dati.',
+    insightsMore: 'Altre {{count}} raccomandazioni',
+    insightsCollapse: 'Mostra meno',
     insightsSelectProfileTitle: 'Seleziona un profilo',
     insightsSelectProfileText: 'Raccomandazioni e promemoria si basano sul profilo attivo e sul diario.',
     insightsOpenProfiles: 'Profili',

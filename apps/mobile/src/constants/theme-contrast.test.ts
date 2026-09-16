@@ -41,11 +41,11 @@ describe('theme contrast', () => {
     }
   });
 
-  it('records the primary-button pair as a documented exception', () => {
+  it('records light primary-button pair as a documented exception; dark sky accent meets AA', () => {
     const light = contrastRatio(lightColors.onAccent, lightColors.accent);
     const dark = contrastRatio(darkColors.onAccent, darkColors.accent);
     expect(light).toBeLessThan(AA);
-    expect(dark).toBeLessThan(AA);
+    expect(dark).toBeGreaterThanOrEqual(AA);
     expect(BRAND_BUTTON_EXCEPTION.reason).toContain('§13');
   });
 });

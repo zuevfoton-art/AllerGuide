@@ -39,7 +39,8 @@ import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabI
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
-import { AI_CHAT_ENABLED } from '@/src/constants/features';
+import { ActionChip } from '@/src/components/ActionChip';
+import { AskChatSheet } from '@/src/components/AskChatSheet';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
@@ -59,6 +60,7 @@ export default function HomeScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
   const prescribedCourse = activeProfileId ? getPrescribedCourse(activeProfileId) : null;
 
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
@@ -138,7 +140,7 @@ export default function HomeScreen() {
     [profile, wellness, t],
   );
 
-  const insightItems = useMemo(
+  const insights = useMemo(
     () =>
       buildHomeInsightItems({
         profile,
@@ -161,6 +163,10 @@ export default function HomeScreen() {
       t,
     ],
   );
+  const [insightsExpanded, setInsightsExpanded] = useState(false);
+  const displayedInsights = insightsExpanded
+    ? [...insights.items, ...insights.collapsedItems]
+    : insights.items;
 
   useEffect(() => {
     if (!returnStage) return;
@@ -194,7 +200,7 @@ export default function HomeScreen() {
         </>
       }>
 
-      <TabScreenHeader eyebrow={dateLabel} title={profile?.name ?? t('tabs.today')} />
+      <TabScreenHeader eyebrow={dateLabel} title={t('tabs.today')} />
 
       {loadingWellness && !wellness ? (
         <>
@@ -216,15 +222,11 @@ export default function HomeScreen() {
             onSaved={reloadHomeData}
           />
           <WeekRingCard entries={diaryEntries} surface="today" />
-          {AI_CHAT_ENABLED ? (
-            <Button
-              testID="today-ask"
-              label={t('today.ask')}
-              variant="ghost"
-              block
-              onPress={() => router.push('/ask')}
-            />
-          ) : null}
+          <ActionChip
+            testID="today-ask"
+            label={t('today.ask')}
+            onPress={() => setAskOpen(true)}
+          />
         </>
       ) : null}
 
@@ -322,21 +324,40 @@ export default function HomeScreen() {
         <View style={[styles.listHead, styles.listHeadPad]}>
           <CardTitle>{t('home.insightsTitle')}</CardTitle>
         </View>
-        {insightItems.length === 0 ? (
+        {displayedInsights.length === 0 ? (
           <View style={styles.emptyInsights}>
             <Text style={styles.emptyInsightsText}>{t('home.insightsEmpty')}</Text>
           </View>
         ) : (
-          insightItems.map((item, index) => (
-            <InsightRow
-              key={item.id}
-              item={item}
-              bordered={index < insightItems.length - 1}
-              styles={styles}
-              ui={ui}
-              theme={theme}
-            />
-          ))
+          <>
+            {displayedInsights.map((item, index) => (
+              <InsightRow
+                key={item.id}
+                item={item}
+                bordered={
+                  index < displayedInsights.length - 1 ||
+                  (!insightsExpanded && insights.collapsedCount > 0)
+                }
+                styles={styles}
+                ui={ui}
+                theme={theme}
+              />
+            ))}
+            {insights.collapsedCount > 0 ? (
+              <Pressable
+                testID="home-insights-more"
+                style={styles.moreInsights}
+                onPress={() => setInsightsExpanded((open) => !open)}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.insightsMore', { count: insights.collapsedCount })}>
+                <Text style={styles.moreInsightsText}>
+                  {insightsExpanded
+                    ? t('home.insightsCollapse')
+                    : t('home.insightsMore', { count: insights.collapsedCount })}
+                </Text>
+              </Pressable>
+            ) : null}
+          </>
         )}
       </GlassCard>
       </HintAnchor>
@@ -361,6 +382,16 @@ export default function HomeScreen() {
       )}
 
       <Disclaimer compact>{t('home.disclaimerShort')}</Disclaimer>
+
+      <AskChatSheet
+        visible={askOpen}
+        onClose={() => setAskOpen(false)}
+        context={
+          insights.items[0]
+            ? [`criticality:${insights.items[0].criticality}`, `kind:${insights.items[0].kind}`]
+            : ['surface:today']
+        }
+      />
     </Screen>
   );
 }
@@ -501,6 +532,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 13,
       color: colors.textSecondary,
       lineHeight: 18,
+    },
+    moreInsights: {
+      minHeight: 44,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    moreInsightsText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accent,
     },
     expertRow: {
       flexDirection: 'row',
