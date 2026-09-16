@@ -4,13 +4,13 @@ import { StyleSheet, View } from 'react-native';
 type OnboardingWaveBackgroundProps = {
   /** Sage soft wash fill */
   accentLight: string;
-  /** Moss / brand accent blob */
+  /** Slate primary accent blob */
   accent: string;
   /** Optional dusty-rose secondary soft (Earth Wellness) */
   secondarySoft?: string;
 };
 
-/** Organic blobs — Earth Wellness atmosphere (Moss + Sage + Dusty Rose). */
+/** Organic blobs — Earth Wellness 2B (Slate + Sage + Dusty Rose). */
 export function OnboardingWaveBackground({
   accentLight,
   accent,
