@@ -195,4 +195,40 @@ describe('scanner-service AI scan auth', () => {
       }),
     );
   });
+
+  it('keeps a medicine pack label on the medicine diary route after composition strip', async () => {
+    mockRunSmartScan.mockResolvedValue({
+      verdict: 'осторожно',
+      reason: 'Найдена лактоза',
+      matches: ['Молоко'],
+      crossMatches: [],
+      mode: 'product',
+      level: 'high',
+      source: 'ocr',
+    });
+
+    const { getDemoMedicineLabelText } = await import('@allerguide/ai');
+    const { scanFromOcr } = await import('./scanner-service');
+    const result = await scanFromOcr({
+      mode: 'product',
+      ocrText: getDemoMedicineLabelText(),
+      profile: {
+        id: 7,
+        name: 'Мария',
+        birthYear: 1992,
+        type: 'self',
+        allergies: '["milk"]',
+      },
+    });
+
+    expect(result.mode).toBe('medicine');
+    expect(result.productCategory).toBe('medicine');
+    expect(result.medicineCard?.name).toMatch(/нурофен/i);
+    expect(mockRunSmartScan).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mode: 'medicine',
+        text: expect.stringMatching(/лактоза/i),
+      }),
+    );
+  });
 });

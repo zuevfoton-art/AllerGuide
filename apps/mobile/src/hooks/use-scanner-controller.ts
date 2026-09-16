@@ -3,6 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
 import { computeScanTrends, extractGtinFromScan, type Profile, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
+import { hasMedicinePackageLabelSignal } from '@allerguide/ai';
 import { useAppStore } from '@/src/store/app-store';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
@@ -434,7 +435,10 @@ export function useScannerController() {
     if (!profileId || !result) return;
 
     const draft = buildScanDiaryDraft({ result, scanText: input });
-    const sectionType = resolveScanDiarySection(result);
+    const sectionType = resolveScanDiarySection({
+      ...result,
+      hasMedicineLabelSignal: hasMedicinePackageLabelSignal(input),
+    });
     const editorState = await buildDiarySectionEditorState({
       sectionType,
       profileId,
