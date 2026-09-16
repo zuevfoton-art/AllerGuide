@@ -1,5 +1,6 @@
 import {
   buildAnalyticsPayload,
+  computeCrashFreeRate,
   isAnalyticsEventName,
   type AnalyticsEventPayload,
 } from '@allerguide/core';
@@ -61,6 +62,12 @@ export function buildAnalyticsDashboard(days = 7) {
     topEvents,
     topScreens,
     byPlatform,
+    crashFree: computeCrashFreeRate({
+      sessionClientIds: recent.filter((item) => item.event === 'session_started').map((item) => item.client_id),
+      crashedClientIds: recent
+        .filter((item) => item.event === 'app_crashed' && item.fatal === true)
+        .map((item) => item.client_id),
+    }),
     recent: recent.slice(-20).reverse(),
   };
 }

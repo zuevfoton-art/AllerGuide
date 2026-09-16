@@ -6,6 +6,7 @@ import {
   parseDishComponentDefs,
   type DiaryAutoMetadata,
   type DiarySection,
+  type DiaryStep,
   type MedicineCard,
 } from '@allerguide/core';
 import {
@@ -17,6 +18,7 @@ import { DiaryDishComponentsField } from '@/src/components/diary/wizard/DiaryDis
 import { DiaryLegacyEditor } from '@/src/components/diary/wizard/DiaryLegacyEditor';
 import { DiaryPefZonePreview } from '@/src/components/diary/wizard/DiaryPefZonePreview';
 import { DiaryStepField } from '@/src/components/diary/wizard/DiaryStepField';
+import { splitDiaryScreenForIme } from '@/src/components/diary/wizard/diary-editor-layout';
 import { createStyles } from '@/src/components/diary/wizard/diary-wizard-styles';
 import { DishNameField } from '@/src/components/DishNameField';
 import { MedicineNameField } from '@/src/components/MedicineNameField';
@@ -123,9 +125,88 @@ export function DiaryWizard({
     initialStepId,
   });
 
+  const { pinnedSteps, scrolledSteps } = splitDiaryScreenForIme(screens);
+  const pinnedAnswerKey = pinnedSteps
+    .map((step) => `${step.id}:${answers[step.id] ?? ''}`)
+    .join('|');
+
+  const renderStep = (current: DiaryStep) => (
+    <View key={current.id} style={styles.fieldBlock}>
+      <Text style={styles.stepLabel}>{current.label}</Text>
+      {current.hint ? <Text style={styles.stepHint}>{current.hint}</Text> : null}
+
+      {current.field === 'checklist' && current.id === 'foodComponents' ? (
+        <DiaryDishComponentsField
+          foodText={answers.food ?? ''}
+          selectedRaw={answers.foodComponents ?? ''}
+          componentsDefRaw={answers.foodComponentsDef ?? ''}
+          dishId={answers.foodDishId ?? ''}
+          dishName={answers.foodDishName ?? ''}
+          conflictsSummary={answers.foodComponentConflicts ?? ''}
+          profileAllergiesJson={profileAllergiesJson}
+          offEnriching={offEnriching}
+          offSource={answers.foodOffSource ?? ''}
+          offProductName={answers.foodOffName ?? ''}
+          onChangeSelection={setFoodComponentSelection}
+        />
+      ) : medicineNameStepId && current.id === medicineNameStepId ? (
+        <MedicineNameField
+          value={answers[medicineNameStepId] ?? ''}
+          placeholder={current.placeholder}
+          label={current.label}
+          inputTestID={`diary-field-${current.id}`}
+          suggestions={medicineSuggestions}
+          loading={medicineSearching}
+          onChange={(value) => setAnswer(medicineNameStepId, value)}
+          onSelect={selectMedicineSuggestion}
+        />
+      ) : section.type === 'Питание' && current.id === 'food' ? (
+        <>
+          <DishNameField
+            value={answers.food ?? ''}
+            placeholder={current.placeholder}
+            label={current.label}
+            inputTestID={`diary-field-${current.id}`}
+            suggestions={dishSuggestions}
+            loading={dishSearching && !hasLocalDishPreview}
+            onChange={(value) => setAnswer('food', value)}
+            onSelect={selectDishSuggestion}
+          />
+          {answers.foodDishName && answers.foodComponentsDef ? (
+            <Text style={styles.hint} testID="diary-dish-preview">
+              {t('diaryWizard.dishPreviewTitle')}:{' '}
+              {parseDishComponentDefs(answers.foodComponentsDef)
+                .map((component) => component.nameRu)
+                .join(', ')}
+            </Text>
+          ) : null}
+          {offEnriching && !hasLocalDishPreview ? (
+            <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
+              <ActivityIndicator size="small" color={theme.colors.accent} />
+              <Text style={styles.hint}>{t('diaryWizard.dishOffLoading')}</Text>
+            </View>
+          ) : null}
+        </>
+      ) : (
+        <DiaryStepField
+          step={current}
+          value={answers[current.id] ?? ''}
+          onChange={(value) => setAnswer(current.id, value)}
+        />
+      )}
+      {isDiaryVoiceStep(section.type, current.id) ? (
+        <VoiceNoteButton
+          testID="diary-wizard-voice"
+          onTranscript={(transcript) => applyVoiceTranscript(current.id, transcript)}
+        />
+      ) : null}
+    </View>
+  );
+
   return (
     <View style={styles.wrap}>
-      <DiaryEditorPinnedTop deps={[section.title, overallStepNumber, overallStepsTotal]}>
+      <DiaryEditorPinnedTop
+        deps={[section.title, overallStepNumber, overallStepsTotal, pinnedAnswerKey]}>
         <Pressable
           testID="diary-wizard-step-label"
           collapsable={false}
@@ -147,82 +228,12 @@ export function DiaryWizard({
             style={[styles.progressFill, { width: `${(overallStepNumber / overallStepsTotal) * 100}%` }]}
           />
         </View>
+        {pinnedSteps.map(renderStep)}
       </DiaryEditorPinnedTop>
 
       {notice ? <View style={styles.notice}>{notice}</View> : null}
 
-      {screens.map((current) => (
-        <View key={current.id} style={styles.fieldBlock}>
-          <Text style={styles.stepLabel}>{current.label}</Text>
-          {current.hint ? <Text style={styles.stepHint}>{current.hint}</Text> : null}
-
-          {current.field === 'checklist' && current.id === 'foodComponents' ? (
-            <DiaryDishComponentsField
-              foodText={answers.food ?? ''}
-              selectedRaw={answers.foodComponents ?? ''}
-              componentsDefRaw={answers.foodComponentsDef ?? ''}
-              dishId={answers.foodDishId ?? ''}
-              dishName={answers.foodDishName ?? ''}
-              conflictsSummary={answers.foodComponentConflicts ?? ''}
-              profileAllergiesJson={profileAllergiesJson}
-              offEnriching={offEnriching}
-              offSource={answers.foodOffSource ?? ''}
-              offProductName={answers.foodOffName ?? ''}
-              onChangeSelection={setFoodComponentSelection}
-            />
-          ) : medicineNameStepId && current.id === medicineNameStepId ? (
-            <MedicineNameField
-              value={answers[medicineNameStepId] ?? ''}
-              placeholder={current.placeholder}
-              label={current.label}
-              inputTestID={`diary-field-${current.id}`}
-              suggestions={medicineSuggestions}
-              loading={medicineSearching}
-              onChange={(value) => setAnswer(medicineNameStepId, value)}
-              onSelect={selectMedicineSuggestion}
-            />
-          ) : section.type === 'Питание' && current.id === 'food' ? (
-            <>
-              <DishNameField
-                value={answers.food ?? ''}
-                placeholder={current.placeholder}
-                label={current.label}
-                inputTestID={`diary-field-${current.id}`}
-                suggestions={dishSuggestions}
-                loading={dishSearching && !hasLocalDishPreview}
-                onChange={(value) => setAnswer('food', value)}
-                onSelect={selectDishSuggestion}
-              />
-              {answers.foodDishName && answers.foodComponentsDef ? (
-                <Text style={styles.hint} testID="diary-dish-preview">
-                  {t('diaryWizard.dishPreviewTitle')}:{' '}
-                  {parseDishComponentDefs(answers.foodComponentsDef)
-                    .map((component) => component.nameRu)
-                    .join(', ')}
-                </Text>
-              ) : null}
-              {offEnriching && !hasLocalDishPreview ? (
-                <View style={styles.offLoadingRow} testID="diary-dish-recognizing">
-                  <ActivityIndicator size="small" color={theme.colors.accent} />
-                  <Text style={styles.hint}>{t('diaryWizard.dishOffLoading')}</Text>
-                </View>
-              ) : null}
-            </>
-          ) : (
-            <DiaryStepField
-              step={current}
-              value={answers[current.id] ?? ''}
-              onChange={(value) => setAnswer(current.id, value)}
-            />
-          )}
-          {isDiaryVoiceStep(section.type, current.id) ? (
-            <VoiceNoteButton
-              testID="diary-wizard-voice"
-              onTranscript={(transcript) => applyVoiceTranscript(current.id, transcript)}
-            />
-          ) : null}
-        </View>
-      ))}
+      {scrolledSteps.map(renderStep)}
 
       {scalePreview ? (
         <Text style={styles.scalePreview}>

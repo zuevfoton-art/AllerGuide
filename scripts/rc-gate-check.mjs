@@ -390,10 +390,11 @@ function checkMaestroFlows() {
     !editorModal.includes('diary-editor-pinned-top') ||
     !editorModal.includes('diaryEditorSheetPaddingBottom') ||
     !editorModal.includes('registerInput') ||
-    /liftStyle\s*[,}\]]/.test(editorModal)
+    /liftStyle\s*[,}\]]/.test(editorModal) ||
+    /focusedInputRef\.current = null/.test(editorModal)
   ) {
     failures.push(
-      'DiaryEditorModal must expose diary-editor-title, cap IME padding, dismiss IME on title press, and must not apply liftStyle',
+      'DiaryEditorModal must expose diary-editor-title, cap IME padding, dismiss IME on title press, keep registered inputs, and must not apply liftStyle',
     );
   }
 
@@ -402,8 +403,13 @@ function checkMaestroFlows() {
     failures.push('diary-editor-ime.ts missing (blur registered Modal input before Keyboard.dismiss)');
   } else {
     const imeBody = fs.readFileSync(diaryImeHelper, 'utf8');
-    if (!imeBody.includes('Keyboard.dismiss') || !imeBody.includes('blurTextInput')) {
-      failures.push('blurDiaryEditorIme must blur the focused input then Keyboard.dismiss');
+    if (
+      !imeBody.includes('Keyboard.dismiss') ||
+      !imeBody.includes('blurTextInput') ||
+      !imeBody.includes('capable.blur') ||
+      !imeBody.includes('for (const node of registered)')
+    ) {
+      failures.push('blurDiaryEditorIme must blur every registered input via host blur() then Keyboard.dismiss');
     }
   }
 
@@ -423,6 +429,26 @@ function checkMaestroFlows() {
   ) {
     failures.push(
       'DiaryStepField inputs must sit in a wrap with definite height (nightly 34451477109 inverted skinArea bounds)',
+    );
+  }
+  if (!stepField.includes('editorScroll?.dismissIme()') || !stepField.includes('handleChangeText')) {
+    failures.push(
+      'DiaryStepField must dismiss IME on choice press and re-register the input on change (nightly 35067465304)',
+    );
+  }
+
+  const diaryWizard = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryWizard.tsx'), 'utf8');
+  const diaryLayout = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/diary-editor-layout.ts'),
+    'utf8',
+  );
+  if (
+    !diaryWizard.includes('splitDiaryScreenForIme') ||
+    !diaryWizard.includes('pinnedSteps.map') ||
+    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS')
+  ) {
+    failures.push(
+      'DiaryWizard must pin compact choice chips above the editor scroll (nightly 35067465304)',
     );
   }
 

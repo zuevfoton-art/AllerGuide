@@ -21,6 +21,8 @@ describe('analytics-events', () => {
     expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_started');
     expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_completed');
     expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_skipped');
+    expect(ANALYTICS_EVENT_NAMES).toContain('session_started');
+    expect(ANALYTICS_EVENT_NAMES).toContain('app_crashed');
     expect(ANALYTICS_EVENT_NAMES.length).toBeGreaterThanOrEqual(10);
   });
 
@@ -30,8 +32,9 @@ describe('analytics-events', () => {
         screen: 'home',
         email: 'secret@example.com',
         profile_id: 3,
+        userId: '9',
       }),
-    ).toEqual({ screen: 'home', profile_id: 3 });
+    ).toEqual({ screen: 'home' });
   });
 
   it('parses valid inbound payloads', () => {

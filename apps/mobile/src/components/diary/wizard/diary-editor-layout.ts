@@ -9,6 +9,48 @@ export const DIARY_EDITOR_HEADER_MIN_HEIGHT = 64;
 export const DIARY_EDITOR_FOOTER_MIN_HEIGHT = 56;
 /** Matches `space[4]` — keep this file free of RN layout imports for Vitest. */
 export const DIARY_EDITOR_SAFE_BOTTOM_MIN = 16;
+/**
+ * Single-select rows small enough to pin above the editor scroll (itching,
+ * 0–3 severity). Catalog grids stay in the scroll below the text field.
+ */
+export const COMPACT_DIARY_CHOICE_MAX_OPTIONS = 8;
+
+type DiaryScreenStep = {
+  field: string;
+  multiSelect?: boolean;
+  choices?: readonly string[];
+};
+
+export function isCompactDiaryChoice(step: DiaryScreenStep): boolean {
+  return (
+    step.field === 'choice' &&
+    !step.multiSelect &&
+    Array.isArray(step.choices) &&
+    step.choices.length > 0 &&
+    step.choices.length <= COMPACT_DIARY_CHOICE_MAX_OPTIONS
+  );
+}
+
+/**
+ * Pin compact choice chips in the sheet chrome when they share a screen with
+ * text fields. Nightly 35067465304: itching `diary-choice-Слабый` sat at
+ * `[232,1925][428,2024]` under Gboard after fill; title tap left IME up
+ * (Modal window token) and `extendedWaitUntil visible` failed for 15s.
+ */
+export function splitDiaryScreenForIme<T extends DiaryScreenStep>(
+  steps: readonly T[],
+): { pinnedSteps: T[]; scrolledSteps: T[] } {
+  const pinnedSteps: T[] = [];
+  const scrolledSteps: T[] = [];
+  for (const step of steps) {
+    if (isCompactDiaryChoice(step)) pinnedSteps.push(step);
+    else scrolledSteps.push(step);
+  }
+  if (pinnedSteps.length === 0 || scrolledSteps.length === 0) {
+    return { pinnedSteps: [], scrolledSteps: [...steps] };
+  }
+  return { pinnedSteps, scrolledSteps };
+}
 
 export function diaryEditorSheetMaxHeight(windowHeight: number): number {
   return Math.round(windowHeight * DIARY_EDITOR_SHEET_MAX_RATIO);

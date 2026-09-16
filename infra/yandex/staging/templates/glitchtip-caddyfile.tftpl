@@ -1,0 +1,8 @@
+{
+	email ${email}
+}
+
+${fqdn}%{ if fqdn_ru != "" }, ${fqdn_ru}%{ endif } {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}

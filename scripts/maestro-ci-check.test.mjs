@@ -282,9 +282,16 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /registerInput/);
     assert.match(editorModal, /unregisterInput/);
     assert.match(editorModal, /blurDiaryEditorIme/);
+    assert.doesNotMatch(
+      editorModal,
+      /focusedInputRef\.current = null/,
+      'must keep the last Modal TextInput so a second IME dismiss can still blur it (nightly 35067465304)',
+    );
     const imeHelper = read('apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
     assert.match(imeHelper, /Keyboard\.dismiss/);
     assert.match(imeHelper, /blurTextInput/);
+    assert.match(imeHelper, /capable\.blur/);
+    assert.match(imeHelper, /for \(const node of registered\)/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /testID="diary-editor-pinned-top"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
@@ -304,6 +311,9 @@ describe('Maestro nightly CI invariants', () => {
     const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
     assert.match(wizard, /DiaryEditorFooter/);
     assert.match(wizard, /DiaryEditorPinnedTop/);
+    assert.match(wizard, /splitDiaryScreenForIme/);
+    assert.match(wizard, /pinnedSteps\.map/);
+    assert.match(wizard, /scrolledSteps\.map/);
     assert.match(wizard, /testID="diary-wizard-primary"/);
     assert.match(wizard, /testID="diary-wizard-step-label"/);
     assert.match(wizard, /onPressIn=\{\(\) => editorScroll\?\.dismissIme\(\)\}/);
@@ -377,9 +387,16 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(stepField, /styles\.inputWrap/);
     assert.match(stepField, /registerInput/);
     assert.match(stepField, /unregisterInput/);
+    assert.match(stepField, /handleChangeText/);
+    assert.match(stepField, /editorScroll\?\.dismissIme\(\)/);
     const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
     assert.match(fieldStyles, /inputWrap:/);
     assert.match(fieldStyles, /height: density\.tapMinHeight/);
+    assert.match(fieldStyles, /inputMultilineWrap:/);
+    assert.match(fieldStyles, /maxHeight: 160/);
+    const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
+    assert.match(layout, /splitDiaryScreenForIme/);
+    assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
   });
 
   it('opens scanner manual input before typing молоко', () => {

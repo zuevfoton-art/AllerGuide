@@ -8,7 +8,8 @@
 #   GOOGLE_PLACES_API_KEY=... GOOGLE_AIR_QUALITY_API_KEY=... ./scripts/yc-lockbox-upsert.sh --places-air-quality
 #
 # Env:
-#   YC_LOCKBOX_SECRET_ID  (default: staging id from yc-ai-phase0-smoke)
+#   YC_LOCKBOX_SECRET_ID  (default: staging API secret). Do not point this at GlitchTip —
+#   use ./scripts/yc-glitchtip-lockbox-init.sh and YC_GLITCHTIP_LOCKBOX_SECRET_ID.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

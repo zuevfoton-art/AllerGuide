@@ -1,0 +1,69 @@
+# GlitchTip — self-hosted crash ingest for Aclearo staging.
+# NOT the AllerGuide Managed Postgres cluster (profiles / diary).
+#
+# Usage:
+#   cp .env.example .env
+#   docker compose up -d
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: glitchtip
+    volumes:
+      - glitchtip-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U glitchtip -d glitchtip']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:8
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  glitchtip:
+    image: glitchtip/glitchtip:6.2.6
+    restart: unless-stopped
+    command: ./bin/run-all-in-one.sh
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    ports:
+      # Loopback only — Caddy on the VM terminates TLS on :443.
+      - '127.0.0.1:8000:8000'
+    environment:
+      DATABASE_URL: postgres://glitchtip:${POSTGRES_PASSWORD}@postgres:5432/glitchtip
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      GLITCHTIP_DOMAIN: ${GLITCHTIP_DOMAIN:-https://errors.staging.aclearo.com}
+      VALKEY_URL: redis://valkey:6379/0
+      GLITCHTIP_MAX_EVENT_LIFE_DAYS: ${GLITCHTIP_MAX_EVENT_LIFE_DAYS:-90}
+      ENABLE_USER_REGISTRATION: ${ENABLE_USER_REGISTRATION:-false}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-support@aclearo.com}
+      EMAIL_URL: ${EMAIL_URL:-consolemail://}
+    volumes:
+      - glitchtip-uploads:/code/uploads
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)\"",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  glitchtip-pg:
+  glitchtip-uploads:

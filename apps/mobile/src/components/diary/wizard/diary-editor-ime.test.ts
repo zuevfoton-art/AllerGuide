@@ -17,9 +17,11 @@ describe('blurDiaryEditorIme', () => {
     }));
 
     const { blurDiaryEditorIme } = await import('./diary-editor-ime');
-    const registered = { id: 'appearance' };
+    const blur = vi.fn();
+    const registered = { id: 'appearance', blur };
     blurDiaryEditorIme([registered as never]);
 
+    expect(blur).toHaveBeenCalledTimes(1);
     expect(blurTextInput).toHaveBeenCalledWith(registered);
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
@@ -73,10 +75,14 @@ describe('blurDiaryEditorIme', () => {
     }));
 
     const { blurDiaryEditorIme } = await import('./diary-editor-ime');
-    const first = { id: 'skinArea' };
-    const second = { id: 'appearance' };
+    const firstBlur = vi.fn();
+    const secondBlur = vi.fn();
+    const first = { id: 'skinArea', blur: firstBlur };
+    const second = { id: 'appearance', blur: secondBlur };
     blurDiaryEditorIme([first, second] as never[]);
 
+    expect(firstBlur).toHaveBeenCalledTimes(1);
+    expect(secondBlur).toHaveBeenCalledTimes(1);
     expect(blurTextInput.mock.calls).toEqual([[first], [second]]);
     expect(dismiss).toHaveBeenCalledTimes(1);
   });

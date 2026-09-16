@@ -3,6 +3,8 @@
 # ("Слабый") sit under Gboard with inverted bounds and tapOn text fails.
 # Nightly 34956812041: wait-for-visible ran before scroll while Gboard still
 # covered the chip; Maestro never reached scrollUntilVisible. Scroll first.
+# Nightly 35067465304: compact chips (itching) are also pinned above the
+# scroll so they stay above Gboard; scrolled catalogs still need this order.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml

@@ -243,7 +243,7 @@ description: Senior product designer for AllerGuide — проектирует �
 | Сервер | Транспорт / идентификатор | Кому нужен | Зачем в AllerGuide | Права |
 |--------|---------------------------|------------|--------------------|-------|
 | GitHub | remote `https://api.githubcopilot.com/mcp/` (OAuth или `Bearer ${env:GITHUB_TOKEN}`); альтернатива — stdio `github/github-mcp-server` | все роли | PR, ревью, Issues, логи Actions без ручного `gh` | read + PR write; **без** admin и без `workflow` |
-| Sentry | remote `https://mcp.sentry.dev/mcp` (OAuth) | разработчик, QA | crash-free для гейта G5, стектрейсы staging/prod | read-only на проект |
+| Sentry | remote `https://mcp.sentry.dev/mcp` (OAuth) | разработчик, QA | **Deprecated for G5.** Crash grouping = GlitchTip UI; crash-free = analytics `crashFree`. Not required to close the gate | read-only на проект |
 | Chrome DevTools / Playwright | stdio | дизайнер, QA | проверка web-сборки Expo на `localhost:5000`, снимки состояний | локально |
 | Context7 (или аналог docs-MCP) | remote | все роли | актуальные документации Expo SDK 55 / RN 0.83 / Drizzle вместо догадок | публичный read |
 | Postgres (staging, YC Managed) | stdio, `STAGING_DATABASE_URL` | разработчик API, аналитик | проверка схем `profile` / `catalog` | **read-only роль, только YC staging** |
@@ -283,13 +283,13 @@ flowchart TD
   Debug --> Dev
   Gate -->|"успех"| QA["QA: Maestro + web-проверка"]
   QA --> Release["Релиз: deploy-staging + EAS"]
-  Release --> Observe["Наблюдение: Sentry + analytics dashboard"]
+  Release --> Observe["Наблюдение: GlitchTip + analytics crashFree"]
   Observe --> Analyst
 
   Analyst -.-> McpAnalytics["MCP: PostHog, Postgres RO, GitHub"]
   Designer -.-> McpDesign["MCP: Figma, Chrome DevTools"]
   Dev -.-> McpDev["MCP: GitHub, Context7, Postgres RO"]
-  QA -.-> McpQa["MCP: Playwright, Sentry"]
+  QA -.-> McpQa["MCP: Playwright (Sentry MCP deprecated)"]
   Release -.-> McpRelease["MCP: GitHub Actions, Yandex Cloud"]
 ```
 
@@ -300,7 +300,7 @@ flowchart TD
 | Аналитик | GitHub (read) | PostHog, Postgres RO staging | запись в БД, prod-данные |
 | Дизайнер | Chrome DevTools | Figma | БД, облако |
 | Разработчик | GitHub, Context7 | Postgres RO staging (YC) | prod-БД, `workflow`-скоуп |
-| QA | Playwright, Sentry (read) | GitHub | облако |
+| QA | Playwright | GitHub; Sentry MCP не обязателен | облако |
 | Релиз | GitHub Actions | YC containers / apigateway (`viewer`) | публикация ревизии в обход CI |
 
 ### 3.5. Безопасность и данные
