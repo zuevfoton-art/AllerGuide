@@ -98,6 +98,8 @@ Workflow: [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas
 
 Runner **не** ставит Android SDK; только `pnpm install` + `eas build --non-interactive`.
 
+Free-plan квота (`used its Android builds from the Free plan this month`): архив на EAS уходит, облачный Gradle не стартует. Workflow пишет warning и остаётся зелёным; APK — путь **C**. Другие ошибки EAS по-прежнему красные.
+
 ### Когда выбирать B вместо ручного A
 
 - Нужна воспроизводимая кнопка для QA
