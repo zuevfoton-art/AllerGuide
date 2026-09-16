@@ -249,6 +249,8 @@ export type LocaleMessages = {
       pollen: string;
     };
     answerFallback: string;
+    quickWhy: string;
+    quickToday: string;
   };
   home: {
     eyebrow: string;
@@ -284,6 +286,8 @@ export type LocaleMessages = {
     phenotypeHintsTitle: string;
     insightsTitle: string;
     insightsEmpty: string;
+    insightsMore: string;
+    insightsCollapse: string;
     insightsSelectProfileTitle: string;
     insightsSelectProfileText: string;
     insightsOpenProfiles: string;
