@@ -221,6 +221,36 @@ describe('saveScanDiaryEntry', () => {
     });
   });
 
+  it('tracks medicine and trigger diary sections without PII', async () => {
+    vi.mocked(addDiaryEntries).mockResolvedValue([{ ok: true, entryId: 13 }]);
+
+    await saveScanDiaryEntry({
+      profileId: 7,
+      entries: [{ type: 'Лекарство', details: '{"v":1,"answers":{}}' }],
+      level: 'medium',
+      source: 'openmedicinefacts',
+    });
+    expect(trackEvent).toHaveBeenCalledWith('scan_saved_to_diary', {
+      risk_level: 'medium',
+      scan_source: 'openmedicinefacts',
+      diary_section: 'medicine',
+    });
+
+    vi.mocked(trackEvent).mockClear();
+    vi.mocked(addDiaryEntries).mockResolvedValue([{ ok: true, entryId: 14 }]);
+    await saveScanDiaryEntry({
+      profileId: 7,
+      entries: [{ type: 'Триггер', details: '{"v":1,"answers":{}}' }],
+      level: 'low',
+      source: 'openproductsfacts',
+    });
+    expect(trackEvent).toHaveBeenCalledWith('scan_saved_to_diary', {
+      risk_level: 'low',
+      scan_source: 'openproductsfacts',
+      diary_section: 'trigger',
+    });
+  });
+
   it('propagates the write error without tracking', async () => {
     vi.mocked(addDiaryEntries).mockResolvedValue([{ ok: false, code: 'profile_not_found' }]);
 

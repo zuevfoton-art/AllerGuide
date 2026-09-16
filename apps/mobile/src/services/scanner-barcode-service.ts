@@ -1,6 +1,7 @@
 import {
   extractGtinFromScan,
   extractNonBarcodeLabel,
+  normalizeBarcode,
   resolveScanDiaryTarget,
   toMedicineCard,
   wasBarcodePreviouslyHighRisk,
@@ -15,7 +16,10 @@ import {
   type ResolvedBarcodeProduct,
 } from '@/src/services/barcode-lookup-service';
 import { fetchMedicineByBarcode, searchMedicinesFromCatalog } from '@/src/services/medicines-api';
-import { findRememberedMedicineByBarcode } from '@/src/services/medicine-memory';
+import {
+  findRememberedMedicineByBarcode,
+  rememberMedicineCardLocally,
+} from '@/src/services/medicine-memory';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import {
@@ -45,6 +49,16 @@ async function resolveMedicineCardByBarcode(barcode: string): Promise<MedicineCa
     if (remote) return remote;
   }
   return findRememberedMedicineByBarcode(barcode);
+}
+
+function cardWithLookupBarcode(card: MedicineCard, lookupCode: string): MedicineCard {
+  if (card.barcode?.trim()) return card;
+  const code = normalizeBarcode(lookupCode);
+  return code ? { ...card, barcode: code } : card;
+}
+
+function cacheMedicineCard(card: MedicineCard): MedicineCard {
+  return rememberMedicineCardLocally(card);
 }
 
 function barcodeScanStatusFor(
@@ -124,7 +138,8 @@ export async function scanBarcode({
 
   const medicineCard = await resolveMedicineCardByBarcode(lookupCode);
   if (medicineCard) {
-    return analyzeMedicineCard({ card: medicineCard, profile, lookupCode, repeatUnsafe });
+    const card = cacheMedicineCard(cardWithLookupBarcode(medicineCard, lookupCode));
+    return analyzeMedicineCard({ card, profile, lookupCode, repeatUnsafe });
   }
 
   const product = await resolveProductByBarcode(lookupCode);
@@ -135,7 +150,12 @@ export async function scanBarcode({
       const cards = await searchMedicinesFromCatalog(nameHint);
       const card = cards[0];
       if (card) {
-        return analyzeMedicineCard({ card, profile, lookupCode, repeatUnsafe });
+        return analyzeMedicineCard({
+          card: cacheMedicineCard(card),
+          profile,
+          lookupCode,
+          repeatUnsafe,
+        });
       }
     }
 
@@ -182,7 +202,10 @@ export async function scanBarcode({
     productImageUrl: product.imageUrl,
     productIngredients: product.ingredients,
     productCategory: target === 'medicine' ? 'medicine' : product.category,
-    medicineCard: target === 'medicine' ? medicineCardFromProduct(product) : undefined,
+    medicineCard:
+      target === 'medicine'
+        ? cacheMedicineCard(cardWithLookupBarcode(medicineCardFromProduct(product), lookupCode))
+        : undefined,
   };
 }
 

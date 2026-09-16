@@ -1,4 +1,5 @@
 import type { MedicineAgeUsage } from '@allerguide/core';
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -177,7 +178,9 @@ export const medicineOverlays = profileSchema.table(
   (table) => [
     primaryKey({ columns: [table.userId, table.normalizedName] }),
     index('medicine_overlays_user_idx').on(table.userId),
-    index('medicine_overlays_barcode_idx').on(table.userId, table.barcode),
+    index('medicine_overlays_barcode_idx')
+      .on(table.userId, table.barcode)
+      .where(sql`${table.barcode} IS NOT NULL AND ${table.barcode} <> ''`),
   ],
 );
 

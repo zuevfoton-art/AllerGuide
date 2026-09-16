@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { findAllergenById, medicineCardKey } from '@allerguide/core';
+import { findAllergenById, medicineCardKey, medicineHasAllergicSideEffects } from '@allerguide/core';
 import {
   findDuplicateKeys,
   readMedicineSeedEntries,
@@ -104,6 +104,15 @@ describe('allergy medicine dataset', () => {
     const amoxiclav = entries.find((entry) => entry.name === 'Амоксиклав');
     expect(amoxiclav?.allergenTags).toEqual(['penicillin']);
     expect(seedEntryToCard(nurofen!).allergenTags).toEqual(['nsaid']);
+  });
+
+  it('flags NSAID seed cards for the scanner side-effect step, not cetirizine', () => {
+    const nurofen = seedEntryToCard(entries.find((entry) => entry.name === 'Нурофен')!);
+    const zyrtec = seedEntryToCard(entries.find((entry) => entry.name === 'Зиртек')!);
+    expect(nurofen.allergenTags).toEqual(['nsaid']);
+    expect(zyrtec.allergenTags).toEqual([]);
+    expect(medicineHasAllergicSideEffects({ allergenTags: nurofen.allergenTags })).toBe(true);
+    expect(medicineHasAllergicSideEffects({ allergenTags: zyrtec.allergenTags })).toBe(false);
   });
 
   it('covers the OTC, culprit, topical, asthma, biologic and ASIT names', () => {

@@ -1,4 +1,5 @@
 import type { MedicineAgeUsage } from '@allerguide/core';
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -125,7 +126,9 @@ export const medicines = catalogSchema.table(
   },
   (table) => [
     uniqueIndex('medicines_normalized_name_uidx').on(table.normalizedName),
-    uniqueIndex('medicines_barcode_uidx').on(table.barcode),
+    uniqueIndex('medicines_barcode_uidx')
+      .on(table.barcode)
+      .where(sql`${table.barcode} IS NOT NULL AND ${table.barcode} <> ''`),
     index('medicines_source_idx').on(table.source),
   ],
 );
