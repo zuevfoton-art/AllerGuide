@@ -267,7 +267,7 @@ Entry: `src/index.ts` → `createApp()` в `src/app.ts`. Порт: `PORT \|\| AP
 | `db/auth-schema.ts` | Legacy `public.users` / `public.sessions` — **не используются** кодом |
 | `db/config.ts` + `index.ts` | YC / local Postgres pools; optional `readDb` |
 | `db/seed-*.ts` / `import-*.ts` | Сиды: allergens, dishes, medicines, market, food-allergy dataset |
-| `drizzle/0000`…`0013_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
+| `drizzle/0000`…`0014_*.sql` | Versioned migrations — **commit SQL**, apply via `db:migrate` |
 
 Миграции: `pnpm --filter api db:generate` → commit → `db:migrate`. Не `db:push` на реальных данных.
 
