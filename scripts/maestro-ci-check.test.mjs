@@ -327,9 +327,14 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(fill, /extendedWaitUntil/);
     const afterInput = fill.split('inputText')[1] ?? '';
     assert.match(afterInput, /scrollUntilVisible/);
     assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
+    assert.ok(
+      fill.indexOf('\n- extendedWaitUntil:') < fill.indexOf('\n- inputText:'),
+      'fill must wait until FIELD_ID is visible before typing (nightly 35072335460)',
+    );
 
     // Nightly 34477934128 / 34575409044: 18 catalog chips above the required
     // field invert `diary-field-symptoms` (`[87,1696][993,1395]`, text «зуд»).
@@ -397,6 +402,9 @@ describe('Maestro nightly CI invariants', () => {
     const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
     assert.match(layout, /splitDiaryScreenForIme/);
     assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
+    assert.match(layout, /isDiaryTextInputStep/);
+    assert.match(layout, /textInputCount >= 2/);
+    assert.match(wizard, /hasScrolledBody/);
   });
 
   it('opens scanner manual input before typing молоко', () => {

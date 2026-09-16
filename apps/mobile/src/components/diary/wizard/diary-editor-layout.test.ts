@@ -9,6 +9,7 @@ import {
   diaryEditorScrollMaxHeight,
   diaryEditorSheetMaxHeight,
   diaryEditorSheetPaddingBottom,
+  isDiaryTextInputStep,
   splitDiaryScreenForIme,
 } from './diary-editor-layout';
 
@@ -118,10 +119,10 @@ describe('splitDiaryScreenForIme', () => {
     choices: Array.from({ length: COMPACT_DIARY_CHOICE_MAX_OPTIONS + 10 }, (_, i) => `s${i}`),
   };
 
-  it('pins compact itching chips when they share a screen with text fields', () => {
+  it('pins skin text fields and itching chips in schema order', () => {
     expect(splitDiaryScreenForIme([skinArea, appearance, itching])).toEqual({
-      pinnedSteps: [itching],
-      scrolledSteps: [skinArea, appearance],
+      pinnedSteps: [skinArea, appearance, itching],
+      scrolledSteps: [],
     });
   });
 
@@ -140,10 +141,42 @@ describe('splitDiaryScreenForIme', () => {
     });
   });
 
-  it('pins itching on the real skin grouped screen', () => {
+  it('pins the real skin grouped screen in schema order with an empty scroll', () => {
     const screen = groupDiaryStepsIntoScreens(getDiarySection('Кожа')?.steps ?? [])[0] ?? [];
     const split = splitDiaryScreenForIme(screen);
-    expect(split.pinnedSteps.map((step) => step.id)).toEqual(['itching']);
-    expect(split.scrolledSteps.map((step) => step.id)).toEqual(['skinArea', 'appearance']);
+    expect(split.pinnedSteps.map((step) => step.id)).toEqual([
+      'skinArea',
+      'appearance',
+      'itching',
+    ]);
+    expect(split.scrolledSteps.map((step) => step.id)).toEqual([]);
+    expect(screen.filter(isDiaryTextInputStep).map((step) => step.id)).toEqual([
+      'skinArea',
+      'appearance',
+    ]);
+  });
+
+  it('pins two medicine text fields and leaves the time picker in the scroll', () => {
+    const medicine = { id: 'medicine', field: 'text' as const };
+    const dosage = { id: 'dosage', field: 'text' as const };
+    const takenAt = { id: 'takenAt', field: 'time' as const };
+    expect(splitDiaryScreenForIme([medicine, dosage, takenAt])).toEqual({
+      pinnedSteps: [medicine, dosage],
+      scrolledSteps: [takenAt],
+    });
+  });
+
+  it('still leaves room for Gboard padding after pinning the skin chrome', () => {
+    const pad = diaryEditorSheetPaddingBottom({
+      windowHeight: 2400,
+      headerHeight: 64 + 400,
+      footerHeight: 143,
+      keyboardInset: 900,
+      safeBottom: 0,
+    });
+    expect(pad).toBe(DIARY_EDITOR_SAFE_BOTTOM_MIN + 900);
+    expect(
+      diaryEditorSheetMaxHeight(2400) - pad - (64 + 400) - 143,
+    ).toBeGreaterThanOrEqual(DIARY_EDITOR_SCROLL_MIN_HEIGHT);
   });
 });
