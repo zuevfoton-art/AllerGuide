@@ -290,7 +290,7 @@ DNS API token (зона allerguide.app) — опционально
 
 | Компонент | Когда | Зачем |
 |-----------|-------|-------|
-| `EXPO_PUBLIC_SENTRY_DSN` | P1.7 / P2.3 | crash-free gate |
+| `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) | P1.7 / P2.3 | GlitchTip crash ingest + first-party crash-free gate |
 | `EXPO_PUBLIC_PRODUCT_DB=true` + seed каталога | после P1.1d import | backend-first barcode |
 | `staging.allerguide.app` (web) | Phase 2 | web-тестеры |
 | Read replica `READ_DATABASE_URL` | нагрузка | каталог read-only |

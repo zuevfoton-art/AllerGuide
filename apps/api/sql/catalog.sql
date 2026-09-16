@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS catalog.medicines (
     ingredients      text         NOT NULL DEFAULT '',
     allergen_tags    jsonb        NOT NULL DEFAULT '[]'::jsonb,
     aliases          jsonb        NOT NULL DEFAULT '[]'::jsonb,
+    barcode          varchar(32),
     source           varchar(32)  NOT NULL DEFAULT 'vision',
     confidence       varchar(16)  NOT NULL DEFAULT 'low',
     recognitions     integer      NOT NULL DEFAULT 1,
@@ -74,6 +75,7 @@ CREATE TABLE IF NOT EXISTS catalog.medicines (
     updated_at       timestamptz  NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS medicines_normalized_name_uidx ON catalog.medicines (normalized_name);
+CREATE UNIQUE INDEX IF NOT EXISTS medicines_barcode_uidx ON catalog.medicines (barcode) WHERE barcode IS NOT NULL AND barcode <> '';
 CREATE INDEX IF NOT EXISTS medicines_source_idx ON catalog.medicines (source);
 CREATE INDEX IF NOT EXISTS medicines_name_trgm ON catalog.medicines USING gin (name gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS medicines_substance_trgm ON catalog.medicines USING gin (active_substance gin_trgm_ops);

@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
-import { WEB_INPUT_FONT_SIZE, density } from '@/src/constants/layout';
+import { WEB_INPUT_FONT_SIZE, density, radii } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
 export function createStyles({ colors, fonts }: AppTheme) {
@@ -133,6 +133,20 @@ export function createStyles({ colors, fonts }: AppTheme) {
 
 export function createFieldStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    // Nightly 34451477109: minHeight on the TextInput still inverted
+    // diary-field-skinArea to `[87,625][995,613]` (h=-12). A wrap with a
+    // definite height keeps the UiAutomator hit box usable.
+    inputWrap: {
+      height: density.tapMinHeight,
+      flexShrink: 0,
+    },
+    inputMultilineWrap: {
+      // Nightly 35081306254: unconstrained multiline in pinned chrome grew
+      // `diary-field-appearance` to 315px (`[42,1558][1038,1873]`) under Gboard.
+      height: 120,
+      flexGrow: 0,
+      flexShrink: 0,
+    },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,
@@ -146,7 +160,7 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
       minHeight: density.tapMinHeight,
       flexShrink: 0,
     },
-    inputMultiline: { minHeight: 120, lineHeight: 22 },
+    inputMultiline: { height: 120, lineHeight: 22 },
     choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     choiceChip: {
       paddingVertical: 9,
@@ -175,10 +189,12 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
     photoBtn: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       gap: 6,
+      minHeight: density.tapMinHeight,
       paddingVertical: 10,
       paddingHorizontal: 12,
-      borderRadius: 8,
+      borderRadius: radii.md,
       borderWidth: 1,
       borderColor: colors.accent,
       backgroundColor: colors.accentLight,

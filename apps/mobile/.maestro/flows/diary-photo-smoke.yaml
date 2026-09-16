@@ -1,4 +1,4 @@
-# §7.3 — diary: skin photo step is reachable (gallery/camera UI)
+# §7.3 — diary: skin photo CTA sits on the appearance screen
 # Does not require actually picking a photo (permission-dependent on CI).
 # Entry types live in the «Что добавить» picker, not home chips.
 appId: com.aclearo.app
@@ -19,29 +19,34 @@ appId: com.aclearo.app
     visible:
       id: diary-wizard-primary
     timeout: 10000
-# skinArea + appearance + itching share one screen
+# skinArea + appearance + photos + itching share one screen
 - runFlow:
     file: _fill-wizard-field.yaml
     env:
       FIELD_ID: diary-field-skinArea
-      FIELD_VALUE: лицо
+      FIELD_VALUE: предплечье
 - runFlow:
     file: _fill-wizard-field.yaml
     env:
       FIELD_ID: diary-field-appearance
-      FIELD_VALUE: покраснение
+      FIELD_VALUE: шелушение
 - runFlow:
     file: _tap-wizard-choice.yaml
     env:
       CHOICE_ID: diary-choice-Слабый
-- runFlow: _tap-wizard-primary.yaml
-# photo step
+- scrollUntilVisible:
+    element:
+      id: diary-photo-step
+    direction: DOWN
+    timeout: 20000
 - extendedWaitUntil:
     visible:
       id: diary-photo-step
     timeout: 10000
 - assertVisible:
     id: diary-photo-library
+- assertVisible:
+    id: diary-photo-camera
 # Skip photos (optional) and finish notes
 - runFlow: _tap-wizard-primary.yaml
 - runFlow: _tap-wizard-primary.yaml

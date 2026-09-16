@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getDiarySection } from '@allerguide/core';
 import type { ScanResultExtended } from '@/src/services/scan-analysis';
 import {
   buildScanDiaryDraft,
+  prepareScanDiarySection,
+  resolveScanDiaryInitialStepId,
   resolveScanDiarySection,
   saveScanDiaryEntry,
+  scanRequiresMedicineSideEffect,
   scanModeFromProductCategory,
   SCAN_DIARY_SECTION_TYPE,
 } from '@/src/services/scan-diary-service';
@@ -144,6 +148,30 @@ describe('buildScanDiaryDraft', () => {
 });
 
 describe('resolveScanDiarySection', () => {
+  it('routes Open Medicine Facts and catalog cards to medicine', () => {
+    expect(resolveScanDiarySection({ source: 'openmedicinefacts' })).toBe('Лекарство');
+    expect(
+      resolveScanDiarySection({
+        productCategory: 'food',
+        medicineCard: {
+          name: 'Нурофен',
+          activeSubstance: 'ибупрофен',
+          form: 'таблетки',
+          strength: '200 мг',
+          manufacturer: '',
+          indications: '',
+          ageUsage: [],
+          minAgeYears: null,
+          ingredients: '',
+          allergenTags: ['nsaid'],
+          aliases: [],
+          source: 'catalog',
+          confidence: 'high',
+        },
+      }),
+    ).toBe('Лекарство');
+  });
+
   it('routes medicine scans to the medicine diary section', () => {
     expect(resolveScanDiarySection({ mode: 'medicine' })).toBe('Лекарство');
     expect(resolveScanDiarySection({ productCategory: 'medicine' })).toBe('Лекарство');
@@ -189,6 +217,37 @@ describe('saveScanDiaryEntry', () => {
     expect(trackEvent).toHaveBeenCalledWith('scan_saved_to_diary', {
       risk_level: 'high',
       scan_source: 'openfoodfacts',
+      diary_section: 'food',
+    });
+  });
+
+  it('tracks medicine and trigger diary sections without PII', async () => {
+    vi.mocked(addDiaryEntries).mockResolvedValue([{ ok: true, entryId: 13 }]);
+
+    await saveScanDiaryEntry({
+      profileId: 7,
+      entries: [{ type: 'Лекарство', details: '{"v":1,"answers":{}}' }],
+      level: 'medium',
+      source: 'openmedicinefacts',
+    });
+    expect(trackEvent).toHaveBeenCalledWith('scan_saved_to_diary', {
+      risk_level: 'medium',
+      scan_source: 'openmedicinefacts',
+      diary_section: 'medicine',
+    });
+
+    vi.mocked(trackEvent).mockClear();
+    vi.mocked(addDiaryEntries).mockResolvedValue([{ ok: true, entryId: 14 }]);
+    await saveScanDiaryEntry({
+      profileId: 7,
+      entries: [{ type: 'Триггер', details: '{"v":1,"answers":{}}' }],
+      level: 'low',
+      source: 'openproductsfacts',
+    });
+    expect(trackEvent).toHaveBeenCalledWith('scan_saved_to_diary', {
+      risk_level: 'low',
+      scan_source: 'openproductsfacts',
+      diary_section: 'trigger',
     });
   });
 
@@ -203,5 +262,70 @@ describe('saveScanDiaryEntry', () => {
 
     expect(saved).toEqual({ ok: false, code: 'profile_not_found' });
     expect(trackEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe('scan diary medicine side-effect step', () => {
+  it('keeps a required side-effect step for NSAID packs and hides it for cetirizine', () => {
+    const medicine = getDiarySection('Лекарство');
+    expect(medicine).toBeTruthy();
+
+    const withReaction = prepareScanDiarySection(medicine!, { requireMedicineSideEffect: true });
+    const sideEffect = withReaction.steps.find((step) => step.id === 'sideEffectSeverity');
+    expect(sideEffect).toBeTruthy();
+    expect(sideEffect?.required).toBe(true);
+    expect(withReaction.steps.some((step) => step.id === 'effect')).toBe(true);
+
+    const hidden = prepareScanDiarySection(medicine!);
+    expect(hidden.steps.some((step) => step.id === 'sideEffectSeverity')).toBe(false);
+  });
+
+  it('requires the step when catalog tags or scan matches fire', () => {
+    const nsaid = scanResult({
+      mode: 'medicine',
+      medicineCard: {
+        name: 'Нурофен',
+        activeSubstance: 'ибупрофен',
+        form: 'таблетки',
+        strength: '200 мг',
+        manufacturer: '',
+        indications: '',
+        ageUsage: [],
+        minAgeYears: null,
+        ingredients: '',
+        allergenTags: ['nsaid'],
+        aliases: [],
+        source: 'catalog',
+        confidence: 'high',
+      },
+    });
+    expect(scanRequiresMedicineSideEffect(nsaid)).toBe(true);
+
+    const zyrtec = scanResult({
+      mode: 'medicine',
+      matches: [],
+      medicineCard: {
+        name: 'Зиртек',
+        activeSubstance: 'цетиризин',
+        form: 'таблетки',
+        strength: '10 мг',
+        manufacturer: '',
+        indications: '',
+        ageUsage: [],
+        minAgeYears: null,
+        ingredients: '',
+        allergenTags: [],
+        aliases: [],
+        source: 'catalog',
+        confidence: 'high',
+      },
+    });
+    expect(scanRequiresMedicineSideEffect(zyrtec)).toBe(false);
+  });
+
+  it('starts medicine and trigger wizards on their name steps', () => {
+    expect(resolveScanDiaryInitialStepId('Лекарство', 'reaction')).toBe('medicine');
+    expect(resolveScanDiaryInitialStepId('Триггер', 'reaction')).toBe('trigger');
+    expect(resolveScanDiaryInitialStepId('Питание', 'food')).toBe('food');
   });
 });

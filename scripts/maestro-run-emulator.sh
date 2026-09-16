@@ -44,6 +44,9 @@ adb shell settings put secure autofill_service null || true
 # (nightly 33394028058: register tap lost, still on /login). Suppress the
 # dialogs system-wide; dismiss_anr stays as a fallback for older images.
 adb shell settings put global hide_error_dialogs 1 || true
+# Nightly 34681029886: ImmersiveModeConfirmation sat in mCurrentFocus while
+# Gboard covered diary-wizard-primary. Title taps to fold IME never landed.
+adb shell settings put secure immersive_mode_confirmations confirmed || true
 
 # First process start pays dex/Hermes. `monkey` opens the app drawer and
 # ANRs Pixel Launcher on API 34 CI AVDs — start the activity directly.

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { parseMultiChoiceValue, toggleMultiChoiceValue, type DiaryStep } from '@allerguide/core';
 import { DateTimeField } from '@/src/components/DateTimeField';
@@ -21,8 +21,24 @@ export function DiaryStepField({
   const inputRef = useRef<TextInput>(null);
   const editorScroll = useDiaryEditorScroll();
 
+  useLayoutEffect(() => {
+    const node = inputRef.current;
+    if (!node) return undefined;
+    // Maestro inputText focuses the native EditText without RN onFocus
+    // (nightly 34956812041), so register on mount, not only on focus.
+    editorScroll?.registerInput(node);
+    return () => editorScroll?.unregisterInput(node);
+  }, [editorScroll]);
+
   const handleFocus = () => {
+    editorScroll?.registerInput(inputRef.current);
     editorScroll?.scrollFieldIntoView(inputRef.current);
+  };
+
+  const handleChangeText = (text: string) => {
+    // Maestro inputText may skip RN onFocus (nightly 35067465304).
+    editorScroll?.registerInput(inputRef.current);
+    onChange(text);
   };
 
   if (step.field === 'photo') {
@@ -60,9 +76,10 @@ export function DiaryStepField({
               collapsable={false}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
               hitSlop={8}
-              onPress={() =>
-                onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice)
-              }>
+              onPress={() => {
+                editorScroll?.dismissIme();
+                onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice);
+              }}>
               <Text style={[styles.choiceText, active && styles.choiceTextActive]}>
                 {step.multiSelect && active ? '✓ ' : ''}
                 {choice}
@@ -75,19 +92,21 @@ export function DiaryStepField({
   }
 
   return (
-    <TextInput
-      ref={inputRef}
-      testID={`diary-field-${step.id}`}
-      collapsable={false}
-      style={[styles.input, step.multiline && styles.inputMultiline]}
-      value={value}
-      onChangeText={onChange}
-      onFocus={handleFocus}
-      placeholder={step.placeholder}
-      placeholderTextColor={theme.colors.textMuted}
-      accessibilityLabel={step.label}
-      multiline={step.multiline}
-      textAlignVertical={step.multiline ? 'top' : 'center'}
-    />
+    <View style={step.multiline ? styles.inputMultilineWrap : styles.inputWrap} collapsable={false}>
+      <TextInput
+        ref={inputRef}
+        testID={`diary-field-${step.id}`}
+        collapsable={false}
+        style={[styles.input, step.multiline && styles.inputMultiline]}
+        value={value}
+        onChangeText={handleChangeText}
+        onFocus={handleFocus}
+        placeholder={step.placeholder}
+        placeholderTextColor={theme.colors.textMuted}
+        accessibilityLabel={step.label}
+        multiline={step.multiline}
+        textAlignVertical={step.multiline ? 'top' : 'center'}
+      />
+    </View>
   );
 }

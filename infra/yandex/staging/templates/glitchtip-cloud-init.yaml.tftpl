@@ -1,0 +1,114 @@
+#cloud-config
+# Caddy is not an Ubuntu 22.04 apt package — setup.sh installs the GitHub binary.
+package_update: true
+packages:
+  - docker.io
+  - docker-compose-v2
+  - jq
+  - curl
+  - ca-certificates
+
+%{ if ssh_public_key != "" ~}
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+%{ endif ~}
+
+write_files:
+  - path: /opt/glitchtip/docker-compose.yml
+    permissions: "0644"
+    encoding: b64
+    content: ${compose_b64}
+  - path: /opt/glitchtip/bootstrap.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${bootstrap_b64}
+  - path: /opt/glitchtip/Caddyfile
+    permissions: "0644"
+    encoding: b64
+    content: ${caddyfile_b64}
+  - path: /opt/glitchtip/setup.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${setup_b64}
+  - path: /opt/glitchtip/acme-retry.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${acme_retry_b64}
+  - path: /opt/glitchtip/bootstrap-admin.py
+    permissions: "0644"
+    encoding: b64
+    content: ${bootstrap_admin_py_b64}
+  - path: /opt/glitchtip/bootstrap-admin.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${bootstrap_admin_sh_b64}
+  - path: /etc/systemd/system/glitchtip-acme-retry.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Reload Caddy until GlitchTip HTTPS/ACME succeeds
+      After=caddy.service
+      Wants=caddy.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/glitchtip/acme-retry.sh
+  - path: /etc/systemd/system/glitchtip-acme-retry.timer
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Retry GlitchTip ACME until HTTPS is ready
+      After=caddy.service
+
+      [Timer]
+      OnBootSec=1min
+      OnUnitActiveSec=2min
+      AccuracySec=15s
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+  - path: /etc/systemd/system/glitchtip-bootstrap.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Start GlitchTip from Lockbox secrets
+      After=docker.service network-online.target
+      Wants=network-online.target
+      Requires=docker.service
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      Restart=on-failure
+      RestartSec=30
+      TimeoutStartSec=600
+      ExecStart=/opt/glitchtip/bootstrap.sh
+
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/systemd/system/glitchtip-bootstrap-admin.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Create GlitchTip admin, org, RN project, emit DSN
+      After=glitchtip-bootstrap.service
+      Requires=glitchtip-bootstrap.service
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      Restart=on-failure
+      RestartSec=30
+      TimeoutStartSec=600
+      ExecStart=/opt/glitchtip/bootstrap-admin.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - /opt/glitchtip/setup.sh

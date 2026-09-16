@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    captureError(error, { componentStack: info.componentStack ?? '' });
+    captureError(error, { componentStack: info.componentStack ?? '' }, { fatal: true });
   }
 
   private reset = () => {

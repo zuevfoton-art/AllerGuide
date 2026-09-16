@@ -91,6 +91,33 @@ output "github_runner_private_ip" {
   value = yandex_compute_instance.gh_runner.network_interface[0].ip_address
 }
 
+output "glitchtip_public_ip" {
+  description = "NAT IP for errors.staging.aclearo.com A record"
+  value       = yandex_compute_instance.glitchtip.network_interface[0].nat_ip_address
+}
+
+output "glitchtip_private_ip" {
+  value = yandex_compute_instance.glitchtip.network_interface[0].ip_address
+}
+
+output "glitchtip_lockbox_secret_id" {
+  description = "Separate from lockbox_secret_id (API). Never mount into Serverless."
+  value       = yandex_lockbox_secret.glitchtip.id
+}
+
+output "glitchtip_service_account_id" {
+  description = "Instance SA: lockbox.payloadViewer on the GlitchTip secret only"
+  value       = yandex_iam_service_account.glitchtip.id
+}
+
+output "glitchtip_fqdn" {
+  value = var.glitchtip_fqdn
+}
+
+output "glitchtip_https_origin" {
+  value = "https://${var.glitchtip_fqdn}"
+}
+
 output "next_steps" {
   value = <<-EOT
     1. Add certificate DNS challenges (output certificate_dns_challenges) in Yandex Cloud DNS.
@@ -101,5 +128,9 @@ output "next_steps" {
     6. Register GitHub self-hosted runner on VM ${yandex_compute_instance.gh_runner.name} (label: yc-staging-vpc).
     7. Store GitHub Secrets: YC_SA_JSON (= terraform output deploy_service_account_key), YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_*, EXPO_TOKEN.
     8. Push branch staging → Deploy staging (Yandex Cloud) (.github/workflows/deploy-staging.yml)
+    9. GlitchTip: A ${var.glitchtip_fqdn} → terraform output -raw glitchtip_public_ip (DNS is not in this Terraform root)
+    10. GlitchTip Lockbox: YC_GLITCHTIP_LOCKBOX_SECRET_ID=$(terraform output -raw glitchtip_lockbox_secret_id) ./scripts/yc-glitchtip-lockbox-init.sh
+    11. Wait for https://${var.glitchtip_fqdn} ; createsuperuser on the VM (ENABLE_USER_REGISTRATION stays false); copy the RN DSN
+    12. EAS preview Sensitive EXPO_PUBLIC_ERROR_DSN = GlitchTip DSN (not sentry.io); rebuild staging APK. See docs/staging-glitchtip.md
   EOT
 }

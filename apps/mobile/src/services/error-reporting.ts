@@ -4,6 +4,11 @@ export type ErrorContext = Record<string, string>;
 
 export type LogCaughtErrorLevel = 'error' | 'warn';
 
+export type CaptureErrorOptions = {
+  /** Unhandled / ErrorBoundary crash. Counted in G5 crash-free. */
+  fatal?: boolean;
+};
+
 const SENSITIVE_EXTRA_KEYS = [
   'token',
   'password',
@@ -12,7 +17,26 @@ const SENSITIVE_EXTRA_KEYS = [
   'authorization',
   'secret',
   'jwt',
+  'userid',
+  'user_id',
+  'profileid',
+  'profile_id',
 ] as const;
+
+/** Hosts we must never send envelopes to (data stays on Yandex Cloud). */
+export function isDisallowedCrashIngestHost(hostname: string): boolean {
+  const host = hostname.trim().toLowerCase();
+  return host === 'sentry.io' || host.endsWith('.sentry.io');
+}
+
+export function hostnameFromCrashDsn(dsn: string): string | undefined {
+  try {
+    const host = new URL(dsn).hostname;
+    return host ? host.toLowerCase() : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 function scrubErrorContext(context?: ErrorContext): ErrorContext | undefined {
   if (!context) return undefined;
@@ -48,6 +72,12 @@ type SentryLike = {
 
 let sentryOverride: SentryLike | null | undefined;
 let reportingEnabled = false;
+let crashAnalyticsSink: ((fatal: boolean) => void) | null = null;
+
+/** Wired from analytics-service so crash ingest does not import analytics (cycle). */
+export function setCrashAnalyticsSink(sink: ((fatal: boolean) => void) | null) {
+  crashAnalyticsSink = sink;
+}
 
 /** @internal test helper */
 export function __setSentryClientForTests(client: SentryLike | null | undefined) {
@@ -66,7 +96,30 @@ function loadSentry(): SentryLike | null {
 }
 
 function resolveDsn(): string | undefined {
-  return process.env.EXPO_PUBLIC_SENTRY_DSN?.trim() || undefined;
+  const raw =
+    process.env.EXPO_PUBLIC_ERROR_DSN?.trim() || process.env.EXPO_PUBLIC_SENTRY_DSN?.trim();
+  if (!raw) return undefined;
+
+  const hostname = hostnameFromCrashDsn(raw);
+  if (!hostname) {
+    console.warn(`[${BRAND_LOG_PREFIX}] Crash DSN is not a valid URL — error reporting stays off`);
+    return undefined;
+  }
+  if (isDisallowedCrashIngestHost(hostname)) {
+    console.warn(
+      `[${BRAND_LOG_PREFIX}] Crash DSN points at sentry.io — refused. Use self-hosted GlitchTip (docs/staging-glitchtip.md)`,
+    );
+    return undefined;
+  }
+  return raw;
+}
+
+function emitFatalCrashAnalytics() {
+  try {
+    crashAnalyticsSink?.(true);
+  } catch {
+    // Analytics is optional; crash reporting must not throw.
+  }
 }
 
 export function isErrorReportingEnabled(): boolean {
@@ -91,17 +144,21 @@ export function initErrorReporting() {
     dsn,
     enabled: true,
     environment: process.env.EXPO_PUBLIC_APP_ENV ?? 'development',
-    tracesSampleRate: 0.1,
-    enableAutoSessionTracking: true,
+    tracesSampleRate: 0,
+    enableAutoSessionTracking: false,
+    autoSessionTracking: false,
     attachStacktrace: true,
     beforeSend: (event: { extra?: Record<string, unknown> }) => scrubSentryEvent(event),
   });
   reportingEnabled = true;
 }
 
-export function captureError(error: Error, context?: ErrorContext) {
+export function captureError(error: Error, context?: ErrorContext, options?: CaptureErrorOptions) {
   const safeContext = scrubErrorContext(context);
   const client = reportingEnabled ? loadSentry() : null;
+  if (options?.fatal) {
+    emitFatalCrashAnalytics();
+  }
   if (client) {
     client.captureException(error, { extra: safeContext });
     return;
@@ -139,8 +196,9 @@ export function logCaughtError(
   captureError(normalized, safeContext);
 }
 
-/** Test-only helper for verifying Sentry wiring without sending events. */
+/** Test-only helper for verifying crash ingest wiring without sending events. */
 export function __resetErrorReportingForTests() {
   reportingEnabled = false;
   sentryOverride = undefined;
+  crashAnalyticsSink = null;
 }

@@ -16,7 +16,8 @@ import {
 } from '@allerguide/core';
 import { MEDICINE_DB_ENABLED, YC_OCR_ENABLED } from '@/src/constants/features';
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
-import { recognizeMedicineViaApi } from '@/src/services/medicines-api';
+import { fetchMedicineByBarcode, recognizeMedicineViaApi } from '@/src/services/medicines-api';
+import { findRememberedMedicineByBarcode } from '@/src/services/medicine-memory';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 
 export type MedicineRecognitionHintCode =
@@ -138,6 +139,17 @@ export async function recognizeMedicineFromBarcode(input: {
     return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
   }
 
+  if (MEDICINE_DB_ENABLED) {
+    const catalogCard = await fetchMedicineByBarcode(barcode);
+    if (catalogCard) {
+      return outcomeFromCard(catalogCard, ageYears, { cached: true });
+    }
+  }
+  const remembered = findRememberedMedicineByBarcode(barcode);
+  if (remembered) {
+    return outcomeFromCard(remembered, ageYears, { cached: true });
+  }
+
   const product = await resolveProductByBarcode(barcode);
   if (!product) {
     return { card: null, ageUsage: null, source: 'ocr', hintCode: 'not_recognized' };
@@ -153,6 +165,7 @@ export async function recognizeMedicineFromBarcode(input: {
       const cloud = await recognizeMedicineViaApi({
         name: name || undefined,
         ocrText: labelText || undefined,
+        barcode,
         ageYears,
       });
       if (cloud?.ok) {
@@ -172,7 +185,10 @@ export async function recognizeMedicineFromBarcode(input: {
     (labelText ? parseMedicineLabelText(labelText) : null) ??
     (name ? parseMedicineVoiceUtterance(name) : null);
   if (parsed) {
-    return outcomeFromCard(cardFromVision(parsed, 'ocr'), ageYears);
+    return outcomeFromCard(
+      toMedicineCard({ ...parsed, barcode, manufacturer: product.brand ?? '' }, 'ocr'),
+      ageYears,
+    );
   }
 
   if (!name) {
@@ -186,6 +202,7 @@ export async function recognizeMedicineFromBarcode(input: {
         manufacturer: product.brand ?? '',
         ingredients: product.ingredients,
         allergenTags: product.declaredAllergenIds,
+        barcode,
         confidence: 'low',
       },
       'ocr',

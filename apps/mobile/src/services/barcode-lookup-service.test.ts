@@ -115,4 +115,35 @@ describe('barcode-lookup-service', () => {
     const product = await resolveProductByBarcode('0000000000000');
     expect(product).toBeNull();
   });
+
+  it('restores Open Medicine Facts category from a cached pack', async () => {
+    cache.set('4013054002508', {
+      barcode: '4013054002508',
+      name: 'Нурофен',
+      ingredients: 'ibuprofen',
+      originSource: 'openmedicinefacts',
+      cachedAt: '2026-09-16T00:00:00.000Z',
+      updatedAt: '2026-09-16T00:00:00.000Z',
+    });
+
+    const product = await resolveProductByBarcode('4013054002508');
+    expect(product?.source).toBe('barcodes_db');
+    expect(product?.category).toBe('medicine');
+    expect(product?.name).toBe('Нурофен');
+  });
+
+  it('restores household category from a cached Open Products Facts pack', async () => {
+    cache.set('8717644231180', {
+      barcode: '8717644231180',
+      name: 'Domestos',
+      ingredients: 'sodium hypochlorite',
+      originSource: 'openproductsfacts',
+      cachedAt: '2026-09-16T00:00:00.000Z',
+      updatedAt: '2026-09-16T00:00:00.000Z',
+    });
+
+    const product = await resolveProductByBarcode('8717644231180');
+    expect(product?.source).toBe('barcodes_db');
+    expect(product?.category).toBe('household');
+  });
 });

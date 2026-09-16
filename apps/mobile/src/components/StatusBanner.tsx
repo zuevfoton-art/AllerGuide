@@ -34,9 +34,16 @@ export function StatusBanner({
   const { t } = useTranslation();
 
   return (
-    <View style={styles.wrap} accessibilityRole="alert" accessibilityLiveRegion="polite">
+    <View
+      style={styles.wrap}
+      testID="status-banner"
+      collapsable={false}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite">
       <Ionicons name={TONE_ICON[tone]} size={18} color={styles.icon.color} />
-      <Text style={styles.message}>{message}</Text>
+      <Text testID="status-banner-message" style={styles.message}>
+        {message}
+      </Text>
       {actionLabel && onAction ? (
         <Pressable
           onPress={onAction}
@@ -48,6 +55,7 @@ export function StatusBanner({
       ) : null}
       {onDismiss ? (
         <Pressable
+          testID="status-banner-dismiss"
           onPress={onDismiss}
           accessibilityRole="button"
           accessibilityLabel={t('common.ok')}
@@ -88,7 +96,7 @@ export function StatusBannerHost() {
   const hide = useBannerStore((s) => s.hide);
   if (!banner) return null;
   return (
-    <View pointerEvents="box-none" style={hostStyles.host}>
+    <View pointerEvents="box-none" collapsable={false} style={hostStyles.host}>
       <StatusBanner
         tone={banner.tone}
         message={banner.message}

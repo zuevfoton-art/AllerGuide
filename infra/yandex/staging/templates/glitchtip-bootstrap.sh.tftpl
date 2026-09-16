@@ -1,0 +1,75 @@
+#!/bin/bash
+# Fetch GlitchTip secrets from Lockbox (instance SA) and start compose + Caddy.
+# Retries until SECRET_KEY and POSTGRES_PASSWORD exist. Does not print secret values.
+set -euo pipefail
+
+LOCKBOX_SECRET_ID='${lockbox_secret_id}'
+GLITCHTIP_FQDN='${fqdn}'
+INSTALL_DIR=/opt/glitchtip
+ENV_FILE="$INSTALL_DIR/.env"
+METADATA=http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token
+PAYLOAD_URL="https://payload.lockbox.api.cloud.yandex.net/lockbox/v1/secrets/${lockbox_secret_id}/payload"
+
+umask 077
+mkdir -p "$INSTALL_DIR"
+
+iam_token=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA" | jq -r .access_token)
+if [[ -z "$iam_token" || "$iam_token" == "null" ]]; then
+  echo "glitchtip-bootstrap: no instance IAM token" >&2
+  exit 1
+fi
+
+payload=$(curl -sf -H "Authorization: Bearer $iam_token" "$PAYLOAD_URL") || {
+  echo "glitchtip-bootstrap: Lockbox payload not ready (create a version with SECRET_KEY + POSTGRES_PASSWORD)" >&2
+  exit 1
+}
+
+lockbox_text() {
+  local key="$1"
+  printf '%s' "$payload" | jq -r --arg key "$key" '
+    .entries[]?
+    | select(.key == $key)
+    | (.textValue // .text_value // "")
+  ' | head -n 1
+}
+
+SECRET_KEY=$(lockbox_text SECRET_KEY)
+POSTGRES_PASSWORD=$(lockbox_text POSTGRES_PASSWORD)
+ENABLE_USER_REGISTRATION=$(lockbox_text ENABLE_USER_REGISTRATION)
+EMAIL_URL=$(lockbox_text EMAIL_URL)
+DEFAULT_FROM_EMAIL=$(lockbox_text DEFAULT_FROM_EMAIL)
+
+if [[ -z "$SECRET_KEY" || -z "$POSTGRES_PASSWORD" ]]; then
+  echo "glitchtip-bootstrap: Lockbox missing SECRET_KEY or POSTGRES_PASSWORD" >&2
+  exit 1
+fi
+
+cat > "$ENV_FILE" <<EOF
+POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+SECRET_KEY=$SECRET_KEY
+GLITCHTIP_DOMAIN=https://$GLITCHTIP_FQDN
+GLITCHTIP_MAX_EVENT_LIFE_DAYS=90
+ENABLE_USER_REGISTRATION=$${ENABLE_USER_REGISTRATION:-false}
+DEFAULT_FROM_EMAIL=$${DEFAULT_FROM_EMAIL:-support@aclearo.com}
+EMAIL_URL=$${EMAIL_URL:-consolemail://}
+EOF
+chmod 600 "$ENV_FILE"
+
+if ! docker compose version >/dev/null 2>&1; then
+  echo "glitchtip-bootstrap: docker compose plugin missing" >&2
+  exit 1
+fi
+
+cd "$INSTALL_DIR"
+docker compose --env-file "$ENV_FILE" up -d
+
+if [[ -f /opt/glitchtip/Caddyfile ]]; then
+  mkdir -p /etc/caddy
+  cp /opt/glitchtip/Caddyfile /etc/caddy/Caddyfile
+  if [[ -f /etc/systemd/system/caddy.service ]] || systemctl cat caddy.service >/dev/null 2>&1; then
+    systemctl enable --now caddy
+    systemctl reload caddy || systemctl restart caddy
+  fi
+fi
+
+echo "glitchtip-bootstrap: compose is up (Caddy terminates TLS on :443; lockbox $LOCKBOX_SECRET_ID)"

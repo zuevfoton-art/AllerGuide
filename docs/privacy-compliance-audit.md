@@ -12,7 +12,7 @@ Fact-check against code on `main` as of 2026-08-17. This is an engineering inven
 | Cloud backup blob | `profile.sync_backups.payload` | Opaque AES-GCM envelope (`encrypted=true`). Server is zero-knowledge |
 | Recovery key | Device / user only (12-word phrase) | Not stored on the server |
 | Analytics | Optional `EXPO_PUBLIC_ANALYTICS_ENABLED` → console / `POST /api/analytics` | Off by default except EAS `staging` |
-| Crash reports | Optional `EXPO_PUBLIC_SENTRY_DSN` | Not set on staging as of this audit |
+| Crash reports | Optional `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) → self-hosted GlitchTip on YC | Not provisioned on staging as of this audit. 90-day event retention (`GLITCHTIP_MAX_EVENT_LIFE_DAYS`). No session replay. Must not use the app Managed Postgres. Runbook: [staging-glitchtip.md](./staging-glitchtip.md) |
 | Pollen / Places / AQ queries | Server proxies; client sends lat/lon when those flags are on | Location is not persisted in profile tables |
 
 Catalog (`catalog.allergens`, `catalog.products`) is global reference data, not personal data.
@@ -61,6 +61,6 @@ Gap: a user who wants a full diary/scan export must use the in-app local export 
 
 - [ ] Lawyer-approved privacy policy in all 6 locales (drafts: #260)
 - [ ] In-app path to export and delete matches the published policy
-- [ ] Retention period for server logs / Sentry stated
+- [ ] Retention period for server logs / GlitchTip (90 days for crash events) stated
 - [ ] Operator named (Aclearo) and contact `support@aclearo.com` confirmed
 - [ ] Production backups of Managed PG covered by the same deletion SLA (see [production-yc-plan.md](./production-yc-plan.md))

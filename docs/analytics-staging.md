@@ -7,7 +7,7 @@ Mobile sends anonymized events to the API ingest endpoint. No PII (email, names,
 | Variable | Value |
 |----------|-------|
 | `EXPO_PUBLIC_ANALYTICS_ENABLED` | `true` |
-| `EXPO_PUBLIC_API_URL` | `https://api.staging.allerguide.app` |
+| `EXPO_PUBLIC_API_URL` | `https://api.staging.aclearo.com` |
 | `EXPO_PUBLIC_ANALYTICS_ENDPOINT` | optional override; default `${API_URL}/api/analytics/events` |
 
 Events are sent with an anonymous `client_id` stored in app settings (not linked to account).
@@ -31,11 +31,28 @@ Example dashboard URL (staging):
 
 ```
 curl -H "x-analytics-dashboard-key: $ANALYTICS_DASHBOARD_KEY" \
-  "https://api.staging.allerguide.app/api/analytics/dashboard?days=7"
+  "https://api.staging.aclearo.com/api/analytics/dashboard?days=7"
 ```
 
 ### Wired events
 
-`screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*` (включая `scan_dish_vision` и `scan_saved_to_diary`), `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `map_pollen_*`, `pollen_alert_sent`, `hint_tour_started`, `hint_tour_completed`, `hint_tour_skipped`
+`screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*` (включая `scan_dish_vision` и `scan_saved_to_diary` с пропом `diary_section`), `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `map_pollen_*`, `pollen_alert_sent`, `hint_tour_started`, `hint_tour_completed`, `hint_tour_skipped`, `session_started`, `app_crashed`
 
 See `apps/mobile/src/services/analytics-service.ts` and key flow call sites.
+
+### G5 crash-free (`dashboard.crashFree`)
+
+GlitchTip has no session health. Soak uses first-party unique clients, not sentry.io Release Health.
+
+```
+crash_free = 1 - unique(app_crashed where fatal=true) / unique(session_started)
+target ≥ 0.99 over the soak window
+slice: platform, app_version, days query param (default 7; soak uses 14)
+```
+
+| Event | When | Props (plus transport `client_id` / `platform` / `app_version`) |
+|-------|------|----------------------------------------------------------------|
+| `session_started` | Cold start, once per runtime (`initAnalytics`) | none |
+| `app_crashed` | `ErrorBoundary` / `captureError(..., { fatal: true })` | `fatal` only — no `error.message`, no stack |
+
+Counted in [`packages/core/src/crash-free.ts`](../packages/core/src/crash-free.ts) (`computeCrashFreeRate`). Native crashes that kill JS before analytics may appear only in GlitchTip — log them in [staging-soak-log.md](./staging-soak-log.md). Ingest runbook: [staging-glitchtip.md](./staging-glitchtip.md).

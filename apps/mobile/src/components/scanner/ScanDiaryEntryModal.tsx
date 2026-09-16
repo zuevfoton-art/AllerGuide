@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { getDiarySection, hideDiaryAutoSteps } from '@allerguide/core';
+import { getDiarySection } from '@allerguide/core';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
 import { DiaryWizard } from '@/src/components/DiaryWizard';
 import { localizeDiarySections } from '@/src/i18n/content';
@@ -8,6 +8,7 @@ import { useTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import {
   SCAN_DIARY_SECTION_OPTIONS,
+  prepareScanDiarySection,
   type ScanDiarySectionType,
 } from '@/src/services/scan-diary-service';
 import { createStyles } from '@/src/components/scanner/scanner-styles';
@@ -31,6 +32,7 @@ type Props = {
   onClose: () => void;
   onSectionChange: (sectionType: string) => void;
   onComplete: (entries: { type: string; details: string; photoUris?: string[] }[]) => void;
+  requireMedicineSideEffect?: boolean;
 };
 
 /** Diary entry started from a scan result, without leaving the scanner. */
@@ -44,6 +46,7 @@ export function ScanDiaryEntryModal({
   onClose,
   onSectionChange,
   onComplete,
+  requireMedicineSideEffect = false,
 }: Props) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -56,8 +59,8 @@ export function ScanDiaryEntryModal({
   const section = useMemo(() => {
     const base =
       localized.find((item) => item.type === sectionType) ?? getDiarySection(sectionType);
-    return base ? hideDiaryAutoSteps(base) : null;
-  }, [localized, sectionType]);
+    return base ? prepareScanDiarySection(base, { requireMedicineSideEffect }) : null;
+  }, [localized, sectionType, requireMedicineSideEffect]);
 
   if (!section) return null;
 

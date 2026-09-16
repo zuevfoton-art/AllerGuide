@@ -1,8 +1,10 @@
 import { createHash } from 'node:crypto';
-import { eq, ilike, or, sql } from 'drizzle-orm';
+import { eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import {
   mergeMedicineCards,
+  normalizeBarcode,
   normalizeMedicineName,
+  offBarcodeLookupCandidates,
   type MedicineCard,
   type MedicineConfidence,
 } from '@allerguide/core';
@@ -38,7 +40,16 @@ export function medicineRowToCard(row: MedicineRow): MedicineCard {
     aliases: row.aliases ?? [],
     source: 'catalog',
     confidence: asConfidence(row.confidence),
+    barcode: row.barcode ?? undefined,
   };
+}
+
+export function storedMedicineBarcode(
+  card: Pick<MedicineCard, 'barcode'>,
+  existing?: string | null,
+): string | null {
+  const next = normalizeBarcode(card.barcode ?? '') || existing || '';
+  return next.length >= 8 ? next : null;
 }
 
 export function escapeIlike(value: string): string {
@@ -72,6 +83,17 @@ export async function findMedicineByNormalizedName(
     .select()
     .from(medicines)
     .where(eq(medicines.normalizedName, normalizedName))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function findMedicineByBarcode(barcode: string): Promise<MedicineRow | null> {
+  const candidates = offBarcodeLookupCandidates(barcode);
+  if (candidates.length === 0) return null;
+  const [row] = await readDb
+    .select()
+    .from(medicines)
+    .where(inArray(medicines.barcode, candidates))
     .limit(1);
   return row ?? null;
 }
@@ -146,6 +168,7 @@ export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRo
       ingredients: merged.ingredients,
       allergenTags: merged.allergenTags,
       aliases: merged.aliases,
+      barcode: storedMedicineBarcode(merged, existing?.barcode),
       source: merged.source,
       confidence: merged.confidence,
       recognitions: 1,
@@ -164,6 +187,7 @@ export async function upsertMedicineCard(card: MedicineCard): Promise<MedicineRo
         ingredients: sql`excluded.ingredients`,
         allergenTags: sql`excluded.allergen_tags`,
         aliases: sql`excluded.aliases`,
+        barcode: sql`coalesce(nullif(excluded.barcode, ''), ${medicines.barcode})`,
         source: sql`excluded.source`,
         confidence: sql`excluded.confidence`,
         recognitions: sql`${medicines.recognitions} + 1`,

@@ -1,7 +1,17 @@
 # Type into a diary wizard field, then fold IME via the step title.
-# Nightly 34349155324: a second TextInput on the same screen (appearance)
-# must be tapped again after IME layout, otherwise inputText appends to
-# the previous field (`лицоyпокраснение`) and Далее stays disabled.
+# Nightly 34349155324 / 34451477109: a second TextInput on the same screen
+# (appearance) must be tapped after IME layout, then assertVisible the value
+# — otherwise inputText appends to skinArea (`лицоyyпокраснение`) and Далее
+# stays disabled.
+# Nightly 35072335460: the same append (`предплечьеyyшелушение`) when Gboard
+# still covered appearance; wait until FIELD_ID is visible before typing.
+# Nightly 35081306254: pinning appearance into diary-editor-pinned-top left
+# it under Gboard with no scroll. Text fields stay in the ScrollView so
+# scrollUntilVisible can lift appearance into the gap above the keyboard.
+# Nightly 35094037122: first tapOn focused appearance, Gboard covered the
+# multiline at `[42,1558][1038,1873]`, second tapOn failed with
+# "Element not found: diary-field-appearance". After the first tap, type
+# into the focused EditText even if the second tap is covered.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -10,12 +20,28 @@ appId: com.aclearo.app
       id: ${FIELD_ID}
     direction: DOWN
     timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: ${FIELD_ID}
+    timeout: 10000
 - tapOn:
     id: ${FIELD_ID}
 - waitForAnimationToEnd:
     timeout: 3000
+# Optional: Gboard may now cover a tall multiline; native focus is enough.
 - tapOn:
     id: ${FIELD_ID}
+    optional: true
 - eraseText: 50
 - inputText: ${FIELD_VALUE}
 - runFlow: _dismiss-wizard-ime.yaml
+# Nightly 34477934128 / 34575409044: after IME the field can sit below catalog
+# chips with inverted UiAutomator bounds (`[87,1696][993,1395]`, text «зуд»).
+- scrollUntilVisible:
+    element:
+      id: ${FIELD_ID}
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: ${FIELD_ID}
+    text: ${FIELD_VALUE}

@@ -43,6 +43,16 @@ describe('diary-wizard-route', () => {
     expect(stepIds).toEqual(['food', 'foodComponents', 'reaction', 'reactionType']);
   });
 
+  it('can keep selected auto steps for the scanner medicine wizard', () => {
+    const medicine = getDiarySection('Лекарство');
+    expect(medicine).toBeTruthy();
+    const keep = new Set(['sideEffectSeverity', 'effect']);
+    const stepIds = hideDiaryAutoSteps(medicine!, { keepStepIds: keep }).steps.map((step) => step.id);
+    expect(stepIds).toContain('sideEffectSeverity');
+    expect(stepIds).toContain('effect');
+    expect(stepIds).not.toContain('medicineSource');
+  });
+
   it('fills missing auto metadata without overwriting user answers', () => {
     const merged = attachDiaryAutoMetadata(
       { pollenContext: 'уже есть' },

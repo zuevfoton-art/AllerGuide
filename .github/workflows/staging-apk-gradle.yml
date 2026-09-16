@@ -72,6 +72,9 @@ jobs:
           java-version: 17
 
       - uses: android-actions/setup-android@v3
+        with:
+          # Nightly 34939781509: Google dropped the obsolete `tools` package.
+          packages: platform-tools
 
       - name: Install Android SDK packages
         run: |
@@ -159,6 +162,15 @@ jobs:
             echo "See docs/gcp-pollen-maps-keys.md §3.1 / §5 and docs/android-stage-build.md §C."
           fi
 
+      # Prefer GH secret; then eas.json staging.env; then EAS preview (staging profile).
+      # sentry.io is refused. Missing DSN still builds — crash ingest stays off.
+      - name: Resolve GlitchTip crash DSN
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_ERROR_DSN: ${{ secrets.EXPO_PUBLIC_ERROR_DSN }}
+          EXPO_PUBLIC_SENTRY_DSN: ${{ secrets.EXPO_PUBLIC_SENTRY_DSN }}
+        run: bash scripts/resolve-staging-error-dsn.sh
+
       # Prefer committed apps/mobile/android (monorepo Gradle + ExpoReactHostFactory).
       # `prebuild --clean` wiped that wiring and produced a non-launching SDK 55 APK
       # (1.0.13). Maps key is injected via manifestPlaceholders + EXPO_PUBLIC_GOOGLE_MAPS_API_KEY.
@@ -220,6 +232,7 @@ jobs:
 
             - Profile env aligned with `eas.json` → `staging` (Google pollen / plume / Yandex interactive)
             - Google Maps key source: must be a real `AIza…` key (GH secret or EAS); otherwise Yandex interactive basemap
+            - Crash DSN: GH secret `EXPO_PUBLIC_ERROR_DSN`, `eas.json` staging.env, or EAS preview Sensitive (self-hosted GlitchTip, not sentry.io)
             - CI signing SHA-1 for GCP Android key allowlist: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`
             - Package: `com.aclearo.app` · API: `https://api.staging.aclearo.com`
           generate_release_notes: true

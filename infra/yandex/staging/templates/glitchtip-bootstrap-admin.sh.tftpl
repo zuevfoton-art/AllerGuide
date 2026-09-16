@@ -1,0 +1,158 @@
+#!/bin/bash
+# Create the first GlitchTip admin (createsuperuser), org, team, RN project.
+# Emits ACLARO_DSN=https://<key>@<fqdn>/<id> to /opt/glitchtip/dsn.txt and
+# /dev/console. Does not print Lockbox or Django password values.
+set -euo pipefail
+
+LOCKBOX_SECRET_ID='${lockbox_secret_id}'
+DSN_HOST='${fqdn}'
+ADMIN_EMAIL='${admin_email}'
+INSTALL_DIR=/opt/glitchtip
+ENV_FILE="$INSTALL_DIR/.env"
+DSN_FILE="$INSTALL_DIR/dsn.txt"
+LOG_FILE=/var/log/glitchtip-bootstrap-admin.log
+PY_FILE="$INSTALL_DIR/bootstrap-admin.py"
+METADATA=http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token
+PAYLOAD_URL="https://payload.lockbox.api.cloud.yandex.net/lockbox/v1/secrets/${lockbox_secret_id}/payload"
+WAIT_ATTEMPTS=60
+WAIT_SECONDS=5
+
+mkdir -p "$(dirname "$LOG_FILE")"
+exec >>"$LOG_FILE" 2>&1
+
+log() {
+  echo "$(date -u +%FT%TZ) $*"
+}
+
+console() {
+  # Serial getty has no login; DSN is public-in-APK. Marker is scrapeable via
+  # `yc compute instance get-serial-port-output`.
+  printf '%s\n' "$*" | tee /dev/console || printf '%s\n' "$*"
+}
+
+if [[ ! -f "$PY_FILE" ]]; then
+  log "glitchtip-bootstrap-admin: missing $PY_FILE"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL missing_script"
+  exit 1
+fi
+
+iam_token=$(curl -sf -H "Metadata-Flavor: Google" "$METADATA" | jq -r .access_token)
+if [[ -z "$iam_token" || "$iam_token" == "null" ]]; then
+  log "glitchtip-bootstrap-admin: no instance IAM token"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL no_iam_token"
+  exit 1
+fi
+
+payload=$(curl -sf -H "Authorization: Bearer $iam_token" "$PAYLOAD_URL") || {
+  log "glitchtip-bootstrap-admin: Lockbox payload not ready"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL lockbox"
+  exit 1
+}
+
+lockbox_text() {
+  local key="$1"
+  printf '%s' "$payload" | jq -r --arg key "$key" '
+    .entries[]?
+    | select(.key == $key)
+    | (.textValue // .text_value // "")
+  ' | head -n 1
+}
+
+ADMIN_PASSWORD=$(lockbox_text GLITCHTIP_ADMIN_PASSWORD)
+LOCKBOX_EMAIL=$(lockbox_text GLITCHTIP_ADMIN_EMAIL)
+if [[ -n "$LOCKBOX_EMAIL" ]]; then
+  ADMIN_EMAIL="$LOCKBOX_EMAIL"
+fi
+
+if [[ -z "$ADMIN_PASSWORD" ]]; then
+  log "glitchtip-bootstrap-admin: Lockbox missing GLITCHTIP_ADMIN_PASSWORD"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL no_admin_password"
+  exit 1
+fi
+
+cd "$INSTALL_DIR"
+if [[ ! -f "$ENV_FILE" ]]; then
+  log "glitchtip-bootstrap-admin: missing $ENV_FILE (compose bootstrap first)"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL no_env"
+  exit 1
+fi
+
+healthy=0
+for _ in $(seq 1 "$WAIT_ATTEMPTS"); do
+  if docker compose exec -T glitchtip \
+    python3 -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)" \
+    >/dev/null 2>&1; then
+    healthy=1
+    break
+  fi
+  sleep "$WAIT_SECONDS"
+done
+if [[ "$healthy" -ne 1 ]]; then
+  log "glitchtip-bootstrap-admin: glitchtip HTTP never became ready"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL not_healthy"
+  exit 1
+fi
+
+docker compose exec -T glitchtip tee /tmp/bootstrap-admin.py <"$PY_FILE" >/dev/null
+
+console "ACLARO_ADMIN_BOOTSTRAP_START"
+
+dsn_line=""
+set +e
+dsn_line=$(
+  docker compose exec -T -w /code \
+    -e PYTHONPATH=/code \
+    -e DJANGO_SETTINGS_MODULE=glitchtip.settings \
+    -e DJANGO_SUPERUSER_PASSWORD="$ADMIN_PASSWORD" \
+    -e GLITCHTIP_ADMIN_EMAIL="$ADMIN_EMAIL" \
+    -e GLITCHTIP_DSN_HOST="$DSN_HOST" \
+    glitchtip python3 /tmp/bootstrap-admin.py
+)
+admin_rc=$?
+set -e
+
+unset ADMIN_PASSWORD
+
+if [[ "$admin_rc" -ne 0 ]]; then
+  log "glitchtip-bootstrap-admin: django script failed rc=$admin_rc"
+  snippet=$(
+    printf '%s\n' "$dsn_line" \
+      | grep -vE '^ACLARO_DSN=' \
+      | tr '\n' ' ' \
+      | tr -cd '[:print:] ' \
+      | head -c 400
+  )
+  snippet="$${snippet//$ADMIN_PASSWORD/***}"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL django $${snippet:-rc=$admin_rc}"
+  exit 1
+fi
+
+dsn_line=$(printf '%s\n' "$dsn_line" | tr -d '\r' | grep -E '^ACLARO_DSN=https://' | tail -n 1)
+if [[ -z "$dsn_line" ]]; then
+  log "glitchtip-bootstrap-admin: no ACLARO_DSN line from django"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL no_dsn"
+  exit 1
+fi
+
+dsn_value="$${dsn_line#ACLARO_DSN=}"
+python3 - "$dsn_value" "$DSN_HOST" <<'PY'
+import sys
+from urllib.parse import urlparse
+
+dsn, allowed = sys.argv[1], sys.argv[2].lower()
+parts = urlparse(dsn)
+host = (parts.hostname or "").lower()
+if parts.scheme != "https" or not parts.username or not (parts.path or "").strip("/"):
+    raise SystemExit("dsn shape")
+if host == "sentry.io" or host.endswith(".sentry.io"):
+    raise SystemExit("sentry.io refused")
+if host != allowed:
+    raise SystemExit("host mismatch")
+PY
+
+umask 022
+printf '%s\n' "$dsn_line" >"$DSN_FILE"
+chmod 644 "$DSN_FILE"
+console "$dsn_line"
+console "ACLARO_ADMIN_BOOTSTRAP_DONE"
+log "glitchtip-bootstrap-admin: dsn written (lockbox $LOCKBOX_SECRET_ID host $DSN_HOST)"

@@ -140,7 +140,7 @@
 | 5.7 | Экран `/clinical-scales`: рекомендуемые и прочие шкалы | ☐ | ☐ | ☐ | |
 | 5.8 | Auto пыльца/скан/ЛС не показываются шагами, пишутся в metadata | ☐ | ☐ | ☐ | нужен интернет для пыльцы |
 | 5.9 | Компактный disclaimer дневника + «Подробнее» | ☐ | ☐ | ☐ | |
-| 5.10 | **§7.3 photo:** секция «Кожа» → шаг фото → камера/галерея, превью, удаление | ☐ | ☐ | ☐ | FR-DIARY-photo; web: gallery |
+| 5.10 | **§7.3 photo:** секция «Кожа» → под «Как выглядит кожа» камера/галерея, превью, удаление | ☐ | ☐ | ☐ | FR-DIARY-photo; web: camera CTA → gallery |
 | 5.10b | **§7.3 medicine photo:** «Лекарство» → фото / голос / вручную → предзаполнение → сохранить | ☐ | ☐ | ☐ | FR-DIARY-medicine-photo |
 | 5.11 | **§7.3 photo:** фото видно в ленте и в PDF отчёта | ☐ | ☐ | ☐ | лимит ≤5, JPEG |
 | 5.12 | **§7.3 dish:** Питание → «Ввести вручную» → «борщ» → чеклист состава → уровень реакции | ☐ | ☐ | ☐ | FR-DIARY-dish-breakdown |
@@ -156,9 +156,11 @@
 | # | Сценарий | iOS | Android | Web | Примечания |
 |---|----------|-----|---------|-----|------------|
 | 6.1 | Камера запрашивает permission (native) | ☐ | ☐ | N/A | web без камеры |
-| 6.2 | Скан штрихкода → результат (OFF / каталог); Data Matrix / QR GS1 нормализуется в GTIN | ☐ | ☐ | N/A | тестовый штрихкод; staging: `PRODUCT_DB` |
+| 6.2 | Скан штрихкода → результат (OFF-family / каталог / GTIN лекарств); Data Matrix / QR GS1 нормализуется в GTIN | ☐ | ☐ | N/A | тестовый штрихкод; staging: `PRODUCT_DB` / `MEDICINE_DB` |
 | 6.2a | Неизвестный штрихкод → `not_found`, без анализа цифр; fail-forward фото/вручную | ☐ | ☐ | ☐ | FR-SCAN-03 |
 | 6.2b | «Сохранить в дневник»: предвыбор раздела (еда / лекарство / триггер) и смена чипа | ☐ | ☐ | ☐ | FR-SCAN-13 |
+| 6.2c | Лекарство из скана: wizard «Лекарство»; НПВП с `allergenTags` → шаг побочки | ☐ | ☐ | ☐ | FR-DIARY-18 |
+| 6.2d | Косметика / бытовая химия → wizard «Триггер» с именем средства | ☐ | ☐ | ☐ | FR-DIARY-19 |
 | 6.3 | Совпадение с аллергиями профиля подсвечено | ☐ | ☐ | N/A | |
 | 6.4 | Три кнопки: Сканер / Штрих-код / Ввести вручную; чипов режимов нет | ☐ | ☐ | ☐ | FR-SCAN-01 |
 | 6.4a | Ручной ввод состава → вердикт; цифры 8–14 → штрихкод | ☐ | ☐ | ☐ | web fallback |
@@ -518,7 +520,7 @@
 | Onboarding | `onboarding-smoke.yaml` | register → profile → `tab-home` |
 | Diary | `diary-smoke.yaml` | новая запись → симптомы |
 | Diary dish | `diary-dish-smoke.yaml` | «борщ» → `diary-dish-checklist` → save |
-| Diary photo | `diary-photo-smoke.yaml` | «Кожа» → шаг `diary-photo-step` |
+| Diary photo | `diary-photo-smoke.yaml` | «Кожа» → `diary-photo-step` на экране вида |
 | Scanner | `scanner-smoke.yaml` | «Ввести вручную» → «молоко» → `scanner-result` |
 | SOS | `sos-smoke.yaml` | `sos-profile-card`, паспорт |
 | Settings | `settings-smoke.yaml` | `/profile`, номер 112 |
@@ -540,7 +542,7 @@
 | Flow | Файл | Проверка |
 |------|------|----------|
 | Auth | `staging-auth-smoke.yaml` | register (API) → logout → login |
-| Backup | `staging-backup-smoke.yaml` | fixture recovery key → upload → «Готово» |
+| Backup | `staging-backup-smoke.yaml` | fixture recovery key → upload → `status-banner-message` «Резервная копия отправлена на сервер.» |
 
 **Запуск:** `pnpm --filter mobile maestro:staging`
 

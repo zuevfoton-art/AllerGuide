@@ -43,7 +43,8 @@ export interface ScanResult {
     | 'llm'
     | 'dish_vision'
     | 'openbeautyfacts'
-    | 'openproductsfacts';
+    | 'openproductsfacts'
+    | 'openmedicinefacts';
 }
 
 function parseProfileAllergens(profile?: Pick<Profile, 'allergies'> | null): string[] {

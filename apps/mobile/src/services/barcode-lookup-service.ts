@@ -13,12 +13,14 @@ export type BarcodeLookupSource =
   | 'catalog_api'
   | 'openfoodfacts'
   | 'openbeautyfacts'
-  | 'openproductsfacts';
+  | 'openproductsfacts'
+  | 'openmedicinefacts';
 
 const OFF_FAMILY_SOURCES = new Set<string>([
   'openfoodfacts',
   'openbeautyfacts',
   'openproductsfacts',
+  'openmedicinefacts',
 ]);
 
 /**

@@ -40,7 +40,7 @@ apps/mobile/.maestro/
     profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы + «Показать ещё» (не в smoke-all)
     profile-cross-reactions-add-all.yaml  # шаг 5 «Добавить все» → чипы на SOS (не в smoke-all)
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
-    diary-photo-smoke.yaml         # §7.3 — skin photo step UI
+    diary-photo-smoke.yaml         # §7.3 — skin photo CTA on the appearance screen
     market-smoke.yaml              # только при EXPO_PUBLIC_MARKET=true (не в smoke-all)
     smoke-all.yaml                 # P2.1a — все offline (без Маркета)
     _staging-bootstrap.yaml
@@ -111,7 +111,7 @@ maestro test .maestro/flows/staging-smoke-all.yaml
 | Flow | Сценарий |
 |------|----------|
 | `staging-auth-smoke` | email register (API) → logout → login |
-| `staging-backup-smoke` | recovery key fixture → upload backup → alert «Готово» |
+| `staging-backup-smoke` | recovery key fixture → upload backup → `status-banner-message` |
 
 ---
 
@@ -170,12 +170,22 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Кнопка «Подождите…» висит до таймаута (staging зелёный, offline красный) | Патч рантайма не попал в APK: Gradle берёт `index.js`, а не `package.json` `main`. Оба entry импортируют `src/install-runtime`. Staging хеширует на API, поэтому не падал |
 | Тап регистрации «пропал», остались на «Вход» | ANR-диалог Pixel Launcher перехватил тап. `hide_error_dialogs 1` в `maestro-run-emulator.sh` |
 | `diary-wizard-primary` не найден после ввода «зуд» | Gboard перекрывает «Далее» (в дампе bounds схлопнуты в ноль). `_dismiss-wizard-ime.yaml` тапает `diary-editor-title`, затем `_tap-wizard-primary.yaml` |
+| Offline nightly: `No visible element found: diary-wizard-primary` (Gboard открыта, кнопка в иерархии) | Nightly 34681029886: `ImmersiveModeConfirmation` в `mCurrentFocus`, Далее `[42,2177][1038,2296]` под клавиатурой. Тот же SHA зелёный на `workflow_dispatch`. `maestro-run-emulator.sh` ставит `immersive_mode_confirmations confirmed` |
+| `"зуд"` не видно в `diary-field-symptoms` | Текст уже в поле, но 18 чипов каталога выше него; Yoga инвертирует bounds (`[87,1696][993,1395]`, nightly 34477934128 / **34575409044**). Обязательное текстовое поле идёт первым на grouped-экране; `_fill-wizard-field` после IME снова `scrollUntilVisible` перед `assertVisible` |
 | `diary-wizard-primary` не виден на шаге симптомов (IME закрыта) | Чипы + поле + голос выше fold; sheet `maxHeight: 88%` + `flexGrow: 0` обрезает кнопку (nightly 34325395361: `[87,2373][993,2358]`). Кнопки мастера в `diary-editor-footer` вне ScrollView; скролл ограничен `diaryEditorScrollMaxHeight` |
 | `Слабый` не найден на шаге кожи | После пина footer чипы зуда ниже fold / под Gboard (nightly 34336499730, inverted bounds). `_tap-wizard-choice.yaml` сворачивает IME и `scrollUntilVisible` по `diary-choice-Слабый` |
-| `diary-photo-step` не появился после «Слабый» | Gboard не закрылся (title был View, не Pressable), второе поле не взяло фокус: `skinArea=лицоyпокраснение`, appearance пустое, Далее disabled (nightly 34349155324). Шапка вызывает `Keyboard.dismiss`; `_fill-wizard-field` тапает поле повторно после layout; `_tap-wizard-primary` требует `enabled: true` |
+| Offline nightly: `No visible element found: id: diary-choice-Слабый` (чип в дампе, Gboard открыта) | Nightly **34946086211** / **34956812041**: чип `[232,1925][428,2024]` под Gboard, `Далее` disabled. Maestro `inputText` не шлёт RN `onFocus`, поэтому blur по «последнему» ref был no-op. Регистрировать все TextInput на mount; `blurDiaryEditorIme` блюрит все и зовёт host `.blur()`; `_tap-wizard-choice` сначала `scrollUntilVisible`, потом `visible` |
+| Offline nightly: `Assertion is false: id: diary-choice-Слабый is visible` (чип в дампе, Gboard открыта) | Nightly **35067465304** на SHA с фиксом 34946086211: те же bounds `[232,1925][428,2024]`. `Keyboard.dismiss` в `Modal` — no-op. Компактные choice-чипы (зуд) пинятся в `diary-editor-pinned-top` над полями; тап чипа тоже `dismissIme`. Дополняет padding-cap (**34943266082**) и mount-time register (**34956812041**) |
+| `diary-photo-step` не появился / `diary-wizard-primary` не Enabled на коже | Второе поле не взяло фокус: `skinArea=лицоyyпокраснение`, appearance пустой, Далее disabled (nightly 34451477109). Смятый `diary-wizard-step-label` (`[87,625][993,322]`) перекрывал title; `diary-field-skinArea` тоже инвертирован (`[87,625][995,613]`, h=−12). Лейбл+прогресс в `DiaryEditorPinnedTop`; title зовёт `dismissDiaryIme` (Keyboard.dismiss + blur); поля в wrap с `height: density.tapMinHeight`; fill `assertVisible` значение; smoke не использует подстроки плейсхолдера |
+| Offline nightly: `"шелушение"` не видно в `diary-field-appearance` | Nightly **35072335460**: `skinArea=предплечьеyyшелушение`, appearance остался плейсхолдером, Далее disabled. Тап appearance попал в Gboard. `_fill-wizard-field` ждёт `visible` FIELD_ID перед вводом |
+| Offline nightly: `Element not found: diary-field-appearance` (чип и поле в дампе, Gboard открыта) | Nightly **35081306254** / **35094037122**: appearance `[42,1558][1038,1873]` (placeholder), pinned-top `[0,1126][1080,2101]` (~975px) держал area+appearance+зуд без ScrollView. Пинить только компактные choice-чипы; текстовые поля остаются в scroll, multiline wrap с `height: 120`. Второй `tapOn` в `_fill-wizard-field` — `optional: true`: первый тап уже даёт фокус, `inputText` печатает даже если Gboard закрыла поле |
+| `Готово` не видно после upload бэкапа | Alert заменили на `StatusBanner` (`uploadSuccess`, не title «Готово»). Nightly 34451477109 ждал текст «Готово» 60 с, баннер автоскрывался за ~4 с. `staging-backup-smoke` ждёт `status-banner-message` с copy «Резервная копия отправлена на сервер.»; `BANNER_AUTO_HIDE_MS` = 10 с |
 | `diary-wizard-step-label` не найден, IME открыта | Заголовок шага уехал под статус-бар: модалка применяла `liftStyle` и padding сразу. Шапка закреплена, поле прокручивается к фокусу; тапаем `diary-editor-title` |
 | `diary-wizard-primary` не появился после выбора раздела | `openSection` ждал pollen/AQI перед открытием визарда. Метаданные грузятся в фоне (`void loadAutoMetadata()`), запросы обогащения — через `fetchWithTimeout` |
 | Сборка падает на `APK is missing the embedded JS bundle`, хотя бандл в APK есть | `maestro-build-apk.sh` работает под `pipefail`, а `grep -q` закрывал пайп: как только листинг перерос 64K буфер, `unzip` умирает с SIGPIPE (141). Листинг читается в `APK_LISTING`, сверка — here-string |
+| Offline nightly: `:app:mergeDexRelease` / `Java heap space` (staging при этом зелёный) | Gradle daemon был `-Xmx2048m`. Nightly 34474685308 собрал JS, потом OOM на D8. `maestro-build-apk.sh` после `expo prebuild` пинит `org.gradle.jvmargs=-Xmx4096m` и зовёт `assembleRelease --no-parallel` |
+| Оба джоба падают за ~1 мин на `android-actions/setup-android@v3` | `sdkmanager tools` → `Failed to find package 'tools'` (nightly 34939781509). Google убрал устаревший пакет; дефолт экшена всё ещё `tools platform-tools`. Передавать `packages: platform-tools` |
+| Offline nightly: `Element not found: diary-editor-title` (Gboard открыта, Далее наверху белого листа) | Nightly 34943266082: sheet `[0,288][1080,2400]`, pinned-top h=55, footer h=23, title нет в дереве. `paddingBottom += keyboardInset` съел шапку. `diaryEditorSheetPaddingBottom` ограничивает паддинг, чтобы header+footer+min scroll оставались в 88% sheet |
 | Нет пошаговых логов Maestro в артефактах | `~/.maestro/tests` в `upload-artifact` не раскрывается. Раннер копирует их в `maestro-*-maestro-logs` |
 | Экран сбрасывается на корневой маршрут посреди сценария (напр. `diary-wizard-primary` исчез) | Сэмплер делал `am start` каждые 8 с: `dumpsys window` держит устаревшую строку `mCurrentFocus` лаунчера на втором дисплее. Передний план определяется по `topResumedActivity` (`scripts/lib/maestro-device.sh`, тест `scripts/maestro-device.test.mjs`) |
 | `diary-chip-skin` не найден на «Записи в дневник» | Чипы типов убраны с домашнего экрана. `Новая запись` → `diary-picker-skin` в модалке «Что добавить» |

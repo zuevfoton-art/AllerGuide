@@ -20,7 +20,7 @@ Unlocked after [RC gate](./rc-gate.md) and [2-week staging soak](./staging-soak-
 |----------|---------------------|
 | CI green on `main` | ✅ green (2026-08-15); RC Gate `success` 2026-08-17 |
 | Maestro E2E nightly | ❌ Required — **BLOCKED**: emulator/driver startup failures (see [staging-soak-log.md](./staging-soak-log.md)) |
-| Sentry + analytics staging | ❌ Required — analytics wired; `EXPO_PUBLIC_SENTRY_DSN` not set on EAS `staging` |
+| GlitchTip + first-party crash-free | ❌ Required — analytics wired (`session_started` / `app_crashed`); GlitchTip DSN not set on EAS `staging` |
 | Security audits 0 critical | ✅ |
 | Performance docs (cold start, Redis, web-store) | ✅ |
 | Soak sign-off (P2.8 G7) | ❌ **BLOCKED** — Phase 3 kickoff not authorized |
@@ -29,7 +29,7 @@ Unlocked after [RC gate](./rc-gate.md) and [2-week staging soak](./staging-soak-
 
 Ordered plan lives in [roadmap-to-prod.md §6](./roadmap-to-prod.md#6-дальнейшие-шаги). Phase 3 specific:
 
-1. Clear soak blockers (enable Maestro after [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) → Sentry DSN → testers). Keep **BLOCKED** in [staging-soak-log.md](./staging-soak-log.md) until sign-off.
+1. Clear soak blockers (enable Maestro after [#259](https://github.com/zuevfoton-art/AllerGuide/pull/259) → GlitchTip DSN → testers). Keep **BLOCKED** in [staging-soak-log.md](./staging-soak-log.md) until sign-off.
 2. Lawyer-review the `de`/`es`/`fr`/`it` legal drafts ([#260](https://github.com/zuevfoton-art/AllerGuide/pull/260)) before store copy (P3.2 / P3.3).
 3. Recreate GitHub milestones/labels, then close **Phase 2** only after soak sign-off and open **Phase 3**.
 4. Replace `ascAppId` / `appleTeamId` placeholders ([store-permissions-justification.md](./store-permissions-justification.md)) and create production EAS secrets (do not reuse the staging Maestro recovery key).

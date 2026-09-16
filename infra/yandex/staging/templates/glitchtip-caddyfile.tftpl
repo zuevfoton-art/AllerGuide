@@ -1,0 +1,15 @@
+{
+	email ${email}
+}
+
+# Explicit :80 so HTTP-01 works even after a failed first issuance.
+# Do not 308 ACME challenge paths to HTTPS (there may be no cert yet).
+http://${fqdn}%{ if fqdn_ru != "" }, http://${fqdn_ru}%{ endif } {
+	@not_acme not path /.well-known/acme-challenge/*
+	redir @not_acme https://{host}{uri} 308
+}
+
+https://${fqdn}%{ if fqdn_ru != "" }, https://${fqdn_ru}%{ endif } {
+	encode gzip
+	reverse_proxy 127.0.0.1:8000
+}

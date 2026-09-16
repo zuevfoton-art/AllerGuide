@@ -32,6 +32,11 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /enable_emulator_http_cleartext/);
     assert.match(script, /network_security_config/);
     assert.match(script, /10\.0\.2\.2/);
+    // Nightly 34474685308: mergeDexRelease OOM at -Xmx2048m. Pin ≥4g after prebuild.
+    assert.match(script, /pin_gradle_heap/);
+    assert.match(script, /Xmx4096m/);
+    assert.match(script, /--no-parallel/);
+    assert.match(script, /-Dorg\.gradle\.jvmargs=/);
   });
 
   it('runs emulator flows via the helper that installs the release APK', () => {
@@ -47,12 +52,61 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(workflow, /~\/\.maestro\/tests/);
     assert.match(workflow, /maestro-offline-maestro-logs/);
     assert.match(workflow, /maestro-staging-maestro-logs/);
+    // Nightly 34939781509: setup-android@v3 default still installs obsolete `tools`.
+    const setupAndroidBlocks = workflow.match(
+      /uses:\s*android-actions\/setup-android@v\d+[\s\S]{0,280}/g,
+    );
+    assert.ok(setupAndroidBlocks && setupAndroidBlocks.length >= 2, 'nightly must set up Android SDK twice');
+    for (const block of setupAndroidBlocks) {
+      assert.match(
+        block,
+        /packages:\s*platform-tools\b/,
+        'setup-android must install platform-tools, not the removed tools package',
+      );
+      assert.doesNotMatch(block, /packages:\s*['"]?tools\b/);
+    }
+
+    for (const relative of [
+      '.github/workflows/staging-apk-gradle.yml',
+      '.github/workflows/release-apk.yml',
+    ]) {
+      const apkWorkflow = read(relative);
+      const apkBlocks = apkWorkflow.match(
+        /uses:\s*android-actions\/setup-android@v\d+[\s\S]{0,280}/g,
+      );
+      assert.ok(apkBlocks?.length, `${relative} must use setup-android`);
+      for (const block of apkBlocks) {
+        assert.match(block, /packages:\s*platform-tools\b/, `${relative} must skip obsolete SDK tools`);
+        assert.doesNotMatch(block, /packages:\s*['"]?tools\b/);
+      }
+    }
+
+    const stagingGradle = read('.github/workflows/staging-apk-gradle.yml');
+    assert.match(
+      stagingGradle,
+      /scripts\/resolve-staging-error-dsn\.sh/,
+      'Gradle staging APK must bake EXPO_PUBLIC_ERROR_DSN the same way as EAS',
+    );
+    const easAndroid = read('.github/workflows/eas-staging-android.yml');
+    assert.match(
+      easAndroid,
+      /eas-android-quota\.sh" apply/,
+      'EAS staging Android must skip Expo Free-plan quota (Gradle is the APK fallback)',
+    );
+    assert.match(stagingGradle, /secrets\.EXPO_PUBLIC_ERROR_DSN/);
+    assert.match(stagingGradle, /secrets\.EXPO_PUBLIC_SENTRY_DSN/);
+    assert.doesNotMatch(
+      stagingGradle,
+      /sentry\.io\/[0-9]/,
+      'do not hard-code a sentry.io DSN in the Gradle workflow',
+    );
 
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
     assert.match(runner, /pm grant/);
     assert.match(runner, /autofill_service null/);
     assert.match(runner, /hide_error_dialogs 1/);
+    assert.match(runner, /immersive_mode_confirmations confirmed/);
     assert.match(runner, /adb logcat/);
     assert.match(runner, /scripts\/lib\/maestro-device\.sh/);
     assert.doesNotMatch(runner, /adb shell monkey/);
@@ -69,6 +123,11 @@ describe('Maestro nightly CI invariants', () => {
     );
     assert.ok(samplerLoop.length > 0, 'sampler loop must exist');
     assert.doesNotMatch(samplerLoop, /ensure_app_foreground/);
+    assert.doesNotMatch(
+      samplerLoop,
+      /dismiss_immersive_confirm/,
+      'in-flow sampler must not KEYCODE_BACK (nightly 33414517311 expo-router pop)',
+    );
     assert.match(samplerLoop, /capture_screen/);
 
     const device = read('scripts/lib/maestro-device.sh');
@@ -79,6 +138,8 @@ describe('Maestro nightly CI invariants', () => {
     // stale launcher line per display (nightly 33414517311).
     assert.match(device, /topResumedActivity/);
     assert.doesNotMatch(device, /launcher_is_focused/);
+    assert.match(device, /ImmersiveModeConfirmation/);
+    assert.match(device, /dismiss_immersive_confirm/);
   });
 
   it('waits for the auth hero title, then scrolls and folds IME without BACK', () => {
@@ -114,6 +175,19 @@ describe('Maestro nightly CI invariants', () => {
       stagingAuth,
       /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
     );
+
+    const stagingBackup = read('apps/mobile/.maestro/flows/staging-backup-smoke.yaml');
+    assert.match(stagingBackup, /id: status-banner-message/);
+    assert.match(stagingBackup, /Резервная копия отправлена на сервер/);
+    assert.match(stagingBackup, /id: status-banner-dismiss/);
+    assert.doesNotMatch(stagingBackup, /text:\s*"Готово"/);
+
+    const bannerStore = read('apps/mobile/src/store/banner-store.ts');
+    assert.match(bannerStore, /export const BANNER_AUTO_HIDE_MS = 10_000/);
+
+    const statusBanner = read('apps/mobile/src/components/StatusBanner.tsx');
+    assert.match(statusBanner, /testID="status-banner-message"/);
+    assert.match(statusBanner, /collapsable=\{false\}/);
 
     for (const name of ['_offline-bootstrap-until-home.yaml', '_staging-bootstrap-until-home.yaml']) {
       const flow = read(`apps/mobile/.maestro/flows/${name}`);
@@ -212,24 +286,57 @@ describe('Maestro nightly CI invariants', () => {
   it('folds diary IME via pinned editor chrome before tapping Далее', () => {
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-wizard-ime.yaml');
     assert.match(dismiss, /id: diary-editor-title/);
+    assert.match(dismiss, /id: diary-wizard-step-label/);
+    assert.ok(
+      dismiss.indexOf('diary-editor-title') < dismiss.indexOf('diary-wizard-step-label'),
+      'dismiss must tap the title, then the wider step label (nightly 34946086211)',
+    );
     assert.match(dismiss, /waitForAnimationToEnd/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
 
     const editorModal = read('apps/mobile/src/components/DiaryEditorModal.tsx');
     assert.match(editorModal, /testID="diary-editor-title"/);
     assert.match(editorModal, /collapsable=\{false\}/);
-    assert.match(editorModal, /onPress=\{Keyboard\.dismiss\}/);
+    assert.match(editorModal, /dismissDiaryIme/);
+    assert.match(editorModal, /onPressIn=\{dismissDiaryIme\}/);
+    assert.match(editorModal, /registerInput/);
+    assert.match(editorModal, /unregisterInput/);
+    assert.match(editorModal, /blurDiaryEditorIme/);
+    assert.doesNotMatch(
+      editorModal,
+      /focusedInputRef\.current = null/,
+      'must keep the last Modal TextInput so a second IME dismiss can still blur it (nightly 35067465304)',
+    );
+    const imeHelper = read('apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
+    assert.match(imeHelper, /Keyboard\.dismiss/);
+    assert.match(imeHelper, /blurTextInput/);
+    assert.match(imeHelper, /capable\.blur/);
+    assert.match(imeHelper, /for \(const node of registered\)/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
+    assert.match(editorModal, /testID="diary-editor-pinned-top"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
+    assert.match(editorModal, /diaryEditorSheetPaddingBottom/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
 
+    const editorLayout = read(
+      'apps/mobile/src/components/diary/wizard/diary-editor-layout.ts',
+    );
+    assert.match(editorLayout, /diaryEditorSheetPaddingBottom/);
+    assert.match(editorLayout, /DIARY_EDITOR_HEADER_MIN_HEIGHT/);
+
     const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
     assert.match(wizard, /DiaryEditorFooter/);
+    assert.match(wizard, /DiaryEditorPinnedTop/);
+    assert.match(wizard, /splitDiaryScreenForIme/);
+    assert.match(wizard, /pinnedSteps\.map/);
+    assert.match(wizard, /scrolledSteps\.map/);
     assert.match(wizard, /testID="diary-wizard-primary"/);
+    assert.match(wizard, /testID="diary-wizard-step-label"/);
+    assert.match(wizard, /onPressIn=\{\(\) => editorScroll\?\.dismissIme\(\)\}/);
 
     const tapPrimary = read('apps/mobile/.maestro/flows/_tap-wizard-primary.yaml');
     assert.match(tapPrimary, /_dismiss-wizard-ime\.yaml/);
@@ -240,6 +347,30 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(fill, /extendedWaitUntil/);
+    assert.match(
+      fill,
+      /tapOn:\s*\n\s+id: \$\{FIELD_ID\}\s*\n\s+optional: true/,
+      'second FIELD_ID tap must be optional once Gboard covers a tall multiline (nightly 35094037122)',
+    );
+    const afterInput = fill.split('inputText')[1] ?? '';
+    assert.match(afterInput, /scrollUntilVisible/);
+    assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
+    assert.ok(
+      fill.indexOf('\n- extendedWaitUntil:') < fill.indexOf('\n- inputText:'),
+      'fill must wait until FIELD_ID is visible before typing (nightly 35072335460)',
+    );
+
+    // Nightly 34477934128 / 34575409044: 18 catalog chips above the required
+    // field invert `diary-field-symptoms` (`[87,1696][993,1395]`, text «зуд»).
+    const symptomsSection =
+      read('packages/core/src/diary-schema.ts').split("type: 'Симптомы'")[1]?.split("type:")[0] ?? '';
+    const textIdx = symptomsSection.indexOf("id: 'symptoms'");
+    const catalogIdx = symptomsSection.indexOf("id: 'symptomCode'");
+    assert.ok(
+      textIdx >= 0 && catalogIdx > textIdx,
+      'required symptoms text must sit above catalog chips on the grouped screen',
+    );
     assert.match(tapPrimary, /enabled: true/);
 
     for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
@@ -258,8 +389,17 @@ describe('Maestro nightly CI invariants', () => {
     const photo = read('apps/mobile/.maestro/flows/diary-photo-smoke.yaml');
     assert.match(photo, /id: diary-picker-skin/);
     assert.match(photo, /id: diary-photo-step/);
+    assert.match(photo, /id: diary-photo-camera/);
+    assert.ok(
+      photo.indexOf('id: diary-photo-step') < photo.indexOf('_tap-wizard-primary.yaml'),
+      'photo CTA must sit on the appearance screen before the first Далее',
+    );
     assert.match(photo, /_tap-wizard-choice.yaml/);
     assert.match(photo, /CHOICE_ID: diary-choice-Слабый/);
+    assert.match(photo, /FIELD_VALUE: предплечье/);
+    assert.match(photo, /FIELD_VALUE: шелушение/);
+    assert.doesNotMatch(photo, /FIELD_VALUE: лицо\b/);
+    assert.doesNotMatch(photo, /FIELD_VALUE: покраснение/);
     assert.doesNotMatch(
       photo,
       /text: "Слабый"/,
@@ -268,12 +408,38 @@ describe('Maestro nightly CI invariants', () => {
 
     const tapChoice = read('apps/mobile/.maestro/flows/_tap-wizard-choice.yaml');
     assert.match(tapChoice, /_dismiss-wizard-ime.yaml/);
+    assert.match(tapChoice, /extendedWaitUntil/);
     assert.match(tapChoice, /scrollUntilVisible/);
+    assert.ok(
+      tapChoice.indexOf('scrollUntilVisible') < tapChoice.indexOf('extendedWaitUntil'),
+      'scroll the chip into view before waiting for visible (nightly 34956812041)',
+    );
     assert.match(tapChoice, /id: \$\{CHOICE_ID\}/);
 
     const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
     assert.match(stepField, /diary-choice-\$\{choice\}/);
     assert.match(stepField, /diary-choice-\$\{step\.id\}/);
+    assert.match(stepField, /styles\.inputWrap/);
+    assert.match(stepField, /registerInput/);
+    assert.match(stepField, /unregisterInput/);
+    assert.match(stepField, /handleChangeText/);
+    assert.match(stepField, /editorScroll\?\.dismissIme\(\)/);
+    const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
+    assert.match(fieldStyles, /inputWrap:/);
+    assert.match(fieldStyles, /height: density\.tapMinHeight/);
+    assert.match(fieldStyles, /inputMultilineWrap:/);
+    assert.match(fieldStyles, /height: 120/);
+    const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
+    assert.match(layout, /splitDiaryScreenForIme/);
+    assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
+    assert.match(layout, /isDiaryTextInputStep/);
+    assert.match(layout, /isCompactDiaryChoice\(step\)/);
+    assert.doesNotMatch(
+      layout,
+      /textInputCount >= 2/,
+      'must not pin every text field into chrome (nightly 35081306254 appearance under Gboard)',
+    );
+    assert.match(wizard, /hasScrolledBody/);
   });
 
   it('opens scanner manual input before typing молоко', () => {

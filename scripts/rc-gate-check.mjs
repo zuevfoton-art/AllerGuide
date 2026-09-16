@@ -124,6 +124,11 @@ function checkMaestroFlows() {
   if (!runner.includes('hide_error_dialogs 1')) {
     failures.push('scripts/maestro-run-emulator.sh must hide system ANR dialogs (they swallow Maestro taps)');
   }
+  if (!runner.includes('immersive_mode_confirmations confirmed')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh must confirm immersive-mode overlay (nightly 34681029886 swallowed IME dismiss)',
+    );
+  }
   if (runner.includes('adb shell monkey')) {
     failures.push('scripts/maestro-run-emulator.sh must not use monkey (ANRs Pixel Launcher)');
   }
@@ -143,10 +148,20 @@ function checkMaestroFlows() {
       'scripts/maestro-run-emulator.sh sampler must not restart the activity mid-flow (resets expo-router)',
     );
   }
+  if (samplerLoop.includes('dismiss_immersive_confirm')) {
+    failures.push(
+      'scripts/maestro-run-emulator.sh sampler must not KEYCODE_BACK mid-flow to dismiss immersive overlay',
+    );
+  }
 
   const device = fs.readFileSync(path.join(root, 'scripts/lib/maestro-device.sh'), 'utf8');
   if (!device.includes('am start') || !device.includes('dismiss_anr')) {
     failures.push('scripts/lib/maestro-device.sh must am start + dismiss ANR');
+  }
+  if (!device.includes('ImmersiveModeConfirmation') || !device.includes('dismiss_immersive_confirm')) {
+    failures.push(
+      'scripts/lib/maestro-device.sh must dismiss ImmersiveModeConfirmation (nightly 34681029886)',
+    );
   }
   if (!device.includes('Application Not Responding')) {
     failures.push('scripts/lib/maestro-device.sh must detect Application Not Responding');
@@ -173,8 +188,31 @@ function checkMaestroFlows() {
     failures.push('maestro-nightly.yml must upload the copied per-command Maestro logs');
   }
 
+  const setupAndroidBlocks = workflow.match(
+    /uses:\s*android-actions\/setup-android@v\d+[\s\S]{0,280}/g,
+  );
+  if (
+    !setupAndroidBlocks?.length ||
+    setupAndroidBlocks.some(
+      (block) => !/packages:\s*platform-tools\b/.test(block) || /packages:\s*['"]?tools\b/.test(block),
+    )
+  ) {
+    failures.push(
+      'maestro-nightly.yml must pass setup-android packages: platform-tools (Google removed the tools package, nightly 34939781509)',
+    );
+  }
+
   if (!buildScript.includes('enable_emulator_http_cleartext') || !buildScript.includes('10.0.2.2')) {
     failures.push('scripts/maestro-build-apk.sh must allow HTTP to 10.0.2.2 on staging release APKs');
+  }
+  if (
+    !buildScript.includes('pin_gradle_heap') ||
+    !buildScript.includes('Xmx4096m') ||
+    !buildScript.includes('--no-parallel')
+  ) {
+    failures.push(
+      'scripts/maestro-build-apk.sh must pin Gradle to -Xmx4096m after prebuild (nightly 34474685308 mergeDex OOM)',
+    );
   }
 
   const runtimePatches = fs.readFileSync(path.join(root, 'apps/mobile/src/install-runtime.ts'), 'utf8');
@@ -337,16 +375,95 @@ function checkMaestroFlows() {
     if (!dismissWizardBody.includes('diary-editor-title')) {
       failures.push('_dismiss-wizard-ime.yaml must tap diary-editor-title (pinned chrome, not the scrolled step title)');
     }
+    if (!dismissWizardBody.includes('diary-wizard-step-label')) {
+      failures.push(
+        '_dismiss-wizard-ime.yaml must also tap diary-wizard-step-label (nightly 34946086211: title tap left Gboard up)',
+      );
+    }
   }
 
   const editorModal = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryEditorModal.tsx'), 'utf8');
   if (
     !editorModal.includes('diary-editor-title') ||
-    !editorModal.includes('Keyboard.dismiss') ||
-    /liftStyle\s*[,}\]]/.test(editorModal)
+    !editorModal.includes('blurDiaryEditorIme') ||
+    !editorModal.includes('onPressIn={dismissDiaryIme}') ||
+    !editorModal.includes('diary-editor-pinned-top') ||
+    !editorModal.includes('diaryEditorSheetPaddingBottom') ||
+    !editorModal.includes('registerInput') ||
+    /liftStyle\s*[,}\]]/.test(editorModal) ||
+    /focusedInputRef\.current = null/.test(editorModal)
   ) {
     failures.push(
-      'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, and must not apply liftStyle',
+      'DiaryEditorModal must expose diary-editor-title, cap IME padding, dismiss IME on title press, keep registered inputs, and must not apply liftStyle',
+    );
+  }
+
+  const diaryImeHelper = path.join(root, 'apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
+  if (!fs.existsSync(diaryImeHelper)) {
+    failures.push('diary-editor-ime.ts missing (blur registered Modal input before Keyboard.dismiss)');
+  } else {
+    const imeBody = fs.readFileSync(diaryImeHelper, 'utf8');
+    if (
+      !imeBody.includes('Keyboard.dismiss') ||
+      !imeBody.includes('blurTextInput') ||
+      !imeBody.includes('capable.blur') ||
+      !imeBody.includes('for (const node of registered)')
+    ) {
+      failures.push('blurDiaryEditorIme must blur every registered input via host blur() then Keyboard.dismiss');
+    }
+  }
+
+  const stepField = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/DiaryStepField.tsx'),
+    'utf8',
+  );
+  const fieldStyles = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts'),
+    'utf8',
+  );
+  if (
+    !stepField.includes('styles.inputWrap') ||
+    !stepField.includes('registerInput') ||
+    !fieldStyles.includes('inputWrap:') ||
+    !fieldStyles.includes('height: density.tapMinHeight') ||
+    !fieldStyles.includes('inputMultilineWrap:')
+  ) {
+    failures.push(
+      'DiaryStepField inputs must sit in a wrap with definite height (nightly 34451477109 inverted skinArea bounds)',
+    );
+  }
+  if (!stepField.includes('editorScroll?.dismissIme()') || !stepField.includes('handleChangeText')) {
+    failures.push(
+      'DiaryStepField must dismiss IME on choice press and re-register the input on change (nightly 35067465304)',
+    );
+  }
+
+  const diaryWizard = fs.readFileSync(path.join(root, 'apps/mobile/src/components/DiaryWizard.tsx'), 'utf8');
+  const diaryLayout = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/diary/wizard/diary-editor-layout.ts'),
+    'utf8',
+  );
+  if (
+    !diaryWizard.includes('splitDiaryScreenForIme') ||
+    !diaryWizard.includes('pinnedSteps.map') ||
+    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS') ||
+    !diaryLayout.includes('isDiaryTextInputStep') ||
+    !diaryLayout.includes('isCompactDiaryChoice(step)') ||
+    diaryLayout.includes('textInputCount >= 2')
+  ) {
+    failures.push(
+      'DiaryWizard must pin compact chips above the editor scroll and keep text fields in the scroll (nightly 35081306254)',
+    );
+  }
+
+  const tapWizardChoice = fs.readFileSync(path.join(flowsDir, '_tap-wizard-choice.yaml'), 'utf8');
+  if (
+    tapWizardChoice.indexOf('scrollUntilVisible') < 0 ||
+    tapWizardChoice.indexOf('extendedWaitUntil') < 0 ||
+    tapWizardChoice.indexOf('scrollUntilVisible') > tapWizardChoice.indexOf('extendedWaitUntil')
+  ) {
+    failures.push(
+      '_tap-wizard-choice.yaml must scrollUntilVisible before waiting for visible (nightly 34956812041)',
     );
   }
 
@@ -360,8 +477,59 @@ function checkMaestroFlows() {
   }
 
   const fillWizardField = fs.readFileSync(path.join(flowsDir, '_fill-wizard-field.yaml'), 'utf8');
-  if (!fillWizardField.includes('waitForAnimationToEnd') || !fillWizardField.includes('eraseText')) {
-    failures.push('_fill-wizard-field.yaml must retap the field after layout before typing');
+  const fillAfterInput = fillWizardField.split('inputText')[1] ?? '';
+  if (
+    !fillWizardField.includes('waitForAnimationToEnd') ||
+    !fillWizardField.includes('eraseText') ||
+    !fillWizardField.includes('assertVisible') ||
+    !fillWizardField.includes('extendedWaitUntil') ||
+    !fillWizardField.includes('optional: true') ||
+    !fillAfterInput.includes('scrollUntilVisible')
+  ) {
+    failures.push(
+      '_fill-wizard-field.yaml must wait for FIELD_ID, type after the first tap, scroll it back into view, and assertVisible FIELD_VALUE',
+    );
+  }
+
+  const diarySchema = fs.readFileSync(path.join(root, 'packages/core/src/diary-schema.ts'), 'utf8');
+  const symptomsSection = diarySchema.split("type: 'Симптомы'")[1]?.split('type:')[0] ?? '';
+  const symptomsTextIdx = symptomsSection.indexOf("id: 'symptoms'");
+  const symptomsCatalogIdx = symptomsSection.indexOf("id: 'symptomCode'");
+  if (!(symptomsTextIdx >= 0 && symptomsCatalogIdx > symptomsTextIdx)) {
+    failures.push(
+      'Симптомы grouped screen must ask the required text field above catalog chips (nightly 34575409044 inverted diary-field-symptoms)',
+    );
+  }
+
+  const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
+  if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
+    failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
+  }
+  if (
+    !photoSmoke.includes('FIELD_VALUE: предплечье') ||
+    !photoSmoke.includes('FIELD_VALUE: шелушение') ||
+    /\bFIELD_VALUE: лицо\b/.test(photoSmoke) ||
+    photoSmoke.includes('FIELD_VALUE: покраснение')
+  ) {
+    failures.push(
+      'diary-photo-smoke.yaml must type values that are not placeholder substrings (лицо / покраснение)',
+    );
+  }
+
+  const stagingBackup = fs.readFileSync(path.join(flowsDir, 'staging-backup-smoke.yaml'), 'utf8');
+  if (
+    /text:\s*"Готово"/.test(stagingBackup) ||
+    !stagingBackup.includes('status-banner-message') ||
+    !stagingBackup.includes('Резервная копия отправлена на сервер')
+  ) {
+    failures.push(
+      'staging-backup-smoke.yaml must wait for uploadSuccess copy (Alert title «Готово» was removed)',
+    );
+  }
+
+  const bannerStore = fs.readFileSync(path.join(root, 'apps/mobile/src/store/banner-store.ts'), 'utf8');
+  if (!bannerStore.includes('BANNER_AUTO_HIDE_MS = 10_000')) {
+    failures.push('banner-store must keep StatusBanner visible for at least 10s (Maestro nightly)');
   }
 
   for (const name of ['diary-smoke.yaml', 'diary-dish-smoke.yaml', 'diary-photo-smoke.yaml']) {
@@ -372,11 +540,6 @@ function checkMaestroFlows() {
     if (!flow.includes('diary-new-entry') || flow.includes('diary-chip-')) {
       failures.push(`${name}: must open types via diary-new-entry (home chips were removed)`);
     }
-  }
-
-  const photoSmoke = fs.readFileSync(path.join(flowsDir, 'diary-photo-smoke.yaml'), 'utf8');
-  if (!photoSmoke.includes('diary-picker-skin') || !photoSmoke.includes('diary-photo-step')) {
-    failures.push('diary-photo-smoke.yaml must pick Кожа via diary-picker-skin then reach diary-photo-step');
   }
 
   const stagingAuth = fs.readFileSync(path.join(flowsDir, 'staging-auth-smoke.yaml'), 'utf8');
@@ -558,17 +721,21 @@ requireFile('docs/qa-checklist.md');
 requireFile('docs/maestro.md');
 requireFile('docs/rc-gate.md');
 requireFile('docs/analytics-staging.md');
+requireFile('docs/staging-glitchtip.md');
 requireFile('docs/performance-cold-start.md', { optional: true });
 requireFile('docs/performance-api-infra.md', { optional: true });
 requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('staging Gradle crash DSN', 'node', ['--test', 'scripts/resolve-staging-error-dsn.test.mjs']);
+runStep('EAS Android quota skip', 'node', ['--test', 'scripts/eas-android-quota.test.mjs']);
 runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
+runStep('glitchtip infra', 'bash', ['scripts/check-glitchtip-infra.sh']);
 checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();

@@ -4,9 +4,16 @@
 # from UiAutomator (Nightly 33736400731).
 # Nightly 34349155324: wait for Keyboard.dismiss() + layout to settle so the
 # next tapOn hits the intended field, not the still-focused previous one.
+# Nightly 34946086211: a single title tap left Gboard up (Modal window token);
+# chips `diary-choice-Слабый` stayed in the tree under the keyboard. Tap the
+# wider step label next, and the title Pressable now blurs on pressIn.
+# Nightly 35067465304: keep blurring the last TextInput (do not null the ref);
+# compact choice chips are also pinned above the scroll.
 appId: com.aclearo.app
 ---
 - tapOn:
     id: diary-editor-title
+- tapOn:
+    id: diary-wizard-step-label
 - waitForAnimationToEnd:
     timeout: 3000

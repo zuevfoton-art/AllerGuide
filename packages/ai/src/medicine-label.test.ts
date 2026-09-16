@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getDemoMedicineLabelText, parseMedicineLabelText } from './medicine-label';
+import { getDemoMedicineLabelText, hasMedicinePackageLabelSignal, parseMedicineLabelText } from './medicine-label';
 
 describe('medicine label parse', () => {
   it('extracts name, substance, form and strength from a Russian label', () => {
@@ -14,5 +14,11 @@ describe('medicine label parse', () => {
   it('returns null for empty or unrelated text', () => {
     expect(parseMedicineLabelText('')).toBeNull();
     expect(parseMedicineLabelText('привет')).toBeNull();
+  });
+
+  it('treats tablet packs as medicine and ignores food nutrition lines', () => {
+    expect(hasMedicinePackageLabelSignal(getDemoMedicineLabelText())).toBe(true);
+    expect(hasMedicinePackageLabelSignal('Йогурт. Белок 10 г, жир 3 г')).toBe(false);
+    expect(hasMedicinePackageLabelSignal('Nivea crème. Aqua, Glycerin, gel')).toBe(false);
   });
 });
