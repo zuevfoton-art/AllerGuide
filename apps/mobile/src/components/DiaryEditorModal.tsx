@@ -188,9 +188,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   }, []);
 
   const dismissDiaryIme = useCallback(() => {
-    const registered = focusedInputRef.current;
-    blurDiaryEditorIme(registered);
-    focusedInputRef.current = null;
+    blurDiaryEditorIme(focusedInputRef.current);
   }, []);
 
   const registerFocusedInput = useCallback((node: DiaryEditorInputHandle | null) => {

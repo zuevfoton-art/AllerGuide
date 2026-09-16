@@ -3,6 +3,8 @@
 # ("Слабый") sit under Gboard with inverted bounds and tapOn text fails.
 # Nightly 34946086211: IME still up after title tap; wait until the chip is
 # actually visible (not merely in the hierarchy) before tapping.
+# Nightly 35067465304: compact chips (itching) are pinned above the scroll so
+# they stay above Gboard even when Keyboard.dismiss is a no-op on the Modal.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml

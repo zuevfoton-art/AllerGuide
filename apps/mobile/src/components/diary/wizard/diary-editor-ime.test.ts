@@ -17,9 +17,11 @@ describe('blurDiaryEditorIme', () => {
     }));
 
     const { blurDiaryEditorIme } = await import('./diary-editor-ime');
-    const registered = { id: 'appearance' };
+    const blur = vi.fn();
+    const registered = { id: 'appearance', blur };
     blurDiaryEditorIme(registered as never);
 
+    expect(blur).toHaveBeenCalledTimes(1);
     expect(blurTextInput).toHaveBeenCalledWith(registered);
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
