@@ -142,6 +142,8 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
     },
     inputMultilineWrap: {
       minHeight: 120,
+      maxHeight: 160,
+      flexGrow: 0,
       flexShrink: 0,
     },
     input: {
@@ -157,7 +159,7 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
       minHeight: density.tapMinHeight,
       flexShrink: 0,
     },
-    inputMultiline: { minHeight: 120, lineHeight: 22 },
+    inputMultiline: { minHeight: 120, maxHeight: 160, lineHeight: 22 },
     choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     choiceChip: {
       paddingVertical: 9,

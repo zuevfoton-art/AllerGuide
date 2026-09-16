@@ -27,8 +27,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalKeyboardAvoid } from '@/src/components/ModalKeyboardAvoid';
 import { blurDiaryEditorIme } from '@/src/components/diary/wizard/diary-editor-ime';
-import { diaryEditorScrollMaxHeight } from '@/src/components/diary/wizard/diary-editor-layout';
-import { radii, space } from '@/src/constants/layout';
+import {
+  diaryEditorScrollMaxHeight,
+  diaryEditorSheetPaddingBottom,
+} from '@/src/components/diary/wizard/diary-editor-layout';
+import { density, radii, space } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useModalAnimation } from '@/src/hooks/use-modal-animation';
 import { useTranslation } from '@/src/store/locale-store';
@@ -43,7 +46,8 @@ type DiaryEditorInputHandle = Parameters<typeof TextInput.State.blurTextInput>[0
 
 type DiaryEditorScrollApi = {
   scrollFieldIntoView: (node: unknown) => void;
-  registerFocusedInput: (node: DiaryEditorInputHandle | null) => void;
+  registerInput: (node: DiaryEditorInputHandle | null) => void;
+  unregisterInput: (node: DiaryEditorInputHandle | null) => void;
   dismissIme: () => void;
 };
 
@@ -153,7 +157,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const modalAnimation = useModalAnimation('slide');
   const scrollRef = useRef<ScrollView>(null);
   const pendingFocusNode = useRef<unknown>(null);
-  const focusedInputRef = useRef<DiaryEditorInputHandle | null>(null);
+  const inputRefs = useRef(new Set<DiaryEditorInputHandle>());
   const footerRenderRef = useRef<FooterRenderer | null>(null);
   const topRenderRef = useRef<FooterRenderer | null>(null);
   const [hasFooter, setHasFooter] = useState(false);
@@ -188,13 +192,15 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   }, []);
 
   const dismissDiaryIme = useCallback(() => {
-    const registered = focusedInputRef.current;
-    blurDiaryEditorIme(registered);
-    focusedInputRef.current = null;
+    blurDiaryEditorIme([...inputRefs.current]);
   }, []);
 
-  const registerFocusedInput = useCallback((node: DiaryEditorInputHandle | null) => {
-    focusedInputRef.current = node;
+  const registerInput = useCallback((node: DiaryEditorInputHandle | null) => {
+    if (node) inputRefs.current.add(node);
+  }, []);
+
+  const unregisterInput = useCallback((node: DiaryEditorInputHandle | null) => {
+    if (node) inputRefs.current.delete(node);
   }, []);
 
   const scrollFieldIntoView = useCallback((node: unknown) => {
@@ -231,12 +237,13 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   }, []);
 
   const scrollApi = useMemo(
-    () => ({ scrollFieldIntoView, registerFocusedInput, dismissIme: dismissDiaryIme }),
-    [scrollFieldIntoView, registerFocusedInput, dismissDiaryIme],
+    () => ({ scrollFieldIntoView, registerInput, unregisterInput, dismissIme: dismissDiaryIme }),
+    [scrollFieldIntoView, registerInput, unregisterInput, dismissDiaryIme],
   );
 
   useEffect(() => {
     if (visible) return;
+    inputRefs.current.clear();
     footerRenderRef.current = null;
     topRenderRef.current = null;
     setHasFooter(false);
@@ -255,7 +262,13 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
       onRequestClose={onClose}>
       <ModalKeyboardAvoid style={styles.root}>
         {({ keyboardInset }) => {
-          const sheetPaddingBottom = Math.max(insets.bottom, space[4]) + keyboardInset;
+          const sheetPaddingBottom = diaryEditorSheetPaddingBottom({
+            windowHeight,
+            headerHeight: headerHeight + topHeight,
+            footerHeight,
+            keyboardInset,
+            safeBottom: insets.bottom,
+          });
           const scrollMaxHeight = diaryEditorScrollMaxHeight({
             windowHeight,
             headerHeight: headerHeight + topHeight,
@@ -274,6 +287,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
               style={[styles.sheet, { paddingBottom: sheetPaddingBottom }]}
               accessibilityViewIsModal>
               <View
+                style={styles.headerChrome}
                 onLayout={(event) => {
                   const next = Math.ceil(event.nativeEvent.layout.height);
                   setHeaderHeight((prev) => (prev === next ? prev : next));
@@ -375,6 +389,9 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       overflow: 'hidden',
     },
+    headerChrome: {
+      flexShrink: 0,
+    },
     grabberWrap: {
       alignItems: 'center',
       paddingTop: 8,
@@ -392,9 +409,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       paddingHorizontal: 8,
       paddingVertical: 8,
+      minHeight: density.tapMinHeight,
+      flexShrink: 0,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       backgroundColor: colors.bg,
+    },
+    headerTitleHit: {
+      flex: 1,
+      flexShrink: 0,
+      minHeight: density.tapMinHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 6,
     },
     headerBtn: {
       minWidth: 72,
@@ -407,11 +434,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.accent,
     },
-    headerTitleHit: {
-      flex: 1,
-      alignItems: 'center',
-      paddingVertical: 6,
-    },
     headerTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 16,
@@ -423,6 +445,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       paddingTop: space[3],
       paddingBottom: space[2],
       gap: space[2],
+      flexShrink: 0,
       backgroundColor: colors.bg,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
@@ -437,6 +460,8 @@ function createStyles({ colors, fonts }: AppTheme) {
     footer: {
       paddingHorizontal: space[4],
       paddingTop: space[2],
+      flexShrink: 0,
+      minHeight: density.tapMinHeight,
       borderTopWidth: 1,
       borderTopColor: colors.border,
       backgroundColor: colors.bg,

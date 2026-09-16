@@ -3,6 +3,9 @@
 # (appearance) must be tapped after IME layout, then assertVisible the value
 # — otherwise inputText appends to skinArea (`лицоyyпокраснение`) and Далее
 # stays disabled.
+# Nightly 35072335460: the same append (`предплечьеyyшелушение`) when Gboard
+# still covered appearance in the scroll. Skin text fields now live in
+# diary-editor-pinned-top; wait until FIELD_ID is visible before typing.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
@@ -11,6 +14,10 @@ appId: com.aclearo.app
       id: ${FIELD_ID}
     direction: DOWN
     timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: ${FIELD_ID}
+    timeout: 10000
 - tapOn:
     id: ${FIELD_ID}
 - waitForAnimationToEnd:
