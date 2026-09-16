@@ -3,7 +3,7 @@
 Документ отвечает на запрос: лучшие мировые практики wellness UX/UI и план улучшения AllerGuide **без обязательства сохранять текущую IA**. Токенный слой Clinical Calm / Claro teal не отменяем как бренд; навигацию, ритуалы, SOS и плотность экранов — пересобираем.
 
 **Макет ключевых экранов:** [`wellness-ux-north-star.html`](./wellness-ux-north-star.html)  
-**UX/UI v2 (tap-depth, criticality, выбор палитры):** [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html)  
+**UX/UI v2 (tap-depth, criticality, production palette B Nordic Air):** [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html)  
 **Связанные документы:** [`brand-claro-green.md`](./brand-claro-green.md) · [`ux-audit-2026-08.md`](./ux-audit-2026-08.md) · [`ux-improvement-plan.md`](./ux-improvement-plan.md) · [`cjm-profile-diary.md`](./cjm-profile-diary.md) · [`functional-requirements.md`](./functional-requirements.md) · [`roadmap-to-prod.md`](./roadmap-to-prod.md)
 
 > Принцип внедрения: экраны остаются тонкими (`app/**` → `services` → `core`). Новые ритуалы (чек-ин, daily reading, кризисный SOS) — доменная логика в `packages/core`, не JSX. Offline-first и 6 локалей не торгуются.

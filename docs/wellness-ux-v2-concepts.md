@@ -163,7 +163,7 @@ Chip профиля → switcher / хаб: профиль / настройки /
 | ID | Название | Фон / surface / action / soft / ink | Характер |
 |----|----------|-------------------------------------|----------|
 | **A** | Forest & Linen / Claro Refuge (**рекомендованный**) | `#F6F2EA` / `#FFFCF6` / `#176C62` / `#DCEFEA` / `#17201E` | Тёплое прибежище, ближе к Claro |
-| **B** | Nordic Air (тёплый небо) | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Тёплый воздух + голубые градации; **не** medical calm / slate |
+| **B** | Nordic Air (тёплый небо) — **выбран** | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Production: тёплый воздух + голубые градации; не medical calm |
 | **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Бежевый · мягкий серый · пыльный синий |
 
 **B wash:** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`. Dark B: тёплый уголь-фон, action `#7EB7D6`, soft `#243846`.
@@ -174,7 +174,7 @@ Plum & Sage снят: не подходит как production-направлен
 
 Во всех вариантах `danger` / `caution` / `success` — отдельная семантика с иконкой и текстом. Это стартовые направления: финальные пары проходят contrast-test после выбора.
 
-**Правило внедрения:** пользователь выбирает **одну** схему → только она становится production-темой (§5 плана). До выбора код `theme.ts` / экраны не переписываем под v2.
+**Правило внедрения:** выбрана production-схема **B — Nordic Air (тёплый небо)**. A и C остаются в HTML для сравнения; в код уходит только B.
 
 ### 4.1. Что покрывает HTML-прототип
 
@@ -189,12 +189,12 @@ Plum & Sage снят: не подходит как production-направлен
 
 ## 5. Связь с реализацией (после выбора)
 
-Не входит в поставку этого документа; чеклист для следующего этапа:
+Чеклист следующего этапа (частично начат после выбора B):
 
-1. Канон в north-star / FR / brand doc.
+1. Канон в north-star / FR / brand doc → B Nordic Air.
 2. `criticality` + resolver видимой/свёрнутой групп в `packages/core` `home-insights.ts`.
-3. Semantic tokens → `theme.ts` / `layout.ts`; primitives `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
-4. Мигрировать все `ProfileHeaderButton` на `variant="chip"` + имя активного профиля (кроме `/profile` и setup).
+3. Semantic tokens → `theme.ts` / `layout.ts` / `claro-gradient.ts`; далее primitives `SelectChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
+4. Мигрировать все `ProfileHeaderButton` на chip + имя (кроме `/profile` и setup).
 5. Voice-to-draft на существующих `VoiceNoteButton` + `voice-dictation-service`.
 6. Analytics без PII; тесты комбинаций criticality; Maestro; `pnpm rc-gate`.
 
@@ -204,4 +204,4 @@ Plum & Sage снят: не подходит как production-направлен
 
 - [x] Зафиксированы tap-depth, IA, criticality, семантика контролов, канон profile chip.
 - [x] HTML сравнивает A / тёплый B / Dusty Beige Sky C на ключевых экранах и состояниях.
-- [ ] Пользователь выбрал одну production-палитру (блокер для §5).
+- [x] Пользователь выбрал production-палитру **B — Nordic Air (тёплый небо)**.
