@@ -18,7 +18,7 @@ export default function MarketScreen() {
 
   return (
     <Screen
-      brandHeaderRight={<ProfileHeaderButton />}
+      brandHeaderRight={<ProfileHeaderButton variant="chip" chipTitle={profile?.name} />}
       refreshing={catalog.refreshing}
       onRefresh={catalog.refresh}
     >

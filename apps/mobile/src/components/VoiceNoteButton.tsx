@@ -17,14 +17,25 @@ interface VoiceNoteButtonProps {
   onTranscript: (transcript: string) => void;
   disabled?: boolean;
   testID?: string;
+  /**
+   * `bar` — labeled mic row (diary / standalone).
+   * `icon` — circular mic for embedding inside an Ask oval composer.
+   */
+  variant?: 'bar' | 'icon';
 }
 
-export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteButtonProps) {
+export function VoiceNoteButton({
+  onTranscript,
+  disabled,
+  testID,
+  variant = 'bar',
+}: VoiceNoteButtonProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale } = useTranslation();
   const [state, setState] = useState<VoiceDictationState>('idle');
   const supported = isVoiceInputSupported();
+  const iconOnly = variant === 'icon';
 
   const handleError = useCallback(
     (code: string) => {
@@ -73,6 +84,7 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
   }, []);
 
   if (!supported) {
+    if (iconOnly) return null;
     return (
       <Text style={styles.hint} testID={testID ? `${testID}-unsupported` : undefined}>
         {t('voiceNote.notSupported')}
@@ -82,6 +94,33 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
 
   const isListening = state === 'listening';
   const isProcessing = state === 'processing';
+  const a11yLabel = isListening
+    ? t('voiceNote.stopRecording')
+    : isProcessing
+      ? t('voiceNote.processing')
+      : t('voiceNote.startRecording');
+
+  if (iconOnly) {
+    return (
+      <Pressable
+        style={[
+          styles.iconBtn,
+          isListening && styles.iconBtnActive,
+          (disabled || isProcessing) && styles.micBtnDisabled,
+        ]}
+        disabled={disabled || isProcessing}
+        onPress={() => void toggle()}
+        accessibilityRole="button"
+        accessibilityLabel={a11yLabel}
+        testID={testID ? `${testID}-mic` : 'voice-note-mic'}>
+        {isListening || isProcessing ? (
+          <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.accent} size="small" />
+        ) : (
+          <Ionicons name="mic" size={22} color={theme.colors.accent} />
+        )}
+      </Pressable>
+    );
+  }
 
   return (
     <View style={styles.wrap} testID={testID}>
@@ -94,13 +133,7 @@ export function VoiceNoteButton({ onTranscript, disabled, testID }: VoiceNoteBut
         disabled={disabled || isProcessing}
         onPress={() => void toggle()}
         accessibilityRole="button"
-        accessibilityLabel={
-          isListening
-            ? t('voiceNote.stopRecording')
-            : isProcessing
-              ? t('voiceNote.processing')
-              : t('voiceNote.startRecording')
-        }
+        accessibilityLabel={a11yLabel}
         testID={testID ? `${testID}-mic` : 'voice-note-mic'}>
         {isListening || isProcessing ? (
           <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.accent} size="small" />
@@ -154,6 +187,16 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
     },
     micBtnDisabled: { opacity: 0.5 },
+    iconBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconBtnActive: {
+      backgroundColor: colors.dangerLight,
+    },
     micLabel: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
