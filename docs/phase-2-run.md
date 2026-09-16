@@ -9,8 +9,8 @@
 | P2.2b | Done | `profile-service.test.ts` (2 теста) |
 | P2.2c | Done | `diary-service.test.ts`, `sync-service-local.test.ts` |
 | P2.2d | Done | `scripts/mobile-test-gate.mjs` (≥30), шаг в [CI](../.github/workflows/ci.yml) |
-| P2.3a | Done | `error-reporting.ts` + `EXPO_PUBLIC_SENTRY_DSN`, `app.config.js` plugin hook |
-| P2.3b | Done | `@sentry/react-native/expo` при `SENTRY_ORG`/`SENTRY_PROJECT`, EAS env в `eas.json` |
+| P2.3a | Done | `error-reporting.ts` + `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`); `sentry.io` refused |
+| P2.3b | Done | Expo plugin only when `SENTRY_URL` is self-hosted GlitchTip (`error-tracker-url.js`); no sentry.io upload |
 | P2.4a | Done | `packages/core/src/analytics-events.ts` (schema, no PII), `analytics-service.test.ts` |
 | P2.4b | Done | API ingest + dashboard, mobile wiring, [`analytics-staging.md`](./analytics-staging.md) |
 | P2.5a | Done | OWASP mobile audit, [`security-audit-mobile.md`](./security-audit-mobile.md) |
@@ -19,9 +19,9 @@
 | P2.7a | Done | `startup-metrics.ts`, deferred allergen warm, [`performance-cold-start.md`](./performance-cold-start.md) |
 | P2.7b | Done | Redis rate-limit, health DB/redis, [`performance-api-infra.md`](./performance-api-infra.md) |
 | P2.7c | Done | `web-store.test.ts`, idle flush, [`performance-web-store.md`](./performance-web-store.md) |
-| P2.8 | **BLOCKED** | Soak **BLOCKED** 2026-07-29; automated `pnpm rc-gate` + [RC Gate CI](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30490654726) **green**; Maestro/Sentry/testers still block sign-off |
+| P2.8 | **BLOCKED** | Soak **BLOCKED** 2026-07-29; automated `pnpm rc-gate` + [RC Gate CI](https://github.com/zuevfoton-art/AllerGuide/actions/runs/30490654726) **green**; Maestro / GlitchTip DSN / testers still block sign-off |
 
-**Далее:** Maestro green streak → Sentry ≥99% → testers → sign-off → [Phase 3 readiness](./phase-3-readiness.md). Phase 3 **не** авторизован.
+**Далее:** Maestro green streak → first-party crash-free ≥99% (GlitchTip backstop) → testers → sign-off → [Phase 3 readiness](./phase-3-readiness.md). Phase 3 **не** авторизован.
 
 См. [roadmap Phase 2](roadmap-to-prod.md#phase-2--quality--security--release-candidate) · [подзадачи](phase1-phase2-issues.md#phase-2--quality--security).
 
@@ -35,16 +35,16 @@
 
 1. Automated: `pnpm rc-gate` (или CI [rc-gate.yml](../.github/workflows/rc-gate.yml)).
 2. EAS staging RC build → internal testers.
-3. Вести [`staging-soak-log.md`](./staging-soak-log.md) 14 дней; Sentry crash-free ≥99%.
+3. Вести [`staging-soak-log.md`](./staging-soak-log.md) 14 дней; first-party crash-free ≥99% (`crashFree` + GlitchTip native backstop).
 4. Maestro nightly green; security audits 0 critical.
 5. Sign-off → [phase-3-readiness.md](./phase-3-readiness.md).
 
-## Sentry (P2.3)
+## GlitchTip (P2.3)
 
-1. Создать проект в Sentry (React Native).
-2. EAS secrets: `EXPO_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`.
-3. Staging/production build с plugin загрузит source maps при наличии org/project.
-4. Проверка: тестовый crash через dev menu / `captureError` виден в dashboard.
+1. Provision the YC VM per [`staging-glitchtip.md`](./staging-glitchtip.md). Do **not** use sentry.io or the app Managed Postgres.
+2. EAS Sensitive: `EXPO_PUBLIC_ERROR_DSN` (optional alias `EXPO_PUBLIC_SENTRY_DSN`). Do not set `SENTRY_AUTH_TOKEN` for sentry.io.
+3. Optional maps upload: `SENTRY_URL` + `SENTRY_ORG` + `SENTRY_PROJECT` only when `SENTRY_URL` is the GlitchTip origin.
+4. Проверка: тестовый crash через `captureError` виден в GlitchTip; cold start → `session_started` на analytics dashboard.
 
 ## Analytics (P2.4b)
 

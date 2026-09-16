@@ -2,7 +2,7 @@
 
 Runbook для развёртывания `apps/api` на **Yandex Cloud** (`ru-central1`): приватный Managed PostgreSQL (без публичного IP), Serverless Container, API Gateway, TLS, CI/CD и EAS-сборки mobile.
 
-**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md) · [`yc-stage-gates.md`](./yc-stage-gates.md) (Phase 0–5)
+**Связанные документы:** [`staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) (поэкранно в UI) · [`staging-deploy.md`](./staging-deploy.md) (общий) · [`staging-infrastructure-plan.md`](./staging-infrastructure-plan.md) · [`brand-rollout.md`](./brand-rollout.md) · [`eas-staging-build.md`](./eas-staging-build.md) · [`yc-stage-gates.md`](./yc-stage-gates.md) (Phase 0–5) · [`staging-glitchtip.md`](./staging-glitchtip.md) (crash ingest, отдельная VM)
 
 ---
 
@@ -12,6 +12,7 @@ Runbook для развёртывания `apps/api` на **Yandex Cloud** (`ru-
 |-------|----------|
 | Staging API (канонический) | `https://api.staging.aclearo.com` |
 | Staging API (RU-зеркало) | `https://api.staging.aclearo.ru` → тот же API GW |
+| Crash ingest (GlitchTip) | `https://errors.staging.aclearo.com` — отдельная VM, не API container |
 | Mobile `EXPO_PUBLIC_API_URL` | `https://api.staging.aclearo.com` (уже в `eas.json`) |
 | Primary / legal | `aclearo.com`, `aclearo.ru` |
 | Product redirect | `a-claro.com`, `a-claro.ru` → `aclearo.com` |
@@ -132,8 +133,9 @@ yc config set folder-id <FOLDER_ID>
 | Serverless Container | `aclearo-staging-api` + VPC connectivity |
 | API Gateway | публичный HTTPS → container |
 | Certificate Manager | TLS для `api.staging.aclearo.com` (+ `.ru`) |
-| Lockbox secret | placeholder для env API |
+| Lockbox secret | placeholder для env API (`aclearo-staging-api-env`) |
 | Compute VM | GitHub runner для миграций |
+| Compute VM + Lockbox | GlitchTip crash ingest (`aclearo-staging-glitchtip`, `errors.staging.aclearo.com`) — [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | IAM | SA для API и deploy |
 
 ### Запуск

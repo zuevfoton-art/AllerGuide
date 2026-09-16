@@ -137,8 +137,8 @@
       "id": "P2.3",
       "milestone": "Phase 2: Quality & Security",
       "labels": ["phase-2", "roadmap"],
-      "title": "[P2.3] Sentry production",
-      "body": "## Описание\nПодключить Sentry в production-сборках с source maps через EAS.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_SENTRY_DSN` настроен для staging/production\n- [ ] Source maps загружаются через EAS build hooks\n- [ ] Тестовый crash виден в Sentry dashboard\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
+      "title": "[P2.3] GlitchTip crash ingest",
+      "body": "## Описание\nSelf-hosted GlitchTip on Yandex Cloud (Sentry-protocol DSN). First-party crash-free for G5 — GlitchTip has no session health.\n\n## Критерий готовности\n- [ ] Staging GlitchTip at `errors.staging.aclearo.com` (own Postgres, not app MDB)\n- [ ] `EXPO_PUBLIC_ERROR_DSN` on EAS `staging` (not sentry.io)\n- [ ] Test crash visible in GlitchTip; `session_started` on analytics dashboard\n- [ ] Soak uses `crashFree` ≥99% + GlitchTip native backstop\n\n## Связанные документы\n- [GlitchTip runbook](../docs/staging-glitchtip.md)\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-2--quality--security--release-candidate)"
     },
     {
       "id": "P2.4",
@@ -222,7 +222,7 @@
       "milestone": "Phase 4: v1.0 Launch",
       "labels": ["phase-4", "roadmap"],
       "title": "[P4.1] Production feature flags",
-      "body": "## Описание\nВключить production feature flags для v1.0.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_API_URL` = `https://api.aclearo.com`\n- [ ] Backend auth ON для новых пользователей\n- [ ] Cloud sync ON + recovery key\n- [ ] AI scan ON (budget 50/user/day)\n- [ ] Sentry и analytics ON\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
+      "body": "## Описание\nВключить production feature flags для v1.0.\n\n## Критерий готовности\n- [ ] `EXPO_PUBLIC_API_URL` = `https://api.aclearo.com`\n- [ ] Backend auth ON для новых пользователей\n- [ ] Cloud sync ON + recovery key\n- [ ] AI scan ON (budget 50/user/day)\n- [ ] GlitchTip DSN и analytics ON\n\n## Связанные документы\n- [Roadmap to Production](../docs/roadmap-to-prod.md#phase-4--v10-launch)"
     },
     {
       "id": "P4.2",

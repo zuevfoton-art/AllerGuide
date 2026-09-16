@@ -39,6 +39,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'hint_tour_started',
   'hint_tour_completed',
   'hint_tour_skipped',
+  'session_started',
+  'app_crashed',
 ] as const;
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number];
@@ -69,6 +71,10 @@ export const ANALYTICS_FORBIDDEN_KEYS = [
   'details',
   'ingredients',
   'notes',
+  'profileId',
+  'profile_id',
+  'userId',
+  'user_id',
 ] as const;
 
 const ALLOWED_PROP_KEY = /^[a-z][a-z0-9_]{0,31}$/;
@@ -83,7 +89,7 @@ export function sanitizeAnalyticsProps(props: AnalyticsEventProps = {}): Record<
   for (const [key, value] of Object.entries(props)) {
     if (value == null) continue;
     const lower = key.toLowerCase();
-    if (ANALYTICS_FORBIDDEN_KEYS.some((forbidden) => lower.includes(forbidden))) continue;
+    if (ANALYTICS_FORBIDDEN_KEYS.some((forbidden) => lower.includes(forbidden.toLowerCase()))) continue;
     if (!ALLOWED_PROP_KEY.test(key)) continue;
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
       out[key] = value;

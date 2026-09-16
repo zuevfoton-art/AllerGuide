@@ -45,7 +45,7 @@ Procedure lives in a **skill** (loaded by `description`). Invariants live in a *
 | Rule | `.cursor/rules/design-tokens.mdc` | Claro tokens, radii ACTION/STATE, i18n |
 | Rule | `.cursor/rules/product-roles.mdc` | Routes a product task to the matching skill |
 
-Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgres read-only): [`.cursor/mcp.json`](.cursor/mcp.json) · setup [`docs/mcp-servers.md`](docs/mcp-servers.md). Secrets only via `${env:NAME}` or OAuth — never a prod DB URL.
+Project MCP servers (GitHub, Playwright, Yandex Cloud, staging YC Postgres read-only; Sentry MCP deprecated — G5 is GlitchTip + first-party `crashFree`): [`.cursor/mcp.json`](.cursor/mcp.json) · setup [`docs/mcp-servers.md`](docs/mcp-servers.md). Secrets only via `${env:NAME}` or OAuth — never a prod DB URL.
 
 ---
 
@@ -90,7 +90,7 @@ Project MCP servers (GitHub, Sentry, Playwright, Yandex Cloud, staging YC Postgr
 - Ask chat (`src/routes/ask.ts`): explainer via `/api/ask`. Enable with `AI_CHAT_ENABLED=true` + `AI_SCAN_ENABLED`; mobile `EXPO_PUBLIC_AI_CHAT=true` (default off). Distress wording returns `{ handoff: 'sos' }` without calling the model.
 - Cloud sync (`src/routes/sync.ts`): disabled by default (`SYNC_ENABLED=false`). When enabled it persists to the `sync_backups` table (in-memory fallback when no DB) and authenticates via mobile JWT. Legacy `SYNC_API_KEY` is ignored whenever `JWT_SECRET` is set. The mobile client encrypts backups client-side (`@allerguide/core` `encryptString`, AES-GCM via Web Crypto or `@noble/ciphers`) before upload — the server is zero-knowledge. Enable on mobile with `EXPO_PUBLIC_CLOUD_SYNC=true`. NOTE: the backup key is currently device-held, so cross-device restore needs key escrow / a password-derived key (follow-up).
 - Mobile backend auth: set `JWT_SECRET` + `DATABASE_URL` on API, migrate, then enable `EXPO_PUBLIC_BACKEND_AUTH=true` on mobile.
-- Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`) to console/HTTP; `EXPO_PUBLIC_SENTRY_DSN` enables crash reporting. Both off by default.
+- Observability: `EXPO_PUBLIC_ANALYTICS_ENABLED=true` logs analytics events (screen views + `profile_created`/`scan_completed`/`session_started`/`app_crashed`) to console/HTTP; `EXPO_PUBLIC_ERROR_DSN` (alias `EXPO_PUBLIC_SENTRY_DSN`) enables crash envelopes to self-hosted GlitchTip (`sentry.io` refused). Both off by default.
 
 ### Production builds (internal alpha)
 - Local Android build (Node.js + Gradle) and Android Studio verification: see [`docs/android-local-build.md`](docs/android-local-build.md). Quick path from `apps/mobile`: `pnpm android` (= `expo run:android`) or `cd android && ./gradlew assembleDebug` → `app/build/outputs/apk/debug/app-debug.apk`. The native `apps/mobile/android/` project is committed (Gradle 9.0.0, Hermes, JDK 17, Expo SDK 55 / RN 0.83, New Arch only).

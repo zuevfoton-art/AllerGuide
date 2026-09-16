@@ -279,23 +279,41 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(editorModal, /collapsable=\{false\}/);
     assert.match(editorModal, /dismissDiaryIme/);
     assert.match(editorModal, /onPressIn=\{dismissDiaryIme\}/);
-    assert.match(editorModal, /registerFocusedInput/);
+    assert.match(editorModal, /registerInput/);
+    assert.match(editorModal, /unregisterInput/);
     assert.match(editorModal, /blurDiaryEditorIme/);
+    assert.doesNotMatch(
+      editorModal,
+      /focusedInputRef\.current = null/,
+      'must keep the last Modal TextInput so a second IME dismiss can still blur it (nightly 35067465304)',
+    );
     const imeHelper = read('apps/mobile/src/components/diary/wizard/diary-editor-ime.ts');
     assert.match(imeHelper, /Keyboard\.dismiss/);
     assert.match(imeHelper, /blurTextInput/);
+    assert.match(imeHelper, /capable\.blur/);
+    assert.match(imeHelper, /for \(const node of registered\)/);
     assert.match(editorModal, /testID="diary-editor-footer"/);
     assert.match(editorModal, /testID="diary-editor-pinned-top"/);
     assert.match(editorModal, /diaryEditorScrollMaxHeight/);
+    assert.match(editorModal, /diaryEditorSheetPaddingBottom/);
     assert.doesNotMatch(
       editorModal,
       /liftStyle\s*[,}\]]/,
       'DiaryEditorModal must not apply liftStyle to the sheet',
     );
 
+    const editorLayout = read(
+      'apps/mobile/src/components/diary/wizard/diary-editor-layout.ts',
+    );
+    assert.match(editorLayout, /diaryEditorSheetPaddingBottom/);
+    assert.match(editorLayout, /DIARY_EDITOR_HEADER_MIN_HEIGHT/);
+
     const wizard = read('apps/mobile/src/components/DiaryWizard.tsx');
     assert.match(wizard, /DiaryEditorFooter/);
     assert.match(wizard, /DiaryEditorPinnedTop/);
+    assert.match(wizard, /splitDiaryScreenForIme/);
+    assert.match(wizard, /pinnedSteps\.map/);
+    assert.match(wizard, /scrolledSteps\.map/);
     assert.match(wizard, /testID="diary-wizard-primary"/);
     assert.match(wizard, /testID="diary-wizard-step-label"/);
     assert.match(wizard, /onPressIn=\{\(\) => editorScroll\?\.dismissIme\(\)\}/);
@@ -357,16 +375,28 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(tapChoice, /_dismiss-wizard-ime.yaml/);
     assert.match(tapChoice, /extendedWaitUntil/);
     assert.match(tapChoice, /scrollUntilVisible/);
+    assert.ok(
+      tapChoice.indexOf('scrollUntilVisible') < tapChoice.indexOf('extendedWaitUntil'),
+      'scroll the chip into view before waiting for visible (nightly 34956812041)',
+    );
     assert.match(tapChoice, /id: \$\{CHOICE_ID\}/);
 
     const stepField = read('apps/mobile/src/components/diary/wizard/DiaryStepField.tsx');
     assert.match(stepField, /diary-choice-\$\{choice\}/);
     assert.match(stepField, /diary-choice-\$\{step\.id\}/);
     assert.match(stepField, /styles\.inputWrap/);
-    assert.match(stepField, /registerFocusedInput/);
+    assert.match(stepField, /registerInput/);
+    assert.match(stepField, /unregisterInput/);
+    assert.match(stepField, /handleChangeText/);
+    assert.match(stepField, /editorScroll\?\.dismissIme\(\)/);
     const fieldStyles = read('apps/mobile/src/components/diary/wizard/diary-wizard-styles.ts');
     assert.match(fieldStyles, /inputWrap:/);
     assert.match(fieldStyles, /height: density\.tapMinHeight/);
+    assert.match(fieldStyles, /inputMultilineWrap:/);
+    assert.match(fieldStyles, /maxHeight: 160/);
+    const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
+    assert.match(layout, /splitDiaryScreenForIme/);
+    assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
   });
 
   it('opens scanner manual input before typing молоко', () => {
