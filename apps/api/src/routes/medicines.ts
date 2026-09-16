@@ -5,6 +5,8 @@ import {
   parseMedicineVoiceUtterance,
 } from '@allerguide/ai';
 import {
+  extractGtinFromScan,
+  normalizeBarcode,
   normalizeMedicineName,
   resolveMedicineAgeUsage,
   toMedicineCard,
@@ -25,6 +27,7 @@ import {
 import {
   bumpMedicineRecognitions,
   deleteMedicineByNormalizedName,
+  findMedicineByBarcode,
   findMedicineByNormalizedName,
   medicineRowToCard,
   searchMedicines,
@@ -33,6 +36,7 @@ import {
 import {
   deleteMedicineOverlay,
   findMedicineOverlay,
+  findMedicineOverlayByBarcode,
   mergeCatalogAndOverlayCards,
   overlayRowToCard,
   searchMedicineOverlays,
@@ -44,6 +48,7 @@ interface RecognizeRequestBody {
   mimeType?: string;
   ocrText?: string;
   name?: string;
+  barcode?: string;
   ageYears?: number;
   profileType?: string;
 }
@@ -60,6 +65,7 @@ interface RememberRequestBody {
   ingredients?: string;
   allergenTags?: string[];
   aliases?: string[];
+  barcode?: string;
   source?: MedicineSource;
   confidence?: MedicineConfidence;
 }
@@ -100,6 +106,26 @@ function parseAgeYears(value: unknown): number | null {
     if (Number.isFinite(parsed)) return parsed;
   }
   return null;
+}
+
+function lookupBarcodeFromInput(value?: string): string {
+  const raw = value?.trim() ?? '';
+  if (!raw) return '';
+  return extractGtinFromScan(raw) || normalizeBarcode(raw);
+}
+
+async function lookupMedicineCardByBarcode(
+  barcode: string,
+  userId: number | null,
+): Promise<{ card: MedicineCard; source: MedicineSource } | null> {
+  if (userId) {
+    const overlay = await findMedicineOverlayByBarcode(userId, barcode);
+    if (overlay) return { card: overlayRowToCard(overlay), source: 'manual' };
+  }
+  const hit = await findMedicineByBarcode(barcode);
+  if (!hit) return null;
+  await bumpMedicineRecognitions(hit.id);
+  return { card: medicineRowToCard(hit), source: 'catalog' };
 }
 
 function lookupNameFromBody(body: RecognizeRequestBody): string {
@@ -159,6 +185,32 @@ export function registerMedicineRoutes(app: Express) {
     }
   });
 
+  app.get('/api/medicines/by-barcode/:code', async (req: Request, res: Response) => {
+    if (!databaseConfigured()) {
+      res.status(503).json({ ok: false, error: 'Medicine catalog is not configured' });
+      return;
+    }
+
+    const barcode = lookupBarcodeFromInput(String(req.params.code ?? ''));
+    if (barcode.length < 8) {
+      res.status(400).json({ ok: false, error: 'Barcode is required' });
+      return;
+    }
+
+    try {
+      const userId = await resolveOptionalUserId(req);
+      const hit = await lookupMedicineCardByBarcode(barcode, userId);
+      if (!hit) {
+        res.status(404).json({ ok: false, error: 'Medicine not found' });
+        return;
+      }
+      respondWithCard(res, hit.card, hit.source, true, parseAgeYears(req.query.ageYears));
+    } catch (error) {
+      logCaughtError('medicines.byBarcode', error, { barcode });
+      res.status(500).json({ ok: false, error: 'Lookup failed' });
+    }
+  });
+
   app.post('/api/medicines', async (req: Request, res: Response) => {
     if (!databaseConfigured()) {
       res.status(503).json({ ok: false, error: 'Medicine catalog is not configured' });
@@ -192,6 +244,7 @@ export function registerMedicineRoutes(app: Express) {
           ingredients: body.ingredients,
           allergenTags: body.allergenTags,
           aliases: body.aliases,
+          barcode: lookupBarcodeFromInput(body.barcode) || undefined,
           confidence: body.confidence,
         },
         body.source === 'catalog' ||
@@ -253,9 +306,10 @@ export function registerMedicineRoutes(app: Express) {
     const imageBase64 = body.imageBase64?.trim();
     const ocrText = body.ocrText?.trim() ?? '';
     const explicitName = body.name?.trim() ?? '';
+    const barcode = lookupBarcodeFromInput(body.barcode);
 
-    if (!imageBase64 && !ocrText && !explicitName) {
-      res.status(400).json({ ok: false, error: 'Provide imageBase64, ocrText, or name' });
+    if (!imageBase64 && !ocrText && !explicitName && !barcode) {
+      res.status(400).json({ ok: false, error: 'Provide imageBase64, ocrText, name, or barcode' });
       return;
     }
 
@@ -278,6 +332,13 @@ export function registerMedicineRoutes(app: Express) {
 
     try {
       const userId = await resolveOptionalUserId(req);
+      if (databaseConfigured() && barcode) {
+        const byBarcode = await lookupMedicineCardByBarcode(barcode, userId);
+        if (byBarcode) {
+          respondWithCard(res, byBarcode.card, byBarcode.source, true, ageYears);
+          return;
+        }
+      }
       if (databaseConfigured() && lookupName) {
         const normalized = normalizeMedicineName(lookupName);
         if (userId) {
@@ -313,7 +374,7 @@ export function registerMedicineRoutes(app: Express) {
           return;
         }
 
-        const card = toMedicineCard(parsed, 'vision');
+        const card = toMedicineCard({ ...parsed, barcode: barcode || undefined }, 'vision');
         if (databaseConfigured() && userId) {
           const saved = await upsertMedicineOverlay(userId, card);
           respondWithCard(res, overlayRowToCard(saved), 'vision', false, ageYears);
@@ -330,7 +391,7 @@ export function registerMedicineRoutes(app: Express) {
           res.status(422).json({ ok: false, error: 'Could not parse medicine label' });
           return;
         }
-        const card = toMedicineCard(parsed, 'ocr');
+        const card = toMedicineCard({ ...parsed, barcode: barcode || undefined }, 'ocr');
         if (databaseConfigured() && userId) {
           const saved = await upsertMedicineOverlay(userId, card);
           respondWithCard(res, overlayRowToCard(saved), 'ocr', false, ageYears);
@@ -345,7 +406,7 @@ export function registerMedicineRoutes(app: Express) {
         return;
       }
 
-      if (explicitName && !databaseConfigured()) {
+      if ((explicitName || barcode) && !databaseConfigured()) {
         res.status(503).json({ ok: false, error: 'Medicine catalog is not configured' });
         return;
       }
@@ -366,3 +427,4 @@ export function registerMedicineRoutes(app: Express) {
     }
   });
 }
+

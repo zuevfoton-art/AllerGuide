@@ -47,6 +47,7 @@ describe('medicines-api', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     delete process.env.EXPO_PUBLIC_API_URL;
+    delete process.env.EXPO_PUBLIC_MEDICINE_DB;
   });
 
   it('skips the catalog write when the device has no backend token', async () => {
@@ -116,5 +117,25 @@ describe('medicines-api', () => {
     const { searchMedicinesFromCatalog } = await import('./medicines-api');
     const hits = await searchMedicinesFromCatalog('зирт');
     expect(hits.map((item) => item.name)).toEqual(['Зиртек']);
+  });
+
+  it('looks up a medicine by barcode when the catalog flag is on', async () => {
+    process.env.EXPO_PUBLIC_MEDICINE_DB = 'true';
+    vi.doMock('@/src/services/auth-service', () => ({
+      getBackendAuthToken: vi.fn().mockResolvedValue('tok'),
+    }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, medicine: card }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { fetchMedicineByBarcode } = await import('./medicines-api');
+    const hit = await fetchMedicineByBarcode('3664798031065');
+
+    expect(hit?.name).toBe('Зиртек');
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://api.example.test/api/medicines/by-barcode/3664798031065',
+    );
   });
 });

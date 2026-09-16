@@ -97,9 +97,8 @@ export const dishes = catalogSchema.table(
 
 /**
  * Shared medicine cards recognized from package photos.
- * Deduped by `normalized_name`. No user id and no photo payload.
- * Follow-up: add a GTIN column (unique) so barcode scans can hit this table
- * after an Open Food Facts miss — today lookup is by name only.
+ * Deduped by `normalized_name`. Optional unique GTIN for barcode scans.
+ * No user id and no photo payload.
  */
 export const medicines = catalogSchema.table(
   'medicines',
@@ -117,6 +116,7 @@ export const medicines = catalogSchema.table(
     ingredients: text('ingredients').notNull().default(''),
     allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
     aliases: jsonb('aliases').$type<string[]>().notNull().default([]),
+    barcode: varchar('barcode', { length: 32 }),
     source: varchar('source', { length: 32 }).notNull().default('vision'),
     confidence: varchar('confidence', { length: 16 }).notNull().default('low'),
     recognitions: integer('recognitions').notNull().default(1),
@@ -125,6 +125,7 @@ export const medicines = catalogSchema.table(
   },
   (table) => [
     uniqueIndex('medicines_normalized_name_uidx').on(table.normalizedName),
+    uniqueIndex('medicines_barcode_uidx').on(table.barcode),
     index('medicines_source_idx').on(table.source),
   ],
 );

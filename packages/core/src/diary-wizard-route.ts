@@ -18,10 +18,28 @@ export type DiaryAutoMetadata = Partial<
 >;
 
 /** Section without auto/duplicate steps: what a single-section wizard shows. */
-export function hideDiaryAutoSteps(section: DiarySection): DiarySection {
+export function hideDiaryAutoSteps(
+  section: DiarySection,
+  options?: { keepStepIds?: ReadonlySet<string> },
+): DiarySection {
+  const keep = options?.keepStepIds;
   return {
     ...section,
-    steps: section.steps.filter((step) => !DIARY_AUTO_STEP_IDS.has(step.id)),
+    steps: section.steps.filter(
+      (step) => !DIARY_AUTO_STEP_IDS.has(step.id) || Boolean(keep?.has(step.id)),
+    ),
+  };
+}
+
+export function requireDiarySteps(
+  section: DiarySection,
+  stepIds: ReadonlySet<string>,
+): DiarySection {
+  return {
+    ...section,
+    steps: section.steps.map((step) =>
+      stepIds.has(step.id) ? { ...step, required: true } : step,
+    ),
   };
 }
 

@@ -18,8 +18,11 @@ import {
 import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
 import {
   buildScanDiaryDraft,
+  resolveScanDiaryInitialStepId,
   resolveScanDiarySection,
   saveScanDiaryEntry,
+  scanDiaryTriggerContextLine,
+  scanRequiresMedicineSideEffect,
 } from '@/src/services/scan-diary-service';
 import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import {
@@ -57,6 +60,7 @@ export type DiaryEntryDraft = {
   sectionType: string;
   prefill?: Record<string, string>;
   initialStepId?: string;
+  requireMedicineSideEffect?: boolean;
 };
 
 function resolveScanProfile(): Profile | null {
@@ -424,7 +428,7 @@ export function useScannerController() {
     });
   };
 
-  /** Scan verdict → «Питание» diary draft; the user confirms the reaction before saving. */
+  /** Scan verdict → Питание / Лекарство / Триггер; the user confirms before saving. */
   const openDiaryEntry = async () => {
     const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
     if (!profileId || !result) return;
@@ -438,12 +442,18 @@ export function useScannerController() {
       locale,
       profileBirthYear: activeProfile?.birthYear,
       recognizedDish: draft.dish,
+      recognizedCard: result.medicineCard,
       scanRef: draft.scanRef,
+      triggerContextLine:
+        sectionType === 'Триггер' ? scanDiaryTriggerContextLine(result) : undefined,
     });
+    const prefill = editorState.prefill?.[sectionType];
     setDiaryDraft({
       sectionType,
-      prefill: editorState.prefill?.[sectionType],
-      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+      prefill,
+      initialStepId: resolveScanDiaryInitialStepId(sectionType, draft.initialStepId),
+      requireMedicineSideEffect:
+        sectionType === 'Лекарство' && scanRequiresMedicineSideEffect(result, prefill),
     });
   };
 
@@ -458,12 +468,18 @@ export function useScannerController() {
       locale,
       profileBirthYear: activeProfile?.birthYear,
       recognizedDish: draft.dish,
+      recognizedCard: result.medicineCard,
       scanRef: draft.scanRef,
+      triggerContextLine:
+        sectionType === 'Триггер' ? scanDiaryTriggerContextLine(result) : undefined,
     });
+    const prefill = editorState.prefill?.[sectionType];
     setDiaryDraft({
       sectionType,
-      prefill: editorState.prefill?.[sectionType],
-      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+      prefill,
+      initialStepId: resolveScanDiaryInitialStepId(sectionType, draft.initialStepId),
+      requireMedicineSideEffect:
+        sectionType === 'Лекарство' && scanRequiresMedicineSideEffect(result, prefill),
     });
   };
 

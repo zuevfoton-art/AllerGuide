@@ -51,6 +51,7 @@ describe('mergeCatalogAndOverlayCards', () => {
       ingredients: catalog.ingredients,
       allergenTags: catalog.allergenTags,
       aliases: catalog.aliases,
+      barcode: null,
       source: 'vision',
       confidence: catalog.confidence,
       createdAt: new Date(),

@@ -4,11 +4,12 @@ export const OFF_FAMILY_SOURCES = [
   'openfoodfacts',
   'openbeautyfacts',
   'openproductsfacts',
+  'openmedicinefacts',
 ] as const;
 
 export type OffFamilySource = (typeof OFF_FAMILY_SOURCES)[number];
 
-export type OffProductCategory = 'food' | 'beauty' | 'household';
+export type OffProductCategory = 'food' | 'beauty' | 'household' | 'medicine';
 
 /** Open Food Facts requires a descriptive User-Agent identifying the app and a contact. */
 export const OFF_DEFAULT_USER_AGENT = 'A-Claro/1.0 (support@aclearo.com)';
@@ -17,6 +18,7 @@ export const OFF_DEFAULT_BASE_URLS: Record<OffFamilySource, string> = {
   openfoodfacts: 'https://world.openfoodfacts.org',
   openbeautyfacts: 'https://world.openbeautyfacts.org',
   openproductsfacts: 'https://world.openproductsfacts.org',
+  openmedicinefacts: 'https://world.openmedicinefacts.org',
 };
 
 /** Superset of fields requested by the mobile and API adapters. */
@@ -58,6 +60,7 @@ export interface NormalizedOffProduct {
 export function categoryFromOffSource(source: OffFamilySource): OffProductCategory {
   if (source === 'openbeautyfacts') return 'beauty';
   if (source === 'openproductsfacts') return 'household';
+  if (source === 'openmedicinefacts') return 'medicine';
   return 'food';
 }
 

@@ -1,16 +1,21 @@
 import {
   extractGtinFromScan,
   extractNonBarcodeLabel,
+  resolveScanDiaryTarget,
+  toMedicineCard,
   wasBarcodePreviouslyHighRisk,
+  type MedicineCard,
   type Profile,
 } from '@allerguide/core';
-import type { ScanMode, ScanResult } from '@allerguide/ai';
+import { hasMedicinePackageLabelSignal, type ScanMode, type ScanResult } from '@allerguide/ai';
 import { MEDICINE_DB_ENABLED } from '@/src/constants/features';
 import {
   resolveProductByBarcode,
   type BarcodeScanStatus,
+  type ResolvedBarcodeProduct,
 } from '@/src/services/barcode-lookup-service';
-import { searchMedicinesFromCatalog } from '@/src/services/medicines-api';
+import { fetchMedicineByBarcode, searchMedicinesFromCatalog } from '@/src/services/medicines-api';
+import { findRememberedMedicineByBarcode } from '@/src/services/medicine-memory';
 import { saveScanHistory, listScanHistory } from '@/src/services/scan-history-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import {
@@ -34,6 +39,77 @@ function barcodeNotFoundResult(source: ScanResult['source'] = 'barcode'): ScanRe
   };
 }
 
+async function resolveMedicineCardByBarcode(barcode: string): Promise<MedicineCard | null> {
+  if (MEDICINE_DB_ENABLED) {
+    const remote = await fetchMedicineByBarcode(barcode);
+    if (remote) return remote;
+  }
+  return findRememberedMedicineByBarcode(barcode);
+}
+
+function barcodeScanStatusFor(
+  result: Pick<ScanResultExtended, 'matches' | 'crossMatches' | 'traceMatches'>,
+  composition: string,
+): BarcodeScanStatus {
+  const hasMatches =
+    result.matches.length > 0 ||
+    result.crossMatches.length > 0 ||
+    (result.traceMatches?.length ?? 0) > 0;
+  if (hasMatches) return 'found_match';
+  if (composition.trim().length < INSUFFICIENT_INGREDIENTS_LENGTH) {
+    return 'found_insufficient_composition';
+  }
+  return 'found_no_allergens';
+}
+
+async function analyzeMedicineCard(input: {
+  card: MedicineCard;
+  profile?: Profile | null;
+  lookupCode: string;
+  repeatUnsafe: boolean;
+  source?: ScanResult['source'];
+}): Promise<ScanResultExtended> {
+  const composition = [input.card.ingredients, input.card.activeSubstance]
+    .filter((part) => part.trim())
+    .join(', ');
+  const result = await analyzeText({
+    mode: 'medicine',
+    text: composition || input.card.name,
+    profile: input.profile,
+    productName: input.card.name,
+    source: input.source ?? 'barcode',
+    declaredAllergenIds: input.card.allergenTags,
+  });
+  const barcodeScanStatus = barcodeScanStatusFor(result, composition);
+  if (input.profile) {
+    await saveScanHistory(input.profile.id, input.lookupCode, result, input.card.name, {
+      composition: composition || input.card.name,
+    });
+  }
+  return {
+    ...result,
+    repeatUnsafe: input.repeatUnsafe,
+    barcodeScanStatus,
+    productCategory: 'medicine',
+    productIngredients: composition || undefined,
+    medicineCard: input.card,
+  };
+}
+
+function medicineCardFromProduct(product: ResolvedBarcodeProduct): MedicineCard {
+  return toMedicineCard(
+    {
+      name: product.name,
+      manufacturer: product.brand ?? '',
+      ingredients: product.ingredients,
+      allergenTags: product.declaredAllergenIds,
+      barcode: product.barcode,
+      confidence: 'low',
+    },
+    'ocr',
+  );
+}
+
 export async function scanBarcode({
   barcode,
   profile,
@@ -45,6 +121,12 @@ export async function scanBarcode({
   const lookupCode = extractGtinFromScan(barcode) || barcode.trim();
   const history = profile ? listScanHistory(profile.id) : [];
   const repeatUnsafe = wasBarcodePreviouslyHighRisk(history, lookupCode);
+
+  const medicineCard = await resolveMedicineCardByBarcode(lookupCode);
+  if (medicineCard) {
+    return analyzeMedicineCard({ card: medicineCard, profile, lookupCode, repeatUnsafe });
+  }
+
   const product = await resolveProductByBarcode(lookupCode);
 
   if (!product) {
@@ -53,36 +135,7 @@ export async function scanBarcode({
       const cards = await searchMedicinesFromCatalog(nameHint);
       const card = cards[0];
       if (card) {
-        const composition = [card.ingredients, card.activeSubstance].filter((part) => part.trim()).join(', ');
-        const result = await analyzeText({
-          mode: 'medicine',
-          text: composition || card.name,
-          profile,
-          productName: card.name,
-          source: 'barcode',
-          declaredAllergenIds: card.allergenTags,
-        });
-        const hasMatches =
-          result.matches.length > 0 ||
-          result.crossMatches.length > 0 ||
-          (result.traceMatches?.length ?? 0) > 0;
-        const barcodeScanStatus: BarcodeScanStatus = hasMatches
-          ? 'found_match'
-          : composition.trim().length < INSUFFICIENT_INGREDIENTS_LENGTH
-            ? 'found_insufficient_composition'
-            : 'found_no_allergens';
-        if (profile) {
-          await saveScanHistory(profile.id, lookupCode, result, card.name, {
-            composition: composition || card.name,
-          });
-        }
-        return {
-          ...result,
-          repeatUnsafe,
-          barcodeScanStatus,
-          productCategory: 'medicine',
-          productIngredients: composition || undefined,
-        };
+        return analyzeMedicineCard({ card, profile, lookupCode, repeatUnsafe });
       }
     }
 
@@ -91,9 +144,17 @@ export async function scanBarcode({
     return { ...result, repeatUnsafe };
   }
 
+  const labelText = [product.name, product.brand, product.ingredients]
+    .filter((part) => part?.trim())
+    .join('\n');
+  const target = resolveScanDiaryTarget({
+    productCategory: product.category,
+    source: product.source,
+    hasMedicineLabelSignal: hasMedicinePackageLabelSignal(labelText),
+  });
   const scanSource: ScanResult['source'] =
     product.source === 'catalog_api' ? 'barcode' : product.source;
-  const mode: ScanMode = scanModeFromProductCategory(product.category);
+  const mode: ScanMode = target === 'medicine' ? 'medicine' : scanModeFromProductCategory(product.category);
 
   const result = await analyzeText({
     mode,
@@ -105,17 +166,7 @@ export async function scanBarcode({
     traceAllergenIds: product.traceAllergenIds,
   });
 
-  const hasMatches =
-    result.matches.length > 0 ||
-    result.crossMatches.length > 0 ||
-    (result.traceMatches?.length ?? 0) > 0;
-  const isShortIngredients = product.ingredients.trim().length < INSUFFICIENT_INGREDIENTS_LENGTH;
-
-  const barcodeScanStatus: BarcodeScanStatus = hasMatches
-    ? 'found_match'
-    : isShortIngredients
-      ? 'found_insufficient_composition'
-      : 'found_no_allergens';
+  const barcodeScanStatus = barcodeScanStatusFor(result, product.ingredients);
 
   if (profile) {
     await saveScanHistory(profile.id, lookupCode, result, product.name, {
@@ -130,7 +181,8 @@ export async function scanBarcode({
     productBrand: product.brand,
     productImageUrl: product.imageUrl,
     productIngredients: product.ingredients,
-    productCategory: product.category,
+    productCategory: target === 'medicine' ? 'medicine' : product.category,
+    medicineCard: target === 'medicine' ? medicineCardFromProduct(product) : undefined,
   };
 }
 

@@ -52,6 +52,16 @@ describe('allergy medicine dataset', () => {
     expect(card.confidence).toBe('high');
     expect(medicineCardKey(card)).toBe('зиртек');
     expect(card.allergenTags).toEqual([]);
+    expect(card.barcode).toBeUndefined();
+  });
+
+  it('keeps an optional seed barcode when the pack GTIN is known', () => {
+    const card = seedEntryToCard({
+      name: 'Зиртек',
+      activeSubstance: 'цетиризин',
+      barcode: '3664798031065',
+    });
+    expect(card.barcode).toBe('3664798031065');
   });
 
   it('maps external allergen terms onto canonical ids, like catalog.products', () => {
@@ -78,6 +88,13 @@ describe('allergy medicine dataset', () => {
       for (const tag of entry.allergenTags ?? []) {
         expect(findAllergenById(tag), `${entry.name} tag ${tag} must be an id`).toBeTruthy();
       }
+    }
+  });
+
+  it('does not invent GTINs: optional barcode is digits only', () => {
+    for (const entry of entries) {
+      if (!entry.barcode) continue;
+      expect(entry.barcode, `${entry.name} barcode`).toMatch(/^\d{8,14}$/);
     }
   });
 

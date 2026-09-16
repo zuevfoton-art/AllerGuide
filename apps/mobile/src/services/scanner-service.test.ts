@@ -22,6 +22,7 @@ vi.mock('@/src/constants/features', () => ({
   YC_OCR_ENABLED: false,
   YC_SCAN_INTENT_LLM_ENABLED: false,
   YC_SEARCH_ENABLED: false,
+  MEDICINE_DB_ENABLED: false,
 }));
 
 vi.mock('@/src/services/dish-vision-api-service', () => ({

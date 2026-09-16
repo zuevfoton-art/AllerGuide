@@ -17,6 +17,7 @@ describe('open-food-facts', () => {
     expect(categoryFromOffSource('openfoodfacts')).toBe('food');
     expect(categoryFromOffSource('openbeautyfacts')).toBe('beauty');
     expect(categoryFromOffSource('openproductsfacts')).toBe('household');
+    expect(categoryFromOffSource('openmedicinefacts')).toBe('medicine');
   });
 
   it('keeps only barcode digits', () => {

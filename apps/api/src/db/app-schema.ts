@@ -168,6 +168,7 @@ export const medicineOverlays = profileSchema.table(
     ingredients: text('ingredients').notNull().default(''),
     allergenTags: jsonb('allergen_tags').$type<string[]>().notNull().default([]),
     aliases: jsonb('aliases').$type<string[]>().notNull().default([]),
+    barcode: varchar('barcode', { length: 32 }),
     source: varchar('source', { length: 32 }).notNull().default('manual'),
     confidence: varchar('confidence', { length: 16 }).notNull().default('low'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -176,6 +177,7 @@ export const medicineOverlays = profileSchema.table(
   (table) => [
     primaryKey({ columns: [table.userId, table.normalizedName] }),
     index('medicine_overlays_user_idx').on(table.userId),
+    index('medicine_overlays_barcode_idx').on(table.userId, table.barcode),
   ],
 );
 

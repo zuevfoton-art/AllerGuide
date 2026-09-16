@@ -36,6 +36,7 @@ export async function recognizeMedicineViaApi(input: {
   mimeType?: string;
   ocrText?: string;
   name?: string;
+  barcode?: string;
   ageYears?: number | null;
 }): Promise<MedicineRecognizeApiSuccess | MedicineRecognizeApiFailure | null> {
   if (!MEDICINE_DB_ENABLED) return null;
@@ -53,6 +54,7 @@ export async function recognizeMedicineViaApi(input: {
         : {}),
       ...(input.ocrText?.trim() ? { ocrText: input.ocrText.trim() } : {}),
       ...(input.name?.trim() ? { name: input.name.trim() } : {}),
+      ...(input.barcode?.trim() ? { barcode: input.barcode.trim() } : {}),
       ...(input.ageYears != null ? { ageYears: input.ageYears } : {}),
     }),
   });
@@ -88,6 +90,38 @@ export async function recognizeMedicineViaApi(input: {
 }
 
 const CATALOG_SEARCH_TIMEOUT_MS = 2500;
+
+export async function fetchMedicineByBarcode(barcode: string): Promise<MedicineCard | null> {
+  if (!MEDICINE_DB_ENABLED) return null;
+  const code = barcode.trim();
+  const baseUrl = getApiBaseUrl();
+  if (code.length < 8 || !baseUrl) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CATALOG_SEARCH_TIMEOUT_MS);
+
+  try {
+    const token = await getBackendAuthToken();
+    const response = await fetch(
+      `${baseUrl}/api/medicines/by-barcode/${encodeURIComponent(code)}`,
+      {
+        signal: controller.signal,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      },
+    );
+    if (!response.ok) return null;
+    const data = (await response.json()) as { ok?: boolean; medicine?: MedicineCard };
+    if (!data.ok || !data.medicine?.name) return null;
+    return data.medicine;
+  } catch (error) {
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      logCaughtError('fetchMedicineByBarcode', error, { extra: { barcode: code } });
+    }
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 export async function searchMedicinesFromCatalog(query: string): Promise<MedicineCard[]> {
   const term = query.trim();

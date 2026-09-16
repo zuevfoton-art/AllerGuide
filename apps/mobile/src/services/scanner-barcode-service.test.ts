@@ -14,6 +14,11 @@ vi.mock('@/src/services/barcode-lookup-service', () => ({
 
 vi.mock('@/src/services/medicines-api', () => ({
   searchMedicinesFromCatalog: vi.fn(),
+  fetchMedicineByBarcode: vi.fn(),
+}));
+
+vi.mock('@/src/services/medicine-memory', () => ({
+  findRememberedMedicineByBarcode: vi.fn(),
 }));
 
 vi.mock('@/src/services/scan-history-service', () => ({
@@ -31,7 +36,8 @@ vi.mock('@/src/services/scan-analysis', () => ({
 }));
 
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
-import { searchMedicinesFromCatalog } from '@/src/services/medicines-api';
+import { fetchMedicineByBarcode, searchMedicinesFromCatalog } from '@/src/services/medicines-api';
+import { findRememberedMedicineByBarcode } from '@/src/services/medicine-memory';
 import { analyzeText } from '@/src/services/scan-analysis';
 import { scanBarcode } from '@/src/services/scanner-barcode-service';
 
@@ -40,6 +46,10 @@ describe('scanBarcode', () => {
     featureState.MEDICINE_DB_ENABLED = false;
     vi.mocked(resolveProductByBarcode).mockReset();
     vi.mocked(searchMedicinesFromCatalog).mockReset();
+    vi.mocked(fetchMedicineByBarcode).mockReset();
+    vi.mocked(findRememberedMedicineByBarcode).mockReset();
+    vi.mocked(fetchMedicineByBarcode).mockResolvedValue(null);
+    vi.mocked(findRememberedMedicineByBarcode).mockReturnValue(null);
     vi.mocked(analyzeText).mockReset();
   });
 
@@ -155,5 +165,76 @@ describe('scanBarcode', () => {
     expect(searchMedicinesFromCatalog).toHaveBeenCalledWith('Zyrtec');
     expect(analyzeText).toHaveBeenCalledWith(expect.objectContaining({ mode: 'medicine' }));
     expect(result.productCategory).toBe('medicine');
+  });
+
+  it('looks up medicines by GTIN before the product/OFF chain', async () => {
+    featureState.MEDICINE_DB_ENABLED = true;
+    vi.mocked(fetchMedicineByBarcode).mockResolvedValue({
+      name: 'Нурофен',
+      activeSubstance: 'ибупрофен',
+      form: 'таблетки',
+      strength: '200 мг',
+      manufacturer: '',
+      indications: '',
+      ageUsage: [],
+      minAgeYears: null,
+      ingredients: 'ибупрофен',
+      allergenTags: ['nsaid'],
+      aliases: [],
+      source: 'catalog',
+      confidence: 'high',
+      barcode: '4013054002508',
+    });
+    vi.mocked(analyzeText).mockResolvedValue({
+      verdict: 'Осторожно',
+      reason: 'nsaid',
+      matches: ['НПВП'],
+      crossMatches: [],
+      mode: 'medicine',
+      level: 'medium',
+      source: 'barcode',
+    });
+
+    const result = await scanBarcode({ barcode: '4013054002508' });
+
+    expect(fetchMedicineByBarcode).toHaveBeenCalledWith('4013054002508');
+    expect(resolveProductByBarcode).not.toHaveBeenCalled();
+    expect(result.productCategory).toBe('medicine');
+    expect(result.medicineCard?.name).toBe('Нурофен');
+    expect(result.mode).toBe('medicine');
+  });
+
+  it('uses a locally remembered pack when the medicine API is off', async () => {
+    vi.mocked(findRememberedMedicineByBarcode).mockReturnValue({
+      name: 'Зиртек',
+      activeSubstance: 'цетиризин',
+      form: 'таблетки',
+      strength: '10 мг',
+      manufacturer: '',
+      indications: '',
+      ageUsage: [],
+      minAgeYears: null,
+      ingredients: '',
+      allergenTags: [],
+      aliases: [],
+      source: 'manual',
+      confidence: 'medium',
+      barcode: '3664798031065',
+    });
+    vi.mocked(analyzeText).mockResolvedValue({
+      verdict: 'Низкий риск',
+      reason: 'ok',
+      matches: [],
+      crossMatches: [],
+      mode: 'medicine',
+      level: 'low',
+      source: 'barcode',
+    });
+
+    const result = await scanBarcode({ barcode: '3664798031065' });
+
+    expect(fetchMedicineByBarcode).not.toHaveBeenCalled();
+    expect(resolveProductByBarcode).not.toHaveBeenCalled();
+    expect(result.medicineCard?.name).toBe('Зиртек');
   });
 });
