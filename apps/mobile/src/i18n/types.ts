@@ -249,6 +249,8 @@ export type LocaleMessages = {
       pollen: string;
     };
     answerFallback: string;
+    quickWhy: string;
+    quickToday: string;
   };
   home: {
     eyebrow: string;

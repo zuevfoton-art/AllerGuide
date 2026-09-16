@@ -245,6 +245,8 @@ const en: LocaleMessages = {
       pollen: 'What about pollen',
     },
     answerFallback: 'Could not answer. Open the expert cards or the journal.',
+    quickWhy: 'Why does this matter?',
+    quickToday: 'What should I do today?',
   },
   home: {
     eyebrow: 'Today',

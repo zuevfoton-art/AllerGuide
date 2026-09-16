@@ -39,7 +39,8 @@ import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabI
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii } from '@/src/constants/layout';
-import { AI_CHAT_ENABLED } from '@/src/constants/features';
+import { ActionChip } from '@/src/components/ActionChip';
+import { AskChatSheet } from '@/src/components/AskChatSheet';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
@@ -59,6 +60,7 @@ export default function HomeScreen() {
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
   const prescribedCourse = activeProfileId ? getPrescribedCourse(activeProfileId) : null;
 
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
@@ -220,15 +222,11 @@ export default function HomeScreen() {
             onSaved={reloadHomeData}
           />
           <WeekRingCard entries={diaryEntries} surface="today" />
-          {AI_CHAT_ENABLED ? (
-            <Button
-              testID="today-ask"
-              label={t('today.ask')}
-              variant="ghost"
-              block
-              onPress={() => router.push('/ask')}
-            />
-          ) : null}
+          <ActionChip
+            testID="today-ask"
+            label={t('today.ask')}
+            onPress={() => setAskOpen(true)}
+          />
         </>
       ) : null}
 
@@ -384,6 +382,16 @@ export default function HomeScreen() {
       )}
 
       <Disclaimer compact>{t('home.disclaimerShort')}</Disclaimer>
+
+      <AskChatSheet
+        visible={askOpen}
+        onClose={() => setAskOpen(false)}
+        context={
+          insights.items[0]
+            ? [`criticality:${insights.items[0].criticality}`, `kind:${insights.items[0].kind}`]
+            : ['surface:today']
+        }
+      />
     </Screen>
   );
 }

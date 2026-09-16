@@ -18,6 +18,9 @@ describe('analytics-events', () => {
     expect(ANALYTICS_EVENT_NAMES).toContain('week_ring_shown');
     expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_opened');
     expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_handoff_sos');
+    expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_voice_started');
+    expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_voice_completed');
+    expect(ANALYTICS_EVENT_NAMES).toContain('ai_chat_voice_error');
     expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_started');
     expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_completed');
     expect(ANALYTICS_EVENT_NAMES).toContain('hint_tour_skipped');

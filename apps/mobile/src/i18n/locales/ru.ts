@@ -246,6 +246,8 @@ const ru: LocaleMessages = {
       pollen: 'Что с пыльцой',
     },
     answerFallback: 'Не получилось ответить. Откройте экспертные материалы или журнал.',
+    quickWhy: 'Почему это важно?',
+    quickToday: 'Что сделать сегодня?',
   },
   home: {
     eyebrow: 'Сегодня',

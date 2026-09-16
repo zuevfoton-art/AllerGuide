@@ -245,6 +245,8 @@ const fr: LocaleMessages = {
       pollen: 'Et le pollen',
     },
     answerFallback: 'Pas de réponse. Ouvrez les fiches expert ou le journal.',
+    quickWhy: 'Pourquoi c’est important ?',
+    quickToday: 'Que faire aujourd’hui ?',
   },
   home: {
     eyebrow: "Aujourd'hui",

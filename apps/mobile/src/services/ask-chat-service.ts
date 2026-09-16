@@ -91,8 +91,26 @@ export function buildAskOfflineCards(): AskOfflineCard[] {
   return cards;
 }
 
-export function trackAskOpened() {
-  trackEvent('ai_chat_opened');
+export type AskOpenSource = 'today' | 'route' | 'scanner' | 'sheet';
+
+export function trackAskOpened(source: AskOpenSource = 'route') {
+  trackEvent('ai_chat_opened', { source });
+}
+
+export function trackAskVoiceStarted(mode: 'os' | 'cloud_mic') {
+  trackEvent('ai_chat_voice_started', { mode });
+}
+
+export function trackAskVoiceCompleted() {
+  trackEvent('ai_chat_voice_completed');
+}
+
+export function trackAskVoiceError(code: string) {
+  const safe =
+    code === 'VOICE_PERMISSION_DENIED' || code === 'VOICE_NOT_SUPPORTED'
+      ? code.toLowerCase()
+      : 'failed';
+  trackEvent('ai_chat_voice_error', { error_code: safe });
 }
 
 /**

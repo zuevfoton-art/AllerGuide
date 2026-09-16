@@ -245,6 +245,8 @@ const es: LocaleMessages = {
       pollen: 'Qué pasa con el polen',
     },
     answerFallback: 'No se pudo responder. Abre las fichas de experto o el diario.',
+    quickWhy: '¿Por qué es importante?',
+    quickToday: '¿Qué hacer hoy?',
   },
   home: {
     eyebrow: 'Hoy',
