@@ -36,39 +36,33 @@ export function isDiaryTextInputStep(step: DiaryScreenStep): boolean {
 }
 
 /**
- * Pin IME targets into the sheet chrome (sibling of ScrollView).
+ * Pin compact choice chips into the sheet chrome (sibling of ScrollView).
  *
  * Nightly 35067465304: itching `diary-choice-Слабый` sat at
  * `[232,1925][428,2024]` under Gboard after fill; title tap left IME up
  * (Modal window token). Compact chips must stay in chrome.
  *
- * Nightly 35072335460: `Keyboard.dismiss` in a Modal is a no-op, so
- * `diaryEditorSheetPaddingBottom` never sees an inset. Maestro then tapped
- * `diary-field-appearance` at `[87,1552][993,1867]` through Gboard; input
- * appended to the still-focused skinArea (`предплечьеyyшелушение`) and
- * appearance stayed on the placeholder. Text fields that share a screen
- * with another text field or with compact chips must sit in chrome too,
- * in schema order (area → appearance → itch), even if that leaves the
- * scroll empty.
+ * Nightly 35081306254 / 35094037122: pinning text fields into that chrome
+ * too (`skinArea` + multiline `appearance` + chips, ~975px) put
+ * `diary-field-appearance` at `[42,1558][1038,1873]` under Gboard. There
+ * is no ScrollView in pinned-top, so `_fill-wizard-field` could not
+ * `scrollUntilVisible` it. Keep text inputs in the scroll; chips stay
+ * pinned when they share a screen with a text field.
  */
 export function splitDiaryScreenForIme<T extends DiaryScreenStep>(
   steps: readonly T[],
 ): { pinnedSteps: T[]; scrolledSteps: T[] } {
-  const textInputCount = steps.filter(isDiaryTextInputStep).length;
+  const hasTextInput = steps.some(isDiaryTextInputStep);
   const hasCompactChoice = steps.some(isCompactDiaryChoice);
-  const shouldPin = textInputCount >= 2 || (textInputCount >= 1 && hasCompactChoice);
-  if (!shouldPin) {
+  if (!hasTextInput || !hasCompactChoice) {
     return { pinnedSteps: [], scrolledSteps: [...steps] };
   }
 
   const pinnedSteps: T[] = [];
   const scrolledSteps: T[] = [];
   for (const step of steps) {
-    if (isDiaryTextInputStep(step) || isCompactDiaryChoice(step)) {
-      pinnedSteps.push(step);
-    } else {
-      scrolledSteps.push(step);
-    }
+    if (isCompactDiaryChoice(step)) pinnedSteps.push(step);
+    else scrolledSteps.push(step);
   }
   return { pinnedSteps, scrolledSteps };
 }

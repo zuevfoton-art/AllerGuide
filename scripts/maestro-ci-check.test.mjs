@@ -418,12 +418,17 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fieldStyles, /inputWrap:/);
     assert.match(fieldStyles, /height: density\.tapMinHeight/);
     assert.match(fieldStyles, /inputMultilineWrap:/);
-    assert.match(fieldStyles, /maxHeight: 160/);
+    assert.match(fieldStyles, /height: 120/);
     const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
     assert.match(layout, /splitDiaryScreenForIme/);
     assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
     assert.match(layout, /isDiaryTextInputStep/);
-    assert.match(layout, /textInputCount >= 2/);
+    assert.match(layout, /isCompactDiaryChoice\(step\)/);
+    assert.doesNotMatch(
+      layout,
+      /textInputCount >= 2/,
+      'must not pin every text field into chrome (nightly 35081306254 appearance under Gboard)',
+    );
     assert.match(wizard, /hasScrolledBody/);
   });
 

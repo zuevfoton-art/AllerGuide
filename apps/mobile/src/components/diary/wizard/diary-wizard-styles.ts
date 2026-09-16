@@ -141,8 +141,9 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
       flexShrink: 0,
     },
     inputMultilineWrap: {
-      minHeight: 120,
-      maxHeight: 160,
+      // Nightly 35081306254: unconstrained multiline in pinned chrome grew
+      // `diary-field-appearance` to 315px (`[42,1558][1038,1873]`) under Gboard.
+      height: 120,
       flexGrow: 0,
       flexShrink: 0,
     },
@@ -159,7 +160,7 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
       minHeight: density.tapMinHeight,
       flexShrink: 0,
     },
-    inputMultiline: { minHeight: 120, maxHeight: 160, lineHeight: 22 },
+    inputMultiline: { height: 120, lineHeight: 22 },
     choiceGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
     choiceChip: {
       paddingVertical: 9,

@@ -425,7 +425,8 @@ function checkMaestroFlows() {
     !stepField.includes('styles.inputWrap') ||
     !stepField.includes('registerInput') ||
     !fieldStyles.includes('inputWrap:') ||
-    !fieldStyles.includes('height: density.tapMinHeight')
+    !fieldStyles.includes('height: density.tapMinHeight') ||
+    !fieldStyles.includes('inputMultilineWrap:')
   ) {
     failures.push(
       'DiaryStepField inputs must sit in a wrap with definite height (nightly 34451477109 inverted skinArea bounds)',
@@ -446,10 +447,12 @@ function checkMaestroFlows() {
     !diaryWizard.includes('splitDiaryScreenForIme') ||
     !diaryWizard.includes('pinnedSteps.map') ||
     !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS') ||
-    !diaryLayout.includes('isDiaryTextInputStep')
+    !diaryLayout.includes('isDiaryTextInputStep') ||
+    !diaryLayout.includes('isCompactDiaryChoice(step)') ||
+    diaryLayout.includes('textInputCount >= 2')
   ) {
     failures.push(
-      'DiaryWizard must pin text fields and compact chips above the editor scroll (nightly 35072335460)',
+      'DiaryWizard must pin compact chips above the editor scroll and keep text fields in the scroll (nightly 35081306254)',
     );
   }
 
