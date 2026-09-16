@@ -62,11 +62,18 @@ jobs:
           fi
           # eas-cli 16.x on this runner fails tarball upload:
           # "Cannot read properties of undefined (reading 'create')".
+          # Capture eas-cli status via PIPESTATUS: `tee` would otherwise hide a
+          # non-zero eas-cli exit. Free-plan Android quota is a warning; other
+          # failures still fail the job. Gradle fallback: staging-apk-gradle.yml.
+          set +e
           npx --yes eas-cli@22.0.0 build \
             --profile staging \
             --platform android \
             --non-interactive \
-            ${WAIT_FLAG}
+            ${WAIT_FLAG} 2>&1 | tee /tmp/eas-android.log
+          status="${PIPESTATUS[0]}"
+          set -e
+          bash "${GITHUB_WORKSPACE}/scripts/eas-android-quota.sh" apply "$status" /tmp/eas-android.log
 
       - name: Next steps
         run: |

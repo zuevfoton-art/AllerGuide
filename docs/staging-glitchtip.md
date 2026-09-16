@@ -151,7 +151,7 @@ pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_SENTRY_DSN --v
 pnpm --filter mobile build:staging:android
 ```
 
-Tag `eas-staging-*` runs [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml) when `workflow_dispatch` is unavailable. Tag `android-staging-*` runs the Gradle APK job; [`scripts/resolve-staging-error-dsn.sh`](../scripts/resolve-staging-error-dsn.sh) prefers a GitHub secret, then `eas.json` `staging.env`, then EAS `env:get`.
+Tag `eas-staging-*` runs [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml) when `workflow_dispatch` is unavailable. Expo Free-plan Android quota is a warning there (`scripts/eas-android-quota.sh`), not a red job. Tag `android-staging-*` runs the Gradle APK job; [`scripts/resolve-staging-error-dsn.sh`](../scripts/resolve-staging-error-dsn.sh) prefers a GitHub secret, then `eas.json` `staging.env`, then EAS `env:get`.
 
 Do **not** set `SENTRY_AUTH_TOKEN` for sentry.io. Maps upload only if `SENTRY_URL` is this origin ([`error-tracker-url.js`](../apps/mobile/error-tracker-url.js)).
 

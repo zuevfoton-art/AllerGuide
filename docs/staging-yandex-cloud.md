@@ -459,7 +459,7 @@ pnpm build:staging:ios    # упадёт без Apple credentials
 | EAS «Сервер недоступен» | DNS `api.staging.aclearo.com`, TLS, URL в `eas.json` |
 | `mobile-ios` / Apple credentials | Ожидаемо без `EAS_IOS_DEVICE`. См. [`eas-staging-build.md`](eas-staging-build.md) |
 | `mobile-android` Gradle unknown error | expo.dev → Run gradlew. Запасной APK: `staging-apk-gradle.yml`. Не откатывать API |
-| `mobile-android` / Free plan this month | EAS quota. Upload мог пройти, build — нет. Не откатывать API (`smoke` уже зелёный). APK: `staging-apk-gradle.yml`. После 1-го числа / paid plan — снова EAS |
+| `mobile-android` / **EAS staging Android** / Free plan this month | EAS quota. Upload мог пройти, build — нет. Warning, не fail job (`eas-android-quota.sh`). Не откатывать API (`smoke` уже зелёный). APK: `staging-apk-gradle.yml`. После 1-го числа / paid plan — снова EAS |
 | Destroy staging | `./scripts/yc-staging-bootstrap.sh destroy` (подтверждение) |
 | GlitchTip NXDOMAIN / no TLS | DNS A at **reg.ru**, not this YC folder. See [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | GlitchTip port 8000 on NAT | Compose must bind `127.0.0.1:8000` only; Caddy terminates :443 |
