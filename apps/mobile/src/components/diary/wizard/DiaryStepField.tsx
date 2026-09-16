@@ -26,6 +26,11 @@ export function DiaryStepField({
     editorScroll?.scrollFieldIntoView(inputRef.current);
   };
 
+  const handleChangeText = (text: string) => {
+    editorScroll?.registerFocusedInput(inputRef.current);
+    onChange(text);
+  };
+
   if (step.field === 'photo') {
     return <DiaryPhotoToolbar value={value} onChange={onChange} />;
   }
@@ -61,9 +66,10 @@ export function DiaryStepField({
               collapsable={false}
               style={[styles.choiceChip, active && styles.choiceChipActive]}
               hitSlop={8}
-              onPress={() =>
-                onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice)
-              }>
+              onPress={() => {
+                editorScroll?.dismissIme();
+                onChange(step.multiSelect ? toggleMultiChoiceValue(value, choice) : choice);
+              }}>
               <Text style={[styles.choiceText, active && styles.choiceTextActive]}>
                 {step.multiSelect && active ? '✓ ' : ''}
                 {choice}
@@ -83,7 +89,7 @@ export function DiaryStepField({
         collapsable={false}
         style={[styles.input, step.multiline && styles.inputMultiline]}
         value={value}
-        onChangeText={onChange}
+        onChangeText={handleChangeText}
         onFocus={handleFocus}
         placeholder={step.placeholder}
         placeholderTextColor={theme.colors.textMuted}
