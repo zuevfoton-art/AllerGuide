@@ -121,7 +121,10 @@ export function useScannerController() {
   const verdictZone = riskLevel ? zoneFromScanRisk(riskLevel) : null;
   const compositionText = result?.productIngredients?.trim() || input.trim();
   const { suggestions: dishSuggestions, searching: dishSearching } = useDishSuggestions(input, {
-    enabled: manualOpen,
+    enabled:
+      manualOpen &&
+      !isManualBarcodeInput(input) &&
+      !hasMedicinePackageLabelSignal(input),
   });
 
   const refreshHistory = useCallback(() => {
