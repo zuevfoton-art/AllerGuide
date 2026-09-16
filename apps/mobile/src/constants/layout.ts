@@ -6,17 +6,18 @@ export const WEB_TAB_BAR_HEIGHT = 68;
 export const WEB_INPUT_FONT_SIZE = 16;
 
 /**
- * Clinical Calm radii — round 3 geometry (handoff pairs 19–22).
- * `full` is for ACTION pressables only (Button, period segment, emergency call).
+ * Brandbook radii — soft institutional blocks; pills only on ACTION.
+ * `full` is for ACTION pressables only (Button, extended FAB, emergency call).
  * Chips, inputs and badges stay on `sm` / `md` — they hold state, they do not fire an action.
  */
 export const radii = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  row: 14,
-  lg: 20,
-  xl: 28,
+  xs: 6,
+  sm: 10,
+  md: 16,
+  row: 16,
+  lg: 24,
+  xl: 32,
+  field: 36,
   full: 9999,
 } as const;
 
@@ -43,17 +44,23 @@ export const density = {
   pickerRowGap: 6,
   tapMinHeight: 44,
   tapMinHeightSm: 36,
-  /** Crisis CTA: reachable with shaking hands, north-star §3.3. */
-  tapMinHeightCrisis: 56,
+  /** v2 §3.1 primary filled action */
+  tapMinHeightPrimary: 52,
+  /** v2 §3.1 secondary */
+  tapMinHeightSecondary: 48,
+  /** Crisis CTA: reachable with shaking hands, north-star §3.3 / v2 §3.1. */
+  tapMinHeightCrisis: 60,
+  /** Extended Ask FAB / icon FAB */
+  tapMinHeightFab: 56,
 } as const;
 
-/** Brand hex for static HTML/PDF exports (mirrors light Earth Wellness theme) */
+/** Brand hex for static HTML/PDF exports (mirrors light brandbook theme) */
 export const brandReportColors = {
-  text: '#1C2624',
-  head: '#1C1B18',
-  muted: '#5A5850',
-  bg: '#F7ECE1',
-  border: '#E2D8CE',
-  accent: '#6E6E58',
+  text: '#0E3A48',
+  head: '#004F70',
+  muted: '#3A6670',
+  bg: '#F4F8F5',
+  border: '#C9DDD6',
+  accent: '#7DCD72',
   danger: '#B91C1C',
 } as const;

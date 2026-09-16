@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BrandPair } from '@/src/components/brand/BrandPair';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
 import { radii } from '@/src/constants/layout';
@@ -22,6 +23,7 @@ export function EmptyState({ icon = 'sparkles-outline', title, description, acti
   return (
     <GlassCard>
       <View style={styles.wrap}>
+        <BrandPair size={22} />
         <View style={styles.iconWrap}>
           <View pointerEvents="none" style={styles.iconWash} />
           <Ionicons name={icon} size={24} color={theme.colors.accent} />
@@ -57,7 +59,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       width: 36,
       height: 36,
       borderRadius: radii.md,
-      backgroundColor: '#DCEEE4',
+      backgroundColor: colors.accentLight,
       opacity: 0.7,
     },
     title: {

@@ -163,11 +163,11 @@ Chip профиля → switcher / хаб: профиль / настройки /
 
 | ID | Название | Фон / surface / action / soft / ink | Характер |
 |----|----------|-------------------------------------|----------|
-| **A** | Forest & Linen / Earth Wellness (**production · olive**) | `#F7ECE1` / `#FFFCF8` / `#6E6E58` (olive CTA) / Sage `#E4E5D4`·`#A3A380` / Slate info `#829399` / Dusty Rose soft `#F3E9E2` / ink `#1C2624` | Тёплое прибежище + photo-3 olive primary; youthful radii / FAB Ask |
+| **A** | Forest & Linen / Brandbook 50/35/15 (**production**) | `#F4F8F5` / `#FFFFFF` / `#7DCD72` (green CTA, petrol ink) / petrol `#006F83` / mix `#004F70` / ink `#0E3A48` | Institutional green+petrol; `BrandField` / extended FAB |
 | **B** | Nordic Air (тёплый небо) — **архив** | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Снят с production; остаётся в HTML для сравнения |
 | **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Concept only |
 
-**A wash:** Sage `#E4E5D4` → Dusty Rose soft `#F3E9E2` → canvas `#F7ECE1`. Dark A: `#14140F` / `#1E1D1A` / action `#A3A380` (olive) / soft `#2A2A22`.
+**A wash:** green `#E5F6E2` → mist `#E8F3F0` → canvas `#F4F8F5`. Dark A: `#0A2F3C` / `#0E3A48` / action `#7DCD72` / soft `#143844`.
 
 **B wash (архив):** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 
@@ -177,7 +177,7 @@ Plum & Sage снят: не подходит как production-направлен
 
 Во всех вариантах `danger` / `caution` / `success` — отдельная семантика с иконкой и текстом. Финальные пары — contrast-test.
 
-**Правило внедрения:** production-схема **A — Forest Refuge · Earth Wellness olive** (layout A + photo-3: **olive primary**, Sage soft surfaces, Slate info, Dusty Rose secondary soft). B и C остаются в HTML для сравнения.
+**Правило внедрения:** production-схема **A — Forest Refuge · Brandbook 50/35/15** (layout A + recognition green, petrol composition, white canvas). B и C остаются в HTML для сравнения.
 
 ### 4.1. Что покрывает HTML-прототип
 
@@ -195,13 +195,13 @@ Plum & Sage снят: не подходит как production-направлен
 
 Чеклист:
 
-1. [x] Канон в north-star / FR / brand doc → **A Earth Wellness olive** (olive primary / Sage surfaces / Slate info).
+1. [x] Канон в north-star / FR / brand doc → **A Brandbook 50/35/15** (green / petrol / white).
 2. [x] `criticality` + resolver в `packages/core` `home-insights.ts`.
 3. [x] Semantic tokens → `theme.ts` / `layout.ts` / `claro-gradient.ts`; primitives `SelectChip`, `ActionChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
 4. [x] `ProfileHeaderButton` chip + имя (кроме `/profile` и setup).
 5. [x] Voice-to-draft на `VoiceNoteButton` + `voice-dictation-service`.
 6. [x] Analytics без PII (`ai_chat_voice_*`); Maestro `ask-smoke.yaml`; `pnpm check:analytics-taxonomy`.
-7. [x] Global Ask FAB на оболочке (не Today chip); `/ask` layout без tab-bar padding; onboarding waves на Earth palette.
+7. [x] Extended Ask FAB на tab roots; icon-only на allow-list стеке; `/ask` без tab-bar padding; `BrandField` / `BrandPair`.
 
 ---
 
@@ -209,4 +209,4 @@ Plum & Sage снят: не подходит как production-направлен
 
 - [x] Tap-depth, IA, criticality, семантика контролов, profile chip.
 - [x] HTML сравнивает A / B / C.
-- [x] Production-палитра **A — Forest Refuge · Earth Wellness olive** (photo-3 olive primary).
+- [x] Production-палитра **A — Forest Refuge · Brandbook 50/35/15**.

@@ -1,4 +1,4 @@
-/** Forest Refuge / Earth Wellness gradient + mirror tokens — no RN deps (testable in Vitest). */
+/** Brandbook 50/35/15 gradient + mirror tokens — no RN deps (testable in Vitest). */
 
 export type ClaroGradient = {
   colors: readonly [string, string, string];
@@ -11,14 +11,14 @@ export type ClaroGradient = {
 export function getClaroGradient(isDark: boolean): ClaroGradient {
   if (isDark) {
     return {
-      colors: ['#14140F', '#2A2A22', '#A3A380'],
+      colors: ['#0A2F3C', '#006F83', '#7DCD72'],
       locations: [0, 0.55, 1],
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     };
   }
   return {
-    colors: ['#5F5F4A', '#6E6E58', '#E4E5D4'],
+    colors: ['#004F70', '#006F83', '#7DCD72'],
     locations: [0, 0.6, 1],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
@@ -26,29 +26,29 @@ export function getClaroGradient(isDark: boolean): ClaroGradient {
 }
 
 /**
- * Light-mode Earth Wellness tokens (mirror theme.ts).
- * Primary CTA = deepened Photo-3 olive (`#6E6E58`; brand swatch `#7F7F67`).
- * Sage = soft wash; Slate = info; dusty rose lives on surfaceMuted/foam in theme.ts.
+ * Light-mode brandbook tokens (mirror theme.ts).
+ * Recognition green `#7DCD72` (50%); petrol info `#006F83` (35%);
+ * CTA ink is deep petrol `#004F70` on green.
  */
 export const LIGHT_CLARO_TOKENS = {
-  tipText: '#5F5F4A',
-  info: '#829399',
-  infoLight: '#E0E5E7',
-  tipBg: '#E4E5D4',
-  tipBorder: '#A3A380',
-  accent: '#6E6E58',
-  accentLight: '#E4E5D4',
-  accentMid: '#A3A380',
+  tipText: '#004F70',
+  info: '#006F83',
+  infoLight: '#D5EEF2',
+  tipBg: '#E5F6E2',
+  tipBorder: '#7DCD72',
+  accent: '#7DCD72',
+  accentLight: '#E5F6E2',
+  accentMid: '#7DCD72',
 } as const;
 
-/** Dark-mode Earth Wellness tokens (mirror theme.ts) — olive primary */
+/** Dark-mode brandbook tokens (mirror theme.ts) — green primary on petrol canvas */
 export const DARK_CLARO_TOKENS = {
-  tipText: '#C5C5A8',
-  info: '#9AADB8',
-  infoLight: '#2C333A',
-  tipBg: '#2A2A22',
-  tipBorder: '#A3A380',
-  accent: '#A3A380',
-  accentLight: '#2A2A22',
-  accentMid: '#7F7F67',
+  tipText: '#C5E8C0',
+  info: '#7EBFD0',
+  infoLight: '#143844',
+  tipBg: '#143844',
+  tipBorder: '#7DCD72',
+  accent: '#7DCD72',
+  accentLight: '#143844',
+  accentMid: '#4FA86A',
 } as const;

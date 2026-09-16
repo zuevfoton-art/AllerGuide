@@ -16,6 +16,8 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { OnboardingWaveBackground } from '@/src/components/onboarding/OnboardingWaveBackground';
 import { OnboardingSlideImage, type OnboardingSlideKey } from '@/src/components/onboarding/OnboardingSlideImage';
 import { OnboardingSlideChrome } from '@/src/components/onboarding/OnboardingSlideChrome';
+import { BrandField } from '@/src/components/brand/BrandField';
+import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
@@ -79,13 +81,15 @@ export default function OnboardingIntroScreen() {
 
   const renderSlide = ({ item }: { item: OnboardingSlideKey }) => (
     <View style={[styles.slide, slideWidth > 0 && { width: slideWidth }]}>
-      <View style={styles.illustrationFrame}>
-        <OnboardingSlideImage
-          slide={item}
-          width={illustrationWidth}
-          height={illustrationWidth * 0.85}
-        />
-      </View>
+      <BrandField tone="recognition" testID="onboarding-intro-hero">
+        <View style={styles.illustrationFrame}>
+          <OnboardingSlideImage
+            slide={item}
+            width={illustrationWidth}
+            height={illustrationWidth * 0.85}
+          />
+        </View>
+      </BrandField>
       <Text style={styles.title}>{t(`onboardingIntro.slides.${item}.title`)}</Text>
       <Text style={styles.desc}>{t(`onboardingIntro.slides.${item}.desc`)}</Text>
     </View>
@@ -98,7 +102,7 @@ export default function OnboardingIntroScreen() {
       <OnboardingWaveBackground
         accent={theme.colors.accent}
         accentLight={theme.colors.accentLight}
-        secondarySoft={theme.colors.surfaceMuted}
+        secondarySoft={theme.colors.info}
       />
       <SafeAreaView style={styles.safe}>
         <View style={[styles.card, { maxWidth: layout.contentMaxWidth }]}>
@@ -156,7 +160,7 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number, is
       width: '100%',
       alignSelf: 'center',
       backgroundColor: colors.card,
-      borderRadius: 28,
+      borderRadius: radii.xl,
       overflow: 'hidden',
       paddingTop: 20,
       paddingBottom: 20,

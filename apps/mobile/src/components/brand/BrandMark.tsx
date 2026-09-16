@@ -8,12 +8,12 @@ type BrandMarkProps = {
   accent?: string;
 };
 
-/** A-Claro monogram — bold **A** on Earth Wellness olive (fallback when theme not passed) */
+/** A-Claro monogram — bold **A** on brandbook green with petrol ink (fallback when theme not passed) */
 export function BrandMark({
   size = 64,
   variant = 'filled',
-  color = '#FFFFFF',
-  accent = '#6E6E58',
+  color = '#004F70',
+  accent = '#7DCD72',
 }: BrandMarkProps) {
   const aPath =
     'M32 15 48.5 49H42.2L39.2 41.5H24.8L21.8 49H15.5L32 15ZM26.8 36.5H37.2L32 23.5 26.8 36.5Z';

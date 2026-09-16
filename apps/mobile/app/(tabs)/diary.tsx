@@ -492,7 +492,9 @@ export default function DiaryScreen() {
     <Screen
       onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
       refreshing={refreshing}
-      brandHeaderRight={<ProfileHeaderButton />}>
+      brandHeaderRight={
+        <ProfileHeaderButton variant="chip" chipTitle={activeProfile?.name} />
+      }>
       <View style={styles.header}>
         <View style={styles.headerText}>
           <ScreenEyebrow section={t('diary.eyebrow')} />

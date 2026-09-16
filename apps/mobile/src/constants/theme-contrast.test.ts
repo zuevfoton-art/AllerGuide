@@ -7,11 +7,11 @@ vi.mock('react-native', () => ({
 }));
 
 /**
- * Brand primary uses AA-safe olive (`#6E6E58`; photo-3 swatch `#7F7F67`).
- * Historical ux-audit §13 applied to lighter Claro/Nordic accents.
+ * Brand primary is recognition green with petrol ink (`#004F70` on `#7DCD72`).
+ * White-on-green fails AA; brandbook uses navy-on-green.
  */
 const BRAND_BUTTON_NOTE = {
-  reason: 'ux-audit-2026-08 §13 — superseded by olive AA primary in Earth Wellness',
+  reason: 'ux-audit-2026-08 §13 — superseded by petrol-on-green AA in brandbook 50/35/15',
 };
 
 const AA = 4.5;
@@ -40,7 +40,7 @@ describe('theme contrast', () => {
     }
   });
 
-  it('keeps white-on-olive primary and dark onAccent/accent at AA', () => {
+  it('keeps petrol-on-green primary and dark onAccent/accent at AA', () => {
     expectReadable(lightColors.onAccent, lightColors.accent, 'light onAccent/accent');
     expectReadable(darkColors.onAccent, darkColors.accent, 'dark onAccent/accent');
     expect(BRAND_BUTTON_NOTE.reason).toContain('§13');
