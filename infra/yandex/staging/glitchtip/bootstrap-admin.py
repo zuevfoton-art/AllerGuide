@@ -128,6 +128,11 @@ def _ensure_project(org):
 
 
 def main() -> int:
+    if os.path.isdir("/code"):
+        os.chdir("/code")
+        if "/code" not in sys.path:
+            sys.path.insert(0, "/code")
+
     email = _require_env("GLITCHTIP_ADMIN_EMAIL")
     password = _require_env("DJANGO_SUPERUSER_PASSWORD")
     allowed_host = os.environ.get("GLITCHTIP_DSN_HOST", DEFAULT_DSN_HOST).strip()
@@ -194,4 +199,12 @@ if __name__ == "__main__":
     if os.environ.get("BOOTSTRAP_ADMIN_SELFTEST") == "1":
         _selftest()
         raise SystemExit(0)
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except Exception:
+        import traceback
+
+        traceback.print_exc()
+        raise SystemExit(1)

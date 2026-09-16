@@ -100,7 +100,9 @@ console "ACLARO_ADMIN_BOOTSTRAP_START"
 dsn_line=""
 set +e
 dsn_line=$(
-  docker compose exec -T \
+  docker compose exec -T -w /code \
+    -e PYTHONPATH=/code \
+    -e DJANGO_SETTINGS_MODULE=glitchtip.settings \
     -e DJANGO_SUPERUSER_PASSWORD="$ADMIN_PASSWORD" \
     -e GLITCHTIP_ADMIN_EMAIL="$ADMIN_EMAIL" \
     -e GLITCHTIP_DSN_HOST="$DSN_HOST" \
@@ -113,7 +115,15 @@ unset ADMIN_PASSWORD
 
 if [[ "$admin_rc" -ne 0 ]]; then
   log "glitchtip-bootstrap-admin: django script failed rc=$admin_rc"
-  console "ACLARO_ADMIN_BOOTSTRAP_FAIL django"
+  snippet=$(
+    printf '%s\n' "$dsn_line" \
+      | grep -vE '^ACLARO_DSN=' \
+      | tr '\n' ' ' \
+      | tr -cd '[:print:] ' \
+      | head -c 400
+  )
+  snippet="$${snippet//$ADMIN_PASSWORD/***}"
+  console "ACLARO_ADMIN_BOOTSTRAP_FAIL django $${snippet:-rc=$admin_rc}"
   exit 1
 fi
 
