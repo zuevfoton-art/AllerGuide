@@ -163,11 +163,11 @@ Chip профиля → switcher / хаб: профиль / настройки /
 
 | ID | Название | Фон / surface / action / soft / ink | Характер |
 |----|----------|-------------------------------------|----------|
-| **A** | Forest & Linen / Earth Wellness (**production · 2B**) | `#F7ECE1` / `#FFFCF8` / `#5F7076` (Slate CTA) / Sage `#E4E5D4`·`#A3A380` / Moss secondary / Dusty Rose soft `#F3E9E2` / ink `#1C2624` | Тёплое прибежище + photo-3 Slate primary; youthful radii / FAB Ask |
+| **A** | Forest & Linen / Earth Wellness (**production · olive**) | `#F7ECE1` / `#FFFCF8` / `#6E6E58` (olive CTA) / Sage `#E4E5D4`·`#A3A380` / Slate info `#829399` / Dusty Rose soft `#F3E9E2` / ink `#1C2624` | Тёплое прибежище + photo-3 olive primary; youthful radii / FAB Ask |
 | **B** | Nordic Air (тёплый небо) — **архив** | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Снят с production; остаётся в HTML для сравнения |
 | **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Concept only |
 
-**A wash:** Sage `#E4E5D4` → Dusty Rose soft `#F3E9E2` → canvas `#F7ECE1`. Dark A: `#14140F` / `#1E1D1A` / action `#9AADB8` (Slate) / soft `#2A2A22`.
+**A wash:** Sage `#E4E5D4` → Dusty Rose soft `#F3E9E2` → canvas `#F7ECE1`. Dark A: `#14140F` / `#1E1D1A` / action `#A3A380` (olive) / soft `#2A2A22`.
 
 **B wash (архив):** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 
@@ -177,7 +177,7 @@ Plum & Sage снят: не подходит как production-направлен
 
 Во всех вариантах `danger` / `caution` / `success` — отдельная семантика с иконкой и текстом. Финальные пары — contrast-test.
 
-**Правило внедрения:** production-схема **A — Forest Refuge · Earth Wellness 2B** (layout A + photo-3: **Slate primary**, Sage/Moss soft surfaces, Dusty Rose secondary soft). B и C остаются в HTML для сравнения.
+**Правило внедрения:** production-схема **A — Forest Refuge · Earth Wellness olive** (layout A + photo-3: **olive primary**, Sage soft surfaces, Slate info, Dusty Rose secondary soft). B и C остаются в HTML для сравнения.
 
 ### 4.1. Что покрывает HTML-прототип
 
@@ -195,7 +195,7 @@ Plum & Sage снят: не подходит как production-направлен
 
 Чеклист:
 
-1. [x] Канон в north-star / FR / brand doc → **A Earth Wellness 2B** (Slate primary / Sage·Moss surfaces).
+1. [x] Канон в north-star / FR / brand doc → **A Earth Wellness olive** (olive primary / Sage surfaces / Slate info).
 2. [x] `criticality` + resolver в `packages/core` `home-insights.ts`.
 3. [x] Semantic tokens → `theme.ts` / `layout.ts` / `claro-gradient.ts`; primitives `SelectChip`, `ActionChip`, `SegmentedControl`, `BottomSheet`, `AskChatPanel` / `AskChatSheet`.
 4. [x] `ProfileHeaderButton` chip + имя (кроме `/profile` и setup).
@@ -209,4 +209,4 @@ Plum & Sage снят: не подходит как production-направлен
 
 - [x] Tap-depth, IA, criticality, семантика контролов, profile chip.
 - [x] HTML сравнивает A / B / C.
-- [x] Production-палитра **A — Forest Refuge · Earth Wellness 2B** (photo-3 Slate primary).
+- [x] Production-палитра **A — Forest Refuge · Earth Wellness olive** (photo-3 olive primary).

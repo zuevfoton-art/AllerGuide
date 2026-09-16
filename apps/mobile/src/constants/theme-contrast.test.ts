@@ -7,11 +7,11 @@ vi.mock('react-native', () => ({
 }));
 
 /**
- * Brand primary uses AA-safe Slate (`#5F7076`; photo-3 swatch `#829399`).
+ * Brand primary uses AA-safe olive (`#6E6E58`; photo-3 swatch `#7F7F67`).
  * Historical ux-audit §13 applied to lighter Claro/Nordic accents.
  */
 const BRAND_BUTTON_NOTE = {
-  reason: 'ux-audit-2026-08 §13 — superseded by Slate AA primary in Earth Wellness 2B',
+  reason: 'ux-audit-2026-08 §13 — superseded by olive AA primary in Earth Wellness',
 };
 
 const AA = 4.5;
@@ -40,7 +40,7 @@ describe('theme contrast', () => {
     }
   });
 
-  it('keeps white-on-Slate primary and dark onAccent/accent at AA', () => {
+  it('keeps white-on-olive primary and dark onAccent/accent at AA', () => {
     expectReadable(lightColors.onAccent, lightColors.accent, 'light onAccent/accent');
     expectReadable(darkColors.onAccent, darkColors.accent, 'dark onAccent/accent');
     expect(BRAND_BUTTON_NOTE.reason).toContain('§13');
