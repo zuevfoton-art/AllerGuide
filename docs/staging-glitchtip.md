@@ -21,7 +21,7 @@ Public hostname: `https://errors.staging.aclearo.com`
 | Security group | `enpt4cblcdr873501otf` (`aclearo-staging-glitchtip-sg`) — :80/:443 in, no :22 |
 | Compose | `glitchtip/glitchtip:6.2.6` + `postgres:16` + `valkey:8` on a VM volume |
 
-Lockbox already has `SECRET_KEY` / `POSTGRES_PASSWORD`. `ENABLE_USER_REGISTRATION` must stay **`false`**. First admin is `createsuperuser` on the VM, not the public signup form.
+Lockbox already has `SECRET_KEY` / `POSTGRES_PASSWORD` / `GLITCHTIP_ADMIN_PASSWORD`. `ENABLE_USER_REGISTRATION` must stay **`false`**. First admin is `glitchtip-bootstrap-admin.service` (`createsuperuser` + org `aclearo-staging` + RN project `mobile`), not the public signup form. DSN is echoed to serial as `ACLARO_DSN=`.
 
 Import into the owner Terraform state (same root as the API):
 
@@ -42,12 +42,30 @@ Optional SSH later: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (ne
 | Step | Who |
 |------|-----|
 | Terraform + cloud-init + Caddy + compose bind + this runbook | git / PR |
+| `terraform apply` / `yc` against the live folder | **Owner only** — Cloud Agent must not apply |
 | Live VM + Lockbox payload (this folder) | **Done** (`yc`, bootstrap SA) |
 | DNS A at **reg.ru** (`ns1.reg.ru` / `ns2.reg.ru`) | **Owner** — not in this YC folder |
-| First GlitchTip admin via `createsuperuser` on the VM, DSN | **Owner** |
-| EAS `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
+| First GlitchTip admin via `createsuperuser` on the VM, DSN | **Automated** (`glitchtip-bootstrap-admin.service` → serial `ACLARO_DSN=`) |
+| EAS Sensitive `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | `eas.json` `staging.env` (public in APK) + EAS preview Sensitive when `EXPO_TOKEN` is available |
 | `terraform import` into owner state | **Owner** (before the next apply) |
 | 14-day soak | Product, after smoke below |
+
+## Apply checklist (owner)
+
+Cloud Agent **does not** `terraform apply` this root from empty local state (that recreates VPC/MDB/API). Live GlitchTip user-data / serial DSN kick is allowed. `eas env:create` needs `EXPO_TOKEN`.
+
+### Greenfield (empty folder / empty Terraform state only)
+
+```bash
+./scripts/yc-staging-bootstrap.sh plan   # must list yandex_compute_instance.glitchtip
+./scripts/yc-staging-bootstrap.sh apply  # owner
+```
+
+Then: Lockbox payload → DNS A → TLS → admin unit (`ACLARO_DSN` on serial) → EAS / `eas.json` DSN → rebuild APK → smoke (sections 2–6).
+
+### This live folder (API already exists)
+
+Do **not** `apply` against empty local state — that recreates VPC/MDB/API. Import the five resources above, then `terraform plan` (no destroy of API/runner/MDB).
 
 ## 1. Terraform apply (only after import)
 
@@ -74,11 +92,13 @@ Keys (hex only for `POSTGRES_PASSWORD` so `DATABASE_URL` stays valid):
 |-----|---------|
 | `SECRET_KEY` | Django signing key |
 | `POSTGRES_PASSWORD` | Compose Postgres on the VM disk |
-| `ENABLE_USER_REGISTRATION` | `true` until the first admin exists, then `false` |
+| `ENABLE_USER_REGISTRATION` | Must stay **`false`**. First admin is `bootstrap-admin.sh`, not the public form |
 | `EMAIL_URL` | Optional; default `consolemail://` |
 | `DEFAULT_FROM_EMAIL` | Optional; default `support@aclearo.com` |
+| `GLITCHTIP_ADMIN_PASSWORD` | Django superuser password for `bootstrap-admin.sh` (never print) |
+| `GLITCHTIP_ADMIN_EMAIL` | Optional; default `support@aclearo.com` |
 
-The VM systemd unit `glitchtip-bootstrap.service` retries Lockbox until those keys exist, then `docker compose up -d`.
+The VM systemd unit `glitchtip-bootstrap.service` retries Lockbox until `SECRET_KEY` / `POSTGRES_PASSWORD` exist, then `docker compose up -d`. `glitchtip-bootstrap-admin.service` then creates the first admin + RN project and writes `/opt/glitchtip/dsn.txt`.
 
 ## 3. DNS + TLS
 
@@ -94,41 +114,44 @@ Optional later: CNAME `errors.staging.aclearo.ru` and `glitchtip_fqdn_ru` in tfv
 
 Wait until `curl -sI https://errors.staging.aclearo.com` is 200/302. Host must not be `sentry.io`.
 
+If the VM booted **before** the A record existed, Caddy's first Let's Encrypt attempt fails. The unit `glitchtip-acme-retry.timer` reloads Caddy every 2 minutes until HTTPS works. Caddyfile keeps HTTP-01 on `:80` (`http://` site; `/.well-known/acme-challenge/*` is not redirected). To kick a live VM without waiting: serial console `sudo systemctl reload caddy`.
+
 Port **8000** from the NAT IP must not answer (compose is loopback-only).
 
 ## 4. First admin (not public signup)
 
 Public registration defaults to **off**. Do not open the UI to create the first user — GlitchTip can still allow a first-registrant takeover if the user table is empty.
 
-On the VM (SSH from a tight CIDR, or serial console):
+`glitchtip-bootstrap-admin.service` reads `GLITCHTIP_ADMIN_PASSWORD` from Lockbox, runs [`bootstrap-admin.py`](../infra/yandex/staging/glitchtip/bootstrap-admin.py) (`createsuperuser` + org `aclearo-staging` + team `aclearo` + project `mobile` / `javascript-react-native`), and writes the DSN. Serial console has no login; scrape the marker instead of opening SSH `0.0.0.0/0`:
 
 ```bash
-cd /opt/glitchtip
-sudo docker compose exec -T glitchtip \
-  python3 manage.py createsuperuser --noinput --email support@aclearo.com
-# set DJANGO_SUPERUSER_PASSWORD in the environment for --noinput
+yc compute instance get-serial-port-output --id fhmpenjqltp5ee82ek9r --port 1 \
+  | tr -d '\r' | grep '^ACLARO_DSN='
+# host must be errors.staging.aclearo.com, never sentry.io
 ```
-
-Then log in, create organization + React Native project. Copy the DSN (`https://<key>@errors.staging.aclearo.com/<id>`). Confirm the host is **not** `sentry.io`.
 
 To flip the flag later without rotating DB secrets:
 
 ```bash
 ENABLE_USER_REGISTRATION=false YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6qrn93qngpnhviaog11 ./scripts/yc-glitchtip-lockbox-init.sh
-sudo systemctl restart glitchtip-bootstrap.service
+sudo systemctl restart glitchtip-bootstrap.service glitchtip-bootstrap-admin.service
 ```
 
 ## 5. EAS DSN + staging APK
 
-DSN is public in the APK by design (Sensitive, not Secret).
+DSN is public in the APK by design (Sensitive, not Secret). Profile `staging` in [`eas.json`](../apps/mobile/eas.json) reads EAS environment **`preview`** and also sets `EXPO_PUBLIC_ERROR_DSN` in `build.staging.env` so a build without dashboard Sensitive still sends envelopes to this host.
 
 ```bash
+GLITCHTIP_DSN="$(yc compute instance get-serial-port-output --id fhmpenjqltp5ee82ek9r --port 1 \
+  | tr -d '\r' | awk -F= '/^ACLARO_DSN=/{print $2}' | tail -n 1)"
 cd apps/mobile
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 # optional alias:
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 pnpm --filter mobile build:staging:android
 ```
+
+Tag `eas-staging-*` runs [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml) when `workflow_dispatch` is unavailable. Expo Free-plan Android quota is a warning there (`scripts/eas-android-quota.sh`), not a red job. Tag `android-staging-*` runs the Gradle APK job; [`scripts/resolve-staging-error-dsn.sh`](../scripts/resolve-staging-error-dsn.sh) prefers a GitHub secret, then `eas.json` `staging.env`, then EAS `env:get`.
 
 Do **not** set `SENTRY_AUTH_TOKEN` for sentry.io. Maps upload only if `SENTRY_URL` is this origin ([`error-tracker-url.js`](../apps/mobile/error-tracker-url.js)).
 

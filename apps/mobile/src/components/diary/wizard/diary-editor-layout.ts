@@ -3,6 +3,12 @@
 export const DIARY_EDITOR_SHEET_MAX_RATIO = 0.88;
 /** One step label + text field must keep a positive height when Gboard is open. */
 export const DIARY_EDITOR_SCROLL_MIN_HEIGHT = 240;
+/** Grabber + title row — matches `headerHeight` initial state in DiaryEditorModal. */
+export const DIARY_EDITOR_HEADER_MIN_HEIGHT = 64;
+/** One primary button row. Do not use crushed onLayout heights for IME padding. */
+export const DIARY_EDITOR_FOOTER_MIN_HEIGHT = 56;
+/** Matches `space[4]` — keep this file free of RN layout imports for Vitest. */
+export const DIARY_EDITOR_SAFE_BOTTOM_MIN = 16;
 /**
  * Single-select rows small enough to pin above the editor scroll (itching,
  * 0–3 severity). Catalog grids stay in the scroll below the text field.
@@ -25,23 +31,44 @@ export function isCompactDiaryChoice(step: DiaryScreenStep): boolean {
   );
 }
 
+export function isDiaryTextInputStep(step: DiaryScreenStep): boolean {
+  return step.field === 'text';
+}
+
 /**
- * Pin compact choice chips in the sheet chrome when they share a screen with
- * text fields. Nightly 35067465304: itching `diary-choice-Слабый` sat at
+ * Pin IME targets into the sheet chrome (sibling of ScrollView).
+ *
+ * Nightly 35067465304: itching `diary-choice-Слабый` sat at
  * `[232,1925][428,2024]` under Gboard after fill; title tap left IME up
- * (Modal window token) and `extendedWaitUntil visible` failed for 15s.
+ * (Modal window token). Compact chips must stay in chrome.
+ *
+ * Nightly 35072335460: `Keyboard.dismiss` in a Modal is a no-op, so
+ * `diaryEditorSheetPaddingBottom` never sees an inset. Maestro then tapped
+ * `diary-field-appearance` at `[87,1552][993,1867]` through Gboard; input
+ * appended to the still-focused skinArea (`предплечьеyyшелушение`) and
+ * appearance stayed on the placeholder. Text fields that share a screen
+ * with another text field or with compact chips must sit in chrome too,
+ * in schema order (area → appearance → itch), even if that leaves the
+ * scroll empty.
  */
 export function splitDiaryScreenForIme<T extends DiaryScreenStep>(
   steps: readonly T[],
 ): { pinnedSteps: T[]; scrolledSteps: T[] } {
+  const textInputCount = steps.filter(isDiaryTextInputStep).length;
+  const hasCompactChoice = steps.some(isCompactDiaryChoice);
+  const shouldPin = textInputCount >= 2 || (textInputCount >= 1 && hasCompactChoice);
+  if (!shouldPin) {
+    return { pinnedSteps: [], scrolledSteps: [...steps] };
+  }
+
   const pinnedSteps: T[] = [];
   const scrolledSteps: T[] = [];
   for (const step of steps) {
-    if (isCompactDiaryChoice(step)) pinnedSteps.push(step);
-    else scrolledSteps.push(step);
-  }
-  if (pinnedSteps.length === 0 || scrolledSteps.length === 0) {
-    return { pinnedSteps: [], scrolledSteps: [...steps] };
+    if (isDiaryTextInputStep(step) || isCompactDiaryChoice(step)) {
+      pinnedSteps.push(step);
+    } else {
+      scrolledSteps.push(step);
+    }
   }
   return { pinnedSteps, scrolledSteps };
 }
@@ -66,4 +93,29 @@ export function diaryEditorScrollMaxHeight(input: {
     DIARY_EDITOR_SCROLL_MIN_HEIGHT,
     sheetMax - input.headerHeight - input.footerHeight - input.sheetPaddingBottom,
   );
+}
+
+/**
+ * Bottom padding that lifts wizard chrome above Gboard.
+ *
+ * Nightly 34943266082: `keyboardInset` ≈ sheet inner height made
+ * `paddingBottom` eat the header, so `diary-editor-title` left the
+ * accessibility tree and `_dismiss-wizard-ime` could not tap it.
+ * Cap padding so header + footer + min scroll still fit in the 88% sheet.
+ */
+export function diaryEditorSheetPaddingBottom(input: {
+  windowHeight: number;
+  headerHeight: number;
+  footerHeight: number;
+  keyboardInset: number;
+  safeBottom: number;
+}): number {
+  const safe = Math.max(input.safeBottom, DIARY_EDITOR_SAFE_BOTTOM_MIN);
+  const sheetMax = diaryEditorSheetMaxHeight(input.windowHeight);
+  const reserved =
+    Math.max(input.headerHeight, DIARY_EDITOR_HEADER_MIN_HEIGHT) +
+    Math.max(input.footerHeight, DIARY_EDITOR_FOOTER_MIN_HEIGHT) +
+    DIARY_EDITOR_SCROLL_MIN_HEIGHT;
+  const maxPad = Math.max(safe, sheetMax - reserved);
+  return Math.min(safe + Math.max(0, input.keyboardInset), maxPad);
 }

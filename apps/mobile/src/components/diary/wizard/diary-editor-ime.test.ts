@@ -19,7 +19,7 @@ describe('blurDiaryEditorIme', () => {
     const { blurDiaryEditorIme } = await import('./diary-editor-ime');
     const blur = vi.fn();
     const registered = { id: 'appearance', blur };
-    blurDiaryEditorIme(registered as never);
+    blurDiaryEditorIme([registered as never]);
 
     expect(blur).toHaveBeenCalledTimes(1);
     expect(blurTextInput).toHaveBeenCalledWith(registered);
@@ -39,7 +39,7 @@ describe('blurDiaryEditorIme', () => {
 
     const { blurDiaryEditorIme } = await import('./diary-editor-ime');
     const registered = { id: 'registered' };
-    blurDiaryEditorIme(registered as never);
+    blurDiaryEditorIme([registered as never]);
 
     expect(blurTextInput.mock.calls).toEqual([[registered], [focused]]);
     expect(dismiss).toHaveBeenCalledTimes(1);
@@ -57,10 +57,33 @@ describe('blurDiaryEditorIme', () => {
     }));
 
     const { blurDiaryEditorIme } = await import('./diary-editor-ime');
-    blurDiaryEditorIme(null);
+    blurDiaryEditorIme([]);
 
     expect(currentlyFocusedField).toHaveBeenCalledTimes(1);
     expect(blurTextInput).toHaveBeenCalledWith(focused);
+    expect(dismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it('blurs every mounted editor input (Maestro inputText skips RN onFocus)', async () => {
+    const blurTextInput = vi.fn();
+    const currentlyFocusedInput = vi.fn(() => null);
+    const dismiss = vi.fn();
+    vi.doMock('react-native', () => ({
+      Platform: { OS: 'android' },
+      Keyboard: { dismiss },
+      TextInput: { State: { blurTextInput, currentlyFocusedInput } },
+    }));
+
+    const { blurDiaryEditorIme } = await import('./diary-editor-ime');
+    const firstBlur = vi.fn();
+    const secondBlur = vi.fn();
+    const first = { id: 'skinArea', blur: firstBlur };
+    const second = { id: 'appearance', blur: secondBlur };
+    blurDiaryEditorIme([first, second] as never[]);
+
+    expect(firstBlur).toHaveBeenCalledTimes(1);
+    expect(secondBlur).toHaveBeenCalledTimes(1);
+    expect(blurTextInput.mock.calls).toEqual([[first], [second]]);
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
 });

@@ -388,11 +388,13 @@ function checkMaestroFlows() {
     !editorModal.includes('blurDiaryEditorIme') ||
     !editorModal.includes('onPressIn={dismissDiaryIme}') ||
     !editorModal.includes('diary-editor-pinned-top') ||
+    !editorModal.includes('diaryEditorSheetPaddingBottom') ||
+    !editorModal.includes('registerInput') ||
     /liftStyle\s*[,}\]]/.test(editorModal) ||
     /focusedInputRef\.current = null/.test(editorModal)
   ) {
     failures.push(
-      'DiaryEditorModal must expose diary-editor-title, dismiss IME on title press, keep the last input ref, and must not apply liftStyle',
+      'DiaryEditorModal must expose diary-editor-title, cap IME padding, dismiss IME on title press, keep registered inputs, and must not apply liftStyle',
     );
   }
 
@@ -401,8 +403,13 @@ function checkMaestroFlows() {
     failures.push('diary-editor-ime.ts missing (blur registered Modal input before Keyboard.dismiss)');
   } else {
     const imeBody = fs.readFileSync(diaryImeHelper, 'utf8');
-    if (!imeBody.includes('Keyboard.dismiss') || !imeBody.includes('blurTextInput') || !imeBody.includes('capable.blur')) {
-      failures.push('blurDiaryEditorIme must call host blur() then Keyboard.dismiss');
+    if (
+      !imeBody.includes('Keyboard.dismiss') ||
+      !imeBody.includes('blurTextInput') ||
+      !imeBody.includes('capable.blur') ||
+      !imeBody.includes('for (const node of registered)')
+    ) {
+      failures.push('blurDiaryEditorIme must blur every registered input via host blur() then Keyboard.dismiss');
     }
   }
 
@@ -416,6 +423,7 @@ function checkMaestroFlows() {
   );
   if (
     !stepField.includes('styles.inputWrap') ||
+    !stepField.includes('registerInput') ||
     !fieldStyles.includes('inputWrap:') ||
     !fieldStyles.includes('height: density.tapMinHeight')
   ) {
@@ -437,10 +445,22 @@ function checkMaestroFlows() {
   if (
     !diaryWizard.includes('splitDiaryScreenForIme') ||
     !diaryWizard.includes('pinnedSteps.map') ||
-    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS')
+    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS') ||
+    !diaryLayout.includes('isDiaryTextInputStep')
   ) {
     failures.push(
-      'DiaryWizard must pin compact choice chips above the editor scroll (nightly 35067465304)',
+      'DiaryWizard must pin text fields and compact chips above the editor scroll (nightly 35072335460)',
+    );
+  }
+
+  const tapWizardChoice = fs.readFileSync(path.join(flowsDir, '_tap-wizard-choice.yaml'), 'utf8');
+  if (
+    tapWizardChoice.indexOf('scrollUntilVisible') < 0 ||
+    tapWizardChoice.indexOf('extendedWaitUntil') < 0 ||
+    tapWizardChoice.indexOf('scrollUntilVisible') > tapWizardChoice.indexOf('extendedWaitUntil')
+  ) {
+    failures.push(
+      '_tap-wizard-choice.yaml must scrollUntilVisible before waiting for visible (nightly 34956812041)',
     );
   }
 
@@ -459,10 +479,11 @@ function checkMaestroFlows() {
     !fillWizardField.includes('waitForAnimationToEnd') ||
     !fillWizardField.includes('eraseText') ||
     !fillWizardField.includes('assertVisible') ||
+    !fillWizardField.includes('extendedWaitUntil') ||
     !fillAfterInput.includes('scrollUntilVisible')
   ) {
     failures.push(
-      '_fill-wizard-field.yaml must retap the field after layout, scroll it back into view, and assertVisible FIELD_VALUE',
+      '_fill-wizard-field.yaml must wait for FIELD_ID, retap after layout, scroll it back into view, and assertVisible FIELD_VALUE',
     );
   }
 
@@ -696,17 +717,21 @@ requireFile('docs/qa-checklist.md');
 requireFile('docs/maestro.md');
 requireFile('docs/rc-gate.md');
 requireFile('docs/analytics-staging.md');
+requireFile('docs/staging-glitchtip.md');
 requireFile('docs/performance-cold-start.md', { optional: true });
 requireFile('docs/performance-api-infra.md', { optional: true });
 requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('staging Gradle crash DSN', 'node', ['--test', 'scripts/resolve-staging-error-dsn.test.mjs']);
+runStep('EAS Android quota skip', 'node', ['--test', 'scripts/eas-android-quota.test.mjs']);
 runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
+runStep('glitchtip infra', 'bash', ['scripts/check-glitchtip-infra.sh']);
 checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();

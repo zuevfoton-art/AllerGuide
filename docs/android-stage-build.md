@@ -98,6 +98,8 @@ Workflow: [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas
 
 Runner **не** ставит Android SDK; только `pnpm install` + `eas build --non-interactive`.
 
+Expo Free-plan **monthly Android quota** is a **warning**, not a red job (`scripts/eas-android-quota.sh`). Upload can succeed and the cloud build still refuse. Fallback: path **C** (`staging-apk-gradle.yml`). Retry EAS after the 1st of the month or on a paid plan.
+
 ### Когда выбирать B вместо ручного A
 
 - Нужна воспроизводимая кнопка для QA

@@ -1,21 +1,21 @@
 # Fold IME, bring a wizard choice chip on-screen, tap it.
 # Nightly 34336499730: after pinning diary-editor-footer, itching chips
 # ("Слабый") sit under Gboard with inverted bounds and tapOn text fails.
-# Nightly 34946086211: IME still up after title tap; wait until the chip is
-# actually visible (not merely in the hierarchy) before tapping.
-# Nightly 35067465304: compact chips (itching) are pinned above the scroll so
-# they stay above Gboard even when Keyboard.dismiss is a no-op on the Modal.
+# Nightly 34956812041: wait-for-visible ran before scroll while Gboard still
+# covered the chip; Maestro never reached scrollUntilVisible. Scroll first.
+# Nightly 35067465304: compact chips (itching) are also pinned above the
+# scroll so they stay above Gboard; scrolled catalogs still need this order.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
-- extendedWaitUntil:
-    visible:
-      id: ${CHOICE_ID}
-    timeout: 15000
 - scrollUntilVisible:
     element:
       id: ${CHOICE_ID}
     direction: DOWN
     timeout: 20000
+- extendedWaitUntil:
+    visible:
+      id: ${CHOICE_ID}
+    timeout: 15000
 - tapOn:
     id: ${CHOICE_ID}

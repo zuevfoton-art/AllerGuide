@@ -9,6 +9,8 @@
 #   ENABLE_USER_REGISTRATION        default false on first create
 #   EMAIL_URL                       default consolemail:// on first create
 #   DEFAULT_FROM_EMAIL              default support@aclearo.com on first create
+#   GLITCHTIP_ADMIN_PASSWORD        generated when missing; used by bootstrap-admin.sh
+#   GLITCHTIP_ADMIN_EMAIL           default support@aclearo.com; first createsuperuser
 #
 # Usage:
 #   YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6q... ./scripts/yc-glitchtip-lockbox-init.sh
@@ -83,12 +85,20 @@ if email_url is None:
 from_email = explicit("DEFAULT_FROM_EMAIL")
 if from_email is None:
     from_email = merged.get("DEFAULT_FROM_EMAIL") or "support@aclearo.com"
+admin_password = explicit("GLITCHTIP_ADMIN_PASSWORD")
+if admin_password is None:
+    admin_password = merged.get("GLITCHTIP_ADMIN_PASSWORD") or hex_secret()
+admin_email = explicit("GLITCHTIP_ADMIN_EMAIL")
+if admin_email is None:
+    admin_email = merged.get("GLITCHTIP_ADMIN_EMAIL") or "support@aclearo.com"
 
 merged["SECRET_KEY"] = secret_key
 merged["POSTGRES_PASSWORD"] = postgres
 merged["ENABLE_USER_REGISTRATION"] = registration
 merged["EMAIL_URL"] = email_url
 merged["DEFAULT_FROM_EMAIL"] = from_email
+merged["GLITCHTIP_ADMIN_PASSWORD"] = admin_password
+merged["GLITCHTIP_ADMIN_EMAIL"] = admin_email
 
 print(json.dumps([{"key": k, "text_value": v} for k, v in merged.items()]))
 print("registration=" + registration, file=__import__("sys").stderr)
@@ -97,5 +107,5 @@ PY
 
 echo "Adding Lockbox version on GlitchTip secret $LOCKBOX_ID (existing SECRET_KEY/POSTGRES_PASSWORD kept unless overridden)"
 yc lockbox secret add-version --id "$LOCKBOX_ID" --payload "$MERGED" >/dev/null
-echo "Lockbox version added. ENABLE_USER_REGISTRATION defaults to false; first admin is createsuperuser on the VM, not public signup."
-echo "Then on the VM: sudo systemctl restart glitchtip-bootstrap.service"
+echo "Lockbox version added. ENABLE_USER_REGISTRATION defaults to false; first admin is bootstrap-admin.sh (createsuperuser), not public signup."
+echo "Then on the VM: sudo systemctl restart glitchtip-bootstrap.service glitchtip-bootstrap-admin.service"

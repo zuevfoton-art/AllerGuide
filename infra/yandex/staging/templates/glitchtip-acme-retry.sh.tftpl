@@ -1,0 +1,38 @@
+#!/bin/bash
+# Reload Caddy until HTTPS for this FQDN presents a public cert.
+# VM cloud-init often runs before the owner creates the DNS A record;
+# Let's Encrypt then fails and Caddy needs a kick after the name resolves.
+set -euo pipefail
+
+FQDN='${fqdn}'
+LOG=/var/log/glitchtip-acme-retry.log
+mkdir -p "$(dirname "$LOG")"
+
+log() { echo "$(date -u +%FT%TZ) $*" | tee -a "$LOG"; }
+
+https_ok() {
+  curl -fsS --max-time 15 \
+    --resolve "$FQDN:443:127.0.0.1" \
+    "https://$FQDN/" -o /dev/null
+}
+
+if https_ok; then
+  log "https ok ($FQDN)"
+  exit 0
+fi
+
+log "https down ($FQDN); reloading caddy"
+if ! systemctl reload caddy.service; then
+  log "reload failed; restarting caddy"
+  systemctl restart caddy.service
+fi
+
+# Issuance is async; give ACME a short window before the next timer tick.
+sleep 12
+if https_ok; then
+  log "https ok after reload ($FQDN)"
+  exit 0
+fi
+
+log "https still down after reload ($FQDN)"
+exit 1

@@ -33,14 +33,20 @@ function readFocusedInput(): InputHandle | null | undefined {
  * Nightly 34946086211: `Keyboard.dismiss()` alone left IME up (Modal window
  * token), so `diary-choice-Слабый` stayed in the tree under Gboard.
  * Call the host `.blur()` (Modal window token) then `TextInput.State`.
+ * Nightly 34956812041: Maestro `inputText` never fires RN `onFocus`, so a
+ * single "last focused" ref was null. Blur every mounted editor input.
  * Web: `TextInput.State.currentlyFocusedInput` is missing — do not call it.
- * Nightly 35067465304: keep blurring the last registered field — clearing the
- * ref after a no-op `Keyboard.dismiss()` left Gboard up for the choice tap.
+ * Nightly 35067465304: keep blurring registered fields — clearing the ref
+ * after a no-op `Keyboard.dismiss()` left Gboard up for the choice tap.
  */
-export function blurDiaryEditorIme(registered: InputHandle | null | undefined) {
-  blurHandle(registered);
+export function blurDiaryEditorIme(
+  registered: readonly (InputHandle | null | undefined)[] = [],
+) {
+  for (const node of registered) {
+    blurHandle(node);
+  }
   const focused = readFocusedInput();
-  if (focused && focused !== registered) blurHandle(focused);
+  if (focused && !registered.includes(focused)) blurHandle(focused);
   if (Platform.OS === 'web' && typeof document !== 'undefined') {
     const active = document.activeElement;
     if (active instanceof HTMLElement) active.blur();

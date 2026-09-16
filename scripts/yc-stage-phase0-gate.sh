@@ -179,6 +179,16 @@ else
   echo ""
 fi
 
+echo "--- GlitchTip ingest (informational, not a gate) ---"
+GLITCHTIP_URL="${GLITCHTIP_URL:-https://errors.staging.aclearo.com}"
+gt_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "${GLITCHTIP_URL}/" || true)"
+if [[ "$gt_code" == "200" || "$gt_code" == "301" || "$gt_code" == "302" ]]; then
+  pass "GlitchTip HTTPS $gt_code at $GLITCHTIP_URL"
+else
+  warn "GlitchTip $GLITCHTIP_URL HTTP ${gt_code:-curl-fail} — not a Phase 0 failure. Owner: docs/staging-glitchtip.md"
+fi
+echo ""
+
 echo "=== Summary ==="
 echo "Failed: $FAILED  Warnings: $WARNED"
 if [[ "$FAILED" -gt 0 ]]; then
