@@ -34,6 +34,36 @@ write_files:
     permissions: "0755"
     encoding: b64
     content: ${setup_b64}
+  - path: /opt/glitchtip/acme-retry.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${acme_retry_b64}
+  - path: /etc/systemd/system/glitchtip-acme-retry.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Reload Caddy until GlitchTip HTTPS/ACME succeeds
+      After=caddy.service
+      Wants=caddy.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/glitchtip/acme-retry.sh
+  - path: /etc/systemd/system/glitchtip-acme-retry.timer
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Retry GlitchTip ACME until HTTPS is ready
+      After=caddy.service
+
+      [Timer]
+      OnBootSec=1min
+      OnUnitActiveSec=2min
+      AccuracySec=15s
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
   - path: /etc/systemd/system/glitchtip-bootstrap.service
     permissions: "0644"
     content: |

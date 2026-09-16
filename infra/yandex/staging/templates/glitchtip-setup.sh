@@ -65,4 +65,5 @@ if ! systemctl start glitchtip-bootstrap.service; then
   echo "glitchtip-setup: first bootstrap start failed; systemd Restart=on-failure will retry" >&2
 fi
 systemctl enable --now caddy.service
+systemctl enable --now glitchtip-acme-retry.timer
 echo "glitchtip-setup: done $(date -u +%FT%TZ)"

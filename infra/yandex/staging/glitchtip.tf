@@ -69,12 +69,16 @@ locals {
     lockbox_secret_id = yandex_lockbox_secret.glitchtip.id
     fqdn              = var.glitchtip_fqdn
   })
+  glitchtip_acme_retry_sh = templatefile("${path.module}/templates/glitchtip-acme-retry.sh.tftpl", {
+    fqdn = var.glitchtip_fqdn
+  })
   glitchtip_cloud_init = templatefile("${path.module}/templates/glitchtip-cloud-init.yaml.tftpl", {
-    compose_b64    = base64encode(file("${path.module}/glitchtip/docker-compose.yml"))
-    bootstrap_b64  = base64encode(local.glitchtip_bootstrap_sh)
-    caddyfile_b64  = base64encode(local.glitchtip_caddyfile)
-    setup_b64      = base64encode(file("${path.module}/templates/glitchtip-setup.sh"))
-    ssh_public_key = var.glitchtip_ssh_public_key
+    compose_b64     = base64encode(file("${path.module}/glitchtip/docker-compose.yml"))
+    bootstrap_b64   = base64encode(local.glitchtip_bootstrap_sh)
+    caddyfile_b64   = base64encode(local.glitchtip_caddyfile)
+    setup_b64       = base64encode(file("${path.module}/templates/glitchtip-setup.sh"))
+    acme_retry_b64  = base64encode(local.glitchtip_acme_retry_sh)
+    ssh_public_key  = var.glitchtip_ssh_public_key
   })
 }
 

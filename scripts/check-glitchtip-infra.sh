@@ -54,6 +54,14 @@ if YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6qs399v1b3unstfh5rj "$INIT" 2>/dev/null; then
 fi
 
 grep -q 'reverse_proxy 127.0.0.1:8000' "$ROOT/infra/yandex/staging/templates/glitchtip-caddyfile.tftpl"
+grep -q 'http://' "$ROOT/infra/yandex/staging/templates/glitchtip-caddyfile.tftpl"
+grep -q 'acme-challenge' "$ROOT/infra/yandex/staging/templates/glitchtip-caddyfile.tftpl"
+if grep -q 'auto_https disable_redirects' "$ROOT/infra/yandex/staging/templates/glitchtip-caddyfile.tftpl"; then
+  echo "disable_redirects without an http:// site leaves Caddy on :443 only" >&2
+  exit 1
+fi
+grep -q 'glitchtip-acme-retry' "$ROOT/infra/yandex/staging/templates/glitchtip-setup.sh"
+grep -q 'acme_retry_b64' "$TF"
 if grep -A6 'port[[:space:]]*=[[:space:]]*22' "$TF" | grep -q '0.0.0.0/0'; then
   echo "GlitchTip SG must not copy the runner SSH 0.0.0.0/0 rule" >&2
   exit 1

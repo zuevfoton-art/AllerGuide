@@ -112,6 +112,8 @@ Optional later: CNAME `errors.staging.aclearo.ru` and `glitchtip_fqdn_ru` in tfv
 
 Wait until `curl -sI https://errors.staging.aclearo.com` is 200/302. Host must not be `sentry.io`.
 
+If the VM booted **before** the A record existed, Caddy's first Let's Encrypt attempt fails. The unit `glitchtip-acme-retry.timer` reloads Caddy every 2 minutes until HTTPS works. Caddyfile keeps HTTP-01 on `:80` (`http://` site; `/.well-known/acme-challenge/*` is not redirected). To kick a live VM without waiting: serial console `sudo systemctl reload caddy`.
+
 Port **8000** from the NAT IP must not answer (compose is loopback-only).
 
 ## 4. First admin (not public signup)

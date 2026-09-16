@@ -1,7 +1,20 @@
 # Example Caddy site for a local VM. Terraform writes the live file from
 # templates/glitchtip-caddyfile.tftpl using glitchtip_fqdn.
+#
+# Explicit http:// keeps :80 open for Let's Encrypt HTTP-01. Non-ACME HTTP 308s
+# to HTTPS. Do not use `auto_https disable_redirects` alone — that can leave
+# Caddy listening only on :443 and ACME cannot complete.
 
-errors.staging.aclearo.com {
+{
+	email support@aclearo.com
+}
+
+http://errors.staging.aclearo.com {
+	@not_acme not path /.well-known/acme-challenge/*
+	redir @not_acme https://{host}{uri} 308
+}
+
+https://errors.staging.aclearo.com {
 	encode gzip
 	reverse_proxy 127.0.0.1:8000
 }
