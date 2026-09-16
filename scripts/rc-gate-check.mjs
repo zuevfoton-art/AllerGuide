@@ -483,10 +483,11 @@ function checkMaestroFlows() {
     !fillWizardField.includes('eraseText') ||
     !fillWizardField.includes('assertVisible') ||
     !fillWizardField.includes('extendedWaitUntil') ||
+    !fillWizardField.includes('optional: true') ||
     !fillAfterInput.includes('scrollUntilVisible')
   ) {
     failures.push(
-      '_fill-wizard-field.yaml must wait for FIELD_ID, retap after layout, scroll it back into view, and assertVisible FIELD_VALUE',
+      '_fill-wizard-field.yaml must wait for FIELD_ID, type after the first tap, scroll it back into view, and assertVisible FIELD_VALUE',
     );
   }
 
