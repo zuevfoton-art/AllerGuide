@@ -445,10 +445,11 @@ function checkMaestroFlows() {
   if (
     !diaryWizard.includes('splitDiaryScreenForIme') ||
     !diaryWizard.includes('pinnedSteps.map') ||
-    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS')
+    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS') ||
+    !diaryLayout.includes('isDiaryTextInputStep')
   ) {
     failures.push(
-      'DiaryWizard must pin compact choice chips above the editor scroll (nightly 35067465304)',
+      'DiaryWizard must pin text fields and compact chips above the editor scroll (nightly 35072335460)',
     );
   }
 
@@ -478,10 +479,11 @@ function checkMaestroFlows() {
     !fillWizardField.includes('waitForAnimationToEnd') ||
     !fillWizardField.includes('eraseText') ||
     !fillWizardField.includes('assertVisible') ||
+    !fillWizardField.includes('extendedWaitUntil') ||
     !fillAfterInput.includes('scrollUntilVisible')
   ) {
     failures.push(
-      '_fill-wizard-field.yaml must retap the field after layout, scroll it back into view, and assertVisible FIELD_VALUE',
+      '_fill-wizard-field.yaml must wait for FIELD_ID, retap after layout, scroll it back into view, and assertVisible FIELD_VALUE',
     );
   }
 
