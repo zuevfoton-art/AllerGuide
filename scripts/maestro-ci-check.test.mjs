@@ -81,6 +81,26 @@ describe('Maestro nightly CI invariants', () => {
       }
     }
 
+    const stagingGradle = read('.github/workflows/staging-apk-gradle.yml');
+    assert.match(
+      stagingGradle,
+      /scripts\/resolve-staging-error-dsn\.sh/,
+      'Gradle staging APK must bake EXPO_PUBLIC_ERROR_DSN the same way as EAS',
+    );
+    const easAndroid = read('.github/workflows/eas-staging-android.yml');
+    assert.match(
+      easAndroid,
+      /eas-android-quota\.sh" apply/,
+      'EAS staging Android must skip Expo Free-plan quota (Gradle is the APK fallback)',
+    );
+    assert.match(stagingGradle, /secrets\.EXPO_PUBLIC_ERROR_DSN/);
+    assert.match(stagingGradle, /secrets\.EXPO_PUBLIC_SENTRY_DSN/);
+    assert.doesNotMatch(
+      stagingGradle,
+      /sentry\.io\/[0-9]/,
+      'do not hard-code a sentry.io DSN in the Gradle workflow',
+    );
+
     const runner = read('scripts/maestro-run-emulator.sh');
     assert.match(runner, /app-release\.apk/);
     assert.match(runner, /pm grant/);
@@ -327,9 +347,14 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(fill, /_dismiss-wizard-ime\.yaml/);
     assert.match(fill, /eraseText/);
     assert.match(fill, /waitForAnimationToEnd/);
+    assert.match(fill, /extendedWaitUntil/);
     const afterInput = fill.split('inputText')[1] ?? '';
     assert.match(afterInput, /scrollUntilVisible/);
     assert.match(fill, /assertVisible:[\s\S]*?id: \$\{FIELD_ID\}[\s\S]*?text: \$\{FIELD_VALUE\}/);
+    assert.ok(
+      fill.indexOf('\n- extendedWaitUntil:') < fill.indexOf('\n- inputText:'),
+      'fill must wait until FIELD_ID is visible before typing (nightly 35072335460)',
+    );
 
     // Nightly 34477934128 / 34575409044: 18 catalog chips above the required
     // field invert `diary-field-symptoms` (`[87,1696][993,1395]`, text «зуд»).
@@ -397,6 +422,9 @@ describe('Maestro nightly CI invariants', () => {
     const layout = read('apps/mobile/src/components/diary/wizard/diary-editor-layout.ts');
     assert.match(layout, /splitDiaryScreenForIme/);
     assert.match(layout, /COMPACT_DIARY_CHOICE_MAX_OPTIONS/);
+    assert.match(layout, /isDiaryTextInputStep/);
+    assert.match(layout, /textInputCount >= 2/);
+    assert.match(wizard, /hasScrolledBody/);
   });
 
   it('opens scanner manual input before typing молоко', () => {

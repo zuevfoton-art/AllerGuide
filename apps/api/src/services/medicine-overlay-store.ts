@@ -1,14 +1,15 @@
-import { and, eq, ilike, or } from 'drizzle-orm';
+import { and, eq, ilike, inArray, or } from 'drizzle-orm';
 import {
   mergeMedicineCards,
   normalizeMedicineName,
+  offBarcodeLookupCandidates,
   type MedicineCard,
   type MedicineConfidence,
   type MedicineSource,
 } from '@allerguide/core';
 import { db } from '../db';
 import { medicineOverlays, type MedicineOverlayRow } from '../db/app-schema';
-import { escapeIlike } from './medicine-catalog-store';
+import { escapeIlike, storedMedicineBarcode } from './medicine-catalog-store';
 
 const DEFAULT_SEARCH_LIMIT = 20;
 
@@ -39,6 +40,7 @@ export function overlayRowToCard(row: MedicineOverlayRow): MedicineCard {
     aliases: row.aliases ?? [],
     source: asSource(row.source),
     confidence: asConfidence(row.confidence),
+    barcode: row.barcode ?? undefined,
   };
 }
 
@@ -53,6 +55,20 @@ export async function findMedicineOverlay(
     .where(
       and(eq(medicineOverlays.userId, userId), eq(medicineOverlays.normalizedName, normalizedName)),
     )
+    .limit(1);
+  return row ?? null;
+}
+
+export async function findMedicineOverlayByBarcode(
+  userId: number,
+  barcode: string,
+): Promise<MedicineOverlayRow | null> {
+  const candidates = offBarcodeLookupCandidates(barcode);
+  if (candidates.length === 0) return null;
+  const [row] = await db
+    .select()
+    .from(medicineOverlays)
+    .where(and(eq(medicineOverlays.userId, userId), inArray(medicineOverlays.barcode, candidates)))
     .limit(1);
   return row ?? null;
 }
@@ -107,6 +123,7 @@ export async function upsertMedicineOverlay(
       ingredients: merged.ingredients,
       allergenTags: merged.allergenTags,
       aliases: merged.aliases,
+      barcode: storedMedicineBarcode(merged, existing?.barcode),
       source: merged.source,
       confidence: merged.confidence,
     })
@@ -124,6 +141,7 @@ export async function upsertMedicineOverlay(
         ingredients: merged.ingredients,
         allergenTags: merged.allergenTags,
         aliases: merged.aliases,
+        barcode: storedMedicineBarcode(merged, existing?.barcode),
         source: merged.source,
         confidence: merged.confidence,
         updatedAt: new Date(),

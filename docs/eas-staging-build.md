@@ -139,6 +139,7 @@ Closed beta: [`closed-beta-p17.md`](closed-beta-p17.md).
 | Android: `Gradle build failed with unknown error` | Логи только на expo.dev → build → **Run gradlew**. Нативный APK при этом собирается через [`android-stage-build.md`](android-stage-build.md) §C. Release Metro `@/` в `import()` — [#331](https://github.com/zuevfoton-art/AllerGuide/pull/331). |
 | Нужен APK без EAS | [`android-stage-build.md`](android-stage-build.md) §C — Gradle on GitHub |
 | Красный `deploy-staging` после зелёного smoke | Не откатывать API. `mobile-android` только submit (`--no-wait`); квота Free plan — warning, не fail job. Ждать APK в **EAS staging Android** или Gradle [`android-stage-build.md`](android-stage-build.md) §C. iOS — skip без `EAS_IOS_DEVICE`. |
+| Красный **EAS staging Android** / Free plan this month | Тоже warning, не fail (`eas-android-quota.sh`). Upload мог пройти, cloud build — нет. APK: Gradle [`android-stage-build.md`](android-stage-build.md) §C. После 1-го числа / paid plan — снова EAS. |
 
 ---
 

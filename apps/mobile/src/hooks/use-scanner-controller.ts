@@ -3,6 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
 import { computeScanTrends, extractGtinFromScan, type Profile, type SafeProduct, type ScanHistoryEntry } from '@allerguide/core';
+import { hasMedicinePackageLabelSignal } from '@allerguide/ai';
 import { useAppStore } from '@/src/store/app-store';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeScanResult } from '@/src/i18n/translate';
@@ -18,8 +19,11 @@ import {
 import { historyEntryToScanResult, listScanHistory } from '@/src/services/scan-history-service';
 import {
   buildScanDiaryDraft,
+  resolveScanDiaryInitialStepId,
   resolveScanDiarySection,
   saveScanDiaryEntry,
+  scanDiaryTriggerContextLine,
+  scanRequiresMedicineSideEffect,
 } from '@/src/services/scan-diary-service';
 import { buildDiarySectionEditorState } from '@/src/services/diary-section-service';
 import {
@@ -57,6 +61,7 @@ export type DiaryEntryDraft = {
   sectionType: string;
   prefill?: Record<string, string>;
   initialStepId?: string;
+  requireMedicineSideEffect?: boolean;
 };
 
 function resolveScanProfile(): Profile | null {
@@ -116,7 +121,10 @@ export function useScannerController() {
   const verdictZone = riskLevel ? zoneFromScanRisk(riskLevel) : null;
   const compositionText = result?.productIngredients?.trim() || input.trim();
   const { suggestions: dishSuggestions, searching: dishSearching } = useDishSuggestions(input, {
-    enabled: manualOpen,
+    enabled:
+      manualOpen &&
+      !isManualBarcodeInput(input) &&
+      !hasMedicinePackageLabelSignal(input),
   });
 
   const refreshHistory = useCallback(() => {
@@ -424,13 +432,16 @@ export function useScannerController() {
     });
   };
 
-  /** Scan verdict → «Питание» diary draft; the user confirms the reaction before saving. */
+  /** Scan verdict → Питание / Лекарство / Триггер; the user confirms before saving. */
   const openDiaryEntry = async () => {
     const profileId = getOrLoadActiveProfileId() ?? activeProfileId;
     if (!profileId || !result) return;
 
     const draft = buildScanDiaryDraft({ result, scanText: input });
-    const sectionType = resolveScanDiarySection(result);
+    const sectionType = resolveScanDiarySection({
+      ...result,
+      hasMedicineLabelSignal: hasMedicinePackageLabelSignal(input),
+    });
     const editorState = await buildDiarySectionEditorState({
       sectionType,
       profileId,
@@ -438,12 +449,18 @@ export function useScannerController() {
       locale,
       profileBirthYear: activeProfile?.birthYear,
       recognizedDish: draft.dish,
+      recognizedCard: result.medicineCard,
       scanRef: draft.scanRef,
+      triggerContextLine:
+        sectionType === 'Триггер' ? scanDiaryTriggerContextLine(result) : undefined,
     });
+    const prefill = editorState.prefill?.[sectionType];
     setDiaryDraft({
       sectionType,
-      prefill: editorState.prefill?.[sectionType],
-      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+      prefill,
+      initialStepId: resolveScanDiaryInitialStepId(sectionType, draft.initialStepId),
+      requireMedicineSideEffect:
+        sectionType === 'Лекарство' && scanRequiresMedicineSideEffect(result, prefill),
     });
   };
 
@@ -458,12 +475,18 @@ export function useScannerController() {
       locale,
       profileBirthYear: activeProfile?.birthYear,
       recognizedDish: draft.dish,
+      recognizedCard: result.medicineCard,
       scanRef: draft.scanRef,
+      triggerContextLine:
+        sectionType === 'Триггер' ? scanDiaryTriggerContextLine(result) : undefined,
     });
+    const prefill = editorState.prefill?.[sectionType];
     setDiaryDraft({
       sectionType,
-      prefill: editorState.prefill?.[sectionType],
-      initialStepId: sectionType === 'Питание' ? draft.initialStepId : undefined,
+      prefill,
+      initialStepId: resolveScanDiaryInitialStepId(sectionType, draft.initialStepId),
+      requireMedicineSideEffect:
+        sectionType === 'Лекарство' && scanRequiresMedicineSideEffect(result, prefill),
     });
   };
 

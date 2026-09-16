@@ -4,6 +4,7 @@ import { scanSourceLabelKey } from './scanner-display';
 describe('scanSourceLabelKey', () => {
   it('maps known sources to scanner.* keys', () => {
     expect(scanSourceLabelKey('openfoodfacts')).toBe('scanner.sourceOpenFoodFacts');
+    expect(scanSourceLabelKey('openmedicinefacts')).toBe('scanner.sourceOpenMedicineFacts');
     expect(scanSourceLabelKey('llm')).toBe('scanner.sourceLlm');
     expect(scanSourceLabelKey('dish_vision')).toBe('scanner.sourceDishVision');
     expect(scanSourceLabelKey('barcode')).toBe('scanner.sourceBarcode');

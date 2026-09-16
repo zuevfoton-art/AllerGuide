@@ -36,7 +36,7 @@ curl -H "x-analytics-dashboard-key: $ANALYTICS_DASHBOARD_KEY" \
 
 ### Wired events
 
-`screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*` (включая `scan_dish_vision` и `scan_saved_to_diary`), `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `map_pollen_*`, `pollen_alert_sent`, `hint_tour_started`, `hint_tour_completed`, `hint_tour_skipped`, `session_started`, `app_crashed`
+`screen_view`, `auth_*`, `profile_*`, `diary_*`, `scan_*` (включая `scan_dish_vision` и `scan_saved_to_diary` с пропом `diary_section`), `sync_*`, `backup_*`, `sos_opened`, `wellness_refreshed`, `settings_changed`, `map_pollen_*`, `pollen_alert_sent`, `hint_tour_started`, `hint_tour_completed`, `hint_tour_skipped`, `session_started`, `app_crashed`
 
 See `apps/mobile/src/services/analytics-service.ts` and key flow call sites.
 

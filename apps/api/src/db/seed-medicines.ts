@@ -43,6 +43,8 @@ export interface MedicineSeedEntry {
   ingredients?: string;
   allergenTags?: string[];
   aliases?: string[];
+  /** Canonical pack GTIN when known. Never invent a code. */
+  barcode?: string;
   /** Instruction URL used while curating the card. Not sent to the API. */
   sourceUrl?: string;
   /** Dataset metadata: prescription-only cards must not carry a dose. */
@@ -79,6 +81,7 @@ export function seedEntryToCard(entry: MedicineSeedEntry): MedicineCard {
       ingredients: entry.ingredients,
       allergenTags: entry.allergenTags?.length ? mapExternalAllergenIds(entry.allergenTags) : [],
       aliases: entry.aliases,
+      barcode: entry.barcode,
       confidence: entry.confidence ?? 'medium',
     },
     'catalog',

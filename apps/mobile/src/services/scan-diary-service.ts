@@ -1,9 +1,18 @@
 import {
   buildComponentsFromProduct,
   buildDishComponentsFromText,
+  diarySectionAnalyticsKey,
+  hideDiaryAutoSteps,
   mapExternalAllergenIds,
+  medicineHasAllergicSideEffects,
+  requireDiarySteps,
+  resolveScanDiaryTarget,
+  scanDiarySectionForTarget,
+  scanTriggerSourceLine,
+  type DiarySection,
   type DishComponentDef,
   type FoodDrugScanRef,
+  type MedicineCard,
 } from '@allerguide/core';
 import { buildOcrScanProductName, type ScanMode } from '@allerguide/ai';
 import { addDiaryEntries, type DiaryMutationResult } from '@/src/services/diary-service';
@@ -32,21 +41,66 @@ export function resolveScanDiarySection(input: {
   mode?: string | null;
   productCategory?: string | null;
   source?: string | null;
+  medicineCard?: MedicineCard | null;
+  hasMedicineLabelSignal?: boolean;
 }): ScanDiarySectionType {
-  const category = input.productCategory ?? '';
-  const mode = input.mode ?? '';
-  const source = input.source ?? '';
-  if (mode === 'medicine' || category === 'medicine') return 'Лекарство';
-  if (
-    mode === 'cosmetics' ||
-    category === 'beauty' ||
-    category === 'household' ||
-    source === 'openbeautyfacts' ||
-    source === 'openproductsfacts'
-  ) {
-    return 'Триггер';
+  return scanDiarySectionForTarget(
+    resolveScanDiaryTarget({
+      mode: input.mode,
+      productCategory: input.productCategory,
+      source: input.source,
+      hasMedicineCatalogHit: Boolean(input.medicineCard),
+      hasMedicineLabelSignal: input.hasMedicineLabelSignal,
+    }),
+  );
+}
+
+export function resolveScanDiaryInitialStepId(
+  sectionType: string,
+  foodInitialStepId: 'food' | 'reaction',
+): string | undefined {
+  if (sectionType === 'Питание') return foodInitialStepId;
+  if (sectionType === 'Лекарство') return 'medicine';
+  if (sectionType === 'Триггер') return 'trigger';
+  return undefined;
+}
+
+export function scanRequiresMedicineSideEffect(
+  result: ScanResultExtended,
+  prefill?: Record<string, string>,
+): boolean {
+  const hasScanAllergenMatch =
+    result.matches.length > 0 ||
+    result.crossMatches.length > 0 ||
+    (result.traceMatches?.length ?? 0) > 0;
+  return medicineHasAllergicSideEffects({
+    allergenTags: result.medicineCard?.allergenTags,
+    hasScanAllergenMatch,
+    intoleranceAlert: prefill?.intoleranceAlert,
+  });
+}
+
+const MEDICINE_SIDE_EFFECT_STEP_IDS = new Set(['sideEffectSeverity', 'effect']);
+
+/** Scanner-only: keep the allergic side-effect step when the pack is a culprit. */
+export function prepareScanDiarySection(
+  section: DiarySection,
+  options?: { requireMedicineSideEffect?: boolean },
+): DiarySection {
+  if (section.type === 'Лекарство' && options?.requireMedicineSideEffect) {
+    return requireDiarySteps(
+      hideDiaryAutoSteps(section, { keepStepIds: MEDICINE_SIDE_EFFECT_STEP_IDS }),
+      new Set(['sideEffectSeverity']),
+    );
   }
-  return SCAN_DIARY_SECTION_TYPE;
+  return hideDiaryAutoSteps(section);
+}
+
+export function scanDiaryTriggerContextLine(input: {
+  productCategory?: string | null;
+  source?: string | null;
+}): string {
+  return scanTriggerSourceLine(input);
 }
 
 const MAX_FOOD_NAME_CHARS = 80;
@@ -216,6 +270,7 @@ export async function saveScanDiaryEntry(input: {
   trackEvent('scan_saved_to_diary', {
     risk_level: input.level,
     scan_source: input.source ?? 'manual',
+    diary_section: diarySectionAnalyticsKey(input.entries[0]?.type ?? SCAN_DIARY_SECTION_TYPE),
   });
   // Diary reminders skip days that already have an entry — same as saving from the diary tab.
   void reconcileAllReminders();

@@ -25,6 +25,8 @@ export interface MedicineCard {
   aliases: string[];
   source: MedicineSource;
   confidence: MedicineConfidence;
+  /** Canonical pack GTIN when known (one card — one barcode). */
+  barcode?: string;
 }
 
 /** Diary steps that type a medicine name and should offer catalog autocomplete. */
@@ -105,6 +107,7 @@ export function toMedicineCard(
     aliases: normalizeMedicineAliases(input.aliases, name),
     source,
     confidence: input.confidence ?? 'low',
+    barcode: input.barcode?.trim() || undefined,
   };
 }
 
@@ -182,6 +185,20 @@ export function buildMedicinePrefillFromCard(
 }
 
 /**
+ * True when the pack is a known allergic-reaction culprit (catalog tags),
+ * the scan matched profile allergens in excipients, or SOS intolerance fired.
+ */
+export function medicineHasAllergicSideEffects(input: {
+  allergenTags?: readonly string[];
+  hasScanAllergenMatch?: boolean;
+  intoleranceAlert?: string | null;
+}): boolean {
+  if (input.allergenTags?.some((tag) => tag.trim())) return true;
+  if (input.hasScanAllergenMatch) return true;
+  return Boolean(input.intoleranceAlert?.trim());
+}
+
+/**
  * Merge a catalog card into diary answers.
  * `replace` is for a tapped suggestion; `fillEmpty` keeps what the user already typed.
  */
@@ -246,6 +263,7 @@ export function mergeMedicineCards(existing: MedicineCard, incoming: MedicineCar
     aliases: mergeAliasLists(existing, incoming, name),
     source: pickRicherSource(existing.source, incoming.source),
     confidence: pickRicherConfidence(existing.confidence, incoming.confidence),
+    barcode: incoming.barcode?.trim() || existing.barcode,
   };
 }
 

@@ -23,6 +23,7 @@ const OFF_FAMILY_ENV_KEYS: Record<OffFamilySource, string> = {
   openfoodfacts: 'OPENFOODFACTS_BASE_URL',
   openbeautyfacts: 'OPENBEAUTYFACTS_BASE_URL',
   openproductsfacts: 'OPENPRODUCTSFACTS_BASE_URL',
+  openmedicinefacts: 'OPENMEDICINEFACTS_BASE_URL',
 };
 
 function datasetBaseUrl(source: OffFamilySource): string {
@@ -64,7 +65,7 @@ async function fetchFromDataset(
   }
 }
 
-/** On-demand product lookup by barcode: OFF → Open Beauty Facts → Open Products Facts. */
+/** Barcode lookup: food → beauty → household → Open Medicine Facts. */
 export async function fetchOpenFoodFactsProduct(
   barcode: string,
 ): Promise<NormalizedProduct | null> {
@@ -115,7 +116,7 @@ async function searchDataset(
 }
 
 /**
- * Full-text search across OFF + Open Beauty Facts + Open Products Facts.
+ * Full-text search across the Open Food Facts family, including medicines.
  */
 export async function searchOpenFoodFacts(
   query: string,

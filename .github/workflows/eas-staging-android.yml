@@ -62,16 +62,24 @@ jobs:
           fi
           # eas-cli 16.x on this runner fails tarball upload:
           # "Cannot read properties of undefined (reading 'create')".
+          # Capture eas-cli status via PIPESTATUS: `tee` would otherwise hide a
+          # non-zero eas-cli exit. Free-plan Android quota is a warning; other
+          # failures still fail the job. Gradle fallback: staging-apk-gradle.yml.
+          set +e
           npx --yes eas-cli@22.0.0 build \
             --profile staging \
             --platform android \
             --non-interactive \
-            ${WAIT_FLAG}
+            ${WAIT_FLAG} 2>&1 | tee /tmp/eas-android.log
+          status="${PIPESTATUS[0]}"
+          set -e
+          bash "${GITHUB_WORKSPACE}/scripts/eas-android-quota.sh" apply "$status" /tmp/eas-android.log
 
       - name: Next steps
         run: |
           echo "::notice::APK appears on expo.dev → Project → Builds (profile staging)."
           echo "Ensure EAS preview env has Sensitive EXPO_PUBLIC_GOOGLE_MAPS_API_KEY (AIza…)."
+          echo "Crash ingest: EAS preview Sensitive EXPO_PUBLIC_ERROR_DSN or eas.json staging.env (GlitchTip, not sentry.io)."
           echo "Staging/preview APK is signed with debug.keystore SHA-1 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25."
           echo "API must have POLLEN_HEATMAP_ENABLED=true + GOOGLE_POLLEN_API_KEY."
           echo "Docs: docs/android-stage-build.md"

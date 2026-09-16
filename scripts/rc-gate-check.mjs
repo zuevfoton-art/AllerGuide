@@ -445,10 +445,11 @@ function checkMaestroFlows() {
   if (
     !diaryWizard.includes('splitDiaryScreenForIme') ||
     !diaryWizard.includes('pinnedSteps.map') ||
-    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS')
+    !diaryLayout.includes('COMPACT_DIARY_CHOICE_MAX_OPTIONS') ||
+    !diaryLayout.includes('isDiaryTextInputStep')
   ) {
     failures.push(
-      'DiaryWizard must pin compact choice chips above the editor scroll (nightly 35067465304)',
+      'DiaryWizard must pin text fields and compact chips above the editor scroll (nightly 35072335460)',
     );
   }
 
@@ -478,10 +479,11 @@ function checkMaestroFlows() {
     !fillWizardField.includes('waitForAnimationToEnd') ||
     !fillWizardField.includes('eraseText') ||
     !fillWizardField.includes('assertVisible') ||
+    !fillWizardField.includes('extendedWaitUntil') ||
     !fillAfterInput.includes('scrollUntilVisible')
   ) {
     failures.push(
-      '_fill-wizard-field.yaml must retap the field after layout, scroll it back into view, and assertVisible FIELD_VALUE',
+      '_fill-wizard-field.yaml must wait for FIELD_ID, retap after layout, scroll it back into view, and assertVisible FIELD_VALUE',
     );
   }
 
@@ -715,17 +717,21 @@ requireFile('docs/qa-checklist.md');
 requireFile('docs/maestro.md');
 requireFile('docs/rc-gate.md');
 requireFile('docs/analytics-staging.md');
+requireFile('docs/staging-glitchtip.md');
 requireFile('docs/performance-cold-start.md', { optional: true });
 requireFile('docs/performance-api-infra.md', { optional: true });
 requireFile('docs/performance-web-store.md', { optional: true });
 
 checkMaestroFlows();
 runStep('maestro CI invariants', 'node', ['--test', 'scripts/maestro-ci-check.test.mjs']);
+runStep('staging Gradle crash DSN', 'node', ['--test', 'scripts/resolve-staging-error-dsn.test.mjs']);
+runStep('EAS Android quota skip', 'node', ['--test', 'scripts/eas-android-quota.test.mjs']);
 runStep('maestro device helpers', 'node', ['--test', 'scripts/maestro-device.test.mjs']);
 runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test.mjs']);
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
+runStep('glitchtip infra', 'bash', ['scripts/check-glitchtip-infra.sh']);
 checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();

@@ -8,6 +8,7 @@ export function scanSourceLabelKey(source?: ScanResultExtended['source']): strin
   if (source === 'openfoodfacts') return 'scanner.sourceOpenFoodFacts';
   if (source === 'openbeautyfacts') return 'scanner.sourceOpenBeautyFacts';
   if (source === 'openproductsfacts') return 'scanner.sourceOpenProductsFacts';
+  if (source === 'openmedicinefacts') return 'scanner.sourceOpenMedicineFacts';
   if (source === 'barcodes_db') return 'scanner.sourceBarcodesDb';
   if (source === 'barcode') return 'scanner.sourceBarcode';
   if (source === 'ocr') return 'scanner.sourceOcr';

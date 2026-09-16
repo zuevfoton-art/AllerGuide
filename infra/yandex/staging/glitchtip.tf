@@ -1,12 +1,16 @@
 # Self-hosted GlitchTip for staging crash ingest.
 # Compose Postgres lives on this VM — never the app Managed Postgres cluster.
-# Live VM is in folder b1glkbb9i8ufp6bsdn4u (docs/staging-glitchtip.md). Import before apply.
+# Live VM is in folder b1glkbb9i8ufp6bsdn4u (docs/staging-glitchtip.md).
+# Cloud Agent / CI must not `terraform apply` this root (no remote state; apply
+# from empty local state recreates VPC/MDB/API). Owner imports live IDs first.
 
 resource "yandex_iam_service_account" "glitchtip" {
   name        = "aclearo-staging-glitchtip"
   description = "GlitchTip VM: read aclearo-staging-glitchtip Lockbox only"
 }
 
+# Lockbox secret placeholder — payload after apply via yc-glitchtip-lockbox-init.sh
+# (same pattern as the API env Lockbox). Never mount into Serverless.
 resource "yandex_lockbox_secret" "glitchtip" {
   name                = "aclearo-staging-glitchtip"
   description         = "GlitchTip VM env (SECRET_KEY, POSTGRES_PASSWORD). Not the API secret."
@@ -65,12 +69,23 @@ locals {
     lockbox_secret_id = yandex_lockbox_secret.glitchtip.id
     fqdn              = var.glitchtip_fqdn
   })
+  glitchtip_bootstrap_admin_sh = templatefile("${path.module}/templates/glitchtip-bootstrap-admin.sh.tftpl", {
+    lockbox_secret_id = yandex_lockbox_secret.glitchtip.id
+    fqdn              = var.glitchtip_fqdn
+    admin_email       = "support@aclearo.com"
+  })
+  glitchtip_acme_retry_sh = templatefile("${path.module}/templates/glitchtip-acme-retry.sh.tftpl", {
+    fqdn = var.glitchtip_fqdn
+  })
   glitchtip_cloud_init = templatefile("${path.module}/templates/glitchtip-cloud-init.yaml.tftpl", {
-    compose_b64    = base64encode(file("${path.module}/glitchtip/docker-compose.yml"))
-    bootstrap_b64  = base64encode(local.glitchtip_bootstrap_sh)
-    caddyfile_b64  = base64encode(local.glitchtip_caddyfile)
-    setup_b64      = base64encode(file("${path.module}/templates/glitchtip-setup.sh"))
-    ssh_public_key = var.glitchtip_ssh_public_key
+    compose_b64            = base64encode(file("${path.module}/glitchtip/docker-compose.yml"))
+    bootstrap_b64          = base64encode(local.glitchtip_bootstrap_sh)
+    bootstrap_admin_sh_b64 = base64encode(local.glitchtip_bootstrap_admin_sh)
+    bootstrap_admin_py_b64 = base64encode(file("${path.module}/glitchtip/bootstrap-admin.py"))
+    caddyfile_b64          = base64encode(local.glitchtip_caddyfile)
+    setup_b64              = base64encode(file("${path.module}/templates/glitchtip-setup.sh"))
+    acme_retry_b64         = base64encode(local.glitchtip_acme_retry_sh)
+    ssh_public_key         = var.glitchtip_ssh_public_key
   })
 }
 

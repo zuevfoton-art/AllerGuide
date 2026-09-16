@@ -2,6 +2,7 @@ import {
   buildCombinedScanText,
   buildOcrScanProductName,
   dishVisionToScanText,
+  parseMedicineLabelText,
   prepareScanTextFromOcr,
   resolveScanEvidenceKind,
   simulateOcrFromCapture,
@@ -12,7 +13,7 @@ import {
   type ScanMode,
   type OcrExtractionResult,
 } from '@allerguide/ai';
-import type { Profile } from '@allerguide/core';
+import { toMedicineCard, type MedicineCard, type Profile } from '@allerguide/core';
 import { AI_DISH_VISION_ENABLED } from '@/src/constants/features';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 import { classifyScanIntentViaApi } from '@/src/services/scan-intent-api-service';
@@ -144,6 +145,22 @@ async function analyzeWithDemoOcrFallback(input: {
   return { ...result, ocr: extraction, evidence: 'ocr' };
 }
 
+/** Intent/mode must see the pack title (таблетки / МНН), not only the stripped composition. */
+function extractionForScanIntent(
+  extraction: OcrExtractionResult,
+  originalLabelText?: string,
+): OcrExtractionResult {
+  const text = originalLabelText?.trim();
+  if (!text) return extraction;
+  return { ...extraction, text };
+}
+
+function medicineCardFromLabelText(text: string): MedicineCard | undefined {
+  const parsed = parseMedicineLabelText(text);
+  if (!parsed) return undefined;
+  return toMedicineCard(parsed, 'ocr');
+}
+
 async function persistFinalScan(
   profile: Profile | null | undefined,
   inputText: string,
@@ -267,12 +284,15 @@ export async function scanFromOcr({
   }
 
   // A: heuristic intent. B (flag): YandexGPT intent via /api/scan/intent.
+  // Composition extraction drops «таблетки» / МНН headers — classify the original label.
+  const originalLabelText = ocrText?.trim() || manualText?.trim();
+  const intentExtraction = extractionForScanIntent(extraction, originalLabelText);
   const llmIntent = await classifyScanIntentViaApi({
-    text: extraction.text,
+    text: intentExtraction.text,
     fallbackMode: mode,
   });
   const classification =
-    llmIntent ?? classifyScanIntentHeuristic(extraction, mode);
+    llmIntent ?? classifyScanIntentHeuristic(intentExtraction, mode);
   const intent = classification.intent;
   const analysisMode = classification.mode;
 
@@ -367,17 +387,30 @@ export async function scanFromOcr({
           : 'no_match'
       : undefined;
 
+  const medicineCard =
+    analysisMode === 'medicine'
+      ? medicineCardFromLabelText(intentExtraction.text)
+      : undefined;
+
   return persistFinalScan(
     profile,
     extraction.text,
     {
       ...result,
+      mode: analysisMode,
       ocr: extraction,
       menuScanStatus,
       evidence,
+      productCategory:
+        analysisMode === 'medicine'
+          ? 'medicine'
+          : analysisMode === 'cosmetics'
+            ? 'beauty'
+            : undefined,
+      medicineCard,
       ...(visionEstimate ? { dishVision: visionEstimate.result } : {}),
     },
-    productName,
+    medicineCard?.name || productName,
     visionEstimate,
   );
 }

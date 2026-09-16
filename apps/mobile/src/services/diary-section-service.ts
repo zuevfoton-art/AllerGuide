@@ -90,6 +90,8 @@ export async function buildDiarySectionEditorState(input: {
   };
   /** Scan the entry is created from; overrides the «last 24 h» history lookup. */
   scanRef?: FoodDrugScanRef | null;
+  /** Explicit trigger context for a cosmetics/household scan (not the 24 h heuristic). */
+  triggerContextLine?: string;
 }): Promise<DiarySectionEditorStateWithSection> {
   const { sectionType, profileId, profileAllergiesJson, locale } = input;
 
@@ -195,6 +197,12 @@ export async function buildDiarySectionEditorState(input: {
     const answers = buildTriggerPrefill(context);
     if (input.recognizedDish?.food.trim()) {
       answers.trigger = input.recognizedDish.food.trim();
+    }
+    if (input.scanRef?.verdict.trim()) {
+      answers.recentScan = input.scanRef.verdict.trim();
+    }
+    if (input.triggerContextLine?.trim()) {
+      answers.context = input.triggerContextLine.trim();
     }
     return { mode: 'section', sectionType, prefill: { Триггер: answers } };
   }

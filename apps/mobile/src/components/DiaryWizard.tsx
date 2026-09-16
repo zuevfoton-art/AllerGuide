@@ -129,6 +129,11 @@ export function DiaryWizard({
   const pinnedAnswerKey = pinnedSteps
     .map((step) => `${step.id}:${answers[step.id] ?? ''}`)
     .join('|');
+  const hasScrolledBody =
+    scrolledSteps.length > 0 ||
+    Boolean(notice) ||
+    Boolean(scalePreview) ||
+    Boolean(pefZonePreview);
 
   const renderStep = (current: DiaryStep) => (
     <View key={current.id} style={styles.fieldBlock}>
@@ -204,7 +209,7 @@ export function DiaryWizard({
   );
 
   return (
-    <View style={styles.wrap}>
+    <View style={hasScrolledBody ? styles.wrap : undefined}>
       <DiaryEditorPinnedTop
         deps={[section.title, overallStepNumber, overallStepsTotal, pinnedAnswerKey]}>
         <Pressable
@@ -231,9 +236,12 @@ export function DiaryWizard({
         {pinnedSteps.map(renderStep)}
       </DiaryEditorPinnedTop>
 
-      {notice ? <View style={styles.notice}>{notice}</View> : null}
-
-      {scrolledSteps.map(renderStep)}
+      {hasScrolledBody ? (
+        <>
+          {notice ? <View style={styles.notice}>{notice}</View> : null}
+          {scrolledSteps.map(renderStep)}
+        </>
+      ) : null}
 
       {scalePreview ? (
         <Text style={styles.scalePreview}>

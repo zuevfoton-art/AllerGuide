@@ -51,11 +51,13 @@ describe('mergeCatalogAndOverlayCards', () => {
       ingredients: catalog.ingredients,
       allergenTags: catalog.allergenTags,
       aliases: catalog.aliases,
+      barcode: '4013054002508',
       source: 'vision',
       confidence: catalog.confidence,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
     expect(card.source).toBe('vision');
+    expect(card.barcode).toBe('4013054002508');
   });
 });

@@ -14,26 +14,18 @@ import {
   rememberMedicineViaApi,
   searchMedicinesFromCatalog,
 } from '@/src/services/medicines-api';
+import {
+  __resetRememberedMedicinesForTests,
+  findRememberedMedicineByBarcode,
+  listRememberedMedicineCards,
+  rememberMedicineCardLocally,
+} from '@/src/services/medicine-memory';
 
-const rememberedByKey = new Map<string, MedicineCard>();
-
-function rememberLocally(card: MedicineCard): MedicineCard {
-  const key = medicineCardKey(card);
-  if (!key) return card;
-  const previous = rememberedByKey.get(key);
-  const merged = previous ? mergeMedicineCards(previous, card) : card;
-  rememberedByKey.set(key, merged);
-  return merged;
-}
-
-export function listRememberedMedicineCards(): MedicineCard[] {
-  return [...rememberedByKey.values()];
-}
-
-/** Test helper. */
-export function __resetRememberedMedicinesForTests(): void {
-  rememberedByKey.clear();
-}
+export {
+  __resetRememberedMedicinesForTests,
+  findRememberedMedicineByBarcode,
+  listRememberedMedicineCards,
+};
 
 export function collectMedicineCardsFromDiaryEntries(
   entries: { type: string; details: string }[],
@@ -93,7 +85,7 @@ export async function searchMedicineSuggestions(
     searchMedicinesFromCatalog(query),
     extraCards.length > 0 ? Promise.resolve([]) : loadDiaryMedicineCards(profileId),
   ]);
-  for (const card of remote) rememberLocally(card);
+  for (const card of remote) rememberMedicineCardLocally(card);
   return filterAndRankMedicineSuggestions(query, [
     ...remote,
     ...diaryCards,
@@ -118,9 +110,9 @@ export async function resolveMedicineSuggestion(
 
 /** Cache locally and write through to the YC catalog. */
 export async function rememberMedicineCard(card: MedicineCard): Promise<MedicineCard> {
-  const local = rememberLocally(card);
+  const local = rememberMedicineCardLocally(card);
   const saved = await rememberMedicineViaApi(local);
-  return saved ? rememberLocally(saved) : local;
+  return saved ? rememberMedicineCardLocally(saved) : local;
 }
 
 export async function rememberMedicineFromDiaryAnswers(
