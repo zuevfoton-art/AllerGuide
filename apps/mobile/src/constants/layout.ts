@@ -47,13 +47,13 @@ export const density = {
   tapMinHeightCrisis: 56,
 } as const;
 
-/** Brand hex for static HTML/PDF exports (mirrors light theme) */
+/** Brand hex for static HTML/PDF exports (mirrors light Nordic Air theme) */
 export const brandReportColors = {
-  text: '#0F172A',
-  head: '#1E3A5F',
-  muted: '#64748B',
-  bg: '#F3F6F4',
-  border: '#E3E9E5',
-  accent: '#2A9D8F',
+  text: '#1C2624',
+  head: '#1A3038',
+  muted: '#5A6B72',
+  bg: '#F5F3EE',
+  border: '#E2DDD4',
+  accent: '#4F8FB8',
   danger: '#B91C1C',
 } as const;

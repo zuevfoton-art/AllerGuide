@@ -1,4 +1,4 @@
-/** Claro teal gradient + mirror tokens — no RN deps (testable in Vitest). */
+/** Nordic Air (warm sky) gradient + mirror tokens — no RN deps (testable in Vitest). */
 
 export type ClaroGradient = {
   colors: readonly [string, string, string];
@@ -11,40 +11,40 @@ export type ClaroGradient = {
 export function getClaroGradient(isDark: boolean): ClaroGradient {
   if (isDark) {
     return {
-      colors: ['#0B1120', '#134E48', '#2A9D8F'],
+      colors: ['#0E1618', '#243846', '#4F8FB8'],
       locations: [0, 0.55, 1],
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     };
   }
   return {
-    colors: ['#1F6B62', '#2A9D8F', '#9FD9D1'],
+    colors: ['#3A6F92', '#4F8FB8', '#D9EAF5'],
     locations: [0, 0.6, 1],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   };
 }
 
-/** Light-mode Claro tokens (mirror theme.ts) — no medical blue, no calm.* keys */
+/** Light-mode Nordic Air tokens (mirror theme.ts) — no Dual Calm medical blues */
 export const LIGHT_CLARO_TOKENS = {
-  tipText: '#1F6B62',
-  info: '#2A9D8F',
-  infoLight: '#E6F6F4',
-  tipBg: '#E6F6F4',
-  tipBorder: '#9FD9D1',
-  accent: '#2A9D8F',
-  accentLight: '#E6F6F4',
-  accentMid: '#9FD9D1',
+  tipText: '#3A6F92',
+  info: '#4F8FB8',
+  infoLight: '#D9EAF5',
+  tipBg: '#D9EAF5',
+  tipBorder: '#A8C9DC',
+  accent: '#4F8FB8',
+  accentLight: '#D9EAF5',
+  accentMid: '#A8C9DC',
 } as const;
 
-/** Dark-mode Claro tokens (mirror theme.ts) */
+/** Dark-mode Nordic Air tokens (mirror theme.ts) */
 export const DARK_CLARO_TOKENS = {
-  tipText: '#9FD9D1',
-  info: '#3DB8A8',
-  infoLight: '#134E48',
-  tipBg: '#134E48',
-  tipBorder: '#2A9D8F',
-  accent: '#3DB8A8',
-  accentLight: '#134E48',
-  accentMid: '#2A9D8F',
+  tipText: '#A8C9DC',
+  info: '#7EB7D6',
+  infoLight: '#243846',
+  tipBg: '#243846',
+  tipBorder: '#4F8FB8',
+  accent: '#7EB7D6',
+  accentLight: '#243846',
+  accentMid: '#4F8FB8',
 } as const;
