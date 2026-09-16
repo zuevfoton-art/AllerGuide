@@ -4,8 +4,10 @@
 # — otherwise inputText appends to skinArea (`лицоyyпокраснение`) and Далее
 # stays disabled.
 # Nightly 35072335460: the same append (`предплечьеyyшелушение`) when Gboard
-# still covered appearance in the scroll. Skin text fields now live in
-# diary-editor-pinned-top; wait until FIELD_ID is visible before typing.
+# still covered appearance; wait until FIELD_ID is visible before typing.
+# Nightly 35081306254: pinning appearance into diary-editor-pinned-top left
+# it under Gboard with no scroll. Text fields stay in the ScrollView so
+# scrollUntilVisible can lift appearance into the gap above the keyboard.
 appId: com.aclearo.app
 ---
 - runFlow: _dismiss-wizard-ime.yaml
