@@ -1,4 +1,4 @@
-/** Nordic Air (warm sky) gradient + mirror tokens — no RN deps (testable in Vitest). */
+/** Forest Refuge / Earth Wellness gradient + mirror tokens — no RN deps (testable in Vitest). */
 
 export type ClaroGradient = {
   colors: readonly [string, string, string];
@@ -11,40 +11,44 @@ export type ClaroGradient = {
 export function getClaroGradient(isDark: boolean): ClaroGradient {
   if (isDark) {
     return {
-      colors: ['#0E1618', '#243846', '#4F8FB8'],
+      colors: ['#14140F', '#2A2A22', '#A3A380'],
       locations: [0, 0.55, 1],
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     };
   }
   return {
-    colors: ['#3A6F92', '#4F8FB8', '#D9EAF5'],
+    colors: ['#5F5F4A', '#6E6E58', '#E4E5D4'],
     locations: [0, 0.6, 1],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   };
 }
 
-/** Light-mode Nordic Air tokens (mirror theme.ts) — no Dual Calm medical blues */
+/**
+ * Light-mode Earth Wellness tokens (mirror theme.ts).
+ * Moss deepened to `#6E6E58` for white-on-accent AA; photo swatch `#7F7F67` is the brand hue.
+ * Sage soft = wash; slate = info; dusty rose lives on surfaceMuted/foam in theme.ts.
+ */
 export const LIGHT_CLARO_TOKENS = {
-  tipText: '#3A6F92',
-  info: '#4F8FB8',
-  infoLight: '#D9EAF5',
-  tipBg: '#D9EAF5',
-  tipBorder: '#A8C9DC',
-  accent: '#4F8FB8',
-  accentLight: '#D9EAF5',
-  accentMid: '#A8C9DC',
+  tipText: '#5F5F4A',
+  info: '#829399',
+  infoLight: '#E0E5E7',
+  tipBg: '#E4E5D4',
+  tipBorder: '#A3A380',
+  accent: '#6E6E58',
+  accentLight: '#E4E5D4',
+  accentMid: '#A3A380',
 } as const;
 
-/** Dark-mode Nordic Air tokens (mirror theme.ts) */
+/** Dark-mode Earth Wellness tokens (mirror theme.ts) */
 export const DARK_CLARO_TOKENS = {
-  tipText: '#A8C9DC',
-  info: '#7EB7D6',
-  infoLight: '#243846',
-  tipBg: '#243846',
-  tipBorder: '#4F8FB8',
-  accent: '#7EB7D6',
-  accentLight: '#243846',
-  accentMid: '#4F8FB8',
+  tipText: '#C5C5A8',
+  info: '#9AADB8',
+  infoLight: '#2C333A',
+  tipBg: '#2A2A22',
+  tipBorder: '#A3A380',
+  accent: '#A3A380',
+  accentLight: '#2A2A22',
+  accentMid: '#7F7F67',
 } as const;

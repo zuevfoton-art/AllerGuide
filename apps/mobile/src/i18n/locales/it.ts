@@ -245,6 +245,7 @@ const it: LocaleMessages = {
       pollen: 'Che succede al polline',
     },
     answerFallback: 'Nessuna risposta. Apri le schede esperto o il diario.',
+    fabLabel: 'Apri chat',
     quickWhy: 'Perché è importante?',
     quickToday: 'Cosa fare oggi?',
   },

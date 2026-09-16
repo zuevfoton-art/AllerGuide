@@ -1,34 +1,38 @@
-# Nordic Air — политика цвета (UX/UI v2)
+# Forest Refuge · Earth Wellness — политика цвета (UX/UI v2)
 
-**Статус:** канон production · supersedes Claro Green teal as product accent  
-**Выбор:** UX/UI v2 вариант **B — Nordic Air (тёплый небо)** — [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md)  
+**Статус:** канон production · supersedes Nordic Air B as product accent  
+**Выбор:** UX/UI v2 **вариант A (Forest & Linen layout)** + палитра **photo-3 Earth Wellness** — [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md)  
 **Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts) · [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts)
 
-> Исторический документ Claro teal (`#2A9D8F`) остаётся в git history и в сравнениях A/C макета. Production accent — тёплый голубой Nordic Air. Dual Calm medical blues по-прежнему запрещены.
+> Nordic Air (`#4F8FB8`) и Claro teal (`#2A9D8F`) остаются в git history / HTML comparison. Production — Moss primary на тёплом peach-linen фоне. Dual Calm medical blues по-прежнему запрещены.
 
 ---
 
 ## Решение
 
-Уходим от **Claro teal** и от **medical calm / Dual Calm slate-blue**. Product + ambient + info — **одна семья тёплого неба (sky blue)** на тёплом льняном фоне. Имена `calm.*` в коде сняты; в UI — `accent*` / `tip*` / `GlassCard variant="soft"`.
+Вариант **A** задаёт характер экрана (тёплое прибежище, крупные поверхности, выразительная иерархия). Палитра с фото 3:
+
+| Swatch | Hex | Роль в UI |
+|--------|-----|-----------|
+| Main Sage | `#A3A380` | Soft wash / `accentMid` |
+| Main Dusty Rose | `#D8C3B6` → soft `#F3E9E2` | Secondary soft / `surfaceMuted` / `foam` |
+| Minor Moss | `#7F7F67` → CTA `#6E6E58` | Primary action (deepened for white-on-accent AA) |
+| Accent Slate | `#829399` | `info` / tip-adjacent cool accent |
+| Neutral Stone | `#D6D2CD` | Tracks / `mint` |
+| Canvas | `#F7ECE1` | `bg` / `cream` |
 
 ---
 
 ## Запрещённые fills (inventory)
 
-Не использовать в `apps/mobile` UI fills, mockups и brand kit (кроме цитат в тестах-banlist):
+Не использовать в `apps/mobile` UI fills (кроме banlist-тестов):
 
-| Hex | Бывшая роль Dual Calm |
-|-----|------------------------|
-| `#2563EB` | calmMid / info |
-| `#1D4ED8` | dark calmMid |
-| `#3B82F6` | calmLight / dark info |
-| `#EFF4FF` | calmWash / infoLight |
-| `#DBEAFE` | calmMist |
-| `#0C4A6E` | dark infoLight |
-| `#BFDBFE` / `#93C5FD` / `#1E40AF` | legacy tip blues |
+| Hex | Бывшая роль |
+|-----|-------------|
+| `#2563EB` / `#1D4ED8` / `#3B82F6` / `#EFF4FF` / `#DBEAFE` / `#0C4A6E` | Dual Calm medical blues |
+| `#4F8FB8` / `#D9EAF5` / `#A8C9DC` / `#3A6F92` / `#7EB7D6` | Retired Nordic Air sky |
 
-Проверка: `rg '#2563EB|#1D4ED8|#3B82F6|#EFF4FF|#DBEAFE|#0C4A6E' apps/mobile docs --glob '!**/claro-gradient.test.ts'` → пусто.
+Проверка: `rg` по этим hex в `apps/mobile` / `docs` (исключая тесты-banlist) → пусто.
 
 ---
 
@@ -36,43 +40,42 @@
 
 | Исключение | Почему |
 |------------|--------|
-| `danger` / SOS `#B91C1C` | Экстренный акцент (не sky) |
-| `success` / `warning` traffic-light | Клинические зоны, не бренд-ambient |
-| `head` тёплый уголь / deep sky | Типографика / KPI, не fill atmosphere |
-| Внешние тайлы карт (Google / Yandex) | Не бренд-токены |
+| `danger` / SOS `#B91C1C` | Экстренный акцент |
+| `success` / `warning` traffic-light | Клинические зоны |
+| `head` тёплый ink | Типографика / KPI |
+| Внешние тайлы карт | Не бренд-токены |
 
 ---
 
-## Канонические токены (Nordic Air B)
+## Канонические токены (Earth Wellness)
 
 | Token | Light | Dark | Роль |
 |-------|-------|------|------|
-| `bg` / `cream` | `#F5F3EE` | `#121614` | Экран |
-| `card` | `#FFFCF8` | `#1A2220` | Surface |
-| `accent` | `#4F8FB8` | `#7EB7D6` | CTA, табы, ссылки, info icon |
-| `accentLight` | `#D9EAF5` | `#243846` | Soft surfaces, tip bg |
-| `accentMid` | `#A8C9DC` | `#4F8FB8` | Soft borders |
-| `tipText` | `#3A6F92` | `#A8C9DC` | Tip copy / gradient deep (light) |
-| `ink` / `text` | `#1C2624` | `#E8F0ED` | Основной текст |
-| `info` / `infoLight` | = accent / accentLight | | Семантика «подсказка» |
-| `tipBg` / `tipBorder` | = accentLight / accentMid | | Tip cards |
+| `bg` / `cream` | `#F7ECE1` | `#14140F` | Экран |
+| `card` | `#FFFCF8` | `#1E1D1A` | Surface |
+| `accent` | `#6E6E58` | `#A3A380` | CTA, табы, FAB, ссылки |
+| `accentLight` | `#E4E5D4` | `#2A2A22` | Soft Sage wash |
+| `accentMid` | `#A3A380` | `#7F7F67` | Soft borders |
+| `info` / `infoLight` | `#829399` / `#E0E5E7` | `#9AADB8` / `#2C333A` | Slate info (≠ accent) |
+| `tipBg` / `tipBorder` / `tipText` | Sage family | Sage family | Tip cards |
+| `surfaceMuted` / `foam` | `#F3E9E2` | `#24221E` | Dusty-rose soft |
+| `ink` / `text` | `#1C2624` | `#F3EDE4` | Основной текст |
 
-Градиент `getClaroGradient(isDark)` (имя файла историческое):
+Градиент `getClaroGradient(isDark)`:
 
-- Light: `#3A6F92` → `#4F8FB8` → `#D9EAF5`
-- Dark: `#0E1618` → `#243846` → `#4F8FB8`
-
-Wash reading: `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
+- Light: `#5F5F4A` → `#6E6E58` → `#E4E5D4`
+- Dark: `#14140F` → `#2A2A22` → `#A3A380`
 
 ---
 
 ## Правила (non-negotiable)
 
-1. Нет второго «медицинского» hue рядом с accent; нет возврата Dual Calm blues.
-2. Soft wellness surfaces — `accentLight` / `accentMid` или `GlassCard variant="soft"`.
+1. Нет второго «медицинского» hue рядом с Moss; нет возврата Dual Calm / Nordic Air sky.
+2. Soft wellness — `accentLight` / `accentMid` / `GlassCard variant="soft"`; dusty rose — `surfaceMuted`.
 3. SOS — только `danger`.
-4. Запрещённые написания бренда — [`brand-rollout.md`](./brand-rollout.md).
-5. Profile chrome вне `/profile` — chip иконка + имя ([`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) §2.4).
+4. Ask entry — **global FAB** на оболочке (не chip «Спросить» на Today); скрыт на SOS / auth / onboarding / `/ask`.
+5. Profile chrome вне `/profile` — chip иконка + имя.
+6. Онбординг волны — `accent` + `accentLight` + `surfaceMuted` (Dusty Rose soft).
 
 ---
 
@@ -82,11 +85,11 @@ Wash reading: `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 |---------|--------|
 | Screen background | `bg` |
 | Soft card / wellness | `GlassCard variant="soft"` → accentLight/Mid |
-| Tab pill | `accentLight` / `accentMid` |
-| Onboarding waves | `accentLight` + `accent` |
-| H1, KPI | `head` |
-| Primary CTA / links | `accent` |
-| Profile switcher chip | `accentLight` / `accentMid` + имя |
+| Tab pill (floating) | `card` + `border`; active slot `accentLight` |
+| Onboarding waves | accentLight + accent + surfaceMuted |
+| H1, KPI | `head` / display type |
+| Primary CTA / FAB | `accent` + `onAccent` |
+| Info / cool hint | `info` / `infoLight` |
 
 ---
 
@@ -94,7 +97,8 @@ Wash reading: `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 
 | # | Содержание | Статус |
 |---|------------|--------|
-| **v2-B** | Выбор Nordic Air + токены `theme.ts` / gradient | ✅ |
-| Далее | SelectChip / BottomSheet / AskChatSheet / Today criticality UI | pending |
+| **v2-B** | Nordic Air (superseded) | ↩️ |
+| **v2-A-earth** | Variant A + photo-3 Moss/Sage/Slate/Rose | ✅ |
+| FAB Ask + Ask layout fix + onboarding retheme | этот PR | ✅ |
 
-Спека сравнения A/B/C: [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html).
+Спека: [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · HTML [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html).

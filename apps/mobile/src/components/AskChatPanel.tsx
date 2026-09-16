@@ -272,7 +272,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     bubble: {
-      borderRadius: radii.md,
+      borderRadius: radii.lg,
       paddingVertical: 10,
       paddingHorizontal: 12,
       maxWidth: '92%',

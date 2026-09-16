@@ -8,18 +8,19 @@ export { getClaroGradient };
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * Nordic Air (warm sky) design tokens — UX/UI v2 production palette B.
+ * Forest Refuge · Earth Wellness — UX/UI v2 Variant A layout + photo-3 palette.
+ * Primary CTA = deepened Moss; soft wash = Sage; info = Slate; secondary soft = Dusty Rose.
  * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
  * Policy: docs/brand-claro-green.md
  */
 export type ThemeColors = {
   bg: string;
   card: string;
-  /** Primary interactive — actions, links, active tabs (Claro teal) */
+  /** Primary interactive — actions, links, active tabs (Moss) */
   accent: string;
   accentLight: string;
   accentMid: string;
-  /** Dark text / KPI — navy for contrast (not ambient fill) */
+  /** Dark text / KPI — warm ink for contrast (not ambient fill) */
   head: string;
   text: string;
   textSecondary: string;
@@ -75,17 +76,17 @@ export type ThemeColors = {
 };
 
 export const lightColors: ThemeColors = {
-  bg: '#F5F3EE',
+  bg: '#F7ECE1',
   card: '#FFFCF8',
-  accent: '#4F8FB8',
-  accentLight: '#D9EAF5',
-  accentMid: '#A8C9DC',
-  head: '#1A3038',
+  accent: '#6E6E58',
+  accentLight: '#E4E5D4',
+  accentMid: '#A3A380',
+  head: '#1C1B18',
   text: '#1C2624',
-  textSecondary: '#5A6B72',
-  textMuted: '#5A6B72',
-  border: '#E2DDD4',
-  borderInput: '#C9C4BA',
+  textSecondary: '#5A5850',
+  textMuted: '#5A5850',
+  border: '#E2D8CE',
+  borderInput: '#C9BDB2',
   success: '#15803D',
   successLight: '#F0FDF4',
   successBorder: '#BBF7D0',
@@ -96,18 +97,18 @@ export const lightColors: ThemeColors = {
   warningLight: '#FFFBEB',
   warningBorder: '#FDE68A',
   warningText: '#92400E',
-  forest: '#1A3038',
+  forest: '#1C1B18',
   green: '#15803D',
-  mint: '#EDE9E2',
-  foam: '#F3EDE4',
-  cream: '#F5F3EE',
+  mint: '#D6D2CD',
+  foam: '#F3E9E2',
+  cream: '#F7ECE1',
   onAccent: '#FFFFFF',
   onDanger: '#FFFFFF',
   purple: '#6366F1',
   pink: '#E11D48',
-  tipBg: '#D9EAF5',
-  tipBorder: '#A8C9DC',
-  tipText: '#3A6F92',
+  tipBg: '#E4E5D4',
+  tipBorder: '#A3A380',
+  tipText: '#5F5F4A',
   iconOnCard: '#FFFFFF',
   scannerSafeBorder: '#BBF7D0',
   scannerDangerBorder: '#FECACA',
@@ -115,30 +116,30 @@ export const lightColors: ThemeColors = {
   scannerDangerIconBg: '#FEF2F2',
   scannerSafeText: '#15803D',
   overlay: '#1C2624',
-  teal: '#4F8FB8',
-  tealLight: '#D9EAF5',
-  surfaceMuted: '#F3EDE4',
-  info: '#4F8FB8',
-  infoLight: '#D9EAF5',
-  focusRing: 'rgba(79,143,184,0.35)',
-  skeletonBase: '#E8E2D8',
-  skeletonSheen: '#F7F3EC',
-  mapLand: '#E8E2D8',
+  teal: '#6E6E58',
+  tealLight: '#E4E5D4',
+  surfaceMuted: '#F3E9E2',
+  info: '#829399',
+  infoLight: '#E0E5E7',
+  focusRing: 'rgba(110,110,88,0.35)',
+  skeletonBase: '#E8DFD6',
+  skeletonSheen: '#F7ECE1',
+  mapLand: '#E8DFD6',
   mapRoad: '#D0C9BE',
 };
 
 export const darkColors: ThemeColors = {
-  bg: '#121614',
-  card: '#1A2220',
-  accent: '#7EB7D6',
-  accentLight: '#243846',
-  accentMid: '#4F8FB8',
-  head: '#E8F0ED',
-  text: '#E8F0ED',
-  textSecondary: '#9BB0A8',
-  textMuted: '#9BB0A8',
-  border: '#2A3531',
-  borderInput: '#3A4842',
+  bg: '#14140F',
+  card: '#1E1D1A',
+  accent: '#A3A380',
+  accentLight: '#2A2A22',
+  accentMid: '#7F7F67',
+  head: '#F3EDE4',
+  text: '#F3EDE4',
+  textSecondary: '#B0A99E',
+  textMuted: '#B0A99E',
+  border: '#2E2C28',
+  borderInput: '#3F3C36',
   success: '#4ADE80',
   successLight: '#14532D',
   successBorder: '#166534',
@@ -149,35 +150,35 @@ export const darkColors: ThemeColors = {
   warningLight: '#451A03',
   warningBorder: '#92400E',
   warningText: '#FDE68A',
-  forest: '#E8F0ED',
+  forest: '#F3EDE4',
   green: '#4ADE80',
-  mint: '#1A2420',
-  foam: '#1A2420',
-  cream: '#121614',
-  onAccent: '#0A1214',
+  mint: '#24221E',
+  foam: '#24221E',
+  cream: '#14140F',
+  onAccent: '#14140F',
   onDanger: '#FFFFFF',
   purple: '#818CF8',
   pink: '#FB7185',
-  tipBg: '#243846',
-  tipBorder: '#4F8FB8',
-  tipText: '#A8C9DC',
-  iconOnCard: '#0A1214',
+  tipBg: '#2A2A22',
+  tipBorder: '#A3A380',
+  tipText: '#C5C5A8',
+  iconOnCard: '#14140F',
   scannerSafeBorder: '#166534',
   scannerDangerBorder: '#991B1B',
   scannerSafeIconBg: '#14532D',
   scannerDangerIconBg: '#450A0A',
   scannerSafeText: '#4ADE80',
   overlay: '#000000',
-  teal: '#7EB7D6',
-  tealLight: '#243846',
-  surfaceMuted: '#1A2420',
-  info: '#7EB7D6',
-  infoLight: '#243846',
-  focusRing: 'rgba(126,183,214,0.45)',
-  skeletonBase: '#1A2420',
-  skeletonSheen: '#24302B',
-  mapLand: '#1A2420',
-  mapRoad: '#2A3531',
+  teal: '#A3A380',
+  tealLight: '#2A2A22',
+  surfaceMuted: '#24221E',
+  info: '#9AADB8',
+  infoLight: '#2C333A',
+  focusRing: 'rgba(163,163,128,0.45)',
+  skeletonBase: '#24221E',
+  skeletonSheen: '#2E2C28',
+  mapLand: '#24221E',
+  mapRoad: '#2E2C28',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {
@@ -200,8 +201,8 @@ function makeShadow(
   return {
     shadowColor: hexColor,
     shadowOffset: { width: 0, height: y },
-    shadowOpacity: opacity,
     shadowRadius: blur,
+    shadowOpacity: opacity,
     elevation,
   };
 }

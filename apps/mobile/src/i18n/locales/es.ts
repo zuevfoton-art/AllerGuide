@@ -245,6 +245,7 @@ const es: LocaleMessages = {
       pollen: 'Qué pasa con el polen',
     },
     answerFallback: 'No se pudo responder. Abre las fichas de experto o el diario.',
+    fabLabel: 'Abrir chat',
     quickWhy: '¿Por qué es importante?',
     quickToday: '¿Qué hacer hoy?',
   },

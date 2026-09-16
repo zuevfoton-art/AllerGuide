@@ -12,11 +12,11 @@ export const WEB_INPUT_FONT_SIZE = 16;
  */
 export const radii = {
   xs: 4,
-  sm: 6,
-  md: 8,
-  row: 10,
-  lg: 16,
-  xl: 20,
+  sm: 8,
+  md: 12,
+  row: 14,
+  lg: 20,
+  xl: 28,
   full: 9999,
 } as const;
 
@@ -47,13 +47,13 @@ export const density = {
   tapMinHeightCrisis: 56,
 } as const;
 
-/** Brand hex for static HTML/PDF exports (mirrors light Nordic Air theme) */
+/** Brand hex for static HTML/PDF exports (mirrors light Earth Wellness theme) */
 export const brandReportColors = {
   text: '#1C2624',
-  head: '#1A3038',
-  muted: '#5A6B72',
-  bg: '#F5F3EE',
-  border: '#E2DDD4',
-  accent: '#4F8FB8',
+  head: '#1C1B18',
+  muted: '#5A5850',
+  bg: '#F7ECE1',
+  border: '#E2D8CE',
+  accent: '#6E6E58',
   danger: '#B91C1C',
 } as const;

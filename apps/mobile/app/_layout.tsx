@@ -5,6 +5,7 @@ import { InteractionManager, Platform, StyleSheet, View, AppState } from 'react-
 import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { AppLockGate } from '@/src/components/AppLockGate';
+import { AskFabHost } from '@/src/components/AskFabHost';
 import { initDb } from '@/src/db/init';
 import { warmAllergenCatalogCache } from '@/src/services/allergen-catalog-service';
 import { initI18n } from '@/src/i18n';
@@ -144,12 +145,15 @@ export default function RootLayout() {
         <WebShell>
           <StatusBar style={isDark ? 'light' : 'dark'} />
           {appReady ? (
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.bg, flex: 1 },
-              }}
-            />
+            <View style={styles.appShell}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.bg, flex: 1 },
+                }}
+              />
+              <AskFabHost />
+            </View>
           ) : (
             <View style={[styles.loading, { backgroundColor: colors.bg }]} />
           )}
@@ -161,6 +165,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   loading: { flex: 1 },
+  appShell: { flex: 1 },
   webOuter: {
     flex: 1,
     width: '100%',
