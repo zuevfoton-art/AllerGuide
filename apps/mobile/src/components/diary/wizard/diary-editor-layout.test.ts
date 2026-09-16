@@ -169,6 +169,12 @@ describe('splitDiaryScreenForIme', () => {
       'appearance',
     ]);
     expect(isCompactDiaryTextIme(pinnedStepsVisibleForIme(pinned, 'appearance'))).toBe(true);
+    expect(pinnedStepsVisibleForIme(pinned, 'skinArea').map((step) => step.id)).toEqual([
+      'skinArea',
+      'appearance',
+      'itching',
+    ]);
+    expect(isCompactDiaryTextIme(pinnedStepsVisibleForIme(pinned, 'skinArea'))).toBe(false);
     expect(pinnedStepsVisibleForIme(pinned, 'itching').map((step) => step.id)).toEqual([
       'skinArea',
       'appearance',

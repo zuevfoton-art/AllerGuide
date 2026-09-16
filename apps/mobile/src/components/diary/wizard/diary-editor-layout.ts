@@ -88,8 +88,12 @@ export function pinnedStepsVisibleForIme<T extends DiaryScreenStep & { id: strin
   focusedStepId: string | null,
 ): T[] {
   if (!focusedStepId) return [...pinnedSteps];
-  const focused = pinnedSteps.find((step) => step.id === focusedStepId);
+  const focusedIndex = pinnedSteps.findIndex((step) => step.id === focusedStepId);
+  const focused = focusedIndex >= 0 ? pinnedSteps[focusedIndex] : undefined;
   if (!focused || !isDiaryTextInputStep(focused)) return [...pinnedSteps];
+  // Nightly dump: skinArea at `[42,1337][1038,1453]` stays above Gboard even
+  // with siblings shown. Only later text fields need the chrome to themselves.
+  if (focusedIndex === 0) return [...pinnedSteps];
   return [focused];
 }
 
