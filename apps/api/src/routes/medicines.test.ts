@@ -23,6 +23,7 @@ const catalogHit: MedicineCard = {
 
 vi.mock('../services/medicine-catalog-store', () => ({
   findMedicineByNormalizedName: vi.fn(async () => null),
+  findMedicineByBarcode: vi.fn(async () => null),
   deleteMedicineByNormalizedName: vi.fn(async () => true),
   searchMedicines: vi.fn(async () => []),
   upsertMedicineCard: vi.fn(async (card: MedicineCard) => ({
@@ -40,6 +41,7 @@ vi.mock('../services/medicine-catalog-store', () => ({
 
 vi.mock('../services/medicine-overlay-store', () => ({
   findMedicineOverlay: vi.fn(async () => null),
+  findMedicineOverlayByBarcode: vi.fn(async () => null),
   searchMedicineOverlays: vi.fn(async () => []),
   upsertMedicineOverlay: vi.fn(async (_userId: number, card: MedicineCard) => ({
     userId: 1,
@@ -101,6 +103,96 @@ describe('medicine routes', () => {
 
     const response = await request(app).get('/api/medicines/search?q=a');
     expect(response.status).toBe(400);
+  });
+
+  it('looks up a catalog medicine by GTIN', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    vi.mocked(store.findMedicineByBarcode).mockResolvedValueOnce({
+      id: 'med-1',
+      normalizedName: 'нурофен',
+      ...catalogHit,
+      barcode: '4013054002508',
+      recognitions: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.mocked(store.medicineRowToCard).mockReturnValueOnce({
+      ...catalogHit,
+      barcode: '4013054002508',
+      source: 'catalog',
+    });
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app).get('/api/medicines/by-barcode/4013054002508');
+    expect(response.status).toBe(200);
+    expect(response.body.medicine.name).toBe('Нурофен');
+    expect(response.body.cached).toBe(true);
+    expect(store.bumpMedicineRecognitions).toHaveBeenCalledWith('med-1');
+  });
+
+  it('prefers the caller overlay on barcode lookup', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const overlay = await import('../services/medicine-overlay-store');
+    vi.mocked(overlay.findMedicineOverlayByBarcode).mockResolvedValueOnce({
+      userId: 1,
+      normalizedName: 'нурофен',
+      ...catalogHit,
+      barcode: '4013054002508',
+      aliases: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.mocked(overlay.overlayRowToCard).mockReturnValueOnce({
+      ...catalogHit,
+      barcode: '4013054002508',
+      source: 'manual',
+    });
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .get('/api/medicines/by-barcode/4013054002508')
+      .set('authorization', 'Bearer mobile-jwt');
+
+    expect(response.status).toBe(200);
+    expect(response.body.source).toBe('manual');
+    expect(overlay.findMedicineOverlayByBarcode).toHaveBeenCalledWith(1, '4013054002508');
+  });
+
+  it('recognizes a medicine by barcode without a name', async () => {
+    process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
+    const store = await import('../services/medicine-catalog-store');
+    vi.mocked(store.findMedicineByBarcode).mockResolvedValueOnce({
+      id: 'med-1',
+      normalizedName: 'нурофен',
+      ...catalogHit,
+      barcode: '4013054002508',
+      recognitions: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.mocked(store.medicineRowToCard).mockReturnValueOnce({
+      ...catalogHit,
+      barcode: '4013054002508',
+    });
+
+    const app = express();
+    app.use(express.json());
+    registerMedicineRoutes(app);
+
+    const response = await request(app)
+      .post('/api/medicines/recognize')
+      .send({ barcode: '4013054002508' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.medicine.name).toBe('Нурофен');
+    expect(store.findMedicineByNormalizedName).not.toHaveBeenCalled();
   });
 
   it('rejects recognize without image, text, or name', async () => {
@@ -199,6 +291,7 @@ describe('medicine routes', () => {
         userId: 1,
         normalizedName: 'нурофен',
         ...catalogHit,
+        barcode: null,
         aliases: [],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -247,6 +340,7 @@ describe('medicine routes', () => {
       id: 'med-1',
       normalizedName: 'нурофен',
       ...catalogHit,
+      barcode: null,
       source: 'manual',
       recognitions: 1,
       createdAt: new Date(),
@@ -367,6 +461,7 @@ describe('medicine routes', () => {
       id: 'med-1',
       normalizedName: 'нурофен',
       ...catalogHit,
+      barcode: null,
       recognitions: 3,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -415,6 +510,7 @@ describe('medicine routes', () => {
       id: 'med-1',
       normalizedName: 'нурофен',
       ...catalogHit,
+      barcode: null,
       source: 'vision',
       confidence: 'medium',
       recognitions: 1,

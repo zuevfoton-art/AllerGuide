@@ -31,6 +31,7 @@ function card(name: string, extras: Partial<MedicineCard> = {}): MedicineCard {
     aliases: extras.aliases ?? [],
     source: extras.source ?? 'catalog',
     confidence: extras.confidence ?? 'high',
+    barcode: extras.barcode,
   };
 }
 
@@ -111,5 +112,14 @@ describe('medicine-suggest-service', () => {
 
     const resolved = await resolveMedicineSuggestion('нурофен', null);
     expect(resolved?.name).toBe('Нурофен');
+  });
+
+  it('finds a remembered pack by GTIN', async () => {
+    const { rememberMedicineCard, findRememberedMedicineByBarcode } = await import(
+      './medicine-suggest-service'
+    );
+    await rememberMedicineCard(card('Зиртек', { barcode: '3664798031065', source: 'manual' }));
+    expect(findRememberedMedicineByBarcode('3664798031065')?.name).toBe('Зиртек');
+    expect(findRememberedMedicineByBarcode('0000000000000')).toBeNull();
   });
 });

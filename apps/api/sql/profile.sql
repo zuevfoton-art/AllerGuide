@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS profile.medicine_overlays (
     ingredients       text NOT NULL DEFAULT '',
     allergen_tags     jsonb NOT NULL DEFAULT '[]'::jsonb,
     aliases           jsonb NOT NULL DEFAULT '[]'::jsonb,
+    barcode           varchar(32),
     source            varchar(32) NOT NULL DEFAULT 'manual',
     confidence        varchar(16) NOT NULL DEFAULT 'low',
     created_at        timestamptz NOT NULL DEFAULT now(),
@@ -129,3 +130,4 @@ CREATE TABLE IF NOT EXISTS profile.medicine_overlays (
     PRIMARY KEY (user_id, normalized_name)
 );
 CREATE INDEX IF NOT EXISTS medicine_overlays_user_idx ON profile.medicine_overlays (user_id);
+CREATE INDEX IF NOT EXISTS medicine_overlays_barcode_idx ON profile.medicine_overlays (user_id, barcode) WHERE barcode IS NOT NULL AND barcode <> '';

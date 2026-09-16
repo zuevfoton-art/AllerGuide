@@ -119,7 +119,7 @@ async function searchDatasetByName(
   return results;
 }
 
-/** Full-text search across OFF + Open Beauty Facts + Open Products Facts. */
+/** Full-text search across the Open Food Facts family, including medicines. */
 export async function searchProductsByName(
   query: string,
   pageSize = 8,

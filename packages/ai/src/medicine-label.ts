@@ -89,6 +89,19 @@ export function parseMedicineLabelText(text: string): MedicineVisionResult | nul
   };
 }
 
+/**
+ * Form / INN signal strong enough to treat a barcode/OCR hit as a medicine pack.
+ * Strength alone (`10 г`) is common on food labels and must not win.
+ */
+const MEDICINE_FORM_SIGNAL = /(таблетк|капсул|сироп|суспенз|порошок)/i;
+
+export function hasMedicinePackageLabelSignal(text: string): boolean {
+  const parsed = parseMedicineLabelText(text);
+  if (!parsed) return false;
+  if (parsed.activeSubstance.trim()) return true;
+  return MEDICINE_FORM_SIGNAL.test(parsed.form) || MEDICINE_FORM_SIGNAL.test(text);
+}
+
 const LEADING_VOICE_NOISE =
   /^(?:я\s+)?(?:сегодня\s+|вчера\s+)?(?:утром\s+|вечером\s+|днём\s+|днем\s+|ночью\s+)?(?:принял[аои]?\s+|выпил[аои]?\s+|дал[аои]?\s+)?(?:лекарство\s+|препарат\s+)?/i;
 const TRAILING_VOICE_NOISE =

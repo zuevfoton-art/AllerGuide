@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { recognizeMedicineViaApi } from '@/src/services/medicines-api';
+import { recognizeMedicineViaApi, fetchMedicineByBarcode } from '@/src/services/medicines-api';
 import { recognizeImageViaApi } from '@/src/services/ocr-api-service';
 import { resolveProductByBarcode } from '@/src/services/barcode-lookup-service';
+import { findRememberedMedicineByBarcode } from '@/src/services/medicine-memory';
 import {
   recognizeMedicineFromBarcode,
   recognizeMedicineFromVoice,
@@ -24,6 +25,11 @@ vi.mock('@/src/constants/features', () => ({
 
 vi.mock('@/src/services/medicines-api', () => ({
   recognizeMedicineViaApi: vi.fn(),
+  fetchMedicineByBarcode: vi.fn(),
+}));
+
+vi.mock('@/src/services/medicine-memory', () => ({
+  findRememberedMedicineByBarcode: vi.fn(),
 }));
 
 vi.mock('@/src/services/ocr-api-service', () => ({
@@ -127,6 +133,10 @@ describe('recognizeMedicineFromBarcode', () => {
     featureState.YC_OCR_ENABLED = false;
     vi.mocked(recognizeMedicineViaApi).mockReset();
     vi.mocked(resolveProductByBarcode).mockReset();
+    vi.mocked(fetchMedicineByBarcode).mockReset();
+    vi.mocked(findRememberedMedicineByBarcode).mockReset();
+    vi.mocked(fetchMedicineByBarcode).mockResolvedValue(null);
+    vi.mocked(findRememberedMedicineByBarcode).mockReturnValue(null);
   });
   it('returns not_recognized when the barcode is missing from catalog/OFF', async () => {
     vi.mocked(resolveProductByBarcode).mockResolvedValue(null);
@@ -194,5 +204,31 @@ describe('recognizeMedicineFromBarcode', () => {
     expect(recognizeMedicineViaApi).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Нурофен' }),
     );
+  });
+
+  it('uses a GTIN catalog hit without looking up the product chain', async () => {
+    featureState.MEDICINE_DB_ENABLED = true;
+    vi.mocked(fetchMedicineByBarcode).mockResolvedValue({
+      name: 'Нурофен',
+      activeSubstance: 'ибупрофен',
+      form: 'таблетки',
+      strength: '200 мг',
+      manufacturer: '',
+      indications: 'боль',
+      ageUsage: [],
+      minAgeYears: 6,
+      ingredients: '',
+      allergenTags: ['nsaid'],
+      aliases: [],
+      source: 'catalog',
+      confidence: 'high',
+      barcode: '4013054002508',
+    });
+
+    const outcome = await recognizeMedicineFromBarcode({ barcode: '4013054002508' });
+    expect(outcome.card?.name).toBe('Нурофен');
+    expect(outcome.cached).toBe(true);
+    expect(resolveProductByBarcode).not.toHaveBeenCalled();
+    expect(recognizeMedicineViaApi).not.toHaveBeenCalled();
   });
 });

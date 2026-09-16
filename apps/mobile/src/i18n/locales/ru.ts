@@ -510,6 +510,7 @@ const ru: LocaleMessages = {
     sourceOpenFoodFacts: 'Open Food Facts',
     sourceOpenBeautyFacts: 'Open Beauty Facts',
     sourceOpenProductsFacts: 'Open Products Facts',
+    sourceOpenMedicineFacts: 'Open Medicine Facts',
     sourceBarcodesDb: 'локальный кэш',
     sourceBarcode: 'штрихкод',
     sourceManual: 'ручной ввод',
@@ -543,7 +544,7 @@ const ru: LocaleMessages = {
     scanWithCamera: 'Сканировать камерой',
     statusNotFound: 'Продукт не найден',
     barcodeNotFoundHint:
-      'Нет в каталоге Open Food Facts, Open Beauty Facts и Open Products Facts. Сфотографируйте этикетку или введите состав — цифры штрихкода сами по себе не анализируются.',
+      'Нет в каталоге Open Food Facts, Open Beauty Facts, Open Products Facts и Open Medicine Facts. Сфотографируйте этикетку или введите состав — цифры штрихкода сами по себе не анализируются.',
     statusInsufficientComposition: 'Состав не распознан полностью',
     statusNoAllergens: 'Аллергенов не обнаружено',
     menuStatusMatch: 'Найдено совпадение в тексте меню',

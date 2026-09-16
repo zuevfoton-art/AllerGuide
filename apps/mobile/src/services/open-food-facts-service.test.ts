@@ -96,4 +96,32 @@ describe('fetchProductByBarcode', () => {
     expect(product?.source).toBe('openproductsfacts');
     expect(product?.category).toBe('household');
   });
+
+  it('falls through to Open Medicine Facts when food, beauty and household miss', async () => {
+    const fetchMock = vi.fn(async (url: string) => {
+      if (String(url).includes('openmedicinefacts.org')) {
+        return new Response(
+          JSON.stringify({
+            status: 1,
+            product: {
+              code: '3664798031065',
+              product_name: 'Zyrtec',
+              ingredients_text: 'cetirizine',
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      return new Response(JSON.stringify({ status: 0 }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const product = await fetchProductByBarcode('3664798031065');
+    expect(product?.name).toBe('Zyrtec');
+    expect(product?.source).toBe('openmedicinefacts');
+    expect(product?.category).toBe('medicine');
+  });
 });

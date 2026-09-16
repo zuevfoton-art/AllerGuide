@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { findAllergenById, medicineCardKey } from '@allerguide/core';
+import { findAllergenById, medicineCardKey, medicineHasAllergicSideEffects } from '@allerguide/core';
 import {
   findDuplicateKeys,
   readMedicineSeedEntries,
@@ -52,6 +52,16 @@ describe('allergy medicine dataset', () => {
     expect(card.confidence).toBe('high');
     expect(medicineCardKey(card)).toBe('зиртек');
     expect(card.allergenTags).toEqual([]);
+    expect(card.barcode).toBeUndefined();
+  });
+
+  it('keeps an optional seed barcode when the pack GTIN is known', () => {
+    const card = seedEntryToCard({
+      name: 'Зиртек',
+      activeSubstance: 'цетиризин',
+      barcode: '3664798031065',
+    });
+    expect(card.barcode).toBe('3664798031065');
   });
 
   it('maps external allergen terms onto canonical ids, like catalog.products', () => {
@@ -81,12 +91,28 @@ describe('allergy medicine dataset', () => {
     }
   });
 
+  it('does not invent GTINs: optional barcode is digits only', () => {
+    for (const entry of entries) {
+      if (!entry.barcode) continue;
+      expect(entry.barcode, `${entry.name} barcode`).toMatch(/^\d{8,14}$/);
+    }
+  });
+
   it('stores culprit allergen tags as taxonomy ids', () => {
     const nurofen = entries.find((entry) => entry.name === 'Нурофен');
     expect(nurofen?.allergenTags).toEqual(['nsaid']);
     const amoxiclav = entries.find((entry) => entry.name === 'Амоксиклав');
     expect(amoxiclav?.allergenTags).toEqual(['penicillin']);
     expect(seedEntryToCard(nurofen!).allergenTags).toEqual(['nsaid']);
+  });
+
+  it('flags NSAID seed cards for the scanner side-effect step, not cetirizine', () => {
+    const nurofen = seedEntryToCard(entries.find((entry) => entry.name === 'Нурофен')!);
+    const zyrtec = seedEntryToCard(entries.find((entry) => entry.name === 'Зиртек')!);
+    expect(nurofen.allergenTags).toEqual(['nsaid']);
+    expect(zyrtec.allergenTags).toEqual([]);
+    expect(medicineHasAllergicSideEffects({ allergenTags: nurofen.allergenTags })).toBe(true);
+    expect(medicineHasAllergicSideEffects({ allergenTags: zyrtec.allergenTags })).toBe(false);
   });
 
   it('covers the OTC, culprit, topical, asthma, biologic and ASIT names', () => {

@@ -509,6 +509,7 @@ const es: LocaleMessages = {
     sourceOpenFoodFacts: 'Open Food Facts',
     sourceOpenBeautyFacts: 'Open Beauty Facts',
     sourceOpenProductsFacts: 'Open Products Facts',
+    sourceOpenMedicineFacts: 'Open Medicine Facts',
     sourceBarcodesDb: 'caché local',
     sourceBarcode: 'código de barras',
     sourceManual: 'entrada manual',
@@ -542,7 +543,7 @@ const es: LocaleMessages = {
     scanWithCamera: 'Escanear con cámara',
     statusNotFound: 'Producto no encontrado',
     barcodeNotFoundHint:
-      'No está en el catálogo, Open Food Facts, Open Beauty Facts ni Open Products Facts. Fotografía la etiqueta o escribe los ingredientes: los dígitos del código no se analizan como texto.',
+      'No está en el catálogo, Open Food Facts, Open Beauty Facts, Open Products Facts ni Open Medicine Facts. Fotografía la etiqueta o escribe los ingredientes: los dígitos del código no se analizan como texto.',
     statusInsufficientComposition: 'Composición no reconocida completamente',
     statusNoAllergens: 'Sin alérgenos detectados',
     menuStatusMatch: 'Coincidencia encontrada en el menú',

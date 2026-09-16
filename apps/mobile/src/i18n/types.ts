@@ -511,6 +511,7 @@ export type LocaleMessages = {
     sourceOpenFoodFacts: string;
     sourceOpenBeautyFacts: string;
     sourceOpenProductsFacts: string;
+    sourceOpenMedicineFacts: string;
     sourceBarcodesDb: string;
     sourceBarcode: string;
     sourceManual: string;

@@ -8,6 +8,7 @@ import {
   medicineCardKey,
   mergeMedicineCards,
   mergeMedicinePrefillFromCard,
+  medicineHasAllergicSideEffects,
   normalizeMedicineName,
   pickMedicineSuggestionForTypedName,
   resolveMedicineAgeUsage,
@@ -104,6 +105,19 @@ describe('medicine-catalog', () => {
     expect(merged.indications).toBe('боль, температура');
     expect(merged.strength).toBe('200 мг');
     expect(merged.source).toBe('vision');
+    expect(merged.barcode).toBeUndefined();
+  });
+
+  it('keeps a GTIN when merging a thinner later card', () => {
+    const merged = mergeMedicineCards(card({ barcode: '4607025392138' }), card({ barcode: '', ingredients: '' }));
+    expect(merged.barcode).toBe('4607025392138');
+  });
+
+  it('flags allergic side effects from catalog tags, scan matches, or SOS', () => {
+    expect(medicineHasAllergicSideEffects({ allergenTags: ['nsaid'] })).toBe(true);
+    expect(medicineHasAllergicSideEffects({ hasScanAllergenMatch: true })).toBe(true);
+    expect(medicineHasAllergicSideEffects({ intoleranceAlert: 'аспирин' })).toBe(true);
+    expect(medicineHasAllergicSideEffects({ allergenTags: [] })).toBe(false);
   });
 
   it('warns when the selected brand matches an INN intolerance', () => {

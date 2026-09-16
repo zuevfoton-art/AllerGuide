@@ -265,6 +265,7 @@ export default function ScannerScreen() {
           sectionType={scan.diaryDraft.sectionType}
           prefill={scan.diaryDraft.prefill}
           initialStepId={scan.diaryDraft.initialStepId}
+          requireMedicineSideEffect={scan.diaryDraft.requireMedicineSideEffect}
           profileId={scan.activeProfileId}
           profileAllergiesJson={scan.activeProfile?.allergies ?? '[]'}
           onClose={scan.closeDiaryEntry}

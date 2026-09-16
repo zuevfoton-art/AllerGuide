@@ -6,7 +6,7 @@ import {
   type ScanResult,
   type OcrExtractionResult,
 } from '@allerguide/ai';
-import type { Profile } from '@allerguide/core';
+import type { MedicineCard, Profile } from '@allerguide/core';
 import { AI_SCAN_ENABLED } from '@/src/constants/features';
 import { getBackendAuthToken } from '@/src/services/auth-service';
 import type { BarcodeScanStatus, MenuScanStatus } from '@/src/services/barcode-lookup-service';
@@ -24,6 +24,8 @@ export type ScanResultExtended = ScanResult & {
   productIngredients?: string;
   /** Product category when the lookup source provides it. */
   productCategory?: string;
+  /** Catalog / remembered medicine card when the GTIN or label hit a pack. */
+  medicineCard?: MedicineCard;
   ocr?: OcrExtractionResult;
   /** Multimodal plate-only estimate (Option D). */
   dishVision?: DishVisionResult;

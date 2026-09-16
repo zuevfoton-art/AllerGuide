@@ -237,7 +237,7 @@ CRUD в `profile-service.ts`: создание, список, редактиро
 | `scanner-dish-lookup-service.ts` | Обогащение состава блюда (OFF + search) |
 | `ocr-api-service.ts` | Cloud Vision OCR через `/api/ocr` |
 | `scan-history-service.ts` | Локальная история сканов |
-| `scan-diary-service.ts` | Результат скана → раздел (`resolveScanDiarySection`) + префилл + запись (`buildScanDiaryDraft`, `saveScanDiaryEntry`); UI выбора — `ScanDiaryEntryModal` |
+| `scan-diary-service.ts` | Результат скана → цель (`resolveScanDiaryTarget`) / раздел (`resolveScanDiarySection`) + префилл + запись (`buildScanDiaryDraft`, `saveScanDiaryEntry`); UI выбора — `ScanDiaryEntryModal` |
 | `profile-service.ts` | CRUD профилей, миграция legacy → userId |
 | `auth-service.ts` | Локальные users **или** backend JWT |
 | `token-session.ts` | Access JWT (web: память; native: SecureStore) + refresh rotation |
@@ -417,7 +417,7 @@ sequenceDiagram
 
 ### OCR / dish-vision поток (фото)
 
-**Штрихкод** (`scanBarcode`) — отдельный путь: кэш → каталог → OFF → Open Beauty Facts → Open Products Facts.
+**Штрихкод** (`scanBarcode`) — отдельный путь: GTIN в `catalog.medicines` / overlay / локальные карточки → кэш → каталог продуктов → OFF → Open Beauty Facts → Open Products Facts → Open Medicine Facts.
 
 **Умный сканер** (кнопка «Сканер», любое фото, `EXPO_PUBLIC_AI_DISH_VISION` on по умолчанию):
 
@@ -432,13 +432,13 @@ sequenceDiagram
 
 ### Результат сканирования → дневник (FR-SCAN-13)
 
-Кнопка «Сохранить в дневник» у результата не пишет запись напрямую: `resolveScanDiarySection`
-выбирает раздел (лекарство → «Лекарство», косметика/химия → «Триггер», иначе «Питание»;
-«Терапия» не используется). `buildScanDiaryDraft` переводит вердикт в блюдо + чеклист состава
+Кнопка «Сохранить в дневник» у результата не пишет запись напрямую: `resolveScanDiaryTarget`
+(`packages/core`) выбирает цель (лекарство / триггер / еда; приоритет medicine > trigger > food),
+`resolveScanDiarySection` мапит её на раздел. `buildScanDiaryDraft` переводит вердикт в блюдо + чеклист состава
 и `FoodDrugScanRef`, затем `buildDiarySectionEditorState` (явный `scanRef` вместо эвристики
-«последний скан за 24 ч») собирает префилл. `ScanDiaryEntryModal` даёт сменить раздел чипами
-и открывает тот же `DiaryWizard`. Запись создаёт `saveScanDiaryEntry` → `addDiaryEntries`
-(+ `diary_entry_saved`, `scan_saved_to_diary`, `reconcileAllReminders`). Всё офлайн.
+«последний скан за 24 ч»; для ЛС — `recognizedCard`, для триггера — имя средства и контекст «Сканер · …») собирает префилл. `ScanDiaryEntryModal` даёт сменить раздел чипами
+и открывает тот же `DiaryWizard`. При аллергическом сигнале у ЛС шаг побочной реакции обязателен (только этот wizard). Запись создаёт `saveScanDiaryEntry` → `addDiaryEntries`
+(+ `diary_entry_saved`, `scan_saved_to_diary` с `diary_section`, `reconcileAllReminders`). Всё офлайн.
 
 ### Анализ текста (`@allerguide/ai`)
 
@@ -456,13 +456,14 @@ sequenceDiagram
 | `openfoodfacts` | Open Food Facts |
 | `openbeautyfacts` | Open Beauty Facts |
 | `openproductsfacts` | Open Products Facts |
+| `openmedicinefacts` | Open Medicine Facts |
 | `barcode` | Общий barcode-путь (UI) |
 | `ocr` | Распознанный текст упаковки/меню |
 | `llm` | Вердикт LLM-скана |
 | `dish_vision` | Оценка блюда по фото (multimodal, без этикетки) |
 | `manual` | Ручной ввод |
 
-Тип в `@allerguide/ai` `scan.ts`: `'manual' | 'barcode' | 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm' | 'dish_vision'`.
+Тип в `@allerguide/ai` `scan.ts`: `'manual' | 'barcode' | 'openfoodfacts' | 'openbeautyfacts' | 'openproductsfacts' | 'openmedicinefacts' | 'barcodes_db' | 'catalog_api' | 'ocr' | 'llm' | 'dish_vision'`.
 
 ### Маппинг аллергенов
 
@@ -530,7 +531,7 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, acce
 | `routes/profiles.ts` | `GET/POST /api/profiles`, `GET/PATCH/DELETE /api/profiles/:id` (JWT) |
 | `routes/catalog.ts` | `GET /api/allergens`, `GET /api/products/search?q=`, `GET /api/products/:barcode` |
 | `routes/dishes.ts` | `GET /api/dishes/search`, `POST /api/dishes/resolve` |
-| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=`, `POST /api/medicines`, `DELETE /api/medicines/:name` |
+| `routes/medicines.ts` | `POST /api/medicines/recognize`, `GET /api/medicines/search?q=`, `GET /api/medicines/by-barcode/:code`, `POST /api/medicines`, `DELETE /api/medicines/:name` |
 | `routes/scan.ts` | `POST /api/scan` |
 | `routes/scan-intent.ts` | `POST /api/scan/intent` |
 | `routes/scan-dish-vision.ts` | `POST /api/scan/dish-vision` |
@@ -565,13 +566,13 @@ JWT: HS256 (`jose`), issuer `allerguide-api`, audience `allerguide-mobile`, acce
 | **`catalog`** | `allergens`, `cross_reactions`, `products`, `dishes`, `medicines`, `alias_feedback`, `market_products`, `market_offers` | `src/db/catalog-schema.ts` |
 | **`public`** | unused leftover `users` / `sessions` (app does not use them) | `src/db/auth-schema.ts` |
 
-Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0013_*`).
+Drizzle-объекты схемо-квалифицированы — код запросов не меняется. Справочные SQL-артефакты: `sql/profile.sql`, `sql/catalog.sql`. Живая БД — миграции в `drizzle/` (`0000`…`0014_*`).
 
 ### Каталог лекарств
 
-- **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Нет user id и нет байтов фото. `aliases jsonb` — латинские/альтернативные названия (миграция `0011_medicines_aliases`).
-- **Распознавание:** `POST /api/medicines/recognize` — lookup по имени/OCR/голосу (каталог + overlay вызывающего) → VL fallback (`AI_MEDICINE_VISION_ENABLED`). Общий каталог не пишет; JWT может сохранить карточку в overlay. Каталожный hit увеличивает `recognitions`.
-- **Поиск:** `GET /api/medicines/search?q=` — общий каталог; с JWT дополнительно overlay вызывающего. Без LLM.
+- **Таблица:** `catalog.medicines`, дедуп по `normalized_name` (ё→е, без пунктуации). Опциональный уникальный `barcode` (GTIN, partial unique для NOT NULL). Нет user id и нет байтов фото. `aliases jsonb` — латинские/альтернативные названия (миграция `0011_medicines_aliases`). Overlay: `profile.medicine_overlays.barcode`.
+- **Распознавание:** `POST /api/medicines/recognize` — lookup по GTIN / имени / OCR / голосу (каталог + overlay вызывающего) → VL fallback (`AI_MEDICINE_VISION_ENABLED`). Общий каталог не пишет; JWT может сохранить карточку в overlay. Каталожный hit увеличивает `recognitions`.
+- **Поиск:** `GET /api/medicines/search?q=` — общий каталог; с JWT дополнительно overlay вызывающего. Без LLM. `GET /api/medicines/by-barcode/:code` — overlay, затем каталог.
 - **allergenTags:** канонические id, как у `catalog.products` (`mapExternalAllergenIds` в сиде).
 - **Remember:** `POST /api/medicines` — JWT пишет только в `profile.medicine_overlays` (карточка видна лишь этому пользователю в search). `x-medicine-write-key` = `MEDICINE_WRITE_KEY` пишет в общий `catalog.medicines` (сид/куратор). Пустые поля не затирают уже известные. Без auth — 401.
 - **Recognize:** lookup каталог + overlay вызывающего; VL/OCR не пишут в общий каталог (overlay — только при JWT).
