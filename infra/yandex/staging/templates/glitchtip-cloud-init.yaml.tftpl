@@ -38,6 +38,14 @@ write_files:
     permissions: "0755"
     encoding: b64
     content: ${acme_retry_b64}
+  - path: /opt/glitchtip/bootstrap-admin.py
+    permissions: "0644"
+    encoding: b64
+    content: ${bootstrap_admin_py_b64}
+  - path: /opt/glitchtip/bootstrap-admin.sh
+    permissions: "0755"
+    encoding: b64
+    content: ${bootstrap_admin_sh_b64}
   - path: /etc/systemd/system/glitchtip-acme-retry.service
     permissions: "0644"
     content: |
@@ -80,6 +88,24 @@ write_files:
       RestartSec=30
       TimeoutStartSec=600
       ExecStart=/opt/glitchtip/bootstrap.sh
+
+      [Install]
+      WantedBy=multi-user.target
+  - path: /etc/systemd/system/glitchtip-bootstrap-admin.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Create GlitchTip admin, org, RN project, emit DSN
+      After=glitchtip-bootstrap.service
+      Requires=glitchtip-bootstrap.service
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      Restart=on-failure
+      RestartSec=30
+      TimeoutStartSec=600
+      ExecStart=/opt/glitchtip/bootstrap-admin.sh
 
       [Install]
       WantedBy=multi-user.target

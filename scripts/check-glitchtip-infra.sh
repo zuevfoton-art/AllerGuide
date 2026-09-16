@@ -62,6 +62,13 @@ if grep -q 'auto_https disable_redirects' "$ROOT/infra/yandex/staging/templates/
 fi
 grep -q 'glitchtip-acme-retry' "$ROOT/infra/yandex/staging/templates/glitchtip-setup.sh"
 grep -q 'acme_retry_b64' "$TF"
+grep -q 'bootstrap_admin_py_b64' "$TF"
+grep -q 'glitchtip-bootstrap-admin' "$ROOT/infra/yandex/staging/templates/glitchtip-setup.sh"
+grep -q 'javascript-react-native' "$ROOT/infra/yandex/staging/glitchtip/bootstrap-admin.py"
+grep -q 'sentry.io' "$ROOT/infra/yandex/staging/glitchtip/bootstrap-admin.py"
+grep -q 'ACLARO_DSN=' "$ROOT/infra/yandex/staging/templates/glitchtip-bootstrap-admin.sh.tftpl"
+grep -q 'GLITCHTIP_ADMIN_PASSWORD' "$ROOT/infra/yandex/staging/templates/glitchtip-bootstrap-admin.sh.tftpl"
+BOOTSTRAP_ADMIN_SELFTEST=1 python3 "$ROOT/infra/yandex/staging/glitchtip/bootstrap-admin.py"
 if grep -A6 'port[[:space:]]*=[[:space:]]*22' "$TF" | grep -q '0.0.0.0/0'; then
   echo "GlitchTip SG must not copy the runner SSH 0.0.0.0/0 rule" >&2
   exit 1
@@ -70,5 +77,10 @@ if grep -E 'fail "GlitchTip|fail '\''GlitchTip' "$ROOT/scripts/yc-stage-phase0-g
   echo "yc-stage-phase0 must not hard-fail on GlitchTip" >&2
   exit 1
 fi
+
+GRADLE_WF="$ROOT/.github/workflows/staging-apk-gradle.yml"
+grep -q 'scripts/resolve-staging-error-dsn.sh' "$GRADLE_WF"
+grep -q 'EXPO_PUBLIC_ERROR_DSN' "$GRADLE_WF"
+grep -q 'isValidCrashIngestDsn' "$ROOT/apps/mobile/error-tracker-url.js"
 
 echo "glitchtip infra checks OK"
