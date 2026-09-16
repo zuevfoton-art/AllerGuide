@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
-import { WEB_INPUT_FONT_SIZE, density } from '@/src/constants/layout';
+import { WEB_INPUT_FONT_SIZE, density, radii } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
 export function createStyles({ colors, fonts }: AppTheme) {
@@ -189,10 +189,12 @@ export function createFieldStyles({ colors, fonts }: AppTheme) {
     photoBtn: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
       gap: 6,
+      minHeight: density.tapMinHeight,
       paddingVertical: 10,
       paddingHorizontal: 12,
-      borderRadius: 8,
+      borderRadius: radii.md,
       borderWidth: 1,
       borderColor: colors.accent,
       backgroundColor: colors.accentLight,

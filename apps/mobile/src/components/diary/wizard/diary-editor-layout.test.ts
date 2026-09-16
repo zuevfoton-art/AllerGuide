@@ -126,6 +126,14 @@ describe('splitDiaryScreenForIme', () => {
     });
   });
 
+  it('keeps the appearance photo toolbar in the scroll, not the chrome', () => {
+    const photos = { id: 'skinPhotos', field: 'photo' as const };
+    expect(splitDiaryScreenForIme([skinArea, appearance, photos, itching])).toEqual({
+      pinnedSteps: [itching],
+      scrolledSteps: [skinArea, appearance, photos],
+    });
+  });
+
   it('leaves a choice-only screen in the scroll (no IME from a text field)', () => {
     expect(splitDiaryScreenForIme([itching])).toEqual({
       pinnedSteps: [],
@@ -145,7 +153,11 @@ describe('splitDiaryScreenForIme', () => {
     const screen = groupDiaryStepsIntoScreens(getDiarySection('Кожа')?.steps ?? [])[0] ?? [];
     const split = splitDiaryScreenForIme(screen);
     expect(split.pinnedSteps.map((step) => step.id)).toEqual(['itching']);
-    expect(split.scrolledSteps.map((step) => step.id)).toEqual(['skinArea', 'appearance']);
+    expect(split.scrolledSteps.map((step) => step.id)).toEqual([
+      'skinArea',
+      'appearance',
+      'skinPhotos',
+    ]);
     expect(screen.filter(isDiaryTextInputStep).map((step) => step.id)).toEqual([
       'skinArea',
       'appearance',

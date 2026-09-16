@@ -40,7 +40,7 @@ apps/mobile/.maestro/
     profile-pollinosis-quick-pick.yaml  # S1 — поллиноз → пыльцевые чипы + «Показать ещё» (не в smoke-all)
     profile-cross-reactions-add-all.yaml  # шаг 5 «Добавить все» → чипы на SOS (не в smoke-all)
     diary-dish-smoke.yaml          # §7.3 — борщ → checklist
-    diary-photo-smoke.yaml         # §7.3 — skin photo step UI
+    diary-photo-smoke.yaml         # §7.3 — skin photo CTA on the appearance screen
     market-smoke.yaml              # только при EXPO_PUBLIC_MARKET=true (не в smoke-all)
     smoke-all.yaml                 # P2.1a — все offline (без Маркета)
     _staging-bootstrap.yaml
