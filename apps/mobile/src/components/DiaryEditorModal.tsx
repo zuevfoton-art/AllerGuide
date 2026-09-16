@@ -49,6 +49,8 @@ type DiaryEditorScrollApi = {
   registerInput: (node: DiaryEditorInputHandle | null) => void;
   unregisterInput: (node: DiaryEditorInputHandle | null) => void;
   dismissIme: () => void;
+  setFocusedStepId: (id: string | null) => void;
+  focusedStepId: string | null;
 };
 
 const DiaryEditorScrollContext = createContext<DiaryEditorScrollApi | null>(null);
@@ -165,6 +167,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   const [headerHeight, setHeaderHeight] = useState(64);
   const [topHeight, setTopHeight] = useState(0);
   const [footerHeight, setFooterHeight] = useState(0);
+  const [focusedStepId, setFocusedStepIdState] = useState<string | null>(null);
 
   const [footerEpoch, setFooterEpoch] = useState(0);
   const [topEpoch, setTopEpoch] = useState(0);
@@ -191,7 +194,12 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
     setTopEpoch((epoch) => epoch + 1);
   }, []);
 
+  const setFocusedStepId = useCallback((id: string | null) => {
+    setFocusedStepIdState((prev) => (prev === id ? prev : id));
+  }, []);
+
   const dismissDiaryIme = useCallback(() => {
+    setFocusedStepIdState(null);
     blurDiaryEditorIme([...inputRefs.current]);
   }, []);
 
@@ -237,8 +245,15 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
   }, []);
 
   const scrollApi = useMemo(
-    () => ({ scrollFieldIntoView, registerInput, unregisterInput, dismissIme: dismissDiaryIme }),
-    [scrollFieldIntoView, registerInput, unregisterInput, dismissDiaryIme],
+    () => ({
+      scrollFieldIntoView,
+      registerInput,
+      unregisterInput,
+      dismissIme: dismissDiaryIme,
+      setFocusedStepId,
+      focusedStepId,
+    }),
+    [scrollFieldIntoView, registerInput, unregisterInput, dismissDiaryIme, setFocusedStepId, focusedStepId],
   );
 
   useEffect(() => {
@@ -250,6 +265,7 @@ export function DiaryEditorModal({ visible, onClose, children }: DiaryEditorModa
     setHasTop(false);
     setFooterHeight(0);
     setTopHeight(0);
+    setFocusedStepIdState(null);
   }, [visible]);
 
   return (
