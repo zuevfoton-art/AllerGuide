@@ -105,6 +105,11 @@ output "glitchtip_lockbox_secret_id" {
   value       = yandex_lockbox_secret.glitchtip.id
 }
 
+output "glitchtip_service_account_id" {
+  description = "Instance SA: lockbox.payloadViewer on the GlitchTip secret only"
+  value       = yandex_iam_service_account.glitchtip.id
+}
+
 output "glitchtip_fqdn" {
   value = var.glitchtip_fqdn
 }
@@ -123,9 +128,9 @@ output "next_steps" {
     6. Register GitHub self-hosted runner on VM ${yandex_compute_instance.gh_runner.name} (label: yc-staging-vpc).
     7. Store GitHub Secrets: YC_SA_JSON (= terraform output deploy_service_account_key), YC_REGISTRY_ID, YC_CONTAINER_ID, STAGING_*, EXPO_TOKEN.
     8. Push branch staging → Deploy staging (Yandex Cloud) (.github/workflows/deploy-staging.yml)
-    9. GlitchTip: A ${var.glitchtip_fqdn} → terraform output -raw glitchtip_public_ip
+    9. GlitchTip: A ${var.glitchtip_fqdn} → terraform output -raw glitchtip_public_ip (DNS is not in this Terraform root)
     10. GlitchTip Lockbox: YC_GLITCHTIP_LOCKBOX_SECRET_ID=$(terraform output -raw glitchtip_lockbox_secret_id) ./scripts/yc-glitchtip-lockbox-init.sh
-    11. Wait for https://${var.glitchtip_fqdn} ; create the single admin; re-run lockbox-init with ENABLE_USER_REGISTRATION=false; restart glitchtip-bootstrap on the VM.
-    12. EAS Sensitive EXPO_PUBLIC_ERROR_DSN = GlitchTip DSN (not sentry.io); rebuild staging APK. See docs/staging-glitchtip.md
+    11. Wait for https://${var.glitchtip_fqdn} ; createsuperuser on the VM (ENABLE_USER_REGISTRATION stays false); copy the RN DSN
+    12. EAS preview Sensitive EXPO_PUBLIC_ERROR_DSN = GlitchTip DSN (not sentry.io); rebuild staging APK. See docs/staging-glitchtip.md
   EOT
 }

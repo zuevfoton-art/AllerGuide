@@ -67,7 +67,8 @@ Exposed as `dashboard.crashFree` on `GET /api/analytics/dashboard`. Native crash
 ```bash
 cd apps/mobile
 # DSN is public-by-design in the client bundle (Sensitive, not Secret)
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+# Profile staging reads EAS environment "preview"
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 pnpm --filter mobile build:staging:android
 ```
 

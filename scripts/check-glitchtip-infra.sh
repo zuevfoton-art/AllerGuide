@@ -29,6 +29,10 @@ if grep -E 'ENABLE_USER_REGISTRATION:-\s*true' "$COMPOSE" "$ROOT/infra/yandex/st
   exit 1
 fi
 grep -q 'yandex_lockbox_secret" "glitchtip"' "$TF"
+if grep -E 'yandex_lockbox_secret\.api_env|lockbox_secret_id \(API\)' "$TF"; then
+  echo "glitchtip.tf must not reference the API Lockbox resource" >&2
+  exit 1
+fi
 grep -q 'postgresql.tf' "$TF" && { echo "glitchtip.tf must not reference app postgresql.tf"; exit 1; } || true
 if grep -n 'yandex_mdb_postgresql' "$TF"; then
   echo "GlitchTip must not use Managed Postgres" >&2
@@ -38,6 +42,16 @@ fi
 # Refuse writing GlitchTip keys into the API Lockbox id.
 if YC_GLITCHTIP_LOCKBOX_SECRET_ID=e6qs399v1b3unstfh5rj "$INIT" 2>/dev/null; then
   echo "lockbox-init must refuse the API secret id" >&2
+  exit 1
+fi
+
+grep -q 'reverse_proxy 127.0.0.1:8000' "$ROOT/infra/yandex/staging/templates/glitchtip-caddyfile.tftpl"
+if grep -A6 'port[[:space:]]*=[[:space:]]*22' "$TF" | grep -q '0.0.0.0/0'; then
+  echo "GlitchTip SG must not copy the runner SSH 0.0.0.0/0 rule" >&2
+  exit 1
+fi
+if grep -E 'fail "GlitchTip|fail '\''GlitchTip' "$ROOT/scripts/yc-stage-phase0-gate.sh"; then
+  echo "yc-stage-phase0 must not hard-fail on GlitchTip" >&2
   exit 1
 fi
 

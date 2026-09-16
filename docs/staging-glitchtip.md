@@ -42,12 +42,30 @@ Optional SSH later: set `glitchtip_ssh_public_key` and `glitchtip_ssh_cidrs` (ne
 | Step | Who |
 |------|-----|
 | Terraform + cloud-init + Caddy + compose bind + this runbook | git / PR |
+| `terraform apply` / `yc` against the live folder | **Owner only** — Cloud Agent must not apply |
 | Live VM + Lockbox payload (this folder) | **Done** (`yc`, bootstrap SA) |
 | DNS A at **reg.ru** (`ns1.reg.ru` / `ns2.reg.ru`) | **Owner** — not in this YC folder |
 | First GlitchTip admin via `createsuperuser` on the VM, DSN | **Owner** |
-| EAS `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
+| EAS Sensitive `EXPO_PUBLIC_ERROR_DSN` + staging APK rebuild | **Owner** (`EXPO_TOKEN`) |
 | `terraform import` into owner state | **Owner** (before the next apply) |
 | 14-day soak | Product, after smoke below |
+
+## Apply checklist (owner)
+
+Cloud Agent **does not** run `terraform apply`, `yc`, DNS, Lockbox payload, or `eas env:create`.
+
+### Greenfield (empty folder / empty Terraform state only)
+
+```bash
+./scripts/yc-staging-bootstrap.sh plan   # must list yandex_compute_instance.glitchtip
+./scripts/yc-staging-bootstrap.sh apply  # owner
+```
+
+Then: Lockbox payload → DNS A → TLS → `createsuperuser` → DSN → EAS Sensitive → rebuild APK → smoke (sections 2–6).
+
+### This live folder (API already exists)
+
+Do **not** `apply` against empty local state — that recreates VPC/MDB/API. Import the five resources above, then `terraform plan` (no destroy of API/runner/MDB).
 
 ## 1. Terraform apply (only after import)
 
@@ -74,7 +92,7 @@ Keys (hex only for `POSTGRES_PASSWORD` so `DATABASE_URL` stays valid):
 |-----|---------|
 | `SECRET_KEY` | Django signing key |
 | `POSTGRES_PASSWORD` | Compose Postgres on the VM disk |
-| `ENABLE_USER_REGISTRATION` | `true` until the first admin exists, then `false` |
+| `ENABLE_USER_REGISTRATION` | Must stay **`false`**. First admin is `createsuperuser` on the VM, not the public form |
 | `EMAIL_URL` | Optional; default `consolemail://` |
 | `DEFAULT_FROM_EMAIL` | Optional; default `support@aclearo.com` |
 
@@ -120,13 +138,13 @@ sudo systemctl restart glitchtip-bootstrap.service
 
 ## 5. EAS DSN + staging APK
 
-DSN is public in the APK by design (Sensitive, not Secret).
+DSN is public in the APK by design (Sensitive, not Secret). Profile `staging` in [`eas.json`](../apps/mobile/eas.json) reads EAS environment **`preview`**.
 
 ```bash
 cd apps/mobile
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_ERROR_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 # optional alias:
-pnpm exec eas env:create --environment staging --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
+pnpm exec eas env:create --environment preview --name EXPO_PUBLIC_SENTRY_DSN --value "$GLITCHTIP_DSN" --visibility sensitive
 pnpm --filter mobile build:staging:android
 ```
 

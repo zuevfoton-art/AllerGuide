@@ -675,6 +675,7 @@ requireFile('docs/qa-checklist.md');
 requireFile('docs/maestro.md');
 requireFile('docs/rc-gate.md');
 requireFile('docs/analytics-staging.md');
+requireFile('docs/staging-glitchtip.md');
 requireFile('docs/performance-cold-start.md', { optional: true });
 requireFile('docs/performance-api-infra.md', { optional: true });
 requireFile('docs/performance-web-store.md', { optional: true });
@@ -686,6 +687,7 @@ runStep('rc-gate health parser', 'node', ['--test', 'scripts/rc-gate-health.test
 runStep('rc-gate doc facts', 'node', ['--test', 'scripts/rc-gate-doc-facts.test.mjs']);
 runStep('analytics taxonomy', 'node', ['scripts/check-analytics-taxonomy.mjs']);
 runStep('design tokens', 'node', ['scripts/check-design-tokens.mjs']);
+runStep('glitchtip infra', 'bash', ['scripts/check-glitchtip-infra.sh']);
 checkDocFacts();
 checkSecurityAuditDocs();
 checkSoakLogStarted();

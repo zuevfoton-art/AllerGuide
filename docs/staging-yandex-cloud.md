@@ -48,8 +48,11 @@ flowchart TB
     SC["Serverless Container apps/api"]
     PG[("Managed PostgreSQL private IP")]
     RUN["VM: GitHub runner yc-staging-vpc"]
+    GT["VM: GlitchTip + Caddy :443"]
+    GTPG[("GlitchTip Postgres on VM disk")]
     SC --> PG
     RUN --> PG
+    GT --> GTPG
   end
 
   subgraph gh [GitHub Actions]
@@ -145,6 +148,8 @@ cp infra/yandex/staging/terraform.tfvars.example infra/yandex/staging/terraform.
 # Отредактируйте: folder_id, pg_password, runner_ssh_public_key
 
 ./scripts/yc-staging-bootstrap.sh plan
+# Owner only. This live folder already has VPC/MDB/API/GlitchTip —
+# import first ([staging-glitchtip.md](./staging-glitchtip.md)). Empty local state + apply recreates the stack.
 ./scripts/yc-staging-bootstrap.sh apply
 ```
 
@@ -157,6 +162,8 @@ terraform output -raw deploy_service_account_key > /tmp/yc-sa-key.json  # → YC
 terraform output container_registry_id
 terraform output serverless_container_id
 terraform output lockbox_secret_id
+terraform output -raw glitchtip_public_ip          # → A errors.staging.aclearo.com
+terraform output -raw glitchtip_lockbox_secret_id  # → YC_GLITCHTIP_LOCKBOX_SECRET_ID
 ```
 
 **Remote state (рекомендуется):** раскомментируйте `backend "s3"` в [`versions.tf`](../infra/yandex/staging/versions.tf) и создайте bucket в Object Storage.
@@ -261,6 +268,16 @@ yc serverless api-gateway add-domain \
 |------|--------|----------|
 | `a-claro.com` | `@`, `www` | 301 → `https://aclearo.com` |
 | `a-claro.ru` | `@`, `www` | 301 → `https://aclearo.ru` |
+
+### 4.5. GlitchTip ingest DNS
+
+Not in this Terraform root (same as API historically). `aclearo.com` NS is **reg.ru**. Owner:
+
+```
+A  errors.staging.aclearo.com  →  $(cd infra/yandex/staging && terraform output -raw glitchtip_public_ip)
+```
+
+TLS is Caddy + Let's Encrypt HTTP-01 on the VM, not Certificate Manager. Runbook: [`staging-glitchtip.md`](./staging-glitchtip.md).
 
 ---
 
@@ -421,6 +438,7 @@ pnpm build:staging:ios    # упадёт без Apple credentials
 - [ ] Push в `staging` → workflow green
 - [ ] `./scripts/staging-preflight.sh` → Pass (auth smoke уже Pass отдельно)
 - [ ] `pnpm yc-stage-phase0` Pass без `ALLOW_MISSING_POLLEN_HEATMAP`
+- [ ] GlitchTip: DNS A `errors.staging.aclearo.com` + EAS preview Sensitive `EXPO_PUBLIC_ERROR_DSN` + smoke — [`staging-glitchtip.md`](./staging-glitchtip.md) (`pnpm yc-stage-phase0` **не** падает, если ingest ещё не готов)
 - [ ] EAS staging APK + iOS установлены, smoke S.1–S.4
 
 ---
@@ -443,6 +461,8 @@ pnpm build:staging:ios    # упадёт без Apple credentials
 | `mobile-android` Gradle unknown error | expo.dev → Run gradlew. Запасной APK: `staging-apk-gradle.yml`. Не откатывать API |
 | `mobile-android` / Free plan this month | EAS quota. Upload мог пройти, build — нет. Не откатывать API (`smoke` уже зелёный). APK: `staging-apk-gradle.yml`. После 1-го числа / paid plan — снова EAS |
 | Destroy staging | `./scripts/yc-staging-bootstrap.sh destroy` (подтверждение) |
+| GlitchTip NXDOMAIN / no TLS | DNS A at **reg.ru**, not this YC folder. See [`staging-glitchtip.md`](./staging-glitchtip.md) |
+| GlitchTip port 8000 on NAT | Compose must bind `127.0.0.1:8000` only; Caddy terminates :443 |
 
 ---
 
@@ -453,6 +473,8 @@ pnpm build:staging:ios    # упадёт без Apple credentials
 | Console UI (поля) | [`docs/staging-yandex-cloud-console.md`](./staging-yandex-cloud-console.md) |
 | Dockerfile | [`Dockerfile`](../Dockerfile) |
 | Terraform | [`infra/yandex/staging/`](../infra/yandex/staging/) |
+| GlitchTip TF | [`infra/yandex/staging/glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) |
+| GlitchTip runbook | [`docs/staging-glitchtip.md`](./staging-glitchtip.md) |
 | Bootstrap | [`scripts/yc-staging-bootstrap.sh`](../scripts/yc-staging-bootstrap.sh) |
 | CI | [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) |
 | Env template | [`apps/api/.env.staging.example`](../apps/api/.env.staging.example) |

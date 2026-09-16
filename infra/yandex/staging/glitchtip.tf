@@ -1,12 +1,16 @@
 # Self-hosted GlitchTip for staging crash ingest.
 # Compose Postgres lives on this VM — never the app Managed Postgres cluster.
-# Live VM is in folder b1glkbb9i8ufp6bsdn4u (docs/staging-glitchtip.md). Import before apply.
+# Live VM is in folder b1glkbb9i8ufp6bsdn4u (docs/staging-glitchtip.md).
+# Cloud Agent / CI must not `terraform apply` this root (no remote state; apply
+# from empty local state recreates VPC/MDB/API). Owner imports live IDs first.
 
 resource "yandex_iam_service_account" "glitchtip" {
   name        = "aclearo-staging-glitchtip"
   description = "GlitchTip VM: read aclearo-staging-glitchtip Lockbox only"
 }
 
+# Lockbox secret placeholder — payload after apply via yc-glitchtip-lockbox-init.sh
+# (same pattern as the API env Lockbox). Never mount into Serverless.
 resource "yandex_lockbox_secret" "glitchtip" {
   name                = "aclearo-staging-glitchtip"
   description         = "GlitchTip VM env (SECRET_KEY, POSTGRES_PASSWORD). Not the API secret."
