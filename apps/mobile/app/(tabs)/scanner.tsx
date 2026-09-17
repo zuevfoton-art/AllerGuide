@@ -129,7 +129,6 @@ export default function ScannerScreen() {
           variant="primary"
           block
           disabled={scan.loading}
-          style={{ borderWidth: 1.5, borderColor: theme.colors.head }}
           onPress={() => void scan.openCamera('scanner')}
         />
       </HintAnchor>
