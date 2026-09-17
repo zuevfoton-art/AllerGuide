@@ -8,21 +8,19 @@ export { getClaroGradient };
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
- * Brandbook 50 / 35 / 15 — UX/UI v2 Variant A layout + institutional palette.
- * Recognition mint `#7FFFD4` (50%); composition petrol `#006F83` (35%);
- * mix `#004F70` + white (15%); neutral canvas `#F4F8F5`.
- * CTA ink is petrol on mint (white-on-mint fails AA).
- * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS.
+ * Claro Green design tokens — product accent family only (no medical blue / calm.*).
+ * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
  * Policy: docs/brand-claro-green.md
+ * `caution*` — moderate diary severity (level 2); not part of Claro CTA family.
  */
 export type ThemeColors = {
   bg: string;
   card: string;
-  /** Primary interactive — actions, links, active tabs (recognition mint) */
+  /** Primary interactive — actions, links, active tabs (Claro teal) */
   accent: string;
   accentLight: string;
   accentMid: string;
-  /** Dark text / KPI — petrol ink for contrast (not ambient fill) */
+  /** Dark text / KPI — navy for contrast (not ambient fill) */
   head: string;
   text: string;
   textSecondary: string;
@@ -39,6 +37,10 @@ export type ThemeColors = {
   warningLight: string;
   warningBorder: string;
   warningText: string;
+  /** Moderate severity (diary 0–3 level 2) */
+  caution: string;
+  cautionLight: string;
+  cautionBorder: string;
   /** @deprecated use head */
   forest: string;
   green: string;
@@ -78,17 +80,17 @@ export type ThemeColors = {
 };
 
 export const lightColors: ThemeColors = {
-  bg: '#F4F8F5',
+  bg: '#F3F6F4',
   card: '#FFFFFF',
-  accent: '#7FFFD4',
-  accentLight: '#E8FFF8',
-  accentMid: '#7FFFD4',
-  head: '#004F70',
-  text: '#0E3A48',
-  textSecondary: '#3A6670',
-  textMuted: '#3A6670',
-  border: '#C9DDD6',
-  borderInput: '#A8C4BC',
+  accent: '#2A9D8F',
+  accentLight: '#E6F6F4',
+  accentMid: '#9FD9D1',
+  head: '#1E3A5F',
+  text: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#5E6B7C',
+  border: '#E3E9E5',
+  borderInput: '#CBD5E1',
   success: '#15803D',
   successLight: '#F0FDF4',
   successBorder: '#BBF7D0',
@@ -99,49 +101,53 @@ export const lightColors: ThemeColors = {
   warningLight: '#FFFBEB',
   warningBorder: '#FDE68A',
   warningText: '#92400E',
-  forest: '#004F70',
+  caution: '#E8A317',
+  cautionLight: '#FFFBEB',
+  cautionBorder: '#FDE68A',
+  forest: '#1E3A5F',
   green: '#15803D',
-  mint: '#D7E8E2',
-  foam: '#E8F3F0',
-  cream: '#F4F8F5',
-  onAccent: '#004F70',
+  mint: '#E9EEEB',
+  foam: '#F1F4F2',
+  cream: '#F3F6F4',
+  onAccent: '#FFFFFF',
   onDanger: '#FFFFFF',
   purple: '#6366F1',
   pink: '#E11D48',
-  tipBg: '#E8FFF8',
-  tipBorder: '#7FFFD4',
-  tipText: '#004F70',
-  iconOnCard: '#004F70',
+  tipBg: '#E6F6F4',
+  tipBorder: '#9FD9D1',
+  tipText: '#1F6B62',
+  iconOnCard: '#FFFFFF',
   scannerSafeBorder: '#BBF7D0',
   scannerDangerBorder: '#FECACA',
   scannerSafeIconBg: '#F0FDF4',
   scannerDangerIconBg: '#FEF2F2',
   scannerSafeText: '#15803D',
-  overlay: '#0E3A48',
-  teal: '#7FFFD4',
-  tealLight: '#E8FFF8',
-  surfaceMuted: '#E8F3F0',
-  info: '#006F83',
-  infoLight: '#D5EEF2',
-  focusRing: 'rgba(127,255,212,0.35)',
-  skeletonBase: '#DCEBE4',
-  skeletonSheen: '#F4F8F5',
-  mapLand: '#DCEBE4',
-  mapRoad: '#C9DDD6',
+  overlay: '#0F172A',
+  teal: '#2A9D8F',
+  tealLight: '#E6F6F4',
+  surfaceMuted: '#F1F4F2',
+  info: '#2A9D8F',
+  infoLight: '#E6F6F4',
+  focusRing: 'rgba(42,157,143,0.35)',
+  skeletonBase: '#E8EEEA',
+  skeletonSheen: '#F6F9F7',
+  mapLand: '#E4EAE5',
+  mapRoad: '#CDD6D0',
 };
 
+/** Dark companion — deep green-slate canvas, Claro teal accent. */
 export const darkColors: ThemeColors = {
-  bg: '#0A2F3C',
-  card: '#0E3A48',
-  accent: '#7FFFD4',
-  accentLight: '#143844',
-  accentMid: '#4FA86A',
-  head: '#E8F7F4',
-  text: '#E8F7F4',
-  textSecondary: '#9EC4CC',
-  textMuted: '#9EC4CC',
-  border: '#1A4A56',
-  borderInput: '#2A5A66',
+  bg: '#0E1512',
+  card: '#161D1B',
+  accent: '#3DB8A8',
+  accentLight: '#134E48',
+  accentMid: '#2A9D8F',
+  head: '#E2E8F0',
+  text: '#F8FAFC',
+  textSecondary: '#CBD5E1',
+  textMuted: '#94A3B8',
+  border: '#2C3A35',
+  borderInput: '#475569',
   success: '#4ADE80',
   successLight: '#14532D',
   successBorder: '#166534',
@@ -152,35 +158,38 @@ export const darkColors: ThemeColors = {
   warningLight: '#451A03',
   warningBorder: '#92400E',
   warningText: '#FDE68A',
-  forest: '#E8F7F4',
+  caution: '#FBBF24',
+  cautionLight: '#451A03',
+  cautionBorder: '#92400E',
+  forest: '#E2E8F0',
   green: '#4ADE80',
-  mint: '#143844',
-  foam: '#143844',
-  cream: '#0A2F3C',
-  onAccent: '#0A2F3C',
+  mint: '#1A2420',
+  foam: '#1A2420',
+  cream: '#0E1512',
+  onAccent: '#FFFFFF',
   onDanger: '#FFFFFF',
   purple: '#818CF8',
   pink: '#FB7185',
-  tipBg: '#143844',
-  tipBorder: '#7FFFD4',
-  tipText: '#C5E8C0',
-  iconOnCard: '#0A2F3C',
+  tipBg: '#134E48',
+  tipBorder: '#2A9D8F',
+  tipText: '#9FD9D1',
+  iconOnCard: '#FFFFFF',
   scannerSafeBorder: '#166534',
   scannerDangerBorder: '#991B1B',
   scannerSafeIconBg: '#14532D',
   scannerDangerIconBg: '#450A0A',
   scannerSafeText: '#4ADE80',
   overlay: '#000000',
-  teal: '#7FFFD4',
-  tealLight: '#143844',
-  surfaceMuted: '#143844',
-  info: '#7EBFD0',
-  infoLight: '#143844',
-  focusRing: 'rgba(127,255,212,0.45)',
-  skeletonBase: '#143844',
-  skeletonSheen: '#1A4A56',
-  mapLand: '#143844',
-  mapRoad: '#1A4A56',
+  teal: '#3DB8A8',
+  tealLight: '#134E48',
+  surfaceMuted: '#1A2420',
+  info: '#3DB8A8',
+  infoLight: '#134E48',
+  focusRing: 'rgba(61,184,168,0.45)',
+  skeletonBase: '#1A2420',
+  skeletonSheen: '#24302B',
+  mapLand: '#1A2420',
+  mapRoad: '#2C3A35',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {
@@ -218,6 +227,9 @@ export function createShadows(colors: ThemeColors) {
     md: makeShadow(shadowBase, 2, 8, 0.1, 3),
     /** @deprecated use sm — flat clinical cards */
     glass: makeShadow(shadowBase, 1, 3, 0.06, 2),
+    /** Dark drop shadow for raised ACTION controls. */
+    raised: makeShadow(shadowBase, 3, 6, 0.22, 5),
+    raisedStrong: makeShadow(shadowBase, 5, 12, 0.28, 8),
     accent: makeShadow(colors.accent, 2, 6, 0.2, 3),
     accentLg: makeShadow(colors.accent, 4, 10, 0.25, 4),
     danger: makeShadow(colors.danger, 4, 8, 0.25, 4),

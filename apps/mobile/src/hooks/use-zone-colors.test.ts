@@ -46,7 +46,7 @@ describe('zone mappers', () => {
     expect(zoneFromScanRisk('high')).toBe('alarm');
 
     expect(zoneFromDiarySeverity(0)).toBe('calm');
-    expect(zoneFromDiarySeverity(1)).toBe('calm');
+    expect(zoneFromDiarySeverity(1)).toBe('attention');
     expect(zoneFromDiarySeverity(2)).toBe('attention');
     expect(zoneFromDiarySeverity(3)).toBe('alarm');
     expect(zoneFromDiarySeverity(null)).toBeNull();
@@ -68,33 +68,33 @@ describe('resolveZoneColors', () => {
 
   it('uses existing clinical triplets in light and dark', () => {
     expect(resolveZoneColors('calm', lightColors)).toEqual({
-      fg: lightColors.success,
+      fg: lightColors.green,
       bg: lightColors.successLight,
       border: lightColors.successBorder,
     });
     expect(resolveZoneColors('attention', lightColors)).toEqual({
-      fg: lightColors.warning,
+      fg: lightColors.warningText,
       bg: lightColors.warningLight,
       border: lightColors.warningBorder,
     });
     expect(resolveZoneColors('alarm', lightColors)).toEqual({
-      fg: lightColors.danger,
+      fg: lightColors.head,
       bg: lightColors.dangerLight,
       border: lightColors.dangerBorder,
     });
 
     expect(resolveZoneColors('calm', darkColors)).toEqual({
-      fg: darkColors.success,
+      fg: darkColors.green,
       bg: darkColors.successLight,
       border: darkColors.successBorder,
     });
     expect(resolveZoneColors('attention', darkColors)).toEqual({
-      fg: darkColors.warning,
+      fg: darkColors.warningText,
       bg: darkColors.warningLight,
       border: darkColors.warningBorder,
     });
     expect(resolveZoneColors('alarm', darkColors)).toEqual({
-      fg: darkColors.danger,
+      fg: darkColors.head,
       bg: darkColors.dangerLight,
       border: darkColors.dangerBorder,
     });

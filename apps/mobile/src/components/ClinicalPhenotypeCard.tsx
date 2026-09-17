@@ -135,7 +135,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     itemSource: {
       fontFamily: fonts.sans,
       fontSize: 12,
-      color: colors.accent,
+      color: colors.head,
     },
     itemDesc: {
       fontFamily: fonts.sans,

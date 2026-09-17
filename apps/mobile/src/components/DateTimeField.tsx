@@ -302,7 +302,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.text,
     },
     cancel: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary },
-    done: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.accent },
+    done: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.head },
     wheels: {
       flexDirection: 'row',
       alignItems: 'center',

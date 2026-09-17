@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { density, radii } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
-export function createStyles({ colors, fonts }: AppTheme) {
+export function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     header: {
       flexDirection: 'row',
@@ -21,9 +21,10 @@ export function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 12,
       borderRadius: radii.full,
       backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.accent,
+      borderWidth: 2,
+      borderColor: colors.head,
       minHeight: 44,
+      ...(shadows.raised as object),
     },
     manualToggleBtn: {
       flex: 1,
@@ -34,15 +35,16 @@ export function createStyles({ colors, fonts }: AppTheme) {
       paddingVertical: 12,
       borderRadius: radii.sm,
       backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.accent,
+      borderWidth: 2,
+      borderColor: colors.head,
       minHeight: 44,
+      ...(shadows.raised as object),
     },
     secondaryBtnText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     emptyHint: {
       fontFamily: fonts.sans,
@@ -279,18 +281,24 @@ export function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
+      ...(shadows.raised as object),
     },
     tabChipActive: {
       backgroundColor: colors.accentLight,
-      borderColor: colors.accent,
+      borderWidth: 2,
+      borderColor: colors.head,
+      ...(shadows.raised as object),
     },
     tabChipText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
       fontWeight: '600',
-      color: colors.textSecondary,
+      color: colors.head,
     },
-    tabChipTextActive: { color: colors.accent },
+    tabChipTextActive: {
+      color: colors.head,
+      fontWeight: '700',
+    },
     historyRow: {
       flexDirection: 'row',
       alignItems: 'center',

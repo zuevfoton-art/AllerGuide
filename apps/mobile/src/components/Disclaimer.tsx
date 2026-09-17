@@ -118,7 +118,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.caption,
       lineHeight: lineHeights.caption,
-      color: colors.accent,
+      color: colors.head,
     },
     footnote: {
       fontFamily: fonts.sans,

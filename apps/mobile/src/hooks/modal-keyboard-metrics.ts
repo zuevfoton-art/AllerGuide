@@ -15,7 +15,9 @@ export function resolveModalKeyboardAvoidance(
   platform: string,
   keyboardInset: number,
 ): ModalKeyboardAvoidance {
-  const liftInset = (platform === 'android' || platform === 'web') && keyboardInset > 0;
+  // RN Modal often ignores KeyboardAvoidingView alone; lift the sheet on every
+  // platform when we know the IME height (Android/web always; iOS as backup).
+  const liftInset = keyboardInset > 0;
 
   return {
     behavior: platform === 'ios' ? 'padding' : undefined,

@@ -227,7 +227,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       letterSpacing: 0.5,
     },
     labelFocused: {
-      color: colors.accent,
+      color: colors.head,
     },
     inputRow: {
       flexDirection: 'row',
@@ -259,9 +259,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     linkWrap: { alignItems: 'center', paddingVertical: 4 },
     linkText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm + 1, color: colors.textSecondary },
-    linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.accent, fontWeight: '600' },
+    linkAccent: { fontFamily: fonts.sansSemiBold, color: colors.head, fontWeight: '600' },
     forgotWrap: { alignItems: 'flex-end', marginTop: -4 },
-    forgotText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm, color: colors.accent },
+    forgotText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm, color: colors.head },
     errorBox: {
       backgroundColor: colors.dangerLight,
       borderRadius: radii.md,

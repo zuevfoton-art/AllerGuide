@@ -249,7 +249,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 12,
       color: colors.textSecondary,
     },
-    filterTextActive: { color: colors.accent },
+    filterTextActive: { color: colors.head },
     filterTextAdair: { color: '#7C3AED' },
     row: {
       flexDirection: 'row',
@@ -324,7 +324,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 10,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
       backgroundColor: colors.accentLight,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -345,7 +345,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     phone: {
       fontFamily: fonts.sans,
       fontSize: 12,
-      color: colors.accent,
+      color: colors.head,
       textDecorationLine: 'underline',
     },
     archivedPhone: {
@@ -357,7 +357,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     empty: {
       fontFamily: fonts.sans,

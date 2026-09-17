@@ -291,7 +291,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     chipText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.label,
-      color: colors.accent,
+      color: colors.head,
       fontWeight: '600',
     },
     hintRow: {

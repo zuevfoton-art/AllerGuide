@@ -486,7 +486,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
       marginTop: 10,
     },
     interpret: {
@@ -544,7 +544,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     expertRow: {
       flexDirection: 'row',
