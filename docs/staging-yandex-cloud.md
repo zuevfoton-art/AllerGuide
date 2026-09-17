@@ -372,6 +372,8 @@ export STAGING_API_URL=https://api.staging.aclearo.com
 
 **Триггер:** push в ветку `staging` или `workflow_dispatch`.
 
+**CLI-профиль:** `install.sh` ставит yc 1.35.1+, который больше не создаёт default-профиль. Перед `yc config set service-account-key` CI вызывает [`scripts/yc-ci-configure.sh`](../scripts/yc-ci-configure.sh) (`yc config profile create github`). Иначе job `deploy` падает с `failed to create active profile '': profile '' was not found`.
+
 | Job | Runner | Действие |
 |-----|--------|----------|
 | `gate` | `ubuntu-latest` | Проверка секретов через `env` (нельзя `secrets.*` в job-level `if`) |

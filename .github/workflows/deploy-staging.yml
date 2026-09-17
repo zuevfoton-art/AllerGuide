@@ -100,7 +100,9 @@ jobs:
           echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           export PATH="$HOME/yandex-cloud/bin:$PATH"
-          yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
+          # yc 1.35.1 does not auto-create a default profile.
+          chmod +x scripts/yc-ci-configure.sh
+          ./scripts/yc-ci-configure.sh "${{ runner.temp }}/yc-sa-key.json"
 
       - name: Login to Yandex Container Registry
         env:
@@ -137,7 +139,9 @@ jobs:
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           export PATH="$HOME/yandex-cloud/bin:$PATH"
           echo "$YC_SA_JSON" > "${{ runner.temp }}/yc-sa-key.json"
-          yc config set service-account-key "${{ runner.temp }}/yc-sa-key.json"
+          # yc 1.35.1 does not auto-create a default profile.
+          chmod +x scripts/yc-ci-configure.sh
+          ./scripts/yc-ci-configure.sh "${{ runner.temp }}/yc-sa-key.json"
 
           export YC_REGISTRY_ID YC_CONTAINER_ID
           export YC_LOCKBOX_SECRET_ID="${YC_LOCKBOX_SECRET_ID:-}"
