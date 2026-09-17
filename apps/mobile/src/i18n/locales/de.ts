@@ -185,7 +185,7 @@ const de: LocaleMessages = {
     settingsDesc: 'SOS, Sync und Erinnerungen',
   },
   today: {
-    readingTitle: 'Heute im Überblick',
+    readingTitle: 'Heute',
     lead: {
       noProfile: 'Es gibt noch kein Profil, daher kann die Prognose Ihre Allergene nicht berücksichtigen.',
       noData: 'Pollen- und Luftdaten sind gerade nicht verfügbar — angezeigt wird, was auf dem Gerät gespeichert ist.',
