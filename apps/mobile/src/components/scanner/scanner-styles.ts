@@ -21,7 +21,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       paddingVertical: 12,
       borderRadius: radii.full,
       backgroundColor: colors.card,
-      borderWidth: 1,
+      borderWidth: 2,
       borderColor: colors.head,
       minHeight: 44,
       ...(shadows.sm as object),
@@ -35,7 +35,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       paddingVertical: 12,
       borderRadius: radii.sm,
       backgroundColor: colors.card,
-      borderWidth: 1,
+      borderWidth: 2,
       borderColor: colors.head,
       minHeight: 44,
       ...(shadows.sm as object),
@@ -285,6 +285,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
     },
     tabChipActive: {
       backgroundColor: colors.accentLight,
+      borderWidth: 2,
       borderColor: colors.head,
       ...(shadows.sm as object),
     },
@@ -294,7 +295,10 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
     },
-    tabChipTextActive: { color: colors.head },
+    tabChipTextActive: {
+      color: colors.head,
+      fontWeight: '700',
+    },
     historyRow: {
       flexDirection: 'row',
       alignItems: 'center',
