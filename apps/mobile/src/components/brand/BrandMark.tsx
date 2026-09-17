@@ -8,12 +8,12 @@ type BrandMarkProps = {
   accent?: string;
 };
 
-/** A-Claro monogram — bold **A** on brandbook green with petrol ink (fallback when theme not passed) */
+/** A-Claro monogram — bold **A** on Claro teal */
 export function BrandMark({
   size = 64,
   variant = 'filled',
-  color = '#004F70',
-  accent = '#7FFFD4',
+  color = '#FFFFFF',
+  accent = '#2A9D8F',
 }: BrandMarkProps) {
   const aPath =
     'M32 15 48.5 49H42.2L39.2 41.5H24.8L21.8 49H15.5L32 15ZM26.8 36.5H37.2L32 23.5 26.8 36.5Z';

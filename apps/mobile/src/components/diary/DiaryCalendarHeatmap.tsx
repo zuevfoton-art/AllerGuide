@@ -14,8 +14,8 @@ type DiaryCalendarHeatmapProps = {
 
 function severityColor(severity: number, theme: AppTheme): string {
   if (severity >= 3) return theme.colors.danger;
-  if (severity >= 2) return '#E8A317';
-  if (severity >= 1) return theme.colors.accent;
+  if (severity >= 2) return theme.colors.caution;
+  if (severity >= 1) return theme.colors.warning;
   return theme.colors.border;
 }
 
