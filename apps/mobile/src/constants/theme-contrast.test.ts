@@ -7,11 +7,12 @@ vi.mock('react-native', () => ({
 }));
 
 /**
- * Brand primary is recognition mint with petrol ink (`#004F70` on `#7FFFD4`).
- * White-on-mint fails AA (~1.2:1); brandbook uses petrol-on-mint (~7.3:1).
+ * Documented exception: white on brand accent fails AA 4.5:1
+ * (light ≈ 3.32, dark ≈ 2.44). See docs/ux-audit-2026-08.md §13.
+ * Do not treat this pair as a gate until product picks a fill shade.
  */
-const BRAND_BUTTON_NOTE = {
-  reason: 'ux-audit-2026-08 §13 — superseded by petrol-on-mint AA in brandbook 50/35/15',
+const BRAND_BUTTON_EXCEPTION = {
+  reason: 'ux-audit-2026-08 §13 — onAccent on accent is a brand exception',
 };
 
 const AA = 4.5;
@@ -40,9 +41,11 @@ describe('theme contrast', () => {
     }
   });
 
-  it('keeps petrol-on-mint primary and dark onAccent/accent at AA', () => {
-    expectReadable(lightColors.onAccent, lightColors.accent, 'light onAccent/accent');
-    expectReadable(darkColors.onAccent, darkColors.accent, 'dark onAccent/accent');
-    expect(BRAND_BUTTON_NOTE.reason).toContain('§13');
+  it('records the primary-button pair as a documented exception', () => {
+    const light = contrastRatio(lightColors.onAccent, lightColors.accent);
+    const dark = contrastRatio(darkColors.onAccent, darkColors.accent);
+    expect(light).toBeLessThan(AA);
+    expect(dark).toBeLessThan(AA);
+    expect(BRAND_BUTTON_EXCEPTION.reason).toContain('§13');
   });
 });

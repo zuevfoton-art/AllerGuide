@@ -55,7 +55,8 @@ export function zoneFromScanRisk(risk: RiskLevel): Zone {
 export function zoneFromDiarySeverity(severity: Severity0_3 | null): Zone | null {
   if (severity === null) return null;
   if (severity >= 3) return 'alarm';
-  if (severity === 2) return 'attention';
+  // Mild (1) and moderate (2) share the attention zone; charts use warning vs caution.
+  if (severity >= 1) return 'attention';
   return 'calm';
 }
 
@@ -74,10 +75,11 @@ export function resolveZoneColors(
 ): ZoneColors | null {
   if (!zone) return null;
   if (zone === 'calm') {
-    return { fg: colors.success, bg: colors.successLight, border: colors.successBorder };
+    // Bright success fills stay for charts; zone copy uses darker emerald ink.
+    return { fg: colors.green, bg: colors.successLight, border: colors.successBorder };
   }
   if (zone === 'attention') {
-    return { fg: colors.warning, bg: colors.warningLight, border: colors.warningBorder };
+    return { fg: colors.warningText, bg: colors.warningLight, border: colors.warningBorder };
   }
-  return { fg: colors.danger, bg: colors.dangerLight, border: colors.dangerBorder };
+  return { fg: colors.head, bg: colors.dangerLight, border: colors.dangerBorder };
 }
