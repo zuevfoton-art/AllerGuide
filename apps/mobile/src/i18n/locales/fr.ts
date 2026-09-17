@@ -184,7 +184,7 @@ const fr: LocaleMessages = {
     settingsDesc: 'SOS, synchronisation et rappels',
   },
   today: {
-    readingTitle: 'Aujourd’hui en bref',
+    readingTitle: 'Aujourd’hui',
     lead: {
       noProfile: 'Il n’y a pas encore de profil, la prévision ne peut donc pas tenir compte de vos allergènes.',
       noData: 'Les données de pollen et d’air sont indisponibles pour le moment — voici ce qui est enregistré sur l’appareil.',
