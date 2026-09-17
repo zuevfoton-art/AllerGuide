@@ -383,7 +383,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       paddingVertical: 4,
     },
-    section: { gap: 10, overflow: 'hidden', width: '100%' },
+    section: { gap: 10, width: '100%', alignSelf: 'stretch' },
     notesInput: {
       minHeight: 120,
       backgroundColor: colors.card,
@@ -425,6 +425,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       color: colors.text,
       width: '100%',
+      minHeight: 48,
     },
     relationRow: {
       flexDirection: 'row',
