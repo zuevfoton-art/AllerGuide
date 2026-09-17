@@ -168,7 +168,7 @@ src/modules/marketplace/
 | `asthma-action-plan.tsx` / `insect-action-plan.tsx` | Планы действий |
 | `food-drug-registry.tsx` | Пищево-лекарственный реестр |
 | `expert.tsx` / `about.tsx` | Эксперт / о приложении |
-| `ask.tsx` | AI-чат deep-link (`EXPO_PUBLIC_AI_CHAT`, default off; SOS-handoff); primary entry — `AskFabHost` |
+| `ask.tsx` | AI-чат deep-link (`EXPO_PUBLIC_AI_CHAT`, default on local+staging; SOS-handoff); primary entry — `AskFabHost` |
 | `legal/privacy.tsx` / `legal/terms.tsx` | Legal |
 | `profiles.tsx` / `settings.tsx` | Redirect → `/profile` |
 | `+html.tsx` | Web-обёртка Expo Router (не экран) |
@@ -333,7 +333,7 @@ Barrel: `index.ts`. Pure TS.
 | `BACKEND_AUTH` | `features.ts` | `JWT_SECRET` + `DATABASE_URL` |
 | `CLOUD_SYNC` | `features.ts` | `SYNC_ENABLED` |
 | `AI_SCAN_ENABLED` | `features.ts` | `AI_SCAN_ENABLED` + LLM keys |
-| `AI_CHAT` | `features.ts` | `AI_CHAT_ENABLED` + `AI_SCAN_ENABLED` (default **off**) |
+| `AI_CHAT` | `features.ts` | `AI_CHAT_ENABLED` + `AI_SCAN_ENABLED` (default **on** local+staging) |
 | `AI_DISH_VISION_ENABLED` | `features.ts` (`EXPO_PUBLIC_AI_DISH_VISION`) | `AI_DISH_VISION_ENABLED` + VL model |
 | `YC_OCR` | `features.ts` (`YC_OCR_ENABLED`) | `YC_OCR_ENABLED` |
 | `YC_SCAN_INTENT_LLM` | `features.ts` | `YC_SCAN_INTENT_LLM` |

@@ -45,7 +45,7 @@ select {
 }
 
 :focus-visible {
-  outline: 2px solid #7DCD72;
+  outline: 2px solid #7FFFD4;
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(125,205,114,0.35);
   border-radius: 6px;

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { apiRequest } from '@/src/services/api-client';
+import { getBackendAuthToken } from '@/src/services/auth-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import {
   buildAskOfflineCards,
@@ -29,10 +30,15 @@ vi.mock('@/src/services/api-client', () => ({
   apiRequest: vi.fn(),
 }));
 
+vi.mock('@/src/services/auth-service', () => ({
+  getBackendAuthToken: vi.fn(),
+}));
+
 describe('ask-chat-service', () => {
   afterEach(() => {
     settings.clear();
     vi.mocked(apiRequest).mockReset();
+    vi.mocked(getBackendAuthToken).mockReset();
     vi.mocked(trackEvent).mockReset();
   });
 
@@ -62,10 +68,12 @@ describe('ask-chat-service', () => {
     expect(result.handoff).toBe(true);
     expect(result.reply.handoff).toBe(true);
     expect(apiRequest).not.toHaveBeenCalled();
+    expect(getBackendAuthToken).not.toHaveBeenCalled();
     expect(trackEvent).toHaveBeenCalledWith('ai_chat_handoff_sos', { length_bucket: 'short' });
   });
 
-  it('uses the model answer when the API succeeds', async () => {
+  it('passes the backend JWT when calling /api/ask', async () => {
+    vi.mocked(getBackendAuthToken).mockResolvedValueOnce('jwt-ask');
     vi.mocked(apiRequest).mockResolvedValueOnce({
       ok: true,
       data: { ok: true, answer: 'Пыльца высокая, сократите прогулку.' },
@@ -82,10 +90,40 @@ describe('ask-chat-service', () => {
     if (!result.ok) return;
     expect(result.offline).toBe(false);
     expect(result.reply.text).toContain('Пыльца высокая');
+    expect(getBackendAuthToken).toHaveBeenCalledOnce();
+    expect(apiRequest).toHaveBeenCalledWith(
+      '/api/ask',
+      expect.objectContaining({
+        method: 'POST',
+        token: 'jwt-ask',
+      }),
+    );
   });
 
-  it('falls back to offline copy when the API is down', async () => {
-    vi.mocked(apiRequest).mockResolvedValueOnce({ ok: false, error: 'down', status: 0 });
+  it('falls back to offline copy when there is no token and the API returns 401', async () => {
+    vi.mocked(getBackendAuthToken).mockResolvedValueOnce(null);
+    vi.mocked(apiRequest).mockResolvedValueOnce({ ok: false, error: 'Unauthorized', status: 401 });
+
+    const result = await sendAskQuestion({
+      raw: 'Можно гулять?',
+      locale: 'ru',
+      history: [],
+      fallbackAnswer: 'Нет сети',
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.offline).toBe(true);
+    expect(result.reply.text).toBe('Нет сети');
+    expect(apiRequest).toHaveBeenCalledWith(
+      '/api/ask',
+      expect.objectContaining({ token: null }),
+    );
+  });
+
+  it('falls back to offline copy when the API is down (503)', async () => {
+    vi.mocked(getBackendAuthToken).mockResolvedValueOnce('jwt-ask');
+    vi.mocked(apiRequest).mockResolvedValueOnce({ ok: false, error: 'unavailable', status: 503 });
 
     const result = await sendAskQuestion({
       raw: 'Можно гулять?',
