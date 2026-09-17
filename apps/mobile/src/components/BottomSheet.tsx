@@ -53,7 +53,7 @@ export function BottomSheet({
       onRequestClose={onClose}
       statusBarTranslucent>
       <ModalKeyboardAvoid style={styles.root}>
-        {({ liftStyle }) => (
+        {({ liftStyle, keyboardInset }) => (
           <View style={styles.root}>
             <Pressable
               style={styles.backdrop}
@@ -65,7 +65,11 @@ export function BottomSheet({
               style={[
                 fullHeight ? styles.fullSheet : styles.sheet,
                 liftStyle,
-                { paddingBottom: Math.max(insets.bottom, space[3]) },
+                {
+                  // When the IME is open it covers the home indicator — drop safe-area pad.
+                  paddingBottom:
+                    keyboardInset > 0 ? space[3] : Math.max(insets.bottom, space[3]),
+                },
               ]}
               accessibilityViewIsModal
               accessibilityLabel={accessibilityLabel ?? title}

@@ -112,28 +112,31 @@ export function useAskChat({
     setDraft((prev) => mergeVoiceIntoField(prev, transcript));
   }, []);
 
+  const suggestionChips = (
+    <View style={styles.chipRow}>
+      {quickQuestions.map((question, index) => (
+        <ActionChip
+          key={`quick-${index}`}
+          testID={`ask-quick-${index}`}
+          label={question}
+          disabled={busy}
+          onPress={() => void send(question)}
+        />
+      ))}
+      {ASK_SUGGESTION_IDS.map((id: AskSuggestionId) => (
+        <ActionChip
+          key={id}
+          testID={`ask-suggest-${id}`}
+          label={t(`ask.suggestions.${id}`)}
+          disabled={busy}
+          onPress={() => void send(t(`ask.suggestions.${id}`))}
+        />
+      ))}
+    </View>
+  );
+
   const composer = (
     <View style={styles.composer} testID={`${testID}-composer`}>
-      <View style={styles.chipRow}>
-        {quickQuestions.map((question, index) => (
-          <ActionChip
-            key={`quick-${index}`}
-            testID={`ask-quick-${index}`}
-            label={question}
-            disabled={busy}
-            onPress={() => void send(question)}
-          />
-        ))}
-        {ASK_SUGGESTION_IDS.map((id: AskSuggestionId) => (
-          <ActionChip
-            key={id}
-            testID={`ask-suggest-${id}`}
-            label={t(`ask.suggestions.${id}`)}
-            disabled={busy}
-            onPress={() => void send(t(`ask.suggestions.${id}`))}
-          />
-        ))}
-      </View>
       <View style={styles.ovalRow}>
         {voiceSupported ? (
           <VoiceNoteButton
@@ -235,6 +238,8 @@ export function useAskChat({
           ))}
         </GlassCard>
       ) : null}
+
+      {suggestionChips}
     </View>
   );
 
