@@ -9,16 +9,16 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
  * Brandbook 50 / 35 / 15 — UX/UI v2 Variant A layout + institutional palette.
- * Recognition green `#7DCD72` (50%); composition petrol `#006F83` (35%);
+ * Recognition mint `#7FFFD4` (50%); composition petrol `#006F83` (35%);
  * mix `#004F70` + white (15%); neutral canvas `#F4F8F5`.
- * CTA ink is petrol on green (white-on-green fails AA).
+ * CTA ink is petrol on mint (white-on-mint fails AA).
  * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS.
  * Policy: docs/brand-claro-green.md
  */
 export type ThemeColors = {
   bg: string;
   card: string;
-  /** Primary interactive — actions, links, active tabs (recognition green) */
+  /** Primary interactive — actions, links, active tabs (recognition mint) */
   accent: string;
   accentLight: string;
   accentMid: string;
@@ -80,9 +80,9 @@ export type ThemeColors = {
 export const lightColors: ThemeColors = {
   bg: '#F4F8F5',
   card: '#FFFFFF',
-  accent: '#7DCD72',
-  accentLight: '#E5F6E2',
-  accentMid: '#7DCD72',
+  accent: '#7FFFD4',
+  accentLight: '#E8FFF8',
+  accentMid: '#7FFFD4',
   head: '#004F70',
   text: '#0E3A48',
   textSecondary: '#3A6670',
@@ -108,8 +108,8 @@ export const lightColors: ThemeColors = {
   onDanger: '#FFFFFF',
   purple: '#6366F1',
   pink: '#E11D48',
-  tipBg: '#E5F6E2',
-  tipBorder: '#7DCD72',
+  tipBg: '#E8FFF8',
+  tipBorder: '#7FFFD4',
   tipText: '#004F70',
   iconOnCard: '#004F70',
   scannerSafeBorder: '#BBF7D0',
@@ -118,12 +118,12 @@ export const lightColors: ThemeColors = {
   scannerDangerIconBg: '#FEF2F2',
   scannerSafeText: '#15803D',
   overlay: '#0E3A48',
-  teal: '#7DCD72',
-  tealLight: '#E5F6E2',
+  teal: '#7FFFD4',
+  tealLight: '#E8FFF8',
   surfaceMuted: '#E8F3F0',
   info: '#006F83',
   infoLight: '#D5EEF2',
-  focusRing: 'rgba(125,205,114,0.35)',
+  focusRing: 'rgba(127,255,212,0.35)',
   skeletonBase: '#DCEBE4',
   skeletonSheen: '#F4F8F5',
   mapLand: '#DCEBE4',
@@ -133,7 +133,7 @@ export const lightColors: ThemeColors = {
 export const darkColors: ThemeColors = {
   bg: '#0A2F3C',
   card: '#0E3A48',
-  accent: '#7DCD72',
+  accent: '#7FFFD4',
   accentLight: '#143844',
   accentMid: '#4FA86A',
   head: '#E8F7F4',
@@ -162,7 +162,7 @@ export const darkColors: ThemeColors = {
   purple: '#818CF8',
   pink: '#FB7185',
   tipBg: '#143844',
-  tipBorder: '#7DCD72',
+  tipBorder: '#7FFFD4',
   tipText: '#C5E8C0',
   iconOnCard: '#0A2F3C',
   scannerSafeBorder: '#166534',
@@ -171,12 +171,12 @@ export const darkColors: ThemeColors = {
   scannerDangerIconBg: '#450A0A',
   scannerSafeText: '#4ADE80',
   overlay: '#000000',
-  teal: '#7DCD72',
+  teal: '#7FFFD4',
   tealLight: '#143844',
   surfaceMuted: '#143844',
   info: '#7EBFD0',
   infoLight: '#143844',
-  focusRing: 'rgba(125,205,114,0.45)',
+  focusRing: 'rgba(127,255,212,0.45)',
   skeletonBase: '#143844',
   skeletonSheen: '#1A4A56',
   mapLand: '#143844',

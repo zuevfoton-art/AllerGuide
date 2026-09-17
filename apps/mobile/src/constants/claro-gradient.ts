@@ -11,14 +11,14 @@ export type ClaroGradient = {
 export function getClaroGradient(isDark: boolean): ClaroGradient {
   if (isDark) {
     return {
-      colors: ['#0A2F3C', '#006F83', '#7DCD72'],
+      colors: ['#0A2F3C', '#006F83', '#7FFFD4'],
       locations: [0, 0.55, 1],
       start: { x: 0, y: 0 },
       end: { x: 1, y: 1 },
     };
   }
   return {
-    colors: ['#004F70', '#006F83', '#7DCD72'],
+    colors: ['#004F70', '#006F83', '#7FFFD4'],
     locations: [0, 0.6, 1],
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
@@ -27,28 +27,28 @@ export function getClaroGradient(isDark: boolean): ClaroGradient {
 
 /**
  * Light-mode brandbook tokens (mirror theme.ts).
- * Recognition green `#7DCD72` (50%); petrol info `#006F83` (35%);
- * CTA ink is deep petrol `#004F70` on green.
+ * Recognition mint `#7FFFD4` (50%); petrol info `#006F83` (35%);
+ * CTA ink is deep petrol `#004F70` on mint.
  */
 export const LIGHT_CLARO_TOKENS = {
   tipText: '#004F70',
   info: '#006F83',
   infoLight: '#D5EEF2',
-  tipBg: '#E5F6E2',
-  tipBorder: '#7DCD72',
-  accent: '#7DCD72',
-  accentLight: '#E5F6E2',
-  accentMid: '#7DCD72',
+  tipBg: '#E8FFF8',
+  tipBorder: '#7FFFD4',
+  accent: '#7FFFD4',
+  accentLight: '#E8FFF8',
+  accentMid: '#7FFFD4',
 } as const;
 
-/** Dark-mode brandbook tokens (mirror theme.ts) — green primary on petrol canvas */
+/** Dark-mode brandbook tokens (mirror theme.ts) — mint primary on petrol canvas */
 export const DARK_CLARO_TOKENS = {
   tipText: '#C5E8C0',
   info: '#7EBFD0',
   infoLight: '#143844',
   tipBg: '#143844',
-  tipBorder: '#7DCD72',
-  accent: '#7DCD72',
+  tipBorder: '#7FFFD4',
+  accent: '#7FFFD4',
   accentLight: '#143844',
   accentMid: '#4FA86A',
 } as const;

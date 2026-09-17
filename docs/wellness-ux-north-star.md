@@ -299,7 +299,7 @@ flowchart TB
 
 **Поведение:**
 
-- Флаг `EXPO_PUBLIC_AI_CHAT` (default off в `.env.example`).
+- Флаг `EXPO_PUBLIC_AI_CHAT` (default on в `.env.example` local+staging; production EAS остаётся off).
 - Offline: набор карточек эксперта + «нет сети, вот что уже в приложении».
 - Сигналы дистресса / «не могу дышать» / «анафилаксия» → немедленный handoff на кризисный SOS, модель не отвечает советом.
 - Disclaimer в шапке чата, collapsible.

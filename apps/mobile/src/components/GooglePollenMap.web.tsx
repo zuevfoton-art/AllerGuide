@@ -122,7 +122,7 @@ export function GooglePollenMap({
 
       for (const marker of markerRefs.current) marker.setMap(null);
       markerRefs.current = markers.map((item) => {
-        const fill = item.color ?? '#7DCD72';
+        const fill = item.color ?? '#7FFFD4';
         const symbolPath = google.maps.SymbolPath?.CIRCLE;
         const marker = new google.maps.Marker({
           map,

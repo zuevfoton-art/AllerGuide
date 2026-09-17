@@ -47,6 +47,7 @@
         "EXPO_PUBLIC_BACKEND_AUTH": "true",
         "EXPO_PUBLIC_CLOUD_SYNC": "true",
         "EXPO_PUBLIC_AI_SCAN_ENABLED": "true",
+        "EXPO_PUBLIC_AI_CHAT": "true",
         "EXPO_PUBLIC_AI_DISH_VISION": "true",
         "EXPO_PUBLIC_YC_OCR": "true",
         "EXPO_PUBLIC_YC_SCAN_INTENT_LLM": "true",
