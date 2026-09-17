@@ -1,10 +1,10 @@
 # Brandbook 50 / 35 / 15 — политика цвета (UX/UI v2)
 
-**Статус:** канон production · supersedes Earth Wellness olive / Nordic Air  
-**Выбор:** UX/UI v2 **вариант A (Forest & Linen layout)** + палитра **брендбук 50/35/15** — [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md)  
+**Статус:** канон production · supersedes Earth Wellness olive / Nordic Air / recognition green `#7DCD72`  
+**Выбор:** UX/UI v2 **вариант A (Forest & Linen layout)** + палитра **брендбук 50/35/15** с recognition **mint** — [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md)  
 **Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts) · [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts)
 
-> Nordic Air (`#4F8FB8`), Claro teal (`#2A9D8F`) и Earth Wellness olive остаются в git history. Production — **recognition green 50%** + **petrol 35%** + **микс 15%** на нейтральном белом холсте. Dual Calm medical blues по-прежнему запрещены.
+> Nordic Air (`#4F8FB8`), Claro teal (`#2A9D8F`), Earth Wellness olive и recognition green `#7DCD72` остаются в git history. Production — **recognition mint 50%** + **petrol 35%** + **микс 15%** на нейтральном белом холсте. Dual Calm medical blues по-прежнему запрещены.
 
 ---
 
@@ -14,12 +14,12 @@
 
 | Доля | Swatch | Hex | Роль в UI |
 |------|--------|-----|-----------|
-| **50%** | Recognition green | `#7DCD72` | CTA / FAB / BrandMark / `BrandField` recognition / active tab |
+| **50%** | Recognition mint | `#7FFFD4` | CTA / FAB / BrandMark / `BrandField` recognition / active tab |
 | **35%** | Composition petrol | `#006F83` | `info`, заголовки-компаньоны, `BrandField` composition |
-| **15%** | Mix | `#004F70` + `#FFFFFF` + green | Ink на green, `BrandPair`, иконки |
+| **15%** | Mix | `#004F70` + `#FFFFFF` + mint | Ink на mint, `BrandPair`, иконки |
 | Neutral | Canvas | `#F4F8F5` / `#FFFFFF` | `bg` / `card` |
 
-CTA: **petrol ink на green** (`onAccent` `#004F70`). Белый на `#7DCD72` ≈ 1.8:1 — нельзя для обычного текста.
+CTA: **petrol ink на mint** (`onAccent` `#004F70`). Белый на `#7FFFD4` ≈ 1.2:1 — нельзя для обычного текста. Petrol на mint ≈ **7.3:1 AA**.
 
 ---
 
@@ -53,27 +53,27 @@ Institutional Petrol `#006F83` / `#004F70` **разрешён** — это не 
 |-------|-------|------|------|
 | `bg` / `cream` | `#F4F8F5` | `#0A2F3C` | Экран |
 | `card` | `#FFFFFF` | `#0E3A48` | Surface |
-| `accent` | `#7DCD72` | `#7DCD72` | CTA, табы, FAB (green) |
-| `onAccent` | `#004F70` | `#0A2F3C` | Ink на green |
-| `accentLight` | `#E5F6E2` | `#143844` | Soft green wash |
-| `accentMid` | `#7DCD72` | `#4FA86A` | Borders / selected |
+| `accent` | `#7FFFD4` | `#7FFFD4` | CTA, табы, FAB (mint) |
+| `onAccent` | `#004F70` | `#0A2F3C` | Ink на mint |
+| `accentLight` | `#E8FFF8` | `#143844` | Soft mint wash |
+| `accentMid` | `#7FFFD4` | `#4FA86A` | Borders / selected |
 | `info` / `infoLight` | `#006F83` / `#D5EEF2` | `#7EBFD0` / `#143844` | Petrol composition |
-| `tipBg` / `tipBorder` / `tipText` | green wash / green / petrol | petrol family | Tip cards |
+| `tipBg` / `tipBorder` / `tipText` | mint wash / mint / petrol | petrol family | Tip cards |
 | `surfaceMuted` / `foam` | `#E8F3F0` | `#143844` | Cool mist |
 | `ink` / `text` | `#0E3A48` | `#E8F7F4` | Основной текст |
 
 Градиент `getClaroGradient(isDark)`:
 
-- Light: `#004F70` → `#006F83` → `#7DCD72`
-- Dark: `#0A2F3C` → `#006F83` → `#7DCD72`
+- Light: `#004F70` → `#006F83` → `#7FFFD4`
+- Dark: `#0A2F3C` → `#006F83` → `#7FFFD4`
 
 ---
 
 ## Правила (non-negotiable)
 
 1. Нет medical Dual Calm рядом с petrol; нет возврата Nordic Air sky.
-2. ~50% brand-green: онбординг-волны / `BrandField` recognition / FAB / primary fill / BrandMark.
-3. ~35% petrol: `head` / `info` / текст на green / composition field.
+2. ~50% brand-mint: онбординг-волны / `BrandField` recognition / FAB / primary fill / BrandMark.
+3. ~35% petrol: `head` / `info` / текст на mint / composition field.
 4. ~15% микс: `BrandPair`, чипы, иконки.
 5. SOS — только `danger`.
 6. Ask — **extended FAB** на tab roots; icon-only на allow-list стеке; скрыт на SOS / auth / onboarding / `/ask` / setup / lock / legal.
@@ -87,13 +87,13 @@ Institutional Petrol `#006F83` / `#004F70` **разрешён** — это не 
 | Элемент | Токен |
 |---------|--------|
 | Screen background | `bg` |
-| Soft card / wellness | `GlassCard variant="soft"` → green wash |
+| Soft card / wellness | `GlassCard variant="soft"` → mint wash |
 | Brand hero | `BrandField` recognition / composition |
 | 15% mark | `BrandPair` |
 | Tab pill (floating) | `card` + `border`; active slot `accentLight` |
 | Onboarding waves | accentLight + accent + info |
 | H1, KPI | `head` / display type |
-| Primary CTA / FAB | `accent` (green) + `onAccent` (petrol) |
+| Primary CTA / FAB | `accent` (mint) + `onAccent` (petrol) |
 | Info / cool hint | `info` / `infoLight` |
 
 ---
@@ -104,6 +104,7 @@ Institutional Petrol `#006F83` / `#004F70` **разрешён** — это не 
 |---|------------|--------|
 | **v2-B** | Nordic Air (superseded) | ↩️ |
 | **v2-A-earth olive** | Olive primary | ↩️ |
-| **v2-A brandbook 50/35/15** | Green + petrol + white | ✅ |
+| **v2-A brandbook green** | Green `#7DCD72` + petrol | ↩️ |
+| **v2-A brandbook mint** | Mint `#7FFFD4` + petrol + white | ✅ |
 
 Спека: [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · HTML [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html).

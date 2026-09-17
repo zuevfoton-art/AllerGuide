@@ -25,12 +25,12 @@ describe('Brandbook tokens (UX/UI v2 · A · 50/35/15)', () => {
     const darkKeys = Object.keys(DARK_CLARO_TOKENS);
     expect(lightKeys.some((k) => k.startsWith('calm'))).toBe(false);
     expect(darkKeys.some((k) => k.startsWith('calm'))).toBe(false);
-    expect(LIGHT_CLARO_TOKENS.accent).toBe('#7DCD72');
-    expect(LIGHT_CLARO_TOKENS.accentLight).toBe('#E5F6E2');
-    expect(LIGHT_CLARO_TOKENS.accentMid).toBe('#7DCD72');
+    expect(LIGHT_CLARO_TOKENS.accent).toBe('#7FFFD4');
+    expect(LIGHT_CLARO_TOKENS.accentLight).toBe('#E8FFF8');
+    expect(LIGHT_CLARO_TOKENS.accentMid).toBe('#7FFFD4');
   });
 
-  it('maps green recognition, petrol info, green wash', () => {
+  it('maps mint recognition, petrol info, mint wash', () => {
     expect(LIGHT_CLARO_TOKENS.tipBg).toBe(LIGHT_CLARO_TOKENS.accentLight);
     expect(LIGHT_CLARO_TOKENS.tipBorder).toBe(LIGHT_CLARO_TOKENS.accent);
     expect(LIGHT_CLARO_TOKENS.tipText).toBe('#004F70');
@@ -38,8 +38,8 @@ describe('Brandbook tokens (UX/UI v2 · A · 50/35/15)', () => {
     expect(LIGHT_CLARO_TOKENS.infoLight).toBe('#D5EEF2');
   });
 
-  it('dark accent stays recognition green; info is petrol tint', () => {
-    expect(DARK_CLARO_TOKENS.accent).toBe('#7DCD72');
+  it('dark accent stays recognition mint; info is petrol tint', () => {
+    expect(DARK_CLARO_TOKENS.accent).toBe('#7FFFD4');
     expect(DARK_CLARO_TOKENS.info).toBe('#7EBFD0');
     expect(DARK_CLARO_TOKENS.tipBg).toBe(DARK_CLARO_TOKENS.accentLight);
   });
@@ -58,12 +58,12 @@ describe('Brandbook tokens (UX/UI v2 · A · 50/35/15)', () => {
     }
   });
 
-  it('returns petrol-to-green gradient stops for light and dark', () => {
+  it('returns petrol-to-mint gradient stops for light and dark', () => {
     const light = getClaroGradient(false);
-    expect(light.colors).toEqual(['#004F70', '#006F83', '#7DCD72']);
+    expect(light.colors).toEqual(['#004F70', '#006F83', '#7FFFD4']);
 
     const dark = getClaroGradient(true);
-    expect(dark.colors).toEqual(['#0A2F3C', '#006F83', '#7DCD72']);
+    expect(dark.colors).toEqual(['#0A2F3C', '#006F83', '#7FFFD4']);
 
     const banned = new Set(
       [...LEGACY_MEDICAL_BLUE, ...LEGACY_NORDIC_SKY].map((h) => h.toUpperCase()),

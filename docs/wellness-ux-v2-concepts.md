@@ -163,11 +163,11 @@ Chip профиля → switcher / хаб: профиль / настройки /
 
 | ID | Название | Фон / surface / action / soft / ink | Характер |
 |----|----------|-------------------------------------|----------|
-| **A** | Forest & Linen / Brandbook 50/35/15 (**production**) | `#F4F8F5` / `#FFFFFF` / `#7DCD72` (green CTA, petrol ink) / petrol `#006F83` / mix `#004F70` / ink `#0E3A48` | Institutional green+petrol; `BrandField` / extended FAB |
+| **A** | Forest & Linen / Brandbook 50/35/15 (**production**) | `#F4F8F5` / `#FFFFFF` / `#7FFFD4` (mint CTA, petrol ink) / petrol `#006F83` / mix `#004F70` / ink `#0E3A48` | Institutional mint+petrol; `BrandField` / extended FAB |
 | **B** | Nordic Air (тёплый небо) — **архив** | `#F5F3EE` / `#FFFCF8` / `#4F8FB8` / `#D9EAF5` / `#1C2624` | Снят с production; остаётся в HTML для сравнения |
 | **C** | Dusty Beige Sky | `#F3EEE6` / `#F7F5F2` / `#6E8399` / `#E5E2DC` (+ `#E2E7ED`) / `#2A2926` | Concept only |
 
-**A wash:** green `#E5F6E2` → mist `#E8F3F0` → canvas `#F4F8F5`. Dark A: `#0A2F3C` / `#0E3A48` / action `#7DCD72` / soft `#143844`.
+**A wash:** mint `#E8FFF8` → mist `#E8F3F0` → canvas `#F4F8F5`. Dark A: `#0A2F3C` / `#0E3A48` / action `#7FFFD4` / soft `#143844`.
 
 **B wash (архив):** `#D9EAF5` → `#E8F1F6` → тёплый `#F3EDE4`.
 

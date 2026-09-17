@@ -7,11 +7,11 @@ vi.mock('react-native', () => ({
 }));
 
 /**
- * Brand primary is recognition green with petrol ink (`#004F70` on `#7DCD72`).
- * White-on-green fails AA; brandbook uses navy-on-green.
+ * Brand primary is recognition mint with petrol ink (`#004F70` on `#7FFFD4`).
+ * White-on-mint fails AA (~1.2:1); brandbook uses petrol-on-mint (~7.3:1).
  */
 const BRAND_BUTTON_NOTE = {
-  reason: 'ux-audit-2026-08 §13 — superseded by petrol-on-green AA in brandbook 50/35/15',
+  reason: 'ux-audit-2026-08 §13 — superseded by petrol-on-mint AA in brandbook 50/35/15',
 };
 
 const AA = 4.5;
@@ -40,7 +40,7 @@ describe('theme contrast', () => {
     }
   });
 
-  it('keeps petrol-on-green primary and dark onAccent/accent at AA', () => {
+  it('keeps petrol-on-mint primary and dark onAccent/accent at AA', () => {
     expectReadable(lightColors.onAccent, lightColors.accent, 'light onAccent/accent');
     expectReadable(darkColors.onAccent, darkColors.accent, 'dark onAccent/accent');
     expect(BRAND_BUTTON_NOTE.reason).toContain('§13');
