@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A-Claro — экранные формы (Canvas)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_tokens.css" />
+  <style>
+    body {
+      font-family: var(--sans);
+      background: linear-gradient(180deg, #eef2f7 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 32px 20px 48px;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--head);
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+
+    .lead {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+
+    .lead a { color: var(--accent); font-weight: 600; text-decoration: none; }
+    .lead a:hover { text-decoration: underline; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    td a:hover { text-decoration: underline; }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      background: var(--surface-muted);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--head);
+    }
+
+    .note {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      padding: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .note strong { color: var(--head); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Экранные формы A-Claro</h1>
+    <p class="lead">
+      As-is макеты для Desktop Canvas + HTML sync / handoff в <code>apps/mobile</code>.
+      Инструкция: <a href="README.md">README.md</a>.
+      Браузерная доска: <a href="board.html">board.html</a>.
+      Референс токенов: <a href="../design-mockup.html">design-mockup.html</a>.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Макет</th>
+          <th>Route</th>
+          <th>Код</th>
+          <th>Состояния</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="sos.html">sos.html</a></td>
+          <td><code>/(tabs)/sos</code></td>
+          <td><code>app/(tabs)/sos.tsx</code></td>
+          <td>default · empty profile</td>
+        </tr>
+        <tr>
+          <td><a href="home.html">home.html</a></td>
+          <td><code>/(tabs)/home</code></td>
+          <td><code>app/(tabs)/home.tsx</code></td>
+          <td>default · loading</td>
+        </tr>
+        <tr>
+          <td><a href="diary.html">diary.html</a></td>
+          <td><code>/(tabs)/diary</code></td>
+          <td><code>app/(tabs)/diary.tsx</code></td>
+          <td>default · empty history</td>
+        </tr>
+        <tr>
+          <td><a href="scanner.html">scanner.html</a></td>
+          <td><code>/(tabs)/scanner</code></td>
+          <td><code>app/(tabs)/scanner.tsx</code></td>
+          <td>default · result safe · error</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Приоритет handoff:</strong> SOS → Home → Diary → Scanner.<br />
+      Токены: <code>_tokens.css</code> ↔ <code>apps/mobile/src/constants/theme.ts</code>.
+      Имена блоков в макетах (<code>data-component</code>) совпадают с компонентами в коде.
+    </div>
+  </div>
+</body>
+</html>
