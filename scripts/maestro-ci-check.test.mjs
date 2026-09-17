@@ -37,6 +37,9 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(script, /Xmx4096m/);
     assert.match(script, /--no-parallel/);
     assert.match(script, /-Dorg\.gradle\.jvmargs=/);
+    // Nightly 35198863494: Maven 403 on gson killed preview assemble while staging
+    // on the same SHA succeeded. Retry the Gradle invocation a few times.
+    assert.match(script, /assemble_release_with_retry/);
   });
 
   it('runs emulator flows via the helper that installs the release APK', () => {
@@ -165,6 +168,7 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(randomPhone, /\+7999/);
 
     const stagingAuth = read('apps/mobile/.maestro/flows/staging-auth-smoke.yaml');
+    assert.match(stagingAuth, /id: profile-header-button/);
     assert.match(stagingAuth, /id: profile-screen-title/);
     assert.match(stagingAuth, /scrollUntilVisible/);
     assert.ok(
@@ -546,6 +550,14 @@ describe('Maestro nightly CI invariants', () => {
     assert.ok(
       flow.indexOf('id: screen-header-back') < flow.indexOf('id: tab-sos'),
       'sos-no-profile-smoke must leave the hub via screen-header-back before tab-sos',
+    );
+
+    const headerBtn = read('apps/mobile/src/components/ProfileHeaderButton.tsx');
+    assert.match(headerBtn, /testID="profile-header-button"/);
+    assert.doesNotMatch(
+      headerBtn,
+      /testID="profile-header-chip"/,
+      'Today named chip must keep profile-header-button (nightly 35198863494)',
     );
 
     const hub = read('apps/mobile/app/profile.tsx');
