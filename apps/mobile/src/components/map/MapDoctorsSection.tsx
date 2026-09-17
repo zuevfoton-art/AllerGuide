@@ -123,7 +123,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 10,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
       backgroundColor: colors.accentLight,
       paddingHorizontal: 6,
       paddingVertical: 2,
@@ -131,7 +131,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       overflow: 'hidden',
     },
     phoneLink: {
-      color: colors.accent,
+      color: colors.head,
       textDecorationLine: 'underline',
     },
   });

@@ -94,6 +94,7 @@ Institutional Petrol `#006F83` / `#004F70` **разрешён** — это не 
 | Onboarding waves | accentLight + accent + info |
 | H1, KPI | `head` / display type |
 | Primary CTA / FAB | `accent` (mint) + `onAccent` (petrol) |
+| Text links («Подробнее», «Свернуть», «Войти», ghost) | `head` (petrol ink) — не mint `accent` |
 | Info / cool hint | `info` / `infoLight` |
 
 ---

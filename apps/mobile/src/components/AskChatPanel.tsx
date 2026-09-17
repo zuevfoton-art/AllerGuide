@@ -112,28 +112,31 @@ export function useAskChat({
     setDraft((prev) => mergeVoiceIntoField(prev, transcript));
   }, []);
 
+  const suggestionChips = (
+    <View style={styles.chipRow}>
+      {quickQuestions.map((question, index) => (
+        <ActionChip
+          key={`quick-${index}`}
+          testID={`ask-quick-${index}`}
+          label={question}
+          disabled={busy}
+          onPress={() => void send(question)}
+        />
+      ))}
+      {ASK_SUGGESTION_IDS.map((id: AskSuggestionId) => (
+        <ActionChip
+          key={id}
+          testID={`ask-suggest-${id}`}
+          label={t(`ask.suggestions.${id}`)}
+          disabled={busy}
+          onPress={() => void send(t(`ask.suggestions.${id}`))}
+        />
+      ))}
+    </View>
+  );
+
   const composer = (
     <View style={styles.composer} testID={`${testID}-composer`}>
-      <View style={styles.chipRow}>
-        {quickQuestions.map((question, index) => (
-          <ActionChip
-            key={`quick-${index}`}
-            testID={`ask-quick-${index}`}
-            label={question}
-            disabled={busy}
-            onPress={() => void send(question)}
-          />
-        ))}
-        {ASK_SUGGESTION_IDS.map((id: AskSuggestionId) => (
-          <ActionChip
-            key={id}
-            testID={`ask-suggest-${id}`}
-            label={t(`ask.suggestions.${id}`)}
-            disabled={busy}
-            onPress={() => void send(t(`ask.suggestions.${id}`))}
-          />
-        ))}
-      </View>
       <View style={styles.ovalRow}>
         {voiceSupported ? (
           <VoiceNoteButton
@@ -147,11 +150,11 @@ export function useAskChat({
           testID="ask-input"
           value={draft}
           onChangeText={setDraft}
-          placeholder={t('ask.inputPlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
+          placeholder=""
           style={styles.ovalInput}
           editable={!busy}
-          multiline
+          multiline={false}
+          numberOfLines={1}
           maxLength={500}
           accessibilityLabel={t('ask.inputPlaceholder')}
         />
@@ -235,6 +238,8 @@ export function useAskChat({
           ))}
         </GlassCard>
       ) : null}
+
+      {suggestionChips}
     </View>
   );
 
@@ -279,7 +284,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: fontSizes.bodySm,
       lineHeight: lineHeights.bodySm,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     body: {
       fontFamily: fonts.sans,
@@ -321,10 +326,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     ovalRow: {
       flexDirection: 'row',
-      alignItems: 'flex-end',
+      alignItems: 'center',
       gap: 6,
-      minHeight: density.tapMinHeight + 4,
-      maxHeight: 104,
+      minHeight: density.tapMinHeight,
       borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
@@ -336,10 +340,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     ovalInput: {
       flex: 1,
-      minHeight: density.tapMinHeight - 4,
-      maxHeight: 88,
+      minHeight: density.tapMinHeight - 8,
       paddingHorizontal: 8,
-      paddingVertical: 10,
+      paddingVertical: 8,
       fontFamily: fonts.sans,
       fontSize: WEB_INPUT_FONT_SIZE,
       color: colors.text,
@@ -351,7 +354,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
-      marginBottom: 2,
     },
     sendBtnDisabled: {
       backgroundColor: colors.border,
@@ -381,7 +383,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: fontSizes.bodySm,
       lineHeight: lineHeights.bodySm,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
   });
 }

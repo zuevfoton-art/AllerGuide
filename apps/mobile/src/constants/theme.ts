@@ -218,6 +218,9 @@ export function createShadows(colors: ThemeColors) {
     md: makeShadow(shadowBase, 2, 8, 0.1, 3),
     /** @deprecated use sm — flat clinical cards */
     glass: makeShadow(shadowBase, 1, 3, 0.06, 2),
+    /** Dark drop shadow for raised ACTION controls (readable on mint/light fills). */
+    raised: makeShadow(shadowBase, 3, 6, 0.22, 5),
+    raisedStrong: makeShadow(shadowBase, 5, 12, 0.28, 8),
     accent: makeShadow(colors.accent, 2, 6, 0.2, 3),
     accentLg: makeShadow(colors.accent, 4, 10, 0.25, 4),
     danger: makeShadow(colors.danger, 4, 8, 0.25, 4),

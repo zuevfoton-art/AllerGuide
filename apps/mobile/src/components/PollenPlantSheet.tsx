@@ -140,7 +140,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     typeBadge: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 11,
-      color: colors.accent,
+      color: colors.head,
       backgroundColor: colors.accentLight,
       borderRadius: 4,
       paddingHorizontal: 8,
@@ -162,7 +162,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     crossTitle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
-      color: colors.accent,
+      color: colors.head,
     },
     empty: {
       fontFamily: fonts.sans,

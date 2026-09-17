@@ -45,7 +45,7 @@ export function ActionChip({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     chip: {
       minHeight: density.tapMinHeight,
@@ -56,10 +56,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       alignItems: 'center',
       justifyContent: 'center',
+      ...(shadows.raised as object),
     },
     chipSelected: {
       backgroundColor: colors.accent,
       borderColor: colors.accent,
+      ...(shadows.raisedStrong as object),
     },
     chipDisabled: { opacity: 0.45 },
     label: {
