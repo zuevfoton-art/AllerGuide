@@ -8,7 +8,8 @@ export const CLOUD_SYNC_ENABLED = process.env.EXPO_PUBLIC_CLOUD_SYNC === 'true';
 export const AI_SCAN_ENABLED = process.env.EXPO_PUBLIC_AI_SCAN_ENABLED === 'true';
 
 /**
- * «Ask» explainer chat via POST /api/ask (north-star N9). Default off.
+ * «Ask» explainer chat via POST /api/ask (north-star N9). Default on for
+ * local + staging (`EXPO_PUBLIC_AI_CHAT=true`); production EAS stays off.
  * Requires AI_CHAT_ENABLED + AI_SCAN_ENABLED on the API. Offline falls back to
  * bundled expert cards; distress wording opens SOS without calling the model.
  */

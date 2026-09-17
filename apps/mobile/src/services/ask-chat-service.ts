@@ -9,6 +9,7 @@ import {
 } from '@allerguide/core';
 import { AI_CHAT_ENABLED } from '@/src/constants/features';
 import { apiRequest } from '@/src/services/api-client';
+import { getBackendAuthToken } from '@/src/services/auth-service';
 import { trackEvent } from '@/src/services/analytics-service';
 import { getSetting, setSetting } from '@/src/services/settings-service';
 
@@ -157,8 +158,10 @@ export async function sendAskQuestion(input: {
       .slice(-6)
       .map((message) => ({ role: message.role, text: message.text }));
 
+    const token = await getBackendAuthToken();
     const response = await apiRequest<AskApiResponse>('/api/ask', {
       method: 'POST',
+      token,
       body: {
         question: parsed.text,
         locale: input.locale,
