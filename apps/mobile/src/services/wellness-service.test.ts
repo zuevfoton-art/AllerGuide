@@ -43,4 +43,15 @@ describe('wellness-service GPS fallback', () => {
     expect(snapshot.regionId).toBe('moscow');
     expect(snapshot.locationLabel).toBe('Moscow');
   });
+
+  it('exposes immune-balance rings and the selected day', async () => {
+    const { fetchWellnessSnapshot } = await import('./wellness-service');
+    const snapshot = await fetchWellnessSnapshot('[]', [], 'ru', undefined, {
+      asOf: new Date(2026, 8, 10),
+    });
+    expect(snapshot.asOf).toBe('2026-09-10');
+    expect(snapshot.rings.pollen).toBeGreaterThanOrEqual(0);
+    expect(snapshot.rings.pollen).toBeLessThanOrEqual(100);
+    expect(snapshot.rings.clinical).toBeNull();
+  });
 });

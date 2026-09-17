@@ -185,8 +185,8 @@ function isZeroSeverityCheckIn(entry: { type: string; details: string }): boolea
   return normalizeSeverity(payload.answers, 'Симптомы') === 0;
 }
 
-export function computeDiaryInsights(entries: DiaryEntry[]): DiaryInsights {
-  const today = new Date();
+export function computeDiaryInsights(entries: DiaryEntry[], asOf: Date = new Date()): DiaryInsights {
+  const today = asOf;
 
   const days: DayBucket[] = [];
   for (let i = 6; i >= 0; i--) {
@@ -206,7 +206,7 @@ export function computeDiaryInsights(entries: DiaryEntry[]): DiaryInsights {
   for (const day of days) bucketMap[day.iso] = day;
 
   const weekTypes: Record<string, number> = {};
-  const cutoff7 = Date.now() - 7 * 86_400_000;
+  const cutoff7 = asOf.getTime() - 7 * 86_400_000;
 
   for (const entry of entries) {
     const d = new Date(entry.createdAt);

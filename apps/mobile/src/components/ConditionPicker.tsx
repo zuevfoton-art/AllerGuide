@@ -162,7 +162,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.textSecondary,
     },
-    chipTextActive: { color: colors.accent },
+    chipTextActive: { color: colors.head },
     optionsBlock: { gap: 6 },
     otherBlock: { gap: 6 },
     optionsTitle: {

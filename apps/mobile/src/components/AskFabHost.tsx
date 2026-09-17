@@ -74,7 +74,7 @@ export function AskFabHost() {
             accessibilityRole="button"
             accessibilityLabel={label}
             onPress={() => setOpen(true)}
-            style={[styles.fab, shadows.accentLg]}>
+            style={[styles.fab, shadows.raisedStrong]}>
             <Ionicons name="chatbubble-ellipses" size={24} color={colors.onAccent} />
             {extended ? (
               <Text {...scaledTextProps} style={styles.label} numberOfLines={1}>

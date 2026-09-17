@@ -333,7 +333,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     filterTextActive: {
-      color: colors.accent,
+      color: colors.head,
     },
     banner: {
       flexDirection: 'row',

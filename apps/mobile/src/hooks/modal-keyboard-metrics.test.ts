@@ -9,11 +9,11 @@ describe('resolveModalKeyboardAvoidance', () => {
     expect(result.insetStyle).toEqual({ paddingBottom: 320 });
   });
 
-  it('uses iOS KeyboardAvoidingView padding without Android lift styles', () => {
+  it('uses iOS KeyboardAvoidingView padding and also lifts when inset is known', () => {
     const result = resolveModalKeyboardAvoidance('ios', 280);
     expect(result.behavior).toBe('padding');
-    expect(result.liftStyle).toBeUndefined();
-    expect(result.insetStyle).toBeUndefined();
+    expect(result.liftStyle).toEqual({ marginBottom: 280 });
+    expect(result.insetStyle).toEqual({ paddingBottom: 280 });
   });
 
   it('applies visualViewport lift/inset on web when the keyboard is open', () => {

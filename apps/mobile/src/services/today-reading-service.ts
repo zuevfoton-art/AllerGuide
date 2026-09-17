@@ -1,6 +1,9 @@
 import {
   buildDailyReading,
   hasDiaryEntryOnDate,
+  addLocalDays,
+  isSameLocalDay,
+  startOfLocalDay,
   type DailyReadingActionId,
   type DailyReadingTone,
   type DiaryEntry,
@@ -73,6 +76,26 @@ export function buildTodayReading(input: {
 
 export function hasCheckedInToday(entries: DiaryEntry[], now = new Date()): boolean {
   return hasDiaryEntryOnDate(entries, now, now);
+}
+
+export function formatBalanceDayLabel(
+  locale: string,
+  date: Date,
+  t: Translate,
+  now = new Date(),
+): string {
+  if (isSameLocalDay(date, now)) return t('home.balanceDayToday');
+  const yesterday = addLocalDays(startOfLocalDay(now), -1);
+  if (isSameLocalDay(date, yesterday)) return t('home.balanceDayYesterday');
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    }).format(date);
+  } catch {
+    return date.toDateString();
+  }
 }
 
 /** Locale-aware «Wednesday, 9 September» eyebrow above the Today title. */

@@ -106,7 +106,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     hint: {
       fontFamily: fonts.sans,
@@ -135,7 +135,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     statsRow: { flexDirection: 'row', gap: 8 },
     stat: {

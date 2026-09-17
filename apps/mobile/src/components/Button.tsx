@@ -22,7 +22,8 @@ type ButtonProps = PressableProps & {
 const TEXT_COLORS: Record<ButtonVariant, keyof AppTheme['colors']> = {
   primary: 'onAccent',
   secondary: 'text',
-  ghost: 'info',
+  // Ghost is a text link — petrol ink, not mint recognition fill.
+  ghost: 'head',
   danger: 'onDanger',
 };
 
@@ -72,7 +73,7 @@ export function Button({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme, scale: number) {
+function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
   return StyleSheet.create({
     base: {
       flexDirection: 'row',
@@ -97,17 +98,33 @@ function createStyles({ colors, fonts }: AppTheme, scale: number) {
       paddingVertical: 14,
     },
     block: { width: '100%' },
-    primary: { backgroundColor: colors.accent },
+    primary: {
+      backgroundColor: colors.accent,
+      // Petrol contour on mint fill (brand composition ink).
+      borderWidth: 2,
+      borderColor: colors.head,
+      ...(shadows.raisedStrong as object),
+    },
     secondary: {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
       minHeight: density.tapMinHeightSecondary,
+      ...(shadows.raised as object),
     },
     ghost: { backgroundColor: 'transparent', minHeight: 36, paddingHorizontal: 0 },
-    danger: { backgroundColor: colors.danger },
+    danger: {
+      backgroundColor: colors.danger,
+      borderWidth: 2,
+      borderColor: colors.dangerBorder,
+      ...(shadows.raisedStrong as object),
+    },
     disabled: { opacity: disabledOpacity },
-    pressed: { opacity: pressedOpacity },
+    pressed: {
+      opacity: pressedOpacity,
+      transform: [{ translateY: 1 }],
+      ...(shadows.sm as object),
+    },
     text: {
       fontFamily: fonts.sansSemiBold,
       fontSize: Math.round(fontSizes.body * scale),

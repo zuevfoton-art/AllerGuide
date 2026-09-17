@@ -168,7 +168,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     chipTextActive: {
-      color: colors.accent,
+      color: colors.head,
       fontFamily: fonts.sansMedium,
     },
   });

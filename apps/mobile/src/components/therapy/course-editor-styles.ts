@@ -34,7 +34,7 @@ export function createCourseEditorStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     catalogPickerBtn: {
       flexDirection: 'row',
@@ -69,7 +69,7 @@ export function createCourseEditorStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.textSecondary,
     },
-    uploadChipTextActive: { color: colors.accent },
+    uploadChipTextActive: { color: colors.head },
     routeBubbles: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     routeBubble: {
       paddingVertical: 9,
@@ -106,7 +106,7 @@ export function createCourseEditorStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'center',
       paddingVertical: 12,
     },
-    ocrBtnText: { fontFamily: fonts.sansSemiBold, fontSize: 14, fontWeight: '600', color: colors.accent },
+    ocrBtnText: { fontFamily: fonts.sansSemiBold, fontSize: 14, fontWeight: '600', color: colors.head },
     ocrHint: {
       fontFamily: fonts.sans,
       fontSize: 12,
@@ -150,7 +150,7 @@ export function createCourseEditorStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
     modalSheet: {
@@ -171,7 +171,7 @@ export function createCourseEditorStyles({ colors, fonts }: AppTheme) {
     },
     modalTitle: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.text },
     modalCancel: { fontFamily: fonts.sans, fontSize: 15, color: colors.textSecondary },
-    modalDone: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.accent },
+    modalDone: { fontFamily: fonts.sans, fontSize: 15, fontWeight: '700', color: colors.head },
     modalDoneDisabled: { opacity: 0.4 },
     parseInput: {
       flex: 1,

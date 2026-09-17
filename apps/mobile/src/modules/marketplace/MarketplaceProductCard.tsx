@@ -210,7 +210,7 @@ function createStyles({ colors, fonts }: AppTheme, compact: boolean) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
   });
 }

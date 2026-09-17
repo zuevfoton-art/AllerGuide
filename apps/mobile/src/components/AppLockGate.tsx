@@ -157,7 +157,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     secondaryText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
-      color: colors.accent,
+      color: colors.head,
       fontWeight: '600',
     },
   });

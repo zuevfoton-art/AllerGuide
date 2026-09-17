@@ -196,7 +196,7 @@ export function ProfileHeaderButton({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     hintAnchor: {
       alignSelf: 'flex-start',
@@ -210,6 +210,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',
+      ...(shadows.raised as object),
     },
     chip: {
       flexDirection: 'row',
@@ -223,6 +224,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.accentMid,
       maxWidth: 220,
       flexShrink: 1,
+      ...(shadows.raised as object),
     },
     chipTextCol: { flexShrink: 1, gap: 1, minWidth: 0 },
     chipTitle: {

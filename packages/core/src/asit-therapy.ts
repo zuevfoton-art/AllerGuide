@@ -266,8 +266,9 @@ function mapSystemicReaction(value: string | undefined): keyof AsitComplianceSum
 export function computeAsitCompliance(
   entries: { type: string; details: string; createdAt: string }[],
   periodDays = 30,
+  asOf: Date = new Date(),
 ): AsitComplianceSummary {
-  const cutoff = Date.now() - periodDays * 86_400_000;
+  const cutoff = asOf.getTime() - periodDays * 86_400_000;
   const summary: AsitComplianceSummary = {
     totalDoses: 0,
     onTime: 0,

@@ -156,7 +156,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     tokenLink: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
-      color: colors.accent,
+      color: colors.head,
       fontWeight: '600',
     },
     offlineBox: {

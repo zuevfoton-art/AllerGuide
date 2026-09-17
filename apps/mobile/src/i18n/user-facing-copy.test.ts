@@ -10,7 +10,14 @@ const BLOCKED_PATTERNS: { id: string; pattern: RegExp }[] = [
   { id: 'шкал', pattern: /шкал/i },
 ];
 
-const ALLOWED_PATHS = new Set(['asthma.ginaLink']);
+const ALLOWED_PATHS = new Set([
+  'asthma.ginaLink',
+  'home.scaleAct',
+  'home.scaleAria',
+  'home.scaleGinaHint',
+  'home.scaleScorad',
+  'home.scaleUas7',
+]);
 
 function flattenMessages(
   value: unknown,
@@ -33,7 +40,7 @@ describe('user-facing locale copy', () => {
     expect(LOCALE_MESSAGES.en.scanner.verdictStop).toBe('High risk');
   });
 
-  it('keeps clinical acronyms and «шкал» out of user strings', () => {
+  it('keeps clinical acronyms out of recommendations copy (rings/sheet keys are allowlisted)', () => {
     const violations: string[] = [];
 
     for (const [locale, messages] of Object.entries(LOCALE_MESSAGES)) {

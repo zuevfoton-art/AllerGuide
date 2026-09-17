@@ -140,7 +140,7 @@ export default function ScannerScreen() {
             onPress={() => void scan.openCamera('barcode')}
             testID="scanner-barcode"
             accessibilityRole="button">
-            <Ionicons name="barcode-outline" size={18} color={theme.colors.accent} />
+            <Ionicons name="barcode-outline" size={18} color={theme.colors.head} />
             <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
           </Pressable>
         </HintAnchor>
@@ -151,7 +151,7 @@ export default function ScannerScreen() {
             testID="scanner-toggle-manual"
             accessibilityRole="button"
             accessibilityState={{ expanded: scan.manualOpen }}>
-            <Ionicons name="create-outline" size={18} color={theme.colors.accent} />
+            <Ionicons name="create-outline" size={18} color={theme.colors.head} />
             <Text style={styles.secondaryBtnText}>
               {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
             </Text>
