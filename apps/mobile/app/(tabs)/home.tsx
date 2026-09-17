@@ -311,7 +311,7 @@ export default function HomeScreen() {
             accessibilityLabel={t('home.factorOpenClinical')}
             style={ui.kpiRow}>
             <Text style={ui.kpiLabel}>{t('home.clinical')}</Text>
-            <Text style={ui.kpiValue}>{t('home.clinicalOpen')}</Text>
+            <Text style={ui.kpiValue}>{wellness.rings.clinical}%</Text>
           </Pressable>
         ) : null}
       </GlassCard>

@@ -215,7 +215,7 @@ const stylesShared = StyleSheet.create({
   legendRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: density.pickerRowGap,
   },
   swatch: {
     width: 8,

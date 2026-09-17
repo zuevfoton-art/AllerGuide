@@ -306,7 +306,6 @@ const en: LocaleMessages = {
     wellnessHideDetails: 'Hide details',
     primaryFactorLabel: 'Main factor',
     clinical: 'Scores',
-    clinicalOpen: 'ACT / ARIA / GINA',
     numbersTitle: 'Numbers and percents',
     balanceDayToday: 'Today',
     balanceDayYesterday: 'Yesterday',

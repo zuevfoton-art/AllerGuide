@@ -114,17 +114,19 @@ function RingArc({
         strokeWidth={width}
         fill="none"
       />
-      <Circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        stroke={color}
-        strokeWidth={width}
-        fill="none"
-        strokeDasharray={`${dash} ${circumference}`}
-        strokeLinecap="round"
-        transform={`rotate(-90 ${cx} ${cy})`}
-      />
+      {clamped > 0 ? (
+        <Circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          stroke={color}
+          strokeWidth={width}
+          fill="none"
+          strokeDasharray={`${dash} ${circumference}`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${cx} ${cy})`}
+        />
+      ) : null}
     </>
   );
 }

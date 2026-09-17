@@ -12,7 +12,6 @@ const BLOCKED_PATTERNS: { id: string; pattern: RegExp }[] = [
 
 const ALLOWED_PATHS = new Set([
   'asthma.ginaLink',
-  'home.clinicalOpen',
   'home.scaleAct',
   'home.scaleAria',
   'home.scaleGinaHint',

@@ -310,7 +310,6 @@ export type LocaleMessages = {
     wellnessHideDetails: string;
     primaryFactorLabel: string;
     clinical: string;
-    clinicalOpen: string;
     numbersTitle: string;
     balanceDayToday: string;
     balanceDayYesterday: string;

@@ -99,8 +99,8 @@ function PercentRow({
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     scroll: { flex: 1, minHeight: 0 },
-    content: { paddingHorizontal: 16, paddingBottom: density.tapMinHeight, gap: space[2] },
-    scaleBlock: { gap: 2 },
+    content: { paddingHorizontal: space[4], paddingBottom: density.tapMinHeight, gap: space[2] },
+    scaleBlock: { gap: space[1] },
     detail: {
       fontFamily: fonts.sans,
       fontSize: fontSizes.caption,

@@ -307,7 +307,6 @@ const ru: LocaleMessages = {
     wellnessHideDetails: 'Скрыть подробности',
     primaryFactorLabel: 'Главный фактор',
     clinical: 'Оценки',
-    clinicalOpen: 'ACT / ARIA / GINA',
     numbersTitle: 'Числа и проценты',
     balanceDayToday: 'Сегодня',
     balanceDayYesterday: 'Вчера',

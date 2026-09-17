@@ -109,7 +109,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       marginTop: space[2],
     },
     sheetBody: {
-      paddingHorizontal: 16,
+      paddingHorizontal: space[4],
       paddingBottom: density.tapMinHeight,
       gap: space[2],
     },
