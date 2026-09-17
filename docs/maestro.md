@@ -17,6 +17,8 @@ Smoke-тесты UI на **нативных** сборках (Android emulator /
 | Android emulator | API 34+ |
 | APK | preview или staging (см. ниже) |
 
+> **Cloud Agent VM эмулятор не запустит.** Вложенный KVM там нерабочий: `emulator` висит на ~0% CPU и не появляется в `adb devices` (`KVM_CREATE_VCPU` падает, хотя `emulator -accel-check` пишет «KVM is installed and usable»). Собрать APK через Gradle можно, прогнать flow — нет; это делает [`maestro-nightly.yml`](../.github/workflows/maestro-nightly.yml) на GitHub Actions. Anchor'ы, которые уезжают за край скролла или под клавиатуру (см. [§ Troubleshooting](#troubleshooting)), проверяют на web-сборке: вьюпорт сжимают до геометрии AVD с открытой клавиатурой и меряют `getBoundingClientRect` + `elementFromPoint`.
+
 ---
 
 ## Структура
