@@ -40,7 +40,7 @@ powershell -ExecutionPolicy Bypass -File docs/screens/canvas/install-windows.ps1
 |------|------------|
 | [`index.html`](./index.html) | Оглавление |
 | [`board.html`](./board.html) | Handoff board (браузер) |
-| [`_tokens.css`](./_tokens.css) | Dual Calm (= `theme.ts`) |
+| [`_tokens.css`](./_tokens.css) | Dual Calm as-is (июль 2026). Production-токены — `apps/mobile/src/constants/theme.ts` и [`brand-claro-green.md`](../brand-claro-green.md) |
 | [`_phone-frame.css`](./_phone-frame.css) | Phone frame |
 | `sos.html` · `home.html` · `diary.html` · `scanner.html` | As-is макеты |
 | [`canvas/`](./canvas/) | Portable `.canvas.tsx` + install scripts |
