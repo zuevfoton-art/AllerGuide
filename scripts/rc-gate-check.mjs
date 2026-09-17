@@ -550,6 +550,18 @@ function checkMaestroFlows() {
   ) {
     failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
   }
+  const profileHeader = fs.readFileSync(
+    path.join(root, 'apps/mobile/src/components/ProfileHeaderButton.tsx'),
+    'utf8',
+  );
+  if (
+    !profileHeader.includes('testID="profile-header-button"') ||
+    profileHeader.includes('testID="profile-header-chip"')
+  ) {
+    failures.push(
+      'ProfileHeaderButton chip chrome must keep testID profile-header-button (nightly 35198863494)',
+    );
+  }
 
   const settingsSmoke = fs.readFileSync(path.join(flowsDir, 'settings-smoke.yaml'), 'utf8');
   if (

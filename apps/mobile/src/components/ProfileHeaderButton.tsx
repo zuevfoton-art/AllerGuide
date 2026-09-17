@@ -71,7 +71,9 @@ export function ProfileHeaderButton({
   const trigger =
     showChip && resolvedTitle ? (
       <Pressable
-        testID="profile-header-chip"
+        // Nightly 35198863494: Today chrome is the named chip, but smoke still
+        // taps `profile-header-button` (staging-auth, settings, SOS-no-profile).
+        testID="profile-header-button"
         style={styles.chip}
         onPress={openTrigger}
         accessibilityRole="button"

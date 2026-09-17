@@ -118,9 +118,21 @@ cd android
 # Metro embeds EXPO_PUBLIC_* only when NODE_ENV=production (same as staging-apk-gradle.yml).
 # Emulator in nightly is x86_64 — skip unused ABIs.
 # --no-parallel keeps D8 mergeDex off competing workers on the 4g heap.
-NODE_ENV=production ./gradlew assembleRelease --no-daemon --no-parallel \
-  -Dorg.gradle.jvmargs="$MAESTRO_GRADLE_JVMARGS" \
-  -PreactNativeArchitectures=x86_64
+# Nightly 35198863494: preview hit Maven 403 for gson while staging assembled.
+assemble_release_with_retry() {
+  local attempt
+  for attempt in 1 2 3; do
+    if NODE_ENV=production ./gradlew assembleRelease --no-daemon --no-parallel \
+      -Dorg.gradle.jvmargs="$MAESTRO_GRADLE_JVMARGS" \
+      -PreactNativeArchitectures=x86_64; then
+      return 0
+    fi
+    echo "Gradle assembleRelease failed (attempt ${attempt}/3); retrying in $((attempt * 20))s"
+    sleep $((attempt * 20))
+  done
+  return 1
+}
+assemble_release_with_retry
 
 APK="$PWD/app/build/outputs/apk/release/app-release.apk"
 if [ ! -f "$APK" ]; then
