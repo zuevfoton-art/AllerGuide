@@ -100,6 +100,9 @@ function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
     block: { width: '100%' },
     primary: {
       backgroundColor: colors.accent,
+      // Petrol contour on mint fill (brand composition ink).
+      borderWidth: 2,
+      borderColor: colors.head,
       ...(shadows.accent as object),
     },
     secondary: {
