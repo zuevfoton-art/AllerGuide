@@ -309,6 +309,26 @@ export type LocaleMessages = {
     wellnessDetails: string;
     wellnessHideDetails: string;
     primaryFactorLabel: string;
+    clinical: string;
+    clinicalOpen: string;
+    numbersTitle: string;
+    balanceDayToday: string;
+    balanceDayYesterday: string;
+    balancePrevDay: string;
+    balanceNextDay: string;
+    balanceStatusA11y: string;
+    balanceScoreA11y: string;
+    feelPickTitle: string;
+    feelMark: string;
+    factorOpenPollen: string;
+    factorOpenAir: string;
+    factorOpenDiary: string;
+    factorOpenClinical: string;
+    scaleAct: string;
+    scaleAria: string;
+    scaleGinaHint: string;
+    scaleScorad: string;
+    scaleUas7: string;
   };
   diary: {
     title: string;

@@ -72,6 +72,7 @@ export * from './ask-chat';
 export * from './diary-triggers';
 export * from './wellness';
 export * from './wellness-display';
+export * from './immune-balance';
 export * from './daily-reading';
 export * from './crisis-plan';
 export * from './wellness-weights';

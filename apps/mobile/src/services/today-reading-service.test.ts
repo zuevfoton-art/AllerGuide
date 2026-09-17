@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildTodayReading,
+  formatBalanceDayLabel,
   formatTodayDate,
   hasCheckedInToday,
 } from '@/src/services/today-reading-service';
@@ -84,6 +85,17 @@ describe('hasCheckedInToday', () => {
   it('is false for yesterday', () => {
     const entries = [{ createdAt: '2026-09-08T23:30:00' }] as unknown as DiaryEntry[];
     expect(hasCheckedInToday(entries, now)).toBe(false);
+  });
+});
+
+describe('formatBalanceDayLabel', () => {
+  it('uses today / yesterday keys and a short date otherwise', () => {
+    const now = new Date(2026, 8, 16);
+    expect(formatBalanceDayLabel('ru', now, t, now)).toBe('home.balanceDayToday');
+    expect(formatBalanceDayLabel('ru', new Date(2026, 8, 15), t, now)).toBe(
+      'home.balanceDayYesterday',
+    );
+    expect(formatBalanceDayLabel('ru', new Date(2026, 8, 14), t, now)).toBeTruthy();
   });
 });
 

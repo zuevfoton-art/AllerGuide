@@ -35,6 +35,10 @@ describe('GINA asthma governance', () => {
     expect(PEF_ZONE_YELLOW_MIN_PERCENT).toBe(GINA_PEF_YELLOW_MIN_PERCENT);
   });
 
+  it('registers the home immune-balance clinical ring as a GINA feature', () => {
+    expect(GINA_ASTHMA_FEATURE_IDS).toContain('immune-balance-clinical-ring');
+  });
+
   it('registers asthma trigger quick-pick as a GINA feature, not a threshold', () => {
     expect(GINA_ASTHMA_FEATURE_IDS).toContain('asthma-trigger-recommendations');
     expect(CONDITION_RECOMMENDED_ALLERGEN_IDS.asthma).toEqual(

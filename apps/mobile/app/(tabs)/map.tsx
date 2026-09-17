@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import {
   buildPlacesMapUrl,
   buildPollenRiskMapUrl,
@@ -73,11 +74,18 @@ export default function MapScreen() {
   const ui = useUiStyles();
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.activeProfile);
+  const { layer: layerParam } = useLocalSearchParams<{ layer?: string }>();
 
   const [selectedTaxonId, setSelectedTaxonId] = useState<PollenMapTaxonId>('birch_pollen');
   const [layerMode, setLayerMode] = useState<MapLayerMode>('pollen');
   const [selectedForecastDay, setSelectedForecastDay] = useState<number | null>(null);
   const [allergenPickerOpen, setAllergenPickerOpen] = useState(false);
+
+  useEffect(() => {
+    if (layerParam === 'air' || layerParam === 'places' || layerParam === 'pollen') {
+      setLayerMode(layerParam);
+    }
+  }, [layerParam]);
 
   const {
     coords,

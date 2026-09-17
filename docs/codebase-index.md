@@ -149,7 +149,7 @@ src/modules/marketplace/
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
 | `(tabs)/_layout.tsx` | 4 вкладки (Сегодня, Журнал, Скан, Карта) + SOS control; маркет не вкладка |
-| `(tabs)/home.tsx` | Сегодня: daily reading, чек-ин 0–3, кольцо недели, home-insights |
+| `(tabs)/home.tsx` | Сегодня: кольца иммунного баланса, компактные бабблы «Сегодня» / «Самочувствие», факторы-действия, кольцо недели, home-insights |
 | `(tabs)/diary.tsx` | Журнал: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |

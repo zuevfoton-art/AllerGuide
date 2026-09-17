@@ -5,13 +5,18 @@ import {
   latestDiaryTimestamp,
   calendarDaysBetween,
   resolveReturnStage,
+  shiftImmuneBalanceDay,
+  startOfLocalDay,
   type DiaryEntry,
 } from '@allerguide/core';
 import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
 import { DailyReadingCard } from '@/src/components/DailyReadingCard';
 import { WeekRingCard } from '@/src/components/WeekRingCard';
+import { ImmuneBalanceCard } from '@/src/components/ImmuneBalanceCard';
+import { ImmuneBalanceStatusSheet } from '@/src/components/ImmuneBalanceStatusSheet';
 import {
   buildTodayReading,
+  formatBalanceDayLabel,
   formatTodayDate,
   hasCheckedInToday,
 } from '@/src/services/today-reading-service';
@@ -38,7 +43,7 @@ import { Disclaimer } from '@/src/components/Disclaimer';
 import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { radii } from '@/src/constants/layout';
+import { radii, space } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
@@ -57,7 +62,8 @@ export default function HomeScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay(new Date()));
+  const [statusOpen, setStatusOpen] = useState(false);
   const prescribedCourse = activeProfileId ? getPrescribedCourse(activeProfileId) : null;
 
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
@@ -75,7 +81,7 @@ export default function HomeScreen() {
       lat: location.lat,
       lon: location.lon,
       label: location.label,
-    }, { profileId: activeProfileId ?? undefined });
+    }, { profileId: activeProfileId ?? undefined, asOf: selectedDay });
   });
   const wellness = wellnessState.data;
   const loadingWellness = wellnessState.loading;
@@ -90,6 +96,10 @@ export default function HomeScreen() {
     }
     void loadDiaryEntriesForHome(activeProfileId).then(setDiaryEntries);
   }, [reloadWellness, activeProfileId]);
+
+  useEffect(() => {
+    void reloadWellness();
+  }, [selectedDay, reloadWellness]);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,6 +142,10 @@ export default function HomeScreen() {
 
   const checkedInToday = useMemo(() => hasCheckedInToday(diaryEntries), [diaryEntries]);
   const dateLabel = useMemo(() => formatTodayDate(locale), [locale]);
+  const balanceDayLabel = useMemo(
+    () => formatBalanceDayLabel(locale, selectedDay, t),
+    [locale, selectedDay, t],
+  );
   const reading = useMemo(
     () => buildTodayReading({ profile, wellness, t }),
     [profile, wellness, t],
@@ -210,6 +224,16 @@ export default function HomeScreen() {
           <SkeletonCard lines={3} />
           <SkeletonCard lines={2} />
         </>
+      ) : wellness ? (
+        <HintAnchor id="home.wellness" testID="home-wellness-kpi">
+          <ImmuneBalanceCard
+            wellness={wellness}
+            selectedDay={selectedDay}
+            dayLabel={balanceDayLabel}
+            onShiftDay={(delta) => setSelectedDay((day) => shiftImmuneBalanceDay(day, delta))}
+            onOpenStatus={() => setStatusOpen(true)}
+          />
+        </HintAnchor>
       ) : (
         <HintAnchor id="home.wellness" testID="home-wellness-kpi">
           <DailyReadingCard reading={reading} />
@@ -218,11 +242,15 @@ export default function HomeScreen() {
 
       {activeProfileId && !(loadingWellness && !wellness) ? (
         <>
-          <QuickCheckInCard
-            profileId={activeProfileId}
-            checkedInToday={checkedInToday}
-            onSaved={reloadHomeData}
-          />
+          <View style={styles.bubbleRow}>
+            <DailyReadingCard reading={reading} compact />
+            <QuickCheckInCard
+              profileId={activeProfileId}
+              checkedInToday={checkedInToday}
+              onSaved={reloadHomeData}
+              compact
+            />
+          </View>
           <WeekRingCard entries={diaryEntries} surface="today" />
         </>
       ) : null}
@@ -231,8 +259,9 @@ export default function HomeScreen() {
       <GlassCard variant="soft">
         <CardTitle>{t('home.factors')}</CardTitle>
         <Pressable
-          onPress={() => setDetailsOpen(true)}
+          onPress={() => router.push('/(tabs)/map?layer=pollen')}
           accessibilityRole="button"
+          accessibilityLabel={t('home.factorOpenPollen')}
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
           <View style={styles.factorValue}>
@@ -246,8 +275,9 @@ export default function HomeScreen() {
           </View>
         </Pressable>
         <Pressable
-          onPress={() => setDetailsOpen(true)}
+          onPress={() => router.push('/(tabs)/map?layer=air')}
           accessibilityRole="button"
+          accessibilityLabel={t('home.factorOpenAir')}
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.air')}</Text>
           <View style={styles.factorValue}>
@@ -261,8 +291,9 @@ export default function HomeScreen() {
           </View>
         </Pressable>
         <Pressable
-          onPress={() => setDetailsOpen(true)}
+          onPress={() => router.push('/(tabs)/diary')}
           accessibilityRole="button"
+          accessibilityLabel={t('home.factorOpenDiary')}
           style={ui.kpiRow}>
           <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
           <View style={styles.factorValue}>
@@ -273,46 +304,24 @@ export default function HomeScreen() {
             <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
           </View>
         </Pressable>
-
-        <Pressable
-          onPress={() => setDetailsOpen((open) => !open)}
-          accessibilityRole="button"
-          testID="home-wellness-details">
-          <Text style={styles.detailsToggle}>
-            {detailsOpen ? t('home.wellnessHideDetails') : t('home.wellnessDetails')}
-          </Text>
-        </Pressable>
-
-        {detailsOpen ? (
-          <>
-            <View style={ui.kpiRow}>
-              <Text style={ui.kpiLabel}>{t('home.index')}</Text>
-              <Text style={ui.kpiValue}>
-                {t(`wellness.index.${wellness.display.indexTier}`)} · {wellness.score}/100
-              </Text>
-            </View>
-            {wellness.factors.map((factor) => {
-              const category =
-                factor.label === t('home.pollen') || factor.label === t('wellness.pollenLabel')
-                  ? t(`wellness.pollen.${wellness.display.pollenTier}`)
-                  : factor.label === t('home.air') || factor.label === t('wellness.airLabel')
-                    ? t(`wellness.air.${wellness.display.airTier}`)
-                    : t(`wellness.diaryState.${wellness.display.diaryTier}`);
-              return (
-                <View key={factor.label} style={styles.detailBlock}>
-                  <View style={ui.kpiRow}>
-                    <Text style={ui.kpiLabel}>{factor.label}</Text>
-                    <Text style={ui.kpiValue}>{category}</Text>
-                  </View>
-                  <Text style={styles.detailExact}>{factor.value}</Text>
-                </View>
-              );
-            })}
-            <Text style={styles.interpret}>{wellness.statusSummary}</Text>
-          </>
+        {wellness.rings.clinical != null ? (
+          <Pressable
+            onPress={() => router.push('/clinical-scales')}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.factorOpenClinical')}
+            style={ui.kpiRow}>
+            <Text style={ui.kpiLabel}>{t('home.clinical')}</Text>
+            <Text style={ui.kpiValue}>{t('home.clinicalOpen')}</Text>
+          </Pressable>
         ) : null}
       </GlassCard>
       ) : null}
+
+      <ImmuneBalanceStatusSheet
+        visible={statusOpen}
+        wellness={wellness}
+        onClose={() => setStatusOpen(false)}
+      />
 
       {loadingWellness && !wellness ? null : (
       <>
@@ -550,6 +559,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     expertBody: { flex: 1, gap: 2 },
     factorValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    bubbleRow: { flexDirection: 'row', gap: space[3], alignItems: 'stretch' },
   });
 }
 

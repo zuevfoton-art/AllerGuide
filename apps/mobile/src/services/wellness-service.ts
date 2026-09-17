@@ -3,16 +3,21 @@ import {
   buildClinicalScalesFromTrends,
   buildDiarySeriesFromInsights,
   buildAsitSummaryFromCompliance,
+  buildImmuneBalanceRings,
   collectLatestScaleTrends,
   computeAsitCompliance,
   computeDiaryInsights,
   computeWellnessConfidence,
   computeWellnessScore,
   computeWellnessScoreBreakdown,
+  diaryEntriesOnOrBefore,
+  getRecommendedScalesForProfile,
   hasAriaAsthmaMultimorbidity,
   getCurrentPollenAlerts,
   getDefaultPollenRegion,
   getFoodAllergenLabels,
+  isSameLocalDay,
+  isoLocalDate,
   OPEN_METEO_POLLEN_TAXON_IDS,
   parseOpenMeteoPollenHourly,
   parseProfileAllergenIds,
@@ -72,6 +77,19 @@ export type WellnessSnapshot = {
     pm25: number | null;
     symptomDays: number;
   };
+  rings: {
+    pollen: number;
+    air: number;
+    diary: number;
+    clinical: number | null;
+  };
+  clinicalScales: {
+    scaleId: string;
+    label: string;
+    total: number;
+    interpretation: string;
+  }[];
+  asOf: string;
 };
 
 function formatGoogleAirFactorValue(snapshot: AirQualitySnapshot): string {
@@ -226,10 +244,12 @@ export async function fetchWellnessSnapshot(
   diaryEntries: DiaryEntry[] = [],
   locale: AppLocale = 'ru',
   location?: { lat: number; lon: number; label?: string },
-  options?: { profileId?: number },
+  options?: { profileId?: number; asOf?: Date },
 ): Promise<WellnessSnapshot> {
   const content = getLocaleContent(locale);
   const messages = LOCALE_MESSAGES[locale];
+  const asOf = options?.asOf ?? new Date();
+  const viewingToday = isSameLocalDay(asOf, new Date());
   const region = location
     ? resolvePollenRegion(location.lat, location.lon)
     : getDefaultPollenRegion();
@@ -242,29 +262,36 @@ export async function fetchWellnessSnapshot(
   const profileAllergenIds = parseProfileAllergenIds(profileAllergiesJson);
   const conditionIds = options?.profileId ? getStoredProfileConditions(options.profileId) : [];
   const multimorbidAriaAsthma = hasAriaAsthmaMultimorbidity(conditionIds);
-  const diaryInsights = computeDiaryInsights(diaryEntries);
+  const scopedEntries = diaryEntriesOnOrBefore(diaryEntries, asOf);
+  const diaryInsights = computeDiaryInsights(scopedEntries, asOf);
   const diarySeries = buildDiarySeriesFromInsights(diaryInsights);
-  const clinicalScales = buildClinicalScalesFromTrends(collectLatestScaleTrends(diaryEntries));
+  const scaleTrends = collectLatestScaleTrends(scopedEntries);
+  const clinicalScales = buildClinicalScalesFromTrends(scaleTrends);
+  const showClinicalRing =
+    getRecommendedScalesForProfile([], conditionIds).length > 0 || clinicalScales.length > 0;
 
-  const month = new Date().getMonth() + 1;
+  const month = asOf.getMonth() + 1;
   const seasonalAlerts = getCurrentPollenAlerts(month, profileAllergenIds, region.id).map(
     (peak) => ({ label: peak.label }),
   );
 
   const timezone = encodeURIComponent(region.timezone);
   const pollenHourly = OPEN_METEO_POLLEN_TAXON_IDS.join(',');
-  const url =
-    `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLocation.lat}` +
-    `&longitude=${resolvedLocation.lon}&timezone=${timezone}&forecast_days=1` +
-    `&current=european_aqi,pm2_5&hourly=${pollenHourly}`;
+  const dayIso = isoLocalDate(asOf);
+  const url = viewingToday
+    ? `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLocation.lat}` +
+      `&longitude=${resolvedLocation.lon}&timezone=${timezone}&forecast_days=1` +
+      `&current=european_aqi,pm2_5&hourly=${pollenHourly}`
+    : `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLocation.lat}` +
+      `&longitude=${resolvedLocation.lon}&timezone=${timezone}` +
+      `&start_date=${dayIso}&end_date=${dayIso}` +
+      `&hourly=${pollenHourly},european_aqi,pm2_5`;
 
   // Optional Google Air Quality enrichment (UAQI + localized health advice).
   // The wellness score keeps using Open-Meteo values for stability.
-  const googleAirQualityPromise = fetchAirQualitySnapshot(
-    resolvedLocation.lat,
-    resolvedLocation.lon,
-    locale,
-  );
+  const googleAirQualityPromise = viewingToday
+    ? fetchAirQualitySnapshot(resolvedLocation.lat, resolvedLocation.lon, locale)
+    : Promise.resolve(null);
 
   let europeanAqi: number | null = null;
   let pm25: number | null = null;
@@ -281,8 +308,9 @@ export async function fetchWellnessSnapshot(
     const res = await fetchWithTimeout(url);
     if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
     const data = await res.json();
-    europeanAqi = data.current?.european_aqi ?? null;
-    pm25 = data.current?.pm2_5 ?? null;
+    europeanAqi =
+      data.current?.european_aqi ?? lastFiniteNumber(data.hourly?.european_aqi) ?? null;
+    pm25 = data.current?.pm2_5 ?? lastFiniteNumber(data.hourly?.pm2_5) ?? null;
     envDataAvailable = true;
 
     pollenMatches = parseOpenMeteoPollenHourly(
@@ -304,7 +332,7 @@ export async function fetchWellnessSnapshot(
   const googleAirQuality = await googleAirQualityPromise;
 
   const foodAllergens = getFoodAllergenLabels(profileAllergenIds);
-  const asitCompliance = computeAsitCompliance(diaryEntries, 30);
+  const asitCompliance = computeAsitCompliance(scopedEntries, 30, asOf);
   const asit = buildAsitSummaryFromCompliance(asitCompliance);
 
   const scoreInput = {
@@ -414,5 +442,22 @@ export async function fetchWellnessSnapshot(
       pm25: envDataAvailable ? pm25 : null,
       symptomDays: diarySeries.symptomDays,
     },
+    rings: buildImmuneBalanceRings(breakdown, showClinicalRing),
+    clinicalScales: scaleTrends.map((scale) => ({
+      scaleId: scale.scaleId,
+      label: scale.label,
+      total: scale.total,
+      interpretation: scale.interpretation,
+    })),
+    asOf: isoLocalDate(asOf),
   };
+}
+
+function lastFiniteNumber(values: unknown): number | null {
+  if (!Array.isArray(values)) return null;
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    const value = values[index];
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+  }
+  return null;
 }
