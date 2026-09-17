@@ -172,7 +172,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.textSecondary,
     },
-    relationTextActive: { color: colors.accent },
+    relationTextActive: { color: colors.head },
     addBtn: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -186,7 +186,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     addBtnText: {
       fontFamily: fonts.sansSemiBold,
-      color: colors.accent,
+      color: colors.head,
       fontWeight: '600',
       fontSize: 14,
     },

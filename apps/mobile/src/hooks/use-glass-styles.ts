@@ -39,7 +39,8 @@ function createUiStyles({ colors, shadows, fonts }: AppTheme, scale: number) {
       fontSize: fs('bodySm'),
       lineHeight: lh('bodySm'),
       fontWeight: '600',
-      color: colors.accent,
+      // Text links stay petrol ink — mint accent fails AA on light surfaces.
+      color: colors.head,
     },
     pill: {
       flexDirection: 'row',

@@ -135,7 +135,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     toggle: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 12,
-      color: colors.accent,
+      color: colors.head,
     },
   });
 }

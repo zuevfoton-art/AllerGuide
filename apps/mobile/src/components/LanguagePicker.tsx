@@ -218,7 +218,7 @@ function createStyles(
     optionTextActive: {
       fontFamily: fonts.sansSemiBold,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     optionSpacer: { width: 18 },
   });

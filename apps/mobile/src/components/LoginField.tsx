@@ -167,7 +167,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       textTransform: 'uppercase',
       letterSpacing: 0.5,
     },
-    labelFocused: { color: colors.accent },
+    labelFocused: { color: colors.head },
     row: {
       flexDirection: 'row',
       alignItems: 'center',

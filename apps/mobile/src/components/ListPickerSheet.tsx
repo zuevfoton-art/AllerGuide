@@ -307,7 +307,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sansSemiBold,
       fontSize: 15,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     headerBtnTextEnd: { textAlign: 'right' },
     headerTitle: {

@@ -22,7 +22,8 @@ type ButtonProps = PressableProps & {
 const TEXT_COLORS: Record<ButtonVariant, keyof AppTheme['colors']> = {
   primary: 'onAccent',
   secondary: 'text',
-  ghost: 'info',
+  // Ghost is a text link — petrol ink, not mint recognition fill.
+  ghost: 'head',
   danger: 'onDanger',
 };
 

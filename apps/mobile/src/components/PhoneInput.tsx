@@ -132,7 +132,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       fontWeight: '600',
     },
-    labelFocused: { color: colors.accent },
+    labelFocused: { color: colors.head },
     row: {
       flexDirection: 'row',
       alignItems: 'center',

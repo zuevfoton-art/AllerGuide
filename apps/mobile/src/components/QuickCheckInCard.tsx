@@ -137,7 +137,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: fontSizes.bodySm,
       lineHeight: lineHeights.bodySm,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
   });
 }
