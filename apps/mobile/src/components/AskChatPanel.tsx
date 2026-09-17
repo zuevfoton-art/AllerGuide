@@ -147,11 +147,11 @@ export function useAskChat({
           testID="ask-input"
           value={draft}
           onChangeText={setDraft}
-          placeholder={t('ask.inputPlaceholder')}
-          placeholderTextColor={theme.colors.textMuted}
+          placeholder=""
           style={styles.ovalInput}
           editable={!busy}
-          multiline
+          multiline={false}
+          numberOfLines={1}
           maxLength={500}
           accessibilityLabel={t('ask.inputPlaceholder')}
         />
@@ -321,10 +321,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     ovalRow: {
       flexDirection: 'row',
-      alignItems: 'flex-end',
+      alignItems: 'center',
       gap: 6,
-      minHeight: density.tapMinHeight + 4,
-      maxHeight: 104,
+      minHeight: density.tapMinHeight,
       borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.border,
@@ -336,10 +335,9 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     ovalInput: {
       flex: 1,
-      minHeight: density.tapMinHeight - 4,
-      maxHeight: 88,
+      minHeight: density.tapMinHeight - 8,
       paddingHorizontal: 8,
-      paddingVertical: 10,
+      paddingVertical: 8,
       fontFamily: fonts.sans,
       fontSize: WEB_INPUT_FONT_SIZE,
       color: colors.text,
@@ -351,7 +349,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: colors.accent,
-      marginBottom: 2,
     },
     sendBtnDisabled: {
       backgroundColor: colors.border,

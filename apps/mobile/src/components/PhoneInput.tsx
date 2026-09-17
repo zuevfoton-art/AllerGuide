@@ -125,7 +125,7 @@ export const PhoneInput = forwardRef<TextInput, PhoneInputProps>(function PhoneI
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    wrap: { gap: 6 },
+    wrap: { gap: 6, width: '100%', alignSelf: 'stretch', minWidth: 0 },
     label: {
       fontFamily: fonts.sans,
       fontSize: fontSizes.bodySm,
@@ -142,6 +142,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
       overflow: 'hidden',
       minHeight: 44,
+      width: '100%',
+      maxWidth: '100%',
     },
     rowFocused: { borderColor: colors.accent },
     countryBtn: {
@@ -161,6 +163,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     input: {
       flex: 1,
+      minWidth: 0,
       fontFamily: fonts.sans,
       fontSize: WEB_INPUT_FONT_SIZE,
       color: colors.text,

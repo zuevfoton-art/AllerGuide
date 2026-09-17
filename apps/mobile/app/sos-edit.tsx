@@ -10,6 +10,7 @@ import { PhoneInput } from '@/src/components/PhoneInput';
 import { Ionicons } from '@expo/vector-icons';
 import {
   DEFAULT_SHOCK_KIT,
+  EMERGENCY_CONTACT_RELATIONS,
   lastListItemQuery,
   replaceLastListItem,
   splitListInput,
@@ -344,13 +345,23 @@ export default function SosEditScreen() {
           placeholder={t('common.phone')}
           testID="sos-contact-phone"
         />
-        <TextInput
-          style={styles.input}
-          value={relation}
-          onChangeText={(value) => setRelation(value as EmergencyContactRelation)}
-          placeholder="relative / trusted / doctor"
-          placeholderTextColor={theme.colors.textMuted}
-        />
+        <View style={styles.relationRow}>
+          {EMERGENCY_CONTACT_RELATIONS.map((option) => {
+            const active = relation === option.key;
+            return (
+              <Pressable
+                key={option.key}
+                style={[styles.relationChip, active && styles.relationChipActive]}
+                onPress={() => setRelation(option.key as EmergencyContactRelation)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}>
+                <Text style={[styles.relationText, active && styles.relationTextActive]}>
+                  {localizeEmergencyRelation(option.key, localeContent)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
         <Button
           label={t('sosEdit.addContact')}
           variant="secondary"
@@ -372,7 +383,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'space-between',
       paddingVertical: 4,
     },
-    section: { gap: 10 },
+    section: { gap: 10, overflow: 'hidden', width: '100%' },
     notesInput: {
       minHeight: 120,
       backgroundColor: colors.card,
@@ -384,13 +395,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontFamily: fonts.sans,
       color: colors.text,
       textAlignVertical: 'top',
+      width: '100%',
     },
     contactCard: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
     },
-    contactInfo: { flex: 1, gap: 2 },
+    contactInfo: { flex: 1, gap: 2, minWidth: 0 },
     contactName: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 15,
@@ -412,7 +424,32 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontSize: 15,
       fontFamily: fonts.sans,
       color: colors.text,
+      width: '100%',
     },
+    relationRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    relationChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: colors.borderInput,
+      backgroundColor: colors.card,
+    },
+    relationChipActive: {
+      borderColor: colors.head,
+      backgroundColor: colors.accentLight,
+    },
+    relationText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    relationTextActive: { color: colors.head },
     checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     checkLabel: {
       fontFamily: fonts.sans,

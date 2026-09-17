@@ -22,7 +22,7 @@ export function createStyles({ colors, fonts }: AppTheme) {
       borderRadius: radii.full,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.accent,
+      borderColor: colors.head,
       minHeight: 44,
     },
     manualToggleBtn: {
@@ -35,14 +35,14 @@ export function createStyles({ colors, fonts }: AppTheme) {
       borderRadius: radii.sm,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.accent,
+      borderColor: colors.head,
       minHeight: 44,
     },
     secondaryBtnText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 13,
       fontWeight: '600',
-      color: colors.accent,
+      color: colors.head,
     },
     emptyHint: {
       fontFamily: fonts.sans,
@@ -282,15 +282,15 @@ export function createStyles({ colors, fonts }: AppTheme) {
     },
     tabChipActive: {
       backgroundColor: colors.accentLight,
-      borderColor: colors.accent,
+      borderColor: colors.head,
     },
     tabChipText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: 14,
       fontWeight: '600',
-      color: colors.textSecondary,
+      color: colors.head,
     },
-    tabChipTextActive: { color: colors.accent },
+    tabChipTextActive: { color: colors.head },
     historyRow: {
       flexDirection: 'row',
       alignItems: 'center',

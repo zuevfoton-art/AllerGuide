@@ -508,6 +508,7 @@ export default function DiaryScreen() {
           label={t('diary.newEntry')}
           variant="primary"
           block
+          style={{ borderWidth: 1.5, borderColor: theme.colors.head }}
           onPress={() => setEntryPickerOpen(true)}
         />
       </HintAnchor>

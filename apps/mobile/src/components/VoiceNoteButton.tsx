@@ -114,9 +114,9 @@ export function VoiceNoteButton({
         accessibilityLabel={a11yLabel}
         testID={testID ? `${testID}-mic` : 'voice-note-mic'}>
         {isListening || isProcessing ? (
-          <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.accent} size="small" />
+          <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.warning} size="small" />
         ) : (
-          <Ionicons name="mic" size={22} color={theme.colors.accent} />
+          <Ionicons name="mic" size={22} color={theme.colors.warning} />
         )}
       </Pressable>
     );
@@ -136,9 +136,9 @@ export function VoiceNoteButton({
         accessibilityLabel={a11yLabel}
         testID={testID ? `${testID}-mic` : 'voice-note-mic'}>
         {isListening || isProcessing ? (
-          <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.accent} size="small" />
+          <ActivityIndicator color={isListening ? theme.colors.danger : theme.colors.warning} size="small" />
         ) : (
-          <Ionicons name="mic" size={20} color={theme.colors.accent} />
+          <Ionicons name="mic" size={20} color={theme.colors.warning} />
         )}
         <Text
           style={[
@@ -205,7 +205,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
     },
     micLabelRecording: { color: colors.danger },
-    micLabelProcessing: { color: colors.accent },
+    micLabelProcessing: { color: colors.warning },
     cancelBtn: { alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 4 },
     cancelText: {
       fontFamily: fonts.sansSemiBold,
