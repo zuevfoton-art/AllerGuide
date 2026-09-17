@@ -184,7 +184,7 @@ const es: LocaleMessages = {
     settingsDesc: 'SOS, sincronización y recordatorios',
   },
   today: {
-    readingTitle: 'Hoy en resumen',
+    readingTitle: 'Hoy',
     lead: {
       noProfile: 'Aún no hay perfil, así que el pronóstico no puede usar tus alérgenos.',
       noData: 'Los datos de polen y aire no están disponibles ahora: mostramos lo guardado en el dispositivo.',
