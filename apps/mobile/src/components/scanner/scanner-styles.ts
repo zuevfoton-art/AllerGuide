@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { density, radii } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
-export function createStyles({ colors, fonts }: AppTheme) {
+export function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     header: {
       flexDirection: 'row',
@@ -24,6 +24,7 @@ export function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.head,
       minHeight: 44,
+      ...(shadows.sm as object),
     },
     manualToggleBtn: {
       flex: 1,
@@ -37,6 +38,7 @@ export function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.head,
       minHeight: 44,
+      ...(shadows.sm as object),
     },
     secondaryBtnText: {
       fontFamily: fonts.sansSemiBold,
@@ -279,10 +281,12 @@ export function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
+      ...(shadows.sm as object),
     },
     tabChipActive: {
       backgroundColor: colors.accentLight,
       borderColor: colors.head,
+      ...(shadows.sm as object),
     },
     tabChipText: {
       fontFamily: fonts.sansSemiBold,

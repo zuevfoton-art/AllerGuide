@@ -73,7 +73,7 @@ export function Button({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme, scale: number) {
+function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
   return StyleSheet.create({
     base: {
       flexDirection: 'row',
@@ -98,15 +98,22 @@ function createStyles({ colors, fonts }: AppTheme, scale: number) {
       paddingVertical: 14,
     },
     block: { width: '100%' },
-    primary: { backgroundColor: colors.accent },
+    primary: {
+      backgroundColor: colors.accent,
+      ...(shadows.accent as object),
+    },
     secondary: {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
       minHeight: density.tapMinHeightSecondary,
+      ...(shadows.sm as object),
     },
     ghost: { backgroundColor: 'transparent', minHeight: 36, paddingHorizontal: 0 },
-    danger: { backgroundColor: colors.danger },
+    danger: {
+      backgroundColor: colors.danger,
+      ...(shadows.danger as object),
+    },
     disabled: { opacity: disabledOpacity },
     pressed: { opacity: pressedOpacity },
     text: {

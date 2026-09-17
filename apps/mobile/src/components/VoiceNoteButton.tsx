@@ -162,7 +162,7 @@ export function VoiceNoteButton({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     wrap: { gap: 8 },
     hint: {
@@ -181,6 +181,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.borderInput,
       backgroundColor: colors.surfaceMuted ?? colors.card,
+      ...(shadows.sm as object),
     },
     micBtnActive: {
       borderColor: colors.danger,
