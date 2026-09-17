@@ -24,7 +24,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       borderWidth: 2,
       borderColor: colors.head,
       minHeight: 44,
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     manualToggleBtn: {
       flex: 1,
@@ -38,7 +38,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       borderWidth: 2,
       borderColor: colors.head,
       minHeight: 44,
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     secondaryBtnText: {
       fontFamily: fonts.sansSemiBold,
@@ -281,13 +281,13 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     tabChipActive: {
       backgroundColor: colors.accentLight,
       borderWidth: 2,
       borderColor: colors.head,
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     tabChipText: {
       fontFamily: fonts.sansSemiBold,

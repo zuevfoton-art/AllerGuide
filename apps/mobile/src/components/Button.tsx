@@ -103,22 +103,28 @@ function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
       // Petrol contour on mint fill (brand composition ink).
       borderWidth: 2,
       borderColor: colors.head,
-      ...(shadows.accent as object),
+      ...(shadows.raisedStrong as object),
     },
     secondary: {
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.borderInput,
       minHeight: density.tapMinHeightSecondary,
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     ghost: { backgroundColor: 'transparent', minHeight: 36, paddingHorizontal: 0 },
     danger: {
       backgroundColor: colors.danger,
-      ...(shadows.danger as object),
+      borderWidth: 2,
+      borderColor: colors.dangerBorder,
+      ...(shadows.raisedStrong as object),
     },
     disabled: { opacity: disabledOpacity },
-    pressed: { opacity: pressedOpacity },
+    pressed: {
+      opacity: pressedOpacity,
+      transform: [{ translateY: 1 }],
+      ...(shadows.sm as object),
+    },
     text: {
       fontFamily: fonts.sansSemiBold,
       fontSize: Math.round(fontSizes.body * scale),

@@ -62,7 +62,7 @@ export function SegmentedControl({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     track: {
       flexDirection: 'row',
@@ -85,6 +85,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       backgroundColor: colors.accentLight,
       borderWidth: 1,
       borderColor: colors.accentMid,
+      ...(shadows.raised as object),
     },
     label: {
       fontFamily: fonts.sansSemiBold,

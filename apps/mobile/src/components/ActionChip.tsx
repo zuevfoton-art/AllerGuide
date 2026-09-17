@@ -56,12 +56,12 @@ function createStyles({ colors, fonts, shadows }: AppTheme) {
       backgroundColor: colors.accentLight,
       alignItems: 'center',
       justifyContent: 'center',
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     chipSelected: {
       backgroundColor: colors.accent,
       borderColor: colors.accent,
-      ...(shadows.accent as object),
+      ...(shadows.raisedStrong as object),
     },
     chipDisabled: { opacity: 0.45 },
     label: {

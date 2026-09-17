@@ -181,7 +181,7 @@ function createStyles({ colors, fonts, shadows }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.borderInput,
       backgroundColor: colors.surfaceMuted ?? colors.card,
-      ...(shadows.sm as object),
+      ...(shadows.raised as object),
     },
     micBtnActive: {
       borderColor: colors.danger,
