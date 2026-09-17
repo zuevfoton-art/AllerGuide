@@ -259,6 +259,7 @@ export default function HomeScreen() {
       <GlassCard variant="soft">
         <CardTitle>{t('home.factors')}</CardTitle>
         <Pressable
+          testID="home-factor-pollen"
           onPress={() => router.push('/(tabs)/map?layer=pollen')}
           accessibilityRole="button"
           accessibilityLabel={t('home.factorOpenPollen')}
@@ -275,6 +276,7 @@ export default function HomeScreen() {
           </View>
         </Pressable>
         <Pressable
+          testID="home-factor-air"
           onPress={() => router.push('/(tabs)/map?layer=air')}
           accessibilityRole="button"
           accessibilityLabel={t('home.factorOpenAir')}
@@ -291,6 +293,7 @@ export default function HomeScreen() {
           </View>
         </Pressable>
         <Pressable
+          testID="home-factor-diary"
           onPress={() => router.push('/(tabs)/diary')}
           accessibilityRole="button"
           accessibilityLabel={t('home.factorOpenDiary')}
@@ -306,6 +309,7 @@ export default function HomeScreen() {
         </Pressable>
         {wellness.rings.clinical != null ? (
           <Pressable
+            testID="home-factor-clinical"
             onPress={() => router.push('/clinical-scales')}
             accessibilityRole="button"
             accessibilityLabel={t('home.factorOpenClinical')}
