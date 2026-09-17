@@ -88,6 +88,7 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Analytics event | `packages/core` `analytics-events.ts` + `crash-free.ts` + `analytics-service.ts`; skill `product-analyst`; `pnpm check:analytics-taxonomy` |
 | Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + [`glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) + compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | Staging APK / EAS Free-plan quota | [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml) + [`scripts/eas-android-quota.sh`](../scripts/eas-android-quota.sh); Gradle fallback [`staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) · [`android-stage-build.md`](./android-stage-build.md) |
+| Staging YC CLI auth in Actions | [`scripts/yc-ci-configure.sh`](../scripts/yc-ci-configure.sh) + [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) (`profile create github` before SA key; yc 1.35.1) |
 | UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
