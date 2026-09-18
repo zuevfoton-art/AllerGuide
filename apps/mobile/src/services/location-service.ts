@@ -25,6 +25,29 @@ type CachedLocation = {
 
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
+/**
+ * A fix is not user-driven and `getCurrentPositionAsync` has no deadline of its
+ * own: indoors, with the provider disabled, or on a CI emulator without an
+ * injected location it stays pending forever. The home loader awaits this, so a
+ * pending fix left Today on skeleton cards and swallowed the first-run hint
+ * tour (nightly 35315005471). Fall back to the default region instead.
+ */
+const POSITION_TIMEOUT_MS = 8000;
+
+async function positionWithinDeadline(): Promise<Location.LocationObject | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+      new Promise<null>((resolve) => {
+        timer = setTimeout(() => resolve(null), POSITION_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 function readCache(): CachedLocation | null {
   const raw = getSetting(LOCATION_CACHE_KEY);
   if (!raw) return null;
@@ -112,9 +135,11 @@ export async function getCurrentLocation(options?: {
       return getDefaultResolvedLocation();
     }
 
-    const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
+    const position = await positionWithinDeadline();
+    if (!position) {
+      logCaughtError('getCurrentLocation', new Error('position fix timed out'), { level: 'warn' });
+      return getDefaultResolvedLocation();
+    }
 
     const { latitude, longitude } = position.coords;
     const region = resolvePollenRegion(latitude, longitude);

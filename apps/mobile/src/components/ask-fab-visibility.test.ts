@@ -37,16 +37,13 @@ describe('shouldShowAskFab', () => {
 });
 
 describe('shouldUseExtendedAskFab', () => {
-  it('extends on tab roots only', () => {
-    expect(shouldUseExtendedAskFab('/home')).toBe(true);
-    expect(shouldUseExtendedAskFab('/diary')).toBe(true);
-    expect(shouldUseExtendedAskFab('/scanner')).toBe(true);
-    expect(shouldUseExtendedAskFab('/map')).toBe(true);
-    expect(shouldUseExtendedAskFab('/profile')).toBe(true);
+  it('never extends — Ask FAB is icon-only', () => {
+    expect(shouldUseExtendedAskFab('/home')).toBe(false);
+    expect(shouldUseExtendedAskFab('/diary')).toBe(false);
+    expect(shouldUseExtendedAskFab('/scanner')).toBe(false);
+    expect(shouldUseExtendedAskFab('/map')).toBe(false);
+    expect(shouldUseExtendedAskFab('/profile')).toBe(false);
     expect(shouldUseExtendedAskFab('/market')).toBe(false);
-    expect(shouldUseExtendedAskFab('/doctor-report')).toBe(false);
-    expect(shouldUseExtendedAskFab('/expert')).toBe(false);
-    expect(shouldUseExtendedAskFab('/profile-edit')).toBe(false);
     expect(shouldUseExtendedAskFab('/sos')).toBe(false);
   });
 });

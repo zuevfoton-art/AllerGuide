@@ -74,6 +74,7 @@ export function DailyReadingCard({
               size="sm"
               block
               onPress={() => router.push(reading.action.href as never)}
+              style={styles.cardAction}
             />
           ) : null}
         </GlassCard>
@@ -98,6 +99,7 @@ export function DailyReadingCard({
             variant="primary"
             block
             onPress={() => router.push(reading.action.href as never)}
+            style={styles.cardAction}
           />
         ) : null}
       </View>
@@ -147,6 +149,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       marginTop: space[2],
       marginBottom: space[1],
+    },
+    /** Figma card-actions / button-action — full width, soft radius */
+    cardAction: {
+      borderRadius: radii.sm,
+      alignSelf: 'stretch',
     },
   });
 }

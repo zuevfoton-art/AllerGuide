@@ -158,6 +158,7 @@ export default function SosScreen() {
         <HintAnchor id="sos.call">
           <SosEmergencyBar
             emergencyLabel={t('sos.call', { number: emergencyBar.emergencyNumber })}
+            emergencyNumber={emergencyBar.emergencyNumber}
             contactName={emergencyBar.firstContact?.name}
             contactPhone={emergencyBar.firstContact?.phone}
             contactRelation={
@@ -461,7 +462,7 @@ function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     sosCenter: {
       gap: 12,
-      alignItems: 'stretch',
+      alignItems: 'center',
       marginBottom: 4,
     },
     sosDisclaimer: {

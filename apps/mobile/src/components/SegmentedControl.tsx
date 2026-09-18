@@ -17,6 +17,8 @@ export type SegmentedControlProps = {
   disabled?: boolean;
   accessibilityLabel?: string;
   testID?: string;
+  /** Figma auth tabs are 36pt with sm corners. */
+  size?: 'md' | 'sm';
 };
 
 /**
@@ -29,13 +31,15 @@ export function SegmentedControl({
   disabled = false,
   accessibilityLabel,
   testID,
+  size = 'md',
 }: SegmentedControlProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const compact = size === 'sm';
 
   return (
     <View
-      style={styles.track}
+      style={[styles.track, compact && styles.trackSm]}
       testID={testID}
       accessibilityRole="tablist"
       accessibilityLabel={accessibilityLabel}>
@@ -45,7 +49,11 @@ export function SegmentedControl({
           <Pressable
             key={option.value}
             testID={option.testID}
-            style={[styles.segment, selected && styles.segmentSelected]}
+            style={[
+              styles.segment,
+              compact && styles.segmentSm,
+              selected && styles.segmentSelected,
+            ]}
             onPress={() => onChange(option.value)}
             disabled={disabled}
             accessibilityRole="tab"
@@ -73,6 +81,10 @@ function createStyles({ colors, fonts, shadows }: AppTheme) {
       borderWidth: 1,
       borderColor: colors.border,
     },
+    trackSm: {
+      borderRadius: radii.sm,
+      padding: 2,
+    },
     segment: {
       flex: 1,
       minHeight: density.tapMinHeight,
@@ -80,6 +92,10 @@ function createStyles({ colors, fonts, shadows }: AppTheme) {
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: 8,
+    },
+    segmentSm: {
+      minHeight: density.tapMinHeightSm,
+      borderRadius: radii.sm,
     },
     segmentSelected: {
       backgroundColor: colors.accentLight,

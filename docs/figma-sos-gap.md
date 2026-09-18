@@ -14,9 +14,11 @@
 | Figma | Код |
 |-------|-----|
 | screen-header | `TabScreenHeader` |
-| sos-center button + disclaimer | `SosEmergencyBar` + disclaimer |
+| sos-button-wrapper 180 + sos-inner-circle 140 | `SosEmergencyBar` center circle (`sos-crisis-call`) |
+| warning-disclaimer | `sos.disclaimerShort` под кругом |
 | passport-card | profile/passport cards |
 | — | crisis plan, grades, notes, tip (ниже) |
+| — | contact row / all-contacts под кругом (продукт) |
 
 ## Не трогаем
 

@@ -23,7 +23,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       paddingVertical: 12,
       borderRadius: radii.full,
       backgroundColor: colors.surfaceMuted,
-      minHeight: 44,
+      minHeight: density.tapMinHeightSecondary,
       ...(shadows.raised as object),
     },
     manualToggleBtn: {
@@ -33,9 +33,9 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 12,
-      borderRadius: radii.sm,
+      borderRadius: radii.full,
       backgroundColor: colors.surfaceMuted,
-      minHeight: 44,
+      minHeight: density.tapMinHeightSecondary,
       ...(shadows.raised as object),
     },
     secondaryBtnText: {

@@ -62,6 +62,7 @@ export default function LoginScreen() {
       <SegmentedControl
         testID="auth-login-mode"
         accessibilityLabel={t('auth.loginSubtitle')}
+        size="sm"
         value={loginMode}
         onChange={(next) => {
           setLoginMode(next as 'phone' | 'email');
