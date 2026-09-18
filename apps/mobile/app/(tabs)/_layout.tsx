@@ -6,6 +6,7 @@ import { HintSpotlight } from '@/src/components/hints/HintSpotlight';
 import { useHintAnchor } from '@/src/components/hints/HintAnchor';
 import { BrandTabIcon, type BrandTabIconName } from '@/src/components/brand/BrandTabIcon';
 import { density } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 import { useTheme } from '@/src/hooks/use-theme';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 import { useTranslation } from '@/src/store/locale-store';
@@ -37,8 +38,6 @@ function TabBarButton({
   onLayout: tabOnLayout,
   ...props
 }: BottomTabBarButtonProps & { testID: string }) {
-  const { colors } = useTheme();
-  const focused = accessibilityState?.selected ?? false;
   const { ref, onLayout } = useHintAnchor(tabAnchorId(testID));
 
   return (
@@ -52,50 +51,7 @@ function TabBarButton({
       collapsable={false}
       testID={testID}
       accessibilityState={accessibilityState}
-      style={[
-        tabBarStyles.button,
-        focused && {
-          backgroundColor: colors.accentLight,
-          borderWidth: 1,
-          borderColor: colors.accentMid,
-        },
-        style,
-      ]}>
-      {props.children}
-    </Pressable>
-  );
-}
-
-/**
- * SOS is not a peer of the four navigation tabs: it is an emergency control that
- * keeps a permanent danger tint so it reads as a call button, not as a section.
- */
-function SosTabBarButton({
-  accessibilityState,
-  style,
-  onLayout: tabOnLayout,
-  ...props
-}: BottomTabBarButtonProps) {
-  const { colors } = useTheme();
-  const { ref, onLayout } = useHintAnchor('tab.sos');
-
-  return (
-    <Pressable
-      {...(props as ComponentProps<typeof Pressable>)}
-      ref={ref}
-      onLayout={(event) => {
-        tabOnLayout?.(event);
-        onLayout();
-      }}
-      collapsable={false}
-      testID="tab-sos"
-      accessibilityState={accessibilityState}
-      style={[
-        tabBarStyles.button,
-        tabBarStyles.emergencyButton,
-        { backgroundColor: colors.dangerLight, borderColor: colors.dangerBorder },
-        style,
-      ]}>
+      style={[tabBarStyles.button, style]}>
       {props.children}
     </Pressable>
   );
@@ -107,13 +63,7 @@ const tabBarStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
-    marginHorizontal: 2,
     minHeight: density.tapMinHeight,
-  },
-  emergencyButton: {
-    borderWidth: 1,
-    minWidth: density.tapMinHeight,
   },
 });
 
@@ -122,7 +72,6 @@ export default function TabsLayout() {
   const { isCompact, showTabLabels, tabBarHeight, tabBarPaddingBottom } = useResponsiveLayout();
   const { t } = useTranslation();
   const iconSize = isCompact ? 22 : 24;
-  const sosSlotWidth = isCompact ? 60 : 68;
 
   return (
     <View style={tabBarStyles.shell}>
@@ -143,11 +92,9 @@ export default function TabsLayout() {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
           paddingBottom: tabBarPaddingBottom,
           paddingTop: 8,
-          paddingHorizontal: 4,
+          paddingHorizontal: 0,
           ...(Platform.OS === 'web'
             ? {
                 maxWidth: 720,
@@ -157,15 +104,16 @@ export default function TabsLayout() {
             : null),
         },
         tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarShowLabel: showTabLabels,
         tabBarLabelStyle: {
-          fontSize: isCompact ? 10 : 11,
-          fontWeight: '600',
+          fontSize: fontSizes.tabLabel,
+          fontWeight: '500',
           marginTop: 2,
         },
         tabBarItemStyle: {
-          paddingHorizontal: isCompact ? 0 : 4,
+          flex: 1,
+          paddingHorizontal: 0,
         },
       }}>
       <Tabs.Screen
@@ -178,7 +126,7 @@ export default function TabsLayout() {
               name="home"
               focused={focused}
               color={colors.accent}
-              muted={colors.textMuted}
+              muted={colors.textSecondary}
               size={iconSize}
             />
           ),
@@ -194,7 +142,7 @@ export default function TabsLayout() {
               name="diary"
               focused={focused}
               color={colors.accent}
-              muted={colors.textMuted}
+              muted={colors.textSecondary}
               size={iconSize}
             />
           ),
@@ -210,7 +158,7 @@ export default function TabsLayout() {
               name="scanner"
               focused={focused}
               color={colors.accent}
-              muted={colors.textMuted}
+              muted={colors.textSecondary}
               size={iconSize}
             />
           ),
@@ -226,7 +174,7 @@ export default function TabsLayout() {
               name="map"
               focused={focused}
               color={colors.accent}
-              muted={colors.textMuted}
+              muted={colors.textSecondary}
               size={iconSize}
             />
           ),
@@ -236,13 +184,12 @@ export default function TabsLayout() {
         name="sos"
         options={{
           title: t('tabs.sos'),
-          tabBarButton: (props) => <SosTabBarButton {...props} />,
-          tabBarIcon: () => (
-            <BrandTabIcon name="sos" size={iconSize} color={colors.danger} focused />
+          tabBarButton: (props) => <TabBarButton {...props} testID="tab-sos" />,
+          tabBarIcon: ({ focused }) => (
+            <BrandTabIcon name="sos" size={iconSize} color={colors.danger} focused={focused} />
           ),
           tabBarActiveTintColor: colors.danger,
           tabBarInactiveTintColor: colors.danger,
-          tabBarItemStyle: { flex: 0, paddingHorizontal: 0, width: sosSlotWidth },
         }}
       />
     </Tabs>

@@ -1,30 +1,32 @@
-# Gap: Figma → Diary (UX only)
+# Gap: Figma Make zip → Diary
 
-Дата: 2026-09-18 · `3328:214` `screen-diary` → `/(tabs)/diary`
+Дата: 2026-09-18 · zip `code-16.txt` → `/(tabs)/diary`
+
+Канон композиции — **Figma Make zip**, не live-фрейм `3328:214`.
 
 ## Победители
 
 | Слой | Источник |
 |------|----------|
-| UI / композиция / токены | Figma |
-| Handlers, picker, editor, course, report, insights | текущий код |
+| UI / композиция / токены | zip |
+| Handlers, picker, editor, course, report | текущий код (роуты живы) |
 
 ## Каркас
 
-| Figma | Код |
-|-------|-----|
-| screen-header | eyebrow + title + profile chip |
-| calendar-strip | `WeekRingCard` (поверх списка) |
-| timeline / entry-card | history `GlassCard` rows |
-| fab-row → fab 56×56 | `DiaryNewEntryFab` в `pinnedBottom` (`diary-new-entry`) |
+| Zip | Код |
+|-----|-----|
+| title «Дневник симптомов» | `ScreenHeader` + `diary.symptomsTitle` |
+| calendar-strip 7 дней 65h | day cells в `diary.tsx` |
+| timeline + SeverityBadge | entry cards + `SeverityBadge` |
+| tags `radius.full` | chips в editor/picker |
+| fab 56 abs bottom 86 / right 24 | `DiaryNewEntryFab` (`diary-new-entry`) |
 | — | Ask FAB поднимается на `/diary` (`askFabBottomOffset`) |
-| — | Курс / Отчёт secondary row (оставляем) |
-| — | insights + condition cards ниже timeline |
+| нет курса / отчёта / week-ring / clinical cards | убраны с кадра; модалки и роуты живы |
 
 ## Dual FAB
 
-На дневнике screen-level «+» и глобальный Ask делят правый нижний угол. Ask поднимается на `tapMinHeightFab + space[3]`, чтобы оба оставались видимыми и кликабельными.
+На дневнике screen-level «+» и глобальный Ask делят правый нижний угол. Ask поднимается на `tapMinHeightFab + space[3]`, чтобы оба оставались видимыми и кликабельными. В zip Ask нет — второй круг в макет не добавляем.
 
 ## Не трогаем
 
-`diary-new-entry`, `diary-setup-course`, `diary-report`, editor/wizard модалки, сервисы дневника.
+`diary-new-entry`, editor/wizard модалки, сервисы дневника, роуты курса и отчёта.

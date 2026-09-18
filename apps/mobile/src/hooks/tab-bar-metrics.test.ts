@@ -14,17 +14,17 @@ describe('tab-bar-metrics', () => {
 
     expect(resolveTabBarPaddingBottom(0)).toBe(6);
     expect(resolveTabBarPaddingBottom(48)).toBe(48);
-    expect(resolveTabBarHeight(48, false)).toBe(64 - 6 + 48);
+    expect(resolveTabBarHeight(48, false)).toBe(52 + 48);
   });
 
-  it('keeps iOS home-indicator floor', async () => {
+  it('keeps iOS home-indicator floor at zip 34', async () => {
     vi.doMock('react-native', () => ({
       Platform: { OS: 'ios' },
     }));
     const { resolveTabBarPaddingBottom, resolveTabBarHeight } = await import('./tab-bar-metrics');
 
-    expect(resolveTabBarPaddingBottom(0)).toBe(22);
+    expect(resolveTabBarPaddingBottom(0)).toBe(34);
     expect(resolveTabBarPaddingBottom(34)).toBe(34);
-    expect(resolveTabBarHeight(34, false)).toBe(84 - 22 + 34);
+    expect(resolveTabBarHeight(34, false)).toBe(52 + 34);
   });
 });

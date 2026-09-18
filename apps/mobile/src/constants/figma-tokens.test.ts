@@ -39,6 +39,7 @@ describe('docs/figma/tokens.json mirrors theme + layout', () => {
       '2': space[2],
       '3': space[3],
       '4': space[4],
+      '5': space[5],
       '6': space[6],
       '8': space[8],
       '12': space[12],

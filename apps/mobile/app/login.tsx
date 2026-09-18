@@ -5,23 +5,19 @@ import { applyLoginFieldInput } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
-import { SegmentedControl } from '@/src/components/SegmentedControl';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { useTranslation } from '@/src/store/locale-store';
 import {
   AuthError,
   AuthField,
-  AuthForgotLink,
   AuthHero,
   AuthLink,
   AuthPrimaryButton,
 } from '@/src/components/AuthForm';
-import { LoginField } from '@/src/components/LoginField';
 import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function LoginScreen() {
   const { t, tAuthError } = useTranslation();
-  const [loginMode, setLoginMode] = useState<'phone' | 'email'>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -58,25 +54,14 @@ export default function LoginScreen() {
   return (
     <Screen>
       <LanguagePicker compact />
-      <AuthHero title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')} />
-      <SegmentedControl
-        testID="auth-login-mode"
-        accessibilityLabel={t('auth.loginSubtitle')}
-        size="sm"
-        value={loginMode}
-        onChange={(next) => {
-          setLoginMode(next as 'phone' | 'email');
-          setLogin('');
-        }}
-        options={[
-          { value: 'phone', label: t('auth.tabPhone'), testID: 'auth-tab-phone' },
-          { value: 'email', label: t('auth.tabEmail'), testID: 'auth-tab-email' },
-        ]}
-      />
-      <LoginField
-        label={loginMode === 'phone' ? t('auth.tabPhone') : t('auth.tabEmail')}
+      <AuthHero title={t('auth.appName')} subtitle={t('auth.tagline')} />
+      <AuthField
+        label={t('auth.emailLabel')}
         value={login}
         onChangeText={setLogin}
+        placeholder={t('auth.emailPlaceholder')}
+        keyboardType="email-address"
+        autoCapitalize="none"
         testID="auth-login-input"
         returnKeyType="next"
         submitBehavior="submit"
@@ -87,6 +72,7 @@ export default function LoginScreen() {
         label={t('common.password')}
         value={password}
         onChangeText={setPassword}
+        placeholder="••••••••"
         secureTextEntry
         testID="auth-password-input"
         returnKeyType="go"
@@ -94,7 +80,6 @@ export default function LoginScreen() {
         onSubmitEditing={() => void handleLogin()}
         {...authPasswordInputProps('current')}
       />
-      <AuthForgotLink text={t('auth.forgotLink')} onPress={() => router.push('/forgot-password')} />
       <AuthError message={error} />
       <AuthPrimaryButton
         label={t('auth.loginButton')}

@@ -1,21 +1,23 @@
-# Gap: Figma → Map (UX only)
+# Gap: Figma Make zip → Map
 
-Дата: 2026-09-18 · `3328:333` `screen-map` → `/(tabs)/map`
+Дата: 2026-09-18 · `/(tabs)/map`
+
+**MapScreen в zip нет** — карту не выдумывать. Текущий map chrome остаётся; токены (Work Sans, zip radii, palette) общие.
 
 ## Победители
 
 | Слой | Источник |
 |------|----------|
-| UI / map-frame / sheet | Figma |
+| Композиция карты | текущий код (нет zip-кадра) |
 | Pollen, layers, places, doctors | текущий код |
+| Цвета / тип / радиусы | zip tokens |
 
 ## Каркас
 
-| Figma | Код |
-|-------|-----|
-| screen-header | title + profile |
-| map-frame + chips | `MapCanvas` + overlay switcher/status |
-| bottom-sheet | status, details, places, doctors, disclaimer |
+| Zip | Код |
+|-----|-----|
+| — | `MapCanvas` + overlay switcher/status |
+| — | bottom-sheet: status, details, places, doctors |
 
 ## Не трогаем
 

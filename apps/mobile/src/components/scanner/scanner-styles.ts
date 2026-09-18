@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { density, radii } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
 export function createStyles({ colors, fonts, shadows }: AppTheme) {
@@ -11,8 +12,35 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
-    /** Figma scanner-container */
-    camZone: { gap: 12 },
+    /** Zip scanner cam 280 + reticle */
+    camZone: { gap: 20, alignItems: 'center' },
+    camView: {
+      width: '100%',
+      height: 280,
+      backgroundColor: colors.surfaceDark,
+      borderRadius: radii.xl,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    reticle: { width: 180, height: 180, position: 'relative' },
+    corner: {
+      position: 'absolute',
+      width: 24,
+      height: 24,
+      borderColor: colors.accent,
+      borderWidth: 3,
+    },
+    cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 8 },
+    cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 8 },
+    cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 8 },
+    cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 8 },
+    instructionText: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.bodySm,
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
     secondaryRow: { flexDirection: 'row', gap: 10 },
     barcodeBtn: {
       flex: 1,

@@ -39,11 +39,11 @@
     },
     "textSecondary": {
       "$type": "color",
-      "$value": "#5F716B"
+      "$value": "#6B7C75"
     },
     "textMuted": {
       "$type": "color",
-      "$value": "#5F716B"
+      "$value": "#6B7C75"
     },
     "border": {
       "$type": "color",
@@ -71,7 +71,7 @@
     },
     "dangerLight": {
       "$type": "color",
-      "$value": "#FEF2F2"
+      "$value": "#FED7D7"
     },
     "dangerBorder": {
       "$type": "color",
@@ -79,23 +79,23 @@
     },
     "warning": {
       "$type": "color",
-      "$value": "#F97316"
+      "$value": "#F59E0B"
     },
     "warningLight": {
       "$type": "color",
-      "$value": "#FFF7ED"
+      "$value": "#FEF3C7"
     },
     "warningBorder": {
       "$type": "color",
-      "$value": "#FED7AA"
+      "$value": "#FDE68A"
     },
     "warningText": {
       "$type": "color",
-      "$value": "#C2410C"
+      "$value": "#B45309"
     },
     "caution": {
       "$type": "color",
-      "$value": "#E8A317"
+      "$value": "#F97316"
     },
     "cautionLight": {
       "$type": "color",
@@ -115,7 +115,7 @@
     },
     "mint": {
       "$type": "color",
-      "$value": "#E4EBE4"
+      "$value": "#EAF2EA"
     },
     "foam": {
       "$type": "color",
@@ -171,7 +171,7 @@
     },
     "scannerDangerIconBg": {
       "$type": "color",
-      "$value": "#FEF2F2"
+      "$value": "#FED7D7"
     },
     "scannerSafeText": {
       "$type": "color",
@@ -193,6 +193,10 @@
       "$type": "color",
       "$value": "#EAF2EA"
     },
+    "surfaceDark": {
+      "$type": "color",
+      "$value": "#D1DED1"
+    },
     "info": {
       "$type": "color",
       "$value": "#5B8C7A"
@@ -207,7 +211,7 @@
     },
     "skeletonBase": {
       "$type": "color",
-      "$value": "#E4EBE4"
+      "$value": "#EAF2EA"
     },
     "skeletonSheen": {
       "$type": "color",
@@ -215,11 +219,51 @@
     },
     "mapLand": {
       "$type": "color",
-      "$value": "#E4EBE4"
+      "$value": "#EAF2EA"
     },
     "mapRoad": {
       "$type": "color",
       "$value": "#C5D0C8"
+    },
+    "ringAllergen": {
+      "$type": "color",
+      "$value": "#EF4444"
+    },
+    "ringMedicine": {
+      "$type": "color",
+      "$value": "#F59E0B"
+    },
+    "severitySafe": {
+      "$type": "color",
+      "$value": "#10B981"
+    },
+    "severityMild": {
+      "$type": "color",
+      "$value": "#F59E0B"
+    },
+    "severityModerate": {
+      "$type": "color",
+      "$value": "#F97316"
+    },
+    "severitySevere": {
+      "$type": "color",
+      "$value": "#EF4444"
+    },
+    "severitySafeBg": {
+      "$type": "color",
+      "$value": "#D1FAE5"
+    },
+    "severityMildBg": {
+      "$type": "color",
+      "$value": "#FEF3C7"
+    },
+    "severityModerateBg": {
+      "$type": "color",
+      "$value": "#FFEDD5"
+    },
+    "severitySevereBg": {
+      "$type": "color",
+      "$value": "#FED7D7"
     }
   },
   "Claro/Dark": {
@@ -293,31 +337,31 @@
     },
     "warning": {
       "$type": "color",
-      "$value": "#FB923C"
+      "$value": "#FBBF24"
     },
     "warningLight": {
       "$type": "color",
-      "$value": "#431407"
+      "$value": "#451A03"
     },
     "warningBorder": {
       "$type": "color",
-      "$value": "#9A3412"
+      "$value": "#92400E"
     },
     "warningText": {
       "$type": "color",
-      "$value": "#FED7AA"
+      "$value": "#FDE68A"
     },
     "caution": {
       "$type": "color",
-      "$value": "#FBBF24"
+      "$value": "#FB923C"
     },
     "cautionLight": {
       "$type": "color",
-      "$value": "#451A03"
+      "$value": "#431407"
     },
     "cautionBorder": {
       "$type": "color",
-      "$value": "#92400E"
+      "$value": "#9A3412"
     },
     "forest": {
       "$type": "color",
@@ -407,6 +451,10 @@
       "$type": "color",
       "$value": "#1A2420"
     },
+    "surfaceDark": {
+      "$type": "color",
+      "$value": "#24302B"
+    },
     "info": {
       "$type": "color",
       "$value": "#7BAF9A"
@@ -434,45 +482,89 @@
     "mapRoad": {
       "$type": "color",
       "$value": "#2C3A35"
+    },
+    "ringAllergen": {
+      "$type": "color",
+      "$value": "#F87171"
+    },
+    "ringMedicine": {
+      "$type": "color",
+      "$value": "#FBBF24"
+    },
+    "severitySafe": {
+      "$type": "color",
+      "$value": "#34D399"
+    },
+    "severityMild": {
+      "$type": "color",
+      "$value": "#FBBF24"
+    },
+    "severityModerate": {
+      "$type": "color",
+      "$value": "#FB923C"
+    },
+    "severitySevere": {
+      "$type": "color",
+      "$value": "#F87171"
+    },
+    "severitySafeBg": {
+      "$type": "color",
+      "$value": "#064E3B"
+    },
+    "severityMildBg": {
+      "$type": "color",
+      "$value": "#451A03"
+    },
+    "severityModerateBg": {
+      "$type": "color",
+      "$value": "#431407"
+    },
+    "severitySevereBg": {
+      "$type": "color",
+      "$value": "#450A0A"
     }
   },
   "Layout": {
     "radii": {
       "xs": {
         "$type": "number",
-        "$value": 8
+        "$value": 6
       },
       "sm": {
         "$type": "number",
-        "$value": 12
+        "$value": 6
       },
       "md": {
         "$type": "number",
-        "$value": 16
+        "$value": 8
       },
       "row": {
         "$type": "number",
-        "$value": 16
+        "$value": 12
       },
       "card": {
         "$type": "number",
-        "$value": 20
+        "$value": 16
       },
       "lg": {
         "$type": "number",
-        "$value": 24
+        "$value": 12
       },
       "xl": {
         "$type": "number",
-        "$value": 32
+        "$value": 16
+      },
+      "xxl": {
+        "$type": "number",
+        "$value": 24
       },
       "field": {
         "$type": "number",
-        "$value": 36
+        "$value": 12
       },
       "full": {
         "$type": "number",
-        "$value": 9999
+        "$value": 999
       }
     },
     "space": {
@@ -492,6 +584,10 @@
         "$type": "number",
         "$value": 16
       },
+      "5": {
+        "$type": "number",
+        "$value": 20
+      },
       "6": {
         "$type": "number",
         "$value": 24
@@ -508,11 +604,11 @@
     "density": {
       "screenGap": {
         "$type": "number",
-        "$value": 10
+        "$value": 16
       },
       "cardPadding": {
         "$type": "number",
-        "$value": 14
+        "$value": 16
       },
       "kpiRowPaddingV": {
         "$type": "number",
@@ -540,7 +636,7 @@
       },
       "tapMinHeightPrimary": {
         "$type": "number",
-        "$value": 52
+        "$value": 48
       },
       "tapMinHeightSecondary": {
         "$type": "number",
@@ -560,18 +656,22 @@
     "families": {
       "sans": {
         "$type": "fontFamilies",
-        "$value": "Inter"
+        "$value": "Work Sans"
       },
       "serif": {
         "$type": "fontFamilies",
-        "$value": "Source Serif 4"
+        "$value": "Work Sans"
       },
       "display": {
         "$type": "fontFamilies",
-        "$value": "Fraunces"
+        "$value": "Work Sans"
       }
     },
     "fontSize": {
+      "tabLabel": {
+        "$type": "number",
+        "$value": 10
+      },
       "caption": {
         "$type": "number",
         "$value": 11
@@ -590,15 +690,15 @@
       },
       "body": {
         "$type": "number",
-        "$value": 15
+        "$value": 14
       },
       "h4": {
         "$type": "number",
-        "$value": 16
+        "$value": 18
       },
       "h3": {
         "$type": "number",
-        "$value": 18
+        "$value": 20
       },
       "h2": {
         "$type": "number",
@@ -606,7 +706,7 @@
       },
       "h1": {
         "$type": "number",
-        "$value": 26
+        "$value": 28
       },
       "display": {
         "$type": "number",

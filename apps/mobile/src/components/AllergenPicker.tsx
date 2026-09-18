@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
   findAllergenById,
@@ -10,6 +10,7 @@ import {
   type CrossReactionMatch,
 } from '@allerguide/core';
 import { density, radii, space } from '@/src/constants/layout';
+import { fontSizes } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { AllergenCatalogModal } from '@/src/components/AllergenCatalogModal';
 import {
@@ -50,6 +51,7 @@ export function AllergenPicker({
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const [catalog, setCatalog] = useState<AllergenRecord[]>(getAllergenCatalogSnapshot);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     void resolveAllergenCatalog().then((result) => setCatalog(result.allergens));
@@ -74,6 +76,10 @@ export function AllergenPicker({
   };
 
   const renderChip = (item: { id: string; name: string }) => {
+    const needle = query.trim().toLowerCase();
+    if (needle && !item.name.toLowerCase().includes(needle) && !item.id.toLowerCase().includes(needle)) {
+      return null;
+    }
     const active = selected.includes(item.id);
     return (
       <Pressable
@@ -93,6 +99,18 @@ export function AllergenPicker({
 
   return (
     <View style={styles.wrap}>
+      <View style={styles.searchRow}>
+        <Ionicons name="search" size={16} color={theme.colors.textSecondary} />
+        <TextInput
+          testID="allergen-search"
+          value={query}
+          onChangeText={setQuery}
+          placeholder={t('allergens.searchPlaceholder')}
+          placeholderTextColor={theme.colors.textSecondary}
+          style={styles.searchInput}
+          accessibilityLabel={t('allergens.searchPlaceholder')}
+        />
+      </View>
       {model.mode === 'recommended' ? (
         <>
           <Text style={styles.sectionHint}>{t('allergens.recommendedTitle')}</Text>
@@ -208,6 +226,23 @@ export function AllergenPicker({
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     wrap: { gap: space[3] },
+    searchRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: density.tapMinHeight,
+      backgroundColor: colors.card,
+      borderRadius: radii.lg,
+      paddingHorizontal: 14,
+      gap: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    searchInput: {
+      flex: 1,
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.body,
+      color: colors.text,
+    },
     group: { gap: space[2] },
     sectionHint: {
       fontFamily: fonts.sansSemiBold,
@@ -240,14 +275,14 @@ function createStyles({ colors, fonts }: AppTheme) {
     chip: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 5,
+      gap: 6,
       minHeight: density.tapMinHeightSm,
       paddingVertical: space[2],
-      paddingHorizontal: space[3],
-      borderRadius: radii.sm,
+      paddingHorizontal: 14,
+      borderRadius: radii.full,
       backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.borderInput,
+      borderColor: colors.border,
     },
     chipActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
     chipText: {

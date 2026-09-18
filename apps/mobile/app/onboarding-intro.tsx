@@ -22,7 +22,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
 
-const SLIDE_KEYS: OnboardingSlideKey[] = ['profile', 'scanner', 'care', 'map', 'sos'];
+const SLIDE_KEYS: OnboardingSlideKey[] = ['profile', 'scanner', 'map'];
 const CARD_PADDING_H = 16;
 
 export default function OnboardingIntroScreen() {
@@ -144,7 +144,7 @@ export default function OnboardingIntroScreen() {
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number, isCompact: boolean) {
+function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number, _isCompact: boolean) {
   return StyleSheet.create({
     root: {
       flex: 1,
@@ -186,29 +186,30 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number, is
     },
     illustrationFrame: {
       width: '100%',
-      minHeight: 200,
+      height: 300,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 4,
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: radii.xxl,
     },
     title: {
-      fontFamily: fonts.serifBold,
-      fontSize: isCompact ? 22 : 26,
+      fontFamily: fonts.sansBold,
+      fontSize: 22,
       fontWeight: '700',
       color: colors.head,
       textAlign: 'center',
-      letterSpacing: -0.3,
-      lineHeight: isCompact ? 28 : 32,
+      lineHeight: 28,
       paddingHorizontal: 4,
       width: '100%',
       flexShrink: 1,
     },
     desc: {
       fontFamily: fonts.sans,
-      fontSize: isCompact ? 14 : 15,
+      fontSize: 14,
       color: colors.textSecondary,
       textAlign: 'center',
-      lineHeight: isCompact ? 20 : 22,
+      lineHeight: 20,
       paddingHorizontal: 4,
       width: '100%',
       flexShrink: 1,

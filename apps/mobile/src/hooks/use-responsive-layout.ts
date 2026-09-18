@@ -25,7 +25,7 @@ export function useResponsiveLayout() {
     : undefined;
 
   const contentMaxWidth = isWeb ? shellMaxWidth : undefined;
-  const horizontalPadding = isCompact ? 14 : isWeb ? 16 : 20;
+  const horizontalPadding = isCompact ? 16 : 24;
   const topPadding = isWeb ? 16 : 56;
   const tabBarHeight = resolveTabBarHeight(insets.bottom, isWeb);
   const tabBarPaddingBottom = resolveTabBarPaddingBottom(insets.bottom);

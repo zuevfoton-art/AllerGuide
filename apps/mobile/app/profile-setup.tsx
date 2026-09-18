@@ -444,6 +444,14 @@ export default function ProfileSetupScreen() {
           </View>
         </View>
       }>
+      <View style={styles.progressBar} testID="profile-setup-progress">
+        <View
+          style={[
+            styles.progressFill,
+            { width: `${Math.round((stepProgressMeta.current / stepProgressMeta.total) * 100)}%` },
+          ]}
+        />
+      </View>
       <View style={styles.header}>
         <Text style={ui.docTitle}>{title}</Text>
         <Text style={ui.docMeta}>{subtitle}</Text>
@@ -579,6 +587,18 @@ export default function ProfileSetupScreen() {
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     header: { gap: 2, marginBottom: 4 },
+    progressBar: {
+      height: 4,
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 2,
+      overflow: 'hidden',
+      marginBottom: 12,
+    },
+    progressFill: {
+      height: 4,
+      backgroundColor: colors.accent,
+      borderRadius: 2,
+    },
     actions: {
       flexDirection: 'row',
       gap: 10,
@@ -595,7 +615,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     /** Figma profile-footer button 354×52, radius 24 */
     footerBtn: {
       minHeight: density.tapMinHeightPrimary,
-      borderRadius: radii.xl,
+      borderRadius: radii.lg,
     },
     error: {
       fontFamily: fonts.sans,

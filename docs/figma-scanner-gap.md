@@ -1,22 +1,25 @@
-# Gap: Figma → Scanner (UX only)
+# Gap: Figma Make zip → Scanner
 
-Дата: 2026-09-18 · `3328:280` `screen-scanner` → `/(tabs)/scanner`
+Дата: 2026-09-18 · zip `code-17.txt` → `/(tabs)/scanner`
+
+Канон композиции — **Figma Make zip**, не live-фрейм `3328:280`.
 
 ## Победители
 
 | Слой | Источник |
 |------|----------|
-| UI / cam-zone / result cards | Figma |
+| UI / cam-zone / result | zip |
 | Scan pipeline, barcode, manual, dish | текущий код |
 
 ## Каркас
 
-| Figma | Код |
-|-------|-----|
-| screen-header | title + profile |
-| scanner-container / cam-view | primary camera zone + barcode/manual |
-| scan-result / ingredients | `ScannerResultPanel` |
-| — | history lists, undo, crop modal |
+| Zip | Код |
+|-----|-----|
+| title «Сканирование продукта» | `scanner.productScanTitle` |
+| cam 280 + reticle | `scanner-primary-camera` |
+| инструкция | zip copy |
+| result «Опасно» + состав highlight | `ScannerResultPanel` |
+| — | barcode/manual остаются handlers, визуал primary — камера |
 
 ## Не трогаем
 

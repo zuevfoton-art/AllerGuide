@@ -67,7 +67,7 @@ a[href="#content"] {
   background: #FFFFFF;
   border: 1px solid #5B8C7A;
   color: #5B8C7A;
-  font: 600 14px/1.2 Inter, system-ui, sans-serif;
+  font: 600 14px/1.2 "Work Sans", system-ui, sans-serif;
   text-decoration: none;
 }
 
@@ -100,7 +100,7 @@ export default function Root({ children }: PropsWithChildren) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;1,8..60,600&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
         <ScrollViewStyleReset />

@@ -12,7 +12,6 @@ import { UndoBanner } from '@/src/components/UndoBanner';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { ImageCropEditor } from '@/src/components/ImageCropEditor';
 import { DishNameField } from '@/src/components/DishNameField';
-import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { ScannerCameraModal } from '@/src/components/scanner/ScannerCameraModal';
 import { ScannerLists } from '@/src/components/scanner/ScannerLists';
 import { ScannerResultPanel } from '@/src/components/scanner/ScannerResultPanel';
@@ -69,7 +68,7 @@ export default function ScannerScreen() {
 
   if (!scan.activeProfileId) {
     return (
-      <Screen>
+      <Screen showBrandHeader={false}>
         <Text style={ui.docTitle}>{t('scanner.titleShort')}</Text>
         <GlassCard>
           <Text style={ui.cardTitle}>{t('scanner.noProfileTitle')}</Text>
@@ -88,11 +87,9 @@ export default function ScannerScreen() {
 
   return (
     <Screen
+      showBrandHeader={false}
       onRefresh={() => scan.refresh()}
       refreshing={scan.refreshing}
-      brandHeaderRight={
-        <ProfileHeaderButton variant="chip" chipTitle={scan.activeProfile?.name} />
-      }
       pinnedTop={
         scan.displayResult ? (
           <GlassCard
@@ -117,23 +114,29 @@ export default function ScannerScreen() {
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={ui.docTitle} testID="scanner-title">
-            {t('scanner.titleShort')}
+            {t('scanner.productScanTitle')}
           </Text>
         </View>
       </View>
 
-      <GlassCard variant="soft" testID="scanner-cam-zone" style={styles.camZone}>
+      <View style={styles.camZone} testID="scanner-cam-zone">
         <HintAnchor id="scanner.photo">
-          <Button
+          <Pressable
             testID="scanner-primary-camera"
-            label={t('scanner.smartScan')}
-            variant="primary"
-            block
-            icon="camera"
-            disabled={scan.loading}
+            style={styles.camView}
             onPress={() => void scan.openCamera('scanner')}
-          />
+            disabled={scan.loading}
+            accessibilityRole="button"
+            accessibilityLabel={t('scanner.smartScan')}>
+            <View style={styles.reticle}>
+              <View style={[styles.corner, styles.cornerTL]} />
+              <View style={[styles.corner, styles.cornerTR]} />
+              <View style={[styles.corner, styles.cornerBL]} />
+              <View style={[styles.corner, styles.cornerBR]} />
+            </View>
+          </Pressable>
         </HintAnchor>
+        <Text style={styles.instructionText}>{t('scanner.cameraHint')}</Text>
 
         <View style={styles.secondaryRow}>
           <HintAnchor id="scanner.barcode" style={{ flex: 1 }}>
@@ -169,7 +172,7 @@ export default function ScannerScreen() {
             {scan.isDishVisionResult ? t('scanner.trustLineDishVision') : t('scanner.trustLine')}
           </Text>
         ) : null}
-      </GlassCard>
+      </View>
 
       {scan.manualOpen ? (
         <View style={styles.manualBlock}>

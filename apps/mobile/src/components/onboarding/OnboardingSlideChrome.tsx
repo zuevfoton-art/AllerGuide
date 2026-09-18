@@ -16,7 +16,7 @@ type OnboardingSlideChromeProps = {
   style?: ViewStyle;
 };
 
-/** Figma onboarding controls: dots + equal Skip | Next (171×52, radius xl). */
+/** Zip onboarding: full-width Далее/Начать + text skip. */
 export function OnboardingSlideChrome({
   theme,
   slideCount,
@@ -43,31 +43,23 @@ export function OnboardingSlideChrome({
           />
         ))}
       </View>
-      <View style={styles.actionsRow}>
+      <View style={styles.actions}>
+        <Button
+          testID="onboarding-intro-next"
+          label={isLast ? startLabel : nextLabel}
+          variant="primary"
+          block
+          onPress={onNext}
+          style={styles.nextBtn}
+        />
         {!isLast ? (
-          <View style={styles.actionSlot}>
-            <Button
-              testID="onboarding-intro-skip"
-              label={skipLabel}
-              variant="secondary"
-              block
-              onPress={onSkip}
-              style={styles.figmaAction}
-            />
-          </View>
-        ) : (
-          <View style={styles.actionSlot} />
-        )}
-        <View style={styles.actionSlot}>
           <Button
-            testID="onboarding-intro-next"
-            label={isLast ? startLabel : nextLabel}
-            variant="primary"
-            block
-            onPress={onNext}
-            style={styles.figmaAction}
+            testID="onboarding-intro-skip"
+            label={skipLabel}
+            variant="ghost"
+            onPress={onSkip}
           />
-        </View>
+        ) : null}
       </View>
     </View>
   );
@@ -76,8 +68,9 @@ export function OnboardingSlideChrome({
 function createStyles({ colors }: AppTheme) {
   return StyleSheet.create({
     footer: {
-      gap: space[3],
-      paddingTop: space[2],
+      gap: space[4],
+      paddingTop: space[8],
+      alignItems: 'center',
     },
     dotsCentered: {
       flexDirection: 'row',
@@ -88,27 +81,20 @@ function createStyles({ colors }: AppTheme) {
     dot: {
       width: 8,
       height: 8,
-      borderRadius: radii.xs,
-      backgroundColor: colors.accentMid,
-      opacity: 0.45,
+      borderRadius: 4,
+      backgroundColor: colors.surfaceDark,
     },
     dotActive: {
       width: 24,
       backgroundColor: colors.accent,
-      opacity: 1,
     },
-    actionsRow: {
-      flexDirection: 'row',
+    actions: {
+      width: '100%',
+      gap: space[4],
       alignItems: 'center',
-      gap: space[3],
     },
-    actionSlot: {
-      flex: 1,
-      minWidth: 0,
-    },
-    /** Figma button-skip / button-next: height 52, radius 24 */
-    figmaAction: {
-      borderRadius: radii.xl,
+    nextBtn: {
+      borderRadius: radii.lg,
       minHeight: density.tapMinHeightPrimary,
     },
   });

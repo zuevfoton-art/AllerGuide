@@ -1,33 +1,27 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import type { ImmuneBalanceRings as ImmuneBalanceRingValues } from '@allerguide/core';
-import { density } from '@/src/constants/layout';
-import { scaledTextProps, textStyles } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
-const RING_SIZE = 200;
-const RING_STROKES = {
-  outer: 12,
-  mid: 12,
-  inner: 12,
-  clinical: 9,
-} as const;
+const RING_SIZE = 140;
+const STROKE_WIDTH = 12;
+const RING_GAP = 4;
 
 type ImmuneBalanceRingsProps = {
-  score: number;
   rings: ImmuneBalanceRingValues;
   accessibilityLabel: string;
 };
 
-export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneBalanceRingsProps) {
+export function ImmuneBalanceRings({ rings, accessibilityLabel }: ImmuneBalanceRingsProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const showClinical = rings.clinical != null;
   const center = RING_SIZE / 2;
-  const radii = showClinical
-    ? { pollen: 88, air: 68, diary: 48, clinical: 30 }
-    : { pollen: 84, air: 62, diary: 40, clinical: 0 };
+  const series = [
+    { progress: rings.pollen, color: theme.colors.ringAllergen },
+    { progress: rings.air, color: theme.colors.ringMedicine },
+    { progress: rings.diary, color: theme.colors.accent },
+  ];
 
   return (
     <View
@@ -36,50 +30,21 @@ export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneB
       accessibilityLabel={accessibilityLabel}
       style={styles.wrap}>
       <Svg width={RING_SIZE} height={RING_SIZE}>
-        <RingArc
-          cx={center}
-          cy={center}
-          r={radii.pollen}
-          progress={rings.pollen}
-          color={theme.colors.accent}
-          track={theme.colors.mint}
-          width={RING_STROKES.outer}
-        />
-        <RingArc
-          cx={center}
-          cy={center}
-          r={radii.air}
-          progress={rings.air}
-          color={theme.colors.success}
-          track={theme.colors.mint}
-          width={RING_STROKES.mid}
-        />
-        <RingArc
-          cx={center}
-          cy={center}
-          r={radii.diary}
-          progress={rings.diary}
-          color={theme.colors.warning}
-          track={theme.colors.mint}
-          width={RING_STROKES.inner}
-        />
-        {showClinical ? (
-          <RingArc
-            cx={center}
-            cy={center}
-            r={radii.clinical}
-            progress={rings.clinical ?? 0}
-            color={theme.colors.tipText}
-            track={theme.colors.mint}
-            width={RING_STROKES.clinical}
-          />
-        ) : null}
+        {series.map((ring, index) => {
+          const radius = center - STROKE_WIDTH * (index + 0.5) - index * RING_GAP;
+          return (
+            <RingArc
+              key={ring.color}
+              cx={center}
+              cy={center}
+              r={radius}
+              progress={ring.progress}
+              color={ring.color}
+              width={STROKE_WIDTH}
+            />
+          );
+        })}
       </Svg>
-      <View pointerEvents="none" style={styles.scoreWrap}>
-        <Text {...scaledTextProps} testID="immune-balance-score" style={styles.score}>
-          {score}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -90,7 +55,6 @@ function RingArc({
   r,
   progress,
   color,
-  track,
   width,
 }: {
   cx: number;
@@ -98,7 +62,6 @@ function RingArc({
   r: number;
   progress: number;
   color: string;
-  track: string;
   width: number;
 }) {
   const circumference = 2 * Math.PI * r;
@@ -110,7 +73,7 @@ function RingArc({
         cx={cx}
         cy={cy}
         r={r}
-        stroke={track}
+        stroke={`${color}30`}
         strokeWidth={width}
         fill="none"
       />
@@ -131,23 +94,13 @@ function RingArc({
   );
 }
 
-function createStyles({ colors }: AppTheme) {
+function createStyles(_theme: AppTheme) {
   return StyleSheet.create({
     wrap: {
       width: RING_SIZE,
       height: RING_SIZE,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    scoreWrap: {
-      ...StyleSheet.absoluteFillObject,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    score: {
-      ...textStyles.kpi,
-      color: colors.head,
-      minHeight: density.tapMinHeight,
     },
   });
 }
