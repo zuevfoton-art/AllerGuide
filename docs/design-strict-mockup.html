@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllerGuide — строгий дизайн (3 варианта)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --page-bg: #e8eaed;
+      --sidebar-w: 300px;
+    }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--page-bg);
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid #ccc; }
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid #d0d5dd;
+      padding: 28px 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .sidebar .lead { font-size: 13px; color: #667085; line-height: 1.55; margin-bottom: 24px; }
+
+    .ctrl-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #98a2b3;
+      margin-bottom: 8px;
+      margin-top: 20px;
+    }
+    .ctrl-label:first-of-type { margin-top: 0; }
+
+    .variant-btns, .screen-btns { display: flex; flex-direction: column; gap: 6px; }
+    .vbtn, .sbtn {
+      border: 1px solid #d0d5dd;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.12s;
+    }
+    .vbtn:hover, .sbtn:hover { border-color: #667085; }
+    .vbtn.active { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+    .sbtn.active { background: #f2f4f7; border-color: #1e3a5f; color: #1e3a5f; }
+    .vbtn small { display: block; font-weight: 400; font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+    .legend {
+      margin-top: 24px;
+      padding: 14px;
+      background: #f9fafb;
+      border: 1px solid #eaecf0;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #667085;
+      line-height: 1.6;
+    }
+    .legend strong { color: #344054; }
+    .swatches { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .sw { width: 28px; height: 28px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.12); }
+
+    /* ── Preview area ── */
+    .preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px 48px;
+      gap: 16px;
+    }
+    .preview-caption {
+      font-size: 13px;
+      color: #667085;
+      text-align: center;
+    }
+    .preview-caption strong { color: #344054; }
+
+    .device {
+      width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 64px rgba(16, 24, 40, 0.18);
+      border: 10px solid #1a1a1a;
+      position: relative;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 28px;
+      background: #1a1a1a;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 30;
+    }
+
+    .status-bar {
+      height: 48px;
+      padding: 14px 28px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .screen-viewport {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scr {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      padding: 8px 16px 88px;
+      display: none;
+      scrollbar-width: none;
+    }
+    .scr.active { display: block; }
+    .scr::-webkit-scrollbar { display: none; }
+
+    .tab-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      padding: 8px 0 20px;
+      z-index: 20;
+    }
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: default;
+      opacity: 0.45;
+    }
+    .tab-item.on { opacity: 1; }
+    .tab-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+    /* ═══ Theme tokens ═══ */
+    .device[data-v="a"] {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --text: #263238;
+      --text-2: #546e7a;
+      --text-3: #78909c;
+      --border: #e0e0e0;
+      --border-light: #f0f0f0;
+      --accent: #1565c0;
+      --accent-bg: #e3f2fd;
+      --danger: #c62828;
+      --danger-bg: #ffebee;
+      --success: #2e7d32;
+      --success-bg: #e8f5e9;
+      --warning: #ef6c00;
+      --warning-bg: #fff3e0;
+      --radius: 2px;
+      --radius-md: 4px;
+      --font-head: 'IBM Plex Sans', sans-serif;
+      --font-body: 'IBM Plex Sans', sans-serif;
+      --font-serif: 'IBM Plex Sans', sans-serif;
+      --tab-bg: #fff;
+      --tab-border: #e0e0e0;
+      --btn-radius: 2px;
+      --shadow: none;
+    }
+    .device[data-v="b"] {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --text: #000000;
+      --text-2: #666666;
+      --text-3: #999999;
+      --border: #000000;
+      --border-light: #dddddd;
+      --accent: #000000;
+      --accent-bg: #000000;
+      --accent-fg: #ffffff;
+      --danger: #e53935;
+      --danger-bg: #ffffff;
+      --success: #000000;
+      --success-bg: #ffffff;
+      --warning: #000000;
+      --warning-bg: #ffffff;
+      --radius: 0px;
+      --radius-md: 0px;
+      --font-head: Inter, sans-serif;
+      --font-body: Inter, sans-serif;
+      --font-serif: Inter, sans-serif;
+      --tab-bg: #fff;
+      --tab-border: #000;
+      --btn-radius: 0px;
+      --shadow: none;
+    }
+    .device[data-v="c"] {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --accent: #1e3a5f;
+      --accent-bg: #1e3a5f;
+      --accent-fg: #ffffff;
+      --danger: #b91c1c;
+      --danger-bg: #fef2f2;
+      --success: #166534;
+      --success-bg: #f0fdf4;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --radius: 6px;
+      --radius-md: 8px;
+      --font-head: 'Source Serif 4', Georgia, serif;
+      --font-body: Inter, sans-serif;
+      --font-serif: 'Source Serif 4', Georgia, serif;
+      --tab-bg: #fff;
+      --tab-border: #e2e8f0;
+      --btn-radius: 4px;
+      --shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .device {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+    }
+    .status-bar { background: var(--bg); color: var(--text); }
+    .tab-bar { background: var(--tab-bg); border-top: 1px solid var(--tab-border); color: var(--text-2); }
+    .tab-item.on { color: var(--accent); }
+
+    /* ═══ Shared components ═══ */
+    .lbl {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+    .lbl:first-child { margin-top: 0; }
+
+    .h1 {
+      font-family: var(--font-head);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+    .sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; }
+
+    .device[data-v="b"] .h1 { font-size: 28px; letter-spacing: -0.03em; }
+    .device[data-v="b"] .lbl { letter-spacing: 0.1em; font-weight: 700; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .device[data-v="b"] .card { border-width: 2px; }
+
+    .profiles { display: flex; gap: 8px; margin-bottom: 16px; }
+    .device[data-v="b"] .profiles { gap: 0; border: 2px solid var(--border); }
+    .prof {
+      flex: 1;
+      padding: 10px 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-2);
+      cursor: default;
+    }
+    .device[data-v="b"] .prof { border: none; border-right: 2px solid var(--border); border-radius: 0; text-transform: uppercase; font-size: 11px; letter-spacing: 0.04em; }
+    .device[data-v="b"] .prof:last-child { border-right: none; }
+    .device[data-v="c"] .profiles { background: var(--border); padding: 3px; border-radius: var(--radius-md); gap: 0; border: none; }
+    .device[data-v="c"] .prof { border: none; border-radius: 4px; background: transparent; }
+    .prof.on {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+    .device[data-v="b"] .prof.on { background: var(--accent); color: var(--accent-fg, #fff); }
+    .device[data-v="c"] .prof.on { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+
+    .metric-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .metric-score { font-size: 32px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+    .device[data-v="b"] .metric-score { font-size: 48px; color: var(--text); }
+    .metric-score small { font-size: 14px; font-weight: 500; color: var(--text-3); }
+    .metric-note { font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 7px 0;
+      border-top: 1px solid var(--border-light);
+      color: var(--text-2);
+    }
+    .metric-row strong { color: var(--text); font-weight: 600; }
+
+    .device[data-v="b"] .index-bar { height: 4px; background: #eee; margin-top: 10px; }
+    .device[data-v="b"] .index-bar-fill { height: 100%; width: 72%; background: #000; }
+
+    .device[data-v="c"] .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .device[data-v="c"] .stat-val { font-size: 24px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+    .device[data-v="c"] .stat-lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .list { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--card); }
+    .device[data-v="b"] .list { border-width: 2px; border-radius: 0; }
+    .li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .li:last-child { border-bottom: none; }
+    .device[data-v="b"] .li { display: grid; grid-template-columns: 24px 1fr auto; }
+    .li-num { font-size: 11px; font-weight: 700; color: var(--text-3); }
+    .li-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--border-light);
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .device[data-v="b"] .li-icon { display: none; }
+    .li-body { flex: 1; min-width: 0; }
+    .li-body strong { display: block; font-size: 14px; font-weight: 600; }
+    .li-body span { font-size: 12px; color: var(--text-3); }
+    .li-act {
+      font-size: 20px;
+      color: var(--accent);
+      font-weight: 300;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--btn-radius);
+      flex-shrink: 0;
+    }
+    .device[data-v="b"] .li-act { border-width: 2px; font-size: 16px; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--btn-radius);
+      cursor: default;
+      margin-bottom: 10px;
+    }
+    .btn-primary { background: var(--accent); color: var(--accent-fg, #fff); }
+    .device[data-v="a"] .btn-primary { background: var(--accent); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .device[data-v="b"] .btn-outline { border-width: 2px; }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--btn-radius);
+      font-size: 15px;
+      background: var(--card);
+      color: var(--text);
+      margin-bottom: 12px;
+      font-family: var(--font-body);
+    }
+    .device[data-v="b"] .input { border-width: 2px; border-radius: 0; }
+
+    .field-lbl { font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .chip {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: var(--btn-radius);
+      background: var(--card);
+      color: var(--text-2);
+    }
+    .chip.on { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+    .device[data-v="b"] .chip { border-width: 2px; border-radius: 0; }
+    .device[data-v="b"] .chip.on { background: #000; color: #fff; }
+
+    .result-safe { border-color: var(--success); background: var(--success-bg); }
+    .result-danger { border-color: var(--danger); background: var(--danger-bg); }
+    .verdict { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .verdict.safe { color: var(--success); }
+    .verdict.danger { color: var(--danger); }
+
+    .sos-banner {
+      background: var(--danger);
+      color: #fff;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 14px;
+    }
+    .device[data-v="b"] .sos-banner { border-radius: 0; border: 2px solid var(--danger); background: #fff; color: var(--danger); }
+
+    .between { display: flex; justify-content: space-between; align-items: center; }
+    .link { font-size: 13px; font-weight: 600; color: var(--accent); }
+    .device[data-v="b"] .link { text-decoration: underline; }
+
+    .hero-block { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 3px solid var(--border); }
+    .hero-num { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; margin-bottom: 4px; }
+
+    .doc-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
+    .doc-title { font-family: var(--font-serif); font-size: 26px; font-weight: 700; margin: 2px 0 4px; }
+
+    .toggle-row { display: flex; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 14px; }
+    .device[data-v="b"] .toggle-row { border-width: 2px; border-radius: 0; }
+    .tog { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-3); border-right: 1px solid var(--border); }
+    .tog:last-child { border-right: none; }
+    .tog.on { background: var(--accent-bg); color: var(--accent); }
+    .device[data-v="b"] .tog.on { background: #000; color: #fff; }
+    .device[data-v="c"] .tog.on { background: var(--accent); color: #fff; }
+
+    .disclaimer { font-size: 11px; color: var(--text-3); text-align: center; line-height: 1.5; margin-top: 12px; }
+
+    .hide-b .b-only { display: none !important; }
+    .hide-b .a-c-only { display: revert; }
+    .device[data-v="b"] .b-only { display: revert !important; }
+    .device[data-v="b"] .a-c-only { display: none !important; }
+
+    .hide-a .a-only { display: none !important; }
+    .device[data-v="a"] .a-only { display: revert !important; }
+
+    .hide-c .c-only { display: none !important; }
+    .device[data-v="c"] .c-only { display: revert !important; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>AllerGuide</h1>
+      <p class="lead">Строгие варианты дизайна — интерактивный HTML-мокап. Выберите вариант и экран.</p>
+
+      <div class="ctrl-label">Вариант дизайна</div>
+      <div class="variant-btns">
+        <button type="button" class="vbtn active" data-v="a">
+          A — Клинический
+          <small>IBM Plex · синий · border 1px</small>
+        </button>
+        <button type="button" class="vbtn" data-v="b">
+          B — Швейцарская сетка
+          <small>Inter · чёрный · radius 0</small>
+        </button>
+        <button type="button" class="vbtn" data-v="c">
+          C — Северный документ
+          <small>Serif + Inter · navy · таблицы</small>
+        </button>
+      </div>
+
+      <div class="ctrl-label">Экран</div>
+      <div class="screen-btns">
+        <button type="button" class="sbtn active" data-s="home">Главная</button>
+        <button type="button" class="sbtn" data-s="diary">Дневник</button>
+        <button type="button" class="sbtn" data-s="scanner">Сканер</button>
+        <button type="button" class="sbtn" data-s="sos">SOS</button>
+        <button type="button" class="sbtn" data-s="login">Вход</button>
+        <button type="button" class="sbtn" data-s="profiles">Профили</button>
+      </div>
+
+      <div class="legend" id="legend">
+        <strong id="legend-title">Вариант A</strong>
+        <span id="legend-text">Фон #FAFAFA, акцент #1565C0, без теней и glass.</span>
+        <div class="swatches" id="swatches"></div>
+      </div>
+    </aside>
+
+    <main class="preview">
+      <p class="preview-caption"><strong id="cap-variant">Клинический минимализм</strong> · <span id="cap-screen">Главная</span></p>
+
+      <div class="device" id="device" data-v="a">
+        <div class="notch"></div>
+        <div class="status-bar"><span>9:41</span><span>▮▮▮ WiFi</span></div>
+
+        <div class="screen-viewport">
+          <!-- HOME -->
+          <div class="scr active" data-screen="home">
+            <div class="b-only hero-block">
+              <div class="hero-num">01 — ГЛАВНАЯ</div>
+              <div class="h1">Сегодня</div>
+              <div class="sub">Профиль · Анна · 20.06.2026</div>
+            </div>
+            <div class="a-c-only">
+              <div class="doc-label c-only">AllerGuide · Сводка</div>
+              <div class="h1 a-only">20 июня</div>
+              <div class="h1 c-only doc-title">Сегодня</div>
+              <div class="sub a-only">Сегодня · Профиль: Анна</div>
+              <div class="sub c-only">20 июня 2026 · Профиль: Анна</div>
+            </div>
+
+            <div class="profiles">
+              <div class="prof on">Анна</div>
+              <div class="prof">Максим</div>
+              <div class="prof" style="flex:0.6">+</div>
+            </div>
+
+            <div class="lbl a-c-only">Самочувствие</div>
+            <div class="lbl b-only">02 — Индекс</div>
+
+            <div class="card">
+              <div class="c-only stat-grid">
+                <div><div class="stat-val">72</div><div class="stat-lbl">Индекс</div></div>
+                <div><div class="stat-val">↑</div><div class="stat-lbl">Пыльца</div></div>
+                <div><div class="stat-val">OK</div><div class="stat-lbl">Воздух</div></div>
+              </div>
+              <div class="a-c-only metric-head">
+                <span style="font-weight:600">Индекс среды</span>
+                <div class="metric-score">72 <small>/ 100</small></div>
+              </div>
+              <div class="b-only metric-head">
+                <div class="metric-score">72</div>
+                <div style="text-align:right;font-size:12px;font-weight:600">УМЕРЕННО<br>из 100</div>
+              </div>
+              <div class="b-only index-bar"><div class="index-bar-fill"></div></div>
+              <div class="metric-note a-c-only">Умеренно · есть факторы внимания</div>
+              <div class="metric-row"><span>Пыльца · Берёза</span><strong>42 grains/m³</strong></div>
+              <div class="metric-row"><span>Воздух · EAQI</span><strong>PM2.5 18</strong></div>
+              <div class="metric-row"><span>Дневник · 48 ч</span><strong>Спокойно</strong></div>
+            </div>
+
+            <div class="lbl">Быстрые действия</div>
+            <div class="list">
+              <div class="li">
+                <span class="li-num b-only">1</span>
+                <div class="li-icon a-c-only">◉</div>
+                <div class="li-body"><strong>Симптомы</strong><span>Записать самочувствие</span></div>
+                <div class="li-act">+</div>
+              </div>
+              <div class="li">
+                <span class="li-num b-only">2</span>
+                <div class="li-icon a-c-only">◉</div>
+                <div class="li-body"><strong>Питание</strong><span>0 записей сегодня</span></div>
+                <div class="li-act">+</div>
+              </div>
+              <div class="li">
+                <span class="li-num b-only">3</span>
+                <div class="li-icon a-c-only">◉</div>
+                <div class="li-body"><strong>Лекарство</strong><span>Отметить приём</span></div>
+                <div class="li-act">+</div>
+              </div>
+            </div>
+            <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.</p>
+          </div>
+
+          <!-- DIARY -->
+          <div class="scr" data-screen="diary">
+            <div class="h1">Дневник</div>
+            <div class="sub">Пошаговые записи наблюдений</div>
+            <div class="profiles">
+              <div class="prof on">Анна</div>
+              <div class="prof">Максим</div>
+            </div>
+            <button type="button" class="btn btn-primary">+ Новая запись по шагам</button>
+
+            <div class="lbl">Быстрое добавление</div>
+            <div class="chip-row">
+              <span class="chip on">Симптомы</span>
+              <span class="chip">Питание</span>
+              <span class="chip">Лекарство</span>
+              <span class="chip">Триггер</span>
+              <span class="chip">Пикфлоуметрия</span>
+            </div>
+
+            <div class="lbl between"><span>История</span><span class="link">Обновить</span></div>
+            <div class="list">
+              <div class="li">
+                <span class="li-num b-only">1</span>
+                <div class="li-icon a-c-only">◉</div>
+                <div class="li-body">
+                  <strong>Симптомы</strong>
+                  <span>Интенсивность: 3 · Нос, глаза · Сегодня, 14:20</span>
+                </div>
+              </div>
+              <div class="li">
+                <span class="li-num b-only">2</span>
+                <div class="li-icon a-c-only">◉</div>
+                <div class="li-body">
+                  <strong>Питание</strong>
+                  <span>Обед: рис, курица · Без реакции · Вчера, 13:05</span>
+                </div>
+              </div>
+              <div class="li">
+                <span class="li-num b-only">3</span>
+                <div class="li-icon a-c-only">◉</div>
+                <div class="li-body">
+                  <strong>Лекарство</strong>
+                  <span>Цетиризин 10 мг · 08:30 · 19 июня</span>
+                </div>
+              </div>
+            </div>
+            <p class="disclaimer">Дневник отражает только наблюдения пользователя.</p>
+          </div>
+
+          <!-- SCANNER -->
+          <div class="scr" data-screen="scanner">
+            <div class="h1">Сканер</div>
+            <div class="sub">Проверка состава по профилю аллергий</div>
+            <div class="profiles"><div class="prof on">Анна</div><div class="prof">Максим</div></div>
+
+            <div class="toggle-row">
+              <div class="tog on">Продукт</div>
+              <div class="tog">Меню</div>
+              <div class="tog">Лекарство</div>
+            </div>
+
+            <div class="card between">
+              <div>
+                <strong>Сканировать штрихкод</strong>
+                <div style="font-size:12px;color:var(--text-3);margin-top:2px">Open Food Facts</div>
+              </div>
+              <span style="font-size:20px;color:var(--text-3)">›</span>
+            </div>
+
+            <div class="lbl">Ручной ввод</div>
+            <input class="input" readonly value="молоко, арахис, сахар" />
+            <button type="button" class="btn btn-primary">Проверить</button>
+
+            <div class="card result-danger">
+              <div class="verdict danger">Есть совпадения</div>
+              <div style="font-size:13px;color:var(--text-2)">Обнаружено: молоко, арахис</div>
+              <div style="font-size:12px;color:var(--text-3);margin-top:8px">Источник: ручной ввод</div>
+            </div>
+            <p class="disclaimer">Результат предварительный и не исключает индивидуальной реакции.</p>
+          </div>
+
+          <!-- SOS -->
+          <div class="scr" data-screen="sos">
+            <div class="between" style="margin-bottom:12px">
+              <div>
+                <div class="h1" style="font-size:22px">SOS</div>
+                <div class="sub" style="margin:0">Экстренная информация</div>
+              </div>
+              <span class="link">Изменить</span>
+            </div>
+            <div class="profiles"><div class="prof on">Анна</div><div class="prof">Максим</div></div>
+
+            <div class="card">
+              <div class="metric-row" style="border:none;padding:4px 0"><span>Имя</span><strong>Анна</strong></div>
+              <div class="metric-row"><span>Возраст</span><strong>8 лет</strong></div>
+              <div class="metric-row"><span>Аллергии</span><strong>Арахис, молоко</strong></div>
+              <div style="margin-top:10px;font-size:13px;color:var(--text-2)">
+                <strong style="color:var(--text);display:block;margin-bottom:4px">Медицинские заметки</strong>
+                Носит широк спектр антигистаминных. Эпипен в рюкзаке.
+              </div>
+            </div>
+
+            <div class="lbl">Экстренные контакты</div>
+            <div class="list">
+              <div class="li">
+                <div class="li-body"><strong>Мария (мама)</strong><span>+7 900 123-45-67</span></div>
+                <span class="link">📞</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary sos-banner">Позвонить 103</button>
+            <p class="disclaimer">Информация внесена пользователем и не является медицинским назначением.</p>
+          </div>
+
+          <!-- LOGIN -->
+          <div class="scr" data-screen="login">
+            <div style="text-align:center;padding:24px 0 32px">
+              <div style="width:56px;height:56px;border:1px solid var(--border);margin:0 auto 12px;display:grid;place-items:center;font-size:24px;border-radius:var(--radius-md)">⚕</div>
+              <div class="h1" style="font-size:24px">AllerGuide</div>
+              <div class="sub">Вход в аккаунт</div>
+            </div>
+
+            <div class="field-lbl">Язык</div>
+            <div class="toggle-row" style="margin-bottom:20px">
+              <div class="tog on">RU</div>
+              <div class="tog">EN</div>
+              <div class="tog">ES</div>
+              <div class="tog">…</div>
+            </div>
+
+            <div class="toggle-row" style="margin-bottom:16px">
+              <div class="tog on">Телефон</div>
+              <div class="tog">Email</div>
+            </div>
+
+            <div class="field-lbl">Номер телефона</div>
+            <input class="input" readonly value="+7 999 123-45-67" />
+            <div class="field-lbl">Пароль</div>
+            <input class="input" readonly value="••••••••" type="password" />
+            <button type="button" class="btn btn-primary">Войти</button>
+            <button type="button" class="btn btn-outline">Зарегистрироваться</button>
+          </div>
+
+          <!-- PROFILES -->
+          <div class="scr" data-screen="profiles">
+            <div class="h1">Мои профили</div>
+            <div class="sub">Редактирование и удаление</div>
+
+            <div class="field-lbl">Язык интерфейса</div>
+            <div class="toggle-row" style="margin-bottom:20px">
+              <div class="tog on">Русский</div>
+              <div class="tog">English</div>
+              <div class="tog">+</div>
+            </div>
+
+            <div class="list">
+              <div class="li">
+                <div class="li-body">
+                  <strong>Анна · Я</strong>
+                  <span>2016 · Арахис, молоко, пыльца берёзы</span>
+                </div>
+                <span class="link">✎</span>
+              </div>
+              <div class="li">
+                <div class="li-body">
+                  <strong>Максим · Ребёнок</strong>
+                  <span>2019 · Яйцо, пшеница</span>
+                </div>
+                <span class="link">✎</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-outline" style="margin-top:12px">+ Добавить профиль</button>
+
+            <div class="lbl" style="margin-top:20px">Тема</div>
+            <div class="toggle-row">
+              <div class="tog on">Светлая</div>
+              <div class="tog">Тёмная</div>
+              <div class="tog">Системная</div>
+            </div>
+
+            <button type="button" class="btn btn-outline" style="margin-top:16px;color:var(--danger);border-color:var(--danger)">Выйти из аккаунта</button>
+          </div>
+        </div>
+
+        <nav class="tab-bar" id="tabbar">
+          <div class="tab-item on" data-tab="home"><span class="tab-icon">⌂</span>Главная</div>
+          <div class="tab-item" data-tab="diary"><span class="tab-icon">☰</span>Дневник</div>
+          <div class="tab-item" data-tab="scanner"><span class="tab-icon">▣</span>Сканер</div>
+          <div class="tab-item a-c-only" data-tab="map"><span class="tab-icon">◎</span>Карта</div>
+          <div class="tab-item" data-tab="sos"><span class="tab-icon">+</span>SOS</div>
+          <div class="tab-item c-only" data-tab="more" style="display:none"><span class="tab-icon">…</span>Ещё</div>
+        </nav>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const LEGENDS = {
+      a: {
+        title: 'Вариант A — Клинический',
+        text: 'Фон #FAFAFA · Карточка #FFF · Акцент #1565C0 · IBM Plex Sans · border 1px · без glass',
+        swatches: ['#fafafa', '#ffffff', '#1565c0', '#263238', '#c62828'],
+      },
+      b: {
+        title: 'Вариант B — Швейцарская сетка',
+        text: 'Фон #FFF · Текст #000 · Границы 2px · Inter · radius 0 · нумерация блоков',
+        swatches: ['#ffffff', '#000000', '#eeeeee', '#e53935'],
+      },
+      c: {
+        title: 'Вариант C — Северный документ',
+        text: 'Фон #F7F8FA · Акцент #1E3A5F · Source Serif + Inter · tabular nums · 4 таба',
+        swatches: ['#f7f8fa', '#ffffff', '#1e3a5f', '#0f172a', '#e2e8f0'],
+      },
+    };
+
+    const SCREEN_NAMES = {
+      home: 'Главная',
+      diary: 'Дневник',
+      scanner: 'Сканер',
+      sos: 'SOS',
+      login: 'Вход',
+      profiles: 'Профили',
+    };
+
+    const VARIANT_NAMES = {
+      a: 'Клинический минимализм',
+      b: 'Швейцарская сетка',
+      c: 'Северный документ',
+    };
+
+    const device = document.getElementById('device');
+    let currentScreen = 'home';
+
+    function setVariant(v) {
+      device.dataset.v = v;
+      document.querySelectorAll('.vbtn').forEach((b) => b.classList.toggle('active', b.dataset.v === v));
+      const leg = LEGENDS[v];
+      document.getElementById('legend-title').textContent = leg.title;
+      document.getElementById('legend-text').textContent = leg.text;
+      document.getElementById('swatches').innerHTML = leg.swatches
+        .map((c) => `<div class="sw" style="background:${c}"></div>`)
+        .join('');
+      document.getElementById('cap-variant').textContent = VARIANT_NAMES[v];
+      updateTabBar();
+    }
+
+    function setScreen(s) {
+      currentScreen = s;
+      document.querySelectorAll('.scr').forEach((el) => el.classList.toggle('active', el.dataset.screen === s));
+      document.querySelectorAll('.sbtn').forEach((b) => b.classList.toggle('active', b.dataset.s === s));
+      document.getElementById('cap-screen').textContent = SCREEN_NAMES[s] || s;
+      updateTabBar();
+    }
+
+    function updateTabBar() {
+      const tabScreens = ['home', 'diary', 'scanner', 'sos'];
+      const showTabs = tabScreens.includes(currentScreen);
+      document.getElementById('tabbar').style.display = showTabs ? 'flex' : 'none';
+      document.querySelectorAll('.tab-item').forEach((t) => {
+        t.classList.toggle('on', t.dataset.tab === currentScreen);
+        if (device.dataset.v === 'c' && t.dataset.tab === 'map') t.style.display = 'none';
+        if (device.dataset.v === 'c' && t.dataset.tab === 'more') t.style.display = showTabs ? 'block' : 'none';
+        if (device.dataset.v !== 'c' && t.dataset.tab === 'more') t.style.display = 'none';
+        if (device.dataset.v !== 'c' && t.dataset.tab === 'map') t.style.display = 'block';
+      });
+    }
+
+    document.querySelectorAll('.vbtn').forEach((b) => b.addEventListener('click', () => setVariant(b.dataset.v)));
+    document.querySelectorAll('.sbtn').forEach((b) => b.addEventListener('click', () => setScreen(b.dataset.s)));
+    document.querySelectorAll('.tab-item[data-tab]').forEach((t) => {
+      if (['home', 'diary', 'scanner', 'sos'].includes(t.dataset.tab)) {
+        t.addEventListener('click', () => {
+          setScreen(t.dataset.tab);
+          document.querySelectorAll('.sbtn').forEach((b) => b.classList.toggle('active', b.dataset.s === t.dataset.tab));
+        });
+      }
+    });
+
+    setVariant('a');
+    setScreen('home');
+  </script>
+</body>
+</html>
