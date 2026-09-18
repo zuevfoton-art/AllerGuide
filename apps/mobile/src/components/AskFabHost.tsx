@@ -4,6 +4,7 @@ import { usePathname, useSegments } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AskChatSheet } from '@/src/components/AskChatSheet';
+import { askFabBottomOffset } from '@/src/components/ask-fab-layout';
 import { shouldShowAskFab, shouldUseExtendedAskFab } from '@/src/components/ask-fab-visibility';
 import { density, radii, space } from '@/src/constants/layout';
 import { fontSizes, scaledTextProps } from '@/src/constants/typography';
@@ -25,9 +26,12 @@ export function AskFabHost() {
   const allowed = shouldShowAskFab(pathname);
   const extended = shouldUseExtendedAskFab(pathname);
   const inTabs = segments[0] === '(tabs)';
-  const bottomOffset = inTabs
-    ? tabBarHeight + space[3]
-    : Math.max(insets.bottom, space[3]) + space[4];
+  const bottomOffset = askFabBottomOffset({
+    pathname,
+    inTabs,
+    tabBarHeight,
+    safeBottom: insets.bottom,
+  });
   const showFab = allowed && !open;
   const label = t('ask.fabLabel');
 

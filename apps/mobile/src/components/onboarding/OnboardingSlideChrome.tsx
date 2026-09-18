@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { Button } from '@/src/components/Button';
 import { density, radii, space } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
@@ -16,7 +16,7 @@ type OnboardingSlideChromeProps = {
   style?: ViewStyle;
 };
 
-/** Figma onboarding controls: dots + Skip | Next row. */
+/** Figma onboarding controls: dots + equal Skip | Next (171×52, radius xl). */
 export function OnboardingSlideChrome({
   theme,
   slideCount,
@@ -45,25 +45,27 @@ export function OnboardingSlideChrome({
       </View>
       <View style={styles.actionsRow}>
         {!isLast ? (
-          <Pressable
-            testID="onboarding-intro-skip"
-            onPress={onSkip}
-            hitSlop={12}
-            style={styles.skipBtn}
-            accessibilityRole="button"
-            accessibilityLabel={skipLabel}>
-            <Text style={styles.skip}>{skipLabel}</Text>
-          </Pressable>
+          <View style={styles.actionSlot}>
+            <Button
+              testID="onboarding-intro-skip"
+              label={skipLabel}
+              variant="secondary"
+              block
+              onPress={onSkip}
+              style={styles.figmaAction}
+            />
+          </View>
         ) : (
-          <View style={styles.skipBtn} />
+          <View style={styles.actionSlot} />
         )}
-        <View style={styles.nextWrap}>
+        <View style={styles.actionSlot}>
           <Button
             testID="onboarding-intro-next"
             label={isLast ? startLabel : nextLabel}
             variant="primary"
             block
             onPress={onNext}
+            style={styles.figmaAction}
           />
         </View>
       </View>
@@ -71,7 +73,7 @@ export function OnboardingSlideChrome({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors }: AppTheme) {
   return StyleSheet.create({
     footer: {
       gap: space[3],
@@ -100,23 +102,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       gap: space[3],
     },
-    skipBtn: {
-      minWidth: 88,
-      minHeight: density.tapMinHeightSecondary,
-      justifyContent: 'center',
-      paddingHorizontal: space[2],
+    actionSlot: {
+      flex: 1,
+      minWidth: 0,
+    },
+    /** Figma button-skip / button-next: height 52, radius 24 */
+    figmaAction: {
       borderRadius: radii.xl,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
+      minHeight: density.tapMinHeightPrimary,
     },
-    skip: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.head,
-      textAlign: 'center',
-    },
-    nextWrap: { flex: 1 },
   });
 }

@@ -609,12 +609,34 @@
     .top-bar-actions { display: flex; align-items: center; gap: 8px; }
 
     .sos-emergency-bar {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      margin-bottom: 12px; padding: 8px 0;
+    }
+    .sos-circle-outer {
+      width: 180px; height: 180px; border-radius: 90px;
+      background: var(--danger-light); display: grid; place-items: center;
+      box-shadow: var(--shadow-raised-strong); border: none; cursor: pointer; padding: 0;
+    }
+    .sos-circle-inner {
+      width: 140px; height: 140px; border-radius: 70px;
+      background: var(--danger); color: #fff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      font-family: var(--sans); font-weight: 800; font-size: 22px; line-height: 1.1;
+    }
+    .sos-contact-row {
+      display: flex; align-items: center; gap: 12px; align-self: stretch;
       background: var(--card); border: 1px solid var(--danger-border);
-      border-radius: var(--radius-lg); padding: 12px; margin-bottom: 12px; display: grid; gap: 8px;
+      border-radius: var(--radius-lg); padding: 12px;
     }
 
-    .sos-contact-row {
-      display: flex; align-items: center; gap: 12px;
+    .fab-row {
+      display: flex; justify-content: flex-end; margin-top: 12px;
+    }
+    .fab {
+      width: 56px; height: 56px; border-radius: 28px; border: none; cursor: pointer;
+      background: var(--accent); color: #fff; font-size: 28px; line-height: 1;
+      display: grid; place-items: center; box-shadow: var(--shadow-raised-strong);
+      padding: 0; min-height: 56px; width: 56px;
     }
 
     .more-hub-icon {
@@ -1220,7 +1242,9 @@
               <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
-          <button class="btn btn-primary" style="margin-top:12px" data-screen="diary-picker">Новая запись</button>
+          <div class="fab-row">
+            <button class="fab" type="button" data-screen="diary-picker" aria-label="Новая запись">+</button>
+          </div>
           <p class="disclaimer">Дневник фиксирует наблюдения и не заменяет консультацию врача.</p>
         </section>
 
@@ -1540,7 +1564,9 @@
           <div class="segment"><div class="segment-item active">Анна</div></div>
 
           <div class="sos-emergency-bar">
-            <button class="btn btn-danger">Позвонить 103</button>
+            <button class="sos-circle-outer" type="button" aria-label="Позвонить 103">
+              <span class="sos-circle-inner">⚠<br />103</span>
+            </button>
             <div class="sos-contact-row">
               <div class="feed-body">
                 <div class="feed-title">Муж</div>

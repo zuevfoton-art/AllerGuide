@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii } from '@/src/constants/layout';
+import { density, radii } from '@/src/constants/layout';
 import type { AppTheme } from '@/src/hooks/use-theme';
 
 export function createMapScreenStyles({ colors, fonts }: AppTheme) {
@@ -33,7 +33,7 @@ export function createMapScreenStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      minHeight: 40,
+      minHeight: density.tapMinHeightSecondary,
       borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.accent,

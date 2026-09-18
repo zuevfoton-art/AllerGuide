@@ -2,11 +2,19 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/src/components/Button';
-import { radii } from '@/src/constants/layout';
+import { density, radii, space } from '@/src/constants/layout';
+import { fontSizes, lineHeights, scaledTextProps } from '@/src/constants/typography';
+import { pressedOpacity } from '@/src/constants/motion';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+
+/** Figma `sos-button-wrapper` / `sos-inner-circle`. */
+const SOS_CIRCLE_OUTER = 180;
+const SOS_CIRCLE_INNER = 140;
 
 type SosEmergencyBarProps = {
   emergencyLabel: string;
+  /** Digits shown in the Figma center circle (e.g. 103 / 112). */
+  emergencyNumber?: string;
   contactName?: string;
   contactPhone?: string;
   contactRelation?: string;
@@ -17,9 +25,10 @@ type SosEmergencyBarProps = {
   onAllContacts?: () => void;
 };
 
-/** Pinned emergency actions — 112 + optional first contact, always visible while scrolling. */
+/** Center danger circle (Figma) + contact CTAs — call handlers unchanged. */
 export function SosEmergencyBar({
   emergencyLabel,
+  emergencyNumber,
   contactName,
   contactPhone,
   contactRelation,
@@ -32,6 +41,7 @@ export function SosEmergencyBar({
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const hasContact = Boolean(contactName && contactPhone);
+  const numberLabel = (emergencyNumber ?? '').trim() || emergencyLabel;
 
   return (
     <View
@@ -39,14 +49,20 @@ export function SosEmergencyBar({
       style={styles.wrap}
       accessibilityRole="toolbar"
       accessibilityLabel={emergencyLabel}>
-      <Button
+      <Pressable
         testID="sos-crisis-call"
-        label={emergencyLabel}
-        variant="danger"
-        size="lg"
-        block
+        accessibilityRole="button"
+        accessibilityLabel={emergencyLabel}
         onPress={onCallEmergency}
-      />
+        style={({ pressed }) => [styles.outerCircle, pressed && styles.pressed]}>
+        <View style={styles.innerCircle}>
+          <Ionicons name="warning" size={28} color={theme.colors.onDanger} />
+          <Text {...scaledTextProps} style={styles.numberText} numberOfLines={1}>
+            {numberLabel}
+          </Text>
+        </View>
+      </Pressable>
+
       {hasContact ? (
         <View style={styles.contactRow}>
           <View style={styles.contactBody}>
@@ -85,43 +101,75 @@ export function SosEmergencyBar({
   );
 }
 
-function createStyles({ colors, fonts }: AppTheme) {
+function createStyles({ colors, fonts, shadows }: AppTheme) {
   return StyleSheet.create({
     wrap: {
-      gap: 8,
+      gap: space[3],
+      alignItems: 'center',
+      paddingVertical: space[2],
+    },
+    outerCircle: {
+      width: SOS_CIRCLE_OUTER,
+      height: SOS_CIRCLE_OUTER,
+      borderRadius: SOS_CIRCLE_OUTER / 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.dangerLight,
+      ...(shadows.raisedStrong as object),
+    },
+    innerCircle: {
+      width: SOS_CIRCLE_INNER,
+      height: SOS_CIRCLE_INNER,
+      borderRadius: SOS_CIRCLE_INNER / 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: space[1],
+      backgroundColor: colors.danger,
+      minHeight: density.tapMinHeightCrisis,
+      minWidth: density.tapMinHeightCrisis,
+    },
+    numberText: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h2,
+      lineHeight: lineHeights.h2,
+      fontWeight: '800',
+      color: colors.onDanger,
+      textAlign: 'center',
+    },
+    pressed: { opacity: pressedOpacity },
+    contactRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[3],
+      alignSelf: 'stretch',
       backgroundColor: colors.card,
       borderRadius: radii.lg,
       borderWidth: 1,
       borderColor: colors.dangerBorder,
-      padding: 12,
-    },
-    contactRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
+      padding: space[3],
     },
     contactBody: { flex: 1, gap: 2, minWidth: 0 },
     contactName: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.bodySm,
       fontWeight: '600',
       color: colors.text,
     },
     contactMeta: {
       fontFamily: fonts.sans,
-      fontSize: 12,
+      fontSize: fontSizes.caption,
       color: colors.textMuted,
     },
     allContacts: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 4,
-      minHeight: 36,
+      gap: space[1],
+      minHeight: density.tapMinHeightSm,
     },
     allContactsText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
+      fontSize: fontSizes.label,
       fontWeight: '600',
       color: colors.accent,
     },

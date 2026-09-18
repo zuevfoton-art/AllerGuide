@@ -132,7 +132,11 @@ export function AuthPrimaryButton({
   );
 }
 
-const authPrimaryButtonStyle = { marginTop: 8 };
+const authPrimaryButtonStyle = {
+  marginTop: 8,
+  borderRadius: radii.xl,
+  minHeight: density.tapMinHeightPrimary,
+};
 
 export function AuthLink({
   text,
