@@ -56,11 +56,11 @@ export const density = {
 
 /** Brand hex for static HTML/PDF exports (mirrors light Claro theme) */
 export const brandReportColors = {
-  text: '#0F172A',
-  head: '#1E3A5F',
-  muted: '#64748B',
-  bg: '#F3F6F4',
-  border: '#E3E9E5',
-  accent: '#2A9D8F',
-  danger: '#B91C1C',
+  text: '#2C3531',
+  head: '#2C3531',
+  muted: '#5F716B',
+  bg: '#FDFBF9',
+  border: '#E2E8F0',
+  accent: '#5B8C7A',
+  danger: '#E53E3E',
 } as const;

@@ -13,7 +13,7 @@
 
 Если `3328-11` — страница UI-kit, а не экран: зафиксируйте ниже `node-id` ближайшего screen-frame «Today / Home / Сегодня» и используйте его как канон пилота.
 
-**Канон screen-frame (после разбора):** см. gap-анализ [`docs/figma-home-gap.md`](./figma-home-gap.md) — до OAuth визуальный канон пилота = `design-mockup.html` `#screen-home`.
+**Канон screen-frame:** `3328:11` (`screens-flow-map`) → **`3328:137` (`screen-dashboard`)** — «Сегодня». Gap: [`docs/figma-home-gap.md`](./figma-home-gap.md).
 
 ## Конфликты макет ↔ код
 

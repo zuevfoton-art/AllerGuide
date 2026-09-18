@@ -19,7 +19,7 @@
 | Канон пилота (fallback до MCP-read) | [`docs/design-mockup.html`](./design-mockup.html) `#screen-home` |
 | Код | [`apps/mobile/app/(tabs)/home.tsx`](../apps/mobile/app/(tabs)/home.tsx) |
 
-**Канон screen-frame:** до успешного MCP-read остаётся `3328-11` как вход в файл; визуальный канон пилота = `#screen-home` в `design-mockup.html`. После OAuth дописать сюда имя слоя и `node-id` screen-frame «Сегодня».
+**Канон screen-frame:** `screens-flow-map` (`3328:11`) → **`screen-dashboard`** (`3328:137`) = «Сегодня» / home.
 
 ## Каркас: mockup / код
 

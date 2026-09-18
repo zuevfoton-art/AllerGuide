@@ -9,36 +9,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #F3F6F4;
+      --bg: #FDFBF9;
       --card: #FFFFFF;
-      --accent: #2A9D8F;
-      --accent-light: #E6F6F4;
-      --accent-mid: #9FD9D1;
-      --info: #2A9D8F;
-      --head: #1E3A5F;
-      --text: #0F172A;
-      --text-secondary: #475569;
-      --text-muted: #5E6B7C;
-      --border: #E3E9E5;
+      --accent: #5B8C7A;
+      --accent-light: #EAF2EA;
+      --accent-mid: #B8CFC4;
+      --info: #5B8C7A;
+      --head: #2C3531;
+      --text: #2C3531;
+      --text-secondary: #5F716B;
+      --text-muted: #5F716B;
+      --border: #E2E8F0;
       --border-input: #CBD5E1;
-      --success: #15803D;
-      --success-light: #F0FDF4;
-      --success-border: #BBF7D0;
-      --danger: #B91C1C;
+      --success: #10B981;
+      --success-light: #ECFDF5;
+      --success-border: #A7F3D0;
+      --danger: #E53E3E;
       --danger-light: #FEF2F2;
       --danger-border: #FECACA;
-      --warning: #B45309;
-      --warning-light: #FFFBEB;
-      --warning-border: #FDE68A;
+      --warning: #F97316;
+      --warning-light: #FFF7ED;
+      --warning-border: #FED7AA;
       --purple: #6366F1;
-      --surface-muted: #F1F4F2;
-      --tip-bg: #E6F6F4;
-      --tip-border: #9FD9D1;
-      --tip-text: #1F6B62;
-      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-      --shadow-raised: 0 3px 6px rgba(15, 23, 42, 0.22);
-      --shadow-raised-strong: 0 5px 12px rgba(15, 23, 42, 0.28);
-      --phone-border: #E3E9E5;
+      --surface-muted: #EAF2EA;
+      --tip-bg: #EAF2EA;
+      --tip-border: #B8CFC4;
+      --tip-text: #3D6B5C;
+      --shadow-sm: 0 1px 3px rgba(44, 53, 49, 0.06);
+      --shadow-raised: 0 3px 6px rgba(44, 53, 49, 0.22);
+      --shadow-raised-strong: 0 5px 12px rgba(44, 53, 49, 0.28);
+      --phone-border: #E2E8F0;
       --radius-sm: 10px;
       --radius-md: 16px;
       --radius-row: 16px;
@@ -47,35 +47,35 @@
       --radius-full: 9999px;
       --density-screen-gap: 10px;
       --density-card-padding: 14px;
-      --map-land: #E4EAE5;
-      --map-road: #CDD6D0;
+      --map-land: #E4EBE4;
+      --map-road: #C5D0C8;
       --sans: 'Inter', system-ui, sans-serif;
       --serif: 'Source Serif 4', Georgia, serif;
     }
 
     [data-theme='dark'] {
-      --bg: #0E1512;
-      --card: #161D1B;
-      --accent: #3DB8A8;
-      --accent-light: #134E48;
-      --accent-mid: #2A9D8F;
-      --info: #3DB8A8;
-      --head: #E2E8F0;
-      --text: #F8FAFC;
-      --text-secondary: #CBD5E1;
-      --text-muted: #94A3B8;
+      --bg: #0F1613;
+      --card: #161D1A;
+      --accent: #7BAF9A;
+      --accent-light: #1A2E28;
+      --accent-mid: #5B8C7A;
+      --info: #7BAF9A;
+      --head: #E8EDE9;
+      --text: #F4F7F5;
+      --text-secondary: #A8B5AF;
+      --text-muted: #8A9892;
       --border: #2C3A35;
       --border-input: #475569;
-      --success-light: #14532D;
-      --success-border: #166534;
+      --success-light: #064E3B;
+      --success-border: #065F46;
       --danger-light: #450A0A;
       --danger-border: #991B1B;
-      --warning-light: #451A03;
-      --warning-border: #92400E;
+      --warning-light: #431407;
+      --warning-border: #9A3412;
       --surface-muted: #1A2420;
-      --tip-bg: #134E48;
-      --tip-border: #2A9D8F;
-      --tip-text: #9FD9D1;
+      --tip-bg: #1A2E28;
+      --tip-border: #5B8C7A;
+      --tip-text: #B8CFC4;
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
       --shadow-raised: 0 3px 6px rgba(0, 0, 0, 0.35);
       --shadow-raised-strong: 0 5px 12px rgba(0, 0, 0, 0.4);
@@ -94,7 +94,7 @@
       padding: 32px 20px 48px;
     }
 
-    [data-theme='dark'] body { background: linear-gradient(180deg, #0E1512 0%, var(--bg) 100%); }
+    [data-theme='dark'] body { background: linear-gradient(180deg, #0F1613 0%, var(--bg) 100%); }
 
     .page {
       max-width: 1180px;
@@ -894,7 +894,7 @@
 
       <div class="legend">
         <strong>Claro Green</strong> · <a href="brand-claro-green.md" style="color:var(--accent)">политика</a><br />
-        Фон <code>#F3F6F4</code> · KPI <code>#1E3A5F</code> · CTA/info <code>#2A9D8F</code> · soft <code>#E6F6F4</code> · SOS <code>#B91C1C</code><br />
+        Фон <code>#FDFBF9</code> · KPI/text <code>#2C3531</code> · CTA/info <code>#5B8C7A</code> · soft <code>#EAF2EA</code> · SOS <code>#E53E3E</code> · Figma <code>screen-dashboard</code><br />
         Surfaces: <code>accentLight</code> / <code>accentMid</code> · <code>GlassCard soft</code> · CTA без contour-кольца<br /><br />
         <strong>Клинический roadmap (РААКИ)</strong><br />
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
@@ -908,11 +908,11 @@
         <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
         <strong>Обновлено</strong> — 18 сентября 2026 · Claro tokens · кнопки без contour · кольца #412 · Figma handoff ([figma-handoff.md](figma-handoff.md))
         <div class="swatch-row">
-          <span class="swatch" style="background:#F3F6F4" title="bg"></span>
-          <span class="swatch" style="background:#FFFFFF;border-color:#E3E9E5" title="card"></span>
-          <span class="swatch" style="background:#1E3A5F" title="head"></span>
-          <span class="swatch" style="background:#2A9D8F" title="accent"></span>
-          <span class="swatch" style="background:#B91C1C" title="danger"></span>
+          <span class="swatch" style="background:#FDFBF9" title="bg"></span>
+          <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
+          <span class="swatch" style="background:#2C3531" title="head"></span>
+          <span class="swatch" style="background:#5B8C7A" title="accent"></span>
+          <span class="swatch" style="background:#E53E3E" title="danger"></span>
         </div>
       </div>
     </aside>
@@ -1443,7 +1443,7 @@
           <div class="card" style="text-align:center">
             <div class="hero-logo" style="width:48px;height:48px;margin:0 auto 8px">
               <svg width="48" height="48" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-                <rect width="44" height="44" rx="10" fill="#2A9D8F"/>
+                <rect width="44" height="44" rx="10" fill="#5B8C7A"/>
                 <path d="M22 10L32 16V28L22 34L12 28V16L22 10Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
                 <path d="M17 22h10M22 17v10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
