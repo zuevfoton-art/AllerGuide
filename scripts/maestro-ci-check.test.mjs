@@ -35,6 +35,15 @@ describe('Maestro nightly CI invariants', () => {
     // Nightly 34474685308: mergeDexRelease OOM at -Xmx2048m. Pin ≥4g after prebuild.
     assert.match(script, /pin_gradle_heap/);
     assert.match(script, /Xmx4096m/);
+    // No EXPO_PUBLIC_* value is an input of the bundle task, so Gradle reports it
+    // UP-TO-DATE after a build with another profile and ships the previous JS:
+    // locally `staging` then `preview` produced byte-identical bundles, staging
+    // API URL and DSN included.
+    assert.match(
+      script,
+      /rm -rf app\/build\/generated\/assets\/react\/release/,
+      'drop the generated bundle so the requested profile always takes',
+    );
     assert.match(script, /--no-parallel/);
     assert.match(script, /-Dorg\.gradle\.jvmargs=/);
     // Nightly 35198863494: Maven 403 on gson killed preview assemble while staging

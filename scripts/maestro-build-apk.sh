@@ -118,6 +118,12 @@ fi
 pin_gradle_heap
 
 cd android
+# The bundle task takes no EXPO_PUBLIC_* value as an input, so Gradle calls it
+# UP-TO-DATE after a build with a different profile and ships the previous JS:
+# `staging` then `preview` produced byte-identical bundles here, staging API URL
+# and DSN included. Drop the generated bundle so the profile always takes.
+rm -rf app/build/generated/assets/react/release
+
 # Metro embeds EXPO_PUBLIC_* only when NODE_ENV=production (same as staging-apk-gradle.yml).
 # Emulator in nightly is x86_64 — skip unused ABIs.
 # --no-parallel keeps D8 mergeDex off competing workers on the 4g heap.
