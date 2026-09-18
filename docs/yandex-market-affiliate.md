@@ -30,6 +30,8 @@ Runbook для экрана «Маркет»: официальный товар�
 
 Без `CLID` + OAuth приложение всё равно открывает **seed deep-link** на `market.yandex.ru` (source=`static`).
 
+Staging Lockbox (`aclearo-staging-api-env`): `pnpm yc-stage-enable-market-feeds` мержит URL фидов и (опционально) `clid` / OAuth / `erid`, затем перемонтирует Serverless revision. Ключи перечислены в [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys). Значения **не** коммитить. После mount: на VPC runner `pnpm --filter api db:import-market` — импорт пишет `draft`; `published` только после модерации `containsAllergenIds`.
+
 ## YM-B — Нормализованный каталог
 
 - Домен: `MarketplaceProduct` / `MarketplaceOffer` в `packages/core/src/marketplace-catalog.ts`.
