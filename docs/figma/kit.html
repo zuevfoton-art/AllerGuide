@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claro kit — Figma page 02</title>
+  <style>
+    :root {
+      --bg: #FDFBF9;
+      --card: #FFFFFF;
+      --accent: #5B8C7A;
+      --accent-light: #EAF2EA;
+      --accent-mid: #B8CFC4;
+      --head: #2C3531;
+      --text: #2C3531;
+      --muted: #5F716B;
+      --border: #E2E8F0;
+      --danger: #E53E3E;
+      --success-light: #ECFDF5;
+      --success-border: #A7F3D0;
+      --green: #047857;
+      --warning-light: #FFF7ED;
+      --danger-light: #FEF2F2;
+      --radius-full: 9999px;
+      --radius-card: 20px;
+      --radius-sm: 12px;
+      --sans: Inter, system-ui, sans-serif;
+    }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text); margin: 0; padding: 24px; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    .lead { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+    section { margin-bottom: 28px; }
+    h2 { font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn { border: 0; border-radius: var(--radius-full); font-weight: 600; min-height: 44px; padding: 0 18px; cursor: default; }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 3px 6px rgba(44,53,49,0.22); }
+    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost { background: transparent; color: var(--head); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { min-height: 36px; font-size: 13px; }
+    .btn-lg { min-height: 60px; padding: 0 24px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 14px; min-width: 160px; }
+    .card.soft { background: var(--accent-light); }
+    .card.calm { background: var(--success-light); border-color: var(--success-border); color: var(--green); }
+    .card.attention { background: var(--warning-light); }
+    .card.alarm { background: var(--danger-light); }
+    .chip { border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 8px 12px; font-size: 13px; background: var(--card); }
+    .tabbar { display: flex; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 8px; }
+    .tab { flex: 1; text-align: center; padding: 10px 6px; border-radius: 16px; font-size: 11px; font-weight: 600; color: var(--muted); }
+    .tab.active { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-mid); }
+    .tab.sos { color: #fff; background: var(--danger); border-radius: var(--radius-full); }
+    .header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 12px 14px; min-width: 220px; }
+    .header .eye { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .header .h { font-size: 22px; font-weight: 700; margin-top: 2px; }
+    .header.tab { display: flex; justify-content: space-between; align-items: center; }
+    .mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Claro components</h1>
+  <p class="lead">Page 02 · ACTION = pill · STATE chips = 12px radius · SOS не равный таб</p>
+  <section>
+    <h2>Button</h2>
+    <div class="row">
+      <button class="btn btn-primary">Primary</button>
+      <button class="btn btn-secondary">Secondary</button>
+      <button class="btn btn-ghost">Ghost</button>
+      <button class="btn btn-danger">Danger</button>
+      <button class="btn btn-primary btn-sm">sm 36</button>
+      <button class="btn btn-danger btn-lg">Кризис 60</button>
+    </div>
+  </section>
+  <section>
+    <h2>GlassCard</h2>
+    <div class="row">
+      <div class="card">default / card 20</div>
+      <div class="card soft">soft</div>
+      <div class="card calm">zone calm</div>
+      <div class="card attention">zone attention</div>
+      <div class="card alarm">zone alarm</div>
+    </div>
+  </section>
+  <section>
+    <h2>Chips STATE</h2>
+    <div class="row">
+      <span class="chip">0 Нет</span>
+      <span class="chip">1 Легко</span>
+      <span class="chip">2 Средне</span>
+      <span class="chip">3 Сильно</span>
+    </div>
+  </section>
+  <section>
+    <h2>TabBar + SOS</h2>
+    <div class="tabbar">
+      <div class="tab active">Сегодня</div>
+      <div class="tab">Журнал</div>
+      <div class="tab">Скан</div>
+      <div class="tab">Карта</div>
+      <div class="tab sos">SOS</div>
+    </div>
+  </section>
+  <section>
+    <h2>Headers</h2>
+    <div class="row">
+      <div class="header tab">
+        <div class="mark">A</div>
+        <div>
+          <div class="eye">Четверг</div>
+          <div class="h">Сегодня</div>
+        </div>
+        <span style="color:var(--danger);font-weight:700">SOS</span>
+      </div>
+      <div class="header">
+        <div class="eye">‹ Назад · стек</div>
+        <div class="h">Настройки</div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

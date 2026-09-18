@@ -32,7 +32,7 @@
       --warning: #F97316;
       --warning-light: #FFF7ED;
       --warning-border: #FED7AA;
-      --purple: #6366F1;
+      --purple: #5D5FEF;
       --surface-muted: #EAF2EA;
       --tip-bg: #EAF2EA;
       --tip-border: #B8CFC4;
@@ -41,9 +41,10 @@
       --shadow-raised: 0 3px 6px rgba(44, 53, 49, 0.22);
       --shadow-raised-strong: 0 5px 12px rgba(44, 53, 49, 0.28);
       --phone-border: #E2E8F0;
-      --radius-sm: 10px;
+      --radius-sm: 12px;
       --radius-md: 16px;
       --radius-row: 16px;
+      --radius-card: 20px;
       --radius-lg: 24px;
       --radius-xl: 32px;
       --radius-full: 9999px;
@@ -897,19 +898,26 @@
     }
     .wizard-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .wizard-step {
-      font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm);
       border: 1px solid var(--border); color: var(--text-muted); background: var(--card);
     }
     .wizard-step.active { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
 
     .collapse-panel[hidden] { display: none; }
+
+    body.trace-mode { padding: 0; background: #888; min-height: 0; }
+    body.trace-mode .sidebar { display: none; }
+    body.trace-mode .page { max-width: none; margin: 0; display: block; }
+    body.trace-mode .device-wrap { padding: 0; }
+    body.trace-mode .phone { box-shadow: none; }
+    .kpi-row[data-screen] { cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="page">
     <aside class="sidebar">
       <h1>AllerGuide Mockup</h1>
-      <p>Интерактивный HTML-макет <strong>Claro Green</strong> (ambient = product teal, без medical blue). Синхронизирован с <code>apps/mobile</code>: soft-карточки, 5 intro-слайдов, 6 вкладок, wizard профиля, дневник (пикер типа + bottom-sheet с закреплёнными шапкой и «Далее»).</p>
+      <p>Интерактивный HTML-макет <strong>Claro Green</strong> (ambient = product teal, без medical blue). Синхронизирован с <code>apps/mobile</code>: 4 вкладки + SOS-control, wizard профиля, дневник (пикер + bottom-sheet). Канон логики — код; пакет отрисовки — <a href="figma-code-to-figma.md">figma-code-to-figma.md</a>.</p>
 
       <div class="controls">
         <button class="btn-nav active" id="theme-light" type="button">Светлая</button>
@@ -918,22 +926,38 @@
 
       <div class="screen-list" id="screen-list">
         <button class="btn-nav" data-screen="login">Вход</button>
+        <button class="btn-nav" data-screen="register">Регистрация</button>
+        <button class="btn-nav" data-screen="forgot-password">Сброс пароля</button>
         <button class="btn-nav" data-screen="onboarding-intro">Intro</button>
         <button class="btn-nav" data-screen="onboarding">Онбординг</button>
         <button class="btn-nav" data-screen="profile-setup">Wizard профиля</button>
         <button class="btn-nav" data-screen="notifications">Уведомления</button>
-        <button class="btn-nav active" data-screen="home">Главная</button>
+        <button class="btn-nav active" data-screen="home">Сегодня</button>
+        <button class="btn-nav" data-screen="home-empty">Сегодня · empty</button>
+        <button class="btn-nav" data-screen="home-offline">Сегодня · offline</button>
         <button class="btn-nav" data-screen="map">Карта</button>
-        <button class="btn-nav" data-screen="diary">Дневник</button>
-        <button class="btn-nav" data-screen="diary-picker">Дневник · пикер</button>
-        <button class="btn-nav" data-screen="diary-editor">Дневник · кожа</button>
-        <button class="btn-nav" data-screen="diary-editor-photo">Дневник · фото</button>
+        <button class="btn-nav" data-screen="diary">Журнал</button>
+        <button class="btn-nav" data-screen="diary-picker">Журнал · пикер</button>
+        <button class="btn-nav" data-screen="diary-editor">Журнал · кожа</button>
+        <button class="btn-nav" data-screen="diary-editor-photo">Журнал · фото</button>
         <button class="btn-nav" data-screen="doctor-report">Отчёт</button>
-        <button class="btn-nav" data-screen="scanner">Сканер</button>
-        <button class="btn-nav" data-screen="market">Маркет</button>
+        <button class="btn-nav" data-screen="clinical-scales">Оценки</button>
+        <button class="btn-nav" data-screen="scanner">Скан</button>
+        <button class="btn-nav" data-screen="market">Маркет (хаб)</button>
         <button class="btn-nav" data-screen="expert">Эксперт</button>
+        <button class="btn-nav" data-screen="ask">Спросить</button>
         <button class="btn-nav" data-screen="sos">SOS</button>
+        <button class="btn-nav" data-screen="sos-empty">SOS без профиля</button>
+        <button class="btn-nav" data-screen="sos-edit">SOS правка</button>
         <button class="btn-nav" data-screen="profile">Профиль</button>
+        <button class="btn-nav" data-screen="profiles">Профили</button>
+        <button class="btn-nav" data-screen="profile-edit">Профиль · правка</button>
+        <button class="btn-nav" data-screen="settings">Настройки</button>
+        <button class="btn-nav" data-screen="therapy">Терапия</button>
+        <button class="btn-nav" data-screen="asit">АСИТ</button>
+        <button class="btn-nav" data-screen="asthma-plan">План астмы</button>
+        <button class="btn-nav" data-screen="insect-plan">План укуса</button>
+        <button class="btn-nav" data-screen="food-drug">Пища / лекарства</button>
       </div>
 
       <div class="legend">
@@ -944,13 +968,13 @@
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Логотип</strong> — monogram A (teal) + wordmark endorser Aclearo<br />
-        <strong>Tab bar</strong> — 6 вкладок: Главная · Дневник · Сканер · Маркет · Карта · SOS<br />
+        <strong>Tab bar</strong> — 4 вкладки Сегодня · Журнал · Скан · Карта + SOS control (маркет — хаб профиля)<br />
         <strong>Профиль</strong> — кнопка в шапке = быстрый switch (модалка); данные профиля только на SOS<br />
         <strong>Главная</strong> — ImmuneBalance rings (PR #412) + compact reading/check-in + week-ring + факторы<br />
         <strong>Сканер</strong> — «Штрих-код» / «Сканер» → камера; OCR A + флаги B/C (Yandex)<br />
         <strong>Дневник</strong> — «Новая запись» открывает пикер «Что добавить»; wizard в bottom-sheet 88%: шапка и футер вне скролла, тап по заголовку сворачивает IME; Кожа: зона+вид+зуд → фото → заметка<br />
         <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
-        <strong>Обновлено</strong> — 18 сентября 2026 · Claro tokens · кнопки без contour · кольца #412 · Figma handoff ([figma-handoff.md](figma-handoff.md))
+        <strong>Обновлено</strong> — 18 сентября 2026 · код→Figma пакет · 4 таба + SOS · [figma-code-to-figma.md](figma-code-to-figma.md)
         <div class="swatch-row">
           <span class="swatch" style="background:#FDFBF9" title="bg"></span>
           <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
@@ -1066,8 +1090,8 @@
               <div><div class="word-endorse">Aclearo</div></div>
             </div>
             <div class="top-bar-actions">
-              <div class="profile-btn" title="Профиль">А</div>
-              <div class="sos-top-btn">🚑</div>
+              <div class="profile-btn" title="Профиль" data-screen="profile">А</div>
+              <div class="sos-top-btn" data-screen="sos">🚑</div>
             </div>
           </div>
           <div class="doc-label">Четверг, 18 сентября</div>
@@ -1170,20 +1194,44 @@
 
           <div class="card soft-card" style="margin-top:10px">
             <div class="card-title" style="margin-bottom:8px">Факторы</div>
-            <div class="kpi-row" style="border:none;padding-top:0">
+            <div class="kpi-row" style="border:none;padding-top:0" data-screen="map" id="home-factor-pollen">
               <span class="kpi-label">Пыльца</span>
               <span class="tier-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
               <span class="kpi-value" style="font-size:12px;font-weight:600">Почти нет</span>
             </div>
-            <div class="kpi-row">
+            <div class="kpi-row" data-screen="map" id="home-factor-air">
               <span class="kpi-label">Воздух</span>
               <span class="tier-dots warn" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
               <span class="kpi-value" style="font-size:12px;font-weight:600;color:var(--warning)">Ниже комфортного</span>
             </div>
-            <div class="kpi-row">
+            <div class="kpi-row" data-screen="diary" id="home-factor-diary">
               <span class="kpi-label">Дневник</span>
               <span class="tier-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
               <span class="kpi-value" style="font-size:12px;font-weight:600">Спокойно</span>
+            </div>
+            <div class="kpi-row" data-screen="clinical-scales" id="home-factor-clinical">
+              <span class="kpi-label">Оценки</span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600">72%</span>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:10px" id="home-insights">
+            <div class="card-title">Подсказки</div>
+            <div class="feed-row">
+              <div>
+                <div class="feed-title">Воздух сегодня ниже комфортного</div>
+                <div class="feed-sub">Короче прогулка · не ACT/ARIA в copy</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card flush" style="margin-top:10px" data-screen="expert">
+            <div class="feed-row" style="border:none">
+              <div>
+                <div class="feed-title">Эксперт</div>
+                <div class="feed-sub">Материалы АДАИР</div>
+              </div>
+              <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
 
@@ -1810,11 +1858,274 @@
           </div>
         </section>
 
+        <section class="screen" id="screen-register">
+          <div class="auth-hero">
+            <div class="doc-label">Аккаунт</div>
+            <div class="doc-title">Регистрация</div>
+            <div class="doc-meta">Телефон или email · FR-AUTH</div>
+          </div>
+          <div class="card">
+            <input class="input" placeholder="Email или телефон" />
+            <input class="input" placeholder="Пароль" type="password" style="margin-top:8px" />
+            <button class="btn btn-primary" style="margin-top:12px" data-screen="onboarding-intro">Создать аккаунт</button>
+            <button class="btn btn-ghost" style="margin-top:8px" data-screen="login">Уже есть вход</button>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-clinical-scales">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="home">‹</div>
+              <div>
+                <div class="doc-label">Оценки</div>
+                <div class="doc-title">Клинические шкалы</div>
+                <div class="doc-meta">FR-DIARY-14 · не на copy Главной</div>
+              </div>
+            </div>
+          </div>
+          <div class="card flush">
+            <div class="feed-row"><div class="feed-title">ACT</div><div class="feed-sub">Астма · если в профиле</div></div>
+            <div class="feed-row"><div class="feed-title">ARIA</div><div class="feed-sub">Ринит</div></div>
+            <div class="feed-row"><div class="feed-title">GINA</div><div class="feed-sub">Пороги в core, не в макете</div></div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-ask">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="home">‹</div>
+              <div>
+                <div class="doc-label">Спросить</div>
+                <div class="doc-title">Чат</div>
+                <div class="doc-meta">Composer над IME · не SOS</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="min-height:120px;color:var(--text-muted)">Пустой диалог</div>
+          <div class="card" style="display:flex;gap:8px;align-items:center">
+            <input class="input" placeholder="Сообщение" style="flex:1" />
+            <button class="btn btn-primary btn-sm" type="button">→</button>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-sos-empty">
+          <div class="pinned-header">
+            <div class="doc-label">SOS</div>
+            <div class="doc-title">Экстренный вызов</div>
+            <div class="doc-meta">Нет профиля · не блокировать EmptyState</div>
+          </div>
+          <p class="feed-sub">Паспорт появится после профиля. Звонок доступен сразу.</p>
+          <button class="btn btn-danger" style="min-height:60px;width:100%">Позвонить 103</button>
+        </section>
+
+        <section class="screen" id="screen-sos-edit">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="profile">‹</div>
+              <div>
+                <div class="doc-label">Профиль</div>
+                <div class="doc-title">Править SOS</div>
+                <div class="doc-meta">FR-SOS-06 · не с вкладки SOS</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="feed-sub">Контакты и паспорт</div>
+            <input class="input" value="103" />
+            <button class="btn btn-primary" style="margin-top:10px">Сохранить</button>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-profile-edit">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="profile">‹</div>
+              <div>
+                <div class="doc-label">Профиль</div>
+                <div class="doc-title">Анна</div>
+                <div class="doc-meta">Аллергены и условия</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <input class="input" value="Анна" />
+            <button class="btn btn-primary" style="margin-top:10px" data-screen="profile">Сохранить</button>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-settings">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="profile">‹</div>
+              <div>
+                <div class="doc-label">Хаб</div>
+                <div class="doc-title">Настройки</div>
+                <div class="doc-meta">FR-SET · backup в ряд</div>
+              </div>
+            </div>
+          </div>
+          <div class="section-label">Локальная копия</div>
+          <div class="card">
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" type="button">Экспортировать</button>
+              <button class="btn btn-secondary btn-sm" type="button">Импортировать</button>
+            </div>
+          </div>
+          <div class="section-label">Облако</div>
+          <div class="card">
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" type="button">Отправить</button>
+              <button class="btn btn-secondary btn-sm" type="button">Восстановить</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-therapy">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="diary">‹</div>
+              <div>
+                <div class="doc-label">Курс</div>
+                <div class="doc-title">Терапия</div>
+                <div class="doc-meta">Назначенная · gating профиля</div>
+              </div>
+            </div>
+          </div>
+          <div class="card"><div class="feed-title">Напоминания</div><div class="feed-sub">Времена курса</div></div>
+        </section>
+
+        <section class="screen" id="screen-asit">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="diary">‹</div>
+              <div>
+                <div class="doc-label">Курс</div>
+                <div class="doc-title">АСИТ</div>
+                <div class="doc-meta">Только при поллинозе</div>
+              </div>
+            </div>
+          </div>
+          <div class="card"><div class="feed-title">Фазы курса</div><div class="feed-sub">Не показывать без pollinosis</div></div>
+        </section>
+
+        <section class="screen" id="screen-home-empty">
+          <div class="top-bar">
+            <div class="brand-row">
+              <div class="brand-mark">A</div>
+              <div><div class="word-endorse">Aclearo</div></div>
+            </div>
+            <div class="top-bar-actions">
+              <div class="profile-btn" data-screen="profile">А</div>
+              <div class="sos-top-btn" data-screen="sos">🚑</div>
+            </div>
+          </div>
+          <div class="doc-label">Сегодня</div>
+          <div class="doc-title" style="margin-bottom:12px">Пока тихо</div>
+          <div class="card">
+            <div class="feed-title">Нет записей дня</div>
+            <div class="feed-sub">Кольца и факторы появятся после профиля и чек-ина. SOS доступен.</div>
+            <button class="btn btn-primary" style="margin-top:12px" data-screen="diary">Новая запись</button>
+          </div>
+          <div class="card"><div class="feed-title">Подсказки</div><div class="feed-sub">Пока нечего показать</div></div>
+        </section>
+
+        <section class="screen" id="screen-home-offline">
+          <div class="top-bar">
+            <div class="brand-row">
+              <div class="brand-mark">A</div>
+              <div><div class="word-endorse">Aclearo</div></div>
+            </div>
+            <div class="top-bar-actions">
+              <div class="profile-btn" data-screen="profile">А</div>
+              <div class="sos-top-btn" data-screen="sos">🚑</div>
+            </div>
+          </div>
+          <div class="doc-label">Сегодня</div>
+          <div class="doc-title" style="margin-bottom:12px">Без сети</div>
+          <div class="card soft-card">
+            <div class="feed-title">Пыльца и воздух</div>
+            <div class="feed-sub">Нет данных · не ошибка ядра. Дневник и SOS работают локально.</div>
+          </div>
+          <button class="btn btn-secondary" data-screen="diary">Открыть журнал</button>
+        </section>
+
+        <section class="screen" id="screen-forgot-password">
+          <div class="auth-hero">
+            <div class="doc-label">Аккаунт</div>
+            <div class="doc-title">Сброс пароля</div>
+            <div class="doc-meta">FR-AUTH · email или телефон</div>
+          </div>
+          <div class="card">
+            <input class="input" placeholder="Email или телефон" />
+            <button class="btn btn-primary" style="margin-top:12px" data-screen="login">Отправить код</button>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-profiles">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="profile">‹</div>
+              <div>
+                <div class="doc-label">Хаб</div>
+                <div class="doc-title">Мои профили</div>
+                <div class="doc-meta">FR-PROF-05…08 · удаление аккаунта</div>
+              </div>
+            </div>
+          </div>
+          <div class="card flush">
+            <div class="feed-row"><div class="feed-title">Анна</div><div class="feed-sub">Я · активный</div></div>
+            <div class="feed-row"><div class="feed-title">Миша</div><div class="feed-sub">Ребёнок</div></div>
+          </div>
+          <button class="btn btn-secondary" style="width:100%;margin-top:10px">Добавить профиль</button>
+          <button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px">Удалить аккаунт</button>
+        </section>
+
+        <section class="screen" id="screen-asthma-plan">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="diary">‹</div>
+              <div>
+                <div class="doc-label">Клиника</div>
+                <div class="doc-title">План астмы</div>
+                <div class="doc-meta">Только при asthma</div>
+              </div>
+            </div>
+          </div>
+          <div class="card"><div class="feed-title">Зоны плана</div><div class="feed-sub">Не показывать без бронхиальной астмы</div></div>
+        </section>
+
+        <section class="screen" id="screen-insect-plan">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="diary">‹</div>
+              <div>
+                <div class="doc-label">Клиника</div>
+                <div class="doc-title">План при укусе</div>
+                <div class="doc-meta">Только insect</div>
+              </div>
+            </div>
+          </div>
+          <div class="card"><div class="feed-title">Шаги</div><div class="feed-sub">Gating explicit insect</div></div>
+        </section>
+
+        <section class="screen" id="screen-food-drug">
+          <div class="pinned-header">
+            <div class="back-row" style="margin-bottom:0">
+              <div class="back-btn" data-screen="diary">‹</div>
+              <div>
+                <div class="doc-label">Клиника</div>
+                <div class="doc-title">Пища и лекарства</div>
+                <div class="doc-meta">foodFocus / drugFocus</div>
+              </div>
+            </div>
+          </div>
+          <div class="card"><div class="feed-title">Реестр</div><div class="feed-sub">Не общий список на всех профилях</div></div>
+        </section>
+
         <nav class="tabbar" id="tabbar">
-          <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Главная</div>
-          <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Дневник</div>
-          <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Сканер</div>
-          <div class="tab" data-screen="market"><span class="tab-icon">🛒</span>Маркет</div>
+          <div class="tab active" data-screen="home"><span class="tab-icon">🏠</span>Сегодня</div>
+          <div class="tab" data-screen="diary"><span class="tab-icon">📔</span>Журнал</div>
+          <div class="tab" data-screen="scanner"><span class="tab-icon">📷</span>Скан</div>
           <div class="tab" data-screen="map"><span class="tab-icon">🗺</span>Карта</div>
           <div class="tab sos" data-screen="sos"><span class="tab-icon">🚑</span>SOS</div>
         </nav>
@@ -1824,8 +2135,14 @@
 
   <script>
     const phone = document.getElementById('phone');
-    const tabScreens = new Set(['home', 'diary', 'scanner', 'market', 'map', 'sos']);
-    const noTabScreens = new Set(['login', 'onboarding-intro', 'onboarding', 'profile-setup', 'notifications', 'profile', 'doctor-report', 'expert', 'diary-editor', 'diary-picker', 'diary-editor-photo']);
+    const tabScreens = new Set(['home', 'diary', 'scanner', 'map', 'sos']);
+    const noTabScreens = new Set([
+      'login', 'register', 'forgot-password', 'onboarding-intro', 'onboarding', 'profile-setup',
+      'notifications', 'profile', 'profiles', 'profile-edit', 'settings', 'doctor-report',
+      'clinical-scales', 'expert', 'ask', 'market', 'sos-empty', 'sos-edit',
+      'diary-editor', 'diary-picker', 'diary-editor-photo', 'therapy', 'asit',
+      'asthma-plan', 'insect-plan', 'food-drug',
+    ]);
 
     function showScreen(name) {
       document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
@@ -1834,7 +2151,10 @@
         btn.classList.toggle('active', btn.dataset.screen === name);
       });
       document.querySelectorAll('.tabbar .tab').forEach((tab) => {
-        tab.classList.toggle('active', tab.dataset.screen === name);
+        const tabName = name === 'home-empty' || name === 'home-offline' ? 'home'
+          : name === 'sos-empty' ? 'sos'
+          : name;
+        tab.classList.toggle('active', tab.dataset.screen === tabName);
       });
       phone.classList.toggle('hidden-tabbar', noTabScreens.has(name));
       if (location.hash !== '#' + name) {
@@ -1844,6 +2164,9 @@
 
     const initial = location.hash.replace(/^#/, '');
     if (initial) showScreen(initial);
+    if (new URLSearchParams(location.search).has('trace') || new URLSearchParams(location.search).has('screen')) {
+      document.body.classList.add('trace-mode');
+    }
 
     document.getElementById('screen-list').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-screen]');
@@ -1932,7 +2255,11 @@
     });
 
     setTheme('light');
-    showScreen('home');
+    const bootParams = new URLSearchParams(location.search);
+    if (bootParams.has('trace') || bootParams.has('screen')) {
+      document.body.classList.add('trace-mode');
+    }
+    showScreen(bootParams.get('screen') || location.hash.replace(/^#/, '') || 'home');
   </script>
 </body>
 </html>

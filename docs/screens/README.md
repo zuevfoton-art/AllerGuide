@@ -40,7 +40,7 @@ powershell -ExecutionPolicy Bypass -File docs/screens/canvas/install-windows.ps1
 |------|------------|
 | [`index.html`](./index.html) | Оглавление |
 | [`board.html`](./board.html) | Handoff board (браузер) |
-| [`_tokens.css`](./_tokens.css) | Dual Calm as-is (июль 2026). Production-токены — `apps/mobile/src/constants/theme.ts` и [`brand-claro-green.md`](../brand-claro-green.md) |
+| [`_tokens.css`](./_tokens.css) | Claro Green (зеркало `theme.ts`). Импорт Variables — [`../figma/tokens.json`](../figma/tokens.json). Dual Calm retired |
 | [`_phone-frame.css`](./_phone-frame.css) | Phone frame |
 | `sos.html` · `home.html` · `diary.html` · `scanner.html` | As-is макеты |
 | [`canvas/`](./canvas/) | Portable `.canvas.tsx` + install scripts |
@@ -59,3 +59,5 @@ powershell -ExecutionPolicy Bypass -File docs/screens/canvas/install-windows.ps1
 - [ ] Offline-first
 
 Приоритет: SOS → Home → Diary → Scanner
+
+Код → Figma (отрисовка без JSX): [`../figma-code-to-figma.md`](../figma-code-to-figma.md) · инвентарь [`../figma/screen-inventory.md`](../figma/screen-inventory.md). Обратно в код: [`../figma-handoff.md`](../figma-handoff.md).
