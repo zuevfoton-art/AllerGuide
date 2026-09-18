@@ -44,15 +44,7 @@ export function shouldShowAskFab(pathname: string | null | undefined): boolean {
   return ASK_FAB_ALLOWED_PREFIXES.some((prefix) => matchesPrefix(path, prefix));
 }
 
-/** Tab roots use the extended (icon + label) FAB. */
-export function shouldUseExtendedAskFab(pathname: string | null | undefined): boolean {
-  if (!shouldShowAskFab(pathname)) return false;
-  const path = (pathname ?? '').split('?')[0] || '';
-  return (
-    matchesPrefix(path, '/home') ||
-    matchesPrefix(path, '/diary') ||
-    matchesPrefix(path, '/scanner') ||
-    matchesPrefix(path, '/map') ||
-    path === '/profile'
-  );
+/** Ask FAB is icon-only everywhere (label stays on accessibilityLabel only). */
+export function shouldUseExtendedAskFab(_pathname: string | null | undefined): boolean {
+  return false;
 }

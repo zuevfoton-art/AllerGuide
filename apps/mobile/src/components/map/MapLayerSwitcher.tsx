@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { MAP_LAYER_CHIPS, type MapLayerMode } from '@/src/components/map/map-constants';
-import { radii } from '@/src/constants/layout';
+import { density, radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -76,10 +76,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: 40,
+      minHeight: density.tapMinHeight,
       paddingHorizontal: 4,
       paddingVertical: 8,
-      borderRadius: radii.sm,
+      borderRadius: radii.card,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.card,
@@ -100,7 +100,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
-      minHeight: 44,
+      minHeight: density.tapMinHeightSecondary,
       borderRadius: radii.full,
       borderWidth: 1,
       borderColor: colors.accent,

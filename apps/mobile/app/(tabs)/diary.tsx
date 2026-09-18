@@ -55,6 +55,7 @@ import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
 import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
 import { Button } from '@/src/components/Button';
+import { DiaryNewEntryFab } from '@/src/components/DiaryNewEntryFab';
 import { CardTitle } from '@/src/components/CardTitle';
 import { Disclaimer } from '@/src/components/Disclaimer';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
@@ -496,16 +497,14 @@ export default function DiaryScreen() {
         <ProfileHeaderButton variant="chip" chipTitle={activeProfile?.name} />
       }
       pinnedBottom={
-        <HintAnchor id="diary.newEntry">
-          <Button
-            testID="diary-new-entry"
-            label={t('diary.newEntry')}
-            variant="primary"
-            block
-            icon="add"
-            onPress={() => setEntryPickerOpen(true)}
-          />
-        </HintAnchor>
+        <View style={styles.fabRow} pointerEvents="box-none">
+          <HintAnchor id="diary.newEntry">
+            <DiaryNewEntryFab
+              accessibilityLabel={t('diary.newEntry')}
+              onPress={() => setEntryPickerOpen(true)}
+            />
+          </HintAnchor>
+        </View>
       }>
       <View style={styles.header}>
         <View style={styles.headerText}>
@@ -693,6 +692,11 @@ function createStyles({ colors, fonts }: AppTheme) {
     },
     actionHalf: {
       flex: 1,
+    },
+    /** Figma fab-row — round + FAB aligned end above tab bar */
+    fabRow: {
+      alignItems: 'flex-end',
+      justifyContent: 'flex-end',
     },
     listHead: {
       flexDirection: 'row',
