@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
-import { SEVERITY_0_3_CHOICES } from '@allerguide/core';
+import { SEVERITY_0_3_CHOICES, SEVERITY_0_3_LABELS, type Severity0_3 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
 import { CardTitle } from '@/src/components/CardTitle';
 import { BottomSheet } from '@/src/components/BottomSheet';
@@ -33,8 +33,9 @@ export function QuickCheckInCard({
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [selected, setSelected] = useState<Severity0_3 | null>(null);
 
-  const save = async (index: 0 | 1 | 2 | 3) => {
+  const save = async (index: Severity0_3) => {
     if (busy) return;
     setBusy(true);
     try {
@@ -43,6 +44,7 @@ export function QuickCheckInCard({
         showStatusBanner({ tone: 'error', message: t('common.error') });
         return;
       }
+      setSelected(index);
       showStatusBanner({ tone: 'success', message: t('reengagement.checkInSaved') });
       setSheetOpen(false);
       onSaved?.();
@@ -52,47 +54,89 @@ export function QuickCheckInCard({
   };
 
   const subtitle = checkedInToday ? t('today.checkedIn') : t('home.feelMark');
+  const showInlineChips = compact && !checkedInToday;
+
+  const chipGrid = (
+    <View style={styles.chipGrid} accessibilityRole="radiogroup">
+      {([0, 1, 2, 3] as const).map((index) => {
+        const active = selected === index;
+        return (
+          <Pressable
+            key={index}
+            testID={`quick-check-in-${index}`}
+            style={[styles.inlineChip, active ? styles.inlineChipActive : null]}
+            onPress={() => void save(index)}
+            disabled={busy}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: active, disabled: busy }}
+            accessibilityLabel={SEVERITY_0_3_LABELS[index]}>
+            <Text style={[styles.inlineChipText, active ? styles.inlineChipTextActive : null]}>
+              {chipLabel(SEVERITY_0_3_CHOICES[index])}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
 
   return (
     <>
-      <Pressable
-        testID="quick-check-in"
-        onPress={() => setSheetOpen(true)}
-        accessibilityRole="button"
-        accessibilityLabel={`${t('reengagement.checkInTitle')}. ${subtitle}`}
-        style={compact ? styles.compactWrap : undefined}>
-        <GlassCard variant="soft" style={compact ? styles.compactCard : undefined}>
-          <CardTitle>{t('reengagement.checkInTitle')}</CardTitle>
-          <Text style={styles.hint} numberOfLines={2}>
-            {subtitle}
-          </Text>
-          {compact ? null : (
-            <Text style={styles.hint}>{t('reengagement.checkInHint')}</Text>
-          )}
-        </GlassCard>
-      </Pressable>
-
-      <BottomSheet
-        visible={sheetOpen}
-        title={t('home.feelPickTitle')}
-        onClose={() => setSheetOpen(false)}
-        testID="feeling-check-in-sheet">
-        <View style={styles.sheetBody}>
-          {SEVERITY_0_3_CHOICES.map((label, index) => (
-            <Pressable
-              key={label}
-              testID={`quick-check-in-${index}`}
-              style={styles.sheetChip}
-              onPress={() => void save(index as 0 | 1 | 2 | 3)}
-              disabled={busy}
-              accessibilityRole="button"
-              accessibilityLabel={label}>
-              <Text style={styles.chipNum}>{index}</Text>
-              <Text style={styles.chipLabel}>{chipLabel(label)}</Text>
-            </Pressable>
-          ))}
+      {showInlineChips ? (
+        <View
+          testID="quick-check-in"
+          accessibilityRole="summary"
+          accessibilityLabel={`${t('reengagement.checkInTitle')}. ${t('reengagement.checkInHint')}`}
+          style={styles.compactWrap}>
+          <GlassCard variant="soft" style={styles.compactCard}>
+            <CardTitle>{t('reengagement.checkInTitle')}</CardTitle>
+            <Text style={styles.hint} numberOfLines={2}>
+              {t('reengagement.checkInHint')}
+            </Text>
+            {chipGrid}
+          </GlassCard>
         </View>
-      </BottomSheet>
+      ) : (
+        <Pressable
+          testID="quick-check-in"
+          onPress={() => setSheetOpen(true)}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('reengagement.checkInTitle')}. ${subtitle}`}
+          style={compact ? styles.compactWrap : undefined}>
+          <GlassCard variant="soft" style={compact ? styles.compactCard : undefined}>
+            <CardTitle>{t('reengagement.checkInTitle')}</CardTitle>
+            <Text style={styles.hint} numberOfLines={2}>
+              {subtitle}
+            </Text>
+            {compact ? null : (
+              <Text style={styles.hint}>{t('reengagement.checkInHint')}</Text>
+            )}
+          </GlassCard>
+        </Pressable>
+      )}
+
+      {!showInlineChips ? (
+        <BottomSheet
+          visible={sheetOpen}
+          title={t('home.feelPickTitle')}
+          onClose={() => setSheetOpen(false)}
+          testID="feeling-check-in-sheet">
+          <View style={styles.sheetBody}>
+            {SEVERITY_0_3_CHOICES.map((label, index) => (
+              <Pressable
+                key={label}
+                testID={`quick-check-in-${index}`}
+                style={styles.sheetChip}
+                onPress={() => void save(index as Severity0_3)}
+                disabled={busy}
+                accessibilityRole="button"
+                accessibilityLabel={label}>
+                <Text style={styles.chipNum}>{index}</Text>
+                <Text style={styles.chipLabel}>{chipLabel(label)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </BottomSheet>
+      ) : null}
     </>
   );
 }
@@ -107,6 +151,40 @@ function createStyles({ colors, fonts }: AppTheme) {
       lineHeight: lineHeights.bodySm,
       color: colors.textSecondary,
       marginTop: space[2],
+    },
+    chipGrid: {
+      marginTop: space[3],
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: space[2],
+    },
+    inlineChip: {
+      width: '47%',
+      flexGrow: 1,
+      minHeight: density.tapMinHeightSm,
+      borderRadius: radii.full,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: space[2],
+      paddingVertical: space[2],
+    },
+    inlineChipActive: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
+    inlineChipText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    inlineChipTextActive: {
+      color: colors.onAccent,
     },
     sheetBody: {
       paddingHorizontal: space[4],

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { GlassCard } from '@/src/components/GlassCard';
 import { CardTitle } from '@/src/components/CardTitle';
@@ -35,7 +35,7 @@ type DailyReadingCardProps = {
   reading: TodayReading;
   /** Rendered under the advice — the single primary next step of the screen. */
   showAction?: boolean;
-  /** Home bubble: title + one line, no CTA. */
+  /** Home bubble: title + lead + sm CTA (Figma / mockup handoff). */
   compact?: boolean;
 };
 
@@ -56,10 +56,9 @@ export function DailyReadingCard({
 
   if (compact) {
     return (
-      <Pressable
+      <View
         testID="today-reading"
-        onPress={() => router.push(reading.action.href as never)}
-        accessibilityRole="button"
+        accessibilityRole="summary"
         accessibilityLabel={`${t('today.readingTitle')}. ${reading.lead}`}
         style={styles.compactWrap}>
         <GlassCard variant="soft" style={styles.compactCard}>
@@ -67,8 +66,18 @@ export function DailyReadingCard({
           <Text style={styles.compactLead} numberOfLines={3}>
             {reading.lead}
           </Text>
+          {showAction ? (
+            <Button
+              testID="today-primary-insight"
+              label={reading.action.label}
+              variant="primary"
+              size="sm"
+              block
+              onPress={() => router.push(reading.action.href as never)}
+            />
+          ) : null}
         </GlassCard>
-      </Pressable>
+      </View>
     );
   }
 
@@ -130,13 +139,14 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
     },
     compactWrap: { flex: 1, minWidth: 0 },
-    compactCard: { flex: 1, minHeight: density.tapMinHeight * 2 },
+    compactCard: { flex: 1, minHeight: density.tapMinHeight * 2, gap: space[2] },
     compactLead: {
       fontFamily: fonts.sans,
       fontSize: fontSizes.bodySm,
       lineHeight: lineHeights.bodySm,
       color: colors.textSecondary,
       marginTop: space[2],
+      marginBottom: space[1],
     },
   });
 }
