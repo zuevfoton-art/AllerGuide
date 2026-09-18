@@ -46,6 +46,7 @@ import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
+import { density, radii } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
@@ -416,7 +417,33 @@ export default function ProfileSetupScreen() {
       : t('profileSetup.next');
 
   return (
-    <Screen>
+    <Screen
+      pinnedBottom={
+        <View style={styles.actions}>
+          {showBack ? (
+            <View style={styles.actionSlot}>
+              <Button
+                testID="profile-wizard-back"
+                label={t('profileSetup.back')}
+                variant="secondary"
+                block
+                onPress={goBack}
+                style={styles.footerBtn}
+              />
+            </View>
+          ) : null}
+          <View style={styles.actionSlot}>
+            <Button
+              testID={isLastStep ? 'profile-save' : 'profile-wizard-next'}
+              label={primaryLabel}
+              variant="primary"
+              block
+              onPress={goNext}
+              style={styles.footerBtn}
+            />
+          </View>
+        </View>
+      }>
       <View style={styles.header}>
         <Text style={ui.docTitle}>{title}</Text>
         <Text style={ui.docMeta}>{subtitle}</Text>
@@ -544,29 +571,6 @@ export default function ProfileSetupScreen() {
         />
       ) : null}
 
-      <View style={styles.actions}>
-        {showBack ? (
-          <View style={styles.actionSlot}>
-            <Button
-              testID="profile-wizard-back"
-              label={t('profileSetup.back')}
-              variant="secondary"
-              block
-              onPress={goBack}
-            />
-          </View>
-        ) : null}
-        <View style={styles.actionSlot}>
-          <Button
-            testID={isLastStep ? 'profile-save' : 'profile-wizard-next'}
-            label={primaryLabel}
-            variant="primary"
-            block
-            onPress={goNext}
-          />
-        </View>
-      </View>
-
       <Disclaimer>{t('profileSetup.disclaimer')}</Disclaimer>
     </Screen>
   );
@@ -587,6 +591,11 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexShrink: 1,
       flexBasis: 0,
       minWidth: 0,
+    },
+    /** Figma profile-footer button 354×52, radius 24 */
+    footerBtn: {
+      minHeight: density.tapMinHeightPrimary,
+      borderRadius: radii.xl,
     },
     error: {
       fontFamily: fonts.sans,

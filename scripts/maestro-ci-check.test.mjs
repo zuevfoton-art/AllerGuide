@@ -11,6 +11,20 @@ function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
 }
 
+// `Screen` renders `pinnedTop` above its ScrollView and everything passed as
+// children inside it, so only the pinned block survives a scroll. Return the
+// prop body to tell the two apart.
+function pinnedTop(source) {
+  const start = source.indexOf('pinnedTop={');
+  if (start === -1) return '';
+  let depth = 0;
+  for (let i = source.indexOf('{', start); i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1;
+    else if (source[i] === '}' && (depth -= 1) === 0) return source.slice(start, i + 1);
+  }
+  return '';
+}
+
 describe('Maestro nightly CI invariants', () => {
   it('builds a release APK with an embedded JS bundle check', () => {
     const script = read('scripts/maestro-build-apk.sh');
@@ -35,6 +49,15 @@ describe('Maestro nightly CI invariants', () => {
     // Nightly 34474685308: mergeDexRelease OOM at -Xmx2048m. Pin ≥4g after prebuild.
     assert.match(script, /pin_gradle_heap/);
     assert.match(script, /Xmx4096m/);
+    // No EXPO_PUBLIC_* value is an input of the bundle task, so Gradle reports it
+    // UP-TO-DATE after a build with another profile and ships the previous JS:
+    // locally `staging` then `preview` produced byte-identical bundles, staging
+    // API URL and DSN included.
+    assert.match(
+      script,
+      /rm -rf app\/build\/generated\/assets\/react\/release/,
+      'drop the generated bundle so the requested profile always takes',
+    );
     assert.match(script, /--no-parallel/);
     assert.match(script, /-Dorg\.gradle\.jvmargs=/);
     // Nightly 35198863494: Maven 403 on gson killed preview assemble while staging
@@ -591,12 +614,83 @@ describe('Maestro nightly CI invariants', () => {
 
     const hub = read('apps/mobile/app/profile.tsx');
     assert.match(hub, /titleTestID="profile-screen-title"/);
-    assert.match(hub, /pinnedTop=\{/);
+    // Focusing the number field makes Android scroll the hub to keep it above
+    // the phone-pad (measured 220dp on a 533dp window). A header inside the
+    // ScrollView leaves the viewport, and UiAutomator then reports it with the
+    // top clamped to the scroll edge and the bottom above it — nightly
+    // 34340207243 dumped `[190,380][892,357]` and the tap found no element.
+    assert.match(
+      pinnedTop(hub),
+      /titleTestID="profile-screen-title"/,
+      'the anchor _dismiss-profile-ime taps must be pinned, not inside the scrolled body',
+    );
     assert.match(hub, /testID="profile-save-number"/);
     assert.match(hub, /testID="profile-emergency-number"/);
 
     const header = read('apps/mobile/src/components/ScreenHeader.tsx');
     assert.match(header, /collapsable=\{false\}/);
+  });
+
+  it('keeps the first-run tour reachable when data never loads', () => {
+    // Nightly 35315005471: both suites died on hint-overlay / hint-skip with
+    // Today stuck on skeleton cards. The home loader awaits a GPS fix, and
+    // `getCurrentPositionAsync` has no deadline of its own, so an emulator
+    // without an injected location kept `loadingWellness` true forever and
+    // `useHintTour('home', { ready: !loadingWellness })` never fired.
+    const location = read('apps/mobile/src/services/location-service.ts');
+    assert.match(location, /POSITION_TIMEOUT_MS/, 'the GPS fix must have a deadline');
+    assert.doesNotMatch(
+      location,
+      /await Location\.getCurrentPositionAsync/,
+      'never await a bare position fix — race it against POSITION_TIMEOUT_MS',
+    );
+
+    // The tour still waits for its data, so the flows must budget for both of
+    // the app's deadlines (GPS + Open-Meteo) instead of the original 20s.
+    for (const name of ['_dismiss-hints.yaml', 'onboarding-smoke.yaml']) {
+      const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+      // Only the waits for the overlay to appear; `notVisible` after the skip
+      // tap stays short on purpose.
+      const waits = [
+        ...flow.matchAll(/\n\s+visible:\s*\n\s+id: hint-(?:overlay|skip)\s*\n\s+timeout: (\d+)/g),
+      ];
+      assert.ok(waits.length > 0, `${name} must wait on a hint anchor`);
+      for (const [, timeout] of waits) {
+        assert.ok(
+          Number(timeout) >= 40000,
+          `${name} must allow the GPS deadline plus the enrichment timeout, got ${timeout}ms`,
+        );
+      }
+    }
+  });
+
+  it('pins the same Gradle memory on the CLI and in gradle.properties', () => {
+    // The script passes jvmargs on the Gradle CLI, which wins over the
+    // properties file, so raising only one of them changes nothing for the
+    // nightly. Keep them identical instead.
+    const script = read('scripts/maestro-build-apk.sh');
+    const props = read('apps/mobile/android/gradle.properties');
+    const fromScript = script.match(/MAESTRO_GRADLE_JVMARGS='([^']+)'/);
+    const fromProps = props.match(/^org\.gradle\.jvmargs=(.+)$/m);
+    assert.ok(fromScript, 'maestro-build-apk.sh must pin MAESTRO_GRADLE_JVMARGS');
+    assert.ok(fromProps, 'gradle.properties must pin org.gradle.jvmargs');
+    assert.equal(
+      fromScript[1].trim(),
+      fromProps[1].trim(),
+      'the CLI jvmargs and gradle.properties must match, or one of them is dead config',
+    );
+    assert.match(fromScript[1], /-XX:MaxMetaspaceSize=1024m/);
+
+    // Nightly 35198863494: the offline job died resolving gson from Maven
+    // Central. `assemble_release_with_retry` covers a transient miss; the cache
+    // keeps an unchanged build off the network entirely.
+    const workflow = read('.github/workflows/maestro-nightly.yml');
+    assert.match(script, /assemble_release_with_retry/);
+    assert.equal(
+      workflow.match(/cache: gradle/g)?.length,
+      2,
+      'both nightly jobs must cache Gradle dependencies',
+    );
   });
 
   it('bans hideKeyboard and the back command in every Maestro flow', () => {

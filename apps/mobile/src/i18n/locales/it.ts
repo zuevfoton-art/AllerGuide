@@ -52,6 +52,9 @@ const it: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Accedi',
+    loginSubtitle: 'Accedi con telefono o email',
+    tabPhone: 'Telefono',
+    tabEmail: 'Email',
     registerTitle: 'Registrazione',
     loginLabel: 'Telefono o e-mail',
     phonePlaceholder: '+39 333 123 4567',

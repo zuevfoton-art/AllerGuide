@@ -609,12 +609,34 @@
     .top-bar-actions { display: flex; align-items: center; gap: 8px; }
 
     .sos-emergency-bar {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      margin-bottom: 12px; padding: 8px 0;
+    }
+    .sos-circle-outer {
+      width: 180px; height: 180px; border-radius: 90px;
+      background: var(--danger-light); display: grid; place-items: center;
+      box-shadow: var(--shadow-raised-strong); border: none; cursor: pointer; padding: 0;
+    }
+    .sos-circle-inner {
+      width: 140px; height: 140px; border-radius: 70px;
+      background: var(--danger); color: #fff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      font-family: var(--sans); font-weight: 800; font-size: 22px; line-height: 1.1;
+    }
+    .sos-contact-row {
+      display: flex; align-items: center; gap: 12px; align-self: stretch;
       background: var(--card); border: 1px solid var(--danger-border);
-      border-radius: var(--radius-lg); padding: 12px; margin-bottom: 12px; display: grid; gap: 8px;
+      border-radius: var(--radius-lg); padding: 12px;
     }
 
-    .sos-contact-row {
-      display: flex; align-items: center; gap: 12px;
+    .fab-row {
+      display: flex; justify-content: flex-end; margin-top: 12px;
+    }
+    .fab {
+      width: 56px; height: 56px; border-radius: 28px; border: none; cursor: pointer;
+      background: var(--accent); color: #fff; font-size: 28px; line-height: 1;
+      display: grid; place-items: center; box-shadow: var(--shadow-raised-strong);
+      padding: 0; min-height: 56px; width: 56px;
     }
 
     .more-hub-icon {
@@ -1177,14 +1199,20 @@
             </div>
             <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <button class="btn btn-primary" data-screen="diary-picker">Новая запись</button>
+          <div class="card soft-card" style="margin-bottom:10px">
+            <div class="week-ring-row" aria-label="3 из 7 дней с записью">
+              <div class="week-ring-slot logged">П</div>
+              <div class="week-ring-slot logged">В</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot logged today">Ч</div>
+              <div class="week-ring-slot">П</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot">В</div>
+            </div>
+          </div>
           <div class="action-row" style="margin-top:8px">
             <button class="btn btn-secondary">Курс</button>
             <button class="btn btn-secondary" data-screen="doctor-report">Отчёт</button>
-          </div>
-          <div class="card" style="margin-top:10px">
-            <div class="card-title" style="margin-bottom:8px">Активность · 7 дней</div>
-            <div class="feed-sub">3 дн. подряд · топ недели: симптомы</div>
           </div>
           <div class="section-label">История записей</div>
           <div class="card flush">
@@ -1213,6 +1241,9 @@
               </div>
               <span style="color:var(--text-muted)">›</span>
             </div>
+          </div>
+          <div class="fab-row">
+            <button class="fab" type="button" data-screen="diary-picker" aria-label="Новая запись">+</button>
           </div>
           <p class="disclaimer">Дневник фиксирует наблюдения и не заменяет консультацию врача.</p>
         </section>
@@ -1397,18 +1428,21 @@
             </div>
             <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <div class="entry-row">
-            <div class="entry-chip active">▮▮ Штрих-код</div>
-            <div class="entry-chip">⬚ Сканер</div>
-          </div>
-          <div class="card">
-            <div class="section-label">или введите вручную</div>
-            <input class="input" placeholder="Штрихкод или состав продукта…" readonly />
-            <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
+          <div class="card soft-card" style="margin-bottom:10px">
+            <button class="btn btn-primary" style="width:100%">Умный скан</button>
+            <div class="entry-row" style="margin-top:10px">
+              <div class="entry-chip">▮▮ Штрих-код</div>
+              <div class="entry-chip">✎ Вручную</div>
+            </div>
+            <div class="feed-sub" style="margin-top:8px;text-align:center">Наведите камеру на штрих-код продукта</div>
           </div>
           <div class="result-danger">
             <strong>Claro: есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
             Claro: <strong>Молоко</strong> · уровень высокий. Результат не заменяет чтение этикетки.
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:6px">Состав</div>
+            <div class="feed-sub">Сахар, какао-масло, сухое цельное молоко…</div>
           </div>
           <div class="card">
             <div class="card-title" style="margin-bottom:6px">История сканирования (30 дней)</div>
@@ -1530,7 +1564,9 @@
           <div class="segment"><div class="segment-item active">Анна</div></div>
 
           <div class="sos-emergency-bar">
-            <button class="btn btn-danger">Позвонить 103</button>
+            <button class="sos-circle-outer" type="button" aria-label="Позвонить 103">
+              <span class="sos-circle-inner">⚠<br />103</span>
+            </button>
             <div class="sos-contact-row">
               <div class="feed-body">
                 <div class="feed-title">Муж</div>

@@ -50,7 +50,7 @@ function createStyles({ colors, shadows }: AppTheme) {
   return StyleSheet.create({
     card: {
       backgroundColor: colors.card,
-      borderRadius: radii.lg,
+      borderRadius: radii.card,
       borderWidth: 1,
       borderColor: colors.border,
       ...(shadows.sm as object),

@@ -114,7 +114,8 @@ export const lightColors: ThemeColors = {
   cream: '#FDFBF9',
   onAccent: '#FFFFFF',
   onDanger: '#FFFFFF',
-  purple: '#6366F1',
+  /** Figma login accent tab (email) */
+  purple: '#5D5FEF',
   pink: '#E11D48',
   tipBg: '#EAF2EA',
   tipBorder: '#B8CFC4',

@@ -1,10 +1,13 @@
 # First-run coach marks block tab taps. Wait for the overlay, then skip all tours.
+# The Today tour opens once its data settles, and offline that costs the app's two
+# deadlines back to back: 8s for a GPS fix plus 8s for Open-Meteo enrichment
+# (nightly 35315005471 timed out at 20s on skeleton cards).
 appId: com.aclearo.app
 ---
 - extendedWaitUntil:
     visible:
       id: hint-skip
-    timeout: 20000
+    timeout: 40000
 - tapOn:
     id: hint-skip
 - extendedWaitUntil:

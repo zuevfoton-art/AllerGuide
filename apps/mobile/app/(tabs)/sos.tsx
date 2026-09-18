@@ -151,63 +151,38 @@ export default function SosScreen() {
   });
 
   return (
-    <Screen
-      onRefresh={() => handleRefresh()}
-      refreshing={refreshing}
-      pinnedTop={
-        <HintAnchor id="sos.call">
-        <SosEmergencyBar
-          emergencyLabel={t('sos.call', { number: emergencyBar.emergencyNumber })}
-          contactName={emergencyBar.firstContact?.name}
-          contactPhone={emergencyBar.firstContact?.phone}
-          contactRelation={
-            emergencyBar.firstContact
-              ? localizeEmergencyRelation(emergencyBar.firstContact.relation, localeContent)
-              : undefined
-          }
-          callContactLabel={t('sos.callContact')}
-          onCallEmergency={() => void Linking.openURL(`tel:${emergencyBar.emergencyNumber}`)}
-          onCallContact={() =>
-            emergencyBar.firstContact && callPhone(emergencyBar.firstContact.phone)
-          }
-          allContactsLabel={
-            contacts.length > 0
-              ? t('sos.allContacts', { count: contacts.length })
-              : undefined
-          }
-          onAllContacts={
-            contacts.length > 0 ? () => router.push('/sos-edit' as any) : undefined
-          }
-        />
-        </HintAnchor>
-      }>
+    <Screen onRefresh={() => handleRefresh()} refreshing={refreshing}>
       <TabScreenHeader eyebrow={t('sos.title')} title={t('sos.crisisTitle')} />
 
-      <GlassCard testID="sos-crisis-plan">
-        <CardTitle>
-          {crisisPlan.source === 'personal' ? t('sos.crisisPlanPersonal') : t('sos.crisisPlanTitle')}
-        </CardTitle>
-        {crisisPlan.steps.map((step, index) => (
-          <View
-            key={step.source === 'personal' ? `${index}-${step.text}` : step.id}
-            testID={`sos-crisis-step-${index + 1}`}
-            style={styles.crisisStep}>
-            <Text style={styles.crisisNum}>{index + 1}</Text>
-            <Text style={styles.crisisText}>
-              {step.source === 'personal'
-                ? step.text
-                : t(`sos.crisisStep.${step.id}`, { number: emergencyBar.emergencyNumber })}
-            </Text>
-          </View>
-        ))}
-        {profile ? null : <Text style={styles.hintText}>{t('sos.crisisPlanNoProfile')}</Text>}
-      </GlassCard>
-
-      {epinephrineHint ? (
-        <GlassCard style={styles.epiHintCard}>
-          <Text style={styles.epiHintText}>{epinephrineHint}</Text>
-        </GlassCard>
-      ) : null}
+      <View style={styles.sosCenter} testID="sos-center">
+        <HintAnchor id="sos.call">
+          <SosEmergencyBar
+            emergencyLabel={t('sos.call', { number: emergencyBar.emergencyNumber })}
+            emergencyNumber={emergencyBar.emergencyNumber}
+            contactName={emergencyBar.firstContact?.name}
+            contactPhone={emergencyBar.firstContact?.phone}
+            contactRelation={
+              emergencyBar.firstContact
+                ? localizeEmergencyRelation(emergencyBar.firstContact.relation, localeContent)
+                : undefined
+            }
+            callContactLabel={t('sos.callContact')}
+            onCallEmergency={() => void Linking.openURL(`tel:${emergencyBar.emergencyNumber}`)}
+            onCallContact={() =>
+              emergencyBar.firstContact && callPhone(emergencyBar.firstContact.phone)
+            }
+            allContactsLabel={
+              contacts.length > 0
+                ? t('sos.allContacts', { count: contacts.length })
+                : undefined
+            }
+            onAllContacts={
+              contacts.length > 0 ? () => router.push('/sos-edit' as any) : undefined
+            }
+          />
+        </HintAnchor>
+        <Text style={styles.sosDisclaimer}>{t('sos.disclaimerShort')}</Text>
+      </View>
 
       {profile ? (
         <>
@@ -257,7 +232,37 @@ export default function SosScreen() {
             ) : null}
           </GlassCard>
           </HintAnchor>
+        </>
+      ) : null}
 
+      <GlassCard testID="sos-crisis-plan">
+        <CardTitle>
+          {crisisPlan.source === 'personal' ? t('sos.crisisPlanPersonal') : t('sos.crisisPlanTitle')}
+        </CardTitle>
+        {crisisPlan.steps.map((step, index) => (
+          <View
+            key={step.source === 'personal' ? `${index}-${step.text}` : step.id}
+            testID={`sos-crisis-step-${index + 1}`}
+            style={styles.crisisStep}>
+            <Text style={styles.crisisNum}>{index + 1}</Text>
+            <Text style={styles.crisisText}>
+              {step.source === 'personal'
+                ? step.text
+                : t(`sos.crisisStep.${step.id}`, { number: emergencyBar.emergencyNumber })}
+            </Text>
+          </View>
+        ))}
+        {profile ? null : <Text style={styles.hintText}>{t('sos.crisisPlanNoProfile')}</Text>}
+      </GlassCard>
+
+      {epinephrineHint ? (
+        <GlassCard style={styles.epiHintCard}>
+          <Text style={styles.epiHintText}>{epinephrineHint}</Text>
+        </GlassCard>
+      ) : null}
+
+      {profile ? (
+        <>
           <Pressable
             testID="sos-passport-toggle"
             style={styles.collapseHead}
@@ -455,6 +460,19 @@ function formatSosAge(
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
+    sosCenter: {
+      gap: 12,
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    sosDisclaimer: {
+      fontFamily: fonts.sans,
+      fontSize: 13,
+      lineHeight: 18,
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingHorizontal: 8,
+    },
     headerRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',

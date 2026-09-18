@@ -122,51 +122,54 @@ export default function ScannerScreen() {
         </View>
       </View>
 
-      <HintAnchor id="scanner.photo">
-        <Button
-          testID="scanner-primary-camera"
-          label={t('scanner.smartScan')}
-          variant="primary"
-          block
-          disabled={scan.loading}
-          onPress={() => void scan.openCamera('scanner')}
-        />
-      </HintAnchor>
-
-      <View style={styles.secondaryRow}>
-        <HintAnchor id="scanner.barcode" style={{ flex: 1 }}>
-          <Pressable
-            style={styles.barcodeBtn}
-            onPress={() => void scan.openCamera('barcode')}
-            testID="scanner-barcode"
-            accessibilityRole="button">
-            <Ionicons name="barcode-outline" size={18} color={theme.colors.head} />
-            <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
-          </Pressable>
+      <GlassCard variant="soft" testID="scanner-cam-zone" style={styles.camZone}>
+        <HintAnchor id="scanner.photo">
+          <Button
+            testID="scanner-primary-camera"
+            label={t('scanner.smartScan')}
+            variant="primary"
+            block
+            icon="camera"
+            disabled={scan.loading}
+            onPress={() => void scan.openCamera('scanner')}
+          />
         </HintAnchor>
-        <HintAnchor id="scanner.manual" style={{ flex: 1 }}>
-          <Pressable
-            style={styles.manualToggleBtn}
-            onPress={() => scan.setManualOpen((value) => !value)}
-            testID="scanner-toggle-manual"
-            accessibilityRole="button"
-            accessibilityState={{ expanded: scan.manualOpen }}>
-            <Ionicons name="create-outline" size={18} color={theme.colors.head} />
-            <Text style={styles.secondaryBtnText}>
-              {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
-            </Text>
-          </Pressable>
-        </HintAnchor>
-      </View>
 
-      {!scan.displayResult && !scan.loading ? (
-        <Text style={styles.emptyHint}>{t('scanner.emptyHint')}</Text>
-      ) : null}
-      {shouldShowScannerPageTrustLine(Boolean(scan.displayResult)) ? (
-        <Text style={styles.trustLine}>
-          {scan.isDishVisionResult ? t('scanner.trustLineDishVision') : t('scanner.trustLine')}
-        </Text>
-      ) : null}
+        <View style={styles.secondaryRow}>
+          <HintAnchor id="scanner.barcode" style={{ flex: 1 }}>
+            <Pressable
+              style={styles.barcodeBtn}
+              onPress={() => void scan.openCamera('barcode')}
+              testID="scanner-barcode"
+              accessibilityRole="button">
+              <Ionicons name="barcode-outline" size={18} color={theme.colors.head} />
+              <Text style={styles.secondaryBtnText}>{t('scanner.modeBarcode')}</Text>
+            </Pressable>
+          </HintAnchor>
+          <HintAnchor id="scanner.manual" style={{ flex: 1 }}>
+            <Pressable
+              style={styles.manualToggleBtn}
+              onPress={() => scan.setManualOpen((value) => !value)}
+              testID="scanner-toggle-manual"
+              accessibilityRole="button"
+              accessibilityState={{ expanded: scan.manualOpen }}>
+              <Ionicons name="create-outline" size={18} color={theme.colors.head} />
+              <Text style={styles.secondaryBtnText}>
+                {scan.manualOpen ? t('scanner.hideManual') : t('scanner.enterManually')}
+              </Text>
+            </Pressable>
+          </HintAnchor>
+        </View>
+
+        {!scan.displayResult && !scan.loading ? (
+          <Text style={styles.emptyHint}>{t('scanner.emptyHint')}</Text>
+        ) : null}
+        {shouldShowScannerPageTrustLine(Boolean(scan.displayResult)) ? (
+          <Text style={styles.trustLine}>
+            {scan.isDishVisionResult ? t('scanner.trustLineDishVision') : t('scanner.trustLine')}
+          </Text>
+        ) : null}
+      </GlassCard>
 
       {scan.manualOpen ? (
         <View style={styles.manualBlock}>

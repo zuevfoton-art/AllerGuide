@@ -46,6 +46,11 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          # Nightly 35198863494 lost the offline job to a Maven Central miss
+          # (`Could not get resource ... gson-2.9.1.pom`) while resolving the
+          # React Native settings plugin. Reuse the dependency cache so an
+          # unchanged build does not depend on the network at all.
+          cache: gradle
 
       - uses: android-actions/setup-android@v3
         with:
@@ -136,6 +141,11 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+          # Nightly 35198863494 lost the offline job to a Maven Central miss
+          # (`Could not get resource ... gson-2.9.1.pom`) while resolving the
+          # React Native settings plugin. Reuse the dependency cache so an
+          # unchanged build does not depend on the network at all.
+          cache: gradle
 
       - uses: android-actions/setup-android@v3
         with:

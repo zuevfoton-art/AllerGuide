@@ -11,6 +11,8 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    /** Figma scanner-container */
+    camZone: { gap: 12 },
     secondaryRow: { flexDirection: 'row', gap: 10 },
     barcodeBtn: {
       flex: 1,
@@ -21,7 +23,7 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       paddingVertical: 12,
       borderRadius: radii.full,
       backgroundColor: colors.surfaceMuted,
-      minHeight: 44,
+      minHeight: density.tapMinHeightSecondary,
       ...(shadows.raised as object),
     },
     manualToggleBtn: {
@@ -31,9 +33,9 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       justifyContent: 'center',
       gap: 6,
       paddingVertical: 12,
-      borderRadius: radii.sm,
+      borderRadius: radii.full,
       backgroundColor: colors.surfaceMuted,
-      minHeight: 44,
+      minHeight: density.tapMinHeightSecondary,
       ...(shadows.raised as object),
     },
     secondaryBtnText: {

@@ -52,6 +52,9 @@ const en: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Sign in',
+    loginSubtitle: 'Sign in with phone or email',
+    tabPhone: 'Phone',
+    tabEmail: 'Email',
     registerTitle: 'Sign up',
     loginLabel: 'Phone or email',
     phonePlaceholder: '+1 555 123-4567',

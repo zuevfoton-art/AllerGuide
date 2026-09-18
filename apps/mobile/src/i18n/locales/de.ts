@@ -53,6 +53,9 @@ const de: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Anmelden',
+    loginSubtitle: 'Mit Telefon oder E-Mail anmelden',
+    tabPhone: 'Telefon',
+    tabEmail: 'E-Mail',
     registerTitle: 'Registrierung',
     loginLabel: 'Telefon oder E-Mail',
     phonePlaceholder: '+49 151 12345678',
