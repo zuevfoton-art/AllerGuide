@@ -80,7 +80,7 @@ function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
       alignItems: 'center',
       justifyContent: 'center',
       gap: 6,
-      borderRadius: radii.full,
+      borderRadius: radii.lg,
       minHeight: density.tapMinHeightPrimary,
       minWidth: 0,
       paddingHorizontal: 20,
@@ -90,7 +90,7 @@ function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
       minHeight: density.tapMinHeightSm,
       paddingHorizontal: 16,
       paddingVertical: 7,
-      borderRadius: radii.full,
+      borderRadius: radii.lg,
     },
     lg: {
       minHeight: density.tapMinHeightCrisis,

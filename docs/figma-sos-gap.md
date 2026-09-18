@@ -1,25 +1,26 @@
-# Gap: Figma → SOS (UX only)
+# Gap: Figma Make zip → SOS
 
-Дата: 2026-09-18 · `3328:396` `screen-sos` → `/(tabs)/sos`
+Дата: 2026-09-18 · zip `code-18.txt` → `/(tabs)/sos`
+
+Канон композиции — **Figma Make zip**, не live-фрейм `3328:396`.
 
 ## Победители
 
 | Слой | Источник |
 |------|----------|
-| UI / center CTA / passport | Figma |
+| UI / круг / паспорт | zip |
 | Call, geo, PDF, contacts, crisis | текущий код |
 
 ## Каркас
 
-| Figma | Код |
-|-------|-----|
-| screen-header | `TabScreenHeader` |
-| sos-button-wrapper 180 + sos-inner-circle 140 | `SosEmergencyBar` center circle (`sos-crisis-call`) |
-| warning-disclaimer | `sos.disclaimerShort` под кругом |
-| passport-card | profile/passport cards |
-| — | crisis plan, grades, notes, tip (ниже) |
-| — | contact row / all-contacts под кругом (продукт) |
+| Zip | Код |
+|-----|-----|
+| title «Экстренная помощь» | `ScreenHeader` + `sos.emergencyTitle` |
+| круг 160 `danger` + «SOS» / «Нажмите для вызова» / «Вызвать скорую помощь» | `SosEmergencyBar` (`sos-crisis-call`) |
+| паспорт ФИО / аллергены / лекарства / контакт | zip passport card (`sos-profile-card`) |
+| нет SOS-control в таббаре | SOS — пятый равный таб, `danger` только на лейбле |
+| нет профиля | тот же круг, hint `sos.emptyProfile` вместо EmptyState-блокера; `sos-crisis-plan` жив |
 
 ## Не трогаем
 
-`sos-crisis-call`, passport edit, contacts, share/PDF.
+`sos-crisis-call`, `sos-crisis-plan`, passport edit, contacts, share/PDF.

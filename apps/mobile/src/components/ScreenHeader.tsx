@@ -1,8 +1,8 @@
 import { useMemo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { radii } from '@/src/constants/layout';
-import { fontSizes, lineHeights, textStyles, tracking } from '@/src/constants/typography';
+import { radii, space } from '@/src/constants/layout';
+import { fontSizes, lineHeights, tracking } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -37,23 +37,25 @@ export function ScreenHeader({
 
   return (
     <View style={[styles.wrap, style]} collapsable={false}>
-      {onBack ? (
-        <Pressable
-          testID="screen-header-back"
-          style={styles.backBtn}
-          onPress={onBack}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={backAccessibilityLabel ?? t('common.back')}>
-          <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
-        </Pressable>
-      ) : null}
-      <View style={styles.textWrap} accessibilityRole="header">
-        {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <View testID={titleTestID} collapsable={false}>
-          <Text style={styles.title}>{title}</Text>
+      <View style={styles.left}>
+        {onBack ? (
+          <Pressable
+            testID="screen-header-back"
+            style={styles.backBtn}
+            onPress={onBack}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={backAccessibilityLabel ?? t('common.back')}>
+            <Ionicons name="chevron-back" size={22} color={theme.colors.text} />
+          </Pressable>
+        ) : null}
+        <View style={styles.textWrap} accessibilityRole="header">
+          {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
+          <View testID={titleTestID} collapsable={false}>
+            <Text style={styles.title}>{title}</Text>
+          </View>
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
-        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
       {linkLabel && onLinkPress ? (
         <Pressable onPress={onLinkPress} hitSlop={8}>
@@ -69,22 +71,27 @@ function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     wrap: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       justifyContent: 'space-between',
-      gap: 12,
+      paddingVertical: space[3],
+      paddingHorizontal: space[5],
       flexShrink: 0,
+    },
+    left: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      flex: 1,
     },
     backBtn: {
       width: 40,
       height: 40,
-      borderRadius: radii.sm,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.border,
+      borderRadius: radii.full,
+      backgroundColor: colors.surfaceMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    textWrap: { flex: 1, gap: 4 },
+    textWrap: { flex: 1, gap: 2 },
     eyebrow: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.caption,
@@ -95,13 +102,18 @@ function createStyles({ colors, fonts }: AppTheme) {
       letterSpacing: tracking.label,
     },
     title: {
-      ...textStyles.h1,
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h3,
+      lineHeight: lineHeights.h3,
       fontWeight: '700',
       color: colors.head,
     },
     subtitle: {
-      ...textStyles.bodySm,
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       color: colors.textSecondary,
+      marginTop: 2,
     },
     link: {
       fontFamily: fonts.sansSemiBold,
@@ -109,7 +121,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       lineHeight: lineHeights.bodySm,
       fontWeight: '600',
       color: colors.head,
-      marginTop: 8,
     },
   });
 }

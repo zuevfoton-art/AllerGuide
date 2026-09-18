@@ -5,22 +5,15 @@ import {
   latestDiaryTimestamp,
   calendarDaysBetween,
   resolveReturnStage,
-  shiftImmuneBalanceDay,
   startOfLocalDay,
   type DiaryEntry,
 } from '@allerguide/core';
-import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
-import { DailyReadingCard } from '@/src/components/DailyReadingCard';
-import { WeekRingCard } from '@/src/components/WeekRingCard';
 import { ImmuneBalanceCard } from '@/src/components/ImmuneBalanceCard';
-import { ImmuneBalanceStatusSheet } from '@/src/components/ImmuneBalanceStatusSheet';
+import { WellnessSummary } from '@/src/components/WellnessSummary';
 import {
-  buildTodayReading,
-  formatBalanceDayLabel,
   formatTodayDate,
-  hasCheckedInToday,
 } from '@/src/services/today-reading-service';
-import { trackReturnAction, trackReturnShown } from '@/src/services/reengagement-service';
+import { trackReturnShown } from '@/src/services/reengagement-service';
 import { fetchWellnessSnapshot, type WellnessSnapshot } from '@/src/services/wellness-service';
 import { getCurrentLocation } from '@/src/services/location-service';
 import { syncPollenReminderForProfile } from '@/src/services/pollen-reminder-service';
@@ -28,42 +21,39 @@ import { getProfileCapabilities } from '@/src/services/profile-capabilities-serv
 import {
   buildHomeInsightItems,
   loadDiaryEntriesForHome,
-  type HomeInsightItem,
 } from '@/src/services/home-insights-service';
 import { useAppStore } from '@/src/store/app-store';
 import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
-import { GlassCard } from '@/src/components/GlassCard';
-import { TabScreenHeader } from '@/src/components/TabScreenHeader';
-import { TierScale } from '@/src/components/TierScale';
-import { CardTitle } from '@/src/components/CardTitle';
 import { SkeletonCard } from '@/src/components/Skeleton';
-import { Button } from '@/src/components/Button';
-import { Disclaimer } from '@/src/components/Disclaimer';
-import { BrandTabIcon, BrandFeatureIcon } from '@/src/components/brand/BrandTabIcon';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { radii, space } from '@/src/constants/layout';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
-import { useTranslation } from '@/src/store/locale-store';
-import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { getProfileReassessmentHints } from '@/src/services/clinical-phenotype-service';
 import { getDiaryEntries } from '@/src/services/diary-service';
 import { getPrescribedCourse } from '@/src/services/prescribed-therapy-service';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { density, radii, space } from '@/src/constants/layout';
+import { fontSizes, lineHeights, scaledTextProps } from '@/src/constants/typography';
+import { useTranslation } from '@/src/store/locale-store';
+
+function profileInitials(name?: string): string {
+  if (!name) return 'AG';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale } = useTranslation();
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const profile = useAppStore((s) => s.activeProfile);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([]);
-  const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay(new Date()));
-  const [statusOpen, setStatusOpen] = useState(false);
+  const selectedDay = useMemo(() => startOfLocalDay(new Date()), []);
   const prescribedCourse = activeProfileId ? getPrescribedCourse(activeProfileId) : null;
 
   const [capabilitiesTick, setCapabilitiesTick] = useState(0);
@@ -97,10 +87,6 @@ export default function HomeScreen() {
     void loadDiaryEntriesForHome(activeProfileId).then(setDiaryEntries);
   }, [reloadWellness, activeProfileId]);
 
-  useEffect(() => {
-    void reloadWellness();
-  }, [selectedDay, reloadWellness]);
-
   useFocusEffect(
     useCallback(() => {
       setCapabilitiesTick((tick) => tick + 1);
@@ -123,13 +109,6 @@ export default function HomeScreen() {
     );
   }, [wellness, activeProfileId, profile, profileCapabilities]);
 
-  const pollenColors = wellness
-    ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.pollenTier), theme.colors)
-    : null;
-  const airColors = wellness
-    ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.airTier), theme.colors)
-    : null;
-
   const phenotypeHints = useMemo(
     () => (profile ? getProfileReassessmentHints(profile) : []),
     [profile],
@@ -140,16 +119,7 @@ export default function HomeScreen() {
     [diaryEntries],
   );
 
-  const checkedInToday = useMemo(() => hasCheckedInToday(diaryEntries), [diaryEntries]);
   const dateLabel = useMemo(() => formatTodayDate(locale), [locale]);
-  const balanceDayLabel = useMemo(
-    () => formatBalanceDayLabel(locale, selectedDay, t),
-    [locale, selectedDay, t],
-  );
-  const reading = useMemo(
-    () => buildTodayReading({ profile, wellness, t }),
-    [profile, wellness, t],
-  );
 
   const insights = useMemo(
     () =>
@@ -174,10 +144,6 @@ export default function HomeScreen() {
       t,
     ],
   );
-  const [insightsExpanded, setInsightsExpanded] = useState(false);
-  const displayedInsights = insightsExpanded
-    ? [...insights.items, ...insights.collapsedItems]
-    : insights.items;
 
   useEffect(() => {
     if (!returnStage) return;
@@ -186,8 +152,18 @@ export default function HomeScreen() {
     trackReturnShown(returnStage, gap, 'home');
   }, [returnStage, diaryEntries]);
 
+  const greeting = profile?.name
+    ? t('home.greeting', { name: profile.name })
+    : t('home.greetingAnon');
+  const recs = insights.items.slice(0, 2);
+  const pollenValue =
+    wellness?.display.pollenValue != null ? wellness.display.pollenValue.toFixed(1) : '—';
+  const aqiValue = wellness?.display.pm25 != null ? String(Math.round(wellness.display.pm25)) : '—';
+  const symptomValue = wellness ? String(wellness.display.symptomDays) : '—';
+
   return (
     <Screen
+      showBrandHeader={false}
       onRefresh={
         activeProfileId
           ? () => {
@@ -196,381 +172,241 @@ export default function HomeScreen() {
             }
           : undefined
       }
-      refreshing={wellnessState.refreshing}
-      brandHeaderRight={
-        <>
-          <ProfileHeaderButton
-            variant="chip"
-            chipTitle={profile?.name}
-            destination="hub"
-            hintAnchorId="home.profile"
-          />
-          <Pressable
-            onPress={() => router.push('/(tabs)/sos')}
-            style={styles.sosBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('tabs.sos')}
-            hitSlop={8}>
-            <BrandTabIcon name="sos" size={20} color={theme.colors.danger} />
-          </Pressable>
-        </>
-      }>
-
-      <TabScreenHeader eyebrow={dateLabel} title={t('tabs.today')} />
+      refreshing={wellnessState.refreshing}>
+      <View style={styles.topHeader}>
+        <View style={styles.greetingBlock}>
+          <Text {...scaledTextProps} style={styles.greeting}>
+            {greeting}
+          </Text>
+          <Text {...scaledTextProps} style={styles.date}>
+            {dateLabel}
+          </Text>
+        </View>
+        <HintAnchor id="home.profile">
+        <Pressable
+          testID="profile-header-button"
+          onPress={() => router.push('/profile')}
+          style={styles.avatar}
+          accessibilityRole="button"
+          accessibilityLabel={t('home.selectProfile')}>
+          <Text style={styles.avatarText}>{profileInitials(profile?.name)}</Text>
+        </Pressable>
+        </HintAnchor>
+      </View>
 
       {loadingWellness && !wellness ? (
         <>
           <SkeletonCard hero lines={3} />
           <SkeletonCard lines={3} />
-          <SkeletonCard lines={2} />
         </>
       ) : wellness ? (
         <HintAnchor id="home.wellness" testID="home-wellness-kpi">
-          <ImmuneBalanceCard
-            wellness={wellness}
-            selectedDay={selectedDay}
-            dayLabel={balanceDayLabel}
-            onShiftDay={(delta) => setSelectedDay((day) => shiftImmuneBalanceDay(day, delta))}
-            onOpenStatus={() => setStatusOpen(true)}
-          />
+          <ImmuneBalanceCard wellness={wellness} />
         </HintAnchor>
-      ) : (
-        <HintAnchor id="home.wellness" testID="home-wellness-kpi">
-          <DailyReadingCard reading={reading} />
-        </HintAnchor>
-      )}
-
-      {activeProfileId && !(loadingWellness && !wellness) ? (
-        <>
-          <View style={styles.bubbleRow}>
-            <DailyReadingCard reading={reading} compact />
-            <QuickCheckInCard
-              profileId={activeProfileId}
-              checkedInToday={checkedInToday}
-              onSaved={reloadHomeData}
-              compact
-            />
-          </View>
-          <WeekRingCard entries={diaryEntries} surface="today" />
-        </>
       ) : null}
 
       {wellness ? (
-      <GlassCard variant="soft">
-        <CardTitle>{t('home.factors')}</CardTitle>
-        <Pressable
-          testID="home-factor-pollen"
-          onPress={() => router.push('/(tabs)/map?layer=pollen')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.factorOpenPollen')}
-          style={ui.kpiRow}>
-          <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
-          <View style={styles.factorValue}>
-            <TierScale
-              activeIndex={verbalTierIndex(wellness.display.pollenTier)}
-              zone={zoneFromWellnessVerbalTier(wellness.display.pollenTier)}
-            />
-            <Text style={[ui.kpiValue, pollenColors ? { color: pollenColors.fg } : null]}>
-              {t(`wellness.pollen.${wellness.display.pollenTier}`)}
-            </Text>
-          </View>
-        </Pressable>
-        <Pressable
-          testID="home-factor-air"
-          onPress={() => router.push('/(tabs)/map?layer=air')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.factorOpenAir')}
-          style={ui.kpiRow}>
-          <Text style={ui.kpiLabel}>{t('home.air')}</Text>
-          <View style={styles.factorValue}>
-            <TierScale
-              activeIndex={verbalTierIndex(wellness.display.airTier)}
-              zone={zoneFromWellnessVerbalTier(wellness.display.airTier)}
-            />
-            <Text style={[ui.kpiValue, airColors ? { color: airColors.fg } : null]}>
-              {t(`wellness.air.${wellness.display.airTier}`)}
-            </Text>
-          </View>
-        </Pressable>
-        <Pressable
-          testID="home-factor-diary"
-          onPress={() => router.push('/(tabs)/diary')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.factorOpenDiary')}
-          style={ui.kpiRow}>
-          <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
-          <View style={styles.factorValue}>
-            <TierScale
-              activeIndex={verbalTierIndex(wellness.display.diaryTier)}
-              zone={zoneFromWellnessVerbalTier(wellness.display.diaryTier)}
-            />
-            <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
-          </View>
-        </Pressable>
-        {wellness.rings.clinical != null ? (
-          <Pressable
-            testID="home-factor-clinical"
-            onPress={() => router.push('/clinical-scales')}
-            accessibilityRole="button"
-            accessibilityLabel={t('home.factorOpenClinical')}
-            style={ui.kpiRow}>
-            <Text style={ui.kpiLabel}>{t('home.clinical')}</Text>
-            <Text style={ui.kpiValue}>{wellness.rings.clinical}%</Text>
-          </Pressable>
-        ) : null}
-      </GlassCard>
+        <WellnessSummary
+          testID="home-wellness-summary"
+          title={t('home.wellnessSummary')}
+          items={[
+            {
+              label: t('home.pollenIndex'),
+              value: pollenValue,
+              color: theme.colors.ringMedicine,
+            },
+            {
+              label: t('home.airQuality'),
+              value: aqiValue,
+              unit: 'AQI',
+              color: theme.colors.accent,
+            },
+            {
+              label: t('home.symptoms'),
+              value: symptomValue,
+              color: theme.colors.ringAllergen,
+            },
+          ]}
+        />
       ) : null}
 
-      <ImmuneBalanceStatusSheet
-        visible={statusOpen}
-        wellness={wellness}
-        onClose={() => setStatusOpen(false)}
-      />
-
-      {loadingWellness && !wellness ? null : (
-      <>
       <HintAnchor id="home.insights" testID="home-insights">
-      <GlassCard padded={false}>
-        <View style={[styles.listHead, styles.listHeadPad]}>
-          <CardTitle>{t('home.insightsTitle')}</CardTitle>
+        <View style={styles.section}>
+          <Text {...scaledTextProps} style={styles.blockHeading}>
+            {t('home.insightsTitle')}
+          </Text>
+          {recs.length === 0 ? (
+            <Text style={styles.emptyRecs}>{t('home.insightsEmpty')}</Text>
+          ) : (
+            recs.map((item) => (
+              <View key={item.id} style={styles.recCard}>
+                <Ionicons
+                  name={item.icon as keyof typeof Ionicons.glyphMap}
+                  size={22}
+                  color={theme.colors.accent}
+                />
+                <View style={styles.recText}>
+                  <Text {...scaledTextProps} style={styles.recTitle}>
+                    {item.title}
+                  </Text>
+                  <Text {...scaledTextProps} style={styles.recDesc}>
+                    {item.text}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
         </View>
-        {displayedInsights.length === 0 ? (
-          <View style={styles.emptyInsights}>
-            <Text style={styles.emptyInsightsText}>{t('home.insightsEmpty')}</Text>
-          </View>
-        ) : (
-          <>
-            {displayedInsights.map((item, index) => (
-              <InsightRow
-                key={item.id}
-                item={item}
-                bordered={
-                  index < displayedInsights.length - 1 ||
-                  (!insightsExpanded && insights.collapsedCount > 0)
-                }
-                styles={styles}
-                ui={ui}
-                theme={theme}
-              />
-            ))}
-            {insights.collapsedCount > 0 ? (
-              <Pressable
-                testID="home-insights-more"
-                style={styles.moreInsights}
-                onPress={() => setInsightsExpanded((open) => !open)}
-                accessibilityRole="button"
-                accessibilityLabel={t('home.insightsMore', { count: insights.collapsedCount })}>
-                <Text style={styles.moreInsightsText}>
-                  {insightsExpanded
-                    ? t('home.insightsCollapse')
-                    : t('home.insightsMore', { count: insights.collapsedCount })}
-                </Text>
-              </Pressable>
-            ) : null}
-          </>
-        )}
-      </GlassCard>
       </HintAnchor>
 
-      <GlassCard padded={false}>
-        <Pressable
-          style={styles.expertRow}
-          onPress={() => router.push('/expert')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.expert')}>
-          <View style={styles.expertIcon}>
-            <BrandFeatureIcon name="expert" size={20} color={theme.colors.textSecondary} />
+      <View style={styles.section}>
+        <Text {...scaledTextProps} style={styles.blockHeading}>
+          {t('home.expert')}
+        </Text>
+        <View style={styles.expertCard}>
+          <View style={styles.expertAvatar}>
+            <Text style={styles.expertAvatarText}>{t('home.expertInitials')}</Text>
           </View>
-          <View style={styles.expertBody}>
-            <Text style={ui.feedTitle}>{t('home.expert')}</Text>
-            <Text style={ui.feedSub}>{t('more.expertDesc')}</Text>
+          <View style={styles.expertInfo}>
+            <Text {...scaledTextProps} style={styles.expertName}>
+              {t('home.expertName')}
+            </Text>
+            <Text {...scaledTextProps} style={styles.expertSpecialty}>
+              {t('home.expertSpecialty')}
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
-        </Pressable>
-      </GlassCard>
-      </>
-      )}
-
-      <Disclaimer compact>{t('home.disclaimerShort')}</Disclaimer>
-    </Screen>
-  );
-}
-
-function InsightRow({
-  item,
-  bordered,
-  styles,
-  ui,
-  theme,
-}: {
-  item: HomeInsightItem;
-  bordered: boolean;
-  styles: ReturnType<typeof createStyles>;
-  ui: ReturnType<typeof useUiStyles>;
-  theme: AppTheme;
-}) {
-  return (
-    <View style={[styles.listRow, bordered && styles.listRowBorder]}>
-      <View style={ui.feedIcon}>
-        <Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={16} color={theme.colors.textSecondary} />
-      </View>
-      <View style={ui.feedBody}>
-        <Text style={ui.feedTitle}>{item.title}</Text>
-        <Text style={ui.feedSub}>{item.text}</Text>
-      </View>
-      {item.action || item.extraAction ? (
-        <View style={styles.insightActions}>
-          {item.action ? (
-            <Button
-              label={item.action.label}
-              variant="ghost"
-              size="sm"
-              onPress={() => {
-                if (item.kind.startsWith('return-')) {
-                  trackReturnAction(item.kind.replace('return-', '') as never, 'cta');
-                }
-                router.push(item.action!.href as never);
-              }}
-            />
-          ) : null}
-          {item.extraAction ? (
-            <Button
-              label={item.extraAction.label}
-              variant="ghost"
-              size="sm"
-              onPress={() => {
-                if (item.kind.startsWith('return-')) {
-                  trackReturnAction(item.kind.replace('return-', '') as never, 'extra');
-                }
-                router.push(item.extraAction!.href as never);
-              }}
-            />
-          ) : null}
+          <Pressable
+            onPress={() => router.push('/expert')}
+            style={styles.expertBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.expertBook')}
+            hitSlop={8}>
+            <Text style={styles.expertBtnText}>{t('home.expertBook')}</Text>
+          </Pressable>
         </View>
-      ) : null}
-    </View>
+      </View>
+    </Screen>
   );
 }
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    sosBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: radii.sm,
-      backgroundColor: colors.dangerLight,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.dangerBorder,
-    },
-    heroKpiLeft: { gap: 8 },
-    heroKpiLabel: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.head,
-    },
-    statusPhrase: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.head,
-    },
-    envHint: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textSecondary,
-    },
-    detailsToggle: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.head,
-      marginTop: 10,
-    },
-    interpret: {
-      fontFamily: fonts.sans,
-      fontSize: 13,
-      color: colors.textSecondary,
-      lineHeight: 18,
-      marginTop: 10,
-      paddingTop: 10,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-    },
-    detailBlock: {
-      marginTop: 8,
-      gap: 2,
-    },
-    detailExact: {
-      fontFamily: fonts.sans,
-      fontSize: 12,
-      color: colors.textMuted,
-    },
-    listHead: {
+    topHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      paddingVertical: space[2],
     },
-    listHeadPad: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
-    listRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
+    greetingBlock: { flex: 1, paddingRight: space[3] },
+    greeting: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h2,
+      lineHeight: lineHeights.h2,
+      fontWeight: '700',
+      color: colors.head,
     },
-    listRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    insightActions: { gap: 4, alignItems: 'flex-end' },
-    emptyInsights: {
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-    },
-    emptyInsightsText: {
+    date: {
       fontFamily: fonts.sans,
-      fontSize: 13,
+      fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
       color: colors.textSecondary,
-      lineHeight: 18,
+      marginTop: space[1],
     },
-    moreInsights: {
-      minHeight: 44,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
+    avatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    moreInsightsText: {
+    avatarText: {
       fontFamily: fonts.sansSemiBold,
-      fontSize: 14,
+      fontSize: fontSizes.body,
+      fontWeight: '600',
+      color: colors.onAccent,
+    },
+    section: { gap: space[3], paddingTop: space[2] },
+    blockHeading: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h4,
+      lineHeight: lineHeights.h4,
+      fontWeight: '700',
+      color: colors.head,
+    },
+    emptyRecs: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.bodySm,
+      color: colors.textSecondary,
+      lineHeight: lineHeights.bodySm,
+    },
+    recCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      backgroundColor: colors.card,
+      borderRadius: radii.xl,
+      padding: density.cardPadding,
+    },
+    recText: { flex: 1, gap: space[1] },
+    recTitle: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.body,
       fontWeight: '600',
       color: colors.head,
     },
-    expertRow: {
+    recDesc: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.label,
+      color: colors.textSecondary,
+    },
+    expertCard: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
+      gap: space[3],
+      backgroundColor: colors.card,
+      borderRadius: radii.xl,
+      padding: density.cardPadding,
     },
-    expertIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 8,
+    expertAvatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
       backgroundColor: colors.surfaceMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    expertBody: { flex: 1, gap: 2 },
-    factorValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    bubbleRow: { flexDirection: 'row', gap: space[3], alignItems: 'stretch' },
+    expertAvatarText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.body,
+      fontWeight: '600',
+      color: colors.accent,
+    },
+    expertInfo: { flex: 1, gap: 2 },
+    expertName: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.body,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    expertSpecialty: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.label,
+      color: colors.textSecondary,
+    },
+    expertBtn: {
+      backgroundColor: colors.accent,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: radii.lg,
+      minHeight: density.tapMinHeightSm,
+      justifyContent: 'center',
+    },
+    expertBtnText: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.label,
+      fontWeight: '600',
+      color: colors.onAccent,
+    },
   });
-}
-
-function verbalTierIndex(tier: string): number {
-  if (tier === 'none') return 0;
-  if (tier === 'low') return 1;
-  if (tier === 'moderate') return 2;
-  if (tier === 'high') return 3;
-  return 0;
 }

@@ -89,7 +89,8 @@ Offline по умолчанию. Сеть — за `EXPO_PUBLIC_*` флагам�
 | Crash reporting | `error-reporting.ts` + `error-tracker-url.js` + [`glitchtip.tf`](../infra/yandex/staging/glitchtip.tf) + compose [`infra/yandex/staging/glitchtip/`](../infra/yandex/staging/glitchtip/) · [`staging-glitchtip.md`](./staging-glitchtip.md) |
 | Staging APK / EAS Free-plan quota | [`.github/workflows/eas-staging-android.yml`](../.github/workflows/eas-staging-android.yml) + [`scripts/eas-android-quota.sh`](../scripts/eas-android-quota.sh); Gradle fallback [`staging-apk-gradle.yml`](../.github/workflows/staging-apk-gradle.yml) · [`android-stage-build.md`](./android-stage-build.md) |
 | Staging YC CLI auth in Actions | [`scripts/yc-ci-configure.sh`](../scripts/yc-ci-configure.sh) + [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml) (`profile create github` before SA key; yc 1.35.1) |
-| UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) |
+| UI / токены / a11y | `constants/{theme,layout,typography,motion}.ts` + `components/*`; skill `product-designer`; `docs/brand-claro-green.md`; Variables [`figma/tokens.json`](./figma/tokens.json); планы [`wellness-design-plan.md`](./wellness-design-plan.md) · [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) |
+| Figma inventory (код → макеты) | [`figma-code-to-figma.md`](./figma-code-to-figma.md) · [`figma/screen-inventory.md`](./figma/screen-inventory.md) · [`figma/screen-specs.md`](./figma/screen-specs.md) · [`figma/tokens.json`](./figma/tokens.json); обратно в код — [`figma-handoff.md`](./figma-handoff.md) |
 | Reminder copy/schedule | `notification-*-service` + core `*-reminder` / `reminder-policy` |
 | Maestro E2E | `apps/mobile/.maestro/` · [`maestro.md`](./maestro.md) |
 | CJM / сценарии профиля и дневника | [`cjm-profile-diary.md`](./cjm-profile-diary.md) |
@@ -150,7 +151,7 @@ src/modules/marketplace/
 | `index.tsx` | Bootstrap: `initDb` → auth → onboarding/home |
 | `_layout.tsx` | Root stack, fonts, i18n, ErrorBoundary, AppLockGate |
 | `(tabs)/_layout.tsx` | 4 вкладки (Сегодня, Журнал, Скан, Карта) + SOS control; маркет не вкладка |
-| `(tabs)/home.tsx` | Сегодня: кольца иммунного баланса, компактные бабблы «Сегодня» / «Самочувствие», факторы-действия, кольцо недели, home-insights |
+| `(tabs)/home.tsx` | Сегодня: кольца иммунного баланса + «Подробнее» (factors в sheet), бабблы reading / check-in smileys, home-insights; week-ring на diary |
 | `(tabs)/diary.tsx` | Журнал: picker «Новая запись», «Настроить курс», история; курсы терапии/АСИТ — через модалку |
 | `clinical-scales.tsx` | Клинические шкалы (не в ленте дневника) |
 | `(tabs)/scanner.tsx` | Штрихкод / фото / текст / OCR |
@@ -381,8 +382,8 @@ Barrel: `index.ts`. Pure TS.
 | Wellness-дизайн (типографика, плотность, возвращение) | [`wellness-design-plan.md`](./wellness-design-plan.md) · [`ux-audit-2026-08.md`](./ux-audit-2026-08.md) · [`ux-improvement-plan.md`](./ux-improvement-plan.md) |
 | Wellness UX north-star (IA 4 таба + SOS, фазы N0–N10) | [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · макет [`wellness-ux-north-star.html`](./wellness-ux-north-star.html) |
 | Wellness UX v2 concepts (≤2 тапа, criticality, 3 палитры) | [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · макет [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html) |
-| Экранные формы (HTML + Cursor Canvas) | [`screens/README.md`](./screens/README.md) · [`screens/board.html`](./screens/board.html) |
-| Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`figma-handoff.md`](./figma-handoff.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
+| Экранные формы (HTML + Cursor Canvas) | [`screens/README.md`](./screens/README.md) · [`screens/board.html`](./screens/board.html) · код→Figma [`figma/`](./figma/) |
+| Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`figma-handoff.md`](./figma-handoff.md) · [`figma-code-to-figma.md`](./figma-code-to-figma.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 | Freemium / PRO / IAP (план) | [`subscription-monetization-plan.md`](./subscription-monetization-plan.md) |
 
 ---

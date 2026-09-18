@@ -1,0 +1,725 @@
+{
+  "$metadata": {
+    "tokenSetOrder": [
+      "Claro/Light",
+      "Claro/Dark",
+      "Layout",
+      "Typography"
+    ],
+    "source": "docs/figma/tokens.json"
+  },
+  "Claro/Light": {
+    "bg": {
+      "$type": "color",
+      "$value": "#FDFBF9"
+    },
+    "card": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "accent": {
+      "$type": "color",
+      "$value": "#5B8C7A"
+    },
+    "accentLight": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "accentMid": {
+      "$type": "color",
+      "$value": "#B8CFC4"
+    },
+    "head": {
+      "$type": "color",
+      "$value": "#2C3531"
+    },
+    "text": {
+      "$type": "color",
+      "$value": "#2C3531"
+    },
+    "textSecondary": {
+      "$type": "color",
+      "$value": "#6B7C75"
+    },
+    "textMuted": {
+      "$type": "color",
+      "$value": "#6B7C75"
+    },
+    "border": {
+      "$type": "color",
+      "$value": "#E2E8F0"
+    },
+    "borderInput": {
+      "$type": "color",
+      "$value": "#CBD5E1"
+    },
+    "success": {
+      "$type": "color",
+      "$value": "#10B981"
+    },
+    "successLight": {
+      "$type": "color",
+      "$value": "#ECFDF5"
+    },
+    "successBorder": {
+      "$type": "color",
+      "$value": "#A7F3D0"
+    },
+    "danger": {
+      "$type": "color",
+      "$value": "#E53E3E"
+    },
+    "dangerLight": {
+      "$type": "color",
+      "$value": "#FED7D7"
+    },
+    "dangerBorder": {
+      "$type": "color",
+      "$value": "#FECACA"
+    },
+    "warning": {
+      "$type": "color",
+      "$value": "#F59E0B"
+    },
+    "warningLight": {
+      "$type": "color",
+      "$value": "#FEF3C7"
+    },
+    "warningBorder": {
+      "$type": "color",
+      "$value": "#FDE68A"
+    },
+    "warningText": {
+      "$type": "color",
+      "$value": "#B45309"
+    },
+    "caution": {
+      "$type": "color",
+      "$value": "#F97316"
+    },
+    "cautionLight": {
+      "$type": "color",
+      "$value": "#FFFBEB"
+    },
+    "cautionBorder": {
+      "$type": "color",
+      "$value": "#FDE68A"
+    },
+    "forest": {
+      "$type": "color",
+      "$value": "#2C3531"
+    },
+    "green": {
+      "$type": "color",
+      "$value": "#047857"
+    },
+    "mint": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "foam": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "cream": {
+      "$type": "color",
+      "$value": "#FDFBF9"
+    },
+    "onAccent": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "onDanger": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "purple": {
+      "$type": "color",
+      "$value": "#5D5FEF"
+    },
+    "pink": {
+      "$type": "color",
+      "$value": "#E11D48"
+    },
+    "tipBg": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "tipBorder": {
+      "$type": "color",
+      "$value": "#B8CFC4"
+    },
+    "tipText": {
+      "$type": "color",
+      "$value": "#3D6B5C"
+    },
+    "iconOnCard": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "scannerSafeBorder": {
+      "$type": "color",
+      "$value": "#A7F3D0"
+    },
+    "scannerDangerBorder": {
+      "$type": "color",
+      "$value": "#FECACA"
+    },
+    "scannerSafeIconBg": {
+      "$type": "color",
+      "$value": "#ECFDF5"
+    },
+    "scannerDangerIconBg": {
+      "$type": "color",
+      "$value": "#FED7D7"
+    },
+    "scannerSafeText": {
+      "$type": "color",
+      "$value": "#047857"
+    },
+    "overlay": {
+      "$type": "color",
+      "$value": "#2C3531"
+    },
+    "teal": {
+      "$type": "color",
+      "$value": "#5B8C7A"
+    },
+    "tealLight": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "surfaceMuted": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "surfaceDark": {
+      "$type": "color",
+      "$value": "#D1DED1"
+    },
+    "info": {
+      "$type": "color",
+      "$value": "#5B8C7A"
+    },
+    "infoLight": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "focusRing": {
+      "$type": "color",
+      "$value": "rgba(91,140,122,0.35)"
+    },
+    "skeletonBase": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "skeletonSheen": {
+      "$type": "color",
+      "$value": "#F7F5F2"
+    },
+    "mapLand": {
+      "$type": "color",
+      "$value": "#EAF2EA"
+    },
+    "mapRoad": {
+      "$type": "color",
+      "$value": "#C5D0C8"
+    },
+    "ringAllergen": {
+      "$type": "color",
+      "$value": "#EF4444"
+    },
+    "ringMedicine": {
+      "$type": "color",
+      "$value": "#F59E0B"
+    },
+    "severitySafe": {
+      "$type": "color",
+      "$value": "#10B981"
+    },
+    "severityMild": {
+      "$type": "color",
+      "$value": "#F59E0B"
+    },
+    "severityModerate": {
+      "$type": "color",
+      "$value": "#F97316"
+    },
+    "severitySevere": {
+      "$type": "color",
+      "$value": "#EF4444"
+    },
+    "severitySafeBg": {
+      "$type": "color",
+      "$value": "#D1FAE5"
+    },
+    "severityMildBg": {
+      "$type": "color",
+      "$value": "#FEF3C7"
+    },
+    "severityModerateBg": {
+      "$type": "color",
+      "$value": "#FFEDD5"
+    },
+    "severitySevereBg": {
+      "$type": "color",
+      "$value": "#FED7D7"
+    }
+  },
+  "Claro/Dark": {
+    "bg": {
+      "$type": "color",
+      "$value": "#0F1613"
+    },
+    "card": {
+      "$type": "color",
+      "$value": "#161D1A"
+    },
+    "accent": {
+      "$type": "color",
+      "$value": "#7BAF9A"
+    },
+    "accentLight": {
+      "$type": "color",
+      "$value": "#1A2E28"
+    },
+    "accentMid": {
+      "$type": "color",
+      "$value": "#5B8C7A"
+    },
+    "head": {
+      "$type": "color",
+      "$value": "#E8EDE9"
+    },
+    "text": {
+      "$type": "color",
+      "$value": "#F4F7F5"
+    },
+    "textSecondary": {
+      "$type": "color",
+      "$value": "#A8B5AF"
+    },
+    "textMuted": {
+      "$type": "color",
+      "$value": "#8A9892"
+    },
+    "border": {
+      "$type": "color",
+      "$value": "#2C3A35"
+    },
+    "borderInput": {
+      "$type": "color",
+      "$value": "#475569"
+    },
+    "success": {
+      "$type": "color",
+      "$value": "#34D399"
+    },
+    "successLight": {
+      "$type": "color",
+      "$value": "#064E3B"
+    },
+    "successBorder": {
+      "$type": "color",
+      "$value": "#065F46"
+    },
+    "danger": {
+      "$type": "color",
+      "$value": "#F87171"
+    },
+    "dangerLight": {
+      "$type": "color",
+      "$value": "#450A0A"
+    },
+    "dangerBorder": {
+      "$type": "color",
+      "$value": "#991B1B"
+    },
+    "warning": {
+      "$type": "color",
+      "$value": "#FBBF24"
+    },
+    "warningLight": {
+      "$type": "color",
+      "$value": "#451A03"
+    },
+    "warningBorder": {
+      "$type": "color",
+      "$value": "#92400E"
+    },
+    "warningText": {
+      "$type": "color",
+      "$value": "#FDE68A"
+    },
+    "caution": {
+      "$type": "color",
+      "$value": "#FB923C"
+    },
+    "cautionLight": {
+      "$type": "color",
+      "$value": "#431407"
+    },
+    "cautionBorder": {
+      "$type": "color",
+      "$value": "#9A3412"
+    },
+    "forest": {
+      "$type": "color",
+      "$value": "#E8EDE9"
+    },
+    "green": {
+      "$type": "color",
+      "$value": "#34D399"
+    },
+    "mint": {
+      "$type": "color",
+      "$value": "#1A2420"
+    },
+    "foam": {
+      "$type": "color",
+      "$value": "#1A2420"
+    },
+    "cream": {
+      "$type": "color",
+      "$value": "#0F1613"
+    },
+    "onAccent": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "onDanger": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "purple": {
+      "$type": "color",
+      "$value": "#818CF8"
+    },
+    "pink": {
+      "$type": "color",
+      "$value": "#FB7185"
+    },
+    "tipBg": {
+      "$type": "color",
+      "$value": "#1A2E28"
+    },
+    "tipBorder": {
+      "$type": "color",
+      "$value": "#5B8C7A"
+    },
+    "tipText": {
+      "$type": "color",
+      "$value": "#B8CFC4"
+    },
+    "iconOnCard": {
+      "$type": "color",
+      "$value": "#FFFFFF"
+    },
+    "scannerSafeBorder": {
+      "$type": "color",
+      "$value": "#065F46"
+    },
+    "scannerDangerBorder": {
+      "$type": "color",
+      "$value": "#991B1B"
+    },
+    "scannerSafeIconBg": {
+      "$type": "color",
+      "$value": "#064E3B"
+    },
+    "scannerDangerIconBg": {
+      "$type": "color",
+      "$value": "#450A0A"
+    },
+    "scannerSafeText": {
+      "$type": "color",
+      "$value": "#34D399"
+    },
+    "overlay": {
+      "$type": "color",
+      "$value": "#000000"
+    },
+    "teal": {
+      "$type": "color",
+      "$value": "#7BAF9A"
+    },
+    "tealLight": {
+      "$type": "color",
+      "$value": "#1A2E28"
+    },
+    "surfaceMuted": {
+      "$type": "color",
+      "$value": "#1A2420"
+    },
+    "surfaceDark": {
+      "$type": "color",
+      "$value": "#24302B"
+    },
+    "info": {
+      "$type": "color",
+      "$value": "#7BAF9A"
+    },
+    "infoLight": {
+      "$type": "color",
+      "$value": "#1A2E28"
+    },
+    "focusRing": {
+      "$type": "color",
+      "$value": "rgba(123,175,154,0.45)"
+    },
+    "skeletonBase": {
+      "$type": "color",
+      "$value": "#1A2420"
+    },
+    "skeletonSheen": {
+      "$type": "color",
+      "$value": "#24302B"
+    },
+    "mapLand": {
+      "$type": "color",
+      "$value": "#1A2420"
+    },
+    "mapRoad": {
+      "$type": "color",
+      "$value": "#2C3A35"
+    },
+    "ringAllergen": {
+      "$type": "color",
+      "$value": "#F87171"
+    },
+    "ringMedicine": {
+      "$type": "color",
+      "$value": "#FBBF24"
+    },
+    "severitySafe": {
+      "$type": "color",
+      "$value": "#34D399"
+    },
+    "severityMild": {
+      "$type": "color",
+      "$value": "#FBBF24"
+    },
+    "severityModerate": {
+      "$type": "color",
+      "$value": "#FB923C"
+    },
+    "severitySevere": {
+      "$type": "color",
+      "$value": "#F87171"
+    },
+    "severitySafeBg": {
+      "$type": "color",
+      "$value": "#064E3B"
+    },
+    "severityMildBg": {
+      "$type": "color",
+      "$value": "#451A03"
+    },
+    "severityModerateBg": {
+      "$type": "color",
+      "$value": "#431407"
+    },
+    "severitySevereBg": {
+      "$type": "color",
+      "$value": "#450A0A"
+    }
+  },
+  "Layout": {
+    "radii": {
+      "xs": {
+        "$type": "number",
+        "$value": 6
+      },
+      "sm": {
+        "$type": "number",
+        "$value": 6
+      },
+      "md": {
+        "$type": "number",
+        "$value": 8
+      },
+      "row": {
+        "$type": "number",
+        "$value": 12
+      },
+      "card": {
+        "$type": "number",
+        "$value": 16
+      },
+      "lg": {
+        "$type": "number",
+        "$value": 12
+      },
+      "xl": {
+        "$type": "number",
+        "$value": 16
+      },
+      "xxl": {
+        "$type": "number",
+        "$value": 24
+      },
+      "field": {
+        "$type": "number",
+        "$value": 12
+      },
+      "full": {
+        "$type": "number",
+        "$value": 999
+      }
+    },
+    "space": {
+      "1": {
+        "$type": "number",
+        "$value": 4
+      },
+      "2": {
+        "$type": "number",
+        "$value": 8
+      },
+      "3": {
+        "$type": "number",
+        "$value": 12
+      },
+      "4": {
+        "$type": "number",
+        "$value": 16
+      },
+      "5": {
+        "$type": "number",
+        "$value": 20
+      },
+      "6": {
+        "$type": "number",
+        "$value": 24
+      },
+      "8": {
+        "$type": "number",
+        "$value": 32
+      },
+      "12": {
+        "$type": "number",
+        "$value": 48
+      }
+    },
+    "density": {
+      "screenGap": {
+        "$type": "number",
+        "$value": 16
+      },
+      "cardPadding": {
+        "$type": "number",
+        "$value": 16
+      },
+      "kpiRowPaddingV": {
+        "$type": "number",
+        "$value": 8
+      },
+      "listRowPaddingV": {
+        "$type": "number",
+        "$value": 12
+      },
+      "pickerRowPaddingV": {
+        "$type": "number",
+        "$value": 8
+      },
+      "pickerRowGap": {
+        "$type": "number",
+        "$value": 6
+      },
+      "tapMinHeight": {
+        "$type": "number",
+        "$value": 44
+      },
+      "tapMinHeightSm": {
+        "$type": "number",
+        "$value": 36
+      },
+      "tapMinHeightPrimary": {
+        "$type": "number",
+        "$value": 48
+      },
+      "tapMinHeightSecondary": {
+        "$type": "number",
+        "$value": 48
+      },
+      "tapMinHeightCrisis": {
+        "$type": "number",
+        "$value": 60
+      },
+      "tapMinHeightFab": {
+        "$type": "number",
+        "$value": 56
+      }
+    }
+  },
+  "Typography": {
+    "families": {
+      "sans": {
+        "$type": "fontFamilies",
+        "$value": "Work Sans"
+      },
+      "serif": {
+        "$type": "fontFamilies",
+        "$value": "Work Sans"
+      },
+      "display": {
+        "$type": "fontFamilies",
+        "$value": "Work Sans"
+      }
+    },
+    "fontSize": {
+      "tabLabel": {
+        "$type": "number",
+        "$value": 10
+      },
+      "caption": {
+        "$type": "number",
+        "$value": 11
+      },
+      "label": {
+        "$type": "number",
+        "$value": 12
+      },
+      "bodySm": {
+        "$type": "number",
+        "$value": 13
+      },
+      "bodyMd": {
+        "$type": "number",
+        "$value": 14
+      },
+      "body": {
+        "$type": "number",
+        "$value": 14
+      },
+      "h4": {
+        "$type": "number",
+        "$value": 18
+      },
+      "h3": {
+        "$type": "number",
+        "$value": 20
+      },
+      "h2": {
+        "$type": "number",
+        "$value": 22
+      },
+      "h1": {
+        "$type": "number",
+        "$value": 28
+      },
+      "display": {
+        "$type": "number",
+        "$value": 32
+      },
+      "kpi": {
+        "$type": "number",
+        "$value": 36
+      }
+    },
+    "maxFontSizeMultiplier": {
+      "$type": "number",
+      "$value": 1.4
+    }
+  }
+}

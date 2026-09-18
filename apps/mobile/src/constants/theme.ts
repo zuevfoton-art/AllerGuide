@@ -11,7 +11,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
  * Claro Green design tokens — product accent family only (no medical blue / calm.*).
  * Keep hex values in sync with LIGHT_CLARO_TOKENS / DARK_CLARO_TOKENS in claro-gradient.ts.
  * Policy: docs/brand-claro-green.md
- * Light palette synced from Figma Izzy library `screen-dashboard` (node 3328:137), 2026-09-18.
+ * Light palette is 1:1 with Figma Make zip (`code.txt`) for screens-flow-map.
  * `caution*` — moderate diary severity (level 2); not part of Claro CTA family.
  */
 export type ThemeColors = {
@@ -69,6 +69,8 @@ export type ThemeColors = {
   /** @deprecated alias for accentLight */
   tealLight: string;
   surfaceMuted: string;
+  /** Zip `surfaceDark` — scanner cam fill / inactive dots */
+  surfaceDark: string;
   info: string;
   infoLight: string;
   focusRing: string;
@@ -78,6 +80,18 @@ export type ThemeColors = {
   mapLand: string;
   /** Map canvas stand-in stroke / road. */
   mapRoad: string;
+  /** Zip dashboard outer ring / allergen axis */
+  ringAllergen: string;
+  /** Zip dashboard mid ring / medicine axis */
+  ringMedicine: string;
+  severitySafe: string;
+  severityMild: string;
+  severityModerate: string;
+  severitySevere: string;
+  severitySafeBg: string;
+  severityMildBg: string;
+  severityModerateBg: string;
+  severitySevereBg: string;
 };
 
 export const lightColors: ThemeColors = {
@@ -88,33 +102,32 @@ export const lightColors: ThemeColors = {
   accentMid: '#B8CFC4',
   head: '#2C3531',
   text: '#2C3531',
-  /** Figma dashboard muted `#6B7C75`, nudged darker for WCAG AA on warm bg */
-  textSecondary: '#5F716B',
-  textMuted: '#5F716B',
+  /** Figma Make zip `textSecondary` — AA exception, do not nudge to #5F716B */
+  textSecondary: '#6B7C75',
+  textMuted: '#6B7C75',
   border: '#E2E8F0',
   borderInput: '#CBD5E1',
   success: '#10B981',
   successLight: '#ECFDF5',
   successBorder: '#A7F3D0',
   danger: '#E53E3E',
-  dangerLight: '#FEF2F2',
+  dangerLight: '#FED7D7',
   dangerBorder: '#FECACA',
-  warning: '#F97316',
-  warningLight: '#FFF7ED',
-  warningBorder: '#FED7AA',
-  warningText: '#C2410C',
-  caution: '#E8A317',
+  warning: '#F59E0B',
+  warningLight: '#FEF3C7',
+  warningBorder: '#FDE68A',
+  warningText: '#B45309',
+  caution: '#F97316',
   cautionLight: '#FFFBEB',
   cautionBorder: '#FDE68A',
   forest: '#2C3531',
   /** Text on successLight (calm zone) — darker than Figma ring fill `#10B981` for AA */
   green: '#047857',
-  mint: '#E4EBE4',
+  mint: '#EAF2EA',
   foam: '#EAF2EA',
   cream: '#FDFBF9',
   onAccent: '#FFFFFF',
   onDanger: '#FFFFFF',
-  /** Figma login accent tab (email) */
   purple: '#5D5FEF',
   pink: '#E11D48',
   tipBg: '#EAF2EA',
@@ -124,22 +137,33 @@ export const lightColors: ThemeColors = {
   scannerSafeBorder: '#A7F3D0',
   scannerDangerBorder: '#FECACA',
   scannerSafeIconBg: '#ECFDF5',
-  scannerDangerIconBg: '#FEF2F2',
+  scannerDangerIconBg: '#FED7D7',
   scannerSafeText: '#047857',
   overlay: '#2C3531',
   teal: '#5B8C7A',
   tealLight: '#EAF2EA',
   surfaceMuted: '#EAF2EA',
+  surfaceDark: '#D1DED1',
   info: '#5B8C7A',
   infoLight: '#EAF2EA',
   focusRing: 'rgba(91,140,122,0.35)',
-  skeletonBase: '#E4EBE4',
+  skeletonBase: '#EAF2EA',
   skeletonSheen: '#F7F5F2',
-  mapLand: '#E4EBE4',
+  mapLand: '#EAF2EA',
   mapRoad: '#C5D0C8',
+  ringAllergen: '#EF4444',
+  ringMedicine: '#F59E0B',
+  severitySafe: '#10B981',
+  severityMild: '#F59E0B',
+  severityModerate: '#F97316',
+  severitySevere: '#EF4444',
+  severitySafeBg: '#D1FAE5',
+  severityMildBg: '#FEF3C7',
+  severityModerateBg: '#FFEDD5',
+  severitySevereBg: '#FED7D7',
 };
 
-/** Dark companion — deep sage canvas, Figma dashboard accent family. */
+/** Dark companion — same roles as the zip light palette, not a second zip set. */
 export const darkColors: ThemeColors = {
   bg: '#0F1613',
   card: '#161D1A',
@@ -158,13 +182,13 @@ export const darkColors: ThemeColors = {
   danger: '#F87171',
   dangerLight: '#450A0A',
   dangerBorder: '#991B1B',
-  warning: '#FB923C',
-  warningLight: '#431407',
-  warningBorder: '#9A3412',
-  warningText: '#FED7AA',
-  caution: '#FBBF24',
-  cautionLight: '#451A03',
-  cautionBorder: '#92400E',
+  warning: '#FBBF24',
+  warningLight: '#451A03',
+  warningBorder: '#92400E',
+  warningText: '#FDE68A',
+  caution: '#FB923C',
+  cautionLight: '#431407',
+  cautionBorder: '#9A3412',
   forest: '#E8EDE9',
   green: '#34D399',
   mint: '#1A2420',
@@ -187,6 +211,7 @@ export const darkColors: ThemeColors = {
   teal: '#7BAF9A',
   tealLight: '#1A2E28',
   surfaceMuted: '#1A2420',
+  surfaceDark: '#24302B',
   info: '#7BAF9A',
   infoLight: '#1A2E28',
   focusRing: 'rgba(123,175,154,0.45)',
@@ -194,6 +219,16 @@ export const darkColors: ThemeColors = {
   skeletonSheen: '#24302B',
   mapLand: '#1A2420',
   mapRoad: '#2C3A35',
+  ringAllergen: '#F87171',
+  ringMedicine: '#FBBF24',
+  severitySafe: '#34D399',
+  severityMild: '#FBBF24',
+  severityModerate: '#FB923C',
+  severitySevere: '#F87171',
+  severitySafeBg: '#064E3B',
+  severityMildBg: '#451A03',
+  severityModerateBg: '#431407',
+  severitySevereBg: '#450A0A',
 };
 
 export function getThemeColors(isDark: boolean): ThemeColors {

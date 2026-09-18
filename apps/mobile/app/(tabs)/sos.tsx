@@ -2,11 +2,10 @@ import { Text, StyleSheet, Linking, Pressable, View } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Screen } from '@/src/components/Screen';
-import { TabScreenHeader } from '@/src/components/TabScreenHeader';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
 import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useHintTour } from '@/src/hooks/use-hint-tour';
 import { GlassCard } from '@/src/components/GlassCard';
-import { EmptyState } from '@/src/components/EmptyState';
 import { SosEmergencyBar } from '@/src/components/SosEmergencyBar';
 import { Button } from '@/src/components/Button';
 import { Disclaimer } from '@/src/components/Disclaimer';
@@ -17,15 +16,12 @@ import {
   BIPHASIC_WARNING,
   buildCrisisPlan,
   formatEpinephrineEligibilityHint,
-  getProfileAgeYears,
   listProfileAllergenChips,
-  pluralRu,
   type EmergencyContact,
 } from '@allerguide/core';
 import { radii } from '@/src/constants/layout';
 import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useAppStore } from '@/src/store/app-store';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeEmergencyRelation } from '@/src/i18n/content';
@@ -47,14 +43,12 @@ import { trackEvent } from '@/src/services/analytics-service';
 
 export default function SosScreen() {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t, locale, content } = useTranslation();
+  const { t, content } = useTranslation();
   useHintTour('sos');
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? listProfileAllergenChips(profile.allergies) : [];
-  const crossReactions = profile ? listProfileAllergenChips(profile.crossReactionAllergies) : [];
   const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [notes, setNotes] = useState('');
   const [actionPlan, setActionPlan] = useState('');
@@ -151,8 +145,8 @@ export default function SosScreen() {
   });
 
   return (
-    <Screen onRefresh={() => handleRefresh()} refreshing={refreshing}>
-      <TabScreenHeader eyebrow={t('sos.title')} title={t('sos.crisisTitle')} />
+    <Screen showBrandHeader={false} onRefresh={() => handleRefresh()} refreshing={refreshing}>
+      <ScreenHeader title={t('sos.emergencyTitle')} style={styles.screenHeader} />
 
       <View style={styles.sosCenter} testID="sos-center">
         <HintAnchor id="sos.call">
@@ -179,61 +173,52 @@ export default function SosScreen() {
             onAllContacts={
               contacts.length > 0 ? () => router.push('/sos-edit' as any) : undefined
             }
+            sosLabel={t('tabs.sos')}
+            pressHint={t('sos.pressToCall')}
+            callHint={t('sos.callAmbulance')}
           />
         </HintAnchor>
-        <Text style={styles.sosDisclaimer}>{t('sos.disclaimerShort')}</Text>
       </View>
 
-      {profile ? (
-        <>
-          <HintAnchor id="sos.passport">
-          <GlassCard testID="sos-profile-card">
-            <View style={ui.kpiRow}>
-              <Text style={ui.kpiLabel}>{t('sos.name')}</Text>
-              <Text style={ui.kpiValue}>{profile.name}</Text>
-            </View>
-            {profile.birthYear ? (
-              <View style={ui.kpiRow}>
-                <Text style={ui.kpiLabel}>{t('sos.age')}</Text>
-                <Text style={ui.kpiValue}>{formatSosAge(profile.birthYear, locale, t)}</Text>
-              </View>
-            ) : null}
-            {allergies.length > 0 ? (
-              <View style={[ui.kpiRow, styles.allergyRow]}>
-                <Text style={ui.kpiLabel}>{t('sos.allergies')}</Text>
-                <View style={styles.allergyChips}>
-                  {allergies.map((allergen) => (
-                    <View
-                      key={allergen.id}
-                      testID={`sos-allergy-chip-${allergen.id}`}
-                      style={styles.allergyChip}>
-                      <Text style={styles.allergyText}>{allergen.name}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ) : null}
-            {crossReactions.length > 0 ? (
-              <View
-                style={[ui.kpiRow, styles.allergyRow]}
-                testID="sos-cross-reactions-row">
-                <Text style={ui.kpiLabel}>{t('sos.crossReactions')}</Text>
-                <View style={styles.allergyChips}>
-                  {crossReactions.map((allergen) => (
-                    <View
-                      key={allergen.id}
-                      testID={`sos-cross-chip-${allergen.id}`}
-                      style={styles.allergyChip}>
-                      <Text style={styles.allergyText}>{allergen.name}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ) : null}
-          </GlassCard>
-          </HintAnchor>
-        </>
-      ) : null}
+      <HintAnchor id="sos.passport">
+      <GlassCard testID="sos-profile-card" style={styles.zipPassport}>
+        <View style={styles.passportHeader}>
+          <Ionicons name="id-card-outline" size={20} color={theme.colors.head} />
+          <Text style={styles.zipPassportTitle}>{t('sos.passportTitle')}</Text>
+        </View>
+        <View style={styles.passportRow}>
+          <Text style={styles.passportLabel}>{t('sos.passportName')}</Text>
+          <Text style={styles.passportValue}>{profile?.name ?? t('sos.emptyValue')}</Text>
+        </View>
+        <View style={styles.passportDivider} />
+        <View style={styles.passportRow}>
+          <Text style={styles.passportLabel}>{t('sos.allergies')}</Text>
+          <Text style={styles.passportValue}>
+            {allergies.length > 0 ? allergies.map((item) => item.name).join(', ') : t('sos.emptyValue')}
+          </Text>
+        </View>
+        <View style={styles.passportDivider} />
+        <View style={styles.passportRow}>
+          <Text style={styles.passportLabel}>{t('sos.passportMedicines')}</Text>
+          <Text style={styles.passportValue}>
+            {passport.epinephrine?.brand || t('sos.emptyValue')}
+          </Text>
+        </View>
+        <View style={styles.passportDivider} />
+        <View style={styles.passportRow}>
+          <Text style={styles.passportLabel}>{t('sos.passportContact')}</Text>
+          <Text style={styles.passportValue}>
+            {firstContact
+              ? `${firstContact.phone}${
+                  firstContact.relation
+                    ? ` (${localizeEmergencyRelation(firstContact.relation, localeContent)})`
+                    : ''
+                }`
+              : t('sos.emptyValue')}
+          </Text>
+        </View>
+      </GlassCard>
+      </HintAnchor>
 
       <GlassCard testID="sos-crisis-plan">
         <CardTitle>
@@ -409,13 +394,7 @@ export default function SosScreen() {
           )}
         </>
       ) : (
-        <EmptyState
-          icon="person-outline"
-          title={t('sos.emptyProfile')}
-          description={t('sos.emptyProfileHint')}
-          actionLabel={t('common.createProfile')}
-          onAction={() => router.push('/profile-setup?mode=add')}
-        />
+        <Text style={styles.hintText}>{t('sos.emptyProfile')}</Text>
       )}
 
       {contacts.length > 0 ? null : profile ? (
@@ -442,22 +421,6 @@ export default function SosScreen() {
   );
 }
 
-function formatSosAge(
-  birthYear: number,
-  locale: string,
-  t: (key: string, params?: Record<string, string | number>) => string,
-): string {
-  const years = getProfileAgeYears(birthYear);
-  if (years == null) return String(birthYear);
-  if (locale === 'ru') {
-    return t('sos.ageYears', {
-      n: years,
-      unit: pluralRu(years, t('sos.ageUnitOne'), t('sos.ageUnitFew'), t('sos.ageUnitMany')),
-    });
-  }
-  return t('sos.ageYears', { n: years });
-}
-
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     sosCenter: {
@@ -465,6 +428,22 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       marginBottom: 4,
     },
+    screenHeader: { paddingHorizontal: 0, paddingVertical: 4 },
+    zipPassport: { gap: 12 },
+    passportHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 4,
+    },
+    zipPassportTitle: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h4,
+      lineHeight: lineHeights.h4,
+      fontWeight: '700',
+      color: colors.head,
+    },
+    passportDivider: { height: 1, backgroundColor: colors.border },
     sosDisclaimer: {
       fontFamily: fonts.sans,
       fontSize: 13,

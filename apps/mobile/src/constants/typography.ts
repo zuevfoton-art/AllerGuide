@@ -1,16 +1,9 @@
 /**
- * Aclearo Refuge type stack:
- * - display (Fraunces) — screen H1 and the daily reading, the «journal» voice;
- * - sans (Inter) — every control, chip, form and tab label;
- * - serif (Source Serif 4) — secondary headings inside cards.
- *
- * Web loads the families by their CSS names via the `<link>` in `app/+html.tsx`,
- * so tokens resolve to a font stack there. Native keeps the per-weight
- * `@expo-google-fonts` file names (see `use-fonts.ts`).
+ * Figma Make zip type stack (`code-2.txt`): Work Sans for display, body, and UI.
+ * Web loads the family via the `<link>` in `app/+html.tsx`.
+ * Native keeps `@expo-google-fonts/work-sans` file names (see `use-fonts.ts`).
  */
-const SANS_WEB = 'Inter, system-ui, -apple-system, "Segoe UI", sans-serif';
-const SERIF_WEB = '"Source Serif 4", Georgia, serif';
-const DISPLAY_WEB = 'Fraunces, "Source Serif 4", Georgia, serif';
+const SANS_WEB = '"Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
 
 /** `document` stands in for `Platform.OS === 'web'`: this module must stay RN-free. */
 const isWeb = typeof document !== 'undefined';
@@ -20,50 +13,51 @@ function family(nativeName: string, webStack: string): string {
 }
 
 export const fonts = {
-  sans: family('Inter_400Regular', SANS_WEB),
-  sansMedium: family('Inter_500Medium', SANS_WEB),
-  sansSemiBold: family('Inter_600SemiBold', SANS_WEB),
-  sansBold: family('Inter_700Bold', SANS_WEB),
-  serif: family('SourceSerif4_600SemiBold', SERIF_WEB),
-  serifBold: family('SourceSerif4_700Bold', SERIF_WEB),
-  display: family('Fraunces_600SemiBold', DISPLAY_WEB),
-  displayBold: family('Fraunces_700Bold', DISPLAY_WEB),
+  sans: family('WorkSans_400Regular', SANS_WEB),
+  sansMedium: family('WorkSans_500Medium', SANS_WEB),
+  sansSemiBold: family('WorkSans_600SemiBold', SANS_WEB),
+  sansBold: family('WorkSans_700Bold', SANS_WEB),
+  serif: family('WorkSans_600SemiBold', SANS_WEB),
+  serifBold: family('WorkSans_700Bold', SANS_WEB),
+  display: family('WorkSans_600SemiBold', SANS_WEB),
+  displayBold: family('WorkSans_700Bold', SANS_WEB),
 } as const;
 
 export type AppFonts = typeof fonts;
 
 export const fontSizes = {
+  tabLabel: 10,
   caption: 11,
   label: 12,
   bodySm: 13,
   bodyMd: 14,
-  body: 15,
-  h4: 16,
-  h3: 18,
+  body: 14,
+  h4: 18,
+  h3: 20,
   h2: 22,
-  h1: 26,
+  h1: 28,
   display: 32,
   kpi: 36,
 } as const;
 
 /**
- * Comfortable line-heights: ~1.5 for body, ~1.25 for headings.
- * One token per font size so screens do not invent 18/19/20 literals.
+ * Zip leading: body 14/20, captions 11/16, headings ~1.2.
  */
 export const lineHeights = {
+  tabLabel: 12,
   caption: 16,
   label: 18,
-  bodySm: 20,
-  bodyMd: 21,
-  body: 22,
-  h4: 20,
-  h3: 22,
+  bodySm: 18,
+  bodyMd: 20,
+  body: 20,
+  h4: 24,
+  h3: 26,
   h2: 28,
-  h1: 32,
+  h1: 34,
   display: 40,
   kpi: 40,
   /** Reading paragraph — ≥1.5 so a long RU sentence stays calm. */
-  reading: 27,
+  reading: 30,
 } as const;
 
 export const tracking = {
@@ -99,13 +93,14 @@ export const textStyles = {
   bodySm: textStyle(fonts.sans, fontSizes.bodySm, lineHeights.bodySm),
   bodyMd: textStyle(fonts.sans, fontSizes.bodyMd, lineHeights.bodyMd),
   body: textStyle(fonts.sans, fontSizes.body, lineHeights.body),
-  h4: textStyle(fonts.sansSemiBold, fontSizes.h4, lineHeights.h4, tracking.normal, '600'),
-  h3: textStyle(fonts.serif, fontSizes.h3, lineHeights.h3, tracking.normal, '600'),
-  h2: textStyle(fonts.serif, fontSizes.h2, lineHeights.h2, tracking.tight, '600'),
-  h1: textStyle(fonts.displayBold, fontSizes.h1, lineHeights.h1, tracking.tight, '700'),
-  /** Daily reading paragraph — display face at body scale, north-star §4.7. */
-  reading: textStyle(fonts.display, fontSizes.h3, lineHeights.reading, tracking.normal, '600'),
+  h4: textStyle(fonts.sansBold, fontSizes.h4, lineHeights.h4, tracking.normal, '700'),
+  h3: textStyle(fonts.sansBold, fontSizes.h3, lineHeights.h3, tracking.normal, '700'),
+  h2: textStyle(fonts.sansBold, fontSizes.h2, lineHeights.h2, tracking.tight, '700'),
+  h1: textStyle(fonts.sansBold, fontSizes.h1, lineHeights.h1, tracking.tight, '700'),
+  /** Daily reading paragraph — Work Sans at h3 scale. */
+  reading: textStyle(fonts.sansSemiBold, fontSizes.h3, lineHeights.reading, tracking.normal, '600'),
   kpi: textStyle(fonts.sansBold, fontSizes.kpi, lineHeights.kpi, tracking.tight, '700'),
+  tabLabel: textStyle(fonts.sansMedium, fontSizes.tabLabel, lineHeights.tabLabel, tracking.normal, '500'),
 } as const;
 
 export type TextStyleName = keyof typeof textStyles;

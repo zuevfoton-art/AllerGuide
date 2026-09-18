@@ -3,7 +3,7 @@
 **Статус:** канон · supersedes Dual Calm (`brand-dual-calm.md` → redirect)  
 **Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts) · [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts) · Figma handoff [`figma-handoff.md`](./figma-handoff.md)
 
-**Синк с Figma (2026-09-18):** light-токены сняты с Izzy library frame `screens-flow-map` → **`screen-dashboard`** (`3328:137`, родитель `3328:11`). Типографика в макете: Work Sans + Inter; в приложении шрифты пока Inter (смена family — отдельный шаг).
+**Синк с Figma (2026-09-18):** light-токены и композиция zip (`code.txt` / `code-2` / `code-3`) для `screens-flow-map`. Типографика: **Work Sans**. `textSecondary` / `textMuted` light = zip `#6B7C75` (документированное AA-исключение, без сдвига в `#5F716B`).
 
 ---
 
@@ -36,8 +36,10 @@
 | Исключение | Почему |
 |------------|--------|
 | `danger` / SOS `#E53E3E` | Экстренный акцент (Figma SOS pill / tab) |
-| `success` `#10B981` / `warning` `#F97316` | Traffic-light зоны колец и KPI |
-| `head` charcoal `#2C3531` | Типографика / KPI (Figma wordmark & score) — не navy Dual Calm |
+| `success` `#10B981` / `warning` `#F59E0B` | Traffic-light зоны колец и KPI (zip) |
+| `head` charcoal `#2C3531` | Типографика / KPI — не navy Dual Calm |
+| `textSecondary` `#6B7C75` | Zip muted; AA exception on `#FDFBF9` / `#FFFFFF` |
+| `ringAllergen` `#EF4444` / `ringMedicine` `#F59E0B` | Zip dashboard rings |
 | Внешние тайлы карт (Google / Yandex) | Не бренд-токены |
 | Store / monogram на accent | Уже Claro |
 
@@ -54,21 +56,24 @@
 | `accentMid` | `#B8CFC4` | `#5B8C7A` | Soft borders (derived mid) |
 | `mint` | `#E4EBE4` | — | Ring tracks |
 | `head` / `text` | `#2C3531` | `#E8EDE9` / `#F4F7F5` | Заголовки и body |
-| `textMuted` | `#5F716B`† | `#8A9892` | Вторичный текст |
+| `textMuted` / `textSecondary` | `#6B7C75`† | `#8A9892` / `#A8B5AF` | Вторичный текст |
 | `border` | `#E2E8F0` | `#2C3A35` | Nav / card stroke |
 | `success` | `#10B981` | `#34D399` | Ring fill / chart safe |
 | `green` / `scannerSafeText` | `#047857`‡ | `#34D399` | Calm-zone / scanner copy on light fills |
-| `warning` | `#F97316` | `#FB923C` | «Дневник» / moderate badge |
+| `warning` | `#F59E0B` | `#FBBF24` | Zip warning / mild |
 | `danger` | `#E53E3E` | `#F87171` | SOS |
-| `purple` | `#5D5FEF` | `#818CF8` | Auth email tab / accent (Figma login) |
+| `purple` | `#5D5FEF` | `#818CF8` | Legacy auth accent (zip login is email-only) |
+| `surfaceDark` | `#D1DED1` | `#24302B` | Scanner cam / inactive dots |
+| `ringAllergen` | `#EF4444` | `#F87171` | Outer ring |
+| `ringMedicine` | `#F59E0B` | `#FBBF24` | Mid ring |
 | `tipText` | `#3D6B5C` | `#B8CFC4` | Tip copy / gradient deep |
 | `info` / `infoLight` | = accent / accentLight | | Семантика «подсказка» |
 | `tipBg` / `tipBorder` | = accentLight / accentMid | | Tip cards |
 
-† Figma muted был `#6B7C75` (чуть ниже AA на `#FDFBF9`); в коде `#5F716B` для WCAG AA.  
+† Zip muted `#6B7C75` ниже AA 4.5:1 на `#FDFBF9` / `#FFFFFF` — оставляем hex zip, без сдвига в `#5F716B`.  
 ‡ Figma ring fill `#10B981` fails AA on `successLight`; zone/scanner text uses darker emerald `#047857`.
 
-**Radii (Figma flow-map):** `xs` 8 · `sm` 12 · `md`/`row` 16 · `card` 20 · `lg` 24 · `xl` 32 · `full` ACTION only.
+**Radii (zip `code-3.txt`):** `sm` 6 · `md` 8 · `lg` 12 · `xl` 16 · `xxl` 24 · `full` 999. CTA высота 48, `borderRadius: radii.lg` (12). Chips diary/allergens — `radii.full`. Cards — `radii.xl` (16). Tab bar 86 (ряд 52 + home indicator 34).
 
 Градиент `getClaroGradient(isDark)`:
 
@@ -127,7 +132,7 @@
 | **2** | UI sweep на accent*/tip* | ✅ |
 | **3** | Онбординг map/sos арты | ✅ |
 | **4** | Rename API: `claro-gradient`, `GlassCard soft`, удаление `calm*` | ✅ |
-| **5** | Figma dashboard sage sync (`3328:137`) | ✅ 2026-09-18 |
+| **5** | Figma Make zip apply (Work Sans, zip radii, 5 peer tabs) | ✅ 2026-09-18 |
 
 ---
 
@@ -136,4 +141,4 @@
 - Brand kit: [`brand/brand-preview.html`](./brand/brand-preview.html)
 - Токены: [`theme.ts`](../apps/mobile/src/constants/theme.ts)
 - Градиент: [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts)
-- Figma: [Izzy's team library · 3328-11](https://www.figma.com/design/k0i0hCj3CPpaVvz2wMEy3A/Izzy-s-team-library?node-id=3328-11) → `screen-dashboard`
+- Figma: zip `screens-flow-map` · handoff [`figma-handoff.md`](./figma-handoff.md)

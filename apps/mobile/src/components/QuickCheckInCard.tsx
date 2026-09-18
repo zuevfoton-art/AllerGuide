@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
-import { SEVERITY_0_3_CHOICES, SEVERITY_0_3_LABELS, type Severity0_3 } from '@allerguide/core';
+import { SEVERITY_0_3_LABELS, type Severity0_3 } from '@allerguide/core';
 import { GlassCard } from '@/src/components/GlassCard';
 import { CardTitle } from '@/src/components/CardTitle';
 import { BottomSheet } from '@/src/components/BottomSheet';
@@ -11,16 +11,20 @@ import { useTranslation } from '@/src/store/locale-store';
 import { saveQuickCheckIn } from '@/src/services/reengagement-service';
 import { showStatusBanner } from '@/src/store/banner-store';
 
+/** Severity 0–3 → face shown in the check-in bubble (a11y still uses text labels). */
+const FEELING_SMILES: Record<Severity0_3, string> = {
+  0: '😊',
+  1: '😐',
+  2: '😕',
+  3: '😣',
+};
+
 type QuickCheckInCardProps = {
   profileId: number;
   onSaved?: () => void;
   checkedInToday?: boolean;
   compact?: boolean;
 };
-
-function chipLabel(choice: string): string {
-  return choice.replace(/^\d\s—\s/, '');
-}
 
 export function QuickCheckInCard({
   profileId,
@@ -53,26 +57,37 @@ export function QuickCheckInCard({
     }
   };
 
-  const subtitle = checkedInToday ? t('today.checkedIn') : t('home.feelMark');
-  const showInlineChips = compact && !checkedInToday;
+  const subtitle =
+    checkedInToday || selected != null
+      ? t('today.checkedIn')
+      : t('home.feelMark');
+  const showInlineSmiles = compact && !checkedInToday && selected == null;
 
-  const chipGrid = (
-    <View style={styles.chipGrid} accessibilityRole="radiogroup">
+  const smileRow = (layout: 'grid' | 'sheet') => (
+    <View
+      style={layout === 'grid' ? styles.smileRow : styles.sheetBody}
+      accessibilityRole="radiogroup">
       {([0, 1, 2, 3] as const).map((index) => {
         const active = selected === index;
         return (
           <Pressable
             key={index}
             testID={`quick-check-in-${index}`}
-            style={[styles.inlineChip, active ? styles.inlineChipActive : null]}
+            style={[
+              layout === 'grid' ? styles.smileBtn : styles.sheetSmile,
+              active ? styles.smileBtnActive : null,
+            ]}
             onPress={() => void save(index)}
             disabled={busy}
             accessibilityRole="radio"
             accessibilityState={{ selected: active, disabled: busy }}
             accessibilityLabel={SEVERITY_0_3_LABELS[index]}>
-            <Text style={[styles.inlineChipText, active ? styles.inlineChipTextActive : null]}>
-              {chipLabel(SEVERITY_0_3_CHOICES[index])}
+            <Text style={layout === 'grid' ? styles.smileGlyph : styles.sheetSmileGlyph}>
+              {FEELING_SMILES[index]}
             </Text>
+            {layout === 'sheet' ? (
+              <Text style={styles.sheetLabel}>{SEVERITY_0_3_LABELS[index]}</Text>
+            ) : null}
           </Pressable>
         );
       })}
@@ -81,7 +96,7 @@ export function QuickCheckInCard({
 
   return (
     <>
-      {showInlineChips ? (
+      {showInlineSmiles ? (
         <View
           testID="quick-check-in"
           accessibilityRole="summary"
@@ -92,7 +107,7 @@ export function QuickCheckInCard({
             <Text style={styles.hint} numberOfLines={2}>
               {t('reengagement.checkInHint')}
             </Text>
-            {chipGrid}
+            {smileRow('grid')}
           </GlassCard>
         </View>
       ) : (
@@ -104,37 +119,34 @@ export function QuickCheckInCard({
           style={compact ? styles.compactWrap : undefined}>
           <GlassCard variant="soft" style={compact ? styles.compactCard : undefined}>
             <CardTitle>{t('reengagement.checkInTitle')}</CardTitle>
-            <Text style={styles.hint} numberOfLines={2}>
-              {subtitle}
-            </Text>
-            {compact ? null : (
-              <Text style={styles.hint}>{t('reengagement.checkInHint')}</Text>
+            {compact && selected != null ? (
+              <View style={styles.savedFace} accessibilityLabel={SEVERITY_0_3_LABELS[selected]}>
+                <Text style={styles.savedSmile}>{FEELING_SMILES[selected]}</Text>
+                <Text style={styles.hint} numberOfLines={1}>
+                  {SEVERITY_0_3_LABELS[selected]}
+                </Text>
+              </View>
+            ) : (
+              <>
+                <Text style={styles.hint} numberOfLines={2}>
+                  {subtitle}
+                </Text>
+                {compact ? null : (
+                  <Text style={styles.hint}>{t('reengagement.checkInHint')}</Text>
+                )}
+              </>
             )}
           </GlassCard>
         </Pressable>
       )}
 
-      {!showInlineChips ? (
+      {!showInlineSmiles ? (
         <BottomSheet
           visible={sheetOpen}
           title={t('home.feelPickTitle')}
           onClose={() => setSheetOpen(false)}
           testID="feeling-check-in-sheet">
-          <View style={styles.sheetBody}>
-            {SEVERITY_0_3_CHOICES.map((label, index) => (
-              <Pressable
-                key={label}
-                testID={`quick-check-in-${index}`}
-                style={styles.sheetChip}
-                onPress={() => void save(index as Severity0_3)}
-                disabled={busy}
-                accessibilityRole="button"
-                accessibilityLabel={label}>
-                <Text style={styles.chipNum}>{index}</Text>
-                <Text style={styles.chipLabel}>{chipLabel(label)}</Text>
-              </Pressable>
-            ))}
-          </View>
+          {smileRow('sheet')}
         </BottomSheet>
       ) : null}
     </>
@@ -152,46 +164,49 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       marginTop: space[2],
     },
-    chipGrid: {
+    smileRow: {
       marginTop: space[3],
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: space[2],
+      justifyContent: 'space-between',
+      gap: space[1],
     },
-    inlineChip: {
-      width: '47%',
-      flexGrow: 1,
-      minHeight: density.tapMinHeightSm,
-      borderRadius: radii.full,
+    smileBtn: {
+      flex: 1,
+      minWidth: 0,
+      minHeight: density.tapMinHeight,
+      borderRadius: radii.md,
       backgroundColor: colors.card,
       borderWidth: 1,
       borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: space[2],
       paddingVertical: space[2],
     },
-    inlineChipActive: {
-      backgroundColor: colors.accent,
+    smileBtnActive: {
+      backgroundColor: colors.accentLight,
       borderColor: colors.accent,
     },
-    inlineChipText: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.caption,
-      lineHeight: lineHeights.caption,
-      fontWeight: '600',
-      color: colors.textSecondary,
+    smileGlyph: {
+      fontSize: fontSizes.h2,
+      lineHeight: lineHeights.h2,
       textAlign: 'center',
     },
-    inlineChipTextActive: {
-      color: colors.onAccent,
+    savedFace: {
+      marginTop: space[3],
+      alignItems: 'center',
+      gap: space[1],
+    },
+    savedSmile: {
+      fontSize: fontSizes.display,
+      lineHeight: lineHeights.display,
+      textAlign: 'center',
     },
     sheetBody: {
       paddingHorizontal: space[4],
       paddingBottom: density.tapMinHeight,
       gap: space[2],
     },
-    sheetChip: {
+    sheetSmile: {
       minHeight: density.tapMinHeight,
       borderRadius: radii.sm,
       borderWidth: 1,
@@ -202,14 +217,13 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       gap: space[3],
     },
-    chipNum: {
-      fontFamily: fonts.sansBold,
-      fontSize: fontSizes.h4,
-      lineHeight: lineHeights.h4,
-      color: colors.head,
-      width: 24,
+    sheetSmileGlyph: {
+      fontSize: fontSizes.h2,
+      lineHeight: lineHeights.h2,
+      width: 40,
+      textAlign: 'center',
     },
-    chipLabel: {
+    sheetLabel: {
       fontFamily: fonts.sans,
       fontSize: fontSizes.body,
       lineHeight: lineHeights.body,

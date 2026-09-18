@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/src/components/Button';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { density, radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
-import { fontSizes, textStyles } from '@/src/constants/typography';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -134,8 +134,8 @@ export function AuthPrimaryButton({
 
 const authPrimaryButtonStyle = {
   marginTop: 8,
-  borderRadius: radii.xl,
-  minHeight: density.tapMinHeightPrimary,
+      borderRadius: radii.lg,
+      minHeight: density.tapMinHeightPrimary,
 };
 
 export function AuthLink({
@@ -185,7 +185,9 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle?: string
 
   return (
     <View style={styles.hero} testID="auth-hero">
-      <BrandLogo size={90} showWordmark />
+      <View style={styles.logoCircle}>
+        <BrandLogo size={36} />
+      </View>
       <Text style={styles.heroTitle} testID="auth-hero-title">
         {title}
       </Text>
@@ -207,28 +209,36 @@ export function AuthError({ message }: { message: string }) {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    hero: { alignItems: 'center', paddingVertical: 16, gap: 8 },
+    hero: { alignItems: 'center', paddingTop: 80, paddingBottom: 40, gap: 12 },
+    logoCircle: {
+      width: 80,
+      height: 80,
+      borderRadius: radii.full,
+      backgroundColor: colors.surfaceMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     heroTitle: {
-      ...textStyles.h1,
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h1,
+      lineHeight: lineHeights.h1,
       fontWeight: '700',
       color: colors.head,
       textAlign: 'center',
     },
     heroSubtitle: {
-      ...textStyles.bodyMd,
       fontFamily: fonts.sans,
+      fontSize: fontSizes.body,
+      lineHeight: lineHeights.body,
       color: colors.textSecondary,
       textAlign: 'center',
-      marginTop: 4,
     },
     fieldWrap: { gap: 6 },
     label: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: fontSizes.label,
-      fontWeight: '600',
+      fontFamily: fonts.sansMedium,
+      fontSize: fontSizes.bodySm,
+      fontWeight: '500',
       color: colors.textSecondary,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
     },
     labelFocused: {
       color: colors.head,
@@ -237,10 +247,10 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.card,
-      borderRadius: radii.sm,
+      borderRadius: radii.lg,
       borderWidth: 1,
-      borderColor: colors.borderInput,
-      minHeight: density.tapMinHeight,
+      borderColor: colors.border,
+      minHeight: density.tapMinHeightPrimary,
       overflow: 'hidden',
     },
     inputRowFocused: {

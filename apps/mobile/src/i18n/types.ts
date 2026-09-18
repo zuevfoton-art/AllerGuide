@@ -58,6 +58,10 @@ export type LocaleMessages = {
     retry: string;
   };
   auth: {
+    appName: string;
+    tagline: string;
+    emailLabel: string;
+    emailPlaceholder: string;
     loginTitle: string;
     loginSubtitle: string;
     tabPhone: string;
@@ -282,6 +286,19 @@ export type LocaleMessages = {
     asit: string;
     asitSub: string;
     expert: string;
+    expertBook: string;
+    expertName: string;
+    expertSpecialty: string;
+    expertInitials: string;
+    greeting: string;
+    greetingAnon: string;
+    dailyRisk: string;
+    ringAllergens: string;
+    ringMedicines: string;
+    ringSymptoms: string;
+    wellnessSummary: string;
+    pollenIndex: string;
+    airQuality: string;
     marketplaceTitle: string;
     marketplaceSub: string;
     marketplaceEmpty: string;
@@ -335,6 +352,9 @@ export type LocaleMessages = {
   diary: {
     title: string;
     eyebrow: string;
+    symptomsTitle: string;
+    todayEntries: string;
+    clearFilter: string;
     newEntry: string;
     quickEntry: string;
     quickAdd: string;
@@ -474,6 +494,8 @@ export type LocaleMessages = {
   scanner: {
     title: string;
     subtitle: string;
+    productScanTitle: string;
+    cameraHint: string;
     openAction: string;
     product: string;
     menu: string;
@@ -1397,6 +1419,13 @@ export type LocaleMessages = {
   sos: {
     title: string;
     subtitle: string;
+    emergencyTitle: string;
+    pressToCall: string;
+    callAmbulance: string;
+    passportName: string;
+    passportMedicines: string;
+    passportContact: string;
+    emptyValue: string;
     name: string;
     age: string;
     allergies: string;

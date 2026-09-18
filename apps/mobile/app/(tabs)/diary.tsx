@@ -4,7 +4,6 @@ import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   buildCourseSetupOptions,
   buildDiaryEntryPickerOptions,
-  formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
   normalizeSeverity,
@@ -13,7 +12,7 @@ import {
   getProfileAgeYears,
   hideDiaryAutoSteps,
   isDiaryHistoryVisible,
-  parseAllergies,
+  startOfLocalDay,
   type ClinicalScaleId,
   type DiaryAutoMetadata,
   type DiarySection,
@@ -37,28 +36,17 @@ import {
   buildClinicalScaleEditorState,
   buildDiarySectionEditorState,
 } from '@/src/services/diary-section-service';
-import { DiaryInsightsCard } from '@/src/components/DiaryInsightsCard';
-import { WeekRingCard } from '@/src/components/WeekRingCard';
-import { FoodDrugAllergyCard } from '@/src/components/FoodDrugAllergyCard';
-import { InsectAllergyCard } from '@/src/components/InsectAllergyCard';
-import { AsthmaCard } from '@/src/components/AsthmaCard';
+import { ScreenHeader } from '@/src/components/ScreenHeader';
+import { SeverityBadge, type SeverityLevel } from '@/src/components/SeverityBadge';
 import { getProfileCapabilities } from '@/src/services/profile-capabilities-service';
 import { getAsthmaActionPlan } from '@/src/services/asthma-action-plan-service';
 import { getAllergyPassport } from '@/src/services/sos-passport-service';
-import { getFoodDrugRegistry } from '@/src/services/food-drug-registry-service';
-import { getInsectActionPlan } from '@/src/services/insect-action-plan-service';
 import { useAppStore } from '@/src/store/app-store';
 import { Screen } from '@/src/components/Screen';
 import { HintAnchor } from '@/src/components/hints/HintAnchor';
 import { useHintTour } from '@/src/hooks/use-hint-tour';
-import { ScreenEyebrow } from '@/src/components/ScreenEyebrow';
-import { GlassCard } from '@/src/components/GlassCard';
 import { EmptyState } from '@/src/components/EmptyState';
-import { Button } from '@/src/components/Button';
 import { DiaryNewEntryFab } from '@/src/components/DiaryNewEntryFab';
-import { CardTitle } from '@/src/components/CardTitle';
-import { Disclaimer } from '@/src/components/Disclaimer';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { DiaryLegacyEditor, DiaryWizard } from '@/src/components/DiaryWizard';
 import { DiaryEditorModal } from '@/src/components/DiaryEditorModal';
 import { DiaryEntryTypePickerModal } from '@/src/components/DiaryEntryTypePickerModal';
@@ -69,37 +57,18 @@ import {
 } from '@/src/components/MedicinePhotoStep';
 import { NutritionCaptureStep } from '@/src/components/NutritionCaptureStep';
 import type { DishEnrichmentResult } from '@/src/services/dish-off-enrichment-service';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import {
-  diaryOutcomeMessageKey,
-  resolveZoneColors,
-  zoneFromDiarySeverity,
-} from '@/src/hooks/use-zone-colors';
+import { density, radii, space } from '@/src/constants/layout';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
+import { diaryOutcomeMessageKey } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeDiarySections, localizeDiaryType } from '@/src/i18n/content';
 import type { DiaryEntry } from '@/src/types';
-import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { collectDiaryAutoMetadata } from '@/src/services/diary-auto-metadata-service';
 import { reconcileAllReminders } from '@/src/services/reminder-reconcile-service';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { confirmDestructiveAction } from '@/src/utils/confirm-destructive-action';
 import { getOrLoadActiveProfileId } from '@/src/services/profile-service';
-
-const TYPE_ICONS: Record<string, string> = {
-  Симптомы: 'pulse',
-  Лекарство: 'medkit',
-  Питание: 'restaurant',
-  Триггер: 'warning',
-  Кожа: 'body',
-  Пикфлоуметрия: 'speedometer',
-  АСИТ: 'fitness',
-  'Укус насекомого': 'bug',
-  'Визит к врачу': 'calendar',
-  Заметка: 'create',
-  Шкала: 'analytics',
-  Терапия: 'medical',
-};
 
 type EditorState =
   | { mode: 'medicinePhoto' }
@@ -116,7 +85,6 @@ type EditorState =
 
 export default function DiaryScreen() {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { t, locale, content } = useTranslation();
   useHintTour('diary');
@@ -124,6 +92,18 @@ export default function DiaryScreen() {
   const activeProfileId = useAppStore((s) => s.activeProfileId);
   const activeProfile = useAppStore((s) => s.activeProfile);
   const [list, setList] = useState<DiaryEntry[]>([]);
+  const [selectedDay, setSelectedDay] = useState(() => startOfLocalDay(new Date()));
+  const weekDays = useMemo(() => {
+    const today = startOfLocalDay(new Date());
+    const mondayOffset = (today.getDay() + 6) % 7;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - mondayOffset);
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + index);
+      return startOfLocalDay(day);
+    });
+  }, []);
   const [photoUrisByEntry, setPhotoUrisByEntry] = useState<Record<number, string[]>>({});
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [entryPickerOpen, setEntryPickerOpen] = useState(false);
@@ -163,21 +143,10 @@ export default function DiaryScreen() {
     () => buildCourseSetupOptions({ asitEnabled }),
     [asitEnabled],
   );
-  const drugFocusEnabled = profileCapabilities?.modules.drugFocus ?? false;
-  const insectFocusEnabled = profileCapabilities?.modules.insectSting ?? false;
-  const peakFlowEnabled = profileCapabilities?.modules.peakFlow ?? false;
-  const foodDrugRegistry = useMemo(
-    () => (activeProfileId ? getFoodDrugRegistry(activeProfileId) : null),
-    [activeProfileId],
-  );
   const drugIntolerances = useMemo(() => {
     if (!activeProfileId) return [];
     return getAllergyPassport(activeProfileId).drugIntolerances;
   }, [activeProfileId]);
-  const insectActionPlan = useMemo(
-    () => (activeProfileId ? getInsectActionPlan(activeProfileId) : null),
-    [activeProfileId],
-  );
   const asthmaActionPlan = useMemo(
     () => (activeProfileId ? getAsthmaActionPlan(activeProfileId) : null),
     [activeProfileId],
@@ -491,11 +460,9 @@ export default function DiaryScreen() {
 
   return (
     <Screen
+      showBrandHeader={false}
       onRefresh={activeProfileId && !editor ? () => void refresh() : undefined}
       refreshing={refreshing}
-      brandHeaderRight={
-        <ProfileHeaderButton variant="chip" chipTitle={activeProfile?.name} />
-      }
       pinnedBottom={
         <View style={styles.fabRow} pointerEvents="box-none">
           <HintAnchor id="diary.newEntry">
@@ -506,40 +473,26 @@ export default function DiaryScreen() {
           </HintAnchor>
         </View>
       }>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <ScreenEyebrow section={t('diary.eyebrow')} />
-          <Text style={ui.docTitle}>{t('diary.title')}</Text>
-        </View>
-      </View>
+      <ScreenHeader title={t('diary.symptomsTitle')} style={styles.screenHeader} />
 
-      {activeProfileId ? <WeekRingCard entries={list} surface="journal" /> : null}
-
-      <View style={styles.actionRow}>
-        <View style={styles.actionHalf}>
-          <HintAnchor id="diary.course">
-            <Button
-              testID="diary-setup-course"
-              label={t('diary.courseShort')}
-              variant="secondary"
-              block
-              icon="medical"
-              onPress={() => setCoursePickerOpen(true)}
-            />
-          </HintAnchor>
-        </View>
-        <View style={styles.actionHalf}>
-          <HintAnchor id="diary.report">
-            <Button
-              testID="diary-report"
-              label={t('diary.reportShort')}
-              variant="secondary"
-              block
-              icon="document"
-              onPress={() => router.push('/doctor-report' as any)}
-            />
-          </HintAnchor>
-        </View>
+      <View style={styles.calendarStrip}>
+        {weekDays.map((day) => {
+          const isActive = day.getTime() === selectedDay.getTime();
+          const weekday = day.toLocaleDateString(locale, { weekday: 'short' });
+          return (
+            <Pressable
+              key={day.toISOString()}
+              testID={`diary-day-${day.getDate()}`}
+              style={[styles.dayCell, isActive && styles.dayCellActive]}
+              onPress={() => setSelectedDay(day)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isActive }}
+              hitSlop={4}>
+              <Text style={[styles.dayName, isActive && styles.dayNameActive]}>{weekday}</Text>
+              <Text style={[styles.dayDate, isActive && styles.dayDateActive]}>{day.getDate()}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <DiaryEntryTypePickerModal
@@ -577,98 +530,78 @@ export default function DiaryScreen() {
         }}
       />
 
-      <DiaryEditorModal visible={editor !== null} onClose={closeEditor}>
-        {renderEditor()}
-      </DiaryEditorModal>
-
-      {list.filter((item) => isDiaryHistoryVisible(item.type)).length === 0 ? (
-        <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
-      ) : (
-        <GlassCard padded={false} testID="diary-timeline">
-          <View style={styles.listHead}>
-            <View style={styles.listHeadPad}>
-              <CardTitle>{t('diary.history')}</CardTitle>
+      {(() => {
+        const visible = list.filter((item) => {
+          if (!isDiaryHistoryVisible(item.type)) return false;
+          return startOfLocalDay(new Date(item.createdAt)).getTime() === selectedDay.getTime();
+        });
+        if (visible.length === 0) {
+          return (
+            <EmptyState icon="document-text-outline" title={t('diary.todayEntries')} description={t('diary.empty')} />
+          );
+        }
+        return (
+          <View style={styles.timeline} testID="diary-timeline">
+            <View style={styles.timelineHeader}>
+              <Text style={styles.timelineTitle}>{t('diary.todayEntries')}</Text>
+              <Pressable onPress={() => setSelectedDay(startOfLocalDay(new Date()))} hitSlop={8}>
+                <Text style={styles.clearFilter}>{t('diary.clearFilter')}</Text>
+              </Pressable>
             </View>
-          </View>
-
-          {list.filter((item) => isDiaryHistoryVisible(item.type)).map((item, index, visible) => {
-            const icon = TYPE_ICONS[item.type] ?? 'create';
-            const summary = formatDiaryEntrySummary(item.type, item.details);
-            const photos = photoUrisByEntry[item.id] ?? [];
-            const answers = getDiaryEntryAnswers(item.type, item.details);
-            const severity = answers ? normalizeSeverity(answers, item.type) : null;
-            const outcomeZone = zoneFromDiarySeverity(severity);
-            const outcomeColors = resolveZoneColors(outcomeZone, theme.colors);
-            return (
-              <Pressable
-                key={item.id}
-                style={[styles.row, index < visible.length - 1 && styles.rowBorder]}
-                onPress={() => openEdit(item)}>
-                <View style={ui.feedIcon}>
-                  <Ionicons name={icon as any} size={16} color={theme.colors.textSecondary} />
-                </View>
-                <View style={ui.feedBody}>
-                  <Text style={ui.feedTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
-                  <Text style={ui.feedSub}>{summary}</Text>
+            {visible.map((item) => {
+              const summary = formatDiaryEntrySummary(item.type, item.details);
+              const photos = photoUrisByEntry[item.id] ?? [];
+              const answers = getDiaryEntryAnswers(item.type, item.details);
+              const severity = answers ? normalizeSeverity(answers, item.type) : null;
+              const timeLabel = new Date(item.createdAt).toLocaleTimeString(locale, {
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+              return (
+                <Pressable
+                  key={item.id}
+                  style={styles.entryCard}
+                  onPress={() => openEdit(item)}
+                  accessibilityRole="button">
+                  <View style={styles.entryTopRow}>
+                    <View style={styles.entryTitleGroup}>
+                      <Text style={styles.entryTitle}>{localizeDiaryType(item.type, localeContent)}</Text>
+                      {severity != null ? (
+                        <SeverityBadge
+                          severity={diarySeverityLevel(severity)}
+                          label={t(diaryOutcomeMessageKey(severity))}
+                        />
+                      ) : null}
+                    </View>
+                    <Text style={styles.entryTime}>{timeLabel}</Text>
+                  </View>
+                  <Text style={styles.entryDescription}>{summary || entryDetailsText(item)}</Text>
                   {photos.length ? (
                     <View style={styles.photoRow}>
                       {photos.slice(0, 3).map((uri) => (
                         <Image key={uri} source={{ uri }} style={styles.photoThumb} />
                       ))}
-                      {photos.length > 3 ? (
-                        <Text style={styles.photoMore}>+{photos.length - 3}</Text>
-                      ) : null}
                     </View>
                   ) : null}
-                  <Text style={styles.cardMeta}>{formatDiaryDate(item.createdAt)}</Text>
-                </View>
-                {severity != null && outcomeColors ? (
-                  <Text style={[styles.outcome, { color: outcomeColors.fg }]}>
-                    {t(diaryOutcomeMessageKey(severity))}
-                  </Text>
-                ) : (
-                  <Ionicons name="chevron-forward" size={16} color={theme.colors.textMuted} />
-                )}
-              </Pressable>
-            );
-          })}
-        </GlassCard>
-      )}
+                </Pressable>
+              );
+            })}
+          </View>
+        );
+      })()}
 
-      <DiaryInsightsCard entries={list} />
-
-      {drugFocusEnabled ? (
-        <FoodDrugAllergyCard
-          mode="drug"
-          profileAllergies={activeProfile ? parseAllergies(activeProfile.allergies) : []}
-          drugIntolerances={drugIntolerances}
-          registry={foodDrugRegistry}
-          entries={list}
-          onLogFood={openNutritionCapture}
-          onLogMedicine={openMedicinePhoto}
-        />
-      ) : null}
-
-      {insectFocusEnabled && activeProfile ? (
-        <InsectAllergyCard
-          profileAllergies={parseAllergies(activeProfile.allergies)}
-          plan={insectActionPlan}
-          entries={list}
-          onLogSting={() => void openSection('Укус насекомого')}
-        />
-      ) : null}
-
-      {peakFlowEnabled ? (
-        <AsthmaCard
-          plan={asthmaActionPlan}
-          entries={list}
-          onLogPef={() => void openSection('Пикфлоуметрия')}
-        />
-      ) : null}
-
-      <Disclaimer compact>{t('diary.disclaimerShort')}</Disclaimer>
+      <DiaryEditorModal visible={editor !== null} onClose={closeEditor}>
+        {renderEditor()}
+      </DiaryEditorModal>
     </Screen>
   );
+}
+
+function diarySeverityLevel(severity: number): SeverityLevel {
+  if (severity <= 0) return 'safe';
+  if (severity === 1) return 'mild';
+  if (severity === 2) return 'moderate';
+  return 'severe';
 }
 
 function entryDetailsText(entry: DiaryEntry): string {
@@ -679,58 +612,95 @@ function entryDetailsText(entry: DiaryEntry): string {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    header: {
+    screenHeader: { paddingHorizontal: 0, paddingVertical: 4 },
+    calendarStrip: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 12,
+      gap: 4,
+      paddingBottom: space[4],
     },
-    headerText: { flex: 1, gap: 2 },
-    actionRow: {
-      flexDirection: 'row',
-      gap: 8,
-    },
-    actionHalf: {
+    dayCell: {
       flex: 1,
+      height: 65,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      backgroundColor: colors.card,
+      borderRadius: radii.lg,
+      minHeight: density.tapMinHeight,
     },
-    /** Figma fab-row — round + FAB aligned end above tab bar */
+    dayCellActive: { backgroundColor: colors.accent },
+    dayName: {
+      fontFamily: fonts.sansMedium,
+      fontSize: fontSizes.caption,
+      fontWeight: '500',
+      color: colors.textSecondary,
+    },
+    dayNameActive: { color: colors.onAccent },
+    dayDate: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.h4,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    dayDateActive: { color: colors.onAccent },
+    timeline: { gap: space[4] },
+    timelineHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    timelineTitle: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h4,
+      fontWeight: '700',
+      color: colors.head,
+    },
+    clearFilter: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.caption,
+      color: colors.textSecondary,
+    },
+    entryCard: {
+      backgroundColor: colors.card,
+      borderRadius: radii.xl,
+      padding: 18,
+      gap: space[4],
+    },
+    entryTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: space[2],
+    },
+    entryTitleGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[2],
+      flex: 1,
+      flexWrap: 'wrap',
+    },
+    entryTitle: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.h4,
+      fontWeight: '700',
+      color: colors.head,
+    },
+    entryTime: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.caption,
+      color: colors.textSecondary,
+    },
+    entryDescription: {
+      fontFamily: fonts.sans,
+      fontSize: fontSizes.bodySm,
+      lineHeight: lineHeights.bodySm,
+      color: colors.head,
+    },
     fabRow: {
       alignItems: 'flex-end',
       justifyContent: 'flex-end',
     },
-    listHead: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingTop: 14,
-    },
-    listHeadPad: { paddingHorizontal: 16 },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-    },
-    rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    cardMeta: {
-      fontFamily: fonts.sans,
-      fontSize: 11,
-      color: colors.textMuted,
-      marginTop: 2,
-    },
-    outcome: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-    },
-    photoRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-    photoThumb: { width: 40, height: 40, borderRadius: 6, backgroundColor: colors.surfaceMuted },
-    photoMore: {
-      fontFamily: fonts.sansSemiBold,
-      fontSize: 12,
-      fontWeight: '600',
-      color: colors.textMuted,
-    },
+    photoRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    photoThumb: { width: 40, height: 40, borderRadius: radii.sm, backgroundColor: colors.surfaceMuted },
   });
 }
