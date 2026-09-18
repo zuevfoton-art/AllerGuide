@@ -39,7 +39,7 @@ describe('askFabBottomOffset', () => {
         tabBarHeight,
         safeBottom: 0,
       }),
-    ).toBe(tabBarHeight + space[3] + density.tapMinHeightFab + space[3]);
+    ).toBe(tabBarHeight + space[3] + density.tapMinHeightFab + space[3] + space[2]);
   });
 
   it('keeps stack-route padding when not in tabs', () => {

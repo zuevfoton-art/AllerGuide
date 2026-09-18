@@ -26,5 +26,6 @@ export function askFabBottomOffset(input: {
     ? input.tabBarHeight + space[3]
     : Math.max(input.safeBottom, space[3]) + space[4];
   if (!shouldRaiseAskFabForScreenFab(input.pathname)) return base;
-  return base + density.tapMinHeightFab + space[3];
+  // One FAB row + gap so Ask sits clearly above the screen-level «+».
+  return base + density.tapMinHeightFab + space[3] + space[2];
 }
