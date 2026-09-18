@@ -6,11 +6,11 @@ import { density } from '@/src/constants/layout';
 import { scaledTextProps, textStyles } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 
-const RING_SIZE = 168;
+const RING_SIZE = 200;
 const RING_STROKES = {
-  outer: 11,
-  mid: 11,
-  inner: 11,
+  outer: 12,
+  mid: 12,
+  inner: 12,
   clinical: 9,
 } as const;
 
@@ -26,8 +26,8 @@ export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneB
   const showClinical = rings.clinical != null;
   const center = RING_SIZE / 2;
   const radii = showClinical
-    ? { pollen: 74, air: 58, diary: 42, clinical: 26 }
-    : { pollen: 70, air: 52, diary: 34, clinical: 0 };
+    ? { pollen: 88, air: 68, diary: 48, clinical: 30 }
+    : { pollen: 84, air: 62, diary: 40, clinical: 0 };
 
   return (
     <View
@@ -42,7 +42,7 @@ export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneB
           r={radii.pollen}
           progress={rings.pollen}
           color={theme.colors.accent}
-          track={theme.colors.accentLight}
+          track={theme.colors.mint}
           width={RING_STROKES.outer}
         />
         <RingArc
@@ -51,7 +51,7 @@ export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneB
           r={radii.air}
           progress={rings.air}
           color={theme.colors.success}
-          track={theme.colors.successLight}
+          track={theme.colors.mint}
           width={RING_STROKES.mid}
         />
         <RingArc
@@ -60,7 +60,7 @@ export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneB
           r={radii.diary}
           progress={rings.diary}
           color={theme.colors.warning}
-          track={theme.colors.warningLight}
+          track={theme.colors.mint}
           width={RING_STROKES.inner}
         />
         {showClinical ? (
@@ -70,7 +70,7 @@ export function ImmuneBalanceRings({ score, rings, accessibilityLabel }: ImmuneB
             r={radii.clinical}
             progress={rings.clinical ?? 0}
             color={theme.colors.tipText}
-            track={theme.colors.accentLight}
+            track={theme.colors.mint}
             width={RING_STROKES.clinical}
           />
         ) : null}

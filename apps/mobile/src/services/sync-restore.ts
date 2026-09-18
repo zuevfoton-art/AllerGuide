@@ -1,4 +1,4 @@
-import type { SyncPayload } from '@allerguide/core';
+import { filterUserScopedSettings, type SyncPayload } from '@allerguide/core';
 
 export interface SyncDb {
   runSync: (sql: string, params?: unknown[]) => void;
@@ -59,7 +59,12 @@ export function applySyncPayload(db: SyncDb, payload: SyncPayload, userId: numbe
     ]);
   }
 
-  for (const [key, value] of Object.entries(payload.appSettings ?? {})) {
+  // Mirror the allowlist the export applies. A backup file is untrusted input,
+  // and on web the same app_settings store also backs "secure" settings such as
+  // the refresh token and recovery key, so an unfiltered restore would let a
+  // crafted file write keys the app never exports.
+  const settings = filterUserScopedSettings(payload.appSettings ?? {});
+  for (const [key, value] of Object.entries(settings)) {
     db.runSync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', [key, value]);
   }
 }

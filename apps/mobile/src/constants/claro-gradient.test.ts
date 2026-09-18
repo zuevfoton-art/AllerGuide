@@ -23,9 +23,9 @@ describe('Claro Green tokens (Phase 0 + 4)', () => {
     const darkKeys = Object.keys(DARK_CLARO_TOKENS);
     expect(lightKeys.some((k) => k.startsWith('calm'))).toBe(false);
     expect(darkKeys.some((k) => k.startsWith('calm'))).toBe(false);
-    expect(LIGHT_CLARO_TOKENS.accent).toBe('#2A9D8F');
-    expect(LIGHT_CLARO_TOKENS.accentLight).toBe('#E6F6F4');
-    expect(LIGHT_CLARO_TOKENS.accentMid).toBe('#9FD9D1');
+    expect(LIGHT_CLARO_TOKENS.accent).toBe('#5B8C7A');
+    expect(LIGHT_CLARO_TOKENS.accentLight).toBe('#EAF2EA');
+    expect(LIGHT_CLARO_TOKENS.accentMid).toBe('#B8CFC4');
   });
 
   it('info and tip alias product accent tokens (light)', () => {
@@ -33,7 +33,7 @@ describe('Claro Green tokens (Phase 0 + 4)', () => {
     expect(LIGHT_CLARO_TOKENS.infoLight).toBe(LIGHT_CLARO_TOKENS.accentLight);
     expect(LIGHT_CLARO_TOKENS.tipBg).toBe(LIGHT_CLARO_TOKENS.accentLight);
     expect(LIGHT_CLARO_TOKENS.tipBorder).toBe(LIGHT_CLARO_TOKENS.accentMid);
-    expect(LIGHT_CLARO_TOKENS.tipText).toBe('#1F6B62');
+    expect(LIGHT_CLARO_TOKENS.tipText).toBe('#3D6B5C');
   });
 
   it('dark info/tip stay in Claro teal family', () => {
@@ -51,10 +51,10 @@ describe('Claro Green tokens (Phase 0 + 4)', () => {
 
   it('returns Claro teal gradient stops for light and dark', () => {
     const light = getClaroGradient(false);
-    expect(light.colors).toEqual(['#1F6B62', '#2A9D8F', '#9FD9D1']);
+    expect(light.colors).toEqual(['#3D6B5C', '#5B8C7A', '#B8CFC4']);
 
     const dark = getClaroGradient(true);
-    expect(dark.colors).toEqual(['#0B1120', '#134E48', '#2A9D8F']);
+    expect(dark.colors).toEqual(['#0B1612', '#1A2E28', '#5B8C7A']);
 
     const banned = new Set(LEGACY_MEDICAL_BLUE.map((h) => h.toUpperCase()));
     for (const stop of [...light.colors, ...dark.colors]) {

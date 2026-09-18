@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTranslation } from '@/src/store/locale-store';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { radii } from '@/src/constants/layout';
 import { getEmergencyNumber, setEmergencyNumber, DEFAULT_EMERGENCY_NUMBER } from '@/src/services/sos-service';
 import { CloudBackupCard } from '@/src/components/CloudBackupCard';
 import { LocalBackupCard } from '@/src/components/LocalBackupCard';
@@ -112,18 +113,22 @@ export default function ProfileScreen() {
       <GlassCard>
         <CardTitle>{t('sos.title')}</CardTitle>
         <Text style={styles.cardHint}>{t('sos.subtitle')}</Text>
-        <Button
-          label={t('profiles.sosPassport')}
-          variant="secondary"
-          block
-          onPress={() => router.push('/sos-edit' as any)}
-        />
-        <Button
-          label={t('profiles.sosContacts')}
-          variant="secondary"
-          block
-          onPress={() => router.push('/sos-edit' as any)}
-        />
+        <View style={styles.actionsRow}>
+          <Button
+            label={t('profiles.sosPassport')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/sos-edit' as any)}
+            style={styles.actionBtn}
+          />
+          <Button
+            label={t('profiles.sosContacts')}
+            variant="secondary"
+            size="sm"
+            onPress={() => router.push('/sos-edit' as any)}
+            style={styles.actionBtn}
+          />
+        </View>
       </GlassCard>
 
       <Text style={ui.sectionLabel}>{t('settings.emergencyNumber')}</Text>
@@ -299,6 +304,15 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.textSecondary,
       lineHeight: 18,
     },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      gap: 10,
+      marginTop: 10,
+    },
+    actionBtn: {
+      flex: 1,
+    },
     input: {
       backgroundColor: colors.card,
       borderRadius: 6,
@@ -353,10 +367,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       minHeight: 44,
       paddingVertical: 12,
       paddingHorizontal: 16,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.dangerBorder,
+      borderRadius: radii.full,
+      backgroundColor: colors.surfaceMuted,
       marginBottom: 10,
     },
     deleteAccountBtn: {
@@ -365,10 +377,8 @@ function createStyles({ colors, fonts }: AppTheme) {
       minHeight: 44,
       paddingVertical: 12,
       paddingHorizontal: 16,
-      borderRadius: 6,
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.danger,
+      borderRadius: radii.full,
+      backgroundColor: colors.dangerLight,
     },
     logoutText: {
       fontFamily: fonts.sansSemiBold,

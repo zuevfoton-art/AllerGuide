@@ -6,14 +6,14 @@
 
 Встроенные в Cloud Agent серверы (`cursor-cloud`, `cursor-subscriptions`) здесь не дублируются.
 
-Реализация соответствует плану [`docs/agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) уровень **B2** (разработка + деплой). Figma и PostHog — уровень B3, в конфиг не входят, пока макеты не ведутся в Figma и PostHog не подключён на stage.
+Реализация соответствует плану [`docs/agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) уровень **B2** (разработка + деплой) плюс **Figma** из B3 (макеты ведутся в Figma). PostHog остаётся вне конфига, пока не подключён на stage.
 
 ---
 
 ## Как включить
 
 1. Cursor Settings → Tools & MCP — серверы из `.cursor/mcp.json` появляются в списке.
-2. Remote с OAuth (GitHub; Sentry MCP **deprecated**): кнопка Connect, логин в браузере.
+2. Remote с OAuth (GitHub, **Figma**; Sentry MCP **deprecated**): кнопка Connect, логин в браузере.
 3. Stdio с env: задать переменные в профиле оболочки или Cursor Dashboard → Cloud Agents → Secrets.
 4. Ненужный сервер: удалить блок из локальной копии или выключить тумблер в Settings. Не коммитить персональные ключи обратно.
 
@@ -28,6 +28,7 @@
 | Сервер в mcp.json | Транспорт | Назначение в AllerGuide | Авторизация | Права |
 |-------------------|-----------|-------------------------|-------------|-------|
 | `github` | remote `https://api.githubcopilot.com/mcp/` | PR, Issues, логи Actions | OAuth (рекомендуется). Альтернатива: header `Authorization: Bearer ${env:GITHUB_TOKEN}` | read + PR write; **без** `admin` и `workflow` |
+| `figma` | remote `https://mcp.figma.com/mcp` | чтение макетов / сверка с Claro токенами; handoff [`figma-handoff.md`](./figma-handoff.md) | OAuth (Cursor Settings → Connect). Cloud: egress `mcp.figma.com` | **read** макетов; без записи в файл Figma |
 | `sentry` | remote `https://mcp.sentry.dev/mcp` | **Deprecated for G5.** Crash grouping is self-hosted GlitchTip ([staging-glitchtip.md](./staging-glitchtip.md)); crash-free is first-party `crashFree` on `/api/analytics/dashboard`. Keep this MCP only if a leftover sentry.io org still exists — it is **not** required to close the gate | OAuth | read-only на проект |
 | `playwright` | stdio `@playwright/mcp` | проверка web Expo на `http://localhost:5000` | локально | localhost |
 | `chrome-devtools` | stdio `chrome-devtools-mcp` | DOM/сеть той же web-сборки | локально | localhost |
@@ -68,7 +69,7 @@ IAM-токен Yandex Cloud живёт максимум 12 часов. В `mcp.j
 | Роль | Включать | Не включать |
 |------|----------|-------------|
 | Аналитик (`product-analyst`) | `github`, `postgres-staging` | YC write, prod DB |
-| Дизайнер (`product-designer`) | `playwright`, `chrome-devtools` | БД, облако |
+| Дизайнер (`product-designer`) | `figma`, `playwright`, `chrome-devtools` | БД, облако |
 | Разработчик | `github`, `context7`, `postgres-staging` | prod DB, `workflow`-скоуп |
 | QA | `playwright` | облако; Sentry MCP не обязателен (G5 = GlitchTip UI + analytics dashboard) |
 | Релиз | `github`, `yandex-cloud-*` (`viewer`) | публикация ревизии в обход CI |
@@ -79,14 +80,12 @@ IAM-токен Yandex Cloud живёт максимум 12 часов. В `mcp.j
 
 ---
 
-## Уровень B3 (не в конфиге)
+## Уровень B3 (частично)
 
-Включить позже, когда появится потребность:
-
-| Сервер | URL | Когда |
-|--------|-----|-------|
-| Figma | `https://mcp.figma.com/mcp` | макеты ведутся в Figma, а не только HTML в `docs/design-mockup.html` |
-| PostHog | `https://mcp.posthog.com/mcp` | `POSTHOG_API_KEY` задан на API и forward из [`posthog-forward.ts`](../apps/api/src/lib/posthog-forward.ts) используется |
+| Сервер | URL | Статус |
+|--------|-----|--------|
+| Figma | `https://mcp.figma.com/mcp` | **В конфиге** — см. каталог выше и [`figma-handoff.md`](./figma-handoff.md) |
+| PostHog | `https://mcp.posthog.com/mcp` | Не в конфиге, пока `POSTHOG_API_KEY` не задан на API и forward из [`posthog-forward.ts`](../apps/api/src/lib/posthog-forward.ts) не используется |
 
 ---
 

@@ -351,3 +351,4 @@ ui     → (peer RN only)
 - [`.cursor/skills/product-analyst/SKILL.md`](../.cursor/skills/product-analyst/SKILL.md) — метрики, события, FR
 - [`.cursor/skills/product-designer/SKILL.md`](../.cursor/skills/product-designer/SKILL.md) — экраны, токены, a11y
 - [`docs/mcp-servers.md`](./mcp-servers.md) — MCP для разработки и деплоя
+- [`docs/figma-handoff.md`](./figma-handoff.md) — Figma → токены Claro → компоненты (`home` пилот)

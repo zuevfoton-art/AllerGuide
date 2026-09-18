@@ -8,6 +8,7 @@ import {
 } from '@allerguide/core';
 import { radii } from '@/src/constants/layout';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
+import { openExternalUrl } from '@/src/services/external-link';
 import { useTranslation } from '@/src/store/locale-store';
 
 export type MapPoiListItem = MapPoi & { distanceKm?: number };
@@ -201,7 +202,7 @@ export function MapPoiSheet({
                 )}
                 {poi.bookingUrl ? (
                   <Pressable
-                    onPress={() => void Linking.openURL(poi.bookingUrl!)}
+                    onPress={() => void openExternalUrl(poi.bookingUrl!)}
                     accessibilityRole="link">
                     <Text style={styles.booking}>{t('map.poiBook')}</Text>
                   </Pressable>

@@ -21,6 +21,11 @@ type ImmuneBalanceCardProps = {
   onOpenStatus: () => void;
 };
 
+/**
+ * Layout mirrors Figma `screen-dashboard` risk-card: centered rings + three
+ * progress mini-cards (pollen / air / diary). Domain axes stay AllerGuide’s
+ * immune-balance rings — not Figma’s symptoms/scanner labels.
+ */
 export function ImmuneBalanceCard({
   wellness,
   selectedDay,
@@ -57,6 +62,27 @@ export function ImmuneBalanceCard({
     clinical: wellness.rings.clinical ?? '—',
   });
 
+  const progressItems = [
+    {
+      key: 'pollen',
+      label: t('home.pollen'),
+      value: wellness.rings.pollen,
+      color: theme.colors.accent,
+    },
+    {
+      key: 'air',
+      label: t('home.air'),
+      value: wellness.rings.air,
+      color: theme.colors.success,
+    },
+    {
+      key: 'diary',
+      label: t('home.diary'),
+      value: wellness.rings.diary,
+      color: theme.colors.warning,
+    },
+  ] as const;
+
   return (
     <GlassCard variant="soft" testID="immune-balance-card">
       <View style={styles.dayRow}>
@@ -79,41 +105,80 @@ export function ImmuneBalanceCard({
         />
       </View>
 
-      <View style={styles.body} {...pan.panHandlers}>
+      <View style={styles.ringsBlock} {...pan.panHandlers}>
         <ImmuneBalanceRings
           score={wellness.score}
           rings={wellness.rings}
           accessibilityLabel={ringA11y}
         />
-        <View style={styles.statusCol}>
-          <Pressable
-            testID="immune-balance-status"
-            onPress={onOpenStatus}
-            accessibilityRole="button"
-            accessibilityLabel={t('home.balanceStatusA11y', { status: wellness.statusTitle })}
-            style={[
-              styles.statusBtn,
-              statusColors
-                ? { backgroundColor: statusColors.bg, borderColor: statusColors.border }
-                : null,
-            ]}
-            hitSlop={8}>
-            <Text
-              {...scaledTextProps}
-              style={[styles.statusText, statusColors ? { color: statusColors.fg } : null]}
-              numberOfLines={3}>
-              {wellness.statusTitle}
-            </Text>
-          </Pressable>
-          <RingLegend color={theme.colors.accent} label={t('home.pollen')} />
-          <RingLegend color={theme.colors.success} label={t('home.air')} />
-          <RingLegend color={theme.colors.warning} label={t('home.diary')} />
-          {wellness.rings.clinical != null ? (
-            <RingLegend color={theme.colors.tipText} label={t('home.clinical')} />
-          ) : null}
-        </View>
       </View>
+
+      <View style={styles.progressRow} testID="immune-balance-progress">
+        {progressItems.map((item) => (
+          <ProgressMiniCard
+            key={item.key}
+            label={item.label}
+            value={item.value}
+            color={item.color}
+            track={theme.colors.mint}
+            styles={styles}
+          />
+        ))}
+      </View>
+
+      <Pressable
+        testID="immune-balance-status"
+        onPress={onOpenStatus}
+        accessibilityRole="button"
+        accessibilityLabel={t('home.balanceStatusA11y', { status: wellness.statusTitle })}
+        style={[
+          styles.statusBtn,
+          statusColors
+            ? { backgroundColor: statusColors.bg, borderColor: statusColors.border }
+            : null,
+        ]}
+        hitSlop={8}>
+        <Text
+          {...scaledTextProps}
+          style={[styles.statusText, statusColors ? { color: statusColors.fg } : null]}
+          numberOfLines={2}>
+          {wellness.statusTitle}
+        </Text>
+        <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
+      </Pressable>
     </GlassCard>
+  );
+}
+
+function ProgressMiniCard({
+  label,
+  value,
+  color,
+  track,
+  styles,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  track: string;
+  styles: ReturnType<typeof createStyles>;
+}) {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  return (
+    <View style={styles.progressCard}>
+      <View style={styles.progressHeader}>
+        <View style={[styles.progressDot, { backgroundColor: color }]} />
+        <Text {...scaledTextProps} style={[styles.progressPct, { color }]}>
+          {clamped}%
+        </Text>
+      </View>
+      <Text {...scaledTextProps} style={styles.progressLabel} numberOfLines={1}>
+        {label}
+      </Text>
+      <View style={[styles.miniTrack, { backgroundColor: track }]}>
+        <View style={[styles.miniFill, { width: `${clamped}%`, backgroundColor: color }]} />
+      </View>
+    </View>
   );
 }
 
@@ -146,18 +211,6 @@ function DayArrow({
   );
 }
 
-function RingLegend({ color, label }: { color: string; label: string }) {
-  const theme = useTheme();
-  return (
-    <View style={stylesShared.legendRow}>
-      <View style={[stylesShared.swatch, { backgroundColor: color }]} />
-      <Text {...scaledTextProps} style={[stylesShared.legendLabel, { color: theme.colors.textSecondary }]}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
     dayRow: {
@@ -176,14 +229,58 @@ function createStyles({ colors, fonts }: AppTheme) {
       fontWeight: '600',
       color: colors.head,
     },
-    body: {
+    ringsBlock: {
+      alignItems: 'center',
+      marginBottom: space[3],
+    },
+    progressRow: {
+      flexDirection: 'row',
+      gap: space[2],
+      marginBottom: space[3],
+    },
+    progressCard: {
+      flex: 1,
+      minWidth: 0,
+      backgroundColor: colors.card,
+      borderRadius: radii.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: space[2],
+      paddingVertical: space[2],
+      gap: space[1],
+    },
+    progressHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: space[3],
+      gap: space[1],
     },
-    statusCol: {
-      flex: 1,
-      gap: space[2],
+    progressDot: {
+      width: 8,
+      height: 8,
+      borderRadius: radii.full,
+    },
+    progressPct: {
+      fontFamily: fonts.sansBold,
+      fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
+      fontWeight: '700',
+    },
+    progressLabel: {
+      fontFamily: fonts.sansSemiBold,
+      fontSize: fontSizes.caption,
+      lineHeight: lineHeights.caption,
+      fontWeight: '600',
+      color: colors.head,
+    },
+    miniTrack: {
+      height: 4,
+      borderRadius: radii.full,
+      overflow: 'hidden',
+      marginTop: space[1],
+    },
+    miniFill: {
+      height: 4,
+      borderRadius: radii.full,
     },
     statusBtn: {
       minHeight: density.tapMinHeight,
@@ -192,9 +289,12 @@ function createStyles({ colors, fonts }: AppTheme) {
       borderColor: colors.border,
       paddingHorizontal: space[3],
       paddingVertical: space[2],
-      justifyContent: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: space[2],
     },
     statusText: {
+      flex: 1,
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
       lineHeight: lineHeights.bodySm,
@@ -211,20 +311,5 @@ const stylesShared = StyleSheet.create({
     borderRadius: radii.full,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  legendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: density.pickerRowGap,
-  },
-  swatch: {
-    width: 8,
-    height: 8,
-    borderRadius: radii.sm,
-  },
-  legendLabel: {
-    fontSize: fontSizes.caption,
-    lineHeight: lineHeights.caption,
-    flexShrink: 1,
   },
 });

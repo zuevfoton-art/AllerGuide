@@ -3,6 +3,9 @@
     "github": {
       "url": "https://api.githubcopilot.com/mcp/"
     },
+    "figma": {
+      "url": "https://mcp.figma.com/mcp"
+    },
     "sentry": {
       "url": "https://mcp.sentry.dev/mcp"
     },

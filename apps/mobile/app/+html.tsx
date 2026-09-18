@@ -45,15 +45,15 @@ select {
 }
 
 :focus-visible {
-  outline: 2px solid #2A9D8F;
+  outline: 2px solid #5B8C7A;
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(42,157,143,0.35);
+  box-shadow: 0 0 0 4px rgba(91,140,122,0.35);
   border-radius: 6px;
 }
 
 [data-tone="danger"]:focus-visible {
-  outline-color: #B91C1C;
-  box-shadow: 0 0 0 4px rgba(185,28,28,0.35);
+  outline-color: #E53E3E;
+  box-shadow: 0 0 0 4px rgba(229,62,62,0.35);
 }
 
 a[href="#content"] {
@@ -65,8 +65,8 @@ a[href="#content"] {
   padding: 10px 14px;
   border-radius: 999px;
   background: #FFFFFF;
-  border: 1px solid #2A9D8F;
-  color: #2A9D8F;
+  border: 1px solid #5B8C7A;
+  color: #5B8C7A;
   font: 600 14px/1.2 Inter, system-ui, sans-serif;
   text-decoration: none;
 }

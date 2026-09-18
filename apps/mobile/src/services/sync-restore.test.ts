@@ -43,4 +43,40 @@ describe('applySyncPayload', () => {
     expect(calls.some((call) => call.sql.toLowerCase().includes('profile_sos'))).toBe(true);
     expect(calls.some((call) => call.sql.toLowerCase().includes('app_settings'))).toBe(true);
   });
+
+  it('restores only allowlisted settings keys from an untrusted backup file', () => {
+    const calls: { sql: string; params?: unknown[] }[] = [];
+    const db = {
+      runSync: (sql: string, params?: unknown[]) => {
+        calls.push({ sql, params });
+      },
+    };
+
+    const payload = createSyncPayload({
+      userId: 7,
+      profiles: [],
+      diaryEntries: [],
+      emergencyContacts: [],
+      scanHistory: [],
+      profileSos: [],
+      appSettings: {
+        themeMode: 'dark',
+        // Keys the export never emits. On web these back "secure" storage.
+        refreshToken: 'attacker-supplied',
+        recoveryKey: 'f'.repeat(64),
+        backupSecret: 'attacker-supplied',
+      },
+    });
+
+    applySyncPayload(db, payload, 7);
+
+    const settingKeys = calls
+      .filter((call) => call.sql.toLowerCase().includes('app_settings'))
+      .map((call) => call.params?.[0]);
+
+    expect(settingKeys).toContain('themeMode');
+    expect(settingKeys).not.toContain('refreshToken');
+    expect(settingKeys).not.toContain('recoveryKey');
+    expect(settingKeys).not.toContain('backupSecret');
+  });
 });

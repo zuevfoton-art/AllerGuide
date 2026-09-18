@@ -1,13 +1,15 @@
 # Claro Green — политика цвета (Фаза 0)
 
 **Статус:** канон · supersedes Dual Calm (`brand-dual-calm.md` → redirect)  
-**Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts) · [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts)
+**Связано:** [`brand-rollout.md`](./brand-rollout.md) · [`apps/mobile/src/constants/theme.ts`](../apps/mobile/src/constants/theme.ts) · [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts) · Figma handoff [`figma-handoff.md`](./figma-handoff.md)
+
+**Синк с Figma (2026-09-18):** light-токены сняты с Izzy library frame `screens-flow-map` → **`screen-dashboard`** (`3328:137`, родитель `3328:11`). Типографика в макете: Work Sans + Inter; в приложении шрифты пока Inter (смена family — отдельный шаг).
 
 ---
 
 ## Решение
 
-Уходим от **синего света** (Medical Calm / Dual Calm). Product + ambient + info — **одна семья Claro teal**. Имена `calm.*` в коде сняты (Фаза 4); в UI — `accent*` / `tip*` / `GlassCard variant="soft"`.
+Уходим от **синего света** (Medical Calm / Dual Calm). Product + ambient + info — **одна sage/teal семья** из Figma dashboard. Имена `calm.*` в коде сняты (Фаза 4); в UI — `accent*` / `tip*` / `GlassCard variant="soft"`.
 
 ---
 
@@ -33,29 +35,42 @@
 
 | Исключение | Почему |
 |------------|--------|
-| `danger` / SOS `#B91C1C` | Экстренный акцент (не teal) |
-| `success` / `warning` traffic-light | Клинические зоны, не бренд-ambient |
-| `head` navy `#1E3A5F` | Только типографика / KPI, не fill atmosphere |
+| `danger` / SOS `#E53E3E` | Экстренный акцент (Figma SOS pill / tab) |
+| `success` `#10B981` / `warning` `#F97316` | Traffic-light зоны колец и KPI |
+| `head` charcoal `#2C3531` | Типографика / KPI (Figma wordmark & score) — не navy Dual Calm |
 | Внешние тайлы карт (Google / Yandex) | Не бренд-токены |
-| Store / monogram на teal | Уже Claro |
+| Store / monogram на accent | Уже Claro |
 
 ---
 
-## Канонические токены
+## Канонические токены (light = Figma dashboard)
 
-| Token | Light | Dark | Роль |
-|-------|-------|------|------|
-| `accent` | `#2A9D8F` | `#3DB8A8` | CTA, табы, ссылки, info icon |
-| `accentLight` | `#E6F6F4` | `#134E48` | Soft surfaces, tip bg |
-| `accentMid` | `#9FD9D1` | `#2A9D8F` | Soft borders |
-| `tipText` | `#1F6B62` | `#9FD9D1` | Tip copy / gradient deep (light) |
+| Token | Light (Figma) | Dark | Роль |
+|-------|---------------|------|------|
+| `bg` / `cream` | `#FDFBF9` | `#0F1613` | Screen background |
+| `card` | `#FFFFFF` | `#161D1A` | Карточки |
+| `accent` | `#5B8C7A` | `#7BAF9A` | CTA, табы, brand mark, info |
+| `accentLight` | `#EAF2EA` | `#1A2E28` | Soft surfaces, risk-card, tip bg |
+| `accentMid` | `#B8CFC4` | `#5B8C7A` | Soft borders (derived mid) |
+| `mint` | `#E4EBE4` | — | Ring tracks |
+| `head` / `text` | `#2C3531` | `#E8EDE9` / `#F4F7F5` | Заголовки и body |
+| `textMuted` | `#5F716B`† | `#8A9892` | Вторичный текст |
+| `border` | `#E2E8F0` | `#2C3A35` | Nav / card stroke |
+| `success` | `#10B981` | `#34D399` | Ring fill / chart safe |
+| `green` / `scannerSafeText` | `#047857`‡ | `#34D399` | Calm-zone / scanner copy on light fills |
+| `warning` | `#F97316` | `#FB923C` | «Дневник» / moderate badge |
+| `danger` | `#E53E3E` | `#F87171` | SOS |
+| `tipText` | `#3D6B5C` | `#B8CFC4` | Tip copy / gradient deep |
 | `info` / `infoLight` | = accent / accentLight | | Семантика «подсказка» |
 | `tipBg` / `tipBorder` | = accentLight / accentMid | | Tip cards |
 
+† Figma muted был `#6B7C75` (чуть ниже AA на `#FDFBF9`); в коде `#5F716B` для WCAG AA.  
+‡ Figma ring fill `#10B981` fails AA on `successLight`; zone/scanner text uses darker emerald `#047857`.
+
 Градиент `getClaroGradient(isDark)`:
 
-- Light: `#1F6B62` → `#2A9D8F` → `#9FD9D1`
-- Dark: `#0B1120` → `#134E48` → `#2A9D8F`
+- Light: `#3D6B5C` → `#5B8C7A` → `#B8CFC4`
+- Dark: `#0B1612` → `#1A2E28` → `#5B8C7A`
 
 ---
 
@@ -64,7 +79,8 @@
 1. Нет второго «медицинского» hue рядом с accent.
 2. Soft wellness surfaces — `accentLight` / `accentMid` или `GlassCard variant="soft"`.
 3. SOS — только `danger`.
-4. Запрещённые написания бренда — [`brand-rollout.md`](./brand-rollout.md).
+4. Новые hex — только через `theme.ts` + этот файл; не литералы в экранах.
+5. Запрещённые написания бренда — [`brand-rollout.md`](./brand-rollout.md).
 
 ---
 
@@ -74,12 +90,12 @@
 |---------|--------|
 | Screen background | `bg` |
 | Soft card / wellness | `GlassCard variant="soft"` → accentLight/Mid |
-| Tab pill | `accentLight` / `accentMid` |
-| Onboarding waves | `accentLight` + `accent` |
-| H1, KPI | `head` |
+| Tab active | `accent` |
+| H1, KPI score | `head` |
 | Primary CTA / links | `accent` |
 | Tip / clinical hint | `tip*` или `info*` |
-| Safe scan | `success` |
+| Safe scan / scanner ring | `success` |
+| Diary / moderate | `warning` |
 | SOS | `danger` |
 
 ---
@@ -108,6 +124,7 @@
 | **2** | UI sweep на accent*/tip* | ✅ |
 | **3** | Онбординг map/sos арты | ✅ |
 | **4** | Rename API: `claro-gradient`, `GlassCard soft`, удаление `calm*` | ✅ |
+| **5** | Figma dashboard sage sync (`3328:137`) | ✅ 2026-09-18 |
 
 ---
 
@@ -116,3 +133,4 @@
 - Brand kit: [`brand/brand-preview.html`](./brand/brand-preview.html)
 - Токены: [`theme.ts`](../apps/mobile/src/constants/theme.ts)
 - Градиент: [`claro-gradient.ts`](../apps/mobile/src/constants/claro-gradient.ts)
+- Figma: [Izzy's team library · 3328-11](https://www.figma.com/design/k0i0hCj3CPpaVvz2wMEy3A/Izzy-s-team-library?node-id=3328-11) → `screen-dashboard`
