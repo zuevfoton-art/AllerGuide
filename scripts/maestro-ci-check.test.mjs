@@ -622,6 +622,39 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(header, /collapsable=\{false\}/);
   });
 
+  it('keeps the first-run tour reachable when data never loads', () => {
+    // Nightly 35315005471: both suites died on hint-overlay / hint-skip with
+    // Today stuck on skeleton cards. The home loader awaits a GPS fix, and
+    // `getCurrentPositionAsync` has no deadline of its own, so an emulator
+    // without an injected location kept `loadingWellness` true forever and
+    // `useHintTour('home', { ready: !loadingWellness })` never fired.
+    const location = read('apps/mobile/src/services/location-service.ts');
+    assert.match(location, /POSITION_TIMEOUT_MS/, 'the GPS fix must have a deadline');
+    assert.doesNotMatch(
+      location,
+      /await Location\.getCurrentPositionAsync/,
+      'never await a bare position fix — race it against POSITION_TIMEOUT_MS',
+    );
+
+    // The tour still waits for its data, so the flows must budget for both of
+    // the app's deadlines (GPS + Open-Meteo) instead of the original 20s.
+    for (const name of ['_dismiss-hints.yaml', 'onboarding-smoke.yaml']) {
+      const flow = fs.readFileSync(path.join(flowsDir, name), 'utf8');
+      // Only the waits for the overlay to appear; `notVisible` after the skip
+      // tap stays short on purpose.
+      const waits = [
+        ...flow.matchAll(/\n\s+visible:\s*\n\s+id: hint-(?:overlay|skip)\s*\n\s+timeout: (\d+)/g),
+      ];
+      assert.ok(waits.length > 0, `${name} must wait on a hint anchor`);
+      for (const [, timeout] of waits) {
+        assert.ok(
+          Number(timeout) >= 40000,
+          `${name} must allow the GPS deadline plus the enrichment timeout, got ${timeout}ms`,
+        );
+      }
+    }
+  });
+
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
     const names = fs.readdirSync(flowsDir).filter((name) => name.endsWith('.yaml'));
     assert.ok(names.includes('_dismiss-ime.yaml'));

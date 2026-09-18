@@ -2,10 +2,12 @@
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap-until-home.yaml
+# Same budget as _dismiss-hints.yaml: the Today tour waits for its data, which
+# offline means the GPS deadline plus the enrichment timeout.
 - extendedWaitUntil:
     visible:
       id: hint-overlay
-    timeout: 20000
+    timeout: 40000
 - assertVisible:
     id: hint-skip
 - runFlow: _dismiss-hints.yaml
