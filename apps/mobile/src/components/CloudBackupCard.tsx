@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { showStatusBanner } from '@/src/store/banner-store';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
@@ -109,22 +109,26 @@ export function CloudBackupCard() {
     <>
       <GlassCard>
         <Text style={styles.cardHint}>{t('settings.cloudBackupDesc')}</Text>
-        <Button
-          testID="cloud-backup-upload"
-          label={t('settings.uploadBackup')}
-          variant="primary"
-          block
-          disabled={loading}
-          onPress={() => void handleUpload()}
-        />
-        <Button
-          testID="cloud-backup-download"
-          label={t('settings.downloadBackup')}
-          variant="secondary"
-          block
-          disabled={loading}
-          onPress={() => void handleDownload()}
-        />
+        <View style={styles.actionsRow}>
+          <Button
+            testID="cloud-backup-upload"
+            label={t('settings.uploadBackup')}
+            variant="primary"
+            size="sm"
+            disabled={loading}
+            onPress={() => void handleUpload()}
+            style={styles.actionBtn}
+          />
+          <Button
+            testID="cloud-backup-download"
+            label={t('settings.downloadBackup')}
+            variant="secondary"
+            size="sm"
+            disabled={loading}
+            onPress={() => void handleDownload()}
+            style={styles.actionBtn}
+          />
+        </View>
       </GlassCard>
 
       <RecoveryKeyModal
@@ -147,6 +151,14 @@ function createStyles(theme: AppTheme) {
       color: theme.colors.textMuted,
       marginBottom: 12,
       lineHeight: 20,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      gap: 10,
+    },
+    actionBtn: {
+      flex: 1,
     },
   });
 }
