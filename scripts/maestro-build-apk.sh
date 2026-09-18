@@ -49,7 +49,10 @@ echo "EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL:-<unset>}"
 # Nightly 34474685308: `:app:mergeDexRelease` died with "Java heap space" at
 # -Xmx2048m. `expo prebuild` can rewrite gradle.properties, so pin heap after it
 # and pass the same jvmargs on the Gradle CLI (CLI wins over the properties file).
-MAESTRO_GRADLE_JVMARGS='-Xmx4096m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError'
+# Because the CLI wins, raising metaspace in gradle.properties alone changes
+# nothing here — nightly 35198863494 still reported "The Daemon will expire after
+# the build after running out of JVM Metaspace" at 512m. Keep both in sync.
+MAESTRO_GRADLE_JVMARGS='-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError'
 
 pin_gradle_heap() {
   local props="$ROOT/apps/mobile/android/gradle.properties"
