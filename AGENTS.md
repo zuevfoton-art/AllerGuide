@@ -45,7 +45,7 @@ Procedure lives in a **skill** (loaded by `description`). Invariants live in a *
 | Rule | `.cursor/rules/design-tokens.mdc` | Claro tokens, radii ACTION/STATE, i18n |
 | Rule | `.cursor/rules/product-roles.mdc` | Routes a product task to the matching skill |
 
-Project MCP servers (GitHub, Playwright, Yandex Cloud, staging YC Postgres read-only; Sentry MCP deprecated — G5 is GlitchTip + first-party `crashFree`): [`.cursor/mcp.json`](.cursor/mcp.json) · setup [`docs/mcp-servers.md`](docs/mcp-servers.md). Secrets only via `${env:NAME}` or OAuth — never a prod DB URL.
+Project MCP servers (GitHub, **Figma**, Playwright, Yandex Cloud, staging YC Postgres read-only; Sentry MCP deprecated — G5 is GlitchTip + first-party `crashFree`): [`.cursor/mcp.json`](.cursor/mcp.json) · setup [`docs/mcp-servers.md`](docs/mcp-servers.md) · Figma handoff [`docs/figma-handoff.md`](docs/figma-handoff.md). Secrets only via `${env:NAME}` or OAuth — never a prod DB URL.
 
 ---
 

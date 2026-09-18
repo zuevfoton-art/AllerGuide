@@ -382,7 +382,7 @@ Barrel: `index.ts`. Pure TS.
 | Wellness UX north-star (IA 4 таба + SOS, фазы N0–N10) | [`wellness-ux-north-star.md`](./wellness-ux-north-star.md) · макет [`wellness-ux-north-star.html`](./wellness-ux-north-star.html) |
 | Wellness UX v2 concepts (≤2 тапа, criticality, 3 палитры) | [`wellness-ux-v2-concepts.md`](./wellness-ux-v2-concepts.md) · макет [`wellness-ux-v2-concepts.html`](./wellness-ux-v2-concepts.html) |
 | Экранные формы (HTML + Cursor Canvas) | [`screens/README.md`](./screens/README.md) · [`screens/board.html`](./screens/board.html) |
-| Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
+| Роли агентов / MCP | [`agents-roles-and-mcp-plan.md`](./agents-roles-and-mcp-plan.md) · [`mcp-servers.md`](./mcp-servers.md) · [`figma-handoff.md`](./figma-handoff.md) · [`.cursor/skills/`](../.cursor/skills/) · [`.cursor/rules/`](../.cursor/rules/) |
 | Freemium / PRO / IAP (план) | [`subscription-monetization-plan.md`](./subscription-monetization-plan.md) |
 
 ---
