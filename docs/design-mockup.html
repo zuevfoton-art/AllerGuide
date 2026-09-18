@@ -88,13 +88,13 @@
 
     body {
       font-family: var(--sans);
-      background: linear-gradient(180deg, #e6f6f4 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
       color: var(--text);
       min-height: 100vh;
       padding: 32px 20px 48px;
     }
 
-    [data-theme='dark'] body { background: linear-gradient(180deg, #0f172a 0%, var(--bg) 100%); }
+    [data-theme='dark'] body { background: linear-gradient(180deg, #0E1512 0%, var(--bg) 100%); }
 
     .page {
       max-width: 1180px;
@@ -261,6 +261,45 @@
     .kpi-row:first-child { border-top: none; padding-top: 0; }
     .kpi-label { color: var(--text-secondary); flex: 1; }
     .kpi-value { font-weight: 700; color: var(--head); font-variant-numeric: tabular-nums; }
+
+    .soft-card {
+      background: var(--accent-light);
+      border-color: var(--accent-mid);
+    }
+
+    .reading-card .interpret {
+      margin-top: 6px; padding-top: 0; border-top: none;
+      font-size: 15px; color: var(--text); line-height: 1.45;
+    }
+
+    .checkin-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    }
+
+    .checkin-chip {
+      appearance: none; border: 1px solid var(--border);
+      background: var(--card); color: var(--text-secondary);
+      border-radius: var(--radius-full); min-height: 40px;
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      cursor: pointer; padding: 6px 4px;
+    }
+
+    .checkin-chip.active {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+      box-shadow: var(--shadow-raised);
+    }
+
+    .tier-dots {
+      display: inline-flex; gap: 3px; align-items: center; margin: 0 8px;
+    }
+
+    .tier-dots i {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border); display: block;
+    }
+
+    .tier-dots i.on { background: var(--accent); }
+    .tier-dots.warn i.on { background: var(--warning); }
 
     .hero-kpi {
       display: flex; justify-content: space-between; align-items: flex-end;
@@ -777,22 +816,22 @@
 
       <div class="legend">
         <strong>Claro Green</strong> · <a href="brand-claro-green.md" style="color:var(--accent)">политика</a><br />
-        Фон <code>#F4F6F9</code> · KPI <code>#1E3A5F</code> · CTA/info <code>#2A9D8F</code> · soft <code>#E6F6F4</code> · SOS <code>#B91C1C</code><br />
-        Surfaces: <code>accentLight</code> / <code>accentMid</code> · <code>GlassCard soft</code><br /><br />
+        Фон <code>#F3F6F4</code> · KPI <code>#1E3A5F</code> · CTA/info <code>#2A9D8F</code> · soft <code>#E6F6F4</code> · SOS <code>#B91C1C</code><br />
+        Surfaces: <code>accentLight</code> / <code>accentMid</code> · <code>GlassCard soft</code> · CTA без contour-кольца<br /><br />
         <strong>Клинический roadmap (РААКИ)</strong><br />
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Логотип</strong> — monogram A (teal) + wordmark endorser Aclearo<br />
         <strong>Tab bar</strong> — 6 вкладок: Главная · Дневник · Сканер · Маркет · Карта · SOS<br />
         <strong>Профиль</strong> — кнопка в шапке = быстрый switch (модалка); данные профиля только на SOS<br />
-        <strong>Главная</strong> — wellness + рекомендации/напоминания (без «Сегодня» и strip профилей)<br />
+        <strong>Главная</strong> — «Сегодня» reading + факторы (без колец иммунного баланса и week-ring)<br />
         <strong>Сканер</strong> — «Штрих-код» / «Сканер» → камера; OCR A + флаги B/C (Yandex)<br />
         <strong>Дневник</strong> — «Новая запись» открывает пикер «Что добавить»; wizard в bottom-sheet 88%: шапка и футер вне скролла, тап по заголовку сворачивает IME; Кожа: зона+вид+зуд → фото → заметка<br />
         <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
-        <strong>Обновлено</strong> — 9 сентября 2026 · diary sheet chrome (pinned header/footer · skin photo)
+        <strong>Обновлено</strong> — 18 сентября 2026 · Claro tokens · кнопки без contour · главная без колец
         <div class="swatch-row">
-          <span class="swatch" style="background:#F4F6F9" title="bg"></span>
-          <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
+          <span class="swatch" style="background:#F3F6F4" title="bg"></span>
+          <span class="swatch" style="background:#FFFFFF;border-color:#E3E9E5" title="card"></span>
           <span class="swatch" style="background:#1E3A5F" title="head"></span>
           <span class="swatch" style="background:#2A9D8F" title="accent"></span>
           <span class="swatch" style="background:#B91C1C" title="danger"></span>
@@ -909,67 +948,48 @@
               <div class="sos-top-btn">🚑</div>
             </div>
           </div>
-          <div class="card" id="wellness-card">
-            <div class="card-head">
-              <span class="card-title">Сводка самочувствия</span>
-              <div style="display:flex;gap:8px;align-items:center">
-                <span class="badge badge-warn" id="wellness-badge">Умеренно</span>
-              </div>
+          <div class="doc-label">Четверг, 18 сентября</div>
+          <div class="doc-title" style="margin-bottom:12px">Сегодня</div>
+
+          <div class="card soft-card reading-card">
+            <div class="card-title">Сегодня</div>
+            <div class="interpret" style="margin-top:6px">
+              Воздух немного ниже комфортного. Держите прогулки короче и лекарство под рукой.
             </div>
-            <div id="wellness-loading" class="doc-meta" style="text-align:center;padding:16px">Загрузка Open-Meteo…</div>
-            <div id="wellness-body" hidden>
-              <div class="hero-kpi">
-                <span class="kpi-label" style="font-weight:600;color:var(--text)">индекс</span>
-                <span class="hero-kpi-num"><span id="score-num">—</span><span class="hero-kpi-sub"> / 100</span></span>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
-                <span class="badge badge-ok" id="confidence-badge">Высокая уверенность</span>
-              </div>
-              <div id="kpi-rows"></div>
-              <div class="interpret" id="wellness-summary">—</div>
+            <button class="btn btn-primary" style="margin-top:12px" type="button" data-screen="map">Где сейчас чище</button>
+          </div>
+
+          <div class="card soft-card" style="margin-top:10px">
+            <div class="card-title">Как вы сегодня?</div>
+            <div class="feed-sub" style="margin-bottom:10px">Отметьте самочувствие одним касанием</div>
+            <div class="checkin-row">
+              <button class="checkin-chip" type="button">нет</button>
+              <button class="checkin-chip" type="button">лёгкая</button>
+              <button class="checkin-chip" type="button">умеренная</button>
+              <button class="checkin-chip" type="button">сильная</button>
             </div>
           </div>
 
-          <div class="card flush">
-            <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px">
-              <span class="card-title">Рекомендации и напоминания</span>
+          <div class="card" style="margin-top:10px">
+            <div class="card-title" style="margin-bottom:8px">Факторы</div>
+            <div class="kpi-row" style="border:none;padding-top:0">
+              <span class="kpi-label">Пыльца</span>
+              <span class="tier-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600">Почти нет</span>
             </div>
-            <div class="feed-row">
-              <div class="feed-icon">📝</div>
-              <div class="feed-body">
-                <div class="feed-title">Нет записи за сегодня</div>
-                <div class="feed-sub">Короткая отметка в дневнике уточнит самочувствие</div>
-              </div>
-              <span class="section-link">Дневник</span>
+            <div class="kpi-row">
+              <span class="kpi-label">Воздух</span>
+              <span class="tier-dots warn" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600;color:var(--warning)">Ниже комфортного</span>
             </div>
-            <div class="feed-row" id="rec-card" hidden>
-              <div class="feed-icon">🌿</div>
-              <div class="feed-body">
-                <div class="feed-title" id="rec-title">—</div>
-                <div class="feed-sub" id="rec-text">—</div>
-              </div>
-            </div>
-            <div class="feed-row">
-              <div class="feed-icon">💓</div>
-              <div class="feed-body">
-                <div class="feed-title">Пора заполнить ACT</div>
-                <div class="feed-sub">Прошло 4+ недели с последней оценки (GINA)</div>
-              </div>
-              <span class="section-link">Открыть</span>
+            <div class="kpi-row">
+              <span class="kpi-label">Дневник</span>
+              <span class="tier-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600">Спокойно</span>
             </div>
           </div>
 
-          <div class="card flush">
-            <div class="feed-row">
-              <div class="more-hub-icon" style="background:var(--accent-light);color:var(--accent)">⭐</div>
-              <div class="feed-body">
-                <div class="feed-title">Эксперт</div>
-                <div class="feed-sub">Материалы и рекомендации АДАИР</div>
-              </div>
-              <span style="color:var(--text-muted)">›</span>
-            </div>
-          </div>
-          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
+          <p class="disclaimer">Сводка носит рекомендательный характер и не заменяет консультацию аллерголога.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
         </section>
 
         <!-- DIARY -->
@@ -1659,61 +1679,13 @@
       });
     });
 
-    /* Wellness KPI (Open-Meteo) */
-    const MOCK = { lat: 55.75, lon: 37.62, allergens: ['birch_pollen'] };
-
-    function tier(v) {
-      if (v == null || v < 10) return 'low';
-      if (v < 50) return 'mid';
-      return 'high';
-    }
-
-    function kpiRow(label, value) {
-      return `<div class="kpi-row"><span class="kpi-label">${label}</span><span class="kpi-value">${value}</span></div>`;
-    }
-
-    async function loadWellness() {
-      const loading = document.getElementById('wellness-loading');
-      const body = document.getElementById('wellness-body');
-      try {
-        const qs = new URLSearchParams({ latitude: MOCK.lat, longitude: MOCK.lon, timezone: 'Europe/Moscow', forecast_days: '1' });
-        const res = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?' + qs + '&current=european_aqi,pm2_5&hourly=birch_pollen');
-        if (!res.ok) throw new Error('api');
-        const data = await res.json();
-        const birch = Math.max(...(data.hourly?.birch_pollen?.slice(0, 12) || [0]));
-        const aqi = data.current?.european_aqi ?? 45;
-        let score = 100;
-        if (tier(birch) === 'mid') score -= 18;
-        if (tier(birch) === 'high') score -= 32;
-        if (aqi > 50) score -= 12;
-        score = Math.max(5, score);
-
-        loading.hidden = true;
-        body.hidden = false;
-        document.getElementById('score-num').textContent = score;
-        document.getElementById('wellness-summary').textContent =
-          score >= 80 ? 'Среда и дневник не указывают на повышенные риски.' : 'Есть отдельные факторы внимания — следите за симптомами.';
-        document.getElementById('wellness-badge').textContent = score >= 80 ? 'Хорошо' : score >= 60 ? 'Умеренно' : 'Внимание';
-        document.getElementById('wellness-badge').className = 'badge ' + (score >= 80 ? 'badge-ok' : score >= 60 ? 'badge-warn' : 'badge-danger');
-        document.getElementById('kpi-rows').innerHTML =
-          kpiRow('Пыльца · Берёза', birch.toFixed(1) + ' grains/m³') +
-          kpiRow('Качество воздуха', 'EAQI ' + aqi) +
-          kpiRow('Дневник · 48 ч', 'Зуд кожи');
-
-        const rec = document.getElementById('rec-card');
-        rec.hidden = false;
-        document.getElementById('rec-title').textContent = 'Снизьте контакт с пыльцой';
-        document.getElementById('rec-text').textContent = 'По возможности проводите меньше времени на улице в дневные часы и промойте нос после прогулки.';
-      } catch {
-        loading.textContent = 'Open-Meteo недоступен — показаны демо-данные.';
-        body.hidden = false;
-        document.getElementById('score-num').textContent = '68';
-        document.getElementById('kpi-rows').innerHTML = kpiRow('Пыльца · Берёза', '42 grains/m³') + kpiRow('Качество воздуха', 'EAQI 45');
-        document.getElementById('wellness-summary').textContent = 'Есть отдельные факторы внимания.';
-      }
-    }
-
-    void loadWellness();
+    /* Home check-in chips (static mock — no score rings) */
+    document.querySelectorAll('.checkin-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.checkin-chip').forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
 
     /* Intro carousel */
     const introCarousel = document.getElementById('intro-carousel');
