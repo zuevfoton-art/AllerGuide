@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/src/components/Button';
 import { BrandLogo } from '@/src/components/brand/BrandLogo';
 import { density, radii, WEB_INPUT_FONT_SIZE } from '@/src/constants/layout';
-import { fontSizes } from '@/src/constants/typography';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 
@@ -221,7 +221,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     heroTitle: {
       fontFamily: fonts.sansBold,
       fontSize: fontSizes.h1,
-      lineHeight: 34,
+      lineHeight: lineHeights.h1,
       fontWeight: '700',
       color: colors.head,
       textAlign: 'center',
@@ -229,7 +229,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     heroSubtitle: {
       fontFamily: fonts.sans,
       fontSize: fontSizes.body,
-      lineHeight: 20,
+      lineHeight: lineHeights.body,
       color: colors.textSecondary,
       textAlign: 'center',
     },

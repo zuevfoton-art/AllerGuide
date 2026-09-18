@@ -232,7 +232,7 @@ export default function HomeScreen() {
 
       <HintAnchor id="home.insights" testID="home-insights">
         <View style={styles.section}>
-          <Text {...scaledTextProps} style={styles.sectionTitle}>
+          <Text {...scaledTextProps} style={styles.blockHeading}>
             {t('home.insightsTitle')}
           </Text>
           {recs.length === 0 ? (
@@ -260,7 +260,7 @@ export default function HomeScreen() {
       </HintAnchor>
 
       <View style={styles.section}>
-        <Text {...scaledTextProps} style={styles.sectionTitle}>
+        <Text {...scaledTextProps} style={styles.blockHeading}>
           {t('home.expert')}
         </Text>
         <View style={styles.expertCard}>
@@ -327,7 +327,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       color: colors.onAccent,
     },
     section: { gap: space[3], paddingTop: space[2] },
-    sectionTitle: {
+    blockHeading: {
       fontFamily: fonts.sansBold,
       fontSize: fontSizes.h4,
       lineHeight: lineHeights.h4,

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { density, radii, space } from '@/src/constants/layout';
+import { density, space } from '@/src/constants/layout';
 import { fontSizes, lineHeights, scaledTextProps } from '@/src/constants/typography';
 import { pressedOpacity } from '@/src/constants/motion';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';

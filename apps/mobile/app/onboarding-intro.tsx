@@ -18,6 +18,7 @@ import { OnboardingSlideImage, type OnboardingSlideKey } from '@/src/components/
 import { OnboardingSlideChrome } from '@/src/components/onboarding/OnboardingSlideChrome';
 import { BrandField } from '@/src/components/brand/BrandField';
 import { radii } from '@/src/constants/layout';
+import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { useResponsiveLayout } from '@/src/hooks/use-responsive-layout';
@@ -90,7 +91,7 @@ export default function OnboardingIntroScreen() {
           />
         </View>
       </BrandField>
-      <Text style={styles.title}>{t(`onboardingIntro.slides.${item}.title`)}</Text>
+      <Text style={styles.slideHeading}>{t(`onboardingIntro.slides.${item}.title`)}</Text>
       <Text style={styles.desc}>{t(`onboardingIntro.slides.${item}.desc`)}</Text>
     </View>
   );
@@ -193,23 +194,23 @@ function createStyles({ colors, fonts }: AppTheme, horizontalPadding: number, _i
       backgroundColor: colors.surfaceMuted,
       borderRadius: radii.xxl,
     },
-    title: {
+    slideHeading: {
       fontFamily: fonts.sansBold,
-      fontSize: 22,
+      fontSize: fontSizes.h2,
       fontWeight: '700',
       color: colors.head,
       textAlign: 'center',
-      lineHeight: 28,
+      lineHeight: lineHeights.h2,
       paddingHorizontal: 4,
       width: '100%',
       flexShrink: 1,
     },
     desc: {
       fontFamily: fonts.sans,
-      fontSize: 14,
+      fontSize: fontSizes.body,
       color: colors.textSecondary,
       textAlign: 'center',
-      lineHeight: 20,
+      lineHeight: lineHeights.body,
       paddingHorizontal: 4,
       width: '100%',
       flexShrink: 1,

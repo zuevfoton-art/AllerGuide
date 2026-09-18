@@ -40,7 +40,7 @@ export function WellnessSummary({ title, items, testID }: WellnessSummaryProps) 
         accessibilityRole="button"
         accessibilityState={{ expanded }}
         hitSlop={8}>
-        <Text {...scaledTextProps} style={styles.title}>
+        <Text {...scaledTextProps} style={styles.kpiHeading}>
           {title}
         </Text>
         <Ionicons
@@ -86,7 +86,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       alignItems: 'center',
       minHeight: density.tapMinHeightSm,
     },
-    title: {
+    kpiHeading: {
       fontFamily: fonts.sansBold,
       fontSize: fontSizes.h4,
       lineHeight: lineHeights.h4,

@@ -4,7 +4,6 @@ import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   buildCourseSetupOptions,
   buildDiaryEntryPickerOptions,
-  formatDiaryDate,
   formatDiaryEntrySummary,
   getDiaryEntryAnswers,
   normalizeSeverity,
@@ -13,7 +12,6 @@ import {
   getProfileAgeYears,
   hideDiaryAutoSteps,
   isDiaryHistoryVisible,
-  parseAllergies,
   startOfLocalDay,
   type ClinicalScaleId,
   type DiaryAutoMetadata,

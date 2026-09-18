@@ -393,11 +393,6 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
     viewfinderWrap: { alignItems: 'center', gap: 20 },
     viewfinder: { width: 260, height: 180, position: 'relative' },
     viewfinderPhoto: { width: 280, height: 360 },
-    corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.accent, borderWidth: 3 },
-    cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 6 },
-    cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 6 },
-    cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 6 },
-    cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 6 },
     viewfinderHint: {
       color: 'rgba(255,255,255,0.85)',
       fontSize: 14,

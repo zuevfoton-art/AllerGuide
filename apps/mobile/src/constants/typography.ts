@@ -57,7 +57,7 @@ export const lineHeights = {
   display: 40,
   kpi: 40,
   /** Reading paragraph — ≥1.5 so a long RU sentence stays calm. */
-  reading: 27,
+  reading: 30,
 } as const;
 
 export const tracking = {

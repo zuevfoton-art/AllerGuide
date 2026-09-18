@@ -16,15 +16,12 @@ import {
   BIPHASIC_WARNING,
   buildCrisisPlan,
   formatEpinephrineEligibilityHint,
-  getProfileAgeYears,
   listProfileAllergenChips,
-  pluralRu,
   type EmergencyContact,
 } from '@allerguide/core';
 import { radii } from '@/src/constants/layout';
 import { fontSizes, lineHeights } from '@/src/constants/typography';
 import { useAppStore } from '@/src/store/app-store';
-import { useUiStyles } from '@/src/hooks/use-glass-styles';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { useTranslation } from '@/src/store/locale-store';
 import { localizeEmergencyRelation } from '@/src/i18n/content';
@@ -46,14 +43,12 @@ import { trackEvent } from '@/src/services/analytics-service';
 
 export default function SosScreen() {
   const theme = useTheme();
-  const ui = useUiStyles();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { t, locale, content } = useTranslation();
+  const { t, content } = useTranslation();
   useHintTour('sos');
   const localeContent = content();
   const profile = useAppStore((s) => s.activeProfile);
   const allergies = profile ? listProfileAllergenChips(profile.allergies) : [];
-  const crossReactions = profile ? listProfileAllergenChips(profile.crossReactionAllergies) : [];
   const [emergencyNumber, setEmergencyNumberState] = useState(DEFAULT_EMERGENCY_NUMBER);
   const [notes, setNotes] = useState('');
   const [actionPlan, setActionPlan] = useState('');
@@ -424,22 +419,6 @@ export default function SosScreen() {
       <Disclaimer compact>{t('sos.disclaimerShort')}</Disclaimer>
     </Screen>
   );
-}
-
-function formatSosAge(
-  birthYear: number,
-  locale: string,
-  t: (key: string, params?: Record<string, string | number>) => string,
-): string {
-  const years = getProfileAgeYears(birthYear);
-  if (years == null) return String(birthYear);
-  if (locale === 'ru') {
-    return t('sos.ageYears', {
-      n: years,
-      unit: pluralRu(years, t('sos.ageUnitOne'), t('sos.ageUnitFew'), t('sos.ageUnitMany')),
-    });
-  }
-  return t('sos.ageYears', { n: years });
 }
 
 function createStyles({ colors, fonts }: AppTheme) {
