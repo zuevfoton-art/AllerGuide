@@ -11,6 +11,8 @@ export function createStyles({ colors, fonts, shadows }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    /** Figma scanner-container */
+    camZone: { gap: 12 },
     secondaryRow: { flexDirection: 'row', gap: 10 },
     barcodeBtn: {
       flex: 1,

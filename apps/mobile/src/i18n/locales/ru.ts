@@ -53,6 +53,9 @@ const ru: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Вход',
+    loginSubtitle: 'Войдите по телефону или email',
+    tabPhone: 'Телефон',
+    tabEmail: 'Email',
     registerTitle: 'Регистрация',
     loginLabel: 'Телефон или почта',
     phonePlaceholder: '+7 999 123-45-67',

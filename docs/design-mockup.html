@@ -1177,14 +1177,20 @@
             </div>
             <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <button class="btn btn-primary" data-screen="diary-picker">Новая запись</button>
+          <div class="card soft-card" style="margin-bottom:10px">
+            <div class="week-ring-row" aria-label="3 из 7 дней с записью">
+              <div class="week-ring-slot logged">П</div>
+              <div class="week-ring-slot logged">В</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot logged today">Ч</div>
+              <div class="week-ring-slot">П</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot">В</div>
+            </div>
+          </div>
           <div class="action-row" style="margin-top:8px">
             <button class="btn btn-secondary">Курс</button>
             <button class="btn btn-secondary" data-screen="doctor-report">Отчёт</button>
-          </div>
-          <div class="card" style="margin-top:10px">
-            <div class="card-title" style="margin-bottom:8px">Активность · 7 дней</div>
-            <div class="feed-sub">3 дн. подряд · топ недели: симптомы</div>
           </div>
           <div class="section-label">История записей</div>
           <div class="card flush">
@@ -1214,6 +1220,7 @@
               <span style="color:var(--text-muted)">›</span>
             </div>
           </div>
+          <button class="btn btn-primary" style="margin-top:12px" data-screen="diary-picker">Новая запись</button>
           <p class="disclaimer">Дневник фиксирует наблюдения и не заменяет консультацию врача.</p>
         </section>
 

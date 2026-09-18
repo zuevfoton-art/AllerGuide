@@ -5,6 +5,7 @@ import { applyLoginFieldInput } from '@allerguide/core';
 import { loginUser } from '@/src/services/auth-service';
 import { Screen } from '@/src/components/Screen';
 import { LanguagePicker } from '@/src/components/LanguagePicker';
+import { SegmentedControl } from '@/src/components/SegmentedControl';
 import { logCaughtError } from '@/src/services/error-reporting';
 import { useTranslation } from '@/src/store/locale-store';
 import {
@@ -20,6 +21,7 @@ import { authPasswordInputProps } from '@/src/constants/auth-input-props';
 
 export default function LoginScreen() {
   const { t, tAuthError } = useTranslation();
+  const [loginMode, setLoginMode] = useState<'phone' | 'email'>('phone');
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -56,9 +58,22 @@ export default function LoginScreen() {
   return (
     <Screen>
       <LanguagePicker compact />
-      <AuthHero title={t('auth.loginTitle')} />
+      <AuthHero title={t('auth.loginTitle')} subtitle={t('auth.loginSubtitle')} />
+      <SegmentedControl
+        testID="auth-login-mode"
+        accessibilityLabel={t('auth.loginSubtitle')}
+        value={loginMode}
+        onChange={(next) => {
+          setLoginMode(next as 'phone' | 'email');
+          setLogin('');
+        }}
+        options={[
+          { value: 'phone', label: t('auth.tabPhone'), testID: 'auth-tab-phone' },
+          { value: 'email', label: t('auth.tabEmail'), testID: 'auth-tab-email' },
+        ]}
+      />
       <LoginField
-        label={t('auth.loginLabel')}
+        label={loginMode === 'phone' ? t('auth.tabPhone') : t('auth.tabEmail')}
         value={login}
         onChangeText={setLogin}
         testID="auth-login-input"

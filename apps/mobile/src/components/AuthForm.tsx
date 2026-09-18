@@ -181,7 +181,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle?: string
 
   return (
     <View style={styles.hero} testID="auth-hero">
-      <BrandLogo size={56} showWordmark />
+      <BrandLogo size={90} showWordmark />
       <Text style={styles.heroTitle} testID="auth-hero-title">
         {title}
       </Text>
@@ -203,7 +203,7 @@ export function AuthError({ message }: { message: string }) {
 
 function createStyles({ colors, fonts }: AppTheme) {
   return StyleSheet.create({
-    hero: { alignItems: 'center', paddingVertical: 12, gap: 6 },
+    hero: { alignItems: 'center', paddingVertical: 16, gap: 8 },
     heroTitle: {
       ...textStyles.h1,
       fontWeight: '700',
@@ -233,7 +233,7 @@ function createStyles({ colors, fonts }: AppTheme) {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.card,
-      borderRadius: radii.md,
+      borderRadius: radii.sm,
       borderWidth: 1,
       borderColor: colors.borderInput,
       minHeight: density.tapMinHeight,
@@ -264,7 +264,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     forgotText: { fontFamily: fonts.sans, fontSize: fontSizes.bodySm, color: colors.head },
     errorBox: {
       backgroundColor: colors.dangerLight,
-      borderRadius: radii.md,
+      borderRadius: radii.sm,
       padding: 10,
       borderWidth: 1,
       borderColor: colors.dangerBorder,

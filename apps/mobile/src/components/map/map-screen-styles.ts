@@ -11,6 +11,23 @@ export function createMapScreenStyles({ colors, fonts }: AppTheme) {
       gap: 12,
     },
     headerText: { flex: 1, gap: 2 },
+    /** Figma map-frame (~420) */
+    mapFrame: {
+      borderRadius: radii.card,
+      overflow: 'hidden',
+      minHeight: 320,
+      backgroundColor: colors.mint,
+    },
+    mapChrome: {
+      paddingHorizontal: 8,
+      paddingBottom: 8,
+      marginTop: -4,
+    },
+    /** Figma bottom-sheet stack */
+    mapSheet: {
+      gap: 10,
+      marginTop: 4,
+    },
     searchAreaBtn: {
       alignSelf: 'center',
       flexDirection: 'row',

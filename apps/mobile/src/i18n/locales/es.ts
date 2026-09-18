@@ -52,6 +52,9 @@ const es: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Iniciar sesión',
+    loginSubtitle: 'Inicie sesión con teléfono o email',
+    tabPhone: 'Teléfono',
+    tabEmail: 'Email',
     registerTitle: 'Registro',
     loginLabel: 'Teléfono o correo',
     phonePlaceholder: '+34 612 345 678',

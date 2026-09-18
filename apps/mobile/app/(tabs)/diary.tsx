@@ -494,6 +494,18 @@ export default function DiaryScreen() {
       refreshing={refreshing}
       brandHeaderRight={
         <ProfileHeaderButton variant="chip" chipTitle={activeProfile?.name} />
+      }
+      pinnedBottom={
+        <HintAnchor id="diary.newEntry">
+          <Button
+            testID="diary-new-entry"
+            label={t('diary.newEntry')}
+            variant="primary"
+            block
+            icon="add"
+            onPress={() => setEntryPickerOpen(true)}
+          />
+        </HintAnchor>
       }>
       <View style={styles.header}>
         <View style={styles.headerText}>
@@ -502,15 +514,8 @@ export default function DiaryScreen() {
         </View>
       </View>
 
-      <HintAnchor id="diary.newEntry">
-        <Button
-          testID="diary-new-entry"
-          label={t('diary.newEntry')}
-          variant="primary"
-          block
-          onPress={() => setEntryPickerOpen(true)}
-        />
-      </HintAnchor>
+      {activeProfileId ? <WeekRingCard entries={list} surface="journal" /> : null}
+
       <View style={styles.actionRow}>
         <View style={styles.actionHalf}>
           <HintAnchor id="diary.course">
@@ -577,13 +582,10 @@ export default function DiaryScreen() {
         {renderEditor()}
       </DiaryEditorModal>
 
-      <DiaryInsightsCard entries={list} />
-      {activeProfileId ? <WeekRingCard entries={list} surface="journal" /> : null}
-
       {list.filter((item) => isDiaryHistoryVisible(item.type)).length === 0 ? (
         <EmptyState icon="document-text-outline" title={t('diary.history')} description={t('diary.empty')} />
       ) : (
-        <GlassCard padded={false}>
+        <GlassCard padded={false} testID="diary-timeline">
           <View style={styles.listHead}>
             <View style={styles.listHeadPad}>
               <CardTitle>{t('diary.history')}</CardTitle>
@@ -633,6 +635,8 @@ export default function DiaryScreen() {
           })}
         </GlassCard>
       )}
+
+      <DiaryInsightsCard entries={list} />
 
       {drugFocusEnabled ? (
         <FoodDrugAllergyCard

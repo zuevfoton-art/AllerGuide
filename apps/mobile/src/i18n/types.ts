@@ -59,6 +59,9 @@ export type LocaleMessages = {
   };
   auth: {
     loginTitle: string;
+    loginSubtitle: string;
+    tabPhone: string;
+    tabEmail: string;
     registerTitle: string;
     loginLabel: string;
     phonePlaceholder: string;
