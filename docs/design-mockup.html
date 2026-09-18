@@ -1404,18 +1404,21 @@
             </div>
             <div class="profile-btn" title="Переключить профиль">А</div>
           </div>
-          <div class="entry-row">
-            <div class="entry-chip active">▮▮ Штрих-код</div>
-            <div class="entry-chip">⬚ Сканер</div>
-          </div>
-          <div class="card">
-            <div class="section-label">или введите вручную</div>
-            <input class="input" placeholder="Штрихкод или состав продукта…" readonly />
-            <button class="btn btn-primary" style="margin-top:10px">Проверить</button>
+          <div class="card soft-card" style="margin-bottom:10px">
+            <button class="btn btn-primary" style="width:100%">Умный скан</button>
+            <div class="entry-row" style="margin-top:10px">
+              <div class="entry-chip">▮▮ Штрих-код</div>
+              <div class="entry-chip">✎ Вручную</div>
+            </div>
+            <div class="feed-sub" style="margin-top:8px;text-align:center">Наведите камеру на штрих-код продукта</div>
           </div>
           <div class="result-danger">
             <strong>Claro: есть совпадения</strong><span class="source-badge">локальный кэш</span><br />
             Claro: <strong>Молоко</strong> · уровень высокий. Результат не заменяет чтение этикетки.
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:6px">Состав</div>
+            <div class="feed-sub">Сахар, какао-масло, сухое цельное молоко…</div>
           </div>
           <div class="card">
             <div class="card-title" style="margin-bottom:6px">История сканирования (30 дней)</div>
