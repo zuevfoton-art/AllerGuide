@@ -267,19 +267,77 @@
       border-color: var(--accent-mid);
     }
 
+    /* Immune balance rings (PR #412) */
+    .balance-day-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 10px;
+    }
+    .balance-day-arrow {
+      width: 40px; height: 40px; border-radius: var(--radius-full);
+      display: grid; place-items: center; color: var(--head);
+      font-size: 18px; cursor: default; user-select: none;
+    }
+    .balance-day-arrow.disabled { opacity: 0.35; }
+    .balance-day-label {
+      flex: 1; text-align: center; font-size: 15px; font-weight: 600; color: var(--head);
+    }
+    .balance-body {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .balance-rings {
+      position: relative; width: 168px; height: 168px; flex-shrink: 0;
+    }
+    .balance-rings svg { display: block; }
+    .balance-score {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      font-size: 32px; font-weight: 700; color: var(--head);
+      font-variant-numeric: tabular-nums; pointer-events: none;
+    }
+    .balance-status-col {
+      flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+    }
+    .balance-status {
+      min-height: 44px; border-radius: var(--radius-sm);
+      border: 1px solid var(--warning-border); background: var(--warning-light);
+      color: var(--warning); font-size: 13px; font-weight: 600;
+      padding: 8px 10px; line-height: 1.3; display: flex; align-items: center;
+    }
+    .balance-legend {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .balance-legend i {
+      width: 8px; height: 8px; border-radius: 3px; display: block; flex-shrink: 0;
+    }
+
+    .bubble-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 10px;
+    }
+    .bubble-card {
+      margin-bottom: 0;
+      padding: 12px;
+    }
+    .bubble-card .interpret {
+      margin-top: 4px; padding-top: 0; border-top: none;
+      font-size: 12px; color: var(--text); line-height: 1.4;
+    }
+    .bubble-card .btn { min-height: 36px; font-size: 12px; margin-top: 8px; padding: 6px 10px; }
+
     .reading-card .interpret {
       margin-top: 6px; padding-top: 0; border-top: none;
       font-size: 15px; color: var(--text); line-height: 1.45;
     }
 
     .checkin-row {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
     }
+    .bubble-card .checkin-row { grid-template-columns: 1fr 1fr; }
 
     .checkin-chip {
       appearance: none; border: 1px solid var(--border);
       background: var(--card); color: var(--text-secondary);
-      border-radius: var(--radius-full); min-height: 40px;
+      border-radius: var(--radius-full); min-height: 36px;
       font-family: var(--sans); font-size: 11px; font-weight: 600;
       cursor: pointer; padding: 6px 4px;
     }
@@ -287,6 +345,26 @@
     .checkin-chip.active {
       background: var(--accent); border-color: var(--accent); color: #fff;
       box-shadow: var(--shadow-raised);
+    }
+
+    .week-ring-row {
+      display: flex; justify-content: space-between; gap: 4px; margin-top: 8px;
+    }
+    .week-ring-slot {
+      flex: 1; aspect-ratio: 1; max-width: 40px; margin: 0 auto;
+      border-radius: 50%; border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      background: var(--card);
+    }
+    .week-ring-slot.logged {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .week-ring-slot.today {
+      box-shadow: 0 0 0 2px var(--accent-mid);
+    }
+    .week-ring-count {
+      margin-top: 8px; font-size: 12px; color: var(--text-secondary);
     }
 
     .tier-dots {
@@ -824,11 +902,11 @@
         <strong>Логотип</strong> — monogram A (teal) + wordmark endorser Aclearo<br />
         <strong>Tab bar</strong> — 6 вкладок: Главная · Дневник · Сканер · Маркет · Карта · SOS<br />
         <strong>Профиль</strong> — кнопка в шапке = быстрый switch (модалка); данные профиля только на SOS<br />
-        <strong>Главная</strong> — «Сегодня» reading + факторы (без колец иммунного баланса и week-ring)<br />
+        <strong>Главная</strong> — ImmuneBalance rings (PR #412) + compact reading/check-in + week-ring + факторы<br />
         <strong>Сканер</strong> — «Штрих-код» / «Сканер» → камера; OCR A + флаги B/C (Yandex)<br />
         <strong>Дневник</strong> — «Новая запись» открывает пикер «Что добавить»; wizard в bottom-sheet 88%: шапка и футер вне скролла, тап по заголовку сворачивает IME; Кожа: зона+вид+зуд → фото → заметка<br />
         <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
-        <strong>Обновлено</strong> — 18 сентября 2026 · Claro tokens · кнопки без contour · главная без колец
+        <strong>Обновлено</strong> — 18 сентября 2026 · Claro tokens · кнопки без contour · кольца иммунного баланса #412
         <div class="swatch-row">
           <span class="swatch" style="background:#F3F6F4" title="bg"></span>
           <span class="swatch" style="background:#FFFFFF;border-color:#E3E9E5" title="card"></span>
@@ -951,26 +1029,78 @@
           <div class="doc-label">Четверг, 18 сентября</div>
           <div class="doc-title" style="margin-bottom:12px">Сегодня</div>
 
-          <div class="card soft-card reading-card">
-            <div class="card-title">Сегодня</div>
-            <div class="interpret" style="margin-top:6px">
-              Воздух немного ниже комфортного. Держите прогулки короче и лекарство под рукой.
+          <!-- ImmuneBalanceCard — concentric rings from PR #412 -->
+          <div class="card soft-card" id="immune-balance-card">
+            <div class="balance-day-row">
+              <div class="balance-day-arrow" title="Предыдущий день">‹</div>
+              <div class="balance-day-label">Сегодня</div>
+              <div class="balance-day-arrow disabled" title="Следующий день">›</div>
             </div>
-            <button class="btn btn-primary" style="margin-top:12px" type="button" data-screen="map">Где сейчас чище</button>
+            <div class="balance-body">
+              <div class="balance-rings" role="img" aria-label="Индекс 68. Пыльца 72%, воздух 55%, дневник 80%">
+                <svg width="168" height="168" viewBox="0 0 168 168" aria-hidden="true">
+                  <!-- pollen track + arc (r=70, 72%) -->
+                  <circle cx="84" cy="84" r="70" fill="none" stroke="var(--accent-light)" stroke-width="11"/>
+                  <circle cx="84" cy="84" r="70" fill="none" stroke="var(--accent)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="316.7 439.8"
+                    transform="rotate(-90 84 84)"/>
+                  <!-- air track + arc (r=52, 55%) -->
+                  <circle cx="84" cy="84" r="52" fill="none" stroke="var(--success-light)" stroke-width="11"/>
+                  <circle cx="84" cy="84" r="52" fill="none" stroke="var(--success)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="179.7 326.7"
+                    transform="rotate(-90 84 84)"/>
+                  <!-- diary track + arc (r=34, 80%) -->
+                  <circle cx="84" cy="84" r="34" fill="none" stroke="var(--warning-light)" stroke-width="11"/>
+                  <circle cx="84" cy="84" r="34" fill="none" stroke="var(--warning)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="170.9 213.6"
+                    transform="rotate(-90 84 84)"/>
+                </svg>
+                <div class="balance-score" id="score-num">68</div>
+              </div>
+              <div class="balance-status-col">
+                <div class="balance-status" id="wellness-badge">Требуется немного больше внимания</div>
+                <div class="balance-legend"><i style="background:var(--accent)"></i>Пыльца</div>
+                <div class="balance-legend"><i style="background:var(--success)"></i>Воздух</div>
+                <div class="balance-legend"><i style="background:var(--warning)"></i>Дневник</div>
+              </div>
+            </div>
           </div>
 
-          <div class="card soft-card" style="margin-top:10px">
-            <div class="card-title">Как вы сегодня?</div>
-            <div class="feed-sub" style="margin-bottom:10px">Отметьте самочувствие одним касанием</div>
-            <div class="checkin-row">
-              <button class="checkin-chip" type="button">нет</button>
-              <button class="checkin-chip" type="button">лёгкая</button>
-              <button class="checkin-chip" type="button">умеренная</button>
-              <button class="checkin-chip" type="button">сильная</button>
+          <div class="bubble-row">
+            <div class="card soft-card bubble-card reading-card">
+              <div class="card-title">Сегодня</div>
+              <div class="interpret">
+                Воздух немного ниже комфортного. Держите прогулки короче.
+              </div>
+              <button class="btn btn-primary" type="button" data-screen="map">Где чище</button>
+            </div>
+            <div class="card soft-card bubble-card">
+              <div class="card-title">Как вы?</div>
+              <div class="feed-sub" style="margin-bottom:8px">Одним касанием</div>
+              <div class="checkin-row">
+                <button class="checkin-chip" type="button">нет</button>
+                <button class="checkin-chip" type="button">лёгкая</button>
+                <button class="checkin-chip" type="button">умеренная</button>
+                <button class="checkin-chip" type="button">сильная</button>
+              </div>
             </div>
           </div>
 
           <div class="card" style="margin-top:10px">
+            <div class="card-title">Неделя</div>
+            <div class="week-ring-row" id="week-ring" aria-label="3 из 7 дней с записью">
+              <div class="week-ring-slot logged">П</div>
+              <div class="week-ring-slot logged">В</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot logged today">Ч</div>
+              <div class="week-ring-slot">П</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot">В</div>
+            </div>
+            <div class="week-ring-count">3 из 7 дней с отметкой</div>
+          </div>
+
+          <div class="card soft-card" style="margin-top:10px">
             <div class="card-title" style="margin-bottom:8px">Факторы</div>
             <div class="kpi-row" style="border:none;padding-top:0">
               <span class="kpi-label">Пыльца</span>
@@ -989,7 +1119,7 @@
             </div>
           </div>
 
-          <p class="disclaimer">Сводка носит рекомендательный характер и не заменяет консультацию аллерголога.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
+          <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
         </section>
 
         <!-- DIARY -->
@@ -1679,7 +1809,7 @@
       });
     });
 
-    /* Home check-in chips (static mock — no score rings) */
+    /* Home check-in chips + immune balance day arrows (static mock) */
     document.querySelectorAll('.checkin-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('.checkin-chip').forEach((c) => c.classList.remove('active'));
