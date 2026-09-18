@@ -9,88 +9,92 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f4f6f9;
-      --card: #ffffff;
+      --bg: #F3F6F4;
+      --card: #FFFFFF;
       --accent: #2A9D8F;
       --accent-light: #E6F6F4;
       --accent-mid: #9FD9D1;
       --info: #2A9D8F;
-      --head: #1e3a5f;
-      --text: #0f172a;
+      --head: #1E3A5F;
+      --text: #0F172A;
       --text-secondary: #475569;
-      --text-muted: #5e6b7c;
-      --border: #e2e8f0;
-      --border-input: #cbd5e1;
-      --success: #15803d;
-      --success-light: #f0fdf4;
-      --success-border: #bbf7d0;
-      --danger: #b91c1c;
-      --danger-light: #fef2f2;
-      --danger-border: #fecaca;
-      --warning: #b45309;
-      --warning-light: #fffbeb;
-      --warning-border: #fde68a;
-      --purple: #6366f1;
-      --surface-muted: #f1f5f9;
+      --text-muted: #5E6B7C;
+      --border: #E3E9E5;
+      --border-input: #CBD5E1;
+      --success: #15803D;
+      --success-light: #F0FDF4;
+      --success-border: #BBF7D0;
+      --danger: #B91C1C;
+      --danger-light: #FEF2F2;
+      --danger-border: #FECACA;
+      --warning: #B45309;
+      --warning-light: #FFFBEB;
+      --warning-border: #FDE68A;
+      --purple: #6366F1;
+      --surface-muted: #F1F4F2;
       --tip-bg: #E6F6F4;
       --tip-border: #9FD9D1;
       --tip-text: #1F6B62;
       --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-      --phone-border: #e2e8f0;
-      --radius-sm: 6px;
-      --radius-md: 8px;
-      --radius-row: 10px;
-      --radius-lg: 16px;
-      --radius-xl: 20px;
+      --shadow-raised: 0 3px 6px rgba(15, 23, 42, 0.22);
+      --shadow-raised-strong: 0 5px 12px rgba(15, 23, 42, 0.28);
+      --phone-border: #E3E9E5;
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-row: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
       --radius-full: 9999px;
       --density-screen-gap: 10px;
       --density-card-padding: 14px;
-      --map-land: #E4EAE8;
-      --map-road: #CBD5D2;
+      --map-land: #E4EAE5;
+      --map-road: #CDD6D0;
       --sans: 'Inter', system-ui, sans-serif;
       --serif: 'Source Serif 4', Georgia, serif;
     }
 
     [data-theme='dark'] {
-      --bg: #0b1120;
-      --card: #151d2e;
+      --bg: #0E1512;
+      --card: #161D1B;
       --accent: #3DB8A8;
       --accent-light: #134E48;
       --accent-mid: #2A9D8F;
       --info: #3DB8A8;
-      --head: #e2e8f0;
-      --text: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-muted: #64748b;
-      --border: #334155;
+      --head: #E2E8F0;
+      --text: #F8FAFC;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --border: #2C3A35;
       --border-input: #475569;
-      --success-light: #14532d;
+      --success-light: #14532D;
       --success-border: #166534;
-      --danger-light: #450a0a;
-      --danger-border: #991b1b;
-      --warning-light: #451a03;
-      --warning-border: #92400e;
-      --surface-muted: #1e293b;
+      --danger-light: #450A0A;
+      --danger-border: #991B1B;
+      --warning-light: #451A03;
+      --warning-border: #92400E;
+      --surface-muted: #1A2420;
       --tip-bg: #134E48;
       --tip-border: #2A9D8F;
       --tip-text: #9FD9D1;
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-      --phone-border: #334155;
-      --map-land: #1B2534;
-      --map-road: #2B3648;
+      --shadow-raised: 0 3px 6px rgba(0, 0, 0, 0.35);
+      --shadow-raised-strong: 0 5px 12px rgba(0, 0, 0, 0.4);
+      --phone-border: #2C3A35;
+      --map-land: #1A2420;
+      --map-road: #2C3A35;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: var(--sans);
-      background: linear-gradient(180deg, #e6f6f4 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, var(--accent-light) 0%, var(--bg) 100%);
       color: var(--text);
       min-height: 100vh;
       padding: 32px 20px 48px;
     }
 
-    [data-theme='dark'] body { background: linear-gradient(180deg, #0f172a 0%, var(--bg) 100%); }
+    [data-theme='dark'] body { background: linear-gradient(180deg, #0E1512 0%, var(--bg) 100%); }
 
     .page {
       max-width: 1180px;
@@ -258,6 +262,123 @@
     .kpi-label { color: var(--text-secondary); flex: 1; }
     .kpi-value { font-weight: 700; color: var(--head); font-variant-numeric: tabular-nums; }
 
+    .soft-card {
+      background: var(--accent-light);
+      border-color: var(--accent-mid);
+    }
+
+    /* Immune balance rings (PR #412) */
+    .balance-day-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 10px;
+    }
+    .balance-day-arrow {
+      width: 40px; height: 40px; border-radius: var(--radius-full);
+      display: grid; place-items: center; color: var(--head);
+      font-size: 18px; cursor: default; user-select: none;
+    }
+    .balance-day-arrow.disabled { opacity: 0.35; }
+    .balance-day-label {
+      flex: 1; text-align: center; font-size: 15px; font-weight: 600; color: var(--head);
+    }
+    .balance-body {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .balance-rings {
+      position: relative; width: 168px; height: 168px; flex-shrink: 0;
+    }
+    .balance-rings svg { display: block; }
+    .balance-score {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      font-size: 32px; font-weight: 700; color: var(--head);
+      font-variant-numeric: tabular-nums; pointer-events: none;
+    }
+    .balance-status-col {
+      flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+    }
+    .balance-status {
+      min-height: 44px; border-radius: var(--radius-sm);
+      border: 1px solid var(--warning-border); background: var(--warning-light);
+      color: var(--warning); font-size: 13px; font-weight: 600;
+      padding: 8px 10px; line-height: 1.3; display: flex; align-items: center;
+    }
+    .balance-legend {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .balance-legend i {
+      width: 8px; height: 8px; border-radius: 3px; display: block; flex-shrink: 0;
+    }
+
+    .bubble-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      margin-top: 10px;
+    }
+    .bubble-card {
+      margin-bottom: 0;
+      padding: 12px;
+    }
+    .bubble-card .interpret {
+      margin-top: 4px; padding-top: 0; border-top: none;
+      font-size: 12px; color: var(--text); line-height: 1.4;
+    }
+    .bubble-card .btn { min-height: 36px; font-size: 12px; margin-top: 8px; padding: 6px 10px; }
+
+    .reading-card .interpret {
+      margin-top: 6px; padding-top: 0; border-top: none;
+      font-size: 15px; color: var(--text); line-height: 1.45;
+    }
+
+    .checkin-row {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+    }
+    .bubble-card .checkin-row { grid-template-columns: 1fr 1fr; }
+
+    .checkin-chip {
+      appearance: none; border: 1px solid var(--border);
+      background: var(--card); color: var(--text-secondary);
+      border-radius: var(--radius-full); min-height: 36px;
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      cursor: pointer; padding: 6px 4px;
+    }
+
+    .checkin-chip.active {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+      box-shadow: var(--shadow-raised);
+    }
+
+    .week-ring-row {
+      display: flex; justify-content: space-between; gap: 4px; margin-top: 8px;
+    }
+    .week-ring-slot {
+      flex: 1; aspect-ratio: 1; max-width: 40px; margin: 0 auto;
+      border-radius: 50%; border: 1.5px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      background: var(--card);
+    }
+    .week-ring-slot.logged {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .week-ring-slot.today {
+      box-shadow: 0 0 0 2px var(--accent-mid);
+    }
+    .week-ring-count {
+      margin-top: 8px; font-size: 12px; color: var(--text-secondary);
+    }
+
+    .tier-dots {
+      display: inline-flex; gap: 3px; align-items: center; margin: 0 8px;
+    }
+
+    .tier-dots i {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border); display: block;
+    }
+
+    .tier-dots i.on { background: var(--accent); }
+    .tier-dots.warn i.on { background: var(--warning); }
+
     .hero-kpi {
       display: flex; justify-content: space-between; align-items: flex-end;
       padding-bottom: 10px; margin-bottom: 4px;
@@ -283,16 +404,26 @@
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
       border-radius: var(--radius-full); font-family: var(--sans);
-      font-size: 15px; font-weight: 600; min-height: 44px;
+      font-size: 15px; font-weight: 600; min-height: 52px;
       padding: 10px 20px; border: none; cursor: pointer; width: 100%;
     }
 
     .btn-sm { min-height: 36px; padding: 7px 16px; font-size: 12px; width: auto; }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border-input); }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-row { display: flex; gap: 8px; }
-    .btn-row .btn { flex: 1; }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      box-shadow: var(--shadow-raised-strong);
+    }
+    .btn-secondary {
+      background: var(--surface-muted); color: var(--text);
+      box-shadow: var(--shadow-raised);
+      min-height: 48px;
+    }
+    .btn-danger {
+      background: var(--danger); color: #fff;
+      box-shadow: var(--shadow-raised-strong);
+    }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-row .btn { flex: 1; min-width: 0; }
 
     .input {
       width: 100%; background: var(--card);
@@ -763,22 +894,22 @@
 
       <div class="legend">
         <strong>Claro Green</strong> · <a href="brand-claro-green.md" style="color:var(--accent)">политика</a><br />
-        Фон <code>#F4F6F9</code> · KPI <code>#1E3A5F</code> · CTA/info <code>#2A9D8F</code> · soft <code>#E6F6F4</code> · SOS <code>#B91C1C</code><br />
-        Surfaces: <code>accentLight</code> / <code>accentMid</code> · <code>GlassCard soft</code><br /><br />
+        Фон <code>#F3F6F4</code> · KPI <code>#1E3A5F</code> · CTA/info <code>#2A9D8F</code> · soft <code>#E6F6F4</code> · SOS <code>#B91C1C</code><br />
+        Surfaces: <code>accentLight</code> / <code>accentMid</code> · <code>GlassCard soft</code> · CTA без contour-кольца<br /><br />
         <strong>Клинический roadmap (РААКИ)</strong><br />
         P1 SOS+шкалы · P2 дневник · P3 АСИТ · P4 пищевая/лекарственная<br /><br />
         <strong>Шрифты</strong> — Inter (UI) + Source Serif 4 (doc titles)<br />
         <strong>Логотип</strong> — monogram A (teal) + wordmark endorser Aclearo<br />
         <strong>Tab bar</strong> — 6 вкладок: Главная · Дневник · Сканер · Маркет · Карта · SOS<br />
         <strong>Профиль</strong> — кнопка в шапке = быстрый switch (модалка); данные профиля только на SOS<br />
-        <strong>Главная</strong> — wellness + рекомендации/напоминания (без «Сегодня» и strip профилей)<br />
+        <strong>Главная</strong> — ImmuneBalance rings (PR #412) + compact reading/check-in + week-ring + факторы<br />
         <strong>Сканер</strong> — «Штрих-код» / «Сканер» → камера; OCR A + флаги B/C (Yandex)<br />
         <strong>Дневник</strong> — «Новая запись» открывает пикер «Что добавить»; wizard в bottom-sheet 88%: шапка и футер вне скролла, тап по заголовку сворачивает IME; Кожа: зона+вид+зуд → фото → заметка<br />
         <strong>Intro</strong> — 5 слайдов: profile · scanner · care · map · sos<br />
-        <strong>Обновлено</strong> — 9 сентября 2026 · diary sheet chrome (pinned header/footer · skin photo)
+        <strong>Обновлено</strong> — 18 сентября 2026 · Claro tokens · кнопки без contour · кольца иммунного баланса #412
         <div class="swatch-row">
-          <span class="swatch" style="background:#F4F6F9" title="bg"></span>
-          <span class="swatch" style="background:#FFFFFF;border-color:#E2E8F0" title="card"></span>
+          <span class="swatch" style="background:#F3F6F4" title="bg"></span>
+          <span class="swatch" style="background:#FFFFFF;border-color:#E3E9E5" title="card"></span>
           <span class="swatch" style="background:#1E3A5F" title="head"></span>
           <span class="swatch" style="background:#2A9D8F" title="accent"></span>
           <span class="swatch" style="background:#B91C1C" title="danger"></span>
@@ -895,66 +1026,99 @@
               <div class="sos-top-btn">🚑</div>
             </div>
           </div>
-          <div class="card" id="wellness-card">
-            <div class="card-head">
-              <span class="card-title">Сводка самочувствия</span>
-              <div style="display:flex;gap:8px;align-items:center">
-                <span class="badge badge-warn" id="wellness-badge">Умеренно</span>
-              </div>
+          <div class="doc-label">Четверг, 18 сентября</div>
+          <div class="doc-title" style="margin-bottom:12px">Сегодня</div>
+
+          <!-- ImmuneBalanceCard — concentric rings from PR #412 -->
+          <div class="card soft-card" id="immune-balance-card">
+            <div class="balance-day-row">
+              <div class="balance-day-arrow" title="Предыдущий день">‹</div>
+              <div class="balance-day-label">Сегодня</div>
+              <div class="balance-day-arrow disabled" title="Следующий день">›</div>
             </div>
-            <div id="wellness-loading" class="doc-meta" style="text-align:center;padding:16px">Загрузка Open-Meteo…</div>
-            <div id="wellness-body" hidden>
-              <div class="hero-kpi">
-                <span class="kpi-label" style="font-weight:600;color:var(--text)">индекс</span>
-                <span class="hero-kpi-num"><span id="score-num">—</span><span class="hero-kpi-sub"> / 100</span></span>
+            <div class="balance-body">
+              <div class="balance-rings" role="img" aria-label="Индекс 68. Пыльца 72%, воздух 55%, дневник 80%">
+                <svg width="168" height="168" viewBox="0 0 168 168" aria-hidden="true">
+                  <!-- pollen track + arc (r=70, 72%) -->
+                  <circle cx="84" cy="84" r="70" fill="none" stroke="var(--accent-light)" stroke-width="11"/>
+                  <circle cx="84" cy="84" r="70" fill="none" stroke="var(--accent)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="316.7 439.8"
+                    transform="rotate(-90 84 84)"/>
+                  <!-- air track + arc (r=52, 55%) -->
+                  <circle cx="84" cy="84" r="52" fill="none" stroke="var(--success-light)" stroke-width="11"/>
+                  <circle cx="84" cy="84" r="52" fill="none" stroke="var(--success)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="179.7 326.7"
+                    transform="rotate(-90 84 84)"/>
+                  <!-- diary track + arc (r=34, 80%) -->
+                  <circle cx="84" cy="84" r="34" fill="none" stroke="var(--warning-light)" stroke-width="11"/>
+                  <circle cx="84" cy="84" r="34" fill="none" stroke="var(--warning)" stroke-width="11"
+                    stroke-linecap="round" stroke-dasharray="170.9 213.6"
+                    transform="rotate(-90 84 84)"/>
+                </svg>
+                <div class="balance-score" id="score-num">68</div>
               </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
-                <span class="badge badge-ok" id="confidence-badge">Высокая уверенность</span>
+              <div class="balance-status-col">
+                <div class="balance-status" id="wellness-badge">Требуется немного больше внимания</div>
+                <div class="balance-legend"><i style="background:var(--accent)"></i>Пыльца</div>
+                <div class="balance-legend"><i style="background:var(--success)"></i>Воздух</div>
+                <div class="balance-legend"><i style="background:var(--warning)"></i>Дневник</div>
               </div>
-              <div id="kpi-rows"></div>
-              <div class="interpret" id="wellness-summary">—</div>
             </div>
           </div>
 
-          <div class="card flush">
-            <div class="card-head list-pad" style="margin-bottom:0;padding-top:14px">
-              <span class="card-title">Рекомендации и напоминания</span>
-            </div>
-            <div class="feed-row">
-              <div class="feed-icon">📝</div>
-              <div class="feed-body">
-                <div class="feed-title">Нет записи за сегодня</div>
-                <div class="feed-sub">Короткая отметка в дневнике уточнит самочувствие</div>
+          <div class="bubble-row">
+            <div class="card soft-card bubble-card reading-card">
+              <div class="card-title">Сегодня</div>
+              <div class="interpret">
+                Воздух немного ниже комфортного. Держите прогулки короче.
               </div>
-              <span class="section-link">Дневник</span>
+              <button class="btn btn-primary" type="button" data-screen="map">Где чище</button>
             </div>
-            <div class="feed-row" id="rec-card" hidden>
-              <div class="feed-icon">🌿</div>
-              <div class="feed-body">
-                <div class="feed-title" id="rec-title">—</div>
-                <div class="feed-sub" id="rec-text">—</div>
+            <div class="card soft-card bubble-card">
+              <div class="card-title">Как вы?</div>
+              <div class="feed-sub" style="margin-bottom:8px">Одним касанием</div>
+              <div class="checkin-row">
+                <button class="checkin-chip" type="button">нет</button>
+                <button class="checkin-chip" type="button">лёгкая</button>
+                <button class="checkin-chip" type="button">умеренная</button>
+                <button class="checkin-chip" type="button">сильная</button>
               </div>
-            </div>
-            <div class="feed-row">
-              <div class="feed-icon">💓</div>
-              <div class="feed-body">
-                <div class="feed-title">Пора заполнить ACT</div>
-                <div class="feed-sub">Прошло 4+ недели с последней оценки (GINA)</div>
-              </div>
-              <span class="section-link">Открыть</span>
             </div>
           </div>
 
-          <div class="card flush">
-            <div class="feed-row">
-              <div class="more-hub-icon" style="background:var(--accent-light);color:var(--accent)">⭐</div>
-              <div class="feed-body">
-                <div class="feed-title">Эксперт</div>
-                <div class="feed-sub">Материалы и рекомендации АДАИР</div>
-              </div>
-              <span style="color:var(--text-muted)">›</span>
+          <div class="card" style="margin-top:10px">
+            <div class="card-title">Неделя</div>
+            <div class="week-ring-row" id="week-ring" aria-label="3 из 7 дней с записью">
+              <div class="week-ring-slot logged">П</div>
+              <div class="week-ring-slot logged">В</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot logged today">Ч</div>
+              <div class="week-ring-slot">П</div>
+              <div class="week-ring-slot">С</div>
+              <div class="week-ring-slot">В</div>
+            </div>
+            <div class="week-ring-count">3 из 7 дней с отметкой</div>
+          </div>
+
+          <div class="card soft-card" style="margin-top:10px">
+            <div class="card-title" style="margin-bottom:8px">Факторы</div>
+            <div class="kpi-row" style="border:none;padding-top:0">
+              <span class="kpi-label">Пыльца</span>
+              <span class="tier-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600">Почти нет</span>
+            </div>
+            <div class="kpi-row">
+              <span class="kpi-label">Воздух</span>
+              <span class="tier-dots warn" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600;color:var(--warning)">Ниже комфортного</span>
+            </div>
+            <div class="kpi-row">
+              <span class="kpi-label">Дневник</span>
+              <span class="tier-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+              <span class="kpi-value" style="font-size:12px;font-weight:600">Спокойно</span>
             </div>
           </div>
+
           <p class="disclaimer">Индекс носит рекомендательный характер и не заменяет консультацию аллерголога.<span class="disclaimer-footnote"><br />mdr-v2 · decision support · not SaMD</span></p>
         </section>
 
@@ -1524,12 +1688,22 @@
             <button class="btn btn-primary" style="margin-top:10px">Сохранить номер</button>
           </div>
 
-          <div class="section-label">Резервные копии</div>
+          <div class="section-label">Локальная резервная копия</div>
           <div class="card">
-            <div class="feed-sub" style="margin-bottom:8px">Локальный файл JSON + облачная копия (AES-GCM, zero-knowledge)</div>
-            <button class="btn btn-secondary" style="width:100%;margin-bottom:8px">Экспорт на устройство</button>
-            <button class="btn btn-primary" style="width:100%;margin-bottom:8px">Загрузить в облако</button>
-            <button class="btn btn-secondary" style="width:100%">Ключ восстановления</button>
+            <div class="feed-sub" style="margin-bottom:8px">Экспорт JSON с профилями, дневником и историей сканов.</div>
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" type="button">Экспортировать данные</button>
+              <button class="btn btn-secondary btn-sm" type="button">Импортировать из файла</button>
+            </div>
+          </div>
+
+          <div class="section-label">Облачная резервная копия</div>
+          <div class="card">
+            <div class="feed-sub" style="margin-bottom:8px">Сохранение профилей и дневника на сервер Aclearo API</div>
+            <div class="btn-row">
+              <button class="btn btn-primary btn-sm" type="button">Отправить резервную копию</button>
+              <button class="btn btn-secondary btn-sm" type="button">Восстановить с сервера</button>
+            </div>
           </div>
 
           <div class="section-label">Уведомления</div>
@@ -1635,61 +1809,13 @@
       });
     });
 
-    /* Wellness KPI (Open-Meteo) */
-    const MOCK = { lat: 55.75, lon: 37.62, allergens: ['birch_pollen'] };
-
-    function tier(v) {
-      if (v == null || v < 10) return 'low';
-      if (v < 50) return 'mid';
-      return 'high';
-    }
-
-    function kpiRow(label, value) {
-      return `<div class="kpi-row"><span class="kpi-label">${label}</span><span class="kpi-value">${value}</span></div>`;
-    }
-
-    async function loadWellness() {
-      const loading = document.getElementById('wellness-loading');
-      const body = document.getElementById('wellness-body');
-      try {
-        const qs = new URLSearchParams({ latitude: MOCK.lat, longitude: MOCK.lon, timezone: 'Europe/Moscow', forecast_days: '1' });
-        const res = await fetch('https://air-quality-api.open-meteo.com/v1/air-quality?' + qs + '&current=european_aqi,pm2_5&hourly=birch_pollen');
-        if (!res.ok) throw new Error('api');
-        const data = await res.json();
-        const birch = Math.max(...(data.hourly?.birch_pollen?.slice(0, 12) || [0]));
-        const aqi = data.current?.european_aqi ?? 45;
-        let score = 100;
-        if (tier(birch) === 'mid') score -= 18;
-        if (tier(birch) === 'high') score -= 32;
-        if (aqi > 50) score -= 12;
-        score = Math.max(5, score);
-
-        loading.hidden = true;
-        body.hidden = false;
-        document.getElementById('score-num').textContent = score;
-        document.getElementById('wellness-summary').textContent =
-          score >= 80 ? 'Среда и дневник не указывают на повышенные риски.' : 'Есть отдельные факторы внимания — следите за симптомами.';
-        document.getElementById('wellness-badge').textContent = score >= 80 ? 'Хорошо' : score >= 60 ? 'Умеренно' : 'Внимание';
-        document.getElementById('wellness-badge').className = 'badge ' + (score >= 80 ? 'badge-ok' : score >= 60 ? 'badge-warn' : 'badge-danger');
-        document.getElementById('kpi-rows').innerHTML =
-          kpiRow('Пыльца · Берёза', birch.toFixed(1) + ' grains/m³') +
-          kpiRow('Качество воздуха', 'EAQI ' + aqi) +
-          kpiRow('Дневник · 48 ч', 'Зуд кожи');
-
-        const rec = document.getElementById('rec-card');
-        rec.hidden = false;
-        document.getElementById('rec-title').textContent = 'Снизьте контакт с пыльцой';
-        document.getElementById('rec-text').textContent = 'По возможности проводите меньше времени на улице в дневные часы и промойте нос после прогулки.';
-      } catch {
-        loading.textContent = 'Open-Meteo недоступен — показаны демо-данные.';
-        body.hidden = false;
-        document.getElementById('score-num').textContent = '68';
-        document.getElementById('kpi-rows').innerHTML = kpiRow('Пыльца · Берёза', '42 grains/m³') + kpiRow('Качество воздуха', 'EAQI 45');
-        document.getElementById('wellness-summary').textContent = 'Есть отдельные факторы внимания.';
-      }
-    }
-
-    void loadWellness();
+    /* Home check-in chips + immune balance day arrows (static mock) */
+    document.querySelectorAll('.checkin-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.checkin-chip').forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
 
     /* Intro carousel */
     const introCarousel = document.getElementById('intro-carousel');
