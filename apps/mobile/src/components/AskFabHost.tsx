@@ -50,8 +50,6 @@ export function AskFabHost() {
           flexDirection: 'row',
           gap: space[2],
           backgroundColor: colors.accent,
-          borderWidth: 2,
-          borderColor: colors.card,
         },
         label: {
           fontFamily: fonts.sansSemiBold,
@@ -60,7 +58,7 @@ export function AskFabHost() {
           color: colors.onAccent,
         },
       }),
-    [bottomOffset, colors.accent, colors.card, colors.onAccent, extended, fonts.sansSemiBold],
+    [bottomOffset, colors.accent, colors.onAccent, extended, fonts.sansSemiBold],
   );
 
   if (!allowed && !open) return null;

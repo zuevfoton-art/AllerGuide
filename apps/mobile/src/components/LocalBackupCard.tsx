@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { showStatusBanner } from '@/src/store/banner-store';
 import { GlassCard } from '@/src/components/GlassCard';
 import { Button } from '@/src/components/Button';
@@ -54,22 +54,26 @@ export function LocalBackupCard() {
   return (
     <GlassCard>
       <Text style={styles.cardHint}>{t('settings.localBackupDesc')}</Text>
-      <Button
-        testID="local-backup-export"
-        label={t('settings.export')}
-        variant="primary"
-        block
-        disabled={loading}
-        onPress={() => void handleExport()}
-      />
-      <Button
-        testID="local-backup-import"
-        label={t('settings.import')}
-        variant="secondary"
-        block
-        disabled={loading}
-        onPress={handleImport}
-      />
+      <View style={styles.actionsRow}>
+        <Button
+          testID="local-backup-export"
+          label={t('settings.export')}
+          variant="primary"
+          size="sm"
+          disabled={loading}
+          onPress={() => void handleExport()}
+          style={styles.actionBtn}
+        />
+        <Button
+          testID="local-backup-import"
+          label={t('settings.import')}
+          variant="secondary"
+          size="sm"
+          disabled={loading}
+          onPress={handleImport}
+          style={styles.actionBtn}
+        />
+      </View>
     </GlassCard>
   );
 }
@@ -81,6 +85,14 @@ function createStyles(theme: AppTheme) {
       color: theme.colors.textMuted,
       marginBottom: 12,
       lineHeight: 20,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      gap: 10,
+    },
+    actionBtn: {
+      flex: 1,
     },
   });
 }

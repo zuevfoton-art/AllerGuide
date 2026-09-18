@@ -100,23 +100,17 @@ function createStyles({ colors, fonts, shadows }: AppTheme, scale: number) {
     block: { width: '100%' },
     primary: {
       backgroundColor: colors.accent,
-      // Petrol contour on mint fill (brand composition ink).
-      borderWidth: 2,
-      borderColor: colors.head,
       ...(shadows.raisedStrong as object),
     },
     secondary: {
-      backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.borderInput,
+      // Fill (not outline) so secondary stays visible on white cards without a contour ring.
+      backgroundColor: colors.surfaceMuted,
       minHeight: density.tapMinHeightSecondary,
       ...(shadows.raised as object),
     },
     ghost: { backgroundColor: 'transparent', minHeight: 36, paddingHorizontal: 0 },
     danger: {
       backgroundColor: colors.danger,
-      borderWidth: 2,
-      borderColor: colors.dangerBorder,
       ...(shadows.raisedStrong as object),
     },
     disabled: { opacity: disabledOpacity },
