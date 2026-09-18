@@ -81,7 +81,7 @@ Offline-first: «нет сети» — не ошибка ядра, а ожида
 
 ## 9. Тёмная тема
 
-Проверять `lightColors` и `darkColors`. Цвет не задавать вне `useTheme()`. Акцент Claro: `#2A9D8F` / `#3DB8A8`; SOS danger остаётся семантическим, не «декоративным красным».
+Проверять `lightColors` и `darkColors`. Цвет не задавать вне `useTheme()`. Акцент Claro: `#5B8C7A` / `#7BAF9A`; SOS danger `#E53E3E` остаётся семантическим, не «декоративным красным». Variables для Figma: [`docs/figma/tokens.json`](../../docs/figma/tokens.json).
 
 ## 10. Формат выдачи спецификации экрана
 
@@ -96,4 +96,4 @@ testID для Maestro:
 Что уходит в docs/ux-improvement-plan.md, если это долг:
 ```
 
-Макеты в репозитории: [`docs/design-mockup.html`](../../docs/design-mockup.html), [`docs/onboarding-mockup.html`](../../docs/onboarding-mockup.html). Figma handoff: [`docs/figma-handoff.md`](../../docs/figma-handoff.md) · gap «Сегодня»: [`docs/figma-home-gap.md`](../../docs/figma-home-gap.md). North-star IA (4 таба + SOS-control, daily reading): [`docs/wellness-ux-north-star.md`](../../docs/wellness-ux-north-star.md), макет [`docs/wellness-ux-north-star.html`](../../docs/wellness-ux-north-star.html). UX-долг текущего каркаса: [`docs/ux-audit-2026-08.md`](../../docs/ux-audit-2026-08.md), [`docs/ux-improvement-plan.md`](../../docs/ux-improvement-plan.md).
+Макеты в репозитории: [`docs/design-mockup.html`](../../docs/design-mockup.html), [`docs/onboarding-mockup.html`](../../docs/onboarding-mockup.html). Код → Figma: [`docs/figma-code-to-figma.md`](../../docs/figma-code-to-figma.md) · стикеры [`docs/figma/screen-specs.md`](../../docs/figma/screen-specs.md). Figma → код: [`docs/figma-handoff.md`](../../docs/figma-handoff.md) · gap «Сегодня»: [`docs/figma-home-gap.md`](../../docs/figma-home-gap.md). North-star IA (4 таба + SOS-control, daily reading): [`docs/wellness-ux-north-star.md`](../../docs/wellness-ux-north-star.md), макет [`docs/wellness-ux-north-star.html`](../../docs/wellness-ux-north-star.html). UX-долг текущего каркаса: [`docs/ux-audit-2026-08.md`](../../docs/ux-audit-2026-08.md), [`docs/ux-improvement-plan.md`](../../docs/ux-improvement-plan.md).

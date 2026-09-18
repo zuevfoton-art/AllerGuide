@@ -47,6 +47,8 @@
 
 Cloud: REST PAT. Desktop: Settings → Tools & MCP → Connect Figma.
 
+Обратный путь (код → отрисовка в Figma): [`figma-code-to-figma.md`](./figma-code-to-figma.md) · пакет [`figma/`](./figma/).
+
 ## Связанное
 
 - MCP: [`docs/mcp-servers.md`](./mcp-servers.md)
