@@ -401,34 +401,6 @@ export default function MapScreen() {
         </View>
       </View>
 
-      <HintAnchor id="map.status" testID="map-status-card">
-      <MapPollenStatusCard
-        loading={loading}
-        hasSnapshot={Boolean(pollenSnapshot)}
-        zone={pollenZone}
-        headlineColor={pollenColors?.fg}
-        levelColor={levelColor}
-        statusHeadline={statusHeadline}
-        profileName={profile?.name}
-        profileRelevant={Boolean(selectedReading?.profileRelevant)}
-        locationLabel={coords.label || pollenRegion.name}
-        updatedLabel={updatedLabel}
-      />
-      </HintAnchor>
-
-      <HintAnchor id="map.layers" testID="map-layer-switcher">
-      <MapLayerSwitcher
-        layerMode={layerMode}
-        onLayerModeChange={(key) => {
-          setLayerMode(key);
-          if (key !== 'pollen') setAllergenPickerOpen(false);
-        }}
-        levelColor={levelColor}
-        taxonLabel={taxonLabel}
-        onAllergenPickerPress={() => setAllergenPickerOpen(true)}
-      />
-      </HintAnchor>
-
       <MapPollenAllergenModal
         visible={allergenPickerOpen}
         items={chipItems}
@@ -443,116 +415,149 @@ export default function MapScreen() {
         onClose={() => setAllergenPickerOpen(false)}
       />
 
-      <MapCanvas
-        styles={styles}
-        theme={theme}
-        latitude={coords.lat}
-        longitude={coords.lon}
-        useGoogleMap={useGoogleMap}
-        useYandexInteractive={useYandexInteractive}
-        showPlaceMarkers={showPlaceMarkers}
-        showPlacesLayer={showPlacesLayer}
-        showSearchAreaButton={showSearchAreaButton}
-        searchingArea={searchingArea}
-        yandexUrl={
-          showPlaceMarkers
-            ? yandexPlacesUrl || yandexPollenUrl
-            : yandexPollenUrl || yandexPlacesUrl
-        }
-        googleMapType={googleMapType}
-        airTileUrlTemplate={airTileUrlTemplate}
-        markers={markers}
-        circles={showPlumeGeo ? plume.circles : []}
-        polylines={showPlumeGeo ? plume.polylines : []}
-        selectedPoiId={selectedPoiId}
-        overlay={mapOverlay}
-        yandexPollenUrl={pollenSnapshot?.yandexPollenUrl}
-        onMarkerPress={setSelectedPoiId}
-        onRegionChange={handleRegionChange}
-        onMapLoaded={googleGuard.onMapLoaded}
-        onSearchThisArea={() => void searchThisArea()}
-      />
-
-      <MapLayerLegend
-        styles={styles}
-        theme={theme}
-        showPlacesLayer={showPlacesLayer}
-        showAirLayer={showAirLayer}
-        selectedTaxonId={selectedTaxonId}
-      />
-
-      {showActionTip ? (
-        <GlassCard style={styles.tipCard}>
-          <Text style={styles.tipText}>
-            {displayStatusLevel === 'high' ? t('map.actionTipHigh') : t('map.actionTipModerate')}
-          </Text>
-          <Button
-            label={t('map.actionTipClinicsCta')}
-            variant="secondary"
-            block
-            onPress={() => {
-              setLayerMode('places');
-              setPlaceFilters(['adair', 'medical']);
-            }}
-          />
-        </GlassCard>
-      ) : null}
-
-      <MapPollenDetails
-        styles={styles}
-        theme={theme}
-        showPollenLayer={showPollenLayer}
-        showAirLayer={showAirLayer}
-        taxonLabel={taxonLabel}
-        selectedTaxonId={selectedTaxonId}
-        selectedUpi={selectedUpi}
-        selectedReadingValue={selectedReading?.value ?? null}
-        pollenSnapshot={pollenSnapshot}
-        pollenZone={pollenZone}
-        heatmapEmpty={heatmapEmpty}
-        isCalendarFallback={isCalendarFallback}
-        pollenPeaks={pollenPeaks}
-        selectedForecastDay={selectedForecastDay}
-        onSelectForecastDay={setSelectedForecastDay}
-        airQuality={airQuality}
-        airQualityLoading={airQualityLoading}
-      />
-
-      {showPlacesPanel ? (
-        <MapPlacesPanel
-          placeInput={placeInput}
-          placeSuggestions={placeSuggestions}
-          placeSearchLoading={placeSearchLoading}
-          placeSearchError={placeSearchError}
-          pois={pois}
+      <View style={styles.mapFrame} testID="map-frame">
+        <MapCanvas
+          styles={styles}
+          theme={theme}
+          latitude={coords.lat}
+          longitude={coords.lon}
+          useGoogleMap={useGoogleMap}
+          useYandexInteractive={useYandexInteractive}
+          showPlaceMarkers={showPlaceMarkers}
+          showPlacesLayer={showPlacesLayer}
+          showSearchAreaButton={showSearchAreaButton}
+          searchingArea={searchingArea}
+          yandexUrl={
+            showPlaceMarkers
+              ? yandexPlacesUrl || yandexPollenUrl
+              : yandexPollenUrl || yandexPlacesUrl
+          }
+          googleMapType={googleMapType}
+          airTileUrlTemplate={airTileUrlTemplate}
+          markers={markers}
+          circles={showPlumeGeo ? plume.circles : []}
+          polylines={showPlumeGeo ? plume.polylines : []}
           selectedPoiId={selectedPoiId}
-          placeFilters={placeFilters}
-          onChangeInput={setPlaceInput}
-          onSubmit={(value) => {
-            void runPlaceSearch(value);
-          }}
-          onSelectSuggestion={(suggestion) => {
-            void handleSelectSuggestion(suggestion);
-          }}
-          onClear={clearPlaceSearch}
-          onSelectPoi={setSelectedPoiId}
-          onToggleFilter={togglePlaceFilter}
+          overlay={mapOverlay}
+          yandexPollenUrl={pollenSnapshot?.yandexPollenUrl}
+          onMarkerPress={setSelectedPoiId}
+          onRegionChange={handleRegionChange}
+          onMapLoaded={googleGuard.onMapLoaded}
+          onSearchThisArea={() => void searchThisArea()}
         />
-      ) : null}
+        <View style={styles.mapChrome}>
+          <HintAnchor id="map.layers" testID="map-layer-switcher">
+            <MapLayerSwitcher
+              layerMode={layerMode}
+              onLayerModeChange={(key) => {
+                setLayerMode(key);
+                if (key !== 'pollen') setAllergenPickerOpen(false);
+              }}
+              levelColor={levelColor}
+              taxonLabel={taxonLabel}
+              onAllergenPickerPress={() => setAllergenPickerOpen(true)}
+            />
+          </HintAnchor>
+        </View>
+      </View>
 
-      <MapDoctorsSection
-        onSelectClinic={(clinicId) => {
-          setLayerMode('places');
-          setPlaceFilters((current) =>
-            current.includes('adair') ? current : [...current, 'adair'],
-          );
-          setSelectedPoiId(`adair:${clinicId}`);
-        }}
-      />
+      <View style={styles.mapSheet} testID="map-bottom-sheet">
+        <HintAnchor id="map.status" testID="map-status-card">
+          <MapPollenStatusCard
+            loading={loading}
+            hasSnapshot={Boolean(pollenSnapshot)}
+            zone={pollenZone}
+            headlineColor={pollenColors?.fg}
+            levelColor={levelColor}
+            statusHeadline={statusHeadline}
+            profileName={profile?.name}
+            profileRelevant={Boolean(selectedReading?.profileRelevant)}
+            locationLabel={coords.label || pollenRegion.name}
+            updatedLabel={updatedLabel}
+          />
+        </HintAnchor>
 
-      <Disclaimer>
-        {showPlacesLayer ? t('map.disclaimerAdair') : t('map.disclaimerUnified')}
-      </Disclaimer>
+        <MapLayerLegend
+          styles={styles}
+          theme={theme}
+          showPlacesLayer={showPlacesLayer}
+          showAirLayer={showAirLayer}
+          selectedTaxonId={selectedTaxonId}
+        />
+
+        {showActionTip ? (
+          <GlassCard style={styles.tipCard}>
+            <Text style={styles.tipText}>
+              {displayStatusLevel === 'high' ? t('map.actionTipHigh') : t('map.actionTipModerate')}
+            </Text>
+            <Button
+              label={t('map.actionTipClinicsCta')}
+              variant="secondary"
+              block
+              onPress={() => {
+                setLayerMode('places');
+                setPlaceFilters(['adair', 'medical']);
+              }}
+            />
+          </GlassCard>
+        ) : null}
+
+        <MapPollenDetails
+          styles={styles}
+          theme={theme}
+          showPollenLayer={showPollenLayer}
+          showAirLayer={showAirLayer}
+          taxonLabel={taxonLabel}
+          selectedTaxonId={selectedTaxonId}
+          selectedUpi={selectedUpi}
+          selectedReadingValue={selectedReading?.value ?? null}
+          pollenSnapshot={pollenSnapshot}
+          pollenZone={pollenZone}
+          heatmapEmpty={heatmapEmpty}
+          isCalendarFallback={isCalendarFallback}
+          pollenPeaks={pollenPeaks}
+          selectedForecastDay={selectedForecastDay}
+          onSelectForecastDay={setSelectedForecastDay}
+          airQuality={airQuality}
+          airQualityLoading={airQualityLoading}
+        />
+
+        {showPlacesPanel ? (
+          <MapPlacesPanel
+            placeInput={placeInput}
+            placeSuggestions={placeSuggestions}
+            placeSearchLoading={placeSearchLoading}
+            placeSearchError={placeSearchError}
+            pois={pois}
+            selectedPoiId={selectedPoiId}
+            placeFilters={placeFilters}
+            onChangeInput={setPlaceInput}
+            onSubmit={(value) => {
+              void runPlaceSearch(value);
+            }}
+            onSelectSuggestion={(suggestion) => {
+              void handleSelectSuggestion(suggestion);
+            }}
+            onClear={clearPlaceSearch}
+            onSelectPoi={setSelectedPoiId}
+            onToggleFilter={togglePlaceFilter}
+          />
+        ) : null}
+
+        <MapDoctorsSection
+          onSelectClinic={(clinicId) => {
+            setLayerMode('places');
+            setPlaceFilters((current) =>
+              current.includes('adair') ? current : [...current, 'adair'],
+            );
+            setSelectedPoiId(`adair:${clinicId}`);
+          }}
+        />
+
+        <Disclaimer>
+          {showPlacesLayer ? t('map.disclaimerAdair') : t('map.disclaimerUnified')}
+        </Disclaimer>
+      </View>
     </Screen>
   );
 }

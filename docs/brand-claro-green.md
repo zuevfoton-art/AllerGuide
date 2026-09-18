@@ -60,12 +60,15 @@
 | `green` / `scannerSafeText` | `#047857`‡ | `#34D399` | Calm-zone / scanner copy on light fills |
 | `warning` | `#F97316` | `#FB923C` | «Дневник» / moderate badge |
 | `danger` | `#E53E3E` | `#F87171` | SOS |
+| `purple` | `#5D5FEF` | `#818CF8` | Auth email tab / accent (Figma login) |
 | `tipText` | `#3D6B5C` | `#B8CFC4` | Tip copy / gradient deep |
 | `info` / `infoLight` | = accent / accentLight | | Семантика «подсказка» |
 | `tipBg` / `tipBorder` | = accentLight / accentMid | | Tip cards |
 
 † Figma muted был `#6B7C75` (чуть ниже AA на `#FDFBF9`); в коде `#5F716B` для WCAG AA.  
 ‡ Figma ring fill `#10B981` fails AA on `successLight`; zone/scanner text uses darker emerald `#047857`.
+
+**Radii (Figma flow-map):** `xs` 8 · `sm` 12 · `md`/`row` 16 · `card` 20 · `lg` 24 · `xl` 32 · `full` ACTION only.
 
 Градиент `getClaroGradient(isDark)`:
 

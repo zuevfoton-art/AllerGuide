@@ -10,11 +10,14 @@ export const WEB_INPUT_FONT_SIZE = 16;
  * `full` is for ACTION pressables only (Button, extended FAB, emergency call).
  * Chips, inputs and badges stay on `sm` / `md` — they hold state, they do not fire an action.
  */
+/** Radii from Figma screens-flow-map (cards 16–20, inputs 12, soft 24–32, ACTION full). */
 export const radii = {
-  xs: 6,
-  sm: 10,
+  xs: 8,
+  sm: 12,
   md: 16,
   row: 16,
+  /** Soft cards / map chips — Figma ~20 */
+  card: 20,
   lg: 24,
   xl: 32,
   field: 36,

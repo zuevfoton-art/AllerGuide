@@ -52,6 +52,9 @@ const fr: LocaleMessages = {
   },
   auth: {
     loginTitle: 'Connexion',
+    loginSubtitle: 'Connectez-vous par téléphone ou e-mail',
+    tabPhone: 'Téléphone',
+    tabEmail: 'E-mail',
     registerTitle: 'Inscription',
     loginLabel: 'Téléphone ou e-mail',
     phonePlaceholder: '+33 6 12 34 56 78',
