@@ -11,7 +11,6 @@ import {
 } from '@allerguide/core';
 import { QuickCheckInCard } from '@/src/components/QuickCheckInCard';
 import { DailyReadingCard } from '@/src/components/DailyReadingCard';
-import { WeekRingCard } from '@/src/components/WeekRingCard';
 import { ImmuneBalanceCard } from '@/src/components/ImmuneBalanceCard';
 import { ImmuneBalanceStatusSheet } from '@/src/components/ImmuneBalanceStatusSheet';
 import {
@@ -35,7 +34,6 @@ import { useAsyncState } from '@/src/hooks/use-async-state';
 import { Screen } from '@/src/components/Screen';
 import { GlassCard } from '@/src/components/GlassCard';
 import { TabScreenHeader } from '@/src/components/TabScreenHeader';
-import { TierScale } from '@/src/components/TierScale';
 import { CardTitle } from '@/src/components/CardTitle';
 import { SkeletonCard } from '@/src/components/Skeleton';
 import { Button } from '@/src/components/Button';
@@ -45,7 +43,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { radii, space } from '@/src/constants/layout';
 import { useUiStyles } from '@/src/hooks/use-glass-styles';
-import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { ProfileHeaderButton } from '@/src/components/ProfileHeaderButton';
 import { HintAnchor } from '@/src/components/hints/HintAnchor';
@@ -122,13 +119,6 @@ export default function HomeScreen() {
       wellness.envDataAvailable,
     );
   }, [wellness, activeProfileId, profile, profileCapabilities]);
-
-  const pollenColors = wellness
-    ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.pollenTier), theme.colors)
-    : null;
-  const airColors = wellness
-    ? resolveZoneColors(zoneFromWellnessVerbalTier(wellness.display.airTier), theme.colors)
-    : null;
 
   const phenotypeHints = useMemo(
     () => (profile ? getProfileReassessmentHints(profile) : []),
@@ -241,84 +231,15 @@ export default function HomeScreen() {
       )}
 
       {activeProfileId && !(loadingWellness && !wellness) ? (
-        <>
-          <View style={styles.bubbleRow}>
-            <DailyReadingCard reading={reading} compact />
-            <QuickCheckInCard
-              profileId={activeProfileId}
-              checkedInToday={checkedInToday}
-              onSaved={reloadHomeData}
-              compact
-            />
-          </View>
-          <WeekRingCard entries={diaryEntries} surface="today" />
-        </>
-      ) : null}
-
-      {wellness ? (
-      <GlassCard variant="soft">
-        <CardTitle>{t('home.factors')}</CardTitle>
-        <Pressable
-          testID="home-factor-pollen"
-          onPress={() => router.push('/(tabs)/map?layer=pollen')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.factorOpenPollen')}
-          style={ui.kpiRow}>
-          <Text style={ui.kpiLabel}>{t('home.pollen')}</Text>
-          <View style={styles.factorValue}>
-            <TierScale
-              activeIndex={verbalTierIndex(wellness.display.pollenTier)}
-              zone={zoneFromWellnessVerbalTier(wellness.display.pollenTier)}
-            />
-            <Text style={[ui.kpiValue, pollenColors ? { color: pollenColors.fg } : null]}>
-              {t(`wellness.pollen.${wellness.display.pollenTier}`)}
-            </Text>
-          </View>
-        </Pressable>
-        <Pressable
-          testID="home-factor-air"
-          onPress={() => router.push('/(tabs)/map?layer=air')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.factorOpenAir')}
-          style={ui.kpiRow}>
-          <Text style={ui.kpiLabel}>{t('home.air')}</Text>
-          <View style={styles.factorValue}>
-            <TierScale
-              activeIndex={verbalTierIndex(wellness.display.airTier)}
-              zone={zoneFromWellnessVerbalTier(wellness.display.airTier)}
-            />
-            <Text style={[ui.kpiValue, airColors ? { color: airColors.fg } : null]}>
-              {t(`wellness.air.${wellness.display.airTier}`)}
-            </Text>
-          </View>
-        </Pressable>
-        <Pressable
-          testID="home-factor-diary"
-          onPress={() => router.push('/(tabs)/diary')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.factorOpenDiary')}
-          style={ui.kpiRow}>
-          <Text style={ui.kpiLabel}>{t('home.diary')}</Text>
-          <View style={styles.factorValue}>
-            <TierScale
-              activeIndex={verbalTierIndex(wellness.display.diaryTier)}
-              zone={zoneFromWellnessVerbalTier(wellness.display.diaryTier)}
-            />
-            <Text style={ui.kpiValue}>{t(`wellness.diaryState.${wellness.display.diaryTier}`)}</Text>
-          </View>
-        </Pressable>
-        {wellness.rings.clinical != null ? (
-          <Pressable
-            testID="home-factor-clinical"
-            onPress={() => router.push('/clinical-scales')}
-            accessibilityRole="button"
-            accessibilityLabel={t('home.factorOpenClinical')}
-            style={ui.kpiRow}>
-            <Text style={ui.kpiLabel}>{t('home.clinical')}</Text>
-            <Text style={ui.kpiValue}>{wellness.rings.clinical}%</Text>
-          </Pressable>
-        ) : null}
-      </GlassCard>
+        <View style={styles.bubbleRow}>
+          <DailyReadingCard reading={reading} compact />
+          <QuickCheckInCard
+            profileId={activeProfileId}
+            checkedInToday={checkedInToday}
+            onSaved={reloadHomeData}
+            compact
+          />
+        </View>
       ) : null}
 
       <ImmuneBalanceStatusSheet
@@ -562,15 +483,6 @@ function createStyles({ colors, fonts }: AppTheme) {
       justifyContent: 'center',
     },
     expertBody: { flex: 1, gap: 2 },
-    factorValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     bubbleRow: { flexDirection: 'row', gap: space[3], alignItems: 'stretch' },
   });
-}
-
-function verbalTierIndex(tier: string): number {
-  if (tier === 'none') return 0;
-  if (tier === 'low') return 1;
-  if (tier === 'moderate') return 2;
-  if (tier === 'high') return 3;
-  return 0;
 }

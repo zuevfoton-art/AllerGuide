@@ -221,8 +221,8 @@ const fr: LocaleMessages = {
     weekCount: '{{count}} jour(s) sur {{total}} noté(s)',
     weekEmpty: 'Aucun jour noté pour l’instant — ce n’est pas grave.',
     weekNudge: 'Un mot sur le rhume des foins',
-    weekOff: 'Semaine sur Aujourd’hui',
-    weekOffHint: 'Sept cases sous le check-in. Un oubli n’est qu’un jour vide, pas une série brisée.',
+    weekOff: 'Semaine dans le Journal',
+    weekOffHint: 'Sept cases sur l’écran Journal. Un oubli n’est qu’un jour vide, pas une série brisée.',
   },
   ask: {
     title: 'Demander',

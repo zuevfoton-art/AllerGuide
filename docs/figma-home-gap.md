@@ -26,10 +26,11 @@
 | Блок Figma | Код | Вердикт |
 |------------|-----|---------|
 | `top-header` brand + SOS + avatar | `TabScreenHeader` / SOS | OK (продуктовый header) |
-| `risk-card` → centered rings 220 + `progress-cards` ×3 + status summary | `ImmuneBalanceCard` + `ImmuneBalanceRings` (200) + progress mini-cards + status CTA | **Сделано** (#422) — оси pollen/air/diary (не labels Симпт./Сканер) |
+| `risk-card` → centered rings 220 + `progress-cards` ×3 + status summary | `ImmuneBalanceCard` + `ImmuneBalanceRings` (200) + progress mini-cards + «Подробнее» → sheet | **Сделано** — оси pollen/air/diary; factors в sheet |
 | `recommendations-card` | `DailyReadingCard` compact + CTA | OK (#421) |
-| check-in (в mockup bubble) | `QuickCheckInCard` compact chips | OK (#421) |
-| Week ring / Factors / TierScale | `WeekRingCard` + `GlassCard` + `TierScale` | OK — в Figma dashboard нет week-ring; оставляем продукт |
+| check-in (в mockup bubble) | `QuickCheckInCard` compact smileys (0–3) | **Сделано** — смайлики вместо 4 text chips |
+| Week ring | — на главной убран; `WeekRingCard` на `/(tabs)/diary` | **Сделано** — активность недели только в дневнике |
+| Factors / TierScale | в `ImmuneBalanceStatusSheet` (не отдельная карточка на home) | **Сделано** |
 | `expert-hub` | expert section на home | оставить |
 | Insights / SOS / clinical ring | есть в коде | **не удалять** |
 
@@ -40,15 +41,16 @@
 ## Дельты пилота
 
 1. **Compact reading** — CTA `reading.action.label` (#421).
-2. **Compact check-in** — сетка 2×2 чипов (#421).
+2. **Compact check-in** — ряд смайликов 😊😐😕😣 (severity 0–3), a11y по `SEVERITY_0_3_LABELS`.
 3. **Theme sync** — sage/cream/SOS из Figma (#422).
-4. **ImmuneBalance layout** — centered rings + 3 progress mini-cards + status row (#422).
-5. Mockup + `docs/screens/home.html` — зеркало risk-card.
-6. Insights / expert / SOS / factors / rings — **не удалять**.
+4. **ImmuneBalance layout** — centered rings + 3 progress mini-cards + «Подробнее» → status/factors sheet.
+5. Mockup + `docs/screens/home.html` — зеркало risk-card / smileys.
+6. Insights / expert / SOS / rings — **не удалять**; factors только в sheet.
+7. Week ring убран с Сегодня — активность недели только на дневнике.
 
 ## Отклонено / отложено
 
-- Удаление колец / week-ring / factors — продукт важнее полного паритета с коротким Figma dashboard.
+- Удаление ImmuneBalance колец / factors — продукт важнее полного паритета с коротким Figma dashboard.
 - Переименование осей колец в «Симпт./Сканер» — доменная модель AllerGuide (пыльца/воздух/дневник).
 - Work Sans font family — отдельный шаг.
 - Массовый перенос остальных табов.

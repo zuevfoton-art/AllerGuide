@@ -222,8 +222,8 @@ const de: LocaleMessages = {
     weekCount: '{{count}} von {{total}} Tagen erfasst',
     weekEmpty: 'Noch kein Tag erfasst — das ist in Ordnung.',
     weekNudge: 'Kurz zum Heuschnupfen',
-    weekOff: 'Woche auf Heute',
-    weekOffHint: 'Sieben Felder unter dem Check-in. Ein Auslassen ist nur ein leerer Tag, keine verlorene Serie.',
+    weekOff: 'Woche im Tagebuch',
+    weekOffHint: 'Sieben Felder auf dem Tagebuch-Bildschirm. Ein Auslassen ist nur ein leerer Tag, keine verlorene Serie.',
   },
   ask: {
     title: 'Fragen',

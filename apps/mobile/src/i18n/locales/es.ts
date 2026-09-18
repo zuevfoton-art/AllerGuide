@@ -221,8 +221,8 @@ const es: LocaleMessages = {
     weekCount: '{{count}} de {{total}} días registrados',
     weekEmpty: 'Aún no hay días — no pasa nada.',
     weekNudge: 'Una nota breve sobre el polen',
-    weekOff: 'Semana en Hoy',
-    weekOffHint: 'Siete huecos bajo el registro. Un día vacío no es una racha perdida.',
+    weekOff: 'Semana en el Diario',
+    weekOffHint: 'Siete huecos en la pantalla Diario. Un día vacío no es una racha perdida.',
   },
   ask: {
     title: 'Preguntar',

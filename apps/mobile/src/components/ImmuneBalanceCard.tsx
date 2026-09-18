@@ -6,7 +6,6 @@ import { ImmuneBalanceRings } from '@/src/components/ImmuneBalanceRings';
 import { density, radii, space } from '@/src/constants/layout';
 import { fontSizes, lineHeights, scaledTextProps } from '@/src/constants/typography';
 import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
-import { resolveZoneColors, zoneFromWellnessLevel } from '@/src/hooks/use-zone-colors';
 import { useTranslation } from '@/src/store/locale-store';
 import { canShiftImmuneBalanceDay } from '@allerguide/core';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,7 +38,6 @@ export function ImmuneBalanceCard({
   const now = new Date();
   const canPrev = canShiftImmuneBalanceDay(selectedDay, -1, now);
   const canNext = canShiftImmuneBalanceDay(selectedDay, 1, now);
-  const statusColors = resolveZoneColors(zoneFromWellnessLevel(wellness.level), theme.colors);
   const pan = useMemo(
     () =>
       PanResponder.create({
@@ -130,21 +128,12 @@ export function ImmuneBalanceCard({
         testID="immune-balance-status"
         onPress={onOpenStatus}
         accessibilityRole="button"
-        accessibilityLabel={t('home.balanceStatusA11y', { status: wellness.statusTitle })}
-        style={[
-          styles.statusBtn,
-          statusColors
-            ? { backgroundColor: statusColors.bg, borderColor: statusColors.border }
-            : null,
-        ]}
+        accessibilityLabel={t('home.wellnessDetails')}
+        style={styles.detailsLink}
         hitSlop={8}>
-        <Text
-          {...scaledTextProps}
-          style={[styles.statusText, statusColors ? { color: statusColors.fg } : null]}
-          numberOfLines={2}>
-          {wellness.statusTitle}
+        <Text {...scaledTextProps} style={styles.detailsLinkText}>
+          {t('home.wellnessDetails')}
         </Text>
-        <Ionicons name="chevron-down" size={16} color={theme.colors.textMuted} />
       </Pressable>
     </GlassCard>
   );
@@ -236,7 +225,7 @@ function createStyles({ colors, fonts }: AppTheme) {
     progressRow: {
       flexDirection: 'row',
       gap: space[2],
-      marginBottom: space[3],
+      marginBottom: space[2],
     },
     progressCard: {
       flex: 1,
@@ -282,24 +271,19 @@ function createStyles({ colors, fonts }: AppTheme) {
       height: 4,
       borderRadius: radii.full,
     },
-    statusBtn: {
-      minHeight: density.tapMinHeight,
-      borderRadius: radii.sm,
-      borderWidth: 1,
-      borderColor: colors.border,
-      paddingHorizontal: space[3],
-      paddingVertical: space[2],
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: space[2],
+    detailsLink: {
+      alignSelf: 'center',
+      minHeight: density.tapMinHeightSm,
+      justifyContent: 'center',
+      paddingHorizontal: space[2],
     },
-    statusText: {
-      flex: 1,
+    detailsLinkText: {
       fontFamily: fonts.sansSemiBold,
       fontSize: fontSizes.bodySm,
       lineHeight: lineHeights.bodySm,
       fontWeight: '600',
       color: colors.head,
+      textAlign: 'center',
     },
   });
 }
