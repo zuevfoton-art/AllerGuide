@@ -49,6 +49,15 @@ describe('Maestro nightly CI invariants', () => {
     // Nightly 34474685308: mergeDexRelease OOM at -Xmx2048m. Pin ≥4g after prebuild.
     assert.match(script, /pin_gradle_heap/);
     assert.match(script, /Xmx4096m/);
+    // No EXPO_PUBLIC_* value is an input of the bundle task, so Gradle reports it
+    // UP-TO-DATE after a build with another profile and ships the previous JS:
+    // locally `staging` then `preview` produced byte-identical bundles, staging
+    // API URL and DSN included.
+    assert.match(
+      script,
+      /rm -rf app\/build\/generated\/assets\/react\/release/,
+      'drop the generated bundle so the requested profile always takes',
+    );
     assert.match(script, /--no-parallel/);
     assert.match(script, /-Dorg\.gradle\.jvmargs=/);
     // Nightly 35198863494: Maven 403 on gson killed preview assemble while staging
@@ -653,6 +662,35 @@ describe('Maestro nightly CI invariants', () => {
         );
       }
     }
+  });
+
+  it('pins the same Gradle memory on the CLI and in gradle.properties', () => {
+    // The script passes jvmargs on the Gradle CLI, which wins over the
+    // properties file, so raising only one of them changes nothing for the
+    // nightly. Keep them identical instead.
+    const script = read('scripts/maestro-build-apk.sh');
+    const props = read('apps/mobile/android/gradle.properties');
+    const fromScript = script.match(/MAESTRO_GRADLE_JVMARGS='([^']+)'/);
+    const fromProps = props.match(/^org\.gradle\.jvmargs=(.+)$/m);
+    assert.ok(fromScript, 'maestro-build-apk.sh must pin MAESTRO_GRADLE_JVMARGS');
+    assert.ok(fromProps, 'gradle.properties must pin org.gradle.jvmargs');
+    assert.equal(
+      fromScript[1].trim(),
+      fromProps[1].trim(),
+      'the CLI jvmargs and gradle.properties must match, or one of them is dead config',
+    );
+    assert.match(fromScript[1], /-XX:MaxMetaspaceSize=1024m/);
+
+    // Nightly 35198863494: the offline job died resolving gson from Maven
+    // Central. `assemble_release_with_retry` covers a transient miss; the cache
+    // keeps an unchanged build off the network entirely.
+    const workflow = read('.github/workflows/maestro-nightly.yml');
+    assert.match(script, /assemble_release_with_retry/);
+    assert.equal(
+      workflow.match(/cache: gradle/g)?.length,
+      2,
+      'both nightly jobs must cache Gradle dependencies',
+    );
   });
 
   it('bans hideKeyboard and the back command in every Maestro flow', () => {
