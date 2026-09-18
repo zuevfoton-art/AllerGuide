@@ -24,6 +24,8 @@
       --success: #10B981;
       --success-light: #ECFDF5;
       --success-border: #A7F3D0;
+      --mint: #E4EBE4;
+      --green: #047857;
       --danger: #E53E3E;
       --danger-light: #FEF2F2;
       --danger-border: #FECACA;
@@ -281,11 +283,12 @@
     .balance-day-label {
       flex: 1; text-align: center; font-size: 15px; font-weight: 600; color: var(--head);
     }
-    .balance-body {
-      display: flex; align-items: center; gap: 12px;
+    /* Figma risk-card: centered rings + 3 progress mini-cards + status */
+    .balance-rings-block {
+      display: flex; justify-content: center; margin-bottom: 12px;
     }
     .balance-rings {
-      position: relative; width: 168px; height: 168px; flex-shrink: 0;
+      position: relative; width: 200px; height: 200px; flex-shrink: 0;
     }
     .balance-rings svg { display: block; }
     .balance-score {
@@ -293,22 +296,41 @@
       font-size: 32px; font-weight: 700; color: var(--head);
       font-variant-numeric: tabular-nums; pointer-events: none;
     }
-    .balance-status-col {
-      flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+    .balance-progress-row {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .balance-progress-card {
+      flex: 1; min-width: 0; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 8px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .balance-progress-header {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .balance-progress-header i {
+      width: 8px; height: 8px; border-radius: 999px; display: block; flex-shrink: 0;
+    }
+    .balance-progress-pct {
+      font-size: 12px; font-weight: 700; line-height: 1.2;
+    }
+    .balance-progress-label {
+      font-size: 12px; font-weight: 600; color: var(--head);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .balance-mini-track {
+      height: 4px; border-radius: 999px; background: var(--mint); overflow: hidden; margin-top: 4px;
+    }
+    .balance-mini-fill {
+      height: 100%; border-radius: 999px;
     }
     .balance-status {
       min-height: 44px; border-radius: var(--radius-sm);
       border: 1px solid var(--warning-border); background: var(--warning-light);
       color: var(--warning); font-size: 13px; font-weight: 600;
-      padding: 8px 10px; line-height: 1.3; display: flex; align-items: center;
+      padding: 8px 12px; line-height: 1.3;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
     }
-    .balance-legend {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 12px; color: var(--text-secondary);
-    }
-    .balance-legend i {
-      width: 8px; height: 8px; border-radius: 3px; display: block; flex-shrink: 0;
-    }
+    .balance-status .chev { color: var(--text-muted); font-size: 14px; }
 
     .bubble-row {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
@@ -1029,40 +1051,64 @@
           <div class="doc-label">Четверг, 18 сентября</div>
           <div class="doc-title" style="margin-bottom:12px">Сегодня</div>
 
-          <!-- ImmuneBalanceCard — concentric rings from PR #412 -->
+          <!-- ImmuneBalanceCard — Figma risk-card (centered rings + progress mini-cards) -->
           <div class="card soft-card" id="immune-balance-card">
             <div class="balance-day-row">
               <div class="balance-day-arrow" title="Предыдущий день">‹</div>
               <div class="balance-day-label">Сегодня</div>
               <div class="balance-day-arrow disabled" title="Следующий день">›</div>
             </div>
-            <div class="balance-body">
+            <div class="balance-rings-block">
               <div class="balance-rings" role="img" aria-label="Индекс 68. Пыльца 72%, воздух 55%, дневник 80%">
-                <svg width="168" height="168" viewBox="0 0 168 168" aria-hidden="true">
-                  <!-- pollen track + arc (r=70, 72%) -->
-                  <circle cx="84" cy="84" r="70" fill="none" stroke="var(--accent-light)" stroke-width="11"/>
-                  <circle cx="84" cy="84" r="70" fill="none" stroke="var(--accent)" stroke-width="11"
-                    stroke-linecap="round" stroke-dasharray="316.7 439.8"
-                    transform="rotate(-90 84 84)"/>
-                  <!-- air track + arc (r=52, 55%) -->
-                  <circle cx="84" cy="84" r="52" fill="none" stroke="var(--success-light)" stroke-width="11"/>
-                  <circle cx="84" cy="84" r="52" fill="none" stroke="var(--success)" stroke-width="11"
-                    stroke-linecap="round" stroke-dasharray="179.7 326.7"
-                    transform="rotate(-90 84 84)"/>
-                  <!-- diary track + arc (r=34, 80%) -->
-                  <circle cx="84" cy="84" r="34" fill="none" stroke="var(--warning-light)" stroke-width="11"/>
-                  <circle cx="84" cy="84" r="34" fill="none" stroke="var(--warning)" stroke-width="11"
-                    stroke-linecap="round" stroke-dasharray="170.9 213.6"
-                    transform="rotate(-90 84 84)"/>
+                <svg width="200" height="200" viewBox="0 0 200 200" aria-hidden="true">
+                  <!-- pollen track + arc (r=84, 72%) -->
+                  <circle cx="100" cy="100" r="84" fill="none" stroke="var(--mint)" stroke-width="12"/>
+                  <circle cx="100" cy="100" r="84" fill="none" stroke="var(--accent)" stroke-width="12"
+                    stroke-linecap="round" stroke-dasharray="380.1 527.8"
+                    transform="rotate(-90 100 100)"/>
+                  <!-- air track + arc (r=62, 55%) -->
+                  <circle cx="100" cy="100" r="62" fill="none" stroke="var(--mint)" stroke-width="12"/>
+                  <circle cx="100" cy="100" r="62" fill="none" stroke="var(--success)" stroke-width="12"
+                    stroke-linecap="round" stroke-dasharray="214.3 389.6"
+                    transform="rotate(-90 100 100)"/>
+                  <!-- diary track + arc (r=40, 80%) -->
+                  <circle cx="100" cy="100" r="40" fill="none" stroke="var(--mint)" stroke-width="12"/>
+                  <circle cx="100" cy="100" r="40" fill="none" stroke="var(--warning)" stroke-width="12"
+                    stroke-linecap="round" stroke-dasharray="201.1 251.3"
+                    transform="rotate(-90 100 100)"/>
                 </svg>
                 <div class="balance-score" id="score-num">68</div>
               </div>
-              <div class="balance-status-col">
-                <div class="balance-status" id="wellness-badge">Требуется немного больше внимания</div>
-                <div class="balance-legend"><i style="background:var(--accent)"></i>Пыльца</div>
-                <div class="balance-legend"><i style="background:var(--success)"></i>Воздух</div>
-                <div class="balance-legend"><i style="background:var(--warning)"></i>Дневник</div>
+            </div>
+            <div class="balance-progress-row">
+              <div class="balance-progress-card">
+                <div class="balance-progress-header">
+                  <i style="background:var(--accent)"></i>
+                  <span class="balance-progress-pct" style="color:var(--accent)">72%</span>
+                </div>
+                <div class="balance-progress-label">Пыльца</div>
+                <div class="balance-mini-track"><div class="balance-mini-fill" style="width:72%;background:var(--accent)"></div></div>
               </div>
+              <div class="balance-progress-card">
+                <div class="balance-progress-header">
+                  <i style="background:var(--success)"></i>
+                  <span class="balance-progress-pct" style="color:var(--success)">55%</span>
+                </div>
+                <div class="balance-progress-label">Воздух</div>
+                <div class="balance-mini-track"><div class="balance-mini-fill" style="width:55%;background:var(--success)"></div></div>
+              </div>
+              <div class="balance-progress-card">
+                <div class="balance-progress-header">
+                  <i style="background:var(--warning)"></i>
+                  <span class="balance-progress-pct" style="color:var(--warning)">80%</span>
+                </div>
+                <div class="balance-progress-label">Дневник</div>
+                <div class="balance-mini-track"><div class="balance-mini-fill" style="width:80%;background:var(--warning)"></div></div>
+              </div>
+            </div>
+            <div class="balance-status" id="wellness-badge">
+              <span>Требуется немного больше внимания</span>
+              <span class="chev" aria-hidden="true">▾</span>
             </div>
           </div>
 

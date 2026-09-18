@@ -107,7 +107,8 @@ export const lightColors: ThemeColors = {
   cautionLight: '#FFFBEB',
   cautionBorder: '#FDE68A',
   forest: '#2C3531',
-  green: '#10B981',
+  /** Text on successLight (calm zone) — darker than Figma ring fill `#10B981` for AA */
+  green: '#047857',
   mint: '#E4EBE4',
   foam: '#EAF2EA',
   cream: '#FDFBF9',
@@ -123,7 +124,7 @@ export const lightColors: ThemeColors = {
   scannerDangerBorder: '#FECACA',
   scannerSafeIconBg: '#ECFDF5',
   scannerDangerIconBg: '#FEF2F2',
-  scannerSafeText: '#10B981',
+  scannerSafeText: '#047857',
   overlay: '#2C3531',
   teal: '#5B8C7A',
   tealLight: '#EAF2EA',

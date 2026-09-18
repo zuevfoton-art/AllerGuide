@@ -56,14 +56,16 @@
 | `head` / `text` | `#2C3531` | `#E8EDE9` / `#F4F7F5` | Заголовки и body |
 | `textMuted` | `#5F716B`† | `#8A9892` | Вторичный текст |
 | `border` | `#E2E8F0` | `#2C3A35` | Nav / card stroke |
-| `success` | `#10B981` | `#34D399` | «Сканер» ring / safe |
+| `success` | `#10B981` | `#34D399` | Ring fill / chart safe |
+| `green` / `scannerSafeText` | `#047857`‡ | `#34D399` | Calm-zone / scanner copy on light fills |
 | `warning` | `#F97316` | `#FB923C` | «Дневник» / moderate badge |
 | `danger` | `#E53E3E` | `#F87171` | SOS |
 | `tipText` | `#3D6B5C` | `#B8CFC4` | Tip copy / gradient deep |
 | `info` / `infoLight` | = accent / accentLight | | Семантика «подсказка» |
 | `tipBg` / `tipBorder` | = accentLight / accentMid | | Tip cards |
 
-† Figma muted был `#6B7C75` (чуть ниже AA на `#FDFBF9`); в коде `#5F716B` для WCAG AA.
+† Figma muted был `#6B7C75` (чуть ниже AA на `#FDFBF9`); в коде `#5F716B` для WCAG AA.  
+‡ Figma ring fill `#10B981` fails AA on `successLight`; zone/scanner text uses darker emerald `#047857`.
 
 Градиент `getClaroGradient(isDark)`:
 
