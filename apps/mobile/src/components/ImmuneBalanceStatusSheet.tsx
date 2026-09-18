@@ -10,6 +10,7 @@ import { useTheme, type AppTheme } from '@/src/hooks/use-theme';
 import { resolveZoneColors, zoneFromWellnessVerbalTier } from '@/src/hooks/use-zone-colors';
 import type { WellnessSnapshot } from '@/src/services/wellness-service';
 import { useTranslation } from '@/src/store/locale-store';
+import type { WellnessVerbalTier } from '@allerguide/core';
 import { Ionicons } from '@expo/vector-icons';
 
 type ImmuneBalanceStatusSheetProps = {
@@ -26,7 +27,7 @@ function scaleNameKey(scaleId: string): string {
   return 'home.clinical';
 }
 
-function verbalTierIndex(tier: string): number {
+function verbalTierIndex(tier: WellnessVerbalTier): number {
   if (tier === 'none') return 0;
   if (tier === 'low') return 1;
   if (tier === 'moderate') return 2;
@@ -147,7 +148,7 @@ function FactorRow({
   testID: string;
   label: string;
   valueLabel: string;
-  tier: string;
+  tier: WellnessVerbalTier;
   percent: number;
   detail?: string;
   accessibilityLabel: string;
