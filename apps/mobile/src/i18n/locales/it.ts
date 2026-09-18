@@ -221,8 +221,8 @@ const it: LocaleMessages = {
     weekCount: '{{count}} giorni su {{total}} registrati',
     weekEmpty: 'Nessun giorno ancora — va bene così.',
     weekNudge: 'Due parole sul polline',
-    weekOff: 'Settimana su Oggi',
-    weekOffHint: 'Sette caselle sotto il check-in. Un giorno vuoto non è una serie bruciata.',
+    weekOff: 'Settimana nel Diario',
+    weekOffHint: 'Sette caselle nella schermata Diario. Un giorno vuoto non è una serie bruciata.',
   },
   ask: {
     title: 'Chiedi',

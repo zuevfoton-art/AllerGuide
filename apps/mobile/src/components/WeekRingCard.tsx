@@ -21,7 +21,7 @@ type WeekRingCardProps = {
 const shownSurfaces = new Set<string>();
 
 /**
- * Seven Monday-to-Sunday slots under the check-in (north-star §4.8).
+ * Seven Monday-to-Sunday slots on the journal (north-star §4.8).
  * Deliberately not a streak: a gap is an empty slot, never «you lost it».
  */
 export function WeekRingCard({ entries, surface }: WeekRingCardProps) {

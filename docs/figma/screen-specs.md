@@ -15,9 +15,9 @@ Copy: RU (+30% DE в пометке, не 6 языков)
 ### Сегодня `/(tabs)/home`
 
 - **Назначение:** индекс дня + действия, не урезанный dashboard.
-- **Иерархия:** `TabScreenHeader` (бренд + аватар → `/profile` + SOS) → `ImmuneBalanceCard` → compact reading + check-in → `WeekRingCard` → факторы → insights → expert → `Disclaimer`.
-- **Компоненты:** `GlassCard soft`, rings 200, progress ×3 **Пыльца / Воздух / Дневник**, status row → sheet.
-- **Тапы:** status → sheet FR-HOME-09; пыльца → `/map?layer=pollen`; воздух → `/map?layer=air`; дневник → журнал; оценки → `/clinical-scales`; expert → `/expert`; reading CTA → карта.
+- **Иерархия:** `TabScreenHeader` (бренд + аватар → `/profile` + SOS) → `ImmuneBalanceCard` → compact reading + check-in smileys → insights → expert → `Disclaimer`. Week-ring — на журнале.
+- **Компоненты:** `GlassCard soft`, rings 200, progress ×3 **Пыльца / Воздух / Дневник**, «Подробнее» → `ImmuneBalanceStatusSheet` (статус + factors/`TierScale`).
+- **Тапы:** «Подробнее» → sheet FR-HOME-09; в sheet: пыльца → `/map?layer=pollen`; воздух → `/map?layer=air`; дневник → журнал; оценки → `/clinical-scales`; expert → `/expert`; reading CTA → карта; check-in smileys → `saveQuickCheckIn`.
 - **Состояния:** default (есть wellness); empty factors / empty insights; offline (ядро живо, пыльца/воздух «нет данных»); no-profile (кольца/факторы скрыты, SOS жив).
 - **A11y:** тап ≥44; rings `role=img`.
 - **testID:** `immune-balance`, `immune-balance-score`, `immune-balance-card`, `immune-balance-status`, `home-factor-pollen|air|diary|clinical`, `home-insights`.

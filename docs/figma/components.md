@@ -52,7 +52,7 @@ SOS — **не** пятый равный таб: permanent `danger` tint, ≥44 
 
 `radii.sm` 12 или `md` 16. **Запрещено** `full` на чипе, фильтре, табе-сегменте, инпуте.
 
-Check-in 0–3 на Сегодня — сетка 2×2 STATE chips.
+Check-in 0–3 на Сегодня — ряд смайликов (severity), a11y по текстовым labels; не text chips.
 
 ## Empty / Error / Skeleton
 
@@ -66,9 +66,9 @@ Check-in 0–3 на Сегодня — сетка 2×2 STATE chips.
 | Карточка риска | `ImmuneBalanceCard` | `immune-balance-card`, `immune-balance-status` |
 | Progress ×3 | pollen / air / diary | оси **не** «Симпт./Сканер» |
 | Reading | `DailyReadingCard` compact | |
-| Чек-ин | `QuickCheckInCard` | |
-| Факторы | rows | `home-factor-pollen\|air\|diary\|clinical` |
-| Неделя | `WeekRingCard` | нет в `3328:137` — рисовать |
+| Чек-ин | `QuickCheckInCard` smileys | `quick-check-in`, `quick-check-in-0…3` |
+| Факторы | rows в `ImmuneBalanceStatusSheet` | `home-factor-pollen\|air\|diary\|clinical` |
+| Неделя | `WeekRingCard` на `/(tabs)/diary` | не на home |
 | Insights | | `home-insights` |
 
 HTML-kit: [`kit.html`](./kit.html) (открыть в браузере, импорт PNG на page 02).

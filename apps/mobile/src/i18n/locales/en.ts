@@ -221,8 +221,8 @@ const en: LocaleMessages = {
     weekCount: '{{count}} of {{total}} days logged',
     weekEmpty: 'No days logged yet — that is fine.',
     weekNudge: 'A short note on hay fever',
-    weekOff: 'Week on Today',
-    weekOffHint: 'Seven slots under the check-in. A miss is just an empty day, not a broken streak.',
+    weekOff: 'Week in Journal',
+    weekOffHint: 'Seven slots on the Journal screen. A miss is just an empty day, not a broken streak.',
   },
   ask: {
     title: 'Ask',
