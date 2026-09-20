@@ -136,9 +136,9 @@ export default function ScannerScreen() {
             </View>
           </Pressable>
         </HintAnchor>
-        <Text style={styles.instructionText} testID="scanner-camera-hint" collapsable={false}>
-          {t('scanner.cameraHint')}
-        </Text>
+        <View testID="scanner-camera-hint" collapsable={false}>
+          <Text style={styles.instructionText}>{t('scanner.cameraHint')}</Text>
+        </View>
 
         <View style={styles.secondaryRow}>
           <HintAnchor id="scanner.barcode" style={{ flex: 1 }}>
