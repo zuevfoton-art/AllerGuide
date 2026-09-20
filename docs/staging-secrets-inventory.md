@@ -40,6 +40,12 @@ Default id: `e6qs399v1b3unstfh5rj` (`terraform output -raw lockbox_secret_id`).
 | `YANDEX_MAPS_INTERACTIVE_ENABLED` | In-app Yandex JS embed | `true` on staging |
 | `YANDEX_MAPS_JS_API_KEY` | Yandex Maps JS API | **server only**; never EAS / `EXPO_PUBLIC_*` |
 | `MAPS_RATE_LIMIT_*` | Embed HTML rate limits | optional defaults |
+| `YANDEX_MARKET_FEED_URL` | Distribution YML product feed | HTTPS only; import via `pnpm --filter api db:import-market` |
+| `YANDEX_MARKET_CLID` / `YANDEX_MARKET_OAUTH_TOKEN` / `YANDEX_MARKET_ERID` | Affiliate resolve | optional; CTA still uses seed deep-links without them |
+| `YANDEX_MARKET_CURATOR_SEARCH` | Retired Affiliate search | keep `false` |
+| `MARKET_PHARMACY_FEED_ENABLED` / `MARKET_PHARMACY_FEED_URL` | OTC pharmacy feed | enable only after Admitad + legal review |
+
+Upsert + remount: `pnpm yc-stage-enable-market-feeds` (needs the two HTTPS feed URLs in env).
 
 Mount list for Serverless: [`apps/api/lockbox-staging.keys`](../apps/api/lockbox-staging.keys).  
 Upsert without wipe: `./scripts/yc-lockbox-upsert.sh KEY=VALUE`.
