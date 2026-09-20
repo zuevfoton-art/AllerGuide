@@ -202,6 +202,16 @@ describe('Maestro nightly CI invariants', () => {
       stagingAuth,
       /scrollUntilVisible:[\s\S]*?id: profile-logout[\s\S]*?-\s+tapOn:\s+id: profile-logout/,
     );
+    assert.match(stagingAuth, /_fill-by-id\.yaml/);
+    assert.match(stagingAuth, /_tap-by-id\.yaml/);
+    assert.match(stagingAuth, /FIELD_ID: auth-login-input/);
+    assert.match(stagingAuth, /FIELD_ID: auth-password-input/);
+    assert.match(stagingAuth, /FIELD_ID: auth-submit/);
+    assert.doesNotMatch(
+      stagingAuth,
+      /^\s*-\s+tapOn:\s*\n\s+id: auth-password-input\s*$/m,
+      'staging-auth must not tap auth-password-input while email IME may cover it',
+    );
 
     const stagingBackup = read('apps/mobile/.maestro/flows/staging-backup-smoke.yaml');
     assert.match(stagingBackup, /id: status-banner-message/);
@@ -482,12 +492,14 @@ describe('Maestro nightly CI invariants', () => {
     assert.doesNotMatch(flow, /^\s*-\s+hideKeyboard\b/m);
 
     const dismiss = read('apps/mobile/.maestro/flows/_dismiss-scanner-ime.yaml');
-    assert.match(dismiss, /id: scanner-title/);
+    assert.match(dismiss, /id: scanner-camera-hint/);
     assert.doesNotMatch(dismiss, /^\s*-\s+hideKeyboard\b/m);
 
     const screen = read('apps/mobile/app/(tabs)/scanner.tsx');
     assert.match(screen, /testID="scanner-toggle-manual"/);
     assert.match(screen, /testID="scanner-title"/);
+    assert.match(screen, /testID="scanner-camera-hint"/);
+    assert.match(screen, /collapsable=\{false\}/);
     assert.match(screen, /inputTestID="scanner-input"/);
   });
 

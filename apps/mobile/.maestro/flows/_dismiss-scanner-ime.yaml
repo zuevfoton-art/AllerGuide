@@ -1,6 +1,8 @@
 # Fold IME on the scanner without BACK / hideKeyboard.
-# Tap the page title (non-interactive Text), same pattern as auth-hero-title.
+# Zip UI puts a 280px camera well above the title, so scanner-title
+# scrolls off when Gboard is open (nightly 35498846516). Tap the camera
+# hint — it stays on screen above the manual field.
 appId: com.aclearo.app
 ---
 - tapOn:
-    id: scanner-title
+    id: scanner-camera-hint
