@@ -1,4 +1,6 @@
-# P2.1a — SOS: profile card + passport collapse
+# P2.1a — SOS: zip passport card + detailed passport collapse
+# The zip card (sos-profile-card) is always open. sos-passport-toggle is the
+# older detailed section below the crisis plan (nightly 35507872138).
 appId: com.aclearo.app
 ---
 - runFlow: _offline-bootstrap.yaml
@@ -10,6 +12,13 @@ appId: com.aclearo.app
     timeout: 10000
 - assertVisible:
     text: Maestro Tester
+- assertVisible:
+    id: sos-crisis-plan
+- scrollUntilVisible:
+    element:
+      id: sos-passport-toggle
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: sos-passport-toggle
 - assertVisible:

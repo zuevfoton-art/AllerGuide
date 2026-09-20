@@ -503,6 +503,29 @@ describe('Maestro nightly CI invariants', () => {
     assert.match(screen, /inputTestID="scanner-input"/);
   });
 
+  it('scrolls to sos-passport-toggle below the zip passport card', () => {
+    const flow = read('apps/mobile/.maestro/flows/sos-smoke.yaml');
+    assert.match(flow, /id: sos-profile-card/);
+    assert.match(flow, /id: sos-crisis-plan/);
+    assert.match(
+      flow,
+      /scrollUntilVisible:[\s\S]*?id: sos-passport-toggle[\s\S]*?-\s+tapOn:\s+id: sos-passport-toggle/,
+    );
+    assert.ok(
+      flow.indexOf('id: sos-profile-card') < flow.indexOf('id: sos-passport-toggle'),
+      'sos-smoke must wait for the zip passport card before the detailed toggle',
+    );
+
+    const screen = read('apps/mobile/app/(tabs)/sos.tsx');
+    assert.match(screen, /testID="sos-profile-card"/);
+    assert.match(screen, /testID="sos-passport-toggle"/);
+    assert.match(screen, /testID="sos-crisis-plan"/);
+    assert.ok(
+      screen.indexOf('testID="sos-profile-card"') < screen.indexOf('testID="sos-passport-toggle"'),
+      'zip passport card is above the detailed toggle',
+    );
+  });
+
   it('keeps first-run food → milk and documents pollinosis quick-pick (S1)', () => {
     const firstRun = read('apps/mobile/.maestro/flows/_complete-first-run-profile.yaml');
     assert.match(firstRun, /id: condition-food/);

@@ -371,6 +371,19 @@ function checkMaestroFlows() {
     failures.push('scanner.tsx must expose scanner-toggle-manual, scanner-title, and scanner-camera-hint');
   }
 
+  const sosSmoke = fs.readFileSync(path.join(flowsDir, 'sos-smoke.yaml'), 'utf8');
+  if (
+    !sosSmoke.includes('sos-profile-card') ||
+    !sosSmoke.includes('sos-crisis-plan') ||
+    !sosSmoke.includes('scrollUntilVisible') ||
+    sosSmoke.indexOf('sos-profile-card') > sosSmoke.indexOf('id: sos-passport-toggle') ||
+    sosSmoke.indexOf('scrollUntilVisible') > sosSmoke.indexOf('id: sos-passport-toggle')
+  ) {
+    failures.push(
+      'sos-smoke.yaml must assert the zip passport card then scroll to sos-passport-toggle',
+    );
+  }
+
   const dismissWizardIme = path.join(flowsDir, '_dismiss-wizard-ime.yaml');
   if (!fs.existsSync(dismissWizardIme)) {
     failures.push('_dismiss-wizard-ime.yaml missing (fold diary IME without BACK)');
