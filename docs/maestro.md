@@ -145,6 +145,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `profile-list-item-0` | первая строка профиля на хабе «Мои профили» |
 | `profile-edit-title` | заголовок `/profile-edit` |
 | `profile-delete` | удаление на `/profile-edit` (не на хабе) |
+| `scanner-camera-hint` | подсказка под видоискателем — свернуть IME на сканере |
 
 ---
 
@@ -164,7 +165,9 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Staging register timeout | API доступен с эмулятора (`10.0.2.2:3001`); health `curl` на хосте |
 | Backup upload timeout | `SYNC_ENABLED=true`, JWT после register; fixture key в APK |
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |
-| `scanner-input` не найден на «Сканер» | Поле спрятано за «Ввести вручную». Сначала `scanner-toggle-manual`, потом ввод. IME закрывать тапом `scanner-title`, не hideKeyboard |
+| `scanner-input` не найден на «Сканер» | Поле спрятано за «Ввести вручную». Сначала `scanner-toggle-manual`, потом ввод. IME закрывать тапом `scanner-camera-hint` (под видоискателем), не `scanner-title` и не hideKeyboard |
+| `scanner-title` не найден после ввода «молоко» | Zip-камера 280px выталкивает заголовок вверх при открытом Gboard (nightly 35498846516). `_dismiss-scanner-ime.yaml` тапает `scanner-camera-hint` |
+| `auth-password-input` не найден на «Вход» после email | Zip AuthHero (лого + padding) + Gboard. `staging-auth-smoke` заполняет поля через `_fill-by-id.yaml`, сабмит — `_tap-by-id.yaml`, не сырой `tapOn`/`pressKey: Enter` |
 | `onboarding-intro-skip` + «Введите корректный номер телефона» | `random-phone.js` даёт 10 национальных цифр без `+`. Android `input text` превращает `+` в пробел; маска LoginField тогда оставляет `(99` |
 | `profile-logout` не виден на «Мои профили» | Кнопка ниже fold (бэкап/пыление). Сначала `profile-screen-title`, потом `scrollUntilVisible` |
 | Форма регистрации заполнена, но онбординг не пришёл | Hermes без JIT: PBKDF2 600k блокирует JS ~40 c. `src/install-runtime` ставит `PASSWORD_HASH_ITERATIONS_INTERPRETED`; ожидание `onboarding-intro-skip` — 60 c |

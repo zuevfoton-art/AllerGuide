@@ -188,7 +188,7 @@ export function AuthHero({ title, subtitle }: { title: string; subtitle?: string
       <View style={styles.logoCircle}>
         <BrandLogo size={36} />
       </View>
-      <Text style={styles.heroTitle} testID="auth-hero-title">
+      <Text style={styles.heroTitle} testID="auth-hero-title" collapsable={false}>
         {title}
       </Text>
       {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}

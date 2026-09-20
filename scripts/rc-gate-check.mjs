@@ -358,13 +358,17 @@ function checkMaestroFlows() {
     failures.push('_dismiss-scanner-ime.yaml missing (fold scanner IME without BACK)');
   } else {
     const dismissScannerBody = fs.readFileSync(dismissScannerIme, 'utf8');
-    if (!dismissScannerBody.includes('scanner-title')) {
-      failures.push('_dismiss-scanner-ime.yaml must tap scanner-title (not hideKeyboard/BACK)');
+    if (!dismissScannerBody.includes('scanner-camera-hint')) {
+      failures.push('_dismiss-scanner-ime.yaml must tap scanner-camera-hint (title scrolls away under Gboard)');
     }
   }
   const scannerScreen = fs.readFileSync(path.join(root, 'apps/mobile/app/(tabs)/scanner.tsx'), 'utf8');
-  if (!scannerScreen.includes('testID="scanner-toggle-manual"') || !scannerScreen.includes('testID="scanner-title"')) {
-    failures.push('scanner.tsx must expose scanner-toggle-manual and scanner-title');
+  if (
+    !scannerScreen.includes('testID="scanner-toggle-manual"') ||
+    !scannerScreen.includes('testID="scanner-title"') ||
+    !scannerScreen.includes('testID="scanner-camera-hint"')
+  ) {
+    failures.push('scanner.tsx must expose scanner-toggle-manual, scanner-title, and scanner-camera-hint');
   }
 
   const dismissWizardIme = path.join(flowsDir, '_dismiss-wizard-ime.yaml');
@@ -549,6 +553,13 @@ function checkMaestroFlows() {
     stagingAuth.indexOf('scrollUntilVisible') > stagingAuth.indexOf('id: profile-logout')
   ) {
     failures.push('staging-auth-smoke.yaml must open profile hub then scroll to profile-logout');
+  }
+  if (
+    !stagingAuth.includes('_fill-by-id.yaml') ||
+    !stagingAuth.includes('FIELD_ID: auth-password-input') ||
+    !stagingAuth.includes('_tap-by-id.yaml')
+  ) {
+    failures.push('staging-auth-smoke.yaml must refill login/password via _fill-by-id (Gboard covers the field)');
   }
   const profileHeader = fs.readFileSync(
     path.join(root, 'apps/mobile/src/components/ProfileHeaderButton.tsx'),
