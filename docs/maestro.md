@@ -146,6 +146,8 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | `profile-edit-title` | заголовок `/profile-edit` |
 | `profile-delete` | удаление на `/profile-edit` (не на хабе) |
 | `scanner-camera-hint` | подсказка под видоискателем — свернуть IME на сканере |
+| `sos-profile-card` | zip-паспорт (всегда открыт) |
+| `sos-passport-toggle` | детальный паспорт ниже плана «Что делать сейчас» |
 
 ---
 
@@ -167,6 +169,7 @@ Workflow [`.github/workflows/maestro-nightly.yml`](../.github/workflows/maestro-
 | Offline scanner fail | профиль с allergen `milk` (bootstrap) |
 | `scanner-input` не найден на «Сканер» | Поле спрятано за «Ввести вручную». Сначала `scanner-toggle-manual`, потом ввод. IME закрывать тапом `scanner-camera-hint` (под видоискателем), не `scanner-title` и не hideKeyboard |
 | `scanner-title` не найден после ввода «молоко» | Zip-камера 280px выталкивает заголовок вверх при открытом Gboard (nightly 35498846516). `_dismiss-scanner-ime.yaml` тапает `scanner-camera-hint` |
+| `sos-passport-toggle` не найден на «Экстренная помощь» | Zip-паспорт (`sos-profile-card`) всегда открыт; toggle — старый детальный блок ниже `sos-crisis-plan` (nightly 35507872138). Сначала карточка, потом `scrollUntilVisible` |
 | `auth-password-input` не найден на «Вход» после email | Zip AuthHero (лого + padding) + Gboard. `staging-auth-smoke` заполняет поля через `_fill-by-id.yaml`, сабмит — `_tap-by-id.yaml`, не сырой `tapOn`/`pressKey: Enter` |
 | `onboarding-intro-skip` + «Введите корректный номер телефона» | `random-phone.js` даёт 10 национальных цифр без `+`. Android `input text` превращает `+` в пробел; маска LoginField тогда оставляет `(99` |
 | `profile-logout` не виден на «Мои профили» | Кнопка ниже fold (бэкап/пыление). Сначала `profile-screen-title`, потом `scrollUntilVisible` |
